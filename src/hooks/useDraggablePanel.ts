@@ -1,14 +1,18 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 
 /**
- * useDraggablePanel (POPUP-SLEEP-1) — pointer-based drag + optional SE-corner
- * resize for a floating dialog panel. Blueprint = useKoiosPanelWidth (the house
- * pointer/clamp/persist pattern), extended to two dimensions. The panel starts
- * centered (pos null = CSS centering); the first drag switches to absolute
- * coordinates. Position/size persist per `persistKey` in localStorage so a
- * recruiter's window lands where they left it. Double-click on the drag handle
- * resets to centered/default (the escape hatch when a window ends up off-view
- * after a monitor change).
+ * useDraggablePanel (POPUP-SLEEP-1) — THE one drag/resize engine for every floating
+ * popup in the app (Danny 06-08 + punt 19 "elke popup sleepbaar"). Blueprint =
+ * useKoiosPanelWidth (the house pointer/clamp/persist pattern), extended to two
+ * dimensions. The panel starts centered (placement null = CSS centering); the first
+ * drag switches to absolute coordinates. Position/size persist per `persistKey` in
+ * localStorage so a recruiter's window lands where they left it. Double-click on the
+ * drag handle resets to centered/default — the single-pointer escape hatch when a
+ * window ends up off-view after a monitor change (and the WCAG 2.5.7 alternative:
+ * dragging only MOVES a window, it is never the only way to reach a function).
+ *
+ * Never a second drag implementation: FloatingPanel is the only consumer and every
+ * popup shell goes through FloatingPanel (§11).
  */
 export interface PanelPlacement {
   x: number
@@ -17,12 +21,27 @@ export interface PanelPlacement {
   h: number | null
 }
 
-const MARGIN = 8 // px of panel that must always stay reachable
+const MARGIN = 8 // px of breathing room when a panel is resized to the viewport edge
+const KEEP_VISIBLE = 80 // px of the panel that must ALWAYS stay inside the viewport
+const HANDLE_H = 48 // the header strip's height — it may never leave the bottom edge
+const FALLBACK_W = 400 // assumed width when a stored placement has no measured size
 
-// Clamp so the drag handle can never fully leave the viewport (else the window
-// becomes unrecoverable without the double-click reset).
-function clamp(v: number, min: number, max: number): number {
+function clampNumber(v: number, min: number, max: number): number {
   return Math.min(Math.max(v, min), max)
+}
+
+/**
+ * The ONE viewport clamp, used by every path that can move a panel (drag, window
+ * resize, boot from storage). A window may hang over an edge, but never far enough
+ * to disappear: at least KEEP_VISIBLE px stays reachable horizontally and the header
+ * strip always stays on screen vertically. Exported for the regression test.
+ */
+export function clampToViewport(x: number, y: number, w: number | null): { x: number; y: number } {
+  const width = w ?? FALLBACK_W
+  return {
+    x: clampNumber(x, KEEP_VISIBLE - width, Math.max(0, window.innerWidth - KEEP_VISIBLE)),
+    y: clampNumber(y, 0, Math.max(0, window.innerHeight - HANDLE_H)),
+  }
 }
 
 function storageKey(key: string): string {
@@ -39,15 +58,14 @@ export function useDraggablePanel(persistKey?: string, resizable = true) {
       if (!raw) return null
       const p = JSON.parse(raw) as PanelPlacement
       // A stored spot from a bigger monitor may be off-screen here — reclamp on boot.
-      return {
-        ...p,
-        x: clamp(p.x, MARGIN - (p.w ?? 400) + 80, window.innerWidth - 80),
-        y: clamp(p.y, 0, window.innerHeight - 48),
-      }
+      return { ...p, ...clampToViewport(p.x, p.y, p.w) }
     } catch {
       return null
     }
   })
+  // True only while a pointer drag/resize is in flight — consumers switch their
+  // transitions off with it, so a dragged window never lags behind the cursor.
+  const [dragging, setDragging] = useState(false)
 
   const persist = useCallback((p: PanelPlacement | null) => {
     if (!persistKey) return
@@ -64,6 +82,15 @@ export function useDraggablePanel(persistKey?: string, resizable = true) {
     placementRef.current = placement
   }, [placement])
 
+  // Suppress text selection for the DURATION of a drag only (a cursor sweeping over
+  // the body would otherwise select the content it passes) — restored on pointerup,
+  // so selecting text in the panel keeps working exactly as before.
+  const suppressSelection = useCallback(() => {
+    const previous = document.body.style.userSelect
+    document.body.style.userSelect = 'none'
+    return () => { document.body.style.userSelect = previous }
+  }, [])
+
   /** Attach to the header: pointer-drag moves the panel. */
   const onDragPointerDown = useCallback((e: React.PointerEvent) => {
     // Ignore drags starting on interactive elements (close button etc.).
@@ -75,12 +102,16 @@ export function useDraggablePanel(persistKey?: string, resizable = true) {
     const start = placementRef.current ?? { x: rect.left, y: rect.top, w: null, h: null }
     const offsetX = e.clientX - rect.left
     const offsetY = e.clientY - rect.top
+    const restoreSelection = suppressSelection()
+    setDragging(true)
+    // Clamp against the panel's real width: a user-resized panel keeps its stored
+    // `w`, an untouched one is measured from the DOM (0 in jsdom → fall back).
+    const clampWidth = start.w ?? (rect.width || null)
 
     const move = (ev: PointerEvent) => {
       const next: PanelPlacement = {
         ...start,
-        x: clamp(ev.clientX - offsetX, MARGIN - rect.width + 80, window.innerWidth - 80),
-        y: clamp(ev.clientY - offsetY, 0, window.innerHeight - 48),
+        ...clampToViewport(ev.clientX - offsetX, ev.clientY - offsetY, clampWidth),
       }
       placementRef.current = next
       setPlacement(next)
@@ -88,11 +119,13 @@ export function useDraggablePanel(persistKey?: string, resizable = true) {
     const up = () => {
       window.removeEventListener('pointermove', move)
       window.removeEventListener('pointerup', up)
+      restoreSelection()
+      setDragging(false)
       persist(placementRef.current)
     }
     window.addEventListener('pointermove', move)
     window.addEventListener('pointerup', up)
-  }, [persist])
+  }, [persist, suppressSelection])
 
   /** Attach to the SE corner handle: pointer-drag resizes the panel. */
   const onResizePointerDown = useCallback((e: React.PointerEvent) => {
@@ -107,14 +140,16 @@ export function useDraggablePanel(persistKey?: string, resizable = true) {
     const baseH = rect.height
     const fromX = e.clientX
     const fromY = e.clientY
+    const restoreSelection = suppressSelection()
+    setDragging(true)
 
     const move = (ev: PointerEvent) => {
       const next: PanelPlacement = {
         // Resizing pins the panel where it stands (switches from centered to absolute).
         x: start.x ?? rect.left,
         y: start.y ?? rect.top,
-        w: clamp(baseW + (ev.clientX - fromX), 320, window.innerWidth - MARGIN),
-        h: clamp(baseH + (ev.clientY - fromY), 200, window.innerHeight - MARGIN),
+        w: clampNumber(baseW + (ev.clientX - fromX), 320, window.innerWidth - MARGIN),
+        h: clampNumber(baseH + (ev.clientY - fromY), 200, window.innerHeight - MARGIN),
       }
       placementRef.current = next
       setPlacement(next)
@@ -122,11 +157,13 @@ export function useDraggablePanel(persistKey?: string, resizable = true) {
     const up = () => {
       window.removeEventListener('pointermove', move)
       window.removeEventListener('pointerup', up)
+      restoreSelection()
+      setDragging(false)
       persist(placementRef.current)
     }
     window.addEventListener('pointermove', move)
     window.addEventListener('pointerup', up)
-  }, [persist, resizable])
+  }, [persist, resizable, suppressSelection])
 
   /** Double-click the handle: back to centered/default size (recovery hatch). */
   const onDragHandleDoubleClick = useCallback(() => {
@@ -140,11 +177,7 @@ export function useDraggablePanel(persistKey?: string, resizable = true) {
     const onWinResize = () => {
       const p = placementRef.current
       if (!p) return
-      const next = {
-        ...p,
-        x: clamp(p.x, MARGIN - (p.w ?? 400) + 80, window.innerWidth - 80),
-        y: clamp(p.y, 0, window.innerHeight - 48),
-      }
+      const next = { ...p, ...clampToViewport(p.x, p.y, p.w) }
       placementRef.current = next
       setPlacement(next)
     }
@@ -152,5 +185,5 @@ export function useDraggablePanel(persistKey?: string, resizable = true) {
     return () => window.removeEventListener('resize', onWinResize)
   }, [])
 
-  return { panelRef, placement, onDragPointerDown, onResizePointerDown, onDragHandleDoubleClick }
+  return { panelRef, placement, dragging, onDragPointerDown, onResizePointerDown, onDragHandleDoubleClick }
 }

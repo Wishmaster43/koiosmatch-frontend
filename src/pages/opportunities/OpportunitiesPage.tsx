@@ -201,7 +201,7 @@ export default function OpportunitiesPage({ intent }: { intent?: unknown } = {})
             {/* BTN_H (§4/§9): one explicit height for every text/action button, everywhere. */}
             <button onClick={() => setAddOpen(true)}
               style={{ display: 'flex', alignItems: 'center', gap: 6, height: BTN_H, padding: '0 14px', fontSize: 13, fontWeight: 600,
-                borderRadius: 8, border: 'none', cursor: 'pointer', background: 'var(--color-primary)', color: '#fff' }}>
+                borderRadius: 8, border: 'none', cursor: 'pointer', background: 'var(--color-primary)', color: 'var(--color-on-accent)' }}>
               + {t('page.add')}
             </button>
             <HeaderSearch key={searchEpoch} onSearch={setQuery} placeholder={t('page.searchPlaceholder')} width={280} />
@@ -211,7 +211,7 @@ export default function OpportunitiesPage({ intent }: { intent?: unknown } = {})
               <div style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: 12, color: 'var(--text)' }}>
                 <span>{t('page.selected', { count: selectedIds.size })}</span>
                 <button onClick={clearSelection}
-                  style={{ fontSize: 12, color: 'var(--color-primary)', background: 'none', border: 'none', cursor: 'pointer' }}>
+                  style={{ fontSize: 12, color: 'var(--color-primary-text)', background: 'none', border: 'none', cursor: 'pointer' }}>
                   {t('page.clearSelection')}
                 </button>
               </div>

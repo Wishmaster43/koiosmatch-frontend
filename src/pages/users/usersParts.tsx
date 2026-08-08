@@ -155,7 +155,7 @@ export function RoleSelector({ user: u, availableRoles, onChanged }: {
                                  background: meta.color, flexShrink: 0 }} />
                   {roleLabel(t, role.name)}
                   {isCurrent && (
-                    <span style={{ marginLeft: 'auto', fontSize: 11, color: 'var(--color-primary)' }}>✓</span>
+                    <span style={{ marginLeft: 'auto', fontSize: 11, color: 'var(--color-primary-text)' }}>✓</span>
                   )}
                 </button>
               )
@@ -249,7 +249,7 @@ export function BranchChips({ branches, emptyText }: { branches: BranchRow[]; em
       {branches.map(b => (
         <span key={b.location_id}
           style={{ padding: '3px 10px', borderRadius: 999, fontSize: 12, fontWeight: 600,
-                   background: 'var(--color-primary-bg)', color: 'var(--color-primary)',
+                   background: 'var(--color-primary-bg)', color: 'var(--color-primary-text)',
                    border: '1px solid var(--color-primary)' }}>
           {b.name ?? '—'}
         </span>

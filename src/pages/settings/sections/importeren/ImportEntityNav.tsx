@@ -64,7 +64,7 @@ export default function ImportEntityNav({ templates, phase, selected, onSelect, 
         <div style={{ padding: '8px 10px' }}>
           <p style={{ fontSize: 12, color: 'var(--color-danger)', marginBottom: 8 }}>{t('import.loadTemplatesError')}</p>
           <button type="button" onClick={onReload}
-            style={{ fontSize: 12, color: 'var(--color-primary)', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}>
+            style={{ fontSize: 12, color: 'var(--color-primary-text)', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}>
             {t('common:error.retry')}
           </button>
         </div>

@@ -4,9 +4,11 @@
  * onPageSizeChange so the parent can refetch. PAGE_SIZE_OPTIONS = selectable sizes.
  */
 import type { ReactNode } from 'react'
+import { useId } from 'react'
 import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { useNumberFormat } from '@/lib/formatters'
+import SelectMenu from './SelectMenu'
 
 export const PAGE_SIZE_OPTIONS = [50, 100, 200, 300, 400, 500]
 
@@ -27,6 +29,9 @@ export default function PaginationBar({ page, totalPages, totalRows, pageSize, o
   const { t } = useTranslation('common')
   // Locale-aware grouping (§ FMT-GETAL-1) — "1.501–2.000 van 99.968", never bare digits.
   const { formatNumber } = useNumberFormat()
+  // Names the SelectMenu trigger via aria-labelledby (a <button> is not labelable
+  // via htmlFor) — the SAME visible "Rows per page" span doubles as the label.
+  const rowsLabelId = useId()
   const from = totalRows === 0 ? 0 : (page - 1) * pageSize + 1
   const to   = Math.min(page * pageSize, totalRows)
 
@@ -63,21 +68,19 @@ export default function PaginationBar({ page, totalPages, totalRows, pageSize, o
         {btn(() => onPageChange(totalPages), page >= totalPages, <ChevronsRight size={13} />, t('lastPage'))}
       </div>
 
-      {/* Rows per page. DELIBERATE DEVIATION from the shared SearchSelect (audit finding,
-          house rule §4/§11): this is a compact numeric enum living inline in app-wide
-          pagination chrome shown on every table — a native <select> keeps its tiny
-          footprint (no popover/portal, no search row) exactly where the point of this
-          control IS its small footprint. Kept as a native select on purpose. */}
+      {/* Rows per page — the shared searchable SelectMenu (CLAUDE.md §4: every
+          dropdown is a searchable combobox, never a bare native <select>). A
+          previous round deliberately kept a native select here for its compact
+          footprint; SelectMenu now filters internally at the SAME trigger
+          footprint (no portal needed for a 6-item list), so that trade-off no
+          longer applies. */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-        <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>{t('rowsPerPage')}</span>
-        <select value={pageSize} onChange={e => onPageSizeChange(Number(e.target.value))}
-          style={{
-            fontSize: 12, padding: '3px 6px', borderRadius: 6,
-            border: '1px solid var(--border)', background: 'var(--surface)',
-            color: 'var(--text)', cursor: 'pointer',
-          }}>
-          {pageSizeOptions.map(n => <option key={n} value={n}>{n}</option>)}
-        </select>
+        <span id={rowsLabelId} style={{ fontSize: 12, color: 'var(--text-muted)' }}>{t('rowsPerPage')}</span>
+        <SelectMenu aria-labelledby={rowsLabelId} value={String(pageSize)}
+          onChange={v => onPageSizeChange(Number(v))}
+          options={pageSizeOptions.map(n => ({ value: String(n), label: String(n) }))}
+          menuWidth={90}
+          style={{ fontSize: 12, padding: '3px 6px', width: 'auto' }} />
       </div>
     </div>
   )

@@ -68,7 +68,7 @@ export default function TasksTable({
   const adviceOf = (r: Task): KoiosAdvice | null => {
     if (!isTaskOverdue(r)) return null
     return { action: 'overdue', label: t('common:koios.actions.overdue', { defaultValue: 'Overdue' }),
-      reason: t('koios.reasons.overdue', { defaultValue: 'This task is past its due date.' }), source: 'rules' }
+      reason: t('koios.reasons.overdue'), source: 'rules' }
   }
   // Coloured chip vs. plain text, driven by the per-column flag. `round` — the
   // status axis reads as a round pill; type/priority stay square (Danny 2026-07-14).

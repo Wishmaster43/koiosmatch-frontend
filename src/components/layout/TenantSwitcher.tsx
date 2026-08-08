@@ -9,6 +9,13 @@ import { useAuth } from '@/context/AuthContext'
 import api, { unwrapList } from '@/lib/api'
 import { ChevronDown, Loader2, Search } from 'lucide-react'
 import type { Tenant } from '@/types/api'
+// Shared luminance-based contrast helper (BRAND-TEXT-COLOR-1) — reused here because
+// each list row shows a DIFFERENT tenant's own brand colour, never the active
+// tenant's --color-on-accent token (which only reflects the active tenant).
+import { readableOn } from '@/hooks/useTenantTheme'
+
+// Only a real 6-digit hex is safe to feed into readableOn's luminance maths.
+const isHexColor = (v: unknown): v is string => typeof v === 'string' && /^#[0-9a-fA-F]{6}$/.test(v)
 
 // App-default primary (mirror of :root --color-primary in index.css — keep in sync):
 // the effective brand of a tenant that never set a custom colour. We can't use the
@@ -106,7 +113,7 @@ export default function TenantSwitcher({ expanded }: { expanded?: boolean }) {
     return (
       <div className="flex justify-center flex-shrink-0 mt-3">
         <div className="flex items-center justify-center rounded"
-          style={{ width: 28, height: 28, background: 'var(--color-primary)', fontSize: 9, color: 'white', fontWeight: 700 }}>
+          style={{ width: 28, height: 28, background: 'var(--color-primary)', fontSize: 9, color: 'var(--color-on-accent)', fontWeight: 700 }}>
           {initials}
         </div>
       </div>
@@ -123,7 +130,7 @@ export default function TenantSwitcher({ expanded }: { expanded?: boolean }) {
         onMouseLeave={e => (e.currentTarget.style.background = 'var(--hover-bg)')}
       >
         <div className="flex items-center justify-center flex-shrink-0 rounded"
-          style={{ width: 22, height: 22, background: 'var(--color-primary)', fontSize: 8, color: 'white', fontWeight: 700 }}>
+          style={{ width: 22, height: 22, background: 'var(--color-primary)', fontSize: 8, color: 'var(--color-on-accent)', fontWeight: 700 }}>
           {initials}
         </div>
         <div className="flex-1 min-w-0 text-left">
@@ -150,7 +157,7 @@ export default function TenantSwitcher({ expanded }: { expanded?: boolean }) {
                 autoFocus
                 value={query}
                 onChange={e => setQuery(e.target.value)}
-                placeholder={t('nav.switchTenant', { defaultValue: 'Zoek bureau…' })}
+                placeholder={t('nav.switchTenant')}
                 className="w-full"
                 style={{ padding: '7px 8px 7px 28px', fontSize: 13, borderRadius: 7, border: '1px solid var(--border)', outline: 'none' }}
               />
@@ -170,11 +177,19 @@ export default function TenantSwitcher({ expanded }: { expanded?: boolean }) {
                   {/* Each tenant's OWN brand colour (list payload carries primary_color) —
                       never the active tenant's token, so you spot a client at a glance
                       (Danny punt 33, 17-07). No brand set → the app-default primary
-                      (that IS that tenant's effective colour), not the current var. */}
-                  <div className="flex items-center justify-center flex-shrink-0 rounded"
-                    style={{ width: 24, height: 24, background: tn.primary_color || APP_DEFAULT_PRIMARY, fontSize: 9, color: 'white', fontWeight: 700 }}>
-                    {tenantInitials(tn.name)}
-                  </div>
+                      (that IS that tenant's effective colour), not the current var.
+                      Text colour is computed per-row too (BRAND-TEXT-COLOR-1) — the
+                      active tenant's --color-on-accent would be wrong here since this
+                      swatch is a DIFFERENT tenant's brand. */}
+                  {(() => {
+                    const swatch = isHexColor(tn.primary_color) ? tn.primary_color : APP_DEFAULT_PRIMARY
+                    return (
+                      <div className="flex items-center justify-center flex-shrink-0 rounded"
+                        style={{ width: 24, height: 24, background: swatch, fontSize: 9, color: readableOn(swatch), fontWeight: 700 }}>
+                        {tenantInitials(tn.name)}
+                      </div>
+                    )
+                  })()}
                   <div className="flex-1 min-w-0 text-left">
                     <div className="text-sm font-medium text-[var(--text)] truncate">{tn.name ?? tn.id}</div>
                     {tenantDomain(tn) && <div className="text-xs text-[var(--text-muted)] truncate">{tenantDomain(tn)}</div>}

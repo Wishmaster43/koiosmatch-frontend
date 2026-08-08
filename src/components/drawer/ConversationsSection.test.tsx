@@ -15,6 +15,7 @@ import ConversationsSection from './ConversationsSection'
 import api from '@/lib/api'
 import { notifyError } from '@/lib/notify'
 import { avatarColor } from '@/lib/avatarColor'
+import { assistConversation } from './conversationAssistApi'
 
 vi.mock('@/lib/api', () => ({
   default: { get: vi.fn(), post: vi.fn() },
@@ -26,6 +27,12 @@ vi.mock('@/lib/datetime', () => ({
 // WA-SEND-TRANSPORT-1: 409/502 must render INLINE, never a toast — mocked so the
 // negative "never called" assertions below are meaningful.
 vi.mock('@/lib/notify', () => ({ notifyError: vi.fn(), notifySuccess: vi.fn() }))
+// G27: ConversationAssistSection makes its own real POST-capable call — mocked here
+// (it has its own dedicated test file) so the pre-existing tests above never fire it.
+vi.mock('./conversationAssistApi', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('./conversationAssistApi')>()
+  return { ...actual, assistConversation: vi.fn() }
+})
 
 const THREADS = [{ id: 'conv-1', wa_number: '+31612345678', last_message_at: '2026-07-17T09:00:00Z', is_active: true, escalated: false }]
 const MESSAGES = [
@@ -359,5 +366,142 @@ describe('ConversationsSection · send outcomes (WA-SEND-TRANSPORT-1)', () => {
 
     await user.click(screen.getByRole('button', { name: 'common:send' }))
     await waitFor(() => expect(screen.queryByText('Even niet.')).not.toBeInTheDocument())
+  })
+})
+
+// G27 / K2-CONV-ASSIST-1: the Koios AI assist affordance inside the open-session
+// composer. ConversationAssistSection has its own dedicated unit tests (request
+// per mode, apply/discard semantics, failure banner) — these prove the WIRING:
+// it renders where the composer renders, is gated on the loaded thread's own
+// messages, and "Overnemen" really lands in the SAME <input> the recruiter sends
+// from (never a separate, invisible target) while "Verwerpen" leaves it untouched.
+describe('ConversationsSection · Koios AI conversation assist (G27)', () => {
+  const recent = new Date(Date.now() - 60_000).toISOString()
+
+  beforeEach(() => {
+    vi.mocked(api.get).mockImplementation((url: string) => {
+      if (url === '/conversations') return Promise.resolve({ data: { data: [{ ...THREADS[0], last_inbound_at: recent }] } })
+      if (url === '/conversations/conv-1/messages') return Promise.resolve({ data: { data: MESSAGES } })
+      return Promise.reject(new Error(`unexpected GET ${url}`))
+    })
+    vi.mocked(assistConversation).mockReset()
+  })
+
+  it('calls assistConversation with the conversation id + mode when Samenvatten is clicked', async () => {
+    vi.mocked(assistConversation).mockResolvedValue({ kind: 'text', text: 'Kandidaat kan morgen starten.' })
+    const user = userEvent.setup()
+    render(<ConversationsSection threadsUrl="/conversations" threadsParams={{ candidate_id: 'cand-1' }} />)
+    await user.click(await screen.findByRole('button', { name: 'Samenvatten' }))
+    expect(assistConversation).toHaveBeenCalledWith(expect.objectContaining({ id: 'conv-1', mode: 'summarize' }), expect.anything())
+  })
+
+  it('honestly disables the assist buttons when the loaded thread has zero messages', async () => {
+    vi.mocked(api.get).mockImplementation((url: string) => {
+      if (url === '/conversations') return Promise.resolve({ data: { data: [{ ...THREADS[0], last_inbound_at: recent }] } })
+      if (url === '/conversations/conv-1/messages') return Promise.resolve({ data: { data: [] } })
+      return Promise.reject(new Error(`unexpected GET ${url}`))
+    })
+    render(<ConversationsSection threadsUrl="/conversations" threadsParams={{ candidate_id: 'cand-1' }} />)
+    expect(await screen.findByRole('button', { name: 'Samenvatten' })).toBeDisabled()
+    expect(screen.getByRole('button', { name: 'Actiepunten' })).toBeDisabled()
+  })
+
+  it('Overnemen writes the assist result straight into the composer draft input', async () => {
+    vi.mocked(assistConversation).mockResolvedValue({ kind: 'text', text: 'Kandidaat kan morgen starten.' })
+    const user = userEvent.setup()
+    render(<ConversationsSection threadsUrl="/conversations" threadsParams={{ candidate_id: 'cand-1' }} />)
+    await user.click(await screen.findByRole('button', { name: 'Samenvatten' }))
+    await screen.findByText('Kandidaat kan morgen starten.')
+    await user.click(screen.getByRole('button', { name: 'Overnemen' }))
+    const input = screen.getByPlaceholderText('conversations.composerPlaceholder')
+    expect(input).toHaveValue('Kandidaat kan morgen starten.')
+  })
+
+  it('Verwerpen leaves an already-typed composer draft completely untouched', async () => {
+    vi.mocked(assistConversation).mockResolvedValue({ kind: 'text', text: 'Kandidaat kan morgen starten.' })
+    const user = userEvent.setup()
+    render(<ConversationsSection threadsUrl="/conversations" threadsParams={{ candidate_id: 'cand-1' }} />)
+    const input = await screen.findByPlaceholderText('conversations.composerPlaceholder')
+    await user.type(input, 'Mijn eigen concept')
+    await user.click(screen.getByRole('button', { name: 'Samenvatten' }))
+    await screen.findByText('Kandidaat kan morgen starten.')
+    await user.click(screen.getByRole('button', { name: 'Verwerpen' }))
+    expect(input).toHaveValue('Mijn eigen concept')
+  })
+})
+
+// WA-WINDOW-1 (Danny punt 12, 08-08): "als het 24-uursvenster niet open is, hoe
+// stuur ik dan een bericht?". The section must ANSWER that on screen: inside the
+// window it says how long free text is still allowed, outside it it offers the
+// only route Meta accepts — an approved template. TemplateComposer has its own
+// dedicated test file; these prove the WIRING (which branch renders when, and
+// with which candidate).
+describe('ConversationsSection · 24h window state (WA-WINDOW-1)', () => {
+  const threadWithInbound = (lastInboundAt: string | null) => [{ ...THREADS[0], candidate_id: 'cand-1', last_inbound_at: lastInboundAt }]
+
+  const mockThreads = (rows: unknown[]) => {
+    vi.mocked(api.get).mockImplementation((url: string) => {
+      if (url === '/conversations') return Promise.resolve({ data: { data: rows } })
+      if (url === '/conversations/conv-1/messages') return Promise.resolve({ data: { data: MESSAGES } })
+      if (url === '/whatsapp-templates') return Promise.resolve({ data: { data: [] } })
+      if (url === '/whatsapp-phone-numbers') return Promise.resolve({ data: { data: [] } })
+      return Promise.reject(new Error(`unexpected GET ${url}`))
+    })
+  }
+
+  it('tells the recruiter how much of the 24h window is left, in hours and minutes', async () => {
+    // 2h ago → 22h left. The line is derived from this row's own last_inbound_at.
+    mockThreads(threadWithInbound(new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString()))
+    render(<ConversationsSection threadsUrl="/conversations" threadsParams={{ candidate_id: 'cand-1' }} />)
+    expect(await screen.findByText('conversations.windowLeftHours')).toBeInTheDocument()
+    expect(await screen.findByPlaceholderText('conversations.composerPlaceholder')).toBeInTheDocument()
+  })
+
+  it('switches to the minutes-only wording in the last hour of the window', async () => {
+    mockThreads(threadWithInbound(new Date(Date.now() - (23 * 60 + 30) * 60 * 1000).toISOString()))
+    render(<ConversationsSection threadsUrl="/conversations" threadsParams={{ candidate_id: 'cand-1' }} />)
+    expect(await screen.findByText('conversations.windowLeftMinutes')).toBeInTheDocument()
+  })
+
+  it('never claims "0 minutes left" while the window is demonstrably still open', async () => {
+    // 30 seconds before the window closes: still open, but under a minute of it left.
+    mockThreads(threadWithInbound(new Date(Date.now() - (24 * 60 * 60 * 1000 - 30_000)).toISOString()))
+    render(<ConversationsSection threadsUrl="/conversations" threadsParams={{ candidate_id: 'cand-1' }} />)
+    expect(await screen.findByText('conversations.windowLeftSeconds')).toBeInTheDocument()
+    expect(await screen.findByPlaceholderText('conversations.composerPlaceholder')).toBeInTheDocument()
+  })
+
+  it('offers the template route — with the thread\'s candidate — once the window has closed', async () => {
+    mockThreads(threadWithInbound(new Date(Date.now() - 25 * 60 * 60 * 1000).toISOString()))
+    render(<ConversationsSection threadsUrl="/conversations" threadsParams={{ candidate_id: 'cand-1' }} />)
+    // The reason stays, but now with a real way forward next to it.
+    expect(await screen.findByText('conversations.sessionClosedHint')).toBeInTheDocument()
+    expect(await screen.findByRole('button', { name: /conversations\.templatePlaceholder/ })).toBeInTheDocument()
+    // Its lookups are really loaded — the picker is wired, not a static placeholder.
+    await waitFor(() => expect(api.get).toHaveBeenCalledWith('/whatsapp-templates'))
+    expect(api.get).toHaveBeenCalledWith('/whatsapp-phone-numbers')
+  })
+
+  it('falls back to the thread\'s nested candidate id when candidate_id is absent', async () => {
+    mockThreads([{ ...THREADS[0], last_inbound_at: null, candidate: { id: 'cand-nested', first_name: 'Jamie', last_name: 'Vos' } }])
+    render(<ConversationsSection threadsUrl="/conversations" threadsParams={{ candidate_id: 'cand-1' }} />)
+    // A candidate IS known, so the picker renders instead of the "no candidate" notice.
+    expect(await screen.findByRole('button', { name: /conversations\.templatePlaceholder/ })).toBeInTheDocument()
+    expect(screen.queryByText('conversations.templateNeedsCandidate')).not.toBeInTheDocument()
+  })
+
+  it('a contact thread (no candidate at all) gets an honest notice, never a dead picker', async () => {
+    mockThreads([{ ...THREADS[0], last_inbound_at: null }])
+    render(<ConversationsSection threadsUrl="/conversations" threadsParams={{ candidate_id: 'cand-1' }} />)
+    expect(await screen.findByText('conversations.templateNeedsCandidate')).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: /conversations\.templatePlaceholder/ })).toBeNull()
+  })
+
+  it('says the window is UNKNOWN when the payload carries no anchor field at all', async () => {
+    // No `last_inbound_at` key whatsoever — an older/partial API shape.
+    mockThreads([{ id: 'conv-1', candidate_id: 'cand-1', wa_number: '+31612345678', is_active: true }])
+    render(<ConversationsSection threadsUrl="/conversations" threadsParams={{ candidate_id: 'cand-1' }} />)
+    expect(await screen.findByText('conversations.windowUnknown')).toBeInTheDocument()
+    expect(screen.queryByText('conversations.sessionClosedHint')).not.toBeInTheDocument()
   })
 })

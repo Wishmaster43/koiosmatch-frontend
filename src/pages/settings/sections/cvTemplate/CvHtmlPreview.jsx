@@ -6,6 +6,7 @@
  * stays a thin composer and this always-light document markup lives in one place.
  */
 import { groupCvSections } from '@/pages/candidates/CandidateCvTemplate'
+import { paletteFor } from '@/pages/candidates/cv/cvStyles'
 import { PREVIEW_CANDIDATE } from './previewCandidate'
 
 // Live HTML mock of the PDF; `t` is the candidates translate fn (cv.* labels).
@@ -27,14 +28,18 @@ export default function CvHtmlPreview({ settings, t }) {
   const A4_H = 1123
   const scale = 0.70
 
+  // Light-on-colour (sidebar) vs dark-on-white (main) content palette for a
+  // movable section — reuses cvStyles.paletteFor so this live preview can never
+  // drift from the real generated PDF. The sidebar sits on the tenant's OWN
+  // colour (color1), so its text must be luminance-derived (readableOn inside
+  // paletteFor) instead of a hardcoded white — a light/yellow brand pick would
+  // otherwise render unreadable here (WCAG audit 2026-08, mirrors BRAND-TEXT-COLOR-1).
+  const sidebarPalette = paletteFor('sidebar', color2, color1)
+  const mainPalette    = paletteFor('main', color2)
   const sideLabel = {
-    fontSize: 7, fontWeight: 700, color: '#fff', textTransform: 'uppercase',
+    fontSize: 7, fontWeight: 700, color: sidebarPalette.text, textTransform: 'uppercase',
     letterSpacing: '1.4px', marginBottom: 7, opacity: 0.85,
   }
-  // Light-on-colour (sidebar) vs dark-on-white (main) content palette for a
-  // movable section — mirrors CandidateCvTemplate's paletteFor exactly.
-  const sidebarPalette = { label: 'rgba(255,255,255,0.6)', text: '#fff', chipBg: 'rgba(255,255,255,0.18)', chipText: '#fff', bulletColor: 'rgba(255,255,255,0.5)' }
-  const mainPalette    = { label: '#94A3B8', text: '#334155', chipBg: `${color2}14`, chipText: color2, bulletColor: color2 }
 
   // Renders one MOVABLE section's content for the given palette — same ids as
   // the PDF's renderMovableContent, plain HTML instead of react-pdf primitives.

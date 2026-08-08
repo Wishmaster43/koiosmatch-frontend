@@ -213,6 +213,24 @@ same validation/UX, lookups via `useX()` hooks (never hardcoded option lists).
   soft-tint style for selection pills inside the candidate drawer. Both exist because the
   2026-07-22/23 audit rounds found the same solid-fill pill hand-rolled 6+ times; a new
   toggle/pill reuses these, never a fresh inline copy.
+- **ALTIJD een zoekbare dropdown — een native `<select>` is een finding (Danny
+  2026-08-08, met nadruk, twee keer).** Elke keuzelijst in de app is zoekbaar —
+  óók een lijst van drie opties (Danny zag Verplicht/Optioneel/Verborgen zonder
+  zoekveld en wil ook dáár de zoekbare variant): gebruik `CreatableSelect`
+  (`allowCreate={false}`), `SearchSelect`, of de gedeelde `SelectMenu` — die
+  filtert sinds 08-08 zélf, dus elk bestaand gebruik erft het zoekveld
+  automatisch. Nooit een kale `<select>`. Dit geldt voor drawers, modals, instellingen,
+  filterpanelen, inline rij-editors en formulieren; ook voor korte lijstjes,
+  zodat het overal hetzelfde voelt. Bij het aanraken van een scherm: vervang de
+  `<select>`s die je tegenkomt, ook als ze niet in je opdracht stonden. Een
+  nieuwe `<select>` toevoegen mag alleen met een geschreven reden in de code
+  (bijv. een browser-native control die bewust nodig is) — anders is het een bug.
+- **Een toevoeg-actie IS een knop, geen tekstlink (Danny 2026-08-08).** Elke
+  "+ X toevoegen"-affordance (vaardigheid, taal, opleiding, locatie, notitie, rij
+  in een tabel …) rendert als de gedeelde `DrawerAddButton` / een echte knop met
+  rand + soft-tint (§4) — nooit als kale gekleurde tekst met een plusje. Reden:
+  gekleurde tekst leest niet als klikbaar en drift per scherm. Kom je een
+  tekstvariant tegen, vervang hem meteen, ook buiten je opdracht.
 - **Soft-chip convention** (everywhere — table + drawer): coloured chips =
   `color + '1A'` background, `color` text, `color + '55'` border. Never solid fills.
 - **In-place edit pattern:** a pencil toggles to diskette (save) + ✕ (cancel), shown

@@ -161,7 +161,7 @@ export default function MatchScoreBlock({ score, criteria = [], summary, onSave,
             {(showOverall || editing) && <span style={{ fontSize: 12, fontWeight: 700, color: scoreColor(overall) }}>{overall}%</span>}
             {onSave && (editing ? (
               <>
-                <button onClick={save} title={t('matchScore.save')} style={{ display: 'flex', width: 26, height: 26, alignItems: 'center', justifyContent: 'center', borderRadius: 6, background: 'var(--color-primary)', color: '#fff', border: 'none', cursor: 'pointer' }}><Save size={13} /></button>
+                <button onClick={save} title={t('matchScore.save')} style={{ display: 'flex', width: 26, height: 26, alignItems: 'center', justifyContent: 'center', borderRadius: 6, background: 'var(--color-primary)', color: 'var(--color-on-accent)', border: 'none', cursor: 'pointer' }}><Save size={13} /></button>
                 <button onClick={cancel} title={t('matchScore.cancel')} style={{ display: 'flex', width: 26, height: 26, alignItems: 'center', justifyContent: 'center', borderRadius: 6, background: 'var(--bg)', color: 'var(--text-muted)', border: '1px solid var(--border)', cursor: 'pointer' }}><X size={13} /></button>
               </>
             ) : (

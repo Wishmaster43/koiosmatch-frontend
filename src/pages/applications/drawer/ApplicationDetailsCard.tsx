@@ -6,6 +6,7 @@ import EntityLink from '@/components/ui/EntityLink'
 import SectionCard from '@/components/ui/SectionCard'
 import SoftChip from '@/components/ui/SoftChip'
 import { CANON_LABEL_STYLE } from '@/components/drawer/fieldRowCanon'
+import { fieldInputStyle } from '@/components/forms/fieldMetrics'
 import { useDateFormat } from '@/lib/datetime'
 import VacancyLinkField from './VacancyLinkField'
 import { useVacancyLinkOptions } from '../hooks/useVacancyLinkOptions'
@@ -36,8 +37,8 @@ function Row({ label, children }: { label: ReactNode; children: ReactNode }) {
 
 const iconBtn = { width: 26, height: 26, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 6, cursor: 'pointer' } as const
 // S7: the Bron input shares the Details block's edit mode (same pencil/save/✕).
-const inputStyle = { width: '100%', padding: '7px 10px', fontSize: 12, borderRadius: 6,
-  border: '1px solid var(--border)', background: 'var(--input-bg)', color: 'var(--text)', boxSizing: 'border-box' as const, outline: 'none' } as const
+// Canon field style (G33/fieldMetrics) — was its own padding-7/font-12/radius-6 copy.
+const inputStyle = fieldInputStyle
 
 interface ApplicationDetailsCardProps {
   application: ApplicationDetail
@@ -111,7 +112,7 @@ export default function ApplicationDetailsCard({ application: a, onLinkVacancy, 
   const action = (onLinkVacancy || onUpdateSource) && (editing ? (
     <div style={{ display: 'flex', gap: 4 }}>
       <button onClick={saveEdit} title={t('common:save')} aria-label={t('common:save')}
-        style={{ ...iconBtn, background: 'var(--color-primary)', color: '#fff', border: 'none' }}><Save size={13} /></button>
+        style={{ ...iconBtn, background: 'var(--color-primary)', color: 'var(--color-on-accent)', border: 'none' }}><Save size={13} /></button>
       <button onClick={cancelEdit} title={t('common:cancel')} aria-label={t('common:cancel')}
         style={{ ...iconBtn, background: 'var(--bg)', color: 'var(--text-muted)', border: '1px solid var(--border)' }}><X size={13} /></button>
     </div>

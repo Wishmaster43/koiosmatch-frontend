@@ -33,6 +33,7 @@ import { notifyError, notifySuccess } from '@/lib/notify'
 import FloatingPanel from '@/components/ui/FloatingPanel'
 import { Z } from '@/lib/zIndexScale'
 import { BTN_H } from '@/config/buttonMetrics'
+import { fieldInputStyle } from '@/components/forms/fieldMetrics'
 import type { Id } from '@/types/common'
 
 // Only the fields the picker/summary show (§8 data minimization) — never the whole
@@ -98,7 +99,8 @@ export default function MergeCustomerModal({ current, onClose, onMerged }: {
     }
   }
 
-  const inputStyle: CSSProperties = { width: '100%', height: 34, padding: '0 10px 0 30px', fontSize: 13, border: '1px solid var(--border)', borderRadius: 8, background: 'var(--input-bg)', color: 'var(--text)', outline: 'none', boxSizing: 'border-box' }
+  // Canon field style (G33/fieldMetrics) + a left inset for the search icon.
+  const inputStyle: CSSProperties = { ...fieldInputStyle, paddingLeft: 30 }
 
   // One read-only summary card per side — NOT a toggle (unlike the candidate/contact
   // reference modals): the direction is fixed, so there is nothing to pick here.

@@ -44,6 +44,8 @@ import { kvkValue, vatValue } from '@/components/drawer/contactLinks'
 import { useConfirm } from '@/hooks/useConfirm'
 import { notifyError } from '@/lib/notify'
 import { useNumberingEntities } from '@/lib/useNumberingEntities'
+import { useIdentifierValidation } from '@/hooks/useIdentifierValidation'
+import { resolveCountryCode } from '@/lib/companyIdentifiers'
 import ZzpAddressCard from './ZzpAddressCard'
 import type { ZzpAddressValues } from './ZzpAddressCard'
 import { useBusinessEmailDuplicateCheck } from '../hooks/useBusinessEmailDuplicateCheck'
@@ -112,14 +114,27 @@ export function ZzpTab({ c, onSave }: { c: Candidate; onSave?: (v: Record<string
     email_zakelijk: zzp.business_email  ?? '',
     iban:           zzp.iban            ?? flat.iban         ?? '',
   }
+  // KVK/BTW-PER-LAND-1 (Danny 08-08, points 10 + 11): the KvK/BTW shape follows the
+  // freelancer's OWN business country (the Adres block below), never a hardcoded
+  // Dutch rule; the tenant setting decides warn-vs-block. MEASURED 08-08 against the
+  // dev API: PATCH /candidates/{id} still validates `freelance.kvk_number` as
+  // `digits:8` and `freelance.vat_number` as `/^NL\d{9}B\d{2}$/`, so a non-Dutch
+  // number is refused server-side regardless of this setting — the honest hint under
+  // the card says exactly that instead of pretending the save will land.
+  const identifiers = useIdentifierValidation()
+  const zzpCountry = (zzp.country as string) ?? ''
+  const zzpCountryCode = resolveCountryCode(zzpCountry)
+  const backendNlOnly = zzpCountryCode !== null && zzpCountryCode !== 'NL'
   const fields = [
     { key: 'bedrijfsnaam', label: t('zzp.companyName'), group: t('zzp.groupCompany') },
     // KVK/BTW render as real hyperlinks in read mode (task 1.1.2/1.1.3) — same
     // shared renderers the customer OverviewTab uses, edit mode stays a plain input.
     { key: 'kvk', label: t('zzp.kvk'), group: t('zzp.groupCompany'),
-      renderValue: (v: unknown) => kvkValue(v, t('zzp.openKvk')) },
+      renderValue: (v: unknown) => kvkValue(v, t('zzp.openKvk')),
+      validate: (v: unknown) => identifiers.notice('coc', v as string, zzpCountry) },
     { key: 'btw', label: t('zzp.vat'), group: t('zzp.groupCompany'),
-      renderValue: (v: unknown) => vatValue(v, t('zzp.openVies')) },
+      renderValue: (v: unknown) => vatValue(v, t('zzp.openVies')),
+      validate: (v: unknown) => identifiers.notice('vat', v as string, zzpCountry) },
     { key: 'kor', label: t('zzp.kor'), group: t('zzp.groupCompany'), type: 'checkbox' },
     // CREDITOR-AUTO-1: only offered as an editable row while the tenant does NOT
     // run it through the numbering sequence — once it does, it renders as its
@@ -199,6 +214,11 @@ export function ZzpTab({ c, onSave }: { c: Candidate; onSave?: (v: Record<string
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
       <EditableFieldTable title={t('zzp.groupCompany')} fields={blockFields(t('zzp.groupCompany'))} value={value} labelWidth={WIDE_LABEL_WIDTH} onSave={handleSaveCompany} />
+      {/* Honest gap notice (§3): the FE now checks per country, the backend does not —
+          a non-Dutch KvK/BTW is still refused by PATCH /candidates/{id} (measured 08-08). */}
+      {backendNlOnly && (
+        <div style={{ fontSize: 11, fontStyle: 'italic', color: 'var(--color-warning)', padding: '0 12px' }}>{t('zzp.identifierNlOnly')}</div>
+      )}
       <ZzpAddressCard value={addressValue} onSave={handleSaveAddress} />
       {/* CREDITOR-AUTO-1 locked row — only rendered once the tenant's numbering
           sequence actually owns this field (see creditorAutoNumbered above);

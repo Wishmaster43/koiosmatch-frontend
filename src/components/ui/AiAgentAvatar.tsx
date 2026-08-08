@@ -23,7 +23,7 @@ export default function AiAgentAvatar({ name, size = 22 }: { name?: string; size
           display: 'flex', alignItems: 'center', justifyContent: 'center',
           background: 'color-mix(in srgb, var(--color-primary) 14%, transparent)',
           border: '1px solid color-mix(in srgb, var(--color-primary) 40%, transparent)',
-          color: 'var(--color-primary)' }}>
+          color: 'var(--color-primary-text)' }}>
         <Sparkle size={Math.round(size * 0.55)} aria-hidden="true" />
       </span>
       <span style={{ fontSize: 12, color: 'var(--text)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{name}</span>

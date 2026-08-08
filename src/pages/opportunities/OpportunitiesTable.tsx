@@ -65,7 +65,7 @@ export default function OpportunitiesTable({ rows, loading, error, onRowClick, s
     if (rule.action === 'none') return null
     return {
       action: rule.action,
-      label: t('common:koios.actions.follow_up', { defaultValue: 'Follow up' }),
+      label: t('common:koios.actions.follow_up'),
       reason: t(rule.reasonKey, { defaultValue: 'The expected close date has passed.' }),
       source: 'rules',
     }

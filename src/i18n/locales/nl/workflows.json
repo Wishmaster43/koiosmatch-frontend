@@ -1009,7 +1009,14 @@
       "match_terminated": "Match beëindigd",
       "appointment_created": "Afspraak aangemaakt",
       "whatsapp_connection_down": "WhatsApp-verbinding verbroken",
-      "whatsapp_connection_restored": "WhatsApp-verbinding hersteld"
+      "whatsapp_connection_restored": "WhatsApp-verbinding hersteld",
+      "vacancy_created": "Vacature aangemaakt",
+      "vacancy_published": "Vacature gepubliceerd",
+      "vacancy_updated": "Vacature gewijzigd",
+      "ai_agent_webhook_received": "AI-agent webhook ontvangen",
+      "interview_started": "Interview gestart",
+      "interview_completed": "Interview afgerond",
+      "interview_disqualified": "Interview afgewezen"
     }
   },
   "templateLibrary": {

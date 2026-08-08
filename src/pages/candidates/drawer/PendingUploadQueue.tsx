@@ -1,6 +1,9 @@
+import { useId } from 'react'
 import { useTranslation } from 'react-i18next'
 import { X } from 'lucide-react'
 import DocumentLinkPicker from './DocumentLinkPicker'
+// G34: the house searchable dropdown replaces the native per-file type <select>.
+import SelectMenu from '@/components/ui/SelectMenu'
 import type { Id, LookupOption } from '@/types/common'
 
 // A queued-but-not-yet-uploaded file, each with its own document type (BUGFIX
@@ -13,12 +16,17 @@ export interface PendingItem { file: File; objectUrl: string; name: string; size
 interface PendingUploadQueueProps {
   pending: PendingItem[]
   docTypes: LookupOption[]
-  educations: Array<{ id?: Id; title?: string }>
-  certifications: Array<{ id?: Id; name?: string }>
+  // DOC-1-EIGENAAR-1: each entry's own `document_id` rides along — DocumentLinkPicker
+  // drops the slots that are already taken (one rule, applied inside the picker).
+  educations: Array<{ id?: Id; title?: string; document_id?: Id | null }>
+  certifications: Array<{ id?: Id; name?: string; document_id?: Id | null }>
   // DOC-LANG-SKILL-LINK-1: same "Koppelen aan" mechanic, extended to languages/skills
   // — threaded straight through to DocumentLinkPicker (mirrors educations/certifications).
-  languages: Array<{ id?: Id; language?: string; name?: string }>
-  skills: Array<{ id?: Id; name?: string }>
+  languages: Array<{ id?: Id; language?: string; name?: string; document_id?: Id | null }>
+  skills: Array<{ id?: Id; name?: string; document_id?: Id | null }>
+  // REFERENTIE-VELDEN-1: references are linkable at upload time too. Optional with an
+  // empty-array default so an older caller keeps rendering exactly as before.
+  references?: Array<{ id?: Id; first_name?: string; middle_name?: string; last_name?: string; document_id?: Id | null }>
   onSetType: (idx: number, type: string) => void
   onSetAllTypes: (type: string) => void
   onSetLink: (idx: number, linkTo: string) => void
@@ -35,9 +43,13 @@ interface PendingUploadQueueProps {
  * presentational, all state lives in the parent.
  */
 export default function PendingUploadQueue({
-  pending, docTypes, educations, certifications, languages, skills, onSetType, onSetAllTypes, onSetLink, onRemove, onUploadAll, onCancel,
+  pending, docTypes, educations, certifications, languages, skills, references = [], onSetType, onSetAllTypes, onSetLink, onRemove, onUploadAll, onCancel,
 }: PendingUploadQueueProps) {
   const { t } = useTranslation('candidates')
+  // Base id for each queued file's type-picker sr-only label — SelectMenu's
+  // trigger is a <button>, which ignores an associated <label for> (mirrors the
+  // exact same pattern in customers/drawer/DocumentsTab.tsx).
+  const docTypeLabelBaseId = useId()
   if (pending.length === 0) return null
   return (
     <div style={{ border: '1px solid var(--color-primary)', borderRadius: 10, padding: 12, marginBottom: 10, background: 'var(--color-primary-bg)' }}>
@@ -70,22 +82,29 @@ export default function PendingUploadQueue({
           <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
             <span style={{ flex: 1, minWidth: 0, fontSize: 12, color: 'var(--text)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{item.name}</span>
             <span style={{ fontSize: 11, color: 'var(--text-muted)', flexShrink: 0 }}>{item.size}</span>
-            <select aria-label={t('documents.docTypeFor', { name: item.name })} value={item.type} onChange={e => onSetType(idx, e.target.value)}
-              style={{ fontSize: 11, border: '1px solid var(--border)', borderRadius: 6, background: 'var(--bg)', color: 'var(--text)' }}>
-              {docTypes.map(dt => <option key={dt.value} value={dt.value}>{dt.label}</option>)}
-            </select>
-            {/* DOC-ENTRY-LINK-1 / DOC-LANG-SKILL-LINK-1: OPTIONAL "Koppelen aan" —
-                grouped by education/certification/language/skill. */}
+            <span id={`${docTypeLabelBaseId}-${idx}`} className="sr-only">{t('documents.docTypeFor', { name: item.name })}</span>
+            <div style={{ width: 130, flexShrink: 0 }}>
+              <SelectMenu aria-labelledby={`${docTypeLabelBaseId}-${idx}`} value={item.type} onChange={v => onSetType(idx, v)}
+                options={docTypes} menuWidth={160}
+                style={{ fontSize: 11, padding: '4px 8px', border: '1px solid var(--border)', borderRadius: 6, background: 'var(--bg)', color: 'var(--text)' }} />
+            </div>
+            {/* DOC-ENTRY-LINK-1 / DOC-LANG-SKILL-LINK-1 / REFERENTIE-VELDEN-1: OPTIONAL
+                "Koppelen aan" — grouped by education/certification/language/skill/
+                reference. Entries that already carry a document are filtered out by the
+                picker itself (DOC-1-EIGENAAR-1). */}
             <DocumentLinkPicker ariaLabel={t('documents.linkToFor', { name: item.name })} value={item.linkTo} onChange={v => onSetLink(idx, v)}
-              educations={educations} certifications={certifications} languages={languages} skills={skills} />
+              educations={educations} certifications={certifications} languages={languages} skills={skills} references={references} />
             <button onClick={() => onRemove(idx)} aria-label={t('common:remove')}
               style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: 2, display: 'flex', flexShrink: 0 }}><X size={12} /></button>
           </div>
         ))}
       </div>
       <div style={{ display: 'flex', gap: 8 }}>
+        {/* CONTRAST-YELLOW-1 (08-08 audit): the fill is var(--text), which flips
+            near-black↔near-white across themes, so the label must flip with it —
+            var(--bg) is always the readable inverse of --text in both themes. */}
         <button onClick={onUploadAll}
-          style={{ padding: '7px 14px', fontSize: 12, fontWeight: 600, borderRadius: 7, background: 'var(--text)', color: 'white', border: 'none', cursor: 'pointer' }}>
+          style={{ padding: '7px 14px', fontSize: 12, fontWeight: 600, borderRadius: 7, background: 'var(--text)', color: 'var(--bg)', border: 'none', cursor: 'pointer' }}>
           {pending.length > 1 ? t('documents.addAll', { count: pending.length }) : t('common:add')}
         </button>
         <button onClick={onCancel}

@@ -284,7 +284,7 @@ describe('AddApplicationModal · APP-OWNER-1 recruiter derivation chain', () => 
 describe('AddApplicationModal · W30 server-side search (candidate/vacancy pickers)', () => {
   it('loads an initial page via /candidates?search=&per_page=25 on mount (never the old per_page:100 dump)', async () => {
     render(<AddApplicationModal onClose={vi.fn()} onCreated={vi.fn()} />)
-    await waitFor(() => expect(api.get).toHaveBeenCalledWith('/candidates', { params: { search: '', per_page: 25 } }))
+    await waitFor(() => expect(api.get).toHaveBeenCalledWith('/candidates', { params: { per_page: 25 } }))
   })
 
   it('skips the /vacancies fetch entirely while locked (data minimisation)', () => {
@@ -296,7 +296,7 @@ describe('AddApplicationModal · W30 server-side search (candidate/vacancy picke
     const user = userEvent.setup()
     render(<AddApplicationModal onClose={vi.fn()} onCreated={vi.fn()} />)
     // Let the initial mount fetch settle before measuring the delta below.
-    await waitFor(() => expect(api.get).toHaveBeenCalledWith('/candidates', { params: { search: '', per_page: 25 } }))
+    await waitFor(() => expect(api.get).toHaveBeenCalledWith('/candidates', { params: { per_page: 25 } }))
     const before = vi.mocked(api.get).mock.calls.filter(c => c[0] === '/candidates').length
 
     await user.click(screen.getByRole('button', { name: /add\.candidatePlaceholder/ }))
@@ -313,7 +313,7 @@ describe('AddApplicationModal · W30 server-side search (candidate/vacancy picke
   it('debounces the vacancy search box the same way, on its own endpoint', async () => {
     const user = userEvent.setup()
     render(<AddApplicationModal onClose={vi.fn()} onCreated={vi.fn()} />)
-    await waitFor(() => expect(api.get).toHaveBeenCalledWith('/vacancies', { params: { search: '', per_page: 25 } }))
+    await waitFor(() => expect(api.get).toHaveBeenCalledWith('/vacancies', { params: { per_page: 25 } }))
     const before = vi.mocked(api.get).mock.calls.filter(c => c[0] === '/vacancies').length
 
     await user.click(screen.getByRole('button', { name: /add\.vacancyPlaceholder/ }))
@@ -382,14 +382,18 @@ describe('AddApplicationModal · W30 custom fields (Extra section)', () => {
     })))
   })
 
-  it('never renders a bare <select> for a non-select custom field, and DOES for a select-type one', () => {
+  it('never renders a bare <select>, even for a select-type custom field — it gets the searchable combobox instead', () => {
     customFieldsState.fields = [
       { key: 'campaign', label: 'Campaign', type: 'text' },
       { key: 'channel', label: 'Channel', type: 'select', options: ['Indeed', 'LinkedIn'] },
     ]
     render(<AddApplicationModal onClose={vi.fn()} onCreated={vi.fn()} />)
-    expect(document.querySelectorAll('select').length).toBe(1)
-    expect(screen.getByLabelText('Channel').tagName).toBe('SELECT')
+    // Danny 08-08 (§4): searchable dropdown everywhere, no bare native <select> —
+    // the select-type custom field now renders through the shared CreatableSelect.
+    expect(document.querySelectorAll('select').length).toBe(0)
+    const trigger = screen.getByLabelText(/Channel/)
+    expect(trigger.tagName).toBe('BUTTON')
+    expect(trigger).toHaveAttribute('aria-haspopup', 'listbox')
   })
 })
 

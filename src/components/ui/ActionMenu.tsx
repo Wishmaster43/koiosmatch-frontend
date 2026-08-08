@@ -12,6 +12,7 @@ import type { CSSProperties, ComponentType, KeyboardEvent as ReactKeyboardEvent,
 import { ChevronDown, ChevronRight, ArrowLeft, Search, Check } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { BTN_H } from '@/config/buttonMetrics'
+import SelectAllRow from './SelectAllRow'
 
 // Icon contract shared by the trigger, nodes and options (lucide-compatible).
 type IconComponent = ComponentType<{ size?: number; style?: CSSProperties; color?: string }>
@@ -209,6 +210,20 @@ export default function ActionMenu({ label, icon: Icon, items = [], menuWidth = 
                   background: 'var(--color-primary)', color: 'var(--color-on-accent)', cursor: query.trim() ? 'pointer' : 'not-allowed', opacity: query.trim() ? 1 : 0.5 }}>
                 {inputNode.submitLabel ?? t('save')}
               </button>
+            </div>
+          )}
+
+          {/* Select all / clear all — MULTI-select levels only (a single-pick list has
+              no meaning for it, § punt 3). It acts on `shownOptions`, i.e. exactly what
+              the search box shows. The working set is local state here, so the batch
+              applies in one update — no per-value queue needed. */}
+          {multiNode && shownOptions.length > 0 && (
+            <div style={{ padding: '8px 10px 0' }}>
+              <SelectAllRow dense role="menuitem" menuItem
+                visibleValues={shownOptions.map(o => o.value)} selectedValues={multiValues}
+                onApply={(values, select) => setMultiValues(prev => select
+                  ? [...prev, ...values.filter(v => !prev.includes(v))]
+                  : prev.filter(v => !values.includes(v)))} />
             </div>
           )}
 

@@ -26,7 +26,11 @@
     "search": "Rechercher…",
     "create": "Créer",
     "cancel": "Annuler",
-    "searchError": "Échec de la recherche"
+    "searchError": "Échec de la recherche",
+    "searchErrorForbidden": "Vous n'avez pas le droit d'effectuer cette recherche.",
+    "searchErrorValidation": "Cette recherche n'a pas été acceptée. Modifiez-la et réessayez.",
+    "searchErrorServer": "Le serveur a renvoyé une erreur pendant la recherche. Réessayez dans un instant.",
+    "searchErrorNetwork": "Pas de connexion — la recherche a échoué."
   },
   "pagination": {
     "perPage": "Résultats par page",
@@ -118,7 +122,13 @@
     "middleName": "Particule",
     "lastName": "Nom de famille",
     "functionTitle": "Fonction",
-    "noFunction": "Aucune fonction renseignée"
+    "noFunction": "Aucune fonction renseignée",
+    "subTabs": {
+      "status": "Statut",
+      "details": "Détails",
+      "cv": "CV",
+      "context": "Contexte"
+    }
   },
   "cvProposal": {
     "title": "Proposition issue du CV",
@@ -296,6 +306,15 @@
       },
       "startedAt": "Démarré {{date}}",
       "period": "{{start}} – {{end}}"
+    },
+    "currentStatus": {
+      "INTRO_SENT": "Intro envoyée",
+      "COMPLETED": "Terminé",
+      "DISQUALIFIED": "Disqualifié"
+    },
+    "conversation": {
+      "title": "Conversation",
+      "noCandidate": "Aucun candidat lié — rien à afficher."
     }
   },
   "appointments": {
@@ -320,7 +339,13 @@
       "noShow": "Absence",
       "cancelled": "Annulé"
     },
-    "noMatches": "Aucun rendez-vous ne correspond à ce filtre."
+    "noMatches": "Aucun rendez-vous ne correspond à ce filtre.",
+    "status": {
+      "planned": "Planifié",
+      "completed": "Terminé",
+      "noShow": "Absence",
+      "cancelled": "Annulé"
+    }
   },
   "notes": {
     "title": "Notes",
@@ -485,7 +510,9 @@
     "phaseSince": "depuis le {{date}}",
     "phaseUnknown": "Historique de phase pas encore enregistré",
     "recalculateScore": "Recalculer le score de match",
-    "recalculateDone": "Score de match recalculé"
+    "recalculateDone": "Score de match recalculé",
+    "editScore": "Modifier le score de match manuellement",
+    "scoreSaved": "Score de match enregistré"
   },
   "competition": {
     "title": "Autres candidats",

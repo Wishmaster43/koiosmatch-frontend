@@ -375,7 +375,7 @@ export default function AddApplicationModal({ onClose, onCreated, lockedVacancy 
           <button onClick={onClose} style={{ height: BTN_H, padding: '0 16px', fontSize: 13, border: '1px solid var(--border)', borderRadius: 8, background: 'var(--surface)', color: 'var(--text)', cursor: 'pointer' }}>{t('add.cancel')}</button>
           <button onClick={create} disabled={!candidateId || !vacancyId || saving}
             style={{ height: BTN_H, padding: '0 16px', fontSize: 13, fontWeight: 500, border: 'none', borderRadius: 8,
-              background: 'var(--color-primary)', color: 'white', cursor: 'pointer', opacity: (candidateId && vacancyId) ? 1 : 0.4 }}>
+              background: 'var(--color-primary)', color: 'var(--color-on-accent)', cursor: 'pointer', opacity: (candidateId && vacancyId) ? 1 : 0.4 }}>
             {t('add.create')}
           </button>
         </div>

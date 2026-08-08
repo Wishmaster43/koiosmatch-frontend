@@ -24,12 +24,12 @@ export default function GeoRadiusGroup({ group }: { group: ReportFilterGroup }) 
       <div style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '5px 8px', borderRadius: 6,
                     background: 'var(--color-primary-bg)', border: '1px solid var(--color-primary)' }}>
         <MapPin size={12} color="var(--color-primary)" style={{ flexShrink: 0 }} />
-        <span style={{ flex: 1, fontSize: 12, color: 'var(--color-primary)', fontWeight: 500,
+        <span style={{ flex: 1, fontSize: 12, color: 'var(--color-primary-text)', fontWeight: 500,
                        overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
           {group.applied.label}
         </span>
         <button onClick={() => group.onClear?.()} aria-label={t('filters.clear')}
-          style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--color-primary)', padding: 0, display: 'flex' }}>
+          style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--color-primary-text)', padding: 0, display: 'flex' }}>
           <X size={11} />
         </button>
       </div>
@@ -51,7 +51,7 @@ export default function GeoRadiusGroup({ group }: { group: ReportFilterGroup }) 
           style={{ marginLeft: 'auto', padding: '5px 10px', fontSize: 11, fontWeight: 600, borderRadius: 6,
                    cursor: q.trim() ? 'pointer' : 'default', border: '1px solid var(--border)',
                    background: q.trim() ? 'var(--color-primary)' : 'var(--hover-bg)',
-                   color: q.trim() ? '#fff' : 'var(--text-muted)' }}>
+                   color: q.trim() ? 'var(--color-on-accent)' : 'var(--text-muted)' }}>
           {t('filters.apply')}
         </button>
       </div>

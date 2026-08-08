@@ -3,7 +3,8 @@
     "title": "Einstellungen",
     "empty": "Keine Einstellungen für Ihre Rolle verfügbar.",
     "search": "Einstellung suchen…",
-    "noResults": "Keine Einstellungen gefunden"
+    "noResults": "Keine Einstellungen gefunden",
+    "categoryPicker": "Kategorie"
   },
   "common": {
     "save": "Speichern",
@@ -228,7 +229,9 @@
     "notif_kandidaten": "Kandidaten",
     "notif_matches": "Matches",
     "notif_taken": "Aufgaben",
-    "koios_advice": "Hinweis-Schwellenwerte"
+    "koios_advice": "Hinweis-Schwellenwerte",
+    "notif_my": "Meine Benachrichtigungen",
+    "customer_identifier_validation": "Nummernprüfung"
   },
   "kpis": {
     "title": "KPI-Einstellungen",
@@ -389,7 +392,13 @@
     "logo": "Logo",
     "logoHint": "PNG, JPG, WEBP oder SVG, max. 2 MB — SVG wird serverseitig geprüft. Wird in der Navigationsleiste angezeigt.",
     "noLogo": "Kein Logo",
-    "logoUploadError": "Logo-Upload fehlgeschlagen."
+    "logoUploadError": "Logo-Upload fehlgeschlagen.",
+    "textColor": "Textfarbe auf Akzentfarbe",
+    "textColorHint": "Die Textfarbe auf farbigen Schaltflächen und Chips. Automatisch wählt Schwarz oder Weiß anhand deiner Akzentfarbe — eine helle Farbe wie Gelb bekommt also dunklen Text.",
+    "textColorAuto": "Automatisch",
+    "textColorLight": "Weiß",
+    "textColorDark": "Dunkel",
+    "textColorLowContrast": "Diese Textfarbe hat zu wenig Kontrast zur Markenfarbe (Verhältnis {{ratio}}; lesbar ist 4,5). Wähle „Automatisch“ für die beste Lesbarkeit."
   },
   "company": {
     "title": "Unternehmen",
@@ -409,7 +418,10 @@
     "streetPlaceholder": "Straßenname",
     "houseNumber": "Hausnummer",
     "houseNumberSuffix": "Zusatz",
-    "bannerUploadFailed": "Banner-Upload fehlgeschlagen"
+    "bannerUploadFailed": "Banner-Upload fehlgeschlagen",
+    "sectionIdentity": "Identität",
+    "sectionAddress": "Adresse",
+    "sectionPreferences": "Voreinstellungen"
   },
   "locations": {
     "title": "Niederlassungen",
@@ -473,7 +485,8 @@
     "mapNoCoords": "Noch keine Standorte mit Koordinaten — geben Sie die Adresse eines Standorts ein, dann erscheint er automatisch auf der Karte.",
     "color": "Farbe",
     "icon": "Symbol",
-    "colorHint": "Farbe und Symbol machen einen Standort in Listen und auf der Karte erkennbar."
+    "colorHint": "Farbe und Symbol machen einen Standort in Listen und auf der Karte erkennbar.",
+    "province": "Provinz"
   },
   "memory": {
     "title": "Speicher",
@@ -695,7 +708,9 @@
     },
     "inApp": {
       "label": "In-App-Benachrichtigungen",
-      "desc": "Benachrichtigungen in der Plattform erhalten"
+      "desc": "Benachrichtigungen in der Plattform erhalten",
+      "notYetActive": "Noch nicht aktiv",
+      "notYetActiveReason": "Für diesen Typ wird noch keine Benachrichtigung gesendet — der Schalter ist bereits einstellbar."
     },
     "context": {
       "sollicitaties": {
@@ -722,6 +737,17 @@
         "title": "Aufgaben",
         "desc": "Benachrichtigungen über neue und aktualisierte Aufgaben."
       }
+    },
+    "my": {
+      "title": "Meine Benachrichtigungen",
+      "subtitle": "Deine eigene Ausnahme zusätzlich zu den mandantenweiten Benachrichtigungseinstellungen — wähle pro Thema, ob du immer, nie oder einfach die Einstellung deiner Organisation folgen möchtest.",
+      "inherit": "Übernehmen",
+      "on": "An",
+      "off": "Aus",
+      "empty": "Es sind noch keine Benachrichtigungsthemen konfiguriert.",
+      "saveFailed": "Speichern fehlgeschlagen — deine Auswahl wurde zurückgesetzt.",
+      "emailNotAvailable": "Noch nicht verfügbar",
+      "emailNotAvailableReason": "Eine persönliche E-Mail-Ausnahme ist noch nicht möglich — hierfür folgst du der mandantenweiten E-Mail-Einstellung."
     }
   },
   "billing": {
@@ -1321,7 +1347,10 @@
     "catAUTHENTICATION": "Authentifizierung",
     "numbersSynced": "Nummern synchronisiert",
     "templatesSynced": "Vorlagen synchronisiert",
-    "syncFailed": "Synchronisierung fehlgeschlagen"
+    "syncFailed": "Synchronisierung fehlgeschlagen",
+    "checkStatus": "Verbindung prüfen",
+    "statusChecked": "Verbindung geprüft.",
+    "statusCheckFailed": "Die Verbindungsprüfung ist fehlgeschlagen."
   },
   "roles": {
     "loading": "Rollen werden geladen…",
@@ -1911,7 +1940,12 @@
   "requiredFields": {
     "title": "Pflichtfelder",
     "subtitle": "Markieren Sie pro Phase, welche Felder Pflicht sind. Ein Pflichtfeld zeigt einen Stern und blockiert das Speichern, wenn es leer ist.",
-    "field": "Feld"
+    "field": "Feld",
+    "groupCount": "{{required}} von {{total}} erforderlich",
+    "customHint": "Eigene Felder speichern ihre Pflichtangabe in der Felddefinition selbst, nicht in dieser Einstellung.",
+    "customEmpty": "Es gibt noch keine eigenen Kandidatenfelder. Sobald du eines anlegst, erscheint es hier und kann je Phase als Pflichtfeld gesetzt werden.",
+    "customAlwaysRequired": "Immer erforderlich, in jeder Phase",
+    "customSaveFailed": "Das Speichern der Felddefinition ist fehlgeschlagen. Bitte versuche es erneut."
   },
   "vacancyTab": {
     "title": "Stellen-Tab bei Kandidaten",
@@ -2620,7 +2654,20 @@
     "title": "Karriereseite",
     "subtitle": "Die öffentliche Stellenseite dieses Mandanten.",
     "activeLabel": "Karriereseite aktiv",
-    "hint": "Schaltet die öffentliche Karriereseite (…/{tenant}/vacatures) ein oder aus. Das Backend erzwingt dies sofort: aus = die Seite zeigt einen Hinweis und Bewerbungen sind geschlossen."
+    "hint": "Schaltet die öffentliche Karriereseite (…/{tenant}/vacatures) ein oder aus. Das Backend erzwingt dies sofort: aus = die Seite zeigt einen Hinweis und Bewerbungen sind geschlossen.",
+    "urls": {
+      "title": "Öffentliche URLs",
+      "subtitle": "In eine Jobbörse oder einen Crawler einfügen — aus der eigenen Adresse dieses Mandanten aufgebaut.",
+      "site": "Seiteninfo (Branding)",
+      "vacancies": "Stellenangebote (JSON)",
+      "sitemap": "Sitemap",
+      "indeedFeed": "Indeed-Feed",
+      "werkzoekenFeed": "Werkzoeken.nl-Feed",
+      "copy": "Kopieren",
+      "open": "Öffnen",
+      "inactiveNotice": "Nicht verfügbar, solange die Karriereseite ausgeschaltet ist.",
+      "noTenant": "Noch kein Mandant ausgewählt."
+    }
   },
   "caoSettings": {
     "title": "Tarifverträge",
@@ -2674,7 +2721,11 @@
       "title": "Sperrgründe — Kunde",
       "subtitle": "Gründe, einen Kunden auf die Sperrliste zu setzen."
     },
-    "add": "Grund hinzufügen"
+    "add": "Grund hinzufügen",
+    "tabs": {
+      "candidate": "Kandidat",
+      "customer": "Kunde"
+    }
   },
   "opportunityLookups": {
     "tabs": {
@@ -2745,5 +2796,30 @@
   "modShiftmanager": {
     "reportingOff": "Shiftmanager-Berichterstattung ist noch nicht aktiviert — schalten Sie das Modul ein, um KPI-Ziele und Anzeigelimits zu konfigurieren."
   },
-  "dashboardsEmpty": "Noch keine Dashboard-Elemente konfiguriert."
+  "dashboardsEmpty": "Noch keine Dashboard-Elemente konfiguriert.",
+  "settings": {
+    "matches": {
+      "stopReasonTitle": "Beendigungsgründe",
+      "stopReasonSubtitle": "Pflichtgrund beim vorzeitigen Beenden eines Matches.",
+      "stopReasonAdd": "Grund hinzufügen"
+    },
+    "outreach": {
+      "outcomeTitle": "Ergebnisse",
+      "outcomeSubtitle": "Das Ergebnis eines Anrufversuchs, getrennt vom Status der Anrufliste.",
+      "outcomeAdd": "Ergebnis hinzufügen"
+    }
+  },
+  "identifierValidation": {
+    "title": "Nummernprüfung",
+    "subtitle": "Legen Sie fest, wie streng Koios Match prüft, ob eine Handelsregister-/USt-Nummer zum Land des Kunden passt.",
+    "modeLabel": "Bei abweichender Nummer",
+    "modeHint": "Warnen erlaubt das Speichern immer; Blockieren weist die Nummer zurück, bis sie stimmt.",
+    "modeWarn": "Nur warnen",
+    "modeBlock": "Speichern blockieren",
+    "rulesTitle": "Erwartetes Format je Land",
+    "colCountry": "Land",
+    "colCoc": "Handelsregisternummer",
+    "colVat": "USt-IdNr.",
+    "unknownCountryHint": "Für Länder ohne obige Regel wird nichts blockiert — es erscheint höchstens ein dezenter Hinweis."
+  }
 }

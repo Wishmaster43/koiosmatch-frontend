@@ -20,7 +20,7 @@ export const LOG_NAME_META = {
   users:     { bg: 'var(--color-warning-bg)', color: 'var(--color-warning)' },
   apps:      { bg: 'var(--color-warning-bg)', color: 'var(--color-warning)' },
   modules:   { bg: 'var(--color-violet-bg)', color: 'var(--color-violet)' },
-  workflows: { bg: 'var(--color-primary-bg)', color: 'var(--color-primary)' },
+  workflows: { bg: 'var(--color-primary-bg)', color: 'var(--color-primary-text)' },
   webhooks:  { bg: 'var(--color-info-bg)', color: 'var(--color-info)' },
   ai:        { bg: 'var(--color-violet-bg)', color: 'var(--color-violet)' },
 }

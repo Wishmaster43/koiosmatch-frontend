@@ -6,6 +6,7 @@ import { useTranslation } from 'react-i18next'
 import { AlertTriangle, Clock, ArrowDownLeft, ArrowUpRight } from 'lucide-react'
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts'
 import ErrorBoundary from '@/components/ui/ErrorBoundary'
+import { useEscalationReasons } from './hooks/useEscalationReasons'
 import type { WaCandidate, WaMessage, WaEscalation, WaActivityDatum } from '@/types/whatsapp'
 
 
@@ -24,12 +25,26 @@ const timeAgo   = (iso?: string) => {
 }
 // Tokens only (§4) — 'outbound' reuses the app's blue secondary accent, never an ad-hoc hex.
 const DIRECTION_COLOR: Record<string, string> = { inbound: 'var(--color-success)', outbound: 'var(--color-secondary)' }
-// Escalation reason → colour. Label = t('reasons.<key>').
-const REASON_COLOR: Record<string, { color: string; bg: string }> = {
-  failed_delivery:   { color: 'var(--color-danger)', bg: 'var(--color-danger-bg)' },
-  no_reply:          { color: 'var(--color-warning)', bg: 'var(--color-warning-bg)' },
-  negative_response: { color: 'var(--color-violet)', bg: 'var(--color-violet-bg)' },
+// LOOKUP-GAP-1(c): escalation-reason colour/label used to be this fixed 3-key
+// map, ignoring the real tenant lookup (/escalation-reasons, Settings → WhatsApp
+// → Escalatieredenen). EscalationList below now resolves a reason from that
+// lookup FIRST (via useEscalationReasons), so a tenant-renamed/added reason
+// renders its own colour/label. GET /whatsapp/escalations today still always
+// sends one of these three DERIVED diagnostic keys instead of a real tenant
+// reason (WhatsappDashboardController::deriveEscalationReason guesses from
+// message timestamps — see useEscalationReasons.ts's file header for the
+// verified backend gap) — this map is the honest fallback that keeps THOSE
+// colour-coded until the backend actually returns a real reason; its label
+// still always comes from t('reasons.<key>'), never a literal string here.
+const DERIVED_REASON_STYLE: Record<string, string> = {
+  failed_delivery:   'var(--color-danger)',
+  no_reply:          'var(--color-warning)',
+  negative_response: 'var(--color-violet)',
 }
+// One soft-tint formula (§4) for every escalation badge, whatever the colour
+// source (tenant hex from the lookup, or a --color-* token from the fallback
+// above) — color-mix works for both, unlike the old hex-only `color + '1A'`.
+const reasonBg = (color: string) => `color-mix(in srgb, ${color} 16%, transparent)`
 
 // ─── sub-components ─────────────────────────────────────────────────────────
 
@@ -37,7 +52,7 @@ function Avatar({ candidate, size = 32 }: { candidate?: WaCandidate; size?: numb
   return (
     <div style={{
       width: size, height: size, borderRadius: '50%', flexShrink: 0,
-      background: 'var(--color-primary-bg)', color: 'var(--color-primary)',
+      background: 'var(--color-primary-bg)', color: 'var(--color-primary-text)',
       display: 'flex', alignItems: 'center', justifyContent: 'center',
       fontSize: size * 0.35, fontWeight: 700,
     }}>
@@ -117,6 +132,9 @@ export function MessageFeed({ messages, loading }: { messages: WaMessage[]; load
 
 export function EscalationList({ escalations, loading }: { escalations: WaEscalation[]; loading?: boolean }) {
   const { t } = useTranslation('whatsapp')
+  // Real tenant escalation-reason lookup (LOOKUP-GAP-1(c)) — see the file header
+  // comment on DERIVED_REASON_STYLE for why today's rows still fall through to it.
+  const { metaOf } = useEscalationReasons()
   return (
     <div style={{
       background: 'var(--surface)', borderRadius: 14,
@@ -145,8 +163,11 @@ export function EscalationList({ escalations, loading }: { escalations: WaEscala
           </div>
         )}
         {!loading && escalations.map((esc, i) => {
-          const meta = REASON_COLOR[esc.reason ?? ''] ?? { color: 'var(--text-muted)', bg: 'var(--bg)' }
-          const reasonLabel = t(`reasons.${esc.reason}`, { defaultValue: esc.reason })
+          // Lookup match wins (a real tenant reason, current or renamed) — falls
+          // back to the derived-diagnostic-key palette, then a neutral tint.
+          const lookupMeta = metaOf(esc.reason)
+          const color = lookupMeta?.color ?? (esc.reason ? DERIVED_REASON_STYLE[esc.reason] : undefined) ?? 'var(--text-muted)'
+          const reasonLabel = lookupMeta?.label ?? t(`reasons.${esc.reason}`, { defaultValue: esc.reason })
           return (
             <div key={esc.candidate_id ?? i} style={{
               display: 'flex', alignItems: 'center', gap: 10,
@@ -160,8 +181,8 @@ export function EscalationList({ escalations, loading }: { escalations: WaEscala
                 <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--text)', marginBottom: 2 }}>
                   {fullName(esc.candidate)}
                 </div>
-                <span style={{ fontSize: 10, fontWeight: 500, color: meta.color,
-                               background: meta.bg, borderRadius: 999, padding: '1px 6px' }}>
+                <span style={{ fontSize: 10, fontWeight: 500, color,
+                               background: reasonBg(color), borderRadius: 999, padding: '1px 6px' }}>
                   {reasonLabel}
                 </span>
               </div>

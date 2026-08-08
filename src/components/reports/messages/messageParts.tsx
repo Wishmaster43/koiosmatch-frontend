@@ -71,6 +71,6 @@ export function StatusBadge({ status }: { status?: string }) {
 export function SortIcon({ active, dir }: { active: boolean; dir: 'asc' | 'desc' }) {
   if (!active) return <ChevronsUpDown size={12} style={{ color: 'var(--border)' }} />
   return dir === 'asc'
-    ? <ChevronUp size={12} style={{ color: 'var(--color-primary)' }} />
-    : <ChevronDown size={12} style={{ color: 'var(--color-primary)' }} />
+    ? <ChevronUp size={12} style={{ color: 'var(--color-primary-text)' }} />
+    : <ChevronDown size={12} style={{ color: 'var(--color-primary-text)' }} />
 }

@@ -1009,7 +1009,14 @@
       "match_terminated": "Match finalizado",
       "appointment_created": "Cita creada",
       "whatsapp_connection_down": "Conexión de WhatsApp caída",
-      "whatsapp_connection_restored": "Conexión de WhatsApp restablecida"
+      "whatsapp_connection_restored": "Conexión de WhatsApp restablecida",
+      "vacancy_created": "Vacante creada",
+      "vacancy_published": "Vacante publicada",
+      "vacancy_updated": "Vacante actualizada",
+      "ai_agent_webhook_received": "Webhook de agente IA recibido",
+      "interview_started": "Entrevista iniciada",
+      "interview_completed": "Entrevista completada",
+      "interview_disqualified": "Entrevista descalificada"
     }
   },
   "templateLibrary": {

@@ -46,12 +46,16 @@ beforeEach(() => {
 })
 
 describe('AgentForm — WhatsApp intro template picker + FAQ/knowledge (WA_INTRO_TEMPLATE-1)', () => {
+  // G34: the template picker is the house CreatableSelect (a <button>+popover), not
+  // a native <select> — open it by its labelled accessible name and click the
+  // wanted option row instead of firing a `change` event on a <select>.
   it('shows the synced WhatsApp templates and PUTs the chosen wa_intro_template', async () => {
     render(<AgentForm agent={mockAgent} prompts={[]} faqs={mockFaqs} onSaved={vi.fn()} onDelete={vi.fn()} />)
 
     // Real templates load from GET /whatsapp-templates — never a hardcoded name.
-    const select = await screen.findByDisplayValue('— Geen template —')
-    fireEvent.change(select, { target: { value: 'welcome_nl' } })
+    const trigger = await screen.findByRole('button', { name: /WhatsApp-intro-template/ })
+    fireEvent.click(trigger)
+    fireEvent.click(await screen.findByRole('button', { name: 'welcome_nl (nl)' }))
 
     fireEvent.click(screen.getByRole('button', { name: 'Opslaan' }))
 
@@ -59,6 +63,12 @@ describe('AgentForm — WhatsApp intro template picker + FAQ/knowledge (WA_INTRO
     const [url, body] = vi.mocked(api.put).mock.calls[0]
     expect(url).toBe('/ai/agents/a1')
     expect((body as Record<string, unknown>).wa_intro_template).toBe('welcome_nl')
+  })
+
+  it('is no longer a native <select> — the prompt and WA-template fields are the house CreatableSelect', async () => {
+    const { container } = render(<AgentForm agent={mockAgent} prompts={[]} faqs={mockFaqs} onSaved={vi.fn()} onDelete={vi.fn()} />)
+    await screen.findByRole('button', { name: /WhatsApp-intro-template/ })
+    expect(container.querySelector('select')).toBeNull()
   })
 
   it('shows a calm empty state when no WhatsApp templates are synced', async () => {

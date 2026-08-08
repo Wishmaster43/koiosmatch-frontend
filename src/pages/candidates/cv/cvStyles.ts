@@ -9,12 +9,29 @@
  * tokens cannot resolve" hex exemptions in one auditable place (§4).
  */
 import { StyleSheet } from '@react-pdf/renderer'
+import { readableOn } from '@/hooks/useTenantTheme'
+
+// Hex + alpha -> rgba(): react-pdf takes literal colour values (no color-mix/CSS
+// vars here, see below), so translucent sidebar text/chip tints are built from
+// the computed on-accent hex rather than a fixed rgba(255,255,255,x) constant.
+function hexToRgba(hex: string, alpha: number): string {
+  const h = hex.replace('#', '')
+  const r = parseInt(h.slice(0, 2), 16)
+  const g = parseInt(h.slice(2, 4), 16)
+  const b = parseInt(h.slice(4, 6), 16)
+  return `rgba(${r}, ${g}, ${b}, ${alpha})`
+}
 
 export function makeStyles(color: string, color2: string) {
   // PDF document colours: @react-pdf/renderer renders this StyleSheet outside the
   // DOM/CSS cascade (it produces an actual PDF file), so var(--color-*) tokens
   // cannot resolve here — these are fixed document-style constants, not UI hex.
   /* eslint-disable no-restricted-syntax -- PDF StyleSheet colours; react-pdf renders outside the CSS cascade so design tokens cannot resolve here */
+  // BRAND-TEXT-COLOR-1: the sidebar's own background IS the tenant accent colour
+  // (`color`), so its text must not stay a hardcoded white — a light brand (e.g.
+  // yellow) would render unreadable. Reuse the same luminance-based helper
+  // useTenantTheme uses to derive --color-on-accent for the DOM.
+  const onAccent = readableOn(color)
   return StyleSheet.create({
     page: { fontFamily: 'Helvetica', backgroundColor: '#FFFFFF', fontSize: 10, color: '#1F2937' },
 
@@ -40,23 +57,23 @@ export function makeStyles(color: string, color2: string) {
     photo: { width: 72, height: 72, borderRadius: 36, marginBottom: 16, objectFit: 'cover' },
     photoPlaceholder: { width: 72, height: 72, borderRadius: 36, backgroundColor: 'rgba(255,255,255,0.2)', marginBottom: 16, borderWidth: 2, borderColor: 'rgba(255,255,255,0.35)', borderStyle: 'solid' },
 
-    sideLabel: { fontSize: 7, fontFamily: 'Helvetica-Bold', color: '#fff', textTransform: 'uppercase', letterSpacing: 1.4, marginBottom: 7, opacity: 0.85 },
-    sideLabelFirst: { fontSize: 7, fontFamily: 'Helvetica-Bold', color: '#fff', textTransform: 'uppercase', letterSpacing: 1.4, marginBottom: 7, opacity: 0.85 },
+    sideLabel: { fontSize: 7, fontFamily: 'Helvetica-Bold', color: onAccent, textTransform: 'uppercase', letterSpacing: 1.4, marginBottom: 7, opacity: 0.85 },
+    sideLabelFirst: { fontSize: 7, fontFamily: 'Helvetica-Bold', color: onAccent, textTransform: 'uppercase', letterSpacing: 1.4, marginBottom: 7, opacity: 0.85 },
 
     contactGroup: { marginBottom: 5 },
-    contactSubLabel: { fontSize: 7, color: 'rgba(255,255,255,0.6)', marginBottom: 1 },
-    contactVal: { fontSize: 8.5, color: '#fff' },
+    contactSubLabel: { fontSize: 7, color: hexToRgba(onAccent, 0.6), marginBottom: 1 },
+    contactVal: { fontSize: 8.5, color: onAccent },
 
     langRow: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 4 },
-    langName: { fontSize: 8.5, color: '#fff' },
-    langLevel: { fontSize: 8, color: 'rgba(255,255,255,0.6)' },
+    langName: { fontSize: 8.5, color: onAccent },
+    langLevel: { fontSize: 8, color: hexToRgba(onAccent, 0.6) },
 
     tagRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 3 },
-    tag: { fontSize: 7.5, color: '#fff', backgroundColor: 'rgba(255,255,255,0.18)', paddingTop: 2, paddingBottom: 2, paddingLeft: 6, paddingRight: 6, borderRadius: 99, marginRight: 3, marginBottom: 3 },
+    tag: { fontSize: 7.5, color: onAccent, backgroundColor: hexToRgba(onAccent, 0.18), paddingTop: 2, paddingBottom: 2, paddingLeft: 6, paddingRight: 6, borderRadius: 99, marginRight: 3, marginBottom: 3 },
 
     certRow: { flexDirection: 'row', marginBottom: 4, gap: 5 },
-    certBullet: { fontSize: 8.5, color: 'rgba(255,255,255,0.5)' },
-    certText: { fontSize: 8.5, color: 'rgba(255,255,255,0.85)', flex: 1 },
+    certBullet: { fontSize: 8.5, color: hexToRgba(onAccent, 0.5) },
+    certText: { fontSize: 8.5, color: hexToRgba(onAccent, 0.85), flex: 1 },
 
     sideBlock: { marginBottom: 14 },
 
@@ -87,10 +104,15 @@ export type CvStyles = ReturnType<typeof makeStyles>
 // convention (§4: tinted background, coloured text) so a tenant-relocated
 // section always stays legible regardless of which region it ends up in.
 export interface Palette { label: string; text: string; chipBg: string; chipText: string; bulletColor: string }
-export function paletteFor(region: 'sidebar' | 'main', color2: string): Palette {
+// `sidebarColor` is the sidebar's own background (the tenant accent) — required
+// for the 'sidebar' region so its text/chip colours can be derived the same
+// readable-luminance way as makeStyles above, instead of a hardcoded white.
+export function paletteFor(region: 'sidebar' | 'main', color2: string, sidebarColor?: string): Palette {
   /* eslint-disable no-restricted-syntax -- PDF palette colours; react-pdf cannot resolve var(--color-*) tokens (mirrors makeStyles above) */
-  return region === 'sidebar'
-    ? { label: 'rgba(255,255,255,0.6)', text: '#fff', chipBg: 'rgba(255,255,255,0.18)', chipText: '#fff', bulletColor: 'rgba(255,255,255,0.5)' }
-    : { label: '#94A3B8', text: '#334155', chipBg: `${color2}14`, chipText: color2, bulletColor: color2 }
+  if (region === 'sidebar') {
+    const onAccent = readableOn(sidebarColor ?? '#19A5CA')
+    return { label: hexToRgba(onAccent, 0.6), text: onAccent, chipBg: hexToRgba(onAccent, 0.18), chipText: onAccent, bulletColor: hexToRgba(onAccent, 0.5) }
+  }
+  return { label: '#94A3B8', text: '#334155', chipBg: `${color2}14`, chipText: color2, bulletColor: color2 }
   /* eslint-enable no-restricted-syntax */
 }

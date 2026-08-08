@@ -46,6 +46,7 @@ import ConfirmDialog from '@/components/ui/ConfirmDialog'
 import { emailValue, phoneValue, websiteValue, kvkValue, vatValue } from '@/components/drawer/contactLinks'
 import { useEntityBranches } from '@/components/drawer/useEntityBranches'
 import { useAllSettings, getBoolSetting } from '@/lib/settings/useAllSettings'
+import { useIdentifierValidation } from '@/hooks/useIdentifierValidation'
 import { useProvinces } from '@/hooks/useProvinces'
 import { getCountryOptions } from '@/lib/countries'
 import EditableRichTextField from './EditableRichTextField'
@@ -85,6 +86,16 @@ export default function OverviewTab({ c, onSave }: { c: Customer; onSave?: (valu
   const { provinces } = useProvinces(countryCode)
   const provinceOptions = provinces.map((p: string) => ({ value: p, label: p }))
 
+  // KVK/BTW-PER-LAND-1 (Danny 08-08, points 10 + 11): the KvK/BTW format check follows
+  // THIS customer's country, never a hardcoded Dutch shape, and whether a mismatch
+  // blocks or only warns is the tenant's own `company_identifier_validation` setting.
+  // The draft's own country row is read first so switching country re-checks live.
+  const identifiers = useIdentifierValidation()
+  const validateCoc = (v: unknown, values: Record<string, unknown>) =>
+    identifiers.notice('coc', v as string, (values.country as string) ?? c.country)
+  const validateVat = (v: unknown, values: Record<string, unknown>) =>
+    identifiers.notice('vat', v as string, (values.country as string) ?? c.country)
+
   const gDetails = t('overview.details')
   const gAddress = t('overview.address')
   const gContact = t('overview.contact')
@@ -109,9 +120,9 @@ export default function OverviewTab({ c, onSave }: { c: Customer; onSave?: (valu
     // sits with the other identifiers rather than off on its own.
     { key: 'debtorNumber', label: t('overview.debtorNumber'), group: gDetails },
     { key: 'cocNumber', label: t('overview.coc'), group: gDetails,
-      renderValue: v => kvkValue(v, t('locations.detail.openKvk')) },
+      renderValue: v => kvkValue(v, t('locations.detail.openKvk')), validate: validateCoc },
     { key: 'vatNumber', label: t('overview.vat'), group: gDetails,
-      renderValue: v => vatValue(v, t('locations.detail.openVies')) },
+      renderValue: v => vatValue(v, t('locations.detail.openVies')), validate: validateVat },
 
     // ADRES — the customer's own address (KLANT-ADRES-1, backend 28-07). Until today the
     // customers table had ONLY `city`, so this block was one lonely row; it now mirrors

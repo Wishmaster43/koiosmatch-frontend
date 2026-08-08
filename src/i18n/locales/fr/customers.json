@@ -515,7 +515,8 @@
     "deleteOneMessage": "Es-tu sûr ? '{{name}}' sera définitivement supprimé — cette action est irréversible.",
     "deleteManyMessage": "Es-tu sûr ? {{count}} documents seront définitivement supprimés — cette action est irréversible.",
     "deleteSelected": "Supprimer ({{count}})",
-    "linkLevelLabel": "Lier le document à"
+    "linkLevelLabel": "Lier le document à",
+    "allTypes": "Tous les types"
   },
   "priceAgreements": {
     "add": "Nouvel accord tarifaire",

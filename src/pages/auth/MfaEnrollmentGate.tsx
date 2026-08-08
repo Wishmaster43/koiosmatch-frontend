@@ -26,7 +26,7 @@ export default function MfaEnrollmentGate() {
           <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 10 }}>
             <div style={{ width: 44, height: 44, borderRadius: 12, background: 'var(--color-primary-bg)', flexShrink: 0,
                           display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <ShieldAlert size={22} style={{ color: 'var(--color-primary)' }} />
+              <ShieldAlert size={22} style={{ color: 'var(--color-primary-text)' }} />
             </div>
             <h1 style={{ fontSize: 18, fontWeight: 700, color: 'var(--text)' }}>{t('mfaGate.title')}</h1>
           </div>

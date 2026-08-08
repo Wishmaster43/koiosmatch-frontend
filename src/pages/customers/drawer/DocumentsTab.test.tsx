@@ -56,6 +56,20 @@ const fileB = new File(['b-content'], 'b.pdf', { type: 'application/pdf' })
 
 const getFileInput = (container: HTMLElement) => container.querySelector('input[type="file"]') as HTMLInputElement
 
+// G34: the per-queued-file type picker is the house SelectMenu (a <button>+popover),
+// not a native <select> — every trigger shares the SAME accessible-name prefix (this
+// test file never bootstraps real i18n, so the interpolated `{name}` in
+// documents.docTypeFor never resolves; production i18n differentiates them for real).
+// `getAllByRole` + index picks the wanted row; opening it scopes the option query to
+// its OWN wrapper div, so it never collides with the always-visible "apply to all" chips.
+const getTypeTriggers = () => screen.getAllByRole('button', { name: /documents\.docTypeFor/ })
+const pickRowType = async (user: ReturnType<typeof userEvent.setup>, rowIndex: number, label: string) => {
+  const trigger = getTypeTriggers()[rowIndex]
+  await user.click(trigger)
+  const menu = trigger.closest('div') as HTMLElement
+  await user.click(await within(menu).findByRole('button', { name: label }))
+}
+
 describe('DocumentsTab · multi-file upload queue', () => {
   beforeEach(() => {
     vi.clearAllMocks()
@@ -76,7 +90,7 @@ describe('DocumentsTab · multi-file upload queue', () => {
 
     // Two files picked → the summary header shows the count, not a single filename.
     expect(screen.getByText('documents.pendingCount')).toBeInTheDocument()
-    expect(screen.getAllByRole('combobox')).toHaveLength(2)
+    expect(getTypeTriggers()).toHaveLength(2)
 
     await user.click(screen.getByRole('button', { name: 'documents.addAll' }))
 
@@ -86,7 +100,14 @@ describe('DocumentsTab · multi-file upload queue', () => {
     expect(upload).toHaveBeenNthCalledWith(2, fileB, 'CV', 'b.pdf', 'blob:b.pdf')
   })
 
-  it('calls upload() with each queued file\'s OWN type when a row select is changed', async () => {
+  it('is no longer a native <select> — the per-row type picker is the house SelectMenu', async () => {
+    vi.mocked(useEntityDocuments).mockReturnValue({ docs: [], upload: vi.fn(), rename: vi.fn(), remove: vi.fn() })
+    const { container } = render(<DocumentsTab customerId="cust-1" />)
+    fireEvent.change(getFileInput(container), { target: { files: [fileA, fileB] } })
+    expect(container.querySelector('select')).toBeNull()
+  })
+
+  it('calls upload() with each queued file\'s OWN type when a row\'s type picker is changed', async () => {
     const upload = vi.fn()
     vi.mocked(useEntityDocuments).mockReturnValue({ docs: [], upload, rename: vi.fn(), remove: vi.fn() })
     const user = userEvent.setup()
@@ -94,8 +115,7 @@ describe('DocumentsTab · multi-file upload queue', () => {
     fireEvent.change(getFileInput(container), { target: { files: [fileA, fileB] } })
 
     // Change only the second row's type — the first must stay on the default.
-    const selects = screen.getAllByRole('combobox')
-    await user.selectOptions(selects[1], 'Diploma')
+    await pickRowType(user, 1, 'Diploma')
 
     await user.click(screen.getByRole('button', { name: 'documents.addAll' }))
 
@@ -112,9 +132,9 @@ describe('DocumentsTab · multi-file upload queue', () => {
 
     await user.click(screen.getByRole('button', { name: 'Diploma' }))
 
-    const selects = screen.getAllByRole('combobox')
-    expect(selects[0]).toHaveValue('Diploma')
-    expect(selects[1]).toHaveValue('Diploma')
+    const triggers = getTypeTriggers()
+    expect(triggers[0]).toHaveTextContent('Diploma')
+    expect(triggers[1]).toHaveTextContent('Diploma')
   })
 
   it('a per-row remove drops only that item and revokes its own object URL', async () => {
@@ -127,7 +147,7 @@ describe('DocumentsTab · multi-file upload queue', () => {
     await user.click(removeButtons[0])
 
     expect(URL.revokeObjectURL).toHaveBeenCalledWith('blob:a.pdf')
-    expect(screen.getAllByRole('combobox')).toHaveLength(1)
+    expect(getTypeTriggers()).toHaveLength(1)
     expect(screen.queryAllByText('a.pdf')).toHaveLength(0)
     // The single remaining item's name now shows twice (summary header + row) — that's fine.
     expect(screen.getAllByText('b.pdf').length).toBeGreaterThan(0)
@@ -241,6 +261,72 @@ describe('DocumentsTab · preview opens the shared modal, never window.open', ()
  * (ScopedDocumentsTab) can consult its OWN vocabulary instead of silently reusing
  * the customer's. Default omitted = 'customer', byte-identical to before this prop existed.
  */
+/**
+ * DOC-FILTER-PARITY-1 (08-08): the type filter now lives behind the shared
+ * DrawerFilterMenu, mirroring the candidate documents section's own filter menu
+ * exactly (§13: assert the toolbar renders search + filter, and that picking a
+ * type actually narrows the visible rows — not just that a callback fired). This
+ * file never bootstraps a real i18next instance (see the describe blocks above),
+ * so every `t()` call falls back to its raw (possibly namespace-prefixed) key.
+ */
+describe('DocumentsTab · type filter (DOC-FILTER-PARITY-1)', () => {
+  const cvDoc = { id: 'doc-a', name: 'a.pdf', type: 'CV', size: '10 KB', download_url: '/dl/a' }
+  const diplomaDoc = { id: 'doc-b', name: 'b.pdf', type: 'Diploma', size: '20 KB', download_url: '/dl/b' }
+
+  beforeEach(() => {
+    vi.clearAllMocks()
+    vi.stubGlobal('URL', { createObjectURL: vi.fn(), revokeObjectURL: vi.fn() })
+  })
+  afterEach(() => vi.unstubAllGlobals())
+
+  it('the toolbar renders the search box and a Filter button', () => {
+    vi.mocked(useEntityDocuments).mockReturnValue({ docs: [cvDoc, diplomaDoc], upload: vi.fn(), rename: vi.fn(), remove: vi.fn() })
+    render(<DocumentsTab customerId="cust-1" />)
+    expect(screen.getByPlaceholderText('documents.search')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'common:filters.button' })).toBeInTheDocument()
+  })
+
+  it('picking a TYPE in the menu narrows the visible documents', async () => {
+    vi.mocked(useEntityDocuments).mockReturnValue({ docs: [cvDoc, diplomaDoc], upload: vi.fn(), rename: vi.fn(), remove: vi.fn() })
+    const user = userEvent.setup()
+    render(<DocumentsTab customerId="cust-1" />)
+    expect(screen.getByText('a.pdf')).toBeInTheDocument()
+    expect(screen.getByText('b.pdf')).toBeInTheDocument()
+
+    await user.click(screen.getByRole('button', { name: 'common:filters.button' }))
+    await user.click(screen.getByRole('button', { name: 'documents.allTypes' }))
+    await user.click(screen.getByRole('button', { name: 'CV' }))
+
+    expect(screen.getByText('a.pdf')).toBeInTheDocument()
+    expect(screen.queryByText('b.pdf')).not.toBeInTheDocument()
+  })
+
+  it('clear-all resets the type filter back to "all"', async () => {
+    vi.mocked(useEntityDocuments).mockReturnValue({ docs: [cvDoc, diplomaDoc], upload: vi.fn(), rename: vi.fn(), remove: vi.fn() })
+    const user = userEvent.setup()
+    render(<DocumentsTab customerId="cust-1" />)
+
+    await user.click(screen.getByRole('button', { name: 'common:filters.button' }))
+    await user.click(screen.getByRole('button', { name: 'documents.allTypes' }))
+    await user.click(screen.getByRole('button', { name: 'CV' }))
+    expect(screen.queryByText('b.pdf')).not.toBeInTheDocument()
+
+    await user.click(screen.getByRole('button', { name: 'common:filters.clearAll' }))
+    expect(screen.getByText('a.pdf')).toBeInTheDocument()
+    expect(screen.getByText('b.pdf')).toBeInTheDocument()
+  })
+
+  it('the free-text search still narrows by name or type, unchanged', async () => {
+    vi.mocked(useEntityDocuments).mockReturnValue({ docs: [cvDoc, diplomaDoc], upload: vi.fn(), rename: vi.fn(), remove: vi.fn() })
+    const user = userEvent.setup()
+    render(<DocumentsTab customerId="cust-1" />)
+
+    await user.type(screen.getByPlaceholderText('documents.search'), 'diploma')
+    expect(screen.queryByText('a.pdf')).not.toBeInTheDocument()
+    expect(screen.getByText('b.pdf')).toBeInTheDocument()
+  })
+})
+
 describe('DocumentsTab · docTypeScope (DOCTYPE-SCOPE-1)', () => {
   beforeEach(() => vi.clearAllMocks())
 

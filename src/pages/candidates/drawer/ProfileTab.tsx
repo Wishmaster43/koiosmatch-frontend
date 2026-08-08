@@ -1,7 +1,8 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import type { ComponentType, CSSProperties } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Edit2, Save, X, Trash2 } from 'lucide-react'
+import { Edit2, Save, X, Trash2, ExternalLink } from 'lucide-react'
+import { useTextPopoutHost } from '@/hooks/useTextPopoutHost'
 import RichTextEditorJs from '@/components/ui/RichTextEditor'
 import SafeHtmlJs from '@/components/ui/SafeHtml'
 import ProfilePersonalTab from './ProfilePersonalTab'
@@ -33,14 +34,47 @@ export default function ProfileTab({ c, onEditSave, autoEditSignal }: { c: Candi
   const [summaryEditing, setSummaryEditing] = useState(false)
   const [summaryExpanded, setSummaryExpanded] = useState(false)
   const [summary, setSummary] = useState(c.summary ?? '')
-  const saveSummary   = () => { onEditSave?.({ summary }); setSummaryEditing(false) }
-  const cancelSummary = () => { setSummary(c.summary ?? ''); setSummaryEditing(false) }
+  // Last PERSISTED profile text — what ✕ restores. Tracked separately from the
+  // record prop because the popped-out window can save this field while the
+  // drawer's own copy of the candidate is still the pre-save one.
+  const [savedSummary, setSavedSummary] = useState(c.summary ?? '')
+  const saveSummary   = () => { onEditSave?.({ summary }); setSavedSummary(summary); setSummaryEditing(false) }
+  const cancelSummary = () => { setSummary(savedSummary); setSummaryEditing(false) }
+
+  // TEKST-POPOUT-1 (Danny 08-08 punt 2) — the profile text gets the notes' own
+  // second-screen affordance: the SAME window.open mechanism, one icon in this
+  // block's title row and nothing else moved (this drill-down is frozen). Both
+  // windows edit one draft: local edits are published, the other window's edits
+  // are adopted, and a save on either side ends the edit here.
+  const popout = useTextPopoutHost({
+    entity: 'candidate', id: c.id, field: 'summary', value: summary, dirty: summary !== savedSummary,
+    onDraft: html => { setSummary(html); setSummaryEditing(true) },
+    onSaved: html => { setSummary(html); setSavedSummary(html); setSummaryEditing(false) },
+  })
+  // Publish every local edit (typing, dictation, applied Koios suggestion).
+  const changeSummary = (html: string) => { setSummary(html); popout.publishDraft(html) }
+  // Open the second screen; editing starts here too, so the two windows show one
+  // and the same draft and closing the popout can never strand unsaved text.
+  const openSummaryPopout = () => { setSummaryEditing(true); popout.open() }
+
+  // Adopt the record's value only when the RECORD ITSELF changes (a reload, a
+  // save elsewhere) and no edit is in progress — comparing against the last seen
+  // record value, so text saved from the popped-out window is not overwritten by
+  // this drawer's now-stale copy.
+  const lastRecordSummary = useRef(c.summary ?? '')
+  useEffect(() => {
+    const next = c.summary ?? ''
+    if (next === lastRecordSummary.current) return
+    lastRecordSummary.current = next
+    setSavedSummary(next)
+    if (!summaryEditing) setSummary(next)
+  }, [c.summary, summaryEditing])
 
   const iconBtn: CSSProperties = { width: 26, height: 26, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 6, cursor: 'pointer' }
   const blockStyle: CSSProperties = { borderRadius: 10, overflow: 'hidden', border: '1px solid var(--border)', background: 'var(--surface)' }
   const editControls = (isEditing: boolean, onSave: () => void, onCancel: () => void, onStart: () => void) => isEditing ? (
     <div style={{ display: 'flex', gap: 4 }}>
-      <button onClick={onSave} title={t('common:save')} style={{ ...iconBtn, background: 'var(--color-primary)', color: '#fff', border: 'none' }}>
+      <button onClick={onSave} title={t('common:save')} style={{ ...iconBtn, background: 'var(--color-primary)', color: 'var(--color-on-accent)', border: 'none' }}>
         <Save size={13} />
       </button>
       <button onClick={onCancel} title={t('common:cancel')} style={{ ...iconBtn, background: 'var(--bg)', color: 'var(--text-muted)', border: '1px solid var(--border)' }}>
@@ -71,22 +105,29 @@ export default function ProfileTab({ c, onEditSave, autoEditSignal }: { c: Candi
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
           <span style={{ fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em', color: 'var(--text-muted)' }}>{t('profile.summary')}</span>
           <div style={{ display: 'flex', gap: 4, alignItems: 'center' }}>
-            {/* Clear the profile text (edit mode only). */}
+            {/* Clear the profile text (edit mode only) — through the same publish
+                path as typing, so a popped-out window clears with it. */}
             {summaryEditing && (
-              <button onClick={() => setSummary('')} title={t('profile.clear')} aria-label={t('profile.clear')}
+              <button onClick={() => changeSummary('')} title={t('profile.clear')} aria-label={t('profile.clear')}
                 style={{ ...iconBtn, background: 'none', color: 'var(--color-danger)', border: '1px solid var(--border)' }}>
                 <Trash2 size={13} />
               </button>
             )}
+            {/* Second screen — same icon + footprint the notes popup uses for its
+                own pop-out, in this block's own title row. */}
+            <button onClick={openSummaryPopout} title={t('common:openSecondScreen')} aria-label={t('common:openSecondScreen')}
+              style={{ ...iconBtn, background: 'none', color: 'var(--text-muted)', border: '1px solid var(--border)' }}>
+              <ExternalLink size={13} />
+            </button>
             {editControls(summaryEditing, saveSummary, cancelSummary, () => setSummaryEditing(true))}
           </div>
         </div>
         {summaryEditing
-          ? <RichTextEditor value={summary} onChange={setSummary}
+          ? <RichTextEditor value={summary} onChange={changeSummary}
               expanded={summaryExpanded} onToggleExpand={() => setSummaryExpanded(v => !v)} />
-          : (c.summary
+          : (summary
               ? <div style={{ ...blockStyle, padding: '10px 12px', maxHeight: 220, overflow: 'auto' }}>
-                  <SafeHtml html={c.summary} style={{ fontSize: 12, color: 'var(--text)', lineHeight: 1.5 }} />
+                  <SafeHtml html={summary} style={{ fontSize: 12, color: 'var(--text)', lineHeight: 1.5 }} />
                 </div>
               : <div style={{ ...blockStyle, padding: '10px 12px', fontSize: 12, color: 'var(--text-muted)' }}>-</div>)}
       </div>

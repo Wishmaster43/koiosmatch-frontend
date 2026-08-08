@@ -5,12 +5,14 @@
  * inherit (USERS-ROLES-LOC-1 role-template copy on create). Extracted from
  * UsersPage.
  */
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useId } from 'react'
 import type { ChangeEvent, CSSProperties, FormEvent } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Loader2 } from 'lucide-react'
 import api, { unwrap } from '@/lib/api'
 import FloatingPanel from '@/components/ui/FloatingPanel'
+// G34: the house searchable dropdown replaces the native role <select>.
+import CreatableSelect from '@/components/ui/CreatableSelect'
 import { BTN_H } from '@/config/buttonMetrics'
 import type { ManagedUser } from '@/types/api'
 import { useAssignableRoles } from './hooks/useAssignableRoles'
@@ -81,6 +83,10 @@ export default function NewUserModal({ onClose, onCreated }: {
 
   const set = (k: keyof typeof form) => (e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) =>
     setForm(f => ({ ...f, [k]: e.target.value }))
+  // The role picker is now the house CreatableSelect (string) => void — same
+  // shape the native select's onChange already produced (e.target.value).
+  const setRole = (v: string) => setForm(f => ({ ...f, role: v }))
+  const roleLabelId = useId()
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault()
@@ -147,14 +153,18 @@ export default function NewUserModal({ onClose, onCreated }: {
             <input required type="password" value={form.password} onChange={set('password')} style={input} placeholder={t('pwPlaceholder')} aria-label={t('password')} />
           </div>
           <div style={{ marginBottom: 12 }}>
-            <label style={label}>{t('role')}</label>
-            <select required value={form.role} onChange={set('role')} aria-label={t('role')}
-              disabled={rolesLoading || roles.length === 0}
-              style={{ ...input, cursor: rolesLoading || roles.length === 0 ? 'default' : 'pointer' }}>
-              {rolesLoading && <option value="">{t('rolesLoading')}</option>}
-              {!rolesLoading && roles.length === 0 && <option value="">{t('noRoles')}</option>}
-              {roles.map(r => <option key={r.id} value={r.name}>{roleLabel(t, r.name)}</option>)}
-            </select>
+            <label id={roleLabelId} style={label}>{t('role')}</label>
+            {/* Loading/empty is honest by having nothing to pick (§3 — no fake
+                affordance), never a disabled attribute the shared component doesn't
+                expose; the dimmed wrapper blocks interaction while there is nothing
+                selectable yet, mirroring the old select's disabled look. */}
+            <div style={(rolesLoading || roles.length === 0) ? { opacity: 0.6, pointerEvents: 'none' } : undefined}>
+              <CreatableSelect value={form.role || null} onChange={setRole} allowCreate={false}
+                aria-labelledby={roleLabelId}
+                placeholder={rolesLoading ? t('rolesLoading') : (roles.length === 0 ? t('noRoles') : undefined)}
+                options={roles.map(r => ({ value: r.name, label: roleLabel(t, r.name) }))}
+                style={input} />
+            </div>
           </div>
 
           {/* AGENT-META-SETUP: only asked for a recruiter/manager — the two roles the
@@ -203,7 +213,7 @@ export default function NewUserModal({ onClose, onCreated }: {
             </button>
             <button type="submit" disabled={saving || !form.role || hasFormatError}
               style={{ height: BTN_H, padding: '0 18px', fontSize: 13, fontWeight: 600, borderRadius: 8, border: 'none',
-                       background: 'var(--color-primary)', color: 'white', cursor: (saving || hasFormatError) ? 'default' : 'pointer',
+                       background: 'var(--color-primary)', color: 'var(--color-on-accent)', cursor: (saving || hasFormatError) ? 'default' : 'pointer',
                        display: 'flex', alignItems: 'center', gap: 6, opacity: hasFormatError ? 0.6 : 1 }}>
               {saving ? <><Loader2 size={13} style={{ animation: 'spin 1s linear infinite' }} /> {t('creating')}</> : t('create')}
             </button>

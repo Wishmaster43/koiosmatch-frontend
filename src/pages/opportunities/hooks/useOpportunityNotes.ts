@@ -1,7 +1,14 @@
 /**
- * useOpportunityNotes — the notes on an opportunity (GET/POST/DELETE
+ * useOpportunityNotes — the notes on an opportunity (GET/POST/PUT/DELETE
  * /opportunities/{id}/notes, backend C-41). Contract {id,author,body,type,created_at},
  * mirroring the candidate/customer notes. 404 = endpoint not built yet → empty (calm).
+ *
+ * OPP-NOTE-EDIT-1 (CMBE golf 2a/2b, G23): `editNote` PUTs
+ * /opportunities/{id}/notes/{note} with {body, type?, language?} — the response
+ * now carries `updated_by`/`updated_at` too, mirroring useCandidateNotes.editNote.
+ * Opportunity notes carry no `author_id` (not migrated onto the RECHTEN-DETAIL-1
+ * ownership model), so the shared NotesTab's edit pencil stays unrestricted here —
+ * matches the pre-existing store()/destroy() behaviour.
  */
 import { useState, useEffect, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -18,6 +25,11 @@ export interface OpportunityNote {
   created_at?: string
   // NOTE-TAAL-1: the note's own spellcheck/output language — null/absent = tenant default.
   language?: string
+  // OPP-NOTE-EDIT-1 (G23): who last edited the note (denormalised name) + when —
+  // absent/undefined on a note that was never edited (the API sends `null`;
+  // typed without it to match the shared NotesTab's NoteItem.updated_by shape).
+  updated_by?: string
+  updated_at?: string
   [k: string]: unknown
 }
 
@@ -72,5 +84,23 @@ export function useOpportunityNotes(id?: Id) {
       })
   }, [id, load, t])
 
-  return { items, loading, error, addNote }
+  // Edit — OPP-NOTE-EDIT-1 (G23): PUT /opportunities/{id}/notes/{note}
+  // {body, type?, language?}. NotesTab passes a list index (mirrors
+  // useCandidateNotes.editNote); optimistic locally, then reload so the
+  // server-resolved `updated_by`/`updated_at` (edited-by meta) shows at once.
+  const editNote = useCallback((index: number, payload: { type: string; body: string; language?: string }) => {
+    if (!id) return
+    const target = items[index]
+    if (!target?.id) return
+    const snapshot = items
+    setItems(prev => prev.map((n, i) => (i === index ? { ...n, type: payload.type, body: payload.body, language: payload.language } : n)))
+    api.put(`/opportunities/${id}/notes/${target.id}`, payload)
+      .then(() => load())
+      .catch(err => {
+        setItems(snapshot)
+        notifyError(extractApiError(err, t('common:actionFailed')))
+      })
+  }, [id, items, load, t])
+
+  return { items, loading, error, addNote, editNote }
 }

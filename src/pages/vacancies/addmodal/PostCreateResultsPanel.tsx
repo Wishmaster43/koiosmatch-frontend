@@ -46,7 +46,7 @@ export default function PostCreateResultsPanel({ files, noteText, noteStatus, no
               <>
                 <span style={{ fontSize: 11, color: 'var(--color-danger)' }}>{f.error}</span>
                 <button type="button" onClick={() => onRetryFile(f.id)}
-                  style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--color-primary)', fontSize: 11, fontWeight: 600 }}>
+                  style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--color-primary-text)', fontSize: 11, fontWeight: 600 }}>
                   {t('common:error.retry')}
                 </button>
               </>
@@ -61,7 +61,7 @@ export default function PostCreateResultsPanel({ files, noteText, noteStatus, no
               <>
                 <span style={{ fontSize: 11, color: 'var(--color-danger)' }}>{noteError}</span>
                 <button type="button" onClick={onRetryNote}
-                  style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--color-primary)', fontSize: 11, fontWeight: 600 }}>
+                  style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--color-primary-text)', fontSize: 11, fontWeight: 600 }}>
                   {t('common:error.retry')}
                 </button>
               </>
@@ -72,7 +72,7 @@ export default function PostCreateResultsPanel({ files, noteText, noteStatus, no
       <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 8 }}>
         <button type="button" onClick={onClose} disabled={running}
           style={{ height: BTN_H, padding: '0 16px', fontSize: 13, fontWeight: 600, borderRadius: 8, border: 'none',
-            background: 'var(--color-primary)', color: '#fff', cursor: running ? 'not-allowed' : 'pointer', opacity: running ? 0.6 : 1 }}>
+            background: 'var(--color-primary)', color: 'var(--color-on-accent)', cursor: running ? 'not-allowed' : 'pointer', opacity: running ? 0.6 : 1 }}>
           {t('common:close')}
         </button>
       </div>

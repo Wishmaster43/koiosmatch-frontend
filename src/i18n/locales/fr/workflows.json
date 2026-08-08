@@ -1009,7 +1009,14 @@
       "match_terminated": "Match terminé",
       "appointment_created": "Rendez-vous créé",
       "whatsapp_connection_down": "Connexion WhatsApp interrompue",
-      "whatsapp_connection_restored": "Connexion WhatsApp rétablie"
+      "whatsapp_connection_restored": "Connexion WhatsApp rétablie",
+      "vacancy_created": "Offre créée",
+      "vacancy_published": "Offre publiée",
+      "vacancy_updated": "Offre mise à jour",
+      "ai_agent_webhook_received": "Webhook agent IA reçu",
+      "interview_started": "Entretien démarré",
+      "interview_completed": "Entretien terminé",
+      "interview_disqualified": "Entretien disqualifié"
     }
   },
   "templateLibrary": {

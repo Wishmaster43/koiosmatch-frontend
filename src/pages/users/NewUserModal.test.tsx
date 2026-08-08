@@ -7,6 +7,11 @@
  * recruiter/manager role; the backend's agent notice is surfaced on success).
  * Sibling lookup hooks are mocked directly (house pattern, see
  * PlanIntakeModal.test.tsx) so no QueryClientProvider is needed here.
+ *
+ * G34: the role picker is the house CreatableSelect (allowCreate={false}), not a
+ * native <select> — interactions below click it open and pick the option button,
+ * instead of `user.selectOptions`/`getByRole('option')`; the eventual REQUEST
+ * assertions (api.post body) are unchanged.
  */
 import { describe, it, expect, vi, afterEach } from 'vitest'
 import { render, screen, waitFor, fireEvent } from '@testing-library/react'
@@ -52,16 +57,33 @@ vi.mock('@/lib/useLocations', () => ({
 
 const noop = () => {}
 
+// G34: open the role picker (accessible name = "role <current value>", the field
+// label prefixed onto the trigger's own text — see CreatableSelect's doc comment)
+// and click the wanted option's row. Mirrors the exact same eventual onChange the
+// old `user.selectOptions(select, name)` produced.
+const pickRole = async (user: ReturnType<typeof userEvent.setup>, label: string) => {
+  await user.click(screen.getByRole('button', { name: /^role / }))
+  await user.click(await screen.findByRole('button', { name: label }))
+}
+
 describe('NewUserModal', () => {
   // Mocks are shared across tests in this file (module-level vi.mock) — clear
   // call history so one test's api.post/notifySuccess calls don't leak into the next.
   afterEach(() => vi.clearAllMocks())
 
+  it('is no longer a native <select> — the role field is the house CreatableSelect', () => {
+    const { container } = render(<NewUserModal onClose={noop} onCreated={noop} />)
+    expect(container.querySelector('select')).toBeNull()
+  })
+
   it('offers every live role (custom roles included) and defaults to planner', async () => {
+    const user = userEvent.setup()
     render(<NewUserModal onClose={noop} onCreated={noop} />)
-    expect(screen.getByRole('option', { name: 'Planner' })).toBeInTheDocument()
-    expect(screen.getByRole('option', { name: 'backoffice' })).toBeInTheDocument()
-    await waitFor(() => expect((screen.getByLabelText('role') as HTMLSelectElement).value).toBe('planner'))
+    // Belt-and-braces: the seed effect has landed on 'planner' before the picker opens.
+    await waitFor(() => expect(screen.getByRole('button', { name: 'role Planner' })).toBeInTheDocument())
+    await user.click(screen.getByRole('button', { name: 'role Planner' }))
+    expect(screen.getByRole('button', { name: 'Planner' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'backoffice' })).toBeInTheDocument()
   })
 
   it('previews the picked role\'s branch template', async () => {
@@ -88,7 +110,7 @@ describe('NewUserModal', () => {
     await user.type(screen.getByLabelText('firstName'), 'Jan')
     await user.type(screen.getByLabelText('email'), 'jan@bedrijf.nl')
     await user.type(screen.getByLabelText('password'), 'wachtwoord123')
-    await user.selectOptions(screen.getByLabelText('role'), 'backoffice')
+    await pickRole(user, 'backoffice')
     await user.click(screen.getByRole('button', { name: 'create' }))
 
     await waitFor(() => expect(api.post).toHaveBeenCalledWith('/users', expect.objectContaining({ role: 'backoffice' })))
@@ -101,7 +123,7 @@ describe('NewUserModal', () => {
     // planner is the default role — not an agent role, so no question yet.
     expect(screen.queryByLabelText('agent.label')).not.toBeInTheDocument()
 
-    await user.selectOptions(screen.getByLabelText('role'), 'recruiter')
+    await pickRole(user, 'recruiter')
     const checkbox = await screen.findByLabelText('agent.label')
     expect(checkbox).toBeChecked()
   })
@@ -114,7 +136,7 @@ describe('NewUserModal', () => {
     const onCreated = vi.fn()
     render(<NewUserModal onClose={noop} onCreated={onCreated} />)
 
-    await user.selectOptions(screen.getByLabelText('role'), 'recruiter')
+    await pickRole(user, 'recruiter')
     await user.type(screen.getByLabelText('firstName'), 'Kelly')
     await user.type(screen.getByLabelText('email'), 'kelly@bedrijf.nl')
     await user.type(screen.getByLabelText('password'), 'wachtwoord123')
@@ -133,7 +155,7 @@ describe('NewUserModal', () => {
     await user.type(screen.getByLabelText('firstName'), 'Jan')
     await user.type(screen.getByLabelText('email'), 'jan@bedrijf.nl')
     await user.type(screen.getByLabelText('password'), 'wachtwoord123')
-    await user.selectOptions(screen.getByLabelText('role'), 'backoffice')
+    await pickRole(user, 'backoffice')
     await user.click(screen.getByRole('button', { name: 'create' }))
 
     await waitFor(() => expect(api.post).toHaveBeenCalled())

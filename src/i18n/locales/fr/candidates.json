@@ -362,7 +362,8 @@
     "archivedNamed": "{{name}} archivé",
     "noStatus": "Sans statut",
     "changelog": "Journal",
-    "tasksSearchPlaceholder": "Rechercher une tâche…"
+    "tasksSearchPlaceholder": "Rechercher une tâche…",
+    "createdAtBy": "Créé le {{date}} par {{name}}"
   },
   "stage": {
     "lead": "Piste",
@@ -409,7 +410,13 @@
     "groupWorkPermit": "Permis de travail",
     "workPermitType": "Type de permis de travail",
     "workPermitValidUntil": "Valable jusqu'au",
-    "linkedinPlaceholder": "linkedin.com/in/nomdutilisateur"
+    "linkedinPlaceholder": "linkedin.com/in/nomdutilisateur",
+    "groupOrigin": "Origine",
+    "source": "Source",
+    "sourcePlaceholder": "Ex. site web, Indeed, recommandation",
+    "createdBy": "Créé par",
+    "createdAt": "Créé le",
+    "readOnlyStamp": "Lecture seule — défini par le système"
   },
   "addFields": {
     "functionTitle": "Intitulé du poste",
@@ -443,7 +450,15 @@
     "phone": "Téléphone",
     "email": "Adresse e-mail",
     "note": "Note",
-    "educationLevel": "Niveau"
+    "educationLevel": "Niveau",
+    "referenceText": "Texte de référence",
+    "referenceFirstName": "Prénom",
+    "referenceMiddleName": "Particule",
+    "referenceLastName": "Nom",
+    "referenceFunction": "Fonction",
+    "mobile": "Mobile",
+    "referenceLetter": "Lettre de référence",
+    "linkedDocumentFor": "Document lié pour {{name}}"
   },
   "work": {
     "client": "Client",
@@ -503,7 +518,26 @@
     "vacancyUnknown": "Offre inconnue",
     "searchPlaceholder": "Rechercher une vacance…",
     "colStatus": "Statut",
-    "colDate": "Date"
+    "colDate": "Date",
+    "showDetails": "Afficher les détails",
+    "hideDetails": "Masquer les détails",
+    "createdAt": "Créée le",
+    "reference": "N° de référence",
+    "rejectionReason": "Motif de refus",
+    "detailsError": "Impossible de charger les détails.",
+    "detailsEmpty": "Aucun détail supplémentaire.",
+    "openApplication": "Ouvrir la candidature",
+    "editApplication": "Modifier la candidature",
+    "applicationUpdated": "Candidature mise à jour",
+    "applicationUpdateFailed": "Échec de la mise à jour de la candidature",
+    "applicationLoadFailed": "Échec du chargement de la candidature",
+    "detachApplication": "Dissocier la candidature",
+    "detachTitle": "Motif de la dissociation",
+    "detachMessage": "La candidature pour {{name}} sera dissociée de ce candidat. L'action est réversible ; le motif est ajouté à la chronologie.",
+    "detachReasonLabel": "Motif",
+    "detachReasonPlaceholder": "Pourquoi cette candidature est-elle dissociée ?",
+    "detachConfirm": "Dissocier",
+    "detachDone": "Candidature dissociée"
   },
   "communication": {
     "newNote": "Nouvelle note",
@@ -708,7 +742,15 @@
     "emergencyContactPhone": "Numéro de téléphone",
     "emergencyContactPhoneInvalid": "Saisissez un numéro de téléphone valide (8 à 15 chiffres, espaces/tirets autorisés).",
     "groupNoticePeriod": "Préavis",
-    "noticePeriodWeeks": "Préavis (semaines)"
+    "noticePeriodWeeks": "Préavis (semaines)",
+    "emergencyContactFirstName": "Prénom",
+    "emergencyContactLastName": "Nom",
+    "emergencyContactMiddleName": "Particule",
+    "emergencyContactMobile": "Numéro de mobile",
+    "emergencyContactRelation": "Relation",
+    "noticePeriodDerivedHint_one": "Sur la base du préavis ({{count}} semaine), disponible à partir du {{date}}.",
+    "noticePeriodDerivedHint_other": "Sur la base du préavis ({{count}} semaines), disponible à partir du {{date}}.",
+    "noticePeriodApply": "Utiliser cette date"
   },
   "zzp": {
     "title": "Indépendant",
@@ -742,7 +784,8 @@
     "businessEmailDuplicateConfirm": "Enregistrer quand même",
     "businessEmailDuplicateCancel": "Retour",
     "creditorAutoHint": "Attribué automatiquement si laissé vide.",
-    "creditorAutoLocked": "Numéroté automatiquement via Paramètres → Numérotation."
+    "creditorAutoLocked": "Numéroté automatiquement via Paramètres → Numérotation.",
+    "identifierNlOnly": "Remarque : pour les indépendants, le serveur n'accepte encore qu'un numéro de registre/TVA néerlandais. Un numéro étranger est refusé à l'enregistrement."
   },
   "certified": {
     "issued": "Délivré",
@@ -788,7 +831,10 @@
     "replace": "Remplacer le fichier",
     "versionCount_one": "{{count}} version précédente",
     "versionCount_other": "{{count}} versions précédentes",
-    "downloadVersion": "Télécharger cette version"
+    "downloadVersion": "Télécharger cette version",
+    "changeLink": "Modifier le lien",
+    "linkedTo": "Lié à {{name}}",
+    "allTypes": "Tous les types"
   },
   "ai": {
     "title": "Koios AI conseille",
@@ -1088,7 +1134,10 @@
     "confirm": "Fusionner",
     "done": "Candidats fusionnés.",
     "errForbidden": "Vous n'êtes pas autorisé à fusionner des candidats.",
-    "errFailed": "Échec de la fusion. Veuillez réessayer."
+    "errFailed": "Échec de la fusion. Veuillez réessayer.",
+    "duplicateLabel": "Candidat en double",
+    "searchHint": "Saisissez au moins {{min}} caractères",
+    "errSearch": "La recherche a échoué. Réessayez."
   },
   "duplicate": {
     "blockedTitle": "Cette personne existe déjà",
@@ -1164,7 +1213,37 @@
     "sessionClosedHint": "La fenêtre de 24 heures est fermée — démarrez une nouvelle conversation avec un modèle pour la rouvrir.",
     "composerUnavailable": "WhatsApp est actuellement injoignable — rien n'a été envoyé. Réessayez dans quelques instants.",
     "pickAgent": "Agent IA (facultatif)",
-    "agentPlaceholder": "Choisir un agent IA…"
+    "agentPlaceholder": "Choisir un agent IA…",
+    "configureWhatsapp": "Configurer WhatsApp →",
+    "assist": {
+      "title": "Assistant Koios",
+      "summarize": "Résumer",
+      "actions": "Actions à mener",
+      "needsMessages": "Cette conversation n'a pas encore de messages",
+      "apply": "Appliquer",
+      "discard": "Rejeter",
+      "noItems": "Aucune action trouvée",
+      "error": "Koios n'a pas pu traiter cette conversation. Veuillez réessayer.",
+      "actionTypes": {
+        "task": "Tâche",
+        "whatsapp": "WhatsApp",
+        "appointment": "Rendez-vous",
+        "notification": "Notification"
+      }
+    },
+    "windowLeftHours": "Encore {{hours}} h {{minutes}} min pour répondre librement",
+    "windowLeftMinutes_one": "Encore {{count}} minute pour répondre librement",
+    "windowLeftMinutes_other": "Encore {{count}} minutes pour répondre librement",
+    "windowLeftSeconds": "Moins d'une minute pour répondre librement",
+    "windowClosesAt": "La fenêtre de 24 heures se ferme à {{time}}",
+    "windowUnknown": "Impossible de savoir si la fenêtre de 24 heures est ouverte : cette conversation ne contient pas l'heure du dernier message entrant. Un modèle approuvé passe toujours.",
+    "sendTemplate": "Envoyer le modèle",
+    "templateSent": "Modèle envoyé",
+    "templateSendFailed": "Impossible d'envoyer le modèle",
+    "templateLoading": "Chargement des modèles…",
+    "templateNeedsCandidate": "Cette conversation n'est pas liée à un candidat ; l'envoi d'un modèle n'est pas encore possible ici.",
+    "templateVarsUnsupported_one": "Ce modèle contient {{count}} variable qui ne peut pas encore être remplie ici — choisissez un modèle sans variables.",
+    "templateVarsUnsupported_other": "Ce modèle contient {{count}} variables qui ne peuvent pas encore être remplies ici — choisissez un modèle sans variables."
   },
   "advice": {
     "reason": {
@@ -1176,7 +1255,8 @@
   },
   "references": {
     "verify": "Vérifier",
-    "verified": "Vérifié"
+    "verified": "Vérifié",
+    "experienceLinkUnavailable": "Le lien avec une expérience professionnelle n'est pas encore possible — il suivra dès que l'API prendra en charge le champ."
   },
   "validation": {
     "emailFormat": "Saisissez une adresse e-mail valide.",

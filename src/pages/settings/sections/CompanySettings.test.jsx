@@ -4,11 +4,12 @@
  * stringify booleans — that happens one layer down in settingsApi.js, which is
  * mocked out here — so the save assertion expects a real boolean.
  */
-import { describe, it, expect, afterEach, vi } from 'vitest'
-import { render, screen, waitFor, fireEvent } from '@testing-library/react'
+import { describe, it, expect, afterEach, beforeEach, vi } from 'vitest'
+import { render, screen, waitFor, fireEvent, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import i18n from '@/i18n'
 import api from '@/lib/api'
+import { getCountryName } from '@/lib/countries'
 import { loadSettings, saveSettings } from '../lib/settingsApi'
 import CompanySettings from './CompanySettings'
 
@@ -77,5 +78,83 @@ describe('CompanySettings — banner upload (BANNER-UPLOAD-1)', () => {
     await user.click(screen.getByRole('button', { name: t('common.save') }))
     await waitFor(() => expect(saveSettings).toHaveBeenCalled())
     expect(saveSettings.mock.calls[0][0].company_banner_url).toBeUndefined()
+  })
+})
+
+// COMPANY-ORDER-1 (Danny 09-08: "#settings/company/company — volgorde klopt niet").
+// Country used to sit at the top, split off from the address block it CLOSES.
+// The screen now reads in three blocks — identity · address (in writing order) ·
+// preferences — and the country↔province cascade must survive country moving to
+// the BOTTOM of the address block (it drives a field rendered ABOVE it).
+const rowOf = (label) => screen.getByText(label).parentElement
+const precedes = (a, b) => Boolean(a.compareDocumentPosition(b) & Node.DOCUMENT_POSITION_FOLLOWING)
+
+describe('CompanySettings — field order & grouping (COMPANY-ORDER-1)', () => {
+  it('renders identity → address (street…country) → preferences, each under its own heading', async () => {
+    loadSettings.mockResolvedValue({})
+    render(<CompanySettings />)
+    await screen.findByRole('button', { name: t('common.upload') })
+
+    // The full reading order, asserted pairwise on the rendered label nodes.
+    const order = [
+      t('company.sectionIdentity'), t('company.banner'), t('company.industry'),
+      t('company.sectionAddress'), t('company.street'), t('company.houseNumber'),
+      t('company.postcode'), t('company.city'), t('company.province'), t('company.country'),
+      t('company.sectionPreferences'), t('company.language'), t('company.currency'), t('company.timezone'),
+    ]
+    const nodes = order.map(label => screen.getByText(label))
+    nodes.forEach((node, i) => {
+      if (i === 0) return
+      expect(precedes(nodes[i - 1], node), `${order[i - 1]} must precede ${order[i]}`).toBe(true)
+    })
+  })
+})
+
+// The cascade itself (PROVINCES-1): GET /provinces?country=XX drives the province
+// options. Measured live 2026-08-09 — NL returns 12 rows, BE returns 11 different
+// ones — so a broken cascade is visible as "the wrong country's provinces".
+describe('CompanySettings — province cascade after the country move (COMPANY-ORDER-1)', () => {
+  const provincesByCountry = {
+    NL: ['Utrecht', 'Zuid-Holland'],
+    BE: ['Antwerpen', 'Limburg'],
+  }
+
+  beforeEach(() => {
+    api.get.mockImplementation((url) => {
+      if (url === '/countries')  return Promise.resolve({ data: { data: [{ code: 'NL' }, { code: 'BE' }] } })
+      if (url === '/industries') return Promise.resolve({ data: { data: ['Zorg'] } })
+      const province = /^\/provinces\?country=([A-Z]{2})$/.exec(url)
+      if (province) return Promise.resolve({ data: { data: provincesByCountry[province[1]] ?? [] } })
+      return new Promise(() => {})
+    })
+  })
+
+  // Restore the file-level "forever pending" GET so later suites are unaffected.
+  afterEach(() => { api.get.mockImplementation(() => new Promise(() => {})) })
+
+  it('switching the country (now the LAST address row) refreshes the province options above it', async () => {
+    // Empty province on purpose: the trigger then carries no accessible name, so a
+    // province NAME in the tree can only be a menu option.
+    loadSettings.mockResolvedValue({ company_country: 'NL', company_province: '' })
+    const user = userEvent.setup()
+    render(<CompanySettings />)
+    await screen.findByRole('button', { name: t('common.upload') })
+
+    // The province picker (searchable dropdown, never a native select) starts on NL.
+    const provinceTrigger = within(rowOf(t('company.province'))).getByRole('button')
+    await user.click(provinceTrigger)
+    expect(await screen.findByRole('button', { name: 'Utrecht' })).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Antwerpen' })).not.toBeInTheDocument()
+    await user.click(provinceTrigger)
+
+    // Pick Belgium in the country row that now sits BELOW the province row.
+    const countryTrigger = within(rowOf(t('company.country'))).getByRole('button')
+    await user.click(countryTrigger)
+    await user.click(await screen.findByRole('button', { name: getCountryName('BE', i18n.language) }))
+
+    // Cascade proof: the province list is Belgium's now, not the stale NL one.
+    await user.click(provinceTrigger)
+    expect(await screen.findByRole('button', { name: 'Antwerpen' })).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Utrecht' })).not.toBeInTheDocument()
   })
 })

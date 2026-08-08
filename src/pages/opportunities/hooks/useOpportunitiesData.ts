@@ -191,6 +191,8 @@ export function useOpportunitiesData(includeArchived: boolean = false, branchIds
     if ('ownerId'    in patch) body.owner_id    = patch.ownerId || null
     if ('clientId'   in patch) body.customer_id = patch.clientId || null
     if ('title'      in patch) body.title       = patch.title
+    // OPP-DESCRIPTION-1: the drawer's "Kanstekst" block PATCHes this directly.
+    if ('description' in patch) body.description = patch.description
     if ('value'      in patch) body.value       = patch.value
     if ('currency'   in patch) body.currency    = patch.currency
     if ('expectedCloseAt' in patch) body.expected_close_at = patch.expectedCloseAt || null

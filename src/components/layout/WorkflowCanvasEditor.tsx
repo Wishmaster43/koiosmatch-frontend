@@ -140,7 +140,7 @@ function EditorInner({ workflow, onClose, onSave, initialRunId }: {
                 position: 'absolute', bottom: 24, right: 24,
                 display: 'flex', alignItems: 'center', gap: 8,
                 padding: '9px 16px', borderRadius: 999,
-                background: 'var(--color-primary)', color: 'white',
+                background: 'var(--color-primary)', color: 'var(--color-on-accent)',
                 border: 'none', cursor: 'pointer', fontSize: 13, fontWeight: 500,
                 boxShadow: '0 4px 14px rgba(0,0,0,0.2)',
                 zIndex: 10,

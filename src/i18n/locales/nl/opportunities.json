@@ -115,7 +115,8 @@
     "created": "Aangemaakt",
     "groups": {
       "deal": "Deal",
-      "organisation": "Organisatie"
+      "organisation": "Organisatie",
+      "description": "Omschrijving"
     }
   },
   "changelog": {
@@ -136,7 +137,8 @@
     "cancel": "Annuleren",
     "groups": {
       "general": "Algemeen",
-      "dealStage": "Waarde & fase"
+      "dealStage": "Waarde & fase",
+      "description": "Omschrijving"
     },
     "fields": {
       "title": "Titel",
@@ -164,5 +166,8 @@
     "reasons": {
       "expectedCloseOverdue": "De verwachte sluitingsdatum is verstreken — volg deze kans op."
     }
+  },
+  "richText": {
+    "empty": "Nog niets vastgelegd"
   }
 }

@@ -1,56 +1,52 @@
 import type { ComponentType } from 'react'
 import { useTranslation } from 'react-i18next'
 import StatsTabJs from '@/components/drawer/tabs/StatsTab'
-import { useDateFormat } from '@/lib/datetime'
-import { useLookups } from '@/context/LookupsContext'
-import { useLastContactTypes } from '@/lib/useLastContactTypes'
 import type { Candidate } from '@/types/candidate'
 
 // StatsTab is still untyped JS — declare the props this tab passes.
-const StatsTab = StatsTabJs as ComponentType<{ kpisTitle?: unknown; kpis?: unknown[]; overview?: unknown; activity?: unknown }>
+const StatsTab = StatsTabJs as ComponentType<{ kpisTitle?: unknown; kpis?: unknown[] }>
 
-// Empty-state value: an italic muted em-dash (§4 — italic reserved for
-// secondary/placeholder text, never data) for overview fields that may be
-// unset — never contacted, no stamped creator, no acquisition channel, …
-const emptyValue = <span style={{ fontStyle: 'italic', color: 'var(--text-muted)' }}>—</span>
-
-/** Statistics tab — maps the candidate onto the generic StatsTab. */
+/**
+ * Statistics tab — counts only.
+ *
+ * STATS-HONEST-1 (Danny 2026-08-09, "en klopt statistieken wel?"): the tab used to
+ * carry a "Statusoverzicht" key/value card that held no statistics at all — status,
+ * last contact, contact type and branch are dossier fields, and every one of them
+ * already had a home that also lets you EDIT it. They were removed here so each
+ * value has exactly one source (§11):
+ *   - status      → the drawer header's own deployability picker (CandidateDrawer,
+ *                   metaPickers `status`), which shows AND changes it.
+ *   - last contact + contact type → the drawer FOOTER (CandidateDrawer), which sits
+ *                   outside the tab body and is therefore visible on this very tab:
+ *                   "Laatste contact: 24-07-2026 · Bellen · door Laura Yesway".
+ *                   Also a sortable column on the candidates table.
+ *   - branch      → the Profiel tab's BranchSection (ProfilePanel), where it is
+ *                   editable against /candidates/{id}/branches.
+ *   - created on / by + source → moved earlier to the Profiel tab's Herkomst card
+ *                   (CandidateOriginCard, DANNY-6).
+ * What is left is what the tab name promises: numbers.
+ */
 export default function StatisticsTab({ c, onJump }: { c: Candidate; onJump?: (tab: string) => void }) {
   const { t } = useTranslation('candidates')
-  const { formatDate } = useDateFormat()
-  // Resolve the status + contact-type SLUGS to their tenant labels — the overview
-  // showed the raw English slug ("available") instead of "Beschikbaar" (Danny).
-  const { statusMeta } = useLookups() as unknown as { statusMeta: (v?: string | null) => { label: string } }
-  const { labelOf: lastContactLabel } = useLastContactTypes()
   return (
     <StatsTab
       kpisTitle={t('drawer.tabs.statistics')}
       kpis={[
         // Counts drill into the Werk tab, where the matches/applications actually live.
-        { label: t('statistics.placements'),  value: c.matches?.length ?? 0,        sub: t('statistics.total'),    color: 'var(--color-primary)', onClick: () => onJump?.('work') },
-        { label: t('statistics.applications'), value: (c.applications ?? []).length, sub: t('statistics.total'),    color: 'var(--color-secondary)', onClick: () => onJump?.('work') },
-        // Tijdelijk verborgen (2026-06-27) — Diensten + Uren gewerkt terug zodra de planning-data live is.
-        // { label: t('statistics.shifts'),       value: c.shiftsCount ?? 24,         sub: t('statistics.thisYear'), color: 'var(--color-success)' },
-        // { label: t('statistics.hoursWorked'),  value: c.hoursWorked ?? 186,          sub: t('statistics.thisYear'), color: 'var(--color-warning)' },
+        { label: t('statistics.placements'),  value: c.matches?.length ?? 0,        sub: t('statistics.total'), color: 'var(--color-primary-text)', onClick: () => onJump?.('work') },
+        { label: t('statistics.applications'), value: (c.applications ?? []).length, sub: t('statistics.total'), color: 'var(--color-secondary)', onClick: () => onJump?.('work') },
+        // Diensten + Uren gewerkt stay hidden — measured live 2026-08-09, not guessed:
+        // GET /candidates/{id} DOES carry stats.shifts_count / stats.hours_worked (and
+        // mapCandidate already maps them), but both read 0 on 30 of 30 candidates probed,
+        // and /sm_shifts — the Shiftmanager mirror they derive from — returns an empty
+        // dataset. So there is no planning data yet: two permanent "0" tiles would state
+        // "this candidate worked nothing" where the truth is "not connected yet".
+        // Re-enable once /sm_shifts returns rows — and only bound to the real field: the
+        // former example fallbacks (24 shifts / 186 hours) were invented numbers and must
+        // never come back.
+        // { label: t('statistics.shifts'),       value: c.shiftsCount ?? 0, sub: t('statistics.thisYear'), color: 'var(--color-success)' },
+        // { label: t('statistics.hoursWorked'),  value: c.hoursWorked ?? 0, sub: t('statistics.thisYear'), color: 'var(--color-warning)' },
       ]}
-      overview={{
-        title: t('statistics.statusOverview'),
-        rows: [
-          [t('statistics.status'),      c.status ? statusMeta(c.status).label : '-'],
-          // LAST-CONTACT-LIVE-1: date + "door {name}" once the BE stamps land
-          // (last_contact_at/_by) — an honest italic em-dash when never contacted,
-          // matching the createdBy/source rows below (§4).
-          [t('statistics.lastContact'), c.lastContactDate
-            ? <>{formatDate(c.lastContactDate)}{c.lastContactBy && <> · {t('drawer.byWho', { name: c.lastContactBy })}</>}</>
-            : emptyValue],
-          [t('statistics.contactType'), c.lastContactType ? lastContactLabel(c.lastContactType) : emptyValue],
-          [t('statistics.memberSince'), c.created ? formatDate(c.created) : '-'],
-          [t('statistics.branch'),      (c.branches ?? []).map(b => b.name).filter(Boolean).join(', ') || '-'],
-          // CREATED-BY-SOURCE-1 (Danny: "wil ik ook zien aangemaakt door wie en de bron").
-          [t('statistics.createdBy'),   c.createdBy?.name || emptyValue],
-          [t('statistics.source'),      c.source || emptyValue],
-        ],
-      }}
     />
   )
 }

@@ -92,7 +92,7 @@ export default function PeriodGroup({ group }: { group: ReportFilterGroup }) {
               <button key={y} onClick={() => setYear(y)}
                 style={{ ...btnBase, padding: '3px 9px',
                          background: active ? 'var(--color-primary)' : 'var(--border)',
-                         color:      active ? 'white'                : 'var(--text)',
+                         color:      active ? 'var(--color-on-accent)' : 'var(--text)',
                          fontWeight: active ? 600 : 400 }}>
                 {y}
               </button>

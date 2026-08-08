@@ -34,7 +34,7 @@ const makeRequirements = (overrides: Partial<RequirementsSection> = {}): Require
   editing: false, setEditing: vi.fn(),
   form: { experienceMin: '1', experienceMax: '3', seniority: 'sen1', education: 'edu1' },
   setF: vi.fn(), save: vi.fn(), cancel: vi.fn(),
-  skills: ['Triage', 'Wondzorg'], newSkill: '', setNewSkill: vi.fn(), addSkill: vi.fn(), removeSkill: vi.fn(),
+  skills: ['Triage', 'Wondzorg'], addSkill: vi.fn(), editSkill: vi.fn(), removeSkill: vi.fn(),
   ...overrides,
 })
 
@@ -50,8 +50,32 @@ describe('DetailsRequirementsTab · read/edit mode (V12)', () => {
     render(<DetailsRequirementsTab vacancy={vacancy} requirements={makeRequirements({ editing: true })} seniorityLevels={seniorityLevels} educationLevels={educationLevels} />)
     expect(screen.getByPlaceholderText('details.experienceFrom')).toBeInTheDocument()
     expect(screen.getByPlaceholderText('details.experienceTo')).toBeInTheDocument()
-    // Two <select> elements: seniority + education.
-    expect(screen.getAllByRole('combobox')).toHaveLength(2)
+    // G35: seniority/education are now the SAME searchable CreatableSelect as
+    // AddVacancyModal's RequirementsCard — real <button> triggers, not native
+    // <select> elements — each showing its currently picked level's label.
+    expect(screen.getByRole('button', { name: 'Senior' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'HBO' })).toBeInTheDocument()
+    expect(screen.queryAllByRole('combobox')).toHaveLength(0)
+  })
+
+  it('picking a seniority option calls setF with that level\'s value — same write path the old <select> used', async () => {
+    const user = userEvent.setup()
+    const requirements = makeRequirements({ editing: true })
+    const levels = [{ value: 'sen1', label: 'Senior' }, { value: 'sen2', label: 'Junior' }]
+    render(<DetailsRequirementsTab vacancy={vacancy} requirements={requirements} seniorityLevels={levels} educationLevels={educationLevels} />)
+    await user.click(screen.getByRole('button', { name: 'Senior' }))
+    await user.click(screen.getByRole('button', { name: 'Junior' }))
+    expect(requirements.setF).toHaveBeenCalledWith('seniority', 'sen2')
+  })
+
+  it('picking an education option calls setF with that level\'s value — same write path the old <select> used', async () => {
+    const user = userEvent.setup()
+    const requirements = makeRequirements({ editing: true })
+    const levels = [{ value: 'edu1', label: 'HBO' }, { value: 'edu2', label: 'MBO' }]
+    render(<DetailsRequirementsTab vacancy={vacancy} requirements={requirements} seniorityLevels={seniorityLevels} educationLevels={levels} />)
+    await user.click(screen.getByRole('button', { name: 'HBO' }))
+    await user.click(screen.getByRole('button', { name: 'MBO' }))
+    expect(requirements.setF).toHaveBeenCalledWith('education', 'edu2')
   })
 
   it('the pencil calls setEditing; Save/Cancel call the section\'s save/cancel', async () => {
@@ -70,53 +94,66 @@ describe('DetailsRequirementsTab · read/edit mode (V12)', () => {
   })
 })
 
-describe('DetailsRequirementsTab · required-skills list (V12 "doet niets")', () => {
-  it('renders every skill as its own row with a remove button', () => {
+// VACANCY-SKILLS-PARITY-1 (Danny 08-08): the skills list now renders through
+// RequiredSkillsSection (shared AddableSection) — same per-row pencil+trash
+// idiom as the candidate drawer's SkillsTab, replacing the old always-visible
+// text+"+" row. This describe block guards THIS component's own wiring: the
+// props it hands to RequiredSkillsSection reach the right `requirements.*`
+// function. RequiredSkillsSection's own add/edit/remove mechanics (the shared
+// AddForm/AddableSection plumbing) are covered by RequiredSkillsSection.test.tsx.
+describe('DetailsRequirementsTab · required-skills list (VACANCY-SKILLS-PARITY-1)', () => {
+  it('renders every skill as its own row with edit AND remove controls (never remove-only)', () => {
     render(<DetailsRequirementsTab vacancy={vacancy} requirements={makeRequirements()} seniorityLevels={seniorityLevels} educationLevels={educationLevels} />)
     expect(screen.getByText('Triage')).toBeInTheDocument()
     expect(screen.getByText('Wondzorg')).toBeInTheDocument()
-    expect(screen.getAllByTitle('common:remove')).toHaveLength(2)
+    // Per-row pencil AND trash — the old interaction only ever had an X (remove).
+    expect(screen.getAllByTitle('Bewerken')).toHaveLength(2)
+    expect(screen.getAllByTitle('Verwijderen')).toHaveLength(2)
   })
 
-  it('renders no list block when there are no skills yet (only the add row)', () => {
+  it('renders the empty state and the "+ add" trigger when there are no skills yet', () => {
     render(<DetailsRequirementsTab vacancy={vacancy} requirements={makeRequirements({ skills: [] })} seniorityLevels={seniorityLevels} educationLevels={educationLevels} />)
-    expect(screen.queryByTitle('common:remove')).not.toBeInTheDocument()
-    expect(screen.getByPlaceholderText('details.addSkill')).toBeInTheDocument()
+    expect(screen.queryByTitle('Verwijderen')).not.toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /details\.addSkill/ })).toBeInTheDocument()
   })
 
   it('clicking the remove icon calls removeSkill with THAT skill, not the whole list', async () => {
     const user = userEvent.setup()
     const requirements = makeRequirements()
     render(<DetailsRequirementsTab vacancy={vacancy} requirements={requirements} seniorityLevels={seniorityLevels} educationLevels={educationLevels} />)
-    await user.click(screen.getAllByTitle('common:remove')[1])
+    await user.click(screen.getAllByTitle('Verwijderen')[1])
     expect(requirements.removeSkill).toHaveBeenCalledWith('Wondzorg')
   })
 
-  it('typing a new skill calls setNewSkill; the + button calls addSkill', async () => {
+  it('the "+ add" trigger reveals an inline form; saving it calls addSkill with the typed name', async () => {
     const user = userEvent.setup()
     const requirements = makeRequirements()
     render(<DetailsRequirementsTab vacancy={vacancy} requirements={requirements} seniorityLevels={seniorityLevels} educationLevels={educationLevels} />)
-    await user.type(screen.getByPlaceholderText('details.addSkill'), 'B')
-    expect(requirements.setNewSkill).toHaveBeenCalledWith('B')
-    await user.click(screen.getByTitle('details.addSkill'))
-    expect(requirements.addSkill).toHaveBeenCalledTimes(1)
+    await user.click(screen.getByRole('button', { name: /details\.addSkill/ }))
+    await user.type(screen.getByPlaceholderText('details.addSkill'), 'BIG-registratie')
+    await user.click(screen.getByTitle('save'))
+    expect(requirements.addSkill).toHaveBeenCalledWith('BIG-registratie')
   })
 
-  it('pressing Enter in the skill input also calls addSkill (no need to reach for the mouse)', async () => {
+  it('the pencil opens the SAME add form prefilled with the row\'s value; saving calls editSkill(index, newName) — a real rename, not remove+re-add', async () => {
     const user = userEvent.setup()
-    const requirements = makeRequirements({ newSkill: 'BIG-registratie' })
+    const requirements = makeRequirements()
     render(<DetailsRequirementsTab vacancy={vacancy} requirements={requirements} seniorityLevels={seniorityLevels} educationLevels={educationLevels} />)
-    await user.type(screen.getByPlaceholderText('details.addSkill'), '{Enter}')
-    expect(requirements.addSkill).toHaveBeenCalledTimes(1)
+    await user.click(screen.getAllByTitle('Bewerken')[1])
+    const input = screen.getByPlaceholderText('details.addSkill')
+    expect(input).toHaveValue('Wondzorg')
+    await user.clear(input)
+    await user.type(input, 'Wondverzorging')
+    await user.click(screen.getByTitle('save'))
+    expect(requirements.editSkill).toHaveBeenCalledWith(1, 'Wondverzorging')
+    expect(requirements.removeSkill).not.toHaveBeenCalled()
   })
 
   it('the quick-add/remove skill controls work identically OUTSIDE and INSIDE the Eisen pencil (§ file docblock: rides along with Save while open)', async () => {
     const user = userEvent.setup()
     const requirements = makeRequirements({ editing: true })
     render(<DetailsRequirementsTab vacancy={vacancy} requirements={requirements} seniorityLevels={seniorityLevels} educationLevels={educationLevels} />)
-    await user.click(screen.getByTitle('details.addSkill'))
-    expect(requirements.addSkill).toHaveBeenCalledTimes(1)
-    await user.click(screen.getAllByTitle('common:remove')[0])
+    await user.click(screen.getAllByTitle('Verwijderen')[0])
     expect(requirements.removeSkill).toHaveBeenCalledWith('Triage')
   })
 })

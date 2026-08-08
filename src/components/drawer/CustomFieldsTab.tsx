@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useId } from 'react'
 import type { CSSProperties } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Edit2, Save, X } from 'lucide-react'
@@ -7,6 +7,8 @@ import type { CustomFieldDef, CustomFieldEntityType } from '@/lib/useCustomField
 import { useDateFormat } from '@/lib/datetime'
 import RichTextEditor from '@/components/ui/RichTextEditor'
 import SafeHtml from '@/components/ui/SafeHtml'
+// G34: the house searchable dropdown replaces the native <select> field type.
+import CreatableSelect from '@/components/ui/CreatableSelect'
 // Job 45 / Danny 22-07 point 12: the SHARED titled-card frame — this tab is reused
 // across all 11 entity drawers, so both the bordered frame AND the uppercase group
 // title use the generic ui/SectionCard (never a candidate-only constants file),
@@ -14,8 +16,10 @@ import SafeHtml from '@/components/ui/SafeHtml'
 // groups (Persoonlijk/Contact) are boxed. The simple-fields grid used to float with
 // no title above it — that read as out of tone next to those sibling cards.
 import SectionCard, { sectionBlock } from '@/components/ui/SectionCard'
+import { fieldInputStyle } from '@/components/forms/fieldMetrics'
 
-const inputStyle: CSSProperties = { width: '100%', padding: '6px 10px', fontSize: 12, borderRadius: 6, border: '1px solid var(--border)', background: 'var(--input-bg)', color: 'var(--text)', boxSizing: 'border-box' }
+// Canon field style (G33/fieldMetrics) — was its own padding-6/font-12/radius-6 copy.
+const inputStyle: CSSProperties = fieldInputStyle
 const iconBtn: CSSProperties = { width: 28, height: 28, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 6, cursor: 'pointer' }
 const labelStyle: CSSProperties = { fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: 3 }
 
@@ -28,13 +32,12 @@ function display(def: CustomFieldDef, raw: unknown, t: (k: string) => string, fo
 }
 
 // Render the edit control for one non-textarea field type.
-function FieldInput({ def, value, onChange }: { def: CustomFieldDef; value: unknown; onChange: (v: unknown) => void }) {
+function FieldInput({ def, value, onChange, labelId }: { def: CustomFieldDef; value: unknown; onChange: (v: unknown) => void; labelId?: string }) {
   if (def.type === 'boolean') return <input type="checkbox" checked={Boolean(value)} onChange={e => onChange(e.target.checked)} />
   if (def.type === 'select') return (
-    <select value={String(value ?? '')} onChange={e => onChange(e.target.value)} style={{ ...inputStyle, cursor: 'pointer' }}>
-      <option value="">—</option>
-      {(def.options ?? []).map(o => <option key={o} value={o}>{o}</option>)}
-    </select>
+    <CreatableSelect aria-labelledby={labelId} value={value != null && value !== '' ? String(value) : null}
+      onChange={onChange} allowCreate={false} clearable placeholder="—"
+      options={(def.options ?? []).map(o => ({ value: o, label: o }))} style={inputStyle} />
   )
   return (
     <input type={def.type === 'number' ? 'number' : def.type === 'date' ? 'date' : 'text'}
@@ -105,6 +108,11 @@ export default function CustomFieldsTab({ entityType, values, onSave }: Props) {
   const { fields, loading } = useCustomFields(entityType)
   const [editing, setEditing] = useState(false)
   const [draft, setDraft]     = useState<Record<string, unknown>>({})
+  // Base id for each select-type field's label — CreatableSelect's trigger is a
+  // <button>, which ignores an associated <label for> (see its own doc comment),
+  // so aria-labelledby names it instead. def.key is unique per tenant def already;
+  // the useId() prefix only guards against two CustomFieldsTab instances at once.
+  const labelBaseId = useId()
 
   // The drawer only mounts this tab once ≥1 active def exists; still, guard the
   // brief window before the defs load or a stale gate (never render half a grid).
@@ -136,14 +144,17 @@ export default function CustomFieldsTab({ entityType, values, onSave }: Props) {
           )}
           style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px 20px' }}
         >
-          {simpleFields.map(def => (
-            <div key={def.key}>
-              <div style={labelStyle}>{def.label}</div>
-              {editing
-                ? <FieldInput def={def} value={draft[def.key] ?? values[def.key]} onChange={val => setVal(def.key, val)} />
-                : <div style={{ fontSize: 13, color: 'var(--text)', minHeight: 18 }}>{display(def, values[def.key], t, formatDate)}</div>}
-            </div>
-          ))}
+          {simpleFields.map(def => {
+            const labelId = `${labelBaseId}-${def.key}`
+            return (
+              <div key={def.key}>
+                <div id={labelId} style={labelStyle}>{def.label}</div>
+                {editing
+                  ? <FieldInput def={def} value={draft[def.key] ?? values[def.key]} onChange={val => setVal(def.key, val)} labelId={labelId} />
+                  : <div style={{ fontSize: 13, color: 'var(--text)', minHeight: 18 }}>{display(def, values[def.key], t, formatDate)}</div>}
+              </div>
+            )
+          })}
         </SectionCard>
       )}
       {textFields.map(def => (

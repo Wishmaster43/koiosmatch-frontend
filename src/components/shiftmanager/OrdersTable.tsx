@@ -6,11 +6,14 @@
  * sorting and pagination. Clicking a row opens OrderDetailDrawer with every field.
  * Thin container: data + paging come from useOrdersTable; this owns the filter UI.
  */
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect, useMemo, useId } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Search } from 'lucide-react'
 import { useRightPanel } from '@/context/RightPanelContext'
 import PaginationBar     from '../ui/PaginationBar'
+// Searchable combobox replaces the bare native <select> (Danny 08-08, §4) — same
+// fixed-vocabulary picker convention as ReportsPage's period picker.
+import CreatableSelect from '../ui/CreatableSelect'
 import {
   NOW, PAD, StatusBadge, SortIcon, TH, TD,
   formatDate, formatTime, formatHours, dash, COL_KEYS,
@@ -34,6 +37,10 @@ export default function OrdersTable() {
     useOrdersTable({ selectedMonth, search, selectedStatuses, sort })
 
   const { registerFilters, unregisterFilters } = useRightPanel()
+  // Names the month picker (a <button>-based combobox is not labelable via
+  // htmlFor — see CreatableSelect's own doc comment); no visible label sits
+  // beside it, so this sr-only span carries the accessible name.
+  const monthLabelId = useId()
 
   // Toggle sort direction, or switch the sorted column (default desc).
   const setSort_ = (key: string) => setSort(prev =>
@@ -83,14 +90,11 @@ export default function OrdersTable() {
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <select value={selectedMonth} onChange={e => setSelectedMonth(e.target.value)}
-            style={{ height: 34, padding: '0 10px', fontSize: 13, border: '1px solid var(--border)',
-                     borderRadius: 8, color: 'var(--text)', background: 'var(--surface)', cursor: 'pointer' }}>
-            <option value="">{t('orders.allMonths')}</option>
-            {monthOptions.map(m => (
-              <option key={m} value={m}>{formatMonth(m)}</option>
-            ))}
-          </select>
+          <span id={monthLabelId} className="sr-only">{t('orders.filterMonth')}</span>
+          <CreatableSelect aria-labelledby={monthLabelId} value={selectedMonth} onChange={setSelectedMonth}
+            allowCreate={false} menuWidth={160}
+            options={[{ value: '', label: t('orders.allMonths') }, ...monthOptions.map(m => ({ value: m, label: formatMonth(m) }))]}
+            style={{ height: 34, fontSize: 13 }} />
           <div className="relative">
             <Search size={14} style={{ position: 'absolute', left: 10, top: '50%',
                                        transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />

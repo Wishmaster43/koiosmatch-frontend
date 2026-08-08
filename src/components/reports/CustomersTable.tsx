@@ -18,8 +18,8 @@ import type { ReportCustomer, SortState } from '@/types/reports'
 function SortIcon({ active, dir }: { active: boolean; dir: 'asc' | 'desc' }) {
   if (!active) return <ChevronsUpDown size={12} style={{ color: 'var(--border)' }} />
   return dir === 'asc'
-    ? <ChevronUp size={12} style={{ color: 'var(--color-primary)' }} />
-    : <ChevronDown size={12} style={{ color: 'var(--color-primary)' }} />
+    ? <ChevronUp size={12} style={{ color: 'var(--color-primary-text)' }} />
+    : <ChevronDown size={12} style={{ color: 'var(--color-primary-text)' }} />
 }
 
 const TH: CSSProperties = { padding: '8px 12px', textAlign: 'left', fontSize: 11, fontWeight: 600,

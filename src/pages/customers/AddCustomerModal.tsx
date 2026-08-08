@@ -335,7 +335,7 @@ export default function AddCustomerModal({ onClose, onCreate, onImported, users 
           </button>
           <button onClick={handleSubmit} disabled={!canSubmit}
             style={{ height: BTN_H, padding: '0 20px', fontSize: 13, fontWeight: 600, borderRadius: 8, border: 'none',
-              background: canSubmit ? 'var(--color-primary)' : 'var(--border)', color: canSubmit ? 'white' : 'var(--text-muted)',
+              background: canSubmit ? 'var(--color-primary)' : 'var(--border)', color: canSubmit ? 'var(--color-on-accent)' : 'var(--text-muted)',
               cursor: canSubmit ? 'pointer' : 'not-allowed' }}>
             {saving ? t('common:saving') : t('modal.create')}
           </button>

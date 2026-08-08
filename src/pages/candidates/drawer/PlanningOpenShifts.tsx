@@ -4,11 +4,15 @@
  * and a schedule toggle. Blocked customers/locations are dimmed and disabled.
  * Filter + scheduled-id state is owned by PlanningPanel and passed in.
  */
+import { useId } from 'react'
 import type { Dispatch, SetStateAction } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Heart, Ban } from 'lucide-react'
 import { sectionBlock, softPill } from './constants'
 import { useFunctions } from '@/lib/useFunctions'
+// ALWAYS-SEARCHABLE-1 (Danny 08-08): the house searchable combobox replaces the
+// native <select> that used to render the distance/level filter pickers below.
+import CreatableSelect from '@/components/ui/CreatableSelect'
 import type { Id } from '@/types/common'
 import type { FavLists, OpenFilters, OpenShift } from './planningTypes'
 
@@ -26,6 +30,11 @@ export default function PlanningOpenShifts({ openShifts, openFilters, setOpenFil
   const { t } = useTranslation('candidates')
   // Function/level options from the tenant lookup (no hardcoded care-level list).
   const { functions: FUNCTION_LEVELS } = useFunctions() as { functions: string[] }
+  // Stable ids for the two filter pickers' visible labels, wired to CreatableSelect
+  // via aria-labelledby (ALWAYS-SEARCHABLE-1) — the documented Field-wrapper pattern
+  // (CreatableSelect.tsx), so each trigger keeps a real accessible name.
+  const distanceLabelId = useId()
+  const maxLevelLabelId = useId()
 
   // Filter open shifts by distance, candidate level and selected shift types.
   const candLevel = openFilters.max_level
@@ -63,18 +72,18 @@ export default function PlanningOpenShifts({ openShifts, openFilters, setOpenFil
             </div>
           </div>
           <div>
-            <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', marginBottom: 5 }}>{t('planning.maxDistance')}</div>
-            <select value={openFilters.distance} onChange={e => setOpenFilters(f => ({ ...f, distance: Number(e.target.value) }))}
-              style={{ padding: '5px 8px', fontSize: 12, border: '1px solid var(--border)', borderRadius: 6, background: 'var(--bg)', color: 'var(--text)', cursor: 'pointer' }}>
-              {[10, 25, 35, 50, 999].map(v => <option key={v} value={v}>{v === 999 ? t('planning.noLimit') : `${v} km`}</option>)}
-            </select>
+            <div id={distanceLabelId} style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', marginBottom: 5 }}>{t('planning.maxDistance')}</div>
+            <CreatableSelect aria-labelledby={distanceLabelId} allowCreate={false} menuWidth={140}
+              value={String(openFilters.distance)} onChange={v => setOpenFilters(f => ({ ...f, distance: Number(v) }))}
+              options={[10, 25, 35, 50, 999].map(v => ({ value: String(v), label: v === 999 ? t('planning.noLimit') : `${v} km` }))}
+              style={{ padding: '5px 8px', fontSize: 12 }} />
           </div>
           <div>
-            <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', marginBottom: 5 }}>{t('planning.maxLevel')}</div>
-            <select value={openFilters.max_level} onChange={e => setOpenFilters(f => ({ ...f, max_level: Number(e.target.value) }))}
-              style={{ padding: '5px 8px', fontSize: 12, border: '1px solid var(--border)', borderRadius: 6, background: 'var(--bg)', color: 'var(--text)', cursor: 'pointer' }}>
-              {FUNCTION_LEVELS.map((fn: string, i: number) => <option key={fn} value={i + 1}>{fn}</option>)}
-            </select>
+            <div id={maxLevelLabelId} style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', marginBottom: 5 }}>{t('planning.maxLevel')}</div>
+            <CreatableSelect aria-labelledby={maxLevelLabelId} allowCreate={false} menuWidth={160}
+              value={String(openFilters.max_level)} onChange={v => setOpenFilters(f => ({ ...f, max_level: Number(v) }))}
+              options={FUNCTION_LEVELS.map((fn: string, i: number) => ({ value: String(i + 1), label: fn }))}
+              style={{ padding: '5px 8px', fontSize: 12 }} />
           </div>
           <div style={{ marginLeft: 'auto' }}>
             <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>

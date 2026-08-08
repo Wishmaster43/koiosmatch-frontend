@@ -11,7 +11,13 @@ import type { CSSProperties, ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Save, X } from 'lucide-react'
 import RichTextEditor from '@/components/ui/RichTextEditor'
+// ALWAYS-SEARCHABLE-1 (Danny 08-08): the house searchable combobox replaces the
+// native <select> that used to render every `options` field below.
+import CreatableSelect from '@/components/ui/CreatableSelect'
 import { TextField, TextArea, DateField } from './fields'
+
+/** One dropdown's option list — a bare string or a {value,label} pair. */
+export type FieldOptions = Array<string | { value: string; label?: ReactNode }>
 
 export interface FieldDef {
   key: string
@@ -26,7 +32,11 @@ export interface FieldDef {
   // field-level pencil bolted onto the read view.
   richtext?: boolean
   date?: boolean
-  options?: Array<string | { value: string; label?: ReactNode }>
+  // A static option list, or a RESOLVER that receives the form's current values so a
+  // list can depend on the row being edited (DOC-1-EIGENAAR-1: the linked-document
+  // picker must hide documents already claimed by another entry while keeping this
+  // row's own pick visible). Additive — every existing caller passes an array.
+  options?: FieldOptions | ((values: FormValues) => FieldOptions)
   type?: string
   half?: boolean
   separator?: boolean
@@ -36,7 +46,7 @@ export interface FieldDef {
   disabledWhen?: string
 }
 
-type FormValues = Record<string, unknown>
+export type FormValues = Record<string, unknown>
 
 function FieldInput({ f, value, onChange, values, disabled }: {
   f: FieldDef; value: unknown; onChange: (v: string | boolean) => void; values: FormValues; disabled?: boolean
@@ -65,21 +75,32 @@ function FieldInput({ f, value, onChange, values, disabled }: {
           {labelText}
         </div>
       )}
-      <RichTextEditor value={value as string | undefined} onChange={onChange} minHeight={48} />
+      {/* resizable (Danny 08-08: "kan referentie txt niet groter maken?") — the
+          shared editor already ships a drag-to-grow handle (MEMORY-RESIZE-1); this
+          form never opted in, so a longer note had no room. minHeight raised from
+          48 to 110 so a note starts readable and can be dragged taller from there. */}
+      <RichTextEditor value={value as string | undefined} onChange={onChange} minHeight={110} resizable />
     </div>
   )
   if (f.textarea) return wrap(<TextArea placeholder={labelText} value={value as string | undefined} onChange={onChange} rows={2} />)
   if (f.date)     return wrap(<DateField placeholder={labelText} value={value as string | undefined} onChange={onChange} />)
+  // ALWAYS-SEARCHABLE-1 (Danny 08-08, CLAUDE.md §4): every dropdown is a searchable
+  // combobox — the house CreatableSelect (allowCreate={false}, pick-only) replaces
+  // the native <select> that used to render every `options` field (education level,
+  // linked document, skill level, …). Same value/onChange contract as before, so no
+  // caller or request shape changes; `clearable` mirrors the old select's own blank
+  // "unset" option. The placeholder carries the accessible name, the same convention
+  // every sibling picker in this drawer already uses (LanguagesSection, ZzpAddressCard, …).
   if (f.options)  return (
-    <select value={(value as string) ?? ''} onChange={e => onChange(e.target.value)}
-      style={{ width: '100%', padding: '7px 10px', fontSize: 12, borderRadius: 6, border: '1px solid var(--border)', background: 'var(--surface)', color: 'var(--text)', boxSizing: 'border-box', outline: 'none' }}>
-      <option value="">{label}</option>
-      {f.options.map(o => {
-        const val = typeof o === 'string' ? o : o.value
-        const lab = typeof o === 'string' ? o : (o.label ?? o.value)
-        return <option key={val} value={val}>{lab}</option>
-      })}
-    </select>
+    // Every real caller's option label is a plain string (tenant lookup labels /
+    // document names) — FieldDef.options keeps the wider ReactNode type for label
+    // flexibility elsewhere, so narrow it here to what CreatableSelect expects.
+    // A resolver form is called with the CURRENT values, so a list may depend on the
+    // row being edited (DOC-1-EIGENAAR-1) — see FieldDef.options.
+    <CreatableSelect value={(value as string) ?? ''} onChange={onChange} allowCreate={false} clearable
+      placeholder={labelText}
+      options={(typeof f.options === 'function' ? f.options(values) : f.options) as Array<string | { value: string; label: string }>}
+      style={{ width: '100%', fontSize: 12 }} />
   )
   return wrap(<TextField placeholder={labelText} value={value as string | undefined} onChange={onChange} type={f.type} />)
 }
@@ -135,7 +156,9 @@ export default function AddForm({ fields, onSave, onCancel, initial }: {
         )}
         <div style={{ display: 'flex', gap: 6 }}>
           <button onClick={() => onSave(values)} title={t('save')}
-            style={{ ...iconBtn, background: 'var(--color-primary)', color: '#fff', border: 'none' }}>
+            // Accent-filled save button — follow the tenant's on-accent contrast
+            // token instead of a hardcoded white (2026-08-08).
+            style={{ ...iconBtn, background: 'var(--color-primary)', color: 'var(--color-on-accent)', border: 'none' }}>
             <Save size={14} />
           </button>
           <button onClick={onCancel} title={t('cancel')}

@@ -40,6 +40,11 @@
   "voice": {
     "start": "Dictate your message",
     "stop": "Stop listening",
-    "denied": "Microphone denied — allow access in your browser"
+    "denied": "Microphone denied — allow access in your browser",
+    "insecureContext": "Dictation needs a secure connection (https) — unavailable on this page",
+    "errorServiceNotAllowed": "Speech recognition was blocked by the browser — service not allowed",
+    "errorAudioCapture": "No microphone found — check your device",
+    "errorNetwork": "Network error during speech recognition — please try again",
+    "errorGeneric": "Speech recognition failed — please try again"
   }
 }

@@ -33,7 +33,9 @@
     "leadsPartial": "Gedeeltelijk geteld — er is een limiet geraakt",
     "leadsComputedAt": "Bijgewerkt op {{date}}",
     "age": "Leeftijd",
-    "applicationsOpen": "Open sollicitaties"
+    "applicationsOpen": "Open sollicitaties",
+    "ageTooltip": "Sinds {{date}}",
+    "applicationsOpenTab": "Open Sollicitaties"
   },
   "publishedState": {
     "yes": "Gepubliceerd",
@@ -225,7 +227,8 @@
     "addSkill": "Vaardigheid toevoegen",
     "description": "Vacaturetekst",
     "matchContractType": "Voorgestelde contractsoort",
-    "matchCao": "Voorgestelde CAO"
+    "matchCao": "Voorgestelde CAO",
+    "skillsEmpty": "Nog geen vereiste vaardigheden."
   },
   "aiagent": {
     "pickerLabel": "AI-agent",
@@ -295,7 +298,9 @@
     "tabs": {
       "settings": "Instellingen",
       "sites": "Vacaturesites"
-    }
+    },
+    "siteLive": "De publieke carrière-site is live. Deze schakelaars bepalen wat daar nu gepubliceerd wordt, inclusief de Indeed- en Werkzoeken-feeds.",
+    "siteOffline": "De publieke carrière-site staat nu uit (Instellingen → Carrière-site). Deze schakelaars bepalen alvast wat live gaat zodra hij aan staat."
   },
   "applicants": {
     "title": "Sollicitaties",
@@ -441,7 +446,11 @@
     }
   },
   "documents": {
-    "docType": "Documenttype"
+    "docType": "Documenttype",
+    "allTypes": "Alle types",
+    "type": "Type",
+    "search": "Zoek in documenten…",
+    "empty": "Nog geen documenten."
   },
   "age": {
     "days": "{{count}}d",

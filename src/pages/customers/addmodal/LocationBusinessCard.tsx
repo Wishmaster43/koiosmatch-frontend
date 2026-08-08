@@ -7,16 +7,23 @@
  */
 import { useTranslation } from 'react-i18next'
 import { Field, TextField } from '@/components/forms/fields'
+import FieldNotice from '@/components/ui/FieldNotice'
 import { cardHead, cardBox, row3Even } from '@/components/ui/modalCards'
+import type { IdentifierNotice } from '@/hooks/useIdentifierValidation'
 
 interface LocationBusinessCardProps {
   cocNumber: string; onCocNumberChange: (v: string) => void
   vatNumber: string; onVatNumberChange: (v: string) => void
   costCenter: string; onCostCenterChange: (v: string) => void
+  // KVK/BTW-PER-LAND-1 (Danny 08-08, points 10 + 11): the per-country format verdict,
+  // computed by the container (it owns the country field) — this card only renders it.
+  cocNotice?: IdentifierNotice | null
+  vatNotice?: IdentifierNotice | null
 }
 
 export default function LocationBusinessCard({
   cocNumber, onCocNumberChange, vatNumber, onVatNumberChange, costCenter, onCostCenterChange,
+  cocNotice, vatNotice,
 }: LocationBusinessCardProps) {
   const { t } = useTranslation(['customers', 'common'])
   return (
@@ -24,8 +31,21 @@ export default function LocationBusinessCard({
       <div style={cardHead}>{t('subModal.groups.business')}</div>
       <div style={cardBox}>
         <div style={row3Even}>
-          <Field label={t('subModal.coc')}><TextField value={cocNumber} onChange={onCocNumberChange} /></Field>
-          <Field label={t('subModal.vat')}><TextField value={vatNumber} onChange={onVatNumberChange} /></Field>
+          {/* The notice sits BESIDE the Field, never inside it: Field clones `id`/
+              `aria-labelledby` onto its single child, so a wrapper div there would
+              orphan the label from the real input (§6). */}
+          <div>
+            <Field label={t('subModal.coc')}>
+              <TextField value={cocNumber} onChange={onCocNumberChange} error={cocNotice?.severity === 'error'} />
+            </Field>
+            <FieldNotice text={cocNotice?.message} severity={cocNotice?.severity} />
+          </div>
+          <div>
+            <Field label={t('subModal.vat')}>
+              <TextField value={vatNumber} onChange={onVatNumberChange} error={vatNotice?.severity === 'error'} />
+            </Field>
+            <FieldNotice text={vatNotice?.message} severity={vatNotice?.severity} />
+          </div>
           <Field label={t('subModal.costCenter')}><TextField value={costCenter} onChange={onCostCenterChange} /></Field>
         </div>
       </div>

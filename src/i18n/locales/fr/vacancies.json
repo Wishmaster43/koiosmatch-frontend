@@ -33,7 +33,9 @@
     "leadsPartial": "Compté partiellement — une limite a été atteinte",
     "leadsComputedAt": "Mis à jour le {{date}}",
     "age": "Âge",
-    "applicationsOpen": "Ouvrir les candidatures"
+    "applicationsOpen": "Ouvrir les candidatures",
+    "ageTooltip": "Depuis le {{date}}",
+    "applicationsOpenTab": "Ouvrir les candidatures"
   },
   "publishedState": {
     "yes": "Publié",
@@ -225,7 +227,8 @@
     "contactPerson": "Contact",
     "pickClientFirst": "Choisissez d'abord un client",
     "matchContractType": "Type de contrat proposé",
-    "matchCao": "CCT proposée"
+    "matchCao": "CCT proposée",
+    "skillsEmpty": "Aucune compétence requise pour l'instant."
   },
   "aiagent": {
     "pickerLabel": "Agent IA",
@@ -295,7 +298,9 @@
     "tabs": {
       "settings": "Paramètres",
       "sites": "Sites d'emploi"
-    }
+    },
+    "siteLive": "Le site carrière public est en ligne. Ces interrupteurs déterminent ce qui y est publié actuellement, y compris les flux Indeed et Werkzoeken.",
+    "siteOffline": "Le site carrière public est actuellement désactivé (Paramètres → Site carrière). Ces interrupteurs déterminent déjà ce qui sera publié dès son activation."
   },
   "applicants": {
     "title": "Candidatures",
@@ -441,7 +446,11 @@
     }
   },
   "documents": {
-    "docType": "Type de document"
+    "docType": "Type de document",
+    "allTypes": "Tous les types",
+    "type": "Type",
+    "search": "Rechercher des documents…",
+    "empty": "Aucun document pour le moment."
   },
   "age": {
     "days": "{{count}}j",

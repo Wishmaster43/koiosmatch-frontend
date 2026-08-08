@@ -18,7 +18,7 @@ export function NoteTypeChip({ value, types }: { value: string; types: NoteType[
   const col = nt?.color
   const soft: CSSProperties = col
     ? { background: col + '1A', color: col, border: `1px solid ${col}55` }
-    : { background: 'var(--color-primary-bg)', color: 'var(--color-primary)' }
+    : { background: 'var(--color-primary-bg)', color: 'var(--color-primary-text)' }
   return <span style={{ ...chipBase, ...soft }}>{nt?.label ?? value}</span>
 }
 

@@ -96,7 +96,10 @@ describe('ScheduleModal · interval frequency', () => {
     const saveBtn = screen.getByText('scheduleModal.save') as HTMLButtonElement
     expect(saveBtn).not.toBeDisabled()
 
-    // Both the number input and the unit <select> share the same aria-label.
+    // The number input still carries the bare 'scheduleModal.every' aria-label;
+    // the unit picker (now CreatableSelect) shares the SAME label text but its
+    // combined accessible name is "<label> <current value>", so it never
+    // matches this exact query — getAllByLabelText resolves to just the input.
     const intervalInput = screen.getAllByLabelText('scheduleModal.every')
       .find(el => el.tagName === 'INPUT') as HTMLInputElement
     fireEvent.change(intervalInput, { target: { value: '' } })
@@ -111,7 +114,7 @@ describe('ScheduleModal · interval frequency', () => {
     render(<ScheduleModal onSave={onSave} onClose={vi.fn()} />)
     fireEvent.click(screen.getByText('scheduleModal.trigger.scheduled'))
     fireEvent.click(screen.getByText('scheduleModal.freq.interval'))
-    // Both the number input and the unit <select> share the same aria-label.
+    // See the regression test above: only the number input matches this exact label.
     const intervalInput = screen.getAllByLabelText('scheduleModal.every')
       .find(el => el.tagName === 'INPUT') as HTMLInputElement
     fireEvent.change(intervalInput, { target: { value: '' } })
@@ -138,28 +141,34 @@ describe('scheduleLabel · event trigger', () => {
 // config carries only the chosen agent's NAME (backend matches trigger_config.agent
 // by name, never id).
 describe('ScheduleModal · webhook (AI-agent) trigger', () => {
+  // G-LAYOUT-SELECT-1 (Danny 08-08, §4): the agent picker is now the house
+  // CreatableSelect, not a native <select> — these proofs go through the
+  // click-to-open interaction. The trigger's accessible name is "<field label>
+  // <current value>" (CreatableSelect prefixes the aria-labelledby'd field name
+  // so the value is never swallowed by it, see AvailabilityEditor.test.tsx).
   it('selecting the webhook type reveals the agent picker with the fetched agents', async () => {
     render(<ScheduleModal onSave={vi.fn()} onClose={vi.fn()} />)
     fireEvent.click(screen.getByText('scheduleModal.trigger.webhook'))
-    const select = await screen.findByLabelText('scheduleModal.agentLabel') as HTMLSelectElement
-    const options = Array.from(select.options).map(o => o.value)
-    expect(options).toEqual(['', 'Michelle', 'Kees'])
+    const trigger = await screen.findByRole('button', { name: 'scheduleModal.agentLabel scheduleModal.agentSelect' })
+    fireEvent.click(trigger)
+    expect(screen.getByRole('button', { name: 'Michelle' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Kees' })).toBeInTheDocument()
   })
 
   it('Save on the webhook type calls onSave with trigger_type-ready shape { agent: <name> }', async () => {
     const onSave = vi.fn()
     render(<ScheduleModal onSave={onSave} onClose={vi.fn()} />)
     fireEvent.click(screen.getByText('scheduleModal.trigger.webhook'))
-    const select = await screen.findByLabelText('scheduleModal.agentLabel') as HTMLSelectElement
-    fireEvent.change(select, { target: { value: 'Michelle' } })
+    const trigger = await screen.findByRole('button', { name: 'scheduleModal.agentLabel scheduleModal.agentSelect' })
+    fireEvent.click(trigger)
+    fireEvent.click(screen.getByRole('button', { name: 'Michelle' }))
     fireEvent.click(screen.getByText('scheduleModal.save'))
     expect(onSave).toHaveBeenCalledWith('Webhook', { schedule_type: 'webhook', agent: 'Michelle' })
   })
 
   it('reopening on an existing Webhook(agent) trigger preselects its stored agent name', async () => {
     render(<ScheduleModal trigger="Webhook" scheduleConfig={{ agent: 'Kees' }} onSave={vi.fn()} onClose={vi.fn()} />)
-    const select = await screen.findByLabelText('scheduleModal.agentLabel') as HTMLSelectElement
-    expect(select.value).toBe('Kees')
+    expect(await screen.findByRole('button', { name: 'scheduleModal.agentLabel Kees' })).toBeInTheDocument()
   })
 
   // BUG 4: a failed GET /ai/agents used to be swallowed into the same empty list
@@ -175,14 +184,14 @@ describe('ScheduleModal · webhook (AI-agent) trigger', () => {
     // Never the misleading "no agents yet" empty-state copy.
     expect(screen.queryByText('scheduleModal.agentEmpty')).not.toBeInTheDocument()
     // No picker is rendered at all, so an empty agent can never be saved from here.
-    expect(screen.queryByLabelText('scheduleModal.agentLabel')).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'scheduleModal.agentLabel scheduleModal.agentSelect' })).not.toBeInTheDocument()
   })
 
   it('BUG 4 regression: Save is disabled while no agent is chosen, even once agents load successfully', async () => {
     const onSave = vi.fn()
     render(<ScheduleModal onSave={onSave} onClose={vi.fn()} />)
     fireEvent.click(screen.getByText('scheduleModal.trigger.webhook'))
-    await screen.findByLabelText('scheduleModal.agentLabel')
+    await screen.findByRole('button', { name: 'scheduleModal.agentLabel scheduleModal.agentSelect' })
 
     const saveBtn = screen.getByText('scheduleModal.save') as HTMLButtonElement
     expect(saveBtn).toBeDisabled()

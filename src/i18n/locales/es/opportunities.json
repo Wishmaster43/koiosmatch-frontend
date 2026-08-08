@@ -80,7 +80,8 @@
     "created": "Creado",
     "groups": {
       "deal": "Negocio",
-      "organisation": "Organización"
+      "organisation": "Organización",
+      "description": "Descripción"
     },
     "currency": "Moneda",
     "hours": "Horas",
@@ -111,7 +112,8 @@
     "cancel": "Cancelar",
     "groups": {
       "general": "General",
-      "dealStage": "Valor & fase"
+      "dealStage": "Valor & fase",
+      "description": "Descripción"
     },
     "fields": {
       "title": "Título",
@@ -164,5 +166,8 @@
     "reasons": {
       "expectedCloseOverdue": "La fecha de cierre prevista ya pasó — da seguimiento a esta oportunidad."
     }
+  },
+  "richText": {
+    "empty": "Aún no hay nada registrado"
   }
 }

@@ -7,7 +7,7 @@
  * existing BE contract: `header_variables` / `variables`, one value per line in
  * slot order. Unknown templates fall back to the raw textareas.
  */
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useId, useMemo, useState } from 'react'
 import type { CSSProperties } from 'react'
 import { useTranslation } from 'react-i18next'
 import { TextFieldWithVars } from './VariablePicker'
@@ -18,12 +18,15 @@ import {
 import type { WorkflowVarGroup } from '@/types/workflow'
 import type { OnChange } from './fieldControls'
 import { unwrapList } from '@/lib/api'
+// Danny 08-08 (§4): the house searchable combobox replaces the bare native
+// <select> for the template picker below.
+import CreatableSelect from '@/components/ui/CreatableSelect'
 
 // ── Preview rendering ────────────────────────────────────────────────────────────
 
 const chipStyle = {
   display: 'inline-block', padding: '0 5px', borderRadius: 5, fontSize: 11,
-  fontFamily: 'monospace', background: 'var(--color-primary-bg)', color: 'var(--color-primary)',
+  fontFamily: 'monospace', background: 'var(--color-primary-bg)', color: 'var(--color-primary-text)',
   border: '1px solid var(--border)', lineHeight: '16px', verticalAlign: 'baseline',
 } as const
 
@@ -94,6 +97,9 @@ export default function WhatsappTemplateField({ value, onChange, config, variabl
   const { t } = useTranslation('workflows')
   const [templates, setTemplates] = useState<WaTemplateOption[]>([])
   const [loading, setLoading] = useState(true)
+  // CreatableSelect's trigger is a <button>, which a plain aria-label cannot
+  // name — a sr-only span + aria-labelledby names it instead (§4).
+  const templateLabelId = useId()
 
   // Load the tenant's approved templates once (components drive the mapping UI).
   useEffect(() => {
@@ -167,11 +173,13 @@ export default function WhatsappTemplateField({ value, onChange, config, variabl
       {loading
         ? <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{t('wa.templateLoading')}</div>
         : (
-          <select value={String(value ?? '')} onChange={e => pick(e.target.value)} aria-label={t('wa.template')}
-            style={{ width: '100%', padding: '7px 9px', border: '1px solid var(--border)', borderRadius: 8, background: 'var(--surface)', fontSize: 13, color: 'var(--text)', outline: 'none', cursor: 'pointer' }}>
-            <option value="">{t('fields.selectPlaceholder')}</option>
-            {templates.map(tpl => <option key={tpl.value} value={tpl.value}>{tpl.label}</option>)}
-          </select>
+          <>
+            <span id={templateLabelId} className="sr-only">{t('wa.template')}</span>
+            <CreatableSelect value={String(value ?? '')} onChange={v => pick(v)} aria-labelledby={templateLabelId} allowCreate={false}
+              placeholder={t('fields.selectPlaceholder')}
+              options={[{ value: '', label: t('fields.selectPlaceholder') }, ...templates]}
+              style={{ width: '100%', padding: '7px 9px', fontSize: 13 }} />
+          </>
         )}
       {!loading && templates.length === 0 && (
         <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>{t('wa.templateEmpty')}</div>

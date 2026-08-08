@@ -23,6 +23,15 @@
  * will ALSO need to check that flag — today browser support is the only
  * gate; the host wires the tenant check once that setting lands.
  *
+ * SECURE-CONTEXT GATE (Danny 08-08: "ik geef de mic toestemming maar tekst
+ * komt niet in het blok"): the Web Speech API is spec-restricted to a SECURE
+ * CONTEXT (https or localhost). Served over plain http the constructor still
+ * exists on `window`, so the mic looks live, but the browser silently blocks
+ * recognition even after the user clicks "allow" on the permission prompt —
+ * a dead-affordance trap. This is caught separately from the HONEST GATE
+ * above: an unsupported browser renders nothing, an insecure context renders
+ * a DISABLED mic with an honest tooltip (§3 — no fake affordances).
+ *
  * Scope note: this ships plain dictation-into-textarea only (click to start,
  * click again or silence-end to stop). A hands-free "conversation mode"
  * (auto-send + spoken replies) was raised mid-build via an unverified channel
@@ -34,6 +43,7 @@ import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Mic, MicOff } from 'lucide-react'
 import type { TFn } from '@/types/koios'
+import { notifyError } from '@/lib/notify'
 
 // Minimal shape of the (still non-standard, vendor-prefixed) Web Speech API
 // recognizer — lib.dom.d.ts ships the *event*/*result* types already but not
@@ -76,14 +86,25 @@ const RECOGNITION_LANG: Record<string, string> = {
  * chat behaviour.
  */
 function useSpeechDictation({ onText, lang }: { onText: (text: string) => void; lang?: string }) {
-  const { i18n } = useTranslation()
+  const { t, i18n } = useTranslation()
   const [listening, setListening] = useState(false)
   const [denied, setDenied] = useState(false)
   const recognitionRef = useRef<SpeechRecognitionInstance | null>(null)
+  // Tracks the last-emitted (index, text) pair so a revised interim result
+  // (same index, growing transcript) only sends the NEW suffix — see onresult below.
+  const lastEmittedRef = useRef<{ index: number; text: string }>({ index: -1, text: '' })
+  // True only when the USER ended the session (click / unmount) — an `onend`
+  // fired for any other reason means the browser cut us off mid-dictation and
+  // we resume, so a pause never silently ends the recording.
+  const userStoppedRef = useRef(false)
 
   // Feature-detect once — the HONEST GATE. `undefined` means neither
   // constructor exists in this browser, so the caller renders nothing.
   const Ctor = typeof window !== 'undefined' ? (window.SpeechRecognition ?? window.webkitSpeechRecognition) : undefined
+  // SECURE-CONTEXT GATE: the constructor can exist over plain http, but the
+  // browser silently refuses to run recognition there — surface this
+  // separately so the caller renders a disabled mic instead of a dead one.
+  const insecureContext = typeof window !== 'undefined' && window.isSecureContext === false
 
   // Never leave the mic hot: stop any live session on unmount (panel/popup closed).
   useEffect(() => {
@@ -91,40 +112,85 @@ function useSpeechDictation({ onText, lang }: { onText: (text: string) => void; 
   }, [])
 
   // Stop the current session (user click or the effect cleanup) — idempotent.
+  // Sets the user-stopped flag FIRST so the onend handler below knows this was
+  // deliberate and must not auto-restart.
   const stopListening = () => {
+    userStoppedRef.current = true
     recognitionRef.current?.stop()
     recognitionRef.current = null
     setListening(false)
   }
 
-  // Start a new single-utterance session: interim results stream in for a
-  // live feel, `continuous: false` lets the browser auto-stop on silence.
+  // Start a HOLD-OPEN session (Danny 08-08: "dictee stopt te snel, ik moet aan
+  // en uit zelf bepalen"): `continuous: true` keeps the recognizer listening
+  // across pauses instead of ending after one utterance, and the onend handler
+  // restarts it if the browser still cuts off on a long silence — so the mic
+  // runs until the user clicks it off (or leaves the panel), never before.
   const startListening = () => {
-    if (!Ctor) return
+    // Defense in depth: the render layer already disables the button in an
+    // insecure context, but never start a session that would silently hang.
+    if (!Ctor || insecureContext) return
     setDenied(false)
+    // Fresh session, fresh dedup state — no stale suffix from a prior utterance.
+    lastEmittedRef.current = { index: -1, text: '' }
+    userStoppedRef.current = false
     const recognition = new Ctor()
-    recognition.continuous = false
+    recognition.continuous = true
     recognition.interimResults = true
     // Caller-supplied language wins (e.g. the note editor's picker); else the
     // app's active UI locale — the chat composer's original behaviour.
     recognition.lang = RECOGNITION_LANG[lang ?? i18n.language] ?? 'en-US'
 
-    // Only replay the segments THIS event changed (resultIndex..end) — replaying
-    // the whole session on every interim revision would duplicate already-sent words.
+    // FINAL-ONLY (Danny 08-08, live: "opname wordt niet voluit geschreven?" —
+    // the note read "te / st / te / st" instead of "test test"). Interim results
+    // are the recognizer THINKING OUT LOUD: it emits a guess ("te"), then revises
+    // it ("test"), then finalises. Emitting every interim made each guess-fragment
+    // its own appended paragraph, so half-words piled up and words were split.
+    // Only FINAL segments are real text, so only those are emitted — the suffix-
+    // diffing this used to do cannot fix fragmentation, because a revision can
+    // REPLACE earlier characters ("te" → "test" is fine, but "tekst" → "test" is
+    // not a suffix at all). Interim text is still requested (interimResults=true)
+    // because it makes the recognizer settle faster; it simply never leaves here.
     recognition.onresult = (event) => {
       let chunk = ''
       for (let i = event.resultIndex; i < event.results.length; i += 1) {
-        chunk += event.results[i][0].transcript
+        if (event.results[i].isFinal) chunk += event.results[i][0].transcript
       }
-      if (chunk) onText(chunk)
+      const text = chunk.trim()
+      if (!text) return
+      // Guard against a recognizer replaying an already-final segment.
+      if (event.resultIndex === lastEmittedRef.current.index && text === lastEmittedRef.current.text) return
+      lastEmittedRef.current = { index: event.resultIndex, text }
+      onText(text)
     }
-    // A denied mic gets an honest title instead of a silently-dead button;
-    // no-speech/aborted just stop quietly — nothing useful to tell the user.
+    // A denied mic gets an honest title instead of a silently-dead button, PLUS
+    // a toast per error code so a failure is never silent (Danny 08-08: onerror
+    // must be VISIBLE). no-speech/aborted stay quiet — expected silence-timeout /
+    // deliberate-stop, nothing useful to tell the user.
     recognition.onerror = (event) => {
-      if (event.error === 'not-allowed' || event.error === 'service-not-allowed') setDenied(true)
+      if (event.error === 'not-allowed') {
+        setDenied(true)
+        notifyError(t('voice.denied', { ns: 'koios' }))
+      } else if (event.error === 'service-not-allowed') {
+        setDenied(true)
+        notifyError(t('voice.errorServiceNotAllowed', { ns: 'koios' }))
+      } else if (event.error === 'audio-capture') {
+        notifyError(t('voice.errorAudioCapture', { ns: 'koios' }))
+      } else if (event.error === 'network') {
+        notifyError(t('voice.errorNetwork', { ns: 'koios' }))
+      } else if (event.error !== 'no-speech' && event.error !== 'aborted') {
+        notifyError(t('voice.errorGeneric', { ns: 'koios' }))
+      }
       setListening(false)
     }
-    recognition.onend = () => setListening(false)
+    // The browser ends a session on its own after a long silence even with
+    // continuous=true. Resume unless the user stopped it (or the mic was
+    // denied) — restarting on the SAME instance is what keeps one long
+    // dictation feeling like one recording.
+    recognition.onend = () => {
+      if (userStoppedRef.current || recognitionRef.current !== recognition) { setListening(false); return }
+      try { recognition.start() } catch { setListening(false) }
+    }
 
     recognitionRef.current = recognition
     recognition.start()
@@ -133,7 +199,7 @@ function useSpeechDictation({ onText, lang }: { onText: (text: string) => void; 
 
   const toggle = () => { if (listening) stopListening(); else startListening() }
 
-  return { supported: Boolean(Ctor), listening, denied, toggle }
+  return { supported: Boolean(Ctor), insecureContext, listening, denied, toggle }
 }
 
 interface KoiosVoiceButtonProps {
@@ -152,11 +218,26 @@ interface KoiosVoiceButtonProps {
 }
 
 export default function KoiosVoiceButton({ onText, t, lang, tone = 'muted' }: KoiosVoiceButtonProps) {
-  const { supported, listening, denied, toggle } = useSpeechDictation({ onText, lang })
+  const { supported, insecureContext, listening, denied, toggle } = useSpeechDictation({ onText, lang })
 
   // Rules of hooks: every hook runs inside useSpeechDictation unconditionally;
   // only the render output is gated on browser support.
   if (!supported) return null
+
+  // Insecure context (plain http): the constructor exists but recognition never
+  // starts — render an honestly-disabled mic instead of a live-looking dead
+  // button (§3 no fake affordances), with a tooltip explaining WHY.
+  if (insecureContext) {
+    const insecureTitle = t('voice.insecureContext', { ns: 'koios' })
+    return (
+      <button type="button" disabled title={insecureTitle} aria-label={insecureTitle} style={{
+        background: 'none', border: 'none', cursor: 'not-allowed', padding: '4px 5px', borderRadius: 7,
+        color: 'var(--sidebar-muted)', opacity: 0.5, display: 'flex',
+      }}>
+        <Mic size={14} />
+      </button>
+    )
+  }
 
   const title = denied ? t('voice.denied', { ns: 'koios' })
     : listening ? t('voice.stop', { ns: 'koios' }) : t('voice.start', { ns: 'koios' })

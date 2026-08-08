@@ -1,9 +1,8 @@
 import { useTranslation } from 'react-i18next'
-import Avatar from '@/components/ui/Avatar'
-import EntityLink from '@/components/ui/EntityLink'
+import { FilePlus2, Globe, Handshake, MessageSquare, Pencil, UserPlus } from 'lucide-react'
 import AiGeneratedLabel from '@/components/ui/AiGeneratedLabel'
-import TimelineRail from '@/components/ui/TimelineRail'
-import { useDateFormat } from '@/lib/datetime'
+import EntityLink from '@/components/ui/EntityLink'
+import EventTimeline, { type TimelineKindMeta } from '@/components/ui/EventTimeline'
 import type { VacancyDetail } from '@/types/vacancy'
 
 // V21-23: tooltip per linkable event kind. An explicit map (not a built key
@@ -14,53 +13,57 @@ const OPEN_LABEL_KEY: Record<string, string> = {
   match: 'timeline.openMatch',
 }
 
+// Event kind → its icon + semantic token. `vacancy_created/updated/published` are
+// what VacancyTimeline.php actually emits (verified live against GET /vacancies/{id});
+// note/application/match are the neighbouring kinds it can merge in. Colour is spent
+// ONLY here, where it carries the event's meaning (§4).
+const KIND_META: Record<string, TimelineKindMeta> = {
+  vacancy_created:   { icon: FilePlus2, color: 'var(--color-primary)' },
+  vacancy_updated:   { icon: Pencil, color: 'var(--text-muted)' },
+  vacancy_published: { icon: Globe, color: 'var(--color-success)' },
+  note:              { icon: MessageSquare, color: 'var(--color-secondary)' },
+  application:       { icon: UserPlus, color: 'var(--color-info)' },
+  match:             { icon: Handshake, color: 'var(--color-success)' },
+}
+
 /**
- * TimelineTab — read-only merged activity feed for a vacancy (notes,
- * applications received, matches made — VacancyTimeline.php). Events that point
- * at a record we can open render their description as an EntityLink: the text
- * opens the record in-app, its trailing icon opens it in a new tab. Notes have
- * no own page and stay plain text. AI-generated entries carry the shared
- * AiGeneratedLabel (AI-ACT-1: icon+text, never a bare mark, §6).
- * A TimelineRail connects the dots (Danny 05-08: isolated bolletjes, no line) and
- * `time` renders through the house DD-MM-YYYY HH:mm formatter, never the
- * mapper's raw ISO value.
+ * TimelineTab — read-only merged activity feed for a vacancy. A thin adapter: it
+ * maps the vacancy's events onto the shared EventTimeline (continuous axis, mono
+ * time, per-day headings) and owns only the vacancy's own event vocabulary, so
+ * this tab and the application Tijdlijn are literally the same component.
+ * Events that point at a record we can open render their text as an EntityLink;
+ * notes have no own page and stay plain text — never a link that 404s.
+ * Author is the muted meta line and is dropped when absent: it is null on every
+ * event the backend currently emits, and the old layout printed that gap as a
+ * bold "—" at the top of the row.
+ *
+ * Loading/error are not passed: this tab renders inside a drawer that has already
+ * resolved both before it mounts, so there is no honest signal to forward — the
+ * states themselves live (and are tested) in EventTimeline.
  */
 export default function TimelineTab({ vacancy: v }: { vacancy: VacancyDetail }) {
   const { t } = useTranslation('vacancies')
-  const { formatDateTime } = useDateFormat()
   const items = v.timeline ?? []
 
-  if (items.length === 0) {
-    return <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{t('timeline.empty')}</div>
-  }
-
   return (
-    // No gap here: each row's own paddingBottom carries the spacing so the
-    // TimelineRail's connector line reaches all the way to the next dot.
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
-      {items.map((ev, i) => {
+    <EventTimeline
+      emptyText={t('timeline.empty')}
+      kindMeta={kind => KIND_META[kind]}
+      events={items.map((ev, i) => {
         // The mapper already resolved the target; the tab only decides how to render it.
         const openKey = OPEN_LABEL_KEY[ev.type]
         const openLabel = openKey ? t(openKey) : undefined
-        return (
-          <div key={ev.id} style={{ display: 'flex', gap: 10, paddingBottom: 12 }}>
-            <TimelineRail isLast={i === items.length - 1} />
-            <Avatar initials={ev.initials} size={26} soft />
-            <div style={{ flex: 1, minWidth: 0 }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--text)' }}>{ev.author || '—'}</span>
-                {ev.ai && <AiGeneratedLabel size={10} />}
-                <span style={{ fontSize: 11, color: 'var(--text-muted)', marginLeft: 'auto' }}>{formatDateTime(ev.time)}</span>
-              </div>
-              <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>
-                {ev.linkPage && ev.linkId
-                  ? <EntityLink page={ev.linkPage} id={ev.linkId} title={openLabel}>{ev.description}</EntityLink>
-                  : ev.description}
-              </div>
-            </div>
-          </div>
-        )
+        return {
+          id: ev.id ?? i,
+          time: ev.time,
+          kind: ev.type,
+          text: ev.linkPage && ev.linkId
+            ? <EntityLink page={ev.linkPage} id={ev.linkId} title={openLabel}>{ev.description}</EntityLink>
+            : ev.description,
+          meta: ev.author || null,
+          trailing: ev.ai ? <AiGeneratedLabel size={10} /> : null,
+        }
       })}
-    </div>
+    />
   )
 }

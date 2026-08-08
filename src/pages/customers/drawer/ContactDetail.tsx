@@ -42,6 +42,7 @@ import { emailValue, phoneValue, linkedinValue, LinkedinMark } from '@/component
 import SubTabBar from '@/components/drawer/SubTabBar'
 import CustomFieldsTab from '@/components/drawer/CustomFieldsTab'
 import BackofficeLinksTab from '@/components/drawer/BackofficeLinksTab'
+import { useBackofficeLinksVisible } from '@/components/drawer/useBackofficeLinksVisible'
 import ArchivedBanner from '@/components/drawer/ArchivedBanner'
 import ChangelogPopover from '@/components/drawer/ChangelogPopover'
 import ChangelogTab from './ChangelogTab'
@@ -98,6 +99,10 @@ export default function ContactDetail({ contact, locations, departments, statuse
   const [tableEpoch, setTableEpoch] = useState(0)
   // The Extra sub-tab only shows when the tenant has defined customer_contact custom fields (§3A(f)).
   const { fields: customFieldDefs } = useCustomFields('customer_contact')
+  // DD-FE-6 ("no empty tabs"): this file passes no extra children into
+  // BackofficeLinksTab, so the Koppelingen sub-tab is genuinely empty (no card,
+  // no "Koppelen" button) unless at least one connector app is enabled.
+  const showKoppelingen = useBackofficeLinksVisible()
   // SCOPED-LIST-TAB-1/GESPREK-CONTACT-1 added 'kansen'/'conversations', right after
   // Gegevens and Taken respectively (§3A — same shared tabs Location/DepartmentDetail carry).
   const [subTab, setSubTab] = useState<'data' | 'kansen' | 'tasks' | 'conversations' | 'extra' | 'koppelingen'>('data')
@@ -261,7 +266,7 @@ export default function ContactDetail({ contact, locations, departments, statuse
                   options={statuses.map(s => ({ value: String(s.id ?? s.value), label: s.label }))} />
               </div>
               <button onClick={saveStatus} title={t('common:save')} aria-label={t('common:save')}
-                style={{ ...iconBtn, background: 'var(--color-primary)', color: '#fff', border: 'none' }}><Save size={13} /></button>
+                style={{ ...iconBtn, background: 'var(--color-primary)', color: 'var(--color-on-accent)', border: 'none' }}><Save size={13} /></button>
               <button onClick={() => setEditingStatus(false)} title={t('common:cancel')} aria-label={t('common:cancel')}
                 style={{ ...iconBtn, background: 'var(--bg)', color: 'var(--text-muted)', border: '1px solid var(--border)' }}><X size={13} /></button>
             </div>
@@ -317,8 +322,9 @@ export default function ContactDetail({ contact, locations, departments, statuse
           restoreLabel={t('contacts.archivedBanner.restore')} />
       )}
 
-      {/* Sub-tab strip — EXTRACT-1 made it unconditional (the Koppelingen sub-tab
-          always shows now); Extra still only appears with ≥1 active custom field. */}
+      {/* Sub-tab strip — DD-FE-6 ("no empty tabs"): Koppelingen only lists when a
+          connector app is enabled (its body would otherwise render nothing);
+          Extra still only appears with ≥1 active custom field. */}
       <SubTabBar
         tabs={[
           { id: 'data',  label: t('contacts.detail.subtabs.data') },
@@ -329,7 +335,7 @@ export default function ContactDetail({ contact, locations, departments, statuse
           // GESPREK-CONTACT-1: local-only label, mirrors the 'data'/'tasks' siblings above.
           { id: 'conversations', label: t('contacts.detail.subtabs.conversations') },
           ...(customFieldDefs.length > 0 ? [{ id: 'extra', label: t('drawer.tabs.extra') }] : []),
-          { id: 'koppelingen', label: t('common:backofficeLinks.tabLabel') },
+          ...(showKoppelingen ? [{ id: 'koppelingen', label: t('common:backofficeLinks.tabLabel') }] : []),
         ]}
         active={subTab}
         onChange={id => setSubTab(id as typeof subTab)}
@@ -395,7 +401,7 @@ export default function ContactDetail({ contact, locations, departments, statuse
         <CustomFieldsTab entityType="customer_contact" values={contact.customFields ?? {}}
           onSave={patch => onSave(contact.id as Id, { customFields: { ...contact.customFields, ...patch } })} />
       )}
-      {subTab === 'koppelingen' && (
+      {subTab === 'koppelingen' && showKoppelingen && (
         <BackofficeLinksTab entity="contacts" id={contact.id as Id} helloflexLink={contact.helloflexLink} shiftmanagerLink={contact.shiftmanagerLink} canLink={canLinkBackoffice} />
       )}
       {/* `existing` is the CUSTOMER-WIDE list, which is exactly the set the scoped merge

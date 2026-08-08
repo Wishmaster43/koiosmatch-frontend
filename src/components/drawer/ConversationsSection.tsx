@@ -11,28 +11,37 @@
  * dossiers reuse them (never duplicate the `conversations.*` keys into
  * 'customers'). Health-adjacent PII (§8): nothing is logged; we only render
  * what the screen needs.
+ *
+ * G27 / K2-CONV-ASSIST-1: an open session thread also renders
+ * `ConversationAssistSection` (Koios AI summarize/actions over the thread's
+ * own stored messages) right above the send input — "Overnemen" writes
+ * straight into `composerText`, the very same draft the input below sends.
+ *
+ * WA-WINDOW-1 (Danny punt 12, 08-08): the window state is now SPOKEN OUT LOUD
+ * instead of implied. Inside the window the composer carries how much time is
+ * left; outside it the free-text input is replaced by `TemplateComposer` — the
+ * only route Meta actually allows there — so the recruiter never has to guess
+ * why the input disappeared or how to reach the candidate anyway.
  */
 import { useCallback, useEffect, useState } from 'react'
 import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
-import { MessageCircle, AlertTriangle, ChevronDown, ChevronRight, Check, CheckCheck, Send } from 'lucide-react'
+import { MessageCircle, AlertTriangle, ChevronDown, ChevronRight, Clock, Send } from 'lucide-react'
 import api, { unwrapList } from '@/lib/api'
 import { notifyError } from '@/lib/notify'
 import { extractApiError } from '@/lib/extractApiError'
 import SectionCard from '@/components/ui/SectionCard'
 import SoftChip from '@/components/ui/SoftChip'
 import { useDateFormat } from '@/lib/datetime'
-import { avatarColor } from '@/lib/avatarColor'
+import ConversationAssistSection from './ConversationAssistSection'
+import ConversationMessage, { type MessageRow } from './ConversationMessage'
+import TemplateComposer from './TemplateComposer'
+import { sessionWindow, windowLeftParts } from './sessionWindow'
 import type { Id } from '@/types/common'
 
-// Meta's own free-form "session" window: 24h since the candidate's last INBOUND
-// message. Mirrors the backend's own gate (WhatsAppBundleSender reads the SAME
-// `last_inbound_at` field) — never a separately invented rule.
-const SESSION_WINDOW_MS = 24 * 60 * 60 * 1000
-function isSessionOpen(lastInboundAt?: string | null): boolean {
-  if (!lastInboundAt) return false
-  return Date.now() - new Date(lastInboundAt).getTime() < SESSION_WINDOW_MS
-}
+// How often the "time left in the window" line re-reads the clock. One minute is
+// the display resolution, so anything faster would only burn renders.
+const WINDOW_TICK_MS = 60_000
 
 // The candidate identity carried on a conversation row — drives the thread heading (name over number).
 interface ConversationCandidate {
@@ -44,6 +53,9 @@ interface ConversationCandidate {
 // One conversation thread as the list endpoint returns it (only the fields the panel shows).
 interface ConversationRow {
   id: Id
+  // WA-WINDOW-1: the thread's own candidate — what POST /conversations/start needs
+  // to send a template once the window has closed (measured on GET /conversations).
+  candidate_id?: Id | null
   wa_number?: string | null
   last_message_at?: string | null
   // WHATSAPP-COMPOSE-1: the 24h session anchor (ConversationResource / Conversation
@@ -54,50 +66,9 @@ interface ConversationRow {
   candidate?: ConversationCandidate | null
 }
 
-// The recruiter/agent behind an outbound message (e.g. Ravi, Kelly).
-interface SentBy {
-  id?: Id
-  name?: string | null
-}
-
-// One message inside a thread — direction drives the bubble side, purpose the badge,
-// sent_by/delivered_at/read_at drive the sender colour and delivery ticks (outbound only).
-interface MessageRow {
-  id: Id
-  direction?: 'inbound' | 'outbound'
-  message_content?: string | null
-  sent_at?: string | null
-  purpose?: string | null
-  sent_by?: SentBy | null
-  delivered_at?: string | null
-  read_at?: string | null
-}
-
-// Humanise a purpose slug for tenants whose value has no explicit translation.
-const humanize = (s: string) => s.replace(/[_-]+/g, ' ').replace(/^\w/, c => c.toUpperCase())
-
 // Prefer the candidate's real name over the raw WhatsApp number for the thread heading.
 const candidateFullName = (row: ConversationRow) =>
   [row.candidate?.first_name, row.candidate?.last_name].filter(Boolean).join(' ').trim()
-
-// Stable colour per sender: the candidate (inbound) gets one fixed colour; each outbound
-// recruiter/agent hashes to its own tint via the shared avatar colour picker — never a
-// second hash function, so a name always reads the same colour app-wide.
-const senderColor = (m: MessageRow) =>
-  m.direction === 'outbound' ? avatarColor(m.sent_by?.name ?? undefined) : 'var(--color-success)'
-
-// WhatsApp-style delivery indicator for outbound messages: sent → single grey check,
-// delivered → double grey check, read → double check in the primary colour. The icon
-// SHAPE is the real signal (single vs. double tick) with an aria-label — colour is never
-// the only cue (§6).
-function DeliveryTicks({ sentAt, deliveredAt, readAt }: { sentAt?: string | null; deliveredAt?: string | null; readAt?: string | null }) {
-  const { t } = useTranslation('candidates')
-  if (!sentAt) return null
-  const state: 'sent' | 'delivered' | 'read' = readAt ? 'read' : deliveredAt ? 'delivered' : 'sent'
-  const Icon = state === 'sent' ? Check : CheckCheck
-  const color = state === 'read' ? 'var(--color-primary)' : 'var(--text-muted)'
-  return <Icon size={12} style={{ color, flexShrink: 0 }} role="img" aria-label={t(`conversations.delivery.${state}`)} />
-}
 
 // WA-SEND-TRANSPORT-1 (landed 06-08, verified by reading MessageController::store /
 // sendSessionReply, read-only reference in koiosmatch-api): an outbound POST
@@ -124,7 +95,7 @@ export default function ConversationsSection({ threadsUrl, threadsParams, header
   headerAction?: ReactNode
 }) {
   // thread UI strings live in the candidates ns — ONE source, both dossiers reuse them
-  const { t } = useTranslation('candidates')
+  const { t, i18n } = useTranslation('candidates')
   const { formatDate, formatDateTime } = useDateFormat()
   const [rows, setRows] = useState<ConversationRow[]>([])
   const [loading, setLoading] = useState(true)
@@ -140,6 +111,16 @@ export default function ConversationsSection({ threadsUrl, threadsParams, header
   // WA-SEND-TRANSPORT-1: the 409/502 inline explanation shown next to the composer —
   // never a toast, so it survives on screen next to the draft the recruiter can retry.
   const [sendError, setSendError] = useState<string | null>(null)
+  // WA-WINDOW-1: a ticking "now" so the remaining-window line counts down while the
+  // drawer stays open, instead of freezing on the value it had at first render.
+  const [nowMs, setNowMs] = useState<number>(() => Date.now())
+
+  // Re-read the clock every minute for the countdown above (§9: the interval is set
+  // up AND torn down inside the effect, so StrictMode's double mount is harmless).
+  useEffect(() => {
+    const timer = setInterval(() => setNowMs(Date.now()), WINDOW_TICK_MS)
+    return () => clearInterval(timer)
+  }, [])
 
   // Serialize the caller's params so a fresh object literal each render doesn't
   // retrigger the fetch — only the actual VALUES (e.g. candidate_id) matter.
@@ -225,6 +206,18 @@ export default function ConversationsSection({ threadsUrl, threadsParams, header
       .finally(() => setSendingMsg(false))
   }, [composerText, t, threadsUrl, threadsParams])
 
+  // WA-WINDOW-1: after a template send the SERVER wrote the outbound row — pull the
+  // thread and the list back in rather than guessing a bubble into place.
+  const reloadThread = useCallback((id: Id) => {
+    api.get(`/conversations/${id}/messages`)
+      .then(r => setMessages(m => ({ ...m, [String(id)]: unwrapList<MessageRow>(r).rows })))
+      .catch(() => {})
+    api.get(threadsUrl, { params: threadsParams })
+      .then(rr => setRows(unwrapList<ConversationRow>(rr).rows))
+      .catch(() => {})
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- same paramsKey rationale as the load effect above
+  }, [threadsUrl, paramsKey])
+
   // Active-window badge (setting `conversation_active_weeks`) — green when active, muted otherwise.
   const activeBadge = (active?: boolean) => (
     <SoftChip label={active ? t('conversations.active') : t('conversations.inactive')}
@@ -251,6 +244,10 @@ export default function ConversationsSection({ threadsUrl, threadsParams, header
         const name = candidateFullName(row)
         const heading = name || row.wa_number || t('conversations.unknownContact')
         const showNumberSub = Boolean(name) && Boolean(row.wa_number)
+        // WA-WINDOW-1: this thread's 24h state, recomputed each minute tick so the
+        // countdown stays true and the composer flips to templates the moment it closes.
+        const win = sessionWindow(row.last_inbound_at, nowMs)
+        const left = windowLeftParts(win.msLeft)
         return (
           <div key={row.id} style={{ border: '1px solid var(--border)', borderRadius: 8, marginBottom: 6, background: 'var(--bg)', overflow: 'hidden' }}>
             {/* Thread header — candidate name (number as subtext), last-activity date, active + escalated badges. */}
@@ -284,38 +281,34 @@ export default function ConversationsSection({ threadsUrl, threadsParams, header
                 {messages[String(row.id)] && msgs.length === 0 && (
                   <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{t('conversations.noMessages')}</div>
                 )}
-                {msgs.map(m => {
-                  const out = m.direction === 'outbound'
-                  const color = senderColor(m)
-                  return (
-                    <div key={m.id} style={{ display: 'flex', flexDirection: 'column', alignItems: out ? 'flex-end' : 'flex-start' }}>
-                      {/* Outbound bubbles name the recruiter/agent behind them, colour-coded so Ravi vs Kelly reads at a glance. */}
-                      {out && m.sent_by?.name && (
-                        <span style={{ fontSize: 10, fontWeight: 600, color, marginBottom: 2 }}>{m.sent_by.name}</span>
-                      )}
-                      <div style={{ maxWidth: '85%', padding: '6px 10px', borderRadius: 10, fontSize: 12, color: 'var(--text)',
-                        background: `color-mix(in srgb, ${color} 10%, transparent)`,
-                        border: `1px solid color-mix(in srgb, ${color} 32%, transparent)` }}>
-                        {m.message_content ?? '—'}
-                      </div>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 2 }}>
-                        {m.purpose && (
-                          <SoftChip label={t(`conversations.purpose.${m.purpose}`, { defaultValue: humanize(m.purpose) })}
-                            color="var(--color-primary)" />
-                        )}
-                        {m.sent_at && <span style={{ fontSize: 10, color: 'var(--text-muted)' }}>{formatDateTime(m.sent_at)}</span>}
-                        {out && <DeliveryTicks sentAt={m.sent_at} deliveredAt={m.delivered_at} readAt={m.read_at} />}
-                      </div>
-                    </div>
-                  )
-                })}
+                {msgs.map(m => (
+                  <ConversationMessage key={m.id} message={m} formatDateTime={formatDateTime} />
+                ))}
 
-                {/* WHATSAPP-COMPOSE-1: the free-text composer, offered iff the payload
-                    itself shows an open 24h session (last_inbound_at) — a closed/never-
-                    opened session gets an honest explanation instead of a silently
-                    missing input. */}
-                {composerEnabled && (isSessionOpen(row.last_inbound_at) ? (
+                {/* WHATSAPP-COMPOSE-1 / WA-WINDOW-1: free text inside the open 24h window,
+                    a template picker outside it. Both branches SAY which one applies and
+                    why — the recruiter never faces a missing input without an answer. */}
+                {composerEnabled && (win.open ? (
                   <>
+                    {/* WA-WINDOW-1: how long free text is still allowed, plus the exact
+                        closing moment on hover — derived from this row's own
+                        last_inbound_at, the very field the backend gates on. */}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginTop: 4, fontSize: 11, color: 'var(--text-muted)' }}
+                      title={win.expiresAt ? t('conversations.windowClosesAt', { time: formatDateTime(win.expiresAt) }) : undefined}>
+                      <Clock size={12} style={{ flexShrink: 0 }} />
+                      {/* Under a minute reads as "less than a minute" — "0 minuten left"
+                          while the window is demonstrably still open would be a lie. */}
+                      <span>{left.hours > 0
+                        ? t('conversations.windowLeftHours', { hours: left.hours, minutes: left.minutes })
+                        : left.minutes > 0
+                          ? t('conversations.windowLeftMinutes', { count: left.minutes })
+                          : t('conversations.windowLeftSeconds')}</span>
+                    </div>
+                    {/* G27: the Koios AI assist affordance — gated on the SAME open-session
+                        condition as the composer itself, so "Overnemen" always writes into a
+                        visibly rendered draft input (never an invisible/pending state). */}
+                    <ConversationAssistSection conversationId={row.id} hasMessages={msgs.length > 0}
+                      onApply={setComposerText} language={i18n.language} />
                     <div style={{ display: 'flex', gap: 6, marginTop: 4 }}>
                       <input value={composerText} onChange={e => setComposerText(e.target.value)}
                         onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(row.id) } }}
@@ -324,7 +317,7 @@ export default function ConversationsSection({ threadsUrl, threadsParams, header
                       <button onClick={() => sendMessage(row.id)} disabled={!composerText.trim() || sendingMsg}
                         aria-label={t('common:send')} title={t('common:send')}
                         style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 30, borderRadius: 8, border: 'none',
-                          background: 'var(--color-primary)', color: '#fff', flexShrink: 0,
+                          background: 'var(--color-primary)', color: 'var(--color-on-accent)', flexShrink: 0,
                           cursor: composerText.trim() ? 'pointer' : 'default', opacity: composerText.trim() ? 1 : 0.5 }}>
                         <Send size={13} />
                       </button>
@@ -339,7 +332,11 @@ export default function ConversationsSection({ threadsUrl, threadsParams, header
                     )}
                   </>
                 ) : (
-                  <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 4 }}>{t('conversations.sessionClosedHint')}</div>
+                  // WA-WINDOW-1 (Danny punt 12): outside the window Meta only accepts an
+                  // approved template — so the answer to "how do I reach them?" is right
+                  // here, instead of one muted sentence and a dead end.
+                  <TemplateComposer candidateId={row.candidate_id ?? row.candidate?.id ?? null}
+                    windowKnown={win.known} onSent={() => reloadThread(row.id)} />
                 ))}
               </div>
             )}

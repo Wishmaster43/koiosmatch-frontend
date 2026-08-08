@@ -71,6 +71,25 @@ describe('MatchesTable · reference number column (JOB1)', () => {
   })
 })
 
+// SWEEP-TABLES: the vacancy column had no render fn, so an empty title printed
+// a blank cell — the only column left inconsistent with the house em-dash
+// convention every other empty cell already follows.
+describe('MatchesTable · vacancy column em-dash (SWEEP-TABLES)', () => {
+  it('renders the real vacancy value, and a plain dash when empty — never a blank cell', () => {
+    const withVacancy = { ...baseRow, id: 22, vacancy: 'Verpleegkundige' }
+    const withoutVacancy = { ...baseRow, id: 23, vacancy: '' }
+    const { container } = render(<MatchesTable rows={[withVacancy, withoutVacancy]} />)
+
+    const headerCell = screen.getByText('Vacature').closest('th') as HTMLElement
+    const colIndex = Array.from(headerCell.parentElement?.children ?? []).indexOf(headerCell)
+    const rows = container.querySelectorAll('tbody tr')
+    const values = Array.from(rows).map(r => r.children[colIndex].textContent)
+    expect(values).toContain('Verpleegkundige')
+    expect(values).toContain('—')
+    expect(values).not.toContain('')
+  })
+})
+
 describe('MatchesTable · backoffice coupling indicator (JOB2)', () => {
   it('distinguishes LINKED, FAILED and NOT LINKED with a real accessible name each', () => {
     mockUseApps.mockReturnValue({ isAppEnabled: () => true })

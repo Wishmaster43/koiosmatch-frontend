@@ -56,7 +56,7 @@ export default function ActionRuleDetailPanel({
       {popupCode ? (
         <>
           <div style={{ marginTop: 10, fontSize: 12.5, color: 'var(--text)' }}>
-            <span style={{ fontFamily: "'JetBrains Mono', monospace", fontWeight: 700, color: 'var(--color-primary)' }}>
+            <span style={{ fontFamily: "'JetBrains Mono', monospace", fontWeight: 700, color: 'var(--color-primary-text)' }}>
               {popupCode}
             </span>
             {' — '}

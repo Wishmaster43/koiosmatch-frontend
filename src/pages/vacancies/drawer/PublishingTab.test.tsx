@@ -4,6 +4,16 @@
  * must drop off the publish panel, and a brand-new vacancy's panel must pre-check the
  * tenant's default_enabled channels. §13: assert the actual toggle state that reaches
  * the DOM, not just that the tab renders.
+ *
+ * CAREER-SITE-ACTIVE (career-vacancy-koppeling): the 'career' channel toggle is a REAL
+ * control — clicking it calls onUpdate with the exact `channels` shape that becomes the
+ * PATCH `published_channels` body the backend's VacancyWriter::syncChannels upserts into
+ * vacancy_channel_publications (§13: assert the REQUEST, not just that a callback fired).
+ * The panel's banner + per-row status label must also honestly reflect the tenant's own
+ * `career_site_active` setting (EnsureCareerSiteActive) rather than a static claim —
+ * `@/lib/settings/useAllSettings` is mocked with a mutable blob (real `getBoolSetting`/
+ * `getJsonSetting` kept via importActual, mirrors OverviewTab.test.tsx's VESTIGING-2
+ * pattern) so that coercion is exercised for real, not stubbed away.
  */
 import { describe, it, expect, vi, afterEach } from 'vitest'
 import { render, screen } from '@testing-library/react'
@@ -25,12 +35,19 @@ const CHANNELS = [
 vi.mock('@/context/VacancyLookupsContext', () => ({
   useVacancyLookups: () => ({ channels: CHANNELS }),
 }))
-vi.mock('@/lib/settings/useAllSettings', () => ({
-  useAllSettings: () => ({}),
-  getJsonSetting: (_s: unknown, _key: string, fallback: unknown) => fallback,
-}))
 
-afterEach(() => vi.clearAllMocks())
+// Mutable per-test settings blob — default {} so career_site_active falls back to
+// false (matches the real tenant default: opt-in) unless a test opts in.
+let mockSettings: Record<string, unknown> = {}
+vi.mock('@/lib/settings/useAllSettings', async () => {
+  const actual = await vi.importActual<typeof import('@/lib/settings/useAllSettings')>('@/lib/settings/useAllSettings')
+  return { ...actual, useAllSettings: () => mockSettings }
+})
+
+afterEach(() => {
+  vi.clearAllMocks()
+  mockSettings = {}
+})
 
 const vacancy = (channels: VacancyDetail['channels'] = []) =>
   ({ id: 'v1', title: 'Verpleegkundige', channels, applicationSettings: {} } as VacancyDetail)
@@ -70,5 +87,68 @@ describe('PublishingTab · channel flags', () => {
     // sibling channel (indeed) never saved anything for it.
     const switches = screen.getAllByRole('switch')
     expect(switches[0]).toHaveAttribute('aria-checked', 'false')
+  })
+})
+
+describe('PublishingTab · toggling a channel persists the real request shape', () => {
+  it('calls onUpdate with the full channels set, the clicked channel flipped, on the career toggle', async () => {
+    const onUpdate = vi.fn()
+    const user = userEvent.setup()
+    render(<PublishingTab vacancy={vacancy([
+      { value: 'career', label: 'Career page', published: false },
+      { value: 'indeed', label: 'Indeed', published: false },
+    ])} onUpdate={onUpdate} />)
+    await openSitesTab()
+
+    // Click the career row's toggle (first switch) — this is the exact interaction
+    // that has to become PATCH { published_channels: [{ value: <channel_id>, ... }] }
+    // server-side (VacancyWriter::syncChannels resolves `value` against VacancyChannel ids).
+    await user.click(screen.getAllByRole('switch')[0])
+
+    expect(onUpdate).toHaveBeenCalledTimes(1)
+    expect(onUpdate).toHaveBeenCalledWith('v1', {
+      channels: [
+        { value: 'career', label: 'Career page', published: true },
+        { value: 'indeed', label: 'Indeed', published: false },
+      ],
+    })
+  })
+})
+
+describe('PublishingTab · honest career-site-active state', () => {
+  it('shows the site-offline banner and a QUEUED row when career_site_active is off (default)', async () => {
+    render(<PublishingTab vacancy={vacancy([{ value: 'career', label: 'Career page', published: true }])} />)
+    await openSitesTab()
+
+    expect(screen.getByText(t('publishing.siteOffline'))).toBeInTheDocument()
+    expect(screen.queryByText(t('publishing.siteLive'))).not.toBeInTheDocument()
+    // The 'career' channel is toggled on but the tenant hasn't switched the site on
+    // yet, so it must read as queued, never as already published.
+    expect(screen.getByText(t('publishing.queuedOn'))).toBeInTheDocument()
+    expect(screen.queryByText(t('publishing.publishedOn'))).not.toBeInTheDocument()
+  })
+
+  it('shows the site-live banner and a PUBLISHED row once career_site_active is on', async () => {
+    mockSettings = { career_site_active: 'true' }
+    render(<PublishingTab vacancy={vacancy([{ value: 'career', label: 'Career page', published: true }])} />)
+    await openSitesTab()
+
+    expect(screen.getByText(t('publishing.siteLive'))).toBeInTheDocument()
+    expect(screen.queryByText(t('publishing.siteOffline'))).not.toBeInTheDocument()
+    expect(screen.getByText(t('publishing.publishedOn'))).toBeInTheDocument()
+  })
+
+  it('a channel that is simply off always reads Not published, regardless of site state', async () => {
+    mockSettings = { career_site_active: 'true' }
+    // indeed stays ON here so only the career row can match "Not published" —
+    // an unambiguous single-element assertion instead of counting duplicates.
+    render(<PublishingTab vacancy={vacancy([
+      { value: 'career', label: 'Career page', published: false },
+      { value: 'indeed', label: 'Indeed', published: true },
+    ])} />)
+    await openSitesTab()
+
+    expect(screen.getByText(t('publishing.notPublished'))).toBeInTheDocument()
+    expect(screen.getByText(t('publishing.publishedOn'))).toBeInTheDocument()
   })
 })

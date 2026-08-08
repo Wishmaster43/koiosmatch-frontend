@@ -109,7 +109,7 @@ export default function RejectionModal({ application: a, onCancel, onConfirm, su
             <div style={{ display: 'flex', gap: 8, alignItems: 'flex-start', background: 'var(--color-primary-bg)', borderRadius: 8, padding: '8px 10px' }}>
               <KoiosAiMark size={18} />
               <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--color-primary)' }}>{t('rejection.aiAdvice')}</div>
+                <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--color-primary-text)' }}>{t('rejection.aiAdvice')}</div>
                 {a.ai.advice_reason && <div style={{ fontSize: 12, color: 'var(--text)', marginTop: 2 }}>{a.ai.advice_reason}</div>}
                 <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 3 }}>
                   {a.ai.auto_reject_eligible ? t('rejection.aiAuto') : t('rejection.aiConfirm')}
@@ -136,7 +136,7 @@ export default function RejectionModal({ application: a, onCancel, onConfirm, su
               {noteEditing ? (
                 <div style={{ display: 'flex', gap: 4 }}>
                   <button onClick={saveNote} title={t('common:save')} aria-label={t('common:save')}
-                    style={{ ...iconBtn, background: 'var(--color-primary)', color: '#fff', border: 'none' }}><Save size={13} /></button>
+                    style={{ ...iconBtn, background: 'var(--color-primary)', color: 'var(--color-on-accent)', border: 'none' }}><Save size={13} /></button>
                   <button onClick={cancelNoteEdit} title={t('common:cancel')} aria-label={t('common:cancel')}
                     style={{ ...iconBtn, background: 'var(--bg)', color: 'var(--text-muted)', border: '1px solid var(--border)' }}><X size={13} /></button>
                 </div>
@@ -167,7 +167,8 @@ export default function RejectionModal({ application: a, onCancel, onConfirm, su
               button — no candidate-facing message goes out on this path. */}
           <button onClick={submit} disabled={!reasonId || submitting}
             style={{ height: 34, padding: '0 16px', fontSize: 13, fontWeight: 600, border: 'none', borderRadius: 8,
-              background: isCorrection ? 'var(--color-primary)' : 'var(--color-danger)', color: '#fff',
+              background: isCorrection ? 'var(--color-primary)' : 'var(--color-danger)',
+              color: isCorrection ? 'var(--color-on-accent)' : '#fff',
               cursor: (!reasonId || submitting) ? 'not-allowed' : 'pointer',
               opacity: (!reasonId || submitting) ? 0.6 : 1 }}>
             {isCorrection ? t('rejection.saveCorrection') : t('rejection.confirm')}

@@ -1,11 +1,18 @@
 /**
- * MergeCandidateModal — behaviour: search → pick duplicate → survivor choice →
+ * MergeCandidateModal — behaviour: pick the duplicate → survivor choice →
  * POST /candidates/{survivor}/merge with the OTHER id as source; onMerged gets
  * the survivor id. The swap case (other record remains) is the regression that
  * matters: survivor/source must invert together.
+ *
+ * MERGE-PICKER-1 (Danny 08-08 punt 20 "zoekbare dropdown hebben die leesbaar
+ * is"): step 1 is now the shared SearchSelect in server-search mode instead of a
+ * hand-rolled input + result list, so the interaction that reaches the SAME
+ * request assertions is open-dropdown → type → click option. The added block at
+ * the bottom guards the punt itself: it IS a dropdown, it IS searchable, it is
+ * never a native <select>, and it never offers a free-text value.
  */
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { render, screen, fireEvent, waitFor } from '@testing-library/react'
+import { render, screen, fireEvent, waitFor, act } from '@testing-library/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 // Real i18n (nl) side-effect init so t() resolves genuine Dutch text (mirrors SectionTabs.test).
 import '@/i18n'
@@ -31,11 +38,18 @@ function mount(onMerged = vi.fn()) {
   return onMerged
 }
 
-// Type in the search box and wait for the debounced result row.
+// Open the dropdown and type — SearchSelect debounces the term up to the modal,
+// which fetches the capped candidate list.
+function openPickerAndType(term = 'anna') {
+  fireEvent.click(screen.getByRole('button', { name: /zoek op naam/i }))
+  fireEvent.change(screen.getByPlaceholderText(/zoeken/i), { target: { value: term } })
+}
+
+// Full step 1: open, search, pick the duplicate row.
 async function searchAndPick() {
   getMock.mockResolvedValue({ data: { data: [dupRow, { ...dupRow, id: 'aaa' }] } })
-  fireEvent.change(screen.getByPlaceholderText(/zoek op naam/i), { target: { value: 'anna' } })
-  const row = await screen.findByText('Anna Dubbel', undefined, { timeout: 2000 })
+  openPickerAndType()
+  const row = await screen.findByText(/Anna Dubbel · K-2/, undefined, { timeout: 2000 })
   fireEvent.click(row)
 }
 
@@ -78,5 +92,85 @@ describe('MergeCandidateModal', () => {
     await waitFor(() => expect(postMock).toHaveBeenCalled())
     expect(onMerged).not.toHaveBeenCalled()
     expect(screen.getByRole('dialog')).toBeTruthy()
+  })
+})
+
+/**
+ * MERGE-PICKER-1 — the punt-20 guard: the duplicate picker must be a real
+ * searchable dropdown (house component, never a native <select>), it must search
+ * SERVER-side (§8: never pull the whole candidate table into the client) and it
+ * must never accept a typed value — a candidate is a relational id.
+ */
+describe('MergeCandidateModal · duplicate picker (punt 20)', () => {
+  beforeEach(() => { getMock.mockReset(); postMock.mockReset() })
+
+  it('is a dropdown, never a native <select>', () => {
+    const { container } = render(
+      <QueryClientProvider client={new QueryClient({ defaultOptions: { queries: { retry: false } } })}>
+        <MergeCandidateModal current={current} onClose={vi.fn()} onMerged={vi.fn()} />
+      </QueryClientProvider>
+    )
+    expect(container.querySelector('select')).toBeNull()
+    const trigger = screen.getByRole('button', { name: /zoek op naam/i })
+    expect(trigger).toHaveAttribute('aria-haspopup', 'listbox')
+  })
+
+  it('opens a searchable list and queries the SERVER with the typed term (capped page)', async () => {
+    getMock.mockResolvedValue({ data: { data: [dupRow] } })
+    mount()
+    openPickerAndType('anna')
+    await waitFor(() => expect(getMock).toHaveBeenCalledWith('/candidates',
+      expect.objectContaining({ params: expect.objectContaining({ search: 'anna', per_page: 8 }) })), { timeout: 2000 })
+  })
+
+  it('shows the candidate NUMBER and e-mail in the option, so lookalikes are tellable apart', async () => {
+    getMock.mockResolvedValue({ data: { data: [dupRow] } })
+    mount()
+    openPickerAndType()
+    const row = await screen.findByText(/Anna Dubbel · K-2 · dup@x.nl/, undefined, { timeout: 2000 })
+    expect(row).toBeTruthy()
+  })
+
+  it('never fires a request below the minimum term length', async () => {
+    mount()
+    openPickerAndType('a')
+    // Wait past SearchSelect's own 250ms debounce inside act(), so the state update
+    // it schedules is flushed before the assertion (no act() warning).
+    await act(async () => { await new Promise(r => setTimeout(r, 400)) })
+    expect(getMock).not.toHaveBeenCalled()
+  })
+
+  it('offers no create/free-text row — a candidate is a relational id', async () => {
+    getMock.mockResolvedValue({ data: { data: [] } })
+    mount()
+    openPickerAndType('zzzz')
+    await waitFor(() => expect(getMock).toHaveBeenCalled(), { timeout: 2000 })
+    expect(screen.queryByText(/“zzzz”/)).toBeNull()
+  })
+
+  it('Escape closes the dropdown first and returns focus to the trigger; a second Escape closes the modal', () => {
+    const onClose = vi.fn()
+    render(
+      <QueryClientProvider client={new QueryClient({ defaultOptions: { queries: { retry: false } } })}>
+        <MergeCandidateModal current={current} onClose={onClose} onMerged={vi.fn()} />
+      </QueryClientProvider>
+    )
+    const trigger = screen.getByRole('button', { name: /zoek op naam/i })
+    fireEvent.click(trigger)
+    fireEvent.keyDown(screen.getByPlaceholderText(/zoeken/i), { key: 'Escape' })
+    // The MENU closed — the modal did not (the innermost open thing wins Escape).
+    expect(screen.queryByPlaceholderText(/zoeken/i)).toBeNull()
+    expect(onClose).not.toHaveBeenCalled()
+    // Focus is back inside the dialog, so the modal's own focus trap can still hear keys.
+    expect(document.activeElement).toBe(trigger)
+    fireEvent.keyDown(trigger, { key: 'Escape' })
+    expect(onClose).toHaveBeenCalled()
+  })
+
+  it('reports a failed search instead of pretending there are no duplicates', async () => {
+    getMock.mockRejectedValue(new Error('boom'))
+    mount()
+    openPickerAndType()
+    expect(await screen.findByText(/merge\.errSearch|zoeken mislukt/i, undefined, { timeout: 2000 })).toBeTruthy()
   })
 })

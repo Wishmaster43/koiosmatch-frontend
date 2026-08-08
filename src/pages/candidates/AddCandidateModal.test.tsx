@@ -202,7 +202,10 @@ describe('AddCandidateModal · Mobiel field (job B)', () => {
     await user.type(screen.getByPlaceholderText('modal.fields.lastName'), 'Jansen')
     await user.type(screen.getByPlaceholderText('modal.fields.mobilePlaceholder'), '0612345678')
     await user.click(screen.getByRole('button', { name: 'modal.create' }))
-    expect(createCandidate.mock.calls[0][0]).toMatchObject({ mobile: '0612345678' })
+    // DUP-PHONE-1 (08-08): still its own `mobile` key — but canonicalised at the save
+    // boundary now, so the server's exact-match dedupe key cannot be dodged by writing
+    // the same number differently. The notation matrix lives in its own describe below.
+    expect(createCandidate.mock.calls[0][0]).toMatchObject({ mobile: '+31612345678' })
   })
 })
 
@@ -358,6 +361,84 @@ describe('AddCandidateModal · duplicate 409 panel', () => {
     await submit(user)
     expect(await screen.findByText('duplicate.blockedTitle')).toBeInTheDocument()
     expect(screen.queryByText('Kandidaat of lead bestaat al')).not.toBeInTheDocument()
+  })
+})
+
+// DUP-PHONE-1 (Danny punt 4, 08-08): the backend duplicate guard compares the RAW
+// column value, so '0612345678' and '+31612345678' were two different candidates to
+// it — the same person, two dossiers. The create body must therefore carry ONE
+// canonical spelling whichever way the recruiter types the number. Measured against
+// the live API 2026-08-08: check-duplicate?mobile=0665277265 -> exists:false while
+// ?mobile=%2B31665277265 -> exists:true for the very same candidate.
+describe('AddCandidateModal · duplicate key is notation-independent', () => {
+  // Fill the required names + the given mobile, submit, and hand back the POSTed body.
+  const submitWithMobile = async (mobile: string): Promise<Record<string, unknown>> => {
+    const user = userEvent.setup()
+    render(<AddCandidateModal onClose={noop} onCreated={noop} />)
+    await user.type(screen.getByPlaceholderText('modal.fields.firstName'), 'Jan')
+    await user.type(screen.getByPlaceholderText('modal.fields.lastName'), 'Jansen')
+    await user.type(screen.getByPlaceholderText('modal.fields.mobilePlaceholder'), mobile)
+    await user.click(screen.getByRole('button', { name: 'modal.create' }))
+    await waitFor(() => expect(createCandidate).toHaveBeenCalled())
+    return createCandidate.mock.calls[0][0]
+  }
+
+  it.each(['+31612345678', '0612345678', '06-12345678', '06 12 34 56 78'])(
+    'POSTs %s as the one canonical mobile the dedupe key compares on',
+    async (typed) => {
+      const body = await submitWithMobile(typed)
+      expect(body.mobile).toBe('+31612345678')
+    },
+  )
+
+  it('canonicalises the landline on the same save boundary', async () => {
+    const user = userEvent.setup()
+    render(<AddCandidateModal onClose={noop} onCreated={noop} />)
+    await user.type(screen.getByPlaceholderText('modal.fields.firstName'), 'Jan')
+    await user.type(screen.getByPlaceholderText('modal.fields.lastName'), 'Jansen')
+    await user.type(screen.getByPlaceholderText('modal.fields.phonePlaceholder'), '030-1234567')
+    await user.click(screen.getByRole('button', { name: 'modal.create' }))
+    await waitFor(() => expect(createCandidate).toHaveBeenCalled())
+    expect(createCandidate.mock.calls[0][0].phone).toBe('+31301234567')
+  })
+
+  it('never rewrites a value it cannot canonicalise safely', async () => {
+    // No '+', no trunk '0' — inventing a country code here would corrupt the record.
+    const body = await submitWithMobile('31612345678')
+    expect(body.mobile).toBe('31612345678')
+  })
+})
+
+// The recruiter-facing half of Danny punt 4: a hit must name the other dossier and
+// keep every typed value, so the recruiter can look, decide, and save again.
+describe('AddCandidateModal · duplicate on a differently written mobile', () => {
+  it('names the existing candidate and leaves the form intact so saving stays possible', async () => {
+    createCandidate.mockRejectedValue({
+      response: { status: 409, data: { message: 'Kandidaat of lead bestaat al', existing: { id: 'dup-9', name: 'Lieke Blom', archived: false } } },
+    })
+    const user = userEvent.setup()
+    render(
+      <NavigationProvider goTo={vi.fn()}>
+        <AddCandidateModal onClose={noop} onCreated={noop} />
+      </NavigationProvider>
+    )
+    await user.type(screen.getByPlaceholderText('modal.fields.firstName'), 'Jan')
+    await user.type(screen.getByPlaceholderText('modal.fields.lastName'), 'Jansen')
+    const mobileInput = screen.getByPlaceholderText('modal.fields.mobilePlaceholder') as HTMLInputElement
+    await user.type(mobileInput, '06-65277265')
+    await user.click(screen.getByRole('button', { name: 'modal.create' }))
+
+    // The request carried the canonical form — that is what let the server see the hit.
+    await waitFor(() => expect(createCandidate.mock.calls[0][0].mobile).toBe('+31665277265'))
+    // WHO it is (name only, §8) + a way to open that dossier.
+    expect(await screen.findByText('Lieke Blom')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'duplicate.open' })).toBeInTheDocument()
+    // Nothing was cleared and the create button is still live: the recruiter decides.
+    expect(mobileInput.value).toBe('06-65277265')
+    const create = screen.getByRole('button', { name: 'modal.create' })
+    expect(create).not.toBeDisabled()
+    await user.click(create)
+    await waitFor(() => expect(createCandidate).toHaveBeenCalledTimes(2))
   })
 })
 

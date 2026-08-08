@@ -149,7 +149,7 @@ export default function OutreachPage() {
       active: false },
     { key: 'active',  label: t('kpi.active'),  value: campaigns.filter((c) => statusKey(c) === 'active').length, sub: t('kpi.activeSub'), color: 'var(--color-success)',
       onClick: () => pickStatus('active'), active: selectedStatus.length === 1 && selectedStatus[0] === 'active' },
-    { key: 'targets', label: t('kpi.targets'), value: campaigns.reduce((n, c) => n + targetsOf(c), 0),           sub: t('kpi.targetsSub'), color: 'var(--color-primary)',
+    { key: 'targets', label: t('kpi.targets'), value: campaigns.reduce((n, c) => n + targetsOf(c), 0),           sub: t('kpi.targetsSub'), color: 'var(--color-primary-text)',
       onClick: () => setKpiTargets(v => !v), active: kpiTargets },
   ]
 
@@ -214,7 +214,7 @@ export default function OutreachPage() {
           <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '0 24px 12px', minHeight: 36, flexShrink: 0 }}>
             {/* BTN_H (§4/§9): one explicit height for every text/action button, everywhere. */}
             <button onClick={() => setCreating(true)}
-              style={{ display: 'flex', alignItems: 'center', gap: 6, height: BTN_H, padding: '0 14px', fontSize: 13, fontWeight: 600, borderRadius: 8, border: 'none', cursor: 'pointer', background: 'var(--color-primary)', color: '#fff' }}>
+              style={{ display: 'flex', alignItems: 'center', gap: 6, height: BTN_H, padding: '0 14px', fontSize: 13, fontWeight: 600, borderRadius: 8, border: 'none', cursor: 'pointer', background: 'var(--color-primary)', color: 'var(--color-on-accent)' }}>
               <Plus size={15} /> {t('new')}
             </button>
             <HeaderSearch onSearch={setQuery} placeholder={t('page.searchPlaceholder')} width={280} />

@@ -86,7 +86,7 @@ export function MonthView({ current, shifts, today, onDayClick }: ViewProps) {
                     width: 24, height: 24, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center',
                     marginBottom: 4, fontSize: 12, fontWeight: isToday ? 700 : 400,
                     background: isToday ? 'var(--color-primary)' : 'transparent',
-                    color: outside ? 'var(--text-muted)' : isToday ? '#fff' : 'var(--text)',
+                    color: outside ? 'var(--text-muted)' : isToday ? 'var(--color-on-accent)' : 'var(--text)',
                   }}>
                     {date.getDate()}
                   </div>
@@ -128,7 +128,7 @@ export function WeekView({ current, shifts, today, onDayClick }: ViewProps) {
                 <div style={{ width: 30, height: 30, borderRadius: '50%', margin: '0 auto',
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
                   background: isToday ? 'var(--color-primary)' : 'transparent',
-                  color: isToday ? '#fff' : 'var(--text)', fontSize: 14, fontWeight: isToday ? 700 : 400 }}>
+                  color: isToday ? 'var(--color-on-accent)' : 'var(--text)', fontSize: 14, fontWeight: isToday ? 700 : 400 }}>
                   {d.getDate()}
                 </div>
               </div>
@@ -157,7 +157,7 @@ export function DayView({ current, shifts, today, onDayClick }: ViewProps) {
     <div style={{ flex: 1, overflow: 'auto', padding: '0 24px' }}>
       <div style={{ padding: '16px 0', borderBottom: '1px solid var(--border)', marginBottom: 16 }}>
         <div style={{ fontSize: 16, fontWeight: 700, color: 'var(--text)' }}>
-          {isToday && <span style={{ color: 'var(--color-primary)', marginRight: 8 }}>{t('today')} —</span>}
+          {isToday && <span style={{ color: 'var(--color-primary-text)', marginRight: 8 }}>{t('today')} —</span>}
           {formatDate(current)}
         </div>
       </div>
@@ -170,7 +170,7 @@ export function DayView({ current, shifts, today, onDayClick }: ViewProps) {
             <div style={{ fontSize: 13, color: 'var(--text-muted)', marginBottom: 20 }}>{t('addHint')}</div>
             <button onClick={() => onDayClick(current)}
               style={{ padding: '9px 18px', fontSize: 13, fontWeight: 600, background: 'var(--color-primary)',
-                color: '#fff', border: 'none', borderRadius: 8, cursor: 'pointer' }}>
+                color: 'var(--color-on-accent)', border: 'none', borderRadius: 8, cursor: 'pointer' }}>
               + {t('addShift')}
             </button>
           </div>

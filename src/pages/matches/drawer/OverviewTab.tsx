@@ -14,9 +14,9 @@
  * KoiosAdviceBlock usage), Matchtekst (M17/optie A, MatchTextBlock — customer-
  * facing rich text, OFFERED-IFF-READ: hidden until the fetched payload
  * actually carries the not-yet-existing `match_text` key, ticket
- * MATCH-TEXT-FIELD-1) and Opmerkingen as its own block with its own pencil
- * (M29, MatchRemarksBlock — separate from the Contract tab's shared-pencil
- * table).
+ * MATCH-TEXT-FIELD-1) and — until it is emptied — the RETIRED Opmerkingen
+ * field (REMARKS-INTO-NOTES-1, MatchRemarksBlock: read-only legacy content with
+ * a move-into-notes action; see that file's header for the decision).
  *
  * OVERZICHT-DATA-1 (overzicht-data cluster follow-up wave): adds the facts
  * that already ride on the LIST row (mapMatch) but never surfaced here —
@@ -75,9 +75,12 @@ interface OverviewTabProps {
   // MATCH-ORDINAL-1 (M14/M15): this match's position among the tenant's other
   // matches per axis — omitting it just hides the ordinal footnote.
   ordinals?: MatchOrdinals
+  // REMARKS-INTO-NOTES-1: switches the drawer to the Notes tab after a legacy
+  // remark was moved into a note, so the recruiter sees where it landed.
+  onOpenNotes?: () => void
 }
 
-export default function OverviewTab({ match, onSetStatus, onUpdate, ordinals }: OverviewTabProps) {
+export default function OverviewTab({ match, onSetStatus, onUpdate, ordinals, onOpenNotes }: OverviewTabProps) {
   const { t } = useTranslation(['matches', 'candidates'])
   const { formatDate, formatDateTime } = useDateFormat()
   // Lifecycle status from the tenant lookup — the is_closed FLAG ends the match (R-1b).
@@ -197,12 +200,20 @@ export default function OverviewTab({ match, onSetStatus, onUpdate, ordinals }: 
       <KoiosAdviceBlock namespace="matches" insights={buildMatchAdviceInsights(match, t)} />
 
       {/* M17/optie A: Matchtekst — OFFERED-IFF-READ, hidden until the backend
-          payload actually carries the `match_text` key (see file header). */}
+          payload actually carries the `match_text` key (see file header). Koios
+          assist + dictation ride the editor's own toolbar (RichTextAssistBar),
+          so no per-block AI wiring is needed here anymore. */}
       <MatchTextBlock value={contract.match_text} present={matchTextPresent} loading={contractLoading} save={saveContract} />
 
-      {/* M29: Opmerkingen — its own block, its own pencil, rich text (house rule).
+      {/* REMARKS-INTO-NOTES-1: the retired Opmerkingen field. Mounted only while it
+          still holds content (read-only + move-into-notes), so Matchtekst above is
+          the one free-text surface — and so the block's note-type lookup is never
+          fetched for the overwhelming majority of matches that have no remark left.
           Shares the contract fetch/save above — no second GET. */}
-      <MatchRemarksBlock remarks={contract.remarks} loading={contractLoading} save={saveContract} />
+      {contract.remarks ? (
+        <MatchRemarksBlock remarks={contract.remarks} loading={contractLoading} save={saveContract}
+          matchId={match.id} onOpenNotes={onOpenNotes} />
+      ) : null}
     </div>
   )
 }

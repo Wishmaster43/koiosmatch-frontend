@@ -62,7 +62,16 @@
       "stage": "Phase",
       "created": "Erstellt",
       "status": "Status",
-      "lastSynced": "Zuletzt synchronisiert"
+      "lastSynced": "Zuletzt synchronisiert",
+      "contractType": "Vertragsart",
+      "startDate": "Startdatum",
+      "endDate": "Enddatum",
+      "hoursPerWeek": "Stunden pro Woche",
+      "lastSyncedHelloflex": "Zuletzt mit HelloFlex synchronisiert",
+      "branch": "Niederlassung",
+      "customerLocation": "Standort",
+      "customerDepartment": "Abteilung",
+      "contactPerson": "Ansprechpartner"
     },
     "openCandidate": "Kandidat öffnen",
     "openVacancy": "Stelle öffnen",
@@ -111,7 +120,13 @@
     "remarks": {
       "title": "Anmerkungen",
       "saved": "Anmerkungen gespeichert.",
-      "saveError": "Anmerkungen konnten nicht gespeichert werden."
+      "saveError": "Anmerkungen konnten nicht gespeichert werden.",
+      "deprecated": "Dieses Feld entfällt. Verschieben Sie den Text in die Notizen — dort erhält er Autor, Datum, Typ und Kanal und erscheint in der Zeitleiste.",
+      "moveToNotes": "In Notizen verschieben",
+      "moving": "Wird verschoben…",
+      "moved": "Die Bemerkung wurde in die Notizen verschoben.",
+      "moveError": "Das Verschieben in die Notizen ist fehlgeschlagen. Der Text wurde nicht geändert.",
+      "moveClearError": "Die Notiz wurde gespeichert, aber das alte Feld konnte nicht geleert werden. Der Text steht jetzt an zwei Stellen."
     },
     "duration": {
       "unit": {
@@ -132,6 +147,19 @@
       "title": "Matchtext",
       "saved": "Matchtext gespeichert.",
       "saveError": "Matchtext konnte nicht gespeichert werden."
+    },
+    "renew": {
+      "button": "Verlängern",
+      "modalTitle": "Match verlängern",
+      "confirm": "Verlängerung bestätigen",
+      "currentEndDate": "Aktuelles Enddatum: {{date}}",
+      "newEndDateLabel": "Neues Enddatum",
+      "noCurrentEndDate": "Kein Enddatum festgelegt (laufend).",
+      "mustBeAfterCurrent": "Das neue Enddatum muss nach dem aktuellen Enddatum liegen.",
+      "success": "Match verlängert.",
+      "error": "Der Match konnte nicht verlängert werden.",
+      "disabledArchived": "Archivierter Match — zuerst wiederherstellen.",
+      "disabledClosed": "Dieser Match wurde bereits beendet."
     }
   },
   "approval": {
@@ -145,7 +173,9 @@
     "reasonPlaceholder": "Ablehnungsgrund…",
     "confirmReject": "Ablehnung bestätigen",
     "alreadyReviewed": "Dieser Match wurde bereits geprüft.",
-    "error": "Die Prüfung konnte nicht angewendet werden."
+    "error": "Die Prüfung konnte nicht angewendet werden.",
+    "badgeLabel": "Bewertung",
+    "badgeWithLabel": "Bewertung: {{status}}"
   },
   "changelog": {
     "loading": "Verlauf wird geladen…",

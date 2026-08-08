@@ -40,6 +40,11 @@
   "voice": {
     "start": "Dictez votre message",
     "stop": "Arrêtez l'écoute",
-    "denied": "Microphone refusé — autorisez l'accès dans votre navigateur"
+    "denied": "Microphone refusé — autorisez l'accès dans votre navigateur",
+    "insecureContext": "La dictée nécessite une connexion sécurisée (https) — indisponible sur cette page",
+    "errorServiceNotAllowed": "La reconnaissance vocale a été bloquée par le navigateur — service non autorisé",
+    "errorAudioCapture": "Aucun microphone détecté — vérifiez votre appareil",
+    "errorNetwork": "Erreur réseau pendant la reconnaissance vocale — veuillez réessayer",
+    "errorGeneric": "La reconnaissance vocale a échoué — veuillez réessayer"
   }
 }

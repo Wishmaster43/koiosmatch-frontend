@@ -77,7 +77,8 @@
     "toggle": "Afficher/masquer les filtres",
     "title": "Filtres",
     "branch": "Filiale",
-    "branchExcludesUnassigned": "Un filtre par filiale masque les enregistrements sans filiale liée."
+    "branchExcludesUnassigned": "Un filtre par filiale masque les enregistrements sans filiale liée.",
+    "button": "Filtrer"
   },
   "nav": {
     "dashboard": "Tableau de bord",
@@ -358,6 +359,22 @@
     "unknownEntity": "Cette fenêtre détachée n'a pas pu être reconnue."
   },
   "notes": {
-    "editedBy": "modifié par {{name}}"
+    "editedBy": "modifié par {{name}}",
+    "allTypes": "Tous les types",
+    "allChannels": "Tous les canaux"
+  },
+  "errors": {
+    "koiosCreditExhausted": "Le crédit Koios de cette organisation est épuisé ou pas encore activé. Rechargez le solde ou contactez votre administrateur.",
+    "koiosUnavailable": "Koios est momentanément indisponible. Réessayez dans un instant."
+  },
+  "timeline": {
+    "today": "Aujourd'hui",
+    "yesterday": "Hier"
+  },
+  "identifierCheck": {
+    "cocInvalid": "Ceci ne semble pas être un numéro de registre du commerce valide pour {{country}} (attendu p. ex. {{example}}).",
+    "vatInvalid": "Ceci ne semble pas être un numéro de TVA valide pour {{country}} (attendu p. ex. {{example}}).",
+    "cocUnverifiable": "Sans pays, le format du numéro de registre du commerce ne peut pas être vérifié.",
+    "vatUnverifiable": "Sans pays, le format du numéro de TVA ne peut pas être vérifié."
   }
 }

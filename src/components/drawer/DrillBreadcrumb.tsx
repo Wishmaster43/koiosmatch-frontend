@@ -19,7 +19,7 @@ export interface Crumb { label: string; onClick: () => void }
 
 const crumbBtn = {
   padding: 0, background: 'none', border: 'none', font: 'inherit', fontSize: 12, fontWeight: 500,
-  color: 'var(--color-primary)', cursor: 'pointer', whiteSpace: 'nowrap' as const,
+  color: 'var(--color-primary-text)', cursor: 'pointer', whiteSpace: 'nowrap' as const,
 }
 
 export default function DrillBreadcrumb({ trail, current }: { trail: Crumb[]; current: string }) {

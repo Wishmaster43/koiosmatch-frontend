@@ -12,8 +12,8 @@
 import { useState } from 'react'
 import type { ComponentType, CSSProperties } from 'react'
 import { useTranslation } from 'react-i18next'
-import { X, Search } from 'lucide-react'
-import { useFocusTrap } from '@/hooks/useFocusTrap'
+import { Search } from 'lucide-react'
+import FloatingPanel from '@/components/ui/FloatingPanel'
 import { WIDE_MODAL } from '@/components/ui/modalMetrics'
 import SoftChipJs from '@/components/ui/SoftChip'
 import type { Contact, Department } from '@/types/customer'
@@ -52,9 +52,6 @@ export default function ContactLinkPicker({ candidates, locations, departments, 
   // Default empty-state text stays the location wording so the existing call
   // site (no emptyLabel passed) keeps rendering exactly what it did before.
   const emptyText = emptyLabel ?? t('locations.detail.pickContactEmpty')
-  // Focus trap + Escape-to-close + focus restore (§6) — the previous inline
-  // version had none of this, a real accessibility gap.
-  const panelRef = useFocusTrap<HTMLDivElement>(onClose)
 
   // Fallback resolver — copied verbatim from ContactsTab.tsx (never a second
   // resolver): the plural locations[]/departments[] arrays come back EMPTY for
@@ -70,60 +67,58 @@ export default function ContactLinkPicker({ candidates, locations, departments, 
   const rows = q ? candidates.filter(c => [c.name, c.role, c.email].some(v => String(v ?? '').toLowerCase().includes(q))) : candidates
 
   return (
-    <div onClick={e => { if (e.target === e.currentTarget) onClose() }}
-      style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.45)', zIndex: 220, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 }}>
-      <div ref={panelRef} role="dialog" aria-modal="true" aria-label={t('locations.detail.pickContactTitle')} tabIndex={-1}
-        style={{ background: 'var(--surface)', borderRadius: 12, width: '100%', ...WIDE_MODAL, boxShadow: '0 20px 60px rgba(0,0,0,0.22)', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
-        <div style={{ padding: '14px 16px', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexShrink: 0 }}>
-          <div>
-            <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text)' }}>{t('locations.detail.pickContactTitle')}</div>
-            {/* Optional caller-supplied warning (e.g. "this repoints, it does not add a second site"). */}
-            {note && <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 2 }}>{note}</div>}
-          </div>
-          <button onClick={onClose} aria-label={t('common:close')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', display: 'flex' }}><X size={16} /></button>
+    // POPUP-SLEEP (Danny punt 19): the shared FloatingPanel shell — drag by the
+    // header, resize, remembered spot, plus the focus trap/Escape it already had.
+    <FloatingPanel open onClose={onClose} ariaLabel={t('locations.detail.pickContactTitle')}
+      width="100%" maxWidth={`min(94vw, ${WIDE_MODAL.maxWidth}px)`} persistKey="contact-link-picker"
+      scrollBody={false} bodyStyle={{ maxHeight: WIDE_MODAL.maxHeight }}
+      header={(
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text)' }}>{t('locations.detail.pickContactTitle')}</div>
+          {/* Optional caller-supplied warning (e.g. "this repoints, it does not add a second site"). */}
+          {note && <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 2 }}>{note}</div>}
         </div>
-
-        {/* Search stays fixed above the scrolling list, mirrors SubEntityTab. */}
-        <div style={{ padding: '12px 16px', flexShrink: 0 }}>
-          <div style={searchWrap}>
-            <Search size={13} color="var(--text-muted)" />
-            <input value={search} onChange={e => setSearch(e.target.value)}
-              placeholder={t('locations.detail.pickContactSearch')} aria-label={t('locations.detail.pickContactSearch')} style={searchInput} />
-          </div>
-        </div>
-
-        <div style={{ flex: 1, overflowY: 'auto', borderTop: '1px solid var(--border)' }}>
-          {candidates.length === 0 && <div style={{ padding: 16, fontSize: 12, color: 'var(--text-muted)' }}>{emptyText}</div>}
-          {candidates.length > 0 && rows.length === 0 && <div style={{ padding: 16, fontSize: 12, color: 'var(--text-muted)' }}>{t('common:noResults')}</div>}
-          {rows.map(c => {
-            // Per-contact CURRENT links — so the user sees what they're re-pointing.
-            const linkedLocations = resolvedLocations(c)
-            const linkedDepartments = resolvedDepartments(c)
-            const hasLinks = linkedLocations.length > 0 || linkedDepartments.length > 0
-            return (
-              <button key={String(c.id)} onClick={() => onPick(c.id as Id)} style={rowBtn}>
-                <div style={{ minWidth: 0 }}>
-                  <div style={{ color: 'var(--text)' }}>{c.name}</div>
-                  <div style={{ color: 'var(--text-muted)', fontSize: 11, marginTop: 2 }}>{[c.role, c.email].filter(Boolean).join(' · ')}</div>
-                </div>
-                <div style={{ flexShrink: 0, maxWidth: '55%', textAlign: 'right' }}>
-                  {hasLinks ? (
-                    <>
-                      <div style={{ fontSize: 10, color: 'var(--text-muted)', marginBottom: 4 }}>{t('locations.detail.pickContactLinks')}</div>
-                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4, justifyContent: 'flex-end' }}>
-                        {linkedLocations.map(l => <SoftChip key={`loc-${String(l.id)}`} label={l.name} color="var(--color-secondary)" />)}
-                        {linkedDepartments.map(d => <SoftChip key={`dep-${String(d.id)}`} label={d.name} color="var(--color-violet)" />)}
-                      </div>
-                    </>
-                  ) : (
-                    <div style={{ fontSize: 11, fontStyle: 'italic', color: 'var(--text-muted)' }}>{t('locations.detail.pickContactNoLinks')}</div>
-                  )}
-                </div>
-              </button>
-            )
-          })}
+      )}>
+      {/* Search stays fixed above the scrolling list, mirrors SubEntityTab. */}
+      <div style={{ padding: '12px 16px', flexShrink: 0 }}>
+        <div style={searchWrap}>
+          <Search size={13} color="var(--text-muted)" />
+          <input value={search} onChange={e => setSearch(e.target.value)}
+            placeholder={t('locations.detail.pickContactSearch')} aria-label={t('locations.detail.pickContactSearch')} style={searchInput} />
         </div>
       </div>
-    </div>
+
+      <div style={{ flex: 1, overflowY: 'auto', borderTop: '1px solid var(--border)' }}>
+        {candidates.length === 0 && <div style={{ padding: 16, fontSize: 12, color: 'var(--text-muted)' }}>{emptyText}</div>}
+        {candidates.length > 0 && rows.length === 0 && <div style={{ padding: 16, fontSize: 12, color: 'var(--text-muted)' }}>{t('common:noResults')}</div>}
+        {rows.map(c => {
+          // Per-contact CURRENT links — so the user sees what they're re-pointing.
+          const linkedLocations = resolvedLocations(c)
+          const linkedDepartments = resolvedDepartments(c)
+          const hasLinks = linkedLocations.length > 0 || linkedDepartments.length > 0
+          return (
+            <button key={String(c.id)} onClick={() => onPick(c.id as Id)} style={rowBtn}>
+              <div style={{ minWidth: 0 }}>
+                <div style={{ color: 'var(--text)' }}>{c.name}</div>
+                <div style={{ color: 'var(--text-muted)', fontSize: 11, marginTop: 2 }}>{[c.role, c.email].filter(Boolean).join(' · ')}</div>
+              </div>
+              <div style={{ flexShrink: 0, maxWidth: '55%', textAlign: 'right' }}>
+                {hasLinks ? (
+                  <>
+                    <div style={{ fontSize: 10, color: 'var(--text-muted)', marginBottom: 4 }}>{t('locations.detail.pickContactLinks')}</div>
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4, justifyContent: 'flex-end' }}>
+                      {linkedLocations.map(l => <SoftChip key={`loc-${String(l.id)}`} label={l.name} color="var(--color-secondary)" />)}
+                      {linkedDepartments.map(d => <SoftChip key={`dep-${String(d.id)}`} label={d.name} color="var(--color-violet)" />)}
+                    </div>
+                  </>
+                ) : (
+                  <div style={{ fontSize: 11, fontStyle: 'italic', color: 'var(--text-muted)' }}>{t('locations.detail.pickContactNoLinks')}</div>
+                )}
+              </div>
+            </button>
+          )
+        })}
+      </div>
+    </FloatingPanel>
   )
 }

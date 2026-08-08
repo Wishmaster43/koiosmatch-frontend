@@ -113,7 +113,9 @@ export default function ProvincesSettings() {
             style={{ display: 'flex', alignItems: 'center', gap: 6, height: 34, padding: '0 14px',
                      fontSize: 13, fontWeight: 500, borderRadius: 8, border: 'none', cursor: 'pointer',
                      whiteSpace: 'nowrap', flexShrink: 0,
-                     background: saved ? 'var(--color-success)' : 'var(--color-primary)', color: 'white' }}>
+                     background: saved ? 'var(--color-success)' : 'var(--color-primary)',
+                     // Success fill needs its own on-* token — white only reaches ~3.3:1 there (WCAG audit 2026-08).
+                     color: saved ? 'var(--color-on-success)' : 'var(--color-on-accent)' }}>
             {saved ? <><Check size={13}/> {t('common.saved')}</> : <><Save size={13}/> {t('common.save')}</>}
           </button>
           <button onClick={openCreate}
@@ -194,7 +196,7 @@ export default function ProvincesSettings() {
             <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, marginTop: 20 }}>
               <button onClick={() => setShowModal(false)} style={{ height: 34, padding: '0 16px', fontSize: 13, border: '1px solid var(--border)', borderRadius: 8, background: 'var(--surface)', cursor: 'pointer' }}>{t('common.cancel')}</button>
               <button onClick={submit} disabled={saving || !name.trim()}
-                style={{ height: 34, padding: '0 16px', fontSize: 13, fontWeight: 500, border: 'none', borderRadius: 8, background: 'var(--color-primary)', color: 'white', cursor: 'pointer', opacity: name.trim() ? 1 : 0.4 }}>
+                style={{ height: 34, padding: '0 16px', fontSize: 13, fontWeight: 500, border: 'none', borderRadius: 8, background: 'var(--color-primary)', color: 'var(--color-on-accent)', cursor: 'pointer', opacity: name.trim() ? 1 : 0.4 }}>
                 {saving ? t('common.saving') : (editing ? t('common.save') : t('statusList.addBtn'))}
               </button>
             </div>

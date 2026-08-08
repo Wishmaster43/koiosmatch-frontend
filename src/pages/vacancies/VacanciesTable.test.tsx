@@ -312,6 +312,23 @@ describe('VacanciesTable · Status sort follows tenant order (V1)', () => {
   })
 })
 
+// SWEEP-TABLES: VacancyQuery::rules() only validates `sort=status` server-side
+// (verified live against VacancyQuery.php) — serverKey is wired on that ONE
+// column, and sort/onSortChange are optional, additive props (DATATABLE-SORT-1)
+// so an uncontrolled caller (every other test in this file) stays untouched.
+describe('VacanciesTable · controlled sort — status serverKey (SWEEP-TABLES)', () => {
+  it('clicking the Status header hands the caller {by: "status", dir: "asc"} — the only server-supported sort key', async () => {
+    const user = userEvent.setup()
+    const onSortChange = vi.fn()
+    render(<VacanciesTable rows={rows} sort={null} onSortChange={onSortChange} />)
+
+    const headerCell = screen.getByText(nlVacancies.columns.status).closest('th') as HTMLElement
+    await user.click(within(headerCell).getByRole('button'))
+
+    expect(onSortChange).toHaveBeenCalledWith({ by: 'status', dir: 'asc' })
+  })
+})
+
 describe('VacanciesTable · default sort (VAC-KPI-REDESIGN 22-07 meelift-fix)', () => {
   it('sorts newest-first by createdAt on first render — defaultSort must match the real column key', () => {
     // The column's real key is 'createdAt' (not 'created'); a stale defaultSort key

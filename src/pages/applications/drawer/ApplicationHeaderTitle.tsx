@@ -7,9 +7,12 @@
  */
 import { useTranslation } from 'react-i18next'
 import ReferenceNumberChip from '@/components/ui/ReferenceNumberChip'
+import { fieldInputStyle } from '@/components/forms/fieldMetrics'
 import type { ApplicationCandidateForm } from '../hooks/useApplicationCandidateEdit'
 
-const inputBase = { width: '100%', minWidth: 0, boxSizing: 'border-box' as const, padding: '6px 10px', borderRadius: 6, border: '1px solid var(--border)', outline: 'none' }
+// Canon field style (G33/fieldMetrics) — mirrors CandidateHeaderBits' inputBase;
+// `minWidth: 0` stays local since it only matters inside this header's grid.
+const inputBase = { ...fieldInputStyle, minWidth: 0 }
 
 interface ApplicationHeaderTitleProps {
   candidateName: string

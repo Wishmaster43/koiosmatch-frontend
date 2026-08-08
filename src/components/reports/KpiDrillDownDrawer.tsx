@@ -89,7 +89,7 @@ function CandidateList({ candidates, dateField, dateLabel, onSelect }: { candida
               onMouseLeave={e => (e.currentTarget.style.background = 'none')}
             >
               <div style={{ width: 32, height: 32, borderRadius: '50%', flexShrink: 0,
-                            background: 'var(--color-primary-bg)', color: 'var(--color-primary)',
+                            background: 'var(--color-primary-bg)', color: 'var(--color-primary-text)',
                             display: 'flex', alignItems: 'center', justifyContent: 'center',
                             fontSize: 11, fontWeight: 600 }}>
                 {initials || '?'}
@@ -187,7 +187,7 @@ function AverageBreakdown({ candidates, KPI_TARGET, onSelect }: { candidates: Re
             color: perMonth[currentMonth].count >= KPI_TARGET ? 'var(--color-success)' : perMonth[currentMonth].count >= avg ? 'var(--color-warning)' : 'var(--color-danger)',
             onClick: () => setSelMonth(currentMonth) },
           { label: t('drilldown.avgPerMonthLabel'),  value: avg,   color: 'var(--text)' },
-          { label: t('drilldown.kpiTargetLabel'),    value: KPI_TARGET, color: 'var(--color-primary)' },
+          { label: t('drilldown.kpiTargetLabel'),    value: KPI_TARGET, color: 'var(--color-primary-text)' },
         ].map(b => {
           const clickable = 'onClick' in b && typeof b.onClick === 'function'
           return (
@@ -278,7 +278,7 @@ function AverageBreakdown({ candidates, KPI_TARGET, onSelect }: { candidates: Re
                   onMouseEnter={e => (e.currentTarget.style.background = 'var(--hover-bg)')}
                   onMouseLeave={e => (e.currentTarget.style.background = 'none')}>
                   <div style={{ width: 28, height: 28, borderRadius: '50%', flexShrink: 0, background: 'var(--color-primary-bg)',
-                                color: 'var(--color-primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 10, fontWeight: 600 }}>
+                                color: 'var(--color-primary-text)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 10, fontWeight: 600 }}>
                     {ini || '?'}
                   </div>
                   <div style={{ flex: 1, minWidth: 0 }}>

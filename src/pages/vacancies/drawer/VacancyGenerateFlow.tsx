@@ -14,10 +14,10 @@ interface VacancyGenerateFlowProps {
 }
 
 const primaryBtn: CSSProperties = { display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 12, fontWeight: 600,
-  padding: '6px 12px', borderRadius: 7, cursor: 'pointer', background: 'var(--color-primary)', color: '#fff', border: 'none' }
+  padding: '6px 12px', borderRadius: 7, cursor: 'pointer', background: 'var(--color-primary)', color: 'var(--color-on-accent)', border: 'none' }
 const ghostBtn: CSSProperties = { display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 12, fontWeight: 500,
   padding: '6px 12px', borderRadius: 7, cursor: 'pointer', background: 'none', color: 'var(--text-muted)', border: '1px solid var(--border)' }
-const linkBtn: CSSProperties = { background: 'none', border: 'none', cursor: 'pointer', padding: 0, fontSize: 11, fontWeight: 600, color: 'var(--color-primary)', textDecoration: 'underline' }
+const linkBtn: CSSProperties = { background: 'none', border: 'none', cursor: 'pointer', padding: 0, fontSize: 11, fontWeight: 600, color: 'var(--color-primary-text)', textDecoration: 'underline' }
 
 /**
  * VacancyGenerateFlow — "Genereer met Koios" on the vacancy description
@@ -43,7 +43,7 @@ export default function VacancyGenerateFlow({ vacancy, onApply }: VacancyGenerat
     return (
       <button type="button" onClick={openFlow} aria-label={t('generate.button')}
         style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 12, fontWeight: 500, padding: '5px 10px',
-          borderRadius: 7, cursor: 'pointer', background: 'var(--color-primary-bg)', color: 'var(--color-primary)',
+          borderRadius: 7, cursor: 'pointer', background: 'var(--color-primary-bg)', color: 'var(--color-primary-text)',
           border: '1px solid color-mix(in srgb, var(--color-primary) 35%, transparent)', marginBottom: 8 }}>
         <KoiosAiMark size={16} tone="soft" title={t('generate.button')} />
         {t('generate.button')}

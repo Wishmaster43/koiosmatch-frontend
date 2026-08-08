@@ -26,7 +26,11 @@
     "search": "Buscar…",
     "create": "Crear",
     "cancel": "Cancelar",
-    "searchError": "Error al buscar"
+    "searchError": "Error al buscar",
+    "searchErrorForbidden": "No tienes permisos para buscar aquí.",
+    "searchErrorValidation": "Esa búsqueda no se aceptó. Ajústala e inténtalo de nuevo.",
+    "searchErrorServer": "El servidor devolvió un error al buscar. Inténtalo de nuevo en un momento.",
+    "searchErrorNetwork": "Sin conexión: la búsqueda falló."
   },
   "pagination": {
     "perPage": "Resultados por página",
@@ -118,7 +122,13 @@
     "middleName": "Partícula",
     "lastName": "Apellido",
     "functionTitle": "Función",
-    "noFunction": "Aún no se ha indicado ninguna función"
+    "noFunction": "Aún no se ha indicado ninguna función",
+    "subTabs": {
+      "status": "Estado",
+      "details": "Detalles",
+      "cv": "CV",
+      "context": "Contexto"
+    }
   },
   "cvProposal": {
     "title": "Propuesta del CV",
@@ -296,6 +306,15 @@
       },
       "startedAt": "Iniciado {{date}}",
       "period": "{{start}} – {{end}}"
+    },
+    "currentStatus": {
+      "INTRO_SENT": "Intro enviada",
+      "COMPLETED": "Completado",
+      "DISQUALIFIED": "Descalificado"
+    },
+    "conversation": {
+      "title": "Conversación",
+      "noCandidate": "Ningún candidato vinculado — nada que mostrar."
     }
   },
   "appointments": {
@@ -320,7 +339,13 @@
       "noShow": "No presentado",
       "cancelled": "Cancelada"
     },
-    "noMatches": "Ninguna cita coincide con este filtro."
+    "noMatches": "Ninguna cita coincide con este filtro.",
+    "status": {
+      "planned": "Planificado",
+      "completed": "Completado",
+      "noShow": "No presentado",
+      "cancelled": "Cancelado"
+    }
   },
   "notes": {
     "title": "Notas",
@@ -485,7 +510,9 @@
     "phaseSince": "desde {{date}}",
     "phaseUnknown": "Historial de fase aún no registrado",
     "recalculateScore": "Recalcular puntuación de match",
-    "recalculateDone": "Puntuación de match recalculada"
+    "recalculateDone": "Puntuación de match recalculada",
+    "editScore": "Editar la puntuación de match manualmente",
+    "scoreSaved": "Puntuación de match guardada"
   },
   "competition": {
     "title": "Otros solicitantes",

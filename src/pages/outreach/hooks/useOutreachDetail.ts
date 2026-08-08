@@ -6,7 +6,7 @@
  * in app/Http/Requests/Outreach). Four states for the drawer; reverts on failure.
  */
 import { useState, useEffect, useCallback } from 'react'
-import { getCampaign, updateCampaign, updateTarget } from '../data/outreachApi'
+import { getCampaign, updateCampaign, updateTarget, assignTargets as assignTargetsApi } from '../data/outreachApi'
 import type { Campaign } from './useOutreachCampaigns'
 
 export interface OutreachTarget {
@@ -21,8 +21,15 @@ export interface OutreachTarget {
     id?: string; name?: string; first_name?: string; last_name?: string
     status?: string | null; phase?: string | null
   } | null
+  // BELLIJST-ASSIGN-1 (G29): the recruiter this target got round-robin assigned to
+  // (OutreachTargetResource `assignee`, central users row, may be null).
+  assignee?: { id?: string; name?: string } | null
   [key: string]: unknown
 }
+
+// The { updated, skipped } id lists assignTargets() reports back (§13 — an honest
+// result summary, never a bare "done").
+export interface AssignResult { updated: string[]; skipped: string[] }
 export interface CampaignDetail extends Campaign { targets?: OutreachTarget[] }
 
 export function useOutreachDetail(id: string | null) {
@@ -65,6 +72,32 @@ export function useOutreachDetail(id: string | null) {
     catch { setDetail(d => (d && prev ? { ...d, targets: prev } : d)) }
   }, [])
 
+  // Save a target's per-candidate note (G30, max:2000 plain string on the backend —
+  // no rich-text storage, so no optimistic-revert is needed beyond the same pattern
+  // as the other target setters). Optimistic, revert on failure.
+  const setTargetNote = useCallback(async (targetId: string, note: string) => {
+    let prev: OutreachTarget[] | undefined
+    setDetail(d => {
+      prev = d?.targets
+      return d ? { ...d, targets: (d.targets ?? []).map(t => t.id === targetId ? { ...t, note } : t) } : d
+    })
+    try { await updateTarget(targetId, { note }) }
+    catch (err) { setDetail(d => (d && prev ? { ...d, targets: prev } : d)); throw err }
+  }, [])
+
+  // BELLIJST-ASSIGN-1 (G29): divide the given targets round-robin over the given
+  // recruiters. No optimistic guess at WHICH target gets WHICH recruiter (the
+  // backend owns the round-robin order) — the fresh campaign detail from the
+  // response replaces state once the request settles; the caller shows the
+  // { updated, skipped } summary. Throws on failure so the caller can notify.
+  const assignTargets = useCallback(async (targetIds: string[], recruiterIds: string[]): Promise<AssignResult> => {
+    if (!id) return { updated: [], skipped: [] }
+    const res = await assignTargetsApi(id, { target_ids: targetIds, recruiter_ids: recruiterIds }) as
+      { data?: CampaignDetail; meta?: AssignResult }
+    if (res?.data) setDetail(res.data)
+    return res?.meta ?? { updated: [], skipped: [] }
+  }, [id])
+
   // Change the campaign's owner — optimistic, revert on failure (mirrors setTargetStatus).
   const setOwner = useCallback(async (campaignId: string, owner: { id: string; name: string } | null) => {
     let prev: CampaignDetail['owner'] | undefined
@@ -89,5 +122,5 @@ export function useOutreachDetail(id: string | null) {
     catch { setDetail(d => (d ? { ...d, custom_fields: prev } : d)) }
   }, [detail])
 
-  return { detail, loading, error, setTargetStatus, setTargetOutcome, setOwner, setCustomFields }
+  return { detail, loading, error, setTargetStatus, setTargetOutcome, setTargetNote, assignTargets, setOwner, setCustomFields }
 }

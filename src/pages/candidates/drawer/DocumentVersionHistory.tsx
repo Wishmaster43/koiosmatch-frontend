@@ -44,7 +44,7 @@ export default function DocumentVersionHistory({ versions }: { versions: DocVers
               {v.file_size != null && <span>· {v.file_size}</span>}
               {v.download_url && (
                 <a href={v.download_url} download rel="noopener noreferrer" aria-label={t('documents.downloadVersion')}
-                  style={{ display: 'flex', color: 'var(--color-primary)' }}>
+                  style={{ display: 'flex', color: 'var(--color-primary-text)' }}>
                   <Download size={10} />
                 </a>
               )}

@@ -97,7 +97,7 @@ export default function KoiosPendingActionCard({ action }: { action: KoiosPendin
       {/* Entity chip + owner */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12 }}>
         <span style={{ width: 22, height: 22, borderRadius: '50%', flexShrink: 0, display: 'flex',
-          alignItems: 'center', justifyContent: 'center', background: 'var(--color-primary-bg)', color: 'var(--color-primary)' }}>
+          alignItems: 'center', justifyContent: 'center', background: 'var(--color-primary-bg)', color: 'var(--color-primary-text)' }}>
           {entityIconEl(action.entity_ref.type, { size: 12 })}
         </span>
         <span style={{ fontWeight: 500, color: 'var(--text)' }}>{action.entity_ref.label}</span>
@@ -139,7 +139,12 @@ export default function KoiosPendingActionCard({ action }: { action: KoiosPendin
           <button onClick={confirm} disabled={status === 'submitting'}
             style={{ padding: '6px 12px', fontSize: 12, fontWeight: 600, borderRadius: 7, border: 'none',
               background: action.destructive && status === 'confirming' ? 'var(--color-danger)' : 'var(--color-primary)',
-              color: '#fff', cursor: status === 'submitting' ? 'default' : 'pointer', opacity: status === 'submitting' ? 0.6 : 1 }}>
+              // Danger fill is a fixed semantic red (always readable with white); the
+              // primary branch is the tenant accent, so it needs the on-accent token.
+              // Both go through their tokens — never a raw hex — so a future tweak to
+              // either fill can't silently desync the text colour.
+              color: action.destructive && status === 'confirming' ? 'var(--color-on-danger)' : 'var(--color-on-accent)',
+              cursor: status === 'submitting' ? 'default' : 'pointer', opacity: status === 'submitting' ? 0.6 : 1 }}>
             {status === 'confirming' ? t('koios.pendingAction.confirmFinal') : t('koios.pendingAction.confirm')}
           </button>
           <button onClick={cancel} disabled={status === 'submitting'}

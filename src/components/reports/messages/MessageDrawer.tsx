@@ -13,7 +13,7 @@ export default function MessageDrawer({ message, onClose }: { message: MessageRo
   const { t } = useTranslation('reports')
   const panelRef = useFocusTrap<HTMLDivElement>(onClose)
   const channelKey = message.channel?.toLowerCase()
-  const channelMeta = (channelKey ? CHANNEL_META[channelKey] : undefined) ?? { Icon: MessageCircle, color: 'var(--color-primary)' }
+  const channelMeta = (channelKey ? CHANNEL_META[channelKey] : undefined) ?? { Icon: MessageCircle, color: 'var(--color-primary-text)' }
   const ChannelIcon = channelMeta.Icon
 
   return (

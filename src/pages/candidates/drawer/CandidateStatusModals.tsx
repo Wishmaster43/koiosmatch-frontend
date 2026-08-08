@@ -16,6 +16,9 @@ import { useTranslation } from 'react-i18next'
 import type { TFunction } from 'i18next'
 import api, { unwrapList } from '@/lib/api'
 import FloatingPanel from '@/components/ui/FloatingPanel'
+// G34: the house searchable dropdown replaces every native <select> in this
+// file (candidate/customer/status relational pickers, never a raw <select>).
+import CreatableSelect from '@/components/ui/CreatableSelect'
 import { Z } from '@/lib/zIndexScale'
 import { BTN_H } from '@/config/buttonMetrics'
 import type { VacancyOption } from '../hooks/useVacancyOptions'
@@ -58,34 +61,32 @@ function MatchPickModal({
       persistKey="candidate-match-pick" width={400} zIndex={Z.confirm} bodyStyle={{ padding: 20 }}>
         <div style={{ fontSize: 12, color: 'var(--text-muted)', lineHeight: 1.5, marginBottom: 12 }}>{t('drawer.placedPickMatchBody')}</div>
 
-        {/* Pick one of the candidate's existing matches (dropdown). */}
+        {/* Pick one of the candidate's existing matches (searchable dropdown). */}
         {matches.length > 0 && (
-          <select value={matchChoice ?? ''} onChange={e => { setMatchChoice(e.target.value || null); if (e.target.value) setNewMatchVacancyId('') }}
-            style={{ width: '100%', padding: '8px 11px', fontSize: 13, borderRadius: 8, border: '1px solid var(--border)', background: 'var(--surface)', color: 'var(--text)', boxSizing: 'border-box', outline: 'none', marginBottom: 12 }}>
-            <option value="">{t('drawer.placedPickPlaceholder')}</option>
-            {matches.map((m, i) => {
-              const mid = String(m.id ?? i)
-              return <option key={mid} value={mid}>{[m.vacancyTitle || '—', m.client].filter(Boolean).join(' · ')}</option>
-            })}
-          </select>
+          <div style={{ marginBottom: 12 }}>
+            <CreatableSelect value={matchChoice} allowCreate={false} clearable
+              onChange={v => { setMatchChoice(v || null); if (v) setNewMatchVacancyId('') }}
+              placeholder={t('drawer.placedPickPlaceholder')}
+              options={matches.map((m, i) => ({ value: String(m.id ?? i), label: [m.vacancyTitle || '—', m.client].filter(Boolean).join(' · ') }))}
+              style={{ padding: '8px 11px', fontSize: 13 }} />
+          </div>
         )}
 
         {/* Or create a new match by picking a vacancy (G-2 direct match → POST /matches). */}
         <div style={{ fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em', color: 'var(--text-muted)', margin: '2px 0 6px' }}>{t('drawer.placedOrNew')}</div>
-        <select value={newMatchVacancyId} onChange={e => { setNewMatchVacancyId(e.target.value); if (e.target.value) setMatchChoice(null) }}
-          aria-label={t('drawer.placedNewPlaceholder')}
-          style={{ width: '100%', padding: '8px 11px', fontSize: 13, borderRadius: 8, border: '1px solid var(--border)', background: 'var(--surface)', color: 'var(--text)', boxSizing: 'border-box', outline: 'none', marginBottom: 16 }}>
-          <option value="">{t('drawer.placedNewPlaceholder')}</option>
-          {vacancyOptions.map(v => (
-            <option key={String(v.value)} value={String(v.value)}>{[v.label || '—', v.client].filter(Boolean).join(' · ')}</option>
-          ))}
-        </select>
+        <div style={{ marginBottom: 16 }}>
+          <CreatableSelect value={newMatchVacancyId || null} allowCreate={false} clearable
+            onChange={v => { setNewMatchVacancyId(v); if (v) setMatchChoice(null) }}
+            placeholder={t('drawer.placedNewPlaceholder')}
+            options={vacancyOptions.map(v => ({ value: String(v.value), label: [v.label || '—', v.client].filter(Boolean).join(' · ') }))}
+            style={{ padding: '8px 11px', fontSize: 13 }} />
+        </div>
 
         {/* BTN_H (§4/§9): one explicit height for every text/action button, everywhere. */}
         <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8 }}>
           <button onClick={onCloseMatch} style={{ height: BTN_H, padding: '0 14px', fontSize: 12, borderRadius: 7, background: 'var(--bg)', color: 'var(--text)', border: '1px solid var(--border)', cursor: 'pointer' }}>{t('common:cancel')}</button>
           <button disabled={(!matchChoice && !newMatchVacancyId) || creatingMatch} onClick={onConfirmMatch}
-            style={{ height: BTN_H, padding: '0 14px', fontSize: 12, fontWeight: 600, borderRadius: 7, background: 'var(--color-primary)', color: '#fff', border: 'none', cursor: 'pointer', opacity: ((matchChoice || newMatchVacancyId) && !creatingMatch) ? 1 : 0.5 }}>{t('drawer.placedConfirm')}</button>
+            style={{ height: BTN_H, padding: '0 14px', fontSize: 12, fontWeight: 600, borderRadius: 7, background: 'var(--color-primary)', color: 'var(--color-on-accent)', border: 'none', cursor: 'pointer', opacity: ((matchChoice || newMatchVacancyId) && !creatingMatch) ? 1 : 0.5 }}>{t('drawer.placedConfirm')}</button>
         </div>
     </FloatingPanel>
   )
@@ -107,12 +108,11 @@ function StatusReasonModal({
               {statusModal.isBlacklist ? t('drawer.blacklistReasonLabel') : t('drawer.reasonLabel')}
             </div>
             {statusModal.isBlacklist ? (
-              // Blacklist: lookup-backed dropdown (BE validates exists on blacklist_reasons.name).
-              <select value={statusModal.reason} onChange={e => setStatusModal(m => m && ({ ...m, reason: e.target.value }))}
-                style={{ width: '100%', boxSizing: 'border-box', padding: '8px 10px', fontSize: 12, border: '1px solid var(--border)', borderRadius: 7, outline: 'none', background: 'var(--surface)' }}>
-                <option value="">{t('drawer.blacklistReasonPick')}</option>
-                {blReasons.map(r => <option key={r} value={r}>{r}</option>)}
-              </select>
+              // Blacklist: lookup-backed searchable dropdown (BE validates exists on blacklist_reasons.name).
+              <CreatableSelect value={statusModal.reason || null} allowCreate={false} clearable
+                onChange={v => setStatusModal(m => m && ({ ...m, reason: v }))}
+                placeholder={t('drawer.blacklistReasonPick')} options={blReasons}
+                style={{ padding: '8px 10px', fontSize: 12 }} />
             ) : (
               // Plain textarea, not RichTextEditor — the backend validates status_reason
               // as `string|max:255` and folds it into the status-change NOTE body via a
@@ -139,7 +139,7 @@ function StatusReasonModal({
         <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8 }}>
           <button onClick={close} style={{ height: BTN_H, padding: '0 14px', fontSize: 12, borderRadius: 7, background: 'var(--bg)', color: 'var(--text)', border: '1px solid var(--border)', cursor: 'pointer' }}>{t('common:cancel')}</button>
           <button onClick={onConfirmStatus} disabled={statusModal.needReason && !statusModal.reason.trim()}
-            style={{ height: BTN_H, padding: '0 14px', fontSize: 12, fontWeight: 600, borderRadius: 7, background: 'var(--color-primary)', color: '#fff', border: 'none', cursor: 'pointer', opacity: (statusModal.needReason && !statusModal.reason.trim()) ? 0.5 : 1 }}>{t('common:save')}</button>
+            style={{ height: BTN_H, padding: '0 14px', fontSize: 12, fontWeight: 600, borderRadius: 7, background: 'var(--color-primary)', color: 'var(--color-on-accent)', border: 'none', cursor: 'pointer', opacity: (statusModal.needReason && !statusModal.reason.trim()) ? 0.5 : 1 }}>{t('common:save')}</button>
         </div>
     </FloatingPanel>
   )

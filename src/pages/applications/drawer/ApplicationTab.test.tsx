@@ -1,3 +1,12 @@
+/**
+ * ApplicationTab · APP-TAB-SPLIT-1 (Danny: "Dit eerste tabblad blijft te druk
+ * dus wellicht sollicitatie en sub-tabjes?") regression guard: the tab now
+ * shows a SubTabBar (Status/Details/CV/Context) instead of one long scroll.
+ * Status is the DEFAULT sub-tab (rejection outcome + status strip render
+ * immediately); every other assertion below clicks its own sub-tab first —
+ * this proves the content actually MOVED there, not just that it still exists
+ * somewhere on the page.
+ */
 import type { ReactElement } from 'react'
 import { describe, it, expect, vi } from 'vitest'
 import { render, screen, waitFor } from '@testing-library/react'
@@ -44,6 +53,11 @@ const renderTab = (ui: ReactElement) => {
   return render(<QueryClientProvider client={qc}>{ui}</QueryClientProvider>)
 }
 
+// Click the named sub-tab (labels are raw i18n keys under the mock above).
+const gotoSubTab = async (user: ReturnType<typeof userEvent.setup>, label: string) => {
+  await user.click(screen.getByRole('tab', { name: label }))
+}
+
 // Minimal application detail for the read-only "Sollicitatie" tab. `vacancy` is a
 // required nested object on the real type (mapApplicationDetail always builds one) —
 // included here too so ApplicationTab's Locatie field (S6) doesn't read undefined.
@@ -58,9 +72,68 @@ const app = (over: Partial<ApplicationDetail> = {}) => ({
   ...over,
 } as unknown as ApplicationDetail)
 
-describe('ApplicationTab', () => {
-  it('renders the read-only details (source/client/vacancy), no repeated heading', () => {
+describe('ApplicationTab · sub-tab strip (APP-TAB-SPLIT-1)', () => {
+  it('renders a tablist with the four sub-tabs, Status active first', () => {
     renderTab(<ApplicationTab application={app()} />)
+    expect(screen.getByRole('tablist')).toBeInTheDocument()
+    expect(screen.getByRole('tab', { name: 'drawer.subTabs.status' })).toHaveAttribute('aria-selected', 'true')
+    expect(screen.getByRole('tab', { name: 'drawer.subTabs.details' })).toBeInTheDocument()
+    expect(screen.getByRole('tab', { name: 'drawer.subTabs.cv' })).toBeInTheDocument()
+    expect(screen.getByRole('tab', { name: 'drawer.subTabs.context' })).toBeInTheDocument()
+    // Only Status's own content renders initially — Details' Bron/Klant/Vacature
+    // card is unmounted until that sub-tab is picked.
+    expect(screen.queryByText('Facebook')).toBeNull()
+    expect(screen.queryByText('Verpleegkundige')).toBeNull()
+  })
+
+  it('switching to Details renders the Bron/Klant/Vacature card', async () => {
+    const user = userEvent.setup()
+    renderTab(<ApplicationTab application={app()} />)
+    await gotoSubTab(user, 'drawer.subTabs.details')
+    expect(screen.getByText('Facebook')).toBeInTheDocument()
+    expect(screen.getByText('Yesway')).toBeInTheDocument()
+    expect(screen.getByText('Verpleegkundige')).toBeInTheDocument()
+  })
+})
+
+// DD-FE-9 (08-08 drill-down audit): the match-score criteria breakdown
+// (per-criterion sliders) moved from the Context sub-tab to Status, directly
+// under the score cell, so adjusting sits where reading is. Status is the
+// DEFAULT sub-tab, so the first case needs no click.
+describe('ApplicationTab · match-score breakdown placement (DD-FE-9, 08-08 drill-down audit)', () => {
+  const scored = { score: 75, matchCriteria: [{ key: 'c1', label: 'Skills', score: 80, weight: 1 }] }
+
+  it('renders the match-score breakdown on the Status sub-tab by default', () => {
+    renderTab(<ApplicationTab application={app(scored)} />)
+    expect(screen.getByText('matchScore.title')).toBeInTheDocument()
+    expect(screen.getByText('Skills')).toBeInTheDocument()
+  })
+
+  it('no longer renders the match-score breakdown on the Context sub-tab', async () => {
+    const user = userEvent.setup()
+    renderTab(<ApplicationTab application={app(scored)} />)
+    await gotoSubTab(user, 'drawer.subTabs.context')
+    expect(screen.queryByText('matchScore.title')).toBeNull()
+    expect(screen.queryByText('Skills')).toBeNull()
+  })
+
+  it('saves the adjusted score via onAdjustScore from the Status sub-tab, same payload shape as before the move', async () => {
+    const onAdjustScore = vi.fn()
+    const user = userEvent.setup()
+    renderTab(<ApplicationTab application={app({ id: 3, ...scored })} onAdjustScore={onAdjustScore} />)
+    await user.click(screen.getByTitle('matchScore.edit'))
+    await user.click(screen.getByTitle('matchScore.save'))
+    // Same PATCH-shaped payload MatchScoreBlock always emitted — only WHERE
+    // it renders changed, not the request it produces.
+    expect(onAdjustScore).toHaveBeenCalledWith(3, { score: 80, criteria: [{ key: 'c1', label: 'Skills', score: 80, weight: 1 }] })
+  })
+})
+
+describe('ApplicationTab', () => {
+  it('renders the read-only details (source/client/vacancy) on the Details sub-tab, no repeated heading', async () => {
+    const user = userEvent.setup()
+    renderTab(<ApplicationTab application={app()} />)
+    await gotoSubTab(user, 'drawer.subTabs.details')
     // S3: the redundant "Details" heading is gone — only the pencil marks the block.
     expect(screen.queryByText('drawer.details')).toBeNull()
     expect(screen.getByText('Facebook')).toBeInTheDocument()
@@ -71,6 +144,7 @@ describe('ApplicationTab', () => {
   // Danny 25-07: the reject FORM moved out of this tab into a footer button +
   // confirm modal (RejectionModal); this tab now only renders the read-only
   // outcome (RejectionSummary, covered by its own test file) when rejected.
+  // Status is the DEFAULT sub-tab, so no click is needed here.
   it('renders no rejection outcome for an active (not yet rejected) application', () => {
     renderTab(<ApplicationTab application={app()} />)
     expect(screen.queryByText('rejection.rejected')).toBeNull()
@@ -81,14 +155,17 @@ describe('ApplicationTab', () => {
     expect(screen.getByText('rejection.rejected')).toBeInTheDocument()
   })
 
-  it('hides the Details edit pencil when onLinkVacancy is not provided', () => {
+  it('hides the Details edit pencil when onLinkVacancy is not provided', async () => {
+    const user = userEvent.setup()
     renderTab(<ApplicationTab application={app()} />)
+    await gotoSubTab(user, 'drawer.subTabs.details')
     expect(screen.queryByLabelText('common:edit')).toBeNull()
   })
 
   it('opens the vacancy picker in edit mode, showing a diskette + cancel', async () => {
     const user = userEvent.setup()
     renderTab(<ApplicationTab application={app()} onLinkVacancy={vi.fn()} />)
+    await gotoSubTab(user, 'drawer.subTabs.details')
     await user.click(screen.getByLabelText('common:edit'))
     expect(screen.getByLabelText('common:save')).toBeInTheDocument()
     expect(screen.getByLabelText('common:cancel')).toBeInTheDocument()
@@ -100,6 +177,7 @@ describe('ApplicationTab', () => {
     const onLinkVacancy = vi.fn()
     const user = userEvent.setup()
     renderTab(<ApplicationTab application={app()} onLinkVacancy={onLinkVacancy} />)
+    await gotoSubTab(user, 'drawer.subTabs.details')
     await user.click(screen.getByLabelText('common:edit'))
     await user.click(screen.getByLabelText('common:cancel'))
     expect(screen.queryByLabelText('common:save')).toBeNull()
@@ -112,6 +190,7 @@ describe('ApplicationTab', () => {
     const onLinkVacancy = vi.fn()
     const user = userEvent.setup()
     renderTab(<ApplicationTab application={app()} onLinkVacancy={onLinkVacancy} />)
+    await gotoSubTab(user, 'drawer.subTabs.details')
 
     await user.click(screen.getByLabelText('common:edit'))
     await waitFor(() => expect(mockGet).toHaveBeenCalledWith('/vacancies', { params: { per_page: 100 } }))
@@ -126,21 +205,27 @@ describe('ApplicationTab', () => {
 
   // S12/S13: the read-only vacancy value is a real EntityLink (in-app click + new-tab
   // icon), not plain text, once a vacancy is actually linked.
-  it('renders the linked vacancy as a clickable EntityLink', () => {
+  it('renders the linked vacancy as a clickable EntityLink', async () => {
+    const user = userEvent.setup()
     renderTab(<ApplicationTab application={app({ vacancyId: 'v9', vacancyTitle: 'Chirurg' })} />)
+    await gotoSubTab(user, 'drawer.subTabs.details')
     expect(screen.getByTitle('drawer.openVacancy')).toBeInTheDocument()
   })
 
   // S12/S13: Klant becomes a real EntityLink once the application carries a
   // customer_id (the vacancy's client) — plain text otherwise (no id to link to).
-  it('renders Klant as a clickable EntityLink once customerId is present', () => {
+  it('renders Klant as a clickable EntityLink once customerId is present', async () => {
+    const user = userEvent.setup()
     renderTab(<ApplicationTab application={app({ customerId: 'cust1' })} />)
+    await gotoSubTab(user, 'drawer.subTabs.details')
     expect(screen.getByTitle('drawer.openCustomer')).toBeInTheDocument()
     expect(screen.getByText('Yesway')).toBeInTheDocument()
   })
 
-  it('renders Klant as plain text when no customerId is present', () => {
+  it('renders Klant as plain text when no customerId is present', async () => {
+    const user = userEvent.setup()
     renderTab(<ApplicationTab application={app()} />)
+    await gotoSubTab(user, 'drawer.subTabs.details')
     expect(screen.queryByTitle('drawer.openCustomer')).toBeNull()
     expect(screen.getByText('Yesway')).toBeInTheDocument()
   })
@@ -148,8 +233,10 @@ describe('ApplicationTab', () => {
   // S7: Bron is editable in-place, sharing the Details block's pencil with the
   // vacancy link — same save/cancel affordance, separate PATCH via onUpdateSource.
   describe('Bron field (S7)', () => {
-    it('shows the Details pencil when only onUpdateSource is provided (no onLinkVacancy)', () => {
+    it('shows the Details pencil when only onUpdateSource is provided (no onLinkVacancy)', async () => {
+      const user = userEvent.setup()
       renderTab(<ApplicationTab application={app()} onUpdateSource={vi.fn()} />)
+      await gotoSubTab(user, 'drawer.subTabs.details')
       expect(screen.getByLabelText('common:edit')).toBeInTheDocument()
     })
 
@@ -157,6 +244,7 @@ describe('ApplicationTab', () => {
       const onUpdateSource = vi.fn()
       const user = userEvent.setup()
       renderTab(<ApplicationTab application={app({ id: 5 })} onUpdateSource={onUpdateSource} />)
+      await gotoSubTab(user, 'drawer.subTabs.details')
       await user.click(screen.getByLabelText('common:edit'))
       const sourceInput = screen.getByDisplayValue('Facebook')
       await user.clear(sourceInput)
@@ -169,6 +257,7 @@ describe('ApplicationTab', () => {
       const onUpdateSource = vi.fn()
       const user = userEvent.setup()
       renderTab(<ApplicationTab application={app()} onUpdateSource={onUpdateSource} />)
+      await gotoSubTab(user, 'drawer.subTabs.details')
       await user.click(screen.getByLabelText('common:edit'))
       await user.click(screen.getByLabelText('common:save'))
       expect(onUpdateSource).not.toHaveBeenCalled()
@@ -178,6 +267,7 @@ describe('ApplicationTab', () => {
       const onUpdateSource = vi.fn()
       const user = userEvent.setup()
       renderTab(<ApplicationTab application={app()} onUpdateSource={onUpdateSource} />)
+      await gotoSubTab(user, 'drawer.subTabs.details')
       await user.click(screen.getByLabelText('common:edit'))
       const sourceInput = screen.getByDisplayValue('Facebook')
       await user.clear(sourceInput)
@@ -193,15 +283,19 @@ describe('ApplicationTab', () => {
   it('stashes the return tab before navigating to the linked vacancy', async () => {
     const user = userEvent.setup()
     renderTab(<ApplicationTab application={app({ id: 77, vacancyId: 'v9', vacancyTitle: 'Chirurg' })} />)
+    await gotoSubTab(user, 'drawer.subTabs.details')
     await user.click(screen.getByTitle('drawer.openVacancy'))
     expect(peekReturnTab(77)).toBe('application')
   })
 
   // S31 (refined 21-07): compact Ja/Nee CV indicator, reusing the candidate
-  // Documents section's download + DocPreviewModal preview affordance.
+  // Documents section's download + DocPreviewModal preview affordance. Now on
+  // its own CV sub-tab.
   describe('CV block (S31)', () => {
     it('states there is no cv, with no download or preview affordance', async () => {
+      const user = userEvent.setup()
       renderTab(<ApplicationTab application={app({ candidateId: 'c1' })} />)
+      await gotoSubTab(user, 'drawer.subTabs.cv')
       expect(await screen.findByText('drawer.cv.none')).toBeInTheDocument()
       expect(screen.queryByLabelText('drawer.cv.download')).toBeNull()
       expect(screen.queryByLabelText('drawer.cv.view')).toBeNull()
@@ -213,7 +307,9 @@ describe('ApplicationTab', () => {
       mockGet.mockImplementation((url: string) => String(url).includes('/documents')
         ? Promise.resolve({ data: { data: [{ id: 'd1', name: 'cv-anna.pdf', type: 'CV', url: 'https://files.example/cv-anna.pdf', created_at: '2026-07-01T10:00:00Z' }] } })
         : Promise.resolve({ data: [] }))
+      const user = userEvent.setup()
       renderTab(<ApplicationTab application={app({ candidateId: 'c1' })} />)
+      await gotoSubTab(user, 'drawer.subTabs.cv')
       expect(await screen.findByText('cv-anna.pdf')).toBeInTheDocument()
       expect(screen.getByText('drawer.cv.uploadedOn')).toBeInTheDocument()
       const downloadLink = screen.getByLabelText('drawer.cv.download')
@@ -225,36 +321,46 @@ describe('ApplicationTab', () => {
   // MOTIVATIE-ZICHTBAAR-1: the backend ships cover_letter on the detail resource
   // today, but only careersite/partner-API applies ever populate it. These cases lock
   // both halves — the letter renders, and its absence renders nothing at all rather
-  // than an empty card — plus the plain-text line-break fallback.
+  // than an empty card — plus the plain-text line-break fallback. Now on the Context sub-tab.
   describe('Motivation section (MOTIVATIE-ZICHTBAAR-1)', () => {
-    it('renders the motivation section when coverLetter is present', () => {
+    it('renders the motivation section when coverLetter is present', async () => {
+      const user = userEvent.setup()
       renderTab(<ApplicationTab application={app({ coverLetter: '<p>Ik solliciteer graag op deze functie.</p>' })} />)
+      await gotoSubTab(user, 'drawer.subTabs.context')
       expect(screen.getByText('motivation.title')).toBeInTheDocument()
       expect(screen.getByText('Ik solliciteer graag op deze functie.')).toBeInTheDocument()
     })
 
-    it('renders nothing when coverLetter is null', () => {
+    it('renders nothing when coverLetter is null', async () => {
+      const user = userEvent.setup()
       renderTab(<ApplicationTab application={app({ coverLetter: null })} />)
+      await gotoSubTab(user, 'drawer.subTabs.context')
       expect(screen.queryByText('motivation.title')).toBeNull()
     })
 
-    it('renders nothing when coverLetter is an empty string', () => {
+    it('renders nothing when coverLetter is an empty string', async () => {
+      const user = userEvent.setup()
       renderTab(<ApplicationTab application={app({ coverLetter: '' })} />)
+      await gotoSubTab(user, 'drawer.subTabs.context')
       expect(screen.queryByText('motivation.title')).toBeNull()
     })
 
     // A partner-API apply can post PLAIN text: without pre-wrap its newlines
     // collapse and the whole letter renders as one unbroken block.
-    it('preserves line breaks for a PLAIN-TEXT motivation (white-space: pre-wrap)', () => {
+    it('preserves line breaks for a PLAIN-TEXT motivation (white-space: pre-wrap)', async () => {
+      const user = userEvent.setup()
       renderTab(<ApplicationTab application={app({ coverLetter: 'Beste,\n\nGraag solliciteer ik.\nMet groet, Anna' })} />)
+      await gotoSubTab(user, 'drawer.subTabs.context')
       const body = screen.getByText(/Graag solliciteer ik/)
       expect(body).toHaveStyle({ whiteSpace: 'pre-wrap' })
     })
 
     // The inverse guard: real HTML must NOT get pre-wrap, or the newlines between
     // its <p> tags would render as visible blank lines.
-    it('does NOT apply pre-wrap to an HTML motivation', () => {
+    it('does NOT apply pre-wrap to an HTML motivation', async () => {
+      const user = userEvent.setup()
       renderTab(<ApplicationTab application={app({ coverLetter: '<p>Regel een</p>\n<p>Regel twee</p>' })} />)
+      await gotoSubTab(user, 'drawer.subTabs.context')
       const body = screen.getByText('Regel een').parentElement as HTMLElement
       expect(body).not.toHaveStyle({ whiteSpace: 'pre-wrap' })
     })
@@ -264,15 +370,20 @@ describe('ApplicationTab', () => {
   // null on every application that did not come through the careersite. These two
   // cases lock BOTH halves: positive evidence renders, absence renders nothing —
   // dropping the null-check would print "…given on Invalid Date" on most rows.
+  // Now on the Context sub-tab.
   describe('Interview consent row (INTERVIEW-CONSENT-PERSIST-1)', () => {
-    it('renders the consent row with the formatted date when interviewConsentGivenAt is present', () => {
+    it('renders the consent row with the formatted date when interviewConsentGivenAt is present', async () => {
+      const user = userEvent.setup()
       renderTab(<ApplicationTab application={app({ interviewConsentGivenAt: '2026-07-20T10:00:00Z' })} />)
+      await gotoSubTab(user, 'drawer.subTabs.context')
       // The mocked useDateFormat.formatDateTime echoes the raw value (see mock above).
       expect(screen.getByText('interviewConsent.given')).toBeInTheDocument()
     })
 
-    it('renders nothing when interviewConsentGivenAt is null', () => {
+    it('renders nothing when interviewConsentGivenAt is null', async () => {
+      const user = userEvent.setup()
       renderTab(<ApplicationTab application={app({ interviewConsentGivenAt: null })} />)
+      await gotoSubTab(user, 'drawer.subTabs.context')
       expect(screen.queryByText('interviewConsent.given')).toBeNull()
     })
   })

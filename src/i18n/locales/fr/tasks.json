@@ -52,10 +52,12 @@
       "links": "Liens",
       "activity": "Activité",
       "extra": "Extra",
-      "notes": "Notes"
+      "notes": "Notes",
+      "related": "Connexes"
     },
     "markDone": "Marquer comme terminé",
-    "tags": "Tags"
+    "tags": "Tags",
+    "lookupNotReady": "Impossible d'enregistrer pour l'instant — cette option n'est pas encore disponible. Veuillez réessayer dans un instant."
   },
   "details": {
     "title": "Détails de la tâche",
@@ -66,7 +68,9 @@
     "dueTime": "Heure",
     "assignee": "Assignée à",
     "owner": "Responsable",
-    "description": "Description"
+    "description": "Description",
+    "location": "Agence",
+    "locationPlaceholder": "Choisir une agence"
   },
   "comments": {
     "send": "Publier"
@@ -88,7 +92,9 @@
     "contact": "Contact",
     "workflow": "Workflow",
     "open": "Ouvrir",
-    "loadError": "Impossible de charger les résultats."
+    "loadError": "Impossible de charger les résultats.",
+    "linkType": "Type de lien",
+    "opportunity": "Opportunité"
   },
   "activity": {
     "empty": "Aucune activité pour le moment."
@@ -127,7 +133,8 @@
     "cardPlanning": "Planification",
     "cardLink": "Lien",
     "cardAssignment": "Attribution",
-    "duePlaceholder": "jj-mm-aaaa"
+    "duePlaceholder": "jj-mm-aaaa",
+    "otherLinks": "Autres liens"
   },
   "bulk": {
     "selected": "{{count}} sélectionné(e)s",
@@ -152,7 +159,17 @@
     "history": "Historique",
     "empty": "Aucune tâche dans cette vue.",
     "loading": "Chargement des tâches…",
-    "error": "Impossible de charger les tâches liées."
+    "error": "Impossible de charger les tâches liées.",
+    "titles": {
+      "candidate": "Tâches de ce candidat",
+      "customer": "Tâches de ce client",
+      "location": "Tâches de ce site",
+      "department": "Tâches de ce service",
+      "contact": "Tâches de ce contact",
+      "assignee": "Tâches de ce recruteur"
+    },
+    "searchPlaceholder": "Rechercher des tâches…",
+    "allStatuses": "Tous les statuts"
   },
   "notes": {
     "title": "Notes",
@@ -170,5 +187,22 @@
     "reasons": {
       "overdue": "Cette tâche a dépassé son échéance."
     }
+  },
+  "ai": {
+    "title": "Koios AI conseille",
+    "beta": "Bêta",
+    "refresh": "Actualiser",
+    "analyzing": "Koios AI analyse cette tâche…",
+    "dueLabel": "Échéance",
+    "dueUnset": "Aucune échéance n'est encore définie pour cette tâche.",
+    "dueToday": "Cette tâche arrive à échéance aujourd'hui.",
+    "dueOverdue": "Cette tâche est en retard de {{count}} jour(s).",
+    "dueUpcoming": "Cette tâche arrive à échéance dans {{count}} jour(s).",
+    "assigneeLabel": "Affectation",
+    "unassigned": "Cette tâche reste au niveau de l'agence — pas encore affectée à un collaborateur précis.",
+    "assignedTo": "Affectée à {{name}}.",
+    "linksLabel": "Lien",
+    "noLinks": "Cette tâche n'est liée à aucun enregistrement — associez un candidat, un client ou un autre enregistrement pour plus de contexte.",
+    "linked": "Liée à {{count}} enregistrement(s)."
   }
 }

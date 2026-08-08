@@ -9,19 +9,26 @@
  *
  * REVIEW FIX (Danny 02-08, second pass): the first version was a hand-rolled radio
  * group with its own boxed rows — not this product's pattern for "pick one from a
- * tenant lookup". Rebuilt on the SAME `SettingRow` + `SelectMenu` every neighbouring
- * row in this exact screen already uses, so it reads as one more row, not a
- * separate widget. It also used to render an empty "not configured" state while the
+ * tenant lookup". Rebuilt on the SAME `SettingRow` every neighbouring row in this
+ * exact screen already uses, so it reads as one more row, not a separate widget
+ * (the picker itself is now `SelectField` — see SWEEP-SETTINGS-DROPDOWN below).
+ * It also used to render an empty "not configured" state while the
  * live tab was, in fact, already filtering via the guess — a control that shows
  * nothing while something real is happening is a lie about the current state. It
  * now ALWAYS shows the value really in effect: the stored setting if one exists,
  * otherwise the exact guess `useStatusFilter` would apply today (or "All" if no
  * active-like status exists) — reusing `isActiveValue`, never a second copy of that
  * heuristic. A short line of text says whether that value was chosen or guessed.
+ *
+ * SWEEP-SETTINGS-DROPDOWN (Danny 08-08): this list is a tenant lookup (grows with
+ * however many statuses the tenant defines), so the non-searchable `SelectMenu`
+ * checklist was the one settings-tree picker still without a type-to-filter box.
+ * Swapped for the shared kit's `SelectField` (SearchSelect-backed, same value/
+ * onChange contract) — every other settings dropdown already went through this
+ * conversion (SchemaSection/CompanySettings/StatusListEditor/ScopeEditor).
  */
 import { useTranslation } from 'react-i18next'
-import SelectMenu from '@/components/ui/SelectMenu'
-import { SettingRow } from './SettingsKit'
+import { SettingRow, SelectField } from './SettingsKit'
 import { STATUS_FILTER_ALL, isActiveValue } from '@/components/drawer/StatusFilterSelect'
 
 export default function DefaultStatusFilterPicker({ statuses, value, onChange }) {
@@ -44,8 +51,7 @@ export default function DefaultStatusFilterPicker({ statuses, value, onChange })
     <SettingRow label={t('customerDisplay.defaultFilter.title')}
       description={configured ? t('customerDisplay.defaultFilter.chosenHint') : t('customerDisplay.defaultFilter.autoHint')}>
       <div style={{ width: 220 }}>
-        <SelectMenu value={effective} options={options} onChange={onChange} menuWidth={220}
-          style={{ background: 'var(--surface)' }} />
+        <SelectField value={effective} options={options} onChange={onChange} />
       </div>
     </SettingRow>
   )

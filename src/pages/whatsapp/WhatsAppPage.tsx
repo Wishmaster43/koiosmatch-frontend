@@ -141,7 +141,8 @@ export default function WhatsAppPage({ intent }: { intent?: unknown } = {}) {
               {badge > 0 && (
                 <span style={{ fontSize: 10, fontWeight: 700, minWidth: 16, height: 16, padding: '0 5px', borderRadius: 99,
                   display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
-                  background: badgeDanger ? 'var(--color-danger)' : 'var(--color-primary)', color: '#fff' }}>
+                  background: badgeDanger ? 'var(--color-danger)' : 'var(--color-primary)',
+                  color: badgeDanger ? '#fff' : 'var(--color-on-accent)' }}>
                   {badge}
                 </span>
               )}
@@ -152,7 +153,7 @@ export default function WhatsAppPage({ intent }: { intent?: unknown } = {}) {
         <button onClick={handleRefresh} disabled={refreshing}
           style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '7px 14px', marginBottom: 6,
                    fontSize: 12, fontWeight: 500, borderRadius: 8, flexShrink: 0, border: 'none',
-                   background: 'var(--color-primary)', color: '#fff',
+                   background: 'var(--color-primary)', color: 'var(--color-on-accent)',
                    cursor: refreshing ? 'not-allowed' : 'pointer', opacity: refreshing ? 0.6 : 1 }}>
           <RefreshCw size={12} className={refreshing ? 'animate-spin' : undefined} /> {t('refresh')}
         </button>

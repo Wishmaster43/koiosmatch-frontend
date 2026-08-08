@@ -137,7 +137,7 @@ export default function CvProposalCard({
               <button type="button" onClick={() => askDecide('accept')} disabled={!canAccept}
                 style={{ ...btnBase, border: '1px solid var(--color-primary)',
                   background: canAccept ? 'var(--color-primary-bg)' : 'none',
-                  color: 'var(--color-primary)', cursor: canAccept ? 'pointer' : 'not-allowed',
+                  color: 'var(--color-primary-text)', cursor: canAccept ? 'pointer' : 'not-allowed',
                   opacity: canAccept ? 1 : 0.6 }}>
                 <Check size={13} /> {t('cvProposal.accept')}
               </button>

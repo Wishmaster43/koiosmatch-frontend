@@ -72,3 +72,88 @@ describe('useCandidatesData · KAND-FILTERS-1 params reach the GET request', () 
     expect(params).not.toHaveProperty('available_from_before')
   })
 })
+
+// CAND-SORT-1 (DATATABLE-SORT-1 reference adoption, mirrors useApplicationsData.test.ts):
+// pins the REQUEST shape (§13: assert the request, not just that a callback fired) for
+// the FE-column-keyed `sort` param — verified against the LIVE CandidateQuery::rules()
+// whitelist (sort_by in:last_name,first_name,created_at,updated_at,last_contact_at,
+// 2026-08-08: opposite sort_dir on last_name/created_at/last_contact_at each returned a
+// different first row; an unlisted sort_by 422s).
+describe('useCandidatesData · sort request shape (CAND-SORT-1)', () => {
+  it('unsorted default: no sort_by/sort_dir on the request (byte-identical to before this change)', async () => {
+    vi.mocked(api.get).mockResolvedValue({ data: { data: [] } })
+    heavyGetMock.mockResolvedValue({ data: { data: null } })
+
+    renderHook(() => useCandidatesData({ filterParams: {}, page: 1, pageSize: 25, t, setActionMsg: vi.fn(), sort: null }), { wrapper })
+
+    await waitFor(() => expect(api.get).toHaveBeenCalledWith('/candidates', expect.anything()))
+    const call = vi.mocked(api.get).mock.calls.find(([url]) => url === '/candidates')
+    const params = call?.[1]?.params as Record<string, unknown> | undefined
+    expect(params).not.toHaveProperty('sort_by')
+    expect(params).not.toHaveProperty('sort_dir')
+  })
+
+  it('a column mapped to a real backend field sends sort_by/sort_dir on the list request', async () => {
+    vi.mocked(api.get).mockResolvedValue({ data: { data: [] } })
+    heavyGetMock.mockResolvedValue({ data: { data: null } })
+
+    renderHook(() => useCandidatesData({
+      filterParams: {}, page: 1, pageSize: 25, t, setActionMsg: vi.fn(), sort: { by: 'created', dir: 'desc' },
+    }), { wrapper })
+
+    await waitFor(() => expect(api.get).toHaveBeenCalledWith('/candidates', expect.anything()))
+    const call = vi.mocked(api.get).mock.calls.find(([url]) => url === '/candidates')
+    const params = call?.[1]?.params as Record<string, unknown> | undefined
+    expect(params).toMatchObject({ sort_by: 'created_at', sort_dir: 'desc' })
+  })
+
+  it('an unmapped FE column key never reaches the request as sort_by/sort_dir (would 422 the whitelist)', async () => {
+    vi.mocked(api.get).mockResolvedValue({ data: { data: [] } })
+    heavyGetMock.mockResolvedValue({ data: { data: null } })
+
+    renderHook(() => useCandidatesData({
+      filterParams: {}, page: 1, pageSize: 25, t, setActionMsg: vi.fn(), sort: { by: 'title', dir: 'asc' },
+    }), { wrapper })
+
+    await waitFor(() => expect(api.get).toHaveBeenCalledWith('/candidates', expect.anything()))
+    const call = vi.mocked(api.get).mock.calls.find(([url]) => url === '/candidates')
+    const params = call?.[1]?.params as Record<string, unknown> | undefined
+    expect(params).not.toHaveProperty('sort_by')
+    expect(params).not.toHaveProperty('sort_dir')
+  })
+
+  it('maps every column the reference adoption wires (name/created/lastContact), one request per key', async () => {
+    const cases: Array<[string, string]> = [
+      ['name', 'last_name'],
+      ['created', 'created_at'],
+      ['lastContact', 'last_contact_at'],
+    ]
+    for (const [by, sortBy] of cases) {
+      vi.clearAllMocks()
+      vi.mocked(api.get).mockResolvedValue({ data: { data: [] } })
+      heavyGetMock.mockResolvedValue({ data: { data: null } })
+      renderHook(() => useCandidatesData({
+        filterParams: {}, page: 1, pageSize: 25, t, setActionMsg: vi.fn(), sort: { by, dir: 'asc' },
+      }), { wrapper })
+
+      await waitFor(() => expect(api.get).toHaveBeenCalledWith('/candidates', expect.anything()))
+      const call = vi.mocked(api.get).mock.calls.find(([url]) => url === '/candidates')
+      const params = call?.[1]?.params as Record<string, unknown> | undefined
+      expect(params).toMatchObject({ sort_by: sortBy, sort_dir: 'asc' })
+    }
+  })
+
+  it('stats stays sortless — a sort never leaks into the /candidates/stats request', async () => {
+    vi.mocked(api.get).mockResolvedValue({ data: { data: [] } })
+    heavyGetMock.mockResolvedValue({ data: { data: null } })
+
+    renderHook(() => useCandidatesData({
+      filterParams: {}, page: 1, pageSize: 25, t, setActionMsg: vi.fn(), sort: { by: 'created', dir: 'desc' },
+    }), { wrapper })
+
+    await waitFor(() => expect(heavyGetMock).toHaveBeenCalledWith('/candidates/stats', expect.anything()))
+    const statsParams = heavyGetMock.mock.calls[0][1]?.params as Record<string, unknown> | undefined
+    expect(statsParams).not.toHaveProperty('sort_by')
+    expect(statsParams).not.toHaveProperty('sort_dir')
+  })
+})

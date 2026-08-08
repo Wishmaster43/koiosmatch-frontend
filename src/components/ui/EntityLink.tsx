@@ -34,7 +34,7 @@ export default function EntityLink({ page, id, children, title, hideIcon = false
     <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, minWidth: 0, maxWidth: '100%' }}>
       <button type="button" title={title} onClick={() => openEntity(page, id)}
         style={{ padding: 0, background: 'none', border: 'none', font: 'inherit', textAlign: 'left',
-          color: 'var(--color-primary)', cursor: 'pointer', textDecoration: 'none',
+          color: 'var(--color-primary-text)', cursor: 'pointer', textDecoration: 'none',
           minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
         onMouseEnter={e => { e.currentTarget.style.textDecoration = 'underline' }}
         onMouseLeave={e => { e.currentTarget.style.textDecoration = 'none' }}>

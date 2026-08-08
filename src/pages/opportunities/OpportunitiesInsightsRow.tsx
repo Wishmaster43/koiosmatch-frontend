@@ -102,7 +102,7 @@ export default function OpportunitiesInsightsRow({
   }
   const activeIs = (labels: (string | undefined)[]) => eqSet(stage, labels.filter((l): l is string => !!l))
   const kpis: KpiSpec[] = [
-    { key: 'open',     label: t('kpi.open'),                                   value: open,     color: 'var(--color-primary)',
+    { key: 'open',     label: t('kpi.open'),                                   value: open,     color: 'var(--color-primary-text)',
       onClick: () => toggleStages(openLabels), active: activeIs(openLabels) },
     { key: 'pipeline', label: t(valueInHours ? 'kpi.pipelineHours' : 'kpi.pipeline'), value: pipeline, color: 'var(--color-success)',
       onClick: () => toggleStages(openLabels), active: activeIs(openLabels) },

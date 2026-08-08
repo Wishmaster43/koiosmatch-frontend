@@ -38,7 +38,7 @@ export default function WholeTreeBanner({ separateEntity, onSelectEntity }: Whol
       borderRadius: 8, marginBottom: 16 }}>
       {/* Title + the levels one single row carries, left to right. */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap', fontSize: 12 }}>
-        <Network size={13} style={{ color: 'var(--color-primary)', flexShrink: 0 }} aria-hidden="true" />
+        <Network size={13} style={{ color: 'var(--color-primary-text)', flexShrink: 0 }} aria-hidden="true" />
         <span style={{ fontWeight: 600, color: 'var(--text)' }}>{t('import.tree.title')}:</span>
         {LEVELS.map((id, index) => (
           <span key={id} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
@@ -62,7 +62,7 @@ export default function WholeTreeBanner({ separateEntity, onSelectEntity }: Whol
         <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap', marginTop: 8, fontSize: 12 }}>
           <span style={{ color: 'var(--text-muted)' }}>{t('import.tree.separateAlternative')}</span>
           <button type="button" onClick={() => onSelectEntity(separateEntity)}
-            style={{ fontSize: 12, fontWeight: 600, color: 'var(--color-primary)', background: 'none',
+            style={{ fontSize: 12, fontWeight: 600, color: 'var(--color-primary-text)', background: 'none',
                      border: 'none', cursor: 'pointer', padding: 0, textDecoration: 'underline' }}>
             {t('import.tree.switchToSeparate')}
           </button>

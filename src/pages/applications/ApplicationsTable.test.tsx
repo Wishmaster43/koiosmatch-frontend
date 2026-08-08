@@ -66,3 +66,50 @@ describe('ApplicationsTable · Koios column', () => {
     expect(values).toEqual(['Volg op', '—'])
   })
 })
+
+// SWEEP-TABLES: the source column had no render fn, so an empty source printed
+// a blank cell — the only column left inconsistent with the house em-dash
+// convention every other empty cell already follows.
+describe('ApplicationsTable · source column em-dash (SWEEP-TABLES)', () => {
+  it('renders the real source value, and a plain dash when empty — never a blank cell', () => {
+    const withSource = { ...baseRow, id: 6, source: 'Website' }
+    const withoutSource = { ...baseRow, id: 7, source: '' }
+    const { container } = render(<ApplicationsTable rows={[withSource, withoutSource]} />)
+
+    // Real (nl) i18n loads transitively via the component's own '@/lib/datetime'
+    // import (not mocked in this file) — 'Bron' is cols.source's real translation.
+    const headerCell = screen.getByText('Bron').closest('th') as HTMLElement
+    const colIndex = Array.from(headerCell.parentElement?.children ?? []).indexOf(headerCell)
+    const rows = container.querySelectorAll('tbody tr')
+    const values = Array.from(rows).map(r => r.children[colIndex].textContent)
+    expect(values).toContain('Website')
+    expect(values).toContain('—')
+    expect(values).not.toContain('')
+  })
+})
+
+// Danny 08-08: "Bezig 2/12 1 regel geen 2 regels" — the interview cell stacked
+// the chip above the progress text, costing a second row of height in every
+// table row. It must read as ONE line.
+describe('ApplicationsTable · interview column', () => {
+  const rowWithInterview = {
+    ...baseRow, id: 9,
+    interview: { category: 'busy', step: 2, total: 12 },
+  } as unknown as Application
+
+  it('renders the chip and the step progress on a single, non-wrapping line', () => {
+    render(<ApplicationsTable rows={[rowWithInterview]} />)
+    const progress = screen.getByText('2/12')
+    const line = progress.parentElement as HTMLElement
+    expect(line).toHaveStyle({ display: 'inline-flex', whiteSpace: 'nowrap' })
+    // The chip is that same line's sibling — never a stacked column wrapper.
+    expect(line.children.length).toBe(2)
+    expect(line.style.flexDirection).not.toBe('column')
+  })
+
+  it('shows only the chip when the flow has no step count', () => {
+    const noSteps = { ...rowWithInterview, id: 10, interview: { category: 'busy', step: null, total: 0 } } as unknown as Application
+    render(<ApplicationsTable rows={[noSteps]} />)
+    expect(screen.queryByText(/\/0$/)).toBeNull()
+  })
+})

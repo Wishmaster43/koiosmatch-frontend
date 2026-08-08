@@ -70,7 +70,7 @@ export default function MatchProfileCard({ templateId, onTemplateChange, onWeigh
       )}
 
       <button type="button" onClick={() => setAdjusting(a => !a)}
-        style={{ alignSelf: 'flex-start', fontSize: 11, fontWeight: 500, color: 'var(--color-primary)',
+        style={{ alignSelf: 'flex-start', fontSize: 11, fontWeight: 500, color: 'var(--color-primary-text)',
           background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}>
         {adjusting ? t('matching.hideAdjust') : t('matching.adjust')}
       </button>

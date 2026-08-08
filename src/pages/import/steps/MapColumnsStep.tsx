@@ -8,12 +8,12 @@
 import type { CSSProperties } from 'react'
 import { useTranslation } from 'react-i18next'
 import { AlertTriangle } from 'lucide-react'
+import CreatableSelect from '@/components/ui/CreatableSelect'
 import { fieldLabel } from '../lib/fieldLabels'
 import { SKIP, missingRequiredColumns, unmappedSourceColumns, type ColumnMapping } from '../lib/mapping'
 
 const SELECT_STYLE: CSSProperties = {
-  height: 32, padding: '0 10px', fontSize: 13, border: '1px solid var(--border)', borderRadius: 8,
-  background: 'var(--surface)', color: 'var(--text)', minWidth: 220,
+  height: 32, fontSize: 13, minWidth: 220,
 }
 
 interface MapColumnsStepProps {
@@ -35,44 +35,61 @@ export default function MapColumnsStep({ entity, headers, targetColumns, mapping
     <div>
       <div style={{ marginBottom: 16 }}>
         <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--text)' }}>
-          {t('import.wizard.mapping.title', { defaultValue: 'Match your columns' })}
+          {t('import.wizard.mapping.title')}
         </div>
         <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>
-          {t('import.wizard.mapping.subtitle', { defaultValue: 'We matched what we recognised — check the rest and adjust where needed.' })}
+          {t('import.wizard.mapping.subtitle')}
         </div>
       </div>
 
       {headers.length === 0 ? (
         <p style={{ fontSize: 13, color: 'var(--text-muted)' }}>
-          {t('import.wizard.mapping.noColumns', { defaultValue: 'This file has no columns to map.' })}
+          {t('import.wizard.mapping.noColumns')}
         </p>
       ) : (
         <div style={{ border: '1px solid var(--border)', borderRadius: 8, overflow: 'hidden' }}>
           <div style={{ display: 'flex', padding: '8px 12px', background: 'var(--hover-bg)', fontSize: 11,
             fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase' }}>
-            <span style={{ flex: 1 }}>{t('import.wizard.mapping.sourceColumn', { defaultValue: 'Column in your file' })}</span>
-            <span style={{ flex: 1 }}>{t('import.wizard.mapping.targetField', { defaultValue: 'Maps to' })}</span>
+            <span style={{ flex: 1 }}>{t('import.wizard.mapping.sourceColumn')}</span>
+            <span style={{ flex: 1 }}>{t('import.wizard.mapping.targetField')}</span>
           </div>
-          {headers.map((header) => (
-            <div key={header} style={{ display: 'flex', alignItems: 'center', padding: '8px 12px',
-              borderTop: '1px solid var(--border)', gap: 12 }}>
-              <span style={{ flex: 1, fontSize: 13, color: 'var(--text)', fontFamily: 'var(--font-mono, monospace)' }}>{header}</span>
-              <div style={{ flex: 1 }}>
-                <select value={mapping[header] ?? SKIP} onChange={(e) => onChangeMapping(header, e.target.value)}
-                  aria-label={t('import.wizard.mapping.targetField', { defaultValue: 'Maps to' }) + `: ${header}`} style={SELECT_STYLE}>
-                  <option value={SKIP}>{t('import.wizard.mapping.skipOption', { defaultValue: '— Do not import —' })}</option>
-                  {targetColumns.map((column) => (
-                    <option key={column} value={column}>{fieldLabel(t, entity, column)}</option>
-                  ))}
-                </select>
-                {mapping[header] === SKIP && (
-                  <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 3, fontStyle: 'italic' }}>
-                    {t('import.wizard.mapping.skippedNotice', { defaultValue: 'This column will be skipped.' })}
-                  </div>
-                )}
+          {headers.map((header) => {
+            // Repeated-row control — each column's picker needs its OWN accessible
+            // name (the house rule for controls inside a repeated row). The id is
+            // derived from the header itself (already the unique React `key` for
+            // this row) rather than useId(), since useId() cannot be called from
+            // inside .map() when the row count varies between renders.
+            const rowLabelId = `map-col-label-${header.replace(/\s+/g, '-')}`
+            const options = [
+              { value: SKIP, label: t('import.wizard.mapping.skipOption') },
+              ...targetColumns.map((column) => ({ value: column, label: fieldLabel(t, entity, column) })),
+            ]
+            return (
+              <div key={header} style={{ display: 'flex', alignItems: 'center', padding: '8px 12px',
+                borderTop: '1px solid var(--border)', gap: 12 }}>
+                <span style={{ flex: 1, fontSize: 13, color: 'var(--text)', fontFamily: 'var(--font-mono, monospace)' }}>{header}</span>
+                <div style={{ flex: 1 }}>
+                  <span id={rowLabelId} className="sr-only">
+                    {t('import.wizard.mapping.targetField')}: {header}
+                  </span>
+                  {/* Searchable combobox replaces the bare native <select> (Danny 08-08, §4). */}
+                  <CreatableSelect
+                    aria-labelledby={rowLabelId}
+                    value={mapping[header] ?? SKIP}
+                    onChange={(value) => onChangeMapping(header, value)}
+                    allowCreate={false}
+                    options={options}
+                    style={SELECT_STYLE}
+                  />
+                  {mapping[header] === SKIP && (
+                    <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 3, fontStyle: 'italic' }}>
+                      {t('import.wizard.mapping.skippedNotice')}
+                    </div>
+                  )}
+                </div>
               </div>
-            </div>
-          ))}
+            )
+          })}
         </div>
       )}
 
@@ -103,7 +120,7 @@ export default function MapColumnsStep({ entity, headers, targetColumns, mapping
         </button>
         <button type="button" onClick={onNext} disabled={missingRequired.length > 0 || headers.length === 0}
           style={{ height: 34, padding: '0 16px', fontSize: 13, fontWeight: 500, border: 'none', borderRadius: 8,
-                   background: 'var(--color-primary)', color: 'white',
+                   background: 'var(--color-primary)', color: 'var(--color-on-accent)',
                    cursor: missingRequired.length > 0 || headers.length === 0 ? 'not-allowed' : 'pointer',
                    opacity: missingRequired.length > 0 || headers.length === 0 ? 0.5 : 1 }}>
           {t('import.wizard.next', { ns: 'settings', defaultValue: 'Next' })}

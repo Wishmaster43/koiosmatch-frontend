@@ -1,0 +1,157 @@
+/**
+ * MyNotificationsSettings (G28) — the CALLER's OWN per-context in-app
+ * notification override, sitting NEXT TO the tenant-wide switch
+ * (NotificationsSettings.jsx, which writes `notif_<context>_in_app` +, since
+ * O-27, `notif_<context>_email`). Reads/writes `GET/PUT /settings/my-notifications
+ * { contexts: { <context>: true|false|null } }` (verified against
+ * app/Http/Controllers/MyNotificationSettingsController.php +
+ * app/Support/Notifier.php::contexts()): `null` = inherit the tenant-wide
+ * default (ON when the tenant never configured it), `true`/`false` forces
+ * this context on/off for the caller only, regardless of the tenant switch.
+ * The context list AND its labels are the exact six the tenant screen
+ * already ships (`notifications.context.*`) — this screen derives the row
+ * set from whatever the API returns rather than hardcoding it, so no new
+ * per-context copy is needed and a future context needs no FE change here.
+ *
+ * E-mail column (O-27, commit 551c17e1) — HONEST GATE, not a working control:
+ * `Notifier::send()` DOES resolve a per-user e-mail override from a
+ * `notif_<context>_email.user.<uuid>` setting key (Notifier.php::userOverridesFor
+ * with channel='email'), but `MyNotificationSettingsController` was never updated
+ * to write it — `index()`/`update()` both call `Notifier::userKey($context, $uid)`
+ * with NO channel argument, which always resolves to the `_in_app.user.<uuid>` key
+ * (the method's default). There is today no request shape this endpoint accepts
+ * that targets the e-mail key, so a working per-user e-mail toggle here would
+ * either 422 on an unexpected field or — worse — silently flip the caller's IN-APP
+ * override while the UI claims it changed e-mail. Verified against the live
+ * controller source (no later commit touches it); until CMBE adds a `channel`
+ * param (mirroring `Notifier::userKey`'s own signature), this column renders a
+ * calm muted marker instead of a SegmentedControl (§3 no fake affordance) — the
+ * caller always follows the tenant-wide e-mail switch for now.
+ *
+ * Each row saves OPTIMISTICALLY on change (its own partial PUT), with
+ * rollback + toast on failure — mirrors useMyKoiosMode, the sibling
+ * per-user "my-*" preference screen on the same controller family — so
+ * there is no separate batch Save button here.
+ */
+import { useEffect, useState } from 'react'
+import type { CSSProperties } from 'react'
+import { useTranslation } from 'react-i18next'
+import { AlertTriangle } from 'lucide-react'
+import api, { unwrap } from '@/lib/api'
+import { notifyError } from '@/lib/notify'
+import SegmentedControl from '@/components/ui/SegmentedControl'
+import SoftChip from '@/components/ui/SoftChip'
+import { SettingCardList, SettingRow, SkeletonRows } from '../components/SettingsKit'
+
+// The API's tri-state per context: null = inherit the tenant default, true/false
+// = an explicit personal override. A distinct type from plain boolean so a caller
+// can never accidentally treat "no override" as "off".
+type ContextValue = boolean | null
+type ContextMap = Record<string, ContextValue>
+
+/** Load + optimistically persist the caller's own per-context overrides. */
+function useMyNotifications() {
+  const { t } = useTranslation('settings')
+  const [contexts, setContexts] = useState<ContextMap>({})
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(false)
+
+  // Load once on mount; the alive guard drops a stale response after unmount (§9).
+  useEffect(() => {
+    let alive = true
+    api.get('/settings/my-notifications')
+      .then(res => {
+        if (!alive) return
+        const body = unwrap<{ contexts?: ContextMap }>(res)
+        setContexts(body?.contexts ?? {})
+      })
+      .catch(() => { if (alive) setError(true) })
+      .finally(() => { if (alive) setLoading(false) })
+    return () => { alive = false }
+  }, [])
+
+  // Persist ONE context optimistically; a failed PUT rolls that row back and
+  // toasts, so a dropped save never leaves the UI silently wrong.
+  const setContext = (context: string, value: ContextValue) => {
+    const prev = contexts[context] ?? null
+    setContexts(c => ({ ...c, [context]: value }))
+    api.put('/settings/my-notifications', { contexts: { [context]: value } }).catch(() => {
+      setContexts(c => ({ ...c, [context]: prev }))
+      notifyError(t('notifications.my.saveFailed'))
+    })
+  }
+
+  return { contexts, loading, error, setContext }
+}
+
+// Tri-state UI value <-> API value mapping, shared by every row.
+const toUi = (v: ContextValue): string => (v === null ? 'inherit' : v ? 'on' : 'off')
+const fromUi = (v: string): ContextValue => (v === 'inherit' ? null : v === 'on')
+
+// Small column caption above each channel control — reused for BOTH the working
+// in-app SegmentedControl and the honest e-mail marker so the two columns read
+// as one pair, not two unrelated widgets.
+const captionStyle: CSSProperties = {
+  fontSize: 10, fontWeight: 600, color: 'var(--text-muted)',
+  textTransform: 'uppercase', letterSpacing: 0.4, textAlign: 'center',
+}
+
+export default function MyNotificationsSettings() {
+  const { t } = useTranslation('settings')
+  const { contexts, loading, error, setContext } = useMyNotifications()
+  const known = Object.keys(contexts)
+
+  // Inherit clears the override (null), On/Off force the context for the
+  // caller only — same three options on every row.
+  const options = [
+    { value: 'inherit', label: t('notifications.my.inherit') },
+    { value: 'on', label: t('notifications.my.on') },
+    { value: 'off', label: t('notifications.my.off') },
+  ]
+
+  return (
+    <div style={{ maxWidth: 640 }}>
+      <div style={{ marginBottom: 20 }}>
+        <h2 style={{ fontSize: 15, fontWeight: 600, color: 'var(--text)' }}>{t('notifications.my.title')}</h2>
+        <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>{t('notifications.my.subtitle')}</p>
+      </div>
+
+      {/* Four explicit UI states: loading skeleton, load error, empty (no known
+          contexts), and the real row list. */}
+      {loading ? <SkeletonRows /> : error ? (
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '24px 0', color: 'var(--color-danger)', fontSize: 13 }}>
+          <AlertTriangle size={14} /> {t('common.loadError')}
+        </div>
+      ) : known.length === 0 ? (
+        <p style={{ fontSize: 13, color: 'var(--text-muted)', padding: '24px 0' }}>{t('notifications.my.empty')}</p>
+      ) : (
+        <SettingCardList>
+          {known.map(context => {
+            const title = t(`notifications.context.${context}.title`, context)
+            return (
+              <SettingRow key={context} label={title} description={t(`notifications.context.${context}.desc`, '')}>
+                {/* Two columns, side by side: a real working in-app override next to
+                    the (currently honest, non-functional) e-mail marker — see the
+                    O-27 note at the top of this file for why e-mail isn't a control yet. */}
+                <div style={{ display: 'flex', alignItems: 'flex-end', gap: 16 }}>
+                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
+                    <span style={captionStyle}>{t('notifications.inApp.label')}</span>
+                    <SegmentedControl size="compact" ariaLabel={title}
+                      value={toUi(contexts[context])}
+                      onChange={next => setContext(context, fromUi(next))}
+                      options={options} />
+                  </div>
+                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
+                    <span style={captionStyle}>{t('notifications.email.label')}</span>
+                    <SoftChip label={t('notifications.my.emailNotAvailable')} color="var(--text-muted)"
+                      title={t('notifications.my.emailNotAvailableReason')} />
+                  </div>
+                </div>
+              </SettingRow>
+            )
+          })}
+        </SettingCardList>
+      )}
+    </div>
+  )
+}

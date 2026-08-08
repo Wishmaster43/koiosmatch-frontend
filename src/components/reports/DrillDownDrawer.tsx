@@ -168,7 +168,7 @@ export default function DrillDownDrawer({ title, subtitle, candidates = [], onCl
                   <div className="flex items-start gap-3">
                     {/* Avatar */}
                     <div className="flex items-center justify-center flex-shrink-0 font-medium rounded-full"
-                      style={{ width: 36, height: 36, background: 'var(--color-primary-bg)', color: 'var(--color-primary)', fontSize: 12 }}>
+                      style={{ width: 36, height: 36, background: 'var(--color-primary-bg)', color: 'var(--color-primary-text)', fontSize: 12 }}>
                       {initials || '?'}
                     </div>
 
@@ -218,7 +218,7 @@ export default function DrillDownDrawer({ title, subtitle, candidates = [], onCl
             {/* Jump to the standalone candidates table (closes the drawer first). */}
             <button onClick={() => { onClose(); navigateToPage('shiftmanager.candidates-table') }}
               className="flex items-center gap-1.5 text-xs font-medium rounded-lg px-3 py-1.5"
-              style={{ background: 'var(--color-primary)', border: '1px solid var(--color-primary)', cursor: 'pointer', color: '#fff' }}>
+              style={{ background: 'var(--color-primary)', border: '1px solid var(--color-primary)', cursor: 'pointer', color: 'var(--color-on-accent)' }}>
               {t('drilldown.viewDetails')}
               <ArrowRight size={13} />
             </button>

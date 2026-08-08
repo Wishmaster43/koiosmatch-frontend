@@ -108,7 +108,11 @@ function SubNavItem({ item, active, onNavigate }) {
       style={{
         gap: 8, padding: '6px 10px',
         background: active ? 'var(--color-primary-bg)' : hovered ? 'var(--sidebar-hover)' : 'transparent',
-        color:      active ? 'var(--color-primary)'    : hovered ? 'var(--sidebar-text)'   : 'var(--sidebar-muted)',
+        // SIDEBAR-CONTRAST-1 (Danny 08-08, "AENF is nog steeds niet leesbaar"): the
+        // active label is the accent used AS TEXT on a near-white sidebar, so it must
+        // read the theme-adjusted token, never the raw brand. Measured: AENF's yellow
+        // #ffde00 on the white sidebar scores 1.1:1 — invisible.
+        color:      active ? 'var(--color-primary-text)' : hovered ? 'var(--sidebar-text)' : 'var(--sidebar-muted)',
       }}
     >
       <div className="flex-shrink-0 rounded-full"
@@ -147,7 +151,8 @@ function NavItem({ item, activePage, expanded, openItems, toggleOpen, onNavigate
           padding:        expanded ? '7px 10px' : '7px',
           justifyContent: expanded ? 'flex-start' : 'center',
           background: isActive ? 'var(--color-primary-bg)' : hovered ? 'var(--sidebar-hover)' : 'transparent',
-          color:      isActive ? 'var(--color-primary)'    : hovered ? 'var(--sidebar-text)'   : 'var(--sidebar-muted)',
+          // SIDEBAR-CONTRAST-1 — same reason as SubNavItem above: accent AS text.
+          color:      isActive ? 'var(--color-primary-text)' : hovered ? 'var(--sidebar-text)' : 'var(--sidebar-muted)',
         }}
       >
         {Icon && <Icon size={15} style={{ flexShrink: 0 }} />}
@@ -287,22 +292,27 @@ export default function Sidebar({ expanded, activePage, setActivePage, koiosOpen
               // color-mix — a var() cannot take a hex-alpha suffix ('var(--x)20' is
               // invalid CSS, the declaration was silently dropped; audit-consolidatie 23-07).
               : 'linear-gradient(135deg, color-mix(in srgb, var(--color-primary) 12%, transparent), color-mix(in srgb, var(--color-violet) 12%, transparent))',
-            color: '#fff',
+            // Solid accent gradient needs the tenant's readable-on-accent token; the
+            // soft-tint (non-open) state is a light surface, so it uses the accent as TEXT
+            // instead (mirrors the "Koios" label below) — never a hardcoded white/#fff.
+            color: koiosOpen ? 'var(--color-on-accent)' : 'var(--color-primary)',
           }}
         >
           <div className="flex items-center justify-center rounded-full flex-shrink-0"
             style={{ width: 18, height: 18, background: koiosOpen ? 'rgba(255,255,255,0.25)' : 'var(--color-primary)' }}>
-            <BrainCircuit size={11} color="white" />
+            {/* Translucent white circle (koiosOpen) stays white; the solid accent circle
+                (collapsed) needs the on-accent token so a light brand keeps a readable icon. */}
+            <BrainCircuit size={11} color={koiosOpen ? 'white' : 'var(--color-on-accent)'} />
           </div>
           {expanded && (
             <span style={{ fontSize: 13, fontWeight: 600, flex: 1, textAlign: 'left',
-              color: koiosOpen ? '#fff' : 'var(--color-primary)' }}>
+              color: koiosOpen ? 'var(--color-on-accent)' : 'var(--color-primary)' }}>
               Koios
             </span>
           )}
           {expanded && !koiosOpen && (
             <span style={{ fontSize: 9, fontWeight: 600, padding: '2px 6px',
-              background: 'var(--color-primary)', color: '#fff', borderRadius: 99, letterSpacing: '0.04em' }}>
+              background: 'var(--color-primary)', color: 'var(--color-on-accent)', borderRadius: 99, letterSpacing: '0.04em' }}>
               AI
             </span>
           )}

@@ -93,7 +93,8 @@
       "ccCust": "Kostenstelle Kunde",
       "candidates": "Kandidaten",
       "notes": "Notizen"
-    }
+    },
+    "filterMonth": "Monat"
   },
   "shiftsDrawer": {
     "count": "{{count}} Einsätze",

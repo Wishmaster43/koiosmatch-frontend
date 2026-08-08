@@ -1,23 +1,82 @@
 import type { CSSProperties } from 'react'
+import type { LucideIcon } from 'lucide-react'
+
+// One fixed rail width for every row that participates in the axis, so the
+// vertical line lands on the SAME x whether the row carries a marker, only the
+// connecting line (past a day heading) or just an indent. A bare dot keeps its
+// intrinsic width so the pre-existing hosts (NotesTab) render unchanged.
+const RAIL_WIDTH = 22
+
+interface TimelineRailProps {
+  // Skip the trailing segment so the axis terminates once, at the very bottom.
+  isLast?: boolean
+  // Semantic token for the marker; the axis line itself stays neutral (§4).
+  color?: string
+  // Diameter of the bare dot (ignored when an icon is given).
+  size?: number
+  // Meaning-carrying icon; renders the §4 soft-tint marker instead of a dot.
+  icon?: LucideIcon
+  // 'marker'    — dot/icon + the segment down to the next row (default)
+  // 'connector' — line only: carries the axis past a day heading
+  // 'spacer'    — width only, no line: above the very first marker
+  variant?: 'marker' | 'connector' | 'spacer'
+}
 
 /**
- * TimelineRail — the dot + connecting vertical line for one row in a chronological
- * timeline/activity list. Shared across every entity's Tijdlijn render so events
- * never show as disconnected dots (Danny 05-08: "waar is de echte lijn?" — no
- * connector between the bolletjes). `alignSelf: 'stretch'` makes the rail fill its
- * row's full height regardless of the row's own `alignItems` (mirrors the working
- * tasks ActivityTab pattern), so the line always reaches the next item's dot.
- * `isLast` skips the trailing segment so the rail terminates cleanly on the final
- * item instead of dangling below it.
+ * TimelineRail — the vertical axis column of one timeline row: a marker (bare dot
+ * or a soft-tinted icon) plus the connecting line down to the next row. Shared
+ * across every entity's Tijdlijn so events read as one continuous axis instead of
+ * disconnected bolletjes (Danny 05-08). `alignSelf: 'stretch'` makes the column
+ * fill its row's full height regardless of the row's own `alignItems`, so the line
+ * always reaches the next marker; `isLast` drops the trailing segment so nothing
+ * dangles below the final event.
  */
-export default function TimelineRail({ isLast = false, color = 'var(--color-primary)', size = 8 }: { isLast?: boolean; color?: string; size?: number }) {
-  const dotStyle: CSSProperties = { width: size, height: size, borderRadius: '50%', background: color, flexShrink: 0, marginTop: 6 }
+export default function TimelineRail({
+  isLast = false, color = 'var(--color-primary)', size = 8, icon: Icon, variant = 'marker',
+}: TimelineRailProps) {
+  // The axis is structure, not decoration — it stays in the neutral border token
+  // while only the marker carries the event's semantic colour (§4).
+  // `flex: 1` (not a fixed height) so the segment always grows to the row's real
+  // height — the column is stretched, so the line meets the next marker exactly.
+  const segment: CSSProperties = { flex: 1, minHeight: 6, width: 1, background: 'var(--border)', flexShrink: 0 }
+
+  // Marker and connector/spacer rows share the fixed width; a legacy bare dot does not.
+  const fixedWidth = Boolean(Icon) || variant !== 'marker'
+  const column: CSSProperties = {
+    display: 'flex', flexDirection: 'column', alignItems: 'center',
+    flexShrink: 0, alignSelf: 'stretch', ...(fixedWidth ? { width: RAIL_WIDTH } : null),
+  }
+
+  // A day heading sits beside the axis, so the line runs past it uninterrupted;
+  // above the FIRST heading it must not, or the axis dangles into empty space.
+  if (variant !== 'marker') {
+    return (
+      <div style={column}>
+        {variant === 'connector' && <span style={segment} data-testid="timeline-connector" />}
+      </div>
+    )
+  }
+
+  // Soft-tint marker (§4): background/border are color-mix tints of the token,
+  // icon is the token itself — never a solid fill. aria-hidden on purpose: the
+  // row's own text already names the event, so announcing it twice is noise.
+  const dot: CSSProperties = Icon
+    ? {
+        width: RAIL_WIDTH, height: RAIL_WIDTH, borderRadius: '50%', flexShrink: 0,
+        display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+        background: `color-mix(in srgb, ${color} 12%, transparent)`,
+        border: `1px solid color-mix(in srgb, ${color} 36%, transparent)`, color,
+      }
+    : { width: size, height: size, borderRadius: '50%', background: color, flexShrink: 0, marginTop: 6 }
+
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', flexShrink: 0, alignSelf: 'stretch' }}>
-      <span style={dotStyle} data-testid="timeline-dot" />
+    <div style={column}>
       {/* data-testid: purely a test hook (no visible/user-facing role) so callers
-          can assert the connector renders/terminates without scraping inline styles. */}
-      {!isLast && <span style={{ flex: 1, width: 1, background: 'var(--border)', marginTop: 2 }} data-testid="timeline-connector" />}
+          can assert the axis renders/terminates without scraping inline styles. */}
+      <span style={dot} data-testid="timeline-dot" aria-hidden="true">
+        {Icon && <Icon size={12} />}
+      </span>
+      {!isLast && <span style={{ ...segment, marginTop: 2 }} data-testid="timeline-connector" />}
     </div>
   )
 }

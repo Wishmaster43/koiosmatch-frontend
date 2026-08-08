@@ -62,6 +62,28 @@ const cardStyle: CSSProperties = {
   background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 10,
 }
 
+/**
+ * humanizeInterviewStatus — `current_status` (e.g. "ACTIVE_IN_CARE") is one entry
+ * off THAT flow's own `statuses[]` list (interview_flows.statuses, verified live
+ * against InterviewSessionResource::block for S-00001/Zorgintake: a 12-name,
+ * tenant/flow-authored vocabulary), never a fixed global enum — so a static i18n
+ * map per value would both violate "nothing hardcoded" (§3B) and miss every future
+ * flow-defined name. SCREAMING_SNAKE → "Screaming snake" is the honest fallback so
+ * the raw enum never reaches the screen; the render below still tries a real i18n
+ * key first for the few markers the ENGINE ITSELF sets verbatim (INTRO_SENT at
+ * session-create, COMPLETED/DISQUALIFIED at session-end — InterviewEngine.php),
+ * which are the one part of this vocabulary that IS universal. Exported so an
+ * unknown value's fallback is directly unit-testable.
+ */
+export function humanizeInterviewStatus(raw: string): string {
+  const spaced = raw.replace(/_+/g, ' ').trim().toLowerCase()
+  return spaced.charAt(0).toUpperCase() + spaced.slice(1)
+}
+
+// Decorative separator between the meta line's segments — hidden from assistive
+// tech since every segment around it already carries its own accessible text.
+const MetaDot = () => <span aria-hidden="true" style={{ color: 'var(--text-muted)', fontSize: 12 }}>·</span>
+
 // BUTTON-SOFT-TINT-1 (Danny 05-08): the active state was a white/transparent
 // outline button — now the house soft-tint recipe (§4, mirrors DrawerAddButton/
 // QuickViewToggle). The inactive/disabled state stays a neutral, unfilled ghost
@@ -229,50 +251,78 @@ export default function InterviewStatusCard({ interview, applicationId }: { inte
 
   return (
     <div style={cardStyle}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
+      {/* I1 (Danny 08-08 screenshot): ONE calm meta line — avatar, name, flow,
+          status chip, turn chip, step, current status — instead of the previous
+          layout where the agent/flow sat in their own stacked title+subtitle
+          block and pushed the chips onto separately wrapped lines. Every segment
+          stays its OWN text node (so exact-text lookups and i18n keys are
+          unaffected) joined visually by a middle dot; the row wraps as a group
+          only once it truly runs out of horizontal room. Elapsed time moves to
+          its own line below — it isn't part of this "who/where" summary and its
+          long phrase was itself crowding the rest off the row. */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
         {/* Agent identity, stated plainly: the backend resolves the running agent
             deterministically (vacancy-coupled → flow persona → oldest by
             created_at/id), so the name is a fact, not a best guess. "Unknown
             agent" only for a payload that carries no agent at all (list rows). */}
         <Avatar initials={(live.agent?.name?.[0] ?? '?').toUpperCase()} size={26} />
-        <div style={{ display: 'flex', flexDirection: 'column', minWidth: 0 }}>
-          <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--text)' }}>
-            {live.agent?.name || t('interview.status.noAgent')}
-          </span>
-          {/* The flow's own name (interview_flows.name) — the subtitle that stayed
-              invisible until the resource started sending `flow_name`. */}
-          {live.flowName && <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>{live.flowName}</span>}
-        </div>
+        <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--text)' }}>
+          {live.agent?.name || t('interview.status.noAgent')}
+        </span>
+        {/* The flow's own name (interview_flows.name) — tenant-authored, so it may
+            already read e.g. "Zorgintake (9 stappen)" on its own. */}
+        {live.flowName && (
+          <>
+            <MetaDot />
+            <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>{live.flowName}</span>
+          </>
+        )}
 
         {/* Turn — soft chip, colour + TEXT (never colour-only, §6 a11y). */}
         {turn && <SoftChip label={t(`interview.status.turn.${turn}`)} color={TURN_COLOR[turn]} round />}
 
-        {/* Category + step (INTERVIEW-PHASE-1 — already real today). */}
+        {/* Category (INTERVIEW-PHASE-1 — already real today). */}
         <StatusPill label={t(`interview.category.${category}`)} color={interviewCategoryColor(category)} />
+
+        {/* DD-FE-11 (08-08 drill-down audit, "Stap 2 van 12" read as the ONLY
+            signal): the flow's own current-step NAME is now the PRIMARY
+            progress readout — see humanizeInterviewStatus above for why an
+            unknown flow-authored value is never shown raw. The numeric
+            position is kept, but demoted to a small muted suffix right after
+            the name (never dropped) — mirrors the equally-ordered interview
+            cell in ApplicationStatusStrip (name main, step count muted after).
+            ONE dot introduces the whole progress unit; the row's own `gap`
+            already spaces the name/count pair inside it. */}
+        {(live.currentStatus || live.total > 0) && <MetaDot />}
+        {live.currentStatus && (
+          <span style={{ fontSize: 12, color: 'var(--text)' }}>
+            {t(`interview.currentStatus.${live.currentStatus}`, { defaultValue: humanizeInterviewStatus(live.currentStatus) })}
+          </span>
+        )}
         {live.total > 0 && (
-          <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>
+          <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>
             {t('interview.stepOf', { step: live.step ?? '–', total: live.total })}
           </span>
         )}
-
-        {/* ELAPSED time since the interview started — deliberately NOT called
-            conversation duration: the backend counts wall clock from session
-            creation, so nights and weekends are inside this number. The tooltip
-            spells that out; the value sits in its OWN span so label and value
-            stay two distinct, independently queryable nodes. */}
-        <span style={{ fontSize: 12, color: 'var(--text-muted)' }} title={t('interview.status.durationHint')}>
-          {t('interview.status.duration')}:{' '}
-          <span>
-            {duration ? (
-              duration.days > 0
-                ? t('interview.status.durationDays', duration)
-                : duration.hours > 0
-                  ? t('interview.status.durationHours', duration)
-                  : t('interview.status.durationMinutes', { count: duration.minutes })
-            ) : t('interview.status.durationUnknown')}
-          </span>
-        </span>
       </div>
+
+      {/* ELAPSED time since the interview started — deliberately NOT called
+          conversation duration: the backend counts wall clock from session
+          creation, so nights and weekends are inside this number. The tooltip
+          spells that out; the value sits in its OWN span so label and value
+          stay two distinct, independently queryable nodes. */}
+      <span style={{ fontSize: 12, color: 'var(--text-muted)' }} title={t('interview.status.durationHint')}>
+        {t('interview.status.duration')}:{' '}
+        <span>
+          {duration ? (
+            duration.days > 0
+              ? t('interview.status.durationDays', duration)
+              : duration.hours > 0
+                ? t('interview.status.durationHours', duration)
+                : t('interview.status.durationMinutes', { count: duration.minutes })
+          ) : t('interview.status.durationUnknown')}
+        </span>
+      </span>
 
       {!hasVisibilityData && (
         <span style={{ fontSize: 11, color: 'var(--text-muted)', fontStyle: 'italic' }}>

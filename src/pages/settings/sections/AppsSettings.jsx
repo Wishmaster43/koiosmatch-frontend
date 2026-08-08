@@ -9,6 +9,7 @@ import { useAuth } from '@/context/AuthContext'
 import { useApps, AVAILABLE_APPS } from '@/context/AppsContext'
 import { canAccessPage } from '@/lib/access'
 import Toggle from '@/components/ui/Toggle'
+import { readableOn } from '@/hooks/useTenantTheme'
 
 export default function AppsSettings() {
   const { t } = useTranslation('settings')
@@ -109,7 +110,10 @@ export default function AppsSettings() {
                   ? <app.Mark size={34} />
                   : app.image
                     ? <img src={app.image} alt={app.label} width={34} height={34} style={{ objectFit: 'contain' }} />
-                    : <span style={{ fontSize: 15, fontWeight: 800, color: '#FFFFFF', letterSpacing: '0.02em' }}>
+                    // Letter badge sits on the app's own fixed brand colour (AVAILABLE_APPS
+                    // data, not the tenant accent) — some of those swatches are light enough
+                    // that a hardcoded white fails contrast, so pick per-app like TenantSwitcher does.
+                    : <span style={{ fontSize: 15, fontWeight: 800, color: readableOn(app.color), letterSpacing: '0.02em' }}>
                         {app.label.slice(0, 2).toUpperCase()}
                       </span>}
               </div>

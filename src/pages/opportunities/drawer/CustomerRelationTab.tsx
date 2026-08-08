@@ -147,7 +147,7 @@ export default function CustomerRelationTab({ opportunity: o, customers = [], on
         {/* In-place edit toggle: pencil → diskette + ✕, same spot (§0.3 pattern). */}
         {onUpdate && (editing ? (
           <div style={{ display: 'flex', gap: 4 }}>
-            <button onClick={save} title={t('common:save')} style={{ ...iconBtn, background: 'var(--color-primary)', color: '#fff', border: 'none' }}><Save size={13} /></button>
+            <button onClick={save} title={t('common:save')} style={{ ...iconBtn, background: 'var(--color-primary)', color: 'var(--color-on-accent)', border: 'none' }}><Save size={13} /></button>
             <button onClick={cancel} title={t('common:cancel')} style={{ ...iconBtn, background: 'var(--bg)', color: 'var(--text-muted)', border: '1px solid var(--border)' }}><X size={13} /></button>
           </div>
         ) : (

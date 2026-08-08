@@ -7,7 +7,7 @@
  * here — mirrors src/pages/customers/drawer/EditableRichTextField.test.tsx).
  */
 import { describe, it, expect, vi } from 'vitest'
-import { render, screen, within } from '@testing-library/react'
+import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { ExperienceTab, EducationTab, CertificationsTab, SkillsTab, resolveEducationStartDate, resolveLinkedDocument } from './SectionTabs'
 
@@ -116,12 +116,11 @@ describe('EducationTab · education level (KAND-NIVEAU-1)', () => {
     const onAdd = vi.fn()
     render(<EducationTab items={[]} onAdd={onAdd} />)
     await user.click(screen.getByRole('button', { name: /Toevoegen/ }))
-    // Two comboboxes render (level_id + the always-present document_id picker,
-    // even with zero documents) — level_id is FIRST in the field list. Wait for
-    // the lookup GET to resolve and its options to render.
-    const levelSelect = (await screen.findAllByRole('combobox'))[0]
-    await within(levelSelect).findByText('HBO')
-    await user.selectOptions(levelSelect, 'lvl-2')
+    // ALWAYS-SEARCHABLE-1: the level_id picker is now the house CreatableSelect — an
+    // empty picker's trigger is named by its own label ("Niveau"). Open it and wait
+    // for the lookup GET to resolve and its portalled options to render.
+    await user.click(screen.getByRole('button', { name: 'Niveau' }))
+    await user.click(await screen.findByRole('button', { name: 'HBO' }))
     await user.click(screen.getByTitle('Opslaan'))
     // §13: assert the save PAYLOAD carries the picked level_id.
     expect(onAdd).toHaveBeenCalledWith(expect.objectContaining({ level_id: 'lvl-2' }))
@@ -141,6 +140,16 @@ describe('EducationTab · education level (KAND-NIVEAU-1)', () => {
     const item = { id: 'e1', title: 'Verpleegkunde', school: 'ROC' }
     render(<EducationTab items={[item]} />)
     expect(screen.queryByText('MBO-4')).toBeNull()
+  })
+
+  // ALWAYS-SEARCHABLE-1 (Danny 08-08): AddForm's `options` field (level_id AND
+  // document_id) is now the house CreatableSelect — never a native <select> again.
+  it('renders no native <select> in the edit form (level_id + document_id both go through CreatableSelect)', async () => {
+    vi.mocked(api.get).mockResolvedValue({ data: { data: [] } })
+    const user = userEvent.setup()
+    const { container } = render(<EducationTab items={[]} onAdd={vi.fn()} />)
+    await user.click(screen.getByRole('button', { name: /Toevoegen/ }))
+    expect(container.querySelector('select')).toBeNull()
   })
 })
 
@@ -338,10 +347,10 @@ describe('EducationTab · DOC-EDU-1 linked-document icons + edit-form picker', (
     const item = { id: 'e1', title: 'Verpleegkunde', school: 'ROC' }
     render(<EducationTab items={[item]} onEdit={onEdit} documents={documents} />)
     await user.click(screen.getByTitle('Bewerken'))
-    // KAND-NIVEAU-1 added a second combobox (level_id, rendered BEFORE document_id
-    // in the field list) — pick the LAST combobox, the document_id picker.
-    const comboboxes = screen.getAllByRole('combobox')
-    await user.selectOptions(comboboxes[comboboxes.length - 1], 'doc2')
+    // ALWAYS-SEARCHABLE-1: the document_id picker is the house CreatableSelect, named
+    // by its own label ("Gekoppeld document") — open it and pick doc2 by document name.
+    await user.click(screen.getByRole('button', { name: 'Gekoppeld document' }))
+    await user.click(await screen.findByRole('button', { name: 'ander.pdf' }))
     await user.click(screen.getByTitle('Opslaan'))
     // §13: assert the save PAYLOAD carries the picked document_id.
     expect(onEdit).toHaveBeenCalledWith(0, expect.objectContaining({ document_id: 'doc2' }))
@@ -389,7 +398,9 @@ describe('CertificationsTab · DOC-GELDIGHEID-1 linked-document icons + edit-for
     const item = { id: 'c1', name: 'VCA Basis', org: 'SSVV' }
     render(<CertificationsTab items={[item]} onEdit={onEdit} documents={documents} />)
     await user.click(screen.getByTitle('Bewerken'))
-    await user.selectOptions(screen.getByRole('combobox'), 'doc2')
+    // ALWAYS-SEARCHABLE-1: the house CreatableSelect, named by its own label.
+    await user.click(screen.getByRole('button', { name: 'Gekoppeld document' }))
+    await user.click(await screen.findByRole('button', { name: 'ander.pdf' }))
     await user.click(screen.getByTitle('Opslaan'))
     expect(onEdit).toHaveBeenCalledWith(0, expect.objectContaining({ document_id: 'doc2' }))
   })
@@ -473,10 +484,11 @@ describe('SkillsTab · DOC-LANG-SKILL-LINK-1 linked-document icons + edit-form p
     const item = { id: 's1', name: 'Heftruck rijden', level: 'Gevorderd' }
     render(<SkillsTab items={[item]} onEdit={onEdit} documents={documents} />)
     await user.click(screen.getByTitle('Bewerken'))
-    // Two comboboxes render (level, rendered BEFORE document_id in the field
-    // list) — pick the LAST combobox, the document_id picker.
-    const comboboxes = screen.getAllByRole('combobox')
-    await user.selectOptions(comboboxes[comboboxes.length - 1], 'doc2')
+    // ALWAYS-SEARCHABLE-1: the document_id picker is the house CreatableSelect, named
+    // by its own label ("Gekoppeld document") — distinct from the level picker
+    // (already showing its picked value "Gevorderd").
+    await user.click(screen.getByRole('button', { name: 'Gekoppeld document' }))
+    await user.click(await screen.findByRole('button', { name: 'ander.pdf' }))
     await user.click(screen.getByTitle('Opslaan'))
     // §13: assert the save PAYLOAD carries the picked document_id.
     expect(onEdit).toHaveBeenCalledWith(0, expect.objectContaining({ document_id: 'doc2' }))

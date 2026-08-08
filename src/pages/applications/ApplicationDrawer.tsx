@@ -178,7 +178,7 @@ export default function ApplicationDrawer({ application: a, onClose, expanded, o
               <button onClick={() => onRestore?.(a.id)} style={{ display: 'flex', alignItems: 'center', gap: 5,
                 fontSize: 12, fontWeight: 500, height: BTN_H, padding: '0 12px', borderRadius: 8,
                 border: '1px solid var(--color-primary)', background: 'var(--color-primary-bg)',
-                color: 'var(--color-primary)', cursor: 'pointer' }}>
+                color: 'var(--color-primary-text)', cursor: 'pointer' }}>
                 <ArchiveRestore size={12} /> {t('restore.button')}
               </button>
             ) : canManage ? (
@@ -256,7 +256,7 @@ export default function ApplicationDrawer({ application: a, onClose, expanded, o
                   style={{ display: 'flex', alignItems: 'center', gap: 5, height: BTN_H, padding: '0 10px',
                     fontSize: 11, fontWeight: 600, borderRadius: 7, cursor: 'pointer',
                     border: '1px solid color-mix(in srgb, var(--color-primary) 30%, transparent)',
-                    background: 'color-mix(in srgb, var(--color-primary) 10%, transparent)', color: 'var(--color-primary)' }}>
+                    background: 'color-mix(in srgb, var(--color-primary) 10%, transparent)', color: 'var(--color-primary-text)' }}>
                   <Send size={12} /> {t('propose.trigger')}
                 </button>
               )}
@@ -266,7 +266,7 @@ export default function ApplicationDrawer({ application: a, onClose, expanded, o
                       candidate drawer's CandidateHeaderActions edit toggle (§4). */}
                   <button type="button" onClick={() => candidateEdit.saveEdit()} disabled={candidateEdit.saving}
                     title={t('common:save')} aria-label={t('common:save')}
-                    style={{ ...iconBtn, background: 'var(--color-primary)', color: '#fff', border: 'none',
+                    style={{ ...iconBtn, background: 'var(--color-primary)', color: 'var(--color-on-accent)', border: 'none',
                       opacity: candidateEdit.saving ? 0.7 : 1, cursor: candidateEdit.saving ? 'not-allowed' : 'pointer' }}>
                     <Save size={14} />
                   </button>

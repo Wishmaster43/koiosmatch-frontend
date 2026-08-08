@@ -21,6 +21,7 @@ import type { ChipOption } from '@/components/ui/ChipMultiSelect'
 import CreatableSelect from '@/components/ui/CreatableSelect'
 import RichTextEditor from '@/components/ui/RichTextEditor'
 import SafeHtml from '@/components/ui/SafeHtml'
+import FieldNotice from '@/components/ui/FieldNotice'
 import { CANON_LABEL_WIDTH } from '@/components/drawer/fieldRowCanon'
 
 export interface FieldRow {
@@ -55,7 +56,16 @@ export interface FieldRow {
   // Same mechanism as 'address': child keys are read straight off the shared
   // `values` object (firstName/middleName/lastName), never a nested 'name' key.
   nameFields?: FieldRow[]
+  // Live format check for THIS row while editing (Danny 08-08, points 10/11 —
+  // the per-country KvK/BTW check). Returns null when there is nothing to say,
+  // a 'warning' the user may save straight through, or an 'error' that refuses
+  // the save. Deliberately a caller-supplied function: this table owns no
+  // domain rules, it only renders the verdict and gates Save on it.
+  validate?: (value: unknown, values: Values) => FieldNotice | null
 }
+
+/** One row's live verdict — see FieldRow.validate. */
+export interface FieldNotice { message: string; severity: 'error' | 'warning' }
 
 type Values = Record<string, unknown>
 
@@ -77,7 +87,10 @@ export const composeNameLine = (v: Values): string =>
 
 const compact: CSSProperties = {
   width: '100%', padding: '7px 10px', fontSize: 12, borderRadius: 6,
-  border: '1px solid var(--border)', background: 'white', color: 'var(--text)',
+  // Input surface = the shared --input-bg token (mirrors fieldMetrics.ts), never a
+  // hardcoded 'white' — that stayed white in dark mode while --text turned near-white
+  // too, making the value unreadable (WCAG contrast audit 2026-08-08).
+  border: '1px solid var(--border)', background: 'var(--input-bg)', color: 'var(--text)',
   boxSizing: 'border-box', outline: 'none',
 }
 // Row base style, parameterised on `dividers` (CANON-DIVIDER-1, 2026-08-05): the
@@ -183,14 +196,28 @@ export default function EditableFieldTable({
   if (!sameValues(value, lastValue)) { setLastValue(value); if (!editing) setSaved(value) }
   const setF = (k: string, v: unknown) => setForm(p => ({ ...p, [k]: v }))
 
+  // Live per-row verdicts over the CURRENT draft. Only computed while EDITING —
+  // `form` is a draft that is re-seeded on entering edit mode, so judging it in read
+  // mode would judge stale input. A row without `validate` never produces one, so
+  // every existing caller is byte-for-byte unchanged.
+  const noticeFor = (f: FieldRow): FieldNotice | null => (editing && f.validate ? f.validate(form[f.key], form) : null)
+  // Save is refused only by a real 'error' — a 'warning' is a hint the user may
+  // save straight through (§3: never hold back data that can be valid).
+  const hasBlockingError = fields.some(f => noticeFor(f)?.severity === 'error')
+
   const startEdit = () => (controlled ? onStartEdit?.() : setEditingState(true))
   const cancel    = () => { setForm(saved); if (controlled) onCancel?.(); else setEditingState(false) }
-  const save      = () => { setSaved(form); onSave?.(form); if (!controlled) setEditingState(false) }
+  const save      = () => { if (hasBlockingError) return; setSaved(form); onSave?.(form); if (!controlled) setEditingState(false) }
   const iconBtn: CSSProperties = { width: 26, height: 26, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 6, cursor: 'pointer' }
   // In-place save (diskette) + cancel (✕), same spot as the pencil.
   const editControls = () => (
     <div style={{ display: 'flex', gap: 4 }}>
-      <button onClick={save} title={t('save')} style={{ ...iconBtn, background: 'var(--color-primary)', color: '#fff', border: 'none' }}><Save size={13} /></button>
+      {/* Accent-filled save button — follow the tenant's on-accent contrast token
+          instead of a hardcoded white (2026-08-08). Disabled (never hidden) while a
+          row reports a blocking format error, so the reason stays readable on screen. */}
+      <button onClick={save} disabled={hasBlockingError} title={t('save')}
+        style={{ ...iconBtn, background: 'var(--color-primary)', color: 'var(--color-on-accent)', border: 'none',
+          ...(hasBlockingError ? { opacity: 0.45, cursor: 'not-allowed' } : {}) }}><Save size={13} /></button>
       <button onClick={cancel} title={t('cancel')} style={{ ...iconBtn, background: 'var(--bg)', color: 'var(--text-muted)', border: '1px solid var(--border)' }}><X size={13} /></button>
     </div>
   )
@@ -274,7 +301,7 @@ export default function EditableFieldTable({
             // Per-value colour when set (e.g. contract forms), else the primary accent.
             const s = col
               ? { background: col + '1A', color: col, border: `1px solid ${col}55` }
-              : { background: 'var(--color-primary-bg)', color: 'var(--color-primary)', border: '1px solid var(--color-primary)' }
+              : { background: 'var(--color-primary-bg)', color: 'var(--color-primary-text)', border: '1px solid var(--color-primary)' }
             return <span key={x} style={{ padding: '2px 9px', borderRadius: 999, fontSize: 11, fontWeight: 500, ...s }}>{o?.label ?? x}</span>
           })}
         </div>
@@ -332,6 +359,7 @@ export default function EditableFieldTable({
       : { padding: '4px 0' }}>
       <span style={{ fontSize: labelFontSize, color: 'var(--text-muted)', display: 'block', marginBottom: 4 }}>{f.label}</span>
       {editing ? renderControl(f) : renderValue(f)}
+      {editing && <FieldNotice text={noticeFor(f)?.message} severity={noticeFor(f)?.severity} />}
     </div>
   ) : (
     <div key={f.key} style={dividers
@@ -339,8 +367,11 @@ export default function EditableFieldTable({
       : rowStyle(dividers)}>
       {/* Canon label span — the same flex/gap-5 anatomy as the candidate's FieldRow. */}
       <span style={{ fontSize: labelFontSize, color: 'var(--text-muted)', width: labelWidth, flexShrink: 0, display: 'flex', alignItems: 'center', gap: 5 }}>{f.label}</span>
-      {/* Canon value wrapper (flex 1 / minWidth 0); the row's own minHeight centres it. */}
-      {editing ? <div style={{ flex: 1, minWidth: 0 }}>{renderControl(f)}</div> : <div style={{ flex: 1, minWidth: 0 }}>{renderValue(f)}</div>}
+      {/* Canon value wrapper (flex 1 / minWidth 0); the row's own minHeight centres it.
+          A live format verdict renders directly under the control, never over it. */}
+      {editing
+        ? <div style={{ flex: 1, minWidth: 0 }}>{renderControl(f)}<FieldNotice text={noticeFor(f)?.message} severity={noticeFor(f)?.severity} /></div>
+        : <div style={{ flex: 1, minWidth: 0 }}>{renderValue(f)}</div>}
     </div>
   )
 
@@ -374,9 +405,23 @@ export default function EditableFieldTable({
         padding: '6px 12px', display: 'flex', flexDirection: 'column', gap: 2 }
   const groupTitleStyle: CSSProperties = { fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em', color: 'var(--text-muted)', marginBottom: 6 }
 
+  // M7 (DRILL-DOWN-CONSISTENCY, 08-08): the top header bar only renders when there is
+  // a real title for it to show — a titleless header on a GROUPED table produced an
+  // empty grey bar sitting above the groups' own titled cards (2 headings + 1
+  // floating pencil + nothing to read, on the match Contract & financieel card). A
+  // titleless UNGROUPED table (e.g. DepartmentDetail's `title=""`, which intentionally
+  // skips a duplicate sub-tab title) is untouched — there the bar is still the only
+  // place for the pencil, so it keeps rendering exactly as before.
+  const showTopHeader = editButton === 'header' && (Boolean(title) || !hasGroups)
+  // Grouped + titleless: the shared pencil (ONE edit cycle governs every group in the
+  // table, unchanged) has no header of its own left to sit in — it moves onto the
+  // FIRST group's own title row instead, the same "pencil beside a title" spot every
+  // other card in the app uses, rather than being dropped.
+  const groupHeaderPencil = editButton === 'header' && !title && hasGroups
+
   return (
     <div>
-      {editButton === 'header' && (
+      {showTopHeader && (
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
           <span style={{ fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em', color: 'var(--text-muted)' }}>{title}</span>
           {editing ? editControls() : <EditPencil onClick={startEdit} title={t('edit')} />}
@@ -386,9 +431,14 @@ export default function EditableFieldTable({
       {hasGroups && groups ? (
         // Canon card pitch: pure gap-10 stacking, no extra margins (candidate ProfileTab).
         <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: dividers ? 12 : 0 }}>
-          {groups.map(g => (
+          {groups.map((g, i) => (
             <div key={g.group}>
-              {g.group && <div style={groupTitleStyle}>{g.group}</div>}
+              {g.group && (
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
+                  <span style={{ ...groupTitleStyle, marginBottom: 0 }}>{g.group}</span>
+                  {groupHeaderPencil && i === 0 && (editing ? editControls() : <EditPencil onClick={startEdit} title={t('edit')} />)}
+                </div>
+              )}
               <div style={cardStyle}>{renderFieldRows(g.fields)}</div>
             </div>
           ))}

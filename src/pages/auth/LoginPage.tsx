@@ -23,7 +23,7 @@ const messageOf = (e: unknown) => (e as { response?: { data?: { message?: string
 function Wordmark({ className }: { className?: string }) {
   return (
     <span className={className} style={{ fontSize: 21, fontWeight: 700, letterSpacing: '-0.015em', color: 'var(--sidebar-text)', whiteSpace: 'nowrap' }}>
-      <span style={{ color: 'var(--color-primary)' }}>Koios</span>Match
+      <span style={{ color: 'var(--color-primary-text)' }}>Koios</span>Match
     </span>
   )
 }
@@ -117,7 +117,7 @@ function CredentialForm({ onMfaRequired }: { onMfaRequired: (token: string) => v
 
       {expired && !error && (
         <div className="mb-4 rounded-lg px-3 py-2.5 text-sm text-amber-700 bg-amber-50 border border-amber-200">
-          {t('login.sessionExpired', { defaultValue: 'Je sessie is verlopen. Log opnieuw in.' })}
+          {t('login.sessionExpired')}
         </div>
       )}
 
@@ -155,8 +155,9 @@ function CredentialForm({ onMfaRequired }: { onMfaRequired: (token: string) => v
         {error && <ErrorBanner>{error}</ErrorBanner>}
 
         <button type="submit" disabled={loading}
-          className="flex items-center justify-center w-full gap-2 text-sm font-medium text-white transition-opacity rounded-lg"
+          className="flex items-center justify-center w-full gap-2 text-sm font-medium transition-opacity rounded-lg"
           style={{ padding: '11px', background: loading ? 'var(--text-muted)' : 'var(--color-primary)',
+                   color: loading ? '#fff' : 'var(--color-on-accent)',
                    border: 'none', cursor: loading ? 'not-allowed' : 'pointer' }}>
           {loading && <Loader2 size={15} className="animate-spin" />}
           {loading ? t('login.busy') : t('login.signIn')}
@@ -211,7 +212,7 @@ function MfaForm({ mfaToken, onBack }: { mfaToken: string; onBack: () => void })
       <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 24 }}>
         <div style={{ width: 44, height: 44, borderRadius: 12, background: 'var(--color-primary-bg)',
                        display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <ShieldCheck size={22} style={{ color: 'var(--color-primary)' }} />
+          <ShieldCheck size={22} style={{ color: 'var(--color-primary-text)' }} />
         </div>
         <div>
           <h1 className="text-xl font-semibold text-gray-900">{t('mfa.title')}</h1>
@@ -239,9 +240,10 @@ function MfaForm({ mfaToken, onBack }: { mfaToken: string; onBack: () => void })
         {error && <ErrorBanner>{error}</ErrorBanner>}
 
         <button type="submit" disabled={loading || code.length < 6}
-          className="flex items-center justify-center w-full gap-2 text-sm font-medium text-white transition-opacity rounded-lg"
+          className="flex items-center justify-center w-full gap-2 text-sm font-medium transition-opacity rounded-lg"
           style={{ padding: '11px',
                    background: (loading || code.length < 6) ? 'var(--text-muted)' : 'var(--color-primary)',
+                   color: (loading || code.length < 6) ? '#fff' : 'var(--color-on-accent)',
                    border: 'none', cursor: (loading || code.length < 6) ? 'not-allowed' : 'pointer' }}>
           {loading && <Loader2 size={15} className="animate-spin" />}
           {loading ? t('mfa.verifying') : t('mfa.verify')}

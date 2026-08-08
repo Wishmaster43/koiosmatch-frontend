@@ -43,7 +43,7 @@ export default function KoiosResultCards({ refs }: { refs: KoiosResultRef[] }) {
               background: 'var(--surface)', border: '1px solid var(--border)',
               cursor: clickable ? 'pointer' : 'default', textAlign: 'left',
             }}>
-            {entityIconEl(ref.type, { size: 13, color: 'var(--color-primary)' })}
+            {entityIconEl(ref.type, { size: 13, color: 'var(--color-primary-text)' })}
             {ref.label}
           </Tag>
         )

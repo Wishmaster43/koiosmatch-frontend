@@ -62,7 +62,16 @@
       "stage": "Fase",
       "created": "Creado",
       "status": "Estado",
-      "lastSynced": "Última sincronización"
+      "lastSynced": "Última sincronización",
+      "contractType": "Tipo de contrato",
+      "startDate": "Fecha de inicio",
+      "endDate": "Fecha de fin",
+      "hoursPerWeek": "Horas por semana",
+      "lastSyncedHelloflex": "Última sincronización con HelloFlex",
+      "branch": "Sucursal",
+      "customerLocation": "Ubicación",
+      "customerDepartment": "Departamento",
+      "contactPerson": "Persona de contacto"
     },
     "openCandidate": "Abrir candidato",
     "openVacancy": "Abrir vacante",
@@ -111,7 +120,13 @@
     "remarks": {
       "title": "Observaciones",
       "saved": "Observaciones guardadas.",
-      "saveError": "No se pudieron guardar las observaciones."
+      "saveError": "No se pudieron guardar las observaciones.",
+      "deprecated": "Este campo va a desaparecer. Traslada el texto a Notas: allí obtiene autor, fecha, tipo y canal, y aparece en la línea de tiempo.",
+      "moveToNotes": "Mover a notas",
+      "moving": "Moviendo…",
+      "moved": "La observación se ha movido a notas.",
+      "moveError": "No se ha podido mover a notas. El texto no ha cambiado.",
+      "moveClearError": "La nota se ha guardado, pero no se ha podido vaciar el campo antiguo. El texto está ahora en dos sitios."
     },
     "duration": {
       "unit": {
@@ -132,6 +147,19 @@
       "title": "Texto del match",
       "saved": "Texto del match guardado.",
       "saveError": "No se pudo guardar el texto del match."
+    },
+    "renew": {
+      "button": "Renovar",
+      "modalTitle": "Renovar match",
+      "confirm": "Confirmar renovación",
+      "currentEndDate": "Fecha de fin actual: {{date}}",
+      "newEndDateLabel": "Nueva fecha de fin",
+      "noCurrentEndDate": "Sin fecha de fin (en curso).",
+      "mustBeAfterCurrent": "La nueva fecha de fin debe ser posterior a la fecha de fin actual.",
+      "success": "Match renovado.",
+      "error": "No se pudo renovar el match.",
+      "disabledArchived": "Match archivado — restaura primero.",
+      "disabledClosed": "Este match ya ha finalizado."
     }
   },
   "approval": {
@@ -145,7 +173,9 @@
     "reasonPlaceholder": "Motivo del rechazo…",
     "confirmReject": "Confirmar rechazo",
     "alreadyReviewed": "Este match ya fue revisado.",
-    "error": "No se pudo aplicar la revisión."
+    "error": "No se pudo aplicar la revisión.",
+    "badgeLabel": "Evaluación",
+    "badgeWithLabel": "Evaluación: {{status}}"
   },
   "changelog": {
     "loading": "Cargando historial…",

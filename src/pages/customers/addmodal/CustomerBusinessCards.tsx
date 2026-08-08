@@ -12,16 +12,15 @@ import type { CustomerForm } from '../AddCustomerModal'
 import { Field, TextField } from '@/components/forms/fields'
 import CreatableSelect from '@/components/ui/CreatableSelect'
 import { cardHead, cardBox, row2 } from '@/components/ui/modalCards'
+import FieldNotice from '@/components/ui/FieldNotice'
 
 interface OptionRow { value: string; label: string }
 
-// VALIDATIE-LIVE-1-rest: the live-format message under billingEmail — same
-// small local component ContactDetailsCard/ContactCard already use for this
-// exact purpose (no shared component exists for a one-line field error yet).
-function FieldError({ text }: { text?: string }) {
-  if (!text) return null
-  return <div role="alert" style={{ fontSize: 11, color: 'var(--color-danger)', marginTop: 3 }}>{text}</div>
-}
+// VALIDATIE-LIVE-1-rest: the live-format message under billingEmail. The local
+// copy this file used to carry is gone — it now renders through the shared
+// components/ui/FieldNotice (KVK/BTW-PER-LAND-1, 08-08), which owns the one
+// look for a field message and adds the warning severity the per-country
+// KvK/BTW check needs (§11: a new shared helper lands WITH adoption).
 
 interface CustomerBusinessCardsProps {
   form: CustomerForm
@@ -81,7 +80,7 @@ export default function CustomerBusinessCards({
               <Field label={t('overview.billingEmail')}>
                 <TextField type="email" value={form.billingEmail} onChange={v => set('billingEmail', v)} error={billingEmailError} />
               </Field>
-              <FieldError text={billingEmailMessage} />
+              <FieldNotice text={billingEmailMessage} />
             </div>
           </div>
         </div>

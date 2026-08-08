@@ -78,7 +78,7 @@ export default function VacancySettingsTab({ c, onSave }: Props) {
               {!followsDefault && (
                 <button onClick={() => onSave?.({ [f.key]: tenantDefault })} title={t('vacancySettings.resetToDefault')}
                   style={{ display: 'inline-flex', alignItems: 'center', gap: 5, height: 26, padding: '0 10px', flexShrink: 0,
-                    fontSize: 11.5, fontWeight: 500, borderRadius: 6, cursor: 'pointer', color: 'var(--color-primary)',
+                    fontSize: 11.5, fontWeight: 500, borderRadius: 6, cursor: 'pointer', color: 'var(--color-primary-text)',
                     background: 'color-mix(in srgb, var(--color-primary) 10%, transparent)',
                     border: '1px solid color-mix(in srgb, var(--color-primary) 30%, transparent)' }}>
                   <RotateCcw size={12} /> {t('vacancySettings.resetToDefault')}

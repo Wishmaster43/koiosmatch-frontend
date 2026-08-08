@@ -45,7 +45,7 @@ export default function ContactPersonDrawer({ contact, onClose }: { contact: Rep
           <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
               <div style={{ width: 44, height: 44, borderRadius: '50%', flexShrink: 0,
-                            background: 'var(--color-primary-bg)', color: 'var(--color-primary)',
+                            background: 'var(--color-primary-bg)', color: 'var(--color-primary-text)',
                             display: 'flex', alignItems: 'center', justifyContent: 'center',
                             fontSize: 15, fontWeight: 700 }}>
                 {initials || '?'}

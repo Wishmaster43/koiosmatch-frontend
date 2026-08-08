@@ -84,6 +84,16 @@ describe('mapOpportunity', () => {
     })
     expect(row.location).toBe('Kantoor Rotterdam')
     expect(row.locationId).toBe('loc-9')
+    // K2: the same `location` object now ALSO surfaces as branch/branchId — the
+    // AddOpportunityModal Vestiging picker's edit-mode prefill.
+    expect(row.branch).toBe('Bureau Amsterdam')
+    expect(row.branchId).toBe('branch-1')
+  })
+
+  it('falls back to the flat location_id when nested location (branch) is absent (K2)', () => {
+    const row = mapOpportunity({ id: 'o5b', location_id: 'branch-42' })
+    expect(row.branchId).toBe('branch-42')
+    expect(row.branch).toBe('')
   })
 
   it('falls back to the flat customer_location_id when nested customer_location is absent', () => {
@@ -101,6 +111,13 @@ describe('mapOpportunity', () => {
     const row = mapOpportunity({ id: 'o8' })
     expect(row.archived).toBe(false)
     expect(row.archivedAt).toBeNull()
+  })
+
+  it('maps description through (OPP-DESCRIPTION-1), coalescing null to an empty string', () => {
+    const row = mapOpportunity({ id: 'o9', description: '<p>Kanstekst</p>' })
+    expect(row.description).toBe('<p>Kanstekst</p>')
+    expect(mapOpportunity({ id: 'o10', description: null }).description).toBe('')
+    expect(mapOpportunity({ id: 'o11' }).description).toBe('')
   })
 
   it('never throws on an empty record and fills safe defaults', () => {

@@ -30,10 +30,12 @@ export default function CustomerBranchesCard({ form, set, branchOptions }: Custo
           useful choice here, not an unfinished field. */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 3 }}>
         <div style={{ ...cardHead, marginBottom: 0 }}>{t('overview.branch')}</div>
+        {/* selectAll={false}: a customer carries exactly ONE branch here, so this is a
+            single-choice picker despite reusing the multi-select control (§3). */}
         <SearchSelect triggerLabel={t('modal.fields.branchAdd')} options={branchOptions}
           selected={form.branchId ? [form.branchId] : []}
           onToggle={(id: string) => set('branchId', form.branchId === id ? '' : id)}
-          menuAlign="right"
+          menuAlign="right" selectAll={false}
           renderTrigger={(toggleOpen: () => void) => <DrawerAddButton onClick={toggleOpen} label={t('modal.fields.branchAdd')} />} />
       </div>
       <div style={cardBox}>

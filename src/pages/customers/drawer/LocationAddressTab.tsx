@@ -15,6 +15,7 @@ import LocationContactSection from './LocationContactSection'
 import KoiosAdviceBlock from '@/components/ai/KoiosAdviceBlock'
 import LocationBranchSection from './LocationBranchSection'
 import { kvkValue, vatValue } from '@/components/drawer/contactLinks'
+import { useIdentifierValidation } from '@/hooks/useIdentifierValidation'
 import { buildLocationAdviceInsights } from './locationAiInsights'
 import { isPrimaryForLocation } from '../hooks/useCustomerContacts'
 import type { Contact, Location } from '@/types/customer'
@@ -43,6 +44,16 @@ export default function LocationAddressTab({
   // from the contact↔location coupling flag, not a name matched against free text.
   const primaryContact = contacts.find(c => isPrimaryForLocation(c, l.id as Id)) ?? null
 
+  // KVK/BTW-PER-LAND-1 (Danny 08-08, points 10 + 11): same per-country check as the
+  // customer's own Bedrijf tab — this SITE's country decides the rule (a Belgian site
+  // under a Dutch customer is checked as Belgian), the tenant setting decides whether
+  // a mismatch blocks or only warns.
+  const identifiers = useIdentifierValidation()
+  const validateCoc = (v: unknown, values: Record<string, unknown>) =>
+    identifiers.notice('coc', v as string, (values.country as string) ?? l.country)
+  const validateVat = (v: unknown, values: Record<string, unknown>) =>
+    identifiers.notice('vat', v as string, (values.country as string) ?? l.country)
+
   // Algemeen/Adres/Registratie — street/no/suffix/postcode/city collapse into ONE
   // composed line in read mode (the 'address' composite) and only expand to loose
   // fields while editing; state/country stay their own rows.
@@ -61,9 +72,9 @@ export default function LocationAddressTab({
     { key: 'state', label: t('locations.detail.state'), type: 'select', options: provinceOptions, group: t('subModal.groups.address') },
     { key: 'country', label: t('locations.detail.country'), type: 'select', options: countryOptions, group: t('subModal.groups.address') },
     { key: 'cocNumber', label: t('locations.detail.coc'), type: 'text', group: t('overview.details'),
-      renderValue: v => kvkValue(v, t('locations.detail.openKvk')) },
+      renderValue: v => kvkValue(v, t('locations.detail.openKvk')), validate: validateCoc },
     { key: 'vatNumber', label: t('locations.detail.vat'), type: 'text', group: t('overview.details'),
-      renderValue: v => vatValue(v, t('locations.detail.openVies')) },
+      renderValue: v => vatValue(v, t('locations.detail.openVies')), validate: validateVat },
     // Kostenplaats sits in Gegevens (Danny 28-07) — no billing-email input here:
     // invoicing always comes from the customer (see OverviewTab).
     { key: 'costCenter', label: t('locations.detail.costCenter'), type: 'text', group: t('overview.details') },

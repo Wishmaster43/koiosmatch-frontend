@@ -4,13 +4,15 @@
  * /candidates/{id}/availability via useCandidateAvailability (real GET/POST/DELETE).
  * Replaces the old mock shift-agenda; the roster/agenda lives under Inroostering.
  */
-import { useState } from 'react'
+import { useState, useId } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Plus, X, Check, Ban } from 'lucide-react'
 import { sectionBlock, sectionTitle, softPill } from './constants'
 import { useCandidateAvailability } from '../hooks/useCandidatePlanning'
 import type { AvailStatus, DayPart } from '../hooks/useCandidatePlanning'
 import type { Id } from '@/types/common'
+// G34: the house searchable dropdown replaces the native day-part <select>.
+import CreatableSelect from '@/components/ui/CreatableSelect'
 
 const PARTS: DayPart[] = ['day', 'morning', 'afternoon', 'evening']
 
@@ -23,6 +25,10 @@ function dmy(iso: string): string {
 export default function AvailabilityEditor({ candidateId }: { candidateId?: Id }) {
   const { t } = useTranslation('candidates')
   const { entries, loading, add, remove } = useCandidateAvailability(candidateId)
+  // The day-part picker has no visible label of its own (inline in the add row) —
+  // a sr-only span + aria-labelledby names it for screen readers (CreatableSelect's
+  // trigger is a <button>, which ignores an associated <label for>, see its own doc).
+  const dayPartLabelId = useId()
   // Local add-form state (default records an "unavailable" exception — the common case).
   const [adding, setAdding] = useState(false)
   const [date,   setDate]   = useState('')
@@ -61,9 +67,11 @@ export default function AvailabilityEditor({ candidateId }: { candidateId?: Id }
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, alignItems: 'center', padding: '10px 12px', marginBottom: 12,
           border: '1px solid var(--border)', borderRadius: 8, background: 'var(--bg)' }}>
           <input type="date" value={date} onChange={e => setDate(e.target.value)} aria-label={t('planning.date')} style={input} />
-          <select value={part} onChange={e => setPart(e.target.value as DayPart)} aria-label={t('planning.dayPart')} style={{ ...input, cursor: 'pointer' }}>
-            {PARTS.map(p => <option key={p} value={p}>{partLabel(p)}</option>)}
-          </select>
+          <span id={dayPartLabelId} className="sr-only">{t('planning.dayPart')}</span>
+          <div style={{ width: 150 }}>
+            <CreatableSelect value={part} onChange={v => setPart(v as DayPart)} allowCreate={false}
+              aria-labelledby={dayPartLabelId} options={PARTS.map(p => ({ value: p, label: partLabel(p) }))} style={input} />
+          </div>
           <div style={{ display: 'flex', gap: 6 }}>
             <button onClick={() => setStatus('available')}   style={pill(status === 'available')}>{t('planning.statusAvailable')}</button>
             <button onClick={() => setStatus('unavailable')} style={pill(status === 'unavailable')}>{t('planning.statusUnavailable')}</button>

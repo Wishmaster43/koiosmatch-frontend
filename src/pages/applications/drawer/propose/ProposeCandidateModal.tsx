@@ -6,13 +6,15 @@ import type { ActionRuleDecision } from '@/components/actionrules'
 import CreatableSelect from '@/components/ui/CreatableSelect'
 import RichTextEditor from '@/components/ui/RichTextEditor'
 import { BTN_H } from '@/config/buttonMetrics'
+import { fieldInputStyle } from '@/components/forms/fieldMetrics'
 import { contactOptionLabel } from '@/lib/contactLabel'
 import { useProposeForm } from './useProposeForm'
 import type { ApplicationDetail } from '@/types/application'
 
 const sectionTitle = { fontSize: 12, fontWeight: 600, color: 'var(--text)', marginBottom: 6 } as const
 const muted = { fontSize: 11, color: 'var(--text-muted)' } as const
-const inputBase = { width: '100%', boxSizing: 'border-box' as const, padding: '7px 10px', fontSize: 13, borderRadius: 8, border: '1px solid var(--border)', background: 'var(--input-bg)', color: 'var(--text)', outline: 'none' }
+// Canon field style (G33/fieldMetrics) — was its own padding-7/font-13/radius-8 copy.
+const inputBase = fieldInputStyle
 
 // The strictest of two AXIS-MATRIX decisions wins (block > warn > allow) — this
 // action touches BOTH the candidate axis and the customer axis (§3A).
@@ -77,7 +79,7 @@ export default function ProposeCandidateModal({ application: a, onClose }: Props
       header={
         <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>
           <span style={{ display: 'inline-flex', width: 30, height: 30, borderRadius: 8, alignItems: 'center', justifyContent: 'center',
-            background: 'var(--color-primary-bg)', color: 'var(--color-primary)' }}><Send size={16} /></span>
+            background: 'var(--color-primary-bg)', color: 'var(--color-primary-text)' }}><Send size={16} /></span>
           <span style={{ fontSize: 15, fontWeight: 700, color: 'var(--text)' }}>{t('propose.title')}</span>
         </span>
       }>
@@ -180,12 +182,12 @@ export default function ProposeCandidateModal({ application: a, onClose }: Props
               QuickViewToggle). */}
           <button onClick={form.copyMessage} style={{ height: BTN_H, padding: '0 16px', fontSize: 13, fontWeight: 500,
             border: '1px solid color-mix(in srgb, var(--color-primary) 30%, transparent)', borderRadius: 8,
-            background: 'color-mix(in srgb, var(--color-primary) 10%, transparent)', color: 'var(--color-primary)', cursor: 'pointer' }}>
+            background: 'color-mix(in srgb, var(--color-primary) 10%, transparent)', color: 'var(--color-primary-text)', cursor: 'pointer' }}>
             {form.copied ? t('propose.copied') : t('propose.copyMessage')}
           </button>
           <button onClick={handleSubmit} disabled={!!form.disabledReason || form.submitting}
             style={{ height: BTN_H, padding: '0 16px', fontSize: 13, fontWeight: 600, border: 'none', borderRadius: 8,
-              background: 'var(--color-primary)', color: '#fff',
+              background: 'var(--color-primary)', color: 'var(--color-on-accent)',
               cursor: (form.disabledReason || form.submitting) ? 'not-allowed' : 'pointer',
               opacity: (form.disabledReason || form.submitting) ? 0.6 : 1 }}>
             {t('propose.submit')}

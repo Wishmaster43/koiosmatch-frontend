@@ -156,7 +156,7 @@ export default function DashboardLayout() {
           <div className="flex items-center flex-shrink-0 gap-2">
             <div
               className="flex items-center justify-center flex-shrink-0 rounded-md"
-              style={{ width: 22, height: 22, background: 'var(--color-primary)', fontSize: 11, color: 'white', fontWeight: 700 }}
+              style={{ width: 22, height: 22, background: 'var(--color-primary)', fontSize: 11, color: 'var(--color-on-accent)', fontWeight: 700 }}
             >
               {(tenant?.name ?? 'K').charAt(0).toUpperCase()}
             </div>
@@ -177,7 +177,7 @@ export default function DashboardLayout() {
           {jumpOrigin && jumpOrigin !== activePage && (
             <button onClick={() => goTo(jumpOrigin)}
               style={{ display: 'inline-flex', alignItems: 'center', gap: 4, padding: '2px 10px', fontSize: 11, fontWeight: 600,
-                borderRadius: 999, cursor: 'pointer', color: 'var(--color-primary)', flexShrink: 0,
+                borderRadius: 999, cursor: 'pointer', color: 'var(--color-primary-text)', flexShrink: 0,
                 background: 'color-mix(in srgb, var(--color-primary) 10%, transparent)',
                 border: '1px solid color-mix(in srgb, var(--color-primary) 30%, transparent)' }}>
               ← {t('back')} · {t(jumpOrigin, { ns: 'pageTitles', keySeparator: false, defaultValue: PAGE_TITLES[jumpOrigin] || jumpOrigin })}
@@ -216,7 +216,7 @@ export default function DashboardLayout() {
                   style={{
                     width: 30, height: 30, borderRadius: '50%', flexShrink: 0,
                     background: activePage === 'profile' ? 'var(--color-primary)' : 'var(--color-primary-bg)',
-                    color: activePage === 'profile' ? 'white' : 'var(--color-primary)',
+                    color: activePage === 'profile' ? 'var(--color-on-accent)' : 'var(--color-primary)',
                     border: `1.5px solid ${activePage === 'profile' ? 'var(--color-primary)' : 'transparent'}`,
                     fontSize: 11, fontWeight: 700, cursor: 'pointer',
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
@@ -247,7 +247,7 @@ export default function DashboardLayout() {
                 {activeFilters > 0 ? (
                   <span style={{
                     position: 'absolute', top: -5, right: -5,
-                    background: 'var(--color-primary)', color: '#fff',
+                    background: 'var(--color-primary)', color: 'var(--color-on-accent)',
                     borderRadius: 999, fontSize: 10, fontWeight: 700,
                     minWidth: 16, height: 16, display: 'flex',
                     alignItems: 'center', justifyContent: 'center',

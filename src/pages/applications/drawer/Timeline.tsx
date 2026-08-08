@@ -1,46 +1,61 @@
 import type { ReactNode } from 'react'
-import Avatar from '@/components/ui/Avatar'
+import { ArrowRightLeft, CalendarClock, Handshake, MessageSquare, Mic, XCircle } from 'lucide-react'
 import AiGeneratedLabel from '@/components/ui/AiGeneratedLabel'
-import TimelineRail from '@/components/ui/TimelineRail'
-import { useDateFormat } from '@/lib/datetime'
+import EventTimeline, { type TimelineKindMeta } from '@/components/ui/EventTimeline'
 import type { Id } from '@/types/common'
 
 export interface TimelineItem { id?: Id; initials?: string; author?: string; time?: string; description?: ReactNode; ai?: boolean }
 
+// Event kind → its icon + semantic token. Kinds are the prefix of the backend's
+// composite id (`appointment:<uuid>` / `stage:<uuid>` — verified live against
+// GET /applications/{id}); the rest are the neighbouring kinds ApplicationTimeline
+// can emit. Colour is spent ONLY here, where it carries the event's meaning (§4).
+const KIND_META: Record<string, TimelineKindMeta> = {
+  appointment: { icon: CalendarClock, color: 'var(--color-info)' },
+  stage:       { icon: ArrowRightLeft, color: 'var(--color-primary)' },
+  note:        { icon: MessageSquare, color: 'var(--color-secondary)' },
+  interview:   { icon: Mic, color: 'var(--color-violet)' },
+  match:       { icon: Handshake, color: 'var(--color-success)' },
+  rejection:   { icon: XCircle, color: 'var(--color-danger)' },
+}
+
 /**
- * Timeline — the application drawer's Tijdlijn tab: a vertical activity list
- * (connector rail + author avatar + description bubble + optional AI-generated
- * disclosure label + time). `time` is the mapper's raw value (created_at, an ISO
- * string) — formatted here via the house DD-MM-YYYY HH:mm, never rendered as a
- * raw ISO string (Danny 05-08: "Datum en tijd staat niet goed"). AI-ACT-1: an
- * `ai` entry used to carry only a bare KoiosAiMark icon (no visible text) — the
- * shared AiGeneratedLabel replaces it so the disclosure is icon+text (§6).
+ * kindOf — the backend sends no `type` on an application timeline event, only a
+ * composite id `"<kind>:<uuid>"`. A UUID never contains a colon, so the first
+ * colon is a safe split. Empty for anything unprefixed → a neutral marker, never
+ * a wrong icon.
+ */
+export function kindOf(id?: Id): string {
+  const s = id == null ? '' : String(id)
+  const colon = s.indexOf(':')
+  return colon > 0 ? s.slice(0, colon) : ''
+}
+
+/**
+ * Timeline — the application drawer's Tijdlijn tab. A thin adapter: it maps the
+ * mapper's items onto the shared EventTimeline (one calm row per event on a
+ * continuous axis, mono time, per-day headings) and owns only the application's
+ * own event vocabulary. Author is deliberately the muted meta line, not the row's
+ * headline: it is null on every system event (verified live), and the old layout
+ * made that missing name the boldest thing on the row.
+ *
+ * Loading/error are not passed: this tab renders inside a drawer that has already
+ * resolved both before it mounts, so there is no honest signal to forward — the
+ * states themselves live (and are tested) in EventTimeline.
  */
 export default function Timeline({ items = [], emptyText }: { items?: TimelineItem[]; emptyText?: ReactNode }) {
-  const { formatDateTime } = useDateFormat()
-  if (!items.length) return <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{emptyText}</div>
-
   return (
-    // No gap here: each row's own paddingBottom carries the spacing so the
-    // TimelineRail's connector line reaches all the way to the next dot.
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
-      {items.map((ev, i) => (
-        <div key={ev.id ?? i} style={{ display: 'flex', gap: 10, alignItems: 'flex-start', paddingBottom: 14 }}>
-          <TimelineRail isLast={i === items.length - 1} />
-          <Avatar initials={ev.initials} size={28} />
-          <div style={{ flex: 1, minWidth: 0 }}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8, marginBottom: 4 }}>
-              <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--text)' }}>{ev.author}</span>
-              <span style={{ fontSize: 11, color: 'var(--text-muted)', whiteSpace: 'nowrap' }}>{formatDateTime(ev.time)}</span>
-            </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8, background: 'var(--bg)',
-              border: '1px solid var(--border)', borderRadius: 8, padding: '8px 12px' }}>
-              <span style={{ flex: 1, fontSize: 12, color: 'var(--text)', lineHeight: 1.45 }}>{ev.description}</span>
-              {ev.ai && <AiGeneratedLabel size={10} />}
-            </div>
-          </div>
-        </div>
-      ))}
-    </div>
+    <EventTimeline
+      emptyText={emptyText}
+      kindMeta={kind => KIND_META[kind]}
+      events={items.map((ev, i) => ({
+        id: ev.id ?? i,
+        time: ev.time,
+        kind: kindOf(ev.id),
+        text: ev.description,
+        meta: ev.author || null,
+        trailing: ev.ai ? <AiGeneratedLabel size={10} /> : null,
+      }))}
+    />
   )
 }

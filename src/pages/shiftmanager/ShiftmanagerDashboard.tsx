@@ -155,7 +155,7 @@ export default function ShiftmanagerDashboard() {
             <div key={i} className="flex items-start gap-3 px-4 py-3"
               style={{ borderBottom: i < conversations.length - 1 ? '1px solid var(--hover-bg)' : 'none' }}>
               <div className="flex items-center justify-center flex-shrink-0 rounded-full"
-                style={{ width: 28, height: 28, background: 'var(--color-primary-bg)', color: 'var(--color-primary)', fontSize: 11 }}>
+                style={{ width: 28, height: 28, background: 'var(--color-primary-bg)', color: 'var(--color-primary-text)', fontSize: 11 }}>
                 {c.name.split(' ').map(n => n[0]).join('')}
               </div>
               <div className="flex-1 min-w-0">

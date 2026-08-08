@@ -88,7 +88,12 @@ export default function AddVacancyModal({
     // handle via negative margins, so the panel's built-in X is hidden.
     <FloatingPanel open onClose={onClose} ariaLabel={f.t('modal.title')}
       persistKey="add-vacancy" scrollBody={false} hideClose
-      width="min(calc(100vw - 48px), 1060px)" maxWidth={`${WIDE_MODAL.maxWidth}px`}
+      // WIDER (Danny 08-08: "Nieuwe vacature mag breder zijn dus knoppen naar
+      // rechts"): the shared 1060px cap squeezed the header so the title wrapped
+      // onto two lines and the status pills sat right against it. This form has
+      // three column groups, so it gets its own, wider cap — the shared
+      // WIDE_MODAL stays untouched for every other modal.
+      width="94vw" maxWidth="1320px"
       header={
         <div style={{ flex: 1, margin: '-12px -16px -13px' }}>
           <ModalHeader status={f.form.status} statusOptions={f.statusOptions}
@@ -199,7 +204,7 @@ export default function AddVacancyModal({
           <button onClick={f.handleSubmit} disabled={!f.canSubmit || f.saving}
             style={{ height: BTN_H, padding: '0 20px', fontSize: 13, fontWeight: 600, borderRadius: 8, border: 'none',
               background: (f.canSubmit && !f.saving) ? 'var(--color-primary)' : 'var(--border)',
-              color: (f.canSubmit && !f.saving) ? 'white' : 'var(--text-muted)',
+              color: (f.canSubmit && !f.saving) ? 'var(--color-on-accent)' : 'var(--text-muted)',
               cursor: (f.canSubmit && !f.saving) ? 'pointer' : 'not-allowed' }}>
             {f.saving ? f.t('modal.creating') : f.t('modal.create')}
           </button>

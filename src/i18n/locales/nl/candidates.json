@@ -384,7 +384,8 @@
     "archivedNamed": "{{name}} gearchiveerd",
     "noStatus": "Geen status",
     "changelog": "Wijzigingslog",
-    "tasksSearchPlaceholder": "Zoek taak…"
+    "tasksSearchPlaceholder": "Zoek taak…",
+    "createdAtBy": "Aangemaakt op {{date}} door {{name}}"
   },
   "stage": {
     "lead": "Lead",
@@ -431,7 +432,13 @@
     "groupWorkPermit": "Werkvergunning",
     "workPermitType": "Type werkvergunning",
     "workPermitValidUntil": "Geldig tot",
-    "linkedinPlaceholder": "linkedin.com/in/gebruikersnaam"
+    "linkedinPlaceholder": "linkedin.com/in/gebruikersnaam",
+    "groupOrigin": "Herkomst",
+    "source": "Bron",
+    "sourcePlaceholder": "Bijv. website, Indeed, doorverwijzing",
+    "createdBy": "Aangemaakt door",
+    "createdAt": "Aangemaakt op",
+    "readOnlyStamp": "Alleen-lezen — door het systeem vastgelegd"
   },
   "addFields": {
     "functionTitle": "Functietitel",
@@ -465,7 +472,15 @@
     "phone": "Telefoon",
     "email": "E-mailadres",
     "note": "Notitie",
-    "educationLevel": "Niveau"
+    "educationLevel": "Niveau",
+    "referenceText": "Referentietekst",
+    "referenceFirstName": "Voornaam",
+    "referenceMiddleName": "Tussenvoegsel",
+    "referenceLastName": "Achternaam",
+    "referenceFunction": "Functie",
+    "mobile": "Mobiel",
+    "referenceLetter": "Referentiebrief",
+    "linkedDocumentFor": "Gekoppeld document voor {{name}}"
   },
   "work": {
     "client": "Klant",
@@ -525,7 +540,26 @@
     "vacancyUnknown": "Onbekende vacature",
     "searchPlaceholder": "Zoek vacature…",
     "colStatus": "Status",
-    "colDate": "Datum"
+    "colDate": "Datum",
+    "showDetails": "Details tonen",
+    "hideDetails": "Details verbergen",
+    "createdAt": "Aangemaakt op",
+    "reference": "Referentienr.",
+    "rejectionReason": "Afwijzingsreden",
+    "detailsError": "Details laden mislukt.",
+    "detailsEmpty": "Geen extra gegevens.",
+    "openApplication": "Sollicitatie openen",
+    "editApplication": "Sollicitatie bewerken",
+    "applicationUpdated": "Sollicitatie bijgewerkt",
+    "applicationUpdateFailed": "Sollicitatie bijwerken mislukt",
+    "applicationLoadFailed": "Sollicitatie laden mislukt",
+    "detachApplication": "Sollicitatie ontkoppelen",
+    "detachTitle": "Reden voor ontkoppelen",
+    "detachMessage": "De sollicitatie op {{name}} wordt losgekoppeld van deze kandidaat. Dit is terug te draaien; de reden komt in de tijdlijn.",
+    "detachReasonLabel": "Reden",
+    "detachReasonPlaceholder": "Waarom wordt deze sollicitatie ontkoppeld?",
+    "detachConfirm": "Ontkoppelen",
+    "detachDone": "Sollicitatie ontkoppeld"
   },
   "communication": {
     "newNote": "Nieuwe notitie",
@@ -730,7 +764,15 @@
     "emergencyContactPhone": "Telefoonnummer",
     "emergencyContactPhoneInvalid": "Voer een geldig telefoonnummer in (8 t/m 15 cijfers, spaties/streepjes toegestaan).",
     "groupNoticePeriod": "Opzegtermijn",
-    "noticePeriodWeeks": "Opzegtermijn (weken)"
+    "noticePeriodWeeks": "Opzegtermijn (weken)",
+    "emergencyContactFirstName": "Voornaam",
+    "emergencyContactLastName": "Achternaam",
+    "emergencyContactMiddleName": "Tussenvoegsel",
+    "emergencyContactMobile": "Mobiel nummer",
+    "emergencyContactRelation": "Relatie",
+    "noticePeriodDerivedHint_one": "Op basis van de opzegtermijn ({{count}} week) inzetbaar vanaf {{date}}.",
+    "noticePeriodDerivedHint_other": "Op basis van de opzegtermijn ({{count}} weken) inzetbaar vanaf {{date}}.",
+    "noticePeriodApply": "Datum overnemen"
   },
   "zzp": {
     "title": "ZZP'er",
@@ -764,7 +806,8 @@
     "businessEmailDuplicateConfirm": "Toch opslaan",
     "businessEmailDuplicateCancel": "Terug",
     "creditorAutoHint": "Wordt automatisch toegekend indien leeg.",
-    "creditorAutoLocked": "Wordt automatisch genummerd via Instellingen → Nummering."
+    "creditorAutoLocked": "Wordt automatisch genummerd via Instellingen → Nummering.",
+    "identifierNlOnly": "Let op: de server accepteert voor ZZP'ers nog uitsluitend een Nederlands KvK-/btw-nummer. Een buitenlands nummer wordt bij opslaan geweigerd."
   },
   "certified": {
     "issued": "Uitgegeven",
@@ -810,7 +853,10 @@
     "replace": "Bestand vervangen",
     "versionCount_one": "{{count}} eerdere versie",
     "versionCount_other": "{{count}} eerdere versies",
-    "downloadVersion": "Deze versie downloaden"
+    "downloadVersion": "Deze versie downloaden",
+    "changeLink": "Koppeling wijzigen",
+    "linkedTo": "Gekoppeld aan {{name}}",
+    "allTypes": "Alle types"
   },
   "ai": {
     "title": "Koios AI adviseert",
@@ -1088,7 +1134,10 @@
     "confirm": "Samenvoegen",
     "done": "Kandidaten samengevoegd.",
     "errForbidden": "Je hebt geen rechten om kandidaten samen te voegen.",
-    "errFailed": "Samenvoegen mislukt. Probeer het opnieuw."
+    "errFailed": "Samenvoegen mislukt. Probeer het opnieuw.",
+    "duplicateLabel": "Dubbele kandidaat",
+    "searchHint": "Typ minimaal {{min}} tekens",
+    "errSearch": "Zoeken mislukt. Probeer het opnieuw."
   },
   "duplicate": {
     "blockedTitle": "Deze persoon bestaat al",
@@ -1164,7 +1213,37 @@
     "sessionClosedHint": "Het 24-uursvenster is gesloten — start een nieuwe conversatie met een template om opnieuw te openen.",
     "composerUnavailable": "WhatsApp is nu niet bereikbaar — er is niets verzonden. Probeer het straks opnieuw.",
     "pickAgent": "AI-agent (optioneel)",
-    "agentPlaceholder": "Kies een AI-agent…"
+    "agentPlaceholder": "Kies een AI-agent…",
+    "configureWhatsapp": "WhatsApp instellen →",
+    "assist": {
+      "title": "Koios assistent",
+      "summarize": "Samenvatten",
+      "actions": "Actiepunten",
+      "needsMessages": "Dit gesprek heeft nog geen berichten",
+      "apply": "Overnemen",
+      "discard": "Verwerpen",
+      "noItems": "Geen actiepunten gevonden",
+      "error": "Koios kon dit gesprek niet verwerken. Probeer het opnieuw.",
+      "actionTypes": {
+        "task": "Taak",
+        "whatsapp": "WhatsApp",
+        "appointment": "Afspraak",
+        "notification": "Melding"
+      }
+    },
+    "windowLeftHours": "Nog {{hours}} u {{minutes}} min om vrij te antwoorden",
+    "windowLeftMinutes_one": "Nog {{count}} minuut om vrij te antwoorden",
+    "windowLeftMinutes_other": "Nog {{count}} minuten om vrij te antwoorden",
+    "windowLeftSeconds": "Minder dan een minuut om vrij te antwoorden",
+    "windowClosesAt": "Het 24-uursvenster sluit om {{time}}",
+    "windowUnknown": "Onbekend of het 24-uursvenster open is: dit gesprek geeft geen tijdstip van het laatste inkomende bericht. Een goedgekeurde template komt altijd aan.",
+    "sendTemplate": "Template versturen",
+    "templateSent": "Template verzonden",
+    "templateSendFailed": "Kon de template niet versturen",
+    "templateLoading": "Templates laden…",
+    "templateNeedsCandidate": "Dit gesprek hoort niet bij een kandidaat; een template versturen kan hier nog niet.",
+    "templateVarsUnsupported_one": "Deze template heeft {{count}} variabele die hier nog niet ingevuld kan worden — kies een template zonder variabelen.",
+    "templateVarsUnsupported_other": "Deze template heeft {{count}} variabelen die hier nog niet ingevuld kunnen worden — kies een template zonder variabelen."
   },
   "advice": {
     "reason": {
@@ -1176,7 +1255,8 @@
   },
   "references": {
     "verify": "Verifiëren",
-    "verified": "Geverifieerd"
+    "verified": "Geverifieerd",
+    "experienceLinkUnavailable": "Koppelen aan een werkervaring kan nog niet — dit volgt zodra de API het veld ondersteunt."
   },
   "validation": {
     "emailFormat": "Voer een geldig e-mailadres in.",

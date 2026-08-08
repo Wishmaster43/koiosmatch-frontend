@@ -33,7 +33,7 @@ export default function CustomerHeaderActions({ isEntryPhase, targetPhase, onCon
           configured on the tenant's lookup → render no button at all. */}
       {isEntryPhase && targetPhase && (
         <button onClick={onConvert}
-          style={{ display: 'flex', alignItems: 'center', gap: 4, height: BTN_H, padding: '0 10px', fontSize: 11, fontWeight: 600, borderRadius: 7, cursor: 'pointer', border: '1px solid var(--color-primary)', background: 'var(--color-primary)', color: 'white' }}>
+          style={{ display: 'flex', alignItems: 'center', gap: 4, height: BTN_H, padding: '0 10px', fontSize: 11, fontWeight: 600, borderRadius: 7, cursor: 'pointer', border: '1px solid var(--color-primary)', background: 'var(--color-primary)', color: 'var(--color-on-accent)' }}>
           <UserCheck size={11} />{t('drawer.convertTo', { phase: targetPhase.label })}
         </button>
       )}
@@ -41,7 +41,7 @@ export default function CustomerHeaderActions({ isEntryPhase, targetPhase, onCon
       {headerEditing ? (
         <>
           <button onClick={onSaveEdit} title={t('drawer.save')}
-            style={{ ...iconBtn, background: 'var(--color-primary)', color: '#fff', border: 'none' }}>
+            style={{ ...iconBtn, background: 'var(--color-primary)', color: 'var(--color-on-accent)', border: 'none' }}>
             <Save size={14} />
           </button>
           <button onClick={onCancelEdit} title={t('drawer.cancel')}

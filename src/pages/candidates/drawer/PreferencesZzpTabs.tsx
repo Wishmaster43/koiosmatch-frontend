@@ -31,6 +31,7 @@ import { useIndustries } from '@/lib/useIndustries'
 import { useDriverLicenses } from '@/lib/useDriverLicenses'
 import EmergencyContactCard from './EmergencyContactCard'
 import type { EmergencyContactValues } from './EmergencyContactCard'
+import NoticePeriodHint from './NoticePeriodHint'
 import type { Candidate } from '@/types/candidate'
 
 // Documented exception to the fieldRowCanon 120px label width (Danny 05-08 unify pass):
@@ -91,25 +92,41 @@ export function PreferencesTab({ c, onSave, onTypesChange, onEditStatus }: { c: 
     rijbewijs:       toArray(pref.license_categories),
     loonheffing:       pref.wage_tax       ?? false,
     loonheffing_vanaf: pref.wage_tax_from  ?? '',
-    // KAND-OPZEGTERMIJN-1: notice period towards the current employer, in weeks.
+    // KAND-OPZEGTERMIJN-1: notice period towards the current employer, in weeks —
+    // part of Beschikbaarheid since Danny punt 9 (see the field schema below).
     noticePeriodWeeks: pref.notice_period_weeks ?? '',
     remarks:     pref.remarks        ?? '',
     // RATE-WISH-1: root fields on the candidate, not the preferences blob.
     desiredRateMin: (c as { desiredRateMin?: string }).desiredRateMin ?? '',
     desiredRateMax: (c as { desiredRateMax?: string }).desiredRateMax ?? '',
   }
-  // KAND-NOODCONTACT-1: third-party PII (name/phone only, per the punchlist) — its
+  // KAND-NOODCONTACT-1 / NOODCONTACT-SPLIT-1 (2026-08-08): third-party PII — its
   // OWN small value object, read straight off the preferences blob rather than
   // folded into the shared `value` above, because EmergencyContactCard owns its
   // own local draft/error state (see its file header) instead of going through
   // the schema-driven EditableFieldTable like every other field on this tab.
+  // Split name/phone/mobile + relation-by-id, verified live against the backend
+  // contract (see EmergencyContactCard.tsx's own header) — the OLD single
+  // `emergency_contact_name` / free-text `emergency_contact_relation` fields no
+  // longer exist server-side.
   const emergencyContactValue: EmergencyContactValues = {
-    name:  (pref.emergency_contact_name  as string) ?? '',
-    phone: (pref.emergency_contact_phone as string) ?? '',
+    firstName:  (pref.emergency_contact_first_name  as string) ?? '',
+    middleName: (pref.emergency_contact_middle_name as string) ?? '',
+    lastName:   (pref.emergency_contact_last_name   as string) ?? '',
+    phone:      (pref.emergency_contact_phone       as string) ?? '',
+    mobile:     (pref.emergency_contact_mobile      as string) ?? '',
+    relationId: (pref.emergency_contact_relation_id as string) ?? '',
+    // Nested {id,label} (KAND-NIVEAU-1 pattern) — read mode's fallback label.
+    relationLabel: (pref.emergency_contact_relation as { label?: string } | null | undefined)?.label ?? '',
   }
   const fields = [
     { key: 'contractvorm',    label: t('drawer.candidateType'),      group: t('preferences.groupAvailability'), type: 'chips', chipOptions: candidateTypeOptions },
     { key: 'beschikbaar_per', label: t('preferences.availableFrom'), group: t('preferences.groupAvailability'), type: 'date' },
+    // KAND-OPZEGTERMIJN-2 (Danny 2026-08-08, punt 9): the notice period sits DIRECTLY
+    // under "Inzetbaar vanaf" instead of in its own Overig card — they are one thing
+    // (X weeks' notice = deployable in X weeks), and NoticePeriodHint below makes that
+    // relation explicit. Same card, same pencil, same save as the rest of Beschikbaarheid.
+    { key: 'noticePeriodWeeks', label: t('preferences.noticePeriodWeeks'), group: t('preferences.groupAvailability'), inputType: 'number' },
     { key: 'hoursPerWeek',   label: t('preferences.hoursPerWeek'),  group: t('preferences.groupAvailability'), inputType: 'number' },
     { key: 'dagen',           label: t('preferences.days'),          group: t('preferences.groupAvailability'), type: 'chips', chipOptions: dayOptions },
     { key: 'branche',         label: t('preferences.sector'),        group: t('preferences.groupAvailability'), type: 'chips', chipOptions: industryOptions },
@@ -121,7 +138,6 @@ export function PreferencesTab({ c, onSave, onTypesChange, onEditStatus }: { c: 
     { key: 'loonheffing_vanaf', label: t('preferences.wageTaxFrom'),  group: t('preferences.groupPayroll'), type: 'date' },
     { key: 'desiredRateMin', label: t('preferences.desiredRateMin'), group: t('preferences.groupDesiredRate'), inputType: 'number', step: '0.01', mono: true },
     { key: 'desiredRateMax', label: t('preferences.desiredRateMax'), group: t('preferences.groupDesiredRate'), inputType: 'number', step: '0.01', mono: true },
-    { key: 'noticePeriodWeeks', label: t('preferences.noticePeriodWeeks'), group: t('preferences.groupNoticePeriod'), inputType: 'number' },
     { key: 'remarks',     label: t('preferences.remarks'),       group: t('preferences.groupOther'), type: 'richtext' },
   ]
   // PREF-PENCIL-SPLIT-1 (05-08): one payload builder PER SECTION, each emitting
@@ -131,6 +147,9 @@ export function PreferencesTab({ c, onSave, onTypesChange, onEditStatus }: { c: 
   // stays routed separately to candidateTypes (never part of the preferences blob).
   const toApiAvailability = (v: Record<string, unknown>) => ({
     available_from: v.beschikbaar_per,
+    // KAND-OPZEGTERMIJN-2: moved in from its own section — both keys are accepted by
+    // PATCH /candidates/{id} inside the preferences blob (verified live 2026-08-08).
+    notice_period_weeks: v.noticePeriodWeeks === '' ? null : Number(v.noticePeriodWeeks),
     hours_per_week: v.hoursPerWeek === '' ? null : Number(v.hoursPerWeek),
     preferred_days: v.dagen,
     sector_pref:    v.branche,
@@ -153,20 +172,19 @@ export function PreferencesTab({ c, onSave, onTypesChange, onEditStatus }: { c: 
     desired_rate_max: v.desiredRateMax === '' ? null : Number(v.desiredRateMax),
   })
   const toApiOther = (v: Record<string, unknown>) => ({ remarks: v.remarks })
-  // KAND-OPZEGTERMIJN-1: its own narrow builder, same reasoning as toApiPayroll —
-  // notice_period_weeks is a distinct section from Opmerkingen, own pencil, own save.
-  const toApiNoticePeriod = (v: Record<string, unknown>) => ({
-    notice_period_weeks: v.noticePeriodWeeks === '' ? null : Number(v.noticePeriodWeeks),
-  })
 
   // One save handler per section, mirroring the payload builders above. Only
   // Beschikbaarheid also routes contractvorm to candidateTypes (its own field).
-  const handleSaveAvailability   = (v: Record<string, unknown>) => { onTypesChange?.((v.contractvorm as string[]) ?? []); onSave?.(toApiAvailability(v)) }
+  // Beschikbaarheid is CONTROLLED (see availEditing below), so its save also has to
+  // leave edit mode — the table only does that for itself when uncontrolled.
+  const handleSaveAvailability   = (v: Record<string, unknown>) => { setAvailEditing(false); onTypesChange?.((v.contractvorm as string[]) ?? []); onSave?.(toApiAvailability(v)) }
   const handleSaveTravel         = (v: Record<string, unknown>) => onSave?.(toApiTravel(v))
   const handleSavePayroll        = (v: Record<string, unknown>) => onSave?.(toApiPayroll(v))
   const handleSaveDesiredRate    = (v: Record<string, unknown>) => onSave?.(toApiDesiredRate(v))
   const handleSaveOther          = (v: Record<string, unknown>) => onSave?.(toApiOther(v))
-  const handleSaveNoticePeriod   = (v: Record<string, unknown>) => onSave?.(toApiNoticePeriod(v))
+  // KAND-OPZEGTERMIJN-2: taking over the suggested date persists exactly ONE key —
+  // it is a proposal accepted by the recruiter, never a silent recalculation (§3).
+  const handleApplyDerivedDate   = (isoDate: string) => onSave?.({ available_from: isoDate })
   // EmergencyContactCard already builds the exact API shape itself (own local
   // draft/validation, see its file header) — this handler is a thin pass-through,
   // kept as its own named function only for symmetry with the other sections.
@@ -198,11 +216,18 @@ export function PreferencesTab({ c, onSave, onTypesChange, onEditStatus }: { c: 
     { id: 'other',        label: t('preferences.groupOther') },
   ]
   const [subTab, setSubTab] = useState('availability')
+  // KAND-OPZEGTERMIJN-2: Beschikbaarheid's edit cycle is CONTROLLED here (the other
+  // sections stay internally controlled). NoticePeriodHint sits outside the table but
+  // writes the same field, so the hint must know whether a draft is open — a PATCH
+  // landing behind an open draft would be wiped by that draft's own save.
+  const [availEditing, setAvailEditing] = useState(false)
+  // Switching sub-tab closes the availability draft, mirroring the remount-reset the
+  // section-unique keys give the uncontrolled tables (EDIT-STATE-LEAK, Danny 05-08).
+  const changeSubTab = (id: string) => { setSubTab(id); setAvailEditing(false) }
   const availabilityFields = fields.filter(f => f.group === t('preferences.groupAvailability')).map(f => ({ ...f, group: undefined }))
   const travelFields       = fields.filter(f => f.group === t('preferences.groupTravel')).map(f => ({ ...f, group: undefined }))
   const payrollFields      = fields.filter(f => f.group === t('preferences.groupPayroll')).map(f => ({ ...f, group: undefined }))
   const desiredRateFields  = fields.filter(f => f.group === t('preferences.groupDesiredRate')).map(f => ({ ...f, group: undefined }))
-  const noticePeriodFields = fields.filter(f => f.group === t('preferences.groupNoticePeriod')).map(f => ({ ...f, group: undefined }))
   const otherFields        = fields.filter(f => f.group === t('preferences.groupOther')).map(f => ({ ...f, group: undefined }))
 
   // Current unavailability window (status axis) — read-only next to "Inzetbaar vanaf"
@@ -234,14 +259,25 @@ export function PreferencesTab({ c, onSave, onTypesChange, onEditStatus }: { c: 
           )}
         </div>
       )}
-      <SubTabBar tabs={SUB_TABS} active={subTab} onChange={setSubTab} />
+      <SubTabBar tabs={SUB_TABS} active={subTab} onChange={changeSubTab} />
       {/* Each section is its OWN EditableFieldTable instance — its own pencil, its own
           editing state, its own narrow onSave (see the toApiXxx / handleSaveXxx
           builders above). On Save, Contractvorm goes to candidateTypes, the rest
           to preferences. Keys are SECTION-unique: the sub-tabs share one React slot,
           so a bare c.id key let the editing state survive a tab switch — pencil on
           Beschikbaarheid made Reizen arrive in edit mode (Danny 05-08). */}
-      {subTab === 'availability' && <EditableFieldTable key={`${c.id}-availability`} fields={availabilityFields} value={value} labelWidth={WIDE_LABEL_WIDTH} onSave={handleSaveAvailability} />}
+      {subTab === 'availability' && (
+        // Beschikbaarheid = one card (Contractvorm · Inzetbaar vanaf · Opzegtermijn ·
+        // Uren · Dagen · Branche) plus the derived-date hint underneath it. The hint
+        // only offers its take-over button in READ mode — see availEditing above.
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+          <EditableFieldTable key={`${c.id}-availability`} fields={availabilityFields} value={value} labelWidth={WIDE_LABEL_WIDTH}
+            editing={availEditing} onStartEdit={() => setAvailEditing(true)} onCancel={() => setAvailEditing(false)}
+            onSave={handleSaveAvailability} />
+          <NoticePeriodHint weeks={value.noticePeriodWeeks} availableFrom={value.beschikbaar_per}
+            canApply={!availEditing} onApply={handleApplyDerivedDate} />
+        </div>
+      )}
       {subTab === 'travel'       && <EditableFieldTable key={`${c.id}-travel`} fields={travelFields}       value={value} labelWidth={WIDE_LABEL_WIDTH} onSave={handleSaveTravel} />}
       {subTab === 'financial' && (
         // Two genuinely distinct sections sharing one sub-tab (see the comment above
@@ -252,13 +288,12 @@ export function PreferencesTab({ c, onSave, onTypesChange, onEditStatus }: { c: 
         </div>
       )}
       {subTab === 'other' && (
-        // Overig now stacks THREE independently-editable cards — Noodcontact ·
-        // Opzegtermijn · Opmerkingen (job "noodcontact-opzeg") — same
+        // Overig stacks TWO independently-editable cards — Noodcontact · Opmerkingen
+        // (Opzegtermijn moved to Beschikbaarheid, Danny punt 9) — same
         // PREF-PENCIL-SPLIT-1 stacking as Financieel above: each owns its own
         // pencil/draft/save, so editing one never flips another into edit mode.
         <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
           <EmergencyContactCard key={`${c.id}-emergency`} value={emergencyContactValue} onSave={handleSaveEmergencyContact} />
-          <EditableFieldTable key={`${c.id}-noticeperiod`} title={t('preferences.groupNoticePeriod')} fields={noticePeriodFields} value={value} labelWidth={WIDE_LABEL_WIDTH} onSave={handleSaveNoticePeriod} />
           <EditableFieldTable key={`${c.id}-other`} fields={otherFields} value={value} labelWidth={WIDE_LABEL_WIDTH} onSave={handleSaveOther} />
         </div>
       )}

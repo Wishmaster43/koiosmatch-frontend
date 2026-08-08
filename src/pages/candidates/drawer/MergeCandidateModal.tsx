@@ -1,22 +1,44 @@
 /**
  * MergeCandidateModal — absorb a duplicate candidate into a survivor (Danny punt 4:
- * the backend merge existed, the UI never did). Step 1: search the duplicate
+ * the backend merge existed, the UI never did). Step 1: pick the duplicate
  * (name/number/email so lookalikes are tellable apart). Step 2: choose which of
  * the two records REMAINS; the other is absorbed and archived (soft-delete,
- * server-side C-29). Calls POST /candidates/{survivor}/merge and hands the
- * survivor id back to the page, which reopens it fresh.
+ * server-side C-29). Calls POST /candidates/{survivor}/merge (verified live
+ * 09-08, permission candidates.delete) and hands the survivor id back to the
+ * page, which reopens it fresh.
+ *
+ * MERGE-PICKER-1 (Danny 08-08 punt 20, "kandidaat samenvoegen: zoekbare dropdown
+ * hebben die leesbaar is"): step 1 used to be a hand-rolled search input plus an
+ * inline result list — the only picker in the app that was not the house dropdown.
+ * It is now the shared `SearchSelect` in server-search mode (`onSearch` debounces
+ * the term up to this component, which re-fetches a capped 8 rows — never the whole
+ * table, §8) with `closeOnToggle` so one pick closes it: a real searchable dropdown,
+ * strict (no create — a candidate is a relational id, not free text).
+ * READABILITY: every colour here goes through the tokens, and the accent is used AS
+ * TEXT via `--color-primary-text` (never the raw `--color-primary`), which
+ * useTenantTheme keeps ≥4.5:1 on the surface for any tenant brand — the old raw
+ * accent measured 2.55:1 on the selected card for the default brand and 1.06:1 for
+ * a light one, i.e. unreadable exactly where it mattered.
  */
-import { useEffect, useRef, useState } from 'react'
-import type { CSSProperties } from 'react'
+import { useCallback, useEffect, useId, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useQueryClient } from '@tanstack/react-query'
-import { Search, GitMerge, Loader2 } from 'lucide-react'
+import { ChevronDown, GitMerge, Loader2 } from 'lucide-react'
 import api, { unwrapList } from '@/lib/api'
 import { notifyError, notifySuccess } from '@/lib/notify'
 import FloatingPanel from '@/components/ui/FloatingPanel'
+import SearchSelect from '@/components/ui/SearchSelect'
 import { Z } from '@/lib/zIndexScale'
 import { BTN_H } from '@/config/buttonMetrics'
+import { fieldInputStyle } from '@/components/forms/fieldMetrics'
 import type { Id } from '@/types/common'
+
+// Modal body is 460 wide with 20px padding — the dropdown spans that inner width so
+// a full "name · number · e-mail" row is readable without truncating (punt 20).
+const PICKER_WIDTH = 420
+// Shortest term worth a round trip; below it the picker says so instead of
+// silently showing "no results".
+const MIN_SEARCH_LENGTH = 2
 
 interface LiteCandidate { id: Id; name: string; code?: string; email?: string }
 
@@ -40,32 +62,62 @@ export default function MergeCandidateModal({ current, onClose, onMerged, initia
 }) {
   const { t } = useTranslation('candidates')
   const queryClient = useQueryClient()
+  const labelId = useId()
+  const triggerId = useId()
 
-  // Step 1: debounced duplicate search (excluding the open candidate itself).
+  // Step 1: server-side duplicate search (excluding the open candidate itself).
   const [query, setQuery] = useState('')
   const [results, setResults] = useState<LiteCandidate[]>([])
   const [searching, setSearching] = useState(false)
+  const [searchFailed, setSearchFailed] = useState(false)
   const [other, setOther] = useState<LiteCandidate | null>(initialOther ?? null)
   // Step 2: which record remains — default: the candidate that is open now.
   const [survivorId, setSurvivorId] = useState<Id>(current.id)
   const [merging, setMerging] = useState(false)
-  const debounceRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
 
+  // SearchSelect owns the debounce (250ms) and hands the settled term down here —
+  // stable identity so its own debounce effect never re-arms on every render.
+  const handleSearch = useCallback((q: string) => setQuery(q), [])
+
+  // Fetch the capped candidate list for the current term. Aborts the in-flight
+  // request on term change/unmount, and every state write is guarded by the
+  // signal so a late-resolving previous term can never overwrite the new one (§9).
   useEffect(() => {
     if (other) return // picker collapsed once a duplicate is chosen
     const q = query.trim()
-    if (q.length < 2) { setResults([]); return }
-    clearTimeout(debounceRef.current)
+    if (q.length < MIN_SEARCH_LENGTH) { setResults([]); setSearchFailed(false); return }
     const ctrl = new AbortController()
-    debounceRef.current = setTimeout(() => {
-      setSearching(true)
-      api.get('/candidates', { params: { search: q, per_page: 8 }, signal: ctrl.signal })
-        .then(res => setResults((unwrapList(res).rows as ApiRow[]).map(rowToLite).filter(c => String(c.id) !== String(current.id))))
-        .catch(() => {})
-        .finally(() => setSearching(false))
-    }, 300)
-    return () => { clearTimeout(debounceRef.current); ctrl.abort() }
+    setSearching(true)
+    setSearchFailed(false)
+    api.get('/candidates', { params: { search: q, per_page: 8 }, signal: ctrl.signal })
+      .then(res => {
+        if (ctrl.signal.aborted) return
+        setResults((unwrapList(res).rows as ApiRow[]).map(rowToLite).filter(c => String(c.id) !== String(current.id)))
+      })
+      .catch(() => { if (!ctrl.signal.aborted) setSearchFailed(true) })
+      .finally(() => { if (!ctrl.signal.aborted) setSearching(false) })
+    return () => ctrl.abort()
   }, [query, other, current.id])
+
+  // One readable dropdown row per candidate: name · number · e-mail, so two people
+  // with the same name are still tellable apart (the whole point of this picker).
+  const pickerOptions = results.map(c => ({
+    value: String(c.id),
+    label: [c.name, c.code, c.email].filter(Boolean).join(' · '),
+  }))
+  // SearchSelect hands back the option VALUE — map it back to the record it names.
+  const pickOther = (id: string) => {
+    const picked = results.find(c => String(c.id) === id)
+    if (picked) setOther(picked)
+  }
+  // The picker's own state line (loading/error/too-short). Rendered ABOVE the
+  // trigger on purpose: the dropdown opens downward over everything below it, so a
+  // status line under the field would be invisible in the exact moment it matters.
+  const searchStatus = searchFailed ? t('merge.errSearch')
+    : searching ? t('merge.searching')
+    // The minimum is interpolated, never baked into the sentence (§5).
+    : (query.trim().length > 0 && query.trim().length < MIN_SEARCH_LENGTH) ? t('merge.searchHint', { min: MIN_SEARCH_LENGTH })
+    : ''
 
   // Fire the merge; the response is the merged detail but the page refetches itself.
   const confirm = async () => {
@@ -86,20 +138,22 @@ export default function MergeCandidateModal({ current, onClose, onMerged, initia
     }
   }
 
-  const inputStyle: CSSProperties = { width: '100%', height: 34, padding: '0 10px 0 30px', fontSize: 13, border: '1px solid var(--border)', borderRadius: 8, background: 'var(--input-bg)', color: 'var(--text)', boxSizing: 'border-box' }
-
-  // One selectable "which record remains" card per side.
+  // One selectable "which record remains" card per side. MERGE-PICKER-1: the active
+  // state paints its accent through `--color-primary-text` (the readable variant),
+  // never the raw `--color-primary` — the raw brand as text on its own 12% tint
+  // measured 2.55:1 for the default brand (and worse for a light one), so the
+  // "Dit dossier blijft" line was unreadable at exactly the brands Danny reported.
   const survivorCard = (c: LiteCandidate, isCurrent: boolean) => {
     const active = String(survivorId) === String(c.id)
     return (
       <button type="button" key={String(c.id)} onClick={() => setSurvivorId(c.id)} aria-pressed={active}
-        style={{ flex: 1, textAlign: 'left', padding: '10px 12px', borderRadius: 10, cursor: 'pointer',
-          border: `1px solid ${active ? 'var(--color-primary)' : 'var(--border)'}`,
+        style={{ flex: 1, minWidth: 0, textAlign: 'left', padding: '10px 12px', borderRadius: 10, cursor: 'pointer',
+          border: `1px solid ${active ? 'var(--color-primary-text)' : 'var(--border)'}`,
           background: active ? 'var(--color-primary-bg)' : 'var(--surface)' }}>
-        <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--text)' }}>{c.name}</div>
+        <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--text)', overflowWrap: 'anywhere' }}>{c.name}</div>
         <div style={{ fontSize: 11, color: 'var(--text-muted)', fontFamily: "'JetBrains Mono', monospace" }}>{c.code ?? '—'}</div>
-        {c.email && <div style={{ fontSize: 11, color: 'var(--text-muted)', overflow: 'hidden', textOverflow: 'ellipsis' }}>{c.email}</div>}
-        <div style={{ fontSize: 10, marginTop: 4, fontWeight: active ? 600 : 400, color: active ? 'var(--color-primary)' : 'var(--text-muted)' }}>
+        {c.email && <div style={{ fontSize: 11, color: 'var(--text-muted)', overflowWrap: 'anywhere' }}>{c.email}</div>}
+        <div style={{ fontSize: 10, marginTop: 4, fontWeight: active ? 600 : 400, color: active ? 'var(--color-primary-text)' : 'var(--text-muted)' }}>
           {active ? t('merge.stays') : (isCurrent ? t('merge.thisRecord') : t('merge.otherRecord'))}
         </div>
       </button>
@@ -114,29 +168,35 @@ export default function MergeCandidateModal({ current, onClose, onMerged, initia
       persistKey="merge-candidate" width={460} zIndex={Z.confirm} bodyStyle={{ padding: 20 }}>
         <div style={{ fontSize: 12, color: 'var(--text-muted)', lineHeight: 1.5, marginBottom: 12 }}>{t('merge.intro', { name: current.name })}</div>
 
-        {/* Step 1 — find the duplicate. */}
+        {/* Step 1 — pick the duplicate through the house searchable dropdown
+            (MERGE-PICKER-1). Label + live status share one row so the trigger never
+            shifts while the menu is open (SearchSelect measures the anchor once). */}
         {!other && (
-          <>
-            <div style={{ position: 'relative', marginBottom: 8 }}>
-              <Search size={13} style={{ position: 'absolute', left: 9, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
-              <input autoFocus value={query} onChange={e => setQuery(e.target.value)}
-                placeholder={t('merge.searchPlaceholder')} aria-label={t('merge.searchPlaceholder')} style={inputStyle} />
+          <div style={{ marginBottom: 16 }}>
+            <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: 8, minHeight: 16, marginBottom: 4 }}>
+              <span id={labelId} style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-muted)' }}>{t('merge.duplicateLabel')}</span>
+              <span aria-live="polite" style={{ fontSize: 11, color: searchFailed ? 'var(--color-danger)' : 'var(--text-muted)' }}>{searchStatus}</span>
             </div>
-            <div style={{ maxHeight: 220, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 4 }}>
-              {searching && <div style={{ fontSize: 12, color: 'var(--text-muted)', padding: 6 }}>{t('merge.searching')}</div>}
-              {!searching && query.trim().length >= 2 && results.length === 0 && (
-                <div style={{ fontSize: 12, color: 'var(--text-muted)', fontStyle: 'italic', padding: 6 }}>{t('merge.noResults')}</div>
-              )}
-              {results.map(c => (
-                <button key={String(c.id)} type="button" onClick={() => setOther(c)}
-                  style={{ textAlign: 'left', padding: '8px 10px', borderRadius: 8, border: '1px solid var(--border)', background: 'var(--surface)', cursor: 'pointer' }}>
-                  <span style={{ fontSize: 12, fontWeight: 500, color: 'var(--text)' }}>{c.name}</span>
-                  <span style={{ fontSize: 11, color: 'var(--text-muted)', marginLeft: 8, fontFamily: "'JetBrains Mono', monospace" }}>{c.code ?? ''}</span>
-                  {c.email && <span style={{ fontSize: 11, color: 'var(--text-muted)', marginLeft: 8 }}>{c.email}</span>}
+            <SearchSelect
+              options={pickerOptions} selected={[]} onToggle={pickOther}
+              onSearch={handleSearch} closeOnToggle width={PICKER_WIDTH}
+              renderTrigger={toggle => (
+                // Canon field box (G33/fieldMetrics) so this picker sits at the same
+                // footprint as every other field. Named by the visible label PLUS its
+                // own text — a <button> is not labelable, and pointing at the label
+                // alone would REPLACE the field's own text instead of prefixing it
+                // (§6, the exact convention CreatableSelect documents).
+                <button type="button" onClick={toggle} id={triggerId}
+                  aria-labelledby={`${labelId} ${triggerId}`} aria-haspopup="listbox"
+                  style={{ ...fieldInputStyle, display: 'flex', alignItems: 'center', gap: 8, textAlign: 'left', cursor: 'pointer' }}>
+                  <span style={{ flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', color: 'var(--text-muted)' }}>
+                    {t('merge.searchPlaceholder')}
+                  </span>
+                  <ChevronDown size={13} style={{ color: 'var(--text-muted)', flexShrink: 0 }} aria-hidden="true" />
                 </button>
-              ))}
-            </div>
-          </>
+              )}
+            />
+          </div>
         )}
 
         {/* Step 2 — choose the survivor + danger summary. */}
@@ -166,7 +226,7 @@ export default function MergeCandidateModal({ current, onClose, onMerged, initia
             </button>
             <button type="button" onClick={confirm} disabled={!other || merging}
               style={{ display: 'flex', alignItems: 'center', gap: 6, height: BTN_H, padding: '0 14px', fontSize: 12, fontWeight: 600, border: 'none', borderRadius: 8,
-                background: 'var(--color-danger)', color: 'var(--color-on-accent)', cursor: !other || merging ? 'not-allowed' : 'pointer', opacity: !other || merging ? 0.5 : 1 }}>
+                background: 'var(--color-danger)', color: 'var(--color-on-danger)', cursor: !other || merging ? 'not-allowed' : 'pointer', opacity: !other || merging ? 0.5 : 1 }}>
               {merging ? <Loader2 size={13} className="animate-spin" /> : <GitMerge size={13} />} {t('merge.confirm')}
             </button>
           </div>

@@ -40,7 +40,12 @@ export const isPersisted = (id: Id | undefined): boolean => id != null && !(type
 // predates this field (and a locally queued file still uses its blob objectUrl).
 export const docUrl = (d: DocItem): string | undefined => d.download_url ?? d.url ?? d.objectUrl
 // Grid used by both the header row and every data row — one source so they never drift.
-export const DOC_GRID_COLUMNS = '18px 1fr 80px 100px'
+// Row layout: checkbox · name · type · size · actions. The actions got their own
+// column (Danny 08-08 "icons moeten opschuiven, past niet meer zo") — they used
+// to share the 100px size cell, so the fifth icon (re-link) pushed the size text
+// out. `auto` lets the icon strip take exactly what it needs; the name column
+// (1fr) gives the space back.
+export const DOC_GRID_COLUMNS = '18px 1fr 84px 64px auto'
 
 // DOC-EXPIRY-1 point 1: pure expiry classification for a document's expires_at —
 // mirrors the 30-day warning / past-due danger window pages/matches/matchExpiry.ts
@@ -58,4 +63,21 @@ export const computeDocExpiry = (expiresAt: string | null | undefined, now: Date
   if (days <= 0) return { kind: 'expired' }
   if (days <= EXPIRY_WARNING_DAYS) return { kind: 'warning' }
   return null
+}
+
+/**
+ * Human file size. The API sends `size` in BYTES; the candidate mapper already
+ * formatted it on load, but a fresh upload/replace RESPONSE overwrote that with
+ * the raw number (Danny 08-08 saw "757653" right after uploading). Both paths
+ * go through this one helper now.
+ */
+export const formatDocSize = (b: unknown): string => {
+  if (b == null || b === '') return ''
+  // Already formatted upstream ("740 KB") — leave it alone.
+  if (typeof b === 'string' && /[a-z]/i.test(b)) return b
+  const n = Number(b)
+  if (Number.isNaN(n)) return String(b)
+  if (n < 1024) return `${n} B`
+  if (n < 1024 * 1024) return `${Math.round(n / 1024)} KB`
+  return `${(n / 1024 / 1024).toFixed(1)} MB`
 }

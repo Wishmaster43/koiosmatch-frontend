@@ -10,15 +10,13 @@ import { Check, ChevronDown, Clock, Copy, Plus, RefreshCw, Save, Trash2 } from '
 import { interactive } from '@/lib/a11y'
 import { useDateFormat } from '@/lib/datetime'
 import { notifySuccess } from '@/lib/notify'
+import { fieldInputStyle, fieldTextareaStyle } from '@/components/forms/fieldMetrics'
 
 // One saved version of a prompt/agent config.
 export interface Version { version?: number; created_at?: string; body?: string; content?: string; [k: string]: unknown }
 
-export const inputStyle: CSSProperties = {
-  width: '100%', padding: '7px 10px', fontSize: 13, borderRadius: 8,
-  border: '1px solid var(--border)', background: 'var(--input-bg)',
-  color: 'var(--text)', outline: 'none', boxSizing: 'border-box',
-}
+// Canon field style (G33/fieldMetrics) — was its own near-identical copy before the sweep.
+export const inputStyle: CSSProperties = fieldInputStyle
 
 // ── shared helpers ────────────────────────────────────────────────────────────
 
@@ -55,7 +53,7 @@ export function SaveBar({ saving, saved, onSave }: { saving?: boolean; saved?: b
       )}
       <button onClick={onSave} disabled={saving}
         style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '5px 12px', fontSize: 12, fontWeight: 600,
-          borderRadius: 8, border: 'none', background: 'var(--color-primary)', color: 'white',
+          borderRadius: 8, border: 'none', background: 'var(--color-primary)', color: 'var(--color-on-accent)',
           cursor: saving ? 'default' : 'pointer', opacity: saving ? 0.6 : 1 }}>
         {saving
           ? <RefreshCw size={11} style={{ animation: 'spin 1s linear infinite' }} />
@@ -112,7 +110,7 @@ export function VersionList({ versions, onRestore }: { versions?: Version[]; onR
                 v{v.version ?? i + 1} — {v.created_at ? formatDateTime(v.created_at) : ''}
               </span>
               <button onClick={() => onRestore(v)}
-                style={{ fontSize: 11, color: 'var(--color-primary)', background: 'none', border: 'none', cursor: 'pointer', padding: '1px 5px' }}>
+                style={{ fontSize: 11, color: 'var(--color-primary-text)', background: 'none', border: 'none', cursor: 'pointer', padding: '1px 5px' }}>
                 {t('ai.restore')}
               </button>
             </div>
@@ -129,8 +127,10 @@ export function TextEditor({ value, onChange, onSave, saving, saved, versions, o
 }) {
   return (
     <div>
+      {/* Multi-line control: base off the textarea canon (vertical padding, no fixed
+          height) rather than the single-line inputStyle, which is now height-locked. */}
       <textarea value={value} onChange={e => onChange(e.target.value)} placeholder={placeholder}
-        style={{ ...inputStyle, height, resize: 'vertical', fontFamily: 'monospace', fontSize: 12, lineHeight: 1.6 }} />
+        style={{ ...fieldTextareaStyle, height, fontFamily: 'monospace', fontSize: 12, lineHeight: 1.6 }} />
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 6 }}>
         <VersionList versions={versions} onRestore={onRestore} />
         <SaveBar saving={saving} saved={saved} onSave={onSave} />
@@ -154,7 +154,7 @@ export function SideList<T extends { id?: string | number }>({ title, items, sel
       <div style={{ border: '1px solid var(--border)', borderRadius: 10, overflow: 'hidden', display: 'flex', flexDirection: 'column', background: 'var(--surface)' }}>
         <div style={{ padding: '9px 11px', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--text)' }}>{title}</span>
-          <button onClick={onNew} aria-label={t('common:add')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--color-primary)', padding: 2 }}>
+          <button onClick={onNew} aria-label={t('common:add')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--color-primary-text)', padding: 2 }}>
             <Plus size={13} />
           </button>
         </div>

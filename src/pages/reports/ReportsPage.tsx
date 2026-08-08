@@ -4,19 +4,23 @@
  * and renders the active report. Each report owns its own data layer; this only
  * switches tabs and propagates the chosen period.
  */
-import { useState } from 'react'
+import { useId, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import FlowReport from './FlowReport'
 import RecruitersReport from './RecruitersReport'
 import VacanciesReport from './VacanciesReport'
 import MatchesReport from './MatchesReport'
 import IntakesReport from './IntakesReport'
+import CreatableSelect from '@/components/ui/CreatableSelect'
 import type { ReportPeriod } from '@/types/analytics'
 
 export default function ReportsPage({ initialTab = 'flow' }: { initialTab?: string }) {
   const { t } = useTranslation('analytics')
   const [tab,    setTab]    = useState(initialTab)
   const [period, setPeriod] = useState<ReportPeriod>('month')
+  // Names the period picker for the button-based CreatableSelect below (a <button>
+  // isn't labelable by htmlFor — see the component's own doc comment).
+  const periodLabelId = useId()
 
   // Sub-tabs are config: { id, label }. Add a tab here when its report lands.
   const tabs = [
@@ -47,17 +51,25 @@ export default function ReportsPage({ initialTab = 'flow' }: { initialTab?: stri
           </button>
         ))}
       </div>
-      <label style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12,
-                      color: 'var(--text-muted)', flexShrink: 0, paddingBottom: 6 }}>
-        {t('period.label')}
-        <select value={period} onChange={e => setPeriod(e.target.value as ReportPeriod)}
-          style={{ height: 30, padding: '0 8px', fontSize: 13, border: '1px solid var(--border)',
-                   borderRadius: 8, color: 'var(--text)', background: 'var(--surface)', cursor: 'pointer' }}>
-          <option value="day">{t('period.day')}</option>
-          <option value="week">{t('period.week')}</option>
-          <option value="month">{t('period.month')}</option>
-        </select>
-      </label>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12,
+                    color: 'var(--text-muted)', flexShrink: 0, paddingBottom: 6 }}>
+        <span id={periodLabelId}>{t('period.label')}</span>
+        {/* Searchable combobox replaces the bare native <select> (Danny 08-08, §4) —
+            allowCreate=false since the period is a fixed, non-creatable vocabulary. */}
+        <CreatableSelect
+          aria-labelledby={periodLabelId}
+          value={period}
+          onChange={v => setPeriod(v as ReportPeriod)}
+          allowCreate={false}
+          menuWidth={140}
+          options={[
+            { value: 'day', label: t('period.day') },
+            { value: 'week', label: t('period.week') },
+            { value: 'month', label: t('period.month') },
+          ]}
+          style={{ height: 30, padding: '0 8px', fontSize: 13 }}
+        />
+      </div>
     </div>
   )
 

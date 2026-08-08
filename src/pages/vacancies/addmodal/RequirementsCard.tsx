@@ -46,7 +46,7 @@ export default function RequirementsCard({
             <TextField value={newSkill} onChange={onNewSkillChange} placeholder={t('details.addSkill')} />
             <button type="button" onClick={onAddSkill} title={t('details.addSkill')}
               style={{ width: 34, height: 34, display: 'flex', alignItems: 'center', justifyContent: 'center',
-                borderRadius: 8, border: 'none', background: 'var(--color-primary)', color: '#fff', cursor: 'pointer', flexShrink: 0 }}>
+                borderRadius: 8, border: 'none', background: 'var(--color-primary)', color: 'var(--color-on-accent)', cursor: 'pointer', flexShrink: 0 }}>
               <Plus size={14} />
             </button>
           </div>

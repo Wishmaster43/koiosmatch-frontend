@@ -24,7 +24,8 @@ export default function KoiosHeader({ connected, expanded, onNewChat, onToggleEx
       display: 'flex', alignItems: 'center', padding: '0 14px', gap: 8 }}>
       <div style={{ width: 28, height: 28, borderRadius: '50%', flexShrink: 0,
         background: GRADIENT, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        <Sparkles size={13} color="white" />
+        {/* GRADIENT embeds the tenant accent — read the on-accent token, not a hardcoded white. */}
+        <Sparkles size={13} color="var(--color-on-accent)" />
       </div>
       <div style={{ flex: 1 }}>
         <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--sidebar-text)', lineHeight: 1.2 }}>Koios</div>
@@ -38,7 +39,7 @@ export default function KoiosHeader({ connected, expanded, onNewChat, onToggleEx
       </div>
       <button onClick={onNewChat} title={t('koios.newChat')}
         style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '4px 9px', fontSize: 10,
-          fontWeight: 600, background: 'rgba(99,102,241,0.12)', color: 'var(--color-primary)',
+          fontWeight: 600, background: 'rgba(99,102,241,0.12)', color: 'var(--color-primary-text)',
           border: 'none', borderRadius: 6, cursor: 'pointer', transition: 'background 0.15s' }}
         onMouseEnter={e => e.currentTarget.style.background = 'rgba(99,102,241,0.22)'}
         onMouseLeave={e => e.currentTarget.style.background = 'rgba(99,102,241,0.12)'}>

@@ -128,4 +128,11 @@ describe('buildCandidatePatch', () => {
     expect(buildCandidatePatch({ country: 'NL' })).toEqual({ country: 'NL' })
     expect(buildCandidatePatch({ country: '' })).toEqual({ country: null })
   })
+  // DANNY-6: the Herkomst card writes Bron through this builder; without the
+  // mapping the save reached an empty body and was skipped entirely.
+  it('maps the acquisition source, sending null when cleared', () => {
+    expect(buildCandidatePatch({ source: 'indeed' })).toEqual({ source: 'indeed' })
+    expect(buildCandidatePatch({ source: '' })).toEqual({ source: null })
+    expect(buildCandidatePatch({ source: null })).toEqual({ source: null })
+  })
 })

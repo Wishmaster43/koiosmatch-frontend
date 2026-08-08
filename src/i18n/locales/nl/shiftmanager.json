@@ -93,7 +93,8 @@
       "ccCust": "Kostenplaats klant",
       "candidates": "Kandidaten",
       "notes": "Notities"
-    }
+    },
+    "filterMonth": "Maand"
   },
   "shiftsDrawer": {
     "count": "{{count}} diensten",

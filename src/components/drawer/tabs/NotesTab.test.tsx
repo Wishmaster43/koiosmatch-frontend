@@ -194,6 +194,99 @@ describe('NotesTab · rights (RECHTEN-DETAIL-1)', () => {
   })
 })
 
+/**
+ * NOTE-FILTERS-1 / NOTES-DOC-FILTER-MENU-1 (Danny 08-08): the type + channel
+ * filters moved from two inline dropdowns next to search into the shared
+ * DrawerFilterMenu popover — filtering BEHAVIOUR is unchanged (same narrowing as
+ * the old inline SelectMenus), only where the controls live changed. No real
+ * i18next instance is bootstrapped in this file (matches every other describe
+ * block above), so `t()` calls without a `defaultValue` fall back to the raw key.
+ */
+describe('NotesTab · type/channel filter menu (NOTE-FILTERS-1)', () => {
+  const filterLabels = { ...labels, type: 'Type', channel: 'Kanaal' }
+  const noteTypes = [{ value: 'call', label: 'Bellen' }, { value: 'email', label: 'E-mail' }]
+  const channels = [{ value: 'phone', label: 'Telefoon' }, { value: 'whatsapp', label: 'WhatsApp' }]
+
+  it('the toolbar no longer renders the type/channel dropdowns inline — only ONE Filter button', () => {
+    render(<NotesTab notes={[note()]} labels={filterLabels} noteTypes={noteTypes} channels={channels}
+      showTimeline={false} showConversations={false} />)
+    // The old inline placeholders are gone from the toolbar row entirely.
+    expect(screen.queryByText('Alle types')).toBeNull()
+    expect(screen.queryByText('Alle kanalen')).toBeNull()
+    expect(screen.getByRole('button', { name: 'Filter' })).toBeInTheDocument()
+  })
+
+  it('picking a TYPE in the menu narrows the visible notes exactly as the old inline dropdown did', async () => {
+    const user = userEvent.setup()
+    render(<NotesTab
+      notes={[note({ type: 'call', text: '<p>Belnotitie</p>' }), note({ type: 'email', text: '<p>Mailnotitie</p>' })]}
+      labels={filterLabels} noteTypes={noteTypes} channels={channels} showTimeline={false} showConversations={false} />)
+    expect(screen.getByText('Belnotitie')).toBeInTheDocument()
+    expect(screen.getByText('Mailnotitie')).toBeInTheDocument()
+
+    await user.click(screen.getByRole('button', { name: 'Filter' }))
+    await user.click(screen.getByRole('button', { name: 'Alle types' }))
+    await user.click(screen.getByRole('button', { name: 'Bellen' }))
+
+    expect(screen.getByText('Belnotitie')).toBeInTheDocument()
+    expect(screen.queryByText('Mailnotitie')).toBeNull()
+  })
+
+  it('picking a CHANNEL in the menu narrows the visible notes exactly as the old inline dropdown did', async () => {
+    const user = userEvent.setup()
+    render(<NotesTab
+      notes={[note({ channel: 'phone', text: '<p>Telefoonnotitie</p>' }), note({ channel: 'whatsapp', text: '<p>WA-notitie</p>' })]}
+      labels={filterLabels} noteTypes={noteTypes} channels={channels} showTimeline={false} showConversations={false} />)
+
+    await user.click(screen.getByRole('button', { name: 'Filter' }))
+    await user.click(screen.getByRole('button', { name: 'Alle kanalen' }))
+    await user.click(screen.getByRole('button', { name: 'WhatsApp' }))
+
+    expect(screen.getByText('WA-notitie')).toBeInTheDocument()
+    expect(screen.queryByText('Telefoonnotitie')).toBeNull()
+  })
+
+  it('the badge reflects the number of ACTIVE filters, and clear-all resets both to "all"', async () => {
+    const user = userEvent.setup()
+    render(<NotesTab
+      notes={[note({ type: 'call', channel: 'phone', text: '<p>Match</p>' }), note({ type: 'email', channel: 'whatsapp', text: '<p>NoMatch</p>' })]}
+      labels={filterLabels} noteTypes={noteTypes} channels={channels} showTimeline={false} showConversations={false} />)
+
+    // Picking a value keeps the panel OPEN (so a second filter can be set in the
+    // same visit) — no need to re-click "Filter" between the two picks below.
+    await user.click(screen.getByRole('button', { name: 'Filter' }))
+    await user.click(screen.getByRole('button', { name: 'Alle types' }))
+    await user.click(screen.getByRole('button', { name: 'Bellen' }))
+    await user.click(screen.getByRole('button', { name: 'Alle kanalen' }))
+    await user.click(screen.getByRole('button', { name: 'Telefoon' }))
+    expect(screen.getByText('Match')).toBeInTheDocument()
+    expect(screen.queryByText('NoMatch')).toBeNull()
+    // Both filters active — the badge shows 2.
+    expect(screen.getByText('2')).toBeInTheDocument()
+
+    await user.click(screen.getByRole('button', { name: 'filters.clearAll' }))
+    // Clearing both restores the full list.
+    expect(screen.getByText('Match')).toBeInTheDocument()
+    expect(screen.getByText('NoMatch')).toBeInTheDocument()
+    expect(screen.queryByText('2')).toBeNull()
+  })
+
+  it('Escape closes the filter panel', async () => {
+    const user = userEvent.setup()
+    render(<NotesTab notes={[note()]} labels={filterLabels} noteTypes={noteTypes} channels={channels}
+      showTimeline={false} showConversations={false} />)
+    await user.click(screen.getByRole('button', { name: 'Filter' }))
+    expect(screen.getByRole('dialog')).toBeInTheDocument()
+    await user.keyboard('{Escape}')
+    expect(screen.queryByRole('dialog')).toBeNull()
+  })
+
+  it('renders no Filter button at all when the host offers neither vocabulary (no fake affordance)', () => {
+    render(<NotesTab notes={[note()]} labels={filterLabels} showTimeline={false} showConversations={false} />)
+    expect(screen.queryByRole('button', { name: 'Filter' })).toBeNull()
+  })
+})
+
 describe('NotesTab · timeline', () => {
   const timelineItem = (over: Record<string, unknown> = {}) => ({ time: '2026-08-04T17:30:00+00:00', text: 'Fase gewijzigd', ...over })
 

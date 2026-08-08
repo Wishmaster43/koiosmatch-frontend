@@ -1,107 +1,21 @@
-import { useState, useEffect, useCallback, useRef } from 'react'
-import type { ComponentType } from 'react'
+import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link2, X, Plus } from 'lucide-react'
-import api, { unwrapList } from '@/lib/api'
-import { SelectField } from '@/components/forms/fields'
-import SearchSelectJs from '@/components/ui/SearchSelect'
 import EntityLink from '@/components/ui/EntityLink'
-import type { TaskDetail, TaskLink } from '@/types/task'
+import AddLinkRow from '../links/AddLinkRow'
+import type { NewLink } from '../links/AddLinkRow'
+import { TASK_LINK_PAGE } from '../links/taskLinkTypes'
+import type { TaskDetail } from '@/types/task'
 import type { Id } from '@/types/common'
-
-type AnyProps = Record<string, unknown>
-const SearchSelect = SearchSelectJs as unknown as ComponentType<AnyProps>
-
-interface LinkRow { id?: Id; name?: string; first_name?: string; last_name?: string; candidate?: { name?: string }; candidateName?: string; vacancyTitle?: string; title?: string; [k: string]: unknown }
-interface LinkEndpoint { url: string; label: (r: LinkRow) => string }
-interface NewLink { type: string; id: string; label: string }
-
-// Link types you can add from the drawer + how to fetch/label their entities.
-const personName = (r: LinkRow): string => r.name || [r.first_name, r.last_name].filter(Boolean).join(' ') || `#${r.id}`
-const TYPE_ENDPOINTS: Record<string, LinkEndpoint> = {
-  candidate:   { url: '/candidates',   label: personName },
-  application: { url: '/applications', label: r => r.candidate?.name || r.candidateName || r.vacancyTitle || r.title || `#${r.id}` },
-  vacancy:     { url: '/vacancies',    label: r => r.title || r.name || `#${r.id}` },
-  match:       { url: '/matches',      label: r => r.candidate?.name || r.candidateName || r.title || `#${r.id}` },
-  customer:    { url: '/customers',    label: r => r.name || `#${r.id}` },
-  location:    { url: '/locations',    label: r => r.name || `#${r.id}` },
-  department:  { url: '/departments',  label: r => r.name || `#${r.id}` },
-  contact:     { url: '/contacts',     label: personName },
-  workflow:    { url: '/workflows',    label: r => r.name || `#${r.id}` },
-}
-
-// Link type → the page that honours the { open: id } intent (click-through, Danny
-// 2026-07-04). Types without a drill-down surface yet (contact/location/…) render
-// as plain text until their page exists (contacts = CUST-3).
-const LINK_PAGE: Record<string, string> = {
-  candidate: 'candidates', vacancy: 'vacancies', customer: 'customers', application: 'applications',
-}
-
-// Inline "add link" row: pick a type, then pick an entity of that type.
-function AddLinkRow({ existing, onAdd, onClose }: { existing: TaskLink[]; onAdd: (link: NewLink) => void; onClose: () => void }) {
-  const { t } = useTranslation(['tasks', 'common'])
-  const [type, setType] = useState('candidate')
-  const [rows, setRows] = useState<LinkRow[]>([])
-  const [query, setQuery] = useState('')
-  const [error, setError] = useState(false)
-  // Freshness guard (mirrors RelatedTasks.tsx/NotesTab.tsx in this same drawer):
-  // lets the retry button re-run this exact fetch without a stale in-flight
-  // response overwriting a newer one.
-  const requestIdRef = useRef(0)
-
-  // Load a capped, server-searched page for the chosen type — never the whole
-  // table. A failed load now surfaces its OWN error line (audit finding
-  // 2026-08-05: this used to silently swallow the failure, leaving the picker
-  // at zero options — indistinguishable from "no matches for this search").
-  const fetchOptions = useCallback(() => {
-    const cfg = TYPE_ENDPOINTS[type]
-    if (!cfg) { setRows([]); return }
-    const requestId = ++requestIdRef.current
-    setError(false)
-    api.get(cfg.url, { params: { q: query, search: query, per_page: 25 } })
-      .then(r => { if (requestIdRef.current === requestId) setRows(unwrapList<LinkRow>(r).rows) })
-      .catch(() => { if (requestIdRef.current === requestId) setError(true) })
-  }, [type, query])
-  useEffect(() => { setRows([]); fetchOptions() }, [fetchOptions])
-
-  const cfg = TYPE_ENDPOINTS[type]
-  const linked = new Set(existing.filter(l => l.type === type).map(l => String(l.id)))
-  const options = rows.filter(r => !linked.has(String(r.id))).map(r => ({ value: String(r.id), label: cfg.label(r) }))
-  const typeOptions = Object.keys(TYPE_ENDPOINTS).map(k => ({ value: k, label: t(`links.${k}`) }))
-
-  return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 6, padding: '10px 12px',
-      border: '1px dashed var(--border)', borderRadius: 10, marginBottom: 8 }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-        <div style={{ width: 150, flexShrink: 0 }}>
-          <SelectField value={type} onChange={v => { setType(v); setQuery('') }} options={typeOptions} />
-        </div>
-        <SearchSelect triggerLabel={t('links.selectEntity')} options={options} selected={[]} onSearch={setQuery}
-          onToggle={(v: string) => { const r = rows.find(x => String(x.id) === v); onAdd({ type, id: v, label: r ? cfg.label(r) : '' }); onClose() }} />
-        <div style={{ flex: 1 }} />
-        <button onClick={onClose} aria-label={t('modal.cancel')}
-          style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', display: 'flex', padding: 4 }}>
-          <X size={15} />
-        </button>
-      </div>
-      {/* Load error (§3, four UI states): distinct from "no matches" so the
-          recruiter knows the search itself failed and can retry it. */}
-      {error && (
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 11, color: 'var(--color-danger)' }}>
-          <span>{t('links.loadError')}</span>
-          <button onClick={fetchOptions} style={{ background: 'none', border: '1px solid var(--border)', borderRadius: 6,
-            padding: '2px 8px', cursor: 'pointer', color: 'var(--text)' }}>{t('common:error.retry')}</button>
-        </div>
-      )}
-    </div>
-  )
-}
 
 /**
  * LinksTab — the polymorphic entities a task is linked to. Lists the current links
  * with a remove (×) per row and an inline "add link" row. Mutations go through the
  * page (onAddLink / onRemoveLink → POST|DELETE /tasks/{id}/links). The type label
  * comes from i18n, never hardcoded.
+ *
+ * The vocabulary + the picker row itself now live in `../links/` (shared with the
+ * CREATE form since Danny 08-08 punt 15) — this tab is the list + mutations only.
  */
 export default function LinksTab({ task, onAddLink, onRemoveLink }: {
   task: TaskDetail; onAddLink: (link: NewLink) => void; onRemoveLink: (link: { type: string; id: Id | null }) => void
@@ -134,7 +48,7 @@ export default function LinksTab({ task, onAddLink, onRemoveLink }: {
             <div key={`${l.type}-${l.id}-${i}`} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 12px',
               background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 10 }}>
               <span style={{ width: 30, height: 30, borderRadius: 8, flexShrink: 0, display: 'flex',
-                alignItems: 'center', justifyContent: 'center', background: 'var(--color-primary-bg)', color: 'var(--color-primary)' }}>
+                alignItems: 'center', justifyContent: 'center', background: 'var(--color-primary-bg)', color: 'var(--color-primary-text)' }}>
                 <Link2 size={15} />
               </span>
               <div style={{ minWidth: 0, flex: 1 }}>
@@ -143,7 +57,7 @@ export default function LinksTab({ task, onAddLink, onRemoveLink }: {
                 </div>
                 {/* Click through to the linked record's own drawer (intent navigation). */}
                 <div style={{ fontSize: 13, color: 'var(--text)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                  <EntityLink page={LINK_PAGE[l.type] ?? ''} id={LINK_PAGE[l.type] ? l.id : null} title={t('links.open')}>
+                  <EntityLink page={TASK_LINK_PAGE[l.type] ?? ''} id={TASK_LINK_PAGE[l.type] ? l.id : null} title={t('links.open')}>
                     {l.label || '—'}
                   </EntityLink>
                 </div>

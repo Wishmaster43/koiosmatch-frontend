@@ -5,7 +5,7 @@
  * stays presentational (search/filter + dialog wiring only).
  * A 403 becomes a "no access" message; any other failure a generic load error.
  */
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import api, { unwrapList } from '@/lib/api'
 import { notifyError } from '@/lib/notify'
@@ -52,6 +52,9 @@ export function useUsersData() {
   // List helpers for the create/edit dialogs (server call lives in the modals).
   const addUser    = (u: ManagedUser) => setUsers(prev => [u, ...prev])
   const updateUser = (u: ManagedUser) => setUsers(prev => prev.map(x => x.id === u.id ? u : x))
+  // Drop a soft-deleted user from the list. Stable identity: it is handed to
+  // useUserDeletion, which the page memoizes its row callbacks against.
+  const removeUser = useCallback((id: string) => setUsers(prev => prev.filter(x => String(x.id) !== id)), [])
 
-  return { users, roles, loading, error, setColor, addUser, updateUser }
+  return { users, roles, loading, error, setColor, addUser, updateUser, removeUser }
 }

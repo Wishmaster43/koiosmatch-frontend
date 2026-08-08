@@ -16,7 +16,12 @@ import type { ApplicationDetail } from '@/types/application'
 // Key-echo (repo-wide precedent, e.g. RejectionSummary.test.tsx) — avoids the
 // real i18n instance's async-init timing flipping assertions between raw keys
 // and translated copy.
-vi.mock('react-i18next', () => ({ useTranslation: () => ({ t: (k: string) => k }) }))
+// Key-echoing stub, but it HONOURS defaultValue like the real t() does — the
+// interview status renders through a defaultValue fallback (RAW-KEY-1), and a
+// mock that ignored it would fail a component that is actually correct.
+vi.mock('react-i18next', () => ({
+  useTranslation: () => ({ t: (k: string, o?: { defaultValue?: string }) => o?.defaultValue ?? k }),
+}))
 // useDateFormat imports @/i18n, which needs a REAL react-i18next to initialise —
 // stub the whole module (mirrors RejectionSummary.test.tsx) so nothing here
 // touches the real singleton.
@@ -28,13 +33,16 @@ vi.mock('@/lib/datetime', () => ({
 // W29 mocks (mirrors InterviewStatusCard.test.tsx's own auth/api/notify seam).
 const mockUseAuth = vi.fn()
 const mockPost = vi.fn()
+// MATCHSCORE-EDIT-1: the manual-override save fires a PATCH, mocked alongside
+// the existing recalculate POST — both live in the same `@/lib/api` seam.
+const mockPatch = vi.fn()
 const mockNotifySuccess = vi.fn()
 const mockNotifyError = vi.fn()
 vi.mock('@/context/AuthContext', () => ({ useAuth: () => mockUseAuth() }))
 // `unwrap` mirrors the real implementation (data → data.data) so the assertions
 // exercise the same envelope handling the app does.
 vi.mock('@/lib/api', () => ({
-  default: { post: (...args: unknown[]) => mockPost(...args) },
+  default: { post: (...args: unknown[]) => mockPost(...args), patch: (...args: unknown[]) => mockPatch(...args) },
   unwrap: (res: unknown) => {
     const body = (res as { data?: unknown })?.data ?? res
     if (body && typeof body === 'object' && !Array.isArray(body) && 'data' in body) return (body as { data: unknown }).data
@@ -49,6 +57,9 @@ const app = (over: Partial<ApplicationDetail> = {}) => ({
   phaseColor: '#2563EB',
   score: null, created: '', appointments: [], interview: null,
   stageDurations: [], currentStageEnteredAt: null,
+  // MATCHSCORE-EDIT-1: provenance defaults — 'ai' + no aiScore, matching
+  // mapApplication.ts's own fallback for an application never manually touched.
+  matchSource: 'ai', aiScore: null,
   ...over,
 } as unknown as ApplicationDetail)
 
@@ -132,6 +143,20 @@ describe('ApplicationStatusStrip', () => {
     })} />)
     expect(screen.getByText('Question 3')).toBeInTheDocument()
     expect(screen.getByText('interview.stepOf')).toBeInTheDocument()
+  })
+
+  // DD-FE-11 (08-08 drill-down audit): the interview cell reads the step NAME
+  // first, with the numeric position ("Stap X van Y") demoted to a small muted
+  // line right after it — never the count as the only/leading signal.
+  it('renders the step name above the muted step-count line, never the reverse', () => {
+    render(<ApplicationStatusStrip application={app({
+      interview: { category: 'busy', currentStatus: 'Question 3', step: 3, total: 5, id: null, agent: null, flowName: null, turn: null, startedAt: null, lastMessageAt: null, endedAt: null, durationSeconds: null, pausedAt: null, pausedBy: null },
+    })} />)
+    const name = screen.getByText('Question 3')
+    const count = screen.getByText('interview.stepOf')
+    expect(name.compareDocumentPosition(count) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
+    expect(count.tagName).toBe('DIV')
+    expect(count).toHaveStyle({ fontSize: 11, color: 'var(--text-muted)' })
   })
 
   // S2/S3: the appointment/interview cells become clickable tab-switches, but
@@ -235,5 +260,90 @@ describe('ApplicationStatusStrip · recalculate score (W29)', () => {
     rerender(<ApplicationStatusStrip application={app({ score: 60 })} />)
     await waitFor(() => expect(screen.getByText('60%')).toBeInTheDocument())
     expect(screen.queryByText('91%')).toBeNull()
+  })
+
+  // W29 + provenance: once a recalculation returns an 'ai' source, the manual note
+  // must never linger from a previous override — the two surfaces must never contradict.
+  it('clears a previous manual note once a recalculation returns an AI-sourced score', async () => {
+    mockPost.mockResolvedValueOnce({ data: { data: { id: 1, match_score: 88, match_score_source: 'ai', ai_match_score: 88 } } })
+    render(<ApplicationStatusStrip application={app({ score: 40, matchSource: 'manual', aiScore: 35 })} />)
+    expect(screen.getByText('matchScore.manualNote')).toBeInTheDocument()
+    await userEvent.click(screen.getByRole('button', { name: 'status.recalculateScore' }))
+    await waitFor(() => expect(screen.getByText('88%')).toBeInTheDocument())
+    expect(screen.queryByText('matchScore.manualNote')).toBeNull()
+  })
+})
+
+// MATCHSCORE-EDIT-1: Danny reported the manual override missing ("ik kan de match
+// score niet meer aanpassen") — UpdateApplicationRequest already accepts
+// match_score 0-100, so this restores the pencil→number-input→save/✕ path.
+describe('ApplicationStatusStrip · manual score override (MATCHSCORE-EDIT-1)', () => {
+  it('PATCHes /applications/{id} with the integer match_score and shows the manual note', async () => {
+    mockPatch.mockResolvedValueOnce({ data: { data: { id: 1, match_score: 72, match_score_source: 'manual', ai_match_score: 39 } } })
+    render(<ApplicationStatusStrip application={app({ score: 39, matchSource: 'ai', aiScore: 39 })} />)
+    await userEvent.click(screen.getByRole('button', { name: 'status.editScore' }))
+    const input = screen.getByRole('spinbutton', { name: 'status.matchScore' })
+    await userEvent.clear(input)
+    await userEvent.type(input, '72')
+    await userEvent.click(screen.getByRole('button', { name: 'matchScore.save' }))
+    // The REQUEST — method, route and the body it carries (§13).
+    expect(mockPatch).toHaveBeenCalledWith('/applications/1', { match_score: 72 })
+    await waitFor(() => expect(screen.getByText('72%')).toBeInTheDocument())
+    // AI-ACT-1: a manual save must never keep wearing the AI-generated look.
+    expect(screen.getByText('matchScore.manualNote')).toBeInTheDocument()
+    expect(mockNotifySuccess).toHaveBeenCalledWith('status.scoreSaved')
+  })
+
+  it('blocks an out-of-range value client-side — no PATCH fires', async () => {
+    render(<ApplicationStatusStrip application={app({ score: 50 })} />)
+    await userEvent.click(screen.getByRole('button', { name: 'status.editScore' }))
+    const input = screen.getByRole('spinbutton', { name: 'status.matchScore' })
+    await userEvent.clear(input)
+    await userEvent.type(input, '101')
+    const saveBtn = screen.getByRole('button', { name: 'matchScore.save' })
+    expect(saveBtn).toBeDisabled()
+    await userEvent.click(saveBtn)
+    expect(mockPatch).not.toHaveBeenCalled()
+  })
+
+  it('blocks a negative value client-side — no PATCH fires', async () => {
+    render(<ApplicationStatusStrip application={app({ score: 50 })} />)
+    await userEvent.click(screen.getByRole('button', { name: 'status.editScore' }))
+    const input = screen.getByRole('spinbutton', { name: 'status.matchScore' })
+    await userEvent.clear(input)
+    await userEvent.type(input, '-5')
+    expect(screen.getByRole('button', { name: 'matchScore.save' })).toBeDisabled()
+    expect(mockPatch).not.toHaveBeenCalled()
+  })
+
+  it('cancels the edit without firing a PATCH, restoring the original score', async () => {
+    render(<ApplicationStatusStrip application={app({ score: 50 })} />)
+    await userEvent.click(screen.getByRole('button', { name: 'status.editScore' }))
+    const input = screen.getByRole('spinbutton', { name: 'status.matchScore' })
+    await userEvent.clear(input)
+    await userEvent.type(input, '10')
+    await userEvent.click(screen.getByRole('button', { name: 'matchScore.cancel' }))
+    expect(mockPatch).not.toHaveBeenCalled()
+    expect(screen.getByText('50%')).toBeInTheDocument()
+    expect(screen.queryByRole('spinbutton')).toBeNull()
+  })
+
+  it('hides the edit pencil entirely without applications.update', () => {
+    mockUseAuth.mockReturnValue({ hasPermission: () => false })
+    render(<ApplicationStatusStrip application={app({ score: 40 })} />)
+    expect(screen.queryByRole('button', { name: 'status.editScore' })).toBeNull()
+  })
+
+  it('surfaces a failed manual save via extractApiError and keeps editing retryable', async () => {
+    mockPatch.mockRejectedValueOnce({ response: { status: 422, data: { message: 'Invalid match score' } } })
+    render(<ApplicationStatusStrip application={app({ score: 40 })} />)
+    await userEvent.click(screen.getByRole('button', { name: 'status.editScore' }))
+    const input = screen.getByRole('spinbutton', { name: 'status.matchScore' })
+    await userEvent.clear(input)
+    await userEvent.type(input, '80')
+    await userEvent.click(screen.getByRole('button', { name: 'matchScore.save' }))
+    await waitFor(() => expect(mockNotifyError).toHaveBeenCalledWith('Invalid match score'))
+    // Still in edit mode with the typed value — the recruiter can retry, nothing was lost.
+    expect(screen.getByRole('spinbutton', { name: 'status.matchScore' })).toHaveValue(80)
   })
 })

@@ -43,6 +43,7 @@ import type { FieldRow } from '@/components/forms/EditableFieldTable'
 import SubTabBar from '@/components/drawer/SubTabBar'
 import CustomFieldsTab from '@/components/drawer/CustomFieldsTab'
 import BackofficeLinksTab from '@/components/drawer/BackofficeLinksTab'
+import { useBackofficeLinksVisible } from '@/components/drawer/useBackofficeLinksVisible'
 import ArchivedBanner from '@/components/drawer/ArchivedBanner'
 import MergeSubEntityModal from './MergeSubEntityModal'
 // JOB-STATUS-1: name + reference chip + status badge/picker, now the shared
@@ -174,6 +175,10 @@ export default function DepartmentDetail({ department, locations, statuses, cont
   const [merging, setMerging] = useState(false)
   // The Extra sub-tab only shows when the tenant has defined customer_department custom fields (§3A(f)).
   const { fields: customFieldDefs } = useCustomFields('customer_department')
+  // DD-FE-6 ("no empty tabs"): this file passes no extra children into
+  // BackofficeLinksTab, so the Koppelingen sub-tab is genuinely empty (no card,
+  // no "Koppelen" button) unless at least one connector app is enabled.
+  const showKoppelingen = useBackofficeLinksVisible()
   // Sub-tabs (short labels, Danny 2026-07-14) — default Gegevens. SCOPED-LIST-TAB-1/
   // TAKEN-OP-AFDELING-1 added vacancies/matches/tasks. SOLLICITATIES-SCOPE-1 added
   // 'applications'. NOTES-LOC-DEPT-1/DOCS-LOC-DEPT-1 added 'notes'/'documents'.
@@ -304,8 +309,9 @@ export default function DepartmentDetail({ department, locations, statuses, cont
           // TAKEN-OP-AFDELING-1: TaskLinkResolver already knows 'department' → task_links.
           { id: 'tasks',     label: t('drawer.tabs.tasks') },
           ...(customFieldDefs.length > 0 ? [{ id: 'extra', label: t('drawer.tabs.extra') }] : []),
-          // EXTRACT-1: the shared Koppelingen sub-tab, always last (§3A/§11).
-          { id: 'koppelingen', label: t('common:backofficeLinks.tabLabel') },
+          // EXTRACT-1: the shared Koppelingen sub-tab, last when it has content.
+          // DD-FE-6 ("no empty tabs"): hidden when no connector app is enabled.
+          ...(showKoppelingen ? [{ id: 'koppelingen', label: t('common:backofficeLinks.tabLabel') }] : []),
         ]}
         active={subTab}
         onChange={id => setSubTab(id as typeof subTab)}
@@ -375,7 +381,7 @@ export default function DepartmentDetail({ department, locations, statuses, cont
           onSave={patch => onSave(department.id as Id, { customFields: { ...department.customFields, ...patch } })} />
       )}
 
-      {subTab === 'koppelingen' && (
+      {subTab === 'koppelingen' && showKoppelingen && (
         <BackofficeLinksTab entity="departments" id={department.id as Id} helloflexLink={department.helloflexLink} shiftmanagerLink={department.shiftmanagerLink} canLink={canLinkBackoffice} />
       )}
 

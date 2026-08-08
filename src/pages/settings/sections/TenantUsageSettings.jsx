@@ -88,22 +88,22 @@ export default function TenantUsageSettings() {
       </div>
 
       {phase === 'loading' && <p style={{ fontSize: 13, color: 'var(--text-muted)', padding: 8 }}>{t('common.loadingShort', { defaultValue: 'Laden…' })}</p>}
-      {phase === 'error'   && <p style={{ fontSize: 13, color: 'var(--text-muted)', padding: 8 }}>{t('usage.loadError', { defaultValue: 'Verbruik laden is mislukt.' })}</p>}
+      {phase === 'error'   && <p style={{ fontSize: 13, color: 'var(--text-muted)', padding: 8 }}>{t('usage.loadError')}</p>}
 
       {phase === 'ready' && (
         <>
           {/* Metric tiles */}
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10, marginBottom: 22 }}>
-            <Tile label={t('usage.col.aiTokens', { defaultValue: 'AI-tokens' })}   value={num(usage?.ai?.tokens)} />
-            <Tile label={t('usage.col.aiCalls', { defaultValue: 'AI-calls' })}     value={num(usage?.ai?.requests)} />
-            <Tile label={t('usage.col.waBusiness', { defaultValue: 'WhatsApp Business' })} value={num(usage?.whatsapp?.business_numbers)} />
-            <Tile label={t('usage.col.hours', { defaultValue: 'Verwerkte uren' })}  value={num(usage?.planning?.processed_hours)} />
+            <Tile label={t('usage.col.aiTokens')}   value={num(usage?.ai?.tokens)} />
+            <Tile label={t('usage.col.aiCalls')}     value={num(usage?.ai?.requests)} />
+            <Tile label={t('usage.col.waBusiness')} value={num(usage?.whatsapp?.business_numbers)} />
+            <Tile label={t('usage.col.hours')}  value={num(usage?.planning?.processed_hours)} />
           </div>
 
           {/* Connectors (per connector — for invoicing) */}
           <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase',
             letterSpacing: '0.05em', marginBottom: 10 }}>
-            {t('usage.col.connectors', { defaultValue: 'Connectors' })}
+            {t('usage.col.connectors')}
           </div>
           <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 10, overflow: 'hidden' }}>
             {connectors.length === 0

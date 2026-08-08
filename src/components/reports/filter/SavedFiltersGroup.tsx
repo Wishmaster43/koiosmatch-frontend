@@ -47,7 +47,7 @@ export default function SavedFiltersGroup({ group }: { group: ReportFilterGroup 
           style={input} />
         <button type="button" onClick={save} title={t('savedFilters.save')}
           style={{ display: 'flex', alignItems: 'center', gap: 5, height: 30, padding: '0 10px', fontSize: 12, fontWeight: 500,
-            border: 'none', borderRadius: 6, cursor: 'pointer', background: 'var(--color-primary)', color: 'var(--surface)' }}>
+            border: 'none', borderRadius: 6, cursor: 'pointer', background: 'var(--color-primary)', color: 'var(--color-on-accent)' }}>
           <Save size={13} /> {t('savedFilters.save')}
         </button>
       </div>

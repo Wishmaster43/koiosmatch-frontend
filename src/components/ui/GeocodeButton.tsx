@@ -32,9 +32,10 @@ export interface GeocodeButtonProps {
   // (ChangelogPopover, merge, archive); 'row' matches a settings table row's boxed
   // icon-button convention (LocationsSettings' Pencil/Trash2 actions).
   variant?: 'ghost' | 'row'
-  // GEO-INLINE-1 (CMBE 04-08): the per-id route answers INLINE now — fresh
-  // coordinates (or an honest geocoded:false) instead of 202-queued. Hosts pass
-  // this to receive the result and update their own display without a refetch.
+  // Receives coordinates when a route answers INLINE, so the host can update its
+  // display without a refetch. Measured 08-08 (and confirmed by CMBE): every
+  // per-id geocode route is async by design and answers 202 {status:queued}, so
+  // this does NOT fire today — it is a tolerant path, not the normal one.
   onResult?: (lat: number, lng: number) => void
 }
 
@@ -48,11 +49,12 @@ export default function GeocodeButton({ endpoint, permission, disabled = false, 
   // recruiter can't use anyway (mirrors the other hide-not-disable gates in this repo).
   if (!hasPermission(permission)) return null
 
-  // GEO-INLINE-1: the per-id route runs inline now (CMBE 04-08, measured 64-214ms) and
-  // returns the real outcome — coordinates, or an honest `geocoded: false` when the
-  // address can't be resolved. Coordinates arrive as Laravel decimal STRINGS (§10),
-  // so they go through toCoord, never a typeof check. A legacy 202/empty body still
-  // falls back to the old "started" toast (bulk stays queued by design).
+  // The per-id routes are QUEUED by design (measured 08-08 on candidates/vacancies:
+  // 202 {status:queued}; the coordinates land ~1s later via the worker), so the
+  // normal outcome here is the honest "started" toast — never a claim of "done"
+  // (§3). The inline branches stay because a route MAY answer with the real result:
+  // coordinates arrive as Laravel decimal STRINGS (§10), hence toCoord, never a
+  // typeof check; an explicit `geocoded: false` means the address didn't resolve.
   const handleClick = async () => {
     if (disabled || loading) return
     setLoading(true)

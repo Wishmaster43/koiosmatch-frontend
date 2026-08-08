@@ -48,6 +48,20 @@ export const WORKFLOW_EVENT_KEYS = [
   'appointment.created',
   'whatsapp.connection_down',
   'whatsapp.connection_restored',
+  // G32 (2026-08-08): seven more dispatch sites already live server-side —
+  // re-verified against TriggerModule::configSchema() (koiosmatch-api,
+  // app/Workflow/Modules/TriggerModule.php ~L68-89) and each call site:
+  // Vacancy.php:123 (created), :181 (published), :190 (updated),
+  // AiAgentWebhookController.php:50 (ai_agent.webhook_received),
+  // InterviewEngine.php:179/366/368 (interview.started/completed/disqualified,
+  // W13). FE catalogue now mirrors the backend vocabulary key-for-key (31/31).
+  'vacancy.created',
+  'vacancy.published',
+  'vacancy.updated',
+  'ai_agent.webhook_received',
+  'interview.started',
+  'interview.completed',
+  'interview.disqualified',
 ] as const
 
 export type WorkflowEventKey = (typeof WORKFLOW_EVENT_KEYS)[number]

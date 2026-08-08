@@ -43,3 +43,28 @@ export function openNotesPopout(a: PopoutEntity | string | number, b?: string | 
   const id: string | number = b === undefined ? (a as string | number) : b
   return window.open(`/popout/notes/${entity}/${id}`, `koios-notes-${entity}-${id}`, POPUP_FEATURES)
 }
+
+/**
+ * TEKST-POPOUT-1 (Danny 08-08, punt 2): the SAME second-screen mechanism for a
+ * single free-text field — today the candidate's profile text. Notes pop out a
+ * whole thread; this pops out ONE field so the recruiter can write it full-size
+ * on a second monitor while the drill-down stays where it was. Deliberately the
+ * same `window.open` + named-window recipe as openNotesPopout above (§11: one
+ * mechanism, never a second implementation) — only the route differs.
+ */
+// The free-text fields that own a second-screen editor. One entry per field the
+// route dispatcher (pages/popout/TextPopoutPage.tsx) knows how to render.
+export type PopoutTextField = 'summary'
+
+// Identity of ONE popped-out field: the OS window name AND the BroadcastChannel
+// topic the two windows sync their draft over (hooks/useTextPopoutSync). Scoped
+// per entity+id+field so two records — or two fields of one record — never mirror
+// each other's text.
+export const textPopoutTopic = (entity: PopoutEntity, id: string | number, field: PopoutTextField) =>
+  `koios-text-${entity}-${id}-${field}`
+
+// Opens (or re-focuses) the second-screen editor for one free-text field. Returns
+// null when the browser blocked the popup — the caller surfaces `common:popupBlocked`.
+export function openTextPopout(entity: PopoutEntity, id: string | number, field: PopoutTextField): Window | null {
+  return window.open(`/popout/text/${entity}/${id}/${field}`, textPopoutTopic(entity, id, field), POPUP_FEATURES)
+}

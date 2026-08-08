@@ -515,7 +515,8 @@
     "deleteOneMessage": "Weet je het zeker? '{{name}}' wordt definitief verwijderd — dit kan niet ongedaan worden gemaakt.",
     "deleteManyMessage": "Weet je het zeker? {{count}} documenten worden definitief verwijderd — dit kan niet ongedaan worden gemaakt.",
     "deleteSelected": "Verwijder ({{count}})",
-    "linkLevelLabel": "Document koppelen aan"
+    "linkLevelLabel": "Document koppelen aan",
+    "allTypes": "Alle types"
   },
   "priceAgreements": {
     "add": "Nieuwe prijsafspraak",

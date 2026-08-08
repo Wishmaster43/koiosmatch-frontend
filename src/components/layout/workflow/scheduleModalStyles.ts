@@ -10,9 +10,12 @@
  * with a small uppercase header).
  */
 import type { CSSProperties } from 'react'
+import { fieldInputStyle } from '@/components/forms/fieldMetrics'
 
-// Text/number/time inputs and their select counterpart.
-export const inputStyle: CSSProperties = { padding: '6px 10px', border: '1px solid var(--border)', borderRadius: 8, fontSize: 13, outline: 'none', background: 'var(--surface)', color: 'var(--text)' }
+// Text/number/time inputs and their select counterpart (G33 canon). `width: 'auto'`
+// overrides the canon's 100% — these render inline in a flex row (several per line,
+// e.g. hh:mm + hh:mm) and each call site opts into a specific width itself.
+export const inputStyle: CSSProperties = { ...fieldInputStyle, width: 'auto' }
 export const selectStyle: CSSProperties = { ...inputStyle, cursor: 'pointer' }
 
 // A config group's bordered card + its small uppercase header.

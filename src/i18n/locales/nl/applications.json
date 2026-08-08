@@ -26,7 +26,11 @@
     "search": "Zoeken…",
     "create": "Aanmaken",
     "cancel": "Annuleren",
-    "searchError": "Zoeken mislukt"
+    "searchError": "Zoeken mislukt",
+    "searchErrorForbidden": "Je hebt geen rechten om hier te zoeken.",
+    "searchErrorValidation": "Deze zoekopdracht werd niet geaccepteerd. Pas hem aan en probeer opnieuw.",
+    "searchErrorServer": "De server gaf een fout bij het zoeken. Probeer het zo opnieuw.",
+    "searchErrorNetwork": "Geen verbinding — zoeken is niet gelukt."
   },
   "pagination": {
     "perPage": "Resultaten per pagina",
@@ -118,7 +122,13 @@
     "middleName": "Tussenvoegsel",
     "lastName": "Achternaam",
     "functionTitle": "Functie",
-    "noFunction": "Nog geen functie ingevuld"
+    "noFunction": "Nog geen functie ingevuld",
+    "subTabs": {
+      "status": "Status",
+      "details": "Details",
+      "cv": "CV",
+      "context": "Context"
+    }
   },
   "cvProposal": {
     "title": "Voorstel uit het cv",
@@ -296,6 +306,15 @@
       },
       "startedAt": "Gestart {{date}}",
       "period": "{{start}} – {{end}}"
+    },
+    "currentStatus": {
+      "INTRO_SENT": "Intro verzonden",
+      "COMPLETED": "Afgerond",
+      "DISQUALIFIED": "Afgewezen"
+    },
+    "conversation": {
+      "title": "Gesprek",
+      "noCandidate": "Geen kandidaat gekoppeld — niets om te tonen."
     }
   },
   "appointments": {
@@ -320,7 +339,13 @@
       "noShow": "Niet verschenen",
       "cancelled": "Geannuleerd"
     },
-    "noMatches": "Geen afspraken gevonden voor dit filter."
+    "noMatches": "Geen afspraken gevonden voor dit filter.",
+    "status": {
+      "planned": "Gepland",
+      "completed": "Afgerond",
+      "noShow": "No-show",
+      "cancelled": "Geannuleerd"
+    }
   },
   "notes": {
     "title": "Notities",
@@ -485,7 +510,9 @@
     "phaseSince": "sinds {{date}}",
     "phaseUnknown": "Faseverloop nog niet vastgelegd",
     "recalculateScore": "Matchscore herberekenen",
-    "recalculateDone": "Matchscore herberekend"
+    "recalculateDone": "Matchscore herberekend",
+    "editScore": "Matchscore handmatig aanpassen",
+    "scoreSaved": "Matchscore opgeslagen"
   },
   "competition": {
     "title": "Andere sollicitanten",

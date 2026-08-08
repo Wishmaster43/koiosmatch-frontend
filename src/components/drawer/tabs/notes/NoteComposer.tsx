@@ -27,28 +27,28 @@
  * pinned outside the scroll area, and the whole content area still scrolls
  * (never clips) if the panel is smaller than everything put together.
  *
- * NOTITIE-VOICE-1 (Danny 06-08 "dictatietaal = editortaal"): a mic button sits
- * directly above the editor, right-aligned — near its own language picker
- * (RichTextEditor's toolbar is out of this file's scope, so the mic lives just
- * outside it rather than inside that shared component). Reuses the SAME
- * `KoiosVoiceButton` the chat composer uses (generalised for reuse, §11 one
- * source) — its `lang` prop is fed the CONTROLLED `language` state above, so
- * dictation always follows the editor's own picked language, never the app's
- * UI locale. Honest states (unsupported browser hidden, denied-mic title) are
- * inherited from the shared component — nothing extra to build here. Each
- * recognized chunk is escaped and appended as a new paragraph (never
- * dangerouslySetInnerHTML with raw speech text, §7).
+ * NOTITIE-VOICE-1 (Danny 06-08 "dictatietaal = editortaal"): the dictation mic
+ * rides the editor's own toolbar slot, next to the language picker, so one
+ * `language` state drives spellcheck AND the recognition locale. Since
+ * KOIOS-ASSIST-TEXTFIELDS (Danny 08-08 "alle omschrijvingen moeten ook een mic
+ * functionaliteit hebben en Koios AI") that mic is no longer wired by hand
+ * here: the shared `RichTextAssistBar` — the SAME component every other
+ * description field now mounts — supplies it, including the escaped
+ * append-to-last-paragraph behaviour this file used to own (§11: the helper
+ * landed WITH adoption, no copy left behind). The bar runs in `modes={[]}`
+ * (mic only) and the editor's own assist is switched off with `assist={false}`,
+ * because this screen's Koios actions live in the richer `NoteAssistSection`
+ * below the editor — it adds action-item extraction + the K0-B execute bridge,
+ * which only make sense for a note.
  */
 import { useEffect, useState } from 'react'
 import type { CSSProperties, ReactNode } from 'react'
-import { useTranslation } from 'react-i18next'
 import { Save, X } from 'lucide-react'
 import FloatingPanel from '@/components/ui/FloatingPanel'
 import RichTextEditor from '@/components/ui/RichTextEditor'
-import KoiosVoiceButton from '@/components/layout/koios/KoiosVoiceButton'
+import RichTextAssistBar from '@/components/ui/RichTextAssistBar'
 import NoteAssistSection from './NoteAssistSection'
 import { CHANNEL_ICON } from './channelIcons'
-import { escapeHtml } from './noteAssistApply'
 import type { NoteItem, NoteType, NotePayload, NotesLabels } from '../NotesTab'
 
 interface NoteComposerProps {
@@ -73,7 +73,6 @@ interface NoteComposerProps {
 const iconBtn: CSSProperties = { width: 30, height: 30, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 8, cursor: 'pointer' }
 
 export default function NoteComposer({ open, initialNote, noteTypes, channels, labels, editorLabels, composerExtra, onPopOut, onSave, onCancel }: NoteComposerProps) {
-  const { t } = useTranslation()
   const isNew = initialNote == null
   // Existing note's own id (K0-B execute source) — a NoteItem's index signature
   // carries it at runtime even though the shared type doesn't declare it
@@ -98,11 +97,6 @@ export default function NoteComposer({ open, initialNote, noteTypes, channels, l
 
   const typeLabel = noteTypes.find(n => n.value === type)?.label ?? ''
   const save = () => onSave({ type, title, body, channel: channel || undefined, language: language || undefined })
-  // NOTITIE-VOICE-1: append a dictated chunk as its own escaped paragraph —
-  // never splice raw speech text into the existing HTML (§7), and never lose
-  // whatever the recruiter already wrote (append-only, mirrors the chat mic's
-  // own "always append" idiom, KoiosPanel's appendVoiceText).
-  const appendVoiceText = (chunk: string) => setBody(prev => `${prev}<p>${escapeHtml(chunk)}</p>`)
   // FloatingPanel wants a plain string; every host's newNote/edit label is one
   // in practice (ReactNode on the type only because DrawerAddButton's `label`
   // slot accepts richer content elsewhere) — coerce defensively, never throw.
@@ -170,7 +164,8 @@ export default function NoteComposer({ open, initialNote, noteTypes, channels, l
             `fill` + a real minHeight floor: the editor is the flexible item that
             absorbs a bigger/smaller panel (see the RESIZE-GROWS-EDITOR docblock). */}
         <RichTextEditor value={body} onChange={setBody}
-          toolbarExtra={<KoiosVoiceButton onText={appendVoiceText} lang={language} t={t} tone="primary" />}
+          assist={false}
+          toolbarExtra={<RichTextAssistBar value={body} onChange={setBody} language={language} modes={[]} />}
           labels={editorLabels} language={language} onLanguageChange={setLanguage} fill minHeight={160} />
 
         {/* NOTE-ASSIST-1: Koios AI assist — always visible under the editor. */}
@@ -181,7 +176,7 @@ export default function NoteComposer({ open, initialNote, noteTypes, channels, l
           scrollBody=false footer), always reachable regardless of scroll position. */}
       <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 6, padding: '10px 16px', borderTop: '1px solid var(--border)', flexShrink: 0 }}>
         <button onClick={save} title={labels.save}
-          style={{ ...iconBtn, background: 'var(--color-primary)', color: '#fff', border: 'none' }}><Save size={15} /></button>
+          style={{ ...iconBtn, background: 'var(--color-primary)', color: 'var(--color-on-accent)', border: 'none' }}><Save size={15} /></button>
         <button onClick={onCancel} title={labels.cancel}
           style={{ ...iconBtn, background: 'var(--bg)', color: 'var(--text-muted)', border: '1px solid var(--border)' }}><X size={15} /></button>
       </div>

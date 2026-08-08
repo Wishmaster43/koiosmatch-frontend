@@ -12,6 +12,7 @@ import { useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { ChevronDown, X } from 'lucide-react'
 import { useLookups } from '@/context/LookupsContext'
+import SelectAllRow from '@/components/ui/SelectAllRow'
 import { optionLabel } from './moduleI18n'
 import type { WorkflowField } from '@/types/workflow'
 import type { OnChange } from './fieldControls'
@@ -50,6 +51,14 @@ export default function MultiSelectField({ field, value, onChange }: {
   const add = (v: string) => { if (v && !selected.includes(v)) onChange(field.key, [...selected, v]); setSearch('') }
   const remove = (v: string) => onChange(field.key, selected.filter(s => s !== v))
 
+  // Select-all / clear-all over the VISIBLE (filtered) options. This host owns the
+  // whole array, so the batch lands in ONE onChange — no per-value queue needed
+  // (unlike the onToggle-only hosts, see useBatchToggle).
+  const applyAll = (values: string[], select: boolean) =>
+    onChange(field.key, select
+      ? [...selected, ...values.filter(v => !selected.includes(v))]
+      : selected.filter(s => !values.includes(s)))
+
   return (
     <div ref={boxRef} style={{ position: 'relative' }}
       onBlur={e => { if (!boxRef.current?.contains(e.relatedTarget as Node)) setOpen(false) }}>
@@ -61,7 +70,7 @@ export default function MultiSelectField({ field, value, onChange }: {
         {selected.map(v => (
           <span key={v} style={{ display: 'inline-flex', alignItems: 'center', gap: 4, padding: '2px 8px',
                                  borderRadius: 999, fontSize: 12, background: 'var(--color-primary-bg)',
-                                 color: 'var(--color-primary)' }}>
+                                 color: 'var(--color-primary-text)' }}>
             {labelFor(v)}
             <button type="button" aria-label={t('common:remove', { defaultValue: 'Verwijderen' })}
               onClick={e => { e.stopPropagation(); remove(v) }}
@@ -87,6 +96,12 @@ export default function MultiSelectField({ field, value, onChange }: {
         <div style={{ position: 'absolute', zIndex: 30, top: '100%', left: 0, right: 0, marginTop: 4,
                       maxHeight: 220, overflowY: 'auto', borderRadius: 8, border: '1px solid var(--border)',
                       background: 'var(--surface)', boxShadow: '0 8px 24px rgba(0,0,0,0.12)' }}>
+          {/* Select-all pinned above the list (free entry has no list to select). */}
+          {!freeEntry && filtered.length > 0 && (
+            <div style={{ position: 'sticky', top: 0, zIndex: 1, background: 'var(--surface)', padding: '6px 8px 0' }}>
+              <SelectAllRow dense visibleValues={filtered.map(o => o.value)} selectedValues={selected} onApply={applyAll} />
+            </div>
+          )}
           {freeEntry ? (
             <div style={{ padding: '9px 12px', fontSize: 12, color: 'var(--text-muted)' }}>
               {t('fields.multiselectFreeEntry', { defaultValue: 'Typ een waarde en druk op Enter om toe te voegen.' })}

@@ -44,7 +44,7 @@ export default function WebhookList({ subs, loading, error, onReload, onOpen, on
         </div>
         {/* BTN_H (§4/§9): one explicit height for every text/action button, everywhere. */}
         <button onClick={onNew}
-          style={{ display: 'flex', alignItems: 'center', gap: 6, height: BTN_H, padding: '0 14px', fontSize: 13, fontWeight: 500, border: 'none', borderRadius: 8, background: 'var(--color-primary)', color: 'white', cursor: 'pointer' }}>
+          style={{ display: 'flex', alignItems: 'center', gap: 6, height: BTN_H, padding: '0 14px', fontSize: 13, fontWeight: 500, border: 'none', borderRadius: 8, background: 'var(--color-primary)', color: 'var(--color-on-accent)', cursor: 'pointer' }}>
           <Plus size={14} /> {t('webhooks.outgoing.new')}
         </button>
       </div>

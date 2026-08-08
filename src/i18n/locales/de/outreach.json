@@ -87,7 +87,8 @@
     },
     "tabs": {
       "targets": "Anrufliste",
-      "extra": "Extra"
+      "extra": "Extra",
+      "stats": "Statistiken"
     },
     "loading": "Laden…",
     "error": "Anrufliste konnte nicht geladen werden.",
@@ -114,7 +115,39 @@
     "matchCreated": "Match erstellt.",
     "matchFailed": "Match erstellen fehlgeschlagen.",
     "owner": "Eigentümer",
-    "selectOwner": "Inhaber wählen"
+    "selectOwner": "Inhaber wählen",
+    "stats": {
+      "error": "Statistiken konnten nicht geladen werden.",
+      "byStatus": "Status",
+      "byOutcome": "Ergebnis",
+      "byAssignee": "Zugewiesen an",
+      "total": "Gesamt",
+      "reached": "Erreicht",
+      "axis": {
+        "status": "Status",
+        "outcome": "Ergebnis",
+        "assignee": "zugewiesen an"
+      },
+      "filteredBy": "Gefiltert nach {{axis}}: {{value}}",
+      "noMatches": "Keine Kandidaten entsprechen diesem Filter."
+    },
+    "note": {
+      "empty": "Noch keine Notiz.",
+      "placeholder": "Notiz hinzufügen…",
+      "saveFailed": "Die Notiz konnte nicht gespeichert werden."
+    },
+    "assign": {
+      "button": "Zuweisen",
+      "selected": "{{count}} ausgewählt",
+      "pickRecruiters": "Recruiter auswählen",
+      "searchRecruiter": "Recruiter suchen…",
+      "noRecruiters": "Keine Recruiter gefunden",
+      "confirm": "Zuweisung bestätigen",
+      "resultPartial": "{{updated}} zugewiesen, {{skipped}} übersprungen",
+      "resultAll": "{{count}} zugewiesen",
+      "failed": "Zuweisung fehlgeschlagen. Bitte erneut versuchen.",
+      "assignedTo": "Zugewiesen an {{name}}"
+    }
   },
   "changelog": {
     "loading": "Wird geladen…",

@@ -150,7 +150,7 @@ export default function ExportSettings() {
               style={{
                 display: 'flex', alignItems: 'center', gap: 6, height: 34, padding: '0 16px', fontSize: 13,
                 fontWeight: 500, border: 'none', borderRadius: 8, whiteSpace: 'nowrap', flexShrink: 0,
-                background: 'var(--color-primary)', color: 'white',
+                background: 'var(--color-primary)', color: 'var(--color-on-accent)',
                 cursor: allowed && !pending ? 'pointer' : 'not-allowed',
                 opacity: !allowed || pending ? 0.5 : 1,
               }}>

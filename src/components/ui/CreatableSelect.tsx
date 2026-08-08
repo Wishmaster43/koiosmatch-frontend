@@ -215,7 +215,7 @@ export default function CreatableSelect({
                   textAlign: 'left', fontSize: 12, cursor: 'pointer', border: 'none',
                   background: value === o.value ? 'var(--color-primary-bg)' : 'none', color: 'var(--text)' }}>
                 <span style={{ flex: 1 }}>{o.label}</span>
-                {value === o.value && <Check size={13} style={{ color: 'var(--color-primary)', flexShrink: 0 }} />}
+                {value === o.value && <Check size={13} style={{ color: 'var(--color-primary-text)', flexShrink: 0 }} />}
               </button>
             ))}
             {canCreate && (
@@ -223,7 +223,7 @@ export default function CreatableSelect({
                 style={{ display: 'flex', alignItems: 'center', gap: 6, width: '100%', padding: '8px 12px',
                   textAlign: 'left', fontSize: 12, cursor: 'pointer', border: 'none',
                   borderTop: filtered.length ? '1px solid var(--border)' : 'none',
-                  background: 'none', color: 'var(--color-primary)', fontWeight: 600 }}>
+                  background: 'none', color: 'var(--color-primary-text)', fontWeight: 600 }}>
                 <Plus size={13} style={{ flexShrink: 0 }} />
                 <span style={{ flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>“{q}”</span>
               </button>

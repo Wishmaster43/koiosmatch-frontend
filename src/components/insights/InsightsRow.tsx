@@ -55,8 +55,8 @@ function DonutCard({ title, data, colors, onPick, active, onClear, picked, clear
           aria-label={picked ? `${picked} — ${clearTitle ?? ''}` : clearTitle}
           style={{ position: 'absolute', bottom: 5, right: 6, width: 22, height: 22, borderRadius: 999,
             display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer',
-            background: 'var(--color-primary-bg)', color: 'var(--color-primary)', border: 'none', zIndex: 1 }}
-          onMouseEnter={e => { e.currentTarget.style.background = 'var(--color-primary)'; e.currentTarget.style.color = '#fff' }}
+            background: 'var(--color-primary-bg)', color: 'var(--color-primary-text)', border: 'none', zIndex: 1 }}
+          onMouseEnter={e => { e.currentTarget.style.background = 'var(--color-primary)'; e.currentTarget.style.color = 'var(--color-on-accent)' }}
           onMouseLeave={e => { e.currentTarget.style.background = 'var(--color-primary-bg)'; e.currentTarget.style.color = 'var(--color-primary)' }}>
           <FilterX size={12} />
         </button>

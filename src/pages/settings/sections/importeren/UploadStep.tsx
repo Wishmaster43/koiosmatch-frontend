@@ -109,7 +109,7 @@ export default function UploadStep({
         <button type="button" onClick={(event) => { event.stopPropagation(); if (canImport) fileRef.current?.click() }}
           disabled={!canImport}
           style={{ height: 32, padding: '0 16px', fontSize: 13, fontWeight: 500, border: 'none', borderRadius: 8,
-                   background: 'var(--color-primary)', color: 'white', cursor: canImport ? 'pointer' : 'not-allowed' }}>
+                   background: 'var(--color-primary)', color: 'var(--color-on-accent)', cursor: canImport ? 'pointer' : 'not-allowed' }}>
           {t('import.selectCsv')}
         </button>
         <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>{t('import.acceptedTypes')}</span>
@@ -126,7 +126,7 @@ export default function UploadStep({
           borderRadius: 8, marginTop: 12 }}>
           <span style={{ fontSize: 13, color: 'var(--text)', flex: 1 }}>{t('import.fileSelected', { name: file.name })}</span>
           <button type="button" onClick={() => fileRef.current?.click()} disabled={!canImport}
-            style={{ fontSize: 12, color: 'var(--color-primary)', background: 'none', border: 'none',
+            style={{ fontSize: 12, color: 'var(--color-primary-text)', background: 'none', border: 'none',
                      cursor: canImport ? 'pointer' : 'not-allowed', padding: 0 }}>
             {t('import.replaceFile')}
           </button>
@@ -142,7 +142,7 @@ export default function UploadStep({
       <div style={{ marginTop: 20 }}>
         <button type="button" onClick={onRunPreview} disabled={!file || !canImport || checking}
           style={{ display: 'flex', alignItems: 'center', gap: 6, height: 34, padding: '0 16px', fontSize: 13,
-                   fontWeight: 500, border: 'none', borderRadius: 8, background: 'var(--color-primary)', color: 'white',
+                   fontWeight: 500, border: 'none', borderRadius: 8, background: 'var(--color-primary)', color: 'var(--color-on-accent)',
                    cursor: !file || !canImport || checking ? 'not-allowed' : 'pointer',
                    opacity: !file || !canImport ? 0.5 : 1 }}>
           {checking && <Loader2 size={14} className="animate-spin" aria-hidden="true" />}

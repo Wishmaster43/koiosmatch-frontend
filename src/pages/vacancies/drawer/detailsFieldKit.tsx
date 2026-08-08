@@ -2,6 +2,8 @@ import type { CSSProperties, ReactNode } from 'react'
 import type { TFunction } from 'i18next'
 import { Edit2, Save, X } from 'lucide-react'
 import { CANON_LABEL_STYLE } from '@/components/drawer/fieldRowCanon'
+import { fieldInputStyle } from '@/components/forms/fieldMetrics'
+import CreatableSelect from '@/components/ui/CreatableSelect'
 
 /**
  * detailsFieldKit — shared row/card/control-button building blocks for the
@@ -11,8 +13,9 @@ import { CANON_LABEL_STYLE } from '@/components/drawer/fieldRowCanon'
  * without repeating the same style constants and JSX four times.
  */
 
-// Style constants — identical across every sub-tab card.
-export const inputStyle: CSSProperties = { width: '100%', padding: '7px 10px', fontSize: 12, borderRadius: 6, border: '1px solid var(--border)', background: 'var(--input-bg)', color: 'var(--text)', boxSizing: 'border-box', outline: 'none' }
+// Style constants — identical across every sub-tab card. inputStyle is the
+// G33/fieldMetrics canon (was its own padding-7/font-12/radius-6 copy).
+export const inputStyle: CSSProperties = fieldInputStyle
 export const iconBtn: CSSProperties = { width: 26, height: 26, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 6, cursor: 'pointer' }
 export const blockStyle: CSSProperties = { borderRadius: 10, overflow: 'hidden', border: '1px solid var(--border)', background: 'var(--surface)' }
 export const groupTitleText: CSSProperties = { fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em', color: 'var(--text-muted)' }
@@ -54,7 +57,7 @@ export function controls(t: TFunction, isEditing: boolean, onSave: () => void, o
   return isEditing ? (
     <div style={{ display: 'flex', gap: 4 }}>
       {extra}
-      <button onClick={onSave} title={t('common:save')} style={{ ...iconBtn, background: 'var(--color-primary)', color: '#fff', border: 'none' }}><Save size={13} /></button>
+      <button onClick={onSave} title={t('common:save')} style={{ ...iconBtn, background: 'var(--color-primary)', color: 'var(--color-on-accent)', border: 'none' }}><Save size={13} /></button>
       <button onClick={onCancel} title={t('common:cancel')} style={{ ...iconBtn, background: 'var(--bg)', color: 'var(--text-muted)', border: '1px solid var(--border)' }}><X size={13} /></button>
     </div>
   ) : (
@@ -75,11 +78,14 @@ export function dateRange(formatDate: (d: string) => string, a: string, b: strin
 // its OWN key union/form/setF so each section's inputs only ever write their
 // own slice of state (never another sub-tab's draft).
 export function makeFieldHelpers<K extends string>(form: Record<K, string>, setF: (k: K, val: string) => void, t: TFunction) {
-  const select = (k: K, options: { value: string; label: string }[]) => (
-    <select value={form[k]} onChange={e => setF(k, e.target.value)} style={inputStyle}>
-      <option value="">{t('common:select')}</option>
-      {options.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
-    </select>
+  // G35: the searchable, lookup-driven picker — mirrors AddVacancyModal's
+  // GeneralCard/RequirementsCard exactly (same CreatableSelect, allowCreate={false},
+  // same placeholder) so seniority/education/function/industry use ONE control in
+  // both the add modal and the drawer instead of a native <select> here vs a
+  // combobox there.
+  const creatable = (k: K, options: Array<string | { value: string; label: string }>) => (
+    <CreatableSelect value={form[k] || null} onChange={(v: string) => setF(k, v)} allowCreate={false}
+      placeholder={t('common:select')} options={options} />
   )
   const text = (k: K, placeholder?: string) => (
     <input value={form[k]} onChange={e => setF(k, e.target.value)} placeholder={placeholder} style={inputStyle} />
@@ -98,5 +104,5 @@ export function makeFieldHelpers<K extends string>(form: Record<K, string>, setF
   )
   const twoNumbers = (a: K, b: K, pa: string, pb: string, opts?: { min?: number; max?: number; step?: number }) =>
     <div style={{ display: 'flex', gap: 6 }}>{number(a, pa, opts)}{number(b, pb, opts)}</div>
-  return { select, text, dateInput, twoInputs, twoDates, number, twoNumbers }
+  return { creatable, text, dateInput, twoInputs, twoDates, number, twoNumbers }
 }

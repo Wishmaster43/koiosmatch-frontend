@@ -123,7 +123,7 @@ export default function AddShiftModal({ date, onClose, onAdd }: { date: Date; on
                 for free the moment that path lands. */}
             <button onClick={handleSave} disabled title={t('previewSaveTitle')}
               style={{ display: 'flex', alignItems: 'center', gap: 6, height: BTN_H, padding: '0 16px', fontSize: 12,
-                fontWeight: 600, background: 'var(--color-primary)', color: '#fff', opacity: 0.5,
+                fontWeight: 600, background: 'var(--color-primary)', color: 'var(--color-on-accent)', opacity: 0.5,
                 border: 'none', borderRadius: 8, cursor: 'not-allowed' }}>
               <Save size={13} /> {t('common:save')}
             </button>

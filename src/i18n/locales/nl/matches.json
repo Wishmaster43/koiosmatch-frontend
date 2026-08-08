@@ -62,7 +62,16 @@
       "stage": "Fase",
       "created": "Aangemaakt",
       "status": "Status",
-      "lastSynced": "Laatst gesynchroniseerd"
+      "lastSynced": "Laatst gesynchroniseerd",
+      "contractType": "Contractsoort",
+      "startDate": "Begindatum",
+      "endDate": "Einddatum",
+      "hoursPerWeek": "Uren per week",
+      "lastSyncedHelloflex": "Laatst gesynced met HelloFlex",
+      "branch": "Vestiging",
+      "customerLocation": "Locatie",
+      "customerDepartment": "Afdeling",
+      "contactPerson": "Contactpersoon"
     },
     "openCandidate": "Kandidaat openen",
     "openVacancy": "Vacature openen",
@@ -111,7 +120,13 @@
     "remarks": {
       "title": "Opmerkingen",
       "saved": "Opmerkingen opgeslagen.",
-      "saveError": "Opslaan van de opmerkingen is mislukt."
+      "saveError": "Opslaan van de opmerkingen is mislukt.",
+      "deprecated": "Dit veld vervalt. Zet de tekst over naar Notities — daar krijgt hij een auteur, een datum, een type en een kanaal, en staat hij in de tijdlijn.",
+      "moveToNotes": "Overzetten naar notities",
+      "moving": "Bezig met overzetten…",
+      "moved": "Opmerking is overgezet naar notities.",
+      "moveError": "Overzetten naar notities is mislukt. De tekst is niet gewijzigd.",
+      "moveClearError": "De notitie is opgeslagen, maar het oude veld kon niet worden leeggemaakt. De tekst staat nu op twee plekken."
     },
     "duration": {
       "unit": {
@@ -132,6 +147,19 @@
       "title": "Matchtekst",
       "saved": "Matchtekst opgeslagen.",
       "saveError": "Opslaan van de matchtekst is mislukt."
+    },
+    "renew": {
+      "button": "Verlengen",
+      "modalTitle": "Match verlengen",
+      "confirm": "Verlenging bevestigen",
+      "currentEndDate": "Huidige einddatum: {{date}}",
+      "newEndDateLabel": "Nieuwe einddatum",
+      "noCurrentEndDate": "Geen einddatum ingesteld (doorlopend).",
+      "mustBeAfterCurrent": "De nieuwe einddatum moet na de huidige einddatum liggen.",
+      "success": "Match verlengd.",
+      "error": "Match kon niet worden verlengd.",
+      "disabledArchived": "Gearchiveerde match — herstel eerst.",
+      "disabledClosed": "Deze match is al beëindigd."
     }
   },
   "approval": {
@@ -145,7 +173,9 @@
     "reasonPlaceholder": "Reden van afwijzing…",
     "confirmReject": "Afwijzing bevestigen",
     "alreadyReviewed": "Deze match is al beoordeeld.",
-    "error": "De beoordeling kon niet worden toegepast."
+    "error": "De beoordeling kon niet worden toegepast.",
+    "badgeLabel": "Beoordeling",
+    "badgeWithLabel": "Beoordeling: {{status}}"
   },
   "changelog": {
     "loading": "Geschiedenis laden…",

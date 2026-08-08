@@ -28,7 +28,7 @@
  * department drill-down now consults its OWN 'customer_location'/'customer_department'
  * lookup (ScopedDocumentsTab passes it) instead of silently reusing the customer's.
  */
-import { useState, useRef } from 'react'
+import { useState, useRef, useId } from 'react'
 import type { ChangeEvent } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Search, X, Pencil, Eye, Download, Trash2 } from 'lucide-react'
@@ -43,6 +43,11 @@ import { useDocumentLinkPicker } from '../hooks/useDocumentLinkPicker'
 import { downloadFilesSequentially } from '@/lib/downloadFiles'
 import ConfirmDialog from '@/components/ui/ConfirmDialog'
 import DocPreviewModal from '@/components/drawer/DocPreviewModal'
+// DOC-FILTER-PARITY-1 (08-08): the shared search-box + searchable TYPE filter
+// combo the candidate documents section already has — reused here verbatim,
+// never forked, so every documents drill-down reads the same (§3A).
+import DrawerFilterMenu from '@/components/drawer/DrawerFilterMenu'
+import type { DrawerFilterConfig } from '@/components/drawer/DrawerFilterMenu'
 // House "+ action" trigger (Danny 27-07 consistency sweep) — replaces the bare
 // text+Plus button below; same click target (opens the hidden file input).
 import DrawerAddButton from '@/components/drawer/DrawerAddButton'
@@ -96,6 +101,10 @@ export default function DocumentsTab({ customerId, locations = [], departments =
   const [renamingId,  setRenamingId]  = useState<Id | null>(null)
   const [renameValue, setRenameValue] = useState('')
   const [docSearch,   setDocSearch]   = useState('')
+  // DOC-FILTER-PARITY-1: filter the list by document type, via the house searchable
+  // dropdown fed by the tenant document-type lookup — '' = all. Mirrors the candidate
+  // documents section's own DOC-TYPE-FILTER-1.
+  const [docTypeFilter, setDocTypeFilter] = useState('')
   // Which doc the preview dialog shows — null = closed.
   const [previewDoc,  setPreviewDoc]  = useState<EntityDoc | null>(null)
   // Bulk-download selection, keyed by docKey — cleared once a download batch starts.
@@ -104,10 +113,15 @@ export default function DocumentsTab({ customerId, locations = [], departments =
   // whole bulk selection; nothing is removed until the shared ConfirmDialog is confirmed.
   const [confirmDelete, setConfirmDelete] = useState<{ kind: 'one'; doc: EntityDoc; index: number } | { kind: 'many' } | null>(null)
   const fileRef = useRef<HTMLInputElement>(null)
+  // G34: base id for the per-queued-file type picker's sr-only label — SelectMenu's
+  // trigger is a <button>, so it needs aria-labelledby (never a plain aria-label prop).
+  const docTypeLabelBaseId = useId()
 
   // Rows currently visible under the search filter, with their original index kept.
+  // DOC-FILTER-PARITY-1: the type filter narrows further, after the free-text search.
   const filteredDocs = docs.map((d, i) => ({ ...d, _i: i }))
     .filter(d => !docSearch || (d.name ?? d.file_name ?? '').toLowerCase().includes(docSearch.toLowerCase()) || (d.type ?? '').toLowerCase().includes(docSearch.toLowerCase()))
+    .filter(d => !docTypeFilter || (d.type ?? '') === docTypeFilter)
   const filteredDownloadableKeys = filteredDocs.filter(d => docUrl(d)).map(d => docKey(d, d._i))
   const allFilteredSelected = filteredDownloadableKeys.length > 0 && filteredDownloadableKeys.every(k => selected.has(k))
 
@@ -189,6 +203,15 @@ export default function DocumentsTab({ customerId, locations = [], departments =
   // File name shown in the single-delete confirm message (empty once the dialog is closed).
   const confirmDeleteName = confirmDelete?.kind === 'one' ? String(confirmDelete.doc.name ?? confirmDelete.doc.file_name ?? '') : ''
 
+  // DOC-FILTER-PARITY-1: the type filter row, behind the shared DrawerFilterMenu —
+  // self-hides when the tenant has no document types configured for this scope
+  // (DrawerFilterMenu renders null on empty).
+  const filterRows: DrawerFilterConfig[] = docTypes.length > 0 ? [{
+    type: 'single', key: 'docType', label: t('documents.type'), value: docTypeFilter, onChange: setDocTypeFilter,
+    allLabel: t('documents.allTypes'),
+    options: docTypes.map(dt => ({ value: String(dt.value ?? ''), label: docTypeLabel(String(dt.value ?? '')) })),
+  }] : []
+
   return (
     <div>
       {/* No section title (Danny 05-08 "documenten naam weg — tabblad heet al zo"): the
@@ -203,12 +226,17 @@ export default function DocumentsTab({ customerId, locations = [], departments =
               style={{ border: 'none', outline: 'none', fontSize: 12, color: 'var(--text)', background: 'none', flex: 1, minWidth: 0 }} />
             {docSearch && <button onClick={() => setDocSearch('')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: 0, display: 'flex' }}><X size={11} /></button>}
           </div>
+          {/* DOC-FILTER-PARITY-1: the type filter lives behind this one compact Filter
+              button, mirroring the candidate documents section — self-hides when the
+              tenant has no document types for this scope. */}
+          <DrawerFilterMenu filters={filterRows}
+            label={t('common:filters.button')} title={t('common:filters.title')} clearAllLabel={t('common:filters.clearAll')} />
           {/* Soft-tint bulk-download + bulk-delete actions (§4) — only shown once something is selected. */}
           {selected.size > 0 && (
             <>
               <button onClick={downloadSelected}
                 style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 11, fontWeight: 600, padding: '4px 10px', borderRadius: 99, cursor: 'pointer', whiteSpace: 'nowrap', flexShrink: 0,
-                  background: 'color-mix(in srgb, var(--color-primary) 14%, transparent)', color: 'var(--color-primary)',
+                  background: 'color-mix(in srgb, var(--color-primary) 14%, transparent)', color: 'var(--color-primary-text)',
                   border: '1px solid color-mix(in srgb, var(--color-primary) 45%, transparent)' }}>
                 <Download size={11} /> {t('documents.downloadSelected', { count: selected.size })}
               </button>
@@ -270,18 +298,23 @@ export default function DocumentsTab({ customerId, locations = [], departments =
                 <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                   <span style={{ flex: 1, minWidth: 0, fontSize: 12, color: 'var(--text)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{item.name}</span>
                   <span style={{ fontSize: 11, color: 'var(--text-muted)', flexShrink: 0 }}>{item.size}</span>
-                  <select aria-label={t('documents.docTypeFor', { name: item.name })} value={item.type} onChange={e => setItemType(idx, e.target.value)}
-                    style={{ fontSize: 11, border: '1px solid var(--border)', borderRadius: 6, background: 'var(--bg)', color: 'var(--text)' }}>
-                    {docTypes.map(dt => <option key={dt.value} value={dt.value}>{dt.label}</option>)}
-                  </select>
+                  <span id={`${docTypeLabelBaseId}-${idx}`} className="sr-only">{t('documents.docTypeFor', { name: item.name })}</span>
+                  <div style={{ width: 130, flexShrink: 0 }}>
+                    <SelectMenu aria-labelledby={`${docTypeLabelBaseId}-${idx}`} value={item.type} onChange={v => setItemType(idx, v)}
+                      options={docTypes} menuWidth={160}
+                      style={{ fontSize: 11, padding: '4px 8px', border: '1px solid var(--border)', borderRadius: 6, background: 'var(--bg)', color: 'var(--text)' }} />
+                  </div>
                   <button onClick={() => removePending(idx)} aria-label={t('common:remove')}
                     style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: 2, display: 'flex', flexShrink: 0 }}><X size={12} /></button>
                 </div>
               ))}
             </div>
             <div style={{ display: 'flex', gap: 8 }}>
+              {/* CONTRAST-YELLOW-1 (08-08 audit): the fill is var(--text), which flips
+                  near-black↔near-white across themes, so the label must flip with it —
+                  var(--bg) is always the readable inverse of --text in both themes. */}
               <button onClick={uploadAll}
-                style={{ padding: '7px 14px', fontSize: 12, fontWeight: 600, borderRadius: 7, background: 'var(--text)', color: 'white', border: 'none', cursor: 'pointer' }}>
+                style={{ padding: '7px 14px', fontSize: 12, fontWeight: 600, borderRadius: 7, background: 'var(--text)', color: 'var(--bg)', border: 'none', cursor: 'pointer' }}>
                 {pending.length > 1 ? t('documents.addAll', { count: pending.length }) : t('documents.add')}
               </button>
               <button onClick={cancelPending}

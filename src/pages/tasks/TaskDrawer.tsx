@@ -1,6 +1,7 @@
-import type { ReactNode } from 'react'
+import type { CSSProperties, ReactNode } from 'react'
+import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { CheckCircle2 } from 'lucide-react'
+import { CheckCircle2, Edit2, Save, X } from 'lucide-react'
 import EntityDrawer from '@/components/drawer/EntityDrawer'
 import EntityHeader from '@/components/drawer/EntityHeader'
 import type { MetaPicker } from '@/components/drawer/EntityHeader'
@@ -12,7 +13,7 @@ import { useCustomFields } from '@/lib/useCustomFields'
 import { useTaskLookups } from '@/context/TaskLookupsContext'
 import { useUsers } from '@/lib/queries'
 import DetailsTab from './drawer/DetailsTab'
-import RelatedTasks from './drawer/RelatedTasks'
+import RelatedTasks, { hasRelatedSubject } from './drawer/RelatedTasks'
 import LinksTab from './drawer/LinksTab'
 import NotesTab from './drawer/NotesTab'
 import ChangelogPopover from '@/components/drawer/ChangelogPopover'
@@ -31,8 +32,14 @@ const userName = (u: UserLike): string => u.name || [u.firstname, u.lastname].fi
 // NT-TASK-1 (Danny, reinstated): the old plain "Reacties" thread removed 2026-07-14
 // returns as a proper type-aware NOTES tab (mirrors matches' NotesTab onto the same
 // shared NotesTab family) instead of the empty comments stub.
+// T5: "related" (the other tasks of whichever record this task is linked to) is its
+// own tab now — was a section pinned under Details, generalised beyond candidate-only.
 // 'extra' (§3A(f)) is appended below only when the tenant has ≥1 active custom field.
-const TAB_IDS = ['details', 'links', 'notes']
+const TAB_IDS = ['details', 'links', 'related', 'notes']
+
+const hdrBtn: CSSProperties = { display: 'flex', alignItems: 'center', justifyContent: 'center', width: 28, height: 28, borderRadius: 7, cursor: 'pointer', flexShrink: 0 }
+const hdrGhost: CSSProperties = { ...hdrBtn, background: 'var(--bg)', color: 'var(--text-muted)', border: '1px solid var(--border)' }
+const hdrPrimary: CSSProperties = { ...hdrBtn, background: 'var(--color-primary)', color: 'var(--color-on-accent)', border: 'none' }
 
 interface TaskDrawerProps {
   task: TaskDetail | null
@@ -59,20 +66,39 @@ export default function TaskDrawer({ task, onClose, expanded, onToggleExpand, on
   const { data: users = [] } = useUsers() as { data?: UserLike[] }
   // The Extra tab only shows when the tenant has defined task custom fields (§3A(f)).
   const { fields: customFieldDefs } = useCustomFields('task')
+  // T1: inline title edit — mirror VacancyDrawer's V7 idiom (pencil → input →
+  // save/cancel). Reset whenever a different task is opened (adjust-during-render,
+  // same pattern as VacancyDrawer) — belt-and-braces since the page also keys the
+  // whole drawer on task.id, remounting this component on every reselect.
+  const [editingTitle, setEditingTitle] = useState(false)
+  const [titleDraft, setTitleDraft] = useState('')
+  const [prevId, setPrevId] = useState<Id | undefined>(task?.id)
+  if (task?.id !== prevId) { setPrevId(task?.id); setEditingTitle(false); setTitleDraft('') }
   if (!task) return null
+
+  const startTitleEdit = () => { setTitleDraft(task.title); setEditingTitle(true) }
+  const saveTitleEdit = () => { const val = titleDraft.trim(); if (val && val !== task.title) onUpdate(task.id, { title: val }); setEditingTitle(false) }
 
   // Map a tab id to its content component.
   const renderTab = (id: string): ReactNode => {
     switch (id) {
-      case 'details':  return <><DetailsTab task={task} onUpdate={patch => onUpdate(task.id, patch)} /><RelatedTasks task={task} /></>
+      case 'details':  return <DetailsTab task={task} onUpdate={patch => onUpdate(task.id, patch)} />
       case 'links':    return <LinksTab task={task} onAddLink={link => onAddLink(task.id, link)} onRemoveLink={link => onRemoveLink(task.id, link)} />
+      // T5: its own tab now (generalised beyond candidate-only) — was a section
+      // pinned under Details.
+      case 'related':  return <RelatedTasks task={task} />
       case 'notes':    return <NotesTab task={task} />
       case 'extra':    return <CustomFieldsTab entityType="task" values={task.customFields ?? {}}
                           onSave={patch => onUpdate(task.id, { customFields: { ...task.customFields, ...patch } })} />
       default:         return null
     }
   }
-  const tabIds = customFieldDefs.length > 0 ? [...TAB_IDS, 'extra'] : TAB_IDS
+  // FIX 2 (esc-en-lege-tabs, "no empty tabs" — §3A): "related" renders nothing (no
+  // list, no add-affordance — it is read-only) when the task carries no qualifying
+  // link and no assignee, so it only joins the tab bar once it has a real subject.
+  const tabIds = TAB_IDS
+    .filter(id => id !== 'related' || hasRelatedSubject(task))
+    .concat(customFieldDefs.length > 0 ? ['extra'] : [])
 
   // Assignee options: "Bureau" (unassigned) + every user. Picking rebuilds the
   // assignee object so the optimistic UI shows the name/initials immediately.
@@ -129,7 +155,13 @@ export default function TaskDrawer({ task, onClose, expanded, onToggleExpand, on
           label={t('drawer.label')}
           expanded={expanded} onToggleExpand={onToggleExpand} onClose={onClose}
           avatar={{ initials: initialsOf(task.title, 'T'), soft: true, color: task.statusColor }}
-          renderTitle={() => (
+          renderTitle={() => editingTitle ? (
+            // T1: inline title edit — mirror VacancyDrawer's renderTitle swap.
+            <input autoFocus value={titleDraft} onChange={e => setTitleDraft(e.target.value)}
+              onKeyDown={e => { if (e.key === 'Enter') saveTitleEdit(); if (e.key === 'Escape') setEditingTitle(false) }}
+              style={{ width: '100%', boxSizing: 'border-box', padding: '6px 10px', fontSize: 15, fontWeight: 700,
+                borderRadius: 6, border: '1px solid var(--border)', outline: 'none', color: 'var(--text)' }} />
+          ) : (
             <>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
                 <span style={{ fontSize: 15, fontWeight: 700, color: 'var(--text)' }}>{task.title}</span>
@@ -146,7 +178,21 @@ export default function TaskDrawer({ task, onClose, expanded, onToggleExpand, on
           // cramped 360px dropdown with no focus trap; now the same 900px centred
           // panel as the candidate drawer. ActivityTab supplies the task's own content.
           titleActions={<ChangelogPopover><ActivityTab task={task} /></ChangelogPopover>}
-          actions={markDone}
+          // T1: title pencil → save/cancel, same spot as VacancyDrawer; "mark done"
+          // rides alongside it. No pencil on an ARCHIVED task (mirrors every other
+          // edit affordance in this drawer — restore first, a deliberate product
+          // choice per the meta-picker comment below, not a technical necessity).
+          actions={editingTitle ? (
+            <>
+              <button onClick={saveTitleEdit} title={t('common:save')} style={hdrPrimary}><Save size={14} /></button>
+              <button onClick={() => setEditingTitle(false)} title={t('common:cancel')} style={hdrGhost}><X size={14} /></button>
+            </>
+          ) : (
+            <>
+              {!task.archived && <button onClick={startTitleEdit} title={t('common:edit')} style={hdrGhost}><Edit2 size={13} /></button>}
+              {markDone}
+            </>
+          )}
           meta={meta}
           // Tag editing is a PATCH too — hidden while archived (same gating, see meta above).
           tags={task.archived ? undefined : {

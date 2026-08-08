@@ -54,9 +54,9 @@ export default function OpportunityLookupsSettings() {
             // for this task) — the fallback keeps the UI in real English meanwhile.
             flagFields={[
               { key: 'is_won', label: t('opportunityLookups.stages.isWon', { defaultValue: 'Won stage' }),
-                description: t('opportunityLookups.stages.isWonHint', { defaultValue: 'This stage marks a deal as won (feeds the won/lost KPIs).' }) },
+                description: t('opportunityLookups.stages.isWonHint') },
               { key: 'is_lost', label: t('opportunityLookups.stages.isLost', { defaultValue: 'Lost stage' }),
-                description: t('opportunityLookups.stages.isLostHint', { defaultValue: 'This stage marks a deal as lost (feeds the won/lost KPIs).' }) },
+                description: t('opportunityLookups.stages.isLostHint') },
             ]} />
         )}
         {activeTab === 'serviceTypes' && (

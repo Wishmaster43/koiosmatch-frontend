@@ -1,40 +1,65 @@
 /**
- * UsersPage — manage the users within the current tenant. Thin container: lists
- * users with search + role filter, and opens the create/edit dialogs. The role
- * badge/changer and the editable colour avatar live in `usersParts`.
+ * UsersPage — user & role management for the current tenant (Settings →
+ * Beheer → Gebruikers). Thin container in the house settings shape: title +
+ * subtitle, a search box and a real "+ Gebruiker" button above the shared table,
+ * with the four UI states handled explicitly.
+ *
+ * It owns no business logic: the list/mutations live in `useUsersData`, the
+ * soft-delete-with-ownership-transfer flow in `useUserDeletion`, and every visual
+ * part in `UsersTable` / the dialogs. Rights only decide what is VISIBLE (§7) —
+ * the backend re-checks users.create / users.update / users.delete /
+ * users.assign_roles on every route.
  */
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect, useMemo, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Plus, Pencil } from 'lucide-react'
+import { Plus, AlertTriangle } from 'lucide-react'
 import { useAuth } from '@/context/AuthContext'
 import { useRightPanel } from '@/context/RightPanelContext'
-import DataTable from '@/components/ui/DataTable'
-import type { Column } from '@/components/ui/DataTable'
+import HeaderSearch from '@/components/ui/HeaderSearch'
 import NewUserModal from './NewUserModal'
 import EditUserModal from './EditUserModal'
+import UserRolesModal from './UserRolesModal'
+import UserTransferDeleteModal from './UserTransferDeleteModal'
+import UsersTable from './UsersTable'
+import { userDisplayName } from './userRow'
+import type { UserRow } from './userRow'
 import { useUsersData } from './hooks/useUsersData'
-import { RoleBadge, RoleSelector, EditableAvatar, isSuperAdminUser, roleName, SUPER_ADMIN_COLOR } from './usersParts'
+import { useUserDeletion } from './hooks/useUserDeletion'
+import { roleName } from './usersParts'
 import { BTN_H } from '@/config/buttonMetrics'
-import type { ManagedUser } from '@/types/api'
-
-// Display name: "first last", falling back to the combined name field.
-const nameOf = (u: ManagedUser) => [u.firstname, u.lastname].filter(Boolean).join(' ') || u.name || '—'
 
 export default function UsersPage() {
   const { t } = useTranslation('users')
-  const { user: me } = useAuth() ?? {}
-  // Data layer (load + optimistic mutations) lives in the hook; the page stays presentational.
-  const { users, roles, loading, error, setColor, addUser, updateUser } = useUsersData()
+  const auth = useAuth()
+  const me = auth?.user
+  // Data layer (load + optimistic mutations) lives in the hook; the page wires it.
+  const { users, roles, loading, error, setColor, addUser, updateUser, removeUser } = useUsersData()
   const [showCreate,   setShowCreate]   = useState(false)
-  const [editingUser,  setEditingUser]  = useState<ManagedUser | null>(null)
+  const [editingUser,  setEditingUser]  = useState<UserRow | null>(null)
+  const [rolesUser,    setRolesUser]    = useState<UserRow | null>(null)
+  const [query,        setQuery]        = useState('')
   const [selectedRole, setSelectedRole] = useState<string[]>([])
   const { registerFilters, unregisterFilters } = useRightPanel()
 
+  // Two-step soft-delete: a 422 with `requires_transfer` opens the transfer dialog.
+  const { target: deleteTarget, owned, busy: deleting, requestDelete, confirmTransfer, close: closeDelete } =
+    useUserDeletion(removeUser)
+
+  // UI gating only — mirrors the backend's permission middleware names.
+  const can = auth?.hasPermission
+  const canCreate      = can?.('users.create') ?? false
+  const canUpdate      = can?.('users.update') ?? false
+  const canDelete      = can?.('users.delete') ?? false
+  const canAssignRoles = can?.('users.assign_roles') ?? false
+
+  // ManagedUser already satisfies UserRow (its extra fields are optional).
+  const rows: UserRow[] = users
+
   const roleOptions = useMemo(() =>
-    [...new Set(users.flatMap(u => (u.roles ?? []).map(roleName)))]
+    [...new Set(rows.flatMap(u => (u.roles ?? []).map(roleName)))]
       .filter((r): r is string => Boolean(r))
-      .map(r => ({ value: r, label: r, count: users.filter(u => (u.roles ?? []).some(x => roleName(x) === r)).length }))
-  , [users])
+      .map(r => ({ value: r, label: r, count: rows.filter(u => (u.roles ?? []).some(x => roleName(x) === r)).length }))
+  , [rows])
 
   const filterGroups = useMemo(() => [
     { key: 'role', label: t('filterRole'), selected: selectedRole, options: roleOptions, onToggle: (v: string) => setSelectedRole(p => p.includes(v) ? p.filter(x => x !== v) : [...p, v]) },
@@ -45,136 +70,84 @@ export default function UsersPage() {
     return () => unregisterFilters('users-page')
   }, [filterGroups, registerFilters, unregisterFilters])
 
+  // Search is client-side on purpose: GET /users takes no query parameters
+  // (measured 09-08 — UserController::index lists the tenant's users unfiltered),
+  // and a tenant's user count is small enough that this stays honest and instant.
   const filtered = useMemo(() => {
-    if (!selectedRole.length) return users
-    return users.filter(u => selectedRole.some(r => (u.roles ?? []).some(x => roleName(x) === r)))
-  }, [users, selectedRole])
+    const q = query.toLowerCase()
+    return rows.filter(u => {
+      const matchesRole = !selectedRole.length || selectedRole.some(r => (u.roles ?? []).some(x => roleName(x) === r))
+      const matchesQuery = !q || `${userDisplayName(u)} ${u.email ?? ''}`.toLowerCase().includes(q)
+      return matchesRole && matchesQuery
+    })
+  }, [rows, selectedRole, query])
 
-  // Column declarations for the shared DataTable — the table owns layout/hover/states.
-  const columns: Column<ManagedUser>[] = [
-    // Name — colour-pick avatar, name, edit pencil (not on system accounts) + you/system badges.
-    { key: 'name', header: t('cols.name'), width: 200, render: u => {
-      const isMe = u.id != null && u.id === me?.id
-      const isSA = isSuperAdminUser(u)
-      return (
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-          <EditableAvatar user={u} onPick={color => setColor(u, color)} />
-          <div style={{ fontWeight: 500, color: 'var(--text)', display: 'flex', alignItems: 'center', gap: 6 }}>
-            {nameOf(u)}
-            {/* Edit button — not shown for super-admin accounts */}
-            {!isSA && (
-              <button onClick={() => setEditingUser(u)} title={t('editUser')} aria-label={t('editUser')}
-                style={{ display: 'flex', alignItems: 'center', justifyContent: 'center',
-                         width: 20, height: 20, borderRadius: 5, border: '1px solid var(--border)',
-                         background: 'var(--surface)', cursor: 'pointer', color: 'var(--text-muted)', flexShrink: 0 }}
-                onMouseEnter={e => (e.currentTarget.style.color = 'var(--color-primary)')}
-                onMouseLeave={e => (e.currentTarget.style.color = 'var(--text-muted)')}>
-                <Pencil size={10} />
-              </button>
-            )}
-            {isMe && (
-              <span style={{ fontSize: 10, fontWeight: 600, color: 'var(--color-primary)',
-                             background: 'var(--color-primary-bg)', borderRadius: 999, padding: '1px 7px' }}>
-                {t('you')}
-              </span>
-            )}
-            {isSA && (
-              <span style={{ fontSize: 10, fontWeight: 600, color: SUPER_ADMIN_COLOR,
-                             background: `color-mix(in srgb, ${SUPER_ADMIN_COLOR} 10%, transparent)`,
-                             borderRadius: 999, padding: '1px 7px' }}>
-                {t('system')}
-              </span>
-            )}
-          </div>
-        </div>
-      )
-    } },
-    // Email / phone — muted secondary text.
-    { key: 'email', header: t('cols.email'), width: 200, cellStyle: { color: 'var(--text-muted)', fontSize: 12 },
-      render: u => u.email ?? '—' },
-    { key: 'phone', header: t('cols.phone'), width: 140, cellStyle: { color: 'var(--text-muted)', fontSize: 12 },
-      render: u => u.phone ?? '—' },
-    // Role — read-only badge for system accounts, inline role-changer otherwise.
-    { key: 'role', header: t('cols.role'), render: u => isSuperAdminUser(u)
-      ? <RoleBadge role="super_admin" />
-      : <RoleSelector user={u} availableRoles={roles} onChanged={updateUser} /> },
-    // Branches — read-only soft chips (Danny 20-07: show the linked set, edit stays in the user dialog).
-    { key: 'branches', header: t('cols.branches'), render: u => {
-      const branches = u.branches ?? []
-      if (!branches.length) return <span style={{ color: 'var(--text-muted)', fontSize: 12 }}>—</span>
-      return (
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4 }}>
-          {branches.map(b => (
-            <span key={b.location_id} style={{ fontSize: 11, fontWeight: 500, padding: '1px 8px', borderRadius: 99,
-              whiteSpace: 'nowrap', color: 'var(--color-primary)',
-              background: 'color-mix(in srgb, var(--color-primary) 10%, transparent)',
-              border: '1px solid color-mix(in srgb, var(--color-primary) 30%, transparent)' }}>
-              {b.name ?? '—'}
-            </span>
-          ))}
-        </div>
-      )
-    } },
-  ]
+  // Stable identities so UsersTable's memoized column array isn't rebuilt per keystroke.
+  const handlePickColor = useCallback((u: UserRow, color: string | null) => setColor(u, color), [setColor])
+  const handleEdit      = useCallback((u: UserRow) => setEditingUser(u), [])
+  const handleEditRoles = useCallback((u: UserRow) => setRolesUser(u), [])
+  const handleDelete    = useCallback((u: UserRow) => { void requestDelete(u) }, [requestDelete])
+
+  // Successor candidates for a transfer: every other user still in the list.
+  const successors = useMemo(
+    () => (deleteTarget ? rows.filter(u => u.id !== deleteTarget.id) : []),
+    [rows, deleteTarget],
+  )
 
   return (
-    <div style={{ padding: 24 }}>
-
-      {/* Header */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
+    <div>
+      {/* Header — the settings-section shape (title + subtitle, actions right). */}
+      <div className="flex items-center justify-between mb-5">
         <div>
-          <h2 style={{ fontSize: 16, fontWeight: 700, color: 'var(--text)', letterSpacing: '-0.2px' }}>
-            {t('title')}
-          </h2>
-          {!loading && (
-            <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>
-              {t('summary', { shown: filtered.length, total: users.length })}
-            </p>
-          )}
+          <h2 style={{ fontSize: 15, fontWeight: 600, color: 'var(--text)' }}>{t('title')}</h2>
+          <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>
+            {loading ? t('subtitle') : t('summary', { shown: filtered.length, total: rows.length })}
+          </p>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          {/* BTN_H (§4/§9): one explicit height for every text/action button, everywhere. */}
-          <button onClick={() => setShowCreate(true)}
-            style={{ display: 'flex', alignItems: 'center', gap: 6, height: BTN_H, padding: '0 14px',
-                     fontSize: 13, fontWeight: 600, borderRadius: 8, border: 'none',
-                     background: 'var(--color-primary)', color: 'white', cursor: 'pointer' }}>
-            <Plus size={14} /> {t('newUser')}
-          </button>
+          <HeaderSearch onSearch={setQuery} placeholder={t('searchPlaceholder')} ariaLabel={t('searchPlaceholder')} width={220} />
+          {/* Hidden without the right, never a dead button (§7 — backend re-checks). */}
+          {canCreate && (
+            <button onClick={() => setShowCreate(true)}
+              style={{ display: 'flex', alignItems: 'center', gap: 6, height: BTN_H, padding: '0 14px',
+                       fontSize: 13, fontWeight: 600, borderRadius: 8, border: 'none',
+                       background: 'var(--color-primary)', color: 'var(--color-on-accent)', cursor: 'pointer' }}>
+              <Plus size={14} aria-hidden="true" /> {t('newUser')}
+            </button>
+          )}
         </div>
       </div>
 
-      {/* Table card — error renders its own state; DataTable owns loading/empty/success. */}
+      {/* Error is its own state; DataTable owns loading / empty / success. */}
       <div style={{ background: 'var(--surface)', borderRadius: 12,
                     border: '1px solid var(--border)', overflow: 'auto' }}>
         {!loading && error ? (
-          <div style={{ padding: '40px 0', textAlign: 'center', fontSize: 13, color: 'var(--color-danger)' }}>
-            {error}
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+                        padding: '40px 0', fontSize: 13, color: 'var(--color-danger)' }}>
+            <AlertTriangle size={14} aria-hidden="true" /> {error}
           </div>
         ) : (
-          <DataTable
-            columns={columns}
-            rows={filtered}
-            getRowId={u => u.id ?? u.email ?? ''}
-            loading={loading}
-            loadingText={t('loading')}
-            emptyText={t('empty')}
-            selectedId={me?.id ?? null}
-          />
+          <UsersTable rows={filtered} loading={loading} currentUserId={me?.id ?? null}
+            canUpdate={canUpdate} canDelete={canDelete} canAssignRoles={canAssignRoles}
+            onEdit={handleEdit} onEditRoles={handleEditRoles} onDelete={handleDelete} onPickColor={handlePickColor} />
         )}
       </div>
 
       {showCreate && (
-        <NewUserModal
-          onClose={() => setShowCreate(false)}
-          onCreated={addUser}
-        />
+        <NewUserModal onClose={() => setShowCreate(false)} onCreated={addUser} />
       )}
       {editingUser && (
-        <EditUserModal
-          user={editingUser}
-          onClose={() => setEditingUser(null)}
-          onSaved={updated => { updateUser(updated); setEditingUser(null) }}
-        />
+        <EditUserModal user={editingUser} onClose={() => setEditingUser(null)}
+          onSaved={updated => { updateUser(updated); setEditingUser(null) }} />
+      )}
+      {rolesUser && (
+        <UserRolesModal user={rolesUser} roles={roles} onClose={() => setRolesUser(null)}
+          onSaved={updated => { updateUser(updated); setRolesUser(null) }} />
+      )}
+      {/* The ownership hand-off — the ONLY way a still-coupled user is removed. */}
+      {deleteTarget && owned && (
+        <UserTransferDeleteModal user={deleteTarget} owned={owned} successors={successors}
+          busy={deleting} onConfirm={confirmTransfer} onClose={closeDelete} />
       )}
     </div>
   )

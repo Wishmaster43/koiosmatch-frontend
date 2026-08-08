@@ -15,15 +15,27 @@ import type { ComponentType, ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { ChevronDown } from 'lucide-react'
 import SearchSelectJs from '@/components/ui/SearchSelect'
-import type { PickOption } from './types'
+import type { PickOption, SearchErrorKind } from './types'
 
 type AnyProps = Record<string, unknown>
 const SearchSelect = SearchSelectJs as unknown as ComponentType<AnyProps>
 
+// FIX 2 (P1, measured 08-08): one i18n key per SearchErrorKind so the message
+// is honest about WHY the search failed, not one generic "search failed" —
+// `add.searchError` stays the fallback for the 'unknown' bucket (kept as-is,
+// already shipped in all 5 locales).
+const SEARCH_ERROR_KEY: Record<SearchErrorKind, string> = {
+  forbidden: 'add.searchErrorForbidden',
+  validation: 'add.searchErrorValidation',
+  server: 'add.searchErrorServer',
+  network: 'add.searchErrorNetwork',
+  unknown: 'add.searchError',
+}
+
 export default function SearchPickField({ label, placeholder, value, options, onPick, onSearch, error, searchError, onRetry }: {
   label: ReactNode; placeholder?: string; value: PickOption | null; options: PickOption[]
   onPick: (opt: PickOption) => void; onSearch: (query: string) => void
-  error?: boolean; searchError?: boolean; onRetry: () => void
+  error?: boolean; searchError?: SearchErrorKind | null; onRetry: () => void
 }) {
   const { t } = useTranslation('applications')
   const labelId = useId()
@@ -57,7 +69,7 @@ export default function SearchPickField({ label, placeholder, value, options, on
           which an unchanged search box would otherwise never re-trigger). */}
       {searchError && (
         <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 4, fontSize: 11, color: 'var(--color-danger)' }}>
-          <span>{t('add.searchError')}</span>
+          <span>{t(SEARCH_ERROR_KEY[searchError])}</span>
           <button type="button" onClick={onRetry}
             style={{ background: 'none', border: '1px solid var(--border)', borderRadius: 6, padding: '1px 6px', cursor: 'pointer', color: 'var(--text)' }}>
             {t('common:error.retry')}

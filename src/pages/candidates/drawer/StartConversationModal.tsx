@@ -49,6 +49,26 @@ const fieldLabel: React.CSSProperties = { fontSize: 12, color: 'var(--text-muted
 const pickerMenuWidth = 340
 const fieldFootprint: React.CSSProperties = { padding: '8px 11px', borderRadius: 8, fontSize: 13 }
 
+/**
+ * ConfigNotice — a missing template/sender is a CONFIGURATION state, not a bug
+ * (measured 08-08 on tenant yesway: the WhatsApp account exists but sits
+ * 'inactive' with 0 synced numbers and 0 templates, so both lookups honestly
+ * return zero rows). A bare red sentence left the recruiter stuck, so the notice
+ * now names the fix and links straight to Settings → WhatsApp, where the sync
+ * buttons live. Deep-link form mirrors SettingsPage's canonical
+ * `#settings/<category>/<tab>`.
+ */
+function ConfigNotice({ text, t, style }: { text: string; t: (k: string, o?: Record<string, unknown>) => string; style?: React.CSSProperties }) {
+  return (
+    <div style={{ fontSize: 11, color: 'var(--color-danger)', marginTop: 3, display: 'flex', flexWrap: 'wrap', gap: 4, ...style }}>
+      <span>{text}</span>
+      <a href="#settings/whatsapp/whatsapp" style={{ color: 'var(--color-primary-text)', fontWeight: 600, textDecoration: 'none' }}>
+        {t('conversations.configureWhatsapp')}
+      </a>
+    </div>
+  )
+}
+
 export default function StartConversationModal({ candidateId, onClose, onStarted }: {
   candidateId: Id
   onClose: () => void
@@ -138,7 +158,7 @@ export default function StartConversationModal({ candidateId, onClose, onStarted
               <CreatableSelect value={templateName || null} onChange={setTemplateName}
                 placeholder={t('conversations.templatePlaceholder')} allowCreate={false} menuWidth={pickerMenuWidth}
                 style={fieldFootprint} options={templates.map(tpl => ({ value: tpl.value, label: tpl.label }))} />
-              {templates.length === 0 && <div style={{ fontSize: 11, color: 'var(--color-danger)', marginTop: 3 }}>{t('conversations.templatesEmpty')}</div>}
+              {templates.length === 0 && <ConfigNotice text={t('conversations.templatesEmpty')} t={t} />}
             </div>
 
             {/* Sender number — only shown with more than one active number; a single
@@ -151,7 +171,7 @@ export default function StartConversationModal({ candidateId, onClose, onStarted
                   style={fieldFootprint} options={numbers} />
               </div>
             )}
-            {numbers.length === 0 && <div style={{ fontSize: 11, color: 'var(--color-danger)', marginBottom: 14 }}>{t('conversations.numbersEmpty')}</div>}
+            {numbers.length === 0 && <ConfigNotice text={t('conversations.numbersEmpty')} t={t} style={{ marginBottom: 14 }} />}
 
             {/* CONV-START-AGENT-1: optional — pins who answers inbound replies on this
                 thread. Never required: a plain start with no agent stays fully supported. */}
@@ -181,7 +201,7 @@ export default function StartConversationModal({ candidateId, onClose, onStarted
         <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8 }}>
           <button onClick={onClose} style={{ height: 34, padding: '0 16px', fontSize: 13, border: '1px solid var(--border)', borderRadius: 8, background: 'var(--surface)', cursor: 'pointer', color: 'var(--text)' }}>{t('common:cancel')}</button>
           <button onClick={submit} disabled={!canSend}
-            style={{ height: 34, padding: '0 16px', fontSize: 13, fontWeight: 500, border: 'none', borderRadius: 8, background: 'var(--color-primary)', color: '#fff', cursor: canSend ? 'pointer' : 'default', opacity: canSend ? 1 : 0.4 }}>
+            style={{ height: 34, padding: '0 16px', fontSize: 13, fontWeight: 500, border: 'none', borderRadius: 8, background: 'var(--color-primary)', color: 'var(--color-on-accent)', cursor: canSend ? 'pointer' : 'default', opacity: canSend ? 1 : 0.4 }}>
             {sending ? t('common:saving') : t('conversations.start')}
           </button>
         </div>

@@ -5,12 +5,27 @@
  * otherwise. Shares the SAME useMatchContract data/save pair OverviewTab
  * already holds — no second GET.
  *
- * OFFERED-IFF-READ (ticket MATCH-TEXT-FIELD-1): the `match_text` column does
- * NOT exist on the backend yet, so this block renders ONLY when the fetched
- * match payload actually carried the `match_text` key (present, even if
- * null) — an absent key renders nothing. A PATCH the server silently drops
- * would be a fake affordance (§3); staying hidden until the key shows up in
- * the GET response is what keeps the save path honest.
+ * OFFERED-IFF-READ (ticket MATCH-TEXT-FIELD-1): this block renders ONLY when
+ * the fetched match payload actually carried the `match_text` key (present,
+ * even if null) — an absent key renders nothing. A PATCH the server silently
+ * drops would be a fake affordance (§3). Measured live 09-08: the column now
+ * EXISTS — GET /matches/{id} returns `match_text` and PATCH /matches/{id}
+ * persists it — so the gate passes today and the guard stays only as the
+ * safety net for a backend that lacks the column.
+ *
+ * REMARKS-INTO-NOTES-1 (Danny 09-08): this is now the match's ONE free-text
+ * field. The old second field, Opmerkingen (`remarks`), is retired — its
+ * content belongs in Notes (author/date/type/channel + timeline); see
+ * MatchRemarksBlock's header.
+ *
+ * KOIOS-ASSIST-TEXTFIELDS (Danny 08-08): the dictation mic + Koios assist now
+ * come from the SHARED RichTextAssistBar inside RichTextEditor's own toolbar —
+ * the same two icons every description field in the app carries. The
+ * match-only MatchAssistSection/useMatchTextAssist/matchAssistApi trio this
+ * block used to mount was a copy of that pattern and is gone (§11: the shared
+ * helper landed WITH adoption). Its 'Genereren' mode went with it: POST
+ * /ai/koios/generate answers 403 for every entity today (measured live
+ * 2026-08-08), so shipping that button would be a dead affordance (§3).
  */
 import { useState, useEffect } from 'react'
 import type { ComponentType } from 'react'
@@ -71,7 +86,7 @@ export default function MatchTextBlock({ value, present, loading, save }: Props)
         {editing ? (
           <div style={{ display: 'flex', gap: 4 }}>
             <button onClick={saveEdit} title={t('common:save')} aria-label={t('common:save')}
-              style={{ ...iconBtn, background: 'var(--color-primary)', color: '#fff', border: 'none' }}>
+              style={{ ...iconBtn, background: 'var(--color-primary)', color: 'var(--color-on-accent)', border: 'none' }}>
               <Save size={13} />
             </button>
             <button onClick={cancelEdit} title={t('common:cancel')} aria-label={t('common:cancel')}

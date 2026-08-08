@@ -96,8 +96,11 @@ function BoardColumnView({ column, items, onDragStart, onDrop, onDragOver, onSel
 
 /**
  * TasksBoard — kanban view, one column per task STATUS (the lookup, never hardcoded).
- * Presentational: the page owns the data and the status mutation (onMove). Mirrors
- * ApplicationsBoard.
+ * Presentational: the page owns the data and the LOCAL status mutation (onMove).
+ * Mirrors ApplicationsBoard. `onMove` both re-groups locally and persists: the
+ * page's chain (useTaskDrawerActions.handleUpdate) resolves the status slug to
+ * the real `status_id` the server validates, so this board needs no write path
+ * of its own (it briefly had one while that chain was silently no-op'ing).
  */
 export default function TasksBoard({ rows, columns, onMove, onSelect, selectedId }: {
   rows: Task[]; columns: BoardColumn[]; onMove: (id: Id, statusKey: string | number) => void; onSelect: (t: Task) => void; selectedId?: Id | null
@@ -112,7 +115,16 @@ export default function TasksBoard({ rows, columns, onMove, onSelect, selectedId
   const handleDragOver = (e: DragEvent<HTMLDivElement>) => { e.preventDefault(); e.dataTransfer.dropEffect = 'move' }
   const handleDrop = (e: DragEvent<HTMLDivElement>, statusKey: string | number) => {
     e.preventDefault()
-    if (dragId.current != null) { onMove(dragId.current, statusKey); dragId.current = null }
+    if (dragId.current != null) {
+      // BOARD-MOVE-1 (superseded 08-08): this used to fire a SECOND, separately
+      // keyed PATCH because the page's own onMove chain sent the slug key the
+      // server silently dropped. That chain now resolves the real status_id
+      // (useTaskDrawerActions.handleUpdate), so onMove both re-groups locally
+      // AND persists — a parallel write here would just be a duplicate request
+      // racing itself.
+      onMove(dragId.current, statusKey)
+      dragId.current = null
+    }
   }
 
   return (

@@ -49,6 +49,11 @@ export function mapTask(t: ApiTask = {}): Task {
       name: assigneeName, initials: initialsOf(assigneeName),
       color: assignee?.avatar_color ?? null,
     } : null,
+    // TASK-LOCATION-READ-1: branch (vestiging), null = none set. Mirrors the
+    // assignee shape above (id + a display object) for the same reason — the
+    // drawer picker reads `location`, the PATCH body key stays `locationId`.
+    locationId: t.location?.id ?? null,
+    location: t.location ? { id: t.location.id ?? '', name: t.location.name ?? '' } : null,
     owner: { name: owner.name ?? t.owner_name ?? '' },
     due: t.due_date ?? t.due_at ?? '',
     // TASK-DUE-TIME-1: optional "HH:mm"; '' means the task has no time-of-day set.

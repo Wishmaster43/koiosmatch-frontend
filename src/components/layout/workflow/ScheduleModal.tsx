@@ -115,7 +115,7 @@ export function ScheduleModal({ trigger, scheduleConfig, onSave, onClose }: {
             style={{
               padding: '7px 16px', borderRadius: 8, fontSize: 13, border: 'none', fontWeight: 600,
               background: form.canSave ? 'var(--color-primary)' : 'var(--border)',
-              color: form.canSave ? 'white' : 'var(--text-muted)',
+              color: form.canSave ? 'var(--color-on-accent)' : 'var(--text-muted)',
               cursor: form.canSave ? 'pointer' : 'not-allowed',
             }}>{t('scheduleModal.save')}</button>
         </div>

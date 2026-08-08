@@ -16,8 +16,8 @@ import { buildDiffCells } from './auditDiffCells'
 function SortIcon({ col, sortCol, sortDir }) {
   if (sortCol !== col) return <ChevronDn size={10} style={{ opacity: 0.25, marginLeft: 3 }} />
   return sortDir === 'asc'
-    ? <ChevronUp  size={10} style={{ color: 'var(--color-primary)', marginLeft: 3 }} />
-    : <ChevronDn  size={10} style={{ color: 'var(--color-primary)', marginLeft: 3 }} />
+    ? <ChevronUp  size={10} style={{ color: 'var(--color-primary-text)', marginLeft: 3 }} />
+    : <ChevronDn  size={10} style={{ color: 'var(--color-primary-text)', marginLeft: 3 }} />
 }
 
 // Props: the page of rows to render, the active sort, and the two callbacks the

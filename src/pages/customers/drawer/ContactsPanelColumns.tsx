@@ -156,7 +156,7 @@ export function useContactsPanelColumns({ scope, scopeId, locationScope, locatio
         // moves when someone else is promoted.
         if (isHere) return (
           <span title={isPrimaryLabel} role="img" aria-label={isPrimaryLabel}
-            style={{ display: 'inline-flex', color: 'var(--color-primary)' }}>
+            style={{ display: 'inline-flex', color: 'var(--color-primary-text)' }}>
             <Star size={13} fill="currentColor" />
           </span>
         )

@@ -6,7 +6,7 @@ import { BrainCircuit } from 'lucide-react'
  * table's AI markers) so the identity stays consistent.
  *
  * tone: 'soft'  = tinted background + primary glyph (calm, for content blocks);
- *       'solid' = primary background + white glyph (for accent buttons).
+ *       'solid' = primary background + on-accent glyph (for accent buttons).
  */
 interface KoiosAiMarkProps {
   size?: number
@@ -21,7 +21,9 @@ export default function KoiosAiMark({ size = 26, tone = 'soft', title = 'Koios A
       style={{ width: size, height: size, borderRadius: Math.round(size * 0.28), flexShrink: 0,
         display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
         background: solid ? 'var(--color-primary)' : 'var(--color-primary-bg)',
-        color: solid ? '#fff' : 'var(--color-primary)' }}>
+        // The glyph sits ON the accent fill in 'solid' tone — use the tenant's
+        // computed on-accent contrast token, not a hardcoded white (2026-08-08).
+        color: solid ? 'var(--color-on-accent)' : 'var(--color-primary)' }}>
       <BrainCircuit size={Math.round(size * 0.56)} />
     </span>
   )

@@ -32,11 +32,20 @@
  * assist section (`notes/NoteAssistSection.tsx`). This file keeps owning WHICH
  * note is being composed (`adding`/`editingIdx`) and the save/delete wiring —
  * everything about HOW the composer looks/behaves lives in `notes/`.
+ *
+ * NOTE-FILTERS-1 / NOTES-DOC-FILTER-MENU-1 (Danny 08-08): the type + contact-
+ * channel filters next to the search box moved BEHIND the shared
+ * `DrawerFilterMenu` ("toolbar leest te druk" — two inline dropdowns read as
+ * clutter next to search + add). The toolbar is back to search + add + one
+ * compact Filter button; the dropdowns themselves are unchanged (still the house
+ * searchable SelectMenu), only where they live changed.
  */
 import { useState } from 'react'
 import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import DrawerAddButton from '@/components/drawer/DrawerAddButton'
+import DrawerFilterMenu from '@/components/drawer/DrawerFilterMenu'
+import type { DrawerFilterConfig } from '@/components/drawer/DrawerFilterMenu'
 import { Edit2, History, Search, Trash2 } from 'lucide-react'
 import Avatar from '@/components/ui/Avatar'
 import SafeHtml from '@/components/ui/SafeHtml'
@@ -173,6 +182,11 @@ export default function NotesTab({
   const [editingIdx, setEditingIdx] = useState<number | null>(null)   // null = new; index = editing
   // Notes search (Danny 03-08) — client-side over the already-loaded `notes` prop.
   const [search, setSearch] = useState('')
+  // NOTE-FILTERS-1 (Danny 08-08): filter by note TYPE and CONTACT CHANNEL next to
+  // the search box — both through the house searchable dropdown. Lives in the
+  // SHARED tab, so every entity's notes get it at once ('' = all).
+  const [typeFilter, setTypeFilter] = useState('')
+  const [channelFilter, setChannelFilter] = useState('')
   const { formatDate, formatDateTime } = useDateFormat()
   // Rights model (RECHTEN-DETAIL-1): current user id + the UI-gate permission check
   // (never security — the BE re-checks). Null-safe: a host with no AuthProvider in
@@ -225,9 +239,32 @@ export default function NotesTab({
   const visibleNotes = notes
     .map((n, i) => ({ n, i }))
     .filter(({ n }) => !q || stripHtml(String(n.text ?? n.body ?? '')).toLowerCase().includes(q) || String(noteAuthor(n)).toLowerCase().includes(q))
+    .filter(({ n }) => !typeFilter || String(n.type ?? '') === typeFilter)
+    .filter(({ n }) => !channelFilter || String(n.channel ?? '') === channelFilter)
   // System notes (backend-written status/phase changes) render as a calm event row —
   // no avatar, no edit pencil, just the "Statuswissel" chip + who/when (N-1-FE).
   const isSystemNote = (n: NoteItem) => Boolean(n.is_system) || SYSTEM_NOTE_TYPES.has(String(n.type ?? ''))
+
+  // NOTE-FILTERS-1 (Danny 08-08): type + contact-channel rows for the shared
+  // DrawerFilterMenu — each only exists once the host actually offers that
+  // vocabulary, so an entity without channels never gets a dead filter row.
+  // Field labels reuse the SAME `labels.type`/`labels.channel` the composer
+  // already shows above its own type/channel pickers — one label, two places.
+  const filterRows: DrawerFilterConfig[] = []
+  if ((chipTypes ?? noteTypes).length > 0) {
+    filterRows.push({
+      type: 'single', key: 'type', label: labels.type, value: typeFilter, onChange: setTypeFilter,
+      allLabel: t('notes.allTypes', { defaultValue: 'Alle types' }),
+      options: (chipTypes ?? noteTypes).map(nt => ({ value: String(nt.value), label: String(nt.label ?? nt.value) })),
+    })
+  }
+  if (channels.length > 0) {
+    filterRows.push({
+      type: 'single', key: 'channel', label: labels.channel, value: channelFilter, onChange: setChannelFilter,
+      allLabel: t('notes.allChannels', { defaultValue: 'Alle kanalen' }),
+      options: channels.map(ch => ({ value: String(ch.value), label: String(ch.label ?? ch.value) })),
+    })
+  }
 
   // Close the popup — NoteComposer owns its own field state, so this is just "not
   // composing anything" again (mirrors the previous reset(), minus the field resets).
@@ -292,6 +329,14 @@ export default function NotesTab({
               aria-label={labels.searchPlaceholder}
               style={{ border: 'none', outline: 'none', fontSize: 12, color: 'var(--text)', background: 'none', flex: 1, minWidth: 0 }} />
           </div>
+          {/* NOTES-DOC-FILTER-MENU-1 (Danny 08-08): type + channel now live BEHIND
+              this one compact Filter button instead of two inline dropdowns — the
+              dropdowns themselves are unchanged (still the house searchable
+              SelectMenu), only where they live changed. Self-hides when the host
+              offers neither vocabulary (DrawerFilterMenu renders null on empty). */}
+          <DrawerFilterMenu filters={filterRows}
+            label={t('filters.button', { defaultValue: 'Filter' })}
+            title={t('filters.title')} clearAllLabel={t('filters.clearAll')} />
           {/* Shared reference-style add button (Danny 20-07: notitie-knop had geen
               achtergrondkleur) — one look on every entity's notes tab. Short text
               (DRAWER-ADD-SHORT-1, Danny 05-08): this always renders inside a

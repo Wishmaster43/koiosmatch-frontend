@@ -63,7 +63,7 @@ export default function KoiosAdviceBlock({ namespace, insights, onRefresh }: Koi
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
         <KoiosAiMark size={16} title={t('common:aiGeneratedHint', { defaultValue: 'Door Koios AI gegenereerd — controleer voor gebruik.' })} />
         <span style={{ fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em', color: 'var(--text-muted)', flex: 1 }}>{t('ai.title')}</span>
-        <span style={{ fontSize: 10, padding: '2px 7px', borderRadius: 99, background: 'var(--color-primary-bg)', color: 'var(--color-primary)', fontWeight: 600 }}>{t('ai.beta')}</span>
+        <span style={{ fontSize: 10, padding: '2px 7px', borderRadius: 99, background: 'var(--color-primary-bg)', color: 'var(--color-primary-text)', fontWeight: 600 }}>{t('ai.beta')}</span>
         <button onClick={handleRefresh}
           title={t('ai.refresh')} aria-label={t('ai.refresh')} disabled={loading}
           style={{ background: 'none', border: 'none', cursor: loading ? 'default' : 'pointer', color: 'var(--text-muted)', padding: 3, display: 'flex', opacity: loading ? 0.4 : 1, borderRadius: 5 }}>

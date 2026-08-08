@@ -88,7 +88,7 @@ export default function ImportResultPanel({ result, showAllRows, onToggleShowAll
         </span>
         {rows.length > attentionRows.length && (
           <button type="button" onClick={onToggleShowAll}
-            style={{ fontSize: 12, color: 'var(--color-primary)', background: 'none', border: 'none', cursor: 'pointer', padding: 0, flexShrink: 0 }}>
+            style={{ fontSize: 12, color: 'var(--color-primary-text)', background: 'none', border: 'none', cursor: 'pointer', padding: 0, flexShrink: 0 }}>
             {showAllRows ? t('import.rows.showAttentionOnly') : t('import.rows.showAll', { count: rows.length })}
           </button>
         )}

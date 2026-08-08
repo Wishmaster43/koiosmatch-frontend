@@ -16,7 +16,7 @@ interface AdviceMeta { icon: LucideIcon; color: string }
 //   default --text-muted (also the fallback for the free-text 'task' action —
 //   applications' raw AI-suggested text has no dedicated meta, see koiosColumn rollout)
 export const ADVICE_META: Record<string, AdviceMeta> = {
-  add_to_pool: { icon: Target,       color: 'var(--color-primary)' },
+  add_to_pool: { icon: Target,       color: 'var(--color-primary-text)' },
   contact:     { icon: Phone,        color: 'var(--color-warning)' },
   plan_intake: { icon: CalendarPlus, color: 'var(--color-map)' },
   // Customers + opportunities: a stalled relationship needs a scheduled follow-up.

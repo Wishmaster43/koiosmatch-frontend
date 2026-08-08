@@ -8,6 +8,7 @@ import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { MessageCircle, RefreshCw, Search } from 'lucide-react'
 import api, { unwrap } from '@/lib/api'
+import { useAuth } from '@/context/AuthContext'
 import { BTN_H } from '@/config/buttonMetrics'
 
 // Phone-number quality ratings → colour. Label = t('whatsapp.quality<KEY>').
@@ -43,7 +44,17 @@ export default function WhatsAppSettings() {
   const [loading,    setLoading]    = useState(true)
   const [noConn,     setNoConn]     = useState(false)
   const [search,     setSearch]     = useState('')
-  const [syncing,    setSyncing]    = useState(null) // 'numbers' | 'templates'
+  const [syncing,    setSyncing]    = useState(null) // 'status' | 'numbers' | 'templates'
+  // PROVISION-GATE-1 (08-08, updated same day): these three actions were briefly
+  // super-admin-only server-side, so the buttons were gated on that. Danny then
+  // chose SELF-SERVICE, and the backend moved them onto
+  // `module:whatsapp` + `permission:whatsapp.manage` (central.php:159, seeded on
+  // tenant_admin) — so a bureau admin manages its own WABA. The UI gate now
+  // mirrors that exact permission; hasPermission already lets super admins
+  // through, so nothing is lost for them. Hidden (not disabled) for anyone
+  // without the right — §3: never a button the server will 403.
+  const { hasPermission } = useAuth()
+  const canProvision = hasPermission?.('whatsapp.manage') === true
   const [syncMsg,    setSyncMsg]    = useState(null)
   const [tab,        setTab]        = useState('connection') // sub-tab: connection | numbers | templates
 
@@ -75,6 +86,22 @@ export default function WhatsAppSettings() {
       await loadDetail(connId)
       setSyncMsg({ ok: true, text: t('whatsapp.numbersSynced') })
     } catch { setSyncMsg({ ok: false, text: t('whatsapp.syncFailed') }) }
+    setSyncing(null)
+  }
+
+  // CONN-CHECK-1 (Danny live 08-08: "Verbinding toont alleen Inactief, geen
+  // actieknop"): POST /whatsapp/{id}/check-status verifies the stored token
+  // against Meta and flips the connection active — it existed server-side with
+  // no button anywhere, so an inactive tenant had no way forward from this
+  // screen. Same handler shape as the two syncs, so all three report through
+  // the one syncMsg banner.
+  const checkStatus = async () => {
+    setSyncing('status'); setSyncMsg(null)
+    try {
+      await api.post(`/whatsapp/${connId}/check-status`)
+      await loadDetail(connId)
+      setSyncMsg({ ok: true, text: t('whatsapp.statusChecked') })
+    } catch { setSyncMsg({ ok: false, text: t('whatsapp.statusCheckFailed') }) }
     setSyncing(null)
   }
 
@@ -180,6 +207,18 @@ export default function WhatsAppSettings() {
                   {t('whatsapp.checked')} {new Date(connection.last_checked_at).toLocaleDateString()}
                 </div>
               )}
+              {/* CONN-CHECK-1: the one action this card was missing — re-verify the
+                  token against Meta (and thereby activate an inactive connection).
+                  Same button footprint as the two sync buttons on the other tabs. */}
+              {connId && canProvision && (
+                <button onClick={checkStatus} disabled={syncing === 'status'}
+                  style={{ display: 'flex', alignItems: 'center', gap: 6, height: BTN_H, padding: '0 12px', flexShrink: 0,
+                           fontSize: 12, fontWeight: 500, borderRadius: 8, cursor: 'pointer',
+                           border: '1px solid var(--border)', background: 'var(--surface)', color: 'var(--text)' }}>
+                  <RefreshCw size={11} style={{ animation: syncing === 'status' ? 'spin 1s linear infinite' : 'none' }} />
+                  {t('whatsapp.checkStatus')}
+                </button>
+              )}
             </div>
         ) : (
           <div style={{ padding: '16px 18px', background: 'var(--hover-bg)', border: '1px solid var(--border)',
@@ -194,7 +233,7 @@ export default function WhatsAppSettings() {
       {tab === 'numbers' && (
       <div>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', marginBottom: 12 }}>
-          {connId && (
+          {connId && canProvision && (
             // BTN_H (§4/§9): one explicit height for every text/action button, everywhere.
             <button onClick={syncNumbers} disabled={syncing === 'numbers'}
               style={{ display: 'flex', alignItems: 'center', gap: 6, height: BTN_H, padding: '0 12px',

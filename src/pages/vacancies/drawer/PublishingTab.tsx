@@ -5,7 +5,7 @@ import SelectMenuJs from '@/components/ui/SelectMenu'
 import SubTabBar from '@/components/drawer/SubTabBar'
 import { sectionTitle } from '@/components/ui/SectionCard'
 import { useVacancyLookups } from '@/context/VacancyLookupsContext'
-import { useAllSettings, getJsonSetting } from '@/lib/settings/useAllSettings'
+import { useAllSettings, getJsonSetting, getBoolSetting } from '@/lib/settings/useAllSettings'
 import { VACANCY_APP_DEFAULTS_KEY, FALLBACK_APP_SETTINGS } from '../data/applicationSettingsDefaults'
 import type { VacancyDetail } from '@/types/vacancy'
 import type { Id } from '@/types/common'
@@ -36,6 +36,15 @@ const APP_FIELDS = ['cv', 'cover_letter', 'photo', 'remarks', 'interview_consent
  * defaults come from the tenant lookups (never hardcoded). Split into two
  * sub-tabs (Instellingen / Vacaturesites) via the shared SubTabBar (V15),
  * mirroring DetailsTab's sub-tab convention — no behaviour change, render only.
+ *
+ * CAREER-SITE-ACTIVE: the 'career' channel toggle is a REAL control — its saved
+ * state (via onUpdate → `channels` → PATCH `published_channels`) is what the
+ * backend's PublicVacancyQuery/ChannelGate reads to decide whether this vacancy
+ * is eligible on the public career site (and, by extension, the Indeed/Werkzoeken
+ * feeds and the sitemap, which share the same eligibility query). The tenant's
+ * own `career_site_active` setting is a second, independent gate on top of every
+ * channel toggle — read here so the panel never claims something is live that the
+ * tenant hasn't switched on yet.
  */
 export default function PublishingTab({ vacancy: v, onUpdate }: { vacancy: VacancyDetail; onUpdate?: (id: Id | undefined, patch: Record<string, unknown>) => void }) {
   const { t } = useTranslation('vacancies')
@@ -43,6 +52,13 @@ export default function PublishingTab({ vacancy: v, onUpdate }: { vacancy: Vacan
   // Tenant default application settings — a new/empty vacancy inherits these.
   const allSettings = useAllSettings()
   const tenantDefaults = getJsonSetting<Record<string, unknown>>(allSettings, VACANCY_APP_DEFAULTS_KEY, FALLBACK_APP_SETTINGS)
+  // CAREER-SITE-ACTIVE (backend EnsureCareerSiteActive middleware): the ONE tenant
+  // switch (Settings → Career site) that gates the ENTIRE public surface these
+  // toggles feed into — the career site itself, applying, the sitemap, and the
+  // Indeed/Werkzoeken feeds all sit behind it (routes/api/career.php). Reading it
+  // here lets the panel tell the truth about whether a toggle is live right now
+  // or merely queued for when the tenant switches the site on.
+  const careerSiteActive = getBoolSetting(allSettings, 'career_site_active', false)
 
   // Merge the configured channels with this vacancy's published state. A channel
   // the tenant deactivated in Settings (CHANNEL-FLAGS-1, round-4 audit finding #3)
@@ -118,27 +134,36 @@ export default function PublishingTab({ vacancy: v, onUpdate }: { vacancy: Vacan
         <div style={{ marginTop: 12 }}>
           {/* Job boards — canon (05-08): the shared sectionTitle. */}
           <div style={{ ...sectionTitle, marginBottom: 8 }}>{t('publishing.channels')}</div>
-          {/* Honest state (Danny 13/7): the toggles record WHAT will be published; the
-              public career site + channel feeds (CAREER-1/PUBLISH-1) are not live yet,
-              so never claim "Gepubliceerd" as if something is already out there. */}
-          <div style={{ fontSize: 11.5, color: 'var(--text-muted)', border: '1px solid var(--border)',
-            borderRadius: 8, padding: '8px 10px', marginBottom: 10, background: 'var(--bg)' }}>
-            {t('publishing.notLiveYet')}
+          {/* Honest state (CAREER-SITE-ACTIVE): the tenant-wide switch actually gates
+              the public surface (career site + apply + sitemap + Indeed/Werkzoeken
+              feeds), so the banner reports the REAL current state instead of a
+              permanent "under construction" claim once that backend went live. */}
+          <div style={{ fontSize: 11.5, color: careerSiteActive ? 'var(--color-success)' : 'var(--color-warning)',
+            border: `1px solid color-mix(in srgb, ${careerSiteActive ? 'var(--color-success)' : 'var(--color-warning)'} 35%, transparent)`,
+            borderRadius: 8, padding: '8px 10px', marginBottom: 10,
+            background: `color-mix(in srgb, ${careerSiteActive ? 'var(--color-success)' : 'var(--color-warning)'} 8%, transparent)` }}>
+            {careerSiteActive ? t('publishing.siteLive') : t('publishing.siteOffline')}
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 20 }}>
-            {channels.map(c => (
-              <div key={c.value} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12,
-                padding: '8px 10px', border: '1px solid var(--border)', borderRadius: 8, background: 'var(--surface)' }}>
-                {/* Canon (05-08): 12px, matching the identical APP_FIELDS row above. */}
-                <span style={{ fontSize: 12, color: 'var(--text)' }}>{c.label}</span>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                  <span style={{ fontSize: 11, color: c.published ? 'var(--color-success)' : 'var(--text-muted)' }}>
-                    {c.published ? t('publishing.queuedOn') : t('publishing.notPublished')}
-                  </span>
-                  <Toggle on={c.published} onChange={next => toggleChannel(c.value, next)} label={c.label} />
+            {channels.map(c => {
+              // Real per-row state: only actually live once BOTH this channel's own
+              // toggle AND the tenant's site-wide switch are on — otherwise it is
+              // saved but queued until the tenant flips the site on.
+              const live = c.published && careerSiteActive
+              const statusLabel = !c.published ? t('publishing.notPublished') : live ? t('publishing.publishedOn') : t('publishing.queuedOn')
+              const statusColor = !c.published ? 'var(--text-muted)' : live ? 'var(--color-success)' : 'var(--color-warning)'
+              return (
+                <div key={c.value} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12,
+                  padding: '8px 10px', border: '1px solid var(--border)', borderRadius: 8, background: 'var(--surface)' }}>
+                  {/* Canon (05-08): 12px, matching the identical APP_FIELDS row above. */}
+                  <span style={{ fontSize: 12, color: 'var(--text)' }}>{c.label}</span>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <span style={{ fontSize: 11, color: statusColor }}>{statusLabel}</span>
+                    <Toggle on={c.published} onChange={next => toggleChannel(c.value, next)} label={c.label} />
+                  </div>
                 </div>
-              </div>
-            ))}
+              )
+            })}
           </div>
         </div>
       )}

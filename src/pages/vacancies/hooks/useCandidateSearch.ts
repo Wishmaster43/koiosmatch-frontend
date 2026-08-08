@@ -125,12 +125,14 @@ export function useCandidateSearch(vacancy: VacancyDetail) {
   // Fetch on any param change; abortable so a fast filter edit never lets a
   // superseded response overwrite the latest one (§9 alive-guard).
   useEffect(() => {
-    if (noLocation) { setRows([]); setLoading(false); setError(false); return }
     const ctrl = new AbortController()
     setLoading(true); setError(false)
     api.get(`/vacancies/${vacancy.id}/candidate-matches`, {
       params: {
-        radius: radiusKm,
+        // GEO-DEGRADE-1: a radius needs an origin — without the vacancy's own geocode
+        // the server still scores and ranks (measured: 37 rows, distance null), so
+        // only the radius is dropped instead of killing the whole tab.
+        ...(noLocation ? {} : { radius: radiusKm }),
         ...(statusSel.length && { status: statusSel }),
         ...(functions.length && { function_title: functions }),
         ...(contractForms.length && { contract_form: contractForms }),

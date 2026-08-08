@@ -53,16 +53,16 @@ export default function PreviewEditStep({
     <div>
       <div style={{ marginBottom: 16 }}>
         <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--text)' }}>
-          {t('import.wizard.preview.title', { defaultValue: 'Check your data' })}
+          {t('import.wizard.preview.title')}
         </div>
         <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>
-          {t('import.wizard.preview.subtitle', { defaultValue: 'This is exactly what will be sent. Click a cell to change it, then run the preview again.' })}
+          {t('import.wizard.preview.subtitle')}
         </div>
       </div>
 
       {editableRows.length === 0 ? (
         <p style={{ fontSize: 13, color: 'var(--text-muted)' }}>
-          {t('import.wizard.preview.noRows', { defaultValue: 'No rows to preview — check your file.' })}
+          {t('import.wizard.preview.noRows')}
         </p>
       ) : (
         <div style={{ border: '1px solid var(--border)', borderRadius: 8, overflow: 'auto', maxHeight: 320 }}>
@@ -108,7 +108,7 @@ export default function PreviewEditStep({
       <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginTop: 16 }}>
         <button type="button" onClick={onValidate} disabled={validating || editableRows.length === 0}
           style={{ display: 'flex', alignItems: 'center', gap: 6, height: 34, padding: '0 16px', fontSize: 13,
-                   fontWeight: 500, border: 'none', borderRadius: 8, background: 'var(--color-primary)', color: 'white',
+                   fontWeight: 500, border: 'none', borderRadius: 8, background: 'var(--color-primary)', color: 'var(--color-on-accent)',
                    cursor: validating || editableRows.length === 0 ? 'not-allowed' : 'pointer',
                    opacity: editableRows.length === 0 ? 0.5 : 1 }}>
           {validating && <Loader2 size={14} className="animate-spin" aria-hidden="true" />}
@@ -116,7 +116,7 @@ export default function PreviewEditStep({
         </button>
         {dirty && (
           <span style={{ fontSize: 12, color: 'var(--text-muted)', fontStyle: 'italic' }}>
-            {t('import.wizard.preview.validateHint', { ns: 'settings', defaultValue: 'Run the preview to see what would happen, then confirm.' })}
+            {t('import.wizard.preview.validateHint', { ns: 'settings' })}
           </span>
         )}
       </div>

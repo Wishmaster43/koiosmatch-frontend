@@ -25,7 +25,7 @@ export default function DetailsGeneralTab({ vacancy: v, general, candidateTypes,
   const { t } = useTranslation('vacancies')
   const { editing, setEditing, form, setF, save, cancel, types, toggleType,
     clientId, handleClientChange, customerOptions, cascade, locationPicker, departmentPicker, contactPicker } = general
-  const { select, twoDates } = makeFieldHelpers(form, setF, t)
+  const { creatable, twoDates } = makeFieldHelpers(form, setF, t)
 
   return card(t('details.groups.general'), <>
     {/* V13: Contractvorm — multi-value soft chips in read mode, toggle buttons in edit mode. */}
@@ -84,7 +84,10 @@ export default function DetailsGeneralTab({ vacancy: v, general, candidateTypes,
     {row(t('details.contactPerson'),
       cascade.contactName ? <EntityLink page="customers" id={v.clientId}>{cascade.contactName}</EntityLink> : dash,
       contactPicker, editing)}
-    {row(t('details.function'), v.category || dash, select('category', fnOptions), editing)}
-    {row(t('details.preferredIndustry'), v.industry || dash, select('industry', industries.map(i => ({ value: i, label: i }))), editing)}
+    {/* G35: function/industry now use the SAME searchable CreatableSelect as
+        AddVacancyModal's GeneralCard (was a native <select> here, a different
+        control for the same lookup data). */}
+    {row(t('details.function'), v.category || dash, creatable('category', fnOptions), editing)}
+    {row(t('details.preferredIndustry'), v.industry || dash, creatable('industry', industries), editing)}
   </>, controls(t, editing, save, cancel, () => setEditing(true)))
 }

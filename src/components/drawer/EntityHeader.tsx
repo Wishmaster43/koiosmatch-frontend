@@ -59,6 +59,9 @@ function PhotoAvatar({ avatar, onChange, labels }: { avatar: AvatarConfig; onCha
       <button onClick={() => setMenuOpen(o => !o)}
         style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, display: 'block', position: 'relative', borderRadius: '50%' }}>
         <Avatar initials={avatar.initials} size={44} photo={avatar.photo} color={avatar.color} soft={avatar.soft} />
+        {/* Fixed dark photo scrim (not a themed token on purpose — it darkens the avatar
+            PHOTO, not an app surface, so it must stay the same in light and dark mode);
+            white on a 35%-black scrim clears contrast in both themes. */}
         <div style={{ position: 'absolute', inset: 0, borderRadius: '50%', background: 'rgba(0,0,0,0.35)',
           display: 'flex', alignItems: 'center', justifyContent: 'center', opacity: 0, transition: 'opacity 0.15s' }}
           onMouseEnter={e => (e.currentTarget.style.opacity = '1')}
@@ -69,7 +72,9 @@ function PhotoAvatar({ avatar, onChange, labels }: { avatar: AvatarConfig; onCha
       <input ref={fileRef} type="file" accept="image/*" aria-label={labels?.upload ?? 'Upload'} style={{ display: 'none' }}
         onChange={e => { const f = e.target.files?.[0]; if (f) { pickFile(f); setMenuOpen(false) } }} />
       {menuOpen && (
-        <div style={{ position: 'absolute', top: '110%', left: 0, zIndex: 200, background: 'white',
+        // Themed surface, not a raw 'white' — this menu floats over the app in both
+        // light and dark mode, and a hardcoded white background broke dark mode.
+        <div style={{ position: 'absolute', top: '110%', left: 0, zIndex: 200, background: 'var(--surface)',
           border: '1px solid var(--border)', borderRadius: 8, boxShadow: '0 4px 16px rgba(0,0,0,0.12)', overflow: 'hidden', minWidth: 140 }}>
           <button onClick={() => { fileRef.current?.click(); setMenuOpen(false) }}
             style={{ display: 'block', width: '100%', padding: '9px 14px', fontSize: 12, textAlign: 'left', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text)' }}
@@ -183,7 +188,10 @@ export default function EntityHeader({
         <button onClick={onToggleExpand} aria-label={expanded ? t('collapse') : t('expand')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: 4, display: 'flex' }}>
           {expanded ? <Minimize2 size={14} /> : <Maximize2 size={14} />}
         </button>
-        <button onClick={onClose} aria-label={t('close')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: 4, display: 'flex' }}>
+        {/* SWEEP-ESC: `data-drawer-close` is the hook the shared EntityDrawer shell uses
+            to close on Escape — it finds and clicks THIS exact button, so every entity
+            drawer inherits Escape-to-close from one place with zero caller changes. */}
+        <button onClick={onClose} aria-label={t('close')} data-drawer-close style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: 4, display: 'flex' }}>
           <X size={15} />
         </button>
       </div>

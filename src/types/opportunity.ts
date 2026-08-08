@@ -12,6 +12,9 @@ export interface Opportunity {
   // next to the title (OpportunityResource::reference_number).
   referenceNumber?: string
   title: string
+  // OPP-DESCRIPTION-1: free-text deal description (nullable HTML, drawer "Kanstekst" +
+  // the +Kans rich-text card) — always a string here (mapOpportunity coalesces null).
+  description: string
   initials: string
   client: string
   clientId: Id | null
@@ -53,6 +56,12 @@ export interface Opportunity {
   departmentId: Id | null
   contact: string
   contactId: Id | null
+  // K2: the TENANT's own branch (Vestiging) handling this deal — read from the
+  // API's `location`/`location_id` (C-41, mirrors Match.branch_id). Distinct
+  // from `location`/`locationId` above, which is the CUSTOMER's own site
+  // (`customer_location`/`customer_location_id`, OPP-LOC-1) — see mapOpportunity.
+  branch: string
+  branchId: Id | null
   // C-41 free-form tags — OpportunityResource always returns an array (never null).
   tags: string[]
   // Tenant custom-field values (§3B "Eigen velden" — the drawer's gated Extra tab).
@@ -69,6 +78,8 @@ export interface ApiOpportunity {
   client_name?: string
   title?: string
   name?: string
+  // OPP-DESCRIPTION-1: nullable rich-text HTML (OpportunityResource, after `title`).
+  description?: string | null
   stage?: { value?: string | number; label?: string; color?: string } | string
   stage_value?: string | number
   stage_label?: string

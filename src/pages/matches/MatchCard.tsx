@@ -154,7 +154,7 @@ export default function MatchCard({
       {id != null && (
         <a href={buildEntityDeepLink('matches', id)} target="_blank" rel="noopener noreferrer" onClick={onBeforeOpen}
           title={t('matchesView.openMatch')} aria-label={t('matchesView.openMatch')}
-          style={{ display: 'flex', color: 'var(--color-primary)', padding: 2 }}>
+          style={{ display: 'flex', color: 'var(--color-primary-text)', padding: 2 }}>
           <ExternalLink size={12} />
         </a>
       )}
@@ -166,7 +166,7 @@ export default function MatchCard({
         </button>
       )}
       {helloflexGuid ? (
-        <span title={t('matchesView.backofficeLinked')} style={{ display: 'flex', color: 'var(--color-primary)' }}><Link2 size={13} /></span>
+        <span title={t('matchesView.backofficeLinked')} style={{ display: 'flex', color: 'var(--color-primary-text)' }}><Link2 size={13} /></span>
       ) : null}
       {(showHelloflex || showShiftmanager) && (
         <BackofficeCouplingIndicator helloflexLink={helloflexLink} shiftmanagerLink={shiftmanagerLink}

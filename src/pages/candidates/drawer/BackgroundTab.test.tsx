@@ -93,7 +93,7 @@ describe('BackgroundTab · references verify wiring (KAND-REFERENTIES-1)', () =>
     vi.mocked(api.post).mockResolvedValue({ id: 'r1', verified_at: '2026-08-01T10:00:00Z', verified_by: 'u1' })
     const c = {
       ...candidate(),
-      references: [{ id: 'r1', name: 'Jan Jansen', relation: 'Manager', employer: 'Zorggroep X' }],
+      references: [{ id: 'r1', first_name: 'Jan', last_name: 'Jansen', relation: { id: 'rel-1', label: 'Manager' }, employer: 'Zorggroep X' }],
     } as unknown as Candidate
     render(<BackgroundTab c={c} />)
     await user.click(screen.getByRole('tab', { name: 'Referenties' }))
@@ -115,7 +115,8 @@ describe('BackgroundTab · references verify wiring (KAND-REFERENTIES-1)', () =>
     render(<BackgroundTab c={c} />)
     await user.click(screen.getByRole('tab', { name: 'Referenties' }))
     await user.click(screen.getByRole('button', { name: 'Toevoegen' }))
-    await user.type(screen.getByPlaceholderText('Naam'), 'Piet Pietersen')
+    await user.type(screen.getByPlaceholderText('Voornaam'), 'Piet')
+    await user.type(screen.getByPlaceholderText('Achternaam'), 'Pietersen')
     fireEvent.click(screen.getByTitle('Opslaan'))
     // The optimistic row (negative temp id) renders with no verify action at all.
     expect(screen.getByText('Piet Pietersen')).toBeInTheDocument()
@@ -232,10 +233,13 @@ describe('BackgroundTab · DOC-ENTRY-LINK-1 document_id round-trips through the 
     render(<BackgroundTab c={c} />)
     await user.click(screen.getByRole('tab', { name: 'Opleiding' }))
     await user.click(screen.getByTitle('Bewerken'))
-    // The document_id select is the ONLY combobox in the education edit form.
-    await user.selectOptions(screen.getAllByRole('combobox').find(el => el.querySelector('option[value="doc2"]'))!, 'doc2')
+    // ALWAYS-SEARCHABLE-1 (Danny 08-08): the document_id picker is the house
+    // CreatableSelect — open it by its currently-picked value ("oud.pdf"); level_id
+    // (KAND-NIVEAU-1) is the OTHER combobox in this form and stays untouched here.
+    await user.click(screen.getByRole('button', { name: 'oud.pdf' }))
+    await user.click(await screen.findByRole('button', { name: 'nieuw.pdf' }))
     await user.click(screen.getByTitle('Opslaan'))
-    expect(api.patch).toHaveBeenCalledWith('/candidates/1/educations/e1', expect.objectContaining({ document_id: 'doc2' }))
+    expect(api.patch).toHaveBeenCalledWith('/candidates/1/educations/e1', expect.objectContaining({ document_id: 'doc2' }), { quietStatuses: [422] })
   })
 
   it('certification: relinking PATCHes the certification route with the new document_id', async () => {
@@ -248,12 +252,13 @@ describe('BackgroundTab · DOC-ENTRY-LINK-1 document_id round-trips through the 
     render(<BackgroundTab c={c} />)
     await user.click(screen.getByRole('tab', { name: 'Certificeringen' }))
     await user.click(screen.getByTitle('Bewerken'))
-    await user.selectOptions(screen.getAllByRole('combobox').find(el => el.querySelector('option[value="doc2"]'))!, 'doc2')
+    await user.click(screen.getByRole('button', { name: 'oud.pdf' }))
+    await user.click(await screen.findByRole('button', { name: 'nieuw.pdf' }))
     await user.click(screen.getByTitle('Opslaan'))
-    expect(api.patch).toHaveBeenCalledWith('/candidates/1/certifications/c1', expect.objectContaining({ document_id: 'doc2' }))
+    expect(api.patch).toHaveBeenCalledWith('/candidates/1/certifications/c1', expect.objectContaining({ document_id: 'doc2' }), { quietStatuses: [422] })
   })
 
-  it('unlinking (picking the empty option) PATCHes document_id: null, never an empty string', async () => {
+  it('unlinking (via the picker\'s own clear affordance) PATCHes document_id: null, never an empty string', async () => {
     const user = userEvent.setup()
     const c = {
       ...candidate(),
@@ -263,8 +268,134 @@ describe('BackgroundTab · DOC-ENTRY-LINK-1 document_id round-trips through the 
     render(<BackgroundTab c={c} />)
     await user.click(screen.getByRole('tab', { name: 'Opleiding' }))
     await user.click(screen.getByTitle('Bewerken'))
-    await user.selectOptions(screen.getAllByRole('combobox').find(el => el.querySelector('option[value="doc1"]'))!, '')
+    // ALWAYS-SEARCHABLE-1: unset via CreatableSelect's own `clearable` X — the
+    // house replacement for the old native select's blank "unset" option.
+    await user.click(screen.getByTitle('Wissen'))
     await user.click(screen.getByTitle('Opslaan'))
-    expect(api.patch).toHaveBeenCalledWith('/candidates/1/educations/e1', expect.objectContaining({ document_id: null }))
+    expect(api.patch).toHaveBeenCalledWith('/candidates/1/educations/e1', expect.objectContaining({ document_id: null }), { quietStatuses: [422] })
+  })
+})
+
+/**
+ * DOC-1-EIGENAAR-1 (Danny 08-08 punt 6). MEASURED live 08-08: PATCHing an entry with a
+ * `document_id` that already hangs elsewhere answers 422 "Dit document is al aan een
+ * ander onderdeel gekoppeld." — so a claimed document must not be offered at all. The
+ * row's OWN document stays in the list, otherwise the current pick becomes invisible.
+ * Asserted through the REAL edit form of all four claimable sections (§13).
+ */
+describe('BackgroundTab · DOC-1-EIGENAAR-1 the picker only offers still-free documents', () => {
+  // vrij.pdf is unclaimed; bezet.pdf already hangs on ANOTHER entry (reverse FK), and
+  // eigen.pdf is the one the row under test holds itself.
+  const documents = [
+    { id: 'doc-free', name: 'vrij.pdf' },
+    { id: 'doc-taken', name: 'bezet.pdf', certification_id: 'other-cert' },
+    { id: 'doc-own', name: 'eigen.pdf' },
+  ]
+
+  const openEditor = async (tab: string, c: Candidate) => {
+    const user = userEvent.setup()
+    render(<BackgroundTab c={c} />)
+    await user.click(screen.getByRole('tab', { name: tab }))
+    await user.click(screen.getByTitle('Bewerken'))
+    // The document picker's trigger shows the row's current pick ("eigen.pdf").
+    await user.click(screen.getByRole('button', { name: 'eigen.pdf' }))
+    return user
+  }
+
+  it('education: hides a document another entry already claims, keeps the free one and its own', async () => {
+    await openEditor('Opleiding', {
+      ...candidate(),
+      educations: [{ id: 'e1', title: 'Verpleegkunde', document_id: 'doc-own' }],
+      documents,
+    } as unknown as Candidate)
+    expect(screen.queryByRole('button', { name: 'bezet.pdf' })).toBeNull()
+    expect(screen.getByRole('button', { name: 'vrij.pdf' })).toBeInTheDocument()
+  })
+
+  it('certification: same rule', async () => {
+    await openEditor('Certificeringen', {
+      ...candidate(),
+      certifications: [{ id: 'c1', name: 'VCA Basis', document_id: 'doc-own' }],
+      documents,
+    } as unknown as Candidate)
+    expect(screen.queryByRole('button', { name: 'bezet.pdf' })).toBeNull()
+    expect(screen.getByRole('button', { name: 'vrij.pdf' })).toBeInTheDocument()
+  })
+
+  it('skill: same rule (and the picker is fed at all — documents used to never reach it)', async () => {
+    await openEditor('Vaardigheden', {
+      ...candidate(),
+      skills: [{ id: 's1', name: 'BHV', level: '', document_id: 'doc-own' }],
+      documents,
+    } as unknown as Candidate)
+    expect(screen.queryByRole('button', { name: 'bezet.pdf' })).toBeNull()
+    expect(screen.getByRole('button', { name: 'vrij.pdf' })).toBeInTheDocument()
+  })
+
+  it('reference: same rule', async () => {
+    await openEditor('Referenties', {
+      ...candidate(),
+      references: [{ id: 'r1', first_name: 'Jan', last_name: 'de Vries', document_id: 'doc-own' }],
+      documents,
+    } as unknown as Candidate)
+    expect(screen.queryByRole('button', { name: 'bezet.pdf' })).toBeNull()
+    expect(screen.getByRole('button', { name: 'vrij.pdf' })).toBeInTheDocument()
+  })
+
+  it('hides a document a SIBLING row in the same section claimed, per row', async () => {
+    const user = userEvent.setup()
+    render(<BackgroundTab c={{
+      ...candidate(),
+      certifications: [
+        { id: 'c1', name: 'VCA Basis', document_id: 'doc-own' },
+        { id: 'c2', name: 'BIG', document_id: 'doc-free' },
+      ],
+      documents,
+    } as unknown as Candidate} />)
+    await user.click(screen.getByRole('tab', { name: 'Certificeringen' }))
+    // Edit the FIRST row: vrij.pdf is taken by its sibling, so it must not be offered.
+    await user.click(screen.getAllByTitle('Bewerken')[0])
+    await user.click(screen.getByRole('button', { name: 'eigen.pdf' }))
+    expect(screen.queryByRole('button', { name: 'vrij.pdf' })).toBeNull()
+  })
+
+  it('drops the picker entirely when the candidate has no documents (no empty dropdown)', async () => {
+    const user = userEvent.setup()
+    render(<BackgroundTab c={{
+      ...candidate(),
+      certifications: [{ id: 'c1', name: 'VCA Basis' }],
+      documents: [],
+    } as unknown as Candidate} />)
+    await user.click(screen.getByRole('tab', { name: 'Certificeringen' }))
+    await user.click(screen.getByTitle('Bewerken'))
+    expect(screen.queryByPlaceholderText('Gekoppeld document')).toBeNull()
+  })
+})
+
+/**
+ * DOC-1-EIGENAAR-1 punt 5 (het vangnet): even with a correct picker the 422 can still
+ * happen (a second tab, a stale list). The recruiter must then read the SERVER's own
+ * reason, never a generic "actie mislukt" — and api.ts's dev diagnostic toast is
+ * silenced for 422 so it cannot bury it (quietStatuses, asserted above).
+ */
+describe('BackgroundTab · a 422 surfaces the server’s readable reason', () => {
+  it('shows the backend guard’s message instead of the generic fallback', async () => {
+    const user = userEvent.setup()
+    vi.mocked(api.patch).mockReset()
+    vi.mocked(api.patch).mockRejectedValue({
+      response: { status: 422, data: { message: 'Dit document is al aan een ander onderdeel gekoppeld.', errors: { document_id: ['Dit document is al aan een ander onderdeel gekoppeld.'] } } },
+    })
+    vi.mocked(notifyError).mockClear()
+    render(<BackgroundTab c={{
+      ...candidate(),
+      certifications: [{ id: 'c1', name: 'VCA Basis' }],
+      documents: [{ id: 'doc-free', name: 'vrij.pdf' }],
+    } as unknown as Candidate} />)
+    await user.click(screen.getByRole('tab', { name: 'Certificeringen' }))
+    await user.click(screen.getByTitle('Bewerken'))
+    await user.click(screen.getByRole('button', { name: 'Gekoppeld document' }))
+    await user.click(await screen.findByRole('button', { name: 'vrij.pdf' }))
+    await user.click(screen.getByTitle('Opslaan'))
+    await waitFor(() => expect(notifyError).toHaveBeenCalledWith('Dit document is al aan een ander onderdeel gekoppeld.'))
   })
 })

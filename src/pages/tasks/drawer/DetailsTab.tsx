@@ -2,14 +2,18 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Edit2, Save, X } from 'lucide-react'
 import { Field, SelectField, DateField, TextField } from '@/components/forms/fields'
+import CreatableSelect from '@/components/ui/CreatableSelect'
 import Avatar from '@/components/ui/Avatar'
 import SoftChip from '@/components/ui/SoftChip'
 import RichTextEditor from '@/components/ui/RichTextEditor'
 import SafeHtml from '@/components/ui/SafeHtml'
 import { sectionTitle } from '@/components/ui/SectionCard'
+import KoiosAdviceBlock from '@/components/ai/KoiosAdviceBlock'
+import { buildTaskAdviceInsights } from './taskAiInsights'
 import { useTaskLookups } from '@/context/TaskLookupsContext'
 import type { TaskLookupItem } from '@/context/TaskLookupsContext'
 import { useUsers } from '@/lib/queries'
+import { useLocations } from '@/lib/useLocations'
 import { useDateFormat } from '@/lib/datetime'
 import { initialsOf } from '@/lib/initials'
 import { isTaskOverdue, dueDateTime } from '../data/mapTask'
@@ -41,7 +45,7 @@ function EditControls({ onSave, onCancel, saveLabel, cancelLabel }: { onSave: ()
   return (
     <div style={{ display: 'flex', gap: 4 }}>
       <button onClick={onSave} title={saveLabel} aria-label={saveLabel}
-        style={{ ...iconBtnBase, background: 'var(--color-primary)', color: '#fff', border: 'none' }}><Save size={13} /></button>
+        style={{ ...iconBtnBase, background: 'var(--color-primary)', color: 'var(--color-on-accent)', border: 'none' }}><Save size={13} /></button>
       <button onClick={onCancel} title={cancelLabel} aria-label={cancelLabel}
         style={{ ...iconBtnBase, background: 'var(--bg)', color: 'var(--text-muted)', border: '1px solid var(--border)' }}><X size={13} /></button>
     </div>
@@ -63,6 +67,9 @@ export default function DetailsTab({ task, onUpdate }: { task: TaskDetail; onUpd
   const { formatDate, formatDateTime } = useDateFormat()
   const { statuses, types, priorities } = useTaskLookups()
   const { data: users = [] } = useUsers() as { data?: UserLike[] }
+  // TASK-LOCATION-READ-1: the tenant's own establishments, same hook every other
+  // entity's branch picker uses (candidates/customers/opportunities/vacancies).
+  const locations = useLocations()
 
   const [editing, setEditing] = useState(false)
   const [draft, setDraft] = useState<Record<string, unknown>>({})
@@ -100,6 +107,15 @@ export default function DetailsTab({ task, onUpdate }: { task: TaskDetail; onUpd
   // Label only — `icon` holds a lucide NAME, never prefix it as text (2026-07-08).
   const opts = (list: TaskLookupItem[]) => list.map(i => ({ value: i.value, label: i.label }))
   const assigneeOpts = [{ value: '', label: t('bureau') }, ...users.map(u => ({ value: String(u.id), label: userName(u) }))]
+  // TASK-LOCATION-READ-1: branch options for the standalone picker below. A direct
+  // meta-style field (no separate pencil, mirrors the header's status/priority/
+  // assignee pickers) — it rebuilds the display object alongside the id so the
+  // optimistic UI shows the branch name immediately, same as the assignee handler.
+  const locationOpts = locations.map(l => ({ value: String(l.value), label: l.label }))
+  const onLocationChange = (v: string) => {
+    const sel = locations.find(l => String(l.value) === v)
+    onUpdate({ locationId: v || null, location: sel ? { id: sel.value, name: sel.label } : null })
+  }
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
@@ -130,7 +146,13 @@ export default function DetailsTab({ task, onUpdate }: { task: TaskDetail; onUpd
               <Field label={t('details.due')}><DateField value={draft.due as string} onChange={v => setD('due', v)} /></Field>
               <Field label={t('details.dueTime')}><TextField type="time" value={draft.dueTime as string} onChange={v => setD('dueTime', v)} /></Field>
             </div>
-            <Field label={t('details.assignee')}><SelectField value={String(draft.assigneeId)} onChange={v => setD('assigneeId', v)} options={assigneeOpts} /></Field>
+            {/* T2: the house SEARCHABLE picker (allowCreate=false — assignee is a closed
+                tenant-user list, never a free-typed value), mirroring the drawer combobox
+                footprint elsewhere (S24c). "Bureau" (unassigned) is a real, pickable option
+                — value '' — same as before. */}
+            <Field label={t('details.assignee')}>
+              <CreatableSelect value={String(draft.assigneeId)} onChange={v => setD('assigneeId', v)} options={assigneeOpts} allowCreate={false} />
+            </Field>
           </div>
         ) : (
           <div style={{ borderRadius: 10, overflow: 'hidden', border: '1px solid var(--border)', background: 'var(--surface)', padding: '6px 12px', display: 'flex', flexDirection: 'column', gap: 2 }}>
@@ -171,6 +193,10 @@ export default function DetailsTab({ task, onUpdate }: { task: TaskDetail; onUpd
           )}
         </div>
         {descEditing ? (
+          // PUNT 16 (spraak-icoon op taak-acties): the mic rides the SHARED
+          // RichTextAssistBar that RichTextEditor mounts on every editor — the same
+          // KoiosVoiceButton the note composer uses. Never pass a second local mic
+          // here (that renders two identical buttons, §11).
           <RichTextEditor value={descDraft} onChange={setDescDraft}
             expanded={descExpanded} onToggleExpand={() => setDescExpanded(e => !e)} />
         ) : (
@@ -179,6 +205,40 @@ export default function DetailsTab({ task, onUpdate }: { task: TaskDetail; onUpd
               ? <SafeHtml html={task.description} style={{ fontSize: 12, color: 'var(--text)', lineHeight: 1.5 }} />
               : <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>—</span>}
           </div>
+        )}
+      </div>
+
+      {/* T4: Koios advice block, bottom of Details (mirrors the vacancy drawer's own
+          bottom placement) — pure FE heuristics from data already on the record
+          (deadline health, assignment, links), no AI/API call. */}
+      <KoiosAdviceBlock namespace="tasks" insights={buildTaskAdviceInsights(task, t)} />
+
+      {/* T3 / TASK-LOCATION-READ-1: the Vestiging (branch) picker, below the advice
+          block per Danny's layout. Previously blocked (write-only field — the
+          resource never serialised it, so a picker could set it but never confirm
+          the saved value, a fake affordance §3) — now unblocked: TaskListResource/
+          TaskDetailResource emit `location {id,name}|null` and index()/show() eager-
+          load the relation (BE golf 2a/2b, 2026-08-08). No edit affordance on an
+          ARCHIVED task (same gating as every other field above). */}
+      <div>
+        {task.archived ? (
+          <Row label={t('details.location')}>
+            <span style={{ fontSize: 12, color: task.location?.name ? 'var(--text)' : 'var(--text-muted)' }}>
+              {task.location?.name || '—'}
+            </span>
+          </Row>
+        ) : (
+          <Field label={t('details.location')}>
+            <CreatableSelect
+              value={task.location?.id != null ? String(task.location.id) : ''}
+              onChange={onLocationChange}
+              options={locationOpts}
+              allowCreate={false}
+              clearable
+              clearLabel={t('details.location')}
+              placeholder={t('details.locationPlaceholder')}
+            />
+          </Field>
         )}
       </div>
     </div>

@@ -16,7 +16,10 @@ const LocationsMapView = lazy(() => import('./LocationsMapView'))
 // composed consistently. Falls back to a legacy `address`/`full_address` string.
 const EMPTY_FORM = {
   name: '', street: '', house_number: '', house_number_suffix: '',
-  postal_code: '', city: '', country: '',
+  // `province` rides along with the rest of the address (the backend's
+  // Store/UpdateLocationRequest validate it) — added 08-08 with the searchable
+  // country/province pickers in the form.
+  postal_code: '', city: '', province: '', country: '',
   // Business identifiers + contact details, so a location is a full entity.
   coc_number: '', vat_number: '', contact_name: '', phone: '', email: '',
   // VESTIGING-ICOON-1: branding — rides along in the same create/update payload.

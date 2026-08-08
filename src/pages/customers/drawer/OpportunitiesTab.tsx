@@ -119,7 +119,7 @@ export default function OpportunitiesTab({ customerId, customerName }: { custome
 
   const columns: Column<Opportunity>[] = [
     { key: 'title', header: t('opportunities.col.title'), sortable: true, sortValue: o => o.title,
-      render: o => <button onClick={() => openEntity('opportunities', o.id)} style={{ padding: 0, background: 'none', border: 'none', font: 'inherit', color: 'var(--color-primary)', cursor: 'pointer', textAlign: 'left' }}>{o.title}</button> },
+      render: o => <button onClick={() => openEntity('opportunities', o.id)} style={{ padding: 0, background: 'none', border: 'none', font: 'inherit', color: 'var(--color-primary-text)', cursor: 'pointer', textAlign: 'left' }}>{o.title}</button> },
     { key: 'stage', header: t('opportunities.col.stage'), sortable: true, sortValue: o => o.stage,
       render: o => !o.stage ? '—' : colorStage
         ? <SoftChip label={o.stage} color={o.stageColor} />

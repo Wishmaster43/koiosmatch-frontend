@@ -77,7 +77,8 @@
     "toggle": "Filters tonen/verbergen",
     "title": "Filters",
     "branch": "Vestiging",
-    "branchExcludesUnassigned": "Een vestigingsfilter verbergt records zonder gekoppelde vestiging."
+    "branchExcludesUnassigned": "Een vestigingsfilter verbergt records zonder gekoppelde vestiging.",
+    "button": "Filter"
   },
   "nav": {
     "dashboard": "Dashboard",
@@ -358,6 +359,22 @@
     "unknownEntity": "Dit pop-outvenster kon niet worden herkend."
   },
   "notes": {
-    "editedBy": "bewerkt door {{name}}"
+    "editedBy": "bewerkt door {{name}}",
+    "allTypes": "Alle types",
+    "allChannels": "Alle kanalen"
+  },
+  "errors": {
+    "koiosCreditExhausted": "Het Koios-tegoed van deze organisatie is op of nog niet geactiveerd. Vul het tegoed aan of neem contact op met de beheerder.",
+    "koiosUnavailable": "Koios is op dit moment niet beschikbaar. Probeer het zo opnieuw."
+  },
+  "timeline": {
+    "today": "Vandaag",
+    "yesterday": "Gisteren"
+  },
+  "identifierCheck": {
+    "cocInvalid": "Dit lijkt geen geldig KvK-/handelsregisternummer voor {{country}} (verwacht bijv. {{example}}).",
+    "vatInvalid": "Dit lijkt geen geldig btw-nummer voor {{country}} (verwacht bijv. {{example}}).",
+    "cocUnverifiable": "Zonder land kan het KvK-/handelsregisternummer niet op formaat gecontroleerd worden.",
+    "vatUnverifiable": "Zonder land kan het btw-nummer niet op formaat gecontroleerd worden."
   }
 }

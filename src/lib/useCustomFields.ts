@@ -35,6 +35,12 @@ export interface CustomFieldDef {
   type: CustomFieldType
   options?: string[]
   required_for?: string[]
+  /** Globally required, in EVERY phase — the second half of the backend's requirement
+   *  test (`$field->required || in_array($phase, $field->required_phases)`). Exposed so
+   *  a required-fields editor can show the phase toggles honestly instead of rendering
+   *  them all off while the field is in fact always required. Optional on the type
+   *  (the hook always sets it) so callers building a fixture stay valid without it. */
+  required_always?: boolean
   sort_order: number
   active: boolean
   has_data: boolean
@@ -47,7 +53,7 @@ export interface CustomFieldDef {
 interface RawDef {
   id?: string | number; key?: string; label_i18n?: Record<string, string>
   type?: CustomFieldType; options?: unknown
-  required_phases?: string[]; sort_order?: number; active?: boolean; in_use?: boolean
+  required?: boolean; required_phases?: string[]; sort_order?: number; active?: boolean; in_use?: boolean
   visible_in_ui?: boolean
 }
 
@@ -94,6 +100,7 @@ export function useCustomFields(entityType: CustomFieldEntityType) {
       label_i18n: d.label_i18n, type: d.type ?? 'text',
       options: Array.isArray(d.options) ? (d.options as string[]) : undefined,
       required_for: d.required_phases ?? [],
+      required_always: d.required === true,
       sort_order: d.sort_order ?? 0,
       active: d.active !== false, has_data: !!d.in_use,
       visible_in_ui: d.visible_in_ui !== false,

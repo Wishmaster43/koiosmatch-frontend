@@ -6,6 +6,7 @@ import { sectionBlock, sectionTitle, softPill } from './constants'
 import { useFunctions } from '@/lib/useFunctions'
 import { usePools } from '@/lib/usePools'
 import { useDriverLicenses } from '@/lib/useDriverLicenses'
+import { fieldInputStyle } from '@/components/forms/fieldMetrics'
 import type { Candidate } from '@/types/candidate'
 
 // AXIS-MATRIX-2 audit R1 (CMFE 2026-07-17): this tab's fields never had a save
@@ -65,7 +66,8 @@ export default function PlanningTab({ c }: { c: Candidate }) {
 
   const { t } = useTranslation('candidates')
 
-  const inputStyle: CSSProperties = { width: '100%', padding: '7px 10px', fontSize: 12, borderRadius: 7, border: '1px solid var(--border)', background: 'var(--bg)', color: 'var(--text)', outline: 'none', boxSizing: 'border-box' }
+  // Canon field style (G33/fieldMetrics) — was its own padding-7/font-12/radius-7 copy.
+  const inputStyle: CSSProperties = fieldInputStyle
   const shiftTypeOpts: [string, string][] = [['Avonddienst', 'eveningShift'], ['Dagdienst', 'dayShift'], ['Nachtdienst', 'nightShift']]
   return (
     <div style={sectionBlock}>
@@ -88,7 +90,7 @@ export default function PlanningTab({ c }: { c: Candidate }) {
       <div style={{ marginBottom: 16 }}>
         <SecLabel action={
           <button disabled
-            style={{ fontSize: 11, color: 'var(--color-primary)', background: 'none', border: 'none', padding: 0, ...disabledStyle }}>
+            style={{ fontSize: 11, color: 'var(--color-primary-text)', background: 'none', border: 'none', padding: 0, ...disabledStyle }}>
             {roles.length === ALL_FUNCTIONS.length ? t('common:none') : t('common:all')}
           </button>
         }>{t('planning.globalFunction')}</SecLabel>
@@ -101,7 +103,7 @@ export default function PlanningTab({ c }: { c: Candidate }) {
       <div style={{ marginBottom: 16 }}>
         <SecLabel action={
           <button disabled
-            style={{ fontSize: 11, color: 'var(--color-primary)', background: 'none', border: 'none', padding: 0, ...disabledStyle }}>
+            style={{ fontSize: 11, color: 'var(--color-primary-text)', background: 'none', border: 'none', padding: 0, ...disabledStyle }}>
             {pools.length === ALL_POOLS.length ? t('common:none') : t('common:all')}
           </button>
         }>{t('planning.pools')}</SecLabel>
@@ -130,7 +132,7 @@ export default function PlanningTab({ c }: { c: Candidate }) {
                 borderRadius: 99, ...softPill(true), opacity: 0.7 }}>
                 {r}
                 <button disabled aria-label={t('common:close')}
-                  style={{ background: 'none', border: 'none', color: 'var(--color-primary)', padding: 0, lineHeight: 1, fontSize: 14, ...disabledStyle, opacity: 0.7 }}>×</button>
+                  style={{ background: 'none', border: 'none', color: 'var(--color-primary-text)', padding: 0, lineHeight: 1, fontSize: 14, ...disabledStyle, opacity: 0.7 }}>×</button>
               </span>
             ))}
           </div>

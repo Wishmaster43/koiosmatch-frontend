@@ -1,13 +1,16 @@
 /**
- * TaskCard — the "Taak" card of AddTaskModal: what the task IS (type/title/
- * description). Pure presentational: form values in, `set()`/`errors` callbacks
- * out (Danny 27-07 popup redesign: split out of AddTaskModal.tsx to keep the
- * container under the file-size cap).
+ * TaskCard — the "Taak" card of AddTaskModal: what the task IS (type + title).
+ * Pure presentational: form values in, `set()`/`errors` callbacks out (Danny
+ * 27-07 popup redesign: split out of AddTaskModal.tsx to keep the container
+ * under the file-size cap).
+ *
+ * PUNT 14 (Danny 08-08): the free-text description moved OUT of this card into
+ * its own `DescriptionCard`, rendered last — it used to sit here, above every
+ * short field. Order change only; the field itself is unchanged.
  */
 import type { TFunction } from 'i18next'
 import { Field, TextField } from '@/components/forms/fields'
 import CreatableSelect from '@/components/ui/CreatableSelect'
-import RichTextEditor from '@/components/ui/RichTextEditor'
 import { cardHead, cardBox, row2, pickerStyle, PICKER_MENU_W } from './fields'
 import type { TaskForm } from '../AddTaskModal'
 import type { TaskLookupItem } from '@/context/TaskLookupsContext'
@@ -36,10 +39,6 @@ export default function TaskCard({ t, form, errors, set, types }: {
             <TextField value={form.title} onChange={v => set('title', v)} placeholder={t('modal.titlePlaceholder')} error={errors.title} />
           </Field>
         </div>
-        {/* Description = note body — same rich editor as the drawer + candidate profile text. */}
-        <Field label={t('modal.description')}>
-          <RichTextEditor value={form.description} onChange={v => set('description', v)} />
-        </Field>
       </div>
     </div>
   )

@@ -93,7 +93,8 @@
       "ccCust": "Centre de coûts client",
       "candidates": "Candidats",
       "notes": "Notes"
-    }
+    },
+    "filterMonth": "Mois"
   },
   "shiftsDrawer": {
     "count": "{{count}} missions",

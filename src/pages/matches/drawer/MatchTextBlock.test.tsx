@@ -2,7 +2,10 @@
  * MatchTextBlock (M17/optie A) — pencil → save/✕ over its own `save` prop (the
  * SAME useMatchContract instance OverviewTab holds), asserting the actual
  * PATCH-shaped call (§13: never only that a callback fired), plus the
- * OFFERED-IFF-READ gate (hidden when `present` is false) and XSS-safety.
+ * OFFERED-IFF-READ gate (hidden when `present` is false) and XSS-safety. Also
+ * covers KOIOS-ASSIST-TEXTFIELDS: the shared RichTextAssistBar rides the
+ * editor's own toolbar while editing (its request/apply/discard behaviour is
+ * covered in RichTextAssistBar.test.tsx — this file only proves it is THERE).
  */
 import { describe, it, expect, vi } from 'vitest'
 import { render, screen } from '@testing-library/react'
@@ -63,6 +66,21 @@ describe('MatchTextBlock', () => {
 
     expect(save).not.toHaveBeenCalled()
     expect(screen.getByText('Oud')).toBeInTheDocument()
+  })
+
+  it('mounts the shared Koios assist toolbar on the editor while editing', async () => {
+    const user = userEvent.setup()
+    render(<MatchTextBlock value="<p>Oud</p>" present loading={false} save={vi.fn()} />)
+
+    // Not shown outside edit mode.
+    expect(screen.queryByTestId('rte-assist-improve')).toBeNull()
+
+    await user.click(screen.getByTitle('common:edit'))
+    // CMFE-KOIOS-CONSISTENCY-1 (Danny 09-08): the mode buttons are directly
+    // visible on the editor toolbar now, no click-to-expand step.
+    expect(screen.getByTestId('rte-assist-improve')).toBeEnabled()
+    expect(screen.getByTestId('rte-assist-summarize')).toBeEnabled()
+    expect(screen.getByTestId('rte-assist-actions')).toBeEnabled()
   })
 
   it('sends null (not an empty string) when the match text is cleared out', async () => {

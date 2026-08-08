@@ -332,7 +332,7 @@ export default function StatusListEditor({ title, subtitle, endpoint, addLabel, 
                 : <span style={{ fontSize: 13, color: 'var(--text)' }}>{labelOf(item)}</span>}
               {/* One badge per active flag (flagFields) — independent booleans, no singleton rule. */}
               {flagList.map(f => item[f.key] && (
-                <span key={f.key} style={{ fontSize: 10, fontWeight: 600, color: 'var(--color-primary)',
+                <span key={f.key} style={{ fontSize: 10, fontWeight: 600, color: 'var(--color-primary-text)',
                                background: 'var(--color-primary-bg)', padding: '2px 7px', borderRadius: 999, whiteSpace: 'nowrap' }}>
                   {f.label}
                 </span>
@@ -357,7 +357,7 @@ export default function StatusListEditor({ title, subtitle, endpoint, addLabel, 
                   <DefaultToggle key={key} active={active} busy={busyDefaultKey === `${key}:${item.id}`}
                     onClick={() => setDefault(field, item)}
                     activeLabel={label ?? t('common.default')} inactiveLabel={label ?? t('common.setDefault')}
-                    title={active ? t('statusList.clearDefault', { defaultValue: 'Click to clear default' }) : undefined} />
+                    title={active ? t('statusList.clearDefault') : undefined} />
                 )
               })}
               <div style={{ flex: 1 }} />
@@ -444,7 +444,7 @@ export default function StatusListEditor({ title, subtitle, endpoint, addLabel, 
             <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, marginTop: 20 }}>
               <button onClick={() => setShowModal(false)} style={{ height: 34, padding: '0 16px', fontSize: 13, border: '1px solid var(--border)', borderRadius: 8, background: 'var(--surface)', cursor: 'pointer' }}>{t('common.cancel')}</button>
               <button onClick={submit} disabled={saving || !draft.name.trim()}
-                style={{ height: 34, padding: '0 16px', fontSize: 13, fontWeight: 500, border: 'none', borderRadius: 8, background: 'var(--color-primary)', color: 'white', cursor: 'pointer', opacity: draft.name.trim() ? 1 : 0.4 }}>
+                style={{ height: 34, padding: '0 16px', fontSize: 13, fontWeight: 500, border: 'none', borderRadius: 8, background: 'var(--color-primary)', color: 'var(--color-on-accent)', cursor: 'pointer', opacity: draft.name.trim() ? 1 : 0.4 }}>
                 {saving ? t('common.saving') : (editing ? t('common.save') : t('statusList.addBtn'))}
               </button>
             </div>

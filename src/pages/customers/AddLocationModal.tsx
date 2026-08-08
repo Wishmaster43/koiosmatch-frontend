@@ -38,6 +38,7 @@ import FloatingPanel from '@/components/ui/FloatingPanel'
 import { useProvinces } from '@/hooks/useProvinces'
 import { notifyError } from '@/lib/notify'
 import { useLiveFieldValidation } from '@/hooks/useLiveFieldValidation'
+import { useIdentifierValidation } from '@/hooks/useIdentifierValidation'
 import { isValidEmailFormat } from '@/lib/contactFieldValidation'
 import { useAllSettings, getJsonSetting } from '@/lib/settings/useAllSettings'
 import { BTN_H } from '@/config/buttonMetrics'
@@ -164,6 +165,13 @@ export default function AddLocationModal({
   // ter plaatse" e-mail — own sibling hook, same idiom as AddCandidateModal.
   const { markTouched, fieldMessage, touchInvalidFields, hasFormatError } =
     useLiveFieldValidation(form, t, EMAIL_VALIDATORS, EMAIL_ERROR_KEYS)
+  // KVK/BTW-PER-LAND-1 (Danny 08-08, points 10 + 11): the KvK/BTW format follows the
+  // country picked in THIS form (live — switching country re-checks both), and only a
+  // tenant on 'block' mode is actually stopped from submitting.
+  const identifiers = useIdentifierValidation()
+  const cocNotice = identifiers.notice('coc', form.cocNumber, form.country)
+  const vatNotice = identifiers.notice('vat', form.vatNumber, form.country)
+  const hasIdentifierError = cocNotice?.severity === 'error' || vatNotice?.severity === 'error'
 
   const set = <K extends keyof LocationPayload>(k: K, v: LocationPayload[K]) => {
     setForm(f => ({ ...f, [k]: v }))
@@ -197,6 +205,9 @@ export default function AddLocationModal({
     // untouched-but-malformed field touched so its message renders.
     const invalidKeys = touchInvalidFields()
     if (!form.name.trim() || invalidKeys.length) { setErrors({ name: !form.name.trim() }); return }
+    // KVK/BTW-PER-LAND-1: only a BLOCKING (tenant setting = 'block') identifier
+    // mismatch stops the submit — a warning is shown but never refuses the save.
+    if (hasIdentifierError) return
     const payload = { ...form, name: form.name.trim() }
     // Edit path: update() keeps its existing toast-based error handling — unchanged,
     // closes immediately. The contact picker above only renders on CREATE (see the
@@ -315,6 +326,7 @@ export default function AddLocationModal({
                 cocNumber={form.cocNumber} onCocNumberChange={v => set('cocNumber', v)}
                 vatNumber={form.vatNumber} onVatNumberChange={v => set('vatNumber', v)}
                 costCenter={form.costCenter} onCostCenterChange={v => set('costCenter', v)}
+                cocNotice={cocNotice} vatNotice={vatNotice}
               />
 
               {/* Contact ter plaatse — extracted card (§0.3 split, 2026-08-03): the
@@ -360,7 +372,9 @@ export default function AddLocationModal({
         {/* BTN_H (§4/§9): one explicit height for every text/action button, everywhere. */}
         <div style={{ padding: '12px 22px', borderTop: '1px solid var(--border)', display: 'flex', justifyContent: 'flex-end', gap: 8, flexShrink: 0 }}>
           <button onClick={onClose} style={{ height: BTN_H, padding: '0 16px', fontSize: 13, borderRadius: 8, border: '1px solid var(--border)', background: 'none', color: 'var(--text)', cursor: 'pointer' }}>{t('subModal.cancel')}</button>
-          <button onClick={submit} disabled={!form.name.trim() || hasFormatError} style={{ height: BTN_H, padding: '0 20px', fontSize: 13, fontWeight: 600, borderRadius: 8, border: 'none', background: (form.name.trim() && !hasFormatError) ? 'var(--color-primary)' : 'var(--border)', color: (form.name.trim() && !hasFormatError) ? 'white' : 'var(--text-muted)', cursor: (form.name.trim() && !hasFormatError) ? 'pointer' : 'not-allowed' }}>
+          {/* KVK/BTW-PER-LAND-1: a blocking identifier mismatch gates the button too,
+              so the disabled state and submit() agree on one condition. */}
+          <button onClick={submit} disabled={!form.name.trim() || hasFormatError || hasIdentifierError} style={{ height: BTN_H, padding: '0 20px', fontSize: 13, fontWeight: 600, borderRadius: 8, border: 'none', background: (form.name.trim() && !hasFormatError && !hasIdentifierError) ? 'var(--color-primary)' : 'var(--border)', color: (form.name.trim() && !hasFormatError && !hasIdentifierError) ? 'var(--color-on-accent)' : 'var(--text-muted)', cursor: (form.name.trim() && !hasFormatError && !hasIdentifierError) ? 'pointer' : 'not-allowed' }}>
             {isEdit ? t('subModal.save') : t('subModal.create')}
           </button>
         </div>

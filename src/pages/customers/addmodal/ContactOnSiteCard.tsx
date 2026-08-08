@@ -33,14 +33,10 @@ import { cardHead, cardBox, row2 } from '@/components/ui/modalCards'
 import { contactOptionLabel } from '@/lib/contactLabel'
 import type { Contact } from '@/types/customer'
 import type { Id } from '@/types/common'
+import FieldNotice from '@/components/ui/FieldNotice'
 
-// VALIDATIE-LIVE-1-rest: the live-format message under email — same small
-// local component ContactDetailsCard/ContactCard already use for this exact
-// purpose (no shared component exists for a one-line field error yet).
-function FieldError({ text }: { text?: string }) {
-  if (!text) return null
-  return <div role="alert" style={{ fontSize: 11, color: 'var(--color-danger)', marginTop: 3 }}>{text}</div>
-}
+// VALIDATIE-LIVE-1-rest: the live-format message under email — one shared
+// renderer now (components/ui/FieldNotice), not a fourth local copy.
 
 // FIELD-HEIGHT-1: same literal as the parent modal's own `pickerStyle` (kept
 // local since this is the only file in this folder that needs it) — a picker
@@ -119,7 +115,7 @@ export default function ContactOnSiteCard({
         <div style={row2}>
           <div onBlur={onEmailBlur}>
             <Field label={t('subModal.email')}><TextField type="email" value={email} onChange={onEmailChange} placeholder="naam@klant.nl" error={emailError} /></Field>
-            <FieldError text={emailMessage} />
+            <FieldNotice text={emailMessage} />
           </div>
           <Field label={t('subModal.phone')}><TextField value={phone} onChange={onPhoneChange} /></Field>
         </div>

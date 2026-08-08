@@ -1,21 +1,26 @@
 import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import api, { unwrap } from '@/lib/api'
-import { Field, TextField, DateField } from '@/components/forms/fields'
-import CreatableSelect from '@/components/ui/CreatableSelect'
 import { useAuth } from '@/context/AuthContext'
 import { useOpportunityStages } from '@/lib/useOpportunityStages'
 import { useOpportunityServiceTypes, useOpportunityAgreementTypes } from '@/lib/useOpportunityLookups'
+// K2: the tenant's own establishments (Vestiging) — the same shared lookup
+// MatchModal uses for its own branch picker (mirrors §3A, one hook not a copy).
+import { useLocations } from '@/lib/useLocations'
 import { useCustomerCascade } from './hooks/useCustomerCascade'
 // The shared "Name — Function" contact-option label (§11 — one shared builder,
 // not a per-screen copy); imported straight from the real implementation since
 // the local re-export above only re-exports the hook itself.
 import { contactOptionLabel } from '@/lib/contactLabel'
 import { mapOpportunity } from './data/mapOpportunity'
+import { hasDescriptionText } from './data/descriptionText'
+import OpportunityGeneralCard from './addmodal/OpportunityGeneralCard'
+import OpportunityDealStageCard from './addmodal/OpportunityDealStageCard'
+import OpportunityDescriptionCard from './addmodal/OpportunityDescriptionCard'
 import { BTN_H } from '@/config/buttonMetrics'
 import { WIDE_MODAL } from '@/components/ui/modalMetrics'
 import FloatingPanel from '@/components/ui/FloatingPanel'
-import { cardHead, cardBox, row2, cardPair } from '@/components/ui/modalCards'
+import { cardPair } from '@/components/ui/modalCards'
 import type { ApiOpportunity, Opportunity } from '@/types/opportunity'
 import type { Id } from '@/types/common'
 
@@ -30,6 +35,10 @@ const API_TO_FORM: Record<string, string> = {
   // under that key 422s ("exists:locations,id"). `customer_location_id` (OPP-LOC-1)
   // is the real, validated column for the customer's own location/site.
   customer_location_id: 'locationId', department_id: 'departmentId', contact_id: 'contactId',
+  // K2: `location_id` IS the tenant's own branch (see the note above) — the real
+  // 422 field name maps back to the new `branchId` form field.
+  location_id: 'branchId',
+  description: 'description',
 }
 
 interface OppForm {
@@ -58,6 +67,24 @@ interface ModalCustomer { id: Id; name: string }
  * resolves the picked customer's own locations/contacts, the CreatableSelect
  * options carry the real label for these ids the same way `existing` already
  * resolves an edited Kans's cascade — only the seed VALUE differs.
+ *
+ * Danny's live feedback (screenshot, 08-08), three points:
+ * K1 — the panel width now literally mirrors MatchModal's own FloatingPanel
+ * footprint (`width="94vw"`, same WIDE_MODAL maxWidth) so the two-column layout
+ * breathes exactly like +Match's.
+ * K2 — a Vestiging (branch) picker was added: `location_id` is a real, validated
+ * field on the opportunity (StoreOpportunityRequest: `exists:locations,id`) that
+ * carries the TENANT's own branch handling the deal — distinct from the existing
+ * customer→location cascade above (the customer's own site, `customer_location_id`).
+ * Uses the same shared `useLocations` hook MatchModal's own branch picker uses.
+ * K3 — SUPERSEDED (2026-08-08, OPP-DESCRIPTION-1, CMBE golf 2a/2b): the "kans-tekst"
+ * rich description that was verified absent above now landed on the backend —
+ * `opportunities.description` (nullable HTML, max 20000; `create_opportunities_table`
+ * + `OpportunityRequest::sharedRules` + `OpportunityResource`, all re-verified
+ * against the live code). Built here as its own card (`OpportunityDescriptionCard`,
+ * mirrors +Match's Opmerkingen — the shared collapsed-ghost `CollapsibleRichText`):
+ * an empty/whitespace-only draft is OMITTED from the POST/PATCH body entirely
+ * (never sends `description: ''`), a filled one rides as sanitised HTML.
  */
 export default function AddOpportunityModal({ onClose, onCreated, users = [], customers = [], defaultCustomerId, initialLocationId, initialDepartmentId, initialContactId, existing }: {
   onClose: () => void; onCreated?: (o: Opportunity) => void; users?: ModalUser[]; customers?: ModalCustomer[]
@@ -102,6 +129,10 @@ export default function AddOpportunityModal({ onClose, onCreated, users = [], cu
     ownerId: existing?.ownerId != null ? String(existing.ownerId) : (me?.id != null ? String(me.id) : ''),
   })
 
+  // OPP-DESCRIPTION-1: the "Kanstekst" rich-text draft — kept OUTSIDE `form`
+  // (mirrors MatchModal's `remarks`) since its own card owns expand/edit state.
+  const [description, setDescription] = useState(existing?.description ?? '')
+
   // Resolve the stage id from the existing deal's stable `value` once the REAL
   // tenant stage lookup has loaded. BUG (found via probe, 2026-07-14): the seed
   // fallback (DEFAULT_OPPORTUNITY_STAGES) carries no `id` — an earlier version of
@@ -128,6 +159,13 @@ export default function AddOpportunityModal({ onClose, onCreated, users = [], cu
   const [contactId,    setContactId]    = useState(existing?.contactId != null ? String(existing.contactId) : (initialContactId != null ? String(initialContactId) : ''))
   const { locations, contacts } = useCustomerCascade(form.clientId)
   const departments = locations.find(l => String(l.id) === locationId)?.departments ?? []
+
+  // K2: Vestiging — the TENANT's own branch handling this deal (`location_id`,
+  // mirrors MatchModal's `branchId`/`branch_id`). Independent of the customer
+  // cascade above (customer/location/department/contact) — never reset when the
+  // client changes, exactly like MatchModal's own branch picker.
+  const [branchId, setBranchId] = useState(existing?.branchId != null ? String(existing.branchId) : '')
+  const branchLocations = useLocations()
 
   // OPP-MODAL-PREFILL-2: a department implies its parent location — a department-scoped
   // "+ Kans" arrives with only initialDepartmentId, which would leave the department
@@ -171,6 +209,12 @@ export default function AddOpportunityModal({ onClose, onCreated, users = [], cu
         customer_location_id: locationId || null,
         department_id: departmentId || null,
         contact_id: contactId || null,
+        // K2: location_id — the TENANT's own branch (Vestiging), validated against
+        // `locations` server-side (see the API_TO_FORM note above).
+        location_id: branchId || null,
+        // OPP-DESCRIPTION-1: an empty/whitespace-only draft is OMITTED entirely
+        // (never `description: ''`) — mirrors +Match's own text-block contract.
+        ...(hasDescriptionText(description) ? { description } : {}),
       }
       const r = existing
         ? await api.patch(`/opportunities/${existing.id}`, body)
@@ -212,10 +256,12 @@ export default function AddOpportunityModal({ onClose, onCreated, users = [], cu
 
   return (
     // POPUP-SLEEP-1: migrated onto the shared FloatingPanel shell — draggable header,
-    // SE-resize, remembered position; same WIDE_MODAL footprint as before.
+    // SE-resize, remembered position. K1 (Danny's screenshot 08-08): the width prop
+    // now literally mirrors MatchModal's own footprint (`94vw`, same WIDE_MODAL
+    // maxWidth) instead of a near-equivalent calc() — one frame, one source.
     <FloatingPanel open onClose={onClose} title={title} ariaLabel={title}
       persistKey="add-opportunity" scrollBody={false}
-      width="min(calc(100vw - 48px), 1060px)" maxWidth={`${WIDE_MODAL.maxWidth}px`}>
+      width="94vw" maxWidth={`${WIDE_MODAL.maxWidth}px`}>
 
         {/* Form — two titled cards side by side (house wide-frame idiom, mirrors
             the +Match modal's Relaties/Contract/Financieel cards).
@@ -224,93 +270,41 @@ export default function AddOpportunityModal({ onClose, onCreated, users = [], cu
         <div style={{ flex: 1, overflowY: 'auto', padding: '20px 22px' }}>
           {/* Two titled cards side by side — the shared cardPair grid (§11). */}
           <div style={cardPair}>
-
             {/* Algemeen — title + the customer→location→department→contact
                 relations + owner (mirrors MatchModal's Relaties card). */}
-            <div>
-              <div style={cardHead}>{t('modal.groups.general')}</div>
-              <div style={cardBox}>
-                <Field label={t('modal.fields.title')} required>
-                  <TextField value={form.title} onChange={v => set('title', v)} placeholder={t('modal.titlePlaceholder')} error={errors.title} />
-                  {errors.title && <div style={{ fontSize: 11, color: 'var(--color-danger)', marginTop: 3 }}>{t('modal.required')}</div>}
-                </Field>
-                <div style={row2}>
-                  <Field label={t('modal.fields.client')}>
-                    {/* Searchable, pick-only (allowCreate=false) — a customer is a
-                        real relational id, never a free-text create. */}
-                    <CreatableSelect allowCreate={false} value={form.clientId || null} onChange={handleClientChange}
-                      placeholder={t('common:select')} options={customerOptions} />
-                  </Field>
-                  <Field label={t('modal.fields.contact')}>
-                    {/* Danny 28-07: same-named contacts (one per location/department
-                        coupling) were indistinguishable — the label now carries the
-                        function title, mirroring RelationsSection's contact picker. */}
-                    <CreatableSelect value={contactId || null} onChange={setContactId} allowCreate={false}
-                      placeholder={form.clientId ? t('common:select') : t('pickClientFirst')}
-                      options={contacts.map(c => ({ value: String(c.id), label: contactOptionLabel(c) }))} />
-                  </Field>
-                </div>
-                <div style={row2}>
-                  <Field label={t('modal.fields.location')}>
-                    <CreatableSelect value={locationId || null} onChange={handleLocationChange} allowCreate={false}
-                      placeholder={form.clientId ? t('common:select') : t('pickClientFirst')}
-                      options={locations.map(l => ({ value: String(l.id), label: l.name ?? '—' }))} />
-                  </Field>
-                  <Field label={t('modal.fields.department')}>
-                    <CreatableSelect value={departmentId || null} onChange={setDepartmentId} allowCreate={false}
-                      placeholder={form.clientId ? t('common:select') : t('pickClientFirst')}
-                      options={departments.map(d => ({ value: String(d.id), label: d.name ?? '—' }))} />
-                  </Field>
-                </div>
-                <Field label={t('modal.fields.owner')}>
-                  <CreatableSelect value={form.ownerId || null} onChange={v => set('ownerId', v)} allowCreate={false}
-                    placeholder={t('common:select')} options={userOptions} />
-                </Field>
-              </div>
-            </div>
+            <OpportunityGeneralCard t={t}
+              title={form.title} onTitleChange={v => set('title', v)} titleError={errors.title} titlePlaceholder={t('modal.titlePlaceholder')}
+              clientId={form.clientId} onClientChange={handleClientChange} customerOptions={customerOptions} clientPicked={!!form.clientId}
+              contactId={contactId} onContactChange={setContactId}
+              contactOptions={contacts.map(c => ({ value: String(c.id), label: contactOptionLabel(c) }))}
+              locationId={locationId} onLocationChange={handleLocationChange}
+              locationOptions={locations.map(l => ({ value: String(l.id), label: l.name ?? '—' }))}
+              departmentId={departmentId} onDepartmentChange={setDepartmentId}
+              departmentOptions={departments.map(d => ({ value: String(d.id), label: d.name ?? '—' }))}
+              ownerId={form.ownerId} onOwnerChange={v => set('ownerId', v)} ownerOptions={userOptions}
+              branchId={branchId} onBranchChange={setBranchId}
+              branchOptions={branchLocations.map(l => ({ value: String(l.value), label: l.label }))}
+            />
 
             {/* Waarde & fase — pipeline stage, service/agreement type, value/hours,
                 contract term + expected close. */}
-            <div>
-              <div style={cardHead}>{t('modal.groups.dealStage')}</div>
-              <div style={cardBox}>
-                <div style={row2}>
-                  <Field label={t('modal.fields.stage')}>
-                    <CreatableSelect value={form.stageId || null} onChange={v => set('stageId', v)} allowCreate={false}
-                      placeholder={t('common:select')} options={stageOptions} />
-                  </Field>
-                  <Field label={t('modal.fields.serviceType')}>
-                    <CreatableSelect value={form.serviceTypeId || null} onChange={v => set('serviceTypeId', v)} allowCreate={false}
-                      placeholder={t('common:select')} options={serviceOptions} />
-                  </Field>
-                </div>
-                <div style={row2}>
-                  <Field label={t('modal.fields.agreementType')}>
-                    <CreatableSelect value={form.agreementTypeId || null} onChange={v => set('agreementTypeId', v)} allowCreate={false}
-                      placeholder={t('common:select')} options={agreementOptions} />
-                  </Field>
-                  <Field label={t('modal.fields.value')}>
-                    <TextField type="number" value={form.value} onChange={v => set('value', v)} placeholder="0" error={errors.value} />
-                  </Field>
-                </div>
-                <div style={row2}>
-                  <Field label={t('modal.fields.hours')}>
-                    <TextField type="number" value={form.hours} onChange={v => set('hours', v)} placeholder="0" error={errors.hours} />
-                  </Field>
-                  <Field label={t('modal.fields.expectedClose')}>
-                    <DateField value={form.expectedCloseAt} onChange={v => set('expectedCloseAt', v)} placeholder={t('common:select')} />
-                  </Field>
-                </div>
-                <div style={row2}>
-                  <Field label={t('modal.fields.startDate')}>
-                    <DateField value={form.startDate} onChange={v => set('startDate', v)} placeholder={t('common:select')} />
-                  </Field>
-                  <Field label={t('modal.fields.endDate')}>
-                    <DateField value={form.endDate} onChange={v => set('endDate', v)} placeholder={t('common:select')} />
-                  </Field>
-                </div>
-              </div>
-            </div>
+            <OpportunityDealStageCard t={t}
+              stageId={form.stageId} onStageChange={v => set('stageId', v)} stageOptions={stageOptions}
+              serviceTypeId={form.serviceTypeId} onServiceTypeChange={v => set('serviceTypeId', v)} serviceOptions={serviceOptions}
+              agreementTypeId={form.agreementTypeId} onAgreementTypeChange={v => set('agreementTypeId', v)} agreementOptions={agreementOptions}
+              value={form.value} onValueChange={v => set('value', v)} valueError={errors.value}
+              hours={form.hours} onHoursChange={v => set('hours', v)} hoursError={errors.hours}
+              expectedCloseAt={form.expectedCloseAt} onExpectedCloseChange={v => set('expectedCloseAt', v)}
+              startDate={form.startDate} onStartDateChange={v => set('startDate', v)}
+              endDate={form.endDate} onEndDateChange={v => set('endDate', v)}
+            />
+          </div>
+
+          {/* Kanstekst — its own full-width card below the two-column pair (mirrors
+              AddLocationModal/AddDepartmentModal's own description card placement),
+              same shared collapsed-ghost block as +Match's Opmerkingen. */}
+          <div style={{ marginTop: 16 }}>
+            <OpportunityDescriptionCard value={description} onChange={setDescription} />
           </div>
         </div>
 
@@ -334,7 +328,7 @@ export default function AddOpportunityModal({ onClose, onCreated, users = [], cu
           <button onClick={handleSubmit} disabled={!canSubmit || saving}
             style={{ height: BTN_H, padding: '0 20px', fontSize: 13, fontWeight: 600, borderRadius: 8, border: 'none',
               background: (canSubmit && !saving) ? 'var(--color-primary)' : 'var(--border)',
-              color: (canSubmit && !saving) ? 'white' : 'var(--text-muted)',
+              color: (canSubmit && !saving) ? 'var(--color-on-accent)' : 'var(--text-muted)',
               cursor: (canSubmit && !saving) ? 'pointer' : 'not-allowed' }}>
             {isEdit
               ? (saving ? t('modal.saving') : t('modal.save'))

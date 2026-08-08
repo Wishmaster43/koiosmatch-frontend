@@ -206,7 +206,7 @@ export default function VacancyGenerationProfilesList() {
                       {t('common.cancel')}
                     </button>
                     <button onClick={() => handleSave(profile)} disabled={saving === profile.id || !form.name?.trim()}
-                      style={{ padding: '6px 14px', fontSize: 12, fontWeight: 600, borderRadius: 6, border: 'none', background: 'var(--color-primary)', color: 'white', cursor: 'pointer' }}>
+                      style={{ padding: '6px 14px', fontSize: 12, fontWeight: 600, borderRadius: 6, border: 'none', background: 'var(--color-primary)', color: 'var(--color-on-accent)', cursor: 'pointer' }}>
                       {saving === profile.id ? t('common.saving') : t('common.save')}
                     </button>
                   </div>
@@ -226,7 +226,7 @@ export default function VacancyGenerationProfilesList() {
               {t('common.cancel')}
             </button>
             <button onClick={handleCreate} disabled={!newForm.name.trim() || saving === 'new'}
-              style={{ padding: '6px 14px', fontSize: 12, fontWeight: 600, borderRadius: 6, border: 'none', background: 'var(--color-primary)', color: 'white', cursor: 'pointer' }}>
+              style={{ padding: '6px 14px', fontSize: 12, fontWeight: 600, borderRadius: 6, border: 'none', background: 'var(--color-primary)', color: 'var(--color-on-accent)', cursor: 'pointer' }}>
               {saving === 'new' ? t('common.saving') : t('vacancyGenerationSettings.add')}
             </button>
           </div>

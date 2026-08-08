@@ -15,24 +15,31 @@
  * (reproduced in isolation; the component itself is correct — see the apply/
  * failure assertions below, which pass once the mock reset moves inline).
  *
+ * CMFE-KOIOS-CONSISTENCY-1 (Danny 09-08): noteAssistApi.ts is now a thin
+ * re-export of the shared richTextAssistApi.ts (§11 one source) — this file's
+ * `assistNote` mock therefore mocks the REAL underlying module
+ * (`@/components/ui/richtext/richTextAssistApi`'s `assistRichText`), which is
+ * what useNoteAssist (itself a re-export of useRichTextAssist) actually calls.
+ *
  * K0-B: the header's NoteKoiosModeToggle and a non-empty 'actions' result's
- * NoteActionsResultsPanel are stubbed here — both have their OWN dedicated
- * test files (mirrors how NoteComposer.test.tsx stubs THIS section as a
- * child); this file stays focused on the improve/summarize request+apply
- * behaviour it already covered before K0-B landed.
+ * AssistActionsResultsPanel (promoted to components/ui/richtext, its own
+ * dedicated test file there) are stubbed here (mirrors how NoteComposer.test.tsx
+ * stubs THIS section as a child); this file stays focused on the
+ * improve/summarize request+apply behaviour it already covered before K0-B
+ * landed.
  */
 import { describe, it, expect, vi } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import NoteAssistSection from './NoteAssistSection'
-import { assistNote } from './noteAssistApi'
+import { assistRichText as assistNote } from '@/components/ui/richtext/richTextAssistApi'
 
-vi.mock('./noteAssistApi', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('./noteAssistApi')>()
-  return { ...actual, assistNote: vi.fn() }
+vi.mock('@/components/ui/richtext/richTextAssistApi', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@/components/ui/richtext/richTextAssistApi')>()
+  return { ...actual, assistRichText: vi.fn() }
 })
 vi.mock('./NoteKoiosModeToggle', () => ({ default: () => <div data-testid="mode-toggle-stub" /> }))
-vi.mock('./NoteActionsResultsPanel', () => ({ default: () => <div data-testid="actions-panel-stub" /> }))
+vi.mock('@/components/ui/richtext/AssistActionsResultsPanel', () => ({ default: () => <div data-testid="actions-panel-stub" /> }))
 
 describe('NoteAssistSection · request per mode', () => {
   it('POSTs {text, language, mode: "improve"} when Verbeteren is clicked', async () => {

@@ -216,6 +216,15 @@ export interface Candidate {
   educations: Loose[]
   languages: Loose[]
   certifications: Loose[]
+  // REFERENTIE-VELDEN-1: third-party references (referees) — was dropped by
+  // mapCandidate's strict allow-list entirely (no `references` key existed here
+  // or on ApiCandidate below), so BackgroundTab.tsx's defensive `(c as unknown
+  // as {references?}).references` cast always resolved to `[]` in the real app
+  // even for a candidate with references in the database — verified live
+  // (GET /candidates/{id} DOES nest `references[]`, mapCandidate just never
+  // copied it through). Mirrors `documents`/`skills`: a straight passthrough,
+  // ReferenceResource's keys already match this tab's own field keys 1:1.
+  references: Loose[]
   skills: string[]
   documents: Loose[]
   applications: Loose[]
@@ -399,6 +408,8 @@ export interface ApiCandidate {
   education?: Loose[]
   languages?: Loose[]
   certifications?: Loose[]
+  // REFERENTIE-VELDEN-1: raw candidate_references rows nested on GET /candidates/{id}.
+  references?: Loose[]
   skills?: string[]
   documents?: Loose[]
   applications?: Loose[]

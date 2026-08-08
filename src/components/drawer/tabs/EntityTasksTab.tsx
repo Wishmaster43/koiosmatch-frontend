@@ -5,10 +5,13 @@
  * statussen — + Nieuwe taak") — search, a status filter, the house "+ Nieuwe taak"
  * trigger, all four UI states, and rows that click through to the task itself.
  *
- * TAKEN-TOOLBAR-2 (this task): the old Open/Historie QuickViewToggle switch is
- * replaced by the shared StatusFilterSelect, keyed on the tenant's real task-status
- * lookup (never a literal open/history split) — "Alle statussen" (nothing picked)
- * shows every task, completed included, same as every other status-filtered list.
+ * TAKEN-TOOLBAR-2: the old Open/Historie QuickViewToggle switch was replaced by a
+ * multi-select status filter keyed on the tenant's real task-status lookup (never a
+ * literal open/history split) — "Alle statussen" (nothing picked) shows every task,
+ * completed included, same as every other status-filtered list. It now lives inside
+ * DrawerFilterMenu (TASK-FILTER-MENU-1 below) rather than the standalone
+ * StatusFilterSelect trigger — this file still reuses that component's
+ * `useStatusFilter` hook for the actual filtering logic, just not its UI.
  *
  * The status chip's colour respects `customer_task_table_color_status` (Settings →
  * Klanten → Weergave → Taken) when this tab renders inside the customer drawer —
@@ -23,11 +26,24 @@
  * shared across features that each own their own i18n namespace (mirrors the shared
  * NotesTab, which takes its labels the same way). Every string still comes from
  * t() at the call site — nothing is hardcoded here.
+ *
+ * TASK-FILTER-MENU-1 (Danny 08-08, "Notities dus zo overal met die filter en ook
+ * taken doen"): status + the tenant TYPE ("Soort activiteit") and PRIORITY lookups
+ * moved BEHIND the shared DrawerFilterMenu (search + add stay in the toolbar), all
+ * as MULTI-select rows (mirrors useStatusFilter's own multi-value contract).
+ * `type`/`priority` field labels come straight from the 'tasks' namespace, not the
+ * `labels` prop: they are TASK-domain vocabulary, identical for every host this tab
+ * renders inside — exactly the same namespace AddTaskModal (rendered by this same
+ * tab) already uses regardless of caller. The generic filter-chrome copy (button/
+ * panel-title/clear-all) comes from 'common', mirroring NotesTab/DocumentsSection.
  */
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { ListChecks, AlertTriangle, Search } from 'lucide-react'
 import DrawerAddButton from '@/components/drawer/DrawerAddButton'
-import StatusFilterSelect, { useStatusFilter } from '@/components/drawer/StatusFilterSelect'
+import DrawerFilterMenu from '@/components/drawer/DrawerFilterMenu'
+import type { DrawerFilterConfig } from '@/components/drawer/DrawerFilterMenu'
+import { useStatusFilter } from '@/components/drawer/StatusFilterSelect'
 import AddTaskModal from '@/pages/tasks/AddTaskModal'
 import { TaskLookupsProvider, useTaskLookups } from '@/context/TaskLookupsContext'
 import { useNavigation } from '@/context/NavigationContext'
@@ -62,6 +78,16 @@ const statusKeyOf = (t: EntityTask): string => {
   const st = t.status as { value?: string } | string | null | undefined
   return String((typeof st === 'object' ? st?.value : st) ?? '')
 }
+// TASK-FILTER-MENU-1: same tolerant object-or-string read for type/priority — the
+// TaskListResource sends both as {value,label,color} lookup objects (mirrors status).
+const typeKeyOf = (t: EntityTask): string => {
+  const v = t.type as { value?: string } | string | null | undefined
+  return String((typeof v === 'object' ? v?.value : v) ?? '')
+}
+const priorityKeyOf = (t: EntityTask): string => {
+  const v = t.priority as { value?: string } | string | null | undefined
+  return String((typeof v === 'object' ? v?.value : v) ?? '')
+}
 
 // Wraps the tab body in the tenant task-status lookup provider. TaskLookupsProvider
 // is only otherwise mounted around the Tasks PAGE (and, before this change, briefly
@@ -78,10 +104,11 @@ export default function EntityTasksTab(props: Props) {
 }
 
 function EntityTasksTabBody({ linkType, id, labels, extraLinks = [] }: Props) {
+  const { t } = useTranslation('tasks')
   const { formatDate } = useDateFormat()
   const { openEntity } = useNavigation()
   const { items, loading, error, reload } = useEntityTasks(linkType, id)
-  const { statuses } = useTaskLookups()
+  const { statuses, types, priorities } = useTaskLookups()
   const [adding, setAdding] = useState(false)
   const [search, setSearch] = useState('')
 
@@ -89,10 +116,34 @@ function EntityTasksTabBody({ linkType, id, labels, extraLinks = [] }: Props) {
   // statussen" = every task, completed included (never a hardcoded open/history split).
   const { value: statusFilter, toggle: toggleStatus, filtered: byStatus } =
     useStatusFilter(items, statuses, statusKeyOf)
+  // TASK-FILTER-MENU-1: type ("Soort activiteit") + priority — same multi-select
+  // shape as status, client-side over the already-loaded `items` (mirrors the
+  // status filter exactly; no new API params).
+  const [typeFilter, setTypeFilter] = useState<string[]>([])
+  const [priorityFilter, setPriorityFilter] = useState<string[]>([])
+  const toggleType = (v: string) => setTypeFilter(p => (p.includes(v) ? p.filter(x => x !== v) : [...p, v]))
+  const togglePriority = (v: string) => setPriorityFilter(p => (p.includes(v) ? p.filter(x => x !== v) : [...p, v]))
+  const byType = typeFilter.length === 0 ? byStatus : byStatus.filter(x => typeFilter.includes(typeKeyOf(x)))
+  const byPriority = priorityFilter.length === 0 ? byType : byType.filter(x => priorityFilter.includes(priorityKeyOf(x)))
 
   // Search narrows on title + owner, client-side — same idiom as the panel searches.
   const q = search.trim().toLowerCase()
-  const visible = q ? byStatus.filter(x => [x.title, x.owner_name].some(v => String(v ?? '').toLowerCase().includes(q))) : byStatus
+  const visible = q ? byPriority.filter(x => [x.title, x.owner_name].some(v => String(v ?? '').toLowerCase().includes(q))) : byPriority
+
+  // TASK-FILTER-MENU-1: the DrawerFilterMenu rows — status always offered (the
+  // lookup always carries the seed fallback), type/priority only when the tenant
+  // actually has entries (no fake affordance, §3).
+  const filterRows: DrawerFilterConfig[] = [
+    { type: 'multi', key: 'status', label: t('cols.status'), selected: statusFilter,
+      options: statuses.map(s => ({ value: s.value, label: s.label })), onToggle: toggleStatus,
+      searchPlaceholder: t('common:search'), noResultsLabel: t('common:noResults') },
+    ...(types.length > 0 ? [{ type: 'multi' as const, key: 'type', label: t('cols.type'), selected: typeFilter,
+      options: types.map(ty => ({ value: ty.value, label: ty.label })), onToggle: toggleType,
+      searchPlaceholder: t('common:search'), noResultsLabel: t('common:noResults') }] : []),
+    ...(priorities.length > 0 ? [{ type: 'multi' as const, key: 'priority', label: t('cols.priority'), selected: priorityFilter,
+      options: priorities.map(p => ({ value: p.value, label: p.label })), onToggle: togglePriority,
+      searchPlaceholder: t('common:search'), noResultsLabel: t('common:noResults') }] : []),
+  ]
 
   // Status-chip colour toggle (CHIPKLEUR-INSTELBAAR-1 pattern, Settings → Klanten →
   // Weergave → Taken). Only wired for the customer embedding today — this shared tab
@@ -104,9 +155,11 @@ function EntityTasksTabBody({ linkType, id, labels, extraLinks = [] }: Props) {
 
   return (
     <div>
-      {/* Toolbar mirrors the Vacatures tab (Danny 03-08): search left, the status
-          filter middle, add right. The search markup copies DepartmentsPanel's
-          verbatim (§11 debt noted there). */}
+      {/* Toolbar mirrors the Vacatures tab (Danny 03-08): search left, the filter
+          button middle, add right. The search markup copies DepartmentsPanel's
+          verbatim (§11 debt noted there). TASK-FILTER-MENU-1: status/type/priority
+          now live BEHIND the one compact Filter button instead of a standing
+          StatusFilterSelect trigger. */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, flex: 1, minWidth: 0, padding: '6px 10px', background: 'var(--bg)', border: '1px solid var(--border)', borderRadius: 8 }}>
           <Search size={13} color="var(--text-muted)" />
@@ -114,7 +167,9 @@ function EntityTasksTabBody({ linkType, id, labels, extraLinks = [] }: Props) {
             placeholder={labels.searchPlaceholder} aria-label={labels.searchPlaceholder}
             style={{ flex: 1, border: 'none', background: 'transparent', outline: 'none', fontSize: 12, color: 'var(--text)' }} />
         </div>
-        <StatusFilterSelect value={statusFilter} onToggle={toggleStatus} statuses={statuses} />
+        <DrawerFilterMenu filters={filterRows}
+          label={t('common:filters.button', { defaultValue: 'Filter' })}
+          title={t('common:filters.title')} clearAllLabel={t('common:filters.clearAll')} />
         {/* DRAWER-ADD-SHORT-1 (Danny 05-08): short — this tab always lives inside a
             drawer sub-tab, never a full page. */}
         <DrawerAddButton onClick={() => setAdding(true)} label={labels.newTask} short />

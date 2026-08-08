@@ -33,7 +33,9 @@
     "leadsPartial": "Partially counted — a limit was hit",
     "leadsComputedAt": "Updated on {{date}}",
     "age": "Age",
-    "applicationsOpen": "Open applications"
+    "applicationsOpen": "Open applications",
+    "ageTooltip": "Since {{date}}",
+    "applicationsOpenTab": "Open Applications"
   },
   "publishedState": {
     "yes": "Published",
@@ -225,7 +227,8 @@
     "addSkill": "Add skill",
     "description": "Vacancy text",
     "matchContractType": "Proposed contract type",
-    "matchCao": "Proposed CBA"
+    "matchCao": "Proposed CBA",
+    "skillsEmpty": "No required skills yet."
   },
   "aiagent": {
     "pickerLabel": "AI agent",
@@ -295,7 +298,9 @@
     "tabs": {
       "settings": "Settings",
       "sites": "Job boards"
-    }
+    },
+    "siteLive": "The public career site is live. These toggles control what's published there right now, including the Indeed and Werkzoeken feeds.",
+    "siteOffline": "The public career site is currently switched off (Settings → Career site). These toggles decide what goes live the moment it's switched on."
   },
   "applicants": {
     "title": "Applications",
@@ -441,7 +446,11 @@
     }
   },
   "documents": {
-    "docType": "Document type"
+    "docType": "Document type",
+    "allTypes": "All types",
+    "type": "Type",
+    "search": "Search documents…",
+    "empty": "No documents yet."
   },
   "age": {
     "days": "{{count}}d",

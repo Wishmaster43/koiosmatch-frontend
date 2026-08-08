@@ -26,6 +26,11 @@ import { BTN_H } from '@/config/buttonMetrics'
 import { LOCATION_ICON_NAMES, resolveLocationIcon, DEFAULT_LOCATION_COLOR } from '@/lib/locationIcons'
 import { useFocusTrap } from '@/hooks/useFocusTrap'
 import { ColorSwatch } from '../../components/SettingsControls'
+import CreatableSelect from '@/components/ui/CreatableSelect'
+import { useCountriesLookup } from '@/lib/useCountriesLookup'
+import { useProvinces } from '@/hooks/useProvinces'
+import FieldNotice from '@/components/ui/FieldNotice'
+import { useIdentifierValidation } from '@/hooks/useIdentifierValidation'
 import IconPickerControl from '../IconPickerControl'
 
 // House field footprint (Danny 27-07 point D): 11px uppercase muted label above
@@ -43,12 +48,38 @@ export default function LocationFormModal({ editingId, form, setForm, saving, on
 
   const setF = (k) => (e) => setForm(x => ({ ...x, [k]: e.target.value }))
   // Called as a function (not <F/>) so inputs keep focus while typing.
-  const field = (k, label, placeholder, type = 'text', flex = 1) => (
+  // ALWAYS-SEARCHABLE (CLAUDE.md §4, Danny 08-08): country and province are
+  // lookup-driven searchable pickers here too — country feeds the province
+  // cascade, exactly like the candidate/vacancy address blocks.
+  const { options: countryOptions } = useCountriesLookup()
+  const { provinces } = useProvinces(form.country || 'NL')
+  const provinceOptions = (provinces ?? []).map(p => (typeof p === 'string' ? { value: p, label: p } : p))
+
+  const picker = (k, label, options, flex = 1) => (
     <div style={{ flex, minWidth: 0 }}>
       <div style={lbl}>{label}</div>
-      <input type={type} value={form[k]} onChange={setF(k)} placeholder={placeholder} aria-label={label} style={inp} />
+      <CreatableSelect value={form[k] || null} onChange={v => setF(k)({ target: { value: v } })}
+        options={options} allowCreate={false} clearable placeholder={label}
+        style={{ padding: '8px 11px', borderRadius: 8, fontSize: 13 }} />
     </div>
   )
+
+  const field = (k, label, placeholder, type = 'text', flex = 1, notice = null) => (
+    <div style={{ flex, minWidth: 0 }}>
+      <div style={lbl}>{label}</div>
+      <input type={type} value={form[k]} onChange={setF(k)} placeholder={placeholder} aria-label={label}
+        style={notice?.severity === 'error' ? { ...inp, borderColor: 'var(--color-danger)' } : inp} />
+      <FieldNotice text={notice?.message} severity={notice?.severity} />
+    </div>
+  )
+
+  // KVK/BTW-PER-LAND-1 (Danny 08-08, points 10 + 11): our OWN establishments carry a
+  // KvK/BTW too, so they get the same per-country check as a customer location — the
+  // country picked right above decides the rule, the tenant setting decides warn-vs-block.
+  const identifiers = useIdentifierValidation()
+  const cocNotice = identifiers.notice('coc', form.coc_number, form.country)
+  const vatNotice = identifiers.notice('vat', form.vat_number, form.country)
+  const identifierBlocked = cocNotice?.severity === 'error' || vatNotice?.severity === 'error'
 
   return (
     <>
@@ -111,7 +142,10 @@ export default function LocationFormModal({ editingId, form, setForm, saving, on
                 {field('postal_code', t('locations.postalCode'), '1234 AB')}
                 {field('city', t('locations.city'), t('locations.city'))}
               </div>
-              {field('country', t('locations.country'), 'Nederland')}
+              <div style={{ display: 'flex', gap: 12 }}>
+                {picker('country', t('locations.country'), countryOptions)}
+                {picker('province', t('locations.province'), provinceOptions)}
+              </div>
             </div>
           </div>
 
@@ -120,8 +154,8 @@ export default function LocationFormModal({ editingId, form, setForm, saving, on
             <div style={cardHead}>{t('locations.sectionBusiness')}</div>
             <div style={cardBox}>
               <div style={{ display: 'flex', gap: 12 }}>
-                {field('coc_number', t('locations.cocNumber'), '12345678')}
-                {field('vat_number', t('locations.vatNumber'), 'NL000000000B01')}
+                {field('coc_number', t('locations.cocNumber'), '12345678', 'text', 1, cocNotice)}
+                {field('vat_number', t('locations.vatNumber'), 'NL000000000B01', 'text', 1, vatNotice)}
               </div>
             </div>
           </div>
@@ -141,8 +175,9 @@ export default function LocationFormModal({ editingId, form, setForm, saving, on
 
         <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, marginTop: 20 }}>
           <button onClick={onClose} style={{ height: BTN_H, padding: '0 16px', fontSize: 13, border: '1px solid var(--border)', borderRadius: 8, background: 'var(--surface)', cursor: 'pointer', color: 'var(--text)' }}>{t('common.cancel')}</button>
-          <button onClick={onSubmit} disabled={saving || !form.name.trim()}
-            style={{ height: BTN_H, padding: '0 16px', fontSize: 13, fontWeight: 500, border: 'none', borderRadius: 8, background: 'var(--color-primary)', color: 'white', cursor: 'pointer', opacity: form.name.trim() ? 1 : 0.4 }}>
+          {/* KVK/BTW-PER-LAND-1: only a BLOCKING mismatch gates Save — a warning still saves. */}
+          <button onClick={onSubmit} disabled={saving || !form.name.trim() || identifierBlocked}
+            style={{ height: BTN_H, padding: '0 16px', fontSize: 13, fontWeight: 500, border: 'none', borderRadius: 8, background: 'var(--color-primary)', color: 'var(--color-on-accent)', cursor: 'pointer', opacity: (form.name.trim() && !identifierBlocked) ? 1 : 0.4 }}>
             {saving ? t('common.saving') : (editingId ? t('common.save') : t('locations.createBtn'))}
           </button>
         </div>

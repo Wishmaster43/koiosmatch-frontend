@@ -24,6 +24,7 @@ import { WIDE_MODAL } from '@/components/ui/modalMetrics'
 import { cardHead, cardBox, row2, cardPair } from '@/components/ui/modalCards'
 import CreatableSelect from '@/components/ui/CreatableSelect'
 import { BTN_H } from '@/config/buttonMetrics'
+import { fieldInputStyle } from '@/components/forms/fieldMetrics'
 
 // Fixed backend enum (not a tenant lookup) — labels via i18n, values stay literal.
 const CHANNELS = ['call', 'email', 'whatsapp'] as const
@@ -37,7 +38,8 @@ interface Props { onClose: () => void; onCreated: (c: Campaign) => void }
 const overlayStyle = { position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.35)', zIndex: 60 } as const
 const panelStyle = { position: 'fixed', top: '50%', left: '50%', transform: 'translate(-50%,-50%)', zIndex: 61, width: '94vw', maxWidth: WIDE_MODAL.maxWidth, maxHeight: WIDE_MODAL.maxHeight, overflowY: 'auto', background: 'var(--surface)', borderRadius: 12, padding: 22, boxShadow: '0 24px 70px rgba(0,0,0,0.22)' } as const
 const lbl = { fontSize: 11, fontWeight: 600, textTransform: 'uppercase' as const, letterSpacing: '0.04em', color: 'var(--text-muted)', marginBottom: 5 }
-const inputStyle = { width: '100%', height: 36, padding: '0 11px', fontSize: 13, color: 'var(--text)', border: '1px solid var(--border)', borderRadius: 8, outline: 'none', background: 'var(--surface)', boxSizing: 'border-box' as const }
+// Canon field style (G33/fieldMetrics) — was its own height-36 copy.
+const inputStyle = fieldInputStyle
 
 export default function OutreachCreate({ onClose, onCreated }: Props) {
   const { t } = useTranslation('outreach')
@@ -67,8 +69,11 @@ export default function OutreachCreate({ onClose, onCreated }: Props) {
     setSaving(true)
     setError(false)
     try {
+      // DD-FE-3: createCampaign now unwraps to the record (was the raw envelope);
+      // `unwrap` returns `unknown` by design (mirrors OutreachPage's own
+      // `restored as Campaign` after restoreCampaign — same api.ts convention).
       const created = await createCampaign({ name: name.trim(), channel, ...(poolId ? { from_pool_id: poolId } : {}) })
-      onCreated(created)
+      onCreated(created as Campaign)
       onClose()
     } catch {
       setError(true)
@@ -142,7 +147,7 @@ export default function OutreachCreate({ onClose, onCreated }: Props) {
             {t('common:cancel', { defaultValue: 'Cancel' })}
           </button>
           <button onClick={submit} disabled={saving || !canSubmit}
-            style={{ height: BTN_H, padding: '0 20px', fontSize: 13, fontWeight: 600, border: 'none', borderRadius: 8, background: 'var(--color-primary)', color: '#fff', cursor: canSubmit ? 'pointer' : 'not-allowed', opacity: canSubmit ? 1 : 0.5 }}>
+            style={{ height: BTN_H, padding: '0 20px', fontSize: 13, fontWeight: 600, border: 'none', borderRadius: 8, background: 'var(--color-primary)', color: 'var(--color-on-accent)', cursor: canSubmit ? 'pointer' : 'not-allowed', opacity: canSubmit ? 1 : 0.5 }}>
             {saving ? t('create.saving') : t('create.submit')}
           </button>
         </div>

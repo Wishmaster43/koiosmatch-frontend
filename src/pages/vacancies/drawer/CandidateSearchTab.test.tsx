@@ -144,11 +144,28 @@ describe('CandidateSearchTab · object-status tolerance', () => {
   })
 })
 
-describe('CandidateSearchTab · no location', () => {
-  it('shows the calm notice and never fetches', async () => {
+// GEO-DEGRADE-1 regression (mirrors candidates/drawer/VacancySearchTab.test): an
+// un-geocoded vacancy used to blank the whole tab. Measured live: the endpoint scores
+// and ranks without an origin (37 rows, distance null), so only the radius is dropped.
+describe('CandidateSearchTab · no location (degrades, never dead-ends)', () => {
+  it('still fetches — omitting radius, keeping every other param', async () => {
+    mockGet.mockResolvedValue({ data: { data: rawRows } })
     render(<CandidateSearchTab vacancy={vacancyNoLocation} />)
+
+    await waitFor(() => expect(mockGet).toHaveBeenCalled())
+    const [url, config] = mockGet.mock.calls[0]
+    expect(url).toBe('/vacancies/v2/candidate-matches')
+    expect((config as { params: Record<string, unknown> }).params).not.toHaveProperty('radius')
+    expect((config as { params: Record<string, unknown> }).params).toMatchObject({ per_page: 100 })
+  })
+
+  it('shows the notice in the MAP slot while the filters and the result list stay', async () => {
+    mockGet.mockResolvedValue({ data: { data: rawRows } })
+    render(<CandidateSearchTab vacancy={vacancyNoLocation} />)
+
     expect(screen.getByText(nl.candidateSearch.noLocation)).toBeInTheDocument()
-    expect(mockGet).not.toHaveBeenCalled()
+    expect(screen.queryByTestId('radius-map-panel')).toBeNull()
+    await waitFor(() => expect(screen.getByText('Alice')).toBeInTheDocument())
   })
 })
 

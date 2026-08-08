@@ -17,6 +17,7 @@ import { useCustomFields } from '@/lib/useCustomFields'
 import { notifyError } from '@/lib/notify'
 import SearchSelect from '@/components/ui/SearchSelect'
 import { DragList } from '../components/SettingsControls'
+import { fieldInputStyle } from '@/components/forms/fieldMetrics'
 
 // Field types the backend supports.
 const FIELD_TYPES = ['text', 'textarea', 'number', 'date', 'boolean', 'select']
@@ -43,10 +44,8 @@ const toField = (d, lang) => ({ ...d, label: pickLabel(d.label_i18n, lang, d.key
 const cardStyle = {
   background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 10, padding: '14px 16px', marginBottom: 8,
 }
-const inputStyle = {
-  padding: '6px 10px', fontSize: 13, borderRadius: 6, border: '1px solid var(--border)',
-  background: 'var(--input-bg)', color: 'var(--text)', outline: 'none', width: '100%', boxSizing: 'border-box',
-}
+// Canon field style (G33/fieldMetrics) — was its own padding-6/radius-6 copy.
+const inputStyle = fieldInputStyle
 const labelStyle = { fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', display: 'block', marginBottom: 4 }
 
 export default function CustomFieldsSettings({ entityType }) {
@@ -290,7 +289,7 @@ export default function CustomFieldsSettings({ entityType }) {
                         {t('common.cancel')}
                       </button>
                       <button onClick={() => handleSave(field)} disabled={saving === field.id}
-                        style={{ padding: '6px 14px', fontSize: 12, fontWeight: 600, borderRadius: 6, border: 'none', background: 'var(--color-primary)', color: 'white', cursor: 'pointer' }}>
+                        style={{ padding: '6px 14px', fontSize: 12, fontWeight: 600, borderRadius: 6, border: 'none', background: 'var(--color-primary)', color: 'var(--color-on-accent)', cursor: 'pointer' }}>
                         {saving === field.id ? t('common.saving') : t('common.save')}
                       </button>
                     </div>
@@ -347,7 +346,7 @@ export default function CustomFieldsSettings({ entityType }) {
                 {t('common.cancel')}
               </button>
               <button onClick={handleCreate} disabled={!newForm.label.trim() || saving === 'new'}
-                style={{ padding: '6px 14px', fontSize: 12, fontWeight: 600, borderRadius: 6, border: 'none', background: 'var(--color-primary)', color: 'white', cursor: 'pointer' }}>
+                style={{ padding: '6px 14px', fontSize: 12, fontWeight: 600, borderRadius: 6, border: 'none', background: 'var(--color-primary)', color: 'var(--color-on-accent)', cursor: 'pointer' }}>
                 {saving === 'new' ? t('common.saving') : t('customFieldsSettings.add')}
               </button>
             </div>

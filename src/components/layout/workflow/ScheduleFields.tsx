@@ -10,17 +10,28 @@
  * trigger type back and forth) and reads its own `t`/locale, so nothing is
  * threaded through.
  */
+import { useId } from 'react'
 import { useTranslation } from 'react-i18next'
 import { X } from 'lucide-react'
 import { dayName, monthName } from './scheduleLabel'
 import { inputStyle, selectStyle, sectionStyle, sectionLabel, fieldLabel, fieldLabelInline } from './scheduleModalStyles'
 import type { ScheduleForm } from './useScheduleForm'
+// Danny 08-08 (§4): the house searchable combobox replaces both bare native
+// <select>s below. Also the SAFER pick here specifically: this modal is
+// wrapped in useFocusTrap (via FloatingPanel), and EventCombobox's own doc
+// comment (this same directory) proved SelectMenu's document-level Escape
+// listener shares the plain <select>'s latent flaw in a trapped dialog —
+// only CreatableSelect's portalled popover truly survives it.
+import CreatableSelect from '@/components/ui/CreatableSelect'
 
 export function ScheduleFields({ form }: { form: ScheduleForm }) {
   const { t, i18n } = useTranslation('workflows')
   const locale = i18n.language
   const { sType, setSType, intVal, setIntVal, intUnit, setIntUnit, time, setTime,
           times, addTime, removeTime, updateTime, dow, toggleDay, dom, setDom, month, setMonth } = form
+  // Sr-only labels for the two converted pickers (see the CreatableSelect note above).
+  const intUnitLabelId = useId()
+  const monthLabelId   = useId()
 
   return (
     <div style={{ ...sectionStyle, display: 'flex', flexDirection: 'column', gap: 18 }}>
@@ -55,10 +66,18 @@ export function ScheduleFields({ form }: { form: ScheduleForm }) {
           <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
             <input type="number" min={1} max={999} value={intVal} onChange={e => setIntVal(e.target.value)}
               aria-label={t('scheduleModal.every')} style={{ ...inputStyle, width: 80 }} />
-            <select value={intUnit} onChange={e => setIntUnit(e.target.value)} aria-label={t('scheduleModal.every')} style={selectStyle}>
-              <option value="minutes">{t('scheduleModal.unit.minutes')}</option>
-              <option value="hours">{t('scheduleModal.unit.hours')}</option>
-            </select>
+            <span id={intUnitLabelId} className="sr-only">{t('scheduleModal.every')}</span>
+            <div style={{ width: 150 }}>
+              {/* selectStyle carries width:'auto' (inline row default) — override it
+                  here so the trigger fills its 150px slot instead of leaving dead
+                  space, same as the month picker below. */}
+              <CreatableSelect value={intUnit} onChange={v => setIntUnit(v)} aria-labelledby={intUnitLabelId} allowCreate={false}
+                options={[
+                  { value: 'minutes', label: t('scheduleModal.unit.minutes') },
+                  { value: 'hours', label: t('scheduleModal.unit.hours') },
+                ]}
+                style={{ ...selectStyle, width: '100%' }} />
+            </div>
           </div>
           <p style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 6 }}>{t('scheduleModal.minInterval')}</p>
         </div>
@@ -70,7 +89,7 @@ export function ScheduleFields({ form }: { form: ScheduleForm }) {
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
             <label style={fieldLabelInline}>{t('scheduleModal.times')}</label>
             <button type="button" onClick={addTime}
-              style={{ fontSize: 11, color: 'var(--color-primary)', background: 'none', border: 'none', cursor: 'pointer', fontWeight: 600 }}>{t('scheduleModal.addTime')}</button>
+              style={{ fontSize: 11, color: 'var(--color-primary-text)', background: 'none', border: 'none', cursor: 'pointer', fontWeight: 600 }}>{t('scheduleModal.addTime')}</button>
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
             {times.map((tm, i) => (
@@ -102,7 +121,7 @@ export function ScheduleFields({ form }: { form: ScheduleForm }) {
                     width: 38, height: 38, borderRadius: '50%', fontSize: 11, fontWeight: 600, cursor: 'pointer',
                     border: `1.5px solid ${dow.includes(i) ? 'var(--color-primary)' : 'var(--border)'}`,
                     background: dow.includes(i) ? 'var(--color-primary)' : 'var(--surface)',
-                    color: dow.includes(i) ? 'white' : 'var(--text)',
+                    color: dow.includes(i) ? 'var(--color-on-accent)' : 'var(--text)',
                   }}>{dayName(locale, i)}</button>
               ))}
             </div>
@@ -127,7 +146,7 @@ export function ScheduleFields({ form }: { form: ScheduleForm }) {
                     width: 34, height: 34, borderRadius: 8, fontSize: 12, fontWeight: dom === d ? 700 : 400, cursor: 'pointer',
                     border: `1.5px solid ${dom === d ? 'var(--color-primary)' : 'var(--border)'}`,
                     background: dom === d ? 'var(--color-primary)' : 'var(--surface)',
-                    color: dom === d ? 'white' : 'var(--text)',
+                    color: dom === d ? 'var(--color-on-accent)' : 'var(--text)',
                   }}>{d}</button>
               ))}
             </div>
@@ -154,9 +173,10 @@ export function ScheduleFields({ form }: { form: ScheduleForm }) {
           <div style={{ display: 'flex', gap: 12 }}>
             <div style={{ flex: 1 }}>
               <label style={fieldLabel}>{t('scheduleModal.month')}</label>
-              <select value={month} onChange={e => setMonth(+e.target.value)} aria-label={t('scheduleModal.month')} style={{ ...selectStyle, width: '100%' }}>
-                {Array.from({ length: 12 }, (_, i) => i).map(i => <option key={i} value={i + 1}>{monthName(locale, i)}</option>)}
-              </select>
+              <span id={monthLabelId} className="sr-only">{t('scheduleModal.month')}</span>
+              <CreatableSelect value={String(month)} onChange={v => setMonth(+v)} aria-labelledby={monthLabelId} allowCreate={false}
+                options={Array.from({ length: 12 }, (_, i) => ({ value: String(i + 1), label: monthName(locale, i) }))}
+                style={{ ...selectStyle, width: '100%' }} />
             </div>
             <div>
               <label style={fieldLabel}>{t('scheduleModal.day')}</label>

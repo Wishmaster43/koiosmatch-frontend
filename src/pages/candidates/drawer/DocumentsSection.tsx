@@ -10,25 +10,51 @@ import { useDocumentTypes } from '@/lib/useDocumentTypes'
 import { downloadFilesSequentially } from '@/lib/downloadFiles'
 import { useAuth } from '@/context/AuthContext'
 import DocPreviewModal from '@/components/drawer/DocPreviewModal'
+import DrawerFilterMenu from '@/components/drawer/DrawerFilterMenu'
+import type { DrawerFilterConfig } from '@/components/drawer/DrawerFilterMenu'
 import DrawerAddButton from './DrawerAddButton'
 import PendingUploadQueue from './PendingUploadQueue'
 import type { PendingItem } from './PendingUploadQueue'
 import DocumentRow from './DocumentRow'
-import { docKey, isPersisted, docUrl, splitExt, DOC_GRID_COLUMNS } from './documentHelpers'
+import type { LinkKind, LinkedDocItem, ResolvedDocLink } from './DocumentRow'
+import { hasSelectableEntry } from './documentLinkRules'
+import { docKey, isPersisted, docUrl, splitExt, formatDocSize, DOC_GRID_COLUMNS } from './documentHelpers'
 import type { DocItem } from './documentHelpers'
 import ConfirmDialog from '@/components/ui/ConfirmDialog'
 import type { Candidate } from '@/types/candidate'
 import type { Id } from '@/types/common'
 
-// DOC-ENTRY-LINK-1 / DOC-LANG-SKILL-LINK-1: maps the "Koppelen aan" picker's
-// "kind:id" prefix to its API relation segment — module scope, never rebuilt per render.
-const RELATION_BY_LINK_KIND: Record<string, string> = { education: 'educations', certification: 'certifications', language: 'languages', skill: 'skills' }
+// DOC-ENTRY-LINK-1 / DOC-LANG-SKILL-LINK-1 / DOC-LIST-LINK-1 / REFERENTIE-VELDEN-1:
+// maps the "Koppelen aan" picker's "kind:id" prefix to its API relation segment —
+// module scope, never rebuilt per render. Shared by the upload-time link
+// (linkDocumentToEntry) AND the list row's re-link/clear (relinkDocument) — one
+// relation map, one PATCH shape. 'reference' PATCHes /candidates/{id}/references/{item}
+// (CMBE shipped candidate_references.document_id, commit 9a9bd8c9).
+const RELATION_BY_LINK_KIND: Record<string, string> = { education: 'educations', certification: 'certifications', language: 'languages', skill: 'skills', reference: 'references' }
+
+// REFERENTIE-VELDEN-1: composes a reference row's referent name for the resolved
+// link chip — mirrors DocumentLinkPicker's own referenceName (duplicated rather
+// than shared: a one-line pure function, and documentHelpers.ts stays out of
+// scope for this change, same reasoning ReferencesTab.tsx already documents).
+const referenceName = (ref: { first_name?: string; middle_name?: string; last_name?: string }): string =>
+  [ref.first_name, ref.middle_name, ref.last_name].filter(Boolean).join(' ')
+
+// DOC-1-EIGENAAR-1 (Danny 08-08 punt 5): a 422 on a link PATCH is an EXPECTED,
+// caller-handled outcome — the backend guard's own readable reason ("Dit document is
+// al aan een ander onderdeel gekoppeld.") is surfaced via extractApiError below.
+// quietStatuses suppresses the generic dev diagnostic toast ("API PATCH … → 422",
+// api.ts) that otherwise fires first and buries that reason.
+const LINK_REQUEST_CONFIG = { quietStatuses: [422] }
 
 /** Documents section — owns its own docs state, upload, rename, search and preview.
  * Persists to /candidates/{id}/documents (multipart upload, PATCH rename, DELETE,
  * POST .../replace). New rows keep their local blob preview until the server doc
  * (with url) returns. Row rendering lives in DocumentRow (§3 size discipline);
- * this file owns the state + every persistence path. */
+ * this file owns the state + every persistence path.
+ * DOC-LIST-LINK-1 (Danny 08-08): the list row also shows + changes the document's
+ * link to an education/certification/language/skill/reference (the upload-time
+ * "Koppelen aan" pick was write-only before this — no trace of it showed in the
+ * list, and there was no way to change or remove it). See resolveDocLink/relinkDocument. */
 export default function DocumentsSection({ c, onRefresh }: { c: Candidate; onRefresh?: () => void }) {
   const { t } = useTranslation('candidates')
   // Point 4: every MANAGE action (upload/rename/replace/delete) gates on this
@@ -40,19 +66,34 @@ export default function DocumentsSection({ c, onRefresh }: { c: Candidate; onRef
   const { types: docTypes, labelOf: docTypeLabel, colorOf: docColor, iconOf: docTypeIcon } = useDocumentTypes('candidate')
   // DOC-ENTRY-LINK-1: the candidate's own educations/certifications feed the
   // "Koppelen aan" grouped picker below (DocumentLinkPicker self-hides when empty).
-  const educationsForLink = (c.educations ?? []) as Array<{ id?: Id; title?: string }>
-  const certificationsForLink = (c.certifications ?? []) as Array<{ id?: Id; name?: string }>
+  const educationsForLink = (c.educations ?? []) as Array<{ id?: Id; title?: string; document_id?: Id | null }>
+  const certificationsForLink = (c.certifications ?? []) as Array<{ id?: Id; name?: string; document_id?: Id | null }>
   // DOC-LANG-SKILL-LINK-1: same picker, extended to languages/skills (BE landed
   // document_id on candidate_languages + candidate_skills, mirrors DOC-EDU-1
   // exactly). Filtered to entries with a real id — a legacy plain-string skill
   // or a not-yet-persisted row has nothing a PATCH could target.
-  const languagesForLink = ((c.languages ?? []) as Array<{ id?: Id; language?: string; name?: string }>).filter(l => l.id != null)
-  const skillsForLink = (((c.skills ?? []) as unknown) as Array<{ id?: Id; name?: string }>).filter(s => s?.id != null)
-  const [docs,        setDocs]        = useState<DocItem[]>(c.documents ?? [])
+  const languagesForLink = ((c.languages ?? []) as Array<{ id?: Id; language?: string; name?: string; document_id?: Id | null }>).filter(l => l.id != null)
+  const skillsForLink = (((c.skills ?? []) as unknown) as Array<{ id?: Id; name?: string; document_id?: Id | null }>).filter(s => s?.id != null)
+  // REFERENTIE-VELDEN-1: the candidate's own references (referees), same mechanic
+  // — filtered to entries with a real id, mirrors languagesForLink/skillsForLink.
+  const referencesForLink = ((c.references ?? []) as Array<{ id?: Id; first_name?: string; middle_name?: string; last_name?: string; document_id?: Id | null }>).filter(r => r.id != null)
+  // DOC-1-EIGENAAR-1: the five lists in one array — the row's "change link" control is
+  // gated on whether THIS document still has a free slot (or its own, so it can always
+  // be unlinked), not merely on "the candidate has entries". An occupied entry is not
+  // offered (see DocumentLinkPicker), so the old gate showed a button that opened a
+  // picker rendering nothing.
+  const linkableLists = [educationsForLink, certificationsForLink, languagesForLink, skillsForLink, referencesForLink]
+  const [docs,        setDocs]        = useState<LinkedDocItem[]>(c.documents ?? [])
   const [pending,      setPending]     = useState<PendingItem[]>([])
   const [renamingDoc, setRenamingDoc] = useState<number | null>(null)
   const [renameValue, setRenameValue] = useState('')
+  // DOC-LIST-LINK-1: which document row's inline "Koppelen aan" re-link picker is
+  // open — at most one at a time, mirrors renamingDoc.
+  const [linkingDoc,  setLinkingDoc]  = useState<number | null>(null)
   const [docSearch,   setDocSearch]   = useState('')
+  // DOC-TYPE-FILTER-1 (Danny 08-08): filter the list by document type, via the
+  // house searchable dropdown fed by the tenant document-type lookup — '' = all.
+  const [docTypeFilter, setDocTypeFilter] = useState('')
   const [previewDoc,  setPreviewDoc]  = useState<DocItem | null>(null)
   // Bulk-download selection, keyed by docKey — cleared once a download batch starts.
   const [selected, setSelected] = useState<Set<string>>(new Set())
@@ -68,6 +109,7 @@ export default function DocumentsSection({ c, onRefresh }: { c: Candidate; onRef
   // Rows currently visible under the search filter, with their original index kept.
   const filteredDocs = docs.map((d, i) => ({ ...d, _i: i }))
     .filter(d => !docSearch || (d.name ?? d.file_name ?? '').toLowerCase().includes(docSearch.toLowerCase()) || (d.type ?? '').toLowerCase().includes(docSearch.toLowerCase()))
+    .filter(d => !docTypeFilter || (d.type ?? '') === docTypeFilter)
   const filteredDownloadableKeys = filteredDocs.filter(d => docUrl(d)).map(d => docKey(d, d._i))
   const allFilteredSelected = filteredDownloadableKeys.length > 0 && filteredDownloadableKeys.every(k => selected.has(k))
 
@@ -100,9 +142,74 @@ export default function DocumentsSection({ c, onRefresh }: { c: Candidate; onRef
     const [kind, entryId] = linkTo.split(':')
     const relation = RELATION_BY_LINK_KIND[kind]
     if (!relation) return
-    api.patch(`/candidates/${c.id}/${relation}/${entryId}`, { document_id: documentId })
+    api.patch(`/candidates/${c.id}/${relation}/${entryId}`, { document_id: documentId }, LINK_REQUEST_CONFIG)
       .then(() => onRefresh?.())
       .catch(err => notifyError(extractApiError(err, t('common:actionFailed'))))
+  }
+  // DOC-LIST-LINK-1: resolve which (if any) of the candidate's own educations/
+  // certifications/languages/skills a document is linked to, from the reverse FK ids
+  // DocumentResource serialises per row. Fixed priority order only matters for a
+  // pre-existing double-link (see relinkDocument below) — resolves to the first match
+  // rather than rendering two chips.
+  const resolveDocLink = (d: LinkedDocItem): ResolvedDocLink | null => {
+    if (d.education_id != null) {
+      const e = educationsForLink.find(x => x.id === d.education_id)
+      if (e) return { kind: 'education', id: d.education_id, label: e.title ?? '' }
+    }
+    if (d.certification_id != null) {
+      const cert = certificationsForLink.find(x => x.id === d.certification_id)
+      if (cert) return { kind: 'certification', id: d.certification_id, label: cert.name ?? '' }
+    }
+    if (d.language_id != null) {
+      const lang = languagesForLink.find(x => x.id === d.language_id)
+      if (lang) return { kind: 'language', id: d.language_id, label: lang.language ?? lang.name ?? '' }
+    }
+    if (d.skill_id != null) {
+      const skill = skillsForLink.find(x => x.id === d.skill_id)
+      if (skill) return { kind: 'skill', id: d.skill_id, label: skill.name ?? '' }
+    }
+    // REFERENTIE-VELDEN-1: reverse-FK resolution for the reference link, labelled
+    // by the referent's own name (never their internal id).
+    if (d.reference_id != null) {
+      const ref = referencesForLink.find(x => x.id === d.reference_id)
+      if (ref) return { kind: 'reference', id: d.reference_id, label: referenceName(ref) }
+    }
+    return null
+  }
+  // DOC-LIST-LINK-1: change or clear a PERSISTED document's link from the list row —
+  // reuses the exact PATCH path linkDocumentToEntry uses for the upload-time link,
+  // extended to also CLEAR the previous side FIRST. MEASURED LIVE (08-08): the
+  // reverse-FK design means the old relation never self-clears when a new one is set
+  // (setting a second link without clearing the first left BOTH sides pointing at the
+  // same document on the real API) — clear-then-set is what keeps "at most one link"
+  // true. Snapshot + revert on any failure, mirroring rename/removeDoc above.
+  const relinkDocument = async (i: number, newLinkTo: string) => {
+    const doc = docs[i]
+    const id = doc?.id
+    setLinkingDoc(null)
+    if (!doc || !isPersisted(id)) return
+    const previous = resolveDocLink(doc)
+    const previousComposite = previous ? `${previous.kind}:${previous.id}` : ''
+    if (newLinkTo === previousComposite) return
+    let newKind: LinkKind | undefined
+    let newId: string | undefined
+    if (newLinkTo) { const [k, entryId] = newLinkTo.split(':'); newKind = k as LinkKind; newId = entryId }
+    const snapshot = { education_id: doc.education_id, certification_id: doc.certification_id, language_id: doc.language_id, skill_id: doc.skill_id, reference_id: doc.reference_id }
+    try {
+      if (previous) await api.patch(`/candidates/${c.id}/${RELATION_BY_LINK_KIND[previous.kind]}/${previous.id}`, { document_id: null }, LINK_REQUEST_CONFIG)
+      if (newKind) await api.patch(`/candidates/${c.id}/${RELATION_BY_LINK_KIND[newKind]}/${newId}`, { document_id: id }, LINK_REQUEST_CONFIG)
+      setDocs(prev => prev.map(x => x.id === id ? { ...x,
+        education_id: newKind === 'education' ? newId : null,
+        certification_id: newKind === 'certification' ? newId : null,
+        language_id: newKind === 'language' ? newId : null,
+        skill_id: newKind === 'skill' ? newId : null,
+        reference_id: newKind === 'reference' ? newId : null,
+      } : x))
+      onRefresh?.()
+    } catch (err) {
+      setDocs(prev => prev.map(x => x.id === id ? { ...x, ...snapshot } : x))
+      notifyError(extractApiError(err, t('common:actionFailed')))
+    }
   }
   // Upload every queued file (multipart), each with its OWN doc type — one optimistic
   // row + POST per item, so a 5-file pick uploads all 5, not just the first.
@@ -121,7 +228,7 @@ export default function DocumentsSection({ c, onRefresh }: { c: Candidate; onRef
         .then(r => {
           const it = unwrap<DocItem>(r)
           if (it?.id) {
-            setDocs(d => d.map(x => x.id === tmpId ? { ...optimistic, ...it } : x))
+            setDocs(d => d.map(x => x.id === tmpId ? { ...optimistic, ...it, size: formatDocSize(it.size) } : x))
             // DOC-ENTRY-LINK-1: only when this file actually had a pick — never
             // fires an empty/no-op PATCH.
             if (p.linkTo) linkDocumentToEntry(p.linkTo, it.id)
@@ -162,7 +269,7 @@ export default function DocumentsSection({ c, onRefresh }: { c: Candidate; onRef
     api.post(`/candidates/${c.id}/documents/${id}/replace`, fd, { headers: { 'Content-Type': 'multipart/form-data' } })
       .then(r => {
         const it = unwrap<DocItem>(r)
-        if (it) setDocs(prev => prev.map(x => x.id === id ? { ...x, ...it } : x))
+        if (it) setDocs(prev => prev.map(x => x.id === id ? { ...x, ...it, size: formatDocSize(it.size) } : x))
       })
       .catch(err => notifyError(extractApiError(err, t('common:actionFailed'))))
   }
@@ -231,17 +338,42 @@ export default function DocumentsSection({ c, onRefresh }: { c: Candidate; onRef
   // File name shown in the single-delete confirm message (empty once the dialog is closed).
   const confirmDeleteName = confirmDelete?.kind === 'one' ? String(docs[confirmDelete.index]?.name ?? docs[confirmDelete.index]?.file_name ?? '') : ''
 
+  // DOC-TYPE-FILTER-1 / NOTES-DOC-FILTER-MENU-1 (Danny 08-08): the document-type
+  // filter moved BEHIND the shared DrawerFilterMenu instead of an inline dropdown
+  // next to search — filtering behaviour is unchanged, only where it lives changed.
+  const filterRows: DrawerFilterConfig[] = docTypes.length > 0 ? [{
+    type: 'single', key: 'docType', label: t('documents.type'), value: docTypeFilter, onChange: setDocTypeFilter,
+    allLabel: t('documents.allTypes', { defaultValue: 'Alle types' }),
+    options: docTypes.map(dt => ({ value: String(dt.value ?? dt.name ?? ''), label: docTypeLabel(String(dt.value ?? dt.name ?? '')) })),
+  }] : []
+
   return (
     <div>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
         <span style={{ fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em', color: 'var(--text-muted)' }}>{t('sections.documents')}</span>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '4px 8px', borderRadius: 6, border: '1px solid var(--border)', background: 'var(--bg)' }}>
-            <Search size={11} style={{ color: 'var(--text-muted)', flexShrink: 0 }} />
+        {/* FILTER-WIDTH-1 (Danny 08-08, punt 18 "filter bij documenten is te kort"):
+            this search box was the only documents toolbar still on a HARDCODED
+            width: 110 — barely room for one word, so a file name could not be
+            filtered. It now grows with the row (flex, minWidth floor) at the same
+            drill-down footprint the customer + vacancy documents bars already use
+            (6/10 padding, radius 8, fontSize 12) — one look, three entities. */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, flex: 1, minWidth: 0, justifyContent: 'flex-end' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6, flex: 1, minWidth: 150, padding: '6px 10px', borderRadius: 8, border: '1px solid var(--border)', background: 'var(--bg)' }}>
+            <Search size={13} style={{ color: 'var(--text-muted)', flexShrink: 0 }} />
             <input value={docSearch} onChange={e => setDocSearch(e.target.value)} placeholder={t('common:search')}
-              style={{ border: 'none', outline: 'none', fontSize: 11, color: 'var(--text)', background: 'none', width: 110 }} />
-            {docSearch && <button onClick={() => setDocSearch('')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: 0, display: 'flex' }}><X size={11} /></button>}
+              aria-label={t('common:search')}
+              style={{ border: 'none', outline: 'none', fontSize: 12, color: 'var(--text)', background: 'none', flex: 1, minWidth: 0 }} />
+            {/* Icon-only control needs a real accessible name (§6) — reuses the shared clear key. */}
+            {docSearch && <button onClick={() => setDocSearch('')} title={t('common:clear')} aria-label={t('common:clear')}
+              style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: 0, display: 'flex' }}><X size={12} /></button>}
           </div>
+          {/* NOTES-DOC-FILTER-MENU-1 (Danny 08-08): the type filter now lives BEHIND
+              this one compact Filter button instead of an inline dropdown — self-
+              hides when the tenant has no document types (DrawerFilterMenu renders
+              null on empty). */}
+          <DrawerFilterMenu filters={filterRows}
+            label={t('common:filters.button', { defaultValue: 'Filter' })}
+            title={t('common:filters.title')} clearAllLabel={t('common:filters.clearAll')} />
           {/* Soft-tint bulk-download + bulk-delete actions (§4) — only shown once something is
               selected. Point 4: download is a READ action (candidates.view, always available
               here); bulk-delete is a MANAGE action and only renders for a manager. */}
@@ -249,7 +381,7 @@ export default function DocumentsSection({ c, onRefresh }: { c: Candidate; onRef
             <>
               <button onClick={downloadSelected}
                 style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 11, fontWeight: 600, padding: '4px 10px', borderRadius: 99, cursor: 'pointer', whiteSpace: 'nowrap', flexShrink: 0,
-                  background: 'color-mix(in srgb, var(--color-primary) 14%, transparent)', color: 'var(--color-primary)',
+                  background: 'color-mix(in srgb, var(--color-primary) 14%, transparent)', color: 'var(--color-primary-text)',
                   border: '1px solid color-mix(in srgb, var(--color-primary) 45%, transparent)' }}>
                 <Download size={11} /> {t('documents.downloadSelected', { count: selected.size })}
               </button>
@@ -271,8 +403,10 @@ export default function DocumentsSection({ c, onRefresh }: { c: Candidate; onRef
       </div>
       <div style={sectionBlock}>
       {/* DOC-ENTRY-LINK-1 / DOC-LANG-SKILL-LINK-1: the "Koppelen aan" picker lives inside this queue (per file). */}
+      {/* REFERENTIE-VELDEN-1 gap closed: references are linkable at upload time too —
+          the queue used to omit them while the list row already offered them. */}
       <PendingUploadQueue pending={pending} docTypes={docTypes} educations={educationsForLink} certifications={certificationsForLink}
-        languages={languagesForLink} skills={skillsForLink}
+        languages={languagesForLink} skills={skillsForLink} references={referencesForLink}
         onSetType={setItemType} onSetAllTypes={setAllTypes} onSetLink={setItemLink} onRemove={removePending}
         onUploadAll={uploadAll} onCancel={cancelPending} />
       {docs.length === 0 && pending.length === 0 && <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{t('sections.documentsEmpty')}</div>}
@@ -289,6 +423,9 @@ export default function DocumentsSection({ c, onRefresh }: { c: Candidate; onRef
           const i = d._i
           const key = docKey(d, i)
           const downloadable = Boolean(docUrl(d))
+          // DOC-LIST-LINK-1: this row's resolved link (chip) + its "kind:id" composite
+          // (pre-fills the inline picker's current selection when re-linking).
+          const currentLink = resolveDocLink(d)
           return (
             <DocumentRow key={i} d={d} selected={selected.has(key)} downloadable={downloadable}
               onToggleSelect={() => toggleSelectedRow(key)} canManage={canManage}
@@ -301,6 +438,11 @@ export default function DocumentsSection({ c, onRefresh }: { c: Candidate; onRef
               onPreview={() => setPreviewDoc(d)}
               onDeleteRequest={() => setConfirmDelete({ kind: 'one', index: i })}
               docColor={docColor} docTypeLabel={docTypeLabel} docTypeIcon={docTypeIcon}
+              linked={currentLink} linking={linkingDoc === i} linkValue={currentLink ? `${currentLink.kind}:${currentLink.id}` : ''}
+              canLink={hasSelectableEntry(linkableLists, currentLink?.id)} onLinkToggle={() => setLinkingDoc(prev => (prev === i ? null : i))}
+              onLinkChange={value => relinkDocument(i, value)}
+              educations={educationsForLink} certifications={certificationsForLink} languages={languagesForLink} skills={skillsForLink}
+              references={referencesForLink}
             />
           )
         })

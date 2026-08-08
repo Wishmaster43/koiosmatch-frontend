@@ -59,7 +59,7 @@ export default function ReportFilterSidebar({
   // is selected by default and the chip row was just noise — Danny 2026-07-06).
   const chip = (chipKey: string, label: string, onRemove?: () => void) => (
     <span key={chipKey} style={{ display: 'flex', alignItems: 'center', gap: 4, maxWidth: '100%',
-      background: 'var(--color-primary-bg)', color: 'var(--color-primary)',
+      background: 'var(--color-primary-bg)', color: 'var(--color-primary-text)',
       borderRadius: 999, padding: '2px 8px', fontSize: 10.5, fontWeight: 500 }}>
       <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{label}</span>
       {onRemove && (
@@ -91,7 +91,7 @@ export default function ReportFilterSidebar({
         <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
           <span style={{ fontWeight: 600, fontSize: 12, color: 'var(--text)' }}>{heading}</span>
           {activeCount > 0 && (
-            <span style={{ background: 'var(--color-primary)', color: 'white',
+            <span style={{ background: 'var(--color-primary)', color: 'var(--color-on-accent)',
                            borderRadius: 999, padding: '1px 6px', fontSize: 10, fontWeight: 600 }}>
               {activeCount}
             </span>

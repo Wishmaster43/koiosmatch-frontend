@@ -88,7 +88,7 @@ export default function IncomingWebhooks() {
             style={{ flex: 1, padding: '8px 12px', fontSize: 13, border: '1px solid var(--border)', borderRadius: 8, outline: 'none', background: 'var(--surface)', color: 'var(--text)' }} />
         </div>
         <button onClick={create} disabled={!name.trim() || creating}
-          style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '8px 16px', fontSize: 13, fontWeight: 500, background: 'var(--color-primary)', color: 'white', border: 'none', borderRadius: 8, cursor: name.trim() ? 'pointer' : 'not-allowed', opacity: name.trim() ? 1 : 0.5 }}>
+          style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '8px 16px', fontSize: 13, fontWeight: 500, background: 'var(--color-primary)', color: 'var(--color-on-accent)', border: 'none', borderRadius: 8, cursor: name.trim() ? 'pointer' : 'not-allowed', opacity: name.trim() ? 1 : 0.5 }}>
           <Plus size={13} /> {creating ? t('webhooks.incoming.creating') : t('webhooks.incoming.create')}
         </button>
       </div>
@@ -126,7 +126,7 @@ export default function IncomingWebhooks() {
                   {editId === wh.id ? (
                     <>
                       <button onClick={() => saveEdit(wh.id)} title={t('common.save')}
-                        style={{ width: 28, height: 28, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--color-primary)', border: 'none', borderRadius: 6, cursor: 'pointer', color: '#fff' }}>
+                        style={{ width: 28, height: 28, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--color-primary)', border: 'none', borderRadius: 6, cursor: 'pointer', color: 'var(--color-on-accent)' }}>
                         <Save size={12} />
                       </button>
                       <button onClick={() => setEditId(null)} title={t('common.cancel')}

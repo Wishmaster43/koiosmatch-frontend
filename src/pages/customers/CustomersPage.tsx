@@ -320,7 +320,7 @@ export default function CustomersPage({ intent }: { intent?: unknown } = {}) {
                 {/* Add on the left (like Applications/Candidates) — BTN_H (§4/§9): one
                     explicit height for every text/action button, everywhere. */}
                 <button onClick={() => setAddOpen(true)} style={{ display: 'flex', alignItems: 'center', height: BTN_H, padding: '0 14px', fontSize: 13, fontWeight: 600,
-                  background: 'var(--color-primary)', color: '#fff', border: 'none', borderRadius: 8, cursor: 'pointer' }}>
+                  background: 'var(--color-primary)', color: 'var(--color-on-accent)', border: 'none', borderRadius: 8, cursor: 'pointer' }}>
                   + {t('page.add')}
                 </button>
                 {/* Shared header search (T10) — debounced, drives the same server-side ?search=. */}

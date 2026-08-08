@@ -8,12 +8,18 @@
  * way). (The live seed has no archived campaigns, so this wiring is verified here.)
  */
 import { describe, it, expect, vi, afterEach } from 'vitest'
-import { render, screen, fireEvent } from '@testing-library/react'
+import { render, screen, fireEvent, act } from '@testing-library/react'
 // Real i18n (nl) side-effect init so t() resolves genuine Dutch text.
 import '@/i18n'
 import nlCommon from '@/i18n/locales/nl/common.json'
 import nlOutreach from '@/i18n/locales/nl/outreach.json'
+
+// Read the label from the locale file itself — the tab used to render an English
+// defaultValue ("Stats") and now resolves the real key, so hardcoding either one
+// makes this test a hostage of translation work.
 import OutreachDrawer from './OutreachDrawer'
+
+const statsTabLabel = (nlOutreach as { drawer: { tabs: { stats: string } } }).drawer.tabs.stats
 
 // The detail hook is the drawer's only data source — stub it and observe the id it gets.
 // `detailReturn` is a per-test mutable override so individual tests can supply a real
@@ -25,15 +31,27 @@ const { detailMock, detailReturn } = vi.hoisted(() => ({
 vi.mock('./hooks/useOutreachDetail', () => ({
   useOutreachDetail: (id: string | null) => {
     detailMock(id)
-    return { detail: detailReturn.current, loading: false, error: false, setTargetStatus: vi.fn(), setTargetOutcome: vi.fn(), setOwner: vi.fn(), setCustomFields: vi.fn() }
+    return {
+      detail: detailReturn.current, loading: false, error: false,
+      setTargetStatus: vi.fn(), setTargetOutcome: vi.fn(), setOwner: vi.fn(), setCustomFields: vi.fn(),
+      // G29/G30: real functions so the prop-wiring test can assert their type.
+      setTargetNote: vi.fn(), assignTargets: vi.fn(),
+    }
   },
 }))
-// The targets tab has its own data needs — out of scope for the drawer wiring test.
-vi.mock('./drawer/TargetsTab', () => ({ default: () => null }))
+// The targets tab has its own data needs — out of scope for most drawer wiring
+// tests, but its PROPS are captured so the G29/G30/G31 wiring test (below) can
+// assert the drawer actually passes them through, not only that it compiles.
+const { targetsTabProps } = vi.hoisted(() => ({ targetsTabProps: { current: null as Record<string, unknown> | null } }))
+vi.mock('./drawer/TargetsTab', () => ({ default: (props: Record<string, unknown>) => { targetsTabProps.current = props; return null } }))
+// The Stats tab (G31) likewise captures its props (filter/onPick/onClear) so the
+// Stats-tab -> Targets-tab filter wiring can be asserted end-to-end.
+const { statsTabProps } = vi.hoisted(() => ({ statsTabProps: { current: null as Record<string, unknown> | null } }))
+vi.mock('./drawer/CampaignStatsTab', () => ({ default: (props: Record<string, unknown>) => { statsTabProps.current = props; return <div data-testid="stats-body" /> } }))
 // The changelog CONTENT has its own test (drawer/ChangelogTab.test.tsx); here we only
 // assert the drawer wires the shared popover shell into the title row.
 vi.mock('./drawer/ChangelogTab', () => ({ default: () => <div data-testid="changelog-body" /> }))
-vi.mock('@/lib/queries', () => ({ useUsers: () => ({ data: [] }) }))
+vi.mock('@/lib/queries', () => ({ useUsers: () => ({ data: [{ id: 'r1', name: 'Nora Recruiter' }] }) }))
 vi.mock('@/lib/useCustomFields', () => ({ useCustomFields: () => ({ fields: [] }) }))
 
 describe('OutreachDrawer — archived state', () => {
@@ -116,5 +134,62 @@ describe('OutreachDrawer — changelog icon (§3A(d))', () => {
     render(<OutreachDrawer id="c1" archived fallbackName="Bellijst Zorg" onClose={() => {}} />)
     openChangelog()
     expect(screen.getByTestId('changelog-body')).toBeInTheDocument()
+  })
+})
+
+// G29/G30/G31: the drawer wires assignTargets/setTargetNote into the Targets
+// tab, adds a Stats tab, and shares ONE filter axis between the two tabs — a
+// donut pick on Stats must actually narrow the Targets tab's list, not just
+// look like it does (§3A "a click genuinely does something").
+describe('OutreachDrawer — G29/G30/G31 wiring (assign, note, stats filter)', () => {
+  afterEach(() => { targetsTabProps.current = null; statsTabProps.current = null })
+
+  it('passes the assign/note mutations and recruiter options through to the Targets tab', () => {
+    render(<OutreachDrawer id="c1" onClose={() => {}} />)
+    expect(targetsTabProps.current?.onAssignTargets).toBeTypeOf('function')
+    expect(targetsTabProps.current?.onSetNote).toBeTypeOf('function')
+    expect(targetsTabProps.current?.recruiters).toEqual([{ value: 'r1', label: 'Nora Recruiter' }])
+    // No filter set yet — both tabs start in the "show everything" state.
+    expect(targetsTabProps.current?.filter).toBeNull()
+  })
+
+  it('renders a Stats tab next to the call list', () => {
+    render(<OutreachDrawer id="c1" onClose={() => {}} />)
+    expect(screen.getByRole('tab', { name: statsTabLabel })).toBeInTheDocument()
+  })
+
+  it('a Stats-tab donut pick sets the SAME filter the Targets tab reads', () => {
+    render(<OutreachDrawer id="c1" onClose={() => {}} />)
+    fireEvent.click(screen.getByRole('tab', { name: statsTabLabel }))
+    expect(statsTabProps.current?.filter).toBeNull()
+
+    // Simulate the donut click via the captured onPick prop (the donut/recharts
+    // click plumbing itself is CampaignStatsTab's own concern/test).
+    act(() => { (statsTabProps.current?.onPick as (axis: string, value: string) => void)('status', 'contacted') })
+
+    // Switch back to the call list — it now receives the SAME filter value.
+    fireEvent.click(screen.getByRole('tab', { name: nlOutreach.drawer.tabs.targets }))
+    expect(targetsTabProps.current?.filter).toEqual({ axis: 'status', value: 'contacted' })
+  })
+
+  it('clicking the same segment again clears the filter (toggle, mirrors the page-level insights row)', () => {
+    render(<OutreachDrawer id="c1" onClose={() => {}} />)
+    fireEvent.click(screen.getByRole('tab', { name: statsTabLabel }))
+    act(() => { (statsTabProps.current?.onPick as (axis: string, value: string) => void)('status', 'contacted') })
+    act(() => { (statsTabProps.current?.onPick as (axis: string, value: string) => void)('status', 'contacted') })
+    expect(statsTabProps.current?.filter).toBeNull()
+  })
+
+  it('resets the filter when the drawer switches to a different campaign', () => {
+    const { rerender } = render(<OutreachDrawer id="c1" onClose={() => {}} />)
+    fireEvent.click(screen.getByRole('tab', { name: statsTabLabel }))
+    act(() => { (statsTabProps.current?.onPick as (axis: string, value: string) => void)('status', 'contacted') })
+    expect(statsTabProps.current?.filter).toEqual({ axis: 'status', value: 'contacted' })
+
+    // A new entity id resets EntityDrawer's own activeTab to the first tab
+    // (Targets) too — read the filter back through that tab, which is the one
+    // still mounted on this render pass.
+    rerender(<OutreachDrawer id="c2" onClose={() => {}} />)
+    expect(targetsTabProps.current?.filter).toBeNull()
   })
 })

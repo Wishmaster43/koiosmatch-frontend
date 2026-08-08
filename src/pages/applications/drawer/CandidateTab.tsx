@@ -143,7 +143,7 @@ export default function CandidateTab({ application: a }: { application: Applicat
           {a.candidateId != null ? (
             <a href={buildEntityDeepLink('candidates', a.candidateId)} target="_blank" rel="noopener noreferrer"
               title={t('applications:drawer.openCandidate')} aria-label={t('applications:drawer.openCandidate')}
-              style={{ display: 'inline-flex', alignItems: 'center', gap: 5, fontSize: 12, flexShrink: 0, color: 'var(--color-primary)', textDecoration: 'none' }}>
+              style={{ display: 'inline-flex', alignItems: 'center', gap: 5, fontSize: 12, flexShrink: 0, color: 'var(--color-primary-text)', textDecoration: 'none' }}>
               <ExternalLink size={13} /> {t('applications:drawer.openCandidate')}
             </a>
           ) : (

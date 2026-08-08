@@ -5,6 +5,7 @@
  * UI-language list. Kept dumb (no API, no business logic).
  */
 import type { ComponentType, CSSProperties, ReactNode } from 'react'
+import { fieldInputStyle } from '@/components/forms/fieldMetrics'
 
 type IconComp = ComponentType<{ size?: number }>
 
@@ -48,13 +49,9 @@ export const ROLE_META: Record<string, { color: string; bg: string }> = {
   default:      { color: 'var(--text-muted)', bg: 'color-mix(in srgb, var(--text-muted) 12%, transparent)' },
 }
 
-// Shared text-input style for the profile forms.
-export const inputStyle: CSSProperties = {
-  width: '100%', padding: '9px 12px', fontSize: 13,
-  background: 'var(--input-bg)', color: 'var(--text)',
-  border: '1px solid var(--border)', borderRadius: 8, outline: 'none',
-  transition: 'border-color 0.15s',
-}
+// Shared text-input style for the profile forms (G33/fieldMetrics canon,
+// plus the border-color transition this screen already had on focus/hover).
+export const inputStyle: CSSProperties = { ...fieldInputStyle, transition: 'border-color 0.15s' }
 
 // Small coloured chip — used for roles and linked locations. Border uses
 // color-mix (not a hex-alpha string suffix) so it stays valid once `color` is a

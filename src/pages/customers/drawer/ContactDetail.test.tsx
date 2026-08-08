@@ -40,6 +40,13 @@ vi.mock('@/context/AuthContext', async () => {
   return { ...actual, useAuth: () => mockAuth.current }
 })
 
+// DD-FE-6 ("no empty tabs"): the Koppelingen sub-tab only lists when a connector
+// app is enabled — default both off (matches the pre-existing no-provider
+// behaviour every other test in this file already renders under).
+const mockUseApps = vi.fn<() => { isAppEnabled: (id: string) => boolean }>()
+vi.mock('@/context/AppsContext', () => ({ useApps: () => mockUseApps() }))
+beforeEach(() => { mockUseApps.mockReturnValue({ isAppEnabled: () => false }) })
+
 // Resolve the active locale's own copy so assertions never guess/hardcode a language.
 const ct = (key: string, opts?: Record<string, unknown>) => i18n.t(key, { ns: 'customers', ...opts })
 const cm = (key: string, opts?: Record<string, unknown>) => i18n.t(key, { ns: 'common', ...opts })
@@ -506,5 +513,26 @@ describe('ContactDetail · Conversaties sub-tab (GESPREK-CONTACT-1)', () => {
     await user.click(screen.getByRole('tab', { name: ct('contacts.detail.subtabs.conversations') }))
 
     await waitFor(() => expect(vi.mocked(api.get)).toHaveBeenCalledWith('/customers/cust-1/contacts/c1/conversations', { params: undefined }))
+  })
+})
+
+/**
+ * DD-FE-6 ("no empty tabs" — 08-08): this file passes no extra children into
+ * the shared BackofficeLinksTab, so with both connector apps off its body
+ * would render nothing (no card, no "Koppelen" button) — the sub-tab must not
+ * even be listed. useBackofficeLinksVisible drives the gate.
+ */
+describe('ContactDetail · Koppelingen sub-tab hidden when empty (DD-FE-6)', () => {
+  it('drops the Koppelingen sub-tab when no connector app is enabled', () => {
+    render(<ContactDetail contact={baseContact()} locations={locations} departments={departments} statuses={statuses}
+      onSave={vi.fn()} onDelete={vi.fn()} close={vi.fn()} />)
+    expect(screen.queryByRole('tab', { name: cm('backofficeLinks.tabLabel') })).not.toBeInTheDocument()
+  })
+
+  it('lists Koppelingen once a connector app (HelloFlex) is enabled', () => {
+    mockUseApps.mockReturnValue({ isAppEnabled: (id: string) => id === 'hf' })
+    render(<ContactDetail contact={baseContact()} locations={locations} departments={departments} statuses={statuses}
+      onSave={vi.fn()} onDelete={vi.fn()} close={vi.fn()} />)
+    expect(screen.getByRole('tab', { name: cm('backofficeLinks.tabLabel') })).toBeInTheDocument()
   })
 })

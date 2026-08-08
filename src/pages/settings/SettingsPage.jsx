@@ -12,7 +12,7 @@
  * Everything is driven by ./registry.jsx — add a setting there (a `schema` for the
  * simple ones), no shell changes needed.
  */
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useId, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Search } from 'lucide-react'
 import { useAuth } from '@/context/AuthContext'
@@ -24,6 +24,9 @@ import { SettingsDirtyContext } from './lib/settingsDirty'
 import SettingItem from './components/SettingItem'
 import SettingsTabs from './components/SettingsTabs'
 import SettingsSearch from './components/SettingsSearch'
+// THE RULE (Danny 08-08, §4): searchable dropdown everywhere, no exceptions for
+// short lists — replaces the mobile category native <select> below.
+import SelectMenu from '@/components/ui/SelectMenu'
 
 // SM-MODULE-TABS-1: a nav item may declare `requiresModuleOrApp: { module, app }` to
 // stay visible when EITHER the tenant module OR the app/koppeling flag is on (a plain
@@ -96,6 +99,9 @@ export default function SettingsPage() {
   const [category, setCategory] = useState(initial.category)
   const [tab,      setTab]      = useState(initial.tab)
   const [searchOpen, setSearchOpen] = useState(false)
+  // Names the mobile category SelectMenu (its trigger is a <button>, not labelable
+  // via htmlFor/aria-label — see SelectMenu's own doc comment) via a sr-only span.
+  const categoryPickerLabelId = useId()
 
   // Dirty-guard: migrated sections report through this; we confirm before leaving.
   const dirtyRef = useRef(false)
@@ -200,11 +206,13 @@ export default function SettingsPage() {
                   padding: '8px 10px', borderRadius: 8, border: 'none', cursor: 'pointer',
                   fontSize: 13, fontWeight: isActive ? 600 : 500, textAlign: 'left', marginBottom: 2,
                   background: isActive ? 'var(--color-primary-bg)' : 'transparent',
-                  color: isActive ? 'var(--color-primary)' : 'var(--text)', transition: 'background 0.12s',
+                  // Active label uses the READABLE accent variant — a light brand
+                  // (yellow) would otherwise print accent-on-accent-tint (Danny 08-08).
+                  color: isActive ? 'var(--color-primary-text)' : 'var(--text)', transition: 'background 0.12s',
                 }}
                 onMouseEnter={e => { if (!isActive) e.currentTarget.style.background = 'var(--hover-bg)' }}
                 onMouseLeave={e => { if (!isActive) e.currentTarget.style.background = 'transparent' }}>
-                {Icon && <Icon size={15} style={{ flexShrink: 0, color: isActive ? 'var(--color-primary)' : 'var(--text-muted)' }} />}
+                {Icon && <Icon size={15} style={{ flexShrink: 0, color: isActive ? 'var(--color-primary-text)' : 'var(--text-muted)' }} />}
                 {t(`groups.${group.key}`)}
               </button>
             )
@@ -213,19 +221,17 @@ export default function SettingsPage() {
 
         {/* ── Content ── */}
         <div style={{ flex: 1, overflowY: 'auto', padding: 32, minWidth: 0 }}>
-          {/* Mobile category selector (sidebar is hidden). DELIBERATE DEVIATION from the
-              shared SearchSelect (audit finding, house rule §4/§11): on touch devices a
-              native <select> opens the OS's own picker sheet — full-height, one-thumb
-              scrollable, no custom-overlay hit-testing quirks — which beats our SearchSelect
-              popover specifically on small screens. Desktop keeps the real sidebar (above)
-              and never sees this control. Kept as a native select on purpose; do not convert. */}
+          {/* Mobile category selector (sidebar is hidden). PREVIOUSLY a deliberate native
+              <select> (the OS's own full-height picker sheet beats a popover on touch) —
+              superseded by Danny's emphatic 08-08 rule (§4): ALWAYS a searchable dropdown,
+              no exceptions for short lists. Desktop keeps the real sidebar (above) and
+              never sees this control. */}
           {currentGroup && (
             <div className="md:hidden" style={{ display: 'flex', gap: 8, marginBottom: 20 }}>
-              <select value={category} onChange={e => selectCategory(e.target.value)}
-                style={{ flex: 1, height: 38, padding: '0 10px', fontSize: 14, border: '1px solid var(--border)',
-                         borderRadius: 9, background: 'var(--surface)', color: 'var(--text)' }}>
-                {visibleGroups.map(g => <option key={g.key} value={g.key}>{t(`groups.${g.key}`)}</option>)}
-              </select>
+              <span id={categoryPickerLabelId} className="sr-only">{t('shell.categoryPicker')}</span>
+              <SelectMenu aria-labelledby={categoryPickerLabelId} value={category} onChange={selectCategory}
+                options={visibleGroups.map(g => ({ value: g.key, label: t(`groups.${g.key}`) }))}
+                style={{ flex: 1, height: 38, fontSize: 14 }} />
               <button onClick={() => setSearchOpen(true)} aria-label={t('shell.search')}
                 style={{ width: 38, height: 38, display: 'flex', alignItems: 'center', justifyContent: 'center',
                          border: '1px solid var(--border)', borderRadius: 9, background: 'var(--surface)', cursor: 'pointer' }}>

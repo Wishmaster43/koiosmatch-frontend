@@ -134,7 +134,7 @@ export default function PriceAgreementForm({ draft, onChange, onSave, onCancel, 
           {t('drawer.cancel')}
         </button>
         <button onClick={onSave} disabled={saving || !isDraftValid(draft)}
-          style={{ height: 30, padding: '0 14px', fontSize: 12, fontWeight: 600, border: 'none', borderRadius: 7, background: 'var(--color-primary)', color: '#fff', cursor: 'pointer', opacity: isDraftValid(draft) ? 1 : 0.4 }}>
+          style={{ height: 30, padding: '0 14px', fontSize: 12, fontWeight: 600, border: 'none', borderRadius: 7, background: 'var(--color-primary)', color: 'var(--color-on-accent)', cursor: 'pointer', opacity: isDraftValid(draft) ? 1 : 0.4 }}>
           {saveLabel}
         </button>
       </div>

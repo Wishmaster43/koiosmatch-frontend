@@ -5,13 +5,16 @@
  * through SafeHtml). The `<>` toggle swaps the WYSIWYG view for a raw-HTML textarea
  * so you can inspect/fix the markup.
  */
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useId, useMemo, useState } from 'react'
 import type { CSSProperties, ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useEditor, EditorContent } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
 import TextAlign from '@tiptap/extension-text-align'
 import { Bold, Italic, List, ListOrdered, Heading2, AlignLeft, AlignCenter, AlignRight, Undo2, Redo2, Maximize2, Minimize2, Code } from 'lucide-react'
+import SelectMenu from './SelectMenu'
+import RichTextAssistBar from './RichTextAssistBar'
+import type { RichTextAssistMode } from './richtext/richTextAssistApi'
 
 // Toolbar-tooltip keys (common:editor.*) — the component translates its own
 // defaults (audit R2: four features each shipped a hardcoded-English copy of
@@ -46,9 +49,20 @@ interface RichTextEditorProps {
   // Host-supplied toolbar control(s) rendered next to the language picker —
   // e.g. the note composer's dictation mic (Danny 08-08: "mic naast de taal").
   toolbarExtra?: ReactNode
+  // KOIOS-ASSIST-TEXTFIELDS (Danny 08-08 "alle omschrijvingen moeten ook een mic
+  // functionaliteit hebben en Koios AI"): the shared RichTextAssistBar (mic +
+  // Koios assist) mounts on EVERY editor by default. Mounted HERE rather than
+  // hand-passed through `toolbarExtra` at ~30 call sites on purpose — that is
+  // exactly the copy-per-screen drift §11 forbids, and it would have meant
+  // editing every entity page (several of them frozen drill-downs) to add the
+  // same three props. Opt out with `assist={false}` when the host supplies its
+  // own (the note composer does).
+  assist?: boolean
+  // Which assist modes the bar offers; `[]` = dictation mic only.
+  assistModes?: RichTextAssistMode[]
 }
 
-export default function RichTextEditor({ value, onChange, expanded, onToggleExpand, labels = {}, fill = false, minHeight = 120, resizable = false, language, onLanguageChange, showLanguage = true, toolbarExtra }: RichTextEditorProps) {
+export default function RichTextEditor({ value, onChange, expanded, onToggleExpand, labels = {}, fill = false, minHeight = 120, resizable = false, language, onLanguageChange, showLanguage = true, toolbarExtra, assist = true, assistModes }: RichTextEditorProps) {
   // Merge caller overrides over the i18n'd defaults (common:editor.*).
   const { t, i18n } = useTranslation('common')
   // Effective spellcheck language: caller-controlled wins, else local choice, else app language.
@@ -64,6 +78,10 @@ export default function RichTextEditor({ value, onChange, expanded, onToggleExpa
   }), [t, labels])
   // Raw-HTML source mode — edit the markup directly to spot/fix errors.
   const [htmlMode, setHtmlMode] = useState(false)
+  // Names the language SelectMenu trigger via aria-labelledby (a <button> is not
+  // labelable via htmlFor) — an sr-only span carries the explicit "Taal"/"Language"
+  // name, since the visible trigger text is the 2-letter code, not the field name.
+  const langLabelId = useId()
 
   const editor = useEditor({
     // StarterKit already includes underline; adding it again triggers a duplicate-extension warning.
@@ -109,7 +127,9 @@ export default function RichTextEditor({ value, onChange, expanded, onToggleExpa
 
   const btn = (active: boolean): CSSProperties => ({
     padding: '4px 7px', fontSize: 12, borderRadius: 5, cursor: 'pointer',
-    background: active ? 'var(--color-primary)' : 'none', color: active ? 'white' : 'var(--text-muted)',
+    // Active toolbar buttons fill with the accent — the glyph follows the tenant's
+    // on-accent contrast token instead of a hardcoded white (2026-08-08).
+    background: active ? 'var(--color-primary)' : 'none', color: active ? 'var(--color-on-accent)' : 'var(--text-muted)',
     border: 'none', display: 'flex', alignItems: 'center',
   })
 
@@ -136,17 +156,25 @@ export default function RichTextEditor({ value, onChange, expanded, onToggleExpa
           </>
         )}
         <div style={{ flex: 1 }} />
+        {/* Dictation mic + Koios assist on EVERY free-text field — one shared
+            component, driven by this editor's own value/onChange and language. */}
+        {assist && (
+          <RichTextAssistBar value={value || ''} onChange={onChange} language={lang} modes={assistModes} />
+        )}
         {/* Host toolbar control(s) — e.g. the notes dictation mic, next to the language picker. */}
         {toolbarExtra}
-        {/* TAAL-SPELL-1: compact spellcheck-language picker (uppercase codes). */}
+        {/* TAAL-SPELL-1: compact spellcheck-language picker (uppercase codes) — the
+            shared searchable SelectMenu (CLAUDE.md §4), never a bare native <select>.
+            `display: contents` keeps the sr-only label out of the toolbar's flex
+            flow so the trigger's own footprint/gap is unchanged. */}
         {showLanguage && (
-          <select value={lang} onChange={e => pickLang(e.target.value)}
-            title={t('editor.language', { defaultValue: 'Taal' })}
-            aria-label={t('editor.language', { defaultValue: 'Taal' })}
-            style={{ fontSize: 11, padding: '2px 4px', borderRadius: 5, cursor: 'pointer',
-              border: '1px solid var(--border)', background: 'var(--surface)', color: 'var(--text-muted)' }}>
-            {EDITOR_LANGS.map(l => <option key={l} value={l}>{l.toUpperCase()}</option>)}
-          </select>
+          <span style={{ display: 'contents' }} title={t('editor.language', { defaultValue: 'Taal' })}>
+            <span id={langLabelId} className="sr-only">{t('editor.language', { defaultValue: 'Taal' })}</span>
+            <SelectMenu aria-labelledby={langLabelId} value={lang} onChange={pickLang}
+              options={EDITOR_LANGS.map(l => ({ value: l, label: l.toUpperCase() }))}
+              menuWidth={70}
+              style={{ fontSize: 11, padding: '2px 4px', width: 'auto', background: 'var(--surface)', color: 'var(--text-muted)' }} />
+          </span>
         )}
         {/* HTML source toggle */}
         <button style={btn(htmlMode)} onClick={toggleHtml} title={lab.html ?? 'HTML'}><Code size={13} /></button>

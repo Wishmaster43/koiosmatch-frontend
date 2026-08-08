@@ -3,6 +3,12 @@
  * bug: picking several files used to collapse to `files?.[0]`, silently dropping
  * everything else. These tests assert the REQUEST (§13) — every queued file gets
  * its own POST with its own `type`, not just that a callback fired.
+ *
+ * G34: the per-row type picker and the "Koppelen aan" link picker are the house
+ * SelectMenu (a <button>+popover), not native <select>s — every mutation
+ * ASSERTION below (api.post/api.patch route + body) is unchanged; only the
+ * interaction that reaches it (click-open + click-option, instead of
+ * `user.selectOptions`) is updated. Mirrors customers/drawer/DocumentsTab.test.tsx.
  */
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { render, screen, fireEvent, within, waitFor } from '@testing-library/react'
@@ -68,6 +74,29 @@ const getFileInput = (container: HTMLElement) => container.querySelector('input[
 // distinguishes it from the main upload input once both are in the DOM.
 const getReplaceFileInput = (container: HTMLElement) => container.querySelector('input[type="file"]:not([multiple])') as HTMLInputElement
 
+// G34: the per-queued-file type picker is the house SelectMenu, not a native
+// <select> — every trigger shares the SAME accessible-name prefix (this test file
+// never bootstraps real i18n, so the interpolated `{name}` in documents.docTypeFor
+// never resolves; production i18n differentiates them for real). Opening a trigger
+// scopes the option query to its OWN wrapper div, so it never collides with the
+// always-visible "apply to all" chips or another row's picker.
+const getTypeTriggers = () => screen.getAllByRole('button', { name: /documents\.docTypeFor/ })
+const pickRowType = async (user: ReturnType<typeof userEvent.setup>, rowIndex: number, label: string) => {
+  const trigger = getTypeTriggers()[rowIndex]
+  await user.click(trigger)
+  const menu = trigger.closest('div') as HTMLElement
+  await user.click(await within(menu).findByRole('button', { name: label }))
+}
+// G34: the "Koppelen aan" link picker (DocumentLinkPicker) is the house SelectMenu
+// too — same idiom, distinct accessible-name prefix (documents.linkToFor).
+const getLinkTriggers = () => screen.queryAllByRole('button', { name: /documents\.linkToFor/ })
+const pickLink = async (user: ReturnType<typeof userEvent.setup>, rowIndex: number, label: string) => {
+  const trigger = getLinkTriggers()[rowIndex]
+  await user.click(trigger)
+  const menu = trigger.closest('div') as HTMLElement
+  await user.click(await within(menu).findByRole('button', { name: label }))
+}
+
 describe('DocumentsSection · multi-file upload queue', () => {
   beforeEach(() => {
     vi.clearAllMocks()
@@ -86,7 +115,7 @@ describe('DocumentsSection · multi-file upload queue', () => {
 
     // Two files picked → the summary header shows the count, not a single filename.
     expect(screen.getByText('documents.pendingCount')).toBeInTheDocument()
-    expect(screen.getAllByRole('combobox')).toHaveLength(2)
+    expect(getTypeTriggers()).toHaveLength(2)
 
     await user.click(screen.getByRole('button', { name: 'documents.addAll' }))
 
@@ -101,14 +130,19 @@ describe('DocumentsSection · multi-file upload queue', () => {
     ]))
   })
 
-  it('uploads each queued file with its OWN type when a row select is changed', async () => {
+  it('is no longer a native <select> — the per-row type picker is the house SelectMenu', () => {
+    const { container } = render(<DocumentsSection c={candidate()} />)
+    fireEvent.change(getFileInput(container), { target: { files: [fileA, fileB] } })
+    expect(container.querySelector('select')).toBeNull()
+  })
+
+  it('uploads each queued file with its OWN type when a row\'s type picker is changed', async () => {
     const user = userEvent.setup()
     const { container } = render(<DocumentsSection c={candidate()} />)
     fireEvent.change(getFileInput(container), { target: { files: [fileA, fileB] } })
 
     // Change only the second row's type — the first must stay on the default.
-    const selects = screen.getAllByRole('combobox')
-    await user.selectOptions(selects[1], 'Diploma')
+    await pickRowType(user, 1, 'Diploma')
 
     await user.click(screen.getByRole('button', { name: 'documents.addAll' }))
 
@@ -124,9 +158,9 @@ describe('DocumentsSection · multi-file upload queue', () => {
 
     await user.click(screen.getByRole('button', { name: 'Diploma' }))
 
-    const selects = screen.getAllByRole('combobox')
-    expect(selects[0]).toHaveValue('Diploma')
-    expect(selects[1]).toHaveValue('Diploma')
+    const triggers = getTypeTriggers()
+    expect(triggers[0]).toHaveTextContent('Diploma')
+    expect(triggers[1]).toHaveTextContent('Diploma')
   })
 
   it('a per-row remove drops only that item and revokes its own object URL', async () => {
@@ -138,7 +172,7 @@ describe('DocumentsSection · multi-file upload queue', () => {
     await user.click(removeButtons[0])
 
     expect(URL.revokeObjectURL).toHaveBeenCalledWith('blob:a.pdf')
-    expect(screen.getAllByRole('combobox')).toHaveLength(1)
+    expect(getTypeTriggers()).toHaveLength(1)
     expect(screen.queryAllByText('a.pdf')).toHaveLength(0)
     // The single remaining item's name now shows twice (summary header + row) — that's fine.
     expect(screen.getAllByText('b.pdf').length).toBeGreaterThan(0)
@@ -341,39 +375,39 @@ describe('DocumentsSection · DOC-ENTRY-LINK-1 upload + link', () => {
   it('hides the "Koppelen aan" picker entirely when the candidate has no education/certification to link', () => {
     const { container } = render(<DocumentsSection c={candidate()} />)
     fireEvent.change(getFileInput(container), { target: { files: [fileA] } })
-    // Only the doc-type select — no fake affordance offering nothing to pick.
-    expect(screen.getAllByRole('combobox')).toHaveLength(1)
+    // Only the doc-type picker — no fake affordance offering nothing to pick.
+    expect(getTypeTriggers()).toHaveLength(1)
+    expect(getLinkTriggers()).toHaveLength(0)
   })
 
   it('shows the grouped "Koppelen aan" picker (education + certification) when the candidate has both', () => {
     const { container } = render(<DocumentsSection c={withLinkables()} />)
     fireEvent.change(getFileInput(container), { target: { files: [fileA] } })
-    // Doc type + "Koppelen aan" = two comboboxes for this one queued file.
-    expect(screen.getAllByRole('combobox')).toHaveLength(2)
+    // Doc type + "Koppelen aan" = one of each picker for this one queued file.
+    expect(getTypeTriggers()).toHaveLength(1)
+    expect(getLinkTriggers()).toHaveLength(1)
   })
 
   it('PATCHes the picked EDUCATION with the new document id after a successful upload', async () => {
     const user = userEvent.setup()
     const { container } = render(<DocumentsSection c={withLinkables()} />)
     fireEvent.change(getFileInput(container), { target: { files: [fileA] } })
-    const selects = screen.getAllByRole('combobox')
-    await user.selectOptions(selects[1], 'education:e1')
+    await pickLink(user, 0, 'sections.education · Verpleegkunde')
     // Two "common:add" buttons exist here: the persistent header "+" trigger and
     // this queue's own upload button — the queue's is always the LAST in the DOM.
     await user.click(screen.getAllByRole('button', { name: 'common:add' }).at(-1)!)
-    await waitFor(() => expect(api.patch).toHaveBeenCalledWith('/candidates/c1/educations/e1', { document_id: 101 }))
+    await waitFor(() => expect(api.patch).toHaveBeenCalledWith('/candidates/c1/educations/e1', { document_id: 101 }, { quietStatuses: [422] }))
   })
 
   it('PATCHes the picked CERTIFICATION with the new document id after a successful upload', async () => {
     const user = userEvent.setup()
     const { container } = render(<DocumentsSection c={withLinkables()} />)
     fireEvent.change(getFileInput(container), { target: { files: [fileA] } })
-    const selects = screen.getAllByRole('combobox')
-    await user.selectOptions(selects[1], 'certification:cert1')
+    await pickLink(user, 0, 'sections.certifications · VCA Basis')
     // Two "common:add" buttons exist here: the persistent header "+" trigger and
     // this queue's own upload button — the queue's is always the LAST in the DOM.
     await user.click(screen.getAllByRole('button', { name: 'common:add' }).at(-1)!)
-    await waitFor(() => expect(api.patch).toHaveBeenCalledWith('/candidates/c1/certifications/cert1', { document_id: 101 }))
+    await waitFor(() => expect(api.patch).toHaveBeenCalledWith('/candidates/c1/certifications/cert1', { document_id: 101 }, { quietStatuses: [422] }))
   })
 
   it('never fires the link PATCH when nothing was picked (plain upload)', async () => {
@@ -392,8 +426,7 @@ describe('DocumentsSection · DOC-ENTRY-LINK-1 upload + link', () => {
     const onRefresh = vi.fn()
     const { container } = render(<DocumentsSection c={withLinkables()} onRefresh={onRefresh} />)
     fireEvent.change(getFileInput(container), { target: { files: [fileA] } })
-    const selects = screen.getAllByRole('combobox')
-    await user.selectOptions(selects[1], 'education:e1')
+    await pickLink(user, 0, 'sections.education · Verpleegkunde')
     // Two "common:add" buttons exist here: the persistent header "+" trigger and
     // this queue's own upload button — the queue's is always the LAST in the DOM.
     await user.click(screen.getAllByRole('button', { name: 'common:add' }).at(-1)!)
@@ -406,8 +439,7 @@ describe('DocumentsSection · DOC-ENTRY-LINK-1 upload + link', () => {
     const onRefresh = vi.fn()
     const { container } = render(<DocumentsSection c={withLinkables()} onRefresh={onRefresh} />)
     fireEvent.change(getFileInput(container), { target: { files: [fileA] } })
-    const selects = screen.getAllByRole('combobox')
-    await user.selectOptions(selects[1], 'education:e1')
+    await pickLink(user, 0, 'sections.education · Verpleegkunde')
     // Two "common:add" buttons exist here: the persistent header "+" trigger and
     // this queue's own upload button — the queue's is always the LAST in the DOM.
     await user.click(screen.getAllByRole('button', { name: 'common:add' }).at(-1)!)
@@ -439,36 +471,36 @@ describe('DocumentsSection · DOC-LANG-SKILL-LINK-1 upload + link (languages/ski
   it('shows the grouped "Koppelen aan" picker (language + skill) when the candidate has both', () => {
     const { container } = render(<DocumentsSection c={withLinkables()} />)
     fireEvent.change(getFileInput(container), { target: { files: [fileA] } })
-    // Doc type + "Koppelen aan" = two comboboxes for this one queued file.
-    expect(screen.getAllByRole('combobox')).toHaveLength(2)
+    // Doc type + "Koppelen aan" = one of each picker for this one queued file.
+    expect(getTypeTriggers()).toHaveLength(1)
+    expect(getLinkTriggers()).toHaveLength(1)
   })
 
   it('a legacy skill entry with no id is never offered as a link target (no fake affordance)', () => {
     const noIdSkill: Candidate = { id: 'c1', documents: [], skills: ['Heftruck rijden'] } as unknown as Candidate
     const { container } = render(<DocumentsSection c={noIdSkill} />)
     fireEvent.change(getFileInput(container), { target: { files: [fileA] } })
-    // Only the doc-type select — the plain-string legacy skill has nothing a PATCH could target.
-    expect(screen.getAllByRole('combobox')).toHaveLength(1)
+    // Only the doc-type picker — the plain-string legacy skill has nothing a PATCH could target.
+    expect(getTypeTriggers()).toHaveLength(1)
+    expect(getLinkTriggers()).toHaveLength(0)
   })
 
   it('PATCHes the picked LANGUAGE with the new document id after a successful upload', async () => {
     const user = userEvent.setup()
     const { container } = render(<DocumentsSection c={withLinkables()} />)
     fireEvent.change(getFileInput(container), { target: { files: [fileA] } })
-    const selects = screen.getAllByRole('combobox')
-    await user.selectOptions(selects[1], 'language:lang1')
+    await pickLink(user, 0, 'sections.languages · Engels')
     await user.click(screen.getAllByRole('button', { name: 'common:add' }).at(-1)!)
-    await waitFor(() => expect(api.patch).toHaveBeenCalledWith('/candidates/c1/languages/lang1', { document_id: 101 }))
+    await waitFor(() => expect(api.patch).toHaveBeenCalledWith('/candidates/c1/languages/lang1', { document_id: 101 }, { quietStatuses: [422] }))
   })
 
   it('PATCHes the picked SKILL with the new document id after a successful upload', async () => {
     const user = userEvent.setup()
     const { container } = render(<DocumentsSection c={withLinkables()} />)
     fireEvent.change(getFileInput(container), { target: { files: [fileA] } })
-    const selects = screen.getAllByRole('combobox')
-    await user.selectOptions(selects[1], 'skill:skill1')
+    await pickLink(user, 0, 'sections.skills · Heftruck rijden')
     await user.click(screen.getAllByRole('button', { name: 'common:add' }).at(-1)!)
-    await waitFor(() => expect(api.patch).toHaveBeenCalledWith('/candidates/c1/skills/skill1', { document_id: 101 }))
+    await waitFor(() => expect(api.patch).toHaveBeenCalledWith('/candidates/c1/skills/skill1', { document_id: 101 }, { quietStatuses: [422] }))
   })
 
   it('calls onRefresh after a successful language link PATCH, so the Achtergrond tab remounts with the fresh link', async () => {
@@ -476,10 +508,243 @@ describe('DocumentsSection · DOC-LANG-SKILL-LINK-1 upload + link (languages/ski
     const onRefresh = vi.fn()
     const { container } = render(<DocumentsSection c={withLinkables()} onRefresh={onRefresh} />)
     fireEvent.change(getFileInput(container), { target: { files: [fileA] } })
-    const selects = screen.getAllByRole('combobox')
-    await user.selectOptions(selects[1], 'skill:skill1')
+    await pickLink(user, 0, 'sections.skills · Heftruck rijden')
     await user.click(screen.getAllByRole('button', { name: 'common:add' }).at(-1)!)
     await waitFor(() => expect(onRefresh).toHaveBeenCalledTimes(1))
+  })
+})
+
+/**
+ * DOC-LIST-LINK-1 (Danny 08-08 "je ziet hier niet waaraan een document gekoppeld
+ * is en je kan de koppeling niet wijzigen"): the LIST row now shows the resolved
+ * link as a chip (education_id/certification_id/language_id/skill_id from
+ * DocumentResource) and can change/clear it via the inline "Koppelen aan" picker.
+ * Asserts the REQUEST (§13): route + body, including the clear-then-set order
+ * relinkDocument uses when moving a link from one entry to another.
+ */
+describe('DocumentsSection · DOC-LIST-LINK-1 list row link chip + relink/clear', () => {
+  const linkables = () => ({
+    educations: [{ id: 'e1', title: 'Verpleegkunde' }],
+    certifications: [{ id: 'cert1', name: 'VCA Basis' }],
+  })
+  // A document already linked to the education (mirrors the real DocumentResource
+  // contract: education_id is the reverse-FK id, not a column on the document itself).
+  const linkedDoc = { id: 'doc1', name: 'diploma.pdf', type: 'Diploma', size: '10 KB', url: '/x', education_id: 'e1' }
+  const unlinkedDoc = { id: 'doc1', name: 'diploma.pdf', type: 'Diploma', size: '10 KB', url: '/x' }
+  const withDocs = (doc: Record<string, unknown>): Candidate => ({ id: 'c1', documents: [doc], ...linkables() } as unknown as Candidate)
+
+  beforeEach(() => {
+    vi.clearAllMocks()
+    vi.stubGlobal('URL', { createObjectURL: vi.fn(), revokeObjectURL: vi.fn() })
+  })
+  afterEach(() => vi.unstubAllGlobals())
+
+  it('shows the linked education\'s own label as a chip on the row', () => {
+    render(<DocumentsSection c={withDocs(linkedDoc)} />)
+    expect(screen.getByText('Verpleegkunde')).toBeInTheDocument()
+  })
+
+  it('renders no chip at all for a document with no link (never an empty chip)', () => {
+    render(<DocumentsSection c={withDocs(unlinkedDoc)} />)
+    expect(screen.queryByTitle('documents.linkedTo')).not.toBeInTheDocument()
+  })
+
+  it('hides the "change link" control when the candidate has nothing to link to', () => {
+    render(<DocumentsSection c={{ id: 'c1', documents: [unlinkedDoc] } as unknown as Candidate} />)
+    expect(screen.queryByRole('button', { name: 'documents.changeLink' })).not.toBeInTheDocument()
+  })
+
+  it('hides the "change link" control for a not-yet-persisted (optimistic) row', () => {
+    const tempDoc = { id: -1753280000000, name: 'pending.pdf', type: 'CV' }
+    render(<DocumentsSection c={withDocs(tempDoc)} />)
+    expect(screen.queryByRole('button', { name: 'documents.changeLink' })).not.toBeInTheDocument()
+  })
+
+  it('linking a previously UNLINKED document PATCHes only the new relation (no clear call)', async () => {
+    const user = userEvent.setup()
+    render(<DocumentsSection c={withDocs(unlinkedDoc)} />)
+    await user.click(screen.getByRole('button', { name: 'documents.changeLink' }))
+    await pickLink(user, 0, 'sections.education · Verpleegkunde')
+    await waitFor(() => expect(api.patch).toHaveBeenCalledWith('/candidates/c1/educations/e1', { document_id: 'doc1' }, { quietStatuses: [422] }))
+    expect(api.patch).toHaveBeenCalledTimes(1)
+    expect(await screen.findByText('Verpleegkunde')).toBeInTheDocument()
+  })
+
+  it('RE-linking from education to certification CLEARS the old side FIRST, then sets the new one', async () => {
+    const user = userEvent.setup()
+    render(<DocumentsSection c={withDocs(linkedDoc)} />)
+    await user.click(screen.getByRole('button', { name: 'documents.changeLink' }))
+    await pickLink(user, 0, 'sections.certifications · VCA Basis')
+    await waitFor(() => expect(api.patch).toHaveBeenCalledTimes(2))
+    const calls = vi.mocked(api.patch).mock.calls
+    // Order matters: the old link is cleared BEFORE the new one is set (measured
+    // live 08-08 — setting the new side first left BOTH sides pointing at the
+    // same document on the real API).
+    expect(calls[0]).toEqual(['/candidates/c1/educations/e1', { document_id: null }, { quietStatuses: [422] }])
+    expect(calls[1]).toEqual(['/candidates/c1/certifications/cert1', { document_id: 'doc1' }, { quietStatuses: [422] }])
+    expect(await screen.findByText('VCA Basis')).toBeInTheDocument()
+    expect(screen.queryByText('Verpleegkunde')).not.toBeInTheDocument()
+  })
+
+  it('clearing an existing link PATCHes document_id: null and the chip disappears', async () => {
+    const user = userEvent.setup()
+    render(<DocumentsSection c={withDocs(linkedDoc)} />)
+    await user.click(screen.getByRole('button', { name: 'documents.changeLink' }))
+    // The blank "documents.linkTo" option is the explicit "no link" choice.
+    await pickLink(user, 0, 'documents.linkTo')
+    await waitFor(() => expect(api.patch).toHaveBeenCalledWith('/candidates/c1/educations/e1', { document_id: null }, { quietStatuses: [422] }))
+    expect(api.patch).toHaveBeenCalledTimes(1)
+    await waitFor(() => expect(screen.queryByText('Verpleegkunde')).not.toBeInTheDocument())
+  })
+
+  it('calls onRefresh after a successful relink, so the Achtergrond tab remounts with the fresh link', async () => {
+    const user = userEvent.setup()
+    const onRefresh = vi.fn()
+    render(<DocumentsSection c={withDocs(unlinkedDoc)} onRefresh={onRefresh} />)
+    await user.click(screen.getByRole('button', { name: 'documents.changeLink' }))
+    await pickLink(user, 0, 'sections.education · Verpleegkunde')
+    await waitFor(() => expect(onRefresh).toHaveBeenCalledTimes(1))
+  })
+
+  it('keeps the OLD chip and surfaces the server error when a relink PATCH is REJECTED', async () => {
+    vi.mocked(api.patch).mockRejectedValueOnce({ response: { data: { message: 'Koppelen mislukt' } } })
+    const user = userEvent.setup()
+    const onRefresh = vi.fn()
+    render(<DocumentsSection c={withDocs(linkedDoc)} onRefresh={onRefresh} />)
+    await user.click(screen.getByRole('button', { name: 'documents.changeLink' }))
+    await pickLink(user, 0, 'sections.certifications · VCA Basis')
+    await waitFor(() => expect(notifyError).toHaveBeenCalledWith('Koppelen mislukt'))
+    // The optimistic swap never happened — the original link is still shown, and
+    // the OTHER tab is never told to refresh with a link that never actually changed.
+    expect(screen.getByText('Verpleegkunde')).toBeInTheDocument()
+    expect(screen.queryByText('VCA Basis')).not.toBeInTheDocument()
+    expect(onRefresh).not.toHaveBeenCalled()
+  })
+})
+
+/**
+ * REFERENTIE-VELDEN-1 (Danny 08-08): the DOCUMENT side of the reference-letter
+ * link CMBE shipped (candidate_references.document_id + the reverse reference_id
+ * on DocumentResource, commit 9a9bd8c9) — mirrors the DOC-LIST-LINK-1 block above
+ * exactly, one kind further. Asserts the REQUEST (§13): route + body, including
+ * the clear-then-set order, and that the chip renders the referent's OWN name.
+ */
+describe('DocumentsSection · REFERENTIE-VELDEN-1 reference link chip + relink/clear', () => {
+  const linkables = () => ({
+    educations: [{ id: 'e1', title: 'Verpleegkunde' }],
+    references: [{ id: 'ref1', first_name: 'Jan', middle_name: 'de', last_name: 'Vries' }],
+  })
+  // A document already linked to the reference (mirrors the real DocumentResource
+  // contract: reference_id is the reverse-FK id, not a column on the document itself).
+  const linkedDoc = { id: 'doc1', name: 'referentiebrief.pdf', type: 'Diploma', size: '10 KB', url: '/x', reference_id: 'ref1' }
+  const unlinkedDoc = { id: 'doc1', name: 'referentiebrief.pdf', type: 'Diploma', size: '10 KB', url: '/x' }
+  const withDocs = (doc: Record<string, unknown>): Candidate => ({ id: 'c1', documents: [doc], ...linkables() } as unknown as Candidate)
+
+  beforeEach(() => {
+    vi.clearAllMocks()
+    vi.stubGlobal('URL', { createObjectURL: vi.fn(), revokeObjectURL: vi.fn() })
+  })
+  afterEach(() => vi.unstubAllGlobals())
+
+  it('shows the referent\'s composed name as a chip on the row', () => {
+    render(<DocumentsSection c={withDocs(linkedDoc)} />)
+    expect(screen.getByText('Jan de Vries')).toBeInTheDocument()
+  })
+
+  it('renders no chip at all for a document with no link (never an empty chip)', () => {
+    render(<DocumentsSection c={withDocs(unlinkedDoc)} />)
+    expect(screen.queryByTitle('documents.linkedTo')).not.toBeInTheDocument()
+  })
+
+  it('linking a previously UNLINKED document to a REFERENCE PATCHes only the new relation (no clear call)', async () => {
+    const user = userEvent.setup()
+    render(<DocumentsSection c={withDocs(unlinkedDoc)} />)
+    await user.click(screen.getByRole('button', { name: 'documents.changeLink' }))
+    await pickLink(user, 0, 'sections.references · Jan de Vries')
+    await waitFor(() => expect(api.patch).toHaveBeenCalledWith('/candidates/c1/references/ref1', { document_id: 'doc1' }, { quietStatuses: [422] }))
+    expect(api.patch).toHaveBeenCalledTimes(1)
+    expect(await screen.findByText('Jan de Vries')).toBeInTheDocument()
+  })
+
+  it('RE-linking from education to reference CLEARS the old side FIRST, then sets the new one', async () => {
+    const educationLinkedDoc = { id: 'doc1', name: 'diploma.pdf', type: 'Diploma', size: '10 KB', url: '/x', education_id: 'e1' }
+    const user = userEvent.setup()
+    render(<DocumentsSection c={withDocs(educationLinkedDoc)} />)
+    await user.click(screen.getByRole('button', { name: 'documents.changeLink' }))
+    await pickLink(user, 0, 'sections.references · Jan de Vries')
+    await waitFor(() => expect(api.patch).toHaveBeenCalledTimes(2))
+    const calls = vi.mocked(api.patch).mock.calls
+    // Order matters: the old link is cleared BEFORE the new one is set (same
+    // clear-then-set order DOC-LIST-LINK-1 uses for every other kind).
+    expect(calls[0]).toEqual(['/candidates/c1/educations/e1', { document_id: null }, { quietStatuses: [422] }])
+    expect(calls[1]).toEqual(['/candidates/c1/references/ref1', { document_id: 'doc1' }, { quietStatuses: [422] }])
+    expect(await screen.findByText('Jan de Vries')).toBeInTheDocument()
+  })
+
+  it('clearing an existing reference link PATCHes document_id: null and the chip disappears', async () => {
+    const user = userEvent.setup()
+    render(<DocumentsSection c={withDocs(linkedDoc)} />)
+    await user.click(screen.getByRole('button', { name: 'documents.changeLink' }))
+    // The blank "documents.linkTo" option is the explicit "no link" choice.
+    await pickLink(user, 0, 'documents.linkTo')
+    await waitFor(() => expect(api.patch).toHaveBeenCalledWith('/candidates/c1/references/ref1', { document_id: null }, { quietStatuses: [422] }))
+    expect(api.patch).toHaveBeenCalledTimes(1)
+    await waitFor(() => expect(screen.queryByText('Jan de Vries')).not.toBeInTheDocument())
+  })
+})
+
+/**
+ * DOC-1-EIGENAAR-1 (Danny 08-08 punt 6), the DOCUMENT side of the same rule.
+ * MEASURED live 08-08: PATCHing a second document onto an entry that already carries
+ * one answers 200 and silently RELEASES the first — so an occupied entry must not be
+ * offered as a link target. The entry this document itself hangs on stays offered, so
+ * the link can always be switched or cleared.
+ */
+describe('DocumentsSection · DOC-1-EIGENAAR-1 occupied entries are not offered as link targets', () => {
+  const doc = { id: 'doc1', name: 'diploma.pdf', type: 'Diploma', size: '10 KB', url: '/x' }
+  beforeEach(() => {
+    vi.clearAllMocks()
+    vi.stubGlobal('URL', { createObjectURL: vi.fn(), revokeObjectURL: vi.fn() })
+  })
+  afterEach(() => vi.unstubAllGlobals())
+
+  it('leaves an entry that already carries another document out of the picker', async () => {
+    const user = userEvent.setup()
+    const c = {
+      id: 'c1', documents: [doc],
+      educations: [{ id: 'e1', title: 'Verpleegkunde', document_id: 'other-doc' }, { id: 'e2', title: 'Anatomie', document_id: null }],
+    } as unknown as Candidate
+    render(<DocumentsSection c={c} />)
+    await user.click(screen.getByRole('button', { name: 'documents.changeLink' }))
+    const trigger = getLinkTriggers()[0]
+    await user.click(trigger)
+    const menu = trigger.closest('div') as HTMLElement
+    expect(within(menu).queryByRole('button', { name: 'sections.education · Verpleegkunde' })).toBeNull()
+    expect(await within(menu).findByRole('button', { name: 'sections.education · Anatomie' })).toBeInTheDocument()
+  })
+
+  it('KEEPS the entry this document hangs on, so its own link can still be cleared', async () => {
+    const user = userEvent.setup()
+    const c = {
+      id: 'c1', documents: [{ ...doc, education_id: 'e1' }],
+      educations: [{ id: 'e1', title: 'Verpleegkunde', document_id: 'doc1' }],
+    } as unknown as Candidate
+    render(<DocumentsSection c={c} />)
+    await user.click(screen.getByRole('button', { name: 'documents.changeLink' }))
+    await pickLink(user, 0, 'documents.linkTo')
+    await waitFor(() => expect(api.patch).toHaveBeenCalledWith('/candidates/c1/educations/e1', { document_id: null }, { quietStatuses: [422] }))
+  })
+
+  it('hides the "change link" control entirely when every entry is already occupied', () => {
+    const c = {
+      id: 'c1', documents: [doc],
+      educations: [{ id: 'e1', title: 'Verpleegkunde', document_id: 'other-doc' }],
+      certifications: [{ id: 'cert1', name: 'VCA Basis', document_id: 'yet-another' }],
+    } as unknown as Candidate
+    render(<DocumentsSection c={c} />)
+    // The old gate ("the candidate HAS entries") opened a picker that rendered
+    // nothing — an empty affordance (§3).
+    expect(screen.queryByRole('button', { name: 'documents.changeLink' })).not.toBeInTheDocument()
   })
 })
 
@@ -630,5 +895,70 @@ describe('DocumentsSection · point 4 permission gating (candidates.documents.ma
     await user.click(screen.getAllByRole('checkbox')[1])
     expect(screen.getByRole('button', { name: 'documents.downloadSelected' })).toBeInTheDocument()
     expect(screen.queryByRole('button', { name: 'documents.deleteSelected' })).not.toBeInTheDocument()
+  })
+})
+
+/**
+ * DOC-TYPE-FILTER-1 / NOTES-DOC-FILTER-MENU-1 (Danny 08-08): the document-type
+ * filter moved from an inline dropdown next to search into the shared
+ * DrawerFilterMenu popover — filtering BEHAVIOUR is unchanged, only where the
+ * control lives changed. No real i18next instance is bootstrapped in this file
+ * (matches every other describe block above), so `t()` calls without a
+ * `defaultValue` fall back to the raw (possibly namespace-prefixed) key.
+ */
+describe('DocumentsSection · document-type filter menu (DOC-TYPE-FILTER-1)', () => {
+  const cvDoc = { id: 'd1', name: 'cv.pdf', type: 'CV', size: '10 KB', url: '/x' }
+  const diplomaDoc = { id: 'd2', name: 'diploma.pdf', type: 'Diploma', size: '10 KB', url: '/x' }
+  const withTypedDocs = (): Candidate => ({ id: 'c1', documents: [cvDoc, diplomaDoc] } as unknown as Candidate)
+
+  beforeEach(() => {
+    vi.clearAllMocks()
+    mockUseAuth.mockReturnValue({ hasPermission: () => true })
+    vi.stubGlobal('URL', { createObjectURL: vi.fn(), revokeObjectURL: vi.fn() })
+  })
+  afterEach(() => vi.unstubAllGlobals())
+
+  it('the toolbar no longer renders the type dropdown inline — only ONE Filter button', () => {
+    render(<DocumentsSection c={withTypedDocs()} />)
+    expect(screen.queryByText('Alle types')).toBeNull()
+    expect(screen.getByRole('button', { name: 'Filter' })).toBeInTheDocument()
+  })
+
+  it('picking a TYPE in the menu narrows the visible documents exactly as the old inline dropdown did', async () => {
+    const user = userEvent.setup()
+    render(<DocumentsSection c={withTypedDocs()} />)
+    expect(screen.getByText('cv.pdf')).toBeInTheDocument()
+    expect(screen.getByText('diploma.pdf')).toBeInTheDocument()
+
+    await user.click(screen.getByRole('button', { name: 'Filter' }))
+    await user.click(screen.getByRole('button', { name: 'Alle types' }))
+    await user.click(screen.getByRole('button', { name: 'CV' }))
+
+    expect(screen.getByText('cv.pdf')).toBeInTheDocument()
+    expect(screen.queryByText('diploma.pdf')).toBeNull()
+  })
+
+  it('the badge counts the active filter, and clear-all resets it back to "all"', async () => {
+    const user = userEvent.setup()
+    render(<DocumentsSection c={withTypedDocs()} />)
+    await user.click(screen.getByRole('button', { name: 'Filter' }))
+    await user.click(screen.getByRole('button', { name: 'Alle types' }))
+    await user.click(screen.getByRole('button', { name: 'CV' }))
+    expect(screen.queryByText('diploma.pdf')).toBeNull()
+    expect(screen.getByText('1')).toBeInTheDocument()
+
+    await user.click(screen.getByRole('button', { name: 'common:filters.clearAll' }))
+    expect(screen.getByText('cv.pdf')).toBeInTheDocument()
+    expect(screen.getByText('diploma.pdf')).toBeInTheDocument()
+    expect(screen.queryByText('1')).toBeNull()
+  })
+
+  it('Escape closes the filter panel', async () => {
+    const user = userEvent.setup()
+    render(<DocumentsSection c={withTypedDocs()} />)
+    await user.click(screen.getByRole('button', { name: 'Filter' }))
+    expect(screen.getByRole('dialog')).toBeInTheDocument()
+    await user.keyboard('{Escape}')
+    expect(screen.queryByRole('dialog')).toBeNull()
   })
 })

@@ -199,17 +199,17 @@ export default function MatchesPage({ intent }: { intent?: unknown } = {}) {
   const insightKpis: KpiSpec[] = [
     // Totaal is the neutral card: clicking clears, but it never shows as "aan"
     // (the default highlight read as an active filter — Danny 2026-07-06).
-    { key: 'total',    label: t('kpi.total'),    value: rows.length, color: 'var(--color-primary)',
+    { key: 'total',    label: t('kpi.total'),    value: rows.length, color: 'var(--color-primary-text)',
       onClick: () => { setStageFilter([]); setOwnerFilter([]); setKpiScored(false) } },
-    { key: 'active',   label: t('kpi.active'),   value: activeCount, color: 'var(--color-primary)',
+    { key: 'active',   label: t('kpi.active'),   value: activeCount, color: 'var(--color-primary-text)',
       onClick: () => toggleStages(activeStages), active: stageFilter.length > 0 && eqSet(stageFilter, activeStages) },
     { key: 'closed',   label: t('kpi.closed'),   value: closedCount, color: 'var(--color-success)',
       onClick: () => toggleStages(closedStages), active: stageFilter.length > 0 && eqSet(stageFilter, closedStages) },
-    { key: 'newThisMonth', label: t('kpi.newThisMonth'), value: newThisMonthCount, color: 'var(--color-primary)',
+    { key: 'newThisMonth', label: t('kpi.newThisMonth'), value: newThisMonthCount, color: 'var(--color-primary-text)',
       onClick: () => { setStageFilter([]); setOwnerFilter([]); setClientFilter([]); setKpiScored(false) } },
     { key: 'unscored', label: t('kpi.unscored'), value: unscoredCount, color: 'var(--color-warning)',
       onClick: () => setKpiScored(false) },
-    { key: 'avgScore', label: t('kpi.avgScore'), value: avgScore != null ? `${avgScore}%` : '—', color: 'var(--color-primary)',
+    { key: 'avgScore', label: t('kpi.avgScore'), value: avgScore != null ? `${avgScore}%` : '—', color: 'var(--color-primary-text)',
       onClick: () => setKpiScored(v => !v), active: kpiScored },
   ]
 
@@ -305,7 +305,7 @@ export default function MatchesPage({ intent }: { intent?: unknown } = {}) {
               onClick={() => setAddOpen(true)}
               style={{ display: 'flex', alignItems: 'center', gap: 6, height: BTN_H, padding: '0 14px', fontSize: 13,
                 fontWeight: 600, borderRadius: 8, border: 'none', cursor: 'pointer',
-                background: 'var(--color-primary)', color: '#fff' }}>
+                background: 'var(--color-primary)', color: 'var(--color-on-accent)' }}>
               <Plus size={15} aria-hidden="true" /> {t('add.button')}
             </button>
           )}
@@ -377,7 +377,9 @@ export default function MatchesPage({ intent }: { intent?: unknown } = {}) {
         // EXTRACT-1: same matches.update gate as canApprove/canArchive above.
         canLinkBackoffice={hasPermission('matches.update')}
         // MATCH-TERMINATE-1: same gate — the backend re-checks on POST /terminate.
-        canTerminate={hasPermission('matches.update')} />
+        canTerminate={hasPermission('matches.update')}
+        // G04/MATCH-RENEWAL-1: same gate — the backend re-checks on POST /renew.
+        canRenew={hasPermission('matches.update')} />
 
       {/* Direct-match creation: the full match form (rate proposal, contract,
           cost center) with a candidate picker; refetch so server-derived fields land. */}

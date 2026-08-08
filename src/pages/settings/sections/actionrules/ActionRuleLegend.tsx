@@ -36,7 +36,7 @@ export default function ActionRuleLegend() {
 
         <button type="button" onClick={() => setExpanded((v) => !v)}
           style={{ marginLeft: 'auto', display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 12,
-                   fontWeight: 500, color: 'var(--color-primary)', background: 'none', border: 'none', cursor: 'pointer' }}>
+                   fontWeight: 500, color: 'var(--color-primary-text)', background: 'none', border: 'none', cursor: 'pointer' }}>
           {t('actionRules.legend.popupsTitle')}
           {expanded ? <ChevronUp size={13} /> : <ChevronDown size={13} />}
         </button>

@@ -62,7 +62,16 @@
       "stage": "Phase",
       "created": "Créé",
       "status": "Statut",
-      "lastSynced": "Dernière synchro"
+      "lastSynced": "Dernière synchro",
+      "contractType": "Type de contrat",
+      "startDate": "Date de début",
+      "endDate": "Date de fin",
+      "hoursPerWeek": "Heures par semaine",
+      "lastSyncedHelloflex": "Dernière synchro HelloFlex",
+      "branch": "Agence",
+      "customerLocation": "Site",
+      "customerDepartment": "Département",
+      "contactPerson": "Personne de contact"
     },
     "openCandidate": "Ouvrir le candidat",
     "openVacancy": "Ouvrir le poste",
@@ -111,7 +120,13 @@
     "remarks": {
       "title": "Remarques",
       "saved": "Remarques enregistrées.",
-      "saveError": "Impossible d'enregistrer les remarques."
+      "saveError": "Impossible d'enregistrer les remarques.",
+      "deprecated": "Ce champ est supprimé. Déplacez le texte vers les Notes — il y reçoit un auteur, une date, un type et un canal, et apparaît dans la chronologie.",
+      "moveToNotes": "Déplacer vers les notes",
+      "moving": "Déplacement…",
+      "moved": "La remarque a été déplacée vers les notes.",
+      "moveError": "Le déplacement vers les notes a échoué. Le texte est inchangé.",
+      "moveClearError": "La note a été enregistrée, mais l'ancien champ n'a pas pu être vidé. Le texte figure désormais à deux endroits."
     },
     "duration": {
       "unit": {
@@ -132,6 +147,19 @@
       "title": "Texte du match",
       "saved": "Texte du match enregistré.",
       "saveError": "Impossible d'enregistrer le texte du match."
+    },
+    "renew": {
+      "button": "Renouveler",
+      "modalTitle": "Renouveler le match",
+      "confirm": "Confirmer le renouvellement",
+      "currentEndDate": "Date de fin actuelle : {{date}}",
+      "newEndDateLabel": "Nouvelle date de fin",
+      "noCurrentEndDate": "Aucune date de fin définie (en cours).",
+      "mustBeAfterCurrent": "La nouvelle date de fin doit être postérieure à la date de fin actuelle.",
+      "success": "Match renouvelé.",
+      "error": "Le match n'a pas pu être renouvelé.",
+      "disabledArchived": "Match archivé — restaurez-le d'abord.",
+      "disabledClosed": "Ce match a déjà été résilié."
     }
   },
   "approval": {
@@ -145,7 +173,9 @@
     "reasonPlaceholder": "Motif du rejet…",
     "confirmReject": "Confirmer le rejet",
     "alreadyReviewed": "Ce match a déjà été évalué.",
-    "error": "Impossible d'appliquer l'évaluation."
+    "error": "Impossible d'appliquer l'évaluation.",
+    "badgeLabel": "Évaluation",
+    "badgeWithLabel": "Évaluation : {{status}}"
   },
   "changelog": {
     "loading": "Chargement de l'historique…",

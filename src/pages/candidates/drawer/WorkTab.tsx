@@ -1,43 +1,26 @@
 import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
-import { ExternalLink, CalendarPlus, Calendar, Clock, User, Building2, Video, Phone, Pencil, Search } from 'lucide-react'
+import { CalendarPlus, Search } from 'lucide-react'
 import MatchesTab from './MatchesTab'
 import PoolsSection from './PoolsSection'
 import DrawerAddButton from './DrawerAddButton'
 import SubTabBar from '@/components/drawer/SubTabBar'
 import StatusFilterSelect, { useStatusFilter } from '@/components/drawer/StatusFilterSelect'
-import StatusPill from '@/components/ui/StatusPill'
-import EntityLink from '@/components/ui/EntityLink'
+import ApplicationRow from './ApplicationRow'
+import { vacancyLabelOf } from './applicationRowModel'
+import type { AppRow, Appt } from './applicationRowModel'
+import DetachApplicationModal from './DetachApplicationModal'
 import AddApplicationModal from './AddApplicationModal'
 import PlanIntakeModal from './PlanIntakeModal'
 import type { ExistingAppointment } from './PlanIntakeModal'
 import MatchModal from './MatchModal'
 import api, { unwrap, unwrapList } from '@/lib/api'
-import { useDateFormat } from '@/lib/datetime'
-import { sectionBlock, rememberReturnTab } from './constants'
+import { notifyError, notifySuccess } from '@/lib/notify'
+import { extractApiError } from '@/lib/extractApiError'
+import { useAuth } from '@/context/AuthContext'
+import { sectionBlock } from './constants'
 import type { Candidate } from '@/types/candidate'
 import type { Id, LookupOption } from '@/types/common'
-import { isSafeUrl } from '@/lib/safeUrl'
-
-// A linked appointment as returned by /candidates/{id}/appointments.
-interface Appt { id: Id; application_id?: Id | null; type?: string; scheduled_at?: string; duration_min?: number | null; modality?: string; owner?: { id?: Id; name?: string }; location_name?: string; status?: string }
-
-// One application row as nested under the candidate (read defensively). The
-// funnel stage (label + colour) used to live in the header chips — shown here now.
-// APP-EMBED-1: vacancy.id (internal EntityLink target) + created_at (applied-on date).
-interface AppRow { id?: string; logo_url?: string; vacancy?: { logo_url?: string; title?: string; url?: string; id?: Id }; vacature?: string; title?: string; url?: string; stageLabel?: string; stageColor?: string; created_at?: string }
-
-// The vacancy link, when the API exposes a URL; otherwise falls back to plain text.
-// AUDIT-2: URLs are tenant-entered data — only http(s) may render as a link.
-const vacancyUrlOf = (s: AppRow) => {
-  const url = s.vacancy?.url ?? s.url ?? null
-  return isSafeUrl(url) ? url : null
-}
-
-// The row's own vacancy label, null for a genuinely vacancy-less (intake) row —
-// shared by both the row render (dash fallback) and the search filter below, so
-// the two never drift into two different ideas of "the label".
-const vacancyLabelOf = (s: AppRow): string | null => s.vacature ?? s.vacancy?.title ?? s.title ?? null
 
 // Known sub-tab ids (deep-link validation lives here, not in the drawer).
 const KNOWN_SUB_TABS = ['applications', 'matches', 'pools'] as const
@@ -45,10 +28,22 @@ const KNOWN_SUB_TABS = ['applications', 'matches', 'pools'] as const
 /** Work tab — matches + paginated applications, with the two candidate actions
  *  (§3B two-action model): couple to a vacancy, or plan an intake.
  *  `onRefresh` (Danny P1 "stale after match create"): replaces the DRAWER's shared
- *  record (header status/phase, Ervaring, MatchesTab) after a create — see reload(). */
+ *  record (header status/phase, Ervaring, MatchesTab) after a create — see reload().
+ *
+ *  Danny punt 5/7 (08-08): every application row now links to the application
+ *  record, can be edited (pencil → the same form in EDIT mode) and detached
+ *  (unlink → reason prompt → DELETE /applications/{id}); the row itself lives in
+ *  `ApplicationRow` so this file stays the thin container it is meant to be. */
 export default function WorkTab({ c, onRefresh, initialSubTab }: { c: Candidate; onRefresh?: () => Promise<void> | void; initialSubTab?: string }) {
   const { t, i18n } = useTranslation(['candidates', 'common'])
-  const { formatDate, locale } = useDateFormat()
+  // applications.update is the ONE permission the backend's own route group requires
+  // for PATCH + DELETE /applications/{id} — a viewer without it never sees the
+  // pencil/unlink at all (§3: no affordance the server will refuse).
+  const auth = useAuth()
+  const canManageApplications = auth?.hasPermission?.('applications.update') ?? false
+  // applications.view guards GET /applications/{id} — the ONE request the row's
+  // expand panel makes, so without it the chevron is not offered at all (§3).
+  const canViewApplications = auth?.hasPermission?.('applications.view') ?? false
   // Local copy of the applications so a create shows immediately (re-fetched from
   // the candidate detail after a POST — the BE may add a vacancy-less intake row).
   const [apps, setApps] = useState<AppRow[]>((c.applications ?? []) as unknown as AppRow[])
@@ -63,6 +58,12 @@ export default function WorkTab({ c, onRefresh, initialSubTab }: { c: Candidate;
   const [editAppt, setEditAppt] = useState<ExistingAppointment | null>(null)
   // The match being edited (pencil on a MatchesTab row) → MatchModal in EDIT mode.
   const [editMatchId, setEditMatchId] = useState<Id | null>(null)
+  // Punt 5: the application being edited (pencil on an application row) → the same
+  // AddApplicationModal in EDIT mode (PATCH /applications/{id}).
+  const [editApplicationId, setEditApplicationId] = useState<Id | null>(null)
+  // Punt 7: the application being detached + the in-flight flag of that DELETE.
+  const [detachRow, setDetachRow] = useState<AppRow | null>(null)
+  const [detaching, setDetaching] = useState(false)
   // Reset the local list when the drawer switches to another candidate / fuller detail.
   useEffect(() => { setApps((c.applications ?? []) as unknown as AppRow[]); setPage(1) }, [c.id, c.applications])
   // Load the candidate's appointments once per candidate (separate structured entity).
@@ -91,21 +92,26 @@ export default function WorkTab({ c, onRefresh, initialSubTab }: { c: Candidate;
     await onRefresh?.()
   }
 
-  // Icon per modality (office/remote/phone) for the appointment line.
-  const ModalityIcon = ({ m }: { m?: string }) => m === 'remote' ? <Video size={11} /> : m === 'phone' ? <Phone size={11} /> : <Building2 size={11} />
+  // Punt 7 — detach: measured live 08-08, DELETE /applications/{id} REQUIRES a
+  // `reason` body (422 "The reason field is required." without it, 204 with it),
+  // which the backend stores as an application note. Non-optimistic on purpose:
+  // a 422/403 must never look like it succeeded (the dead-bulk-unlink lesson, §13).
+  const detachApplication = async (reason: string) => {
+    const id = detachRow?.id
+    if (id == null) return
+    setDetaching(true)
+    try {
+      await api.delete(`/applications/${id}`, { data: { reason } })
+      notifySuccess(t('work.detachDone'))
+      setDetachRow(null)
+      await reload()
+    } catch (err) {
+      notifyError(extractApiError(err, t('common:actionFailed')))
+    } finally { setDetaching(false) }
+  }
+
   // The appointment linked to an application row (by application_id).
   const apptFor = (appId?: Id | null) => appId != null ? appts.find(a => String(a.application_id) === String(appId)) : undefined
-  // "09:00–09:30" from scheduled_at + duration_min. The BE stores the wall time the
-  // user entered as UTC, so this MUST read it back as UTC — Date's local getters
-  // would shift it (+2h in Europe/Amsterdam) instead of showing the entered time.
-  const timeRange = (a: Appt) => {
-    if (!a.scheduled_at) return ''
-    const start = new Date(a.scheduled_at)
-    const hhmm = (d: Date) => d.toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit', timeZone: 'UTC' })
-    if (!a.duration_min) return hhmm(start)
-    const end = new Date(start.getTime() + a.duration_min * 60000)
-    return `${hhmm(start)}–${hhmm(end)}`
-  }
 
   const PER = 5
 
@@ -215,56 +221,17 @@ export default function WorkTab({ c, onRefresh, initialSubTab }: { c: Candidate;
           </div>
           {slice.length === 0
             ? <div style={{ padding: '20px', textAlign: 'center', fontSize: 12, color: 'var(--text-muted)' }}>{t('sections.applicationsEmpty')}</div>
-            : slice.map((s, i) => {
-              // Vacancy-less intake applications have no title → show a dash (CONSIST-2).
-              const label = vacancyLabelOf(s) ?? '—'
-              const url = vacancyUrlOf(s)
-              const vacancyId = s.vacancy?.id ?? null
-              const appt = apptFor(s.id)
-              return (
-              <div key={i} style={{ borderBottom: i < slice.length - 1 ? '1px solid var(--border)' : 'none' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 12px', fontSize: 12, color: 'var(--text)' }}>
-                  {(s.logo_url ?? s.vacancy?.logo_url) && <img src={s.logo_url ?? s.vacancy?.logo_url} alt="" style={{ width: 24, height: 24, borderRadius: 4, objectFit: 'contain', flexShrink: 0 }} />}
-                  {/* Vacancy name: an external URL (tenant-entered, isSafeUrl-gated above)
-                      wins when present; otherwise an internal EntityLink to the vacancy's
-                      own page + drawer when we have its id (APP-EMBED-1); a plain span
-                      only for genuinely vacancy-less (intake) rows. */}
-                  {url
-                    ? <a href={url} target="_blank" rel="noopener noreferrer" style={{ fontWeight: 500, flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', color: 'var(--color-primary)', textDecoration: 'none' }}>{label}</a>
-                    : vacancyId != null
-                      ? <span style={{ fontWeight: 500, flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
-                          // Cross-entity jump: coming BACK must land on the Werk tab (punt 15).
-                          onClickCapture={() => rememberReturnTab(c.id, 'work')}>
-                          <EntityLink page="vacancies" id={vacancyId} title={label}>{label}</EntityLink>
-                        </span>
-                      : <span style={{ fontWeight: 500, flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{label}</span>}
-                  {s.stageLabel && <StatusPill label={s.stageLabel} color={s.stageColor} />}
-                  {/* Applied-on date (APP-EMBED-1: application.created_at) — dash only when genuinely missing. */}
-                  <span style={{ fontSize: 11, color: 'var(--text-muted)', flexShrink: 0 }}>{s.created_at ? formatDate(s.created_at) : '—'}</span>
-                  {url && (
-                    <a href={url} target="_blank" rel="noopener noreferrer" title={t('work.openVacancy')}
-                      style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 24, height: 24, borderRadius: 5, border: '1px solid var(--border)', background: 'var(--bg)', color: 'var(--text-muted)', flexShrink: 0 }}>
-                      <ExternalLink size={12} />
-                    </a>
-                  )}
-                </div>
-                {/* Linked appointment: date · start–end · modality · owner (CONSIST-2 / APPT). */}
-                {appt && (
-                  <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: 10, padding: '0 12px 10px 12px', fontSize: 11, color: 'var(--text-muted)' }}>
-                    {appt.scheduled_at && <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}><Calendar size={11} /> {formatDate(appt.scheduled_at, { day: '2-digit', month: '2-digit', year: 'numeric', timeZone: 'UTC' })}</span>}
-                    {appt.scheduled_at && <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}><Clock size={11} /> {timeRange(appt)}{appt.duration_min ? ` · ${appt.duration_min} min` : ''}</span>}
-                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}><ModalityIcon m={appt.modality} /> {t(`work.modality${appt.modality === 'remote' ? 'Remote' : appt.modality === 'phone' ? 'Phone' : 'Office'}`)}{appt.location_name ? ` · ${appt.location_name}` : ''}</span>
-                    {appt.owner?.name && <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}><User size={11} /> {appt.owner.name}</span>}
-                    {/* Pencil: edit this intake appointment (Danny) — prefilled modal → PATCH. */}
-                    <button onClick={() => setEditAppt({ id: appt.id, scheduled_at: appt.scheduled_at, duration_min: appt.duration_min, modality: appt.modality, type: appt.type, owner_id: (appt.owner as { id?: Id })?.id, vacancy_id: vacancyId })}
-                      title={t('work.editIntake')} aria-label={t('work.editIntake')}
-                      style={{ marginLeft: 'auto', display: 'inline-flex', alignItems: 'center', border: 'none', background: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: 2 }}>
-                      <Pencil size={11} />
-                    </button>
-                  </div>
-                )}
+            : slice.map((s, i) => (
+              <div key={s.id != null ? String(s.id) : i} style={{ borderBottom: i < slice.length - 1 ? '1px solid var(--border)' : 'none' }}>
+                <ApplicationRow
+                  candidateId={c.id} row={s} appointment={apptFor(s.id)}
+                  canManage={canManageApplications} canView={canViewApplications}
+                  onEdit={setEditApplicationId}
+                  onDetach={setDetachRow}
+                  onEditAppointment={setEditAppt}
+                />
               </div>
-            )})
+            ))
           }
         </div>
         {filteredApps.length > 0 && (
@@ -289,6 +256,17 @@ export default function WorkTab({ c, onRefresh, initialSubTab }: { c: Candidate;
           the logged-in-user fallback — mirrors the intake modal one line above. */}
       {modal === 'match'  && <MatchModal candidateId={c.id} candidateOwnerId={c.ownerId} onClose={() => setModal(null)} onCreated={reload} />}
       {editAppt && <PlanIntakeModal candidateId={c.id} existing={editAppt} onClose={() => setEditAppt(null)} onCreated={reload} />}
+      {/* Punt 5: pencil on an application row — the SAME create form in EDIT mode
+          (prefills from GET /applications/{id}, PATCHes only what changed). */}
+      {editApplicationId != null && (
+        <AddApplicationModal candidateId={c.id} candidateOwnerId={c.ownerId} candidateOwnerName={c.owner}
+          editApplicationId={editApplicationId} onClose={() => setEditApplicationId(null)} onCreated={reload} />
+      )}
+      {/* Punt 7: unlink on an application row — reason prompt, then the DELETE. */}
+      {detachRow && (
+        <DetachApplicationModal label={vacancyLabelOf(detachRow) ?? '—'} submitting={detaching}
+          onCancel={() => setDetachRow(null)} onConfirm={detachApplication} />
+      )}
       {/* Pencil on a MatchesTab row (point 2) — same modal, in EDIT mode: prefills
           from GET /matches/{id} (the candidate's own embedded row is thin) and
           PATCHes instead of POSTing. candidateOwnerId is irrelevant here (edit mode

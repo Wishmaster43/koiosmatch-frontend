@@ -164,6 +164,13 @@ export interface VacancyDetail extends Vacancy {
   customerDepartmentName: string
   contactId: string
   contactName: string
+  // SWEEP-VESTIGING: the vacancy's OWN bureau branch ("vestiging", FK location_id)
+  // — a DIFFERENT concept from customerLocationId above (the KLANT's own site
+  // picked via the cascade). Read-only display for now (DetailsLocationTab);
+  // mirrors AddVacancyModal's PlacementCard branch picker, which POSTs the same
+  // `location_id` key VacancyWriter's scalar passthrough already accepts.
+  branchId: string
+  branchName: string
   channels: Array<{ value: string | number | undefined; label: string; published: boolean; key?: string; icon?: string }>
   applications: Array<{
     id: Id | undefined; candidateId: Id | null; candidateName: string; candidateInitials: string
@@ -193,12 +200,10 @@ export interface ApiVacancy {
   status_value?: string | number
   status_label?: string
   status_color?: string
-  // VACANCY-LEADS-COUNT-1: these two are the legacy seeded-random column and its
-  // camelCase alias — deliberately UNUSED by the mapper (both seeders that write
-  // leads_count fill it with random_int(0, 25), never a real computation). Kept
-  // typed here only because raw API rows may still carry the field.
-  leads_count?: number
-  leadsCount?: number
+  // G39 (08-08): the legacy seeded-random `leads_count` (+ its camelCase alias) is
+  // GONE from this type — the mapper never read it (both seeders filled it with
+  // random_int(0,25), never a real computation) and CMBE drops the backend emit +
+  // column now that this declaration no longer invites a read.
   // VACANCY-LEADS-COUNT-1: the real match-count field, emitted once ticket
   // VACANCY-LEADS-COUNT-1 lands backend-side — the only field the mapper reads.
   candidate_match_count?: number
@@ -308,5 +313,11 @@ export interface ApiVacancy {
   customer_department?: { id?: Id; name?: string } | null
   contact_id?: Id
   contact?: { id?: Id; name?: string } | null
+  // SWEEP-VESTIGING (VAC-NEST-1): the vacancy's own bureau branch ("vestiging")
+  // — VacancyDetailResource sends the raw FK (`location_id`) AND the resolved
+  // {id,name} separately as `branch` (its magic `location` property collides
+  // with the free-text address column of the same name on this model).
+  location_id?: Id | null
+  branch?: { id?: Id; name?: string } | null
   [k: string]: unknown
 }

@@ -3,7 +3,8 @@
     "title": "Settings",
     "empty": "No settings available for your role.",
     "search": "Search a setting…",
-    "noResults": "No settings found"
+    "noResults": "No settings found",
+    "categoryPicker": "Category"
   },
   "common": {
     "save": "Save",
@@ -228,7 +229,9 @@
     "notif_kandidaten": "Candidates",
     "notif_matches": "Matches",
     "notif_taken": "Tasks",
-    "koios_advice": "Advice thresholds"
+    "koios_advice": "Advice thresholds",
+    "notif_my": "My notifications",
+    "customer_identifier_validation": "Number validation"
   },
   "kpis": {
     "title": "KPI settings",
@@ -411,7 +414,13 @@
     "logo": "Logo",
     "logoHint": "PNG, JPG, WEBP or SVG, max 2 MB — SVG is scanned server-side. Shown in the navigation bar.",
     "noLogo": "No logo",
-    "logoUploadError": "Failed to upload the logo."
+    "logoUploadError": "Failed to upload the logo.",
+    "textColor": "Text colour on accent",
+    "textColorHint": "The colour of text on coloured buttons and chips. Automatic picks black or white based on your accent colour — so a light colour like yellow gets dark text.",
+    "textColorAuto": "Automatic",
+    "textColorLight": "White",
+    "textColorDark": "Dark",
+    "textColorLowContrast": "This text colour has too little contrast with your brand colour (ratio {{ratio}}; readable is 4.5). Pick \"Automatic\" for the most readable option."
   },
   "company": {
     "title": "Company",
@@ -431,7 +440,10 @@
     "streetPlaceholder": "Street name",
     "houseNumber": "House number",
     "houseNumberSuffix": "Addition",
-    "bannerUploadFailed": "Banner upload failed"
+    "bannerUploadFailed": "Banner upload failed",
+    "sectionIdentity": "Identity",
+    "sectionAddress": "Address",
+    "sectionPreferences": "Preferences"
   },
   "locations": {
     "title": "Branches",
@@ -495,7 +507,8 @@
     "mapNoCoords": "No locations with coordinates yet — fill in a location's address and it will appear on the map automatically.",
     "color": "Colour",
     "icon": "Icon",
-    "colorHint": "Colour and icon make a branch recognisable in lists and on the map."
+    "colorHint": "Colour and icon make a branch recognisable in lists and on the map.",
+    "province": "Province"
   },
   "memory": {
     "title": "Memory",
@@ -927,7 +940,9 @@
     },
     "inApp": {
       "label": "In-app notifications",
-      "desc": "Receive notifications within the platform"
+      "desc": "Receive notifications within the platform",
+      "notYetActive": "Not active yet",
+      "notYetActiveReason": "No notification is sent for this type yet — the toggle is already configurable."
     },
     "context": {
       "sollicitaties": {
@@ -954,6 +969,17 @@
         "title": "Tasks",
         "desc": "Notifications about new and updated tasks."
       }
+    },
+    "my": {
+      "title": "My notifications",
+      "subtitle": "Your own override on top of the tenant-wide notification settings — choose per topic whether you always want to be notified, never, or simply follow what your organisation has set.",
+      "inherit": "Inherit",
+      "on": "On",
+      "off": "Off",
+      "empty": "No notification topics are configured yet.",
+      "saveFailed": "Saving failed — your choice was reverted.",
+      "emailNotAvailable": "Not available yet",
+      "emailNotAvailableReason": "A personal e-mail override isn't possible yet — you follow the tenant-wide e-mail setting for this."
     }
   },
   "billing": {
@@ -1553,7 +1579,10 @@
     "catAUTHENTICATION": "Authentication",
     "numbersSynced": "Numbers synchronised",
     "templatesSynced": "Templates synchronised",
-    "syncFailed": "Synchronisation failed"
+    "syncFailed": "Synchronisation failed",
+    "checkStatus": "Check connection",
+    "statusChecked": "Connection checked.",
+    "statusCheckFailed": "Checking the connection failed."
   },
   "roles": {
     "loading": "Loading roles…",
@@ -1933,7 +1962,12 @@
   "requiredFields": {
     "title": "Required fields",
     "subtitle": "Mark which fields are required per phase. A required field shows a star and blocks saving when empty.",
-    "field": "Field"
+    "field": "Field",
+    "groupCount": "{{required}} of {{total}} required",
+    "customHint": "Custom fields store their requirement on the field definition itself, not in this setting.",
+    "customEmpty": "There are no custom candidate fields yet. As soon as you create one, it appears here and you can make it required per phase.",
+    "customAlwaysRequired": "Always required, in every phase",
+    "customSaveFailed": "Saving the field definition failed. Please try again."
   },
   "vacancyTab": {
     "title": "Vacancies tab on candidates",
@@ -2620,7 +2654,20 @@
     "title": "Career site",
     "subtitle": "This tenant's public vacancy site.",
     "activeLabel": "Career site active",
-    "hint": "Turn the public career site (…/{tenant}/vacatures) on or off. The backend enforces it immediately: off = the public site shows a calm inactive notice and applying is closed."
+    "hint": "Turn the public career site (…/{tenant}/vacatures) on or off. The backend enforces it immediately: off = the public site shows a calm inactive notice and applying is closed.",
+    "urls": {
+      "title": "Public URLs",
+      "subtitle": "Copy these into a job board or crawler — built from this tenant's own address.",
+      "site": "Site info (branding)",
+      "vacancies": "Vacancies (JSON)",
+      "sitemap": "Sitemap",
+      "indeedFeed": "Indeed feed",
+      "werkzoekenFeed": "Werkzoeken.nl feed",
+      "copy": "Copy",
+      "open": "Open",
+      "inactiveNotice": "Unavailable while the career site is off.",
+      "noTenant": "No tenant selected yet."
+    }
   },
   "caoSettings": {
     "title": "Collective agreements (CLA)",
@@ -2674,7 +2721,11 @@
       "title": "Blacklist reasons — customer",
       "subtitle": "Reasons for putting a customer on the blacklist."
     },
-    "add": "Add reason"
+    "add": "Add reason",
+    "tabs": {
+      "candidate": "Candidate",
+      "customer": "Customer"
+    }
   },
   "opportunityLookups": {
     "tabs": {
@@ -2745,5 +2796,30 @@
   "modShiftmanager": {
     "reportingOff": "Shiftmanager reporting isn't enabled yet — turn on the module to configure KPI targets and display limits."
   },
-  "dashboardsEmpty": "No dashboard items configured yet."
+  "dashboardsEmpty": "No dashboard items configured yet.",
+  "settings": {
+    "matches": {
+      "stopReasonTitle": "Stop reasons",
+      "stopReasonSubtitle": "Mandatory reason when ending a match early.",
+      "stopReasonAdd": "Add reason"
+    },
+    "outreach": {
+      "outcomeTitle": "Outcomes",
+      "outcomeSubtitle": "The result of one call attempt, separate from the call-list status.",
+      "outcomeAdd": "Add outcome"
+    }
+  },
+  "identifierValidation": {
+    "title": "Number validation",
+    "subtitle": "Decide how strictly Koios Match checks that a company register/VAT number matches the customer's country.",
+    "modeLabel": "On a mismatching number",
+    "modeHint": "Warn always allows saving; block refuses the number until it matches.",
+    "modeWarn": "Warn only",
+    "modeBlock": "Block saving",
+    "rulesTitle": "Expected format per country",
+    "colCountry": "Country",
+    "colCoc": "Company register number",
+    "colVat": "VAT number",
+    "unknownCountryHint": "For countries without a rule above nothing is blocked — you only get a soft hint."
+  }
 }

@@ -122,7 +122,7 @@ export default function VacancyTab({ application: a, onLinkVacancy }: VacancyTab
               <VacancyLinkField value={vacancyId} options={vacancyOptions} onChange={setVacancyId} />
             </div>
             <button onClick={saveLink} disabled={!vacancyId} title={t('common:save')} aria-label={t('common:save')}
-              style={{ ...iconBtn, background: 'var(--color-primary)', color: '#fff', border: 'none', opacity: vacancyId ? 1 : 0.5 }}><Save size={13} /></button>
+              style={{ ...iconBtn, background: 'var(--color-primary)', color: 'var(--color-on-accent)', border: 'none', opacity: vacancyId ? 1 : 0.5 }}><Save size={13} /></button>
             <button onClick={() => setLinking(false)} title={t('common:cancel')} aria-label={t('common:cancel')}
               style={{ ...iconBtn, background: 'var(--bg)', color: 'var(--text-muted)', border: '1px solid var(--border)' }}><X size={13} /></button>
           </div>
@@ -160,7 +160,7 @@ export default function VacancyTab({ application: a, onLinkVacancy }: VacancyTab
           {a.vacancyId != null ? (
             <a href={buildEntityDeepLink('vacancies', a.vacancyId)} target="_blank" rel="noopener noreferrer"
               title={t('drawer.openVacancy')} aria-label={t('drawer.openVacancy')}
-              style={{ display: 'inline-flex', alignItems: 'center', gap: 5, fontSize: 12, color: 'var(--color-primary)', textDecoration: 'none' }}>
+              style={{ display: 'inline-flex', alignItems: 'center', gap: 5, fontSize: 12, color: 'var(--color-primary-text)', textDecoration: 'none' }}>
               <ExternalLink size={13} /> {t('drawer.openVacancy')}
             </a>
           ) : (

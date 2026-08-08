@@ -144,7 +144,7 @@ export default function ImporterenSettings() {
           style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 20, padding: '10px 14px',
                    background: 'color-mix(in srgb, var(--color-primary) 8%, transparent)',
                    border: '1px solid color-mix(in srgb, var(--color-primary) 25%, transparent)',
-                   borderRadius: 8, fontSize: 12, color: 'var(--color-primary)', cursor: 'pointer', width: '100%',
+                   borderRadius: 8, fontSize: 12, color: 'var(--color-primary-text)', cursor: 'pointer', width: '100%',
                    textAlign: 'left' }}>
           <span style={{ flex: 1, color: 'var(--text)' }}>
             {t('import.wizard.linkFromSettings', {
@@ -153,7 +153,7 @@ export default function ImporterenSettings() {
             })}
           </span>
           <span style={{ display: 'flex', alignItems: 'center', gap: 4, fontWeight: 600, flexShrink: 0 }}>
-            {t('import.wizard.linkFromSettingsCta', { ns: 'settings', defaultValue: 'Open the import wizard' })}
+            {t('import.wizard.linkFromSettingsCta', { ns: 'settings' })}
             <ArrowRight size={13} aria-hidden="true" />
           </span>
         </button>

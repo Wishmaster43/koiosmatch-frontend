@@ -14,6 +14,7 @@ import { useConfirm } from '@/hooks/useConfirm'
 import { getSubscription, updateSubscription, deleteSubscription, regenerateSecret } from './webhooksApi'
 import EventCatalog from './EventCatalog'
 import { BTN_H } from '@/config/buttonMetrics'
+import { fieldInputStyle } from '@/components/forms/fieldMetrics'
 
 export default function WebhookDetail({ subId, listRow, onBack, onPatch, onDelete }) {
   const { t } = useTranslation('settings')
@@ -76,7 +77,8 @@ export default function WebhookDetail({ subId, listRow, onBack, onPatch, onDelet
   if (!sub) return <p style={{ fontSize: 13, color: 'var(--text-muted)' }}>{t('common.loadingShort')}</p>
 
   const eventsDirty = JSON.stringify([...events].sort()) !== JSON.stringify([...(sub.event_types ?? [])].sort())
-  const inputStyle = { width: '100%', height: 34, padding: '0 10px', fontSize: 13, color: 'var(--text)', border: '1px solid var(--border)', borderRadius: 8, outline: 'none', background: 'var(--surface)' }
+  // Canon field style (G33/fieldMetrics) — already matched it exactly, now shared.
+  const inputStyle = fieldInputStyle
   const labelStyle = { fontSize: 12, color: 'var(--text-muted)', marginBottom: 4, display: 'block' }
 
   return (
@@ -90,7 +92,7 @@ export default function WebhookDetail({ subId, listRow, onBack, onPatch, onDelet
             <ArrowLeft size={13} /> {t('common.back')}
           </button>
           <div style={{ width: 34, height: 34, borderRadius: 9, background: 'var(--color-primary-bg)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-            <Webhook size={16} style={{ color: 'var(--color-primary)' }} />
+            <Webhook size={16} style={{ color: 'var(--color-primary-text)' }} />
           </div>
           <h2 style={{ fontSize: 17, fontWeight: 700, color: 'var(--text)', margin: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{sub.name}</h2>
           <StatusBadge status={sub.status ?? 'active'} map={statusMap} />
@@ -126,10 +128,10 @@ export default function WebhookDetail({ subId, listRow, onBack, onPatch, onDelet
           {editing ? (
             <div style={{ display: 'flex', gap: 8 }}>
               <button onClick={() => { setForm(sub); setEditing(false) }} style={{ display: 'flex', alignItems: 'center', gap: 5, height: BTN_H, padding: '0 12px', fontSize: 13, border: '1px solid var(--border)', borderRadius: 8, background: 'var(--surface)', cursor: 'pointer', color: 'var(--text)' }}><X size={13} /> {t('common.cancel')}</button>
-              <button onClick={saveDetails} style={{ display: 'flex', alignItems: 'center', gap: 6, height: BTN_H, padding: '0 14px', fontSize: 13, fontWeight: 500, border: 'none', borderRadius: 8, background: 'var(--color-primary)', color: 'white', cursor: 'pointer' }}><Save size={13} /> {t('common.save')}</button>
+              <button onClick={saveDetails} style={{ display: 'flex', alignItems: 'center', gap: 6, height: BTN_H, padding: '0 14px', fontSize: 13, fontWeight: 500, border: 'none', borderRadius: 8, background: 'var(--color-primary)', color: 'var(--color-on-accent)', cursor: 'pointer' }}><Save size={13} /> {t('common.save')}</button>
             </div>
           ) : (
-            <button onClick={() => setEditing(true)} style={{ display: 'flex', alignItems: 'center', gap: 6, height: BTN_H, padding: '0 12px', fontSize: 13, fontWeight: 500, border: '1px solid var(--color-primary)', borderRadius: 8, background: 'var(--color-primary-bg)', color: 'var(--color-primary)', cursor: 'pointer' }}><Pencil size={13} /> {t('webhooks.outgoing.edit')}</button>
+            <button onClick={() => setEditing(true)} style={{ display: 'flex', alignItems: 'center', gap: 6, height: BTN_H, padding: '0 12px', fontSize: 13, fontWeight: 500, border: '1px solid var(--color-primary)', borderRadius: 8, background: 'var(--color-primary-bg)', color: 'var(--color-primary-text)', cursor: 'pointer' }}><Pencil size={13} /> {t('webhooks.outgoing.edit')}</button>
           )}
         </div>
         {editing ? (
@@ -154,8 +156,9 @@ export default function WebhookDetail({ subId, listRow, onBack, onPatch, onDelet
       <div style={{ maxWidth: 680 }}>
         <div className="flex items-center justify-between" style={{ marginBottom: 12 }}>
           <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)' }}>{t('webhooks.outgoing.field.events')}</span>
+          {/* Success fill needs its own on-* token — white only reaches ~3.3:1 there (WCAG audit 2026-08). */}
           <button onClick={saveEvents} disabled={!eventsDirty || savingEv}
-            style={{ display: 'flex', alignItems: 'center', gap: 6, height: BTN_H, padding: '0 14px', fontSize: 13, fontWeight: 500, border: 'none', borderRadius: 8, cursor: eventsDirty && !savingEv ? 'pointer' : 'default', opacity: eventsDirty || savedEv ? 1 : 0.55, background: savedEv ? 'var(--color-success)' : 'var(--color-primary)', color: 'white' }}>
+            style={{ display: 'flex', alignItems: 'center', gap: 6, height: BTN_H, padding: '0 14px', fontSize: 13, fontWeight: 500, border: 'none', borderRadius: 8, cursor: eventsDirty && !savingEv ? 'pointer' : 'default', opacity: eventsDirty || savedEv ? 1 : 0.55, background: savedEv ? 'var(--color-success)' : 'var(--color-primary)', color: savedEv ? 'var(--color-on-success)' : 'var(--color-on-accent)' }}>
             {savedEv ? <><Check size={13} /> {t('common.saved')}</> : savingEv ? <><RefreshCw size={13} className="animate-spin" /> {t('common.saving')}</> : <><Save size={13} /> {t('common.save')}</>}
           </button>
         </div>

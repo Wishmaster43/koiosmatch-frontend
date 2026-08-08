@@ -26,7 +26,11 @@
     "search": "Suchen…",
     "create": "Erstellen",
     "cancel": "Abbrechen",
-    "searchError": "Suche fehlgeschlagen"
+    "searchError": "Suche fehlgeschlagen",
+    "searchErrorForbidden": "Du hast keine Berechtigung, hier zu suchen.",
+    "searchErrorValidation": "Diese Suche wurde nicht akzeptiert. Passe sie an und versuche es erneut.",
+    "searchErrorServer": "Der Server hat bei der Suche einen Fehler gemeldet. Bitte gleich erneut versuchen.",
+    "searchErrorNetwork": "Keine Verbindung — die Suche ist fehlgeschlagen."
   },
   "pagination": {
     "perPage": "Ergebnisse pro Seite",
@@ -118,7 +122,13 @@
     "middleName": "Namenszusatz",
     "lastName": "Nachname",
     "functionTitle": "Funktion",
-    "noFunction": "Noch keine Funktion angegeben"
+    "noFunction": "Noch keine Funktion angegeben",
+    "subTabs": {
+      "status": "Status",
+      "details": "Details",
+      "cv": "Lebenslauf",
+      "context": "Kontext"
+    }
   },
   "cvProposal": {
     "title": "Vorschlag aus dem Lebenslauf",
@@ -296,6 +306,15 @@
       },
       "startedAt": "Gestartet {{date}}",
       "period": "{{start}} – {{end}}"
+    },
+    "currentStatus": {
+      "INTRO_SENT": "Intro gesendet",
+      "COMPLETED": "Abgeschlossen",
+      "DISQUALIFIED": "Disqualifiziert"
+    },
+    "conversation": {
+      "title": "Gespräch",
+      "noCandidate": "Kein Kandidat verknüpft — nichts anzuzeigen."
     }
   },
   "appointments": {
@@ -320,7 +339,13 @@
       "noShow": "Nicht erschienen",
       "cancelled": "Abgesagt"
     },
-    "noMatches": "Keine Termine entsprechen diesem Filter."
+    "noMatches": "Keine Termine entsprechen diesem Filter.",
+    "status": {
+      "planned": "Geplant",
+      "completed": "Abgeschlossen",
+      "noShow": "Nicht erschienen",
+      "cancelled": "Storniert"
+    }
   },
   "notes": {
     "title": "Notizen",
@@ -485,7 +510,9 @@
     "phaseSince": "seit {{date}}",
     "phaseUnknown": "Phasenverlauf noch nicht erfasst",
     "recalculateScore": "Match-Score neu berechnen",
-    "recalculateDone": "Match-Score neu berechnet"
+    "recalculateDone": "Match-Score neu berechnet",
+    "editScore": "Match-Score manuell anpassen",
+    "scoreSaved": "Match-Score gespeichert"
   },
   "competition": {
     "title": "Andere Bewerber",

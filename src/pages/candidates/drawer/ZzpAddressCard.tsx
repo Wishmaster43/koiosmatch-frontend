@@ -87,7 +87,7 @@ export default function ZzpAddressCard({ value, onSave }: { value: ZzpAddressVal
       <GroupHeader title={t('zzp.groupAddress')}>
         {editing ? (
           <div style={{ display: 'flex', gap: 4 }}>
-            <button onClick={save} title={tc('save')} style={{ ...iconBtn, background: 'var(--color-primary)', color: '#fff', border: 'none' }}><Save size={13} /></button>
+            <button onClick={save} title={tc('save')} style={{ ...iconBtn, background: 'var(--color-primary)', color: 'var(--color-on-accent)', border: 'none' }}><Save size={13} /></button>
             <button onClick={cancel} title={tc('cancel')} style={{ ...iconBtn, background: 'var(--bg)', color: 'var(--text-muted)', border: '1px solid var(--border)' }}><X size={13} /></button>
           </div>
         ) : (

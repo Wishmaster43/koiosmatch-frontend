@@ -515,7 +515,8 @@
     "deleteOneMessage": "¿Estás seguro? '{{name}}' se eliminará definitivamente — esto no se puede deshacer.",
     "deleteManyMessage": "¿Estás seguro? Se eliminarán definitivamente {{count}} documentos — esto no se puede deshacer.",
     "deleteSelected": "Eliminar ({{count}})",
-    "linkLevelLabel": "Vincular documento a"
+    "linkLevelLabel": "Vincular documento a",
+    "allTypes": "Todos los tipos"
   },
   "priceAgreements": {
     "add": "Nuevo acuerdo de precios",

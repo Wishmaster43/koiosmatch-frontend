@@ -83,7 +83,7 @@ export default function ApiKeyDetail({ keyId, listRow, onBack, onPatch, onDelete
             <ArrowLeft size={13} /> {t('common.back')}
           </button>
           <div style={{ width: 34, height: 34, borderRadius: 9, background: 'var(--color-primary-bg)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-            <Key size={16} style={{ color: 'var(--color-primary)' }} />
+            <Key size={16} style={{ color: 'var(--color-primary-text)' }} />
           </div>
           <div style={{ minWidth: 0 }}>
             <h2 style={{ fontSize: 17, fontWeight: 700, color: 'var(--text)', margin: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{apiKey.friendly_name ?? apiKey.name}</h2>

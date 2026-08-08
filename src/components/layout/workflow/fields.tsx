@@ -5,6 +5,7 @@
  * builders (agent/faq/webhook pickers, filters, response-structure) are delegated
  * to `./fieldControls`. Extracted from WorkflowCanvasEditor.
  */
+import { useId } from 'react'
 import { Plus, X } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import type { WorkflowField, EdgeFilters, WorkflowVarGroup } from '@/types/workflow'
@@ -16,12 +17,20 @@ import { TextFieldWithVars } from './VariablePicker'
 import { fieldLabel, fieldPlaceholder, optionLabel } from './moduleI18n'
 import WhatsappTemplateField from './WhatsappTemplateField'
 import MultiSelectField from './MultiSelectField'
+// Danny 08-08 (§4): the house searchable combobox replaces the bare native
+// <select> for the generic 'select' field type below.
+import CreatableSelect from '@/components/ui/CreatableSelect'
 
 export function FieldInput({ field, value, onChange, variables, config }: {
   field: WorkflowField; value?: unknown; onChange: OnChange; variables?: WorkflowVarGroup[]
   config?: Record<string, unknown>
 }) {
   const { t } = useTranslation('workflows')
+  // Called unconditionally (rules-of-hooks) even though only the 'select' branch
+  // below uses it — CreatableSelect's trigger is a <button>, which a plain
+  // aria-label cannot name the way a native <select> could; a sr-only span +
+  // aria-labelledby names it instead (mirrors AvailabilityEditor/ReportsPage).
+  const selectLabelId = useId()
   if (field.type === 'webhook_select') {
     return <WebhookSelectField value={value} onChange={onChange} fieldKey={field.key} />
   }
@@ -59,17 +68,25 @@ export function FieldInput({ field, value, onChange, variables, config }: {
     return <MultiSelectField field={field} value={value} onChange={onChange} />
   }
   if (field.type === 'select') {
+    // Normalise both accepted option shapes (a plain string or {value,label});
+    // a leading blank entry is kept ONLY when the schema has no default — same
+    // condition the native <select>'s own placeholder <option> used.
+    const options = (field.options ?? []).map(o => {
+      const val = typeof o === 'object' ? o.value : o
+      const lbl = typeof o === 'object' ? o.label : o
+      return { value: String(val), label: optionLabel(t, lbl as string) }
+    })
+    const withPlaceholder = field.default == null
+      ? [{ value: '', label: t('fields.selectPlaceholder') }, ...options]
+      : options
     return (
-      <select value={(value ?? field.default ?? '') as string} onChange={e => onChange(field.key, e.target.value)}
-        aria-label={fieldLabel(t, field.label)}
-        style={{ width: '100%', padding: '7px 9px', border: '1px solid var(--border)', borderRadius: 8, background: 'var(--surface)', fontSize: 13, color: 'var(--text)', outline: 'none' }}>
-        {field.default == null && <option value="">{t('fields.selectPlaceholder')}</option>}
-        {(field.options ?? []).map(o => {
-          const val = typeof o === 'object' ? o.value : o
-          const lbl = typeof o === 'object' ? o.label : o
-          return <option key={val} value={val}>{optionLabel(t, lbl as string)}</option>
-        })}
-      </select>
+      <>
+        <span id={selectLabelId} className="sr-only">{fieldLabel(t, field.label)}</span>
+        <CreatableSelect value={(value ?? field.default ?? '') as string} onChange={v => onChange(field.key, v)}
+          aria-labelledby={selectLabelId} allowCreate={false} options={withPlaceholder}
+          placeholder={t('fields.selectPlaceholder')}
+          style={{ width: '100%', padding: '7px 9px', fontSize: 13 }} />
+      </>
     )
   }
   if (field.type === 'textarea') {
@@ -106,7 +123,7 @@ export function FieldInput({ field, value, onChange, variables, config }: {
           </div>
         ))}
         <button type="button" onClick={add}
-          style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 11, color: 'var(--color-primary)', background: 'none', border: '1px dashed var(--color-primary)', borderRadius: 6, padding: '4px 8px', cursor: 'pointer' }}>
+          style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 11, color: 'var(--color-primary-text)', background: 'none', border: '1px dashed var(--color-primary)', borderRadius: 6, padding: '4px 8px', cursor: 'pointer' }}>
           <Plus size={10} /> {t('fields.add')}
         </button>
       </div>

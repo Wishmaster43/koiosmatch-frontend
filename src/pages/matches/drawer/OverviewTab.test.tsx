@@ -81,4 +81,24 @@ describe('OverviewTab · overzicht-data cluster', () => {
     renderTab(baseMatch)
     expect(await screen.findByText(i18n.t('matches:drawer.matchText.title'))).toBeInTheDocument()
   })
+
+  // REMARKS-INTO-NOTES-1 (Danny 09-08): Matchtekst stays, Opmerkingen is retired.
+  it('offers exactly ONE free-text editor (Matchtekst) even while a legacy remark is still there', async () => {
+    mockedGet.mockResolvedValue({ data: { data: { match_text: null, remarks: '<p>Oude opmerking</p>' } } })
+    renderTab(baseMatch)
+    // The legacy content is still readable — nothing was thrown away. Asserted
+    // inside waitFor (never `await findBy…` then assert): the tab re-renders once
+    // more when the note-type lookup lands, which can detach the node found by an
+    // earlier query and turn a correct render into a flaky failure.
+    await waitFor(() => expect(screen.getByText('Oude opmerking')).toBeInTheDocument())
+    // …but only one pencil is on the tab, and it belongs to Matchtekst.
+    await waitFor(() => expect(screen.getAllByRole('button', { name: i18n.t('common:edit') })).toHaveLength(1))
+  })
+
+  it('drops the retired Opmerkingen block entirely once the field is empty', async () => {
+    mockedGet.mockResolvedValue({ data: { data: { match_text: null, remarks: null } } })
+    renderTab(baseMatch)
+    await waitFor(() => expect(mockedGet).toHaveBeenCalledWith('/matches/m1'))
+    expect(screen.queryByText(i18n.t('matches:drawer.remarks.title'))).not.toBeInTheDocument()
+  })
 })

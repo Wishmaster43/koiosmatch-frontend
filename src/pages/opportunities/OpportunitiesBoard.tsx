@@ -25,7 +25,7 @@ function BoardCard({ opp, onDragStart, onClick, selected }: {
 
       {/* Value */}
       {opp.value != null && (
-        <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--color-primary)', marginBottom: 8 }}>
+        <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--color-primary-text)', marginBottom: 8 }}>
           {new Intl.NumberFormat('nl-NL', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(opp.value)}
         </div>
       )}

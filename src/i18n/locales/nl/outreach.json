@@ -87,7 +87,8 @@
     },
     "tabs": {
       "targets": "Bellijst",
-      "extra": "Extra"
+      "extra": "Extra",
+      "stats": "Statistieken"
     },
     "loading": "Laden…",
     "error": "Bellijst laden is mislukt.",
@@ -114,7 +115,39 @@
     "matchCreated": "Match aangemaakt.",
     "matchFailed": "Match maken mislukt.",
     "owner": "Eigenaar",
-    "selectOwner": "Kies eigenaar"
+    "selectOwner": "Kies eigenaar",
+    "stats": {
+      "error": "Statistieken laden is mislukt.",
+      "byStatus": "Status",
+      "byOutcome": "Uitkomst",
+      "byAssignee": "Toegewezen aan",
+      "total": "Totaal",
+      "reached": "Bereikt",
+      "axis": {
+        "status": "status",
+        "outcome": "uitkomst",
+        "assignee": "toegewezen aan"
+      },
+      "filteredBy": "Gefilterd op {{axis}}: {{value}}",
+      "noMatches": "Geen kandidaten voldoen aan dit filter."
+    },
+    "note": {
+      "empty": "Nog geen notitie.",
+      "placeholder": "Notitie toevoegen…",
+      "saveFailed": "Opslaan van de notitie is mislukt."
+    },
+    "assign": {
+      "button": "Toewijzen",
+      "selected": "{{count}} geselecteerd",
+      "pickRecruiters": "Kies recruiters",
+      "searchRecruiter": "Zoek een recruiter…",
+      "noRecruiters": "Geen recruiters gevonden",
+      "confirm": "Toewijzing bevestigen",
+      "resultPartial": "{{updated}} toegewezen, {{skipped}} overgeslagen",
+      "resultAll": "{{count}} toegewezen",
+      "failed": "Toewijzen is mislukt. Probeer het opnieuw.",
+      "assignedTo": "Toegewezen aan {{name}}"
+    }
   },
   "changelog": {
     "loading": "Laden…",

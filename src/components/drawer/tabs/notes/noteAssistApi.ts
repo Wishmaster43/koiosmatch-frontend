@@ -1,64 +1,17 @@
 /**
- * noteAssistApi — thin API layer for NOTE-ASSIST-1 (F3): improve / summarize /
- * extract action items from a note via Koios AI. SUGGESTIONS ONLY — this never
- * persists or executes anything (F4's real action-creation bridge is a later
- * wave). Hand-written types (§10): this freshly landed route has no
- * openapi-typescript entry yet — mirrors vacancyGenerateApi.ts's shape.
+ * noteAssistApi — thin re-export of the shared rich-text assist API (§11 one
+ * source, CMFE-KOIOS-CONSISTENCY-1 Danny 09-08). The note composer and the
+ * shared RichTextAssistBar hit the exact same POST /ai/koios/notes/assist
+ * contract now (all three modes) — this file keeps the note domain's existing
+ * `AssistMode` / `AssistActionType` / `AssistActionItem` / `AssistResult` /
+ * `assistNote` / `ACTION_TYPE_LABEL_NL` names stable for its own importers
+ * (NoteAssistSection, noteAssistApply, their tests) without a second
+ * implementation living behind them.
  */
-import api from '@/lib/api'
-
-export type AssistMode = 'improve' | 'summarize' | 'actions'
-// The action-item types the backend can extract (NoteAssistPrompt::ACTION_TYPES) —
-// anything else is dropped server-side before it ever reaches the FE.
-export type AssistActionType = 'task' | 'whatsapp' | 'email' | 'appointment' | 'notification'
-export interface AssistActionItem {
-  title: string
-  type: AssistActionType
-  due_date: string | null
-  note_excerpt: string | null
-  // CMBE 5961c673 (verified live 2026-08-07, KoiosNoteAssistController::actionsResponse):
-  // a draft text for whatsapp/email items, and a proposed start date-time for
-  // appointment items — both always present on a fresh assist response but kept
-  // OPTIONAL here (never required) so the many existing sibling fixtures across
-  // this folder that predate this field keep compiling unchanged.
-  message?: string | null
-  start?: string | null
-}
-// Dutch fallback label per action-item type (DEFAULT-VALUE-1 — the
-// common:notesAssist.actionTypes.* keys are reported, not yet shipped). ONE
-// source (§11): NoteAssistSection, NoteActionsResultsPanel and
-// NoteActionItemCard all render this same type, so they all key off this map
-// instead of three hand-copied duplicates.
-export const ACTION_TYPE_LABEL_NL: Record<AssistActionType, string> = {
-  task: 'Taak', whatsapp: 'WhatsApp', email: 'E-mail', appointment: 'Afspraak', notification: 'Melding',
-}
-// improve/summarize return prose; actions returns structured items — one
-// discriminated result so the caller never has to guess the shape by mode alone.
-export type AssistResult =
-  | { kind: 'text'; text: string }
-  | { kind: 'actions'; items: AssistActionItem[] }
-
-interface ApiTextResponse { text: string }
-interface ApiActionsResponse { items: AssistActionItem[] }
-
-/**
- * POST /ai/koios/notes/assist — one assist call over the CURRENT note text (the
- * editor's HTML; the backend strips it to plain text server-side, §7 boundary —
- * the model never sees raw markup). 402 = the tenant's Koios budget is exhausted
- * this month; 422 = actions mode could not parse a usable list — both are
- * expected, caller-handled outcomes (see useNoteAssist), so quietStatuses keeps
- * the dev console/toast quiet for them (mirrors the 404/503 convention already
- * used in vacancyGenerateApi.ts). A longer timeout than the 20s default: this is
- * a real Anthropic round-trip over a whole note, not a CRUD call.
- */
-export async function assistNote(
-  { text, language, mode }: { text: string; language?: string; mode: AssistMode },
-  signal?: AbortSignal,
-): Promise<AssistResult> {
-  const res = await api.post<ApiTextResponse | ApiActionsResponse>('/ai/koios/notes/assist',
-    { text, language, mode },
-    { signal, timeout: 60000, quietStatuses: [402, 422, 503] })
-  return mode === 'actions'
-    ? { kind: 'actions', items: (res.data as ApiActionsResponse).items ?? [] }
-    : { kind: 'text', text: (res.data as ApiTextResponse).text ?? '' }
-}
+export { assistRichText as assistNote, ACTION_TYPE_LABEL_NL } from '@/components/ui/richtext/richTextAssistApi'
+export type {
+  RichTextAssistMode as AssistMode,
+  RichTextAssistActionType as AssistActionType,
+  RichTextAssistActionItem as AssistActionItem,
+  RichTextAssistResult as AssistResult,
+} from '@/components/ui/richtext/richTextAssistApi'

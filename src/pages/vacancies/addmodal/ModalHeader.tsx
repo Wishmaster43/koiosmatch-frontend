@@ -23,7 +23,9 @@ export default function ModalHeader({ status, statusOptions, onSelectStatus, onC
   return (
     <div style={{ padding: '18px 22px 14px', borderBottom: '1px solid var(--border)', flexShrink: 0,
       display: 'flex', alignItems: 'center', gap: 16 }}>
-      <span style={{ fontSize: 15, fontWeight: 700, color: 'var(--text)' }}>{t('modal.title')}</span>
+      {/* nowrap: the title must stay on ONE line so the status pills sit fully
+          right (Danny 08-08) instead of being pushed against a wrapped title. */}
+      <span style={{ fontSize: 15, fontWeight: 700, color: 'var(--text)', whiteSpace: 'nowrap' }}>{t('modal.title')}</span>
       {/* Status pill row — a read-and-pick control, never a form field. A
           genuinely empty lookup renders no pills at all (never a fabricated
           highlight), matching the honest "nothing picked" state. */}

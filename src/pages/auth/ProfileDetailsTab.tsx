@@ -71,7 +71,7 @@ export default function ProfileDetailsTab({ form, onField, onSave, saving, saved
           style={{
             marginTop: 8, padding: '9px 20px', fontSize: 13, fontWeight: 600,
             background: saved ? 'var(--color-success)' : 'var(--color-primary)',
-            color: 'white', border: 'none', borderRadius: 8, cursor: saving ? 'default' : 'pointer',
+            color: saved ? 'white' : 'var(--color-on-accent)', border: 'none', borderRadius: 8, cursor: saving ? 'default' : 'pointer',
             display: 'flex', alignItems: 'center', gap: 6, transition: 'background 0.2s',
           }}>
           {saving

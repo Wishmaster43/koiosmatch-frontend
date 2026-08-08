@@ -69,7 +69,9 @@ function ErrorFallback({ error, onReset, compact }: { error: Error | null; onRes
       <button onClick={onReset} style={{
         display: 'flex', alignItems: 'center', gap: 7, padding: '8px 14px', fontSize: 13, fontWeight: 500,
         borderRadius: 8, cursor: 'pointer', border: '1px solid var(--color-primary)',
-        background: 'var(--color-primary)', color: 'white' }}>
+        // Accent-filled button — follow the tenant's on-accent contrast token
+        // instead of a hardcoded white (2026-08-08).
+        background: 'var(--color-primary)', color: 'var(--color-on-accent)' }}>
         <RotateCcw size={14} /> {t('error.retry')}
       </button>
       {/* Technical detail is dev-only — never leak server detail/PII in production (§8). */}

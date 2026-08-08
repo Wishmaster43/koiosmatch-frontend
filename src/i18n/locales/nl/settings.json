@@ -3,7 +3,8 @@
     "title": "Instellingen",
     "empty": "Geen instellingen beschikbaar voor jouw rol.",
     "search": "Zoek een instelling…",
-    "noResults": "Geen instellingen gevonden"
+    "noResults": "Geen instellingen gevonden",
+    "categoryPicker": "Categorie"
   },
   "common": {
     "save": "Opslaan",
@@ -228,7 +229,9 @@
     "notif_kandidaten": "Kandidaten",
     "notif_matches": "Matches",
     "notif_taken": "Taken",
-    "koios_advice": "Advies-drempels"
+    "koios_advice": "Advies-drempels",
+    "notif_my": "Mijn meldingen",
+    "customer_identifier_validation": "Nummervalidatie"
   },
   "kpis": {
     "title": "KPI-instellingen",
@@ -411,7 +414,13 @@
     "logo": "Logo",
     "logoHint": "PNG, JPG, WEBP of SVG, max 2 MB — SVG wordt serverside gescand. Getoond in de navigatiebalk.",
     "noLogo": "Geen logo",
-    "logoUploadError": "Logo uploaden is mislukt."
+    "logoUploadError": "Logo uploaden is mislukt.",
+    "textColor": "Tekstkleur op accentkleur",
+    "textColorHint": "De kleur van tekst op gekleurde knoppen en chips. Automatisch kiest zwart of wit op basis van je accentkleur — bij een lichte kleur zoals geel wordt de tekst dus donker.",
+    "textColorAuto": "Automatisch",
+    "textColorLight": "Wit",
+    "textColorDark": "Donker",
+    "textColorLowContrast": "Deze tekstkleur heeft te weinig contrast met je huisstijlkleur (ratio {{ratio}}; leesbaar is 4,5). Kies \"Automatisch\" voor de best leesbare kleur."
   },
   "company": {
     "title": "Bedrijf",
@@ -431,7 +440,10 @@
     "streetPlaceholder": "Straatnaam",
     "houseNumber": "Huisnummer",
     "houseNumberSuffix": "Toevoegsel",
-    "bannerUploadFailed": "Banner uploaden mislukt"
+    "bannerUploadFailed": "Banner uploaden mislukt",
+    "sectionIdentity": "Identiteit",
+    "sectionAddress": "Adres",
+    "sectionPreferences": "Voorkeuren"
   },
   "locations": {
     "title": "Vestigingen",
@@ -495,7 +507,8 @@
     "mapNoCoords": "Nog geen vestigingen met coördinaten — vul het adres van een locatie in, dan verschijnt die automatisch op de kaart.",
     "color": "Kleur",
     "icon": "Icoon",
-    "colorHint": "Kleur en icoon maken een vestiging herkenbaar in lijsten en op de kaart."
+    "colorHint": "Kleur en icoon maken een vestiging herkenbaar in lijsten en op de kaart.",
+    "province": "Provincie"
   },
   "memory": {
     "title": "Geheugen",
@@ -927,7 +940,9 @@
     },
     "inApp": {
       "label": "In-app notificaties",
-      "desc": "Ontvang meldingen binnen het platform"
+      "desc": "Ontvang meldingen binnen het platform",
+      "notYetActive": "Nog niet actief",
+      "notYetActiveReason": "Voor dit type verstuurt het systeem nog geen melding — de schakelaar is alvast instelbaar."
     },
     "context": {
       "sollicitaties": {
@@ -954,6 +969,17 @@
         "title": "Taken",
         "desc": "Meldingen over nieuwe en bijgewerkte taken."
       }
+    },
+    "my": {
+      "title": "Mijn meldingen",
+      "subtitle": "Jouw eigen uitzondering bovenop de organisatiebrede meldingsinstellingen — kies per onderwerp of je altijd, nooit, of gewoon de instelling van je organisatie wilt volgen.",
+      "inherit": "Overnemen",
+      "on": "Aan",
+      "off": "Uit",
+      "empty": "Er zijn nog geen meldingsonderwerpen ingesteld.",
+      "saveFailed": "Opslaan is mislukt — je keuze is teruggedraaid.",
+      "emailNotAvailable": "Nog niet beschikbaar",
+      "emailNotAvailableReason": "Een persoonlijke e-mailuitzondering is nog niet mogelijk — je volgt hiervoor de organisatiebrede e-mailinstelling."
     }
   },
   "billing": {
@@ -1553,7 +1579,10 @@
     "catAUTHENTICATION": "Authenticatie",
     "numbersSynced": "Nummers gesynchroniseerd",
     "templatesSynced": "Templates gesynchroniseerd",
-    "syncFailed": "Synchronisatie mislukt"
+    "syncFailed": "Synchronisatie mislukt",
+    "checkStatus": "Controleer verbinding",
+    "statusChecked": "Verbinding gecontroleerd.",
+    "statusCheckFailed": "Controleren van de verbinding is mislukt."
   },
   "roles": {
     "loading": "Rollen ophalen…",
@@ -1933,7 +1962,12 @@
   "requiredFields": {
     "title": "Verplichte velden",
     "subtitle": "Markeer per fase welke velden verplicht zijn. Een verplicht veld toont een ster en blokkeert opslaan als het leeg is.",
-    "field": "Veld"
+    "field": "Veld",
+    "groupCount": "{{required}} van {{total}} verplicht",
+    "customHint": "Eigen velden bewaren hun verplichting op de velddefinitie zelf, niet in deze instelling.",
+    "customEmpty": "Er zijn nog geen eigen velden voor kandidaten. Zodra je er een aanmaakt, verschijnt hij hier en kun je hem per fase verplicht maken.",
+    "customAlwaysRequired": "Altijd verplicht, in elke fase",
+    "customSaveFailed": "Opslaan van de velddefinitie is mislukt. Probeer het opnieuw."
   },
   "vacancyTab": {
     "title": "Vacatures-tabblad bij kandidaten",
@@ -2620,7 +2654,20 @@
     "title": "Carrière-site",
     "subtitle": "De publieke vacaturesite van deze tenant.",
     "activeLabel": "Carrière-site actief",
-    "hint": "Zet de publieke carrière-site (…/{tenant}/vacatures) aan of uit. De backend dwingt dit direct af: uit = de publieke site toont een nette niet-actief-melding en solliciteren is dicht."
+    "hint": "Zet de publieke carrière-site (…/{tenant}/vacatures) aan of uit. De backend dwingt dit direct af: uit = de publieke site toont een nette niet-actief-melding en solliciteren is dicht.",
+    "urls": {
+      "title": "Publieke URL's",
+      "subtitle": "Kopieer deze naar een vacaturesite of crawler — opgebouwd uit het eigen adres van deze tenant.",
+      "site": "Site-info (branding)",
+      "vacancies": "Vacatures (JSON)",
+      "sitemap": "Sitemap",
+      "indeedFeed": "Indeed-feed",
+      "werkzoekenFeed": "Werkzoeken.nl-feed",
+      "copy": "Kopiëren",
+      "open": "Openen",
+      "inactiveNotice": "Niet beschikbaar zolang de carrière-site uit staat.",
+      "noTenant": "Nog geen tenant geselecteerd."
+    }
   },
   "caoSettings": {
     "title": "CAO's",
@@ -2674,7 +2721,11 @@
       "title": "Blacklist-redenen — klant",
       "subtitle": "Redenen om een klant op de blacklist te zetten."
     },
-    "add": "Reden toevoegen"
+    "add": "Reden toevoegen",
+    "tabs": {
+      "candidate": "Kandidaat",
+      "customer": "Klant"
+    }
   },
   "opportunityLookups": {
     "tabs": {
@@ -2745,5 +2796,30 @@
   "modShiftmanager": {
     "reportingOff": "Shiftmanager-rapportage staat nog niet aan — zet de module aan om KPI-doelen en weergavelimieten in te stellen."
   },
-  "dashboardsEmpty": "Nog geen dashboarditems geconfigureerd."
+  "dashboardsEmpty": "Nog geen dashboarditems geconfigureerd.",
+  "settings": {
+    "matches": {
+      "stopReasonTitle": "Beëindigingsredenen",
+      "stopReasonSubtitle": "Verplichte reden bij het voortijdig beëindigen van een match.",
+      "stopReasonAdd": "Reden toevoegen"
+    },
+    "outreach": {
+      "outcomeTitle": "Uitkomsten",
+      "outcomeSubtitle": "Het resultaat van één belpoging, los van de bellijst-status.",
+      "outcomeAdd": "Uitkomst toevoegen"
+    }
+  },
+  "identifierValidation": {
+    "title": "Nummervalidatie",
+    "subtitle": "Bepaal hoe streng Koios Match controleert of een KvK-/btw-nummer bij het land van de klant past.",
+    "modeLabel": "Bij een afwijkend nummer",
+    "modeHint": "Waarschuwen laat opslaan altijd toe; blokkeren weigert het nummer tot het klopt.",
+    "modeWarn": "Alleen waarschuwen",
+    "modeBlock": "Opslaan blokkeren",
+    "rulesTitle": "Verwacht formaat per land",
+    "colCountry": "Land",
+    "colCoc": "KvK-nummer",
+    "colVat": "Btw-nummer",
+    "unknownCountryHint": "Voor landen zonder regel hierboven wordt niets geblokkeerd — je krijgt hooguit een zachte hint."
+  }
 }

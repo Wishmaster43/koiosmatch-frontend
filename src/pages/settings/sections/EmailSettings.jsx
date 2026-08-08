@@ -12,6 +12,7 @@ import api from '@/lib/api'
 import { loadSettings, saveSettings } from '../lib/settingsApi'
 import RichTextEditor from '@/components/ui/RichTextEditor'
 import CalloutBox from '@/components/ui/CalloutBox'
+import { fieldInputStyle } from '@/components/forms/fieldMetrics'
 
 export default function EmailSettings({ context = 'klanten' }) {
   const { t } = useTranslation('settings')
@@ -81,10 +82,8 @@ export default function EmailSettings({ context = 'klanten' }) {
     setTesting(false)
   }
 
-  const inputStyle = {
-    height: 34, width: '100%', padding: '0 10px', fontSize: 13,
-    border: '1px solid var(--border)', borderRadius: 8, outline: 'none', color: 'var(--text)',
-  }
+  // Canon field style (G33/fieldMetrics) — was its own height-34 copy, minus a background.
+  const inputStyle = fieldInputStyle
   const labelStyle = { fontSize: 12, fontWeight: 500, color: 'var(--text)', marginBottom: 4, display: 'block' }
   // Shared card chrome — matches the settings kit's SettingCard so this section
   // reads at the same compact density as every other settings panel.
@@ -115,7 +114,9 @@ export default function EmailSettings({ context = 'klanten' }) {
             style={{ display: 'flex', alignItems: 'center', gap: 6, height: 34, padding: '0 14px', whiteSpace: 'nowrap',
                      fontSize: 13, fontWeight: 500, borderRadius: 8, cursor: saving ? 'wait' : 'pointer',
                      border: 'none', opacity: saving ? 0.7 : 1,
-                     background: saved ? 'var(--color-success)' : 'var(--color-primary)', color: 'white', transition: 'background 0.2s' }}>
+                     background: saved ? 'var(--color-success)' : 'var(--color-primary)',
+                     // Success fill needs its own on-* token — white only reaches ~3.3:1 there (WCAG audit 2026-08).
+                     color: saved ? 'var(--color-on-success)' : 'var(--color-on-accent)', transition: 'background 0.2s' }}>
             {saved   ? <><Check size={13} /> {t('common.saved')}</>                         :
              saving  ? <><RefreshCw size={13} className="animate-spin" /> {t('common.saving')}</> :
                        <><Save size={13} /> {t('common.save')}</>}

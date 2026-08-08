@@ -12,6 +12,7 @@ import { useDateFormat } from '@/lib/datetime'
 import { KEY_TYPES, isValidIpOrCidr } from './constants'
 import SearchSelect from '@/components/ui/SearchSelect'
 import { BTN_H } from '@/config/buttonMetrics'
+import { fieldInputStyle } from '@/components/forms/fieldMetrics'
 
 export default function ApiKeyGeneralTab({ apiKey, onSave }) {
   const { t } = useTranslation('settings')
@@ -49,7 +50,8 @@ export default function ApiKeyGeneralTab({ apiKey, onSave }) {
 
   const cancel = () => { setForm(apiKey); setEditing(false) }
 
-  const inputStyle = { width: '100%', height: 32, padding: '0 10px', fontSize: 13, color: 'var(--text)', border: '1px solid var(--border)', borderRadius: 7, outline: 'none', background: 'var(--surface)' }
+  // Canon field style (G33/fieldMetrics) — was its own height-32/radius-7 copy.
+  const inputStyle = fieldInputStyle
   const labelStyle = { fontSize: 12, color: 'var(--text-muted)', marginBottom: 4, display: 'block' }
 
   // Read-only field rows for DetailTable.
@@ -76,13 +78,13 @@ export default function ApiKeyGeneralTab({ apiKey, onSave }) {
               <X size={13} /> {t('common.cancel')}
             </button>
             <button onClick={save} disabled={saving}
-              style={{ display: 'flex', alignItems: 'center', gap: 6, height: BTN_H, padding: '0 14px', fontSize: 13, fontWeight: 500, border: 'none', borderRadius: 8, background: 'var(--color-primary)', color: 'white', cursor: 'pointer' }}>
+              style={{ display: 'flex', alignItems: 'center', gap: 6, height: BTN_H, padding: '0 14px', fontSize: 13, fontWeight: 500, border: 'none', borderRadius: 8, background: 'var(--color-primary)', color: 'var(--color-on-accent)', cursor: 'pointer' }}>
               {saving ? <RefreshCw size={13} className="animate-spin" /> : <Save size={13} />} {t('common.save')}
             </button>
           </>
         ) : (
           <button onClick={() => setEditing(true)}
-            style={{ display: 'flex', alignItems: 'center', gap: 6, height: BTN_H, padding: '0 14px', fontSize: 13, fontWeight: 500, border: '1px solid var(--color-primary)', borderRadius: 8, background: 'var(--color-primary-bg)', color: 'var(--color-primary)', cursor: 'pointer' }}>
+            style={{ display: 'flex', alignItems: 'center', gap: 6, height: BTN_H, padding: '0 14px', fontSize: 13, fontWeight: 500, border: '1px solid var(--color-primary)', borderRadius: 8, background: 'var(--color-primary-bg)', color: 'var(--color-primary-text)', cursor: 'pointer' }}>
             <Pencil size={13} /> {t('apiKeys.edit')}
           </button>
         )}

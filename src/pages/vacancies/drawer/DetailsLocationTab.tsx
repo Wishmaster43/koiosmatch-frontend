@@ -58,5 +58,13 @@ export default function DetailsLocationTab({ vacancy: v, location }: Props) {
       <CreatableSelect value={form.country || null} onChange={(val: string) => setF('country', val)} allowCreate={false}
         clearable clearLabel={t('details.country')}
         placeholder={t('common:select')} options={countryOptions} />, editing)}
+    {/* SWEEP-VESTIGING: the vacancy's OWN bureau branch (vestiging, location_id)
+        — distinct from the country/province cascade above, which is the WORK
+        address. Read-only for now: `branchId`/`branchName` now round-trip through
+        mapVacancy.ts, but a picker (mirrors AddVacancyModal's PlacementCard —
+        useLocations() + CreatableSelect, POSTs the same `location_id` key) needs
+        this tab's own hook section (useVacancyDetailsForm.ts) to gain a save
+        path — tracked as a follow-up, not wired here to avoid a fake affordance. */}
+    {row(t('modal.fields.branch'), v.branchName || dash, v.branchName || dash, editing)}
   </>, controls(t, editing, save, cancel, () => setEditing(true)))
 }

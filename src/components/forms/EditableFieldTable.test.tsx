@@ -204,6 +204,52 @@ describe('EditableFieldTable · name composite (edit mode)', () => {
   })
 })
 
+// Regression (M7/DRILL-DOWN-CONSISTENCY, 08-08): a GROUPED table with no top-level
+// title used to still render the header bar (empty title text + a floating pencil)
+// above the groups' own titled cards — measured on the match Contract & financieel
+// card, "2 headers / 1 pencil / nothing to read". The bar must disappear and the one
+// shared pencil (still ONE edit cycle for every group) must move onto the first
+// group's own title row instead of being dropped.
+describe('EditableFieldTable · grouped table with no top-level title (M7)', () => {
+  const groupedFields: FieldRow[] = [
+    { key: 'a', label: 'Field A', group: 'Group one' },
+    { key: 'b', label: 'Field B', group: 'Group two' },
+  ]
+  const groupedValue = { a: 'Alpha', b: 'Beta' }
+
+  it('renders no empty header bar above the group titles', () => {
+    render(<EditableFieldTable fields={groupedFields} value={groupedValue} />)
+    // Both group titles render as real headings...
+    expect(screen.getByText('Group one')).toBeInTheDocument()
+    expect(screen.getByText('Group two')).toBeInTheDocument()
+    // ...and exactly ONE pencil exists for the whole table (no second, titleless bar).
+    expect(screen.getAllByTitle('edit')).toHaveLength(1)
+  })
+
+  it('puts the shared pencil on the FIRST group only, and it edits every group at once', async () => {
+    const user = userEvent.setup()
+    render(<EditableFieldTable fields={groupedFields} value={groupedValue} />)
+    await user.click(screen.getByTitle('edit'))
+    // Entering edit mode via the (single) pencil edits BOTH groups in one cycle.
+    expect(screen.getByDisplayValue('Alpha')).toBeInTheDocument()
+    expect(screen.getByDisplayValue('Beta')).toBeInTheDocument()
+  })
+
+  it('still shows the ordinary top header when a title IS given, even when grouped', () => {
+    render(<EditableFieldTable title="My table" fields={groupedFields} value={groupedValue} />)
+    expect(screen.getByText('My table')).toBeInTheDocument()
+    // Top header owns the pencil again; the group titles carry none of their own.
+    expect(screen.getAllByTitle('edit')).toHaveLength(1)
+  })
+
+  it('keeps the titleless header bar (and its pencil) for an UNGROUPED table — unchanged', () => {
+    // Mirrors DepartmentDetail's `title=""` usage: a deliberately empty title, no
+    // `group` on any field, so the single header bar stays the only pencil spot.
+    render(<EditableFieldTable title="" fields={[{ key: 'a', label: 'Field A' }]} value={{ a: 'Alpha' }} />)
+    expect(screen.getByTitle('edit')).toBeInTheDocument()
+  })
+})
+
 // Regression (Danny 28-07, found by an adversarial verification pass): the read view
 // used to follow the last DRAFT, not the source of truth. If the parent stored something
 // different from what was typed — declining "replace the primary contact?" saves

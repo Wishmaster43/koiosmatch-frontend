@@ -185,6 +185,33 @@ describe('useOpportunitiesData · tags PATCH (audit finding: tags never persiste
   })
 })
 
+describe('useOpportunitiesData · description PATCH (OPP-DESCRIPTION-1)', () => {
+  it('sends { description } in the PATCH body when the drawer\'s Kanstekst block saves', async () => {
+    mockedGet.mockResolvedValue({ data: { data: [{ id: 'o1', title: 'Deal A', description: null }] } })
+    mockedPatch.mockResolvedValue({ data: { data: {} } })
+    const { result } = renderHook(() => useOpportunitiesData(), { wrapper })
+    await waitFor(() => expect(result.current.loading).toBe(false))
+
+    // Mirrors OpportunityDescriptionBlock's onSave: onUpdate(id, { description: html }).
+    result.current.updateOpportunity('o1', { description: '<p>Kanstekst</p>' })
+
+    await waitFor(() => expect(mockedPatch).toHaveBeenCalled())
+    expect(mockedPatch).toHaveBeenCalledWith('/opportunities/o1', { description: '<p>Kanstekst</p>' })
+  })
+
+  it('sends { description: null } when the block is cleared back to empty', async () => {
+    mockedGet.mockResolvedValue({ data: { data: [{ id: 'o1', title: 'Deal A', description: '<p>Was here</p>' }] } })
+    mockedPatch.mockResolvedValue({ data: { data: {} } })
+    const { result } = renderHook(() => useOpportunitiesData(), { wrapper })
+    await waitFor(() => expect(result.current.loading).toBe(false))
+
+    result.current.updateOpportunity('o1', { description: null })
+
+    await waitFor(() => expect(mockedPatch).toHaveBeenCalled())
+    expect(mockedPatch).toHaveBeenCalledWith('/opportunities/o1', { description: null })
+  })
+})
+
 // Regression coverage for the optimistic-update bug class (measured audit
 // 2026-07-27): handleMove used to `.catch(() => notifyError(...))` with no revert,
 // so a rejected board move (a backend stage-transition guard) left the card sitting

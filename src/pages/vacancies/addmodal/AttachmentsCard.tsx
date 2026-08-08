@@ -48,7 +48,7 @@ export default function AttachmentsCard({ files, onAddFile, onRemoveFile, noteTe
             {t('drawer.tabs.documents')}
           </span>
           <button type="button" onClick={() => fileRef.current?.click()}
-            style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 11, fontWeight: 500, color: 'var(--color-primary)', background: 'none', border: 'none', cursor: 'pointer' }}>
+            style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 11, fontWeight: 500, color: 'var(--color-primary-text)', background: 'none', border: 'none', cursor: 'pointer' }}>
             <Plus size={11} /> {t('common:add')}
           </button>
         </div>

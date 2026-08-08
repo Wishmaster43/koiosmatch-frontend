@@ -54,8 +54,10 @@
       "links": "Links",
       "activity": "Activity",
       "extra": "Extra",
-      "notes": "Notes"
-    }
+      "notes": "Notes",
+      "related": "Related"
+    },
+    "lookupNotReady": "Couldn't save yet — this option isn't available. Please try again in a moment."
   },
   "bulk": {
     "selected": "{{count}} selected",
@@ -80,7 +82,9 @@
     "dueTime": "Time",
     "assignee": "Assigned to",
     "owner": "Created by",
-    "description": "Description"
+    "description": "Description",
+    "location": "Branch",
+    "locationPlaceholder": "Pick a branch"
   },
   "comments": {
     "send": "Post"
@@ -102,7 +106,9 @@
     "contact": "Contact",
     "workflow": "Workflow",
     "open": "Open",
-    "loadError": "Results could not be loaded."
+    "loadError": "Results could not be loaded.",
+    "linkType": "Link type",
+    "opportunity": "Opportunity"
   },
   "activity": {
     "empty": "No activity yet."
@@ -141,7 +147,8 @@
     "cardPlanning": "Planning",
     "cardLink": "Link",
     "cardAssignment": "Assignment",
-    "duePlaceholder": "dd-mm-yyyy"
+    "duePlaceholder": "dd-mm-yyyy",
+    "otherLinks": "Other links"
   },
   "page": {
     "searchPlaceholder": "Search tasks"
@@ -152,7 +159,17 @@
     "history": "History",
     "empty": "No tasks in this view.",
     "loading": "Loading tasks…",
-    "error": "Related tasks could not be loaded."
+    "error": "Related tasks could not be loaded.",
+    "titles": {
+      "candidate": "Tasks for this candidate",
+      "customer": "Tasks for this customer",
+      "location": "Tasks for this location",
+      "department": "Tasks for this department",
+      "contact": "Tasks for this contact",
+      "assignee": "Tasks for this recruiter"
+    },
+    "searchPlaceholder": "Search tasks…",
+    "allStatuses": "All statuses"
   },
   "notes": {
     "title": "Notes",
@@ -170,5 +187,22 @@
     "reasons": {
       "overdue": "This task is past its due date."
     }
+  },
+  "ai": {
+    "title": "Koios AI advises",
+    "beta": "Beta",
+    "refresh": "Refresh",
+    "analyzing": "Koios AI is analysing this task…",
+    "dueLabel": "Deadline",
+    "dueUnset": "No due date has been set for this task yet.",
+    "dueToday": "This task is due today.",
+    "dueOverdue": "This task is {{count}} day(s) overdue.",
+    "dueUpcoming": "This task is due in {{count}} day(s).",
+    "assigneeLabel": "Assignment",
+    "unassigned": "This task still sits with the agency — not yet assigned to a specific team member.",
+    "assignedTo": "Assigned to {{name}}.",
+    "linksLabel": "Link",
+    "noLinks": "This task isn't linked to any record — link a candidate, client or other record for context.",
+    "linked": "Linked to {{count}} record(s)."
   }
 }

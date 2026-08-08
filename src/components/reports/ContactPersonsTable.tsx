@@ -179,7 +179,7 @@ export default function ContactPersonsTable() {
                     <td style={{ ...TD, minWidth: 160 }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                         <div style={{ width: 28, height: 28, borderRadius: '50%', flexShrink: 0,
-                                      background: 'var(--color-primary-bg)', color: 'var(--color-primary)',
+                                      background: 'var(--color-primary-bg)', color: 'var(--color-primary-text)',
                                       display: 'flex', alignItems: 'center', justifyContent: 'center',
                                       fontSize: 10, fontWeight: 600 }}>
                           {initials || '?'}

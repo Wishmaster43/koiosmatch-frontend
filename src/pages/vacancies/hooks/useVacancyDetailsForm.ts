@@ -72,8 +72,14 @@ export interface RequirementsSection {
   editing: boolean; setEditing: (v: boolean) => void
   form: RequirementsForm; setF: (k: RequirementsKey, val: string) => void
   save: () => void; cancel: () => void
-  skills: string[]; newSkill: string; setNewSkill: (v: string) => void
-  addSkill: () => void; removeSkill: (s: string) => void
+  // VACANCY-SKILLS-PARITY-1 (Danny 08-08): addSkill/editSkill now take the
+  // value directly (the RequiredSkillsSection editor's own AddForm submits it)
+  // instead of reading a separate `newSkill` input-state field — the always-
+  // visible text+button row is gone, so that state has no reader left.
+  skills: string[]
+  addSkill: (name: string) => void
+  editSkill: (i: number, name: string) => void
+  removeSkill: (s: string) => void
 }
 export interface ConditionsSection {
   editing: boolean; setEditing: (v: boolean) => void
@@ -225,13 +231,20 @@ export function useVacancyDetailsForm(v: VacancyDetail, onUpdate?: UpdateFn) {
     // eslint-disable-next-line react-hooks/exhaustive-deps -- only react to opening the editor / the lookups resolving, never to the recruiter's own pick
   }, [requirementsForm.editing, defaultSeniority, defaultEducation])
   const [skills, setSkills] = useState<string[]>(() => (v.skills ?? []).map(skillStr).filter(Boolean))
-  const [newSkill, setNewSkill] = useState('')
   // Skills are quick-editable OUTSIDE the pencil (Danny 2026-07-06: "kan ik niet
   // invullen"): adding/removing persists immediately; while the Eisen pencil is
   // open the change rides along with ITS Save instead (skills moved into this
   // section — see DetailsRequirementsTab's file comment for why).
   const persistSkills = (next: string[]) => { setSkills(next); if (!requirementsForm.editing) onUpdate?.(v.id, { skills: next }) }
-  const addSkill = () => { const sk = newSkill.trim(); if (sk && !skills.includes(sk)) persistSkills([...skills, sk]); setNewSkill('') }
+  const addSkill = (name: string) => { const sk = name.trim(); if (sk && !skills.includes(sk)) persistSkills([...skills, sk]) }
+  // VACANCY-SKILLS-PARITY-1: rename a skill IN PLACE (same list position) — the
+  // candidate SkillsTab's per-row pencil equivalent, since a plain string[]
+  // field has no id to PATCH individually against.
+  const editSkill = (i: number, name: string) => {
+    const sk = name.trim()
+    if (!sk || skills.some((s, idx) => idx !== i && s === sk)) return
+    persistSkills(skills.map((s, idx) => (idx === i ? sk : s)))
+  }
   const removeSkill = (s: string) => persistSkills(skills.filter(x => x !== s))
   const saveRequirements = () => {
     const sen = seniorityLevels.find(s => s.value === requirementsForm.form.seniority)
@@ -246,7 +259,7 @@ export function useVacancyDetailsForm(v: VacancyDetail, onUpdate?: UpdateFn) {
   }
   const cancelRequirements = () => {
     requirementsForm.reset()
-    setSkills((v.skills ?? []).map(skillStr).filter(Boolean)); setNewSkill('')
+    setSkills((v.skills ?? []).map(skillStr).filter(Boolean))
     requirementsForm.setEditing(false)
   }
 
@@ -289,7 +302,7 @@ export function useVacancyDetailsForm(v: VacancyDetail, onUpdate?: UpdateFn) {
     requirements: {
       editing: requirementsForm.editing, setEditing: requirementsForm.setEditing, form: requirementsForm.form, setF: requirementsForm.setF,
       save: saveRequirements, cancel: cancelRequirements,
-      skills, newSkill, setNewSkill, addSkill, removeSkill,
+      skills, addSkill, editSkill, removeSkill,
     } satisfies RequirementsSection,
     conditions: {
       editing: conditionsForm.editing, setEditing: conditionsForm.setEditing, form: conditionsForm.form, setF: conditionsForm.setF,

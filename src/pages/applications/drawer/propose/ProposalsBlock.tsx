@@ -24,7 +24,7 @@ const linkButtonStyle: CSSProperties = {
   display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 4,
   height: 26, minWidth: 26, padding: '0 8px', fontSize: 11, borderRadius: 6,
   border: '1px solid color-mix(in srgb, var(--color-primary) 30%, transparent)',
-  background: 'color-mix(in srgb, var(--color-primary) 10%, transparent)', color: 'var(--color-primary)',
+  background: 'color-mix(in srgb, var(--color-primary) 10%, transparent)', color: 'var(--color-primary-text)',
   cursor: 'pointer', textDecoration: 'none',
 }
 

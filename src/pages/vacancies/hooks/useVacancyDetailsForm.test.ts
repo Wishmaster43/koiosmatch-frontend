@@ -181,26 +181,47 @@ describe('useVacancyDetailsForm · sections are independent (VAC-DETAILS-SPLIT-1
     expect(result.current.requirements.editing).toBe(true)
   })
 
+  // VACANCY-SKILLS-PARITY-1 (Danny 08-08): addSkill now takes the value
+  // directly — RequiredSkillsSection's AddForm submits it in one call, so
+  // there is no more separate `newSkill` input-state to seed first.
   it('skills add/remove persists immediately when the Eisen pencil is closed', () => {
     const onUpdate = vi.fn()
     const { result } = renderHook(() => useVacancyDetailsForm(vacancy(), onUpdate))
-    // Two separate act()s: addSkill reads `newSkill` from its OWN render's
-    // closure, so it must run AFTER the setNewSkill re-render lands.
-    act(() => { result.current.requirements.setNewSkill('Triage') })
-    act(() => { result.current.requirements.addSkill() })
+    act(() => { result.current.requirements.addSkill('Triage') })
     expect(result.current.requirements.skills).toEqual(['Triage'])
     expect(onUpdate).toHaveBeenCalledWith('v1', { skills: ['Triage'] })
+    act(() => { result.current.requirements.removeSkill('Triage') })
+    expect(result.current.requirements.skills).toEqual([])
+    expect(onUpdate).toHaveBeenCalledWith('v1', { skills: [] })
   })
 
   it('skills add rides along with the Eisen Save (no immediate PATCH) while its pencil is open', () => {
     const onUpdate = vi.fn()
     const { result } = renderHook(() => useVacancyDetailsForm(vacancy(), onUpdate))
     act(() => { result.current.requirements.setEditing(true) })
-    act(() => { result.current.requirements.setNewSkill('Triage') })
-    act(() => { result.current.requirements.addSkill() })
+    act(() => { result.current.requirements.addSkill('Triage') })
     expect(onUpdate).not.toHaveBeenCalled()
     act(() => { result.current.requirements.save() })
     const [, patch] = onUpdate.mock.calls[0]
     expect(patch).toEqual(expect.objectContaining({ skills: ['Triage'] }))
+  })
+
+  // VACANCY-SKILLS-PARITY-1: the candidate SkillsTab's per-row pencil equivalent
+  // — renames a skill IN PLACE (same array position), never a remove+re-add,
+  // and still PATCHes the plain `skills: string[]` shape unchanged.
+  it('editSkill renames a skill at its own index and PATCHes the updated array', () => {
+    const onUpdate = vi.fn()
+    const { result } = renderHook(() => useVacancyDetailsForm(vacancy({ skills: ['Triage', 'Wondzorg'] }), onUpdate))
+    act(() => { result.current.requirements.editSkill(1, 'Wondverzorging') })
+    expect(result.current.requirements.skills).toEqual(['Triage', 'Wondverzorging'])
+    expect(onUpdate).toHaveBeenCalledWith('v1', { skills: ['Triage', 'Wondverzorging'] })
+  })
+
+  it('editSkill ignores a rename that collides with a different existing skill', () => {
+    const onUpdate = vi.fn()
+    const { result } = renderHook(() => useVacancyDetailsForm(vacancy({ skills: ['Triage', 'Wondzorg'] }), onUpdate))
+    act(() => { result.current.requirements.editSkill(1, 'Triage') })
+    expect(result.current.requirements.skills).toEqual(['Triage', 'Wondzorg'])
+    expect(onUpdate).not.toHaveBeenCalled()
   })
 })

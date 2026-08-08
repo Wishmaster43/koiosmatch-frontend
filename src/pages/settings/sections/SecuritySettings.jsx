@@ -73,7 +73,10 @@ export default function SecuritySettings() {
         <button type="submit" disabled={loading || disableCode.length < 6}
           style={{ height: BTN_H, padding: '0 20px', fontSize: 13, fontWeight: 500, borderRadius: 8,
                    border: 'none', cursor: (loading || disableCode.length < 6) ? 'not-allowed' : 'pointer',
-                   background: (loading || disableCode.length < 6) ? 'var(--border)' : 'var(--color-danger)', color: 'white' }}>
+                   background: (loading || disableCode.length < 6) ? 'var(--border)' : 'var(--color-danger)',
+                   // On-danger fill needs its own readable token (white); the neutral
+                   // disabled fill reuses the muted-on-border convention (StatusListEditor).
+                   color: (loading || disableCode.length < 6) ? 'var(--text-muted)' : 'var(--color-on-danger)' }}>
           {loading ? t('security.working') : t('security.disableBtn')}
         </button>
       </form>
@@ -110,7 +113,7 @@ export default function SecuritySettings() {
             <button onClick={() => { setStep('wizard'); setError('') }}
               style={{ height: BTN_H, padding: '0 14px', fontSize: 12, fontWeight: 500, borderRadius: 8,
                        cursor: 'pointer', border: 'none',
-                       background: 'var(--color-primary)', color: 'white', flexShrink: 0 }}>
+                       background: 'var(--color-primary)', color: 'var(--color-on-accent)', flexShrink: 0 }}>
               {t('security.enable')}
             </button>
           )

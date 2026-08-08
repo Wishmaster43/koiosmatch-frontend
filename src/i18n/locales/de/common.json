@@ -77,7 +77,8 @@
     "toggle": "Filter anzeigen/ausblenden",
     "title": "Filter",
     "branch": "Niederlassung",
-    "branchExcludesUnassigned": "Ein Niederlassungsfilter blendet Datensätze ohne verknüpfte Niederlassung aus."
+    "branchExcludesUnassigned": "Ein Niederlassungsfilter blendet Datensätze ohne verknüpfte Niederlassung aus.",
+    "button": "Filter"
   },
   "nav": {
     "dashboard": "Dashboard",
@@ -358,6 +359,22 @@
     "unknownEntity": "Dieses Pop-out-Fenster konnte nicht erkannt werden."
   },
   "notes": {
-    "editedBy": "bearbeitet von {{name}}"
+    "editedBy": "bearbeitet von {{name}}",
+    "allTypes": "Alle Typen",
+    "allChannels": "Alle Kanäle"
+  },
+  "errors": {
+    "koiosCreditExhausted": "Das Koios-Guthaben dieser Organisation ist aufgebraucht oder noch nicht aktiviert. Bitte aufladen oder den Administrator kontaktieren.",
+    "koiosUnavailable": "Koios ist derzeit nicht verfügbar. Bitte versuche es gleich erneut."
+  },
+  "timeline": {
+    "today": "Heute",
+    "yesterday": "Gestern"
+  },
+  "identifierCheck": {
+    "cocInvalid": "Dies scheint keine gültige Handelsregisternummer für {{country}} zu sein (erwartet z. B. {{example}}).",
+    "vatInvalid": "Dies scheint keine gültige USt-IdNr. für {{country}} zu sein (erwartet z. B. {{example}}).",
+    "cocUnverifiable": "Ohne Land kann die Handelsregisternummer nicht auf das Format geprüft werden.",
+    "vatUnverifiable": "Ohne Land kann die USt-IdNr. nicht auf das Format geprüft werden."
   }
 }

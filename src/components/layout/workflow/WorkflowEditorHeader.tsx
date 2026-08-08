@@ -205,7 +205,7 @@ export default function WorkflowEditorHeader({
       <button onClick={onSaveClose}
         style={{
           display: 'flex', alignItems: 'center', gap: 6, padding: '6px 14px', borderRadius: 8, fontSize: 12, fontWeight: 500,
-          background: 'var(--color-primary)', color: 'white',
+          background: 'var(--color-primary)', color: 'var(--color-on-accent)',
           border: 'none', cursor: 'pointer',
         }}>
         <Save size={13} />

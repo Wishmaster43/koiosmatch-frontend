@@ -18,7 +18,7 @@ import GeoRadiusGroup from './GeoRadiusGroup'
 function CountBadge({ count, label }: { count: number; label: string }) {
   return (
     <span aria-label={label} style={{
-      background: 'var(--color-primary)', color: 'white', borderRadius: 999,
+      background: 'var(--color-primary)', color: 'var(--color-on-accent)', borderRadius: 999,
       padding: '1px 6px', fontSize: 10, fontWeight: 600, flexShrink: 0,
     }}>
       {count}

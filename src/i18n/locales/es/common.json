@@ -77,7 +77,8 @@
     "toggle": "Mostrar/ocultar filtros",
     "title": "Filtros",
     "branch": "Sucursal",
-    "branchExcludesUnassigned": "Un filtro por sucursal oculta los registros sin sucursal vinculada."
+    "branchExcludesUnassigned": "Un filtro por sucursal oculta los registros sin sucursal vinculada.",
+    "button": "Filtrar"
   },
   "nav": {
     "dashboard": "Panel",
@@ -358,6 +359,22 @@
     "unknownEntity": "No se pudo reconocer esta ventana emergente."
   },
   "notes": {
-    "editedBy": "editado por {{name}}"
+    "editedBy": "editado por {{name}}",
+    "allTypes": "Todos los tipos",
+    "allChannels": "Todos los canales"
+  },
+  "errors": {
+    "koiosCreditExhausted": "El crédito de Koios de esta organización se ha agotado o aún no está activado. Recarga el saldo o contacta con tu administrador.",
+    "koiosUnavailable": "Koios no está disponible en este momento. Inténtalo de nuevo en breve."
+  },
+  "timeline": {
+    "today": "Hoy",
+    "yesterday": "Ayer"
+  },
+  "identifierCheck": {
+    "cocInvalid": "Esto no parece un número de registro mercantil válido para {{country}} (se espera p. ej. {{example}}).",
+    "vatInvalid": "Esto no parece un número de IVA válido para {{country}} (se espera p. ej. {{example}}).",
+    "cocUnverifiable": "Sin país no se puede comprobar el formato del número de registro mercantil.",
+    "vatUnverifiable": "Sin país no se puede comprobar el formato del número de IVA."
   }
 }

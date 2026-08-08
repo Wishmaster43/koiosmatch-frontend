@@ -14,6 +14,7 @@ import { CvDocument } from '@/pages/candidates/CandidateCvTemplate'
 import { useCvSettings } from '@/lib/useCvSettings'
 import { useLocale } from '@/lib/datetime'
 import { loadSettings } from '../lib/settingsApi'
+import { fieldInputStyle } from '@/components/forms/fieldMetrics'
 import { PREVIEW_CANDIDATE } from './cvTemplate/previewCandidate'
 import CvHtmlPreview from './cvTemplate/CvHtmlPreview'
 import CvSectionList from './cvTemplate/CvSectionList'
@@ -70,10 +71,8 @@ export default function CvTemplateSettings() {
     }
   }
 
-  const fieldStyle = {
-    width: '100%', padding: '8px 10px', fontSize: 13, border: '1px solid var(--border)',
-    borderRadius: 6, background: 'var(--bg)', color: 'var(--text)', boxSizing: 'border-box',
-  }
+  // Canon field style (G33/fieldMetrics) — was its own padding-8/radius-6 copy.
+  const fieldStyle = fieldInputStyle
   const labelStyle = { fontSize: 12, fontWeight: 600, color: 'var(--text)', marginBottom: 5, display: 'block' }
 
   return (

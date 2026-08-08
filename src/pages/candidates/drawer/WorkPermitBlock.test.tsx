@@ -4,26 +4,39 @@ import userEvent from '@testing-library/user-event'
 // Real i18n so t()/defaultValue resolve real Dutch text, like the rest of this drawer's tests.
 import '@/i18n'
 import WorkPermitBlock from './WorkPermitBlock'
-import { useIsNonEuNationality } from './useIsNonEuNationality'
+import { useWorkPermitVisibility } from './useWorkPermitVisibility'
 import type { Candidate } from '@/types/candidate'
 
-// Own hook, own test (useIsNonEuNationality.test.ts) — mocked directly here so
-// this component's tests don't depend on its network call, mirroring how
-// ProfilePersonalTab.test.tsx mocks useProfileRequiredKeys.
-vi.mock('./useIsNonEuNationality', () => ({ useIsNonEuNationality: vi.fn(() => true) }))
+// Own hook, own tests (workPermitVisibility.test.ts covers the RULE; the wiring
+// test below covers what this component feeds it) — mocked here so the rendering
+// tests don't depend on its network call, mirroring how ProfilePersonalTab.test.tsx
+// mocks useProfileRequiredKeys.
+vi.mock('./useWorkPermitVisibility', () => ({ useWorkPermitVisibility: vi.fn(() => true) }))
 
-describe('WorkPermitBlock · visible only for a non-EU/EEA candidate (KAND-WERKVERGUNNING-2)', () => {
-  beforeEach(() => { vi.mocked(useIsNonEuNationality).mockReturnValue(true) })
+// KAND-WERKVERGUNNING-LOOKUP-1: the work-permit-type lookup, mocked directly
+// (own hook, own test — useWorkPermitTypes is a thin useCachedLookup wrapper,
+// same convention as ProfilePersonalTab.test.tsx mocking useGenders).
+vi.mock('@/lib/useWorkPermitTypes', () => ({
+  useWorkPermitTypes: () => ({
+    workPermitTypes: [
+      { value: 'twv', label: 'Tewerkstellingsvergunning (TWV)' },
+      { value: 'gvva', label: 'Gecombineerde vergunning (GVVA)' },
+    ],
+  }),
+}))
+
+describe('WorkPermitBlock · rendering + save (KAND-WERKVERGUNNING-2)', () => {
+  beforeEach(() => { vi.mocked(useWorkPermitVisibility).mockReturnValue(true) })
 
   const candidate = { id: 1, nationality: 'Marokkaans' } as unknown as Candidate
 
-  it('renders nothing for an EU/EEA candidate', () => {
-    vi.mocked(useIsNonEuNationality).mockReturnValue(false)
+  it('renders nothing when the visibility rule hides the card', () => {
+    vi.mocked(useWorkPermitVisibility).mockReturnValue(false)
     const { container } = render(<WorkPermitBlock c={candidate} />)
     expect(container).toBeEmptyDOMElement()
   })
 
-  it('shows the group title and both fields for a non-EU/EEA candidate', () => {
+  it('shows the group title and both fields when visible', () => {
     render(<WorkPermitBlock c={candidate} />)
     expect(screen.getByText('Werkvergunning')).toBeInTheDocument()
     expect(screen.getByText('Type werkvergunning')).toBeInTheDocument()
@@ -40,17 +53,35 @@ describe('WorkPermitBlock · visible only for a non-EU/EEA candidate (KAND-WERKV
     expect(screen.queryByTitle('Bewerken')).toBeNull()
   })
 
-  it('sends the typed work-permit type + date on save (assert the REQUEST body)', async () => {
+  // KAND-WERKVERGUNNING-LOOKUP-1: the field is a pick-only searchable dropdown
+  // over the tenant lookup now, never a plain <select> and never free typing
+  // (CLAUDE.md §4 standing rule) — mirrors ProfilePersonalTab's identical test.
+  it('is a pick-only searchable dropdown fed by the lookup — no plain <select>, no create-on-type', async () => {
+    const user = userEvent.setup()
+    const { container } = render(<WorkPermitBlock c={candidate} />)
+    await user.click(screen.getByTitle('Bewerken'))
+    expect(container.querySelectorAll('select')).toHaveLength(0)
+    const typeField = screen.getByText('Type werkvergunning').parentElement as HTMLElement
+    await user.click(within(typeField).getByRole('button'))
+    await user.type(screen.getByPlaceholderText('Selecteer'), 'Gecombineerde')
+    expect(screen.getByRole('button', { name: 'Gecombineerde vergunning (GVVA)' })).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Tewerkstellingsvergunning (TWV)' })).toBeNull()
+  })
+
+  // §13: assert the REQUEST — the picked option's lookup `value` (the slug PATCH
+  // /candidates/{id} validates against work_permit_types.value, verified live),
+  // never the display label.
+  it('sends the picked work-permit type slug + date on save (assert the REQUEST body)', async () => {
     const user = userEvent.setup()
     const onSave = vi.fn()
     render(<WorkPermitBlock c={candidate} onSave={onSave} />)
     await user.click(screen.getByTitle('Bewerken'))
-    const typeRow = screen.getByText('Type werkvergunning').parentElement as HTMLElement
-    const typeInput = within(typeRow).getByRole('textbox') as HTMLInputElement
-    await user.type(typeInput, 'Gecombineerde vergunning')
+    const typeField = screen.getByText('Type werkvergunning').parentElement as HTMLElement
+    await user.click(within(typeField).getByRole('button'))
+    await user.click(screen.getByRole('button', { name: 'Gecombineerde vergunning (GVVA)' }))
     await user.click(screen.getByTitle('Opslaan'))
     expect(onSave).toHaveBeenCalledTimes(1)
-    expect(onSave).toHaveBeenCalledWith({ workPermitType: 'Gecombineerde vergunning', workPermitValidUntil: '' })
+    expect(onSave).toHaveBeenCalledWith({ workPermitType: 'gvva', workPermitValidUntil: '' })
   })
 
   it('cancel restores the original value without calling onSave', async () => {
@@ -58,16 +89,23 @@ describe('WorkPermitBlock · visible only for a non-EU/EEA candidate (KAND-WERKV
     const onSave = vi.fn()
     // KAND-WERKVERGUNNING-2 data-plumbing note (see WorkPermitBlock.tsx): read
     // defensively off the raw snake_case field until mapCandidate.ts is extended.
-    const withValue = { ...candidate, work_permit_type: 'Tewerkstellingsvergunning' } as unknown as Candidate
+    const withValue = { ...candidate, work_permit_type: 'twv' } as unknown as Candidate
     render(<WorkPermitBlock c={withValue} onSave={onSave} />)
     await user.click(screen.getByTitle('Bewerken'))
-    const typeRow = screen.getByText('Type werkvergunning').parentElement as HTMLElement
-    const typeInput = within(typeRow).getByRole('textbox') as HTMLInputElement
-    await user.clear(typeInput)
-    await user.type(typeInput, 'Iets anders')
+    const typeField = screen.getByText('Type werkvergunning').parentElement as HTMLElement
+    await user.click(within(typeField).getByRole('button'))
+    await user.click(screen.getByRole('button', { name: 'Gecombineerde vergunning (GVVA)' }))
     await user.click(screen.getByTitle('Annuleren'))
     expect(onSave).not.toHaveBeenCalled()
-    expect(screen.getByText('Tewerkstellingsvergunning')).toBeInTheDocument()
+    expect(screen.getByText('Tewerkstellingsvergunning (TWV)')).toBeInTheDocument()
+  })
+
+  // A candidate written before the value moved onto a lookup (or since renamed/
+  // deleted in Settings) must keep showing its stored slug — never a silent blank.
+  it('an unknown/legacy work-permit value still renders instead of being silently blanked', () => {
+    const legacy = { ...candidate, work_permit_type: 'oud_type_niet_meer_in_lijst' } as unknown as Candidate
+    render(<WorkPermitBlock c={legacy} />)
+    expect(screen.getByText('oud_type_niet_meer_in_lijst')).toBeInTheDocument()
   })
 
   it('reads the current valid-until date defensively off the raw snake_case field, formatted DD-MM-YYYY', () => {
@@ -79,5 +117,42 @@ describe('WorkPermitBlock · visible only for a non-EU/EEA candidate (KAND-WERKV
   it('shows a dash for both fields when nothing is set yet', () => {
     render(<WorkPermitBlock c={candidate} />)
     expect(screen.getAllByText('-')).toHaveLength(2)
+  })
+})
+
+/**
+ * DANNY-PUNT-1 · the SEAM between this component and the visibility rule. The rule
+ * itself is proven in workPermitVisibility.test.ts; what must be pinned HERE is
+ * that the component actually tells the rule whether the card holds data — get
+ * that argument wrong and a filled-in work permit disappears off the screen, which
+ * is the one failure mode Danny called out as unacceptable. §13: assert the call,
+ * not merely that something rendered.
+ */
+describe('WorkPermitBlock · what it feeds the visibility rule', () => {
+  beforeEach(() => { vi.mocked(useWorkPermitVisibility).mockReturnValue(true) })
+
+  it('reports UNOBSERVABLE when the candidate carries no work-permit key at all', () => {
+    // This is today's real production shape: mapCandidate.ts drops both columns, so
+    // "no key" must never be read as "empty" — that would hide a stored permit.
+    render(<WorkPermitBlock c={{ id: 1, nationality: 'Nederlandse' } as unknown as Candidate} />)
+    expect(useWorkPermitVisibility).toHaveBeenCalledWith('Nederlandse', 'unobservable')
+  })
+
+  it('reports EMPTY only when the keys are present and both are blank', () => {
+    const blank = { id: 1, nationality: 'Nederlandse', work_permit_type: null, work_permit_valid_until: null } as unknown as Candidate
+    render(<WorkPermitBlock c={blank} />)
+    expect(useWorkPermitVisibility).toHaveBeenCalledWith('Nederlandse', 'empty')
+  })
+
+  it('reports FILLED when a permit type is stored (so it can never be hidden)', () => {
+    const withType = { id: 1, nationality: 'Nederlandse', work_permit_type: 'twv' } as unknown as Candidate
+    render(<WorkPermitBlock c={withType} />)
+    expect(useWorkPermitVisibility).toHaveBeenCalledWith('Nederlandse', 'filled')
+  })
+
+  it('reports FILLED when only a validity date is stored', () => {
+    const withDate = { id: 1, nationality: 'Nederlandse', work_permit_valid_until: '2027-01-01' } as unknown as Candidate
+    render(<WorkPermitBlock c={withDate} />)
+    expect(useWorkPermitVisibility).toHaveBeenCalledWith('Nederlandse', 'filled')
   })
 })

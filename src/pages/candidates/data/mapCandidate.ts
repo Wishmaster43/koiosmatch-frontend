@@ -233,6 +233,10 @@ export function mapCandidate(c: ApiCandidate): Candidate {
       x => Math.max(dateVal(x.issued), dateVal(x.expires)),
     ),
     skills:          c.skills ?? [],
+    // REFERENTIE-VELDEN-1: third-party references (referees) — straight
+    // passthrough, mirrors skills/documents; was missing entirely (BackgroundTab's
+    // defensive read always resolved to `[]` in the real app — verified live).
+    references:      c.references ?? [],
     documents:       (c.documents ?? []).map(d => ({
       ...d,
       name: d.name ?? d.file_name,

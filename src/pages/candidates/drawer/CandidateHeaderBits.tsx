@@ -14,13 +14,16 @@ import { useCvSettings } from '@/lib/useCvSettings'
 import { useLocale, useDateFormat } from '@/lib/datetime'
 import { useFunctions } from '@/lib/useFunctions'
 import { BTN_H } from '@/config/buttonMetrics'
+import { fieldInputStyle } from '@/components/forms/fieldMetrics'
 import CreatableSelect from '@/components/ui/CreatableSelect'
 import ReferenceNumberChip from '@/components/ui/ReferenceNumberChip'
 import type { Candidate } from '@/types/candidate'
 import type { Id, LookupOption } from '@/types/common'
 import type { HeaderForm } from '../hooks/useCandidateHeaderEdit'
 
-const inputBase = { width: '100%', minWidth: 0, boxSizing: 'border-box' as const, padding: '6px 10px', borderRadius: 6, border: '1px solid var(--border)' }
+// Canon field style (G33/fieldMetrics) — was its own padding-6/radius-6 copy;
+// `minWidth: 0` stays local since it only matters inside this header's grid.
+const inputBase = { ...fieldInputStyle, minWidth: 0 }
 const iconBtn = { display: 'flex', alignItems: 'center', justifyContent: 'center', width: 28, height: 28, borderRadius: 7, cursor: 'pointer', flexShrink: 0 } as const
 
 // Title block: name + phase badge, or the name/function edit form. The status
@@ -145,7 +148,7 @@ export function ArchivedBanner({ c, canHardDelete, onRestore, onMarkDeletion, on
       {/* Herstellen (both states) */}
       {onRestore && (
         <button onClick={() => onRestore(c.id)} title={t('drawer.restore')} aria-label={t('drawer.restore')}
-          style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 3, display: 'flex', color: 'var(--color-primary)' }}>
+          style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 3, display: 'flex', color: 'var(--color-primary-text)' }}>
           <RotateCcw size={14} />
         </button>
       )}
@@ -162,7 +165,7 @@ export function ArchivedBanner({ c, canHardDelete, onRestore, onMarkDeletion, on
       {inTrash && onHardDelete && canHardDelete && (
         <button onClick={() => onHardDelete(c.id)}
           title={t('drawer.hardDelete')} aria-label={t('drawer.hardDelete')}
-          style={{ display: 'inline-flex', alignItems: 'center', gap: 4, background: 'var(--color-danger)', border: 'none', borderRadius: 6, cursor: 'pointer', padding: '3px 8px', color: 'var(--color-on-accent)', fontSize: 11, fontWeight: 600 }}>
+          style={{ display: 'inline-flex', alignItems: 'center', gap: 4, background: 'var(--color-danger)', border: 'none', borderRadius: 6, cursor: 'pointer', padding: '3px 8px', color: 'var(--color-on-danger)', fontSize: 11, fontWeight: 600 }}>
           <Trash2 size={12} /> {t('erase.deleteForever')}
         </button>
       )}

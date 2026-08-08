@@ -1,10 +1,18 @@
 import { useState } from 'react'
+import type { ComponentType } from 'react'
 import { useTranslation } from 'react-i18next'
 import DatePicker from 'react-datepicker'
 import { useDateFormat } from '@/lib/datetime'
+import { useWorkPermitTypes } from '@/lib/useWorkPermitTypes'
+import CreatableSelectJs from '@/components/ui/CreatableSelect'
 import { FieldRow, EditControls, GroupCard, GroupHeader, inputStyle } from './profileFieldShared'
-import { useIsNonEuNationality } from './useIsNonEuNationality'
+import { useWorkPermitVisibility } from './useWorkPermitVisibility'
+import type { WorkPermitDataState } from './workPermitVisibility'
 import type { Candidate } from '@/types/candidate'
+
+type AnyProps = Record<string, unknown>
+// CreatableSelect is still untyped JS — accept any props at the boundary (mirrors ProfilePersonalTab).
+const CreatableSelect = CreatableSelectJs as unknown as ComponentType<AnyProps>
 
 // The fields this card owns — mirrors ProfilePersonalTab's per-card split (own
 // pencil, own draft/error state, never blocking another card's in-progress edit).
@@ -12,43 +20,71 @@ type WPKey = 'workPermitType' | 'workPermitValidUntil'
 type WPForm = Record<WPKey, string>
 
 /**
- * WorkPermitBlock — KAND-WERKVERGUNNING-2: work-permit fields, shown ONLY for a
- * non-EU/EEA candidate (useIsNonEuNationality, resolved from the nationality
- * lookup's `is_eu` flag — never a hardcoded nationality list). Two plain backend
- * columns (candidates.work_permit_type / work_permit_valid_until — see the
- * candidates migration, CandidateProfileRequest and WorkPermitGuard): no
- * controlled vocabulary on the backend, so `work_permit_type` is a free-text
- * field, not a lookup dropdown. One more stacked card in ProfileTab, same
- * pencil→save/cancel convention as Personal/Address/Contact.
+ * WorkPermitBlock — KAND-WERKVERGUNNING-2: work-permit fields backed by two plain
+ * backend columns (candidates.work_permit_type / work_permit_valid_until — see the
+ * candidates migration, CandidateProfileRequest and WorkPermitGuard).
  *
- * DATA-PLUMBING NOTE (handover): mapCandidate.ts does not map
- * work_permit_type/work_permit_valid_until onto the typed Candidate model yet,
- * and candidatesShared.ts's buildCandidatePatch does not forward
- * workPermitType/workPermitValidUntil onto the PATCH body either — both are
- * outside this change's owned files (mapCandidate.ts / candidatesShared.ts /
- * types/candidate.ts). Until those three small additions land (exact snippets in
- * the handover), this card LOCALLY reflects an edit (CandidateDrawer's
- * `mergedC` spread) but the PATCH silently carries no work-permit fields, so a
- * reload reverts it — flagged loudly rather than shipped silently. Reads the raw
- * record defensively (mirrors the identical pattern in BackgroundTab.tsx's
- * `references` field) so this card starts showing real data the moment the
- * mapper change lands, with no further edit here.
+ * DANNY-PUNT-1 (2026-08-09): the card is hidden ONLY when it is empty AND the
+ * candidate's nationality provably resolves to the company's own country — for a
+ * Dutch candidate at a Dutch company the block was pure noise. Every unknown keeps
+ * it visible, and a card that already holds a permit type or validity date is NEVER
+ * hidden regardless of nationality (residence-right data must stay reachable). The
+ * rule, and the live API measurements it rests on, live in `workPermitVisibility.ts`;
+ * `useWorkPermitVisibility` feeds it. This replaces the old non-EU-only gate.
+ *
+ * KAND-WERKVERGUNNING-LOOKUP-1 (2026-08-08): `work_permit_type` moved from
+ * free text onto a tenant lookup (GET /work-permit-types, useWorkPermitTypes) —
+ * the stale "no controlled vocabulary" claim this docblock used to carry is
+ * corrected here. The field is a pick-only (allowCreate=false) type-to-filter
+ * dropdown over that lookup, mirrors ProfilePersonalTab's gender/nationality
+ * fields exactly — never a plain <select> (CLAUDE.md §4 standing rule: always a
+ * searchable dropdown). Verified live against koiosmatch-api: PATCH
+ * /candidates/{id} still takes the plain slug STRING on `work_permit_type`
+ * (CandidateProfileRequest validates it with `Rule::exists('work_permit_types',
+ * 'value')`, not an id) — so the option `value` sent on save is that same slug,
+ * no shape change needed on candidatesShared.ts's buildCandidatePatch (already
+ * forwards `workPermitType` → `work_permit_type` unchanged). A legacy/unknown
+ * slug already stored (no longer present in the tenant's lookup) still renders
+ * as-is via the raw-string fallback below — never silently blanked — same
+ * tolerance as ProfilePersonalTab's gender/nationality display.
+ *
+ * `work_permit_valid_until` is unaffected by the lookup move and keeps its own
+ * plain date column + DatePicker, untouched here.
  */
 export default function WorkPermitBlock({ c, onSave, autoEditSignal }: {
   c: Candidate; onSave?: (v: Record<string, unknown>) => void; autoEditSignal?: number
 }) {
   const { t } = useTranslation('candidates')
   const { formatDate } = useDateFormat()
-  const isNonEu = useIsNonEuNationality(c.nationality)
+  // Work-permit kind now comes from a tenant lookup (KAND-WERKVERGUNNING-LOOKUP-1),
+  // never a hardcoded option list — see the docblock above.
+  const { workPermitTypes } = useWorkPermitTypes()
 
-  // See the DATA-PLUMBING NOTE above — read both the (future) typed camelCase
-  // keys and today's raw snake_case API keys, whichever is present.
+  // mapCandidate.ts does not map work_permit_type/work_permit_valid_until onto the
+  // typed Candidate model (re-measured 09-08: none of the four key variants survives
+  // the mapper, so in production BOTH read empty even when the API has values — a
+  // pre-existing display gap, owned by the mapper, reported not silently patched
+  // here). Read the (future) camelCase keys and the raw snake_case ones, whichever
+  // is present. Mirrors the identical pattern in BackgroundTab.tsx's `references`.
   const raw = c as unknown as {
     workPermitType?: string | null; workPermitValidUntil?: string | null
     work_permit_type?: string | null; work_permit_valid_until?: string | null
   }
   const currentType = raw.workPermitType ?? raw.work_permit_type ?? ''
   const currentValidUntil = raw.workPermitValidUntil ?? raw.work_permit_valid_until ?? ''
+
+  // DANNY-PUNT-1: classify the card as filled / empty / unobservable, because only a
+  // provably EMPTY card may ever be hidden. When the candidate object carries none of
+  // the four key variants the mapper has dropped them (measured 09-08), so we cannot
+  // tell whether a permit exists — that is 'unobservable' and keeps the card visible,
+  // never a silent "empty". See the WorkPermitDataState docs for the full reasoning.
+  const permitKeys = ['workPermitType', 'work_permit_type', 'workPermitValidUntil', 'work_permit_valid_until'] as const
+  const asRecord = c as unknown as Record<string, unknown>
+  const observable = permitKeys.some(k => k in asRecord)
+  const dataState: WorkPermitDataState = !observable
+    ? 'unobservable'
+    : (currentType || currentValidUntil) ? 'filled' : 'empty'
+  const visible = useWorkPermitVisibility(c.nationality, dataState)
 
   const emptyForm = (): WPForm => ({ workPermitType: currentType, workPermitValidUntil: currentValidUntil })
   const [editing, setEditing] = useState(false)
@@ -64,9 +100,9 @@ export default function WorkPermitBlock({ c, onSave, autoEditSignal }: {
   const save = () => { onSave?.(form); setEditing(false) }
   const cancel = () => { setForm(emptyForm()); setEditing(false) }
 
-  // Not an EU/EEA candidate → no work-permit fields to show (calm by default,
-  // §3B: the block appears only when the tenant's own lookup flags it relevant).
-  if (!isNonEu) return null
+  // Empty card + a nationality that provably matches the company's own country →
+  // nothing to ask (calm by default, §3B). Every other case stays visible.
+  if (!visible) return null
 
   const renderInput = (key: WPKey) => {
     if (key === 'workPermitValidUntil') return (
@@ -81,7 +117,15 @@ export default function WorkPermitBlock({ c, onSave, autoEditSignal }: {
         customInput={<input style={inputStyle} />}
       />
     )
-    return <input value={form.workPermitType} onChange={e => setF('workPermitType', e.target.value)} style={inputStyle} />
+    // Pick-only (allowCreate=false) type-to-filter dropdown over the tenant lookup —
+    // never a plain <select> (CLAUDE.md §4 standing rule). Sends the option's
+    // `value` (the same lookup slug PATCH validates), mirrors ProfilePersonalTab's
+    // gender/nationality fields exactly.
+    return (
+      <CreatableSelect value={form.workPermitType || null} onChange={(v: string) => setF('workPermitType', v)} allowCreate={false}
+        placeholder={t('common:select')} style={inputStyle}
+        options={workPermitTypes.map(w => ({ value: w.value, label: w.label }))} />
+    )
   }
 
   const renderValue = (key: WPKey) => {
@@ -89,7 +133,10 @@ export default function WorkPermitBlock({ c, onSave, autoEditSignal }: {
       const v = currentValidUntil
       return <span style={{ fontSize: 12, color: v ? 'var(--text)' : 'var(--text-muted)' }}>{v ? formatDate(v) : '-'}</span>
     }
-    return <span style={{ fontSize: 12, color: currentType ? 'var(--text)' : 'var(--text-muted)' }}>{currentType || '-'}</span>
+    // Resolve the display label from the lookup; a legacy/unknown slug (no longer
+    // in the tenant's lookup) falls back to the raw stored string — never blanked.
+    const label = workPermitTypes.find(w => w.value === currentType || w.label === currentType)?.label ?? currentType
+    return <span style={{ fontSize: 12, color: currentType ? 'var(--text)' : 'var(--text-muted)' }}>{label || '-'}</span>
   }
 
   const field = (key: WPKey, label: string) => (
@@ -98,11 +145,9 @@ export default function WorkPermitBlock({ c, onSave, autoEditSignal }: {
     </FieldRow>
   )
 
-  // KAND-WERKVERGUNNING-2: these three keys are NOT in the locale files yet (out
-  // of scope here — see the handover, which reports them for all five locales).
-  // `defaultValue` mirrors BackgroundTab.tsx's identical KAND-REFERENTIES-1
-  // pattern: real Dutch text renders immediately, the manager's key addition is
-  // then a no-op swap-in rather than a blocker.
+  // KAND-WERKVERGUNNING-2: these three keys now exist in all five locales
+  // (candidates.json — nl/en/de/fr/es); `defaultValue` is kept as a harmless
+  // safety net (mirrors BackgroundTab.tsx's identical KAND-REFERENTIES-1 pattern).
   return (
     <div>
       <GroupHeader title={t('profile.groupWorkPermit', { defaultValue: 'Werkvergunning' })}>

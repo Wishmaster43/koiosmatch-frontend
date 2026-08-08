@@ -228,7 +228,7 @@ export default function PriceAgreementsTab({ customerId, c, onSave }: { customer
           <span>{t('priceAgreements.loadError')}</span>
           {/* Arrow-wrap: reload now takes an optional AbortSignal (audit r4) — the
               click event must never flow into that parameter. */}
-          <button onClick={() => reload()} style={{ marginLeft: 'auto', fontSize: 11, fontWeight: 600, color: 'var(--color-primary)', background: 'none', border: 'none', cursor: 'pointer' }}>{t('priceAgreements.retry')}</button>
+          <button onClick={() => reload()} style={{ marginLeft: 'auto', fontSize: 11, fontWeight: 600, color: 'var(--color-primary-text)', background: 'none', border: 'none', cursor: 'pointer' }}>{t('priceAgreements.retry')}</button>
         </div>
       )}
 

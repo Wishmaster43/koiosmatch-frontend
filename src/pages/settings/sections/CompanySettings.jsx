@@ -6,7 +6,9 @@ import { notifyError } from '@/lib/notify'
 import { loadSettings, saveSettings } from '../lib/settingsApi'
 import { useIndustries } from '@/lib/useIndustries'
 import { useCountriesLookup } from '@/lib/useCountriesLookup'
+import { useProvinces } from '@/hooks/useProvinces'
 import SearchSelect from '@/components/ui/SearchSelect'
+import { cardHead } from '@/components/ui/modalCards'
 // One language source for the whole app (Danny 14/7): the same five shipped
 // locales the profile picker offers — never a diverging local list.
 import { LANGUAGES as APP_LANGUAGES } from '@/pages/auth/profileParts'
@@ -20,13 +22,32 @@ const CURRENCIES = ['Euro (€)','Dollar ($)','Pond (£)']
 const TIMEZONES  = ['Europa/Amsterdam','Europa/Brussel','Europa/Londen','UTC']
 
 // Module-scope so they keep a stable identity across renders (otherwise text
-// inputs lose focus on every keystroke).
-function Row({ label, children }) {
+// inputs lose focus on every keystroke). `last` drops the divider on a block's
+// closing row so a titled card never ends on a dangling rule.
+function Row({ label, children, last = false }) {
   return (
-    <div style={{ display: 'flex', alignItems: 'flex-start', padding: '14px 0', borderBottom: '1px solid var(--hover-bg)', gap: 24 }}>
+    <div style={{ display: 'flex', alignItems: 'flex-start', padding: '14px 0', borderBottom: last ? 'none' : '1px solid var(--hover-bg)', gap: 24 }}>
       <div style={{ width: 200, flexShrink: 0, fontSize: 13, color: 'var(--text-muted)', paddingTop: 8 }}>{label}</div>
       <div style={{ flex: 1 }}>{children}</div>
     </div>
+  )
+}
+
+// The card chrome this screen already used for its single form block, hoisted so
+// all three blocks share one source (§11).
+const GROUP_CARD = {
+  background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12, padding: '0 24px',
+}
+
+// One titled block of rows — the settings-wide "titled card" idiom (shared
+// `cardHead` above a bordered surface, mirroring Settings → Vestigingen's
+// address/contact blocks), so the three groups read as one form, not three screens.
+function Group({ title, children }) {
+  return (
+    <section>
+      <h3 style={cardHead}>{title}</h3>
+      <div style={GROUP_CARD}>{children}</div>
+    </section>
   )
 }
 
@@ -84,6 +105,11 @@ export default function CompanySettings() {
   // Backend-sourced operating-country codes, labelled in the current UI language.
   const { options: countryOptions } = useCountriesLookup()
   const [form,       setForm]       = useState(EMPTY)
+  // Provinces cascade on the picked country (PROVINCES-1) — same hook the candidate
+  // and vacancy address blocks use, so the tenant maintains one list.
+  const { provinces } = useProvinces(form.company_country || 'NL')
+  const provinceOptions = (provinces ?? []).map(p => (typeof p === 'string' ? { value: p, label: p } : p))
+
   const [bannerUrl,  setBannerUrl]  = useState(null)
   const [saved,      setSaved]      = useState(false)
   const [saving,     setSaving]     = useState(false)
@@ -154,7 +180,9 @@ export default function CompanySettings() {
         <button onClick={save} disabled={saving}
           style={{ display: 'flex', alignItems: 'center', gap: 6, height: BTN_H, padding: '0 14px',
                    fontSize: 13, fontWeight: 500, borderRadius: 8, border: 'none', cursor: 'pointer',
-                   background: saved ? 'var(--color-success)' : 'var(--color-primary)', color: 'white' }}>
+                   background: saved ? 'var(--color-success)' : 'var(--color-primary)',
+                   // Success fill needs its own on-* token — white only reaches ~3.3:1 there (WCAG audit 2026-08).
+                   color: saved ? 'var(--color-on-success)' : 'var(--color-on-accent)' }}>
           {saved ? <><Check size={13}/> {t('common.saved')}</> : saving ? <><RefreshCw size={13} className="animate-spin"/> {t('common.saving')}</> : <><Save size={13}/> {t('common.save')}</>}
         </button>
       </div>
@@ -165,37 +193,58 @@ export default function CompanySettings() {
       {loading && <p style={{ fontSize: 13, color: 'var(--text-muted)' }}>{t('common.loading')}</p>}
 
       {!loading && (
-        <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12, padding: '0 24px' }}>
-          <Row label={t('company.banner')}>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-              {bannerUrl && <img src={bannerUrl} alt={t('company.banner')} style={{ width: '100%', maxWidth: 400, height: 100, objectFit: 'cover', borderRadius: 8, border: '1px solid var(--border)' }} />}
-              <div style={{ display: 'flex', gap: 8 }}>
-                {/* Real upload (BANNER-UPLOAD-1). No local "remove": clearing only the
-                    preview would reappear on reload — a delete needs its own endpoint. */}
-                <input ref={bannerRef} type="file" accept="image/png,image/jpeg,image/webp,image/svg+xml" style={{ display: 'none' }} onChange={handleBannerFile} />
-                <button onClick={() => bannerRef.current?.click()}
-                  style={{ height: BTN_H, padding: '0 12px', fontSize: 12, border: '1px solid var(--border)', borderRadius: 7, background: 'var(--surface)', cursor: 'pointer', color: 'var(--text)' }}>
-                  {t('common.upload')}
-                </button>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+          {/* 1. Identity — what the company IS, before any address detail. */}
+          <Group title={t('company.sectionIdentity')}>
+            <Row label={t('company.banner')}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                {bannerUrl && <img src={bannerUrl} alt={t('company.banner')} style={{ width: '100%', maxWidth: 400, height: 100, objectFit: 'cover', borderRadius: 8, border: '1px solid var(--border)' }} />}
+                <div style={{ display: 'flex', gap: 8 }}>
+                  {/* Real upload (BANNER-UPLOAD-1). No local "remove": clearing only the
+                      preview would reappear on reload — a delete needs its own endpoint. */}
+                  <input ref={bannerRef} type="file" accept="image/png,image/jpeg,image/webp,image/svg+xml" style={{ display: 'none' }} onChange={handleBannerFile} />
+                  <button onClick={() => bannerRef.current?.click()}
+                    style={{ height: BTN_H, padding: '0 12px', fontSize: 12, border: '1px solid var(--border)', borderRadius: 7, background: 'var(--surface)', cursor: 'pointer', color: 'var(--text)' }}>
+                    {t('common.upload')}
+                  </button>
+                </div>
               </div>
-            </div>
-          </Row>
-          <Row label={t('company.industry')}><Select value={form.company_industry} onChange={v => set('company_industry', v)} options={industries} /></Row>
-          <Row label={t('company.country')}><Select value={form.company_country} onChange={v => set('company_country', v)} options={countryOptions} /></Row>
+            </Row>
+            <Row label={t('company.industry')} last><Select value={form.company_industry} onChange={v => set('company_industry', v)} options={industries} /></Row>
+          </Group>
 
-          <Row label={t('company.street')}><Input value={form.company_street} onChange={v => set('company_street', v)} placeholder={t('company.streetPlaceholder')} /></Row>
-          <Row label={t('company.houseNumber')}>
-            <div style={{ display: 'flex', gap: 12 }}>
-              <Input value={form.company_house_number} onChange={v => set('company_house_number', v)} placeholder="28" style={{ maxWidth: 170 }} />
-              <Input value={form.company_house_number_suffix} onChange={v => set('company_house_number_suffix', v)} placeholder={t('company.houseNumberSuffix')} style={{ maxWidth: 170 }} />
-            </div>
-          </Row>
-          <Row label={t('company.postcode')}><Input value={form.company_postcode} onChange={v => set('company_postcode', v)} placeholder="1234 AB" /></Row>
-          <Row label={t('company.city')}><Input value={form.company_city} onChange={v => set('company_city', v)} placeholder={t('company.cityPlaceholder')} /></Row>
-          <Row label={t('company.province')}><Input value={form.company_province} onChange={v => set('company_province', v)} placeholder={t('company.province')} /></Row>
-          <Row label={t('company.language')}><Select value={form.company_language} onChange={v => set('company_language', v)} options={LANGUAGES} /></Row>
-          <Row label={t('company.currency')}><Select value={form.company_currency} onChange={v => set('company_currency', v)} options={CURRENCIES} /></Row>
-          <Row label={t('company.timezone')}><Select value={form.company_timezone} onChange={v => set('company_timezone', v)} options={TIMEZONES} /></Row>
+          {/* 2. Address, in the order an address is WRITTEN (Danny 09-08): street →
+              number → postcode → city → province → country. Country used to sit on
+              top, split off from the block it closes, so reading the address took a
+              jump. Country still feeds the province cascade below — that link runs
+              through `form.company_country` state, not through JSX order, so the
+              province list keeps updating from a field rendered underneath it. */}
+          <Group title={t('company.sectionAddress')}>
+            <Row label={t('company.street')}><Input value={form.company_street} onChange={v => set('company_street', v)} placeholder={t('company.streetPlaceholder')} /></Row>
+            <Row label={t('company.houseNumber')}>
+              <div style={{ display: 'flex', gap: 12 }}>
+                <Input value={form.company_house_number} onChange={v => set('company_house_number', v)} placeholder="28" style={{ maxWidth: 170 }} />
+                <Input value={form.company_house_number_suffix} onChange={v => set('company_house_number_suffix', v)} placeholder={t('company.houseNumberSuffix')} style={{ maxWidth: 170 }} />
+              </div>
+            </Row>
+            <Row label={t('company.postcode')}><Input value={form.company_postcode} onChange={v => set('company_postcode', v)} placeholder="1234 AB" /></Row>
+            <Row label={t('company.city')}><Input value={form.company_city} onChange={v => set('company_city', v)} placeholder={t('company.cityPlaceholder')} /></Row>
+            {/* Provincie is a searchable dropdown like everywhere else (Danny 08-08,
+                CLAUDE.md §4) — options cascade on the picked country, mirroring the
+                candidate/vacancy address blocks. */}
+            <Row label={t('company.province')}>
+              <Select value={form.company_province} onChange={v => set('company_province', v)}
+                options={provinceOptions} />
+            </Row>
+            <Row label={t('company.country')} last><Select value={form.company_country} onChange={v => set('company_country', v)} options={countryOptions} /></Row>
+          </Group>
+
+          {/* 3. Preferences — the tenant's locale defaults, unrelated to the address. */}
+          <Group title={t('company.sectionPreferences')}>
+            <Row label={t('company.language')}><Select value={form.company_language} onChange={v => set('company_language', v)} options={LANGUAGES} /></Row>
+            <Row label={t('company.currency')}><Select value={form.company_currency} onChange={v => set('company_currency', v)} options={CURRENCIES} /></Row>
+            <Row label={t('company.timezone')} last><Select value={form.company_timezone} onChange={v => set('company_timezone', v)} options={TIMEZONES} /></Row>
+          </Group>
         </div>
       )}
       {/* Organisation policies (MFA enforcement, …) live in their OWN sub-menu now:

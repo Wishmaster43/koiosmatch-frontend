@@ -515,7 +515,8 @@
     "deleteOneMessage": "Sind Sie sicher? '{{name}}' wird endgültig gelöscht — dies kann nicht rückgängig gemacht werden.",
     "deleteManyMessage": "Sind Sie sicher? {{count}} Dokumente werden endgültig gelöscht — dies kann nicht rückgängig gemacht werden.",
     "deleteSelected": "Löschen ({{count}})",
-    "linkLevelLabel": "Dokument verknüpfen mit"
+    "linkLevelLabel": "Dokument verknüpfen mit",
+    "allTypes": "Alle Typen"
   },
   "priceAgreements": {
     "add": "Neue Preisvereinbarung",

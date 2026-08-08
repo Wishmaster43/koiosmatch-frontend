@@ -260,7 +260,7 @@ export default function ApplicationsPage({ intent }: { intent?: unknown } = {}) 
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
             {/* BTN_H (§4/§9): one explicit height for every text/action button, everywhere. */}
             <button onClick={() => setAddOpen(true)} style={{ display: 'flex', alignItems: 'center', gap: 5,
-              height: BTN_H, padding: '0 14px', fontSize: 13, fontWeight: 600, background: 'var(--color-primary)', color: '#fff',
+              height: BTN_H, padding: '0 14px', fontSize: 13, fontWeight: 600, background: 'var(--color-primary)', color: 'var(--color-on-accent)',
               border: 'none', borderRadius: 8, cursor: 'pointer' }}>
               <Plus size={14} /> {t('add.button')}
             </button>
@@ -274,7 +274,7 @@ export default function ApplicationsPage({ intent }: { intent?: unknown } = {}) 
               <div style={{ display: 'flex', alignItems: 'center', gap: 6, height: BTN_H, padding: '0 10px', borderRadius: 7,
                 background: 'color-mix(in srgb, var(--color-primary) 10%, transparent)',
                 border: '1px solid color-mix(in srgb, var(--color-primary) 30%, transparent)',
-                color: 'var(--color-primary)', fontSize: 12, fontWeight: 500 }}>
+                color: 'var(--color-primary-text)', fontSize: 12, fontWeight: 500 }}>
                 <Users size={13} />
                 {t('page.scopedBySelection', { count: selectedCandidateIds.length })}
                 <button onClick={() => setSelectedCandidateIds([])} aria-label={t('page.clearScope')}

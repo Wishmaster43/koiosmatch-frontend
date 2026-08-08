@@ -174,7 +174,7 @@ export function LookupBlock({ slug, title, subtitle, items, setItems, locked = f
             )}
             {/* Appointment badge: marks the funnel stage that requires a planned intake. */}
             {isFunnelBlock && item.requires_appointment && (
-              <span style={{ fontSize: 10, fontWeight: 600, color: 'var(--color-primary)',
+              <span style={{ fontSize: 10, fontWeight: 600, color: 'var(--color-primary-text)',
                              background: 'var(--color-primary-bg)', padding: '2px 7px', borderRadius: 999 }}>
                 {t('lookups.appointmentBadge')}
               </span>
@@ -371,7 +371,7 @@ export function LookupBlock({ slug, title, subtitle, items, setItems, locked = f
             <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, marginTop: 20 }}>
               <button onClick={() => setModal(null)} style={{ height: 34, padding: '0 16px', fontSize: 13, border: '1px solid var(--border)', borderRadius: 8, background: 'var(--surface)', cursor: 'pointer' }}>{t('common.cancel')}</button>
               <button onClick={save} disabled={busy || !modal.label.trim()}
-                style={{ height: 34, padding: '0 16px', fontSize: 13, fontWeight: 500, border: 'none', borderRadius: 8, background: 'var(--color-primary)', color: 'white', cursor: 'pointer', opacity: modal.label.trim() ? 1 : 0.4 }}>
+                style={{ height: 34, padding: '0 16px', fontSize: 13, fontWeight: 500, border: 'none', borderRadius: 8, background: 'var(--color-primary)', color: 'var(--color-on-accent)', cursor: 'pointer', opacity: modal.label.trim() ? 1 : 0.4 }}>
                 {busy ? t('common.saving') : t('common.save')}
               </button>
             </div>

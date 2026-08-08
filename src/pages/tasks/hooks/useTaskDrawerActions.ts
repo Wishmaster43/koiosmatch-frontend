@@ -12,8 +12,14 @@ import api, { unwrap } from '@/lib/api'
 import { notifyError, notifySuccess } from '@/lib/notify'
 import { extractApiError } from '@/lib/extractApiError'
 import { mapTaskDetail } from '../data/mapTask'
+import { useTaskLookupIds } from './useTaskLookupIds'
 import type { Task, TaskDetail, ApiTask } from '@/types/task'
 import type { Id } from '@/types/common'
+
+// The three lookup axes a drawer patch may carry, mapped to their uuid-FK map key.
+const AXIS_OF: Record<string, 'type' | 'status' | 'priority'> = {
+  typeKey: 'type', statusKey: 'status', priorityKey: 'priority',
+}
 
 interface NewLink { type: string; id: string; label: string }
 
@@ -28,6 +34,13 @@ interface Args {
 export function useTaskDrawerActions({ setTasks, archivedTasks, setArchivedTasks, decorate, t }: Args) {
   const [selected, setSelected] = useState<TaskDetail | null>(null)
   const [expanded, setExpanded] = useState(false)
+  // TASKTYPE-ID-1 (measured): UpdateTaskRequest only validates the real uuid FK
+  // (`status_id`/`priority_id`/`type_id`) — the tenant slug this drawer's header
+  // pickers/DetailsTab carry (`status`/`priority`/`type`) is an undeclared key,
+  // silently dropped by Laravel's `validated()` (200 OK, nothing changes). Shared
+  // with AddTaskModal/useTaskBoardMove/useTaskBulkActions via the ONE slug→uuid
+  // hook — see its header comment for the full story.
+  const { maps: lookupIds } = useTaskLookupIds()
   // Open a task: show the light row immediately, then fetch the full detail.
   const selectedIdRef = useRef<Id | null>(null)
   const closeDrawer = () => { selectedIdRef.current = null; setSelected(null); setExpanded(false) }
@@ -51,6 +64,21 @@ export function useTaskDrawerActions({ setTasks, archivedTasks, setArchivedTasks
 
   // Edit one or more fields (drawer or kanban drag). `patch` is LOCAL-shaped.
   const handleUpdate = (id: Id | undefined, patch: Record<string, unknown>) => {
+    // TASKTYPE-ID-1: resolve every lookup axis this patch touches to its real uuid
+    // FK BEFORE any state changes. An axis whose slug has no matching row yet
+    // (maps still loading, or a seed-only fallback row the server never created)
+    // means there is nothing safe to send — firing the PATCH anyway would silently
+    // no-op (200 OK, value unchanged). Abort the WHOLE update instead: no
+    // optimistic write, no request, an honest toast — every picker visibly stays put.
+    const resolvedIds: Partial<Record<'type' | 'status' | 'priority', string>> = {}
+    for (const [patchKey, axis] of Object.entries(AXIS_OF)) {
+      if (!(patchKey in patch)) continue
+      const slug = patch[patchKey]
+      const resolved = slug != null ? lookupIds[axis][String(slug)] : undefined
+      if (!resolved) { notifyError(t('drawer.lookupNotReady')); return }
+      resolvedIds[axis] = resolved
+    }
+
     // Bug class fix: this used to `.catch(() => notifyError(...))` with no revert,
     // so a rejected PATCH left the new value on screen as if the server had saved
     // it. Snapshot ONLY the fields this patch overwrites (never the whole row, so a
@@ -70,10 +98,17 @@ export function useTaskDrawerActions({ setTasks, archivedTasks, setArchivedTasks
       : undefined
     setSelected(prev => (prev && prev.id === id ? decorate({ ...prev, ...patch } as TaskDetail) : prev))
     const body: Record<string, unknown> = {
-      status: patch.statusKey, priority: patch.priorityKey, type: patch.typeKey,
+      // T1: title is a plain PATCHable string field (UpdateTaskRequest 'title') —
+      // was entirely missing from this mapping, so a title edit had nowhere to go.
+      title: patch.title,
+      // TASKTYPE-ID-1: the resolved uuid FK, never the bare tenant slug (see above).
+      status_id: resolvedIds.status, priority_id: resolvedIds.priority, type_id: resolvedIds.type,
       // TASK-DUE-TIME-1: '' (cleared time input) persists as null, never as "".
       due_date: patch.due, due_time: patch.dueTime === undefined ? undefined : (patch.dueTime || null),
       description: patch.description, assignee_id: patch.assigneeId,
+      // TASK-LOCATION-READ-1: branch (vestiging) FK — nullable uuid, cleared with
+      // an explicit null (never dropped like an untouched/undefined key below).
+      location_id: patch.locationId,
       tags: patch.tags, custom_fields: patch.customFields,
     }
     Object.keys(body).forEach(k => { if (body[k] === undefined) delete body[k] })

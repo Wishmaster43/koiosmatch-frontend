@@ -95,7 +95,7 @@ export default function RolesSettings() {
           <button onClick={createRole} disabled={creating || !newRoleName.trim()}
             style={{ display: 'flex', alignItems: 'center', gap: 6, height: BTN_H, padding: '0 12px',
                      fontSize: 13, fontWeight: 500, borderRadius: 8, cursor: 'pointer', border: 'none',
-                     background: 'var(--color-primary)', color: 'white', opacity: newRoleName.trim() ? 1 : 0.4 }}>
+                     background: 'var(--color-primary)', color: 'var(--color-on-accent)', opacity: newRoleName.trim() ? 1 : 0.4 }}>
             <Plus size={13} /> {t('roles.create')}
           </button>
         </div>
@@ -127,7 +127,7 @@ export default function RolesSettings() {
                 <button onClick={() => setEditRole(role)}
                   style={{ display: 'flex', alignItems: 'center', gap: 6, height: BTN_H, padding: '0 14px',
                            fontSize: 13, fontWeight: 500, borderRadius: 8, cursor: 'pointer',
-                           border: '1px solid var(--color-primary)', background: 'var(--color-primary-bg)', color: 'var(--color-primary)' }}>
+                           border: '1px solid var(--color-primary)', background: 'var(--color-primary-bg)', color: 'var(--color-primary-text)' }}>
                   {t('roles.edit')}
                 </button>
                 <button onClick={() => canDelete && deleteRole(role)} disabled={!canDelete || deleting === role.id}

@@ -26,11 +26,11 @@ const today = new Date()
 const y = today.getFullYear(), m = today.getMonth()
 
 const INITIAL_SHIFTS: Shift[] = [
-  { id: 1, date: new Date(y, m, today.getDate()),     title: 'Nachtdienst', location: 'Rivas Zorggroep',   candidate: 'Ismail Eddahchouri', start: '22:00', end: '06:00', color: 'var(--color-primary)' },
+  { id: 1, date: new Date(y, m, today.getDate()),     title: 'Nachtdienst', location: 'Rivas Zorggroep',   candidate: 'Ismail Eddahchouri', start: '22:00', end: '06:00', color: 'var(--color-primary-text)' },
   { id: 2, date: new Date(y, m, today.getDate()),     title: 'Dagdienst',   location: 'Yesway Zorg',       candidate: 'Elif Akagündüz',     start: '07:00', end: '15:00', color: 'var(--color-success)' },
   { id: 3, date: new Date(y, m, today.getDate() + 1), title: 'Avonddienst', location: 'WoonzorgGroep',     candidate: 'Rubina Milan',        start: '15:00', end: '23:00', color: 'var(--color-warning)' },
   { id: 4, date: new Date(y, m, today.getDate() + 2), title: 'Dagdienst',   location: 'Rivas Zorggroep',   candidate: 'Merel Van Muijlwijk', start: '07:00', end: '15:00', color: 'var(--color-success)' },
-  { id: 5, date: new Date(y, m, today.getDate() + 4), title: 'Nachtdienst', location: 'Yesway Zorg',       candidate: 'Figen Ooijevaar',     start: '22:00', end: '06:00', color: 'var(--color-primary)' },
+  { id: 5, date: new Date(y, m, today.getDate() + 4), title: 'Nachtdienst', location: 'Yesway Zorg',       candidate: 'Figen Ooijevaar',     start: '22:00', end: '06:00', color: 'var(--color-primary-text)' },
   { id: 6, date: new Date(y, m, today.getDate() - 1), title: 'Dagdienst',   location: 'WoonzorgGroep',     candidate: 'Petra Kuiters',       start: '07:00', end: '15:00', color: 'var(--color-success)' },
 ]
 
@@ -141,7 +141,7 @@ export default function PlanningPage() {
               style={{ padding: '6px 14px', fontSize: 12, fontWeight: view === v ? 600 : 400,
                 border: 'none', borderRight: i < VIEW_IDS.length - 1 ? '1px solid var(--border)' : 'none',
                 background: view === v ? 'var(--color-primary)' : 'var(--surface)',
-                color:      view === v ? '#fff' : 'var(--text)', cursor: 'pointer' }}>
+                color:      view === v ? 'var(--color-on-accent)' : 'var(--text)', cursor: 'pointer' }}>
               {t(`views.${v}`)}
             </button>
           ))}
@@ -150,7 +150,7 @@ export default function PlanningPage() {
         {/* Add button */}
         <button onClick={() => setModal(new Date())}
           style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '7px 14px', fontSize: 12,
-            fontWeight: 600, background: 'var(--color-primary)', color: '#fff',
+            fontWeight: 600, background: 'var(--color-primary)', color: 'var(--color-on-accent)',
             border: 'none', borderRadius: 8, cursor: 'pointer' }}>
           <Plus size={14} /> {t('addShift')}
         </button>

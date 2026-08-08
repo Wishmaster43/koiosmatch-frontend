@@ -44,7 +44,7 @@ export default function WorkflowsListPanel({
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 20 }}>
         <button
           onClick={() => openEditor({ name: t('page.newWorkflow'), trigger: 'Dagelijks 08:00', status: 'draft', last_run: null, steps: [], folder_id: selectedFolder === 'unassigned' ? null : (selectedFolder ?? null) })}
-          style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '8px 16px', fontSize: 13, fontWeight: 600, color: 'white', background: 'var(--color-primary)', border: 'none', borderRadius: 8, cursor: 'pointer' }}
+          style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '8px 16px', fontSize: 13, fontWeight: 600, color: 'var(--color-on-accent)', background: 'var(--color-primary)', border: 'none', borderRadius: 8, cursor: 'pointer' }}
         >
           <Plus size={14} /> {t('page.newWorkflow')}
         </button>

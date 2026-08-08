@@ -12,7 +12,7 @@ import userEvent from '@testing-library/user-event'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import InterviewsTab from './InterviewsTab'
 import api from '@/lib/api'
-import type { ApplicationDetail } from '@/types/application'
+import type { ApplicationDetail, ApplicationInterview } from '@/types/application'
 
 // Deterministic key-echo (repo-wide precedent, e.g. InterviewStatusCard.test.tsx).
 vi.mock('react-i18next', () => ({ useTranslation: () => ({ t: (k: string) => k }) }))
@@ -253,5 +253,79 @@ describe('InterviewsTab · interview history (real BE contract, W7)', () => {
       }],
     }))
     expect(screen.getByText('—')).toBeInTheDocument()
+  })
+})
+
+// CONV-APPLICATION-ID-1 (re-verified live 08-08 AFTER the backend landing, on
+// S-00001/Noud van Leeuwen): InterviewEngine::startForApplication() now sets
+// Conversation.application_id going forward, so /conversations?application_id=
+// is the PRECISE per-application thread. But it is code-forward only — the live
+// re-measurement still shows S-00001's own (pre-existing) thread answering 0 rows
+// for that scoped query, and the model keeps exactly ONE Conversation row per
+// candidate, so an older application's thread can later get repointed at a newer
+// interview. The tab therefore preflights the application scope and only falls
+// back to the candidate-wide scope (the previous link) when that read is empty.
+describe('InterviewsTab · live conversation panel (CONV-APPLICATION-ID-1, 08-08)', () => {
+  const runningInterview: ApplicationInterview = {
+    category: 'busy', currentStatus: 'ACTIVE_IN_CARE', step: 2, total: 12, id: 'iv-9',
+    agent: { id: 'a1', name: 'Kelly' }, flowName: 'Zorgintake', turn: 'candidate',
+    startedAt: null, lastMessageAt: null, endedAt: null, durationSeconds: null, pausedAt: null, pausedBy: null,
+  }
+
+  it('preflights /conversations scoped by application_id, and renders the panel on THAT scope when it resolves a real thread', async () => {
+    // Preflight: application-scoped read finds the thread → ConversationsSection
+    // then renders with the SAME precise scope, never candidate_id.
+    mockGet.mockResolvedValueOnce({ data: { data: [{ id: 'conv-1' }] } })
+    mockGet.mockResolvedValueOnce({ data: { data: [{ id: 'conv-1', wa_number: '+31600000000' }] } })
+    renderTab(app({ candidateId: 'cand-1', interview: runningInterview }))
+
+    await waitFor(() => expect(mockGet).toHaveBeenNthCalledWith(1, '/conversations', { params: { application_id: 'app-1' } }))
+    await waitFor(() => expect(mockGet).toHaveBeenNthCalledWith(2, '/conversations', { params: { application_id: 'app-1' } }))
+    expect(mockGet).not.toHaveBeenCalledWith('/conversations', { params: { candidate_id: 'cand-1' } })
+  })
+
+  it('falls back to candidate_id ONLY when the application-scoped preflight comes back empty', async () => {
+    // Preflight: application-scoped read is empty (the honest, re-measured case for
+    // S-00001-style pre-existing threads) → falls back to the candidate-wide scope.
+    mockGet.mockResolvedValueOnce({ data: { data: [] } })
+    mockGet.mockResolvedValueOnce({ data: { data: [] } })
+    renderTab(app({ candidateId: 'cand-1', interview: runningInterview }))
+
+    await waitFor(() => expect(mockGet).toHaveBeenNthCalledWith(1, '/conversations', { params: { application_id: 'app-1' } }))
+    await waitFor(() => expect(mockGet).toHaveBeenNthCalledWith(2, '/conversations', { params: { candidate_id: 'cand-1' } }))
+  })
+
+  it('falls back to candidate_id when the application-scoped preflight request itself errors', async () => {
+    mockGet.mockRejectedValueOnce(new Error('network'))
+    mockGet.mockResolvedValueOnce({ data: { data: [] } })
+    renderTab(app({ candidateId: 'cand-1', interview: runningInterview }))
+
+    await waitFor(() => expect(mockGet).toHaveBeenNthCalledWith(1, '/conversations', { params: { application_id: 'app-1' } }))
+    await waitFor(() => expect(mockGet).toHaveBeenNthCalledWith(2, '/conversations', { params: { candidate_id: 'cand-1' } }))
+  })
+
+  it('still offers the panel from interview HISTORY alone, with no live session running', async () => {
+    mockGet.mockResolvedValueOnce({ data: { data: [] } })
+    mockGet.mockResolvedValueOnce({ data: { data: [] } })
+    renderTab(app({
+      candidateId: 'cand-1',
+      interviews: [{ id: 'iv-1', status: 'completed', startedAt: '2026-08-01T09:00:00Z', finishedAt: '2026-08-01T09:20:00Z', transcript: [] }],
+    }))
+    await waitFor(() => expect(mockGet).toHaveBeenCalledWith('/conversations', { params: { candidate_id: 'cand-1' } }))
+  })
+
+  it('shows an honest notice instead of the panel when the application has no linked candidate — never even preflights', () => {
+    renderTab(app({ interview: runningInterview }))
+    expect(screen.getByText('interview.conversation.noCandidate')).toBeInTheDocument()
+    expect(mockGet).not.toHaveBeenCalled()
+  })
+
+  it('does not render the conversation panel at all when the application never ran an interview — never preflights either', () => {
+    renderTab(app({ candidateId: 'cand-1' }))
+    expect(screen.queryByText('interview.conversation.title')).toBeNull()
+    // No session yet also means StartInterviewAction renders (its OWN /ai/agents
+    // fetch is unrelated) — the assertion here is specifically that /conversations
+    // is never called, i.e. the preflight itself never ran.
+    expect(mockGet).not.toHaveBeenCalledWith('/conversations', expect.anything())
   })
 })

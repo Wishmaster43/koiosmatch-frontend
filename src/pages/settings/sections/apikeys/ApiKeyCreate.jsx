@@ -15,6 +15,7 @@ import ScopeEditor from './ScopeEditor'
 import SearchSelect from '@/components/ui/SearchSelect'
 import CalloutBox from '@/components/ui/CalloutBox'
 import { BTN_H } from '@/config/buttonMetrics'
+import { fieldInputStyle } from '@/components/forms/fieldMetrics'
 
 export default function ApiKeyCreate({ onBack, onCreated }) {
   const { t } = useTranslation('settings')
@@ -52,7 +53,9 @@ export default function ApiKeyCreate({ onBack, onCreated }) {
     setTimeout(() => setCopied(false), 2000)
   }
 
-  const inputStyle = { width: '100%', height: 38, padding: '0 11px', fontSize: 13, color: 'var(--text)', border: '1px solid var(--border)', borderRadius: 8, outline: 'none', background: 'var(--surface)' }
+  // Canon field style (G33/fieldMetrics) — was its own height-38/padding-11 copy
+  // (one of only two 38px outliers on the whole platform; 34 is the majority).
+  const inputStyle = fieldInputStyle
   const labelStyle = { fontSize: 12, fontWeight: 500, color: 'var(--text-muted)', marginBottom: 5, display: 'block' }
   const fieldGrid = { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }
 
@@ -66,7 +69,7 @@ export default function ApiKeyCreate({ onBack, onCreated }) {
           <ArrowLeft size={13} /> {t('common.back')}
         </button>
         <div style={{ width: 34, height: 34, borderRadius: 9, background: 'var(--color-primary-bg)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-          <Key size={16} style={{ color: 'var(--color-primary)' }} />
+          <Key size={16} style={{ color: 'var(--color-primary-text)' }} />
         </div>
         <h2 style={{ fontSize: 17, fontWeight: 700, color: 'var(--text)', margin: 0 }}>{t('apiKeys.createTitle')}</h2>
       </div>
@@ -88,7 +91,7 @@ export default function ApiKeyCreate({ onBack, onCreated }) {
               </CalloutBox>
             </div>
             <button onClick={onBack}
-              style={{ height: BTN_H, padding: '0 20px', fontSize: 13, fontWeight: 500, border: 'none', borderRadius: 8, background: 'var(--color-primary)', color: 'white', cursor: 'pointer' }}>
+              style={{ height: BTN_H, padding: '0 20px', fontSize: 13, fontWeight: 500, border: 'none', borderRadius: 8, background: 'var(--color-primary)', color: 'var(--color-on-accent)', cursor: 'pointer' }}>
               {t('apiKeys.done')}
             </button>
           </div>
@@ -149,7 +152,7 @@ export default function ApiKeyCreate({ onBack, onCreated }) {
             {/* BTN_H (§4/§9): one explicit height for every text/action button, everywhere. */}
             <div style={{ display: 'flex', gap: 10 }}>
               <button onClick={submit} disabled={saving || !form.friendly_name.trim()}
-                style={{ height: BTN_H, padding: '0 20px', fontSize: 13, fontWeight: 500, border: 'none', borderRadius: 8, background: 'var(--color-primary)', color: 'white', cursor: form.friendly_name.trim() ? 'pointer' : 'not-allowed', opacity: form.friendly_name.trim() ? 1 : 0.5 }}>
+                style={{ height: BTN_H, padding: '0 20px', fontSize: 13, fontWeight: 500, border: 'none', borderRadius: 8, background: 'var(--color-primary)', color: 'var(--color-on-accent)', cursor: form.friendly_name.trim() ? 'pointer' : 'not-allowed', opacity: form.friendly_name.trim() ? 1 : 0.5 }}>
                 {saving ? t('apiKeys.creating') : t('apiKeys.create')}
               </button>
               <button onClick={onBack}

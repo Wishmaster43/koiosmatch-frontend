@@ -44,6 +44,9 @@ const noteTypes = [{ value: 'general', label: 'Algemeen' }, { value: 'call', lab
 // KoiosVoiceButton.test.tsx's own mock (jsdom ships neither the real API nor
 // the vendor-prefixed one). Local to this file: each test file owns its mock.
 interface MockResultEvent { resultIndex: number; results: Array<Array<{ transcript: string }>> }
+// Final-segment double: the component only reads results whose isFinal is true.
+const seg = (transcript: string, isFinal = true) => Object.assign([{ transcript }], { isFinal })
+
 class MockSpeechRecognition {
   static lastInstance: MockSpeechRecognition | null = null
   continuous = false
@@ -170,19 +173,22 @@ describe('NoteComposer · dictation mic (NOTITIE-VOICE-1)', () => {
     expect(micButton()).toBeNull()
   })
 
-  it('appends a dictated chunk to the body as an escaped paragraph, never overwriting existing text', async () => {
+  it('appends a dictated sentence escaped, continuing the last paragraph, never overwriting existing text', async () => {
     window.SpeechRecognition = MockSpeechRecognition as unknown as typeof window.SpeechRecognition
     const user = userEvent.setup()
     render(<NoteComposer open initialNote={null} noteTypes={noteTypes} channels={[]} labels={labels} onSave={vi.fn()} onCancel={vi.fn()} />)
 
-    await user.type(screen.getByLabelText('body'), 'Klant gebeld.')
+    await user.type(screen.getByLabelText('body'), '<p>Klant gebeld.</p>')
     await user.click(micButton()!)
     expect(MockSpeechRecognition.lastInstance?.start).toHaveBeenCalledTimes(1)
-    act(() => { MockSpeechRecognition.lastInstance?.onresult?.({ resultIndex: 0, results: [[{ transcript: '<script>alert(1)</script>' }]] }) })
+    // Only FINAL segments reach the host (interim guesses are dropped upstream).
+    act(() => { MockSpeechRecognition.lastInstance?.onresult?.({ resultIndex: 0, results: [seg('<script>alert(1)</script>')] }) })
 
-    // Escaped (never raw HTML — §7) and appended, the typed text is still there.
+    // Escaped (never raw HTML — §7) and joined INTO the open paragraph, so a
+    // dictated sentence continues the text instead of starting its own line
+    // (Danny 08-08: dictation used to read as a column of fragments).
     expect(screen.getByLabelText('body')).toHaveValue(
-      'Klant gebeld.<p>&lt;script&gt;alert(1)&lt;/script&gt;</p>',
+      '<p>Klant gebeld. &lt;script&gt;alert(1)&lt;/script&gt;</p>',
     )
   })
 

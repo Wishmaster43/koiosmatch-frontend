@@ -37,7 +37,7 @@ export default function DescriptionTab({ vacancy: v, onUpdate }: { vacancy: Vaca
   const controls = descEditing ? (
     <div style={{ display: 'flex', gap: 4 }}>
       <button onClick={() => setDescription('')} title={t('common:remove')} style={{ ...iconBtn, background: 'none', color: 'var(--color-danger)', border: '1px solid var(--border)' }}><Trash2 size={13} /></button>
-      <button onClick={saveDesc} title={t('common:save')} style={{ ...iconBtn, background: 'var(--color-primary)', color: '#fff', border: 'none' }}><Save size={13} /></button>
+      <button onClick={saveDesc} title={t('common:save')} style={{ ...iconBtn, background: 'var(--color-primary)', color: 'var(--color-on-accent)', border: 'none' }}><Save size={13} /></button>
       <button onClick={cancelDesc} title={t('common:cancel')} style={{ ...iconBtn, background: 'var(--bg)', color: 'var(--text-muted)', border: '1px solid var(--border)' }}><X size={13} /></button>
     </div>
   ) : (

@@ -8,13 +8,13 @@
  */
 import { Field, TextField } from '@/components/forms/fields'
 import { cardHead, cardBox, row3Even, row } from '@/components/ui/modalCards'
+import FieldNotice from '@/components/ui/FieldNotice'
 
 // Duplicate/server message line under email·phone·mobile — the client-side
-// duplicate message wins over the server's own message when both exist (same collision).
-function FieldError({ text }: { text?: string }) {
-  if (!text) return null
-  return <div role="alert" style={{ fontSize: 11, color: 'var(--color-danger)' }}>{text}</div>
-}
+// duplicate message wins over the server's own message when both exist (same
+// collision). Rendered by the shared components/ui/FieldNotice; this card's
+// rows sit flush, so its 3px top margin is zeroed out here (unchanged look).
+const FieldError = ({ text }: { text?: string }) => <FieldNotice text={text} style={{ marginTop: 0 }} />
 
 interface ContactDetailsCardProps {
   cardLabel: string

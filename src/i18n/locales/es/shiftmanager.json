@@ -93,7 +93,8 @@
       "ccCust": "Centro de costes cliente",
       "candidates": "Candidatos",
       "notes": "Notas"
-    }
+    },
+    "filterMonth": "Mes"
   },
   "shiftsDrawer": {
     "count": "{{count}} turnos",

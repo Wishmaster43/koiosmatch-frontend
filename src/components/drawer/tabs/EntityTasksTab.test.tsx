@@ -5,11 +5,14 @@
  * the "+ Nieuwe taak" trigger. AddTaskModal is mocked out — mounting the real
  * modal once stalled a whole suite (see the component's own header comment).
  *
- * TAKEN-TOOLBAR-2 (this task): the old Open/Historie QuickViewToggle switch is
- * gone — replaced by the shared StatusFilterSelect keyed on the tenant task-status
- * lookup (useTaskLookups, stubbed below with a controllable ref so a test can pick
- * a status without a real /task-statuses fetch). "Alle statussen" (nothing picked)
- * shows every task, completed included.
+ * TASK-FILTER-MENU-1 (Danny 08-08, "Notities dus zo overal met die filter en ook
+ * taken doen"): status + the tenant TYPE/PRIORITY lookups now live behind the
+ * shared DrawerFilterMenu — one "Filter" button, each row a multi-select
+ * checklist (useTaskLookups, stubbed below with controllable refs so a test can
+ * pick a value without a real /task-* fetch). No i18n instance is bootstrapped
+ * here (mirrors OpportunitiesTab.test.tsx's own documented convention), so t()
+ * echoes the raw key except where the component passes an explicit defaultValue
+ * (the Filter button label falls back to 'Filter').
  */
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, fireEvent } from '@testing-library/react'
@@ -24,20 +27,29 @@ const { openEntityMock } = vi.hoisted(() => ({ openEntityMock: vi.fn() }))
 // lets the colour-toggle tests below flip `customer_task_table_color_status` without
 // hitting the real /settings endpoint.
 const settingsRef = vi.hoisted(() => ({ current: {} as Record<string, unknown> }))
-// Controllable task-status lookup (mirrors settingsRef above) — lets the filter
-// tests below pick a real status option without a network round-trip.
-// eslint-disable-next-line no-restricted-syntax -- test fixture colours, mirroring the tenant seed
+// Controllable task lookups (mirrors settingsRef above) — lets the filter tests
+// below pick a real status/type/priority option without a network round-trip.
+/* eslint-disable no-restricted-syntax -- test fixture colours, mirroring the tenant seed */
 const statusesRef = vi.hoisted(() => ({ current: [
   { value: 'todo', label: 'Te doen', color: '#D98A8A', is_done: false },
   { value: 'done', label: 'Afgerond', color: '#79B58E', is_done: true },
 ] }))
+const typesRef = vi.hoisted(() => ({ current: [
+  { value: 'task', label: 'Taak', color: '#6E8FD6' },
+  { value: 'call', label: 'Belafspraak', color: '#5FB0AC' },
+] }))
+const prioritiesRef = vi.hoisted(() => ({ current: [
+  { value: 'low', label: 'Laag', color: '#79B58E' },
+  { value: 'high', label: 'Hoog', color: '#D98A8A' },
+] }))
+/* eslint-enable no-restricted-syntax */
 
 vi.mock('@/hooks/useEntityTasks', () => ({ useEntityTasks: vi.fn() }))
 vi.mock('@/context/NavigationContext', () => ({ useNavigation: () => ({ openEntity: openEntityMock, navigate: vi.fn() }) }))
 vi.mock('@/lib/datetime', () => ({ useDateFormat: () => ({ formatDate: (v: string) => `d(${v})`, formatDateTime: (v: string) => `dt(${v})` }) }))
 vi.mock('@/context/TaskLookupsContext', () => ({
   TaskLookupsProvider: ({ children }: { children: ReactNode }) => <>{children}</>,
-  useTaskLookups: () => ({ statuses: statusesRef.current }),
+  useTaskLookups: () => ({ statuses: statusesRef.current, types: typesRef.current, priorities: prioritiesRef.current }),
 }))
 vi.mock('@/lib/settings/useAllSettings', async () => {
   const actual = await vi.importActual('@/lib/settings/useAllSettings')
@@ -95,14 +107,11 @@ describe('EntityTasksTab · four UI states', () => {
   })
 })
 
-/** TAKEN-TOOLBAR-2 (Danny 03-08): the status filter replaces the old Open/Historie
- *  switch — "Alle statussen" (nothing picked) shows every task, completed included;
- *  picking a real status (from the tenant task-status lookup) narrows to it. i18n is
- *  unmocked here, so t() echoes the raw key (mirrors OpportunitiesTab.test.tsx's own
- *  documented convention) — the trigger's own text is the literal 'filters.allStatuses'
- *  key until a status is picked. */
-describe('EntityTasksTab · status filter (replaces Open/Historie)', () => {
-  it('shows every task until a status is picked — nothing selected = all, completed included', () => {
+/** TASK-FILTER-MENU-1: status/type/priority now live behind the shared
+ *  DrawerFilterMenu — "Filter" (nothing picked) shows every task, completed
+ *  included; picking a real value (from the tenant lookups) narrows to it. */
+describe('EntityTasksTab · filter menu (status/type/priority)', () => {
+  it('shows every task until a filter is picked — nothing selected = all, completed included', () => {
     mockTasks({ items: [
       task({ id: 1, title: 'Open Task', status: 'todo', completed_at: null }),
       task({ id: 2, title: 'Done Task', status: 'done', completed_at: '2026-07-01' }),
@@ -112,18 +121,123 @@ describe('EntityTasksTab · status filter (replaces Open/Historie)', () => {
     expect(screen.getByText('Done Task')).toBeInTheDocument()
   })
 
-  it('narrows to the picked status only', async () => {
+  it('the toolbar no longer renders a standing status dropdown — only ONE Filter button', () => {
+    mockTasks({ items: [task()] })
+    render(<EntityTasksTab linkType="contact" id="c-1" labels={labels} />)
+    expect(screen.queryByRole('button', { name: 'filters.allStatuses' })).toBeNull()
+    expect(screen.getByRole('button', { name: 'Filter' })).toBeInTheDocument()
+  })
+
+  it('narrows to the picked STATUS only', async () => {
     const user = userEvent.setup()
     mockTasks({ items: [
       task({ id: 1, title: 'Open Task', status: 'todo', completed_at: null }),
       task({ id: 2, title: 'Done Task', status: 'done', completed_at: '2026-07-01' }),
     ] })
     render(<EntityTasksTab linkType="contact" id="c-1" labels={labels} />)
-    // Nothing picked yet, so the trigger's own text is the "all statuses" label.
-    await user.click(screen.getByRole('button', { name: 'filters.allStatuses' }))
-    await user.click(await screen.findByRole('button', { name: 'Afgerond' }))
+    await user.click(screen.getByRole('button', { name: 'Filter' }))
+    await user.click(screen.getByRole('checkbox', { name: 'Afgerond' }))
     expect(screen.getByText('Done Task')).toBeInTheDocument()
     expect(screen.queryByText('Open Task')).toBeNull()
+  })
+
+  it('narrows to the picked TYPE only', async () => {
+    const user = userEvent.setup()
+    mockTasks({ items: [
+      task({ id: 1, title: 'Bel taak', type: 'call' }),
+      task({ id: 2, title: 'Gewone taak', type: 'task' }),
+    ] })
+    render(<EntityTasksTab linkType="contact" id="c-1" labels={labels} />)
+    await user.click(screen.getByRole('button', { name: 'Filter' }))
+    await user.click(screen.getByRole('checkbox', { name: 'Belafspraak' }))
+    expect(screen.getByText('Bel taak')).toBeInTheDocument()
+    expect(screen.queryByText('Gewone taak')).toBeNull()
+  })
+
+  it('narrows to the picked PRIORITY only', async () => {
+    const user = userEvent.setup()
+    mockTasks({ items: [
+      task({ id: 1, title: 'Urgente taak', priority: 'high' }),
+      task({ id: 2, title: 'Rustige taak', priority: 'low' }),
+    ] })
+    render(<EntityTasksTab linkType="contact" id="c-1" labels={labels} />)
+    await user.click(screen.getByRole('button', { name: 'Filter' }))
+    await user.click(screen.getByRole('checkbox', { name: 'Hoog' }))
+    expect(screen.getByText('Urgente taak')).toBeInTheDocument()
+    expect(screen.queryByText('Rustige taak')).toBeNull()
+  })
+
+  it('reads a lookup OBJECT ({value,label,color}) exactly like a bare string (TaskListResource shape)', async () => {
+    const user = userEvent.setup()
+    /* eslint-disable no-restricted-syntax -- test fixture colours, mirroring the tenant seed */
+    mockTasks({ items: [
+      task({ id: 1, title: 'Bel taak', type: { value: 'call', label: 'Belafspraak', color: '#5FB0AC' } }),
+      task({ id: 2, title: 'Gewone taak', type: { value: 'task', label: 'Taak', color: '#6E8FD6' } }),
+    ] })
+    /* eslint-enable no-restricted-syntax */
+    render(<EntityTasksTab linkType="contact" id="c-1" labels={labels} />)
+    await user.click(screen.getByRole('button', { name: 'Filter' }))
+    await user.click(screen.getByRole('checkbox', { name: 'Belafspraak' }))
+    expect(screen.getByText('Bel taak')).toBeInTheDocument()
+    expect(screen.queryByText('Gewone taak')).toBeNull()
+  })
+
+  it('the badge counts every active selection across all three rows', async () => {
+    const user = userEvent.setup()
+    mockTasks({ items: [task()] })
+    render(<EntityTasksTab linkType="contact" id="c-1" labels={labels} />)
+    await user.click(screen.getByRole('button', { name: 'Filter' }))
+    await user.click(screen.getByRole('checkbox', { name: 'Afgerond' }))
+    await user.click(screen.getByRole('checkbox', { name: 'Belafspraak' }))
+    expect(screen.getByText('2')).toBeInTheDocument()
+  })
+
+  it('clear-all resets every row and restores the full list', async () => {
+    const user = userEvent.setup()
+    mockTasks({ items: [
+      task({ id: 1, title: 'Open Task', status: 'todo' }),
+      task({ id: 2, title: 'Done Task', status: 'done' }),
+    ] })
+    render(<EntityTasksTab linkType="contact" id="c-1" labels={labels} />)
+    await user.click(screen.getByRole('button', { name: 'Filter' }))
+    await user.click(screen.getByRole('checkbox', { name: 'Afgerond' }))
+    expect(screen.queryByText('Open Task')).toBeNull()
+    await user.click(screen.getByRole('button', { name: 'common:filters.clearAll' }))
+    expect(screen.getByText('Open Task')).toBeInTheDocument()
+    expect(screen.getByText('Done Task')).toBeInTheDocument()
+  })
+
+  it('Escape closes the filter panel', async () => {
+    const user = userEvent.setup()
+    mockTasks({ items: [task()] })
+    render(<EntityTasksTab linkType="contact" id="c-1" labels={labels} />)
+    await user.click(screen.getByRole('button', { name: 'Filter' }))
+    expect(screen.getByRole('dialog')).toBeInTheDocument()
+    await user.keyboard('{Escape}')
+    expect(screen.queryByRole('dialog')).toBeNull()
+  })
+
+  it('offers no type/priority row when the tenant lookup is empty (no fake affordance)', async () => {
+    const user = userEvent.setup()
+    typesRef.current = []
+    prioritiesRef.current = []
+    mockTasks({ items: [task()] })
+    render(<EntityTasksTab linkType="contact" id="c-1" labels={labels} />)
+    await user.click(screen.getByRole('button', { name: 'Filter' }))
+    expect(screen.queryByRole('checkbox', { name: 'Belafspraak' })).toBeNull()
+    expect(screen.queryByRole('checkbox', { name: 'Hoog' })).toBeNull()
+    // The status row is unaffected — the seed lookup always carries entries.
+    expect(screen.getByRole('checkbox', { name: 'Afgerond' })).toBeInTheDocument()
+    /* eslint-disable no-restricted-syntax -- test fixture colours, mirroring the tenant seed */
+    typesRef.current = [
+      { value: 'task', label: 'Taak', color: '#6E8FD6' },
+      { value: 'call', label: 'Belafspraak', color: '#5FB0AC' },
+    ]
+    prioritiesRef.current = [
+      { value: 'low', label: 'Laag', color: '#79B58E' },
+      { value: 'high', label: 'Hoog', color: '#D98A8A' },
+    ]
+    /* eslint-enable no-restricted-syntax */
   })
 })
 

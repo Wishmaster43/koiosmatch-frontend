@@ -99,7 +99,7 @@ interface VacancyDrawerProps {
 
 const hdrBtn: CSSProperties = { display: 'flex', alignItems: 'center', justifyContent: 'center', width: 28, height: 28, borderRadius: 7, cursor: 'pointer', flexShrink: 0 }
 const hdrGhost: CSSProperties = { ...hdrBtn, background: 'var(--bg)', color: 'var(--text-muted)', border: '1px solid var(--border)' }
-const hdrPrimary: CSSProperties = { ...hdrBtn, background: 'var(--color-primary)', color: '#fff', border: 'none' }
+const hdrPrimary: CSSProperties = { ...hdrBtn, background: 'var(--color-primary)', color: 'var(--color-on-accent)', border: 'none' }
 
 /**
  * VacancyDrawer — thin container: wires data (lookups + onUpdate) and declares the

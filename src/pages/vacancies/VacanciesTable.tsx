@@ -2,7 +2,7 @@ import type { RefObject } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Globe } from 'lucide-react'
 import DataTable from '@/components/ui/DataTable'
-import type { Column } from '@/components/ui/DataTable'
+import type { Column, ControlledSort } from '@/components/ui/DataTable'
 import Avatar, { NEUTRAL_AVATAR } from '@/components/ui/Avatar'
 import StatusPill from '@/components/ui/StatusPill'
 import SoftChip from '@/components/ui/SoftChip'
@@ -22,7 +22,7 @@ const plainCell = { color: 'var(--text)', fontSize: 12 }
 // noise) — mirrors CustomersTable's count-cell deep-link buttons (§3A: extend the
 // established pattern, never a fresh inline copy).
 const leadsBtn = { display: 'inline-flex', fontFamily: 'JetBrains Mono, monospace', fontSize: 12,
-  color: 'var(--color-primary)', background: 'none', border: 'none', padding: 0, cursor: 'pointer', font: 'inherit' }
+  color: 'var(--color-primary-text)', background: 'none', border: 'none', padding: 0, cursor: 'pointer', font: 'inherit' }
 
 interface VacanciesTableProps {
   rows: Vacancy[]
@@ -42,6 +42,11 @@ interface VacanciesTableProps {
   onToggleAll?: (ids: Id[], allSelected: boolean) => void
   stickyHeader?: boolean
   scrollParentRef?: RefObject<HTMLElement | null>
+  // SWEEP-TABLES / DATATABLE-SORT-1: controlled-sort escape hatch — forwarded to
+  // DataTable as-is. Optional so a caller (or a test) that omits both keeps the
+  // pre-existing uncontrolled/defaultSort behaviour untouched (mirrors ApplicationsTable).
+  sort?: ControlledSort | null
+  onSortChange?: (sort: ControlledSort) => void
 }
 
 /**
@@ -49,7 +54,7 @@ interface VacanciesTableProps {
  * sorting, selection and the loading/empty states live in the shared DataTable.
  * Mirrors CandidatesTable / ApplicationsTable.
  */
-export default function VacanciesTable({ rows, loading, selectedId, onSelect, onOpenCandidateSearch, onOpenApplicants, selectable, selectedIds, onToggleRow, onToggleAll, stickyHeader = false, scrollParentRef }: VacanciesTableProps) {
+export default function VacanciesTable({ rows, loading, selectedId, onSelect, onOpenCandidateSearch, onOpenApplicants, selectable, selectedIds, onToggleRow, onToggleAll, stickyHeader = false, scrollParentRef, sort, onSortChange }: VacanciesTableProps) {
   const { t } = useTranslation('vacancies')
   const { formatDate } = useDateFormat()
   const { statuses = [], statusMeta } = useVacancyLookups()
@@ -110,7 +115,14 @@ export default function VacanciesTable({ rows, loading, selectedId, onSelect, on
       ) : <span style={{ color: 'var(--text-muted)' }}>—</span>,
     },
     {
-      key: 'status', header: t('columns.status'), sortable: true,
+      // SWEEP-TABLES: VacancyQuery::rules() validates `sort` as `in:status` ONLY —
+      // no other column has a server-side equivalent (verified live against
+      // VacancyQuery.php 2026-08-08), so `serverKey` is wired here alone. Unlike
+      // ApplicationQuery's sort_by/sort_dir pair, the backend's applySort() ignores
+      // direction entirely for `sort=status` (it always orders by the tenant's own
+      // sort_order, published-desc, created-desc) — a future caller translating this
+      // into a request must send `{ sort: 'status' }` regardless of the clicked dir.
+      key: 'status', header: t('columns.status'), sortable: true, serverKey: 'status',
       sortValue: r => {
         const idx = statusOrderIndex.get(r.statusValue != null ? String(r.statusValue) : '') ?? statuses.length
         return idx * 2 + (r.published ? 0 : 1)
@@ -260,6 +272,8 @@ export default function VacanciesTable({ rows, loading, selectedId, onSelect, on
       stickyHeader={stickyHeader}
       scrollParentRef={scrollParentRef}
       defaultSort={{ key: 'createdAt', dir: 'desc' }}
+      sort={sort}
+      onSortChange={onSortChange}
     />
   )
 }

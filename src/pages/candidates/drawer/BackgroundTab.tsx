@@ -3,6 +3,9 @@ import type { ComponentType, Dispatch, SetStateAction } from 'react'
 import { useTranslation } from 'react-i18next'
 import api, { unwrap } from '@/lib/api'
 import { notifyError } from '@/lib/notify'
+// §10: one shared server-message extractor — never a bare "actie mislukt" where the
+// backend told us exactly what is wrong (DOC-1-EIGENAAR-1's 422, a validation error, …).
+import { extractApiError } from '@/lib/extractApiError'
 import { ExperienceTab as ExperienceTabJs, EducationTab as EducationTabJs, CertificationsTab as CertificationsTabJs, SkillsTab as SkillsTabJs } from './SectionTabs'
 import LanguagesSection from './LanguagesSection'
 import ReferencesTab from './ReferencesTab'
@@ -12,7 +15,8 @@ import type { Candidate } from '@/types/candidate'
 type RelItem = Record<string, unknown>
 type RelTabProps = {
   items?: RelItem[]; onAdd?: (v: RelItem) => void; onEdit?: (i: number, v: RelItem) => void; onRemove?: (i: number) => void
-  // DOC-ENTRY-LINK-1: Education/Certifications only — Experience/Skills ignore both.
+  // DOC-ENTRY-LINK-1: Education/Certifications/Skills/References — Experience ignores
+  // both (measured 08-08: candidate_experiences has no document_id, see the report).
   documents?: RelItem[]; onJumpToDocuments?: () => void
 }
 
@@ -60,11 +64,20 @@ const TO_API: Record<string, (v: RelItem) => Record<string, unknown>> = {
     // DOC-GELDIGHEID-1: mirrors the education mapping exactly.
     document_id: v.document_id || null,
   }),
-  skills: v => ({ name: v.name, level: v.level }),
-  // KAND-REFERENTIES-1: candidate_references columns, no FE→BE renaming needed.
+  // DOC-LANG-SKILL-LINK-1: document_id belongs here too — measured live 08-08,
+  // PATCH /candidates/{id}/skills/{skill} persists it (200, echoed back). It was
+  // missing, so the skills picker's pick was dropped on save (a fake affordance).
+  skills: v => ({ name: v.name, level: v.level, document_id: v.document_id || null }),
+  // REFERENTIE-VELDEN-1: candidate_references columns — a straight passthrough,
+  // ReferenceResource's field names already match the form's own keys 1:1 (no
+  // FE→BE renaming needed, mirrors the old contract's shape). relation_id and
+  // document_id are nullable FKs — '' (nothing picked) must send null, never an
+  // empty string (mirrors educations/certifications' document_id handling).
   references: v => ({
-    name: v.name, relation: v.relation, employer: v.employer,
-    phone: v.phone, email: v.email, note: v.note,
+    first_name: v.first_name, middle_name: v.middle_name, last_name: v.last_name,
+    function: v.function, relation_id: v.relation_id || null, employer: v.employer,
+    phone: v.phone, mobile: v.mobile, email: v.email, note: v.note,
+    document_id: v.document_id || null,
   }),
 }
 
@@ -75,13 +88,10 @@ export default function BackgroundTab({ c, onEditSave, onJump }: { c: Candidate;
   // Candidate.skills is string[] from the mapper, but the SkillsTab edits them as
   // { name, level } objects (it renders both) — widen to the relation-item shape.
   const [skills,      setSkills]       = useState<RelItem[]>((c.skills ?? []) as unknown as RelItem[])
-  // KAND-REFERENTIES-1: `references` isn't on the Candidate type/mapper yet (out
-  // of scope for this change — flagged to the manager) even though the backend
-  // already nests it on GET /candidates/{id}; read it defensively so this tab
-  // starts working the moment the mapper catches up, without another edit here.
-  const [references,  setReferences]   = useState<RelItem[]>(
-    ((c as unknown as { references?: RelItem[] }).references ?? []) as RelItem[],
-  )
+  // REFERENTIE-VELDEN-1: `references` now lands on the Candidate type/mapper
+  // (mapCandidate.ts) — the old defensive cast is gone, this reads the same way
+  // every sibling relation list above does.
+  const [references,  setReferences]   = useState<RelItem[]>(c.references ?? [])
   // 'common' stays the default ns (bare t('actionFailed') below); candidates:
   // strings (the sub-tab labels) use the explicit prefix.
   const { t, i18n } = useTranslation(['common', 'candidates'])
@@ -110,14 +120,19 @@ export default function BackgroundTab({ c, onEditSave, onJump }: { c: Candidate;
   // restores the exact previous row, onRemove re-inserts the removed row at its
   // ORIGINAL index — never a whole-list snapshot, which would resurrect rows a
   // different in-flight call already removed successfully.
+  // DOC-1-EIGENAAR-1 (Danny 08-08 punt 5): a 422 on these routes is an EXPECTED,
+  // caller-handled outcome (e.g. "Dit document is al aan een ander onderdeel
+  // gekoppeld.") — quietStatuses suppresses api.ts's generic dev diagnostic toast
+  // ("API PATCH … → 422") so the server's own readable reason is what the user reads.
+  const REQUEST_CONFIG = { quietStatuses: [422] }
   const ops = (rel: string, list: RelItem[], set: Dispatch<SetStateAction<RelItem[]>>) => ({
     onAdd: (raw: RelItem) => {
       const v = NORMALIZE[rel](raw)
       const id = -(Date.now() + (++tempRelSeq))
       set(p => [...p, { ...v, id }])
-      api.post(`/candidates/${c.id}/${rel}`, TO_API[rel](v))
+      api.post(`/candidates/${c.id}/${rel}`, TO_API[rel](v), REQUEST_CONFIG)
         .then(r => { const it = unwrap<RelItem>(r); if (it?.id) set(p => p.map(x => x.id === id ? { ...v, ...it } : x)) })
-        .catch(() => { set(p => p.filter(x => x.id !== id)); notifyError(t('actionFailed')) })
+        .catch(err => { set(p => p.filter(x => x.id !== id)); notifyError(extractApiError(err, t('actionFailed'))) })
     },
     onEdit: (i: number, raw: RelItem) => {
       // Merge over the stored row FIRST: SectionTabs now has two independent editors
@@ -130,9 +145,9 @@ export default function BackgroundTab({ c, onEditSave, onJump }: { c: Candidate;
       const id = list[i]?.id
       set(p => p.map((x, idx) => idx === i ? { ...x, ...v } : x))
       if (isPersisted(id)) {
-        api.patch(`/candidates/${c.id}/${rel}/${id}`, TO_API[rel](v)).catch(() => {
+        api.patch(`/candidates/${c.id}/${rel}/${id}`, TO_API[rel](v), REQUEST_CONFIG).catch(err => {
           if (before) set(p => p.map(x => x.id === id ? before : x))
-          notifyError(t('actionFailed'))
+          notifyError(extractApiError(err, t('actionFailed')))
         })
       }
     },
@@ -141,9 +156,9 @@ export default function BackgroundTab({ c, onEditSave, onJump }: { c: Candidate;
       const row = list[i]
       set(p => p.filter((_, idx) => idx !== i))
       if (!isPersisted(id)) return
-      api.delete(`/candidates/${c.id}/${rel}/${id}`).catch(() => {
+      api.delete(`/candidates/${c.id}/${rel}/${id}`).catch(err => {
         if (row) set(p => { const next = [...p]; next.splice(Math.min(i, next.length), 0, row); return next })
-        notifyError(t('actionFailed'))
+        notifyError(extractApiError(err, t('actionFailed')))
       })
     },
   })
@@ -157,7 +172,7 @@ export default function BackgroundTab({ c, onEditSave, onJump }: { c: Candidate;
     if (!isPersisted(id)) return
     api.post(`/candidates/${c.id}/references/${id}/verify`)
       .then(r => { const it = unwrap<RelItem>(r); if (it) setReferences(p => p.map(x => x.id === id ? { ...x, ...it } : x)) })
-      .catch(() => notifyError(t('actionFailed')))
+      .catch(err => notifyError(extractApiError(err, t('actionFailed'))))
   }
 
   // House sub-tab bar (Danny kandidaten-ronde-2, punt B): one sub-tab per section
@@ -189,11 +204,16 @@ export default function BackgroundTab({ c, onEditSave, onJump }: { c: Candidate;
           to the Documenten tab (thin passthrough — CandidateDrawer owns tab state). */}
       {subTab === 'education'      && <EducationTab      items={educations}  documents={c.documents ?? []} onJumpToDocuments={onJump ? () => onJump('documents') : undefined} {...ops('educations', educations, setEducations)} />}
       {subTab === 'certifications' && <CertificationsTab items={certs}       documents={c.documents ?? []} onJumpToDocuments={onJump ? () => onJump('documents') : undefined} {...ops('certifications', certs, setCerts)} />}
-      {subTab === 'skills'         && <SkillsTab         items={skills}      {...ops('skills', skills, setSkills)} />}
+      {/* DOC-LANG-SKILL-LINK-1: Vaardigheden already renders the "gekoppeld document"
+          picker, but never received `documents` — so it always resolved to an empty
+          list (a dropdown with nothing in it, and no read-mode link icons). */}
+      {subTab === 'skills'         && <SkillsTab         items={skills}      documents={c.documents ?? []} onJumpToDocuments={onJump ? () => onJump('documents') : undefined} {...ops('skills', skills, setSkills)} />}
       {/* KAND-REFERENTIES-1: onVerify is the one action outside the generic add/edit/
           remove ops() shape — it stamps server-only fields, so it stays a dedicated
-          handler in this container instead of squeezing into TO_API/NORMALIZE. */}
-      {subTab === 'references'     && <ReferencesTab      items={references}  onVerify={verifyReference} {...ops('references', references, setReferences)} />}
+          handler in this container instead of squeezing into TO_API/NORMALIZE.
+          REFERENTIE-VELDEN-1: documents/onJumpToDocuments feed the "reference
+          letter" picker + read-mode icons, mirrors Education/Certifications above. */}
+      {subTab === 'references'     && <ReferencesTab      items={references}  documents={c.documents ?? []} onJumpToDocuments={onJump ? () => onJump('documents') : undefined} onVerify={verifyReference} {...ops('references', references, setReferences)} />}
       {/* Talen already lived on this tab (moved here from Profiel earlier) — now its
           own sub-tab instead of a stacked block; persists via the drawer's onUpdate. */}
       {subTab === 'languages'      && <LanguagesSection c={c} onEditSave={onEditSave} />}

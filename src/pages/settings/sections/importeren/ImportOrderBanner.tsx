@@ -54,7 +54,7 @@ export default function ImportOrderBanner({ entity, wholeTreeEntity, onSelectEnt
         <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap', marginTop: 8, fontSize: 12 }}>
           <span style={{ color: 'var(--text-muted)' }}>{t('import.order.treeAlternative')}</span>
           <button type="button" onClick={() => onSelectEntity(wholeTreeEntity)}
-            style={{ fontSize: 12, fontWeight: 600, color: 'var(--color-primary)', background: 'none',
+            style={{ fontSize: 12, fontWeight: 600, color: 'var(--color-primary-text)', background: 'none',
                      border: 'none', cursor: 'pointer', padding: 0, textDecoration: 'underline' }}>
             {t('import.order.switchToTree')}
           </button>

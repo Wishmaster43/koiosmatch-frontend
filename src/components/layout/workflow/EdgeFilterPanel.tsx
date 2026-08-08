@@ -15,8 +15,8 @@
  */
 import { useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Plus, Trash2, X } from 'lucide-react'
-import { useFocusTrap } from '@/hooks/useFocusTrap'
+import { Plus, Trash2 } from 'lucide-react'
+import FloatingPanel from '@/components/ui/FloatingPanel'
 import { parseEdgeFilterGroups, edgeFilterGroupsToFilters } from './serialization'
 import { VALUELESS_OPERATORS } from './constants'
 import { collectUpstreamFilterFields, toFilterFieldOptions, type ModuleCatalog } from './filterFieldCatalog'
@@ -45,7 +45,6 @@ export function EdgeFilterPanel({ filters, label, sourceNodeId, nodes = [], edge
   const [groups, setGroups] = useState<FilterConditionGroup[]>(() => parseEdgeFilterGroups(filters))
   const [name, setName] = useState(label ?? '')
   const { t } = useTranslation('workflows')
-  const panelRef = useFocusTrap<HTMLDivElement>(onClose)
 
   // Make-style numbered field options: walk the edge source's upstream chain
   // once per graph change, then flatten to "N. <module label> · <field>" options.
@@ -79,113 +78,106 @@ export function EdgeFilterPanel({ filters, label, sourceNodeId, nodes = [], edge
   }
 
   return (
-    <div style={{
-      position: 'fixed', inset: 0, zIndex: 200, display: 'flex', alignItems: 'center', justifyContent: 'center',
-      background: 'rgba(0,0,0,0.3)',
-    }} onClick={onClose}>
-      <div ref={panelRef} role="dialog" aria-modal="true" aria-label={t('canvas.filterTitle')} tabIndex={-1} style={{
-        background: 'var(--surface)', borderRadius: 14, padding: 24, width: 660, maxWidth: '96vw', maxHeight: '80vh', overflow: 'auto',
-        boxShadow: '0 20px 60px rgba(0,0,0,0.2)',
-      }} onClick={e => e.stopPropagation()}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
-          <div style={{ fontSize: 15, fontWeight: 700, color: 'var(--text)' }}>{t('canvas.filterTitle')}</div>
-          <button onClick={onClose} aria-label={t('common:close')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)' }}><X size={16} /></button>
-        </div>
+    // POPUP-SLEEP (Danny punt 19): the shared FloatingPanel shell — this editor is
+    // dragged aside by its header to compare against the canvas behind it, and keeps
+    // the same focus trap / Escape-to-close it had inline.
+    <FloatingPanel open onClose={onClose} ariaLabel={t('canvas.filterTitle')}
+      width={660} maxWidth="96vw" persistKey="edge-filter" bodyStyle={{ padding: 24 }}
+      header={<div style={{ fontSize: 15, fontWeight: 700, color: 'var(--text)' }}>{t('canvas.filterTitle')}</div>}>
 
-        {/* Route naam — the Router branch name (Make-style); shown on the edge */}
-        <div style={{ marginBottom: 16 }}>
-          <label style={{ display: 'block', fontSize: 10, fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 6 }}>
-            {t('canvas.routeName')}
-          </label>
-          <input value={name} onChange={e => setName(e.target.value)}
-            placeholder={t('canvas.routeNamePlaceholder')} aria-label={t('canvas.routeName')}
-            style={{ width: '100%', padding: '6px 8px', fontSize: 12, border: '1px solid var(--border)', borderRadius: 6, outline: 'none', boxSizing: 'border-box' }} />
-        </div>
+      {/* Route naam — the Router branch name (Make-style); shown on the edge */}
+      <div style={{ marginBottom: 16 }}>
+        <label style={{ display: 'block', fontSize: 10, fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 6 }}>
+          {t('canvas.routeName')}
+        </label>
+        <input value={name} onChange={e => setName(e.target.value)}
+          placeholder={t('canvas.routeNamePlaceholder')} aria-label={t('canvas.routeName')}
+          style={{ width: '100%', padding: '6px 8px', fontSize: 12, border: '1px solid var(--border)', borderRadius: 6, outline: 'none', boxSizing: 'border-box' }} />
+      </div>
 
-        {/* OR'ed groups — each group ANDs its own conditions; "+ OF-groep" adds another */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 12 }}>
-          {groups.map((group, gi) => (
-            <div key={gi}>
-              {gi > 0 && (
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8, margin: '2px 0 10px' }}>
-                  <div style={{ flex: 1, height: 1, background: 'var(--border)' }} />
-                  <span style={{ fontSize: 10, fontWeight: 700, color: 'var(--color-primary)', background: 'var(--color-primary-bg)', borderRadius: 999, padding: '2px 10px' }}>
-                    {t('canvas.orDivider')}
+      {/* OR'ed groups — each group ANDs its own conditions; "+ OF-groep" adds another */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 12 }}>
+        {groups.map((group, gi) => (
+          <div key={gi}>
+            {gi > 0 && (
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, margin: '2px 0 10px' }}>
+                <div style={{ flex: 1, height: 1, background: 'var(--border)' }} />
+                <span style={{ fontSize: 10, fontWeight: 700, color: 'var(--color-primary-text)', background: 'var(--color-primary-bg)', borderRadius: 999, padding: '2px 10px' }}>
+                  {t('canvas.orDivider')}
+                </span>
+                <div style={{ flex: 1, height: 1, background: 'var(--border)' }} />
+              </div>
+            )}
+            <div style={{ border: '1px solid var(--border)', borderRadius: 10, padding: 10, display: 'flex', flexDirection: 'column', gap: 8 }}>
+              {groups.length > 1 && (
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                  <span style={{ fontSize: 10, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                    {t('canvas.groupLabel', { n: gi + 1 })}
                   </span>
-                  <div style={{ flex: 1, height: 1, background: 'var(--border)' }} />
+                  <button onClick={() => removeGroup(gi)} title={t('canvas.removeGroup')} aria-label={t('canvas.removeGroup')}
+                    style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: 2, display: 'flex' }}>
+                    <Trash2 size={12} />
+                  </button>
                 </div>
               )}
-              <div style={{ border: '1px solid var(--border)', borderRadius: 10, padding: 10, display: 'flex', flexDirection: 'column', gap: 8 }}>
-                {groups.length > 1 && (
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                    <span style={{ fontSize: 10, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                      {t('canvas.groupLabel', { n: gi + 1 })}
-                    </span>
-                    <button onClick={() => removeGroup(gi)} title={t('canvas.removeGroup')} aria-label={t('canvas.removeGroup')}
-                      style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: 2, display: 'flex' }}>
-                      <Trash2 size={12} />
-                    </button>
-                  </div>
-                )}
-                {group.map((c, ci) => {
-                  const hint = operatorHint(t, c.operator)
-                  return (
-                    <div key={ci} style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-                      {/* Row 1 — the Make-style field+"Toon als" picker gets its own full-width
-                          row (it packs two controls); cramming it beside operator/value/delete
-                          left it truncated to a sliver on narrower panels. */}
-                      <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
-                        {ci > 0
-                          ? <div style={{ fontSize: 10, fontWeight: 700, color: 'var(--text-muted)', width: 28, textAlign: 'center', flexShrink: 0 }}>{t('canvas.andLabel')}</div>
-                          : <div style={{ width: 28, flexShrink: 0 }} />}
-                        <FilterFieldPicker value={c.field ?? ''} options={fieldOptions}
-                          onChange={v => updCond(gi, ci, 'field', v)} />
-                      </div>
-                      {/* Row 2 — operator + value + delete */}
-                      <div style={{ display: 'flex', gap: 6, alignItems: 'center', paddingLeft: 34 }}>
-                        <OperatorSelect value={c.operator} onChange={v => updCond(gi, ci, 'operator', v)} />
-                        {!VALUELESS_OPERATORS.includes(c.operator ?? '') && (
-                          <input value={c.value} onChange={e => updCond(gi, ci, 'value', e.target.value)}
-                            placeholder={t('fields.valuePlaceholder')} aria-label={t('fields.valuePlaceholder')}
-                            style={{ flex: 1, padding: '6px 8px', fontSize: 12, border: '1px solid var(--border)', borderRadius: 6, outline: 'none' }} />
-                        )}
-                        <button onClick={() => delCond(gi, ci)} aria-label={t('canvas.deleteCondition')} title={t('canvas.deleteCondition')}
-                          style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--color-danger)', padding: 4 }}><Trash2 size={12} /></button>
-                      </div>
-                      {hint && (
-                        <div style={{ fontSize: 10, color: 'var(--text-muted)', fontStyle: 'italic', marginLeft: 34, marginTop: 2 }}>{hint}</div>
-                      )}
+              {group.map((c, ci) => {
+                const hint = operatorHint(t, c.operator)
+                return (
+                  <div key={ci} style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                    {/* Row 1 — the Make-style field+"Toon als" picker gets its own full-width
+                        row (it packs two controls); cramming it beside operator/value/delete
+                        left it truncated to a sliver on narrower panels. */}
+                    <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+                      {ci > 0
+                        ? <div style={{ fontSize: 10, fontWeight: 700, color: 'var(--text-muted)', width: 28, textAlign: 'center', flexShrink: 0 }}>{t('canvas.andLabel')}</div>
+                        : <div style={{ width: 28, flexShrink: 0 }} />}
+                      <FilterFieldPicker value={c.field ?? ''} options={fieldOptions}
+                        onChange={v => updCond(gi, ci, 'field', v)} />
                     </div>
-                  )
-                })}
-                <button onClick={() => addCond(gi)} style={{
-                  display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, color: 'var(--color-primary)',
-                  background: 'none', border: '1px dashed var(--color-primary)', borderRadius: 8,
-                  padding: '6px 12px', cursor: 'pointer', justifyContent: 'center',
-                }}>
-                  <Plus size={12} /> {t('fields.addCondition')}
-                </button>
-              </div>
+                    {/* Row 2 — operator + value + delete */}
+                    <div style={{ display: 'flex', gap: 6, alignItems: 'center', paddingLeft: 34 }}>
+                      <OperatorSelect value={c.operator} onChange={v => updCond(gi, ci, 'operator', v)} />
+                      {!VALUELESS_OPERATORS.includes(c.operator ?? '') && (
+                        <input value={c.value} onChange={e => updCond(gi, ci, 'value', e.target.value)}
+                          placeholder={t('fields.valuePlaceholder')} aria-label={t('fields.valuePlaceholder')}
+                          style={{ flex: 1, padding: '6px 8px', fontSize: 12, border: '1px solid var(--border)', borderRadius: 6, outline: 'none' }} />
+                      )}
+                      <button onClick={() => delCond(gi, ci)} aria-label={t('canvas.deleteCondition')} title={t('canvas.deleteCondition')}
+                        style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--color-danger)', padding: 4 }}><Trash2 size={12} /></button>
+                    </div>
+                    {hint && (
+                      <div style={{ fontSize: 10, color: 'var(--text-muted)', fontStyle: 'italic', marginLeft: 34, marginTop: 2 }}>{hint}</div>
+                    )}
+                  </div>
+                )
+              })}
+              <button onClick={() => addCond(gi)} style={{
+                display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, color: 'var(--color-primary-text)',
+                background: 'none', border: '1px dashed var(--color-primary)', borderRadius: 8,
+                padding: '6px 12px', cursor: 'pointer', justifyContent: 'center',
+              }}>
+                <Plus size={12} /> {t('fields.addCondition')}
+              </button>
             </div>
-          ))}
-        </div>
-
-        <button onClick={addGroup} style={{
-          display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, fontWeight: 600, color: 'var(--color-primary)',
-          background: 'var(--color-primary-bg)', border: 'none', borderRadius: 8,
-          padding: '8px 12px', cursor: 'pointer', marginBottom: 20, width: '100%', justifyContent: 'center',
-        }}>
-          <Plus size={12} /> {t('canvas.addGroup')}
-        </button>
-
-        <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
-          <button onClick={onClose} style={{ padding: '8px 16px', fontSize: 13, border: '1px solid var(--border)', borderRadius: 8, background: 'var(--surface)', cursor: 'pointer', color: 'var(--text-muted)' }}>{t('common:cancel')}</button>
-          <button onClick={handleSave}
-            style={{ padding: '8px 16px', fontSize: 13, border: 'none', borderRadius: 8, background: 'var(--color-primary)', color: 'white', cursor: 'pointer', fontWeight: 600 }}>
-            {t('common:save')}
-          </button>
-        </div>
+          </div>
+        ))}
       </div>
-    </div>
+
+      <button onClick={addGroup} style={{
+        display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, fontWeight: 600, color: 'var(--color-primary-text)',
+        background: 'var(--color-primary-bg)', border: 'none', borderRadius: 8,
+        padding: '8px 12px', cursor: 'pointer', marginBottom: 20, width: '100%', justifyContent: 'center',
+      }}>
+        <Plus size={12} /> {t('canvas.addGroup')}
+      </button>
+
+      <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
+        <button onClick={onClose} style={{ padding: '8px 16px', fontSize: 13, border: '1px solid var(--border)', borderRadius: 8, background: 'var(--surface)', cursor: 'pointer', color: 'var(--text-muted)' }}>{t('common:cancel')}</button>
+        <button onClick={handleSave}
+          style={{ padding: '8px 16px', fontSize: 13, border: 'none', borderRadius: 8, background: 'var(--color-primary)', color: 'var(--color-on-accent)', cursor: 'pointer', fontWeight: 600 }}>
+          {t('common:save')}
+        </button>
+      </div>
+    </FloatingPanel>
   )
 }

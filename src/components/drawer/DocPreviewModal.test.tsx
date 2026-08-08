@@ -64,12 +64,60 @@ describe('DocPreviewModal', () => {
     // PREVIEW-RELATIVE-URL-1: a relative api url resolves against the API origin
     // (test env: VITE_API_URL is relative → falls back to the frontend origin),
     // never fetched raw — a bare relative fetch was exactly the live 05-08 bug.
-    await waitFor(() => expect(fetch).toHaveBeenCalledWith(`${window.location.origin}/api/candidates/1/documents/2/download`, { credentials: 'include' }))
+    // PREVIEW-TENANT-HEADER-1: the raw fetch must carry the SAME tenant header
+    // the axios client adds — without it the tenant-scoped download route 404s
+    // and the modal honestly (but wrongly) reported "no preview".
+    await waitFor(() => expect(fetch).toHaveBeenCalledWith(
+      `${window.location.origin}/api/candidates/1/documents/2/download`,
+      { credentials: 'include', headers: { 'X-Auth-Mode': 'cookie', 'X-Tenant': 'demo' } },
+    ))
     await waitFor(() => expect(document.querySelectorAll('canvas').length).toBe(2))
     expect(document.querySelector('iframe')).toBeNull()
     expect(openSpy).not.toHaveBeenCalled()
     // pdf.js is handed the FETCHED object URL, never the raw authenticated route.
     expect(mockGetDocument).toHaveBeenCalledWith({ url: 'blob:fetched-object-url' })
+  })
+
+  // PREVIEW-CORS-1 (Danny 08-08 "Preview niet beschikbaar" on a linked document).
+  // REPRODUCED live: the modal preferred the ABSOLUTE signed `download_url`, which
+  // in cookie mode is a CROSS-ORIGIN fetch from the app's own origin and is blocked
+  // by CORS (net::ERR_FAILED) — so every persisted document fell into the honest
+  // "no preview" state. These prove the REQUEST, not just that something rendered.
+  it('fetches the SAME-ORIGIN stream route first and never the cross-origin signed url (PREVIEW-CORS-1)', async () => {
+    render(<DocPreviewModal onClose={() => {}} doc={{
+      name: 'diploma.png',
+      url: '/api/candidates/1/documents/2/download',
+      download_url: 'http://koiosmatch-api.test/api/files/candidate-documents/demo/1/2?expires=1&signature=abc',
+    }} />)
+    await waitFor(() => expect(screen.getByAltText('diploma.png')).toHaveAttribute('src', 'blob:fetched-object-url'))
+    expect(fetch).toHaveBeenCalledTimes(1)
+    expect(fetch).toHaveBeenCalledWith(
+      `${window.location.origin}/api/candidates/1/documents/2/download`,
+      { credentials: 'include', headers: { 'X-Auth-Mode': 'cookie', 'X-Tenant': 'demo' } },
+    )
+    expect(fetch).not.toHaveBeenCalledWith(expect.stringContaining('koiosmatch-api.test'), expect.anything())
+  })
+
+  it('falls through to the next candidate url when the first fetch is blocked (CORS rejection)', async () => {
+    // First candidate (the same-origin stream route) rejects the way a blocked
+    // cross-origin fetch does; the signed absolute url then serves the bytes.
+    const calls: string[] = []
+    vi.stubGlobal('fetch', vi.fn((url: string) => {
+      calls.push(url)
+      return calls.length === 1
+        ? Promise.reject(new TypeError('Failed to fetch'))
+        : Promise.resolve({ ok: true, blob: () => Promise.resolve(new Blob(['x'])) })
+    }))
+    render(<DocPreviewModal onClose={() => {}} doc={{
+      name: 'diploma.png',
+      url: '/api/candidates/1/documents/2/download',
+      download_url: 'http://koiosmatch-api.test/api/files/candidate-documents/demo/1/2?expires=1&signature=abc',
+    }} />)
+    await waitFor(() => expect(screen.getByAltText('diploma.png')).toHaveAttribute('src', 'blob:fetched-object-url'))
+    expect(calls).toEqual([
+      `${window.location.origin}/api/candidates/1/documents/2/download`,
+      'http://koiosmatch-api.test/api/files/candidate-documents/demo/1/2?expires=1&signature=abc',
+    ])
   })
 
   it('renders a PENDING (locally queued) file\'s own blob URL directly — no network fetch at all', async () => {

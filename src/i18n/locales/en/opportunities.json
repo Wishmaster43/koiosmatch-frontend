@@ -115,7 +115,8 @@
     "created": "Created",
     "groups": {
       "deal": "Deal",
-      "organisation": "Organisation"
+      "organisation": "Organisation",
+      "description": "Description"
     }
   },
   "changelog": {
@@ -136,7 +137,8 @@
     "cancel": "Cancel",
     "groups": {
       "general": "General",
-      "dealStage": "Value & stage"
+      "dealStage": "Value & stage",
+      "description": "Description"
     },
     "fields": {
       "title": "Title",
@@ -164,5 +166,8 @@
     "reasons": {
       "expectedCloseOverdue": "The expected close date has passed — follow up on this deal."
     }
+  },
+  "richText": {
+    "empty": "Nothing recorded yet"
   }
 }

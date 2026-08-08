@@ -2,7 +2,14 @@
  * OutreachDrawer — the drill-down for one bellijst (campaign), on the shared
  * EntityDrawer/EntityHeader shell (§3A blueprint; this was the ONE entity without a
  * drawer — audit 2026-07-03). Thin container: data via useOutreachDetail, header
- * config + a single Targets tab; all row markup lives in drawer/TargetsTab.
+ * config + Targets/Stats tabs; all row markup lives in drawer/TargetsTab and
+ * drawer/CampaignStatsTab.
+ *
+ * G29/G30/G31 (2026-08-08): round-robin recruiter assignment (assignTargets),
+ * per-target notes (setTargetNote) and the campaign Stats tab all landed here.
+ * The Stats-tab -> Targets-tab click-to-filter axis (targetFilter.ts) lives in
+ * THIS container's own state — the one piece of state genuinely shared between
+ * two sibling tabs, never duplicated into either tab itself.
  *
  * DRAWER-STD-1 (2026-07-14): the status pill that used to float in the body
  * `children` now sits in the title as a read-only badge (mirrors the candidate
@@ -21,6 +28,7 @@
  * plain findOrFail (would 404) AND it is a deliberate product choice either way
  * (restore first).
  */
+import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useDateFormat } from '@/lib/datetime'
 import { useCustomFields } from '@/lib/useCustomFields'
@@ -36,8 +44,10 @@ import { useUsers } from '@/lib/queries'
 import { useOutreachDetail } from './hooks/useOutreachDetail'
 import TargetsTab from './drawer/TargetsTab'
 import ChangelogTab from './drawer/ChangelogTab'
+import CampaignStatsTab from './drawer/CampaignStatsTab'
 import ArchivedBanner from '@/components/drawer/ArchivedBanner'
 import type { Id } from '@/types/common'
+import type { TargetFilter } from './drawer/targetFilter'
 
 // Campaign status → semantic colour for the header badge (draft calm, done success).
 const STATUS_COLOR: Record<string, string> = {
@@ -69,10 +79,15 @@ export default function OutreachDrawer({ id, createdAt, archived = false, archiv
   const { t } = useTranslation('outreach')
   const { formatDate, formatDateTime } = useDateFormat()
   // Always fetch: an archived campaign's detail now loads too (withTrashed show()).
-  const { detail, loading, error, setTargetStatus, setTargetOutcome, setOwner, setCustomFields } = useOutreachDetail(id)
+  const { detail, loading, error, setTargetStatus, setTargetOutcome, setTargetNote, assignTargets, setOwner, setCustomFields } = useOutreachDetail(id)
   const { data: users = [] } = useUsers() as { data?: UserLike[] }
   // The Extra tab only shows when the tenant has defined outreach-campaign custom fields (§3A(f)).
   const { fields: customFieldDefs } = useCustomFields('outreach_campaign')
+  // G31 — the Stats tab's active donut pick, read by the Targets tab to narrow
+  // its list. Reset to null whenever the drawer opens on a different campaign.
+  const [targetFilter, setTargetFilterState] = useState<TargetFilter>(null)
+  const [filterCampaignId, setFilterCampaignId] = useState(id)
+  if (id !== filterCampaignId) { setFilterCampaignId(id); setTargetFilterState(null) }
   if (!id) return null
 
   const name = detail?.name ?? fallbackName ?? '…'
@@ -93,10 +108,29 @@ export default function OutreachDrawer({ id, createdAt, archived = false, archiv
     setOwner(id, u ? { id: String(u.id), name: userName(u) } : null)
   }
 
-  // Tabs are config (§3A) — the call list is the main tab; Extra is appended when defined.
+  // G29 — recruiter options for the assign picker; every selectable tenant user
+  // (mirrors ownerOptions minus the "current value first" special-case, since
+  // the assign picker is a fresh multi-select, not a single current-value field).
+  const recruiterOptions = users.map(u => ({ value: String(u.id), label: userName(u) }))
+
+  // G31 — one shared filter axis, set by a Stats-tab donut click and read by the
+  // Targets tab; clicking the SAME value again clears it (mirrors the page-level
+  // insights row's donut toggle convention).
+  const onPickFilter = (axis: 'status' | 'outcome' | 'assignee', value: string) =>
+    setTargetFilterState(f => (f?.axis === axis && f?.value === value) ? null : { axis, value })
+  const onClearFilter = () => setTargetFilterState(null)
+
+  // Tabs are config (§3A) — the call list is the main tab; Stats surfaces the
+  // by_status/by_outcome/by_assignee breakdown (G31); Extra is appended when defined.
   const tabs: EntityTab[] = [
     { id: 'targets', label: t('drawer.tabs.targets'), render: () => (
-      <TargetsTab targets={detail?.targets ?? []} loading={loading} error={error} onSetStatus={setTargetStatus} onSetOutcome={setTargetOutcome} />
+      <TargetsTab targets={detail?.targets ?? []} loading={loading} error={error}
+        onSetStatus={setTargetStatus} onSetOutcome={setTargetOutcome} onSetNote={setTargetNote}
+        recruiters={recruiterOptions} onAssignTargets={assignTargets}
+        filter={targetFilter} onClearFilter={onClearFilter} />
+    ) },
+    { id: 'stats', label: t('drawer.tabs.stats', { defaultValue: 'Stats' }), render: () => (
+      <CampaignStatsTab campaignId={id} filter={targetFilter} onPick={onPickFilter} onClear={onClearFilter} />
     ) },
     ...(customFieldDefs.length > 0 ? [{ id: 'extra', label: t('drawer.tabs.extra'), render: () => (
       <CustomFieldsTab entityType="outreach_campaign" values={detail?.custom_fields ?? {}}

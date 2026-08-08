@@ -6,10 +6,11 @@
  * keys, like EditableFieldTable.test.tsx and every other test in this repo that
  * doesn't deliberately opt into real i18n.
  */
-import { describe, it, expect, vi } from 'vitest'
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { PreferencesTab } from './PreferencesZzpTabs'
+import { buildCandidatePatch } from '../data/candidatesShared'
 import type { Candidate } from '@/types/candidate'
 
 vi.mock('@/lib/datetime', () => ({ useDateFormat: () => ({ formatDate: (v: string) => v, formatDateTime: (v: string) => v, locale: 'nl-NL' }) }))
@@ -19,6 +20,9 @@ vi.mock('@/context/LookupsContext', () => ({
 vi.mock('@/lib/useFunctions', () => ({ useFunctions: () => ({ functions: [], allowFreeEntry: true }) }))
 vi.mock('@/lib/useIndustries', () => ({ useIndustries: () => ({ industries: [] }) }))
 vi.mock('@/lib/useDriverLicenses', () => ({ useDriverLicenses: () => ({ licenses: [] }) }))
+// NOODCONTACT-SPLIT-1: EmergencyContactCard's relation dropdown now fetches its
+// own lookup — mocked for isolation, mirrors the other lookup hooks above.
+vi.mock('@/lib/useEmergencyContactRelations', () => ({ useEmergencyContactRelations: () => ({ emergencyContactRelations: [] }) }))
 
 const candidate = (): Candidate => ({
   id: 1, candidateTypes: [], preferences: {}, zzp: {}, archived: false, status: 'available',
@@ -126,51 +130,159 @@ describe('PreferencesTab · sub-tabs (kandidaten-ronde-2, punt D)', () => {
     expect(screen.getAllByText('preferences.groupOther')).toHaveLength(1) // the sub-tab button only
   })
 
-  // Job "noodcontact-opzeg": Overig gained two more independently-editable cards
-  // above Opmerkingen — Noodcontact and Opzegtermijn — each with their OWN pencil,
-  // same PREF-PENCIL-SPLIT-1 stacking as Financieel's Loonheffing/Gewenst tarief.
-  it('Overig shows Noodcontact and Opzegtermijn as their own cards, each with its own pencil', async () => {
+  // Job "noodcontact-opzeg" + KAND-OPZEGTERMIJN-2 (Danny punt 9): Overig now holds
+  // Noodcontact and Opmerkingen — Opzegtermijn moved out to Beschikbaarheid.
+  it('Overig shows Noodcontact and Opmerkingen as their own cards, each with its own pencil', async () => {
     const user = userEvent.setup()
     render(<PreferencesTab c={candidate()} />)
     await user.click(screen.getByRole('tab', { name: 'preferences.groupOther' }))
     expect(screen.getByText('preferences.groupEmergencyContact')).toBeInTheDocument()
     expect(screen.getByText('preferences.emergencyContactName')).toBeInTheDocument()
     expect(screen.getByText('preferences.emergencyContactPhone')).toBeInTheDocument()
-    expect(screen.getByText('preferences.groupNoticePeriod')).toBeInTheDocument()
-    expect(screen.getByText('preferences.noticePeriodWeeks')).toBeInTheDocument()
-    // Noodcontact · Opzegtermijn · Opmerkingen — three cards, three own pencils.
-    expect(screen.getAllByTitle('edit')).toHaveLength(3)
-  })
-
-  it('editing Opzegtermijn leaves Noodcontact and Opmerkingen read-only', async () => {
-    const user = userEvent.setup()
-    render(<PreferencesTab c={candidate()} />)
-    await user.click(screen.getByRole('tab', { name: 'preferences.groupOther' }))
-    await user.click(screen.getAllByTitle('edit')[1]) // Opzegtermijn is the middle card
-    expect(screen.getByTitle('save')).toBeInTheDocument()
+    // Noodcontact · Opmerkingen — two cards, two own pencils.
     expect(screen.getAllByTitle('edit')).toHaveLength(2)
   })
 
-  it('Opzegtermijn save sends ONLY notice_period_weeks', async () => {
-    const user = userEvent.setup()
-    const onSave = vi.fn()
-    render(<PreferencesTab c={candidate()} onSave={onSave} />)
-    await user.click(screen.getByRole('tab', { name: 'preferences.groupOther' }))
-    await user.click(screen.getAllByTitle('edit')[1]) // Opzegtermijn
-    await user.type(screen.getByRole('spinbutton'), '4')
-    await user.click(screen.getByTitle('save'))
-    expect(onSave).toHaveBeenCalledTimes(1)
-    expect(onSave).toHaveBeenCalledWith({ notice_period_weeks: 4 })
-  })
-
-  it('Noodcontact save flows through the tab onSave with the emergency-contact API keys', async () => {
+  it('Noodcontact save flows through the tab onSave with the split emergency-contact API keys', async () => {
     const user = userEvent.setup()
     const onSave = vi.fn()
     render(<PreferencesTab c={candidate()} onSave={onSave} />)
     await user.click(screen.getByRole('tab', { name: 'preferences.groupOther' }))
     await user.click(screen.getAllByTitle('edit')[0]) // Noodcontact
     await user.click(screen.getByTitle('save'))
-    expect(onSave).toHaveBeenCalledWith({ emergency_contact_name: '', emergency_contact_phone: '' })
+    // NOODCONTACT-SPLIT-1: split name/phone/mobile + relation-by-id (never a
+    // label) — '' -> null for the nullable relation FK (mirrors COUNTRY-1).
+    expect(onSave).toHaveBeenCalledWith({
+      emergency_contact_first_name: '',
+      emergency_contact_middle_name: '',
+      emergency_contact_last_name: '',
+      emergency_contact_phone: '',
+      emergency_contact_mobile: '',
+      emergency_contact_relation_id: null,
+    })
+  })
+})
+
+/**
+ * KAND-OPZEGTERMIJN-2 (Danny 2026-08-08, punt 9) — the notice period belongs to
+ * availability: it now sits in the Beschikbaarheid card directly under "Inzetbaar
+ * vanaf", saves in that section's payload, and a derived-date hint offers (never
+ * imposes) today + X weeks when no availability date is recorded yet.
+ *
+ * The clock is frozen so the derived date is deterministic; only Date is faked so
+ * userEvent's own timers keep running.
+ */
+describe('PreferencesTab · Opzegtermijn ↔ Inzetbaar vanaf (Danny punt 9)', () => {
+  const prefCandidate = (preferences: Record<string, unknown>): Candidate => ({
+    id: 1, candidateTypes: [], preferences, zzp: {}, archived: false, status: 'available',
+  } as unknown as Candidate)
+
+  beforeEach(() => { vi.useFakeTimers({ toFake: ['Date'] }); vi.setSystemTime(new Date(2026, 7, 9, 12, 0, 0)) })
+  afterEach(() => { vi.useRealTimers() })
+
+  it('renders Opzegtermijn inside Beschikbaarheid, directly after Inzetbaar vanaf, and no longer under Overig', async () => {
+    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime })
+    render(<PreferencesTab c={prefCandidate({})} />)
+    expect(screen.getByText('preferences.noticePeriodWeeks')).toBeInTheDocument()
+    // Adjacency is the point of the move — assert the DOM order of the two labels.
+    const labels = screen.getAllByText(/^preferences\./).map(el => el.textContent)
+    expect(labels.indexOf('preferences.noticePeriodWeeks')).toBe(labels.indexOf('preferences.availableFrom') + 1)
+    // The old standalone Opzegtermijn card is gone from Overig.
+    await user.click(screen.getByRole('tab', { name: 'preferences.groupOther' }))
+    expect(screen.queryByText('preferences.noticePeriodWeeks')).toBeNull()
+    expect(screen.queryByText('preferences.groupNoticePeriod')).toBeNull()
+  })
+
+  it('the Beschikbaarheid save sends notice_period_weeks together with available_from — and only this section keys', async () => {
+    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime })
+    const onSave = vi.fn()
+    render(<PreferencesTab c={prefCandidate({ available_from: '2026-10-01', hours_per_week: 16, preferred_days: ['thu'], sector_pref: ['IT'] })} onSave={onSave} />)
+    await user.click(screen.getByTitle('edit'))
+    // Two number inputs in this card: [0] Opzegtermijn, [1] Uren per week.
+    await user.type(screen.getAllByRole('spinbutton')[0], '4')
+    await user.click(screen.getByTitle('save'))
+    expect(onSave).toHaveBeenCalledTimes(1)
+    expect(onSave).toHaveBeenCalledWith({
+      available_from: '2026-10-01',
+      notice_period_weeks: 4,
+      hours_per_week: 16,
+      preferred_days: ['thu'],
+      sector_pref: ['IT'],
+    })
+  })
+
+  it('clearing the notice period sends null (never an empty string)', async () => {
+    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime })
+    const onSave = vi.fn()
+    render(<PreferencesTab c={prefCandidate({ notice_period_weeks: 4 })} onSave={onSave} />)
+    await user.click(screen.getByTitle('edit'))
+    await user.clear(screen.getAllByRole('spinbutton')[0])
+    await user.click(screen.getByTitle('save'))
+    expect((onSave.mock.calls[0][0] as Record<string, unknown>).notice_period_weeks).toBeNull()
+  })
+
+  it('shows the derived-date hint when a notice period is set but no availability date is', () => {
+    render(<PreferencesTab c={prefCandidate({ notice_period_weeks: 4 })} onSave={vi.fn()} />)
+    expect(screen.getByText('preferences.noticePeriodDerivedHint')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'preferences.noticePeriodApply' })).toBeInTheDocument()
+  })
+
+  it('never argues with a date the recruiter already entered — no hint when available_from is filled', () => {
+    render(<PreferencesTab c={prefCandidate({ notice_period_weeks: 4, available_from: '2026-12-01' })} onSave={vi.fn()} />)
+    expect(screen.queryByText('preferences.noticePeriodDerivedHint')).toBeNull()
+  })
+
+  it('shows no hint without a notice period', () => {
+    render(<PreferencesTab c={prefCandidate({})} onSave={vi.fn()} />)
+    expect(screen.queryByText('preferences.noticePeriodDerivedHint')).toBeNull()
+  })
+
+  // The take-over is an explicit acceptance of a proposal: exactly ONE field is
+  // persisted, and it is today + 4 weeks (09-08-2026 → 06-09-2026).
+  it('taking over the derived date PATCHes only available_from with today + X weeks', async () => {
+    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime })
+    const onSave = vi.fn()
+    render(<PreferencesTab c={prefCandidate({ notice_period_weeks: 4 })} onSave={onSave} />)
+    await user.click(screen.getByRole('button', { name: 'preferences.noticePeriodApply' }))
+    expect(onSave).toHaveBeenCalledTimes(1)
+    expect(onSave).toHaveBeenCalledWith({ available_from: '2026-09-06' })
+  })
+
+  // A take-over landing behind an OPEN draft would be wiped by that draft's save,
+  // so the button is withheld while the card is being edited (the hint itself stays).
+  it('withholds the take-over button while the Beschikbaarheid card is in edit mode', async () => {
+    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime })
+    render(<PreferencesTab c={prefCandidate({ notice_period_weeks: 4 })} onSave={vi.fn()} />)
+    await user.click(screen.getByTitle('edit'))
+    expect(screen.getByText('preferences.noticePeriodDerivedHint')).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'preferences.noticePeriodApply' })).toBeNull()
+  })
+
+  // §13 seam proof: what the section emits must survive the drawer's merge and the
+  // UI-patch → API-body mapping as the exact preferences blob measured live against
+  // PATCH /candidates/{id} (2026-08-08: both keys accepted and persisted, HTTP 200).
+  it('the emitted payload maps to the measured PATCH body (preferences blob with both keys)', async () => {
+    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime })
+    const onSave = vi.fn()
+    const existing = { available_from: '2026-10-01', hours_per_week: 16, preferred_days: ['thu'], sector_pref: ['IT'], remarks: 'keep me' }
+    render(<PreferencesTab c={prefCandidate(existing)} onSave={onSave} />)
+    await user.click(screen.getByTitle('edit'))
+    await user.type(screen.getAllByRole('spinbutton')[0], '4')
+    await user.click(screen.getByTitle('save'))
+    // CandidateDrawer merges the section payload onto the existing blob, then
+    // buildCandidatePatch turns the UI patch into the wire body.
+    const prefs = onSave.mock.calls[0][0] as Record<string, unknown>
+    const body = buildCandidatePatch({ preferences: { ...existing, ...prefs } })
+    expect(body).toEqual({
+      preferences: {
+        available_from: '2026-10-01',
+        notice_period_weeks: 4,
+        hours_per_week: 16,
+        preferred_days: ['thu'],
+        sector_pref: ['IT'],
+        remarks: 'keep me',
+      },
+    })
   })
 })
 

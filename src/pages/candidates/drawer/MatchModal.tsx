@@ -211,7 +211,7 @@ export default function MatchModal({
         <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, marginTop: 20 }}>
           <button onClick={onClose} style={{ height: 34, padding: '0 16px', fontSize: 13, border: '1px solid var(--border)', borderRadius: 8, background: 'var(--surface)', cursor: 'pointer', color: 'var(--text)' }}>{t('common:cancel')}</button>
           <button onClick={form.handleSubmitClick} disabled={form.saving || !form.customerId || !form.func}
-            style={{ height: 34, padding: '0 16px', fontSize: 13, fontWeight: 600, border: 'none', borderRadius: 8, background: 'var(--color-primary)', color: '#fff', cursor: (form.customerId && form.func) ? 'pointer' : 'default', opacity: (form.customerId && form.func) ? 1 : 0.4 }}>
+            style={{ height: 34, padding: '0 16px', fontSize: 13, fontWeight: 600, border: 'none', borderRadius: 8, background: 'var(--color-primary)', color: 'var(--color-on-accent)', cursor: (form.customerId && form.func) ? 'pointer' : 'default', opacity: (form.customerId && form.func) ? 1 : 0.4 }}>
             {form.saving ? t('common:saving') : (form.deviatesFromProposal && form.confirmDeviation ? t('placement.rateProposal.deviationConfirm') : t(editing ? 'common:save' : 'placement.create'))}
           </button>
         </div>

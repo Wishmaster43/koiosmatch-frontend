@@ -65,7 +65,7 @@ export default function MatchesTable({
     if (rule.action === 'none') return null
     return {
       action: rule.action,
-      label: t('common:koios.actions.renew', { defaultValue: 'Renew?' }),
+      label: t('common:koios.actions.renew'),
       reason: t(rule.reasonKey, { ...rule.reasonParams, defaultValue: 'The contract end date is approaching.' }),
       source: 'rules',
     }
@@ -103,7 +103,10 @@ export default function MatchesTable({
       cellStyle: { color: 'var(--text-muted)', fontSize: 12, fontFamily: 'JetBrains Mono, monospace', fontVariantNumeric: 'tabular-nums' },
       sortable: true, sortValue: r => r.referenceNumber ?? '', render: r => r.referenceNumber || '—',
     },
-    { key: 'vacancy', header: t('cols.vacancy'), sortable: true, nowrap: false },
+    // SWEEP-TABLES: explicit em-dash fallback — without a render fn, DataTable's
+    // default cell (`field(row, col.key)`) prints a blank string for an empty
+    // vacancy title, the only column left inconsistent with the house convention.
+    { key: 'vacancy', header: t('cols.vacancy'), sortable: true, nowrap: false, render: r => r.vacancy || '—' },
     // Klant — soft avatar + name (AVATAR-CHIP-1: same chip as the candidate identity
     // column), muted text keeps it reading as a secondary reference.
     { key: 'client',  header: t('cols.client'),  sortable: true, nowrap: true,

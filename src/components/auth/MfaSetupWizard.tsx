@@ -95,7 +95,7 @@ export default function MfaSetupWizard({ setupMfa, confirmMfa, onConfirmed, onFi
           <div style={{ display: 'flex', gap: 10 }}>
             <button onClick={() => void startSetup()}
               style={{ height: 34, padding: '0 16px', fontSize: 13, fontWeight: 500, borderRadius: 8,
-                       cursor: 'pointer', border: 'none', background: 'var(--color-primary)', color: 'white' }}>
+                       cursor: 'pointer', border: 'none', background: 'var(--color-primary)', color: 'var(--color-on-accent)' }}>
               {t('security.retry')}
             </button>
             {onCancel && (
@@ -146,7 +146,7 @@ export default function MfaSetupWizard({ setupMfa, confirmMfa, onConfirmed, onFi
         </button>
         <button onClick={() => void finish()} disabled={busy}
           style={{ height: 34, padding: '0 20px', fontSize: 13, fontWeight: 500, borderRadius: 8,
-                   cursor: busy ? 'not-allowed' : 'pointer', border: 'none', background: 'var(--color-primary)', color: 'white' }}>
+                   cursor: busy ? 'not-allowed' : 'pointer', border: 'none', background: 'var(--color-primary)', color: 'var(--color-on-accent)' }}>
           {busy ? t('security.working') : t('security.done')}
         </button>
       </div>

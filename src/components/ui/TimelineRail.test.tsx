@@ -1,11 +1,14 @@
 /**
- * TimelineRail — the shared dot + connector line rendered on every Tijdlijn/
- * changelog row (Danny 05-08: "tijdlijn zijn alleen losse bolletjes, waar is de
- * echte lijn?"). Pure presentational atom: assert the connector renders between
- * items and terminates cleanly on the last one.
+ * TimelineRail — the shared axis column of every Tijdlijn row (Danny 05-08:
+ * "tijdlijn zijn alleen losse bolletjes, waar is de echte lijn?"; punt 17: the
+ * whole thing "ziet er nog niet uit"). Pure presentational atom, so the tests
+ * assert the two things a host depends on: the axis connects between rows and
+ * terminates cleanly, and a meaning-carrying marker follows the §4 soft-tint
+ * recipe rather than a solid fill.
  */
 import { describe, it, expect } from 'vitest'
 import { render, screen } from '@testing-library/react'
+import { CalendarClock } from 'lucide-react'
 import TimelineRail from './TimelineRail'
 
 describe('TimelineRail', () => {
@@ -45,5 +48,49 @@ describe('TimelineRail', () => {
     // 3 items → 2 connectors (between 1-2 and 2-3), none trailing the last dot.
     expect(screen.getAllByTestId('timeline-connector')).toHaveLength(2)
     expect(screen.getAllByTestId('timeline-dot')).toHaveLength(3)
+  })
+})
+
+// Punt 17: the marker is the ONE place colour is spent on a timeline row, so it
+// must follow the house soft-tint recipe — never a solid fill (§4).
+describe('TimelineRail · soft-tint marker', () => {
+  it('tints an icon marker with color-mix and paints the icon in the token itself', () => {
+    render(<TimelineRail icon={CalendarClock} color="var(--color-info)" />)
+    const style = screen.getByTestId('timeline-dot').getAttribute('style') ?? ''
+    expect(style).toMatch(/background:\s*color-mix\(in srgb, var\(--color-info\) 12%, transparent\)/)
+    expect(style).toMatch(/border:\s*1px solid color-mix\(in srgb, var\(--color-info\) 36%, transparent\)/)
+    // The icon inherits `color`, so the marker is never a solid block of the token.
+    expect(style).toMatch(/color:\s*var\(--color-info\)/)
+    expect(style).not.toMatch(/background:\s*var\(--color-info\)/)
+  })
+
+  it('keeps the legacy bare dot when no icon is given — the NotesTab contract', () => {
+    // NotesTab renders <TimelineRail isLast={…} /> with no other props; that call
+    // must keep its existing solid 8px dot, so this atom stays safe to share.
+    render(<TimelineRail />)
+    const style = screen.getByTestId('timeline-dot').getAttribute('style') ?? ''
+    expect(style).toMatch(/background:\s*var\(--color-primary\)/)
+    expect(style).toMatch(/width:\s*8px/)
+  })
+
+  it('hides the marker from screen readers — the row text already names the event', () => {
+    render(<TimelineRail icon={CalendarClock} />)
+    expect(screen.getByTestId('timeline-dot')).toHaveAttribute('aria-hidden', 'true')
+  })
+})
+
+// The axis has to survive a day heading: it runs BESIDE the heading (connector),
+// but must not dangle above the very first marker (spacer).
+describe('TimelineRail · day-heading variants', () => {
+  it('carries the axis past a day heading with a line and no marker', () => {
+    render(<TimelineRail variant="connector" />)
+    expect(screen.getByTestId('timeline-connector')).toBeInTheDocument()
+    expect(screen.queryByTestId('timeline-dot')).toBeNull()
+  })
+
+  it('reserves the axis width without drawing a line above the first heading', () => {
+    render(<TimelineRail variant="spacer" />)
+    expect(screen.queryByTestId('timeline-connector')).toBeNull()
+    expect(screen.queryByTestId('timeline-dot')).toBeNull()
   })
 })

@@ -29,7 +29,7 @@ export default function JobQueueSettings() {
     <div>
       {/* Header */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 4 }}>
-        <ListChecks size={18} style={{ color: 'var(--color-primary)' }} />
+        <ListChecks size={18} style={{ color: 'var(--color-primary-text)' }} />
         <h2 style={{ fontSize: 15, fontWeight: 600, color: 'var(--text)', margin: 0 }}>{t('jobs.title')}</h2>
       </div>
       <p style={{ fontSize: 12, color: 'var(--text-muted)', margin: '2px 0 16px' }}>{t('jobs.subtitle')}</p>

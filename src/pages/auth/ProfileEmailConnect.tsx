@@ -20,6 +20,7 @@ import { useTranslation } from 'react-i18next'
 import { Mail, RefreshCw, Eye, EyeOff } from 'lucide-react'
 import { useEmailConnection } from './useEmailConnection'
 import type { SmtpForm } from './useEmailConnection'
+import { fieldInputStyle } from '@/components/forms/fieldMetrics'
 
 const PROVIDERS = [
   { id: 'office', label: 'Office 365' },
@@ -27,11 +28,8 @@ const PROVIDERS = [
   { id: 'smtp',   label: 'SMTP' },
 ]
 
-const inputStyle: CSSProperties = {
-  height: 36, width: '100%', padding: '0 12px', fontSize: 13, boxSizing: 'border-box',
-  background: 'var(--input-bg)', color: 'var(--text)', border: '1px solid var(--border)',
-  borderRadius: 8, outline: 'none',
-}
+// Canon field style (G33/fieldMetrics) — was its own height-36 copy.
+const inputStyle: CSSProperties = fieldInputStyle
 const labelStyle: CSSProperties = { fontSize: 12, fontWeight: 500, color: 'var(--text-muted)', marginBottom: 5, display: 'block' }
 
 export default function ProfileEmailConnect() {
@@ -100,7 +98,7 @@ export default function ProfileEmailConnect() {
           {(choice === 'office' || choice === 'gmail') && (
             <button onClick={() => connectOauth(choice)} disabled={busy}
               style={{ display: 'flex', alignItems: 'center', gap: 8, height: 38, padding: '0 18px',
-                       fontSize: 13, fontWeight: 600, borderRadius: 8, border: 'none', color: 'white',
+                       fontSize: 13, fontWeight: 600, borderRadius: 8, border: 'none', color: 'var(--color-on-accent)',
                        background: 'var(--color-primary)', cursor: busy ? 'default' : 'pointer' }}>
               {busy ? <RefreshCw size={14} className="animate-spin" /> : <Mail size={14} />}
               {t('profile.email.connectWith', { provider: PROVIDERS.find(p => p.id === choice)?.label ?? choice })}
@@ -154,7 +152,7 @@ export default function ProfileEmailConnect() {
               </div>
               <button onClick={() => saveSmtp(smtp)} disabled={busy || !smtp.host.trim()}
                 style={{ alignSelf: 'flex-start', display: 'flex', alignItems: 'center', gap: 8, height: 38, padding: '0 18px',
-                         fontSize: 13, fontWeight: 600, borderRadius: 8, border: 'none', color: 'white',
+                         fontSize: 13, fontWeight: 600, borderRadius: 8, border: 'none', color: 'var(--color-on-accent)',
                          background: 'var(--color-primary)', cursor: busy ? 'default' : 'pointer',
                          opacity: smtp.host.trim() ? 1 : 0.5 }}>
                 {busy ? <RefreshCw size={14} className="animate-spin" /> : <Mail size={14} />}

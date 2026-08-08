@@ -1,11 +1,13 @@
 /**
- * AddTaskModal — EDIT mode (Danny 20-07: pencil on a candidate task row). Create
- * mode's body SHAPE/keys stay unchanged (verified below); edit mode GETs the
- * full task, prefills the form, and PATCHes the update-request's REAL keys —
- * `type_id`/`status_id`/`priority_id` (uuid FKs), not the create form's slug
- * `type`/`status`/`priority` — with a pre-existing link this form doesn't manage
- * (an 'opportunity' link) carried over so the PATCH's full-replace `links` never
- * silently drops it.
+ * AddTaskModal — EDIT mode (Danny 20-07: pencil on a candidate task row) + create
+ * mode. TASKTYPE-ID-1: BOTH now POST/PATCH the real update-request keys —
+ * `type_id`/`status_id`/`priority_id` (uuid FKs), resolved from the form's slug
+ * via `useTaskLookupIds` — never the bare `type`/`status`/`priority` slugs
+ * StoreTaskRequest doesn't even declare as rules (a create used to silently land
+ * on the tenant's default status/type no matter what was picked). Edit mode GETs
+ * the full task, prefills the form, and PATCHes, with a pre-existing link this
+ * form doesn't manage (an 'opportunity' link) carried over so the PATCH's
+ * full-replace `links` never silently drops it.
  *
  * Popup redesign (Danny 27-07 #tasks): every dropdown is now a searchable
  * CreatableSelect, not a native <select> — the combobox-role assertions below
@@ -23,9 +25,30 @@
  * effect, whose deps compare `types`/`statuses`/`priorities` by reference).
  */
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
-import { render, screen, waitFor } from '@testing-library/react'
+import { render, screen, waitFor, fireEvent } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import AddTaskModal from './AddTaskModal'
+
+/**
+ * i18n is STUBBED so every assertion below reads the KEY, which is what this
+ * file has always asserted. That used to hold by accident: nothing in the
+ * modal's import graph pulled `@/i18n`, so react-i18next stayed uninitialised
+ * and echoed keys on its own. On 09-08 that stopped being true — the shared
+ * RichTextEditor now reaches `@/lib/datetime` (→ `@/i18n`) through
+ * RichTextAssistBar's new assist panel, which initialises the real singleton
+ * and made `t('modal.cardLink')` resolve to "Koppelingen", failing 19 tests
+ * that had not changed. Stubbing the hook makes this file independent of what
+ * any OTHER module drags into the graph (same fix, same reason, as the sibling
+ * richtext/AssistActionsResultsPanel.test.tsx).
+ *
+ * `importOriginal` is kept for the rest of the module: `@/i18n` itself still
+ * imports `initReactI18next`, and a mock without it throws on load. `i18n` is
+ * handed out too — RichTextEditor and KoiosVoiceButton read `i18n.language`.
+ */
+vi.mock('react-i18next', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('react-i18next')>()
+  return { ...actual, useTranslation: () => ({ t: (k: string) => k, i18n: { language: 'nl' } }) }
+})
 
 const EDIT_ID = 'task-1'
 const FAIL_ID = 'task-fail'
@@ -51,9 +74,11 @@ const TASK_DETAIL_RAW = {
     { type: 'candidate', id: 'cand-1', label: 'Piet Jansen' },
   ],
 }
-// Raw lookup rows (id = uuid FK, value = tenant-facing slug) — what the update
-// request actually needs, distinct from the create form's slug-only options.
-const TYPE_ROWS     = [{ id: 'type-uuid-1', value: 'call', label: 'Belafspraak' }]
+// Raw lookup rows (id = uuid FK, value = tenant-facing slug) — what BOTH the
+// create and update requests actually need (TASKTYPE-ID-1), distinct from the
+// slug-only options the form's pickers render. 'email' is included so the
+// is_default-flag test below (a non-first default) can resolve its type_id too.
+const TYPE_ROWS     = [{ id: 'type-uuid-1', value: 'call', label: 'Belafspraak' }, { id: 'type-uuid-2', value: 'email', label: 'E-mail' }]
 const STATUS_ROWS   = [{ id: 'status-uuid-1', value: 'todo', label: 'Te doen' }]
 const PRIORITY_ROWS = [{ id: 'prio-uuid-1', value: 'normal', label: 'Normaal' }]
 // Two candidates so the link picker's search box has something to filter
@@ -62,6 +87,9 @@ const CANDIDATE_ROWS = [
   { id: 'cand-1', name: 'Piet Jansen' },
   { id: 'cand-2', name: 'Klaas de Vries' },
 ]
+// PUNT 15: a customer department, so the create form's shared link picker (the
+// drawer's own AddLinkRow, one vocabulary) has a real row to couple the task to.
+const DEPARTMENT_ROWS = [{ id: 'dep-1', name: 'Backoffice Zorg' }]
 
 // STABLE references, like the real provider (statuses/types/priorities are useState
 // values, unchanged across renders). Fresh array literals per call would make the
@@ -86,7 +114,26 @@ const ORIGINAL_TYPES = lk.types
 vi.mock('@/context/TaskLookupsContext', () => ({
   useTaskLookups: () => ({ statuses: lk.statuses, types: lk.types, priorities: lk.priorities, defaultPriority: lk.defaultPriority }),
 }))
-vi.mock('@/lib/queries', () => ({ useUsers: () => ({ data: [{ id: 'user-9', name: 'Danny' }] }) }))
+// The tenant user list behind the assignee picker. Mutable (vi.hoisted, same
+// pattern as `lk`/`authState` below) so the "assign to a colleague / bureau"
+// block can swap in its own colleagues and force the load-error state, and a
+// STABLE array reference by default — a fresh literal per call would rebuild the
+// option memo on every render. Colleagues here are role-LESS on purpose: an
+// uninitialised i18next echoes keys, so a roled option would render as the bare
+// `modal.assigneeWithRole` key and two of them would be indistinguishable. The
+// role grouping/labelling itself is proven, with real strings, in the injected
+// i18n of addmodal/assigneeOptions.test.ts.
+const { usersState } = vi.hoisted(() => ({
+  usersState: {
+    rows: [{ id: 'user-9', name: 'Danny' }] as Array<{ id: string; name: string }>,
+    isError: false,
+    refetch: vi.fn(),
+  },
+}))
+const ORIGINAL_USERS = usersState.rows
+vi.mock('@/lib/queries', () => ({
+  useUsers: () => ({ data: usersState.rows, isError: usersState.isError, refetch: usersState.refetch }),
+}))
 vi.mock('@/lib/notify', () => ({ notifyError: vi.fn(), notifySuccess: vi.fn() }))
 // TASK-ASSIGNEE-DEFAULT-1: `authState.user` is mutable (vi.hoisted, mirrors
 // AddCustomerModal.test.tsx's identical ACCOUNTMANAGER-DEFAULT-1 pattern) so the
@@ -108,6 +155,7 @@ vi.mock('@/lib/api', async (importOriginal) => {
     if (url === '/task-statuses')    return Promise.resolve({ data: STATUS_ROWS })
     if (url === '/task-priorities')  return Promise.resolve({ data: PRIORITY_ROWS })
     if (url === '/candidates')       return Promise.resolve({ data: { data: CANDIDATE_ROWS } })
+    if (url === '/departments')      return Promise.resolve({ data: { data: DEPARTMENT_ROWS } })
     return Promise.resolve({ data: { data: [] } }) // /customers, /contacts
   })
   const patch = vi.fn(() => Promise.resolve({ data: { data: {} } }))
@@ -120,7 +168,13 @@ vi.mock('@/lib/api', async (importOriginal) => {
 // later test's "not called" assertion (found by the validation test below).
 // authState/lk.types are reset too, so a test that overrides either never leaks
 // into the next one regardless of run order.
-beforeEach(() => { vi.clearAllMocks(); authState.user = null; lk.types = ORIGINAL_TYPES })
+beforeEach(() => {
+  vi.clearAllMocks()
+  authState.user = null
+  lk.types = ORIGINAL_TYPES
+  usersState.rows = ORIGINAL_USERS
+  usersState.isError = false
+})
 // Blanket safety net for the fixed-clock tests below: if one of them fails/throws
 // BEFORE its own vi.useRealTimers() call runs, fake timers would otherwise stay on
 // and hang every later test's userEvent/findBy/waitFor (they poll via setTimeout).
@@ -181,8 +235,8 @@ describe('AddTaskModal · edit mode prefill + PATCH (Danny 20-07)', () => {
   })
 })
 
-describe('AddTaskModal · create mode body SHAPE/keys are unchanged by the edit-mode refactor', () => {
-  it('POSTs the same keys as before — only due_date/due_time now carry the TASK-SMART-DEFAULTS-1 proposal (fixed clock: no logged-in user here, so assignee_id stays null)', async () => {
+describe('AddTaskModal · create mode POSTs the real uuid FKs (TASKTYPE-ID-1)', () => {
+  it('POSTs type_id/status_id/priority_id resolved from the picked slug, never the bare slug keys', async () => {
     // Fixed clock ONLY around mount, where the date/time default is read once —
     // switched back to real timers before any userEvent interaction (fake timers +
     // userEvent's internal delays don't mix, house convention: CvUpload.test.tsx).
@@ -197,9 +251,18 @@ describe('AddTaskModal · create mode body SHAPE/keys are unchanged by the edit-
 
     const api = (await import('@/lib/api')).default
     expect(api.post).toHaveBeenCalledWith('/tasks', {
-      title: 'Nieuwe taak', type: 'call', status: 'todo', priority: 'normal',
+      title: 'Nieuwe taak', type_id: 'type-uuid-1', status_id: 'status-uuid-1', priority_id: 'prio-uuid-1',
       assignee_id: null, due_date: '2026-08-03', due_time: '11:00', description: null, links: [],
     })
+  })
+
+  it('blocks the create button while the id lookup is still loading, even once the title is filled', () => {
+    render(<AddTaskModal onClose={noop} onCreated={noop} />)
+    // fireEvent (not userEvent) stays fully synchronous — no `await` between mount
+    // and this assertion, so the mocked lookup GETs (promises) cannot have resolved
+    // yet: proves `loadingLookupIds` gates the button on its own, not just the title.
+    fireEvent.change(screen.getByPlaceholderText('modal.titlePlaceholder'), { target: { value: 'Nieuwe taak' } })
+    expect(screen.getByRole('button', { name: 'modal.create' })).toBeDisabled()
   })
 })
 
@@ -249,8 +312,99 @@ describe('AddTaskModal · assignee defaults to the logged-in user (TASK-ASSIGNEE
     // (note: "Super Admin" DOES appear elsewhere, on the read-only "Aangemaakt
     // door" creator line — that always shows the logged-in user regardless of
     // assignability, a separate concern from the assignee proposal under test).
-    expect(screen.getByRole('button', { name: /modal\.assignee/ })).toHaveTextContent('modal.assigneePlaceholder')
+    expect(screen.getByRole('button', { name: /modal\.assignee/ })).toHaveTextContent('modal.assigneeUnassigned')
     expect(screen.getByRole('button', { name: /modal\.assignee/ })).not.toHaveTextContent('Super Admin')
+  })
+})
+
+/**
+ * ASSIGN-TO-BACKOFFICE (Danny 08-08, closing 14/15/16). Assigning to a
+ * department/team is NOT buildable — measured 09-08: `assignee_id` is a tenant
+ * USER uuid (a role id answers 422) and `GET /teams` → 404. So these tests pin
+ * the honest substitute: one searchable colleague list (role-grouped, see
+ * addmodal/assigneeOptions.test.ts) and "Bureau" as a real, choosable option
+ * that lands as `assignee_id: null` — a measured 201, not a silent empty value.
+ */
+describe('AddTaskModal · assigning to a colleague, with "Bureau" as a real choice', () => {
+  it('offers exactly the bureau row plus one row per colleague — never a team/department row that could not be saved', async () => {
+    usersState.rows = [{ id: 'u-1', name: 'Laura Yesway' }, { id: 'u-2', name: 'Kelly Yesway' }]
+    const user = userEvent.setup()
+    render(<AddTaskModal onClose={noop} onCreated={noop} />)
+
+    await user.click(screen.getByRole('button', { name: /modal\.assignee/ }))
+    const bureau = screen.getByRole('button', { name: 'modal.assigneeUnassigned' })
+    expect(screen.getByRole('button', { name: 'Laura Yesway' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Kelly Yesway' })).toBeInTheDocument()
+    // Structural count, not an absence-of-a-string check: an invented "team"/
+    // "afdeling" row would show up here as a fourth option.
+    expect(bureau.parentElement!.querySelectorAll('button')).toHaveLength(3)
+  })
+
+  it('assigns to the chosen colleague and POSTs their user id', async () => {
+    usersState.rows = [{ id: 'u-backoffice', name: 'Laura Yesway' }]
+    const user = userEvent.setup()
+    render(<AddTaskModal onClose={noop} onCreated={noop} />)
+
+    await user.click(screen.getByRole('button', { name: /modal\.assignee/ }))
+    await user.click(screen.getByRole('button', { name: 'Laura Yesway' }))
+    await user.type(screen.getByPlaceholderText('modal.titlePlaceholder'), 'Contract controleren')
+    await user.click(screen.getByRole('button', { name: 'modal.create' }))
+
+    // §13 — assert the REQUEST, not that a callback fired.
+    const api = (await import('@/lib/api')).default
+    expect(api.post).toHaveBeenCalledWith('/tasks', expect.objectContaining({ assignee_id: 'u-backoffice' }))
+  })
+
+  it('lets the recruiter deliberately pick the bureau, clearing a proposed assignee and POSTing assignee_id null', async () => {
+    // Start from the proposed logged-in assignee, so this proves the bureau row
+    // CLEARS a filled field — not merely that an untouched form stays empty.
+    authState.user = { id: 'user-9', name: 'Danny' }
+    const user = userEvent.setup()
+    render(<AddTaskModal onClose={noop} onCreated={noop} />)
+    expect(screen.getByRole('button', { name: /modal\.assignee/ })).toHaveTextContent('Danny')
+
+    await user.click(screen.getByRole('button', { name: /modal\.assignee/ }))
+    await user.click(screen.getByRole('button', { name: 'modal.assigneeUnassigned' }))
+    // The choice explains itself in plain language instead of reading as "empty".
+    expect(screen.getByText('modal.assigneeUnassignedHint')).toBeInTheDocument()
+
+    await user.type(screen.getByPlaceholderText('modal.titlePlaceholder'), 'Uitzoeken wie dit oppakt')
+    await user.click(screen.getByRole('button', { name: 'modal.create' }))
+
+    const api = (await import('@/lib/api')).default
+    expect(api.post).toHaveBeenCalledWith('/tasks', expect.objectContaining({ assignee_id: null }))
+  })
+
+  it('filters the colleague list from the picker\'s own search box (every dropdown is searchable)', async () => {
+    usersState.rows = [{ id: 'u-1', name: 'Laura Yesway' }, { id: 'u-2', name: 'Kelly Yesway' }]
+    const user = userEvent.setup()
+    render(<AddTaskModal onClose={noop} onCreated={noop} />)
+
+    await user.click(screen.getByRole('button', { name: /modal\.assignee/ }))
+    // The search input carries the field's own label (no placeholder of its own).
+    await user.type(screen.getByRole('textbox', { name: 'modal.assignee' }), 'Laura')
+
+    expect(screen.getByRole('button', { name: 'Laura Yesway' })).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Kelly Yesway' })).toBeNull()
+  })
+
+  it('says so honestly when the tenant has no assignable colleagues — the bureau stays a valid choice', () => {
+    usersState.rows = []
+    render(<AddTaskModal onClose={noop} onCreated={noop} />)
+
+    expect(screen.getByText('modal.assigneeEmpty')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /modal\.assignee/ })).toHaveTextContent('modal.assigneeUnassigned')
+  })
+
+  it('surfaces a failed colleague load with a retry, instead of an unexplained one-option picker', async () => {
+    usersState.isError = true
+    usersState.rows = []
+    const user = userEvent.setup()
+    render(<AddTaskModal onClose={noop} onCreated={noop} />)
+
+    expect(screen.getByRole('alert')).toHaveTextContent('modal.assigneeLoadError')
+    await user.click(screen.getByRole('button', { name: 'common:error.retry' }))
+    expect(usersState.refetch).toHaveBeenCalled()
   })
 })
 
@@ -271,7 +425,7 @@ describe('AddTaskModal · Soort activiteit defaults from the lookup\'s is_defaul
     await user.type(screen.getByPlaceholderText('modal.titlePlaceholder'), 'Nieuwe taak')
     await user.click(screen.getByRole('button', { name: 'modal.create' }))
     const api = (await import('@/lib/api')).default
-    expect(api.post).toHaveBeenCalledWith('/tasks', expect.objectContaining({ type: 'email' }))
+    expect(api.post).toHaveBeenCalledWith('/tasks', expect.objectContaining({ type_id: 'type-uuid-2' }))
   })
 })
 
@@ -300,5 +454,98 @@ describe('AddTaskModal · searchable pickers (Danny 27-07 popup redesign, JOB B)
     // Typing filters down to the matching option only.
     expect(screen.getByRole('button', { name: 'Piet Jansen' })).toBeInTheDocument()
     expect(screen.queryByRole('button', { name: 'Klaas de Vries' })).toBeNull()
+  })
+})
+
+describe('AddTaskModal · PUNT 14 — the description sits BELOW every other field', () => {
+  it('renders the Omschrijving card after the Koppeling card in document order', () => {
+    render(<AddTaskModal onClose={noop} onCreated={noop} />)
+    const linkHead = screen.getByText('modal.cardLink')
+    const descHead = screen.getByText('modal.description')
+    // Bitmask compare: DOCUMENT_POSITION_FOLLOWING means descHead comes AFTER
+    // linkHead — the whole point of the reorder (it used to be the first card).
+    expect(linkHead.compareDocumentPosition(descHead) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
+  })
+})
+
+describe('AddTaskModal · PUNT 15 — a new task couples to the full shared link vocabulary', () => {
+  it('POSTs a department coupling picked through the drawer\'s own link picker', async () => {
+    const user = userEvent.setup()
+    render(<AddTaskModal onClose={noop} onCreated={noop} />)
+
+    // Open the coupling row (a real button, never coloured text).
+    await user.click(screen.getByRole('button', { name: 'links.add' }))
+    // Switch the link TYPE to "afdeling" — the type trigger shows the current
+    // token's translated label; the option list is the shared vocabulary minus
+    // the three tokens that already have their own dedicated field.
+    await user.click(screen.getByRole('button', { name: 'links.application' }))
+    await user.click(screen.getByRole('button', { name: 'links.department' }))
+    // The picker searches the department endpoint server-side (capped page).
+    const api = (await import('@/lib/api')).default
+    await waitFor(() => expect(api.get).toHaveBeenCalledWith('/departments', { params: { q: '', search: '', per_page: 25 } }))
+
+    await user.click(screen.getByRole('button', { name: 'links.selectEntity' }))
+    await user.click(await screen.findByRole('button', { name: 'Backoffice Zorg' }))
+    // The staged coupling is visible (and removable) before saving.
+    expect(screen.getByText('Backoffice Zorg')).toBeInTheDocument()
+
+    await user.type(screen.getByPlaceholderText('modal.titlePlaceholder'), 'Vraag contract op')
+    await user.click(screen.getByRole('button', { name: 'modal.create' }))
+
+    // §13 — assert the REQUEST: the coupling must actually ride into the body.
+    expect(api.post).toHaveBeenCalledWith('/tasks', expect.objectContaining({
+      links: [{ type: 'department', id: 'dep-1' }],
+    }))
+  })
+
+  it('removes a staged coupling again, so it never reaches the request', async () => {
+    const user = userEvent.setup()
+    render(<AddTaskModal onClose={noop} onCreated={noop} />)
+
+    await user.click(screen.getByRole('button', { name: 'links.add' }))
+    await user.click(screen.getByRole('button', { name: 'links.application' }))
+    await user.click(screen.getByRole('button', { name: 'links.department' }))
+    await user.click(screen.getByRole('button', { name: 'links.selectEntity' }))
+    await user.click(await screen.findByRole('button', { name: 'Backoffice Zorg' }))
+    await user.click(screen.getByRole('button', { name: 'links.remove' }))
+
+    await user.type(screen.getByPlaceholderText('modal.titlePlaceholder'), 'Vraag contract op')
+    await user.click(screen.getByRole('button', { name: 'modal.create' }))
+
+    const api = (await import('@/lib/api')).default
+    expect(api.post).toHaveBeenCalledWith('/tasks', expect.objectContaining({ links: [] }))
+  })
+
+  it('edit mode shows the loaded task\'s unmanaged link instead of silently carrying it', async () => {
+    render(<AddTaskModal editId={EDIT_ID} onClose={noop} onSaved={noop} />)
+    // TASK_DETAIL_RAW carries an 'opportunity' link with the label "Deal X" — it
+    // used to be invisible carry-over state; now it is a listed, removable row.
+    expect(await screen.findByText('Deal X')).toBeInTheDocument()
+  })
+})
+
+describe('AddTaskModal · PUNT 16 — the shared dictation mic (same component notes use)', () => {
+  // jsdom ships no SpeechRecognition; the component's HONEST GATE hides the mic
+  // without one, so the constructor is stubbed exactly like KoiosVoiceButton's
+  // own test does (never a second mic implementation to assert against).
+  class MockSpeechRecognition {
+    continuous = false
+    interimResults = false
+    lang = ''
+    onresult: (() => void) | null = null
+    onerror: (() => void) | null = null
+    onend: (() => void) | null = null
+    start = vi.fn()
+    stop = vi.fn()
+  }
+  beforeEach(() => { (window as unknown as { SpeechRecognition: unknown }).SpeechRecognition = MockSpeechRecognition })
+  afterEach(() => { delete (window as { SpeechRecognition?: unknown }).SpeechRecognition })
+
+  it('renders exactly ONE mic on the description editor — the shared editor bar\'s, never a second local copy', () => {
+    render(<AddTaskModal onClose={noop} onCreated={noop} />)
+    // RichTextEditor mounts the shared RichTextAssistBar (same KoiosVoiceButton
+    // the note composer uses) on every editor, so the task description has its
+    // mic for free. A local `toolbarExtra` mic here would make this two (§11).
+    expect(screen.getAllByRole('button', { name: 'voice.start' })).toHaveLength(1)
   })
 })

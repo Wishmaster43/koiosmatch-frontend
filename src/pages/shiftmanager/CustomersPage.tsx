@@ -153,7 +153,7 @@ export default function CustomersPage() {
   const insightKpis: KpiSpec[] = [
     { key: 'locations',   label: t('insights.locations'),   value: totalLocations,   sub: t('insights.locationsSub'),   color: 'var(--color-secondary)' },
     { key: 'departments', label: t('insights.departments'), value: totalDepartments, sub: t('insights.departmentsSub'), color: 'var(--color-violet)' },
-    { key: 'contacts',    label: t('insights.contacts'),    value: totalContacts,    sub: t('insights.contactsSub'),    color: 'var(--color-primary)' },
+    { key: 'contacts',    label: t('insights.contacts'),    value: totalContacts,    sub: t('insights.contactsSub'),    color: 'var(--color-primary-text)' },
     { key: 'noContact',   label: t('insights.noContact'),   value: noContactCount,   sub: t('insights.noContactSub'),   color: 'var(--color-danger)' },
   ]
 

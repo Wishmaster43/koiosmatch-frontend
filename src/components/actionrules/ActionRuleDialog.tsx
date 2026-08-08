@@ -7,9 +7,8 @@
  * nothing to proceed with.
  */
 import { useTranslation } from 'react-i18next'
-import { X } from 'lucide-react'
 import ActionRuleBanner from './ActionRuleBanner'
-import { useFocusTrap } from '@/hooks/useFocusTrap'
+import FloatingPanel from '@/components/ui/FloatingPanel'
 import type { ActionRuleDecision } from './actionRuleTypes'
 
 export interface ActionRuleDialogProps {
@@ -19,51 +18,33 @@ export interface ActionRuleDialogProps {
   onCancel: () => void
 }
 
-// The dialog surface — its own component, mounted only while `open` (item 20):
-// useFocusTrap needs a fresh mount to attach the ref before its effect runs; a
-// single always-mounted component that just toggles visibility would not.
-function DialogPanel({ decision, onConfirm, onCancel }: Omit<ActionRuleDialogProps, 'open'>) {
+// POPUP-SLEEP (Danny punt 19): the hand-rolled overlay/focus-trap is replaced by the
+// shared FloatingPanel, so this P-popup can be dragged aside (by its header) to read
+// the record it is warning about — while keeping the exact same Escape/focus semantics.
+export default function ActionRuleDialog({ open, decision, onConfirm, onCancel }: ActionRuleDialogProps) {
   const { t } = useTranslation('common')
-  const panelRef = useFocusTrap<HTMLDivElement>(onCancel)
   const canConfirm = decision?.effect !== 'block'
 
   return (
-    <div style={{ position: 'fixed', inset: 0, zIndex: 200, display: 'flex',
-      alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.4)' }}
-      onMouseDown={(e) => { if (e.target === e.currentTarget) onCancel() }}>
-      <div ref={panelRef} role="dialog" aria-modal="true" aria-label={t('actionRules.title')} tabIndex={-1}
-        style={{ width: 380, maxWidth: '90vw', background: 'var(--surface)', borderRadius: 12,
-          border: '1px solid var(--border)', boxShadow: '0 8px 30px rgba(0,0,0,0.2)', padding: 16 }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
-          <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--text)' }}>{t('actionRules.title')}</span>
-          <button onClick={onCancel} aria-label={t('actionRules.cancel')}
-            style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', display: 'flex', padding: 2 }}>
-            <X size={15} />
-          </button>
-        </div>
+    <FloatingPanel open={open} onClose={onCancel} ariaLabel={t('actionRules.title')}
+      width={380} maxWidth="90vw" persistKey="action-rule" bodyStyle={{ padding: 16 }}
+      header={<span style={{ fontSize: 13, fontWeight: 700, color: 'var(--text)' }}>{t('actionRules.title')}</span>}>
+      <ActionRuleBanner decision={decision} />
 
-        <ActionRuleBanner decision={decision} />
-
-        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, marginTop: 16 }}>
-          <button onClick={onCancel}
-            style={{ padding: '6px 12px', fontSize: 12, fontWeight: 500, borderRadius: 7,
-              border: '1px solid var(--border)', background: 'none', color: 'var(--text)', cursor: 'pointer' }}>
-            {t('actionRules.cancel')}
+      <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, marginTop: 16 }}>
+        <button onClick={onCancel}
+          style={{ padding: '6px 12px', fontSize: 12, fontWeight: 500, borderRadius: 7,
+            border: '1px solid var(--border)', background: 'none', color: 'var(--text)', cursor: 'pointer' }}>
+          {t('actionRules.cancel')}
+        </button>
+        {canConfirm && (
+          <button onClick={onConfirm}
+            style={{ padding: '6px 12px', fontSize: 12, fontWeight: 600, borderRadius: 7, border: 'none',
+              background: 'var(--color-primary)', color: 'var(--color-on-accent)', cursor: 'pointer' }}>
+            {t('actionRules.ok')}
           </button>
-          {canConfirm && (
-            <button onClick={onConfirm}
-              style={{ padding: '6px 12px', fontSize: 12, fontWeight: 600, borderRadius: 7, border: 'none',
-                background: 'var(--color-primary)', color: '#fff', cursor: 'pointer' }}>
-              {t('actionRules.ok')}
-            </button>
-          )}
-        </div>
+        )}
       </div>
-    </div>
+    </FloatingPanel>
   )
-}
-
-export default function ActionRuleDialog({ open, decision, onConfirm, onCancel }: ActionRuleDialogProps) {
-  if (!open) return null
-  return <DialogPanel decision={decision} onConfirm={onConfirm} onCancel={onCancel} />
 }

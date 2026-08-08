@@ -30,6 +30,9 @@ export interface MatchContract {
   sell_rate: number | null
   cost_center: string | null
   billing_emails: string[]
+  // REMARKS-INTO-NOTES-1 (09-08): the RETIRED Opmerkingen field. Still read (the
+  // column still holds data), but the only write left is clearing it after its
+  // content was copied into a note — see MatchRemarksBlock.
   remarks: string | null
   // M17: customer-facing match text — the backend column doesn't exist yet
   // (MATCH-TEXT-FIELD-1), so callers must check `matchTextPresent` (below)

@@ -36,6 +36,11 @@ vi.mock('@/lib/notify', () => ({ notifySuccess: vi.fn(), notifyError: vi.fn() })
 vi.mock('@/context/AuthContext', () => ({
   useAuth: () => ({ hasPermission: () => true, hasModule: () => false }),
 }))
+// DD-FE-6 ("no empty tabs"): the Koppelingen sub-tab only lists when a connector
+// app is enabled — default both off (matches the pre-existing no-provider
+// behaviour every other test in this file already renders under).
+const mockUseApps = vi.fn<() => { isAppEnabled: (id: string) => boolean }>()
+vi.mock('@/context/AppsContext', () => ({ useApps: () => mockUseApps() }))
 // SOLLICITATIES-SCOPE-1: DepartmentDetail now calls a REAL react-query hook
 // (useScopedVacancyIds, step 1 of the Sollicitaties chain) — this file previously
 // needed no api mock at all (every other query-touching child was stubbed).
@@ -96,7 +101,7 @@ vi.mock('@/context/LookupsContext', () => ({
   useLookups: () => ({ funnelTypes: [{ value: 'applied', label: 'Aangemeld', color: 'var(--color-info)' }], funnelMeta: () => ({ label: '', color: 'var(--text-muted)' }) }),
 }))
 
-beforeEach(() => { vi.clearAllMocks(); mockPost.mockResolvedValue({ data: {} }); queryClient.clear() })
+beforeEach(() => { vi.clearAllMocks(); mockPost.mockResolvedValue({ data: {} }); queryClient.clear(); mockUseApps.mockReturnValue({ isAppEnabled: () => false }) })
 
 // Resolve the active locale's own copy so assertions never guess/hardcode a language.
 const ct = (key: string, opts?: Record<string, unknown>) => i18n.t(key, { ns: 'customers', ...opts })
@@ -564,5 +569,24 @@ describe('DepartmentDetail · Contacts sub-tab renders the department-scoped pri
 
     expect(screen.getByLabelText(ct('departments.detail.isPrimaryContact'))).toBeInTheDocument()
     expect(screen.queryByRole('button', { name: ct('departments.detail.setPrimaryContact') })).toBeNull()
+  })
+})
+
+/**
+ * DD-FE-6 ("no empty tabs" — 08-08): this file passes no extra children into
+ * the shared BackofficeLinksTab, so with both connector apps off its body
+ * would render nothing (no card, no "Koppelen" button) — the sub-tab must not
+ * even be listed. useBackofficeLinksVisible drives the gate.
+ */
+describe('DepartmentDetail · Koppelingen sub-tab hidden when empty (DD-FE-6)', () => {
+  it('drops the Koppelingen sub-tab when no connector app is enabled', () => {
+    render(<DepartmentDetail department={department()} onSave={vi.fn()} {...baseProps} />)
+    expect(screen.queryByRole('tab', { name: cm('backofficeLinks.tabLabel') })).not.toBeInTheDocument()
+  })
+
+  it('lists Koppelingen once a connector app (Shiftmanager) is enabled', () => {
+    mockUseApps.mockReturnValue({ isAppEnabled: (id: string) => id === 'shiftmanager' })
+    render(<DepartmentDetail department={department()} onSave={vi.fn()} {...baseProps} />)
+    expect(screen.getByRole('tab', { name: cm('backofficeLinks.tabLabel') })).toBeInTheDocument()
   })
 })

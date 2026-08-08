@@ -40,8 +40,20 @@ i18n.addResourceBundle('nl', 'candidates', {
     availableFromFilter: 'Inzetbaar vanaf',
     functionNotInLookup: "Functie '{{title}}' staat niet in de functielijst — alle functies worden doorzocht.",
     apply: 'Solliciteren',
+    // Danny 08-08, point 8 — the reset trigger and the range slider's mono readout.
+    resetFilters: 'Filters herstellen',
+    hoursRangeValue: '{{min}}–{{max}}',
   },
 }, true, true)
+
+// Nudge a range-slider thumb with the keyboard — jsdom gives every element a
+// zero-width bounding box, so a pointer DRAG cannot be simulated; the arrow-key
+// path is the same state transition and is the accessible one anyway (§6).
+function nudgeSlider(name: string, key: 'ArrowLeft' | 'ArrowRight', times: number) {
+  for (let i = 0; i < times; i += 1) {
+    fireEvent.keyDown(screen.getByRole('slider', { name }), { key })
+  }
+}
 
 // Keep the real unwrap/unwrapList (importActual) — only the default client is stubbed.
 // `post` is added for the AddApplicationModal submit exercised below (Solliciteren).
@@ -76,9 +88,14 @@ vi.mock('@/components/actionrules', async (importOriginal) => ({
 }))
 
 // Stub the map — Leaflet cannot run under jsdom; assert the props it receives instead.
+// The stub button drives the SAME onRadiusChange callback the real panel's radius
+// slider does, so the reset test below can prove the radius is restored too.
 vi.mock('@/components/map/RadiusMapPanel', () => ({
-  default: ({ points, radiusKm, pointsLabel }: { points: Array<{ id: string | number }>; radiusKm: number; pointsLabel?: string }) => (
-    <div data-testid="radius-map-panel" data-radius={radiusKm} data-points={points.length}>{pointsLabel}</div>
+  default: ({ points, radiusKm, pointsLabel, onRadiusChange }: { points: Array<{ id: string | number }>; radiusKm: number; pointsLabel?: string; onRadiusChange?: (km: number) => void }) => (
+    <div data-testid="radius-map-panel" data-radius={radiusKm} data-points={points.length}>
+      {pointsLabel}
+      <button type="button" onClick={() => onRadiusChange?.(80)}>stub-set-radius</button>
+    </div>
   ),
 }))
 
@@ -240,11 +257,32 @@ describe('VacancySearchTab · status preselection follows the tenant setting', (
   })
 })
 
-describe('VacancySearchTab · no location', () => {
-  it('shows the calm notice and never fetches', async () => {
+// GEO-DEGRADE-1 regression (Danny 08-08 "vacatures zoeken werkt niet meer en ik zie
+// de filters verdwijnen"): an un-geocoded candidate used to blank the WHOLE tab. The
+// live endpoint scores and ranks fine without an origin (measured: 9 rows, score 66,
+// distance null), so only the RADIUS is dropped — the search itself must keep working.
+describe('VacancySearchTab · no location (degrades, never dead-ends)', () => {
+  it('still fetches — omitting radius, keeping every other param', async () => {
+    stubApi({ matches: () => Promise.resolve({ data: { data: rawMatchRows } }) })
     render(<VacancySearchTab candidate={candidateNoLocation} />)
+
+    await waitFor(() => expect(mockGet).toHaveBeenCalled())
+    const [url, config] = mockGet.mock.calls.find((c: unknown[]) => String(c[0]).includes('/vacancy-matches'))!
+    expect(url).toBe('/candidates/cand2/vacancy-matches')
+    expect((config as { params: Record<string, unknown> }).params).not.toHaveProperty('radius')
+    expect((config as { params: Record<string, unknown> }).params).toMatchObject({ status: ['open'], per_page: 100 })
+  })
+
+  it('shows the notice in the MAP slot while the filters and the result list stay', async () => {
+    stubApi({ matches: () => Promise.resolve({ data: { data: rawMatchRows } }) })
+    render(<VacancySearchTab candidate={candidateNoLocation} />)
+
+    // The honest notice replaces the map…
     expect(screen.getByText(nl.vacancySearch.noLocation)).toBeInTheDocument()
-    expect(mockGet).not.toHaveBeenCalled()
+    expect(screen.queryByTestId('radius-map-panel')).toBeNull()
+    // …but the filters and the real results are still there (the actual bug).
+    expect(screen.getByText(nl.vacancySearch.statuses)).toBeInTheDocument()
+    await waitFor(() => expect(screen.getByText('Verzorgende IG | Amersfoort')).toBeInTheDocument())
   })
 })
 
@@ -563,41 +601,86 @@ const hoursRows = [
     distance_km: '5.0', score: null, criteria: [], ai_advised: false, ai_advice_reason: null },
 ]
 
-describe('VacancySearchTab · weekly-hours range filter (gated, Danny 06-08)', () => {
+describe('VacancySearchTab · weekly-hours RANGE SLIDER (gated, Danny 08-08 point 8)', () => {
   it('stays hidden when NO fetched row carries an hours_min/hours_max key', async () => {
     stubApi({ matches: () => Promise.resolve({ data: { data: rawMatchRows } }) })
     render(<VacancySearchTab candidate={candidateWithLocation} />)
 
     await waitFor(() => expect(screen.getByText('Verzorgende IG | Amersfoort')).toBeInTheDocument())
     expect(screen.queryByText('Uren per week')).not.toBeInTheDocument()
+    // No slider at all — not a disabled one, not an empty one.
+    expect(screen.queryByRole('slider', { name: 'Uren per week Min' })).toBeNull()
   })
 
-  it('shows once a row carries the key and filters by range overlap, never excluding a vacancy without hours data', async () => {
+  it('renders ONE slider with TWO thumbs (min + max) and the values in mono, once a row carries the key', async () => {
     stubApi({ matches: () => Promise.resolve({ data: { data: hoursRows } }) })
     render(<VacancySearchTab candidate={candidateWithLocation} />)
 
     await waitFor(() => expect(screen.getByText('Uren per week')).toBeInTheDocument())
-    // No filter typed yet (candidate has no hours_per_week preference) — all 3 show.
+    const minThumb = screen.getByRole('slider', { name: 'Uren per week Min' })
+    const maxThumb = screen.getByRole('slider', { name: 'Uren per week Max' })
+    // Domain 0..40, both handles parked at their ends → an open range on load.
+    expect(minThumb).toHaveAttribute('aria-valuenow', '0')
+    expect(maxThumb).toHaveAttribute('aria-valuenow', '40')
+    expect(screen.getByText('0–40')).toBeInTheDocument()
+    // Handles at the domain ends mean "unbounded" — all 3 rows still show.
     expect(screen.getByText('Fulltime | Ede')).toBeInTheDocument()
     expect(screen.getByText('Parttime | Arnhem')).toBeInTheDocument()
     expect(screen.getByText('Onbekende uren | Nijmegen')).toBeInTheDocument()
+  })
 
-    // Min = 30 excludes the 8-16 vacancy (no overlap); the no-data row is untouched.
-    fireEvent.change(screen.getByRole('spinbutton', { name: 'Uren per week Min' }), { target: { value: '30' } })
+  it('the LOWER thumb sends the lower bound: 30 excludes the 8-16 vacancy, never the no-hours row', async () => {
+    stubApi({ matches: () => Promise.resolve({ data: { data: hoursRows } }) })
+    render(<VacancySearchTab candidate={candidateWithLocation} />)
+    await waitFor(() => expect(screen.getByText('Uren per week')).toBeInTheDocument())
+
+    nudgeSlider('Uren per week Min', 'ArrowRight', 30)
+
     await waitFor(() => expect(screen.queryByText('Parttime | Arnhem')).not.toBeInTheDocument())
+    expect(screen.getByRole('slider', { name: 'Uren per week Min' })).toHaveAttribute('aria-valuenow', '30')
+    expect(screen.getByText('30–40')).toBeInTheDocument()
     expect(screen.getByText('Fulltime | Ede')).toBeInTheDocument()
     expect(screen.getByText('Onbekende uren | Nijmegen')).toBeInTheDocument()
   })
 
-  it("seeds the MIN filter from the candidate's own hours_per_week preference", async () => {
+  it('the UPPER thumb sends the upper bound: 20 excludes the 32-40 vacancy, never the no-hours row', async () => {
+    stubApi({ matches: () => Promise.resolve({ data: { data: hoursRows } }) })
+    render(<VacancySearchTab candidate={candidateWithLocation} />)
+    await waitFor(() => expect(screen.getByText('Uren per week')).toBeInTheDocument())
+
+    nudgeSlider('Uren per week Max', 'ArrowLeft', 20)
+
+    await waitFor(() => expect(screen.queryByText('Fulltime | Ede')).not.toBeInTheDocument())
+    expect(screen.getByRole('slider', { name: 'Uren per week Max' })).toHaveAttribute('aria-valuenow', '20')
+    expect(screen.getByText('0–20')).toBeInTheDocument()
+    expect(screen.getByText('Parttime | Arnhem')).toBeInTheDocument()
+    expect(screen.getByText('Onbekende uren | Nijmegen')).toBeInTheDocument()
+  })
+
+  it("seeds the LOWER bound from the candidate's own hours_per_week preference", async () => {
     stubApi({ matches: () => Promise.resolve({ data: { data: hoursRows } }) })
     const candidate = { ...candidateWithLocation, preferences: { hours_per_week: 30 } } as unknown as Candidate
     render(<VacancySearchTab candidate={candidate} />)
 
-    await waitFor(() => expect(screen.getByRole('spinbutton', { name: 'Uren per week Min' })).toHaveValue(30))
+    await waitFor(() => expect(screen.getByRole('slider', { name: 'Uren per week Min' })).toHaveAttribute('aria-valuenow', '30'))
     // Already filtered on load — the 8-16 vacancy never overlaps a 30-hour minimum.
     expect(screen.queryByText('Parttime | Arnhem')).not.toBeInTheDocument()
     expect(screen.getByText('Fulltime | Ede')).toBeInTheDocument()
+  })
+
+  it('neither thumb can cross the other', async () => {
+    stubApi({ matches: () => Promise.resolve({ data: { data: hoursRows } }) })
+    render(<VacancySearchTab candidate={candidateWithLocation} />)
+    await waitFor(() => expect(screen.getByText('Uren per week')).toBeInTheDocument())
+
+    // Push the upper thumb all the way down, then the lower thumb all the way up.
+    nudgeSlider('Uren per week Max', 'ArrowLeft', 30)
+    nudgeSlider('Uren per week Min', 'ArrowRight', 40)
+
+    const lower = screen.getByRole('slider', { name: 'Uren per week Min' }).getAttribute('aria-valuenow')
+    const upper = screen.getByRole('slider', { name: 'Uren per week Max' }).getAttribute('aria-valuenow')
+    expect(Number(lower)).toBeLessThanOrEqual(Number(upper))
+    expect(upper).toBe('10')
   })
 })
 
@@ -718,5 +801,87 @@ describe('VacancySearchTab · "Solliciteren" action (Danny 06-08 screenshot)', (
     await userEvent.click(screen.getByRole('button', { name: 'Sollicitatie aanmaken' }))
 
     expect(mockPost).toHaveBeenCalledWith('/applications', expect.objectContaining({ vacancy_id: 'v2' }))
+  })
+})
+
+// Danny 08-08, point 8 — a reset that puts EVERY filter back to its starting value
+// (radius and the per-candidate prefilled values included), and that only shows up
+// when it would actually do something.
+describe('VacancySearchTab · reset filters (Danny 08-08, point 8)', () => {
+  const startParams = { radius: 30, status: ['open'], function_title: ['Verzorgende IG'], per_page: 100 }
+
+  it('stays hidden while nothing deviates from the starting state', async () => {
+    stubApi({ matches: () => Promise.resolve({ data: { data: rawMatchRows } }) })
+    render(<VacancySearchTab candidate={candidateWithLocation} />)
+
+    await waitFor(() => expect(screen.getByText('Verzorgende IG | Amersfoort')).toBeInTheDocument())
+    expect(screen.queryByRole('button', { name: 'Filters herstellen' })).toBeNull()
+  })
+
+  it('restores the SERVER filters — the request goes back to the exact starting parameters', async () => {
+    stubApi({ matches: () => Promise.resolve({ data: { data: rawMatchRows } }) })
+    render(<VacancySearchTab candidate={candidateWithLocation} />)
+    await waitFor(() => expect(mockGet).toHaveBeenCalledWith('/candidates/cand1/vacancy-matches', {
+      params: startParams, signal: expect.anything(),
+    }))
+
+    // Deviate on TWO axes at once: an extra status and a bigger radius.
+    const statusesLabel = screen.getByText(nl.vacancySearch.statuses)
+    await userEvent.click(within(statusesLabel.parentElement as HTMLElement).getByRole('button'))
+    await userEvent.click(await screen.findByRole('button', { name: 'Gesloten' }))
+    await userEvent.click(screen.getByRole('button', { name: 'stub-set-radius' }))
+    await waitFor(() => expect(mockGet).toHaveBeenLastCalledWith('/candidates/cand1/vacancy-matches', {
+      params: { radius: 80, status: ['open', 'closed'], function_title: ['Verzorgende IG'], per_page: 100 },
+      signal: expect.anything(),
+    }))
+
+    // Reset — the very next request carries the STARTING parameters again.
+    await userEvent.click(screen.getByRole('button', { name: 'Filters herstellen' }))
+    await waitFor(() => expect(mockGet).toHaveBeenLastCalledWith('/candidates/cand1/vacancy-matches', {
+      params: startParams, signal: expect.anything(),
+    }))
+    // …and the button retires itself: nothing deviates any more.
+    await waitFor(() => expect(screen.queryByRole('button', { name: 'Filters herstellen' })).toBeNull())
+  })
+
+  it("restores the per-candidate PREFILLED hours range, not a blank one", async () => {
+    stubApi({ matches: () => Promise.resolve({ data: { data: hoursRows } }) })
+    const candidate = { ...candidateWithLocation, preferences: { hours_per_week: 30 } } as unknown as Candidate
+    render(<VacancySearchTab candidate={candidate} />)
+
+    // Seeded lower bound 30 — the 8-16 vacancy is filtered out on load.
+    await waitFor(() => expect(screen.getByRole('slider', { name: 'Uren per week Min' })).toHaveAttribute('aria-valuenow', '30'))
+    expect(screen.queryByText('Parttime | Arnhem')).not.toBeInTheDocument()
+
+    // Widen the range fully open — the 8-16 vacancy comes back and reset appears.
+    nudgeSlider('Uren per week Min', 'ArrowLeft', 30)
+    await waitFor(() => expect(screen.getByText('Parttime | Arnhem')).toBeInTheDocument())
+    expect(screen.getByRole('button', { name: 'Filters herstellen' })).toBeInTheDocument()
+
+    // Reset goes back to the candidate's OWN 30-hour seed, never to a blank 0.
+    await userEvent.click(screen.getByRole('button', { name: 'Filters herstellen' }))
+    await waitFor(() => expect(screen.getByRole('slider', { name: 'Uren per week Min' })).toHaveAttribute('aria-valuenow', '30'))
+    expect(screen.queryByText('Parttime | Arnhem')).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Filters herstellen' })).toBeNull()
+  })
+
+  it('restores the contract-form filter to the candidate\'s own seeded value', async () => {
+    stubApi({ matches: () => Promise.resolve({ data: { data: contractvormRows } }) })
+    const candidate = { ...candidateWithLocation, candidateTypes: ['freelance'] } as unknown as Candidate
+    render(<VacancySearchTab candidate={candidate} />)
+
+    // Seeded to ['ZZP'] — the other contract form is filtered out, nothing deviates.
+    await waitFor(() => expect(screen.getByText('ZZP-vacature | Ede')).toBeInTheDocument())
+    expect(screen.queryByRole('button', { name: 'Filters herstellen' })).toBeNull()
+
+    // Add a second contract form, then reset back to the seed.
+    const label = screen.getByText('Contractvorm')
+    await userEvent.click(within(label.parentElement as HTMLElement).getByRole('button'))
+    await userEvent.click(await screen.findByRole('button', { name: 'Tijdelijk' }))
+    await waitFor(() => expect(screen.getByText('Tijdelijk-vacature | Arnhem')).toBeInTheDocument())
+
+    await userEvent.click(screen.getByRole('button', { name: 'Filters herstellen' }))
+    await waitFor(() => expect(screen.queryByText('Tijdelijk-vacature | Arnhem')).not.toBeInTheDocument())
+    expect(screen.getByText('ZZP-vacature | Ede')).toBeInTheDocument()
   })
 })

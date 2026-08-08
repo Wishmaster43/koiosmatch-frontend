@@ -73,7 +73,7 @@ export default function CvUploadCard({ phase, errorKey, fileName, summary, onFil
             <span style={{ fontSize: 12, color: 'var(--text-muted)', flex: '1 1 200px' }}>{t('modal.cv.intro')}</span>
             <button type="button" onClick={() => inputRef.current?.click()}
               style={{ ...ghostBtn, borderColor: 'color-mix(in srgb, var(--color-primary) 45%, transparent)',
-                background: 'color-mix(in srgb, var(--color-primary) 8%, transparent)', color: 'var(--color-primary)', fontWeight: 600, flexShrink: 0 }}>
+                background: 'color-mix(in srgb, var(--color-primary) 8%, transparent)', color: 'var(--color-primary-text)', fontWeight: 600, flexShrink: 0 }}>
               {t('modal.cv.choose')}
             </button>
             <span style={{ fontSize: 11, color: 'var(--text-muted)', width: '100%' }}>{t('modal.cv.hint')}</span>
@@ -112,7 +112,7 @@ export default function CvUploadCard({ phase, errorKey, fileName, summary, onFil
             </div>
             {summary.filled.length > 0 && (
               <>
-                <div style={{ fontSize: 11, color: 'var(--color-primary)', fontWeight: 600 }}>{t('modal.cv.checkNotice')}</div>
+                <div style={{ fontSize: 11, color: 'var(--color-primary-text)', fontWeight: 600 }}>{t('modal.cv.checkNotice')}</div>
                 {/* AI-Act disclosure (AI-ACT-1): the fields above were read/filled
                     by Koios AI from the cv, not typed by the recruiter. */}
                 <AiGeneratedLabel />

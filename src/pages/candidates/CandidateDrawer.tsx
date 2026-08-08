@@ -8,8 +8,6 @@ import { useState, useEffect } from 'react'
 import type { ComponentType, ReactNode } from 'react'
 import { Trash2, GitMerge } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
-import { useDateFormat } from '@/lib/datetime'
-import { useLastContactTypes } from '@/lib/useLastContactTypes'
 import EntityDrawerJs from '@/components/drawer/EntityDrawer'
 import EntityHeaderJs from '@/components/drawer/EntityHeader'
 import { NEUTRAL_AVATAR } from '@/components/ui/Avatar'
@@ -38,6 +36,7 @@ import ChangelogTab from './drawer/ChangelogTab'
 import MergeCandidateModal from './drawer/MergeCandidateModal'
 import CandidateStatusModals from './drawer/CandidateStatusModals'
 import { CandidateTitle, CandidateHeaderActions, ArchivedBanner } from './drawer/CandidateHeaderBits'
+import CandidateDrawerFooter from './drawer/CandidateDrawerFooter'
 import { peekReturnTab, clearReturnTab } from './drawer/constants'
 import { parseTabTarget } from './drawer/tabTarget'
 import type { Candidate } from '@/types/candidate'
@@ -104,8 +103,6 @@ interface CandidateDrawerProps {
 
 export default function CandidateDrawer({ candidate: c, onClose, expanded, onToggleExpand, onUpdate, onArchive, onMarkDeletion, onRestore, onHardDelete, onMerged, onRefresh, users = [], initialTab }: CandidateDrawerProps) {
   const { t } = useTranslation('candidates')
-  const { formatDate, formatDateTime } = useDateFormat() as { formatDate: (d?: string | null, opts?: Intl.DateTimeFormatOptions) => string; formatDateTime: (d?: string | null) => string }
-  const { labelOf: lastContactLabel } = useLastContactTypes()
   const { colorOf: genderColor } = useGenders() as { colorOf: (g?: string) => string | undefined }
   // Avatar colour follows the same tenant setting as the table: neutral grey by
   // default, per-gender only when enabled (Settings → Candidate → Table display).
@@ -261,25 +258,9 @@ export default function CandidateDrawer({ candidate: c, onClose, expanded, onTog
       initialTab={deepLink?.tab ?? undefined}
       expanded={expanded}
       onToggleExpand={onToggleExpand}
-      footer={
-        // Created-at on the left, last-contact (date · channel) on the right.
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, fontSize: 11, color: 'var(--text-muted)' }}>
-          <span>{t('drawer.createdAt', { date: formatDateTime(c.created) })}</span>
-          <span>
-            {t('drawer.lastContact')}:{' '}
-            {(c.lastContactDate || c.lastContactType) ? (
-              <span style={{ color: 'var(--text)' }}>
-                {c.lastContactDate && formatDate(c.lastContactDate)}
-                {c.lastContactDate && c.lastContactType && ' · '}
-                {c.lastContactType && lastContactLabel(c.lastContactType)}
-                {c.lastContactBy && <> · {t('drawer.byWho', { name: c.lastContactBy })}</>}
-              </span>
-            ) : (
-              <span style={{ fontStyle: 'italic' }}>{t('drawer.notRegistered')}</span>
-            )}
-          </span>
-        </div>
-      }
+      // Creation stamp (date + author) on the left, last contact on the right —
+      // its own component so this container stays wiring only.
+      footer={<CandidateDrawerFooter c={c} />}
       tabs={tabs.map(tab => ({ id: tab.id, label: t(`drawer.tabs.${tab.tKey}`), autoExpand: tab.id === 'planning' || tab.id === 'vacancySearch', render: (setTab?: (id: string) => void) => renderTabContent(tab.id, setTab) }))}
       header={({ setActiveTab }) => (
         <EntityHeader

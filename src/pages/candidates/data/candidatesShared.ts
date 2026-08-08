@@ -86,6 +86,9 @@ export const buildCandidatePatch = (patch: Record<string, unknown>): Record<stri
   // COUNTRY-1: home-address country (ISO-2 code); '' clears it (never send an empty string).
   if ('country'           in patch) body.country           = patch.country === '' ? null : patch.country
   if ('linkedin'          in patch) body.linkedin_slug     = patch.linkedin
+  // DANNY-6: acquisition source (free-text column, CandidateProfileRequest max:64).
+  // Without this mapping the Herkomst card's save silently dropped the field.
+  if ('source'            in patch) body.source            = patch.source === '' ? null : patch.source
   // WORK-PERMIT-1: plain columns on candidates (CandidateProfileRequest validates both) —
   // without this mapping the WorkPermitBlock's save silently dropped its fields.
   if ('workPermitType'       in patch) body.work_permit_type        = patch.workPermitType || null

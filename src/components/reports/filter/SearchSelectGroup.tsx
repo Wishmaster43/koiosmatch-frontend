@@ -8,6 +8,8 @@ import { X, Search, ChevronDown } from 'lucide-react'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import type { ReportFilterGroup } from '@/types/reports'
+import SelectAllRow from '@/components/ui/SelectAllRow'
+import { useBatchToggle } from '@/hooks/useBatchToggle'
 
 export default function SearchSelectGroup({ group }: { group: ReportFilterGroup }) {
   const { t } = useTranslation('common')
@@ -20,6 +22,9 @@ export default function SearchSelectGroup({ group }: { group: ReportFilterGroup 
     (o.label ?? '').toLowerCase().includes(query.toLowerCase())
   )
   const hasSelected = selected.length > 0
+  // Select-all over the search-filtered options; page toggles are per-value (and
+  // often stale-closure setStates), hence the one-value-per-commit batch helper.
+  const applyBatch = useBatchToggle<string | number>(group.onToggle)
 
   return (
     <div>
@@ -70,6 +75,13 @@ export default function SearchSelectGroup({ group }: { group: ReportFilterGroup 
             )}
           </div>
 
+          {/* Select all / clear all — acts on `visible`, i.e. exactly the options
+              the current search shows, never the whole vocabulary. */}
+          <div style={{ padding: '4px 8px 0' }}>
+            <SelectAllRow dense visibleValues={visible.map(o => o.value)} selectedValues={selected}
+              onApply={values => applyBatch(values)} />
+          </div>
+
           {/* Options */}
           <div style={{ maxHeight: 160, overflowY: 'auto', padding: '4px 0' }}>
             {options.length === 0 && (
@@ -109,7 +121,7 @@ export default function SearchSelectGroup({ group }: { group: ReportFilterGroup 
                 return (
                   <span key={val} style={{
                     display: 'flex', alignItems: 'center', gap: 3,
-                    background: 'var(--color-primary-bg)', color: 'var(--color-primary)',
+                    background: 'var(--color-primary-bg)', color: 'var(--color-primary-text)',
                     borderRadius: 999, padding: '2px 7px', fontSize: 10, fontWeight: 500,
                   }}>
                     {opt?.label ?? val}

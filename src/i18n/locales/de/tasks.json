@@ -52,10 +52,12 @@
       "links": "Verknüpfungen",
       "activity": "Aktivität",
       "extra": "Extra",
-      "notes": "Notizen"
+      "notes": "Notizen",
+      "related": "Verwandt"
     },
     "markDone": "Als erledigt markieren",
-    "tags": "Tags"
+    "tags": "Tags",
+    "lookupNotReady": "Konnte noch nicht gespeichert werden – diese Option ist noch nicht verfügbar. Bitte versuchen Sie es gleich noch einmal."
   },
   "details": {
     "title": "Aufgabendetails",
@@ -66,7 +68,9 @@
     "dueTime": "Uhrzeit",
     "assignee": "Zugewiesen an",
     "owner": "Inhaber",
-    "description": "Beschreibung"
+    "description": "Beschreibung",
+    "location": "Niederlassung",
+    "locationPlaceholder": "Niederlassung wählen"
   },
   "comments": {
     "send": "Senden"
@@ -88,7 +92,9 @@
     "contact": "Kontakt",
     "workflow": "Workflow",
     "open": "Öffnen",
-    "loadError": "Ergebnisse konnten nicht geladen werden."
+    "loadError": "Ergebnisse konnten nicht geladen werden.",
+    "linkType": "Verknüpfungstyp",
+    "opportunity": "Chance"
   },
   "activity": {
     "empty": "Noch keine Aktivität."
@@ -127,7 +133,8 @@
     "cardPlanning": "Planung",
     "cardLink": "Verknüpfung",
     "cardAssignment": "Zuweisung",
-    "duePlaceholder": "TT-MM-JJJJ"
+    "duePlaceholder": "TT-MM-JJJJ",
+    "otherLinks": "Weitere Verknüpfungen"
   },
   "bulk": {
     "selected": "{{count}} ausgewählt",
@@ -152,7 +159,17 @@
     "history": "Historie",
     "empty": "Keine Aufgaben in dieser Ansicht.",
     "loading": "Aufgaben werden geladen…",
-    "error": "Verknüpfte Aufgaben konnten nicht geladen werden."
+    "error": "Verknüpfte Aufgaben konnten nicht geladen werden.",
+    "titles": {
+      "candidate": "Aufgaben zu diesem Kandidaten",
+      "customer": "Aufgaben zu diesem Kunden",
+      "location": "Aufgaben zu diesem Standort",
+      "department": "Aufgaben zu dieser Abteilung",
+      "contact": "Aufgaben zu diesem Kontakt",
+      "assignee": "Aufgaben dieses Recruiters"
+    },
+    "searchPlaceholder": "Aufgaben durchsuchen…",
+    "allStatuses": "Alle Status"
   },
   "notes": {
     "title": "Notizen",
@@ -170,5 +187,22 @@
     "reasons": {
       "overdue": "Diese Aufgabe ist überfällig."
     }
+  },
+  "ai": {
+    "title": "Koios AI empfiehlt",
+    "beta": "Beta",
+    "refresh": "Aktualisieren",
+    "analyzing": "Koios AI analysiert diese Aufgabe…",
+    "dueLabel": "Frist",
+    "dueUnset": "Für diese Aufgabe ist noch kein Fälligkeitsdatum festgelegt.",
+    "dueToday": "Diese Aufgabe ist heute fällig.",
+    "dueOverdue": "Diese Aufgabe ist {{count}} Tag(e) überfällig.",
+    "dueUpcoming": "Diese Aufgabe ist in {{count}} Tag(en) fällig.",
+    "assigneeLabel": "Zuweisung",
+    "unassigned": "Diese Aufgabe liegt noch beim Büro — noch keinem bestimmten Mitarbeiter zugewiesen.",
+    "assignedTo": "Zugewiesen an {{name}}.",
+    "linksLabel": "Verknüpfung",
+    "noLinks": "Diese Aufgabe ist mit keinem Datensatz verknüpft — verknüpfen Sie einen Kandidaten, Kunden oder Datensatz für mehr Kontext.",
+    "linked": "Verknüpft mit {{count}} Datensatz/Datensätzen."
   }
 }

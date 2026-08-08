@@ -40,6 +40,11 @@
   "voice": {
     "start": "Spreek je bericht in",
     "stop": "Stop met luisteren",
-    "denied": "Microfoon geweigerd — sta toegang toe in je browser"
+    "denied": "Microfoon geweigerd — sta toegang toe in je browser",
+    "insecureContext": "Dictee vereist een beveiligde verbinding (https) — niet beschikbaar op deze pagina",
+    "errorServiceNotAllowed": "Spraakherkenning is geblokkeerd door de browser — service niet toegestaan",
+    "errorAudioCapture": "Geen microfoon gevonden — controleer je apparaat",
+    "errorNetwork": "Netwerkfout tijdens spraakherkenning — probeer het opnieuw",
+    "errorGeneric": "Spraakherkenning is mislukt — probeer het opnieuw"
   }
 }

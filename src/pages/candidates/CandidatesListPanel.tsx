@@ -95,7 +95,7 @@ export default function CandidatesListPanel({
     <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
 
       <InsightsRow donuts={insightDonuts} kpis={insightKpis}
-        clearTitle={t('analytics.clearFilter', { defaultValue: 'Filter wissen' })}
+        clearTitle={t('analytics.clearFilter')}
         // Data honesty (STATS-OOM-1): when the server-wide stats call failed and
         // there is more data than the loaded page, the cards fall back to
         // page-scope counts — label them instead of presenting them as totals.

@@ -104,13 +104,13 @@ export default function UploadStep({ entity, canView, canImport, onFileReady }: 
                  gap: 12, cursor: canImport ? 'pointer' : 'not-allowed', opacity: canImport ? 1 : 0.5,
                  background: drag ? 'var(--color-primary-bg)' : 'var(--hover-bg)', transition: 'all 0.15s' }}>
         {parsing
-          ? <Loader2 size={28} className="animate-spin" style={{ color: 'var(--color-primary)' }} aria-hidden="true" />
+          ? <Loader2 size={28} className="animate-spin" style={{ color: 'var(--color-primary-text)' }} aria-hidden="true" />
           : <CloudUpload size={28} style={{ color: 'var(--text-muted)' }} aria-hidden="true" />}
         <span style={{ fontSize: 13, color: 'var(--text-muted)' }}>{t('import.dropHere')}</span>
         <button type="button" onClick={(event) => { event.stopPropagation(); if (canImport && !parsing) fileRef.current?.click() }}
           disabled={!canImport || parsing}
           style={{ height: 32, padding: '0 16px', fontSize: 13, fontWeight: 500, border: 'none', borderRadius: 8,
-                   background: 'var(--color-primary)', color: 'white', cursor: canImport && !parsing ? 'pointer' : 'not-allowed' }}>
+                   background: 'var(--color-primary)', color: 'var(--color-on-accent)', cursor: canImport && !parsing ? 'pointer' : 'not-allowed' }}>
           {t('import.selectCsv')}
         </button>
         <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>{t('import.acceptedTypes')}</span>

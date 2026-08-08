@@ -71,10 +71,10 @@ export default function SubEntityStatusTitleRow({
               placeholder={t('locations.detail.status')} allowCreate={false} menuWidth={180} />
           </div>
           <button onClick={saveStatus} title={t('common:save')} aria-label={t('common:save')}
-            // No --color-primary-contrast token exists yet (tracked for a later
-            // sweep); the fallback keeps this identical to the shared
-            // EditableFieldTable's own Save button today.
-            style={{ ...iconBtn, background: 'var(--color-primary)', color: 'var(--color-primary-contrast, #fff)', border: 'none' }}><Save size={13} /></button>
+            // BRAND-TEXT-COLOR-1: readable text on the accent background is the
+            // dedicated --color-on-accent token (derived from brand luminance),
+            // not a hardcoded white — mirrors the shared EditableFieldTable Save button.
+            style={{ ...iconBtn, background: 'var(--color-primary)', color: 'var(--color-on-accent)', border: 'none' }}><Save size={13} /></button>
           <button onClick={cancelStatus} title={t('common:cancel')} aria-label={t('common:cancel')}
             style={{ ...iconBtn, background: 'var(--bg)', color: 'var(--text-muted)', border: '1px solid var(--border)' }}><X size={13} /></button>
         </div>

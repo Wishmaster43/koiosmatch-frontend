@@ -87,7 +87,8 @@
     },
     "tabs": {
       "targets": "Call list",
-      "extra": "Extra"
+      "extra": "Extra",
+      "stats": "Stats"
     },
     "loading": "Loading…",
     "error": "Failed to load the call list.",
@@ -114,7 +115,39 @@
     "matchCreated": "Match created.",
     "matchFailed": "Creating the match failed.",
     "owner": "Owner",
-    "selectOwner": "Select owner"
+    "selectOwner": "Select owner",
+    "stats": {
+      "error": "Loading statistics failed.",
+      "byStatus": "Status",
+      "byOutcome": "Outcome",
+      "byAssignee": "Assignee",
+      "total": "Total",
+      "reached": "Reached",
+      "axis": {
+        "status": "status",
+        "outcome": "outcome",
+        "assignee": "assignee"
+      },
+      "filteredBy": "Filtered by {{axis}}: {{value}}",
+      "noMatches": "No candidates match this filter."
+    },
+    "note": {
+      "empty": "No note yet.",
+      "placeholder": "Add a note…",
+      "saveFailed": "Saving the note failed."
+    },
+    "assign": {
+      "button": "Assign",
+      "selected": "{{count}} selected",
+      "pickRecruiters": "Pick recruiters",
+      "searchRecruiter": "Search a recruiter…",
+      "noRecruiters": "No recruiters found",
+      "confirm": "Confirm assignment",
+      "resultPartial": "{{updated}} assigned, {{skipped}} skipped",
+      "resultAll": "{{count}} assigned",
+      "failed": "Assigning failed. Please try again.",
+      "assignedTo": "Assigned to {{name}}"
+    }
   },
   "changelog": {
     "loading": "Loading…",

@@ -16,13 +16,10 @@
 import { useTranslation } from 'react-i18next'
 import type { FormState } from '../AddCandidateModal'
 import { CvField, TextField, cardHead, cardBox, row } from './fields'
+import FieldNotice from '@/components/ui/FieldNotice'
 
-// The live-validation/422 message under a field — same small local component
-// the customer contact modal's ContactDetailsCard already uses for this exact purpose.
-function FieldError({ text }: { text?: string }) {
-  if (!text) return null
-  return <div role="alert" style={{ fontSize: 11, color: 'var(--color-danger)', marginTop: 3 }}>{text}</div>
-}
+// The live-validation/422 message under a field — one shared renderer now
+// (components/ui/FieldNotice), not a per-modal copy.
 
 interface ContactCardProps {
   form: FormState
@@ -45,27 +42,27 @@ export default function ContactCard({ form, errors, set, isReq, onBlur, fieldMes
           <CvField name="email" label={t('modal.fields.email')} required={isReq('email')}>
             <TextField type="email" value={form.email} onChange={v => set('email', v)} placeholder={t('modal.fields.emailPlaceholder')} error={errors.email || !!fieldMessage('email')} />
           </CvField>
-          <FieldError text={fieldMessage('email')} />
+          <FieldNotice text={fieldMessage('email')} />
         </div>
         <div style={row('1fr 1fr')}>
           <div onBlur={() => onBlur('phone')}>
             <CvField name="phone" label={t('modal.fields.phone')} required={isReq('phone')}>
               <TextField type="tel" value={form.phone} onChange={v => set('phone', v)} placeholder={t('modal.fields.phonePlaceholder')} error={errors.phone || !!fieldMessage('phone')} />
             </CvField>
-            <FieldError text={fieldMessage('phone')} />
+            <FieldNotice text={fieldMessage('phone')} />
           </div>
           <div onBlur={() => onBlur('mobile')}>
             <CvField name="mobile" label={t('modal.fields.mobile')}>
               <TextField type="tel" value={form.mobile} onChange={v => set('mobile', v)} placeholder={t('modal.fields.mobilePlaceholder')} error={!!fieldMessage('mobile')} />
             </CvField>
-            <FieldError text={fieldMessage('mobile')} />
+            <FieldNotice text={fieldMessage('mobile')} />
           </div>
         </div>
         <div onBlur={() => onBlur('linkedin')}>
           <CvField name="linkedin" label={t('modal.fields.linkedin')}>
             <TextField value={form.linkedin} onChange={v => set('linkedin', v)} placeholder={t('modal.fields.linkedinPlaceholder')} error={!!fieldMessage('linkedin')} />
           </CvField>
-          <FieldError text={fieldMessage('linkedin')} />
+          <FieldNotice text={fieldMessage('linkedin')} />
         </div>
       </div>
     </div>

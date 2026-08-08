@@ -28,7 +28,11 @@ interface Props {
 export default function DetailsConditionsTab({ vacancy: v, conditions, contractTypeOptions, caoOptions }: Props) {
   const { t } = useTranslation('vacancies')
   const { editing, setEditing, form, setF, save, cancel } = conditions
-  const { twoNumbers, select } = makeFieldHelpers(form, setF, t)
+  // SWEEP-NATIVE-SELECT: contract-form/CAO now use the SAME searchable
+  // CreatableSelect as AddVacancyModal's match-vocabulary pickers — was a native
+  // <select> here, a different control for the same lookup data (mirrors G35's
+  // fix to DetailsGeneralTab's function/industry fields).
+  const { twoNumbers, creatable } = makeFieldHelpers(form, setF, t)
 
   // Read-mode: resolve the stored slug to its tenant label (the backend sends
   // the bare slug here, unlike seniority/education which arrive pre-resolved —
@@ -44,7 +48,7 @@ export default function DetailsConditionsTab({ vacancy: v, conditions, contractT
   return card(t('details.groups.conditions'), <>
     {row(t('details.salary'), pair(v.salaryMin, v.salaryMax) || v.salary || dash, twoNumbers('salaryMin', 'salaryMax', 'min', 'max', { min: 0, step: 0.01 }), editing)}
     {row(t('details.hours'), pair(v.hoursMin, v.hoursMax) || v.hours || dash, twoNumbers('hoursMin', 'hoursMax', 'min', 'max', { min: 0, max: 168, step: 1 }), editing)}
-    {row(t('details.matchContractType'), contractTypeLabel || dash, select('contractType', contractTypeOptions), editing)}
-    {row(t('details.matchCao'), caoLabel || dash, select('cao', caoOptions), editing)}
+    {row(t('details.matchContractType'), contractTypeLabel || dash, creatable('contractType', contractTypeOptions), editing)}
+    {row(t('details.matchCao'), caoLabel || dash, creatable('cao', caoOptions), editing)}
   </>, controls(t, editing, save, cancel, () => setEditing(true)))
 }

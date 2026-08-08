@@ -33,7 +33,9 @@
     "leadsPartial": "Teilweise gezählt — ein Limit wurde erreicht",
     "leadsComputedAt": "Aktualisiert am {{date}}",
     "age": "Alter",
-    "applicationsOpen": "Bewerbungen öffnen"
+    "applicationsOpen": "Bewerbungen öffnen",
+    "ageTooltip": "Seit {{date}}",
+    "applicationsOpenTab": "Bewerbungen öffnen"
   },
   "publishedState": {
     "yes": "Veröffentlicht",
@@ -225,7 +227,8 @@
     "contactPerson": "Ansprechpartner",
     "pickClientFirst": "Zuerst einen Kunden wählen",
     "matchContractType": "Vorgeschlagene Vertragsart",
-    "matchCao": "Vorgeschlagener Tarifvertrag"
+    "matchCao": "Vorgeschlagener Tarifvertrag",
+    "skillsEmpty": "Noch keine erforderlichen Fähigkeiten."
   },
   "aiagent": {
     "pickerLabel": "KI-Agent",
@@ -295,7 +298,9 @@
     "tabs": {
       "settings": "Einstellungen",
       "sites": "Stellenbörsen"
-    }
+    },
+    "siteLive": "Die öffentliche Karriereseite ist live. Diese Schalter bestimmen, was dort jetzt veröffentlicht wird, einschließlich der Indeed- und Werkzoeken-Feeds.",
+    "siteOffline": "Die öffentliche Karriereseite ist derzeit ausgeschaltet (Einstellungen → Karriereseite). Diese Schalter legen fest, was live geht, sobald sie aktiviert ist."
   },
   "applicants": {
     "title": "Bewerbungen",
@@ -441,7 +446,11 @@
     }
   },
   "documents": {
-    "docType": "Dokumenttyp"
+    "docType": "Dokumenttyp",
+    "allTypes": "Alle Typen",
+    "type": "Typ",
+    "search": "Dokumente durchsuchen…",
+    "empty": "Noch keine Dokumente."
   },
   "age": {
     "days": "{{count}}T",

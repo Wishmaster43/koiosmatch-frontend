@@ -54,8 +54,10 @@
       "links": "Koppelingen",
       "activity": "Activiteit",
       "extra": "Extra",
-      "notes": "Notities"
-    }
+      "notes": "Notities",
+      "related": "Gerelateerd"
+    },
+    "lookupNotReady": "Nog niet op te slaan — deze optie is nog niet beschikbaar. Probeer het straks opnieuw."
   },
   "bulk": {
     "selected": "{{count}} geselecteerd",
@@ -80,7 +82,9 @@
     "dueTime": "Tijd",
     "assignee": "Toegewezen aan",
     "owner": "Aangemaakt door",
-    "description": "Omschrijving"
+    "description": "Omschrijving",
+    "location": "Vestiging",
+    "locationPlaceholder": "Kies een vestiging"
   },
   "comments": {
     "send": "Plaatsen"
@@ -102,7 +106,9 @@
     "contact": "Contactpersoon",
     "workflow": "Workflow",
     "open": "Openen",
-    "loadError": "Resultaten konden niet geladen worden."
+    "loadError": "Resultaten konden niet geladen worden.",
+    "linkType": "Soort koppeling",
+    "opportunity": "Kans"
   },
   "activity": {
     "empty": "Nog geen activiteit."
@@ -141,7 +147,8 @@
     "cardPlanning": "Planning",
     "cardLink": "Koppeling",
     "cardAssignment": "Toewijzing",
-    "duePlaceholder": "dd-mm-jjjj"
+    "duePlaceholder": "dd-mm-jjjj",
+    "otherLinks": "Overige koppelingen"
   },
   "page": {
     "searchPlaceholder": "Zoek naar taken"
@@ -152,7 +159,17 @@
     "history": "Historie",
     "empty": "Geen taken in deze weergave.",
     "loading": "Taken laden…",
-    "error": "Gerelateerde taken konden niet geladen worden."
+    "error": "Gerelateerde taken konden niet geladen worden.",
+    "titles": {
+      "candidate": "Taken van deze kandidaat",
+      "customer": "Taken van deze klant",
+      "location": "Taken van deze locatie",
+      "department": "Taken van deze afdeling",
+      "contact": "Taken van deze contactpersoon",
+      "assignee": "Taken van deze recruiter"
+    },
+    "searchPlaceholder": "Zoek in taken…",
+    "allStatuses": "Alle statussen"
   },
   "notes": {
     "title": "Notities",
@@ -170,5 +187,22 @@
     "reasons": {
       "overdue": "Deze taak is over de deadline."
     }
+  },
+  "ai": {
+    "title": "Koios AI adviseert",
+    "beta": "Beta",
+    "refresh": "Vernieuwen",
+    "analyzing": "Koios AI analyseert deze taak…",
+    "dueLabel": "Deadline",
+    "dueUnset": "Er is nog geen vervaldatum ingesteld voor deze taak.",
+    "dueToday": "Deze taak vervalt vandaag.",
+    "dueOverdue": "Deze taak is {{count}} dag(en) te laat.",
+    "dueUpcoming": "Deze taak vervalt over {{count}} dag(en).",
+    "assigneeLabel": "Toewijzing",
+    "unassigned": "Deze taak staat nog bij Bureau — nog niet toegewezen aan een specifieke medewerker.",
+    "assignedTo": "Toegewezen aan {{name}}.",
+    "linksLabel": "Koppeling",
+    "noLinks": "Deze taak is aan geen enkel record gekoppeld — koppel een kandidaat, klant of ander record voor context.",
+    "linked": "Gekoppeld aan {{count}} record(en)."
   }
 }

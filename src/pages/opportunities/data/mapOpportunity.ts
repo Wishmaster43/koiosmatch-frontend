@@ -19,6 +19,9 @@ export function mapOpportunity(o: ApiOpportunity): Opportunity {
   // customer_location, never `location` — reading the wrong one silently prefilled
   // an empty/mismatched pick in the drawer's edit mode (Danny, 2026-07-14).
   const loc = (o.customer_location && typeof o.customer_location === 'object') ? o.customer_location : null
+  // K2: the TENANT's own branch (`location`) — kept separate from `loc` above on
+  // purpose (see the comment there); surfaced as `branch`/`branchId`.
+  const branchObj = (o.location && typeof o.location === 'object') ? o.location : null
   const dep = (o.department && typeof o.department === 'object') ? o.department : null
   const con = (o.contact    && typeof o.contact    === 'object') ? o.contact    : null
   // Decimal fields (value/hours) may arrive as a string — coerce to a number or null.
@@ -30,6 +33,9 @@ export function mapOpportunity(o: ApiOpportunity): Opportunity {
     // NUMMER-3: the human-readable number, shown as a copy chip next to the title.
     referenceNumber: o.reference_number ?? '',
     title,
+    // OPP-DESCRIPTION-1: nullable rich-text HTML — coalesced to '' so the drawer/
+    // +Kans rich-text block never has to null-check.
+    description: o.description ?? '',
     initials:   initialsOf([title, client].find(v => v && v !== '—')),
     client,
     clientId:   customer?.id ?? o.customer_id ?? o.client_id ?? null,
@@ -64,6 +70,11 @@ export function mapOpportunity(o: ApiOpportunity): Opportunity {
     agreementTypeId:    agr?.id ?? o.agreement_type_id ?? null,
     location:      loc?.name ?? o.location_name ?? '',
     locationId:    loc?.id ?? o.customer_location_id ?? null,
+    // K2: the tenant's own branch (Vestiging) — read `location`/`location_id`
+    // directly, never the `location_name` flat fallback above (that one is
+    // already claimed by the customer-location fallback chain).
+    branch:        branchObj?.name ?? '',
+    branchId:      branchObj?.id ?? o.location_id ?? null,
     department:    dep?.name ?? '',
     departmentId:  dep?.id ?? o.department_id ?? null,
     contact:       con?.name ?? '',

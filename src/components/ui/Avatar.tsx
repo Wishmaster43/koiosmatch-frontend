@@ -45,11 +45,17 @@ export default function Avatar({ initials, size = 28, photo, color, soft = false
   const isHex      = typeof bg === 'string' && bg.startsWith('#')
   const softBg     = isHex ? bg + '1A' : `color-mix(in srgb, ${bg} 12%, transparent)`
   const softBorder = isHex ? bg + '55' : `color-mix(in srgb, ${bg} 40%, transparent)`
+  // The solid (non-soft) bubble's initials sit directly on `bg`; when that resolves
+  // to the tenant accent token, follow --color-on-accent instead of a hardcoded
+  // white (2026-08-08 — a yellow tenant brand made it unreadable). Every other
+  // palette entry (secondary/success/warning/danger/fixed hex) keeps white, which
+  // stays legible for those fixed tokens.
+  const isAccentBg = typeof bg === 'string' && bg.includes('--color-primary')
   return (
     <div style={{ width: size, height: size, borderRadius: '50%', flexShrink: 0, boxSizing: 'border-box',
       display: 'flex', alignItems: 'center', justifyContent: 'center',
       background: soft ? softBg : bg,
-      color: soft ? 'var(--text)' : '#fff',
+      color: soft ? 'var(--text)' : (isAccentBg ? 'var(--color-on-accent)' : '#fff'),
       border: soft ? `1px solid ${softBorder}` : 'none',
       fontSize: size * 0.36, fontWeight: 700 }}>
       {initials}

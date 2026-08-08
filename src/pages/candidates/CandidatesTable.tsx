@@ -5,7 +5,8 @@ import { Mail, MessageCircle, PhoneCall, Building2, Video, FileText, HelpCircle 
 import DataTable from '@/components/ui/DataTable'
 import CandidateStatusChip from '@/components/ui/CandidateStatusChip'
 import SoftChip from '@/components/ui/SoftChip'
-import type { Column } from '@/components/ui/DataTable'
+import type { Column, ControlledSort } from '@/components/ui/DataTable'
+import { CANDIDATE_SORT_KEYS } from './hooks/useCandidatesData'
 import Avatar, { NEUTRAL_AVATAR } from '@/components/ui/Avatar'
 import BackofficeCouplingIndicator from '@/components/ui/BackofficeCouplingIndicator'
 import { makeKoiosColumn } from '@/components/ui/koiosColumn'
@@ -58,6 +59,11 @@ interface CandidatesTableProps {
   stickyHeader?: boolean
   // Virtualization (audit item 7): the vertical scroll container the table sits in.
   scrollParentRef?: RefObject<HTMLElement | null>
+  // CAND-SORT-1: controlled-sort escape hatch — forwarded to DataTable as-is.
+  // Optional so a caller (or a test) that omits both keeps the pre-existing
+  // uncontrolled/defaultSort behaviour untouched.
+  sort?: ControlledSort | null
+  onSortChange?: (sort: ControlledSort) => void
 }
 
 /**
@@ -73,7 +79,7 @@ interface CandidatesTableProps {
  * hits. genderColor/lastContactLabel/lastContactIcon are themselves stabilized
  * (useCallback) in their hooks so they don't force this memo to churn.
  */
-export default function CandidatesTable({ rows, loading, selectedId, onSelect, onOpenTab, selectable, selectedIds, onToggleRow, onToggleAll, stickyHeader = false, scrollParentRef }: CandidatesTableProps) {
+export default function CandidatesTable({ rows, loading, selectedId, onSelect, onOpenTab, selectable, selectedIds, onToggleRow, onToggleAll, stickyHeader = false, scrollParentRef, sort, onSortChange }: CandidatesTableProps) {
   const { t } = useTranslation('candidates')
   const { formatDate } = useDateFormat()
   // LookupsContext is still untyped JS — cast its API to the meta shapes used here.
@@ -121,7 +127,10 @@ export default function CandidatesTable({ rows, loading, selectedId, onSelect, o
 
     return [
       {
+        // CAND-SORT-1: serverKey maps to CandidateQuery's last_name sort (mirrors the
+        // pre-adoption hardcoded orderBy('last_name') default).
         key: 'name', header: t('columns.name'), sortable: true, sortValue: c => c.name,
+        serverKey: CANDIDATE_SORT_KEYS.name,
         sticky: true, width: 200, nowrap: true,
         render: c => (
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, minWidth: 0 }}>
@@ -172,10 +181,17 @@ export default function CandidatesTable({ rows, loading, selectedId, onSelect, o
           return <button type="button" onClick={e => { e.stopPropagation(); onOpenTab?.(c, target) }} aria-label={linkLabel} style={cellButton}>{chip}</button>
         },
       },
-      { key: 'created', header: t('columns.createdAt'), nowrap: true, cellStyle: plainCell, sortable: true, sortValue: c => c.created, render: c => formatDate(c.created) },
       {
-        // Combined last-contact column: date + channel icon. Channel stays filterable via CandidatesPage filters.
+        // CAND-SORT-1: serverKey maps to CandidateQuery's created_at sort.
+        key: 'created', header: t('columns.createdAt'), nowrap: true, cellStyle: plainCell, sortable: true, sortValue: c => c.created,
+        serverKey: CANDIDATE_SORT_KEYS.created,
+        render: c => formatDate(c.created),
+      },
+      {
+        // Combined last-contact column: date + channel icon. Channel stays filterable via
+        // CandidatesPage filters. CAND-SORT-1: serverKey maps to CandidateQuery's last_contact_at sort.
         key: 'lastContact', header: t('columns.lastContact'), nowrap: true, sortable: true, sortValue: c => c.lastContactAt ?? '',
+        serverKey: CANDIDATE_SORT_KEYS.lastContact,
         render: c => {
           if (!c.lastContactAt) return <span style={{ color: 'var(--text-muted)' }}>—</span>
           const label = lastContactLabel(c.lastContactType)
@@ -307,7 +323,13 @@ export default function CandidatesTable({ rows, loading, selectedId, onSelect, o
       loadingText={t('page.loading')}
       emptyText={t('page.empty')}
       stickyHeader={stickyHeader}
+      // CAND-SORT-1: defaultSort still seeds the UNCONTROLLED fallback (a caller
+      // that omits sort/onSortChange, e.g. most of this file's own tests) —
+      // harmless when the page below DOES pass both, since DataTable then reads
+      // `sort` from the prop instead.
       defaultSort={{ key: 'created', dir: 'desc' }}
+      sort={sort}
+      onSortChange={onSortChange}
       scrollParentRef={scrollParentRef}
     />
   )

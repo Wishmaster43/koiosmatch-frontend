@@ -8,9 +8,14 @@ import { notifySuccess, notifyError } from '@/lib/notify'
 import { extractApiError } from '@/lib/extractApiError'
 import { useMatchStopReasons } from '../hooks/useMatchStopReasons'
 import { useMatchTerminate } from '../hooks/useMatchTerminate'
+import { fieldInputStyle, fieldTextareaStyle } from '@/components/forms/fieldMetrics'
 import type { MatchRow } from '@/types/match'
 
-const fieldBox: CSSProperties = { width: '100%', boxSizing: 'border-box', padding: '8px 10px', fontSize: 13, borderRadius: 8, border: '1px solid var(--border)', background: 'var(--surface)', color: 'var(--text)', outline: 'none', fontFamily: 'inherit' }
+// Canon field style (G33/fieldMetrics) — was its own padding-8/radius-8 copy;
+// fieldBox covers the single-line date input + the disabled-lookup notice,
+// noteBox covers the multi-line textarea below (height doesn't apply there).
+const fieldBox: CSSProperties = fieldInputStyle
+const noteBox: CSSProperties = fieldTextareaStyle
 const errorText: CSSProperties = { fontSize: 11, color: 'var(--color-danger)', marginTop: 4 }
 const NOTE_MAX = 2000
 const NOTE_COUNTER_FROM = 1800
@@ -127,7 +132,7 @@ export default function TerminateMatchModal({ match, onClose, onUpdate }: Props)
             </div>
             <textarea value={note} maxLength={NOTE_MAX} onChange={e => setNote(e.target.value)}
               placeholder={t('drawer.terminate.notePlaceholder')} rows={3}
-              aria-label={t('drawer.terminate.noteLabel')} style={{ ...fieldBox, resize: 'vertical' }} />
+              aria-label={t('drawer.terminate.noteLabel')} style={noteBox} />
             {fieldErrors.note && <div style={errorText}>{fieldErrors.note}</div>}
           </div>
         </div>

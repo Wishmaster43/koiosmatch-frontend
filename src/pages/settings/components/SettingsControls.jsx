@@ -83,7 +83,7 @@ export function DefaultToggle({ active, onClick, busy, activeLabel, inactiveLabe
         fontSize: 11, fontWeight: active ? 600 : 500, borderRadius: 999, whiteSpace: 'nowrap', flexShrink: 0,
         border: `1px solid color-mix(in srgb, var(--color-primary) ${active ? 45 : 28}%, transparent)`,
         background: `color-mix(in srgb, var(--color-primary) ${active ? 16 : 8}%, transparent)`,
-        color: 'var(--color-primary)', cursor: disabled ? 'default' : 'pointer',
+        color: 'var(--color-primary-text)', cursor: disabled ? 'default' : 'pointer',
         opacity: busy ? 0.6 : 1,
       }}>
       {active && <Check size={10} />}

@@ -5,13 +5,14 @@
  * Asserts the real navigation seam (which page + which id) and the new-tab
  * anchor's rel hardening, not merely that something rendered.
  *
+ * Punt 17 (redesign) adds: the day is stated once as a heading, the row carries
+ * only HH:mm, and the event kind drives a meaning-carrying marker colour.
+ *
  * `@/lib/datetime` is mocked (mirrors src/pages/*\/drawer/ChangelogTab.test.tsx):
- * TimelineTab now formats `time` via formatDateTime (Danny 05-08 — raw ISO was
- * rendering), and that hook transitively imports the real i18n bootstrap, which
- * would load REAL translations and break the literal-key assertions below
- * (`t('timeline.openApplication')` etc.) elsewhere in this file. The mock keeps
- * those i18n-key assertions intact; formatDateTime's own output is asserted for
- * real in datetime.test.ts, and the wiring (component calls it) below.
+ * the tab formats `time` through that hook, and it transitively imports the real
+ * i18n bootstrap, which would load REAL translations and break the literal-key
+ * assertions below (`t('timeline.openApplication')` etc.). The mock keeps those
+ * intact; the formatters' own output is asserted for real in datetime.test.ts.
  */
 import { describe, it, expect, vi } from 'vitest'
 import { render, screen } from '@testing-library/react'
@@ -20,13 +21,14 @@ import TimelineTab from './TimelineTab'
 import { NavigationProvider } from '@/context/NavigationContext'
 import type { VacancyDetail, VacancyTimelineEvent } from '@/types/vacancy'
 
-// Distinguishable (not identity) transform: proves the component ROUTES `time`
-// through formatDateTime rather than rendering the raw field directly.
+// Distinguishable (not identity) transforms: prove the component ROUTES `time`
+// through the house formatters rather than rendering the raw field directly.
 vi.mock('@/lib/datetime', () => ({
   useDateFormat: () => ({
-    formatDate: (v: string) => v,
-    formatDateTime: (v?: string | null) => (v ? `FMT(${v})` : '—'),
     locale: 'nl-NL',
+    formatDate: (v: string) => `DAY(${String(v).slice(0, 10)})`,
+    formatDateTime: (v?: string | null) => (v ? `FULL(${v})` : '—'),
+    formatTime: (v?: string | null) => (v ? String(v).slice(11, 16) : ''),
   }),
 }))
 
@@ -89,6 +91,7 @@ describe('TimelineTab', () => {
   it('shows the calm empty state when there is no activity', () => {
     renderTab([])
     expect(screen.getByText('timeline.empty')).toBeInTheDocument()
+    expect(screen.queryByTestId('timeline-dot')).toBeNull()
   })
 })
 
@@ -107,14 +110,20 @@ describe('TimelineTab · AI-generated disclosure (AI-ACT-1)', () => {
   })
 })
 
-// Danny 05-08: raw ISO strings + isolated dots without a connecting line, on
-// this Tijdlijn tab specifically (screenshot was the applications one, but the
-// same fix applies here too).
-describe('TimelineTab · connector rail & date formatting', () => {
-  it('routes `time` through formatDateTime — never the raw ISO field', () => {
+// Danny 05-08: raw ISO strings + isolated dots without a connecting line.
+// Punt 17: the full stamp repeated on every row, and one primary dot for every
+// kind of event regardless of what happened.
+describe('TimelineTab · axis, day heading & time', () => {
+  it('routes `time` through the house formatters — never the raw ISO field', () => {
     renderTab([event({ id: `note-${UUID}`, description: 'Klant gebeld', time: '2026-07-24T09:00:00+02:00' })])
-    expect(screen.getByText('FMT(2026-07-24T09:00:00+02:00)')).toBeInTheDocument()
+    expect(screen.getByText('09:00')).toBeInTheDocument()
+    expect(screen.getByText('DAY(2026-07-24)')).toBeInTheDocument()
     expect(screen.queryByText('2026-07-24T09:00:00+02:00')).toBeNull()
+  })
+
+  it('keeps the full moment on hover instead of on the row', () => {
+    renderTab([event({ id: `note-${UUID}`, time: '2026-07-24T09:00:00+02:00' })])
+    expect(screen.getByText('09:00')).toHaveAttribute('title', 'FULL(2026-07-24T09:00:00+02:00)')
   })
 
   it('draws no dangling connector after a single item', () => {
@@ -128,6 +137,28 @@ describe('TimelineTab · connector rail & date formatting', () => {
       event({ id: 'note-1' }), event({ id: 'note-2' }), event({ id: 'note-3' }),
     ])
     expect(screen.getAllByTestId('timeline-dot')).toHaveLength(3)
+    // One shared day → one heading that adds no segment: 3 items → 2 segments.
+    expect(screen.getAllByTestId('timeline-connector')).toHaveLength(2)
+  })
+
+  it('gives each event kind its own marker colour — the real backend kinds', () => {
+    // Verified live against GET /vacancies/{id}: these three are what ships today.
+    renderTab([
+      event({ id: 'vacancy_published-1', type: 'vacancy_published', description: 'Gepubliceerd', author: null as unknown as string }),
+      event({ id: 'vacancy_created-1', type: 'vacancy_created', description: 'Vacature aangemaakt', time: '2026-07-23T08:00:00+02:00' }),
+    ])
+    const dots = screen.getAllByTestId('timeline-dot')
+    expect(dots[0].getAttribute('style')).toMatch(/var\(--color-success\)/)
+    expect(dots[1].getAttribute('style')).toMatch(/var\(--color-primary\)/)
+  })
+
+  it('carries the axis past a SECOND day heading, and never above the first', () => {
+    renderTab([
+      event({ id: 'note-1', time: '2026-07-24T09:00:00+02:00' }),
+      event({ id: 'note-2', time: '2026-07-23T09:00:00+02:00' }),
+    ])
+    expect(screen.getAllByText(/^DAY\(/)).toHaveLength(2)
+    // 2 markers → 1 inter-row segment, + 1 segment beside the second heading.
     expect(screen.getAllByTestId('timeline-connector')).toHaveLength(2)
   })
 })

@@ -102,7 +102,7 @@ export function CvDocument({ c, settings = {}, locale = 'nl-NL', t, redactContac
   // order (§ CV section placement) — the same function the settings screen's
   // live preview calls, so the two can never disagree.
   const groups = groupCvSections(secs)
-  const sidebarPalette = paletteFor('sidebar', color2)
+  const sidebarPalette = paletteFor('sidebar', color2, color)
   const mainPalette    = paletteFor('main', color2)
 
   return (

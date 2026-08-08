@@ -127,7 +127,7 @@ export default function SmCandidatesInsightsRow({
       sub: t('kpiRow.attentionNote', { ns: 'reports' }), color: 'var(--color-danger)',
       onClick: () => onDrillDown(t('kpiRow.attention', { ns: 'reports' }), aandacht) },
     { key: 'newThisMonth', label: t('kpiRow.newThisMonth', { ns: 'reports', month: monthLabel, avg: monthStats.avg }),
-      value: monthStats.items.length, color: 'var(--color-primary)',
+      value: monthStats.items.length, color: 'var(--color-primary-text)',
       onClick: () => onDrillDown(t('kpiRow.drillNewIn', { ns: 'reports', month: monthLabel }), monthStats.items) },
     { key: 'noShows', label: t('candidatesPage.kpi.noShows'), value: noShows.length,
       sub: t('candidatesPage.kpi.noShowsSub'), color: 'var(--color-danger)',

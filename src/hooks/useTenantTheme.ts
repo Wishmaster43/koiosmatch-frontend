@@ -12,30 +12,99 @@ import { useAllSettings } from '@/lib/settings/useAllSettings'
 // Loose hex check — only apply a real colour, never arbitrary strings into CSS.
 const isHexColor = (v: unknown): v is string => typeof v === 'string' && /^#[0-9a-fA-F]{6}$/.test(v)
 
-export function useTenantTheme(tenant?: { primary_color?: string | null } | null): void {
+/** WCAG relative luminance of a #rrggbb colour (sRGB channels linearised first). */
+function luminanceOf(hex: string): number {
+  const h = hex.replace('#', '')
+  const full = h.length === 3 ? h.split('').map(c => c + c).join('') : h
+  const [r, g, b] = [0, 2, 4].map(i => parseInt(full.slice(i, i + 2), 16) / 255)
+  const lin = (c: number) => (c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4)
+  return 0.2126 * lin(r) + 0.7152 * lin(g) + 0.0722 * lin(b)
+}
+
+/** WCAG contrast ratio between two #rrggbb colours. */
+export function contrastRatio(a: string, b: string): number {
+  const la = luminanceOf(a), lb = luminanceOf(b)
+  return (Math.max(la, lb) + 0.05) / (Math.min(la, lb) + 0.05)
+}
+
+/**
+ * Readable text colour for a background — picks whichever of near-black/white
+ * actually CONTRASTS MORE, instead of guessing from a luminance threshold.
+ * Measured 08-08 why that matters: the Yesway orange (#F97316) sits just under a
+ * 0.45 threshold, so the old rule kept WHITE text at ratio 2.8 (unreadable, Danny:
+ * "rode vlak is niet te lezen") while near-black scores ~7.4 on the same fill.
+ * Comparing the two real ratios has no threshold to tune and is right for every hue.
+ */
+export function readableOn(hex: string): string {
+  const bg = luminanceOf(hex)
+  const ratio = (a: number, b: number) => (Math.max(a, b) + 0.05) / (Math.min(a, b) + 0.05)
+  const dark = '#1F2937'
+  return ratio(bg, luminanceOf(dark)) >= ratio(bg, 1) ? dark : '#FFFFFF'
+}
+
+export function useTenantTheme(tenant?: { primary_color?: string | null; text_color?: string | null } | null): void {
   const settings = useAllSettings()
-  // The Branding form saves settings.brand_color; some tenant payloads carry primary_color.
-  // These two halves never met before (form saved one key, the applier read the other) —
-  // read both, the tenant-facing Branding setting wins.
+  // The Branding form saves settings.brand_color; some tenant payloads carry
+  // primary_color. Read both — the tenant-facing Branding setting wins.
   const brand = (settings?.brand_color as string | undefined) ?? tenant?.primary_color
+  // BRAND-TEXT-COLOR-1 (Danny 08-08 "als ik geel kies moet de txt niet wit zijn"):
+  // the text ON the accent is its own token. Explicit pick wins (Branding form, or
+  // tenant.text_color from /auth/me); otherwise it is derived from real contrast.
+  const brandText = (settings?.brand_text_color as string | undefined) ?? tenant?.text_color ?? undefined
 
   useEffect(() => {
     const root = document.documentElement
-    if (isHexColor(brand)) {
-      root.style.setProperty('--color-primary', brand)
-      root.style.setProperty('--color-primary-light', `color-mix(in srgb, ${brand} 70%, white)`)
-      root.style.setProperty('--color-primary-bg', `color-mix(in srgb, ${brand} 12%, transparent)`)
-    } else {
-      // No (valid) tenant brand → fall back to the index.css defaults.
-      root.style.removeProperty('--color-primary')
-      root.style.removeProperty('--color-primary-light')
-      root.style.removeProperty('--color-primary-bg')
+
+    // THEME-REACTIVE (Danny 08-08 "als ik nu dark of light theme kies moet het ook
+    // nog werken"): the readable accent depends on the SURFACE it sits on, so this
+    // recomputes on a theme flip too — not only when the brand changes.
+    const apply = () => {
+      if (isHexColor(brand)) {
+        root.style.setProperty('--color-primary', brand)
+        root.style.setProperty('--color-primary-light', `color-mix(in srgb, ${brand} 70%, white)`)
+        root.style.setProperty('--color-primary-bg', `color-mix(in srgb, ${brand} 12%, transparent)`)
+        // Text ON the accent (button labels, chips): explicit pick, else the
+        // higher-contrast of near-black/white.
+        root.style.setProperty('--color-on-accent', isHexColor(brandText) ? brandText : readableOn(brand))
+        // Accent used AS text (active menu item, tabs, links): a light brand fades
+        // into a light surface, a darkened one fades into the dark theme — mix
+        // toward whichever direction this theme needs, and only when needed.
+        const darkMode = root.getAttribute('data-theme') === 'dark'
+          || (!root.getAttribute('data-theme') && window.matchMedia?.('(prefers-color-scheme: dark)').matches)
+        const surface = darkMode ? '#13131F' : '#FFFFFF'
+        root.style.setProperty('--color-primary-text',
+          contrastRatio(brand, surface) >= 4.5
+            ? brand
+            : `color-mix(in srgb, ${brand} 60%, ${darkMode ? '#FFFFFF' : '#111827'})`)
+      } else {
+        // No (valid) tenant brand → the index.css defaults stay.
+        root.style.removeProperty('--color-primary')
+        root.style.removeProperty('--color-primary-light')
+        root.style.removeProperty('--color-primary-bg')
+        root.style.removeProperty('--color-primary-text')
+        // An explicit text colour still applies without a brand colour.
+        if (isHexColor(brandText)) root.style.setProperty('--color-on-accent', brandText)
+        else root.style.removeProperty('--color-on-accent')
+      }
     }
-    // Reset on unmount (e.g. logout unmounts the layout) so the next tenant starts clean.
+
+    apply()
+    // Theme changes two ways: the app stamps data-theme on <html>, or the OS
+    // preference flips while the app follows the system. Watch both.
+    const observer = new MutationObserver(apply)
+    observer.observe(root, { attributes: true, attributeFilter: ['data-theme'] })
+    const media = window.matchMedia?.('(prefers-color-scheme: dark)')
+    media?.addEventListener?.('change', apply)
+
+    // Reset on unmount (logout unmounts the layout) so the next tenant starts clean.
     return () => {
+      observer.disconnect()
+      media?.removeEventListener?.('change', apply)
       root.style.removeProperty('--color-primary')
       root.style.removeProperty('--color-primary-light')
       root.style.removeProperty('--color-primary-bg')
+      root.style.removeProperty('--color-primary-text')
+      root.style.removeProperty('--color-on-accent')
     }
-  }, [brand])
+  }, [brand, brandText])
 }

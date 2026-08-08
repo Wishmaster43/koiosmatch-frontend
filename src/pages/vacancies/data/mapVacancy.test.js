@@ -237,4 +237,30 @@ describe('mapVacancyDetail', () => {
     const detail = mapVacancyDetail({ id: 'v1' })
     expect(detail.country).toBe('')
   })
+
+  // SWEEP-VESTIGING: the vacancy's own bureau branch (vestiging) — was dropped
+  // entirely by the mapper, so it could never round-trip to DetailsLocationTab.
+  // VacancyDetailResource sends the raw FK (location_id) AND the resolved
+  // {id,name} separately as `branch`.
+  describe('branch / vestiging (SWEEP-VESTIGING)', () => {
+    it('maps location_id + the resolved branch name', () => {
+      const detail = mapVacancyDetail({
+        id: 'v1', location_id: 'branch1', branch: { id: 'branch1', name: 'Utrecht' },
+      })
+      expect(detail.branchId).toBe('branch1')
+      expect(detail.branchName).toBe('Utrecht')
+    })
+
+    it('falls back to the resolved branch object\'s own id when location_id is absent', () => {
+      const detail = mapVacancyDetail({ id: 'v1', branch: { id: 'branch2', name: 'Assen' } })
+      expect(detail.branchId).toBe('branch2')
+      expect(detail.branchName).toBe('Assen')
+    })
+
+    it('defaults to empty strings when no branch was ever picked', () => {
+      const detail = mapVacancyDetail({ id: 'v1' })
+      expect(detail.branchId).toBe('')
+      expect(detail.branchName).toBe('')
+    })
+  })
 })

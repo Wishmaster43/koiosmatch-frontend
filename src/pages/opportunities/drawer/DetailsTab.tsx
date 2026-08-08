@@ -2,6 +2,8 @@ import { useTranslation } from 'react-i18next'
 import EditableFieldTable from '@/components/forms/EditableFieldTable'
 import type { FieldRow } from '@/components/forms/EditableFieldTable'
 import { useOpportunityServiceTypes, useOpportunityAgreementTypes } from '@/lib/useOpportunityLookups'
+import OpportunityDescriptionBlock from './OpportunityDescriptionBlock'
+import { hasDescriptionText } from '../data/descriptionText'
 import type { Opportunity } from '@/types/opportunity'
 import type { Id } from '@/types/common'
 
@@ -15,6 +17,10 @@ interface DetailsTabProps {
  * in-place editable card, plus a read-only organisation card (customer → location →
  * department → contact, edited via the header pickers / dependent pickers per C-42).
  * Service/agreement types come from tenant lookups (seed fallback until the backend).
+ *
+ * OPP-DESCRIPTION-1 (CMBE golf 2a/2b): the "Kanstekst" rich-text block sits above
+ * the deal fields — its own house pencil → save/cancel, PATCHing `description`
+ * straight through (OpportunityRequest::sharedRules, nullable HTML, max 20000).
  */
 export default function DetailsTab({ opportunity: o, onUpdate }: DetailsTabProps) {
   const { t } = useTranslation('opportunities')
@@ -75,7 +81,14 @@ export default function DetailsTab({ opportunity: o, onUpdate }: DetailsTabProps
   }
 
   return (
-    <div>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+      {/* OPP-DESCRIPTION-1: the free-text "Kanstekst" — own pencil/save/cancel,
+          independent of the EditableFieldTable's own edit state below. A cleared
+          editor still emits stray markup ('<p></p>'), not '' — hasDescriptionText
+          strips tags first so the clear path PATCHes description: null, never
+          that literal markup string (measured live, 08-08). */}
+      <OpportunityDescriptionBlock value={o.description ?? ''}
+        onSave={html => onUpdate?.(o.id, { description: hasDescriptionText(html) ? html : null })} />
       {/* Canon (05-08): no row dividers, 11px labels (candidate ProfileTab convention). */}
       <EditableFieldTable title={t('details.groups.deal')} fields={dealFields} value={dealValue}
         onSave={onUpdate ? saveDeal : undefined} />

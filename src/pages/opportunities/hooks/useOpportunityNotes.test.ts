@@ -8,6 +8,11 @@
  * on success, and on failure remove that exact temp note + surface the server's own
  * message. Assert the SEAM (§13): the exact POST body, the optimistic write, and
  * the revert + notify on rejection.
+ *
+ * editNote coverage (OPP-NOTE-EDIT-1, CMBE golf 2a/2b, G23): PUT
+ * /opportunities/{id}/notes/{note} {body, type?, language?} — assert the exact
+ * PUT method/route/body (§13), the optimistic local update, and the revert +
+ * notify on rejection, mirroring addNote's own three-case coverage.
  */
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { renderHook, act, waitFor } from '@testing-library/react'
@@ -15,7 +20,7 @@ import { useOpportunityNotes } from './useOpportunityNotes'
 
 vi.mock('@/lib/api', async () => {
   const actual = await vi.importActual<typeof import('@/lib/api')>('@/lib/api')
-  return { ...actual, default: { get: vi.fn(), post: vi.fn() } }
+  return { ...actual, default: { get: vi.fn(), post: vi.fn(), put: vi.fn() } }
 })
 vi.mock('@/lib/notify', () => ({ notifyError: vi.fn(), notifySuccess: vi.fn() }))
 // Minimal i18n stub (mirrors useWorkflowsData.test.ts) — the hook now calls
@@ -27,6 +32,7 @@ import { notifyError } from '@/lib/notify'
 
 const mockedGet  = vi.mocked(api.get)
 const mockedPost = vi.mocked(api.post)
+const mockedPut  = vi.mocked(api.put)
 
 beforeEach(() => { vi.clearAllMocks(); mockedGet.mockResolvedValue({ data: [] }) })
 
@@ -59,5 +65,42 @@ describe('useOpportunityNotes · addNote', () => {
     await waitFor(() => expect(result.current.loading).toBe(false))
     act(() => { result.current.addNote({ type: 'internal', body: '   ' }) })
     expect(mockedPost).not.toHaveBeenCalled()
+  })
+})
+
+describe('useOpportunityNotes · editNote (OPP-NOTE-EDIT-1)', () => {
+  it('PUTs the exact route + body, updates optimistically, then reloads on success', async () => {
+    mockedGet.mockResolvedValueOnce({ data: [{ id: 'n1', type: 'internal', body: 'Origineel', author: 'Piet' }] })
+    mockedPut.mockResolvedValue({})
+    const { result } = renderHook(() => useOpportunityNotes('o1'))
+    await waitFor(() => expect(result.current.loading).toBe(false))
+    expect(result.current.items).toHaveLength(1)
+
+    act(() => { result.current.editNote(0, { type: 'internal', body: 'Bewerkte tekst' }) })
+    // Assert the REQUEST (§13): exact route + body — never only that the callback fired.
+    expect(mockedPut).toHaveBeenCalledWith('/opportunities/o1/notes/n1', { type: 'internal', body: 'Bewerkte tekst' })
+    expect(result.current.items[0].body).toBe('Bewerkte tekst') // optimistic
+    await waitFor(() => expect(mockedGet).toHaveBeenCalledTimes(2)) // reload after success
+    expect(notifyError).not.toHaveBeenCalled()
+  })
+
+  it('reverts the optimistic edit and surfaces the server message on rejection', async () => {
+    mockedGet.mockResolvedValueOnce({ data: [{ id: 'n1', type: 'internal', body: 'Origineel', author: 'Piet' }] })
+    mockedPut.mockRejectedValue({ response: { status: 500, data: { message: 'Kon de notitie niet bewerken' } } })
+    const { result } = renderHook(() => useOpportunityNotes('o1'))
+    await waitFor(() => expect(result.current.loading).toBe(false))
+
+    act(() => { result.current.editNote(0, { type: 'internal', body: 'Zou verloren gaan' }) })
+    expect(result.current.items[0].body).toBe('Zou verloren gaan') // optimistic
+    await waitFor(() => expect(result.current.items[0].body).toBe('Origineel')) // reverted
+    expect(notifyError).toHaveBeenCalledWith('Kon de notitie niet bewerken')
+  })
+
+  it('is a no-op for an unknown index — never PUTs without a real target note', async () => {
+    mockedGet.mockResolvedValueOnce({ data: [] })
+    const { result } = renderHook(() => useOpportunityNotes('o1'))
+    await waitFor(() => expect(result.current.loading).toBe(false))
+    act(() => { result.current.editNote(0, { type: 'internal', body: 'Geen doel' }) })
+    expect(mockedPut).not.toHaveBeenCalled()
   })
 })

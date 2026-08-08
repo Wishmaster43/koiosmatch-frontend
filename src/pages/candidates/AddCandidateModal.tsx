@@ -30,6 +30,7 @@ import { WIDE_MODAL } from '@/components/ui/modalMetrics'
 import FloatingPanel from '@/components/ui/FloatingPanel'
 import { modalColumns } from '@/components/ui/modalCards'
 import { toLinkedinSlug } from '@/components/drawer/contactLinks'
+import { canonicalPhone } from '@/lib/phoneNumber'
 import type { Candidate } from '@/types/candidate'
 import type { Id, LookupOption } from '@/types/common'
 import ModalHeader from './addmodal/ModalHeader'
@@ -214,6 +215,14 @@ export default function AddCandidateModal({ onClose, onCreated }: AddCandidateMo
     // backend column expects — applied ONCE here at the save boundary, so the
     // field itself stays a plain, unopinionated text input.
     const linkedinSlug = toLinkedinSlug(form.linkedin)
+    // DUP-PHONE-1: canonicalise both numbers ONCE here, same save-boundary idiom as
+    // toLinkedinSlug above. The server's duplicate guard compares the RAW column
+    // value (DuplicateFinder: `where('mobile', $value)`), measured 2026-08-08 —
+    // '0665277265' answers exists:false for a candidate stored as '+31665277265'.
+    // Sending the canonical form is what makes "the same number, other notation"
+    // actually collide with the existing dossier instead of creating a second one.
+    const canonicalLandline = canonicalPhone(form.phone)
+    const canonicalMobile   = canonicalPhone(form.mobile)
     try {
       const body = {
         first_name:          form.firstName.trim(),
@@ -221,11 +230,12 @@ export default function AddCandidateModal({ onClose, onCreated }: AddCandidateMo
         last_name:           form.lastName.trim(),
         function_title:      form.functionTitle.trim() || null,
         email:               form.email || null,
-        phone:               form.phone || null,
+        phone:               canonicalLandline || null,
         // Split field (BE 2026-07-20): mobile is validated separately from the
         // landline `phone` on CandidateProfileRequest — same body key the drawer's
-        // buildCandidatePatch already maps (candidatesShared.ts).
-        mobile:              form.mobile || null,
+        // buildCandidatePatch already maps (candidatesShared.ts). Canonical form
+        // (DUP-PHONE-1) so the dedupe key is notation-independent.
+        mobile:              canonicalMobile || null,
         date_of_birth:       form.dateOfBirth || null,
         gender:              form.gender || null,
         street:              form.street || null,

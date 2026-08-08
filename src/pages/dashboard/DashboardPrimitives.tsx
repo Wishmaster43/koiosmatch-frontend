@@ -43,7 +43,7 @@ export function Block({ title, action, onAction, children }: { title?: ReactNode
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between',
         padding: '12px 16px', borderBottom: '1px solid var(--border)' }}>
         <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)' }}>{title}</span>
-        {action && <span {...interactive(onAction)} style={{ fontSize: 12, color: 'var(--color-primary)', cursor: 'pointer' }}>{action} →</span>}
+        {action && <span {...interactive(onAction)} style={{ fontSize: 12, color: 'var(--color-primary-text)', cursor: 'pointer' }}>{action} →</span>}
       </div>
       {children}
     </div>

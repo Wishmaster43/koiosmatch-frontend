@@ -18,6 +18,7 @@ import { X, Plus } from 'lucide-react'
 import RichTextEditor from '@/components/ui/RichTextEditor'
 import ChipMultiSelect from '@/components/ui/ChipMultiSelect'
 import SearchSelect from '@/components/ui/SearchSelect'
+import { fieldInputStyle } from '@/components/forms/fieldMetrics'
 import { Toggle } from '../components/SettingsKit'
 import { useLocations } from '@/lib/useLocations'
 import { useContractTypes } from '@/lib/useContractTypes'
@@ -32,7 +33,8 @@ const TONES = ['neutral', 'professional', 'friendly', 'enthusiastic', 'formal']
 const LENGTHS = ['short', 'medium', 'long']
 
 const labelStyle = { fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', display: 'block', marginBottom: 4 }
-const inputStyle = { padding: '6px 10px', fontSize: 13, borderRadius: 6, border: '1px solid var(--border)', background: 'var(--input-bg)', color: 'var(--text)', outline: 'none', width: '100%', boxSizing: 'border-box' }
+// Canon field style (G33/fieldMetrics) — was its own padding-6/radius-6 copy.
+const inputStyle = fieldInputStyle
 const hintStyle = { fontSize: 11, color: 'var(--text-muted)', marginTop: 3 }
 
 // Toggle a value's membership in an array (add if absent, remove if present).

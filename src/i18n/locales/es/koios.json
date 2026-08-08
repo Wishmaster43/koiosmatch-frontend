@@ -40,6 +40,11 @@
   "voice": {
     "start": "Dicta tu mensaje",
     "stop": "Deja de escuchar",
-    "denied": "Micrófono denegado — permite el acceso en tu navegador"
+    "denied": "Micrófono denegado — permite el acceso en tu navegador",
+    "insecureContext": "El dictado requiere una conexión segura (https) — no disponible en esta página",
+    "errorServiceNotAllowed": "El reconocimiento de voz fue bloqueado por el navegador — servicio no permitido",
+    "errorAudioCapture": "No se encontró micrófono — revisa tu dispositivo",
+    "errorNetwork": "Error de red durante el reconocimiento de voz — inténtalo de nuevo",
+    "errorGeneric": "El reconocimiento de voz falló — inténtalo de nuevo"
   }
 }

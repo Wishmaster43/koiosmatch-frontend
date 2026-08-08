@@ -77,7 +77,8 @@
     "toggle": "Show/hide filters",
     "title": "Filters",
     "branch": "Branch",
-    "branchExcludesUnassigned": "A branch filter hides records with no branch linked yet."
+    "branchExcludesUnassigned": "A branch filter hides records with no branch linked yet.",
+    "button": "Filter"
   },
   "nav": {
     "dashboard": "Dashboard",
@@ -358,6 +359,22 @@
     "unknownEntity": "This pop-out window could not be recognized."
   },
   "notes": {
-    "editedBy": "edited by {{name}}"
+    "editedBy": "edited by {{name}}",
+    "allTypes": "All types",
+    "allChannels": "All channels"
+  },
+  "errors": {
+    "koiosCreditExhausted": "This organisation’s Koios credit is used up or not activated yet. Top up the balance or contact your administrator.",
+    "koiosUnavailable": "Koios is unavailable right now. Please try again shortly."
+  },
+  "timeline": {
+    "today": "Today",
+    "yesterday": "Yesterday"
+  },
+  "identifierCheck": {
+    "cocInvalid": "This does not look like a valid company register number for {{country}} (expected e.g. {{example}}).",
+    "vatInvalid": "This does not look like a valid VAT number for {{country}} (expected e.g. {{example}}).",
+    "cocUnverifiable": "Without a country the company register number cannot be format-checked.",
+    "vatUnverifiable": "Without a country the VAT number cannot be format-checked."
   }
 }

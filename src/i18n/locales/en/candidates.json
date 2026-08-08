@@ -384,7 +384,8 @@
     "archivedNamed": "{{name}} archived",
     "noStatus": "No status",
     "changelog": "Changelog",
-    "tasksSearchPlaceholder": "Search task…"
+    "tasksSearchPlaceholder": "Search task…",
+    "createdAtBy": "Created on {{date}} by {{name}}"
   },
   "stage": {
     "lead": "Lead",
@@ -431,7 +432,13 @@
     "groupWorkPermit": "Work permit",
     "workPermitType": "Work permit type",
     "workPermitValidUntil": "Valid until",
-    "linkedinPlaceholder": "linkedin.com/in/username"
+    "linkedinPlaceholder": "linkedin.com/in/username",
+    "groupOrigin": "Origin",
+    "source": "Source",
+    "sourcePlaceholder": "E.g. website, Indeed, referral",
+    "createdBy": "Created by",
+    "createdAt": "Created on",
+    "readOnlyStamp": "Read-only — set by the system"
   },
   "addFields": {
     "functionTitle": "Job title",
@@ -465,7 +472,15 @@
     "phone": "Phone",
     "email": "Email address",
     "note": "Note",
-    "educationLevel": "Level"
+    "educationLevel": "Level",
+    "referenceText": "Reference text",
+    "referenceFirstName": "First name",
+    "referenceMiddleName": "Middle name",
+    "referenceLastName": "Last name",
+    "referenceFunction": "Function",
+    "mobile": "Mobile",
+    "referenceLetter": "Reference letter",
+    "linkedDocumentFor": "Linked document for {{name}}"
   },
   "work": {
     "client": "Client",
@@ -525,7 +540,26 @@
     "vacancyUnknown": "Unknown vacancy",
     "searchPlaceholder": "Search vacancy…",
     "colStatus": "Status",
-    "colDate": "Date"
+    "colDate": "Date",
+    "showDetails": "Show details",
+    "hideDetails": "Hide details",
+    "createdAt": "Created on",
+    "reference": "Reference no.",
+    "rejectionReason": "Rejection reason",
+    "detailsError": "Could not load the details.",
+    "detailsEmpty": "No extra details.",
+    "openApplication": "Open application",
+    "editApplication": "Edit application",
+    "applicationUpdated": "Application updated",
+    "applicationUpdateFailed": "Updating the application failed",
+    "applicationLoadFailed": "Loading the application failed",
+    "detachApplication": "Detach application",
+    "detachTitle": "Reason for detaching",
+    "detachMessage": "The application for {{name}} will be detached from this candidate. This can be undone; the reason is added to the timeline.",
+    "detachReasonLabel": "Reason",
+    "detachReasonPlaceholder": "Why is this application being detached?",
+    "detachConfirm": "Detach",
+    "detachDone": "Application detached"
   },
   "communication": {
     "newNote": "New note",
@@ -730,7 +764,15 @@
     "emergencyContactPhone": "Phone number",
     "emergencyContactPhoneInvalid": "Enter a valid phone number (8 to 15 digits, spaces/dashes allowed).",
     "groupNoticePeriod": "Notice period",
-    "noticePeriodWeeks": "Notice period (weeks)"
+    "noticePeriodWeeks": "Notice period (weeks)",
+    "emergencyContactFirstName": "First name",
+    "emergencyContactLastName": "Last name",
+    "emergencyContactMiddleName": "Middle name",
+    "emergencyContactMobile": "Mobile number",
+    "emergencyContactRelation": "Relation",
+    "noticePeriodDerivedHint_one": "Based on the notice period ({{count}} week), available from {{date}}.",
+    "noticePeriodDerivedHint_other": "Based on the notice period ({{count}} weeks), available from {{date}}.",
+    "noticePeriodApply": "Use this date"
   },
   "zzp": {
     "title": "Freelancer",
@@ -764,7 +806,8 @@
     "businessEmailDuplicateConfirm": "Save anyway",
     "businessEmailDuplicateCancel": "Go back",
     "creditorAutoHint": "Automatically assigned if left empty.",
-    "creditorAutoLocked": "Automatically numbered via Settings → Numbering."
+    "creditorAutoLocked": "Automatically numbered via Settings → Numbering.",
+    "identifierNlOnly": "Note: for freelancers the server still only accepts a Dutch company register/VAT number. A foreign number is rejected on save."
   },
   "certified": {
     "issued": "Issued",
@@ -810,7 +853,10 @@
     "replace": "Replace file",
     "versionCount_one": "{{count}} previous version",
     "versionCount_other": "{{count}} previous versions",
-    "downloadVersion": "Download this version"
+    "downloadVersion": "Download this version",
+    "changeLink": "Change link",
+    "linkedTo": "Linked to {{name}}",
+    "allTypes": "All types"
   },
   "ai": {
     "title": "Koios AI advises",
@@ -1088,7 +1134,10 @@
     "confirm": "Merge",
     "done": "Candidates merged.",
     "errForbidden": "You are not allowed to merge candidates.",
-    "errFailed": "Merge failed. Please try again."
+    "errFailed": "Merge failed. Please try again.",
+    "duplicateLabel": "Duplicate candidate",
+    "searchHint": "Type at least {{min}} characters",
+    "errSearch": "Search failed. Please try again."
   },
   "duplicate": {
     "blockedTitle": "This person already exists",
@@ -1164,7 +1213,37 @@
     "sessionClosedHint": "The 24-hour window is closed — start a new conversation with a template to reopen it.",
     "composerUnavailable": "WhatsApp is unreachable right now — nothing was sent. Please try again shortly.",
     "pickAgent": "AI agent (optional)",
-    "agentPlaceholder": "Choose an AI agent…"
+    "agentPlaceholder": "Choose an AI agent…",
+    "configureWhatsapp": "Set up WhatsApp →",
+    "assist": {
+      "title": "Koios assist",
+      "summarize": "Summarize",
+      "actions": "Action items",
+      "needsMessages": "This conversation has no messages yet",
+      "apply": "Apply",
+      "discard": "Discard",
+      "noItems": "No action items found",
+      "error": "Koios could not process this conversation. Please try again.",
+      "actionTypes": {
+        "task": "Task",
+        "whatsapp": "WhatsApp",
+        "appointment": "Appointment",
+        "notification": "Notification"
+      }
+    },
+    "windowLeftHours": "{{hours}}h {{minutes}}m left to reply freely",
+    "windowLeftMinutes_one": "{{count}} minute left to reply freely",
+    "windowLeftMinutes_other": "{{count}} minutes left to reply freely",
+    "windowLeftSeconds": "Less than a minute left to reply freely",
+    "windowClosesAt": "The 24-hour window closes at {{time}}",
+    "windowUnknown": "Unknown whether the 24-hour window is open: this conversation carries no time for the last incoming message. An approved template always gets through.",
+    "sendTemplate": "Send template",
+    "templateSent": "Template sent",
+    "templateSendFailed": "Could not send the template",
+    "templateLoading": "Loading templates…",
+    "templateNeedsCandidate": "This conversation is not linked to a candidate; sending a template is not possible here yet.",
+    "templateVarsUnsupported_one": "This template has {{count}} variable that cannot be filled in here yet — pick a template without variables.",
+    "templateVarsUnsupported_other": "This template has {{count}} variables that cannot be filled in here yet — pick a template without variables."
   },
   "advice": {
     "reason": {
@@ -1176,7 +1255,8 @@
   },
   "references": {
     "verify": "Verify",
-    "verified": "Verified"
+    "verified": "Verified",
+    "experienceLinkUnavailable": "Linking to a work experience is not possible yet — this follows once the API supports the field."
   },
   "validation": {
     "emailFormat": "Enter a valid e-mail address.",

@@ -13,6 +13,7 @@ import { Loader2, RefreshCw } from 'lucide-react'
 import api, { unwrap } from '@/lib/api'
 import FloatingPanel from '@/components/ui/FloatingPanel'
 import { BTN_H } from '@/config/buttonMetrics'
+import { fieldInputStyle } from '@/components/forms/fieldMetrics'
 import { useLocations } from '@/lib/useLocations'
 import ChipMultiSelect from '@/components/ui/ChipMultiSelect'
 import { useLiveFieldValidation } from '@/hooks/useLiveFieldValidation'
@@ -86,11 +87,8 @@ export default function EditUserModal({ user, onClose, onSaved }: {
     }
   }
 
-  const inputStyle: CSSProperties = {
-    width: '100%', padding: '8px 10px', fontSize: 13, borderRadius: 8,
-    border: '1px solid var(--border)', background: 'var(--input-bg)',
-    color: 'var(--text)', outline: 'none', boxSizing: 'border-box',
-  }
+  // Canon field style (G33/fieldMetrics) — was its own padding-8/radius-8 copy.
+  const inputStyle: CSSProperties = fieldInputStyle
   const labelStyle: CSSProperties = {
     display: 'block', fontSize: 12, fontWeight: 500, color: 'var(--text-muted)', marginBottom: 5,
   }
@@ -191,7 +189,7 @@ export default function EditUserModal({ user, onClose, onSaved }: {
             </button>
             <button type="submit" disabled={saving || hasFormatError}
               style={{ height: BTN_H, padding: '0 18px', fontSize: 13, fontWeight: 600, borderRadius: 8, border: 'none',
-                       background: 'var(--color-primary)', color: 'white', cursor: (saving || hasFormatError) ? 'default' : 'pointer',
+                       background: 'var(--color-primary)', color: 'var(--color-on-accent)', cursor: (saving || hasFormatError) ? 'default' : 'pointer',
                        display: 'flex', alignItems: 'center', gap: 6, opacity: hasFormatError ? 0.6 : 1 }}>
               {saving ? <><Loader2 size={13} style={{ animation: 'spin 1s linear infinite' }} /> {t('saving')}</> : t('common:save')}
             </button>

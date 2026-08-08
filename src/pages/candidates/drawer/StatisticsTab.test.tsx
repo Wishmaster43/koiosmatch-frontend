@@ -1,64 +1,88 @@
 /**
- * StatisticsTab — CREATED-BY-SOURCE-1 (Danny: "wil ik ook zien aangemaakt door
- * wie en de bron"): the overview card gains two rows, each falling back to an
- * italic muted em-dash (§4) when the value is unset (legacy rows).
- * LAST-CONTACT-LIVE-1: the last-contact row wires the real last_contact_at/
- * _type/_by stamps — DD-MM-YYYY date, "door {name}" when a stamped user is
- * known, and the same honest em-dash when the candidate was never contacted.
+ * StatisticsTab — the tab is COUNTS ONLY (STATS-HONEST-1, Danny 2026-08-09).
+ * The old "Statusoverzicht" card held dossier fields, not statistics, and every
+ * one of them duplicated a place that also lets you edit it: status → the drawer
+ * header picker, last contact + contact type → the always-visible drawer footer,
+ * branch → the Profiel tab's BranchSection, created-on/by + source → the Profiel
+ * tab's Herkomst card (DANNY-6). This suite guards that none of them can silently
+ * reappear here, that the two real KPIs keep counting from the candidate payload,
+ * and that the gated Diensten/Uren tiles never ship an invented number.
  */
 import { describe, it, expect, vi } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import StatisticsTab from './StatisticsTab'
+// Vite's ?raw import — the source-level guard below reads this file's own text
+// (node:fs is not typed in this tsconfig, and jsdom gives import.meta an http URL).
+import statisticsTabSource from './StatisticsTab.tsx?raw'
 import type { Candidate } from '@/types/candidate'
 
-vi.mock('@/lib/datetime', () => ({ useDateFormat: () => ({ formatDate: (v: string) => v }) }))
-vi.mock('@/context/LookupsContext', () => ({ useLookups: () => ({ statusMeta: () => ({ label: '' }) }) }))
-vi.mock('@/lib/useLastContactTypes', () => ({ useLastContactTypes: () => ({ labelOf: (v: string) => v }) }))
-// Mirrors RetentionConsentBlock.test.tsx's pattern: interpolate only the option
-// this suite asserts on ("name" for drawer.byWho), key-fallback for the rest —
-// real i18next has no instance in this test env, so t() would otherwise drop opts.
 vi.mock('react-i18next', () => ({
-  useTranslation: () => ({
-    t: (k: string, o?: Record<string, unknown>) => (o && 'name' in o ? `${k}|${o.name}` : k),
-  }),
+  useTranslation: () => ({ t: (k: string) => k }),
 }))
 
 const baseCandidate = (overrides: Partial<Candidate> = {}): Candidate =>
   ({ id: 1, matches: [], applications: [], branches: [], ...overrides } as unknown as Candidate)
 
-describe('StatisticsTab · createdBy / source rows', () => {
-  it('shows the creator name and the acquisition source when present', () => {
-    render(<StatisticsTab c={baseCandidate({ createdBy: { id: 7, name: 'Bente de Jong' }, source: 'indeed' })} />)
-    expect(screen.getByText('Bente de Jong')).toBeInTheDocument()
-    expect(screen.getByText('indeed')).toBeInTheDocument()
-  })
-
-  it('renders an italic em-dash for a legacy row without a creator/source', () => {
-    render(<StatisticsTab c={baseCandidate({ createdBy: null, source: null })} />)
-    const dashes = screen.getAllByText('—')
-    expect(dashes.length).toBeGreaterThanOrEqual(2)
-    dashes.forEach(el => expect(el).toHaveStyle({ fontStyle: 'italic' }))
+describe('StatisticsTab · dossier fields live elsewhere (STATS-HONEST-1 / DANNY-6)', () => {
+  it('renders no status-overview card and none of its former rows', () => {
+    render(<StatisticsTab c={baseCandidate({
+      status: 'available',
+      lastContactDate: '2026-08-01', lastContactType: 'phone', lastContactBy: 'Bente de Jong',
+      branches: [{ id: 'b1', name: 'Utrecht' }] as Candidate['branches'],
+      createdBy: { id: 7, name: 'Bente de Jong' }, source: 'indeed', created: '2026-01-05',
+    })} />)
+    // The card itself is gone — StatsTab only renders it when `overview` is passed.
+    expect(screen.queryByText('statistics.statusOverview')).not.toBeInTheDocument()
+    for (const key of ['statistics.status', 'statistics.lastContact', 'statistics.contactType',
+      'statistics.branch', 'statistics.memberSince', 'statistics.createdBy', 'statistics.source']) {
+      expect(screen.queryByText(key)).not.toBeInTheDocument()
+    }
+    // …and so are the values they used to print.
+    expect(screen.queryByText(/Bente de Jong/)).not.toBeInTheDocument()
+    expect(screen.queryByText('indeed')).not.toBeInTheDocument()
+    expect(screen.queryByText('Utrecht')).not.toBeInTheDocument()
   })
 })
 
-describe('StatisticsTab · last-contact row (LAST-CONTACT-LIVE-1)', () => {
-  it('shows the stamped date and the "door {name}" attribution when both landed', () => {
-    render(<StatisticsTab c={baseCandidate({ lastContactDate: '2026-08-01', lastContactType: 'phone', lastContactBy: 'Bente de Jong' })} />)
-    // The date + attribution render as sibling text nodes inside one row value
-    // (a JSX fragment) — match on the row's full text, not an isolated node.
-    expect(screen.getByText(/2026-08-01.*drawer\.byWho\|Bente de Jong/)).toBeInTheDocument()
+describe('StatisticsTab · the two KPIs count the real payload', () => {
+  it('shows the match and application counts from the candidate record', () => {
+    render(<StatisticsTab c={baseCandidate({
+      matches: [{ id: 'm1' }, { id: 'm2' }] as Candidate['matches'],
+      applications: [{ id: 'a1' }] as Candidate['applications'],
+    })} />)
+    expect(screen.getByText('statistics.placements')).toBeInTheDocument()
+    expect(screen.getByText('2')).toBeInTheDocument()
+    expect(screen.getByText('statistics.applications')).toBeInTheDocument()
+    expect(screen.getByText('1')).toBeInTheDocument()
   })
 
-  it('shows the date without an attribution when no user is stamped', () => {
-    render(<StatisticsTab c={baseCandidate({ lastContactDate: '2026-08-01', lastContactType: null, lastContactBy: null })} />)
-    expect(screen.getByText('2026-08-01')).toBeInTheDocument()
-    expect(screen.queryByText(/drawer\.byWho/)).not.toBeInTheDocument()
+  it('falls back to 0 — never blank — when the record carries no lists at all', () => {
+    render(<StatisticsTab c={{ id: 1 } as unknown as Candidate} />)
+    expect(screen.getAllByText('0')).toHaveLength(2)
   })
 
-  it('renders an honest italic em-dash when the candidate was never contacted', () => {
-    render(<StatisticsTab c={baseCandidate({ lastContactDate: null, lastContactType: null, lastContactBy: null })} />)
-    const dashes = screen.getAllByText('—')
-    expect(dashes.length).toBeGreaterThanOrEqual(2) // last-contact row + contact-type row
-    dashes.forEach(el => expect(el).toHaveStyle({ fontStyle: 'italic' }))
+  it('jumps to the Werk tab, where the counted records live', () => {
+    const onJump = vi.fn()
+    render(<StatisticsTab c={baseCandidate()} onJump={onJump} />)
+    screen.getByText('statistics.placements').closest('[role="button"]')?.dispatchEvent(
+      new MouseEvent('click', { bubbles: true })
+    )
+    expect(onJump).toHaveBeenCalledWith('work')
+  })
+})
+
+describe('StatisticsTab · the gated shift/hour tiles carry no invented numbers', () => {
+  // Source-level guard: the example values 24 and 186 once shipped as `?? 24` /
+  // `?? 186` fallbacks. Uncommenting the tiles must never resurrect them, so the
+  // assertion reads the file rather than the DOM (the tiles do not render today).
+  it('never re-introduces the 24 / 186 example fallbacks', () => {
+    expect(statisticsTabSource).not.toMatch(/shiftsCount\s*\?\?\s*(?!0\b)\d+/)
+    expect(statisticsTabSource).not.toMatch(/hoursWorked\s*\?\?\s*(?!0\b)\d+/)
+  })
+
+  it('renders exactly the two honest KPIs while planning data is absent', () => {
+    render(<StatisticsTab c={baseCandidate()} />)
+    expect(screen.queryByText('statistics.shifts')).not.toBeInTheDocument()
+    expect(screen.queryByText('statistics.hoursWorked')).not.toBeInTheDocument()
   })
 })

@@ -66,7 +66,7 @@ export default function PoolsSection({ c }: { c: Candidate }) {
                           <span style={{ width: 8, height: 8, borderRadius: '50%', background: color, flexShrink: 0 }} />
                           {p.name}
                         </span>
-                        {selected && <Check size={13} style={{ color: 'var(--color-primary)', flexShrink: 0 }} />}
+                        {selected && <Check size={13} style={{ color: 'var(--color-primary-text)', flexShrink: 0 }} />}
                       </button>
                     )
                   })

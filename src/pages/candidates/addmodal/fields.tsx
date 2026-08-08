@@ -31,7 +31,7 @@ const cvBadge: CSSProperties = {
   fontSize: 9, fontWeight: 700, letterSpacing: '0.06em', lineHeight: 1.6,
   padding: '0 5px', borderRadius: 999, textTransform: 'uppercase',
   background: 'color-mix(in srgb, var(--color-primary) 14%, transparent)',
-  color: 'var(--color-primary)',
+  color: 'var(--color-primary-text)',
   border: '1px solid color-mix(in srgb, var(--color-primary) 40%, transparent)',
 }
 

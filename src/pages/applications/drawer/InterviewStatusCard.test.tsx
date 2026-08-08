@@ -12,7 +12,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import InterviewStatusCard, { resolveDurationSeconds, splitDuration } from './InterviewStatusCard'
+import InterviewStatusCard, { resolveDurationSeconds, splitDuration, humanizeInterviewStatus } from './InterviewStatusCard'
 import type { ApplicationInterview } from '@/types/application'
 
 // Deterministic key-echo (repo-wide precedent, e.g. ApplicationTab.test.tsx) —
@@ -134,9 +134,9 @@ describe('InterviewStatusCard · rich render', () => {
     expect(screen.getByText('interview.status.turn.agent')).toBeInTheDocument()
   })
 
-  // The flow's name is the card's subtitle. It stayed invisible until the backend
-  // started sending `flow_name`, so both branches are pinned.
-  it('renders the flow name as the subtitle, and nothing in its place when absent', () => {
+  // The flow's name sits inline on the one-line meta row. It stayed invisible
+  // until the backend started sending `flow_name`, so both branches are pinned.
+  it('renders the flow name inline, and nothing in its place when absent', () => {
     const { rerender } = render(<InterviewStatusCard interview={fullInterview()} applicationId="app-1" />)
     expect(screen.getByText('Verpleegkundige intake')).toBeInTheDocument()
     rerender(<InterviewStatusCard interview={fullInterview({ flowName: null })} applicationId="app-1" />)
@@ -183,6 +183,93 @@ describe("InterviewStatusCard · honest gate (list payload without visibility fi
   it('still renders the category + step, which already works today (INTERVIEW-PHASE-1)', () => {
     render(<InterviewStatusCard interview={bareInterview} applicationId="app-1" />)
     expect(screen.getByText('interview.category.busy')).toBeInTheDocument()
+    expect(screen.getByText('interview.stepOf')).toBeInTheDocument()
+  })
+})
+
+describe('humanizeInterviewStatus (pure)', () => {
+  // interview_flows.statuses[] is a TENANT/FLOW-authored vocabulary (verified live
+  // against S-00001/Zorgintake) — an unknown value must humanise, never crash or
+  // echo the raw SCREAMING_SNAKE enum.
+  it('turns a SCREAMING_SNAKE status into a humanised label', () => {
+    expect(humanizeInterviewStatus('ACTIVE_IN_CARE')).toBe('Active in care')
+  })
+
+  it('collapses repeated underscores and trims stray ones', () => {
+    expect(humanizeInterviewStatus('DIPLOMA__CHECK_')).toBe('Diploma check')
+  })
+
+  it('leaves a single-word value correctly cased', () => {
+    expect(humanizeInterviewStatus('COMPLETED')).toBe('Completed')
+  })
+})
+
+// I1 (Danny 08-08 screenshot): "Bezig · Stap 2 van 12" rendered as a stacked block
+// instead of one row. These assert the STRUCTURE (siblings in one flex container),
+// since jsdom does not compute real wrapped layout.
+describe('InterviewStatusCard · one-line meta composition (I1, 08-08)', () => {
+  it('renders name, flow, turn chip, status chip and step as siblings in ONE row', () => {
+    render(<InterviewStatusCard interview={fullInterview()} applicationId="app-1" />)
+    const name = screen.getByText('Verpleegkundige-agent')
+    const flow = screen.getByText('Verpleegkundige intake')
+    const turnChip = screen.getByText('interview.status.turn.agent')
+    const statusChip = screen.getByText('interview.category.busy')
+    const stepText = screen.getByText('interview.stepOf')
+    const row = name.parentElement
+    expect(row).not.toBeNull()
+    expect(flow.parentElement).toBe(row)
+    expect(turnChip.parentElement).toBe(row)
+    expect(statusChip.parentElement).toBe(row)
+    expect(stepText.parentElement).toBe(row)
+    // The row itself is a wrapping flex line — a group wrap, not per-item stacking.
+    expect(row).toHaveStyle({ display: 'flex', flexWrap: 'wrap' })
+  })
+
+  // Elapsed time is deliberately NOT part of the meta row (it was crowding the
+  // rest off the line) — it lives in its own sibling below the row.
+  it('keeps the elapsed-time line OUTSIDE the one-line meta row', () => {
+    render(<InterviewStatusCard interview={fullInterview()} applicationId="app-1" />)
+    const name = screen.getByText('Verpleegkundige-agent')
+    const durationLabel = screen.getByText(/interview\.status\.duration:/)
+    expect(durationLabel.parentElement).not.toBe(name.parentElement)
+  })
+})
+
+// I3 (Danny 08-08 screenshot): "ACTIVE_IN_CARE" must never reach the screen raw.
+describe('InterviewStatusCard · current-status mapping (I3, 08-08)', () => {
+  it('renders a known engine marker through its own i18n key', () => {
+    render(<InterviewStatusCard interview={fullInterview({ currentStatus: 'COMPLETED' })} applicationId="app-1" />)
+    expect(screen.getByText('interview.currentStatus.COMPLETED')).toBeInTheDocument()
+  })
+
+  it('never shows the raw SCREAMING_SNAKE value for a flow-authored status', () => {
+    render(<InterviewStatusCard interview={fullInterview({ currentStatus: 'ACTIVE_IN_CARE' })} applicationId="app-1" />)
+    expect(screen.queryByText('ACTIVE_IN_CARE')).toBeNull()
+  })
+
+  it('renders nothing for the current-status segment when the field is absent', () => {
+    render(<InterviewStatusCard interview={fullInterview({ currentStatus: null })} applicationId="app-1" />)
+    expect(screen.queryByText(/interview\.currentStatus\./)).toBeNull()
+  })
+})
+
+// DD-FE-11 (08-08 drill-down audit): the interview progress used to read "Stap 2
+// van 12" as the ONLY signal — Danny wants the step NAME first, with the numeric
+// position demoted to a small muted suffix after it (never dropped).
+describe('InterviewStatusCard · step name leads, count is a muted suffix (DD-FE-11, 08-08)', () => {
+  it('renders the step name before the muted step-count segment', () => {
+    render(<InterviewStatusCard interview={fullInterview()} applicationId="app-1" />)
+    const name = screen.getByText('interview.currentStatus.ACTIVE_IN_CARE')
+    const count = screen.getByText('interview.stepOf')
+    // Both already sit in the same one-line meta row (I1 suite above); this pins
+    // the ORDER between them — name first, count after, never the reverse.
+    expect(name.compareDocumentPosition(count) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
+    // The count is visually demoted (smaller + muted) relative to the name.
+    expect(count).toHaveStyle({ fontSize: '11px', color: 'var(--text-muted)' })
+  })
+
+  it('still shows the step count on its own when the flow has no current-step name', () => {
+    render(<InterviewStatusCard interview={fullInterview({ currentStatus: null })} applicationId="app-1" />)
     expect(screen.getByText('interview.stepOf')).toBeInTheDocument()
   })
 })

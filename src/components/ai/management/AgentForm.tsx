@@ -3,6 +3,7 @@
  * ChatTest panel. Used by AgentsTab. Extracted from AIManagementTabs.
  */
 import { useState, useEffect, useId, useRef } from 'react'
+import type { CSSProperties } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Brain, ChevronDown, Eye, EyeOff, MessageSquare, Send, Trash2 } from 'lucide-react'
 import api, { unwrap, unwrapList } from '@/lib/api'
@@ -10,6 +11,8 @@ import { interactive } from '@/lib/a11y'
 import { notifyError } from '@/lib/notify'
 import Avatar from '@/components/ui/Avatar'
 import ChipMultiSelect from '@/components/ui/ChipMultiSelect'
+// G34: the house searchable dropdown replaces the native prompt/WA-template <select>s.
+import CreatableSelect from '@/components/ui/CreatableSelect'
 import { initialsOf } from '@/lib/initials'
 import { inputStyle, Field, CopyableValue, SaveBar } from './shared'
 import { InterviewFlowSection } from './InterviewFlowSection'
@@ -17,6 +20,10 @@ import type { AiAgent, AiItem, ChatMessage } from '@/types/ai'
 // Reuse the WhatsApp-templates option shape from the workflow module's template
 // picker (GET /whatsapp-templates) instead of re-declaring it (§11 — one truth).
 import type { WaTemplateOption } from '@/components/layout/workflow/whatsappTemplate'
+
+// Mirrors shared.tsx's `Field` label style — used directly (not via `Field`) for the
+// two CreatableSelect pickers below, which need their own aria-labelledby wiring.
+const fieldLabelStyle: CSSProperties = { display: 'block', fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', marginBottom: 5, textTransform: 'uppercase', letterSpacing: '0.04em' }
 
 // The agent edit-form's local state. No `model` field (MODEL-1): the company-wide
 // model from Settings is used everywhere, never chosen per agent.
@@ -107,7 +114,7 @@ function ChatTest({ agent, onClose }: { agent: AiAgent; onClose?: () => void }) 
           placeholder={t('ai.chat.placeholder')} aria-label={t('ai.chat.placeholder')}
           style={{ ...inputStyle, flex: 1 }} />
         <button onClick={send} disabled={!input.trim() || loading} aria-label={t('common:send')}
-          style={{ width: 32, height: 32, borderRadius: 7, border: 'none', background: 'var(--color-primary)', color: 'white',
+          style={{ width: 32, height: 32, borderRadius: 7, border: 'none', background: 'var(--color-primary)', color: 'var(--color-on-accent)',
             cursor: input.trim() ? 'pointer' : 'default', opacity: input.trim() ? 1 : 0.4,
             display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
           <Send size={13} />
@@ -142,6 +149,13 @@ export function AgentForm({ agent, prompts, faqs, onSaved, onDelete }: {
   const [chatOpen,    setChatOpen]    = useState(false)
   const [showApiKey,  setShowApiKey]  = useState(false)
   const apiKeyId = useId()
+  // The prompt/WA-template pickers are now the house CreatableSelect, which renders
+  // a <button> — unlike shared.tsx's `Field` (built for <input>/<select>, htmlFor
+  // only), a button ignores an associated <label for> for its accessible name, so
+  // these two fields wire their own label id via aria-labelledby instead (mirrors
+  // components/forms/fields.tsx's Field, which already carries this exact fix).
+  const promptLabelId = useId()
+  const waTemplateLabelId = useId()
   // Custom API override is an optional, rarely-used disclosure (calm by default) —
   // pre-opened only when a value (endpoint or key) is already configured.
   const [showCustomApi, setShowCustomApi] = useState(!!agent?.custom_endpoint || !!agent?.has_custom_api_key)
@@ -248,28 +262,30 @@ export function AgentForm({ agent, prompts, faqs, onSaved, onDelete }: {
               : <p style={{ fontSize: 12, color: 'var(--text-muted)', margin: 0 }}>{t('ai.agent.webhookEmpty')}</p>}
           </Field>
 
-          <Field label={t('ai.agent.prompt')}>
-            <select value={form.prompt_id} onChange={e => set('prompt_id', e.target.value)} style={{ ...inputStyle, cursor: 'pointer' }}>
-              <option value="">{t('ai.agent.noPrompt')}</option>
-              {prompts.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
-            </select>
-          </Field>
+          <div style={{ marginBottom: 13 }}>
+            <label id={promptLabelId} style={fieldLabelStyle}>{t('ai.agent.prompt')}</label>
+            <CreatableSelect value={form.prompt_id ? String(form.prompt_id) : null} allowCreate={false} clearable
+              aria-labelledby={promptLabelId} onChange={v => set('prompt_id', v)}
+              placeholder={t('ai.agent.noPrompt')} options={prompts.map(p => ({ value: String(p.id), label: p.name ?? '' }))}
+              style={inputStyle} />
+          </div>
 
           {/* WA_INTRO_TEMPLATE-1: only real, approved, synced templates are selectable —
               never free text. Empty/loading states reuse the workflow module's wa.* copy
               (same GET /whatsapp-templates source) instead of a duplicate key. */}
-          <Field label={t('ai.agent.waIntroTemplate')}>
+          <div style={{ marginBottom: 13 }}>
+            <label id={waTemplateLabelId} style={fieldLabelStyle}>{t('ai.agent.waIntroTemplate')}</label>
             {waLoading
               ? <p style={{ fontSize: 12, color: 'var(--text-muted)', margin: 0 }}>{t('wa.templateLoading')}</p>
               : waTemplates.length === 0
                 ? <p style={{ fontSize: 12, color: 'var(--text-muted)', margin: 0 }}>{t('wa.templateEmpty')}</p>
                 : (
-                  <select value={form.wa_intro_template} onChange={e => set('wa_intro_template', e.target.value)} style={{ ...inputStyle, cursor: 'pointer' }}>
-                    <option value="">{t('ai.agent.noWaTemplate')}</option>
-                    {waTemplates.map(tpl => <option key={tpl.value} value={tpl.value}>{tpl.label}</option>)}
-                  </select>
+                  <CreatableSelect value={form.wa_intro_template || null} allowCreate={false} clearable
+                    aria-labelledby={waTemplateLabelId} onChange={v => set('wa_intro_template', v)}
+                    placeholder={t('ai.agent.noWaTemplate')} options={waTemplates}
+                    style={inputStyle} />
                 )}
-          </Field>
+          </div>
 
           {/* Kennisbank section — the general-knowledge toggle plus, when the tenant has
               FAQs, which ones this agent may draw on (soft chips, mirrors the entity

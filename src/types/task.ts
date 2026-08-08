@@ -32,6 +32,11 @@ export interface Task {
   priorityColor: string | null
   assigneeId: Id | null
   assignee: { name: string; initials: string; color: string | null } | null
+  // TASK-LOCATION-READ-1: the branch (vestiging) the task sits under, id + display
+  // name (null = no branch). Optional so pre-existing Task fixtures across the
+  // codebase (constructed before this field existed) keep type-checking.
+  locationId?: Id | null
+  location?: { id: Id; name: string } | null
   owner: { name: string }
   due: string
   // TASK-DUE-TIME-1 (BE 3f1274d): optional 24h "HH:mm" time-of-day on the due date.
@@ -81,6 +86,9 @@ export interface ApiTask {
   assignee?: { id?: Id; name?: string; avatar_color?: string | null } | null
   assignee_name?: string
   assignee_id?: Id
+  // TASK-LOCATION-READ-1 (BE golf 2a/2b, 2026-08-08): TaskListResource/
+  // TaskDetailResource now emit this after `priority`; null = no branch set.
+  location?: { id?: Id; name?: string } | null
   owner?: { name?: string }
   created_by?: { name?: string }
   owner_name?: string

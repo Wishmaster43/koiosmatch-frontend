@@ -515,7 +515,8 @@
     "deleteOneMessage": "Are you sure? '{{name}}' will be permanently deleted — this cannot be undone.",
     "deleteManyMessage": "Are you sure? {{count}} documents will be permanently deleted — this cannot be undone.",
     "deleteSelected": "Delete ({{count}})",
-    "linkLevelLabel": "Link document to"
+    "linkLevelLabel": "Link document to",
+    "allTypes": "All types"
   },
   "priceAgreements": {
     "add": "New price agreement",

@@ -9,6 +9,7 @@ import RadiusMapPanel from '@/components/map/RadiusMapPanel'
 import EntityLink from '@/components/ui/EntityLink'
 import KoiosAiMark from '@/components/ui/KoiosAiMark'
 import SearchSelect from '@/components/ui/SearchSelect'
+import GeocodeButton from '@/components/ui/GeocodeButton'
 import StatusPill from '@/components/ui/StatusPill'
 import { useCandidateSearch } from '../hooks/useCandidateSearch'
 import { useFunctions } from '@/lib/useFunctions'
@@ -52,11 +53,6 @@ export default function CandidateSearchTab({ vacancy }: { vacancy: VacancyDetail
   // The refresh-advice button's own busy flag (separate from the list's loading state).
   const [refreshing, setRefreshing] = useState(false)
 
-  // Honest empty state — no dead map/filters when the vacancy has no coordinates yet.
-  if (noLocation) {
-    return <div style={{ padding: 16, fontSize: 12, color: 'var(--text-muted)' }}>{t('candidateSearch.noLocation')}</div>
-  }
-
   const selectedRow = rows.find(r => r.id === selectedId) ?? null
   const selectCandidate = (id: Id) => setSelectedId(id)
 
@@ -87,6 +83,21 @@ export default function CandidateSearchTab({ vacancy }: { vacancy: VacancyDetail
   // Searchable checklist dropdowns (shared SearchSelect, §3A — never a hand-rolled
   // chip row), side by side: three filters wrap onto a new line only when narrow
   // (Danny 23-07: filters must sit next to each other, never stacked).
+  //
+  // NOT ADDED (verified 08-08, KAND-FILTERS-1 relocation): hours-per-week +
+  // available-before were asked for here too, mirrored after candidates/drawer/
+  // VacancySearchTab's own "offered-iff-read" hours/available-from filters. That
+  // mirror works because MatchExplorerService::vacancyShape() already returns
+  // hours_min/hours_max/start_date per row (VACANCY-MATCHES-FIELDS-1), so the tab
+  // can filter client-side once the data is present. The reverse direction has
+  // no such data: MatchExplorerService::candidateShape() (this tab's GET
+  // /vacancies/{id}/candidate-matches) returns no candidate preference fields at
+  // all, and MatchExplorerRequest doesn't accept hours_per_week_min/max or
+  // available_from_before as filter params either — unlike /candidates, this
+  // endpoint is NOT built on CandidateQuery. Wiring a filter here would either
+  // silently no-op (fake affordance, §3) or need a backend addition (shape +
+  // params) PLUS changes to ../hooks/useCandidateSearch.ts, which sits outside
+  // this task's file scope. Left out rather than shipped disabled/dead.
   const filtersRow = (
     <div style={{ display: 'flex', flexWrap: 'wrap', gap: 16 }}>
       <div style={{ minWidth: 180 }}>
@@ -110,7 +121,15 @@ export default function CandidateSearchTab({ vacancy }: { vacancy: VacancyDetail
     </div>
   )
 
-  const mapPane = (
+  // GEO-DEGRADE-1 (Danny 08-08) — mirrors candidates/drawer/VacancySearchTab: only the
+  // map needs coordinates, so an un-geocoded vacancy shows the notice in the map's
+  // place instead of blanking the whole tab. The candidate search itself keeps working.
+  const mapPane = noLocation ? (
+    <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: 16, border: '1px dashed var(--border)', borderRadius: 10 }}>
+      <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>{t('candidateSearch.noLocation')}</span>
+      <GeocodeButton endpoint={`/vacancies/${vacancy.id}/geocode`} permission="vacancies.update" variant="row" />
+    </div>
+  ) : (
     <RadiusMapPanel padded={false} points={points} center={center} radiusKm={radiusKm}
       mapHeight={'clamp(340px, calc(100vh - 540px), 720px)'}
       centerMarker={{ label: vacancy.title ?? '', sub: t('candidateSearch.centerVacancy') }}
@@ -167,7 +186,7 @@ export default function CandidateSearchTab({ vacancy }: { vacancy: VacancyDetail
   ) : error ? (
     <div style={{ padding: 16, display: 'flex', flexDirection: 'column', gap: 8 }}>
       <span style={{ fontSize: 12, color: 'var(--color-danger)' }}>{t('common:error.body')}</span>
-      <button onClick={retry} style={{ alignSelf: 'flex-start', fontSize: 12, fontWeight: 600, color: 'var(--color-primary)', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}>
+      <button onClick={retry} style={{ alignSelf: 'flex-start', fontSize: 12, fontWeight: 600, color: 'var(--color-primary-text)', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}>
         {t('common:error.retry')}
       </button>
     </div>
@@ -224,7 +243,7 @@ export default function CandidateSearchTab({ vacancy }: { vacancy: VacancyDetail
   const refreshButton = (
     <button type="button" onClick={handleRefreshAdvice} disabled={refreshing}
       style={{ display: 'inline-flex', alignItems: 'center', gap: 6, marginBottom: 10,
-        fontSize: 12, fontWeight: 600, color: 'var(--color-primary)', background: 'var(--color-primary-bg)',
+        fontSize: 12, fontWeight: 600, color: 'var(--color-primary-text)', background: 'var(--color-primary-bg)',
         border: '1px solid color-mix(in srgb, var(--color-primary) 30%, transparent)', borderRadius: 8,
         padding: '6px 12px', cursor: refreshing ? 'default' : 'pointer', opacity: refreshing ? 0.6 : 1 }}>
       <RefreshCw size={13} className={refreshing ? 'animate-spin' : ''} />

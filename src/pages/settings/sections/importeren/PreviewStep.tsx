@@ -64,7 +64,7 @@ export default function PreviewStep({ result, runStatus, runError, canImport, on
         <button type="button" onClick={onConfirm} disabled={confirmDisabled}
           title={canImport ? undefined : t('import.noImportPermission')}
           style={{ display: 'flex', alignItems: 'center', gap: 6, height: 34, padding: '0 16px', fontSize: 13,
-                   fontWeight: 500, border: 'none', borderRadius: 8, background: 'var(--color-primary)', color: 'white',
+                   fontWeight: 500, border: 'none', borderRadius: 8, background: 'var(--color-primary)', color: 'var(--color-on-accent)',
                    cursor: confirmDisabled ? 'not-allowed' : 'pointer', opacity: !canImport || nothingToImport ? 0.5 : 1 }}>
           {confirming && <Loader2 size={14} className="animate-spin" aria-hidden="true" />}
           {confirming ? t('import.preview.running') : t('import.preview.confirm')}

@@ -232,6 +232,11 @@ export function mapVacancyDetail(raw: ApiVacancy = {}): VacancyDetail {
     customerDepartmentName: raw.customer_department?.name ?? '',
     contactId: raw.contact_id != null ? String(raw.contact_id) : '',
     contactName: raw.contact?.name ?? '',
+    // SWEEP-VESTIGING: the vacancy's own bureau branch (vestiging) — was dropped
+    // entirely, so it could never round-trip. Read the raw FK first, falling back
+    // to the resolved `branch` object's own id (either arrives, per VAC-NEST-1).
+    branchId: raw.location_id != null ? String(raw.location_id) : (raw.branch?.id != null ? String(raw.branch.id) : ''),
+    branchName: raw.branch?.name ?? '',
     // Per-vacancy application settings (cv/cover_letter/photo/remarks/interview_consent → required|optional|hidden).
     applicationSettings: raw.application_settings ?? {},
     // Per-vacancy AI matching weights (6 dimensions, int 1..5) for the Matching tab.

@@ -80,7 +80,8 @@
     "created": "Erstellt",
     "groups": {
       "deal": "Deal",
-      "organisation": "Organisation"
+      "organisation": "Organisation",
+      "description": "Beschreibung"
     },
     "currency": "Währung",
     "hours": "Stunden",
@@ -111,7 +112,8 @@
     "cancel": "Abbrechen",
     "groups": {
       "general": "Allgemein",
-      "dealStage": "Wert & Phase"
+      "dealStage": "Wert & Phase",
+      "description": "Beschreibung"
     },
     "fields": {
       "title": "Titel",
@@ -164,5 +166,8 @@
     "reasons": {
       "expectedCloseOverdue": "Das erwartete Abschlussdatum ist verstrichen — bei dieser Chance nachfassen."
     }
+  },
+  "richText": {
+    "empty": "Noch nichts erfasst"
   }
 }

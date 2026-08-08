@@ -72,7 +72,7 @@ export default function OutreachList({ campaigns, loading, error, onReload, onOp
   const statusMap = {
     draft:  { label: t('status.draft'),  bg: 'var(--hover-bg)',        color: 'var(--text-muted)' },
     active: { label: t('status.active'), bg: 'var(--color-success-bg)', color: 'var(--color-success)' },
-    done:   { label: t('status.done'),   bg: 'var(--color-primary-bg)', color: 'var(--color-primary)' },
+    done:   { label: t('status.done'),   bg: 'var(--color-primary-bg)', color: 'var(--color-primary-text)' },
   }
 
   // Column order mirrors the candidates blueprint (§3A): identity → qualification →

@@ -15,7 +15,7 @@ function LineTooltip({ active, payload, label, onItemClick, unit, t, formatNumbe
     <div className="px-3 py-2 text-sm bg-white rounded-xl"
       style={{ border: '1px solid var(--border)', boxShadow: '0 4px 16px rgba(0,0,0,0.08)' }}>
       <div className="mb-0.5 font-medium text-gray-500" style={{ fontSize: 11 }}>{label}</div>
-      <div style={{ color: 'var(--color-primary)', fontSize: 13, fontWeight: 600 }}>
+      <div style={{ color: 'var(--color-primary-text)', fontSize: 13, fontWeight: 600 }}>
         {formatNumber(payload[0].value ?? 0)}{unit ? ` ${unit}` : ''}
       </div>
       {onItemClick && <div className="mt-1 text-xs text-gray-300">{t('clickForDetails')}</div>}

@@ -70,3 +70,23 @@ describe('DetailsLocationTab · address canon (V9)', () => {
     expect(screen.getAllByText('-').length).toBeGreaterThanOrEqual(2)
   })
 })
+
+// SWEEP-VESTIGING: the vacancy's own bureau branch (vestiging) now round-trips
+// through mapVacancy.ts — this proves the row actually renders the served
+// value (read-only for now; no picker in this pass, see the component's own
+// comment on why).
+describe('DetailsLocationTab · bureau branch / vestiging (SWEEP-VESTIGING)', () => {
+  it('renders the resolved branch name', () => {
+    // A name distinct from the fixture's own province ('Utrecht') so this
+    // assertion can't accidentally match that unrelated row instead.
+    const withBranch = { ...vacancy, branchName: 'Hoofdkantoor Assen' } as VacancyDetail
+    render(<DetailsLocationTab vacancy={withBranch} location={makeLocation()} />)
+    expect(screen.getByText('Hoofdkantoor Assen')).toBeInTheDocument()
+  })
+
+  it('falls back to a dash when no branch was ever picked', () => {
+    const noBranch = { ...vacancy, branchName: '' } as VacancyDetail
+    render(<DetailsLocationTab vacancy={noBranch} location={makeLocation()} />)
+    expect(screen.getAllByText('-').length).toBeGreaterThanOrEqual(1)
+  })
+})

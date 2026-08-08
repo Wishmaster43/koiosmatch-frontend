@@ -8,20 +8,28 @@
  * in the composer, even mid-error — Danny explicitly wants to SEE the Koios
  * space exist even when there is no budget left this month.
  *
- * K0-B (F4, 06-08): "Actiepunten" results now execute for REAL through
- * `NoteActionsResultsPanel` (Uitvoeren → per-item execute/confirm cards,
- * "Als tekst toevoegen" kept as the old append-as-list secondary option) —
- * improve/summarize keep the original review→Overnemen/Verwerpen idiom
- * unchanged below. The header also carries the compact Wizard/Auto switch
- * (`NoteKoiosModeToggle`, same K0 setting as the profile "Weergave" tab).
+ * K0-B (F4, 06-08): "Actiepunten" results now execute for REAL through the
+ * SHARED `AssistActionsResultsPanel` (Uitvoeren → per-item execute/confirm
+ * cards, "Als tekst toevoegen" kept as the old append-as-list secondary
+ * option) — improve/summarize keep the original review→Overnemen/Verwerpen
+ * idiom unchanged below. The header also carries the compact Wizard/Auto
+ * switch (`NoteKoiosModeToggle`, same K0 setting as the profile "Weergave" tab).
+ *
+ * CMFE-KOIOS-CONSISTENCY-1 (Danny 09-08): the state machine (useNoteAssist),
+ * the API call (assistNote) and the execute wizard
+ * (AssistActionsResultsPanel/AssistActionItemCard/useAssistActionsExecute) are
+ * now the SAME implementation the shared RichTextAssistBar uses on every other
+ * rich-text field — this file's own noteAssistApi.ts/useNoteAssist.ts/
+ * noteAssistApply.ts just re-export those names (§11 one source). What stays
+ * genuinely NOTE-specific and lives only here: linking a batch of actions to
+ * THIS note (`source={{ note_id: noteId }}`, the one field the shared execute
+ * contract recognises today) and the K0 Wizard/Auto toggle in the header (a
+ * note-popup placement decision, not a generic rich-text-field concern).
  *
  * DEFAULT-VALUE-1 (Danny 07-08, live popup feedback): the `common:notesAssist.*`
- * keys are reported to the locale owners but not yet landed in the shipped
- * JSON files (house rule: this lane never edits src/i18n/locales/**) — every
- * t() call here therefore carries a Dutch `defaultValue` so the UI never shows
- * a raw dotted key while the keys are in flight. Once the keys land, i18next
- * prefers the real translation over the default automatically — nothing here
- * needs to change.
+ * keys have since landed in all five shipped locale files — the Dutch
+ * `defaultValue`s below are a harmless leftover safety net, never the value
+ * actually shown once a real translation resolves.
  */
 import type { CSSProperties } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -30,7 +38,7 @@ import KoiosAiMark from '@/components/ui/KoiosAiMark'
 import CalloutBox from '@/components/ui/CalloutBox'
 import { useNoteAssist } from './useNoteAssist'
 import { applyAssistResult } from './noteAssistApply'
-import NoteActionsResultsPanel from './NoteActionsResultsPanel'
+import AssistActionsResultsPanel from '@/components/ui/richtext/AssistActionsResultsPanel'
 import NoteKoiosModeToggle from './NoteKoiosModeToggle'
 import { ACTION_TYPE_LABEL_NL } from './noteAssistApi'
 import type { AssistMode, AssistActionType } from './noteAssistApi'
@@ -49,12 +57,12 @@ interface NoteAssistSectionProps {
 const actionBtn = (active: boolean, disabled: boolean): CSSProperties => ({
   display: 'inline-flex', alignItems: 'center', gap: 5, fontSize: 11, fontWeight: 500,
   padding: '5px 9px', borderRadius: 7, cursor: disabled ? 'default' : 'pointer',
-  background: 'var(--color-primary-bg)', color: 'var(--color-primary)',
+  background: 'var(--color-primary-bg)', color: 'var(--color-primary-text)',
   border: '1px solid color-mix(in srgb, var(--color-primary) 30%, transparent)',
   opacity: disabled && !active ? 0.5 : 1,
 })
 const primaryBtn: CSSProperties = { display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 12, fontWeight: 600,
-  padding: '5px 11px', borderRadius: 7, cursor: 'pointer', background: 'var(--color-primary)', color: '#fff', border: 'none' }
+  padding: '5px 11px', borderRadius: 7, cursor: 'pointer', background: 'var(--color-primary)', color: 'var(--color-on-accent)', border: 'none' }
 const ghostBtn: CSSProperties = { display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 12, fontWeight: 500,
   padding: '5px 11px', borderRadius: 7, cursor: 'pointer', background: 'none', color: 'var(--text-muted)', border: '1px solid var(--border)' }
 
@@ -134,7 +142,7 @@ export default function NoteAssistSection({ body, onApply, language, noteId }: N
           Overnemen/Verwerpen idiom below stays for improve/summarize/an EMPTY
           actions result (nothing to execute). */}
       {status === 'success' && result && result.kind === 'actions' && result.items.length > 0 && (
-        <NoteActionsResultsPanel items={result.items} noteId={noteId} onApplyAsText={handleApply} onDiscard={discard} />
+        <AssistActionsResultsPanel items={result.items} source={noteId ? { note_id: noteId } : undefined} onApplyAsText={handleApply} onDiscard={discard} />
       )}
 
       {status === 'success' && result && !(result.kind === 'actions' && result.items.length > 0) && (

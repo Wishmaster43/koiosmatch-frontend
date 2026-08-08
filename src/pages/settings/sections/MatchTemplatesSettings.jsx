@@ -9,6 +9,7 @@ import SearchSelect from '@/components/ui/SearchSelect'
 import { useConfirm } from '@/hooks/useConfirm'
 import { useContractTypes } from '@/lib/useContractTypes'
 import { useFunctions } from '@/lib/useFunctions'
+import { fieldInputStyle } from '@/components/forms/fieldMetrics'
 
 // The six scoring dimensions (mirrors the backend App\Enums\MatchDimension, single
 // source of truth there, and the vacancy Matching tab's picker). Duplicated here on
@@ -25,7 +26,8 @@ const toggleInArray = (arr, value) => (arr ?? []).includes(value) ? arr.filter(x
 
 const cardStyle = { background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 10, padding: '14px 16px', marginBottom: 8 }
 const labelStyle = { fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', display: 'block', marginBottom: 4 }
-const inputStyle = { padding: '6px 10px', fontSize: 13, borderRadius: 6, border: '1px solid var(--border)', background: 'var(--input-bg)', color: 'var(--text)', outline: 'none', width: '100%', boxSizing: 'border-box' }
+// Canon field style (G33/fieldMetrics) — was its own padding-6/radius-6 copy.
+const inputStyle = fieldInputStyle
 
 // Compact read-only preview of a template's six weights (row summary) — five ticks
 // per dimension, filled up to the stored value, so the list is scannable at a glance.
@@ -295,7 +297,7 @@ export default function MatchTemplatesSettings() {
                       {t('common.cancel')}
                     </button>
                     <button onClick={() => handleSave(tpl)} disabled={saving === tpl.id || !form.name?.trim()}
-                      style={{ padding: '6px 14px', fontSize: 12, fontWeight: 600, borderRadius: 6, border: 'none', background: 'var(--color-primary)', color: 'white', cursor: 'pointer' }}>
+                      style={{ padding: '6px 14px', fontSize: 12, fontWeight: 600, borderRadius: 6, border: 'none', background: 'var(--color-primary)', color: 'var(--color-on-accent)', cursor: 'pointer' }}>
                       {saving === tpl.id ? t('common.saving') : t('common.save')}
                     </button>
                   </div>
@@ -328,7 +330,7 @@ export default function MatchTemplatesSettings() {
                 {t('common.cancel')}
               </button>
               <button onClick={handleCreate} disabled={!newForm.name.trim() || saving === 'new'}
-                style={{ padding: '6px 14px', fontSize: 12, fontWeight: 600, borderRadius: 6, border: 'none', background: 'var(--color-primary)', color: 'white', cursor: 'pointer' }}>
+                style={{ padding: '6px 14px', fontSize: 12, fontWeight: 600, borderRadius: 6, border: 'none', background: 'var(--color-primary)', color: 'var(--color-on-accent)', cursor: 'pointer' }}>
                 {saving === 'new' ? t('common.saving') : t('matchTemplatesSettings.add')}
               </button>
             </div>

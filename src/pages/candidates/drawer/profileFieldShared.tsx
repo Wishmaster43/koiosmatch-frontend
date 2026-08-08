@@ -10,13 +10,11 @@ import type { CSSProperties, ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Edit2, Save, X } from 'lucide-react'
 import { CANON_LABEL_STYLE } from '@/components/drawer/fieldRowCanon'
+import { fieldInputStyle } from '@/components/forms/fieldMetrics'
 
-// Shared input styling for text/date/combobox controls across all three tabs.
-export const inputStyle: CSSProperties = {
-  width: '100%', padding: '7px 10px', fontSize: 12, borderRadius: 6,
-  border: '1px solid var(--border)', background: 'var(--input-bg)', color: 'var(--text)',
-  boxSizing: 'border-box',
-}
+// Shared input styling for text/date/combobox controls across all three tabs
+// (G33/fieldMetrics canon — was its own padding-7/font-12/radius-6 copy).
+export const inputStyle: CSSProperties = fieldInputStyle
 
 // Shared square icon-button sizing for the pencil/save/cancel controls.
 export const iconBtn: CSSProperties = {

@@ -1,60 +1,24 @@
 import { useState, useRef, useEffect, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
-import { History, X } from 'lucide-react'
+import { History } from 'lucide-react'
 import { sectionTitle } from '@/components/ui/SectionCard'
-import { useFocusTrap } from '@/hooks/useFocusTrap'
-
-interface ChangelogPanelProps { label: string; onClose: () => void; children: ReactNode }
-
-/**
- * ChangelogPanel — the actual popover surface, mounted only while open. Its own
- * component (rather than an inline conditional block) so useFocusTrap (§6) attaches
- * on a fresh mount — a single always-mounted parent toggling visibility would never
- * re-run the trap effect the moment the panel first appears. `children` is the
- * entity's own content component (e.g. candidates' ChangelogTab), only rendered
- * (and thus only fetched) while this panel is mounted.
- */
-function ChangelogPanel({ label, onClose, children }: ChangelogPanelProps) {
-  const { t } = useTranslation('common')
-  const panelRef = useFocusTrap<HTMLDivElement>(onClose)
-  return (
-    <div ref={panelRef} role="dialog" aria-modal="true" aria-label={label} tabIndex={-1}
-      style={{ position: 'fixed', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', zIndex: 400,
-        width: 900, maxWidth: '92vw', maxHeight: '82vh', display: 'flex', flexDirection: 'column',
-        background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 10,
-        boxShadow: '0 8px 28px rgba(0,0,0,0.16)', overflow: 'hidden' }}>
-      {/* Popover header — title + close, supplies the chrome the bare content drops. */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-        padding: '12px 14px', borderBottom: '1px solid var(--border)', flexShrink: 0 }}>
-        <span style={{ ...sectionTitle, display: 'flex', alignItems: 'center', gap: 7 }}>
-          <History size={14} style={{ color: 'var(--text-muted)' }} /> {label}
-        </span>
-        {/* Close carries its OWN name: inherited from the candidate original, this button
-            repeated the popover's label, so a screen reader announced two identical
-            "Wijzigingslog" buttons — one opening, one closing (§6). */}
-        <button onClick={onClose} aria-label={t('close')}
-          style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: 2, display: 'flex' }}>
-          <X size={15} />
-        </button>
-      </div>
-      {/* Scrollable body — the caller's own changelog content, no card of its own. */}
-      <div style={{ overflowY: 'auto', padding: '12px 14px' }}>
-        {children}
-      </div>
-    </div>
-  )
-}
+import FloatingPanel from '@/components/ui/FloatingPanel'
 
 /**
  * ChangelogPopover — THE one shared record-history affordance for every entity
  * drawer (Danny 27-07: "changelog icon in alle drill downs nalopen, moet zijn zoals
  * kandidaat drill down"; §3A(d): record history is a changelog ICON-popover in the
- * title row, never a tab). Promoted from the candidate drawer (the house standard)
- * so every entity gets the identical 900px centred panel, focus trap, Escape-to-
- * close and focus-restore instead of a hand-rolled 360px corner dropdown. This
- * shell owns only the icon/open-close/outside-click/focus-trap/global-open-request
- * chrome — each entity keeps its OWN content (fetch + field-label mapping) and
- * passes it as `children`, and its own already-translated `label`.
+ * title row, never a tab). This shell owns only the icon/open-close/outside-click/
+ * global-open-request chrome — each entity keeps its OWN content (fetch + field-label
+ * mapping) and passes it as `children`, and its own already-translated `label`.
+ *
+ * POPUP-SLEEP (Danny punt 19, "wijzigingslog niet sleepbaar; elke popup sleepbaar"):
+ * the hand-rolled fixed/centred panel is gone — the window IS the shared
+ * FloatingPanel now, so it inherits the one drag/resize/remember-my-spot engine
+ * (useDraggablePanel) plus the focus trap, Escape-to-close and focus restore. It runs
+ * MODELESS (`overlay={false}`): a changelog is a reference window you drag aside to
+ * compare against the record underneath, so a dimming scrim would defeat its purpose.
+ * `persistKey` makes it reopen where the recruiter left it.
  */
 export default function ChangelogPopover({ label, children }: { label?: string; children: ReactNode }) {
   const { t } = useTranslation('common')
@@ -76,7 +40,8 @@ export default function ChangelogPopover({ label, children }: { label?: string; 
   }, [])
 
   // Close on outside click while the popover is open (Escape is handled by the
-  // panel's own focus trap).
+  // panel's own focus trap). The panel renders INSIDE this wrapper, so a click on
+  // its chrome — including a drag on the header — never counts as "outside".
   useEffect(() => {
     if (!open) return
     const onClick = (e: MouseEvent) => { if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false) }
@@ -90,11 +55,20 @@ export default function ChangelogPopover({ label, children }: { label?: string; 
       <button onClick={() => setOpen(o => !o)} title={title}
         aria-label={title} aria-haspopup="dialog" aria-expanded={open}
         style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 4, display: 'flex',
-          color: open ? 'var(--color-primary)' : 'var(--text-muted)' }}>
+          color: open ? 'var(--color-primary-text)' : 'var(--text-muted)' }}>
         <History size={14} />
       </button>
 
-      {open && <ChangelogPanel label={title} onClose={() => setOpen(false)}>{children}</ChangelogPanel>}
+      <FloatingPanel open={open} onClose={() => setOpen(false)} ariaLabel={title}
+        width={900} maxWidth="92vw" persistKey="changelog" overlay={false}
+        bodyStyle={{ padding: '12px 14px' }}
+        header={(
+          <span style={{ ...sectionTitle, display: 'flex', alignItems: 'center', gap: 7 }}>
+            <History size={14} style={{ color: 'var(--text-muted)' }} /> {title}
+          </span>
+        )}>
+        {children}
+      </FloatingPanel>
     </div>
   )
 }

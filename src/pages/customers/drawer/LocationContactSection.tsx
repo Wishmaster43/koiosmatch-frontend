@@ -61,7 +61,7 @@ const LinkMatchButton = ({ label, onClick, busy }: { label: string; onClick: () 
     style={{
       display: 'flex', alignItems: 'center', gap: 6, height: 26, padding: '0 10px',
       fontSize: 12, fontWeight: 600, borderRadius: 7, border: 'none',
-      background: 'var(--color-primary)', color: '#fff',
+      background: 'var(--color-primary)', color: 'var(--color-on-accent)',
       cursor: busy ? 'not-allowed' : 'pointer', opacity: busy ? 0.7 : 1,
     }}>
     {busy ? <Loader2 size={12} className="animate-spin" /> : <Star size={12} />}

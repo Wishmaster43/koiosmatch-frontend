@@ -35,12 +35,12 @@ export default function OutreachBulkBar({ count, onClear, onSetStatus, onArchive
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: 10, width: '100%',
       padding: '8px 12px', borderRadius: 8, background: 'var(--color-primary-bg)', border: '1px solid var(--color-primary)' }}>
-      <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--color-primary)' }}>{t('bulk.selected', { count })}</span>
+      <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--color-primary-text)' }}>{t('bulk.selected', { count })}</span>
       <ActionMenu label={t('bulk.actions')} icon={ListChecks} items={items} />
       {/* BTN_H (§4/§9): one explicit height for every text/action button, everywhere. */}
       <button onClick={onClear}
         style={{ display: 'flex', alignItems: 'center', gap: 5, marginLeft: 'auto', height: BTN_H, padding: '0 10px', fontSize: 12,
-          border: 'none', borderRadius: 7, background: 'none', color: 'var(--color-primary)', cursor: 'pointer', fontWeight: 500 }}>
+          border: 'none', borderRadius: 7, background: 'none', color: 'var(--color-primary-text)', cursor: 'pointer', fontWeight: 500 }}>
         <X size={13} /> {t('bulk.deselect')}
       </button>
     </div>

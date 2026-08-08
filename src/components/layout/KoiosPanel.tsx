@@ -3,6 +3,7 @@ import type { ChangeEvent, KeyboardEvent } from 'react'
 import { useTranslation } from 'react-i18next'
 import { X, Bot, AtSign, Paperclip, ArrowUp } from 'lucide-react'
 import { useLocale } from '@/lib/datetime'
+import { usePrefersReducedMotion } from '@/hooks/usePrefersReducedMotion'
 import { useKoiosChat } from './koios/useKoiosChat'
 import { useKoiosSettings } from './koios/useKoiosSettings'
 import { useKoiosPanelWidth } from './koios/useKoiosPanelWidth'
@@ -58,7 +59,8 @@ function KoiosMessage({ msg, isNew, t, locale }: { msg: KoiosChatMessage; isNew?
       {isKoios && (
         <div style={{ width: 26, height: 26, borderRadius: '50%', flexShrink: 0, marginBottom: 2,
           background: GRADIENT, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <Bot size={13} color="white" />
+          {/* GRADIENT embeds the tenant accent — the on-accent token, not a hardcoded white. */}
+          <Bot size={13} color="var(--color-on-accent)" />
         </div>
       )}
       <div style={{ maxWidth: '84%', display: 'flex', flexDirection: 'column',
@@ -68,7 +70,7 @@ function KoiosMessage({ msg, isNew, t, locale }: { msg: KoiosChatMessage; isNew?
           borderRadius: isKoios ? '4px 16px 16px 16px' : '16px 4px 16px 16px',
           fontSize: 13, lineHeight: 1.6, whiteSpace: 'pre-wrap',
           background: isKoios ? 'var(--surface)' : GRADIENT,
-          color:      isKoios ? (notice ? 'var(--text-muted)' : 'var(--text)') : '#fff',
+          color:      isKoios ? (notice ? 'var(--text-muted)' : 'var(--text)') : 'var(--color-on-accent)',
           border:     isKoios ? '1px solid var(--border)' : 'none',
           boxShadow:  isKoios ? 'none' : '0 2px 10px rgba(99,102,241,0.35)',
         }}>
@@ -94,7 +96,7 @@ function TypingIndicator() {
     <div style={{ display: 'flex', gap: 8, alignItems: 'flex-end' }}>
       <div style={{ width: 26, height: 26, borderRadius: '50%', flexShrink: 0,
         background: GRADIENT, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        <Bot size={13} color="white" />
+        <Bot size={13} color="var(--color-on-accent)" />
       </div>
       <div style={{ padding: '10px 14px', borderRadius: '4px 16px 16px 16px',
         background: 'var(--surface)', border: '1px solid var(--border)',
@@ -139,11 +141,9 @@ export default function KoiosPanel({ open, onClose, onNavigate }: { open?: boole
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const bottomRef   = useRef<HTMLDivElement>(null)
   const mentionRef  = useRef<HTMLDivElement>(null)
-  // prefers-reduced-motion (§6): guarded for jsdom/older browsers where
-  // matchMedia is absent, so it never breaks a plain render.
-  const [reduceMotion, setReduceMotion] = useState(() =>
-    typeof window !== 'undefined' && typeof window.matchMedia === 'function'
-      && window.matchMedia('(prefers-reduced-motion: reduce)').matches)
+  // prefers-reduced-motion (§6) — now the shared hook (§11: the drag layer needed the
+  // same signal, so this inline copy was promoted instead of duplicated).
+  const reduceMotion = usePrefersReducedMotion()
   // Real tenant counts for the mention categories — fetched once, lazily, the
   // first time the menu opens (never blocks the menu's first paint).
   const mentionCounts = useKoiosMentionCounts(showMention)
@@ -166,16 +166,6 @@ export default function KoiosPanel({ open, onClose, onNavigate }: { open?: boole
     }
     document.addEventListener('mousedown', handler)
     return () => document.removeEventListener('mousedown', handler)
-  }, [])
-
-  // Track prefers-reduced-motion live, so toggling it in the OS applies
-  // without a reload; no-ops where matchMedia isn't available (jsdom/tests).
-  useEffect(() => {
-    if (typeof window === 'undefined' || typeof window.matchMedia !== 'function') return
-    const mq = window.matchMedia('(prefers-reduced-motion: reduce)')
-    const onChange = () => setReduceMotion(mq.matches)
-    mq.addEventListener('change', onChange)
-    return () => mq.removeEventListener('change', onChange)
   }, [])
 
   // Submit the composer: hand the text + context refs to the hook, then clear + refocus.
@@ -322,7 +312,7 @@ export default function KoiosPanel({ open, onClose, onNavigate }: { open?: boole
                   display: 'inline-flex', alignItems: 'center', gap: 4, padding: '3px 8px', borderRadius: 999,
                   fontSize: 11, fontWeight: 500,
                   background: 'color-mix(in srgb, var(--color-primary) 12%, transparent)',
-                  color: 'var(--color-primary)',
+                  color: 'var(--color-primary-text)',
                   border: `1px ${pending ? 'dashed' : 'solid'} color-mix(in srgb, var(--color-primary) 40%, transparent)`,
                 }}>
                   {ref.label}
@@ -408,7 +398,10 @@ export default function KoiosPanel({ open, onClose, onNavigate }: { open?: boole
                 width: 30, height: 30, borderRadius: '50%', border: 'none', flexShrink: 0,
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
                 background: input.trim() && !loading ? 'var(--text)' : 'var(--border)',
-                color: 'white',
+                // Fill is the inverted text/bg pair (dark pill in light mode, light pill in
+                // dark mode) — var(--bg) is guaranteed to contrast var(--text) by definition,
+                // unlike the raw 'white' this replaced (unreadable at 1.09:1 in dark mode).
+                color: input.trim() && !loading ? 'var(--bg)' : 'var(--text-muted)',
                 cursor: input.trim() && !loading ? 'pointer' : 'default',
                 transition: 'background 0.15s, transform 0.1s',
               }}

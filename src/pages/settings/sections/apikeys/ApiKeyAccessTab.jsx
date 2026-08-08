@@ -34,8 +34,9 @@ export default function ApiKeyAccessTab({ scopes, onSave }) {
       <div className="flex items-center justify-between" style={{ marginBottom: 14 }}>
         <p style={{ fontSize: 12, color: 'var(--text-muted)' }}>{t('apiKeys.access.subtitle')}</p>
         {/* BTN_H (§4/§9): one explicit height for every text/action button, everywhere. */}
+        {/* Success fill needs its own on-* token — white only reaches ~3.3:1 there (WCAG audit 2026-08). */}
         <button onClick={save} disabled={!dirty || saving}
-          style={{ display: 'flex', alignItems: 'center', gap: 6, height: BTN_H, padding: '0 14px', fontSize: 13, fontWeight: 500, border: 'none', borderRadius: 8, cursor: dirty && !saving ? 'pointer' : 'default', opacity: dirty || saved ? 1 : 0.55, background: saved ? 'var(--color-success)' : 'var(--color-primary)', color: 'white' }}>
+          style={{ display: 'flex', alignItems: 'center', gap: 6, height: BTN_H, padding: '0 14px', fontSize: 13, fontWeight: 500, border: 'none', borderRadius: 8, cursor: dirty && !saving ? 'pointer' : 'default', opacity: dirty || saved ? 1 : 0.55, background: saved ? 'var(--color-success)' : 'var(--color-primary)', color: saved ? 'var(--color-on-success)' : 'var(--color-on-accent)' }}>
           {saved ? <><Check size={13} /> {t('common.saved')}</> : saving ? <><RefreshCw size={13} className="animate-spin" /> {t('common.saving')}</> : <><Save size={13} /> {t('common.save')}</>}
         </button>
       </div>

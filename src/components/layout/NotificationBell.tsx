@@ -53,7 +53,8 @@ export default function NotificationBell() {
         {unseen > 0 && (
           <span style={{
             position: 'absolute', top: -5, right: -5,
-            background: 'var(--color-danger)', color: '#fff',
+            // Fixed danger fill needs its own on-danger token, never a raw hex.
+            background: 'var(--color-danger)', color: 'var(--color-on-danger)',
             borderRadius: 999, fontSize: 10, fontWeight: 700,
             minWidth: 16, height: 16, display: 'flex', alignItems: 'center', justifyContent: 'center',
             padding: '0 4px', lineHeight: 1,

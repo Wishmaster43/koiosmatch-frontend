@@ -41,12 +41,23 @@
  * panel): `initialVacancyId` seeds the vacancy picker once on mount — a soft
  * prefill, not a lock, so a misklik stays recoverable via the same searchable
  * combobox.
+ *
+ * EDIT MODE (Danny punt 5, 08-08 — the pencil on a candidate application row):
+ * with `editApplicationId` set this form PREFILLS from GET /applications/{id}
+ * (vacancy, recruiter, funnel phase) and submits `PATCH /applications/{id}`
+ * instead of POSTing — the exact shape MatchModal's own pencil/edit mode uses.
+ * Only CHANGED fields go in the payload: UpdateApplicationRequest validates each
+ * field `sometimes`, and re-sending an unchanged stage would write a phantom
+ * stage transition into the application's own stage history. The create-only
+ * seeds (owner derivation chain, default start stage) stand down in edit mode so
+ * they can never overwrite what the record already holds.
  */
 import { useState, useEffect, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { AlertTriangle } from 'lucide-react'
-import api from '@/lib/api'
+import api, { unwrap } from '@/lib/api'
 import { notifyError, notifySuccess } from '@/lib/notify'
+import { extractApiError } from '@/lib/extractApiError'
 import CreatableSelect from '@/components/ui/CreatableSelect'
 import FloatingPanel from '@/components/ui/FloatingPanel'
 import { useVacancyOptions } from '../hooks/useVacancyOptions'
@@ -67,7 +78,7 @@ const fieldFootprint: React.CSSProperties = { padding: '8px 11px', borderRadius:
 // 422 field-error keys are snake_case; map them back to this form's field names.
 const API_TO_FORM: Record<string, string> = { candidate_id: 'candidateId', vacancy_id: 'vacancyId', owner_id: 'ownerId', application_stage_id: 'phase' }
 
-export default function AddApplicationModal({ candidateId, candidateOwnerId, candidateOwnerName, initialVacancyId, onClose, onCreated }: {
+export default function AddApplicationModal({ candidateId, candidateOwnerId, candidateOwnerName, initialVacancyId, editApplicationId, onClose, onCreated }: {
   candidateId: Id
   // OWNER-DEVIATION-1: the candidate's own owner, passed down from the already-
   // loaded drawer record (WorkTab's `c.ownerId`/`c.owner`) — never refetched.
@@ -76,10 +87,13 @@ export default function AddApplicationModal({ candidateId, candidateOwnerId, can
   // VACANCY-PREFILL-1: a vacancy already chosen by the caller (e.g. the score panel
   // in VacancySearchTab) — seeds the picker once, still freely changeable.
   initialVacancyId?: Id
+  // Punt 5: set from an application row's pencil — prefill + PATCH instead of POST.
+  editApplicationId?: Id
   onClose: () => void
   onCreated: () => void
 }) {
   const { t } = useTranslation('candidates')
+  const editing = editApplicationId != null
   const vacancyOptions = useVacancyOptions(true)
   // S24b: the real stage id (not just the slug) — needed to submit application_stage_id.
   const { stages, defaultStage } = useApplicationStages()
@@ -100,7 +114,10 @@ export default function AddApplicationModal({ candidateId, candidateOwnerId, can
   // allowed); block additionally disables the submit button (§3A "calm explanation",
   // never a silent 422 the recruiter has to decode).
   const { decision: appRuleDecision } = useActionRulePreflight('application.create', { candidateId: String(candidateId || '') })
-  const appRuleBlocked = appRuleDecision?.effect === 'block'
+  // Edit mode never creates anything, so the application.create rule may neither
+  // warn nor block there — the decision itself stays loaded (Rules of Hooks), only
+  // its effect on this form is gated.
+  const appRuleBlocked = !editing && appRuleDecision?.effect === 'block'
 
   // VACANCY-PREFILL-1: seed once from the caller's prop (a lazy initializer, read
   // only at mount) — the picker still lets the recruiter pick a different vacancy.
@@ -109,6 +126,9 @@ export default function AddApplicationModal({ candidateId, candidateOwnerId, can
   const [phaseId, setPhaseId] = useState(() => defaultStage?.id ?? '')
   const [saving, setSaving] = useState(false)
   const [errors, setErrors] = useState<Record<string, boolean>>({})
+  // EDIT MODE: the record as loaded, so the PATCH below can send only what changed.
+  const [loaded, setLoaded] = useState<{ vacancyId: string; ownerId: string; phaseKey: string } | null>(null)
+  const phaseSeededRef = useRef(false)
 
   // The picked vacancy's own option row — carries ownerId/ownerName (useVacancyOptions
   // reads it straight off VacancyListResource's `owner`, no extra fetch, see that hook).
@@ -161,16 +181,74 @@ export default function AddApplicationModal({ candidateId, candidateOwnerId, can
   // the default. Re-sync to the CURRENT default whenever it no longer matches a real
   // option; skipped once the recruiter (or an already-valid default) picked one.
   useEffect(() => {
+    // Edit mode prefills the record's OWN stage below — never seed a default over it.
+    if (editing) return
     if (phaseId && stages.some(s => s.id === phaseId)) return
     if (!defaultStage) return
     setPhaseId(defaultStage.id)
-  }, [defaultStage, stages, phaseId])
+  }, [defaultStage, stages, phaseId, editing])
 
-  // Create via the canonical POST /applications — vacancy_id may be null (open application).
+  // EDIT MODE prefill (punt 5): one GET of the full record — the candidate-embedded
+  // row is thin (no owner, no phase key), exactly like MatchModal's own edit-mode
+  // fetch. `alive` guards a fast id switch so a stale response can never win.
+  useEffect(() => {
+    if (!editing) return
+    let alive = true
+    api.get(`/applications/${editApplicationId}`)
+      .then(r => {
+        if (!alive) return
+        const d = unwrap(r) as { vacancy?: { id?: Id } | null; owner?: { id?: Id } | null; phase_key?: string | null }
+        const snap = {
+          vacancyId: d?.vacancy?.id != null ? String(d.vacancy.id) : '',
+          ownerId: d?.owner?.id != null ? String(d.owner.id) : '',
+          phaseKey: d?.phase_key ?? '',
+        }
+        setLoaded(snap)
+        setVacancyId(snap.vacancyId)
+        // The stored owner counts as an explicit choice: the create-time derivation
+        // chain (vacancy > candidate > me) must never overwrite it.
+        ownerManualRef.current = true
+        setOwnerIdState(snap.ownerId)
+      })
+      .catch(err => { if (alive) notifyError(extractApiError(err, t('work.applicationLoadFailed'))) })
+    return () => { alive = false }
+  }, [editing, editApplicationId]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Map the loaded `phase_key` onto the REAL stage id once the tenant lookup has
+  // resolved — the seed fallback's fake ids would otherwise stick (the same
+  // measured trap the create-mode default effect documents above). Seeded once,
+  // so a manual pick made while the lookup was still loading survives.
+  useEffect(() => {
+    if (!editing || phaseSeededRef.current) return
+    const stage = loaded?.phaseKey ? stages.find(s => s.value === loaded.phaseKey) : undefined
+    if (!stage) return
+    phaseSeededRef.current = true
+    setPhaseId(stage.id)
+  }, [editing, loaded, stages])
+
+  // Create via the canonical POST /applications — vacancy_id may be null (open
+  // application) — or, in EDIT mode, PATCH /applications/{id} with the changed
+  // fields only (measured contract: UpdateApplicationRequest takes vacancy_id /
+  // owner_id / application_stage_id, each `sometimes`).
   const submit = async () => {
     setSaving(true)
     setErrors({})
     try {
+      if (editing) {
+        const payload: Record<string, unknown> = {}
+        if ((loaded?.vacancyId ?? '') !== vacancyId) payload.vacancy_id = vacancyId || null
+        if ((loaded?.ownerId ?? '') !== ownerId) payload.owner_id = ownerId || null
+        const loadedStageId = loaded?.phaseKey ? (stages.find(s => s.value === loaded.phaseKey)?.id ?? '') : ''
+        if (phaseId && phaseId !== loadedStageId) payload.application_stage_id = phaseId
+        // Nothing changed: close without a pointless write (and without a fake
+        // "bijgewerkt" toast for a request that never happened).
+        if (Object.keys(payload).length > 0) {
+          await api.patch(`/applications/${editApplicationId}`, payload)
+          notifySuccess(t('work.applicationUpdated'))
+        }
+        onCreated(); onClose()
+        return
+      }
       await api.post('/applications', {
         candidate_id: candidateId, vacancy_id: vacancyId || null, owner_id: ownerId || null,
         application_stage_id: phaseId || undefined,
@@ -187,18 +265,22 @@ export default function AddApplicationModal({ candidateId, candidateOwnerId, can
         Object.keys(apiErrors).forEach(k => { e2[API_TO_FORM[k] ?? k] = true })
         setErrors(e2)
       }
-      notifyError(e?.response?.data?.message ?? t('work.applicationFailed'))
+      notifyError(e?.response?.data?.message ?? t(editing ? 'work.applicationUpdateFailed' : 'work.applicationFailed'))
     } finally { setSaving(false) }
   }
+
+  // One title/labels source for both modes (§5: never a hardcoded twin).
+  const title = t(editing ? 'work.editApplication' : 'work.addApplication')
 
   return (
     // POPUP-SLEEP-1: migrated onto the shared FloatingPanel — draggable header,
     // SE-resize, remembered position; same overlay/Esc/backdrop semantics as before.
-    <FloatingPanel open onClose={onClose} title={t('work.addApplication')} ariaLabel={t('work.addApplication')}
+    <FloatingPanel open onClose={onClose} title={title} ariaLabel={title}
       persistKey="candidate-add-application" width={420} maxWidth="92vw" bodyStyle={{ padding: 22 }}>
 
-        {/* AXIS-MATRIX-2 preflight — warn/block on this candidate before the recruiter picks a vacancy. */}
-        {appRuleDecision && appRuleDecision.effect !== 'allow' && (
+        {/* AXIS-MATRIX-2 preflight — warn/block on this candidate before the recruiter
+            picks a vacancy. Create only: editing an existing application is not a create. */}
+        {!editing && appRuleDecision && appRuleDecision.effect !== 'allow' && (
           <div style={{ marginBottom: 14 }}><ActionRuleBanner decision={appRuleDecision} /></div>
         )}
 
@@ -257,8 +339,8 @@ export default function AddApplicationModal({ candidateId, candidateOwnerId, can
         <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8 }}>
           <button onClick={onClose} style={{ height: 34, padding: '0 16px', fontSize: 13, border: '1px solid var(--border)', borderRadius: 8, background: 'var(--surface)', cursor: 'pointer', color: 'var(--text)' }}>{t('common:cancel')}</button>
           <button onClick={submit} disabled={saving || appRuleBlocked}
-            style={{ height: 34, padding: '0 16px', fontSize: 13, fontWeight: 500, border: 'none', borderRadius: 8, background: 'var(--color-primary)', color: '#fff', cursor: !appRuleBlocked ? 'pointer' : 'default', opacity: !appRuleBlocked ? 1 : 0.4 }}>
-            {saving ? t('common:saving') : t('work.createApplication')}
+            style={{ height: 34, padding: '0 16px', fontSize: 13, fontWeight: 500, border: 'none', borderRadius: 8, background: 'var(--color-primary)', color: 'var(--color-on-accent)', cursor: !appRuleBlocked ? 'pointer' : 'default', opacity: !appRuleBlocked ? 1 : 0.4 }}>
+            {saving ? t('common:saving') : t(editing ? 'common:save' : 'work.createApplication')}
           </button>
         </div>
     </FloatingPanel>

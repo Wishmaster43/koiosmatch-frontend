@@ -1,0 +1,201 @@
+/**
+ * ApplicationRow — ONE row of the candidate drawer's Sollicitaties list
+ * (WorkTab's "applications" sub-tab). Extracted from WorkTab (Danny punt 5/7,
+ * 08-08) because the row stopped being read-only text: it now carries the record
+ * link, the edit pencil and the detach action, and WorkTab was heading past the
+ * §3 split trigger with all of it inline.
+ *
+ * PUNT 5 — the row IS an application, so its title is the shared `EntityLink` to
+ * the APPLICATION record: the name opens it in-app (accent colour), the trailing
+ * icon opens the same record in a new window. Same shape the customer drawer's
+ * own application list uses (CustomerApplicationsList links its primary cell to
+ * `page="applications"`), so both application lists read as one system.
+ * DELIBERATE CHANGE, reported to the manager: the title used to link to the
+ * VACANCY. The vacancy stays reachable through its own external-URL icon at the
+ * end of the row (unchanged) and from the application drawer's Vacature tab; a
+ * second in-app link on the same line would mean two identical ⧉ icons per row,
+ * exactly what MatchCard's `hideIcon` exists to avoid. A row without an
+ * application id (should not happen — CandidateResource always sends it) keeps
+ * the old vacancy-link fallback rather than losing its link entirely.
+ *
+ * PUNT 7 — detach: the pencil's neighbour. Both are permission-gated on
+ * `applications.update` (the backend route group's own middleware) and render
+ * nothing at all for a viewer without it, mirroring RejectionSummary /
+ * InterviewStatusCard: a disabled-looking button for an action the server will
+ * refuse is a fake affordance (§3).
+ *
+ * EXPAND (Danny 09-08: "bij matches heb ik een pijltje om uit te klappen … bij
+ * sollicitaties niet. Dat is niet consistent") — the row now carries the SAME
+ * disclosure MatchCard's `collapsible` mode has: collapsed by default, a trailing
+ * chevron (ChevronRight → ChevronDown, no animation, exactly as there), a click on
+ * the row's own empty space as the mouse convenience on top of it, and the label/
+ * value panel rendered in place below. The panel body lives in
+ * `ApplicationRowDetails` (it loads the application detail — see that file's
+ * docblock for why the embedded row cannot carry it).
+ * Gated on `applications.view`: GET /applications/{id} sits behind that permission
+ * (routes/api/tenant/applications-matches.php:17), so a chevron that could only
+ * ever 403 is never rendered (§3).
+ */
+import type { CSSProperties } from 'react'
+import { useId, useState } from 'react'
+import { useTranslation } from 'react-i18next'
+import { Calendar, Clock, User, Building2, Video, Phone, Pencil, Unlink, ExternalLink, ChevronRight, ChevronDown } from 'lucide-react'
+import EntityLink from '@/components/ui/EntityLink'
+import StatusPill from '@/components/ui/StatusPill'
+import ApplicationRowDetails from './ApplicationRowDetails'
+import { useDateFormat } from '@/lib/datetime'
+import { rememberReturnTab } from './constants'
+import { vacancyLabelOf, vacancyUrlOf } from './applicationRowModel'
+import type { AppRow, Appt } from './applicationRowModel'
+import type { ExistingAppointment } from './PlanIntakeModal'
+import type { Id } from '@/types/common'
+
+// Row action icon (pencil / unlink) — the MatchCard idiom: bare icon button, muted
+// by default, the danger token only on the destructive one. Tokens only (§4).
+const iconBtn: CSSProperties = { display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: 22, height: 22, border: 'none', background: 'none', borderRadius: 5, cursor: 'pointer', padding: 0, flexShrink: 0 }
+// Title cell: grows, never pushes the pills/date off the row.
+const titleCell: CSSProperties = { fontWeight: 500, flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }
+
+// Icon per modality (office/remote/phone) for the appointment line — module scope
+// so it is one stable component type, never re-created on every render.
+const ModalityIcon = ({ m }: { m?: string }) => m === 'remote' ? <Video size={11} /> : m === 'phone' ? <Phone size={11} /> : <Building2 size={11} />
+
+export default function ApplicationRow({ candidateId, row, appointment, canManage, canView = false, onEdit, onDetach, onEditAppointment }: {
+  candidateId: Id
+  row: AppRow
+  // The appointment linked to THIS application (resolved by the host from its own list).
+  appointment?: Appt
+  // applications.update — the one permission the backend requires for PATCH + DELETE.
+  canManage: boolean
+  // applications.view — the permission GET /applications/{id} needs; gates the
+  // expand chevron, since the panel has nothing to load without it.
+  canView?: boolean
+  // Pencil: reopens the application form in EDIT mode (host owns the modal state).
+  onEdit: (applicationId: Id) => void
+  // Unlink: hands the row to the host's reason prompt (DELETE needs a reason, measured).
+  onDetach: (row: AppRow) => void
+  // Pencil on the appointment line: prefilled intake modal (host owns the state).
+  onEditAppointment: (existing: ExistingAppointment) => void
+}) {
+  const { t } = useTranslation(['candidates', 'common'])
+  const { formatDate, locale } = useDateFormat()
+
+  // Vacancy-less intake applications have no title → show a dash (CONSIST-2).
+  const label = vacancyLabelOf(row) ?? '—'
+  const url = vacancyUrlOf(row)
+  const vacancyId = row.vacancy?.id ?? null
+  const applicationId = row.id ?? null
+
+  // Disclosure state — collapsed by default, per row, purely presentational
+  // (mirrors MatchCard's own `expanded`). Only offered when there IS an
+  // application to load and the viewer may read it.
+  const [expanded, setExpanded] = useState(false)
+  const collapsible = canView && applicationId != null
+  const toggle = () => setExpanded(x => !x)
+  // Stable ids so the button owns the panel (aria-controls) and the panel is named
+  // by the button (aria-labelledby) — the arrow is never the only signal (§6).
+  const rowId = useId()
+  const toggleId = `${rowId}-toggle`
+  const panelId = `${rowId}-panel`
+  // The row's own empty space toggles too (MatchCard idiom); the interactive
+  // clusters below stop propagation so links/buttons keep working independently.
+  const stop = (e: { stopPropagation: () => void }) => e.stopPropagation()
+
+  // "09:00–09:30" from scheduled_at + duration_min. The BE stores the wall time the
+  // user entered as UTC, so this MUST read it back as UTC — Date's local getters
+  // would shift it (+2h in Europe/Amsterdam) instead of showing the entered time.
+  const timeRange = (a: Appt) => {
+    if (!a.scheduled_at) return ''
+    const start = new Date(a.scheduled_at)
+    const hhmm = (d: Date) => d.toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit', timeZone: 'UTC' })
+    if (!a.duration_min) return hhmm(start)
+    const end = new Date(start.getTime() + a.duration_min * 60000)
+    return `${hhmm(start)}–${hhmm(end)}`
+  }
+
+  return (
+    <div>
+      <div onClick={collapsible ? toggle : undefined}
+        style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 12px', fontSize: 12, color: 'var(--text)', cursor: collapsible ? 'pointer' : undefined }}>
+        {(row.logo_url ?? row.vacancy?.logo_url) && <img src={row.logo_url ?? row.vacancy?.logo_url} alt="" style={{ width: 24, height: 24, borderRadius: 4, objectFit: 'contain', flexShrink: 0 }} />}
+        {/* Punt 5: the title links to the APPLICATION (name = in-app, ⧉ = new window).
+            Cross-entity jump: coming BACK must land on the Werk tab (punt 15).
+            onClickCapture still fires BEFORE the bubble-phase stop below, so the
+            return-tab is stashed and the row does not also toggle on a title click. */}
+        {applicationId != null
+          ? <span style={titleCell} onClickCapture={() => rememberReturnTab(candidateId, 'work')} onClick={stop}>
+              <EntityLink page="applications" id={applicationId} title={t('work.openApplication')}>{label}</EntityLink>
+            </span>
+          : url
+            ? <a href={url} target="_blank" rel="noopener noreferrer" onClick={stop} style={{ ...titleCell, color: 'var(--color-primary-text)', textDecoration: 'none' }}>{label}</a>
+            : vacancyId != null
+              ? <span style={titleCell} onClickCapture={() => rememberReturnTab(candidateId, 'work')} onClick={stop}>
+                  <EntityLink page="vacancies" id={vacancyId} title={label}>{label}</EntityLink>
+                </span>
+              : <span style={titleCell}>{label}</span>}
+        {row.stageLabel && <StatusPill label={row.stageLabel} color={row.stageColor} />}
+        {/* Applied-on date (APP-EMBED-1: application.created_at) — dash only when genuinely missing. */}
+        <span style={{ fontSize: 11, color: 'var(--text-muted)', flexShrink: 0 }}>{row.created_at ? formatDate(row.created_at) : '—'}</span>
+        {/* Action cluster — one stop-propagation wrapper (MatchCard's iconsBlock
+            idiom) so every existing action keeps its own click when the row toggles. */}
+        <span onClick={stop} style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
+          {/* Punt 5: edit this application — same modal, EDIT mode (PATCH /applications/{id}). */}
+          {canManage && applicationId != null && (
+            <button type="button" onClick={() => onEdit(applicationId)}
+              title={t('work.editApplication')} aria-label={t('work.editApplication')}
+              style={{ ...iconBtn, color: 'var(--text-muted)' }}>
+              <Pencil size={12} />
+            </button>
+          )}
+          {/* Punt 7: detach this application from the candidate (soft-delete, restorable). */}
+          {canManage && applicationId != null && (
+            <button type="button" onClick={() => onDetach(row)}
+              title={t('work.detachApplication')} aria-label={t('work.detachApplication')}
+              style={{ ...iconBtn, background: 'var(--color-danger-bg)', color: 'var(--color-danger)' }}>
+              <Unlink size={12} />
+            </button>
+          )}
+          {/* The vacancy's OWN public URL (tenant-entered, isSafeUrl-gated) — unchanged. */}
+          {url && (
+            <a href={url} target="_blank" rel="noopener noreferrer" title={t('work.openVacancy')} aria-label={t('work.openVacancy')}
+              style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 24, height: 24, borderRadius: 5, border: '1px solid var(--border)', background: 'var(--bg)', color: 'var(--text-muted)', flexShrink: 0 }}>
+              <ExternalLink size={12} />
+            </a>
+          )}
+        </span>
+        {/* The explicit, keyboard-reachable disclosure (the row click is only a
+            mouse convenience on top of it) — same chevron pair as MatchCard. */}
+        {collapsible && (
+          <button type="button" id={toggleId} onClick={e => { stop(e); toggle() }}
+            title={expanded ? t('work.hideDetails') : t('work.showDetails')}
+            aria-label={expanded ? t('work.hideDetails') : t('work.showDetails')}
+            aria-expanded={expanded} aria-controls={panelId}
+            style={{ ...iconBtn, color: 'var(--text-muted)' }}>
+            {expanded ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
+          </button>
+        )}
+      </div>
+      {/* Linked appointment: date · start–end · modality · owner (CONSIST-2 / APPT). */}
+      {appointment && (
+        <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: 10, padding: '0 12px 10px 12px', fontSize: 11, color: 'var(--text-muted)' }}>
+          {appointment.scheduled_at && <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}><Calendar size={11} /> {formatDate(appointment.scheduled_at, { day: '2-digit', month: '2-digit', year: 'numeric', timeZone: 'UTC' })}</span>}
+          {appointment.scheduled_at && <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}><Clock size={11} /> {timeRange(appointment)}{appointment.duration_min ? ` · ${appointment.duration_min} min` : ''}</span>}
+          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}><ModalityIcon m={appointment.modality} /> {t(`work.modality${appointment.modality === 'remote' ? 'Remote' : appointment.modality === 'phone' ? 'Phone' : 'Office'}`)}{appointment.location_name ? ` · ${appointment.location_name}` : ''}</span>
+          {appointment.owner?.name && <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}><User size={11} /> {appointment.owner.name}</span>}
+          {/* Pencil: edit this intake appointment (Danny) — prefilled modal → PATCH.
+              Passes the ROW'S VACANCY id, never the application's own id (regression guard). */}
+          <button type="button" onClick={() => onEditAppointment({ id: appointment.id, scheduled_at: appointment.scheduled_at, duration_min: appointment.duration_min, modality: appointment.modality, type: appointment.type, owner_id: (appointment.owner as { id?: Id })?.id, vacancy_id: vacancyId })}
+            title={t('work.editIntake')} aria-label={t('work.editIntake')}
+            style={{ marginLeft: 'auto', display: 'inline-flex', alignItems: 'center', border: 'none', background: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: 2 }}>
+            <Pencil size={11} />
+          </button>
+        </div>
+      )}
+      {/* The unfolded panel — mounted only while expanded, so the detail request
+          is made on first expand and never for a row nobody opens (§8). */}
+      {collapsible && expanded && applicationId != null && (
+        <ApplicationRowDetails applicationId={applicationId} id={panelId} labelledBy={toggleId} />
+      )}
+    </div>
+  )
+}

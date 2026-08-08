@@ -17,8 +17,18 @@ const CreatableSelect = CreatableSelectJs as unknown as ComponentType<AnyProps>
 
 // The fields this sub-tab owns — split out of the old combined ProfileTab
 // (Danny 28-07: one pencil flipping ~15 fields was unmaintainable).
-type PersonalKey = 'gender' | 'nationality' | 'dob' | 'placeOfBirth'
+// `source` joined this card on 09-08: acquisition source is a business field you
+// filter, report and correct on, so it needs a real edit path — but it is a single
+// row, not a card of its own (the former Herkomst card was removed; the created
+// on/by stamps it also carried now live in the drawer footer, §11 one source).
+type PersonalKey = 'gender' | 'nationality' | 'dob' | 'placeOfBirth' | 'source'
 type PersonalForm = Record<PersonalKey, string>
+
+// Mirrors the backend rule (CandidateProfileRequest: nullable string, max:64).
+// Client-side is UX only — the server re-validates (§7). Measured 09-08: there is
+// NO candidate-source lookup endpoint (/candidate-sources and /sources both 404),
+// so this is an honest free-text input, never a fake dropdown.
+const SOURCE_MAX = 64
 
 // Only gender/dob are ever tenant-required among this tab's fields (mirrors
 // the old PROFILE_REQ_MAP — nationality/placeOfBirth are never required).
@@ -40,6 +50,7 @@ export default function ProfilePersonalTab({ c, onSave, autoEditSignal }: {
 
   const emptyForm = (): PersonalForm => ({
     gender: c.gender ?? '', nationality: c.nationality ?? '', dob: c.dob ?? '', placeOfBirth: c.placeOfBirth ?? '',
+    source: c.source ?? '',
   })
   const [editing, setEditing] = useState(false)
   // Open edit mode when the parent bumps the signal (e.g. right after Lead→Kandidaat convert).
@@ -84,6 +95,11 @@ export default function ProfilePersonalTab({ c, onSave, autoEditSignal }: {
         customInput={<input style={inputStyle} />}
       />
     )
+    // Acquisition source: free text (no lookup exists), length-capped like the API.
+    if (key === 'source') return (
+      <input value={form.source} onChange={e => setF('source', e.target.value)} maxLength={SOURCE_MAX}
+        aria-label={t('profile.source')} style={inputStyle} />
+    )
     return <input value={form[key]} onChange={e => setF(key, e.target.value)} style={inputStyle} />
   }
 
@@ -107,7 +123,7 @@ export default function ProfilePersonalTab({ c, onSave, autoEditSignal }: {
           {bday && (
             <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 11, fontWeight: 500,
               padding: '2px 8px', borderRadius: 99, background: 'var(--color-primary-bg)',
-              color: 'var(--color-primary)', border: '1px solid var(--color-primary)' }}>
+              color: 'var(--color-primary-text)', border: '1px solid var(--color-primary)' }}>
               <Cake size={11} /> {bday}
             </span>
           )}
@@ -138,6 +154,9 @@ export default function ProfilePersonalTab({ c, onSave, autoEditSignal }: {
         {field('nationality', t('profile.nationality'))}
         {field('dob', t('profile.dob'))}
         {field('placeOfBirth', t('profile.placeOfBirth'))}
+        {/* Where this candidate came from — editable here, its created-on/by stamps
+            live in the drawer footer (Danny 09-08, one place per value). */}
+        {field('source', t('profile.source'))}
       </GroupCard>
     </div>
   )

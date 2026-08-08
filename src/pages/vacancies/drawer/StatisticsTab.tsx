@@ -75,7 +75,7 @@ export default function StatisticsTab({ vacancy: v }: { vacancy: VacancyDetail }
           // Never compute a percentage against an unknown lead count (that would
           // read as a real conversion rate derived from fiction) — the honest dash.
           { label: t('statistics.leadsToApplications'), value: leadsKnown ? pct(totalApps, leads ?? 0) : '—',
-            sub: leadsKnown ? t('statistics.ofLeads', { count: leads ?? 0 }) : t('columns.leadsUnknown'), color: 'var(--color-primary)' },
+            sub: leadsKnown ? t('statistics.ofLeads', { count: leads ?? 0 }) : t('columns.leadsUnknown'), color: 'var(--color-primary-text)' },
           { label: t('statistics.daysOpen'), value: daysOpen ?? '—',
             sub: v.created ? t('statistics.daysOpenSub', { date: formatDate(v.created) }) : undefined, color: 'var(--color-secondary)' },
           { label: t('statistics.channelsPublished'), value: publishedChannels.length,

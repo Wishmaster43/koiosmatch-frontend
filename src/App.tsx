@@ -28,6 +28,9 @@ const NotesPopoutPage = lazy(() => import('./pages/popout/NotesPopoutPage'))
 // Lazy: F5-uitbreiding — legacy alias for the originally shipped candidate-only
 // popout URL (`/popout/notes/:candidateId`), redirecting to the new entity-aware route.
 const CandidatePopoutRedirect = lazy(() => import('./pages/popout/CandidatePopoutRedirect'))
+// Lazy: TEKST-POPOUT-1 — the second-screen window for ONE free-text field
+// (candidate profile text today), same recipe as the notes popout above.
+const TextPopoutPage = lazy(() => import('./pages/popout/TextPopoutPage'))
 
 // Boot loader — shown while the auth context resolves (and as Suspense fallback).
 function BootLoader() {
@@ -93,6 +96,17 @@ export default function App() {
                 <ProtectedRoute>
                   <Suspense fallback={<BootLoader />}>
                     <NotesPopoutPage />
+                  </Suspense>
+                </ProtectedRoute>
+              } />
+              {/* TEKST-POPOUT-1 (Danny 08-08 punt 2): the same second-screen treatment
+                  for ONE free-text field — the candidate's profile text today. Outside
+                  DashboardLayout for the same reason as the notes popout: a bare window
+                  that can live on a second monitor. */}
+              <Route path="/popout/text/:entity/:id/:field" element={
+                <ProtectedRoute>
+                  <Suspense fallback={<BootLoader />}>
+                    <TextPopoutPage />
                   </Suspense>
                 </ProtectedRoute>
               } />

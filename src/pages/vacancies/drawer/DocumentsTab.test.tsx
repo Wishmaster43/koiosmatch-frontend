@@ -150,3 +150,73 @@ describe('DocumentsTab (vacancy) · document type', () => {
     expect(revokeObjectURL).not.toHaveBeenCalled()
   })
 })
+
+/**
+ * DOC-FILTER-PARITY-1 (08-08): the vacancy documents tab gets the SAME search box
+ * + searchable TYPE filter (behind the shared DrawerFilterMenu) the candidate
+ * documents section already has — bringing every documents drill-down onto one
+ * shape. §13: assert the toolbar renders search + filter, and that both actually
+ * narrow the visible rows.
+ */
+describe('DocumentsTab (vacancy) · search + type filter (DOC-FILTER-PARITY-1)', () => {
+  const contractDoc = { id: 'd1', name: 'contract.pdf', type: 'Contract', size: '10 KB', download_url: 'https://x/contract.pdf' }
+  const cvDoc = { id: 'd2', name: 'cv.pdf', type: 'CV', size: '20 KB', download_url: 'https://x/cv.pdf' }
+
+  beforeEach(() => {
+    createObjectURL = vi.fn(() => 'blob:contract.pdf')
+    revokeObjectURL = vi.fn()
+    vi.stubGlobal('URL', { ...URL, createObjectURL, revokeObjectURL })
+  })
+  afterEach(() => vi.clearAllMocks())
+
+  it('renders a search box and a Filter button in the toolbar', () => {
+    vi.mocked(useEntityDocuments).mockReturnValue({ docs: [contractDoc, cvDoc], upload: vi.fn(), rename: vi.fn(), remove: vi.fn() })
+    render(<DocumentsTab vacancy={vacancy} />)
+    expect(screen.getByPlaceholderText(t('documents.search'))).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: t('common:filters.button') })).toBeInTheDocument()
+  })
+
+  it('the free-text search narrows the list by name', async () => {
+    vi.mocked(useEntityDocuments).mockReturnValue({ docs: [contractDoc, cvDoc], upload: vi.fn(), rename: vi.fn(), remove: vi.fn() })
+    render(<DocumentsTab vacancy={vacancy} />)
+    await userEvent.type(screen.getByPlaceholderText(t('documents.search')), 'cv')
+    expect(screen.queryByText('contract.pdf')).not.toBeInTheDocument()
+    expect(screen.getByText('cv.pdf')).toBeInTheDocument()
+  })
+
+  it('picking a TYPE in the filter menu narrows the visible documents', async () => {
+    vi.mocked(useEntityDocuments).mockReturnValue({ docs: [contractDoc, cvDoc], upload: vi.fn(), rename: vi.fn(), remove: vi.fn() })
+    render(<DocumentsTab vacancy={vacancy} />)
+    expect(screen.getByText('contract.pdf')).toBeInTheDocument()
+    expect(screen.getByText('cv.pdf')).toBeInTheDocument()
+
+    await userEvent.click(screen.getByRole('button', { name: t('common:filters.button') }))
+    await userEvent.click(screen.getByRole('button', { name: t('documents.allTypes') }))
+    await userEvent.click(screen.getByRole('button', { name: 'CV' }))
+
+    expect(screen.queryByText('contract.pdf')).not.toBeInTheDocument()
+    expect(screen.getByText('cv.pdf')).toBeInTheDocument()
+  })
+
+  it('clear-all resets the type filter back to "all"', async () => {
+    vi.mocked(useEntityDocuments).mockReturnValue({ docs: [contractDoc, cvDoc], upload: vi.fn(), rename: vi.fn(), remove: vi.fn() })
+    render(<DocumentsTab vacancy={vacancy} />)
+
+    await userEvent.click(screen.getByRole('button', { name: t('common:filters.button') }))
+    await userEvent.click(screen.getByRole('button', { name: t('documents.allTypes') }))
+    await userEvent.click(screen.getByRole('button', { name: 'CV' }))
+    expect(screen.queryByText('contract.pdf')).not.toBeInTheDocument()
+
+    await userEvent.click(screen.getByRole('button', { name: t('common:filters.clearAll') }))
+    expect(screen.getByText('contract.pdf')).toBeInTheDocument()
+    expect(screen.getByText('cv.pdf')).toBeInTheDocument()
+  })
+
+  // Regression: this empty state used to read the APPLICANTS copy ("No applications
+  // yet."), a copy-paste bug — it now has its own documents-scoped key.
+  it('shows the documents-scoped empty state, not the applicants one', () => {
+    vi.mocked(useEntityDocuments).mockReturnValue({ docs: [], upload: vi.fn(), rename: vi.fn(), remove: vi.fn() })
+    render(<DocumentsTab vacancy={vacancy} />)
+    expect(screen.getByText(t('documents.empty'))).toBeInTheDocument()
+  })
+})

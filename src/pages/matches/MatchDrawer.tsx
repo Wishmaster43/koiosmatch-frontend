@@ -20,12 +20,18 @@
  * (MATCH-TERMINATE-1, 2026-08-04) opens TerminateMatchModal, which POSTs
  * /matches/{id}/terminate and hands the updated match back through onUpdate —
  * hidden once the match's status already carries the tenant's is_closed flag,
- * or once archived. Thin container: header config + tab list + the
- * useMatchApproval wiring; all body markup lives in the tab/header components.
+ * or once archived. A "Verlengen" header action (G04/MATCH-RENEWAL-1,
+ * 2026-08-08) opens RenewMatchModal, which POSTs /matches/{id}/renew and hands
+ * the updated match back the same way — visible whenever the permission is
+ * there, but DISABLED with an honest reason once closed/archived (unlike
+ * terminate's hide-outright, per G04: "disabled with a reason where the BE
+ * refuses" is the more informative choice for an already-ended match). Thin
+ * container: header config + tab list + the useMatchApproval wiring; all body
+ * markup lives in the tab/header components.
  */
 import { useState, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Trash2, Ban } from 'lucide-react'
+import { Trash2, Ban, RefreshCw } from 'lucide-react'
 import EntityDrawer from '@/components/drawer/EntityDrawer'
 import type { EntityTab } from '@/components/drawer/EntityDrawer'
 import EntityHeader from '@/components/drawer/EntityHeader'
@@ -33,6 +39,7 @@ import ArchivedBanner from '@/components/drawer/ArchivedBanner'
 import ReferenceNumberChip from '@/components/ui/ReferenceNumberChip'
 import CustomFieldsTab from '@/components/drawer/CustomFieldsTab'
 import BackofficeLinksTab from '@/components/drawer/BackofficeLinksTab'
+import { useBackofficeLinksVisible } from '@/components/drawer/useBackofficeLinksVisible'
 import { useDateFormat } from '@/lib/datetime'
 import { useMatchStatuses } from '@/lib/useMatchStatuses'
 import { useCustomFields } from '@/lib/useCustomFields'
@@ -43,11 +50,13 @@ import OverviewTab from './drawer/OverviewTab'
 import MatchContractSection from './drawer/MatchContractSection'
 import NotesTab from './drawer/NotesTab'
 import TerminateMatchModal from './drawer/TerminateMatchModal'
+import RenewMatchModal from './drawer/RenewMatchModal'
 import ChangelogPopover from '@/components/drawer/ChangelogPopover'
 import ChangelogTab from './drawer/ChangelogTab'
 import MatchApprovalBadge from './drawer/MatchApprovalBadge'
 import MatchApprovalActions from './drawer/MatchApprovalActions'
 import { useMatchApproval } from './hooks/useMatchApproval'
+import { useMatchApprovalMode } from './hooks/useMatchApprovalMode'
 import { computeMatchOrdinals } from './matchOrdinals'
 import type { OwnerCandidate } from './hooks/useMatchMutations'
 import type { MatchRow } from '@/types/match'
@@ -86,26 +95,39 @@ interface MatchDrawerProps {
   // MATCH-TERMINATE-1: same matches.update gate as the sibling actions (§7 —
   // UI-only; POST /matches/{id}/terminate re-checks server-side).
   canTerminate?: boolean
+  // G04/MATCH-RENEWAL-1: same matches.update gate as terminate (§7 — UI-only;
+  // POST /matches/{id}/renew re-checks server-side).
+  canRenew?: boolean
 }
 
 export default function MatchDrawer({
   match, allRows = [], onClose, expanded = false, onToggleExpand, onSetStatus, onSetOwner, canApprove = false, onApprovalChange, onUpdate, onUpdateCustomFields,
-  onArchive, onRestore, canLinkBackoffice = false, canTerminate: canTerminatePermission = false,
+  onArchive, onRestore, canLinkBackoffice = false, canTerminate: canTerminatePermission = false, canRenew: canRenewPermission = false,
 }: MatchDrawerProps) {
   const { t } = useTranslation('matches')
   const { formatDate, formatDateTime } = useDateFormat()
   // Approval data/actions live in one hook here (thin container, §3) — the header
   // pieces below stay presentational.
   const { reason, busy, rejectOpen, setRejectOpen, approve, reject } = useMatchApproval(match, onApprovalChange)
+  // goedkeuring-badge-eerlijk (08-08): the tenant's approval_mode setting — feeds
+  // MatchApprovalBadge's honesty gate (an "Approved" badge is noise when approval
+  // is switched off, since every match then defaults to approved with no way off it).
+  const { approvalMode } = useMatchApprovalMode()
   // R-1b lifecycle status — the same tenant lookup the board/table use. metaOf
   // also drives the terminate button's is_closed gate below (MATCH-TERMINATE-1).
   const { statuses: matchStatuses, metaOf: matchStatusMeta } = useMatchStatuses()
   // The Extra tab only shows when the tenant has defined match custom fields (§3A(f)).
   const { fields: customFieldDefs } = useCustomFields('match')
+  // DD-FE-6 ("no empty tabs"): this file passes no extra children into
+  // BackofficeLinksTab, so the Koppelingen tab is genuinely empty (no card, no
+  // "Koppelen" button) unless at least one connector app is enabled.
+  const showKoppelingen = useBackofficeLinksVisible()
   // MATCH-OWNER-1: the tenant's users, the owner picker's options (cached app-wide).
   const { data: users = [] } = useUsers() as { data?: OwnerCandidate[] }
   // MATCH-TERMINATE-1: the "Beëindigen" confirm modal, opened from the header action below.
   const [terminateOpen, setTerminateOpen] = useState(false)
+  // G04/MATCH-RENEWAL-1: the "Verlengen" confirm modal, opened from the header action below.
+  const [renewOpen, setRenewOpen] = useState(false)
   // MATCH-ORDINAL-1 (M14/M15): this match's position among the tenant's other
   // matches per axis — computed once per (match, allRows) change, not per render.
   const ordinals = useMemo(() => computeMatchOrdinals(allRows, match), [allRows, match])
@@ -119,6 +141,18 @@ export default function MatchDrawer({
   // picker already loads, rather than a second fetch.
   const matchIsClosed = Boolean(matchStatusMeta(match.status)?.is_closed)
   const canTerminate = canTerminatePermission && !match.archived && !matchIsClosed
+
+  // G04/MATCH-RENEWAL-1: unlike terminate, the renew button stays VISIBLE whenever
+  // the permission is there — but DISABLED with an honest reason once the match is
+  // already closed or archived, i.e. the backend would refuse it (a renewal can
+  // only push end_date forward on a live match). No fake affordance: the click
+  // handler below only opens the modal when there is no reason.
+  const renewDisabledReason = match.archived
+    ? t('drawer.renew.disabledArchived')
+    : matchIsClosed
+      ? t('drawer.renew.disabledClosed')
+      : undefined
+  const canRenew = canRenewPermission
 
   // Owner picker options, mirroring CandidateDrawer: a synthetic entry for the
   // CURRENT owner only when that user is missing from /users (a deactivated or
@@ -148,7 +182,9 @@ export default function MatchDrawer({
   const tabs: EntityTab[] = [
     // M9 (overzicht-layout): Overview now carries the relation hyperlinks + the
     // ordinal footnote too — the whole match, one tab.
-    { id: 'overview',  label: t('drawer.tabs.overview'), render: () => <OverviewTab match={match} onSetStatus={onSetStatus} onUpdate={onUpdate} ordinals={ordinals} /> },
+    // REMARKS-INTO-NOTES-1: the shell hands each tab its own setActiveTab, so the
+    // retired Opmerkingen block can jump to Notes right after moving its text there.
+    { id: 'overview',  label: t('drawer.tabs.overview'), render: setTab => <OverviewTab match={match} onSetStatus={onSetStatus} onUpdate={onUpdate} ordinals={ordinals} onOpenNotes={() => setTab?.('notes')} /> },
     { id: 'contract',  label: t('drawer.contract.title'), render: () => <MatchContractSection matchId={match.id} onUpdate={onUpdate} /> },
     // NT-MATCH-1: notes, after the content tabs above and before Extra/Koppelingen
     // (there is no Changelog TAB — record history stays the icon-popover, §3A(d)).
@@ -158,10 +194,12 @@ export default function MatchDrawer({
         onSave={patch => onUpdateCustomFields?.(match.id, patch)} />
     ) }] : []),
     // EXTRACT-1: the shared HelloFlex/Shiftmanager cards, positioned last (§3A/§11).
-    // Label comes from the shared common:backofficeLinks.tabLabel key.
-    { id: 'koppelingen', label: t('common:backofficeLinks.tabLabel'), render: () => (
+    // Label comes from the shared common:backofficeLinks.tabLabel key. DD-FE-6
+    // ("no empty tabs"): only listed when a connector app is enabled — otherwise
+    // the tab body would render nothing (no card, no "Koppelen" button).
+    ...(showKoppelingen ? [{ id: 'koppelingen', label: t('common:backofficeLinks.tabLabel'), render: () => (
       <BackofficeLinksTab entity="matches" id={match.id as Id} helloflexLink={match.helloflexLink} shiftmanagerLink={match.shiftmanagerLink} canLink={canLinkBackoffice} />
-    ) },
+    ) }] : []),
   ]
 
   return (
@@ -205,8 +243,9 @@ export default function MatchDrawer({
             <>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
                 <span style={{ fontSize: 15, fontWeight: 700, color: 'var(--text)' }}>{match.candidate}</span>
-                {/* Approval badge — colour-coded, read-only, next to the title (§3A calm header). */}
-                <MatchApprovalBadge status={match.approval_status} />
+                {/* Approval badge — colour-coded, read-only, next to the title (§3A calm header).
+                    Only rendered when it means something (goedkeuring-badge-eerlijk) — see the gate in MatchApprovalBadge. */}
+                <MatchApprovalBadge status={match.approval_status} approvalMode={approvalMode} />
                 {/* Score sits beside the title (moved out of the old ad-hoc headerChips row). */}
                 <ScorePill value={match.score} />
                 {/* NUMMER-1: human-readable reference number, click-to-copy — same spot on every drawer. */}
@@ -224,6 +263,20 @@ export default function MatchDrawer({
               <MatchApprovalActions status={match.approval_status} reason={reason} canUpdate={canApprove && !match.archived} busy={busy}
                 rejectOpen={rejectOpen} onOpenReject={() => setRejectOpen(true)} onCancelReject={() => setRejectOpen(false)}
                 onApprove={approve} onReject={reject} />
+              {/* G04/MATCH-RENEWAL-1: one calm primary-tint button (§4 soft-tint, never a
+                  solid fill) — stays visible but DISABLED with a title/reason once the
+                  match is already closed or archived (no fake affordance). */}
+              {canRenew && (
+                <button onClick={() => !renewDisabledReason && setRenewOpen(true)} disabled={Boolean(renewDisabledReason)}
+                  title={renewDisabledReason} aria-label={renewDisabledReason || t('drawer.renew.button')}
+                  style={{ display: 'flex', alignItems: 'center', gap: 4, height: 26, padding: '0 9px', fontSize: 11, fontWeight: 600,
+                    borderRadius: 7, cursor: renewDisabledReason ? 'not-allowed' : 'pointer',
+                    border: '1px solid color-mix(in srgb, var(--color-primary) 40%, transparent)',
+                    background: 'color-mix(in srgb, var(--color-primary) 10%, transparent)', color: 'var(--color-primary-text)',
+                    opacity: renewDisabledReason ? 0.5 : 1 }}>
+                  <RefreshCw size={11} />{t('drawer.renew.button')}
+                </button>
+              )}
               {/* MATCH-TERMINATE-1: one calm danger-tint button (§4 soft-tint, never a
                   solid fill) — hidden once the match is already closed or archived. */}
               {canTerminate && (
@@ -279,6 +332,10 @@ export default function MatchDrawer({
         prompt pattern (a fresh mount per open keeps useFocusTrap correct). */}
     {terminateOpen && (
       <TerminateMatchModal match={match} onClose={() => setTerminateOpen(false)} onUpdate={onUpdate} />
+    )}
+    {/* G04/MATCH-RENEWAL-1: same mounted-only-while-open idiom as terminate. */}
+    {renewOpen && (
+      <RenewMatchModal match={match} onClose={() => setRenewOpen(false)} onUpdate={onUpdate} />
     )}
     </>
   )

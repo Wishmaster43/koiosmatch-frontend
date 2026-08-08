@@ -3,7 +3,8 @@
     "title": "Paramètres",
     "empty": "Aucun paramètre disponible pour votre rôle.",
     "search": "Rechercher un paramètre…",
-    "noResults": "Aucun paramètre trouvé"
+    "noResults": "Aucun paramètre trouvé",
+    "categoryPicker": "Catégorie"
   },
   "common": {
     "save": "Enregistrer",
@@ -228,7 +229,9 @@
     "notif_kandidaten": "Candidats",
     "notif_matches": "Matchs",
     "notif_taken": "Tâches",
-    "koios_advice": "Seuils de conseils"
+    "koios_advice": "Seuils de conseils",
+    "notif_my": "Mes notifications",
+    "customer_identifier_validation": "Validation des numéros"
   },
   "kpis": {
     "title": "Paramètres KPI",
@@ -389,7 +392,13 @@
     "logo": "Logo",
     "logoHint": "PNG, JPG, WEBP ou SVG, max 2 Mo — le SVG est scanné côté serveur. Affiché dans la barre de navigation.",
     "noLogo": "Aucun logo",
-    "logoUploadError": "Échec de l'envoi du logo."
+    "logoUploadError": "Échec de l'envoi du logo.",
+    "textColor": "Couleur du texte sur l'accent",
+    "textColorHint": "La couleur du texte sur les boutons et puces colorés. Le mode automatique choisit le noir ou le blanc selon votre couleur d'accent — une couleur claire comme le jaune reçoit donc du texte foncé.",
+    "textColorAuto": "Automatique",
+    "textColorLight": "Blanc",
+    "textColorDark": "Foncé",
+    "textColorLowContrast": "Cette couleur de texte contraste trop peu avec votre couleur de marque (ratio {{ratio}} ; lisible à partir de 4,5). Choisissez « Automatique » pour la meilleure lisibilité."
   },
   "company": {
     "title": "Entreprise",
@@ -409,7 +418,10 @@
     "streetPlaceholder": "Nom de rue",
     "houseNumber": "Numéro",
     "houseNumberSuffix": "Complément",
-    "bannerUploadFailed": "Échec du téléversement de la bannière"
+    "bannerUploadFailed": "Échec du téléversement de la bannière",
+    "sectionIdentity": "Identité",
+    "sectionAddress": "Adresse",
+    "sectionPreferences": "Préférences"
   },
   "locations": {
     "title": "Agences",
@@ -473,7 +485,8 @@
     "mapNoCoords": "Aucun emplacement avec des coordonnées pour l'instant — renseignez l'adresse d'un emplacement et il apparaîtra automatiquement sur la carte.",
     "color": "Couleur",
     "icon": "Icône",
-    "colorHint": "La couleur et l’icône rendent un site reconnaissable dans les listes et sur la carte."
+    "colorHint": "La couleur et l’icône rendent un site reconnaissable dans les listes et sur la carte.",
+    "province": "Province"
   },
   "memory": {
     "title": "Mémoire",
@@ -695,7 +708,9 @@
     },
     "inApp": {
       "label": "Notifications in-app",
-      "desc": "Recevoir des notifications dans la plateforme"
+      "desc": "Recevoir des notifications dans la plateforme",
+      "notYetActive": "Pas encore actif",
+      "notYetActiveReason": "Aucune notification n'est encore envoyée pour ce type — le bouton est déjà configurable."
     },
     "context": {
       "sollicitaties": {
@@ -722,6 +737,17 @@
         "title": "Tâches",
         "desc": "Notifications sur les tâches nouvelles et mises à jour."
       }
+    },
+    "my": {
+      "title": "Mes notifications",
+      "subtitle": "Votre propre exception en plus des paramètres de notification communs à l'organisation — choisissez par sujet si vous voulez toujours être notifié, jamais, ou simplement suivre le réglage de votre organisation.",
+      "inherit": "Hériter",
+      "on": "Activé",
+      "off": "Désactivé",
+      "empty": "Aucun sujet de notification n'est encore configuré.",
+      "saveFailed": "Échec de l'enregistrement — votre choix a été annulé.",
+      "emailNotAvailable": "Pas encore disponible",
+      "emailNotAvailableReason": "Une exception e-mail personnelle n'est pas encore possible — pour cela, vous suivez le réglage e-mail commun à l'organisation."
     }
   },
   "billing": {
@@ -1321,7 +1347,10 @@
     "catAUTHENTICATION": "Authentification",
     "numbersSynced": "Numéros synchronisés",
     "templatesSynced": "Modèles synchronisés",
-    "syncFailed": "Échec de la synchronisation"
+    "syncFailed": "Échec de la synchronisation",
+    "checkStatus": "Vérifier la connexion",
+    "statusChecked": "Connexion vérifiée.",
+    "statusCheckFailed": "La vérification de la connexion a échoué."
   },
   "roles": {
     "loading": "Chargement des rôles…",
@@ -1911,7 +1940,12 @@
   "requiredFields": {
     "title": "Champs requis",
     "subtitle": "Indiquez par phase quels champs sont requis. Un champ requis affiche une étoile et bloque l enregistrement s il est vide.",
-    "field": "Champ"
+    "field": "Champ",
+    "groupCount": "{{required}} sur {{total}} obligatoires",
+    "customHint": "Les champs personnalisés enregistrent leur caractère obligatoire sur la définition du champ elle-même, et non dans ce paramètre.",
+    "customEmpty": "Il n'y a pas encore de champs personnalisés pour les candidats. Dès que vous en créez un, il apparaît ici et vous pouvez le rendre obligatoire par phase.",
+    "customAlwaysRequired": "Toujours obligatoire, à chaque phase",
+    "customSaveFailed": "L'enregistrement de la définition du champ a échoué. Veuillez réessayer."
   },
   "vacancyTab": {
     "title": "Onglet Postes chez les candidats",
@@ -2620,7 +2654,20 @@
     "title": "Site carrière",
     "subtitle": "Le site public des offres de ce locataire.",
     "activeLabel": "Site carrière actif",
-    "hint": "Active ou désactive le site carrière public (…/{tenant}/vacatures). Le backend l'applique immédiatement : désactivé = le site affiche un avis et les candidatures sont fermées."
+    "hint": "Active ou désactive le site carrière public (…/{tenant}/vacatures). Le backend l'applique immédiatement : désactivé = le site affiche un avis et les candidatures sont fermées.",
+    "urls": {
+      "title": "URL publiques",
+      "subtitle": "À copier dans un site d'emploi ou un robot d'indexation — construites à partir de l'adresse propre de ce client.",
+      "site": "Infos du site (image de marque)",
+      "vacancies": "Offres d'emploi (JSON)",
+      "sitemap": "Plan du site",
+      "indeedFeed": "Flux Indeed",
+      "werkzoekenFeed": "Flux Werkzoeken.nl",
+      "copy": "Copier",
+      "open": "Ouvrir",
+      "inactiveNotice": "Indisponible tant que le site carrière est désactivé.",
+      "noTenant": "Aucun client sélectionné pour l'instant."
+    }
   },
   "caoSettings": {
     "title": "Conventions collectives",
@@ -2674,7 +2721,11 @@
       "title": "Motifs de liste noire — client",
       "subtitle": "Motifs pour mettre un client sur liste noire."
     },
-    "add": "Ajouter un motif"
+    "add": "Ajouter un motif",
+    "tabs": {
+      "candidate": "Candidat",
+      "customer": "Client"
+    }
   },
   "opportunityLookups": {
     "tabs": {
@@ -2745,5 +2796,30 @@
   "modShiftmanager": {
     "reportingOff": "Le reporting Shiftmanager n'est pas encore activé — activez le module pour configurer les objectifs KPI et les limites d'affichage."
   },
-  "dashboardsEmpty": "Aucun élément de tableau de bord configuré pour le moment."
+  "dashboardsEmpty": "Aucun élément de tableau de bord configuré pour le moment.",
+  "settings": {
+    "matches": {
+      "stopReasonTitle": "Motifs d'arrêt",
+      "stopReasonSubtitle": "Motif obligatoire lors de l'arrêt anticipé d'un match.",
+      "stopReasonAdd": "Ajouter un motif"
+    },
+    "outreach": {
+      "outcomeTitle": "Résultats",
+      "outcomeSubtitle": "Le résultat d'une tentative d'appel, distinct du statut de la liste d'appels.",
+      "outcomeAdd": "Ajouter un résultat"
+    }
+  },
+  "identifierValidation": {
+    "title": "Validation des numéros",
+    "subtitle": "Déterminez avec quelle rigueur Koios Match vérifie qu'un numéro de registre/TVA correspond au pays du client.",
+    "modeLabel": "En cas de numéro non conforme",
+    "modeHint": "Avertir permet toujours d'enregistrer ; bloquer refuse le numéro tant qu'il n'est pas conforme.",
+    "modeWarn": "Avertir seulement",
+    "modeBlock": "Bloquer l'enregistrement",
+    "rulesTitle": "Format attendu par pays",
+    "colCountry": "Pays",
+    "colCoc": "Numéro de registre",
+    "colVat": "Numéro de TVA",
+    "unknownCountryHint": "Pour les pays sans règle ci-dessus, rien n'est bloqué — vous recevez tout au plus une indication discrète."
+  }
 }

@@ -4,7 +4,7 @@
  * builder and the response-structure builder. The plain inputs + the dispatcher
  * live in `fields.tsx`, which delegates the field types below to these.
  */
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useId } from 'react'
 import { Loader2, Plus, X, Check, Copy } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { VALUELESS_OPERATORS, normalizeOperator } from './constants'
@@ -13,6 +13,9 @@ import { FilterFieldPicker } from './FilterFieldPicker'
 import { OperatorSelect } from './OperatorSelect'
 import type { WorkflowField, EdgeFilters, FilterCondition } from '@/types/workflow'
 import { unwrap, unwrapList } from '@/lib/api'
+// Danny 08-08 (§4): the house searchable combobox replaces every bare native
+// <select> below (webhook / lookup / response-structure-type pickers).
+import CreatableSelect from '@/components/ui/CreatableSelect'
 
 // Shared change handler: writes one field's value into the node config.
 export type OnChange = (key: string, value: unknown) => void
@@ -75,6 +78,9 @@ export function WebhookSelectField({ value, onChange, fieldKey }: { value?: unkn
   const [showNew,  setShowNew]  = useState(false)
   const [newName,  setNewName]  = useState('')
   const [copied,   setCopied]   = useState(false)
+  // CreatableSelect's trigger is a <button>, which a plain aria-label cannot
+  // name — a sr-only span + aria-labelledby names it instead (§4).
+  const webhookLabelId = useId()
 
   // Load the tenant's inbound webhooks (same resource as Settings).
   useEffect(() => {
@@ -116,12 +122,15 @@ export function WebhookSelectField({ value, onChange, fieldKey }: { value?: unkn
       {error && <div style={{ fontSize: 11, color: 'var(--color-danger)' }}>{t('fields.webhookError')}</div>}
 
       {/* Picker — existing inbound webhooks */}
-      <select value={(value as string) || ''} onChange={e => onChange(fieldKey, e.target.value)}
-        aria-label={t('fields.webhookSelect')}
-        style={{ width: '100%', padding: '7px 9px', border: '1px solid var(--border)', borderRadius: 8, background: 'var(--surface)', fontSize: 13, color: 'var(--text)', outline: 'none', cursor: 'pointer' }}>
-        <option value="">{hooks.length ? t('fields.webhookSelect') : t('fields.webhookEmpty')}</option>
-        {hooks.map(h => <option key={h.id} value={h.id}>{h.name}</option>)}
-      </select>
+      <span id={webhookLabelId} className="sr-only">{t('fields.webhookSelect')}</span>
+      <CreatableSelect value={(value as string) || ''} onChange={v => onChange(fieldKey, v)}
+        aria-labelledby={webhookLabelId} allowCreate={false}
+        placeholder={hooks.length ? t('fields.webhookSelect') : t('fields.webhookEmpty')}
+        options={[
+          { value: '', label: hooks.length ? t('fields.webhookSelect') : t('fields.webhookEmpty') },
+          ...hooks.map(h => ({ value: String(h.id ?? ''), label: h.name ?? String(h.id ?? '') })),
+        ]}
+        style={{ width: '100%', padding: '7px 9px', fontSize: 13 }} />
 
       {/* Inline create — mirrors Make's "Create a webhook" */}
       {showNew ? (
@@ -130,7 +139,7 @@ export function WebhookSelectField({ value, onChange, fieldKey }: { value?: unkn
             placeholder={t('fields.webhookNamePlaceholder')} aria-label={t('fields.webhookNamePlaceholder')} onKeyDown={e => e.key === 'Enter' && create()}
             style={{ flex: 1, padding: '6px 9px', fontSize: 12, border: '1px solid var(--border)', borderRadius: 8, outline: 'none' }} />
           <button type="button" onClick={create} disabled={!newName.trim() || creating}
-            style={{ padding: '6px 12px', fontSize: 12, fontWeight: 600, background: 'var(--color-primary)', color: 'white', border: 'none', borderRadius: 8, cursor: newName.trim() ? 'pointer' : 'not-allowed', opacity: newName.trim() ? 1 : 0.5, display: 'flex', alignItems: 'center', gap: 4 }}>
+            style={{ padding: '6px 12px', fontSize: 12, fontWeight: 600, background: 'var(--color-primary)', color: 'var(--color-on-accent)', border: 'none', borderRadius: 8, cursor: newName.trim() ? 'pointer' : 'not-allowed', opacity: newName.trim() ? 1 : 0.5, display: 'flex', alignItems: 'center', gap: 4 }}>
             {creating ? <Loader2 size={11} className="animate-spin" /> : <Plus size={11} />} {t('fields.create')}
           </button>
           <button type="button" onClick={() => { setShowNew(false); setNewName('') }}
@@ -140,7 +149,7 @@ export function WebhookSelectField({ value, onChange, fieldKey }: { value?: unkn
         </div>
       ) : (
         <button type="button" onClick={() => setShowNew(true)}
-          style={{ alignSelf: 'flex-start', display: 'flex', alignItems: 'center', gap: 4, fontSize: 11, color: 'var(--color-primary)', background: 'none', border: '1px dashed var(--color-primary)', borderRadius: 6, padding: '5px 9px', cursor: 'pointer' }}>
+          style={{ alignSelf: 'flex-start', display: 'flex', alignItems: 'center', gap: 4, fontSize: 11, color: 'var(--color-primary-text)', background: 'none', border: '1px dashed var(--color-primary)', borderRadius: 6, padding: '5px 9px', cursor: 'pointer' }}>
           <Plus size={11} /> {t('fields.webhookCreate')}
         </button>
       )}
@@ -174,6 +183,9 @@ export function LookupSelectField({ value, onChange, fieldKey, endpoint }: {
 }) {
   const { t } = useTranslation('workflows')
   const [opts, setOpts] = useState<Array<{ value: string; label: string }>>([])
+  // CreatableSelect's trigger is a <button>, which a plain aria-label cannot
+  // name — a sr-only span + aria-labelledby names it instead (§4).
+  const lookupLabelId = useId()
 
   // Load the lookup values once; accept the common {value|id, label|name} shapes.
   useEffect(() => {
@@ -191,12 +203,16 @@ export function LookupSelectField({ value, onChange, fieldKey, endpoint }: {
   }, [endpoint])
 
   return (
-    <select value={(value as string) ?? ''} onChange={e => onChange(fieldKey, e.target.value)}
-      aria-label={fieldKey}
-      style={{ width: '100%', padding: '7px 9px', border: '1px solid var(--border)', borderRadius: 8, background: 'var(--surface)', fontSize: 13, color: 'var(--text)', outline: 'none', cursor: 'pointer' }}>
-      <option value="">{t('fields.selectPlaceholder')}</option>
-      {opts.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
-    </select>
+    <>
+      {/* No visible label wraps this field (schema-driven, key is the only name
+          available here) — kept as the accessible name text, same as before. */}
+      <span id={lookupLabelId} className="sr-only">{fieldKey}</span>
+      <CreatableSelect value={(value as string) ?? ''} onChange={v => onChange(fieldKey, v)}
+        aria-labelledby={lookupLabelId} allowCreate={false}
+        placeholder={t('fields.selectPlaceholder')}
+        options={[{ value: '', label: t('fields.selectPlaceholder') }, ...opts]}
+        style={{ width: '100%', padding: '7px 9px', fontSize: 13 }} />
+    </>
   )
 }
 
@@ -234,7 +250,7 @@ export function FiltersField({ field, value, onChange }: { field: WorkflowField;
           {[['AND', t('fields.logicAll')], ['OR', t('fields.logicAny')]].map(([l, lbl]) => (
             <button key={l} type="button" onClick={() => setLogic(l)}
               style={{ padding: '3px 10px', fontSize: 11, fontWeight: 600, borderRadius: 999, border: 'none', cursor: 'pointer',
-                background: logic === l ? 'var(--color-primary)' : 'var(--border)', color: logic === l ? 'white' : 'var(--text-muted)' }}>{lbl}</button>
+                background: logic === l ? 'var(--color-primary)' : 'var(--border)', color: logic === l ? 'var(--color-on-accent)' : 'var(--text-muted)' }}>{lbl}</button>
           ))}
         </div>
       )}
@@ -262,7 +278,7 @@ export function FiltersField({ field, value, onChange }: { field: WorkflowField;
         )
       })}
       <button type="button" onClick={add}
-        style={{ alignSelf: 'flex-start', display: 'flex', alignItems: 'center', gap: 4, fontSize: 11, color: 'var(--color-primary)', background: 'none', border: '1px dashed var(--color-primary)', borderRadius: 6, padding: '5px 9px', cursor: 'pointer' }}>
+        style={{ alignSelf: 'flex-start', display: 'flex', alignItems: 'center', gap: 4, fontSize: 11, color: 'var(--color-primary-text)', background: 'none', border: '1px dashed var(--color-primary)', borderRadius: 6, padding: '5px 9px', cursor: 'pointer' }}>
         <Plus size={10} /> {t('fields.addCondition')}
       </button>
     </div>
@@ -276,6 +292,9 @@ const RS_TYPES = ['Text', 'Number', 'Boolean', 'Date', 'Array', 'Collection', 'A
 export function ResponseStructureField({ value, onChange, fieldKey }: { value?: unknown; onChange: OnChange; fieldKey: string }) {
   const { t } = useTranslation('workflows')
   const items = (Array.isArray(value) ? value : []) as Array<{ name?: string; type?: string }>
+  // Base id for each row's own sr-only label (repeated row — every instance
+  // needs its OWN accessible name, mirrors DocumentsTab's per-row picker).
+  const typeLabelBaseId = useId()
 
   const add    = ()                                       => onChange(fieldKey, [...items, { name: '', type: 'Text' }])
   const remove = (i: number)                              => onChange(fieldKey, items.filter((_, j) => j !== i))
@@ -297,11 +316,11 @@ export function ResponseStructureField({ value, onChange, fieldKey }: { value?: 
             style={{ padding: '5px 7px', fontSize: 12, border: '1px solid var(--border)', borderRadius: 6, outline: 'none', minWidth: 0 }}
             onFocus={e => (e.target.style.borderColor = 'var(--color-primary)')}
             onBlur={e  => (e.target.style.borderColor = 'var(--border)')} />
-          <select value={item.type} onChange={e => update(i, 'type', e.target.value)}
-            aria-label={t('fields.typeLabel')}
-            style={{ padding: '5px 5px', fontSize: 12, border: '1px solid var(--border)', borderRadius: 6, outline: 'none', background: 'var(--surface)', cursor: 'pointer' }}>
-            {RS_TYPES.map(t => <option key={t} value={t}>{t}</option>)}
-          </select>
+          <span id={`${typeLabelBaseId}-${i}`} className="sr-only">{t('fields.typeLabel')}</span>
+          <CreatableSelect value={item.type} onChange={v => update(i, 'type', v)}
+            aria-labelledby={`${typeLabelBaseId}-${i}`} allowCreate={false}
+            options={RS_TYPES.map(rt => ({ value: rt, label: rt }))} menuWidth={110}
+            style={{ padding: '5px 5px', fontSize: 12 }} />
           <button type="button" onClick={() => remove(i)}
             style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--border)', padding: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
             onMouseEnter={e => (e.currentTarget.style.color = 'var(--color-danger)')}
@@ -311,7 +330,7 @@ export function ResponseStructureField({ value, onChange, fieldKey }: { value?: 
         </div>
       ))}
       <button type="button" onClick={add}
-        style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 11, color: 'var(--color-primary)',
+        style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 11, color: 'var(--color-primary-text)',
           background: 'none', border: '1px dashed var(--color-primary)', borderRadius: 6,
           padding: '5px 9px', cursor: 'pointer', marginTop: 2 }}>
         <Plus size={10} /> {t('fields.addItem')}

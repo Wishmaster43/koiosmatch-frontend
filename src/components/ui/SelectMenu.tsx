@@ -9,6 +9,7 @@
  */
 import type { CSSProperties } from 'react'
 import { useState, useRef, useEffect, useId } from 'react'
+import { useTranslation } from 'react-i18next'
 import type { ReactNode } from 'react'
 import { ChevronDown, Check } from 'lucide-react'
 import Avatar from './Avatar'
@@ -44,6 +45,7 @@ export default function SelectMenu({ id, 'aria-labelledby': ariaLabelledBy, valu
   const triggerId = id ?? autoId
   // See CreatableSelect: label + own text, so the value is not swallowed by the name.
   const labelledBy = ariaLabelledBy ? `${ariaLabelledBy} ${triggerId}` : undefined
+  const { t } = useTranslation('common')
   const [open, setOpen] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
   const triggerRef = useRef<HTMLButtonElement>(null)
@@ -88,6 +90,17 @@ export default function SelectMenu({ id, 'aria-labelledby': ariaLabelledBy, valu
 
   const opts: SelectOption[] = options.map(o => (typeof o === 'string' ? { value: o, label: o } : o))
   const current = opts.find(o => o.value === value)
+  // SEARCHABLE-ALWAYS (Danny 08-08, CLAUDE.md §4: "zoekbare dropdowns overal waar
+  // we een dropdown hebben"): every menu filters, including the short ones — so a
+  // picker feels the same wherever you meet it. Filtering happens here rather
+  // than at 40+ call sites; the trigger, value contract and onChange are
+  // untouched, so no consumer changes.
+  const [query, setQuery] = useState('')
+  const shown = query.trim()
+    ? opts.filter(o => String(o.label ?? '').toLowerCase().includes(query.trim().toLowerCase()))
+    : opts
+  // A fresh open always starts unfiltered — a stale query would hide options.
+  useEffect(() => { if (!open) setQuery('') }, [open])
 
   return (
     <div ref={ref} style={{ position: 'relative' }}>
@@ -111,8 +124,19 @@ export default function SelectMenu({ id, 'aria-labelledby': ariaLabelledBy, valu
           style={{ position: 'absolute', top: '100%', left: 0, zIndex: 200, marginTop: 4, minWidth: menuWidth,
           background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 8,
           boxShadow: '0 4px 16px rgba(0,0,0,0.1)', overflow: 'hidden', maxHeight: 240, overflowY: 'auto' }}>
+          {/* Filter box — autofocused so typing narrows immediately, Escape-safe
+              (the outside-click/Escape handling above owns closing). */}
+          <div style={{ padding: 6, borderBottom: '1px solid var(--border)', position: 'sticky', top: 0, background: 'var(--surface)' }}>
+            <input autoFocus value={query} onChange={e => setQuery(e.target.value)}
+              aria-label={t('search')} placeholder={t('search')}
+              style={{ width: '100%', boxSizing: 'border-box', padding: '5px 8px', fontSize: 12, borderRadius: 6,
+                border: '1px solid var(--border)', background: 'var(--bg)', color: 'var(--text)', outline: 'none' }} />
+          </div>
           {opts.length === 0 && <div style={{ padding: '10px 12px', fontSize: 12, color: 'var(--text-muted)' }}>{placeholder ?? '—'}</div>}
-          {opts.map(o => (
+          {opts.length > 0 && shown.length === 0 && (
+            <div style={{ padding: '10px 12px', fontSize: 12, color: 'var(--text-muted)' }}>{t('noResults')}</div>
+          )}
+          {shown.map(o => (
             <button key={o.value} onClick={() => { if (o.disabled) return; onChange(o.value); setOpen(false) }}
               aria-current={value === o.value} disabled={o.disabled} aria-disabled={o.disabled || undefined}
               style={{ display: 'flex', alignItems: 'center', gap: 8, width: '100%',
@@ -122,7 +146,7 @@ export default function SelectMenu({ id, 'aria-labelledby': ariaLabelledBy, valu
                 color: o.disabled ? 'var(--text-muted)' : 'var(--text)' }}>
               {o.initials && <Avatar initials={o.initials} size={20} />}
               <span style={{ flex: 1 }}>{o.label}</span>
-              {value === o.value && <Check size={13} style={{ color: 'var(--color-primary)', flexShrink: 0 }} />}
+              {value === o.value && <Check size={13} style={{ color: 'var(--color-primary-text)', flexShrink: 0 }} />}
             </button>
           ))}
         </div>

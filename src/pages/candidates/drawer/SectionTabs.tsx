@@ -24,6 +24,8 @@ import { useDateFormat } from '@/lib/datetime'
 import { useSkillLevels } from '@/lib/useSkillLevels'
 import { useEducationLevels } from '@/lib/useEducationLevels'
 import { downloadFilesSequentially } from '@/lib/downloadFiles'
+// DOC-1-EIGENAAR-1: the one shared "which document is still free" rule (measured 08-08).
+import { linkedDocumentOptions } from './documentLinkRules'
 import type { Id } from '@/types/common'
 
 // One shared render-prop: the "+ Toevoegen" trigger for every Achtergrond
@@ -187,9 +189,9 @@ export function EducationTab({ items = [], onAdd, onEdit, onRemove, documents = 
   // DOC-EDU-1: preview overlay for a row's linked proof document — the shared
   // house DocPreviewModal (never a fork).
   const [previewDoc, setPreviewDoc] = useState<RelItem | null>(null)
-  // "Koppelen aan" picker options — every candidate document, labeled by its own
-  // name (mirrors the upload-flow picker in DocumentsSection; same source list).
-  const documentOptions = documents.map(d => ({ value: String(d.id ?? ''), label: (d.name as string) ?? (d.file_name as string) ?? '' }))
+  // "Koppelen aan" picker options, resolved PER ROW — only documents no other entry
+  // has claimed, plus this row's own pick (DOC-1-EIGENAAR-1).
+  const documentOptions = linkedDocumentOptions(documents, items)
   // KAND-NIVEAU-1: the tenant education-level lookup (id-based — level_id on
   // candidate_educations, never the name, so a tenant rename never breaks a row).
   const { levels } = useEducationLevels()
@@ -198,13 +200,10 @@ export function EducationTab({ items = [], onAdd, onEdit, onRemove, documents = 
   const fields = [
     { key: 'title',     label: t('addFields.diploma'),     half: true },
     { key: 'school',    label: t('addFields.institution'), half: true },
-    // KAND-NIVEAU-1: a pick-only dropdown (own row, full width) — AddForm's plain
-    // `options` field renders a native <select> today; the punchlist's "searchable
-    // CreatableSelect" ask needs a small AddForm.tsx extension outside this
-    // change's owned files (flagged in the handover with the exact snippet).
-    // `defaultValue`: the key isn't in the locale files yet (reported, not applied
-    // here) — mirrors the identical KAND-REFERENTIES-1 pattern a few lines up the
-    // call chain in BackgroundTab.tsx.
+    // KAND-NIVEAU-1: a pick-only dropdown (own row, full width) — AddForm's `options`
+    // field now renders the house CreatableSelect (ALWAYS-SEARCHABLE-1, Danny 08-08,
+    // AddForm.tsx), never a native <select>. `defaultValue` stays as a harmless belt-
+    // and-braces fallback (the key already exists in every locale).
     { key: 'level_id',  label: t('addFields.educationLevel', { defaultValue: 'Niveau' }), options: levelOptions },
     { key: 'start',     label: t('addFields.startDate'), half: true, date: true },
     { key: 'end',       label: t('addFields.endDate'),   half: true, date: true,
@@ -212,7 +211,9 @@ export function EducationTab({ items = [], onAdd, onEdit, onRemove, documents = 
     { key: 'inProgress', label: t('addFields.inProgress'), checkbox: true },
     { key: 'issued',    label: t('addFields.diplomaDate'), date: true, hideWhen: 'inProgress' },
     // DOC-EDU-1: optionally link an already-uploaded proof document to this entry.
-    { key: 'document_id', label: t('addFields.linkedDocument'), options: documentOptions },
+    // Offered only once the candidate HAS documents — an always-empty dropdown is a
+    // fake affordance (§3).
+    ...(documents.length > 0 ? [{ key: 'document_id', label: t('addFields.linkedDocument'), options: documentOptions }] : []),
     // Description renders as a `richtext` field in this same form, mirroring
     // Experience/Certifications — one pencil per entry (Danny 05-08).
     { key: 'desc',      label: t('addFields.description'), richtext: true },
@@ -279,9 +280,9 @@ export function CertificationsTab({ items = [], onAdd, onEdit, onRemove, documen
   // DOC-GELDIGHEID-1: preview overlay for a row's linked proof document — the
   // shared house DocPreviewModal (never a fork).
   const [previewDoc, setPreviewDoc] = useState<RelItem | null>(null)
-  // "Koppelen aan" picker options — every candidate document, labeled by its own
-  // name (mirrors the upload-flow picker in DocumentsSection; same source list).
-  const documentOptions = documents.map(d => ({ value: String(d.id ?? ''), label: (d.name as string) ?? (d.file_name as string) ?? '' }))
+  // "Koppelen aan" picker options, resolved PER ROW — only documents no other entry
+  // has claimed, plus this row's own pick (DOC-1-EIGENAAR-1).
+  const documentOptions = linkedDocumentOptions(documents, items)
   // Compact layout: name+org pair; issued–expires stay a "tot" pair (separator).
   // The description renders as a `richtext` field in this same form (one
   // pencil per entry, Danny 05-08) — see ProseField (view-only) below.
@@ -292,8 +293,9 @@ export function CertificationsTab({ items = [], onAdd, onEdit, onRemove, documen
     { key: 'expires', label: t('addFields.expiryDate'), date: true, disabledWhen: 'noExpiry' },
     { key: 'noExpiry', label: t('addFields.alwaysValid'), checkbox: true },
     { key: 'license', label: t('addFields.licenseNumber') },
-    // DOC-GELDIGHEID-1: optionally link an already-uploaded proof document to this entry.
-    { key: 'document_id', label: t('addFields.linkedDocument'), options: documentOptions },
+    // DOC-GELDIGHEID-1: optionally link an already-uploaded proof document to this entry
+    // (only offered once the candidate HAS documents — §3, no fake affordance).
+    ...(documents.length > 0 ? [{ key: 'document_id', label: t('addFields.linkedDocument'), options: documentOptions }] : []),
     { key: 'desc',    label: t('addFields.description'), richtext: true },
   ]
   return (
@@ -335,14 +337,15 @@ export function SkillsTab({ items = [], onAdd, onEdit, onRemove, documents = [],
   // DOC-LANG-SKILL-LINK-1: preview overlay for a row's linked proof document — the
   // shared house DocPreviewModal (never a fork), mirrors Education/Certifications.
   const [previewDoc, setPreviewDoc] = useState<RelItem | null>(null)
-  // "Koppelen aan" picker options — every candidate document, labeled by its own
-  // name (mirrors the upload-flow picker in DocumentsSection; same source list).
-  const documentOptions = documents.map(d => ({ value: String(d.id ?? ''), label: (d.name as string) ?? (d.file_name as string) ?? '' }))
+  // "Koppelen aan" picker options, resolved PER ROW — only documents no other entry
+  // has claimed, plus this row's own pick (DOC-1-EIGENAAR-1).
+  const documentOptions = linkedDocumentOptions(documents, items)
   const fields = [
     { key: 'name',  label: t('addFields.skill') },
     { key: 'level', label: t('addFields.skillLevel'), options: levels },
-    // DOC-LANG-SKILL-LINK-1: optionally link an already-uploaded proof document to this entry.
-    { key: 'document_id', label: t('addFields.linkedDocument'), options: documentOptions },
+    // DOC-LANG-SKILL-LINK-1: optionally link an already-uploaded proof document to this
+    // entry (only offered once the candidate HAS documents — §3, no fake affordance).
+    ...(documents.length > 0 ? [{ key: 'document_id', label: t('addFields.linkedDocument'), options: documentOptions }] : []),
   ]
   // Skills render as a vertical list (one per row) so edit/remove read clearly.
   return (

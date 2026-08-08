@@ -6,6 +6,7 @@ import RichTextEditor from '@/components/ui/RichTextEditor'
 import SegmentedControl from '@/components/ui/SegmentedControl'
 import { Toggle } from '../components/SettingsKit'
 import { notifyError } from '@/lib/notify'
+import { fieldInputStyle } from '@/components/forms/fieldMetrics'
 
 // The tenant-setting key: one JSON blob holding the whole proposal configuration
 // (shared contract with the sibling "propose candidate" modal — MODAL agent reads
@@ -75,7 +76,8 @@ export default function ProposalSettings() {
   const cardStyle = { background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 10, padding: '14px 16px', marginBottom: 12 }
   const labelStyle = { fontSize: 13, fontWeight: 600, color: 'var(--text)', marginBottom: 4, display: 'block' }
   const hintStyle = { fontSize: 11, color: 'var(--text-muted)', marginBottom: 10 }
-  const inputStyle = { width: '100%', boxSizing: 'border-box', height: 34, padding: '0 10px', fontSize: 13, color: 'var(--text)', border: '1px solid var(--border)', borderRadius: 8, outline: 'none' }
+  // Canon field style (G33/fieldMetrics) — already matched it exactly, now shared.
+  const inputStyle = fieldInputStyle
 
   return (
     <div style={{ maxWidth: 720 }}>
@@ -106,7 +108,7 @@ export default function ProposalSettings() {
           <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
             {TOKENS.map(token => (
               <span key={token} style={{ fontSize: 11, fontFamily: 'JetBrains Mono, monospace', padding: '3px 8px', borderRadius: 6,
-                color: 'var(--color-primary)', background: 'var(--color-primary-bg, color-mix(in srgb, var(--color-primary) 10%, transparent))',
+                color: 'var(--color-primary-text)', background: 'var(--color-primary-bg, color-mix(in srgb, var(--color-primary) 10%, transparent))',
                 border: '1px solid color-mix(in srgb, var(--color-primary) 30%, transparent)' }}>
                 {token}
               </span>
@@ -117,7 +119,9 @@ export default function ProposalSettings() {
         <button onClick={saveTemplate} disabled={templateSaving}
           style={{ display: 'flex', alignItems: 'center', gap: 6, height: 32, padding: '0 12px', marginTop: 14,
             fontSize: 12, fontWeight: 500, borderRadius: 7, border: 'none', cursor: templateSaving ? 'wait' : 'pointer',
-            opacity: templateSaving ? 0.7 : 1, background: templateSaved ? 'var(--color-success)' : 'var(--color-primary)', color: 'white' }}>
+            opacity: templateSaving ? 0.7 : 1, background: templateSaved ? 'var(--color-success)' : 'var(--color-primary)',
+            // Success fill needs its own on-* token — white only reaches ~3.3:1 there (WCAG audit 2026-08).
+            color: templateSaved ? 'var(--color-on-success)' : 'var(--color-on-accent)' }}>
           <Save size={12} />
           {templateSaved ? t('proposal.saved') : templateSaving ? t('common.saving') : t('common.save')}
         </button>

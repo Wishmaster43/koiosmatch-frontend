@@ -7,18 +7,17 @@
  */
 import { useId, cloneElement, isValidElement } from 'react'
 import type { CSSProperties, ReactNode, ReactElement } from 'react'
-import { ChevronDown } from 'lucide-react'
 import DatePicker from 'react-datepicker'
 import 'react-datepicker/dist/react-datepicker.css'
 import { useTranslation } from 'react-i18next'
+import { fieldInputStyle } from './fieldMetrics'
+import CreatableSelect from '@/components/ui/CreatableSelect'
 
 export interface SelectOption { value: string; label?: ReactNode }
 
-export const inputStyle: CSSProperties = {
-  width: '100%', padding: '8px 11px', fontSize: 13, borderRadius: 8,
-  border: '1px solid var(--border)', background: 'var(--surface)',
-  color: 'var(--text)', boxSizing: 'border-box', outline: 'none',
-}
+// Canon field style (G33/fieldMetrics) — this was its own one-off (padding
+// 8/11, background var(--surface)) before the platform-wide sweep.
+export const inputStyle: CSSProperties = fieldInputStyle
 
 /** Parse any date-ish value into a Date, or null when invalid/empty. */
 export function parseDate(value?: string | number | Date | null): Date | null {
@@ -78,20 +77,20 @@ export function TextArea({ id, value, onChange, placeholder, rows = 3, style }: 
   )
 }
 
-export function SelectField({ id, value, onChange, options = [], placeholder, style }: {
-  id?: string; value?: string; onChange: (v: string) => void; options?: Array<string | SelectOption>; placeholder?: string; style?: CSSProperties
+// SELECT-SEARCHABLE-1 (Danny 08-08, CLAUDE.md §4: every dropdown is a searchable
+// combobox): rewired onto the shared CreatableSelect (allowCreate=false, pick-only)
+// instead of a bare native <select> — same value/onChange contract, so no caller
+// changes shape. `aria-labelledby` (cloned in by the Field wrapper above) now
+// reaches the trigger directly, since a <button> — unlike a native <select> — is
+// not labelable via `htmlFor`; `placeholder` still carries the name for callers
+// that render this standalone (no wrapping <Field>), same as TextField/TextArea.
+export function SelectField({ id, value, onChange, options = [], placeholder, style, 'aria-labelledby': ariaLabelledBy }: {
+  id?: string; value?: string; onChange: (v: string) => void; options?: Array<string | SelectOption>; placeholder?: string; style?: CSSProperties; 'aria-labelledby'?: string
 }) {
-  const opts: SelectOption[] = options.map(o => (typeof o === 'string' ? { value: o, label: o } : o))
   return (
-    <div style={{ position: 'relative' }}>
-      <select id={id} value={value ?? ''} onChange={e => onChange(e.target.value)} aria-label={placeholder}
-        style={{ ...inputStyle, appearance: 'none', paddingRight: 30, cursor: 'pointer', ...style }}>
-        {placeholder !== undefined && <option value="">{placeholder}</option>}
-        {opts.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
-      </select>
-      <ChevronDown size={13} style={{ position: 'absolute', right: 9, top: '50%',
-        transform: 'translateY(-50%)', color: 'var(--text-muted)', pointerEvents: 'none' }} />
-    </div>
+    <CreatableSelect id={id} aria-labelledby={ariaLabelledBy} value={value ?? ''} onChange={onChange}
+      options={options as Array<string | { value: string; label: string }>} placeholder={placeholder} allowCreate={false}
+      style={{ ...inputStyle, cursor: 'pointer', ...style }} />
   )
 }
 
@@ -124,12 +123,21 @@ export function CheckboxField({ id, checked, onChange, disabled }: {
 }
 
 /** "+ label" ghost button used at the top of every addable section. */
+/**
+ * AddButton — every "+ X toevoegen" affordance in a form/section. Danny 08-08:
+ * "MOET EEN KNOP ZIJN" — it used to render as bare orange text with a plus,
+ * which does not read as clickable and drifted per screen. Now it is a real
+ * bordered button in the §4 soft-tint recipe, matching DrawerAddButton so the
+ * add action looks identical in a drawer tab and in a form section.
+ */
 export function AddButton({ onClick, label }: { onClick: () => void; label?: ReactNode }) {
   const { t } = useTranslation('common')
   return (
-    <button onClick={onClick}
-      style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 11, fontWeight: 500,
-        color: 'var(--color-primary)', background: 'none', border: 'none', cursor: 'pointer' }}>
+    <button type="button" onClick={onClick}
+      style={{ display: 'inline-flex', alignItems: 'center', gap: 5, fontSize: 12, fontWeight: 500,
+        padding: '5px 11px', borderRadius: 8, cursor: 'pointer', color: 'var(--color-primary-text)',
+        background: 'color-mix(in srgb, var(--color-primary) 8%, transparent)',
+        border: '1px solid color-mix(in srgb, var(--color-primary) 32%, transparent)' }}>
       <span style={{ fontSize: 13, lineHeight: 1 }}>+</span> {label ?? t('add')}
     </button>
   )
@@ -143,7 +151,11 @@ export function SaveCancel({ onSave, onCancel, saveLabel, cancelLabel }: {
     <div style={{ display: 'flex', gap: 8, marginTop: 10 }}>
       <button onClick={onSave}
         style={{ padding: '8px 16px', fontSize: 12, fontWeight: 600, borderRadius: 8,
-          background: 'var(--text)', color: '#fff', border: 'none', cursor: 'pointer' }}>
+          // Inverted button: fill = --text, so the label must be its exact theme
+          // opposite (--surface), never a hardcoded white — a fixed white on
+          // --text vanished in dark mode where --text itself turns near-white
+          // (WCAG contrast audit 2026-08-08).
+          background: 'var(--text)', color: 'var(--surface)', border: 'none', cursor: 'pointer' }}>
         {saveLabel ?? t('save')}
       </button>
       <button onClick={onCancel}

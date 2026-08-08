@@ -13,9 +13,12 @@ import { useQuery } from '@tanstack/react-query'
 import api, { unwrap } from '@/lib/api'
 import { initialsOf } from '@/lib/initials'
 
-export interface CandidateLite { id: string; name: string; initials: string }
+export interface CandidateLite { id: string; name: string; initials: string; summary: string }
 
-// The subset of the raw candidate resource this hook actually reads.
+// The subset of the raw candidate resource this hook actually reads. `summary`
+// joined the list for the profile-text popout (TEKST-POPOUT-1) — the SAME
+// response already carried it, so that window costs no extra request and the
+// notes popout simply ignores the field.
 interface RawCandidateLite {
   id?: string | number
   name?: string
@@ -24,6 +27,8 @@ interface RawCandidateLite {
   lastname?: string
   first_name?: string
   last_name?: string
+  summary?: string | null
+  bio?: string | null
 }
 
 // Same name-derivation fallback chain as mapCandidate.ts (data/mapCandidate.ts) —
@@ -40,7 +45,8 @@ export function useCandidateLite(id: string | undefined) {
     queryFn: async ({ signal }): Promise<CandidateLite> => {
       const raw = unwrap<RawCandidateLite>(await api.get(`/candidates/${id}`, { signal }))
       const name = nameOf(raw)
-      return { id: String(raw.id ?? id), name, initials: initialsOf(name) }
+      // Same summary fallback chain as mapCandidate (summary → bio → empty).
+      return { id: String(raw.id ?? id), name, initials: initialsOf(name), summary: raw.summary ?? raw.bio ?? '' }
     },
   })
   return { candidate, loading, error, reload }

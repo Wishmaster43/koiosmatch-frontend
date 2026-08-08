@@ -86,7 +86,7 @@ export default function OrderDetailDrawer({ row, onClose }: { row: OrderRow | nu
                                         padding: '8px 10px', background: 'var(--bg)',
                                         borderRadius: 8, border: '1px solid var(--border)' }}>
                     <div style={{ width: 28, height: 28, borderRadius: '50%', flexShrink: 0,
-                                  background: 'var(--color-primary-bg)', color: 'var(--color-primary)',
+                                  background: 'var(--color-primary-bg)', color: 'var(--color-primary-text)',
                                   display: 'flex', alignItems: 'center', justifyContent: 'center',
                                   fontSize: 10, fontWeight: 700 }}>
                       {c ? `${(c.first_name??'')[0]??''}${(c.last_name??'')[0]??''}`.toUpperCase() : '?'}

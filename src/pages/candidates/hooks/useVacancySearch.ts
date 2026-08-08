@@ -7,7 +7,8 @@
  * does the scoring, the radius filter (against the candidate's own geocoded
  * location) and the best-score-first sort. Mirrors the abort/alive idiom
  * (AbortController per fetch, ignore a superseded response, adjust-during-
- * render reset on an entity switch).
+ * render reset on an entity switch). The pure seed/filter rules live next door
+ * in vacancySearchFilters.ts.
  */
 import { useState, useEffect } from 'react'
 import type { Dispatch, SetStateAction } from 'react'
@@ -20,34 +21,16 @@ import { useFunctions } from '@/lib/useFunctions'
 import { useAllSettings, getJsonSetting } from '@/lib/settings/useAllSettings'
 import { getVacancyTabDefaults } from '../lib/vacancyTabVisibility'
 import type { VacancyTabConfig } from '../lib/vacancyTabVisibility'
+import {
+  HOURS_RANGE_MAX, applyClientFilters, defaultAvailableFrom, defaultHoursRange,
+  defaultRadiusKm, matchFunctionOption, sameValues,
+} from './vacancySearchFilters'
+import type { HoursRange, VacancySearchRow } from './vacancySearchFilters'
 import type { Criterion } from '@/components/match/MatchScoreBlock'
 import type { Candidate } from '@/types/candidate'
 import type { Id } from '@/types/common'
 
-export interface VacancySearchRow {
-  id: Id
-  title: string
-  customer: string
-  city: string
-  status: string
-  functionTitle: string
-  lat: number | null
-  lng: number | null
-  distanceKm: number | null
-  score: number | null
-  criteria: Criterion[]
-  aiAdvised: boolean
-  aiAdviceReason: string | null
-  // Contract-form LABEL as returned by the vacancy ("ZZP"/"Oproep"/"Tijdelijk"/…) —
-  // already tenant-configured text, not a slug (MatchExplorerService::vacancyShape).
-  employmentType: string | null
-  // Weekly-hours range + start date (CMBE ticket in flight, Danny 06-08) — null when
-  // the backend hasn't shipped the field yet OR the vacancy itself left it empty;
-  // both cases are handled identically by the "never exclude" filter rule below.
-  hoursMin: number | null
-  hoursMax: number | null
-  startDate: string | null
-}
+export type { VacancySearchRow, HoursRange } from './vacancySearchFilters'
 
 // Raw /candidates/{id}/vacancy-matches row — read defensively (snake_case,
 // tolerant of gaps). Kept LOCAL on purpose: importing the vacancy feature's
@@ -61,8 +44,8 @@ interface RawMatchRow {
     customer_name?: string; function_title?: string
     lat?: unknown; lng?: unknown
     employment_type?: string; status?: unknown
-    // Not shipped yet (CMBE ticket in flight) — read defensively; the KEY's mere
-    // presence (even with a null value) drives the gated filters' visibility below.
+    // Measured live 09-08 (yesway): these three ARE shipped by vacancyShape. The
+    // KEY's mere presence (even with a null value) drives the gated filters below.
     hours_min?: unknown; hours_max?: unknown; start_date?: unknown
   }
   distance_km?: unknown
@@ -72,75 +55,9 @@ interface RawMatchRow {
   ai_advice_reason?: string | null
 }
 
-// Per-candidate travel preference (Danny 23-07): the radius default follows the
-// candidate's OWN `preferences.max_travel_km`, falling back to a calm 30km when
-// that isn't set (or isn't a usable positive number).
-function defaultRadiusKm(candidate: Candidate): number {
-  const pref = Number((candidate.preferences as { max_travel_km?: unknown } | undefined)?.max_travel_km)
-  return Number.isFinite(pref) && pref > 0 ? pref : 30
-}
-
 // Debounce window for the radius→fetch trigger (Danny 06-08 network-tab feedback):
 // a slider DRAG must settle before the request fires, not fire once per tick.
 const RADIUS_DEBOUNCE_MS = 350
-
-// Seed the "Uren per week" MIN filter from the candidate's own hours preference
-// (max stays empty — an open-ended upper bound until the recruiter narrows it).
-function defaultHoursMin(candidate: Candidate): string {
-  const pref = Number((candidate.preferences as { hours_per_week?: unknown } | undefined)?.hours_per_week)
-  return Number.isFinite(pref) && pref > 0 ? String(pref) : ''
-}
-
-// Seed the "Inzetbaar vanaf" filter from the candidate's own available-from date.
-// Sliced to the date-only part — the preference may carry a full timestamp.
-function defaultAvailableFrom(candidate: Candidate): string {
-  const pref = (candidate.preferences as { available_from?: unknown } | undefined)?.available_from
-  return typeof pref === 'string' && pref ? pref.slice(0, 10) : ''
-}
-
-// Range-overlap test for the "Uren per week" filter — a vacancy carrying NEITHER
-// hours_min NOR hours_max is never excluded (no data to filter on); an open filter
-// bound (empty min/max) never narrows the range either.
-function hoursOverlap(row: VacancySearchRow, min: string, max: string): boolean {
-  if (row.hoursMin == null && row.hoursMax == null) return true
-  const vMin = row.hoursMin ?? -Infinity
-  const vMax = row.hoursMax ?? Infinity
-  const fMin = min !== '' ? Number(min) : -Infinity
-  const fMax = max !== '' ? Number(max) : Infinity
-  return vMin <= fMax && fMin <= vMax
-}
-
-// "Inzetbaar vanaf" filter: keep vacancies whose start_date is on/after the chosen
-// date. A vacancy without its own start_date is never excluded (no data to filter
-// on); date-only string comparison is safe since both sides are ISO 'YYYY-MM-DD'.
-function afterAvailableFrom(row: VacancySearchRow, chosen: string): boolean {
-  if (!chosen || !row.startDate) return true
-  return row.startDate.slice(0, 10) >= chosen
-}
-
-// Client-side filters over the ALREADY-FETCHED rows (Danny 06-08 "eerst de extra
-// filters") — the set is already radius/status/function bounded by the server; these
-// three narrow it further without a second network round-trip.
-function applyClientFilters(rows: VacancySearchRow[], contractvorm: string[], hoursMin: string, hoursMax: string, availableFrom: string): VacancySearchRow[] {
-  return rows.filter(r =>
-    (contractvorm.length === 0 || contractvorm.includes(r.employmentType ?? '')) &&
-    hoursOverlap(r, hoursMin, hoursMax) &&
-    afterAvailableFrom(r, availableFrom),
-  )
-}
-
-// Ghost-filter fix (Danny 05-08): the candidate's own `title` (e.g. "Verpleegkundige")
-// often has NO exact match in the tenant's /functions lookup (which may only carry
-// "Verpleegkundige N4"/"N5") — seeding that raw title selected a value the SearchSelect
-// can render no check for AND the API can't match on (zero results, no visible cause).
-// Match EXACT + case-insensitive only — never a prefix expansion (a scope-of-practice
-// title must never auto-select a DIFFERENT function, e.g. Verzorgende-anything) — and
-// return the option's OWN casing so the stored value lines up with what renders.
-function matchFunctionOption(title: string | null | undefined, options: string[]): string | null {
-  const needle = (title ?? '').trim().toLowerCase()
-  if (!needle) return null
-  return options.find(o => o.toLowerCase() === needle) ?? null
-}
 
 export function useVacancySearch(candidate: Candidate) {
   const { statuses } = useVacancyLookups()
@@ -157,15 +74,22 @@ export function useVacancySearch(candidate: Candidate) {
   const vacancyTabCfg = getJsonSetting<VacancyTabConfig | null>(allSettings, 'candidate_vacancy_tab', null)
   const defaultStatusValues = vacancyTabCfg?.vacancy_statuses ?? getVacancyTabDefaults([], [], [], statuses).vacancy_statuses
 
-  const [radiusKm, setRadiusKm]         = useState(() => defaultRadiusKm(candidate))
+  // The per-candidate STARTING values, recomputed every render from the same
+  // inputs the initial state and the re-seed effects use — one source of truth for
+  // the reset action and for the "is anything actually changed?" test behind it.
+  const radiusSeed = defaultRadiusKm(candidate)
+  const functionMatch = matchFunctionOption(candidate.title, functionOptions)
+  const functionSeed = functionMatch ? [functionMatch] : []
+  const statusSeed = canonicalizeToOptions(defaultStatusValues, statuses)
+  const hoursRangeSeed = defaultHoursRange(candidate)
+  const availableFromSeed = defaultAvailableFrom(candidate)
+
+  const [radiusKm, setRadiusKm]         = useState(radiusSeed)
   // The slider/map bind to the LIVE radiusKm above (instant feedback); the fetch
   // effect below reads THIS debounced echo instead, so a drag never fires one
   // request per tick — only once the value has settled for RADIUS_DEBOUNCE_MS.
   const [debouncedRadiusKm, setDebouncedRadiusKm] = useState(radiusKm)
-  const [functions, setFunctionsState]  = useState<string[]>(() => {
-    const match = matchFunctionOption(candidate.title, functionOptions)
-    return match ? [match] : []
-  })
+  const [functions, setFunctionsState]  = useState<string[]>(functionSeed)
   const [statusSel, setStatusSel] = useState<string[]>(defaultStatusValues)
 
   // A manual pick wins forever for this candidate — the tenant lookup arriving late
@@ -190,9 +114,8 @@ export function useVacancySearch(candidate: Candidate) {
   // "Uren per week" range + "Inzetbaar vanaf" date — plain editable filters, seeded
   // once from the candidate's OWN preferences (synchronously available on the prop,
   // unlike the async tenant lookups above, so no userTouched merge-back is needed).
-  const [hoursMin, setHoursMin] = useState(() => defaultHoursMin(candidate))
-  const [hoursMax, setHoursMax] = useState('')
-  const [availableFrom, setAvailableFrom] = useState(() => defaultAvailableFrom(candidate))
+  const [hoursRange, setHoursRange] = useState<HoursRange>(hoursRangeSeed)
+  const [availableFrom, setAvailableFrom] = useState(availableFromSeed)
 
   // The tab is NOT remounted when a different candidate is opened (EntityDrawer only
   // keys its tab body by the active TAB id, not the entity) — re-derive the filter
@@ -202,23 +125,19 @@ export function useVacancySearch(candidate: Candidate) {
   const [prevId, setPrevId] = useState<Id | undefined>(candidate.id)
   if (candidate.id !== prevId) {
     setPrevId(candidate.id)
-    setRadiusKm(defaultRadiusKm(candidate))
+    setRadiusKm(radiusSeed)
     // A candidate switch is a hard reset, not a drag — settle the fetch trigger
     // immediately too, or the new candidate's first fetch waits out the debounce.
-    setDebouncedRadiusKm(defaultRadiusKm(candidate))
+    setDebouncedRadiusKm(radiusSeed)
     setUserTouchedFunctions(false)
-    setFunctionsState(() => {
-      const match = matchFunctionOption(candidate.title, functionOptions)
-      return match ? [match] : []
-    })
+    setFunctionsState(functionSeed)
     setStatusSel(defaultStatusValues)
     // New candidate → blank contract-form pick (the seeding effect below re-derives
     // it once the fresh rows/lookup are in), and re-seed the plain preference filters.
     setUserTouchedContractvorm(false)
     setContractvormState([])
-    setHoursMin(defaultHoursMin(candidate))
-    setHoursMax('')
-    setAvailableFrom(defaultAvailableFrom(candidate))
+    setHoursRange(hoursRangeSeed)
+    setAvailableFrom(availableFromSeed)
   }
 
   // useFunctions() resolves async (a synchronous seed fallback, then the REAL
@@ -226,14 +145,12 @@ export function useVacancySearch(candidate: Candidate) {
   // still gets picked up, but only while the user hasn't made their own choice yet.
   useEffect(() => {
     if (userTouchedFunctions) return
-    const match = matchFunctionOption(candidate.title, functionOptions)
-    const next = match ? [match] : []
     // Bail on a content-equal result (comparing via the FUNCTIONAL updater, not the
     // `functions` closure, so this effect needs no extra dependency) — a fresh `[]`
     // is a different array reference from the initial seed's own `[]`, and without
     // this guard every mount fired a harmless-looking but wasteful SECOND fetch (the
     // vacancy-matches effect below re-triggers on any new `functions` reference).
-    setFunctionsState(prev => (prev.length === next.length && prev.every((v, i) => v === next[i]) ? prev : next))
+    setFunctionsState(prev => (sameValues(prev, functionSeed) ? prev : functionSeed))
     // eslint-disable-next-line react-hooks/exhaustive-deps -- candidate.id/title drive the prevId block above; only re-seed here on a genuine functionOptions arrival.
   }, [functionOptions, userTouchedFunctions])
 
@@ -253,7 +170,7 @@ export function useVacancySearch(candidate: Candidate) {
   const [reloadKey, setReloadKey] = useState(0)
   // OFFERED-IFF-READ (mirrors MatchTextBlock): whether ANY fetched row's vacancy
   // object carries the hours_min/hours_max/start_date KEY at all (even if null) —
-  // the CMBE fields are in flight, so the gated filters stay hidden until they land.
+  // a filter only appears once the data behind it is demonstrably there.
   const [hasHoursData, setHasHoursData]         = useState(false)
   const [hasAvailableFromData, setHasAvailableFromData] = useState(false)
 
@@ -274,12 +191,17 @@ export function useVacancySearch(candidate: Candidate) {
   // resolves the search origin from the candidate's own geocode. `radius` reads
   // the DEBOUNCED value (see above) — every other param fires immediately.
   useEffect(() => {
-    if (noLocation) { setRawRows([]); setLoading(false); setError(false); return }
     const ctrl = new AbortController()
     setLoading(true); setError(false)
     api.get(`/candidates/${candidate.id}/vacancy-matches`, {
       params: {
-        radius: debouncedRadiusKm,
+        // GEO-DEGRADE-1 (Danny 08-08 "vacatures zoeken werkt niet meer + de filters
+        // verdwijnen"): an un-geocoded candidate used to bail out here, which killed
+        // the whole tab — filters, list and all. Measured against the live endpoint:
+        // it happily scores and ranks WITHOUT an origin (9 rows, score 66, distance
+        // null), so only the radius is dropped. The map/distance stay hidden (they
+        // genuinely need coordinates) — the search itself keeps working.
+        ...(noLocation ? {} : { radius: debouncedRadiusKm }),
         ...(statusSel.length && { status: statusSel }),
         ...(functions.length && { function_title: functions }),
         per_page: 100,
@@ -332,18 +254,19 @@ export function useVacancySearch(candidate: Candidate) {
     ...rawRows.map(r => r.employmentType).filter((v): v is string => Boolean(v)),
   ]))
 
-  // Seed the contract-form filter from the candidate's OWN contractvorm (slugs ->
-  // labels via the tenant lookup), intersected with what's actually offerable right
-  // now — never seed a chip the SearchSelect can't render a match for. Re-runs
-  // while untouched so a late-arriving lookup/row set still converges (mirrors the
-  // function filter's re-seed effect above).
+  // Contract-form SEED: the candidate's OWN contractvorm (slugs → labels via the
+  // tenant lookup), intersected with what's actually offerable right now — never
+  // seed a chip the SearchSelect can't render a match for.
+  const contractvormSeed = (candidate.candidateTypes ?? [])
+    .map(slug => typeMeta(slug).label)
+    .filter((l): l is string => Boolean(l))
+    .filter(l => contractvormOptions.includes(l))
+
+  // Apply that seed while the user hasn't picked their own, re-running so a
+  // late-arriving lookup/row set still converges (mirrors the function re-seed above).
   useEffect(() => {
     if (userTouchedContractvorm) return
-    const candidateLabels = (candidate.candidateTypes ?? [])
-      .map(slug => typeMeta(slug).label)
-      .filter((l): l is string => Boolean(l))
-    const seed = candidateLabels.filter(l => contractvormOptions.includes(l))
-    setContractvormState(prev => (prev.length === seed.length && prev.every((v, i) => v === seed[i]) ? prev : seed))
+    setContractvormState(prev => (sameValues(prev, contractvormSeed) ? prev : contractvormSeed))
     // eslint-disable-next-line react-hooks/exhaustive-deps -- candidate switches are handled by the prevId block above; only re-seed here on a genuine lookup/rows arrival.
   }, [candidateTypes, rawRows, userTouchedContractvorm])
 
@@ -351,11 +274,38 @@ export function useVacancySearch(candidate: Candidate) {
   // NO exact match in the tenant lookup, so the Functie filter above seeded EMPTY
   // and silently searches every function — surface that as a small hint instead of
   // a silent gap. Empty title never triggers it (nothing to mismatch).
-  const functionNotInLookup = Boolean(candidate.title?.trim()) && !matchFunctionOption(candidate.title, functionOptions)
+  const functionNotInLookup = Boolean(candidate.title?.trim()) && !functionMatch
+
+  // Whether ANY filter differs from its starting value. The two lookup-seeded
+  // filters only count once the user has actually touched them — while untouched
+  // their re-seed effects converge them to the seed anyway, and comparing before
+  // that flashed the reset button on every mount.
+  const filtersDirty =
+    radiusKm !== radiusSeed ||
+    (userTouchedFunctions && !sameValues(functions, functionSeed)) ||
+    (userTouchedContractvorm && !sameValues(contractvorm, contractvormSeed)) ||
+    !sameValues(statusSel, statusSeed) ||
+    hoursRange[0] !== hoursRangeSeed[0] || hoursRange[1] !== hoursRangeSeed[1] ||
+    availableFrom !== availableFromSeed
+
+  // Reset every filter to its per-candidate STARTING value — the seeds above, not
+  // blanks, so the radius and the candidate's own preferences come back too.
+  const resetFilters = () => {
+    setRadiusKm(radiusSeed)
+    // A reset is a discrete click, not a drag — settle the fetch trigger at once.
+    setDebouncedRadiusKm(radiusSeed)
+    setUserTouchedFunctions(false)
+    setFunctionsState(functionSeed)
+    setStatusSel(statusSeed)
+    setUserTouchedContractvorm(false)
+    setContractvormState(contractvormSeed)
+    setHoursRange(hoursRangeSeed)
+    setAvailableFrom(availableFromSeed)
+  }
 
   // The fully-filtered view returned to the tab — client-side only (the API set is
   // already radius/status/function bounded), so no extra network round-trip.
-  const rows = applyClientFilters(rawRows, contractvorm, hoursMin, hoursMax, availableFrom)
+  const rows = applyClientFilters(rawRows, contractvorm, hoursRange, availableFrom)
 
   return {
     rows, loading, error, retry: () => setReloadKey(k => k + 1),
@@ -363,9 +313,10 @@ export function useVacancySearch(candidate: Candidate) {
     functions, setFunctions,
     functionNotInLookup,
     contractvorm, setContractvorm, contractvormOptions,
-    hoursMin, setHoursMin, hoursMax, setHoursMax, hasHoursData,
+    hoursRange, setHoursRange, hoursRangeMax: HOURS_RANGE_MAX, hasHoursData,
     availableFrom, setAvailableFrom, hasAvailableFromData,
     statuses: statusSel, setStatuses: setStatusSel,
+    filtersDirty, resetFilters,
     noLocation,
   }
 }

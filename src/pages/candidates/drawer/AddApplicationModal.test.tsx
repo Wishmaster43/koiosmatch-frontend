@@ -39,8 +39,15 @@ vi.mock('@/hooks/useApplicationStages', () => ({
   }),
 }))
 vi.mock('@/lib/notify', () => ({ notifyError: vi.fn(), notifySuccess: vi.fn() }))
+// `unwrap` is exported for real (the component uses it to read the edit-mode
+// GET) — a factory mock must carry every named export the component imports.
 vi.mock('@/lib/api', () => ({
-  default: { post: vi.fn(() => Promise.resolve({ data: { data: {} } })), get: vi.fn(() => Promise.reject({ response: { status: 404 } })) },
+  default: {
+    post: vi.fn(() => Promise.resolve({ data: { data: {} } })),
+    patch: vi.fn(() => Promise.resolve({ data: { data: {} } })),
+    get: vi.fn(() => Promise.reject({ response: { status: 404 } })),
+  },
+  unwrap: (r: { data?: { data?: unknown } }) => r?.data?.data ?? r?.data,
 }))
 // Only the network-backed hook is stubbed (defaults to "no decision") — the real
 // ActionRuleBanner renders, so its own P-code styling/markup is what's asserted.
@@ -59,6 +66,8 @@ const noop = () => {}
 // test explicitly overrides it (owner-deviation tests below).
 beforeEach(() => {
   vi.mocked(api.post).mockClear()
+  vi.mocked(api.patch).mockClear()
+  vi.mocked(api.get).mockClear()
   vi.mocked(useVacancyOptions).mockReturnValue([{ value: 'vac-1', label: 'Verzorgende IG', client: 'Zorggroep A' }])
   vi.mocked(useUsers).mockReturnValue({
     data: [{ id: 'u1', name: 'Piet Recruiter' }, { id: 'u2', name: 'Klaas Anders' }, { id: 'u3', name: 'Anna Derde' }],
@@ -317,5 +326,73 @@ describe('AddApplicationModal · APP-OWNER-1 recruiter derivation chain', () => 
 
     await user.click(screen.getByRole('button', { name: 'work.createApplication' }))
     expect(api.post).toHaveBeenCalledWith('/applications', expect.objectContaining({ owner_id: 'u1' }))
+  })
+})
+
+/**
+ * EDIT MODE (Danny punt 5, 08-08) — the pencil on a candidate application row
+ * reopens THIS form with `editApplicationId` set: prefill from
+ * GET /applications/{id}, then PATCH /applications/{id} with the CHANGED fields
+ * only. The route + field names are the measured contract (UpdateApplicationRequest
+ * validates vacancy_id / owner_id / application_stage_id, each `sometimes`), so
+ * these assertions name the exact method, route and body — never "a callback fired"
+ * (§13, the dead bulk-unlink lesson).
+ */
+describe('AddApplicationModal · EDIT mode (punt 5)', () => {
+  // Vacancy vac-1, recruiter u2 (NOT the logged-in u1), fase invited.
+  const detail = { data: { data: { id: 'app-1', vacancy: { id: 'vac-1', title: 'Verzorgende IG' }, owner: { id: 'u2', name: 'Klaas Anders' }, phase_key: 'invited' } } }
+
+  it('prefills vacancy, recruiter and fase from GET /applications/{id}', async () => {
+    vi.mocked(api.get).mockResolvedValueOnce(detail)
+    render(<AddApplicationModal candidateId="cand-1" editApplicationId="app-1" onClose={noop} onCreated={noop} />)
+
+    expect(api.get).toHaveBeenCalledWith('/applications/app-1')
+    // The record's OWN stage wins over the tenant default (stage-applied)...
+    expect(await screen.findByRole('button', { name: /Uitgenodigd\/Intake/ })).toBeInTheDocument()
+    // ...and its OWN owner over the create-time derivation chain (which would pick u1).
+    expect(screen.getByRole('button', { name: /Klaas Anders/ })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /Verzorgende IG/ })).toBeInTheDocument()
+    // Edit is not a create: the header/button read as an edit.
+    expect(screen.getByRole('button', { name: 'common:save' })).toBeInTheDocument()
+  })
+
+  it('PATCHes the exact route + only the CHANGED field', async () => {
+    vi.mocked(api.get).mockResolvedValueOnce(detail)
+    const user = userEvent.setup()
+    render(<AddApplicationModal candidateId="cand-1" editApplicationId="app-1" onClose={noop} onCreated={noop} />)
+
+    // Move the fase invited -> applied; vacancy and recruiter stay untouched.
+    await user.click(await screen.findByRole('button', { name: /Uitgenodigd\/Intake/ }))
+    await user.click(await screen.findByRole('button', { name: /Gesolliciteerd/ }))
+    await user.click(screen.getByRole('button', { name: 'common:save' }))
+
+    expect(api.patch).toHaveBeenCalledWith('/applications/app-1', { application_stage_id: 'stage-applied' })
+    // An edit must never fall through to the create route.
+    expect(api.post).not.toHaveBeenCalled()
+  })
+
+  it('sends the changed recruiter as owner_id', async () => {
+    vi.mocked(api.get).mockResolvedValueOnce(detail)
+    const user = userEvent.setup()
+    render(<AddApplicationModal candidateId="cand-1" editApplicationId="app-1" onClose={noop} onCreated={noop} />)
+
+    await user.click(await screen.findByRole('button', { name: /Klaas Anders/ }))
+    await user.click(await screen.findByRole('button', { name: 'Anna Derde' }))
+    await user.click(screen.getByRole('button', { name: 'common:save' }))
+
+    expect(api.patch).toHaveBeenCalledWith('/applications/app-1', { owner_id: 'u3' })
+  })
+
+  it('writes nothing when nothing changed (an unchanged stage would log a phantom transition)', async () => {
+    vi.mocked(api.get).mockResolvedValueOnce(detail)
+    const onCreated = vi.fn()
+    const onClose = vi.fn()
+    const user = userEvent.setup()
+    render(<AddApplicationModal candidateId="cand-1" editApplicationId="app-1" onClose={onClose} onCreated={onCreated} />)
+
+    await user.click(await screen.findByRole('button', { name: 'common:save' }))
+    expect(api.patch).not.toHaveBeenCalled()
+    expect(api.post).not.toHaveBeenCalled()
+    expect(onClose).toHaveBeenCalled()
   })
 })

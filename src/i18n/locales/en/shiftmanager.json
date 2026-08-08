@@ -93,7 +93,8 @@
       "ccCust": "Cost center cust.",
       "candidates": "Candidates",
       "notes": "Notes"
-    }
+    },
+    "filterMonth": "Month"
   },
   "shiftsDrawer": {
     "count": "{{count}} shifts",

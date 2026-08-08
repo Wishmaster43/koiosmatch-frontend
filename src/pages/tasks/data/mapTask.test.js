@@ -53,6 +53,20 @@ describe('mapTask', () => {
     expect(mapTask({ id: 't5', due_date: '2026-06-30', due_time: '14:30' }).dueTime).toBe('14:30')
     expect(mapTask({ id: 't6', due_date: '2026-06-30' }).dueTime).toBe('')
   })
+
+  // TASK-LOCATION-READ-1 (BE golf 2a/2b, 2026-08-08): TaskListResource/
+  // TaskDetailResource now emit `location {id,name}|null` after `priority`.
+  it('maps the branch (location) through, id + name', () => {
+    const row = mapTask({ id: 't7', location: { id: 'loc-1', name: 'Vestiging Noord' } })
+    expect(row.locationId).toBe('loc-1')
+    expect(row.location).toEqual({ id: 'loc-1', name: 'Vestiging Noord' })
+  })
+
+  it('treats a missing/null location as no branch, never a crash', () => {
+    const row = mapTask({ id: 't8' })
+    expect(row.locationId).toBeNull()
+    expect(row.location).toBeNull()
+  })
 })
 
 // TASK-DUE-TIME-1 helpers: date+time combination and the time-aware overdue rule.

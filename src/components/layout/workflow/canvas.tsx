@@ -42,7 +42,7 @@ function ModuleNode({ id, data, selected }: { id: string; data: FlowNodeData; se
   // Node label — translated via the shared `modules.*` keys (§5), same mechanism
   // as ConfigPanel/ModulePicker; an unrecognised type shows a translated notice
   // instead of the raw Dutch registry fallback.
-  const nodeLabel = knownMeta ? t('modules.' + rawType, { defaultValue: knownMeta.label }) : t('canvas.unknownModule', { defaultValue: 'Unknown module' })
+  const nodeLabel = knownMeta ? t('modules.' + rawType, { defaultValue: knownMeta.label }) : t('canvas.unknownModule')
   // WF-R3 live per-step status → node ring + badge colour.
   const status = data.status as string | undefined
   const failed = status === 'failed'
@@ -117,7 +117,7 @@ function ModuleNode({ id, data, selected }: { id: string; data: FlowNodeData; se
           title={t('canvas.dragStart')} aria-label={t('canvas.dragStart')}
           style={{
             position: 'absolute', top: -14, left: '50%', transform: 'translateX(-50%)',
-            background: 'var(--color-primary)', color: 'white',
+            background: 'var(--color-primary)', color: 'var(--color-on-accent)',
             fontSize: 9, fontWeight: 700, letterSpacing: '0.05em',
             padding: '2px 8px', borderRadius: 999, whiteSpace: 'nowrap',
             cursor: 'grab', zIndex: 5,
@@ -128,7 +128,7 @@ function ModuleNode({ id, data, selected }: { id: string; data: FlowNodeData; se
       )}
       {!data.isFirst && (
         <Handle type="target" id="in" position={Position.Left}
-          style={{ width: 10, height: 10, background: 'var(--border)', border: '2px solid white', top: '38%' }} />
+          style={{ width: 10, height: 10, background: 'var(--border)', border: '2px solid var(--surface)', top: '38%' }} />
       )}
       <div style={{ position: 'relative' }}>
         {/* NODE-PROGRESS-1: the progress arc, drawn exactly on the glow ring. Determinate
@@ -157,10 +157,15 @@ function ModuleNode({ id, data, selected }: { id: string; data: FlowNodeData; se
             circle and the run button owns bottom-right — bottom-left is the only
             corner that is free on every node. */}
         {badgeCount != null && (
+          // Soft-tint chip (§4) instead of a solid meta.color fill with hardcoded white text:
+          // the module palette varies from dark (module-teal-strong) to pale (module-mauve,
+          // module-periwinkle), so a fixed white foreground fails contrast on the lighter
+          // swatches. meta.color-on-meta.bg is the same safe pairing already used for the
+          // node's own icon (below), so it stays readable for every module colour.
           <span style={{ position: 'absolute', bottom: -6, left: -9, zIndex: 4,
                          minWidth: 16, padding: '2px 6px', borderRadius: 999,
                          display: 'flex', alignItems: 'center', justifyContent: 'center',
-                         background: meta.color, color: 'white', fontSize: 10, fontWeight: 700,
+                         background: meta.bg, color: meta.color, fontSize: 10, fontWeight: 700,
                          fontFamily: "'JetBrains Mono', monospace", lineHeight: '14px',
                          border: '2px solid var(--surface)', whiteSpace: 'nowrap' }}>
             {badgeCount}
@@ -206,10 +211,12 @@ function ModuleNode({ id, data, selected }: { id: string; data: FlowNodeData; se
           <div style={{
             position: 'absolute', top: -4, right: -4,
             width: 16, height: 16, borderRadius: '50%',
-            background: failed ? 'var(--color-danger)' : 'var(--color-success)', border: '2px solid white',
+            background: failed ? 'var(--color-danger)' : 'var(--color-success)', border: '2px solid var(--surface)',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
           }}>
-            {failed ? <X size={9} color="white" /> : <CheckCircle size={9} color="white" />}
+            {/* Icon on a FIXED semantic fill — the on-danger/on-success tokens, never a raw
+                'white' (white only reaches 3.3:1 on --color-success, failing 4.5:1). */}
+            {failed ? <X size={9} color="var(--color-on-danger)" /> : <CheckCircle size={9} color="var(--color-on-success)" />}
           </div>
         )}
       </div>
@@ -222,7 +229,7 @@ function ModuleNode({ id, data, selected }: { id: string; data: FlowNodeData; se
         )}
       </div>
       <Handle type="source" id="out" position={Position.Right}
-        style={{ width: 10, height: 10, background: 'var(--border)', border: '2px solid white', top: '38%' }} />
+        style={{ width: 10, height: 10, background: 'var(--border)', border: '2px solid var(--surface)', top: '38%' }} />
     </div>
   )
 }
@@ -288,12 +295,15 @@ function AddableEdge({ id, sourceX, sourceY, targetX, targetY, selected, data }:
         }}>
           {/* Route name (Router branch) */}
           {data?.label && (
-            <div style={{ fontSize: 9, background: 'var(--color-primary-bg)', color: 'var(--color-primary)', borderRadius: 999, padding: '1px 6px', fontWeight: 700, maxWidth: 130, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+            <div style={{ fontSize: 9, background: 'var(--color-primary-bg)', color: 'var(--color-primary-text)', borderRadius: 999, padding: '1px 6px', fontWeight: 700, maxWidth: 130, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
               {data.label}
             </div>
           )}
           {hasFilters && (
-            <div style={{ fontSize: 9, background: 'var(--color-violet)', color: 'white', borderRadius: 999, padding: '1px 6px', fontWeight: 700 }}>
+            // Soft-tint chip (§4), matching the filter toggle button below — a solid
+            // var(--color-violet) fill with hardcoded white text is unreviewed against
+            // theme/brand changes even though violet itself is fixed.
+            <div style={{ fontSize: 9, background: 'var(--color-violet-bg)', color: 'var(--color-violet)', borderRadius: 999, padding: '1px 6px', fontWeight: 700 }}>
               {t('canvas.filterCount', { count: filterCount })}
             </div>
           )}

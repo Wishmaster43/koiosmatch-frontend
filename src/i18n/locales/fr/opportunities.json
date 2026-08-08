@@ -80,7 +80,8 @@
     "created": "Créé",
     "groups": {
       "deal": "Affaire",
-      "organisation": "Organisation"
+      "organisation": "Organisation",
+      "description": "Description"
     },
     "currency": "Devise",
     "hours": "Heures",
@@ -111,7 +112,8 @@
     "cancel": "Annuler",
     "groups": {
       "general": "Général",
-      "dealStage": "Valeur & phase"
+      "dealStage": "Valeur & phase",
+      "description": "Description"
     },
     "fields": {
       "title": "Titre",
@@ -164,5 +166,8 @@
     "reasons": {
       "expectedCloseOverdue": "La date de clôture prévue est dépassée — relancez cette opportunité."
     }
+  },
+  "richText": {
+    "empty": "Rien d'enregistré pour l'instant"
   }
 }

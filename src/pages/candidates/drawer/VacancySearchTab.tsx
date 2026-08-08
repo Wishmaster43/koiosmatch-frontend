@@ -9,10 +9,11 @@ import RadiusMapPanel from '@/components/map/RadiusMapPanel'
 import DrillPager from '@/components/drawer/DrillPager'
 import EntityLink from '@/components/ui/EntityLink'
 import KoiosAiMark from '@/components/ui/KoiosAiMark'
-import SearchSelect from '@/components/ui/SearchSelect'
+import GeocodeButton from '@/components/ui/GeocodeButton'
 import StatusPill from '@/components/ui/StatusPill'
 import DrawerAddButton from './DrawerAddButton'
 import AddApplicationModal from './AddApplicationModal'
+import VacancySearchFilters from './VacancySearchFilters'
 import api, { unwrap } from '@/lib/api'
 import { useVacancySearch } from '../hooks/useVacancySearch'
 import { useFunctions } from '@/lib/useFunctions'
@@ -21,11 +22,7 @@ import { toCoord } from '@/lib/coords'
 import type { Candidate } from '@/types/candidate'
 import type { Id } from '@/types/common'
 
-const filterLabel: CSSProperties = { fontSize: 11, color: 'var(--text-muted)', display: 'block', marginBottom: 4 }
 const rowStyle: CSSProperties = { display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8, padding: '8px 10px', borderRadius: 8, cursor: 'pointer' }
-// Bare filter-bar input (mirrors ChangelogTab's date-range inputStyle — the one
-// established "plain input in a filter row" look, not the EditableFieldTable form field).
-const filterInput: CSSProperties = { padding: '6px 9px', fontSize: 12, border: '1px solid var(--border)', borderRadius: 7, background: 'var(--surface)', color: 'var(--text)', outline: 'none' }
 // Snippet length cap (2-3 lines of plain text) — a short teaser, not the full description.
 const SNIPPET_MAX_LENGTH = 220
 
@@ -66,8 +63,9 @@ function VacancySearchTabInner({ candidate }: { candidate: Candidate }) {
     functions: selectedFunctions, setFunctions, functionNotInLookup,
     statuses: selectedStatuses, setStatuses,
     contractvorm, setContractvorm, contractvormOptions,
-    hoursMin, setHoursMin, hoursMax, setHoursMax, hasHoursData,
+    hoursRange, setHoursRange, hoursRangeMax, hasHoursData,
     availableFrom, setAvailableFrom, hasAvailableFromData,
+    filtersDirty, resetFilters,
     noLocation,
   } = useVacancySearch(candidate)
 
@@ -102,11 +100,6 @@ function VacancySearchTabInner({ candidate }: { candidate: Candidate }) {
     return () => ctrl.abort()
   }, [selectedId])
 
-  // Honest empty state — no dead map/filters when the candidate has no coordinates yet.
-  if (noLocation) {
-    return <div style={{ padding: 16, fontSize: 12, color: 'var(--text-muted)' }}>{t('vacancySearch.noLocation')}</div>
-  }
-
   const selectedRow = rows.find(r => r.id === selectedId) ?? null
   const selectVacancy = (id: Id) => setSelectedId(id)
 
@@ -118,84 +111,36 @@ function VacancySearchTabInner({ candidate }: { candidate: Candidate }) {
   const goPrev = selectedIndex > 0 ? () => setSelectedId(rows[selectedIndex - 1].id) : undefined
   const goNext = selectedIndex >= 0 && selectedIndex < rows.length - 1 ? () => setSelectedId(rows[selectedIndex + 1].id) : undefined
 
-  const toggleFunction = (name: string) =>
-    setFunctions(selectedFunctions.includes(name) ? selectedFunctions.filter(f => f !== name) : [...selectedFunctions, name])
-  const toggleStatus = (value: string) =>
-    setStatuses(selectedStatuses.includes(value) ? selectedStatuses.filter(s => s !== value) : [...selectedStatuses, value])
-  const toggleContractvorm = (value: string) =>
-    setContractvorm(contractvorm.includes(value) ? contractvorm.filter(v => v !== value) : [...contractvorm, value])
-
-  // Trigger text mirrors the shared filter-panel idiom (SearchSelectGroup / report
-  // filters): a count once something is selected, else a calm "choose X" prompt.
-  const triggerText = (selected: string[], label: string) =>
-    selected.length > 0 ? t('common:filters.selectedCount', { count: selected.length }) : t('common:filters.choose', { label: label.toLowerCase() })
-
   const center = { lat: toCoord(candidate.lat) as number, lng: toCoord(candidate.lng) as number }
   const points = rows
     .filter(r => r.lat != null && r.lng != null)
     .map(r => ({ id: r.id, lat: r.lat as number, lng: r.lng as number, label: r.title, sub: [r.customer, r.city].filter(Boolean).join(' · ') }))
 
+  // Filter bar (own component — the tab stays a thin container, §3): every value
+  // and setter comes straight from the hook, including the reset action.
   const filtersRow: ReactNode = (
-    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 16 }}>
-      <div style={{ minWidth: 180 }}>
-        <span style={filterLabel}>{t('vacancySearch.statuses')}</span>
-        <SearchSelect
-          options={statusOptions.map(s => ({ value: s.value, label: s.label }))}
-          selected={selectedStatuses} onToggle={toggleStatus}
-          triggerLabel={triggerText(selectedStatuses, t('vacancySearch.statuses'))}
-        />
-      </div>
-      <div style={{ minWidth: 180 }}>
-        <span style={filterLabel}>{t('vacancySearch.functions')}</span>
-        <SearchSelect
-          options={functionOptions} selected={selectedFunctions} onToggle={toggleFunction}
-          triggerLabel={triggerText(selectedFunctions, t('vacancySearch.functions'))}
-        />
-        {/* Ghost-filter hint (Danny 06-08 live feedback): the candidate's own title has
-            no exact lookup match, so the filter above seeded empty (searches ALL functions)
-            — say so instead of leaving a silent gap. */}
-        {functionNotInLookup && (
-          <span style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 4, fontStyle: 'italic', display: 'block' }}>
-            {t('vacancySearch.functionNotInLookup', { title: candidate.title })}
-          </span>
-        )}
-      </div>
-      <div style={{ minWidth: 180 }}>
-        <span style={filterLabel}>{t('vacancySearch.contractForm')}</span>
-        <SearchSelect
-          options={contractvormOptions} selected={contractvorm} onToggle={toggleContractvorm}
-          triggerLabel={triggerText(contractvorm, t('vacancySearch.contractForm'))}
-        />
-      </div>
-      {/* Uren-per-week range — gated (offered-iff-read): only rendered once the CMBE
-          hours_min/hours_max fields actually show up in the fetched payload. */}
-      {hasHoursData && (
-        <div style={{ minWidth: 180 }}>
-          <span style={filterLabel}>{t('vacancySearch.hoursPerWeek')}</span>
-          <div style={{ display: 'flex', gap: 6 }}>
-            <input type="number" min={0} value={hoursMin} onChange={e => setHoursMin(e.target.value)}
-              placeholder={t('vacancySearch.hoursMinPlaceholder')}
-              aria-label={`${t('vacancySearch.hoursPerWeek')} ${t('vacancySearch.hoursMinPlaceholder')}`}
-              style={{ ...filterInput, width: 70 }} />
-            <input type="number" min={0} value={hoursMax} onChange={e => setHoursMax(e.target.value)}
-              placeholder={t('vacancySearch.hoursMaxPlaceholder')}
-              aria-label={`${t('vacancySearch.hoursPerWeek')} ${t('vacancySearch.hoursMaxPlaceholder')}`}
-              style={{ ...filterInput, width: 70 }} />
-          </div>
-        </div>
-      )}
-      {/* Inzetbaar-vanaf date — gated the same way, on the CMBE start_date field. */}
-      {hasAvailableFromData && (
-        <div style={{ minWidth: 180 }}>
-          <span style={filterLabel}>{t('vacancySearch.availableFromFilter')}</span>
-          <input type="date" value={availableFrom} onChange={e => setAvailableFrom(e.target.value)}
-            aria-label={t('vacancySearch.availableFromFilter')} style={filterInput} />
-        </div>
-      )}
-    </div>
+    <VacancySearchFilters
+      candidateTitle={candidate.title}
+      statusOptions={statusOptions} statuses={selectedStatuses} onStatusesChange={setStatuses}
+      functionOptions={functionOptions} functions={selectedFunctions} onFunctionsChange={setFunctions}
+      functionNotInLookup={functionNotInLookup}
+      contractvormOptions={contractvormOptions} contractvorm={contractvorm} onContractvormChange={setContractvorm}
+      hasHoursData={hasHoursData} hoursRange={hoursRange} hoursRangeMax={hoursRangeMax} onHoursRangeChange={setHoursRange}
+      hasAvailableFromData={hasAvailableFromData} availableFrom={availableFrom} onAvailableFromChange={setAvailableFrom}
+      filtersDirty={filtersDirty} onReset={resetFilters}
+    />
   )
 
-  const mapPane: ReactNode = (
+  // GEO-DEGRADE-1 (Danny 08-08): an un-geocoded candidate used to blank the WHOLE tab
+  // — filters, list and all. Only the map genuinely needs coordinates, so the notice
+  // takes the map's place (with the shared geocode trigger) and everything else works.
+  const mapPane: ReactNode = noLocation ? (
+    <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: 16, border: '1px dashed var(--border)', borderRadius: 10 }}>
+      <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>{t('vacancySearch.noLocation')}</span>
+      <GeocodeButton endpoint={`/candidates/${candidate.id}/geocode`} permission="candidates.update"
+        variant="row" disabled={!candidate.address} />
+    </div>
+  ) : (
     <RadiusMapPanel padded={false} points={points} center={center} radiusKm={radiusKm}
       // Larger viewport offset (Danny 23-07, live feedback) — the drawer chrome
       // above the tab was pushing the map tall enough to force page scroll;
@@ -265,7 +210,7 @@ function VacancySearchTabInner({ candidate }: { candidate: Candidate }) {
   ) : error ? (
     <div style={{ padding: 16, display: 'flex', flexDirection: 'column', gap: 8 }}>
       <span style={{ fontSize: 12, color: 'var(--color-danger)' }}>{t('common:error.body')}</span>
-      <button onClick={retry} style={{ alignSelf: 'flex-start', fontSize: 12, fontWeight: 600, color: 'var(--color-primary)', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}>
+      <button onClick={retry} style={{ alignSelf: 'flex-start', fontSize: 12, fontWeight: 600, color: 'var(--color-primary-text)', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}>
         {t('common:error.retry')}
       </button>
     </div>
@@ -315,7 +260,7 @@ function VacancySearchTabInner({ candidate }: { candidate: Candidate }) {
                   (the row itself already carries the click/keyboard semantics above).
                   Bold + primary-orange (Danny 06-08 screenshot feedback) — same token
                   EntityLink's title button uses, so it reads as one affordance family. */}
-              <ChevronRight size={14} strokeWidth={3} aria-hidden="true" style={{ color: 'var(--color-primary)' }} />
+              <ChevronRight size={14} strokeWidth={3} aria-hidden="true" style={{ color: 'var(--color-primary-text)' }} />
             </div>
           </div>
         )

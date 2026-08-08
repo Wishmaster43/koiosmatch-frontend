@@ -12,7 +12,7 @@
  * and restores the previous width when you leave it.
  */
 import { useState, useRef, useEffect } from 'react'
-import type { ReactNode } from 'react'
+import type { ReactNode, KeyboardEvent } from 'react'
 import DrawerTabs from './DrawerTabs'
 import ErrorBoundary from '../ui/ErrorBoundary'
 
@@ -57,10 +57,31 @@ export default function EntityDrawer({
     else if (autoExpandedRef.current && expanded && !active?.autoExpand) { autoExpandedRef.current = false; onToggleExpand?.() }
   }, [activeTab]) // eslint-disable-line react-hooks/exhaustive-deps
 
+  // SWEEP-ESC: Escape closes the drawer by clicking the header's own close button
+  // (marked `data-drawer-close` on EntityHeader) — every entity drawer already wires
+  // a real onClose onto that button (§3A), so this needs no new onClose prop and no
+  // caller-side change at all. Listening in the BUBBLE phase on this root node is
+  // what makes it respect an already-open nested popup: a FloatingPanel modal either
+  // (a) is mounted as a REACT SIBLING of EntityDrawer by every caller — MatchDrawer/
+  // ApplicationDrawer/etc. render it alongside, not inside, EntityDrawer — so its
+  // keydown never reaches this subtree at all, or (b) is a genuine DOM descendant
+  // (a modal opened from within a tab) and already owns a CLOSER bubble-phase
+  // listener on its own node (useFocusTrap) that calls stopPropagation first. A
+  // SelectMenu dropdown's own Escape handling runs even earlier, in the document
+  // CAPTURE phase (see SelectMenu.tsx's ordering comment) — also stopping this
+  // listener from ever firing. Verified against both useFocusTrap.ts and
+  // SelectMenu.tsx before writing this, per the ordering they already established.
+  const rootRef = useRef<HTMLDivElement>(null)
+  const handleKeyDown = (e: KeyboardEvent<HTMLDivElement>) => {
+    if (e.key !== 'Escape') return
+    rootRef.current?.querySelector<HTMLButtonElement>('[data-drawer-close]')?.click()
+  }
+
   if (!entity) return null
 
   return (
-    <div style={{ width: expanded ? widthExpanded : widthCollapsed, flexShrink: 0, height: '100%',
+    <div ref={rootRef} onKeyDown={handleKeyDown}
+      style={{ width: expanded ? widthExpanded : widthCollapsed, flexShrink: 0, height: '100%',
       borderLeft: '1px solid var(--border)', background: 'var(--surface)',
       display: 'flex', flexDirection: 'column', transition: 'width 0.2s ease', overflow: 'hidden' }}>
 

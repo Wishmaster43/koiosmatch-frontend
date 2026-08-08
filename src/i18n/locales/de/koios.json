@@ -40,6 +40,11 @@
   "voice": {
     "start": "Nachricht einsprechen",
     "stop": "Zuhören stoppen",
-    "denied": "Mikrofonzugriff verweigert — erlauben Sie den Zugriff in Ihrem Browser"
+    "denied": "Mikrofonzugriff verweigert — erlauben Sie den Zugriff in Ihrem Browser",
+    "insecureContext": "Diktat erfordert eine sichere Verbindung (https) — auf dieser Seite nicht verfügbar",
+    "errorServiceNotAllowed": "Die Spracherkennung wurde vom Browser blockiert — Dienst nicht erlaubt",
+    "errorAudioCapture": "Kein Mikrofon gefunden — überprüfen Sie Ihr Gerät",
+    "errorNetwork": "Netzwerkfehler bei der Spracherkennung — bitte versuchen Sie es erneut",
+    "errorGeneric": "Spracherkennung fehlgeschlagen — bitte versuchen Sie es erneut"
   }
 }

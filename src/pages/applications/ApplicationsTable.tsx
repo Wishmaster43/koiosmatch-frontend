@@ -120,11 +120,15 @@ export default function ApplicationsTable({ rows, loading, error, selectedId, on
     // + "step X of Y" within its own flow — em-dash when no session exists.
     { key: 'interview', header: t('cols.interview'), sortable: true, sortValue: r => r.interview?.category ?? '',
       render: r => r.interview ? (
-        <span style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+        // ONE row (Danny 08-08: "Bezig 2/12 1 regel geen 2 regels") — chip and
+        // progress sit side by side; the compact "2/12" form keeps the column
+        // narrow where the drawer can afford the spelled-out "Stap 2 van 12".
+        <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, whiteSpace: 'nowrap' }}>
           <StatusPill label={t(`interview.category.${r.interview.category}`)} color={interviewCategoryColor(r.interview.category)} />
           {r.interview.total > 0 && (
-            <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>
-              {t('interview.stepOf', { step: r.interview.step ?? '–', total: r.interview.total })}
+            <span style={{ fontSize: 11, color: 'var(--text-muted)', fontFamily: 'JetBrains Mono, monospace' }}
+              title={t('interview.stepOf', { step: r.interview.step ?? '–', total: r.interview.total })}>
+              {r.interview.step ?? '–'}/{r.interview.total}
             </span>
           )}
         </span>
@@ -134,7 +138,11 @@ export default function ApplicationsTable({ rows, loading, error, selectedId, on
     { key: 'created', header: t('cols.created'), nowrap: true, sortable: true, sortValue: r => r.created ?? '',
       serverKey: APPLICATION_SORT_KEYS.created,
       cellStyle: { color: 'var(--text-muted)', fontSize: 12 }, render: r => r.created ? formatDate(r.created) : '—' },
-    { key: 'source', header: t('cols.source'), sortable: true, cellStyle: { color: 'var(--text-muted)', fontSize: 12 } },
+    // SWEEP-TABLES: explicit em-dash fallback — without a render fn, DataTable's
+    // default cell (`field(row, col.key)`) prints a blank string for an empty
+    // source, the only column left inconsistent with the house convention.
+    { key: 'source', header: t('cols.source'), sortable: true, cellStyle: { color: 'var(--text-muted)', fontSize: 12 },
+      render: r => r.source || '—' },
     // Shared Koios column factory (Danny 05-08 consistency pass) — was a
     // hand-rolled mark+text cell (no dash/sort/colour-toggle support); now the
     // same header/sort/cell as every other entity table. `cols.task` already

@@ -1,17 +1,24 @@
 /**
  * FloatingPanel (POPUP-SLEEP-1, Danny GO 06-08 "alle popups sleepbaar") — the ONE
- * shared draggable/resizable dialog shell every modal migrates onto. Keeps the
+ * shared draggable/resizable dialog shell every popup migrates onto. Keeps the
  * exact house modal semantics (overlay, backdrop-click closes, useFocusTrap for
  * Esc/tab/focus-restore, token colours) and adds: drag by header, SE-corner
  * resize, per-window position/size memory, double-click-header reset, and
  * bring-to-front stacking via the shared zIndexScale. Mounted only while `open`
  * (useFocusTrap needs a fresh mount — house rule, mirrors ConfirmDialog).
+ *
+ * MODELESS MODE (`overlay={false}`, Danny punt 19): a record-history/reference
+ * popup exists exactly SO you can read the screen underneath while it stays open —
+ * a dimming backdrop would defeat that. Modeless renders the same window without
+ * the scrim and lets pointer events pass through everywhere except the panel; the
+ * caller keeps its own outside-click rule. Escape/tab behaviour is unchanged.
  */
 import { type CSSProperties, type ReactNode, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { ExternalLink, X } from 'lucide-react'
 import { useFocusTrap } from '@/hooks/useFocusTrap'
 import { useDraggablePanel } from '@/hooks/useDraggablePanel'
+import { usePrefersReducedMotion } from '@/hooks/usePrefersReducedMotion'
 import { nextFloatingZ } from '@/lib/zIndexScale'
 
 export interface FloatingPanelProps {
@@ -49,12 +56,18 @@ export interface FloatingPanelProps {
    * decides WHAT opens; the caller wires the actual `window.open` (see lib/secondScreen.ts).
    */
   onPopOut?: () => void
+  /**
+   * false = modeless: no dim scrim, the page underneath stays visible AND clickable
+   * (the point of a draggable reference window). Default true = the classic modal.
+   */
+  overlay?: boolean
 }
 
-function Panel({ onClose, ariaLabel, title, header, children, width, maxWidth, persistKey, resizable, zIndex, bodyStyle, hideClose, scrollBody = true, onPopOut }: Omit<FloatingPanelProps, 'open'>) {
+function Panel({ onClose, ariaLabel, title, header, children, width, maxWidth, persistKey, resizable, zIndex, bodyStyle, hideClose, scrollBody = true, onPopOut, overlay = true }: Omit<FloatingPanelProps, 'open'>) {
   const { t } = useTranslation('common')
   const panelTrapRef = useFocusTrap<HTMLDivElement>(onClose)
-  const { panelRef, placement, onDragPointerDown, onResizePointerDown, onDragHandleDoubleClick } = useDraggablePanel(persistKey, resizable !== false)
+  const { panelRef, placement, dragging, onDragPointerDown, onResizePointerDown, onDragHandleDoubleClick } = useDraggablePanel(persistKey, resizable !== false)
+  const reducedMotion = usePrefersReducedMotion()
   // Claim a fresh slot in the floating band once per mount; pointerdown re-claims
   // so the last-touched window wins (multi-window ready, harmless for one).
   const [z, setZ] = useState(() => zIndex ?? nextFloatingZ())
@@ -66,22 +79,30 @@ function Panel({ onClose, ariaLabel, title, header, children, width, maxWidth, p
 
   return (
     <div style={{ position: 'fixed', inset: 0, zIndex: z, display: 'flex',
-      alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.45)' }}
-      onMouseDown={e => { if (e.target === e.currentTarget) onClose() }}>
+      alignItems: 'center', justifyContent: 'center',
+      // Modeless: no scrim and clicks fall through to the page behind it.
+      background: overlay ? 'rgba(0,0,0,0.45)' : 'none',
+      pointerEvents: overlay ? undefined : 'none' }}
+      onMouseDown={e => { if (overlay && e.target === e.currentTarget) onClose() }}>
       <div
         // Two refs on one node: the focus trap + the drag geometry.
         ref={node => {
           panelTrapRef.current = node
           panelRef.current = node
         }}
-        role="dialog" aria-modal="true" aria-label={ariaLabel ?? title ?? 'dialog'} tabIndex={-1}
+        role="dialog" aria-modal={overlay ? true : undefined} aria-label={ariaLabel ?? title ?? 'dialog'} tabIndex={-1}
         onPointerDown={() => { if (!zIndex) setZ(nextFloatingZ()) }}
         style={{ ...positioned, maxWidth: maxWidth ?? 'min(94vw, 1100px)', maxHeight: '92vh',
           display: 'flex', flexDirection: 'column', background: 'var(--surface)',
-          borderRadius: 14, border: '1px solid var(--border)',
-          boxShadow: '0 20px 60px rgba(0,0,0,0.22)', overflow: 'hidden' }}>
-        {/* Drag handle: the whole header row. Double-click = reset to center. */}
-        <div onPointerDown={onDragPointerDown} onDoubleClick={onDragHandleDoubleClick}
+          borderRadius: 14, border: '1px solid var(--border)', pointerEvents: 'auto',
+          // The window lifts while it is being dragged; that lift never animates
+          // during the drag itself, and never at all under prefers-reduced-motion (§6).
+          boxShadow: dragging ? '0 28px 70px rgba(0,0,0,0.32)' : '0 20px 60px rgba(0,0,0,0.22)',
+          transition: dragging || reducedMotion ? 'none' : 'box-shadow 150ms ease',
+          overflow: 'hidden' }}>
+        {/* Drag handle: the whole header row (never the body — selecting text there
+            must keep working). Double-click = reset to center. */}
+        <div data-drag-handle onPointerDown={onDragPointerDown} onDoubleClick={onDragHandleDoubleClick}
           style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '12px 16px',
             cursor: 'move', userSelect: 'none', borderBottom: '1px solid var(--border)', flexShrink: 0 }}>
           {header ?? <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--text)', flex: 1 }}>{title}</div>}

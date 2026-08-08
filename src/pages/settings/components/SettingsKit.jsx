@@ -29,6 +29,7 @@ import SearchSelect from '@/components/ui/SearchSelect'
 // on mount — including the pre-existing customerDisplay chip-colour fields, which
 // broke this task's own verification run. One-line fix: import the sibling component.
 import { ColorSwatch } from './SettingsControls'
+import { fieldInputStyle } from '@/components/forms/fieldMetrics'
 
 const CARD = {
   background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 10,
@@ -64,7 +65,9 @@ export function SettingsScaffold({ title, subtitle, form, maxWidth, actions, chi
                 display: 'flex', alignItems: 'center', gap: 6, height: 34, padding: '0 14px',
                 fontSize: 13, fontWeight: 500, borderRadius: 8, border: 'none',
                 cursor: canSave ? 'pointer' : 'default', opacity: canSave || saved ? 1 : 0.55,
-                background: saved ? 'var(--color-success)' : 'var(--color-primary)', color: 'white',
+                background: saved ? 'var(--color-success)' : 'var(--color-primary)',
+                // Success fill needs its own on-* token — white only reaches ~3.3:1 there (WCAG audit 2026-08).
+                color: saved ? 'var(--color-on-success)' : 'var(--color-on-accent)',
                 transition: 'background 0.2s, opacity 0.2s',
               }}>
               {saved  ? <><Check size={13} /> {t('common.saved')}</>                                :
@@ -113,10 +116,9 @@ export function SettingRow({ label, description, children }) {
 // existing `import { Toggle } from '.../SettingsKit'` call site keeps working unchanged.
 export const Toggle = ToggleUi
 
-const inputStyle = {
-  height: 34, padding: '0 10px', fontSize: 14, color: 'var(--text)',
-  border: '1px solid var(--border)', borderRadius: 8, outline: 'none', fontFamily: 'inherit',
-}
+// Canon field style (G33/fieldMetrics) — was its own copy at font-size 14 (every
+// other field on the platform is 13; this settings kit was the one outlier).
+const inputStyle = fieldInputStyle
 
 export function NumberField({ value, onChange, min = 0, max, unit, width = 80 }) {
   return (

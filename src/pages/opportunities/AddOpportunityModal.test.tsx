@@ -6,6 +6,10 @@
  * validation, same 422 mapping, same onCreated/onClose callbacks. The tenant
  * lookup + cascade hooks are a different file's scope — mocked directly (no
  * QueryClientProvider needed), mirroring MatchModal.test.tsx.
+ *
+ * Danny's screenshot round (08-08): K1 covers the panel now sharing MatchModal's
+ * exact `width="94vw"` footprint; K2 covers the new Vestiging (branch) picker —
+ * `location_id`, distinct from the existing customer→location cascade.
  */
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, within } from '@testing-library/react'
@@ -38,6 +42,18 @@ vi.mock('./hooks/useCustomerCascade', () => ({
   }),
 }))
 vi.mock('@/context/AuthContext', () => ({ useAuth: () => ({ user: { id: 'me-1', name: 'Piet' } }) }))
+// Tiptap needs a real browser to mount — stubbed with a plain controlled textarea,
+// mirrors the house convention (AddLocationModal.test.tsx / DescriptionTab.test.tsx).
+vi.mock('@/components/ui/RichTextEditor', () => ({
+  default: ({ value, onChange }: { value: string; onChange: (v: string) => void }) => (
+    <textarea aria-label="rich-text-editor" value={value} onChange={e => onChange(e.target.value)} />
+  ),
+}))
+// K2: the shared branch (Vestiging) lookup — mirrors MatchModal.test.tsx's own
+// '@/lib/useLocations' mock, no QueryClientProvider needed.
+vi.mock('@/lib/useLocations', () => ({
+  useLocations: () => [{ value: 'branch-1', label: 'Hoofdkantoor' }, { value: 'branch-2', label: 'Bijkantoor' }],
+}))
 // Real `unwrap` (importActual) so the POST/PATCH response parsing stays exactly
 // production; only the HTTP methods themselves are spied on.
 vi.mock('@/lib/api', async () => {
@@ -66,6 +82,12 @@ describe('AddOpportunityModal · house wide frame (Danny 27-07)', () => {
     expect(screen.getByRole('dialog')).toHaveStyle({ maxWidth: '1060px', maxHeight: '92vh' })
     expect(screen.getByText('modal.groups.general')).toBeInTheDocument()
     expect(screen.getByText('modal.groups.dealStage')).toBeInTheDocument()
+  })
+
+  it('K1: shares MatchModal\'s exact width prop (94vw), not the old near-equivalent calc()', () => {
+    render(<AddOpportunityModal onClose={noop} />)
+    // Mirrors MatchModal.test.tsx's own footprint assertion style (dialog inline style).
+    expect(screen.getByRole('dialog')).toHaveStyle({ width: '94vw' })
   })
 
   it('has no bare <select> element left — every dropdown is the searchable CreatableSelect', () => {
@@ -150,6 +172,28 @@ describe('AddOpportunityModal · same POST payload as before, searchable picks i
     }))
   })
 
+  it('K2: sends location_id null when the Vestiging branch picker is left untouched', async () => {
+    const user = userEvent.setup()
+    render(<AddOpportunityModal onClose={noop} />)
+    await user.type(screen.getByPlaceholderText('modal.titlePlaceholder'), 'Kans zonder vestiging')
+    await user.click(screen.getByRole('button', { name: 'modal.create' }))
+    expect(api.post).toHaveBeenCalledWith('/opportunities', expect.objectContaining({ location_id: null }))
+  })
+
+  it('K2: the Vestiging branch pick rides the body as location_id — distinct from customer_location_id', async () => {
+    const user = userEvent.setup()
+    render(<AddOpportunityModal onClose={noop} customers={[{ id: 'cust-1', name: 'Acme' }]} />)
+    await user.type(screen.getByPlaceholderText('modal.titlePlaceholder'), 'Kans met vestiging')
+
+    await user.click(fieldTrigger('modal.fields.branch'))
+    await user.click(await screen.findByRole('button', { name: 'Hoofdkantoor' }))
+
+    await user.click(screen.getByRole('button', { name: 'modal.create' }))
+    expect(api.post).toHaveBeenCalledWith('/opportunities', expect.objectContaining({
+      location_id: 'branch-1', customer_location_id: null,
+    }))
+  })
+
   it('contact picker (28-07): the option label carries the function title, but the id submitted stays plain', async () => {
     const user = userEvent.setup()
     render(<AddOpportunityModal onClose={noop} customers={[{ id: 'cust-1', name: 'Acme' }]} />)
@@ -165,6 +209,47 @@ describe('AddOpportunityModal · same POST payload as before, searchable picks i
     await user.click(screen.getByRole('button', { name: 'modal.create' }))
     // The REQUEST carries the plain contact id — the function title is cosmetic only.
     expect(api.post).toHaveBeenCalledWith('/opportunities', expect.objectContaining({ contact_id: 'con-2' }))
+  })
+})
+
+describe('AddOpportunityModal · Kanstekst (OPP-DESCRIPTION-1)', () => {
+  it('omits description from the POST body entirely when the collapsed card is never opened', async () => {
+    const user = userEvent.setup()
+    render(<AddOpportunityModal onClose={noop} />)
+    await user.type(screen.getByPlaceholderText('modal.titlePlaceholder'), 'Kans zonder tekst')
+    await user.click(screen.getByRole('button', { name: 'modal.create' }))
+
+    expect(api.post).toHaveBeenCalledTimes(1)
+    const body = vi.mocked(api.post).mock.calls[0][1] as Record<string, unknown>
+    expect('description' in body).toBe(false)
+  })
+
+  it('rides the typed Kanstekst on the POST body once the card is opened and filled', async () => {
+    const user = userEvent.setup()
+    render(<AddOpportunityModal onClose={noop} />)
+    await user.type(screen.getByPlaceholderText('modal.titlePlaceholder'), 'Kans met tekst')
+
+    // The card starts as a collapsed ghost (CollapsibleRichText) — never auto-open.
+    await user.click(screen.getByRole('button', { name: 'modal.groups.description' }))
+    await user.type(screen.getByLabelText('rich-text-editor'), 'Belangrijke context over deze kans')
+
+    await user.click(screen.getByRole('button', { name: 'modal.create' }))
+    expect(api.post).toHaveBeenCalledWith('/opportunities', expect.objectContaining({
+      description: 'Belangrijke context over deze kans',
+    }))
+  })
+
+  it('omits description when the card is opened but left blank/whitespace-only', async () => {
+    const user = userEvent.setup()
+    render(<AddOpportunityModal onClose={noop} />)
+    await user.type(screen.getByPlaceholderText('modal.titlePlaceholder'), 'Kans met lege tekst')
+
+    await user.click(screen.getByRole('button', { name: 'modal.groups.description' }))
+    await user.type(screen.getByLabelText('rich-text-editor'), '   ')
+
+    await user.click(screen.getByRole('button', { name: 'modal.create' }))
+    const body = vi.mocked(api.post).mock.calls[0][1] as Record<string, unknown>
+    expect('description' in body).toBe(false)
   })
 })
 
@@ -218,5 +303,27 @@ describe('AddOpportunityModal · edit mode (existing prop) — PATCH, never POST
     await user.click(screen.getByRole('button', { name: 'modal.save' }))
     expect(api.patch).toHaveBeenCalledWith('/opportunities/opp-9', expect.objectContaining({ title: 'Bestaande kans' }))
     expect(api.post).not.toHaveBeenCalled()
+  })
+
+  it('K2: prefills the Vestiging branch picker from existing.branchId and re-sends it unchanged on save', async () => {
+    const user = userEvent.setup()
+    const existingWithBranch = { ...existing, branchId: 'branch-2' } as unknown as Opportunity
+    render(<AddOpportunityModal onClose={noop} existing={existingWithBranch} customers={[{ id: 'cust-1', name: 'Acme' }]} />)
+    expect(fieldTrigger('modal.fields.branch')).toHaveTextContent('Bijkantoor')
+    await user.click(screen.getByRole('button', { name: 'modal.save' }))
+    expect(api.patch).toHaveBeenCalledWith('/opportunities/opp-9', expect.objectContaining({ location_id: 'branch-2' }))
+  })
+
+  it('OPP-DESCRIPTION-1: prefills the Kanstekst collapsed preview from existing.description and re-sends it unchanged', async () => {
+    const user = userEvent.setup()
+    const existingWithDescription = { ...existing, description: '<p>Bestaande kanstekst</p>' } as unknown as Opportunity
+    render(<AddOpportunityModal onClose={noop} existing={existingWithDescription} customers={[{ id: 'cust-1', name: 'Acme' }]} />)
+    // Collapsed-ghost preview strips tags — the stored HTML shows as plain text.
+    expect(screen.getByRole('button', { name: 'modal.groups.description' })).toHaveTextContent('Bestaande kanstekst')
+
+    await user.click(screen.getByRole('button', { name: 'modal.save' }))
+    expect(api.patch).toHaveBeenCalledWith('/opportunities/opp-9', expect.objectContaining({
+      description: '<p>Bestaande kanstekst</p>',
+    }))
   })
 })

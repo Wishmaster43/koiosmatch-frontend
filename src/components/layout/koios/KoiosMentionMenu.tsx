@@ -49,7 +49,7 @@ function EntityRow({ hit, refType, onPick }: { hit: KoiosEntityHit; refType: str
       onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--hover-bg)' }}
       onMouseLeave={(e) => { e.currentTarget.style.background = 'none' }}>
       <span style={{ width: 26, height: 26, borderRadius: '50%', flexShrink: 0, display: 'flex',
-        alignItems: 'center', justifyContent: 'center', background: 'var(--color-primary-bg)', color: 'var(--color-primary)' }}>
+        alignItems: 'center', justifyContent: 'center', background: 'var(--color-primary-bg)', color: 'var(--color-primary-text)' }}>
         {entityIconEl(refType, { size: 13 })}
       </span>
       <div style={{ minWidth: 0 }}>
@@ -168,7 +168,7 @@ export default function KoiosMentionMenu({
               <div style={{ width: 28, height: 28, borderRadius: 8, flexShrink: 0,
                 background: 'linear-gradient(135deg,var(--color-primary-bg),var(--color-violet-bg))',
                 display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--color-primary)' }}>@</span>
+                <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--color-primary-text)' }}>@</span>
               </div>
               <div>
                 <div style={{ fontSize: 13, fontWeight: 500, color: 'var(--text)' }}>{c.label}</div>

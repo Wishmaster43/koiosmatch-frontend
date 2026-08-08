@@ -71,7 +71,9 @@ export default function VacancyMatchingSettings() {
         <button onClick={save} disabled={saving}
           style={{ display: 'flex', alignItems: 'center', gap: 6, height: 34, padding: '0 14px', fontSize: 13, fontWeight: 500,
             borderRadius: 8, border: 'none', cursor: 'pointer', whiteSpace: 'nowrap', flexShrink: 0,
-            background: saved ? 'var(--color-success)' : 'var(--color-primary)', color: 'white' }}>
+            background: saved ? 'var(--color-success)' : 'var(--color-primary)',
+            // Success fill needs its own on-* token — white only reaches ~3.3:1 there (WCAG audit 2026-08).
+            color: saved ? 'var(--color-on-success)' : 'var(--color-on-accent)' }}>
           {saved ? <><Check size={13} /> {t('matching.saved')}</> : <><Save size={13} /> {t('matching.save')}</>}
         </button>
       </div>

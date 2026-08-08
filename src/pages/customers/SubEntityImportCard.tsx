@@ -202,13 +202,13 @@ export default function SubEntityImportCard({ entity, customerName, wizard, canV
                 title={canImport ? undefined : t('import.noImportPermission', { ns: 'settings' })}
                 style={{ ...ghostBtn, borderColor: 'color-mix(in srgb, var(--color-primary) 45%, transparent)',
                   background: 'color-mix(in srgb, var(--color-primary) 8%, transparent)',
-                  color: 'var(--color-primary)', fontWeight: 600, opacity: canImport ? 1 : 0.5,
+                  color: 'var(--color-primary-text)', fontWeight: 600, opacity: canImport ? 1 : 0.5,
                   cursor: canImport ? 'pointer' : 'not-allowed' }}>
                 <FileUp size={14} /> {t('import.selectCsv', { ns: 'settings' })}
               </button>
               <button type="button" onClick={handleDownloadTemplate} disabled={!canView}
                 title={canView ? undefined : t('import.noViewPermission', { ns: 'settings' })}
-                style={{ fontSize: 12, color: 'var(--color-primary)', background: 'none', border: 'none',
+                style={{ fontSize: 12, color: 'var(--color-primary-text)', background: 'none', border: 'none',
                   padding: 0, cursor: canView ? 'pointer' : 'not-allowed', opacity: canView ? 1 : 0.5 }}>
                 {t('import.downloadTemplate', { ns: 'settings' })}
               </button>
@@ -237,14 +237,14 @@ export default function SubEntityImportCard({ entity, customerName, wizard, canV
                 {t('import.fileSelected', { ns: 'settings', name: file.name })}
               </span>
               <button type="button" onClick={() => inputRef.current?.click()} disabled={checking}
-                style={{ fontSize: 12, color: 'var(--color-primary)', background: 'none', border: 'none',
+                style={{ fontSize: 12, color: 'var(--color-primary-text)', background: 'none', border: 'none',
                   padding: 0, cursor: checking ? 'not-allowed' : 'pointer' }}>
                 {t('import.replaceFile', { ns: 'settings' })}
               </button>
               <button type="button" onClick={wizard.runPreview} disabled={!canImport || checking}
                 style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 6, height: BTN_H, padding: '0 14px',
                   fontSize: 12, fontWeight: 600, border: 'none', borderRadius: 8,
-                  background: 'var(--color-primary)', color: 'white',
+                  background: 'var(--color-primary)', color: 'var(--color-on-accent)',
                   cursor: !canImport || checking ? 'not-allowed' : 'pointer', opacity: !canImport ? 0.5 : 1 }}>
                 {checking && <Loader2 size={13} style={{ animation: 'spin 1s linear infinite' }} />}
                 {checking ? t('import.runningPreview', { ns: 'settings' }) : t('import.runPreview', { ns: 'settings' })}

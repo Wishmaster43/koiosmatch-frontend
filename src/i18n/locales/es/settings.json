@@ -3,7 +3,8 @@
     "title": "Configuración",
     "empty": "No hay configuración disponible para tu rol.",
     "search": "Buscar un ajuste…",
-    "noResults": "No se encontraron ajustes"
+    "noResults": "No se encontraron ajustes",
+    "categoryPicker": "Categoría"
   },
   "common": {
     "save": "Guardar",
@@ -228,7 +229,9 @@
     "notif_kandidaten": "Candidatos",
     "notif_matches": "Coincidencias",
     "notif_taken": "Tareas",
-    "koios_advice": "Umbrales de aviso"
+    "koios_advice": "Umbrales de aviso",
+    "notif_my": "Mis notificaciones",
+    "customer_identifier_validation": "Validación de números"
   },
   "kpis": {
     "title": "Configuración de KPI",
@@ -389,7 +392,13 @@
     "logo": "Logo",
     "logoHint": "PNG, JPG, WEBP o SVG, máx. 2 MB — el SVG se escanea en el servidor. Se muestra en la barra de navegación.",
     "noLogo": "Sin logo",
-    "logoUploadError": "No se pudo subir el logo."
+    "logoUploadError": "No se pudo subir el logo.",
+    "textColor": "Color del texto sobre el acento",
+    "textColorHint": "El color del texto sobre botones y chips de color. El modo automático elige negro o blanco según tu color de acento, de modo que un color claro como el amarillo recibe texto oscuro.",
+    "textColorAuto": "Automático",
+    "textColorLight": "Blanco",
+    "textColorDark": "Oscuro",
+    "textColorLowContrast": "Este color de texto tiene muy poco contraste con tu color de marca (ratio {{ratio}}; legible es 4,5). Elige «Automático» para la mejor legibilidad."
   },
   "company": {
     "title": "Empresa",
@@ -409,7 +418,10 @@
     "streetPlaceholder": "Nombre de la calle",
     "houseNumber": "Número",
     "houseNumberSuffix": "Complemento",
-    "bannerUploadFailed": "Error al subir el banner"
+    "bannerUploadFailed": "Error al subir el banner",
+    "sectionIdentity": "Identidad",
+    "sectionAddress": "Dirección",
+    "sectionPreferences": "Preferencias"
   },
   "locations": {
     "title": "Sucursales",
@@ -473,7 +485,8 @@
     "mapNoCoords": "Aún no hay ubicaciones con coordenadas: introduce la dirección de una ubicación y aparecerá automáticamente en el mapa.",
     "color": "Color",
     "icon": "Icono",
-    "colorHint": "El color y el icono hacen reconocible una sede en listas y en el mapa."
+    "colorHint": "El color y el icono hacen reconocible una sede en listas y en el mapa.",
+    "province": "Provincia"
   },
   "memory": {
     "title": "Memoria",
@@ -695,7 +708,9 @@
     },
     "inApp": {
       "label": "Notificaciones in-app",
-      "desc": "Recibe notificaciones dentro de la plataforma"
+      "desc": "Recibe notificaciones dentro de la plataforma",
+      "notYetActive": "Aún no activo",
+      "notYetActiveReason": "Aún no se envía ninguna notificación para este tipo: el interruptor ya se puede configurar."
     },
     "context": {
       "sollicitaties": {
@@ -722,6 +737,17 @@
         "title": "Tareas",
         "desc": "Notificaciones sobre tareas nuevas y actualizadas."
       }
+    },
+    "my": {
+      "title": "Mis notificaciones",
+      "subtitle": "Tu propia excepción sobre los ajustes de notificación de toda la organización — elige por tema si quieres que se te notifique siempre, nunca, o simplemente seguir lo que ha configurado tu organización.",
+      "inherit": "Heredar",
+      "on": "Activado",
+      "off": "Desactivado",
+      "empty": "Todavía no hay temas de notificación configurados.",
+      "saveFailed": "Error al guardar — tu elección se ha revertido.",
+      "emailNotAvailable": "Aún no disponible",
+      "emailNotAvailableReason": "Todavía no es posible una excepción de correo personal — para esto sigues el ajuste de correo de toda la organización."
     }
   },
   "billing": {
@@ -1321,7 +1347,10 @@
     "catAUTHENTICATION": "Autenticación",
     "numbersSynced": "Números sincronizados",
     "templatesSynced": "Plantillas sincronizadas",
-    "syncFailed": "Error de sincronización"
+    "syncFailed": "Error de sincronización",
+    "checkStatus": "Comprobar conexión",
+    "statusChecked": "Conexión comprobada.",
+    "statusCheckFailed": "No se pudo comprobar la conexión."
   },
   "roles": {
     "loading": "Cargando roles…",
@@ -1911,7 +1940,12 @@
   "requiredFields": {
     "title": "Campos obligatorios",
     "subtitle": "Marque por fase qué campos son obligatorios. Un campo obligatorio muestra un asterisco y bloquea el guardado si está vacío.",
-    "field": "Campo"
+    "field": "Campo",
+    "groupCount": "{{required}} de {{total}} obligatorios",
+    "customHint": "Los campos propios guardan su obligatoriedad en la definición del campo, no en este ajuste.",
+    "customEmpty": "Todavía no hay campos propios de candidatos. En cuanto crees uno, aparecerá aquí y podrás hacerlo obligatorio por fase.",
+    "customAlwaysRequired": "Siempre obligatorio, en todas las fases",
+    "customSaveFailed": "No se ha podido guardar la definición del campo. Inténtalo de nuevo."
   },
   "vacancyTab": {
     "title": "Pestaña Vacantes en candidatos",
@@ -2620,7 +2654,20 @@
     "title": "Sitio de empleo",
     "subtitle": "El sitio público de vacantes de este inquilino.",
     "activeLabel": "Sitio de empleo activo",
-    "hint": "Activa o desactiva el sitio público de empleo (…/{tenant}/vacatures). El backend lo aplica de inmediato: desactivado = el sitio muestra un aviso y las solicitudes quedan cerradas."
+    "hint": "Activa o desactiva el sitio público de empleo (…/{tenant}/vacatures). El backend lo aplica de inmediato: desactivado = el sitio muestra un aviso y las solicitudes quedan cerradas.",
+    "urls": {
+      "title": "URL públicas",
+      "subtitle": "Cópialas en un portal de empleo o un rastreador — creadas a partir de la propia dirección de este inquilino.",
+      "site": "Información del sitio (marca)",
+      "vacancies": "Vacantes (JSON)",
+      "sitemap": "Mapa del sitio",
+      "indeedFeed": "Feed de Indeed",
+      "werkzoekenFeed": "Feed de Werkzoeken.nl",
+      "copy": "Copiar",
+      "open": "Abrir",
+      "inactiveNotice": "No disponible mientras el sitio de carreras esté desactivado.",
+      "noTenant": "Todavía no se ha seleccionado ningún inquilino."
+    }
   },
   "caoSettings": {
     "title": "Convenios colectivos",
@@ -2674,7 +2721,11 @@
       "title": "Motivos de lista negra — cliente",
       "subtitle": "Motivos para poner a un cliente en la lista negra."
     },
-    "add": "Añadir motivo"
+    "add": "Añadir motivo",
+    "tabs": {
+      "candidate": "Candidato",
+      "customer": "Cliente"
+    }
   },
   "opportunityLookups": {
     "tabs": {
@@ -2745,5 +2796,30 @@
   "modShiftmanager": {
     "reportingOff": "La generación de informes de Shiftmanager aún no está activada — active el módulo para configurar los objetivos de KPI y los límites de visualización."
   },
-  "dashboardsEmpty": "Aún no se han configurado elementos del panel."
+  "dashboardsEmpty": "Aún no se han configurado elementos del panel.",
+  "settings": {
+    "matches": {
+      "stopReasonTitle": "Motivos de finalización",
+      "stopReasonSubtitle": "Motivo obligatorio al finalizar un match anticipadamente.",
+      "stopReasonAdd": "Añadir motivo"
+    },
+    "outreach": {
+      "outcomeTitle": "Resultados",
+      "outcomeSubtitle": "El resultado de un intento de llamada, independiente del estado de la lista de llamadas.",
+      "outcomeAdd": "Añadir resultado"
+    }
+  },
+  "identifierValidation": {
+    "title": "Validación de números",
+    "subtitle": "Decide con qué rigor Koios Match comprueba que un número de registro/IVA corresponde al país del cliente.",
+    "modeLabel": "Con un número que no coincide",
+    "modeHint": "Avisar siempre permite guardar; bloquear rechaza el número hasta que sea correcto.",
+    "modeWarn": "Solo avisar",
+    "modeBlock": "Bloquear el guardado",
+    "rulesTitle": "Formato esperado por país",
+    "colCountry": "País",
+    "colCoc": "Número de registro",
+    "colVat": "Número de IVA",
+    "unknownCountryHint": "Para países sin una regla arriba no se bloquea nada: solo recibirás un aviso suave."
+  }
 }

@@ -33,7 +33,9 @@
     "leadsPartial": "Contado parcialmente — se alcanzó un límite",
     "leadsComputedAt": "Actualizado el {{date}}",
     "age": "Antigüedad",
-    "applicationsOpen": "Abrir solicitudes"
+    "applicationsOpen": "Abrir solicitudes",
+    "ageTooltip": "Desde el {{date}}",
+    "applicationsOpenTab": "Abrir solicitudes"
   },
   "publishedState": {
     "yes": "Publicada",
@@ -225,7 +227,8 @@
     "contactPerson": "Persona de contacto",
     "pickClientFirst": "Elige primero un cliente",
     "matchContractType": "Tipo de contrato propuesto",
-    "matchCao": "Convenio propuesto"
+    "matchCao": "Convenio propuesto",
+    "skillsEmpty": "Aún no hay aptitudes requeridas."
   },
   "aiagent": {
     "pickerLabel": "Agente IA",
@@ -295,7 +298,9 @@
     "tabs": {
       "settings": "Ajustes",
       "sites": "Portales de empleo"
-    }
+    },
+    "siteLive": "El sitio público de empleo está activo. Estos interruptores determinan lo que se publica allí ahora mismo, incluidos los feeds de Indeed y Werkzoeken.",
+    "siteOffline": "El sitio público de empleo está actualmente desactivado (Ajustes → Sitio de empleo). Estos interruptores ya determinan qué se publicará en cuanto se active."
   },
   "applicants": {
     "title": "Candidaturas",
@@ -441,7 +446,11 @@
     }
   },
   "documents": {
-    "docType": "Tipo de documento"
+    "docType": "Tipo de documento",
+    "allTypes": "Todos los tipos",
+    "type": "Tipo",
+    "search": "Buscar documentos…",
+    "empty": "Aún no hay documentos."
   },
   "age": {
     "days": "{{count}}d",

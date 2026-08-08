@@ -15,6 +15,7 @@ import { Eye, EyeOff, Copy, Check, Save } from 'lucide-react'
 import { useAuth } from '@/context/AuthContext'
 import { notifyError } from '@/lib/notify'
 import { loadSettings, saveSettings } from '../lib/settingsApi'
+import { fieldInputStyle } from '@/components/forms/fieldMetrics'
 
 // The exact placeholder the backend masks a stored secret with (SettingController::MASK) —
 // matching it lets the FE tell "already set" apart from "empty" without ever seeing the value.
@@ -25,7 +26,8 @@ const MASK = '••••••••'
 const API_URL = import.meta.env.VITE_API_URL ?? 'http://koiosmatch-api.test/api'
 
 const labelStyle = { fontSize: 12, fontWeight: 500, color: 'var(--text-muted)', marginBottom: 4, display: 'block' }
-const inputStyle = { width: '100%', padding: '8px 12px', fontSize: 13, border: '1px solid var(--border)', borderRadius: 8, outline: 'none', background: 'var(--surface)', color: 'var(--text)', boxSizing: 'border-box' }
+// Canon field style (G33/fieldMetrics) — was its own padding-8/12 copy.
+const inputStyle = fieldInputStyle
 
 // One masked secret field: starts empty, shows a "✓ set" badge when the server
 // already stores a value, and reveals/hides on demand (mirrors EmailSettings' smtp_pass).
@@ -144,7 +146,7 @@ export default function FacebookLeadsSettings() {
 
       <button onClick={save} disabled={saving}
         style={{ display: 'flex', alignItems: 'center', gap: 6, height: 34, padding: '0 16px', fontSize: 13, fontWeight: 500,
-          border: 'none', borderRadius: 8, background: 'var(--color-primary)', color: 'white',
+          border: 'none', borderRadius: 8, background: 'var(--color-primary)', color: 'var(--color-on-accent)',
           cursor: saving ? 'not-allowed' : 'pointer', opacity: saving ? 0.7 : 1, marginBottom: 24 }}>
         <Save size={14} />
         {saving ? t('common.saving') : saved ? t('common.saved') : t('common.save')}

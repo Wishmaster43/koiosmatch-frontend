@@ -56,6 +56,7 @@ import VacancyMatchingSettings from './sections/VacancyMatchingSettings'
 import VacancyCandidateTabSettings from './sections/VacancyCandidateTabSettings'
 import CustomerDisplaySettings from './sections/CustomerDisplaySettings'
 import CustomerRequiredFieldsSettings from './sections/customers/CustomerRequiredFieldsSettings'
+import IdentifierValidationSettings from './sections/customers/IdentifierValidationSettings'
 import { CustomerConversionSettings } from './sections/CustomerConversionSettings'
 import MatchTemplatesSettings from './sections/MatchTemplatesSettings'
 import MatchRatesSettings from './sections/MatchRatesSettings'
@@ -259,6 +260,10 @@ export const NAV_GROUPS = [
       // KLANT-VERPLICHT-1 (Danny 02-08): required fields per klant-fase + the three
       // sub-entities — same Flag icon as the candidate's own required-fields item.
       { id: 'customer_required_fields', icon: Flag, component: CustomerRequiredFieldsSettings },
+      // KVK/BTW-PER-LAND-1 (Danny 08-08, points 10 + 11): warn-vs-block on a KvK/BTW
+      // number that does not match its country's format — the rules themselves are
+      // real-world data (lib/companyIdentifiers), only the behaviour is tenant-set.
+      { id: 'customer_identifier_validation', icon: Hash, component: IdentifierValidationSettings },
       // Conversion behaviour: default status after Prospect → Klant (mirrors the
       // candidate's candidate_conversion, same UserCheck icon reads as "conversion").
       { id: 'customer_conversion', icon: UserCheck, component: CustomerConversionSettings },

@@ -52,10 +52,12 @@
       "links": "Vínculos",
       "activity": "Actividad",
       "extra": "Extra",
-      "notes": "Notas"
+      "notes": "Notas",
+      "related": "Relacionado"
     },
     "markDone": "Marcar como hecho",
-    "tags": "Etiquetas"
+    "tags": "Etiquetas",
+    "lookupNotReady": "Todavía no se pudo guardar: esta opción aún no está disponible. Vuelve a intentarlo en un momento."
   },
   "details": {
     "title": "Detalles de la tarea",
@@ -66,7 +68,9 @@
     "dueTime": "Hora",
     "assignee": "Asignada a",
     "owner": "Responsable",
-    "description": "Descripción"
+    "description": "Descripción",
+    "location": "Sucursal",
+    "locationPlaceholder": "Elige una sucursal"
   },
   "comments": {
     "send": "Publicar"
@@ -88,7 +92,9 @@
     "contact": "Contacto",
     "workflow": "Workflow",
     "open": "Abrir",
-    "loadError": "No se pudieron cargar los resultados."
+    "loadError": "No se pudieron cargar los resultados.",
+    "linkType": "Tipo de vínculo",
+    "opportunity": "Oportunidad"
   },
   "activity": {
     "empty": "Aún no hay actividad."
@@ -127,7 +133,8 @@
     "cardPlanning": "Planificación",
     "cardLink": "Vínculo",
     "cardAssignment": "Asignación",
-    "duePlaceholder": "dd-mm-aaaa"
+    "duePlaceholder": "dd-mm-aaaa",
+    "otherLinks": "Otros vínculos"
   },
   "bulk": {
     "selected": "{{count}} seleccionado(s)",
@@ -152,7 +159,17 @@
     "history": "Historial",
     "empty": "No hay tareas en esta vista.",
     "loading": "Cargando tareas…",
-    "error": "No se pudieron cargar las tareas relacionadas."
+    "error": "No se pudieron cargar las tareas relacionadas.",
+    "titles": {
+      "candidate": "Tareas de este candidato",
+      "customer": "Tareas de este cliente",
+      "location": "Tareas de esta ubicación",
+      "department": "Tareas de este departamento",
+      "contact": "Tareas de este contacto",
+      "assignee": "Tareas de este reclutador"
+    },
+    "searchPlaceholder": "Buscar tareas…",
+    "allStatuses": "Todos los estados"
   },
   "notes": {
     "title": "Notas",
@@ -170,5 +187,22 @@
     "reasons": {
       "overdue": "Esta tarea está atrasada."
     }
+  },
+  "ai": {
+    "title": "Koios AI aconseja",
+    "beta": "Beta",
+    "refresh": "Actualizar",
+    "analyzing": "Koios AI está analizando esta tarea…",
+    "dueLabel": "Fecha límite",
+    "dueUnset": "Aún no se ha establecido una fecha límite para esta tarea.",
+    "dueToday": "Esta tarea vence hoy.",
+    "dueOverdue": "Esta tarea lleva {{count}} día(s) de retraso.",
+    "dueUpcoming": "Esta tarea vence en {{count}} día(s).",
+    "assigneeLabel": "Asignación",
+    "unassigned": "Esta tarea sigue asignada a la agencia — aún no a un empleado concreto.",
+    "assignedTo": "Asignada a {{name}}.",
+    "linksLabel": "Vínculo",
+    "noLinks": "Esta tarea no está vinculada a ningún registro — vincule un candidato, cliente u otro registro para dar contexto.",
+    "linked": "Vinculada a {{count}} registro(s)."
   }
 }

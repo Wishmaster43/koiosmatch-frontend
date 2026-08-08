@@ -18,3 +18,10 @@ export interface RawPickRow {
   title?: string; titel?: string; client_name?: string; client?: string
   owner?: { id?: Id; name?: string } | null
 }
+
+// Why the picker's server search failed — useSearchOptions classifies the axios
+// rejection into ONE of these (401/403 → forbidden, 422 → validation, 5xx →
+// server, no response at all → network, anything else → unknown) so
+// SearchPickField can say WHY instead of one generic "search failed" for every
+// cause (FIX 2, DD-FE / P1, measured 08-08).
+export type SearchErrorKind = 'forbidden' | 'validation' | 'server' | 'network' | 'unknown'

@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 // Real i18n so t() resolves real Dutch text, like the rest of this drawer's tests.
-import '@/i18n'
+import i18n from '@/i18n'
 import ProfilePersonalTab from './ProfilePersonalTab'
 import { useProfileRequiredKeys } from './useProfileRequiredKeys'
 import type { Candidate } from '@/types/candidate'
@@ -13,25 +13,40 @@ vi.mock('@/lib/useNationalities', () => ({ useNationalities: () => ({ nationalit
 // the underlying settings/api plumbing that hook already covers separately.
 vi.mock('./useProfileRequiredKeys', () => ({ useProfileRequiredKeys: vi.fn(() => []) }))
 
+// The Bron label is resolved through i18n itself, not hardcoded: this suite must
+// pass both before and after the `profile.source` key lands in the locale files.
+const SOURCE_LABEL = i18n.t('candidates:profile.source')
+
 // Danny 28-07 split: the old combined ProfileTab flipped ~15 fields per pencil.
-// Personal now owns exactly gender/nationality/dob/placeOfBirth — its own
-// pencil, its own request shape.
+// Personal now owns exactly gender/nationality/dob/placeOfBirth — plus `source`
+// since 09-08 (the separate Herkomst card was removed; bron is a business field
+// that must stay editable, its created-on/by stamps moved to the drawer footer).
 describe('ProfilePersonalTab · own fields, own pencil, own request shape', () => {
   // Reset to "nothing required" before every test — a test that overrides this
   // (the required-fields case below) must not leak into the others, since the
   // component re-renders (and re-invokes the hook) on every click.
   beforeEach(() => { vi.mocked(useProfileRequiredKeys).mockReturnValue([]) })
 
-  const candidate = { id: 1, gender: 'male', nationality: 'Nederlands', dob: '1990-01-01', placeOfBirth: 'Utrecht', phase: 'candidate' } as unknown as Candidate
+  const candidate = { id: 1, gender: 'male', nationality: 'Nederlands', dob: '1990-01-01', placeOfBirth: 'Utrecht', source: 'werkzoeken', phase: 'candidate' } as unknown as Candidate
 
-  it('renders exactly its own four fields, nothing from Address/Contact', () => {
+  it('renders exactly its own five fields, nothing from Address/Contact', () => {
     render(<ProfilePersonalTab c={candidate} />)
     expect(screen.getByText('Geslacht')).toBeInTheDocument()
     expect(screen.getByText('Nationaliteit')).toBeInTheDocument()
     expect(screen.getByText('Geboortedatum')).toBeInTheDocument()
     expect(screen.getByText('Geboorteplaats')).toBeInTheDocument()
+    expect(screen.getByText(SOURCE_LABEL)).toBeInTheDocument()
     expect(screen.queryByText('Straat')).toBeNull()
     expect(screen.queryByText('E-mailadres')).toBeNull()
+  })
+
+  // Bron is a single ROW here, never a card of its own — and the creation stamps
+  // it used to sit next to belong to the drawer footer, not to this card (§11).
+  it('shows the bron value but none of the creation stamps', () => {
+    render(<ProfilePersonalTab c={{ ...candidate, createdBy: { id: 7, name: 'Laura Yesway' }, created: '2025-10-29T16:03:57+00:00' } as unknown as Candidate} />)
+    expect(screen.getByText('werkzoeken')).toBeInTheDocument()
+    expect(screen.queryByText('Laura Yesway')).toBeNull()
+    expect(screen.queryByText('29-10-2025')).toBeNull()
   })
 
   it('the pencil flips only this tab into edit mode (save/cancel replace it)', async () => {
@@ -55,7 +70,34 @@ describe('ProfilePersonalTab · own fields, own pencil, own request shape', () =
     await user.type(placeInput, 'Amsterdam')
     await user.click(screen.getByTitle('Opslaan'))
     expect(onSave).toHaveBeenCalledTimes(1)
-    expect(onSave).toHaveBeenCalledWith({ gender: 'male', nationality: 'Nederlands', dob: '1990-01-01', placeOfBirth: 'Amsterdam' })
+    expect(onSave).toHaveBeenCalledWith({ gender: 'male', nationality: 'Nederlands', dob: '1990-01-01', placeOfBirth: 'Amsterdam', source: 'werkzoeken' })
+  })
+
+  // The bron edit must reach the request under the `source` key — that is the key
+  // buildCandidatePatch maps to the API column (its ''→null clearing is pinned in
+  // candidatesShared.test.js), so a typo here would silently drop the field.
+  it('sends an edited bron under the `source` key (assert the REQUEST body)', async () => {
+    const user = userEvent.setup()
+    const onSave = vi.fn()
+    render(<ProfilePersonalTab c={candidate} onSave={onSave} />)
+    await user.click(screen.getByTitle('Bewerken'))
+    const sourceInput = screen.getByLabelText(SOURCE_LABEL) as HTMLInputElement
+    await user.clear(sourceInput)
+    await user.type(sourceInput, 'indeed')
+    await user.click(screen.getByTitle('Opslaan'))
+    expect(onSave).toHaveBeenCalledWith(expect.objectContaining({ source: 'indeed' }))
+  })
+
+  // Clearing must reach the request as an empty string (mapped to null downstream),
+  // never be omitted — an omitted key leaves the old value on the server.
+  it('sends an empty bron when the field is cleared', async () => {
+    const user = userEvent.setup()
+    const onSave = vi.fn()
+    render(<ProfilePersonalTab c={candidate} onSave={onSave} />)
+    await user.click(screen.getByTitle('Bewerken'))
+    await user.clear(screen.getByLabelText(SOURCE_LABEL))
+    await user.click(screen.getByTitle('Opslaan'))
+    expect(onSave).toHaveBeenCalledWith(expect.objectContaining({ source: '' }))
   })
 
   it('cancel restores the original values without calling onSave', async () => {

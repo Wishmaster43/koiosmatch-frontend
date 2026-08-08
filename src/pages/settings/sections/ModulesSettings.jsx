@@ -126,14 +126,14 @@ export default function ModulesSettings() {
       {/* Base package (one of three) */}
       <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase',
                     letterSpacing: '0.07em', marginBottom: 10 }}>
-        {t('modules.tierHeading', { defaultValue: 'Pakket' })}
+        {t('modules.tierHeading')}
       </div>
       {/* Shared SegmentedControl (audit finding, §4/§11) replaces the hand-rolled radio
           cards + hardcoded white check — same tier semantics/payload (setPkg(tier.id)),
           same success-green tint the "activate" flow already uses for "this is on". */}
       <div style={{ marginBottom: 28 }}>
         <SegmentedControl
-          ariaLabel={t('modules.tierHeading', { defaultValue: 'Pakket' })}
+          ariaLabel={t('modules.tierHeading')}
           color="var(--color-success)"
           value={pkg}
           onChange={setPkg}
@@ -149,7 +149,7 @@ export default function ModulesSettings() {
       {/* Add-ons (toggle on top of the package) */}
       <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase',
                     letterSpacing: '0.07em', marginBottom: 10 }}>
-        {t('modules.addonsHeading', { defaultValue: 'Losse modules (add-ons)' })}
+        {t('modules.addonsHeading')}
       </div>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 28 }}>
         {ADDONS.map(addon => {
@@ -180,7 +180,7 @@ export default function ModulesSettings() {
               {disabled && (
                 <span style={{ fontSize: 10, fontWeight: 600, color: 'var(--color-info)',
                   background: 'var(--color-info-bg)', borderRadius: 999, padding: '2px 8px' }}>
-                  {t('modules.comingSoon', { defaultValue: 'binnenkort' })}
+                  {t('modules.comingSoon')}
                 </span>
               )}
             </div>
@@ -194,7 +194,10 @@ export default function ModulesSettings() {
           style={{ display: 'flex', alignItems: 'center', gap: 6, height: BTN_H, padding: '0 20px',
                    fontSize: 13, fontWeight: 500, borderRadius: 8, border: 'none',
                    background: savedOk ? 'var(--color-success)' : hasChange ? 'var(--color-primary)' : 'var(--border)',
-                   color: 'white', cursor: (saving || !hasChange) ? 'not-allowed' : 'pointer',
+                   // Each fill gets its own readable token: success/accent have dedicated
+                   // on-* tokens, the neutral disabled fill reuses muted-on-border (WCAG audit 2026-08).
+                   color: savedOk ? 'var(--color-on-success)' : hasChange ? 'var(--color-on-accent)' : 'var(--text-muted)',
+                   cursor: (saving || !hasChange) ? 'not-allowed' : 'pointer',
                    transition: 'background 0.2s', opacity: saving ? 0.7 : 1 }}>
           {savedOk ? <><Check size={13} /> {t('modules.savedActive')}</>
           : saving  ? <><RefreshCw size={13} className="animate-spin" /> {t('common.saving')}</>

@@ -69,7 +69,8 @@ export default function MatchingTab({ vacancy: v, onUpdate }: { vacancy: Vacancy
         <button onClick={save}
           style={{ display: 'flex', alignItems: 'center', gap: 6, height: 32, padding: '0 14px', fontSize: 13, fontWeight: 500,
             borderRadius: 8, border: 'none', cursor: 'pointer', whiteSpace: 'nowrap', flexShrink: 0,
-            background: saved ? 'var(--color-success)' : 'var(--color-primary)', color: 'white' }}>
+            background: saved ? 'var(--color-success)' : 'var(--color-primary)',
+            color: saved ? 'white' : 'var(--color-on-accent)' }}>
           {saved ? <><Check size={13} /> {t('matching.saved')}</> : <><Save size={13} /> {t('matching.save')}</>}
         </button>
       </div>

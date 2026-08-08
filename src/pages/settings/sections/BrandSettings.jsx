@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
+import { readableOn, contrastRatio } from '@/hooks/useTenantTheme'
 import { useTranslation } from 'react-i18next'
 import { Check, RefreshCw, Save, Upload, X } from 'lucide-react'
 import api from '@/lib/api'
@@ -21,6 +22,11 @@ export default function BrandSettings() {
   const [primaryColor, setPrimaryColor]   = useState('#3B8FD4') // default brand colour (data, not styling)
   // eslint-disable-next-line no-restricted-syntax -- DATA: typeable hex mirror of primaryColor's default
   const [hexDraft,     setHexDraft]       = useState('#3B8FD4') // typeable hex mirror of primaryColor
+  // BRAND-TEXT-COLOR-1 (Danny 08-08: "als ik geel kies moet de txt niet wit zijn"):
+  // the colour of text ON the accent. '' = automatic — useTenantTheme derives
+  // black/white from the brand's luminance, which is right for most tenants; an
+  // explicit pick overrides it.
+  const [textColor,    setTextColor]      = useState('')
   const [logoPreview,  setLogoPreview]    = useState(null)
   const [logoFile,     setLogoFile]       = useState(null)
   const [companyName,  setCompanyName]    = useState('')
@@ -36,6 +42,7 @@ export default function BrandSettings() {
     loadSettings()
       .then(stored => {
         if (stored.brand_color)    { setPrimaryColor(stored.brand_color); setHexDraft(stored.brand_color) }
+        if (stored.brand_text_color) setTextColor(stored.brand_text_color)
         if (stored.company_name)   setCompanyName(stored.company_name)
         if (stored.logo_url)       setLogoPreview(stored.logo_url)
       })
@@ -53,17 +60,28 @@ export default function BrandSettings() {
     reader.readAsDataURL(file)
   }
 
+  // BRAND-TEXT-COLOR-1 (Danny 08-08: "txt blijft wit"): the live preview used to
+  // move ONLY --color-primary, so picking yellow kept the white default text until
+  // a save + reload let useTenantTheme recompute it. Preview both tokens together:
+  // an explicit pick wins, otherwise the same luminance rule the hook applies.
+  const applyAccentTokens = (color, text) => {
+    const root = document.documentElement
+    root.style.setProperty('--color-primary', color)
+    root.style.setProperty('--color-on-accent', /^#[0-9a-fA-F]{6}$/.test(text ?? '') ? text : readableOn(color))
+  }
+
   const applyColor = (color) => {
     setPrimaryColor(color)
     setHexDraft(color)
-    document.documentElement.style.setProperty('--color-primary', color)
+    applyAccentTokens(color, textColor)
   }
 
   const save = async () => {
     setSaving(true)
     setLogoError(null)
     try {
-      const payload = { brand_color: primaryColor, company_name: companyName }
+      // '' (automatic) is sent as null so the backend clears any earlier pick.
+      const payload = { brand_color: primaryColor, company_name: companyName, brand_text_color: textColor || null }
       if (logoFile) {
         const fd = new FormData()
         fd.append('logo', logoFile)
@@ -103,7 +121,9 @@ export default function BrandSettings() {
           style={{ display: 'flex', alignItems: 'center', gap: 6, height: 34, padding: '0 14px',
                    fontSize: 13, fontWeight: 500, borderRadius: 8, cursor: saving ? 'wait' : 'pointer',
                    border: 'none', opacity: saving ? 0.7 : 1,
-                   background: saved ? 'var(--color-success)' : 'var(--color-primary)', color: 'white', transition: 'background 0.2s' }}>
+                   background: saved ? 'var(--color-success)' : 'var(--color-primary)',
+                   // Success fill needs its own on-* token — white only reaches ~3.3:1 there (WCAG audit 2026-08).
+                   color: saved ? 'var(--color-on-success)' : 'var(--color-on-accent)', transition: 'background 0.2s' }}>
           {saved   ? <><Check size={13} /> {t('common.saved')}</>                         :
            saving  ? <><RefreshCw size={13} className="animate-spin" /> {t('common.saving')}</> :
                      <><Save size={13} /> {t('common.save')}</>}
@@ -156,11 +176,52 @@ export default function BrandSettings() {
                          color: 'var(--text)', outline: 'none' }} />
             </div>
           </div>
+          {/* Text ON the accent — automatic by default, overridable. */}
+          <div style={{ marginTop: 16, paddingTop: 14, borderTop: '1px solid var(--border)' }}>
+            <div style={{ fontSize: 13, fontWeight: 500, color: 'var(--text)', marginBottom: 4 }}>{t('brand.textColor')}</div>
+            <div style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 10 }}>{t('brand.textColorHint')}</div>
+            <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
+              {[{ v: '', label: t('brand.textColorAuto') }, { v: '#FFFFFF', label: t('brand.textColorLight') }, { v: '#1F2937', label: t('brand.textColorDark') }].map(o => {
+                const active = textColor === o.v
+                return (
+                  <button key={o.v || 'auto'} type="button" onClick={() => { setTextColor(o.v); applyAccentTokens(primaryColor, o.v) }} aria-pressed={active}
+                    // Chosen block keeps DARK text (Danny 08-08): the house soft-tint
+                    // normally colours the label with its own token, but here that token
+                    // is the tenant's accent — on a light brand (yellow, mint) accent-on-tint
+                    // is unreadable. The tint + border still carry the colour; the label stays legible.
+                    style={{ padding: '5px 11px', fontSize: 12, fontWeight: active ? 600 : 500, borderRadius: 8, cursor: 'pointer',
+                      color: 'var(--text)',
+                      background: active ? 'color-mix(in srgb, var(--color-primary) 10%, transparent)' : 'var(--surface)',
+                      border: `1px solid ${active ? 'color-mix(in srgb, var(--color-primary) 40%, transparent)' : 'var(--border)'}` }}>
+                    {o.label}
+                  </button>
+                )
+              })}
+              <input type="color" value={textColor || '#FFFFFF'} aria-label={t('brand.textColor')}
+                onChange={e => { setTextColor(e.target.value); applyAccentTokens(primaryColor, e.target.value) }}
+                style={{ width: 32, height: 32, borderRadius: 6, border: '1px solid var(--border)', cursor: 'pointer', padding: 2 }} />
+            </div>
+            {/* Honest contrast warning: an EXPLICIT pick overrides the automatic one,
+                so a tenant can pin white on a light brand and make its own buttons
+                unreadable (measured on Yesway: a seeded #FFFFFF on orange scores 2.8).
+                Say it out loud and name the fix — never silently ignore the choice. */}
+            {textColor && contrastRatio(textColor, primaryColor) < 4.5 && (
+              <div role="status" style={{ marginTop: 10, fontSize: 11, padding: '7px 10px', borderRadius: 8,
+                color: 'var(--color-warning)', background: 'color-mix(in srgb, var(--color-warning) 10%, transparent)',
+                border: '1px solid color-mix(in srgb, var(--color-warning) 30%, transparent)' }}>
+                {t('brand.textColorLowContrast', { ratio: contrastRatio(textColor, primaryColor).toFixed(1) })}
+              </div>
+            )}
+          </div>
           <div style={{ marginTop: 14, display: 'flex', gap: 8, alignItems: 'center' }}>
             <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>{t('brand.preview')}</span>
             {/* BTN_H (§4/§9): one explicit height for every text/action button, everywhere (incl. this live preview). */}
+            {/* BRAND-TEXT-COLOR-1: this preview's background IS the tenant accent (primaryColor,
+                live-synced to --color-primary), so its label must read the same on-accent token the
+                Save button and every other accent-filled control uses — a hardcoded white here was
+                exactly Danny's 08-08 bug (yellow brand -> white-on-yellow, unreadable). */}
             <button style={{ height: BTN_H, padding: '0 14px', fontSize: 12, fontWeight: 500,
-                             background: primaryColor, color: 'white', border: 'none', borderRadius: 7, cursor: 'default' }}>
+                             background: primaryColor, color: 'var(--color-on-accent)', border: 'none', borderRadius: 7, cursor: 'default' }}>
               {t('brand.buttonPreview')}
             </button>
             <span style={{ fontSize: 12, color: primaryColor, fontWeight: 500, cursor: 'default' }}>{t('brand.linkPreview')}</span>

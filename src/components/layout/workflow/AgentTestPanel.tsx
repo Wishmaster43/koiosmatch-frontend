@@ -97,7 +97,7 @@ export default function AgentTestPanel({ config }: {
             {t('agentTest.title')}
           </span>
           <button onClick={addVariable}
-            style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 11, color: 'var(--color-primary)', background: 'none', border: 'none', cursor: 'pointer', padding: '2px 0' }}>
+            style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 11, color: 'var(--color-primary-text)', background: 'none', border: 'none', cursor: 'pointer', padding: '2px 0' }}>
             <Plus size={11} /> {t('agentTest.add')}
           </button>
         </div>
@@ -149,7 +149,7 @@ export default function AgentTestPanel({ config }: {
             <div style={{
               maxWidth: '88%', padding: '8px 11px', borderRadius: msg.role === 'user' ? '12px 12px 2px 12px' : '12px 12px 12px 2px',
               background: msg.role === 'user' ? 'var(--color-primary)' : 'var(--hover-bg)',
-              color: msg.role === 'user' ? 'white' : 'var(--text)',
+              color: msg.role === 'user' ? 'var(--color-on-accent)' : 'var(--text)',
               fontSize: 12, lineHeight: 1.55, whiteSpace: 'pre-wrap', wordBreak: 'break-word',
             }}>
               {msg.content}
@@ -199,7 +199,10 @@ export default function AgentTestPanel({ config }: {
         />
         <button onClick={sendMessage} disabled={!input.trim() || loading} aria-label={t('agentTest.send')}
           style={{ width: 36, height: 36, borderRadius: 8, background: input.trim() && !loading ? 'var(--color-primary)' : 'var(--border)', border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: input.trim() && !loading ? 'pointer' : 'not-allowed', alignSelf: 'flex-end', flexShrink: 0 }}>
-          <Send size={14} color="white" />
+          {/* Active fill is the tenant accent (on-accent token); disabled fill is neutral
+              border, so the icon falls back to text-muted instead of a raw white that
+              fails at 1.31:1 on a yellow brand. */}
+          <Send size={14} color={input.trim() && !loading ? 'var(--color-on-accent)' : 'var(--text-muted)'} />
         </button>
       </div>
     </div>

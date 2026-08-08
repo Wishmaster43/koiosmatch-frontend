@@ -26,7 +26,11 @@
     "search": "Search…",
     "create": "Create",
     "cancel": "Cancel",
-    "searchError": "Search failed"
+    "searchError": "Search failed",
+    "searchErrorForbidden": "You don't have permission to search here.",
+    "searchErrorValidation": "That search wasn't accepted. Adjust it and try again.",
+    "searchErrorServer": "The server errored while searching. Try again shortly.",
+    "searchErrorNetwork": "No connection — the search failed."
   },
   "pagination": {
     "perPage": "Results per page",
@@ -118,7 +122,13 @@
     "middleName": "Middle name",
     "lastName": "Last name",
     "functionTitle": "Function",
-    "noFunction": "No function set yet"
+    "noFunction": "No function set yet",
+    "subTabs": {
+      "status": "Status",
+      "details": "Details",
+      "cv": "CV",
+      "context": "Context"
+    }
   },
   "cvProposal": {
     "title": "Proposal from the CV",
@@ -296,6 +306,15 @@
       },
       "startedAt": "Started {{date}}",
       "period": "{{start}} – {{end}}"
+    },
+    "currentStatus": {
+      "INTRO_SENT": "Intro sent",
+      "COMPLETED": "Completed",
+      "DISQUALIFIED": "Disqualified"
+    },
+    "conversation": {
+      "title": "Conversation",
+      "noCandidate": "No candidate linked — nothing to show."
     }
   },
   "appointments": {
@@ -320,7 +339,13 @@
       "noShow": "No-show",
       "cancelled": "Cancelled"
     },
-    "noMatches": "No appointments match this filter."
+    "noMatches": "No appointments match this filter.",
+    "status": {
+      "planned": "Planned",
+      "completed": "Completed",
+      "noShow": "No-show",
+      "cancelled": "Cancelled"
+    }
   },
   "notes": {
     "title": "Notes",
@@ -485,7 +510,9 @@
     "phaseSince": "since {{date}}",
     "phaseUnknown": "Phase history not yet recorded",
     "recalculateScore": "Recalculate match score",
-    "recalculateDone": "Match score recalculated"
+    "recalculateDone": "Match score recalculated",
+    "editScore": "Edit match score manually",
+    "scoreSaved": "Match score saved"
   },
   "competition": {
     "title": "Other applicants",

@@ -87,7 +87,8 @@
     },
     "tabs": {
       "targets": "Lista de llamadas",
-      "extra": "Extra"
+      "extra": "Extra",
+      "stats": "Estadísticas"
     },
     "loading": "Cargando…",
     "error": "No se pudo cargar la lista de llamadas.",
@@ -114,7 +115,39 @@
     "matchCreated": "Match creado.",
     "matchFailed": "Error al crear el match.",
     "owner": "Responsable",
-    "selectOwner": "Seleccionar responsable"
+    "selectOwner": "Seleccionar responsable",
+    "stats": {
+      "error": "No se pudieron cargar las estadísticas.",
+      "byStatus": "Estado",
+      "byOutcome": "Resultado",
+      "byAssignee": "Asignado a",
+      "total": "Total",
+      "reached": "Contactados",
+      "axis": {
+        "status": "estado",
+        "outcome": "resultado",
+        "assignee": "asignado a"
+      },
+      "filteredBy": "Filtrado por {{axis}}: {{value}}",
+      "noMatches": "Ningún candidato coincide con este filtro."
+    },
+    "note": {
+      "empty": "Aún no hay ninguna nota.",
+      "placeholder": "Añadir una nota…",
+      "saveFailed": "No se pudo guardar la nota."
+    },
+    "assign": {
+      "button": "Asignar",
+      "selected": "{{count}} seleccionados",
+      "pickRecruiters": "Elegir reclutadores",
+      "searchRecruiter": "Buscar un reclutador…",
+      "noRecruiters": "No se encontraron reclutadores",
+      "confirm": "Confirmar asignación",
+      "resultPartial": "{{updated}} asignados, {{skipped}} omitidos",
+      "resultAll": "{{count}} asignados",
+      "failed": "La asignación falló. Inténtalo de nuevo.",
+      "assignedTo": "Asignado a {{name}}"
+    }
   },
   "changelog": {
     "loading": "Cargando…",
