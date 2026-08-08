@@ -2,18 +2,37 @@
  * DashboardsSettings — DASH-SUBTABS-1 (Danny 04-08 "lijst is te lang met 2
  * tabellen dus moet Grafieken & lijsten subtabje worden"): the KPI matrix and
  * the blocks matrix render as two sub-tabs, one visible at a time, switching
- * via the shared underline SubTabBar.
+ * via the shared underline SubTabBar. DASH-SET-UI-1: also covers the loading
+ * state and the toggle save path — §13 asserts the REQUEST body, not just
+ * that a callback fired.
  */
-import { describe, it, expect } from 'vitest'
-import { render, screen } from '@testing-library/react'
+import { describe, it, expect, vi, afterEach } from 'vitest'
+import { render, screen, within, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import i18n from '@/i18n'
-import DashboardsSettings from './DashboardsSettings'
+import DashboardsSettings, { DASHBOARD_HIDDEN_KEY } from './DashboardsSettings'
 
 const st = (key: string) => i18n.t(key, { ns: 'settings' })
+const dt = (key: string) => i18n.t(key, { ns: 'dashboard' })
 
-// Network is not under test here — the shared settings blob loader tolerates a
-// rejected fetch (module-level cache stays {}), so no explicit axios mock is needed.
+// Controllable settings blob + loaded flag + a spy on the save path (mirrors
+// KoiosAdviceSettings.test.tsx's mocking pattern). vi.hoisted: factories run
+// before these const declarations otherwise (TDZ). `mockLoaded` defaults to
+// true so every pre-existing test keeps seeing the matrix immediately.
+const mockSettings = vi.hoisted(() => vi.fn(() => ({} as Record<string, unknown>)))
+const mockLoaded = vi.hoisted(() => vi.fn(() => true))
+const saveSettingsKeys = vi.hoisted(() => vi.fn(async () => {}))
+vi.mock('@/lib/settings/useAllSettings', async () => {
+  const actual = await vi.importActual('@/lib/settings/useAllSettings')
+  return {
+    ...actual,
+    useAllSettings: () => mockSettings(),
+    useSettingsLoaded: () => mockLoaded(),
+    saveSettingsKeys,
+  }
+})
+
+afterEach(() => vi.clearAllMocks())
 
 describe('DashboardsSettings — KPIs / Charts & lists sub-tabs', () => {
   // The sub-tab and the matrix section share the same label — query the named
@@ -34,5 +53,53 @@ describe('DashboardsSettings — KPIs / Charts & lists sub-tabs', () => {
 
     expect(screen.getByRole('region', { name: st('dashboardsBlocks') })).toBeInTheDocument()
     expect(screen.queryByRole('region', { name: st('dashboardsKpis') })).not.toBeInTheDocument()
+  })
+})
+
+describe('DashboardsSettings — loading state (§3)', () => {
+  // mockReturnValueOnce so the override never leaks into the tests below it.
+  it('shows a loading message instead of the matrix while the settings blob has not resolved yet', () => {
+    mockLoaded.mockReturnValueOnce(false)
+    render(<DashboardsSettings />)
+
+    expect(screen.getByText(st('common.loading'))).toBeInTheDocument()
+    expect(screen.queryByRole('tablist')).not.toBeInTheDocument()
+    expect(screen.queryByRole('region', { name: st('dashboardsKpis') })).not.toBeInTheDocument()
+  })
+})
+
+describe('DashboardsSettings — toggle save path (§13, request body)', () => {
+  // 'occupancy' is unique to the 'planning' dashboard type (templates.ts KPI_ROWS),
+  // so its row renders exactly one live toggle button — a deterministic target that
+  // doesn't depend on table column order.
+  const occupancyToggle = () => {
+    const row = screen.getByText(dt('kpi.occupancy')).closest('tr') as HTMLElement
+    return within(row).getByRole('button')
+  }
+
+  it('toggling a KPI off PATCHes the exact { type: { kpis: [id] } } hidden-map body', async () => {
+    render(<DashboardsSettings />)
+
+    await userEvent.click(occupancyToggle())
+
+    await waitFor(() => {
+      expect(saveSettingsKeys).toHaveBeenCalledWith({
+        [DASHBOARD_HIDDEN_KEY]: { planning: { kpis: ['occupancy'] } },
+      })
+    })
+  })
+
+  it('toggling the same KPI back on removes it from the hidden-map body again', async () => {
+    render(<DashboardsSettings />)
+    const toggle = occupancyToggle()
+
+    await userEvent.click(toggle) // hide
+    await userEvent.click(toggle) // show again — same DOM node, React just updates its aria state
+
+    await waitFor(() => {
+      expect(saveSettingsKeys).toHaveBeenLastCalledWith({
+        [DASHBOARD_HIDDEN_KEY]: { planning: { kpis: [] } },
+      })
+    })
   })
 })

@@ -781,5 +781,12 @@
     "reasons": {
       "noOpenVacancies": "Keine offenen Stellen — bei diesem Kunden nachfassen."
     }
+  },
+  "validation": {
+    "emailFormat": "Geben Sie eine gültige E-Mail-Adresse ein."
+  },
+  "popout": {
+    "windowTitle": "Notizen — {{name}}",
+    "loadError": "Dieser Kunde konnte nicht geladen werden."
   }
 }

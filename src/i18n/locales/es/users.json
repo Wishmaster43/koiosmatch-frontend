@@ -56,5 +56,8 @@
     "loading": "Cargando…",
     "previewTitle": "Sedes de este rol",
     "previewEmpty": "Sin conjunto inicial — este rol no tiene sedes; el nuevo usuario empieza sin restricción."
+  },
+  "validation": {
+    "emailFormat": "Introduce una dirección de correo electrónico válida."
   }
 }

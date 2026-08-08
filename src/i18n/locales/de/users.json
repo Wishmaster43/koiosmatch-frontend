@@ -56,5 +56,8 @@
     "loading": "Wird geladen…",
     "previewTitle": "Standorte dieser Rolle",
     "previewEmpty": "Keine Startauswahl — diese Rolle hat keine Standorte; der neue Benutzer startet ohne Einschränkung."
+  },
+  "validation": {
+    "emailFormat": "Geben Sie eine gültige E-Mail-Adresse ein."
   }
 }

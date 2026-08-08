@@ -21,6 +21,7 @@ import PaginationBar from '@/components/ui/PaginationBar'
 import HeaderSearch from '@/components/ui/HeaderSearch'
 import ClearFiltersButton from '@/components/ui/ClearFiltersButton'
 import QuickViewToggle from '@/components/ui/QuickViewToggle'
+import ViewSwitch from '@/components/ui/ViewSwitch'
 import VacanciesTable from './VacanciesTable'
 import VacanciesBulkBar from './VacanciesBulkBar'
 import VacancyDrawer from './VacancyDrawer'
@@ -306,59 +307,70 @@ function VacanciesPageInner({ intent }: { intent?: unknown }) {
               the ONE shared component (§3A). */}
           <ActionMessageBanner msg={actionMsg} onDismiss={() => setActionMsg(null)} dismissLabel={t('common:close')} />
 
-          {/* Map view (STRAAL-1 v2, mirrors candidates): map LEFT, the filtered vacancy
-              table RIGHT — one radius search drives both panes. Lazy Leaflet load. */}
-          {view === 'map' ? (
-            <div style={{ flex: 1, minHeight: 0, display: 'flex', gap: 14, padding: '0 24px 16px' }}>
-              <div style={{ flex: '1.1 1 0', minWidth: 400, display: 'flex', flexDirection: 'column' }}>
-                <Suspense fallback={<div style={{ padding: 24, fontSize: 12, color: 'var(--text-muted)' }}>{t('common:map.loading')}</div>}>
-                  <VacanciesMapView rows={vacancies} padded={false} center={mapCenter} radiusKm={mapStraalActive ? mapRadius : 0}
-                    onCenterChange={(lat, lng) => { setMapCenter({ lat, lng }); setMapStraalActive(true) }}
-                    onRadiusChange={(km: number) => { setMapRadius(km); setMapStraalActive(true) }}
-                    onClearRadius={mapStraalActive ? () => setMapStraalActive(false) : undefined}
-                    onPick={id => openVacancy({ id } as Parameters<typeof selectVacancy>[0])} />
-                </Suspense>
-              </div>
-              {/* Right pane: the same server-filtered rows as a table (row click = drawer). */}
-              <div style={{ flex: '1 1 0', minWidth: 0, display: 'flex', flexDirection: 'column' }}>
-                <div style={{ flex: 1, overflowY: 'auto', overflowX: 'auto' }}>
-                  {error && (
-                    <ErrorBanner style={{ marginBottom: 12 }}>{error}</ErrorBanner>
-                  )}
-                  <VacanciesTable rows={vacancies} loading={loading} selectedId={selected?.id} onSelect={openVacancy}
-                    onOpenCandidateSearch={openCandidateSearch} onOpenApplicants={openApplicants} />
-                </div>
-                <PaginationBar page={page} totalPages={lastPage} totalRows={total} pageSize={pageSize}
-                  onPageChange={setPage} onPageSizeChange={handlePageSizeChange} pageSizeOptions={pageSizeOptions} />
-              </div>
-            </div>
-          ) : (
-            <>
-              {/* Table */}
-              <div ref={tableScrollRef} style={{ flex: 1, overflowY: 'auto', padding: '0 24px 16px' }}>
-                {error && (
-                  <ErrorBanner style={{ marginBottom: 12 }}>{error}</ErrorBanner>
-                )}
-                <VacanciesTable
-                  rows={vacancies}
-                  loading={loading}
-                  selectedId={selected?.id}
-                  onSelect={openVacancy}
-                  onOpenCandidateSearch={openCandidateSearch}
-                  onOpenApplicants={openApplicants}
-                  selectable
-                  selectedIds={selectedIds}
-                  onToggleRow={toggleRow}
-                  onToggleAll={toggleAll}
-                  stickyHeader
-                  scrollParentRef={tableScrollRef}
-                />
-              </div>
+          {/* Table ⇄ map — ViewSwitch keeps both mounted (display toggle, not
+              unmount) so the table's virtualizer never remeasures 0 on returning
+              from the map (§ViewSwitch, mirrors candidates/customers). Map LEFT,
+              filtered vacancy table RIGHT when active — one radius search drives
+              both panes. Lazy Leaflet load. */}
+          <ViewSwitch active={view} views={[
+            {
+              id: 'table',
+              render: () => (
+                <>
+                  <div ref={tableScrollRef} style={{ flex: 1, overflowY: 'auto', padding: '0 24px 16px' }}>
+                    {error && (
+                      <ErrorBanner style={{ marginBottom: 12 }}>{error}</ErrorBanner>
+                    )}
+                    <VacanciesTable
+                      rows={vacancies}
+                      loading={loading}
+                      selectedId={selected?.id}
+                      onSelect={openVacancy}
+                      onOpenCandidateSearch={openCandidateSearch}
+                      onOpenApplicants={openApplicants}
+                      selectable
+                      selectedIds={selectedIds}
+                      onToggleRow={toggleRow}
+                      onToggleAll={toggleAll}
+                      stickyHeader
+                      scrollParentRef={tableScrollRef}
+                    />
+                  </div>
 
-              <PaginationBar page={page} totalPages={lastPage} totalRows={total} pageSize={pageSize}
-                onPageChange={setPage} onPageSizeChange={handlePageSizeChange} pageSizeOptions={pageSizeOptions} />
-            </>
-          )}
+                  <PaginationBar page={page} totalPages={lastPage} totalRows={total} pageSize={pageSize}
+                    onPageChange={setPage} onPageSizeChange={handlePageSizeChange} pageSizeOptions={pageSizeOptions} />
+                </>
+              ),
+            },
+            {
+              id: 'map',
+              render: () => (
+                <div style={{ flex: 1, minHeight: 0, display: 'flex', gap: 14, padding: '0 24px 16px' }}>
+                  <div style={{ flex: '1.1 1 0', minWidth: 400, display: 'flex', flexDirection: 'column' }}>
+                    <Suspense fallback={<div style={{ padding: 24, fontSize: 12, color: 'var(--text-muted)' }}>{t('common:map.loading')}</div>}>
+                      <VacanciesMapView rows={vacancies} padded={false} center={mapCenter} radiusKm={mapStraalActive ? mapRadius : 0}
+                        onCenterChange={(lat, lng) => { setMapCenter({ lat, lng }); setMapStraalActive(true) }}
+                        onRadiusChange={(km: number) => { setMapRadius(km); setMapStraalActive(true) }}
+                        onClearRadius={mapStraalActive ? () => setMapStraalActive(false) : undefined}
+                        onPick={id => openVacancy({ id } as Parameters<typeof selectVacancy>[0])} />
+                    </Suspense>
+                  </div>
+                  {/* Right pane: the same server-filtered rows as a table (row click = drawer). */}
+                  <div style={{ flex: '1 1 0', minWidth: 0, display: 'flex', flexDirection: 'column' }}>
+                    <div style={{ flex: 1, overflowY: 'auto', overflowX: 'auto' }}>
+                      {error && (
+                        <ErrorBanner style={{ marginBottom: 12 }}>{error}</ErrorBanner>
+                      )}
+                      <VacanciesTable rows={vacancies} loading={loading} selectedId={selected?.id} onSelect={openVacancy}
+                        onOpenCandidateSearch={openCandidateSearch} onOpenApplicants={openApplicants} />
+                    </div>
+                    <PaginationBar page={page} totalPages={lastPage} totalRows={total} pageSize={pageSize}
+                      onPageChange={setPage} onPageSizeChange={handlePageSizeChange} pageSizeOptions={pageSizeOptions} />
+                  </div>
+                </div>
+              ),
+            },
+          ]} />
         </div>
 
         {/* Drawer — remounts (key) when the full detail arrives so tabs re-init */}

@@ -15,13 +15,28 @@ import { cardHead, cardBox, row2 } from '@/components/ui/modalCards'
 
 interface OptionRow { value: string; label: string }
 
+// VALIDATIE-LIVE-1-rest: the live-format message under billingEmail — same
+// small local component ContactDetailsCard/ContactCard already use for this
+// exact purpose (no shared component exists for a one-line field error yet).
+function FieldError({ text }: { text?: string }) {
+  if (!text) return null
+  return <div role="alert" style={{ fontSize: 11, color: 'var(--color-danger)', marginTop: 3 }}>{text}</div>
+}
+
 interface CustomerBusinessCardsProps {
   form: CustomerForm
   set: (k: keyof CustomerForm, v: string) => void
   userOptions: OptionRow[]
+  // VALIDATIE-LIVE-1-rest: live format check for billingEmail — blur marks it
+  // touched so the message can render; the message itself is resolved upstream.
+  billingEmailError?: boolean
+  billingEmailMessage?: string
+  onBillingEmailBlur?: () => void
 }
 
-export default function CustomerBusinessCards({ form, set, userOptions }: CustomerBusinessCardsProps) {
+export default function CustomerBusinessCards({
+  form, set, userOptions, billingEmailError, billingEmailMessage, onBillingEmailBlur,
+}: CustomerBusinessCardsProps) {
   const { t } = useTranslation(['customers', 'common'])
   return (
     <>
@@ -62,9 +77,12 @@ export default function CustomerBusinessCards({ form, set, userOptions }: Custom
             <Field label={t('overview.costCenter')}>
               <TextField value={form.costCenter} onChange={v => set('costCenter', v)} />
             </Field>
-            <Field label={t('overview.billingEmail')}>
-              <TextField type="email" value={form.billingEmail} onChange={v => set('billingEmail', v)} />
-            </Field>
+            <div onBlur={onBillingEmailBlur}>
+              <Field label={t('overview.billingEmail')}>
+                <TextField type="email" value={form.billingEmail} onChange={v => set('billingEmail', v)} error={billingEmailError} />
+              </Field>
+              <FieldError text={billingEmailMessage} />
+            </div>
           </div>
         </div>
       </div>

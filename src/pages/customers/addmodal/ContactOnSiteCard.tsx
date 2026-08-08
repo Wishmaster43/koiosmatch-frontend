@@ -34,6 +34,14 @@ import { contactOptionLabel } from '@/lib/contactLabel'
 import type { Contact } from '@/types/customer'
 import type { Id } from '@/types/common'
 
+// VALIDATIE-LIVE-1-rest: the live-format message under email — same small
+// local component ContactDetailsCard/ContactCard already use for this exact
+// purpose (no shared component exists for a one-line field error yet).
+function FieldError({ text }: { text?: string }) {
+  if (!text) return null
+  return <div role="alert" style={{ fontSize: 11, color: 'var(--color-danger)', marginTop: 3 }}>{text}</div>
+}
+
 // FIELD-HEIGHT-1: same literal as the parent modal's own `pickerStyle` (kept
 // local since this is the only file in this folder that needs it) — a picker
 // sitting next to a plain text input must match TextField's own height exactly.
@@ -47,6 +55,11 @@ interface ContactOnSiteCardProps {
   phone: string
   onContactNameChange: (v: string) => void
   onEmailChange: (v: string) => void
+  // VALIDATIE-LIVE-1-rest: blur marks email touched so its live format error
+  // can render (mirrors candidates/addmodal/ContactCard's own onBlur wrapper).
+  onEmailBlur?: () => void
+  emailError?: boolean
+  emailMessage?: string
   onPhoneChange: (v: string) => void
   // Which existing contact (if any) was picked — null when nothing was picked
   // yet, or a brand-new name was typed that matches no existing contact. Owned
@@ -58,7 +71,7 @@ interface ContactOnSiteCardProps {
 }
 
 export default function ContactOnSiteCard({
-  isEdit, contactName, email, phone, onContactNameChange, onEmailChange, onPhoneChange,
+  isEdit, contactName, email, phone, onContactNameChange, onEmailChange, onEmailBlur, emailError, emailMessage, onPhoneChange,
   pickedContactId, onPickedContactChange, existingContacts,
 }: ContactOnSiteCardProps) {
   const { t } = useTranslation(['customers', 'common'])
@@ -104,7 +117,10 @@ export default function ContactOnSiteCard({
           </div>
         )}
         <div style={row2}>
-          <Field label={t('subModal.email')}><TextField type="email" value={email} onChange={onEmailChange} placeholder="naam@klant.nl" /></Field>
+          <div onBlur={onEmailBlur}>
+            <Field label={t('subModal.email')}><TextField type="email" value={email} onChange={onEmailChange} placeholder="naam@klant.nl" error={emailError} /></Field>
+            <FieldError text={emailMessage} />
+          </div>
           <Field label={t('subModal.phone')}><TextField value={phone} onChange={onPhoneChange} /></Field>
         </div>
       </div>

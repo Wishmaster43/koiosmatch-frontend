@@ -353,5 +353,8 @@
     "analyzing": "Analyseren…"
   },
   "openSecondScreen": "Open op tweede scherm",
-  "popupBlocked": "Je browser heeft het pop-outvenster geblokkeerd. Sta pop-ups toe voor deze site."
+  "popupBlocked": "Je browser heeft het pop-outvenster geblokkeerd. Sta pop-ups toe voor deze site.",
+  "popout": {
+    "unknownEntity": "Dit pop-outvenster kon niet worden herkend."
+  }
 }

@@ -351,6 +351,51 @@ describe('AddContactPersonModal', () => {
   })
 })
 
+// VALIDATIE-LIVE-1-rest (2026-08-08): email is the one contact field the backend
+// validates with a shape rule (CustomerContactController::validateContact `email`
+// => Laravel's `email` rule) — a malformed value now shows a live, on-blur inline
+// error and blocks submit instead of only bouncing back as a 422.
+describe('AddContactPersonModal · live e-mail format validation (VALIDATIE-LIVE-1-rest)', () => {
+  it('shows an inline error under e-mail once blurred with a malformed value, and disables Create', async () => {
+    const onCreate = vi.fn()
+    const user = userEvent.setup()
+    render(<AddContactPersonModal onClose={() => {}} onCreate={onCreate} locations={locations} statuses={statuses} />)
+
+    await user.type(screen.getByLabelText(ct('subModal.firstName'), { exact: false }), 'Jan')
+    await user.type(screen.getByLabelText(ct('subModal.lastName'), { exact: false }), 'Jansen')
+    const emailField = screen.getByLabelText(ct('subModal.email'), { exact: false })
+    await user.type(emailField, 'not-an-email')
+    fireEvent.focusOut(emailField)
+
+    expect(await screen.findByText(ct('validation.emailFormat'))).toBeInTheDocument()
+    const createBtn = screen.getByRole('button', { name: ct('subModal.create') })
+    expect(createBtn).toBeDisabled()
+    await user.click(createBtn)
+    expect(onCreate).not.toHaveBeenCalled()
+  })
+
+  it('a well-formed e-mail never blocks submit, and phone/mobile stay free of a live format gate (no backend shape rule for them)', async () => {
+    const onCreate = vi.fn().mockResolvedValue(undefined)
+    const user = userEvent.setup()
+    render(<AddContactPersonModal onClose={() => {}} onCreate={onCreate} locations={locations} statuses={statuses} />)
+
+    await user.type(screen.getByLabelText(ct('subModal.firstName'), { exact: false }), 'Jan')
+    await user.type(screen.getByLabelText(ct('subModal.lastName'), { exact: false }), 'Jansen')
+    const emailField = screen.getByLabelText(ct('subModal.email'), { exact: false })
+    await user.type(emailField, 'jan@klant.nl')
+    fireEvent.focusOut(emailField)
+    // Free text in phone (the backend never restricts its shape here, unlike the
+    // candidate form) must never gain a live "format" error of its own.
+    const phoneField = screen.getByLabelText(ct('subModal.phone'), { exact: false })
+    await user.type(phoneField, 'bel maar even')
+    fireEvent.focusOut(phoneField)
+    expect(screen.queryByText(ct('validation.emailFormat'))).not.toBeInTheDocument()
+
+    await user.click(screen.getByRole('button', { name: ct('subModal.create') }))
+    await waitFor(() => expect(onCreate).toHaveBeenCalled())
+  })
+})
+
 // STATUS-HIDDEN-1 (Danny 02-08, second round): the status picker (inside
 // ContactLinkCard) is hidden by default in the create popup — ContactsPanel's
 // own status editor already covers create AND edit — and only reappears when

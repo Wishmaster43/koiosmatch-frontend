@@ -7,6 +7,8 @@ import { useLocations } from '@/lib/useLocations'
 import { useCustomerPhases } from '@/lib/useCustomerPhases'
 import { useProvinces } from '@/hooks/useProvinces'
 import { useAuth } from '@/context/AuthContext'
+import { useLiveFieldValidation } from '@/hooks/useLiveFieldValidation'
+import { isValidEmailFormat } from '@/lib/contactFieldValidation'
 import { BTN_H } from '@/config/buttonMetrics'
 import { WIDE_MODAL } from '@/components/ui/modalMetrics'
 import { modalColumns } from '@/components/ui/modalCards'
@@ -55,6 +57,13 @@ const API_TO_FORM: Record<string, string> = {
   street: 'street', house_number: 'houseNumber', house_number_suffix: 'houseNumberSuffix',
   postcode: 'postalCode', province: 'province', country: 'country',
 }
+
+// VALIDATIE-LIVE-1-rest: billingEmail is the only field here the backend
+// validates with a shape rule (CustomerRequest::sharedRules `billing_email` =>
+// Laravel's `email` rule) — website/costCenter stay plain strings server-side,
+// so no live format gate is added for them (see src/lib/contactFieldValidation.ts).
+const EMAIL_VALIDATORS = { billingEmail: isValidEmailFormat }
+const EMAIL_ERROR_KEYS = { billingEmail: 'validation.emailFormat' }
 
 /**
  * AddCustomerModal — create a customer. Status comes from the tenant lookup
@@ -180,6 +189,11 @@ export default function AddCustomerModal({ onClose, onCreate, onImported, users 
     // eslint-disable-next-line react-hooks/exhaustive-deps -- only react to the resolved province list changing, not every form edit
   }, [provinces])
 
+  // VALIDATIE-LIVE-1-rest: live, on-blur/typing format check for billingEmail —
+  // own sibling hook (mirrors AddCandidateModal's useLiveFieldValidation).
+  const { markTouched, fieldMessage, touchInvalidFields, hasFormatError } =
+    useLiveFieldValidation(form, t, EMAIL_VALIDATORS, EMAIL_ERROR_KEYS)
+
   const set = (k: keyof CustomerForm, v: string) => {
     setForm(f => ({ ...f, [k]: v }))
     if (errors[k]) setErrors(e => ({ ...e, [k]: false }))
@@ -187,7 +201,10 @@ export default function AddCustomerModal({ onClose, onCreate, onImported, users 
   }
 
   const handleSubmit = async () => {
-    if (!form.name.trim()) { setErrors({ name: true }); return }
+    // VALIDATIE-LIVE-1-rest: block on a live format failure too — marks any
+    // untouched-but-malformed field touched so its message renders.
+    const invalidKeys = touchInvalidFields()
+    if (!form.name.trim() || invalidKeys.length) { setErrors({ name: !form.name.trim() }); return }
     setSaving(true)
     try {
       await onCreate?.(form)
@@ -211,7 +228,7 @@ export default function AddCustomerModal({ onClose, onCreate, onImported, users 
   // CUSTOMER-IMPORT-1: blocked while an import is past its upload step (preview or
   // result) — never let the manual form fire a SECOND create while the import is
   // mid-decision or has just written its own records.
-  const canSubmit = !!form.name.trim() && !saving && importWizard.step === 'upload'
+  const canSubmit = !!form.name.trim() && !saving && importWizard.step === 'upload' && !hasFormatError
   // The phase the title names — the pills below are the only way to change it.
   const selectedPhase = phases.find(p => String(p.value) === String(form.phase))
   const userOptions = users.map(u => ({ value: String(u.id), label: u.name }))
@@ -281,7 +298,9 @@ export default function AddCustomerModal({ onClose, onCreate, onImported, users 
 
             {/* RIGHT — secondary/optional: owner, online/billing, company text, branch. */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-              <CustomerBusinessCards form={form} set={set} userOptions={userOptions} />
+              <CustomerBusinessCards form={form} set={set} userOptions={userOptions}
+                billingEmailError={!!fieldMessage('billingEmail')} billingEmailMessage={fieldMessage('billingEmail')}
+                onBillingEmailBlur={() => markTouched('billingEmail')} />
               <CustomerCompanyTextCard form={form} set={set} />
               <CustomerBranchesCard form={form} set={set} branchOptions={branchOptions} />
             </div>

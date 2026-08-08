@@ -781,5 +781,12 @@
     "reasons": {
       "noOpenVacancies": "Aucune offre ouverte — relancez ce client."
     }
+  },
+  "validation": {
+    "emailFormat": "Saisissez une adresse e-mail valide."
+  },
+  "popout": {
+    "windowTitle": "Notes — {{name}}",
+    "loadError": "Ce client n'a pas pu être chargé."
   }
 }

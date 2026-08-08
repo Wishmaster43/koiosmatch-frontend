@@ -453,5 +453,9 @@
     "reasons": {
       "staleNoApplications": "No applications yet, posted {{days}} days ago."
     }
+  },
+  "popout": {
+    "windowTitle": "Notes — {{name}}",
+    "loadError": "This vacancy could not be loaded."
   }
 }

@@ -7,6 +7,12 @@ import StatusListEditor from './StatusListEditor'
  * reorder + in-use 409 (via matches.cao) but no screen, same gap class as
  * provinces). Name-only list; drives the customer price agreements and the
  * + Match popup's CAO picker.
+ *
+ * withValueSlug (LOOKUP-GAP-1(d) verification 08-08): CaoController extends
+ * SlugLookupController, whose store() validates `value` as REQUIRED — without
+ * this opt-in StatusListEditor only ever sent name/label and "+ CLA toevoegen"
+ * would 422 on every tenant (same bug class already fixed for
+ * CustomerPhasesSettings/OpportunityLookupsSettings — see StatusListEditor.jsx).
  */
 export default function CaoSettings() {
   const { t } = useTranslation('settings')
@@ -18,6 +24,7 @@ export default function CaoSettings() {
         endpoint="/cao"
         addLabel={t('caoSettings.add')}
         withColor
+        withValueSlug
       />
     </div>
   )

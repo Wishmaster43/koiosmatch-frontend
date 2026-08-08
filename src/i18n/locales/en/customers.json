@@ -781,5 +781,12 @@
     "reasons": {
       "noOpenVacancies": "No open vacancies — follow up with this customer."
     }
+  },
+  "validation": {
+    "emailFormat": "Enter a valid e-mail address."
+  },
+  "popout": {
+    "windowTitle": "Notes — {{name}}",
+    "loadError": "This customer could not be loaded."
   }
 }

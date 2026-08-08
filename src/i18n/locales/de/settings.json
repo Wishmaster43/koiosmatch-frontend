@@ -1340,8 +1340,6 @@
     "deleteBlocked_other": "Nicht löschbar — {{count}} Benutzer haben diese Rolle. Weisen Sie ihnen zuerst eine andere Rolle zu.",
     "confirmDelete": "Rolle „{{name}}\" löschen?",
     "empty": "Noch keine Rollen erstellt.",
-    "matrixGroup": "Gruppe",
-    "matrixOther": "Sonstiges",
     "groups": {
       "candidates": "Kandidaten",
       "customers": "Kunden",
@@ -1402,7 +1400,8 @@
     "pageAccess": "Seite: {{label}}",
     "hints": {
       "candidatesSync": "SM-Spiegel"
-    }
+    },
+    "matrixAllowed": "{{active}}/{{total}} erlaubt"
   },
   "audit": {
     "title": "Audit-Log",
@@ -2742,5 +2741,9 @@
     "matchRenewHint": "Wie viele Tage vor (oder nach) dem Enddatum eines Matches Koios eine Verlängerung vorschlägt.",
     "matchRenewLabel": "Tage (1-365)",
     "matchRenewSaveFailed": "Speichern des Match-Verlängerungsfensters fehlgeschlagen."
-  }
+  },
+  "modShiftmanager": {
+    "reportingOff": "Shiftmanager-Berichterstattung ist noch nicht aktiviert — schalten Sie das Modul ein, um KPI-Ziele und Anzeigelimits zu konfigurieren."
+  },
+  "dashboardsEmpty": "Noch keine Dashboard-Elemente konfiguriert."
 }

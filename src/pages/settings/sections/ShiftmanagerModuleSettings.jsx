@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useAuth } from '@/context/AuthContext'
+import { useApps } from '@/context/AppsContext'
 import SubTabBar from '@/components/drawer/SubTabBar'
 import SchemaSection from '../components/SchemaSection'
 import displaySchema from '../schemas/display'
@@ -13,19 +14,40 @@ import smKpisSchema from '../schemas/smKpis'
  * translated titles (smKpis.title / display.title) so there is one source of
  * truth for each section's name. The manual Sync tab is retired (SYNC-RETIRE-1
  * — the daily sm:sync-all cron replaced it; the emergency trigger stays on the
- * SM pages' SmSyncButton). Reachability is registry-gated on the 'sm' module
- * (→ Modules).
+ * SM pages' SmSyncButton).
+ *
+ * SM-MODULE-TABS-1 (Danny 16-08 restore): reachability hangs on TWO independent
+ * superadmin toggles — Modules → "Rapportage Shiftmanager" ('sm', hasModule) and
+ * Apps → the Shiftmanager connector ('shiftmanager', isAppEnabled) — the settings
+ * nav item is gated on EITHER (registry.jsx `requiresModuleOrApp`, see
+ * SettingsPage's passesModuleOrApp). Inside this screen, both existing sub-tabs
+ * back the REPORTING dashboards only (KPI targets feed the SM dashboard; display
+ * limits feed CandidatesReport/ShiftmanagerDashboard — all module-gated pages) —
+ * there is no app-only content since the Sync tab retired. So the tab SET follows
+ * the module flag; an app-only tenant still reaches the screen (nav gate) but
+ * sees an honest "nothing here yet" notice instead of both tabs.
  */
 export default function ShiftmanagerModuleSettings() {
   const { t } = useTranslation('settings')
   const { hasModule } = useAuth()
+  const { isAppEnabled } = useApps() ?? {}
 
   // Active sub-tab: KPI targets first, display limits second.
   const [activeTab, setActiveTab] = useState('kpis')
 
-  // Defensive guard for direct deep links — the registry already hides the tab.
-  if (!hasModule('sm')) {
-    return <p style={{ fontSize: 13, color: 'var(--text-muted)' }}>{t('shell.empty')}</p>
+  // Both tabs back reporting-only content — no module means no tabs to show.
+  const moduleOn = hasModule('sm')
+  const appOn = isAppEnabled ? isAppEnabled('shiftmanager') : false
+
+  // Deep-link / app-only guard: distinguish "reachable via the app flag but the
+  // reporting module is off" (accurate notice) from "neither flag on" (the
+  // registry already hides the nav item, so this is a defensive fallback only).
+  if (!moduleOn) {
+    return (
+      <p style={{ fontSize: 13, color: 'var(--text-muted)' }}>
+        {appOn ? t('modShiftmanager.reportingOff') : t('shell.empty')}
+      </p>
+    )
   }
 
   const tabs = [

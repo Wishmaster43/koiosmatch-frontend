@@ -1572,8 +1572,6 @@
     "deleteBlocked_other": "Niet verwijderbaar — {{count}} gebruikers hebben deze rol. Wijs hen eerst een andere rol toe.",
     "confirmDelete": "Rol \"{{name}}\" verwijderen?",
     "empty": "Nog geen rollen aangemaakt.",
-    "matrixGroup": "Groep",
-    "matrixOther": "Overig",
     "groups": {
       "candidates": "Kandidaten",
       "customers": "Klanten",
@@ -1634,7 +1632,8 @@
     "pageAccess": "Pagina: {{label}}",
     "hints": {
       "candidatesSync": "SM-spiegel"
-    }
+    },
+    "matrixAllowed": "{{active}}/{{total}} toegestaan"
   },
   "audit": {
     "title": "Audit log",
@@ -2742,5 +2741,9 @@
     "matchRenewHint": "Hoeveel dagen vóór (of na) de einddatum van een match Koios voorstelt om deze te verlengen.",
     "matchRenewLabel": "Dagen (1-365)",
     "matchRenewSaveFailed": "Opslaan van het match-verlengingsvenster is mislukt."
-  }
+  },
+  "modShiftmanager": {
+    "reportingOff": "Shiftmanager-rapportage staat nog niet aan — zet de module aan om KPI-doelen en weergavelimieten in te stellen."
+  },
+  "dashboardsEmpty": "Nog geen dashboarditems geconfigureerd."
 }

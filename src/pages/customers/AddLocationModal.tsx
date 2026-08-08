@@ -37,6 +37,8 @@ import { MapPin } from 'lucide-react'
 import FloatingPanel from '@/components/ui/FloatingPanel'
 import { useProvinces } from '@/hooks/useProvinces'
 import { notifyError } from '@/lib/notify'
+import { useLiveFieldValidation } from '@/hooks/useLiveFieldValidation'
+import { isValidEmailFormat } from '@/lib/contactFieldValidation'
 import { useAllSettings, getJsonSetting } from '@/lib/settings/useAllSettings'
 import { BTN_H } from '@/config/buttonMetrics'
 import { WIDE_MODAL } from '@/components/ui/modalMetrics'
@@ -67,6 +69,14 @@ const API_TO_FORM: Record<string, string> = {
   // LOCATIE-OMSCHRIJVING-1 (Danny 02-08): mirrors the department's own description field.
   description: 'description',
 }
+
+// VALIDATIE-LIVE-1-rest: `email` is the only "contact ter plaatse" field the
+// backend validates with a shape rule (CustomerLocationController::rules
+// `email` => Laravel's `email` rule) — `phone` stays a plain string
+// server-side, so no live format gate is added for it here (see
+// src/lib/contactFieldValidation.ts for the full backend-verification note).
+const EMAIL_VALIDATORS = { email: isValidEmailFormat }
+const EMAIL_ERROR_KEYS = { email: 'validation.emailFormat' }
 
 export default function AddLocationModal({
   onClose, onCreate, onImported, onAddContact, customerId, customerName, statuses = [], initial, existingContacts = [],
@@ -150,6 +160,11 @@ export default function AddLocationModal({
   // cause. Same flat-array setting shape the Settings screen already writes.
   const settings = useAllSettings()
   const showStatusPicker = getJsonSetting<string[]>(settings, 'customer_location_required_fields', []).includes('status_id')
+  // VALIDATIE-LIVE-1-rest: live, on-blur/typing format check for the "contact
+  // ter plaatse" e-mail — own sibling hook, same idiom as AddCandidateModal.
+  const { markTouched, fieldMessage, touchInvalidFields, hasFormatError } =
+    useLiveFieldValidation(form, t, EMAIL_VALIDATORS, EMAIL_ERROR_KEYS)
+
   const set = <K extends keyof LocationPayload>(k: K, v: LocationPayload[K]) => {
     setForm(f => ({ ...f, [k]: v }))
     if (errors[k]) setErrors(e => ({ ...e, [k]: false }))
@@ -178,7 +193,10 @@ export default function AddLocationModal({
   }, [importWizard.run])
 
   const submit = async () => {
-    if (!form.name.trim()) { setErrors({ name: true }); return }
+    // VALIDATIE-LIVE-1-rest: block on a live format failure too — marks any
+    // untouched-but-malformed field touched so its message renders.
+    const invalidKeys = touchInvalidFields()
+    if (!form.name.trim() || invalidKeys.length) { setErrors({ name: !form.name.trim() }); return }
     const payload = { ...form, name: form.name.trim() }
     // Edit path: update() keeps its existing toast-based error handling — unchanged,
     // closes immediately. The contact picker above only renders on CREATE (see the
@@ -307,7 +325,8 @@ export default function AddLocationModal({
                 isEdit={isEdit}
                 contactName={form.contactName} email={form.email} phone={form.phone}
                 onContactNameChange={v => set('contactName', v)}
-                onEmailChange={v => set('email', v)}
+                onEmailChange={v => set('email', v)} onEmailBlur={() => markTouched('email')}
+                emailError={!!fieldMessage('email')} emailMessage={fieldMessage('email')}
                 onPhoneChange={v => set('phone', v)}
                 pickedContactId={pickedContactId} onPickedContactChange={setPickedContactId}
                 existingContacts={existingContacts}
@@ -341,7 +360,7 @@ export default function AddLocationModal({
         {/* BTN_H (§4/§9): one explicit height for every text/action button, everywhere. */}
         <div style={{ padding: '12px 22px', borderTop: '1px solid var(--border)', display: 'flex', justifyContent: 'flex-end', gap: 8, flexShrink: 0 }}>
           <button onClick={onClose} style={{ height: BTN_H, padding: '0 16px', fontSize: 13, borderRadius: 8, border: '1px solid var(--border)', background: 'none', color: 'var(--text)', cursor: 'pointer' }}>{t('subModal.cancel')}</button>
-          <button onClick={submit} disabled={!form.name.trim()} style={{ height: BTN_H, padding: '0 20px', fontSize: 13, fontWeight: 600, borderRadius: 8, border: 'none', background: form.name.trim() ? 'var(--color-primary)' : 'var(--border)', color: form.name.trim() ? 'white' : 'var(--text-muted)', cursor: form.name.trim() ? 'pointer' : 'not-allowed' }}>
+          <button onClick={submit} disabled={!form.name.trim() || hasFormatError} style={{ height: BTN_H, padding: '0 20px', fontSize: 13, fontWeight: 600, borderRadius: 8, border: 'none', background: (form.name.trim() && !hasFormatError) ? 'var(--color-primary)' : 'var(--border)', color: (form.name.trim() && !hasFormatError) ? 'white' : 'var(--text-muted)', cursor: (form.name.trim() && !hasFormatError) ? 'pointer' : 'not-allowed' }}>
             {isEdit ? t('subModal.save') : t('subModal.create')}
           </button>
         </div>

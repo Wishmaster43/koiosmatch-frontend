@@ -3,7 +3,7 @@
  * /escalation-reasons. Asserts the create REQUEST (§13).
  */
 import { describe, it, expect, afterEach, vi } from 'vitest'
-import { render, screen, waitFor } from '@testing-library/react'
+import { render, screen, waitFor, fireEvent } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import i18n from '@/i18n'
 import api from '@/lib/api'
@@ -43,5 +43,22 @@ describe('EscalationReasonsSettings', () => {
     await user.click(screen.getByRole('button', { name: st('statusList.addBtn') }))
 
     await waitFor(() => expect(api.post).toHaveBeenCalledWith('/escalation-reasons', expect.objectContaining({ name: 'Ziek' })))
+  })
+
+  // REASON-REORDER-1 (backend landed 04-08): EscalationReasonController gained
+  // PUT /escalation-reasons/reorder that day — the editor no longer opts out of
+  // it (LOOKUP-GAP-1(d) verification 08-08 caught the stale reorderable={false}).
+  it('drag-reorder is enabled and persists via PUT /escalation-reasons/reorder', async () => {
+    api.get.mockResolvedValue({ data: [row({ id: 'e1', name: 'Boos' }), row({ id: 'e2', name: 'Ziek' })] })
+    api.put.mockResolvedValue({ data: {} })
+    render(<EscalationReasonsSettings />)
+
+    await screen.findByText('Ziek')
+    const rowOf = (text) => screen.getByText(text).closest('div[draggable]')
+    fireEvent.dragStart(rowOf('Ziek'))
+    fireEvent.dragOver(rowOf('Boos'))
+    fireEvent.drop(rowOf('Boos'))
+
+    await waitFor(() => expect(api.put).toHaveBeenCalledWith('/escalation-reasons/reorder', { ids: ['e2', 'e1'] }))
   })
 })

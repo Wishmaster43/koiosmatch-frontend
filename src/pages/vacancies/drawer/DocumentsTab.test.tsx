@@ -43,9 +43,16 @@ const clickConfirm = () => {
   return userEvent.click(buttons[buttons.length - 1])
 }
 
+// Hoisted mock refs (reassigned per test in beforeEach) so individual tests can vary
+// createObjectURL's return value across calls (§13: assert the actual revoke calls).
+let createObjectURL: ReturnType<typeof vi.fn>
+let revokeObjectURL: ReturnType<typeof vi.fn>
+
 describe('DocumentsTab (vacancy) · document type', () => {
   beforeEach(() => {
-    vi.stubGlobal('URL', { ...URL, createObjectURL: vi.fn(() => 'blob:contract.pdf'), revokeObjectURL: vi.fn() })
+    createObjectURL = vi.fn(() => 'blob:contract.pdf')
+    revokeObjectURL = vi.fn()
+    vi.stubGlobal('URL', { ...URL, createObjectURL, revokeObjectURL })
   })
   afterEach(() => vi.clearAllMocks())
 
@@ -99,5 +106,47 @@ describe('DocumentsTab (vacancy) · document type', () => {
     })
     render(<DocumentsTab vacancy={vacancy} />)
     expect(screen.getByText('Contract')).toBeInTheDocument()
+  })
+
+  // Blob-URL leak (heraudit-2, point 3): a staged-but-unconfirmed preview must be
+  // revoked when replaced by a second pick — the old preview used to stay alive forever.
+  it('revokes the previous staged preview when a second file is picked before confirming', async () => {
+    createObjectURL.mockReturnValueOnce('blob:first.pdf').mockReturnValueOnce('blob:second.pdf')
+    vi.mocked(useEntityDocuments).mockReturnValue({ docs: [], upload: vi.fn(), rename: vi.fn(), remove: vi.fn() })
+    const { container } = render(<DocumentsTab vacancy={vacancy} />)
+    const secondFile = new File(['other'], 'second.pdf', { type: 'application/pdf' })
+
+    fireEvent.change(getFileInput(container), { target: { files: [file] } })
+    expect(revokeObjectURL).not.toHaveBeenCalled()
+
+    fireEvent.change(getFileInput(container), { target: { files: [secondFile] } })
+    expect(revokeObjectURL).toHaveBeenCalledWith('blob:first.pdf')
+    expect(revokeObjectURL).not.toHaveBeenCalledWith('blob:second.pdf')
+    expect(screen.getByText('second.pdf')).toBeInTheDocument()
+  })
+
+  // Blob-URL leak (heraudit-2, point 3): closing the drawer (unmount) with a staged,
+  // unconfirmed file must revoke its preview too — not just the explicit "cancel" path.
+  it('revokes a still-staged preview on unmount', () => {
+    vi.mocked(useEntityDocuments).mockReturnValue({ docs: [], upload: vi.fn(), rename: vi.fn(), remove: vi.fn() })
+    const { container, unmount } = render(<DocumentsTab vacancy={vacancy} />)
+    fireEvent.change(getFileInput(container), { target: { files: [file] } })
+
+    unmount()
+    expect(revokeObjectURL).toHaveBeenCalledWith('blob:contract.pdf')
+  })
+
+  // Confirming the upload hands the object URL's lifecycle to useEntityDocuments
+  // (which revokes it once the server doc replaces the optimistic row) — the modal
+  // itself must NOT also revoke it, or the still-showing optimistic preview would break.
+  it('does not revoke the object URL itself on confirm (ownership passes to upload())', async () => {
+    const upload = vi.fn()
+    vi.mocked(useEntityDocuments).mockReturnValue({ docs: [], upload, rename: vi.fn(), remove: vi.fn() })
+    const { container } = render(<DocumentsTab vacancy={vacancy} />)
+    fireEvent.change(getFileInput(container), { target: { files: [file] } })
+
+    await clickConfirm()
+    expect(upload).toHaveBeenCalledWith(file, 'Contract', 'contract.pdf', 'blob:contract.pdf')
+    expect(revokeObjectURL).not.toHaveBeenCalled()
   })
 })

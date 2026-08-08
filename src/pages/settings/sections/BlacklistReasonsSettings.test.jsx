@@ -5,7 +5,7 @@
  * serving two endpoints) and the create REQUEST (§13).
  */
 import { describe, it, expect, afterEach, vi } from 'vitest'
-import { render, screen, waitFor } from '@testing-library/react'
+import { render, screen, waitFor, fireEvent } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import i18n from '@/i18n'
 import api from '@/lib/api'
@@ -53,5 +53,22 @@ describe('BlacklistReasonsSettings', () => {
     await user.click(screen.getByRole('button', { name: st('statusList.addBtn') }))
 
     await waitFor(() => expect(api.post).toHaveBeenCalledWith('/candidate-blacklist-reasons', expect.objectContaining({ name: 'Agressie' })))
+  })
+
+  // Both blacklist controllers gained sort_order + PUT /{endpoint}/reorder on
+  // 2026-08-04 (BE b649f8f0) — this guards the removal of the stale
+  // reorderable={false} opt-out (LOOKUP-GAP-1(d) verification 08-08).
+  it('drag-reorder is enabled and persists via PUT /candidate-blacklist-reasons/reorder', async () => {
+    api.get.mockResolvedValue({ data: [row({ id: 'b1', name: 'No-show' }), row({ id: 'b2', name: 'Agressie' })] })
+    api.put.mockResolvedValue({ data: {} })
+    render(<BlacklistReasonsSettings />)
+
+    await screen.findByText('Agressie')
+    const rowOf = (text) => screen.getByText(text).closest('div[draggable]')
+    fireEvent.dragStart(rowOf('Agressie'))
+    fireEvent.dragOver(rowOf('No-show'))
+    fireEvent.drop(rowOf('No-show'))
+
+    await waitFor(() => expect(api.put).toHaveBeenCalledWith('/candidate-blacklist-reasons/reorder', { ids: ['b2', 'b1'] }))
   })
 })

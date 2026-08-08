@@ -56,5 +56,8 @@
     "loading": "Loading…",
     "previewTitle": "Branches for this role",
     "previewEmpty": "No starting set — this role has no branches, so the new user starts unrestricted."
+  },
+  "validation": {
+    "emailFormat": "Enter a valid e-mail address."
   }
 }

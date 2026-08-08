@@ -181,6 +181,55 @@ describe('DataTable · shift-click range selection (job 43)', () => {
   })
 })
 
+// DATATABLE-SORT-1 — the additive controlled-sort escape hatch. Both new props
+// are optional; the tests below prove (a) the escape hatch works when opted
+// into and (b) the other 36+ consumers that never pass it stay byte-identical.
+function ControlledTable({ initialSort = null }) {
+  const [sort, setSort] = useState(initialSort)
+  return <DataTable columns={columns} rows={rows} sort={sort} onSortChange={setSort} />
+}
+
+describe('DataTable · controlled sort (DATATABLE-SORT-1)', () => {
+  it('calls onSortChange with the FE column key on header click, and does NOT resort on its own until the caller feeds the new sort back', async () => {
+    const user = userEvent.setup()
+    const onSortChange = vi.fn()
+    render(<DataTable columns={columns} rows={rows} sort={null} onSortChange={onSortChange} />)
+    await user.click(screen.getByRole('button', { name: 'Name' }))
+    expect(onSortChange).toHaveBeenCalledWith({ by: 'name', dir: 'asc' })
+    // The caller (this test) never echoed the new sort back via the `sort` prop —
+    // a controlled component must not silently mutate its own display, so the
+    // original row order is still showing (Bob before Ann).
+    const bodyRows = screen.getAllByRole('row').slice(1)
+    expect(within(bodyRows[0]).getByText('Bob')).toBeInTheDocument()
+  })
+
+  it('round-trips through a stateful caller exactly like the uncontrolled table: click → asc, click again → desc', async () => {
+    const user = userEvent.setup()
+    render(<ControlledTable />)
+    const nameHeader = screen.getByText('Name').closest('th')
+    await user.click(screen.getByRole('button', { name: 'Name' }))
+    expect(nameHeader).toHaveAttribute('aria-sort', 'ascending')
+    expect(within(screen.getAllByRole('row')[1]).getByText('Ann')).toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: 'Name' }))
+    expect(nameHeader).toHaveAttribute('aria-sort', 'descending')
+    expect(within(screen.getAllByRole('row')[1]).getByText('Bob')).toBeInTheDocument()
+  })
+
+  // Regression guard: a table that passes NEITHER prop must behave exactly as
+  // it did before this feature existed — internal state, no callback ever fired.
+  it('leaves the uncontrolled path untouched when sort/onSortChange are both omitted', async () => {
+    const user = userEvent.setup()
+    const onSortChange = vi.fn()
+    render(<DataTable columns={columns} rows={rows} />)
+    await user.click(screen.getByRole('button', { name: 'Name' }))
+    await user.click(screen.getByRole('button', { name: 'Name' }))
+    expect(onSortChange).not.toHaveBeenCalled() // never wired, so it can never fire
+    const nameHeader = screen.getByText('Name').closest('th')
+    expect(nameHeader).toHaveAttribute('aria-sort', 'descending')
+    expect(within(screen.getAllByRole('row')[1]).getByText('Bob')).toBeInTheDocument()
+  })
+})
+
 // Unknown sort values (null/undefined) must sink to the bottom in BOTH directions.
 // Reversing the whole sorted array floated "not computed yet" vacancies above the
 // vacancy with the most real leads on the descending click (audit 2026-07-27).

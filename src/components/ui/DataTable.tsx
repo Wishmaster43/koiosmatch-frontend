@@ -29,6 +29,12 @@ export { shiftRangeIds }
  * `selectedId` re-renders the two affected rows, not all 5000+ cells. This only
  * pays off when the caller's `columns` array is referentially stable (useMemo) —
  * an unstable columns array still forces every row to re-render every time.
+ *
+ * Controlled sort (DATATABLE-SORT-1, additive): sort is private state by
+ * default (unchanged). Pass `sort` + `onSortChange` to lift it to the caller —
+ * e.g. to also drive a real server-side `sort_by`/`sort_dir` request, see
+ * pages/applications' ApplicationsTable/ApplicationsPage for the reference
+ * adoption. Omitting both keeps every other consumer byte-identical.
  */
 export type RowId = string | number
 
@@ -45,10 +51,24 @@ export interface Column<Row> {
   sortValue?: (row: Row) => string | number | null | undefined
   sticky?: boolean                            // pin column to left edge during horizontal scroll
   width?: number                              // px width used to compute sticky left offsets
+  // DATATABLE-SORT-1: optional metadata a caller can set on a column that maps to
+  // a REAL backend sort field (e.g. 'created_at') — DataTable itself never reads
+  // this; it exists so a consumer building a server request off `onSortChange`
+  // has the mapping right next to the column definition. Purely additive.
+  serverKey?: string
 }
 
 interface SortState {
   key: string
+  dir: 'asc' | 'desc'
+}
+
+// The controlled-sort shape exchanged with a caller (DATATABLE-SORT-1). `by` is
+// always the clicked column's own `key` — never a backend field name — so
+// DataTable's own local reorder (sortedRows below) keeps working identically
+// whether or not the caller ALSO triggers a server refetch off this value.
+export interface ControlledSort {
+  by: string
   dir: 'asc' | 'desc'
 }
 
@@ -70,6 +90,13 @@ interface DataTableProps<Row> {
   // Virtualization (opt-in): the vertical scroll container the table sits in.
   scrollParentRef?: RefObject<HTMLElement | null>
   estimatedRowHeight?: number
+  // DATATABLE-SORT-1 — additive, backward-compatible controlled-sort escape
+  // hatch: when `onSortChange` is provided the table's sort state is OWNED by
+  // the caller (header clicks call it instead of the internal toggle, and the
+  // caret renders from `sort`). Neither prop given ⇒ behaviour is byte-identical
+  // to before this change — every other consumer is untouched.
+  sort?: ControlledSort | null
+  onSortChange?: (sort: ControlledSort) => void
 }
 
 export default function DataTable<Row>({
@@ -92,12 +119,32 @@ export default function DataTable<Row>({
   defaultSort = null,
   scrollParentRef,
   estimatedRowHeight = 44,
+  sort: sortProp,
+  onSortChange,
 }: DataTableProps<Row>) {
   const { t } = useTranslation('common')
-  const [sort, setSort] = useState<SortState | null>(defaultSort)
+  // DATATABLE-SORT-1: presence of `onSortChange` decides the mode. Uncontrolled
+  // keeps its OWN private state (byte-identical to before this change);
+  // controlled derives `sort` straight from the caller's prop every render, so
+  // it never disagrees with what the caller thinks the current sort is.
+  const isControlled = onSortChange !== undefined
+  const [internalSort, setInternalSort] = useState<SortState | null>(defaultSort)
+  const sort: SortState | null = useMemo(() => {
+    if (!isControlled) return internalSort
+    return sortProp ? { key: sortProp.by, dir: sortProp.dir } : null
+  }, [isControlled, sortProp, internalSort])
 
   const toggleSort = (col: Column<Row>) => {
-    setSort(prev => {
+    if (isControlled) {
+      // The caller owns the commit — compute the next state from the CURRENT
+      // (prop-derived) sort and hand it off instead of mutating local state.
+      const next: SortState = (!sort || sort.key !== col.key)
+        ? { key: col.key, dir: 'asc' }
+        : { key: col.key, dir: sort.dir === 'asc' ? 'desc' : 'asc' }
+      onSortChange?.({ by: next.key, dir: next.dir })
+      return
+    }
+    setInternalSort(prev => {
       if (!prev || prev.key !== col.key) return { key: col.key, dir: 'asc' }
       return { key: col.key, dir: prev.dir === 'asc' ? 'desc' : 'asc' }
     })

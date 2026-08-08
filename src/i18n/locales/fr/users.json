@@ -56,5 +56,8 @@
     "loading": "Chargement…",
     "previewTitle": "Sites de ce rôle",
     "previewEmpty": "Aucun ensemble de départ — ce rôle n'a aucun site ; le nouvel utilisateur démarre sans restriction."
+  },
+  "validation": {
+    "emailFormat": "Saisissez une adresse e-mail valide."
   }
 }

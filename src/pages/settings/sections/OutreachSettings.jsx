@@ -25,12 +25,18 @@ export function OutreachStatusSettings() {
  * dimension from status (the pipeline). Same value/label/color/order shape as
  * OutreachStatus (SlugLookupController base) — no extra flags, in-use guarded
  * by outreach_targets.outcome.
+ *
+ * withValueSlug (LOOKUP-GAP-1(d) verification 08-08): OutreachOutcomeController
+ * extends SlugLookupController, whose store() validates `value` as REQUIRED —
+ * without this opt-in StatusListEditor only ever sent name/label and
+ * "+ toevoegen" would 422 on every tenant (same bug class already fixed for
+ * CustomerPhasesSettings/OpportunityLookupsSettings — see StatusListEditor.jsx).
  */
 export function OutreachOutcomeSettings() {
   const { t } = useTranslation('settings')
   return (
     <div style={{ maxWidth: 640 }}>
-      <StatusListEditor compact withColor title={t('outreach.outcomeTitle')} subtitle={t('outreach.outcomeSubtitle')}
+      <StatusListEditor compact withColor withValueSlug title={t('outreach.outcomeTitle')} subtitle={t('outreach.outcomeSubtitle')}
         endpoint="/outreach-outcomes" addLabel={t('outreach.outcomeAdd')} />
     </div>
   )

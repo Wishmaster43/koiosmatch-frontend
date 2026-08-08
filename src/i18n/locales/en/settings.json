@@ -1572,8 +1572,6 @@
     "deleteBlocked_other": "Cannot delete — {{count}} users have this role. Assign them another role first.",
     "confirmDelete": "Delete role \"{{name}}\"?",
     "empty": "No roles created yet.",
-    "matrixGroup": "Group",
-    "matrixOther": "Other",
     "groups": {
       "candidates": "Candidates",
       "customers": "Customers",
@@ -1634,7 +1632,8 @@
     "pageAccess": "Page: {{label}}",
     "hints": {
       "candidatesSync": "SM mirror"
-    }
+    },
+    "matrixAllowed": "{{active}}/{{total}} allowed"
   },
   "audit": {
     "title": "Audit log",
@@ -2742,5 +2741,9 @@
     "matchRenewHint": "How many days before (or past) a match's end date Koios suggests renewing it.",
     "matchRenewLabel": "Days (1-365)",
     "matchRenewSaveFailed": "Saving the match renewal window failed."
-  }
+  },
+  "modShiftmanager": {
+    "reportingOff": "Shiftmanager reporting isn't enabled yet — turn on the module to configure KPI targets and display limits."
+  },
+  "dashboardsEmpty": "No dashboard items configured yet."
 }

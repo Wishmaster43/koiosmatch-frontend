@@ -48,6 +48,8 @@ import VacancySettingsTab from './VacancySettingsTab'
 import SelectMenu from '@/components/ui/SelectMenu'
 import { useNoteTypes } from '@/lib/useNoteTypes'
 import { contactOptionLabel } from '@/lib/contactLabel'
+import { openNotesPopout } from '@/lib/secondScreen'
+import { notifyError } from '@/lib/notify'
 import type { Id } from '@/types/common'
 import type { Customer, CustomerNote } from '@/types/customer'
 
@@ -220,6 +222,10 @@ export default function CustomerNotesTab({ customerId, customerName, customerIni
           when the scoped noteTypes list swaps, so a stale type can't 422 on save. */}
       {active === 'notes' && (
         <NotesTab {...notesProps} showTimeline={false} showConversations={false}
+          // F5-uitbreiding: pop the customer's notes into a real browser window
+          // (named window — reopening focuses the existing one); a blocked popup
+          // gets an honest notice instead of failing silently (mirrors CommunicationTab).
+          onPopOut={() => { if (!openNotesPopout('customer', String(customerId))) notifyError(t('common:popupBlocked')) }}
           // NOTES-LOC-DEPT-1 → composer (Danny 05-08 "koppelen aan klant weg, dat moet
           // komen als je doet + notitie"): the four-level link picker (Klant · Locatie ·
           // Afdeling · Contactpersoon) lives INSIDE the compose flow now, only when

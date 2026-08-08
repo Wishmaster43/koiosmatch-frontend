@@ -353,5 +353,8 @@
     "analyzing": "Analyse…"
   },
   "openSecondScreen": "Ouvrir sur un second écran",
-  "popupBlocked": "Votre navigateur a bloqué la fenêtre détachée. Veuillez autoriser les fenêtres pop-up pour ce site."
+  "popupBlocked": "Votre navigateur a bloqué la fenêtre détachée. Veuillez autoriser les fenêtres pop-up pour ce site.",
+  "popout": {
+    "unknownEntity": "Cette fenêtre détachée n'a pas pu être reconnue."
+  }
 }

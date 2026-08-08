@@ -1340,8 +1340,6 @@
     "deleteBlocked_other": "No se puede eliminar — {{count}} usuarios tienen este rol. Asígnales primero otro rol.",
     "confirmDelete": "¿Eliminar el rol \"{{name}}\"?",
     "empty": "Aún no se han creado roles.",
-    "matrixGroup": "Grupo",
-    "matrixOther": "Otros",
     "groups": {
       "candidates": "Candidatos",
       "customers": "Clientes",
@@ -1402,7 +1400,8 @@
     "pageAccess": "Página: {{label}}",
     "hints": {
       "candidatesSync": "Espejo SM"
-    }
+    },
+    "matrixAllowed": "{{active}}/{{total}} permitido(s)"
   },
   "audit": {
     "title": "Registro de auditoría",
@@ -2742,5 +2741,9 @@
     "matchRenewHint": "Cuántos días antes (o después) de la fecha de fin de un match Koios sugiere renovarlo.",
     "matchRenewLabel": "Días (1-365)",
     "matchRenewSaveFailed": "No se pudo guardar la ventana de renovación del match."
-  }
+  },
+  "modShiftmanager": {
+    "reportingOff": "La generación de informes de Shiftmanager aún no está activada — active el módulo para configurar los objetivos de KPI y los límites de visualización."
+  },
+  "dashboardsEmpty": "Aún no se han configurado elementos del panel."
 }

@@ -8,12 +8,12 @@ import StatusListEditor from './StatusListEditor'
  * group ("klant bij klant, kandidaat bij kandidaat", Danny 2026-08-05) — the earlier
  * two-sub-tabs-under-candidates shape put customer config in the wrong menu.
  *
- * Endpoints (backend core-lookups.php, both SimpleLookupController: plain name+colour
- * CRUD, no sort_order/reorder route, delete guarded 409): candidate uses the renamed
+ * Endpoints (backend core-lookups.php): candidate uses the renamed
  * `/candidate-blacklist-reasons` (the old `/blacklist-reasons` stays only as a
  * temporary FE-migration alias, BLACKLIST-RENAME); customer uses
- * `/customer-blacklist-reasons` (KLANT-BLACKLIST-1).
- * Both are reorderable={false}: SimpleLookupController has no /reorder route (audit 04-08).
+ * `/customer-blacklist-reasons` (KLANT-BLACKLIST-1). Both gained sort_order +
+ * PUT /{endpoint}/reorder on 2026-08-04 (BE b649f8f0) — reorder is real now,
+ * so the old reorderable={false} audit note no longer applies.
  */
 const ENDPOINTS = {
   candidate: '/candidate-blacklist-reasons',
@@ -24,7 +24,7 @@ export default function BlacklistReasonsSettings({ entity = 'candidate' }) {
   const { t } = useTranslation('settings')
   return (
     <div style={{ maxWidth: 640 }}>
-      <StatusListEditor reorderable={false} title={t(`blacklistReasons.${entity}.title`)}
+      <StatusListEditor title={t(`blacklistReasons.${entity}.title`)}
         subtitle={t(`blacklistReasons.${entity}.subtitle`)}
         endpoint={ENDPOINTS[entity]} addLabel={t('blacklistReasons.add')} withColor />
     </div>

@@ -353,5 +353,8 @@
     "analyzing": "Analysing…"
   },
   "openSecondScreen": "Open on second screen",
-  "popupBlocked": "Your browser blocked the pop-out window. Please allow pop-ups for this site."
+  "popupBlocked": "Your browser blocked the pop-out window. Please allow pop-ups for this site.",
+  "popout": {
+    "unknownEntity": "This pop-out window could not be recognized."
+  }
 }

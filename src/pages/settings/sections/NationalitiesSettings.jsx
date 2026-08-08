@@ -27,14 +27,18 @@ import { getFlagEmoji } from '@/lib/countries'
  * candidate holding this nationality is asked for work-permit fields (EU/EEA
  * nationals never are). Wired as a flagField (checkbox + row badge), independent
  * of the country-code extraField above.
+ *
+ * REASON-REORDER-1 (backend landed 04-08, api b649f8f0): NationalityController
+ * gained `sort_order` + PUT /nationalities/reorder that same day — drag-reorder is
+ * back on (was correctly off before that commit; LOOKUP-GAP-1(d) verification 08-08
+ * caught the stale `reorderable={false}`, a capability the backend now serves).
  */
 export default function NationalitiesSettings() {
   const { t } = useTranslation('settings')
   const { options: countryOptions } = useCountriesLookup()
   return (
     <div style={{ maxWidth: 640 }}>
-      {/* reorderable off: SimpleLookupController family has no /reorder route (audit 04-08). */}
-      <StatusListEditor reorderable={false} withColor={false} title={t('nationalities.title')} subtitle={t('nationalities.subtitle')}
+      <StatusListEditor withColor={false} title={t('nationalities.title')} subtitle={t('nationalities.subtitle')}
         endpoint="/nationalities" addLabel={t('nationalities.add')}
         extraField={{ key: 'country_code', label: t('nationalities.countryCode'), options: countryOptions, default: null, hideRowBadge: true }}
         flagField={{ key: 'is_eu', label: t('nationalities.isEu'), description: t('nationalities.isEuDesc') }}

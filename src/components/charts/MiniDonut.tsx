@@ -16,7 +16,13 @@ const DEFAULT_COLORS = [
 ]
 /* eslint-enable no-restricted-syntax */
 
-function MiniTooltip({ active, payload, total }: TipProps & { total?: number }) {
+// Exported (not just internal) so a unit test can render the tooltip content
+// directly — simulating a real recharts hover over the SVG is unreliable in jsdom.
+export function MiniTooltip({ active, payload, total }: TipProps & { total?: number }) {
+  // Locale-aware grouping (§ FMT-GETAL-1) — segment counts were rendered raw
+  // (no thousands separator at all), the one gap left in this file's otherwise
+  // nl-NL-formatted numbers (center label + full-label title already used it).
+  const locale = useLocale()
   if (!active || !payload?.length) return null
   const item = payload[0]
   const val  = item.value ?? 0
@@ -25,7 +31,7 @@ function MiniTooltip({ active, payload, total }: TipProps & { total?: number }) 
     <div style={{ padding: '5px 9px', fontSize: 11, background: 'white', borderRadius: 8,
       border: '1px solid var(--border)', boxShadow: '0 4px 16px rgba(0,0,0,0.10)', whiteSpace: 'nowrap' }}>
       <span style={{ fontWeight: 600, color: 'var(--text)' }}>{item.name}</span>
-      <span style={{ color: item.payload?.fill, marginLeft: 6 }}>{val} · {pct}%</span>
+      <span style={{ color: item.payload?.fill, marginLeft: 6 }}>{formatNumber(val, locale)} · {pct}%</span>
     </div>
   )
 }

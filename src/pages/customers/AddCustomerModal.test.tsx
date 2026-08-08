@@ -153,6 +153,37 @@ describe('AddCustomerModal · validation', () => {
   })
 })
 
+// VALIDATIE-LIVE-1-rest (2026-08-08): billingEmail is the one field on this form
+// the backend validates with a shape rule — a malformed value now shows a live,
+// on-blur inline error and blocks the create instead of only bouncing back as a 422.
+describe('AddCustomerModal · live e-mail format validation (VALIDATIE-LIVE-1-rest)', () => {
+  it('shows an inline error under Facturatie e-mail once blurred with a malformed value, and disables Create', async () => {
+    const onCreate = vi.fn()
+    const user = userEvent.setup()
+    render(<AddCustomerModal onClose={() => {}} onCreate={onCreate} users={users} statuses={statuses} />)
+    await user.type(screen.getByPlaceholderText(ct('modal.fields.namePlaceholder')), 'Rivas Zorggroep')
+    const emailField = screen.getByLabelText(ct('overview.billingEmail'), { exact: false })
+    await user.type(emailField, 'not-an-email')
+    fireEvent.focusOut(emailField)
+    expect(await screen.findByRole('alert')).toHaveTextContent(/.+/)
+    expect(screen.getByRole('button', { name: ct('modal.create') })).toBeDisabled()
+    await user.click(screen.getByRole('button', { name: ct('modal.create') }))
+    expect(onCreate).not.toHaveBeenCalled()
+  })
+
+  it('a well-formed e-mail never blocks submit', async () => {
+    const onCreate = vi.fn().mockResolvedValue(undefined)
+    const user = userEvent.setup()
+    render(<AddCustomerModal onClose={() => {}} onCreate={onCreate} users={users} statuses={statuses} />)
+    await user.type(screen.getByPlaceholderText(ct('modal.fields.namePlaceholder')), 'Rivas Zorggroep')
+    const emailField = screen.getByLabelText(ct('overview.billingEmail'), { exact: false })
+    await user.type(emailField, 'facturen@rivas.nl')
+    fireEvent.focusOut(emailField)
+    await user.click(screen.getByRole('button', { name: ct('modal.create') }))
+    await waitFor(() => expect(onCreate).toHaveBeenCalled())
+  })
+})
+
 describe('AddCustomerModal · vestiging als eigen blok onderaan (Danny 02-08)', () => {
   // The branch left the address card and became its own block at the bottom, exactly as the
   // candidate modal does it: an add trigger beside the heading, a removable chip, and the

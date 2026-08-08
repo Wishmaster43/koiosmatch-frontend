@@ -6,14 +6,17 @@ import StatusListEditor from './StatusListEditor'
  * StatusListEditor (name + colour + reorder + 409 in-use), so nothing is hardcoded.
  */
 
-/** Match statuses — the match lifecycle values. Backend /match-statuses (R-1). */
+/** Match statuses — the match lifecycle values. Backend /match-statuses (R-1).
+ * withValueSlug: MatchStatusController extends SlugLookupController, whose store()
+ * REQUIRES `value` — without the opt-in every "+ toevoegen" 422'd silently (same
+ * bug class as ContractTypes below, LOOKUP-GAP-1(d) verification 08-08). */
 export function MatchStatusSettings() {
   const { t } = useTranslation('settings')
   return (
     <div style={{ maxWidth: 640 }}>
       {/* R-1b live: tenant-added statuses are write-usable; the is_closed FLAG (never the
           slug) drives behaviour — a closed status ends the match (ended_at + open count). */}
-      <StatusListEditor compact withColor title={t('matches.statusTitle')} subtitle={t('matches.statusSubtitle')}
+      <StatusListEditor compact withColor withValueSlug title={t('matches.statusTitle')} subtitle={t('matches.statusSubtitle')}
         endpoint="/match-statuses" addLabel={t('matches.statusAdd')}
         flagField={{ key: 'is_closed', label: t('matches.flagClosed'), description: t('matches.flagClosedDesc') }} />
     </div>
@@ -38,12 +41,18 @@ export function MatchStatusSettings() {
  * below like the other three (round-4 audit correction: this comment used to
  * claim it was still honest-gated pending a BE follow-up that had, in fact,
  * already shipped).
+ *
+ * withValueSlug (LOOKUP-GAP-1(d) verification 08-08): ContractTypeController
+ * extends SlugLookupController, whose store() validates `value` as REQUIRED —
+ * without this opt-in StatusListEditor only ever sent name/label and
+ * "+ toevoegen" would 422 on every tenant (same bug class already fixed for
+ * CustomerPhasesSettings/OpportunityLookupsSettings — see StatusListEditor.jsx).
  */
 export function ContractTypesSettings() {
   const { t } = useTranslation('settings')
   return (
     <div style={{ maxWidth: 640 }}>
-      <StatusListEditor compact withColor title={t('matches.contractTypeTitle')} subtitle={t('matches.contractTypeSubtitle')}
+      <StatusListEditor compact withColor withValueSlug title={t('matches.contractTypeTitle')} subtitle={t('matches.contractTypeSubtitle')}
         endpoint="/contract-types" addLabel={t('matches.contractTypeAdd')}
         numberField={{ key: 'default_duration_days', label: t('matches.contractTypeDurationLabel'), default: null }}
         defaultField={{ key: 'is_default' }} />
@@ -55,13 +64,14 @@ export function ContractTypesSettings() {
  * Match stop reasons — the mandatory reason recorded on
  * POST /matches/{id}/terminate (MATCH-TERMINATE-1). Same value/label/color/order
  * shape as MatchStatus (SlugLookupController base) — no extra flags, in-use guarded
- * by match_terminations.stop_reason.
+ * by match_terminations.stop_reason. withValueSlug for the same reason as
+ * MatchStatus above: the base store() requires `value`.
  */
 export function MatchStopReasonSettings() {
   const { t } = useTranslation('settings')
   return (
     <div style={{ maxWidth: 640 }}>
-      <StatusListEditor compact withColor title={t('matches.stopReasonTitle')} subtitle={t('matches.stopReasonSubtitle')}
+      <StatusListEditor compact withColor withValueSlug title={t('matches.stopReasonTitle')} subtitle={t('matches.stopReasonSubtitle')}
         endpoint="/match-stop-reasons" addLabel={t('matches.stopReasonAdd')} />
     </div>
   )

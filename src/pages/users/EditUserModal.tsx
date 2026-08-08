@@ -15,8 +15,18 @@ import FloatingPanel from '@/components/ui/FloatingPanel'
 import { BTN_H } from '@/config/buttonMetrics'
 import { useLocations } from '@/lib/useLocations'
 import ChipMultiSelect from '@/components/ui/ChipMultiSelect'
+import { useLiveFieldValidation } from '@/hooks/useLiveFieldValidation'
+import { isValidEmailFormat } from '@/lib/contactFieldValidation'
 import { useUserBranches } from './hooks/useUserBranches'
 import type { ManagedUser } from '@/types/api'
+
+// VALIDATIE-LIVE-1-rest: `email` is the only field here the backend validates
+// with a shape rule (UserController's inline PATCH rules — `'email' =>
+// 'sometimes|email|unique:...'`) — `phone` stays a plain string server-side
+// (`'sometimes|nullable|string|max:32'`), so no live format gate is added for
+// it (see src/lib/contactFieldValidation.ts for the full verification note).
+const EMAIL_VALIDATORS = { email: isValidEmailFormat }
+const EMAIL_ERROR_KEYS = { email: 'validation.emailFormat' }
 
 export default function EditUserModal({ user, onClose, onSaved }: {
   user: ManagedUser
@@ -38,12 +48,19 @@ export default function EditUserModal({ user, onClose, onSaved }: {
   const [changePassword, setChangePassword] = useState(false)
   const [saving, setSaving] = useState(false)
   const [error,  setError]  = useState<string | null>(null)
+  // VALIDATIE-LIVE-1-rest: live, on-blur/typing format check for email — own
+  // sibling hook, same idiom as AddCandidateModal.
+  const { markTouched, fieldMessage, touchInvalidFields, hasFormatError } =
+    useLiveFieldValidation(form, t, EMAIL_VALIDATORS, EMAIL_ERROR_KEYS)
 
   const set = (k: keyof typeof form) => (e: ChangeEvent<HTMLInputElement>) =>
     setForm(f => ({ ...f, [k]: e.target.value }))
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault()
+    // VALIDATIE-LIVE-1-rest: block on a live format failure too — marks any
+    // untouched-but-malformed field touched so its message renders.
+    if (touchInvalidFields().length) return
     setSaving(true); setError(null)
     try {
       const payload: Record<string, string> = {
@@ -106,10 +123,13 @@ export default function EditUserModal({ user, onClose, onSaved }: {
             </div>
           </div>
 
-          {/* E-mail */}
-          <div style={{ marginBottom: 12 }}>
+          {/* E-mail — VALIDATIE-LIVE-1-rest: blur marks it touched so a live
+              format error renders inline instead of only bouncing back as a 422. */}
+          <div style={{ marginBottom: 12 }} onBlur={() => markTouched('email')}>
             <label style={labelStyle}>{t('email')}</label>
-            <input required type="email" value={form.email} onChange={set('email')} style={inputStyle} aria-label={t('email')} />
+            <input required type="email" value={form.email} onChange={set('email')} aria-label={t('email')}
+              style={{ ...inputStyle, ...(fieldMessage('email') ? { borderColor: 'var(--color-danger)' } : {}) }} />
+            {fieldMessage('email') && <p style={{ fontSize: 11, color: 'var(--color-danger)', marginTop: 5 }}>{fieldMessage('email')}</p>}
           </div>
 
           {/* Phone */}
@@ -169,10 +189,10 @@ export default function EditUserModal({ user, onClose, onSaved }: {
                        background: 'var(--surface)', color: 'var(--text-muted)', cursor: 'pointer' }}>
               {t('common:cancel')}
             </button>
-            <button type="submit" disabled={saving}
+            <button type="submit" disabled={saving || hasFormatError}
               style={{ height: BTN_H, padding: '0 18px', fontSize: 13, fontWeight: 600, borderRadius: 8, border: 'none',
-                       background: 'var(--color-primary)', color: 'white', cursor: saving ? 'default' : 'pointer',
-                       display: 'flex', alignItems: 'center', gap: 6 }}>
+                       background: 'var(--color-primary)', color: 'white', cursor: (saving || hasFormatError) ? 'default' : 'pointer',
+                       display: 'flex', alignItems: 'center', gap: 6, opacity: hasFormatError ? 0.6 : 1 }}>
               {saving ? <><Loader2 size={13} style={{ animation: 'spin 1s linear infinite' }} /> {t('saving')}</> : t('common:save')}
             </button>
           </div>

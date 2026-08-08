@@ -56,5 +56,8 @@
     "loading": "Laden…",
     "previewTitle": "Vestigingen bij deze rol",
     "previewEmpty": "Geen startset — deze rol heeft geen vestigingen; de nieuwe gebruiker start zonder beperking."
+  },
+  "validation": {
+    "emailFormat": "Voer een geldig e-mailadres in."
   }
 }

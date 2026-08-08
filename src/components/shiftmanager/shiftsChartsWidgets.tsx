@@ -219,18 +219,20 @@ export function ChartCard({ title, subtitle, action, loading, error, children }:
 }) {
   const { t } = useTranslation('shiftmanager')
   return (
-    <div className="overflow-hidden bg-[var(--surface)] border shadow-sm rounded-2xl border-slate-200">
+    // §4: design tokens only — replaces the hardcoded Tailwind slate-* palette
+    // (was a lone outlier vs. every sibling shiftmanager component using var(--text*)).
+    <div className="overflow-hidden bg-[var(--surface)] border shadow-sm rounded-2xl border-[var(--border)]">
       <div className="p-5">
         {/* Title + subtitle on one line; optional action (e.g. Waarden|%) on the right (Danny). */}
         <div className="flex items-center justify-between gap-2 mb-3">
           <div className="flex items-baseline gap-2 min-w-0">
-            <h3 className="text-base font-semibold text-slate-900">{title}</h3>
-            {subtitle && <span className="text-xs text-slate-500">· {subtitle}</span>}
+            <h3 className="text-base font-semibold text-[var(--text)]">{title}</h3>
+            {subtitle && <span className="text-xs text-[var(--text-muted)]">· {subtitle}</span>}
           </div>
           {action}
         </div>
         {loading && (
-          <div className="flex items-center justify-center h-64 text-slate-400">{t('charts.loading')}</div>
+          <div className="flex items-center justify-center h-64 text-[var(--text-muted)]">{t('charts.loading')}</div>
         )}
         {error && !loading && (
           <div className="flex items-center justify-center h-64 text-[var(--color-danger)]">{error}</div>
@@ -238,7 +240,7 @@ export function ChartCard({ title, subtitle, action, loading, error, children }:
         {/* Local boundary: a broken chart (bad data / lib error) shows a fallback, not a dead page. */}
         {!loading && !error && (
           <ErrorBoundary fallback={() => (
-            <div className="flex items-center justify-center h-64 text-slate-400">—</div>
+            <div className="flex items-center justify-center h-64 text-[var(--text-muted)]">—</div>
           )}>
             {children}
           </ErrorBoundary>

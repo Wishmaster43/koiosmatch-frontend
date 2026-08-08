@@ -42,6 +42,15 @@ export interface AppStats {
 interface ListResult { applications: Application[]; total: number; lastPage: number }
 interface WideResult { applications: Application[]; total: number }
 
+// DATATABLE-SORT-1 reference adoption: the FE-column-keyed sort DataTable's
+// controlled-sort escape hatch exchanges with ApplicationsPage (see
+// ApplicationsTable/ApplicationsPage). `by` is always a Column.key, never a
+// backend field name — see sortParams() below for the translation.
+export interface AppSort {
+  by: string
+  dir: 'asc' | 'desc'
+}
+
 interface UseApplicationsDataParams {
   // usePageMemory widens the page's 'table' | 'board' state to string — compared
   // with === below, so the wider type is harmless here.
@@ -51,6 +60,7 @@ interface UseApplicationsDataParams {
   page: number
   pageSize: number
   funnelTypes: LookupItem[]
+  sort?: AppSort | null
 }
 
 // Stable empty defaults (module-level so a loading/errored query never hands the
@@ -74,22 +84,47 @@ const WIDE_MAX_ROWS = APPLICATIONS_MAX_PER_PAGE
 // list, never a hard error (mirrors the pre-pagination fetch's behaviour).
 const isMissingEndpoint = (err: unknown): boolean => (err as { response?: { status?: number } })?.response?.status === 404
 
-export function useApplicationsData({ view, filterParams, bucketParam, page, pageSize, funnelTypes }: UseApplicationsDataParams) {
+// SOLL-SORT-1 reference adoption (DATATABLE-SORT-1): the FE column keys that map
+// to a REAL backend sort_by value — mirrors ApplicationQuery::SORTS, the
+// whitelist verified live against ApplicationQuery.php (koiosmatch-api,
+// 2026-08-08). A clicked column absent here still reorders the loaded page
+// locally (DataTable's own sortedRows, unaffected by this hook) — it simply
+// never becomes a sort_by/sort_dir query param, so an unmapped column can never
+// 422 the request. `stage_order` sorts by the tenant's configured funnel order,
+// not a hardcoded stage list.
+export const APPLICATION_SORT_KEYS: Record<string, string> = {
+  candidate: 'candidate_last_name',
+  created: 'created_at',
+  score: 'match_score',
+  phase: 'stage_order',
+}
+
+// Translate the page's FE-column-keyed sort into sort_by/sort_dir request
+// params — an empty object (no keys added) when there is no sort, or the
+// column has no backend mapping, so the request shape is unchanged either way.
+function sortParams(sort?: AppSort | null): Record<string, string> {
+  const sortBy = sort ? APPLICATION_SORT_KEYS[sort.by] : undefined
+  return sortBy ? { sort_by: sortBy, sort_dir: sort!.dir } : {}
+}
+
+export function useApplicationsData({ view, filterParams, bucketParam, page, pageSize, funnelTypes, sort }: UseApplicationsDataParams) {
   const queryClient = useQueryClient()
 
   // TABLE — server-paginated; only active in table view. Memoized so the
   // setApplications/setTotal callbacks below don't re-create on every render
   // (react-hooks/exhaustive-deps — a fresh array identity each render would
-  // otherwise churn their useCallback deps).
-  const listKey = useMemo(() => ['applications', 'list', filterParams, bucketParam, page, pageSize] as const,
-    [filterParams, bucketParam, page, pageSize])
+  // otherwise churn their useCallback deps). DATATABLE-SORT-1: `sort` rides in the
+  // key too, so a header click that maps to a real sort_by cleanly refetches.
+  const listKey = useMemo(() => ['applications', 'list', filterParams, bucketParam, page, pageSize, sort] as const,
+    [filterParams, bucketParam, page, pageSize, sort])
   const listQuery = useQuery({
     queryKey: listKey,
     queryFn: async ({ signal }): Promise<ListResult> => {
       // Defensive re-clamp (belt-and-braces): the page already clamps pageSize to
       // APPLICATIONS_MAX_PER_PAGE, but a 422 here is expensive to diagnose (2026-07-15),
       // so this hook never trusts a caller to have done it.
-      const params = { ...filterParams, ...(bucketParam ? { bucket: bucketParam } : {}), page, per_page: Math.min(pageSize, APPLICATIONS_MAX_PER_PAGE) }
+      const params = { ...filterParams, ...(bucketParam ? { bucket: bucketParam } : {}), ...sortParams(sort),
+        page, per_page: Math.min(pageSize, APPLICATIONS_MAX_PER_PAGE) }
       try {
         const res = await api.get('/applications', { params, signal })
         const { rows, total, lastPage } = unwrapList<ApiApplication>(res)
@@ -105,12 +140,14 @@ export function useApplicationsData({ view, filterParams, bucketParam, page, pag
 
   // WIDE — the whole bucket-less funnel, capped (see WIDE_MAX_ROWS above). Always
   // enabled: the insights strip needs it even while the table view is active.
-  const wideKey = useMemo(() => ['applications', 'wide', filterParams] as const, [filterParams])
+  // DATATABLE-SORT-1: threaded through too (task: "list + wide queries") — the
+  // board/insights consumers of wideRows then see the same order as the table.
+  const wideKey = useMemo(() => ['applications', 'wide', filterParams, sort] as const, [filterParams, sort])
   const wideQuery = useQuery({
     queryKey: wideKey,
     queryFn: async ({ signal }): Promise<WideResult> => {
       try {
-        const res = await api.get('/applications', { params: { ...filterParams, per_page: WIDE_MAX_ROWS }, signal })
+        const res = await api.get('/applications', { params: { ...filterParams, ...sortParams(sort), per_page: WIDE_MAX_ROWS }, signal })
         const { rows, total } = unwrapList<ApiApplication>(res)
         return { applications: rows.map(a => mapApplication(a, funnelTypes)), total }
       } catch (err) {

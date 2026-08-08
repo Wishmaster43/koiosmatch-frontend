@@ -19,7 +19,9 @@ function FieldError({ text }: { text?: string }) {
 interface ContactDetailsCardProps {
   cardLabel: string
   emailLabel: string; phoneLabel: string; mobileLabel: string
-  email: string; onEmailChange: (v: string) => void; emailError?: boolean; emailMessage?: string
+  // VALIDATIE-LIVE-1-rest: blur marks email touched so its live format error
+  // can render (mirrors candidates/addmodal/ContactCard's own onBlur wrapper).
+  email: string; onEmailChange: (v: string) => void; onEmailBlur?: () => void; emailError?: boolean; emailMessage?: string
   phone: string; onPhoneChange: (v: string) => void; phoneError?: boolean; phoneMessage?: string
   mobile: string; onMobileChange: (v: string) => void; mobileError?: boolean; mobileMessage?: string
   // CONTACT-LINKEDIN-1 (Danny 05-08): the profile SLUG only — a pasted full URL is
@@ -31,7 +33,7 @@ interface ContactDetailsCardProps {
 
 export default function ContactDetailsCard({
   cardLabel, emailLabel, phoneLabel, mobileLabel,
-  email, onEmailChange, emailError, emailMessage,
+  email, onEmailChange, onEmailBlur, emailError, emailMessage,
   phone, onPhoneChange, phoneError, phoneMessage,
   mobile, onMobileChange, mobileError, mobileMessage,
   linkedinLabel, linkedinPlaceholder, linkedin, onLinkedinChange,
@@ -41,7 +43,7 @@ export default function ContactDetailsCard({
       <div style={cardHead}>{cardLabel}</div>
       <div style={cardBox}>
         <div style={row3Even}>
-          <div>
+          <div onBlur={onEmailBlur}>
             <Field label={emailLabel}>
               <TextField type="email" value={email} onChange={onEmailChange} placeholder="naam@klant.nl" error={emailError} />
             </Field>

@@ -1,9 +1,12 @@
 /**
  * useCandidateDrawerActions — drawer open/close state + the single-record
  * lifecycle mutations of the candidates page (§0.3 split from CandidatesPage):
- * select (light row → full record fetch, ARCH-3 aware), archive, restore,
+ * select (light row → full record fetch), archive, restore,
  * mark-for-deletion (ERASE-1) and the hard-delete preview flow. The list
  * updates (remove row, total--) stay optimistic; the backend re-checks (§3B).
+ * (The old ARCH-3 workaround — skipping the fetch for archived rows because the
+ * detail endpoint 404'd on soft-deleted records — was removed once ARCH-READ-1
+ * landed BE-side, 2026-07-13: every candidate read path is withTrashed now.)
  *
  * Archive/mark-deletion are GUARDED (§3B, ARCHIVE-GUARD): a candidate must
  * never move to Gearchiveerd/Prullenbak while a live application or active

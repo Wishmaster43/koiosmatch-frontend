@@ -1,30 +1,43 @@
 /**
- * RolesSettings — the rights matrix (Danny 2026-07-20 "the permission list is too
- * long now"; RECHTEN-UI-1 06-08 turned the "Other" column into a per-row expand).
- * Covers: CRUD toggles render, non-CRUD actions stay hidden until the row's expand
- * is opened, a CRUD toggle click PUTs the real request (§13 — mutation tests assert
- * the request, not just that a callback fired), and module-gated rows (planning/
- * outreach/reports/whatsapp/workflows) follow the ONE sidebar gate (lib/access
+ * RolesSettings — the HelloFlex-style rights list (RECHTEN-UI-1, Danny GO 08-08:
+ * "elke groep is een collapsed rij met een x/y-samenvatting, uitklappen toont de
+ * losse rechten"). Covers: every group row starts collapsed (no toggle visible
+ * until its row expands, real <button> with aria-expanded), the summary chip
+ * shows an "x/y allowed" count, expanding reveals EVERY permission in that group
+ * (CRUD + non-CRUD alike) as its own labelled toggle in the documented order, a
+ * toggle click PUTs the real request (§13 — mutation tests assert the request,
+ * not just that a callback fired), and module-gated rows (planning/outreach/
+ * reports/whatsapp/workflows) follow the ONE sidebar gate (lib/access
  * canAccessPage): the tenant module flag hides a row for everyone (incl. super
  * admins — Danny 2026-07-02), while an empty accessiblePages list fails OPEN for
- * module-free pages like outreach.
+ * module-free pages like outreach. Also guards the three previously-reported bugs
+ * (i18n key leak on 'vacancy_generation', duplicate labels, the 'page.details'
+ * group mislabelled "Details") staying fixed under the new row-per-group layout.
  */
 import { describe, it, expect, afterEach, vi } from 'vitest'
 import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import i18n from '@/i18n'
 import api from '@/lib/api'
-import RolesSettings, { RoleBranchTemplate } from './RolesSettings'
+import RolesSettings from './RolesSettings'
+import { RoleBranchTemplate } from './RoleBranchTemplate'
+import type { Role } from './rolesTypes'
 import { PermissionMatrix } from './RolesPermissionMatrix'
+import type { PermissionGroups } from './RolesPermissionMatrix'
 
-const st = (key, opts) => i18n.t(key, { ns: 'settings', ...opts })
+const st = (key: string, opts?: Record<string, unknown>) => i18n.t(key, { ns: 'settings', ...opts })
+// Mirrors the component's own fallback computation exactly (RolesPermissionMatrix.tsx)
+// so the assertion stays correct whether or not roles.matrixAllowed has been seeded yet.
+const chipText = (active: number, total: number) =>
+  st('roles.matrixAllowed', { active, total, defaultValue: `${active}/${total} toegestaan` })
+const rowName = (group: string, active: number, total: number) => `${st(`roles.groups.${group}`)} — ${chipText(active, total)}`
 
 const mockAuth = vi.fn()
 vi.mock('@/context/AuthContext', () => ({ useAuth: () => mockAuth() }))
 // Network-backed hook, mocked directly so the branch-template card doesn't
 // need a real QueryClientProvider (mirrors AddCandidateModal.test.tsx).
 // Controllable per test (the branch-toggle tests below need real options).
-const mockLocations = vi.fn(() => [])
+const mockLocations = vi.fn((): Array<{ value: string; label: string }> => [])
 vi.mock('@/lib/useLocations', () => ({ useLocations: () => mockLocations() }))
 vi.mock('@/lib/api', async () => {
   const actual = await vi.importActual('@/lib/api')
@@ -37,55 +50,57 @@ afterEach(() => vi.clearAllMocks())
 // Minimal fixture mirroring the real GET /permissions grouping (name split on
 // the first '.'). Mirrors the real "candidates" group shape end to end (RECHTEN-
 // UI-1: archive/documents.manage/notes.manage_all/sync are exactly its detail
-// entries). "planning" is gated behind the 'planning' sidebar page (GROUP_MODULE_
-// PAGE in RolesPermissionMatrix.jsx) and has no detail entries (dash, no expand).
-const GROUPS = [
+// entries, verified against the live payload 08-08). "planning" is gated behind
+// the 'planning' sidebar page (GROUP_MODULE_PAGE in RolesPermissionMatrix.tsx).
+const GROUPS: PermissionGroups = [
   ['candidates', [
     { name: 'candidates.view' }, { name: 'candidates.create' },
-    { name: 'candidates.update' }, { name: 'candidates.delete' },
-    { name: 'candidates.archive' }, { name: 'candidates.documents.manage' },
-    { name: 'candidates.notes.manage_all' }, { name: 'candidates.sync' },
+    { name: 'candidates.update' }, { name: 'candidates.archive' }, { name: 'candidates.delete' },
+    { name: 'candidates.documents.manage' }, { name: 'candidates.notes.manage_all' }, { name: 'candidates.sync' },
   ]],
   ['planning', [{ name: 'planning.view' }, { name: 'planning.create' }]],
   ['outreach', [{ name: 'outreach.view' }]],
   ['page',     [{ name: 'page.candidates' }, { name: 'page.details' }]],
+  // Live-payload regression case: a single-permission group whose i18n group key
+  // ('vacancy_generation') must resolve to a real label, never leak the raw prefix.
+  ['vacancy_generation', [{ name: 'vacancy_generation.manage' }]],
 ]
 // canAccessPage-shaped auth values: the planning page needs the tenant 'plan'
 // module; outreach has no module requirement (page-layer only, fail-open).
 const AUTH_WITH_PLAN    = { user: { is_super_admin: false }, activeTenant: { modules: ['plan'] }, accessiblePages: [] }
 const AUTH_WITHOUT_PLAN = { user: { is_super_admin: false }, activeTenant: { modules: ['sm'] },   accessiblePages: [] }
 const activePerms = new Set(['candidates.view', 'candidates.update'])
-const hasPermission = (name) => activePerms.has(name)
+const hasPermission = (name: string) => activePerms.has(name)
 
-describe('PermissionMatrix — CRUD grid + per-row expand (RECHTEN-UI-1)', () => {
-  it('renders CRUD cells always; non-CRUD detail toggles stay hidden until the row expand opens', () => {
+describe('PermissionMatrix — collapsed group rows, expand reveals every toggle (RECHTEN-UI-1)', () => {
+  it('renders every group fully collapsed: only the label + "x/y allowed" chip show, no toggle yet', () => {
     mockAuth.mockReturnValue(AUTH_WITH_PLAN)
     render(<PermissionMatrix groups={GROUPS} hasPermission={hasPermission} onToggle={vi.fn()} />)
 
-    // Group label + "active/total" count (8 candidates perms, 2 active).
-    expect(screen.getByText(st('roles.groups.candidates'))).toBeInTheDocument()
-    expect(screen.getByText('2/8')).toBeInTheDocument()
-    // Detail entries are NOT rendered yet — the row's expand starts collapsed
-    // (no fake affordance: nothing pre-clutters the row).
+    // The row is a real button carrying the group label + count in its accessible name.
+    const row = screen.getByRole('button', { name: rowName('candidates', 2, 8) })
+    expect(row).toHaveAttribute('aria-expanded', 'false')
+    // The compact "2/8" summary is on screen (visually, not just in the a11y name).
+    expect(screen.getByText(chipText(2, 8))).toBeInTheDocument()
+    // No toggle for ANY candidates permission exists yet — CRUD included — until
+    // the row itself is opened (no fake affordance: nothing pre-clutters the row).
+    expect(screen.queryByTitle('candidates.create')).not.toBeInTheDocument()
     expect(screen.queryByText('Archiveren')).not.toBeInTheDocument()
-    expect(screen.queryByText('Documenten beheren')).not.toBeInTheDocument()
-    // The expand trigger itself carries the count + an accessible name.
-    const trigger = screen.getByRole('button', { name: `4 ${st('roles.matrixOther')} — ${st('roles.groups.candidates')}` })
-    expect(trigger).toHaveAttribute('aria-expanded', 'false')
-    // planning has no detail entries -> its "Other" cell is a plain dash, no button.
-    expect(screen.queryByRole('button', { name: new RegExp(`— ${st('roles.groups.planning')}$`) })).not.toBeInTheDocument()
   })
 
-  it('opening the expand reveals the candidates detail toggles in the documented order + labels', async () => {
+  it('opening a row reveals every permission in that group as its own toggle, CRUD + non-CRUD alike', async () => {
     mockAuth.mockReturnValue(AUTH_WITH_PLAN)
     const user = userEvent.setup()
     render(<PermissionMatrix groups={GROUPS} hasPermission={hasPermission} onToggle={vi.fn()} />)
 
-    const trigger = screen.getByRole('button', { name: `4 ${st('roles.matrixOther')} — ${st('roles.groups.candidates')}` })
-    await user.click(trigger)
-    expect(trigger).toHaveAttribute('aria-expanded', 'true')
+    const row = screen.getByRole('button', { name: rowName('candidates', 2, 8) })
+    await user.click(row)
+    expect(row).toHaveAttribute('aria-expanded', 'true')
 
-    // RECHTEN-UI-1 #1: Archiveren, Documenten beheren, Alle notities beheren, Synchroniseren.
+    // CRUD verbs get their generic action label.
+    expect(screen.getByText(st('roles.actions.view'))).toBeInTheDocument()
+    expect(screen.getByText(st('roles.actions.create'))).toBeInTheDocument()
+    // Non-CRUD entries keep their documented overrides.
     expect(screen.getByText('Archiveren')).toBeInTheDocument()
     expect(screen.getByText('Documenten beheren')).toBeInTheDocument()
     expect(screen.getByText('Alle notities beheren')).toBeInTheDocument()
@@ -96,46 +111,67 @@ describe('PermissionMatrix — CRUD grid + per-row expand (RECHTEN-UI-1)', () =>
     expect(syncToggle).toHaveAttribute('title', 'SM-spiegel')
   })
 
-  it('clicking a CRUD toggle calls onToggle with that permission name', async () => {
+  it('clicking a CRUD toggle inside the expanded row calls onToggle with that permission name', async () => {
     mockAuth.mockReturnValue(AUTH_WITH_PLAN)
     const onToggle = vi.fn()
     const user = userEvent.setup()
     render(<PermissionMatrix groups={GROUPS} hasPermission={hasPermission} onToggle={onToggle} />)
 
-    // The toggle itself carries the accessible name now (a11y fix: aria-label/title
-    // moved off the wrapper div straight onto the button) — select it by role/name.
-    // PermissionToggle renders the shared Toggle (role=switch, audit finding 05-08).
+    await user.click(screen.getByRole('button', { name: rowName('candidates', 2, 8) }))
     const toggle = screen.getByRole('switch', { name: `${st('roles.groups.candidates')} — ${st('roles.actions.create')}` })
     expect(toggle).toHaveAttribute('aria-label')
     await user.click(toggle)
     expect(onToggle).toHaveBeenCalledWith('candidates.create')
   })
 
-  it('clicking an expanded detail toggle calls onToggle with that permission name', async () => {
+  it('clicking a non-CRUD toggle inside the expanded row calls onToggle with that permission name', async () => {
     mockAuth.mockReturnValue(AUTH_WITH_PLAN)
     const onToggle = vi.fn()
     const user = userEvent.setup()
     render(<PermissionMatrix groups={GROUPS} hasPermission={hasPermission} onToggle={onToggle} />)
 
-    await user.click(screen.getByRole('button', { name: `4 ${st('roles.matrixOther')} — ${st('roles.groups.candidates')}` }))
+    await user.click(screen.getByRole('button', { name: rowName('candidates', 2, 8) }))
     const toggle = screen.getByRole('switch', { name: `${st('roles.groups.candidates')} — Archiveren` })
     await user.click(toggle)
     expect(onToggle).toHaveBeenCalledWith('candidates.archive')
   })
 
-  it('page.* detail toggles get a "Pagina: …" prefix so they never read the same as their CRUD group row', async () => {
+  it('page.* entries get a "Pagina: …" prefix so they never read the same as their CRUD group row', async () => {
     mockAuth.mockReturnValue(AUTH_WITH_PLAN)
     const user = userEvent.setup()
     render(<PermissionMatrix groups={GROUPS} hasPermission={hasPermission} onToggle={vi.fn()} />)
 
-    await user.click(screen.getByRole('button', { name: `2 ${st('roles.matrixOther')} — ${st('roles.groups.page')}` }))
-    // "Kandidaten" (the candidates CRUD row header) stays a single exact match —
-    // the nav toggle reads "Pagina: Kandidaten" instead, a genuinely different
-    // string, so the two never collide (RECHTEN-UI-1 #4).
+    await user.click(screen.getByRole('button', { name: rowName('page', 0, 2) }))
+    // "Kandidaten" (the candidates row) stays a single exact match — the nav
+    // toggle reads "Pagina: Kandidaten" instead, a genuinely different string.
     expect(screen.getAllByText(st('roles.groups.candidates'), { exact: true })).toHaveLength(1)
     expect(screen.getByText(`Pagina: ${st('roles.groups.candidates')}`)).toBeInTheDocument()
-    // page.details is renamed away from the generic "Details" label.
+    // page.details is renamed away from the generic "Details" label — never a
+    // bare "Details" group/toggle anywhere in the rendered tree.
     expect(screen.getByText('Pagina: Rapportdetails (SM/AI)')).toBeInTheDocument()
+    expect(screen.queryByText('Details', { exact: true })).not.toBeInTheDocument()
+  })
+
+  it('a single-permission group (vacancy_generation) shows its real translated label, never the raw i18n key', () => {
+    mockAuth.mockReturnValue(AUTH_WITH_PLAN)
+    render(<PermissionMatrix groups={GROUPS} hasPermission={hasPermission} onToggle={vi.fn()} />)
+    expect(screen.getByText(st('roles.groups.vacancy_generation'))).toBeInTheDocument()
+    expect(screen.queryByText('vacancy_generation', { exact: true })).not.toBeInTheDocument()
+  })
+
+  it('every visible group label + detail label combination is unique (no duplicate rows)', async () => {
+    mockAuth.mockReturnValue(AUTH_WITH_PLAN)
+    const user = userEvent.setup()
+    render(<PermissionMatrix groups={GROUPS} hasPermission={hasPermission} onToggle={vi.fn()} />)
+
+    // Expand every row, then assert the accessible name of every rendered
+    // toggle is unique — a duplicate name is exactly what "duplicate labels" means.
+    for (const [group] of GROUPS) {
+      const trigger = screen.queryAllByRole('button').find(b => b.getAttribute('aria-label')?.startsWith(`${st(`roles.groups.${group}`)} — `))
+      if (trigger) await user.click(trigger)
+    }
+    const names = screen.getAllByRole('switch').map(el => el.getAttribute('aria-label'))
+    expect(new Set(names).size).toBe(names.length)
   })
 })
 
@@ -169,9 +205,9 @@ describe('RolesSettings — end-to-end toggle through the matrix', () => {
   it('clicking a CRUD toggle PUTs the full updated permission list (request, not just callback)', async () => {
     mockAuth.mockReturnValue({ user: { is_super_admin: false }, accessiblePages: [] })
     // eslint-disable-next-line no-restricted-syntax -- DATA: a fixture role's tenant-picked colour, not a style rule.
-    const role = { id: 'r1', name: 'recruiter', color: '#3B8FD4', icon: 'shield', users_count: 0,
+    const role: Role = { id: 'r1', name: 'recruiter', color: '#3B8FD4', icon: 'shield', users_count: 0,
       permissions: [{ name: 'candidates.view' }] }
-    api.get.mockImplementation((url) => {
+    vi.mocked(api.get).mockImplementation((url: string) => {
       if (url === '/roles') return Promise.resolve({ data: [role] })
       if (url === '/permissions') return Promise.resolve({ data: {
         candidates: [{ name: 'candidates.view' }, { name: 'candidates.create' }, { name: 'candidates.update' }, { name: 'candidates.delete' }],
@@ -181,14 +217,15 @@ describe('RolesSettings — end-to-end toggle through the matrix', () => {
       if (url === '/roles/r1/branches') return Promise.resolve({ data: [] })
       return Promise.reject(new Error(`unexpected GET ${url}`))
     })
-    api.put.mockResolvedValue({ data: { ...role, permissions: [{ name: 'candidates.view' }, { name: 'candidates.create' }] } })
+    vi.mocked(api.put).mockResolvedValue({ data: { ...role, permissions: [{ name: 'candidates.view' }, { name: 'candidates.create' }] } })
 
     const user = userEvent.setup()
     render(<RolesSettings />)
 
     await user.click(await screen.findByRole('button', { name: st('roles.edit') }))
-    // Title/aria-label now sit directly on the toggle button (no wrapper div) —
-    // find it by its accessible name and click it directly.
+    // Open the candidates row (4/4 CRUD perms, 1 active) then click its create toggle.
+    const row = await screen.findByRole('button', { name: `${st('roles.groups.candidates')} — ${chipText(1, 4)}` })
+    await user.click(row)
     const toggle = await screen.findByTitle('candidates.create')
     await user.click(toggle)
 
@@ -207,15 +244,15 @@ describe('RolesSettings — appearance save reverts on failure', () => {
   it('reverts the start-dashboard change and notifies when the PUT fails', async () => {
     mockAuth.mockReturnValue({ user: { is_super_admin: false }, accessiblePages: [] })
     // eslint-disable-next-line no-restricted-syntax -- DATA: a fixture role's tenant-picked colour, not a style rule.
-    const role = { id: 'r1', name: 'recruiter', color: '#3B8FD4', icon: 'shield', users_count: 0, dashboard_type: null, permissions: [] }
-    api.get.mockImplementation((url) => {
+    const role: Role = { id: 'r1', name: 'recruiter', color: '#3B8FD4', icon: 'shield', users_count: 0, dashboard_type: null, permissions: [] }
+    vi.mocked(api.get).mockImplementation((url: string) => {
       if (url === '/roles') return Promise.resolve({ data: [role] })
       if (url === '/permissions') return Promise.resolve({ data: {} })
       if (url === '/roles/icons') return Promise.reject(new Error('404'))
       if (url === '/roles/r1/branches') return Promise.resolve({ data: [] })
       return Promise.reject(new Error(`unexpected GET ${url}`))
     })
-    api.put.mockRejectedValue(new Error('network down'))
+    vi.mocked(api.put).mockRejectedValue(new Error('network down'))
     const { notifyError } = await import('@/lib/notify')
     const user = userEvent.setup()
     render(<RolesSettings />)
@@ -242,12 +279,12 @@ describe('RolesSettings — appearance save reverts on failure', () => {
 describe('RoleBranchTemplate — branch toggle (optimistic PUT + revert on failure)', () => {
   const arm = () => {
     mockLocations.mockReturnValue([{ value: 'l1', label: 'Noord' }])
-    api.get.mockResolvedValue({ data: { data: [] } }) // role has no branches yet
+    vi.mocked(api.get).mockResolvedValue({ data: { data: [] } }) // role has no branches yet
   }
 
   it('toggling a branch PUTs the replace-set to /roles/{id}/branches', async () => {
     arm()
-    api.put.mockResolvedValue({ data: {} })
+    vi.mocked(api.put).mockResolvedValue({ data: {} })
     const user = userEvent.setup()
     render(<RoleBranchTemplate roleId="r1" />)
 
@@ -260,7 +297,7 @@ describe('RoleBranchTemplate — branch toggle (optimistic PUT + revert on failu
 
   it('reverts the toggle and notifies when the PUT fails', async () => {
     arm()
-    api.put.mockRejectedValue(new Error('network down'))
+    vi.mocked(api.put).mockRejectedValue(new Error('network down'))
     const { notifyError } = await import('@/lib/notify')
     const user = userEvent.setup()
     render(<RoleBranchTemplate roleId="r1" />)
@@ -272,7 +309,7 @@ describe('RoleBranchTemplate — branch toggle (optimistic PUT + revert on failu
     // Reverted STATE, not just the toast: the chip is deselected again, and a
     // second click ADDS again (proving branchIds rolled back to empty).
     await waitFor(() => expect(chip).toHaveAttribute('aria-pressed', 'false'))
-    api.put.mockResolvedValue({ data: {} })
+    vi.mocked(api.put).mockResolvedValue({ data: {} })
     await user.click(chip)
     await waitFor(() => expect(api.put).toHaveBeenLastCalledWith('/roles/r1/branches', { location_ids: ['l1'] }))
   })

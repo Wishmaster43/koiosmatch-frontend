@@ -261,6 +261,43 @@ describe('AddLocationModal · contact ter plaatse (Danny: "je typt Joost de Boer
   })
 })
 
+// VALIDATIE-LIVE-1-rest (2026-08-08): email ("contact ter plaatse") is the one
+// field the backend validates with a shape rule (CustomerLocationController::
+// rules `email` => Laravel's `email` rule) — a malformed value now shows a live,
+// on-blur inline error and blocks submit instead of only bouncing back as a 422.
+describe('AddLocationModal · live e-mail format validation (VALIDATIE-LIVE-1-rest)', () => {
+  it('shows an inline error under e-mail once blurred with a malformed value, and disables Create', async () => {
+    const onCreate = vi.fn()
+    const user = userEvent.setup()
+    render(<AddLocationModal onClose={() => {}} onCreate={onCreate} statuses={statuses} />)
+
+    await user.type(screen.getByLabelText(ct('subModal.locationName'), { exact: false }), 'Hoofdlocatie')
+    const emailField = screen.getByLabelText(ct('subModal.email'))
+    await user.type(emailField, 'not-an-email')
+    fireEvent.focusOut(emailField)
+
+    expect(await screen.findByText(ct('validation.emailFormat'))).toBeInTheDocument()
+    const createBtn = screen.getByRole('button', { name: ct('subModal.create') })
+    expect(createBtn).toBeDisabled()
+    await user.click(createBtn)
+    expect(onCreate).not.toHaveBeenCalled()
+  })
+
+  it('a well-formed e-mail never blocks submit', async () => {
+    const onCreate = vi.fn().mockResolvedValue(undefined)
+    const user = userEvent.setup()
+    render(<AddLocationModal onClose={() => {}} onCreate={onCreate} statuses={statuses} />)
+
+    await user.type(screen.getByLabelText(ct('subModal.locationName'), { exact: false }), 'Hoofdlocatie')
+    const emailField = screen.getByLabelText(ct('subModal.email'))
+    await user.type(emailField, 'contact@klant.nl')
+    fireEvent.focusOut(emailField)
+
+    await user.click(screen.getByRole('button', { name: ct('subModal.create') }))
+    await waitFor(() => expect(onCreate).toHaveBeenCalled())
+  })
+})
+
 // CONTACT-PRIMAIR-LOCATIE-2: the last gap — typing a NEW name (matching no existing
 // contact) used to only write the location's free-text column, never a real record.
 describe('AddLocationModal · typing a brand-new contact now creates + couples it (CONTACT-PRIMAIR-LOCATIE-2)', () => {

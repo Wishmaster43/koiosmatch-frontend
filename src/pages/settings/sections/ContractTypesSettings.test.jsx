@@ -4,6 +4,12 @@
  * (default_duration_days) and asserts the create request carries the entered
  * duration. Mirrors AppointmentLocationSettings.test.jsx — same shared
  * component, same contract.
+ *
+ * LOOKUP-GAP-1(d) verification 08-08: ContractTypeController extends
+ * SlugLookupController, whose store() validates `value` as REQUIRED — the
+ * create test also asserts the slugged `value` lands in the POST body, guarding
+ * the `withValueSlug` opt-in that makes the button real (mirrors
+ * CustomerPhasesSettings.test.jsx's regression guard for the same bug class).
  */
 import { describe, it, expect, afterEach, vi } from 'vitest'
 import { render, screen, waitFor } from '@testing-library/react'
@@ -45,8 +51,9 @@ describe('ContractTypesSettings', () => {
     await user.type(screen.getByDisplayValue(''), '90')
     await user.click(screen.getByRole('button', { name: st('statusList.addBtn') }))
 
-    // Assert the REQUEST (§13) — not just that a callback fired.
+    // Assert the REQUEST (§13) — not just that a callback fired. `value` is the
+    // slug SlugLookupController::store() requires; missing it would 422 in real life.
     await waitFor(() => expect(api.post).toHaveBeenCalledWith('/contract-types',
-      expect.objectContaining({ name: 'ZZP Flex', default_duration_days: 90 })))
+      expect.objectContaining({ name: 'ZZP Flex', default_duration_days: 90, value: 'zzp_flex' })))
   })
 })

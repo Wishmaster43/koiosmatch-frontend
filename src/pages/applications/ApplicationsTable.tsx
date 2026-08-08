@@ -1,7 +1,7 @@
 import type { RefObject } from 'react'
 import { useTranslation } from 'react-i18next'
 import DataTable from '@/components/ui/DataTable'
-import type { Column } from '@/components/ui/DataTable'
+import type { Column, ControlledSort } from '@/components/ui/DataTable'
 import Avatar from '@/components/ui/Avatar'
 import EntityNameCell from '@/components/ui/EntityNameCell'
 import StatusPill from '@/components/ui/StatusPill'
@@ -13,6 +13,7 @@ import type { Id } from '@/types/common'
 import { useAllSettings, getBoolSetting } from '@/lib/settings/useAllSettings'
 import { useDateFormat } from '@/lib/datetime'
 import { interviewCategoryColor } from './data/applicationsShared'
+import { APPLICATION_SORT_KEYS } from './hooks/useApplicationsData'
 
 // The list resource's own AI-suggested next action (raw free text, `a.task` /
 // `a.ai_task` / `a.ai.task` — see mapApplication.ts) IS the advice; there is no
@@ -48,6 +49,11 @@ interface ApplicationsTableProps {
   // Virtualization (F-7): the vertical scroll container this table lives in —
   // opt-in, forwarded straight to DataTable (mirrors CustomersTable/VacanciesTable).
   scrollParentRef?: RefObject<HTMLElement | null>
+  // DATATABLE-SORT-1: controlled-sort escape hatch — forwarded to DataTable
+  // as-is. Optional so a caller (or a test) that omits both keeps the
+  // pre-existing uncontrolled/defaultSort behaviour untouched.
+  sort?: ControlledSort | null
+  onSortChange?: (sort: ControlledSort) => void
 }
 
 /**
@@ -55,7 +61,7 @@ interface ApplicationsTableProps {
  * selection, hover and the loading/empty states. Mirrors MatchesTable.
  */
 export default function ApplicationsTable({ rows, loading, error, selectedId, onSelect, stickyHeader = false,
-  selectable, selectedIds, onToggleRow, onToggleAll, scrollParentRef }: ApplicationsTableProps) {
+  selectable, selectedIds, onToggleRow, onToggleAll, scrollParentRef, sort, onSortChange }: ApplicationsTableProps) {
   const { t } = useTranslation('applications')
   const { formatDate } = useDateFormat()
   // Tenant display settings (Settings → Applications → Table display). Coloured
@@ -71,7 +77,9 @@ export default function ApplicationsTable({ rows, loading, error, selectedId, on
   // dates → qualification → Koios → owner LAST (Danny 2026-07-14 table standardization).
   const columns: Column<Application>[] = [
     // Candidate — avatar + name. Sticky first column (stays on horizontal scroll), like the candidates table.
+    // DATATABLE-SORT-1: serverKey maps to ApplicationQuery's candidate_last_name sort.
     { key: 'candidate', header: t('cols.candidate'), sortable: true, sortValue: r => r.candidateName,
+      serverKey: APPLICATION_SORT_KEYS.candidate,
       sticky: true, width: 200, nowrap: true,
       render: r => (
         <span style={{ display: 'flex', alignItems: 'center', gap: 8, minWidth: 0 }}>
@@ -90,11 +98,15 @@ export default function ApplicationsTable({ rows, loading, error, selectedId, on
     // column), muted text keeps it reading as a secondary reference.
     { key: 'client', header: t('cols.client'), sortable: true, nowrap: true,
       render: r => <EntityNameCell name={r.client} textStyle={{ color: 'var(--text-muted)' }} /> },
-    // Match score.
+    // Match score. DATATABLE-SORT-1: serverKey maps to ApplicationQuery's match_score sort.
     { key: 'score', header: t('cols.score'), align: 'right', sortable: true,
-      sortValue: r => r.score ?? -1, render: r => <ScorePill value={r.score} plain={!colorScore} /> },
+      sortValue: r => r.score ?? -1, serverKey: APPLICATION_SORT_KEYS.score,
+      render: r => <ScorePill value={r.score} plain={!colorScore} /> },
     // Funnel phase — soft pill in the phase colour (or plain text when the toggle is off).
+    // DATATABLE-SORT-1: serverKey maps to ApplicationQuery's stage_order sort (the
+    // tenant's configured funnel order, not this column's alphabetical label sort).
     { key: 'phase', header: t('cols.phase'), sortable: true, sortValue: r => r.phaseLabel ?? '',
+      serverKey: APPLICATION_SORT_KEYS.phase,
       render: r => colorPhase
         ? <StatusPill label={r.phaseLabel} color={r.phaseColor} />
         : <span style={plainCell}>{r.phaseLabel || '—'}</span> },
@@ -117,8 +129,10 @@ export default function ApplicationsTable({ rows, loading, error, selectedId, on
           )}
         </span>
       ) : <span style={{ color: 'var(--text-muted)' }}>—</span> },
-    // Created date — the table defaults to newest first.
+    // Created date — the table defaults to newest first. DATATABLE-SORT-1:
+    // serverKey maps to ApplicationQuery's created_at sort.
     { key: 'created', header: t('cols.created'), nowrap: true, sortable: true, sortValue: r => r.created ?? '',
+      serverKey: APPLICATION_SORT_KEYS.created,
       cellStyle: { color: 'var(--text-muted)', fontSize: 12 }, render: r => r.created ? formatDate(r.created) : '—' },
     { key: 'source', header: t('cols.source'), sortable: true, cellStyle: { color: 'var(--text-muted)', fontSize: 12 } },
     // Shared Koios column factory (Danny 05-08 consistency pass) — was a
@@ -147,7 +161,13 @@ export default function ApplicationsTable({ rows, loading, error, selectedId, on
       onRowClick={onSelect}
       selectedId={selectedId}
       stickyHeader={stickyHeader}
+      // DATATABLE-SORT-1: defaultSort still seeds the UNCONTROLLED fallback (a
+      // caller that omits sort/onSortChange, e.g. ApplicationsTable.test.tsx) —
+      // harmless when the page below DOES pass both, since DataTable then reads
+      // `sort` from the prop instead.
       defaultSort={{ key: 'created', dir: 'desc' }}
+      sort={sort}
+      onSortChange={onSortChange}
       selectable={selectable}
       selectedIds={selectedIds}
       onToggleRow={onToggleRow}

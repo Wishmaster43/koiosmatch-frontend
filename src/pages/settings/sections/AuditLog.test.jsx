@@ -45,6 +45,17 @@ afterEach(async () => {
   await act(async () => { await i18n.changeLanguage('nl') })
 })
 
+describe('AuditLog — request seam', () => {
+  it('GETs the exact tenant-wide activity-log route (§13: pins the seam, not just that a call fired)', async () => {
+    api.get.mockResolvedValue({ data: [] })
+    await act(async () => { renderAuditLog() })
+    // THE SEAM: exact route, no query params — a renamed/typo'd endpoint fails
+    // here instead of 404-ing silently in production (mirrors the per-entity
+    // ChangelogTab route-assertion convention, e.g. outreach's ChangelogTab.test.tsx).
+    expect(api.get).toHaveBeenCalledWith('/activity-log')
+  })
+})
+
 describe('AuditLog — activity-log fetch does not re-run on language switch', () => {
   it('calls /activity-log exactly once even if the language changes while the request is pending', async () => {
     const { promise, resolve } = deferred()

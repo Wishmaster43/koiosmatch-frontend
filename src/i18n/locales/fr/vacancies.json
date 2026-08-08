@@ -453,5 +453,9 @@
     "reasons": {
       "staleNoApplications": "Aucune candidature, publiée il y a {{days}} jours."
     }
+  },
+  "popout": {
+    "windowTitle": "Notes — {{name}}",
+    "loadError": "Cette offre d'emploi n'a pas pu être chargée."
   }
 }

@@ -453,5 +453,9 @@
     "reasons": {
       "staleNoApplications": "Nog geen sollicitaties, {{days}} dagen geleden geplaatst."
     }
+  },
+  "popout": {
+    "windowTitle": "Notities — {{name}}",
+    "loadError": "Deze vacature kon niet worden geladen."
   }
 }

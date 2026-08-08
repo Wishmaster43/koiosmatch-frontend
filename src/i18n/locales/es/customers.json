@@ -781,5 +781,12 @@
     "reasons": {
       "noOpenVacancies": "Sin vacantes abiertas — haz seguimiento a este cliente."
     }
+  },
+  "validation": {
+    "emailFormat": "Introduce una dirección de correo electrónico válida."
+  },
+  "popout": {
+    "windowTitle": "Notas — {{name}}",
+    "loadError": "No se pudo cargar este cliente."
   }
 }

@@ -9,7 +9,7 @@
  * PlanIntakeModal.test.tsx) so no QueryClientProvider is needed here.
  */
 import { describe, it, expect, vi, afterEach } from 'vitest'
-import { render, screen, waitFor } from '@testing-library/react'
+import { render, screen, waitFor, fireEvent } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import NewUserModal from './NewUserModal'
 import api from '@/lib/api'
@@ -139,5 +139,43 @@ describe('NewUserModal', () => {
     await waitFor(() => expect(api.post).toHaveBeenCalled())
     expect(vi.mocked(api.post).mock.calls[0][1]).not.toHaveProperty('create_agent')
     expect(notifySuccess).not.toHaveBeenCalled()
+  })
+})
+
+// VALIDATIE-LIVE-1-rest (2026-08-08): email is the one field here the backend
+// validates with a shape rule (UserController's inline POST rules — `'email' =>
+// 'required|email|unique:users,email'`) — a malformed value now shows a live,
+// on-blur inline error and blocks the create instead of only bouncing back as a 422.
+describe('NewUserModal · live e-mail format validation (VALIDATIE-LIVE-1-rest)', () => {
+  afterEach(() => vi.clearAllMocks())
+
+  it('shows an inline error under e-mail once blurred with a malformed value, and disables create', async () => {
+    const user = userEvent.setup()
+    render(<NewUserModal onClose={noop} onCreated={noop} />)
+
+    await user.type(screen.getByLabelText('firstName'), 'Jan')
+    const emailField = screen.getByLabelText('email')
+    await user.type(emailField, 'not-an-email')
+    fireEvent.focusOut(emailField)
+
+    expect(await screen.findByText('validation.emailFormat')).toBeInTheDocument()
+    await user.type(screen.getByLabelText('password'), 'wachtwoord123')
+    expect(screen.getByRole('button', { name: 'create' })).toBeDisabled()
+    expect(api.post).not.toHaveBeenCalled()
+  })
+
+  it('a well-formed e-mail never blocks the create', async () => {
+    vi.mocked(api.post).mockResolvedValueOnce({ data: { data: { id: 'u4', email: 'jan@bedrijf.nl' } } })
+    const user = userEvent.setup()
+    render(<NewUserModal onClose={noop} onCreated={noop} />)
+
+    await user.type(screen.getByLabelText('firstName'), 'Jan')
+    const emailField = screen.getByLabelText('email')
+    await user.type(emailField, 'jan@bedrijf.nl')
+    fireEvent.focusOut(emailField)
+    await user.type(screen.getByLabelText('password'), 'wachtwoord123')
+    await user.click(screen.getByRole('button', { name: 'create' }))
+
+    await waitFor(() => expect(api.post).toHaveBeenCalled())
   })
 })

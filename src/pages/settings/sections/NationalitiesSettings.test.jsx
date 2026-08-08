@@ -4,7 +4,7 @@
  * that the button click "did something".
  */
 import { describe, it, expect, afterEach, vi } from 'vitest'
-import { render, screen, waitFor } from '@testing-library/react'
+import { render, screen, waitFor, fireEvent } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import i18n from '@/i18n'
 import api from '@/lib/api'
@@ -80,5 +80,22 @@ describe('NationalitiesSettings', () => {
     await user.click(screen.getByRole('button', { name: st('statusList.addBtn') }))
 
     await waitFor(() => expect(api.post).toHaveBeenCalledWith('/nationalities', expect.objectContaining({ name: 'Duitse', country_code: 'DE' })))
+  })
+
+  // REASON-REORDER-1 (backend landed 04-08): NationalityController gained
+  // PUT /nationalities/reorder that day — the editor no longer opts out of it
+  // (LOOKUP-GAP-1(d) verification 08-08 caught the stale reorderable={false}).
+  it('drag-reorder is enabled and persists via PUT /nationalities/reorder', async () => {
+    api.get.mockResolvedValue({ data: [row({ id: 'n1', name: 'Nederlandse' }), row({ id: 'n2', name: 'Belgische' })] })
+    api.put.mockResolvedValue({ data: {} })
+    render(<NationalitiesSettings />)
+
+    await screen.findByText('Belgische')
+    const rowOf = (text) => screen.getByText(text).closest('div[draggable]')
+    fireEvent.dragStart(rowOf('Belgische'))
+    fireEvent.dragOver(rowOf('Nederlandse'))
+    fireEvent.drop(rowOf('Nederlandse'))
+
+    await waitFor(() => expect(api.put).toHaveBeenCalledWith('/nationalities/reorder', { ids: ['n2', 'n1'] }))
   })
 })

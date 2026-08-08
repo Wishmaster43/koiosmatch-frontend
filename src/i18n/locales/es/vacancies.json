@@ -453,5 +453,9 @@
     "reasons": {
       "staleNoApplications": "Aún sin candidaturas, publicada hace {{days}} días."
     }
+  },
+  "popout": {
+    "windowTitle": "Notas — {{name}}",
+    "loadError": "No se pudo cargar esta vacante."
   }
 }

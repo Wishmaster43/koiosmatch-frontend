@@ -781,5 +781,12 @@
     "reasons": {
       "noOpenVacancies": "Geen openstaande vacatures — neem contact op met deze klant."
     }
+  },
+  "validation": {
+    "emailFormat": "Voer een geldig e-mailadres in."
+  },
+  "popout": {
+    "windowTitle": "Notities — {{name}}",
+    "loadError": "Deze klant kon niet worden geladen."
   }
 }

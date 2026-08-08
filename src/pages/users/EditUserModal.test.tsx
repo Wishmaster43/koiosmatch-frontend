@@ -5,7 +5,7 @@
  * surfaces notifyError — mirrors RoleBranchTemplate in RolesSettings.jsx.
  */
 import { describe, it, expect, vi } from 'vitest'
-import { render, screen, waitFor } from '@testing-library/react'
+import { render, screen, waitFor, fireEvent } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import EditUserModal from './EditUserModal'
 import api from '@/lib/api'
@@ -44,6 +44,43 @@ describe('EditUserModal · profile save', () => {
     }))
     expect(api.patch).not.toHaveBeenCalled()
     expect(onSaved).toHaveBeenCalled()
+  })
+})
+
+// VALIDATIE-LIVE-1-rest (2026-08-08): email is the one field here the backend
+// validates with a shape rule (UserController's inline PATCH rules — `'email'
+// => 'sometimes|email|unique:...'`) — a malformed value now shows a live,
+// on-blur inline error and blocks the save instead of only bouncing back as a 422.
+describe('EditUserModal · live e-mail format validation (VALIDATIE-LIVE-1-rest)', () => {
+  it('shows an inline error under e-mail once blurred with a malformed value, and disables Save', async () => {
+    vi.mocked(api.get).mockResolvedValueOnce({ data: { data: [] } })
+    // This file's mocks are module-scope with no shared beforeEach reset — clear the
+    // call history so an EARLIER test's PUT does not leak into this "never called" check.
+    vi.mocked(api.put).mockClear()
+    const user = userEvent.setup()
+    render(<EditUserModal user={testUser} onClose={noop} onSaved={noop} />)
+
+    const emailInput = await screen.findByDisplayValue('jan@bedrijf.nl')
+    await user.clear(emailInput)
+    await user.type(emailInput, 'not-an-email')
+    fireEvent.focusOut(emailInput)
+
+    expect(await screen.findByText('validation.emailFormat')).toBeInTheDocument()
+    expect(screen.getByText('common:save').closest('button')).toBeDisabled()
+    expect(api.put).not.toHaveBeenCalled()
+  })
+
+  it('a well-formed e-mail never blocks the save', async () => {
+    vi.mocked(api.get).mockResolvedValueOnce({ data: { data: [] } })
+    vi.mocked(api.put).mockResolvedValueOnce({ data: { data: testUser } })
+    const user = userEvent.setup()
+    render(<EditUserModal user={testUser} onClose={noop} onSaved={noop} />)
+
+    const emailInput = await screen.findByDisplayValue('jan@bedrijf.nl')
+    fireEvent.focusOut(emailInput)
+    await user.click(screen.getByText('common:save'))
+
+    await waitFor(() => expect(api.put).toHaveBeenCalled())
   })
 })
 

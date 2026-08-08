@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import type { ChangeEvent } from 'react'
 import { useTranslation } from 'react-i18next'
 import { FileText, X } from 'lucide-react'
@@ -32,24 +32,42 @@ export default function DocumentsTab({ vacancy: v }: { vacancy: VacancyDetail })
   const { types: docTypes, labelOf: docTypeLabel, colorOf: docColor } = useDocumentTypes('vacancy')
   const fileRef = useRef<HTMLInputElement>(null)
   const [pending, setPending] = useState<PendingDoc | null>(null)
+  // Tracks the blob: URL of the currently staged preview, so it can be revoked when
+  // replaced/cancelled/uploaded and on unmount — mirrors EntityHeader's PhotoAvatar /
+  // useProfileForm fix (same class of leak: a preview created with URL.createObjectURL
+  // that only ever got revoked on the happy "cancel" path, never on replace or unmount).
+  const pendingUrlRef = useRef<string | null>(null)
+
+  // Revoke a still-staged preview on unmount (drawer closed with a queued, unconfirmed
+  // file) — reads the ref at cleanup time, so it always sees the latest staged URL.
+  useEffect(() => () => { if (pendingUrlRef.current) URL.revokeObjectURL(pendingUrlRef.current) }, [])
 
   // Stage the picked file instead of uploading it blind — default type = the
   // tenant's first configured value, so the chip row always shows a selection.
   const onPick = (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (!file) return
-    setPending({ file, objectUrl: URL.createObjectURL(file), name: file.name, size: Math.round(file.size / 1024) + ' KB', type: docTypes[0]?.value ?? '' })
+    // Revoke the previous staged preview (if any) before replacing it — picking again
+    // without confirming/cancelling first used to leak the earlier blob URL.
+    if (pendingUrlRef.current) URL.revokeObjectURL(pendingUrlRef.current)
+    const objectUrl = URL.createObjectURL(file)
+    pendingUrlRef.current = objectUrl
+    setPending({ file, objectUrl, name: file.name, size: Math.round(file.size / 1024) + ' KB', type: docTypes[0]?.value ?? '' })
     e.target.value = ''
   }
   // Confirm the staged file — upload with its picked type, then clear the queue.
+  // Ownership of the object URL passes to useEntityDocuments (it revokes it once the
+  // server doc replaces the optimistic row), so the ref is cleared WITHOUT revoking here.
   const confirmUpload = () => {
     if (!pending) return
     upload(pending.file, pending.type, pending.name, pending.objectUrl)
+    pendingUrlRef.current = null
     setPending(null)
   }
   // Cancel discards the queued file and revokes its blob preview URL.
   const cancelUpload = () => {
     if (pending) URL.revokeObjectURL(pending.objectUrl)
+    pendingUrlRef.current = null
     setPending(null)
   }
 

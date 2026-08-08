@@ -453,5 +453,9 @@
     "reasons": {
       "staleNoApplications": "Noch keine Bewerbungen, vor {{days}} Tagen veröffentlicht."
     }
+  },
+  "popout": {
+    "windowTitle": "Notizen — {{name}}",
+    "loadError": "Diese Stelle konnte nicht geladen werden."
   }
 }

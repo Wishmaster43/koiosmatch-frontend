@@ -14,6 +14,7 @@ import { usePageMemory } from '@/lib/usePageMemory'
 import { useListPageSize } from '@/hooks/useListPageSize'
 import { useApplicationFilters, OWNER_NONE } from './hooks/useApplicationFilters'
 import { useApplicationsData, APPLICATIONS_MAX_PER_PAGE } from './hooks/useApplicationsData'
+import type { AppSort } from './hooks/useApplicationsData'
 import { useApplicationDrawerActions } from './hooks/useApplicationDrawerActions'
 import { useApplicationBulkActions } from './hooks/useApplicationBulkActions'
 import InsightsRow from '@/components/insights/InsightsRow'
@@ -73,6 +74,13 @@ export default function ApplicationsPage({ intent }: { intent?: unknown } = {}) 
   // gezet worden", Danny 2026-08-05).
   const { pageSize, setPageSize: setPageSizeClamped, options: pageSizeOptions } =
     useListPageSize('apps', APPLICATIONS_MAX_PER_PAGE)
+  // DATATABLE-SORT-1 reference adoption: the table's controlled sort, lifted here
+  // (sticky like every other filter above) so a header click can ALSO drive a
+  // real server-side sort_by/sort_dir request via useApplicationsData, not just
+  // reorder the currently loaded page. Defaults to the same "newest first" the
+  // uncontrolled table used before this change (see ApplicationsTable's own
+  // defaultSort fallback) — the resulting order is identical either way.
+  const [sort, setSort] = usePageMemory<AppSort | null>('apps.sort', { by: 'created', dir: 'desc' })
   // Virtualization (F-7): the vertical scroll container the table body lives in.
   const tableScrollRef = useRef<HTMLDivElement>(null)
   // KPI-card attention toggle: null | 'new' | 'scored' | 'aiTasks' (one at a time).
@@ -97,7 +105,7 @@ export default function ApplicationsPage({ intent }: { intent?: unknown } = {}) 
   // fallback. See useApplicationsData's header comment for the verified contract.
   const { applications, setApplications, loading, error, total, setTotal, lastPage,
     wideRows, wideLoading, wideError, wideIsPartial, stats, statsFailed } =
-    useApplicationsData({ view, filterParams, bucketParam, page, pageSize, funnelTypes })
+    useApplicationsData({ view, filterParams, bucketParam, page, pageSize, funnelTypes, sort })
   const [selectedIds,    setSelectedIds]    = useState<Set<Id>>(() => new Set())
 
   // Clear the selection whenever the visible set changes (bucket/filters/paging).
@@ -157,9 +165,10 @@ export default function ApplicationsPage({ intent }: { intent?: unknown } = {}) 
     return () => unregisterFilters('applications-page')
   }, [filterGroups, registerFilters, unregisterFilters])
 
-  // Reset to the first page whenever the bucket or any filter changes.
+  // Reset to the first page whenever the bucket, any filter, or the sort changes
+  // (DATATABLE-SORT-1: a new order restarts pagination, same as every filter above).
   useEffect(() => { setPage(1) }, [bucket, attention, selectedPhase, selectedOwner, selectedSource, selectedVac,
-    selectedClient, showArchived, interviewBusy, interviewPaused, query, selectedCandidateIds])
+    selectedClient, showArchived, interviewBusy, interviewPaused, query, selectedCandidateIds, sort])
 
   // TABLE rows: the server's page — W27: now narrowed server-side by every filter
   // (bucket/phase_key/vacancy_id/owner_id/source/customer_id/search-or-ref/
@@ -328,7 +337,7 @@ export default function ApplicationsPage({ intent }: { intent?: unknown } = {}) 
               <ApplicationsTable rows={tableRows} loading={loading} error={error}
                 selectedId={selected?.id} onSelect={selectApplication} stickyHeader
                 selectable selectedIds={selectedIds} onToggleRow={toggleRow} onToggleAll={toggleAll}
-                scrollParentRef={tableScrollRef} />
+                scrollParentRef={tableScrollRef} sort={sort} onSortChange={setSort} />
             </div>
             <PaginationBar page={page} totalPages={lastPage} totalRows={total}
               pageSize={pageSize} onPageChange={setPage} pageSizeOptions={pageSizeOptions}

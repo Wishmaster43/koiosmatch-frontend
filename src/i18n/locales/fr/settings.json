@@ -1340,8 +1340,6 @@
     "deleteBlocked_other": "Suppression impossible — {{count}} utilisateurs possèdent ce rôle. Attribuez-leur d'abord un autre rôle.",
     "confirmDelete": "Supprimer le rôle « {{name}} » ?",
     "empty": "Aucun rôle créé pour le moment.",
-    "matrixGroup": "Groupe",
-    "matrixOther": "Autres",
     "groups": {
       "candidates": "Candidats",
       "customers": "Clients",
@@ -1402,7 +1400,8 @@
     "pageAccess": "Page : {{label}}",
     "hints": {
       "candidatesSync": "Miroir SM"
-    }
+    },
+    "matrixAllowed": "{{active}}/{{total}} autorisé(s)"
   },
   "audit": {
     "title": "Journal d'audit",
@@ -2742,5 +2741,9 @@
     "matchRenewHint": "Combien de jours avant (ou après) la date de fin d'un match Koios suggère de le renouveler.",
     "matchRenewLabel": "Jours (1-365)",
     "matchRenewSaveFailed": "Échec de l’enregistrement de la fenêtre de renouvellement du match."
-  }
+  },
+  "modShiftmanager": {
+    "reportingOff": "Le reporting Shiftmanager n'est pas encore activé — activez le module pour configurer les objectifs KPI et les limites d'affichage."
+  },
+  "dashboardsEmpty": "Aucun élément de tableau de bord configuré pour le moment."
 }

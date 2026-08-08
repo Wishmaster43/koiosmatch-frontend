@@ -16,8 +16,10 @@ vi.mock('@/lib/api', async () => {
   const actual = await vi.importActual('@/lib/api')
   return { ...actual, default: { get: vi.fn(), patch: vi.fn(), post: vi.fn(), delete: vi.fn() } }
 })
+vi.mock('@/lib/notify', () => ({ notifyError: vi.fn(), notifySuccess: vi.fn() }))
 const mockedGet = vi.mocked(api.get)
 const mockedPatch = vi.mocked(api.patch)
+const mockedPost = vi.mocked(api.post)
 
 // Resolve the active locale's own copy so assertions never guess/hardcode a language.
 const st = (key, opts) => i18n.t(key, { ns: 'settings', ...opts })
@@ -26,6 +28,8 @@ afterEach(() => vi.clearAllMocks())
 
 // One baseline field def, matching the generic /custom-fields shape.
 const FIELD = { id: '1', key: 'plate', label_i18n: { en: 'Plate' }, type: 'text', active: true, in_use: false, visible_in_ui: true, sort_order: 0 }
+// A second field, used by the drag-reorder tests below to have something to swap with.
+const FIELD_2 = { id: '2', key: 'color', label_i18n: { en: 'Color' }, type: 'text', active: true, in_use: false, visible_in_ui: true, sort_order: 1 }
 
 describe('CustomFieldsSettings — visible_in_ui toggle (worklist #44)', () => {
   it('shows no API-only badge when visible_in_ui is true', async () => {
@@ -125,5 +129,55 @@ describe('CustomFieldsSettings — type selector locks once a field has data', (
 
     fireEvent.click(typeTrigger)
     expect(screen.getByText(st('customFieldsSettings.types.number'))).toBeInTheDocument()
+  })
+})
+
+// K11 (CF-ORDER-1): drag-reorder mirrors the Contractvorm (contract-forms) lookup
+// editor's DragList exactly — same DnD idiom (native HTML5 drag events via the
+// shared DragList), same visual affordance (grip handle, drag-over highlight).
+// The body shape ({ ids: [...] }) is verified against CustomFieldController::reorder
+// (koiosmatch-api, routes/api/tenant/core-lookups.php). §13: assert the REQUEST,
+// and that a failed POST reverts the optimistic order instead of silently "succeeding"
+// — mirrors CandidateLookupsSettings' "reverts the order and notifies" test for the
+// same shared DragList.
+describe('CustomFieldsSettings — drag-reorder (K11)', () => {
+  it('POSTs the reordered ids to /custom-fields/reorder when a row is dropped', async () => {
+    mockedGet.mockResolvedValue({ data: { data: [FIELD, FIELD_2] } })
+    mockedPost.mockResolvedValue({ data: { reordered: 2 } })
+    const { container } = render(<CustomFieldsSettings entityType="vacancy" />)
+
+    await waitFor(() => expect(screen.getByText('Color')).toBeInTheDocument())
+    const rows = container.querySelectorAll('[draggable="true"]')
+    expect(rows).toHaveLength(2)
+
+    // Drag row 0 (Plate) onto row 1 (Color) to swap their order.
+    fireEvent.dragStart(rows[0])
+    fireEvent.dragOver(rows[1])
+    fireEvent.drop(rows[1])
+    fireEvent.dragEnd(rows[0])
+
+    await waitFor(() => expect(mockedPost).toHaveBeenCalledWith('/custom-fields/reorder', { ids: ['2', '1'] }))
+  })
+
+  it('reverts the order and notifies when the reorder POST fails', async () => {
+    mockedGet.mockResolvedValue({ data: { data: [FIELD, FIELD_2] } })
+    mockedPost.mockRejectedValue(new Error('network down'))
+    const { notifyError } = await import('@/lib/notify')
+    const { container } = render(<CustomFieldsSettings entityType="vacancy" />)
+
+    await waitFor(() => expect(screen.getByText('Color')).toBeInTheDocument())
+    const rows = container.querySelectorAll('[draggable="true"]')
+
+    fireEvent.dragStart(rows[0])
+    fireEvent.dragOver(rows[1])
+    fireEvent.drop(rows[1])
+    fireEvent.dragEnd(rows[0])
+
+    await waitFor(() => expect(mockedPost).toHaveBeenCalledWith('/custom-fields/reorder', { ids: ['2', '1'] }))
+    await waitFor(() => expect(notifyError).toHaveBeenCalledWith(st('statusList.saveFailed')))
+
+    // Reverted: Plate is back in its original (first) position.
+    const labels = Array.from(container.querySelectorAll('[draggable="true"]')).map(r => r.textContent)
+    expect(labels[0]).toContain('Plate')
   })
 })

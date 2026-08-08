@@ -14,6 +14,7 @@ import { useTranslation } from 'react-i18next'
 import { Plus, Trash2, ChevronDown, ChevronUp, Eye, EyeOff, Monitor, MonitorOff } from 'lucide-react'
 import api, { unwrap, unwrapList } from '@/lib/api'
 import { useCustomFields } from '@/lib/useCustomFields'
+import { notifyError } from '@/lib/notify'
 import SearchSelect from '@/components/ui/SearchSelect'
 import { DragList } from '../components/SettingsControls'
 
@@ -71,11 +72,20 @@ export default function CustomFieldsSettings({ entityType }) {
 
   // Persist a drag-reordered list (same mechanism as the contract-forms lookup
   // editor's DragList — one shared drag implementation, not a per-screen redo).
-  // Optimistic: apply locally first, POST the full id order, reconcile invalidate.
+  // Optimistic: apply locally first, POST the full id order (body verified against
+  // CustomFieldController::reorder, koiosmatch-api: { ids: uuid[] }). A failed POST
+  // reverts the optimistic order and notifies — mirrors the contract-forms editor's
+  // reorder (CandidateLookupsSettings.jsx), never a silent catch (§13).
   const reorder = async (next) => {
+    const previous = fields
     setFields(next)
-    await api.post('/custom-fields/reorder', { ids: next.map(f => f.id) }).catch(() => {})
-    invalidate()
+    try {
+      await api.post('/custom-fields/reorder', { ids: next.map(f => f.id) })
+      invalidate()
+    } catch {
+      setFields(previous)
+      notifyError(t('statusList.saveFailed'))
+    }
   }
 
   // Toggle active without opening the full edit card.

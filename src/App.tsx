@@ -25,6 +25,9 @@ const MfaEnrollmentGate = lazy(() => import('./pages/auth/MfaEnrollmentGate'))
 // Lazy: NOTITIE-POPOUT-1 F5 — the standalone second-screen notes window, only
 // loaded when a recruiter actually opens one (route-level code splitting, §9).
 const NotesPopoutPage = lazy(() => import('./pages/popout/NotesPopoutPage'))
+// Lazy: F5-uitbreiding — legacy alias for the originally shipped candidate-only
+// popout URL (`/popout/notes/:candidateId`), redirecting to the new entity-aware route.
+const CandidatePopoutRedirect = lazy(() => import('./pages/popout/CandidatePopoutRedirect'))
 
 // Boot loader — shown while the auth context resolves (and as Suspense fallback).
 function BootLoader() {
@@ -81,14 +84,25 @@ export default function App() {
           <ErrorBoundary>
             <Routes>
               <Route path="/login" element={<PublicRoute><LoginPage /></PublicRoute>} />
-              {/* NOTITIE-POPOUT-1 F5 (Trap B): a slim, id-driven second-screen window —
+              {/* NOTITIE-POPOUT-1 F5 (Trap B), generalised by F5-uitbreiding to
+                  candidate|customer|vacancy: a slim, id-driven second-screen window —
                   auth-guarded like every other route, but rendered OUTSIDE DashboardLayout
                   (no sidebar/topbar/Koios panel) so it's a bare full-viewport page a
                   recruiter can drag to a second monitor. */}
-              <Route path="/popout/notes/:candidateId" element={
+              <Route path="/popout/notes/:entity/:id" element={
                 <ProtectedRoute>
                   <Suspense fallback={<BootLoader />}>
                     <NotesPopoutPage />
+                  </Suspense>
+                </ProtectedRoute>
+              } />
+              {/* Legacy alias — the originally shipped candidate-only URL (pre F5-
+                  uitbreiding) keeps resolving via a redirect, so an already-open OS
+                  window or a bookmarked link never breaks. */}
+              <Route path="/popout/notes/:candidateId" element={
+                <ProtectedRoute>
+                  <Suspense fallback={<BootLoader />}>
+                    <CandidatePopoutRedirect />
                   </Suspense>
                 </ProtectedRoute>
               } />

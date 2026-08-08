@@ -18,7 +18,15 @@ import { useRoleBranchTemplate } from './hooks/useRoleBranchTemplate'
 import { useLocations } from '@/lib/useLocations'
 import { notifyError, notifySuccess } from '@/lib/notify'
 import ChipMultiSelect from '@/components/ui/ChipMultiSelect'
+import { useLiveFieldValidation } from '@/hooks/useLiveFieldValidation'
+import { isValidEmailFormat } from '@/lib/contactFieldValidation'
 import { roleLabel } from './usersParts'
+
+// VALIDATIE-LIVE-1-rest: `email` is the only field here the backend validates
+// with a shape rule (UserController's inline POST rules — `'email' =>
+// 'required|email|unique:users,email'`), so this is the only live format gate.
+const EMAIL_VALIDATORS = { email: isValidEmailFormat }
+const EMAIL_ERROR_KEYS = { email: 'validation.emailFormat' }
 
 // POST /users response envelope: the UserResource plus a top-level `agent` block
 // the backend attaches only when it provisioned an AI agent for this user
@@ -40,6 +48,10 @@ export default function NewUserModal({ onClose, onCreated }: {
   // AGENT-META-SETUP: "create an AI agent?" — default on, asked only for the two
   // roles the backend actually provisions an agent for (AiAgentProvisioner::AGENT_ROLES).
   const [createAgent, setCreateAgent] = useState(true)
+  // VALIDATIE-LIVE-1-rest: live, on-blur/typing format check for email — own
+  // sibling hook, same idiom as AddCandidateModal.
+  const { markTouched, fieldMessage, touchInvalidFields, hasFormatError } =
+    useLiveFieldValidation(form, t, EMAIL_VALIDATORS, EMAIL_ERROR_KEYS)
 
   // Seed the role select once the live list arrives — prefer "planner" (the old
   // default) if present, otherwise whatever the tenant's first assignable role is.
@@ -72,6 +84,9 @@ export default function NewUserModal({ onClose, onCreated }: {
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault()
+    // VALIDATIE-LIVE-1-rest: block on a live format failure too — marks any
+    // untouched-but-malformed field touched so its message renders.
+    if (touchInvalidFields().length) return
     setSaving(true); setError(null)
     try {
       // The flag only means anything for a recruiter/manager — omit it for every
@@ -119,9 +134,13 @@ export default function NewUserModal({ onClose, onCreated }: {
               <input value={form.lastname} onChange={set('lastname')} style={input} placeholder="Jansen" aria-label={t('lastName')} />
             </div>
           </div>
-          <div style={{ marginBottom: 12 }}>
+          {/* E-mail — VALIDATIE-LIVE-1-rest: blur marks it touched so a live
+              format error renders inline instead of only bouncing back as a 422. */}
+          <div style={{ marginBottom: 12 }} onBlur={() => markTouched('email')}>
             <label style={label}>{t('email')}</label>
-            <input required type="email" value={form.email} onChange={set('email')} style={input} placeholder="jan@bedrijf.nl" aria-label={t('email')} />
+            <input required type="email" value={form.email} onChange={set('email')} placeholder="jan@bedrijf.nl" aria-label={t('email')}
+              style={{ ...input, ...(fieldMessage('email') ? { borderColor: 'var(--color-danger)' } : {}) }} />
+            {fieldMessage('email') && <p style={{ fontSize: 11, color: 'var(--color-danger)', marginTop: 5 }}>{fieldMessage('email')}</p>}
           </div>
           <div style={{ marginBottom: 12 }}>
             <label style={label}>{t('password')}</label>
@@ -182,10 +201,10 @@ export default function NewUserModal({ onClose, onCreated }: {
                        background: 'var(--surface)', color: 'var(--text-muted)', cursor: 'pointer' }}>
               {t('common:cancel')}
             </button>
-            <button type="submit" disabled={saving || !form.role}
+            <button type="submit" disabled={saving || !form.role || hasFormatError}
               style={{ height: BTN_H, padding: '0 18px', fontSize: 13, fontWeight: 600, borderRadius: 8, border: 'none',
-                       background: 'var(--color-primary)', color: 'white', cursor: saving ? 'default' : 'pointer',
-                       display: 'flex', alignItems: 'center', gap: 6 }}>
+                       background: 'var(--color-primary)', color: 'white', cursor: (saving || hasFormatError) ? 'default' : 'pointer',
+                       display: 'flex', alignItems: 'center', gap: 6, opacity: hasFormatError ? 0.6 : 1 }}>
               {saving ? <><Loader2 size={13} style={{ animation: 'spin 1s linear infinite' }} /> {t('creating')}</> : t('create')}
             </button>
           </div>

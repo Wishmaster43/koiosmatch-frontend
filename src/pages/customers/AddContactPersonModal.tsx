@@ -56,6 +56,8 @@ import FloatingPanel from '@/components/ui/FloatingPanel'
 import { useContactFunctions } from '@/lib/useContactFunctions'
 import { useGenders } from '@/lib/useGenders'
 import { useAllSettings, getJsonSetting } from '@/lib/settings/useAllSettings'
+import { useLiveFieldValidation } from '@/hooks/useLiveFieldValidation'
+import { isValidEmailFormat } from '@/lib/contactFieldValidation'
 import { BTN_H } from '@/config/buttonMetrics'
 import { WIDE_MODAL } from '@/components/ui/modalMetrics'
 import CollapsedCard from '@/components/ui/CollapsedCard'
@@ -88,6 +90,14 @@ const API_TO_FORM: Record<string, string> = {
   // CONTACT-LINKEDIN-1: the backend validation rule/column is `linkedin_slug`.
   linkedin_slug: 'linkedin',
 }
+
+// VALIDATIE-LIVE-1-rest: `email` is the only contact field the backend
+// validates with a shape rule (CustomerContactController::validateContact
+// `email` => Laravel's `email` rule) — phone/mobile/linkedin_slug stay plain
+// strings server-side, so no live format gate is added for them here (see
+// src/lib/contactFieldValidation.ts for the full backend-verification note).
+const EMAIL_VALIDATORS = { email: isValidEmailFormat }
+const EMAIL_ERROR_KEYS = { email: 'validation.emailFormat' }
 
 export default function AddContactPersonModal({
   onClose, onCreate, onImported, customerName, locations = [], departments = [], statuses = [], initial, lockLocationId, lockDepartmentId, existing = [],
@@ -152,15 +162,17 @@ export default function AddContactPersonModal({
     customFields: initial?.customFields ?? {},
   })
   const [errors, setErrors] = useState<Record<string, boolean>>({})
-  // The server's own per-field message (first one, when it sends one) — shown
-  // under the field alongside the red border instead of being thrown away.
-  const [fieldMessages, setFieldMessages] = useState<Record<string, string>>({})
   // Non-field 422/generic failure — only reachable on the CREATE path (see submit()).
   const [createError, setCreateError] = useState<string | null>(null)
+  // VALIDATIE-LIVE-1-rest: live, on-blur/typing format check for email — owns
+  // the per-field message state too (the server's own 422 text, set via
+  // setFieldMessages below, always wins over a live check).
+  const { fieldMessages, setFieldMessages, markTouched, fieldMessage, clearFieldMessage, touchInvalidFields, hasFormatError } =
+    useLiveFieldValidation(form, t, EMAIL_VALIDATORS, EMAIL_ERROR_KEYS)
   const set = <K extends keyof ContactPayload>(k: K, v: ContactPayload[K]) => {
     setForm(f => ({ ...f, [k]: v }))
     if (errors[k]) setErrors(e => ({ ...e, [k]: false }))
-    if (fieldMessages[k]) setFieldMessages(m => ({ ...m, [k]: '' }))
+    clearFieldMessage(k)
     setCreateError(null)
   }
 
@@ -208,7 +220,10 @@ export default function AddContactPersonModal({
   const mobileDup = findDuplicate(form.mobile, 'mobile')
 
   const submit = async () => {
-    if (!form.firstName.trim() || !form.lastName.trim()) {
+    // VALIDATIE-LIVE-1-rest: block on a live format failure too — marks any
+    // untouched-but-malformed field touched so its message renders.
+    const invalidKeys = touchInvalidFields()
+    if (!form.firstName.trim() || !form.lastName.trim() || invalidKeys.length) {
       setErrors({ firstName: !form.firstName.trim(), lastName: !form.lastName.trim() })
       return
     }
@@ -256,7 +271,7 @@ export default function AddContactPersonModal({
     }
   }
 
-  const canSubmit = !!form.firstName.trim() && !!form.lastName.trim() && !emailDup && !phoneDup && !mobileDup
+  const canSubmit = !!form.firstName.trim() && !!form.lastName.trim() && !emailDup && !phoneDup && !mobileDup && !hasFormatError
   // Department options stay EMPTY until a location is picked — mirrors AddShiftModal's
   // customer->department cascade (PLAN-LOOKUP-1). Never fall back to "every department
   // of this customer": a department belongs to exactly one location, so offering the
@@ -280,7 +295,11 @@ export default function AddContactPersonModal({
   const showDepartmentPicker = !lockDepartmentId
   // ContactDetailsCard is pure presentational — the duplicate object stays here
   // (it needs `existing`), only the already-formatted message string goes down.
-  const emailMessage = emailDup ? t('subModal.duplicate.email', { name: emailDup.name }) : fieldMessages.email
+  // VALIDATIE-LIVE-1-rest: emailMessage now also resolves the live format
+  // check via fieldMessage() (server 422 still wins over it); phone/mobile
+  // have no format check registered, so fieldMessage() reduces to the same
+  // raw 422 text fieldMessages.phone/mobile always held.
+  const emailMessage = emailDup ? t('subModal.duplicate.email', { name: emailDup.name }) : fieldMessage('email')
   const phoneMessage = phoneDup ? t('subModal.duplicate.phone', { name: phoneDup.name }) : fieldMessages.phone
   const mobileMessage = mobileDup ? t('subModal.duplicate.mobile', { name: mobileDup.name }) : fieldMessages.mobile
   // Contact-function/gender option rows for ContactIdentityCard.
@@ -319,7 +338,8 @@ export default function AddContactPersonModal({
           <ContactDetailsCard
             cardLabel={t('subModal.groups.contactInfo')}
             emailLabel={t('subModal.email')} phoneLabel={t('subModal.phone')} mobileLabel={t('subModal.mobile')}
-            email={form.email} onEmailChange={v => set('email', v)} emailError={!!emailDup || errors.email} emailMessage={emailMessage}
+            email={form.email} onEmailChange={v => set('email', v)} onEmailBlur={() => markTouched('email')}
+            emailError={!!emailDup || errors.email || !!emailMessage} emailMessage={emailMessage}
             phone={form.phone} onPhoneChange={v => set('phone', v)} phoneError={!!phoneDup || errors.phone} phoneMessage={phoneMessage}
             mobile={form.mobile} onMobileChange={v => set('mobile', v)} mobileError={!!mobileDup || errors.mobile} mobileMessage={mobileMessage}
             linkedinLabel={t('subModal.linkedin')} linkedinPlaceholder={t('subModal.linkedinPlaceholder')}
