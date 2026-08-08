@@ -145,9 +145,13 @@ interface KoiosVoiceButtonProps {
   // Omit to follow the active UI locale (the chat composer's original,
   // unchanged behaviour) — NoteComposer passes its OWN language-picker value.
   lang?: string
+  // Idle colour: 'muted' (chat composer default) or 'primary' — the note editor
+  // toolbar wants the tenant accent (Danny 08-08 "met een tenant kleur").
+  // Listening always shows the danger recording tint, whatever the tone.
+  tone?: 'muted' | 'primary'
 }
 
-export default function KoiosVoiceButton({ onText, t, lang }: KoiosVoiceButtonProps) {
+export default function KoiosVoiceButton({ onText, t, lang, tone = 'muted' }: KoiosVoiceButtonProps) {
   const { supported, listening, denied, toggle } = useSpeechDictation({ onText, lang })
 
   // Rules of hooks: every hook runs inside useSpeechDictation unconditionally;
@@ -156,6 +160,8 @@ export default function KoiosVoiceButton({ onText, t, lang }: KoiosVoiceButtonPr
 
   const title = denied ? t('voice.denied', { ns: 'koios' })
     : listening ? t('voice.stop', { ns: 'koios' }) : t('voice.start', { ns: 'koios' })
+  // Idle colour per tone; hover always previews the accent.
+  const idleColor = tone === 'primary' ? 'var(--color-primary)' : 'var(--sidebar-muted)'
 
   return (
     <>
@@ -170,12 +176,12 @@ export default function KoiosVoiceButton({ onText, t, lang }: KoiosVoiceButtonPr
           // §4 soft-tint: active state = a stronger color-mix tint + bold, never a solid fill.
           background: listening ? 'color-mix(in srgb, var(--color-danger) 14%, transparent)' : 'none',
           border: 'none', cursor: 'pointer', padding: '4px 5px', borderRadius: 7,
-          color: listening ? 'var(--color-danger)' : 'var(--sidebar-muted)',
+          color: listening ? 'var(--color-danger)' : idleColor,
           fontWeight: listening ? 600 : 400,
           display: 'flex', transition: 'background 0.15s, color 0.15s',
         }}
         onMouseEnter={e => { if (!listening) { e.currentTarget.style.background = 'var(--hover-bg)'; e.currentTarget.style.color = 'var(--color-primary)' } }}
-        onMouseLeave={e => { if (!listening) { e.currentTarget.style.background = 'none'; e.currentTarget.style.color = 'var(--sidebar-muted)' } }}
+        onMouseLeave={e => { if (!listening) { e.currentTarget.style.background = 'none'; e.currentTarget.style.color = idleColor } }}
       >
         {listening ? <MicOff size={14} /> : <Mic size={14} />}
       </button>

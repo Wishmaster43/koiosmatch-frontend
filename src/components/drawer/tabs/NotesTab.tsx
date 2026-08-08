@@ -35,6 +35,7 @@
  */
 import { useState } from 'react'
 import type { ReactNode } from 'react'
+import { useTranslation } from 'react-i18next'
 import DrawerAddButton from '@/components/drawer/DrawerAddButton'
 import { Edit2, History, Search, Trash2 } from 'lucide-react'
 import Avatar from '@/components/ui/Avatar'
@@ -162,6 +163,8 @@ export default function NotesTab({
   showNotes = true, showTimeline = true, showConversations = true, onEditStatusEvent, renderTimelineContent,
   error, onRetry, composerExtra, onPopOut,
 }: NotesTabProps) {
+  // Shared meta copy (edited-by) — common namespace so every host gets it at once.
+  const { t } = useTranslation('common')
   // POPUP-SLEEP-1: this file only tracks WHICH note is being composed — the
   // composer's own fields (type/channel/title/body/language) now live inside
   // NoteComposer (notes/), mounted fresh per open so they always start from the
@@ -296,9 +299,15 @@ export default function NotesTab({
               (POPUP-SLEEP-1) instead of an inline block. */}
           {!adding && <DrawerAddButton onClick={() => setAdding(true)} label={labels.newNote} short />}
         </div>
-        {/* POPUP-SLEEP-1: the add/edit composer — see notes/NoteComposer.tsx. Mounted
-            unconditionally; FloatingPanel itself only renders while `open`. */}
+        {/* POPUP-SLEEP-1: the add/edit composer — see notes/NoteComposer.tsx.
+            EDIT-PREFILL-1 (Danny 08-08 "popup maar geen txt erin"): the composer
+            holds its fields in state initialized from `initialNote` at MOUNT — but
+            this component stays mounted across opens, so an edit-open reused the
+            stale empty state from page load. The `key` forces a fresh mount per
+            compose target (new vs edit-i), so the fields always seed from the
+            note actually being edited. */}
         <NoteComposer
+          key={editingIdx != null ? `edit-${editingIdx}` : adding ? 'new' : 'idle'}
           open={adding}
           initialNote={editingIdx != null ? notes[editingIdx] : null}
           noteTypes={noteTypes} channels={channels} labels={labels} editorLabels={editorLabels}
@@ -325,9 +334,11 @@ export default function NotesTab({
                     {/* "By whom · when" (always) + "edited by X" once the backend logs it (NOTES-2b). */}
                     <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 11, color: 'var(--text-muted)', whiteSpace: 'nowrap' }}>
                       {who ? `${who} · ` : ''}{noteWhen(n)}
+                      {/* EDIT-MARKER-1 (Danny 08-08 "2 keer een potloodje"): plain italic
+                          meta text, no icon — a pencil here read as a second edit BUTTON. */}
                       {noteEdited(n) && (
-                        <span style={{ display: 'inline-flex', alignItems: 'center', gap: 2 }} title={labels.edit as string}>
-                          <Edit2 size={9} /> {noteEditor(n)}
+                        <span style={{ fontStyle: 'italic' }}>
+                          · {t('notes.editedBy', { name: noteEditor(n), defaultValue: 'bewerkt door {{name}}' })}
                         </span>
                       )}
                     </span>

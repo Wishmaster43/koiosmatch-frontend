@@ -356,5 +356,8 @@
   "popupBlocked": "Ihr Browser hat das Pop-out-Fenster blockiert. Bitte lassen Sie Pop-ups für diese Website zu.",
   "popout": {
     "unknownEntity": "Dieses Pop-out-Fenster konnte nicht erkannt werden."
+  },
+  "notes": {
+    "editedBy": "bearbeitet von {{name}}"
   }
 }

@@ -86,7 +86,6 @@ export default function NoteComposer({ open, initialNote, noteTypes, channels, l
   // NOTE-TAAL-1: prefilled from the note being edited; undefined for a new note
   // (RichTextEditor then falls back to the app's own locale — its normal default).
   const [language, setLanguage] = useState<string | undefined>(initialNote?.language ?? undefined)
-  const [expanded, setExpanded] = useState(false)
 
   // Resync when the host swaps the writable type list mid-compose (the customer
   // tab's link-level picker switches scope INSIDE the composer) — a stale type
@@ -162,20 +161,16 @@ export default function NoteComposer({ open, initialNote, noteTypes, channels, l
         )}
         <input value={title} onChange={e => setTitle(e.target.value)} placeholder={labels.notePlaceholder?.(typeLabel)}
           style={{ width: '100%', padding: '8px 12px', fontSize: 13, fontWeight: 500, borderRadius: 8, border: '1px solid var(--border)', background: 'var(--surface)', color: 'var(--text)', boxSizing: 'border-box', outline: 'none', flexShrink: 0 }} />
-        {/* NOTITIE-VOICE-1: dictation mic, right next to where the editor's own
-            language picker renders below it — the picked `language` state drives
-            BOTH the editor's spellcheck AND the mic's recognition locale, so
-            they always agree. Renders nothing on an unsupported browser (the
-            shared component's own HONEST GATE). */}
-        <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: -4 }}>
-          <KoiosVoiceButton onText={appendVoiceText} lang={language} t={t} />
-        </div>
         {/* TAAL-SPELL-1: language/onLanguageChange controlled here so the pick rides
-            into the save payload; showLanguage defaults true on RichTextEditor, so
-            the picker (and native browser spellcheck) is visible with no opt-in.
+            into the save payload. NOTITIE-VOICE-1 (Danny 08-08 "mic naast de taal,
+            tenant kleur"): the dictation mic rides the editor's own toolbar slot,
+            directly next to the language picker — one `language` state drives both
+            the spellcheck AND the recognition locale. No expand button (Danny
+            08-08): the FloatingPanel itself resizes, the toggle did nothing useful.
             `fill` + a real minHeight floor: the editor is the flexible item that
             absorbs a bigger/smaller panel (see the RESIZE-GROWS-EDITOR docblock). */}
-        <RichTextEditor value={body} onChange={setBody} expanded={expanded} onToggleExpand={() => setExpanded(e => !e)}
+        <RichTextEditor value={body} onChange={setBody}
+          toolbarExtra={<KoiosVoiceButton onText={appendVoiceText} lang={language} t={t} tone="primary" />}
           labels={editorLabels} language={language} onLanguageChange={setLanguage} fill minHeight={160} />
 
         {/* NOTE-ASSIST-1: Koios AI assist — always visible under the editor. */}

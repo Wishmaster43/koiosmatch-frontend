@@ -356,5 +356,8 @@
   "popupBlocked": "Votre navigateur a bloqué la fenêtre détachée. Veuillez autoriser les fenêtres pop-up pour ce site.",
   "popout": {
     "unknownEntity": "Cette fenêtre détachée n'a pas pu être reconnue."
+  },
+  "notes": {
+    "editedBy": "modifié par {{name}}"
   }
 }

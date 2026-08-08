@@ -22,8 +22,11 @@ import userEvent from '@testing-library/user-event'
 import NoteComposer from './NoteComposer'
 
 vi.mock('@/components/ui/RichTextEditor', () => ({
-  default: ({ value, onChange, language, onLanguageChange, fill, minHeight }: { value?: string; onChange: (v: string) => void; language?: string; onLanguageChange?: (l: string) => void; fill?: boolean; minHeight?: number }) => (
+  // Renders `toolbarExtra` like the real editor does — the dictation mic lives in
+  // that slot now (Danny 08-08 "mic naast de taal"), so the mock must mount it.
+  default: ({ value, onChange, language, onLanguageChange, fill, minHeight, toolbarExtra }: { value?: string; onChange: (v: string) => void; language?: string; onLanguageChange?: (l: string) => void; fill?: boolean; minHeight?: number; toolbarExtra?: React.ReactNode }) => (
     <div data-testid="rte-wrapper" data-fill={fill ? 'true' : 'false'} data-min-height={minHeight}>
+      {toolbarExtra}
       <textarea aria-label="body" value={value ?? ''} onChange={e => onChange(e.target.value)} />
       <span data-testid="current-language">{language ?? ''}</span>
       <button type="button" onClick={() => onLanguageChange?.('de')}>pick-german</button>
@@ -158,7 +161,9 @@ describe('NoteComposer · dictation mic (NOTITIE-VOICE-1)', () => {
   // The mic button lives in the row directly above the RichTextEditor wrapper —
   // located by DOM position, never by its translated title (no i18next instance
   // in this test tree, mirrors KoiosVoiceButton.test.tsx's own t stub concern).
-  const micButton = () => screen.getByTestId('rte-wrapper').previousElementSibling?.querySelector('button') ?? null
+  // The mic lives INSIDE the editor's toolbarExtra slot now (Danny 08-08 "mic
+  // naast de taal") — it is the only button in there carrying aria-pressed.
+  const micButton = () => screen.getByTestId('rte-wrapper').querySelector('button[aria-pressed]')
 
   it('renders no mic on an unsupported browser (the shared HONEST GATE, inherited unchanged)', () => {
     render(<NoteComposer open initialNote={null} noteTypes={noteTypes} channels={[]} labels={labels} onSave={vi.fn()} onCancel={vi.fn()} />)

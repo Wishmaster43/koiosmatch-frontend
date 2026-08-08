@@ -6,7 +6,7 @@
  * so you can inspect/fix the markup.
  */
 import { useEffect, useMemo, useState } from 'react'
-import type { CSSProperties } from 'react'
+import type { CSSProperties, ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useEditor, EditorContent } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
@@ -43,9 +43,12 @@ interface RichTextEditorProps {
   language?: string
   onLanguageChange?: (lang: string) => void
   showLanguage?: boolean
+  // Host-supplied toolbar control(s) rendered next to the language picker —
+  // e.g. the note composer's dictation mic (Danny 08-08: "mic naast de taal").
+  toolbarExtra?: ReactNode
 }
 
-export default function RichTextEditor({ value, onChange, expanded, onToggleExpand, labels = {}, fill = false, minHeight = 120, resizable = false, language, onLanguageChange, showLanguage = true }: RichTextEditorProps) {
+export default function RichTextEditor({ value, onChange, expanded, onToggleExpand, labels = {}, fill = false, minHeight = 120, resizable = false, language, onLanguageChange, showLanguage = true, toolbarExtra }: RichTextEditorProps) {
   // Merge caller overrides over the i18n'd defaults (common:editor.*).
   const { t, i18n } = useTranslation('common')
   // Effective spellcheck language: caller-controlled wins, else local choice, else app language.
@@ -72,9 +75,22 @@ export default function RichTextEditor({ value, onChange, expanded, onToggleExpa
     onUpdate: ({ editor }) => onChange(editor.getHTML()),
   })
 
+  // EXTERNAL-VALUE-SYNC (Danny 08-08 "txt komt niet in notities blok"): TipTap only
+  // reads `content` at init, so an outside append — the dictation mic, the Koios
+  // assist "Overnemen" — changed the value prop but never the editor. Sync any
+  // external change in; a no-op while typing (value came FROM getHTML, so they
+  // match) and both-empty is equivalent ('' vs TipTap's '<p></p>'), so the cursor
+  // never jumps mid-keystroke. setContent's emitUpdate defaults false — no loop.
   useEffect(() => {
-    if (editor && !editor.isDestroyed && value === '') editor.commands.clearContent()
-  }, [value, editor])
+    if (!editor || editor.isDestroyed || htmlMode) return
+    const cur = editor.getHTML()
+    if (value === cur) return
+    if (!value && cur === '<p></p>') return
+    // emitUpdate:false (TipTap v3 options object): the change CAME from the host —
+    // echoing it back through onChange would be a redundant round-trip (and a
+    // loop risk on normalizing hosts).
+    editor.commands.setContent(value || '', { emitUpdate: false })
+  }, [value, editor, htmlMode])
 
   // Language switch re-applies the content attributes (TipTap has no reactive prop).
   useEffect(() => {
@@ -120,6 +136,8 @@ export default function RichTextEditor({ value, onChange, expanded, onToggleExpa
           </>
         )}
         <div style={{ flex: 1 }} />
+        {/* Host toolbar control(s) — e.g. the notes dictation mic, next to the language picker. */}
+        {toolbarExtra}
         {/* TAAL-SPELL-1: compact spellcheck-language picker (uppercase codes). */}
         {showLanguage && (
           <select value={lang} onChange={e => pickLang(e.target.value)}

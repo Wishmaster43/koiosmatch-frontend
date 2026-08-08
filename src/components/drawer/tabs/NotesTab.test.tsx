@@ -85,6 +85,21 @@ describe('NotesTab · search', () => {
     await user.click(screen.getByTitle('Save'))
     expect(onEditNote).toHaveBeenCalledWith(2, expect.objectContaining({}))
   })
+
+  it('EDIT-PREFILL-1: edit-open seeds the composer from the note — an immediate save carries the ORIGINAL text, never an empty body', async () => {
+    // The composer stays mounted across opens; before the remount-key its fields
+    // seeded ONCE at page load (empty), so every edit opened blank and a save
+    // would have WIPED the note (Danny 08-08 "popup maar geen txt erin").
+    const user = userEvent.setup()
+    const onEditNote = vi.fn()
+    render(<NotesTab notes={[note({ text: '<p>Bestaande tekst</p>', title: 'Belnotitie' })]}
+      labels={labels} onEditNote={onEditNote} showTimeline={false} showConversations={false} />)
+    await user.click(screen.getByTitle('Bewerken'))
+    await user.click(screen.getByTitle('Save'))
+    expect(onEditNote).toHaveBeenCalledWith(0, expect.objectContaining({
+      title: 'Belnotitie', body: expect.stringContaining('Bestaande tekst'),
+    }))
+  })
 })
 
 // Load-error state (Danny 04-08: retry affordance added HERE, in the shared tab, so

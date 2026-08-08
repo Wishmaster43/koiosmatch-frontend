@@ -356,5 +356,8 @@
   "popupBlocked": "Tu navegador bloqueó la ventana emergente. Permite las ventanas emergentes para este sitio.",
   "popout": {
     "unknownEntity": "No se pudo reconocer esta ventana emergente."
+  },
+  "notes": {
+    "editedBy": "editado por {{name}}"
   }
 }

@@ -356,5 +356,8 @@
   "popupBlocked": "Your browser blocked the pop-out window. Please allow pop-ups for this site.",
   "popout": {
     "unknownEntity": "This pop-out window could not be recognized."
+  },
+  "notes": {
+    "editedBy": "edited by {{name}}"
   }
 }
