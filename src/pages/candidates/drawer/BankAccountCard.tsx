@@ -31,6 +31,7 @@ import { useTranslation } from 'react-i18next'
 import { Edit2, Save, X } from 'lucide-react'
 import { GroupCard, GroupHeader, FieldRow, inputStyle, iconBtn } from './profileFieldShared'
 import { formatIban, normalizeIban } from '@/lib/iban'
+import { useAuth } from '@/context/AuthContext'
 
 export interface BankAccountValues {
   /** Stored wire form (no spaces) — shown grouped in fours, sent ungrouped. */
@@ -48,6 +49,14 @@ export default function BankAccountCard({ value, onSave }: {
   value: BankAccountValues
   onSave: (v: Record<string, unknown>) => void
 }) {
+  // FINANCIAL-GATE-1 (Danny 09-08, decided after we measured that NO permission
+  // covered financial data at all): a bank account is least-privilege territory —
+  // a recruiter calling a candidate has no business seeing where they get paid.
+  // The backend is the real gate (it nulls these four fields without the
+  // permission, default-deny); this hides the block so nobody stares at an
+  // unexplained empty card. Hidden, not disabled: an empty field the viewer may
+  // never fill is noise, and §7 says UI gating is UX only.
+  const auth = useAuth()
   const { t } = useTranslation('candidates')
   // Bare-key convention (mirrors EmergencyContactCard's own header): this tab's
   // suite runs WITHOUT real i18n, where profileFieldShared's cross-namespace
@@ -77,6 +86,9 @@ export default function BankAccountCard({ value, onSave }: {
   }
 
   const shownIban = formatIban(value.iban)
+
+  // Hidden entirely without the permission — see FINANCIAL-GATE-1 above.
+  if (!auth?.hasPermission?.('candidates.financial.view')) return null
 
   return (
     <div>

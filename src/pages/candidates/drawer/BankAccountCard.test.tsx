@@ -28,6 +28,13 @@ import BankAccountCard from './BankAccountCard'
 import { buildCandidatePatch } from '../data/candidatesShared'
 import { formatIban, normalizeIban } from '@/lib/iban'
 
+// FINANCIAL-GATE-1: the card is permission-gated now, so every existing test
+// renders as a viewer who HAS the permission. The gate itself is proven by its
+// own describe block at the bottom of this file.
+const mockHasPermission = vi.fn()
+vi.mock('@/context/AuthContext', () => ({ useAuth: () => ({ hasPermission: mockHasPermission }) }))
+beforeEach(() => { mockHasPermission.mockImplementation(() => true) })
+
 vi.mock('@/lib/api', async () => {
   const actual = await vi.importActual<typeof import('@/lib/api')>('@/lib/api')
   return { ...actual, default: { patch: vi.fn(), get: vi.fn() } }
@@ -149,5 +156,24 @@ describe('BANK-1 · the server owns the IBAN verdict', () => {
     result.current.patchCandidate('c1', { zzp: { iban: 'NL00INGB0000000000', account_holder_name: 'Zorg B.V.' } })
     expect(apiPatch).toHaveBeenCalledWith('/candidates/c1', { freelance: { iban: 'NL00INGB0000000000', account_holder_name: 'Zorg B.V.' } })
     await waitFor(() => expect(notifyError).toHaveBeenCalledWith('Het IBAN-controlegetal klopt niet.'))
+  })
+})
+
+// FINANCIAL-GATE-1 (Danny 09-08). We measured that NO permission covered
+// financial data, Danny chose to add one, and the backend now nulls these fields
+// without it. The block therefore hides rather than showing two empty rows a
+// viewer can neither explain nor fill.
+describe('BankAccountCard · permission gate', () => {
+  it('renders nothing without candidates.financial.view', () => {
+    mockHasPermission.mockImplementation(() => false)
+    const { container } = render(
+      <BankAccountCard value={{ iban: 'NL91ABNA0417164300', accountHolderName: 'N. Blom' }} onSave={vi.fn()} />,
+    )
+    expect(container).toBeEmptyDOMElement()
+  })
+
+  it('asks for exactly that permission, not a neighbouring one', () => {
+    render(<BankAccountCard value={{ iban: '', accountHolderName: '' }} onSave={vi.fn()} />)
+    expect(mockHasPermission).toHaveBeenCalledWith('candidates.financial.view')
   })
 })

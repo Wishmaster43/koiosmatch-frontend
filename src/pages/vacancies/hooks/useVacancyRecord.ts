@@ -9,6 +9,7 @@ import { useState, useRef } from 'react'
 import type { Dispatch, SetStateAction } from 'react'
 import api, { unwrap } from '@/lib/api'
 import { notifyError, notifySuccess } from '@/lib/notify'
+import { mergePatch } from '@/lib/mergePatch'
 import { mapVacancyDetail } from '../data/mapVacancy'
 import { initialsOf, buildVacancyPatch } from '../data/vacanciesShared'
 import type { TFunction } from 'i18next'
@@ -59,9 +60,12 @@ export function useVacancyRecord({ setVacancies, setTotal, statusMeta, users, cu
     if ('ownerId' in patch) { const u = users.find(x => x.id === patch.ownerId); local.owner = { id: patch.ownerId, name: u?.name ?? '', initials: initialsOf(u?.name ?? ''), color: null } }
     if ('clientId' in patch) { const c = customers.find(x => x.id === patch.clientId); local.clientName = c?.name ?? '' }
 
-    setVacancies(prev => prev.map(x => x.id === id ? ({ ...x, ...local } as Vacancy) : x))
-    setSelected(prev => (prev && prev.id === id ? ({ ...prev, ...local } as Vacancy) : prev))
-    setDetail(prev   => (prev && prev.id === id ? ({ ...prev, ...local } as VacancyDetail) : prev))
+    // ZZP-MERGE-1: deep-merge (never shallow-spread) so a patch touching only part
+    // of a nested object (e.g. customFieldValues) keeps that object's other keys
+    // instead of wiping them locally (mirrors updateCandidate).
+    setVacancies(prev => prev.map(x => x.id === id ? (mergePatch(x as unknown as Record<string, unknown>, local) as unknown as Vacancy) : x))
+    setSelected(prev => (prev && prev.id === id ? (mergePatch(prev as unknown as Record<string, unknown>, local) as unknown as Vacancy) : prev))
+    setDetail(prev   => (prev && prev.id === id ? (mergePatch(prev as unknown as Record<string, unknown>, local) as unknown as VacancyDetail) : prev))
 
     const body = buildVacancyPatch(patch)
     if (!Object.keys(body).length) return Promise.resolve(true)

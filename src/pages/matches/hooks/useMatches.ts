@@ -17,6 +17,7 @@ import { useState, useEffect } from 'react'
 import api from '@/lib/api'
 import { initialsOf } from '@/lib/initials'
 import { backofficeLinkOf } from '@/lib/backofficeLink'
+import { mergePatch } from '@/lib/mergePatch'
 import type { RawMatch, MatchRow } from '@/types/match'
 
 // MatchQuery caps per_page at `between:1,200` (measured 2026-08-05 seam-harness:
@@ -148,8 +149,10 @@ export function useMatches(ref: string | null = null, includeArchived: boolean =
   }, [refreshTick, ref, includeArchived])
 
   // Patch one match in place (optimistic board drag / stage change / archive flag).
+  // ZZP-MERGE-1: deep-merge (never shallow-spread) so a patch touching only part of
+  // a nested object (e.g. customFieldValues) keeps that object's other keys.
   const updateMatch = (id: MatchRow['id'], patch: Partial<MatchRow>) =>
-    setRows(prev => prev.map(r => (r.id === id ? { ...r, ...patch } : r)))
+    setRows(prev => prev.map(r => (r.id === id ? mergePatch(r as unknown as Record<string, unknown>, patch) as unknown as MatchRow : r)))
 
   const reload = () => setRefreshTick(t => t + 1)
 

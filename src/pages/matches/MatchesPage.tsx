@@ -9,6 +9,7 @@ import { useMatchStatuses } from '@/lib/useMatchStatuses'
 import api, { unwrap } from '@/lib/api'
 import { notifyError } from '@/lib/notify'
 import { isReferenceQuery } from '@/lib/referenceNumber'
+import { mergePatch } from '@/lib/mergePatch'
 import InsightsRow from '@/components/insights/InsightsRow'
 import type { DonutSpec, KpiSpec } from '@/components/insights/InsightsRow'
 import MatchesTable from './MatchesTable'
@@ -247,7 +248,8 @@ export default function MatchesPage({ intent }: { intent?: unknown } = {}) {
   // just patch fields on the same row — no need for two persistence paths).
   const patchRow = (id: MatchRow['id'], patch: Partial<MatchRow>) => {
     updateMatch(id, patch)
-    setSelected(p => (p && p.id === id ? { ...p, ...patch } : p))
+    // ZZP-MERGE-1: deep-merge (never shallow-spread), see useMatches.updateMatch.
+    setSelected(p => (p && p.id === id ? mergePatch(p as unknown as Record<string, unknown>, patch) as unknown as MatchRow : p))
   }
 
   // ARCHIVE-1: per-id archive/restore (enkelstuks-sweep, BE 9170e40) — gated on

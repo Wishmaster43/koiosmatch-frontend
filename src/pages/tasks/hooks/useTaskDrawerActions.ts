@@ -11,6 +11,7 @@ import type { TFunction } from 'i18next'
 import api, { unwrap } from '@/lib/api'
 import { notifyError, notifySuccess } from '@/lib/notify'
 import { extractApiError } from '@/lib/extractApiError'
+import { mergePatch } from '@/lib/mergePatch'
 import { mapTaskDetail } from '../data/mapTask'
 import { useTaskLookupIds } from './useTaskLookupIds'
 import type { Task, TaskDetail, ApiTask } from '@/types/task'
@@ -87,16 +88,19 @@ export function useTaskDrawerActions({ setTasks, archivedTasks, setArchivedTasks
     // (not the tasks array itself).
     const keys = Object.keys(patch)
     let beforeRow: Record<string, unknown> | undefined
+    // ZZP-MERGE-1: deep-merge (never shallow-spread) so a patch touching only part
+    // of a nested object (e.g. customFields) keeps that object's other keys instead
+    // of wiping them locally (mirrors useCandidateRecord.updateCandidate).
     setTasks(prev => prev.map(x => {
       if (x.id !== id) return x
       beforeRow = {}
       keys.forEach(k => { (beforeRow as Record<string, unknown>)[k] = (x as unknown as Record<string, unknown>)[k] })
-      return { ...x, ...patch } as Task
+      return mergePatch(x as unknown as Record<string, unknown>, patch) as unknown as Task
     }))
     const beforeSelected = selected && selected.id === id
       ? keys.reduce((acc, k) => ({ ...acc, [k]: (selected as unknown as Record<string, unknown>)[k] }), {} as Record<string, unknown>)
       : undefined
-    setSelected(prev => (prev && prev.id === id ? decorate({ ...prev, ...patch } as TaskDetail) : prev))
+    setSelected(prev => (prev && prev.id === id ? decorate(mergePatch(prev as unknown as Record<string, unknown>, patch) as unknown as TaskDetail) : prev))
     const body: Record<string, unknown> = {
       // T1: title is a plain PATCHable string field (UpdateTaskRequest 'title') —
       // was entirely missing from this mapping, so a title edit had nowhere to go.

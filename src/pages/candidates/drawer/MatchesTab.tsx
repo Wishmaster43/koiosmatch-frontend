@@ -117,7 +117,10 @@ export default function MatchesTab({ c, onEdit, onAdd }: { c: Candidate
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '8px 12px', marginBottom: 8,
         background: 'var(--bg)', border: '1px solid var(--border)', borderRadius: 8,
         fontSize: 11, fontWeight: 600, color: 'var(--text-muted)' }}>
-        <span style={{ flex: 1, minWidth: 0 }}>{t('work.vacancy')}</span>
+        {/* minWidth:0 lets this shrink, so it MUST clip — without overflow the
+            label paints straight over the next column when space runs short
+            (Danny 09-08 saw "VacatuStatus" printed on top of each other). */}
+        <span style={{ flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{t('work.vacancy')}</span>
         {/* Reuses the SAME key ApplicationRow's own status column uses (WorkTab.tsx) —
             "de sollicitatielijst gebruikt er een voor zijn eigen statuskop". */}
         <span data-testid="match-col-status-header" style={MATCH_COL_STATUS}>{t('work.colStatus')}</span>

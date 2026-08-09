@@ -19,6 +19,7 @@ import AddCandidateModal from './AddCandidateModal'
 import CandidatesListPanel from './CandidatesListPanel'
 import type { ActionMessage } from '@/components/ui/ActionMessageBanner'
 import { toggleOneValue, isStale, isNeverContacted, optsFrom } from './data/candidatesShared'
+import { mergePatch } from '@/lib/mergePatch'
 import { usePools } from '@/lib/usePools'
 import { usePageMemory } from '@/lib/usePageMemory'
 import { useListPageSize } from '@/hooks/useListPageSize'
@@ -263,9 +264,12 @@ export default function CandidatesPage({ intent }: { intent?: CandidateIntent } 
     const beforeSelected = selected?.id === id ? pick(selected) : null
     const beforeDetail = detail?.id === id ? pick(detail) : null
 
-    setCandidates(prev => prev.map(x => x.id === id ? { ...x, ...patch } as Candidate : x))
-    setSelected(prev => (prev && prev.id === id ? { ...prev, ...patch } as Candidate : prev))
-    setDetail(prev  => (prev && prev.id === id ? { ...prev, ...patch } as Candidate : prev))
+    // ZZP-MERGE-1: deep-merge (never shallow-spread) so a patch touching only one
+    // nested block (e.g. the ZZP tab's Facturatie save, `{ zzp: { iban, ... } }`)
+    // keeps that object's other keys (Bedrijf/Adres) instead of wiping them locally.
+    setCandidates(prev => prev.map(x => x.id === id ? mergePatch(x as unknown as Record<string, unknown>, patch) as unknown as Candidate : x))
+    setSelected(prev => (prev && prev.id === id ? mergePatch(prev as unknown as Record<string, unknown>, patch) as unknown as Candidate : prev))
+    setDetail(prev  => (prev && prev.id === id ? mergePatch(prev as unknown as Record<string, unknown>, patch) as unknown as Candidate : prev))
 
     patchCandidate(id, patch, () => {
       if (beforeRow) setCandidates(prev => prev.map(x => x.id === id ? { ...x, ...beforeRow } as Candidate : x))

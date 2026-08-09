@@ -39,7 +39,7 @@ export const MATCH_COLUMN_WIDTH = 140
 export const MATCH_COL_STATUS: CSSProperties = { width: 108, flexShrink: 0 }
 
 // Other party (client on the candidate side) — a real fixed column.
-export const MATCH_COL_OTHER_PARTY: CSSProperties = { width: MATCH_COLUMN_WIDTH, flexShrink: 0 }
+export const MATCH_COL_OTHER_PARTY: CSSProperties = { width: 128, flexShrink: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }
 
 // Score column (SCORE-COLUMN-1, Danny 09-08 second look, point 3): the score pill
 // is a DATA value ("82%" or a muted dash when unscored) that the user READS, not
@@ -59,4 +59,8 @@ export const MATCH_COL_SCORE: CSSProperties = { width: 56, flexShrink: 0, textAl
 // header's own trailing cell. Width unchanged from before the Score-column split:
 // 140 already comfortably covered the icon set on its own (a wide action rail was
 // never the bug Danny flagged), so it is not re-measured down.
-export const MATCH_COL_ACTIONS: CSSProperties = { width: MATCH_COLUMN_WIDTH, flexShrink: 0 }
+// Sized to what actually renders: open-in-new (24) + pencil (24) + chevron (22)
+// with two 8px gaps = 86. It sat at 140 — 54px of dead space that the vacancy
+// title paid for, which is why that title collapsed to "A..." in a drawer
+// (Danny 09-08). A column reserves what it needs, not a round number.
+export const MATCH_COL_ACTIONS: CSSProperties = { width: 96, flexShrink: 0 }

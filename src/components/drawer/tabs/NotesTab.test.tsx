@@ -355,3 +355,25 @@ describe('NotesTab · timeline', () => {
     expect(screen.getAllByTestId('timeline-connector')).toHaveLength(2)
   })
 })
+
+// POPOUT-HANDOFF-1 (Danny 09-08): popping out from the composer is a HANDOFF —
+// the modal closes and the second screen takes over. Two open editors for one
+// thread means whichever you typed in last silently wins.
+describe('NotesTab · pop-out from the composer hands over', () => {
+  it('closes the composer and opens the second screen in one action', async () => {
+    const user = userEvent.setup()
+    const onPopOut = vi.fn()
+    render(<NotesTab notes={[note()]} labels={labels} showTimeline={false} showConversations={false}
+      onPopOut={onPopOut} />)
+
+    await user.click(screen.getByRole('button', { name: labels.newNote }))
+    // Toolbar pop-out renders first, the composer's own last — click the composer's.
+    // This suite runs without real i18n, so t() yields the bare key.
+    const popOuts = screen.getAllByRole('button', { name: 'openSecondScreen' })
+    await user.click(popOuts[popOuts.length - 1])
+
+    expect(onPopOut).toHaveBeenCalledTimes(1)
+    // The composer is gone — not left open behind the new window.
+    expect(screen.queryByRole('dialog')).toBeNull()
+  })
+})

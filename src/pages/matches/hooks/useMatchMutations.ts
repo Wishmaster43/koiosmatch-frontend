@@ -17,6 +17,7 @@ import type { Dispatch, SetStateAction } from 'react'
 import api from '@/lib/api'
 import { notify } from '@/lib/notify'
 import { initialsOf } from '@/lib/initials'
+import { mergePatch } from '@/lib/mergePatch'
 import type { MatchRow } from '@/types/match'
 import type { Id } from '@/types/common'
 
@@ -53,7 +54,8 @@ export function useMatchMutations({ rows, selected, updateMatch, setSelected }: 
     const beforeRow      = snapshotFields(rows.find(r => r.id === id), patch)
     const beforeSelected = selected && selected.id === id ? snapshotFields(selected, patch) : undefined
     updateMatch(id, patch)
-    setSelected(p => (p && p.id === id ? { ...p, ...patch } : p))
+    // ZZP-MERGE-1: deep-merge (never shallow-spread), see useMatches.updateMatch.
+    setSelected(p => (p && p.id === id ? mergePatch(p as unknown as Record<string, unknown>, patch) as unknown as MatchRow : p))
     return () => {
       if (beforeRow) updateMatch(id, beforeRow)
       if (beforeSelected) setSelected(p => (p && p.id === id ? { ...p, ...beforeSelected } : p))

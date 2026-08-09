@@ -13,6 +13,11 @@ import { PreferencesTab } from './PreferencesZzpTabs'
 import { buildCandidatePatch } from '../data/candidatesShared'
 import type { Candidate } from '@/types/candidate'
 
+// FINANCIAL-GATE-1: the bank-account rows are permission-gated now, so this
+// suite renders as a viewer who HAS candidates.financial.view. The gate itself
+// is proven in BankAccountCard.test.tsx.
+vi.mock('@/context/AuthContext', () => ({ useAuth: () => ({ hasPermission: () => true }) }))
+
 vi.mock('@/lib/datetime', () => ({ useDateFormat: () => ({ formatDate: (v: string) => v, formatDateTime: (v: string) => v, locale: 'nl-NL' }) }))
 vi.mock('@/context/LookupsContext', () => ({
   useLookups: () => ({ candidateTypes: [], statusMeta: () => ({ label: '', color: '#000' }) }),

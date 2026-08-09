@@ -287,6 +287,12 @@ export default function NotesTab({
   // Close the popup — NoteComposer owns its own field state, so this is just "not
   // composing anything" again (mirrors the previous reset(), minus the field resets).
   const closeComposer = () => { setAdding(false); setEditingIdx(null) }
+  // POPOUT-HANDOFF-1 (Danny 09-08: "moet bestaand venster sluiten en de pop-out
+  // direct openen in het versleepbare scherm, zoals bij profieltekst"). Popping
+  // out is a HANDOFF, not a second copy: leaving the modal open behind the new
+  // window gives two editors for one thread, and whichever you type in last
+  // silently wins. Close first, then hand over.
+  const popOutFromComposer = () => { closeComposer(); onPopOut?.() }
   const openEdit = (i: number) => { setEditingIdx(i); setAdding(true) }
   // NoteComposer hands back the finished payload; this is the only place that
   // still decides add-vs-edit (the index into the FULL `notes` array).
@@ -388,7 +394,7 @@ export default function NotesTab({
           open={adding}
           initialNote={editingIdx != null ? notes[editingIdx] : null}
           noteTypes={noteTypes} channels={channels} labels={labels} editorLabels={editorLabels}
-          composerExtra={composerExtra} onPopOut={onPopOut}
+          composerExtra={composerExtra} onPopOut={onPopOut && popOutFromComposer}
           onSave={handleSave} onCancel={closeComposer}
         />
         <div style={sectionBlock}>

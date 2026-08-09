@@ -14,6 +14,7 @@ import type { TFunction } from 'i18next'
 import api, { unwrap } from '@/lib/api'
 import { notifyError } from '@/lib/notify'
 import { extractApiError } from '@/lib/extractApiError'
+import { mergePatch } from '@/lib/mergePatch'
 import { mapCustomer } from '../data/mapCustomer'
 import { mapCustomerBilling, BILLING_API_FIELDS } from './customerBillingAddress'
 import type { Customer, ApiCustomer } from '@/types/customer'
@@ -156,15 +157,18 @@ export function useCustomerRecord({ setCustomers, setTotal, users, t }: Args) {
       return snap
     }
     let beforeCustomer: Record<string, unknown> | undefined
+    // ZZP-MERGE-1: deep-merge (never shallow-spread) so a patch touching only part
+    // of a nested object (e.g. the invoice-address block) keeps that object's other
+    // keys instead of wiping them locally (mirrors updateCandidate).
     setCustomers(prev => prev.map(c => {
       if (c.id !== id) return c
       beforeCustomer = snapshot(c as unknown as Record<string, unknown>)
-      return { ...c, ...patch } as Customer
+      return mergePatch(c as unknown as Record<string, unknown>, patch) as unknown as Customer
     }))
     const beforeSelected = snapshot(selected && selected.id === id ? (selected as unknown as Record<string, unknown>) : undefined)
     const beforeDetail   = snapshot(detail   && detail.id === id   ? (detail   as unknown as Record<string, unknown>) : undefined)
-    setSelected(prev => (prev && prev.id === id ? ({ ...prev, ...patch } as Customer) : prev))
-    setDetail(prev   => (prev && prev.id === id ? ({ ...prev, ...patch } as Customer) : prev))
+    setSelected(prev => (prev && prev.id === id ? (mergePatch(prev as unknown as Record<string, unknown>, patch) as unknown as Customer) : prev))
+    setDetail(prev   => (prev && prev.id === id ? (mergePatch(prev as unknown as Record<string, unknown>, patch) as unknown as Customer) : prev))
 
     const body: Record<string, unknown> = {}
     Object.keys(patch).forEach(k => { if (FIELD_MAP[k]) body[FIELD_MAP[k]] = patch[k] })

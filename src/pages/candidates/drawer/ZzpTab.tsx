@@ -47,6 +47,7 @@ import { useTranslation } from 'react-i18next'
 import EditableFieldTableJs from '@/components/forms/EditableFieldTable'
 import { kvkValue, vatValue } from '@/components/drawer/contactLinks'
 import { formatIban, normalizeIban } from '@/lib/iban'
+import { useAuth } from '@/context/AuthContext'
 import { useConfirm } from '@/hooks/useConfirm'
 import { notifyError } from '@/lib/notify'
 import { useNumberingEntities } from '@/lib/useNumberingEntities'
@@ -138,10 +139,13 @@ export function ZzpTab({ c, onSave }: { c: Candidate; onSave?: (v: Record<string
   // `digits:8` and `freelance.vat_number` as `/^NL\d{9}B\d{2}$/`, so a non-Dutch
   // number is refused server-side regardless of this setting — the honest hint under
   // the card says exactly that instead of pretending the save will land.
+  const auth = useAuth()
   const identifiers = useIdentifierValidation()
   const zzpCountry = (zzp.country as string) ?? ''
   const zzpCountryCode = resolveCountryCode(zzpCountry)
   const backendNlOnly = zzpCountryCode !== null && zzpCountryCode !== 'NL'
+  // FINANCIAL-GATE-1: same permission as the candidate's private bank card.
+  const canSeeFinancial = auth?.hasPermission?.('candidates.financial.view') ?? false
   const fields = [
     { key: 'bedrijfsnaam', label: t('zzp.companyName'), group: t('zzp.groupCompany') },
     // KVK/BTW render as real hyperlinks in read mode (task 1.1.2/1.1.3) — same
@@ -162,10 +166,17 @@ export function ZzpTab({ c, onSave }: { c: Candidate; onSave?: (v: Record<string
     // client-side mod-97 check: the backend validates it (422 "Het
     // IBAN-controlegetal klopt niet.", measured on `freelance.iban`) and the
     // drawer's patchCandidate already surfaces that message via extractApiError.
-    { key: 'iban', label: t('zzp.iban'), group: t('zzp.groupInvoicing'), mono: true },
-    // Danny 2026-08-09, point 2: the tenaamstelling next to the existing IBAN —
-    // one row added, nothing else in this block moved.
-    { key: 'tenaamstelling', label: t('zzp.accountHolderName'), group: t('zzp.groupInvoicing') },
+    // FINANCIAL-GATE-1: the account number + holder are gated on
+    // `candidates.financial.view` (Danny 09-08). The backend nulls both fields
+    // without it, so showing the rows would only ever render two empty values a
+    // viewer cannot explain or fill. Same permission as the candidate's private
+    // account card — one rule, both accounts.
+    ...(canSeeFinancial ? [
+      { key: 'iban', label: t('zzp.iban'), group: t('zzp.groupInvoicing'), mono: true },
+      // Danny 2026-08-09, point 2: the tenaamstelling next to the existing IBAN —
+      // one row added, nothing else in this block moved.
+      { key: 'tenaamstelling', label: t('zzp.accountHolderName'), group: t('zzp.groupInvoicing') },
+    ] : []),
   ]
   const blockFields = (group: string) => fields.filter(f => f.group === group).map(f => ({ ...f, group: undefined }))
 
