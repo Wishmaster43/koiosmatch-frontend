@@ -2,10 +2,10 @@
  * MemorySettings — free-text notes the AI keeps in mind (stored as `memory_notes`).
  * Migrated to the settings kit: the scaffold owns the header + dirty-aware save.
  *
- * ACTIONS-SCOPE-1 (Danny 09-08): assistModes is pinned to improve/summarize
- * only - these are standing facts about the tenant fed to the AI as context,
- * not a conversation, so "Actiepunten" (which belongs to a NOTE yielding
- * follow-up tasks, section 3A) does not apply here.
+ * These are standing facts about the tenant fed to the AI as context, not a
+ * conversation, so this field never opts into "Actiepunten" - it rides
+ * RichTextAssistBar's own improve+summarize-only default
+ * (ACTIONS-SCOPE-DEFAULT-FLIP), no per-field override needed.
  */
 import { useTranslation } from 'react-i18next'
 import { useSettingsForm } from '../lib/useSettingsForm'
@@ -23,7 +23,6 @@ export default function MemorySettings() {
       <RichTextEditor value={form.values.memory_notes}
         onChange={v => form.set('memory_notes', v)}
         minHeight={240} resizable
-        assistModes={['improve', 'summarize']}
         placeholder={t('memory.placeholder')} />
     </SettingsScaffold>
   )

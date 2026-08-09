@@ -12,8 +12,9 @@ import type { VacancyDetail } from '@/types/vacancy'
 // RichTextEditor/SafeHtml are heavy third-party-backed editors — stub with a
 // minimal controlled surface so this test only exercises DescriptionTab's own
 // state, mirroring the candidate ProfileTab.test.tsx convention. `assistModes`
-// is surfaced as a data attribute so ACTIONS-SCOPE-1 (no actiepunten on a
-// description field) can be asserted without mounting the real assist bar.
+// is surfaced as a data attribute so ACTIONS-SCOPE-DEFAULT-FLIP (no actiepunten
+// on a description field, via the shared default — no per-field override) can
+// be asserted without mounting the real assist bar.
 vi.mock('@/components/ui/RichTextEditor', () => ({
   default: ({ value, onChange, assistModes }: { value: string; onChange: (v: string) => void; assistModes?: string[] }) => (
     <textarea aria-label="rich-text-editor" value={value} onChange={e => onChange(e.target.value)}
@@ -50,10 +51,12 @@ describe('DescriptionTab · edit + save', () => {
     expect(screen.queryByTestId('safe-html')).not.toBeInTheDocument()
   })
 
-  it('requests only improve/summarize from the shared assist bar (ACTIONS-SCOPE-1: a vacancy description is a description, not a conversation)', () => {
+  it('passes no explicit assistModes override — a vacancy description is a description, not a conversation, so it inherits the shared improve+summarize-only default', () => {
     render(<DescriptionTab vacancy={vacancy} onUpdate={vi.fn()} />)
     fireEvent.click(screen.getByTitle('common:edit'))
-    expect(screen.getByLabelText('rich-text-editor')).toHaveAttribute('data-assist-modes', 'improve,summarize')
+    // The mock only sets the attribute when a value is passed — its absence
+    // proves NO explicit override reaches RichTextEditor (undefined `assistModes`).
+    expect(screen.getByLabelText('rich-text-editor')).not.toHaveAttribute('data-assist-modes')
   })
 
   it('save persists the edited description via onUpdate(id, { description })', () => {

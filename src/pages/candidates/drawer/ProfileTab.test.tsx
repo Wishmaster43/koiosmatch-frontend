@@ -64,11 +64,13 @@ describe('ProfileTab · one tab, one pencil per card', () => {
     expect(screen.getAllByTitle('Bewerken')).toHaveLength(4)
   })
 
-  // KOIOS-GENERATE-1 (Danny 09-08): "Actiepunten kan bij profiel tekst weg" — a
-  // conversation-note affordance, not a profile description. The profile text
-  // instead gets Verbeteren/Samenvatten plus "Genereer met Koios", scoped to
-  // THIS candidate's own id (never a hardcoded/placeholder entity).
-  it('opens the profile text with Verbeteren/Samenvatten + Koios generate — never Actiepunten', async () => {
+  // ACTIONS-SCOPE-DEFAULT-FLIP (Danny 09-08): "Actiepunten kan bij profiel tekst
+  // weg" — a conversation-note affordance, not a profile description. ProfileTab
+  // no longer passes an explicit `assistModes` override at all (§11 one source);
+  // it inherits RichTextAssistBar's own improve+summarize-only default, which is
+  // exactly this rule. Only "Genereer met Koios" stays an explicit per-field
+  // prop, scoped to THIS candidate's own id (never a hardcoded/placeholder entity).
+  it('passes no explicit assistModes override (inherits the improve+summarize-only default) + Koios generate scoped to this candidate', async () => {
     const user = userEvent.setup()
     render(<ProfileTab c={{ ...candidate, id: 'cand-42' } as unknown as Candidate} />)
     // Persoonlijk · Adres · Contact · profieltekst — profieltekst's pencil is last.
@@ -76,7 +78,7 @@ describe('ProfileTab · one tab, one pencil per card', () => {
     await user.click(pencils[pencils.length - 1])
 
     const rte = screen.getByTestId('summary-rte')
-    expect(rte.dataset.modes).toBe('improve,summarize')
+    expect(rte.dataset.modes).toBe('')
     expect(rte.dataset.generate).toBe('candidate:cand-42')
   })
 

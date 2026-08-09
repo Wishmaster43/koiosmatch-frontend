@@ -14,9 +14,9 @@ import '@/i18n'
 import OpportunityDescriptionBlock from './OpportunityDescriptionBlock'
 
 // Minimal stand-in for the Tiptap editor — a plain textarea wired to value/onChange.
-// `assistModes` is surfaced as a data attribute so ACTIONS-SCOPE-1 (no
-// actiepunten on a description field) can be asserted without mounting the
-// real assist bar.
+// `assistModes` is surfaced as a data attribute so ACTIONS-SCOPE-DEFAULT-FLIP (no
+// actiepunten on a description field, via the shared default — no per-field
+// override) can be asserted without mounting the real assist bar.
 vi.mock('@/components/ui/RichTextEditor', () => ({
   default: ({ value, onChange, assistModes }: { value?: string; onChange: (v: string) => void; assistModes?: string[] }) => (
     <textarea data-testid="rte" value={value ?? ''} onChange={e => onChange(e.target.value)}
@@ -53,11 +53,13 @@ describe('OpportunityDescriptionBlock · pencil → edit → save/cancel', () =>
     expect(screen.getByTestId('rte')).toHaveValue('<p>Origineel</p>')
   })
 
-  it('requests only improve/summarize from the shared assist bar (ACTIONS-SCOPE-1: the Kanstekst is a description, not a conversation)', async () => {
+  it('passes no explicit assistModes override — the Kanstekst is a description, not a conversation, so it inherits the shared improve+summarize-only default', async () => {
     const user = userEvent.setup()
     render(<OpportunityDescriptionBlock value="<p>Origineel</p>" onSave={() => {}} />)
     await user.click(screen.getByTitle('Bewerken'))
-    expect(screen.getByTestId('rte')).toHaveAttribute('data-assist-modes', 'improve,summarize')
+    // The mock only sets the attribute when a value is passed — its absence
+    // proves NO explicit override reaches RichTextEditor (undefined `assistModes`).
+    expect(screen.getByTestId('rte')).not.toHaveAttribute('data-assist-modes')
   })
 
   it('saves the edited draft and leaves edit mode', async () => {

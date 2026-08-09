@@ -73,14 +73,16 @@ describe('CandidateSummaryPopout', () => {
     expect(screen.getByTestId('text-popout-save')).toBeDisabled()
   })
 
-  // KOIOS-GENERATE-1 (Danny 09-08): the drill-down's ProfileTab and this popped-out
-  // window edit the SAME field — both must offer the identical Koios affordances
-  // (Verbeteren/Samenvatten + generate, never Actiepunten), scoped to this candidate.
-  it('offers the same Koios assist modes + generate entity/id as the drill-down', () => {
+  // ACTIONS-SCOPE-DEFAULT-FLIP (Danny 09-08): the drill-down's ProfileTab and this
+  // popped-out window edit the SAME field — both must offer the identical Koios
+  // affordances (Verbeteren/Samenvatten + generate, never Actiepunten). Neither
+  // passes an explicit `assistModes` override anymore (§11 one source); both
+  // inherit RichTextAssistBar's own improve+summarize-only default.
+  it('passes no explicit assistModes override (same shared default as the drill-down) + generate entity/id', () => {
     liteState.candidate = { id: 'c1', name: 'Lieke Blom', initials: 'LB', summary: '<p>Ervaren</p>' }
     render(<CandidateSummaryPopout id="c1" />)
     const meta = screen.getByTestId('summary-rte-meta')
-    expect(meta.dataset.modes).toBe('improve,summarize')
+    expect(meta.dataset.modes).toBe('')
     expect(meta.dataset.generate).toBe('candidate:c1')
   })
 

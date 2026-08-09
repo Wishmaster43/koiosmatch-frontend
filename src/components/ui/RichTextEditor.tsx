@@ -58,7 +58,9 @@ interface RichTextEditorProps {
   // same three props. Opt out with `assist={false}` when the host supplies its
   // own (the note composer does).
   assist?: boolean
-  // Which assist modes the bar offers; `[]` = dictation mic only.
+  // Which assist modes the bar offers; unset = RichTextAssistBar's own default
+  // (improve+summarize, no actiepunten — ACTIONS-SCOPE-DEFAULT-FLIP), `[]` =
+  // dictation mic only.
   assistModes?: RichTextAssistMode[]
   // KOIOS-GENERATE-1 (Danny 09-08): forwarded straight to RichTextAssistBar's own
   // `generate` prop — omit on any field the backend cannot generate for (§3).

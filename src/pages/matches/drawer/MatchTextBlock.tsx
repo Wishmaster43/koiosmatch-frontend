@@ -32,12 +32,12 @@
  * (the Koios credit balance is empty), an account state, not a rights problem.
  * See richTextAssistApi.ts's header for the full measured contract. This block
  * still doesn't pass `assistGenerate` (no Generate button here) — that is a
- * separate, not-yet-decided step, unrelated to the ACTIONS-SCOPE-1 note below.
+ * separate, not-yet-decided step.
  *
- * ACTIONS-SCOPE-1 (Danny 09-08): `assistModes` is pinned to Verbeteren/
- * Samenvatten only — a match text is a description of the placement, not a
- * conversation, so "Actiepunten" (which belongs to a NOTE yielding follow-up
- * tasks, §3A) does not apply here.
+ * A match text is a description of the placement, not a conversation, so it
+ * never opts into "Actiepunten" — it just rides RichTextAssistBar's own
+ * improve+summarize-only default (ACTIONS-SCOPE-DEFAULT-FLIP), no per-field
+ * override needed.
  */
 import { useState, useEffect } from 'react'
 import type { ComponentType } from 'react'
@@ -116,8 +116,7 @@ export default function MatchTextBlock({ value, present, loading, save }: Props)
       {loading ? (
         <div style={{ ...blockStyle, padding: '10px 12px', fontSize: 12, color: 'var(--text-muted)' }}>{t('drawer.contract.loading')}</div>
       ) : editing ? (
-        // ACTIONS-SCOPE-1: no "Actiepunten" mode — a match text is a description, not a conversation.
-        <RichTextEditor value={draft} onChange={setDraft} assistModes={['improve', 'summarize']} />
+        <RichTextEditor value={draft} onChange={setDraft} />
       ) : value ? (
         <div style={{ ...blockStyle, padding: '10px 12px', maxHeight: 220, overflow: 'auto' }}>
           <SafeHtml html={value} style={{ fontSize: 12, color: 'var(--text)', lineHeight: 1.5 }} />

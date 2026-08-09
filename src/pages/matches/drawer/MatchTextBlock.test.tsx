@@ -68,7 +68,7 @@ describe('MatchTextBlock', () => {
     expect(screen.getByText('Oud')).toBeInTheDocument()
   })
 
-  it('mounts the shared Koios assist toolbar on the editor while editing, WITHOUT an actiepunten mode (ACTIONS-SCOPE-1: a match text is a description, not a conversation)', async () => {
+  it('mounts the shared Koios assist toolbar on the editor while editing, WITHOUT an actiepunten mode (a match text is a description, not a conversation — the shared improve+summarize-only default, no per-field override)', async () => {
     const user = userEvent.setup()
     render(<MatchTextBlock value="<p>Oud</p>" present loading={false} save={vi.fn()} />)
 
@@ -80,7 +80,9 @@ describe('MatchTextBlock', () => {
     // visible on the editor toolbar now, no click-to-expand step.
     expect(screen.getByTestId('rte-assist-improve')).toBeEnabled()
     expect(screen.getByTestId('rte-assist-summarize')).toBeEnabled()
-    // ACTIONS-SCOPE-1: no action-item extraction on a description field.
+    // ACTIONS-SCOPE-DEFAULT-FLIP: no action-item extraction on a description
+    // field — MatchTextBlock passes no `assistModes` override at all now, so
+    // this proves RichTextAssistBar's OWN default already excludes it.
     expect(screen.queryByTestId('rte-assist-actions')).toBeNull()
   })
 

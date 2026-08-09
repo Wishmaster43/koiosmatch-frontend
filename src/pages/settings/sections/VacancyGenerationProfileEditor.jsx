@@ -12,10 +12,10 @@
  * `contract_type_slugs[]` / `function_group_ids[]` / `industry_ids[]` contract;
  * see the VacancyGenerationSettings hand-off note for backend-Claude.
  *
- * ACTIONS-SCOPE-1 (Danny 09-08): both rich-text fields below pin assistModes to
- * improve/summarize only - a generation template/brand-instructions block is
- * prompt-engine config, not a conversation, so "Actiepunten" (which belongs to
- * a NOTE yielding follow-up tasks, section 3A) does not apply here.
+ * A generation template/brand-instructions block is prompt-engine config, not
+ * a conversation, so neither rich-text field below opts into "Actiepunten" -
+ * both ride RichTextAssistBar's own improve+summarize-only default
+ * (ACTIONS-SCOPE-DEFAULT-FLIP), no per-field override needed.
  */
 import { useTranslation } from 'react-i18next'
 import { useState } from 'react'
@@ -125,8 +125,7 @@ export default function VacancyGenerationProfileEditor({ draft, onChange, conten
 
         <div>
           <label style={labelStyle}>{t('vacancyGenerationSettings.templateLabel')}</label>
-          <RichTextEditor value={draft.content.template} onChange={v => setContent('template', v)} minHeight={120}
-            assistModes={['improve', 'summarize']} />
+          <RichTextEditor value={draft.content.template} onChange={v => setContent('template', v)} minHeight={120} />
           <p style={hintStyle}>{t('vacancyGenerationSettings.templateHint')}</p>
         </div>
 
@@ -189,8 +188,7 @@ export default function VacancyGenerationProfileEditor({ draft, onChange, conten
 
         <div>
           <label style={labelStyle}>{t('vacancyGenerationSettings.brandLabel')}</label>
-          <RichTextEditor value={draft.content.brand_instructions} onChange={v => setContent('brand_instructions', v)} minHeight={80}
-            assistModes={['improve', 'summarize']} />
+          <RichTextEditor value={draft.content.brand_instructions} onChange={v => setContent('brand_instructions', v)} minHeight={80} />
         </div>
 
         {/* Forbidden words — free-text chip adder (mirrors the API-key IP whitelist). */}

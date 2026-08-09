@@ -168,11 +168,15 @@ export default function MatchModal({
               <div>
                 <div style={cardHead}>{t('placement.remarks')}</div>
                 <div style={cardBox}>
+                  {/* ACTIONS-SCOPE-DEFAULT-FLIP: "Opmerkingen" reads as a
+                      conversation (like a note), not a description — keep all
+                      three Koios modes, including Actiepunten, explicitly. */}
                   <CollapsibleRichText
                     t={t} value={form.remarks} onChange={form.setRemarks}
                     expanded={form.remarksExpanded} setExpanded={form.setRemarksExpanded}
                     editing={form.remarksEditing} setEditing={form.setRemarksEditing}
                     placeholder={t('placement.remarksAdd')}
+                    assistModes={['improve', 'summarize', 'actions']}
                   />
                 </div>
               </div>

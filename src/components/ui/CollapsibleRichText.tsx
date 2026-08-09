@@ -17,6 +17,7 @@ import { useRef } from 'react'
 import { Pencil, X } from 'lucide-react'
 import type { TFunction } from 'i18next'
 import RichTextEditor from './RichTextEditor'
+import type { RichTextAssistMode } from './richtext/richTextAssistApi'
 
 export interface CollapsibleRichTextProps {
   t: TFunction
@@ -39,10 +40,19 @@ export interface CollapsibleRichTextProps {
    * with a colliding footer label passes its own card heading instead.
    */
   ariaLabel?: string
+  /**
+   * ACTIONS-SCOPE-DEFAULT-FLIP (Danny 09-08): passthrough to RichTextEditor's own
+   * `assistModes`. Most CollapsibleRichText callers are DESCRIPTIONS (department,
+   * location, company, candidate profile, opportunity) — leave this unset and they
+   * inherit RichTextAssistBar's shared default (improve+summarize, no actiepunten).
+   * The two callers that read as a CONVERSATION (+Match's Opmerkingen, the vacancy
+   * attachments note) pass `['improve', 'summarize', 'actions']` explicitly.
+   */
+  assistModes?: RichTextAssistMode[]
 }
 
 export default function CollapsibleRichText({
-  t, value, onChange, expanded, setExpanded, editing, setEditing, placeholder, ariaLabel,
+  t, value, onChange, expanded, setExpanded, editing, setEditing, placeholder, ariaLabel, assistModes,
 }: CollapsibleRichTextProps) {
   // Snapshot at open, so ✕ can revert unsaved edits (form-local, no server call).
   const openedWithRef = useRef('')
@@ -62,9 +72,11 @@ export default function CollapsibleRichText({
         </button>
       </div>
       {/* Rich-text block (house rule, CLAUDE.md §3A/§4), not a bare textarea —
-          stored/POSTed as sanitised HTML. */}
+          stored/POSTed as sanitised HTML. `assistModes` forwards straight through
+          to RichTextEditor; unset means "inherit the shared default" (see the
+          prop's own doc comment above). */}
       <RichTextEditor value={value} onChange={onChange}
-        expanded={expanded} onToggleExpand={() => setExpanded(v => !v)} />
+        expanded={expanded} onToggleExpand={() => setExpanded(v => !v)} assistModes={assistModes} />
     </div>
   ) : (
     // Collapsed ghost affordance (dashed border) — shows a one-line preview when

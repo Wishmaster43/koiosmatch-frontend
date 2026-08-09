@@ -25,10 +25,10 @@ const groupTitle: CSSProperties = { fontSize: 11, fontWeight: 600, textTransform
  * met Koios" flow, and its own independent pencil/save/cancel toggle as before —
  * only the state now lives in useVacancyDescription instead of the field-grid hook.
  *
- * ACTIONS-SCOPE-1 (Danny 09-08): `assistModes` is pinned to Verbeteren/
- * Samenvatten only — a vacancy description is a description of the role, not a
- * conversation, so "Actiepunten" (which belongs to a NOTE yielding follow-up
- * tasks, §3A) does not apply here.
+ * A vacancy description is a description of the role, not a conversation, so
+ * it never opts into "Actiepunten" — it rides RichTextAssistBar's own
+ * improve+summarize-only default (ACTIONS-SCOPE-DEFAULT-FLIP), no per-field
+ * override needed.
  */
 export default function DescriptionTab({ vacancy: v, onUpdate }: { vacancy: VacancyDetail; onUpdate?: UpdateFn }) {
   const { t } = useTranslation('vacancies')
@@ -60,8 +60,7 @@ export default function DescriptionTab({ vacancy: v, onUpdate }: { vacancy: Vaca
           explicit "Toepassen" (never a silent overwrite of the saved text). */}
       <VacancyGenerateFlow vacancy={v} onApply={applyGeneratedConcept} />
       {descEditing
-        ? <RichTextEditor key={descKey} value={description} onChange={setDescription} expanded={descExpanded} onToggleExpand={() => setDescExpanded(x => !x)}
-            assistModes={['improve', 'summarize']} />
+        ? <RichTextEditor key={descKey} value={description} onChange={setDescription} expanded={descExpanded} onToggleExpand={() => setDescExpanded(x => !x)} />
         : (v.description
             // Full height — the block grows with the text; the drawer body scrolls
             // when it overflows (Danny 23-07: no inner 220px scrollbox on a full tab).

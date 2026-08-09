@@ -122,9 +122,13 @@ vi.mock('@/components/actionrules', () => ({ useActionRulePreflight: () => ({ de
 vi.mock('@/lib/notify', () => ({ notifyError: vi.fn(), notifySuccess: vi.fn() }))
 // Stand-in for the Tiptap editor (its own internals are covered elsewhere) — a
 // plain textarea wired to value/onChange, tagged so tests can find it.
+// ACTIONS-SCOPE-DEFAULT-FLIP: `assistModes` is surfaced as a data attribute so
+// the "Opmerkingen" conversation-mode override can be asserted without
+// mounting the real assist bar.
 vi.mock('@/components/ui/RichTextEditor', () => ({
-  default: ({ value, onChange }: { value?: string; onChange: (v: string) => void }) => (
-    <textarea data-testid="rte" value={value ?? ''} onChange={e => onChange(e.target.value)} />
+  default: ({ value, onChange, assistModes }: { value?: string; onChange: (v: string) => void; assistModes?: string[] }) => (
+    <textarea data-testid="rte" value={value ?? ''} onChange={e => onChange(e.target.value)}
+      data-assist-modes={assistModes ? assistModes.join(',') : ''} />
   ),
 }))
 
@@ -321,6 +325,17 @@ describe('MatchModal · opmerkingen starts collapsed (job 23, Danny 24-07)', () 
     await screen.findByRole('dialog')
     await user.click(screen.getByRole('button', { name: 'placement.remarksAdd' }))
     expect(screen.getByTestId('rte')).toBeInTheDocument()
+  })
+
+  // ACTIONS-SCOPE-DEFAULT-FLIP (Danny 09-08): "Opmerkingen" reads as a
+  // conversation, not a description — it must keep Actiepunten even though the
+  // shared RichTextAssistBar default is now improve+summarize only.
+  it('keeps all three Koios assist modes on Opmerkingen, including Actiepunten (a conversation, not a description)', async () => {
+    const user = userEvent.setup()
+    render(<MatchModal candidateId="cand-1" onClose={noop} onCreated={noop} />)
+    await screen.findByRole('dialog')
+    await user.click(screen.getByRole('button', { name: 'placement.remarksAdd' }))
+    expect(screen.getByTestId('rte')).toHaveAttribute('data-assist-modes', 'improve,summarize,actions')
   })
 })
 

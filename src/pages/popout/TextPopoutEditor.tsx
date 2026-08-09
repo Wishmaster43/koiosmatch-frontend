@@ -9,13 +9,14 @@
  * KOIOS-ASSIST-TEXTFIELDS — the shared dictation mic + Koios assist bar, without
  * a single prop of its own (`assist` defaults to true).
  *
- * KOIOS-GENERATE-1 (Danny 09-08): `assistModes` is hardcoded to Verbeteren/
- * Samenvatten (no Actiepunten) — every field this popout writes today or in the
- * near future (profile text, later a customer/location description, a match
- * text) is a description-style field, never a conversation thread, so
- * "extract action items" never fits here (that stays the note composer's own
- * mode set). `generate` mirrors the drill-down's own field one-for-one — see
- * this component's `generate` prop.
+ * KOIOS-GENERATE-1 (Danny 09-08): every field this popout writes today or in
+ * the near future (profile text, later a customer/location description, a
+ * match text) is a description-style field, never a conversation thread, so
+ * it never opts into Actiepunten — it rides RichTextAssistBar's own
+ * improve+summarize-only default (ACTIONS-SCOPE-DEFAULT-FLIP), no per-field
+ * override needed (that mode set stays the note composer's own). `generate`
+ * mirrors the drill-down's own field one-for-one — see this component's
+ * `generate` prop.
  *
  * CLOSING NEVER EATS TEXT (Danny's explicit requirement): a native beforeunload
  * guard fires while the draft is dirty, so closing or reloading this window
@@ -81,8 +82,7 @@ export default function TextPopoutEditor({ value, onChange, onSave, dirty, gener
     <div style={{ display: 'flex', flexDirection: 'column', gap: 10, height: '100%', minHeight: 0 }}>
       {/* `fill` makes the editor the one growing item, so a resized window grows
           the WRITING space instead of empty padding (mirrors the note composer). */}
-      <RichTextEditor value={value} onChange={onChange} fill minHeight={220}
-        assistModes={['improve', 'summarize']} assistGenerate={generate} />
+      <RichTextEditor value={value} onChange={onChange} fill minHeight={220} assistGenerate={generate} />
 
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10, flexShrink: 0 }}>
         {/* Honest, announced save state — never a silent "did that land?" window. */}

@@ -129,10 +129,9 @@ export default function ProfileTab({ c, onEditSave, autoEditSignal }: { c: Candi
         {summaryEditing
           ? <RichTextEditor value={summary} onChange={changeSummary}
               expanded={summaryExpanded} onToggleExpand={() => setSummaryExpanded(v => !v)}
-              // KOIOS-GENERATE-1 (Danny 09-08): the profile text offers Verbeteren/
-              // Samenvatten + "Genereer met Koios" — never Actiepunten, which belongs
-              // to a conversation note, not a profile description.
-              assistModes={['improve', 'summarize']}
+              // KOIOS-GENERATE-1 (Danny 09-08): the profile text also offers
+              // "Genereer met Koios" — Actiepunten stays off via the shared
+              // improve+summarize-only default (ACTIONS-SCOPE-DEFAULT-FLIP).
               assistGenerate={{ entity: 'candidate', id: String(c.id) }} />
           : (summary
               ? <div style={{ ...blockStyle, padding: '10px 12px', maxHeight: 220, overflow: 'auto' }}>

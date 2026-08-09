@@ -67,11 +67,21 @@ describe('RichTextAssistBar', () => {
   afterEach(() => { delete (window as { SpeechRecognition?: unknown }).SpeechRecognition })
 
   it('shows the mode buttons directly — no click-to-expand step (Danny 09-08)', () => {
-    render(<Host initial="<p>tekst</p>" />)
+    render(<Host initial="<p>tekst</p>" modes={['improve', 'summarize', 'actions']} />)
     // No toggle to click first — every mode button is already in the document.
     expect(screen.getByTestId('rte-assist-improve')).toBeInTheDocument()
     expect(screen.getByTestId('rte-assist-summarize')).toBeInTheDocument()
     expect(screen.getByTestId('rte-assist-actions')).toBeInTheDocument()
+  })
+
+  // ACTIONS-SCOPE-DEFAULT-FLIP (Danny 09-08): the majority of free-text fields
+  // are descriptions, not conversations — a host that passes NO explicit
+  // `modes` prop must offer improve+summarize only, never Actiepunten unasked.
+  it('defaults to improve+summarize only when the host passes no explicit modes', () => {
+    render(<Host initial="<p>tekst</p>" />)
+    expect(screen.getByTestId('rte-assist-improve')).toBeInTheDocument()
+    expect(screen.getByTestId('rte-assist-summarize')).toBeInTheDocument()
+    expect(screen.queryByTestId('rte-assist-actions')).toBeNull()
   })
 
   it('POSTs /ai/koios/notes/assist with the field text, mode and language — and never applies before Overnemen', async () => {
@@ -124,7 +134,7 @@ describe('RichTextAssistBar', () => {
   it('POSTs mode: "actions" and hands a non-empty result off to the shared execute wizard', async () => {
     const user = userEvent.setup()
     post.mockResolvedValue({ data: { items: [{ title: 'Bel terug', type: 'task', due_date: null, note_excerpt: null }] } })
-    render(<Host initial="<p>bel de kandidaat morgen terug</p>" />)
+    render(<Host initial="<p>bel de kandidaat morgen terug</p>" modes={['improve', 'summarize', 'actions']} />)
 
     await user.click(screen.getByTestId('rte-assist-actions'))
 
@@ -139,7 +149,7 @@ describe('RichTextAssistBar', () => {
   it('an EMPTY actions result shows a calm "no items" notice, no execute wizard, no Overnemen', async () => {
     const user = userEvent.setup()
     post.mockResolvedValue({ data: { items: [] } })
-    render(<Host initial="<p>niets te doen hier</p>" />)
+    render(<Host initial="<p>niets te doen hier</p>" modes={['improve', 'summarize', 'actions']} />)
 
     await user.click(screen.getByTestId('rte-assist-actions'))
 
@@ -149,7 +159,7 @@ describe('RichTextAssistBar', () => {
   })
 
   it('disables the modes with a VISIBLE reason while the field is still empty (no fake affordance)', async () => {
-    render(<Host initial="<p></p>" />)
+    render(<Host initial="<p></p>" modes={['improve', 'summarize', 'actions']} />)
 
     expect(screen.getByTestId('rte-assist-improve')).toBeDisabled()
     expect(screen.getByTestId('rte-assist-actions')).toBeDisabled()

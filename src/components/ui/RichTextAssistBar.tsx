@@ -28,6 +28,20 @@
  * notes (§3: a disabled-with-reason button is honest, a hidden one is not) —
  * and 'actions' is a first-class third mode with the same execute wizard.
  *
+ * ACTIONS-SCOPE-DEFAULT-FLIP (Danny 09-08, verbatim: "Actiepunten volgen uit
+ * een GESPREK, niet uit een omschrijving. De meerderheid van de velden zijn
+ * omschrijvingen, dus de standaard hoort andersom"): the default `modes` below
+ * is improve+summarize ONLY — Actiepunten no longer ships on a field unless the
+ * caller explicitly opts in with `modes={['improve', 'summarize', 'actions']}`.
+ * Before this, every new free-text field got Actiepunten unasked, and each
+ * conversation-vs-description call had to be un-set per field (profile text,
+ * match text, opportunity text, vacancy description, five settings screens all
+ * carried the same `assistModes={['improve', 'summarize']}` override on the
+ * SAME day this shipped — that repetition is exactly the smell that flipped the
+ * default instead). The only place Actiepunten stays ON by default is
+ * NoteAssistSection (the note composer's own richer assist block below the
+ * editor, not this bar) — the one field that genuinely is a conversation.
+ *
  * KNOWN FOOTPRINT CHANGE: this rides on ~30 editors app-wide, several of them
  * on the candidate/customer drill-downs a 2026-08-08 memory note freezes
  * ("niets wijzigen zonder overleg, uitsluiten in brede sweeps"). The assist
@@ -84,9 +98,13 @@ interface RichTextAssistBarProps {
   onChange: (html: string) => void
   // Dictation + spellcheck language (2-letter code) — the editor's own picker.
   language?: string
-  // Which assist modes to offer. An EMPTY array renders the mic alone — used by
-  // the note composer, whose richer assist section (with the K0 Wizard/Auto
-  // toggle) already owns this exact same mode set below the editor.
+  // Which assist modes to offer. DEFAULT (prop omitted) is improve+summarize
+  // ONLY — see ACTIONS-SCOPE-DEFAULT-FLIP below, most fields are descriptions,
+  // not conversations. Pass `['improve', 'summarize', 'actions']` explicitly for
+  // a conversation-like field (a note, +Match's Opmerkingen). An EMPTY array
+  // renders the mic alone — used by the note composer, whose richer assist
+  // section (with the K0 Wizard/Auto toggle) already owns this exact same mode
+  // set below the editor.
   modes?: RichTextAssistMode[]
   // KOIOS-GENERATE-1: which entity/id to generate a fresh suggestion FROM. Omit
   // entirely on a field the backend cannot generate for — see the file header.
@@ -115,7 +133,7 @@ const primaryBtn: CSSProperties = { display: 'inline-flex', alignItems: 'center'
 const ghostBtn: CSSProperties = { display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 12, fontWeight: 500,
   padding: '5px 11px', borderRadius: 7, cursor: 'pointer', background: 'none', color: 'var(--text-muted)', border: '1px solid var(--border)' }
 
-export default function RichTextAssistBar({ value, onChange, language, modes = ['improve', 'summarize', 'actions'], generate }: RichTextAssistBarProps) {
+export default function RichTextAssistBar({ value, onChange, language, modes = ['improve', 'summarize'], generate }: RichTextAssistBarProps) {
   const { t } = useTranslation('common')
   const { mode, status, result, errorMessage, tone, run, runGenerate, discard } = useRichTextAssist(language)
   const hasModes = modes.length > 0

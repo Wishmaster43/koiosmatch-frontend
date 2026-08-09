@@ -74,9 +74,13 @@ export default function AttachmentsCard({ files, onAddFile, onRemoveFile, noteTe
         <div style={{ fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em', color: 'var(--text-muted)', marginBottom: 6 }}>
           {t('modal.attachments.noteLabel')}
         </div>
+        {/* ACTIONS-SCOPE-DEFAULT-FLIP: this note reads as a conversation (like a
+            NotesTab note), not a description — keep all three Koios modes,
+            including Actiepunten, explicitly. */}
         <CollapsibleRichText t={t} value={noteText} onChange={onNoteChange}
           expanded={noteExpanded} setExpanded={setNoteExpanded} editing={noteEditing} setEditing={setNoteEditing}
-          placeholder={t('modal.attachments.notePlaceholder')} ariaLabel={t('modal.attachments.noteLabel')} />
+          placeholder={t('modal.attachments.notePlaceholder')} ariaLabel={t('modal.attachments.noteLabel')}
+          assistModes={['improve', 'summarize', 'actions']} />
       </div>
     </div>
   )
