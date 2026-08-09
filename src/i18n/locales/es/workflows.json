@@ -50,7 +50,10 @@
     "typeLabel": "Tipo",
     "itemNamePlaceholder": "nombre_elemento",
     "addItem": "Añadir elemento",
-    "operator": "Operador"
+    "operator": "Operador",
+    "multiselectSearch": "Buscar…",
+    "multiselectNoResults": "Sin resultados.",
+    "multiselectFreeEntry": "Escribe un valor y pulsa Enter para añadirlo."
   },
   "scheduleModal": {
     "title": "Configurar programación",

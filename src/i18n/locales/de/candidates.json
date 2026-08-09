@@ -993,7 +993,9 @@
     "hoursMaxPlaceholder": "Max",
     "availableFromFilter": "Einsetzbar ab",
     "functionNotInLookup": "Funktion '{{title}}' steht nicht in der Funktionsliste — es werden alle Funktionen durchsucht.",
-    "apply": "Bewerben"
+    "apply": "Bewerben",
+    "resetFilters": "Filter zurücksetzen",
+    "hoursRangeValue": "{{min}}–{{max}}"
   },
   "erase": {
     "trashView": "Papierkorb",
@@ -1265,6 +1267,7 @@
   },
   "popout": {
     "windowTitle": "Notizen — {{name}}",
-    "loadError": "Dieser Kandidat konnte nicht geladen werden."
+    "loadError": "Dieser Kandidat konnte nicht geladen werden.",
+    "summaryWindowTitle": "Profiltext — {{name}}"
   }
 }

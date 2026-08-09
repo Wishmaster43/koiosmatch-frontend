@@ -146,6 +146,9 @@ vi.mock('@/context/AuthContext', () => ({ useAuth: () => ({ user: authState.user
 // URL-dispatching mock: the candidate link picker gets two rows (filter coverage
 // below); customers/contacts pickers stay empty; the edit-mode GETs (task detail +
 // raw lookup lists) resolve their own fixtures; FAIL_ID exercises the load-error path.
+// Mutable so the link-picker load-failure test can make ONE endpoint reject and
+// then heal it again to prove the retry actually re-fetches.
+const { apiState } = vi.hoisted(() => ({ apiState: { candidatesFail: false } }))
 vi.mock('@/lib/api', async (importOriginal) => {
   const actual = await importOriginal<typeof import('@/lib/api')>()
   const get = vi.fn((url: string) => {
@@ -154,7 +157,7 @@ vi.mock('@/lib/api', async (importOriginal) => {
     if (url === '/task-types')       return Promise.resolve({ data: TYPE_ROWS })
     if (url === '/task-statuses')    return Promise.resolve({ data: STATUS_ROWS })
     if (url === '/task-priorities')  return Promise.resolve({ data: PRIORITY_ROWS })
-    if (url === '/candidates')       return Promise.resolve({ data: { data: CANDIDATE_ROWS } })
+    if (url === '/candidates')       return apiState.candidatesFail ? Promise.reject(new Error('boom')) : Promise.resolve({ data: { data: CANDIDATE_ROWS } })
     if (url === '/departments')      return Promise.resolve({ data: { data: DEPARTMENT_ROWS } })
     return Promise.resolve({ data: { data: [] } }) // /customers, /contacts
   })
@@ -174,6 +177,7 @@ beforeEach(() => {
   lk.types = ORIGINAL_TYPES
   usersState.rows = ORIGINAL_USERS
   usersState.isError = false
+  apiState.candidatesFail = false
 })
 // Blanket safety net for the fixed-clock tests below: if one of them fails/throws
 // BEFORE its own vi.useRealTimers() call runs, fake timers would otherwise stay on
@@ -439,6 +443,33 @@ describe('AddTaskModal · validation (Danny 27-07: the redesigned popup still bl
     // Let the link-picker loads (candidates/customers/contacts) settle before the
     // test returns, so their `.then` never lands after RTL's cleanup/unmount.
     await waitFor(() => expect(api.get).toHaveBeenCalledWith('/candidates', { params: { per_page: 200 } }))
+  })
+})
+
+describe('AddTaskModal · the three relational pickers report a failed load (§3 four states)', () => {
+  it('shows an error + retry instead of an empty picker indistinguishable from "geen kandidaten"', async () => {
+    // The load used to end in `.catch(() => {})`, so a dead /candidates left the
+    // picker at zero options with no explanation at all.
+    apiState.candidatesFail = true
+    const user = userEvent.setup()
+    render(<AddTaskModal onClose={noop} onCreated={noop} />)
+
+    expect(await screen.findByText('links.loadError')).toBeInTheDocument()
+
+    // Retry really re-fetches: heal the endpoint, press it, the line disappears.
+    apiState.candidatesFail = false
+    await user.click(screen.getByRole('button', { name: 'common:error.retry' }))
+    await waitFor(() => expect(screen.queryByText('links.loadError')).toBeNull())
+  })
+
+  it('keeps the two healthy pickers usable when only one endpoint dies (allSettled, not all)', async () => {
+    apiState.candidatesFail = true
+    render(<AddTaskModal onClose={noop} onCreated={noop} />)
+
+    await screen.findByText('links.loadError')
+    // /departments still answered — its rows reach the shared link adder.
+    const api = (await import('@/lib/api')).default
+    expect(api.get).toHaveBeenCalledWith('/contacts', { params: { per_page: 200 } })
   })
 })
 

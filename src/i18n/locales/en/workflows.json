@@ -54,7 +54,10 @@
     "typeLabel": "Type",
     "itemNamePlaceholder": "item_name",
     "addItem": "Add item",
-    "operator": "Operator"
+    "operator": "Operator",
+    "multiselectSearch": "Search…",
+    "multiselectNoResults": "No results.",
+    "multiselectFreeEntry": "Type a value and press Enter to add it."
   },
   "scheduleModal": {
     "title": "Set schedule",

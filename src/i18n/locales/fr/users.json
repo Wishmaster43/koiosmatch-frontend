@@ -27,13 +27,18 @@
     "email": "E-mail",
     "phone": "Téléphone",
     "role": "Rôle",
-    "branches": "Agences"
+    "branches": "Agences",
+    "status": "Statut",
+    "lastLogin": "Dernière connexion"
   },
   "roles": {
     "super_admin": "Super admin",
     "tenant_admin": "Admin",
     "planner": "Planificateur",
-    "user": "Utilisateur"
+    "user": "Utilisateur",
+    "recruiter": "Recruteur",
+    "manager": "Manager",
+    "backoffice": "Back-office"
   },
   "noRoles": "Aucun rôle disponible",
   "rolesLoading": "Chargement des rôles…",
@@ -59,5 +64,60 @@
   },
   "validation": {
     "emailFormat": "Saisissez une adresse e-mail valide."
+  },
+  "subtitle": "Gérez les utilisateurs de cette organisation et leurs rôles.",
+  "searchPlaceholder": "Rechercher par nom ou e-mail",
+  "status": {
+    "active": "Actif",
+    "archived": "Archivé"
+  },
+  "delete": {
+    "action": "Supprimer l'utilisateur",
+    "title": "Supprimer l'utilisateur",
+    "explain_one": "{{name}} est encore propriétaire de {{count}} enregistrement. Choisissez un collègue qui le reprend — ce n'est qu'ensuite que l'utilisateur peut être supprimé.",
+    "explain_other": "{{name}} est encore propriétaire de {{count}} enregistrements. Choisissez un collègue qui les reprend — ce n'est qu'ensuite que l'utilisateur peut être supprimé.",
+    "ownedTitle": "Ce qui sera transféré",
+    "successor": "Transférer à",
+    "successorPlaceholder": "Choisir un collègue",
+    "successorHint": "Ce collègue devient propriétaire de tous les enregistrements ci-dessus.",
+    "confirm": "Transférer et supprimer",
+    "done": "Utilisateur supprimé.",
+    "transferred": "Propriété transférée et utilisateur supprimé.",
+    "failed": "La suppression a échoué. Veuillez réessayer.",
+    "types": {
+      "candidates_one": "{{count}} candidat",
+      "candidates_other": "{{count}} candidats",
+      "customers_one": "{{count}} client",
+      "customers_other": "{{count}} clients",
+      "vacancies_one": "{{count}} offre d'emploi",
+      "vacancies_other": "{{count}} offres d'emploi",
+      "matches_one": "{{count}} match",
+      "matches_other": "{{count}} matchs",
+      "applications_one": "{{count}} candidature",
+      "applications_other": "{{count}} candidatures",
+      "opportunities_one": "{{count}} opportunité",
+      "opportunities_other": "{{count}} opportunités",
+      "appointments_one": "{{count}} rendez-vous",
+      "appointments_other": "{{count}} rendez-vous",
+      "planningOrders_one": "{{count}} ordre de planning",
+      "planningOrders_other": "{{count}} ordres de planning",
+      "pools_one": "{{count}} pool",
+      "pools_other": "{{count}} pools",
+      "outreachCampaigns_one": "{{count}} campagne",
+      "outreachCampaigns_other": "{{count}} campagnes",
+      "tasks_one": "{{count}} tâche",
+      "tasks_other": "{{count}} tâches",
+      "outreachTargets_one": "{{count}} contact de campagne",
+      "outreachTargets_other": "{{count}} contacts de campagne",
+      "other_one": "{{count}} enregistrement ({{type}})",
+      "other_other": "{{count}} enregistrements ({{type}})"
+    }
+  },
+  "rolesModal": {
+    "title": "Attribuer des rôles",
+    "hint": "Choisissez un ou plusieurs rôles. L'ensemble complet est enregistré — les rôles retirés sont révoqués.",
+    "none": "Aucun rôle choisi",
+    "add": "Ajouter un rôle",
+    "remove": "Retirer {{role}}"
   }
 }

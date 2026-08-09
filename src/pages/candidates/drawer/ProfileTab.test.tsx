@@ -44,10 +44,14 @@ describe('ProfileTab · one tab, one pencil per card', () => {
     expect(screen.getByText('E-mailadres')).toBeInTheDocument()
   })
 
-  it('gives each card its own pencil, plus one for the profile text', () => {
+  it('gives each card its own pencil, plus one for the profile text — Herkomst adds a card but no pencil', () => {
     render(<ProfileTab c={{ ...candidate, summary: '<p>Hello</p>' } as unknown as Candidate} />)
     expect(screen.getByText('Profieltekst')).toBeInTheDocument()
+    // Herkomst (CandidateOriginCard) is mounted too, but it is read-only by
+    // design (Danny 09-08, "Herkomst geen potloodje") — it adds a CARD, not a
+    // pencil, so the count stays exactly what it was before it existed:
     // Persoonlijk + Adres + Contact + de profieltekst.
+    expect(screen.getByText('Herkomst')).toBeInTheDocument()
     expect(screen.getAllByTitle('Bewerken')).toHaveLength(4)
   })
 
@@ -70,15 +74,17 @@ describe('ProfileTab · one tab, one pencil per card', () => {
     expect(screen.getAllByTitle('Opslaan')).toHaveLength(2)
   })
 
-  // Danny 09-08: the separate Herkomst card is GONE. Bron survives as one editable
-  // row on the Persoonlijk card; the created-on/by STAMPS moved to the drawer footer
-  // (CandidateDrawerFooter) and must not reappear on this tab — one place per value
-  // (§11). Asserted on VALUES, not labels, so it survives a label rewording.
-  it('keeps bron on the tab but no longer repeats the creation stamps', () => {
-    render(<ProfileTab c={{ ...candidate, source: 'werkzoeken', createdBy: { id: 7, name: 'Laura Yesway' }, created: '2025-10-29T16:03:57+00:00' } as unknown as Candidate} />)
+  // Danny 09-08 "ik mis de bron": the OPPOSITE of the old split is now true. Source,
+  // creator and creation date no longer live in two places (a row on Persoonlijk +
+  // stamps in the footer) — all three render TOGETHER in the read-only Herkomst
+  // block (CandidateOriginCard), mounted on this tab. Asserted on VALUES, not
+  // labels, so it survives a label rewording.
+  it('renders source, creator and creation date together in the Herkomst block', () => {
+    render(<ProfileTab c={{ ...candidate, source: 'werkzoeken', createdBy: { id: 7, name: 'Laura Yesway' }, created: '2025-10-29T16:03:57' } as unknown as Candidate} />)
+    expect(screen.getByText('Herkomst')).toBeInTheDocument()
     expect(screen.getByText('werkzoeken')).toBeInTheDocument()
-    expect(screen.queryByText('Laura Yesway')).toBeNull()
-    expect(screen.queryByText('29-10-2025')).toBeNull()
+    expect(screen.getByText('Laura Yesway')).toBeInTheDocument()
+    expect(screen.getByText(/29-10-2025/)).toBeInTheDocument()
   })
 
   it('saves only the edited card\'s own fields', async () => {
@@ -87,7 +93,8 @@ describe('ProfileTab · one tab, one pencil per card', () => {
     render(<ProfileTab c={candidate} onEditSave={onEditSave} />)
     await user.click(screen.getAllByTitle('Bewerken')[0])
     await user.click(screen.getByTitle('Opslaan'))
-    expect(onEditSave).toHaveBeenCalledWith({ gender: 'male', nationality: 'Nederlands', dob: '1990-01-01', placeOfBirth: 'Utrecht', source: '' })
+    // No `source` key: ProfilePersonalTab no longer owns that field (§11).
+    expect(onEditSave).toHaveBeenCalledWith({ gender: 'male', nationality: 'Nederlands', dob: '1990-01-01', placeOfBirth: 'Utrecht' })
   })
 })
 

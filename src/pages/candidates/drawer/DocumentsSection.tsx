@@ -349,8 +349,10 @@ export default function DocumentsSection({ c, onRefresh }: { c: Candidate; onRef
 
   return (
     <div>
+      {/* No "DOCUMENTEN" heading here (Danny 09-08): the tab bar directly above
+          already says it, and the customer + vacancy documents tabs never had one
+          — this was the odd one out. The toolbar starts with the search box. */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
-        <span style={{ fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em', color: 'var(--text-muted)' }}>{t('sections.documents')}</span>
         {/* FILTER-WIDTH-1 (Danny 08-08, punt 18 "filter bij documenten is te kort"):
             this search box was the only documents toolbar still on a HARDCODED
             width: 110 — barely room for one word, so a file name could not be

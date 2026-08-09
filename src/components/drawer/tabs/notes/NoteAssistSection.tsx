@@ -67,8 +67,9 @@ const ghostBtn: CSSProperties = { display: 'inline-flex', alignItems: 'center', 
   padding: '5px 11px', borderRadius: 7, cursor: 'pointer', background: 'none', color: 'var(--text-muted)', border: '1px solid var(--border)' }
 
 // Dutch fallback copy (DEFAULT-VALUE-1) — mode button label. The action-item
-// type label (ACTION_TYPE_LABEL_NL) now lives in noteAssistApi.ts (§11 one
-// source — NoteActionsResultsPanel/NoteActionItemCard render the same items).
+// type label (ACTION_TYPE_LABEL_NL) now lives in richTextAssistApi.ts (§11 one
+// source — the shared AssistActionsResultsPanel/AssistActionItemCard render
+// the same items).
 const MODE_LABEL_NL: Record<AssistMode, string> = { improve: 'Verbeteren', summarize: 'Samenvatten', actions: 'Actiepunten' }
 
 // One row per mode — icon + i18n key share the mode name, so adding a fourth

@@ -89,7 +89,10 @@
     "typeLabel": "Type",
     "itemNamePlaceholder": "item_naam",
     "addItem": "Item toevoegen",
-    "operator": "Operator"
+    "operator": "Operator",
+    "multiselectSearch": "Zoeken…",
+    "multiselectNoResults": "Geen resultaten.",
+    "multiselectFreeEntry": "Typ een waarde en druk op Enter om toe te voegen."
   },
   "scheduleModal": {
     "title": "Planning instellen",

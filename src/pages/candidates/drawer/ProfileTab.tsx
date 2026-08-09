@@ -9,6 +9,7 @@ import ProfilePersonalTab from './ProfilePersonalTab'
 import ProfileAddressTab from './ProfileAddressTab'
 import ProfileContactTab from './ProfileContactTab'
 import WorkPermitBlock from './WorkPermitBlock'
+import CandidateOriginCard from './CandidateOriginCard'
 import type { Candidate } from '@/types/candidate'
 
 type AnyProps = Record<string, unknown>
@@ -99,6 +100,9 @@ export default function ProfileTab({ c, onEditSave, autoEditSignal }: { c: Candi
       <WorkPermitBlock    c={c} onSave={onEditSave} autoEditSignal={autoEditSignal} />
       <ProfileAddressTab  c={c} onSave={onEditSave} autoEditSignal={autoEditSignal} />
       <ProfileContactTab  c={c} onSave={onEditSave} autoEditSignal={autoEditSignal} />
+      {/* Herkomst last: it describes the DOSSIER (source + who created it, when),
+          not the person, so it reads after the person's own fields. */}
+      <CandidateOriginCard c={c} />
 
       {/* ── Profile text — same rich editor as Notes (formatting + HTML toggle + expand) ── */}
       <div>

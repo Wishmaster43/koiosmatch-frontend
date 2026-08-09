@@ -27,13 +27,18 @@
     "email": "Email",
     "phone": "Phone",
     "role": "Role",
-    "branches": "Branches"
+    "branches": "Branches",
+    "status": "Status",
+    "lastLogin": "Last login"
   },
   "roles": {
     "super_admin": "Super admin",
     "tenant_admin": "Admin",
     "planner": "Planner",
-    "user": "User"
+    "user": "User",
+    "recruiter": "Recruiter",
+    "manager": "Manager",
+    "backoffice": "Back office"
   },
   "noRoles": "No roles available",
   "rolesLoading": "Loading roles…",
@@ -59,5 +64,60 @@
   },
   "validation": {
     "emailFormat": "Enter a valid e-mail address."
+  },
+  "subtitle": "Manage this organisation's users and their roles.",
+  "searchPlaceholder": "Search by name or e-mail",
+  "status": {
+    "active": "Active",
+    "archived": "Archived"
+  },
+  "delete": {
+    "action": "Delete user",
+    "title": "Delete user",
+    "explain_one": "{{name}} still owns {{count}} record. Choose a colleague to take it over — only then can the user be deleted.",
+    "explain_other": "{{name}} still owns {{count}} records. Choose a colleague to take them over — only then can the user be deleted.",
+    "ownedTitle": "What will be transferred",
+    "successor": "Transfer to",
+    "successorPlaceholder": "Choose a colleague",
+    "successorHint": "This colleague becomes the owner of every record above.",
+    "confirm": "Transfer and delete",
+    "done": "User deleted.",
+    "transferred": "Ownership transferred and user deleted.",
+    "failed": "Deleting failed. Please try again.",
+    "types": {
+      "candidates_one": "{{count}} candidate",
+      "candidates_other": "{{count}} candidates",
+      "customers_one": "{{count}} customer",
+      "customers_other": "{{count}} customers",
+      "vacancies_one": "{{count}} vacancy",
+      "vacancies_other": "{{count}} vacancies",
+      "matches_one": "{{count}} match",
+      "matches_other": "{{count}} matches",
+      "applications_one": "{{count}} application",
+      "applications_other": "{{count}} applications",
+      "opportunities_one": "{{count}} opportunity",
+      "opportunities_other": "{{count}} opportunities",
+      "appointments_one": "{{count}} appointment",
+      "appointments_other": "{{count}} appointments",
+      "planningOrders_one": "{{count}} planning order",
+      "planningOrders_other": "{{count}} planning orders",
+      "pools_one": "{{count}} pool",
+      "pools_other": "{{count}} pools",
+      "outreachCampaigns_one": "{{count}} campaign",
+      "outreachCampaigns_other": "{{count}} campaigns",
+      "tasks_one": "{{count}} task",
+      "tasks_other": "{{count}} tasks",
+      "outreachTargets_one": "{{count}} campaign contact",
+      "outreachTargets_other": "{{count}} campaign contacts",
+      "other_one": "{{count}} record ({{type}})",
+      "other_other": "{{count}} records ({{type}})"
+    }
+  },
+  "rolesModal": {
+    "title": "Assign roles",
+    "hint": "Pick one or more roles. The complete set is saved — roles you remove are revoked.",
+    "none": "No role chosen yet",
+    "add": "Add role",
+    "remove": "Remove {{role}}"
   }
 }

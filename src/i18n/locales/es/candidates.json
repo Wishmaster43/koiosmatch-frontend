@@ -993,7 +993,9 @@
     "hoursMaxPlaceholder": "Máx",
     "availableFromFilter": "Desplegable desde",
     "functionNotInLookup": "La función '{{title}}' no está en la lista de funciones — se buscarán todas las funciones.",
-    "apply": "Postular"
+    "apply": "Postular",
+    "resetFilters": "Restablecer filtros",
+    "hoursRangeValue": "{{min}}–{{max}}"
   },
   "erase": {
     "trashView": "Papelera",
@@ -1265,6 +1267,7 @@
   },
   "popout": {
     "windowTitle": "Notas — {{name}}",
-    "loadError": "No se pudo cargar este candidato."
+    "loadError": "No se pudo cargar este candidato.",
+    "summaryWindowTitle": "Texto de perfil — {{name}}"
   }
 }

@@ -376,5 +376,12 @@
     "vatInvalid": "Dies scheint keine gültige USt-IdNr. für {{country}} zu sein (erwartet z. B. {{example}}).",
     "cocUnverifiable": "Ohne Land kann die Handelsregisternummer nicht auf das Format geprüft werden.",
     "vatUnverifiable": "Ohne Land kann die USt-IdNr. nicht auf das Format geprüft werden."
+  },
+  "unsavedChanges": "Nicht gespeicherte Änderungen",
+  "allChangesSaved": "Alle Änderungen gespeichert",
+  "multiSelect": {
+    "selectVisible": "Alle auswählen",
+    "clearVisible": "Alle entfernen",
+    "visibleHint": "Gilt für die {{count}} sichtbaren Optionen"
   }
 }

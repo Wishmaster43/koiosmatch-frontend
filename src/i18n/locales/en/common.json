@@ -376,5 +376,12 @@
     "vatInvalid": "This does not look like a valid VAT number for {{country}} (expected e.g. {{example}}).",
     "cocUnverifiable": "Without a country the company register number cannot be format-checked.",
     "vatUnverifiable": "Without a country the VAT number cannot be format-checked."
+  },
+  "unsavedChanges": "Unsaved changes",
+  "allChangesSaved": "All changes saved",
+  "multiSelect": {
+    "selectVisible": "Select all",
+    "clearVisible": "Clear all",
+    "visibleHint": "Applies to the {{count}} visible options"
   }
 }

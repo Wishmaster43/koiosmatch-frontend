@@ -27,13 +27,18 @@
     "email": "E-mail",
     "phone": "Telefoon",
     "role": "Rol",
-    "branches": "Vestigingen"
+    "branches": "Vestigingen",
+    "status": "Status",
+    "lastLogin": "Laatste login"
   },
   "roles": {
     "super_admin": "Super admin",
     "tenant_admin": "Admin",
     "planner": "Planner",
-    "user": "Gebruiker"
+    "user": "Gebruiker",
+    "recruiter": "Recruiter",
+    "manager": "Manager",
+    "backoffice": "Backoffice"
   },
   "noRoles": "Geen rollen beschikbaar",
   "rolesLoading": "Rollen laden…",
@@ -59,5 +64,60 @@
   },
   "validation": {
     "emailFormat": "Voer een geldig e-mailadres in."
+  },
+  "subtitle": "Beheer de gebruikers van deze organisatie en hun rollen.",
+  "searchPlaceholder": "Zoek op naam of e-mail",
+  "status": {
+    "active": "Actief",
+    "archived": "Gearchiveerd"
+  },
+  "delete": {
+    "action": "Gebruiker verwijderen",
+    "title": "Gebruiker verwijderen",
+    "explain_one": "{{name}} is nog eigenaar van {{count}} record. Kies een collega die het overneemt — pas daarna kan de gebruiker worden verwijderd.",
+    "explain_other": "{{name}} is nog eigenaar van {{count}} records. Kies een collega die ze overneemt — pas daarna kan de gebruiker worden verwijderd.",
+    "ownedTitle": "Wat wordt overgedragen",
+    "successor": "Draag over aan",
+    "successorPlaceholder": "Kies een collega",
+    "successorHint": "Deze collega wordt eigenaar van alle records hierboven.",
+    "confirm": "Overdragen en verwijderen",
+    "done": "Gebruiker verwijderd.",
+    "transferred": "Eigenaarschap overgedragen en gebruiker verwijderd.",
+    "failed": "Verwijderen mislukt. Probeer het opnieuw.",
+    "types": {
+      "candidates_one": "{{count}} kandidaat",
+      "candidates_other": "{{count}} kandidaten",
+      "customers_one": "{{count}} klant",
+      "customers_other": "{{count}} klanten",
+      "vacancies_one": "{{count}} vacature",
+      "vacancies_other": "{{count}} vacatures",
+      "matches_one": "{{count}} match",
+      "matches_other": "{{count}} matches",
+      "applications_one": "{{count}} sollicitatie",
+      "applications_other": "{{count}} sollicitaties",
+      "opportunities_one": "{{count}} opportunity",
+      "opportunities_other": "{{count}} opportunities",
+      "appointments_one": "{{count}} afspraak",
+      "appointments_other": "{{count}} afspraken",
+      "planningOrders_one": "{{count}} planningsopdracht",
+      "planningOrders_other": "{{count}} planningsopdrachten",
+      "pools_one": "{{count}} pool",
+      "pools_other": "{{count}} pools",
+      "outreachCampaigns_one": "{{count}} campagne",
+      "outreachCampaigns_other": "{{count}} campagnes",
+      "tasks_one": "{{count}} taak",
+      "tasks_other": "{{count}} taken",
+      "outreachTargets_one": "{{count}} campagnecontact",
+      "outreachTargets_other": "{{count}} campagnecontacten",
+      "other_one": "{{count}} record ({{type}})",
+      "other_other": "{{count}} records ({{type}})"
+    }
+  },
+  "rolesModal": {
+    "title": "Rollen toewijzen",
+    "hint": "Kies één of meer rollen. De volledige set wordt opgeslagen — rollen die je weghaalt, worden ingetrokken.",
+    "none": "Nog geen rol gekozen",
+    "add": "Rol toevoegen",
+    "remove": "{{role}} verwijderen"
   }
 }

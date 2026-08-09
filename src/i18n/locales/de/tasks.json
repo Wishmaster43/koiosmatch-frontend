@@ -134,7 +134,12 @@
     "cardLink": "Verknüpfung",
     "cardAssignment": "Zuweisung",
     "duePlaceholder": "TT-MM-JJJJ",
-    "otherLinks": "Weitere Verknüpfungen"
+    "otherLinks": "Weitere Verknüpfungen",
+    "assigneeUnassigned": "Agentur (niemand zugewiesen)",
+    "assigneeUnassignedHint": "Niemand ist verantwortlich: Die Aufgabe bleibt bei der Agentur, bis ein Kollege sie übernimmt.",
+    "assigneeWithRole": "{{name}} · {{role}}",
+    "assigneeEmpty": "Noch keine Kollegen zum Zuweisen — nur die Agentur ist wählbar.",
+    "assigneeLoadError": "Kollegen konnten nicht geladen werden."
   },
   "bulk": {
     "selected": "{{count}} ausgewählt",

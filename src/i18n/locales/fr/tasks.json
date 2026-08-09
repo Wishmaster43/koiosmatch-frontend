@@ -134,7 +134,12 @@
     "cardLink": "Lien",
     "cardAssignment": "Attribution",
     "duePlaceholder": "jj-mm-aaaa",
-    "otherLinks": "Autres liens"
+    "otherLinks": "Autres liens",
+    "assigneeUnassigned": "Agence (personne d'assigné)",
+    "assigneeUnassignedHint": "Personne n'est responsable : la tâche reste à l'agence jusqu'à ce qu'un collègue la prenne en charge.",
+    "assigneeWithRole": "{{name}} · {{role}}",
+    "assigneeEmpty": "Aucun collègue à qui assigner pour l'instant — seule l'agence peut être choisie.",
+    "assigneeLoadError": "Impossible de charger les collègues."
   },
   "bulk": {
     "selected": "{{count}} sélectionné(e)s",

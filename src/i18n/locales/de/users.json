@@ -27,13 +27,18 @@
     "email": "E-Mail",
     "phone": "Telefon",
     "role": "Rolle",
-    "branches": "Niederlassungen"
+    "branches": "Niederlassungen",
+    "status": "Status",
+    "lastLogin": "Letzte Anmeldung"
   },
   "roles": {
     "super_admin": "Super-Admin",
     "tenant_admin": "Admin",
     "planner": "Planer",
-    "user": "Benutzer"
+    "user": "Benutzer",
+    "recruiter": "Recruiter",
+    "manager": "Manager",
+    "backoffice": "Backoffice"
   },
   "noRoles": "Keine Rollen verfügbar",
   "rolesLoading": "Rollen werden geladen…",
@@ -59,5 +64,60 @@
   },
   "validation": {
     "emailFormat": "Geben Sie eine gültige E-Mail-Adresse ein."
+  },
+  "subtitle": "Verwalten Sie die Benutzer dieser Organisation und ihre Rollen.",
+  "searchPlaceholder": "Nach Name oder E-Mail suchen",
+  "status": {
+    "active": "Aktiv",
+    "archived": "Archiviert"
+  },
+  "delete": {
+    "action": "Benutzer löschen",
+    "title": "Benutzer löschen",
+    "explain_one": "{{name}} besitzt noch {{count}} Datensatz. Wählen Sie eine Kollegin oder einen Kollegen zur Übernahme — erst danach kann der Benutzer gelöscht werden.",
+    "explain_other": "{{name}} besitzt noch {{count}} Datensätze. Wählen Sie eine Kollegin oder einen Kollegen zur Übernahme — erst danach kann der Benutzer gelöscht werden.",
+    "ownedTitle": "Was übertragen wird",
+    "successor": "Übertragen an",
+    "successorPlaceholder": "Kollegin oder Kollegen wählen",
+    "successorHint": "Diese Person wird Eigentümer aller oben genannten Datensätze.",
+    "confirm": "Übertragen und löschen",
+    "done": "Benutzer gelöscht.",
+    "transferred": "Eigentum übertragen und Benutzer gelöscht.",
+    "failed": "Löschen fehlgeschlagen. Bitte erneut versuchen.",
+    "types": {
+      "candidates_one": "{{count}} Kandidat",
+      "candidates_other": "{{count}} Kandidaten",
+      "customers_one": "{{count}} Kunde",
+      "customers_other": "{{count}} Kunden",
+      "vacancies_one": "{{count}} Stelle",
+      "vacancies_other": "{{count}} Stellen",
+      "matches_one": "{{count}} Match",
+      "matches_other": "{{count}} Matches",
+      "applications_one": "{{count}} Bewerbung",
+      "applications_other": "{{count}} Bewerbungen",
+      "opportunities_one": "{{count}} Opportunity",
+      "opportunities_other": "{{count}} Opportunities",
+      "appointments_one": "{{count}} Termin",
+      "appointments_other": "{{count}} Termine",
+      "planningOrders_one": "{{count}} Planungsauftrag",
+      "planningOrders_other": "{{count}} Planungsaufträge",
+      "pools_one": "{{count}} Pool",
+      "pools_other": "{{count}} Pools",
+      "outreachCampaigns_one": "{{count}} Kampagne",
+      "outreachCampaigns_other": "{{count}} Kampagnen",
+      "tasks_one": "{{count}} Aufgabe",
+      "tasks_other": "{{count}} Aufgaben",
+      "outreachTargets_one": "{{count}} Kampagnenkontakt",
+      "outreachTargets_other": "{{count}} Kampagnenkontakte",
+      "other_one": "{{count}} Datensatz ({{type}})",
+      "other_other": "{{count}} Datensätze ({{type}})"
+    }
+  },
+  "rolesModal": {
+    "title": "Rollen zuweisen",
+    "hint": "Wählen Sie eine oder mehrere Rollen. Der gesamte Satz wird gespeichert — entfernte Rollen werden entzogen.",
+    "none": "Noch keine Rolle gewählt",
+    "add": "Rolle hinzufügen",
+    "remove": "{{role}} entfernen"
   }
 }

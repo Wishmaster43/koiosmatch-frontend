@@ -993,7 +993,9 @@
     "hoursMaxPlaceholder": "Max",
     "availableFromFilter": "Inzetbaar vanaf",
     "functionNotInLookup": "Functie '{{title}}' staat niet in de functielijst — alle functies worden doorzocht.",
-    "apply": "Solliciteren"
+    "apply": "Solliciteren",
+    "resetFilters": "Filters herstellen",
+    "hoursRangeValue": "{{min}}–{{max}}"
   },
   "erase": {
     "trashView": "Prullenbak",
@@ -1265,6 +1267,7 @@
   },
   "popout": {
     "windowTitle": "Notities — {{name}}",
-    "loadError": "Deze kandidaat kon niet worden geladen."
+    "loadError": "Deze kandidaat kon niet worden geladen.",
+    "summaryWindowTitle": "Profieltekst — {{name}}"
   }
 }

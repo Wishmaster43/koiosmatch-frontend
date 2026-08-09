@@ -27,13 +27,18 @@
     "email": "Correo",
     "phone": "Teléfono",
     "role": "Rol",
-    "branches": "Sedes"
+    "branches": "Sedes",
+    "status": "Estado",
+    "lastLogin": "Último acceso"
   },
   "roles": {
     "super_admin": "Súper admin",
     "tenant_admin": "Admin",
     "planner": "Planificador",
-    "user": "Usuario"
+    "user": "Usuario",
+    "recruiter": "Reclutador",
+    "manager": "Gerente",
+    "backoffice": "Back office"
   },
   "noRoles": "No hay roles disponibles",
   "rolesLoading": "Cargando roles…",
@@ -59,5 +64,60 @@
   },
   "validation": {
     "emailFormat": "Introduce una dirección de correo electrónico válida."
+  },
+  "subtitle": "Gestiona los usuarios de esta organización y sus roles.",
+  "searchPlaceholder": "Buscar por nombre o correo",
+  "status": {
+    "active": "Activo",
+    "archived": "Archivado"
+  },
+  "delete": {
+    "action": "Eliminar usuario",
+    "title": "Eliminar usuario",
+    "explain_one": "{{name}} todavía es propietario de {{count}} registro. Elige a un compañero que lo asuma: solo entonces se puede eliminar el usuario.",
+    "explain_other": "{{name}} todavía es propietario de {{count}} registros. Elige a un compañero que los asuma: solo entonces se puede eliminar el usuario.",
+    "ownedTitle": "Qué se transferirá",
+    "successor": "Transferir a",
+    "successorPlaceholder": "Elegir un compañero",
+    "successorHint": "Este compañero pasa a ser propietario de todos los registros anteriores.",
+    "confirm": "Transferir y eliminar",
+    "done": "Usuario eliminado.",
+    "transferred": "Propiedad transferida y usuario eliminado.",
+    "failed": "No se pudo eliminar. Inténtalo de nuevo.",
+    "types": {
+      "candidates_one": "{{count}} candidato",
+      "candidates_other": "{{count}} candidatos",
+      "customers_one": "{{count}} cliente",
+      "customers_other": "{{count}} clientes",
+      "vacancies_one": "{{count}} vacante",
+      "vacancies_other": "{{count}} vacantes",
+      "matches_one": "{{count}} match",
+      "matches_other": "{{count}} matches",
+      "applications_one": "{{count}} solicitud",
+      "applications_other": "{{count}} solicitudes",
+      "opportunities_one": "{{count}} oportunidad",
+      "opportunities_other": "{{count}} oportunidades",
+      "appointments_one": "{{count}} cita",
+      "appointments_other": "{{count}} citas",
+      "planningOrders_one": "{{count}} orden de planificación",
+      "planningOrders_other": "{{count}} órdenes de planificación",
+      "pools_one": "{{count}} pool",
+      "pools_other": "{{count}} pools",
+      "outreachCampaigns_one": "{{count}} campaña",
+      "outreachCampaigns_other": "{{count}} campañas",
+      "tasks_one": "{{count}} tarea",
+      "tasks_other": "{{count}} tareas",
+      "outreachTargets_one": "{{count}} contacto de campaña",
+      "outreachTargets_other": "{{count}} contactos de campaña",
+      "other_one": "{{count}} registro ({{type}})",
+      "other_other": "{{count}} registros ({{type}})"
+    }
+  },
+  "rolesModal": {
+    "title": "Asignar roles",
+    "hint": "Elige uno o más roles. Se guarda el conjunto completo: los roles que quites se revocan.",
+    "none": "Aún no se ha elegido ningún rol",
+    "add": "Añadir rol",
+    "remove": "Quitar {{role}}"
   }
 }

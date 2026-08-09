@@ -376,5 +376,12 @@
     "vatInvalid": "Esto no parece un número de IVA válido para {{country}} (se espera p. ej. {{example}}).",
     "cocUnverifiable": "Sin país no se puede comprobar el formato del número de registro mercantil.",
     "vatUnverifiable": "Sin país no se puede comprobar el formato del número de IVA."
+  },
+  "unsavedChanges": "Cambios sin guardar",
+  "allChangesSaved": "Todos los cambios guardados",
+  "multiSelect": {
+    "selectVisible": "Seleccionar todo",
+    "clearVisible": "Borrar todo",
+    "visibleHint": "Se aplica a las {{count}} opciones visibles"
   }
 }

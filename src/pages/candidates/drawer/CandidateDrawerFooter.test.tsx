@@ -1,13 +1,15 @@
 /**
- * CandidateDrawerFooter — Danny 09-08: "aangemaakt op" already stood in the
- * footer, so the separate Herkomst card repeating it was a second truth. The
- * author joined that line here; the acquisition SOURCE deliberately did NOT (it
- * stays editable on the Profiel tab).
+ * CandidateDrawerFooter — Danny 09-08 "ik mis de bron": source, created-by and
+ * created-on used to be split across two places — a stray row in the
+ * "Persoonlijk" card and this footer's creation stamp — and that split is
+ * exactly what made the source unfindable (it read as a property of the
+ * PERSON in Persoonlijk, while it describes the DOSSIER). All three now live
+ * together in CandidateOriginCard ("Herkomst") on the Profiel tab, and this
+ * footer strip no longer renders any creation info at all — only last contact.
  *
  * These tests pin the seam, not a translated sentence: WHICH i18n key is used and
- * WITH WHICH interpolation values — so they hold both before and after the
- * `drawer.createdAtBy` key lands in the locale files, and a silently invented
- * "door onbekend" would fail them.
+ * WITH WHICH interpolation values — so they hold both before and after a locale
+ * wording change, and a silently invented "door onbekend" would fail them.
  */
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen } from '@testing-library/react'
@@ -27,34 +29,20 @@ vi.mock('@/lib/useLastContactTypes', () => ({ useLastContactTypes: () => ({ labe
 const candidate = (overrides: Partial<Candidate> = {}): Candidate =>
   ({ id: 1, created: '2025-10-29T16:03:00', ...overrides } as unknown as Candidate)
 
-describe('CandidateDrawerFooter · the creation stamp', () => {
+describe('CandidateDrawerFooter · no creation stamp (moved to CandidateOriginCard)', () => {
   beforeEach(() => { mockT.mockClear() })
 
-  it('states date AND author on one line when the record carries a creator', () => {
-    render(<CandidateDrawerFooter c={candidate({ createdBy: { id: 7, name: 'Laura Yesway' } })} />)
-    // DD-MM-YYYY, HH:mm via lib/datetime — never a hand-built date string (§14).
-    expect(mockT).toHaveBeenCalledWith('drawer.createdAtBy', { date: '29-10-2025, 16:03', name: 'Laura Yesway' })
-    expect(screen.getByText(/drawer\.createdAtBy\|date=29-10-2025, 16:03\|name=Laura Yesway/)).toBeInTheDocument()
-  })
-
-  it('falls back to the date-only line when the author is unknown — never "door onbekend"', () => {
-    render(<CandidateDrawerFooter c={candidate({ createdBy: null })} />)
-    expect(mockT).toHaveBeenCalledWith('drawer.createdAt', { date: '29-10-2025, 16:03' })
-    expect(mockT).not.toHaveBeenCalledWith('drawer.createdAtBy', expect.anything())
-    expect(screen.queryByText(/onbekend|unknown/i)).toBeNull()
-  })
-
-  it('omits the stamp entirely when there is no creation timestamp — no "Aangemaakt op —"', () => {
-    render(<CandidateDrawerFooter c={{ id: 1 } as unknown as Candidate} />)
+  // Regression guard, not a duplication test: source, author and timestamp are
+  // ALL present on the record, yet none of them may surface here — that exact
+  // split (stamp in the footer, source on the Profiel tab) is the bug that made
+  // the source unfindable in the first place (§11 — one place per value).
+  it('never renders creation info — source, author and timestamp all moved to CandidateOriginCard', () => {
+    render(<CandidateDrawerFooter c={candidate({ createdBy: { id: 7, name: 'Laura Yesway' }, source: 'werkzoeken' })} />)
     expect(mockT).not.toHaveBeenCalledWith('drawer.createdAt', expect.anything())
     expect(mockT).not.toHaveBeenCalledWith('drawer.createdAtBy', expect.anything())
-  })
-
-  // §11: the source must have exactly ONE home (the Profiel tab's editable row);
-  // a read-only copy down here would be the same duplication we just removed.
-  it('does not repeat the acquisition source', () => {
-    render(<CandidateDrawerFooter c={candidate({ source: 'werkzoeken', createdBy: { id: 7, name: 'Laura Yesway' } })} />)
+    expect(screen.queryByText(/Laura Yesway/)).toBeNull()
     expect(screen.queryByText(/werkzoeken/)).toBeNull()
+    expect(screen.queryByText(/29-10-2025/)).toBeNull()
   })
 })
 

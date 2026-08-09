@@ -50,7 +50,10 @@
     "typeLabel": "Typ",
     "itemNamePlaceholder": "element_name",
     "addItem": "Element hinzufügen",
-    "operator": "Operator"
+    "operator": "Operator",
+    "multiselectSearch": "Suchen…",
+    "multiselectNoResults": "Keine Ergebnisse.",
+    "multiselectFreeEntry": "Wert eingeben und mit Enter hinzufügen."
   },
   "scheduleModal": {
     "title": "Zeitplan festlegen",

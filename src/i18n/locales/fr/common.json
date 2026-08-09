@@ -376,5 +376,12 @@
     "vatInvalid": "Ceci ne semble pas être un numéro de TVA valide pour {{country}} (attendu p. ex. {{example}}).",
     "cocUnverifiable": "Sans pays, le format du numéro de registre du commerce ne peut pas être vérifié.",
     "vatUnverifiable": "Sans pays, le format du numéro de TVA ne peut pas être vérifié."
+  },
+  "unsavedChanges": "Modifications non enregistrées",
+  "allChangesSaved": "Toutes les modifications sont enregistrées",
+  "multiSelect": {
+    "selectVisible": "Tout sélectionner",
+    "clearVisible": "Tout effacer",
+    "visibleHint": "S'applique aux {{count}} options visibles"
   }
 }

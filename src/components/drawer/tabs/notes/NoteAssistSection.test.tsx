@@ -134,7 +134,7 @@ describe('NoteAssistSection · Overnemen (apply) semantics', () => {
     expect(screen.queryByRole('button', { name: 'Overnemen' })).toBeNull()
   })
 
-  it('a NON-empty actions result hands off to NoteActionsResultsPanel (K0-B execute flow), not the plain Overnemen list', async () => {
+  it('a NON-empty actions result hands off to the shared AssistActionsResultsPanel (K0-B execute flow), not the plain Overnemen list', async () => {
     vi.mocked(assistNote).mockReset()
     const user = userEvent.setup()
     vi.mocked(assistNote).mockResolvedValue({

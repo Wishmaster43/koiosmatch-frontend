@@ -50,7 +50,10 @@
     "typeLabel": "Type",
     "itemNamePlaceholder": "nom_element",
     "addItem": "Ajouter un élément",
-    "operator": "Opérateur"
+    "operator": "Opérateur",
+    "multiselectSearch": "Rechercher…",
+    "multiselectNoResults": "Aucun résultat.",
+    "multiselectFreeEntry": "Saisissez une valeur et appuyez sur Entrée pour l'ajouter."
   },
   "scheduleModal": {
     "title": "Définir la planification",

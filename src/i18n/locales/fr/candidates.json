@@ -993,7 +993,9 @@
     "hoursMaxPlaceholder": "Max",
     "availableFromFilter": "Déployable à partir du",
     "functionNotInLookup": "La fonction '{{title}}' ne figure pas dans la liste des fonctions — toutes les fonctions seront recherchées.",
-    "apply": "Postuler"
+    "apply": "Postuler",
+    "resetFilters": "Réinitialiser les filtres",
+    "hoursRangeValue": "{{min}}–{{max}}"
   },
   "erase": {
     "trashView": "Corbeille",
@@ -1265,6 +1267,7 @@
   },
   "popout": {
     "windowTitle": "Notes — {{name}}",
-    "loadError": "Ce candidat n'a pas pu être chargé."
+    "loadError": "Ce candidat n'a pas pu être chargé.",
+    "summaryWindowTitle": "Texte de profil — {{name}}"
   }
 }

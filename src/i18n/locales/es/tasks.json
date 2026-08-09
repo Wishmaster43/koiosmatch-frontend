@@ -134,7 +134,12 @@
     "cardLink": "Vínculo",
     "cardAssignment": "Asignación",
     "duePlaceholder": "dd-mm-aaaa",
-    "otherLinks": "Otros vínculos"
+    "otherLinks": "Otros vínculos",
+    "assigneeUnassigned": "Agencia (nadie asignado)",
+    "assigneeUnassignedHint": "Nadie es responsable: la tarea permanece en la agencia hasta que un compañero la asuma.",
+    "assigneeWithRole": "{{name}} · {{role}}",
+    "assigneeEmpty": "Todavía no hay compañeros a quienes asignar: solo se puede elegir la agencia.",
+    "assigneeLoadError": "No se han podido cargar los compañeros."
   },
   "bulk": {
     "selected": "{{count}} seleccionado(s)",

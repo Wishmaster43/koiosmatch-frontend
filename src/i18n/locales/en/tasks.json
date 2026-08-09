@@ -148,7 +148,12 @@
     "cardLink": "Link",
     "cardAssignment": "Assignment",
     "duePlaceholder": "dd-mm-yyyy",
-    "otherLinks": "Other links"
+    "otherLinks": "Other links",
+    "assigneeUnassigned": "Agency (nobody assigned)",
+    "assigneeUnassignedHint": "Nobody is responsible: the task stays with the agency until a colleague picks it up.",
+    "assigneeWithRole": "{{name}} · {{role}}",
+    "assigneeEmpty": "No colleagues to assign to yet — only the agency can be chosen.",
+    "assigneeLoadError": "Colleagues could not be loaded."
   },
   "page": {
     "searchPlaceholder": "Search tasks"

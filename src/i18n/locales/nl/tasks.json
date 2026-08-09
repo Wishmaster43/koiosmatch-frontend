@@ -148,7 +148,12 @@
     "cardLink": "Koppeling",
     "cardAssignment": "Toewijzing",
     "duePlaceholder": "dd-mm-jjjj",
-    "otherLinks": "Overige koppelingen"
+    "otherLinks": "Overige koppelingen",
+    "assigneeUnassigned": "Bureau (niemand toegewezen)",
+    "assigneeUnassignedHint": "Niemand is verantwoordelijk: de taak blijft op het bureau staan tot een collega hem oppakt.",
+    "assigneeWithRole": "{{name}} · {{role}}",
+    "assigneeEmpty": "Nog geen collega's om aan toe te wijzen — alleen het bureau is te kiezen.",
+    "assigneeLoadError": "Collega's konden niet worden geladen."
   },
   "page": {
     "searchPlaceholder": "Zoek naar taken"

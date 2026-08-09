@@ -376,5 +376,12 @@
     "vatInvalid": "Dit lijkt geen geldig btw-nummer voor {{country}} (verwacht bijv. {{example}}).",
     "cocUnverifiable": "Zonder land kan het KvK-/handelsregisternummer niet op formaat gecontroleerd worden.",
     "vatUnverifiable": "Zonder land kan het btw-nummer niet op formaat gecontroleerd worden."
+  },
+  "unsavedChanges": "Niet-opgeslagen wijzigingen",
+  "allChangesSaved": "Alles opgeslagen",
+  "multiSelect": {
+    "selectVisible": "Alles selecteren",
+    "clearVisible": "Alles wissen",
+    "visibleHint": "Werkt op de {{count}} zichtbare opties"
   }
 }
