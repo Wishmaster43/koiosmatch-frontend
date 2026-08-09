@@ -101,6 +101,15 @@ describe('readableAccentText — the brand AS text, adjusted only as far as need
     expect(contrastRatio(adjusted, WHITE)).toBeLessThan(6.37)
   })
 
+  // Danny said "niet te lezen" twice while the ratio technically PASSED at 4.58:1.
+  // 4.5 is the floor for legible, not for comfortable — a link in a dense list
+  // needs margin. This pins that margin so a later tweak cannot quietly give it back.
+  it('clears the AA floor with real margin, not by a hair', () => {
+    for (const brand of Object.values(BRANDS)) {
+      expect(contrastRatio(readableAccentText(brand, WHITE), WHITE)).toBeGreaterThanOrEqual(5.5)
+    }
+  })
+
   // A fixed mix ratio cannot serve every hue: 75% brand + black clears AA for
   // orange (5.12:1) but leaves yellow at 2.42:1. This is the case that proves it.
   it('darkens yellow harder than orange, because yellow needs it', () => {

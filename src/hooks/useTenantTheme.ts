@@ -64,12 +64,24 @@ function mixHex(a: string, b: string, amount: number): string {
  *
  * A fixed ratio cannot work across hues — 75% brand + black clears AA for orange
  * (5.12:1) but leaves yellow at 2.42:1 — which is exactly why this steps instead.
+ *
+ * Third lesson (09-08, "vacature naam niet te lezen", twice): aiming at exactly 4.5
+ * landed the vacancy link on 4.58:1 and Danny still could not read it comfortably.
+ * 4.5 is the floor for LEGIBLE, not for comfortable, and a link is scanned in a
+ * dense list rather than read as prose. The default target is now 5.5 — a
+ * deliberate margin above the minimum instead of sitting on it — which keeps the
+ * hue recognisable while stepping the orange from #cc4a2e to #b24028. When a real
+ * user says twice that they cannot read it, the formula is wrong, not the user.
  */
-export function readableAccentText(brand: string, surface: string, target = 4.5): string {
+const ACCENT_TEXT_TARGET = 5.5
+
+export function readableAccentText(brand: string, surface: string, target = ACCENT_TEXT_TARGET): string {
   if (contrastRatio(brand, surface) >= target) return brand
   // Move AWAY from the surface: darken on a light one, lighten on a dark one.
   const toward = luminanceOf(surface) > 0.5 ? '#000000' : '#FFFFFF'
-  for (let keep = 0.95; keep > 0; keep -= 0.05) {
+  // 2% steps (was 5%): a finer walk stops just past the target instead of
+  // overshooting it, which is what kept the brand hue recognisable in the first place.
+  for (let keep = 0.98; keep > 0; keep -= 0.02) {
     const candidate = mixHex(brand, toward, keep)
     if (contrastRatio(candidate, surface) >= target) return candidate
   }
