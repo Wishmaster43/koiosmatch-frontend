@@ -11,10 +11,13 @@ import type { VacancyDetail } from '@/types/vacancy'
 
 // RichTextEditor/SafeHtml are heavy third-party-backed editors — stub with a
 // minimal controlled surface so this test only exercises DescriptionTab's own
-// state, mirroring the candidate ProfileTab.test.tsx convention.
+// state, mirroring the candidate ProfileTab.test.tsx convention. `assistModes`
+// is surfaced as a data attribute so ACTIONS-SCOPE-1 (no actiepunten on a
+// description field) can be asserted without mounting the real assist bar.
 vi.mock('@/components/ui/RichTextEditor', () => ({
-  default: ({ value, onChange }: { value: string; onChange: (v: string) => void }) => (
-    <textarea aria-label="rich-text-editor" value={value} onChange={e => onChange(e.target.value)} />
+  default: ({ value, onChange, assistModes }: { value: string; onChange: (v: string) => void; assistModes?: string[] }) => (
+    <textarea aria-label="rich-text-editor" value={value} onChange={e => onChange(e.target.value)}
+      data-assist-modes={assistModes ? assistModes.join(',') : undefined} />
   ),
 }))
 vi.mock('@/components/ui/SafeHtml', () => ({
@@ -45,6 +48,12 @@ describe('DescriptionTab · edit + save', () => {
     fireEvent.click(screen.getByTitle('common:edit'))
     expect(screen.getByLabelText('rich-text-editor')).toBeInTheDocument()
     expect(screen.queryByTestId('safe-html')).not.toBeInTheDocument()
+  })
+
+  it('requests only improve/summarize from the shared assist bar (ACTIONS-SCOPE-1: a vacancy description is a description, not a conversation)', () => {
+    render(<DescriptionTab vacancy={vacancy} onUpdate={vi.fn()} />)
+    fireEvent.click(screen.getByTitle('common:edit'))
+    expect(screen.getByLabelText('rich-text-editor')).toHaveAttribute('data-assist-modes', 'improve,summarize')
   })
 
   it('save persists the edited description via onUpdate(id, { description })', () => {

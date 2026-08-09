@@ -6,9 +6,18 @@
  */
 import { useTranslation } from 'react-i18next'
 import RadiusMap, { type MapPoint } from '@/components/map/RadiusMap'
+import Slider from '@/components/ui/Slider'
 import type { Id } from '@/types/common'
 
 export type { MapPoint }
+
+// Slider domain for the radius control — mirrors the previous native range input
+// (min 5, max 150, step 5). The shared Slider has no arbitrary min (always 0), so
+// the onChange handler below re-applies the 5km floor to keep the exact same
+// reachable value set the native input had.
+const RADIUS_SLIDER_MAX = 150
+const RADIUS_SLIDER_MIN = 5
+const RADIUS_SLIDER_STEP = 5
 
 export default function RadiusMapPanel({ points, center, radiusKm, onCenterChange, onRadiusChange, onClearRadius, onPick, pointsLabel, padded = true, mapHeight, centerMarker }: {
   points: MapPoint[]
@@ -31,19 +40,26 @@ export default function RadiusMapPanel({ points, center, radiusKm, onCenterChang
 }) {
   const { t } = useTranslation('common')
 
+  // Clamp back onto the 5km floor — see RADIUS_SLIDER_MIN doc comment above.
+  const handleSliderChange = (v: number) => onRadiusChange(Math.max(RADIUS_SLIDER_MIN, v))
+
   return (
-    <div style={{ padding: padded ? '0 24px 16px' : 0, display: 'flex', flexDirection: 'column', gap: 10, flex: 1, minHeight: 0 }}>
-      {/* Radius: slider + exact km input — both drive the server-side filter. */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
-        <label htmlFor="radius-slider" style={{ fontSize: 12, color: 'var(--text-muted)' }}>{t('map.radius')}</label>
-        <input id="radius-slider" type="range" min={5} max={150} step={5} value={radiusKm > 0 ? radiusKm : 30}
-          onChange={e => onRadiusChange(Number(e.target.value))} style={{ width: 180 }} />
+    <div style={{ padding: padded ? '0 24px 16px' : 0, display: 'flex', flexDirection: 'column', gap: 6, flex: 1, minHeight: 0 }}>
+      {/* Radius: the ONE shared orange Slider (COMPACT-1, Danny 09-08 — was a bare
+          <input type="range"> rendering in the browser's own blue, a second slider
+          look right below the "Uren per week" filter's shared Slider) + exact km
+          input, both driving the server-side filter. */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+        <span style={{ fontSize: 12, color: 'var(--text-muted)', flexShrink: 0 }}>{t('map.radius')}</span>
+        <div style={{ width: 110, flexShrink: 0 }}>
+          <Slider value={radiusKm > 0 ? radiusKm : 30} max={RADIUS_SLIDER_MAX} step={RADIUS_SLIDER_STEP}
+            onChange={handleSliderChange} ariaLabel={t('map.radius')} />
+        </div>
         <input type="number" min={1} max={300} value={radiusKm > 0 ? radiusKm : ''} placeholder="—" aria-label={t('map.radius')}
           onChange={e => { const v = Number(e.target.value); if (v >= 1) onRadiusChange(v) }}
-          style={{ width: 62, padding: '4px 6px', fontSize: 12, borderRadius: 6, border: '1px solid var(--border)',
+          style={{ width: 56, padding: '4px 6px', fontSize: 12, borderRadius: 6, border: '1px solid var(--border)',
                    background: 'var(--hover-bg)', color: 'var(--text)', outline: 'none' }} />
         <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>km</span>
-        <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>{t('map.clickHint')}</span>
         {onClearRadius && (
           <button onClick={onClearRadius}
             style={{ fontSize: 11, fontWeight: 600, padding: '3px 10px', borderRadius: 999, cursor: 'pointer',
@@ -52,10 +68,12 @@ export default function RadiusMapPanel({ points, center, radiusKm, onCenterChang
             {t('map.clearRadius')}
           </button>
         )}
-        <span style={{ marginLeft: 'auto', fontSize: 12, color: 'var(--text-muted)' }}>
-          {pointsLabel ?? t('map.pointCount', { count: points.length })}
-        </span>
       </div>
+      {/* The click-hint + point count used to be two separate spans crowding the
+          radius row (Danny 09-08) — now ONE subtle, italic helper line below it. */}
+      <span style={{ fontSize: 11, color: 'var(--text-muted)', fontStyle: 'italic' }}>
+        {(pointsLabel ?? t('map.pointCount', { count: points.length }))} · {t('map.clickHint')}
+      </span>
       {/* The map fills the remaining pane height; hosts (drawer tabs) can force a
           taller map via mapHeight (Danny 23-07: "kaart kan langer"). */}
       <div style={{ flex: 1, minHeight: mapHeight ?? 380, display: 'flex' }}>

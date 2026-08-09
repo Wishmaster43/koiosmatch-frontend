@@ -287,6 +287,46 @@ describe('NotesTab · type/channel filter menu (NOTE-FILTERS-1)', () => {
   })
 })
 
+/**
+ * NOTITIE-POPOUT-BAR-1 (Danny 09-08 "kan je hier de pop-out ook bijzetten?"): the
+ * second-screen button now sits in the notes TOOLBAR, not only inside the composer's
+ * FloatingPanel header. It is gated on the host wiring `onPopOut` — i.e. on an entity
+ * that really owns a `/popout/notes/{entity}/{id}` route — so an entity without one
+ * (applications/matches/tasks/opportunities, scoped location/department notes) never
+ * gets a button that would open an empty window (§3). No real i18next instance runs in
+ * this file, so `t('openSecondScreen')` falls back to the raw key.
+ */
+describe('NotesTab · toolbar pop-out (NOTITIE-POPOUT-BAR-1)', () => {
+  it('renders the pop-out button when the host wired onPopOut (entity WITH a popout route)', () => {
+    render(<NotesTab notes={[note()]} labels={labels} onPopOut={vi.fn()}
+      showTimeline={false} showConversations={false} />)
+    expect(screen.getByRole('button', { name: 'openSecondScreen' })).toBeInTheDocument()
+  })
+
+  it('renders NO pop-out button for a host that wired none (entity WITHOUT a popout route)', () => {
+    render(<NotesTab notes={[note()]} labels={labels} showTimeline={false} showConversations={false} />)
+    expect(screen.queryByRole('button', { name: 'openSecondScreen' })).toBeNull()
+  })
+
+  it('clicking it calls the host handler once — without opening the composer', async () => {
+    const user = userEvent.setup()
+    const onPopOut = vi.fn()
+    render(<NotesTab notes={[note()]} labels={labels} onPopOut={onPopOut}
+      showTimeline={false} showConversations={false} />)
+    await user.click(screen.getByRole('button', { name: 'openSecondScreen' }))
+    expect(onPopOut).toHaveBeenCalledTimes(1)
+    // The composer (FloatingPanel) must stay shut — this is a "read it elsewhere"
+    // action, not a "write a note" one.
+    expect(screen.queryByRole('dialog')).toBeNull()
+  })
+
+  it('does not render it on a notes-less section (timeline-only host render)', () => {
+    render(<NotesTab timeline={[{ time: '2026-08-04T17:30:00+00:00', text: 'Fase gewijzigd' }]}
+      labels={labels} onPopOut={vi.fn()} showNotes={false} showConversations={false} />)
+    expect(screen.queryByRole('button', { name: 'openSecondScreen' })).toBeNull()
+  })
+})
+
 describe('NotesTab · timeline', () => {
   const timelineItem = (over: Record<string, unknown> = {}) => ({ time: '2026-08-04T17:30:00+00:00', text: 'Fase gewijzigd', ...over })
 

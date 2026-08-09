@@ -39,6 +39,18 @@
  * clutter next to search + add). The toolbar is back to search + add + one
  * compact Filter button; the dropdowns themselves are unchanged (still the house
  * searchable SelectMenu), only where they live changed.
+ *
+ * NOTITIE-POPOUT-BAR-1 (Danny 09-08 "kan je hier de pop-out ook bijzetten?"):
+ * the second-screen affordance was reachable only from INSIDE the composer's
+ * FloatingPanel header, so a recruiter who just wants to read/answer the thread
+ * on a second monitor first had to open a new note. The toolbar now carries the
+ * same button — mirroring the profile text's pop-out (candidates/drawer/
+ * ProfileTab) 1:1 in icon, footprint and tone, never a new shape. It is gated on
+ * the host having wired `onPopOut`, i.e. on an entity that actually owns a
+ * `/popout/notes/{entity}/{id}` route (candidate · customer · vacancy today), so
+ * no entity gets a button that would open an empty window (§3), and the popout
+ * window itself — which passes no handler — never shows a button re-opening
+ * itself.
  */
 import { useState } from 'react'
 import type { ReactNode } from 'react'
@@ -46,7 +58,7 @@ import { useTranslation } from 'react-i18next'
 import DrawerAddButton from '@/components/drawer/DrawerAddButton'
 import DrawerFilterMenu from '@/components/drawer/DrawerFilterMenu'
 import type { DrawerFilterConfig } from '@/components/drawer/DrawerFilterMenu'
-import { Edit2, History, Search, Trash2 } from 'lucide-react'
+import { Edit2, ExternalLink, History, Search, Trash2 } from 'lucide-react'
 import Avatar from '@/components/ui/Avatar'
 import SafeHtml from '@/components/ui/SafeHtml'
 import SectionCard, { sectionBlock } from '@/components/ui/SectionCard'
@@ -135,8 +147,14 @@ interface NotesTabProps {
   // the customer tab's "link this note to …" picker belongs in the compose flow,
   // not as a standing toolbar row). Rendered only while composing a NEW note.
   composerExtra?: ReactNode
-  // F5 second-screen: forwarded to the composer's FloatingPanel pop-out button.
-  // Only candidate hosts pass it (the popout window is candidate-only for now).
+  // F5 second-screen (+ NOTITIE-POPOUT-BAR-1): opens this record's notes in a real
+  // second browser window. Drives BOTH the toolbar pop-out button and the composer's
+  // FloatingPanel header button. Passed ONLY by a host whose entity owns a
+  // `/popout/notes/{entity}/{id}` route — candidate, customer and vacancy today;
+  // applications/matches/tasks/opportunities and the scoped location/department
+  // notes have no such route, so they omit it and render no button at all (§3, no
+  // fake affordance). The popout window's own pages deliberately omit it too, so
+  // the second screen never offers to open itself again.
   onPopOut?: () => void
   showTimeline?: boolean
   showConversations?: boolean
@@ -337,6 +355,20 @@ export default function NotesTab({
           <DrawerFilterMenu filters={filterRows}
             label={t('filters.button', { defaultValue: 'Filter' })}
             title={t('filters.title')} clearAllLabel={t('filters.clearAll')} />
+          {/* NOTITIE-POPOUT-BAR-1 (Danny 09-08): pop the thread onto a second screen
+              straight from the toolbar. Deliberately the SAME 26x26 bordered icon
+              button, the same ExternalLink glyph and the same `common:openSecondScreen`
+              label as the profile text's pop-out and the composer's header button —
+              one affordance, one look. Renders only for a host that wired onPopOut
+              (see the prop's comment: an entity with a real popout route). */}
+          {onPopOut && (
+            <button type="button" onClick={onPopOut} title={t('openSecondScreen')} aria-label={t('openSecondScreen')}
+              style={{ width: 26, height: 26, display: 'flex', alignItems: 'center', justifyContent: 'center',
+                borderRadius: 6, background: 'none', color: 'var(--text-muted)',
+                border: '1px solid var(--border)', cursor: 'pointer', flexShrink: 0 }}>
+              <ExternalLink size={13} />
+            </button>
+          )}
           {/* Shared reference-style add button (Danny 20-07: notitie-knop had geen
               achtergrondkleur) — one look on every entity's notes tab. Short text
               (DRAWER-ADD-SHORT-1, Danny 05-08): this always renders inside a

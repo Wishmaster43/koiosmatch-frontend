@@ -751,7 +751,10 @@
     "emergencyContactRelation": "Relación",
     "noticePeriodDerivedHint_one": "Según el preaviso ({{count}} semana), disponible desde el {{date}}.",
     "noticePeriodDerivedHint_other": "Según el preaviso ({{count}} semanas), disponible desde el {{date}}.",
-    "noticePeriodApply": "Usar esta fecha"
+    "noticePeriodApply": "Usar esta fecha",
+    "groupBankAccount": "Cuenta bancaria",
+    "iban": "Número de cuenta (IBAN)",
+    "accountHolderName": "Titular de la cuenta"
   },
   "zzp": {
     "title": "Autónomo",
@@ -786,7 +789,8 @@
     "businessEmailDuplicateCancel": "Volver",
     "creditorAutoHint": "Se asigna automáticamente si se deja vacío.",
     "creditorAutoLocked": "Numerado automáticamente mediante Configuración → Numeración.",
-    "identifierNlOnly": "Nota: para autónomos el servidor solo acepta todavía un número de registro/IVA neerlandés. Un número extranjero se rechaza al guardar."
+    "identifierNlOnly": "Nota: para autónomos el servidor solo acepta todavía un número de registro/IVA neerlandés. Un número extranjero se rechaza al guardar.",
+    "accountHolderName": "Titular de la cuenta"
   },
   "certified": {
     "issued": "Emitido",

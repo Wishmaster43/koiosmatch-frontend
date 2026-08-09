@@ -99,8 +99,12 @@ export default function ProposalSettings() {
           style={{ ...inputStyle, marginBottom: 14 }} />
 
         <label style={labelStyle}>{t('proposal.bodyLabel')}</label>
-        {/* House rule: every multi-line free-text field is the shared rich-text editor. */}
-        <RichTextEditor value={body} onChange={setBody} minHeight={180} resizable />
+        {/* House rule: every multi-line free-text field is the shared rich-text editor.
+            ACTIONS-SCOPE-1 (Danny 09-08): assistModes pinned to improve/summarize -
+            this is a reusable message TEMPLATE (token placeholders, no real recipient
+            yet), not a conversation, so "Actiepunten" does not apply here. */}
+        <RichTextEditor value={body} onChange={setBody} minHeight={180} resizable
+          assistModes={['improve', 'summarize']} />
 
         <div style={{ marginTop: 12 }}>
           <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', marginBottom: 6 }}>{t('proposal.tokensTitle')}</div>

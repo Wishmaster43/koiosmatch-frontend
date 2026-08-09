@@ -52,11 +52,11 @@ const finalSegment = (transcript: string) => ({ isFinal: true, 0: { transcript }
 
 // Host harness — the bar is controlled, so the test owns the value like a real
 // editor host does.
-function Host({ initial = '', modes }: { initial?: string; modes?: ('improve' | 'summarize' | 'actions')[] }) {
+function Host({ initial = '', modes, generate }: { initial?: string; modes?: ('improve' | 'summarize' | 'actions')[]; generate?: { entity: 'candidate' | 'customer' | 'location' | 'match'; id: string } }) {
   const [value, setValue] = useState(initial)
   return (
     <>
-      <RichTextAssistBar value={value} onChange={setValue} language="nl" modes={modes} />
+      <RichTextAssistBar value={value} onChange={setValue} language="nl" modes={modes} generate={generate} />
       <output data-testid="value">{value}</output>
     </>
   )
@@ -167,6 +167,58 @@ describe('RichTextAssistBar', () => {
 
     await waitFor(() => expect(screen.getByText('Maandbudget bereikt')).toBeInTheDocument())
     expect(screen.getByTestId('rte-assist-improve')).toBeEnabled()
+  })
+
+  // KOIOS-GENERATE-1 (Danny 09-08): the generate button is a fake affordance the
+  // moment it renders on a field the backend cannot generate for — so its own
+  // presence is gated on the caller-supplied `generate` prop, never a default.
+  it('renders no "Genereer met Koios" button when the host passes no `generate` prop', () => {
+    render(<Host initial="<p>tekst</p>" />)
+    expect(screen.queryByTestId('rte-assist-generate')).toBeNull()
+  })
+
+  it('POSTs entity+id (never the field text) to /ai/koios/generate and offers it through the same Overnemen strip', async () => {
+    const user = userEvent.setup()
+    post.mockResolvedValue({ data: { text: 'Ervaren verpleegkundige met 5 jaar ervaring.' } })
+    render(<Host initial="<p>bestaande tekst</p>" generate={{ entity: 'candidate', id: 'cand-1' }} />)
+
+    await user.click(screen.getByTestId('rte-assist-generate'))
+
+    expect(post).toHaveBeenCalledWith('/ai/koios/generate',
+      { entity: 'candidate', id: 'cand-1' },
+      expect.objectContaining({ timeout: 60000, quietStatuses: [402, 403, 422, 503] }))
+    await waitFor(() => expect(screen.getByTestId('rte-assist-preview')).toHaveTextContent('Ervaren verpleegkundige met 5 jaar ervaring.'))
+
+    // Overnemen APPENDS (never silently overwrites the recruiter's own text —
+    // 'generate' is not even a rewrite OF the current value, unlike 'improve').
+    await user.click(screen.getByTestId('rte-assist-apply'))
+    expect(screen.getByTestId('value')).toHaveTextContent('<p>bestaande tekst</p><p>Ervaren verpleegkundige met 5 jaar ervaring.</p>')
+  })
+
+  it('offers "Genereer met Koios" even on a completely empty field (unlike improve/summarize)', () => {
+    render(<Host initial="<p></p>" generate={{ entity: 'candidate', id: 'cand-1' }} />)
+    // The text-modes stay honestly disabled on empty text, but generate does not
+    // need existing text — it writes FROM the entity's own data.
+    expect(screen.getByTestId('rte-assist-improve')).toBeDisabled()
+    expect(screen.getByTestId('rte-assist-generate')).toBeEnabled()
+  })
+
+  // CMBE commit 456ac45b (measured 09-08): a real upstream credit failure carries
+  // a stable `code` the frontend translates itself — never the raw server string.
+  it('surfaces a koios_credit_exhausted 402 as a CALM, TRANSLATED warning (not the raw server message)', async () => {
+    const user = userEvent.setup()
+    post.mockRejectedValue({ response: { status: 402, data: { code: 'koios_credit_exhausted', message: 'Het Koios-tegoed van deze organisatie is op of nog niet geactiveerd.' } } })
+    render(<Host initial="<p>tekst</p>" generate={{ entity: 'candidate', id: 'cand-1' }} />)
+
+    await user.click(screen.getByTestId('rte-assist-generate'))
+
+    // i18n resources are unloaded in this suite (see file header) — t() renders
+    // the raw key, which is exactly what proves the CODE (not the message text)
+    // drove the lookup: the raw Dutch server message must NOT be shown.
+    await waitFor(() => expect(screen.getByText('errors.koiosCreditExhausted')).toBeInTheDocument())
+    expect(screen.queryByText('Het Koios-tegoed van deze organisatie is op of nog niet geactiveerd.')).toBeNull()
+    // Retryable — a 402 is an expected, actionable outcome, not a dead end.
+    expect(screen.getByTestId('rte-assist-generate')).toBeEnabled()
   })
 
   it('renders no assist row at all when the host offers no modes (mic-only hosts, e.g. the note composer)', () => {

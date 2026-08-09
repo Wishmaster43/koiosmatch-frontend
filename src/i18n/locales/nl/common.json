@@ -345,7 +345,8 @@
       "auto": "Auto",
       "wizardHint": "Elke actie eerst bevestigen",
       "autoHint": "Acties direct uitvoeren (berichten blijven wachten op bevestiging tenzij aangezet in je profiel)"
-    }
+    },
+    "generate": "Genereer met Koios"
   },
   "ai": {
     "title": "Koios AI adviseert",

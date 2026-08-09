@@ -14,7 +14,7 @@ import TextAlign from '@tiptap/extension-text-align'
 import { Bold, Italic, List, ListOrdered, Heading2, AlignLeft, AlignCenter, AlignRight, Undo2, Redo2, Maximize2, Minimize2, Code } from 'lucide-react'
 import SelectMenu from './SelectMenu'
 import RichTextAssistBar from './RichTextAssistBar'
-import type { RichTextAssistMode } from './richtext/richTextAssistApi'
+import type { GenerateEntity, RichTextAssistMode } from './richtext/richTextAssistApi'
 
 // Toolbar-tooltip keys (common:editor.*) — the component translates its own
 // defaults (audit R2: four features each shipped a hardcoded-English copy of
@@ -60,9 +60,12 @@ interface RichTextEditorProps {
   assist?: boolean
   // Which assist modes the bar offers; `[]` = dictation mic only.
   assistModes?: RichTextAssistMode[]
+  // KOIOS-GENERATE-1 (Danny 09-08): forwarded straight to RichTextAssistBar's own
+  // `generate` prop — omit on any field the backend cannot generate for (§3).
+  assistGenerate?: { entity: GenerateEntity; id: string }
 }
 
-export default function RichTextEditor({ value, onChange, expanded, onToggleExpand, labels = {}, fill = false, minHeight = 120, resizable = false, language, onLanguageChange, showLanguage = true, toolbarExtra, assist = true, assistModes }: RichTextEditorProps) {
+export default function RichTextEditor({ value, onChange, expanded, onToggleExpand, labels = {}, fill = false, minHeight = 120, resizable = false, language, onLanguageChange, showLanguage = true, toolbarExtra, assist = true, assistModes, assistGenerate }: RichTextEditorProps) {
   // Merge caller overrides over the i18n'd defaults (common:editor.*).
   const { t, i18n } = useTranslation('common')
   // Effective spellcheck language: caller-controlled wins, else local choice, else app language.
@@ -159,7 +162,7 @@ export default function RichTextEditor({ value, onChange, expanded, onToggleExpa
         {/* Dictation mic + Koios assist on EVERY free-text field — one shared
             component, driven by this editor's own value/onChange and language. */}
         {assist && (
-          <RichTextAssistBar value={value || ''} onChange={onChange} language={lang} modes={assistModes} />
+          <RichTextAssistBar value={value || ''} onChange={onChange} language={lang} modes={assistModes} generate={assistGenerate} />
         )}
         {/* Host toolbar control(s) — e.g. the notes dictation mic, next to the language picker. */}
         {toolbarExtra}

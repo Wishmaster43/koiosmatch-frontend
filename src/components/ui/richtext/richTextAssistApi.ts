@@ -18,13 +18,21 @@
  *    credit balance, an account state, not a contract problem). Route:
  *    routes/api/tenant/communication-ai.php, middleware module:koios_ai +
  *    permission:koios.use + throttle:30,1.
- *  - POST /ai/koios/generate (entity-generate) is DELIBERATELY NOT CALLED from
- *    here. Measured the same session for entity ∈ candidate|customer|location|
- *    match with real ids: every one answers 403 "Onvoldoende rechten om deze
- *    gegevens te gebruiken." — even for a super admin holding "*". Wiring a
- *    "Genereren" button onto a route that always refuses would be a dead
- *    affordance (§3), so the bar does not render one until the backend gate is
- *    fixed. Reported as a backend gap.
+ *  - POST /ai/koios/generate (entity-generate) IS NOW WIRED (KOIOS-GENERATE-1,
+ *    Danny 09-08 — supersedes the 08-08 "403 for everyone" note above, which was
+ *    a permission-gate bug since fixed by CMBE commit 456ac45b). Re-measured live
+ *    against KoiosEntityGenerateController.php: the request body is `{entity, id,
+ *    instructions?}` — there is NO `field` key; the backend maps one entity kind
+ *    to exactly one generated field (candidate → profile text, customer/location
+ *    → description, match → match text), so a caller only ever supplies WHICH
+ *    entity, never which field. A 402/503 failure here can carry a stable `code`
+ *    (`koios_credit_exhausted` / `koios_unavailable`, ClaudeApiException::render())
+ *    when the upstream Anthropic call itself fails — the SAME two codes
+ *    extractApiError's apiErrorKey() already maps to translated common:errors.*
+ *    text; the tenant's own monthly-budget 402 and the "no API key configured"
+ *    503 carry no code and fall back to the server's own message. 403 = the
+ *    caller lacks the entity's own *.view permission; 422 = the id no longer
+ *    exists in this tenant (soft-deleted/cross-tenant).
  *
  * Hand-written types (§10): this route carries no openapi-typescript entry yet
  * (the generated spec documents request shapes + 401 only), so the success
@@ -87,4 +95,28 @@ export async function assistRichText(
   return mode === 'actions'
     ? { kind: 'actions', items: (res.data as ApiActionsResponse).items ?? [] }
     : { kind: 'text', text: (res.data as ApiTextResponse).text ?? '' }
+}
+
+// Entities KoiosEntityGenerateController can write a suggestion for — mirrors its
+// ENTITIES map 1:1. Kept as its OWN type (not folded into RichTextAssistMode):
+// generate is a different request shape entirely (entity+id, never text+mode).
+export type GenerateEntity = 'candidate' | 'customer' | 'location' | 'match'
+
+interface ApiGenerateResponse { text: string }
+
+/**
+ * POST /ai/koios/generate — a fresh text suggestion written FROM the entity's own
+ * data (name, function, skills, …), never from the field's current draft — so,
+ * unlike improve/summarize, an EMPTY field is a valid starting point. Read-only:
+ * this never persists anything, same review-then-Overnemen contract as the other
+ * modes. See this file's header for the measured error-code contract.
+ */
+export async function generateEntityText(
+  { entity, id }: { entity: GenerateEntity; id: string },
+  signal?: AbortSignal,
+): Promise<RichTextAssistResult> {
+  const res = await api.post<ApiGenerateResponse>('/ai/koios/generate',
+    { entity, id },
+    { signal, timeout: 60000, quietStatuses: [402, 403, 422, 503] })
+  return { kind: 'text', text: res.data.text ?? '' }
 }

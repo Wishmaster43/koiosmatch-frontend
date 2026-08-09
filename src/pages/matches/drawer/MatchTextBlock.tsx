@@ -23,9 +23,21 @@
  * the same two icons every description field in the app carries. The
  * match-only MatchAssistSection/useMatchTextAssist/matchAssistApi trio this
  * block used to mount was a copy of that pattern and is gone (§11: the shared
- * helper landed WITH adoption). Its 'Genereren' mode went with it: POST
- * /ai/koios/generate answers 403 for every entity today (measured live
- * 2026-08-08), so shipping that button would be a dead affordance (§3).
+ * helper landed WITH adoption).
+ *
+ * CORRECTION (Danny 09-08, supersedes the 08-08 "403 for everyone" line above):
+ * that permission-gate bug is fixed (backend commit 456ac45b, KOIOS-GENERATE-1)
+ * — POST /ai/koios/generate is a real, working endpoint now, not a dead end.
+ * Measured live 09-08: this tenant's own call answers 402 `koios_credit_exhausted`
+ * (the Koios credit balance is empty), an account state, not a rights problem.
+ * See richTextAssistApi.ts's header for the full measured contract. This block
+ * still doesn't pass `assistGenerate` (no Generate button here) — that is a
+ * separate, not-yet-decided step, unrelated to the ACTIONS-SCOPE-1 note below.
+ *
+ * ACTIONS-SCOPE-1 (Danny 09-08): `assistModes` is pinned to Verbeteren/
+ * Samenvatten only — a match text is a description of the placement, not a
+ * conversation, so "Actiepunten" (which belongs to a NOTE yielding follow-up
+ * tasks, §3A) does not apply here.
  */
 import { useState, useEffect } from 'react'
 import type { ComponentType } from 'react'
@@ -104,7 +116,8 @@ export default function MatchTextBlock({ value, present, loading, save }: Props)
       {loading ? (
         <div style={{ ...blockStyle, padding: '10px 12px', fontSize: 12, color: 'var(--text-muted)' }}>{t('drawer.contract.loading')}</div>
       ) : editing ? (
-        <RichTextEditor value={draft} onChange={setDraft} />
+        // ACTIONS-SCOPE-1: no "Actiepunten" mode — a match text is a description, not a conversation.
+        <RichTextEditor value={draft} onChange={setDraft} assistModes={['improve', 'summarize']} />
       ) : value ? (
         <div style={{ ...blockStyle, padding: '10px 12px', maxHeight: 220, overflow: 'auto' }}>
           <SafeHtml html={value} style={{ fontSize: 12, color: 'var(--text)', lineHeight: 1.5 }} />

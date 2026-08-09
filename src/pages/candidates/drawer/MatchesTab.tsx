@@ -6,6 +6,7 @@ import StatusFilterSelect, { useStatusFilter } from '@/components/drawer/StatusF
 import DrawerAddButton from './DrawerAddButton'
 import { useMatchStatuses } from '@/lib/useMatchStatuses'
 import MatchCard from '@/pages/matches/MatchCard'
+import { MATCH_COL_STATUS, MATCH_COL_OTHER_PARTY, MATCH_COL_SCORE, MATCH_COL_ACTIONS } from '@/pages/matches/matchRowColumns'
 import { rememberReturnTab } from './constants'
 import type { Candidate, CandidateMatch } from '@/types/candidate'
 import type { Id } from '@/types/common'
@@ -49,7 +50,9 @@ export default function MatchesTab({ c, onEdit, onAdd }: { c: Candidate
   // Opens the match CREATE modal (WorkTab owns the modal state) — omitted, the
   // button simply doesn't render (mirrors the onEdit pencil's own optional gate).
   onAdd?: () => void }) {
-  const { t } = useTranslation('candidates')
+  // 'matches' is loaded for the Score column header below (matches:cols.score),
+  // reused from MatchesTable's own "Match" column label rather than a new key.
+  const { t } = useTranslation(['candidates', 'matches'])
   // Match lifecycle lookup (R-1b) — resolves the title's fase + the "Contract"
   // row from the status slug, same as MatchesTable/MatchDrawer; the backend-
   // resolved stage/stageColor stay the fallback for payloads without the slug yet.
@@ -100,23 +103,28 @@ export default function MatchesTab({ c, onEdit, onAdd }: { c: Candidate
       </div>
       <SectionCard>
       {/* Column header bar (Danny 09-08: "Match heeft geen titelbalk en
-          sollicitaties wel" — mirrors WorkTab's own header bar, same style,
-          so both lists read as one system; kept per Danny's advice rather than
-          removed, since a bare pill/date/value row reads as undecipherable
-          without one). Only "Vacature" and the other-party label are real
-          columns here — MatchCard's own summary row otherwise has no fixed
-          column grid to line up against (unlike ApplicationRow, which reads
-          its widths from the shared applicationRowColumns.ts), so this stays a
-          close visual match rather than a pixel-exact one; the trailing cell
-          stays empty over the score/coupling-icon/chevron cluster, the same
-          "empty header above an unlabelled column" idiom WorkTab uses for its
-          own actions column. */}
+          sollicitaties wel" — mirrors WorkTab's own header bar, same style, so
+          both lists read as one system). SECOND LOOK (Danny 09-08, "Open heeft
+          geen kopje??"): the status pill used to ride glued onto the title
+          behind an em-dash and the score pill sat as an unlabeled dash between
+          the client name and the icon cluster — both are real columns now,
+          reading their widths from the SAME matchRowColumns.ts MatchCard's own
+          cells use (never two loose numbers — this header used to hardcode its
+          own `width: 140` literals instead of importing them, the exact bug
+          this shared module exists to prevent). Column order: Vacature ·
+          Status · Klant · Match(score) · actions (empty header — pure
+          click-icons + chevron only, mirrors WorkTab's own actions column). */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '8px 12px', marginBottom: 8,
         background: 'var(--bg)', border: '1px solid var(--border)', borderRadius: 8,
         fontSize: 11, fontWeight: 600, color: 'var(--text-muted)' }}>
         <span style={{ flex: 1, minWidth: 0 }}>{t('work.vacancy')}</span>
-        <span style={{ width: 140, flexShrink: 0 }}>{t('matchesView.client')}</span>
-        <span aria-hidden="true" data-testid="match-col-actions-header" style={{ width: 140, flexShrink: 0 }} />
+        {/* Reuses the SAME key ApplicationRow's own status column uses (WorkTab.tsx) —
+            "de sollicitatielijst gebruikt er een voor zijn eigen statuskop". */}
+        <span data-testid="match-col-status-header" style={MATCH_COL_STATUS}>{t('work.colStatus')}</span>
+        <span data-testid="match-col-client-header" style={MATCH_COL_OTHER_PARTY}>{t('matchesView.client')}</span>
+        {/* Reuses MatchesTable's own score-column label ("Match") rather than a new key. */}
+        <span data-testid="match-col-score-header" style={MATCH_COL_SCORE}>{t('matches:cols.score')}</span>
+        <span aria-hidden="true" data-testid="match-col-actions-header" style={MATCH_COL_ACTIONS} />
       </div>
       {matches.length === 0 ? (
         <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{t('matchesView.empty')}</div>

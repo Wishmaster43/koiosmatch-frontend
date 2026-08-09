@@ -3,6 +3,8 @@ import { ExternalLink, Link2, Pencil, ChevronRight, ChevronDown } from 'lucide-r
 import { useTranslation } from 'react-i18next'
 import type { ReactNode } from 'react'
 import SoftChip from '@/components/ui/SoftChip'
+import StatusPill from '@/components/ui/StatusPill'
+import { MATCH_COLUMN_WIDTH, MATCH_COL_STATUS, MATCH_COL_OTHER_PARTY, MATCH_COL_SCORE, MATCH_COL_ACTIONS } from './matchRowColumns'
 import EntityLink, { buildEntityDeepLink } from '@/components/ui/EntityLink'
 import BackofficeCouplingIndicator from '@/components/ui/BackofficeCouplingIndicator'
 import ScorePill from './ScorePill'
@@ -64,6 +66,12 @@ export interface MatchCardProps {
   // surface background instead — matching ApplicationRow's rows exactly. Off by
   // default: every OTHER caller (the customer drawer's own MatchesTab, which
   // never sets `collapsible` either) renders byte-identical.
+  //
+  // SECOND LOOK (Danny 09-08, "Open heeft geen kopje??"): flatRow now ALSO
+  // splits the stage and the score out of the merged title/icon cluster into
+  // their own labeled columns (Status, Match) — see the render below and
+  // matchRowColumns.ts. Only flatRow gets the split, since it is the only
+  // variant with a header bar above it to line columns up against.
   flatRow?: boolean
 }
 
@@ -156,6 +164,18 @@ export default function MatchCard({
     </span>
   )
 
+  // Title-only block (STATUS-COLUMN-1, Danny 09-08 second look): the flatRow
+  // (header-barred) variant below gives the stage its OWN column instead of the
+  // " — {fase}" suffix titleBlock carries, so this drops that suffix. Every other
+  // caller has no header bar to line the stage up against and keeps titleBlock.
+  const titleOnly = (
+    <span style={{ flex: 1, minWidth: 0, fontSize: 12, fontWeight: 600, color: 'var(--text)', overflow: 'hidden' }}>
+      <span onClickCapture={onBeforeOpen} onClick={e => e.stopPropagation()} style={{ minWidth: 0, overflow: 'hidden' }}>
+        <EntityLink page="vacancies" id={vacancyId} title={vacancyTitle || '—'} hideIcon>{vacancyTitle || '—'}</EntityLink>
+      </span>
+    </span>
+  )
+
   // Right-side icons: open-in-new / edit / backoffice / vacancy-URL — shared
   // verbatim between the default header and the compact summary row.
   const iconsBlock = (
@@ -194,37 +214,79 @@ export default function MatchCard({
   // independently) — the chevron button stays the explicit, keyboard-reachable
   // control (aria-expanded), the row click is a mouse convenience on top of it.
   const toggle = () => setExpanded(x => !x)
+  // ACTIONS-COLUMN-1 (Danny 09-08 second look): a shared element so the flatRow
+  // variant can render it INSIDE the fixed actions column below (it used to sit
+  // OUTSIDE every column entirely, so the row ran wider than the header's own
+  // trailing cell) while every other caller keeps it as its own trailing element.
+  const chevronButton = (
+    <button type="button" onClick={e => { e.stopPropagation(); toggle() }}
+      title={expanded ? t('common:collapse') : t('common:expand')}
+      aria-label={expanded ? t('common:collapse') : t('common:expand')}
+      aria-expanded={expanded}
+      style={{ display: 'flex', border: 'none', background: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: 2, flexShrink: 0 }}>
+      {expanded ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
+    </button>
+  )
   const showRows = !collapsible || expanded
 
   return (
     <div style={{ border: '1px solid var(--border)', borderRadius: 8, overflow: 'hidden', marginBottom: 8 }}>
       {/* Header: "{vacature} — {fase}" one-liner (point 2) + score + coupling
           glyphs. Compact mode (collapsible) additionally shows the other-party
-          value inline and a chevron, in the order Danny asked for: title—stage,
-          other party, score, icons, chevron. */}
+          value inline and a chevron. flatRow order (Danny 09-08 second look,
+          own labeled columns replacing the two headerless dashes): vacature,
+          status, other party, score, actions+chevron. */}
       <div onClick={collapsible ? toggle : undefined} data-testid="match-card-header"
         style={{ padding: '8px 12px', background: flatRow ? 'var(--surface)' : 'var(--bg)', borderBottom: collapsible && !expanded ? 'none' : '1px solid var(--border)',
           display: 'flex', alignItems: 'center', gap: 8, cursor: collapsible ? 'pointer' : undefined }}>
-        {titleBlock}
+        {flatRow ? titleOnly : titleBlock}
         {collapsible ? (
           <>
+            {/* STATUS COLUMN (Danny 09-08 second look: "de status zit niet eens
+                in een eigen kolom" — it used to ride glued onto the title behind
+                an em-dash, see titleOnly above). flatRow-only, same as the two
+                columns below: no header bar elsewhere to line it up against. */}
+            {flatRow && (
+              <span onClick={e => e.stopPropagation()} data-testid="match-col-status" style={MATCH_COL_STATUS}>
+                {stageLabel && <StatusPill label={stageLabel} color={stageColor} />}
+              </span>
+            )}
             {/* Other-party value inline in the summary row (Danny: "vacancy title —
                 status, client, score %, …") — stops propagation so clicking the
                 value itself (may be an EntityLink) doesn't also toggle the row. */}
-            <span onClick={e => e.stopPropagation()} style={{ fontSize: 12, color: 'var(--text-muted)', flexShrink: 0, maxWidth: 140, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+            {/* COLUMN-ALIGN-1 (Danny 09-08): under a header BAR these two cells must
+                occupy a FIXED column, not shrink to their content — a maxWidth cell
+                slides left as soon as the value is short, and the label above it
+                stops pointing at anything. Only the header-bar caller (flatRow) pins
+                them; every other caller keeps the content-width summary row it had. */}
+            <span onClick={e => e.stopPropagation()} data-testid={flatRow ? 'match-col-client' : undefined}
+              style={{ fontSize: 12, color: 'var(--text-muted)', flexShrink: 0,
+              ...(flatRow ? MATCH_COL_OTHER_PARTY : { maxWidth: MATCH_COLUMN_WIDTH }),
+              overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
               {otherPartyValue}
             </span>
-            <span onClick={e => e.stopPropagation()} style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
-              {scorePill}
+            {/* SCORE COLUMN (Danny 09-08 second look, point 3): the score is a DATA
+                value ("82%" or a muted dash), not a click action, so it gets its
+                own labeled column ("Match", matches:cols.score) instead of sitting
+                as an unlabeled dash between the client name and the icon cluster —
+                that dash was the SECOND headerless column Danny flagged. Only the
+                pure click-actions below keep the shared empty header, mirroring
+                ApplicationRow's own actions column. flatRow-only, same reasoning
+                as the Status column above. */}
+            {flatRow && (
+              <span onClick={e => e.stopPropagation()} data-testid="match-col-score" style={MATCH_COL_SCORE}>{scorePill}</span>
+            )}
+            <span onClick={e => e.stopPropagation()} data-testid={flatRow ? 'match-col-actions' : undefined}
+              style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0,
+              ...(flatRow ? MATCH_COL_ACTIONS : {}), justifyContent: flatRow ? 'flex-end' : undefined }}>
+              {!flatRow && scorePill}
               {iconsBlock}
+              {/* The chevron rides INSIDE this same fixed column for flatRow — see
+                  ACTIONS-COLUMN-1 above. Every other caller keeps it as its own
+                  trailing element (below). */}
+              {flatRow && chevronButton}
             </span>
-            <button type="button" onClick={e => { e.stopPropagation(); toggle() }}
-              title={expanded ? t('common:collapse') : t('common:expand')}
-              aria-label={expanded ? t('common:collapse') : t('common:expand')}
-              aria-expanded={expanded}
-              style={{ display: 'flex', border: 'none', background: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: 2, flexShrink: 0 }}>
-              {expanded ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
-            </button>
+            {!flatRow && chevronButton}
           </>
         ) : (
           <>

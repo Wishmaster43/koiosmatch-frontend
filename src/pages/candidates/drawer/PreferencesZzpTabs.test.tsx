@@ -101,21 +101,47 @@ describe('PreferencesTab · sub-tabs (kandidaten-ronde-2, punt D)', () => {
     expect(screen.queryByText('preferences.remarks')).toBeNull()
   })
 
-  // PREF-PENCIL-SPLIT-1 (05-08): Financieel holds TWO distinct sections
-  // (Loonheffing, Gewenst tarief) — each now gets its own card + pencil, so
-  // editing one must never flip the other into edit mode (same regression class
-  // as VAC-DETAILS-SPLIT-1 / ZzpTab's own Bedrijf/Adres/Facturatie split, see ZzpTab.test.tsx).
-  it('Financieel shows Loonheffing and Gewenst tarief as two separately-editable cards', async () => {
+  // PREF-PENCIL-SPLIT-1 (05-08): Financieel holds distinct sections — each gets
+  // its own card + pencil, so editing one must never flip another into edit mode
+  // (same regression class as VAC-DETAILS-SPLIT-1 / ZzpTab's own
+  // Bedrijf/Adres/Facturatie split, see ZzpTab.test.tsx). BANK-1 (09-08) added
+  // Bankrekening as the THIRD card here, hence three pencils instead of two.
+  it('Financieel shows Loonheffing, Bankrekening and Gewenst tarief as separately-editable cards', async () => {
     const user = userEvent.setup()
     render(<PreferencesTab c={candidate()} />)
     await user.click(screen.getByRole('tab', { name: 'preferences.groupFinancial' }))
+    expect(screen.getByText('preferences.groupBankAccount')).toBeInTheDocument()
     expect(screen.getByText('preferences.groupDesiredRate')).toBeInTheDocument()
-    expect(screen.getAllByTitle('edit')).toHaveLength(2)
-    // Editing Loonheffing leaves Gewenst tarief read-only (one pencil left).
+    expect(screen.getAllByTitle('edit')).toHaveLength(3)
+    // Editing Loonheffing leaves the other two read-only (two pencils left).
     await user.click(screen.getAllByTitle('edit')[0])
     expect(screen.getByTitle('save')).toBeInTheDocument()
-    expect(screen.getAllByTitle('edit')).toHaveLength(1)
+    expect(screen.getAllByTitle('edit')).toHaveLength(2)
     expect(screen.getByText('preferences.desiredRateMin')).toBeInTheDocument()
+  })
+
+  // BANK-1 (Danny 2026-08-09): the PRIVATE salary account lives on this sub-tab,
+  // reading from the ROOT candidate fields (never the preferences blob) and
+  // emitting the API keys the drawer lifts back out to root — see
+  // BankAccountCard.test.tsx for the wire-body assertions.
+  it('Financieel renders the private bank account from the ROOT candidate fields, grouped in fours', async () => {
+    const user = userEvent.setup()
+    const c = { ...candidate(), iban: 'NL91ABNA0417164300', accountHolderName: 'Jan Jansen' } as Candidate
+    render(<PreferencesTab c={c} />)
+    await user.click(screen.getByRole('tab', { name: 'preferences.groupFinancial' }))
+    expect(screen.getByText('NL91 ABNA 0417 1643 00')).toBeInTheDocument()
+    expect(screen.getByText('Jan Jansen')).toBeInTheDocument()
+  })
+
+  it('Financieel saves the bank account with the API keys only (never wrapped in a preferences key here)', async () => {
+    const user = userEvent.setup()
+    const onSave = vi.fn()
+    const c = { ...candidate(), iban: 'NL91ABNA0417164300', accountHolderName: 'Jan Jansen' } as Candidate
+    render(<PreferencesTab c={c} onSave={onSave} />)
+    await user.click(screen.getByRole('tab', { name: 'preferences.groupFinancial' }))
+    await user.click(screen.getAllByTitle('edit')[1]) // Bankrekening
+    await user.click(screen.getByTitle('save'))
+    expect(onSave).toHaveBeenCalledWith({ iban: 'NL91ABNA0417164300', account_holder_name: 'Jan Jansen' })
   })
 
   // Overig now holds ONLY Opmerkingen (Loonheffing moved to Financieel) — its

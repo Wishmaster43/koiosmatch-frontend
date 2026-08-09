@@ -9,8 +9,10 @@ import type { CSSProperties, ReactNode, PointerEvent as ReactPointerEvent, Keybo
  * Two modes, one component:
  * - single: pass `value` + `onChange` (the original contract, unchanged).
  * - range:  pass `range` ([lower, upper]) + `onRangeChange` — two thumbs bounding
- *           a filled segment; a drag moves whichever thumb is nearest and neither
- *           thumb can cross the other.
+ *           a filled segment; a drag moves whichever thumb is nearest. Dragging a
+ *           thumb PAST its neighbour hands control to that neighbour instead of
+ *           clamping, so a collapsed ([v, v]) or crossed range always stays
+ *           re-openable in either direction.
  *
  * labels: [leftLabel, centerLabel, rightLabel]
  */
@@ -39,6 +41,11 @@ export default function Slider({
   // Which thumb a pointer drag grabbed (range mode) — decided on pointer-down so
   // the rest of the drag keeps moving that same thumb, even past its neighbour.
   const activeThumb = useRef<0 | 1>(0)
+  // A collapsed range (lower === upper) makes "closest thumb" meaningless — both
+  // distances are identical by construction, so the down-click can't tell them
+  // apart. Remember the down VALUE here; the first move resolves the tie by
+  // DIRECTION instead (Danny 09-08, "verspringt"). Cleared once resolved.
+  const pendingTieValue = useRef<number | null>(null)
 
   const [lower, upper] = range ?? [0, max]
   const pctOf = (v: number) => clamp((v / max) * 100, 0, 100)
@@ -59,25 +66,50 @@ export default function Slider({
     if (next != null) onChange?.(next)
   }, [valueFromClientX, onChange])
 
-  // Range mode: move ONE thumb, clamped so it never crosses its neighbour.
+  // Range mode: move ONE thumb. Dragging it PAST its neighbour hands control to
+  // that neighbour instead of clamping at it — a range parked at equal values (or
+  // dragged fully crossed) must stay able to open in either direction, never get
+  // stuck (Danny 09-08: dragging the lower thumb past the upper one used to pin
+  // both at the same value with no way back except a reset).
   const setRangeFromClientX = useCallback((clientX: number, thumb: 0 | 1) => {
     const next = valueFromClientX(clientX)
     if (next == null) return
-    onRangeChange?.(thumb === 0 ? [Math.min(next, upper), upper] : [lower, Math.max(next, lower)])
+    if (thumb === 0) {
+      if (next > upper) { activeThumb.current = 1; onRangeChange?.([upper, next]); return }
+      onRangeChange?.([next, upper])
+    } else {
+      if (next < lower) { activeThumb.current = 0; onRangeChange?.([next, lower]); return }
+      onRangeChange?.([lower, next])
+    }
   }, [valueFromClientX, onRangeChange, lower, upper])
 
   const onPointerDown = (e: ReactPointerEvent<HTMLDivElement>) => {
     e.currentTarget.setPointerCapture?.(e.pointerId)
     if (!range) { setFromClientX(e.clientX); return }
-    // Grab whichever thumb sits closest to the click (ties go to the lower one).
     const picked = valueFromClientX(e.clientX)
-    activeThumb.current = picked == null || Math.abs(picked - lower) <= Math.abs(picked - upper) ? 0 : 1
+    if (lower === upper) {
+      // Tie: distance-to-lower and distance-to-upper are IDENTICAL by construction
+      // — picking "closest" always resolved to the same thumb. Defer to the first
+      // move's direction instead (see pendingTieValue doc comment above).
+      pendingTieValue.current = picked
+      activeThumb.current = 0
+    } else {
+      pendingTieValue.current = null
+      activeThumb.current = picked == null || Math.abs(picked - lower) <= Math.abs(picked - upper) ? 0 : 1
+    }
     setRangeFromClientX(e.clientX, activeThumb.current)
   }
   const onPointerMove = (e: ReactPointerEvent<HTMLDivElement>) => {
     if (e.buttons !== 1) return
-    if (range) setRangeFromClientX(e.clientX, activeThumb.current)
-    else setFromClientX(e.clientX)
+    if (!range) { setFromClientX(e.clientX); return }
+    // Resolve a pending tie by drag direction: which side of the down-point did
+    // the pointer move to?
+    if (pendingTieValue.current != null) {
+      const next = valueFromClientX(e.clientX)
+      if (next != null && next !== pendingTieValue.current) activeThumb.current = next > pendingTieValue.current ? 1 : 0
+      pendingTieValue.current = null
+    }
+    setRangeFromClientX(e.clientX, activeThumb.current)
   }
 
   // Keyboard (single mode): arrow keys nudge by one step.

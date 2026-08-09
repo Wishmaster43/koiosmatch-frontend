@@ -773,7 +773,10 @@
     "emergencyContactRelation": "Relatie",
     "noticePeriodDerivedHint_one": "Op basis van de opzegtermijn ({{count}} week) inzetbaar vanaf {{date}}.",
     "noticePeriodDerivedHint_other": "Op basis van de opzegtermijn ({{count}} weken) inzetbaar vanaf {{date}}.",
-    "noticePeriodApply": "Datum overnemen"
+    "noticePeriodApply": "Datum overnemen",
+    "groupBankAccount": "Bankrekening",
+    "iban": "Rekeningnummer (IBAN)",
+    "accountHolderName": "Tenaamstelling"
   },
   "zzp": {
     "title": "ZZP'er",
@@ -808,7 +811,8 @@
     "businessEmailDuplicateCancel": "Terug",
     "creditorAutoHint": "Wordt automatisch toegekend indien leeg.",
     "creditorAutoLocked": "Wordt automatisch genummerd via Instellingen → Nummering.",
-    "identifierNlOnly": "Let op: de server accepteert voor ZZP'ers nog uitsluitend een Nederlands KvK-/btw-nummer. Een buitenlands nummer wordt bij opslaan geweigerd."
+    "identifierNlOnly": "Let op: de server accepteert voor ZZP'ers nog uitsluitend een Nederlands KvK-/btw-nummer. Een buitenlands nummer wordt bij opslaan geweigerd.",
+    "accountHolderName": "Tenaamstelling"
   },
   "certified": {
     "issued": "Uitgegeven",

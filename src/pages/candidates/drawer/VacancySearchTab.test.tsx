@@ -712,7 +712,10 @@ describe('VacancySearchTab · "Inzetbaar vanaf" date filter (gated, Danny 06-08)
     expect(screen.getByText('Laat beschikbaar | Arnhem')).toBeInTheDocument()
     expect(screen.getByText('Onbekende datum | Nijmegen')).toBeInTheDocument()
 
-    fireEvent.change(screen.getByLabelText('Inzetbaar vanaf'), { target: { value: '2026-07-01' } })
+    // COMPACT-1 (Danny 09-08): the filter is now the shared react-datepicker
+    // convention (DD-MM-YYYY), not a native <input type="date"> — type the
+    // displayed format instead of the raw ISO value.
+    fireEvent.change(screen.getByLabelText('Inzetbaar vanaf'), { target: { value: '01-07-2026' } })
     await waitFor(() => expect(screen.queryByText('Vroeg beschikbaar | Ede')).not.toBeInTheDocument())
     expect(screen.getByText('Laat beschikbaar | Arnhem')).toBeInTheDocument()
     expect(screen.getByText('Onbekende datum | Nijmegen')).toBeInTheDocument()
@@ -723,7 +726,9 @@ describe('VacancySearchTab · "Inzetbaar vanaf" date filter (gated, Danny 06-08)
     const candidate = { ...candidateWithLocation, preferences: { available_from: '2026-07-01' } } as unknown as Candidate
     render(<VacancySearchTab candidate={candidate} />)
 
-    await waitFor(() => expect(screen.getByLabelText('Inzetbaar vanaf')).toHaveValue('2026-07-01'))
+    // COMPACT-1 (Danny 09-08): displayed as DD-MM-YYYY now (the shared datepicker
+    // convention), not the raw ISO value the old native input showed.
+    await waitFor(() => expect(screen.getByLabelText('Inzetbaar vanaf')).toHaveValue('01-07-2026'))
     // Already filtered on load — the 2026-06-01 vacancy is before the seeded date.
     expect(screen.queryByText('Vroeg beschikbaar | Ede')).not.toBeInTheDocument()
     expect(screen.getByText('Laat beschikbaar | Arnhem')).toBeInTheDocument()

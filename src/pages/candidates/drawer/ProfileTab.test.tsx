@@ -10,7 +10,16 @@ vi.mock('@/lib/api', () => ({
 vi.mock('@/lib/useGenders', () => ({ useGenders: () => ({ genders: [{ value: 'male', label: 'Man' }, { value: 'female', label: 'Vrouw' }] }) }))
 vi.mock('@/lib/useNationalities', () => ({ useNationalities: () => ({ nationalities: ['Nederlands', 'Belgisch'] }) }))
 vi.mock('@/hooks/useProvinces', () => ({ useProvinces: () => ({ provinces: ['Utrecht', 'Zuid-Holland'] }) }))
-vi.mock('@/components/ui/RichTextEditor', () => ({ default: () => null }))
+// KOIOS-GENERATE-1: a bare stub would hide whether ProfileTab wires the right
+// assist modes/entity through — expose the two props this suite cares about as
+// data-attributes instead of swallowing them (§13: assert the actual request/props).
+vi.mock('@/components/ui/RichTextEditor', () => ({
+  default: ({ assistModes, assistGenerate }: { assistModes?: string[]; assistGenerate?: { entity: string; id: string } }) => (
+    <div data-testid="summary-rte"
+      data-modes={(assistModes ?? []).join(',')}
+      data-generate={assistGenerate ? `${assistGenerate.entity}:${assistGenerate.id}` : ''} />
+  ),
+}))
 vi.mock('@/components/ui/SafeHtml', () => ({ default: () => null }))
 // DANNY-PUNT-1: own hook, own tests (workPermitVisibility.test.ts) — mocked here
 // so ProfileTab's tests don't depend on its network call. Default hidden (false)
@@ -53,6 +62,22 @@ describe('ProfileTab · one tab, one pencil per card', () => {
     // Persoonlijk + Adres + Contact + de profieltekst.
     expect(screen.getByText('Herkomst')).toBeInTheDocument()
     expect(screen.getAllByTitle('Bewerken')).toHaveLength(4)
+  })
+
+  // KOIOS-GENERATE-1 (Danny 09-08): "Actiepunten kan bij profiel tekst weg" — a
+  // conversation-note affordance, not a profile description. The profile text
+  // instead gets Verbeteren/Samenvatten plus "Genereer met Koios", scoped to
+  // THIS candidate's own id (never a hardcoded/placeholder entity).
+  it('opens the profile text with Verbeteren/Samenvatten + Koios generate — never Actiepunten', async () => {
+    const user = userEvent.setup()
+    render(<ProfileTab c={{ ...candidate, id: 'cand-42' } as unknown as Candidate} />)
+    // Persoonlijk · Adres · Contact · profieltekst — profieltekst's pencil is last.
+    const pencils = screen.getAllByTitle('Bewerken')
+    await user.click(pencils[pencils.length - 1])
+
+    const rte = screen.getByTestId('summary-rte')
+    expect(rte.dataset.modes).toBe('improve,summarize')
+    expect(rte.dataset.generate).toBe('candidate:cand-42')
   })
 
   it('editing one card leaves the others read-only — the whole form no longer opens', async () => {

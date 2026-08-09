@@ -14,9 +14,13 @@ import '@/i18n'
 import OpportunityDescriptionBlock from './OpportunityDescriptionBlock'
 
 // Minimal stand-in for the Tiptap editor — a plain textarea wired to value/onChange.
+// `assistModes` is surfaced as a data attribute so ACTIONS-SCOPE-1 (no
+// actiepunten on a description field) can be asserted without mounting the
+// real assist bar.
 vi.mock('@/components/ui/RichTextEditor', () => ({
-  default: ({ value, onChange }: { value?: string; onChange: (v: string) => void }) => (
-    <textarea data-testid="rte" value={value ?? ''} onChange={e => onChange(e.target.value)} />
+  default: ({ value, onChange, assistModes }: { value?: string; onChange: (v: string) => void; assistModes?: string[] }) => (
+    <textarea data-testid="rte" value={value ?? ''} onChange={e => onChange(e.target.value)}
+      data-assist-modes={assistModes ? assistModes.join(',') : undefined} />
   ),
 }))
 
@@ -47,6 +51,13 @@ describe('OpportunityDescriptionBlock · pencil → edit → save/cancel', () =>
     render(<OpportunityDescriptionBlock value="<p>Origineel</p>" onSave={() => {}} />)
     await user.click(screen.getByTitle('Bewerken'))
     expect(screen.getByTestId('rte')).toHaveValue('<p>Origineel</p>')
+  })
+
+  it('requests only improve/summarize from the shared assist bar (ACTIONS-SCOPE-1: the Kanstekst is a description, not a conversation)', async () => {
+    const user = userEvent.setup()
+    render(<OpportunityDescriptionBlock value="<p>Origineel</p>" onSave={() => {}} />)
+    await user.click(screen.getByTitle('Bewerken'))
+    expect(screen.getByTestId('rte')).toHaveAttribute('data-assist-modes', 'improve,summarize')
   })
 
   it('saves the edited draft and leaves edit mode', async () => {

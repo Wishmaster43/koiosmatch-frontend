@@ -321,3 +321,79 @@ describe('ZzpTab · CREDITOR-AUTO-1 re-reads a blank creditor number after save'
     expect(fetchDetailMock).not.toHaveBeenCalled()
   })
 })
+
+// BANK-1 (Danny 2026-08-09, point 2): the BUSINESS account gets its tenaamstelling
+// next to the IBAN that was already there. Both fields ride in the SAME Facturatie
+// save — one row added, nothing moved. The IBAN's display grouping is a view
+// concern only: what leaves this tab is the ungrouped wire form, because the API
+// stores the string verbatim (measured 2026-08-09 — see BankAccountCard.test.tsx).
+describe('ZzpTab · BANK-1 business account (IBAN + tenaamstelling)', () => {
+  beforeEach(() => { checkDuplicateMock.mockReset(); notifyErrorMock.mockReset() })
+
+  const openInvoicing = async (user: ReturnType<typeof userEvent.setup>) => {
+    await user.click(screen.getAllByTitle('edit')[2]) // Facturatie
+  }
+
+  it('shows the tenaamstelling row inside Facturatie, next to the IBAN', () => {
+    render(<ZzpTab c={candidate({ account_holder_name: 'Zorg B.V.' })} />)
+    expect(screen.getByText('zzp.iban')).toBeInTheDocument()
+    expect(screen.getByText('zzp.accountHolderName')).toBeInTheDocument()
+    expect(screen.getByText('Zorg B.V.')).toBeInTheDocument()
+  })
+
+  it('renders the stored IBAN in readable groups of four', () => {
+    render(<ZzpTab c={candidate()} />) // fixture stores NL91ABNA0417164300
+    expect(screen.getByText('NL91 ABNA 0417 1643 00')).toBeInTheDocument()
+  })
+
+  it('sends iban WITHOUT spaces and account_holder_name trimmed, in the same Facturatie save', async () => {
+    const user = userEvent.setup()
+    const onSave = vi.fn()
+    render(<ZzpTab c={candidate({ iban: '', account_holder_name: '' })} onSave={onSave} />)
+    await openInvoicing(user)
+    const ibanRow = screen.getByText('zzp.iban').parentElement as HTMLElement
+    const holderRow = screen.getByText('zzp.accountHolderName').parentElement as HTMLElement
+    await user.type(within(ibanRow).getByRole('textbox'), 'nl91 abna 0417 1643 00')
+    await user.type(within(holderRow).getByRole('textbox'), '  Zorg B.V. ')
+    await user.click(screen.getByTitle('save'))
+    expect(onSave).toHaveBeenCalledWith(expect.objectContaining({
+      iban: 'NL91ABNA0417164300', account_holder_name: 'Zorg B.V.',
+    }))
+  })
+
+  it('clears both fields with empty strings (the API turns them into NULL, measured)', async () => {
+    const user = userEvent.setup()
+    const onSave = vi.fn()
+    render(<ZzpTab c={candidate({ account_holder_name: 'Zorg B.V.' })} onSave={onSave} />)
+    await openInvoicing(user)
+    await user.clear(within(screen.getByText('zzp.iban').parentElement as HTMLElement).getByRole('textbox'))
+    await user.clear(within(screen.getByText('zzp.accountHolderName').parentElement as HTMLElement).getByRole('textbox'))
+    await user.click(screen.getByTitle('save'))
+    expect(onSave).toHaveBeenCalledWith(expect.objectContaining({ iban: '', account_holder_name: '' }))
+  })
+})
+
+// BANK-1 regression: the two accounts must never bleed into each other. This tab
+// used to fall back to a top-level `iban` on the record ("legacy flat field") —
+// harmless while nothing set it, a data leak the moment BANK-1 made that field
+// the candidate's PRIVATE salary account.
+describe('ZzpTab · BANK-1 never falls back to the private salary account', () => {
+  beforeEach(() => { checkDuplicateMock.mockReset(); notifyErrorMock.mockReset() })
+
+  it('shows an empty business IBAN even when the candidate has a private one', () => {
+    const c = { ...candidate({ iban: '', account_holder_name: '' }), iban: 'NL91ABNA0417164300', accountHolderName: 'Jan Jansen' } as unknown as Candidate
+    render(<ZzpTab c={c} />)
+    expect(screen.queryByText('NL91 ABNA 0417 1643 00')).toBeNull()
+    expect(screen.queryByText('Jan Jansen')).toBeNull()
+  })
+
+  it('never writes the private account into freelance on a Facturatie save', async () => {
+    const user = userEvent.setup()
+    const onSave = vi.fn()
+    const c = { ...candidate({ iban: '', account_holder_name: '' }), iban: 'NL91ABNA0417164300', accountHolderName: 'Jan Jansen' } as unknown as Candidate
+    render(<ZzpTab c={c} onSave={onSave} />)
+    await user.click(screen.getAllByTitle('edit')[2]) // Facturatie
+    await user.click(screen.getByTitle('save'))
+    expect(onSave).toHaveBeenCalledWith(expect.objectContaining({ iban: '', account_holder_name: '' }))
+  })
+})

@@ -4,6 +4,11 @@
  * vs. planning means separate accounts, every context has its own provider/SMTP
  * credentials, sender identity AND email signature. Everything is stored under
  * `email_<context>_*` settings keys; the signature is HTML (RichTextEditor).
+ *
+ * ACTIONS-SCOPE-1 (Danny 09-08): the signature editor pins assistModes to
+ * improve/summarize only - a signature is a static sign-off block, not a
+ * conversation, so "Actiepunten" (which belongs to a NOTE yielding follow-up
+ * tasks, section 3A) does not apply here.
  */
 import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -256,7 +261,8 @@ export default function EmailSettings({ context = 'klanten' }) {
           <div style={{ fontSize: 13, fontWeight: 500, color: 'var(--text)', marginBottom: 2 }}>{t('email.signature')}</div>
           <div style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 10 }}>{t('email.signatureHint')}</div>
           <RichTextEditor value={signature} onChange={setSignature} fill
-            expanded={sigExpanded} onToggleExpand={() => setSigExpanded(e => !e)} />
+            expanded={sigExpanded} onToggleExpand={() => setSigExpanded(e => !e)}
+            assistModes={['improve', 'summarize']} />
         </div>
 
       </div>

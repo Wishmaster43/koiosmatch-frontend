@@ -16,10 +16,12 @@ import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import i18n from '@/i18n'
 import MatchesTab from './MatchesTab'
+import { MATCH_COL_STATUS, MATCH_COL_OTHER_PARTY, MATCH_COL_SCORE, MATCH_COL_ACTIONS } from '@/pages/matches/matchRowColumns'
 import type { Candidate } from '@/types/candidate'
 
 const ct = (key: string) => i18n.t(key, { ns: 'candidates' })
 const cm = (key: string) => i18n.t(key, { ns: 'common' })
+const mt = (key: string) => i18n.t(key, { ns: 'matches' })
 
 // Spy on the cross-entity navigation (candidate → Match) instead of a real page switch.
 const openEntity = vi.fn()
@@ -78,9 +80,9 @@ describe('MatchesTab', () => {
     expect(screen.getByText('Fase 1-2 z.u.b. (Works)')).toBeInTheDocument()
   })
 
-  // Point 2: the fase merges into the title now — no separate row, and the
-  // stage's own colour rides the title's second half.
-  it('resolves the fase from useMatchStatuses INTO THE TITLE — the slug wins over the raw stage label', () => {
+  // Point 2, since split into its own Status column (Danny 09-08 second look —
+  // see the "every visible column has a header" describe block below).
+  it('resolves the fase from useMatchStatuses INTO THE STATUS COLUMN — the slug wins over the raw stage label', () => {
     render(<MatchesTab c={candidate([
       // eslint-disable-next-line no-restricted-syntax -- test fixture hex, not a UI colour
       { id: 'm1', vacancyTitle: 'Verpleegkundige', client: 'Yesway', status: 'open', stage: 'Fallback stage', stageColor: '#999999' },
@@ -275,5 +277,49 @@ describe('MatchesTab · column header bar (Danny 09-08)', () => {
   it('renders the collapsed summary row with the FLAT surface background (matches ApplicationRow)', () => {
     render(<MatchesTab c={candidate([{ id: 'm1', vacancyTitle: 'Verpleegkundige', client: 'Yesway' }])} />)
     expect(screen.getByTestId('match-card-header')).toHaveStyle({ background: 'var(--surface)' })
+  })
+})
+
+/**
+ * SECOND LOOK (Danny 09-08, "Open heeft geen kopje??"): the status pill used to
+ * ride glued onto the title behind an em-dash, and the score pill sat as an
+ * unlabeled dash between the client name and the icon cluster — TWO visible
+ * columns with no header. This is the regression guard for exactly that
+ * complaint: every visible column gets a header, and header + row cell read
+ * their width from the SAME matchRowColumns.ts constants (never two loose
+ * numbers, mirroring WorkTab/applicationRowColumns.ts).
+ */
+describe('MatchesTab · every visible column has a header (Danny 09-08 second look)', () => {
+  const row = { id: 'm1', vacancyId: 'v1', vacancyTitle: 'Verpleegkundige', client: 'Yesway', status: 'open', score: 82 }
+
+  it('renders a Status header AND a Match(score) header, reusing WorkTab\'s own status key + MatchesTable\'s own score key', () => {
+    render(<MatchesTab c={candidate([row])} />)
+    // Reuses the exact key ApplicationRow's own status column header uses.
+    expect(screen.getByText(ct('work.colStatus'))).toBeInTheDocument()
+    // Reuses MatchesTable's own score-column label — no new i18n key introduced.
+    expect(screen.getByText(mt('cols.score'))).toBeInTheDocument()
+  })
+
+  it('renders the status pill and the score pill INSIDE their own labeled columns, not glued to the title or floating unlabeled', () => {
+    render(<MatchesTab c={candidate([row])} />)
+    // metaOf('open') resolves to the mocked "Open (lookup)" label.
+    expect(screen.getByTestId('match-col-status')).toHaveTextContent('Open (lookup)')
+    expect(screen.getByTestId('match-col-score')).toHaveTextContent('82%')
+    // The title itself no longer carries the merged "— {fase}" suffix.
+    expect(screen.getByRole('button', { name: 'Verpleegkundige' })).toBeInTheDocument()
+  })
+
+  it('reads every column width from the SAME matchRowColumns.ts constants for both the header cell and the row cell (never two loose numbers)', () => {
+    render(<MatchesTab c={candidate([row])} />)
+    const pairs: [string, string, string][] = [
+      ['match-col-status-header', 'match-col-status', `${Number(MATCH_COL_STATUS.width)}px`],
+      ['match-col-client-header', 'match-col-client', `${Number(MATCH_COL_OTHER_PARTY.width)}px`],
+      ['match-col-score-header', 'match-col-score', `${Number(MATCH_COL_SCORE.width)}px`],
+      ['match-col-actions-header', 'match-col-actions', `${Number(MATCH_COL_ACTIONS.width)}px`],
+    ]
+    for (const [headerId, cellId, width] of pairs) {
+      expect(screen.getByTestId(headerId)).toHaveStyle({ width })
+      expect(screen.getByTestId(cellId)).toHaveStyle({ width })
+    }
   })
 })

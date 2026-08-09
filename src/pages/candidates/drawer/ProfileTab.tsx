@@ -128,7 +128,12 @@ export default function ProfileTab({ c, onEditSave, autoEditSignal }: { c: Candi
         </div>
         {summaryEditing
           ? <RichTextEditor value={summary} onChange={changeSummary}
-              expanded={summaryExpanded} onToggleExpand={() => setSummaryExpanded(v => !v)} />
+              expanded={summaryExpanded} onToggleExpand={() => setSummaryExpanded(v => !v)}
+              // KOIOS-GENERATE-1 (Danny 09-08): the profile text offers Verbeteren/
+              // Samenvatten + "Genereer met Koios" — never Actiepunten, which belongs
+              // to a conversation note, not a profile description.
+              assistModes={['improve', 'summarize']}
+              assistGenerate={{ entity: 'candidate', id: String(c.id) }} />
           : (summary
               ? <div style={{ ...blockStyle, padding: '10px 12px', maxHeight: 220, overflow: 'auto' }}>
                   <SafeHtml html={summary} style={{ fontSize: 12, color: 'var(--text)', lineHeight: 1.5 }} />

@@ -64,6 +64,12 @@ export function mapCandidate(c: ApiCandidate): Candidate {
   return {
     desiredRateMin: c.desired_rate_min != null ? String(c.desired_rate_min) : '',
     desiredRateMax: c.desired_rate_max != null ? String(c.desired_rate_max) : '',
+    // BANK-1: private (salary) bank account — DETAIL ONLY. The list resource
+    // deliberately omits both (measured 2026-08-09: GET /candidates carries no
+    // iban/account_holder_name at all), which is exactly the AVG §8 posture we
+    // want: financial personal data never rides along in a list payload.
+    iban:              c.iban != null ? String(c.iban) : '',
+    accountHolderName: c.account_holder_name != null ? String(c.account_holder_name) : '',
     id:              c.id ?? '',
     // NUMMER-1: human-readable reference number (K-00123), shown in the drawer + table.
     referenceNumber: c.reference_number ?? '',

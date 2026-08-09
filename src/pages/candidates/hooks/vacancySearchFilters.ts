@@ -87,6 +87,25 @@ export function afterAvailableFrom(row: VacancySearchRow, chosen: string): boole
   return row.startDate.slice(0, 10) >= chosen
 }
 
+/**
+ * Contract-form filter — a vacancy that carries NO contract form is never excluded.
+ *
+ * This is the same "no data to filter on" rule hoursOverlap and afterAvailableFrom
+ * already follow, and this filter was the one that broke it. Measured 09-08 on
+ * Danny's own candidate: the server returned 9 matches, every one of them with
+ * employment_type null, while the filter had auto-seeded the candidate's own three
+ * contract forms — so `''` matched none of them and the screen said "geen vacatures
+ * gevonden binnen deze filters" while the API had just answered with nine.
+ *
+ * Excluding a row for a value the row does not have is never right: it hides real
+ * results and blames the recruiter's filters for missing data.
+ */
+export function matchesContractForm(row: VacancySearchRow, contractvorm: string[]): boolean {
+  if (contractvorm.length === 0) return true
+  if (!row.employmentType) return true
+  return contractvorm.includes(row.employmentType)
+}
+
 // Client-side filters over the ALREADY-FETCHED rows (Danny 06-08 "eerst de extra
 // filters") — the set is already radius/status/function bounded by the server; these
 // three narrow it further without a second network round-trip.
@@ -97,7 +116,7 @@ export function applyClientFilters(
   availableFrom: string,
 ): VacancySearchRow[] {
   return rows.filter(r =>
-    (contractvorm.length === 0 || contractvorm.includes(r.employmentType ?? '')) &&
+    matchesContractForm(r, contractvorm) &&
     hoursOverlap(r, hoursRange) &&
     afterAvailableFrom(r, availableFrom),
   )

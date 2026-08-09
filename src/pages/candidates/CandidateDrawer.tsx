@@ -196,12 +196,15 @@ export default function CandidateDrawer({ candidate: c, onClose, expanded, onTog
       case 'planning':       return <PlanningPanel c={c} />
       case 'preferences':    return <PreferencesTab c={c}
         onSave={(p: unknown) => {
-          // RATE-WISH-1: desired_rate_* are ROOT candidate fields — split them out of
-          // the preferences blob so everything lands in ONE PATCH.
-          const { desired_rate_min, desired_rate_max, ...prefs } = p as Record<string, unknown>
+          // RATE-WISH-1 + BANK-1: desired_rate_* and the private bank account
+          // (iban / account_holder_name) are ROOT candidate fields — split them
+          // out of the preferences blob so everything lands in ONE PATCH.
+          const { desired_rate_min, desired_rate_max, iban, account_holder_name, ...prefs } = p as Record<string, unknown>
           onUpdate?.(c.id, { preferences: { ...(c.preferences ?? {}), ...prefs },
             ...(desired_rate_min !== undefined ? { desiredRateMin: desired_rate_min } : {}),
-            ...(desired_rate_max !== undefined ? { desiredRateMax: desired_rate_max } : {}) })
+            ...(desired_rate_max !== undefined ? { desiredRateMax: desired_rate_max } : {}),
+            ...(iban !== undefined ? { iban } : {}),
+            ...(account_holder_name !== undefined ? { accountHolderName: account_holder_name } : {}) })
         }}
         onTypesChange={(types: string[]) => onUpdate?.(c.id, { candidateTypes: types })}
         // "Potlood op de statuswissel" (Danny 2026-07-20): reopen the status modal

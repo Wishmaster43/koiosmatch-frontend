@@ -6,6 +6,11 @@
  * endpoint does not exist yet — a 404 on the initial GET degrades to a calm
  * "available once the backend lands" notice with no CRUD affordance, never a
  * dead Add button whose POST would silently fail (§3).
+ *
+ * ACTIONS-SCOPE-1 (Danny 09-08): the block body's assistModes are pinned to
+ * improve/summarize only - a reusable text block is template config, not a
+ * conversation, so "Actiepunten" (which belongs to a NOTE yielding follow-up
+ * tasks, §3A) does not apply here.
  */
 import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -169,7 +174,8 @@ export default function VacancyContentBlocksSettings() {
                 </div>
                 <div>
                   <label style={labelStyle}>{t('vacancyContentBlocksSettings.bodyLabel')}</label>
-                  <RichTextEditor value={form.body ?? ''} onChange={v => setEF(block.id, 'body', v)} minHeight={90} />
+                  <RichTextEditor value={form.body ?? ''} onChange={v => setEF(block.id, 'body', v)} minHeight={90}
+                    assistModes={['improve', 'summarize']} />
                 </div>
                 <div style={{ display: 'flex', gap: 8, justifyContent: 'space-between' }}>
                   <button onClick={() => handleDelete(block)} disabled={block.in_use || saving === block.id}
@@ -229,7 +235,8 @@ export default function VacancyContentBlocksSettings() {
             </div>
             <div>
               <label style={labelStyle}>{t('vacancyContentBlocksSettings.bodyLabel')}</label>
-              <RichTextEditor value={newForm.body} onChange={v => setNewForm(p => ({ ...p, body: v }))} minHeight={90} />
+              <RichTextEditor value={newForm.body} onChange={v => setNewForm(p => ({ ...p, body: v }))} minHeight={90}
+                assistModes={['improve', 'summarize']} />
             </div>
             <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
               <button onClick={() => setAdding(false)}

@@ -41,12 +41,14 @@ function actionsToHtml(items: RichTextAssistActionItem[], typeLabel: (type: stri
 
 /**
  * The field's value AFTER "Overnemen": 'improve' REPLACES the whole value (it
- * is a rewrite of that same text), 'summarize'/'actions' APPEND below it —
- * never a silent overwrite of what the user already wrote (Danny's explicit
- * "nooit auto-overschrijven"). `typeLabel` translates an action-item's `type`
- * enum into display text — the caller owns i18n (this file stays pure/testable).
+ * is a rewrite of that same text), 'summarize'/'actions'/'generate' APPEND
+ * below it — never a silent overwrite of what the user already wrote (Danny's
+ * explicit "nooit auto-overschrijven"; 'generate' especially, since it is not
+ * even a rewrite OF the current text). `typeLabel` translates an action-item's
+ * `type` enum into display text — the caller owns i18n (this file stays
+ * pure/testable).
  */
-export function applyRichTextAssist(currentHtml: string, mode: RichTextAssistMode, result: RichTextAssistResult, typeLabel: (type: string) => string): string {
+export function applyRichTextAssist(currentHtml: string, mode: RichTextAssistMode | 'generate', result: RichTextAssistResult, typeLabel: (type: string) => string): string {
   if (result.kind === 'text') {
     const html = textToHtml(result.text)
     return mode === 'improve' ? html : `${currentHtml}${html}`

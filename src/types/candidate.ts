@@ -125,6 +125,11 @@ export interface Candidate {
   // RATE-WISH-1: gewenst uurloon van-tot (strings for the edit fields; '' = leeg).
   desiredRateMin?: string
   desiredRateMax?: string
+  // BANK-1: the PRIVATE (salary) bank account — detail-only, never in the list
+  // resource (§8). `iban` is the wire form (no spaces); lib/iban formats it for
+  // display. The BUSINESS account lives under `zzp` (freelance) instead.
+  iban?: string
+  accountHolderName?: string
   id: string | number
   // Human-readable sequence number (NUMMER-1), e.g. "K-00123". Tenant-configurable
   // prefix/padding/start (Settings → Nummering); server-assigned, immutable.
@@ -300,6 +305,10 @@ export interface ApiCandidateMatch {
 export interface ApiCandidate {
   desired_rate_min?: number | string | null
   desired_rate_max?: number | string | null
+  // BANK-1: private (salary) bank account — top level on the DETAIL resource
+  // only (CMBE 03ba8ec9); the business pair sits under `freelance` below.
+  iban?: string | null
+  account_holder_name?: string | null
   id?: string | number
   // NUMMER-1: server-assigned human-readable reference number (K-00123).
   reference_number?: string

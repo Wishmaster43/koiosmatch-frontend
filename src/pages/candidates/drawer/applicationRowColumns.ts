@@ -16,10 +16,16 @@ import type { CSSProperties } from 'react'
 // 11px font without wrapping. A tenant-renamed stage that runs longer than this
 // simply overflows the column visually rather than being clipped — the same
 // trade-off the header's own fixed width already accepted.
-export const APPLICATION_COL_STATUS: CSSProperties = { width: 90, flexShrink: 0 }
+// 90 was too tight for the seed labels themselves — "Gesolliciteerd" is 14
+// characters plus the pill's own padding, so the pill spilled past its column
+// (Danny 09-08, second look). Measured against the longest seed stage.
+export const APPLICATION_COL_STATUS: CSSProperties = { width: 108, flexShrink: 0 }
 
 // Applied-on date column (DD-MM-YYYY), right-aligned toward the actions cluster.
-export const APPLICATION_COL_DATE: CSSProperties = { width: 64, flexShrink: 0, textAlign: 'right' }
+// nowrap + a width that actually fits the format: at 64 the date broke over two
+// lines ("08-08-" / "2026"), which is the one thing a fixed-format column should
+// never do. The format has a known maximum length, so the column is sized to it.
+export const APPLICATION_COL_DATE: CSSProperties = { width: 78, flexShrink: 0, textAlign: 'right', whiteSpace: 'nowrap' }
 
 // Trailing actions cluster: pencil (22px) + unlink (22px) + external-link link
 // (24px) + disclosure chevron (22px), three 8px gaps between up to four icons —

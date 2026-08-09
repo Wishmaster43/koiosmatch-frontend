@@ -751,7 +751,10 @@
     "emergencyContactRelation": "Relation",
     "noticePeriodDerivedHint_one": "Sur la base du préavis ({{count}} semaine), disponible à partir du {{date}}.",
     "noticePeriodDerivedHint_other": "Sur la base du préavis ({{count}} semaines), disponible à partir du {{date}}.",
-    "noticePeriodApply": "Utiliser cette date"
+    "noticePeriodApply": "Utiliser cette date",
+    "groupBankAccount": "Compte bancaire",
+    "iban": "Numéro de compte (IBAN)",
+    "accountHolderName": "Titulaire du compte"
   },
   "zzp": {
     "title": "Indépendant",
@@ -786,7 +789,8 @@
     "businessEmailDuplicateCancel": "Retour",
     "creditorAutoHint": "Attribué automatiquement si laissé vide.",
     "creditorAutoLocked": "Numéroté automatiquement via Paramètres → Numérotation.",
-    "identifierNlOnly": "Remarque : pour les indépendants, le serveur n'accepte encore qu'un numéro de registre/TVA néerlandais. Un numéro étranger est refusé à l'enregistrement."
+    "identifierNlOnly": "Remarque : pour les indépendants, le serveur n'accepte encore qu'un numéro de registre/TVA néerlandais. Un numéro étranger est refusé à l'enregistrement.",
+    "accountHolderName": "Titulaire du compte"
   },
   "certified": {
     "issued": "Délivré",

@@ -60,6 +60,29 @@ describe('vacancies NotesTab (VACANCY-NOTE-TYPE-1, shared reuse)', () => {
     await waitFor(() => expect(mockPost).toHaveBeenCalledWith('/vacancies/1/notes', expect.objectContaining({ type: 'intake' })))
   })
 
+  // NOTITIE-POPOUT-BAR-1 (Danny 09-08): the toolbar pop-out must open THIS vacancy's
+  // own second-screen window. §13 — assert the actual window.open call (route +
+  // entity + id + named window), not just that a handler fired: a wrong entity or a
+  // missing id lands the recruiter on an empty popout, which is exactly the failure
+  // the button gating is meant to prevent.
+  it('the toolbar pop-out opens /popout/notes/vacancy/{id} in a per-record named window', async () => {
+    const user = userEvent.setup()
+    const openSpy = vi.spyOn(window, 'open').mockReturnValue({} as Window)
+    render(<NotesTab vacancy={vacancy({ id: 7 })} />)
+    await user.click(screen.getByRole('button', { name: 'openSecondScreen' }))
+    expect(openSpy).toHaveBeenCalledWith('/popout/notes/vacancy/7', 'koios-notes-vacancy-7', expect.any(String))
+    openSpy.mockRestore()
+  })
+
+  it('reports a blocked popup instead of failing silently', async () => {
+    const user = userEvent.setup()
+    const openSpy = vi.spyOn(window, 'open').mockReturnValue(null)
+    render(<NotesTab vacancy={vacancy()} />)
+    await user.click(screen.getByRole('button', { name: 'openSecondScreen' }))
+    expect(notifyError).toHaveBeenCalledWith('common:popupBlocked')
+    openSpy.mockRestore()
+  })
+
   it('removes the optimistic note and reports the server message when the save FAILS', async () => {
     mockPost.mockRejectedValue({ response: { status: 422, data: { message: 'Notitie opslaan mislukt' } } })
     const user = userEvent.setup()

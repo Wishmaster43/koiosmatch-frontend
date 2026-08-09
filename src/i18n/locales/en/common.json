@@ -345,7 +345,8 @@
       "auto": "Auto",
       "wizardHint": "Confirm every action first",
       "autoHint": "Run actions immediately (messages still wait for confirmation unless enabled in your profile)"
-    }
+    },
+    "generate": "Generate with Koios"
   },
   "ai": {
     "title": "Koios AI advises",

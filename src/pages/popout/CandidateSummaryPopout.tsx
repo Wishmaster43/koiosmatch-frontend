@@ -53,7 +53,10 @@ export default function CandidateSummaryPopout({ id }: { id: string | undefined 
       loadingLabel={t('common:loading')} errorLabel={t('popout.loadError')} retryLabel={t('common:error.retry')}
       name={candidate?.name ?? ''} initials={candidate?.initials ?? ''} subtitle={t('profile.summary')}
     >
-      <TextPopoutEditor value={text ?? ''} onChange={change} onSave={save} dirty={dirty} />
+      {/* KOIOS-GENERATE-1: same entity/id the drill-down's own ProfileTab passes —
+          the "Genereer met Koios" button must appear identically in both windows. */}
+      <TextPopoutEditor value={text ?? ''} onChange={change} onSave={save} dirty={dirty}
+        generate={id ? { entity: 'candidate', id } : undefined} />
     </PopoutShell>
   )
 }

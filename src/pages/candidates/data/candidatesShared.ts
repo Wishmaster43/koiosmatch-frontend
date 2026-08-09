@@ -99,6 +99,13 @@ export const buildCandidatePatch = (patch: Record<string, unknown>): Record<stri
   // RATE-WISH-1: gewenst uurloon van-tot ('' -> null so clearing persists).
   if ('desiredRateMin' in patch) body.desired_rate_min = patch.desiredRateMin === '' ? null : patch.desiredRateMin
   if ('desiredRateMax' in patch) body.desired_rate_max = patch.desiredRateMax === '' ? null : patch.desiredRateMax
+  // BANK-1: the PRIVATE (salary) bank account — top-level `iban` +
+  // `account_holder_name` on PATCH /candidates/{id} (measured 2026-08-09; the
+  // BUSINESS account is a separate pair under `freelance`, see the zzp key
+  // below). '' -> null so clearing the field actually persists (COUNTRY-1
+  // convention). The IBAN arrives here already normalised (lib/iban).
+  if ('iban'              in patch) body.iban                = patch.iban === '' ? null : patch.iban
+  if ('accountHolderName' in patch) body.account_holder_name = patch.accountHolderName === '' ? null : patch.accountHolderName
   // Tenant custom fields (Extra tab): both spellings map to the API key — this
   // was MISSING, so every eigen-velden save silently vanished (Danny 16-07).
   if ('customFields'      in patch) body.custom_fields     = patch.customFields

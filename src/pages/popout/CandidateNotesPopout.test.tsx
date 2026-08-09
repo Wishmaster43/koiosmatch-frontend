@@ -60,6 +60,18 @@ describe('CandidateNotesPopout', () => {
     expect(screen.getByText('sections.notesEmpty')).toBeInTheDocument()
   })
 
+  // NOTITIE-POPOUT-BAR-1 (Danny 09-08, point 3): the toolbar pop-out button belongs
+  // in the DRILL-DOWN, never in the second-screen window itself — a button that
+  // re-opens the window you are already looking at is nonsense. This page passes no
+  // onPopOut, and the shared NotesTab renders nothing without it.
+  it('never shows the pop-out button inside the pop-out window itself', () => {
+    liteState.candidate = { id: 'cand-1', name: 'Anne de Vries', initials: 'AD' }
+    render(<CandidateNotesPopout id="cand-1" />)
+    expect(screen.getByText('sections.notesEmpty')).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'openSecondScreen' })).toBeNull()
+    expect(screen.queryByRole('button', { name: 'common:openSecondScreen' })).toBeNull()
+  })
+
   it('sets the window title to the candidate popout title and restores it on unmount', () => {
     liteState.candidate = { id: 'cand-1', name: 'Anne de Vries', initials: 'AD' }
     const { unmount } = render(<CandidateNotesPopout id="cand-1" />)

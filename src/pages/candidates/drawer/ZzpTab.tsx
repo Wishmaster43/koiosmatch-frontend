@@ -15,6 +15,11 @@
  * ON-SAVE-ONLY duplicate warning (never a hard block, §3 "prompt, don't
  * hard-block") via useBusinessEmailDuplicateCheck.
  *
+ * BANK-1 (Danny 2026-08-09, point 2) — Facturatie gains the TENAAMSTELLING next
+ * to its existing IBAN (`freelance.account_holder_name`, CMBE 03ba8ec9). Both
+ * account numbers in the app share `lib/iban`: displayed in groups of four,
+ * stored/sent without spaces, validated server-side only.
+ *
  * 1.1.4 (creditor number, ZZP-CREDITOR-SEQ-1) — CREDITOR-AUTO-1: the field
  * becomes READ-ONLY once the tenant's own numbering sequence owns it
  * (Settings → Nummering, `useNumberingEntities`, entity key `zzp_creditor`).
@@ -41,6 +46,7 @@ import type { ComponentType } from 'react'
 import { useTranslation } from 'react-i18next'
 import EditableFieldTableJs from '@/components/forms/EditableFieldTable'
 import { kvkValue, vatValue } from '@/components/drawer/contactLinks'
+import { formatIban, normalizeIban } from '@/lib/iban'
 import { useConfirm } from '@/hooks/useConfirm'
 import { notifyError } from '@/lib/notify'
 import { useNumberingEntities } from '@/lib/useNumberingEntities'
@@ -112,7 +118,18 @@ export function ZzpTab({ c, onSave }: { c: Candidate; onSave?: (v: Record<string
     kor:            zzp.kor             ?? flat.kor          ?? false,
     crediteur:      creditorOverride    ?? zzp.creditor_number ?? '',
     email_zakelijk: zzp.business_email  ?? '',
-    iban:           zzp.iban            ?? flat.iban         ?? '',
+    // BANK-1: the BUSINESS account. The IBAN reads (and edits) in readable
+    // groups of four but is STORED ungrouped — the API keeps whatever string it
+    // is sent (measured), so handleSaveInvoicing normalises it again on save.
+    // The legacy `flat.iban` fallback that used to sit here is GONE ON PURPOSE:
+    // since BANK-1 a top-level `iban` on the record is the candidate's PRIVATE
+    // salary account (mapCandidate), so keeping it would render — and, on the
+    // next Facturatie save, WRITE — the private account as the company's one.
+    // Two accounts, two sources, never a fallback between them.
+    iban:           formatIban(zzp.iban ?? ''),
+    // Tenaamstelling (Danny 2026-08-09, point 2) — CMBE 03ba8ec9 added
+    // `freelance.account_holder_name`; measured live the same day.
+    tenaamstelling: zzp.account_holder_name ?? '',
   }
   // KVK/BTW-PER-LAND-1 (Danny 08-08, points 10 + 11): the KvK/BTW shape follows the
   // freelancer's OWN business country (the Adres block below), never a hardcoded
@@ -141,7 +158,14 @@ export function ZzpTab({ c, onSave }: { c: Candidate; onSave?: (v: Record<string
     // own read-only row instead (see the JSX below), never as an input here.
     ...(creditorAutoNumbered ? [] : [{ key: 'crediteur', label: t('zzp.creditor'), group: t('zzp.groupInvoicing') }]),
     { key: 'email_zakelijk', label: t('zzp.businessEmail'), group: t('zzp.groupInvoicing'), inputType: 'email' },
-    { key: 'iban', label: t('zzp.iban'), group: t('zzp.groupInvoicing') },
+    // An account number is an identifying number → JetBrains Mono (§4). No
+    // client-side mod-97 check: the backend validates it (422 "Het
+    // IBAN-controlegetal klopt niet.", measured on `freelance.iban`) and the
+    // drawer's patchCandidate already surfaces that message via extractApiError.
+    { key: 'iban', label: t('zzp.iban'), group: t('zzp.groupInvoicing'), mono: true },
+    // Danny 2026-08-09, point 2: the tenaamstelling next to the existing IBAN —
+    // one row added, nothing else in this block moved.
+    { key: 'tenaamstelling', label: t('zzp.accountHolderName'), group: t('zzp.groupInvoicing') },
   ]
   const blockFields = (group: string) => fields.filter(f => f.group === group).map(f => ({ ...f, group: undefined }))
 
@@ -183,7 +207,13 @@ export function ZzpTab({ c, onSave }: { c: Candidate; onSave?: (v: Record<string
 
   const handleSaveInvoicing = (v: Record<string, unknown>) => {
     const commit = () => {
-      onSave?.({ creditor_number: v.crediteur, business_email: v.email_zakelijk, iban: v.iban })
+      // BANK-1: the IBAN goes out WITHOUT spaces (the API stores the string
+      // verbatim), the tenaamstelling trimmed — the readable grouping is a
+      // display concern only.
+      onSave?.({
+        creditor_number: v.crediteur, business_email: v.email_zakelijk,
+        iban: normalizeIban(v.iban), account_holder_name: String(v.tenaamstelling ?? '').trim(),
+      })
       // CREDITOR-AUTO-1: only worth a re-read when it was submitted BLANK — that
       // is the one case the backend fills in behind the optimistic patch above.
       if (!String(v.crediteur ?? '').trim()) refreshCreditorNumber(c.id)

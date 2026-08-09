@@ -7,6 +7,11 @@
  * in opportunities/drawer rather than importing another entity's drawer
  * internals (§2) — the same small per-entity pattern already exists as
  * customers/drawer/EditableRichTextField and matches/drawer/MatchTextBlock.
+ *
+ * ACTIONS-SCOPE-1 (Danny 09-08): `assistModes` is pinned to Verbeteren/
+ * Samenvatten only — the "Kanstekst" is a description of the opportunity, not
+ * a conversation, so "Actiepunten" (which belongs to a NOTE yielding follow-up
+ * tasks, §3A) does not apply here.
  */
 import { useState } from 'react'
 import type { CSSProperties } from 'react'
@@ -59,7 +64,8 @@ export default function OpportunityDescriptionBlock({ value, onSave }: Opportuni
         )}
       </div>
       {editing
-        ? <RichTextEditor value={draft} onChange={setDraft} expanded={expanded} onToggleExpand={() => setExpanded(v => !v)} />
+        ? <RichTextEditor value={draft} onChange={setDraft} expanded={expanded} onToggleExpand={() => setExpanded(v => !v)}
+            assistModes={['improve', 'summarize']} />
         : (value
             ? <div style={{ ...blockStyle, padding: '10px 12px', maxHeight: 220, overflow: 'auto' }}>
                 <SafeHtml html={value} style={{ fontSize: 12, color: 'var(--text)', lineHeight: 1.5 }} />

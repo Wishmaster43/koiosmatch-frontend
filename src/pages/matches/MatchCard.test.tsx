@@ -19,6 +19,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import i18n from '@/i18n'
 import MatchCard from './MatchCard'
+import { MATCH_COL_STATUS, MATCH_COL_OTHER_PARTY, MATCH_COL_SCORE, MATCH_COL_ACTIONS } from './matchRowColumns'
 
 const ct = (key: string, opts?: Record<string, unknown>) => i18n.t(key, { ns: 'candidates', ...opts })
 const cm = (key: string) => i18n.t(key, { ns: 'common' })
@@ -145,5 +146,48 @@ describe('MatchCard · flatRow (Danny 09-08)', () => {
   it('renders the plain surface background when flatRow is set', () => {
     render(<MatchCard {...base} flatRow />)
     expect(screen.getByTestId('match-card-header')).toHaveStyle({ background: 'var(--surface)' })
+  })
+})
+
+/**
+ * COLUMN SPLIT (Danny 09-08, second look — "Open heeft geen kopje??"): the
+ * flatRow variant used to glue the stage onto the title behind an em-dash and
+ * show the score as an unlabeled dash between the client name and the icon
+ * cluster — two headerless columns. Both now render in their own fixed-width
+ * cell, reading the SAME widths candidates/drawer/MatchesTab.tsx's header bar
+ * reads from matchRowColumns.ts (never two loose numbers).
+ */
+describe('MatchCard · flatRow column split (Danny 09-08 second look)', () => {
+  // eslint-disable-next-line no-restricted-syntax -- test fixture hex, not a UI colour
+  const flat = { ...base, stageLabel: 'Voorgesteld', stageColor: '#123456', score: 82, collapsible: true, flatRow: true }
+
+  it('drops the merged "— {fase}" title suffix — the stage renders in its own Status column instead', () => {
+    const { container } = render(<MatchCard {...flat} />)
+    expect(screen.getByRole('button', { name: 'Verpleegkundige' })).toBeInTheDocument()
+    // The old merged form ("Verpleegkundige — Voorgesteld") is gone from the title...
+    expect(container.textContent).not.toContain('— Voorgesteld')
+    // ...the stage now lives in its own labeled column.
+    expect(screen.getByTestId('match-col-status')).toHaveTextContent('Voorgesteld')
+  })
+
+  it('renders the score in its own column, not inline with the icon cluster', () => {
+    render(<MatchCard {...flat} />)
+    expect(screen.getByTestId('match-col-score')).toHaveTextContent('82%')
+    expect(screen.getByTestId('match-col-actions')).not.toHaveTextContent('82%')
+  })
+
+  it('reads the Status/Client/Score/Actions cell widths from the SAME matchRowColumns constants the header reads', () => {
+    render(<MatchCard {...flat} />)
+    expect(screen.getByTestId('match-col-status')).toHaveStyle({ width: `${Number(MATCH_COL_STATUS.width)}px` })
+    expect(screen.getByTestId('match-col-client')).toHaveStyle({ width: `${Number(MATCH_COL_OTHER_PARTY.width)}px` })
+    expect(screen.getByTestId('match-col-score')).toHaveStyle({ width: `${Number(MATCH_COL_SCORE.width)}px` })
+    expect(screen.getByTestId('match-col-actions')).toHaveStyle({ width: `${Number(MATCH_COL_ACTIONS.width)}px` })
+  })
+
+  it('keeps the merged title and renders no separate Status/Score columns when collapsible without flatRow (no current caller, kept for compatibility)', () => {
+    render(<MatchCard {...flat} flatRow={false} />)
+    expect(screen.queryByTestId('match-col-status')).toBeNull()
+    expect(screen.queryByTestId('match-col-score')).toBeNull()
+    expect(screen.getByText('Voorgesteld')).toBeInTheDocument()
   })
 })

@@ -36,14 +36,21 @@
  * every field, never a per-screen exemption. Flagged in the delivery report
  * for confirmation rather than silently special-cased.
  *
- * WHY NO "GENEREREN" BUTTON: the entity-generate route (POST /ai/koios/generate)
- * exists but answers 403 for every supported entity today — measured live, see
- * richTextAssistApi.ts's header. §3: no fake affordances, so the button is not
- * rendered at all rather than shipped dead. It returns the moment the backend
- * gate is fixed (one MODES entry + a `generate` prop).
+ * KOIOS-GENERATE-1 (Danny 09-08): a FOURTH, opt-in affordance — "Genereer met
+ * Koios" (mirrors the vacancy description's own generate button, same label
+ * wording + soft-tint pill shape). It POSTs entity+id (not the field's text) to
+ * /ai/koios/generate and lands in the exact same review-then-Overnemen preview
+ * as the other three modes — see richTextAssistApi.ts's header for the measured
+ * contract. Only rendered when the caller passes `generate={{ entity, id }}`:
+ * an omitted prop means the backend cannot generate for that field, so the
+ * button must not exist there at all (§3, no fake affordance) — this is WHY it
+ * is its own prop rather than a fifth `modes` entry (`modes` alone can never
+ * carry the entity/id a real request needs).
  *
  * i18n: every label reuses the ALREADY-SHIPPED `common:notesAssist.*` keys
- * (present in nl/en/de/fr/es) — this component adds no new key.
+ * (present in nl/en/de/fr/es); this component adds exactly one new key,
+ * `notesAssist.generate`, reported alongside the delivery (§5 — locale files
+ * are never edited directly here).
  *
  * LAZY EXECUTE WIZARD: AssistActionsResultsPanel is loaded via `lazy()`, not a
  * static import. It (through AssistActionItemCard) pulls in `@/lib/datetime`,
@@ -59,13 +66,13 @@
 import { lazy, Suspense } from 'react'
 import type { CSSProperties } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Wand2, AlignLeft, ListChecks, Loader2, Check, X } from 'lucide-react'
+import { Wand2, AlignLeft, ListChecks, Sparkles, Loader2, Check, X } from 'lucide-react'
 import KoiosAiMark from './KoiosAiMark'
 import CalloutBox from './CalloutBox'
 import KoiosVoiceButton from '@/components/layout/koios/KoiosVoiceButton'
 import { useRichTextAssist } from './richtext/useRichTextAssist'
 import { appendDictatedText, applyRichTextAssist, hasPlainText } from './richtext/richTextAssistApply'
-import type { RichTextAssistMode } from './richtext/richTextAssistApi'
+import type { GenerateEntity, RichTextAssistMode } from './richtext/richTextAssistApi'
 
 // See the LAZY EXECUTE WIZARD docblock note above for why this is lazy, not a
 // plain static import.
@@ -81,6 +88,9 @@ interface RichTextAssistBarProps {
   // the note composer, whose richer assist section (with the K0 Wizard/Auto
   // toggle) already owns this exact same mode set below the editor.
   modes?: RichTextAssistMode[]
+  // KOIOS-GENERATE-1: which entity/id to generate a fresh suggestion FROM. Omit
+  // entirely on a field the backend cannot generate for — see the file header.
+  generate?: { entity: GenerateEntity; id: string }
 }
 
 // One row per mode — icon + i18n key share the mode name, so a fourth mode is
@@ -105,10 +115,14 @@ const primaryBtn: CSSProperties = { display: 'inline-flex', alignItems: 'center'
 const ghostBtn: CSSProperties = { display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 12, fontWeight: 500,
   padding: '5px 11px', borderRadius: 7, cursor: 'pointer', background: 'none', color: 'var(--text-muted)', border: '1px solid var(--border)' }
 
-export default function RichTextAssistBar({ value, onChange, language, modes = ['improve', 'summarize', 'actions'] }: RichTextAssistBarProps) {
+export default function RichTextAssistBar({ value, onChange, language, modes = ['improve', 'summarize', 'actions'], generate }: RichTextAssistBarProps) {
   const { t } = useTranslation('common')
-  const { mode, status, result, errorMessage, tone, run, discard } = useRichTextAssist(language)
-  const offersAssist = modes.length > 0
+  const { mode, status, result, errorMessage, tone, run, runGenerate, discard } = useRichTextAssist(language)
+  const hasModes = modes.length > 0
+  // The group renders once EITHER a text mode or generate is offered — a field
+  // with modes=[] but a `generate` prop (a hypothetical future empty-field-only
+  // host) must still get its own row, not silently disappear.
+  const offersAssist = hasModes || Boolean(generate)
   const loading = status === 'loading'
   const hasText = hasPlainText(value)
   const assistLabel = t('notesAssist.title')
@@ -156,11 +170,22 @@ export default function RichTextAssistBar({ value, onChange, language, modes = [
                 {t(`notesAssist.${m}`)}
               </button>
             ))}
+            {/* KOIOS-GENERATE-1: unlike the modes above, this never needs existing
+                text — it writes FROM the entity's own data, so only `loading` gates it. */}
+            {generate && (
+              <button type="button" onClick={() => runGenerate(generate.entity, generate.id)} disabled={loading}
+                data-testid="rte-assist-generate"
+                style={actionBtn(loading && mode === 'generate', loading)}>
+                {loading && mode === 'generate' ? <Loader2 size={12} className="animate-spin" /> : <Sparkles size={12} />}
+                {t('notesAssist.generate')}
+              </button>
+            )}
           </div>
 
           {/* Honest, VISIBLE reason the buttons are disabled — never a
-              hover-only tooltip alone (§3). */}
-          {!hasText && (
+              hover-only tooltip alone (§3). Only applies to the text modes:
+              generate needs no existing text, so it stays out of this gate. */}
+          {!hasText && hasModes && (
             <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>{t('notesAssist.needsText')}</div>
           )}
 

@@ -251,3 +251,24 @@ describe('mapCandidate — createdBy / source (CREATED-BY-SOURCE-1)', () => {
     expect(mapCandidate({}).source).toBeNull()
   })
 })
+
+// BANK-1 (Danny 2026-08-09): the private (salary) bank account arrives at the
+// TOP level of the DETAIL resource only — the list deliberately omits both
+// fields (measured live), so the mapper must degrade to '' instead of undefined.
+describe('mapCandidate — private bank account (BANK-1)', () => {
+  it('maps the top-level iban + account_holder_name from the detail record', () => {
+    const r = mapCandidate({ iban: 'NL91ABNA0417164300', account_holder_name: 'Jan Jansen' })
+    expect(r.iban).toBe('NL91ABNA0417164300')
+    expect(r.accountHolderName).toBe('Jan Jansen')
+  })
+  it('falls back to empty strings on a list row, which never carries them', () => {
+    const r = mapCandidate({})
+    expect(r.iban).toBe('')
+    expect(r.accountHolderName).toBe('')
+  })
+  it('keeps the BUSINESS account separate, under the freelance/zzp block', () => {
+    const r = mapCandidate({ freelance: { iban: 'NL91ABNA0417164300', account_holder_name: 'Zorg B.V.' } })
+    expect(r.zzp.account_holder_name).toBe('Zorg B.V.')
+    expect(r.iban).toBe('')
+  })
+})

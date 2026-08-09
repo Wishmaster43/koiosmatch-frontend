@@ -773,7 +773,10 @@
     "emergencyContactRelation": "Relation",
     "noticePeriodDerivedHint_one": "Based on the notice period ({{count}} week), available from {{date}}.",
     "noticePeriodDerivedHint_other": "Based on the notice period ({{count}} weeks), available from {{date}}.",
-    "noticePeriodApply": "Use this date"
+    "noticePeriodApply": "Use this date",
+    "groupBankAccount": "Bank account",
+    "iban": "Account number (IBAN)",
+    "accountHolderName": "Account holder"
   },
   "zzp": {
     "title": "Freelancer",
@@ -808,7 +811,8 @@
     "businessEmailDuplicateCancel": "Go back",
     "creditorAutoHint": "Automatically assigned if left empty.",
     "creditorAutoLocked": "Automatically numbered via Settings → Numbering.",
-    "identifierNlOnly": "Note: for freelancers the server still only accepts a Dutch company register/VAT number. A foreign number is rejected on save."
+    "identifierNlOnly": "Note: for freelancers the server still only accepts a Dutch company register/VAT number. A foreign number is rejected on save.",
+    "accountHolderName": "Account holder"
   },
   "certified": {
     "issued": "Issued",

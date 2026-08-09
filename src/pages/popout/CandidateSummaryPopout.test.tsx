@@ -12,10 +12,17 @@ import CandidateSummaryPopout from './CandidateSummaryPopout'
 import api from '@/lib/api'
 
 // TipTap's editor is out of scope here (its own tests cover it) — a plain
-// textarea keeps this a focused test of THIS page's wiring.
+// textarea keeps this a focused test of THIS page's wiring. assistModes/
+// assistGenerate are surfaced as data-attributes (KOIOS-GENERATE-1) so a test
+// below can prove this window offers the SAME Koios affordances as the drill-down.
 vi.mock('@/components/ui/RichTextEditor', () => ({
-  default: ({ value, onChange }: { value: string; onChange: (html: string) => void }) => (
-    <textarea aria-label="editor" value={value} onChange={e => onChange(e.target.value)} />
+  default: ({ value, onChange, assistModes, assistGenerate }: { value: string; onChange: (html: string) => void; assistModes?: string[]; assistGenerate?: { entity: string; id: string } }) => (
+    <>
+      <textarea aria-label="editor" value={value} onChange={e => onChange(e.target.value)} />
+      <div data-testid="summary-rte-meta"
+        data-modes={(assistModes ?? []).join(',')}
+        data-generate={assistGenerate ? `${assistGenerate.entity}:${assistGenerate.id}` : ''} />
+    </>
   ),
 }))
 vi.mock('@/lib/api', () => ({
@@ -64,6 +71,17 @@ describe('CandidateSummaryPopout', () => {
     expect(screen.getByText('Lieke Blom')).toBeInTheDocument()
     expect(screen.getByLabelText('editor')).toHaveValue('<p>Ervaren</p>')
     expect(screen.getByTestId('text-popout-save')).toBeDisabled()
+  })
+
+  // KOIOS-GENERATE-1 (Danny 09-08): the drill-down's ProfileTab and this popped-out
+  // window edit the SAME field — both must offer the identical Koios affordances
+  // (Verbeteren/Samenvatten + generate, never Actiepunten), scoped to this candidate.
+  it('offers the same Koios assist modes + generate entity/id as the drill-down', () => {
+    liteState.candidate = { id: 'c1', name: 'Lieke Blom', initials: 'LB', summary: '<p>Ervaren</p>' }
+    render(<CandidateSummaryPopout id="c1" />)
+    const meta = screen.getByTestId('summary-rte-meta')
+    expect(meta.dataset.modes).toBe('improve,summarize')
+    expect(meta.dataset.generate).toBe('candidate:c1')
   })
 
   // Danny 09-08: "bij opslaan van pop-out sluit het venster niet". Saving now sends

@@ -751,7 +751,10 @@
     "emergencyContactRelation": "Beziehung",
     "noticePeriodDerivedHint_one": "Auf Basis der Kündigungsfrist ({{count}} Woche) einsetzbar ab {{date}}.",
     "noticePeriodDerivedHint_other": "Auf Basis der Kündigungsfrist ({{count}} Wochen) einsetzbar ab {{date}}.",
-    "noticePeriodApply": "Datum übernehmen"
+    "noticePeriodApply": "Datum übernehmen",
+    "groupBankAccount": "Bankverbindung",
+    "iban": "Kontonummer (IBAN)",
+    "accountHolderName": "Kontoinhaber"
   },
   "zzp": {
     "title": "Freiberufler",
@@ -786,7 +789,8 @@
     "businessEmailDuplicateCancel": "Zurück",
     "creditorAutoHint": "Wird automatisch vergeben, wenn leer gelassen.",
     "creditorAutoLocked": "Wird automatisch nummeriert über Einstellungen → Nummerierung.",
-    "identifierNlOnly": "Hinweis: Für Freelancer akzeptiert der Server bisher nur eine niederländische Handelsregister-/USt-Nummer. Eine ausländische Nummer wird beim Speichern abgelehnt."
+    "identifierNlOnly": "Hinweis: Für Freelancer akzeptiert der Server bisher nur eine niederländische Handelsregister-/USt-Nummer. Eine ausländische Nummer wird beim Speichern abgelehnt.",
+    "accountHolderName": "Kontoinhaber"
   },
   "certified": {
     "issued": "Ausgestellt",

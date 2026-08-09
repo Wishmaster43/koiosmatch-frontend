@@ -63,8 +63,10 @@ interface NoteComposerProps {
   // mirrors the previous inline composer's `editingIdx === null` gate.
   composerExtra?: ReactNode
   // F5 second-screen: host-supplied pop-out handler — forwarded to FloatingPanel's
-  // header button. Only candidate hosts pass it today (the popout window is
-  // candidate-only); the popout window itself never does (no recursion).
+  // header button. Passed by every host whose entity owns a popout route
+  // (candidate · customer · vacancy); since NOTITIE-POPOUT-BAR-1 the same handler
+  // also drives the notes TOOLBAR button, so the affordance is reachable without
+  // opening a note first. The popout window itself never passes it (no recursion).
   onPopOut?: () => void
   onSave: (payload: NotePayload) => void
   onCancel: () => void

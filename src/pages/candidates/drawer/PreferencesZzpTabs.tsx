@@ -31,6 +31,8 @@ import { useIndustries } from '@/lib/useIndustries'
 import { useDriverLicenses } from '@/lib/useDriverLicenses'
 import EmergencyContactCard from './EmergencyContactCard'
 import type { EmergencyContactValues } from './EmergencyContactCard'
+import BankAccountCard from './BankAccountCard'
+import type { BankAccountValues } from './BankAccountCard'
 import NoticePeriodHint from './NoticePeriodHint'
 import type { Candidate } from '@/types/candidate'
 
@@ -119,6 +121,15 @@ export function PreferencesTab({ c, onSave, onTypesChange, onEditStatus }: { c: 
     // Nested {id,label} (KAND-NIVEAU-1 pattern) — read mode's fallback label.
     relationLabel: (pref.emergency_contact_relation as { label?: string } | null | undefined)?.label ?? '',
   }
+  // BANK-1 (Danny 2026-08-09, "Financieel — bankrekeningnummer en naam van
+  // rekeningnummer"): the PRIVATE salary account — ROOT candidate fields, not
+  // part of the preferences blob (same split as desiredRate* above). Its own
+  // small value object because BankAccountCard owns its own draft/edit state
+  // (mirrors EmergencyContactCard) instead of going through EditableFieldTable.
+  const bankAccountValue: BankAccountValues = {
+    iban:              (c as { iban?: string }).iban ?? '',
+    accountHolderName: (c as { accountHolderName?: string }).accountHolderName ?? '',
+  }
   const fields = [
     { key: 'contractvorm',    label: t('drawer.candidateType'),      group: t('preferences.groupAvailability'), type: 'chips', chipOptions: candidateTypeOptions },
     { key: 'beschikbaar_per', label: t('preferences.availableFrom'), group: t('preferences.groupAvailability'), type: 'date' },
@@ -185,6 +196,11 @@ export function PreferencesTab({ c, onSave, onTypesChange, onEditStatus }: { c: 
   // KAND-OPZEGTERMIJN-2: taking over the suggested date persists exactly ONE key —
   // it is a proposal accepted by the recruiter, never a silent recalculation (§3).
   const handleApplyDerivedDate   = (isoDate: string) => onSave?.({ available_from: isoDate })
+  // BANK-1: BankAccountCard already emits the exact API keys (iban /
+  // account_holder_name) — a thin pass-through, like the emergency-contact one
+  // below. The drawer's own onSave wrapper lifts both out of the preferences
+  // blob into root PATCH keys (see CandidateDrawer).
+  const handleSaveBankAccount = (v: Record<string, unknown>) => onSave?.(v)
   // EmergencyContactCard already builds the exact API shape itself (own local
   // draft/validation, see its file header) — this handler is a thin pass-through,
   // kept as its own named function only for symmetry with the other sections.
@@ -203,12 +219,13 @@ export function PreferencesTab({ c, onSave, onTypesChange, onEditStatus }: { c: 
   // cleared for their filtered rows (EditableFieldTable then renders one calm,
   // un-headed card — same branch as ZzpTab's Facturatie below).
   //
-  // Financieel is the one sub-tab that genuinely holds TWO distinct sections —
-  // Loonheffing and Gewenst tarief — so it renders TWO stacked EditableFieldTables
-  // (mirrors ZzpTab's Bedrijf/Adres/Facturatie blocks), each with its OWN title,
-  // pencil and editing state. Before PREF-PENCIL-SPLIT-1 both groups lived inside
-  // ONE EditableFieldTable, which drew two group headings under a single shared
-  // pencil — editing Loonheffing silently flipped Gewenst tarief into edit mode too.
+  // Financieel is the one sub-tab that genuinely holds SEVERAL distinct sections —
+  // Loonheffing, Bankrekening (BANK-1) and Gewenst tarief — so it renders stacked
+  // cards (mirrors ZzpTab's Bedrijf/Adres/Facturatie blocks), each with its OWN
+  // title, pencil and editing state. Before PREF-PENCIL-SPLIT-1 both groups lived
+  // inside ONE EditableFieldTable, which drew two group headings under a single
+  // shared pencil — editing Loonheffing silently flipped Gewenst tarief into edit
+  // mode too.
   const SUB_TABS = [
     { id: 'availability', label: t('preferences.groupAvailability') },
     { id: 'travel',       label: t('preferences.groupTravel') },
@@ -280,10 +297,13 @@ export function PreferencesTab({ c, onSave, onTypesChange, onEditStatus }: { c: 
       )}
       {subTab === 'travel'       && <EditableFieldTable key={`${c.id}-travel`} fields={travelFields}       value={value} labelWidth={WIDE_LABEL_WIDTH} onSave={handleSaveTravel} />}
       {subTab === 'financial' && (
-        // Two genuinely distinct sections sharing one sub-tab (see the comment above
+        // Three genuinely distinct sections sharing one sub-tab (see the comment above
         // SUB_TABS) — stacked with the canon gap-10, exactly like ZzpTab's blocks.
+        // BANK-1 puts Bankrekening directly under Loonheffing: both answer "how is
+        // this person paid", while Gewenst tarief is a wish, not a payment fact.
         <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
           <EditableFieldTable key={`${c.id}-payroll`} title={t('preferences.groupPayroll')}     fields={payrollFields}     value={value} labelWidth={WIDE_LABEL_WIDTH} onSave={handleSavePayroll} />
+          <BankAccountCard    key={`${c.id}-bank`}    value={bankAccountValue} onSave={handleSaveBankAccount} />
           <EditableFieldTable key={`${c.id}-rate`}    title={t('preferences.groupDesiredRate')} fields={desiredRateFields} value={value} labelWidth={WIDE_LABEL_WIDTH} onSave={handleSaveDesiredRate} />
         </div>
       )}

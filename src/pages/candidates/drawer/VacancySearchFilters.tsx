@@ -1,14 +1,18 @@
-import type { CSSProperties } from 'react'
+import type { CSSProperties, ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
+import DatePicker from 'react-datepicker'
 import { RotateCcw } from 'lucide-react'
 import SearchSelect from '@/components/ui/SearchSelect'
 import Slider from '@/components/ui/Slider'
+import { parseDate } from '@/components/forms/fields'
 import type { HoursRange } from '../hooks/vacancySearchFilters'
 
-const filterLabel: CSSProperties = { fontSize: 11, color: 'var(--text-muted)', display: 'block', marginBottom: 4 }
+// Inline label — sits BESIDE its control instead of above it (Danny 09-08: a
+// label-above-every-filter layout ran the bar over four lines with dead space).
+const filterLabelInline: CSSProperties = { fontSize: 11, color: 'var(--text-muted)', whiteSpace: 'nowrap', flexShrink: 0 }
 // Bare filter-bar input (mirrors ChangelogTab's date-range inputStyle — the one
 // established "plain input in a filter row" look, not the EditableFieldTable form field).
-const filterInput: CSSProperties = { padding: '6px 9px', fontSize: 12, border: '1px solid var(--border)', borderRadius: 7, background: 'var(--surface)', color: 'var(--text)', outline: 'none' }
+const filterInput: CSSProperties = { padding: '6px 9px', fontSize: 12, border: '1px solid var(--border)', borderRadius: 7, background: 'var(--surface)', color: 'var(--text)', outline: 'none', width: 128 }
 // Reset trigger — a REAL button in the §4 soft-tint convention (tinted background,
 // token text/icon, tinted border), never coloured text with an icon glued to it.
 const resetButton: CSSProperties = {
@@ -20,6 +24,31 @@ const resetButton: CSSProperties = {
 }
 // Numeric readout of the hours range — JetBrains Mono per §4 (numbers/IDs).
 const hoursReadout: CSSProperties = { fontFamily: 'JetBrains Mono, monospace', fontSize: 12, color: 'var(--text)', whiteSpace: 'nowrap' }
+
+// Format a react-datepicker selection as a LOCAL YYYY-MM-DD string — never
+// `.toISOString()` (that converts through UTC first, which silently shifts the
+// date back a day in any timezone ahead of UTC, e.g. Europe/Amsterdam CEST —
+// caught while wiring this up 09-08). The filter compares date-only strings, so
+// the LOCAL calendar day the recruiter picked is what must round-trip.
+function toLocalIsoDate(d: Date): string {
+  const y = d.getFullYear()
+  const m = String(d.getMonth() + 1).padStart(2, '0')
+  const day = String(d.getDate()).padStart(2, '0')
+  return `${y}-${m}-${day}`
+}
+
+// One label-beside-control filter unit — replaces the old label-ABOVE block per
+// filter. Every filter is now one line tall instead of two, and wraps as a
+// single flex item instead of a fixed-width column with dead space around a
+// narrower trigger button (the gap Danny pointed at right of Contractvorm).
+function FilterField({ label, align = 'center', children }: { label: string; align?: CSSProperties['alignItems']; children: ReactNode }) {
+  return (
+    <div style={{ display: 'flex', alignItems: align, gap: 6 }}>
+      <span style={filterLabelInline}>{label}</span>
+      {children}
+    </div>
+  )
+}
 
 interface VacancySearchFiltersProps {
   /** The candidate's own function title — only used for the not-in-lookup hint. */
@@ -53,6 +82,10 @@ interface VacancySearchFiltersProps {
  * (VacancySearchTab). Purely presentational: every value and setter arrives as a
  * prop, no API calls and no business logic (§3 container/presentational split).
  * Every list is a searchable dropdown (SearchSelect), never a native <select>.
+ * COMPACT-1 (Danny 09-08): one continuous flex-wrap row, label BESIDE each
+ * control instead of above it — the bar used to run four lines tall with dead
+ * space around fixed-width columns; now every filter is a single-line unit that
+ * wraps on its own, and the reset button lives in the same wrap flow.
  */
 export default function VacancySearchFilters({
   candidateTitle, statusOptions, statuses, onStatusesChange,
@@ -74,18 +107,18 @@ export default function VacancySearchFilters({
     selected.length > 0 ? t('common:filters.selectedCount', { count: selected.length }) : t('common:filters.choose', { label: label.toLowerCase() })
 
   return (
-    <div style={{ display: 'flex', alignItems: 'flex-end', gap: 16 }}>
-      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 16, flex: 1, minWidth: 0 }}>
-        <div style={{ minWidth: 180 }}>
-          <span style={filterLabel}>{t('vacancySearch.statuses')}</span>
-          <SearchSelect
-            options={statusOptions.map(s => ({ value: s.value, label: s.label }))}
-            selected={statuses} onToggle={v => onStatusesChange(toggle(statuses, v))}
-            triggerLabel={triggerText(statuses, t('vacancySearch.statuses'))}
-          />
-        </div>
-        <div style={{ minWidth: 180 }}>
-          <span style={filterLabel}>{t('vacancySearch.functions')}</span>
+    <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '8px 16px' }}>
+      <FilterField label={t('vacancySearch.statuses')}>
+        <SearchSelect
+          options={statusOptions.map(s => ({ value: s.value, label: s.label }))}
+          selected={statuses} onToggle={v => onStatusesChange(toggle(statuses, v))}
+          triggerLabel={triggerText(statuses, t('vacancySearch.statuses'))}
+        />
+      </FilterField>
+      {/* flex-start: the ghost-filter hint below the control (when shown) makes this
+          field two lines tall — centering the label against that would look off. */}
+      <FilterField label={t('vacancySearch.functions')} align="flex-start">
+        <div>
           <SearchSelect
             options={functionOptions} selected={functions} onToggle={v => onFunctionsChange(toggle(functions, v))}
             triggerLabel={triggerText(functions, t('vacancySearch.functions'))}
@@ -94,48 +127,58 @@ export default function VacancySearchFilters({
               no exact lookup match, so the filter above seeded empty (searches ALL functions)
               — say so instead of leaving a silent gap. */}
           {functionNotInLookup && (
-            <span style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 4, fontStyle: 'italic', display: 'block' }}>
+            <span style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 2, fontStyle: 'italic', display: 'block' }}>
               {t('vacancySearch.functionNotInLookup', { title: candidateTitle })}
             </span>
           )}
         </div>
-        <div style={{ minWidth: 180 }}>
-          <span style={filterLabel}>{t('vacancySearch.contractForm')}</span>
-          <SearchSelect
-            options={contractvormOptions} selected={contractvorm} onToggle={v => onContractvormChange(toggle(contractvorm, v))}
-            triggerLabel={triggerText(contractvorm, t('vacancySearch.contractForm'))}
-          />
-        </div>
-        {/* Uren-per-week range — ONE slider with two thumbs (Danny 08-08, point 8),
-            gated (offered-iff-read) on the vacancy hours_min/hours_max fields. */}
-        {hasHoursData && (
-          <div style={{ minWidth: 220 }}>
-            <span style={filterLabel}>{t('vacancySearch.hoursPerWeek')}</span>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-              <div style={{ flex: 1, minWidth: 130 }}>
-                <Slider range={hoursRange} max={hoursRangeMax} step={1} onRangeChange={onHoursRangeChange}
-                  ariaLabels={[
-                    `${t('vacancySearch.hoursPerWeek')} ${t('vacancySearch.hoursMinPlaceholder')}`,
-                    `${t('vacancySearch.hoursPerWeek')} ${t('vacancySearch.hoursMaxPlaceholder')}`,
-                  ]} />
-              </div>
-              <span style={hoursReadout}>{t('vacancySearch.hoursRangeValue', { min: hoursRange[0], max: hoursRange[1] })}</span>
+      </FilterField>
+      <FilterField label={t('vacancySearch.contractForm')}>
+        <SearchSelect
+          options={contractvormOptions} selected={contractvorm} onToggle={v => onContractvormChange(toggle(contractvorm, v))}
+          triggerLabel={triggerText(contractvorm, t('vacancySearch.contractForm'))}
+        />
+      </FilterField>
+      {/* Uren-per-week range — ONE slider with two thumbs (Danny 08-08, point 8),
+          gated (offered-iff-read) on the vacancy hours_min/hours_max fields. */}
+      {hasHoursData && (
+        <FilterField label={t('vacancySearch.hoursPerWeek')}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, width: 150 }}>
+            <div style={{ flex: 1 }}>
+              <Slider range={hoursRange} max={hoursRangeMax} step={1} onRangeChange={onHoursRangeChange}
+                ariaLabels={[
+                  `${t('vacancySearch.hoursPerWeek')} ${t('vacancySearch.hoursMinPlaceholder')}`,
+                  `${t('vacancySearch.hoursPerWeek')} ${t('vacancySearch.hoursMaxPlaceholder')}`,
+                ]} />
             </div>
+            <span style={hoursReadout}>{t('vacancySearch.hoursRangeValue', { min: hoursRange[0], max: hoursRange[1] })}</span>
           </div>
-        )}
-        {/* Inzetbaar-vanaf date — gated the same way, on the vacancy start_date field. */}
-        {hasAvailableFromData && (
-          <div style={{ minWidth: 180 }}>
-            <span style={filterLabel}>{t('vacancySearch.availableFromFilter')}</span>
-            <input type="date" value={availableFrom} onChange={e => onAvailableFromChange(e.target.value)}
-              aria-label={t('vacancySearch.availableFromFilter')} style={filterInput} />
-          </div>
-        )}
-      </div>
+        </FilterField>
+      )}
+      {/* Inzetbaar-vanaf date — gated the same way, on the vacancy start_date field.
+          FIX (Danny 09-08): was a bare <input type="date"> — browser-native icon,
+          non-NL date format and off-height. Now the shared react-datepicker convention
+          (mirrors ProfilePersonalTab's dob field), DD-MM-YYYY, same filter-bar input look. */}
+      {hasAvailableFromData && (
+        <FilterField label={t('vacancySearch.availableFromFilter')}>
+          <DatePicker
+            selected={parseDate(availableFrom)}
+            onChange={(d: Date | null) => onAvailableFromChange(d ? toLocalIsoDate(d) : '')}
+            dateFormat="dd-MM-yyyy"
+            showMonthDropdown showYearDropdown dropdownMode="select"
+            placeholderText={t('vacancySearch.availableFromFilter')}
+            portalId="datepicker-portal"
+            popperPlacement="bottom-start"
+            customInput={<input aria-label={t('vacancySearch.availableFromFilter')} style={filterInput} />}
+          />
+        </FilterField>
+      )}
       {/* Reset (Danny 08-08, point 8) — only rendered when it would actually change
-          something; a button that does nothing is noise. */}
+          something; a button that does nothing is noise. Lives in the SAME wrap
+          flow as the filters: auto-margin pushes it right when there's room, and
+          it wraps onto its own line (still right-aligned) when there isn't. */}
       {filtersDirty && (
-        <button type="button" onClick={onReset} style={resetButton}>
+        <button type="button" onClick={onReset} style={{ ...resetButton, marginLeft: 'auto' }}>
           <RotateCcw size={13} aria-hidden="true" />
           {t('vacancySearch.resetFilters')}
         </button>

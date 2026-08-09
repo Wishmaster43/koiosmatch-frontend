@@ -9,6 +9,14 @@
  * KOIOS-ASSIST-TEXTFIELDS — the shared dictation mic + Koios assist bar, without
  * a single prop of its own (`assist` defaults to true).
  *
+ * KOIOS-GENERATE-1 (Danny 09-08): `assistModes` is hardcoded to Verbeteren/
+ * Samenvatten (no Actiepunten) — every field this popout writes today or in the
+ * near future (profile text, later a customer/location description, a match
+ * text) is a description-style field, never a conversation thread, so
+ * "extract action items" never fits here (that stays the note composer's own
+ * mode set). `generate` mirrors the drill-down's own field one-for-one — see
+ * this component's `generate` prop.
+ *
  * CLOSING NEVER EATS TEXT (Danny's explicit requirement): a native beforeunload
  * guard fires while the draft is dirty, so closing or reloading this window
  * always asks first. It is written out here rather than extracted into a shared
@@ -20,6 +28,7 @@ import { useEffect, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Save } from 'lucide-react'
 import RichTextEditor from '@/components/ui/RichTextEditor'
+import type { GenerateEntity } from '@/components/ui/richtext/richTextAssistApi'
 
 interface TextPopoutEditorProps {
   value: string
@@ -28,9 +37,12 @@ interface TextPopoutEditorProps {
   onSave: () => Promise<boolean>
   // Unsaved-changes marker — drives the footer state AND the close guard.
   dirty: boolean
+  // KOIOS-GENERATE-1: which entity/id this popped-out field belongs to — omit on
+  // any field the backend cannot generate for (§3, mirrors the drill-down).
+  generate?: { entity: GenerateEntity; id: string }
 }
 
-export default function TextPopoutEditor({ value, onChange, onSave, dirty }: TextPopoutEditorProps) {
+export default function TextPopoutEditor({ value, onChange, onSave, dirty, generate }: TextPopoutEditorProps) {
   const { t } = useTranslation('common')
 
   // Warn before this window is closed/reloaded with unsaved text. The browser
@@ -69,7 +81,8 @@ export default function TextPopoutEditor({ value, onChange, onSave, dirty }: Tex
     <div style={{ display: 'flex', flexDirection: 'column', gap: 10, height: '100%', minHeight: 0 }}>
       {/* `fill` makes the editor the one growing item, so a resized window grows
           the WRITING space instead of empty padding (mirrors the note composer). */}
-      <RichTextEditor value={value} onChange={onChange} fill minHeight={220} />
+      <RichTextEditor value={value} onChange={onChange} fill minHeight={220}
+        assistModes={['improve', 'summarize']} assistGenerate={generate} />
 
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10, flexShrink: 0 }}>
         {/* Honest, announced save state — never a silent "did that land?" window. */}
