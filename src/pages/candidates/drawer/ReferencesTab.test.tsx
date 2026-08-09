@@ -10,15 +10,13 @@
  * convention WorkPermitBlock.test.tsx uses for useWorkPermitTypes) so these
  * tests never depend on a real network call.
  *
- * §13 scope note: BackgroundTab.tsx's `TO_API.references` mapper (out of scope
- * for this change — already modified in the working tree by another pass) is a
- * STRAIGHT PASSTHROUGH for every field below — ReferenceResource's own keys
- * already match this form's field keys 1:1, no FE→BE renaming happens between
- * onAdd's payload and the POST/PATCH body (mirrors the old contract's shape).
- * Asserting the exact onAdd/onEdit payload here is therefore equivalent to
- * asserting the request body; the actual axios call assertion (mirrors
- * BackgroundTab.test.tsx's own DOC-ENTRY-LINK-1 describe block) is the
- * responsibility of whoever finalises BackgroundTab.test.tsx.
+ * §13 scope note: BackgroundTab.tsx's `TO_API.references` mapper passes every
+ * field below through unchanged — ReferenceResource's own keys already match this
+ * form's field keys 1:1 — except that the nullable FKs (`relation_id`,
+ * `document_id`, `work_experience_id`) turn an emptied picker into `null` rather
+ * than `''`. So the onAdd/onEdit payloads asserted here are the request body, with
+ * that one documented exception; the real axios calls are asserted in
+ * BackgroundTab.test.tsx (DOC-ENTRY-LINK-1 and REF-ERVARING-1).
  */
 import { describe, it, expect, vi } from 'vitest'
 import { render, screen } from '@testing-library/react'
@@ -226,74 +224,140 @@ describe('ReferencesTab · verify action ↔ verified badge', () => {
 })
 
 /**
- * REF-ERVARING-1 (Danny 08-08, punt 4) — "a reference must be linkable to a work
- * experience". MEASURED live first (koiosmatch-api.test, X-Tenant: yesway): the
- * backend has no such field in either direction, and POST/PATCH on
- * /candidates/{id}/references answer 201/200 while SILENTLY dropping
- * work_experience_id (see ReferenceExperienceGate's header for the full probe).
+ * REF-ERVARING-1 (Danny 08-08, punt 4) — a reference belongs to a concrete work
+ * experience (the referee was the manager AT that employer). The backend shipped
+ * the field (commit d6eb75cb) and it was MEASURED live 09-08 before this was
+ * built: PATCH /candidates/{c}/references/{r} persists `work_experience_id`
+ * (200 + a fresh GET echoes it plus a nested `work_experience`), a foreign
+ * candidate's experience is rejected 422, and unlinking is the same PATCH with
+ * null — the full probe log lives in referenceExperienceLink.tsx's header. The
+ * earlier "not possible yet" gate is deleted: its notice had become untrue (§11,
+ * never two truths).
  *
- * §13 honesty note: the two tests the task asked for — "the real request shape"
- * and "unlinking really sends an empty/null field" — CANNOT exist, because there
- * is no field to send; writing them would assert a contract the server does not
- * have (exactly the green-but-dead test class §13 warns about, bulk-ontkoppelen
- * 2026-07-17). What IS asserted instead: the honest gate is there, it is NOT an
- * interactive control, and the save path never sends a key the API silently drops.
+ * §13 split: the exact PATCH body for linking AND unlinking is asserted where the
+ * request actually fires — BackgroundTab.test.tsx ("REF-ERVARING-1 …"). This file
+ * owns the presentation: which picker is offered, what the read line says, and
+ * what the form hands back.
  */
-describe('ReferencesTab · work-experience link is honestly gated (no backend field)', () => {
-  it('shows the honest notice once per tab — not once per reference row', () => {
+describe('ReferencesTab · work-experience link (REF-ERVARING-1)', () => {
+  // Two shapes on purpose: mapCandidate's camelCase (title/company/start/end) and
+  // the raw API snake_case — both must resolve, since the list holds mapped rows
+  // while a freshly POSTed one comes back straight from ReferenceResource.
+  const experiences = [
+    { id: 'exp-1', title: 'Helpende', company: 'Revalidatiekliniek Zuid', start: '2023-08-06', end: '2024-06-30', current: false },
+    { id: 'exp-2', function_title: 'Verzorgende', employer: 'Woonzorg Centrum', start_date: '2024-08-06', end_date: null, current: true },
+  ]
+  // The picker's visible name is the (still unreported) i18n key until the manager
+  // lands it in the locale files — match either form so the test survives that
+  // change instead of silently pinning the untranslated state (§5).
+  const PICKER = /workExperience|Werkervaring/i
+
+  it('reads a linked experience as one line: employer · function · period in DD-MM-YYYY', () => {
+    const item = { id: 'r1', first_name: 'Jan', last_name: 'Jansen', work_experience_id: 'exp-1' }
+    render(<ReferencesTab items={[item]} experiences={experiences} />)
+    expect(screen.getByText('Revalidatiekliniek Zuid · Helpende · 06-08-2023 – 30-06-2024')).toBeInTheDocument()
+  })
+
+  it('shows "heden" instead of an empty end date for a running experience', () => {
+    const item = { id: 'r1', first_name: 'Jan', last_name: 'Jansen', work_experience_id: 'exp-2' }
+    render(<ReferencesTab items={[item]} experiences={experiences} />)
+    expect(screen.getByText('Woonzorg Centrum · Verzorgende · 06-08-2024 – heden')).toBeInTheDocument()
+  })
+
+  it('shows "heden" for an experience that simply has no end date, current flag or not', () => {
+    const open = [{ id: 'exp-3', title: 'Helpende', company: 'Thuiszorg Noord', start: '2025-01-15', end: null, current: false }]
+    const item = { id: 'r1', first_name: 'Jan', last_name: 'Jansen', work_experience_id: 'exp-3' }
+    render(<ReferencesTab items={[item]} experiences={open} />)
+    expect(screen.getByText('Thuiszorg Noord · Helpende · 15-01-2025 – heden')).toBeInTheDocument()
+  })
+
+  it('resolves the link straight from the row\'s own nested work_experience object', () => {
+    const item = {
+      id: 'r1', first_name: 'Jan', last_name: 'Jansen', work_experience_id: 'exp-9',
+      work_experience: { id: 'exp-9', function_title: 'Helpende', employer: 'Oud Werk', start_date: '2019-03-01', end_date: '2020-03-01' },
+    }
+    render(<ReferencesTab items={[item]} experiences={experiences} />)
+    expect(screen.getByText('Oud Werk · Helpende · 01-03-2019 – 01-03-2020')).toBeInTheDocument()
+  })
+
+  // The measured detail: the PATCH response never refreshes the nested object, so
+  // a just-cleared row still carries the OLD one. The id decides, never the stale nest.
+  it('reads as unlinked once the id is cleared, even while a stale nested object is still attached', () => {
+    const item = {
+      id: 'r1', first_name: 'Jan', last_name: 'Jansen', work_experience_id: '',
+      work_experience: { id: 'exp-1', function_title: 'Helpende', employer: 'Revalidatiekliniek Zuid' },
+    }
+    render(<ReferencesTab items={[item]} experiences={experiences} />)
+    expect(screen.queryByText(/Revalidatiekliniek Zuid/)).toBeNull()
+  })
+
+  it('offers a searchable, pick-only picker of THIS candidate\'s experiences and hands the id back to onAdd', async () => {
+    const user = userEvent.setup()
+    const onAdd = vi.fn()
+    const { container } = render(<ReferencesTab items={[]} onAdd={onAdd} experiences={experiences} />)
+    await user.click(screen.getByRole('button', { name: 'Toevoegen' }))
+    // ALWAYS-SEARCHABLE-1: the house CreatableSelect, never a native <select>.
+    expect(container.querySelectorAll('select')).toHaveLength(0)
+    await user.click(screen.getByRole('button', { name: PICKER }))
+    await user.click(await screen.findByRole('button', { name: 'Woonzorg Centrum · Verzorgende · 06-08-2024 – heden' }))
+    await user.type(screen.getByPlaceholderText('Achternaam'), 'Jansen')
+    await user.click(screen.getByTitle('Opslaan'))
+    expect(onAdd).toHaveBeenCalledWith(expect.objectContaining({ work_experience_id: 'exp-2' }))
+  })
+
+  // Unlink mirrors the reference-letter link exactly: the row's own pencil, the
+  // picker's clear (X), save — BackgroundTab turns the emptied value into null.
+  it('clearing the picker in the row editor hands back an empty work_experience_id (→ PATCH null)', async () => {
+    const user = userEvent.setup()
+    const onEdit = vi.fn()
+    const item = { id: 'r1', first_name: 'Jan', last_name: 'Jansen', work_experience_id: 'exp-1' }
+    render(<ReferencesTab items={[item]} onEdit={onEdit} experiences={experiences} />)
+    await user.click(screen.getByTitle('Bewerken'))
+    await user.click(screen.getByTitle('Wissen'))
+    await user.click(screen.getByTitle('Opslaan'))
+    expect(onEdit).toHaveBeenCalledWith(0, expect.objectContaining({ work_experience_id: '' }))
+  })
+
+  // An optimistic experience (negative temp id) has no server-side row yet — offering
+  // it would PATCH an id the API rejects with 422.
+  it('never offers a not-yet-persisted experience as a link target', async () => {
+    const user = userEvent.setup()
+    render(<ReferencesTab items={[]} onAdd={vi.fn()} experiences={[{ id: -1712, title: 'Helpende', company: 'Nieuw', start: '2025-01-01' }]} />)
+    await user.click(screen.getByRole('button', { name: 'Toevoegen' }))
+    expect(screen.queryByRole('button', { name: PICKER })).toBeNull()
+  })
+})
+
+/**
+ * REF-ERVARING-1, the honest empty case: a candidate with zero work experiences
+ * gets a calm explanation, never a picker with nothing in it (§3 — an empty
+ * dropdown is a dead button).
+ */
+describe('ReferencesTab · no work experiences to link', () => {
+  it('offers no picker at all in the add form', async () => {
+    const user = userEvent.setup()
+    render(<ReferencesTab items={[]} onAdd={vi.fn()} experiences={[]} />)
+    await user.click(screen.getByRole('button', { name: 'Toevoegen' }))
+    expect(screen.queryByRole('button', { name: /workExperience|Werkervaring/i })).toBeNull()
+  })
+
+  it('explains the absence once per tab when there are references to link', () => {
     const items = [
       { id: 'r1', first_name: 'Jan', last_name: 'Jansen' },
       { id: 'r2', first_name: 'Ans', last_name: 'de Vries' },
     ]
-    render(<ReferencesTab items={items} />)
-    expect(screen.getAllByTestId('reference-experience-gate')).toHaveLength(1)
+    render(<ReferencesTab items={items} experiences={[]} />)
+    expect(screen.getAllByTestId('reference-no-experiences')).toHaveLength(1)
   })
 
-  it('renders no notice at all when there are no references yet (nothing to link)', () => {
-    render(<ReferencesTab items={[]} />)
-    expect(screen.queryByTestId('reference-experience-gate')).toBeNull()
+  it('stays quiet when there is nothing to link yet (no references at all)', () => {
+    render(<ReferencesTab items={[]} experiences={[]} />)
+    expect(screen.queryByTestId('reference-no-experiences')).toBeNull()
   })
 
-  // The gate is a NOTICE, never a disabled-looking control: no button, no
-  // searchable dropdown, nothing a recruiter could read as "clickable later".
-  it('the gate is inert — it contains no button and no dropdown trigger', () => {
+  it('drops the explanation as soon as the candidate has a linkable experience', () => {
     const item = { id: 'r1', first_name: 'Jan', last_name: 'Jansen' }
-    render(<ReferencesTab items={[item]} />)
-    const gate = screen.getByTestId('reference-experience-gate')
-    expect(gate.querySelectorAll('button')).toHaveLength(0)
-    expect(gate.querySelectorAll('select')).toHaveLength(0)
-    expect(gate.querySelectorAll('input')).toHaveLength(0)
-  })
-
-  // The measured trap: PATCH .../references/{item} returns 200 for an unknown
-  // key and drops it. So the save path must never carry one — a green request
-  // test on such a key would prove nothing about persistence.
-  it('never sends an experience-link key in the add payload', async () => {
-    const user = userEvent.setup()
-    const onAdd = vi.fn()
-    render(<ReferencesTab items={[]} onAdd={onAdd} />)
-    await user.click(screen.getByRole('button', { name: 'Toevoegen' }))
-    await user.type(screen.getByPlaceholderText('Achternaam'), 'Jansen')
-    await user.click(screen.getByTitle('Opslaan'))
-
-    const payload = onAdd.mock.calls[0][0] as Record<string, unknown>
-    expect(Object.keys(payload)).not.toContain('work_experience_id')
-    expect(Object.keys(payload)).not.toContain('experience_id')
-    expect(Object.keys(payload)).not.toContain('candidate_experience_id')
-  })
-
-  // Same for the edit path — the row form offers no experience field, so onEdit's
-  // merged payload cannot smuggle one into the PATCH body either.
-  it('never sends an experience-link key in the edit payload', async () => {
-    const user = userEvent.setup()
-    const onEdit = vi.fn()
-    const item = { id: 'r1', first_name: 'Jan', last_name: 'Jansen' }
-    render(<ReferencesTab items={[item]} onEdit={onEdit} />)
-    await user.click(screen.getByTitle('Bewerken'))
-    await user.click(screen.getByTitle('Opslaan'))
-
-    const payload = onEdit.mock.calls[0][1] as Record<string, unknown>
-    expect(Object.keys(payload)).not.toContain('work_experience_id')
-    expect(Object.keys(payload)).not.toContain('experience_id')
+    render(<ReferencesTab items={[item]} experiences={[{ id: 'exp-1', title: 'Helpende', company: 'Zorggroep X' }]} />)
+    expect(screen.queryByTestId('reference-no-experiences')).toBeNull()
   })
 })

@@ -65,7 +65,11 @@ export default function PopoutShell({ loading, error, loadingLabel, errorLabel, 
   if (error) return <PopoutErrorRow message={errorLabel} retryLabel={retryLabel} onRetry={onRetry} />
 
   return (
-    <div style={{ minHeight: '100vh', background: 'var(--bg)', display: 'flex', flexDirection: 'column' }}>
+    // height (not minHeight) on purpose (Danny 09-08: "tekst blok blijft klein").
+    // A percentage height only resolves against a DEFINITE parent height; with
+    // minHeight the body's flex:1 stayed auto, so the editor's own height:100%
+    // collapsed to its content and left the rest of the window empty.
+    <div style={{ height: '100vh', background: 'var(--bg)', display: 'flex', flexDirection: 'column' }}>
       <header style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '14px 20px',
         borderBottom: '1px solid var(--border)', flexShrink: 0 }}>
         <Avatar initials={initials} soft size={32} />

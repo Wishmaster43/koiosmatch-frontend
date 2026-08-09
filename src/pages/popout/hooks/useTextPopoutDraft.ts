@@ -23,8 +23,10 @@ interface TextPopoutDraftOptions {
   topic: string
   // The record's stored value; undefined while it is still loading.
   storedValue: string | undefined
-  // Persist the field. `revert` runs when the server rejected the write.
-  onSave: (html: string, revert: () => void) => void
+  // Persist the field. `revert` runs when the server rejected the write. May
+  // return a promise resolving TRUE on success, which is what lets a caller close
+  // its window only once the text actually landed.
+  onSave: (html: string, revert: () => void) => void | Promise<boolean>
 }
 
 export function useTextPopoutDraft({ topic, storedValue, onSave }: TextPopoutDraftOptions) {
@@ -69,12 +71,15 @@ export function useTextPopoutDraft({ topic, storedValue, onSave }: TextPopoutDra
 
   // Persist + tell the opener, so one save clears the unsaved marker in both
   // windows; a rejected write puts the marker back on both.
-  const save = useCallback(() => {
-    if (text === null) return
+  // Resolves TRUE only when the write landed — a caller that closes on save must
+  // never close on a REJECTED one, or the recruiter's text is gone with the window.
+  const save = useCallback(async (): Promise<boolean> => {
+    if (text === null) return false
     const html = text
     setDirty(false)
     post({ kind: 'saved', html })
-    onSave(html, () => { setDirty(true); post({ kind: 'draft', html }) })
+    const result = await onSave(html, () => { setDirty(true); post({ kind: 'draft', html }) })
+    return result !== false
   }, [text, post, onSave])
 
   return { text, dirty, change, save }

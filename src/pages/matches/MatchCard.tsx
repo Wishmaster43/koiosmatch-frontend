@@ -56,6 +56,15 @@ export interface MatchCardProps {
   // Off by default so the customer drawer's own MatchesTab (and, in spirit, the
   // scoped Matches sub-tab) render byte-identical, unchanged.
   collapsible?: boolean
+  // Opt-in FLAT row background (Danny 09-08, candidate drawer consistency sweep:
+  // "achtergrondkleur van Match en sollicitatie kloppen niet" — the collapsed
+  // summary line used the tinted `--bg` header tone while the candidate
+  // drawer's own Sollicitaties rows are flat, so the two lists read as two
+  // different components). When true, the header/summary line uses the plain
+  // surface background instead — matching ApplicationRow's rows exactly. Off by
+  // default: every OTHER caller (the customer drawer's own MatchesTab, which
+  // never sets `collapsible` either) renders byte-identical.
+  flatRow?: boolean
 }
 
 /**
@@ -87,7 +96,7 @@ export default function MatchCard({
   otherPartyLabel, otherPartyValue,
   contractType, contractStatus, functionTitle, branchName, ownerName, startDate, endDate,
   isClosed = false, archived = false,
-  collapsible = false,
+  collapsible = false, flatRow = false,
 }: MatchCardProps) {
   const { t } = useTranslation(['candidates', 'common'])
   const { formatDate } = useDateFormat()
@@ -193,8 +202,8 @@ export default function MatchCard({
           glyphs. Compact mode (collapsible) additionally shows the other-party
           value inline and a chevron, in the order Danny asked for: title—stage,
           other party, score, icons, chevron. */}
-      <div onClick={collapsible ? toggle : undefined}
-        style={{ padding: '8px 12px', background: 'var(--bg)', borderBottom: collapsible && !expanded ? 'none' : '1px solid var(--border)',
+      <div onClick={collapsible ? toggle : undefined} data-testid="match-card-header"
+        style={{ padding: '8px 12px', background: flatRow ? 'var(--surface)' : 'var(--bg)', borderBottom: collapsible && !expanded ? 'none' : '1px solid var(--border)',
           display: 'flex', alignItems: 'center', gap: 8, cursor: collapsible ? 'pointer' : undefined }}>
         {titleBlock}
         {collapsible ? (

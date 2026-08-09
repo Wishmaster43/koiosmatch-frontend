@@ -20,7 +20,8 @@
     "links": "Koppeling",
     "assignee": "Toegewezen aan",
     "due": "Vervaldatum",
-    "created": "Aangemaakt"
+    "created": "Aangemaakt",
+    "team": "Afdeling"
   },
   "kpi": {
     "open": "Open",
@@ -84,7 +85,9 @@
     "owner": "Aangemaakt door",
     "description": "Omschrijving",
     "location": "Vestiging",
-    "locationPlaceholder": "Kies een vestiging"
+    "locationPlaceholder": "Kies een vestiging",
+    "team": "Afdeling",
+    "teamPlaceholder": "Kies een afdeling"
   },
   "comments": {
     "send": "Plaatsen"
@@ -153,7 +156,12 @@
     "assigneeUnassignedHint": "Niemand is verantwoordelijk: de taak blijft op het bureau staan tot een collega hem oppakt.",
     "assigneeWithRole": "{{name}} · {{role}}",
     "assigneeEmpty": "Nog geen collega's om aan toe te wijzen — alleen het bureau is te kiezen.",
-    "assigneeLoadError": "Collega's konden niet worden geladen."
+    "assigneeLoadError": "Collega's konden niet worden geladen.",
+    "team": "Afdeling",
+    "teamPlaceholder": "Kies een afdeling",
+    "teamHint": "Waar de taak wacht, bijvoorbeeld Backoffice. De afdeling blijft staan zodra een collega de taak oppakt.",
+    "teamEmpty": "Er zijn nog geen interne afdelingen ingesteld.",
+    "teamLoadError": "Interne afdelingen konden niet worden geladen."
   },
   "page": {
     "searchPlaceholder": "Zoek naar taken"

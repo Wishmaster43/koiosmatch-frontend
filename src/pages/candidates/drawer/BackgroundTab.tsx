@@ -78,6 +78,13 @@ const TO_API: Record<string, (v: RelItem) => Record<string, unknown>> = {
     function: v.function, relation_id: v.relation_id || null, employer: v.employer,
     phone: v.phone, mobile: v.mobile, email: v.email, note: v.note,
     document_id: v.document_id || null,
+    // REF-ERVARING-1 (Danny 08-08 punt 4, backend commit d6eb75cb): the work
+    // experience this referee vouches for. Measured live 09-08 — PATCH
+    // /candidates/{c}/references/{r} persists it (200 + a fresh GET echoes the id
+    // AND a nested `work_experience`), a foreign candidate's experience is rejected
+    // 422 (IDOR-safe), and unlinking is this same PATCH with null. So '' (picker
+    // cleared) must send null, exactly like document_id/relation_id above.
+    work_experience_id: v.work_experience_id || null,
   }),
 }
 
@@ -213,7 +220,10 @@ export default function BackgroundTab({ c, onEditSave, onJump }: { c: Candidate;
           handler in this container instead of squeezing into TO_API/NORMALIZE.
           REFERENTIE-VELDEN-1: documents/onJumpToDocuments feed the "reference
           letter" picker + read-mode icons, mirrors Education/Certifications above. */}
-      {subTab === 'references'     && <ReferencesTab      items={references}  documents={c.documents ?? []} onJumpToDocuments={onJump ? () => onJump('documents') : undefined} onVerify={verifyReference} {...ops('references', references, setReferences)} />}
+      {/* REF-ERVARING-1: `experiences` is the LOCAL list, not c.experiences — an
+          experience added this session is instantly linkable, and one just removed
+          disappears from the picker. */}
+      {subTab === 'references'     && <ReferencesTab      items={references}  documents={c.documents ?? []} experiences={experiences} onJumpToDocuments={onJump ? () => onJump('documents') : undefined} onVerify={verifyReference} {...ops('references', references, setReferences)} />}
       {/* Talen already lived on this tab (moved here from Profiel earlier) — now its
           own sub-tab instead of a stacked block; persists via the drawer's onUpdate. */}
       {subTab === 'languages'      && <LanguagesSection c={c} onEditSave={onEditSave} />}

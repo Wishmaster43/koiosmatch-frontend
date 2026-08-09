@@ -58,7 +58,9 @@ describe('useTextPopoutDraft', () => {
     expect(seen).toContainEqual({ kind: 'draft', html: '<p>x</p>' })
   })
 
-  it('saves through the host path, tells the other window, and re-dirties on rejection', () => {
+  // save() is async now (it resolves TRUE only on a landed write, which is what
+  // lets the pop-out close itself safely) — so the act() around it must be awaited.
+  it('saves through the host path, tells the other window, and re-dirties on rejection', async () => {
     const peer = new FakeChannel('t4')
     const seen: unknown[] = []
     peer.onmessage = e => seen.push(e.data)
@@ -67,7 +69,7 @@ describe('useTextPopoutDraft', () => {
     const { result } = renderHook(() => useTextPopoutDraft({ topic: 't4', storedValue: 'a', onSave }))
 
     act(() => result.current.change('ab'))
-    act(() => result.current.save())
+    await act(async () => { await result.current.save() })
     expect(onSave).toHaveBeenCalledWith('ab', expect.any(Function))
     expect(result.current.dirty).toBe(false)
     expect(seen).toContainEqual({ kind: 'saved', html: 'ab' })
@@ -77,9 +79,9 @@ describe('useTextPopoutDraft', () => {
     expect(result.current.dirty).toBe(true)
   })
 
-  it('adopts a remote save: same text, unsaved marker gone', () => {
+  it('adopts a remote save: same text, unsaved marker gone', async () => {
     const { result } = renderHook(() => useTextPopoutDraft({ topic: 't5', storedValue: 'a', onSave: vi.fn() }))
-    act(() => result.current.change('ab'))
+    await act(async () => { result.current.change('ab') })
     expect(result.current.dirty).toBe(true)
     act(() => { new FakeChannel('t5').postMessage({ kind: 'saved', html: 'abc' }) })
     expect(result.current.text).toBe('abc')

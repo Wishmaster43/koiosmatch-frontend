@@ -24,7 +24,8 @@ import RichTextEditor from '@/components/ui/RichTextEditor'
 interface TextPopoutEditorProps {
   value: string
   onChange: (html: string) => void
-  onSave: () => void
+  // Resolves TRUE only when the write actually landed.
+  onSave: () => Promise<boolean>
   // Unsaved-changes marker — drives the footer state AND the close guard.
   dirty: boolean
 }
@@ -40,6 +41,13 @@ export default function TextPopoutEditor({ value, onChange, onSave, dirty }: Tex
     window.addEventListener('beforeunload', handler)
     return () => window.removeEventListener('beforeunload', handler)
   }, [dirty])
+
+  // Save AND close (Danny 09-08: "bij opslaan van pop-out sluit het venster niet").
+  // This window exists to write ONE field, so finishing it is finishing the window.
+  // It closes only on a landed write — closing on a REJECTED save would take the
+  // recruiter's text with it. The button says "en sluiten" so the closing is never
+  // a surprise (§3); Cmd+S below stays a plain checkpoint that keeps you writing.
+  const saveAndClose = async () => { if (await onSave()) window.close() }
 
   // Cmd/Ctrl+S saves without reaching for the mouse — the whole point of a
   // full-screen writing window (§6 keyboard operability). The handler reads the
@@ -69,11 +77,11 @@ export default function TextPopoutEditor({ value, onChange, onSave, dirty }: Tex
           style={{ fontSize: 11, color: dirty ? 'var(--color-warning)' : 'var(--text-muted)' }}>
           {dirty ? t('unsavedChanges') : t('allChangesSaved')}
         </span>
-        <button type="button" onClick={onSave} disabled={!dirty} data-testid="text-popout-save"
+        <button type="button" onClick={saveAndClose} disabled={!dirty} data-testid="text-popout-save"
           style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '6px 12px', fontSize: 12, fontWeight: 600,
             borderRadius: 8, border: 'none', cursor: dirty ? 'pointer' : 'default', opacity: dirty ? 1 : 0.5,
             background: 'var(--color-primary)', color: 'var(--color-on-accent)' }}>
-          <Save size={13} /> {t('save')}
+          <Save size={13} /> {t('popout.saveAndClose')}
         </button>
       </div>
     </div>

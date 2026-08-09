@@ -458,7 +458,8 @@
     "referenceFunction": "Funktion",
     "mobile": "Mobil",
     "referenceLetter": "Referenzschreiben",
-    "linkedDocumentFor": "Verknüpftes Dokument für {{name}}"
+    "linkedDocumentFor": "Verknüpftes Dokument für {{name}}",
+    "workExperience": "Berufserfahrung"
   },
   "work": {
     "client": "Kunde",
@@ -1258,7 +1259,9 @@
   "references": {
     "verify": "Verifizieren",
     "verified": "Verifiziert",
-    "experienceLinkUnavailable": "Die Verknüpfung mit einer Berufserfahrung ist noch nicht möglich — sie folgt, sobald die API das Feld unterstützt."
+    "experienceLinkUnavailable": "Die Verknüpfung mit einer Berufserfahrung ist noch nicht möglich — sie folgt, sobald die API das Feld unterstützt.",
+    "linkedExperience": "Verknüpfte Berufserfahrung",
+    "noExperiencesToLink": "Diese Person hat noch keine Berufserfahrung — fügen Sie zuerst eine hinzu, um eine Referenz damit zu verknüpfen."
   },
   "validation": {
     "emailFormat": "Geben Sie eine gültige E-Mail-Adresse ein.",

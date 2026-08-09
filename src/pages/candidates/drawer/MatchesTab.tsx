@@ -99,6 +99,25 @@ export default function MatchesTab({ c, onEdit, onAdd }: { c: Candidate
         {onAdd && <DrawerAddButton onClick={onAdd} label={t('work.addMatch')} />}
       </div>
       <SectionCard>
+      {/* Column header bar (Danny 09-08: "Match heeft geen titelbalk en
+          sollicitaties wel" — mirrors WorkTab's own header bar, same style,
+          so both lists read as one system; kept per Danny's advice rather than
+          removed, since a bare pill/date/value row reads as undecipherable
+          without one). Only "Vacature" and the other-party label are real
+          columns here — MatchCard's own summary row otherwise has no fixed
+          column grid to line up against (unlike ApplicationRow, which reads
+          its widths from the shared applicationRowColumns.ts), so this stays a
+          close visual match rather than a pixel-exact one; the trailing cell
+          stays empty over the score/coupling-icon/chevron cluster, the same
+          "empty header above an unlabelled column" idiom WorkTab uses for its
+          own actions column. */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '8px 12px', marginBottom: 8,
+        background: 'var(--bg)', border: '1px solid var(--border)', borderRadius: 8,
+        fontSize: 11, fontWeight: 600, color: 'var(--text-muted)' }}>
+        <span style={{ flex: 1, minWidth: 0 }}>{t('work.vacancy')}</span>
+        <span style={{ width: 140, flexShrink: 0 }}>{t('matchesView.client')}</span>
+        <span aria-hidden="true" data-testid="match-col-actions-header" style={{ width: 140, flexShrink: 0 }} />
+      </div>
       {matches.length === 0 ? (
         <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{t('matchesView.empty')}</div>
       ) : matches.map((m, i) => {
@@ -122,6 +141,10 @@ export default function MatchesTab({ c, onEdit, onAdd }: { c: Candidate
             // Compact mode (Danny live review, 04-08): collapsed by default, one
             // summary row per match, expanding in place — see MatchCard's own prop doc.
             collapsible
+            // Flat row background (Danny 09-08): matches ApplicationRow's own flat
+            // rows now that this list has its own tinted column-header bar above —
+            // see MatchCard's own prop doc for why this is opt-in.
+            flatRow
           />
         )
       })}

@@ -117,6 +117,14 @@ export default function TasksTable({
         : dash },
     { key: 'createdAt', header: t('cols.created'), nowrap: true, sortable: true, sortValue: r => r.createdAt || '',
       cellStyle: { color: 'var(--text-muted)', fontSize: 12 }, render: r => formatDate(r.createdAt) },
+    // TEAM-1: the INTERNAL department the task waits at (Backoffice, Planning, …),
+    // as a soft chip in the lookup's own colour — the same treatment type/status/
+    // priority get, so the row reads as one system. Sits just before Koios so the
+    // assignee keeps the last slot (§3A) and Koios keeps its slot right before it.
+    // "Openstaand bij Backoffice" is this cell filled while the assignee cell shows
+    // Bureau; a person picking the task up leaves this chip standing.
+    { key: 'team', header: t('cols.team'), sortable: true, sortValue: r => r.team?.name ?? '',
+      render: r => (r.team ? <SoftChip label={r.team.name} color={r.team.color} /> : dash) },
     // Shared Koios column factory (Danny 05-08 consistency pass) — same header,
     // sort and cell as every other entity table; sits right before assignee (§3A).
     makeKoiosColumn({ adviceOf, colored: colorKoios, label: t('common:koios.column', { defaultValue: 'Koios' }) }),

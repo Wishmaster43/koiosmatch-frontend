@@ -20,7 +20,8 @@
     "links": "Vínculo",
     "assignee": "Asignada a",
     "due": "Fecha límite",
-    "created": "Creado"
+    "created": "Creado",
+    "team": "Departamento"
   },
   "kpi": {
     "open": "Abiertas",
@@ -70,7 +71,9 @@
     "owner": "Responsable",
     "description": "Descripción",
     "location": "Sucursal",
-    "locationPlaceholder": "Elige una sucursal"
+    "locationPlaceholder": "Elige una sucursal",
+    "team": "Departamento",
+    "teamPlaceholder": "Elige un departamento"
   },
   "comments": {
     "send": "Publicar"
@@ -139,7 +142,12 @@
     "assigneeUnassignedHint": "Nadie es responsable: la tarea permanece en la agencia hasta que un compañero la asuma.",
     "assigneeWithRole": "{{name}} · {{role}}",
     "assigneeEmpty": "Todavía no hay compañeros a quienes asignar: solo se puede elegir la agencia.",
-    "assigneeLoadError": "No se han podido cargar los compañeros."
+    "assigneeLoadError": "No se han podido cargar los compañeros.",
+    "team": "Departamento",
+    "teamPlaceholder": "Elige un departamento",
+    "teamHint": "Dónde espera la tarea, por ejemplo Backoffice. El departamento se mantiene en cuanto un compañero asume la tarea.",
+    "teamEmpty": "Aún no se ha configurado ningún departamento interno.",
+    "teamLoadError": "No se han podido cargar los departamentos internos."
   },
   "bulk": {
     "selected": "{{count}} seleccionado(s)",

@@ -42,6 +42,40 @@ export function readableOn(hex: string): string {
   return ratio(bg, luminanceOf(dark)) >= ratio(bg, 1) ? dark : '#FFFFFF'
 }
 
+// Channel-wise blend of two #rrggbb colours; `amount` is how much of `a` remains.
+function mixHex(a: string, b: string, amount: number): string {
+  const parse = (h: string) => [0, 2, 4].map(i => parseInt(h.replace('#', '').slice(i, i + 2), 16))
+  const [ar, ag, ab] = parse(a)
+  const [br, bg, bb] = parse(b)
+  const ch = (x: number, y: number) => Math.round(x * amount + y * (1 - amount))
+  return `#${[ch(ar, br), ch(ag, bg), ch(ab, bb)].map(v => v.toString(16).padStart(2, '0')).join('')}`
+}
+
+/**
+ * The brand used AS TEXT on a surface, darkened (or lightened) just enough to clear
+ * WCAG AA — and no further.
+ *
+ * Two lessons are baked in here, both from Danny's own eyes. First: a raw light brand
+ * is unreadable as text (Yesway's orange scores 3.07:1 on white, AENF's yellow 1.34:1),
+ * so it must be adjusted. Second (09-08, "kleuren zijn anders"): the first fix mixed
+ * toward #111827, a BLUE-black, which dragged the orange to a muddy maroon AND
+ * overshot to 6.4:1. Mixing toward pure black/white keeps the hue, and stepping until
+ * the ratio is merely MET keeps the colour as close to the brand as the rule allows.
+ *
+ * A fixed ratio cannot work across hues — 75% brand + black clears AA for orange
+ * (5.12:1) but leaves yellow at 2.42:1 — which is exactly why this steps instead.
+ */
+export function readableAccentText(brand: string, surface: string, target = 4.5): string {
+  if (contrastRatio(brand, surface) >= target) return brand
+  // Move AWAY from the surface: darken on a light one, lighten on a dark one.
+  const toward = luminanceOf(surface) > 0.5 ? '#000000' : '#FFFFFF'
+  for (let keep = 0.95; keep > 0; keep -= 0.05) {
+    const candidate = mixHex(brand, toward, keep)
+    if (contrastRatio(candidate, surface) >= target) return candidate
+  }
+  return toward
+}
+
 export function useTenantTheme(tenant?: { primary_color?: string | null; text_color?: string | null } | null): void {
   const settings = useAllSettings()
   // The Branding form saves settings.brand_color; some tenant payloads carry
@@ -72,10 +106,7 @@ export function useTenantTheme(tenant?: { primary_color?: string | null; text_co
         const darkMode = root.getAttribute('data-theme') === 'dark'
           || (!root.getAttribute('data-theme') && window.matchMedia?.('(prefers-color-scheme: dark)').matches)
         const surface = darkMode ? '#13131F' : '#FFFFFF'
-        root.style.setProperty('--color-primary-text',
-          contrastRatio(brand, surface) >= 4.5
-            ? brand
-            : `color-mix(in srgb, ${brand} 60%, ${darkMode ? '#FFFFFF' : '#111827'})`)
+        root.style.setProperty('--color-primary-text', readableAccentText(brand, surface))
       } else {
         // No (valid) tenant brand → the index.css defaults stay.
         root.style.removeProperty('--color-primary')

@@ -376,3 +376,38 @@ describe('WorkTab · Sollicitaties toolbar (search + stage filter, Danny live re
     expect(screen.getByText('work.colDate')).toBeInTheDocument()
   })
 })
+
+/**
+ * Danny 09-08: "de koppen staan niet boven hun eigen kolom" — the header used
+ * to declare its own fixed widths while ApplicationRow built its cells
+ * completely differently (a pill with its own intrinsic width, a date with
+ * only `flexShrink: 0`), and the header had no column at all for the trailing
+ * pencil/unlink/external-link/chevron cluster. Both sides now read their
+ * widths from the SAME shared module (applicationRowColumns.ts) — these tests
+ * compare the ACTUAL rendered header cell to the ACTUAL rendered row cell
+ * (not just to the imported constant), so a future hardcoded, divergent
+ * number on either side breaks this instead of silently drifting apart again.
+ */
+describe('WorkTab · Sollicitaties header/row share ONE column geometry (Danny 09-08)', () => {
+  const oneApp = [{ id: 'a1', vacancy: { id: 'v1', title: 'Verpleegkundige' }, stageLabel: 'Gesolliciteerd', created_at: '2026-07-01' }]
+
+  it('renders an (empty) header cell above the actions column (Danny: "lege kop boven de actiekolom")', () => {
+    render(<WorkTab c={candidate(oneApp)} />)
+    expect(screen.getByTestId('app-col-actions-header')).toBeInTheDocument()
+  })
+
+  it('status/date/actions column widths are IDENTICAL between the header and the row', () => {
+    render(<WorkTab c={candidate(oneApp)} />)
+    const statusHeader = screen.getByText('work.colStatus')
+    const dateHeader = screen.getByText('work.colDate')
+    const actionsHeader = screen.getByTestId('app-col-actions-header')
+    // The stage pill's own wrapping cell (StatusPill's text is the pill's OWN
+    // direct text child, so its immediate parent is ApplicationRow's column span).
+    const statusCell = screen.getByText('Gesolliciteerd').parentElement as HTMLElement
+    const dateCell = screen.getByText('fmt(2026-07-01)')
+    const actionsCell = screen.getByTestId('app-col-actions')
+    expect(statusCell.style.width).toBe(statusHeader.style.width)
+    expect(dateCell.style.width).toBe(dateHeader.style.width)
+    expect(actionsCell.style.width).toBe(actionsHeader.style.width)
+  })
+})

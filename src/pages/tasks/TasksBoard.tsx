@@ -32,8 +32,14 @@ function BoardCard({ task, onDragStart, onClick, selected, formatDate, formatDat
         )}
       </div>
 
-      {/* Type chip */}
-      {task.typeLabel && <div style={{ marginBottom: 8 }}><SoftChip label={task.typeLabel} color={task.typeColor} /></div>}
+      {/* Type chip + TEAM-1: the internal department the task waits at, same soft
+          chip in the lookup's own colour (mirrors the table's own team column). */}
+      {(task.typeLabel || task.team) && (
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap', marginBottom: 8 }}>
+          {task.typeLabel && <SoftChip label={task.typeLabel} color={task.typeColor} />}
+          {task.team && <SoftChip label={task.team.name} color={task.team.color} />}
+        </div>
+      )}
 
       {/* Linked entity (single-line clamp) */}
       {task.linkLabel && (

@@ -45,6 +45,7 @@ import StatusPill from '@/components/ui/StatusPill'
 import ApplicationRowDetails from './ApplicationRowDetails'
 import { useDateFormat } from '@/lib/datetime'
 import { rememberReturnTab } from './constants'
+import { APPLICATION_COL_STATUS, APPLICATION_COL_DATE, APPLICATION_COL_ACTIONS } from './applicationRowColumns'
 import { vacancyLabelOf, vacancyUrlOf } from './applicationRowModel'
 import type { AppRow, Appt } from './applicationRowModel'
 import type { ExistingAppointment } from './PlanIntakeModal'
@@ -52,7 +53,13 @@ import type { Id } from '@/types/common'
 
 // Row action icon (pencil / unlink) — the MatchCard idiom: bare icon button, muted
 // by default, the danger token only on the destructive one. Tokens only (§4).
-const iconBtn: CSSProperties = { display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: 22, height: 22, border: 'none', background: 'none', borderRadius: 5, cursor: 'pointer', padding: 0, flexShrink: 0 }
+// `boxSizing: 'border-box'` (Danny 09-08: "de knoppen in één rij horen dezelfde
+// afmeting te hebben") — the unlink button below adds a 1px border on TOP of
+// this same width/height; without border-box that border would grow it to
+// 24x24 while the borderless pencil stayed 22x22, the exact size mismatch Danny
+// flagged next to it. border-box keeps every icon button in this cluster the
+// same rendered box whether or not it carries a border.
+const iconBtn: CSSProperties = { display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: 22, height: 22, boxSizing: 'border-box', border: 'none', background: 'none', borderRadius: 5, cursor: 'pointer', padding: 0, flexShrink: 0 }
 // Title cell: grows, never pushes the pills/date off the row.
 const titleCell: CSSProperties = { fontWeight: 500, flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }
 
@@ -133,12 +140,21 @@ export default function ApplicationRow({ candidateId, row, appointment, canManag
                   <EntityLink page="vacancies" id={vacancyId} title={label}>{label}</EntityLink>
                 </span>
               : <span style={titleCell}>{label}</span>}
-        {row.stageLabel && <StatusPill label={row.stageLabel} color={row.stageColor} />}
-        {/* Applied-on date (APP-EMBED-1: application.created_at) — dash only when genuinely missing. */}
-        <span style={{ fontSize: 11, color: 'var(--text-muted)', flexShrink: 0 }}>{row.created_at ? formatDate(row.created_at) : '—'}</span>
-        {/* Action cluster — one stop-propagation wrapper (MatchCard's iconsBlock
-            idiom) so every existing action keeps its own click when the row toggles. */}
-        <span onClick={stop} style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
+        {/* Status column (APPLICATION-COL-1, Danny 09-08): the pill sits inside the
+            SAME fixed-width cell the header labels — always rendered (even when
+            this row genuinely has no stage) so a missing pill never shifts the
+            date/actions columns that follow it. */}
+        <span style={APPLICATION_COL_STATUS}>{row.stageLabel && <StatusPill label={row.stageLabel} color={row.stageColor} />}</span>
+        {/* Applied-on date (APP-EMBED-1: application.created_at) — dash only when
+            genuinely missing; same shared column width as the header's own cell. */}
+        <span style={{ fontSize: 11, color: 'var(--text-muted)', ...APPLICATION_COL_DATE }}>{row.created_at ? formatDate(row.created_at) : '—'}</span>
+        {/* Actions column (APPLICATION-COL-1): pencil/unlink/external-link/chevron
+            now share ONE fixed-width, right-aligned cell (the same shared width the
+            header's own empty trailing cell reserves) instead of two separate,
+            unaccounted-for clusters — one stop-propagation wrapper (MatchCard's
+            iconsBlock idiom) so every action keeps its own click when the row toggles. */}
+        <span onClick={stop} data-testid="app-col-actions"
+          style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 8, ...APPLICATION_COL_ACTIONS }}>
           {/* Punt 5: edit this application — same modal, EDIT mode (PATCH /applications/{id}). */}
           {canManage && applicationId != null && (
             <button type="button" onClick={() => onEdit(applicationId)}
@@ -147,11 +163,15 @@ export default function ApplicationRow({ candidateId, row, appointment, canManag
               <Pencil size={12} />
             </button>
           )}
-          {/* Punt 7: detach this application from the candidate (soft-delete, restorable). */}
+          {/* Punt 7: detach this application from the candidate (soft-delete,
+              restorable). Danny 09-08: this used a solid `--color-danger-bg` fill
+              with NO border, standing out next to the borderless pencil — now the
+              real §4 soft-tint (8-16% bg / border 28-50%), same size as the pencil
+              (iconBtn's border-box above keeps the added border from growing it). */}
           {canManage && applicationId != null && (
             <button type="button" onClick={() => onDetach(row)}
               title={t('work.detachApplication')} aria-label={t('work.detachApplication')}
-              style={{ ...iconBtn, background: 'var(--color-danger-bg)', color: 'var(--color-danger)' }}>
+              style={{ ...iconBtn, background: 'color-mix(in srgb, var(--color-danger) 12%, transparent)', color: 'var(--color-danger)', border: '1px solid color-mix(in srgb, var(--color-danger) 40%, transparent)' }}>
               <Unlink size={12} />
             </button>
           )}
@@ -162,18 +182,18 @@ export default function ApplicationRow({ candidateId, row, appointment, canManag
               <ExternalLink size={12} />
             </a>
           )}
+          {/* The explicit, keyboard-reachable disclosure (the row click is only a
+              mouse convenience on top of it) — same chevron pair as MatchCard. */}
+          {collapsible && (
+            <button type="button" id={toggleId} onClick={e => { stop(e); toggle() }}
+              title={expanded ? t('work.hideDetails') : t('work.showDetails')}
+              aria-label={expanded ? t('work.hideDetails') : t('work.showDetails')}
+              aria-expanded={expanded} aria-controls={panelId}
+              style={{ ...iconBtn, color: 'var(--text-muted)' }}>
+              {expanded ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
+            </button>
+          )}
         </span>
-        {/* The explicit, keyboard-reachable disclosure (the row click is only a
-            mouse convenience on top of it) — same chevron pair as MatchCard. */}
-        {collapsible && (
-          <button type="button" id={toggleId} onClick={e => { stop(e); toggle() }}
-            title={expanded ? t('work.hideDetails') : t('work.showDetails')}
-            aria-label={expanded ? t('work.hideDetails') : t('work.showDetails')}
-            aria-expanded={expanded} aria-controls={panelId}
-            style={{ ...iconBtn, color: 'var(--text-muted)' }}>
-            {expanded ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
-          </button>
-        )}
       </div>
       {/* Linked appointment: date · start–end · modality · owner (CONSIST-2 / APPT). */}
       {appointment && (

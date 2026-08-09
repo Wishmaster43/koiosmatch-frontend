@@ -106,6 +106,12 @@ export function useTaskDrawerActions({ setTasks, archivedTasks, setArchivedTasks
       // TASK-DUE-TIME-1: '' (cleared time input) persists as null, never as "".
       due_date: patch.due, due_time: patch.dueTime === undefined ? undefined : (patch.dueTime || null),
       description: patch.description, assignee_id: patch.assigneeId,
+      // TEAM-1: the INTERNAL department FK (`assignee_team_id`) — nullable uuid,
+      // cleared with an explicit null. Deliberately a SEPARATE key from
+      // assignee_id: the two axes are non-exclusive (where the task waits vs. who
+      // picked it up), and a patch that carries only one must never disturb the
+      // other (measured 09-08: PATCH {assignee_id} keeps `assignee_team`).
+      assignee_team_id: patch.teamId,
       // TASK-LOCATION-READ-1: branch (vestiging) FK — nullable uuid, cleared with
       // an explicit null (never dropped like an untouched/undefined key below).
       location_id: patch.locationId,

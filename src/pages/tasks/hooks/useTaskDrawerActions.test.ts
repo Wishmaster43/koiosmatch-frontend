@@ -188,6 +188,45 @@ describe('useTaskDrawerActions · handleUpdate', () => {
     await waitFor(() => expect(r.result.current.tasks[0].location).toBeNull())
   })
 
+  // TEAM-1: the internal department is a direct FK patch too (no lookup axis).
+  it('PATCHes { assignee_team_id } when a department is picked', async () => {
+    mockedPatch.mockResolvedValue({})
+    const r = harness([task({ id: 't1', team: null })])
+    act(() => { r.result.current.actions.handleUpdate('t1', { teamId: 'team-1', team: { id: 'team-1', name: 'Backoffice', color: null } }) })
+    expect(mockedPatch).toHaveBeenCalledWith('/tasks/t1', { assignee_team_id: 'team-1' })
+    await waitFor(() => expect(r.result.current.tasks[0].team).toEqual({ id: 'team-1', name: 'Backoffice', color: null }))
+  })
+
+  it('PATCHes { assignee_team_id: null } when the department is cleared', async () => {
+    mockedPatch.mockResolvedValue({})
+    const r = harness([task({ id: 't1', team: { id: 'team-1', name: 'Backoffice', color: null } })])
+    act(() => { r.result.current.actions.handleUpdate('t1', { teamId: null, team: null }) })
+    expect(mockedPatch).toHaveBeenCalledWith('/tasks/t1', { assignee_team_id: null })
+    await waitFor(() => expect(r.result.current.tasks[0].team).toBeNull())
+  })
+
+  /**
+   * THE non-exclusivity regression (Danny 09-08, the agreement that dies quietly).
+   * The drawer header's assignee picker patches ONLY `assigneeId`. The request must
+   * therefore carry NO `assignee_team_id` key at all — the backend's `sometimes`
+   * rule then leaves the department untouched (measured live: the PATCH response
+   * still carries the same `assignee_team`). If this hook ever "helpfully" sent
+   * `assignee_team_id: null` alongside a person, every queued task would lose the
+   * department it came from the moment a colleague picked it up.
+   */
+  it('assigning a person does NOT touch the department — no assignee_team_id key in that request', async () => {
+    mockedPatch.mockResolvedValue({})
+    const r = harness([task({ id: 't1', teamId: 'team-1', team: { id: 'team-1', name: 'Backoffice', color: null } })])
+    act(() => { r.result.current.actions.handleUpdate('t1', { assigneeId: 'u-kelly', assignee: { name: 'Kelly', initials: 'K', color: null } }) })
+
+    expect(mockedPatch).toHaveBeenCalledWith('/tasks/t1', { assignee_id: 'u-kelly' })
+    const body = mockedPatch.mock.calls[0][1] as Record<string, unknown>
+    expect('assignee_team_id' in body).toBe(false)
+    // …and the row keeps showing where the task came from.
+    await waitFor(() => expect(r.result.current.tasks[0].assigneeId).toBe('u-kelly'))
+    expect(r.result.current.tasks[0].team).toEqual({ id: 'team-1', name: 'Backoffice', color: null })
+  })
+
   it('reverts ONLY the patched field and reports the server message when the PATCH fails', async () => {
     seedAllLookups()
     mockedPatch.mockRejectedValue({ response: { status: 422, data: { message: 'Status bestaat niet meer' } } })

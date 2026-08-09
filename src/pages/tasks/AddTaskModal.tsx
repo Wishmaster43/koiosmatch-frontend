@@ -18,6 +18,7 @@ import DescriptionCard from './addmodal/DescriptionCard'
 import type { NewLink } from './links/AddLinkRow'
 import { todayISO, nextRoundHour } from './addmodal/defaults'
 import { useAssigneeOptions } from './addmodal/useAssigneeOptions'
+import { useTeams } from '@/lib/useTeams'
 import { useLinkOptions } from './addmodal/useLinkOptions'
 import { userName, API_TO_FORM } from './addmodal/formHelpers'
 import type { UserLike } from './addmodal/formHelpers'
@@ -27,6 +28,9 @@ import type { ApiTask } from '@/types/task'
 // Exported so the addmodal/ card components share this exact shape (type-only import).
 export interface TaskForm {
   type: string; title: string; assigneeId: string; status: string; due: string
+  // TEAM-1: the INTERNAL department the task waits at (`assignee_team_id`).
+  // Independent of `assigneeId` — see the header comment.
+  teamId: string
   // TASK-DUE-TIME-1: optional "HH:mm" paired with `due`, native <input type="time">.
   dueTime: string; priority: string; description: string
   candidateId: string; customerId: string; contactId: string
@@ -95,13 +99,18 @@ type LinkPair = { type: string; id: string }
  * same KoiosVoiceButton notes use) — never a local one, that renders a second
  * button (§11).
  *
- * ASSIGN-TO-BACKOFFICE (Danny 08-08, closing out 14/15/16; re-measured live
- * 09-08). Assigning a task to an internal DEPARTMENT/TEAM stays UNBUILT on
- * purpose (honest gate, §3 — `assignee_id` is one tenant USER, `GET /teams` is
- * a 404). What is built instead is real: the assignee picker groups colleagues
- * per tenant ROLE (which is what "Backoffice" actually is today) and makes the
- * unassigned choice an explicit "Bureau" option. The full measurement and both
- * rules live in `addmodal/assigneeOptions` + its `useAssigneeOptions` hook.
+ * ASSIGN-TO-BACKOFFICE / TEAM-1 (Danny 08-08, delivered 09-08 once the backend
+ * shipped it — commit e0e2277f). Assigning a task to an internal DEPARTMENT is
+ * now real and NON-EXCLUSIVE: `assignee_team_id` says WHERE the task waits
+ * (Backoffice), `assignee_id` says WHO picked it up, and the two live side by
+ * side in this card. Measured live 09-08: `GET /teams` → 200, `POST /tasks` with
+ * `assignee_team_id` → 201 echoing `assignee_team{id,name,color}`, and a PATCH
+ * carrying ONLY `assignee_id` returns that same `assignee_team` — assigning a
+ * person never wipes the department. So BOTH submit paths below always send
+ * `assignee_team_id` (null when cleared, never omitted — an omitted key cannot
+ * clear a value). The colleague picker keeps its role grouping and the explicit
+ * "Bureau" row (see `addmodal/assigneeOptions`); the department list comes from
+ * the shared `@/lib/useTeams`.
  *
  * `lockCustomerId`/`lockCustomerName` (Danny 28-07, "+ Nieuwe taak" from the
  * customer drawer) mirror AddVacancyModal's `lockCustomerId` pattern: the
@@ -127,6 +136,9 @@ export default function AddTaskModal({ onClose, onCreated, onSaved, initial, ext
   // the raw user list the assignability guard below needs, and the four load
   // states AssignmentCard renders (see addmodal/useAssigneeOptions).
   const { users, options: assigneeOpts, loading: usersLoading, error: usersError, retry: retryUsers, hasColleagues } = useAssigneeOptions()
+  // TEAM-1: the tenant's internal departments (GET /teams) — the second, independent
+  // half of "toewijzing". Shared hook, so a future settings screen reads the same cache.
+  const { teams, loading: teamsLoading, error: teamsError, retry: retryTeams } = useTeams()
   const auth = useAuth()
   const ownerName = auth?.user ? userName(auth.user as UserLike) : ''
   const isEdit = editId != null
@@ -146,7 +158,7 @@ export default function AddTaskModal({ onClose, onCreated, onSaved, initial, ext
   // what the prefill effect below fills in, and must never be pre-empted by a
   // "today" flash. Lazy initializer so `new Date()` is read once, at mount.
   const [form, setForm] = useState<TaskForm>(() => ({
-    type: '', title: '', assigneeId: '', status: '',
+    type: '', title: '', assigneeId: '', teamId: '', status: '',
     due: isEdit ? '' : todayISO(), dueTime: isEdit ? '' : nextRoundHour(),
     priority: '', description: '',
     candidateId: '', customerId: lockCustomerId ?? '', contactId: '', ...initial,
@@ -211,6 +223,8 @@ export default function AddTaskModal({ onClose, onCreated, onSaved, initial, ext
       setForm(f => ({ ...f,
         type: String(detail.typeKey ?? ''), title: detail.title === '—' ? '' : detail.title,
         assigneeId: detail.assigneeId != null ? String(detail.assigneeId) : '',
+        // TEAM-1: prefill the department too, so a save never silently clears it.
+        teamId: detail.teamId != null ? String(detail.teamId) : '',
         status: String(detail.statusKey ?? ''), due: detail.due ?? '', dueTime: detail.dueTime ?? '',
         priority: String(detail.priorityKey ?? ''), description: detail.description ?? '',
         candidateId: linkOf('candidate')?.id != null ? String(linkOf('candidate')!.id) : '',
@@ -288,6 +302,8 @@ export default function AddTaskModal({ onClose, onCreated, onSaved, initial, ext
         status_id: form.status ? lookupIds.status[form.status] : null,
         priority_id: form.priority ? lookupIds.priority[form.priority] : null,
         assignee_id: form.assigneeId || null, due_date: form.due || null, due_time: form.dueTime || null,
+        // TEAM-1: the internal department — always sent, null when none is picked.
+        assignee_team_id: form.teamId || null,
         description: form.description || null, links: buildLinks(),
       }
       const r = await api.post('/tasks', body)
@@ -315,6 +331,9 @@ export default function AddTaskModal({ onClose, onCreated, onSaved, initial, ext
         status_id: form.status ? lookupIds.status[form.status] : undefined,
         priority_id: form.priority ? lookupIds.priority[form.priority] : null,
         assignee_id: form.assigneeId || null, due_date: form.due || null, due_time: form.dueTime || null,
+        // TEAM-1: sent explicitly (never omitted) — omitting the key would leave a
+        // cleared department standing, since UpdateTaskRequest uses `sometimes`.
+        assignee_team_id: form.teamId || null,
         description: form.description || null, links: buildLinks(),
       }
       Object.keys(body).forEach(k => { if (body[k] === undefined) delete body[k] })
@@ -354,7 +373,8 @@ export default function AddTaskModal({ onClose, onCreated, onSaved, initial, ext
             <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
               <PlanningCard t={t} form={form} set={set} priorities={priorities} statuses={statuses} />
               <AssignmentCard t={t} form={form} set={set} ownerName={ownerName} assigneeOpts={assigneeOpts}
-                usersLoading={usersLoading} usersError={usersError} hasColleagues={hasColleagues} onRetryUsers={retryUsers} />
+                usersLoading={usersLoading} usersError={usersError} hasColleagues={hasColleagues} onRetryUsers={retryUsers}
+                teams={teams} teamsLoading={teamsLoading} teamsError={teamsError} onRetryTeams={retryTeams} />
             </div>
             <LinkCard t={t} form={form} set={set}
               candidates={linkOptions.candidates} customers={linkOptions.customers} contacts={linkOptions.contacts}

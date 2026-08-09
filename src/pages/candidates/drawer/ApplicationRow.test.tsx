@@ -173,3 +173,33 @@ describe('ApplicationRow · the existing row actions keep working', () => {
     await waitFor(() => expect(screen.getByRole('button', { name: ct('work.hideDetails') })).toHaveAttribute('aria-expanded', 'true'))
   })
 })
+
+/**
+ * Danny 09-08: the unlink button used a SOLID `--color-danger-bg` fill with no
+ * border, standing out next to the borderless pencil right beside it. Now the
+ * real §4 soft-tint (background color-mix 8-16%, icon/text = the colour
+ * itself, border color-mix 28-50%) — and the SAME rendered size as the pencil.
+ */
+describe('ApplicationRow · unlink follows the soft-tint convention, same size as the pencil (Danny 09-08)', () => {
+  it('renders a color-mix background + border instead of a solid fill', () => {
+    renderRow()
+    const unlink = screen.getByRole('button', { name: ct('work.detachApplication') })
+    expect(unlink.style.background).toContain('color-mix')
+    expect(unlink.style.background).toContain('var(--color-danger)')
+    expect(unlink.style.border).toContain('color-mix')
+    expect(unlink.style.border).toContain('var(--color-danger)')
+    expect(unlink.style.color).toBe('var(--color-danger)')
+  })
+
+  it('renders at the EXACT same box size as the pencil next to it', () => {
+    renderRow()
+    const pencil = screen.getByRole('button', { name: ct('work.editApplication') })
+    const unlink = screen.getByRole('button', { name: ct('work.detachApplication') })
+    expect(unlink.style.width).toBe(pencil.style.width)
+    expect(unlink.style.height).toBe(pencil.style.height)
+    // border-box keeps the border unlink carries (and pencil doesn't) from
+    // growing its rendered box past the pencil's — the actual regression guard.
+    expect(unlink.style.boxSizing).toBe('border-box')
+    expect(pencil.style.boxSizing).toBe('border-box')
+  })
+})

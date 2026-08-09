@@ -458,7 +458,8 @@
     "referenceFunction": "Función",
     "mobile": "Móvil",
     "referenceLetter": "Carta de referencia",
-    "linkedDocumentFor": "Documento vinculado para {{name}}"
+    "linkedDocumentFor": "Documento vinculado para {{name}}",
+    "workExperience": "Experiencia laboral"
   },
   "work": {
     "client": "Cliente",
@@ -1258,7 +1259,9 @@
   "references": {
     "verify": "Verificar",
     "verified": "Verificado",
-    "experienceLinkUnavailable": "Todavía no se puede vincular una experiencia laboral: llegará cuando la API admita el campo."
+    "experienceLinkUnavailable": "Todavía no se puede vincular una experiencia laboral: llegará cuando la API admita el campo.",
+    "linkedExperience": "Experiencia laboral vinculada",
+    "noExperiencesToLink": "Este candidato aún no tiene experiencia laboral: añade una primero para vincular una referencia."
   },
   "validation": {
     "emailFormat": "Introduce una dirección de correo electrónico válida.",

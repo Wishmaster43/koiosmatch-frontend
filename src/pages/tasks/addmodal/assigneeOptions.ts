@@ -4,28 +4,23 @@
  * labelling rules below are unit-testable without a QueryClient (the hook that
  * feeds it lives next door in `useAssigneeOptions`).
  *
- * PUNT 14/15/16 follow-up (Danny 08-08: "een taak moet ook aan Backoffice
- * toegewezen kunnen worden"). MEASURED against the live API on 09-08, and the
- * honest answer is in two halves:
+ * SCOPE — this file builds the PERSON half only. Assigning a task to an internal
+ * DEPARTMENT is a second, independent axis (`assignee_team_id`, TEAM-1, backend
+ * e0e2277f): it has its own picker in AssignmentCard fed by `@/lib/useTeams`, and
+ * picking a person here deliberately leaves that department standing (measured
+ * 09-08 — a PATCH with only `assignee_id` returns the same `assignee_team`). An
+ * earlier version of this comment claimed `GET /teams` was a 404; it now answers
+ * 200, and the honest gate it justified is gone.
  *
- *  - NOT POSSIBLE — assigning to a DEPARTMENT/TEAM. A task carries exactly one
- *    `assignee_id`, validated as a uuid of a USER of this tenant: posting a role
- *    id came back `422 {"assignee_id":["The assignee id field must be a valid
- *    UUID.","The selected assignee does not belong to this tenant."]}`, there is
- *    no team entity (`GET /teams` → 404) and no `assignee_team_id`/
- *    `assignee_role_id` rule. So this file builds NO department picker — a
- *    control with nowhere to save is exactly the fake affordance §3 forbids.
- *    (The `department` link token on the Koppelingen card is the CUSTOMER's
- *    department, a different thing entirely.)
- *  - POSSIBLE, and done here — "Backoffice" exists today as a tenant ROLE, and
- *    `GET /users` ships every user's roles inline (measured: Laura Yesway →
- *    `roles:[{id:7,name:"backoffice",…}]`, Kelly → manager, Ravi → recruiter).
- *    So the colleague picker GROUPS BY ROLE: rows are ordered by their role
- *    label (same-role colleagues land together, role-less ones last) and each
- *    label carries its role, which is what the shared CreatableSelect's search
- *    box filters on. Typing "backoffice" therefore narrows the list to the
- *    backoffice colleagues — Danny finds "iemand van Backoffice" in one search
- *    without the app pretending a department coupling exists.
+ * A task's `assignee_id` is one uuid of a USER of this tenant (posting a role id
+ * came back `422 {"assignee_id":["…must be a valid UUID.","…does not belong to
+ * this tenant."]}`), so this list contains only real users. It GROUPS THEM BY
+ * ROLE: `GET /users` ships every user's roles inline (measured: Laura Yesway →
+ * `roles:[{id:7,name:"backoffice",…}]`, Kelly → manager, Ravi → recruiter), rows
+ * are ordered by their role label (same-role colleagues land together, role-less
+ * ones last) and each label carries its role, which is what the shared
+ * CreatableSelect's search box filters on. Typing "backoffice" therefore narrows
+ * the list to the backoffice colleagues in one search.
  *
  * The empty value is a REAL first option ("Bureau — niemand toegewezen"), never
  * a placeholder: `assignee_id: null` is a measured, accepted create (201, the

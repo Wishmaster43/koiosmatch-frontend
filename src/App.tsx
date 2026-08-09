@@ -18,6 +18,7 @@ import ErrorBoundary                              from '@/components/ui/ErrorBou
 import Toaster                                    from '@/components/ui/Toaster'
 import LoginPage                                  from './pages/auth/LoginPage'
 import DashboardLayout                            from './components/layout/DashboardLayout'
+import TenantThemed from './components/layout/TenantThemed'
 import './index.css'
 
 // Lazy: only users blocked by tenant-wide MFA enforcement ever load this screen.
@@ -94,9 +95,14 @@ export default function App() {
                   recruiter can drag to a second monitor. */}
               <Route path="/popout/notes/:entity/:id" element={
                 <ProtectedRoute>
-                  <Suspense fallback={<BootLoader />}>
-                    <NotesPopoutPage />
-                  </Suspense>
+                  {/* TenantThemed: a pop-out lives outside DashboardLayout, which is
+                      the only place the brand tokens were applied — without this the
+                      second screen renders in the default blue (Danny 09-08). */}
+                  <TenantThemed>
+                    <Suspense fallback={<BootLoader />}>
+                      <NotesPopoutPage />
+                    </Suspense>
+                  </TenantThemed>
                 </ProtectedRoute>
               } />
               {/* TEKST-POPOUT-1 (Danny 08-08 punt 2): the same second-screen treatment
@@ -105,9 +111,11 @@ export default function App() {
                   that can live on a second monitor. */}
               <Route path="/popout/text/:entity/:id/:field" element={
                 <ProtectedRoute>
-                  <Suspense fallback={<BootLoader />}>
-                    <TextPopoutPage />
-                  </Suspense>
+                  <TenantThemed>
+                    <Suspense fallback={<BootLoader />}>
+                      <TextPopoutPage />
+                    </Suspense>
+                  </TenantThemed>
                 </ProtectedRoute>
               } />
               {/* Legacy alias — the originally shipped candidate-only URL (pre F5-

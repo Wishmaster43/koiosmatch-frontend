@@ -13,6 +13,7 @@ import { buildTaskAdviceInsights } from './taskAiInsights'
 import { useTaskLookups } from '@/context/TaskLookupsContext'
 import type { TaskLookupItem } from '@/context/TaskLookupsContext'
 import { useUsers } from '@/lib/queries'
+import { useTeams } from '@/lib/useTeams'
 import { useLocations } from '@/lib/useLocations'
 import { useDateFormat } from '@/lib/datetime'
 import { initialsOf } from '@/lib/initials'
@@ -61,12 +62,22 @@ function EditControls({ onSave, onCancel, saveLabel, cancelLabel }: { onSave: ()
  * fields around it) — so editing one never discards an in-progress edit on the other.
  * Lookups (type/status/priority) and the assignee come from the tenant lookup +
  * /users; nothing is hardcoded. Owner is always read-only.
+ *
+ * TEAM-1 (Danny 09-08): a RUNNING task can still be hung on an internal
+ * department. "Interne afdeling" rides the same pencil as the assignee — the two
+ * belong together (where it waits · who picked it up) and are saved in one patch —
+ * but they are INDEPENDENT values: picking a person leaves the department standing
+ * (measured: a PATCH with only `assignee_id` returns the same `assignee_team`).
+ * Not to be confused with the CUSTOMER department on the Koppelingen tab
+ * ("Klantafdeling"); this one is the tenant's own Backoffice/Planning/… .
  */
 export default function DetailsTab({ task, onUpdate }: { task: TaskDetail; onUpdate: (patch: Record<string, unknown>) => void }) {
   const { t } = useTranslation('tasks')
   const { formatDate, formatDateTime } = useDateFormat()
   const { statuses, types, priorities } = useTaskLookups()
   const { data: users = [] } = useUsers() as { data?: UserLike[] }
+  // TEAM-1: the tenant's internal departments, same shared hook the create modal uses.
+  const { teams } = useTeams()
   // TASK-LOCATION-READ-1: the tenant's own establishments, same hook every other
   // entity's branch picker uses (candidates/customers/opportunities/vacancies).
   const locations = useLocations()
@@ -82,7 +93,8 @@ export default function DetailsTab({ task, onUpdate }: { task: TaskDetail; onUpd
   // is seeded/saved separately below — it never rides along in this patch).
   const startEdit = () => {
     setDraft({ typeKey: task.typeKey, statusKey: task.statusKey, priorityKey: task.priorityKey,
-      due: task.due || '', dueTime: task.dueTime || '', assigneeId: task.assigneeId ?? '' })
+      due: task.due || '', dueTime: task.dueTime || '', assigneeId: task.assigneeId ?? '',
+      teamId: task.teamId ?? '' })
     setEditing(true)
   }
   const setD = (k: string, v: unknown) => setDraft(d => ({ ...d, [k]: v }))
@@ -93,9 +105,14 @@ export default function DetailsTab({ task, onUpdate }: { task: TaskDetail; onUpd
   const save = () => {
     const sel = users.find(u => String(u.id) === String(draft.assigneeId))
     const assignee = sel ? { name: userName(sel), initials: initialsOf(userName(sel)), color: sel.avatar_color ?? null } : null
+    // TEAM-1: rebuild the department display object alongside its id so the chip
+    // updates optimistically — and carry BOTH axes, so saving a person never
+    // sends a patch that reads as "clear the department".
+    const team = teams.find(x => String(x.value) === String(draft.teamId))
     onUpdate({ typeKey: draft.typeKey, statusKey: draft.statusKey, priorityKey: draft.priorityKey,
       due: draft.due || '', dueTime: draft.dueTime || '',
-      assigneeId: draft.assigneeId || null, assignee })
+      assigneeId: draft.assigneeId || null, assignee,
+      teamId: draft.teamId || null, team: team ? { id: team.value, name: team.label, color: team.color } : null })
     setEditing(false)
   }
 
@@ -107,6 +124,8 @@ export default function DetailsTab({ task, onUpdate }: { task: TaskDetail; onUpd
   // Label only — `icon` holds a lucide NAME, never prefix it as text (2026-07-08).
   const opts = (list: TaskLookupItem[]) => list.map(i => ({ value: i.value, label: i.label }))
   const assigneeOpts = [{ value: '', label: t('bureau') }, ...users.map(u => ({ value: String(u.id), label: userName(u) }))]
+  // TEAM-1: internal-department options; "no department" is the picker's clear (X).
+  const teamOpts = teams.map(x => ({ value: String(x.value), label: x.label }))
   // TASK-LOCATION-READ-1: branch options for the standalone picker below. A direct
   // meta-style field (no separate pencil, mirrors the header's status/priority/
   // assignee pickers) — it rebuilds the display object alongside the id so the
@@ -153,6 +172,13 @@ export default function DetailsTab({ task, onUpdate }: { task: TaskDetail; onUpd
             <Field label={t('details.assignee')}>
               <CreatableSelect value={String(draft.assigneeId)} onChange={v => setD('assigneeId', v)} options={assigneeOpts} allowCreate={false} />
             </Field>
+            {/* TEAM-1: the INTERNAL department (Backoffice, Planning, …) — a second,
+                independent axis next to the person above, never a replacement for
+                it. Searchable + clearable, because "no department" really persists. */}
+            <Field label={t('details.team')}>
+              <CreatableSelect value={String(draft.teamId ?? '')} onChange={v => setD('teamId', v)} options={teamOpts}
+                allowCreate={false} clearable clearLabel={t('details.team')} placeholder={t('details.teamPlaceholder')} />
+            </Field>
           </div>
         ) : (
           <div style={{ borderRadius: 10, overflow: 'hidden', border: '1px solid var(--border)', background: 'var(--surface)', padding: '6px 12px', display: 'flex', flexDirection: 'column', gap: 2 }}>
@@ -172,6 +198,13 @@ export default function DetailsTab({ task, onUpdate }: { task: TaskDetail; onUpd
                   <span style={{ fontSize: 12, color: 'var(--text)' }}>{task.assignee.name}</span>
                 </span>
               ) : <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>{t('bureau')}</span>}
+            </Row>
+            {/* TEAM-1: the department chip — the lookup's own colour in the §4
+                soft-tint (SoftChip), mirroring how status/type/priority read. */}
+            <Row label={t('details.team')}>
+              {task.team
+                ? <SoftChip label={task.team.name} color={task.team.color} />
+                : <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>—</span>}
             </Row>
             <Row label={t('details.owner')}><span style={{ fontSize: 12, color: 'var(--text)' }}>{task.owner?.name || '—'}</span></Row>
           </div>

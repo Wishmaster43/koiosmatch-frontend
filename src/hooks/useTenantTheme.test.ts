@@ -9,7 +9,7 @@
  * — a future tweak to the mixing rule stays free as long as the text stays legible.
  */
 import { describe, it, expect } from 'vitest'
-import { contrastRatio, readableOn } from './useTenantTheme'
+import { contrastRatio, readableOn, readableAccentText } from './useTenantTheme'
 
 // WCAG AA for normal-size text. Anything below this is a finding, not a taste call.
 const AA = 4.5
@@ -74,5 +74,37 @@ describe('accent AS text — why --color-primary-text exists', () => {
     // The token values from src/index.css (--sidebar-muted on --sidebar-bg).
     expect(contrastRatio('#6B7280', '#FFFFFF')).toBeGreaterThanOrEqual(AA)
     expect(contrastRatio('#8A93A3', '#1C1C2E')).toBeGreaterThanOrEqual(AA)
+  })
+})
+
+describe('readableAccentText — the brand AS text, adjusted only as far as needed', () => {
+  const WHITE = '#FFFFFF'
+  const DARK = '#13131F'
+
+  it('leaves a brand that already passes completely alone', () => {
+    expect(readableAccentText(BRANDS.deepBlue, WHITE)).toBe(BRANDS.deepBlue)
+  })
+
+  it('clears AA for every brand, on a light AND a dark surface', () => {
+    for (const [name, brand] of Object.entries(BRANDS)) {
+      expect(contrastRatio(readableAccentText(brand, WHITE), WHITE), `${name} on white`).toBeGreaterThanOrEqual(AA)
+      expect(contrastRatio(readableAccentText(brand, DARK), DARK), `${name} on dark`).toBeGreaterThanOrEqual(AA)
+    }
+  })
+
+  // The muddy-maroon regression (Danny 09-08 "kleuren zijn anders"): the first fix
+  // mixed toward a BLUE-black at a fixed 60%, landing on #a04132 at 6.37:1 — both
+  // off-hue and far past the requirement. Staying near the threshold keeps the
+  // result recognisably the brand colour.
+  it('does not overshoot the requirement', () => {
+    const adjusted = readableAccentText(BRANDS.yeswayOrange, WHITE)
+    expect(contrastRatio(adjusted, WHITE)).toBeLessThan(6.37)
+  })
+
+  // A fixed mix ratio cannot serve every hue: 75% brand + black clears AA for
+  // orange (5.12:1) but leaves yellow at 2.42:1. This is the case that proves it.
+  it('darkens yellow harder than orange, because yellow needs it', () => {
+    expect(contrastRatio(readableAccentText('#ffde00', WHITE), WHITE)).toBeGreaterThanOrEqual(AA)
+    expect(contrastRatio(readableAccentText(BRANDS.yeswayOrange, WHITE), WHITE)).toBeGreaterThanOrEqual(AA)
   })
 })

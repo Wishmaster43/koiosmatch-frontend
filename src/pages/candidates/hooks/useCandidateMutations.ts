@@ -55,14 +55,19 @@ export function useCandidateRecord() {
   // so it — not this hook — knows what to put back; `revert` is an optional callback
   // the caller supplies to restore its own snapshot of the overwritten fields. Kept
   // optional so this stays a drop-in replacement for callers that don't pass one yet.
-  const patchCandidate = (id: Id, patch: Record<string, unknown>, revert?: () => void) => {
+  // Returns a promise that resolves TRUE only when the write actually landed, so a
+  // caller can act on success (the text pop-out closes its window on it). Existing
+  // fire-and-forget callers simply ignore the return value.
+  const patchCandidate = (id: Id, patch: Record<string, unknown>, revert?: () => void): Promise<boolean> => {
     const body = buildCandidatePatch(patch)
-    if (Object.keys(body).length) {
-      api.patch(`/candidates/${id}`, body).catch(err => {
+    if (!Object.keys(body).length) return Promise.resolve(true)
+    return api.patch(`/candidates/${id}`, body)
+      .then(() => true)
+      .catch(err => {
         revert?.()
         notifyError(extractApiError(err, t('common:actionFailed')))
+        return false
       })
-    }
   }
 
   return { fetchDetail, patchCandidate }

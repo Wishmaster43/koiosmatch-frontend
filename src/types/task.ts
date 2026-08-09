@@ -32,6 +32,12 @@ export interface Task {
   priorityColor: string | null
   assigneeId: Id | null
   assignee: { name: string; initials: string; color: string | null } | null
+  // TEAM-1: the INTERNAL department the task waits at (e.g. Backoffice) — NOT the
+  // customer department behind the `department` link token. Non-exclusive with the
+  // assignee above: a person picking the task up leaves this standing, so the
+  // origin is never lost. Optional so pre-existing Task fixtures keep type-checking.
+  teamId?: Id | null
+  team?: { id: Id; name: string; color: string | null } | null
   // TASK-LOCATION-READ-1: the branch (vestiging) the task sits under, id + display
   // name (null = no branch). Optional so pre-existing Task fixtures across the
   // codebase (constructed before this field existed) keep type-checking.
@@ -86,6 +92,10 @@ export interface ApiTask {
   assignee?: { id?: Id; name?: string; avatar_color?: string | null } | null
   assignee_name?: string
   assignee_id?: Id
+  // TEAM-1 (BE e0e2277f, measured 09-08): TaskListResource AND TaskDetailResource
+  // both emit `assignee_team {id,name,color}`; null = no internal department.
+  assignee_team?: { id?: Id; name?: string; color?: string | null } | null
+  assignee_team_id?: Id
   // TASK-LOCATION-READ-1 (BE golf 2a/2b, 2026-08-08): TaskListResource/
   // TaskDetailResource now emit this after `priority`; null = no branch set.
   location?: { id?: Id; name?: string } | null

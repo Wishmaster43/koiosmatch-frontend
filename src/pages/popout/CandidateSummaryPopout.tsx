@@ -28,8 +28,8 @@ export default function CandidateSummaryPopout({ id }: { id: string | undefined 
   // Persist through the drawer's own patch path; `revert` runs on a rejected
   // write so neither window keeps claiming the text was saved.
   const persist = useCallback((html: string, revert: () => void) => {
-    if (!id) return
-    patchCandidate(id, { summary: html }, revert)
+    if (!id) return Promise.resolve(false)
+    return patchCandidate(id, { summary: html }, revert)
   }, [id, patchCandidate])
 
   const { text, dirty, change, save } = useTextPopoutDraft({

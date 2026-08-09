@@ -3,12 +3,14 @@
  * "Toewijzen aan" picker (Danny 08-08: "een taak moet ook aan Backoffice
  * toegewezen kunnen worden").
  *
- * Assigning to a DEPARTMENT is not buildable — measured 09-08: `assignee_id` is
- * validated as a uuid of a tenant USER (a role id answers 422) and `GET /teams`
- * is a 404. "Backoffice" DOES exist as a tenant role, and `GET /users` ships
- * each user's roles inline, so the honest substitute is a colleague picker
- * GROUPED PER ROLE whose labels carry that role. These tests pin exactly that,
- * plus the explicit "Bureau" (nobody) row.
+ * This is the PERSON half only. Assigning to an internal DEPARTMENT is a second,
+ * independent axis (`assignee_team_id`, TEAM-1) with its own picker and its own
+ * tests in AddTaskModal.test.tsx — an earlier version of this comment said
+ * `GET /teams` was a 404; it answers 200 since backend e0e2277f. What stays true
+ * here: `assignee_id` is validated as a uuid of a tenant USER (a role id answers
+ * 422), and `GET /users` ships each user's roles inline, so this list is a
+ * colleague picker GROUPED PER ROLE whose labels carry that role. These tests pin
+ * exactly that, plus the explicit "Bureau" (nobody) row.
  *
  * i18n is INJECTED into the builder, so this file asserts real strings instead
  * of the echoed keys an uninitialised i18next would produce — the grouping and

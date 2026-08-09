@@ -20,7 +20,8 @@
     "links": "Lien",
     "assignee": "Assignée à",
     "due": "Échéance",
-    "created": "Créé"
+    "created": "Créé",
+    "team": "Service"
   },
   "kpi": {
     "open": "Ouvertes",
@@ -70,7 +71,9 @@
     "owner": "Responsable",
     "description": "Description",
     "location": "Agence",
-    "locationPlaceholder": "Choisir une agence"
+    "locationPlaceholder": "Choisir une agence",
+    "team": "Service",
+    "teamPlaceholder": "Choisir un service"
   },
   "comments": {
     "send": "Publier"
@@ -139,7 +142,12 @@
     "assigneeUnassignedHint": "Personne n'est responsable : la tâche reste à l'agence jusqu'à ce qu'un collègue la prenne en charge.",
     "assigneeWithRole": "{{name}} · {{role}}",
     "assigneeEmpty": "Aucun collègue à qui assigner pour l'instant — seule l'agence peut être choisie.",
-    "assigneeLoadError": "Impossible de charger les collègues."
+    "assigneeLoadError": "Impossible de charger les collègues.",
+    "team": "Service",
+    "teamPlaceholder": "Choisir un service",
+    "teamHint": "Où la tâche attend, par exemple le Backoffice. Le service reste en place dès qu'un collègue prend la tâche en charge.",
+    "teamEmpty": "Aucun service interne n'a encore été configuré.",
+    "teamLoadError": "Impossible de charger les services internes."
   },
   "bulk": {
     "selected": "{{count}} sélectionné(e)s",

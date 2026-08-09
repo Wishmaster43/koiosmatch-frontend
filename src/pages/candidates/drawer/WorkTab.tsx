@@ -19,6 +19,7 @@ import { notifyError, notifySuccess } from '@/lib/notify'
 import { extractApiError } from '@/lib/extractApiError'
 import { useAuth } from '@/context/AuthContext'
 import { sectionBlock } from './constants'
+import { APPLICATION_COL_STATUS, APPLICATION_COL_DATE, APPLICATION_COL_ACTIONS } from './applicationRowColumns'
 import type { Candidate } from '@/types/candidate'
 import type { Id, LookupOption } from '@/types/common'
 
@@ -211,13 +212,17 @@ export default function WorkTab({ c, onRefresh, initialSubTab }: { c: Candidate;
         <div style={sectionBlock}>
         <div style={{ border: '1px solid var(--border)', borderRadius: 8, overflow: 'hidden' }}>
           {/* Column headers (Danny live review: "Status en datum hebben geen
-              kopje?") — aligned with the row's own layout below: the vacancy
-              label grows, the stage pill and the applied-on date each get a
-              fixed-width header cell over their own column. */}
+              kopje?"; Danny 09-08: the widths now come from the SAME shared
+              constants ApplicationRow reads for its own cells — see
+              applicationRowColumns.ts — so a header can never again float
+              above the wrong column. The trailing cell stays empty (Danny
+              09-08: "een lege kop boven de actiekolom") since pencil/unlink/
+              external-link/chevron have no single label of their own. */}
           <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 12px', background: 'var(--bg)', borderBottom: '1px solid var(--border)', fontSize: 11, fontWeight: 600, color: 'var(--text-muted)' }}>
             <span style={{ flex: 1, minWidth: 0 }}>{t('work.vacancy')}</span>
-            <span style={{ width: 90, flexShrink: 0 }}>{t('work.colStatus')}</span>
-            <span style={{ width: 64, flexShrink: 0, textAlign: 'right' }}>{t('work.colDate')}</span>
+            <span style={APPLICATION_COL_STATUS}>{t('work.colStatus')}</span>
+            <span style={APPLICATION_COL_DATE}>{t('work.colDate')}</span>
+            <span aria-hidden="true" data-testid="app-col-actions-header" style={APPLICATION_COL_ACTIONS} />
           </div>
           {slice.length === 0
             ? <div style={{ padding: '20px', textAlign: 'center', fontSize: 12, color: 'var(--text-muted)' }}>{t('sections.applicationsEmpty')}</div>

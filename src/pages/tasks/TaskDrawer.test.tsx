@@ -33,6 +33,9 @@ vi.mock('@/lib/queries', () => ({ useUsers: () => ({ data: [] }) }))
 // the tenant's branches via react-query's useLocations — mock it out for the same
 // reason useUsers above is mocked (no QueryClientProvider in this render harness).
 vi.mock('@/lib/useLocations', () => ({ useLocations: () => [] }))
+// TEAM-1: DetailsTab also reads the tenant's INTERNAL departments through
+// react-query — mocked for the same no-QueryClientProvider reason as the two above.
+vi.mock('@/lib/useTeams', () => ({ useTeams: () => ({ teams: [], loading: false, error: false, retry: vi.fn() }) }))
 vi.mock('@/lib/useCustomFields', () => ({ useCustomFields: () => ({ fields: [] }) }))
 vi.mock('@/lib/api', () => ({ default: { get: vi.fn(() => new Promise(() => {})) }, unwrap: (r: unknown) => r, unwrapList: () => ({ rows: [] }) }))
 

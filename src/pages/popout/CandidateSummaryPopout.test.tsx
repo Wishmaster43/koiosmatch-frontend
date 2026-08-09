@@ -66,14 +66,34 @@ describe('CandidateSummaryPopout', () => {
     expect(screen.getByTestId('text-popout-save')).toBeDisabled()
   })
 
-  it('PATCHes /candidates/{id} with the edited summary — the real request', async () => {
+  // Danny 09-08: "bij opslaan van pop-out sluit het venster niet". Saving now sends
+  // the real PATCH and then closes the window — the assertion is the CLOSE, not a
+  // disabled button (the button is gone with the window by then).
+  it('PATCHes /candidates/{id} with the edited summary and then closes the window', async () => {
     const user = userEvent.setup()
+    const close = vi.spyOn(window, 'close').mockImplementation(() => {})
     liteState.candidate = { id: 'c1', name: 'Lieke Blom', initials: 'LB', summary: 'a' }
     render(<CandidateSummaryPopout id="c1" />)
     await user.type(screen.getByLabelText('editor'), 'b')
     expect(screen.getByTestId('text-popout-save')).toBeEnabled()
     await user.click(screen.getByTestId('text-popout-save'))
     expect(api.patch).toHaveBeenCalledWith('/candidates/c1', { summary: 'ab' })
-    expect(screen.getByTestId('text-popout-save')).toBeDisabled()
+    expect(close).toHaveBeenCalled()
+    close.mockRestore()
+  })
+
+  // The other half of the same rule: a REJECTED write must keep the window open,
+  // or the recruiter's text disappears with it.
+  it('keeps the window open when the server refuses the write', async () => {
+    const user = userEvent.setup()
+    const close = vi.spyOn(window, 'close').mockImplementation(() => {})
+    vi.mocked(api.patch).mockRejectedValueOnce({ response: { status: 422 } })
+    liteState.candidate = { id: 'c1', name: 'Lieke Blom', initials: 'LB', summary: 'a' }
+    render(<CandidateSummaryPopout id="c1" />)
+    await user.type(screen.getByLabelText('editor'), 'b')
+    await user.click(screen.getByTestId('text-popout-save'))
+    expect(api.patch).toHaveBeenCalled()
+    expect(close).not.toHaveBeenCalled()
+    close.mockRestore()
   })
 })

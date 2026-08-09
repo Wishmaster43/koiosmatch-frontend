@@ -34,6 +34,30 @@ describe('mapTask', () => {
     expect(row.statusIsDone).toBe(false)
   })
 
+  // TEAM-1: `assignee_team` is the INTERNAL department the task waits at, an axis
+  // of its own next to the assignee — a row can carry both, either, or neither.
+  it('maps assignee_team to the team pair, independently of the assignee', () => {
+    const both = mapTask({
+      id: 't4', title: 'Contract verwerken',
+      assignee: { id: 'u1', name: 'Kelly Yesway' },
+      // eslint-disable-next-line no-restricted-syntax -- API fixture colour (DATA, mirrors the live row)
+      assignee_team: { id: 'team-1', name: 'Backoffice', color: '#2563EB' },
+    })
+    expect(both.assigneeId).toBe('u1')
+    // eslint-disable-next-line no-restricted-syntax -- API fixture colour (DATA, mirrors the live row)
+    expect(both).toMatchObject({ teamId: 'team-1', team: { id: 'team-1', name: 'Backoffice', color: '#2563EB' } })
+
+    // "Openstaand bij Backoffice" — department set, nobody assigned.
+    const queued = mapTask({ id: 't5', title: 'Wacht op backoffice', assignee_team: { id: 'team-1', name: 'Backoffice' } })
+    expect(queued.assignee).toBeNull()
+    expect(queued).toMatchObject({ teamId: 'team-1', team: { id: 'team-1', name: 'Backoffice', color: null } })
+
+    // No department at all stays an honest null pair, never a fabricated row.
+    const none = mapTask({ id: 't6', title: 'Losse taak' })
+    expect(none.teamId).toBeNull()
+    expect(none.team).toBeNull()
+  })
+
   it('marks done from completed_at when the status object is absent', () => {
     const row = mapTask({ id: 't3', title: 'Klaar', completed_at: '2026-06-20' })
     expect(row.statusIsDone).toBe(true)

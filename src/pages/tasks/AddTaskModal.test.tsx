@@ -66,6 +66,10 @@ const TASK_DETAIL_RAW = {
   // eslint-disable-next-line no-restricted-syntax -- test fixture hex, not a UI colour
   priority: { value: 'normal', label: 'Normaal', color: '#DDA071' },
   assignee: { id: 'user-9', name: 'Danny' },
+  // TEAM-1: the task ALSO waits at an internal department — the two axes coexist
+  // on one record, which is precisely what the edit path must not flatten.
+  // eslint-disable-next-line no-restricted-syntax -- API fixture colour (DATA, mirrors the live row)
+  assignee_team: { id: 'team-1', name: 'Backoffice', color: '#2563EB' },
   due_date: '2026-07-25',
   due_time: '14:00',
   description: '<p>Bespreek beschikbaarheid</p>',
@@ -134,6 +138,23 @@ const ORIGINAL_USERS = usersState.rows
 vi.mock('@/lib/queries', () => ({
   useUsers: () => ({ data: usersState.rows, isError: usersState.isError, refetch: usersState.refetch }),
 }))
+// TEAM-1: the internal-department lookup behind the second picker on the
+// Toewijzing card. Mutable + STABLE by default, same reasons as `usersState`
+// above (a fresh literal per call would rebuild the option list every render).
+const { teamsState } = vi.hoisted(() => ({
+  teamsState: {
+    rows: [
+      { value: 'team-1', label: 'Backoffice', color: null },
+      { value: 'team-2', label: 'Planning', color: null },
+    ] as Array<{ value: string; label: string; color: string | null }>,
+    isError: false,
+    retry: vi.fn(),
+  },
+}))
+const ORIGINAL_TEAMS = teamsState.rows
+vi.mock('@/lib/useTeams', () => ({
+  useTeams: () => ({ teams: teamsState.rows, loading: false, error: teamsState.isError, retry: teamsState.retry }),
+}))
 vi.mock('@/lib/notify', () => ({ notifyError: vi.fn(), notifySuccess: vi.fn() }))
 // TASK-ASSIGNEE-DEFAULT-1: `authState.user` is mutable (vi.hoisted, mirrors
 // AddCustomerModal.test.tsx's identical ACCOUNTMANAGER-DEFAULT-1 pattern) so the
@@ -177,6 +198,8 @@ beforeEach(() => {
   lk.types = ORIGINAL_TYPES
   usersState.rows = ORIGINAL_USERS
   usersState.isError = false
+  teamsState.rows = ORIGINAL_TEAMS
+  teamsState.isError = false
   apiState.candidatesFail = false
 })
 // Blanket safety net for the fixed-clock tests below: if one of them fails/throws
@@ -207,6 +230,9 @@ describe('AddTaskModal · edit mode prefill + PATCH (Danny 20-07)', () => {
     // button's own visible text) — find by label, assert the picked value via text.
     expect(screen.getByRole('button', { name: /modal\.type/ })).toHaveTextContent('Belafspraak')
     expect(screen.getByRole('button', { name: /modal\.assignee/ })).toHaveTextContent('Danny')
+    // TEAM-1: the internal department prefills as its own picker value, next to
+    // the person — never folded into the assignee field.
+    expect(screen.getByRole('button', { name: /modal\.team/ })).toHaveTextContent('Backoffice')
 
     await user.click(screen.getByRole('button', { name: 'modal.save' }))
 
@@ -217,6 +243,7 @@ describe('AddTaskModal · edit mode prefill + PATCH (Danny 20-07)', () => {
       status_id: 'status-uuid-1',
       priority_id: 'prio-uuid-1',
       assignee_id: 'user-9',
+      assignee_team_id: 'team-1',
       due_date: '2026-07-25',
       due_time: '14:00',
       description: '<p>Bespreek beschikbaarheid</p>',
@@ -256,7 +283,7 @@ describe('AddTaskModal · create mode POSTs the real uuid FKs (TASKTYPE-ID-1)', 
     const api = (await import('@/lib/api')).default
     expect(api.post).toHaveBeenCalledWith('/tasks', {
       title: 'Nieuwe taak', type_id: 'type-uuid-1', status_id: 'status-uuid-1', priority_id: 'prio-uuid-1',
-      assignee_id: null, due_date: '2026-08-03', due_time: '11:00', description: null, links: [],
+      assignee_id: null, assignee_team_id: null, due_date: '2026-08-03', due_time: '11:00', description: null, links: [],
     })
   })
 
@@ -322,15 +349,14 @@ describe('AddTaskModal · assignee defaults to the logged-in user (TASK-ASSIGNEE
 })
 
 /**
- * ASSIGN-TO-BACKOFFICE (Danny 08-08, closing 14/15/16). Assigning to a
- * department/team is NOT buildable — measured 09-08: `assignee_id` is a tenant
- * USER uuid (a role id answers 422) and `GET /teams` → 404. So these tests pin
- * the honest substitute: one searchable colleague list (role-grouped, see
- * addmodal/assigneeOptions.test.ts) and "Bureau" as a real, choosable option
- * that lands as `assignee_id: null` — a measured 201, not a silent empty value.
+ * The PERSON axis. `assignee_id` is one tenant USER uuid (a role id answers 422),
+ * so this list contains only real colleagues — the internal DEPARTMENT lives in
+ * its own picker and its own describe block below (TEAM-1), never as a smuggled
+ * row in here. "Bureau" is a real, choosable option that lands as
+ * `assignee_id: null` — a measured 201, not a silent empty value.
  */
 describe('AddTaskModal · assigning to a colleague, with "Bureau" as a real choice', () => {
-  it('offers exactly the bureau row plus one row per colleague — never a team/department row that could not be saved', async () => {
+  it('offers exactly the bureau row plus one row per colleague — never a department row in the PERSON list', async () => {
     usersState.rows = [{ id: 'u-1', name: 'Laura Yesway' }, { id: 'u-2', name: 'Kelly Yesway' }]
     const user = userEvent.setup()
     render(<AddTaskModal onClose={noop} onCreated={noop} />)
@@ -339,8 +365,8 @@ describe('AddTaskModal · assigning to a colleague, with "Bureau" as a real choi
     const bureau = screen.getByRole('button', { name: 'modal.assigneeUnassigned' })
     expect(screen.getByRole('button', { name: 'Laura Yesway' })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Kelly Yesway' })).toBeInTheDocument()
-    // Structural count, not an absence-of-a-string check: an invented "team"/
-    // "afdeling" row would show up here as a fourth option.
+    // Structural count, not an absence-of-a-string check: a department row
+    // smuggled into the PERSON list would show up here as a fourth option.
     expect(bureau.parentElement!.querySelectorAll('button')).toHaveLength(3)
   })
 
@@ -409,6 +435,122 @@ describe('AddTaskModal · assigning to a colleague, with "Bureau" as a real choi
     expect(screen.getByRole('alert')).toHaveTextContent('modal.assigneeLoadError')
     await user.click(screen.getByRole('button', { name: 'common:error.retry' }))
     expect(usersState.refetch).toHaveBeenCalled()
+  })
+})
+
+/**
+ * TEAM-1 (Danny 09-08: "een nieuwe taak moet ook op een afdeling zoals Backoffice
+ * kunnen"). The internal DEPARTMENT is a second axis NEXT TO the person, and the
+ * agreement that breaks most quietly is the non-exclusivity: `assignee_team_id`
+ * says where the task waits, `assignee_id` says who picked it up, and setting the
+ * person must LEAVE the department standing (measured 09-08 — a PATCH carrying
+ * only `assignee_id` comes back with the same `assignee_team`). These tests assert
+ * the REQUEST on both submit paths (§13), because that is the seam where a
+ * "helpful" clear-the-other-field would land.
+ */
+describe('AddTaskModal · internal department (TEAM-1), non-exclusive with the assignee', () => {
+  it('POSTs the picked department alongside the assignee — both axes on one create', async () => {
+    authState.user = { id: 'user-9', name: 'Danny' }
+    usersState.rows = [{ id: 'user-9', name: 'Danny' }]
+    const user = userEvent.setup()
+    render(<AddTaskModal onClose={noop} onCreated={noop} />)
+
+    await user.click(screen.getByRole('button', { name: /modal\.team/ }))
+    await user.click(screen.getByRole('button', { name: 'Backoffice' }))
+    await user.type(screen.getByPlaceholderText('modal.titlePlaceholder'), 'Contract verwerken')
+    await user.click(screen.getByRole('button', { name: 'modal.create' }))
+
+    const api = (await import('@/lib/api')).default
+    expect(api.post).toHaveBeenCalledWith('/tasks', expect.objectContaining({
+      assignee_team_id: 'team-1', assignee_id: 'user-9',
+    }))
+  })
+
+  it('creates "openstaand bij Backoffice" — department set, person deliberately on the bureau', async () => {
+    authState.user = { id: 'user-9', name: 'Danny' }
+    usersState.rows = [{ id: 'user-9', name: 'Danny' }]
+    const user = userEvent.setup()
+    render(<AddTaskModal onClose={noop} onCreated={noop} />)
+
+    await user.click(screen.getByRole('button', { name: /modal\.team/ }))
+    await user.click(screen.getByRole('button', { name: 'Backoffice' }))
+    await user.click(screen.getByRole('button', { name: /modal\.assignee/ }))
+    await user.click(screen.getByRole('button', { name: 'modal.assigneeUnassigned' }))
+    await user.type(screen.getByPlaceholderText('modal.titlePlaceholder'), 'Wacht op backoffice')
+    await user.click(screen.getByRole('button', { name: 'modal.create' }))
+
+    const api = (await import('@/lib/api')).default
+    expect(api.post).toHaveBeenCalledWith('/tasks', expect.objectContaining({
+      assignee_team_id: 'team-1', assignee_id: null,
+    }))
+  })
+
+  // THE regression this feature exists for: a colleague picking up a queued task
+  // must not erase where it came from. Edit mode, department already set, only the
+  // person is changed — the PATCH must still carry the ORIGINAL department.
+  it('assigning a person to an existing task LEAVES the department standing', async () => {
+    usersState.rows = [{ id: 'user-9', name: 'Danny' }, { id: 'u-kelly', name: 'Kelly Yesway' }]
+    const user = userEvent.setup()
+    render(<AddTaskModal editId={EDIT_ID} onClose={noop} onSaved={noop} />)
+
+    await screen.findByDisplayValue('Bel kandidaat terug')
+    await user.click(screen.getByRole('button', { name: /modal\.assignee/ }))
+    await user.click(screen.getByRole('button', { name: 'Kelly Yesway' }))
+    await user.click(screen.getByRole('button', { name: 'modal.save' }))
+
+    const api = (await import('@/lib/api')).default
+    expect(api.patch).toHaveBeenCalledWith(`/tasks/${EDIT_ID}`, expect.objectContaining({
+      assignee_id: 'u-kelly', assignee_team_id: 'team-1',
+    }))
+  })
+
+  it('clearing the department PATCHes an explicit null — an omitted key could never clear it', async () => {
+    const user = userEvent.setup()
+    const { container } = render(<AddTaskModal editId={EDIT_ID} onClose={noop} onSaved={noop} />)
+
+    await screen.findByDisplayValue('Bel kandidaat terug')
+    // The clear affordance is CreatableSelect's opt-in X, rendered next to the
+    // trigger whose id ends in -clear (mirrors DetailsTab's own branch-clear test).
+    const clearBtn = container.querySelector('button[id$="-clear"]')
+    expect(clearBtn).toBeTruthy()
+    await user.click(clearBtn!)
+    await user.click(screen.getByRole('button', { name: 'modal.save' }))
+
+    const api = (await import('@/lib/api')).default
+    expect(api.patch).toHaveBeenCalledWith(`/tasks/${EDIT_ID}`, expect.objectContaining({
+      assignee_team_id: null, assignee_id: 'user-9',
+    }))
+  })
+
+  it('filters the department list from the picker\'s own search box (never a native select)', async () => {
+    const user = userEvent.setup()
+    render(<AddTaskModal onClose={noop} onCreated={noop} />)
+
+    await user.click(screen.getByRole('button', { name: /modal\.team/ }))
+    // With a placeholder set, CreatableSelect names its search box after it
+    // (shared component behaviour) — hence the placeholder key, not the label key.
+    await user.type(screen.getByRole('textbox', { name: 'modal.teamPlaceholder' }), 'Plan')
+
+    expect(screen.getByRole('button', { name: 'Planning' })).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Backoffice' })).toBeNull()
+  })
+
+  it('says so honestly when the tenant configured no departments yet', () => {
+    teamsState.rows = []
+    render(<AddTaskModal onClose={noop} onCreated={noop} />)
+
+    expect(screen.getByText('modal.teamEmpty')).toBeInTheDocument()
+  })
+
+  it('surfaces a failed department load with a retry, instead of a silently empty picker', async () => {
+    teamsState.isError = true
+    teamsState.rows = []
+    const user = userEvent.setup()
+    render(<AddTaskModal onClose={noop} onCreated={noop} />)
+
+    expect(screen.getByRole('alert')).toHaveTextContent('modal.teamLoadError')
+    await user.click(screen.getByRole('button', { name: 'common:error.retry' }))
+    expect(teamsState.retry).toHaveBeenCalled()
   })
 })
 

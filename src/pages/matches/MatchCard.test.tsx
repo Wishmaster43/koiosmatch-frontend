@@ -128,3 +128,22 @@ describe('MatchCard · header affordances', () => {
     expect(screen.queryByTitle(cm('edit'))).toBeNull()
   })
 })
+
+/**
+ * flatRow (Danny 09-08, candidate drawer consistency sweep: "achtergrondkleur
+ * van Match en sollicitatie kloppen niet"). Opt-in and OFF by default so the
+ * customer drawer's own MatchesTab (never passes `flatRow`) renders exactly
+ * the tinted header it always has — only a caller that explicitly opts in
+ * gets the flat surface background.
+ */
+describe('MatchCard · flatRow (Danny 09-08)', () => {
+  it('defaults to the tinted --bg header (every OTHER caller stays unchanged)', () => {
+    render(<MatchCard {...base} />)
+    expect(screen.getByTestId('match-card-header')).toHaveStyle({ background: 'var(--bg)' })
+  })
+
+  it('renders the plain surface background when flatRow is set', () => {
+    render(<MatchCard {...base} flatRow />)
+    expect(screen.getByTestId('match-card-header')).toHaveStyle({ background: 'var(--surface)' })
+  })
+})

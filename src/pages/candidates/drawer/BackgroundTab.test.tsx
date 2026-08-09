@@ -373,6 +373,75 @@ describe('BackgroundTab · DOC-1-EIGENAAR-1 the picker only offers still-free do
 })
 
 /**
+ * REF-ERVARING-1 (Danny 08-08 punt 4) — the reference ↔ work-experience link, now
+ * that the backend carries it (commit d6eb75cb). MEASURED live 09-08 against
+ * koiosmatch-api.test (X-Tenant: yesway): `PATCH /candidates/{c}/references/{r}`
+ * with a `work_experience_id` of THIS candidate's own experience answers 200 and a
+ * fresh GET echoes the id plus a nested `work_experience`; another candidate's
+ * experience is rejected 422 (IDOR-safe); `null` unlinks. The full probe log lives
+ * in referenceExperienceLink.tsx's header — every probe row was deleted again.
+ *
+ * §13: these assert the REQUEST (route + body), not merely that a callback fired —
+ * ReferencesTab.test.tsx owns the presentation side.
+ */
+describe('BackgroundTab · REF-ERVARING-1 work_experience_id round-trips through the reference PATCH', () => {
+  // The picker's visible name is its (still unreported) i18n key until the manager
+  // lands it in the locale files — match either form (§5).
+  const PICKER = /workExperience|Werkervaring/i
+  const experiences = [{ id: 'exp-1', title: 'Helpende', company: 'Zorggroep X', start: '2023-08-06', end: null, current: true }]
+
+  beforeEach(() => {
+    vi.mocked(api.patch).mockReset()
+    vi.mocked(api.patch).mockResolvedValue({ data: { data: {} } })
+  })
+
+  it('linking a reference to a work experience PATCHes the reference route with the experience id', async () => {
+    const user = userEvent.setup()
+    const c = {
+      ...candidate(),
+      experiences,
+      references: [{ id: 'r1', first_name: 'Jan', last_name: 'Jansen' }],
+    } as unknown as Candidate
+    render(<BackgroundTab c={c} />)
+    await user.click(screen.getByRole('tab', { name: 'Referenties' }))
+    await user.click(screen.getByTitle('Bewerken'))
+    await user.click(screen.getByRole('button', { name: PICKER }))
+    await user.click(await screen.findByRole('button', { name: 'Zorggroep X · Helpende · 06-08-2023 – heden' }))
+    await user.click(screen.getByTitle('Opslaan'))
+    expect(api.patch).toHaveBeenCalledWith('/candidates/1/references/r1', expect.objectContaining({ work_experience_id: 'exp-1' }), { quietStatuses: [422] })
+  })
+
+  it('unlinking (the picker\'s own clear affordance) PATCHes work_experience_id: null, never an empty string', async () => {
+    const user = userEvent.setup()
+    const c = {
+      ...candidate(),
+      experiences,
+      references: [{ id: 'r1', first_name: 'Jan', last_name: 'Jansen', work_experience_id: 'exp-1' }],
+    } as unknown as Candidate
+    render(<BackgroundTab c={c} />)
+    await user.click(screen.getByRole('tab', { name: 'Referenties' }))
+    await user.click(screen.getByTitle('Bewerken'))
+    await user.click(screen.getByTitle('Wissen'))
+    await user.click(screen.getByTitle('Opslaan'))
+    expect(api.patch).toHaveBeenCalledWith('/candidates/1/references/r1', expect.objectContaining({ work_experience_id: null }), { quietStatuses: [422] })
+  })
+
+  it('sends work_experience_id: null for a reference that was never linked (no empty string reaches the API)', async () => {
+    const user = userEvent.setup()
+    const c = {
+      ...candidate(),
+      experiences,
+      references: [{ id: 'r1', first_name: 'Jan', last_name: 'Jansen' }],
+    } as unknown as Candidate
+    render(<BackgroundTab c={c} />)
+    await user.click(screen.getByRole('tab', { name: 'Referenties' }))
+    await user.click(screen.getByTitle('Bewerken'))
+    await user.click(screen.getByTitle('Opslaan'))
+    expect(api.patch).toHaveBeenCalledWith('/candidates/1/references/r1', expect.objectContaining({ work_experience_id: null }), { quietStatuses: [422] })
+  })
+})
+
+/**
  * DOC-1-EIGENAAR-1 punt 5 (het vangnet): even with a correct picker the 422 can still
  * happen (a second tab, a stale list). The recruiter must then read the SERVER's own
  * reason, never a generic "actie mislukt" — and api.ts's dev diagnostic toast is

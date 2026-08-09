@@ -25,6 +25,19 @@ vi.mock('@/lib/queries', () => ({ useUsers: () => ({ data: [{ id: 'u1', name: 'A
 vi.mock('@/lib/useLocations', () => ({
   useLocations: () => [{ value: 'loc-1', label: 'Vestiging Noord' }, { value: 'loc-2', label: 'Vestiging Zuid' }],
 }))
+// TEAM-1: the tenant's INTERNAL departments (Backoffice, Planning, …) — the axis
+// that says where a task waits. Not the customer department behind the
+// `department` LINK token, which lives on the Koppelingen tab.
+vi.mock('@/lib/useTeams', () => ({
+  useTeams: () => ({
+    teams: [
+      // eslint-disable-next-line no-restricted-syntax -- test fixture lookup colour (DATA, not UI styling)
+      { value: 'team-1', label: 'Backoffice', color: '#2563EB' },
+      { value: 'team-2', label: 'Planning', color: null },
+    ],
+    loading: false, error: false, retry: vi.fn(),
+  }),
+}))
 // Same convention as candidates/drawer/ProfileTab.test.tsx: the rich editor and its
 // sanitised-HTML reader are mocked out — these tests assert the SAVE REQUEST, not
 // the Tiptap widget itself.
@@ -43,6 +56,8 @@ const task: TaskDetail = {
   comments: [], activity: [], customFields: {}, archived: false, archivedAt: null,
   // TASK-LOCATION-READ-1: no branch by default; the picker's own tests below set one.
   locationId: null, location: null,
+  // TEAM-1: no internal department by default; the team block below sets one.
+  teamId: null, team: null,
 }
 
 // Danny 28-07 drill-down audit: the fields block (type/status/priority/due/assignee)
@@ -66,6 +81,9 @@ describe('tasks DetailsTab — split fields/description edit sections', () => {
     expect(onUpdate).toHaveBeenCalledWith({
       typeKey: 'call', statusKey: 'todo', priorityKey: 'normal',
       due: '2026-08-01', dueTime: '', assigneeId: null, assignee: null,
+      // TEAM-1: the department rides the SAME pencil as the person and is always
+      // part of this patch, so neither axis can silently drop the other.
+      teamId: null, team: null,
     })
   })
 
@@ -209,6 +227,81 @@ describe('tasks DetailsTab — branch/vestiging picker (TASK-LOCATION-READ-1)', 
 
   it('shows the dash placeholder on an archived task with no branch', () => {
     render(<DetailsTab task={{ ...task, archived: true }} onUpdate={vi.fn()} />)
-    expect(screen.getByText('—')).toBeInTheDocument()
+    // Scoped to the branch ROW: several optional fields render their own dash now
+    // (TEAM-1 added the department row), so a bare getByText('—') is ambiguous.
+    const branchRow = screen.getByText(i18n.t('tasks:details.location')).parentElement
+    expect(branchRow).toHaveTextContent('—')
+  })
+})
+
+/**
+ * TEAM-1 (Danny 09-08): a RUNNING task can still be hung on an internal
+ * department. The picker rides the fields pencil next to the assignee, and the
+ * read view shows the department as a soft chip in the lookup's own colour.
+ * The rule these tests defend: the two axes are NON-EXCLUSIVE — picking a person
+ * leaves the department standing, and the save carries both every time.
+ */
+describe('tasks DetailsTab — internal department (TEAM-1)', () => {
+  const withTeam: TaskDetail = { ...task, teamId: 'team-1', team: { id: 'team-1', name: 'Backoffice', color: null } }
+
+  it('shows the department as a chip in the read view, and a dash when there is none', () => {
+    const { rerender } = render(<DetailsTab task={withTeam} onUpdate={vi.fn()} />)
+    expect(screen.getByText('Backoffice')).toBeInTheDocument()
+
+    rerender(<DetailsTab task={task} onUpdate={vi.fn()} />)
+    const teamRow = screen.getByText(i18n.t('tasks:details.team')).parentElement
+    expect(teamRow).toHaveTextContent('—')
+  })
+
+  it('hangs a running task on a department — the patch carries teamId + the chip data', () => {
+    const onUpdate = vi.fn()
+    render(<DetailsTab task={task} onUpdate={onUpdate} />)
+    fireEvent.click(screen.getByTitle('Taakdetails'))
+    fireEvent.click(screen.getByRole('button', { name: i18n.t('tasks:details.team') }))
+    fireEvent.click(screen.getByRole('button', { name: 'Planning' }))
+    fireEvent.click(screen.getByTitle('Plaatsen'))
+
+    expect(onUpdate).toHaveBeenCalledWith(expect.objectContaining({
+      teamId: 'team-2', team: { id: 'team-2', name: 'Planning', color: null },
+    }))
+  })
+
+  // The agreement that breaks most quietly: someone picks the queued task up and
+  // the department it came from silently disappears. It must survive.
+  it('assigning a person LEAVES the department standing in the same patch', () => {
+    const onUpdate = vi.fn()
+    render(<DetailsTab task={withTeam} onUpdate={onUpdate} />)
+    fireEvent.click(screen.getByTitle('Taakdetails'))
+    fireEvent.click(screen.getByRole('button', { name: /Toegewezen aan/ }))
+    fireEvent.click(screen.getByRole('button', { name: 'Anna' }))
+    fireEvent.click(screen.getByTitle('Plaatsen'))
+
+    // The chip data is rebuilt from the LOOKUP (its colour is the authoritative
+    // one), exactly like the assignee object next to it — same idiom, same reason.
+    expect(onUpdate).toHaveBeenCalledWith(expect.objectContaining({
+      assigneeId: 'u1',
+      // eslint-disable-next-line no-restricted-syntax -- test fixture lookup colour (DATA, not UI styling)
+      teamId: 'team-1', team: { id: 'team-1', name: 'Backoffice', color: '#2563EB' },
+    }))
+  })
+
+  it('clearing the department sends an explicit null pair, never an omitted key', () => {
+    const onUpdate = vi.fn()
+    const { container } = render(<DetailsTab task={withTeam} onUpdate={onUpdate} />)
+    fireEvent.click(screen.getByTitle('Taakdetails'))
+    // CreatableSelect's opt-in clear (X); in edit mode the department picker is the
+    // only clearable one on screen (the branch picker lives in the read view).
+    const clearBtn = container.querySelector('button[id$="-clear"]')
+    expect(clearBtn).toBeTruthy()
+    fireEvent.click(clearBtn!)
+    fireEvent.click(screen.getByTitle('Plaatsen'))
+
+    expect(onUpdate).toHaveBeenCalledWith(expect.objectContaining({ teamId: null, team: null }))
+  })
+
+  it('is a searchable picker, never a native <select>', () => {
+    render(<DetailsTab task={task} onUpdate={vi.fn()} />)
+    fireEvent.click(screen.getByTitle('Taakdetails'))
+    expect(screen.queryByLabelText(i18n.t('tasks:details.team'), { selector: 'select' })).toBeNull()
   })
 })

@@ -480,7 +480,8 @@
     "referenceFunction": "Function",
     "mobile": "Mobile",
     "referenceLetter": "Reference letter",
-    "linkedDocumentFor": "Linked document for {{name}}"
+    "linkedDocumentFor": "Linked document for {{name}}",
+    "workExperience": "Work experience"
   },
   "work": {
     "client": "Client",
@@ -1258,7 +1259,9 @@
   "references": {
     "verify": "Verify",
     "verified": "Verified",
-    "experienceLinkUnavailable": "Linking to a work experience is not possible yet — this follows once the API supports the field."
+    "experienceLinkUnavailable": "Linking to a work experience is not possible yet — this follows once the API supports the field.",
+    "linkedExperience": "Linked work experience",
+    "noExperiencesToLink": "This candidate has no work experience yet — add one first to link a reference to it."
   },
   "validation": {
     "emailFormat": "Enter a valid e-mail address.",

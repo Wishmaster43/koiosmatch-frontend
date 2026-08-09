@@ -49,6 +49,15 @@ export function mapTask(t: ApiTask = {}): Task {
       name: assigneeName, initials: initialsOf(assigneeName),
       color: assignee?.avatar_color ?? null,
     } : null,
+    // TEAM-1: the INTERNAL department the task waits at (Backoffice, Planning, …),
+    // null = none. Mirrors the assignee pair above (id + display object) — and is
+    // deliberately INDEPENDENT of it: assignee = who picked the task up, team =
+    // where it came from / waits, and one never clears the other (measured: a PATCH
+    // with only `assignee_id` returns the same `assignee_team`, 09-08).
+    teamId: t.assignee_team?.id ?? t.assignee_team_id ?? null,
+    team: t.assignee_team
+      ? { id: t.assignee_team.id ?? '', name: t.assignee_team.name ?? '', color: t.assignee_team.color ?? null }
+      : null,
     // TASK-LOCATION-READ-1: branch (vestiging), null = none set. Mirrors the
     // assignee shape above (id + a display object) for the same reason — the
     // drawer picker reads `location`, the PATCH body key stays `locationId`.

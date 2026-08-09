@@ -31,7 +31,11 @@ import SafeHtml from '@/components/ui/SafeHtml'
 import SoftChip from '@/components/ui/SoftChip'
 import DocPreviewModal from '@/components/drawer/DocPreviewModal'
 import DrawerAddButton from './DrawerAddButton'
-import ReferenceExperienceGate from './ReferenceExperienceGate'
+// REF-ERVARING-1: the reference ↔ work-experience link (contract measured live
+// 09-08 — see referenceExperienceLink's header). Rules/labels live in the helper
+// module, the two read-only views in LinkedExperience.
+import { resolveLinkedExperience, useExperienceOptions, type LinkableExperience } from './referenceExperienceLink'
+import { LinkedExperienceLine, NoExperiencesNotice } from './LinkedExperience'
 import { useDateFormat } from '@/lib/datetime'
 import { useReferenceRelations } from '@/lib/useReferenceRelations'
 import { downloadFilesSequentially } from '@/lib/downloadFiles'
@@ -64,6 +68,9 @@ interface ReferencesTabProps {
   // exactly (SectionTabs.tsx RelTabProps).
   documents?: RelItem[]
   onJumpToDocuments?: () => void
+  // REF-ERVARING-1: the candidate's OWN work experiences — the only valid link
+  // targets (the backend scopes the FK to this candidate, 422 otherwise).
+  experiences?: LinkableExperience[]
 }
 
 // A row is persisted once it carries a real backend id (a non-empty UUID string,
@@ -123,7 +130,7 @@ function ReferenceLetterLink({ doc, onPreview, onJump }: { doc: RelItem; onPrevi
   )
 }
 
-export default function ReferencesTab({ items = [], onAdd, onEdit, onRemove, onVerify, documents = [], onJumpToDocuments }: ReferencesTabProps) {
+export default function ReferencesTab({ items = [], onAdd, onEdit, onRemove, onVerify, documents = [], onJumpToDocuments, experiences = [] }: ReferencesTabProps) {
   const { t } = useTranslation('candidates')
   const { formatDate } = useDateFormat()
   // REFERENTIE-VELDEN-1: the relation lookup, searchable + pick-only (CLAUDE.md
@@ -134,6 +141,11 @@ export default function ReferencesTab({ items = [], onAdd, onEdit, onRemove, onV
   // documents no other entry has claimed, plus this row's own pick
   // (DOC-1-EIGENAAR-1, mirrors EducationTab's documentOptions in SectionTabs.tsx).
   const documentOptions = linkedDocumentOptions(documents, items)
+  // REF-ERVARING-1: the work-experience picker's options — persisted experiences
+  // only, labelled exactly like the read line ("werkgever · functie · periode").
+  // Several references may point at the SAME experience (a manager and a colleague
+  // at one employer), so unlike the document link this list is never exclusive.
+  const experienceOptions = useExperienceOptions(experiences)
   // DOC-EDU-1 mirror: preview overlay for a row's linked reference letter — the
   // shared house DocPreviewModal (never a fork).
   const [previewDoc, setPreviewDoc] = useState<RelItem | null>(null)
@@ -160,6 +172,13 @@ export default function ReferencesTab({ items = [], onAdd, onEdit, onRemove, onV
     // reference letter) to this entry — same "options" idiom, own field. Offered only
     // once the candidate HAS documents (§3, no always-empty dropdown).
     ...(documents.length > 0 ? [{ key: 'document_id', label: t('addFields.referenceLetter', { defaultValue: 'Referentiebrief' }), options: documentOptions }] : []),
+    // REF-ERVARING-1 (Danny 08-08 punt 4): the experience this referee is the
+    // reference FOR. Same "options" idiom as the reference-letter link right above
+    // — a searchable, pick-only CreatableSelect whose clear (X) unlinks, i.e. the
+    // very same PATCH with null (BackgroundTab's TO_API maps '' → null). Offered
+    // only once the candidate HAS an experience; NoExperiencesNotice explains the
+    // absence instead of showing an empty picker (§3).
+    ...(experienceOptions.length > 0 ? [{ key: 'work_experience_id', label: t('addFields.workExperience'), options: experienceOptions }] : []),
     // Danny 08-08: this free-text block is the REFERENCE's own text, not a
     // generic note — the profile block next to it is labelled by what it is, so
     // this one is too ("Referentietekst", key referenceText).
@@ -167,12 +186,10 @@ export default function ReferencesTab({ items = [], onAdd, onEdit, onRemove, onV
   ]
   return (
     <>
-    {/* REF-ERVARING-1 (Danny 08-08, punt 4): a reference belongs to a concrete work
-        experience, but the backend carries no link either way — measured live, see
-        ReferenceExperienceGate's header. The picker is therefore NOT built; this one
-        honest notice replaces it, and only when there is at least one reference (a
-        recruiter with an empty list has nothing to link yet). */}
-    {items.length > 0 && <ReferenceExperienceGate />}
+    {/* REF-ERVARING-1: a candidate without a single work experience gets a calm
+        explanation instead of a picker with nothing in it — but only where a
+        recruiter would look for the link, i.e. once there is at least one reference. */}
+    {items.length > 0 && experienceOptions.length === 0 && <NoExperiencesNotice />}
     <AddableSection title={null} emptyText={t('sections.referencesEmpty', { defaultValue: 'Nog geen referenties.' })}
       renderAddButton={renderAddButton} items={items} fields={fields} onAdd={onAdd} onEdit={onEdit} onRemove={onRemove}
       renderItem={(raw: RelItem, i: number, arr: RelItem[]) => {
@@ -194,6 +211,11 @@ export default function ReferencesTab({ items = [], onAdd, onEdit, onRemove, onV
         const verifiedAt = r.verifiedAt ?? r.verified_at ?? null
         // DOC-EDU-1 mirror: resolve the linked reference letter, if any.
         const linkedDoc = resolveReferenceDocument(raw, documents)
+        // REF-ERVARING-1: the linked work experience — resolved by ID against this
+        // candidate's own list, so a just-cleared or just-switched link reads right
+        // even before the drawer refetches (the PATCH response leaves the nested
+        // object stale — see referenceExperienceLink's header).
+        const linkedExperience = resolveLinkedExperience(raw, experiences)
         return (
           <div key={r.id ?? i} style={{ display: 'flex', gap: 10, padding: '10px 0', borderBottom: i < arr.length - 1 ? '1px solid var(--border)' : 'none' }}>
             <div style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--color-info)', flexShrink: 0, marginTop: 5 }} />
@@ -202,6 +224,9 @@ export default function ReferencesTab({ items = [], onAdd, onEdit, onRemove, onV
               {secondary && <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{secondary}</div>}
               {contact && <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{contact}</div>}
               <NoteField value={r.note} />
+              {/* REF-ERVARING-1: the linked experience reads as one calm line —
+                  "werkgever · functie · periode", "heden" for a running job. */}
+              {linkedExperience && <LinkedExperienceLine experience={linkedExperience} />}
               {/* REFERENTIE-VELDEN-1: the reference-letter icons only render once a
                   linked document actually resolves — no fake affordance. */}
               {linkedDoc && <ReferenceLetterLink doc={linkedDoc} onPreview={() => setPreviewDoc(linkedDoc)} onJump={onJumpToDocuments} />}

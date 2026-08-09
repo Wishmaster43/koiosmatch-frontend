@@ -458,7 +458,8 @@
     "referenceFunction": "Fonction",
     "mobile": "Mobile",
     "referenceLetter": "Lettre de référence",
-    "linkedDocumentFor": "Document lié pour {{name}}"
+    "linkedDocumentFor": "Document lié pour {{name}}",
+    "workExperience": "Expérience professionnelle"
   },
   "work": {
     "client": "Client",
@@ -1258,7 +1259,9 @@
   "references": {
     "verify": "Vérifier",
     "verified": "Vérifié",
-    "experienceLinkUnavailable": "Le lien avec une expérience professionnelle n'est pas encore possible — il suivra dès que l'API prendra en charge le champ."
+    "experienceLinkUnavailable": "Le lien avec une expérience professionnelle n'est pas encore possible — il suivra dès que l'API prendra en charge le champ.",
+    "linkedExperience": "Expérience professionnelle liée",
+    "noExperiencesToLink": "Ce candidat n'a pas encore d'expérience professionnelle — ajoutez-en une d'abord pour y associer une référence."
   },
   "validation": {
     "emailFormat": "Saisissez une adresse e-mail valide.",

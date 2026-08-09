@@ -1,0 +1,31 @@
+import type { CSSProperties } from 'react'
+
+/**
+ * Shared column geometry for the candidate drawer's Sollicitaties list — the ONE
+ * source both WorkTab's header bar and ApplicationRow's own row read, so a
+ * column width can never drift between the two again (Danny 09-08: "de koppen
+ * staan niet boven hun eigen kolom" — the header declared its own fixed widths
+ * while the row built its cells completely differently, with a whole trailing
+ * actions cluster the header had no column for at all). Each constant below is
+ * spread verbatim at BOTH call sites — change a number here and the header
+ * label and the cell it labels move together in the same edit.
+ */
+
+// Stage pill column — width picked to fit the seed funnel-stage labels
+// (Aangevraagd/Uitgenodigd/Voorgesteld/Aangenomen/Afgewezen) at the pill's own
+// 11px font without wrapping. A tenant-renamed stage that runs longer than this
+// simply overflows the column visually rather than being clipped — the same
+// trade-off the header's own fixed width already accepted.
+export const APPLICATION_COL_STATUS: CSSProperties = { width: 90, flexShrink: 0 }
+
+// Applied-on date column (DD-MM-YYYY), right-aligned toward the actions cluster.
+export const APPLICATION_COL_DATE: CSSProperties = { width: 64, flexShrink: 0, textAlign: 'right' }
+
+// Trailing actions cluster: pencil (22px) + unlink (22px) + external-link link
+// (24px) + disclosure chevron (22px), three 8px gaps between up to four icons —
+// 22 + 22 + 24 + 22 + 3*8 = 114. Reserved at this FIXED width regardless of how
+// many of the four actually render for a given viewer/row (permissions and a
+// missing vacancy URL both drop icons) — right-aligned within it — so the
+// column's right edge, and the empty header cell above it, never shifts based
+// on data or role.
+export const APPLICATION_COL_ACTIONS: CSSProperties = { width: 114, flexShrink: 0 }

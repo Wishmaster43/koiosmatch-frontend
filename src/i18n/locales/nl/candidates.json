@@ -480,7 +480,8 @@
     "referenceFunction": "Functie",
     "mobile": "Mobiel",
     "referenceLetter": "Referentiebrief",
-    "linkedDocumentFor": "Gekoppeld document voor {{name}}"
+    "linkedDocumentFor": "Gekoppeld document voor {{name}}",
+    "workExperience": "Werkervaring"
   },
   "work": {
     "client": "Klant",
@@ -1258,7 +1259,9 @@
   "references": {
     "verify": "Verifiëren",
     "verified": "Geverifieerd",
-    "experienceLinkUnavailable": "Koppelen aan een werkervaring kan nog niet — dit volgt zodra de API het veld ondersteunt."
+    "experienceLinkUnavailable": "Koppelen aan een werkervaring kan nog niet — dit volgt zodra de API het veld ondersteunt.",
+    "linkedExperience": "Gekoppelde werkervaring",
+    "noExperiencesToLink": "Deze kandidaat heeft nog geen werkervaring — voeg er eerst een toe om een referentie eraan te koppelen."
   },
   "validation": {
     "emailFormat": "Voer een geldig e-mailadres in.",

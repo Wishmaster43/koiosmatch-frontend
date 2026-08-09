@@ -260,3 +260,20 @@ describe('MatchesTab · sorts newest match first', () => {
     expect(titles).toEqual(['Gedateerd', 'Ongedateerd'])
   })
 })
+
+/** Column header bar (Danny 09-08: "Match heeft geen titelbalk en sollicitaties
+ *  wel") — mirrors WorkTab's own header bar so both lists read as one system;
+ *  present even on the empty state, same as WorkTab's own header. */
+describe('MatchesTab · column header bar (Danny 09-08)', () => {
+  it('renders the Vacature/Klant header labels above the list, incl. the empty state', () => {
+    render(<MatchesTab c={candidate([])} />)
+    expect(screen.getByText(ct('work.vacancy'))).toBeInTheDocument()
+    expect(screen.getByText(ct('matchesView.client'))).toBeInTheDocument()
+    expect(screen.getByTestId('match-col-actions-header')).toBeInTheDocument()
+  })
+
+  it('renders the collapsed summary row with the FLAT surface background (matches ApplicationRow)', () => {
+    render(<MatchesTab c={candidate([{ id: 'm1', vacancyTitle: 'Verpleegkundige', client: 'Yesway' }])} />)
+    expect(screen.getByTestId('match-card-header')).toHaveStyle({ background: 'var(--surface)' })
+  })
+})

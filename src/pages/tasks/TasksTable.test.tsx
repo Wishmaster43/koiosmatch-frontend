@@ -20,7 +20,10 @@ vi.mock('@/lib/datetime', () => ({
 }))
 // Real (nl) translations, since mocking '@/lib/datetime' above removes the
 // transitive '@/i18n' side-effect import the production component relies on.
-import '@/i18n'
+// Kept as a BINDING (not only the side effect) so the TEAM-1 block below can read
+// the same resolved header string the component renders, whether or not the
+// reported nl copy for `cols.team` has landed in tasks.json yet.
+import i18n from '@/i18n'
 
 const baseRow = {
   id: 't1', title: 'Bellen met kandidaat', links: [], assignee: null,
@@ -82,5 +85,43 @@ describe('TasksTable · Koios column (Danny 05-08)', () => {
     const headerCell = screen.getByRole('img', { name: 'Koios AI' }).closest('th') as HTMLElement
     const col = Array.from(headerCell.parentElement?.children ?? []).indexOf(headerCell)
     expect(container.querySelectorAll('tbody tr')[0].children[col].textContent).toBe('—')
+  })
+})
+
+/**
+ * TEAM-1 (Danny 09-08): the list must show WHERE a task waits, not just who has
+ * it. "Openstaand bij Backoffice" is the department cell filled while the
+ * assignee cell still reads Bureau — so both cells have to be scannable in one
+ * row, and a task someone picked up keeps its department chip.
+ */
+describe('TasksTable · internal department column (TEAM-1)', () => {
+  // Column index of the department header, resolved from the rendered header row.
+  const teamColIndex = () => {
+    const headerCell = screen.getByText(i18n.t('tasks:cols.team')).closest('th') as HTMLElement
+    return Array.from(headerCell.parentElement?.children ?? []).indexOf(headerCell)
+  }
+
+  it('shows the department name for a queued task and a dash when there is none', () => {
+    const queued = { ...baseRow, id: 't40', team: { id: 'team-1', name: 'Backoffice', color: null } } as unknown as Task
+    const none = { ...baseRow, id: 't41', team: null } as unknown as Task
+    const { container } = render(<TasksTable rows={[queued, none]} />)
+
+    const col = teamColIndex()
+    const values = Array.from(container.querySelectorAll('tbody tr')).map(r => r.children[col].textContent)
+    expect(values).toContain('Backoffice')
+    expect(values).toContain('—')
+  })
+
+  it('keeps the department chip on a task a colleague already picked up (non-exclusive)', () => {
+    const pickedUp = {
+      ...baseRow, id: 't42',
+      team: { id: 'team-1', name: 'Backoffice', color: null },
+      assignee: { name: 'Kelly Yesway', initials: 'KY', color: null },
+    } as unknown as Task
+    const { container } = render(<TasksTable rows={[pickedUp]} />)
+
+    const row = container.querySelectorAll('tbody tr')[0]
+    expect(row.children[teamColIndex()].textContent).toBe('Backoffice')
+    expect(row).toHaveTextContent('Kelly Yesway')
   })
 })

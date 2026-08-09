@@ -20,7 +20,8 @@
     "links": "Verknüpfung",
     "assignee": "Zugewiesen an",
     "due": "Fälligkeitsdatum",
-    "created": "Erstellt"
+    "created": "Erstellt",
+    "team": "Abteilung"
   },
   "kpi": {
     "open": "Offen",
@@ -70,7 +71,9 @@
     "owner": "Inhaber",
     "description": "Beschreibung",
     "location": "Niederlassung",
-    "locationPlaceholder": "Niederlassung wählen"
+    "locationPlaceholder": "Niederlassung wählen",
+    "team": "Abteilung",
+    "teamPlaceholder": "Abteilung wählen"
   },
   "comments": {
     "send": "Senden"
@@ -139,7 +142,12 @@
     "assigneeUnassignedHint": "Niemand ist verantwortlich: Die Aufgabe bleibt bei der Agentur, bis ein Kollege sie übernimmt.",
     "assigneeWithRole": "{{name}} · {{role}}",
     "assigneeEmpty": "Noch keine Kollegen zum Zuweisen — nur die Agentur ist wählbar.",
-    "assigneeLoadError": "Kollegen konnten nicht geladen werden."
+    "assigneeLoadError": "Kollegen konnten nicht geladen werden.",
+    "team": "Abteilung",
+    "teamPlaceholder": "Abteilung wählen",
+    "teamHint": "Wo die Aufgabe wartet, zum Beispiel Backoffice. Die Abteilung bleibt bestehen, sobald ein Kollege die Aufgabe übernimmt.",
+    "teamEmpty": "Es sind noch keine internen Abteilungen eingerichtet.",
+    "teamLoadError": "Interne Abteilungen konnten nicht geladen werden."
   },
   "bulk": {
     "selected": "{{count}} ausgewählt",
