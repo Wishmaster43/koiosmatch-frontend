@@ -9,6 +9,7 @@ import { useState, useMemo } from 'react'
 import { usePageMemory } from '@/lib/usePageMemory'
 import { geocodeNL } from '@/lib/geocode'
 import { isReferenceQuery } from '@/lib/referenceNumber'
+import { toLocalIsoDate } from '@/lib/localDate'
 
 export interface GeoFilter { q: string; km: number; lat: number; lng: number; label: string }
 export interface DateRangeFilter { param: 'created_between' | 'last_contact_between'; from: string; to: string }
@@ -112,7 +113,9 @@ export function useCandidateFilters({ t, staleMonths, view, mapCenter, mapRadius
     // threshold; never-contacted + no-follow-up send server params too (BE KPI-2a).
     if (attentionFilter === 'stale6m') {
       const cutoff = new Date(); cutoff.setMonth(cutoff.getMonth() - staleMonths)
-      p.last_contact_between = ['1900-01-01', cutoff.toISOString().slice(0, 10)]
+      // Local calendar day, never `.toISOString()` — see toLocalIsoDate's doc for the
+      // measured UTC-shift bug this fixes.
+      p.last_contact_between = ['1900-01-01', toLocalIsoDate(cutoff)]
     }
     if (attentionFilter === 'neverContacted') p.never_contacted = 1
     if (attentionFilter === 'noFollowup')     p.no_followup = 1

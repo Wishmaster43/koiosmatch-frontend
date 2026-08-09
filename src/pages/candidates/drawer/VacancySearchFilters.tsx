@@ -5,6 +5,7 @@ import { RotateCcw } from 'lucide-react'
 import SearchSelect from '@/components/ui/SearchSelect'
 import Slider from '@/components/ui/Slider'
 import { parseDate } from '@/components/forms/fields'
+import { toLocalIsoDate } from '@/lib/localDate'
 import type { HoursRange } from '../hooks/vacancySearchFilters'
 
 // Inline label — sits BESIDE its control instead of above it (Danny 09-08: a
@@ -24,18 +25,6 @@ const resetButton: CSSProperties = {
 }
 // Numeric readout of the hours range — JetBrains Mono per §4 (numbers/IDs).
 const hoursReadout: CSSProperties = { fontFamily: 'JetBrains Mono, monospace', fontSize: 12, color: 'var(--text)', whiteSpace: 'nowrap' }
-
-// Format a react-datepicker selection as a LOCAL YYYY-MM-DD string — never
-// `.toISOString()` (that converts through UTC first, which silently shifts the
-// date back a day in any timezone ahead of UTC, e.g. Europe/Amsterdam CEST —
-// caught while wiring this up 09-08). The filter compares date-only strings, so
-// the LOCAL calendar day the recruiter picked is what must round-trip.
-function toLocalIsoDate(d: Date): string {
-  const y = d.getFullYear()
-  const m = String(d.getMonth() + 1).padStart(2, '0')
-  const day = String(d.getDate()).padStart(2, '0')
-  return `${y}-${m}-${day}`
-}
 
 // One label-beside-control filter unit — replaces the old label-ABOVE block per
 // filter. Every filter is now one line tall instead of two, and wraps as a

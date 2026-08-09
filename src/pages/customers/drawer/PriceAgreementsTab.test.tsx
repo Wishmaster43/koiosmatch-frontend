@@ -11,12 +11,16 @@
  * call sites (PriceAgreementsTab's type-only import and AddPriceAgreementModal's
  * default import), since vitest mocks by resolved module id.
  */
-import { describe, it, expect, vi } from 'vitest'
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import PriceAgreementsTab from './PriceAgreementsTab'
 import { usePriceAgreements } from '../hooks/usePriceAgreements'
 import type { Customer } from '@/types/customer'
+
+// This project ships no @types/node; process.env.TZ is a genuine Node global at
+// test runtime (Vitest runs under Node) — this is a minimal local type shim for it.
+declare const process: { env: Record<string, string | undefined> }
 
 // PriceAgreementRow (rendered per row, unmocked) imports '@/lib/datetime', which
 // itself imports '@/i18n' as a side effect — that would boot the REAL i18next
@@ -25,7 +29,18 @@ import type { Customer } from '@/types/customer'
 // useLocations is react-query-backed (the Facturatie block's Vestiging picker uses it),
 // so it is mocked here rather than wrapping this test in a QueryClientProvider.
 vi.mock('@/lib/useLocations', () => ({ useLocations: () => [{ value: 'loc-1', label: 'Vestiging Noord' }] }))
-vi.mock('@/lib/datetime', () => ({ useDateFormat: () => ({ formatDate: (v: string) => v }) }))
+// toLocalIsoDate is re-implemented here (NOT vi.importActual — that would load the
+// real '@/lib/datetime', which itself imports '@/i18n' as a side effect, exactly
+// what the comment above is avoiding) so `todayIso` still computes for real.
+vi.mock('@/lib/datetime', () => ({
+  useDateFormat: () => ({ formatDate: (v: string) => v }),
+  toLocalIsoDate: (d: Date) => {
+    const y = d.getFullYear()
+    const m = String(d.getMonth() + 1).padStart(2, '0')
+    const day = String(d.getDate()).padStart(2, '0')
+    return `${y}-${m}-${day}`
+  },
+}))
 vi.mock('../hooks/usePriceAgreements', () => ({ usePriceAgreements: vi.fn() }))
 // TOOLBAR-4: the toolbar tests below render a real (populated) row list, which
 // mounts the real PriceAgreementRow -> useCao() -> useCachedLookup's own GET /cao.
@@ -164,6 +179,41 @@ describe('PriceAgreementsTab · toolbar search + derived active/expired filter (
     await user.click(await screen.findByRole('button', { name: 'priceAgreements.statusExpired' }))
     expect(screen.getByText('Verzorgende')).toBeInTheDocument()
     expect(screen.queryByText('Verpleegkundige')).toBeNull()
+  })
+
+  // Regression guard (Danny 09-08, UTC-date-shift fix): `todayIso` (the "active vs
+  // expired" boundary) must be TODAY'S local day, never a UTC-shifted one. Wrong in
+  // the old code: just after local midnight, `.toISOString().slice(0, 10)` still
+  // reported YESTERDAY, so an agreement that expired yesterday kept showing "active".
+  describe('the "expired" boundary uses the LOCAL calendar day, never UTC-shifted', () => {
+    const originalTz = process.env.TZ
+    beforeEach(() => {
+      // Explicit TZ so this proves something on any machine, not just one that
+      // happens to run in UTC (where old-buggy and fixed code would coincide).
+      process.env.TZ = 'Europe/Amsterdam'
+      // Freeze "now" just after local midnight (CET, winter) — the exact window
+      // where the old UTC conversion read "today" as the day before.
+      vi.useFakeTimers({ toFake: ['Date'] })
+      vi.setSystemTime(new Date(2026, 0, 15, 0, 30, 0))
+    })
+    afterEach(() => {
+      vi.useRealTimers()
+      process.env.TZ = originalTz
+    })
+
+    it('treats an agreement that expired YESTERDAY (local) as already expired', async () => {
+      const user = userEvent.setup()
+      vi.mocked(usePriceAgreements).mockReturnValue({
+        ...baseHook,
+        agreements: [agreementRow({ id: 'pa-1', functionTitle: 'Verpleegkundige', validUntil: '2026-01-14' })],
+      })
+      render(<PriceAgreementsTab customerId="cust-1" />)
+      await user.click(screen.getByRole('button', { name: 'filters.allStatuses' }))
+      await user.click(await screen.findByRole('button', { name: 'priceAgreements.statusExpired' }))
+      // Only visible under "expired" if todayIso resolved to 2026-01-15 (local), not
+      // 2026-01-14 (the UTC-shifted value the old code would have produced).
+      expect(screen.getByText('Verpleegkundige')).toBeInTheDocument()
+    })
   })
 
   it('renders the toolbar in house order: search, then status filter, then "+"', () => {

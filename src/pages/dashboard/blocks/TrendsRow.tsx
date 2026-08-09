@@ -5,6 +5,7 @@
  * size split); the bucket→navigation mapping in onBarClick is unchanged.
  */
 import { useTranslation } from 'react-i18next'
+import { toLocalIsoDate } from '@/lib/localDate'
 import WeeklyBarChartCard from '@/components/charts/WeeklyBarChartCard'
 import { Panel } from '../DashboardPrimitives'
 import FunnelConversion from './FunnelConversion'
@@ -41,7 +42,9 @@ export default function TrendsRow({ vis, trendData, trendSeries, funnelData, onN
             const iso = typeof name === 'string' && /^\d{4}-\d{2}-\d{2}/.test(name) ? name.slice(0, 10) : undefined
             const from = r?.__from ?? r?.__date ?? iso
             let to = r?.__to
-            if (!to && from) { const d = new Date(from); d.setDate(d.getDate() + 6); to = d.toISOString().slice(0, 10) }
+            // Local calendar day, never `.toISOString()` — see toLocalIsoDate's doc for the
+            // measured UTC-shift bug this fixes.
+            if (!to && from) { const d = new Date(from); d.setDate(d.getDate() + 6); to = toLocalIsoDate(d) }
             if (page === 'candidates' && from && to) { onNavigate?.('candidates', { created_between: [from, to] }); return }
             onNavigate?.(page, name ? { period: name } : undefined)
           }} />

@@ -39,7 +39,12 @@ export const MATCH_COLUMN_WIDTH = 140
 export const MATCH_COL_STATUS: CSSProperties = { width: 108, flexShrink: 0 }
 
 // Other party (client on the candidate side) — a real fixed column.
-export const MATCH_COL_OTHER_PARTY: CSSProperties = { width: 128, flexShrink: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }
+// SHRINKABLE on purpose (Danny 09-08: "vacature naam niet te lezen"). The
+// vacancy title is what identifies the row; a client name is context. When the
+// drawer gets narrow SOMETHING has to give, and it should be the context, not the
+// identity. flex-basis 128 with shrink allowed, floored at 72 so it never becomes
+// a stub. Header and row read this SAME constant, so they shrink in step.
+export const MATCH_COL_OTHER_PARTY: CSSProperties = { flex: '0 1 128px', minWidth: 72, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }
 
 // Score column (SCORE-COLUMN-1, Danny 09-08 second look, point 3): the score pill
 // is a DATA value ("82%" or a muted dash when unscored) that the user READS, not

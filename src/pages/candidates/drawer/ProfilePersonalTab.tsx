@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next'
 import { Cake } from 'lucide-react'
 import DatePicker from 'react-datepicker'
 import { useDateFormat, calcAge, daysUntilBirthday } from '@/lib/datetime'
+import { toLocalIsoDate } from '@/lib/localDate'
 import { useGenders } from '@/lib/useGenders'
 import { useNationalities } from '@/lib/useNationalities'
 import CreatableSelectJs from '@/components/ui/CreatableSelect'
@@ -79,7 +80,8 @@ export default function ProfilePersonalTab({ c, onSave, autoEditSignal }: {
     if (key === 'dob') return (
       <DatePicker
         selected={(() => { try { const d = form.dob ? new Date(form.dob) : null; return d && !isNaN(d.getTime()) ? d : null } catch { return null } })()}
-        onChange={(d: Date | null) => setF('dob', d ? d.toISOString().slice(0, 10) : '')}
+        // Local calendar day, never `.toISOString()` — a birthdate off by a day is a wrong age.
+        onChange={(d: Date | null) => setF('dob', d ? toLocalIsoDate(d) : '')}
         dateFormat="dd-MM-yyyy"
         showMonthDropdown showYearDropdown dropdownMode="select"
         placeholderText={t('profile.selectDate')}

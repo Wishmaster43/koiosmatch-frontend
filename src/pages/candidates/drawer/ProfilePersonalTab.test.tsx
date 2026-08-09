@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 // Real i18n so t() resolves real Dutch text, like the rest of this drawer's tests.
@@ -6,6 +6,10 @@ import i18n from '@/i18n'
 import ProfilePersonalTab from './ProfilePersonalTab'
 import { useProfileRequiredKeys } from './useProfileRequiredKeys'
 import type { Candidate } from '@/types/candidate'
+
+// This project ships no @types/node; process.env.TZ is a genuine Node global at
+// test runtime (Vitest runs under Node) — this is a minimal local type shim for it.
+declare const process: { env: Record<string, string | undefined> }
 
 vi.mock('@/lib/useGenders', () => ({ useGenders: () => ({ genders: [{ value: 'male', label: 'Man' }, { value: 'female', label: 'Vrouw' }] }) }))
 vi.mock('@/lib/useNationalities', () => ({ useNationalities: () => ({ nationalities: ['Nederlands', 'Belgisch'] }) }))
@@ -106,5 +110,46 @@ describe('ProfilePersonalTab · own fields, own pencil, own request shape', () =
     await user.type(screen.getByPlaceholderText('Selecteer'), 'Belg')
     expect(screen.getByRole('button', { name: 'Belgisch' })).toBeInTheDocument()
     expect(screen.queryByRole('button', { name: 'Nederlands' })).toBeNull()
+  })
+})
+
+// Regression guard (Danny 09-08, UTC-date-shift fix): the dob field is a DatePicker
+// wired straight to toLocalIsoDate — prove the SENT value is the picked local day,
+// not one rolled back by a UTC conversion. A wrong birthdate means a wrong age.
+describe('ProfilePersonalTab · dob field sends the LOCAL calendar day, never UTC-shifted', () => {
+  const originalTz = process.env.TZ
+  beforeEach(() => {
+    vi.mocked(useProfileRequiredKeys).mockReturnValue([])
+    // Explicit TZ so this proves something on any machine, not just one that
+    // happens to run in UTC (where old-buggy and fixed code would coincide).
+    process.env.TZ = 'Europe/Amsterdam'
+    // Freeze "now" just after local midnight (CET, winter) — the exact window where
+    // `.toISOString().slice(0, 10)` used to roll the picked day back by one (measured
+    // 09-08: picking 15 Jan 2026 saved as "2026-01-14"). Only Date is faked, so
+    // userEvent's own internal timers keep ticking normally.
+    vi.useFakeTimers({ toFake: ['Date'] })
+    vi.setSystemTime(new Date(2026, 0, 15, 0, 30, 0))
+  })
+  afterEach(() => {
+    vi.useRealTimers()
+    process.env.TZ = originalTz
+  })
+
+  it('sends dob "2026-01-15" when the today cell is picked, not "2026-01-14"', async () => {
+    const user = userEvent.setup()
+    const onSave = vi.fn()
+    // Empty dob so the calendar opens on the CURRENT month (frozen "today") instead
+    // of navigating away to a stored birth year.
+    const noDob = { id: 3, gender: 'male', nationality: 'Nederlands', dob: '', placeOfBirth: '', phase: 'candidate' } as unknown as Candidate
+    render(<ProfilePersonalTab c={noDob} onSave={onSave} />)
+    await user.click(screen.getByTitle('Bewerken'))
+    const dobRow = screen.getByText('Geboortedatum').parentElement as HTMLElement
+    await user.click(within(dobRow).getByRole('textbox'))
+    // The calendar renders into the shared datepicker-portal, outside this row.
+    const todayCell = document.querySelector('.react-datepicker__day--today') as HTMLElement
+    expect(todayCell).toBeTruthy()
+    await user.click(todayCell)
+    await user.click(screen.getByTitle('Opslaan'))
+    expect(onSave).toHaveBeenCalledWith(expect.objectContaining({ dob: '2026-01-15' }))
   })
 })

@@ -16,7 +16,7 @@
  * reference, no per-endpoint transform — so pinning the shape produced here
  * pins both requests at once.
  */
-import { describe, it, expect, vi } from 'vitest'
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { renderHook, act } from '@testing-library/react'
 import { useState } from 'react'
 
@@ -36,6 +36,10 @@ vi.mock('@/lib/geocode', () => ({
 }))
 
 import { useCandidateFilters } from './useCandidateFilters'
+
+// This project ships no @types/node; process.env.TZ is a genuine Node global at
+// test runtime (Vitest runs under Node) — this is a minimal local type shim for it.
+declare const process: { env: Record<string, string | undefined> }
 
 const t = (k: string) => k
 const baseArgs = {
@@ -176,6 +180,34 @@ describe('useCandidateFilters — geo radius (straal-blok, PDOK)', () => {
     act(() => { result.current.clearGeo() })
     expect(result.current.filterParams.lat).toBeUndefined()
     expect(result.current.filterParams.radius).toBeUndefined()
+  })
+})
+
+// Regression guard (Danny 09-08, UTC-date-shift fix): the stale6m cutoff must be
+// TODAY'S local day minus staleMonths, never a UTC-shifted one. Wrong in the old
+// code: just after local midnight, `.toISOString().slice(0, 10)` reported a cutoff
+// one day too early, silently excluding a candidate whose last contact was exactly
+// on the boundary.
+describe('useCandidateFilters — stale6m cutoff uses the LOCAL calendar day, never UTC-shifted', () => {
+  const originalTz = process.env.TZ
+  beforeEach(() => {
+    // Explicit TZ so this proves something on any machine, not just one that
+    // happens to run in UTC (where old-buggy and fixed code would coincide).
+    process.env.TZ = 'Europe/Amsterdam'
+    // Freeze "now" just after local midnight (CET, winter) — the exact window
+    // where the old UTC conversion read the cutoff a day early.
+    vi.useFakeTimers({ toFake: ['Date'] })
+    vi.setSystemTime(new Date(2026, 0, 15, 0, 30, 0))
+  })
+  afterEach(() => {
+    vi.useRealTimers()
+    process.env.TZ = originalTz
+  })
+
+  it('computes the 6-month-stale cutoff as 2025-07-15, not 2025-07-14', () => {
+    const { result } = renderHook(() => useCandidateFilters(baseArgs))
+    act(() => { result.current.setAttentionFilter('stale6m') })
+    expect(result.current.filterParams.last_contact_between).toEqual(['1900-01-01', '2025-07-15'])
   })
 })
 

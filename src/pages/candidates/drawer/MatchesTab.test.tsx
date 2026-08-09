@@ -311,15 +311,21 @@ describe('MatchesTab · every visible column has a header (Danny 09-08 second lo
 
   it('reads every column width from the SAME matchRowColumns.ts constants for both the header cell and the row cell (never two loose numbers)', () => {
     render(<MatchesTab c={candidate([row])} />)
-    const pairs: [string, string, string][] = [
+    // Fixed columns are pinned on width; the client column is deliberately
+    // SHRINKABLE (the vacancy title must keep room), so header and cell are
+    // matched on its minWidth floor instead. The point of the test is unchanged:
+    // both sides read ONE constant, never two loose numbers.
+    const fixed: [string, string, string][] = [
       ['match-col-status-header', 'match-col-status', `${Number(MATCH_COL_STATUS.width)}px`],
-      ['match-col-client-header', 'match-col-client', `${Number(MATCH_COL_OTHER_PARTY.width)}px`],
       ['match-col-score-header', 'match-col-score', `${Number(MATCH_COL_SCORE.width)}px`],
       ['match-col-actions-header', 'match-col-actions', `${Number(MATCH_COL_ACTIONS.width)}px`],
     ]
-    for (const [headerId, cellId, width] of pairs) {
+    for (const [headerId, cellId, width] of fixed) {
       expect(screen.getByTestId(headerId)).toHaveStyle({ width })
       expect(screen.getByTestId(cellId)).toHaveStyle({ width })
     }
+    const clientFloor = { minWidth: `${Number(MATCH_COL_OTHER_PARTY.minWidth)}px` }
+    expect(screen.getByTestId('match-col-client-header')).toHaveStyle(clientFloor)
+    expect(screen.getByTestId('match-col-client')).toHaveStyle(clientFloor)
   })
 })

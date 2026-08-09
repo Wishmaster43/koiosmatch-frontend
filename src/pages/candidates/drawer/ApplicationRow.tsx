@@ -45,7 +45,7 @@ import StatusPill from '@/components/ui/StatusPill'
 import ApplicationRowDetails from './ApplicationRowDetails'
 import { useDateFormat } from '@/lib/datetime'
 import { rememberReturnTab } from './constants'
-import { APPLICATION_COL_STATUS, APPLICATION_COL_DATE, APPLICATION_COL_ACTIONS } from './applicationRowColumns'
+import { APPLICATION_COL_STATUS, APPLICATION_COL_DATE, APPLICATION_COL_ACTIONS, APPLICATION_COL_TITLE } from './applicationRowColumns'
 import { vacancyLabelOf, vacancyUrlOf } from './applicationRowModel'
 import type { AppRow, Appt } from './applicationRowModel'
 import type { ExistingAppointment } from './PlanIntakeModal'
@@ -61,7 +61,8 @@ import type { Id } from '@/types/common'
 // same rendered box whether or not it carries a border.
 const iconBtn: CSSProperties = { display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: 22, height: 22, boxSizing: 'border-box', border: 'none', background: 'none', borderRadius: 5, cursor: 'pointer', padding: 0, flexShrink: 0 }
 // Title cell: grows, never pushes the pills/date off the row.
-const titleCell: CSSProperties = { fontWeight: 500, flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }
+// Reads the SHARED title column so the header cell above it can never drift.
+const titleCell: CSSProperties = { fontWeight: 500, ...APPLICATION_COL_TITLE }
 
 // Icon per modality (office/remote/phone) for the appointment line — module scope
 // so it is one stable component type, never re-created on every render.

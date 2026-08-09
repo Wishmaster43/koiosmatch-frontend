@@ -168,8 +168,10 @@ export default function MatchCard({
   // (header-barred) variant below gives the stage its OWN column instead of the
   // " — {fase}" suffix titleBlock carries, so this drops that suffix. Every other
   // caller has no header bar to line the stage up against and keeps titleBlock.
+  // minWidth 140, not 0: with 0 the title collapsed to a single letter in a narrow
+  // drawer while the fixed columns kept their full width (Danny 09-08).
   const titleOnly = (
-    <span style={{ flex: 1, minWidth: 0, fontSize: 12, fontWeight: 600, color: 'var(--text)', overflow: 'hidden' }}>
+    <span style={{ flex: 1, minWidth: 140, fontSize: 12, fontWeight: 600, color: 'var(--text)', overflow: 'hidden' }}>
       <span onClickCapture={onBeforeOpen} onClick={e => e.stopPropagation()} style={{ minWidth: 0, overflow: 'hidden' }}>
         <EntityLink page="vacancies" id={vacancyId} title={vacancyTitle || '—'} hideIcon>{vacancyTitle || '—'}</EntityLink>
       </span>

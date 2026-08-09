@@ -3,6 +3,7 @@ import type { ComponentType } from 'react'
 import { useTranslation } from 'react-i18next'
 import DatePicker from 'react-datepicker'
 import { useDateFormat } from '@/lib/datetime'
+import { toLocalIsoDate } from '@/lib/localDate'
 import { useWorkPermitTypes } from '@/lib/useWorkPermitTypes'
 import CreatableSelectJs from '@/components/ui/CreatableSelect'
 import { FieldRow, EditControls, GroupCard, GroupHeader, inputStyle } from './profileFieldShared'
@@ -108,7 +109,9 @@ export default function WorkPermitBlock({ c, onSave, autoEditSignal }: {
     if (key === 'workPermitValidUntil') return (
       <DatePicker
         selected={(() => { try { const d = form.workPermitValidUntil ? new Date(form.workPermitValidUntil) : null; return d && !isNaN(d.getTime()) ? d : null } catch { return null } })()}
-        onChange={(d: Date | null) => setF('workPermitValidUntil', d ? d.toISOString().slice(0, 10) : '')}
+        // Local calendar day, never `.toISOString()` — a permit expiry off by a day is a
+        // document someone relies on being wrong (CLAUDE.md fix task 09-08).
+        onChange={(d: Date | null) => setF('workPermitValidUntil', d ? toLocalIsoDate(d) : '')}
         dateFormat="dd-MM-yyyy"
         showMonthDropdown showYearDropdown dropdownMode="select"
         placeholderText={t('profile.selectDate')}

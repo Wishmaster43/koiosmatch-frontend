@@ -11,6 +11,7 @@ import DatePicker from 'react-datepicker'
 import 'react-datepicker/dist/react-datepicker.css'
 import { useTranslation } from 'react-i18next'
 import { fieldInputStyle } from './fieldMetrics'
+import { toLocalIsoDate } from '@/lib/localDate'
 import CreatableSelect from '@/components/ui/CreatableSelect'
 
 export interface SelectOption { value: string; label?: ReactNode }
@@ -101,7 +102,9 @@ export function DateField({ id, value, onChange, placeholder, style }: {
     <DatePicker
       id={id}
       selected={parseDate(value)}
-      onChange={(d: Date | null) => onChange(d ? d.toISOString().slice(0, 10) : '')}
+      // Local calendar day, never `.toISOString()` — see toLocalIsoDate's doc for the
+      // measured UTC-shift bug this fixes (this is the SHARED DateField every form uses).
+      onChange={(d: Date | null) => onChange(d ? toLocalIsoDate(d) : '')}
       dateFormat="dd-MM-yyyy"
       showMonthDropdown showYearDropdown dropdownMode="select"
       placeholderText={placeholder}

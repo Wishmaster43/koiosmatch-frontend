@@ -7,8 +7,19 @@
 import { useCallback, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { LOCALE_BY_LANG } from '../i18n'
+// Re-exported so existing importers keep working; it lives in localDate because
+// it needs no locale and this module's i18n import has an initialising side effect.
+export { toLocalIsoDate } from './localDate'
 
 type DateInput = string | number | Date | null | undefined
+
+// Convert a Date to its LOCAL calendar-day 'YYYY-MM-DD' — never `d.toISOString().slice(0, 10)`
+// for a user-picked date. `toISOString()` converts through UTC first, and Europe/Amsterdam
+// is always ahead of UTC (UTC+1 winter / UTC+2 summer), so local midnight rolls back to the
+// PREVIOUS day once converted — measured: picking 1 July 2026 saved as "2026-06-30", picking
+// 15 January 2026 saved as "2026-01-14", year-round, winter and summer alike. Reading the
+// Date's own LOCAL getters (getFullYear/getMonth/getDate) instead means the calendar day the
+// user actually picked is the one that round-trips to the API.
 
 export function useLocale(): string {
   const { i18n } = useTranslation()

@@ -21,6 +21,12 @@ import type { CSSProperties } from 'react'
 // (Danny 09-08, second look). Measured against the longest seed stage.
 export const APPLICATION_COL_STATUS: CSSProperties = { width: 108, flexShrink: 0 }
 
+// The vacancy title cell — shared so the header's own first cell matches it.
+// minWidth 140 (not 0) keeps the row's IDENTITY readable when the drawer narrows;
+// without a floor the title was squeezed to a single letter while the fixed
+// columns kept every pixel (Danny 09-08, "vacature naam niet te lezen").
+export const APPLICATION_COL_TITLE: CSSProperties = { flex: 1, minWidth: 140, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }
+
 // Applied-on date column (DD-MM-YYYY), right-aligned toward the actions cluster.
 // nowrap + a width that actually fits the format: at 64 the date broke over two
 // lines ("08-08-" / "2026"), which is the one thing a fixed-format column should

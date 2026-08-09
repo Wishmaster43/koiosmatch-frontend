@@ -19,7 +19,7 @@ import { notifyError, notifySuccess } from '@/lib/notify'
 import { extractApiError } from '@/lib/extractApiError'
 import { useAuth } from '@/context/AuthContext'
 import { sectionBlock } from './constants'
-import { APPLICATION_COL_STATUS, APPLICATION_COL_DATE, APPLICATION_COL_ACTIONS } from './applicationRowColumns'
+import { APPLICATION_COL_STATUS, APPLICATION_COL_DATE, APPLICATION_COL_ACTIONS, APPLICATION_COL_TITLE } from './applicationRowColumns'
 import type { Candidate } from '@/types/candidate'
 import type { Id, LookupOption } from '@/types/common'
 
@@ -219,7 +219,7 @@ export default function WorkTab({ c, onRefresh, initialSubTab }: { c: Candidate;
               09-08: "een lege kop boven de actiekolom") since pencil/unlink/
               external-link/chevron have no single label of their own. */}
           <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 12px', background: 'var(--bg)', borderBottom: '1px solid var(--border)', fontSize: 11, fontWeight: 600, color: 'var(--text-muted)' }}>
-            <span style={{ flex: 1, minWidth: 0 }}>{t('work.vacancy')}</span>
+            <span style={APPLICATION_COL_TITLE}>{t('work.vacancy')}</span>
             <span style={APPLICATION_COL_STATUS}>{t('work.colStatus')}</span>
             <span style={APPLICATION_COL_DATE}>{t('work.colDate')}</span>
             <span aria-hidden="true" data-testid="app-col-actions-header" style={APPLICATION_COL_ACTIONS} />

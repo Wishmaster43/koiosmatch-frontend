@@ -178,10 +178,14 @@ describe('MatchCard · flatRow column split (Danny 09-08 second look)', () => {
 
   it('reads the Status/Client/Score/Actions cell widths from the SAME matchRowColumns constants the header reads', () => {
     render(<MatchCard {...flat} />)
+    // The fixed columns are asserted on their own constant's width. The client
+    // column is deliberately SHRINKABLE now (the vacancy title must keep room),
+    // so it is asserted on its minWidth floor instead of a fixed width — pinning
+    // a number there would undo exactly what makes the title readable.
     expect(screen.getByTestId('match-col-status')).toHaveStyle({ width: `${Number(MATCH_COL_STATUS.width)}px` })
-    expect(screen.getByTestId('match-col-client')).toHaveStyle({ width: `${Number(MATCH_COL_OTHER_PARTY.width)}px` })
     expect(screen.getByTestId('match-col-score')).toHaveStyle({ width: `${Number(MATCH_COL_SCORE.width)}px` })
     expect(screen.getByTestId('match-col-actions')).toHaveStyle({ width: `${Number(MATCH_COL_ACTIONS.width)}px` })
+    expect(screen.getByTestId('match-col-client')).toHaveStyle({ minWidth: `${Number(MATCH_COL_OTHER_PARTY.minWidth)}px` })
   })
 
   it('keeps the merged title and renders no separate Status/Score columns when collapsible without flatRow (no current caller, kept for compatibility)', () => {

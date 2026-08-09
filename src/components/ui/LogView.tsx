@@ -12,6 +12,7 @@ import { useRightPanel } from '@/context/RightPanelContext'
 import DataTable from '@/components/ui/DataTable'
 import type { Column, RowId } from '@/components/ui/DataTable'
 import { escapeCsvCell } from '@/lib/csv'
+import { toLocalIsoDate } from '@/lib/localDate'
 import CalloutBox from '@/components/ui/CalloutBox'
 
 export interface LogExportCol<Row> { header: string; value: (row: Row) => string }
@@ -55,7 +56,9 @@ export default function LogView<Row>({
     const csv = '﻿' + [header, ...body].map(r => r.map(escapeCsvCell).join(',')).join('\r\n')
     const url = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8;' }))
     const a = document.createElement('a')
-    a.href = url; a.download = `${exportName}-${new Date().toISOString().slice(0, 10)}.csv`
+    // Not a persisted calendar field, but the same local-vs-UTC "today" can still read
+    // as yesterday near midnight — the shared helper is a free swap for a clearer filename.
+    a.href = url; a.download = `${exportName}-${toLocalIsoDate(new Date())}.csv`
     document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url)
   }
 

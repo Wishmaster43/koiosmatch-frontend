@@ -33,6 +33,7 @@ import { useLocations } from '@/lib/useLocations'
 import SubTabBar from '@/components/drawer/SubTabBar'
 import { getCountryOptions } from '@/lib/countries'
 import { resolveCustomerBillingAddress } from '../hooks/customerBillingAddress'
+import { toLocalIsoDate } from '@/lib/localDate'
 import type { Customer } from '@/types/customer'
 import type { Id, LookupOption } from '@/types/common'
 
@@ -68,7 +69,9 @@ export default function PriceAgreementsTab({ customerId, c, onSave }: { customer
   // lookup, never sent to the backend. `STATUS_FILTER_ALL` is passed as the tenant
   // default so this starts showing EVERY row (no silent guess hiding expired ones);
   // the recruiter opts into narrowing, same as every StatusFilterSelect caller can.
-  const todayIso = new Date().toISOString().slice(0, 10)
+  // Local calendar day, never `.toISOString()` — see toLocalIsoDate's doc for the
+  // measured UTC-shift bug this fixes.
+  const todayIso = toLocalIsoDate(new Date())
   const isExpired = (a: PriceAgreement) => !!a.validUntil && a.validUntil.slice(0, 10) < todayIso
   const derivedStatuses: LookupOption[] = [
     { id: 'active', value: 'active', label: t('priceAgreements.statusActive') },

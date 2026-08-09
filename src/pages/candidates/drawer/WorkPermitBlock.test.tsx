@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 // Real i18n so t()/defaultValue resolve real Dutch text, like the rest of this drawer's tests.
@@ -6,6 +6,10 @@ import '@/i18n'
 import WorkPermitBlock from './WorkPermitBlock'
 import { useWorkPermitVisibility } from './useWorkPermitVisibility'
 import type { Candidate } from '@/types/candidate'
+
+// This project ships no @types/node; process.env.TZ is a genuine Node global at
+// test runtime (Vitest runs under Node) — this is a minimal local type shim for it.
+declare const process: { env: Record<string, string | undefined> }
 
 // Own hook, own tests (workPermitVisibility.test.ts covers the RULE; the wiring
 // test below covers what this component feeds it) — mocked here so the rendering
@@ -154,5 +158,45 @@ describe('WorkPermitBlock · what it feeds the visibility rule', () => {
     const withDate = { id: 1, nationality: 'Nederlandse', work_permit_valid_until: '2027-01-01' } as unknown as Candidate
     render(<WorkPermitBlock c={withDate} />)
     expect(useWorkPermitVisibility).toHaveBeenCalledWith('Nederlandse', 'filled')
+  })
+})
+
+// Regression guard (Danny 09-08, UTC-date-shift fix): workPermitValidUntil is a
+// DatePicker wired straight to toLocalIsoDate — prove the SENT value is the picked
+// local day, not one rolled back by a UTC conversion. A wrong expiry is a document
+// someone relies on being wrong.
+describe('WorkPermitBlock · valid-until field sends the LOCAL calendar day, never UTC-shifted', () => {
+  const originalTz = process.env.TZ
+  beforeEach(() => {
+    vi.mocked(useWorkPermitVisibility).mockReturnValue(true)
+    // Explicit TZ so this proves something on any machine, not just one that
+    // happens to run in UTC (where old-buggy and fixed code would coincide).
+    process.env.TZ = 'Europe/Amsterdam'
+    // Freeze "now" just after local midnight (CET, winter) — the exact window where
+    // `.toISOString().slice(0, 10)` used to roll the picked day back by one (measured
+    // 09-08: picking 15 Jan 2026 saved as "2026-01-14"). Only Date is faked, so
+    // userEvent's own internal timers keep ticking normally.
+    vi.useFakeTimers({ toFake: ['Date'] })
+    vi.setSystemTime(new Date(2026, 0, 15, 0, 30, 0))
+  })
+  afterEach(() => {
+    vi.useRealTimers()
+    process.env.TZ = originalTz
+  })
+
+  it('sends workPermitValidUntil "2026-01-15" when the today cell is picked, not "2026-01-14"', async () => {
+    const user = userEvent.setup()
+    const onSave = vi.fn()
+    const candidate = { id: 1, nationality: 'Marokkaans' } as unknown as Candidate
+    render(<WorkPermitBlock c={candidate} onSave={onSave} />)
+    await user.click(screen.getByTitle('Bewerken'))
+    const validUntilRow = screen.getByText('Geldig tot').parentElement as HTMLElement
+    await user.click(within(validUntilRow).getByRole('textbox'))
+    // The calendar renders into the shared datepicker-portal, outside this row.
+    const todayCell = document.querySelector('.react-datepicker__day--today') as HTMLElement
+    expect(todayCell).toBeTruthy()
+    await user.click(todayCell)
+    await user.click(screen.getByTitle('Opslaan'))
+    expect(onSave).toHaveBeenCalledWith(expect.objectContaining({ workPermitValidUntil: '2026-01-15' }))
   })
 })
