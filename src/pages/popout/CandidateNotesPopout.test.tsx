@@ -62,8 +62,9 @@ describe('CandidateNotesPopout', () => {
 
   // NOTITIE-POPOUT-BAR-1 (Danny 09-08, point 3): the toolbar pop-out button belongs
   // in the DRILL-DOWN, never in the second-screen window itself — a button that
-  // re-opens the window you are already looking at is nonsense. This page passes no
-  // onPopOut, and the shared NotesTab renders nothing without it.
+  // re-opens the window you are already looking at is nonsense. Since
+  // NOTITIE-POPOUT-HANDOFF-1 this page DOES name its popout target, but with
+  // `role: 'window'` — the receiving side, which renders no button of its own.
   it('never shows the pop-out button inside the pop-out window itself', () => {
     liteState.candidate = { id: 'cand-1', name: 'Anne de Vries', initials: 'AD' }
     render(<CandidateNotesPopout id="cand-1" />)

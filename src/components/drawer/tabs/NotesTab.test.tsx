@@ -5,10 +5,47 @@
  * name; edit still targets the note's ORIGINAL index in the full list after a
  * search narrows what is rendered (openEdit/onEditNote key off that index).
  */
-import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { render, screen } from '@testing-library/react'
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
+import { render, screen, act } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import NotesTab from './NotesTab'
+import { noteDraftTopic } from '@/lib/secondScreen'
+
+// The second-screen window opener — jsdom's window.open does nothing useful, and
+// the handoff needs to distinguish "window opened" from "popup blocked".
+const { openNotesPopoutMock } = vi.hoisted(() => ({ openNotesPopoutMock: vi.fn() }))
+vi.mock('@/lib/secondScreen', async importOriginal => ({
+  ...(await importOriginal<typeof import('@/lib/secondScreen')>()),
+  openNotesPopout: openNotesPopoutMock,
+}))
+
+// Tiptap is out of scope here (mirrors NoteComposer.test.tsx's own convention);
+// the stub gives the note body a plain, typable control so a HANDOFF test can
+// prove the recruiter's actual keystrokes travel.
+vi.mock('@/components/ui/RichTextEditor', () => ({
+  default: ({ value, onChange, toolbarExtra }: { value?: string; onChange: (v: string) => void; toolbarExtra?: React.ReactNode }) => (
+    <div data-testid="rte-wrapper">
+      {toolbarExtra}
+      <textarea aria-label="body" value={value ?? ''} onChange={e => onChange(e.target.value)} />
+    </div>
+  ),
+}))
+
+// In-memory stand-in for BroadcastChannel — one bus per topic, and (like the real
+// thing) a channel never receives its own message. Same double as
+// pages/popout/hooks/useTextPopoutDraft.test.ts, which jsdom also forces.
+const buses = new Map<string, Set<FakeChannel>>()
+class FakeChannel {
+  onmessage: ((e: { data: unknown }) => void) | null = null
+  constructor(public topic: string) {
+    if (!buses.has(topic)) buses.set(topic, new Set())
+    buses.get(topic)!.add(this)
+  }
+  postMessage(data: unknown) {
+    buses.get(this.topic)?.forEach(peer => { if (peer !== this) peer.onmessage?.({ data }) })
+  }
+  close() { buses.get(this.topic)?.delete(this) }
+}
 
 // formatDateTime added alongside the existing formatDate mock (distinguishable
 // transform, not identity) — proves the Tijdlijn section routes `time` through
@@ -289,32 +326,40 @@ describe('NotesTab · type/channel filter menu (NOTE-FILTERS-1)', () => {
 
 /**
  * NOTITIE-POPOUT-BAR-1 (Danny 09-08 "kan je hier de pop-out ook bijzetten?"): the
- * second-screen button now sits in the notes TOOLBAR, not only inside the composer's
- * FloatingPanel header. It is gated on the host wiring `onPopOut` — i.e. on an entity
- * that really owns a `/popout/notes/{entity}/{id}` route — so an entity without one
- * (applications/matches/tasks/opportunities, scoped location/department notes) never
- * gets a button that would open an empty window (§3). No real i18next instance runs in
- * this file, so `t('openSecondScreen')` falls back to the raw key.
+ * second-screen button sits in the notes TOOLBAR. It is gated on the host wiring
+ * `popout` — i.e. on an entity that really owns a `/popout/notes/{entity}/{id}`
+ * route — so an entity without one (applications/matches/tasks/opportunities, scoped
+ * location/department notes) never gets a button that would open an empty window (§3).
+ * No real i18next instance runs in this file, so `t('openSecondScreen')` falls back
+ * to the raw key.
  */
 describe('NotesTab · toolbar pop-out (NOTITIE-POPOUT-BAR-1)', () => {
-  it('renders the pop-out button when the host wired onPopOut (entity WITH a popout route)', () => {
-    render(<NotesTab notes={[note()]} labels={labels} onPopOut={vi.fn()}
+  const target = { entity: 'candidate' as const, id: 'c1' }
+  beforeEach(() => openNotesPopoutMock.mockReturnValue({} as Window))
+
+  it('renders the pop-out button when the host named a popout target (entity WITH a route)', () => {
+    render(<NotesTab notes={[note()]} labels={labels} popout={target}
       showTimeline={false} showConversations={false} />)
     expect(screen.getByRole('button', { name: 'openSecondScreen' })).toBeInTheDocument()
   })
 
-  it('renders NO pop-out button for a host that wired none (entity WITHOUT a popout route)', () => {
+  it('renders NO pop-out button for a host that named none (entity WITHOUT a popout route)', () => {
     render(<NotesTab notes={[note()]} labels={labels} showTimeline={false} showConversations={false} />)
     expect(screen.queryByRole('button', { name: 'openSecondScreen' })).toBeNull()
   })
 
-  it('clicking it calls the host handler once — without opening the composer', async () => {
+  it('renders NO pop-out button inside the popped-out window itself (no self-reopening)', () => {
+    render(<NotesTab notes={[note()]} labels={labels} popout={{ ...target, role: 'window' }}
+      showTimeline={false} showConversations={false} />)
+    expect(screen.queryByRole('button', { name: 'openSecondScreen' })).toBeNull()
+  })
+
+  it('clicking it opens that record\'s window once — without opening the composer', async () => {
     const user = userEvent.setup()
-    const onPopOut = vi.fn()
-    render(<NotesTab notes={[note()]} labels={labels} onPopOut={onPopOut}
+    render(<NotesTab notes={[note()]} labels={labels} popout={target}
       showTimeline={false} showConversations={false} />)
     await user.click(screen.getByRole('button', { name: 'openSecondScreen' }))
-    expect(onPopOut).toHaveBeenCalledTimes(1)
+    expect(openNotesPopoutMock).toHaveBeenCalledWith('candidate', 'c1')
     // The composer (FloatingPanel) must stay shut — this is a "read it elsewhere"
     // action, not a "write a note" one.
     expect(screen.queryByRole('dialog')).toBeNull()
@@ -322,7 +367,7 @@ describe('NotesTab · toolbar pop-out (NOTITIE-POPOUT-BAR-1)', () => {
 
   it('does not render it on a notes-less section (timeline-only host render)', () => {
     render(<NotesTab timeline={[{ time: '2026-08-04T17:30:00+00:00', text: 'Fase gewijzigd' }]}
-      labels={labels} onPopOut={vi.fn()} showNotes={false} showConversations={false} />)
+      labels={labels} popout={target} showNotes={false} showConversations={false} />)
     expect(screen.queryByRole('button', { name: 'openSecondScreen' })).toBeNull()
   })
 })
@@ -356,24 +401,145 @@ describe('NotesTab · timeline', () => {
   })
 })
 
-// POPOUT-HANDOFF-1 (Danny 09-08): popping out from the composer is a HANDOFF —
-// the modal closes and the second screen takes over. Two open editors for one
-// thread means whichever you typed in last silently wins.
-describe('NotesTab · pop-out from the composer hands over', () => {
-  it('closes the composer and opens the second screen in one action', async () => {
-    const user = userEvent.setup()
-    const onPopOut = vi.fn()
-    render(<NotesTab notes={[note()]} labels={labels} showTimeline={false} showConversations={false}
-      onPopOut={onPopOut} />)
+/**
+ * NOTITIE-POPOUT-HANDOFF-1 (Danny 09/10-08 "werking hetzelfde als icon
+ * profieltekst"): popping out from the composer is a HANDOFF — the text MOVES to
+ * the second screen and this composer closes only once that screen confirms it has
+ * it. Two editors for one thread means whichever you typed in last silently wins;
+ * closing before the transfer landed means the text is simply gone. Both are text
+ * loss, so both are asserted here.
+ */
+describe('NotesTab · pop-out from the composer hands the text over', () => {
+  const target = { entity: 'candidate' as const, id: 'c1' }
+  const topic = noteDraftTopic(target.entity, target.id)
+  const popoutLabels = { ...labels, notePlaceholder: () => 'Titel…' }
+  // Every message the second screen would see.
+  let seen: unknown[]
+  let peer: FakeChannel
 
+  beforeEach(() => {
+    buses.clear()
+    seen = []
+    openNotesPopoutMock.mockReturnValue({} as Window)
+    vi.stubGlobal('BroadcastChannel', FakeChannel as unknown as typeof BroadcastChannel)
+    peer = new FakeChannel(topic)
+    peer.onmessage = e => seen.push(e.data)
+  })
+  afterEach(() => vi.unstubAllGlobals())
+
+  // Opens the composer and writes a half-typed note into it.
+  const composeHalfANote = async (user: ReturnType<typeof userEvent.setup>) => {
     await user.click(screen.getByRole('button', { name: labels.newNote }))
-    // Toolbar pop-out renders first, the composer's own last — click the composer's.
-    // This suite runs without real i18n, so t() yields the bare key.
-    const popOuts = screen.getAllByRole('button', { name: 'openSecondScreen' })
-    await user.click(popOuts[popOuts.length - 1])
+    await user.type(screen.getByLabelText('body'), 'Halve notitie')
+    await user.type(screen.getByPlaceholderText('Titel…'), 'Belnotitie')
+  }
+  // The composer's OWN pop-out icon (the toolbar one renders first in the DOM).
+  const blockPopOut = () => {
+    const titleRow = screen.getByPlaceholderText('Titel…').parentElement!
+    return titleRow.querySelector('button[aria-label="openSecondScreen"]') as HTMLButtonElement | null
+  }
+  const drafts = () => seen.filter((m): m is { kind: 'draft'; note: Record<string, unknown> } =>
+    typeof m === 'object' && m !== null && (m as { kind?: string }).kind === 'draft')
 
-    expect(onPopOut).toHaveBeenCalledTimes(1)
-    // The composer is gone — not left open behind the new window.
+  it('puts the icon in the note BLOCK — never in the window title bar any more', async () => {
+    const user = userEvent.setup()
+    render(<NotesTab notes={[note()]} labels={popoutLabels} popout={target}
+      showTimeline={false} showConversations={false} />)
+    await user.click(screen.getByRole('button', { name: labels.newNote }))
+
+    // The FloatingPanel's drag handle IS its title bar — the icon left it.
+    const dragHandle = screen.getByRole('dialog').querySelector('[data-drag-handle]')!
+    expect(dragHandle.querySelector('button[aria-label="openSecondScreen"]')).toBeNull()
+    // It sits in the block's own title row instead, next to the note title.
+    expect(blockPopOut()).not.toBeNull()
+  })
+
+  it('publishes the TYPED note on the handoff topic — the text travels', async () => {
+    const user = userEvent.setup()
+    render(<NotesTab notes={[note()]} labels={popoutLabels} popout={target}
+      showTimeline={false} showConversations={false} />)
+    await composeHalfANote(user)
+    await user.click(blockPopOut()!)
+
+    expect(openNotesPopoutMock).toHaveBeenCalledWith('candidate', 'c1')
+    expect(drafts()).toHaveLength(1)
+    expect(drafts()[0].note).toEqual(expect.objectContaining({ body: 'Halve notitie', title: 'Belnotitie' }))
+  })
+
+  it('keeps the composer — WITH the text — open until the second screen acks', async () => {
+    const user = userEvent.setup()
+    render(<NotesTab notes={[note()]} labels={popoutLabels} popout={target}
+      showTimeline={false} showConversations={false} />)
+    await composeHalfANote(user)
+    await user.click(blockPopOut()!)
+
+    // Nothing acked yet: the text is still here, not gone with a closed window.
+    expect(screen.getByRole('dialog')).toBeInTheDocument()
+    expect(screen.getByLabelText('body')).toHaveValue('Halve notitie')
+
+    act(() => peer.postMessage({ kind: 'ack' }))
     expect(screen.queryByRole('dialog')).toBeNull()
+  })
+
+  it('never publishes NOR closes when the browser blocked the pop-out window', async () => {
+    const user = userEvent.setup()
+    openNotesPopoutMock.mockReturnValue(null)
+    render(<NotesTab notes={[note()]} labels={popoutLabels} popout={target}
+      showTimeline={false} showConversations={false} />)
+    await composeHalfANote(user)
+    await user.click(blockPopOut()!)
+
+    expect(drafts()).toHaveLength(0)
+    expect(screen.getByRole('dialog')).toBeInTheDocument()
+    expect(screen.getByLabelText('body')).toHaveValue('Halve notitie')
+  })
+
+  it('replays the draft to a window that boots LATER and says hello', async () => {
+    const user = userEvent.setup()
+    render(<NotesTab notes={[note()]} labels={popoutLabels} popout={target}
+      showTimeline={false} showConversations={false} />)
+    await composeHalfANote(user)
+    await user.click(blockPopOut()!)
+    seen.length = 0
+
+    act(() => peer.postMessage({ kind: 'hello' }))
+    expect(drafts()[0].note).toEqual(expect.objectContaining({ body: 'Halve notitie' }))
+  })
+
+  it('shows no hand-over icon while EDITING an existing note (it would save as a new one)', async () => {
+    const user = userEvent.setup()
+    render(<NotesTab notes={[note({ text: '<p>Bestaand</p>' })]} labels={popoutLabels} popout={target}
+      onEditNote={vi.fn()} showTimeline={false} showConversations={false} />)
+    await user.click(screen.getByTitle('Bewerken'))
+    expect(screen.getByRole('dialog')).toBeInTheDocument()
+    expect(blockPopOut()).toBeNull()
+  })
+
+  // The RECEIVING half: this render IS the second screen.
+  it('opens its own composer on an incoming draft and acks it', () => {
+    render(<NotesTab notes={[]} labels={popoutLabels} popout={{ ...target, role: 'window' }}
+      showTimeline={false} showConversations={false} />)
+    act(() => peer.postMessage({ kind: 'draft', note: { type: '', channel: '', title: 'Belnotitie', body: 'Halve notitie' } }))
+
+    expect(screen.getByRole('dialog')).toBeInTheDocument()
+    expect(screen.getByLabelText('body')).toHaveValue('Halve notitie')
+    expect(screen.getByPlaceholderText('Titel…')).toHaveValue('Belnotitie')
+    // Acked only from the render that shows it — that ack is what lets the
+    // drill-down close its own composer.
+    expect(seen).toContainEqual({ kind: 'ack' })
+  })
+
+  it('does NOT ack (and so never costs text) when its own composer is already busy', async () => {
+    const user = userEvent.setup()
+    render(<NotesTab notes={[]} labels={popoutLabels} popout={{ ...target, role: 'window' }}
+      showTimeline={false} showConversations={false} />)
+    await user.click(screen.getByRole('button', { name: labels.newNote }))
+    await user.type(screen.getByLabelText('body'), 'Eigen tekst')
+    seen.length = 0
+
+    act(() => peer.postMessage({ kind: 'draft', note: { type: '', channel: '', title: 'Belnotitie', body: 'Halve notitie' } }))
+    expect(seen).not.toContainEqual({ kind: 'ack' })
+    // This window's own text is untouched — one text loss is never traded for another.
+    expect(screen.getByLabelText('body')).toHaveValue('Eigen tekst')
   })
 })

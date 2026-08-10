@@ -5,7 +5,6 @@ import { notifyError } from '@/lib/notify'
 import { extractApiError } from '@/lib/extractApiError'
 import SharedNotesTab from '@/components/drawer/tabs/NotesTab'
 import { useNoteTypes } from '@/lib/useNoteTypes'
-import { openNotesPopout } from '@/lib/secondScreen'
 import type { VacancyDetail } from '@/types/vacancy'
 
 // Structural match for the shared NotesTab's NoteItem (typed fields + open index).
@@ -51,10 +50,11 @@ export default function NotesTab({ vacancy: v }: { vacancy: VacancyDetail }) {
       authorInitials={initials}
       showTimeline={false}
       showConversations={false}
-      // F5-uitbreiding: pop the vacancy's notes into a real browser window (named
-      // window — reopening focuses the existing one); a blocked popup gets an
-      // honest notice instead of failing silently (mirrors CommunicationTab).
-      onPopOut={() => { if (!openNotesPopout('vacancy', String(v.id))) notifyError(t('common:popupBlocked')) }}
+      // F5-uitbreiding: which record the shared tab may pop out (named window —
+      // reopening focuses the existing one). Since NOTITIE-POPOUT-HANDOFF-1 the tab
+      // owns opening it, the blocked-popup notice AND handing a half-typed note
+      // over, so this host only names the target (mirrors CommunicationTab).
+      popout={{ entity: 'vacancy', id: String(v.id) }}
       labels={{
         notes: t('notes.title'),
         newNote: t('notes.new'),

@@ -74,12 +74,16 @@ describe('vacancies NotesTab (VACANCY-NOTE-TYPE-1, shared reuse)', () => {
     openSpy.mockRestore()
   })
 
+  // The notice itself moved into the shared hook (NOTITIE-POPOUT-HANDOFF-1, which
+  // needs to know whether the window actually opened before it hands a draft over),
+  // so it now resolves the SAME common-namespace key through that hook's own
+  // useTranslation('common') — hence the bare 'popupBlocked' fallback here.
   it('reports a blocked popup instead of failing silently', async () => {
     const user = userEvent.setup()
     const openSpy = vi.spyOn(window, 'open').mockReturnValue(null)
     render(<NotesTab vacancy={vacancy()} />)
     await user.click(screen.getByRole('button', { name: 'openSecondScreen' }))
-    expect(notifyError).toHaveBeenCalledWith('common:popupBlocked')
+    expect(notifyError).toHaveBeenCalledWith('popupBlocked')
     openSpy.mockRestore()
   })
 

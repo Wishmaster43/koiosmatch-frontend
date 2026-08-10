@@ -40,15 +40,27 @@
  * because this screen's Koios actions live in the richer `NoteAssistSection`
  * below the editor — it adds action-item extraction + the K0-B execute bridge,
  * which only make sense for a note.
+ *
+ * NOTITIE-POPOUT-HANDOFF-1 (Danny 09/10-08 "icon verplaatsen en werking hetzelfde
+ * als icon profieltekst"): the pop-out icon LEFT the FloatingPanel's title bar and
+ * now sits in this block's own title row, beside the note title and directly above
+ * the editor — the exact place and the exact 26x26 bordered icon button the profile
+ * text uses (candidates/drawer/ProfileTab). And, like the profile text, THE TEXT
+ * TRAVELS: clicking it hands the whole half-typed note (type · channel · title ·
+ * body · language) to the second screen over the shared popout channel
+ * (hooks/useNotesPopout) instead of opening an empty sheet. This composer closes
+ * only once that window confirms it holds the draft — never on the click itself.
  */
 import { useEffect, useState } from 'react'
 import type { CSSProperties, ReactNode } from 'react'
-import { Save, X } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
+import { ExternalLink, Save, X } from 'lucide-react'
 import FloatingPanel from '@/components/ui/FloatingPanel'
 import RichTextEditor from '@/components/ui/RichTextEditor'
 import RichTextAssistBar from '@/components/ui/RichTextAssistBar'
 import NoteAssistSection from './NoteAssistSection'
 import { CHANNEL_ICON } from './channelIcons'
+import type { NoteDraft } from '@/hooks/useNotesPopout'
 import type { NoteItem, NoteType, NotePayload, NotesLabels } from '../NotesTab'
 
 interface NoteComposerProps {
@@ -62,31 +74,45 @@ interface NoteComposerProps {
   // Host-supplied composer row (customer tab's link picker) — NEW notes only,
   // mirrors the previous inline composer's `editingIdx === null` gate.
   composerExtra?: ReactNode
-  // F5 second-screen: host-supplied pop-out handler — forwarded to FloatingPanel's
-  // header button. Passed by every host whose entity owns a popout route
-  // (candidate · customer · vacancy); since NOTITIE-POPOUT-BAR-1 the same handler
-  // also drives the notes TOOLBAR button, so the affordance is reachable without
-  // opening a note first. The popout window itself never passes it (no recursion).
-  onPopOut?: () => void
+  // NOTITIE-POPOUT-HANDOFF-1: hand this half-typed note to the second screen.
+  // Wired only by a host whose entity owns a `/popout/notes/{entity}/{id}` route
+  // (candidate · customer · vacancy); the popout window itself never passes it (no
+  // recursion). Handing over does NOT close this composer — the host closes it
+  // once the window confirms it holds the draft.
+  onPopOutDraft?: (draft: NoteDraft) => void
+  // A handoff is in flight: the icon reads as busy and cannot be fired twice.
+  popOutPending?: boolean
+  // A draft handed over BY another window. Seeds exactly the fields `initialNote`
+  // seeds, but the note stays a NEW one (a draft carries no note id).
+  initialDraft?: NoteDraft | null
   onSave: (payload: NotePayload) => void
   onCancel: () => void
 }
 
 const iconBtn: CSSProperties = { width: 30, height: 30, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 8, cursor: 'pointer' }
+// Pop-out icon — byte-for-byte the profile text's own affordance (ProfileTab):
+// 26x26, bordered, muted, no fill. One affordance, one look (§4).
+const popOutBtn: CSSProperties = { width: 26, height: 26, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 6, background: 'none', color: 'var(--text-muted)', border: '1px solid var(--border)', flexShrink: 0 }
 
-export default function NoteComposer({ open, initialNote, noteTypes, channels, labels, editorLabels, composerExtra, onPopOut, onSave, onCancel }: NoteComposerProps) {
+export default function NoteComposer({ open, initialNote, noteTypes, channels, labels, editorLabels, composerExtra, onPopOutDraft, popOutPending, initialDraft, onSave, onCancel }: NoteComposerProps) {
+  const { t } = useTranslation('common')
   const isNew = initialNote == null
   // Existing note's own id (K0-B execute source) — a NoteItem's index signature
   // carries it at runtime even though the shared type doesn't declare it
   // (mirrors author_id's optional-field convention in NotesTab.tsx).
   const noteId = initialNote && typeof initialNote.id === 'string' ? initialNote.id : undefined
-  const [type, setType] = useState(initialNote?.type ?? noteTypes[0]?.value ?? '')
-  const [channel, setChannel] = useState(initialNote?.channel ?? '')
-  const [title, setTitle] = useState(initialNote?.title ?? '')
-  const [body, setBody] = useState(initialNote?.text ?? initialNote?.body ?? '')
+  // One seed for all fields: a draft handed over from another window wins, else
+  // the note being edited. Both fill the SAME fields — only `isNew` differs.
+  const seed = initialDraft
+    ? { type: initialDraft.type, channel: initialDraft.channel, title: initialDraft.title, body: initialDraft.body, language: initialDraft.language }
+    : { type: initialNote?.type ?? '', channel: initialNote?.channel ?? '', title: initialNote?.title ?? '', body: initialNote?.text ?? initialNote?.body ?? '', language: initialNote?.language }
+  const [type, setType] = useState(seed.type || noteTypes[0]?.value || '')
+  const [channel, setChannel] = useState(seed.channel)
+  const [title, setTitle] = useState(seed.title)
+  const [body, setBody] = useState(seed.body)
   // NOTE-TAAL-1: prefilled from the note being edited; undefined for a new note
   // (RichTextEditor then falls back to the app's own locale — its normal default).
-  const [language, setLanguage] = useState<string | undefined>(initialNote?.language ?? undefined)
+  const [language, setLanguage] = useState<string | undefined>(seed.language)
 
   // Resync when the host swaps the writable type list mid-compose (the customer
   // tab's link-level picker switches scope INSIDE the composer) — a stale type
@@ -99,15 +125,24 @@ export default function NoteComposer({ open, initialNote, noteTypes, channels, l
 
   const typeLabel = noteTypes.find(n => n.value === type)?.label ?? ''
   const save = () => onSave({ type, title, body, channel: channel || undefined, language: language || undefined })
+  // Only a NEW note can be handed to the second screen: a draft carries no note
+  // id, so a window receiving one saves it as a new note. Rather than a button
+  // that would silently duplicate (or drop) an edit, an edit shows none at all
+  // (§3, no fake affordance) — the toolbar pop-out still opens the thread there.
+  const canHandOff = Boolean(onPopOutDraft) && isNew
+  // Hand the WHOLE composed note over; the host waits for the window's ack.
+  const popOut = () => onPopOutDraft?.({ type, channel, title, body, language })
   // FloatingPanel wants a plain string; every host's newNote/edit label is one
   // in practice (ReactNode on the type only because DrawerAddButton's `label`
   // slot accepts richer content elsewhere) — coerce defensively, never throw.
   const rawTitle = isNew ? labels.newNote : labels.edit
   const panelTitle = typeof rawTitle === 'string' ? rawTitle : String(rawTitle ?? '')
 
+  // No `onPopOut` on the panel any more (NOTITIE-POPOUT-HANDOFF-1): the
+  // second-screen icon moved out of the window's title bar into the note block.
   return (
     <FloatingPanel open={open} onClose={onCancel} title={panelTitle} ariaLabel={panelTitle}
-      persistKey="notes-composer" width={640} maxWidth="92vw" scrollBody={false} onPopOut={onPopOut}>
+      persistKey="notes-composer" width={640} maxWidth="92vw" scrollBody={false}>
       {/* Scrollable content — RichTextEditor (fill) is the ONE growing item, so
           dragging the panel bigger grows the WRITING space, never empty
           whitespace below a stuck-size editor. `overflow: auto` is the safety
@@ -155,8 +190,21 @@ export default function NoteComposer({ open, initialNote, noteTypes, channels, l
             </div>
           </div>
         )}
-        <input value={title} onChange={e => setTitle(e.target.value)} placeholder={labels.notePlaceholder?.(typeLabel)}
-          style={{ width: '100%', padding: '8px 12px', fontSize: 13, fontWeight: 500, borderRadius: 8, border: '1px solid var(--border)', background: 'var(--surface)', color: 'var(--text)', boxSizing: 'border-box', outline: 'none', flexShrink: 0 }} />
+        {/* Title row OF THE NOTE BLOCK — the pop-out icon lives here now, directly
+            above the editor and part of the content, exactly like the profile
+            text's own title row (Danny 09/10-08). Hidden while editing an existing
+            note: see canHandOff. */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0 }}>
+          <input value={title} onChange={e => setTitle(e.target.value)} placeholder={labels.notePlaceholder?.(typeLabel)}
+            style={{ flex: 1, minWidth: 0, padding: '8px 12px', fontSize: 13, fontWeight: 500, borderRadius: 8, border: '1px solid var(--border)', background: 'var(--surface)', color: 'var(--text)', boxSizing: 'border-box', outline: 'none' }} />
+          {canHandOff && (
+            <button type="button" onClick={popOut} disabled={popOutPending} aria-busy={popOutPending}
+              title={t('openSecondScreen')} aria-label={t('openSecondScreen')}
+              style={{ ...popOutBtn, opacity: popOutPending ? 0.5 : 1, cursor: popOutPending ? 'default' : 'pointer' }}>
+              <ExternalLink size={13} />
+            </button>
+          )}
+        </div>
         {/* TAAL-SPELL-1: language/onLanguageChange controlled here so the pick rides
             into the save payload. NOTITIE-VOICE-1 (Danny 08-08 "mic naast de taal,
             tenant kleur"): the dictation mic rides the editor's own toolbar slot,

@@ -156,6 +156,84 @@ describe('NoteComposer · save payload (NOTE-TAAL-1)', () => {
   })
 })
 
+/**
+ * NOTITIE-POPOUT-HANDOFF-1 (Danny 09/10-08): the pop-out icon moved OUT of the
+ * FloatingPanel's title bar into this block's own title row — same place, same
+ * 26x26 bordered button as the profile text — and it now hands the composed note
+ * over instead of opening an empty second screen. This file owns the composer half:
+ * where the icon is, what it hands over, and when it refuses to render at all.
+ * The channel/ack half lives in hooks/useNotesPopout.test.ts + NotesTab.test.tsx.
+ */
+describe('NoteComposer · second-screen hand-over (NOTITIE-POPOUT-HANDOFF-1)', () => {
+  // No i18next instance in this tree, so t('openSecondScreen') is the bare key.
+  const popOutButton = () => screen.queryByRole('button', { name: 'openSecondScreen' })
+
+  it('renders the icon in the note block, NOT in the panel title bar', () => {
+    render(<NoteComposer open initialNote={null} noteTypes={noteTypes} channels={[]} labels={labels}
+      onPopOutDraft={vi.fn()} onSave={vi.fn()} onCancel={vi.fn()} />)
+    const dragHandle = screen.getByRole('dialog').querySelector('[data-drag-handle]')!
+    expect(dragHandle.querySelector('button[aria-label="openSecondScreen"]')).toBeNull()
+    expect(popOutButton()).toBeInTheDocument()
+  })
+
+  it('hands over every field the recruiter filled in — type, channel, title, body, language', async () => {
+    const user = userEvent.setup()
+    const onPopOutDraft = vi.fn()
+    const channels = [{ value: 'phone', label: 'Telefoon' }]
+    render(<NoteComposer open initialNote={null} noteTypes={noteTypes} channels={channels} labels={labels}
+      onPopOutDraft={onPopOutDraft} onSave={vi.fn()} onCancel={vi.fn()} />)
+
+    await user.click(screen.getByText('Bellen'))
+    await user.click(screen.getByText('Telefoon'))
+    await user.click(screen.getByRole('button', { name: 'pick-german' }))
+    await user.type(screen.getByLabelText('body'), 'Klant gebeld')
+    await user.click(popOutButton()!)
+
+    expect(onPopOutDraft).toHaveBeenCalledWith({ type: 'call', channel: 'phone', title: '', body: 'Klant gebeld', language: 'de' })
+  })
+
+  it('never closes itself on the click — the host closes it on the window\'s ack', async () => {
+    const user = userEvent.setup()
+    const onCancel = vi.fn()
+    render(<NoteComposer open initialNote={null} noteTypes={noteTypes} channels={[]} labels={labels}
+      onPopOutDraft={vi.fn()} onSave={vi.fn()} onCancel={onCancel} />)
+    await user.click(popOutButton()!)
+    expect(onCancel).not.toHaveBeenCalled()
+    expect(screen.getByRole('dialog')).toBeInTheDocument()
+  })
+
+  it('is disabled while a hand-over is in flight (never fired twice)', () => {
+    render(<NoteComposer open initialNote={null} noteTypes={noteTypes} channels={[]} labels={labels}
+      onPopOutDraft={vi.fn()} popOutPending onSave={vi.fn()} onCancel={vi.fn()} />)
+    expect(popOutButton()).toBeDisabled()
+  })
+
+  it('renders no icon at all while EDITING an existing note (§3, it would save a duplicate)', () => {
+    render(<NoteComposer open initialNote={{ type: 'general', text: 'Existing' }} noteTypes={noteTypes} channels={[]}
+      labels={labels} onPopOutDraft={vi.fn()} onSave={vi.fn()} onCancel={vi.fn()} />)
+    expect(popOutButton()).toBeNull()
+  })
+
+  it('renders no icon for a host without a popout route', () => {
+    render(<NoteComposer open initialNote={null} noteTypes={noteTypes} channels={[]} labels={labels}
+      onSave={vi.fn()} onCancel={vi.fn()} />)
+    expect(popOutButton()).toBeNull()
+  })
+
+  it('seeds itself from a received draft — and stays a NEW note, so saving adds one', async () => {
+    const user = userEvent.setup()
+    const onSave = vi.fn()
+    render(<NoteComposer open initialNote={null} initialDraft={{ type: 'call', channel: 'phone', title: 'Belnotitie', body: 'Halve notitie', language: 'fr' }}
+      noteTypes={noteTypes} channels={[]} labels={labels} onSave={onSave} onCancel={vi.fn()} />)
+
+    expect(screen.getByRole('dialog', { name: 'Nieuwe notitie' })).toBeInTheDocument()
+    expect(screen.getByLabelText('body')).toHaveValue('Halve notitie')
+    expect(screen.getByTestId('current-language')).toHaveTextContent('fr')
+    await user.click(screen.getByTitle('Save'))
+    expect(onSave).toHaveBeenCalledWith({ type: 'call', channel: 'phone', title: 'Belnotitie', body: 'Halve notitie', language: 'fr' })
+  })
+})
+
 describe('NoteComposer · dictation mic (NOTITIE-VOICE-1)', () => {
   afterEach(() => {
     delete (window as { SpeechRecognition?: unknown }).SpeechRecognition

@@ -46,13 +46,20 @@
  * on a second monitor first had to open a new note. The toolbar now carries the
  * same button — mirroring the profile text's pop-out (candidates/drawer/
  * ProfileTab) 1:1 in icon, footprint and tone, never a new shape. It is gated on
- * the host having wired `onPopOut`, i.e. on an entity that actually owns a
+ * the host having wired `popout`, i.e. on an entity that actually owns a
  * `/popout/notes/{entity}/{id}` route (candidate · customer · vacancy today), so
  * no entity gets a button that would open an empty window (§3), and the popout
- * window itself — which passes no handler — never shows a button re-opening
- * itself.
+ * window itself (`role: 'window'`) never shows a button re-opening itself.
+ *
+ * NOTITIE-POPOUT-HANDOFF-1 (Danny 09/10-08 "werking hetzelfde als icon
+ * profieltekst"): popping out from the COMPOSER now moves the half-typed note
+ * along instead of leaving the recruiter with an empty sheet on the second screen.
+ * This tab owns the two ends of that handoff — it hands the composer's draft over
+ * and closes the composer ONLY on the receiving window's ack, and, when it IS that
+ * window, it opens its own composer on the incoming draft and acks it. The
+ * protocol itself lives in `hooks/useNotesPopout` (§3 logic-in-hooks).
  */
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import DrawerAddButton from '@/components/drawer/DrawerAddButton'
@@ -65,6 +72,8 @@ import SectionCard, { sectionBlock } from '@/components/ui/SectionCard'
 import TimelineRail from '@/components/ui/TimelineRail'
 import { useAuth } from '@/context/AuthContext'
 import { useConfirm } from '@/hooks/useConfirm'
+import { useNotesPopout } from '@/hooks/useNotesPopout'
+import type { NotesPopoutTarget } from '@/hooks/useNotesPopout'
 import { useDateFormat } from '@/lib/datetime'
 import { initialsOf } from '@/lib/initials'
 import { SYSTEM_NOTE_TYPES } from '@/lib/useNoteTypes'
@@ -147,15 +156,17 @@ interface NotesTabProps {
   // the customer tab's "link this note to …" picker belongs in the compose flow,
   // not as a standing toolbar row). Rendered only while composing a NEW note.
   composerExtra?: ReactNode
-  // F5 second-screen (+ NOTITIE-POPOUT-BAR-1): opens this record's notes in a real
-  // second browser window. Drives BOTH the toolbar pop-out button and the composer's
-  // FloatingPanel header button. Passed ONLY by a host whose entity owns a
-  // `/popout/notes/{entity}/{id}` route — candidate, customer and vacancy today;
-  // applications/matches/tasks/opportunities and the scoped location/department
-  // notes have no such route, so they omit it and render no button at all (§3, no
-  // fake affordance). The popout window's own pages deliberately omit it too, so
-  // the second screen never offers to open itself again.
-  onPopOut?: () => void
+  // F5 second-screen (+ NOTITIE-POPOUT-BAR-1 / -HANDOFF-1): which record this
+  // notes surface belongs to, and which side of the glass this render is on. One
+  // prop carries the whole relationship — the toolbar button, the composer's
+  // handoff and (in the window itself) receiving a handed-over draft all key off
+  // it. Passed ONLY by a host whose entity owns a `/popout/notes/{entity}/{id}`
+  // route — candidate, customer and vacancy today; applications/matches/tasks/
+  // opportunities and the scoped location/department notes have no such route, so
+  // they omit it and render no button at all (§3, no fake affordance). The popout
+  // pages pass it with `role: 'window'`, so the second screen receives drafts but
+  // never offers to open itself again.
+  popout?: NotesPopoutTarget
   showTimeline?: boolean
   showConversations?: boolean
   // Optional (Danny 2026-07-20, job A "potlood op de statuswissel"): when the host
@@ -188,7 +199,7 @@ export default function NotesTab({
   authorInitials, timelineName, timelineInitials, onAddNote, onEditNote, onDeleteNote,
   managePermission = 'candidates.notes.manage_all',
   showNotes = true, showTimeline = true, showConversations = true, onEditStatusEvent, renderTimelineContent,
-  error, onRetry, composerExtra, onPopOut,
+  error, onRetry, composerExtra, popout,
 }: NotesTabProps) {
   // Shared meta copy (edited-by) — common namespace so every host gets it at once.
   const { t } = useTranslation('common')
@@ -215,6 +226,18 @@ export default function NotesTab({
   const hasPermission = auth?.hasPermission ?? (() => false)
   // Delete goes through the shared confirm dialog, never a native window.confirm() (§0).
   const { confirm, dialog } = useConfirm()
+  // Second screen (NOTITIE-POPOUT-BAR-1 / -HANDOFF-1): opening the window, handing
+  // the composer's half-typed note over to it, and — when this render IS that
+  // window — taking such a draft over. The protocol lives in the hook (§3).
+  const { isWindow: isPopoutWindow, open: openPopout, handOff, pending: handoffPending, incoming, ack, clearIncoming } =
+    useNotesPopout({ target: popout, onHandedOver: () => { setAdding(false); setEditingIdx(null) } })
+  // A handed-over draft is only taken over while THIS composer is free: overwriting
+  // a note being written here would just move the text loss elsewhere. Not taken
+  // over = never acked = the drill-down keeps its own text (see the hook).
+  const incomingDraft = adding ? null : incoming
+  // Ack from an EFFECT, i.e. after the render that actually shows the draft — the
+  // other window may close only once this one demonstrably holds the text.
+  useEffect(() => { if (incomingDraft) ack() }, [incomingDraft, ack])
 
   // Load-error state (see NotesTabProps.error) — a calm danger row replaces the
   // whole tab body, same shape as MatchContractSection's error+retry; no button
@@ -286,13 +309,15 @@ export default function NotesTab({
 
   // Close the popup — NoteComposer owns its own field state, so this is just "not
   // composing anything" again (mirrors the previous reset(), minus the field resets).
-  const closeComposer = () => { setAdding(false); setEditingIdx(null) }
+  // Dropping a received draft too, so a next note never re-seeds from it.
+  const closeComposer = () => { setAdding(false); setEditingIdx(null); clearIncoming() }
   // POPOUT-HANDOFF-1 (Danny 09-08: "moet bestaand venster sluiten en de pop-out
-  // direct openen in het versleepbare scherm, zoals bij profieltekst"). Popping
-  // out is a HANDOFF, not a second copy: leaving the modal open behind the new
-  // window gives two editors for one thread, and whichever you type in last
-  // silently wins. Close first, then hand over.
-  const popOutFromComposer = () => { closeComposer(); onPopOut?.() }
+  // direct openen in het versleepbare scherm, zoals bij profieltekst"). Popping out
+  // is a HANDOFF, not a second copy: two editors for one thread means whichever you
+  // typed in last silently wins. Since -HANDOFF-1 the TEXT moves with it and the
+  // closing waits for the receiving window's ack — handled in the hook, which calls
+  // back into the state setters above; a failed handoff simply never closes this.
+  const composerOpen = adding || incomingDraft != null
   const openEdit = (i: number) => { setEditingIdx(i); setAdding(true) }
   // NoteComposer hands back the finished payload; this is the only place that
   // still decides add-vs-edit (the index into the FULL `notes` array).
@@ -365,10 +390,11 @@ export default function NotesTab({
               straight from the toolbar. Deliberately the SAME 26x26 bordered icon
               button, the same ExternalLink glyph and the same `common:openSecondScreen`
               label as the profile text's pop-out and the composer's header button —
-              one affordance, one look. Renders only for a host that wired onPopOut
-              (see the prop's comment: an entity with a real popout route). */}
-          {onPopOut && (
-            <button type="button" onClick={onPopOut} title={t('openSecondScreen')} aria-label={t('openSecondScreen')}
+              one affordance, one look. Renders only for a host that wired `popout`
+              (see the prop's comment: an entity with a real popout route), and never
+              inside the popped-out window itself. */}
+          {popout && !isPopoutWindow && (
+            <button type="button" onClick={openPopout} title={t('openSecondScreen')} aria-label={t('openSecondScreen')}
               style={{ width: 26, height: 26, display: 'flex', alignItems: 'center', justifyContent: 'center',
                 borderRadius: 6, background: 'none', color: 'var(--text-muted)',
                 border: '1px solid var(--border)', cursor: 'pointer', flexShrink: 0 }}>
@@ -380,7 +406,7 @@ export default function NotesTab({
               (DRAWER-ADD-SHORT-1, Danny 05-08): this always renders inside a
               drawer sub-tab, never a full page. Opens the POPUP composer now
               (POPUP-SLEEP-1) instead of an inline block. */}
-          {!adding && <DrawerAddButton onClick={() => setAdding(true)} label={labels.newNote} short />}
+          {!composerOpen && <DrawerAddButton onClick={() => setAdding(true)} label={labels.newNote} short />}
         </div>
         {/* POPUP-SLEEP-1: the add/edit composer — see notes/NoteComposer.tsx.
             EDIT-PREFILL-1 (Danny 08-08 "popup maar geen txt erin"): the composer
@@ -390,15 +416,19 @@ export default function NotesTab({
             compose target (new vs edit-i), so the fields always seed from the
             note actually being edited. */}
         <NoteComposer
-          key={editingIdx != null ? `edit-${editingIdx}` : adding ? 'new' : 'idle'}
-          open={adding}
+          key={incomingDraft ? 'handoff' : editingIdx != null ? `edit-${editingIdx}` : adding ? 'new' : 'idle'}
+          open={composerOpen}
           initialNote={editingIdx != null ? notes[editingIdx] : null}
+          // Second screen: seeded FROM a handed-over draft in the popout window,
+          // and the source OF one in the drill-down (never both in one render).
+          initialDraft={incomingDraft}
           noteTypes={noteTypes} channels={channels} labels={labels} editorLabels={editorLabels}
-          composerExtra={composerExtra} onPopOut={onPopOut && popOutFromComposer}
+          composerExtra={composerExtra}
+          onPopOutDraft={popout && !isPopoutWindow ? handOff : undefined} popOutPending={handoffPending}
           onSave={handleSave} onCancel={closeComposer}
         />
         <div style={sectionBlock}>
-        {visibleNotes.length === 0 && !adding
+        {visibleNotes.length === 0 && !composerOpen
           ? <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{labels.notesEmpty}</div>
           : visibleNotes.map(({ n, i }) => {
               const who = noteAuthor(n)

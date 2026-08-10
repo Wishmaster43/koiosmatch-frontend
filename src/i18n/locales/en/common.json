@@ -385,5 +385,6 @@
     "selectVisible": "Select all",
     "clearVisible": "Clear all",
     "visibleHint": "Applies to the {{count}} visible options"
-  }
+  },
+  "popoutHandoffFailed": "The second screen did not take the note over. Your text is still here."
 }

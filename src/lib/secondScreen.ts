@@ -45,6 +45,15 @@ export function openNotesPopout(a: PopoutEntity | string | number, b?: string | 
 }
 
 /**
+ * NOTITIE-POPOUT-HANDOFF-1 (Danny 09/10-08): identity of ONE note handoff — the
+ * BroadcastChannel topic the drill-down's note composer and the second-screen
+ * notes window move a half-typed note over (hooks/useNotesPopout). Deliberately
+ * built like `textPopoutTopic` below — same recipe, one mechanism (§11) — and
+ * scoped per entity+id so two records can never swap drafts.
+ */
+export const noteDraftTopic = (entity: PopoutEntity, id: string | number) => `koios-note-draft-${entity}-${id}`
+
+/**
  * TEKST-POPOUT-1 (Danny 08-08, punt 2): the SAME second-screen mechanism for a
  * single free-text field — today the candidate's profile text. Notes pop out a
  * whole thread; this pops out ONE field so the recruiter can write it full-size

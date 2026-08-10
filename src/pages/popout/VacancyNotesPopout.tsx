@@ -58,7 +58,11 @@ export default function VacancyNotesPopout({ id }: { id: string | undefined }) {
       loadingLabel={t('common:loading')} errorLabel={t('popout.loadError')} retryLabel={t('common:error.retry')}
       name={vacancy?.name ?? ''} initials={vacancy?.initials ?? ''} subtitle={t('notes.title')}
     >
-      <NotesTab {...notesProps} showTimeline={false} showConversations={false} />
+      {/* NOTITIE-POPOUT-HANDOFF-1: `role: 'window'` makes this the RECEIVING side —
+          a note the recruiter was half-typing in the drill-down opens here, in the
+          composer, instead of being lost. It renders no pop-out button of its own. */}
+      <NotesTab {...notesProps} showTimeline={false} showConversations={false}
+        popout={id ? { entity: 'vacancy', id, role: 'window' } : undefined} />
     </PopoutShell>
   )
 }
