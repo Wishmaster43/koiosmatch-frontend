@@ -174,16 +174,24 @@ export default function NoteComposer({ open, initialNote, noteTypes, channels, l
           <div>
             <div style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 6 }}>{labels.channel}</div>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+              {/* PICKER contrast: only the SELECTED chip wears its channel colour; the rest
+                  sit neutral on --surface/--border — the exact treatment the Type row above
+                  uses. Every chip tinted in its own colour made 16%-blue vs 8%-green an
+                  impossible comparison, so the selection was invisible. The icon stays on
+                  every chip (colour is never the only signal) and aria-pressed exposes the
+                  selection to screen readers (§6). The note LIST chip keeps its own colour —
+                  there the colour answers "which channel was this". */}
               {channels.map(ch => {
                 const active = channel === ch.value
                 const col = ch.color ?? 'var(--color-primary)'
                 const Icon = CHANNEL_ICON[ch.value]
                 return (
-                  <button key={ch.value} type="button" onClick={() => setChannel(active ? '' : ch.value)}
+                  <button key={ch.value} type="button" aria-pressed={active} onClick={() => setChannel(active ? '' : ch.value)}
                     style={{ display: 'inline-flex', alignItems: 'center', gap: 5, padding: '4px 10px', fontSize: 11,
-                      fontWeight: active ? 600 : 500, borderRadius: 99, cursor: 'pointer', color: col,
-                      background: `color-mix(in srgb, ${col} ${active ? 16 : 8}%, transparent)`,
-                      border: `1px solid color-mix(in srgb, ${col} ${active ? 50 : 28}%, transparent)` }}>
+                      fontWeight: active ? 600 : 500, borderRadius: 99, cursor: 'pointer',
+                      color: active ? col : 'var(--text-muted)',
+                      background: active ? `color-mix(in srgb, ${col} 16%, transparent)` : 'var(--surface)',
+                      border: active ? `1px solid color-mix(in srgb, ${col} 50%, transparent)` : '1px solid var(--border)' }}>
                     {Icon && <Icon size={12} />} {ch.label}
                   </button>
                 )

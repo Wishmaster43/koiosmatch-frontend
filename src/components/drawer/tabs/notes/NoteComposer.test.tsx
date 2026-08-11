@@ -234,6 +234,75 @@ describe('NoteComposer · second-screen hand-over (NOTITIE-POPOUT-HANDOFF-1)', (
   })
 })
 
+/**
+ * CHANNEL-PICKER-CONTRAST-1: the contact-channel row must SHOW which chip is
+ * picked. Before this, every chip carried its own colour and selection was only a
+ * stronger tint (16% vs 8%) — comparing a 16% blue against an 8% green is not
+ * something the eye can do. Now only the selected chip wears its channel colour;
+ * the rest are neutral, exactly like the Type row above it.
+ */
+describe('NoteComposer · channel picker shows the selection (CHANNEL-PICKER-CONTRAST-1)', () => {
+  // Fixture channel colours are DATA, not styling: a tenant lookup delivers a raw
+  // hex per channel over the API, so the test must feed the component one too.
+  // eslint-disable-next-line no-restricted-syntax -- see above: API data, not a design token
+  const EMAIL_COLOR = '#2563eb'
+  // eslint-disable-next-line no-restricted-syntax -- see above: API data, not a design token
+  const WHATSAPP_COLOR = '#16a34a'
+  const channels = [
+    { value: 'email', label: 'Email', color: EMAIL_COLOR },
+    { value: 'whatsapp', label: 'WhatsApp', color: WHATSAPP_COLOR },
+  ]
+  const chip = (name: string) => screen.getByRole('button', { name: new RegExp(name) })
+
+  it('renders every channel chip unselected and neutral when no channel is picked', () => {
+    render(<NoteComposer open initialNote={null} noteTypes={noteTypes} channels={channels} labels={labels} onSave={vi.fn()} onCancel={vi.fn()} />)
+    for (const ch of channels) {
+      const btn = chip(ch.label)
+      expect(btn).toHaveAttribute('aria-pressed', 'false')
+      expect(btn).toHaveStyle({ background: 'var(--surface)', color: 'var(--text-muted)' })
+      expect(btn.style.border).toBe('1px solid var(--border)')
+      // The channel colour must NOT leak onto an unselected chip.
+      expect(btn.style.background).not.toContain(EMAIL_COLOR)
+    }
+  })
+
+  it('gives ONLY the selected chip its own channel colour, leaving the others on --surface', async () => {
+    const user = userEvent.setup()
+    render(<NoteComposer open initialNote={null} noteTypes={noteTypes} channels={channels} labels={labels} onSave={vi.fn()} onCancel={vi.fn()} />)
+
+    await user.click(chip('Email'))
+
+    const selected = chip('Email')
+    expect(selected).toHaveAttribute('aria-pressed', 'true')
+    // jsdom normalizes a hex colour to rgb() — toHaveStyle normalizes both sides.
+    expect(selected).toHaveStyle({ color: EMAIL_COLOR })
+    // jsdom rewrites the hex inside color-mix() to rgb() — assert on the parts
+    // that carry the meaning: the channel colour, the 16%/50% tint, color-mix.
+    expect(selected.style.background).toContain('color-mix(in srgb, rgb(37, 99, 235)')
+    expect(selected.style.background).toContain('16%')
+    // (jsdom's `border` shorthand parser drops the percentage, so only the
+    // colour itself is assertable there — the point stands: it is NOT --border.)
+    expect(selected.style.border).toContain('color-mix(in srgb, rgb(37, 99, 235)')
+    expect(selected.style.border).not.toContain('var(--border)')
+    expect(selected.style.fontWeight).toBe('600')
+
+    const other = chip('WhatsApp')
+    expect(other).toHaveAttribute('aria-pressed', 'false')
+    expect(other).toHaveStyle({ background: 'var(--surface)', color: 'var(--text-muted)' })
+    expect(other.style.fontWeight).toBe('500')
+  })
+
+  it('returns the chip to neutral (and aria-pressed=false) when the selection is toggled off', async () => {
+    const user = userEvent.setup()
+    render(<NoteComposer open initialNote={null} noteTypes={noteTypes} channels={channels} labels={labels} onSave={vi.fn()} onCancel={vi.fn()} />)
+    await user.click(chip('Email'))
+    await user.click(chip('Email'))
+    const btn = chip('Email')
+    expect(btn).toHaveAttribute('aria-pressed', 'false')
+    expect(btn).toHaveStyle({ background: 'var(--surface)' })
+  })
+})
+
 describe('NoteComposer · dictation mic (NOTITIE-VOICE-1)', () => {
   afterEach(() => {
     delete (window as { SpeechRecognition?: unknown }).SpeechRecognition
