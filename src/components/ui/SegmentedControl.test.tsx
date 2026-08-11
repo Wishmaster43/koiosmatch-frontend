@@ -37,3 +37,49 @@ describe('SegmentedControl', () => {
     expect(onChange).toHaveBeenCalledWith('c')
   })
 })
+
+// Danny 11-08, on the package picker: "waarom zijn de kleuren van de pakketten
+// allemaal groen? Alleen het gekozen pakket moet dezelfde kleur groen zijn."
+// The §4 default (an inactive option keeps its own weaker tint) is right when each
+// option carries its OWN meaning. It is wrong when all options share ONE colour that
+// means "this is the active one" — then a faint tint on the rest is simply untrue.
+describe('SegmentedControl · activeOnly leaves the unselected options neutral', () => {
+  const options = [
+    { value: 'core', label: 'Core' },
+    { value: 'pro', label: 'Pro' },
+    { value: 'enterprise', label: 'Enterprise' },
+  ]
+
+  it('tints only the selected option and leaves the others on the neutral surface', () => {
+    render(<SegmentedControl options={options} value="pro" onChange={vi.fn()}
+      color="var(--color-success)" ariaLabel="Pakket" activeOnly />)
+
+    const chosen = screen.getByRole('radio', { name: /Pro/ })
+    const other = screen.getByRole('radio', { name: /Core/ })
+    // The chosen one carries the colour…
+    expect(chosen.style.background).toContain('color-mix')
+    // …and the others carry none of it at all.
+    expect(other.style.background).toBe('var(--surface)')
+    expect(other.style.borderColor === '' ? other.style.border : other.style.borderColor).toContain('var(--border)')
+  })
+
+  // The chosen option must wear the SAME green as every other "this is on" surface
+  // (Danny 11-08, exact values: --color-success-bg fill, full --color-success border).
+  // Measured, no color-mix percentage reproduces that pastel — the closest, 14%, is
+  // visibly off — so an approximation here silently drifts away from the add-on rows
+  // and the apps screen. This asserts the token is read, not approximated.
+  it('paints the selected option with activeFill and a full-strength border, never a color-mix', () => {
+    render(<SegmentedControl options={options} value="pro" onChange={vi.fn()} ariaLabel="Pakket"
+                             color="var(--color-success)" activeOnly activeFill="var(--color-success-bg)" />)
+    const chosen = screen.getByRole('radio', { name: /Pro/ })
+    expect(chosen.style.background).toBe('var(--color-success-bg)')
+    expect(chosen.style.border).toBe('1px solid var(--color-success)')
+    expect(chosen.style.background).not.toContain('color-mix')
+  })
+
+  it('still tints every option WITHOUT activeOnly — the §4 default is unchanged', () => {
+    render(<SegmentedControl options={options} value="pro" onChange={vi.fn()}
+      color="var(--color-success)" ariaLabel="Pakket" />)
+    expect(screen.getByRole('radio', { name: /Core/ }).style.background).toContain('color-mix')
+  })
+})

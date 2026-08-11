@@ -252,8 +252,8 @@ export default function VacancyDrawer({ vacancy: v, onClose, expanded, onToggleE
                     title={t('drawer.publishedOnChannel', { channel: c.label })}
                     style={{ display: 'inline-flex', alignItems: 'center', gap: 5, fontSize: 11, fontWeight: 500,
                       padding: '3px 9px', borderRadius: 999, cursor: 'pointer',
-                      background: 'var(--color-success-bg, color-mix(in srgb, var(--color-success) 12%, transparent))',
-                      color: 'var(--color-success)', border: '1px solid color-mix(in srgb, var(--color-success) 40%, transparent)' }}>
+                      background: 'var(--color-success-bg)',
+                      color: 'var(--color-success)', border: '1px solid var(--color-success)' }}>
                     <Icon size={12} /> {c.label}
                   </button>
                 )

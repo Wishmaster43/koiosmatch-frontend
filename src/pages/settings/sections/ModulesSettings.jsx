@@ -135,6 +135,11 @@ export default function ModulesSettings() {
         <SegmentedControl
           ariaLabel={t('modules.tierHeading')}
           color="var(--color-success)"
+          // Only the chosen package is green, in exactly the add-on rows' green
+          // (Danny 11-08). `color` drives the text + full border; activeFill is the
+          // flat token those rows use, which no color-mix reproduces.
+          activeOnly
+          activeFill="var(--color-success-bg)"
           value={pkg}
           onChange={setPkg}
           options={TIERS.map(tier => ({
@@ -160,6 +165,12 @@ export default function ModulesSettings() {
               onClick={disabled ? undefined : () => toggleAddon(addon.id)}
               style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '14px 16px',
                 borderRadius: 10, cursor: disabled ? 'not-allowed' : 'pointer', opacity: disabled ? 0.55 : 1,
+                // ONE green for both lists (Danny 11-08, exact values): the
+                // --color-success-bg fill with the full --color-success border. That
+                // pastel is NOT a mix of the green — measured, the closest mix (14%)
+                // is visibly off — so it can only come from the token itself, which
+                // is why the package picker below reads the SAME two tokens instead
+                // of a color-mix approximation.
                 background: on ? 'var(--color-success-bg)' : 'var(--surface)',
                 border: `1px solid ${on ? 'var(--color-success)' : 'var(--border)'}` }}>
               {addon.image

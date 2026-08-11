@@ -121,8 +121,8 @@ export default function UploadStep({
 
       {file && (
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 14px',
-          background: 'color-mix(in srgb, var(--color-success) 8%, transparent)',
-          border: '1px solid color-mix(in srgb, var(--color-success) 30%, transparent)',
+          background: 'var(--color-success-bg)',
+          border: '1px solid var(--color-success)',
           borderRadius: 8, marginTop: 12 }}>
           <span style={{ fontSize: 13, color: 'var(--text)', flex: 1 }}>{t('import.fileSelected', { name: file.name })}</span>
           <button type="button" onClick={() => fileRef.current?.click()} disabled={!canImport}

@@ -31,9 +31,25 @@ export interface SegmentedControlProps {
   // no full-width cards — for a spot too tight for the default vertical option-card
   // layout (e.g. CvSectionList's per-row sidebar⇄main switch). Default unchanged.
   size?: 'default' | 'compact'
+  // Tint ONLY the selected option, leaving the rest neutral (Danny 11-08, on the
+  // package picker: "alleen het gekozen pakket moet groen zijn").
+  //
+  // The §4 default — an inactive option keeps its own colour, just weaker — is right
+  // when each option carries its OWN meaning (a status, a phase): the tint IS the
+  // value. It is wrong when every option shares ONE colour that means "this is the
+  // active one", because then a faint tint on the others says something untrue. Set
+  // this whenever the colour means "on" rather than "which".
+  activeOnly?: boolean
+  // Exact background for the SELECTED option, when the design calls for a flat
+  // semantic token instead of a derived tint (e.g. --color-success-bg). Some house
+  // tints are their own colour, not a percentage of the accent — measured on
+  // --color-success-bg, the closest color-mix is visibly off — so a caller that must
+  // match such a surface passes it here rather than approximating it. The border then
+  // uses the full `color`, matching that same surface's own border.
+  activeFill?: string
 }
 
-export default function SegmentedControl({ options, value, onChange, color = 'var(--color-primary)', ariaLabel, size = 'default' }: SegmentedControlProps) {
+export default function SegmentedControl({ options, value, onChange, color = 'var(--color-primary)', ariaLabel, size = 'default', activeOnly = false, activeFill }: SegmentedControlProps) {
   const refs = useRef<Array<HTMLButtonElement | null>>([])
   const compact = size === 'compact'
 
@@ -65,15 +81,25 @@ export default function SegmentedControl({ options, value, onChange, color = 'va
             onKeyDown={e => onKeyDown(e, i)}
             style={compact ? {
               padding: '3px 9px', fontSize: 10.5, fontWeight: active ? 600 : 500, borderRadius: 999,
-              cursor: 'pointer', whiteSpace: 'nowrap', flexShrink: 0, color,
-              background: `color-mix(in srgb, ${color} ${active ? 14 : 6}%, transparent)`,
-              border: `1px solid color-mix(in srgb, ${color} ${active ? 45 : 20}%, transparent)`,
+              cursor: 'pointer', whiteSpace: 'nowrap', flexShrink: 0,
+              color: activeOnly && !active ? 'var(--text-muted)' : color,
+              background: activeOnly && !active ? 'var(--surface)'
+                : active && activeFill ? activeFill
+                : `color-mix(in srgb, ${color} ${active ? 14 : 6}%, transparent)`,
+              border: activeOnly && !active ? '1px solid var(--border)'
+                : active && activeFill ? `1px solid ${color}`
+                : `1px solid color-mix(in srgb, ${color} ${active ? 45 : 20}%, transparent)`,
             } : {
               display: 'flex', alignItems: 'flex-start', gap: 10, textAlign: 'left',
               padding: '10px 14px', borderRadius: 10, cursor: 'pointer', width: '100%',
-              color, fontWeight: active ? 600 : 500,
-              background: `color-mix(in srgb, ${color} ${active ? 16 : 8}%, transparent)`,
-              border: `1px solid color-mix(in srgb, ${color} ${active ? 50 : 28}%, transparent)`,
+              color: activeOnly && !active ? 'var(--text)' : color,
+              fontWeight: active ? 600 : 500,
+              background: activeOnly && !active ? 'var(--surface)'
+                : active && activeFill ? activeFill
+                : `color-mix(in srgb, ${color} ${active ? 16 : 8}%, transparent)`,
+              border: activeOnly && !active ? '1px solid var(--border)'
+                : active && activeFill ? `1px solid ${color}`
+                : `1px solid color-mix(in srgb, ${color} ${active ? 50 : 28}%, transparent)`,
             }}>
             {compact ? opt.label : (
               <>

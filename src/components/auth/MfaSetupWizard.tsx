@@ -119,7 +119,7 @@ export default function MfaSetupWizard({ setupMfa, confirmMfa, onConfirmed, onFi
   if (step === 'recovery') return (
     <div style={{ maxWidth: 480 }}>
       <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12, padding: '14px 16px',
-                    background: 'var(--color-success-bg)', border: '1px solid color-mix(in srgb, var(--color-success) 45%, transparent)', borderRadius: 12, marginBottom: 24 }}>
+                    background: 'var(--color-success-bg)', border: '1px solid var(--color-success)', borderRadius: 12, marginBottom: 24 }}>
         <ShieldCheck size={18} color="var(--color-success)" style={{ flexShrink: 0, marginTop: 1 }} />
         <div>
           <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--color-success)' }}>{t('security.enabledTitle')}</div>

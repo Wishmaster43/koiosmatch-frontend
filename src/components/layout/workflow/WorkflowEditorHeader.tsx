@@ -127,7 +127,7 @@ export default function WorkflowEditorHeader({
           display: 'flex', alignItems: 'center', gap: 6, padding: '4px 10px', borderRadius: 999,
           background: status === 'active' ? 'var(--color-success-bg)' : 'var(--hover-bg)',
           color:      status === 'active' ? 'var(--color-success)' : 'var(--text-muted)',
-          border:     `1px solid ${status === 'active' ? 'color-mix(in srgb, var(--color-success) 40%, transparent)' : 'var(--border)'}`,
+          border:     `1px solid ${status === 'active' ? 'var(--color-success)' : 'var(--border)'}`,
           cursor: 'pointer', fontSize: 11, fontWeight: 500,
         }}>
         <span style={{ width: 6, height: 6, borderRadius: '50%', background: status === 'active' ? 'var(--color-success)' : 'var(--border)' }} />

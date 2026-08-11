@@ -449,6 +449,18 @@ never label it "Matched"; "matched" is the *application* bucket, a different axi
   re-implement the button inline** (that produced five drifting styles across eight pages;
   this must not regress). New toggle = pass props to that component; new look = change the
   component once.
+- **The "aan/gelukt" green is a TOKEN PAIR, never a mix (Danny 11-08, exact values:
+  `background-color: rgb(220, 252, 231)` / `border-color: rgb(22, 163, 74)`).** Any surface
+  that means *this is on / this is chosen / this succeeded* — module + app cards, the active
+  package, an active workflow toggle, a success notice, a published-channel chip — uses
+  **`--color-success-bg` as the fill and the full `--color-success` as the border**. This is a
+  deliberate EXCEPTION to the color-mix recipe above: measured, **no percentage reproduces
+  that pastel** (the closest, 14% on white, is visibly off), so an approximation always drifts
+  — which is exactly how the packages, the add-on rows and the apps screen ended up wearing
+  three different greens. The rule above still governs chips whose colour carries *which*
+  state (status/phase); this one governs *whether* something is on. In the shared
+  `SegmentedControl` that is the **`activeFill`** prop (with `activeOnly`, since one shared
+  colour means "this is the active one" — tinting the rest then states something untrue).
 - **Blueprint-conformance checklist — a new/updated entity page mirrors the candidate page
   1:1 (§3A). Verify before shipping:** (1) quick-view toggles via `QuickViewToggle`; (2) the
   shared `HeaderSearch` present; (3) `<Entity>InsightsRow` with the same donut/KPI footprint;
