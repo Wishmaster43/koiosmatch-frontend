@@ -23,10 +23,31 @@
 // pages/popout/NotesPopoutPage.tsx — keep the three in sync.
 export type PopoutEntity = 'candidate' | 'customer' | 'vacancy'
 
-// One popup-window feature string for every second-screen window this app opens —
-// small, chrome-less, and resizable so the recruiter can still fit it beside
-// whatever else is open on that monitor.
-const POPUP_FEATURES = 'popup=yes,width=560,height=720'
+/**
+ * Feature string for every second-screen window this app opens, sized to the
+ * screen it lands on rather than to a fixed number.
+ *
+ * It used to be a flat 560x720 (Danny 11-08: "scherm pop-out is erg klein"). A
+ * fixed size cannot be right twice: on a 27" monitor 560px is a sliver, on a
+ * laptop the same number is reasonable. This takes a share of the available
+ * screen with a floor and a ceiling — wide enough to actually write in, never so
+ * wide that it stops being a SIDE window you can put next to the app. Centred on
+ * the available area so it does not open half off-screen on a second monitor.
+ *
+ * Falls back to the old fixed size where `screen` is unavailable (tests, jsdom).
+ */
+function popupFeatures(): string {
+  const avail = typeof window !== 'undefined' ? window.screen : undefined
+  if (!avail?.availWidth || !avail?.availHeight) return 'popup=yes,width=560,height=720'
+  const width = Math.round(Math.min(1100, Math.max(720, avail.availWidth * 0.5)))
+  const height = Math.round(Math.min(1000, Math.max(640, avail.availHeight * 0.85)))
+  // availLeft/availTop are non-standard (Firefox/Safari) but are what places the
+  // window on the RIGHT monitor in a multi-screen setup — read defensively.
+  const offset = avail as Screen & { availLeft?: number; availTop?: number }
+  const left = Math.round((avail.availWidth - width) / 2 + (offset.availLeft ?? 0))
+  const top = Math.round((avail.availHeight - height) / 2 + (offset.availTop ?? 0))
+  return `popup=yes,width=${width},height=${height},left=${left},top=${top}`
+}
 
 // Legacy single-arg overload (candidate id only) — kept so the originally shipped
 // candidate call site (candidates/drawer/CommunicationTab.tsx) keeps compiling and
@@ -41,7 +62,7 @@ export function openNotesPopout(entity: PopoutEntity, id: string | number): Wind
 export function openNotesPopout(a: PopoutEntity | string | number, b?: string | number): Window | null {
   const entity: PopoutEntity = b === undefined ? 'candidate' : (a as PopoutEntity)
   const id: string | number = b === undefined ? (a as string | number) : b
-  return window.open(`/popout/notes/${entity}/${id}`, `koios-notes-${entity}-${id}`, POPUP_FEATURES)
+  return window.open(`/popout/notes/${entity}/${id}`, `koios-notes-${entity}-${id}`, popupFeatures())
 }
 
 /**
@@ -52,6 +73,23 @@ export function openNotesPopout(a: PopoutEntity | string | number, b?: string | 
  * scoped per entity+id so two records can never swap drafts.
  */
 export const noteDraftTopic = (entity: PopoutEntity, id: string | number) => `koios-note-draft-${entity}-${id}`
+
+/**
+ * NOTITIE-POPOUT-EDIT-1 (Danny 10-08: "icon moet onder change en prullenbakje
+ * komen … en direct edit pop-out"): which entities' popout WINDOW can actually
+ * SAVE an edit to an existing note. Measured against the running API on 10-08
+ * (routes/api/tenant/*.php + the generated spec):
+ *   candidate → PATCH /candidates/{id}/notes/{note} exists AND CandidateNotesPopout
+ *               wires onEditNote, so a handed-over note is patched in place.
+ *   customer  → GET/POST /customers/{id}/notes only — no per-note PATCH at all.
+ *   vacancy   → GET/POST + DELETE /vacancies/{id}/notes/{note} — still no PATCH.
+ * Handing an EXISTING note to a window that can only ADD would persist it as a
+ * SECOND note: a duplicate the recruiter cannot tell apart from the original and
+ * that no undo removes. So those two surfaces render no per-note pop-out button
+ * at all (§3, no fake affordance). Widen this set ONLY together with that
+ * window's real edit wiring.
+ */
+export const NOTE_EDIT_POPOUT_ENTITIES: ReadonlySet<PopoutEntity> = new Set<PopoutEntity>(['candidate'])
 
 /**
  * TEKST-POPOUT-1 (Danny 08-08, punt 2): the SAME second-screen mechanism for a
@@ -75,5 +113,5 @@ export const textPopoutTopic = (entity: PopoutEntity, id: string | number, field
 // Opens (or re-focuses) the second-screen editor for one free-text field. Returns
 // null when the browser blocked the popup — the caller surfaces `common:popupBlocked`.
 export function openTextPopout(entity: PopoutEntity, id: string | number, field: PopoutTextField): Window | null {
-  return window.open(`/popout/text/${entity}/${id}/${field}`, textPopoutTopic(entity, id, field), POPUP_FEATURES)
+  return window.open(`/popout/text/${entity}/${id}/${field}`, textPopoutTopic(entity, id, field), popupFeatures())
 }

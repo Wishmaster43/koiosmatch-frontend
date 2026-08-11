@@ -125,10 +125,11 @@ export default function NoteComposer({ open, initialNote, noteTypes, channels, l
 
   const typeLabel = noteTypes.find(n => n.value === type)?.label ?? ''
   const save = () => onSave({ type, title, body, channel: channel || undefined, language: language || undefined })
-  // Only a NEW note can be handed to the second screen: a draft carries no note
-  // id, so a window receiving one saves it as a new note. Rather than a button
-  // that would silently duplicate (or drop) an edit, an edit shows none at all
-  // (§3, no fake affordance) — the toolbar pop-out still opens the thread there.
+  // Only a NEW note is handed over from HERE: a draft carries no note id, so a
+  // window receiving one saves it as a new note. An existing note has its own,
+  // id-based route to the second screen since NOTITIE-POPOUT-EDIT-1 — the pop-out
+  // icon beside that note's pencil/bin in the list — so this composer keeps showing
+  // none while editing, rather than a button that would duplicate the note.
   const canHandOff = Boolean(onPopOutDraft) && isNew
   // Hand the WHOLE composed note over; the host waits for the window's ack.
   const popOut = () => onPopOutDraft?.({ type, channel, title, body, language })

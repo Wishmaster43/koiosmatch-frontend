@@ -19,19 +19,29 @@
  * HANDOFF_TIMEOUT_MS the handoff is abandoned, so a late ack can never close a
  * composer the recruiter has meanwhile kept typing in.
  *
- * NEW notes only. A draft carries no note id, so a receiving window would save it
- * as a new note — handing over an EDIT needs the window to route the save to that
- * exact note, which two of the three popout routes cannot do at all today
- * (customer/vacancy popouts wire only addNote). The composer therefore shows no
- * pop-out icon while editing an existing note, rather than dropping the text.
+ * TWO things can be handed over, one protocol:
+ *   draft — a half-typed NEW note (from the composer). It carries no note id, so
+ *           the receiving window saves it as a new note. That is correct: it never
+ *           existed anywhere else.
+ *   edit  — ONE EXISTING note, by id (NOTITIE-POPOUT-EDIT-1, Danny 10-08: the
+ *           pop-out icon now sits beside each note's pencil/bin and must open THAT
+ *           note in the second screen's editor). Only the id travels — the window
+ *           resolves it against the thread IT loaded and routes the save to that
+ *           exact note, so no content is copied and no second note can appear.
+ *           A window that cannot find the id (thread still loading, note not in
+ *           its scope) simply never acks. And only entities whose popout window
+ *           can really PATCH a note may be asked at all — see
+ *           NOTE_EDIT_POPOUT_ENTITIES / `canHandOffNote`; a duplicate note is a
+ *           worse outcome than no button.
  *
  * §8 — the draft never leaves the browser: same-origin BroadcastChannel, nothing
- * logged, nothing sent to any server.
+ * logged, nothing sent to any server. An `edit` message carries an id only, never
+ * the note's text.
  */
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { notifyError } from '@/lib/notify'
-import { noteDraftTopic, openNotesPopout } from '@/lib/secondScreen'
+import { noteDraftTopic, openNotesPopout, NOTE_EDIT_POPOUT_ENTITIES } from '@/lib/secondScreen'
 import type { PopoutEntity } from '@/lib/secondScreen'
 import { useTextPopoutSync } from './useTextPopoutSync'
 
@@ -46,8 +56,17 @@ export interface NoteDraft {
   language?: string
 }
 
-// The handoff vocabulary — three messages, mirroring the text popout's own.
-type NoteDraftMessage = { kind: 'hello' } | { kind: 'draft'; note: NoteDraft } | { kind: 'ack' }
+// The handoff vocabulary — mirroring the text popout's own, plus `edit` for an
+// EXISTING note (id only, never its text — see the docblock).
+type NoteDraftMessage =
+  | { kind: 'hello' }
+  | { kind: 'draft'; note: NoteDraft }
+  | { kind: 'edit'; noteId: string }
+  | { kind: 'ack' }
+
+// What one in-flight handoff IS — stored verbatim so it is also the wire message
+// (one shape, never a second mapping between state and protocol).
+export type NoteHandoff = { kind: 'draft'; note: NoteDraft } | { kind: 'edit'; noteId: string }
 
 // Which record this notes surface belongs to, and which side of the glass it is on.
 export interface NotesPopoutTarget {
@@ -65,8 +84,11 @@ const HANDOFF_TIMEOUT_MS = 8000
 
 interface NotesPopoutOptions {
   target?: NotesPopoutTarget
-  // Host side only: the window confirmed it holds the draft — the composer may close.
-  onHandedOver: () => void
+  // Host side only: the window confirmed it holds the handoff. `kind` says WHAT it
+  // took over, because only a `draft` has something here to close — an `edit` left
+  // the note itself untouched in the list, so closing a composer on that ack would
+  // throw away whatever else the recruiter happened to be writing.
+  onHandedOver: (kind: NoteHandoff['kind']) => void
 }
 
 export function useNotesPopout({ target, onHandedOver }: NotesPopoutOptions) {
@@ -77,20 +99,24 @@ export function useNotesPopout({ target, onHandedOver }: NotesPopoutOptions) {
   const id = target?.id
   const isWindow = target?.role === 'window'
 
-  // Host: the draft waiting to be taken over (null = nothing in flight).
-  const [pending, setPending] = useState<NoteDraft | null>(null)
+  // Host: the handoff waiting to be taken over (null = nothing in flight).
+  const [pending, setPending] = useState<NoteHandoff | null>(null)
   // Window: the draft this window received, until its composer took it over.
   const [incoming, setIncoming] = useState<NoteDraft | null>(null)
-  // Mirrored in a ref: onMessage is registered once and would otherwise read a
-  // stale `incoming`, which is exactly how the second draft slipped past.
+  // Window: the id of the EXISTING note this window was asked to open in its
+  // editor, until its composer really shows that note (NOTITIE-POPOUT-EDIT-1).
+  const [incomingNoteId, setIncomingNoteId] = useState<string | null>(null)
+  // Mirrored in refs: onMessage is registered once and would otherwise read a
+  // stale value, which is exactly how the second draft slipped past.
   const incomingRef = useRef<NoteDraft | null>(null)
+  const incomingNoteIdRef = useRef<string | null>(null)
 
-  // Latest callback + pending draft for the message handler — refs so a reply is
+  // Latest callback + pending handoff for the message handler — refs so a reply is
   // never sent from a stale closure; assigned in an effect, never during render.
   const handedOverRef = useRef(onHandedOver)
   const pendingRef = useRef(pending)
   useEffect(() => { handedOverRef.current = onHandedOver; pendingRef.current = pending })
-  // One ack per received draft (the composer's effect fires on every render).
+  // One ack per received handoff (the composer's effect fires on every render).
   const ackedRef = useRef(false)
 
   const post = useTextPopoutSync<NoteDraftMessage>({
@@ -99,29 +125,32 @@ export function useNotesPopout({ target, onHandedOver }: NotesPopoutOptions) {
     // actually handing something over, so an idle drawer opens no channel at all.
     enabled: Boolean(entity && id) && (isWindow || pending !== null),
     onMessage: message => {
-      // Window side: adopt a handed-over draft — but ONLY when this window is
-      // free. Refusing (no state change, no ack) is what makes the handoff safe:
-      // the host never closes without an ack, so its text stays put and the user
-      // gets the honest "not taken over" notice. Accepting here would overwrite a
-      // note this window is still holding AND ack it, so the SECOND half-typed
-      // note would exist nowhere — reproduced by the verify round before this
-      // guard existed (body stayed on the first text while an ack went out).
+      // Window side: adopt a handed-over draft or edit request — but ONLY when
+      // this window is free. Refusing (no state change, no ack) is what makes the
+      // handoff safe: the host never closes without an ack, so its text stays put
+      // and the user gets the honest "not taken over" notice. Accepting here would
+      // overwrite a note this window is still holding AND ack it, so the SECOND
+      // half-typed note would exist nowhere — reproduced by the verify round
+      // before this guard existed (body stayed on the first text while an ack went out).
       if (isWindow) {
-        if (message.kind !== 'draft') return
-        if (incomingRef.current) return
+        if (message.kind !== 'draft' && message.kind !== 'edit') return
+        if (incomingRef.current || incomingNoteIdRef.current) return
         ackedRef.current = false
-        setIncoming(message.note)
+        if (message.kind === 'draft') setIncoming(message.note)
+        else setIncomingNoteId(message.noteId)
         return
       }
-      // Host side: a window just booted — replay the draft it was opened for.
+      // Host side: a window just booted — replay whatever it was opened for.
       if (message.kind === 'hello') {
-        if (pendingRef.current) post({ kind: 'draft', note: pendingRef.current })
+        if (pendingRef.current) post(pendingRef.current)
         return
       }
-      // Host side: the window holds the text — the composer may close now.
+      // Host side: the window holds it — a draft's composer may close now (an edit
+      // handoff has nothing here to close; see onHandedOver).
       if (message.kind === 'ack') {
+        const kind = pendingRef.current?.kind
         setPending(null)
-        handedOverRef.current()
+        if (kind) handedOverRef.current(kind)
       }
     },
   })
@@ -130,12 +159,25 @@ export function useNotesPopout({ target, onHandedOver }: NotesPopoutOptions) {
   // replay its draft into it.
   useEffect(() => { if (isWindow) post({ kind: 'hello' }) }, [isWindow, post])
 
-  // Host side: post the draft as soon as the channel is open — that reaches a
+  // Host side: post the handoff as soon as the channel is open — that reaches a
   // window that was ALREADY open (it will never send a second `hello`).
   useEffect(() => {
     if (isWindow || !pending) return
-    post({ kind: 'draft', note: pending })
+    post(pending)
   }, [isWindow, pending, post])
+
+  // Window side: bound an edit request this window never resolved (note deleted
+  // meanwhile, outside this window's scope, or its own composer stayed busy).
+  // Without this it would sit here as "busy" forever and refuse every later
+  // handoff. Safe to drop, and only here: an edit request carries no text (the
+  // note itself is untouched on the server), while a held DRAFT is the only copy
+  // of what someone typed and is therefore never dropped. Bounded by the same
+  // window as the sender's own wait, which has by then told the recruiter.
+  useEffect(() => {
+    if (!isWindow || !incomingNoteId) return
+    const timer = setTimeout(() => { if (!ackedRef.current) setIncomingNoteId(null) }, HANDOFF_TIMEOUT_MS)
+    return () => clearTimeout(timer)
+  }, [isWindow, incomingNoteId])
 
   // Host side: bound the wait. On expiry the handoff is abandoned — the composer
   // stays open with the text in it and the recruiter is told why.
@@ -148,19 +190,29 @@ export function useNotesPopout({ target, onHandedOver }: NotesPopoutOptions) {
     return () => clearTimeout(timer)
   }, [isWindow, pending, t])
 
-  // Host side, toolbar: just open (or re-focus) the window — nothing to hand over.
-  const open = useCallback(() => {
-    if (!entity || !id) return
-    if (!openNotesPopout(entity, id)) notifyError(t('popupBlocked'))
-  }, [entity, id, t])
-
   // Host side, composer: open the window AND start the handoff. A blocked popup
   // never starts one — there would be nobody to take the text over.
   const handOff = useCallback((draft: NoteDraft) => {
     if (!entity || !id) return
     if (!openNotesPopout(entity, id)) { notifyError(t('popupBlocked')); return }
-    setPending(draft)
+    setPending({ kind: 'draft', note: draft })
   }, [entity, id, t])
+
+  // Host side, note row (NOTITIE-POPOUT-EDIT-1): open the window AND ask it to put
+  // THIS existing note in its editor. Only the id travels; the window resolves it
+  // against its own thread and patches that same record, so this can never produce
+  // a second note. Same blocked-popup rule as handOff.
+  const handOffNote = useCallback((noteId: string) => {
+    if (!entity || !id) return
+    if (!openNotesPopout(entity, id)) { notifyError(t('popupBlocked')); return }
+    setPending({ kind: 'edit', noteId })
+  }, [entity, id, t])
+
+  // May this surface hand an EXISTING note over at all? Only a host (never the
+  // window itself) of an entity whose popout can really save an edit — see
+  // NOTE_EDIT_POPOUT_ENTITIES. False = render no button (§3), never a button that
+  // would duplicate the note in the second screen.
+  const canHandOffNote = Boolean(entity && id) && !isWindow && NOTE_EDIT_POPOUT_ENTITIES.has(entity as PopoutEntity)
 
   // Window side: called from the composer's own render pass, so the ack means
   // "the text is committed HERE" — the only thing that may close the other window.
@@ -170,12 +222,18 @@ export function useNotesPopout({ target, onHandedOver }: NotesPopoutOptions) {
     post({ kind: 'ack' })
   }, [post])
 
-  // Window side: the composer closed — forget the draft so a later note never
-  // re-seeds from it.
-  // Keep the ref in step with the state it guards.
+  // Keep the refs in step with the state they guard.
   useEffect(() => { incomingRef.current = incoming }, [incoming])
+  useEffect(() => { incomingNoteIdRef.current = incomingNoteId }, [incomingNoteId])
 
-  const clearIncoming = useCallback(() => { incomingRef.current = null; setIncoming(null) }, [])
+  // Window side: the composer closed — forget both handoff kinds so a later note
+  // never re-seeds from them and the window is free to receive again.
+  const clearIncoming = useCallback(() => {
+    incomingRef.current = null
+    incomingNoteIdRef.current = null
+    setIncoming(null)
+    setIncomingNoteId(null)
+  }, [])
 
-  return { isWindow, open, handOff, pending: pending !== null, incoming, ack, clearIncoming }
+  return { isWindow, handOff, handOffNote, canHandOffNote, pending: pending !== null, incoming, incomingNoteId, ack, clearIncoming }
 }

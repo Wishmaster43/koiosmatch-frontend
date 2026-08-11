@@ -27,7 +27,8 @@
  */
 import { useEffect, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Save } from 'lucide-react'
+import { useConfirm } from '@/hooks/useConfirm'
+import { Save, X } from 'lucide-react'
 import RichTextEditor from '@/components/ui/RichTextEditor'
 import type { GenerateEntity } from '@/components/ui/richtext/richTextAssistApi'
 
@@ -45,6 +46,7 @@ interface TextPopoutEditorProps {
 
 export default function TextPopoutEditor({ value, onChange, onSave, dirty, generate }: TextPopoutEditorProps) {
   const { t } = useTranslation('common')
+  const { confirm, dialog: confirmDialog } = useConfirm()
 
   // Warn before this window is closed/reloaded with unsaved text. The browser
   // shows its own generic wording — returnValue only arms it.
@@ -61,6 +63,19 @@ export default function TextPopoutEditor({ value, onChange, onSave, dirty, gener
   // recruiter's text with it. The button says "en sluiten" so the closing is never
   // a surprise (§3); Cmd+S below stays a plain checkpoint that keeps you writing.
   const saveAndClose = async () => { if (await onSave()) window.close() }
+
+  // Close WITHOUT saving (Danny 10-08: "naast opslaan en sluiten een knop
+  // annuleren of sluiten"). The window had only one way out, so leaving text you
+  // did not want meant saving it first. Unsaved text is confirmed before it goes:
+  // this window may hold the only copy, and a silent discard is the one thing a
+  // second screen must never do.
+  const close = () => {
+    // The house dialog, not window.confirm: 42 call sites already use it and a
+    // native prompt would be the only one left in src/ (§9 consistency, and the
+    // browser box cannot be translated or styled).
+    if (!dirty) { window.close(); return }
+    confirm(t('discardChangesConfirm'), () => window.close(), { danger: true, confirmLabel: t('close') })
+  }
 
   // Cmd/Ctrl+S saves without reaching for the mouse — the whole point of a
   // full-screen writing window (§6 keyboard operability). The handler reads the
@@ -83,6 +98,7 @@ export default function TextPopoutEditor({ value, onChange, onSave, dirty, gener
       {/* `fill` makes the editor the one growing item, so a resized window grows
           the WRITING space instead of empty padding (mirrors the note composer). */}
       <RichTextEditor value={value} onChange={onChange} fill minHeight={220} assistGenerate={generate} />
+      {confirmDialog}
 
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10, flexShrink: 0 }}>
         {/* Honest, announced save state — never a silent "did that land?" window. */}
@@ -90,12 +106,20 @@ export default function TextPopoutEditor({ value, onChange, onSave, dirty, gener
           style={{ fontSize: 11, color: dirty ? 'var(--color-warning)' : 'var(--text-muted)' }}>
           {dirty ? t('unsavedChanges') : t('allChangesSaved')}
         </span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+        <button type="button" onClick={close} data-testid="text-popout-close"
+          style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '6px 12px', fontSize: 12, fontWeight: 500,
+            borderRadius: 8, border: '1px solid var(--border)', cursor: 'pointer',
+            background: 'var(--surface)', color: 'var(--text-muted)' }}>
+          <X size={13} /> {t('close')}
+        </button>
         <button type="button" onClick={saveAndClose} disabled={!dirty} data-testid="text-popout-save"
           style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '6px 12px', fontSize: 12, fontWeight: 600,
             borderRadius: 8, border: 'none', cursor: dirty ? 'pointer' : 'default', opacity: dirty ? 1 : 0.5,
             background: 'var(--color-primary)', color: 'var(--color-on-accent)' }}>
           <Save size={13} /> {t('popout.saveAndClose')}
         </button>
+        </div>
       </div>
     </div>
   )

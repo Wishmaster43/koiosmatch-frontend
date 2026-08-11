@@ -386,5 +386,6 @@
     "clearVisible": "Alles wissen",
     "visibleHint": "Werkt op de {{count}} zichtbare opties"
   },
-  "popoutHandoffFailed": "Het tweede scherm heeft de notitie niet overgenomen. Je tekst staat hier nog."
+  "popoutHandoffFailed": "Het tweede scherm heeft de notitie niet overgenomen. Je tekst staat hier nog.",
+  "discardChangesConfirm": "Je hebt tekst die nog niet is opgeslagen. Sluiten zonder opslaan?"
 }

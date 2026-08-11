@@ -386,5 +386,6 @@
     "clearVisible": "Borrar todo",
     "visibleHint": "Se aplica a las {{count}} opciones visibles"
   },
-  "popoutHandoffFailed": "La segunda pantalla no ha recogido la nota. Tu texto sigue aquí."
+  "popoutHandoffFailed": "La segunda pantalla no ha recogido la nota. Tu texto sigue aquí.",
+  "discardChangesConfirm": "Tienes texto sin guardar. ¿Cerrar sin guardar?"
 }

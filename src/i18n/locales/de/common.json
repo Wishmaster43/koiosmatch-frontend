@@ -386,5 +386,6 @@
     "clearVisible": "Alle entfernen",
     "visibleHint": "Gilt für die {{count}} sichtbaren Optionen"
   },
-  "popoutHandoffFailed": "Der zweite Bildschirm hat die Notiz nicht übernommen. Dein Text ist noch hier."
+  "popoutHandoffFailed": "Der zweite Bildschirm hat die Notiz nicht übernommen. Dein Text ist noch hier.",
+  "discardChangesConfirm": "Du hast noch nicht gespeicherten Text. Ohne Speichern schließen?"
 }

@@ -117,9 +117,150 @@ describe('useNotesPopout · host side', () => {
   it('does nothing without a popout target (entity with no second-screen route)', () => {
     const { result } = renderHook(() => useNotesPopout({ target: undefined, onHandedOver: vi.fn() }))
     act(() => result.current.handOff(draft))
-    act(() => result.current.open())
+    act(() => result.current.handOffNote('n1'))
     expect(openNotesPopoutMock).not.toHaveBeenCalled()
     expect(result.current.pending).toBe(false)
+    expect(result.current.canHandOffNote).toBe(false)
+  })
+})
+
+/**
+ * NOTITIE-POPOUT-EDIT-1 (Danny 10-08): the per-note icon hands an EXISTING note to
+ * the second screen. The contract that matters is that only its ID travels — the
+ * window patches its own record — and that a window which cannot find that id never
+ * confirms, so the drill-down is told the truth instead of assuming.
+ */
+describe('useNotesPopout · handing an EXISTING note over', () => {
+  let seen: unknown[]
+  let peer: FakeChannel
+
+  beforeEach(() => {
+    buses.clear()
+    seen = []
+    openNotesPopoutMock.mockReset().mockReturnValue({} as Window)
+    vi.stubGlobal('BroadcastChannel', FakeChannel as unknown as typeof BroadcastChannel)
+    peer = new FakeChannel(topic)
+    peer.onmessage = e => seen.push(e.data)
+  })
+  afterEach(() => vi.unstubAllGlobals())
+
+  it('opens the record\'s window and publishes the note ID — never the note text', () => {
+    const { result } = renderHook(() => useNotesPopout({ target, onHandedOver: vi.fn() }))
+    act(() => result.current.handOffNote('note-7'))
+    expect(openNotesPopoutMock).toHaveBeenCalledWith('candidate', 'c1')
+    expect(seen).toContainEqual({ kind: 'edit', noteId: 'note-7' })
+    // §8 / duplicate-safety: no body, title or type on the wire — the window reads
+    // its own copy, so there is nothing to save as a second note.
+    expect(JSON.stringify(seen)).not.toContain('Halve notitie')
+    expect(result.current.pending).toBe(true)
+  })
+
+  it('replays the edit request to a window that boots later and says hello', () => {
+    const { result } = renderHook(() => useNotesPopout({ target, onHandedOver: vi.fn() }))
+    act(() => result.current.handOffNote('note-7'))
+    seen.length = 0
+    act(() => peer.postMessage({ kind: 'hello' }))
+    expect(seen).toContainEqual({ kind: 'edit', noteId: 'note-7' })
+  })
+
+  it('publishes nothing when the popup was blocked', () => {
+    openNotesPopoutMock.mockReturnValue(null)
+    const { result } = renderHook(() => useNotesPopout({ target, onHandedOver: vi.fn() }))
+    act(() => result.current.handOffNote('note-7'))
+    expect(seen).toHaveLength(0)
+    expect(result.current.pending).toBe(false)
+  })
+
+  it('reports the ack as an EDIT, so the caller never closes a composer over it', () => {
+    const onHandedOver = vi.fn()
+    const { result } = renderHook(() => useNotesPopout({ target, onHandedOver }))
+    act(() => result.current.handOffNote('note-7'))
+    act(() => peer.postMessage({ kind: 'ack' }))
+    expect(onHandedOver).toHaveBeenCalledWith('edit')
+  })
+
+  it('reports a DRAFT ack as a draft (the composer-closing case)', () => {
+    const onHandedOver = vi.fn()
+    const { result } = renderHook(() => useNotesPopout({ target, onHandedOver }))
+    act(() => result.current.handOff(draft))
+    act(() => peer.postMessage({ kind: 'ack' }))
+    expect(onHandedOver).toHaveBeenCalledWith('draft')
+  })
+
+  it('the window adopts the requested note id and stays free for nothing else meanwhile', () => {
+    const windowTarget = { ...target, role: 'window' as const }
+    const { result } = renderHook(() => useNotesPopout({ target: windowTarget, onHandedOver: vi.fn() }))
+    act(() => peer.postMessage({ kind: 'edit', noteId: 'note-7' }))
+    expect(result.current.incomingNoteId).toBe('note-7')
+
+    // Busy: a SECOND handoff (of either kind) is refused, exactly like a held draft.
+    act(() => peer.postMessage({ kind: 'edit', noteId: 'note-9' }))
+    act(() => peer.postMessage({ kind: 'draft', note: draft }))
+    expect(result.current.incomingNoteId).toBe('note-7')
+    expect(result.current.incoming).toBeNull()
+
+    // Cleared (composer closed) — free again.
+    act(() => result.current.clearIncoming())
+    act(() => peer.postMessage({ kind: 'edit', noteId: 'note-9' }))
+    expect(result.current.incomingNoteId).toBe('note-9')
+  })
+
+  it('a window drops an edit request it never resolved, instead of staying busy forever', () => {
+    vi.useFakeTimers()
+    try {
+      const windowTarget = { ...target, role: 'window' as const }
+      const { result } = renderHook(() => useNotesPopout({ target: windowTarget, onHandedOver: vi.fn() }))
+      // Never acked (the note is not in this window's thread) — after the same bound
+      // the sender waits, the request is dropped so the NEXT one can land.
+      act(() => peer.postMessage({ kind: 'edit', noteId: 'gone-99' }))
+      act(() => { vi.advanceTimersByTime(8000) })
+      expect(result.current.incomingNoteId).toBeNull()
+
+      act(() => peer.postMessage({ kind: 'edit', noteId: 'note-7' }))
+      expect(result.current.incomingNoteId).toBe('note-7')
+    } finally {
+      vi.useRealTimers()
+    }
+  })
+
+  it('an ACKED request is NOT dropped — its composer is open on that note', () => {
+    vi.useFakeTimers()
+    try {
+      const windowTarget = { ...target, role: 'window' as const }
+      const { result } = renderHook(() => useNotesPopout({ target: windowTarget, onHandedOver: vi.fn() }))
+      act(() => peer.postMessage({ kind: 'edit', noteId: 'note-7' }))
+      act(() => result.current.ack())
+      act(() => { vi.advanceTimersByTime(8000) })
+      expect(result.current.incomingNoteId).toBe('note-7')
+    } finally {
+      vi.useRealTimers()
+    }
+  })
+})
+
+/**
+ * Which entities may be asked to edit a note on their second screen. Measured
+ * 10-08: only the candidate popout can PATCH a note (and wires onEditNote); the
+ * customer and vacancy popouts wire add-only, so handing an existing note there
+ * would save a DUPLICATE. No button is the correct answer, and this is the gate
+ * the shared NotesTab reads.
+ */
+describe('useNotesPopout · canHandOffNote', () => {
+  it('is true for a candidate HOST', () => {
+    const { result } = renderHook(() => useNotesPopout({ target, onHandedOver: vi.fn() }))
+    expect(result.current.canHandOffNote).toBe(true)
+  })
+
+  it('is false for customer and vacancy hosts (their window cannot save an edit)', () => {
+    const customer = renderHook(() => useNotesPopout({ target: { entity: 'customer', id: 'x1' }, onHandedOver: vi.fn() }))
+    const vacancy = renderHook(() => useNotesPopout({ target: { entity: 'vacancy', id: 'v1' }, onHandedOver: vi.fn() }))
+    expect(customer.result.current.canHandOffNote).toBe(false)
+    expect(vacancy.result.current.canHandOffNote).toBe(false)
+  })
+
+  it('is false inside the popout window itself (no self-reopening)', () => {
+    const { result } = renderHook(() => useNotesPopout({ target: { ...target, role: 'window' }, onHandedOver: vi.fn() }))
+    expect(result.current.canHandOffNote).toBe(false)
   })
 })
 

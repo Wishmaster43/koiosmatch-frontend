@@ -40,24 +40,26 @@
  * compact Filter button; the dropdowns themselves are unchanged (still the house
  * searchable SelectMenu), only where they live changed.
  *
- * NOTITIE-POPOUT-BAR-1 (Danny 09-08 "kan je hier de pop-out ook bijzetten?"):
- * the second-screen affordance was reachable only from INSIDE the composer's
- * FloatingPanel header, so a recruiter who just wants to read/answer the thread
- * on a second monitor first had to open a new note. The toolbar now carries the
- * same button — mirroring the profile text's pop-out (candidates/drawer/
- * ProfileTab) 1:1 in icon, footprint and tone, never a new shape. It is gated on
- * the host having wired `popout`, i.e. on an entity that actually owns a
- * `/popout/notes/{entity}/{id}` route (candidate · customer · vacancy today), so
- * no entity gets a button that would open an empty window (§3), and the popout
- * window itself (`role: 'window'`) never shows a button re-opening itself.
- *
  * NOTITIE-POPOUT-HANDOFF-1 (Danny 09/10-08 "werking hetzelfde als icon
- * profieltekst"): popping out from the COMPOSER now moves the half-typed note
- * along instead of leaving the recruiter with an empty sheet on the second screen.
- * This tab owns the two ends of that handoff — it hands the composer's draft over
- * and closes the composer ONLY on the receiving window's ack, and, when it IS that
+ * profieltekst"): popping out from the COMPOSER moves the half-typed note along
+ * instead of leaving the recruiter with an empty sheet on the second screen. This
+ * tab owns the two ends of that handoff — it hands the composer's draft over and
+ * closes the composer ONLY on the receiving window's ack, and, when it IS that
  * window, it opens its own composer on the incoming draft and acks it. The
  * protocol itself lives in `hooks/useNotesPopout` (§3 logic-in-hooks).
+ *
+ * NOTITIE-POPOUT-EDIT-1 (Danny 10-08: "icon moet onder change en prullenbakje
+ * komen … en direct edit pop-out"): the second-screen icon that used to sit in the
+ * TOOLBAR (next to Filter) is gone — it only ever opened the thread, never an
+ * editor, which is exactly what Danny reported. Every note now carries the icon in
+ * its OWN header row, third after the pencil and the bin and styled identically,
+ * and clicking it opens the second screen with THAT note already in the composer.
+ * Only the note's ID travels (see the hook): the window resolves it against the
+ * thread it loaded itself and routes the save to that exact record, so the handoff
+ * can never produce a duplicate note. It renders only where the receiving window
+ * can really PATCH a note (`canHandOffNote` → NOTE_EDIT_POPOUT_ENTITIES: candidate
+ * today; the customer/vacancy popouts wire add-only, so no button there) and only
+ * where this user may edit the note here as well (same gate as the pencil).
  */
 import { useEffect, useState } from 'react'
 import type { ReactNode } from 'react'
@@ -83,6 +85,12 @@ import { NoteTypeChip, NoteChannelChip } from './notes/NoteChips'
 // Strip tags for search matching only (display still goes through SafeHtml) —
 // a raw substring match against the stored HTML would miss/false-match on markup.
 const stripHtml = (html: string) => html.replace(/<[^>]*>/g, ' ')
+
+// A note's stable id — the only thing an edit handoff carries across windows
+// (NOTITIE-POPOUT-EDIT-1). Module scope: it closes over nothing, and the receiving
+// effects below would otherwise re-run on every render. A local/optimistic note
+// without an id cannot be pointed at from another window, so it gets no button.
+const noteIdOf = (n: NoteItem) => (typeof n.id === 'string' || typeof n.id === 'number') ? String(n.id) : null
 
 // Exported: NoteComposer (notes/) reads these — one shared shape, never a
 // second hand-copied type for the popup.
@@ -156,16 +164,18 @@ interface NotesTabProps {
   // the customer tab's "link this note to …" picker belongs in the compose flow,
   // not as a standing toolbar row). Rendered only while composing a NEW note.
   composerExtra?: ReactNode
-  // F5 second-screen (+ NOTITIE-POPOUT-BAR-1 / -HANDOFF-1): which record this
+  // F5 second-screen (+ NOTITIE-POPOUT-HANDOFF-1 / -EDIT-1): which record this
   // notes surface belongs to, and which side of the glass this render is on. One
-  // prop carries the whole relationship — the toolbar button, the composer's
-  // handoff and (in the window itself) receiving a handed-over draft all key off
+  // prop carries the whole relationship — the composer's draft handoff, the
+  // per-note edit handoff and (in the window itself) receiving either all key off
   // it. Passed ONLY by a host whose entity owns a `/popout/notes/{entity}/{id}`
   // route — candidate, customer and vacancy today; applications/matches/tasks/
   // opportunities and the scoped location/department notes have no such route, so
-  // they omit it and render no button at all (§3, no fake affordance). The popout
-  // pages pass it with `role: 'window'`, so the second screen receives drafts but
-  // never offers to open itself again.
+  // they omit it and render no button at all (§3, no fake affordance). Naming the
+  // target is NOT enough for the per-note button: that one also needs a window that
+  // can really PATCH the note (NOTE_EDIT_POPOUT_ENTITIES). The popout pages pass it
+  // with `role: 'window'`, so the second screen receives handoffs but never offers
+  // to open itself again.
   popout?: NotesPopoutTarget
   showTimeline?: boolean
   showConversations?: boolean
@@ -226,11 +236,14 @@ export default function NotesTab({
   const hasPermission = auth?.hasPermission ?? (() => false)
   // Delete goes through the shared confirm dialog, never a native window.confirm() (§0).
   const { confirm, dialog } = useConfirm()
-  // Second screen (NOTITIE-POPOUT-BAR-1 / -HANDOFF-1): opening the window, handing
-  // the composer's half-typed note over to it, and — when this render IS that
-  // window — taking such a draft over. The protocol lives in the hook (§3).
-  const { isWindow: isPopoutWindow, open: openPopout, handOff, pending: handoffPending, incoming, ack, clearIncoming } =
-    useNotesPopout({ target: popout, onHandedOver: () => { setAdding(false); setEditingIdx(null) } })
+  // Second screen (NOTITIE-POPOUT-HANDOFF-1 / -EDIT-1): handing the composer's
+  // half-typed note over, handing ONE existing note over to be edited there, and —
+  // when this render IS that window — taking either over. The protocol lives in
+  // the hook (§3). Only a DRAFT handoff closes the composer here: an edit handoff
+  // left the note in the list untouched, so closing on its ack would throw away
+  // whatever else the recruiter happened to have open.
+  const { isWindow: isPopoutWindow, handOff, handOffNote, canHandOffNote, pending: handoffPending, incoming, incomingNoteId, ack, clearIncoming } =
+    useNotesPopout({ target: popout, onHandedOver: kind => { if (kind === 'draft') { setAdding(false); setEditingIdx(null) } } })
   // A handed-over draft is only taken over while THIS composer is free: overwriting
   // a note being written here would just move the text loss elsewhere. Not taken
   // over = never acked = the drill-down keeps its own text (see the hook).
@@ -238,6 +251,29 @@ export default function NotesTab({
   // Ack from an EFFECT, i.e. after the render that actually shows the draft — the
   // other window may close only once this one demonstrably holds the text.
   useEffect(() => { if (incomingDraft) ack() }, [incomingDraft, ack])
+  // Window side (NOTITIE-POPOUT-EDIT-1): the drill-down asked this window to open
+  // ONE existing note in its editor. Resolved against the thread THIS window
+  // loaded — never against anything the sender sent — and only while this composer
+  // is free, so a note being written here is never overwritten. Not found (thread
+  // still loading, note outside this window's scope) = index -1 = nothing happens
+  // and nothing is acked, which is what keeps the drill-down honest.
+  const incomingEditIdx = incomingNoteId != null && !adding
+    ? notes.findIndex(n => noteIdOf(n) === incomingNoteId)
+    : -1
+  useEffect(() => {
+    if (incomingEditIdx < 0) return
+    setEditingIdx(incomingEditIdx)
+    setAdding(true)
+  }, [incomingEditIdx])
+  // Confirm ONLY from a render where the composer really holds that exact note —
+  // acking on the request alone would tell the drill-down the note is being edited
+  // here while this window never found it.
+  useEffect(() => {
+    const shown = editingIdx == null ? undefined : notes[editingIdx]
+    if (incomingNoteId == null || !adding || !shown) return
+    if (noteIdOf(shown) !== incomingNoteId) return
+    ack()
+  }, [incomingNoteId, adding, editingIdx, notes, ack])
 
   // Load-error state (see NotesTabProps.error) — a calm danger row replaces the
   // whole tab body, same shape as MatchContractSection's error+retry; no button
@@ -272,6 +308,11 @@ export default function NotesTab({
     const isOwn = n.author_id !== null && currentUserId != null && String(n.author_id) === String(currentUserId)
     return isOwn || hasPermission(managePermission)
   }
+  // Per-note second-screen affordance (NOTITIE-POPOUT-EDIT-1): only where the
+  // receiving window can actually PATCH the note (canHandOffNote) AND this surface
+  // edits notes at all — the icon sits in the pencil's group and must never promise
+  // more than the pencil does.
+  const canPopOutNote = canHandOffNote && Boolean(onEditNote)
   // Search narrows on body text (HTML stripped) + author name. The original index
   // is kept alongside each note (not just filtered away) because openEdit/
   // onEditNote key off a note's position in the FULL `notes` array, not the
@@ -386,21 +427,10 @@ export default function NotesTab({
           <DrawerFilterMenu filters={filterRows}
             label={t('filters.button', { defaultValue: 'Filter' })}
             title={t('filters.title')} clearAllLabel={t('filters.clearAll')} />
-          {/* NOTITIE-POPOUT-BAR-1 (Danny 09-08): pop the thread onto a second screen
-              straight from the toolbar. Deliberately the SAME 26x26 bordered icon
-              button, the same ExternalLink glyph and the same `common:openSecondScreen`
-              label as the profile text's pop-out and the composer's header button —
-              one affordance, one look. Renders only for a host that wired `popout`
-              (see the prop's comment: an entity with a real popout route), and never
-              inside the popped-out window itself. */}
-          {popout && !isPopoutWindow && (
-            <button type="button" onClick={openPopout} title={t('openSecondScreen')} aria-label={t('openSecondScreen')}
-              style={{ width: 26, height: 26, display: 'flex', alignItems: 'center', justifyContent: 'center',
-                borderRadius: 6, background: 'none', color: 'var(--text-muted)',
-                border: '1px solid var(--border)', cursor: 'pointer', flexShrink: 0 }}>
-              <ExternalLink size={13} />
-            </button>
-          )}
+          {/* NOTITIE-POPOUT-EDIT-1 (Danny 10-08): the toolbar's own pop-out button is
+              GONE — it opened the thread but never an editor, which is exactly what
+              Danny reported twice. The affordance now lives per NOTE, beside that
+              note's pencil and bin (see the note rows below). */}
           {/* Shared reference-style add button (Danny 20-07: notitie-knop had geen
               achtergrondkleur) — one look on every entity's notes tab. Short text
               (DRAWER-ADD-SHORT-1, Danny 05-08): this always renders inside a
@@ -466,6 +496,22 @@ export default function NotesTab({
                       <button onClick={() => requestDelete(i)} title={labels.deleteNote} aria-label={labels.deleteNote}
                         style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: '0 0 0 6px', display: 'flex' }}>
                         <Trash2 size={13} />
+                      </button>
+                    )}
+                    {/* NOTITIE-POPOUT-EDIT-1: third icon of the same group — same
+                        borderless, muted, 6px-left footprint as the pencil and the
+                        bin, so they read as one set. Opens the second screen with
+                        THIS note in its editor; only the id travels, the window
+                        patches its own record (never a copy → never a duplicate).
+                        Same edit rights as the pencil, only where the receiving
+                        window can really save an edit, and never inside that window. */}
+                    {canPopOutNote && canManageNote(n) && noteIdOf(n) && (
+                      <button type="button" onClick={() => handOffNote(noteIdOf(n) as string)}
+                        disabled={handoffPending} aria-busy={handoffPending}
+                        title={t('openSecondScreen')} aria-label={t('openSecondScreen')}
+                        style={{ background: 'none', border: 'none', cursor: handoffPending ? 'default' : 'pointer',
+                          color: 'var(--text-muted)', padding: '0 0 0 6px', display: 'flex', opacity: handoffPending ? 0.5 : 1 }}>
+                        <ExternalLink size={13} />
                       </button>
                     )}
                   </div>

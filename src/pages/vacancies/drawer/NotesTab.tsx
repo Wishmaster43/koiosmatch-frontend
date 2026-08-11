@@ -54,6 +54,10 @@ export default function NotesTab({ vacancy: v }: { vacancy: VacancyDetail }) {
       // reopening focuses the existing one). Since NOTITIE-POPOUT-HANDOFF-1 the tab
       // owns opening it, the blocked-popup notice AND handing a half-typed note
       // over, so this host only names the target (mirrors CommunicationTab).
+      // NOTITIE-POPOUT-EDIT-1: naming it does NOT give a vacancy note the per-note
+      // "edit on the second screen" icon — VacancyNotesPopout can only ADD (the API
+      // has no PATCH for a single vacancy note), so handing an existing note there
+      // would save a duplicate. Popping a NEW note out of the composer still works.
       popout={{ entity: 'vacancy', id: String(v.id) }}
       labels={{
         notes: t('notes.title'),

@@ -60,29 +60,43 @@ describe('vacancies NotesTab (VACANCY-NOTE-TYPE-1, shared reuse)', () => {
     await waitFor(() => expect(mockPost).toHaveBeenCalledWith('/vacancies/1/notes', expect.objectContaining({ type: 'intake' })))
   })
 
-  // NOTITIE-POPOUT-BAR-1 (Danny 09-08): the toolbar pop-out must open THIS vacancy's
-  // own second-screen window. §13 — assert the actual window.open call (route +
-  // entity + id + named window), not just that a handler fired: a wrong entity or a
-  // missing id lands the recruiter on an empty popout, which is exactly the failure
-  // the button gating is meant to prevent.
-  it('the toolbar pop-out opens /popout/notes/vacancy/{id} in a per-record named window', async () => {
+  // NOTITIE-POPOUT-EDIT-1 (Danny 10-08): the TOOLBAR pop-out is gone app-wide, and a
+  // vacancy note gets no per-note one either — the vacancy popout window can only ADD
+  // (no PATCH /vacancies/{id}/notes/{note}), so handing an existing note there would
+  // save a duplicate. What remains for this entity is the COMPOSER's hand-over of a
+  // NEW note, which is exactly what these two tests now cover.
+  const composerPopOut = () =>
+    screen.getByPlaceholderText('notes.placeholder').parentElement!
+      .querySelector('button[aria-label="openSecondScreen"]') as HTMLButtonElement | null
+
+  it('no pop-out button in the toolbar, and none on a note row (its window cannot edit)', () => {
+    render(<NotesTab vacancy={vacancy()} />)
+    expect(screen.queryByRole('button', { name: 'openSecondScreen' })).toBeNull()
+  })
+
+  // §13 — assert the actual window.open call (route + entity + id + named window),
+  // not just that a handler fired: a wrong entity or a missing id lands the recruiter
+  // on an empty popout, which is exactly the failure the button gating prevents.
+  it('the composer pop-out opens /popout/notes/vacancy/{id} in a per-record named window', async () => {
     const user = userEvent.setup()
     const openSpy = vi.spyOn(window, 'open').mockReturnValue({} as Window)
     render(<NotesTab vacancy={vacancy({ id: 7 })} />)
-    await user.click(screen.getByRole('button', { name: 'openSecondScreen' }))
+    await user.click(screen.getByRole('button', { name: 'notes.new' }))
+    await user.click(composerPopOut()!)
     expect(openSpy).toHaveBeenCalledWith('/popout/notes/vacancy/7', 'koios-notes-vacancy-7', expect.any(String))
     openSpy.mockRestore()
   })
 
-  // The notice itself moved into the shared hook (NOTITIE-POPOUT-HANDOFF-1, which
+  // The notice itself lives in the shared hook (NOTITIE-POPOUT-HANDOFF-1, which
   // needs to know whether the window actually opened before it hands a draft over),
-  // so it now resolves the SAME common-namespace key through that hook's own
+  // so it resolves the SAME common-namespace key through that hook's own
   // useTranslation('common') — hence the bare 'popupBlocked' fallback here.
   it('reports a blocked popup instead of failing silently', async () => {
     const user = userEvent.setup()
     const openSpy = vi.spyOn(window, 'open').mockReturnValue(null)
     render(<NotesTab vacancy={vacancy()} />)
-    await user.click(screen.getByRole('button', { name: 'openSecondScreen' }))
+    await user.click(screen.getByRole('button', { name: 'notes.new' }))
+    await user.click(composerPopOut()!)
     expect(notifyError).toHaveBeenCalledWith('popupBlocked')
     openSpy.mockRestore()
   })

@@ -325,50 +325,168 @@ describe('NotesTab · type/channel filter menu (NOTE-FILTERS-1)', () => {
 })
 
 /**
- * NOTITIE-POPOUT-BAR-1 (Danny 09-08 "kan je hier de pop-out ook bijzetten?"): the
- * second-screen button sits in the notes TOOLBAR. It is gated on the host wiring
- * `popout` — i.e. on an entity that really owns a `/popout/notes/{entity}/{id}`
- * route — so an entity without one (applications/matches/tasks/opportunities, scoped
- * location/department notes) never gets a button that would open an empty window (§3).
+ * NOTITIE-POPOUT-EDIT-1 (Danny 10-08: "1. Icon staat nog steeds naast filter en
+ * opent geen pop-out editor modus. 2. Icon moet onder change en prullenbakje komen
+ * … en direct edit pop-out"). The toolbar button is REMOVED and the affordance now
+ * sits per note, third after the pencil and the bin, opening THAT note in the
+ * second screen's editor.
+ *
+ * The dangerous outcome is a DUPLICATE note (two notes, no way to tell which is
+ * real), so the gates below are the point of this block: only where the receiving
+ * window can really PATCH a note, only with the same rights as the pencil, only for
+ * a note with a real id — and the window confirms only once it FOUND that note.
  * No real i18next instance runs in this file, so `t('openSecondScreen')` falls back
  * to the raw key.
  */
-describe('NotesTab · toolbar pop-out (NOTITIE-POPOUT-BAR-1)', () => {
+describe('NotesTab · per-note pop-out (NOTITIE-POPOUT-EDIT-1)', () => {
   const target = { entity: 'candidate' as const, id: 'c1' }
-  beforeEach(() => openNotesPopoutMock.mockReturnValue({} as Window))
+  const topic = noteDraftTopic(target.entity, target.id)
+  const editLabels = { ...labels, deleteNote: 'Verwijderen', notePlaceholder: () => 'Titel…' }
+  const first = note({ id: 'n1', text: '<p>Eerste</p>' })
+  const second = note({ id: 'n2', text: '<p>Tweede</p>' })
+  let seen: unknown[]
+  let peer: FakeChannel
 
-  it('renders the pop-out button when the host named a popout target (entity WITH a route)', () => {
-    render(<NotesTab notes={[note()]} labels={labels} popout={target}
-      showTimeline={false} showConversations={false} />)
-    expect(screen.getByRole('button', { name: 'openSecondScreen' })).toBeInTheDocument()
+  beforeEach(() => {
+    buses.clear()
+    seen = []
+    openNotesPopoutMock.mockReset().mockReturnValue({} as Window)
+    vi.stubGlobal('BroadcastChannel', FakeChannel as unknown as typeof BroadcastChannel)
+    peer = new FakeChannel(topic)
+    peer.onmessage = e => seen.push(e.data)
+  })
+  afterEach(() => vi.unstubAllGlobals())
+
+  // The icon buttons of the note header row the pencil lives in, in DOM order.
+  const rowIcons = () =>
+    [...screen.getByTitle('Bewerken').parentElement!.querySelectorAll('button')]
+      .map(b => b.getAttribute('aria-label'))
+
+  it('sits in the note header as the THIRD icon, after the pencil and the bin', () => {
+    render(<NotesTab notes={[first]} labels={editLabels} popout={target}
+      onEditNote={vi.fn()} onDeleteNote={vi.fn()} showTimeline={false} showConversations={false} />)
+    expect(rowIcons()).toEqual(['Bewerken', 'Verwijderen', 'openSecondScreen'])
   })
 
-  it('renders NO pop-out button for a host that named none (entity WITHOUT a popout route)', () => {
-    render(<NotesTab notes={[note()]} labels={labels} showTimeline={false} showConversations={false} />)
-    expect(screen.queryByRole('button', { name: 'openSecondScreen' })).toBeNull()
+  it('is GONE from the toolbar next to Filter — the button Danny reported', () => {
+    render(<NotesTab notes={[first]} labels={editLabels} popout={target} noteTypes={[{ value: 'note', label: 'Notitie' }]}
+      onEditNote={vi.fn()} onDeleteNote={vi.fn()} showTimeline={false} showConversations={false} />)
+    // The toolbar row is the search input's own row — it must hold no pop-out button.
+    const toolbar = screen.getByPlaceholderText('Zoek notities…').closest('div')!.parentElement!
+    expect(toolbar.querySelector('button[aria-label="openSecondScreen"]')).toBeNull()
+    // The only one in the whole tab is the note's own.
+    expect(screen.getAllByRole('button', { name: 'openSecondScreen' })).toHaveLength(1)
   })
 
-  it('renders NO pop-out button inside the popped-out window itself (no self-reopening)', () => {
-    render(<NotesTab notes={[note()]} labels={labels} popout={{ ...target, role: 'window' }}
-      showTimeline={false} showConversations={false} />)
-    expect(screen.queryByRole('button', { name: 'openSecondScreen' })).toBeNull()
-  })
-
-  it('clicking it opens that record\'s window once — without opening the composer', async () => {
+  it('clicking it opens THAT record\'s window and asks for THAT note — by id, no text on the wire', async () => {
     const user = userEvent.setup()
-    render(<NotesTab notes={[note()]} labels={labels} popout={target}
-      showTimeline={false} showConversations={false} />)
-    await user.click(screen.getByRole('button', { name: 'openSecondScreen' }))
+    render(<NotesTab notes={[first, second]} labels={editLabels} popout={target}
+      onEditNote={vi.fn()} showTimeline={false} showConversations={false} />)
+    // The second note's own icon (both notes carry one).
+    await user.click(screen.getAllByRole('button', { name: 'openSecondScreen' })[1])
+
     expect(openNotesPopoutMock).toHaveBeenCalledWith('candidate', 'c1')
-    // The composer (FloatingPanel) must stay shut — this is a "read it elsewhere"
-    // action, not a "write a note" one.
+    expect(seen).toContainEqual({ kind: 'edit', noteId: 'n2' })
+    // The drill-down composer must NOT open here — the editing happens over there.
     expect(screen.queryByRole('dialog')).toBeNull()
   })
 
-  it('does not render it on a notes-less section (timeline-only host render)', () => {
-    render(<NotesTab timeline={[{ time: '2026-08-04T17:30:00+00:00', text: 'Fase gewijzigd' }]}
-      labels={labels} popout={target} showNotes={false} showConversations={false} />)
+  it('renders none for customer/vacancy hosts — their popout can only ADD, so it would duplicate the note', () => {
+    const { unmount } = render(<NotesTab notes={[first]} labels={editLabels} popout={{ entity: 'customer', id: 'x1' }}
+      onEditNote={vi.fn()} showTimeline={false} showConversations={false} />)
     expect(screen.queryByRole('button', { name: 'openSecondScreen' })).toBeNull()
+    unmount()
+
+    render(<NotesTab notes={[first]} labels={editLabels} popout={{ entity: 'vacancy', id: 'v1' }}
+      onEditNote={vi.fn()} showTimeline={false} showConversations={false} />)
+    expect(screen.queryByRole('button', { name: 'openSecondScreen' })).toBeNull()
+  })
+
+  it('renders none when the host wires no edit at all (the pencil is absent too)', () => {
+    render(<NotesTab notes={[first]} labels={editLabels} popout={target}
+      showTimeline={false} showConversations={false} />)
+    expect(screen.queryByRole('button', { name: 'openSecondScreen' })).toBeNull()
+  })
+
+  it('renders none on SOMEONE ELSE\'s note — same rights gate as the pencil', () => {
+    mockUseAuth.mockReturnValue({ user: { id: 'u1' }, hasPermission: () => false })
+    render(<NotesTab notes={[note({ id: 'n1', text: '<p>Eerste</p>', author_id: 'u2' })]} labels={editLabels}
+      popout={target} onEditNote={vi.fn()} showTimeline={false} showConversations={false} />)
+    expect(screen.queryByRole('button', { name: 'openSecondScreen' })).toBeNull()
+  })
+
+  it('renders none on a note without a stable id (an optimistic one no window can resolve)', () => {
+    render(<NotesTab notes={[note({ text: '<p>Eerste</p>' })]} labels={editLabels} popout={target}
+      onEditNote={vi.fn()} showTimeline={false} showConversations={false} />)
+    expect(screen.queryByRole('button', { name: 'openSecondScreen' })).toBeNull()
+  })
+
+  it('renders none inside the popped-out window itself (no self-reopening)', () => {
+    render(<NotesTab notes={[first]} labels={editLabels} popout={{ ...target, role: 'window' }}
+      onEditNote={vi.fn()} showTimeline={false} showConversations={false} />)
+    expect(screen.queryByRole('button', { name: 'openSecondScreen' })).toBeNull()
+  })
+
+  // The RECEIVING half — this render IS the second screen.
+  it('a window asked for a note opens ITS composer on THAT note and acks', () => {
+    render(<NotesTab notes={[first, second]} labels={editLabels} popout={{ ...target, role: 'window' }}
+      onEditNote={vi.fn()} showTimeline={false} showConversations={false} />)
+    act(() => peer.postMessage({ kind: 'edit', noteId: 'n2' }))
+
+    expect(screen.getByRole('dialog')).toBeInTheDocument()
+    expect(screen.getByLabelText('body')).toHaveValue('<p>Tweede</p>')
+    expect(seen).toContainEqual({ kind: 'ack' })
+  })
+
+  it('saving in that window PATCHES the existing note — it never adds a second one', async () => {
+    const user = userEvent.setup()
+    const onEditNote = vi.fn()
+    const onAddNote = vi.fn()
+    render(<NotesTab notes={[first, second]} labels={editLabels} popout={{ ...target, role: 'window' }}
+      onAddNote={onAddNote} onEditNote={onEditNote} showTimeline={false} showConversations={false} />)
+    act(() => peer.postMessage({ kind: 'edit', noteId: 'n2' }))
+    await user.type(screen.getByLabelText('body'), ' aangevuld')
+    await user.click(screen.getByTitle('Save'))
+
+    // Index 1 = the note with id n2 in the list this window itself holds.
+    expect(onEditNote).toHaveBeenCalledWith(1, expect.objectContaining({ body: expect.stringContaining('Tweede') }))
+    expect(onAddNote).not.toHaveBeenCalled()
+  })
+
+  it('a window that does not (yet) have the note does NOT ack — and acks once the thread arrives', () => {
+    const { rerender } = render(<NotesTab notes={[]} labels={editLabels} popout={{ ...target, role: 'window' }}
+      onEditNote={vi.fn()} showTimeline={false} showConversations={false} />)
+    act(() => peer.postMessage({ kind: 'edit', noteId: 'n2' }))
+
+    // Thread still loading: nothing opened, nothing confirmed.
+    expect(screen.queryByRole('dialog')).toBeNull()
+    expect(seen).not.toContainEqual({ kind: 'ack' })
+
+    rerender(<NotesTab notes={[first, second]} labels={editLabels} popout={{ ...target, role: 'window' }}
+      onEditNote={vi.fn()} showTimeline={false} showConversations={false} />)
+    expect(screen.getByLabelText('body')).toHaveValue('<p>Tweede</p>')
+    expect(seen).toContainEqual({ kind: 'ack' })
+  })
+
+  it('a window holding an UNKNOWN note id never acks (nothing is silently created)', () => {
+    render(<NotesTab notes={[first]} labels={editLabels} popout={{ ...target, role: 'window' }}
+      onEditNote={vi.fn()} showTimeline={false} showConversations={false} />)
+    act(() => peer.postMessage({ kind: 'edit', noteId: 'gone-99' }))
+    expect(screen.queryByRole('dialog')).toBeNull()
+    expect(seen).not.toContainEqual({ kind: 'ack' })
+  })
+
+  it('a window whose own composer is busy refuses the note and keeps its own text', async () => {
+    const user = userEvent.setup()
+    render(<NotesTab notes={[first, second]} labels={editLabels} popout={{ ...target, role: 'window' }}
+      onEditNote={vi.fn()} showTimeline={false} showConversations={false} />)
+    await user.click(screen.getByRole('button', { name: labels.newNote }))
+    await user.type(screen.getByLabelText('body'), 'Eigen tekst')
+    seen.length = 0
+
+    act(() => peer.postMessage({ kind: 'edit', noteId: 'n2' }))
+    expect(seen).not.toContainEqual({ kind: 'ack' })
+    expect(screen.getByLabelText('body')).toHaveValue('Eigen tekst')
   })
 })
 
@@ -433,7 +551,8 @@ describe('NotesTab · pop-out from the composer hands the text over', () => {
     await user.type(screen.getByLabelText('body'), 'Halve notitie')
     await user.type(screen.getByPlaceholderText('Titel…'), 'Belnotitie')
   }
-  // The composer's OWN pop-out icon (the toolbar one renders first in the DOM).
+  // The composer's OWN pop-out icon — scoped to the note-title row inside the
+  // FloatingPanel, so a note row's own icon (NOTITIE-POPOUT-EDIT-1) is never picked up.
   const blockPopOut = () => {
     const titleRow = screen.getByPlaceholderText('Titel…').parentElement!
     return titleRow.querySelector('button[aria-label="openSecondScreen"]') as HTMLButtonElement | null
