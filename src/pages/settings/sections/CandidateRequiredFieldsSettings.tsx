@@ -71,6 +71,24 @@ export default function CandidateRequiredFieldsSettings() {
       <h3 style={{ fontSize: 14, fontWeight: 600, color: 'var(--text)', marginBottom: 4 }}>{t('requiredFields.title')}</h3>
       <p style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 14 }}>{t('requiredFields.subtitle')}</p>
 
+      {/* Expand/collapse all built-in groups at once — v1 scope only, CandidateCustomRequiredFields keeps its own open state. */}
+      <div style={{ display: 'flex', gap: 8, marginBottom: 12 }}>
+        <button type="button" onClick={() => setOpenIds(CANDIDATE_FIELD_GROUPS.map(g => g.id))}
+          style={{
+            fontSize: 12, fontWeight: 500, padding: '6px 12px', borderRadius: 6,
+            border: '1px solid var(--border)', background: 'var(--surface)', color: 'var(--text)', cursor: 'pointer',
+          }}>
+          {t('requiredFields.expandAll')}
+        </button>
+        <button type="button" onClick={() => setOpenIds([])}
+          style={{
+            fontSize: 12, fontWeight: 500, padding: '6px 12px', borderRadius: 6,
+            border: '1px solid var(--border)', background: 'var(--surface)', color: 'var(--text)', cursor: 'pointer',
+          }}>
+          {t('requiredFields.collapseAll')}
+        </button>
+      </div>
+
       {/* Built-in fields — one collapsible block per card of the candidate screens. */}
       {CANDIDATE_FIELD_GROUPS.map(group => (
         <RequiredFieldsGroup key={group.id} group={group} phases={cols}

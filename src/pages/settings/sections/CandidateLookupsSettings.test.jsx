@@ -142,6 +142,26 @@ describe('CandidateLookupsSettings — phase is_applicant flag', () => {
       '/settings/candidate-lookups/phases/p1', expect.objectContaining({ is_applicant: true })))
   })
 
+  // P21: the label input locks on a structural phase (the server 422s a label
+  // rename), but every other modal field — colour, is_applicant, is_default —
+  // stays interactive (the 04-08 audit re-enabled the pencil deliberately).
+  it('disables the label input (with a hint) on a locked phase, while the switch stays interactive', async () => {
+    api.get.mockResolvedValue({ data: {
+      // eslint-disable-next-line no-restricted-syntax -- DATA: fixture phase colour, not a style rule.
+      phases: [{ id: 'p1', value: 'lead', label: 'Lead', color: '#3B8FD4', is_applicant: false }],
+    } })
+    const user = userEvent.setup()
+    render(<CandidatePhasesSettings />)
+
+    await screen.findByText('Lead')
+    await user.click(screen.getByTitle(st('lookups.edit')))
+
+    const labelInput = screen.getByDisplayValue('Lead')
+    expect(labelInput).toBeDisabled()
+    expect(screen.getByText(st('lookups.labelLocked'))).toBeInTheDocument()
+    expect(screen.getByRole('switch')).not.toBeDisabled()
+  })
+
   it('keeps the edit pencil enabled on the locked phases block while hiding add/delete', async () => {
     api.get.mockResolvedValue({ data: {
       // eslint-disable-next-line no-restricted-syntax -- DATA: fixture phase colour, not a style rule.

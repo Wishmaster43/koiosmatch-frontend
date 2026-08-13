@@ -1610,6 +1610,7 @@
     "valueField": "Slug (Wert)",
     "valueHint": "Stabiler Schlüssel; leer lassen, um einen aus dem Label zu generieren.",
     "valueImmutable": "Der Slug kann nach der Erstellung nicht mehr geändert werden.",
+    "labelLocked": "Die Beschriftung ist gesperrt, da diese Phase strukturell ist \u2014 Automatisierungen verlassen sich darauf. Farbe und andere Kennzeichen bleiben bearbeitbar.",
     "candidate_types": {
       "title": "Vertragsarten",
       "subtitle": "Mehrere pro Kandidat (z. B. Aushilfe, Freiberufler, Payroll)."
@@ -1938,6 +1939,8 @@
     "expiringAlertDaysSaveFailed": "Speichern des Ablauf-Warnfensters fehlgeschlagen."
   },
   "requiredFields": {
+    "expandAll": "Alle aufklappen",
+    "collapseAll": "Alle einklappen",
     "title": "Pflichtfelder",
     "subtitle": "Markieren Sie pro Phase, welche Felder Pflicht sind. Ein Pflichtfeld zeigt einen Stern und blockiert das Speichern, wenn es leer ist.",
     "field": "Feld",

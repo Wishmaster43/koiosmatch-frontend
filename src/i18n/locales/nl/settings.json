@@ -574,6 +574,7 @@
     "valueField": "Slug (waarde)",
     "valueHint": "Stabiele sleutel; leeg laten genereert er een uit het label.",
     "valueImmutable": "De slug kan na aanmaken niet meer gewijzigd worden.",
+    "labelLocked": "Het label is vergrendeld omdat deze fase structureel is \u2014 automatiseringen leunen erop. Kleur en andere vlaggen blijven bewerkbaar.",
     "colorField": "Kleur",
     "confirmDelete": "\"{{name}}\" verwijderen? Als deze in gebruik is, wordt hij gearchiveerd.",
     "isApplicant": "Toont de sollicitatie-funnel",
@@ -1960,6 +1961,8 @@
     "expiringAlertDaysSaveFailed": "Opslaan van de vervalwaarschuwing is mislukt."
   },
   "requiredFields": {
+    "expandAll": "Alles uitklappen",
+    "collapseAll": "Alles inklappen",
     "title": "Verplichte velden",
     "subtitle": "Markeer per fase welke velden verplicht zijn. Een verplicht veld toont een ster en blokkeert opslaan als het leeg is.",
     "field": "Veld",

@@ -1610,6 +1610,7 @@
     "valueField": "Slug (valor)",
     "valueHint": "Clave estable; déjalo vacío para generar una a partir de la etiqueta.",
     "valueImmutable": "El slug no se puede cambiar tras la creación.",
+    "labelLocked": "La etiqueta est\u00e1 bloqueada porque esta fase es estructural: las automatizaciones dependen de ella. El color y otros indicadores siguen siendo editables.",
     "candidate_types": {
       "title": "Tipos de contrato",
       "subtitle": "Varios por candidato (p. ej. Eventual, Autónomo, Payroll)."
@@ -1938,6 +1939,8 @@
     "expiringAlertDaysSaveFailed": "No se pudo guardar la ventana de aviso de caducidad."
   },
   "requiredFields": {
+    "expandAll": "Expandir todo",
+    "collapseAll": "Contraer todo",
     "title": "Campos obligatorios",
     "subtitle": "Marque por fase qué campos son obligatorios. Un campo obligatorio muestra un asterisco y bloquea el guardado si está vacío.",
     "field": "Campo",

@@ -173,6 +173,23 @@ describe('built-in fields — saving keeps the phase-keyed shape', () => {
   })
 })
 
+describe('expand all / collapse all — drives every built-in group at once', () => {
+  it('collapse all closes every group, expand all reopens every group', async () => {
+    const user = userEvent.setup()
+    blobRef.current = CONTACT_OPEN
+    render(<CandidateRequiredFieldsSettings />)
+
+    const contactHeader = screen.getByRole('button', { name: new RegExp(ct('candidates:modal.fields.cardContact')) })
+    expect(contactHeader).toHaveAttribute('aria-expanded', 'true')
+
+    await user.click(screen.getByRole('button', { name: i18n.t('requiredFields.collapseAll', { ns: 'settings' }) }))
+    expect(contactHeader).toHaveAttribute('aria-expanded', 'false')
+
+    await user.click(screen.getByRole('button', { name: i18n.t('requiredFields.expandAll', { ns: 'settings' }) }))
+    expect(contactHeader).toHaveAttribute('aria-expanded', 'true')
+  })
+})
+
 describe('custom fields — the toggle writes to the DEFINITION, never to the setting', () => {
   const def = {
     id: 'cf-1', entity_type: 'candidate', key: 'helloflexguid',

@@ -1610,6 +1610,7 @@
     "valueField": "Slug (valeur)",
     "valueHint": "Clé stable ; laissez vide pour en générer une à partir du libellé.",
     "valueImmutable": "Le slug ne peut plus être modifié après la création.",
+    "labelLocked": "Le libell\u00e9 est verrouill\u00e9 car cette phase est structurelle \u2014 les automatisations s'appuient dessus. La couleur et les autres indicateurs restent modifiables.",
     "candidate_types": {
       "title": "Types de contrat",
       "subtitle": "Plusieurs par candidat (ex. Extra, Indépendant, Payroll)."
@@ -1938,6 +1939,8 @@
     "expiringAlertDaysSaveFailed": "Échec de l'enregistrement de la fenêtre d'alerte d'expiration."
   },
   "requiredFields": {
+    "expandAll": "Tout déplier",
+    "collapseAll": "Tout replier",
     "title": "Champs requis",
     "subtitle": "Indiquez par phase quels champs sont requis. Un champ requis affiche une étoile et bloque l enregistrement s il est vide.",
     "field": "Champ",

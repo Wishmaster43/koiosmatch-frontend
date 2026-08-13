@@ -241,9 +241,22 @@ export function LookupBlock({ slug, title, subtitle, items, setItems, locked = f
 
             <div style={{ marginBottom: 14 }}>
               <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 5 }}>{t('lookups.labelField')}</div>
-              <input value={modal.label} autoFocus onChange={e => setModal(m => ({ ...m, label: e.target.value }))}
+              {/* Phase label lock (P21, mirrors the BE 422 in CandidateLookupController::update()):
+                  a locked lookup's label is structural (automations/matrix read it by slug, but
+                  tenants renaming the seeded Lead/Candidate label breaks recognisability across
+                  screens) — so on a locked list, only the label input disables in edit mode.
+                  Colour/is_applicant/is_default stay editable (04-08 audit re-enabled the pencil
+                  deliberately) — this is a narrower lock, not a re-disable of the whole modal. */}
+              <input value={modal.label} autoFocus={!(locked && modal.mode === 'edit')}
+                disabled={locked && modal.mode === 'edit'}
+                onChange={e => setModal(m => ({ ...m, label: e.target.value }))}
                 placeholder={t('lookups.labelPlaceholder')}
-                style={{ width: '100%', height: 36, padding: '0 10px', fontSize: 13, border: '1px solid var(--border)', borderRadius: 8, outline: 'none', boxSizing: 'border-box' }} />
+                style={{ width: '100%', height: 36, padding: '0 10px', fontSize: 13, border: '1px solid var(--border)', borderRadius: 8, outline: 'none', boxSizing: 'border-box',
+                         background: (locked && modal.mode === 'edit') ? 'var(--hover-bg)' : 'var(--surface)',
+                         color: (locked && modal.mode === 'edit') ? 'var(--text-muted)' : 'var(--text)' }} />
+              {locked && modal.mode === 'edit' && (
+                <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 4 }}>{t('lookups.labelLocked')}</div>
+              )}
             </div>
 
             <div style={{ marginBottom: 14 }}>

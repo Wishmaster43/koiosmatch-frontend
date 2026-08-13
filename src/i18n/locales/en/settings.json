@@ -574,6 +574,7 @@
     "valueField": "Slug (value)",
     "valueHint": "Stable key; leave empty to generate one from the label.",
     "valueImmutable": "The slug cannot be changed after creation.",
+    "labelLocked": "The label is locked because this phase is structural \u2014 automations rely on it. Colour and other flags stay editable.",
     "colorField": "Colour",
     "confirmDelete": "Delete \"{{name}}\"? If it is in use it will be archived.",
     "isApplicant": "Reveals the application funnel",
@@ -1960,6 +1961,8 @@
     "expiringAlertDaysSaveFailed": "Saving the expiry alert window failed."
   },
   "requiredFields": {
+    "expandAll": "Expand all",
+    "collapseAll": "Collapse all",
     "title": "Required fields",
     "subtitle": "Mark which fields are required per phase. A required field shows a star and blocks saving when empty.",
     "field": "Field",
