@@ -16,7 +16,23 @@
     "matches": "Matches",
     "intakes": "Intakes",
     "outreach": "Outreach",
-    "sources": "Fuentes"
+    "sources": "Fuentes",
+    "candidates": "Entrada"
+  },
+  "candidates": {
+    "loading": "Cargando entrada…",
+    "error": "No se pudo cargar la entrada",
+    "empty": "Sin entrada en este período",
+    "total": "Entrada total",
+    "series": "Entrada a lo largo del tiempo",
+    "window": "Entrada {{from}} a {{to}}",
+    "axes": {
+      "status": "Estado",
+      "phase": "Fase",
+      "source": "Fuente",
+      "owner": "Propietario",
+      "branch": "Sucursal"
+    }
   },
   "intakes": {
     "loading": "Cargando intakes…",

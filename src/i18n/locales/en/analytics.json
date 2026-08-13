@@ -16,7 +16,23 @@
     "matches": "Matches",
     "intakes": "Intakes",
     "outreach": "Outreach",
-    "sources": "Sources"
+    "sources": "Sources",
+    "candidates": "Inflow"
+  },
+  "candidates": {
+    "loading": "Loading inflow…",
+    "error": "Could not load the inflow",
+    "empty": "No inflow in this period",
+    "total": "Total inflow",
+    "series": "Inflow over time",
+    "window": "Inflow {{from}} through {{to}}",
+    "axes": {
+      "status": "Status",
+      "phase": "Phase",
+      "source": "Source",
+      "owner": "Owner",
+      "branch": "Branch"
+    }
   },
   "intakes": {
     "loading": "Loading intakes…",

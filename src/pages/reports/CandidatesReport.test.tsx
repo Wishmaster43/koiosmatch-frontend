@@ -1,0 +1,120 @@
+import { describe, it, expect, vi } from 'vitest'
+import { render, screen } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import CandidatesReport from './CandidatesReport'
+import type { CandidatesReportData } from '@/types/analytics'
+
+// Data layer under test control (loading/error/empty/success — the four UI states).
+const mockUseCandidatesReport = vi.fn()
+vi.mock('./useCandidatesReport', () => ({ useCandidatesReport: () => mockUseCandidatesReport() }))
+
+// Spy on the underlying axios client so we can assert the exact request shape
+// (method/route/params) that a bar/bucket click sends — mutation tests must assert
+// the request, never only that a callback fired (CLAUDE.md §13).
+const getSpy = vi.fn().mockResolvedValue({ data: { data: [], meta: { total: 0 } } })
+vi.mock('@/lib/api', () => ({
+  default: { get: (...args: unknown[]) => getSpy(...args) },
+  unwrapList: (r: { data: { data?: unknown[]; meta?: { total?: number } } }) => ({ rows: r.data?.data ?? [], total: r.data?.meta?.total ?? 0 }),
+}))
+
+const data: CandidatesReportData = {
+  period: 'month', from: '2026-08-01', to: '2026-08-31', total: 12,
+  timeseries: { bucket: 'week', series: [{ date: '2026-08-03', label: 'Wk 32', value: 5 }, { date: '2026-08-10', label: 'Wk 33', value: 7 }] },
+  by_status:  [{ value: 'available', label: 'Beschikbaar', color: '#16a34a', count: 8 }, { value: 'placed', label: 'Geplaatst', color: '#2563eb', count: 4 }],
+  by_phase:   [{ value: 'lead', label: 'Lead', color: null, count: 3 }, { value: 'candidate', label: 'Kandidaat', color: null, count: 9 }],
+  by_source:  [{ value: 'referral', label: 'Referral', color: null, count: 6 }],
+  by_owner:   [{ owner_id: 'u1', name: 'Anna de Vries', count: 12 }],
+  by_branch:  [{ value: 'utrecht', label: 'Utrecht', color: null, count: 12 }],
+}
+
+function renderReport() {
+  const qc = new QueryClient()
+  return render(
+    <QueryClientProvider client={qc}>
+      <CandidatesReport period="month" />
+    </QueryClientProvider>,
+  )
+}
+
+describe('CandidatesReport (RAPPORTEN-SUITE-1 inflow report)', () => {
+  it('shows the loading state', () => {
+    mockUseCandidatesReport.mockReturnValue({ data: null, loading: true, error: false })
+    renderReport()
+    expect(screen.getByText('Instroom laden…')).toBeInTheDocument()
+  })
+
+  it('shows the error state', () => {
+    mockUseCandidatesReport.mockReturnValue({ data: null, loading: false, error: true })
+    renderReport()
+    expect(screen.getByText('Kon de instroom niet laden')).toBeInTheDocument()
+  })
+
+  it('shows the empty state when there is no inflow', () => {
+    mockUseCandidatesReport.mockReturnValue({ data: { ...data, total: 0, by_status: [], by_phase: [], by_source: [], by_owner: [], by_branch: [], timeseries: { bucket: 'week', series: [] } }, loading: false, error: false })
+    renderReport()
+    expect(screen.getByText('Geen instroom in deze periode')).toBeInTheDocument()
+  })
+
+  it('renders the axis bars on success', () => {
+    mockUseCandidatesReport.mockReturnValue({ data, loading: false, error: false })
+    renderReport()
+    expect(screen.getByText('Beschikbaar')).toBeInTheDocument()
+    expect(screen.getByText('Anna de Vries')).toBeInTheDocument()
+    expect(screen.getByText('Utrecht')).toBeInTheDocument()
+  })
+
+  // BELANGRIJK per contract: the created_at window must be prominent, DD-MM-YYYY —
+  // never ISO (CLAUDE.md §3B DATUM-1) — so "report ≠ list" never becomes a support ticket.
+  it('renders the data window prominently as DD-MM-YYYY', () => {
+    mockUseCandidatesReport.mockReturnValue({ data, loading: false, error: false })
+    renderReport()
+    expect(screen.getByText('Instroom 01-08-2026 t/m 31-08-2026')).toBeInTheDocument()
+    expect(screen.queryByText(/2026-08-01/)).not.toBeInTheDocument()
+  })
+
+  it('clicking a status bar drills with the status XOR param, never mixed with other axes', async () => {
+    const user = userEvent.setup()
+    mockUseCandidatesReport.mockReturnValue({ data, loading: false, error: false })
+    renderReport()
+    await user.click(screen.getByText('Beschikbaar'))
+    expect(getSpy).toHaveBeenCalledWith('/reports/candidates/drill',
+      expect.objectContaining({ params: { status: 'available', period: 'month' } }))
+    expect(getSpy).toHaveBeenCalledWith('/reports/candidates/advice',
+      expect.objectContaining({ params: { status: 'available', period: 'month' } }))
+  })
+
+  it('clicking an owner bar drills with the owner XOR param (D2 shape: owner_id → owner)', async () => {
+    const user = userEvent.setup()
+    mockUseCandidatesReport.mockReturnValue({ data, loading: false, error: false })
+    renderReport()
+    await user.click(screen.getByText('Anna de Vries'))
+    expect(getSpy).toHaveBeenCalledWith('/reports/candidates/drill',
+      expect.objectContaining({ params: { owner: 'u1', period: 'month' } }))
+  })
+
+  // A week bucket click drills with date=<the bucket's machine key> + bucket=week, so
+  // the drawer counts the WHOLE week — bar and drawer total always agree per contract.
+  it('clicking a week timeseries bar drills with date + bucket=week', async () => {
+    const user = userEvent.setup()
+    mockUseCandidatesReport.mockReturnValue({ data, loading: false, error: false })
+    renderReport()
+    await user.click(screen.getByText('Wk 32'))
+    expect(getSpy).toHaveBeenCalledWith('/reports/candidates/drill',
+      expect.objectContaining({ params: { date: '2026-08-03', bucket: 'week', period: 'month' } }))
+  })
+
+  it('omits bucket when the timeseries is day-granular', async () => {
+    const user = userEvent.setup()
+    mockUseCandidatesReport.mockReturnValue({
+      data: { ...data, timeseries: { bucket: 'day', series: [{ date: '2026-08-03', label: '03-08', value: 2 }] } },
+      loading: false, error: false,
+    })
+    renderReport()
+    await user.click(screen.getByText('03-08'))
+    expect(getSpy).toHaveBeenCalledWith('/reports/candidates/drill',
+      expect.objectContaining({ params: { date: '2026-08-03', period: 'month' } }))
+    const call = getSpy.mock.calls.find(c => c[0] === '/reports/candidates/drill')
+    expect(call?.[1].params).not.toHaveProperty('bucket')
+  })
+})

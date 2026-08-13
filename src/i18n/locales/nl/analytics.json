@@ -16,7 +16,23 @@
     "matches": "Matches",
     "intakes": "Intakes",
     "outreach": "Outreach",
-    "sources": "Bronnen"
+    "sources": "Bronnen",
+    "candidates": "Instroom"
+  },
+  "candidates": {
+    "loading": "Instroom laden…",
+    "error": "Kon de instroom niet laden",
+    "empty": "Geen instroom in deze periode",
+    "total": "Totaal ingestroomd",
+    "series": "Instroom over tijd",
+    "window": "Instroom {{from}} t/m {{to}}",
+    "axes": {
+      "status": "Status",
+      "phase": "Fase",
+      "source": "Bron",
+      "owner": "Eigenaar",
+      "branch": "Vestiging"
+    }
   },
   "intakes": {
     "loading": "Intakes laden…",

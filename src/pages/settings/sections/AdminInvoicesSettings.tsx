@@ -22,22 +22,19 @@ import SearchSelect from '@/components/ui/SearchSelect'
 import { BTN_H } from '@/config/buttonMetrics'
 import { card, th as thBase, td as tdBase, numCell as numCellBase, notice } from './usageCardStyles'
 import type { CSSProperties } from 'react'
+import type { operations } from '@/types/api-generated'
 const th = thBase as CSSProperties
 const td = tdBase as CSSProperties
 const numCell = numCellBase as CSSProperties
 
-interface AdminInvoice {
-  id: string
-  tenant_id: string
-  tenant_name?: string | null
-  number: string | null
-  period: string
-  status: 'draft' | 'final'
-  total: number
-  vat_amount: number
-  finalized_at: string | null
-  sent_at: string | null
-}
+// Invoice row + generate-result shapes lifted from the generated spec
+// (RAPPORTEN-SUITE-1 portie 1 / 923-ops drop carries the 2xx invoice schemas) —
+// `Required` because the generated element type marks every field optional while
+// the backend always populates them for a real invoice row.
+type AdminInvoice = Required<
+  NonNullable<operations['getAdminInvoices']['responses'][200]['content']['application/json']['data']>[number]
+>
+type GenerateResult = operations['postAdminInvoicesGenerate']['responses'][200]['content']['application/json']
 
 // Last 12 months as { value: 'YYYY-MM', label } — newest first (mirrors TenantUsageSettings).
 function buildMonths() {
@@ -96,10 +93,10 @@ export default function AdminInvoicesSettings() {
   const handleGenerate = async () => {
     setGenerating(true)
     try {
-      // Response shape per contract (aa48ba1c): { month, generated, already_final } —
+      // Response shape from the generated spec: { month, generated, already_final } —
       // the toast reports what really happened instead of a generic "done".
       const res = await api.post('/admin/invoices/generate', { month })
-      const body = (res?.data?.data ?? res?.data ?? {}) as { generated?: number; already_final?: number }
+      const body = (res?.data?.data ?? res?.data ?? {}) as GenerateResult
       notifySuccess(body.generated != null
         ? t('adminInvoices.generateResult', { generated: body.generated, alreadyFinal: body.already_final ?? 0 })
         : t('adminInvoices.generateSuccess'))

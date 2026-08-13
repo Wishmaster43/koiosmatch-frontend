@@ -16,7 +16,23 @@
     "matches": "Matchs",
     "intakes": "Intakes",
     "outreach": "Outreach",
-    "sources": "Sources"
+    "sources": "Sources",
+    "candidates": "Flux entrant"
+  },
+  "candidates": {
+    "loading": "Chargement du flux entrant…",
+    "error": "Impossible de charger le flux entrant",
+    "empty": "Aucun flux entrant sur cette période",
+    "total": "Flux entrant total",
+    "series": "Flux entrant dans le temps",
+    "window": "Flux entrant du {{from}} au {{to}}",
+    "axes": {
+      "status": "Statut",
+      "phase": "Phase",
+      "source": "Source",
+      "owner": "Propriétaire",
+      "branch": "Antenne"
+    }
   },
   "intakes": {
     "loading": "Chargement des intakes…",

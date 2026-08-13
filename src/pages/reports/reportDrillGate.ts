@@ -2,19 +2,21 @@
  * reportDrillGate — the per-report-set capability flag for the report drill-down
  * affordance. REPORTS-DRILL-1 (verified live 2026-08-13, see
  * koiosmatch-api/docs/CONTRACT-CHANGELOG.md) shipped `GET /reports/{r}/drill|advice`
- * for **flow · matches · recruiters · vacancies** only — intakes/outreach/sources have
+ * for **flow · matches · recruiters · vacancies** — intakes/outreach/sources have
  * no matching backend endpoint yet, so those three stay gated off until their own
- * contract lands. Every report reads its own key here; there is nothing left to flip
- * per screen once a report's endpoint exists. Tests override via
- * `vi.mock('./reportDrillGate', ...)`.
+ * contract lands. RAPPORTEN-SUITE-1 (2026-08-14, "portie 1") added the same pair for
+ * **candidates** (six-way XOR: status|phase|source|owner|branch|date). Every report
+ * reads its own key here; there is nothing left to flip per screen once a report's
+ * endpoint exists. Tests override via `vi.mock('./reportDrillGate', ...)`.
  */
-export type DrillableReport = 'flow' | 'matches' | 'recruiters' | 'vacancies' | 'intakes' | 'outreach' | 'sources'
+export type DrillableReport = 'flow' | 'matches' | 'recruiters' | 'vacancies' | 'intakes' | 'outreach' | 'sources' | 'candidates'
 
 export const REPORT_DRILL_AVAILABLE: Record<DrillableReport, boolean> = {
   flow: true,
   matches: true,
   recruiters: true,
   vacancies: true,
+  candidates: true,
   // Not shipped yet — no /reports/{r}/drill|advice endpoint on the backend.
   intakes: false,
   outreach: false,

@@ -91,7 +91,11 @@ export default function WorkflowsListPanel({
               onDragEnd={() => { dragWf.current = null }}
               style={{ cursor: 'grab' }}
             >
-              <WorkflowCard workflow={wf} onRun={handleRun} onEdit={() => openEditor(wf)} />
+              <WorkflowCard workflow={wf} onRun={handleRun} onEdit={() => openEditor(wf)}
+                canManageFolders={canManageFolders}
+                onArchive={() => handleArchive(wf)}
+                onRestore={() => handleRestore(wf)}
+              />
             </div>
           ))}
           {visibleWorkflows.length === 0 && (

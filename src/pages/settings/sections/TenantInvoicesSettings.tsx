@@ -20,21 +20,18 @@ import { extractApiError } from '@/lib/extractApiError'
 import StatusPill from '@/components/ui/StatusPill'
 import { card, th as thBase, td as tdBase, numCell as numCellBase, notice } from './usageCardStyles'
 import type { CSSProperties } from 'react'
+import type { operations } from '@/types/api-generated'
 const th = thBase as CSSProperties
 const td = tdBase as CSSProperties
 const numCell = numCellBase as CSSProperties
 
-// One invoice row as the tenant-facing endpoint returns it (final invoices only).
-interface TenantInvoice {
-  id: string
-  number: string | null
-  period: string
-  total: number
-  vat_amount: number
-  status: string
-  finalized_at: string | null
-  sent_at: string | null
-}
+// One invoice row as the tenant-facing endpoint returns it (final invoices only) —
+// lifted from the generated spec (RAPPORTEN-SUITE-1 portie 1 / 923-ops drop).
+// `Required` because the generated element type marks every field optional while
+// the backend always populates them for a real invoice row.
+type TenantInvoice = Required<
+  NonNullable<operations['getBillingInvoices']['responses'][200]['content']['application/json']['data']>[number]
+>
 
 // Status → soft-chip colour (semantic tokens only, §4). Final invoices are always
 // 'final' server-side, but a future 'credited' state is handled defensively.

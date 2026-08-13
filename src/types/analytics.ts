@@ -143,6 +143,34 @@ export interface OutreachReportData {
   by_outcome: OutreachOutcomeCount[]
 }
 
+// ── Candidates/leads inflow report (GET /reports/candidates, RAPPORTEN-SUITE-1) ─
+// Hand-written from the backend Service (no 2xx schema in the generated spec yet,
+// §10) — mirrors the CONTRACT-CHANGELOG "portie 1" entry exactly.
+
+// One axis segment: color/label come straight from the tenant lookup payload —
+// never hardcoded (§4). `value` is the drill/advice XOR param.
+export interface CandidateSegment { value: string; label: string; color: string | null; count: number }
+
+// by_owner has its own D2 shape (owner_id/name), distinct from the other axes.
+export interface CandidateOwnerSegment { owner_id: string; name: string; count: number }
+
+// One point in the created_at timeseries; `date` is the machine key used for the
+// date/bucket drill, `label` is the display string.
+export interface CandidateTimeseriesPoint { date: string; label: string; value: number }
+
+export interface CandidatesReportData {
+  period: string
+  from: string
+  to: string
+  total: number
+  timeseries: { bucket: 'day' | 'week'; series: CandidateTimeseriesPoint[] }
+  by_status: CandidateSegment[]
+  by_phase: CandidateSegment[]
+  by_source: CandidateSegment[]
+  by_owner: CandidateOwnerSegment[]
+  by_branch: CandidateSegment[]
+}
+
 // ── Sources report (GET /reports/sources, REPORTS-2 fase 2) ──────────────────
 // Hand-written from the backend Service (no 2xx schema in the generated spec yet,
 // §10) — mirrors App\Services\Report\SourcesReport::run() exactly.

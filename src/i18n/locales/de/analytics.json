@@ -16,7 +16,23 @@
     "matches": "Matches",
     "intakes": "Intakes",
     "outreach": "Outreach",
-    "sources": "Quellen"
+    "sources": "Quellen",
+    "candidates": "Zulauf"
+  },
+  "candidates": {
+    "loading": "Zulauf wird geladen…",
+    "error": "Zulauf konnte nicht geladen werden",
+    "empty": "Kein Zulauf in diesem Zeitraum",
+    "total": "Zulauf gesamt",
+    "series": "Zulauf im Zeitverlauf",
+    "window": "Zulauf {{from}} bis {{to}}",
+    "axes": {
+      "status": "Status",
+      "phase": "Phase",
+      "source": "Quelle",
+      "owner": "Eigentümer",
+      "branch": "Niederlassung"
+    }
   },
   "intakes": {
     "loading": "Intakes werden geladen…",

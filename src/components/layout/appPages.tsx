@@ -67,6 +67,7 @@ export const PAGE_TITLES: Record<string, string> = {
 
   // Reports hub (analytical)
   reports:                      'Reports',
+  'reports.candidates':         'Reports — Candidates',
   'reports.flow':               'Reports — Flow',
   'reports.recruiters':         'Reports — Recruiters',
   'reports.vacancies':          'Reports — Vacancies',
@@ -155,6 +156,7 @@ export function renderPage(activePage: string, { navIntent, goTo, dashView }: { 
 
     // ── Reports hub (analytical) ──────────────────────────────────────────
     case 'reports':
+    case 'reports.candidates':     return <ReportsPage initialTab="candidates" />
     case 'reports.flow':           return <ReportsPage initialTab="flow" />
     case 'reports.recruiters':     return <ReportsPage initialTab="recruiters" />
     case 'reports.vacancies':      return <ReportsPage initialTab="vacancies" />
