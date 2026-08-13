@@ -5,6 +5,7 @@
  */
 import { useTranslation } from 'react-i18next'
 import RadiusMapPanel, { type MapPoint } from '@/components/map/RadiusMapPanel'
+import { toCoord } from '@/lib/coords'
 import type { Customer } from '@/types/customer'
 import type { Id } from '@/types/common'
 
@@ -23,10 +24,14 @@ export default function CustomersMapView({ rows, statusColor, center, radiusKm, 
   const { t } = useTranslation(['customers', 'common'])
 
   // Only rows with geocoded coordinates land on the map (PDOK fills them on save).
+  // PDOK-LATLNG-1 (§10, bit again 14-08 "alle klanten zijn weg"): Laravel serialises
+  // DECIMAL columns as STRINGS — a `typeof === 'number'` check drops every real
+  // coordinate the moment the resource stops float-casting. toCoord coerces both.
   const points: MapPoint[] = rows
-    .filter(c => typeof c.lat === 'number' && typeof c.lng === 'number' && c.id != null)
-    .map(c => ({
-      id: c.id as Id, lat: c.lat as number, lng: c.lng as number, label: c.name,
+    .map(c => ({ c, lat: toCoord(c.lat), lng: toCoord(c.lng) }))
+    .filter(({ c, lat, lng }) => lat != null && lng != null && c.id != null)
+    .map(({ c, lat, lng }) => ({
+      id: c.id as Id, lat: lat as number, lng: lng as number, label: c.name,
       sub: [c.city, c.distanceKm != null ? t('common:map.kmAway', { km: c.distanceKm }) : null].filter(Boolean).join(' · '),
       // eslint-disable-next-line no-restricted-syntax -- DATA fallback, not a UI colour choice
       color: statusColor(c.status) ?? '#9CA3AF',

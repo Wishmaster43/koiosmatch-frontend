@@ -1,8 +1,10 @@
 /**
- * RetentionSettings (AVG-RET-2, Danny 22-07 punt 8) — asserts the REAL /settings
- * request (§13: a mutation/read test must prove the seam, never only that a
- * callback fired): the two retention windows load with tenant defaults, coerce
- * stored strings to numbers, and save both keys on a single POST.
+ * RetentionSettings (AVG-RET-2, Danny 22-07 punt 8; consent row added 13-08
+ * per CMBE handoff) — asserts the REAL /settings request (§13: a mutation/read
+ * test must prove the seam, never only that a callback fired): the three
+ * retention windows load with tenant defaults, coerce stored strings to
+ * numbers, and save all three keys on a single POST. The legacy
+ * `retention_candidate_months` key is never rendered as a field.
  */
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, waitFor } from '@testing-library/react'
@@ -25,33 +27,55 @@ beforeEach(() => {
 })
 
 describe('RetentionSettings — load', () => {
-  it('GETs /settings and renders the tenant defaults (24 / 60 months)', async () => {
+  it('GETs /settings and renders the tenant defaults (24 / 60 / 24 months)', async () => {
     render(<RetentionSettings />)
     await waitFor(() => expect(api.get).toHaveBeenCalledWith('/settings'))
-    expect(await screen.findByDisplayValue('24')).toBeInTheDocument()
+    expect(await screen.findAllByDisplayValue('24')).toHaveLength(2) // never-placed + consent-months share the 24 default
     expect(screen.getByDisplayValue('60')).toBeInTheDocument()
   })
 
   it('coerces stored string values to numbers', async () => {
-    api.get.mockResolvedValue({ data: { retention_months_never_placed: '36', retention_months_ever_placed: '84' } })
+    api.get.mockResolvedValue({ data: { retention_months_never_placed: '36', retention_months_ever_placed: '84', retention_consent_months: '12' } })
     render(<RetentionSettings />)
     expect(await screen.findByDisplayValue('36')).toBeInTheDocument()
     expect(screen.getByDisplayValue('84')).toBeInTheDocument()
+    expect(screen.getByDisplayValue('12')).toBeInTheDocument()
+  })
+
+  it('never renders the legacy retention_candidate_months key as a field', async () => {
+    render(<RetentionSettings />)
+    await waitFor(() => expect(api.get).toHaveBeenCalledWith('/settings'))
+    expect(screen.queryByText(/retention_candidate_months/i)).not.toBeInTheDocument()
   })
 })
 
 describe('RetentionSettings — save', () => {
-  it('POSTs both retention windows to /settings on save', async () => {
+  it('POSTs all three retention keys to /settings on save', async () => {
     const user = userEvent.setup()
     render(<RetentionSettings />)
-    const neverPlaced = await screen.findByDisplayValue('24')
+    const neverPlaced = (await screen.findAllByDisplayValue('24'))[0]
 
     await user.clear(neverPlaced)
     await user.type(neverPlaced, '36')
     await user.click(screen.getByRole('button', { name: t('common.save') }))
 
     await waitFor(() => expect(api.post).toHaveBeenCalledWith('/settings', {
-      retention_months_never_placed: '36', retention_months_ever_placed: '60',
+      retention_months_never_placed: '36', retention_months_ever_placed: '60', retention_consent_months: '24',
+    }))
+  })
+
+  it('allows 0 for consent months (deliberate "never expires") and saves it verbatim', async () => {
+    const user = userEvent.setup()
+    render(<RetentionSettings />)
+    const rows = await screen.findAllByDisplayValue('24')
+    const consentField = rows[rows.length - 1]
+
+    await user.clear(consentField)
+    await user.type(consentField, '0')
+    await user.click(screen.getByRole('button', { name: t('common.save') }))
+
+    await waitFor(() => expect(api.post).toHaveBeenCalledWith('/settings', {
+      retention_months_never_placed: '24', retention_months_ever_placed: '60', retention_consent_months: '0',
     }))
   })
 })

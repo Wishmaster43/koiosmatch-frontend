@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next'
-import { ListChecks, UserCog, CircleDot, Building2, Globe, GlobeLock, Bot, BotOff, Tag, StickyNote, Archive, X } from 'lucide-react'
+import { ListChecks, Search, UserCog, CircleDot, Building2, Globe, GlobeLock, Bot, BotOff, Tag, StickyNote, Archive, X } from 'lucide-react'
 import ActionMenu from '@/components/ui/ActionMenu'
 import type { MenuNode } from '@/components/ui/ActionMenu'
 import { BTN_H } from '@/config/buttonMetrics'
@@ -8,6 +8,7 @@ import type { Id, LookupOption } from '@/types/common'
 interface BulkUser { id: Id; name: string }
 interface BulkCustomer { id: Id; name: string }
 interface BulkAiAgent { id: Id; name: string }
+interface BulkVacancy { id: Id; title: string }
 
 interface VacanciesBulkBarProps {
   count: number
@@ -28,6 +29,11 @@ interface VacanciesBulkBarProps {
   customers?: BulkCustomer[]
   aiAgents?: BulkAiAgent[]
   selectedTags?: string[]
+  // VAC-BULK-SEARCH-1 (Danny 14-08): the currently checked vacancies (id + title) —
+  // one selected opens its "Kandidaten zoeken" tab directly, several show a picker.
+  // Navigation only, no mutation, so it never touches optimistic bulk state.
+  selectedVacancies?: BulkVacancy[]
+  onOpenCandidateSearch?: (id: Id) => void
 }
 
 /**
@@ -40,6 +46,7 @@ export default function VacanciesBulkBar({
   count, onClear, onSetOwner, onSetStatus, onSetClient, onPublish, onUnpublish, onSetAiAgent,
   onRemoveTag, onAddNote, onArchive, canArchive = false,
   users = [], statuses = [], customers = [], aiAgents = [], selectedTags = [],
+  selectedVacancies = [], onOpenCandidateSearch,
 }: VacanciesBulkBarProps) {
   const { t } = useTranslation('vacancies')
 
@@ -49,14 +56,26 @@ export default function VacanciesBulkBar({
   const customerOptions = customers.map(c => ({ value: c.id, label: c.name }))
   const agentOptions = aiAgents.map(a => ({ value: a.id, label: a.name }))
   const tagOptions = selectedTags.map(tg => ({ value: tg, label: tg }))
+  const vacancyOptions = selectedVacancies.map(v => ({ value: v.id, label: v.title }))
 
   // Resolve a picked user/customer/agent id back to the full object the parent needs.
   const pickUser = (handler: (u: BulkUser) => void) => (id: string | number) => { const u = users.find(x => x.id === id); if (u) handler(u) }
   const pickCustomer = (handler: (c: BulkCustomer) => void) => (id: string | number) => { const c = customers.find(x => x.id === id); if (c) handler(c) }
   const pickAgent = (id: string | number) => { const a = aiAgents.find(x => x.id === id); if (a) onSetAiAgent(a) }
 
-  // Declarative bulk-action tree; archive is gated (server re-checks).
+  // Declarative bulk-action tree; archive is gated (server re-checks). "Kandidaten
+  // zoeken" is navigation, not a mutation, so it goes first: one checked vacancy
+  // opens its search tab directly, several show a drill-in picker (mirrors the
+  // owner/status/client option-list nodes below).
   const items: MenuNode[] = [
+    ...(onOpenCandidateSearch ? [
+      selectedVacancies.length === 1
+        ? { key: 'candidateSearch', label: t('bulk.searchCandidates'), icon: Search,
+            onSelect: () => onOpenCandidateSearch(selectedVacancies[0].id) }
+        : { key: 'candidateSearch', label: t('bulk.searchCandidates'), icon: Search,
+            searchPlaceholder: t('bulk.searchVacancy'), emptyText: t('bulk.noVacancies'),
+            options: vacancyOptions, onPick: onOpenCandidateSearch },
+    ] as MenuNode[] : []),
     { key: 'owner', label: t('bulk.changeOwner'), icon: UserCog,
       searchPlaceholder: t('bulk.searchOwner'), emptyText: t('bulk.noUsers'), options: userOptions, onPick: pickUser(onSetOwner) },
     { key: 'status', label: t('bulk.changeStatus'), icon: CircleDot,

@@ -97,3 +97,37 @@ describe('VacanciesBulkBar · AI-agent node', () => {
     expect(screen.queryByText('bulk.aiAgent')).toBeNull()
   })
 })
+
+// VAC-BULK-SEARCH-1 (Danny 14-08): "Kandidaten zoeken" — one checked vacancy opens
+// directly, several show a drill-in picker of the checked vacancies.
+describe('VacanciesBulkBar · candidate-search node', () => {
+  it('is hidden when the caller does not wire onOpenCandidateSearch (no dead end)', async () => {
+    const user = userEvent.setup()
+    render(<VacanciesBulkBar {...baseProps()} selectedVacancies={[{ id: 'v1', title: 'Verpleegkundige' }]} />)
+    await user.click(screen.getByText('bulk.actions'))
+    expect(screen.queryByText('bulk.searchCandidates')).toBeNull()
+  })
+
+  it('opens the single selected vacancy directly (no submenu)', async () => {
+    const user = userEvent.setup()
+    const onOpenCandidateSearch = vi.fn()
+    render(<VacanciesBulkBar {...baseProps()}
+      selectedVacancies={[{ id: 'v1', title: 'Verpleegkundige' }]}
+      onOpenCandidateSearch={onOpenCandidateSearch} />)
+    await user.click(screen.getByText('bulk.actions'))
+    await user.click(screen.getByText('bulk.searchCandidates'))
+    expect(onOpenCandidateSearch).toHaveBeenCalledWith('v1')
+  })
+
+  it('shows a picker of the checked vacancies for multiple selections', async () => {
+    const user = userEvent.setup()
+    const onOpenCandidateSearch = vi.fn()
+    render(<VacanciesBulkBar {...baseProps()}
+      selectedVacancies={[{ id: 'v1', title: 'Verpleegkundige' }, { id: 'v2', title: 'Doktersassistent' }]}
+      onOpenCandidateSearch={onOpenCandidateSearch} />)
+    await user.click(screen.getByText('bulk.actions'))
+    await user.click(screen.getByText('bulk.searchCandidates'))
+    await user.click(screen.getByText('Doktersassistent'))
+    expect(onOpenCandidateSearch).toHaveBeenCalledWith('v2')
+  })
+})

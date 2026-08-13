@@ -7,7 +7,7 @@
  * page's open/close wiring. The modal's own submit/validation/payload
  * behaviour is covered separately in OutreachCreate.test.tsx.
  */
-import { describe, it, expect, vi } from 'vitest'
+import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import i18n from '@/i18n'
@@ -15,6 +15,11 @@ import OutreachPage from './OutreachPage'
 import type { Campaign } from './hooks/useOutreachCampaigns'
 
 const CAMPAIGNS: Campaign[] = [{ id: 'c1', name: 'Bellijst A', channel: 'call', status: 'active', targets_count: 3 }]
+// Real OutreachCampaignResource shape (verified against the backend, 2026-08-13):
+// the source talent pool arrives as a flat `pool_name` string, never a nested
+// pool/from_pool/target_group object — the target-group filter must read exactly
+// that field, not the tolerant guesswork it used to fall back on.
+const CAMPAIGNS_WITH_POOL: Campaign[] = [{ id: 'c1', name: 'Bellijst A', channel: 'call', status: 'active', targets_count: 3, pool_name: 'Pool A' }]
 // The real (now-unmocked) PaginationBar footer pulls the shared i18n singleton into
 // this test's module graph, so `t()` resolves real strings everywhere in the page
 // (it used to fall back to the raw key before PaginationBar existed on this page) —
@@ -24,10 +29,17 @@ const newButtonLabel = i18n.t('new', { ns: 'outreach' })
 // Auth/permissions — archive/restore both allowed so the toolbar renders in full.
 vi.mock('@/context/AuthContext', () => ({ useAuth: () => ({ hasPermission: () => true }) }))
 // The campaign list hook is network-backed — mocked directly (page wiring only).
+// `currentCampaigns` is mutable so individual tests can swap in a row shape
+// (e.g. one carrying `pool_name`) without a second module-scope mock.
+let currentCampaigns: Campaign[] = CAMPAIGNS
 vi.mock('./hooks/useOutreachCampaigns', () => ({
-  useOutreachCampaigns: () => ({ campaigns: CAMPAIGNS, loading: false, error: false, reload: vi.fn(), add: vi.fn(), patch: vi.fn(), drop: vi.fn() }),
+  useOutreachCampaigns: () => ({ campaigns: currentCampaigns, loading: false, error: false, reload: vi.fn(), add: vi.fn(), patch: vi.fn(), drop: vi.fn() }),
   OUTREACH_MAX_PER_PAGE: 200,
 }))
+// Right panel — captures registerFilters so the derived filter-group config
+// (target-group options in particular) can be asserted directly.
+const registerFilters = vi.fn()
+vi.mock('@/context/RightPanelContext', () => ({ useRightPanel: () => ({ registerFilters, unregisterFilters: vi.fn() }) }))
 vi.mock('./data/outreachApi', () => ({
   listCampaigns: vi.fn(() => Promise.resolve({ rows: [] })),
   updateCampaign: vi.fn(),
@@ -47,6 +59,25 @@ vi.mock('./OutreachList', () => ({ default: () => <div data-testid="outreach-lis
 vi.mock('./OutreachBoard', () => ({ default: () => null }))
 vi.mock('./OutreachBulkBar', () => ({ default: () => null }))
 vi.mock('./OutreachDrawer', () => ({ default: () => null }))
+
+beforeEach(() => { currentCampaigns = CAMPAIGNS; registerFilters.mockClear() })
+
+describe('OutreachPage · target-group filter reads the real pool_name field', () => {
+  it('derives the target-group option straight from pool_name, not a guessed shape', () => {
+    currentCampaigns = CAMPAIGNS_WITH_POOL
+    render(<OutreachPage />)
+    const lastCall = registerFilters.mock.calls.at(-1) as [string, Array<{ key: string; options: Array<{ value: string; label: string }> }>]
+    const groups = lastCall[1]
+    const targetGroup = groups.find(g => g.key === 'targetGroup')
+    expect(targetGroup?.options).toEqual([{ value: 'Pool A', label: 'Pool A', count: 1 }])
+  })
+
+  it('omits the target-group filter entirely when no row carries pool_name', () => {
+    render(<OutreachPage />)
+    const lastCall = registerFilters.mock.calls.at(-1) as [string, Array<{ key: string }>]
+    expect(lastCall[1].find(g => g.key === 'targetGroup')).toBeUndefined()
+  })
+})
 
 describe('OutreachPage · + Bellijst opens a modal, not a full-page swap', () => {
   it('the list is mounted before "+" is clicked', () => {

@@ -23,10 +23,12 @@
  */
 import { describe, it, expect, vi } from 'vitest'
 import { act, render, screen, waitFor } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import i18n from '@/i18n'
 import CustomersPage from './CustomersPage'
 
 const cm = (key: string) => i18n.t(key, { ns: 'common' })
+const cu = (key: string) => i18n.t(key, { ns: 'customers' })
 
 interface FilterGroup { key: string; selected: string[]; onToggle: (v: string) => void }
 
@@ -179,5 +181,45 @@ describe('CustomersPage · filter-panel parity (province/phase/archived)', () =>
     const lastCall = useCustomersDataMock.mock.calls.at(-1)![0]
     expect(lastCall.filterParams.include_archived).toBe(1)
     act(() => archivedGroup!.onToggle('archived')) // clean up
+  })
+})
+
+// TOOLBAR-PARITY-1 (Danny 14-08): the candidates toolbar carries QuickViewToggles
+// for Archived + Map (Trash/Blacklist are candidate-only, see skipped notes) — this
+// asserts clicking the REAL toolbar buttons (not the filter-panel proxy above)
+// reaches the request param / view state, mirroring CandidatesToolbar.test.tsx's seam.
+describe('CustomersPage · toolbar quick-view toggles (candidate parity, TOOLBAR-PARITY-1)', () => {
+  it('clicking the toolbar Archived toggle sets include_archived=1 in filterParams and shows aria-pressed=true', async () => {
+    useCustomersDataMock.mockReturnValue(baseResult)
+    const user = userEvent.setup()
+    render(<CustomersPage />)
+    await waitFor(() => expect(apiGet).toHaveBeenCalled())
+
+    const archivedBtn = screen.getByRole('button', { name: cu('page.archivedView') })
+    expect(archivedBtn).toHaveAttribute('aria-pressed', 'false')
+    await user.click(archivedBtn)
+
+    expect(archivedBtn).toHaveAttribute('aria-pressed', 'true')
+    const lastCall = useCustomersDataMock.mock.calls.at(-1)![0]
+    expect(lastCall.filterParams.include_archived).toBe(1)
+
+    await user.click(archivedBtn) // clean up (module-level usePageMemory store)
+  })
+
+  it('clicking the toolbar Map toggle flips aria-pressed and switches the view to map', async () => {
+    useCustomersDataMock.mockReturnValue(baseResult)
+    const user = userEvent.setup()
+    render(<CustomersPage />)
+    await waitFor(() => expect(apiGet).toHaveBeenCalled())
+
+    const mapBtn = screen.getByRole('button', { name: cm('map.view') })
+    expect(mapBtn).toHaveAttribute('aria-pressed', 'false')
+    await user.click(mapBtn)
+    expect(mapBtn).toHaveAttribute('aria-pressed', 'true')
+    // Table pagination (table-view only content) is no longer the active pane —
+    // the map's loading fallback (Suspense) proves the map view rendered.
+    await waitFor(() => expect(screen.getByText(cm('map.loading'))).toBeInTheDocument())
+
+    await user.click(mapBtn) // clean up
   })
 })

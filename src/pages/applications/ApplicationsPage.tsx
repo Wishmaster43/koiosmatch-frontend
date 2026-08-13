@@ -32,14 +32,12 @@ import QuickViewToggle from '@/components/ui/QuickViewToggle'
 import { BTN_H } from '@/config/buttonMetrics'
 import {
   buildPhaseData, buildOwnerData, buildSourceData, buildOwnerDataFromStats, buildSourceDataFromStats,
-  buildVacOptions, buildClientOptions, asOptions,
+  buildVacOptions, buildClientOptions, buildBucketData, asOptions,
   bucketCount, computeAvgScore, computeAiTaskCount, buildApplicationInsights,
 } from './data/applicationInsights'
 import { buildApplicationFilterGroups } from './data/applicationFilterGroups'
 import type { Application } from '@/types/application'
 import type { Id } from '@/types/common'
-
-const BUCKETS = ['active', 'matched', 'rejected']
 
 // Right-panel multi-toggle for a filter dimension.
 const tog = (set: Dispatch<SetStateAction<string[]>>) => (v: string) => set(p => p.includes(v) ? p.filter(x => x !== v) : [...p, v])
@@ -150,6 +148,19 @@ export default function ApplicationsPage({ intent }: { intent?: unknown } = {}) 
   const vacOptions = useMemo(() => buildVacOptions(wideRows), [wideRows])
   // W27: customer/client filter options — new dimension (customer_id[]).
   const clientOptions = useMemo(() => buildClientOptions(wideRows), [wideRows])
+  // Bucket counts + donut data (Danny 14-08: replaces the old toolbar tab row) —
+  // real server-wide totals via stats.by_bucket when available (bucketCount's
+  // own per-bucket fallback covers the rest). See buildBucketData's header
+  // comment for why "placed" isn't a 4th slice yet.
+  const bucketCounts = useMemo(() => ({
+    active: bucketCount(stats, wideRows, 'active'),
+    matched: bucketCount(stats, wideRows, 'matched'),
+    rejected: bucketCount(stats, wideRows, 'rejected'),
+  }), [stats, wideRows])
+  const bucketData = useMemo(() => buildBucketData(t, bucketCounts), [t, bucketCounts])
+  // Bucket options for the right filter panel — one truth with the donut/deep-link
+  // state (Danny 14-08: "en natuurlijk staat alles rechts in het filtermenu").
+  const bucketOptions = useMemo(() => asOptions(bucketData), [bucketData])
 
   // Register the right-panel filters. Config lives in the data/ builder (mirrors
   // buildCandidateFilterGroups/buildCustomerFilterGroups) — categorised groups +
@@ -157,17 +168,17 @@ export default function ApplicationsPage({ intent }: { intent?: unknown } = {}) 
   const filterGroups = useMemo(() => buildApplicationFilterGroups({
     t, tog,
     filters: {
-      selectedPhase, setSelectedPhase, selectedOwner, setSelectedOwner,
+      bucket, setBucket, selectedPhase, setSelectedPhase, selectedOwner, setSelectedOwner,
       selectedSource, setSelectedSource, selectedVac, setSelectedVac,
       selectedClient, setSelectedClient, selectedBranch, setSelectedBranch,
       showArchived, setShowArchived, showTrash, setShowTrash, dateRange, setDateRange,
     },
     options: {
-      phaseOptions: asOptions(phaseData), ownerOptions: asOptions(ownerData), sourceOptions: asOptions(sourceData),
+      bucketOptions, phaseOptions: asOptions(phaseData), ownerOptions: asOptions(ownerData), sourceOptions: asOptions(sourceData),
       vacOptions, clientOptions, branchOptions,
     },
-  }), [t, selectedPhase, selectedOwner, selectedSource, selectedVac, selectedClient, selectedBranch,
-    showArchived, showTrash, dateRange, phaseData, ownerData, sourceData, vacOptions, clientOptions, branchOptions]) // eslint-disable-line react-hooks/exhaustive-deps
+  }), [t, bucket, selectedPhase, selectedOwner, selectedSource, selectedVac, selectedClient, selectedBranch,
+    showArchived, showTrash, dateRange, bucketOptions, phaseData, ownerData, sourceData, vacOptions, clientOptions, branchOptions]) // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     registerFilters('applications-page', filterGroups)
@@ -243,13 +254,11 @@ export default function ApplicationsPage({ intent }: { intent?: unknown } = {}) 
   // an honest sub-label on the card (STATS-HONEST-1).
   const missingAppointmentCount = useMemo(() => wideRows.filter(a => a.missingAppointment).length, [wideRows])
   const counts = useMemo(() => ({
-    active: bucketCount(stats, wideRows, 'active'),
-    matched: bucketCount(stats, wideRows, 'matched'),
-    rejected: bucketCount(stats, wideRows, 'rejected'),
+    ...bucketCounts,
     new: stats ? (stats.attention?.new ?? 0) : wideRows.filter(a => a.isNew && a.bucket === 'active').length,
-  }), [stats, wideRows])
+  }), [stats, wideRows, bucketCounts])
   const { donuts: insightDonuts, kpis: insightKpis } = buildApplicationInsights({
-    t, phaseData, ownerData, sourceData,
+    t, phaseData, ownerData, sourceData, bucketData,
     selectedPhase, setSelectedPhase, selectedOwner, setSelectedOwner, selectedSource, setSelectedSource,
     bucket, setBucket, attention, setAttention, toggleAttention, showArchived, setShowArchived, clearAllFilters,
     counts, avgScore, aiTaskCount, missingAppointmentCount,
@@ -306,20 +315,11 @@ export default function ApplicationsPage({ intent }: { intent?: unknown } = {}) 
             )}
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          {/* Bucket tabs — soft-tinted active (§4: never a solid fill). */}
-          {BUCKETS.map(b => {
-            const on = bucket === b && !showArchived
-            return (
-            <button key={b} onClick={() => { setShowArchived(false); setBucket(b) }} style={{ padding: '5px 14px', fontSize: 13,
-              fontWeight: on ? 600 : 400, borderRadius: 7, cursor: 'pointer',
-              background: on ? 'color-mix(in srgb, var(--color-primary) 14%, transparent)' : 'transparent',
-              // Text-colour accent uses the AA-contrast text token, not the raw brand primary.
-              color: on ? 'var(--color-primary-text)' : 'var(--text)',
-              border: `1px solid ${on ? 'color-mix(in srgb, var(--color-primary) 45%, transparent)' : 'var(--border)'}` }}>
-              {t(`buckets.${b}`)}
-            </button>
-            )
-          })}
+          {/* No status bucket tabs here (Danny 14-08, "moet een donut worden!!"):
+              the active/matched/rejected dimension moved to the insights-row
+              donut (see bucketData/buildBucketData) and the right filter panel's
+              bucket group — the state itself (`bucket`) is unchanged, only the
+              toolbar control was removed to stop the duplication. */}
           {/* Archived (detached) view — shared quick-view toggle (§4). */}
           <QuickViewToggle active={showArchived} onToggle={() => setShowArchived(v => !v)}
             label={t('archived.toggle')} color="var(--color-archive)" icon={Archive} />

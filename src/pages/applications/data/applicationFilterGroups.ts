@@ -9,6 +9,8 @@ import type { Dispatch, SetStateAction } from 'react'
 import type { TFunction } from 'i18next'
 import type { AppDateRangeFilter } from '../hooks/useApplicationFilters'
 
+type SetBucket = Dispatch<SetStateAction<string>>
+
 interface Opt { value?: string | number; label?: string; count?: number; color?: string }
 type Tog = (set: Dispatch<SetStateAction<string[]>>) => (v: string) => void
 
@@ -19,6 +21,9 @@ interface BuildArgs {
   t: TFunction
   tog: Tog
   filters: {
+    // Bucket (Danny 14-08): the same single-value state the removed toolbar tab
+    // row drove — one truth, now bound to the donut + this panel group.
+    bucket: string; setBucket: SetBucket
     selectedPhase: string[]; setSelectedPhase: Dispatch<SetStateAction<string[]>>
     selectedOwner: string[]; setSelectedOwner: Dispatch<SetStateAction<string[]>>
     selectedSource: string[]; setSelectedSource: Dispatch<SetStateAction<string[]>>
@@ -30,7 +35,7 @@ interface BuildArgs {
     dateRange: AppDateRangeFilter | null; setDateRange: (v: AppDateRangeFilter | null) => void
   }
   options: {
-    phaseOptions: Opt[]; ownerOptions: Opt[]; sourceOptions: Opt[]
+    bucketOptions: Opt[]; phaseOptions: Opt[]; ownerOptions: Opt[]; sourceOptions: Opt[]
     vacOptions: Opt[]; clientOptions: Opt[]; branchOptions: Opt[]
   }
 }
@@ -42,7 +47,14 @@ export function buildApplicationFilterGroups({ t, tog, filters: f, options: o }:
   const catOrg        = t('filters.categories.organisation')
   const catDisplay     = t('filters.categories.display')
 
+  // Bucket — single-value dimension (never multi, unlike the tog() groups below):
+  // picking a slice REPLACES the current bucket; picking the active one again
+  // returns to the default 'active' (mirrors the donut's pickBucket behaviour,
+  // see applicationInsights.ts).
+  const onToggleBucket = (v: string) => { f.setShowArchived(() => false); f.setBucket(prev => (prev === v ? 'active' : v)) }
+
   return [
+    { key: 'bucket',  type: 'search-select', category: catLifecycle, label: t('insights.bucket'), selected: f.bucket === 'active' ? [] : [f.bucket], options: o.bucketOptions, onToggle: onToggleBucket },
     { key: 'phase',   type: 'search-select', category: catLifecycle, label: t('insights.phase'),  selected: f.selectedPhase,  options: o.phaseOptions,  onToggle: tog(f.setSelectedPhase) },
     { key: 'owner',   type: 'search-select', category: catOrg,       label: t('insights.owner'),  selected: f.selectedOwner,  options: o.ownerOptions,  onToggle: tog(f.setSelectedOwner) },
     { key: 'source',  type: 'search-select', category: catOrg,       label: t('insights.source'), selected: f.selectedSource, options: o.sourceOptions, onToggle: tog(f.setSelectedSource) },

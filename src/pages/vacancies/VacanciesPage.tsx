@@ -286,7 +286,6 @@ function VacanciesPageInner({ intent }: { intent?: unknown }) {
   }
 
   // Status tab bar: "All" + one button per configured status.
-  const buckets = [{ value: 'all', label: t('buckets.all') }, ...statuses.map(st => ({ value: st.value, label: st.label }))]
 
   return (
     <>
@@ -314,7 +313,9 @@ function VacanciesPageInner({ intent }: { intent?: unknown }) {
                   onSetAiAgent={bulkSetAiAgent}
                   onRemoveTag={bulkRemoveTag} onAddNote={bulkAddNote} onArchive={bulkArchive}
                   canArchive={hasPermission('vacancies.delete')}
-                  users={users} statuses={statuses} customers={customerList} aiAgents={aiAgents} selectedTags={selectedTags} />
+                  users={users} statuses={statuses} customers={customerList} aiAgents={aiAgents} selectedTags={selectedTags}
+                  selectedVacancies={vacancies.filter((v): v is typeof v & { id: Id } => v.id != null && selectedIds.has(v.id)).map(v => ({ id: v.id, title: v.title }))}
+                  onOpenCandidateSearch={openCandidateSearch} />
               ) : (
                 <>
                   {/* BTN_H (§4/§9): one explicit height for every text/action button, everywhere. */}
@@ -341,18 +342,10 @@ function VacanciesPageInner({ intent }: { intent?: unknown }) {
                   carries that view as a click-to-filter card, and the agent donut's
                   "Geen agent" segment drives the same toggleWithoutAgent — a third
                   control for one filter is duplication, not convenience. */}
-              {/* Bucket tabs — soft-tinted active (§4: never a solid fill); mirrors
-                  ApplicationsPage's identical bucket control verbatim. */}
-              {buckets.map(b => (
-                <button key={b.value} onClick={() => setStatusBucket(b.value)}
-                  style={{ padding: '5px 14px', fontSize: 13, fontWeight: statusBucket === b.value ? 600 : 400, borderRadius: 7, cursor: 'pointer',
-                    background: statusBucket === b.value ? 'color-mix(in srgb, var(--color-primary) 14%, transparent)' : 'transparent',
-                    // Text-colour accent uses the AA-contrast text token, not the raw brand primary.
-                    color: statusBucket === b.value ? 'var(--color-primary-text)' : 'var(--text)',
-                    border: `1px solid ${statusBucket === b.value ? 'color-mix(in srgb, var(--color-primary) 45%, transparent)' : 'var(--border)'}` }}>
-                  {b.label}
-                </button>
-              ))}
+              {/* No status bucket tabs here (Danny 14-08, PDF-punt "rode rij weg"):
+                  status filtering lives in the right filter panel now — a second
+                  toolbar control for the same statusBucket was duplication. The
+                  state itself stays: the panel, KPI cards and deep-links drive it. */}
             </div>
           </div>
 

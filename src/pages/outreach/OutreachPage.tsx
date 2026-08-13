@@ -48,15 +48,14 @@ const CHANNELS = [
 const statusKey  = (c: Campaign) => c.status ?? 'draft'
 const channelKey = (c: Campaign) => c.channel ?? 'call'
 const targetsOf  = (c: Campaign) => c.targets_count ?? c.target_count ?? 0
-// The owner/target-group filters read defensively — a campaign row may carry
-// either a nested object or a flat *_name field depending on which endpoint
-// populated it, so neither shape is assumed.
+// Owner name reads defensively — a campaign row may carry either a nested
+// object or a flat owner_name field depending on which endpoint populated it.
 const ownerNameOf = (c: Campaign) => (c.owner as { name?: string } | null)?.name ?? (c as Record<string, unknown>).owner_name as string | undefined ?? ''
-const targetGroupNameOf = (c: Campaign) => {
-  const rec = c as Record<string, unknown>
-  const pool = (rec.pool ?? rec.from_pool ?? rec.target_group) as { name?: string } | string | null | undefined
-  return typeof pool === 'string' ? pool : pool?.name ?? (rec.pool_name as string | undefined) ?? ''
-}
+// Target group = the source talent pool the campaign was seeded from. The real
+// field (OutreachCampaignResource::toArray) is the flat `pool_name` string —
+// confirmed by CMBE 2026-08-13, replacing the earlier tolerant
+// pool/from_pool/target_group guesswork that never matched a real API shape.
+const targetGroupNameOf = (c: Campaign) => (c as Record<string, unknown>).pool_name as string | undefined ?? ''
 
 // Right-panel multi-toggle for a filter dimension.
 const tog = (set: Dispatch<SetStateAction<string[]>>) => (v: string) =>

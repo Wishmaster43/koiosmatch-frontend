@@ -14,6 +14,10 @@ import ApplicationsPage from './ApplicationsPage'
 // Capture every filterParams object the data hook is called with — the real
 // request the page would send to the server.
 const dataHookCalls: Array<Record<string, unknown>> = []
+// Bucket donut/panel test (Danny 14-08): the bucket VALUE sent alongside
+// filterParams — a separate arg on useApplicationsData, not folded into
+// filterParams (see useApplicationFilters' bucketParam).
+const bucketParamCalls: Array<string | undefined> = []
 
 interface FilterGroup { key: string; selected: string[]; onToggle: (v: string) => void }
 let capturedGroups: FilterGroup[] = []
@@ -38,8 +42,9 @@ vi.mock('@/hooks/useListPageSize', () => ({ useListPageSize: () => ({ pageSize: 
 const dataHookState = vi.hoisted(() => ({ wideIsPartial: false, statsFailed: false }))
 vi.mock('./hooks/useApplicationsData', () => ({
   APPLICATIONS_MAX_PER_PAGE: 200,
-  useApplicationsData: (args: { filterParams: Record<string, unknown> }) => {
+  useApplicationsData: (args: { filterParams: Record<string, unknown>; bucketParam?: string }) => {
     dataHookCalls.push(args.filterParams)
+    bucketParamCalls.push(args.bucketParam)
     return { applications: [], setApplications: vi.fn(), loading: false, error: null, total: 0, setTotal: vi.fn(),
       lastPage: 1, wideRows: [], wideLoading: false, wideError: null,
       wideIsPartial: dataHookState.wideIsPartial, stats: null, statsFailed: dataHookState.statsFailed }
@@ -140,5 +145,48 @@ describe('S-board-1 · board view sample-notice honesty', () => {
     render(<ApplicationsPage />)
     await user.click(screen.getByRole('button', { name: 'view.board' }))
     expect(insightsRowCalls.at(-1)?.notice).toBeUndefined()
+  })
+})
+
+// Danny 14-08: the bucket toolbar tab row is gone — active/matched/rejected now
+// live in ONE donut (insights row) + a matching right-panel group, both driving
+// the same `bucket` state that reaches the server as `bucketParam` (§13: the
+// REQUEST, not just a fired callback).
+describe('ApplicationsPage · bucket donut (replaces the toolbar tab row)', () => {
+  it('renders no bucket toolbar buttons anymore', () => {
+    render(<ApplicationsPage />)
+    expect(screen.queryByRole('button', { name: 'buckets.active' })).toBeNull()
+    expect(screen.queryByRole('button', { name: 'buckets.matched' })).toBeNull()
+    expect(screen.queryByRole('button', { name: 'buckets.rejected' })).toBeNull()
+  })
+
+  it('clicking the "matched" donut slice sends bucket=matched to the data layer', () => {
+    insightsRowCalls.length = 0
+    bucketParamCalls.length = 0
+    render(<ApplicationsPage />)
+    const donuts = insightsRowCalls.at(-1)?.donuts as Array<{ key: string; onPick: (d: unknown) => void }>
+    const bucketDonut = donuts.find(d => d.key === 'bucket')!
+    act(() => bucketDonut.onPick({ key: 'matched' }))
+    expect(bucketParamCalls.at(-1)).toBe('matched')
+  })
+
+  it('clicking the same donut slice again returns to the default bucket', () => {
+    insightsRowCalls.length = 0
+    bucketParamCalls.length = 0
+    render(<ApplicationsPage />)
+    const pick = () => (insightsRowCalls.at(-1)?.donuts as Array<{ key: string; onPick: (d: unknown) => void }>).find(d => d.key === 'bucket')!
+    act(() => pick().onPick({ key: 'rejected' }))
+    expect(bucketParamCalls.at(-1)).toBe('rejected')
+    act(() => pick().onPick({ key: 'rejected' }))
+    expect(bucketParamCalls.at(-1)).toBe('active')
+  })
+
+  it('the right filter panel carries a bucket group whose onToggle reaches the same request', () => {
+    bucketParamCalls.length = 0
+    render(<ApplicationsPage />)
+    const bucketGroup = capturedGroups.find(g => g.key === 'bucket')
+    expect(bucketGroup).toBeTruthy()
+    act(() => bucketGroup!.onToggle('matched'))
+    expect(bucketParamCalls.at(-1)).toBe('matched')
   })
 })

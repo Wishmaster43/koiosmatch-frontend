@@ -31,6 +31,15 @@ export const pickOne = (set: Dispatch<SetStateAction<string[]>>) => (d: unknown)
   if (v != null) set(p => (p.length === 1 && p[0] === v) ? [] : [v])
 }
 
+// Bucket donut click → the SAME single-value bucket state the old toolbar tab
+// row drove (Danny 14-08: "de knoppenrij verdwijnt, dit wordt een donut").
+// Clicking the currently-active slice returns to the default ('active').
+export const pickBucket = (setBucket: Dispatch<SetStateAction<string>>, setShowArchived: Dispatch<SetStateAction<boolean>>) => (d: unknown) => {
+  const o = d as { key?: string; name?: string; payload?: { key?: string } } | null | undefined
+  const v = o?.key ?? o?.payload?.key ?? o?.name
+  if (v != null) { setShowArchived(false); setBucket(prev => (prev === v ? 'active' : v)) }
+}
+
 // Counts prefer the server-wide stats (real totals, unaffected by any row cap);
 // fall back to counting the wide (≤200) sample when stats hasn't loaded.
 export const phaseCount = (stats: AppStats | null, wideRows: Application[], key: string): number => {
@@ -39,6 +48,26 @@ export const phaseCount = (stats: AppStats | null, wideRows: Application[], key:
 }
 export const bucketCount = (stats: AppStats | null, wideRows: Application[], b: string): number =>
   stats?.by_bucket?.[b] ?? wideRows.filter(a => a.bucket === b).length
+
+// Bucket donut data — replaces the old toolbar tab row (Danny 14-08). Counts are
+// the real server-wide `stats.by_bucket` totals whenever available (bucketCount's
+// own fallback covers the wide-sample case). NOTE (STATS-HONEST-1): a fourth
+// "placed" segment was requested but is NOT built here — `ApplicationQuery`'s
+// bucket enum is `active|matched|rejected` only (verified against the backend
+// query + stats aggregation) and the linked-Match summary that could distinguish
+// "matched" from an actually-placed application is a DETAIL-only field (`match`
+// on `ApplicationDetail`, never present on the list/board rows or the stats
+// response) — there is no honest signal to split "matched" further without a
+// backend addition. Per the domain model (CLAUDE.md §3B) the funnel's Hired
+// stage already IS the placement trigger (Hired → Match → deployability
+// Placed), so today "matched" already represents the placement bucket; a
+// distinct "placed" slice needs backend-Claude to add either a `by_bucket`
+// segment or a lightweight `has_match` list/stats field. Reported as a gap.
+export const buildBucketData = (t: TFunction, counts: { active: number; matched: number; rejected: number }): Aggregate[] => ([
+  { name: t('buckets.active'),   key: 'active',   color: 'var(--color-primary)', value: counts.active },
+  { name: t('buckets.matched'),  key: 'matched',  color: 'var(--color-success)', value: counts.matched },
+  { name: t('buckets.rejected'), key: 'rejected', color: 'var(--color-danger)',  value: counts.rejected },
+].filter(d => d.value > 0))
 
 // ── Donut data (phase / recruiter / source), each with counts ──
 export const buildPhaseData = (phases: BoardPhase[], stats: AppStats | null, wideRows: Application[]): Aggregate[] =>
@@ -124,7 +153,7 @@ interface Counts { active: number; matched: number; rejected: number; new: numbe
 
 interface BuildArgs {
   t: TFunction
-  phaseData: Aggregate[]; ownerData: Aggregate[]; sourceData: Aggregate[]
+  phaseData: Aggregate[]; ownerData: Aggregate[]; sourceData: Aggregate[]; bucketData: Aggregate[]
   selectedPhase: string[]; setSelectedPhase: Dispatch<SetStateAction<string[]>>
   selectedOwner: string[]; setSelectedOwner: Dispatch<SetStateAction<string[]>>
   selectedSource: string[]; setSelectedSource: Dispatch<SetStateAction<string[]>>
@@ -144,12 +173,18 @@ interface BuildArgs {
 
 // ── Insights strip: 3 donuts (filterable) + 6 KPI cards, equal footprint (§3A) ──
 export function buildApplicationInsights({
-  t, phaseData, ownerData, sourceData,
+  t, phaseData, ownerData, sourceData, bucketData,
   selectedPhase, setSelectedPhase, selectedOwner, setSelectedOwner, selectedSource, setSelectedSource,
   bucket, setBucket, attention, setAttention, toggleAttention, showArchived, setShowArchived, clearAllFilters,
   counts, avgScore, aiTaskCount, missingAppointmentCount,
 }: BuildArgs): { donuts: DonutSpec[]; kpis: KpiSpec[] } {
+  // Bucket is a single-value dimension (not a multi-select array like the other
+  // three donuts) — "picked" and "active" read directly off the bucket state.
+  const bucketActive = bucket !== 'active' || showArchived
   const donuts: DonutSpec[] = [
+    { key: 'bucket', title: t('insights.bucket'), data: bucketData, onPick: pickBucket(setBucket, setShowArchived),
+      active: bucketActive, onClear: () => { setBucket('active'); setShowArchived(false) },
+      picked: bucketActive ? (bucketData.find(d => d.key === bucket)?.name ?? null) : null },
     { key: 'phase',  title: t('insights.phase'),  data: phaseData,  onPick: pickOne(setSelectedPhase),  active: selectedPhase.length > 0,  onClear: () => setSelectedPhase([]),  picked: pickedLabel(phaseData, selectedPhase[0]) },
     { key: 'owner',  title: t('insights.owner'),  data: ownerData,  onPick: pickOne(setSelectedOwner),  active: selectedOwner.length > 0,  onClear: () => setSelectedOwner([]),  picked: pickedLabel(ownerData, selectedOwner[0]) },
     { key: 'source', title: t('insights.source'), data: sourceData, onPick: pickOne(setSelectedSource), active: selectedSource.length > 0, onClear: () => setSelectedSource([]), picked: pickedLabel(sourceData, selectedSource[0]) },
