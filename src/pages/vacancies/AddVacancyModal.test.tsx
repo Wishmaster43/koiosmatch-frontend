@@ -187,6 +187,26 @@ describe('AddVacancyModal · seven titled cards (SLICE 1)', () => {
   })
 })
 
+describe('AddVacancyModal · card structure (Danny 14-08 recipe — FieldRow label-left)', () => {
+  it('keeps every titled card and puts each field label to the LEFT of its control', () => {
+    render(<AddVacancyModal onClose={noop} users={users} customers={customers} />)
+    // Card titles still present (recipe point 2 — titled cards via cardHead/cardBox).
+    expect(screen.getByText('modal.fields.cardGeneral')).toBeInTheDocument()
+    expect(screen.getByText('modal.fields.cardClient')).toBeInTheDocument()
+    expect(screen.getByText('modal.fields.cardPlacement')).toBeInTheDocument()
+    // Label-left row (recipe point 3): the title field's label sits before the
+    // input in DOM order and the row is a horizontal flex (FieldRow's own layout).
+    const titleInput = screen.getByPlaceholderText('modal.titlePlaceholder')
+    const row = titleInput.closest('div[style*="align-items: flex-start"]') as HTMLElement
+    expect(row).toBeInTheDocument()
+    const label = row.querySelector('label')
+    expect(label).toBeInTheDocument()
+    // The label is the row's first child, the field column is the second — label LEFT of field.
+    expect(row.children[0]).toBe(label)
+    expect(row.children[0].compareDocumentPosition(titleInput)).toBe(Node.DOCUMENT_POSITION_FOLLOWING)
+  })
+})
+
 describe('AddVacancyModal · A+D layout (Danny 03-08 — two columns + collapsed secondaries)', () => {
   it('keeps the required title field OUTSIDE any CollapsedCard — visible without opening a section', () => {
     render(<AddVacancyModal onClose={noop} users={users} customers={customers} />)

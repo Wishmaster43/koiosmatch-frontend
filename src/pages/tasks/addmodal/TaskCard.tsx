@@ -9,7 +9,7 @@
  * short field. Order change only; the field itself is unchanged.
  */
 import type { TFunction } from 'i18next'
-import { Field, TextField } from '@/components/forms/fields'
+import { FieldRow, TextField } from '@/components/forms/fields'
 import CreatableSelect from '@/components/ui/CreatableSelect'
 import { cardHead, cardBox, row2, pickerStyle, PICKER_MENU_W } from './fields'
 import type { TaskForm } from '../AddTaskModal'
@@ -29,15 +29,15 @@ export default function TaskCard({ t, form, errors, set, types }: {
         <div style={row2}>
           {/* Soort activiteit — the TYPE lookup (searchable, allowCreate=false: a
               tenant-managed value, never a free-text create). */}
-          <Field label={t('modal.type')} required>
+          <FieldRow label={t('modal.type')} required>
             <CreatableSelect value={form.type || null} onChange={(v: string) => set('type', v)} allowCreate={false}
               placeholder={t('modal.typePlaceholder')} menuWidth={PICKER_MENU_W}
               style={errors.type ? { ...pickerStyle, borderColor: 'var(--color-danger)' } : pickerStyle}
               options={types.map(x => ({ value: x.value, label: x.label }))} />
-          </Field>
-          <Field label={t('modal.titleLabel')} required>
+          </FieldRow>
+          <FieldRow label={t('modal.titleLabel')} required>
             <TextField value={form.title} onChange={v => set('title', v)} placeholder={t('modal.titlePlaceholder')} error={errors.title} />
-          </Field>
+          </FieldRow>
         </div>
       </div>
     </div>

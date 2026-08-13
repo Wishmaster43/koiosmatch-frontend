@@ -11,6 +11,7 @@ import DatePicker from 'react-datepicker'
 import 'react-datepicker/dist/react-datepicker.css'
 import { useTranslation } from 'react-i18next'
 import { fieldInputStyle } from './fieldMetrics'
+import { CANON_LABEL_STYLE } from '@/components/drawer/fieldRowCanon'
 import { toLocalIsoDate } from '@/lib/localDate'
 import CreatableSelect from '@/components/ui/CreatableSelect'
 
@@ -33,6 +34,26 @@ export function Label({ children, required, htmlFor, id }: { children: ReactNode
       marginBottom: 5, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
       {children}{required && <span style={{ color: 'var(--color-danger)', marginLeft: 2 }}>*</span>}
     </label>
+  )
+}
+
+// MODAL-CANON (Danny 13/14-08 "hou het met + Match aan"): the label-LEFT row for
+// every create-modal field — label on the canon column width (fieldRowCanon),
+// field takes the rest. Same id/aria-labelledby wiring as Field below; ONE
+// implementation, so no modal restyles it privately (§3A field-layout rule).
+export function FieldRow({ label, required, children }: { label: ReactNode; required?: boolean; children: ReactNode }) {
+  const id = useId()
+  const labelId = `${id}-label`
+  const child = isValidElement(children)
+    ? cloneElement(children as ReactElement<{ id?: string; 'aria-labelledby'?: string }>, { id, 'aria-labelledby': labelId })
+    : children
+  return (
+    <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10 }}>
+      <label id={labelId} htmlFor={id} style={{ ...CANON_LABEL_STYLE, paddingTop: 8 }}>
+        {label}{required && <span style={{ color: 'var(--color-danger)', marginLeft: 2 }}>*</span>}
+      </label>
+      <div style={{ flex: 1, minWidth: 0 }}>{child}</div>
+    </div>
   )
 }
 

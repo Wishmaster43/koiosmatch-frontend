@@ -29,7 +29,7 @@
  * renders: "bureau" and "no department" stay valid choices even when a list fails.
  */
 import type { TFunction } from 'i18next'
-import { Field } from '@/components/forms/fields'
+import { FieldRow } from '@/components/forms/fields'
 import CreatableSelect from '@/components/ui/CreatableSelect'
 import { cardHead, cardBox, pickerStyle, PICKER_MENU_W } from './fields'
 import { UNASSIGNED_VALUE } from './assigneeOptions'
@@ -79,11 +79,11 @@ export default function AssignmentCard({
         {/* Interne afdeling — WHERE the task waits. Searchable (never a native
             <select>) and clearable, because "no department" really persists. */}
         <div>
-          <Field label={t('modal.team')}>
+          <FieldRow label={t('modal.team')}>
             <CreatableSelect value={form.teamId} onChange={(v: string) => set('teamId', v)} allowCreate={false}
               style={pickerStyle} menuWidth={PICKER_MENU_W} options={teamOpts}
               clearable clearLabel={t('modal.team')} placeholder={t('modal.teamPlaceholder')} />
-          </Field>
+          </FieldRow>
 
           {/* Exactly one status/help line, in state order: error > loading > empty >
               the plain-language explanation of what a department does here. */}
@@ -106,10 +106,10 @@ export default function AssignmentCard({
             because `assignee_id: null` is a measured, accepted create. Picking a
             person here leaves the department above untouched (TEAM-1). */}
         <div>
-          <Field label={t('modal.assignee')}>
+          <FieldRow label={t('modal.assignee')}>
             <CreatableSelect value={form.assigneeId} onChange={(v: string) => set('assigneeId', v)} allowCreate={false}
               style={pickerStyle} menuWidth={PICKER_MENU_W} options={assigneeOpts} />
-          </Field>
+          </FieldRow>
 
           {/* Exactly one status/help line, in state order: error wins over
               loading, loading over empty, and the bureau hint shows only once the

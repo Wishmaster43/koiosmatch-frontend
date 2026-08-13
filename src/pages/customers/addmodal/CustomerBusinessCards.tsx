@@ -9,7 +9,7 @@
  */
 import { useTranslation } from 'react-i18next'
 import type { CustomerForm } from '../AddCustomerModal'
-import { Field, TextField } from '@/components/forms/fields'
+import { FieldRow, TextField } from '@/components/forms/fields'
 import CreatableSelect from '@/components/ui/CreatableSelect'
 import { cardHead, cardBox, row2 } from '@/components/ui/modalCards'
 import FieldNotice from '@/components/ui/FieldNotice'
@@ -47,14 +47,14 @@ export default function CustomerBusinessCards({
       <div>
         <div style={cardHead}>{t('modal.fields.cardOwner')}</div>
         <div style={cardBox}>
-          <Field label={t('modal.fields.accountManager')}>
+          <FieldRow label={t('modal.fields.accountManager')}>
             {/* CLEAR-SWEEP (Danny 13-08): owner is genuinely optional (the create
                 body sends owner_id unconditionally, including empty — see
                 useCustomerRecord.handleCreate) — so clearable. */}
             <CreatableSelect value={form.ownerId || null} onChange={v => set('ownerId', v)} allowCreate={false}
               clearable clearLabel={t('modal.fields.accountManager')}
               placeholder={t('modal.fields.selectOwner')} options={userOptions} />
-          </Field>
+          </FieldRow>
         </div>
       </div>
 
@@ -66,9 +66,9 @@ export default function CustomerBusinessCards({
       <div>
         <div style={cardHead}>{t('overview.online')}</div>
         <div style={cardBox}>
-          <Field label={t('overview.website')}>
+          <FieldRow label={t('overview.website')}>
             <TextField value={form.website} onChange={v => set('website', v)} placeholder="https://" />
-          </Field>
+          </FieldRow>
         </div>
       </div>
 
@@ -77,13 +77,13 @@ export default function CustomerBusinessCards({
         <div style={cardHead}>{t('overview.billing')}</div>
         <div style={cardBox}>
           <div style={row2}>
-            <Field label={t('overview.costCenter')}>
+            <FieldRow label={t('overview.costCenter')}>
               <TextField value={form.costCenter} onChange={v => set('costCenter', v)} />
-            </Field>
+            </FieldRow>
             <div onBlur={onBillingEmailBlur}>
-              <Field label={t('overview.billingEmail')}>
+              <FieldRow label={t('overview.billingEmail')}>
                 <TextField type="email" value={form.billingEmail} onChange={v => set('billingEmail', v)} error={billingEmailError} />
-              </Field>
+              </FieldRow>
               <FieldNotice text={billingEmailMessage} />
             </div>
           </div>

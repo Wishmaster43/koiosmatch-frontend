@@ -31,7 +31,7 @@ import { useTranslation } from 'react-i18next'
 import { useAuth } from '@/context/AuthContext'
 import { Building } from 'lucide-react'
 import FloatingPanel from '@/components/ui/FloatingPanel'
-import { Field, TextField } from '@/components/forms/fields'
+import { FieldRow, TextField } from '@/components/forms/fields'
 import CreatableSelect from '@/components/ui/CreatableSelect'
 import CollapsibleRichText from '@/components/ui/CollapsibleRichText'
 import { useAllSettings, getJsonSetting } from '@/lib/settings/useAllSettings'
@@ -174,16 +174,16 @@ export default function AddDepartmentModal({ onClose, onCreate, onImported, loca
             <div style={cardHead}>{t('subModal.groups.general')}</div>
             <div style={cardBox}>
               <div>
-                <Field label={t('subModal.departmentName')} required>
+                <FieldRow label={t('subModal.departmentName')} required>
                   <TextField value={form.name} onChange={v => set('name', v)} placeholder={t('subModal.departmentPlaceholder')} error={errors.name} />
-                </Field>
+                </FieldRow>
                 {errors.name && <div style={{ fontSize: 11, color: 'var(--color-danger)', marginTop: 3 }}>{t('subModal.required')}</div>}
               </div>
 
               {showLocationPicker ? (
                 <div style={row2}>
                   <div>
-                    <Field label={t('subModal.selectLocation')} required>
+                    <FieldRow label={t('subModal.selectLocation')} required>
                       {locations.length === 0 ? (
                         <div style={{ fontSize: 12, color: 'var(--color-warning)', padding: '8px 11px', border: '1px solid var(--color-warning)', borderRadius: 8, background: 'var(--color-warning-bg)' }}>
                           {t('subModal.noLocationsFirst')}
@@ -197,7 +197,7 @@ export default function AddDepartmentModal({ onClose, onCreate, onImported, loca
                           allowCreate={false} placeholder={t('subModal.selectLocation')}
                           options={locations.map(l => ({ value: String(l.id), label: l.name }))} />
                       )}
-                    </Field>
+                    </FieldRow>
                     {errors.locationId && <div style={{ fontSize: 11, color: 'var(--color-danger)', marginTop: 3 }}>{t('subModal.required')}</div>}
                   </div>
                   {/* STATUS-HIDDEN-1: hidden unless the tenant marked it required — an
@@ -205,18 +205,18 @@ export default function AddDepartmentModal({ onClose, onCreate, onImported, loca
                       instead of stretching across the row (mirrors ContactLinkCard's
                       own showLocationPicker/showDepartmentPicker filler convention). */}
                   {showStatusPicker ? (
-                    <Field label={t('subModal.status')}>
+                    <FieldRow label={t('subModal.status')}>
                       <CreatableSelect value={form.statusId ? String(form.statusId) : null} onChange={v => set('statusId', v || null)} allowCreate={false}
                         placeholder={t('subModal.selectStatus')} options={statusOptions} />
-                    </Field>
+                    </FieldRow>
                   ) : <div />}
                 </div>
               ) : showStatusPicker && (
                 <div style={row3Even}>
-                  <Field label={t('subModal.status')}>
+                  <FieldRow label={t('subModal.status')}>
                     <CreatableSelect value={form.statusId ? String(form.statusId) : null} onChange={v => set('statusId', v || null)} allowCreate={false}
                       placeholder={t('subModal.selectStatus')} options={statusOptions} />
-                  </Field>
+                  </FieldRow>
                 </div>
               )}
             </div>
@@ -230,7 +230,7 @@ export default function AddDepartmentModal({ onClose, onCreate, onImported, loca
             <div style={cardHead}>{t('subModal.groups.business')}</div>
             <div style={cardBox}>
               <div style={row3Even}>
-                <Field label={t('subModal.costCenter')}><TextField value={form.costCenter} onChange={v => set('costCenter', v)} /></Field>
+                <FieldRow label={t('subModal.costCenter')}><TextField value={form.costCenter} onChange={v => set('costCenter', v)} /></FieldRow>
               </div>
             </div>
           </div>

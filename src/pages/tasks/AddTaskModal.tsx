@@ -9,7 +9,7 @@ import { mapTaskDetail } from './data/mapTask'
 import { BTN_H } from '@/config/buttonMetrics'
 import { WIDE_MODAL } from '@/components/ui/modalMetrics'
 import FloatingPanel from '@/components/ui/FloatingPanel'
-import { cardPair } from '@/components/ui/modalCards'
+import { modalColumns } from '@/components/ui/modalCards'
 import TaskCard from './addmodal/TaskCard'
 import PlanningCard from './addmodal/PlanningCard'
 import LinkCard from './addmodal/LinkCard'
@@ -369,7 +369,9 @@ export default function AddTaskModal({ onClose, onCreated, onSaved, initial, ext
         ) : (
         <div style={{ flex: 1, overflowY: 'auto', padding: '20px 24px', display: 'flex', flexDirection: 'column', gap: 16 }}>
           <TaskCard t={t} form={form} errors={errors} set={set} types={types} />
-          <div style={cardPair}>
+          {/* CARD-COLUMNS-CANON: the shared modalColumns grid (§11, mirrors
+              AddCustomerModal/MatchModal) — was the local `cardPair` alias. */}
+          <div style={modalColumns()}>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
               <PlanningCard t={t} form={form} set={set} priorities={priorities} statuses={statuses} />
               <AssignmentCard t={t} form={form} set={set} ownerName={ownerName} assigneeOpts={assigneeOpts}

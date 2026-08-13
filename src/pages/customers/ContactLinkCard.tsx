@@ -12,7 +12,7 @@
  * layout unchanged when the picker is absent.
  */
 import { useTranslation } from 'react-i18next'
-import { Field } from '@/components/forms/fields'
+import { FieldRow } from '@/components/forms/fields'
 import CreatableSelect from '@/components/ui/CreatableSelect'
 import Toggle from '@/components/ui/Toggle'
 import { cardHead, cardBox, row2 } from '@/components/ui/modalCards'
@@ -67,7 +67,7 @@ export default function ContactLinkCard({
         {(showLocationPicker || showDepartmentPicker) && (
           <div style={row2}>
             {showLocationPicker && (
-              <Field label={t('subModal.selectLocation')}>
+              <FieldRow label={t('subModal.selectLocation')}>
                 {/* CLEAR-SWEEP (Danny 13-08): optional — useCustomerContacts.toApi
                     already coerces an empty locationId to null on save. */}
                 <CreatableSelect value={locationId ? String(locationId) : null} allowCreate={false}
@@ -75,17 +75,17 @@ export default function ContactLinkCard({
                   clearable clearLabel={t('subModal.selectLocation')}
                   placeholder={t('subModal.noneOption')} options={locationOptions}
                   style={CREATABLE_STYLE} />
-              </Field>
+              </FieldRow>
             )}
             {showDepartmentPicker && (
-              <Field label={t('subModal.selectDepartment')}>
+              <FieldRow label={t('subModal.selectDepartment')}>
                 {/* CLEAR-SWEEP: optional — useCustomerContacts.toApi coerces an empty
                     departmentId to null on save the same way. */}
                 <CreatableSelect value={departmentId ? String(departmentId) : null} allowCreate={false}
                   onChange={onDepartmentChange}
                   clearable clearLabel={t('subModal.selectDepartment')}
                   placeholder={departmentPlaceholder} options={departmentOptions} style={CREATABLE_STYLE} />
-              </Field>
+              </FieldRow>
             )}
             {showLocationPicker !== showDepartmentPicker && <div />}
           </div>
@@ -96,11 +96,11 @@ export default function ContactLinkCard({
               stretching across the row (mirrors the location/department filler
               convention above). */}
           {showStatusPicker ? (
-            <Field label={t('subModal.status')}>
+            <FieldRow label={t('subModal.status')}>
               <CreatableSelect value={statusId ? String(statusId) : null} allowCreate={false}
                 onChange={onStatusChange} placeholder={t('subModal.selectStatus')} options={statusSelectOptions}
                 style={CREATABLE_STYLE} />
-            </Field>
+            </FieldRow>
           ) : <div />}
           <div style={{ display: 'flex', alignItems: 'center', gap: 7, paddingBottom: 8 }}>
             <Toggle checked={isPrimary} onChange={onPrimaryToggle} ariaLabel={t('subModal.isPrimary')} />

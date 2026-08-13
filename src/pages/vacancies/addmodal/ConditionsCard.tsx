@@ -6,7 +6,7 @@
  * choice (not new i18n scope for a pre-existing convention).
  */
 import { useTranslation } from 'react-i18next'
-import { Field, TextField } from '@/components/forms/fields'
+import { FieldRow, TextField } from '@/components/forms/fields'
 import { cardHead, cardBox, row3Even, row2 } from '@/components/ui/modalCards'
 
 type ConditionsKey = 'salaryMin' | 'salaryMax' | 'salaryPeriod' | 'hoursMin' | 'hoursMax'
@@ -23,19 +23,19 @@ export default function ConditionsCard({ salaryMin, salaryMax, salaryPeriod, hou
     <div>
       <div style={cardHead}>{t('details.groups.conditions')}</div>
       <div style={cardBox}>
-        <Field label={t('details.salary')}>
+        <FieldRow label={t('details.salary')}>
           <div style={row3Even}>
             <TextField type="number" value={salaryMin} onChange={v => onChange('salaryMin', v)} placeholder="min" />
             <TextField type="number" value={salaryMax} onChange={v => onChange('salaryMax', v)} placeholder="max" />
             <TextField value={salaryPeriod} onChange={v => onChange('salaryPeriod', v)} placeholder={t('modal.fields.salaryPeriodPlaceholder')} />
           </div>
-        </Field>
-        <Field label={t('details.hours')}>
+        </FieldRow>
+        <FieldRow label={t('details.hours')}>
           <div style={row2}>
             <TextField type="number" value={hoursMin} onChange={v => onChange('hoursMin', v)} placeholder="min" />
             <TextField type="number" value={hoursMax} onChange={v => onChange('hoursMax', v)} placeholder="max" />
           </div>
-        </Field>
+        </FieldRow>
       </div>
     </div>
   )

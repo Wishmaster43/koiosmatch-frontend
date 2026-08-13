@@ -10,7 +10,7 @@
  * (`showStatusPicker`, owned by the parent's settings read).
  */
 import { useTranslation } from 'react-i18next'
-import { Field, TextField } from '@/components/forms/fields'
+import { FieldRow, TextField } from '@/components/forms/fields'
 import CreatableSelect from '@/components/ui/CreatableSelect'
 import { cardHead, cardBox, row2 } from '@/components/ui/modalCards'
 
@@ -39,19 +39,19 @@ export default function LocationGeneralCard({
       <div style={cardHead}>{t('subModal.groups.general')}</div>
       <div style={cardBox}>
         <div>
-          <Field label={t('subModal.locationName')} required>
+          <FieldRow label={t('subModal.locationName')} required>
             <TextField value={name} onChange={onNameChange} placeholder={t('subModal.locationPlaceholder')} error={nameError} />
-          </Field>
+          </FieldRow>
           {nameError && <div style={{ fontSize: 11, color: 'var(--color-danger)', marginTop: 3 }}>{t('subModal.required')}</div>}
         </div>
         {/* STATUS-HIDDEN-1: hidden unless the tenant marked it required —
             LocationDetail's own title-row picker is where status is set. */}
         {showStatusPicker && (
           <div style={{ ...row2, alignItems: 'end' }}>
-            <Field label={t('subModal.status')}>
+            <FieldRow label={t('subModal.status')}>
               <CreatableSelect value={statusId ? String(statusId) : null} onChange={onStatusChange} allowCreate={false}
                 placeholder={t('subModal.selectStatus')} options={statusOptions} style={pickerStyle} />
-            </Field>
+            </FieldRow>
             <div />
           </div>
         )}

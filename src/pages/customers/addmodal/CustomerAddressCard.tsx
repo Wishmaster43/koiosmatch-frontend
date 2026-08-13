@@ -16,7 +16,7 @@
  */
 import { useTranslation } from 'react-i18next'
 import type { CustomerForm } from '../AddCustomerModal'
-import { Field, TextField } from '@/components/forms/fields'
+import { FieldRow, TextField } from '@/components/forms/fields'
 import CreatableSelect from '@/components/ui/CreatableSelect'
 import { cardHead, cardBox, row } from '@/components/ui/modalCards'
 import { getCountryOptions } from '@/lib/countries'
@@ -39,41 +39,41 @@ export default function AddressCard({ form, set, provinces }: AddressCardProps) 
       <div style={cardHead}>{t('overview.address')}</div>
       <div style={cardBox}>
         <div style={row('2fr 1fr 1fr')}>
-          <Field label={t('locations.detail.street')}>
+          <FieldRow label={t('locations.detail.street')}>
             <TextField value={form.street} onChange={v => set('street', v)} />
-          </Field>
-          <Field label={t('locations.detail.houseNumber')}>
+          </FieldRow>
+          <FieldRow label={t('locations.detail.houseNumber')}>
             <TextField value={form.houseNumber} onChange={v => set('houseNumber', v)} />
-          </Field>
-          <Field label={t('locations.detail.houseNumberSuffix')}>
+          </FieldRow>
+          <FieldRow label={t('locations.detail.houseNumberSuffix')}>
             <TextField value={form.houseNumberSuffix} onChange={v => set('houseNumberSuffix', v)} />
-          </Field>
+          </FieldRow>
         </div>
         <div style={row('1fr 2fr')}>
-          <Field label={t('locations.detail.postalCode')}>
+          <FieldRow label={t('locations.detail.postalCode')}>
             <TextField value={form.postalCode} onChange={v => set('postalCode', v)} />
-          </Field>
-          <Field label={t('modal.fields.city')}>
+          </FieldRow>
+          <FieldRow label={t('modal.fields.city')}>
             <TextField value={form.city} onChange={v => set('city', v)} placeholder={t('modal.fields.cityPlaceholder')} />
-          </Field>
+          </FieldRow>
         </div>
         <div style={row('1fr 1fr')}>
           {/* Sends `province` (the backend's preferred key, per CustomerRequest — `state`
               is only a legacy input alias) — the same key the candidate's home address uses. */}
-          <Field label={t('locations.detail.state')}>
+          <FieldRow label={t('locations.detail.state')}>
             {/* CLEAR-SWEEP (Danny 13-08): province is in OPTIONAL_CREATE_FIELDS
                 (useCustomerRecord) — omitted from the create body entirely when
                 empty — so clearable. */}
             <CreatableSelect value={form.province || null} onChange={(v: string) => set('province', v)} allowCreate={false}
               clearable clearLabel={t('locations.detail.state')}
               placeholder={t('common:select')} options={provinces} menuWidth={260} />
-          </Field>
-          <Field label={t('locations.detail.country')}>
+          </FieldRow>
+          <FieldRow label={t('locations.detail.country')}>
             {/* CLEAR-SWEEP: country is in OPTIONAL_CREATE_FIELDS the same way. */}
             <CreatableSelect value={form.country || null} onChange={(v: string) => set('country', v)} allowCreate={false}
               clearable clearLabel={t('locations.detail.country')}
               placeholder={t('common:select')} options={countryOptions} menuWidth={260} />
-          </Field>
+          </FieldRow>
         </div>
       </div>
     </div>

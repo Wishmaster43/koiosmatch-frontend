@@ -60,6 +60,7 @@ import { useLiveFieldValidation } from '@/hooks/useLiveFieldValidation'
 import { isValidEmailFormat } from '@/lib/contactFieldValidation'
 import { BTN_H } from '@/config/buttonMetrics'
 import { WIDE_MODAL } from '@/components/ui/modalMetrics'
+import { modalColumns } from '@/components/ui/modalCards'
 import CollapsedCard from '@/components/ui/CollapsedCard'
 import SubEntityImportCard, { subEntityImportTitle } from './SubEntityImportCard'
 import ContactIdentityCard from './addmodal/ContactIdentityCard'
@@ -324,48 +325,59 @@ export default function AddContactPersonModal({
         </div>
       }>
         <div style={{ flex: 1, overflowY: 'auto', padding: '18px 22px', display: 'flex', flexDirection: 'column', gap: 16 }}>
-          {/* Persoon — name + function (Danny 27-07 card split: name/lastname/functie). */}
-          <ContactIdentityCard
-            firstName={form.firstName} onFirstNameChange={v => set('firstName', v)} firstNameError={errors.firstName}
-            middleName={form.middleName} onMiddleNameChange={v => set('middleName', v)}
-            lastName={form.lastName} onLastNameChange={v => set('lastName', v)} lastNameError={errors.lastName}
-            role={form.role} onRoleChange={v => set('role', v)} contactFunctions={contactFunctions} allowFreeEntry={allowFreeEntry}
-            gender={form.gender} onGenderChange={v => set('gender', v)} genders={genderOptions}
-          />
+          {/* HET-RECEPT (Danny 14-08): two responsive columns, same idiom as
+              AddCustomerModal/AddLocationModal — LEFT keeps the identity fields
+              the recruiter always fills (Persoon/Contact), RIGHT holds the
+              relational coupling (Koppeling); falls back to one column below
+              340px per column. */}
+          <div style={modalColumns('repeat(auto-fit, minmax(340px, 1fr))')}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+              {/* Persoon — name + function (Danny 27-07 card split: name/lastname/functie). */}
+              <ContactIdentityCard
+                firstName={form.firstName} onFirstNameChange={v => set('firstName', v)} firstNameError={errors.firstName}
+                middleName={form.middleName} onMiddleNameChange={v => set('middleName', v)}
+                lastName={form.lastName} onLastNameChange={v => set('lastName', v)} lastNameError={errors.lastName}
+                role={form.role} onRoleChange={v => set('role', v)} contactFunctions={contactFunctions} allowFreeEntry={allowFreeEntry}
+                gender={form.gender} onGenderChange={v => set('gender', v)} genders={genderOptions}
+              />
 
-          {/* Contact — e-mail/telefoon/mobiel (Danny 27-07: exact card the request named)
-              + LinkedIn (CONTACT-LINKEDIN-1, 05-08). */}
-          <ContactDetailsCard
-            cardLabel={t('subModal.groups.contactInfo')}
-            emailLabel={t('subModal.email')} phoneLabel={t('subModal.phone')} mobileLabel={t('subModal.mobile')}
-            email={form.email} onEmailChange={v => set('email', v)} onEmailBlur={() => markTouched('email')}
-            emailError={!!emailDup || errors.email || !!emailMessage} emailMessage={emailMessage}
-            phone={form.phone} onPhoneChange={v => set('phone', v)} phoneError={!!phoneDup || errors.phone} phoneMessage={phoneMessage}
-            mobile={form.mobile} onMobileChange={v => set('mobile', v)} mobileError={!!mobileDup || errors.mobile} mobileMessage={mobileMessage}
-            linkedinLabel={t('subModal.linkedin')} linkedinPlaceholder={t('subModal.linkedinPlaceholder')}
-            linkedin={form.linkedin} onLinkedinChange={v => set('linkedin', v)}
-          />
+              {/* Contact — e-mail/telefoon/mobiel (Danny 27-07: exact card the request named)
+                  + LinkedIn (CONTACT-LINKEDIN-1, 05-08). */}
+              <ContactDetailsCard
+                cardLabel={t('subModal.groups.contactInfo')}
+                emailLabel={t('subModal.email')} phoneLabel={t('subModal.phone')} mobileLabel={t('subModal.mobile')}
+                email={form.email} onEmailChange={v => set('email', v)} onEmailBlur={() => markTouched('email')}
+                emailError={!!emailDup || errors.email || !!emailMessage} emailMessage={emailMessage}
+                phone={form.phone} onPhoneChange={v => set('phone', v)} phoneError={!!phoneDup || errors.phone} phoneMessage={phoneMessage}
+                mobile={form.mobile} onMobileChange={v => set('mobile', v)} mobileError={!!mobileDup || errors.mobile} mobileMessage={mobileMessage}
+                linkedinLabel={t('subModal.linkedin')} linkedinPlaceholder={t('subModal.linkedinPlaceholder')}
+                linkedin={form.linkedin} onLinkedinChange={v => set('linkedin', v)}
+              />
+            </div>
 
-          {/* Koppeling — locatie/afdeling (searchable, allowCreate=false: real relational
-              ids) + status/primair-vlag for that link. Extracted into its own component
-              (ContactLinkCard) to keep this file under the ~400-line split trigger. */}
-          <ContactLinkCard
-            locationId={form.locationId ? String(form.locationId) : null}
-            departmentId={form.departmentId ? String(form.departmentId) : null}
-            statusId={form.statusId ? String(form.statusId) : null}
-            isPrimary={form.isPrimary}
-            locationOptions={locations.map(l => ({ value: String(l.id), label: l.name }))}
-            departmentOptions={departmentOptions}
-            departmentPlaceholder={departmentPlaceholder}
-            statusOptions={statuses}
-            showLocationPicker={showLocationPicker}
-            showDepartmentPicker={showDepartmentPicker}
-            showStatusPicker={showStatusPicker}
-            onLocationChange={v => { set('locationId', v || null); set('departmentId', null) }}
-            onDepartmentChange={v => set('departmentId', v || null)}
-            onStatusChange={v => set('statusId', v || null)}
-            onPrimaryToggle={handlePrimaryToggle}
-          />
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+              {/* Koppeling — locatie/afdeling (searchable, allowCreate=false: real relational
+                  ids) + status/primair-vlag for that link. Extracted into its own component
+                  (ContactLinkCard) to keep this file under the ~400-line split trigger. */}
+              <ContactLinkCard
+                locationId={form.locationId ? String(form.locationId) : null}
+                departmentId={form.departmentId ? String(form.departmentId) : null}
+                statusId={form.statusId ? String(form.statusId) : null}
+                isPrimary={form.isPrimary}
+                locationOptions={locations.map(l => ({ value: String(l.id), label: l.name }))}
+                departmentOptions={departmentOptions}
+                departmentPlaceholder={departmentPlaceholder}
+                statusOptions={statuses}
+                showLocationPicker={showLocationPicker}
+                showDepartmentPicker={showDepartmentPicker}
+                showStatusPicker={showStatusPicker}
+                onLocationChange={v => { set('locationId', v || null); set('departmentId', null) }}
+                onDepartmentChange={v => set('departmentId', v || null)}
+                onStatusChange={v => set('statusId', v || null)}
+                onPrimaryToggle={handlePrimaryToggle}
+              />
+            </div>
+          </div>
 
           {/* SUBENTITY-IMPORT-1 (moved to the bottom + collapsed, Danny 03-08 A+D
               decision): a secondary/optional bulk-create path must never force a

@@ -27,7 +27,7 @@
  * here would be a second, conflicting UI for the same fact.
  */
 import { useTranslation } from 'react-i18next'
-import { Field, TextField } from '@/components/forms/fields'
+import { FieldRow, TextField } from '@/components/forms/fields'
 import CreatableSelect from '@/components/ui/CreatableSelect'
 import { cardHead, cardBox, row2 } from '@/components/ui/modalCards'
 import { contactOptionLabel } from '@/lib/contactLabel'
@@ -93,10 +93,10 @@ export default function ContactOnSiteCard({
             AddLocationModal's own report for why they stay) — they also ride
             along into the new contact record on the typed-new path. */}
         {isEdit ? (
-          <Field label={t('subModal.contactName')}><TextField value={contactName} onChange={onContactNameChange} /></Field>
+          <FieldRow label={t('subModal.contactName')}><TextField value={contactName} onChange={onContactNameChange} /></FieldRow>
         ) : (
           <div>
-            <Field label={t('subModal.contactName')}>
+            <FieldRow label={t('subModal.contactName')}>
               {/* Controlled on the ID when a real contact is picked (so the trigger's
                   OWN label lookup resolves the name, and reopening the list still
                   shows the checkmark on it) — falls back to the raw typed text once
@@ -108,16 +108,16 @@ export default function ContactOnSiteCard({
                   onContactNameChange(existingMatch ? existingMatch.name : v)
                 }}
                 placeholder={t('subModal.contactName')} options={contactOptions} menuWidth={280} style={pickerStyle} />
-            </Field>
+            </FieldRow>
             <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 3 }}>{t('subModal.contactPersonHint')}</div>
           </div>
         )}
         <div style={row2}>
           <div onBlur={onEmailBlur}>
-            <Field label={t('subModal.email')}><TextField type="email" value={email} onChange={onEmailChange} placeholder="naam@klant.nl" error={emailError} /></Field>
+            <FieldRow label={t('subModal.email')}><TextField type="email" value={email} onChange={onEmailChange} placeholder="naam@klant.nl" error={emailError} /></FieldRow>
             <FieldNotice text={emailMessage} />
           </div>
-          <Field label={t('subModal.phone')}><TextField value={phone} onChange={onPhoneChange} /></Field>
+          <FieldRow label={t('subModal.phone')}><TextField value={phone} onChange={onPhoneChange} /></FieldRow>
         </div>
       </div>
     </div>

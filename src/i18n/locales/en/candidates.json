@@ -289,14 +289,17 @@
         "unavailable": "The CV reader is unavailable right now. Try again later.",
         "timeout": "Reading this CV took too long. Try again or fill in the details manually.",
         "generic": "The CV could not be read."
-      }
+      },
+      "uploadButton": "Upload CV"
     },
     "cvPaste": {
       "title": "Candidate from pasted CV text",
       "placeholder": "Paste the CV text here…",
       "submit": "Read text",
-      "tooShort": "Paste at least {{min}} characters. Koios needs enough text to read."
-    }
+      "tooShort": "Paste at least {{min}} characters. Koios needs enough text to read.",
+      "openButton": "Paste CV text"
+    },
+    "entryHint": "Start from a CV, or fill in the form yourself."
   },
   "drawer": {
     "availability": "Availability",

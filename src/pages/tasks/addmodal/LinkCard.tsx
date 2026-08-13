@@ -19,7 +19,7 @@
 import type { TFunction } from 'i18next'
 import { useState } from 'react'
 import { Link2, X } from 'lucide-react'
-import { Field } from '@/components/forms/fields'
+import { FieldRow } from '@/components/forms/fields'
 import CreatableSelect from '@/components/ui/CreatableSelect'
 import DrawerAddButton from '@/components/drawer/DrawerAddButton'
 import AddLinkRow from '../links/AddLinkRow'
@@ -59,11 +59,11 @@ export default function LinkCard({ t, form, set, candidates, customers, contacts
         {/* Gekoppeld record — candidate/customer/contact, each a searchable
             relational picker (allowCreate=false: a real id, never free-text). */}
         <div style={row2}>
-          <Field label={t('modal.candidate')}>
+          <FieldRow label={t('modal.candidate')}>
             <CreatableSelect value={form.candidateId || null} onChange={(v: string) => set('candidateId', v)} allowCreate={false}
               placeholder={t('modal.candidatePlaceholder')} style={pickerStyle} menuWidth={PICKER_MENU_W} options={candidates} />
-          </Field>
-          <Field label={t('modal.customer')}>
+          </FieldRow>
+          <FieldRow label={t('modal.customer')}>
             {lockCustomerId
               ? (
                 // Read-only: the drawer this modal was opened from already fixes
@@ -76,12 +76,12 @@ export default function LinkCard({ t, form, set, candidates, customers, contacts
                 <CreatableSelect value={form.customerId || null} onChange={(v: string) => set('customerId', v)} allowCreate={false}
                   placeholder={t('modal.customerPlaceholder')} style={pickerStyle} menuWidth={PICKER_MENU_W} options={customers} />
               )}
-          </Field>
+          </FieldRow>
         </div>
-        <Field label={t('modal.contact')}>
+        <FieldRow label={t('modal.contact')}>
           <CreatableSelect value={form.contactId || null} onChange={(v: string) => set('contactId', v)} allowCreate={false}
             placeholder={t('modal.contactPlaceholder')} style={pickerStyle} menuWidth={PICKER_MENU_W} options={contacts} />
-        </Field>
+        </FieldRow>
 
         {/* One honest line for the three pickers above (§3): still loading, or a
             failed fetch with a retry — reusing the shared wording AddLinkRow

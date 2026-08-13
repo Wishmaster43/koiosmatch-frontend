@@ -8,9 +8,9 @@
  */
 import { useTranslation } from 'react-i18next'
 import type { ReactNode } from 'react'
-import { Field } from '@/components/forms/fields'
+import { FieldRow } from '@/components/forms/fields'
 import CreatableSelect from '@/components/ui/CreatableSelect'
-import { cardHead, cardBox, row3Even } from '@/components/ui/modalCards'
+import { cardHead, cardBox } from '@/components/ui/modalCards'
 
 interface Props {
   lockCustomerId?: string; lockCustomerName?: string
@@ -27,7 +27,7 @@ export default function ClientCascadeCard({
     <div>
       <div style={cardHead}>{t('modal.fields.cardClient')}</div>
       <div style={cardBox}>
-        <Field label={t('modal.fields.client')}>
+        <FieldRow label={t('modal.fields.client')}>
           {lockCustomerId
             ? (
               // Read-only: the drawer/scope this modal was opened from already fixes the customer.
@@ -36,14 +36,12 @@ export default function ClientCascadeCard({
             )
             : <CreatableSelect value={clientId || null} onChange={onClientChange} allowCreate={false}
                 placeholder={t('common:select')} options={customerOptions} />}
-        </Field>
+        </FieldRow>
         {/* Locatie -> afdeling -> contactpersoon — every level optional/clearable,
             editable even while the klant itself is locked. */}
-        <div style={row3Even}>
-          <Field label={t('details.customerLocation')}>{locationPicker}</Field>
-          <Field label={t('details.customerDepartment')}>{departmentPicker}</Field>
-          <Field label={t('details.contactPerson')}>{contactPicker}</Field>
-        </div>
+        <FieldRow label={t('details.customerLocation')}>{locationPicker}</FieldRow>
+        <FieldRow label={t('details.customerDepartment')}>{departmentPicker}</FieldRow>
+        <FieldRow label={t('details.contactPerson')}>{contactPicker}</FieldRow>
       </div>
     </div>
   )

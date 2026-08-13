@@ -267,14 +267,17 @@
         "unavailable": "Der Lebenslauf-Leser ist derzeit nicht verfügbar. Versuchen Sie es später erneut.",
         "timeout": "Das Lesen dieses Lebenslaufs hat zu lange gedauert. Versuchen Sie es erneut oder tragen Sie die Daten manuell ein.",
         "generic": "Der Lebenslauf konnte nicht gelesen werden."
-      }
+      },
+      "uploadButton": "Lebenslauf hochladen"
     },
     "cvPaste": {
       "title": "Kandidat aus eingefügtem Lebenslauftext",
       "placeholder": "Lebenslauftext hier einfügen…",
       "submit": "Text lesen",
-      "tooShort": "Füge mindestens {{min}} Zeichen ein. Koios braucht genug Text zum Lesen."
-    }
+      "tooShort": "Füge mindestens {{min}} Zeichen ein. Koios braucht genug Text zum Lesen.",
+      "openButton": "Lebenslauftext einfügen"
+    },
+    "entryHint": "Beginnen Sie mit einem Lebenslauf oder füllen Sie das Formular selbst aus."
   },
   "drawer": {
     "availability": "Verfügbarkeit",

@@ -6,7 +6,7 @@
  * the parent's form state.
  */
 import type { TFunction } from 'i18next'
-import { Field, TextField, DateField } from '@/components/forms/fields'
+import { FieldRow, TextField, DateField } from '@/components/forms/fields'
 import CreatableSelect from '@/components/ui/CreatableSelect'
 import { cardHead, cardBox, row2 } from '@/components/ui/modalCards'
 
@@ -40,42 +40,42 @@ export default function OpportunityDealStageCard({
         <div style={row2}>
           {/* CLEAR-SWEEP (Danny 13-08): stage/service/agreement all ride `|| null`
               in the submit body (AddOpportunityModal.handleSubmit) — optional. */}
-          <Field label={t('modal.fields.stage')}>
+          <FieldRow label={t('modal.fields.stage')}>
             <CreatableSelect value={stageId || null} onChange={onStageChange} allowCreate={false}
               clearable clearLabel={t('modal.fields.stage')}
               placeholder={t('common:select')} options={stageOptions} />
-          </Field>
-          <Field label={t('modal.fields.serviceType')}>
+          </FieldRow>
+          <FieldRow label={t('modal.fields.serviceType')}>
             <CreatableSelect value={serviceTypeId || null} onChange={onServiceTypeChange} allowCreate={false}
               clearable clearLabel={t('modal.fields.serviceType')}
               placeholder={t('common:select')} options={serviceOptions} />
-          </Field>
+          </FieldRow>
         </div>
         <div style={row2}>
-          <Field label={t('modal.fields.agreementType')}>
+          <FieldRow label={t('modal.fields.agreementType')}>
             <CreatableSelect value={agreementTypeId || null} onChange={onAgreementTypeChange} allowCreate={false}
               clearable clearLabel={t('modal.fields.agreementType')}
               placeholder={t('common:select')} options={agreementOptions} />
-          </Field>
-          <Field label={t('modal.fields.value')}>
+          </FieldRow>
+          <FieldRow label={t('modal.fields.value')}>
             <TextField type="number" value={value} onChange={onValueChange} placeholder="0" error={valueError} />
-          </Field>
+          </FieldRow>
         </div>
         <div style={row2}>
-          <Field label={t('modal.fields.hours')}>
+          <FieldRow label={t('modal.fields.hours')}>
             <TextField type="number" value={hours} onChange={onHoursChange} placeholder="0" error={hoursError} />
-          </Field>
-          <Field label={t('modal.fields.expectedClose')}>
+          </FieldRow>
+          <FieldRow label={t('modal.fields.expectedClose')}>
             <DateField value={expectedCloseAt} onChange={onExpectedCloseChange} placeholder={t('common:select')} />
-          </Field>
+          </FieldRow>
         </div>
         <div style={row2}>
-          <Field label={t('modal.fields.startDate')}>
+          <FieldRow label={t('modal.fields.startDate')}>
             <DateField value={startDate} onChange={onStartDateChange} placeholder={t('common:select')} />
-          </Field>
-          <Field label={t('modal.fields.endDate')}>
+          </FieldRow>
+          <FieldRow label={t('modal.fields.endDate')}>
             <DateField value={endDate} onChange={onEndDateChange} placeholder={t('common:select')} />
-          </Field>
+          </FieldRow>
         </div>
       </div>
     </div>

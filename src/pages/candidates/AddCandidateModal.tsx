@@ -343,7 +343,8 @@ export default function AddCandidateModal({ onClose, onCreated }: AddCandidateMo
       header={
         <div style={{ flex: '1 1 100%', margin: '-12px -16px -13px' }}>
           <ModalHeader status={status} pickStatuses={pickStatuses} selectedStatus={selectedStatus} statusLabel={statusLabel}
-            onSelectStatus={v => { setStatus(v); setErrors({}) }} onClose={onClose} />
+            onSelectStatus={v => { setStatus(v); setErrors({}) }} onClose={onClose}
+            canParseCv={canParseCv} onCvFile={cv.start} onCvText={pasteCv.startText} />
         </div>
       }>
 
@@ -364,14 +365,17 @@ export default function AddCandidateModal({ onClose, onCreated }: AddCandidateMo
               <CvFilledContext.Provider value={combinedCvFilled}>
                 <div style={{ ...modalColumns(), gap: 14 }}>
                   {/* Both parse routes require candidates.update — hide the control when
-                      it would 403 rather than offer an affordance that cannot work. */}
+                      it would 403 rather than offer an affordance that cannot work.
+                      CV-ENTRY-ICONS-1: starting a parse now happens from the header's
+                      icons (ModalHeader/CvEntryIcons) — these only render the busy/
+                      ready/error progress strip once a parse has actually started. */}
                   {canParseCv && (
                     <>
                       <CvUploadCard phase={cv.phase} errorKey={cv.errorKey} fileName={cv.fileName}
-                        summary={cvSummary} onFile={cv.start} onReset={cv.reset} />
+                        summary={cvSummary} onReset={cv.reset} />
                       {/* PASTE-CV-1: independent phase/summary, a text alternative to the file picker. */}
                       <PasteCvCard phase={pasteCv.phase} errorKey={pasteCv.errorKey}
-                        summary={pasteCvSummary} onSubmit={pasteCv.startText} onReset={pasteCv.reset} />
+                        summary={pasteCvSummary} onReset={pasteCv.reset} />
                     </>
                   )}
                   <PersonalCard form={form} errors={errors} set={set} isReq={isReq} genderOptions={genderOptions} />

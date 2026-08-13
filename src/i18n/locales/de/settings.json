@@ -506,6 +506,10 @@
       "label": "Aufbewahrung — schon einmal vermittelt",
       "description": "Anzahl Monate, die ein mindestens einmal vermittelter Kandidat aufbewahrt wird. Standardmäßig länger wegen der steuerlichen Aufbewahrungspflicht."
     },
+    "consentMonths": {
+      "label": "Gültigkeit der Zustimmung",
+      "description": "Anzahl Monate, die eine erteilte Aufbewahrungszustimmung gültig bleibt, bevor sie erneut bestätigt werden muss. 0 = Zustimmung läuft nie ab."
+    },
     "unit": "Monate"
   },
   "statusList": {

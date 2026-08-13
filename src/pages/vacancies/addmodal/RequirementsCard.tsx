@@ -8,9 +8,9 @@
  */
 import { useTranslation } from 'react-i18next'
 import { X, Plus } from 'lucide-react'
-import { Field, TextField } from '@/components/forms/fields'
+import { FieldRow, TextField } from '@/components/forms/fields'
 import CreatableSelect from '@/components/ui/CreatableSelect'
-import { cardHead, cardBox, row2 } from '@/components/ui/modalCards'
+import { cardHead, cardBox } from '@/components/ui/modalCards'
 
 interface Level { value: string; label: string }
 interface Props {
@@ -29,22 +29,20 @@ export default function RequirementsCard({
     <div>
       <div style={cardHead}>{t('details.groups.requirements')}</div>
       <div style={cardBox}>
-        <div style={row2}>
-          {/* VAC-CLEAR-1: both are `sometimes|nullable` server-side (StoreVacancyRequest) — optional, so both carry the clear cross. */}
-          <Field label={t('details.seniority')}>
-            <CreatableSelect value={seniority || null} onChange={onSeniorityChange} allowCreate={false}
-              clearable clearLabel={t('details.seniority')}
-              placeholder={t('common:select')} options={seniorityLevels} />
-          </Field>
-          <Field label={t('details.education')}>
-            <CreatableSelect value={education || null} onChange={onEducationChange} allowCreate={false}
-              clearable clearLabel={t('details.education')}
-              placeholder={t('common:select')} options={educationLevels} />
-          </Field>
-        </div>
+        {/* VAC-CLEAR-1: both are `sometimes|nullable` server-side (StoreVacancyRequest) — optional, so both carry the clear cross. */}
+        <FieldRow label={t('details.seniority')}>
+          <CreatableSelect value={seniority || null} onChange={onSeniorityChange} allowCreate={false}
+            clearable clearLabel={t('details.seniority')}
+            placeholder={t('common:select')} options={seniorityLevels} />
+        </FieldRow>
+        <FieldRow label={t('details.education')}>
+          <CreatableSelect value={education || null} onChange={onEducationChange} allowCreate={false}
+            clearable clearLabel={t('details.education')}
+            placeholder={t('common:select')} options={educationLevels} />
+        </FieldRow>
         {/* Required skills — free strings, vertical list + quick-add (mirrors
             DetailsRequirementsTab.tsx:42-61). */}
-        <Field label={t('details.skills')}>
+        <FieldRow label={t('details.skills')}>
           <div style={{ display: 'flex', gap: 6 }}>
             <TextField value={newSkill} onChange={onNewSkillChange} placeholder={t('details.addSkill')} />
             <button type="button" onClick={onAddSkill} title={t('details.addSkill')}
@@ -53,7 +51,7 @@ export default function RequirementsCard({
               <Plus size={14} />
             </button>
           </div>
-        </Field>
+        </FieldRow>
         {skills.length > 0 && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
             {skills.map(s => (

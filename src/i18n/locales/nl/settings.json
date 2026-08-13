@@ -528,6 +528,10 @@
       "label": "Bewaartermijn — ooit geplaatst",
       "description": "Aantal maanden dat een ooit geplaatste kandidaat bewaard blijft. Standaard langer vanwege de fiscale bewaarplicht."
     },
+    "consentMonths": {
+      "label": "Bewaartermijn toestemming",
+      "description": "Aantal maanden dat een gegeven bewaartoestemming geldig blijft voordat opnieuw bevestiging nodig is. 0 = toestemming verloopt nooit."
+    },
     "unit": "maanden"
   },
   "statusList": {

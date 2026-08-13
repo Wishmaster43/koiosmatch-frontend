@@ -506,6 +506,10 @@
       "label": "Conservación — alguna vez colocado",
       "description": "Meses que se conserva un candidato que fue colocado al menos una vez. Por defecto más largo debido a la obligación legal de conservación fiscal."
     },
+    "consentMonths": {
+      "label": "Validez del consentimiento",
+      "description": "Meses durante los que un consentimiento de conservación concedido sigue siendo válido antes de tener que reconfirmarse. 0 = el consentimiento nunca caduca."
+    },
     "unit": "meses"
   },
   "statusList": {

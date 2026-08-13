@@ -69,6 +69,28 @@ beforeEach(() => {
   vi.mocked(runImport).mockReset()
 })
 
+// HET-RECEPT (Danny 14-08, MatchModal is the reference): this is the small
+// popup exception (may stay narrower/single-column) but still follows the
+// label-LEFT FieldRow rule for every field. Card-structure regression test.
+describe('AddDepartmentModal · card structure follows HET-RECEPT (label-left FieldRow)', () => {
+  it('renders the Algemeen card title', () => {
+    render(<AddDepartmentModal onClose={() => {}} locations={locations} statuses={statuses} />)
+    expect(screen.getByText(ct('subModal.groups.general'))).toBeInTheDocument()
+  })
+
+  it('renders the department-name label at the canon label width, immediately before its field', () => {
+    render(<AddDepartmentModal onClose={() => {}} locations={locations} statuses={statuses} />)
+    const label = screen.getByText(ct('subModal.departmentName'))
+    expect(label.tagName).toBe('LABEL')
+    expect(label.style.width).toBe('120px')
+    const row = label.parentElement as HTMLElement
+    expect(row.style.display).toBe('flex')
+    expect(row.style.flexDirection).not.toBe('column')
+    expect(row.children[0]).toBe(label)
+    expect(row.children.length).toBeGreaterThan(1)
+  })
+})
+
 describe('AddDepartmentModal', () => {
   it('blocks submit while the name is empty', async () => {
     const onCreate = vi.fn()

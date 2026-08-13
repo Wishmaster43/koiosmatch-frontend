@@ -658,6 +658,26 @@ describe('AddTaskModal · searchable pickers (Danny 27-07 popup redesign, JOB B)
   })
 })
 
+describe('AddTaskModal · card-structure regression (MODAL-CANON: FieldRow label-left, mirrors AddCustomerModal/MatchModal)', () => {
+  it('renders every card title and each field as a label-LEFT row (a <label> before its field)', () => {
+    render(<AddTaskModal onClose={noop} onCreated={noop} />)
+    expect(screen.getByText('modal.cardTask')).toBeInTheDocument()
+    expect(screen.getByText('modal.cardPlanning')).toBeInTheDocument()
+    expect(screen.getByText('modal.cardAssignment')).toBeInTheDocument()
+    expect(screen.getByText('modal.cardLink')).toBeInTheDocument()
+    expect(screen.getByText('modal.description')).toBeInTheDocument()
+
+    // FieldRow renders <label>{text}</label> as the FIRST child of the row, the
+    // field itself as a sibling — proves the swap from the old label-above `Field`
+    // landed, not just a visual coincidence.
+    const titleLabel = screen.getByText('modal.titleLabel')
+    expect(titleLabel.tagName).toBe('LABEL')
+    const row = titleLabel.parentElement as HTMLElement
+    expect(row.children[0]).toBe(titleLabel)
+    expect(row.children).toHaveLength(2)
+  })
+})
+
 describe('AddTaskModal · PUNT 14 — the description sits BELOW every other field', () => {
   it('renders the Omschrijving card after the Koppeling card in document order', () => {
     render(<AddTaskModal onClose={noop} onCreated={noop} />)

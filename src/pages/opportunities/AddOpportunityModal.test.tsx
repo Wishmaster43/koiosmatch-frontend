@@ -306,6 +306,23 @@ describe('AddOpportunityModal · OPP-MODAL-PREFILL-1 (initialLocationId/initialD
   })
 })
 
+describe('AddOpportunityModal · card-structure regression (MODAL-CANON: FieldRow label-left, mirrors AddCustomerModal/MatchModal)', () => {
+  it('renders both titled cards, each field as a label-LEFT row (a <label> before its field)', () => {
+    render(<AddOpportunityModal onClose={noop} />)
+    expect(screen.getByText('modal.groups.general')).toBeInTheDocument()
+    expect(screen.getByText('modal.groups.dealStage')).toBeInTheDocument()
+
+    // FieldRow renders <label>{text}</label> as the FIRST child of the row, the
+    // field itself as a sibling — proves the swap from the old label-above `Field`
+    // landed, not just a visual coincidence.
+    const titleLabel = screen.getByText('modal.fields.title')
+    expect(titleLabel.tagName).toBe('LABEL')
+    const row = titleLabel.parentElement as HTMLElement
+    expect(row.children[0]).toBe(titleLabel)
+    expect(row.children).toHaveLength(2)
+  })
+})
+
 describe('AddOpportunityModal · edit mode (existing prop) — PATCH, never POST', () => {
   const existing = {
     id: 'opp-9', title: 'Bestaande kans', clientId: 'cust-1', stageValue: 'lead',

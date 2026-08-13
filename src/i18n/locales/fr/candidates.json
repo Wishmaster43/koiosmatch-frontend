@@ -267,14 +267,17 @@
         "unavailable": "Le lecteur de CV est indisponible pour le moment. Réessayez plus tard.",
         "timeout": "La lecture de ce CV a pris trop de temps. Réessayez ou saisissez les données manuellement.",
         "generic": "Le CV n'a pas pu être lu."
-      }
+      },
+      "uploadButton": "Téléverser le CV"
     },
     "cvPaste": {
       "title": "Candidat à partir d'un texte de CV collé",
       "placeholder": "Collez ici le texte du CV…",
       "submit": "Lire le texte",
-      "tooShort": "Collez au moins {{min}} caractères. Koios a besoin de suffisamment de texte pour lire."
-    }
+      "tooShort": "Collez au moins {{min}} caractères. Koios a besoin de suffisamment de texte pour lire.",
+      "openButton": "Coller le texte du CV"
+    },
+    "entryHint": "Partez d’un CV ou remplissez le formulaire vous-même."
   },
   "drawer": {
     "availability": "Disponibilité",

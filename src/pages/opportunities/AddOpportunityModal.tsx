@@ -20,7 +20,7 @@ import OpportunityDescriptionCard from './addmodal/OpportunityDescriptionCard'
 import { BTN_H } from '@/config/buttonMetrics'
 import { WIDE_MODAL } from '@/components/ui/modalMetrics'
 import FloatingPanel from '@/components/ui/FloatingPanel'
-import { cardPair } from '@/components/ui/modalCards'
+import { modalColumns } from '@/components/ui/modalCards'
 import type { ApiOpportunity, Opportunity } from '@/types/opportunity'
 import type { Id } from '@/types/common'
 
@@ -268,8 +268,9 @@ export default function AddOpportunityModal({ onClose, onCreated, users = [], cu
             Every dropdown is a searchable CreatableSelect (allowCreate=false) —
             no bare <select> is left in this modal. */}
         <div style={{ flex: 1, overflowY: 'auto', padding: '20px 22px' }}>
-          {/* Two titled cards side by side — the shared cardPair grid (§11). */}
-          <div style={cardPair}>
+          {/* Two titled cards side by side — the shared modalColumns grid (§11,
+              CARD-COLUMNS-CANON: mirrors AddCustomerModal/MatchModal). */}
+          <div style={modalColumns()}>
             {/* Algemeen — title + the customer→location→department→contact
                 relations + owner (mirrors MatchModal's Relaties card). */}
             <OpportunityGeneralCard t={t}

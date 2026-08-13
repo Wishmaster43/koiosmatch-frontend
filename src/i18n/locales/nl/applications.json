@@ -77,6 +77,7 @@
     "missingAppointmentSub": "Alleen geladen rijen, niet het tenant-brede totaal. Klik om te filteren"
   },
   "insights": {
+    "bucket": "Status",
     "phase": "Fase",
     "owner": "Recruiter",
     "source": "Bron",

@@ -6,7 +6,7 @@
  * parent's form state.
  */
 import type { TFunction } from 'i18next'
-import { Field, TextField } from '@/components/forms/fields'
+import { FieldRow, TextField } from '@/components/forms/fields'
 import CreatableSelect from '@/components/ui/CreatableSelect'
 import { cardHead, cardBox, row2 } from '@/components/ui/modalCards'
 
@@ -41,12 +41,12 @@ export default function OpportunityGeneralCard({
     <div>
       <div style={cardHead}>{t('modal.groups.general')}</div>
       <div style={cardBox}>
-        <Field label={t('modal.fields.title')} required>
+        <FieldRow label={t('modal.fields.title')} required>
           <TextField value={title} onChange={onTitleChange} placeholder={titlePlaceholder} error={titleError} />
           {titleError && <div style={{ fontSize: 11, color: 'var(--color-danger)', marginTop: 3 }}>{t('modal.required')}</div>}
-        </Field>
+        </FieldRow>
         <div style={row2}>
-          <Field label={t('modal.fields.client')}>
+          <FieldRow label={t('modal.fields.client')}>
             {/* Searchable, pick-only (allowCreate=false) — a customer is a real
                 relational id, never a free-text create.
                 CLEAR-SWEEP (Danny 13-08): every field here rides `|| null` in the
@@ -55,8 +55,8 @@ export default function OpportunityGeneralCard({
             <CreatableSelect allowCreate={false} value={clientId || null} onChange={onClientChange}
               clearable clearLabel={t('modal.fields.client')}
               placeholder={t('common:select')} options={customerOptions} />
-          </Field>
-          <Field label={t('modal.fields.contact')}>
+          </FieldRow>
+          <FieldRow label={t('modal.fields.contact')}>
             {/* Danny 28-07: same-named contacts (one per location/department
                 coupling) were indistinguishable — the label carries the
                 function title, mirroring RelationsSection's contact picker
@@ -64,33 +64,33 @@ export default function OpportunityGeneralCard({
             <CreatableSelect value={contactId || null} onChange={onContactChange} allowCreate={false}
               clearable clearLabel={t('modal.fields.contact')}
               placeholder={cascadePlaceholder} options={contactOptions} />
-          </Field>
+          </FieldRow>
         </div>
         <div style={row2}>
-          <Field label={t('modal.fields.location')}>
+          <FieldRow label={t('modal.fields.location')}>
             <CreatableSelect value={locationId || null} onChange={onLocationChange} allowCreate={false}
               clearable clearLabel={t('modal.fields.location')}
               placeholder={cascadePlaceholder} options={locationOptions} />
-          </Field>
-          <Field label={t('modal.fields.department')}>
+          </FieldRow>
+          <FieldRow label={t('modal.fields.department')}>
             <CreatableSelect value={departmentId || null} onChange={onDepartmentChange} allowCreate={false}
               clearable clearLabel={t('modal.fields.department')}
               placeholder={cascadePlaceholder} options={departmentOptions} />
-          </Field>
+          </FieldRow>
         </div>
         <div style={row2}>
-          <Field label={t('modal.fields.owner')}>
+          <FieldRow label={t('modal.fields.owner')}>
             <CreatableSelect value={ownerId || null} onChange={onOwnerChange} allowCreate={false}
               clearable clearLabel={t('modal.fields.owner')}
               placeholder={t('common:select')} options={ownerOptions} />
-          </Field>
+          </FieldRow>
           {/* K2: Vestiging — the bureau's own branch handling this deal
               (`location_id`, distinct from the customer's site above). */}
-          <Field label={t('modal.fields.branch')}>
+          <FieldRow label={t('modal.fields.branch')}>
             <CreatableSelect value={branchId || null} onChange={onBranchChange} allowCreate={false}
               clearable clearLabel={t('modal.fields.branch')}
               placeholder={t('common:select')} options={branchOptions} />
-          </Field>
+          </FieldRow>
         </div>
       </div>
     </div>

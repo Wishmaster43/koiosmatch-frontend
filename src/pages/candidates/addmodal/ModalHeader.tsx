@@ -1,12 +1,19 @@
 /**
- * ModalHeader — title/subtitle + the phase-choice pill row + close button.
- * Pure presentational: the selected phase value in, `onSelectStatus`/`onClose`
- * callbacks out. Phase state itself (and its default) stays in the container.
+ * ModalHeader — title/subtitle + the CV entry icons + the phase-choice pill row
+ * + close button. Pure presentational: the selected phase value in,
+ * `onSelectStatus`/`onClose` callbacks out. Phase state itself (and its default)
+ * stays in the container.
+ *
+ * CV-ENTRY-ICONS-1 (Danny 13-08): the two "from CV" banner cards moved here as
+ * two compact icon affordances (upload / paste, gated on `canParseCv` — both
+ * parse routes need candidates.create) plus one short hint line, mirroring the
+ * profile-text pop-out idiom instead of taking up a whole card each.
  */
 import { useTranslation } from 'react-i18next'
 import { X } from 'lucide-react'
 import { BTN_H } from '@/config/buttonMetrics'
 import type { LookupOption } from '@/types/common'
+import CvEntryIcons from './CvEntryIcons'
 
 interface ModalHeaderProps {
   status: string
@@ -15,9 +22,13 @@ interface ModalHeaderProps {
   statusLabel: string
   onSelectStatus: (value: string) => void
   onClose: () => void
+  canParseCv: boolean
+  onCvFile: (file: File) => void
+  onCvText: (text: string) => void
 }
 
-export default function ModalHeader({ status, pickStatuses, selectedStatus, statusLabel, onSelectStatus, onClose }: ModalHeaderProps) {
+export default function ModalHeader({ status, pickStatuses, selectedStatus, statusLabel, onSelectStatus, onClose,
+  canParseCv, onCvFile, onCvText }: ModalHeaderProps) {
   const { t } = useTranslation(['candidates', 'common'])
   return (
     <div style={{ padding: '18px 24px 14px', borderBottom: '1px solid var(--border)',
@@ -30,6 +41,13 @@ export default function ModalHeader({ status, pickStatuses, selectedStatus, stat
           {status ? t('modal.fillRequired') : t('modal.statusPanelHint')}
         </div>
       </div>
+      {/* CV entry: upload icon + paste icon, with a short hint line beside them. */}
+      {canParseCv && (
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
+          <CvEntryIcons onFile={onCvFile} onSubmitText={onCvText} />
+          <span style={{ fontSize: 10, color: 'var(--text-muted)', maxWidth: 130, lineHeight: 1.3 }}>{t('modal.entryHint')}</span>
+        </div>
+      )}
       {/* Phase choice — two compact pills, same colour semantics as the old cards. */}
       <div style={{ display: 'flex', gap: 8, marginLeft: 'auto', flexShrink: 0 }}>
         {pickStatuses.map(s => {

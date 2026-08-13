@@ -6,12 +6,15 @@
 import { useContext } from 'react'
 import type { ComponentType, CSSProperties, ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Field as FieldJs, TextField as TextFieldJs, SelectField as SelectFieldJs } from '@/components/forms/fields'
+import { FieldRow, TextField as TextFieldJs, SelectField as SelectFieldJs } from '@/components/forms/fields'
 import CreatableSelectJs from '@/components/ui/CreatableSelect'
 import { CvFilledContext } from './cvFilledContext'
 
-// Shared form fields are still untyped JS — declare the props this modal uses (typed boundary).
-export const Field = FieldJs as ComponentType<{ label?: ReactNode; required?: boolean; children?: ReactNode }>
+// THE RECIPE (Danny 14-08): every field is a label-LEFT row, mirroring the
+// +Match modal — `Field` (label-above) is replaced by the shared `FieldRow`
+// (canon label width, aria-wiring built in) app-wide in this modal. Kept under
+// the same `Field` export name so every card below needs no further changes.
+export const Field = FieldRow as ComponentType<{ label?: ReactNode; required?: boolean; children?: ReactNode }>
 export const TextField = TextFieldJs as ComponentType<{ value?: string; onChange?: (v: string) => void; placeholder?: string; type?: string; error?: boolean; style?: CSSProperties }>
 export const SelectField = SelectFieldJs as ComponentType<{ value?: string; onChange?: (v: string) => void; placeholder?: string; options?: Array<{ value: string; label: string } | string> }>
 // Searchable combobox (drill-down pattern) — still untyped JS, same cast as ProfileTab.

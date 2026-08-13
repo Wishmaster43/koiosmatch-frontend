@@ -5,7 +5,7 @@
  * callback comes from the parent's own form state.
  */
 import { useTranslation } from 'react-i18next'
-import { Field, TextField } from '@/components/forms/fields'
+import { FieldRow, TextField } from '@/components/forms/fields'
 import CreatableSelect from '@/components/ui/CreatableSelect'
 import { cardHead, cardBox, row2, row3Even } from '@/components/ui/modalCards'
 
@@ -39,17 +39,17 @@ export default function ContactIdentityCard({
       <div style={cardHead}>{t('subModal.groups.person')}</div>
       <div style={cardBox}>
         <div style={row3Even}>
-          <Field label={t('subModal.firstName')} required>
+          <FieldRow label={t('subModal.firstName')} required>
             <TextField value={firstName} onChange={onFirstNameChange} error={firstNameError} />
-          </Field>
+          </FieldRow>
           {/* CONTACT-TUSSENVOEGSEL-1: without this the backend stores "Jan Vries"
               for "Jan de Vries" — and an edit of an existing contact wiped it. */}
-          <Field label={t('subModal.middleName')}>
+          <FieldRow label={t('subModal.middleName')}>
             <TextField value={middleName} onChange={onMiddleNameChange} placeholder="van" />
-          </Field>
-          <Field label={t('subModal.lastName')} required>
+          </FieldRow>
+          <FieldRow label={t('subModal.lastName')} required>
             <TextField value={lastName} onChange={onLastNameChange} error={lastNameError} />
-          </Field>
+          </FieldRow>
         </div>
         {(firstNameError || lastNameError) && <div style={{ fontSize: 11, color: 'var(--color-danger)' }}>{t('subModal.required')}</div>}
         {/* Function is a searchable/creatable tenant lookup (contact-function
@@ -58,22 +58,22 @@ export default function ContactIdentityCard({
             stretching the full 1060px — a lone full-width picker read as a banner
             (Danny 27-07: "functie is lelijk groot zo"). */}
         <div style={row2}>
-          <Field label={t('subModal.role')}>
+          <FieldRow label={t('subModal.role')}>
             {/* CLEAR-SWEEP (Danny 13-08): role is optional (useCustomerContacts.toApi
                 sends `function` as-is, empty string included, which the nullable
                 column accepts) — so clearable, independent of the create/strict toggle. */}
             <CreatableSelect value={role} onChange={onRoleChange} options={contactFunctions}
               allowCreate={allowFreeEntry} clearable clearLabel={t('subModal.role')}
               placeholder={t('common:select')} style={CREATABLE_STYLE} />
-          </Field>
+          </FieldRow>
           {/* Geslacht: options come from the tenant /genders lookup and the field
               stores the VALUE SLUG the backend validates with exists:candidate_genders,value.
               CLEAR-SWEEP: optional — useCustomerContacts.toApi coerces '' to null. */}
-          <Field label={t('subModal.gender')}>
+          <FieldRow label={t('subModal.gender')}>
             <CreatableSelect value={gender || null} onChange={onGenderChange} allowCreate={false}
               clearable clearLabel={t('subModal.gender')}
               placeholder={t('subModal.noneOption')} style={CREATABLE_STYLE} options={genders} />
-          </Field>
+          </FieldRow>
         </div>
       </div>
     </div>

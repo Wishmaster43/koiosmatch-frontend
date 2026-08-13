@@ -528,6 +528,10 @@
       "label": "Retention — ever placed",
       "description": "Months a candidate who was placed at least once is kept. Longer by default for the statutory tax/payroll retention duty."
     },
+    "consentMonths": {
+      "label": "Consent validity",
+      "description": "Months a granted retention consent stays valid before it must be re-confirmed. 0 = consent never expires."
+    },
     "unit": "months"
   },
   "statusList": {

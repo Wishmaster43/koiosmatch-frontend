@@ -11,7 +11,7 @@
  * "Nederland") with no lookup behind it (see AddLocationModal's file header).
  */
 import { useTranslation } from 'react-i18next'
-import { Field, TextField } from '@/components/forms/fields'
+import { FieldRow, TextField } from '@/components/forms/fields'
 import CreatableSelect from '@/components/ui/CreatableSelect'
 import { cardHead, cardBox, row2, row } from '@/components/ui/modalCards'
 
@@ -45,13 +45,13 @@ export default function LocationAddressCard({
       <div style={cardHead}>{t('subModal.groups.address')}</div>
       <div style={cardBox}>
         <div style={rowStreet}>
-          <Field label={t('subModal.street')}><TextField value={street} onChange={onStreetChange} /></Field>
-          <Field label={t('subModal.houseNumber')}><TextField value={houseNumber} onChange={onHouseNumberChange} /></Field>
-          <Field label={t('subModal.houseNumberSuffix')}><TextField value={houseNumberSuffix} onChange={onHouseNumberSuffixChange} /></Field>
+          <FieldRow label={t('subModal.street')}><TextField value={street} onChange={onStreetChange} /></FieldRow>
+          <FieldRow label={t('subModal.houseNumber')}><TextField value={houseNumber} onChange={onHouseNumberChange} /></FieldRow>
+          <FieldRow label={t('subModal.houseNumberSuffix')}><TextField value={houseNumberSuffix} onChange={onHouseNumberSuffixChange} /></FieldRow>
         </div>
         <div style={rowPostal}>
-          <Field label={t('subModal.postalCode')}><TextField value={postalCode} onChange={onPostalCodeChange} placeholder="1234 AB" /></Field>
-          <Field label={t('subModal.city')}><TextField value={city} onChange={onCityChange} /></Field>
+          <FieldRow label={t('subModal.postalCode')}><TextField value={postalCode} onChange={onPostalCodeChange} placeholder="1234 AB" /></FieldRow>
+          <FieldRow label={t('subModal.city')}><TextField value={city} onChange={onCityChange} /></FieldRow>
         </div>
         <div style={row2}>
           {/* PROVINCIE-1 (Danny 02-08: "provincie heeft geen zoekbare dropdown???"):
@@ -61,16 +61,16 @@ export default function LocationAddressCard({
               server-side whenever `province` itself is absent
               (normaliseLegacyKeys) — verified in the controller source, so this
               is not a silently-dropped key, just the legacy name. */}
-          <Field label={t('subModal.state')}>
+          <FieldRow label={t('subModal.state')}>
             {/* CLEAR-SWEEP (Danny 13-08): optional — useCustomerLocations.toApi sends
                 `state` through as-is (nullable column), so an explicit '' clear reaches
                 the saved state, never silently dropped. */}
             <CreatableSelect value={state || null} onChange={onStateChange} allowCreate={false}
               clearable clearLabel={t('subModal.state')}
               placeholder={t('common:select')} options={provinces} menuWidth={260} style={pickerStyle} />
-          </Field>
+          </FieldRow>
           {/* `country` stays free text on purpose — see file header comment. */}
-          <Field label={t('subModal.country')}><TextField value={country} onChange={onCountryChange} /></Field>
+          <FieldRow label={t('subModal.country')}><TextField value={country} onChange={onCountryChange} /></FieldRow>
         </div>
       </div>
     </div>

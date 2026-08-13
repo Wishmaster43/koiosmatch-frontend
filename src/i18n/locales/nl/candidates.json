@@ -289,14 +289,17 @@
         "unavailable": "De cv-lezer is nu niet beschikbaar. Probeer het later opnieuw.",
         "timeout": "Het lezen van dit cv duurde te lang. Probeer het opnieuw of vul de gegevens handmatig in.",
         "generic": "Het cv kon niet gelezen worden."
-      }
+      },
+      "uploadButton": "Cv uploaden"
     },
     "cvPaste": {
       "title": "Kandidaat van geplakte cv-tekst",
       "placeholder": "Plak hier de cv-tekst…",
       "submit": "Tekst lezen",
-      "tooShort": "Plak minstens {{min}} tekens. Koios heeft genoeg tekst nodig om te lezen."
-    }
+      "tooShort": "Plak minstens {{min}} tekens. Koios heeft genoeg tekst nodig om te lezen.",
+      "openButton": "Cv-tekst plakken"
+    },
+    "entryHint": "Begin vanuit een cv, of vul het formulier zelf in."
   },
   "drawer": {
     "availability": "Beschikbaarheid",

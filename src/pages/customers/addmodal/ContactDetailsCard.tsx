@@ -6,7 +6,7 @@
  * contacts + the server response), this card only renders the already-computed
  * error flag and message string per field.
  */
-import { Field, TextField } from '@/components/forms/fields'
+import { FieldRow, TextField } from '@/components/forms/fields'
 import { cardHead, cardBox, row3Even, row } from '@/components/ui/modalCards'
 import FieldNotice from '@/components/ui/FieldNotice'
 
@@ -44,29 +44,29 @@ export default function ContactDetailsCard({
       <div style={cardBox}>
         <div style={row3Even}>
           <div onBlur={onEmailBlur}>
-            <Field label={emailLabel}>
+            <FieldRow label={emailLabel}>
               <TextField type="email" value={email} onChange={onEmailChange} placeholder="naam@klant.nl" error={emailError} />
-            </Field>
+            </FieldRow>
             <FieldError text={emailMessage} />
           </div>
           <div>
-            <Field label={phoneLabel}>
+            <FieldRow label={phoneLabel}>
               <TextField value={phone} onChange={onPhoneChange} error={phoneError} />
-            </Field>
+            </FieldRow>
             <FieldError text={phoneMessage} />
           </div>
           <div>
-            <Field label={mobileLabel}>
+            <FieldRow label={mobileLabel}>
               <TextField value={mobile} onChange={onMobileChange} error={mobileError} />
-            </Field>
+            </FieldRow>
             <FieldError text={mobileMessage} />
           </div>
         </div>
         {/* LinkedIn gets its own row — a 4th field doesn't fit the row3Even grid above. */}
         <div style={row('1fr')}>
-          <Field label={linkedinLabel}>
+          <FieldRow label={linkedinLabel}>
             <TextField value={linkedin} onChange={onLinkedinChange} placeholder={linkedinPlaceholder} />
-          </Field>
+          </FieldRow>
         </div>
       </div>
     </div>

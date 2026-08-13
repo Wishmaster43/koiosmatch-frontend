@@ -6,7 +6,7 @@
  * from the parent's own form state.
  */
 import { useTranslation } from 'react-i18next'
-import { Field, TextField } from '@/components/forms/fields'
+import { FieldRow, TextField } from '@/components/forms/fields'
 import FieldNotice from '@/components/ui/FieldNotice'
 import { cardHead, cardBox, row3Even } from '@/components/ui/modalCards'
 import type { IdentifierNotice } from '@/hooks/useIdentifierValidation'
@@ -31,22 +31,22 @@ export default function LocationBusinessCard({
       <div style={cardHead}>{t('subModal.groups.business')}</div>
       <div style={cardBox}>
         <div style={row3Even}>
-          {/* The notice sits BESIDE the Field, never inside it: Field clones `id`/
+          {/* The notice sits BESIDE the FieldRow, never inside it: FieldRow clones `id`/
               `aria-labelledby` onto its single child, so a wrapper div there would
               orphan the label from the real input (§6). */}
           <div>
-            <Field label={t('subModal.coc')}>
+            <FieldRow label={t('subModal.coc')}>
               <TextField value={cocNumber} onChange={onCocNumberChange} error={cocNotice?.severity === 'error'} />
-            </Field>
+            </FieldRow>
             <FieldNotice text={cocNotice?.message} severity={cocNotice?.severity} />
           </div>
           <div>
-            <Field label={t('subModal.vat')}>
+            <FieldRow label={t('subModal.vat')}>
               <TextField value={vatNumber} onChange={onVatNumberChange} error={vatNotice?.severity === 'error'} />
-            </Field>
+            </FieldRow>
             <FieldNotice text={vatNotice?.message} severity={vatNotice?.severity} />
           </div>
-          <Field label={t('subModal.costCenter')}><TextField value={costCenter} onChange={onCostCenterChange} /></Field>
+          <FieldRow label={t('subModal.costCenter')}><TextField value={costCenter} onChange={onCostCenterChange} /></FieldRow>
         </div>
       </div>
     </div>

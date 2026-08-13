@@ -106,6 +106,25 @@ describe('AddCustomerModal · titled cards (Danny 02-08: mirrors AddCandidateMod
   })
 })
 
+// HET-RECEPT (Danny 14-08, MatchModal is the reference): every field row is a
+// label-LEFT row via the shared FieldRow (components/forms/fields) — the canon
+// label column (fixed 120px width) sits BEFORE the field in DOM order, never
+// stacked above it. Card-structure regression test for the layout sweep.
+describe('AddCustomerModal · card structure follows HET-RECEPT (label-left FieldRow)', () => {
+  it('renders the name label at the canon label width, immediately before its field', () => {
+    render(<AddCustomerModal onClose={() => {}} users={users} statuses={statuses} />)
+    const label = screen.getByText(ct('modal.fields.name'))
+    expect(label.tagName).toBe('LABEL')
+    expect(label.style.width).toBe('120px')
+    const row = label.parentElement as HTMLElement
+    expect(row.style.display).toBe('flex')
+    expect(row.style.flexDirection).not.toBe('column')
+    // The field sits as the label's next sibling within the row, not above it.
+    expect(row.children[0]).toBe(label)
+    expect(row.children.length).toBeGreaterThan(1)
+  })
+})
+
 describe('AddCustomerModal · debtor number removed (Danny 02-08)', () => {
   // DEBITEURNUMMER-1: the field's old hardcoded placeholder ("10042") is a
   // language-independent fingerprint — if it is found, the field is still there.

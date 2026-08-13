@@ -99,6 +99,30 @@ const contact = (overrides: Partial<Contact>): Contact => ({
   ...overrides,
 })
 
+// HET-RECEPT (Danny 14-08, MatchModal is the reference): titled cards (Persoon/
+// Contact/Koppeling) in two columns, every field a label-LEFT FieldRow. Card-
+// structure regression test for the layout sweep.
+describe('AddContactPersonModal · card structure follows HET-RECEPT (label-left FieldRow)', () => {
+  it('renders the Persoon / Contact / Koppeling card titles', () => {
+    render(<AddContactPersonModal onClose={() => {}} locations={locations} statuses={statuses} />)
+    expect(screen.getByText(ct('subModal.groups.person'))).toBeInTheDocument()
+    expect(screen.getByText(ct('subModal.groups.contactInfo'))).toBeInTheDocument()
+    expect(screen.getByText(ct('subModal.groups.link'))).toBeInTheDocument()
+  })
+
+  it('renders the first-name label at the canon label width, immediately before its field', () => {
+    render(<AddContactPersonModal onClose={() => {}} locations={locations} statuses={statuses} />)
+    const label = screen.getByText(ct('subModal.firstName'))
+    expect(label.tagName).toBe('LABEL')
+    expect(label.style.width).toBe('120px')
+    const row = label.parentElement as HTMLElement
+    expect(row.style.display).toBe('flex')
+    expect(row.style.flexDirection).not.toBe('column')
+    expect(row.children[0]).toBe(label)
+    expect(row.children.length).toBeGreaterThan(1)
+  })
+})
+
 describe('AddContactPersonModal', () => {
   it('blocks submit while first/last name are empty and shows the required message', async () => {
     const onCreate = vi.fn()

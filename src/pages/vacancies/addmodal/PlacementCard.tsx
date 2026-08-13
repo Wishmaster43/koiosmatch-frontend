@@ -10,10 +10,10 @@
  * confused in this codebase before — keep the naming apart everywhere.
  */
 import { useTranslation } from 'react-i18next'
-import { Field, TextField, DateField } from '@/components/forms/fields'
+import { FieldRow, TextField, DateField } from '@/components/forms/fields'
 import CreatableSelect from '@/components/ui/CreatableSelect'
 import { getCountryOptions } from '@/lib/countries'
-import { cardHead, cardBox, row2, row } from '@/components/ui/modalCards'
+import { cardHead, cardBox } from '@/components/ui/modalCards'
 
 interface CandidateType { value: string; label: string; color?: string }
 type AddressKey = 'street' | 'houseNumber' | 'houseNumberSuffix' | 'postalCode' | 'city' | 'province' | 'country'
@@ -28,9 +28,6 @@ interface Props {
   branchOptions: Array<{ value: string; label: string }>
 }
 
-const rowStreet = row('2fr 1fr 1fr')
-const rowPostal = row('1fr 2fr')
-
 export default function PlacementCard({
   contractTypes, candidateTypes, onToggleType, startDate, endDate, onStartDateChange, onEndDateChange,
   street, houseNumber, houseNumberSuffix, postalCode, city, province, country, onFieldChange, provinces,
@@ -44,7 +41,7 @@ export default function PlacementCard({
       <div style={cardHead}>{t('modal.fields.cardPlacement')}</div>
       <div style={cardBox}>
         {/* Contractvorm — multi-value soft-chip toggle (mirrors DetailsGeneralTab's edit mode). */}
-        <Field label={t('details.contractType')}>
+        <FieldRow label={t('details.contractType')}>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 5 }}>
             {candidateTypes.map(ctype => {
               const on = contractTypes.includes(ctype.value)
@@ -58,41 +55,46 @@ export default function PlacementCard({
               )
             })}
           </div>
-        </Field>
-        <div style={row2}>
-          <Field label={t('details.startDate')}>
-            <DateField value={startDate} onChange={onStartDateChange} placeholder={t('common:select')} />
-          </Field>
-          <Field label={t('details.endDate')}>
-            <DateField value={endDate} onChange={onEndDateChange} placeholder={t('common:select')} />
-          </Field>
-        </div>
-        {/* Structured address — mirrors AddLocationModal's Adres card grouping. */}
-        <div style={rowStreet}>
-          <Field label={t('details.street')}><TextField value={street} onChange={v => onFieldChange('street', v)} /></Field>
-          <Field label={t('details.houseNumber')}><TextField value={houseNumber} onChange={v => onFieldChange('houseNumber', v)} /></Field>
-          <Field label={t('details.houseNumberSuffix')}><TextField value={houseNumberSuffix} onChange={v => onFieldChange('houseNumberSuffix', v)} /></Field>
-        </div>
-        <div style={rowPostal}>
-          <Field label={t('details.postalCode')}><TextField value={postalCode} onChange={v => onFieldChange('postalCode', v)} placeholder="1234 AB" /></Field>
-          <Field label={t('details.city')}><TextField value={city} onChange={v => onFieldChange('city', v)} /></Field>
-        </div>
-        <div style={row2}>
-          <Field label={t('details.province')}>
-            <CreatableSelect value={province || null} onChange={(v: string) => onFieldChange('province', v)} allowCreate={false}
-              clearable clearLabel={t('details.province')} placeholder={t('common:select')} options={provinces.map(p => ({ value: p, label: p }))} />
-          </Field>
-          <Field label={t('details.country')}>
-            <CreatableSelect value={country || null} onChange={(v: string) => onFieldChange('country', v)} allowCreate={false}
-              clearable clearLabel={t('details.country')} placeholder={t('common:select')} options={countryOptions} />
-          </Field>
-        </div>
+        </FieldRow>
+        <FieldRow label={t('details.startDate')}>
+          <DateField value={startDate} onChange={onStartDateChange} placeholder={t('common:select')} />
+        </FieldRow>
+        <FieldRow label={t('details.endDate')}>
+          <DateField value={endDate} onChange={onEndDateChange} placeholder={t('common:select')} />
+        </FieldRow>
+        {/* Structured address — mirrors AddLocationModal's Adres card grouping;
+            each segment is its own label-left row so each input keeps its OWN
+            accessible name (a wrapping div's aria-labelledby does not reach a
+            nested input — grouping these under one shared label broke a11y). */}
+        <FieldRow label={t('details.street')}>
+          <TextField value={street} onChange={v => onFieldChange('street', v)} />
+        </FieldRow>
+        <FieldRow label={t('details.houseNumber')}>
+          <TextField value={houseNumber} onChange={v => onFieldChange('houseNumber', v)} />
+        </FieldRow>
+        <FieldRow label={t('details.houseNumberSuffix')}>
+          <TextField value={houseNumberSuffix} onChange={v => onFieldChange('houseNumberSuffix', v)} />
+        </FieldRow>
+        <FieldRow label={t('details.postalCode')}>
+          <TextField value={postalCode} onChange={v => onFieldChange('postalCode', v)} placeholder="1234 AB" />
+        </FieldRow>
+        <FieldRow label={t('details.city')}>
+          <TextField value={city} onChange={v => onFieldChange('city', v)} />
+        </FieldRow>
+        <FieldRow label={t('details.province')}>
+          <CreatableSelect value={province || null} onChange={(v: string) => onFieldChange('province', v)} allowCreate={false}
+            clearable clearLabel={t('details.province')} placeholder={t('common:select')} options={provinces.map(p => ({ value: p, label: p }))} />
+        </FieldRow>
+        <FieldRow label={t('details.country')}>
+          <CreatableSelect value={country || null} onChange={(v: string) => onFieldChange('country', v)} allowCreate={false}
+            clearable clearLabel={t('details.country')} placeholder={t('common:select')} options={countryOptions} />
+        </FieldRow>
         {/* Vestiging (bureau) — see this file's header comment for why this is a
             DIFFERENT field from the klant location above. */}
-        <Field label={t('modal.fields.branch')}>
+        <FieldRow label={t('modal.fields.branch')}>
           <CreatableSelect value={branchId || null} onChange={onBranchChange} allowCreate={false}
             clearable clearLabel={t('modal.fields.branch')} placeholder={t('common:select')} options={branchOptions} />
-        </Field>
+        </FieldRow>
       </div>
     </div>
   )

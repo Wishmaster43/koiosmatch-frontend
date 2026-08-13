@@ -119,6 +119,35 @@ describe('AddCandidateModal · Optie A card layout', () => {
     await user.keyboard('{Escape}')
     expect(onClose).toHaveBeenCalled()
   })
+
+  // CV-ENTRY-ICONS-1 (Danny 13-08): the two "from CV" banner cards are gone — a
+  // header icon pair replaces them, and the card title only appears once a parse
+  // has actually started (CvUploadCard/PasteCvCard return null while idle).
+  it('shows CV entry as header icons, never the old banner cards, on open', () => {
+    // Both parse routes require candidates.create — grant it for this assertion.
+    state.permissions = ['candidates.update', 'candidates.create']
+    render(<AddCandidateModal onClose={noop} />)
+    expect(screen.getByRole('button', { name: 'modal.cv.uploadButton' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'modal.cvPaste.openButton' })).toBeInTheDocument()
+    expect(screen.queryByText('modal.cv.title')).not.toBeInTheDocument()
+    expect(screen.queryByText('modal.cvPaste.title')).not.toBeInTheDocument()
+  })
+
+  // Card-structure regression: every card renders its title, and every field
+  // inside puts the label to the LEFT of the control (FieldRow/Field convention),
+  // not stacked above it — the label text and its input share one row container.
+  it('renders every card title with label-before-field rows', () => {
+    render(<AddCandidateModal onClose={noop} />)
+    ;['modal.fields.cardPersonal', 'modal.fields.cardContact', 'modal.fields.cardWork', 'modal.fields.cardAddress']
+      .forEach(key => expect(screen.getByText(key)).toBeInTheDocument())
+
+    const firstNameInput = screen.getByPlaceholderText('modal.fields.firstName')
+    const label = screen.getByText('modal.fields.firstName', { selector: 'label' })
+    // Label and control share the same row wrapper (label's parent = the row div).
+    expect(label.parentElement).toContainElement(firstNameInput)
+    // The label node precedes the field node in DOM order (left in a row layout).
+    expect(label.compareDocumentPosition(firstNameInput) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
+  })
 })
 
 describe('AddCandidateModal · submit body unchanged by the layout rework', () => {

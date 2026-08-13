@@ -506,6 +506,10 @@
       "label": "Conservation — déjà placé",
       "description": "Nombre de mois de conservation d'un candidat placé au moins une fois. Plus long par défaut en raison de l'obligation légale de conservation fiscale."
     },
+    "consentMonths": {
+      "label": "Validité du consentement",
+      "description": "Nombre de mois pendant lesquels un consentement de conservation accordé reste valable avant de devoir être reconfirmé. 0 = le consentement n'expire jamais."
+    },
     "unit": "mois"
   },
   "statusList": {

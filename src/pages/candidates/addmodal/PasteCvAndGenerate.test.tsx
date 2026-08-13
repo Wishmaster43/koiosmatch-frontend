@@ -59,7 +59,14 @@ const noop = () => {}
 const LONG_TEXT = 'Anna de Vries, verzorgende IG met tien jaar ervaring in de ouderenzorg. '.repeat(2)
 const SHORT_TEXT = 'te kort'
 
+// CV-ENTRY-ICONS-1: paste now starts from a header icon that opens a popover
+// with the same textarea/submit — open it first, mirroring the real recruiter flow.
+const openPastePopover = async (user: ReturnType<typeof userEvent.setup>) => {
+  await user.click(screen.getByRole('button', { name: 'modal.cvPaste.openButton' }))
+}
+
 const pasteAndSubmit = async (user: ReturnType<typeof userEvent.setup>, text: string) => {
+  await openPastePopover(user)
   const textarea = screen.getByLabelText('modal.cvPaste.title')
   await user.click(textarea)
   await user.paste(text)
@@ -96,6 +103,7 @@ describe('Paste-CV · the request', () => {
   it('shows a calm hint and fires no request under the character minimum', async () => {
     const user = userEvent.setup()
     render(<AddCandidateModal onClose={noop} />)
+    await openPastePopover(user)
     const textarea = screen.getByLabelText('modal.cvPaste.title')
     await user.click(textarea)
     await user.paste(SHORT_TEXT)

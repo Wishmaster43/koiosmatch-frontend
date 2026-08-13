@@ -5,9 +5,9 @@
  * "what job is this".
  */
 import { useTranslation } from 'react-i18next'
-import { Field, TextField } from '@/components/forms/fields'
+import { FieldRow, TextField } from '@/components/forms/fields'
 import CreatableSelect from '@/components/ui/CreatableSelect'
-import { cardHead, cardBox, row2 } from '@/components/ui/modalCards'
+import { cardHead, cardBox } from '@/components/ui/modalCards'
 
 interface Props {
   title: string; onTitleChange: (v: string) => void; titleError?: boolean
@@ -26,28 +26,26 @@ export default function GeneralCard({
       <div style={cardHead}>{t('modal.fields.cardGeneral')}</div>
       <div style={cardBox}>
         <div>
-          <Field label={t('modal.fields.title')} required>
+          <FieldRow label={t('modal.fields.title')} required>
             <TextField value={title} onChange={onTitleChange} placeholder={t('modal.titlePlaceholder')} error={titleError} />
-          </Field>
+          </FieldRow>
           {titleError && <div style={{ fontSize: 11, color: 'var(--color-danger)', marginTop: 3 }}>{t('modal.required')}</div>}
         </div>
-        <div style={row2}>
-          {/* Punt 5: "Categorie" -> "Functie" everywhere — the API key stays
-              `category` (VacancyWriter aliases it onto `function_title`); only
-              the i18n VALUE renames (see the delivery report's locale-key list —
-              this file cannot edit locales, so the key name is unchanged). */}
-          {/* VAC-CLEAR-1: both fields are `sometimes|nullable` server-side (StoreVacancyRequest) — optional, so both carry the clear cross. */}
-          <Field label={t('modal.fields.category')}>
-            <CreatableSelect value={category || null} onChange={onCategoryChange} allowCreate={false}
-              clearable clearLabel={t('modal.fields.category')}
-              placeholder={t('common:select')} options={functions} />
-          </Field>
-          <Field label={t('modal.fields.industry')}>
-            <CreatableSelect value={industry || null} onChange={onIndustryChange} allowCreate={false}
-              clearable clearLabel={t('modal.fields.industry')}
-              placeholder={t('common:select')} options={industries} />
-          </Field>
-        </div>
+        {/* Punt 5: "Categorie" -> "Functie" everywhere — the API key stays
+            `category` (VacancyWriter aliases it onto `function_title`); only
+            the i18n VALUE renames (see the delivery report's locale-key list —
+            this file cannot edit locales, so the key name is unchanged). */}
+        {/* VAC-CLEAR-1: both fields are `sometimes|nullable` server-side (StoreVacancyRequest) — optional, so both carry the clear cross. */}
+        <FieldRow label={t('modal.fields.category')}>
+          <CreatableSelect value={category || null} onChange={onCategoryChange} allowCreate={false}
+            clearable clearLabel={t('modal.fields.category')}
+            placeholder={t('common:select')} options={functions} />
+        </FieldRow>
+        <FieldRow label={t('modal.fields.industry')}>
+          <CreatableSelect value={industry || null} onChange={onIndustryChange} allowCreate={false}
+            clearable clearLabel={t('modal.fields.industry')}
+            placeholder={t('common:select')} options={industries} />
+        </FieldRow>
       </div>
     </div>
   )

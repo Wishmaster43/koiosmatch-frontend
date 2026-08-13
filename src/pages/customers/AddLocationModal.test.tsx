@@ -89,6 +89,29 @@ beforeEach(() => {
   vi.mocked(setLocationPrimaryContact).mockReset()
 })
 
+// HET-RECEPT (Danny 14-08, MatchModal is the reference): titled cards (Algemeen/
+// Adres/Zakelijk/Contact/Omschrijving) in two columns, every field a label-LEFT
+// FieldRow. Card-structure regression test for the layout sweep.
+describe('AddLocationModal · card structure follows HET-RECEPT (label-left FieldRow)', () => {
+  it('renders the Algemeen / Adres card titles', () => {
+    render(<AddLocationModal onClose={() => {}} statuses={statuses} />)
+    expect(screen.getByText(ct('subModal.groups.general'))).toBeInTheDocument()
+    expect(screen.getByText(ct('subModal.groups.address'))).toBeInTheDocument()
+  })
+
+  it('renders the location-name label at the canon label width, immediately before its field', () => {
+    render(<AddLocationModal onClose={() => {}} statuses={statuses} />)
+    const label = screen.getByText(ct('subModal.locationName'))
+    expect(label.tagName).toBe('LABEL')
+    expect(label.style.width).toBe('120px')
+    const row = label.parentElement as HTMLElement
+    expect(row.style.display).toBe('flex')
+    expect(row.style.flexDirection).not.toBe('column')
+    expect(row.children[0]).toBe(label)
+    expect(row.children.length).toBeGreaterThan(1)
+  })
+})
+
 describe('AddLocationModal', () => {
   it('blocks submit while the name is empty and shows the required message', async () => {
     const onCreate = vi.fn()
