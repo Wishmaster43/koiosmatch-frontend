@@ -104,9 +104,9 @@ export default function VacancySearchFilters({
           triggerLabel={triggerText(statuses, t('vacancySearch.statuses'))}
         />
       </FilterField>
-      {/* flex-start: the ghost-filter hint below the control (when shown) makes this
-          field two lines tall — centering the label against that would look off. */}
-      <FilterField label={t('vacancySearch.functions')} align="flex-start">
+      {/* flex-start only when the ghost-filter hint below the control makes this field
+          two lines tall; otherwise center like every other single-line filter field. */}
+      <FilterField label={t('vacancySearch.functions')} align={functionNotInLookup ? 'flex-start' : 'center'}>
         <div>
           <SearchSelect
             options={functionOptions} selected={functions} onToggle={v => onFunctionsChange(toggle(functions, v))}
