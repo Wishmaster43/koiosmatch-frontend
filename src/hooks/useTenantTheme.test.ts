@@ -118,10 +118,12 @@ describe('readableAccentText — the brand AS text, adjusted only as far as need
   })
 })
 
-// P2-clamp (Danny 13-08): an EXPLICIT --color-on-accent pick must never win when it
-// is actually unreadable — BrandSettings still WARNS (r.208-212) but never blocks
-// saving, so a bad pick would otherwise reach production as a broken button.
-describe('applyBrandTokens — clamps an explicit on-accent pick that fails AA', () => {
+// P2-clamp, REVISED same day (Danny 13-08 "oranje en wit past wel — yesway.nu"):
+// an explicit pick is honoured from the WCAG UI-component bar (3:1 — button labels
+// are large/bold text, 1.4.3/1.4.11), and only corrected when TRULY unreadable
+// (under 3:1, like white on AENF yellow). BrandSettings still warns in the
+// 3.0–4.5 band but the tenant's brand identity wins there.
+describe('applyBrandTokens — explicit on-accent pick: honoured from 3:1, corrected below', () => {
   afterEach(() => {
     // Reset every token this function can touch so tests never leak into each other.
     const root = document.documentElement
@@ -130,12 +132,21 @@ describe('applyBrandTokens — clamps an explicit on-accent pick that fails AA',
     }
   })
 
-  it('falls back to the derived colour when the explicit text fails AA on the brand', () => {
-    applyBrandTokens('#ffde00', '#FFFFFF') // yellow brand + white text: white on yellow is far under AA
+  it('falls back to the derived colour when the explicit text is truly unreadable (under 3:1)', () => {
+    applyBrandTokens('#ffde00', '#FFFFFF') // yellow brand + white text ≈ 1.6:1 — under even the UI bar
     const applied = document.documentElement.style.getPropertyValue('--color-on-accent').trim()
     expect(applied).not.toBe('#FFFFFF')
     expect(applied).toBe(readableOn('#ffde00'))
     expect(contrastRatio(applied, '#ffde00')).toBeGreaterThanOrEqual(AA)
+  })
+
+  it("honours white on Yesway orange — 3.1:1 clears the UI-component bar (Danny 13-08: it is the live brand)", () => {
+    applyBrandTokens(BRANDS.yeswayOrange, '#FFFFFF')
+    expect(document.documentElement.style.getPropertyValue('--color-on-accent').trim()).toBe('#FFFFFF')
+    // Sanity: the combo really sits between the two WCAG bars.
+    const ratio = contrastRatio('#FFFFFF', BRANDS.yeswayOrange)
+    expect(ratio).toBeGreaterThanOrEqual(3.0)
+    expect(ratio).toBeLessThan(AA)
   })
 
   it('keeps the explicit text when it clears AA on the brand', () => {

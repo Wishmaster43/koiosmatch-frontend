@@ -90,7 +90,15 @@ export function readableAccentText(brand: string, surface: string, target = ACCE
 
 // WCAG AA floor for the on-accent fill — the button LABEL must clear this
 // against whatever the accent fill actually is (brand, or the CSS default).
-const ON_ACCENT_AA = 4.5
+// Two WCAG bars, deliberately (Danny 13-08, "oranje en wit past wel — kijk op
+// yesway.nu"): 4.5:1 is the bar for NORMAL text (1.4.3), but button labels and
+// chips on an accent fill are large/bold UI-component text, where WCAG sets the
+// bar at 3:1 (1.4.3 large text / 1.4.11 non-text). White on Yesway orange
+// measures 3.1 — a real, working brand identity that a 4.5 clamp wrongly
+// overrode. So: an EXPLICIT tenant pick is honoured from 3:1 up; only truly
+// unreadable combos (white on AENF yellow ≈ 1.7) are still corrected. The
+// AUTOMATIC mode keeps aiming for the best contrast via readableOn.
+const ON_ACCENT_EXPLICIT_FLOOR = 3.0
 
 /**
  * The on-accent colour to actually use: an explicit pick wins, but only when it
@@ -100,7 +108,7 @@ const ON_ACCENT_AA = 4.5
  * bold-but-legible choice is never overridden.
  */
 function clampedOnAccent(explicit: string | null | undefined, bg: string): string {
-  if (isHexColor(explicit) && contrastRatio(explicit, bg) >= ON_ACCENT_AA) return explicit
+  if (isHexColor(explicit) && contrastRatio(explicit, bg) >= ON_ACCENT_EXPLICIT_FLOOR) return explicit
   return readableOn(bg)
 }
 
