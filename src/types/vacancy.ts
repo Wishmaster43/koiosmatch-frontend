@@ -56,6 +56,9 @@ export interface Vacancy {
   matchCountState?: MatchCountState | null
   applicationsCount: number
   applicationsByPhase: Loose
+  // V-table-2: matches this vacancy has (VacancyListResource.php always emits a
+  // real int, never null — a Match is the continuation of a Hired application).
+  matchesCount: number
   published: boolean
   // ISO moment of publication; null when never published (stale clock = publishedAt ?? created).
   publishedAt?: string | null
@@ -209,6 +212,8 @@ export interface ApiVacancy {
   // VACANCY-LEADS-COUNT-1: the real match-count field, emitted once ticket
   // VACANCY-LEADS-COUNT-1 lands backend-side — the only field the mapper reads.
   candidate_match_count?: number
+  // V-table-2: real match count (VacancyListResource.php:54, always an int, never null).
+  matches_count?: number
   // VACANCY-LEADS-COUNT-1: the count's provenance, event-driven (15-min worker +
   // nightly full run) — null when the count itself has never been computed.
   match_count_state?: {

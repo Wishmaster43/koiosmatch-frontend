@@ -21,6 +21,11 @@ describe('mapVacancy', () => {
     expect(row.owner).toMatchObject({ id: 'u1', name: 'Kelly van Vliet', initials: 'KV', color: '#abc' })
   })
 
+  it('maps matches_count as a real number, defaulting to 0 (V-table-2)', () => {
+    expect(mapVacancy({ id: 'v1', matches_count: 3 }).matchesCount).toBe(3)
+    expect(mapVacancy({ id: 'v1' }).matchesCount).toBe(0)
+  })
+
   it('derives the applications total from the per-phase breakdown when no count is given', () => {
     const row = mapVacancy({ id: 'v2', applications_by_phase: { applied: 3, hired: 1, rejected: 2 } })
     expect(row.applicationsCount).toBe(6)

@@ -36,6 +36,8 @@ interface VacanciesTableProps {
   // V4 (vacatures-tabel-cluster): the Sollicitaties count deep-links to the
   // drawer's "applicants" tab — mirrors onOpenCandidateSearch's leads deep-link.
   onOpenApplicants?: (id: Id) => void
+  // V-table-2: the Matches count deep-links to the drawer's read-only "matches" tab.
+  onOpenMatches?: (id: Id) => void
   selectable?: boolean
   selectedIds?: Set<Id>
   onToggleRow?: (id: Id) => void
@@ -54,7 +56,7 @@ interface VacanciesTableProps {
  * sorting, selection and the loading/empty states live in the shared DataTable.
  * Mirrors CandidatesTable / ApplicationsTable.
  */
-export default function VacanciesTable({ rows, loading, selectedId, onSelect, onOpenCandidateSearch, onOpenApplicants, selectable, selectedIds, onToggleRow, onToggleAll, stickyHeader = false, scrollParentRef, sort, onSortChange }: VacanciesTableProps) {
+export default function VacanciesTable({ rows, loading, selectedId, onSelect, onOpenCandidateSearch, onOpenApplicants, onOpenMatches, selectable, selectedIds, onToggleRow, onToggleAll, stickyHeader = false, scrollParentRef, sort, onSortChange }: VacanciesTableProps) {
   const { t } = useTranslation('vacancies')
   const { formatDate } = useDateFormat()
   const { statuses = [], statusMeta } = useVacancyLookups()
@@ -207,6 +209,20 @@ export default function VacanciesTable({ rows, loading, selectedId, onSelect, on
           {r.applicationsCount ?? 0}
         </button>
       ) : (r.applicationsCount ?? 0),
+    },
+    {
+      // V-table-2: third count column — Matches, deep-linking to the drawer's
+      // read-only Matches tab (mirrors the Sollicitaties column's ghost button).
+      key: 'matches', header: t('columns.matches'), sortable: true, sortValue: r => r.matchesCount,
+      cellStyle: { fontFamily: 'JetBrains Mono, monospace', fontSize: 12, color: 'var(--text)' },
+      render: r => onOpenMatches ? (
+        <button type="button" style={leadsBtn} aria-label={t('columns.matchesOpen')}
+          onClick={e => { e.stopPropagation(); onOpenMatches(r.id as Id) }}
+          onMouseEnter={e => { e.currentTarget.style.textDecoration = 'underline' }}
+          onMouseLeave={e => { e.currentTarget.style.textDecoration = 'none' }}>
+          {r.matchesCount ?? 0}
+        </button>
+      ) : (r.matchesCount ?? 0),
     },
     {
       key: 'published', header: t('columns.published'), nowrap: true, sortable: true, sortValue: r => (r.published ? 1 : 0),

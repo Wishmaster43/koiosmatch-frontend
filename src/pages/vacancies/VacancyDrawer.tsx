@@ -24,6 +24,7 @@ import DocumentsTab from './drawer/DocumentsTab'
 import TimelineTab from './drawer/TimelineTab'
 import NotesTab from './drawer/NotesTab'
 import StatisticsTab from './drawer/StatisticsTab'
+import MatchesTab from './drawer/MatchesTab'
 import MatchingTab from './drawer/MatchingTab'
 import CandidateSearchTab from './drawer/CandidateSearchTab'
 import CustomFieldsTab from '@/components/drawer/CustomFieldsTab'
@@ -37,13 +38,18 @@ interface DrawerUser { id: Id; name: string }
 // Tab list — config only; each renders one small component (one per tab/section).
 // Details is the FIRST tab (Danny 2026-07-04 — reverses R-7's pinned-above-the-tabs
 // layout: "Details moet gewoon eerste tabje zijn", the pinned editor crowded the drawer).
-const TABS: { id: string; tKey: string; autoExpand?: boolean; render: (v: VacancyDetail, onUpdate?: UpdateFn) => ReactNode }[] = [
+// V-stats-1: render optionally receives the drawer's own setActiveTab so a tab
+// (Statistics) can deep-link into a sibling tab without route hacks.
+const TABS: { id: string; tKey: string; autoExpand?: boolean; render: (v: VacancyDetail, onUpdate?: UpdateFn, setActiveTab?: (id: string) => void) => ReactNode }[] = [
   { id: 'details',    tKey: 'details',    render: (v, onUpdate) => <DetailsTab vacancy={v} onUpdate={onUpdate} /> },
   // Beschrijving — its OWN main tab now (Danny 21-07: moved out of Details' sub-tabs,
   // right after Details so the vacancy text still reads next to the field grid).
   { id: 'description', tKey: 'description', render: (v, onUpdate) => <DescriptionTab vacancy={v} onUpdate={onUpdate} /> },
   { id: 'applicants', tKey: 'applicants', render: v => <ApplicantsTab vacancy={v} /> },
   { id: 'matching',   tKey: 'matching',   render: (v, onUpdate) => <MatchingTab vacancy={v} onUpdate={onUpdate} /> },
+  // V-table-2: read-only Matches tab (mirrors the candidate/customer drawer's
+  // own read-only MatchesTab anatomy) — the table's Matches count deep-links here.
+  { id: 'matches',    tKey: 'matches',    render: v => <MatchesTab vacancyId={v.id} /> },
   // Match-zoeker fase 1 (vacancy side, Danny 23-07): candidates matching this
   // vacancy's radius/function/status filters, map + list side by side.
   // autoExpand (Danny 23-07): the map+list layout is unusable in the narrow
@@ -79,7 +85,10 @@ const TABS: { id: string; tKey: string; autoExpand?: boolean; render: (v: Vacanc
       disabled={!v.city && !v.street && !v.postalCode && !v.location} />
   ) },
   // Statistieken last (Danny 28-07) — a read-only summary, not a working tab.
-  { id: 'statistics', tKey: 'statistics', render: v => <StatisticsTab vacancy={v} /> },
+  // V-stats-1: setActiveTab forwarded so the tab's own counts deep-link into
+  // their source tab (Leads → Kandidaten zoeken, Sollicitaties → applicants,
+  // published channels → Publiceren) instead of a route hack.
+  { id: 'statistics', tKey: 'statistics', render: (v, _onUpdate, setActiveTab) => <StatisticsTab vacancy={v} onNavigateTab={setActiveTab} /> },
 ]
 
 interface VacancyDrawerProps {
@@ -176,7 +185,9 @@ export default function VacancyDrawer({ vacancy: v, onClose, expanded, onToggleE
       tabs={visibleTabs.map(tab => ({
         id: tab.id,
         label: tab.id === 'koppelingen' ? t('common:backofficeLinks.tabLabel') : t(`drawer.tabs.${tab.tKey}`),
-        autoExpand: tab.autoExpand, render: () => tab.render(v, onUpdate),
+        // V-stats-1: EntityDrawer hands each tab its own setActiveTab — forward it
+        // so Statistics can deep-link into a sibling tab without a route hack.
+        autoExpand: tab.autoExpand, render: (setActiveTab?: (id: string) => void) => tab.render(v, onUpdate, setActiveTab),
       }))}
       header={({ setActiveTab }) => (
         <>

@@ -253,6 +253,37 @@ describe('VacanciesTable · Applications count deep-link (V4)', () => {
   })
 })
 
+// V-table-2: the Matches count deep-links to the drawer's read-only Matches tab —
+// mirrors the Applications column's deep-link mechanics verbatim.
+describe('VacanciesTable · Matches count deep-link (V-table-2)', () => {
+  it('renders a plain number when onOpenMatches is not wired', () => {
+    const plainRows = [{ id: 'v1', title: 'A', matchesCount: 2, created: '2024-01-01', createdSort: '2024-01-01' }] as unknown as Vacancy[]
+    const { container } = render(<VacanciesTable rows={plainRows} />)
+    const headerCell = screen.getByText(nlVacancies.columns.matches).closest('th') as HTMLElement
+    const colIndex = Array.from(headerCell.parentElement?.children ?? []).indexOf(headerCell)
+    const cell = container.querySelectorAll('tbody tr')[0].children[colIndex]
+    expect(cell.querySelector('button')).not.toBeInTheDocument()
+    expect(cell.textContent).toBe('2')
+  })
+
+  it('clicking the matches count calls onOpenMatches with the row id and does not open the row', async () => {
+    const user = userEvent.setup()
+    const onOpenMatches = vi.fn()
+    const onSelect = vi.fn()
+    const matchRows = [{ id: 'v8', title: 'A', matchesCount: 3, created: '2024-01-01', createdSort: '2024-01-01' }] as unknown as Vacancy[]
+    render(<VacanciesTable rows={matchRows} onSelect={onSelect} onOpenMatches={onOpenMatches} />)
+
+    const headerCell = screen.getByText(nlVacancies.columns.matches).closest('th') as HTMLElement
+    const colIndex = Array.from(headerCell.parentElement?.children ?? []).indexOf(headerCell)
+    const btn = within(screen.getAllByRole('row')[1].children[colIndex] as HTMLElement).getByRole('button')
+    expect(btn).toHaveTextContent('3')
+    await user.click(btn)
+
+    expect(onOpenMatches).toHaveBeenCalledWith('v8')
+    expect(onSelect).not.toHaveBeenCalled()
+  })
+})
+
 // V2 (vacatures-tabel-cluster): a compact relative-age column derived from
 // created_at — no backend dependency, so this is exercisable with pure dates.
 describe('VacanciesTable · Age column (V2)', () => {

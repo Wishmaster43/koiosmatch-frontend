@@ -35,7 +35,9 @@
     "age": "Âge",
     "applicationsOpen": "Ouvrir les candidatures",
     "ageTooltip": "Depuis le {{date}}",
-    "applicationsOpenTab": "Ouvrir les candidatures"
+    "applicationsOpenTab": "Ouvrir les candidatures",
+    "matches": "Matchs",
+    "matchesOpen": "Ouvrir les matchs"
   },
   "publishedState": {
     "yes": "Publié",
@@ -150,7 +152,8 @@
       "notes": "Notes",
       "statistics": "Statistiques",
       "extra": "Extra",
-      "changelog": "Modifications"
+      "changelog": "Modifications",
+      "matches": "Matchs"
     },
     "archivedBanner": {
       "since": "Archivé le {{date}}",
@@ -468,5 +471,8 @@
   "popout": {
     "windowTitle": "Notes — {{name}}",
     "loadError": "Cette offre d'emploi n'a pas pu être chargée."
+  },
+  "matchesTab": {
+    "loadError": "Impossible de charger les matchs."
   }
 }

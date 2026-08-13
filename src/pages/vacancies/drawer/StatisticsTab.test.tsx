@@ -110,3 +110,48 @@ describe('StatisticsTab · V25 real data (derived from the detail applications a
     expect(mockNavigate).toHaveBeenCalledWith('applications', { stage: 'applied', vacancy: 'v42' })
   })
 })
+
+// V-stats-1: the counts deep-link to the tabs they count — real, keyboard-
+// operable buttons that call the drawer's own setActiveTab, no route hack.
+describe('StatisticsTab · V-stats-1 counts deep-link to their own tab', () => {
+  const baseVacancy = () => mapVacancyDetail({
+    id: 'v1', title: 'Test', candidate_match_count: 4, created_at: '2026-06-01T00:00:00Z',
+    /* eslint-disable no-restricted-syntax -- test fixture hex, not UI styling */
+    applications: [
+      { id: 'a1', candidate: { id: 'c1', name: 'Rosa Tijssen' }, phase: { value: 'applied', label: 'Gesolliciteerd', color: '#94A3B8' } },
+      { id: 'a2', candidate: { id: 'c2', name: 'Kelly van Vliet' }, phase: { value: 'hired', label: 'Aangenomen', color: '#79B58E' } },
+    ],
+    /* eslint-enable no-restricted-syntax */
+    channels: [{ value: 'career', label: 'Carrière-pagina', published: true }],
+  })
+
+  it('renders plain text (no button) when onNavigateTab is not wired', () => {
+    render(<StatisticsTab vacancy={baseVacancy()} />)
+    expect(screen.getByText('4').closest('button')).toBeNull()
+    expect(screen.getByText('2').closest('button')).toBeNull()
+  })
+
+  it('clicking the Leads count jumps to the "candidateSearch" tab', async () => {
+    const onNavigateTab = vi.fn()
+    const user = userEvent.setup()
+    render(<StatisticsTab vacancy={baseVacancy()} onNavigateTab={onNavigateTab} />)
+    await user.click(screen.getByRole('button', { name: nlVacancies.columns.leadsOpenSearch }))
+    expect(onNavigateTab).toHaveBeenCalledWith('candidateSearch')
+  })
+
+  it('clicking the Sollicitaties count jumps to the "applicants" tab', async () => {
+    const onNavigateTab = vi.fn()
+    const user = userEvent.setup()
+    render(<StatisticsTab vacancy={baseVacancy()} onNavigateTab={onNavigateTab} />)
+    await user.click(screen.getByRole('button', { name: nlVacancies.columns.applicationsOpen }))
+    expect(onNavigateTab).toHaveBeenCalledWith('applicants')
+  })
+
+  it('clicking the published-channels KPI jumps to the "publishing" tab', async () => {
+    const onNavigateTab = vi.fn()
+    const user = userEvent.setup()
+    render(<StatisticsTab vacancy={baseVacancy()} onNavigateTab={onNavigateTab} />)
+    await user.click(screen.getByText(nlVacancies.statistics.channelsPublished))
+    expect(onNavigateTab).toHaveBeenCalledWith('publishing')
+  })
+})

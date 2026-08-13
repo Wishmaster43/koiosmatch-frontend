@@ -63,6 +63,8 @@ export function mapVacancy(v: ApiVacancy = {}): Vacancy {
     matchCountState: mapMatchCountState(v.match_count_state),
     applicationsCount: v.applications_count ?? v.applicationsCount ?? sumPhases(byPhase),
     applicationsByPhase: byPhase,
+    // V-table-2: real match count, always a number (server-side default 0).
+    matchesCount: Number(v.matches_count ?? 0),
     published: Boolean(v.published ?? false),
     // Wave-2 contract (13-08): stale_online counts from COALESCE(published_at,
     // created_at) — map the timestamp tolerantly so the FE measures the same clock.

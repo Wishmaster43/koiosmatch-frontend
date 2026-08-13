@@ -35,7 +35,9 @@
     "age": "Age",
     "applicationsOpen": "Open applications",
     "ageTooltip": "Since {{date}}",
-    "applicationsOpenTab": "Open Applications"
+    "applicationsOpenTab": "Open Applications",
+    "matches": "Matches",
+    "matchesOpen": "Open matches"
   },
   "publishedState": {
     "yes": "Published",
@@ -150,7 +152,8 @@
       "timeline": "Timeline",
       "notes": "Notes",
       "statistics": "Statistics",
-      "changelog": "Changelog"
+      "changelog": "Changelog",
+      "matches": "Matches"
     },
     "archivedBanner": {
       "since": "Archived on {{date}}",
@@ -468,5 +471,8 @@
   "popout": {
     "windowTitle": "Notes — {{name}}",
     "loadError": "This vacancy could not be loaded."
+  },
+  "matchesTab": {
+    "loadError": "Could not load matches."
   }
 }

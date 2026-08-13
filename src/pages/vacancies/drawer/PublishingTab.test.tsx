@@ -154,6 +154,53 @@ describe('PublishingTab · honest career-site-active state', () => {
   })
 })
 
+// S-selectall-1: alles/niets toggle above the channel list — one persisted patch,
+// indeterminate reads as "select" until every visible channel is on.
+describe('PublishingTab · S-selectall-1 select-all above the channel list', () => {
+  it('selects every visible (active) channel in ONE onUpdate call', async () => {
+    const onUpdate = vi.fn()
+    const user = userEvent.setup()
+    render(<PublishingTab vacancy={vacancy([
+      { value: 'career', label: 'Career page', published: false },
+      { value: 'indeed', label: 'Indeed', published: false },
+    ])} onUpdate={onUpdate} />)
+    await openSitesTab()
+
+    await user.click(screen.getByRole('button', { name: new RegExp(t('common:multiSelect.selectVisible'), 'i') }))
+
+    expect(onUpdate).toHaveBeenCalledTimes(1)
+    expect(onUpdate).toHaveBeenCalledWith('v1', {
+      channels: [
+        { value: 'career', label: 'Career page', published: true },
+        { value: 'indeed', label: 'Indeed', published: true },
+      ],
+    })
+    const switches = screen.getAllByRole('switch')
+    expect(switches[0]).toHaveAttribute('aria-checked', 'true')
+    expect(switches[1]).toHaveAttribute('aria-checked', 'true')
+  })
+
+  it('flips to clear-all once every visible channel is already selected, and clears them', async () => {
+    const onUpdate = vi.fn()
+    const user = userEvent.setup()
+    render(<PublishingTab vacancy={vacancy([
+      { value: 'career', label: 'Career page', published: true },
+      { value: 'indeed', label: 'Indeed', published: true },
+    ])} onUpdate={onUpdate} />)
+    await openSitesTab()
+
+    const clearBtn = screen.getByRole('button', { name: new RegExp(t('common:multiSelect.clearVisible'), 'i') })
+    await user.click(clearBtn)
+
+    expect(onUpdate).toHaveBeenCalledWith('v1', {
+      channels: [
+        { value: 'career', label: 'Career page', published: false },
+        { value: 'indeed', label: 'Indeed', published: false },
+      ],
+    })
+  })
+})
+
 // V-pub-1: switching the drawer target vacancy must resync the local channel/
 // settings/subTab state — previously the useState only seeded once, so vacancy
 // B kept rendering vacancy A's channels and application-field settings.

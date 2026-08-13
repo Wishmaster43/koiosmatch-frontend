@@ -1,6 +1,7 @@
 import { useTranslation } from 'react-i18next'
 import SelectMenu from '@/components/ui/SelectMenu'
 import Toggle from '@/components/ui/Toggle'
+import SelectAllRow from '@/components/ui/SelectAllRow'
 import { cardBox } from '@/components/ui/modalCards'
 
 export interface PublicationChannel { value: string; label: string; published: boolean }
@@ -69,7 +70,16 @@ export default function PublicationCard({ published, onPublishedChange, channels
           borderRadius: 8, padding: '8px 10px', marginBottom: 10, background: 'var(--bg)' }}>
           {t('publishing.notLiveYet')}
         </div>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+        {/* S-selectall-1: alles/niets above the channel list — mirrors the shared
+            SelectAllRow's own indeterminate/select-all/clear-all contract; each
+            change rides the SAME per-channel toggle callback (setChannels'
+            functional updater makes a sequential apply safe). */}
+        <SelectAllRow
+          visibleValues={channels.map(c => c.value)}
+          selectedValues={channels.filter(c => c.published).map(c => c.value)}
+          onApply={(values, select) => values.forEach(v => onToggleChannel(v, select))}
+        />
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginTop: 8 }}>
           {channels.map(c => (
             <div key={c.value} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12,
               padding: '8px 10px', border: '1px solid var(--border)', borderRadius: 8, background: 'var(--bg)' }}>

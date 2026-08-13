@@ -28,7 +28,15 @@ const MiniDonut = MiniDonutJs as unknown as ComponentType<AnyProps>
  * `applications` array instead, so this tab (and the Sollicitaties tab) are no
  * longer empty for a real vacancy.
  */
-export default function StatisticsTab({ vacancy: v }: { vacancy: VacancyDetail }) {
+// V-stats-1: ghost-button treatment for a deep-linking count — mirrors the
+// table's own leadsBtn/applications ghost buttons (§3A: one look, everywhere).
+const linkBtn = { display: 'inline-flex', fontFamily: 'JetBrains Mono, monospace', fontSize: 12,
+  color: 'var(--color-primary-text)', background: 'none', border: 'none', padding: 0, cursor: 'pointer', font: 'inherit' }
+
+export default function StatisticsTab({ vacancy: v, onNavigateTab }: { vacancy: VacancyDetail
+  // V-stats-1: jumps to a sibling drawer tab (VacancyDrawer's own setActiveTab) —
+  // Leads → Kandidaten zoeken, Sollicitaties → Sollicitaties, kanalen → Publiceren.
+  onNavigateTab?: (id: string) => void }) {
   const { t } = useTranslation('vacancies')
   // Phase-donut click → Sollicitaties, pre-filtered on this vacancy + that stage.
   const { navigate } = useNavigation()
@@ -78,16 +86,27 @@ export default function StatisticsTab({ vacancy: v }: { vacancy: VacancyDetail }
             sub: leadsKnown ? t('statistics.ofLeads', { count: leads ?? 0 }) : t('columns.leadsUnknown'), color: 'var(--color-primary-text)' },
           { label: t('statistics.daysOpen'), value: daysOpen ?? '—',
             sub: v.created ? t('statistics.daysOpenSub', { date: formatDate(v.created) }) : undefined, color: 'var(--color-secondary)' },
+          // V-stats-1: published-channels KPI jumps straight to the Publiceren tab.
           { label: t('statistics.channelsPublished'), value: publishedChannels.length,
-            sub: t('statistics.channelsPublishedSub', { total: (v.channels ?? []).length }), color: 'var(--color-violet)' },
+            sub: t('statistics.channelsPublishedSub', { total: (v.channels ?? []).length }), color: 'var(--color-violet)',
+            onClick: onNavigateTab ? () => onNavigateTab('publishing') : undefined },
         ]}
         overview={{
           title: t('statistics.overviewTitle'),
           rows: [
             [t('statistics.createdOn'), v.created ? formatDate(v.created) : '—'],
             [t('statistics.lastActivity'), lastActivity ? formatDateTime(lastActivity) : '—'],
-            [t('columns.leads'), leadsKnown ? String(leads) : '—'],
-            [t('columns.applications'), String(totalApps)],
+            // V-stats-1: Leads deep-links to Kandidaten zoeken — real, keyboard-
+            // operable buttons (not the row itself, which stays a static label).
+            [t('columns.leads'), leadsKnown && onNavigateTab ? (
+              <button type="button" style={linkBtn} aria-label={t('columns.leadsOpenSearch')}
+                onClick={() => onNavigateTab('candidateSearch')}>{String(leads)}</button>
+            ) : (leadsKnown ? String(leads) : '—')],
+            // V-stats-1: Sollicitaties deep-links to the applicants tab.
+            [t('columns.applications'), onNavigateTab ? (
+              <button type="button" style={linkBtn} aria-label={t('columns.applicationsOpen')}
+                onClick={() => onNavigateTab('applicants')}>{String(totalApps)}</button>
+            ) : String(totalApps)],
           ],
         }}
       />

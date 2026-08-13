@@ -164,6 +164,8 @@ function VacanciesPageInner({ intent }: { intent?: unknown }) {
   // V4 (vacatures-tabel-cluster): the Sollicitaties count deep-links to the
   // drawer's "applicants" tab (already registered in VacancyDrawer's TABS).
   const openApplicants = (id: Id) => { setDrawerInitialTab('applicants'); selectVacancy({ id } as Parameters<typeof selectVacancy>[0], { forceOpen: true }) }
+  // V-table-2: the Matches count deep-links to the drawer's read-only "matches" tab.
+  const openMatches = (id: Id) => { setDrawerInitialTab('matches'); selectVacancy({ id } as Parameters<typeof selectVacancy>[0], { forceOpen: true }) }
 
   // Open a vacancy drawer when arriving via a cross-entity link (intent).
   useOpenFromIntent(intent, (id) => openVacancy({ id } as Parameters<typeof selectVacancy>[0]))
@@ -347,6 +349,7 @@ function VacanciesPageInner({ intent }: { intent?: unknown }) {
                       onSelect={openVacancy}
                       onOpenCandidateSearch={openCandidateSearch}
                       onOpenApplicants={openApplicants}
+                      onOpenMatches={openMatches}
                       selectable
                       selectedIds={selectedIds}
                       onToggleRow={toggleRow}
@@ -383,7 +386,7 @@ function VacanciesPageInner({ intent }: { intent?: unknown }) {
                         <ErrorBanner style={{ marginBottom: 12 }}>{error}</ErrorBanner>
                       )}
                       <VacanciesTable rows={vacancies} loading={loading} selectedId={selected?.id} onSelect={openVacancy}
-                        onOpenCandidateSearch={openCandidateSearch} onOpenApplicants={openApplicants} />
+                        onOpenCandidateSearch={openCandidateSearch} onOpenApplicants={openApplicants} onOpenMatches={openMatches} />
                     </div>
                     <PaginationBar page={page} totalPages={lastPage} totalRows={total} pageSize={pageSize}
                       onPageChange={setPage} onPageSizeChange={handlePageSizeChange} pageSizeOptions={pageSizeOptions} />

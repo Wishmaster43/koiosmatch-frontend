@@ -36,6 +36,7 @@ vi.mock('./drawer/TimelineTab', () => ({ default: () => null }))
 vi.mock('./drawer/NotesTab', () => ({ default: () => null }))
 vi.mock('./drawer/StatisticsTab', () => ({ default: () => null }))
 vi.mock('./drawer/MatchingTab', () => ({ default: () => null }))
+vi.mock('./drawer/MatchesTab', () => ({ default: () => null }))
 // Danny 27-07: VacancyDrawer now wires the shared house ChangelogPopover shell
 // directly (@/components/drawer/ChangelogPopover) with this file's own ChangelogTab
 // as content — stub the content component; it only ever mounts once the popover is

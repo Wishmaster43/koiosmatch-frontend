@@ -35,7 +35,9 @@
     "age": "Alter",
     "applicationsOpen": "Bewerbungen öffnen",
     "ageTooltip": "Seit {{date}}",
-    "applicationsOpenTab": "Bewerbungen öffnen"
+    "applicationsOpenTab": "Bewerbungen öffnen",
+    "matches": "Matches",
+    "matchesOpen": "Matches öffnen"
   },
   "publishedState": {
     "yes": "Veröffentlicht",
@@ -150,7 +152,8 @@
       "notes": "Notizen",
       "statistics": "Statistiken",
       "extra": "Extra",
-      "changelog": "Änderungen"
+      "changelog": "Änderungen",
+      "matches": "Matches"
     },
     "archivedBanner": {
       "since": "Archiviert am {{date}}",
@@ -468,5 +471,8 @@
   "popout": {
     "windowTitle": "Notizen — {{name}}",
     "loadError": "Diese Stelle konnte nicht geladen werden."
+  },
+  "matchesTab": {
+    "loadError": "Matches konnten nicht geladen werden."
   }
 }

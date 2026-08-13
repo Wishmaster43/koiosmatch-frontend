@@ -35,7 +35,9 @@
     "age": "Antigüedad",
     "applicationsOpen": "Abrir solicitudes",
     "ageTooltip": "Desde el {{date}}",
-    "applicationsOpenTab": "Abrir solicitudes"
+    "applicationsOpenTab": "Abrir solicitudes",
+    "matches": "Matches",
+    "matchesOpen": "Abrir matches"
   },
   "publishedState": {
     "yes": "Publicada",
@@ -150,7 +152,8 @@
       "notes": "Notas",
       "statistics": "Estadísticas",
       "extra": "Extra",
-      "changelog": "Cambios"
+      "changelog": "Cambios",
+      "matches": "Matches"
     },
     "archivedBanner": {
       "since": "Archivada el {{date}}",
@@ -468,5 +471,8 @@
   "popout": {
     "windowTitle": "Notas — {{name}}",
     "loadError": "No se pudo cargar esta vacante."
+  },
+  "matchesTab": {
+    "loadError": "No se pudieron cargar los matches."
   }
 }

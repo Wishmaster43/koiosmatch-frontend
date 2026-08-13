@@ -3,6 +3,7 @@ import type { ComponentType } from 'react'
 import { useTranslation } from 'react-i18next'
 import SelectMenuJs from '@/components/ui/SelectMenu'
 import SubTabBar from '@/components/drawer/SubTabBar'
+import SelectAllRow from '@/components/ui/SelectAllRow'
 import { sectionTitle } from '@/components/ui/SectionCard'
 import { useVacancyLookups } from '@/context/VacancyLookupsContext'
 import { useAllSettings, getJsonSetting, getBoolSetting } from '@/lib/settings/useAllSettings'
@@ -99,6 +100,15 @@ export default function PublishingTab({ vacancy: v, onUpdate }: { vacancy: Vacan
     setChannels(updated)
     onUpdate?.(v.id, { channels: updated })
   }
+  // S-selectall-1: batch-flip the given channels in ONE persisted patch (never a
+  // per-channel loop — toggleChannel above reads `channels` from the render
+  // closure, so a loop of single calls would only keep the LAST iteration's write).
+  const toggleAllChannels = (values: string[], select: boolean) => {
+    const set = new Set(values)
+    const updated = channels.map(c => set.has(c.value) ? { ...c, published: select } : c)
+    setChannels(updated)
+    onUpdate?.(v.id, { channels: updated })
+  }
   // Set an application-field requirement (required|optional|hidden) and persist.
   const setField = (field: string, value: unknown) => {
     const updated = { ...settings, [field]: value }
@@ -155,7 +165,14 @@ export default function PublishingTab({ vacancy: v, onUpdate }: { vacancy: Vacan
             background: `color-mix(in srgb, ${careerSiteActive ? 'var(--color-success)' : 'var(--color-warning)'} 8%, transparent)` }}>
             {careerSiteActive ? t('publishing.siteLive') : t('publishing.siteOffline')}
           </div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 20 }}>
+          {/* S-selectall-1: alles/niets above the channel list — same shared
+              SelectAllRow contract PublicationCard uses in the create modal. */}
+          <SelectAllRow
+            visibleValues={channels.map(c => c.value)}
+            selectedValues={channels.filter(c => c.published).map(c => c.value)}
+            onApply={toggleAllChannels}
+          />
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginTop: 8, marginBottom: 20 }}>
             {channels.map(c => {
               // Real per-row state: only actually live once BOTH this channel's own
               // toggle AND the tenant's site-wide switch are on — otherwise it is

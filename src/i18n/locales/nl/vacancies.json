@@ -35,7 +35,9 @@
     "age": "Leeftijd",
     "applicationsOpen": "Open sollicitaties",
     "ageTooltip": "Sinds {{date}}",
-    "applicationsOpenTab": "Open Sollicitaties"
+    "applicationsOpenTab": "Open Sollicitaties",
+    "matches": "Matches",
+    "matchesOpen": "Open matches"
   },
   "publishedState": {
     "yes": "Gepubliceerd",
@@ -150,7 +152,8 @@
       "timeline": "Tijdlijn",
       "notes": "Notities",
       "statistics": "Statistieken",
-      "changelog": "Wijzigingen"
+      "changelog": "Wijzigingen",
+      "matches": "Matches"
     },
     "archivedBanner": {
       "since": "Gearchiveerd op {{date}}",
@@ -468,5 +471,8 @@
   "popout": {
     "windowTitle": "Notities — {{name}}",
     "loadError": "Deze vacature kon niet worden geladen."
+  },
+  "matchesTab": {
+    "loadError": "Matches konden niet worden geladen."
   }
 }
