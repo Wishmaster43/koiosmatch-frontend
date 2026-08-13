@@ -32,7 +32,7 @@ interface PendingDoc { file: File; objectUrl: string; name: string; size: string
  */
 export default function DocumentsTab({ vacancy: v }: { vacancy: VacancyDetail }) {
   const { t } = useTranslation('vacancies')
-  const { docs, upload, remove } = useEntityDocuments('vacancies', v.id)
+  const { docs, loading, error, upload, remove } = useEntityDocuments('vacancies', v.id)
   // Vacancy's own document-type lookup (entity-scoped) — never a hardcoded list.
   const { types: docTypes, labelOf: docTypeLabel, colorOf: docColor } = useDocumentTypes('vacancy')
   const fileRef = useRef<HTMLInputElement>(null)
@@ -151,10 +151,19 @@ export default function DocumentsTab({ vacancy: v }: { vacancy: VacancyDetail })
         </div>
       )}
 
-      {docs.length === 0 && !pending ? (
+      {/* L8-docs-1: four explicit UI states (§3) — loading/error/empty/success,
+          a failed fetch must never silently read as "no documents". */}
+      {loading ? (
+        <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{t('documents.loading')}</div>
+      ) : error ? (
+        <div style={{ fontSize: 12, color: 'var(--color-danger)' }}>{t('documents.loadFailed')}</div>
+      ) : docs.length === 0 && !pending ? (
         // DOC-FILTER-PARITY-1: fixes a copy-paste bug — this used to read the
         // APPLICANTS empty-state key ("No applications yet."), not a documents one.
         <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{t('documents.empty')}</div>
+      ) : filteredDocs.length === 0 ? (
+        // A filter/search with zero matches is distinct from "no documents at all".
+        <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{t('documents.noResults')}</div>
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
           {filteredDocs.map((d, i) => {

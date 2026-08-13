@@ -62,12 +62,12 @@ const TABS: { id: string; tKey: string; autoExpand?: boolean; render: (v: Vacanc
   { id: 'extra',      tKey: 'extra',      render: (v, onUpdate) => <CustomFieldsTab entityType="vacancy" values={v.customFieldValues ?? {}}
       onSave={patch => onUpdate?.(v.id, { customFieldValues: { ...(v.customFieldValues ?? {}), ...patch } })} /> },
   { id: 'documents',  tKey: 'documents',  render: v => <DocumentsTab vacancy={v} /> },
-  // Tijdlijn TAB (intended: real lifecycle activity — created/status changes/
-  // applications received) is distinct BY DESIGN from the changelog ICON in the
-  // title row (raw field-change audit, the shared ChangelogPopover) — §3A(d): tab =
-  // activiteit, icon = veldwijzigingen. Currently a calm empty state: the backend
-  // hardcodes `timeline: []` (no aggregator like ApplicationTimeline exists yet for
-  // vacancies) — BE follow-up, not a reason to remove this tab.
+  // Tijdlijn TAB (real lifecycle activity — created/status changes/applications
+  // received) is distinct BY DESIGN from the changelog ICON in the title row (raw
+  // field-change audit, the shared ChangelogPopover) — §3A(d): tab = activiteit,
+  // icon = veldwijzigingen. Live: VacancyDetailResource::timelineFor() feeds note/
+  // application/match record events with link targets plus created/published/
+  // updated lifecycle moments, newest-first.
   { id: 'timeline',   tKey: 'timeline',   render: v => <TimelineTab vacancy={v} /> },
   { id: 'notes',      tKey: 'notes',      render: v => <NotesTab vacancy={v} /> },
   // Koppelingen (Danny 28-07): PDOK left the title row, so the vacancy gets the same

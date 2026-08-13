@@ -32,6 +32,14 @@ import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import AddApplicationModal from './AddApplicationModal'
 import api from '@/lib/api'
+import { useActionRulePreflight } from '@/components/actionrules'
+
+// AXIS-1: only the network hook is stubbed, mirroring the candidate-drawer
+// variant's own test — the real ActionRuleBanner still renders.
+vi.mock('@/components/actionrules', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@/components/actionrules')>()),
+  useActionRulePreflight: vi.fn(() => ({ decision: null, loading: false, error: false })),
+}))
 
 // Real (uuid) stage ids — anything else is unsubmittable per the backend rule
 // (uuid|exists:application_stages,id) and the modal filters it out on purpose.
@@ -112,6 +120,7 @@ beforeEach(() => {
   rowState.candidates = [{ id: 'c1', name: 'Anna Kandidaat' }]
   rowState.vacancies = [{ id: 'v1', title: 'Verzorgende IG', client_name: 'Zorggroep A' }]
   rowState.lockedVacancyOwner = null
+  vi.mocked(useActionRulePreflight).mockReturnValue({ decision: null, loading: false, error: false })
 })
 
 // Pick candidate + vacancy through the real search popovers (W30: SearchSelect,
@@ -413,6 +422,45 @@ describe('AddApplicationModal · W30 custom fields (Extra section)', () => {
     const trigger = screen.getByLabelText(/Channel/)
     expect(trigger.tagName).toBe('BUTTON')
     expect(trigger).toHaveAttribute('aria-haspopup', 'listbox')
+  })
+})
+
+describe('AddApplicationModal · AXIS-1 action-rule preflight', () => {
+  it('renders no banner while the decision is allow/loading', async () => {
+    const user = userEvent.setup()
+    render(<AddApplicationModal onClose={() => {}} onCreated={() => {}} />)
+    await pickCandidateAndVacancy(user)
+    expect(screen.queryByTestId('action-rule-banner')).not.toBeInTheDocument()
+  })
+
+  it('warn: shows the banner but leaves Create enabled', async () => {
+    vi.mocked(useActionRulePreflight).mockReturnValue({
+      decision: { effect: 'warn', popup_code: 'P1', message: 'Anna is tijdelijk niet inzetbaar.' }, loading: false, error: false,
+    })
+    const user = userEvent.setup()
+    render(<AddApplicationModal onClose={() => {}} onCreated={() => {}} />)
+    await pickCandidateAndVacancy(user)
+
+    const banner = screen.getByTestId('action-rule-banner')
+    expect(banner).toHaveAttribute('data-effect', 'warn')
+    expect(screen.getByText('Anna is tijdelijk niet inzetbaar.')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'add.create' })).toBeEnabled()
+  })
+
+  it('block: shows the banner and disables Create even with candidate + vacancy picked', async () => {
+    vi.mocked(useActionRulePreflight).mockReturnValue({
+      decision: { effect: 'block', popup_code: 'P3', message: 'Anna staat op de blacklist.' }, loading: false, error: false,
+    })
+    const user = userEvent.setup()
+    render(<AddApplicationModal onClose={() => {}} onCreated={() => {}} />)
+    await pickCandidateAndVacancy(user)
+
+    expect(screen.getByTestId('action-rule-banner')).toHaveAttribute('data-effect', 'block')
+    expect(screen.getByRole('button', { name: 'add.create' })).toBeDisabled()
+    // Even a direct call must not slip through — the hook name/params are the request.
+    expect(useActionRulePreflight).toHaveBeenCalledWith('application.create', { candidateId: 'c1' })
+    await user.click(screen.getByRole('button', { name: 'add.create' }))
+    expect(api.post).not.toHaveBeenCalled()
   })
 })
 

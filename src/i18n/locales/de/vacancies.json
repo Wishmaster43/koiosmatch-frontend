@@ -449,7 +449,10 @@
     "allTypes": "Alle Typen",
     "type": "Typ",
     "search": "Dokumente durchsuchen…",
-    "empty": "Noch keine Dokumente."
+    "empty": "Noch keine Dokumente.",
+    "loading": "Dokumente werden geladen…",
+    "loadFailed": "Dokumente konnten nicht geladen werden.",
+    "noResults": "Keine Dokumente innerhalb dieser Filter gefunden."
   },
   "age": {
     "days": "{{count}}T",

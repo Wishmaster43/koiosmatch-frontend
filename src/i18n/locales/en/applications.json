@@ -443,7 +443,7 @@
     "submit": "Download CV + record proposal",
     "copyMessage": "Copy message",
     "copied": "Copied",
-    "notSentYet": "Koios does not send this message itself yet — download the CV and send it from your own mail program. An automatic, revocable link follows once that capability ships.",
+    "notSentYet": "Koios does not send this message itself. Download the CV and send it from your own mail program, or use the revocable share link above.",
     "recorded": "Proposal recorded",
     "loading": "Loading…",
     "noteTitle": "Candidate proposed",

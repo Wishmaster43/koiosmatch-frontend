@@ -449,7 +449,10 @@
     "allTypes": "Tous les types",
     "type": "Type",
     "search": "Rechercher des documents…",
-    "empty": "Aucun document pour le moment."
+    "empty": "Aucun document pour le moment.",
+    "loading": "Chargement des documents…",
+    "loadFailed": "Échec du chargement des documents.",
+    "noResults": "Aucun document trouvé avec ces filtres."
   },
   "age": {
     "days": "{{count}}j",

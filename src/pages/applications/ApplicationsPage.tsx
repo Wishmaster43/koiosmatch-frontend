@@ -254,7 +254,12 @@ export default function ApplicationsPage({ intent }: { intent?: unknown } = {}) 
           // instead is itself an incomplete sample (statsFailed && wideIsPartial).
           // VESTIGING-2: an explicit branch filter EXCLUDES applications with no
           // branch yet — a resulting empty list must say so, not read as "nothing here".
+          // S-board-1: the board view's columns are built straight from `wideRows`
+          // (no stats-backed bucket source there), so a capped sample must be
+          // disclosed regardless of whether /applications/stats itself is healthy —
+          // stats health only matters for the table view's fallback path above.
           notice={(statsFailed && wideIsPartial) ? t('insights.pageScopeNotice')
+            : (view === 'board' && wideIsPartial) ? t('insights.pageScopeNotice')
             : (selectedBranch.length > 0 && total === 0 ? t('common:filters.branchExcludesUnassigned') : undefined)} />
 
         {/* Tab bar — add + buckets + view toggle */}

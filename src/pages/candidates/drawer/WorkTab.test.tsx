@@ -382,6 +382,43 @@ describe('WorkTab · Sollicitaties toolbar (search + stage filter, Danny live re
 })
 
 /**
+ * S-cand-1: the stage filter now groups/filters on `stageKey` when the backend
+ * embed carries it, so a tenant renaming a stage's LABEL never silently splits
+ * one stage into two filter buckets — falls back to stageLabel while any row
+ * still predates the embed (rollout-safe).
+ */
+describe('WorkTab · S-cand-1 stage filter uses stageKey (label fallback)', () => {
+  it('two rows sharing one stageKey but different (renamed) labels stay ONE filter bucket', async () => {
+    const rows = [
+      { id: 'a1', vacancy: { id: 'v1', title: 'Verpleegkundige' }, stageKey: 'applied', stageLabel: 'Gesolliciteerd', created_at: '2026-07-01' },
+      { id: 'a2', vacancy: { id: 'v2', title: 'Verzorgende' }, stageKey: 'applied', stageLabel: 'Sollicitatie ontvangen', created_at: '2026-07-02' },
+    ]
+    const user = userEvent.setup()
+    render(<WorkTab c={candidate(rows)} />)
+    await user.click(screen.getByRole('button', { name: 'filters.allStatuses' }))
+    // Only ONE stage option in the menu — not two, despite the differing labels.
+    expect(screen.getAllByRole('button', { name: /Gesolliciteerd|Sollicitatie ontvangen/ })).toHaveLength(1)
+    await user.click(screen.getByRole('button', { name: /Gesolliciteerd|Sollicitatie ontvangen/ }))
+    // Picking that one bucket keeps BOTH rows.
+    expect(screen.getByRole('button', { name: 'Verpleegkundige' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Verzorgende' })).toBeInTheDocument()
+  })
+
+  it('still filters correctly by label when stageKey is absent (pre-rollout rows)', async () => {
+    const rows = [
+      { id: 'a1', vacancy: { id: 'v1', title: 'Verpleegkundige' }, stageLabel: 'Gesolliciteerd', created_at: '2026-07-01' },
+      { id: 'a2', vacancy: { id: 'v2', title: 'Verzorgende' }, stageLabel: 'Ingepland', created_at: '2026-07-02' },
+    ]
+    const user = userEvent.setup()
+    render(<WorkTab c={candidate(rows)} />)
+    await user.click(screen.getByRole('button', { name: 'filters.allStatuses' }))
+    await user.click(await screen.findByRole('button', { name: 'Ingepland' }))
+    expect(screen.getByRole('button', { name: 'Verzorgende' })).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Verpleegkundige' })).toBeNull()
+  })
+})
+
+/**
  * Danny 09-08: "de koppen staan niet boven hun eigen kolom" — the header used
  * to declare its own fixed widths while ApplicationRow built its cells
  * completely differently (a pill with its own intrinsic width, a date with

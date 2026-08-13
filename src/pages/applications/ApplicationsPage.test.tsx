@@ -5,8 +5,9 @@
  * (too_long_in_stage=1 / missing_appointment=1) into the data layer, mirroring
  * how CandidatesPage:113 consumes { attention: 'stale6m' }.
  */
-import { describe, it, expect, vi } from 'vitest'
-import { render } from '@testing-library/react'
+import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { render, screen } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import { useState } from 'react'
 import ApplicationsPage from './ApplicationsPage'
 
@@ -28,14 +29,22 @@ vi.mock('@/lib/usePageMemory', () => ({
     useState(typeof initial === 'function' ? (initial as () => unknown)() : initial),
 }))
 vi.mock('@/hooks/useListPageSize', () => ({ useListPageSize: () => ({ pageSize: 25, setPageSize: vi.fn(), options: [25] }) }))
+// S-board-1: mutable per-test override so the sample-notice tests can force
+// wideIsPartial without re-declaring the whole mock factory.
+const dataHookState = vi.hoisted(() => ({ wideIsPartial: false, statsFailed: false }))
 vi.mock('./hooks/useApplicationsData', () => ({
   APPLICATIONS_MAX_PER_PAGE: 200,
   useApplicationsData: (args: { filterParams: Record<string, unknown> }) => {
     dataHookCalls.push(args.filterParams)
     return { applications: [], setApplications: vi.fn(), loading: false, error: null, total: 0, setTotal: vi.fn(),
-      lastPage: 1, wideRows: [], wideLoading: false, wideError: null, wideIsPartial: false, stats: null, statsFailed: false }
+      lastPage: 1, wideRows: [], wideLoading: false, wideError: null,
+      wideIsPartial: dataHookState.wideIsPartial, stats: null, statsFailed: dataHookState.statsFailed }
   },
 }))
+// Capture the InsightsRow props (notice included) instead of rendering the real
+// component — the mocked page's other children are stubbed to null too.
+const insightsRowCalls: Array<Record<string, unknown>> = []
+vi.mock('@/components/insights/InsightsRow', () => ({ default: (props: Record<string, unknown>) => { insightsRowCalls.push(props); return null } }))
 vi.mock('./hooks/useApplicationDrawerActions', () => ({
   useApplicationDrawerActions: () => ({
     selected: null, expanded: false, setExpanded: vi.fn(), closeDrawer: vi.fn(), selectApplication: vi.fn(),
@@ -47,7 +56,6 @@ vi.mock('./hooks/useApplicationDrawerActions', () => ({
 vi.mock('./hooks/useApplicationBulkActions', () => ({
   useApplicationBulkActions: () => ({ toggleRow: vi.fn(), toggleAll: vi.fn(), bulkSetPhase: vi.fn(), bulkDetach: vi.fn() }),
 }))
-vi.mock('@/components/insights/InsightsRow', () => ({ default: () => null }))
 vi.mock('./ApplicationsTable', () => ({ default: () => null }))
 vi.mock('./ApplicationsBoard', () => ({ default: () => null }))
 vi.mock('./ApplicationDrawer', () => ({ default: () => null }))
@@ -80,5 +88,35 @@ describe('ApplicationsPage · D6 dashboard intent seam', () => {
     const last = dataHookCalls[dataHookCalls.length - 1]
     expect(last.too_long_in_stage).toBeUndefined()
     expect(last.missing_appointment).toBeUndefined()
+  })
+})
+
+describe('S-board-1 · board view sample-notice honesty', () => {
+  beforeEach(() => {
+    insightsRowCalls.length = 0
+    dataHookState.wideIsPartial = false
+    dataHookState.statsFailed = false
+  })
+
+  it('shows no notice in table view even when the wide fetch is partial (stats healthy)', () => {
+    dataHookState.wideIsPartial = true
+    render(<ApplicationsPage />)
+    expect(insightsRowCalls.at(-1)?.notice).toBeUndefined()
+  })
+
+  it('shows the honesty notice in board view once the wide fetch exceeds WIDE_MAX_ROWS, regardless of stats health', async () => {
+    dataHookState.wideIsPartial = true
+    const user = userEvent.setup()
+    render(<ApplicationsPage />)
+    await user.click(screen.getByRole('button', { name: 'view.board' }))
+    expect(insightsRowCalls.at(-1)?.notice).toBe('insights.pageScopeNotice')
+  })
+
+  it('board view stays silent when the wide fetch is complete', async () => {
+    dataHookState.wideIsPartial = false
+    const user = userEvent.setup()
+    render(<ApplicationsPage />)
+    await user.click(screen.getByRole('button', { name: 'view.board' }))
+    expect(insightsRowCalls.at(-1)?.notice).toBeUndefined()
   })
 })

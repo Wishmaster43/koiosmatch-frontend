@@ -449,7 +449,10 @@
     "allTypes": "All types",
     "type": "Type",
     "search": "Search documents…",
-    "empty": "No documents yet."
+    "empty": "No documents yet.",
+    "loading": "Loading documents…",
+    "loadFailed": "Failed to load documents.",
+    "noResults": "No documents found within these filters."
   },
   "age": {
     "days": "{{count}}d",

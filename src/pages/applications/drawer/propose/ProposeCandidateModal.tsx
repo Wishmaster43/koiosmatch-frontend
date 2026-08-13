@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next'
-import { Info, Send, TriangleAlert } from 'lucide-react'
+import { Check, Copy, Info, Send, TriangleAlert } from 'lucide-react'
 import FloatingPanel from '@/components/ui/FloatingPanel'
 import { useActionRulePreflight, ActionRuleBanner, ActionRuleDialog } from '@/components/actionrules'
 import type { ActionRuleDecision } from '@/components/actionrules'
@@ -35,8 +35,11 @@ interface Props {
  * ProposeCandidateModal — records a candidate proposal to the customer contact:
  * downloads the house-style CV client-side, drafts a subject + rich-text message
  * from the tenant's templates, and logs it as an application note (+ optional
- * funnel-phase move). Koios does NOT send anything itself yet — the honest line
+ * funnel-phase move). Koios does NOT send anything itself — the honest line
  * above the footer says so, and there is deliberately no "Verzenden" button.
+ * PROPOSE-SHARE-LINK-1 shipped on the backend: a successful record now returns
+ * a real recipient-facing share_url, surfaced here with a copy button so the
+ * recruiter never has to hunt for it in the ProposalsBlock history afterwards.
  */
 export default function ProposeCandidateModal({ application: a, onClose }: Props) {
   const { t } = useTranslation(['applications', 'common'])
@@ -65,9 +68,11 @@ export default function ProposeCandidateModal({ application: a, onClose }: Props
     : form.disabledReason === 'noConsent' ? t('propose.consentRequired')
     : null
 
+  // V-appdetail-5: on success the modal stays open long enough to hand over the
+  // share link (never auto-closes into it) — the recruiter closes it themselves
+  // once they've copied/opened it, mirroring ProposalsBlock's own affordance.
   const handleSubmit = async () => {
-    const ok = await form.submit()
-    if (ok) onClose()
+    await form.submit()
   }
 
   return (
@@ -162,11 +167,28 @@ export default function ProposeCandidateModal({ application: a, onClose }: Props
         </div>
 
         {/* The honest line — Koios prepares the CV + message, it does not send them
-            (PROPOSE-SHARE-LINK-1 is still open on the backend). Never a Verzenden button. */}
+            itself. Never a Verzenden button. */}
         <div style={{ display: 'flex', gap: 6, marginTop: 16, padding: '8px 10px', borderRadius: 8, fontSize: 11, color: 'var(--text-muted)',
           background: 'color-mix(in srgb, var(--color-primary) 6%, transparent)', border: '1px solid color-mix(in srgb, var(--color-primary) 20%, transparent)' }}>
           <Info size={13} style={{ flexShrink: 0, marginTop: 1 }} /> {t('propose.notSentYet')}
         </div>
+
+        {/* V-appdetail-5: on success, hand over the recorded proposal's own share
+            link right here — a copy button, never the raw URL in a log/toast (§8). */}
+        {form.shareUrl && (
+          <div role="status" style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 10, padding: '8px 10px',
+            borderRadius: 8, fontSize: 11, color: 'var(--color-success)',
+            background: 'var(--color-success-bg)', border: '1px solid var(--color-success)' }}>
+            <span style={{ flex: 1 }}>{t('propose.recorded')}</span>
+            <button type="button" onClick={form.copyShareLink}
+              style={{ display: 'inline-flex', alignItems: 'center', gap: 4, height: 26, padding: '0 8px', fontSize: 11,
+                borderRadius: 6, border: '1px solid var(--color-success)', background: 'transparent',
+                color: 'var(--color-success)', cursor: 'pointer' }}>
+              {form.shareLinkCopied ? <Check size={11} /> : <Copy size={11} />}
+              {form.shareLinkCopied ? t('propose.copied') : t('propose.copyLink')}
+            </button>
+          </div>
+        )}
 
         {disabledText && (
           <div style={{ marginTop: 8, fontSize: 11, color: 'var(--text-muted)' }}>{disabledText}</div>

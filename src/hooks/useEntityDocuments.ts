@@ -63,15 +63,23 @@ const fmtSize = (s: string | number | undefined): string => {
 export function useEntityDocuments(prefix: string, parentId: Id | undefined, listUrl?: string) {
   const { t } = useTranslation()
   const [docs, setDocs] = useState<EntityDoc[]>([])
+  // L8-docs-1: the list fetch's own loading/error state, exposed so consumers can
+  // render the four honest UI states (§3) instead of a fetch failure silently
+  // reading as "no documents".
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState(false)
 
   // Load the list (server returns newest-first) whenever the parent (or, for a
   // scoped drill-down, the DOCS-LOC-DEPT-1 listUrl override) changes.
   useEffect(() => {
-    if (!parentId) { setDocs([]); return }
+    if (!parentId) { setDocs([]); setLoading(false); setError(false); return }
     let alive = true
+    setLoading(true)
+    setError(false)
     api.get(listUrl ?? `/${prefix}/${parentId}/documents`)
       .then(res => { if (alive) setDocs(unwrapList<EntityDoc>(res).rows.map(d => ({ ...d, size: fmtSize(d.size) }))) })
-      .catch(() => { if (alive) setDocs([]) })
+      .catch(() => { if (alive) { setDocs([]); setError(true) } })
+      .finally(() => { if (alive) setLoading(false) })
     return () => { alive = false }
   }, [prefix, parentId, listUrl])
 
@@ -123,5 +131,5 @@ export function useEntityDocuments(prefix: string, parentId: Id | undefined, lis
       })
   }, [prefix, parentId, docs, t])
 
-  return { docs, upload, rename, remove }
+  return { docs, loading, error, upload, rename, remove }
 }

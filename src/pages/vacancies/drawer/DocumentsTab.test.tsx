@@ -16,7 +16,7 @@ import type { VacancyDetail } from '@/types/vacancy'
 const t = (key: string, opts?: Record<string, unknown>) => i18n.t(key, { ns: 'vacancies', ...opts })
 
 vi.mock('@/hooks/useEntityDocuments', () => ({
-  useEntityDocuments: vi.fn(() => ({ docs: [], upload: vi.fn(), rename: vi.fn(), remove: vi.fn() })),
+  useEntityDocuments: vi.fn(() => ({ docs: [], loading: false, error: false, upload: vi.fn(), rename: vi.fn(), remove: vi.fn() })),
 }))
 // A fixed 2-type tenant lookup, entity-scoped 'vacancy' — the real hook's fetch/
 // cache plumbing is irrelevant here, only that DocumentsTab reads it and passes
@@ -64,7 +64,7 @@ describe('DocumentsTab (vacancy) · document type', () => {
 
   it('defaults the staged file to the lookup\'s first type and confirms it into upload()', async () => {
     const upload = vi.fn()
-    vi.mocked(useEntityDocuments).mockReturnValue({ docs: [], upload, rename: vi.fn(), remove: vi.fn() })
+    vi.mocked(useEntityDocuments).mockReturnValue({ docs: [], loading: false, error: false, upload, rename: vi.fn(), remove: vi.fn() })
     const { container } = render(<DocumentsTab vacancy={vacancy} />)
     fireEvent.change(getFileInput(container), { target: { files: [file] } })
 
@@ -79,7 +79,7 @@ describe('DocumentsTab (vacancy) · document type', () => {
 
   it('lets the user pick a different type before confirming the upload', async () => {
     const upload = vi.fn()
-    vi.mocked(useEntityDocuments).mockReturnValue({ docs: [], upload, rename: vi.fn(), remove: vi.fn() })
+    vi.mocked(useEntityDocuments).mockReturnValue({ docs: [], loading: false, error: false, upload, rename: vi.fn(), remove: vi.fn() })
     const { container } = render(<DocumentsTab vacancy={vacancy} />)
     fireEvent.change(getFileInput(container), { target: { files: [file] } })
 
@@ -90,7 +90,7 @@ describe('DocumentsTab (vacancy) · document type', () => {
 
   it('cancelling the staged file never calls upload()', async () => {
     const upload = vi.fn()
-    vi.mocked(useEntityDocuments).mockReturnValue({ docs: [], upload, rename: vi.fn(), remove: vi.fn() })
+    vi.mocked(useEntityDocuments).mockReturnValue({ docs: [], loading: false, error: false, upload, rename: vi.fn(), remove: vi.fn() })
     const { container } = render(<DocumentsTab vacancy={vacancy} />)
     fireEvent.change(getFileInput(container), { target: { files: [file] } })
 
@@ -102,7 +102,7 @@ describe('DocumentsTab (vacancy) · document type', () => {
   it('renders an existing document\'s type as a soft-tint chip', () => {
     vi.mocked(useEntityDocuments).mockReturnValue({
       docs: [{ id: 'd1', name: 'contract.pdf', type: 'Contract', download_url: 'https://x/contract.pdf' }],
-      upload: vi.fn(), rename: vi.fn(), remove: vi.fn(),
+      loading: false, error: false, upload: vi.fn(), rename: vi.fn(), remove: vi.fn(),
     })
     render(<DocumentsTab vacancy={vacancy} />)
     expect(screen.getByText('Contract')).toBeInTheDocument()
@@ -112,7 +112,7 @@ describe('DocumentsTab (vacancy) · document type', () => {
   // revoked when replaced by a second pick — the old preview used to stay alive forever.
   it('revokes the previous staged preview when a second file is picked before confirming', async () => {
     createObjectURL.mockReturnValueOnce('blob:first.pdf').mockReturnValueOnce('blob:second.pdf')
-    vi.mocked(useEntityDocuments).mockReturnValue({ docs: [], upload: vi.fn(), rename: vi.fn(), remove: vi.fn() })
+    vi.mocked(useEntityDocuments).mockReturnValue({ docs: [], loading: false, error: false, upload: vi.fn(), rename: vi.fn(), remove: vi.fn() })
     const { container } = render(<DocumentsTab vacancy={vacancy} />)
     const secondFile = new File(['other'], 'second.pdf', { type: 'application/pdf' })
 
@@ -128,7 +128,7 @@ describe('DocumentsTab (vacancy) · document type', () => {
   // Blob-URL leak (heraudit-2, point 3): closing the drawer (unmount) with a staged,
   // unconfirmed file must revoke its preview too — not just the explicit "cancel" path.
   it('revokes a still-staged preview on unmount', () => {
-    vi.mocked(useEntityDocuments).mockReturnValue({ docs: [], upload: vi.fn(), rename: vi.fn(), remove: vi.fn() })
+    vi.mocked(useEntityDocuments).mockReturnValue({ docs: [], loading: false, error: false, upload: vi.fn(), rename: vi.fn(), remove: vi.fn() })
     const { container, unmount } = render(<DocumentsTab vacancy={vacancy} />)
     fireEvent.change(getFileInput(container), { target: { files: [file] } })
 
@@ -141,7 +141,7 @@ describe('DocumentsTab (vacancy) · document type', () => {
   // itself must NOT also revoke it, or the still-showing optimistic preview would break.
   it('does not revoke the object URL itself on confirm (ownership passes to upload())', async () => {
     const upload = vi.fn()
-    vi.mocked(useEntityDocuments).mockReturnValue({ docs: [], upload, rename: vi.fn(), remove: vi.fn() })
+    vi.mocked(useEntityDocuments).mockReturnValue({ docs: [], loading: false, error: false, upload, rename: vi.fn(), remove: vi.fn() })
     const { container } = render(<DocumentsTab vacancy={vacancy} />)
     fireEvent.change(getFileInput(container), { target: { files: [file] } })
 
@@ -170,14 +170,14 @@ describe('DocumentsTab (vacancy) · search + type filter (DOC-FILTER-PARITY-1)',
   afterEach(() => vi.clearAllMocks())
 
   it('renders a search box and a Filter button in the toolbar', () => {
-    vi.mocked(useEntityDocuments).mockReturnValue({ docs: [contractDoc, cvDoc], upload: vi.fn(), rename: vi.fn(), remove: vi.fn() })
+    vi.mocked(useEntityDocuments).mockReturnValue({ docs: [contractDoc, cvDoc], loading: false, error: false, upload: vi.fn(), rename: vi.fn(), remove: vi.fn() })
     render(<DocumentsTab vacancy={vacancy} />)
     expect(screen.getByPlaceholderText(t('documents.search'))).toBeInTheDocument()
     expect(screen.getByRole('button', { name: t('common:filters.button') })).toBeInTheDocument()
   })
 
   it('the free-text search narrows the list by name', async () => {
-    vi.mocked(useEntityDocuments).mockReturnValue({ docs: [contractDoc, cvDoc], upload: vi.fn(), rename: vi.fn(), remove: vi.fn() })
+    vi.mocked(useEntityDocuments).mockReturnValue({ docs: [contractDoc, cvDoc], loading: false, error: false, upload: vi.fn(), rename: vi.fn(), remove: vi.fn() })
     render(<DocumentsTab vacancy={vacancy} />)
     await userEvent.type(screen.getByPlaceholderText(t('documents.search')), 'cv')
     expect(screen.queryByText('contract.pdf')).not.toBeInTheDocument()
@@ -185,7 +185,7 @@ describe('DocumentsTab (vacancy) · search + type filter (DOC-FILTER-PARITY-1)',
   })
 
   it('picking a TYPE in the filter menu narrows the visible documents', async () => {
-    vi.mocked(useEntityDocuments).mockReturnValue({ docs: [contractDoc, cvDoc], upload: vi.fn(), rename: vi.fn(), remove: vi.fn() })
+    vi.mocked(useEntityDocuments).mockReturnValue({ docs: [contractDoc, cvDoc], loading: false, error: false, upload: vi.fn(), rename: vi.fn(), remove: vi.fn() })
     render(<DocumentsTab vacancy={vacancy} />)
     expect(screen.getByText('contract.pdf')).toBeInTheDocument()
     expect(screen.getByText('cv.pdf')).toBeInTheDocument()
@@ -199,7 +199,7 @@ describe('DocumentsTab (vacancy) · search + type filter (DOC-FILTER-PARITY-1)',
   })
 
   it('clear-all resets the type filter back to "all"', async () => {
-    vi.mocked(useEntityDocuments).mockReturnValue({ docs: [contractDoc, cvDoc], upload: vi.fn(), rename: vi.fn(), remove: vi.fn() })
+    vi.mocked(useEntityDocuments).mockReturnValue({ docs: [contractDoc, cvDoc], loading: false, error: false, upload: vi.fn(), rename: vi.fn(), remove: vi.fn() })
     render(<DocumentsTab vacancy={vacancy} />)
 
     await userEvent.click(screen.getByRole('button', { name: t('common:filters.button') }))
@@ -215,8 +215,45 @@ describe('DocumentsTab (vacancy) · search + type filter (DOC-FILTER-PARITY-1)',
   // Regression: this empty state used to read the APPLICANTS copy ("No applications
   // yet."), a copy-paste bug — it now has its own documents-scoped key.
   it('shows the documents-scoped empty state, not the applicants one', () => {
-    vi.mocked(useEntityDocuments).mockReturnValue({ docs: [], upload: vi.fn(), rename: vi.fn(), remove: vi.fn() })
+    vi.mocked(useEntityDocuments).mockReturnValue({ docs: [], loading: false, error: false, upload: vi.fn(), rename: vi.fn(), remove: vi.fn() })
     render(<DocumentsTab vacancy={vacancy} />)
     expect(screen.getByText(t('documents.empty'))).toBeInTheDocument()
+  })
+})
+
+/**
+ * L8-docs-1: useEntityDocuments now exposes loading/error, and the four honest
+ * states (§3) — a failed fetch must never read as "no documents".
+ */
+describe('DocumentsTab (vacancy) · L8-docs-1 four honest states', () => {
+  it('shows a loading state while the list fetch is in flight', () => {
+    vi.mocked(useEntityDocuments).mockReturnValue({ docs: [], loading: true, error: false, upload: vi.fn(), rename: vi.fn(), remove: vi.fn() })
+    render(<DocumentsTab vacancy={vacancy} />)
+    expect(screen.getByText(t('documents.loading'))).toBeInTheDocument()
+    expect(screen.queryByText(t('documents.empty'))).not.toBeInTheDocument()
+  })
+
+  it('shows an error state on a failed fetch, distinct from the empty state', () => {
+    vi.mocked(useEntityDocuments).mockReturnValue({ docs: [], loading: false, error: true, upload: vi.fn(), rename: vi.fn(), remove: vi.fn() })
+    render(<DocumentsTab vacancy={vacancy} />)
+    expect(screen.getByText(t('documents.loadFailed'))).toBeInTheDocument()
+    expect(screen.queryByText(t('documents.empty'))).not.toBeInTheDocument()
+  })
+
+  it('shows the empty state once loaded with zero documents', () => {
+    vi.mocked(useEntityDocuments).mockReturnValue({ docs: [], loading: false, error: false, upload: vi.fn(), rename: vi.fn(), remove: vi.fn() })
+    render(<DocumentsTab vacancy={vacancy} />)
+    expect(screen.getByText(t('documents.empty'))).toBeInTheDocument()
+  })
+
+  it('shows a no-results line (not the empty state) when a filter matches zero of the loaded documents', async () => {
+    vi.mocked(useEntityDocuments).mockReturnValue({
+      docs: [{ id: 'd1', name: 'contract.pdf', type: 'Contract', download_url: 'https://x/contract.pdf' }],
+      loading: false, error: false, upload: vi.fn(), rename: vi.fn(), remove: vi.fn(),
+    })
+    render(<DocumentsTab vacancy={vacancy} />)
+    await userEvent.type(screen.getByPlaceholderText(t('documents.search')), 'nomatch')
+    expect(screen.getByText(t('documents.noResults'))).toBeInTheDocument()
+    expect(screen.queryByText(t('documents.empty'))).not.toBeInTheDocument()
   })
 })

@@ -118,6 +118,10 @@ export function useProposeForm(application: ApplicationDetail) {
   const [consentConfirmed, setConsentConfirmed] = useState(false)
   const [submitting, setSubmitting] = useState(false)
   const [copied, setCopied] = useState(false)
+  // V-appdetail-5: the freshly recorded proposal's own recipient-facing link —
+  // handed straight to the recruiter after submit() succeeds, so they never have
+  // to go hunting for it in the ProposalsBlock history below.
+  const [shareUrl, setShareUrl] = useState<string | null>(null)
   const copyTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   useEffect(() => () => { if (copyTimerRef.current) clearTimeout(copyTimerRef.current) }, [])
@@ -211,7 +215,7 @@ export function useProposeForm(application: ApplicationDetail) {
       // does not send an e-mail itself. If this fails (403/422), no CV full of
       // special-category data has left the recruiter's browser — the AVG trail
       // never has a gap.
-      await api.post(`/applications/${application.id}/propose`, {
+      const res = await api.post(`/applications/${application.id}/propose`, {
         contact_id: recipientContactId,
         cv_variant: cvVariant,
         subject,
@@ -219,6 +223,11 @@ export function useProposeForm(application: ApplicationDetail) {
         // when ticked — so the proposal history matches what the customer received.
         body: composedBody(),
       })
+      // V-appdetail-5: PROPOSE-SHARE-LINK-1 shipped — the response's own record
+      // carries the same recipient-facing share_url ProposalsBlock renders (never
+      // logged, §8 — only handed into component state for the copy affordance).
+      const created = unwrap<{ share_url?: string | null }>(res)
+      setShareUrl(created?.share_url ?? null)
       // Refresh the proposals-history block (ProposalsBlock shares this query
       // key) so the freshly recorded proposal appears without a manual reload.
       queryClient.invalidateQueries({ queryKey: ['applications', application.id, 'proposals'] })
@@ -252,6 +261,23 @@ export function useProposeForm(application: ApplicationDetail) {
     }
   }
 
+  // V-appdetail-5: copy the recorded share link only — never the message body/
+  // subject, and the URL itself never reaches a log or toast (§8).
+  const [shareLinkCopied, setShareLinkCopied] = useState(false)
+  const shareLinkCopyTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  useEffect(() => () => { if (shareLinkCopyTimerRef.current) clearTimeout(shareLinkCopyTimerRef.current) }, [])
+  const copyShareLink = async () => {
+    if (!shareUrl) return
+    try {
+      await navigator.clipboard.writeText(shareUrl)
+      setShareLinkCopied(true)
+      if (shareLinkCopyTimerRef.current) clearTimeout(shareLinkCopyTimerRef.current)
+      shareLinkCopyTimerRef.current = setTimeout(() => setShareLinkCopied(false), 2000)
+    } catch {
+      notifyError(t('common:actionFailed'))
+    }
+  }
+
   return {
     contacts, contactsLoading, contactsError,
     candidateLoading, candidateError,
@@ -262,5 +288,6 @@ export function useProposeForm(application: ApplicationDetail) {
     consentConfirmed, setConsentConfirmed,
     disabledReason, submitting, submit,
     copyMessage, copied,
+    shareUrl, copyShareLink, shareLinkCopied,
   }
 }

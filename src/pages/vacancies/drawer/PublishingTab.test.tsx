@@ -17,6 +17,7 @@
  */
 import { describe, it, expect, vi, afterEach } from 'vitest'
 import { render, screen } from '@testing-library/react'
+import { useState } from 'react'
 import userEvent from '@testing-library/user-event'
 import i18n from '@/i18n'
 import PublishingTab from './PublishingTab'
@@ -150,5 +151,34 @@ describe('PublishingTab · honest career-site-active state', () => {
 
     expect(screen.getByText(t('publishing.notPublished'))).toBeInTheDocument()
     expect(screen.getByText(t('publishing.publishedOn'))).toBeInTheDocument()
+  })
+})
+
+// V-pub-1: switching the drawer target vacancy must resync the local channel/
+// settings/subTab state — previously the useState only seeded once, so vacancy
+// B kept rendering vacancy A's channels and application-field settings.
+describe('PublishingTab · V-pub-1 resyncs on vacancy switch', () => {
+  const vacancyA = { id: 'a', title: 'A', channels: [{ value: 'career', label: 'Career page', published: true }], applicationSettings: { cv: 'required' } } as unknown as VacancyDetail
+  const vacancyB = { id: 'b', title: 'B', channels: [{ value: 'career', label: 'Career page', published: false }], applicationSettings: { cv: 'hidden' } } as unknown as VacancyDetail
+
+  function Switcher() {
+    const [v, setV] = useState<VacancyDetail>(vacancyA)
+    return (
+      <div>
+        <button onClick={() => setV(vacancyB)}>switch</button>
+        <PublishingTab vacancy={v} />
+      </div>
+    )
+  }
+
+  it("renders vacancy B's channel state, not A's, after switching", async () => {
+    const user = userEvent.setup()
+    render(<Switcher />)
+    await user.click(screen.getByText('switch'))
+    await openSitesTab()
+
+    // Vacancy B's own saved 'career' state (published: false) must win — a stale
+    // A-seeded state would have left the switch checked.
+    expect(screen.getAllByRole('switch')[0]).toHaveAttribute('aria-checked', 'false')
   })
 })

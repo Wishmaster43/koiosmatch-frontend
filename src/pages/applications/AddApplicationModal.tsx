@@ -11,6 +11,10 @@ import { useLookups } from '@/context/LookupsContext'
 // modal uses (single source); it lives under pages/candidates today, which is a §2
 // cross-page import — moving it to src/hooks/ is a separate, repo-wide change.
 import { useApplicationStages } from '@/hooks/useApplicationStages'
+// AXIS-1: this page-level modal used to skip the action-rule preflight the
+// candidate-drawer variant runs (AddApplicationModal.tsx under pages/candidates/
+// drawer/) — reuse the SAME shared hook/banner, never a second implementation.
+import { useActionRulePreflight, ActionRuleBanner } from '@/components/actionrules'
 import { useCustomFields } from '@/lib/useCustomFields'
 import { mapApplication } from './data/mapApplication'
 import { BTN_H } from '@/config/buttonMetrics'
@@ -159,6 +163,12 @@ export default function AddApplicationModal({ onClose, onCreated, lockedVacancy 
   const pickCandidate = (opt: PickOption) => { setCandidateId(String(opt.value)); setPickedCandidate(opt) }
   const pickVacancy   = (opt: PickOption) => { setVacancyId(String(opt.value)); setPickedVacancy(opt) }
 
+  // AXIS-1: same application.create preflight the candidate-drawer variant runs —
+  // POST /applications enforces this against the candidate server-side, so surface
+  // the same warn/block decision here BEFORE submit, once a candidate is picked.
+  const { decision: appRuleDecision } = useActionRulePreflight('application.create', { candidateId })
+  const appRuleBlocked = appRuleDecision?.effect === 'block'
+
   // APP-OWNER-1: the LOCKED vacancy path only receives {id, title, client} from
   // its caller — its own recruiter is fetched once, alive-guarded, since the
   // non-locked search above (which DOES carry owner) never runs for it.
@@ -245,7 +255,7 @@ export default function AddApplicationModal({ onClose, onCreated, lockedVacancy 
   const [createError, setCreateError] = useState<string | null>(null)
   const [errors,      setErrors]      = useState<Record<string, boolean>>({})
   const create = async () => {
-    if (!candidateId || !vacancyId || saving) return
+    if (!candidateId || !vacancyId || saving || appRuleBlocked) return
     setSaving(true)
     setCreateError(null)
     setErrors({})
@@ -297,6 +307,11 @@ export default function AddApplicationModal({ onClose, onCreated, lockedVacancy 
         {/* Candidate + vacancy side by side — the two "big" relational pickers get
             equal, comfortable room; owner (+ start stage) sit on the row below. */}
         <div style={{ padding: 22, display: 'flex', flexDirection: 'column', gap: 16 }}>
+          {/* AXIS-1 preflight — warn/block on the picked candidate before submit
+              (mirrors the candidate-drawer variant's identical banner placement). */}
+          {candidateId && appRuleDecision && appRuleDecision.effect !== 'allow' && (
+            <ActionRuleBanner decision={appRuleDecision} />
+          )}
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
             <SearchPickField label={t('add.candidate')} placeholder={t('add.candidatePlaceholder')}
               value={pickedCandidate} options={candidateSearch.options} onPick={pickCandidate}
@@ -389,9 +404,9 @@ export default function AddApplicationModal({ onClose, onCreated, lockedVacancy 
         {/* BTN_H (§4/§9): one explicit height for every text/action button, everywhere. */}
         <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, padding: '14px 22px', borderTop: '1px solid var(--border)' }}>
           <button onClick={onClose} style={{ height: BTN_H, padding: '0 16px', fontSize: 13, border: '1px solid var(--border)', borderRadius: 8, background: 'var(--surface)', color: 'var(--text)', cursor: 'pointer' }}>{t('add.cancel')}</button>
-          <button onClick={create} disabled={!candidateId || !vacancyId || saving}
+          <button onClick={create} disabled={!candidateId || !vacancyId || saving || appRuleBlocked}
             style={{ height: BTN_H, padding: '0 16px', fontSize: 13, fontWeight: 500, border: 'none', borderRadius: 8,
-              background: 'var(--color-primary)', color: 'var(--color-on-accent)', cursor: 'pointer', opacity: (candidateId && vacancyId) ? 1 : 0.4 }}>
+              background: 'var(--color-primary)', color: 'var(--color-on-accent)', cursor: 'pointer', opacity: (candidateId && vacancyId && !appRuleBlocked) ? 1 : 0.4 }}>
             {t('add.create')}
           </button>
         </div>

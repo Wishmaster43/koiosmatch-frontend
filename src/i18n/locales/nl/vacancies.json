@@ -449,7 +449,10 @@
     "allTypes": "Alle types",
     "type": "Type",
     "search": "Zoek in documenten…",
-    "empty": "Nog geen documenten."
+    "empty": "Nog geen documenten.",
+    "loading": "Documenten laden…",
+    "loadFailed": "Documenten laden is mislukt.",
+    "noResults": "Geen documenten gevonden binnen deze filters."
   },
   "age": {
     "days": "{{count}}d",

@@ -230,6 +230,35 @@ describe('useProposeForm', () => {
     expect(buildProposalCvBlob).not.toHaveBeenCalled()
   })
 
+  // V-appdetail-5: the response's own share_url is captured into state so the
+  // modal can hand it straight to the recruiter, never logged (§8).
+  it('captures the response share_url into state on a successful record', async () => {
+    apiPost.mockResolvedValueOnce({ data: { id: 9, share_url: 'https://app.example/p/abc123' } })
+    const { result } = renderHook(() => useProposeForm(app()), { wrapper })
+    await waitFor(() => expect(result.current.candidateLoading).toBe(false))
+    act(() => { result.current.setConsentConfirmed(true) })
+    await waitFor(() => expect(result.current.disabledReason).toBeNull())
+
+    expect(result.current.shareUrl).toBeNull()
+    await act(async () => { await result.current.submit() })
+    expect(result.current.shareUrl).toBe('https://app.example/p/abc123')
+  })
+
+  it('copyShareLink copies the captured share_url and never the raw response object', async () => {
+    apiPost.mockResolvedValueOnce({ data: { id: 9, share_url: 'https://app.example/p/abc123' } })
+    const writeText = vi.fn(() => Promise.resolve())
+    vi.stubGlobal('navigator', { clipboard: { writeText } })
+    const { result } = renderHook(() => useProposeForm(app()), { wrapper })
+    await waitFor(() => expect(result.current.candidateLoading).toBe(false))
+    act(() => { result.current.setConsentConfirmed(true) })
+    await waitFor(() => expect(result.current.disabledReason).toBeNull())
+    await act(async () => { await result.current.submit() })
+
+    await act(async () => { await result.current.copyShareLink() })
+    expect(writeText).toHaveBeenCalledWith('https://app.example/p/abc123')
+    expect(result.current.shareLinkCopied).toBe(true)
+  })
+
   it('disables submit until a contact is present and consent is ticked', async () => {
     const { result } = renderHook(() => useProposeForm(app()), { wrapper })
     await waitFor(() => expect(result.current.contactsLoading).toBe(false))

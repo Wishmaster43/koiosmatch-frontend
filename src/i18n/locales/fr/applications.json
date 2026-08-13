@@ -432,7 +432,7 @@
     "submit": "Télécharger le CV + enregistrer la proposition",
     "copyMessage": "Copier le message",
     "copied": "Copié",
-    "notSentYet": "Koios n'envoie pas encore ce message lui-même — téléchargez le CV et envoyez-le depuis votre propre messagerie. Un lien automatique et révocable suivra dès que cette fonctionnalité sera disponible.",
+    "notSentYet": "Koios n'envoie pas ce message lui-même. Téléchargez le CV et envoyez-le depuis votre propre messagerie, ou utilisez le lien partageable révocable ci-dessus.",
     "recorded": "Proposition enregistrée",
     "loading": "Chargement…",
     "noteTitle": "Candidat proposé",

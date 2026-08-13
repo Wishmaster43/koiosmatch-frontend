@@ -43,6 +43,7 @@ const { formFixture } = vi.hoisted(() => ({
     consentConfirmed: false, setConsentConfirmed: vi.fn(),
     disabledReason: 'noConsent' as const, submitting: false, submit: vi.fn(() => Promise.resolve(true)),
     copyMessage: vi.fn(), copied: false,
+    shareUrl: null as string | null, copyShareLink: vi.fn(), shareLinkCopied: false,
   },
 }))
 vi.mock('./useProposeForm', () => ({ useProposeForm: () => formFixture }))
@@ -85,5 +86,35 @@ describe('ProposeCandidateModal', () => {
     render(<ProposeCandidateModal application={app()} onClose={vi.fn()} />)
     expect(screen.getByTestId('banner')).toHaveTextContent('Let op')
     expect(screen.getByText('propose.submit')).toBeInTheDocument()
+  })
+})
+
+// V-appdetail-5: after a successful record, the share link is surfaced with a
+// copy button — never a raw URL rendered as visible plain link text.
+describe('ProposeCandidateModal · V-appdetail-5 share link on success', () => {
+  it('renders no share-link affordance before a proposal has been recorded', () => {
+    mockDecision.candidate = null; mockDecision.customer = null
+    formFixture.shareUrl = null
+    render(<ProposeCandidateModal application={app()} onClose={vi.fn()} />)
+    expect(screen.queryByText('propose.copyLink')).toBeNull()
+  })
+
+  it('shows the copy-link button once the hook holds a share_url', () => {
+    mockDecision.candidate = null; mockDecision.customer = null
+    formFixture.shareUrl = 'https://app.example/p/abc123'
+    render(<ProposeCandidateModal application={app()} onClose={vi.fn()} />)
+    expect(screen.getByText('propose.recorded')).toBeInTheDocument()
+    expect(screen.getByText('propose.copyLink')).toBeInTheDocument()
+    // The raw URL itself is never rendered as visible text (§8).
+    expect(screen.queryByText('https://app.example/p/abc123')).toBeNull()
+  })
+
+  it('clicking the copy button calls the hook\'s copyShareLink, not a re-implementation', async () => {
+    mockDecision.candidate = null; mockDecision.customer = null
+    formFixture.shareUrl = 'https://app.example/p/abc123'
+    const user = (await import('@testing-library/user-event')).default.setup()
+    render(<ProposeCandidateModal application={app()} onClose={vi.fn()} />)
+    await user.click(screen.getByText('propose.copyLink'))
+    expect(formFixture.copyShareLink).toHaveBeenCalledTimes(1)
   })
 })

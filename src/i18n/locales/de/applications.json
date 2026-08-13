@@ -432,7 +432,7 @@
     "submit": "Lebenslauf herunterladen + Vorschlag festhalten",
     "copyMessage": "Nachricht kopieren",
     "copied": "Kopiert",
-    "notSentYet": "Koios verschickt diese Nachricht noch nicht selbst — laden Sie den Lebenslauf herunter und versenden Sie ihn über Ihr eigenes E-Mail-Programm. Ein automatischer, widerrufbarer Link folgt, sobald diese Funktion verfügbar ist.",
+    "notSentYet": "Koios verschickt diese Nachricht nicht selbst. Laden Sie den Lebenslauf herunter und versenden Sie ihn über Ihr eigenes E-Mail-Programm, oder nutzen Sie den widerrufbaren Link oben.",
     "recorded": "Vorschlag festgehalten",
     "loading": "Wird geladen…",
     "noteTitle": "Kandidat vorgeschlagen",

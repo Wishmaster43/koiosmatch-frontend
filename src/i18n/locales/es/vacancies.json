@@ -449,7 +449,10 @@
     "allTypes": "Todos los tipos",
     "type": "Tipo",
     "search": "Buscar documentos…",
-    "empty": "Aún no hay documentos."
+    "empty": "Aún no hay documentos.",
+    "loading": "Cargando documentos…",
+    "loadFailed": "Error al cargar los documentos.",
+    "noResults": "No se han encontrado documentos con estos filtros."
   },
   "age": {
     "days": "{{count}}d",

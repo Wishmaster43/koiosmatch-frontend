@@ -13,7 +13,11 @@ import type { Id } from '@/types/common'
 // CMBE wave 1 (batch 14): the embedded application row now carries client_name
 // directly (the vacancy's own customer) so the Klant column never has to load
 // the full application detail just to show who the vacancy is for.
-export interface AppRow { id?: Id; logo_url?: string; vacancy?: { logo_url?: string; title?: string; url?: string; id?: Id }; vacature?: string; title?: string; url?: string; stageLabel?: string; stageColor?: string; created_at?: string; client_name?: string | null }
+// S-cand-1: `stageKey` (the funnel lookup's own `value`, ApplicationResource's
+// camelCase field) filters by the STABLE key rather than the translated label —
+// optional while the backend embed rolls out, so WorkTab falls back to
+// stageLabel until every tenant's rows carry it.
+export interface AppRow { id?: Id; logo_url?: string; vacancy?: { logo_url?: string; title?: string; url?: string; id?: Id }; vacature?: string; title?: string; url?: string; stageLabel?: string; stageKey?: string; stageColor?: string; created_at?: string; client_name?: string | null }
 
 // A linked appointment as returned by /candidates/{id}/appointments.
 export interface Appt { id: Id; application_id?: Id | null; type?: string; scheduled_at?: string; duration_min?: number | null; modality?: string; owner?: { id?: Id; name?: string }; location_name?: string; status?: string }

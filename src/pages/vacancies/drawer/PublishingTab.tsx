@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import type { ComponentType } from 'react'
 import { useTranslation } from 'react-i18next'
 import SelectMenuJs from '@/components/ui/SelectMenu'
@@ -70,17 +70,28 @@ export default function PublishingTab({ vacancy: v, onUpdate }: { vacancy: Vacan
   // every channel (untouched ones stay off, never silently re-enabled).
   const hasSavedChannelState = (v.channels ?? []).length > 0
   const publishedMap: Record<string, unknown> = Object.fromEntries((v.channels ?? []).map(c => [c.value, c.published]))
-  const [channels, setChannels] = useState<ChannelState[]>(
-    channelLookup
-      .filter(c => c.active !== false)
-      .map(c => ({
-        value: c.value,
-        label: c.label,
-        published: hasSavedChannelState ? Boolean(publishedMap[c.value]) : Boolean(c.default_enabled),
-      }))
-  )
+  // Build the merged channel list from the current vacancy's own saved state.
+  const buildChannels = (): ChannelState[] => channelLookup
+    .filter(c => c.active !== false)
+    .map(c => ({
+      value: c.value,
+      label: c.label,
+      published: hasSavedChannelState ? Boolean(publishedMap[c.value]) : Boolean(c.default_enabled),
+    }))
+  const [channels, setChannels] = useState<ChannelState[]>(buildChannels)
   // Vacancy's own settings win; the tenant default fills any gap.
-  const [settings, setSettings] = useState<Record<string, unknown>>({ ...tenantDefaults, ...((v.applicationSettings ?? {}) as Record<string, unknown>) })
+  const buildSettings = (): Record<string, unknown> => ({ ...tenantDefaults, ...((v.applicationSettings ?? {}) as Record<string, unknown>) })
+  const [settings, setSettings] = useState<Record<string, unknown>>(buildSettings)
+
+  // V-PUB-1: resync channels/settings/subTab whenever the vacancy identity changes —
+  // without this, switching drawer target left stale channel/settings state from the
+  // previous vacancy on screen (mirrors MatchingTab's v.id-keyed resync effect).
+  useEffect(() => {
+    setChannels(buildChannels())
+    setSettings(buildSettings())
+    setSubTab('settings')
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [v.id])
 
   // Toggle a channel's published state and persist the full channel set.
   const toggleChannel = (value: string, next: boolean) => {

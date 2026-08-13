@@ -116,25 +116,27 @@ export default function WorkTab({ c, onRefresh, initialSubTab }: { c: Candidate;
 
   const PER = 5
 
-  // Stage filter (Danny live review, 04-08): the candidate-embedded application row
-  // only ever carries the RESOLVED `stageLabel`/`stageColor` — the backend's
-  // ApplicationResource (Candidate embed) never sends a stage id/slug, unlike the
-  // real /application-stages lookup (useApplicationStages) — so there is no stable
-  // key here to match a tenant lookup id against. Deriving the option list from the
-  // loaded rows themselves is the honest fallback: it can only ever offer stages
-  // that actually occur on this candidate, deduped by their (tenant-set) label text,
-  // which doubles as the filter identity. Known edge case: if a tenant literally
-  // names a stage "Open"/"Actief"/"Active", useStatusFilter's shared active-guess
-  // heuristic would auto-select it as the default filter — an accepted limitation
-  // of this derived list, not a bug in the shared hook.
+  // Stage filter (S-cand-1, CMBE ApplicationResource::stageKey): the candidate-
+  // embedded application row now carries the funnel lookup's own STABLE `stageKey`
+  // alongside the resolved `stageLabel`/`stageColor` — filtering on the key means a
+  // tenant renaming a stage's label no longer silently splits it into two filter
+  // buckets. Falls back to the label while any row's embed still predates the
+  // backend rollout (rollout-safe, AppRow.stageKey is optional). The identity a
+  // row groups/filters under is therefore `s.stageKey ?? s.stageLabel`, used
+  // consistently for both the derived option list and the reader below — with a
+  // real key in play, the earlier "Open"/"Actief" auto-select edge case (a tenant
+  // literally naming a stage that word) no longer applies: the key, not the
+  // translatable label, is what useStatusFilter's active-guess heuristic sees.
+  const stageIdentity = (s: AppRow): string => s.stageKey ?? s.stageLabel ?? ''
   const stageOptions: LookupOption[] = Object.values(
     apps.reduce<Record<string, LookupOption>>((acc, s) => {
-      if (s.stageLabel && !acc[s.stageLabel]) acc[s.stageLabel] = { value: s.stageLabel, label: s.stageLabel, color: s.stageColor ?? undefined }
+      const id = stageIdentity(s)
+      if (id && s.stageLabel && !acc[id]) acc[id] = { value: id, label: s.stageLabel, color: s.stageColor ?? undefined }
       return acc
     }, {})
   )
   const { value: stageFilter, toggle: toggleStage, filtered: stageFiltered } =
-    useStatusFilter(apps, stageOptions, s => s.stageLabel ?? '')
+    useStatusFilter(apps, stageOptions, stageIdentity)
 
   // Free-text search on top of the stage filter — narrows on the vacancy label only.
   const q = search.trim().toLowerCase()
