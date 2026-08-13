@@ -2492,6 +2492,14 @@
     "byQueue": "Por cola",
     "byTenant": "Por tenant",
     "centralTenant": "Central (plataforma)",
+    "health": {
+      "horizonDown": "El proceso Horizon no está en ejecución.",
+      "schedulerDown": "El programador no está en ejecución.",
+      "healthy": "Todo en orden.",
+      "healthySeen_one": "Todo en orden · visto hace {{minutes}} minuto.",
+      "healthySeen_other": "Todo en orden · visto hace {{minutes}} minutos.",
+      "incidentBanner": "Incidencia desde {{since}}."
+    },
     "pending": "Pendiente",
     "reserved": "En ejecución",
     "oldestPending": "Más antigua pendiente",

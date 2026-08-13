@@ -2492,6 +2492,14 @@
     "byQueue": "Per wachtrij",
     "byTenant": "Per tenant",
     "centralTenant": "Centraal (platform)",
+    "health": {
+      "horizonDown": "Horizon-proces draait niet.",
+      "schedulerDown": "De scheduler draait niet.",
+      "healthy": "Alles gezond.",
+      "healthySeen_one": "Alles gezond · laatst gezien {{minutes}} minuut geleden.",
+      "healthySeen_other": "Alles gezond · laatst gezien {{minutes}} minuten geleden.",
+      "incidentBanner": "Storing sinds {{since}}."
+    },
     "pending": "Wachtend",
     "reserved": "In behandeling",
     "oldestPending": "Oudste wachtend",

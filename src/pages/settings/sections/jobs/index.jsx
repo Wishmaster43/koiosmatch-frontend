@@ -10,6 +10,7 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { ListChecks } from 'lucide-react'
 import { useQueueSummary } from './useQueueSummary'
+import QueueHealthBlock from './QueueHealthBlock'
 import QueueOverviewTab from './QueueOverviewTab'
 import JobsTab from './JobsTab'
 import RecentJobsTab from './RecentJobsTab'
@@ -33,6 +34,9 @@ export default function JobQueueSettings() {
         <h2 style={{ fontSize: 15, fontWeight: 600, color: 'var(--text)', margin: 0 }}>{t('jobs.title')}</h2>
       </div>
       <p style={{ fontSize: 12, color: 'var(--text-muted)', margin: '2px 0 16px' }}>{t('jobs.subtitle')}</p>
+
+      {/* QUEUE-WATCH-1: Horizon/scheduler health strip + incident banner, above the tabs. */}
+      <QueueHealthBlock queueStatus={summary?.queue_status} />
 
       {/* Tab strip — same look as ApiKeyDetail's inline tabs. */}
       <div role="tablist" style={{ display: 'flex', gap: 4, borderBottom: '1px solid var(--border)', marginBottom: 20 }}>

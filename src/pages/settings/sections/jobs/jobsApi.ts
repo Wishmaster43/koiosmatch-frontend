@@ -39,6 +39,20 @@ export interface QueueSummary {
   // overview tab warns instead of showing all-zero counts (BE audit 15-07).
   driver?: string
   status?: string
+  // QUEUE-WATCH-1 (13-08): additive Horizon-health block — absent on an older
+  // server (§10 additive-field tolerance), so every reader must optional-chain it.
+  queue_status?: QueueStatus
+}
+
+// Hand-written — additive field on GET /admin/jobs (QUEUE-WATCH-1), no 2xx schema
+// generated for this route (same reason as QueueSummary above).
+export interface QueueSupervisor { name: string; status: string }
+export interface QueueStatus {
+  horizon_running: boolean
+  master_last_seen_seconds: number | null
+  supervisors: QueueSupervisor[]
+  scheduler_last_tick_at: string | null
+  watch: { alerting: boolean; open_incident_since: string | null }
 }
 
 // GET /admin/jobs — per-queue + per-tenant pending/reserved health + worker heartbeat.

@@ -2492,6 +2492,14 @@
     "byQueue": "By queue",
     "byTenant": "By tenant",
     "centralTenant": "Central (platform)",
+    "health": {
+      "horizonDown": "The Horizon process is not running.",
+      "schedulerDown": "The scheduler is not running.",
+      "healthy": "Everything healthy.",
+      "healthySeen_one": "Everything healthy · last seen {{minutes}} minute ago.",
+      "healthySeen_other": "Everything healthy · last seen {{minutes}} minutes ago.",
+      "incidentBanner": "Incident since {{since}}."
+    },
     "pending": "Pending",
     "reserved": "Running",
     "oldestPending": "Oldest pending",

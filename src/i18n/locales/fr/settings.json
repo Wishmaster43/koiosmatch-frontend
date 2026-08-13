@@ -2492,6 +2492,14 @@
     "byQueue": "Par file d'attente",
     "byTenant": "Par tenant",
     "centralTenant": "Central (plateforme)",
+    "health": {
+      "horizonDown": "Le processus Horizon ne fonctionne pas.",
+      "schedulerDown": "Le planificateur ne fonctionne pas.",
+      "healthy": "Tout va bien.",
+      "healthySeen_one": "Tout va bien · vu il y a {{minutes}} minute.",
+      "healthySeen_other": "Tout va bien · vu il y a {{minutes}} minutes.",
+      "incidentBanner": "Incident depuis {{since}}."
+    },
     "pending": "En attente",
     "reserved": "En cours",
     "oldestPending": "Plus ancienne en attente",

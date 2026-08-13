@@ -2492,6 +2492,14 @@
     "byQueue": "Nach Warteschlange",
     "byTenant": "Nach Mandant",
     "centralTenant": "Zentral (Plattform)",
+    "health": {
+      "horizonDown": "Der Horizon-Prozess läuft nicht.",
+      "schedulerDown": "Der Scheduler läuft nicht.",
+      "healthy": "Alles in Ordnung.",
+      "healthySeen_one": "Alles in Ordnung · zuletzt gesehen vor {{minutes}} Minute.",
+      "healthySeen_other": "Alles in Ordnung · zuletzt gesehen vor {{minutes}} Minuten.",
+      "incidentBanner": "Störung seit {{since}}."
+    },
     "pending": "Wartend",
     "reserved": "In Bearbeitung",
     "oldestPending": "Älteste wartend",
