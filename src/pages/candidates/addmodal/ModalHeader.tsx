@@ -45,7 +45,8 @@ export default function ModalHeader({ status, pickStatuses, selectedStatus, stat
       {canParseCv && (
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
           <CvEntryIcons onFile={onCvFile} onSubmitText={onCvText} />
-          <span style={{ fontSize: 10, color: 'var(--text-muted)', maxWidth: 130, lineHeight: 1.3 }}>{t('modal.entryHint')}</span>
+          {/* Readable hint (Danny 14-08 "tekst uitschrijven, niet zo klein"). */}
+          <span style={{ fontSize: 12.5, color: 'var(--text)', maxWidth: 240, lineHeight: 1.35 }}>{t('modal.entryHint')}</span>
         </div>
       )}
       {/* Phase choice — two compact pills, same colour semantics as the old cards. */}

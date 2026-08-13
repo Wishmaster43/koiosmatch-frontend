@@ -19,10 +19,15 @@ interface CvEntryIconsProps {
   onSubmitText: (text: string) => void
 }
 
-// Same 26x26 bordered icon footprint used by the profile-text pop-out (ProfileTab).
+// Tenant-tinted icon buttons (Danny 14-08 "icons in kleur van tenant zoals de
+// knoppen"): the §4 soft-tint recipe the shared buttons wear — primary tint,
+// primary border, AA primary text — slightly larger than the muted 26px idiom.
 const iconBtn: CSSProperties = {
-  width: 26, height: 26, display: 'flex', alignItems: 'center', justifyContent: 'center',
-  borderRadius: 6, cursor: 'pointer', background: 'none', border: '1px solid var(--border)', color: 'var(--text-muted)',
+  width: 30, height: 30, display: 'flex', alignItems: 'center', justifyContent: 'center',
+  borderRadius: 8, cursor: 'pointer',
+  background: 'color-mix(in srgb, var(--color-primary) 10%, transparent)',
+  border: '1px solid color-mix(in srgb, var(--color-primary) 40%, transparent)',
+  color: 'var(--color-primary-text)',
 }
 
 export default function CvEntryIcons({ onFile, onSubmitText }: CvEntryIconsProps) {
@@ -64,7 +69,7 @@ export default function CvEntryIcons({ onFile, onSubmitText }: CvEntryIconsProps
     <div style={{ position: 'relative', display: 'flex', alignItems: 'center', gap: 6 }}>
       <button type="button" onClick={() => inputRef.current?.click()}
         title={t('modal.cv.uploadButton')} aria-label={t('modal.cv.uploadButton')} style={iconBtn}>
-        <FileUp size={13} />
+        <FileUp size={14} />
       </button>
       {/* The real input: labelled for assistive tech, kept out of the tab order and
           out of sight — the visible button is what drives it (§6). */}
@@ -75,10 +80,10 @@ export default function CvEntryIcons({ onFile, onSubmitText }: CvEntryIconsProps
       <button type="button" onClick={() => setPasteOpen(o => !o)} aria-expanded={pasteOpen}
         title={t('modal.cvPaste.openButton')} aria-label={t('modal.cvPaste.openButton')}
         style={{ ...iconBtn,
-          background: pasteOpen ? 'color-mix(in srgb, var(--color-primary) 10%, transparent)' : 'none',
-          borderColor: pasteOpen ? 'color-mix(in srgb, var(--color-primary) 45%, transparent)' : 'var(--border)',
-          color: pasteOpen ? 'var(--color-primary-text)' : 'var(--text-muted)' }}>
-        <ClipboardPaste size={13} />
+          // Open = the stronger active tint (§4: active is a stronger tint + weight).
+          background: pasteOpen ? 'color-mix(in srgb, var(--color-primary) 16%, transparent)' : iconBtn.background,
+          borderColor: pasteOpen ? 'color-mix(in srgb, var(--color-primary) 50%, transparent)' : undefined }}>
+        <ClipboardPaste size={14} />
       </button>
 
       {pasteOpen && (

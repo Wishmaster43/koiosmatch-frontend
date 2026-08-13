@@ -15,7 +15,7 @@
  */
 import { useTranslation } from 'react-i18next'
 import type { FormState } from '../AddCandidateModal'
-import { CvField, TextField, cardHead, cardBox, row } from './fields'
+import { CvField, TextField, cardHead, cardBox } from './fields'
 import FieldNotice from '@/components/ui/FieldNotice'
 
 // The live-validation/422 message under a field — one shared renderer now
@@ -44,19 +44,20 @@ export default function ContactCard({ form, errors, set, isReq, onBlur, fieldMes
           </CvField>
           <FieldNotice text={fieldMessage('email')} />
         </div>
-        <div style={row('1fr 1fr')}>
-          <div onBlur={() => onBlur('phone')}>
-            <CvField name="phone" label={t('modal.fields.phone')} required={isReq('phone')}>
-              <TextField type="tel" value={form.phone} onChange={v => set('phone', v)} placeholder={t('modal.fields.phonePlaceholder')} error={errors.phone || !!fieldMessage('phone')} />
-            </CvField>
-            <FieldNotice text={fieldMessage('phone')} />
-          </div>
-          <div onBlur={() => onBlur('mobile')}>
-            <CvField name="mobile" label={t('modal.fields.mobile')}>
-              <TextField type="tel" value={form.mobile} onChange={v => set('mobile', v)} placeholder={t('modal.fields.mobilePlaceholder')} error={!!fieldMessage('mobile')} />
-            </CvField>
-            <FieldNotice text={fieldMessage('mobile')} />
-          </div>
+        {/* Phone and mobile each get a FULL row (Danny 14-08 "Telefoon en mobiel
+            past niet"): paired half-width label-left rows squeezed the inputs to
+            postage stamps inside this half-width card. */}
+        <div onBlur={() => onBlur('phone')}>
+          <CvField name="phone" label={t('modal.fields.phone')} required={isReq('phone')}>
+            <TextField type="tel" value={form.phone} onChange={v => set('phone', v)} placeholder={t('modal.fields.phonePlaceholder')} error={errors.phone || !!fieldMessage('phone')} />
+          </CvField>
+          <FieldNotice text={fieldMessage('phone')} />
+        </div>
+        <div onBlur={() => onBlur('mobile')}>
+          <CvField name="mobile" label={t('modal.fields.mobile')}>
+            <TextField type="tel" value={form.mobile} onChange={v => set('mobile', v)} placeholder={t('modal.fields.mobilePlaceholder')} error={!!fieldMessage('mobile')} />
+          </CvField>
+          <FieldNotice text={fieldMessage('mobile')} />
         </div>
         <div onBlur={() => onBlur('linkedin')}>
           <CvField name="linkedin" label={t('modal.fields.linkedin')}>
