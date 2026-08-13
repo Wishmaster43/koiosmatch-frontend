@@ -130,6 +130,9 @@ export interface Candidate {
   // display. The BUSINESS account lives under `zzp` (freelance) instead.
   iban?: string
   accountHolderName?: string
+  // DOC-BANK-1: undefined when the server omitted the field (no financial
+  // permission — render nothing); null/id when the field was present.
+  bankDocumentId?: string | number | null
   id: string | number
   // Human-readable sequence number (NUMMER-1), e.g. "K-00123". Tenant-configurable
   // prefix/padding/start (Settings → Nummering); server-assigned, immutable.
@@ -316,6 +319,10 @@ export interface ApiCandidate {
   // only (CMBE 03ba8ec9); the business pair sits under `freelance` below.
   iban?: string | null
   account_holder_name?: string | null
+  // DOC-BANK-1: proof-of-bank-account document (financial.view-gated on the
+  // server — the key is simply absent from the payload without that
+  // permission, so mapCandidate must distinguish "absent" from "present-null").
+  bank_document_id?: string | null
   id?: string | number
   // NUMMER-1: server-assigned human-readable reference number (K-00123).
   reference_number?: string

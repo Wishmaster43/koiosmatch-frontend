@@ -1,5 +1,6 @@
 import type { RefObject } from 'react'
 import { useTranslation } from 'react-i18next'
+import { Clock } from 'lucide-react'
 import DataTable from '@/components/ui/DataTable'
 import type { Column, ControlledSort } from '@/components/ui/DataTable'
 import Avatar from '@/components/ui/Avatar'
@@ -107,9 +108,19 @@ export default function ApplicationsTable({ rows, loading, error, selectedId, on
     // tenant's configured funnel order, not this column's alphabetical label sort).
     { key: 'phase', header: t('cols.phase'), sortable: true, sortValue: r => r.phaseLabel ?? '',
       serverKey: APPLICATION_SORT_KEYS.phase,
-      render: r => colorPhase
-        ? <StatusPill label={r.phaseLabel} color={r.phaseColor} />
-        : <span style={plainCell}>{r.phaseLabel || '—'}</span> },
+      render: r => (
+        <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+          {colorPhase
+            ? <StatusPill label={r.phaseLabel} color={r.phaseColor} />
+            : <span style={plainCell}>{r.phaseLabel || '—'}</span>}
+          {/* D6-KAART-2: subtle per-row flag — colour never the only signal, the
+              icon shape + tooltip text carry the meaning on their own. */}
+          {r.tooLongInStage && (
+            <Clock size={13} strokeWidth={2} color="var(--color-warning)"
+              aria-label={t('kpi.tooLongInStage')} role="img" />
+          )}
+        </span>
+      ) },
     // Candidate deployability status — the ONE shared chip (C-CHIP): slug drives the
     // model-v2 rules (Lead→dash, blacklist), with the pre-resolved label/colour as
     // fallback until the /applications resource exposes the slug (BE gap filed).

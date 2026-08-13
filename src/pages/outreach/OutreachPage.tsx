@@ -14,6 +14,7 @@ import { useRightPanel } from '@/context/RightPanelContext'
 import InsightsRow from '@/components/insights/InsightsRow'
 import { buildOutreachFilterGroups } from './data/outreachFilterGroups'
 import HeaderSearch from '@/components/ui/HeaderSearch'
+import ClearFiltersButton from '@/components/ui/ClearFiltersButton'
 import QuickViewToggle from '@/components/ui/QuickViewToggle'
 import ViewModeToggle from '@/components/ui/ViewModeToggle'
 import type { DonutSpec, KpiSpec } from '@/components/insights/InsightsRow'
@@ -179,6 +180,19 @@ export default function OutreachPage() {
   // Reset to the first page whenever the filtered set's shape changes.
   useEffect(() => { setPage(1) }, [selectedStatus, selectedChannel, selectedOwner, selectedTargetGroup, kpiTargets, query, showArchived]) // eslint-disable-line react-hooks/exhaustive-deps
 
+  // OUTREACH-WISKNOP: same clear-all-filters parity as the other list pages
+  // (ClearFiltersButton reports its active state to RightPanelContext, so the
+  // topbar filter dot also lights up here) — every filter dimension this page
+  // owns, mirrored from useApplicationFilters' anyFilterActive/clearAllFilters.
+  const anyFilterActive = Boolean(query.trim() || selectedStatus.length || selectedChannel.length
+    || selectedOwner.length || selectedTargetGroup.length || kpiTargets || showArchived)
+  // Remount the (self-stateful) search input on clear so the visible text resets too.
+  const [searchEpoch, setSearchEpoch] = useState(0)
+  const clearAllFilters = () => {
+    setSearchEpoch(e => e + 1); setQuery(''); setSelectedStatus([]); setSelectedChannel([])
+    setSelectedOwner([]); setSelectedTargetGroup([]); setKpiTargets(false); setShowArchived(false)
+  }
+
   // Donut/KPI click = set exactly one status value (or clear when clicked again).
   const pickStatus  = (v?: string) => { if (v != null) setSelectedStatus((p) => (p.length === 1 && p[0] === v) ? [] : [v]) }
   const pickChannel = (v?: string) => { if (v != null) setSelectedChannel((p) => (p.length === 1 && p[0] === v) ? [] : [v]) }
@@ -263,7 +277,8 @@ export default function OutreachPage() {
               style={{ display: 'flex', alignItems: 'center', gap: 6, height: BTN_H, padding: '0 14px', fontSize: 13, fontWeight: 600, borderRadius: 8, border: 'none', cursor: 'pointer', background: 'var(--color-primary)', color: 'var(--color-on-accent)' }}>
               <Plus size={15} /> {t('new')}
             </button>
-            <HeaderSearch onSearch={setQuery} placeholder={t('page.searchPlaceholder')} width={280} />
+            <HeaderSearch key={searchEpoch} onSearch={setQuery} placeholder={t('page.searchPlaceholder')} width={280} />
+            <ClearFiltersButton active={anyFilterActive} onClear={clearAllFilters} />
 
             <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 8 }}>
               {/* Archived (soft-deleted) — shared quick-view toggle (§4). */}

@@ -74,7 +74,9 @@
     "aiTasks": "Tâches IA ouvertes",
     "aiTasksSub": "En attente d’action",
     "missingAppointment": "Rendez-vous manquant",
-    "missingAppointmentSub": "Lignes chargées uniquement, pas le total pour tout le locataire. Cliquer pour filtrer"
+    "missingAppointmentSub": "Lignes chargées uniquement, pas le total pour tout le locataire. Cliquer pour filtrer",
+    "tooLongInStage": "Trop longtemps à cette étape",
+    "tooLongInStageSub": "Total pour tout le locataire. Cliquer pour filtrer"
   },
   "insights": {
     "bucket": "Statut",

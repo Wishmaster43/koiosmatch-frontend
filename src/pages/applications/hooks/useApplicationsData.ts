@@ -37,7 +37,9 @@ export interface AppStats {
   by_owner?: Array<{ owner_id?: string | null; name?: string; count?: number }>
   by_source?: Array<{ source?: string | null; count?: number }>
   avg_score?: number | null
-  attention?: { new?: number; scored?: number; ai_tasks?: number }
+  // D6-KAART-2: real server-wide too_long_in_stage attention counter (df9450dc)
+  // — same predicate as the too_long_in_stage=1 list filter and row flag.
+  attention?: { new?: number; scored?: number; ai_tasks?: number; too_long_in_stage?: number }
 }
 interface ListResult { applications: Application[]; total: number; lastPage: number }
 interface WideResult { applications: Application[]; total: number }

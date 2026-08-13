@@ -18,7 +18,7 @@ import { useLastContactTypes } from '@/lib/useLastContactTypes'
 import LookupIcon from '@/components/ui/LookupIcon'
 import { useAllSettings, getBoolSetting } from '@/lib/settings/useAllSettings'
 import { useCandidateAdvice } from '@/lib/useCandidateAdvice'
-import { contactTarget, funnelTarget, statusTarget, TARGET_CONVERSATIONS, TARGET_MATCHES, TARGET_POOLS, TARGET_PREFERENCES } from './data/candidateCellTargets'
+import { contactTarget, funnelTarget, statusTarget, TARGET_CONVERSATIONS, TARGET_MATCHES, TARGET_POOLS, TARGET_PREFERENCES, TARGET_INTEGRATIONS } from './data/candidateCellTargets'
 import type { Candidate } from '@/types/candidate'
 import type { Id } from '@/types/common'
 
@@ -298,8 +298,16 @@ export default function CandidatesTable({ rows, loading, selectedId, onSelect, o
         // two-system state has no single clean sort order, and this is a glance
         // aid, not a data axis a recruiter would want to sort a whole list by.
         key: 'coupling', header: t('columns.coupling'), nowrap: true,
-        render: c => <BackofficeCouplingIndicator helloflexLink={c.helloflexLink} shiftmanagerLink={c.shiftmanagerLink}
-          showHelloflex={showHelloflex} showShiftmanager={showShiftmanager} />,
+        // KOPPELING-COLUMN-1: a ghost button, exactly like the other deep-link
+        // cells above — opens the drawer straight on the Koppelingen tab instead
+        // of only being a glance-aid nobody can click through from.
+        render: c => (
+          <button type="button" onClick={e => { e.stopPropagation(); onOpenTab?.(c, TARGET_INTEGRATIONS) }}
+            aria-label={t('cellLinks.integrations')} style={cellButton}>
+            <BackofficeCouplingIndicator helloflexLink={c.helloflexLink} shiftmanagerLink={c.shiftmanagerLink}
+              showHelloflex={showHelloflex} showShiftmanager={showShiftmanager} />
+          </button>
+        ),
       },
       {
         key: 'owner', header: t('columns.owner'), sortable: true, sortValue: c => c.owner,

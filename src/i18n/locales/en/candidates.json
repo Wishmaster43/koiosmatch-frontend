@@ -47,7 +47,8 @@
     "matches": "Open matches",
     "applications": "Open applications",
     "pools": "Open talent pools",
-    "preferences": "Open preferences"
+    "preferences": "Open preferences",
+    "integrations": "Open integrations"
   },
   "bulk": {
     "selected": "{{count}} selected",
@@ -793,7 +794,8 @@
     "noticePeriodApply": "Use this date",
     "groupBankAccount": "Bank account",
     "iban": "Account number (IBAN)",
-    "accountHolderName": "Account holder"
+    "accountHolderName": "Account holder",
+    "bankDocument": "Proof document"
   },
   "zzp": {
     "title": "Freelancer",

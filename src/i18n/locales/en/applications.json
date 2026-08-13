@@ -74,7 +74,9 @@
     "aiTasks": "Open AI tasks",
     "aiTasksSub": "Awaiting action",
     "missingAppointment": "Missing appointment",
-    "missingAppointmentSub": "Loaded rows only, not the tenant-wide total. Click to filter"
+    "missingAppointmentSub": "Loaded rows only, not the tenant-wide total. Click to filter",
+    "tooLongInStage": "Too long in stage",
+    "tooLongInStageSub": "Server-wide total. Click to filter"
   },
   "insights": {
     "bucket": "Status",

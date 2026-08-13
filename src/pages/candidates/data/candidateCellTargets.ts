@@ -8,6 +8,9 @@ export const TARGET_APPLICATIONS = 'work:applications'
 export const TARGET_MATCHES = 'work:matches'
 export const TARGET_POOLS = 'work:pools'
 export const TARGET_PREFERENCES = 'preferences'
+// KOPPELING-COLUMN-1: the backoffice-coupling column deep-links to the drawer's
+// Koppelingen (Integraties) tab — a plain top-level tab id, no sub-tab needed.
+export const TARGET_INTEGRATIONS = 'integrations'
 
 /**
  * Contact-moment cell target. The last-contact-type lookup has no boolean flag

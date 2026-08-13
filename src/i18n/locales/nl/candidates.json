@@ -47,7 +47,8 @@
     "matches": "Open matches",
     "applications": "Open sollicitaties",
     "pools": "Open talentenpools",
-    "preferences": "Open voorkeuren"
+    "preferences": "Open voorkeuren",
+    "integrations": "Open koppelingen"
   },
   "bulk": {
     "selected": "{{count}} geselecteerd",
@@ -793,7 +794,8 @@
     "noticePeriodApply": "Datum overnemen",
     "groupBankAccount": "Bankrekening",
     "iban": "Rekeningnummer (IBAN)",
-    "accountHolderName": "Tenaamstelling"
+    "accountHolderName": "Tenaamstelling",
+    "bankDocument": "Bewijsdocument"
   },
   "zzp": {
     "title": "ZZP'er",

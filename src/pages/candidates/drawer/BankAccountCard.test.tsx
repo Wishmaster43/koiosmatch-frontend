@@ -40,8 +40,17 @@ vi.mock('@/lib/api', async () => {
   return { ...actual, default: { patch: vi.fn(), get: vi.fn() } }
 })
 vi.mock('@/lib/notify', () => ({ notifyError: vi.fn() }))
+// DOC-BANK-1: stub the shared preview modal (its own pdf.js internals are out of
+// scope here, mirrors SectionTabs.test.tsx) but keep the passed `doc` visible so
+// a test can assert WHICH document the preview icon actually opened.
+vi.mock('@/components/drawer/DocPreviewModal', () => ({
+  default: ({ doc }: { doc?: { name?: string } }) => <div data-testid="preview-modal">{doc?.name}</div>,
+}))
+// Asserted as a REQUEST-shaped call (§13: url + name), never just "a click fired".
+vi.mock('@/lib/downloadFiles', () => ({ downloadFilesSequentially: vi.fn() }))
 import api from '@/lib/api'
 import { notifyError } from '@/lib/notify'
+import { downloadFilesSequentially } from '@/lib/downloadFiles'
 import { useCandidateRecord } from '../hooks/useCandidateMutations'
 
 const apiPatch = api.patch as unknown as ReturnType<typeof vi.fn>
@@ -175,5 +184,50 @@ describe('BankAccountCard · permission gate', () => {
   it('asks for exactly that permission, not a neighbouring one', () => {
     render(<BankAccountCard value={{ iban: '', accountHolderName: '' }} onSave={vi.fn()} />)
     expect(mockHasPermission).toHaveBeenCalledWith('candidates.financial.view')
+  })
+})
+
+/**
+ * DOC-BANK-1: the proof-of-bank-account slot — renders ONLY once the
+ * `bank_document_id` was BOTH present in the payload (mapCandidate leaves it
+ * `undefined` when the server's financial.view gate omitted the key entirely)
+ * AND resolves to a real document in `documents`.
+ */
+describe('BankAccountCard · DOC-BANK-1 proof-of-bank-account slot', () => {
+  const documents = [
+    { id: 'doc1', name: 'bankafschrift.pdf', url: '/api/candidates/c1/documents/doc1/download' },
+  ]
+  const value = { iban: 'NL91ABNA0417164300', accountHolderName: 'Jan Jansen' }
+
+  it('renders no slot when bankDocumentId is undefined (server omitted the field — gate closed)', () => {
+    render(<BankAccountCard value={value} onSave={vi.fn()} documents={documents} />)
+    expect(screen.queryByTitle('documents.preview')).toBeNull()
+  })
+
+  it('renders no slot when bankDocumentId is present but null (gate open, nothing linked)', () => {
+    render(<BankAccountCard value={value} onSave={vi.fn()} bankDocumentId={null} documents={documents} />)
+    expect(screen.queryByTitle('documents.preview')).toBeNull()
+  })
+
+  it('renders preview + download icons once bankDocumentId resolves to a real document', () => {
+    render(<BankAccountCard value={value} onSave={vi.fn()} bankDocumentId="doc1" documents={documents} />)
+    expect(screen.getByTitle('documents.preview')).toBeInTheDocument()
+    expect(screen.getByTitle('documents.download')).toBeInTheDocument()
+  })
+
+  it('preview opens the shared DocPreviewModal with the resolved document', async () => {
+    const user = userEvent.setup()
+    render(<BankAccountCard value={value} onSave={vi.fn()} bankDocumentId="doc1" documents={documents} />)
+    expect(screen.queryByTestId('preview-modal')).toBeNull()
+    await user.click(screen.getByTitle('documents.preview'))
+    expect(screen.getByTestId('preview-modal')).toHaveTextContent('bankafschrift.pdf')
+  })
+
+  it('download calls the shared downloadFilesSequentially helper with the resolved document\'s own url + name', async () => {
+    const user = userEvent.setup()
+    vi.mocked(downloadFilesSequentially).mockClear()
+    render(<BankAccountCard value={value} onSave={vi.fn()} bankDocumentId="doc1" documents={documents} />)
+    await user.click(screen.getByTitle('documents.download'))
+    expect(downloadFilesSequentially).toHaveBeenCalledWith([{ url: documents[0].url, name: documents[0].name }])
   })
 })

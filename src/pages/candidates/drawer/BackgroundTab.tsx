@@ -15,8 +15,9 @@ import type { Candidate } from '@/types/candidate'
 type RelItem = Record<string, unknown>
 type RelTabProps = {
   items?: RelItem[]; onAdd?: (v: RelItem) => void; onEdit?: (i: number, v: RelItem) => void; onRemove?: (i: number) => void
-  // DOC-ENTRY-LINK-1: Education/Certifications/Skills/References — Experience ignores
-  // both (measured 08-08: candidate_experiences has no document_id, see the report).
+  // DOC-ENTRY-LINK-1/DOC-ERV-1: Education/Certifications/Skills/References/Experience
+  // all resolve+show a linked proof document via these two props (read-only display
+  // for Experience — there is no "Koppelen aan" edit-form picker on that tab).
   documents?: RelItem[]; onJumpToDocuments?: () => void
 }
 
@@ -205,7 +206,9 @@ export default function BackgroundTab({ c, onEditSave, onJump }: { c: Candidate;
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
       <SubTabBar tabs={SUB_TABS} active={subTab} onChange={setSubTab} />
-      {subTab === 'experience'     && <ExperienceTab     items={experiences} {...ops('experiences', experiences, setExperiences)} />}
+      {/* DOC-ERV-1: documents/onJumpToDocuments feed the read-only proof-document
+          icons on a work-experience row — same pattern as Education below. */}
+      {subTab === 'experience'     && <ExperienceTab     items={experiences} documents={c.documents ?? []} onJumpToDocuments={onJump ? () => onJump('documents') : undefined} {...ops('experiences', experiences, setExperiences)} />}
       {/* DOC-ENTRY-LINK-1: candidate.documents feeds both the "Koppelen aan" edit-form
           picker and the 3 read-only link icons; onJumpToDocuments switches the drawer
           to the Documenten tab (thin passthrough — CandidateDrawer owns tab state). */}

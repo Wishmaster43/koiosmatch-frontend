@@ -70,6 +70,11 @@ export function mapCandidate(c: ApiCandidate): Candidate {
     // want: financial personal data never rides along in a list payload.
     iban:              c.iban != null ? String(c.iban) : '',
     accountHolderName: c.account_holder_name != null ? String(c.account_holder_name) : '',
+    // DOC-BANK-1: the server only includes `bank_document_id` at all with the
+    // `candidates.financial.view` permission — `undefined` (key genuinely
+    // absent) must stay distinguishable from `null` (present, nothing linked)
+    // so the UI can render "gate closed" as nothing, not a fake empty slot.
+    bankDocumentId: Object.prototype.hasOwnProperty.call(c, 'bank_document_id') ? (c.bank_document_id ?? null) : undefined,
     id:              c.id ?? '',
     // NUMMER-1: human-readable reference number (K-00123), shown in the drawer + table.
     referenceNumber: c.reference_number ?? '',

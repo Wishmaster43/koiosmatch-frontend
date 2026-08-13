@@ -70,7 +70,10 @@ const AddableSection = AddableSectionJs as unknown as ComponentType<AnyProps>
 export function resolveLinkedDocument(
   entry: RelItem,
   documents: RelItem[],
-  reverseKey: 'education_id' | 'certification_id' | 'language_id' | 'skill_id',
+  // DOC-ERV-1: 'experience_id' added — a work-experience row can carry the same
+  // proof-document link (document_id / nested document / reverse FK) as the
+  // other relations; read-only here (no "Koppelen aan" picker on this tab).
+  reverseKey: 'education_id' | 'certification_id' | 'language_id' | 'skill_id' | 'experience_id',
 ): RelItem | undefined {
   const docId = entry.document_id
   if (docId != null) {
@@ -137,9 +140,14 @@ function ProseField({ value }: { value?: string }) {
   )
 }
 
-export function ExperienceTab({ items = [], onAdd, onEdit, onRemove }: RelTabProps) {
+export function ExperienceTab({ items = [], onAdd, onEdit, onRemove, documents = [], onJumpToDocuments }: RelTabProps) {
   const { t } = useTranslation('candidates')
   const { formatDate } = useDateFormat()
+  // DOC-ERV-1: preview overlay for a row's linked proof document — the shared
+  // pattern already used by Education/Certifications/Skills below. No "Koppelen
+  // aan" edit-form picker here (no persistence UI is being added) — this only
+  // SURFACES a document_id/nested document the row already carries.
+  const [previewDoc, setPreviewDoc] = useState<RelItem | null>(null)
   // Format a date to DD-MM-YYYY, or '' when empty (so ranges don't show a stray dash).
   const fmt = (d?: string) => (d ? formatDate(d) : '')
   // Compact layout: title+company and start+end each pair onto one row. The
@@ -157,29 +165,35 @@ export function ExperienceTab({ items = [], onAdd, onEdit, onRemove }: RelTabPro
     { key: 'desc',     label: t('addFields.description'), richtext: true },
   ]
   return (
-    <AddableSection title={null} emptyText={t('sections.experienceEmpty')} renderAddButton={renderAddButton}
-      items={items} fields={fields} onAdd={onAdd} onEdit={onEdit} onRemove={onRemove}
-      renderItem={(raw: RelItem, i: number, arr: RelItem[]) => {
-        const e = raw as { id?: Id; title?: string; function_title?: string; company?: string; employer?: string; location?: string; start?: string; start_date?: string; end?: string; end_date?: string; current?: boolean; period?: string; desc?: string }
-        const start = e.start ?? e.start_date, end = e.end ?? e.end_date
-        // Date range in DD-MM-YYYY; an open (current) job shows "– Heden" — but only
-        // with a start date, so an unknown start never renders a dangling "– Heden".
-        const range = e.current
-          ? (fmt(start) ? `${fmt(start)} – ${t('addFields.present')}` : t('addFields.present'))
-          : (e.period ?? [fmt(start), fmt(end)].filter(Boolean).join(' – '))
-        // Compact secondary line: employer · location · period on one muted row (strak, like Education).
-        const secondary = [e.company ?? e.employer, e.location, range].filter(Boolean).join(' · ')
-        return (
-          <div key={e.id ?? i} style={{ display: 'flex', gap: 10, padding: '10px 0', borderBottom: i < arr.length - 1 ? '1px solid var(--border)' : 'none' }}>
-            <div style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--color-warning)', flexShrink: 0, marginTop: 5 }} />
-            <div style={{ flex: 1, minWidth: 0 }}>
-              <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)' }}>{e.title ?? e.function_title}</div>
-              {secondary && <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{secondary}</div>}
-              <ProseField value={e.desc} />
+    <>
+      <AddableSection title={null} emptyText={t('sections.experienceEmpty')} renderAddButton={renderAddButton}
+        items={items} fields={fields} onAdd={onAdd} onEdit={onEdit} onRemove={onRemove}
+        renderItem={(raw: RelItem, i: number, arr: RelItem[]) => {
+          const e = raw as { id?: Id; title?: string; function_title?: string; company?: string; employer?: string; location?: string; start?: string; start_date?: string; end?: string; end_date?: string; current?: boolean; period?: string; desc?: string }
+          const start = e.start ?? e.start_date, end = e.end ?? e.end_date
+          // Date range in DD-MM-YYYY; an open (current) job shows "– Heden" — but only
+          // with a start date, so an unknown start never renders a dangling "– Heden".
+          const range = e.current
+            ? (fmt(start) ? `${fmt(start)} – ${t('addFields.present')}` : t('addFields.present'))
+            : (e.period ?? [fmt(start), fmt(end)].filter(Boolean).join(' – '))
+          // Compact secondary line: employer · location · period on one muted row (strak, like Education).
+          const secondary = [e.company ?? e.employer, e.location, range].filter(Boolean).join(' · ')
+          // DOC-ERV-1: resolve the linked proof document, if any — icons render only when found.
+          const linkedDoc = resolveLinkedDocument(raw, documents, 'experience_id')
+          return (
+            <div key={e.id ?? i} style={{ display: 'flex', gap: 10, padding: '10px 0', borderBottom: i < arr.length - 1 ? '1px solid var(--border)' : 'none' }}>
+              <div style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--color-warning)', flexShrink: 0, marginTop: 5 }} />
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)' }}>{e.title ?? e.function_title}</div>
+                {secondary && <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{secondary}</div>}
+                <ProseField value={e.desc} />
+                {linkedDoc && <DocEntryLinks doc={linkedDoc} onPreview={() => setPreviewDoc(linkedDoc)} onJump={onJumpToDocuments} />}
+              </div>
             </div>
-          </div>
-        )
-      }} />
+          )
+        }} />
+      {previewDoc && <DocPreviewModal doc={previewDoc} onClose={() => setPreviewDoc(null)} />}
+    </>
   )
 }
 

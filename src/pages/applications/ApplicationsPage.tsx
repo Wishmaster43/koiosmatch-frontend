@@ -253,6 +253,11 @@ export default function ApplicationsPage({ intent }: { intent?: unknown } = {}) 
   // missing_appointment count) — derived from the loaded wide sample only, with
   // an honest sub-label on the card (STATS-HONEST-1).
   const missingAppointmentCount = useMemo(() => wideRows.filter(a => a.missingAppointment).length, [wideRows])
+  // D6-KAART-2: real server-wide total; fall back to the wide sample only
+  // while stats hasn't loaded yet (mirrors aiTaskCount's own fallback).
+  const tooLongInStageCount = useMemo(() => stats
+    ? (stats.attention?.too_long_in_stage ?? 0)
+    : wideRows.filter(a => a.tooLongInStage).length, [stats, wideRows])
   const counts = useMemo(() => ({
     ...bucketCounts,
     new: stats ? (stats.attention?.new ?? 0) : wideRows.filter(a => a.isNew && a.bucket === 'active').length,
@@ -261,7 +266,7 @@ export default function ApplicationsPage({ intent }: { intent?: unknown } = {}) 
     t, phaseData, ownerData, sourceData, bucketData,
     selectedPhase, setSelectedPhase, selectedOwner, setSelectedOwner, selectedSource, setSelectedSource,
     bucket, setBucket, attention, setAttention, toggleAttention, showArchived, setShowArchived, clearAllFilters,
-    counts, avgScore, aiTaskCount, missingAppointmentCount,
+    counts, avgScore, aiTaskCount, missingAppointmentCount, tooLongInStageCount,
   })
 
   return (

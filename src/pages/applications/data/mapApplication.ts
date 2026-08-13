@@ -153,6 +153,8 @@ export function mapApplication(a: ApiApplication = {}, funnelTypes: LookupItem[]
     currentStageEnteredAt: a.current_stage_entered_at ?? null,
     // V-appdetail-1: requires_appointment phase with no planned appointment.
     missingAppointment: Boolean(a.missing_appointment),
+    // D6-KAART-2: same predicate as the too_long_in_stage=1 filter / attention count.
+    tooLongInStage: Boolean(a.too_long_in_stage),
   }
 }
 

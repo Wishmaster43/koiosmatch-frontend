@@ -74,7 +74,9 @@
     "aiTasks": "Offene KI-Aufgaben",
     "aiTasksSub": "Warten auf Aktion",
     "missingAppointment": "Termin fehlt",
-    "missingAppointmentSub": "Nur geladene Zeilen, nicht die mandantenweite Gesamtzahl. Zum Filtern klicken"
+    "missingAppointmentSub": "Nur geladene Zeilen, nicht die mandantenweite Gesamtzahl. Zum Filtern klicken",
+    "tooLongInStage": "Zu lange in Phase",
+    "tooLongInStageSub": "Mandantenweite Gesamtzahl. Zum Filtern klicken"
   },
   "insights": {
     "bucket": "Status",

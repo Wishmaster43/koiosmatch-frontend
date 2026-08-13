@@ -365,7 +365,10 @@ export function PreferencesTab({ c, onSave, onTypesChange, onEditStatus }: { c: 
         // this person paid", while Gewenst tarief is a wish, not a payment fact.
         <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
           <EditableFieldTable key={`${c.id}-payroll`} title={t('preferences.groupPayroll')}     fields={payrollFields}     value={value} labelWidth={WIDE_LABEL_WIDTH} onSave={handleSavePayroll} />
-          <BankAccountCard    key={`${c.id}-bank`}    value={bankAccountValue} onSave={handleSaveBankAccount} />
+          {/* DOC-BANK-1: bankDocumentId stays `undefined` (renders no slot) unless
+              the server's financial.view gate actually returned the field. */}
+          <BankAccountCard    key={`${c.id}-bank`}    value={bankAccountValue} onSave={handleSaveBankAccount}
+            bankDocumentId={c.bankDocumentId} documents={c.documents ?? []} />
           <EditableFieldTable key={`${c.id}-rate`}    title={t('preferences.groupDesiredRate')} fields={desiredRateFields} value={value} labelWidth={WIDE_LABEL_WIDTH} onSave={handleSaveDesiredRate} />
         </div>
       )}

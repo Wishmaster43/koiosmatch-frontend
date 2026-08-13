@@ -771,7 +771,8 @@
     "noticePeriodApply": "Datum übernehmen",
     "groupBankAccount": "Bankverbindung",
     "iban": "Kontonummer (IBAN)",
-    "accountHolderName": "Kontoinhaber"
+    "accountHolderName": "Kontoinhaber",
+    "bankDocument": "Nachweisdokument"
   },
   "zzp": {
     "title": "Freiberufler",
@@ -995,7 +996,8 @@
     "matches": "Matches öffnen",
     "applications": "Bewerbungen öffnen",
     "pools": "Talentpools öffnen",
-    "preferences": "Präferenzen öffnen"
+    "preferences": "Präferenzen öffnen",
+    "integrations": "Verknüpfungen öffnen"
   },
   "map": {
     "pointCount": "{{count}} Kandidaten auf der Karte"

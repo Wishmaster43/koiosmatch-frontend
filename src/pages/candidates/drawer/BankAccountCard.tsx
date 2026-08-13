@@ -28,10 +28,13 @@
  */
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Edit2, Save, X } from 'lucide-react'
+import { Edit2, Save, X, Eye, Download } from 'lucide-react'
 import { GroupCard, GroupHeader, FieldRow, inputStyle, iconBtn } from './profileFieldShared'
 import { formatIban, normalizeIban } from '@/lib/iban'
 import { useAuth } from '@/context/AuthContext'
+import DocPreviewModal from '@/components/drawer/DocPreviewModal'
+import { downloadFilesSequentially } from '@/lib/downloadFiles'
+import type { Loose } from '@/types/candidate'
 
 export interface BankAccountValues {
   /** Stored wire form (no spaces) — shown grouped in fours, sent ungrouped. */
@@ -45,9 +48,15 @@ const EMPTY: BankAccountValues = { iban: '', accountHolderName: '' }
 // ZZP creditor number and the desired-rate fields on this tab.
 const MONO = { fontFamily: 'JetBrains Mono, monospace' }
 
-export default function BankAccountCard({ value, onSave }: {
+export default function BankAccountCard({ value, onSave, bankDocumentId, documents = [] }: {
   value: BankAccountValues
   onSave: (v: Record<string, unknown>) => void
+  // DOC-BANK-1: `undefined` when the server omitted `bank_document_id`
+  // entirely (no financial permission — render no slot at all); a real id/null
+  // once the field is present. `documents` resolves the id to the actual proof
+  // document (url/name), mirroring SectionTabs' resolveLinkedDocument.
+  bankDocumentId?: string | number | null
+  documents?: Loose[]
 }) {
   // FINANCIAL-GATE-1 (Danny 09-08, decided after we measured that NO permission
   // covered financial data at all): a bank account is least-privilege territory —
@@ -66,6 +75,8 @@ export default function BankAccountCard({ value, onSave }: {
 
   const [editing, setEditing] = useState(false)
   const [form, setForm] = useState<BankAccountValues>({ ...EMPTY, ...value })
+  // DOC-BANK-1: preview overlay state — declared before any early return (hooks rule).
+  const [previewDoc, setPreviewDoc] = useState<Loose | null>(null)
 
   // Enter edit mode with the READABLE (grouped) form in the input, so the value
   // is checked the way it is printed on a bank card.
@@ -89,6 +100,15 @@ export default function BankAccountCard({ value, onSave }: {
 
   // Hidden entirely without the permission — see FINANCIAL-GATE-1 above.
   if (!auth?.hasPermission?.('candidates.financial.view')) return null
+
+  // DOC-BANK-1: resolve the linked proof-of-bank document, if any. The icon
+  // renders ONLY when the field is present (not `undefined`) AND it resolves
+  // to a real document — a present-but-null id, or an id with nothing in
+  // `documents`, both render nothing (no fake affordance, §3).
+  const linkedDoc = bankDocumentId != null
+    ? documents.find(d => String(d.id) === String(bankDocumentId))
+    : undefined
+  const download = () => linkedDoc && downloadFilesSequentially([{ url: (linkedDoc.url as string) ?? (linkedDoc.download_url as string), name: (linkedDoc.name as string) ?? '' }])
 
   return (
     <div>
@@ -116,7 +136,20 @@ export default function BankAccountCard({ value, onSave }: {
                 aria-label={t('preferences.accountHolderName')} autoComplete="off" style={inputStyle} />
             : <span style={{ fontSize: 12, color: value.accountHolderName ? 'var(--text)' : 'var(--text-muted)' }}>{value.accountHolderName || '-'}</span>}
         </FieldRow>
+        {/* DOC-BANK-1: the proof-of-bank-account slot — only mounted once a
+            linked document actually resolved (calm by default, no fake affordance). */}
+        {linkedDoc && (
+          <FieldRow label={t('preferences.bankDocument')}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+              <button type="button" aria-label={t('documents.preview')} title={t('documents.preview')} onClick={() => setPreviewDoc(linkedDoc)}
+                style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: '2px 3px', display: 'flex' }}><Eye size={13} /></button>
+              <button type="button" aria-label={t('documents.download')} title={t('documents.download')} onClick={download}
+                style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: '2px 3px', display: 'flex' }}><Download size={13} /></button>
+            </div>
+          </FieldRow>
+        )}
       </GroupCard>
+      {previewDoc && <DocPreviewModal doc={previewDoc} onClose={() => setPreviewDoc(null)} />}
     </div>
   )
 }

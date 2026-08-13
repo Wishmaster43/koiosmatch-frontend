@@ -74,7 +74,9 @@
     "aiTasks": "Openstaande AI-taken",
     "aiTasksSub": "Wachten op actie",
     "missingAppointment": "Afspraak ontbreekt",
-    "missingAppointmentSub": "Alleen geladen rijen, niet het tenant-brede totaal. Klik om te filteren"
+    "missingAppointmentSub": "Alleen geladen rijen, niet het tenant-brede totaal. Klik om te filteren",
+    "tooLongInStage": "Te lang in fase",
+    "tooLongInStageSub": "Server-breed totaal. Klik om te filteren"
   },
   "insights": {
     "bucket": "Status",

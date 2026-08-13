@@ -160,6 +160,23 @@ describe('CandidatesTable · backoffice coupling indicator (JOB2)', () => {
     expect(screen.queryByRole('img', { name: /HelloFlex/ })).toBeNull()
     expect(screen.queryByRole('img', { name: /Shiftmanager/ })).toBeNull()
   })
+
+  // KOPPELING-COLUMN-1: the coupling cell is a real ghost button now, matching
+  // every other deep-link cell in this table — clicking it opens the drawer on
+  // the RIGHT candidate's Koppelingen tab, and never also selects the row.
+  it('clicking the coupling cell opens the integrations tab for that candidate, not row-select', async () => {
+    mockUseApps.mockReturnValue({ isAppEnabled: () => true })
+    const onOpenTab = vi.fn()
+    const onSelect = vi.fn()
+    const other = { ...baseCandidate, id: 44, helloflexLink: link({ status: 'linked' }), shiftmanagerLink: null }
+    const row = { ...baseCandidate, id: 45, helloflexLink: link({ status: 'failed' }), shiftmanagerLink: null }
+    render(<CandidatesTable rows={[other, row]} onOpenTab={onOpenTab} onSelect={onSelect} />)
+    const buttons = screen.getAllByRole('button', { name: /koppelingen/i })
+    expect(buttons).toHaveLength(2)
+    await userEvent.click(buttons[0])
+    expect(onOpenTab).toHaveBeenCalledWith(row, 'integrations')
+    expect(onSelect).not.toHaveBeenCalled()
+  })
 })
 
 // Danny 05-08: the "Koios" column now rolls out to every entity table via the

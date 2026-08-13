@@ -521,3 +521,67 @@ describe('SkillsTab · DOC-LANG-SKILL-LINK-1 linked-document icons + edit-form p
     expect(onEdit).toHaveBeenCalledWith(0, expect.objectContaining({ document_id: 'doc2' }))
   })
 })
+
+/**
+ * DOC-ERV-1: a work-experience row surfaces the same read-only preview/download/
+ * jump icons as Education/Certifications/Skills once it carries a linked proof
+ * document — but there is NO "Koppelen aan" edit-form picker here (this task
+ * only adds the read-side display, no new persistence path).
+ */
+describe('ExperienceTab · DOC-ERV-1 linked-document icons (read-only)', () => {
+  const documents = [
+    { id: 'doc1', name: 'werkgeversverklaring.pdf', url: '/api/candidates/c1/documents/doc1/download', type: 'Werkgeversverklaring' },
+    { id: 'doc2', name: 'ander.pdf', url: '/api/candidates/c1/documents/doc2/download' },
+  ]
+
+  it('renders no link icons when the entry has no linked document (calm by default)', () => {
+    const item = { id: 'e1', title: 'Verpleegkundige', company: 'Ziekenhuis X' }
+    render(<ExperienceTab items={[item]} documents={documents} />)
+    expect(screen.queryByTitle('Voorbeeld')).toBeNull()
+    expect(screen.queryByTitle('Downloaden')).toBeNull()
+  })
+
+  it('renders preview + download icons once the entry links a document (by document_id)', () => {
+    const item = { id: 'e1', title: 'Verpleegkundige', document_id: 'doc1' }
+    render(<ExperienceTab items={[item]} documents={documents} />)
+    expect(screen.getByTitle('Voorbeeld')).toBeInTheDocument()
+    expect(screen.getByTitle('Downloaden')).toBeInTheDocument()
+  })
+
+  it('resolves the linked document via the reverse link (experience_id) when document_id is absent', () => {
+    const withReverse = [{ id: 'doc9', name: 'werkgeversverklaring.pdf', experience_id: 'e1' }]
+    const item = { id: 'e1', title: 'Verpleegkundige' }
+    render(<ExperienceTab items={[item]} documents={withReverse} />)
+    expect(screen.getByTitle('Voorbeeld')).toBeInTheDocument()
+  })
+
+  it('the jump icon is absent without an onJumpToDocuments callback, and present + wired with one', async () => {
+    const user = userEvent.setup()
+    const onJumpToDocuments = vi.fn()
+    const item = { id: 'e1', title: 'Verpleegkundige', document_id: 'doc1' }
+    const { rerender } = render(<ExperienceTab items={[item]} documents={documents} />)
+    expect(screen.queryByTitle(/jumpToDocuments|Naar documenten/)).toBeNull()
+
+    rerender(<ExperienceTab items={[item]} documents={documents} onJumpToDocuments={onJumpToDocuments} />)
+    await user.click(screen.getByTitle(/jumpToDocuments|Naar documenten/))
+    expect(onJumpToDocuments).toHaveBeenCalledTimes(1)
+  })
+
+  it('preview opens the shared DocPreviewModal with the resolved linked document', async () => {
+    const user = userEvent.setup()
+    const item = { id: 'e1', title: 'Verpleegkundige', document_id: 'doc1' }
+    render(<ExperienceTab items={[item]} documents={documents} />)
+    expect(screen.queryByTestId('preview-modal')).toBeNull()
+    await user.click(screen.getByTitle('Voorbeeld'))
+    expect(screen.getByTestId('preview-modal')).toHaveTextContent('werkgeversverklaring.pdf')
+  })
+
+  it('download calls the shared downloadFilesSequentially helper with the linked document\'s own url + name', async () => {
+    const user = userEvent.setup()
+    vi.mocked(downloadFilesSequentially).mockClear()
+    const item = { id: 'e1', title: 'Verpleegkundige', document_id: 'doc1' }
+    render(<ExperienceTab items={[item]} documents={documents} />)
+    await user.click(screen.getByTitle('Downloaden'))
+    expect(downloadFilesSequentially).toHaveBeenCalledWith([{ url: documents[0].url, name: documents[0].name }])
+  })
+})

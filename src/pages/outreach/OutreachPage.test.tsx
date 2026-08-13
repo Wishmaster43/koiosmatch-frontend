@@ -8,7 +8,7 @@
  * behaviour is covered separately in OutreachCreate.test.tsx.
  */
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { render, screen } from '@testing-library/react'
+import { act, render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import i18n from '@/i18n'
 import OutreachPage from './OutreachPage'
@@ -39,7 +39,10 @@ vi.mock('./hooks/useOutreachCampaigns', () => ({
 // Right panel — captures registerFilters so the derived filter-group config
 // (target-group options in particular) can be asserted directly.
 const registerFilters = vi.fn()
-vi.mock('@/context/RightPanelContext', () => ({ useRightPanel: () => ({ registerFilters, unregisterFilters: vi.fn() }) }))
+// OUTREACH-WISKNOP: reportPageFilter is the shared ClearFiltersButton's own
+// dependency (feeds the topbar filter dot) — must exist on the stub or its
+// unconditional useEffect throws.
+vi.mock('@/context/RightPanelContext', () => ({ useRightPanel: () => ({ registerFilters, unregisterFilters: vi.fn(), reportPageFilter: vi.fn() }) }))
 vi.mock('./data/outreachApi', () => ({
   listCampaigns: vi.fn(() => Promise.resolve({ rows: [] })),
   updateCampaign: vi.fn(),
@@ -104,5 +107,33 @@ describe('OutreachPage · + Bellijst opens a modal, not a full-page swap', () =>
     await user.keyboard('{Escape}')
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
     expect(screen.getByTestId('outreach-list-stub')).toBeInTheDocument()
+  })
+})
+
+// OUTREACH-WISKNOP: the shared ClearFiltersButton — hidden on the default view,
+// appears once a filter narrows it, and its click resets every dimension this
+// page owns (mirrors ApplicationsPage's anyFilterActive/clearAllFilters parity).
+describe('OutreachPage · clear-filters parity (OUTREACH-WISKNOP)', () => {
+  const clearLabel = i18n.t('clearFilters', { ns: 'common' })
+
+  it('is hidden on the default (unfiltered) view', () => {
+    render(<OutreachPage />)
+    expect(screen.queryByRole('button', { name: clearLabel })).not.toBeInTheDocument()
+  })
+
+  it('appears once the archived filter narrows the view, and clearing it resets that filter', async () => {
+    const user = userEvent.setup()
+    render(<OutreachPage />)
+    const archivedGroup = (registerFilters.mock.calls.at(-1)?.[1] as Array<{ key: string; onToggle: (v: string) => void }>)
+      .find(g => g.key === 'archived')!
+    act(() => archivedGroup.onToggle('archived'))
+
+    const clearBtn = await screen.findByRole('button', { name: clearLabel })
+    await user.click(clearBtn)
+
+    const lastArchivedGroup = (registerFilters.mock.calls.at(-1)?.[1] as Array<{ key: string; selected: string[] }>)
+      .find(g => g.key === 'archived')!
+    expect(lastArchivedGroup.selected).toEqual([])
+    expect(screen.queryByRole('button', { name: clearLabel })).not.toBeInTheDocument()
   })
 })

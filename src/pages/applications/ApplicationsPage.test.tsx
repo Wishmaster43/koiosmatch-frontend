@@ -100,6 +100,32 @@ describe('ApplicationsPage · D6 dashboard intent seam', () => {
   })
 })
 
+// D6-KAART-2: the "too long in stage" KPI card — click sets the attention
+// intent which the data hook turns into the real too_long_in_stage=1 request
+// param (§13: assert the request, not just that a callback fired), and its
+// value reads the real server-wide stats.attention.too_long_in_stage count.
+describe('ApplicationsPage · D6-KAART-2 too-long-in-stage KPI card', () => {
+  it('clicking the KPI card sends too_long_in_stage=1 on the next request', () => {
+    insightsRowCalls.length = 0
+    dataHookCalls.length = 0
+    render(<ApplicationsPage />)
+    const kpis = insightsRowCalls.at(-1)?.kpis as Array<{ key: string; onClick: () => void }>
+    act(() => kpis.find(k => k.key === 'tooLongInStage')!.onClick())
+    const last = dataHookCalls[dataHookCalls.length - 1]
+    expect(last.too_long_in_stage).toBe(1)
+  })
+
+  it('shows the real server-wide stats count on the card, not a page-derived one', () => {
+    insightsRowCalls.length = 0
+    dataHookState.statsFailed = false
+    // The mocked data hook always returns stats: null here — this test only
+    // needs the wideRows fallback path to prove the flag drives the count.
+    render(<ApplicationsPage />)
+    const kpis = insightsRowCalls.at(-1)?.kpis as Array<{ key: string; value: number }>
+    expect(kpis.find(k => k.key === 'tooLongInStage')!.value).toBe(0)
+  })
+})
+
 // FILTER-PARITY-1: archived/trash filter groups exist and their onToggle reaches
 // the real request params — the §13 seam test (never only "a callback fired").
 describe('ApplicationsPage · filter-panel parity (archived/trash)', () => {

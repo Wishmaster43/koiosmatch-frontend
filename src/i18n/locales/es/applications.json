@@ -74,7 +74,9 @@
     "aiTasks": "Tareas de IA abiertas",
     "aiTasksSub": "A la espera de acción",
     "missingAppointment": "Cita pendiente",
-    "missingAppointmentSub": "Solo filas cargadas, no el total del inquilino. Clic para filtrar"
+    "missingAppointmentSub": "Solo filas cargadas, no el total del inquilino. Clic para filtrar",
+    "tooLongInStage": "Demasiado tiempo en la fase",
+    "tooLongInStageSub": "Total del inquilino. Clic para filtrar"
   },
   "insights": {
     "bucket": "Estado",

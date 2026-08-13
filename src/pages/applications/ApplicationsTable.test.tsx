@@ -88,6 +88,18 @@ describe('ApplicationsTable · source column em-dash (SWEEP-TABLES)', () => {
   })
 })
 
+// D6-KAART-2: the too_long_in_stage row flag (df9450dc) — a subtle icon next
+// to the phase pill, colour never the only signal (icon shape + title text).
+describe('ApplicationsTable · too-long-in-stage row icon (D6-KAART-2)', () => {
+  it('shows the clock icon only on rows carrying the flag', () => {
+    const flagged = { ...baseRow, id: 10, tooLongInStage: true }
+    const notFlagged = { ...baseRow, id: 11, tooLongInStage: false }
+    render(<ApplicationsTable rows={[flagged, notFlagged]} />)
+    // Real (nl) i18n resolves kpi.tooLongInStage to the icon's accessible name.
+    expect(screen.getAllByLabelText('Te lang in fase')).toHaveLength(1)
+  })
+})
+
 // Danny 08-08: "Bezig 2/12 1 regel geen 2 regels" — the interview cell stacked
 // the chip above the progress text, costing a second row of height in every
 // table row. It must read as ONE line.

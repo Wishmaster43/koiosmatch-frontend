@@ -771,7 +771,8 @@
     "noticePeriodApply": "Usar esta fecha",
     "groupBankAccount": "Cuenta bancaria",
     "iban": "Número de cuenta (IBAN)",
-    "accountHolderName": "Titular de la cuenta"
+    "accountHolderName": "Titular de la cuenta",
+    "bankDocument": "Documento justificativo"
   },
   "zzp": {
     "title": "Autónomo",
@@ -995,7 +996,8 @@
     "matches": "Abrir matches",
     "applications": "Abrir solicitudes",
     "pools": "Abrir grupos de talento",
-    "preferences": "Abrir preferencias"
+    "preferences": "Abrir preferencias",
+    "integrations": "Abrir integraciones"
   },
   "map": {
     "pointCount": "{{count}} candidatos en el mapa"

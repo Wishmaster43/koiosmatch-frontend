@@ -137,6 +137,10 @@ export interface Application {
   // the candidate resource already exposes (missing_appointment), read here at the
   // application's own level so a row can flag it without a second candidate fetch.
   missingAppointment: boolean
+  // D6-KAART-2: same predicate as the stats.attention.too_long_in_stage count
+  // (df9450dc) — flags a row whose current stage was entered before the tenant
+  // stale-stage threshold, so the table can show a subtle per-row indicator.
+  tooLongInStage: boolean
 }
 
 /** The enriched application model rendered by the drawer tabs. */

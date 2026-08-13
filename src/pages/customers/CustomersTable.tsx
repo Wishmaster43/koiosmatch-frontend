@@ -145,8 +145,17 @@ export default function CustomersTable({
       // Backoffice coupling scanning aid (JOB2) — not sortable: a compound
       // two-system state has no single clean sort order, it's a glance aid.
       key: 'coupling', header: t('cols.coupling'), nowrap: true,
-      render: c => <BackofficeCouplingIndicator helloflexLink={c.helloflexLink} shiftmanagerLink={c.shiftmanagerLink}
-        showHelloflex={showHelloflex} showShiftmanager={showShiftmanager} />,
+      // KOPPELING-KOLOM: the same cell deep-link as the other count columns —
+      // a ghost button (ring-only, no chip look) straight to the drawer's
+      // Koppelingen tab, so a recruiter never has to open the drawer just to
+      // check/fix a coupling.
+      render: c => (
+        <button type="button" style={countBtn} onClick={e => { e.stopPropagation(); onOpenTab?.(c, 'koppelingen') }}
+          aria-label={t('cols.coupling')}>
+          <BackofficeCouplingIndicator helloflexLink={c.helloflexLink} shiftmanagerLink={c.shiftmanagerLink}
+            showHelloflex={showHelloflex} showShiftmanager={showShiftmanager} />
+        </button>
+      ),
     },
     {
       key: 'accountManager', header: t('cols.accountManager'), sortable: true, sortValue: c => c.owner,

@@ -169,6 +169,10 @@ interface BuildArgs {
   // count reflects the loaded wide sample, not the tenant-wide total (STATS-HONEST-1;
   // see missingAppointmentSub for the footnote shown on the card).
   missingAppointmentCount: number
+  // D6-KAART-2: real server-wide count from `stats.attention.too_long_in_stage`
+  // (df9450dc) — same predicate as the too_long_in_stage=1 list filter and the
+  // per-row flag, no STATS-HONEST-1 footnote needed (this one IS the real total).
+  tooLongInStageCount: number
 }
 
 // ── Insights strip: 3 donuts (filterable) + 6 KPI cards, equal footprint (§3A) ──
@@ -176,7 +180,7 @@ export function buildApplicationInsights({
   t, phaseData, ownerData, sourceData, bucketData,
   selectedPhase, setSelectedPhase, selectedOwner, setSelectedOwner, selectedSource, setSelectedSource,
   bucket, setBucket, attention, setAttention, toggleAttention, showArchived, setShowArchived, clearAllFilters,
-  counts, avgScore, aiTaskCount, missingAppointmentCount,
+  counts, avgScore, aiTaskCount, missingAppointmentCount, tooLongInStageCount,
 }: BuildArgs): { donuts: DonutSpec[]; kpis: KpiSpec[] } {
   // Bucket is a single-value dimension (not a multi-select array like the other
   // three donuts) — "picked" and "active" read directly off the bucket state.
@@ -215,6 +219,13 @@ export function buildApplicationInsights({
       sub: t('kpi.missingAppointmentSub'), color: 'var(--color-warning)',
       onClick: () => { setShowArchived(false); toggleAttention('missingAppointment') },
       active: attention === 'missingAppointment' },
+    // D6-KAART-2: server-wide "too long in stage" tile — drives the same
+    // real filter param (`too_long_in_stage=1`) as the request-level intent
+    // seam already tested in useApplicationFilters.test.ts.
+    { key: 'tooLongInStage', label: t('kpi.tooLongInStage'), value: tooLongInStageCount,
+      sub: t('kpi.tooLongInStageSub'), color: 'var(--color-warning)',
+      onClick: () => { setShowArchived(false); toggleAttention('tooLongInStage') },
+      active: attention === 'tooLongInStage' },
   ]
   return { donuts, kpis }
 }
