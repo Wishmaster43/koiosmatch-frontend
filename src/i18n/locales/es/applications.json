@@ -72,7 +72,9 @@
     "avgScore": "Puntuación media",
     "avgScoreSub": "Sobre candidaturas activas",
     "aiTasks": "Tareas de IA abiertas",
-    "aiTasksSub": "A la espera de acción"
+    "aiTasksSub": "A la espera de acción",
+    "missingAppointment": "Cita pendiente",
+    "missingAppointmentSub": "Solo filas cargadas, no el total del inquilino. Clic para filtrar"
   },
   "insights": {
     "phase": "Fase",

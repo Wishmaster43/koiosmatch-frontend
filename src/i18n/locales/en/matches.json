@@ -201,7 +201,11 @@
   "filters": {
     "stage": "Stage",
     "owner": "Owner",
-    "status": "Status"
+    "status": "Status",
+    "client": "Client",
+    "moreFilters": "More filters",
+    "moreFiltersTitle": "More filters",
+    "removeFilter": "Remove '{{label}}' filter"
   },
   "view": {
     "matches": "Matches",

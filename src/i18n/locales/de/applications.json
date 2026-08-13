@@ -72,7 +72,9 @@
     "avgScore": "Ø Match-Score",
     "avgScoreSub": "Über aktive Bewerbungen",
     "aiTasks": "Offene KI-Aufgaben",
-    "aiTasksSub": "Warten auf Aktion"
+    "aiTasksSub": "Warten auf Aktion",
+    "missingAppointment": "Termin fehlt",
+    "missingAppointmentSub": "Nur geladene Zeilen, nicht die mandantenweite Gesamtzahl. Zum Filtern klicken"
   },
   "insights": {
     "phase": "Phase",

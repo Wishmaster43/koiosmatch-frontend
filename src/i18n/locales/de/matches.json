@@ -201,7 +201,11 @@
   "filters": {
     "stage": "Phase",
     "owner": "Inhaber",
-    "status": "Status"
+    "status": "Status",
+    "client": "Kunde",
+    "moreFilters": "Weitere Filter",
+    "moreFiltersTitle": "Weitere Filter",
+    "removeFilter": "Filter '{{label}}' entfernen"
   },
   "view": {
     "matches": "Matches",

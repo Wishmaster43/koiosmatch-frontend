@@ -72,7 +72,9 @@
     "avgScore": "Avg. match score",
     "avgScoreSub": "Across active applications",
     "aiTasks": "Open AI tasks",
-    "aiTasksSub": "Awaiting action"
+    "aiTasksSub": "Awaiting action",
+    "missingAppointment": "Missing appointment",
+    "missingAppointmentSub": "Loaded rows only, not the tenant-wide total. Click to filter"
   },
   "insights": {
     "phase": "Phase",

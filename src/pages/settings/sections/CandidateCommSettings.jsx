@@ -1,6 +1,11 @@
 import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import StatusListEditor from './StatusListEditor'
+// B8: the shared always-visible checkbox list — a hand-rolled `<label><input
+// type="checkbox">` row per field is a finding (§0, "ALTIJD een zoekbare
+// dropdown … óók een lijst van drie opties"); OpenCheckGroup is the ONE
+// component for a small fixed vocabulary.
+import OpenCheckGroup from '@/components/reports/filter/OpenCheckGroup'
 import { resolveGenericLookupIcon } from './lookupIcons'
 import { useAllSettings, saveSettingsKeys, invalidateAllSettingsCache, getNumberSetting, getJsonSetting } from '@/lib/settings/useAllSettings'
 import { notifyError } from '@/lib/notify'
@@ -106,13 +111,13 @@ function DedupeKeysField() {
     <div style={{ marginBottom: 16, paddingBottom: 16, borderBottom: '1px solid var(--border)' }}>
       <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)', marginBottom: 4 }}>{t('lastContactTypes.dedupeKeysTitle')}</div>
       <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 8, maxWidth: 460 }}>{t('lastContactTypes.dedupeKeysHint')}</div>
-      <div style={{ display: 'flex', gap: 16 }}>
-        {DEDUPE_FIELDS.map(field => (
-          <label key={field} htmlFor={`candidate-dedupe-${field}`} style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, color: 'var(--text)', cursor: 'pointer' }}>
-            <input id={`candidate-dedupe-${field}`} type="checkbox" checked={keys.includes(field)} onChange={() => toggle(field)} />
-            {t(`lastContactTypes.dedupeKeys.${field}`)}
-          </label>
-        ))}
+      <div style={{ maxWidth: 220 }}>
+        <OpenCheckGroup group={{
+          key: 'dedupeKeys',
+          options: DEDUPE_FIELDS.map(field => ({ value: field, label: t(`lastContactTypes.dedupeKeys.${field}`) })),
+          selected: keys,
+          onToggle: toggle,
+        }} />
       </div>
     </div>
   )

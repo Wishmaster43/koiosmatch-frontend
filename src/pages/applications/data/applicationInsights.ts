@@ -135,6 +135,11 @@ interface BuildArgs {
   clearAllFilters: () => void
   counts: Counts
   avgScore: string; aiTaskCount: number
+  // D6: page-derived only — `/applications/stats` has no server-wide field for
+  // this (verified against AppStats.attention: new/scored/ai_tasks only), so the
+  // count reflects the loaded wide sample, not the tenant-wide total (STATS-HONEST-1;
+  // see missingAppointmentSub for the footnote shown on the card).
+  missingAppointmentCount: number
 }
 
 // ── Insights strip: 3 donuts (filterable) + 6 KPI cards, equal footprint (§3A) ──
@@ -142,7 +147,7 @@ export function buildApplicationInsights({
   t, phaseData, ownerData, sourceData,
   selectedPhase, setSelectedPhase, selectedOwner, setSelectedOwner, selectedSource, setSelectedSource,
   bucket, setBucket, attention, setAttention, toggleAttention, showArchived, setShowArchived, clearAllFilters,
-  counts, avgScore, aiTaskCount,
+  counts, avgScore, aiTaskCount, missingAppointmentCount,
 }: BuildArgs): { donuts: DonutSpec[]; kpis: KpiSpec[] } {
   const donuts: DonutSpec[] = [
     { key: 'phase',  title: t('insights.phase'),  data: phaseData,  onPick: pickOne(setSelectedPhase),  active: selectedPhase.length > 0,  onClear: () => setSelectedPhase([]),  picked: pickedLabel(phaseData, selectedPhase[0]) },
@@ -168,6 +173,13 @@ export function buildApplicationInsights({
       onClick: () => { setShowArchived(false); toggleAttention('scored') }, active: attention === 'scored' },
     { key: 'aiTasks', label: t('kpi.aiTasks'), value: aiTaskCount, sub: t('kpi.aiTasksSub'), color: AI_TASKS_ACCENT,
       onClick: () => { setShowArchived(false); setBucket('active'); toggleAttention('aiTasks') }, active: attention === 'aiTasks' },
+    // D6: drives the real server-side `missing_appointment=1` filter on click, but the
+    // COUNT shown is page-derived (no server-wide stats field exists yet) — the sub
+    // label says so honestly rather than presenting a partial figure as the total.
+    { key: 'missingAppointment', label: t('kpi.missingAppointment'), value: missingAppointmentCount,
+      sub: t('kpi.missingAppointmentSub'), color: 'var(--color-warning)',
+      onClick: () => { setShowArchived(false); toggleAttention('missingAppointment') },
+      active: attention === 'missingAppointment' },
   ]
   return { donuts, kpis }
 }

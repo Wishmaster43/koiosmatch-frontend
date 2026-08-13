@@ -81,9 +81,14 @@ export default function FilterGroupBlock({
             </div>
           ) : group.type === 'geo-radius' ? (
             <GeoRadiusGroup group={group} />
-          ) : group.type === 'search-select' && group.display === 'open' ? (
+          ) : (group.type === 'search-select' || !group.type) && group.display === 'open' ? (
             <OpenCheckGroup group={group} />
-          ) : group.type === 'search-select' ? (
+          ) : group.type === 'search-select' || !group.type ? (
+            // PARITY-FALLBACK-1: a group with no `type` at all (a page that has
+            // not been through the typed-group sweep yet) still gets the
+            // searchable dropdown, never the untyped plain checkbox list below —
+            // a long lookup with no search box was exactly the gap the seven-page
+            // filter-parity pass exists to close (§0 shared fix).
             <SearchSelectGroup group={group} />
           ) : group.type === 'radio' ? (
             <div style={{ display: 'flex', background: 'var(--border)', borderRadius: 7, padding: 2, gap: 2 }}>

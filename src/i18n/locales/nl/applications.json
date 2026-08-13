@@ -72,7 +72,9 @@
     "avgScore": "Gem. matchscore",
     "avgScoreSub": "Over actieve sollicitaties",
     "aiTasks": "Openstaande AI-taken",
-    "aiTasksSub": "Wachten op actie"
+    "aiTasksSub": "Wachten op actie",
+    "missingAppointment": "Afspraak ontbreekt",
+    "missingAppointmentSub": "Alleen geladen rijen, niet het tenant-brede totaal. Klik om te filteren"
   },
   "insights": {
     "phase": "Fase",

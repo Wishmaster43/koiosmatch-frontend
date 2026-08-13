@@ -231,6 +231,10 @@ export default function ApplicationsPage({ intent }: { intent?: unknown } = {}) 
     ? (stats.avg_score != null ? Math.round(stats.avg_score) + '%' : '—')
     : computeAvgScore(wideRows), [stats, wideRows])
   const aiTaskCount = useMemo(() => stats ? (stats.attention?.ai_tasks ?? 0) : computeAiTaskCount(wideRows), [stats, wideRows])
+  // D6: no server-wide stats field for this yet (AppStats.attention has no
+  // missing_appointment count) — derived from the loaded wide sample only, with
+  // an honest sub-label on the card (STATS-HONEST-1).
+  const missingAppointmentCount = useMemo(() => wideRows.filter(a => a.missingAppointment).length, [wideRows])
   const counts = useMemo(() => ({
     active: bucketCount(stats, wideRows, 'active'),
     matched: bucketCount(stats, wideRows, 'matched'),
@@ -241,7 +245,7 @@ export default function ApplicationsPage({ intent }: { intent?: unknown } = {}) 
     t, phaseData, ownerData, sourceData,
     selectedPhase, setSelectedPhase, selectedOwner, setSelectedOwner, selectedSource, setSelectedSource,
     bucket, setBucket, attention, setAttention, toggleAttention, showArchived, setShowArchived, clearAllFilters,
-    counts, avgScore, aiTaskCount,
+    counts, avgScore, aiTaskCount, missingAppointmentCount,
   })
 
   return (

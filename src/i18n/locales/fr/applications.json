@@ -72,7 +72,9 @@
     "avgScore": "Score moyen",
     "avgScoreSub": "Sur les candidatures actives",
     "aiTasks": "Tâches IA ouvertes",
-    "aiTasksSub": "En attente d’action"
+    "aiTasksSub": "En attente d’action",
+    "missingAppointment": "Rendez-vous manquant",
+    "missingAppointmentSub": "Lignes chargées uniquement, pas le total pour tout le locataire. Cliquer pour filtrer"
   },
   "insights": {
     "phase": "Phase",

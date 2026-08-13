@@ -201,7 +201,11 @@
   "filters": {
     "stage": "Fase",
     "owner": "Eigenaar",
-    "status": "Status"
+    "status": "Status",
+    "client": "Klant",
+    "moreFilters": "Meer filters",
+    "moreFiltersTitle": "Meer filters",
+    "removeFilter": "Filter '{{label}}' verwijderen"
   },
   "view": {
     "matches": "Matches",

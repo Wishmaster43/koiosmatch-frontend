@@ -27,6 +27,7 @@ import ViewSwitch from '@/components/ui/ViewSwitch'
 import HeaderSearch from '@/components/ui/HeaderSearch'
 import ClearFiltersButton from '@/components/ui/ClearFiltersButton'
 import QuickViewToggle from '@/components/ui/QuickViewToggle'
+import MatchFilterBar from './MatchFilterBar'
 import { useOpenFromIntent } from '@/context/NavigationContext'
 import { useDrawerUrl } from '@/hooks/useDrawerUrl'
 import { useMatches, mapMatch, MATCHES_MAX_PER_PAGE } from './hooks/useMatches'
@@ -114,6 +115,12 @@ export default function MatchesPage({ intent }: { intent?: unknown } = {}) {
   // Multi-select toggle for the right-panel filter groups (add/remove a value).
   const tog = (set: Dispatch<SetStateAction<string[]>>) => (v: string | number) =>
     set(p => p.includes(String(v)) ? p.filter(x => x !== String(v)) : [...p, String(v)])
+
+  // B12: the same aggregates power the toolbar's primary/secondary filter options
+  // (value/label pairs) as their donut counterparts — one source per filter dimension.
+  const stageOptions = useMemo(() => stageData.map(d => ({ value: d.key, label: d.name })), [stageData])
+  const ownerOptions = useMemo(() => ownerData.map(d => ({ value: d.key, label: d.name })), [ownerData])
+  const clientOptions = useMemo(() => clientData.map(d => ({ value: d.key, label: d.name })), [clientData])
 
   // Right-panel filters: status (stage) + owner. The same stageFilter/ownerFilter
   // drive the donuts, so both stay in sync. (Archived lives in the toolbar segment.)
@@ -313,6 +320,13 @@ export default function MatchesPage({ intent }: { intent?: unknown } = {}) {
           )}
           {/* Shared search — mirror the other list pages (§3A). */}
           <HeaderSearch key={searchEpoch} onSearch={setQuery} placeholder={t('page.searchPlaceholder')} width={260} />
+          {/* B12: primary filters (stage/owner) + a "More filters" popover for client —
+              same recipe as the candidate Match-zoeker (VacancySearchFilters). */}
+          <MatchFilterBar
+            stageOptions={stageOptions} stage={stageFilter} onStageChange={setStageFilter}
+            ownerOptions={ownerOptions} owner={ownerFilter} onOwnerChange={setOwnerFilter}
+            clientOptions={clientOptions} client={clientFilter} onClientChange={setClientFilter}
+          />
             <ClearFiltersButton active={anyFilterActive} onClear={clearAllFilters} />
         </div>
 
