@@ -7,6 +7,8 @@ import { LinkedinMark, toLinkedinSlug } from '@/components/drawer/contactLinks'
 import { FieldRow, EditControls, GroupCard, GroupHeader, inputStyle } from './profileFieldShared'
 import { useProfileRequiredKeys } from './useProfileRequiredKeys'
 import { isValidEmailFormat, isValidPhoneFormat, isValidLinkedinFormat } from '../lib/contactFieldValidation'
+import { useContactMomentConfirm } from '../hooks/useContactMomentConfirm'
+import ContactMomentConfirmBanner from './ContactMomentConfirmBanner'
 import type { Candidate } from '@/types/candidate'
 
 // The fields this sub-tab owns — split out of the old combined ProfileTab
@@ -32,11 +34,18 @@ const FORMAT_ERROR_KEY: Partial<Record<ContactKey, string>> = {
 /** Contact sub-tab — e-mail, mobiel, telefoon, LinkedIn. Own pencil, own
  *  draft/error state; cancelling here never discards an in-progress edit in
  *  the Personal or Address sub-tab (each has its own). */
-export default function ProfileContactTab({ c, onSave, autoEditSignal }: {
+export default function ProfileContactTab({ c, onSave, autoEditSignal, onContactMoment }: {
   c: Candidate; onSave?: (v: Record<string, unknown>) => void; autoEditSignal?: number
+  onContactMoment?: (v: Record<string, unknown>) => void
 }) {
   const { t } = useTranslation('candidates')
   const requiredKeys = useProfileRequiredKeys(c.phase)
+  // B15-flow: after a mailto: click, offer the confirm-as-contact-moment banner.
+  // The write is monotonic — always render what the SERVER hands back, never a
+  // local "email + now" guess.
+  const contactMoment = useContactMomentConfirm(c.id, stamp => {
+    onContactMoment?.({ lastContactAt: stamp.last_contact_at, lastContactType: stamp.last_contact_type })
+  })
   const isReq = (key: ContactKey) => { const bk = REQ_MAP[key]; return !!bk && requiredKeys.includes(bk) }
 
   const emptyForm = (): ContactForm => ({
@@ -103,16 +112,25 @@ export default function ProfileContactTab({ c, onSave, autoEditSignal }: {
     // custom brand colour (useTenantTheme). --color-info is a fixed semantic token
     // (never touched by tenant theming) — the ordinary "this is a hyperlink" blue.
     if (key === 'email' && v) return (
-      <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
-        <a href={`mailto:${v}`} style={{ fontSize: 12, color: 'var(--color-info)', textDecoration: 'none' }}>{v}</a>
-        {/* Mail shortcut icon (Danny punt 49) — same affordance as WhatsApp/phone. */}
-        <a href={`mailto:${v}`} title={t('profile.sendEmail')} aria-label={t('profile.sendEmail')}
-          style={{ display: 'inline-flex', color: 'var(--text-muted)' }}
-          onMouseEnter={e => { e.currentTarget.style.color = 'var(--color-info)' }}
-          onMouseLeave={e => { e.currentTarget.style.color = 'var(--text-muted)' }}>
-          <Mail size={13} />
-        </a>
-      </span>
+      <div>
+        <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+          <a href={`mailto:${v}`} style={{ fontSize: 12, color: 'var(--color-info)', textDecoration: 'none' }}
+            onClick={() => contactMoment.prompt('email')}>{v}</a>
+          {/* Mail shortcut icon (Danny punt 49) — same affordance as WhatsApp/phone. */}
+          <a href={`mailto:${v}`} title={t('profile.sendEmail')} aria-label={t('profile.sendEmail')}
+            style={{ display: 'inline-flex', color: 'var(--text-muted)' }}
+            onClick={() => contactMoment.prompt('email')}
+            onMouseEnter={e => { e.currentTarget.style.color = 'var(--color-info)' }}
+            onMouseLeave={e => { e.currentTarget.style.color = 'var(--text-muted)' }}>
+            <Mail size={13} />
+          </a>
+        </span>
+        {/* B15-flow: non-blocking confirm banner, only after THIS field's mailto click. */}
+        {contactMoment.pending === 'email' && (
+          <ContactMomentConfirmBanner channel="email" saving={contactMoment.saving}
+            onConfirm={contactMoment.confirm} onDismiss={contactMoment.dismiss} />
+        )}
+      </div>
     )
     // Mobile → WhatsApp only (BE 2026-07-20 split): a mobile number is the one
     // that can hold a WhatsApp conversation — the value itself still dials via tel:.

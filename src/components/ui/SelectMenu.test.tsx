@@ -83,6 +83,36 @@ describe('SelectMenu · keyboard + focus (§6 WCAG 2.2 AA)', () => {
     expect(trigger).toHaveFocus()
   })
 
+})
+
+// S-icon-1: options may carry an optional `icon` — rendered on the trigger (once
+// selected) and in each menu row. Purely additive: a caller that never passes
+// icon (every existing call site) sees identical output.
+describe('SelectMenu · optional option icon (S-icon-1)', () => {
+  it('renders the icon for the selected option on the trigger, and for each option in the menu', async () => {
+    const user = userEvent.setup()
+    const options = [
+      { value: 'a', label: 'Alpha', icon: <span data-testid="icon-a">●</span> },
+      { value: 'b', label: 'Beta', icon: <span data-testid="icon-b">●</span> },
+    ]
+    render(<SelectMenu value="a" onChange={() => {}} options={options} />)
+    // Trigger shows the selected option's icon.
+    expect(screen.getByTestId('icon-a')).toBeInTheDocument()
+    expect(screen.queryByTestId('icon-b')).toBeNull()
+
+    await user.click(screen.getByRole('button'))
+    // Both rows render their own icon once the menu is open.
+    expect(screen.getAllByTestId('icon-a').length).toBeGreaterThan(0)
+    expect(screen.getByTestId('icon-b')).toBeInTheDocument()
+  })
+
+  it('never changes output for callers without icon (backward compatible)', () => {
+    render(<SelectMenu value="a" onChange={() => {}} options={['a', 'b']} />)
+    expect(screen.getByRole('button')).toHaveTextContent('a')
+  })
+})
+
+describe('SelectMenu · keyboard + focus (§6 WCAG 2.2 AA), continued', () => {
   it('does not steal focus from another element when closed by an outside click', async () => {
     const user = userEvent.setup()
     render(

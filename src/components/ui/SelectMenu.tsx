@@ -20,6 +20,10 @@ interface SelectOption {
   value: string
   label: ReactNode
   initials?: string
+  // Optional lookup icon (S-icon-1) — rendered before the label, both on the
+  // trigger (when selected) and in each menu row. Purely additive: callers that
+  // never pass it see no layout/behaviour change.
+  icon?: ReactNode
   // A row that is shown for context but cannot be chosen — e.g. the current owner
   // when they are not in the selectable list. Without this it rendered as an ordinary
   // clickable button whose handler silently did nothing, which reads as broken (§3).
@@ -127,6 +131,7 @@ export default function SelectMenu({ id, 'aria-labelledby': ariaLabelledBy, valu
           border: '1px solid var(--border)', borderRadius: 7, background: 'var(--bg)', cursor: 'pointer' , ...style }}>
         {leading}
         {current?.initials && <Avatar initials={current.initials} size={18} />}
+        {current?.icon && !current.initials && <span style={{ display: 'flex', flexShrink: 0 }}>{current.icon}</span>}
         <span style={{ fontSize: (style as { fontSize?: number } | undefined)?.fontSize ?? 12, flex: 1, textAlign: 'left', whiteSpace: 'nowrap', overflow: 'hidden',
           textOverflow: 'ellipsis', color: current ? 'var(--text)' : 'var(--text-muted)' }}>
           {current?.label ?? placeholder ?? '-'}
@@ -165,6 +170,7 @@ export default function SelectMenu({ id, 'aria-labelledby': ariaLabelledBy, valu
                 background: value === o.value ? 'var(--color-primary-bg)' : 'none',
                 color: o.disabled ? 'var(--text-muted)' : 'var(--text)' }}>
               {o.initials && <Avatar initials={o.initials} size={20} />}
+              {o.icon && !o.initials && <span style={{ display: 'flex', flexShrink: 0 }}>{o.icon}</span>}
               <span style={{ flex: 1 }}>{o.label}</span>
               {value === o.value && <Check size={13} style={{ color: 'var(--color-primary-text)', flexShrink: 0 }} />}
             </button>

@@ -29,7 +29,10 @@ const SafeHtml = SafeHtmlJs as unknown as ComponentType<AnyProps>
  *
  *  The profile TEXT block keeps its own separate pencil below, exactly as before;
  *  the Koios AI advice block lives one level up in ProfilePanel.tsx, unaffected. */
-export default function ProfileTab({ c, onEditSave, autoEditSignal }: { c: Candidate; onEditSave?: (v: Record<string, unknown>) => void; autoEditSignal?: number }) {
+export default function ProfileTab({ c, onEditSave, autoEditSignal, onContactMoment }: {
+  c: Candidate; onEditSave?: (v: Record<string, unknown>) => void; autoEditSignal?: number
+  onContactMoment?: (v: Record<string, unknown>) => void
+}) {
   const { t } = useTranslation('candidates')
 
   const [summaryEditing, setSummaryEditing] = useState(false)
@@ -99,7 +102,7 @@ export default function ProfileTab({ c, onEditSave, autoEditSignal }: { c: Candi
           component's own doc comment for the visibility rule + data-plumbing status. */}
       <WorkPermitBlock    c={c} onSave={onEditSave} autoEditSignal={autoEditSignal} />
       <ProfileAddressTab  c={c} onSave={onEditSave} autoEditSignal={autoEditSignal} />
-      <ProfileContactTab  c={c} onSave={onEditSave} autoEditSignal={autoEditSignal} />
+      <ProfileContactTab  c={c} onSave={onEditSave} autoEditSignal={autoEditSignal} onContactMoment={onContactMoment} />
       {/* Herkomst last: it describes the DOSSIER (source + who created it, when),
           not the person, so it reads after the person's own fields. */}
       <CandidateOriginCard c={c} />
