@@ -3,6 +3,13 @@
   "loading": "Sollicitaties laden…",
   "empty": "Nog geen sollicitaties.",
   "error": "Sollicitaties laden is mislukt.",
+  "missingAppointment": "In een intakefase, maar nog geen afspraak gepland.",
+  "moveWarn": {
+    "title": "Nog geen afspraak gepland",
+    "message": "Voor deze kandidaat is nog geen afspraak gepland voor de fase \"{{phase}}\". Je kunt de sollicitatie wel verplaatsen, maar plan snel een afspraak.",
+    "confirm": "Toch verplaatsen",
+    "cancel": "Annuleren"
+  },
   "buckets": {
     "active": "Actief",
     "matched": "Matched",

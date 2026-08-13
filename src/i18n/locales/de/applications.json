@@ -3,6 +3,13 @@
   "loading": "Bewerbungen werden geladen…",
   "empty": "Noch keine Bewerbungen.",
   "error": "Bewerbungen konnten nicht geladen werden.",
+  "missingAppointment": "In einer Intake-Phase, aber noch kein Termin geplant.",
+  "moveWarn": {
+    "title": "Noch kein Termin geplant",
+    "message": "Für diese Bewerbung ist für die Phase \"{{phase}}\" noch kein Termin geplant. Sie können trotzdem verschieben, planen Sie aber bald einen Termin.",
+    "confirm": "Trotzdem verschieben",
+    "cancel": "Abbrechen"
+  },
   "buckets": {
     "active": "Aktiv",
     "matched": "Gematcht",

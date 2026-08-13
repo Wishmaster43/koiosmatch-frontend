@@ -15,7 +15,7 @@ import CandidateStatusModals from './CandidateStatusModals'
 // api.get('/candidate-blacklist-reasons') only fires while a blacklist prompt is
 // open — stubbed so the reason dropdown has real options to pick from.
 vi.mock('@/lib/api', () => ({
-  default: { get: vi.fn(() => Promise.resolve({ data: { data: [{ name: 'No-show' }, { name: 'Fraud' }] } })) },
+  default: { get: vi.fn(() => Promise.resolve({ data: { data: [{ name: 'No-show' }, { name: 'Fraud', icon: '🚫' }] } })) },
   unwrapList: (r: { data?: { data?: unknown } }) => ({ rows: r?.data?.data ?? [] }),
 }))
 
@@ -83,5 +83,18 @@ describe('CandidateStatusModals · blacklist reason dropdown', () => {
     const updater = setStatusModal.mock.calls[0][0] as (m: unknown) => unknown
     expect(updater({ target: 'blacklist', reason: '', date: '', needReason: true, needDate: false, isBlacklist: true }))
       .toEqual({ target: 'blacklist', reason: 'No-show', date: '', needReason: true, needDate: false, isBlacklist: true })
+  })
+
+  // BLACKLIST-ICON-1: the reasons carry the tenant lookup's own icon (S-icon-1,
+  // mirrored via CreatableSelect) — a reason with an icon shows it next to its label.
+  it('shows the lookup icon next to a reason that has one', async () => {
+    render(<CandidateStatusModals {...baseProps}
+      statusModal={{ target: 'blacklist', reason: '', date: '', needReason: true, needDate: false, isBlacklist: true }}
+      setStatusModal={vi.fn()} />)
+    const user = userEvent.setup()
+    await user.click(screen.getByRole('button', { name: 'drawer.blacklistReasonPick' }))
+    await screen.findByRole('button', { name: 'No-show' })
+    // "Fraud" carries icon: '🚫' (emoji passthrough in LookupIcon) — "No-show" has none.
+    expect(screen.getByText('🚫')).toBeInTheDocument()
   })
 })

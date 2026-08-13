@@ -17,6 +17,7 @@ import { BTN_H } from '@/config/buttonMetrics'
 import { fieldInputStyle } from '@/components/forms/fieldMetrics'
 import CreatableSelect from '@/components/ui/CreatableSelect'
 import ReferenceNumberChip from '@/components/ui/ReferenceNumberChip'
+import LookupIcon from '@/components/ui/LookupIcon'
 import type { Candidate } from '@/types/candidate'
 import type { Id, LookupOption } from '@/types/common'
 import type { HeaderForm } from '../hooks/useCandidateHeaderEdit'
@@ -32,7 +33,10 @@ const iconBtn = { display: 'flex', alignItems: 'center', justifyContent: 'center
 export function CandidateTitle({ c, editing, hf, setHF, phaseInfo, showPhase }: {
   c: Candidate; editing: boolean
   hf: (k: keyof HeaderForm) => string; setHF: (k: keyof HeaderForm, v: string) => void
-  phaseInfo: { label: string; color: string }; showPhase: boolean
+  // HEADER-ICONEN: phaseInfo carries the tenant lookup's own icon slug (LookupItem.icon,
+  // resolved server-side) alongside label/color — optional so a lookup without an icon
+  // (or a caller that hasn't upgraded yet) renders exactly as before.
+  phaseInfo: { label: string; color: string; icon?: string }; showPhase: boolean
 }) {
   const { t } = useTranslation('candidates')
   const { functions, allowFreeEntry } = useFunctions() as { functions: Array<string | { value: string; label: string }>; allowFreeEntry: boolean }
@@ -56,8 +60,12 @@ export function CandidateTitle({ c, editing, hf, setHF, phaseInfo, showPhase }: 
         <div style={{ fontSize: 15, fontWeight: 700, color: 'var(--text)' }}>{c.name}</div>
         {/* Fase = colour-coded read-only badge (no picker); convert lives in the header actions. */}
         {showPhase && (
-          <span style={{ fontSize: 11, fontWeight: 600, padding: '2px 9px', borderRadius: 999,
-            background: phaseInfo.color + '1A', color: phaseInfo.color, border: `1px solid ${phaseInfo.color}55` }}>{phaseInfo.label}</span>
+          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 11, fontWeight: 600, padding: '2px 9px', borderRadius: 999,
+            background: phaseInfo.color + '1A', color: phaseInfo.color, border: `1px solid ${phaseInfo.color}55` }}>
+            {/* HEADER-ICONEN: the phase lookup's own icon, never colour-only (§6). */}
+            {phaseInfo.icon && <LookupIcon icon={phaseInfo.icon} size={11} />}
+            {phaseInfo.label}
+          </span>
         )}
         {/* NUMMER-1: human-readable reference number, click-to-copy — same spot on every drawer. */}
         <ReferenceNumberChip value={c.referenceNumber} />

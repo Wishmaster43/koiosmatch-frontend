@@ -88,7 +88,12 @@
     "shiftsUnfilled": "Unfilled",
     "shiftsOccupancy": "Occupancy",
     "touchpoints": "Today",
-    "attentionTitle": "To follow up"
+    "attentionTitle": "To follow up",
+    "expiringMatches": "Expiring matches",
+    "staleLeads": "Stale leads",
+    "staleVacancies": "Stale vacancies",
+    "koiosSuggestions": "Koios suggestions",
+    "customersByOwner": "Customers by owner"
   },
   "action": {
     "allCandidates": "All candidates",
@@ -154,5 +159,8 @@
       "conversation": "From a conversation",
       "chat": "From chat"
     }
+  },
+  "widget": {
+    "unknown": "Unknown"
   }
 }

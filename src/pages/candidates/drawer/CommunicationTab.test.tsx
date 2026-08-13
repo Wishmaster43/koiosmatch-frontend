@@ -326,6 +326,36 @@ describe('CommunicationTab · match.created timeline card (point 3, Danny live P
   })
 })
 
+// B24-TAB: application events (c.applications) are merged chronologically into the
+// Tijdlijn alongside status/system events (c.timeline), via mergeTimelineEvents.
+describe('CommunicationTab · merged timeline with application events (B24-TAB)', () => {
+  const goToTimeline = (user: ReturnType<typeof userEvent.setup>) =>
+    user.click(screen.getByRole('tab', { name: 'sections.timeline' }))
+
+  it('shows an application event interleaved with a status event, newest first', async () => {
+    const user = userEvent.setup()
+    render(<CommunicationTab c={candidate({}, {
+      timeline: [{ text: 'Status gewijzigd', created_at: '2026-08-01T09:00:00.000Z' } as unknown as Candidate['timeline'][number]],
+      applications: [{ id: 'a1', vacancy_title: 'Verpleegkundige', created_at: '2026-08-05T09:00:00.000Z' }],
+    })} />)
+    await goToTimeline(user)
+    expect(screen.getByText(/communication\.timelineApplication.*Verpleegkundige/)).toBeInTheDocument()
+    const rows = screen.getAllByText(/Status gewijzigd|communication\.timelineApplication/)
+    // Newest first: the application event (05-08) precedes the status event (01-08).
+    expect(rows[0].textContent).toMatch(/communication\.timelineApplication/)
+    expect(rows[1].textContent).toMatch(/Status gewijzigd/)
+  })
+
+  it('falls back to a generic label when the application carries no vacancy title', async () => {
+    const user = userEvent.setup()
+    render(<CommunicationTab c={candidate({}, {
+      applications: [{ id: 'a1', created_at: '2026-08-05T09:00:00.000Z' }],
+    })} />)
+    await goToTimeline(user)
+    expect(screen.getByText('communication.timelineApplicationGeneric')).toBeInTheDocument()
+  })
+})
+
 // WHATSAPP-COMPOSE-1 (Danny 06-08): the "Conversatie starten" trigger next to the
 // Conversaties section — disabled with an honest title for a candidate without a
 // mobile number (no dead sends, §3), enabled + opens the modal otherwise.

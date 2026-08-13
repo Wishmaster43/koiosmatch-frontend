@@ -88,7 +88,12 @@
     "shiftsUnfilled": "Unbesetzt",
     "shiftsOccupancy": "Auslastung",
     "touchpoints": "Heute",
-    "attentionTitle": "Abzuarbeiten"
+    "attentionTitle": "Abzuarbeiten",
+    "expiringMatches": "Auslaufende Matches",
+    "staleLeads": "Stillstehende Leads",
+    "staleVacancies": "Stillstehende Stellen",
+    "koiosSuggestions": "Koios-Vorschläge",
+    "customersByOwner": "Kunden nach Kundenbetreuer"
   },
   "action": {
     "allCandidates": "Alle Kandidaten",
@@ -154,5 +159,8 @@
       "conversation": "Aus einer Konversation",
       "chat": "Aus dem Chat"
     }
+  },
+  "widget": {
+    "unknown": "Unbekannt"
   }
 }

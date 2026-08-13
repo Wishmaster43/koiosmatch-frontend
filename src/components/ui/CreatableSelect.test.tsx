@@ -255,3 +255,30 @@ describe('CreatableSelect · clearable does not disturb focus handling', () => {
     expect(screen.getByRole('button', { name: 'clear' })).toHaveFocus()
   })
 })
+
+// S-icon-1 (mirrored from SelectMenu.test.tsx): options may carry an optional
+// `icon` — rendered on the trigger (once selected) AND on every menu row.
+// Additive: options without it (every existing call site) render unchanged.
+describe('CreatableSelect · optional option icon (S-icon-1)', () => {
+  it('renders the icon for the selected option on the trigger, and for each option in the menu', async () => {
+    const user = userEvent.setup()
+    const options = [
+      { value: 'a', label: 'Alpha', icon: <span data-testid="icon-a">●</span> },
+      { value: 'b', label: 'Beta', icon: <span data-testid="icon-b">●</span> },
+    ]
+    render(<CreatableSelect value="a" onChange={() => {}} options={options} placeholder="Select" />)
+    // Trigger shows the selected option's icon.
+    expect(screen.getByTestId('icon-a')).toBeInTheDocument()
+    expect(screen.queryByTestId('icon-b')).toBeNull()
+
+    await user.click(screen.getByRole('button', { name: /Alpha/ }))
+    // Both rows render their own icon once the menu is open.
+    expect(screen.getAllByTestId('icon-a').length).toBeGreaterThan(0)
+    expect(screen.getByTestId('icon-b')).toBeInTheDocument()
+  })
+
+  it('never changes output for callers without icon (backward compatible)', () => {
+    render(<CreatableSelect value="a" onChange={() => {}} options={[{ value: 'a', label: 'Alpha' }]} placeholder="Select" />)
+    expect(screen.getByRole('button', { name: 'Alpha' })).toBeInTheDocument()
+  })
+})

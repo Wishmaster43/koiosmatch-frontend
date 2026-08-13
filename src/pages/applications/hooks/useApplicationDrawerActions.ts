@@ -44,6 +44,10 @@ export function useApplicationDrawerActions({ applications, wideRows, setApplica
   const [selected, setSelected] = useState<ApplicationDetail | null>(null)
   const [expanded, setExpanded] = useState(false)
   const selectedIdRef = useRef<Id | null>(null)
+  // V-appdetail-2: a phase-change onto a requires_appointment funnel stage for an
+  // application that has none planned yet — warn, never block (§3B "prompt, don't
+  // hard-block"). Holds the move the confirm dialog will actually execute.
+  const [pendingMove, setPendingMove] = useState<{ id: Id; phaseKey: string; phaseLabel: string } | null>(null)
 
   const closeDrawer = () => { selectedIdRef.current = null; setSelected(null); setExpanded(false) }
 
@@ -66,7 +70,7 @@ export function useApplicationDrawerActions({ applications, wideRows, setApplica
   // Kanban move: set the new phase + bucket; label/colour re-resolve from the lookup.
   // `before` checks wideRows too — the board (where a move is dragged) renders off
   // wideRows, which the table-page `applications` array doesn't hold while in board view.
-  const handleMove = (id: Id, phaseKey: string) => {
+  const doMove = (id: Id, phaseKey: string) => {
     const before = applications.find(a => a.id === id) ?? wideRows.find(a => a.id === id)
     const newBucket = bucketOfPhase(phaseKey, funnelTypes)
     setApplications(prev => prev.map(a => a.id === id ? { ...a, phaseKey, bucket: newBucket } : a))
@@ -87,6 +91,31 @@ export function useApplicationDrawerActions({ applications, wideRows, setApplica
         notifyError(extractApiError(err, t('common:actionFailed')))
       })
   }
+
+  // V-appdetail-2: intercept a move ONTO a requires_appointment phase for a row
+  // that has no appointment planned yet (missingAppointment) — warn (P-style
+  // banner in the confirm dialog), never block, mirroring §3B "prompt, don't
+  // hard-block". Every other move proceeds exactly as before, unintercepted.
+  const handleMove = (id: Id, phaseKey: string) => {
+    const before = applications.find(a => a.id === id) ?? wideRows.find(a => a.id === id)
+    const target = funnelTypes.find(f => f.value === phaseKey)
+    if (target?.requires_appointment && before?.missingAppointment) {
+      setPendingMove({ id, phaseKey, phaseLabel: target.label })
+      return
+    }
+    doMove(id, phaseKey)
+  }
+
+  // Confirm dialog resolution: proceed with the held move, or drop it — the
+  // board/select control that triggered handleMove never sees these, it only
+  // ever calls handleMove itself (optimistic UI already reverted nothing, since
+  // doMove was never called for a pending move).
+  const confirmPendingMove = () => {
+    if (!pendingMove) return
+    doMove(pendingMove.id, pendingMove.phaseKey)
+    setPendingMove(null)
+  }
+  const cancelPendingMove = () => setPendingMove(null)
 
   // Reassign an application's recruiter (owner); optimistic + PATCH owner_id.
   // OPTIMISTIC-REVERT-1 (audit 2026-07-27, same bug class as handleMove/handleLinkVacancy/
@@ -310,5 +339,8 @@ export function useApplicationDrawerActions({ applications, wideRows, setApplica
     selected, setSelected, expanded, setExpanded, closeDrawer, selectApplication,
     handleMove, handleOwner, handleLinkVacancy, handleUpdateSource, handleReject,
     handleAdjustScore, handleUpdateCustomFields, handleCandidateUpdated, handleDetach, handleRestore,
+    // V-appdetail-2: the pending move + its resolve/cancel, for the page to render
+    // the confirm dialog against.
+    pendingMove, confirmPendingMove, cancelPendingMove,
   }
 }

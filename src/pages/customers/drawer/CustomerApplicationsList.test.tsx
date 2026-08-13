@@ -41,6 +41,13 @@ vi.mock('@/context/LookupsContext', () => ({
 const openEntity = vi.fn()
 vi.mock('@/context/NavigationContext', () => ({ useNavigation: () => ({ openEntity, navigate: vi.fn() }) }))
 
+// S-custlist-1's pencil reuses the candidate drawer's own edit form — stubbed
+// here, its own test coverage lives on that component.
+vi.mock('@/pages/candidates/drawer/AddApplicationModal', () => ({ default: () => null }))
+// The lazy detail panel's own request — never asserted here (ApplicationRowDetails
+// has its own test file); a resolved empty object keeps it from hanging.
+vi.mock('@/lib/api', () => ({ default: { get: vi.fn(() => Promise.resolve({ data: { data: {} } })) }, unwrap: (r: unknown) => (r as { data?: { data?: unknown } })?.data?.data ?? {} }))
+
 const row = (over: Partial<Application> = {}): Application => ({
   id: 'app-1', candidateId: 'cand-1', candidateName: 'Jane Doe', candidateInitials: 'JD',
   vacancyId: 'vac-1', vacancyTitle: 'Verpleegkundige', client: 'Acme', customerId: 'cust-1',
@@ -48,6 +55,7 @@ const row = (over: Partial<Application> = {}): Application => ({
   interview: null, source: '', owner: { id: null, name: '', initials: '', color: null },
   candidateStatusLabel: '', candidateStatusColor: 'var(--text-muted)', candidateStatus: '', candidatePhase: '',
   created: '2026-07-01', isNew: false, archived: false, deletedAt: null, currentStageEnteredAt: null,
+  missingAppointment: false,
   ...over,
 })
 
@@ -140,6 +148,55 @@ describe('CustomerApplicationsList', () => {
  * still renders as ONE coherent state here — same columns/toolbar/row-click as
  * the customerId mode above, only the data SOURCE differs.
  */
+// S-custlist-1: every row carries the same action cluster the candidate
+// drawer's own application row carries — pencil-edit + expand-with-lazy-detail.
+describe('CustomerApplicationsList · action cluster (S-custlist-1)', () => {
+  afterEach(() => { vi.doUnmock('@/context/AuthContext'); vi.resetModules() })
+
+  it('renders no actions column without applications.update/.view', async () => {
+    vi.resetModules()
+    vi.doMock('@/context/AuthContext', () => ({ useAuth: () => ({ hasPermission: () => false }) }))
+    const { default: NoPerm } = await import('./CustomerApplicationsList')
+    mockUseCustomerApplications.mockReturnValue({ rows: [row()], loading: false, error: false })
+    render(<NoPerm customerId="cust-1" />)
+    expect(screen.queryByTitle('Sollicitatie bewerken')).toBeNull()
+    expect(screen.queryByTitle('Details tonen')).toBeNull()
+  })
+
+  it('pencil opens the reused candidate-drawer edit form; chevron expands the lazy detail panel', async () => {
+    const user = userEvent.setup()
+    vi.resetModules()
+    vi.doMock('@/context/AuthContext', () => ({ useAuth: () => ({ hasPermission: () => true }) }))
+    const { default: WithPerm } = await import('./CustomerApplicationsList')
+    mockUseCustomerApplications.mockReturnValue({ rows: [row()], loading: false, error: false })
+    render(<WithPerm customerId="cust-1" />)
+
+    // Pencil/chevron never trigger the row's own openEntity click-through.
+    await user.click(screen.getByTitle('Sollicitatie bewerken'))
+    expect(openEntity).not.toHaveBeenCalled()
+
+    const chevron = screen.getByTitle('Details tonen')
+    expect(chevron).toHaveAttribute('aria-expanded', 'false')
+    await user.click(chevron)
+    expect(screen.getByTitle('Details verbergen')).toHaveAttribute('aria-expanded', 'true')
+    expect(openEntity).not.toHaveBeenCalled()
+  })
+})
+
+// V-appdetail-1: the candidate row shows an inconsistency icon (never colour
+// alone, §6) when the application sits at a requires_appointment phase with no
+// appointment planned yet.
+describe('CustomerApplicationsList · missing-appointment icon (V-appdetail-1)', () => {
+  it('shows the icon when missingAppointment is true, hides it otherwise', () => {
+    mockUseCustomerApplications.mockReturnValue({
+      rows: [row({ missingAppointment: true }), row({ id: 'app-2', candidateName: 'John Smith', missingAppointment: false })],
+      loading: false, error: false,
+    })
+    render(<CustomerApplicationsList customerId="cust-1" />)
+    expect(screen.getAllByRole('img', { name: 'In een intakefase, maar nog geen afspraak gepland.' })).toHaveLength(1)
+  })
+})
+
 describe('CustomerApplicationsList · vacancyIds mode (location/department drill-down)', () => {
   it('fetches through useApplicationsByVacancyIds with this level\'s ids + the tenant funnel lookup', () => {
     mockUseCustomerApplications.mockReturnValue({ rows: [], loading: false, error: false })

@@ -24,6 +24,7 @@ import type { BoardPhase } from './ApplicationsBoard'
 import ApplicationDrawer from './ApplicationDrawer'
 import ApplicationsBulkBar from './ApplicationsBulkBar'
 import AddApplicationModal from './AddApplicationModal'
+import PhaseChangeAppointmentWarning from './PhaseChangeAppointmentWarning'
 import PaginationBar from '@/components/ui/PaginationBar'
 import HeaderSearch from '@/components/ui/HeaderSearch'
 import ClearFiltersButton from '@/components/ui/ClearFiltersButton'
@@ -125,6 +126,7 @@ export default function ApplicationsPage({ intent }: { intent?: unknown } = {}) 
     selected, expanded, setExpanded, closeDrawer, selectApplication,
     handleMove, handleOwner, handleLinkVacancy, handleUpdateSource, handleReject,
     handleAdjustScore, handleUpdateCustomFields, handleCandidateUpdated, handleDetach, handleRestore,
+    pendingMove, confirmPendingMove, cancelPendingMove,
   } = useApplicationDrawerActions({ applications, wideRows, setApplications, setTotal, funnelTypes, users, bucket, decorate, t })
 
   // ── Bulk selection + mutations — §0.3 split (F1, audit R1): mirrors useCandidateBulkActions.
@@ -382,6 +384,13 @@ export default function ApplicationsPage({ intent }: { intent?: unknown } = {}) 
       />
 
       {addOpen && <AddApplicationModal onClose={() => setAddOpen(false)} onCreated={handleCreated} />}
+
+      {/* V-appdetail-2: warn-not-block confirm for a move onto a requires_appointment
+          phase with no appointment planned yet — never blocks the move itself. */}
+      {pendingMove && (
+        <PhaseChangeAppointmentWarning phaseLabel={pendingMove.phaseLabel}
+          onConfirm={confirmPendingMove} onCancel={cancelPendingMove} />
+      )}
     </div>
   )
 }

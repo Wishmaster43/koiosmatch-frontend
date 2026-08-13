@@ -581,6 +581,8 @@
     "timelinePlacedAt": "Colocado en {{customer}}",
     "timelineOngoing": "hoy",
     "timelineVia": "vía {{name}}",
+    "timelineApplication": "Solicitud:",
+    "timelineApplicationGeneric": "Solicitud",
     "searchPlaceholder": "Buscar notas…",
     "deleteNote": "Eliminar nota",
     "deleteConfirm": "¿Seguro que quieres eliminar esta nota?"

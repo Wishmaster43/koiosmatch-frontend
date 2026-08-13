@@ -21,7 +21,7 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import type { TFunction } from 'i18next'
-import { Shield, BarChart2, Users, ClipboardList, Target, Clock, Eye, Check } from 'lucide-react'
+import { Shield, BarChart2, Users, ClipboardList, Target, UserCog, Building2, Clock, Eye, Check } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import { useAllSettings, useSettingsLoaded, getJsonSetting, saveSettingsKeys } from '@/lib/settings/useAllSettings'
 import SubTabBar from '@/components/drawer/SubTabBar'
@@ -34,7 +34,10 @@ import {
 // Per-type icon (calm, one accent). Labels/descriptions come from i18n, never hardcoded.
 const TYPE_ICON: Record<DashboardType, LucideIcon> = {
   admin: Shield, management: BarChart2, recruitment: Users,
-  backoffice: ClipboardList, sales: Target, planning: Clock, readonly: Eye,
+  backoffice: ClipboardList, sales: Target,
+  // KD11 (DASHP36) — the two new sales-dashboard roles.
+  accountmanager: UserCog, sales_manager: Building2,
+  planning: Clock, readonly: Eye,
 }
 
 // Shape of the persisted override: hidden KPI/block ids per dashboard type.

@@ -25,7 +25,7 @@
  * scrollable and selectable, never truncated off.
  */
 import { useState, useRef, useEffect, useId } from 'react'
-import type { CSSProperties } from 'react'
+import type { CSSProperties, ReactNode } from 'react'
 import { createPortal } from 'react-dom'
 import { useTranslation } from 'react-i18next'
 import { ChevronDown, Check, Plus, X } from 'lucide-react'
@@ -40,6 +40,10 @@ const CLEAR_BUTTON_RIGHT = 26
 interface CreatableOption {
   value: string
   label: string
+  // Optional lookup icon (S-icon-1, mirrored from SelectMenu) — rendered before
+  // the label, both on the trigger (when selected) and in each menu row. Purely
+  // additive: options without it (every existing call site) render unchanged.
+  icon?: ReactNode
 }
 
 interface CreatableSelectProps {
@@ -166,6 +170,8 @@ export default function CreatableSelect({
             padding would push the chevron inward too, and it would also be overridable
             by a caller's own `style`. Applied only while the X is showing, so a caller
             that never opts in keeps its exact current layout. */}
+        {/* S-icon-1 (mirrored from SelectMenu): the selected option's own icon, if any. */}
+        {current?.icon && <span style={{ display: 'flex', flexShrink: 0 }}>{current.icon}</span>}
         <span style={{ fontSize: (style as { fontSize?: number } | undefined)?.fontSize ?? 12, flex: 1, textAlign: 'left', whiteSpace: 'nowrap', overflow: 'hidden',
           textOverflow: 'ellipsis', color: (current || value) ? 'var(--text)' : 'var(--text-muted)',
           ...(showClear ? { marginRight: CLEAR_BUTTON_SIZE } : {}) }}>
@@ -225,6 +231,8 @@ export default function CreatableSelect({
                 style={{ display: 'flex', alignItems: 'center', gap: 8, width: '100%', padding: '8px 12px',
                   textAlign: 'left', fontSize: 12, cursor: 'pointer', border: 'none',
                   background: value === o.value ? 'var(--color-primary-bg)' : 'none', color: 'var(--text)' }}>
+                {/* S-icon-1: each row shows its own option icon, if any. */}
+                {o.icon && <span style={{ display: 'flex', flexShrink: 0 }}>{o.icon}</span>}
                 <span style={{ flex: 1 }}>{o.label}</span>
                 {value === o.value && <Check size={13} style={{ color: 'var(--color-primary-text)', flexShrink: 0 }} />}
               </button>

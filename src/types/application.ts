@@ -132,6 +132,11 @@ export interface Application {
   // application entered its current phase — the status strip computes days
   // from this when the richer `stageDurations` detail array isn't loaded yet.
   currentStageEnteredAt: string | null
+  // V-appdetail-1 (§3B): true when this application sits at a requires_appointment
+  // funnel phase but carries no planned appointment — the same inconsistency flag
+  // the candidate resource already exposes (missing_appointment), read here at the
+  // application's own level so a row can flag it without a second candidate fetch.
+  missingAppointment: boolean
 }
 
 /** The enriched application model rendered by the drawer tabs. */
@@ -291,6 +296,8 @@ export interface ApiApplication {
   }>
   // APP-STAGE-DURATIONS-1: list contract's own "entered current stage at" timestamp.
   current_stage_entered_at?: string | null
+  // V-appdetail-1: mirrors CandidateResource's own missing_appointment flag.
+  missing_appointment?: boolean
   task?: string
   ai_task?: string
   ai?: { task?: string }

@@ -3,6 +3,13 @@
   "loading": "Chargement des candidatures…",
   "empty": "Aucune candidature pour le moment.",
   "error": "Impossible de charger les candidatures.",
+  "missingAppointment": "En phase d'intake, mais aucun rendez-vous encore planifié.",
+  "moveWarn": {
+    "title": "Aucun rendez-vous encore planifié",
+    "message": "Aucun rendez-vous n'est encore planifié pour la phase \"{{phase}}\". Vous pouvez tout de même déplacer, mais planifiez un rendez-vous rapidement.",
+    "confirm": "Déplacer quand même",
+    "cancel": "Annuler"
+  },
   "buckets": {
     "active": "Actives",
     "matched": "Matchées",

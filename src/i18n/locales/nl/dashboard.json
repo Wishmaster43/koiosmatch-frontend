@@ -88,7 +88,12 @@
     "shiftsUnfilled": "Onvervuld",
     "shiftsOccupancy": "Bezetting",
     "touchpoints": "Vandaag",
-    "attentionTitle": "Werk af"
+    "attentionTitle": "Werk af",
+    "expiringMatches": "Aflopende matches",
+    "staleLeads": "Stilstaande leads",
+    "staleVacancies": "Stilstaande vacatures",
+    "koiosSuggestions": "Koios-suggesties",
+    "customersByOwner": "Klanten per accountmanager"
   },
   "action": {
     "allCandidates": "Alle kandidaten",
@@ -154,5 +159,8 @@
       "conversation": "Vanuit een gesprek",
       "chat": "Vanuit chat"
     }
+  },
+  "widget": {
+    "unknown": "Onbekend"
   }
 }

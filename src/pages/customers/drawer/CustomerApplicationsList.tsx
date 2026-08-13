@@ -34,19 +34,36 @@
  * (every row already belongs to this customer). Candidate/Vacancy/Phase/Score/
  * Created mirror the applications table's own cells and phase-chip convention
  * (StatusPill) 1:1 — identical toolbar/columns/row-click in either mode.
+ *
+ * S-custlist-1: every row now carries the SAME action cluster the candidate
+ * drawer's own application row carries — pencil-edit (reuses the candidate
+ * drawer's `AddApplicationModal` in edit mode, never a second form) + an
+ * expand chevron that lazily loads `ApplicationRowDetails` (the exact
+ * candidate-drawer detail panel, reused as-is) in a small anchored popover
+ * (mirrors `ChangelogPopover`'s own anchored-FloatingPanel shape). Both are
+ * gated on the same `applications.update`/`applications.view` permissions the
+ * candidate side gates on. The candidate cell's own `EntityLink` to the
+ * application record was already in place — unchanged.
  */
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Search } from 'lucide-react'
+import { Search, Pencil, ChevronRight, ChevronDown, AlertTriangle } from 'lucide-react'
 import DataTable from '@/components/ui/DataTable'
 import type { Column } from '@/components/ui/DataTable'
 import Avatar from '@/components/ui/Avatar'
 import StatusPill from '@/components/ui/StatusPill'
 import EntityLink from '@/components/ui/EntityLink'
+import FloatingPanel from '@/components/ui/FloatingPanel'
 import StatusFilterSelect, { useStatusFilter } from '@/components/drawer/StatusFilterSelect'
 import { useNavigation } from '@/context/NavigationContext'
 import { useLookups } from '@/context/LookupsContext'
+import { useAuth } from '@/context/AuthContext'
 import { useDateFormat } from '@/lib/datetime'
+import { queryClient } from '@/lib/queryClient'
+// S-custlist-1: reuse, never fork — the exact candidate-drawer edit form and
+// detail panel (see the docblock above).
+import CandidateAddApplicationModal from '@/pages/candidates/drawer/AddApplicationModal'
+import ApplicationRowDetails from '@/pages/candidates/drawer/ApplicationRowDetails'
 import { useCustomerApplications, useApplicationsByVacancyIds } from '../hooks/useCustomerDrawerData'
 import type { Application } from '@/types/application'
 import type { Id } from '@/types/common'
@@ -59,7 +76,7 @@ type Props =
   | { vacancyIds: Id[]; vacancyIdsLoading: boolean; vacancyIdsError?: boolean }
 
 export default function CustomerApplicationsList(props: Props) {
-  const { t } = useTranslation(['customers', 'applications'])
+  const { t } = useTranslation(['customers', 'applications', 'candidates'])
   const { openEntity } = useNavigation()
   const { formatDate } = useDateFormat()
   // The tenant funnel-stage lookup — global LookupsContext, already mounted app-wide
@@ -67,6 +84,16 @@ export default function CustomerApplicationsList(props: Props) {
   // phase pill's label/colour (mirrors ApplicationsPage's own `decorate` step) and the
   // phase filter's options.
   const { funnelTypes, funnelMeta } = useLookups()
+  // S-custlist-1: same permission gates the candidate side reads for its own
+  // pencil/expand-chevron — applications.update for PATCH, applications.view for
+  // GET /applications/{id} (what the expand panel loads).
+  const auth = useAuth()
+  const canManageApplications = auth?.hasPermission?.('applications.update') ?? false
+  const canViewApplications = auth?.hasPermission?.('applications.view') ?? false
+  // Pencil target (edit modal) + expand target (detail popover) — one at a time each.
+  const [editApplicationId, setEditApplicationId] = useState<Id | null>(null)
+  const [editCandidateId, setEditCandidateId] = useState<Id | null>(null)
+  const [expandedId, setExpandedId] = useState<Id | null>(null)
 
   // Split the union into plain locals — `vacancyIds` presence on the prop object
   // is the mode switch (never passed alongside `customerId`, see the Props type
@@ -117,6 +144,14 @@ export default function CustomerApplicationsList(props: Props) {
         <span style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
           <Avatar initials={r.candidateInitials} size={22} soft />
           <EntityLink page="applications" id={r.id}>{r.candidateName}</EntityLink>
+          {/* V-appdetail-1: at a requires_appointment phase with no planned
+              appointment — icon + tooltip text, never colour/icon alone (§6). */}
+          {r.missingAppointment && (
+            <span role="img" aria-label={t('applications:missingAppointment')} title={t('applications:missingAppointment')}
+              style={{ display: 'inline-flex', flexShrink: 0 }}>
+              <AlertTriangle size={13} color="var(--color-warning)" aria-hidden="true" />
+            </span>
+          )}
         </span>
       ) },
     { key: 'vacancy', header: t('applications:cols.vacancy'), sortable: true, sortValue: r => r.vacancyTitle,
@@ -128,6 +163,40 @@ export default function CustomerApplicationsList(props: Props) {
       render: r => r.score != null ? <span style={{ fontWeight: 600 }}>{r.score}%</span> : <span style={{ color: 'var(--text-muted)' }}>—</span> },
     { key: 'created', header: t('applications:cols.created'), nowrap: true, sortable: true, sortValue: r => r.created ?? '',
       cellStyle: { color: 'var(--text-muted)', fontSize: 12 }, render: r => r.created ? formatDate(r.created) : '—' },
+    // S-custlist-1: pencil-edit + expand-with-lazy-detail — same action cluster
+    // the candidate drawer's own ApplicationRow carries. Never rendered when
+    // the viewer holds neither permission (§3: no dead affordance).
+    ...(canManageApplications || canViewApplications ? [{
+      key: 'actions', header: '', align: 'right' as const,
+      render: (r: Application) => (
+        <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 6 }} onClick={e => e.stopPropagation()}>
+          {canManageApplications && r.id != null && (
+            <button type="button" onClick={() => { setEditCandidateId(r.candidateId ?? null); setEditApplicationId(r.id ?? null) }}
+              title={t('candidates:work.editApplication')} aria-label={t('candidates:work.editApplication')}
+              style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: 22, height: 22, border: 'none', background: 'none', borderRadius: 5, cursor: 'pointer', color: 'var(--text-muted)' }}>
+              <Pencil size={12} />
+            </button>
+          )}
+          {canViewApplications && r.id != null && (
+            <span style={{ position: 'relative', display: 'inline-flex' }}>
+              <button type="button" onClick={() => setExpandedId(x => x === r.id ? null : (r.id ?? null))}
+                title={expandedId === r.id ? t('candidates:work.hideDetails') : t('candidates:work.showDetails')}
+                aria-label={expandedId === r.id ? t('candidates:work.hideDetails') : t('candidates:work.showDetails')}
+                aria-expanded={expandedId === r.id} aria-haspopup="dialog"
+                style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: 22, height: 22, border: 'none', background: 'none', borderRadius: 5, cursor: 'pointer', color: 'var(--text-muted)' }}>
+                {expandedId === r.id ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
+              </button>
+              {/* Lazy detail — the SAME candidate-drawer panel, only fetched on first expand (§8). */}
+              <FloatingPanel open={expandedId === r.id} onClose={() => setExpandedId(null)}
+                ariaLabel={t('candidates:work.showDetails')} width={360} persistKey="customer-application-row"
+                bodyStyle={{ padding: 0 }} hideClose>
+                <ApplicationRowDetails applicationId={r.id} id={`custapp-panel-${r.id}`} labelledBy={`custapp-toggle-${r.id}`} />
+              </FloatingPanel>
+            </span>
+          )}
+        </span>
+      ),
+    }] : []),
   ]
 
   // Explicit ERROR state — never a table that silently renders as "empty".
@@ -150,6 +219,19 @@ export default function CustomerApplicationsList(props: Props) {
       </div>
       <DataTable columns={columns} rows={filteredRows} loading={loading} loadingText={t('applications:loading')}
         emptyText={t('applications:empty')} onRowClick={r => r.id != null && openEntity('applications', r.id)} />
+
+      {/* S-custlist-1 reuse: the SAME candidate-drawer edit form, EDIT mode
+          (PATCH /applications/{id}) — never a second form. Refetches both
+          possible data sources on success (only the active mode's query is
+          ever actually subscribed, the other is a harmless no-op match). */}
+      {editApplicationId != null && editCandidateId != null && (
+        <CandidateAddApplicationModal candidateId={editCandidateId} editApplicationId={editApplicationId}
+          onClose={() => { setEditApplicationId(null); setEditCandidateId(null) }}
+          onCreated={() => {
+            setEditApplicationId(null); setEditCandidateId(null)
+            queryClient.invalidateQueries({ predicate: q => Array.isArray(q.queryKey) && q.queryKey.includes('applications') })
+          }} />
+      )}
     </div>
   )
 }

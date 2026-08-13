@@ -11,7 +11,7 @@
  * when the overlay first appears.
  */
 import { useState, useEffect } from 'react'
-import type { Dispatch, SetStateAction } from 'react'
+import type { Dispatch, ReactNode, SetStateAction } from 'react'
 import { useTranslation } from 'react-i18next'
 import type { TFunction } from 'i18next'
 import api, { unwrapList } from '@/lib/api'
@@ -19,6 +19,7 @@ import FloatingPanel from '@/components/ui/FloatingPanel'
 // G34: the house searchable dropdown replaces every native <select> in this
 // file (candidate/customer/status relational pickers, never a raw <select>).
 import CreatableSelect from '@/components/ui/CreatableSelect'
+import LookupIcon from '@/components/ui/LookupIcon'
 import { Z } from '@/lib/zIndexScale'
 import { BTN_H } from '@/config/buttonMetrics'
 import type { VacancyOption } from '../hooks/useVacancyOptions'
@@ -27,6 +28,10 @@ import type { VacancyOption } from '../hooks/useVacancyOptions'
 const STATUS_REASON_MAX = 255
 
 interface MatchRow { id?: string | number; vacancyTitle?: string; client?: string }
+// BLACKLIST-ICON-1: the blacklist-reason picker carries the full lookup object
+// (value/label/icon) — mirrors SelectMenu's S-icon-1 shape now that CreatableSelect
+// supports it, instead of the previous bare `string[]` of names.
+interface BlacklistReasonOption { value: string; label: string; icon?: ReactNode }
 // isBlacklist → the reason is the lookup-backed blacklist_reason (dropdown from
 // /candidate-blacklist-reasons; BE validates Rule::exists), never free text.
 export interface StatusModalState { target: string; reason: string; date: string; needReason: boolean; needDate: boolean; isBlacklist?: boolean }
@@ -95,7 +100,7 @@ function MatchPickModal({
 // Status change asking a reason and/or a "available again" date (status flags).
 function StatusReasonModal({
   statusModal, setStatusModal, onConfirmStatus, blReasons, t,
-}: Pick<Props, 'setStatusModal' | 'onConfirmStatus'> & { statusModal: StatusModalState; blReasons: string[]; t: TFunction }) {
+}: Pick<Props, 'setStatusModal' | 'onConfirmStatus'> & { statusModal: StatusModalState; blReasons: BlacklistReasonOption[]; t: TFunction }) {
   const close = () => setStatusModal(null)
   return (
     // POPUP-SLEEP-1: migrated onto the shared FloatingPanel — draggable header,
@@ -153,11 +158,18 @@ export default function CandidateStatusModals({
 
   // Blacklist reasons (tenant lookup) — loaded once when a blacklist prompt opens; the
   // backend validates against blacklist_reasons.name, so free text would 422.
-  const [blReasons, setBlReasons] = useState<string[]>([])
+  const [blReasons, setBlReasons] = useState<BlacklistReasonOption[]>([])
   useEffect(() => {
     if (!statusModal?.isBlacklist || blReasons.length) return
     api.get('/candidate-blacklist-reasons')
-      .then(r => setBlReasons(((unwrapList(r).rows) as Array<{ name?: string }>).map(x => String(x.name ?? '')).filter(Boolean)))
+      .then(r => setBlReasons(
+        ((unwrapList(r).rows) as Array<{ name?: string; icon?: string }>)
+          .filter(x => x.name)
+          // BLACKLIST-ICON-1: full lookup object, mirroring S-icon-1 — the value the
+          // BE validates against stays `name` (unchanged contract), the icon just
+          // rides alongside it for display, resolved via the shared LookupIcon.
+          .map(x => ({ value: String(x.name), label: String(x.name), icon: x.icon ? <LookupIcon icon={x.icon} size={12} /> : undefined })),
+      ))
       .catch(() => setBlReasons([]))
   }, [statusModal?.isBlacklist, blReasons.length])
 

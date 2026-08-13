@@ -315,7 +315,9 @@
     "planIntake": "Intake plannen",
     "addApplication": "Sollicitatie",
     "searchPlaceholder": "Zoek op kandidaatnaam…",
-    "noMatch": "Geen sollicitaties gevonden binnen deze filters."
+    "noMatch": "Geen sollicitaties gevonden binnen deze filters.",
+    "of": "van",
+    "detachDone": "Sollicitatie ontkoppeld"
   },
   "candidateSearch": {
     "noLocation": "Deze vacature heeft nog geen locatie(-coördinaten) — werk eerst het adres bij, dan verschijnt hier de kaart.",

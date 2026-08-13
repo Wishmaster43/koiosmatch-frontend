@@ -7,11 +7,14 @@
  * are the confirmed values (docs/plans/DASHBOARD-PLAN.md): never diverge. `/auth/me`
  * returns roles[].dashboard_type.
  */
-export const DASHBOARD_TYPES = ['admin', 'management', 'recruitment', 'backoffice', 'sales', 'planning', 'readonly'] as const
+// KD11 (DASHP36, 2026-08-13) — two new sales-dashboard roles: `accountmanager`
+// (own-customer scope) and `sales_manager` (tenant-wide customer dimension +
+// the `customers_by_owner` breakdown). Server-resolved scoping, see CONTRACT-CHANGELOG.
+export const DASHBOARD_TYPES = ['admin', 'management', 'recruitment', 'backoffice', 'sales', 'accountmanager', 'sales_manager', 'planning', 'readonly'] as const
 export type DashboardType = typeof DASHBOARD_TYPES[number]
 
 // Multi-role users: the richest dashboard wins.
-export const TYPE_PRECEDENCE: DashboardType[] = ['admin', 'management', 'recruitment', 'backoffice', 'sales', 'planning', 'readonly']
+export const TYPE_PRECEDENCE: DashboardType[] = ['admin', 'management', 'recruitment', 'backoffice', 'sales_manager', 'sales', 'accountmanager', 'planning', 'readonly']
 
 // Types allowed to switch/preview every role's view (see everything).
 export const SUPER_VIEWS: DashboardType[] = ['admin', 'management']
@@ -27,6 +30,11 @@ export const KPI_ROWS: Record<DashboardType, string[]> = {
   recruitment: ['candidates', 'never', 'stale', 'tasksOverdue', 'failedWf', 'uncalledCallist', 'intakes', 'tooLongInStage', 'missingApptApps', 'closingSoon', 'staleStatusVac'],
   backoffice:  ['tasks', 'placements', 'missingDocs', 'expiringContracts', 'couplingErrors', 'incompleteRuns'],
   sales:       ['opps', 'pipeline', 'expiringOpps', 'fillRate', 'placements', 'activeConv'],
+  // KD11 — own-customer scope (server-resolved); same KPI vocabulary as `sales`,
+  // the backend narrows the underlying query to the account manager's customers.
+  accountmanager: ['opps', 'pipeline', 'expiringOpps', 'placements', 'activeConv'],
+  // KD11 — tenant-wide over the customer dimension (richest sales view).
+  sales_manager:  ['opps', 'pipeline', 'expiringOpps', 'fillRate', 'placements', 'activeConv'],
   planning:    ['failedWf', 'incompleteRuns', 'openShifts', 'occupancy'],
   readonly:    ['candidates', 'tasks', 'stale'],
 }
@@ -38,6 +46,12 @@ export const DASHBOARD_TEMPLATES: Record<DashboardType, string[]> = {
   recruitment: ['block.touchpoints', 'block.attention', 'chart.status', 'chart.funnel', 'chart.funnelConversion', 'chart.weekly', 'list.candidates', 'list.applications', 'list.conversations', 'list.runs'],
   backoffice: ['chart.status', 'chart.funnel', 'list.applications', 'list.runs'],
   sales: ['chart.oppStage', 'chart.status', 'list.leads'],
+  // KD11 — the two sales-dashboard TEMPLATES on the DASHP36 widget-feed keys
+  // (expiring_matches/stale_leads/stale_vacancies/koios_suggestions), equal
+  // footprint via the shared WidgetListBlock (config-driven, §3A). `sales_manager`
+  // additionally gets the tenant-wide `customers_by_owner` breakdown.
+  accountmanager: ['chart.oppStage', 'chart.status', 'list.leads', 'block.expiringMatches', 'block.staleLeads', 'block.staleVacancies', 'block.koiosSuggestions'],
+  sales_manager:  ['chart.oppStage', 'chart.status', 'list.leads', 'block.expiringMatches', 'block.staleLeads', 'block.staleVacancies', 'block.koiosSuggestions', 'block.customersByOwner'],
   planning: ['block.shifts', 'chart.weekly', 'list.runs', 'list.conversations'],
   readonly: ['chart.status', 'chart.funnel'],
 }
@@ -67,6 +81,10 @@ export const BLOCK_LABEL_KEY: Record<string, string> = {
   'list.conversations': 'block.recentConversations', 'list.runs': 'block.recentRuns', 'list.leads': 'block.leadsPipeline',
   'block.touchpoints': 'block.touchpoints', 'block.attention': 'block.attentionTitle',
   'block.shifts': 'block.shifts',
+  // KD11 widget feeds (DASHP36).
+  'block.expiringMatches': 'block.expiringMatches', 'block.staleLeads': 'block.staleLeads',
+  'block.staleVacancies': 'block.staleVacancies', 'block.koiosSuggestions': 'block.koiosSuggestions',
+  'block.customersByOwner': 'block.customersByOwner',
 }
 
 // Is a chart/list block visible for the active dashboard type?

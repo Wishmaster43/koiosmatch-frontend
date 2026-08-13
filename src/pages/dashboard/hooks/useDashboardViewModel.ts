@@ -79,6 +79,52 @@ export function useDashboardViewModel({
       status: m.label, statusColor: m.color, time: fmtWhen(a.created_at) }
   }), [dash, funnelMeta])
 
+  // KD11 (DASHP36) — the four sales-dashboard widget feeds, mapped to the shared
+  // WidgetListBlock row shape. Each self-hides via WidgetListBlock when empty; the
+  // feed itself is absent (not `[]`) for a role without the view-permission, so
+  // `?? []` here just means "nothing to show", never a fabricated zero-state.
+  const expiringMatchesRows = useMemo(() => (dash?.expiring_matches ?? []).map(m => ({
+    key: m.id ?? `${m.candidate_id}-${m.customer_id}`,
+    // candidate_name is PII and `null` without candidates.view (DASHP36) — fall
+    // back to the customer so the row still means something, never blank.
+    primary: m.candidate_name || m.customer_name || '—',
+    secondary: m.candidate_name ? m.customer_name : undefined,
+    meta: fmtWhen(m.end_date),
+    onClick: m.id != null ? () => onNavigate?.('matches', { open: m.id }) : undefined,
+  })), [dash, onNavigate])
+
+  const staleLeadsRows = useMemo(() => (dash?.stale_leads ?? []).map((l, i) => ({
+    key: l.id ?? l.name ?? `row-${i}`,
+    primary: l.name || '—',
+    meta: fmtWhen(l.phase_changed_at),
+    onClick: l.id != null ? () => onNavigate?.('candidates', { open: l.id }) : undefined,
+  })), [dash, onNavigate])
+
+  const staleVacanciesRows = useMemo(() => (dash?.stale_vacancies ?? []).map((v, i) => ({
+    key: v.id ?? v.title ?? `row-${i}`,
+    primary: v.title || '—',
+    meta: fmtWhen(v.published_at),
+    onClick: v.id != null ? () => onNavigate?.('vacancies', { open: v.id }) : undefined,
+  })), [dash, onNavigate])
+
+  const koiosSuggestionsRows = useMemo(() => (dash?.koios_suggestions ?? []).map((s, i) => ({
+    key: s.vacancy_id ?? s.vacancy_title ?? `row-${i}`,
+    primary: s.vacancy_title || '—',
+    meta: s.suggestions_count != null ? formatNumber(s.suggestions_count) : undefined,
+    onClick: s.vacancy_id != null ? () => onNavigate?.('vacancies', { open: s.vacancy_id }) : undefined,
+  })), [dash, onNavigate, formatNumber])
+
+  // sales_manager only — a breakdown, not a record list, so it never navigates.
+  const customersByOwnerRows = useMemo(() => (dash?.customers_by_owner ?? []).map((c, i) => ({
+    // Index fallback (stable per render), never Math.random (a fresh key per
+    // render would remount the row). Aggregates carry no onClick — the explicit
+    // undefined keeps every widget row the same shape (test relies on it).
+    key: c.owner_id ?? c.name ?? `row-${i}`,
+    primary: c.name || '—',
+    meta: c.count != null ? formatNumber(c.count) : undefined,
+    onClick: undefined as (() => void) | undefined,
+  })), [dash, formatNumber])
+
   const recentLeads = useMemo(() => (dash?.recent?.leads ?? []).map(l => ({
     id: l.id, name: l.name, contact: l.contact_name || '—',
     status: humanize(l.status_value), statusColor: 'var(--color-secondary)', time: fmtWhen(l.created_at),
@@ -173,6 +219,9 @@ export function useDashboardViewModel({
     missingApptApps: 'app_missing_appointment',
     closingSoon: 'vac_closing_soon',
     staleStatusVac: 'vac_stale_status',
+    // DASHP36: `null` until the tenant has flagged an `is_cv` document type —
+    // the tile must not render a fake "0" in the meantime.
+    missingDocs: 'missing_documents',
   }
   // Every role ALWAYS gets its own full KPI row (never hidden).
   const kpis: DashboardKpi[] = kpiRow(activeType)
@@ -186,6 +235,8 @@ export function useDashboardViewModel({
     vis, statusData, recruiterData, funnelData, oppStageData,
     recentCandidates, recentApplications, recentLeads, runs, conversations,
     showRuns, showConv, trendData, trendSeries, att, kpis,
+    // KD11 widget feeds (DASHP36).
+    expiringMatchesRows, staleLeadsRows, staleVacanciesRows, koiosSuggestionsRows, customersByOwnerRows,
   }
 }
 

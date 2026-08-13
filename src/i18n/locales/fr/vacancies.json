@@ -315,7 +315,9 @@
     "planIntake": "Planifier un entretien",
     "addApplication": "Candidature",
     "searchPlaceholder": "Rechercher par nom de candidat…",
-    "noMatch": "Aucune candidature trouvée avec ces filtres."
+    "noMatch": "Aucune candidature trouvée avec ces filtres.",
+    "of": "sur",
+    "detachDone": "Candidature dissociée"
   },
   "candidateSearch": {
     "noLocation": "Cette vacance n'a pas encore de coordonnées de localisation — mettez d'abord à jour l'adresse, la carte apparaîtra ensuite ici.",

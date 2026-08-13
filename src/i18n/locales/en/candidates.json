@@ -603,6 +603,8 @@
     "timelinePlacedAt": "Placed at {{customer}}",
     "timelineOngoing": "present",
     "timelineVia": "via {{name}}",
+    "timelineApplication": "Application:",
+    "timelineApplicationGeneric": "Application",
     "searchPlaceholder": "Search notes…",
     "deleteNote": "Delete note",
     "deleteConfirm": "Are you sure you want to delete this note?"

@@ -100,6 +100,66 @@ describe('useApplicationDrawerActions · handleReject', () => {
   })
 })
 
+// V-appdetail-2: a move onto a requires_appointment phase for a row with no
+// appointment planned yet warns first (never blocks) — every other move stays
+// exactly as before, unintercepted.
+describe('useApplicationDrawerActions · handleMove (V-appdetail-2 appointment warn)', () => {
+  const FUNNEL_APPT: LookupItem[] = [
+    { value: 'applied', label: 'Gesolliciteerd', color: 'slate' },
+    { value: 'invited', label: 'Uitgenodigd', color: 'purple', requires_appointment: true },
+  ]
+  function harnessAppt(initial: Application[]) {
+    return renderHook(() => {
+      const [applications, setApplications] = useState<Application[]>(initial)
+      const [, setTotal] = useState(initial.length)
+      const actions = useApplicationDrawerActions({
+        applications, wideRows: [], setApplications, setTotal,
+        funnelTypes: FUNNEL_APPT, users: [], bucket: 'active',
+        decorate: <T,>(a: T) => a, t,
+      })
+      return { applications, actions }
+    })
+  }
+
+  beforeEach(() => { vi.clearAllMocks() })
+
+  it('holds the move as pending instead of moving immediately, and never PATCHes yet', () => {
+    const { result } = harnessAppt([app({ phaseKey: 'applied', missingAppointment: true } as Partial<Application>)])
+    act(() => result.current.actions.handleMove(1, 'invited'))
+    expect(result.current.applications[0].phaseKey).toBe('applied') // not moved yet
+    expect(apiPatch).not.toHaveBeenCalled()
+    expect(result.current.actions.pendingMove).toEqual({ id: 1, phaseKey: 'invited', phaseLabel: 'Uitgenodigd' })
+  })
+
+  it('confirming the pending move proceeds with the exact same PATCH an unintercepted move would send', async () => {
+    apiPatch.mockResolvedValue({ data: { data: {} } })
+    const { result } = harnessAppt([app({ phaseKey: 'applied', missingAppointment: true } as Partial<Application>)])
+    act(() => result.current.actions.handleMove(1, 'invited'))
+    act(() => result.current.actions.confirmPendingMove())
+    expect(result.current.applications[0].phaseKey).toBe('invited')
+    expect(apiPatch).toHaveBeenCalledWith('/applications/1', { phase_key: 'invited' })
+    expect(result.current.actions.pendingMove).toBeNull()
+  })
+
+  it('cancelling drops the pending move — the application stays on its current phase', () => {
+    const { result } = harnessAppt([app({ phaseKey: 'applied', missingAppointment: true } as Partial<Application>)])
+    act(() => result.current.actions.handleMove(1, 'invited'))
+    act(() => result.current.actions.cancelPendingMove())
+    expect(result.current.actions.pendingMove).toBeNull()
+    expect(result.current.applications[0].phaseKey).toBe('applied')
+    expect(apiPatch).not.toHaveBeenCalled()
+  })
+
+  it('a move that is NOT missing an appointment proceeds immediately, unintercepted', () => {
+    apiPatch.mockResolvedValue({ data: { data: {} } })
+    const { result } = harnessAppt([app({ phaseKey: 'applied', missingAppointment: false } as Partial<Application>)])
+    act(() => result.current.actions.handleMove(1, 'invited'))
+    expect(result.current.applications[0].phaseKey).toBe('invited')
+    expect(apiPatch).toHaveBeenCalledWith('/applications/1', { phase_key: 'invited' })
+    expect(result.current.actions.pendingMove).toBeNull()
+  })
+})
+
 // OPTIMISTIC-REVERT-1 (audit 2026-07-27): handleOwner/handleAdjustScore/handleUpdateCustomFields
 // used to end in a bare toast on failure, leaving the optimistic write on screen as if it had
 // saved. These tests assert the SEAM (request body) and the revert of BOTH state slices.

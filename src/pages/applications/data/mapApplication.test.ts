@@ -36,6 +36,12 @@ describe('mapApplication', () => {
     expect(mapApplication({ id: 7, phase_key: 'aangenomen' }).bucket).toBe('active')
   })
 
+  // V-appdetail-1: mirrors CandidateResource's own missing_appointment flag.
+  it('maps missing_appointment to missingAppointment, tolerant/false when absent', () => {
+    expect(mapApplication({ id: 8, missing_appointment: true }).missingAppointment).toBe(true)
+    expect(mapApplication({ id: 9 }).missingAppointment).toBe(false)
+  })
+
   // S12/13: ApplicationListResource sends the vacancy's client_id as customer_id.
   it('maps customer_id to customerId, null when absent', () => {
     expect(mapApplication({ id: 8, customer_id: 'cust1' }).customerId).toBe('cust1')

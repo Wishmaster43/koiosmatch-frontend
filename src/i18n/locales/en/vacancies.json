@@ -315,7 +315,9 @@
     "planIntake": "Plan intake",
     "addApplication": "Application",
     "searchPlaceholder": "Search by candidate name…",
-    "noMatch": "No applications found within these filters."
+    "noMatch": "No applications found within these filters.",
+    "of": "of",
+    "detachDone": "Application detached"
   },
   "candidateSearch": {
     "noLocation": "This vacancy has no location (coordinates) yet — update the address first, then the map appears here.",

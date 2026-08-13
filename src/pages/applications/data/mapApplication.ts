@@ -151,6 +151,8 @@ export function mapApplication(a: ApiApplication = {}, funnelTypes: LookupItem[]
     deletedAt: a.deleted_at ?? null,
     // APP-STAGE-DURATIONS-1: the list contract's own "entered current stage" timestamp.
     currentStageEnteredAt: a.current_stage_entered_at ?? null,
+    // V-appdetail-1: requires_appointment phase with no planned appointment.
+    missingAppointment: Boolean(a.missing_appointment),
   }
 }
 

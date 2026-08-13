@@ -3,6 +3,13 @@
   "loading": "Cargando candidaturas…",
   "empty": "Aún no hay candidaturas.",
   "error": "No se pudieron cargar las candidaturas.",
+  "missingAppointment": "En una fase de intake, pero aún no hay una cita planificada.",
+  "moveWarn": {
+    "title": "Aún no hay una cita planificada",
+    "message": "Todavía no hay una cita planificada para la fase \"{{phase}}\". Puedes moverla de todos modos, pero planifica una cita pronto.",
+    "confirm": "Mover de todos modos",
+    "cancel": "Cancelar"
+  },
   "buckets": {
     "active": "Activas",
     "matched": "Emparejadas",

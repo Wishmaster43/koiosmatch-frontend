@@ -16,6 +16,7 @@ import ActivityListsRow from './blocks/ActivityListsRow'
 import ShiftsSummary from './blocks/ShiftsSummary'
 import TouchpointsFeed from './blocks/TouchpointsFeed'
 import AttentionCandidates from './blocks/AttentionCandidates'
+import WidgetListBlock from './blocks/WidgetListBlock'
 import KoiosForYouCard from './KoiosForYouCard'
 import type { DashStats, DashOpp, DashData, DashAppStats, DashVacStats } from '@/types/dashboard'
 import { useAllSettings, getJsonSetting, getBoolSetting } from '@/lib/settings/useAllSettings'
@@ -81,6 +82,7 @@ export default function Dashboard({ onNavigate, viewType }: { onNavigate?: (page
     vis, statusData, recruiterData, funnelData, oppStageData,
     recentCandidates, recentApplications, recentLeads, runs, conversations,
     showRuns, showConv, trendData, trendSeries, att, kpis,
+    expiringMatchesRows, staleLeadsRows, staleVacanciesRows, koiosSuggestionsRows, customersByOwnerRows,
   } = useDashboardViewModel({
     t, formatNumber, stats, opp, dash, dashCharts, statusMeta, funnelMeta, funnelTypes,
     activeType, hiddenBlocks, hiddenKpis, hasPlanning, valueInHours, candidateTotalLabel,
@@ -157,6 +159,23 @@ export default function Dashboard({ onNavigate, viewType }: { onNavigate?: (page
           {vis('block.shifts') && (
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 16 }}>
             {vis('block.shifts') && <ShiftsSummary open={att.open_shifts} filled={att.filled_shifts} unfilled={att.unfilled_shifts} occupancy={att.occupancy} onOpen={() => onNavigate?.('planning')} />}
+          </div>
+          )}
+
+          {/* KD11 (DASHP36) — the two sales-dashboard TEMPLATES' widget feeds:
+              equal-footprint WidgetListBlock tiles, config-driven per role via
+              templates.ts (accountmanager/sales_manager). Self-hide when empty. */}
+          {(vis('block.expiringMatches') || vis('block.staleLeads') || vis('block.staleVacancies') || vis('block.koiosSuggestions')) && (
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 16 }}>
+            {vis('block.expiringMatches') && <WidgetListBlock title={t('block.expiringMatches')} rows={expiringMatchesRows} />}
+            {vis('block.staleLeads') && <WidgetListBlock title={t('block.staleLeads')} rows={staleLeadsRows} />}
+            {vis('block.staleVacancies') && <WidgetListBlock title={t('block.staleVacancies')} rows={staleVacanciesRows} />}
+            {vis('block.koiosSuggestions') && <WidgetListBlock title={t('block.koiosSuggestions')} rows={koiosSuggestionsRows} />}
+          </div>
+          )}
+          {vis('block.customersByOwner') && (
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: 16, marginBottom: 16 }}>
+            <WidgetListBlock title={t('block.customersByOwner')} rows={customersByOwnerRows} />
           </div>
           )}
 

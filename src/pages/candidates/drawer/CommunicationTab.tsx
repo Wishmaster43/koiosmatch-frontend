@@ -1,7 +1,7 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import type { ComponentType } from 'react'
 import { useTranslation } from 'react-i18next'
-import { MessageCircle } from 'lucide-react'
+import { MessageCircle, Briefcase } from 'lucide-react'
 import { useDateFormat } from '@/lib/datetime'
 import NotesTabJs from '@/components/drawer/tabs/NotesTab'
 import SubTabBar from '@/components/drawer/SubTabBar'
@@ -15,6 +15,7 @@ import StartConversationModal from './StartConversationModal'
 import { useNoteTypes, SYSTEM_NOTE_TYPES } from '@/lib/useNoteTypes'
 import { useLastContactTypes } from '@/lib/useLastContactTypes'
 import { useCandidateNotes } from '@/pages/candidates/hooks/useCandidateNotes'
+import { mergeTimelineEvents } from './mergeTimelineEvents'
 import type { Candidate } from '@/types/candidate'
 
 type AnyProps = Record<string, unknown>
@@ -118,6 +119,21 @@ export default function CommunicationTab({ c, onSave, onEditStatusEvent, initial
   // plain `ev.text`/`ev.description` line unchanged (honest gate: nothing renders
   // differently until the backend actually ships the event).
   const renderMatchTimeline = (ev: Record<string, unknown>) => {
+    // B24-TAB: application events get a small Briefcase icon so the merged Tijdlijn
+    // reads which kind of event a row is at a glance (icon + text, never colour-only, §6).
+    if (ev.kind === 'application') {
+      return (
+        <div style={{ display: 'flex', alignItems: 'flex-start', gap: 6 }}>
+          <Briefcase size={13} style={{ color: 'var(--text-muted)', marginTop: 1, flexShrink: 0 }} aria-hidden="true" />
+          <div>
+            <div>{ev.text as string}</div>
+            {typeof ev.meta === 'string' && ev.meta && (
+              <div style={{ marginTop: 2, fontSize: 11, color: 'var(--text-muted)' }}>{ev.meta}</div>
+            )}
+          </div>
+        </div>
+      )
+    }
     const ctx = matchContext(ev)
     if (!ctx) return null
     const customer = typeof ctx.customer_name === 'string' ? ctx.customer_name : undefined
@@ -143,10 +159,41 @@ export default function CommunicationTab({ c, onSave, onEditStatusEvent, initial
     )
   }
 
+  // B24-TAB: application/funnel events, mapped to the shared TimelineEvent shape
+  // (`kind: 'application'`) so mergeTimelineEvents can interleave them with the
+  // status/system events already carried on c.timeline — one chronological read
+  // instead of two disjoint lists. Tolerant of the untyped `Loose` application
+  // shape; an application with no usable date sorts last (never crashes/jumps top).
+  const applicationEvents = (c.applications ?? []).map((app, i) => {
+    const a = app as Record<string, unknown>
+    const vacancy = (a.vacancy as Record<string, unknown> | undefined)
+    const title = (typeof a.vacancy_title === 'string' && a.vacancy_title)
+      || (typeof vacancy?.title === 'string' ? vacancy.title : undefined)
+      || (typeof a.function_title === 'string' ? a.function_title : undefined)
+    const stage = typeof a.funnel_stage_label === 'string' ? a.funnel_stage_label
+      : (typeof a.stage === 'string' ? a.stage : undefined)
+    return {
+      id: `app-${(a.id as string | number | undefined) ?? i}`,
+      kind: 'application' as const,
+      time: (a.created_at as string | undefined) ?? (a.updated_at as string | undefined),
+      // Title built with plain concatenation (not t() interpolation) so the value
+      // is never swallowed by a raw-key i18n test double, mirroring renderMatchTimeline.
+      text: title ? `${t('communication.timelineApplication')} ${title}` : t('communication.timelineApplicationGeneric'),
+      meta: stage,
+    }
+  })
+  // Chronological merge (B24-TAB) — status/system events (c.timeline) interleaved
+  // with application events, newest-first, via the tested mergeTimelineEvents util.
+  const mergedTimeline = useMemo(
+    () => mergeTimelineEvents(c.timeline ?? [], applicationEvents),
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- c.timeline/applications are new arrays per parent render; length is a cheap-enough proxy to avoid re-sorting every keystroke elsewhere in the drawer.
+    [c.timeline, c.applications],
+  )
+
   // Shared NotesTab props — each sub-tab renders exactly one of its sections.
   const notesProps = {
     notes: userNotes, onAddNote: addNote, onEditNote: editUserNote, onDeleteNote: deleteUserNote,
-    timeline: c.timeline ?? [], systemNotes,
+    timeline: mergedTimeline, systemNotes,
     noteTypes: writableTypes, chipTypes: allNoteTypes, channels, authorInitials: c.ownerInitials, timelineName: c.name,
     timelineInitials: c.initials,
     // Job A pencil on the "Statuswissel" timeline row — see the prop comment above.

@@ -581,6 +581,8 @@
     "timelinePlacedAt": "Platziert bei {{customer}}",
     "timelineOngoing": "heute",
     "timelineVia": "über {{name}}",
+    "timelineApplication": "Bewerbung:",
+    "timelineApplicationGeneric": "Bewerbung",
     "searchPlaceholder": "Notizen suchen…",
     "deleteNote": "Notiz löschen",
     "deleteConfirm": "Möchten Sie diese Notiz wirklich löschen?"

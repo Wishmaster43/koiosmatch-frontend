@@ -17,6 +17,12 @@ vi.mock('@/context/VacancyLookupsContext', () => ({
 vi.mock('@/lib/api', () => ({ default: { get: vi.fn(() => Promise.resolve({ data: { data: {} } })) }, unwrap: (r: unknown) => r }))
 vi.mock('@/pages/candidates/drawer/PlanIntakeModal', () => ({ default: () => null }))
 vi.mock('@/pages/applications/AddApplicationModal', () => ({ default: () => null }))
+vi.mock('@/pages/candidates/drawer/AddApplicationModal', () => ({ default: () => null }))
+vi.mock('@/pages/candidates/drawer/DetachApplicationModal', () => ({ default: () => null }))
+// Reused row (S-vacapp-1) pulls in useDateFormat, which pulls in the real i18n
+// init — mocked out exactly like WorkTab.test.tsx so this file stays on the
+// same "untranslated raw key" test convention as the rest of this suite.
+vi.mock('@/lib/datetime', () => ({ useDateFormat: () => ({ formatDate: (v: string) => `fmt(${v})`, locale: 'nl-NL' }) }))
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any -- raw API-shaped fixture, mapVacancyDetail's own input type
 const vacancy = (applications: any[]) => mapVacancyDetail({ id: 'v1', title: 'Verpleegkundige', applications, applicationsByPhase: {} })
@@ -70,5 +76,51 @@ describe('ApplicantsTab · phase chips are clickable filters (V-count-1)', () =>
     await userEvent.click(appliedChip)
     expect(appliedChip).toHaveAttribute('aria-pressed', 'false')
     expect(screen.getByText('Piet Pietersen')).toBeInTheDocument()
+  })
+})
+
+// S-vacapp-1: the applicant row REUSES the candidate drawer's own ApplicationRow
+// (record EntityLink, pencil-edit, reason-gated unlink, lazy detail, pagination)
+// — never a second, forked row implementation.
+describe('ApplicantsTab · reuses the candidate drawer ApplicationRow (S-vacapp-1)', () => {
+  it('links each row to the APPLICATION record (not a second, forked link)', () => {
+    render(<ApplicantsTab vacancy={vacancy([
+      { id: 'a1', candidate_id: 'c1', candidate_name: 'Jan Jansen', phase: { value: 'applied' } },
+    ])} />)
+    // The reused row's own accessible "open in new tab" affordance proves
+    // ApplicationRow (not a hand-rolled row) rendered for this applicant.
+    expect(screen.getAllByTitle('openInNewTab').length).toBeGreaterThan(0)
+  })
+
+  it('hides pencil/unlink without applications.update, shows them with it', async () => {
+    vi.doMock('@/context/AuthContext', () => ({ useAuth: () => ({ hasPermission: () => false }) }))
+    const { default: NoPerm } = await import('./ApplicantsTab')
+    const { unmount } = render(<NoPerm vacancy={vacancy([
+      { id: 'a1', candidate_id: 'c1', candidate_name: 'Jan Jansen', phase: { value: 'applied' } },
+    ])} />)
+    expect(screen.queryByTitle('work.editApplication')).toBeNull()
+    expect(screen.queryByTitle('work.detachApplication')).toBeNull()
+    unmount()
+
+    vi.resetModules()
+    vi.doMock('@/context/AuthContext', () => ({ useAuth: () => ({ hasPermission: () => true }) }))
+    const { default: WithPerm } = await import('./ApplicantsTab')
+    render(<WithPerm vacancy={vacancy([
+      { id: 'a1', candidate_id: 'c1', candidate_name: 'Jan Jansen', phase: { value: 'applied' } },
+    ])} />)
+    expect(screen.getByTitle('work.editApplication')).toBeInTheDocument()
+    expect(screen.getByTitle('work.detachApplication')).toBeInTheDocument()
+  })
+
+  it('paginates at 5 rows per page (mirrors WorkTab)', async () => {
+    const apps = Array.from({ length: 6 }, (_, i) => ({
+      id: `a${i}`, candidate_id: `c${i}`, candidate_name: `Candidate ${i}`, phase: { value: 'applied' },
+    }))
+    render(<ApplicantsTab vacancy={vacancy(apps)} />)
+    expect(screen.getByText('Candidate 0')).toBeInTheDocument()
+    expect(screen.queryByText('Candidate 5')).toBeNull()
+    await userEvent.click(screen.getByText('›'))
+    expect(screen.getByText('Candidate 5')).toBeInTheDocument()
+    expect(screen.queryByText('Candidate 0')).toBeNull()
   })
 })

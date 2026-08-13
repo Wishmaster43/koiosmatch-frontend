@@ -3,6 +3,13 @@
   "loading": "Loading applications…",
   "empty": "No applications yet.",
   "error": "Couldn't load applications.",
+  "missingAppointment": "At an intake phase with no appointment planned yet.",
+  "moveWarn": {
+    "title": "No appointment planned yet",
+    "message": "This candidate has no appointment planned for the \"{{phase}}\" phase. You can still move it, but plan an appointment soon.",
+    "confirm": "Move anyway",
+    "cancel": "Cancel"
+  },
   "buckets": {
     "active": "Active",
     "matched": "Matched",

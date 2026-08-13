@@ -315,7 +315,9 @@
     "planIntake": "Planificar intake",
     "addApplication": "Candidatura",
     "searchPlaceholder": "Buscar por nombre de candidato…",
-    "noMatch": "No se encontraron solicitudes con estos filtros."
+    "noMatch": "No se encontraron solicitudes con estos filtros.",
+    "of": "de",
+    "detachDone": "Candidatura desvinculada"
   },
   "candidateSearch": {
     "noLocation": "Esta vacante aún no tiene coordenadas de ubicación — actualiza primero la dirección, luego aparecerá el mapa aquí.",

@@ -88,7 +88,12 @@
     "shiftsUnfilled": "Sin cubrir",
     "shiftsOccupancy": "Ocupación",
     "touchpoints": "Hoy",
-    "attentionTitle": "Por atender"
+    "attentionTitle": "Por atender",
+    "expiringMatches": "Matches por vencer",
+    "staleLeads": "Leads estancados",
+    "staleVacancies": "Vacantes estancadas",
+    "koiosSuggestions": "Sugerencias de Koios",
+    "customersByOwner": "Clientes por gestor"
   },
   "action": {
     "allCandidates": "Todos los candidatos",
@@ -154,5 +159,8 @@
       "conversation": "Desde una conversación",
       "chat": "Desde el chat"
     }
+  },
+  "widget": {
+    "unknown": "Desconocido"
   }
 }
