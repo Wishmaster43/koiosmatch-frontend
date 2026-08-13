@@ -281,7 +281,8 @@ export default function CustomersPage({ intent }: { intent?: unknown } = {}) {
   const insightKpis: KpiSpec[] = [
     kpiCard('locations',   t('insights.locations'),     totalLocations,   t('insights.locationsSub'),     'var(--color-secondary)'),
     kpiCard('departments', t('insights.departments'),   totalDepartments, t('insights.departmentsSub'),   'var(--color-violet)'),
-    kpiCard('contacts',    t('insights.contacts'),      totalContacts,    t('insights.contactsSub'),      'var(--color-primary)'),
+    // Use the readable primary-text token, not the raw primary, so a light brand colour (e.g. AENF yellow) stays legible
+    kpiCard('contacts',    t('insights.contacts'),      totalContacts,    t('insights.contactsSub'),      'var(--color-primary-text)'),
     kpiCard('openVac',     t('insights.openVacancies'), totalOpenVac,     t('insights.openVacanciesSub'), 'var(--color-warning)'),
     kpiCard('active',      t('insights.activeMatches'), totalActive,      t('insights.activeMatchesSub'), 'var(--color-success)'),
     kpiCard('noContact',   t('insights.noContact'),     noContactCount,   t('insights.noContactSub'),     'var(--color-danger)'),

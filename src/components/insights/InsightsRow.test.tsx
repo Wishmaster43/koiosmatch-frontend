@@ -4,7 +4,7 @@
  * rendered when set, absent entirely when not. No donuts/kpis needed for this gap.
  */
 import { describe, it, expect } from 'vitest'
-import { render, screen } from '@testing-library/react'
+import { render, screen, fireEvent } from '@testing-library/react'
 import InsightsRow from './InsightsRow'
 
 describe('InsightsRow · notice', () => {
@@ -22,5 +22,23 @@ describe('InsightsRow · notice', () => {
   it('renders no status banner for an empty-string notice', () => {
     render(<InsightsRow notice="" />)
     expect(screen.queryByRole('status')).toBeNull()
+  })
+})
+
+// Regression: on mouse-leave the donut clear button must restore the readable
+// --color-primary-text token, never the raw --color-primary (unreadable on a
+// light brand colour such as AENF yellow).
+describe('InsightsRow · donut clear button colour', () => {
+  it('restores the primary-text token, not the raw primary, on mouse leave', () => {
+    render(
+      <InsightsRow
+        donuts={[{ key: 'status', data: [{ label: 'A', value: 1 }], active: true, onClear: () => {}, picked: 'A' }]}
+      />
+    )
+    const clearBtn = screen.getByRole('button')
+    fireEvent.mouseEnter(clearBtn)
+    expect(clearBtn).toHaveStyle({ color: 'var(--color-on-accent)' })
+    fireEvent.mouseLeave(clearBtn)
+    expect(clearBtn).toHaveStyle({ color: 'var(--color-primary-text)' })
   })
 })

@@ -57,7 +57,8 @@ function DonutCard({ title, data, colors, onPick, active, onClear, picked, clear
             display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer',
             background: 'var(--color-primary-bg)', color: 'var(--color-primary-text)', border: 'none', zIndex: 1 }}
           onMouseEnter={e => { e.currentTarget.style.background = 'var(--color-primary)'; e.currentTarget.style.color = 'var(--color-on-accent)' }}
-          onMouseLeave={e => { e.currentTarget.style.background = 'var(--color-primary-bg)'; e.currentTarget.style.color = 'var(--color-primary)' }}>
+          // Restore the readable text token on leave, never the raw primary — keeps contrast on light brand colours (e.g. AENF yellow)
+          onMouseLeave={e => { e.currentTarget.style.background = 'var(--color-primary-bg)'; e.currentTarget.style.color = 'var(--color-primary-text)' }}>
           <FilterX size={12} />
         </button>
       )}
