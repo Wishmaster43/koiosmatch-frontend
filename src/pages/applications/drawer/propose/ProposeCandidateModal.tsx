@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Check, Copy, Info, Send, TriangleAlert } from 'lucide-react'
 import FloatingPanel from '@/components/ui/FloatingPanel'
@@ -40,10 +41,26 @@ interface Props {
  * PROPOSE-SHARE-LINK-1 shipped on the backend: a successful record now returns
  * a real recipient-facing share_url, surfaced here with a copy button so the
  * recruiter never has to hunt for it in the ProposalsBlock history afterwards.
+ *
+ * V-appdetail-4: the message body gets an expand toggle (RichTextEditor's own
+ * `expanded`/`onToggleExpand`, mirroring the rejection note). It deliberately
+ * does NOT get the second-screen pop-out: `body` is un-persisted draft state of
+ * this whole multi-field form (recipient, documents, CV variant, consent) that
+ * only commits atomically on Verzenden — there is no standalone PATCH for the
+ * body alone, so a pop-out window could only "save" by writing a field the
+ * server has no route for, or by silently dropping every other field. Honest
+ * skip (§3, no fake affordance) until proposals get their own draft-persistence
+ * route.
  */
 export default function ProposeCandidateModal({ application: a, onClose }: Props) {
   const { t } = useTranslation(['applications', 'common'])
   const form = useProposeForm(a)
+  // V-appdetail-4: the propose body gets an expand toggle, mirroring the
+  // rejection note's own RichTextEditor expand — no pop-out here (see this
+  // file's own docblock: the body is un-persisted draft state of a multi-field
+  // form, not a standalone saved field, so there is no real save path for a
+  // second window to write through).
+  const [bodyExpanded, setBodyExpanded] = useState(false)
 
   // Guard both axes this action touches — candidate.propose (sharing a health-
   // data record) and customer.propose (sharing it with this specific customer).
@@ -154,7 +171,8 @@ export default function ProposeCandidateModal({ application: a, onClose }: Props
             <label htmlFor="propose-subject" style={{ display: 'block', fontSize: 11, color: 'var(--text-muted)', marginBottom: 4 }}>{t('propose.subject')}</label>
             <input id="propose-subject" value={form.subject} onChange={e => form.setSubject(e.target.value)}
               style={{ ...inputBase, marginBottom: 8 }} />
-            <RichTextEditor value={form.body} onChange={form.setBody} />
+            <RichTextEditor value={form.body} onChange={form.setBody}
+              expanded={bodyExpanded} onToggleExpand={() => setBodyExpanded(v => !v)} />
           </div>
 
           {/* 5. AVG-bevestiging — required tick; the primary action stays disabled

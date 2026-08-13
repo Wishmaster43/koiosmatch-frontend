@@ -18,7 +18,7 @@ import { NavigationProvider } from '@/context/NavigationContext'
 import DashboardSwitcher from '@/pages/dashboard/DashboardSwitcher'
 import NotificationBell from '@/components/layout/NotificationBell'
 import { useTenantTheme } from '@/hooks/useTenantTheme'
-import { DASHBOARD_TYPES, canSwitchViews } from '@/pages/dashboard/templates'
+import { canSwitchViews, switcherTypes } from '@/pages/dashboard/templates'
 import type { DashboardType } from '@/pages/dashboard/templates'
 import type { ReportFilterGroup } from '@/types/reports'
 
@@ -95,7 +95,10 @@ export default function DashboardLayout() {
   const dashMyType = (auth?.dashboardType?.() ?? 'readonly') as DashboardType
   const dashCanSwitch = (auth?.isSuperAdmin?.() ?? false) || canSwitchViews(dashMyType)
   const [dashView, setDashView] = useState<DashboardType>(dashCanSwitch ? 'management' : dashMyType)
-  const dashAllowed: DashboardType[] = dashCanSwitch ? [...DASHBOARD_TYPES] : [dashMyType]
+  // DASHBOARD-KIEZER-1 — the switcher's choosable list drops admin/sales/readonly and
+  // gates 'planning' on the tenant module (same hasModule('plan') gate block.shifts uses).
+  const hasPlanning = (auth?.hasModule ?? (() => false))('plan')
+  const dashAllowed: DashboardType[] = dashCanSwitch ? switcherTypes(hasPlanning) : [dashMyType]
   const { filterGroups, pageFilterActive }  = useRightPanel()
 
   // Active tenant drives topbar branding. Super admins see the tenant they switched to;

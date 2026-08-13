@@ -612,7 +612,20 @@
     "createdBy": "Creado por",
     "source": "Origen",
     "recentActivity": "Actividad reciente",
-    "noActivity": "Aún no hay actividad."
+    "noActivity": "Aún no hay actividad.",
+    "byOutcome": "Candidaturas por fase",
+    "appointments": "Intakes / citas",
+    "appointmentsUpcoming": "previstas",
+    "appointmentsCompleted": "completadas",
+    "notes": "Notas",
+    "notesCount_one": "{{count}} nota",
+    "notesCount_other": "{{count}} notas",
+    "lastContactValue": "{{date}} · {{type}}",
+    "timeline": "Cronología",
+    "daysSinceCreated_one": "{{count}} día desde la creación",
+    "daysSinceCreated_other": "{{count}} días desde la creación",
+    "daysSincePhaseChange_one": "{{count}} día desde el último cambio de fase",
+    "daysSincePhaseChange_other": "{{count}} días desde el último cambio de fase"
   },
   "planning": {
     "availability": "Disponibilidad",

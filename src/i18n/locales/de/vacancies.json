@@ -480,7 +480,8 @@
   },
   "popout": {
     "windowTitle": "Notizen. {{name}}",
-    "loadError": "Diese Stelle konnte nicht geladen werden."
+    "loadError": "Diese Stelle konnte nicht geladen werden.",
+    "descriptionWindowTitle": "Stellentext — {{name}}"
   },
   "matchesTab": {
     "loadError": "Matches konnten nicht geladen werden."

@@ -80,3 +80,16 @@ describe('DescriptionTab · edit + save', () => {
     expect(screen.getByTestId('safe-html')).toHaveTextContent('Huidige tekst')
   })
 })
+
+// V-desc-1: the second-screen pop-out icon.
+describe('DescriptionTab · second-screen pop-out', () => {
+  it('renders a pop-out icon that opens /popout/text/vacancy/{id}/description', () => {
+    const openSpy = vi.spyOn(window, 'open').mockReturnValue({} as Window)
+    render(<DescriptionTab vacancy={vacancy} onUpdate={vi.fn()} />)
+    fireEvent.click(screen.getByTitle('common:openSecondScreen'))
+    expect(openSpy).toHaveBeenCalledWith('/popout/text/vacancy/v1/description', expect.stringContaining('koios-text-vacancy-v1-description'), expect.any(String))
+    // Opening it also starts an edit, same as the pencil.
+    expect(screen.getByLabelText('rich-text-editor')).toBeInTheDocument()
+    openSpy.mockRestore()
+  })
+})

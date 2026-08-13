@@ -1,6 +1,6 @@
 import type { ComponentType, CSSProperties } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Edit2, Save, X, Trash2 } from 'lucide-react'
+import { Edit2, Save, X, Trash2, ExternalLink } from 'lucide-react'
 import RichTextEditorJs from '@/components/ui/RichTextEditor'
 import SafeHtmlJs from '@/components/ui/SafeHtml'
 import VacancyGenerateFlow from './VacancyGenerateFlow'
@@ -34,7 +34,7 @@ export default function DescriptionTab({ vacancy: v, onUpdate }: { vacancy: Vaca
   const { t } = useTranslation('vacancies')
   const {
     descEditing, setDescEditing, descExpanded, setDescExpanded, description, setDescription, saveDesc, cancelDesc,
-    descKey, applyGeneratedConcept,
+    descKey, applyGeneratedConcept, openDescriptionPopout,
   } = useVacancyDescription(v, onUpdate)
 
   // Edit-toggle control block (pencil ↔ save/cancel), same pattern as DetailsTab's
@@ -53,7 +53,15 @@ export default function DescriptionTab({ vacancy: v, onUpdate }: { vacancy: Vaca
     <div>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
         <span style={groupTitle}>{t('details.description')}</span>
-        {controls}
+        <div style={{ display: 'flex', gap: 4, alignItems: 'center' }}>
+          {/* V-desc-1: second screen — same icon + footprint the candidate
+              profile-text pop-out uses, in this block's own title row. */}
+          <button onClick={openDescriptionPopout} title={t('common:openSecondScreen')} aria-label={t('common:openSecondScreen')}
+            style={{ ...iconBtn, background: 'none', color: 'var(--text-muted)', border: '1px solid var(--border)' }}>
+            <ExternalLink size={13} />
+          </button>
+          {controls}
+        </div>
       </div>
       {/* VACGEN-1 fase 1b: "Genereer met Koios" — resolves the tenant's generation
           profile, generates a CONCEPT, and only feeds it into this draft on an

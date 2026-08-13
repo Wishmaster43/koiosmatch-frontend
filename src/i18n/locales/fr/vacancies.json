@@ -480,7 +480,8 @@
   },
   "popout": {
     "windowTitle": "Notes. {{name}}",
-    "loadError": "Cette offre d'emploi n'a pas pu être chargée."
+    "loadError": "Cette offre d'emploi n'a pas pu être chargée.",
+    "descriptionWindowTitle": "Texte de l'offre — {{name}}"
   },
   "matchesTab": {
     "loadError": "Impossible de charger les matchs."

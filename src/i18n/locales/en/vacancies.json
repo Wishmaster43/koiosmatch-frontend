@@ -480,7 +480,8 @@
   },
   "popout": {
     "windowTitle": "Notes. {{name}}",
-    "loadError": "This vacancy could not be loaded."
+    "loadError": "This vacancy could not be loaded.",
+    "descriptionWindowTitle": "Vacancy text — {{name}}"
   },
   "matchesTab": {
     "loadError": "Could not load matches."

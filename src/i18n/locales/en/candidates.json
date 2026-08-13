@@ -635,7 +635,20 @@
     "createdBy": "Created by",
     "source": "Source",
     "recentActivity": "Recent activity",
-    "noActivity": "No activity yet."
+    "noActivity": "No activity yet.",
+    "byOutcome": "Applications by stage",
+    "appointments": "Intakes / appointments",
+    "appointmentsUpcoming": "upcoming",
+    "appointmentsCompleted": "completed",
+    "notes": "Notes",
+    "notesCount_one": "{{count}} note",
+    "notesCount_other": "{{count}} notes",
+    "lastContactValue": "{{date}} · {{type}}",
+    "timeline": "Timeline",
+    "daysSinceCreated_one": "{{count}} day since created",
+    "daysSinceCreated_other": "{{count}} days since created",
+    "daysSincePhaseChange_one": "{{count}} day since last phase change",
+    "daysSincePhaseChange_other": "{{count}} days since last phase change"
   },
   "planning": {
     "availability": "Availability",

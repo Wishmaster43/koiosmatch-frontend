@@ -111,8 +111,11 @@
     "admin": "Admin",
     "management": "Dirección",
     "recruitment": "Reclutamiento",
+    "recruitment_manager": "Manager de reclutamiento",
     "backoffice": "Backoffice",
     "sales": "Ventas",
+    "accountmanager": "Gestor de cuentas",
+    "sales_manager": "Director de ventas",
     "planning": "Planificación",
     "readonly": "Solo lectura"
   },

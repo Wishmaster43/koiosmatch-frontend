@@ -322,6 +322,25 @@ function VacancySearchTabInner({ candidate }: { candidate: Candidate }) {
               <div style={{ fontSize: 11, color: 'var(--text-muted)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                 {[r.customer, r.city].filter(Boolean).join(' · ') || '—'}
               </div>
+              {/* V-search-1: per-row meta chips — hours + employment type, only when
+                  the row really carries them (salary is detail-only, stays on the
+                  summary card). Mono for the numbers (§4). */}
+              {(formatRange(r.hoursMin, r.hoursMax, n => String(n)) || r.employmentType) && (
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 2, minWidth: 0 }}>
+                  {formatRange(r.hoursMin, r.hoursMax, n => String(n)) && (
+                    <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 10.5, color: 'var(--text-muted)',
+                      border: '1px solid var(--border)', borderRadius: 999, padding: '1px 7px', whiteSpace: 'nowrap' }}>
+                      {t('vacancySearch.cardHours', { range: formatRange(r.hoursMin, r.hoursMax, n => String(n)) })}
+                    </span>
+                  )}
+                  {r.employmentType && (
+                    <span style={{ fontSize: 10.5, color: 'var(--text-muted)', border: '1px solid var(--border)',
+                      borderRadius: 999, padding: '1px 7px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                      {r.employmentType}
+                    </span>
+                  )}
+                </div>
+              )}
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0 }}>
               {r.score != null && <ScorePill score={r.score} />}

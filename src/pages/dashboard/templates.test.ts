@@ -6,7 +6,7 @@
  */
 import { describe, it, expect } from 'vitest'
 import { buildDashboardKpis } from './dashboardKpis'
-import { KPI_ROWS } from './templates'
+import { KPI_ROWS, DASHBOARD_TEMPLATES, switcherTypes } from './templates'
 
 describe('dashboard KPI row guard', () => {
   // Minimal stub args — only the shape matters, not the values, for id resolution.
@@ -32,4 +32,29 @@ describe('dashboard KPI row guard', () => {
       expect(unknown, `${role} references unknown KPI ids: ${unknown.join(', ')}`).toEqual([])
     })
   }
+
+  // 'recruitment_manager' is registered in every role table (DASHBOARD-KIEZER-1).
+  it('recruitment_manager is registered in KPI_ROWS and DASHBOARD_TEMPLATES', () => {
+    expect(KPI_ROWS.recruitment_manager.length).toBeGreaterThan(0)
+    expect(DASHBOARD_TEMPLATES.recruitment_manager).toContain('chart.recruiter')
+  })
+})
+
+describe('switcherTypes (DASHBOARD-KIEZER-1)', () => {
+  it('drops admin/sales/readonly from the manual chooser list', () => {
+    const list = switcherTypes(true)
+    expect(list).not.toContain('admin')
+    expect(list).not.toContain('sales')
+    expect(list).not.toContain('readonly')
+  })
+
+  it('includes planning only when the tenant has the module', () => {
+    expect(switcherTypes(true)).toContain('planning')
+    expect(switcherTypes(false)).not.toContain('planning')
+  })
+
+  it('keeps recruitment_manager, recruitment and both sales-manager roles selectable', () => {
+    const list = switcherTypes(false)
+    expect(list).toEqual(expect.arrayContaining(['management', 'recruitment', 'recruitment_manager', 'backoffice', 'accountmanager', 'sales_manager']))
+  })
 })

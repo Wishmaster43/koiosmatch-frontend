@@ -50,6 +50,14 @@ interface Props {
  * for the ORIGINAL reject) is hidden, and the confirm button reads "save
  * correction" instead of "reject". The caller's onConfirm still receives the
  * exact same payload shape; only ITS request differs (PATCH vs POST).
+ *
+ * V-appdetail-4: the note already had an expand (`noteExpanded` +
+ * RichTextEditor's `onToggleExpand`, unchanged here). It deliberately does NOT
+ * get the second-screen pop-out: `note`/`draftNote` are un-persisted draft
+ * state of this whole reject/correct form (reason + note commit together on
+ * one submit) — there is no standalone PATCH for the note alone, so a pop-out
+ * window would have nothing real to save through. Honest skip (§3, no fake
+ * affordance) until rejections get their own draft-persistence route.
  */
 export default function RejectionModal({ application: a, onCancel, onConfirm, submitting, mode = 'reject', initialReasonId, initialNote }: Props) {
   const { t } = useTranslation(['applications', 'common'])

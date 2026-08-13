@@ -10,14 +10,26 @@
 // KD11 (DASHP36, 2026-08-13) — two new sales-dashboard roles: `accountmanager`
 // (own-customer scope) and `sales_manager` (tenant-wide customer dimension +
 // the `customers_by_owner` breakdown). Server-resolved scoping, see CONTRACT-CHANGELOG.
-export const DASHBOARD_TYPES = ['admin', 'management', 'recruitment', 'backoffice', 'sales', 'accountmanager', 'sales_manager', 'planning', 'readonly'] as const
+// DASHBOARD-KIEZER-1 (Danny 2026-08-14) — `recruitment_manager` is NEW: the
+// team-wide manager view over the recruitment KPI set (own-scope `recruitment`
+// stays the individual recruiter's dashboard, mirroring accountmanager/sales_manager).
+export const DASHBOARD_TYPES = ['admin', 'management', 'recruitment', 'recruitment_manager', 'backoffice', 'sales', 'accountmanager', 'sales_manager', 'planning', 'readonly'] as const
 export type DashboardType = typeof DASHBOARD_TYPES[number]
 
-// Multi-role users: the richest dashboard wins.
-export const TYPE_PRECEDENCE: DashboardType[] = ['admin', 'management', 'recruitment', 'backoffice', 'sales_manager', 'sales', 'accountmanager', 'planning', 'readonly']
+// Multi-role users: the richest dashboard wins. Manager variants precede their
+// own-scope counterpart (recruitment_manager > recruitment, sales_manager > sales).
+export const TYPE_PRECEDENCE: DashboardType[] = ['admin', 'management', 'recruitment_manager', 'recruitment', 'backoffice', 'sales_manager', 'sales', 'accountmanager', 'planning', 'readonly']
 
 // Types allowed to switch/preview every role's view (see everything).
 export const SUPER_VIEWS: DashboardType[] = ['admin', 'management']
+
+// DASHBOARD-KIEZER-1 — types a user may manually PICK from the switcher dropdown.
+// admin/sales/readonly stay resolvable (TYPE_PRECEDENCE) but are not chooser options
+// (Danny 14-08: they clutter the list); `planning` only appears when the tenant has
+// the planning module (mirrors the `block.shifts` gate in Dashboard.tsx/useDashboardViewModel).
+const SWITCHER_EXCLUDED: DashboardType[] = ['admin', 'sales', 'readonly']
+export const switcherTypes = (hasPlanning: boolean): DashboardType[] =>
+  DASHBOARD_TYPES.filter(t => !SWITCHER_EXCLUDED.includes(t) && (t !== 'planning' || hasPlanning))
 
 // ── KPI row per role — bare KPI ids resolved in Dashboard.tsx (kpiById). Every role
 // shows a full, role-specific row (never hidden). 🟡 metrics render "—" until the
@@ -28,6 +40,11 @@ export const KPI_ROWS: Record<DashboardType, string[]> = {
   admin:       ['candidates', 'opps', 'pipeline', 'expiringOpps', 'placements', 'intakes', 'openVacancies', 'tasksOverdue', 'activeConv'],
   management:  ['candidates', 'opps', 'pipeline', 'expiringOpps', 'placements', 'intakes', 'openVacancies', 'tasksOverdue', 'activeConv'],
   recruitment: ['candidates', 'never', 'stale', 'tasksOverdue', 'failedWf', 'uncalledCallist', 'intakes', 'tooLongInStage', 'missingApptApps', 'closingSoon', 'staleStatusVac'],
+  // DASHBOARD-KIEZER-1 — team-wide manager view: same KPI vocabulary as `recruitment`
+  // (the backend widens the underlying query team-wide instead of owner-scoped; the
+  // FE feeds carry no owner-scope param today, so this row stays server-identical to
+  // `recruitment` until a scoped endpoint lands — tracked as a BE follow-up, see skipped).
+  recruitment_manager: ['candidates', 'never', 'stale', 'tasksOverdue', 'failedWf', 'uncalledCallist', 'intakes', 'tooLongInStage', 'missingApptApps', 'closingSoon', 'staleStatusVac'],
   backoffice:  ['tasks', 'placements', 'missingDocs', 'expiringContracts', 'couplingErrors', 'incompleteRuns'],
   sales:       ['opps', 'pipeline', 'expiringOpps', 'fillRate', 'placements', 'activeConv'],
   // KD11 — own-customer scope (server-resolved); same KPI vocabulary as `sales`,
@@ -44,6 +61,10 @@ export const DASHBOARD_TEMPLATES: Record<DashboardType, string[]> = {
   admin: ['*'],
   management: ['*'],
   recruitment: ['block.touchpoints', 'block.attention', 'chart.status', 'chart.funnel', 'chart.funnelConversion', 'chart.weekly', 'list.candidates', 'list.applications', 'list.conversations', 'list.runs'],
+  // DASHBOARD-KIEZER-1 — the manager view keeps the full recruitment surface AND
+  // adds the per-recruiter breakdown chart (chart.recruiter, existing recruiterData/
+  // by_owner feed — the one block a manager needs that an individual recruiter doesn't).
+  recruitment_manager: ['block.touchpoints', 'block.attention', 'chart.status', 'chart.recruiter', 'chart.funnel', 'chart.funnelConversion', 'chart.weekly', 'list.candidates', 'list.applications', 'list.conversations', 'list.runs'],
   backoffice: ['chart.status', 'chart.funnel', 'list.applications', 'list.runs'],
   sales: ['chart.oppStage', 'chart.status', 'list.leads'],
   // KD11 — the two sales-dashboard TEMPLATES on the DASHP36 widget-feed keys

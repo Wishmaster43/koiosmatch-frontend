@@ -404,7 +404,9 @@
     "correctionDone": "Rechazo corregido"
   },
   "motivation": {
-    "title": "Carta de motivación"
+    "title": "Carta de motivación",
+    "showMore": "Mostrar más",
+    "showLess": "Mostrar menos"
   },
   "interviewConsent": {
     "given": "Consentimiento para la entrevista otorgado el {{date}}"

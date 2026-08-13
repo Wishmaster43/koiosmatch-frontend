@@ -111,8 +111,11 @@
     "admin": "Admin",
     "management": "Management",
     "recruitment": "Recruitment",
+    "recruitment_manager": "Recruitment-Manager",
     "backoffice": "Backoffice",
     "sales": "Vertrieb",
+    "accountmanager": "Kundenbetreuer",
+    "sales_manager": "Vertriebsleiter",
     "planning": "Planung",
     "readonly": "Schreibgeschützt"
   },

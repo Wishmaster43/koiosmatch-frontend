@@ -12,8 +12,13 @@ import type { ApplicationDetail } from '@/types/application'
 vi.mock('react-i18next', () => ({ useTranslation: () => ({ t: (k: string, opts?: Record<string, unknown>) => (opts ? `${k}:${JSON.stringify(opts)}` : k) }) }))
 
 vi.mock('@/components/ui/RichTextEditor', () => ({
-  default: ({ value, onChange }: { value?: string; onChange: (v: string) => void }) => (
-    <textarea data-testid="rte" value={value ?? ''} onChange={e => onChange(e.target.value)} />
+  default: ({ value, onChange, expanded, onToggleExpand }: { value?: string; onChange: (v: string) => void; expanded?: boolean; onToggleExpand?: () => void }) => (
+    <div>
+      <textarea data-testid="rte" value={value ?? ''} onChange={e => onChange(e.target.value)} />
+      {onToggleExpand && (
+        <button type="button" data-testid="rte-expand-toggle" onClick={onToggleExpand}>{expanded ? 'collapse' : 'expand'}</button>
+      )}
+    </div>
   ),
 }))
 
@@ -116,5 +121,19 @@ describe('ProposeCandidateModal · V-appdetail-5 share link on success', () => {
     render(<ProposeCandidateModal application={app()} onClose={vi.fn()} />)
     await user.click(screen.getByText('propose.copyLink'))
     expect(formFixture.copyShareLink).toHaveBeenCalledTimes(1)
+  })
+})
+
+// V-appdetail-4: the message body gets a real expand toggle (no pop-out — see
+// this component's own docblock for the honest-skip reason).
+describe('ProposeCandidateModal · V-appdetail-4 body expand', () => {
+  it('toggles the body editor between expanded and collapsed', async () => {
+    mockDecision.candidate = null; mockDecision.customer = null
+    const user = (await import('@testing-library/user-event')).default.setup()
+    render(<ProposeCandidateModal application={app()} onClose={vi.fn()} />)
+    const toggle = screen.getByTestId('rte-expand-toggle')
+    expect(toggle).toHaveTextContent('expand')
+    await user.click(toggle)
+    expect(toggle).toHaveTextContent('collapse')
   })
 })

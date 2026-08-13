@@ -415,7 +415,9 @@
     "correctionDone": "Rejection corrected"
   },
   "motivation": {
-    "title": "Motivation"
+    "title": "Motivation",
+    "showMore": "Show more",
+    "showLess": "Show less"
   },
   "interviewConsent": {
     "given": "Interview consent given on {{date}}"

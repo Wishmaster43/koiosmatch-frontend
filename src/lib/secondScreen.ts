@@ -134,7 +134,9 @@ export function openNoteEditPopout(entity: PopoutEntity, id: string | number, no
 // `departmentPopoutId()` below, not a bare department id — the popped-out window
 // needs the customer id too (the nested PATCH route requires it, and there is no
 // standalone GET /departments/{id}).
-export type PopoutTextField = 'summary' | 'matchRemarks' | 'companyText' | 'departmentText'
+// `description` (V-desc-1): the vacancy's own rich-text description gets the
+// same second-screen treatment — one entry, mirrors `companyText` 1:1.
+export type PopoutTextField = 'summary' | 'matchRemarks' | 'companyText' | 'departmentText' | 'description'
 
 // K5a: encodes/decodes the composite id `departmentText` travels under —
 // `<customerId>:<departmentId>` — so ONE string still fits the existing

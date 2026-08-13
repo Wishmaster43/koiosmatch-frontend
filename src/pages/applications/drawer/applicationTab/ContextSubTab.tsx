@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { ShieldCheck } from 'lucide-react'
 import { useDateFormat } from '@/lib/datetime'
@@ -19,6 +20,12 @@ interface ContextSubTabProps {
 // blank lines. `<` must be followed by a letter, so "5 < 6" is still plain text.
 const isPlainText = (html: string) => !/<[a-z][\s\S]*?>/i.test(html)
 
+// V-appdetail-4: long letters get a show-more/less toggle instead of always
+// rendering the full text — a plain STRING-LENGTH heuristic (no DOM measuring),
+// mirrors the tag-stripped length so markup weight never trips the threshold early.
+const COLLAPSE_THRESHOLD = 400
+const collapsedHeight = 160
+
 /**
  * ContextSubTab — APP-TAB-SPLIT-1, group (d): everything that is CONTEXT
  * rather than the application's own core state — competing applicants on the
@@ -31,6 +38,9 @@ const isPlainText = (html: string) => !/<[a-z][\s\S]*?>/i.test(html)
 export default function ContextSubTab({ application: a }: ContextSubTabProps) {
   const { t } = useTranslation(['applications', 'common'])
   const { formatDateTime } = useDateFormat()
+  // V-appdetail-4: motivation letter expand — read-only, no persistence involved.
+  const [letterExpanded, setLetterExpanded] = useState(false)
+  const letterIsLong = (a.coverLetter?.replace(/<[^>]*>/g, '').length ?? 0) > COLLAPSE_THRESHOLD
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
@@ -49,8 +59,17 @@ export default function ContextSubTab({ application: a }: ContextSubTabProps) {
       {a.coverLetter && (
         <SectionCard title={t('motivation.title')}>
           {/* Canon (05-08): 12px prose, matching the candidate profile summary/notes convention. */}
-          <SafeHtml html={a.coverLetter} style={{ fontSize: 12, color: 'var(--text)', lineHeight: 1.5,
-            whiteSpace: isPlainText(a.coverLetter) ? 'pre-wrap' : undefined }} />
+          <div style={!letterExpanded && letterIsLong ? { maxHeight: collapsedHeight, overflow: 'hidden' } : undefined}>
+            <SafeHtml html={a.coverLetter} style={{ fontSize: 12, color: 'var(--text)', lineHeight: 1.5,
+              whiteSpace: isPlainText(a.coverLetter) ? 'pre-wrap' : undefined }} />
+          </div>
+          {letterIsLong && (
+            <button type="button" onClick={() => setLetterExpanded(v => !v)}
+              style={{ marginTop: 6, background: 'none', border: 'none', cursor: 'pointer', padding: 0,
+                fontSize: 11, fontWeight: 600, color: 'var(--color-primary-text)' }}>
+              {letterExpanded ? t('motivation.showLess') : t('motivation.showMore')}
+            </button>
+          )}
         </SectionCard>
       )}
 

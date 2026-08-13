@@ -1,15 +1,17 @@
 /**
- * StatisticsTab — the tab is COUNTS ONLY (STATS-HONEST-1, Danny 2026-08-09).
+ * StatisticsTab — honest, derived statistics only (STATS-HONEST-1, B11 point 19).
  * The old "Statusoverzicht" card held dossier fields, not statistics, and every
  * one of them duplicated a place that also lets you edit it: status → the drawer
  * header picker, last contact + contact type → the always-visible drawer footer,
  * branch → the Profiel tab's BranchSection, created-on/by + source → the Profiel
  * tab's Herkomst card (DANNY-6). This suite guards that none of them can silently
- * reappear here, that the two real KPIs keep counting from the candidate payload,
- * and that the gated Diensten/Uren tiles never ship an invented number.
+ * reappear here, that the KPIs keep counting from the candidate payload, that the
+ * gated Diensten/Uren tiles never ship an invented number, and that each new
+ * derived block (outcomes/appointments/notes/timeline) renders only when its own
+ * source data is actually present — never a fabricated zero.
  */
 import { describe, it, expect, vi } from 'vitest'
-import { render, screen } from '@testing-library/react'
+import { render, screen, waitFor } from '@testing-library/react'
 import StatisticsTab from './StatisticsTab'
 // Vite's ?raw import — the source-level guard below reads this file's own text
 // (node:fs is not typed in this tsconfig, and jsdom gives import.meta an http URL).
@@ -17,27 +19,40 @@ import statisticsTabSource from './StatisticsTab.tsx?raw'
 import type { Candidate } from '@/types/candidate'
 
 vi.mock('react-i18next', () => ({
-  useTranslation: () => ({ t: (k: string) => k }),
+  useTranslation: () => ({ t: (k: string, opts?: Record<string, unknown>) => (opts ? `${k}:${JSON.stringify(opts)}` : k) }),
+}))
+vi.mock('@/lib/datetime', () => ({ useDateFormat: () => ({ formatDate: (v: string) => v }) }))
+
+let mockNotes: { notes: unknown[]; loaded: boolean } = { notes: [], loaded: true }
+vi.mock('@/pages/candidates/hooks/useCandidateNotes', () => ({
+  useCandidateNotes: () => mockNotes,
+}))
+
+let mockAppointmentsResponse: unknown[] = []
+vi.mock('@/lib/api', () => ({
+  default: { get: () => Promise.resolve({ data: { data: mockAppointmentsResponse } }) },
+  unwrapList: (r: { data?: { data?: unknown[] } }) => ({ rows: r.data?.data ?? [] }),
 }))
 
 const baseCandidate = (overrides: Partial<Candidate> = {}): Candidate =>
   ({ id: 1, matches: [], applications: [], branches: [], ...overrides } as unknown as Candidate)
 
 describe('StatisticsTab · dossier fields live elsewhere (STATS-HONEST-1 / DANNY-6)', () => {
-  it('renders no status-overview card and none of its former rows', () => {
+  it('renders no status-overview card and none of its former rows', async () => {
+    mockNotes = { notes: [], loaded: true }
+    mockAppointmentsResponse = []
     render(<StatisticsTab c={baseCandidate({
       status: 'available',
       lastContactDate: '2026-08-01', lastContactType: 'phone', lastContactBy: 'Bente de Jong',
       branches: [{ id: 'b1', name: 'Utrecht' }] as Candidate['branches'],
       createdBy: { id: 7, name: 'Bente de Jong' }, source: 'indeed', created: '2026-01-05',
     })} />)
-    // The card itself is gone — StatsTab only renders it when `overview` is passed.
+    await waitFor(() => {})
     expect(screen.queryByText('statistics.statusOverview')).not.toBeInTheDocument()
-    for (const key of ['statistics.status', 'statistics.lastContact', 'statistics.contactType',
+    for (const key of ['statistics.status', 'statistics.contactType',
       'statistics.branch', 'statistics.memberSince', 'statistics.createdBy', 'statistics.source']) {
       expect(screen.queryByText(key)).not.toBeInTheDocument()
     }
-    // …and so are the values they used to print.
     expect(screen.queryByText(/Bente de Jong/)).not.toBeInTheDocument()
     expect(screen.queryByText('indeed')).not.toBeInTheDocument()
     expect(screen.queryByText('Utrecht')).not.toBeInTheDocument()
@@ -84,5 +99,48 @@ describe('StatisticsTab · the gated shift/hour tiles carry no invented numbers'
     render(<StatisticsTab c={baseCandidate()} />)
     expect(screen.queryByText('statistics.shifts')).not.toBeInTheDocument()
     expect(screen.queryByText('statistics.hoursWorked')).not.toBeInTheDocument()
+  })
+})
+
+describe('StatisticsTab · derived blocks hide without their own source data (B11 point 19)', () => {
+  it('shows no outcome/appointments/notes/timeline blocks for a bare candidate', async () => {
+    mockNotes = { notes: [], loaded: true }
+    mockAppointmentsResponse = []
+    render(<StatisticsTab c={baseCandidate()} />)
+    await waitFor(() => {})
+    expect(screen.queryByText('statistics.byOutcome')).not.toBeInTheDocument()
+    expect(screen.queryByText('statistics.appointments')).not.toBeInTheDocument()
+    // Notes loaded (empty array) still renders a "0 notes" line — that IS real data.
+    expect(screen.queryByText('statistics.timeline')).not.toBeInTheDocument()
+  })
+
+  it('renders the applications-by-outcome block once applications carry a stage', () => {
+    render(<StatisticsTab c={baseCandidate({
+      applications: [
+        { id: 1, stageKey: 'applied', stageLabel: 'Applied', stageColor: '#2563eb' },
+        { id: 2, stageKey: 'applied', stageLabel: 'Applied', stageColor: '#2563eb' },
+      ] as unknown as Candidate['applications'],
+    })} />)
+    expect(screen.getByText('statistics.byOutcome')).toBeInTheDocument()
+    expect(screen.getByText('Applied')).toBeInTheDocument()
+    expect(screen.getAllByText('2').length).toBeGreaterThan(0)
+  })
+
+  it('renders the appointments block once the side-load resolves with rows', async () => {
+    mockAppointmentsResponse = [{ id: 1, status: 'scheduled', scheduled_at: '2099-01-01T00:00:00Z' }]
+    render(<StatisticsTab c={baseCandidate()} />)
+    expect(await screen.findByText('statistics.appointments')).toBeInTheDocument()
+  })
+
+  it('renders notes count + last contact once their sources exist', () => {
+    mockNotes = { notes: [{ id: 1 }, { id: 2 }], loaded: true }
+    render(<StatisticsTab c={baseCandidate({ lastContactAt: '2026-08-01', lastContactType: 'phone' })} />)
+    expect(screen.getByText('statistics.notesCount:{"count":2}')).toBeInTheDocument()
+    expect(screen.getByText(/statistics.lastContact/)).toBeInTheDocument()
+  })
+
+  it('renders the timeline block once created/phase-change dates exist', () => {
+    render(<StatisticsTab c={baseCandidate({ created: '2026-01-01', statusChangedAt: '2026-01-05' })} />)
+    expect(screen.getByText('statistics.timeline')).toBeInTheDocument()
   })
 })

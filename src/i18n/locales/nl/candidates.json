@@ -635,7 +635,20 @@
     "createdBy": "Aangemaakt door",
     "source": "Bron",
     "recentActivity": "Recente activiteit",
-    "noActivity": "Nog geen activiteiten."
+    "noActivity": "Nog geen activiteiten.",
+    "byOutcome": "Sollicitaties per fase",
+    "appointments": "Intakes / afspraken",
+    "appointmentsUpcoming": "gepland",
+    "appointmentsCompleted": "afgerond",
+    "notes": "Notities",
+    "notesCount_one": "{{count}} notitie",
+    "notesCount_other": "{{count}} notities",
+    "lastContactValue": "{{date}} · {{type}}",
+    "timeline": "Tijdlijn",
+    "daysSinceCreated_one": "{{count}} dag sinds aanmaak",
+    "daysSinceCreated_other": "{{count}} dagen sinds aanmaak",
+    "daysSincePhaseChange_one": "{{count}} dag sinds laatste fasewissel",
+    "daysSincePhaseChange_other": "{{count}} dagen sinds laatste fasewissel"
   },
   "planning": {
     "availability": "Beschikbaarheid",

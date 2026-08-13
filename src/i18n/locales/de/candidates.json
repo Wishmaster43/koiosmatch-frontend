@@ -612,7 +612,20 @@
     "createdBy": "Erstellt von",
     "source": "Quelle",
     "recentActivity": "Letzte Aktivität",
-    "noActivity": "Noch keine Aktivitäten."
+    "noActivity": "Noch keine Aktivitäten.",
+    "byOutcome": "Bewerbungen nach Phase",
+    "appointments": "Intakes / Termine",
+    "appointmentsUpcoming": "geplant",
+    "appointmentsCompleted": "abgeschlossen",
+    "notes": "Notizen",
+    "notesCount_one": "{{count}} Notiz",
+    "notesCount_other": "{{count}} Notizen",
+    "lastContactValue": "{{date}} · {{type}}",
+    "timeline": "Zeitachse",
+    "daysSinceCreated_one": "{{count}} Tag seit Erstellung",
+    "daysSinceCreated_other": "{{count}} Tage seit Erstellung",
+    "daysSincePhaseChange_one": "{{count}} Tag seit letztem Phasenwechsel",
+    "daysSincePhaseChange_other": "{{count}} Tage seit letztem Phasenwechsel"
   },
   "planning": {
     "availability": "Verfügbarkeit",

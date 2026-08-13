@@ -404,7 +404,9 @@
     "correctionDone": "Ablehnung korrigiert"
   },
   "motivation": {
-    "title": "Motivationsschreiben"
+    "title": "Motivationsschreiben",
+    "showMore": "Mehr anzeigen",
+    "showLess": "Weniger anzeigen"
   },
   "interviewConsent": {
     "given": "Interview-Zustimmung erteilt am {{date}}"

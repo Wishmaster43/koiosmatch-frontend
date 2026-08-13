@@ -34,6 +34,8 @@ import {
 // Per-type icon (calm, one accent). Labels/descriptions come from i18n, never hardcoded.
 const TYPE_ICON: Record<DashboardType, LucideIcon> = {
   admin: Shield, management: BarChart2, recruitment: Users,
+  // DASHBOARD-KIEZER-1 — the new team-wide manager view (own-scope `recruitment`'s counterpart).
+  recruitment_manager: UserCog,
   backoffice: ClipboardList, sales: Target,
   // KD11 (DASHP36) — the two new sales-dashboard roles.
   accountmanager: UserCog, sales_manager: Building2,

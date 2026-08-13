@@ -480,7 +480,8 @@
   },
   "popout": {
     "windowTitle": "Notities. {{name}}",
-    "loadError": "Deze vacature kon niet worden geladen."
+    "loadError": "Deze vacature kon niet worden geladen.",
+    "descriptionWindowTitle": "Vacaturetekst — {{name}}"
   },
   "matchesTab": {
     "loadError": "Matches konden niet worden geladen."

@@ -21,6 +21,9 @@ import MatchRemarksPopout from './MatchRemarksPopout'
 // this dispatcher only imports them.
 import CustomerCompanyTextPopout from '@/pages/customers/popout/CustomerCompanyTextPopout'
 import CustomerDepartmentTextPopout from '@/pages/customers/popout/CustomerDepartmentTextPopout'
+// V-desc-1: the vacancy description popout lives under pages/vacancies/popout
+// (this task's own folder scope), not here — this dispatcher only imports it.
+import VacancyDescriptionPopout from '@/pages/vacancies/popout/VacancyDescriptionPopout'
 
 // One entry per supported `<entity>:<field>` pair — keep in sync with
 // PopoutTextField / openTextPopout in lib/secondScreen.ts.
@@ -29,6 +32,7 @@ const TEXT_POPOUT_PAGES: Record<string, ComponentType<{ id: string | undefined }
   'candidate:matchRemarks': MatchRemarksPopout,
   'customer:companyText': CustomerCompanyTextPopout,
   'customer:departmentText': CustomerDepartmentTextPopout,
+  'vacancy:description': VacancyDescriptionPopout,
 }
 
 export default function TextPopoutPage() {

@@ -111,8 +111,11 @@
     "admin": "Admin",
     "management": "Management",
     "recruitment": "Recruitment",
+    "recruitment_manager": "Recruitment-manager",
     "backoffice": "Back office",
     "sales": "Sales",
+    "accountmanager": "Accountmanager",
+    "sales_manager": "Salesmanager",
     "planning": "Planning",
     "readonly": "Alleen-lezen"
   },

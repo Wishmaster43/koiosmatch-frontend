@@ -480,7 +480,8 @@
   },
   "popout": {
     "windowTitle": "Notas. {{name}}",
-    "loadError": "No se pudo cargar esta vacante."
+    "loadError": "No se pudo cargar esta vacante.",
+    "descriptionWindowTitle": "Texto de la vacante — {{name}}"
   },
   "matchesTab": {
     "loadError": "No se pudieron cargar los matches."

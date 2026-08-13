@@ -415,7 +415,9 @@
     "correctionDone": "Afwijzing gecorrigeerd"
   },
   "motivation": {
-    "title": "Motivatie"
+    "title": "Motivatie",
+    "showMore": "Meer tonen",
+    "showLess": "Minder tonen"
   },
   "interviewConsent": {
     "given": "Interview-toestemming gegeven op {{date}}"

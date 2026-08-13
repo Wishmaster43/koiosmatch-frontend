@@ -612,7 +612,20 @@
     "createdBy": "Créé par",
     "source": "Source",
     "recentActivity": "Activité récente",
-    "noActivity": "Aucune activité."
+    "noActivity": "Aucune activité.",
+    "byOutcome": "Candidatures par phase",
+    "appointments": "Intakes / rendez-vous",
+    "appointmentsUpcoming": "prévus",
+    "appointmentsCompleted": "terminés",
+    "notes": "Notes",
+    "notesCount_one": "{{count}} note",
+    "notesCount_other": "{{count}} notes",
+    "lastContactValue": "{{date}} · {{type}}",
+    "timeline": "Chronologie",
+    "daysSinceCreated_one": "{{count}} jour depuis la création",
+    "daysSinceCreated_other": "{{count}} jours depuis la création",
+    "daysSincePhaseChange_one": "{{count}} jour depuis le dernier changement de phase",
+    "daysSincePhaseChange_other": "{{count}} jours depuis le dernier changement de phase"
   },
   "planning": {
     "availability": "Disponibilité",
