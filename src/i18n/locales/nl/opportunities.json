@@ -169,5 +169,13 @@
   },
   "richText": {
     "empty": "Nog niets vastgelegd"
+  },
+  "filters": {
+    "archived": "Gearchiveerd",
+    "categories": {
+      "lifecycle": "Levenscyclus",
+      "organisation": "Organisatie",
+      "display": "Weergave"
+    }
   }
 }

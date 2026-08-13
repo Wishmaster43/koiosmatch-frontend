@@ -46,8 +46,10 @@ import AddressCard from './addmodal/AddressCard'
 import ProfileTextCard from './addmodal/ProfileTextCard'
 import BranchesCard from './addmodal/BranchesCard'
 import CvUploadCard from './addmodal/CvUploadCard'
+import PasteCvCard from './addmodal/PasteCvCard'
 import { CvFilledContext } from './addmodal/cvFilledContext'
 import { useCvPrefill } from './addmodal/useCvPrefill'
+import { usePasteCvPrefill } from './addmodal/usePasteCvPrefill'
 import { useLiveFieldValidation } from './addmodal/useLiveFieldValidation'
 import { useRequiredFields } from './addmodal/useRequiredFields'
 
@@ -165,6 +167,11 @@ export default function AddCandidateModal({ onClose, onCreated }: AddCandidateMo
     setErrors({})
   }, [])
   const { cv, cvFilled, summary: cvSummary, clearMark } = useCvPrefill(form, applyCvPatch)
+  // PASTE-CV-1: an independent parse instance (own phase/error), same mapping.
+  const { cv: pasteCv, cvFilled: pasteCvFilled, summary: pasteCvSummary, clearMark: clearPasteMark } = usePasteCvPrefill(form, applyCvPatch)
+  // Marks from either path share one "from CV, check me" context — a field can
+  // only have come from one of them at a time in practice, so a union is safe.
+  const combinedCvFilled = new Set<string>([...cvFilled, ...pasteCvFilled])
   // VALIDATIE-LIVE-1 (§3 size split): live format checks + the 422 field message
   // resolution — own sibling hook, fed the live form so a message always reflects
   // the value currently on screen.
@@ -177,8 +184,10 @@ export default function AddCandidateModal({ onClose, onCreated }: AddCandidateMo
     // A fresh edit invalidates any server 422 message shown for this field.
     clearFieldMessage(k)
     setSubmitErr(null)
-    // Editing a CV-prefilled field means the recruiter checked it — drop the mark.
+    // Editing a CV-prefilled field means the recruiter checked it — drop the mark
+    // on whichever path (file or paste) filled it.
     clearMark(k)
+    clearPasteMark(k)
     // Editing anything invalidates the refused-create verdict; the next submit re-asks
     // the server (which stays the only authority on what is a duplicate).
     setDupBlock(null)
@@ -352,13 +361,18 @@ export default function AddCandidateModal({ onClose, onCreated }: AddCandidateMo
               // Each card is a presentational component under addmodal/ (§refactor 2026-07-20).
               // CvFilledContext lets each card mark its own CV-prefilled fields
               // without drilling the set through two levels (§3).
-              <CvFilledContext.Provider value={cvFilled}>
+              <CvFilledContext.Provider value={combinedCvFilled}>
                 <div style={{ ...modalColumns(), gap: 14 }}>
                   {/* Both parse routes require candidates.update — hide the control when
                       it would 403 rather than offer an affordance that cannot work. */}
                   {canParseCv && (
-                    <CvUploadCard phase={cv.phase} errorKey={cv.errorKey} fileName={cv.fileName}
-                      summary={cvSummary} onFile={cv.start} onReset={cv.reset} />
+                    <>
+                      <CvUploadCard phase={cv.phase} errorKey={cv.errorKey} fileName={cv.fileName}
+                        summary={cvSummary} onFile={cv.start} onReset={cv.reset} />
+                      {/* PASTE-CV-1: independent phase/summary, a text alternative to the file picker. */}
+                      <PasteCvCard phase={pasteCv.phase} errorKey={pasteCv.errorKey}
+                        summary={pasteCvSummary} onSubmit={pasteCv.startText} onReset={pasteCv.reset} />
+                    </>
                   )}
                   <PersonalCard form={form} errors={errors} set={set} isReq={isReq} genderOptions={genderOptions} />
                   <ContactCard form={form} errors={errors} set={set} isReq={isReq} onBlur={markTouched} fieldMessage={fieldMessage} />

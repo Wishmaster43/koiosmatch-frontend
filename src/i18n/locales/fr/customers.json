@@ -39,10 +39,15 @@
     "industry": "Secteur",
     "categories": {
       "general": "Général",
-      "organisation": "Organisation"
+      "organisation": "Organisation",
+      "display": "Affichage"
     },
     "allStatuses": "Tous les statuts",
-    "statusFilter": "Filtrer par statut"
+    "statusFilter": "Filtrer par statut",
+    "phase": "Phase",
+    "province": "Province",
+    "archived": "Archivé",
+    "periodCreated": "Période (créé)"
   },
   "insights": {
     "statusTitle": "Statut",

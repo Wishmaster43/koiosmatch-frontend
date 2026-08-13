@@ -534,5 +534,14 @@
     "total_other": "{{count}} candidats pour ce poste",
     "inPhase_one": "Ce candidat est en phase {{phase}}, avec 1 autre.",
     "inPhase_other": "Ce candidat est en phase {{phase}}, avec {{count}} autres."
+  },
+  "filters": {
+    "categories": {
+      "lifecycle": "Recrutement",
+      "organisation": "Organisation",
+      "display": "Affichage"
+    },
+    "trash": "Corbeille",
+    "periodCreated": "Période (créé)"
   }
 }

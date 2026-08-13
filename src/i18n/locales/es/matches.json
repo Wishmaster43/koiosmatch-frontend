@@ -29,7 +29,8 @@
     "avgScore": "Puntuación media",
     "closed": "Cerrados",
     "newThisMonth": "Nuevo este mes",
-    "unscored": "Sin puntuación"
+    "unscored": "Sin puntuación",
+    "scored": "Puntuado"
   },
   "drawer": {
     "label": "Match",
@@ -205,7 +206,15 @@
     "client": "Cliente",
     "moreFilters": "Más filtros",
     "moreFiltersTitle": "Más filtros",
-    "removeFilter": "Quitar el filtro '{{label}}'"
+    "removeFilter": "Quitar el filtro '{{label}}'",
+    "scoreState": "Puntuación",
+    "dateRange": "Rango de fechas",
+    "archived": "Archivado",
+    "categories": {
+      "match": "Match",
+      "organisation": "Organización",
+      "display": "Visualización"
+    }
   },
   "view": {
     "matches": "Matches",

@@ -6,7 +6,7 @@
  * how CandidatesPage:113 consumes { attention: 'stale6m' }.
  */
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { render, screen } from '@testing-library/react'
+import { act, render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { useState } from 'react'
 import ApplicationsPage from './ApplicationsPage'
@@ -15,7 +15,11 @@ import ApplicationsPage from './ApplicationsPage'
 // request the page would send to the server.
 const dataHookCalls: Array<Record<string, unknown>> = []
 
-vi.mock('@/context/RightPanelContext', () => ({ useRightPanel: () => ({ registerFilters: vi.fn(), unregisterFilters: vi.fn() }) }))
+interface FilterGroup { key: string; selected: string[]; onToggle: (v: string) => void }
+let capturedGroups: FilterGroup[] = []
+vi.mock('@/context/RightPanelContext', () => ({
+  useRightPanel: () => ({ registerFilters: (_k: string, groups: FilterGroup[]) => { capturedGroups = groups }, unregisterFilters: vi.fn() }),
+}))
 vi.mock('@/context/LookupsContext', () => ({ useLookups: () => ({ funnelTypes: [], funnelMeta: () => ({ label: '', color: '#000' }) }) }))
 vi.mock('@/context/AuthContext', () => ({ useAuth: () => ({ hasPermission: () => true }) }))
 vi.mock('@/lib/queries', () => ({ useUsers: () => ({ data: [] }) }))
@@ -88,6 +92,24 @@ describe('ApplicationsPage · D6 dashboard intent seam', () => {
     const last = dataHookCalls[dataHookCalls.length - 1]
     expect(last.too_long_in_stage).toBeUndefined()
     expect(last.missing_appointment).toBeUndefined()
+  })
+})
+
+// FILTER-PARITY-1: archived/trash filter groups exist and their onToggle reaches
+// the real request params — the §13 seam test (never only "a callback fired").
+describe('ApplicationsPage · filter-panel parity (archived/trash)', () => {
+  it('registers archived and trash filter groups, both reaching include_archived=1', () => {
+    dataHookCalls.length = 0
+    render(<ApplicationsPage />)
+
+    const archivedGroup = capturedGroups.find(g => g.key === 'archived')
+    const trashGroup = capturedGroups.find(g => g.key === 'trash')
+    expect(archivedGroup).toBeTruthy()
+    expect(trashGroup).toBeTruthy()
+
+    act(() => archivedGroup!.onToggle('archived'))
+    const last = dataHookCalls[dataHookCalls.length - 1]
+    expect(last.include_archived).toBe(1)
   })
 })
 

@@ -534,5 +534,14 @@
     "total_other": "{{count}} solicitantes para esta vacante",
     "inPhase_one": "Este candidato está en {{phase}}, junto con 1 más.",
     "inPhase_other": "Este candidato está en {{phase}}, junto con {{count}} más."
+  },
+  "filters": {
+    "categories": {
+      "lifecycle": "Contratación",
+      "organisation": "Organización",
+      "display": "Visualización"
+    },
+    "trash": "Papelera",
+    "periodCreated": "Periodo (creado)"
   }
 }

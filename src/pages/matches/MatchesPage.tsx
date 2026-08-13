@@ -31,6 +31,8 @@ import MatchFilterBar from './MatchFilterBar'
 import { useOpenFromIntent } from '@/context/NavigationContext'
 import { useDrawerUrl } from '@/hooks/useDrawerUrl'
 import { useMatches, mapMatch, MATCHES_MAX_PER_PAGE } from './hooks/useMatches'
+import { buildMatchFilterGroups } from './data/matchFilterGroups'
+import type { MatchDateRange } from './data/matchFilterGroups'
 import { useMatchesBulkActions } from './hooks/useMatchesBulkActions'
 import { useMatchArchive } from './hooks/useMatchArchive'
 import { useMatchMutations } from './hooks/useMatchMutations'
@@ -72,6 +74,12 @@ export default function MatchesPage({ intent }: { intent?: unknown } = {}) {
   const [kpiScored, setKpiScored] = usePageMemory('matches.scored', false)
   const [ownerFilter, setOwnerFilter] = usePageMemory<string[]>('matches.owner', [])
   const [clientFilter, setClientFilter] = usePageMemory<string[]>('matches.client', [])
+  // VESTIGING: branch (bureau) filter — narrows to matches run from that branch.
+  const [branchFilter, setBranchFilter] = usePageMemory<string[]>('matches.branch', [])
+  // Unscored complements kpiScored: both live in the right panel's one "score state" group.
+  const [kpiUnscored, setKpiUnscored] = usePageMemory('matches.unscored', false)
+  // Match-date window (a single removable range, not multi-value).
+  const [dateRange, setDateRange] = usePageMemory<MatchDateRange | null>('matches.dateRange', null)
   // Start of the current month, captured once (purity — feeds the "Nieuw" KPI).
   const [monthStart] = useState(() => { const d = new Date(); d.setDate(1); d.setHours(0, 0, 0, 0); return d.getTime() })
   // Bulk selection (checkboxes); accumulates across pages, clears on filter change.
@@ -112,6 +120,13 @@ export default function MatchesPage({ intent }: { intent?: unknown } = {}) {
     return Object.values(m)
   }, [rows])
 
+  // Branch distribution — right-panel-only filter dimension (no toolbar/donut twin).
+  const branchData = useMemo(() => {
+    const m: Record<string, { value: string; label: string; count: number }> = {}
+    rows.forEach(r => { if (r.branchName) (m[r.branchName] ??= { value: r.branchName, label: r.branchName, count: 0 }).count++ })
+    return Object.values(m)
+  }, [rows])
+
   // Multi-select toggle for the right-panel filter groups (add/remove a value).
   const tog = (set: Dispatch<SetStateAction<string[]>>) => (v: string | number) =>
     set(p => p.includes(String(v)) ? p.filter(x => x !== String(v)) : [...p, String(v)])
@@ -122,19 +137,20 @@ export default function MatchesPage({ intent }: { intent?: unknown } = {}) {
   const ownerOptions = useMemo(() => ownerData.map(d => ({ value: d.key, label: d.name })), [ownerData])
   const clientOptions = useMemo(() => clientData.map(d => ({ value: d.key, label: d.name })), [clientData])
 
-  // Right-panel filters: status (stage) + owner. The same stageFilter/ownerFilter
-  // drive the donuts, so both stay in sync. (Archived lives in the toolbar segment.)
-  const filterGroups = useMemo(() => [
-    { key: 'stage', label: t('filters.status'), selected: stageFilter,
-      options: stageData.map(d => ({ value: d.key, label: d.name, count: d.value })),
-      onToggle: tog(setStageFilter) },
-    { key: 'owner', label: t('filters.owner'), selected: ownerFilter,
-      options: ownerData.map(d => ({ value: d.key, label: d.name, count: d.value })),
-      onToggle: tog(setOwnerFilter) },
-    { key: 'client', label: t('insights.client'), selected: clientFilter,
-      options: clientData.map(d => ({ value: d.key, label: d.name, count: d.value })),
-      onToggle: tog(setClientFilter) },
-  ], [t, stageFilter, ownerFilter, clientFilter, stageData, ownerData, clientData])
+  // Right-panel filters: stage/owner/client/branch/score-state/date-range/archived
+  // — pure builder (§0.3 split). The same stageFilter/ownerFilter drive the donuts,
+  // so both stay in sync.
+  const filterGroups = useMemo(() => buildMatchFilterGroups({
+    t, tog,
+    stageFilter, setStageFilter, ownerFilter, setOwnerFilter, clientFilter, setClientFilter,
+    branchFilter, setBranchFilter, kpiScored, setKpiScored, kpiUnscored, setKpiUnscored,
+    dateRange, setDateRange, showArchived, setShowArchived,
+    stageData: stageData.map(d => ({ value: d.key, label: d.name, count: d.value })),
+    ownerData: ownerData.map(d => ({ value: d.key, label: d.name, count: d.value })),
+    clientData: clientData.map(d => ({ value: d.key, label: d.name, count: d.value })),
+    branchOptions: branchData,
+  }), [t, stageFilter, ownerFilter, clientFilter, branchFilter, kpiScored, kpiUnscored, dateRange, showArchived,
+       stageData, ownerData, clientData, branchData])
 
   // Register/unregister the filters in the right panel.
   useEffect(() => {
@@ -144,7 +160,8 @@ export default function MatchesPage({ intent }: { intent?: unknown } = {}) {
 
   // Reset to the first page and clear the selection whenever a filter changes
   // (kept out of the memo — setting state during render can loop).
-  useEffect(() => { setPage(1); setSelectedIds(new Set()) }, [stageFilter, ownerFilter, kpiScored, query, showArchived])
+  useEffect(() => { setPage(1); setSelectedIds(new Set()) },
+    [stageFilter, ownerFilter, clientFilter, branchFilter, kpiScored, kpiUnscored, dateRange, query, showArchived])
 
   // Filter the visible rows by donut selection. A reference-number query already
   // narrowed `rows` server-side (exact `?ref=` lookup) — skip the free-text
@@ -154,12 +171,16 @@ export default function MatchesPage({ intent }: { intent?: unknown } = {}) {
     return rows.filter(r => {
       if (stageFilter.length && !stageFilter.includes(r.status)) return false
       if (kpiScored && typeof r.score !== 'number') return false
+      if (kpiUnscored && typeof r.score === 'number') return false
       if (ownerFilter.length && !ownerFilter.includes(r.owner)) return false
       if (clientFilter.length && !clientFilter.includes(r.client)) return false
+      if (branchFilter.length && !branchFilter.includes(r.branchName ?? '')) return false
+      if (dateRange?.from && (!r.date || new Date(r.date).getTime() < new Date(dateRange.from).getTime())) return false
+      if (dateRange?.to && (!r.date || new Date(r.date).getTime() > new Date(dateRange.to).getTime())) return false
       if (q && ![r.candidate, r.vacancy, r.client].some(v => String(v ?? '').toLowerCase().includes(q))) return false
       return true
     })
-  }, [rows, stageFilter, ownerFilter, clientFilter, kpiScored, query, refQuery])
+  }, [rows, stageFilter, ownerFilter, clientFilter, branchFilter, kpiScored, kpiUnscored, dateRange, query, refQuery])
 
   // Board rows never include archived matches: dragging one to a new status would
   // PATCH /matches/{id}, which 404s once soft-deleted (MatchController::update has
@@ -191,11 +212,12 @@ export default function MatchesPage({ intent }: { intent?: unknown } = {}) {
   ]
 
   // Shared clear-all (page memory keeps filters sticky).
-  const anyFilterActive = Boolean(query.trim() || kpiScored || stageFilter.length || ownerFilter.length || clientFilter.length || showArchived)
+  const anyFilterActive = Boolean(query.trim() || kpiScored || kpiUnscored || stageFilter.length || ownerFilter.length
+    || clientFilter.length || branchFilter.length || dateRange || showArchived)
   const [searchEpoch, setSearchEpoch] = useState(0)
   const clearAllFilters = () => {
-    setSearchEpoch(e => e + 1); setQuery(''); setKpiScored(false)
-    setStageFilter([]); setOwnerFilter([]); setClientFilter([]); setShowArchived(false)
+    setSearchEpoch(e => e + 1); setQuery(''); setKpiScored(false); setKpiUnscored(false)
+    setStageFilter([]); setOwnerFilter([]); setClientFilter([]); setBranchFilter([]); setDateRange(null); setShowArchived(false)
   }
 
   // KPI clicks drive the existing stage filter (chip + clear come for free);

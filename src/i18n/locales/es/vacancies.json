@@ -71,8 +71,13 @@
     "employmentType": "Tipo de contrato",
     "categories": {
       "general": "General",
-      "organisation": "Organización"
-    }
+      "organisation": "Organización",
+      "display": "Visualización"
+    },
+    "published": "Publicada",
+    "publishedYes": "Publicada",
+    "publishedNo": "No publicada",
+    "archived": "Archivada"
   },
   "bulk": {
     "selected": "{{count}} seleccionada(s)",

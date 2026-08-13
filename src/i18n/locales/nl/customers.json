@@ -39,10 +39,15 @@
     "industry": "Branche",
     "categories": {
       "general": "Algemeen",
-      "organisation": "Organisatie"
+      "organisation": "Organisatie",
+      "display": "Weergave"
     },
     "allStatuses": "Alle statussen",
-    "statusFilter": "Filter op status"
+    "statusFilter": "Filter op status",
+    "phase": "Fase",
+    "province": "Provincie",
+    "archived": "Gearchiveerd",
+    "periodCreated": "Periode (aangemaakt)"
   },
   "insights": {
     "statusTitle": "Status",

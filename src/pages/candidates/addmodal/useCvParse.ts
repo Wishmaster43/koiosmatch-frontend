@@ -27,6 +27,10 @@ export const CV_POLL_TIMEOUT_MS = 90000
 // the server re-validates, and CvParsingService even re-checks the PDF magic bytes (§7).
 export const CV_MAX_BYTES = 10 * 1024 * 1024
 export const CV_ACCEPT_MIME = 'application/pdf'
+// PASTE-CV-1 (13-08): same endpoint, `raw_text` body instead of a file — bounds
+// mirror ParseCvRequest's `raw_text` rule (30..50000 chars, XOR with file).
+export const CV_TEXT_MIN_CHARS = 30
+export const CV_TEXT_MAX_CHARS = 50000
 
 /** Every message this hook can produce, as literal i18n keys (greppable, one place). */
 export const CV_ERROR_KEYS = {
@@ -177,6 +181,33 @@ export function useCvParse({ onReady }: UseCvParseOptions) {
     }
   }, [fail, failFromError, poll])
 
+  // Paste-CV path (PASTE-CV-1): same route/token/poll, `raw_text` JSON body instead
+  // of a multipart file. Under-length text never fires a request — the caller shows
+  // a calm hint instead (kalme hint, geen request) rather than a round-trip error.
+  const startText = useCallback(async (text: string) => {
+    const value = text.trim()
+    if (value.length < CV_TEXT_MIN_CHARS || value.length > CV_TEXT_MAX_CHARS) return
+
+    if (timerRef.current) clearTimeout(timerRef.current)
+    abortRef.current?.abort()
+    setErrorKey(null)
+    setFileName(null)
+
+    setPhase('uploading')
+    const controller = new AbortController()
+    abortRef.current = controller
+    try {
+      const body = unwrap<{ token?: string }>(await api.post('/candidates/parse-cv', { raw_text: value }, { signal: controller.signal }))
+      if (!aliveRef.current) return
+      const token = body?.token
+      if (!token) { fail(CV_ERROR_KEYS.generic); return }
+      setPhase('processing')
+      poll(token, Date.now() + CV_POLL_TIMEOUT_MS)
+    } catch (err) {
+      failFromError(err)
+    }
+  }, [fail, failFromError, poll])
+
   // Back to idle: abort whatever is in flight and clear the widget. Deliberately does
   // NOT clear the form — values already prefilled belong to the recruiter now.
   const reset = useCallback(() => {
@@ -187,5 +218,5 @@ export function useCvParse({ onReady }: UseCvParseOptions) {
     setFileName(null)
   }, [])
 
-  return { phase, errorKey, fileName, start, reset }
+  return { phase, errorKey, fileName, start, startText, reset }
 }

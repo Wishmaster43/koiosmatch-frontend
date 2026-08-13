@@ -15,8 +15,10 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import CollapsibleRichText from '@/components/ui/CollapsibleRichText'
+import KoiosSuggestionBadge from '@/components/ui/KoiosSuggestionBadge'
 import type { FormState } from '../AddCandidateModal'
 import { cardHead, cardBox } from './fields'
+import ProfileGenerateFlow from './ProfileGenerateFlow'
 
 interface ProfileTextCardProps {
   form: FormState
@@ -29,15 +31,31 @@ export default function ProfileTextCard({ form, set }: ProfileTextCardProps) {
   // remarksEditing — this modal has no equivalent shared form hook to own it).
   const [expanded, setExpanded] = useState(false)
   const [editing, setEditing] = useState(false)
+  // GENERATE-FIELDS-1: the applied concept keeps its Koios badge until the
+  // recruiter actually edits the text — mirrors the CV-prefill mark lifecycle.
+  const [generated, setGenerated] = useState(false)
+
+  const applyGenerated = (concept: string) => {
+    set('summary', concept)
+    setExpanded(true)
+    setGenerated(true)
+  }
+  const handleChange = (v: string) => {
+    set('summary', v)
+    setGenerated(false)
+  }
+
   return (
     // No gridColumn span (Danny 05-08): a plain grid cell so this card sits LEFT,
     // side by side with BranchesCard, instead of stacking full-width above it.
     <div>
       <div style={cardHead}>{t('profile.summary')}</div>
+      <ProfileGenerateFlow form={form} onApply={applyGenerated} />
       <div style={cardBox}>
-        <CollapsibleRichText t={t} value={form.summary} onChange={v => set('summary', v)}
+        <CollapsibleRichText t={t} value={form.summary} onChange={handleChange}
           expanded={expanded} setExpanded={setExpanded} editing={editing} setEditing={setEditing}
           placeholder={t('common:add')} />
+        {generated && <KoiosSuggestionBadge />}
       </div>
     </div>
   )

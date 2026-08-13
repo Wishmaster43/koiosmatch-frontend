@@ -290,6 +290,12 @@
         "timeout": "Het lezen van dit cv duurde te lang. Probeer het opnieuw of vul de gegevens handmatig in.",
         "generic": "Het cv kon niet gelezen worden."
       }
+    },
+    "cvPaste": {
+      "title": "Kandidaat van geplakte cv-tekst",
+      "placeholder": "Plak hier de cv-tekst…",
+      "submit": "Tekst lezen",
+      "tooShort": "Plak minstens {{min}} tekens. Koios heeft genoeg tekst nodig om te lezen."
     }
   },
   "drawer": {
@@ -1298,5 +1304,15 @@
     "summaryWindowTitle": "Profieltekst — {{name}}",
     "noteNotFound": "Notitie niet gevonden. Mogelijk is hij verwijderd of hoort hij bij een andere kandidaat.",
     "noteReadOnly": "Deze notitie is van een andere gebruiker. Je kunt hem hier alleen lezen."
+  },
+  "generate": {
+    "button": "Genereer met Koios",
+    "cta": "Genereren",
+    "generating": "Koios genereert een conceptprofieltekst…",
+    "error": "Genereren is mislukt. Probeer het opnieuw.",
+    "previewLabel": "Voorstel (concept), nog niet opgeslagen",
+    "apply": "Toepassen",
+    "discard": "Verwerpen",
+    "needsFieldsFirst": "Vul eerst een naam of functietitel in om een concept te genereren."
   }
 }

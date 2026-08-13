@@ -178,5 +178,15 @@
       "noTargets": "Diese aktive Kampagne hat noch keine Kontakte geladen.",
       "staleDraft": "Dieser Entwurf hat geladene Kontakte, wurde aber nie aktiviert."
     }
+  },
+  "filters": {
+    "owner": "Eigentümer",
+    "targetGroup": "Zielgruppe",
+    "archived": "Archiviert",
+    "categories": {
+      "campaign": "Kampagne",
+      "organisation": "Organisation",
+      "display": "Ansicht"
+    }
   }
 }

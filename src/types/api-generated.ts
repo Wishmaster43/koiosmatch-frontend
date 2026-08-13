@@ -98,6 +98,412 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/applications": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** GET /applications — paginated, filtered list ({ data, meta }). */
+        get: operations["getApplications"];
+        put?: never;
+        /**
+         * POST /applications — couple an EXISTING candidate to a vacancy on the first
+         *     funnel phase (lowest sort_order; never hardcoded). A candidate may apply many
+         *     times (incl. repeats), so there is NO hard uniqueness — a still-open identical
+         *     candidate×vacancy only yields a soft warning. Gated by applications.create.
+         */
+        post: operations["postApplications"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/applications/stats": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * GET /applications/stats — KPI strip. Honours the SCOPE filters (vacancy/owner/
+         *     search) but never the segment selectors (bucket/phase_key), so the strip keeps
+         *     showing the full distribution the user is choosing between.
+         */
+        get: operations["getApplicationsStats"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/applications/{application}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The application.
+                 * @example architecto
+                 */
+                application: string;
+            };
+            cookie?: never;
+        };
+        /** GET /applications/{id} — the wide drawer detail ({ data }). */
+        get: operations["getApplicationsApplication"];
+        /** PATCH /applications/{id} — move phase and/or reassign owner. */
+        put: operations["putApplicationsApplication"];
+        post?: never;
+        /** DELETE /applications/{id} — detach (restores prior lifecycle status). */
+        delete: operations["deleteApplicationsApplication"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/applications/{application}/proposals": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The application.
+                 * @example architecto
+                 */
+                application: string;
+            };
+            cookie?: never;
+        };
+        /** GET /applications/{id}/proposals — newest first, never emits subject/body. */
+        get: operations["getApplicationsApplicationProposals"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/applications/{application}/reject": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The application.
+                 * @example architecto
+                 */
+                application: string;
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** POST /applications/{id}/reject — reject (keeps the row) + send (Opdracht 3). */
+        post: operations["postApplicationsApplicationReject"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/applications/{application}/score": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The application.
+                 * @example architecto
+                 */
+                application: string;
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * POST /applications/{id}/score — (re)run the deterministic scoring engine,
+         *     bounded by the vacancy's effective assessment, and persist the result flat.
+         */
+        post: operations["postApplicationsApplicationScore"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/applications/{application}/notes": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The application.
+                 * @example architecto
+                 */
+                application: string;
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * POST /applications/{id}/notes — add a recruiter note to a sollicitatie.
+         * @description Returns the full detail so the drawer can refresh in one call.
+         *     Gated by applications.update (same as other writes on this resource).
+         */
+        post: operations["postApplicationsApplicationNotes"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/applications/{application}/notes/{note}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The application.
+                 * @example architecto
+                 */
+                application: string;
+                /**
+                 * @description The note.
+                 * @example architecto
+                 */
+                note: string;
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /**
+         * A-popout-1: PATCH /applications/{id}/notes/{note} { body?, type?, language? } — edit
+         *     an existing note. IDOR-safe: the note is resolved THROUGH its application relation
+         *     (404 when it isn't this application's). Ownership: the author may edit their own
+         *     note; anyone else needs applications.notes.manage_all (mirrors candidates.notes.manage_all
+         *     — seeded to tenant_admin/manager in RoleAndPermissionSeeder, same as its siblings).
+         */
+        patch: operations["patchApplicationsApplicationNotesNote"];
+        trace?: never;
+    };
+    "/api/applications/{application}/propose": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The application.
+                 * @example architecto
+                 */
+                application: string;
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** POST /applications/{id}/propose — snapshot the contact + send. */
+        post: operations["postApplicationsApplicationPropose"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/proposals/{proposal}/revoke": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The proposal.
+                 * @example architecto
+                 */
+                proposal: string;
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** POST /proposals/{id}/revoke — idempotent: already-revoked stays revoked, no error. */
+        post: operations["postProposalsProposalRevoke"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/applications/{application}/stop-interview": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The application.
+                 * @example architecto
+                 */
+                application: string;
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * INTERVIEW-STOP-1: POST /applications/{id}/stop-interview — recruiter takeover.
+         * @description Pauses the AI so the human answers; the engine never auto-resumes a paused session
+         *     (see InterviewEngine::handleInbound). Idempotent; reversible via resume-interview.
+         */
+        post: operations["postApplicationsApplicationStopInterview"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/applications/{application}/resume-interview": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The application.
+                 * @example architecto
+                 */
+                application: string;
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** INTERVIEW-STOP-1: POST /applications/{id}/resume-interview — hand the flow back to the AI. */
+        post: operations["postApplicationsApplicationResumeInterview"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/applications/{application}/interview": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The application.
+                 * @example architecto
+                 */
+                application: string;
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * INTERVIEW-PERAPP-1: POST /applications/{id}/interview {agent_id} — start the AI interview
+         *     for THIS application with a CHOSEN agent (its own flow), independent of the vacancy's
+         *     coupled agent. Returns the live interview block (id + agent). A candidate that already has
+         *     an (open) session gets that session back (200); a guard skip is a 422 with the reason.
+         */
+        post: operations["postApplicationsApplicationInterview"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/vacancies/{vacancy}/start-interviews": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The vacancy.
+                 * @example architecto
+                 */
+                vacancy: string;
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * INTERVIEW-BACKFILL-1: POST /vacancies/{id}/start-interviews — start the AI interview for
+         *     every ELIGIBLE existing applicant of a vacancy (coupling an agent only auto-starts NEW
+         *     applications). Sends real WhatsApp, so the FE confirms first (AVG, no auto-fire).
+         * @description Idempotent + guard-driven; reports per application what happened.
+         */
+        post: operations["postVacanciesVacancyStartInterviews"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/applications/{application}/rejection": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The application.
+                 * @example architecto
+                 */
+                application: string;
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /**
+         * PATCH /applications/{id}/rejection — APP-REJECTION-EDIT-1: correct the reason
+         *     and/or internal note of an ALREADY rejected application. Writes ONLY
+         *     rejection_reason_id/rejection_note — never the stage, never re-delivers (the
+         *     candidate must NOT get a second rejection message). 404 when the application
+         *     isn't currently rejected — there is nothing to correct.
+         */
+        patch: operations["patchApplicationsApplicationRejection"];
+        trace?: never;
+    };
+    "/api/applications/{application}/restore": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The application.
+                 * @example architecto
+                 */
+                application: string;
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** POST /applications/{id}/restore — un-detach a soft-deleted application (A1). */
+        post: operations["postApplicationsApplicationRestore"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/appointments": {
         parameters: {
             query?: never;
@@ -131,8 +537,7 @@ export interface paths {
         /** GET /candidates/{id}/appointments — appointments for one candidate. */
         get: operations["getCandidatesCandidateAppointments"];
         put?: never;
-        /** POST /candidates/{id}/appointments — schedule (returns the record incl. id). */
-        post: operations["postCandidatesCandidateAppointments"];
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -164,8 +569,154 @@ export interface paths {
         delete: operations["deleteCandidatesCandidateAppointmentsAppointment"];
         options?: never;
         head?: never;
-        /** PATCH /candidates/{id}/appointments/{aid} — edit a scheduled appointment. */
-        patch: operations["patchCandidatesCandidateAppointmentsAppointment"];
+        patch?: never;
+        trace?: never;
+    };
+    "/api/appointments/{appointment}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The appointment.
+                 * @example architecto
+                 */
+                appointment: string;
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** APPT-LINKS-1: DELETE /appointments/{aid} — soft-delete without a candidate parent. */
+        delete: operations["deleteAppointmentsAppointment"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/appointment-types": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** GET — active, ordered, each row carrying an `in_use` flag. */
+        get: operations["getAppointmentTypes"];
+        put?: never;
+        /** POST — create (value is the immutable slug). */
+        post: operations["postAppointmentTypes"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/appointment-locations": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** GET — active, ordered, each row carrying an `in_use` flag. */
+        get: operations["getAppointmentLocations"];
+        put?: never;
+        /** POST — create (value is the immutable slug). */
+        post: operations["postAppointmentLocations"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/appointment-types/reorder": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * PUT /reorder  body: { ids: [.
+         * @description ..] }
+         */
+        put: operations["putAppointmentTypesReorder"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/appointment-types/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The ID of the appointment type.
+                 * @example BcECdBDA-CdED-bFEA-CbCE-BcCdeBfbbebc
+                 */
+                id: string;
+            };
+            cookie?: never;
+        };
+        get?: never;
+        /** PUT /{id} — value (slug) is immutable; only label/color/sort_order/active change. */
+        put: operations["putAppointmentTypesId"];
+        post?: never;
+        /** DELETE /{id} — 409 while still referenced. */
+        delete: operations["deleteAppointmentTypesId"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/appointment-locations/reorder": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * PUT /reorder  body: { ids: [.
+         * @description ..] }
+         */
+        put: operations["putAppointmentLocationsReorder"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/appointment-locations/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The ID of the appointment location.
+                 * @example BcECdBDA-CdED-bFEA-CbCE-BcCdeBfbbebc
+                 */
+                id: string;
+            };
+            cookie?: never;
+        };
+        get?: never;
+        /** PUT /{id} — value (slug) is immutable; only label/color/sort_order/active change. */
+        put: operations["putAppointmentLocationsId"];
+        post?: never;
+        /** DELETE /{id} — 409 while still referenced. */
+        delete: operations["deleteAppointmentLocationsId"];
+        options?: never;
+        head?: never;
+        patch?: never;
         trace?: never;
     };
     "/api/sync/{entity}/bulk": {
@@ -213,40 +764,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/notifications": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** GET /notifications — the current user's recent feed + the unseen count. */
-        get: operations["getNotifications"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/notifications/seen": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** POST /notifications/seen — mark all of the current user's notifications as seen. */
-        post: operations["postNotificationsSeen"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/api/tenants": {
         parameters: {
             query?: never;
@@ -278,7 +795,7 @@ export interface paths {
             path: {
                 /**
                  * @description The ID of the tenant.
-                 * @example demo
+                 * @example aenf
                  */
                 id: string;
             };
@@ -328,7 +845,7 @@ export interface paths {
             path: {
                 /**
                  * @description The tenant.
-                 * @example demo
+                 * @example aenf
                  */
                 tenant: string;
             };
@@ -361,25 +878,33 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/users/{id}": {
+    "/api/users/{user_id}": {
         parameters: {
             query?: never;
             header?: never;
             path: {
                 /**
                  * @description The ID of the user.
-                 * @example 019f6f5e-4418-7136-af8c-00cf6071e88b
+                 * @example 019ffa63-0452-70b5-b76d-9c87f55a834f
                  */
-                id: string;
+                user_id: string;
             };
             cookie?: never;
         };
         /** GET /users/{user} — show a single user (must belong to the caller's tenant). */
-        get: operations["getUsersId"];
-        put?: never;
+        get: operations["getUsersUserId"];
+        /** PUT /users/{user} — update a user (must belong to the caller's tenant). */
+        put: operations["putUsersUserId"];
         post?: never;
-        /** DELETE /users/{user} — delete a user (must belong to the caller's tenant). */
-        delete: operations["deleteUsersId"];
+        /**
+         * DELETE /users/{user} — SOFT-delete a user of the caller's tenant.
+         * @description USER-SOFTDELETE-1 (Danny 08-08): a user who still OWNS active objects
+         *     (candidates/vacancies/matches/…) may NEVER be deleted without first handing
+         *     that ownership to a successor — the database must stay intact and no object
+         *     may ever be orphaned. Deletion is always a soft-delete (the row, and every
+         *     historical created_by/author_id reference to it, stays resolvable).
+         */
+        delete: operations["deleteUsersUserId"];
         options?: never;
         head?: never;
         patch?: never;
@@ -392,7 +917,7 @@ export interface paths {
             path: {
                 /**
                  * @description The ID of the user.
-                 * @example 019f6f5e-4418-7136-af8c-00cf6071e88b
+                 * @example 019ffa63-0452-70b5-b76d-9c87f55a834f
                  */
                 user_id: string;
             };
@@ -408,29 +933,6 @@ export interface paths {
          *     crafted role id/name). Roles are resolved on the central DB.
          */
         put: operations["putUsersUserIdRoles"];
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/users/{user_id}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /**
-                 * @description The ID of the user.
-                 * @example 019f6f5e-4418-7136-af8c-00cf6071e88b
-                 */
-                user_id: string;
-            };
-            cookie?: never;
-        };
-        get?: never;
-        /** PUT /users/{user} — update a user (must belong to the caller's tenant). */
-        put: operations["putUsersUserId"];
         post?: never;
         delete?: never;
         options?: never;
@@ -552,7 +1054,7 @@ export interface paths {
             path: {
                 /**
                  * @description The ID of the user.
-                 * @example 019f6f5e-4418-7136-af8c-00cf6071e88b
+                 * @example 019ffa63-0452-70b5-b76d-9c87f55a834f
                  */
                 id: string;
             };
@@ -724,6 +1226,260 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/exports/contacts.csv": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** GET /exports/contacts.csv — customer contacts (business contact data). */
+        get: operations["getExportsContactsCsv"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/exports/locations.csv": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** GET /exports/locations.csv — customer locations (sites of the client). */
+        get: operations["getExportsLocationsCsv"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/exports/departments.csv": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** GET /exports/departments.csv — customer departments. */
+        get: operations["getExportsDepartmentsCsv"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/exports/matches.csv": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** GET /exports/matches.csv — the matches export (candidate × vacancy outcomes). */
+        get: operations["getExportsMatchesCsv"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/exports/tasks.csv": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** GET /exports/tasks.csv — tasks (title + operational fields, never the description). */
+        get: operations["getExportsTasksCsv"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/exports/opportunities.csv": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** GET /exports/opportunities.csv — the sales pipeline. */
+        get: operations["getExportsOpportunitiesCsv"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/exports/outreach.csv": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** GET /exports/outreach.csv — call lists (campaigns, not the individual contacts). */
+        get: operations["getExportsOutreachCsv"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/imports/templates": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * GET /imports/templates — which templates exist, for the import screen's list.
+         * @description Data-driven discovery must not advertise what the caller cannot run: this route
+         *     carries `customers.view` (every template shares that right except vacancies,
+         *     which has its own tree), so `vacancies` is hidden here unless the caller also
+         *     holds `vacancies.create` — the permission the actual import POST requires. Every
+         *     other entry stays customer-tree-gated, unchanged.
+         */
+        get: operations["getImportsTemplates"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/imports/vacancies/template.csv": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** GET /imports/{entity}/template.csv — a filled-in example file for that entity. */
+        get: operations["getImportsVacanciesTemplateCsv"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/imports/{entity}/template.csv": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @example architecto */
+                entity: string;
+            };
+            cookie?: never;
+        };
+        /** GET /imports/{entity}/template.csv — a filled-in example file for that entity. */
+        get: operations["getImportsEntityTemplateCsv"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/imports/vacancies/dry-run": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** POST /imports/{entity}/dry-run — the preview; nothing is written. */
+        post: operations["postImportsVacanciesDryRun"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/imports/vacancies": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** POST /imports/{entity} — the real run, transactional per row and idempotent. */
+        post: operations["postImportsVacancies"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/imports/{entity}/dry-run": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @example architecto */
+                entity: string;
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** POST /imports/{entity}/dry-run — the preview; nothing is written. */
+        post: operations["postImportsEntityDryRun"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/imports/{entity}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @example architecto */
+                entity: string;
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** POST /imports/{entity} — the real run, transactional per row and idempotent. */
+        post: operations["postImportsEntity"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/whatsapp/webhook": {
         parameters: {
             query?: never;
@@ -838,7 +1594,7 @@ export interface paths {
             path: {
                 /**
                  * @description The ID of the whatsappConnection.
-                 * @example 019f6f5e-5756-73e2-ac73-a51b2eed7356
+                 * @example 019ffbe8-a821-7218-a25d-ccce8d51f818
                  */
                 whatsappConnection_id: string;
             };
@@ -863,7 +1619,7 @@ export interface paths {
             path: {
                 /**
                  * @description The ID of the whatsappConnection.
-                 * @example 019f6f5e-5756-73e2-ac73-a51b2eed7356
+                 * @example 019ffbe8-a821-7218-a25d-ccce8d51f818
                  */
                 whatsappConnection_id: string;
             };
@@ -886,7 +1642,7 @@ export interface paths {
             path: {
                 /**
                  * @description The ID of the whatsappConnection.
-                 * @example 019f6f5e-5756-73e2-ac73-a51b2eed7356
+                 * @example 019ffbe8-a821-7218-a25d-ccce8d51f818
                  */
                 whatsappConnection_id: string;
             };
@@ -909,7 +1665,7 @@ export interface paths {
             path: {
                 /**
                  * @description The ID of the whatsappConnection.
-                 * @example 019f6f5e-5756-73e2-ac73-a51b2eed7356
+                 * @example 019ffbe8-a821-7218-a25d-ccce8d51f818
                  */
                 whatsappConnection_id: string;
             };
@@ -925,17 +1681,56 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/settings/messaging-limits": {
+    "/api/whatsapp/{whatsappConnection_id}/templates/{template}": {
         parameters: {
             query?: never;
             header?: never;
-            path?: never;
+            path: {
+                /**
+                 * @description The ID of the whatsappConnection.
+                 * @example 019ffbe8-a821-7218-a25d-ccce8d51f818
+                 */
+                whatsappConnection_id: string;
+                /**
+                 * @description The template.
+                 * @example architecto
+                 */
+                template: string;
+            };
             cookie?: never;
         };
-        /** GET /api/settings/messaging-limits — caps per lane + the hard ceilings. */
-        get: operations["getSettingsMessagingLimits"];
-        /** PUT /api/settings/messaging-limits — set caps (clamped to the ceiling). */
-        put: operations["putSettingsMessagingLimits"];
+        /**
+         * GET /whatsapp/{whatsappConnection}/templates/{template} — show one template's body,
+         *     category, language, status and its variables (parsed from the stored components,
+         *     never re-stored — components is the single source of truth synced from Meta).
+         */
+        get: operations["getWhatsappWhatsappConnectionIdTemplatesTemplate"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/whatsapp/{whatsappConnection_id}/phone-numbers/{phoneNumber}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The ID of the whatsappConnection.
+                 * @example 019ffbe8-a821-7218-a25d-ccce8d51f818
+                 */
+                whatsappConnection_id: string;
+                /** @example architecto */
+                phoneNumber: string;
+            };
+            cookie?: never;
+        };
+        /** GET /whatsapp/{whatsappConnection}/phone-numbers/{phoneNumber} — show one phone number. */
+        get: operations["getWhatsappWhatsappConnectionIdPhoneNumbersPhoneNumber"];
+        put?: never;
         post?: never;
         delete?: never;
         options?: never;
@@ -1043,6 +1838,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
+        /** GET /conversations — paginated list, newest activity first, with filters. */
         get: operations["getConversations"];
         put?: never;
         post?: never;
@@ -1171,6 +1967,174 @@ export interface paths {
         get: operations["getMessages"];
         put?: never;
         post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/outreach-campaigns": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** GET /outreach-campaigns — paginated, filtered list ({ data, meta }). */
+        get: operations["getOutreachCampaigns"];
+        put?: never;
+        /** POST /outreach-campaigns — create a campaign (+ optionally fill from a pool). */
+        post: operations["postOutreachCampaigns"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/outreach-campaigns/{campaign}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @example architecto */
+                campaign: string;
+            };
+            cookie?: never;
+        };
+        /** GET /outreach-campaigns/{id} — the campaign + its targets (candidates resolved). */
+        get: operations["getOutreachCampaignsCampaign"];
+        /** PATCH /outreach-campaigns/{id} — partial update (name/status/channel/owner/pool). */
+        put: operations["putOutreachCampaignsCampaign"];
+        post?: never;
+        delete: operations["deleteOutreachCampaignsCampaign"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/outreach-campaigns/{campaign}/stats": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @example architecto */
+                campaign: string;
+            };
+            cookie?: never;
+        };
+        /** GET /outreach-campaigns/{id}/stats — the target-status + outcome + assignee distributions. */
+        get: operations["getOutreachCampaignsCampaignStats"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/outreach-campaigns/{campaign}/activity": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @example architecto */
+                campaign: string;
+            };
+            cookie?: never;
+        };
+        /** GET /outreach-campaigns/{id}/activity — the campaign's change log (CMFE 20). */
+        get: operations["getOutreachCampaignsCampaignActivity"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/outreach-campaigns/{campaign}/generate": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @example architecto */
+                campaign: string;
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** POST /outreach-campaigns/{id}/generate { pool_id? } — fill targets from a pool. */
+        post: operations["postOutreachCampaignsCampaignGenerate"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/outreach-campaigns/{campaign}/targets/assign": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @example architecto */
+                campaign: string;
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * POST /outreach-campaigns/{id}/targets/assign { target_ids[], recruiter_ids[] } —
+         *     BELLIJST-ASSIGN-1: divide the selected targets over the chosen recruiters
+         *     round-robin. Both arrays are validated up front; recruiter ids must resolve
+         *     to a real user of THIS tenant (or a super admin), never an id from another
+         *     tenant. Targets are resolved through the campaign's own relation (IDOR-safe).
+         */
+        post: operations["postOutreachCampaignsCampaignTargetsAssign"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/outreach-targets/{target}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @example architecto */
+                target: string;
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** PATCH /outreach-targets/{id} — mark the candidate's outreach status + note. */
+        patch: operations["patchOutreachTargetsTarget"];
+        trace?: never;
+    };
+    "/api/outreach-campaigns/{campaign}/restore": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @example architecto */
+                campaign: string;
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * POST /outreach-campaigns/{id}/restore — un-archive a soft-deleted campaign
+         *     (per-GUID reversible pair of the delete; update-class §5).
+         */
+        post: operations["postOutreachCampaignsCampaignRestore"];
         delete?: never;
         options?: never;
         head?: never;
@@ -1411,9 +2375,14 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * GET /email-log/{id} — one message WITH its (decrypted) body for the drawer. The body
-         *     may carry personal/health data (§9), so reading it is an ACCESS event: we record who
-         *     opened which email in the audit trail. IDOR-safe: resolved inside the tenant context.
+         * GET /email-log/{id} — one message WITH its (decrypted) body for the drawer.
+         * @description The body may carry personal/health data (§9), so three layers protect it:
+         *      1. the route gate — settings.view AND candidates.view (see routes/api/tenant/communication-ai.php);
+         *      2. IDOR scope — when the caller opens the mail FROM a dossier it passes
+         *         ?entity_type=&entity_id=, and the row must belong to THAT parent; a bare id from
+         *         another context 404s instead of returning its content (§5, existence stays hidden);
+         *      3. per-row authorization — the mail is only as readable as the entity it concerns.
+         *     The read itself is an ACCESS event and is recorded in the audit trail.
          */
         get: operations["getEmailLogId"];
         put?: never;
@@ -1679,7 +2648,7 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** POST /admin/jobs/failed/retry-all — re-queue every failed job. */
+        /** POST /admin/jobs/failed/retry-all {queue?} — re-queue every failed job, or (EINDSTREEP-4) only one lane's. */
         post: operations["postAdminJobsFailedRetryAll"];
         delete?: never;
         options?: never;
@@ -1722,6 +2691,63 @@ export interface paths {
         post?: never;
         /** DELETE /admin/jobs/failed/{uuid} — drop a single failed job. */
         delete: operations["deleteAdminJobsFailedUuid"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/admin/jobs/queues": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** GET /admin/jobs/queues — every configured lane's live pause state ('running'/'paused'/'unknown'). */
+        get: operations["getAdminJobsQueues"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/admin/jobs/queues/{lane}/pause": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @example architecto */
+                lane: string;
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** POST /admin/jobs/queues/{lane}/pause — signal the lane's Horizon supervisor to stop consuming. */
+        post: operations["postAdminJobsQueuesLanePause"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/admin/jobs/queues/{lane}/resume": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @example architecto */
+                lane: string;
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** POST /admin/jobs/queues/{lane}/resume — signal the lane's Horizon supervisor to resume consuming. */
+        post: operations["postAdminJobsQueuesLaneResume"];
+        delete?: never;
         options?: never;
         head?: never;
         patch?: never;
@@ -2060,6 +3086,29 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/auth/mfa/recovery-codes": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * POST /auth/mfa/recovery-codes (auth) {code} — regenerate the recovery codes.
+         * @description G16 (MFA-RECOVERY-REGEN-1): recovery codes are single-use, so a user who spent them
+         *     all had NO way to get more without disable() — which itself needs a valid code: a
+         *     dead-end. This mints a fresh set (requires a valid TOTP/recovery code, like disable,
+         *     so a hijacked session alone can't rotate them), invalidating the old ones.
+         */
+        post: operations["postAuthMfaRecoveryCodes"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/vacancies/{vacancy}/notes": {
         parameters: {
             query?: never;
@@ -2076,7 +3125,7 @@ export interface paths {
         /** GET /vacancies/{id}/notes — the thread, newest first. */
         get: operations["getVacanciesVacancyNotes"];
         put?: never;
-        /** POST /vacancies/{id}/notes { body } — add a note authored by the current user. */
+        /** POST /vacancies/{id}/notes { body, type? } — add a note authored by the current user. */
         post: operations["postVacanciesVacancyNotes"];
         delete?: never;
         options?: never;
@@ -2112,40 +3161,16 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/opportunities/{opportunity}/notes": {
+    "/api/customers/{customer}/notes/{note}": {
         parameters: {
             query?: never;
             header?: never;
             path: {
                 /**
-                 * @description The opportunity.
+                 * @description The customer.
                  * @example architecto
                  */
-                opportunity: string;
-            };
-            cookie?: never;
-        };
-        /** GET /opportunities/{id}/notes — the thread, newest first. */
-        get: operations["getOpportunitiesOpportunityNotes"];
-        put?: never;
-        /** POST /opportunities/{id}/notes { body, type? } — add a note authored by the current user. */
-        post: operations["postOpportunitiesOpportunityNotes"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/opportunities/{opportunity}/notes/{note}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /**
-                 * @description The opportunity.
-                 * @example architecto
-                 */
-                opportunity: string;
+                customer: string;
                 /**
                  * @description The note.
                  * @example architecto
@@ -2157,197 +3182,12 @@ export interface paths {
         get?: never;
         put?: never;
         post?: never;
-        /** DELETE /opportunities/{id}/notes/{note} — remove a note (scoped to the deal). */
-        delete: operations["deleteOpportunitiesOpportunityNotesNote"];
+        /** DELETE /customers/{customer}/notes/{note} — remove a note (scoped to the customer). */
+        delete: operations["deleteCustomersCustomerNotesNote"];
         options?: never;
         head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/opportunity-service-types": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** GET — ordered list, each carrying in_use. */
-        get: operations["getOpportunityServiceTypes"];
-        put?: never;
-        /** POST — create a lookup value (accepts label or name). */
-        post: operations["postOpportunityServiceTypes"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/opportunity-agreement-types": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** GET — ordered list, each carrying in_use. */
-        get: operations["getOpportunityAgreementTypes"];
-        put?: never;
-        /** POST — create a lookup value (accepts label or name). */
-        post: operations["postOpportunityAgreementTypes"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/opportunity-deal-types": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** GET /opportunity-deal-types — ordered list, each carrying in_use. */
-        get: operations["getOpportunityDealTypes"];
-        put?: never;
-        /** POST /opportunity-deal-types — create (accepts label or name). */
-        post: operations["postOpportunityDealTypes"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/opportunity-service-types/reorder": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        /**
-         * PUT /reorder  body: { ids: [.
-         * @description ..] }
-         */
-        put: operations["putOpportunityServiceTypesReorder"];
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/opportunity-service-types/{id}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /**
-                 * @description The ID of the opportunity service type.
-                 * @example architecto
-                 */
-                id: string;
-            };
-            cookie?: never;
-        };
-        get?: never;
-        /** PUT /{id} — resolved by id inside the tenant context (no implicit binding). */
-        put: operations["putOpportunityServiceTypesId"];
-        post?: never;
-        /** DELETE /{id} — 409 while still referenced by a deal. */
-        delete: operations["deleteOpportunityServiceTypesId"];
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/opportunity-agreement-types/reorder": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        /**
-         * PUT /reorder  body: { ids: [.
-         * @description ..] }
-         */
-        put: operations["putOpportunityAgreementTypesReorder"];
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/opportunity-agreement-types/{id}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /**
-                 * @description The ID of the opportunity agreement type.
-                 * @example architecto
-                 */
-                id: string;
-            };
-            cookie?: never;
-        };
-        get?: never;
-        /** PUT /{id} — resolved by id inside the tenant context (no implicit binding). */
-        put: operations["putOpportunityAgreementTypesId"];
-        post?: never;
-        /** DELETE /{id} — 409 while still referenced by a deal. */
-        delete: operations["deleteOpportunityAgreementTypesId"];
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/opportunity-deal-types/reorder": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        /**
-         * PUT /opportunity-deal-types/reorder  body: { ids: [.
-         * @description ..] }
-         */
-        put: operations["putOpportunityDealTypesReorder"];
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/opportunity-deal-types/{id}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /**
-                 * @description The ID of the opportunity deal type.
-                 * @example architecto
-                 */
-                id: string;
-            };
-            cookie?: never;
-        };
-        get?: never;
-        /** PUT /opportunity-deal-types/{id} — resolved by id inside the tenant context. */
-        put: operations["putOpportunityDealTypesId"];
-        post?: never;
-        /** DELETE /opportunity-deal-types/{id} — 409 while still referenced by a deal. */
-        delete: operations["deleteOpportunityDealTypesId"];
-        options?: never;
-        head?: never;
-        patch?: never;
+        /** PATCH /customers/{customer}/notes/{note} { text|body, type?, language? } — edit an existing note. */
+        patch: operations["patchCustomersCustomerNotesNote"];
         trace?: never;
     };
     "/api/candidates/{candidate}/notes": {
@@ -2403,6 +3243,23 @@ export interface paths {
         patch: operations["patchCandidatesCandidateNotesNote"];
         trace?: never;
     };
+    "/api/conversations/start": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** POST /conversations/start — send the opening template and return the thread. */
+        post: operations["postConversationsStart"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/health/connectors": {
         parameters: {
             query?: never;
@@ -2438,107 +3295,6 @@ export interface paths {
         get: operations["getSettingsEmailOauthCallback"];
         put?: never;
         post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/files/tenant-logo/{tenant}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @example architecto */
-                tenant: string;
-            };
-            cookie?: never;
-        };
-        /**
-         * GET (signed, UNAUTHENTICATED) /files/tenant-logo/{tenant} — stream the tenant logo.
-         * @description `signed` already verified the short-lived signature and `tenant.param` initialised
-         *     the bureau from the signed {tenant} segment, so a plain lookup here is IDOR-safe.
-         */
-        get: operations["getFilesTenantLogoTenant"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/files/tenant-banner/{tenant}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @example architecto */
-                tenant: string;
-            };
-            cookie?: never;
-        };
-        /** GET (signed) /files/tenant-banner/{tenant} — stream the banner (same CSP hardening). */
-        get: operations["getFilesTenantBannerTenant"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/settings": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** GET /settings — return all settings as a key=>value map, masking secrets. */
-        get: operations["getSettings"];
-        put?: never;
-        /** POST /settings — upsert one or more settings (encrypting the sensitive ones). */
-        post: operations["postSettings"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/settings/logo": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** POST /settings/logo — replace the tenant logo with an uploaded image. */
-        post: operations["postSettingsLogo"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/settings/banner": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * POST /settings/banner (BANNER-UPLOAD-1) — replace the tenant's company banner.
-         * @description Mirrors the logo flow exactly: private-disk path persisted (`company_banner_path`),
-         *     a short-lived signed URL minted on read — never a static/public path, and never
-         *     the FE's old session-local blob: string (the bug this endpoint replaces).
-         */
-        post: operations["postSettingsBanner"];
         delete?: never;
         options?: never;
         head?: never;
@@ -2636,6 +3392,42 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/settings/my-notifications": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** GET /api/settings/my-notifications — the caller's override per known context (absent = inherit ON). */
+        get: operations["getSettingsMyNotifications"];
+        /** PUT /api/settings/my-notifications — set the caller's own override(s); null clears (inherit tenant). */
+        put: operations["putSettingsMyNotifications"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/settings/my-koios-mode": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** GET /api/settings/my-koios-mode — the caller's mode (defaults: wizard, no auto messages). */
+        get: operations["getSettingsMyKoiosMode"];
+        /** PUT /api/settings/my-koios-mode — set the caller's own mode/opt-in. */
+        put: operations["putSettingsMyKoiosMode"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/settings/apps": {
         parameters: {
             query?: never;
@@ -2647,6 +3439,40 @@ export interface paths {
         get: operations["getSettingsApps"];
         /** PUT/PATCH /settings/apps — replace the enabled-apps list. */
         put: operations["putSettingsApps"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/countries": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** GET /countries — code + name, NL first, then alphabetical by name. */
+        get: operations["getCountries"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/numbering-entities": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** GET /numbering-entities — key, prefix, pad, start, label for every configured entity. */
+        get: operations["getNumberingEntities"];
+        put?: never;
         post?: never;
         delete?: never;
         options?: never;
@@ -2718,10 +3544,31 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** GET — name-ordered list; every row carries an `in_use` flag (false when nothing references it). */
+        /** GET — sort_order-then-name, mirroring every sibling lookup (base orders by name only). */
         get: operations["getNationalities"];
         put?: never;
         post: operations["postNationalities"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/nationalities/reorder": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * PUT /nationalities/reorder  body: { ids: [.
+         * @description ..] } — persist the drag order as sort_order.
+         *      Mirrors LookupController::reorder exactly (same validation shape, same settings.update gate on the route).
+         */
+        put: operations["putNationalitiesReorder"];
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -2819,7 +3666,7 @@ export interface paths {
             path: {
                 /**
                  * @description The ID of the planningConnection.
-                 * @example 019f6f5e-5759-70cc-a3d6-bf7831628164
+                 * @example architecto
                  */
                 planningConnection_id: string;
             };
@@ -2844,7 +3691,7 @@ export interface paths {
             path: {
                 /**
                  * @description The ID of the planningConnection.
-                 * @example 019f6f5e-5759-70cc-a3d6-bf7831628164
+                 * @example architecto
                  */
                 planningConnection_id: string;
             };
@@ -3297,7 +4144,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** GET — name-ordered list; every row carries an `in_use` flag (false when nothing references it). */
+        /** GET — sort_order-ordered list (falls back to name), each row carrying `in_use`. */
         get: operations["getCandidateBlacklistReasons"];
         put?: never;
         post: operations["postCandidateBlacklistReasons"];
@@ -3337,7 +4184,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** GET — name-ordered list; every row carries an `in_use` flag (false when nothing references it). */
+        /** GET — sort_order-ordered list (falls back to name), each row carrying `in_use`. */
         get: operations["getBlacklistReasons"];
         put?: never;
         post: operations["postBlacklistReasons"];
@@ -3370,6 +4217,46 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/education-levels": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** GET — sort_order-ordered list (falls back to name), each row carrying `in_use`. */
+        get: operations["getEducationLevels"];
+        put?: never;
+        post: operations["postEducationLevels"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/education-levels/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The ID of the education level.
+                 * @example architecto
+                 */
+                id: string;
+            };
+            cookie?: never;
+        };
+        get: operations["getEducationLevelsId"];
+        put: operations["putEducationLevelsId"];
+        post?: never;
+        /** DELETE — 409 when still referenced (only if a source is declared). */
+        delete: operations["deleteEducationLevelsId"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/candidate-genders/{gender}": {
         parameters: {
             query?: never;
@@ -3395,6 +4282,66 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/candidate-blacklist-reasons/reorder": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * PUT /reorder  body: { ids: [.
+         * @description ..] } — persist the drag order as sort_order.
+         */
+        put: operations["putCandidateBlacklistReasonsReorder"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/blacklist-reasons/reorder": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * PUT /reorder  body: { ids: [.
+         * @description ..] } — persist the drag order as sort_order.
+         */
+        put: operations["putBlacklistReasonsReorder"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/education-levels/reorder": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * PUT /reorder  body: { ids: [.
+         * @description ..] } — persist the drag order as sort_order.
+         */
+        put: operations["putEducationLevelsReorder"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/candidates/{candidate}/documents": {
         parameters: {
             query?: never;
@@ -3411,10 +4358,13 @@ export interface paths {
         /**
          * GET /candidates/{candidate}/documents
          *     ARCH-READ-1: withTrashed — an archived candidate's documents list stays readable.
+         * @description DOC-EXPIRY-1: optional "verloopt binnen X dagen" filter (?expires_within_days=N),
+         *     same shape as the other expiry-window filters in this repo (CandidateQuery's
+         *     retention_expiring_days, MatchCriteriaResolver's expiring_within_days).
          */
         get: operations["getCandidatesCandidateDocuments"];
         put?: never;
-        /** POST /candidates/{candidate}/documents — multipart: file, type, name. */
+        /** POST /candidates/{candidate}/documents — multipart: file, type, name, expires_at?. */
         post: operations["postCandidatesCandidateDocuments"];
         delete?: never;
         options?: never;
@@ -3478,8 +4428,105 @@ export interface paths {
         delete: operations["deleteCandidatesCandidateDocumentsDocument"];
         options?: never;
         head?: never;
-        /** PATCH /candidates/{candidate}/documents/{document} — rename only. */
+        /**
+         * PATCH /candidates/{candidate}/documents/{document} — rename and/or correct the
+         *     DOC-EXPIRY-1 validity date; name stays required (unchanged contract) so an
+         *     existing caller sending only `name` keeps working exactly as before.
+         */
         patch: operations["patchCandidatesCandidateDocumentsDocument"];
+        trace?: never;
+    };
+    "/api/candidates/{candidate}/documents/{document}/replace": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The candidate.
+                 * @example architecto
+                 */
+                candidate: string;
+                /**
+                 * @description The document.
+                 * @example architecto
+                 */
+                document: string;
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * POST /candidates/{candidate}/documents/{document}/replace — multipart: file.
+         * @description DOC-VERSIE-1: swaps the FILE on the same document row (id/name/type/expires_at
+         *     untouched, so every existing reference keeps working) and snapshots the previous
+         *     file into a version row FIRST. The old file stays on disk — it IS the version.
+         */
+        post: operations["postCandidatesCandidateDocumentsDocumentReplace"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/candidates/{candidate}/documents/{document}/versions/{version}/download": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The candidate.
+                 * @example architecto
+                 */
+                candidate: string;
+                /**
+                 * @description The document.
+                 * @example architecto
+                 */
+                document: string;
+                /**
+                 * @description The version.
+                 * @example architecto
+                 */
+                version: string;
+            };
+            cookie?: never;
+        };
+        /**
+         * GET /candidates/{candidate}/documents/{document}/versions/{version}/download
+         *     DOC-VERSIE-1: streams a superseded file. Resolved candidate → document → version
+         *     (IDOR chain — a version id from another document/candidate 404s), mirroring download().
+         */
+        get: operations["getCandidatesCandidateDocumentsDocumentVersionsVersionDownload"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/candidates/{candidate}/contact-moments": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The candidate.
+                 * @example BcECdBDA-CdED-bFEA-CbCE-BcCdeBfbbebc
+                 */
+                candidate: string;
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** POST /candidates/{candidate}/contact-moments — stamp a confirmed manual contact. */
+        post: operations["postCandidatesCandidateContactMoments"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
         trace?: never;
     };
     "/api/candidates": {
@@ -3529,11 +4576,143 @@ export interface paths {
         };
         /**
          * GET /candidates/check-duplicate?email=&mobile= — live FE dedupe probe.
-         * @description Returns { exists, match?: { id, name, type } } (mobile maps to the phone column).
+         * @description Returns { exists, match?: { id, name, type } } (mobile has its own dedupe column,
+         *     see DuplicateFinder::column()).
          */
         get: operations["getCandidatesCheckDuplicate"];
         put?: never;
+        /**
+         * POST /candidates/check-duplicate — same probe as the GET, but with the PII
+         *     (email/mobile/phone) in the body instead of the query string, so it doesn't
+         *     land in access logs (§7). GET stays live for now; FE migrates at its own pace.
+         */
+        post: operations["postCandidatesCheckDuplicate"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/candidates/parse-cv": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * POST /candidates/parse-cv — accept a CV, queue the parse, return a token.
+         * @description The token doubles as the cache key's IDOR check subject via `created_by`.
+         */
+        post: operations["postCandidatesParseCv"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/candidates/parse-cv/{token}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @example BcECdBDA-CdED-bFEA-CbCE-BcCdeBfbbebc */
+                token: string;
+            };
+            cookie?: never;
+        };
+        /**
+         * GET /candidates/parse-cv/{token} — poll for the proposal. An unknown/expired
+         *     token and a token belonging to someone else return the SAME generic 404
+         *     (§8 — never confirm to user B that user A has a parse in flight).
+         */
+        get: operations["getCandidatesParseCvToken"];
+        put?: never;
         post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/candidates/{candidate}/cv-parse-proposals": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The candidate.
+                 * @example BcECdBDA-CdED-bFEA-CbCE-BcCdeBfbbebc
+                 */
+                candidate: string;
+            };
+            cookie?: never;
+        };
+        /** GET /candidates/{candidate}/cv-parse-proposals — newest first. */
+        get: operations["getCandidatesCandidateCvParseProposals"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/candidates/{candidate}/cv-parse-proposals/{proposal}/accept": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The candidate.
+                 * @example BcECdBDA-CdED-bFEA-CbCE-BcCdeBfbbebc
+                 */
+                candidate: string;
+                /** @example BcECdBDA-CdED-bFEA-CbCE-BcCdeBfbbebc */
+                proposal: string;
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * POST /candidates/{candidate}/cv-parse-proposals/{proposal}/accept —
+         *     fill-blank-only merge (never overwrites a field the candidate already has;
+         *     see CvParseProposalApplier). Idempotent: an already-decided proposal is
+         *     returned as-is, never re-applied — clicking accept twice must never
+         *     double-append work history nor silently re-run the merge.
+         */
+        post: operations["postCandidatesCandidateCvParseProposalsProposalAccept"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/candidates/{candidate}/cv-parse-proposals/{proposal}/reject": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The candidate.
+                 * @example BcECdBDA-CdED-bFEA-CbCE-BcCdeBfbbebc
+                 */
+                candidate: string;
+                /** @example BcECdBDA-CdED-bFEA-CbCE-BcCdeBfbbebc */
+                proposal: string;
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * POST /candidates/{candidate}/cv-parse-proposals/{proposal}/reject — idempotent:
+         *     already-rejected (or already-accepted) stays as-is, never re-decided.
+         */
+        post: operations["postCandidatesCandidateCvParseProposalsProposalReject"];
         delete?: never;
         options?: never;
         head?: never;
@@ -3573,6 +4752,34 @@ export interface paths {
         head?: never;
         /** PATCH /candidates/{candidate} — update profile + the 3 layers. */
         patch: operations["patchCandidatesCandidate"];
+        trace?: never;
+    };
+    "/api/candidates/{candidate}/freelance/verify-vat": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The candidate.
+                 * @example BcECdBDA-CdED-bFEA-CbCE-BcCdeBfbbebc
+                 */
+                candidate: string;
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * POST /candidates/{candidate}/freelance/verify-vat — check the candidate's
+         *     stored VAT number against VIES (ZZP-COMPLEET-1). ADVISORY: a VIES
+         *     timeout/outage returns 'unknown' and stamps vat_verified_valid = null — it
+         *     never blocks the caller or is treated as "invalid" (see ViesClient docblock).
+         */
+        post: operations["postCandidatesCandidateFreelanceVerifyVat"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
         trace?: never;
     };
     "/api/candidates/{candidate}/geocode": {
@@ -3935,7 +5142,12 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** POST /candidates/bulk/geocode — GEO-REGEOCODE-1: re-run PDOK geocoding for a batch. */
+        /**
+         * POST /candidates/bulk/geocode — GEO-REGEOCODE-1: re-run PDOK geocoding for a batch.
+         * @description GEOMISS-1: `only_missing: true` queues every tenant candidate with an address but
+         *     no coordinates instead — `candidate_ids` is then forbidden (mutually exclusive
+         *     selection, never both) rather than optionally ignored.
+         */
         post: operations["postCandidatesBulkGeocode"];
         delete?: never;
         options?: never;
@@ -3992,7 +5204,7 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** POST /candidates/bulk/archive — soft-delete a batch (perm candidates.delete). */
+        /** POST /candidates/bulk/archive — soft-delete a batch (perm candidates.archive, RECHTEN-ARCHIVE-1). */
         post: operations["postCandidatesBulkArchive"];
         delete?: never;
         options?: never;
@@ -4009,7 +5221,7 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** POST /candidates/bulk/restore — un-archive a batch (perm candidates.delete). */
+        /** POST /candidates/bulk/restore — un-archive a batch (perm candidates.archive, RECHTEN-ARCHIVE-1). */
         post: operations["postCandidatesBulkRestore"];
         delete?: never;
         options?: never;
@@ -4349,6 +5561,76 @@ export interface paths {
         patch: operations["patchCandidatesCandidateLanguagesItem"];
         trace?: never;
     };
+    "/api/candidates/{candidate}/references": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The candidate.
+                 * @example architecto
+                 */
+                candidate: string;
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["postCandidatesCandidateReferences"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/candidates/{candidate}/references/{item}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The candidate.
+                 * @example architecto
+                 */
+                candidate: string;
+                /** @example architecto */
+                item: string;
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete: operations["deleteCandidatesCandidateReferencesItem"];
+        options?: never;
+        head?: never;
+        patch: operations["patchCandidatesCandidateReferencesItem"];
+        trace?: never;
+    };
+    "/api/candidates/{candidate}/references/{item}/verify": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The candidate.
+                 * @example architecto
+                 */
+                candidate: string;
+                /** @example architecto */
+                item: string;
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["postCandidatesCandidateReferencesItemVerify"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/languages": {
         parameters: {
             query?: never;
@@ -4664,7 +5946,13 @@ export interface paths {
         /** PUT {id} — rename / reorder / (de)activate. Resolved by id inside the tenant context. */
         put: operations["putFunctionsFunction"];
         post?: never;
-        /** DELETE {id} — remove a list entry (the free string stays on the business rows). */
+        /**
+         * DELETE {id} — remove a list entry. Blocked with a 409 + {in_use:true} while a
+         *     business row still carries this exact value (mirrors the /document-types
+         *     in-use-409 guard, DOCTYPES-1/K-49) — deleting it would silently strand that row's
+         *     value with no way back onto the dropdown. The free string itself is never
+         *     touched: only the SUGGESTION disappears, never the data.
+         */
         delete: operations["deleteFunctionsFunction"];
         options?: never;
         head?: never;
@@ -4766,6 +6054,192 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/work-permit-types": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** GET — active, ordered, each row carrying an `in_use` flag. */
+        get: operations["getWorkPermitTypes"];
+        put?: never;
+        /** POST — create (value is the immutable slug). */
+        post: operations["postWorkPermitTypes"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/emergency-contact-relations": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** GET — active, ordered, each row carrying an `in_use` flag. */
+        get: operations["getEmergencyContactRelations"];
+        put?: never;
+        /** POST — create (value is the immutable slug). */
+        post: operations["postEmergencyContactRelations"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/reference-relations": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** GET — active, ordered, each row carrying an `in_use` flag. */
+        get: operations["getReferenceRelations"];
+        put?: never;
+        /** POST — create (value is the immutable slug). */
+        post: operations["postReferenceRelations"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/work-permit-types/reorder": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * PUT /reorder  body: { ids: [.
+         * @description ..] }
+         */
+        put: operations["putWorkPermitTypesReorder"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/work-permit-types/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The ID of the work permit type.
+                 * @example BcECdBDA-CdED-bFEA-CbCE-BcCdeBfbbebc
+                 */
+                id: string;
+            };
+            cookie?: never;
+        };
+        get?: never;
+        /** PUT /{id} — value (slug) is immutable; only label/color/sort_order/active change. */
+        put: operations["putWorkPermitTypesId"];
+        post?: never;
+        /** DELETE /{id} — 409 while still referenced. */
+        delete: operations["deleteWorkPermitTypesId"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/emergency-contact-relations/reorder": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * PUT /reorder  body: { ids: [.
+         * @description ..] }
+         */
+        put: operations["putEmergencyContactRelationsReorder"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/emergency-contact-relations/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The ID of the emergency contact relation.
+                 * @example BcECdBDA-CdED-bFEA-CbCE-BcCdeBfbbebc
+                 */
+                id: string;
+            };
+            cookie?: never;
+        };
+        get?: never;
+        /** PUT /{id} — value (slug) is immutable; only label/color/sort_order/active change. */
+        put: operations["putEmergencyContactRelationsId"];
+        post?: never;
+        /** DELETE /{id} — 409 while still referenced. */
+        delete: operations["deleteEmergencyContactRelationsId"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/reference-relations/reorder": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * PUT /reorder  body: { ids: [.
+         * @description ..] }
+         */
+        put: operations["putReferenceRelationsReorder"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/reference-relations/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The ID of the reference relation.
+                 * @example BcECdBDA-CdED-bFEA-CbCE-BcCdeBfbbebc
+                 */
+                id: string;
+            };
+            cookie?: never;
+        };
+        get?: never;
+        /** PUT /{id} — value (slug) is immutable; only label/color/sort_order/active change. */
+        put: operations["putReferenceRelationsId"];
+        post?: never;
+        /** DELETE /{id} — 409 while still referenced. */
+        delete: operations["deleteReferenceRelationsId"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/last-contact-types/reorder": {
         parameters: {
             query?: never;
@@ -4854,130 +6328,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/appointment-types": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** GET — active, ordered, each row carrying an `in_use` flag. */
-        get: operations["getAppointmentTypes"];
-        put?: never;
-        /** POST — create (value is the immutable slug). */
-        post: operations["postAppointmentTypes"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/appointment-locations": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** GET — active, ordered, each row carrying an `in_use` flag. */
-        get: operations["getAppointmentLocations"];
-        put?: never;
-        /** POST — create (value is the immutable slug). */
-        post: operations["postAppointmentLocations"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/appointment-types/reorder": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        /**
-         * PUT /reorder  body: { ids: [.
-         * @description ..] }
-         */
-        put: operations["putAppointmentTypesReorder"];
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/appointment-types/{id}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /**
-                 * @description The ID of the appointment type.
-                 * @example BcECdBDA-CdED-bFEA-CbCE-BcCdeBfbbebc
-                 */
-                id: string;
-            };
-            cookie?: never;
-        };
-        get?: never;
-        /** PUT /{id} — value (slug) is immutable; only label/color/sort_order/active change. */
-        put: operations["putAppointmentTypesId"];
-        post?: never;
-        /** DELETE /{id} — 409 while still referenced. */
-        delete: operations["deleteAppointmentTypesId"];
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/appointment-locations/reorder": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        /**
-         * PUT /reorder  body: { ids: [.
-         * @description ..] }
-         */
-        put: operations["putAppointmentLocationsReorder"];
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/appointment-locations/{id}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /**
-                 * @description The ID of the appointment location.
-                 * @example BcECdBDA-CdED-bFEA-CbCE-BcCdeBfbbebc
-                 */
-                id: string;
-            };
-            cookie?: never;
-        };
-        get?: never;
-        /** PUT /{id} — value (slug) is immutable; only label/color/sort_order/active change. */
-        put: operations["putAppointmentLocationsId"];
-        post?: never;
-        /** DELETE /{id} — 409 while still referenced. */
-        delete: operations["deleteAppointmentLocationsId"];
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/api/document-types": {
         parameters: {
             query?: never;
@@ -4985,7 +6335,13 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** GET — ?entity=vacancy narrows to that entity's types PLUS the global (null) rows. */
+        /**
+         * GET — ?entity=vacancy narrows STRICTLY to that entity's own types (global rows
+         *     excluded); no param returns every type across every entity. Mirrors
+         *     NoteTypeController::scopeIndex() exactly — the two lookups must behave the same
+         *     for the same query param (a prior version widened this with an orWhereNull,
+         *     which diverged from note-types for the same ?entity= contract).
+         */
         get: operations["getDocumentTypes"];
         put?: never;
         /** POST / — add an entry (name + optional colour + position). */
@@ -5145,254 +6501,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/opportunities": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** GET /opportunities — paginated, filtered list ({ data, meta }). */
-        get: operations["getOpportunities"];
-        put?: never;
-        /**
-         * POST /opportunities — create a deal. currency defaults to EUR. Audited by the
-         *     model itself (AuditsChanges: field-level diff + causer + source/ip), so no
-         *     duplicate ids-only manual log (CHANGELOG-2/3).
-         */
-        post: operations["postOpportunities"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/opportunities/stats": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** GET /opportunities/stats — server-wide KPIs honouring the SAME filters as the list. */
-        get: operations["getOpportunitiesStats"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/opportunities/{opportunity}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /**
-                 * @description The opportunity.
-                 * @example architecto
-                 */
-                opportunity: string;
-            };
-            cookie?: never;
-        };
-        /** GET /opportunities/{id} — single deal (resolved inside the tenant context). */
-        get: operations["getOpportunitiesOpportunity"];
-        /** PATCH /opportunities/{id} — partial update. Audited via AuditsChanges (old→new diff). */
-        put: operations["putOpportunitiesOpportunity"];
-        post?: never;
-        /** DELETE /opportunities/{id} — soft-delete; the audited 'deleted' event is the trail. */
-        delete: operations["deleteOpportunitiesOpportunity"];
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/opportunities/{opportunity}/restore": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /**
-                 * @description The opportunity.
-                 * @example architecto
-                 */
-                opportunity: string;
-            };
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** D-3: POST /opportunities/{id}/restore — un-archive a soft-deleted opportunity. */
-        post: operations["postOpportunitiesOpportunityRestore"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/opportunities/bulk/stage": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** C-41: POST /opportunities/bulk/stage { opportunity_ids:[], opportunity_stage_id }. */
-        post: operations["postOpportunitiesBulkStage"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/opportunities/bulk/owner": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** C-41: POST /opportunities/bulk/owner { opportunity_ids:[], owner_id|null }. */
-        post: operations["postOpportunitiesBulkOwner"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/opportunities/bulk/client": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** C-41: POST /opportunities/bulk/client { opportunity_ids:[], customer_id|null }. */
-        post: operations["postOpportunitiesBulkClient"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/opportunities/bulk/tags": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** C-41: POST /opportunities/bulk/tags { opportunity_ids:[], tags:[] } — add tags (merge unique). */
-        post: operations["postOpportunitiesBulkTags"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/opportunities/bulk/tags/remove": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** C-41: POST /opportunities/bulk/tags/remove { opportunity_ids:[], tags:[] } — strip tags. */
-        post: operations["postOpportunitiesBulkTagsRemove"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/opportunities/bulk/archive": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** D-2: POST /opportunities/bulk/archive { opportunity_ids:[…] } — soft-delete a set. */
-        post: operations["postOpportunitiesBulkArchive"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/opportunity-stages": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** GET /opportunity-stages — ordered list, each carrying in_use. */
-        get: operations["getOpportunityStages"];
-        put?: never;
-        /** POST /opportunity-stages — create a stage (accepts label or name). */
-        post: operations["postOpportunityStages"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/opportunity-stages/reorder": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        /**
-         * PUT /opportunity-stages/reorder  body: { ids: [.
-         * @description ..] }
-         */
-        put: operations["putOpportunityStagesReorder"];
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/opportunity-stages/{opportunityStage}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @example architecto */
-                opportunityStage: string;
-            };
-            cookie?: never;
-        };
-        get?: never;
-        /** PUT /opportunity-stages/{opportunityStage} — resolved by id (no implicit binding). */
-        put: operations["putOpportunityStagesOpportunityStage"];
-        post?: never;
-        /** DELETE /opportunity-stages/{opportunityStage} — 409 while still referenced. */
-        delete: operations["deleteOpportunityStagesOpportunityStage"];
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/api/files/customer-documents/{tenant}/{parent}/{document}": {
         parameters: {
             query?: never;
@@ -5413,6 +6521,33 @@ export interface paths {
          *     bureau from the signed {tenant} segment; we only re-scope by parent here (IDOR-safe).
          */
         get: operations["getFilesCustomerDocumentsTenantParentDocument"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/files/customer-location-logos/{tenant}/{location}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @example architecto */
+                tenant: string;
+                /** @example architecto */
+                location: string;
+            };
+            cookie?: never;
+        };
+        /**
+         * GET (signed, UNAUTHENTICATED) /files/customer-location-logos/{tenant}/{location} —
+         *     K4b: stream the location's logo. `signed` verifies the short-lived signature and
+         *     `tenant.param` initialises the tenant from the signed {tenant} segment, so the
+         *     plain lookup here is IDOR-safe (mirrors SettingController::signedLogoDownload()).
+         */
+        get: operations["getFilesCustomerLocationLogosTenantLocation"];
         put?: never;
         post?: never;
         delete?: never;
@@ -5508,6 +6643,68 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/customer-phases": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** GET — active, ordered, each row carrying an `in_use` flag. */
+        get: operations["getCustomerPhases"];
+        put?: never;
+        /** POST — create (value is the immutable slug). */
+        post: operations["postCustomerPhases"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/customer-phases/reorder": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * PUT /reorder  body: { ids: [.
+         * @description ..] }
+         */
+        put: operations["putCustomerPhasesReorder"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/customer-phases/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The ID of the customer phase.
+                 * @example BcECdBDA-CdED-bFEA-CbCE-BcCdeBfbbebc
+                 */
+                id: string;
+            };
+            cookie?: never;
+        };
+        get?: never;
+        /** PUT /{id} — value (slug) is immutable; only label/color/sort_order/active change. */
+        put: operations["putCustomerPhasesId"];
+        post?: never;
+        /** DELETE /{id} — 409 while still referenced. */
+        delete: operations["deleteCustomerPhasesId"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/locations": {
         parameters: {
             query?: never;
@@ -5568,6 +6765,66 @@ export interface paths {
         put?: never;
         /** POST /locations/{location}/geocode — GEO-REGEOCODE-1: re-run PDOK geocoding for this establishment. */
         post: operations["postLocationsLocationGeocode"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/customer-blacklist-reasons": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** GET — sort_order-ordered list (falls back to name), each row carrying `in_use`. */
+        get: operations["getCustomerBlacklistReasons"];
+        put?: never;
+        post: operations["postCustomerBlacklistReasons"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/customer-blacklist-reasons/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The ID of the customer blacklist reason.
+                 * @example architecto
+                 */
+                id: string;
+            };
+            cookie?: never;
+        };
+        get: operations["getCustomerBlacklistReasonsId"];
+        put: operations["putCustomerBlacklistReasonsId"];
+        post?: never;
+        /** DELETE — 409 when still referenced (only if a source is declared). */
+        delete: operations["deleteCustomerBlacklistReasonsId"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/customer-blacklist-reasons/reorder": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * PUT /reorder  body: { ids: [.
+         * @description ..] } — persist the drag order as sort_order.
+         */
+        put: operations["putCustomerBlacklistReasonsReorder"];
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -5701,6 +6958,41 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/customers/{customer}/notes": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The customer.
+                 * @example architecto
+                 */
+                customer: string;
+            };
+            cookie?: never;
+        };
+        /**
+         * GET /customers/{id}/notes — the dedicated notes list (NOTES-LOC-DEPT-1),
+         *     customer-OWN-level only by default (no location, no department — the pure
+         *     company-level notes); ?rollup=1 additionally returns every location- and
+         *     department-level note under this customer, so "the customer shows everything"
+         *     is an explicit ASK, never a silent default (mirrors the location/department
+         *     siblings below). Does NOT replace the customer DETAIL's embedded `notes` field
+         *     (CustomerDetailResource) — that keeps returning the full set exactly as before.
+         */
+        get: operations["getCustomersCustomerNotes"];
+        put?: never;
+        /**
+         * POST /customers/{id}/notes — add a single timeline note to one customer,
+         *     optionally filed against ONE contactpersoon (CONTACT-NOTITIES-1).
+         */
+        post: operations["postCustomersCustomerNotes"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/customers/{customer}/planning-summary": {
         parameters: {
             query?: never;
@@ -5715,7 +7007,7 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * GET /customers/{id}/planning-summary (?location_id / ?department_id) →
+         * GET /customers/{id}/planning-summary (?location_id / ?department_id) ->
          *     { active_now, upcoming: [{date, shift, department, candidate|null}] }.
          */
         get: operations["getCustomersCustomerPlanningSummary"];
@@ -5750,6 +7042,29 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/customers/{customer}/timeline": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The customer.
+                 * @example BcECdBDA-CdED-bFEA-CbCE-BcCdeBfbbebc
+                 */
+                customer: string;
+            };
+            cookie?: never;
+        };
+        /** GET /customers/{id}/timeline — the merged, newest-first event stream. */
+        get: operations["getCustomersCustomerTimeline"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/customers/{customer}/branches": {
         parameters: {
             query?: never;
@@ -5766,7 +7081,7 @@ export interface paths {
         /** GET /customers/{customer}/branches — the branches this customer belongs to. */
         get: operations["getCustomersCustomerBranches"];
         put?: never;
-        /** POST /customers/{customer}/branches  body: { location_id } — attach (idempotent). */
+        /** POST /customers/{customer}/branches  body: { location_id, is_billing? } — attach. */
         post: operations["postCustomersCustomerBranches"];
         delete?: never;
         options?: never;
@@ -5802,6 +7117,41 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/customers/{customer}/branches/{branch}/billing": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The customer.
+                 * @example BcECdBDA-CdED-bFEA-CbCE-BcCdeBfbbebc
+                 */
+                customer: string;
+                /**
+                 * @description The branch.
+                 * @example BcECdBDA-CdED-bFEA-CbCE-BcCdeBfbbebc
+                 */
+                branch: string;
+            };
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * PUT /customers/{customer}/branches/{branch}/billing — make THIS coupling the one
+         *     the matches invoice through (FACTURATIE-VOLGT-VESTIGING-1).
+         * @description Idempotent, and it attaches the coupling when it is missing: billing can never
+         *     point at a branch the klant is not coupled to, which is exactly the divergence
+         *     customers.location_id allowed. Setting a new one clears the old (model-level).
+         *     Update-class, so gated on customers.update — it is fully reversible (§5).
+         */
+        put: operations["putCustomersCustomerBranchesBranchBilling"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/customers/{customer}/geocode": {
         parameters: {
             query?: never;
@@ -5820,6 +7170,149 @@ export interface paths {
         /** POST /customers/{customer}/geocode — GEO-REGEOCODE-1: re-run PDOK geocoding for this customer. */
         post: operations["postCustomersCustomerGeocode"];
         delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/customers/{customer}/merge": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The customer.
+                 * @example BcECdBDA-CdED-bFEA-CbCE-BcCdeBfbbebc
+                 */
+                customer: string;
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * POST /customers/{customer}/merge { target_customer_id }
+         * @description KLANT-SAMENVOEGEN-1 — merge this customer ({customer}, the DUPLICATE/loser)
+         *     INTO the target (the survivor): every relation that points at a customer moves
+         *     over (CustomerMerger has the full inventory), colliding pivot rows are
+         *     deduplicated, the survivor's still-empty fields are backfilled from the loser,
+         *     and the loser is SOFT-deleted — never hard-deleted, so it stays recoverable and
+         *     auditable (§9), mirroring CandidateMerger rather than ContactMerger (which hard-
+         *     deletes because customer_contacts carries no deleted_at).
+         *
+         *     Both ids resolve through Customer::findOrFail() (branch-scoped via
+         *     ScopedByBranch + tenant-isolated by the connection, §4/§5) — a foreign customer,
+         *     one from another branch, or one from another tenant is a 404, never a cross-
+         *     customer merge (IDOR-safe). An INGRIJPENDE write, so it sits on the same
+         *     customers.update gate as the rest of this group (§5) with its own audit entry
+         *     carrying BOTH ids — never a name (§9).
+         */
+        post: operations["postCustomersCustomerMerge"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/customers/{customerId}/locations/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @example architecto */
+                customerId: string;
+                /**
+                 * @description The ID of the location.
+                 * @example architecto
+                 */
+                id: string;
+            };
+            cookie?: never;
+        };
+        get?: never;
+        /** PATCH /customers/{customerId}/locations/{id} */
+        put: operations["putCustomersCustomerIdLocationsId"];
+        post?: never;
+        /**
+         * DELETE /customers/{customerId}/locations/{id} — K-42: a HARD delete never
+         *     cascades. Refused with a 409 naming what still hangs (per-type counts, same
+         *     shape as LOC-DELETE-GUARD-1); only an unused location is actually removed.
+         * @description ARCHIVE-SUBENTITY-1: resolved WITH trashed rows — an already-archived location
+         *     may still be purged for good — and removed via forceDelete(), because the model
+         *     now carries SoftDeletes: a plain delete() would only archive it a second time
+         *     (no-op) instead of physically removing the row this endpoint has always promised.
+         */
+        delete: operations["deleteCustomersCustomerIdLocationsId"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/customers/{customerId}/departments/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @example architecto */
+                customerId: string;
+                /**
+                 * @description The ID of the department.
+                 * @example architecto
+                 */
+                id: string;
+            };
+            cookie?: never;
+        };
+        get?: never;
+        /** PATCH /customers/{customerId}/departments/{id} */
+        put: operations["putCustomersCustomerIdDepartmentsId"];
+        post?: never;
+        /**
+         * DELETE /customers/{customerId}/departments/{id} — K-42: a HARD delete never
+         *     cascades. Refused with a 409 naming what still hangs; only an unused department
+         *     is actually removed.
+         * @description ARCHIVE-SUBENTITY-1: resolved WITH trashed rows (an already-archived department
+         *     may still be purged) and removed via forceDelete() — the model now carries
+         *     SoftDeletes, so a plain delete() would only archive it again instead of the
+         *     physical removal this endpoint has always promised.
+         */
+        delete: operations["deleteCustomersCustomerIdDepartmentsId"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/customers/{customerId}/contacts/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @example architecto */
+                customerId: string;
+                /**
+                 * @description The ID of the contact.
+                 * @example architecto
+                 */
+                id: string;
+            };
+            cookie?: never;
+        };
+        get?: never;
+        /** PATCH /customers/{customerId}/contacts/{id} */
+        put: operations["putCustomersCustomerIdContactsId"];
+        post?: never;
+        /**
+         * DELETE /customers/{customerId}/contacts/{id} — K-42: a HARD delete never
+         *     cascades. Refused with a 409 naming what still hangs; only an unused contact is
+         *     actually removed. The CONTACT-MULTI-1 location/department pivots do NOT block
+         *     (those are the contact's OWN couplings and are detached on a FORCE delete, §2),
+         *     but real business rows attached to this person do.
+         * @description ARCHIVE-SUBENTITY-1: resolved WITH trashed rows (an already-archived contact may
+         *     still be purged) and removed via forceDelete() — the model now carries
+         *     SoftDeletes, so a plain delete() would only archive it again instead of the
+         *     physical removal (+ pivot detach) this endpoint has always promised.
+         */
+        delete: operations["deleteCustomersCustomerIdContactsId"];
         options?: never;
         head?: never;
         patch?: never;
@@ -5870,6 +7363,29 @@ export interface paths {
         put?: never;
         /** POST /customers/bulk/status — set the lifecycle status for a batch. */
         post: operations["postCustomersBulkStatus"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/customers/bulk/phase": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * POST /customers/bulk/phase — KLANT-FASE-BULK-1: promote a batch to a lifecycle
+         *     phase (customer_phases.value — a tenant-renameable slug, never hardcoded). A
+         *     customer missing a required field for the target phase (KLANT-VERPLICHT-1) is
+         *     skipped, not promoted, so the { updated, skipped } split stays reconcilable —
+         *     `skipped` carries WHY (not_found / already_on_phase / missing_required_field).
+         */
+        post: operations["postCustomersBulkPhase"];
         delete?: never;
         options?: never;
         head?: never;
@@ -5927,29 +7443,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/customers/{customer}/notes": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /**
-                 * @description The customer.
-                 * @example architecto
-                 */
-                customer: string;
-            };
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** POST /customers/{id}/notes — add a single timeline note to one customer. */
-        post: operations["postCustomersCustomerNotes"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/api/customers/bulk/archive": {
         parameters: {
             query?: never;
@@ -5980,10 +7473,15 @@ export interface paths {
             };
             cookie?: never;
         };
-        /** GET /{prefix}/{parent}/documents — the list, newest first. */
+        /**
+         * GET /{prefix}/{parent}/documents — the list, newest first.
+         * @description DOC-EXPIRY-1: optional "verloopt binnen X dagen" filter (?expires_within_days=N)
+         *     for entities whose document table tracks expiry — mirrors the candidate documents
+         *     endpoint and the other expiry-window filters in this repo.
+         */
         get: operations["getCustomersCustomerDocuments"];
         put?: never;
-        /** POST /{prefix}/{parent}/documents — multipart: file, name?, type?. */
+        /** POST /{prefix}/{parent}/documents — multipart: file, name?, type?, expires_at?. */
         post: operations["postCustomersCustomerDocuments"];
         delete?: never;
         options?: never;
@@ -6044,7 +7542,12 @@ export interface paths {
         delete: operations["deleteCustomersCustomerDocumentsDocument"];
         options?: never;
         head?: never;
-        /** PATCH /{prefix}/{parent}/documents/{document} — rename only. */
+        /**
+         * PATCH /customers/{customerId}/documents/{document} — customer documents additionally
+         *     track expiry + the optional location/department link (DOC-EXPIRY-1/DOCS-LOC-DEPT-1);
+         *     these @bodyParam tags are scoped to THIS subclass only so the shared base's Scribe
+         *     docs never advertise them on vacancy documents, where they are ['prohibited'].
+         */
         patch: operations["patchCustomersCustomerDocumentsDocument"];
         trace?: never;
     };
@@ -6109,6 +7612,40 @@ export interface paths {
          * @description ?q= searches the name server-side; ?per_page= sizes the page.
          */
         get: operations["getDepartments"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/customers/{customerId}/contacts/{id}/conversations": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @example architecto */
+                customerId: string;
+                /**
+                 * @description The ID of the contact.
+                 * @example architecto
+                 */
+                id: string;
+            };
+            cookie?: never;
+        };
+        /**
+         * GET /customers/{customerId}/contacts/{id}/conversations — GESPREK-CONTACT-1: this
+         *     contact's WhatsApp threads. Reuses the EXISTING candidate conversation layer
+         *     (Conversation/Message/ConversationResource) entity-scoped on customer_contact_id
+         *     instead of a parallel mechanism. Read-only (customers.view, §5); IDOR-safe via the
+         *     parent relation (scoped(), same as show/update/destroy — §4).
+         * @description Unlike the bureau-wide /conversations this is always dossier-scoped (never an
+         *     unfiltered inbox read), so it needs no extra page.whatsapp gate the way that
+         *     endpoint's unscoped list does.
+         */
+        get: operations["getCustomersCustomerIdContactsIdConversations"];
         put?: never;
         post?: never;
         delete?: never;
@@ -6185,7 +7722,220 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/customers/{customerId}/locations/{id}": {
+    "/api/customers/{customerId}/locations/{id}/notes": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @example architecto */
+                customerId: string;
+                /**
+                 * @description The ID of the location.
+                 * @example architecto
+                 */
+                id: string;
+            };
+            cookie?: never;
+        };
+        /**
+         * GET /customers/{customerId}/locations/{id}/notes — NOTES-LOC-DEPT-1: this site's
+         *     OWN notes by default; add ?rollup=1 to additionally include every note filed
+         *     against one of its departments. "Own" = customer_location_id matches AND
+         *     customer_department_id is null — a note that ALSO names a department is a
+         *     department-level note (the deepest level wins, matching CustomerTreeLinkGuard).
+         */
+        get: operations["getCustomersCustomerIdLocationsIdNotes"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/customers/{customerId}/departments/{id}/notes": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @example architecto */
+                customerId: string;
+                /**
+                 * @description The ID of the department.
+                 * @example architecto
+                 */
+                id: string;
+            };
+            cookie?: never;
+        };
+        /**
+         * GET /customers/{customerId}/departments/{id}/notes — NOTES-LOC-DEPT-1: this
+         *     department's own notes. A department is a LEAF (nothing nests under it), so
+         *     there is nothing to roll up here — unlike its location sibling.
+         */
+        get: operations["getCustomersCustomerIdDepartmentsIdNotes"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/customers/{customerId}/locations/{id}/documents": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @example architecto */
+                customerId: string;
+                /**
+                 * @description The ID of the location.
+                 * @example architecto
+                 */
+                id: string;
+            };
+            cookie?: never;
+        };
+        /**
+         * GET /customers/{customerId}/locations/{locationId}/documents — DOCS-LOC-DEPT-1:
+         *     this site's OWN documents by default; add ?rollup=1 to additionally include every
+         *     document filed against one of its departments. Mirrors CustomerLocationController::
+         *     notes() exactly — "own" excludes a document that ALSO names a department (the
+         *     deepest level wins, matching CustomerTreeLinkGuard).
+         */
+        get: operations["getCustomersCustomerIdLocationsIdDocuments"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/customers/{customerId}/departments/{id}/documents": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @example architecto */
+                customerId: string;
+                /**
+                 * @description The ID of the department.
+                 * @example architecto
+                 */
+                id: string;
+            };
+            cookie?: never;
+        };
+        /**
+         * GET /customers/{customerId}/departments/{departmentId}/documents — DOCS-LOC-DEPT-1:
+         *     this department's own documents. A department is a LEAF, so there is nothing to
+         *     roll up here — unlike its location sibling.
+         */
+        get: operations["getCustomersCustomerIdDepartmentsIdDocuments"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/customers/{customerId}/locations/{id}/activity": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @example architecto */
+                customerId: string;
+                /**
+                 * @description The ID of the location.
+                 * @example architecto
+                 */
+                id: string;
+            };
+            cookie?: never;
+        };
+        /**
+         * GET /customers/{customerId}/locations/{id}/activity — LOC-DEPT-CHANGELOG-1: the
+         *     same shared change-log shape/pagination/permission as /customers/{id}/activity
+         *     (customers.view). Resolved ALWAYS through the parent customer (§4/§5 — a location
+         *     carries no branch scope of its own), so a location whose customer sits outside the
+         *     caller's vestiging grant 404s here, never leaks its history.
+         */
+        get: operations["getCustomersCustomerIdLocationsIdActivity"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/customers/{customerId}/departments/{id}/activity": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @example architecto */
+                customerId: string;
+                /**
+                 * @description The ID of the department.
+                 * @example architecto
+                 */
+                id: string;
+            };
+            cookie?: never;
+        };
+        /**
+         * GET /customers/{customerId}/departments/{id}/activity — LOC-DEPT-CHANGELOG-1:
+         *     the same shared change-log shape/pagination/permission as
+         *     /customers/{id}/activity (customers.view). Resolved ALWAYS through the parent
+         *     customer (§4/§5 — a department carries no branch scope of its own), so a
+         *     department whose customer sits outside the caller's vestiging grant 404s.
+         */
+        get: operations["getCustomersCustomerIdDepartmentsIdActivity"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/customers/{customerId}/contacts/{id}/activity": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @example architecto */
+                customerId: string;
+                /**
+                 * @description The ID of the contact.
+                 * @example architecto
+                 */
+                id: string;
+            };
+            cookie?: never;
+        };
+        /**
+         * GET /customers/{customerId}/contacts/{id}/activity — LOC-DEPT-CHANGELOG-1: the
+         *     same shared change-log shape/pagination/permission as /customers/{id}/activity
+         *     (customers.view). Resolved ALWAYS through the parent customer (§4/§5 — a contact
+         *     carries no branch scope of its own), so a contact whose customer sits outside the
+         *     caller's vestiging grant 404s here, never leaks its history.
+         */
+        get: operations["getCustomersCustomerIdContactsIdActivity"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/customers/{customerId}/locations/{id}/archive": {
         parameters: {
             query?: never;
             header?: never;
@@ -6201,17 +7951,119 @@ export interface paths {
             cookie?: never;
         };
         get?: never;
-        /** PATCH /customers/{customerId}/locations/{id} */
-        put: operations["putCustomersCustomerIdLocationsId"];
-        post?: never;
-        /** DELETE /customers/{customerId}/locations/{id} */
-        delete: operations["deleteCustomersCustomerIdLocationsId"];
+        put?: never;
+        /**
+         * POST /customers/{customerId}/locations/{id}/archive — ARCHIVE-SUBENTITY-1:
+         *     soft-delete a location (reversible, gated on customers.update — §5, never the
+         *     stricter .delete reserved for the real hard delete above). Deliberately carries
+         *     NONE of the K-42 in-use guard: that guard protects the IRREVERSIBLE hard delete
+         *     from silently orphaning live rows; archiving is reversible and the whole point of
+         *     it is that a location may still have a department/vacancy/etc. hanging off it
+         *     (Danny's ticket, point 5). scoped() already excludes an already-archived row (the
+         *     SoftDeletes default scope), so archiving twice 404s instead of a silent no-op.
+         */
+        post: operations["postCustomersCustomerIdLocationsIdArchive"];
+        delete?: never;
         options?: never;
         head?: never;
         patch?: never;
         trace?: never;
     };
-    "/api/customers/{customerId}/departments/{id}": {
+    "/api/customers/{customerId}/locations/{id}/restore": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @example architecto */
+                customerId: string;
+                /**
+                 * @description The ID of the location.
+                 * @example architecto
+                 */
+                id: string;
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * POST /customers/{customerId}/locations/{id}/restore — un-archive. onlyTrashed:
+         *     restoring a live row is a 404, not a silent no-op (mirrors VacancyController's
+         *     own restore()). Update-class (§5): reversing an archive is exactly as reversible
+         *     as the archive itself.
+         */
+        post: operations["postCustomersCustomerIdLocationsIdRestore"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/customers/{customerId}/locations/{id}/geocode": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @example architecto */
+                customerId: string;
+                /**
+                 * @description The ID of the location.
+                 * @example architecto
+                 */
+                id: string;
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * POST /customers/{customerId}/locations/{id}/geocode — KLANTLOCATIE-GEOCODE-1:
+         *     re-run PDOK geocoding for ONE site. Every other geocodable entity (kandidaat /
+         *     klant / vestiging / vacature) already had this manual trigger; the klant-locatie —
+         *     the address planning and the radius filter actually work from — did not, so a fixed
+         *     postcode could only be re-geocoded by touching the address again. Same contract as
+         *     the others: queue the async job, answer 202. Route-gated on customers.update (a
+         *     write-class trigger, §5).
+         */
+        post: operations["postCustomersCustomerIdLocationsIdGeocode"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/customers/{customerId}/locations/{id}/logo": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @example architecto */
+                customerId: string;
+                /**
+                 * @description The ID of the location.
+                 * @example architecto
+                 */
+                id: string;
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * POST /customers/{customerId}/locations/{id}/logo — K4b: replace THIS location's
+         *     logo. Mirrors SettingController::uploadLogo() exactly (same format set/size, same
+         *     SVG script-content scan, same private-disk-path-only persistence + old-file
+         *     cleanup) — the only difference is the per-location, per-tenant storage folder and
+         *     the IDOR-safe resolution through the parent customer (§4/§5).
+         */
+        post: operations["postCustomersCustomerIdLocationsIdLogo"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/customers/{customerId}/departments/{id}/archive": {
         parameters: {
             query?: never;
             header?: never;
@@ -6227,17 +8079,49 @@ export interface paths {
             cookie?: never;
         };
         get?: never;
-        /** PATCH /customers/{customerId}/departments/{id} */
-        put: operations["putCustomersCustomerIdDepartmentsId"];
-        post?: never;
-        /** DELETE /customers/{customerId}/departments/{id} */
-        delete: operations["deleteCustomersCustomerIdDepartmentsId"];
+        put?: never;
+        /**
+         * POST /customers/{customerId}/departments/{id}/archive — ARCHIVE-SUBENTITY-1:
+         *     soft-delete a department (reversible, customers.update — §5). Carries NONE of the
+         *     K-42 in-use guard on purpose: archiving is reversible, so a department may still
+         *     have a contact/vacancy/etc. hanging off it (Danny's ticket, point 5).
+         */
+        post: operations["postCustomersCustomerIdDepartmentsIdArchive"];
+        delete?: never;
         options?: never;
         head?: never;
         patch?: never;
         trace?: never;
     };
-    "/api/customers/{customerId}/contacts/{id}": {
+    "/api/customers/{customerId}/departments/{id}/restore": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @example architecto */
+                customerId: string;
+                /**
+                 * @description The ID of the department.
+                 * @example architecto
+                 */
+                id: string;
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * POST /customers/{customerId}/departments/{id}/restore — un-archive. onlyTrashed:
+         *     restoring a live row 404s instead of a silent no-op.
+         */
+        post: operations["postCustomersCustomerIdDepartmentsIdRestore"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/customers/{customerId}/contacts/{id}/archive": {
         parameters: {
             query?: never;
             header?: never;
@@ -6253,11 +8137,220 @@ export interface paths {
             cookie?: never;
         };
         get?: never;
-        /** PATCH /customers/{customerId}/contacts/{id} */
-        put: operations["putCustomersCustomerIdContactsId"];
+        put?: never;
+        /**
+         * POST /customers/{customerId}/contacts/{id}/archive — ARCHIVE-SUBENTITY-1:
+         *     soft-delete a contact (reversible, customers.update — §5). Carries NONE of the
+         *     K-42 in-use guard on purpose: archiving is reversible, so a contact may still
+         *     have a match/vacancy/conversation/etc. hanging off it (Danny's ticket, point 5).
+         * @description The location/department pivots are NOT touched (that only happens on a force
+         *     delete, see the model's `deleting` hook) — an archived contact restores with the
+         *     exact same couplings it had before.
+         */
+        post: operations["postCustomersCustomerIdContactsIdArchive"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/customers/{customerId}/contacts/{id}/restore": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @example architecto */
+                customerId: string;
+                /**
+                 * @description The ID of the contact.
+                 * @example architecto
+                 */
+                id: string;
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * POST /customers/{customerId}/contacts/{id}/restore — un-archive. onlyTrashed:
+         *     restoring a live row 404s instead of a silent no-op.
+         */
+        post: operations["postCustomersCustomerIdContactsIdRestore"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/customers/{customerId}/contacts/{id}/merge": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @example architecto */
+                customerId: string;
+                /**
+                 * @description The ID of the contact.
+                 * @example architecto
+                 */
+                id: string;
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * POST /customers/{customerId}/contacts/{id}/merge { target_contact_id }
+         * @description CMFE-16 — merge this DUPLICATE contact ({id}) INTO the target (the survivor):
+         *     every reference moves over, then the duplicate row is removed. Both contacts are
+         *     resolved through the SAME customer, so a foreign or other-customer id is a 404 and
+         *     never a cross-customer/cross-tenant merge (§4/§5). One transaction lives in
+         *     ContactMerger. Returns the survivor in the normal contact shape.
+         */
+        post: operations["postCustomersCustomerIdContactsIdMerge"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/customers/{customerId}/contacts/{id}/locations/{locationId}/primary": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @example architecto */
+                customerId: string;
+                /**
+                 * @description The ID of the contact.
+                 * @example architecto
+                 */
+                id: string;
+                /** @example architecto */
+                locationId: string;
+            };
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * PUT /customers/{customerId}/contacts/{id}/locations/{locationId}/primary — mark
+         *     this contact as the PRIMARY contact of {locationId} (CONTACT-LOCATION-PRIMARY-1,
+         *     at most one per location — CustomerContactLocation's saved-hook is the backstop
+         *     for any write path outside this endpoint, §2).
+         * @description Both the contact and the location are re-resolved against THIS customer
+         *     (IDOR-safe, §4/§5) — a foreign contact or a location of another customer 404s
+         *     instead of crossing into another customer's tree. Update-class: the flag is
+         *     fully reversible, so it sits in the customers.update route group (§5).
+         */
+        put: operations["putCustomersCustomerIdContactsIdLocationsLocationIdPrimary"];
         post?: never;
-        /** DELETE /customers/{customerId}/contacts/{id} */
-        delete: operations["deleteCustomersCustomerIdContactsId"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/customers/{customerId}/contacts/{id}/departments/{departmentId}/primary": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @example architecto */
+                customerId: string;
+                /**
+                 * @description The ID of the contact.
+                 * @example architecto
+                 */
+                id: string;
+                /** @example architecto */
+                departmentId: string;
+            };
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * PUT /customers/{customerId}/contacts/{id}/departments/{departmentId}/primary — mark
+         *     this contact as the PRIMARY contact of {departmentId} (CONTACT-DEPARTMENT-PRIMARY-1,
+         *     at most one per department — mirrors primaryLocation() exactly, §2 correctness
+         *     mechanism lives on the model, this endpoint only triggers it).
+         * @description Both the contact and the department are re-resolved against THIS customer
+         *     (IDOR-safe, §4/§5) — a foreign contact or a department of another customer 404s
+         *     instead of crossing into another customer's tree. Update-class: the flag is
+         *     fully reversible, so it sits in the customers.update route group (§5).
+         */
+        put: operations["putCustomersCustomerIdContactsIdDepartmentsDepartmentIdPrimary"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/customers/{customerId}/locations/{id}/merge": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @example architecto */
+                customerId: string;
+                /**
+                 * @description The ID of the location.
+                 * @example architecto
+                 */
+                id: string;
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * POST /customers/{customerId}/locations/{id}/merge { target_id }
+         * @description LOCATIE-SAMENVOEGEN-1 — merge this DUPLICATE location ({id}) INTO the target
+         *     (the survivor): every relation CustomerLocationMerger's inventory lists moves
+         *     over, then the duplicate is soft-deleted (recoverable, §9) — never hard-deleted.
+         *
+         *     {id} resolves THROUGH the parent customer relation (§4/§5, IDOR-safe) — a
+         *     location that is not this customer's 404s. `target_id` is validated separately
+         *     (mirrors validateContact()'s customer_location_id check) — a location that
+         *     EXISTS but belongs to ANOTHER customer 422s instead of a cross-customer merge.
+         */
+        post: operations["postCustomersCustomerIdLocationsIdMerge"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/customers/{customerId}/departments/{id}/merge": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @example architecto */
+                customerId: string;
+                /**
+                 * @description The ID of the department.
+                 * @example architecto
+                 */
+                id: string;
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * POST /customers/{customerId}/departments/{id}/merge { target_id }
+         * @description AFDELING-SAMENVOEGEN-1 — merge this DUPLICATE department ({id}) INTO the target
+         *     (the survivor): every relation CustomerDepartmentMerger's inventory lists moves
+         *     over, then the duplicate is soft-deleted (recoverable, §9) — never hard-deleted.
+         *
+         *     {id} resolves THROUGH the parent customer relation (§4/§5, IDOR-safe) — a
+         *     department that is not this customer's 404s. `target_id` is validated separately
+         *     (mirrors assertLocationBelongsToCustomer()'s shape) — a department that EXISTS
+         *     but belongs to ANOTHER customer 422s instead of a cross-customer merge.
+         */
+        post: operations["postCustomersCustomerIdDepartmentsIdMerge"];
+        delete?: never;
         options?: never;
         head?: never;
         patch?: never;
@@ -6374,7 +8467,13 @@ export interface paths {
         /** PUT {id} — rename / reorder / (de)activate. Resolved by id inside the tenant context. */
         put: operations["putContactFunctionsId"];
         post?: never;
-        /** DELETE {id} — remove a list entry (the free string stays on the business rows). */
+        /**
+         * DELETE {id} — remove a list entry. Blocked with a 409 + {in_use:true} while a
+         *     business row still carries this exact value (mirrors the /document-types
+         *     in-use-409 guard, DOCTYPES-1/K-49) — deleting it would silently strand that row's
+         *     value with no way back onto the dropdown. The free string itself is never
+         *     touched: only the SUGGESTION disappears, never the data.
+         */
         delete: operations["deleteContactFunctionsId"];
         options?: never;
         head?: never;
@@ -6805,17 +8904,123 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/ai/koios/settings": {
+    "/api/ai/koios/notes/assist": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        /** GET /ai/koios/settings — modellen + status. */
-        get: operations["getAiKoiosSettings"];
+        get?: never;
         put?: never;
-        post?: never;
+        /** POST /ai/koios/notes/assist — run one assist mode over a note text. */
+        post: operations["postAiKoiosNotesAssist"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/ai/koios/generate": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** POST /ai/koios/generate — generate a text suggestion from a DB row OR posted draft fields. */
+        post: operations["postAiKoiosGenerate"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/ai/koios/conversations/{id}/assist": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The ID of the conversation.
+                 * @example architecto
+                 */
+                id: string;
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** POST /ai/koios/conversations/{id}/assist — run one assist mode over a thread. */
+        post: operations["postAiKoiosConversationsIdAssist"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/ai/koios/notes/actions/execute": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** POST /ai/koios/notes/actions/execute — run/park a batch of action items. */
+        post: operations["postAiKoiosNotesActionsExecute"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/ai/koios/actions/{id}/confirm": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The ID of the action.
+                 * @example architecto
+                 */
+                id: string;
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * POST /ai/koios/actions/{id}/confirm — execute the parked tool call.
+         * @description Fresh authorization re-check happens inside ToolExecutor::executePending.
+         */
+        post: operations["postAiKoiosActionsIdConfirm"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/ai/koios/actions/{id}/cancel": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The ID of the action.
+                 * @example architecto
+                 */
+                id: string;
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** POST /ai/koios/actions/{id}/cancel — cancel a pending action; never runs anything. */
+        post: operations["postAiKoiosActionsIdCancel"];
         delete?: never;
         options?: never;
         head?: never;
@@ -6835,6 +9040,23 @@ export interface paths {
          * @description Validated against the selectable list; stored as tenant setting; audited.
          */
         put: operations["putAiKoiosModel"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/ai/koios/settings": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** GET /ai/koios/settings — modellen + status. */
+        get: operations["getAiKoiosSettings"];
+        put?: never;
         post?: never;
         delete?: never;
         options?: never;
@@ -6920,6 +9142,47 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/ai/koios/usage/billing": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * K0-D: GET /ai/koios/usage/billing?month=YYYY-MM — the invoice-facing view:
+         *     Claude cost × margin above the free allowance + workflow tokens × cent price.
+         * @description Tenant-scoped: only the current tenant's own rows/counters.
+         */
+        get: operations["getAiKoiosUsageBilling"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/ai/koios/for-you": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * K0-D (§4 noordster): GET /ai/koios/for-you?days=7|30 — "Koios deed dit voor
+         *     jou": the koios-triggered workflow runs of the last 7/30 days.
+         */
+        get: operations["getAiKoiosForYou"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/ai/koios/admin/usage": {
         parameters: {
             query?: never;
@@ -6954,17 +9217,63 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/settings/matching": {
+    "/api/whatsapp-message-types": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        get: operations["getSettingsMatching"];
-        put: operations["putSettingsMatching"];
+        /** GET — active, ordered, each row carrying an `in_use` flag. */
+        get: operations["getWhatsappMessageTypes"];
+        put?: never;
+        /** POST — create (value is the immutable slug). */
+        post: operations["postWhatsappMessageTypes"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/whatsapp-message-types/reorder": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * PUT /reorder  body: { ids: [.
+         * @description ..] }
+         */
+        put: operations["putWhatsappMessageTypesReorder"];
         post?: never;
         delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/whatsapp-message-types/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The ID of the whatsapp message type.
+                 * @example architecto
+                 */
+                id: string;
+            };
+            cookie?: never;
+        };
+        get?: never;
+        /** PUT /{id} — value (slug) is immutable; only label/color/sort_order/active change. */
+        put: operations["putWhatsappMessageTypesId"];
+        post?: never;
+        /** DELETE /{id} — 409 while still referenced. */
+        delete: operations["deleteWhatsappMessageTypesId"];
         options?: never;
         head?: never;
         patch?: never;
@@ -7048,7 +9357,7 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * GET /matches/rate-proposal — fase A: the rate proposal for a placement being filled
+         * GET /matches/rate-proposal — fase A: the rate proposal for a match being filled
          *     in (customer × function/cao/scale/step). Read-only, so matches.view; the exists rule
          *     runs on the tenant connection (isolation + IDOR in one). Returns the most specific
          *     valid price agreement's rates; sale_rate falls back to purchase × conversion_factor.
@@ -7072,12 +9381,7 @@ export interface paths {
         /** GET /matches — paginated, filtered list ({ data, meta }). */
         get: operations["getMatches"];
         put?: never;
-        /**
-         * POST /matches — directly couple a candidate × vacancy into a Match (G-2, decided JA).
-         * @description Idempotent (one Match per pair); the GUARANTEED side-effects live in MatchMaker (candidate
-         *     → placed, CV work-experience, match.created). 201 on a fresh couple, 200 when it existed.
-         */
-        post: operations["postMatches"];
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -7099,14 +9403,56 @@ export interface paths {
         };
         /** GET /matches/{id} — detail ({ data }). */
         get: operations["getMatchesMatch"];
-        /**
-         * PATCH /matches/{id} — open/close the match. Audited by the model itself
-         *     (AuditsChanges: field-level old→new + causer) — no duplicate ids-only manual
-         *     log, and a no-op PATCH logs nothing (CHANGELOG-2/3).
-         */
-        put: operations["putMatchesMatch"];
+        put?: never;
         post?: never;
         delete: operations["deleteMatchesMatch"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/matches/{match}/notes": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The match.
+                 * @example BcECdBDA-CdED-bFEA-CbCE-BcCdeBfbbebc
+                 */
+                match: string;
+            };
+            cookie?: never;
+        };
+        /** GET /matches/{id}/notes — the thread, newest first. */
+        get: operations["getMatchesMatchNotes"];
+        put?: never;
+        /** POST /matches/{id}/notes { body, type? } — add a note authored by the current user. */
+        post: operations["postMatchesMatchNotes"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/matches/{match}/advice": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The match.
+                 * @example architecto
+                 */
+                match: string;
+            };
+            cookie?: never;
+        };
+        /** GET /matches/{id}/advice — the fase-1 rule-based advice array for this match. */
+        get: operations["getMatchesMatchAdvice"];
+        put?: never;
+        post?: never;
+        delete?: never;
         options?: never;
         head?: never;
         patch?: never;
@@ -7180,7 +9526,7 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * POST /matches/{id}/approve — fase B: the manager approves a pending placement.
+         * POST /matches/{id}/approve — fase B: the manager approves a pending match.
          * @description Only a pending match can be decided (409 otherwise); the direct update() leaves the
          *     rate fields undirtied, so the model's recompute hook never overrides the decision.
          */
@@ -7207,10 +9553,76 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * POST /matches/{id}/reject — fase B: the manager rejects a pending placement, with a
+         * POST /matches/{id}/reject — fase B: the manager rejects a pending match, with a
          *     mandatory reason (the recruiter must know WHY). Same pending-only guard as approve.
          */
         post: operations["postMatchesMatchReject"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/matches/{match}/renew": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The match.
+                 * @example architecto
+                 */
+                match: string;
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * POST /matches/{id}/renew (MATCH-RENEWAL-1) — extend the match: the new end
+         *     date must be strictly AFTER the current one. The Form Request rule below is a
+         *     FAST pre-check for a clean 422 on the happy path — MatchRenewalService is the
+         *     REAL owner of that rule (it re-checks it against the row it locks inside its
+         *     own transaction, so a sibling renewal that lands between this validation and
+         *     the service call is still caught) and throws a typed
+         *     MatchRenewalInvalidEndDateException rather than a bare exception a 500 would
+         *     come from; caught below and turned into the SAME 422 shape a Form Request
+         *     failure would produce. The sequence (1st/2nd/3rd.
+         * @description .. renewal) is assigned by
+         *     the SERVICE inside that same transaction — never here — so two concurrent
+         *     renewals can never collide.
+         */
+        post: operations["postMatchesMatchRenew"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/matches/{match}/terminate": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The match.
+                 * @example architecto
+                 */
+                match: string;
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * POST /matches/{id}/terminate (MATCH-TERMINATE-1) — stop the match early with a
+         *     MANDATORY, lookup-backed reason (never free text alone, mirrors blacklist_
+         *     reason). Closes the match via the tenant's is_closed-FLAGGED status (R-1b,
+         *     MatchTerminationService) — the model's own updating hook stamps ended_at from
+         *     that status change (existing behaviour, untouched here). `note` is free text —
+         *     never logged (§6).
+         */
+        post: operations["postMatchesMatchTerminate"];
         delete?: never;
         options?: never;
         head?: never;
@@ -7238,6 +9650,34 @@ export interface paths {
          */
         post: operations["postMatchesMatchRestore"];
         delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/matches/{match}/notes/{note}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The match.
+                 * @example BcECdBDA-CdED-bFEA-CbCE-BcCdeBfbbebc
+                 */
+                match: string;
+                /**
+                 * @description The note.
+                 * @example architecto
+                 */
+                note: string;
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** DELETE /matches/{id}/notes/{note} — remove a note (scoped to the match). */
+        delete: operations["deleteMatchesMatchNotesNote"];
         options?: never;
         head?: never;
         patch?: never;
@@ -7320,6 +9760,24 @@ export interface paths {
         put?: never;
         /** POST — create (value is the immutable slug). */
         post: operations["postContractTypes"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/match-stop-reasons": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** GET — active, ordered, each row carrying an `in_use` flag. */
+        get: operations["getMatchStopReasons"];
+        put?: never;
+        /** POST — create (value is the immutable slug). */
+        post: operations["postMatchStopReasons"];
         delete?: never;
         options?: never;
         head?: never;
@@ -7414,6 +9872,50 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/match-stop-reasons/reorder": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * PUT /reorder  body: { ids: [.
+         * @description ..] }
+         */
+        put: operations["putMatchStopReasonsReorder"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/match-stop-reasons/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The ID of the match stop reason.
+                 * @example architecto
+                 */
+                id: string;
+            };
+            cookie?: never;
+        };
+        get?: never;
+        /** PUT /{id} — value (slug) is immutable; only label/color/sort_order/active change. */
+        put: operations["putMatchStopReasonsId"];
+        post?: never;
+        /** DELETE /{id} — 409 while still referenced. */
+        delete: operations["deleteMatchStopReasonsId"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/vacancies/{id}/candidate-matches": {
         parameters: {
             query?: never;
@@ -7488,57 +9990,15 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/outreach-campaigns": {
+    "/api/push/vapid-key": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        /** GET /outreach-campaigns — paginated, filtered list ({ data, meta }). */
-        get: operations["getOutreachCampaigns"];
-        put?: never;
-        /** POST /outreach-campaigns — create a campaign (+ optionally fill from a pool). */
-        post: operations["postOutreachCampaigns"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/outreach-campaigns/{campaign}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @example architecto */
-                campaign: string;
-            };
-            cookie?: never;
-        };
-        /** GET /outreach-campaigns/{id} — the campaign + its targets (candidates resolved). */
-        get: operations["getOutreachCampaignsCampaign"];
-        /** PATCH /outreach-campaigns/{id} — partial update (name/status/channel/owner/pool). */
-        put: operations["putOutreachCampaignsCampaign"];
-        post?: never;
-        delete: operations["deleteOutreachCampaignsCampaign"];
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/outreach-campaigns/{campaign}/stats": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @example architecto */
-                campaign: string;
-            };
-            cookie?: never;
-        };
-        /** GET /outreach-campaigns/{id}/stats — the target-status + outcome distributions. */
-        get: operations["getOutreachCampaignsCampaignStats"];
+        /** GET /push/vapid-key — the PUBLIC key the browser needs to subscribe. Never the private one. */
+        get: operations["getPushVapidKey"];
         put?: never;
         post?: never;
         delete?: never;
@@ -7547,64 +10007,571 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/outreach-campaigns/{campaign}/generate": {
+    "/api/push/subscriptions": {
         parameters: {
             query?: never;
             header?: never;
-            path: {
-                /** @example architecto */
-                campaign: string;
-            };
+            path?: never;
             cookie?: never;
         };
         get?: never;
         put?: never;
-        /** POST /outreach-campaigns/{id}/generate { pool_id? } — fill targets from a pool. */
-        post: operations["postOutreachCampaignsCampaignGenerate"];
+        /** POST /push/subscriptions — upsert THIS user's subscription for one browser endpoint. */
+        post: operations["postPushSubscriptions"];
+        /** DELETE /push/subscriptions — remove THIS user's subscription for one endpoint. */
+        delete: operations["deletePushSubscriptions"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/notifications": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** GET /notifications — the current user's recent feed + the unseen count. */
+        get: operations["getNotifications"];
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
         patch?: never;
         trace?: never;
     };
-    "/api/outreach-targets/{target}": {
+    "/api/notifications/seen": {
         parameters: {
             query?: never;
             header?: never;
-            path: {
-                /** @example architecto */
-                target: string;
-            };
+            path?: never;
             cookie?: never;
         };
         get?: never;
         put?: never;
-        post?: never;
+        /** POST /notifications/seen — mark all of the current user's notifications as seen. */
+        post: operations["postNotificationsSeen"];
         delete?: never;
         options?: never;
         head?: never;
-        /** PATCH /outreach-targets/{id} — mark the candidate's outreach status + note. */
-        patch: operations["patchOutreachTargetsTarget"];
+        patch?: never;
         trace?: never;
     };
-    "/api/outreach-campaigns/{campaign}/restore": {
+    "/api/opportunities": {
         parameters: {
             query?: never;
             header?: never;
-            path: {
-                /** @example architecto */
-                campaign: string;
-            };
+            path?: never;
             cookie?: never;
         };
-        get?: never;
+        /** GET /opportunities — paginated, filtered list ({ data, meta }). */
+        get: operations["getOpportunities"];
         put?: never;
         /**
-         * POST /outreach-campaigns/{id}/restore — un-archive a soft-deleted campaign
-         *     (per-GUID reversible pair of the delete; update-class §5).
+         * POST /opportunities — create a deal. currency defaults to EUR. Audited by the
+         *     model itself (AuditsChanges: field-level diff + causer + source/ip), so no
+         *     duplicate ids-only manual log (CHANGELOG-2/3).
          */
-        post: operations["postOutreachCampaignsCampaignRestore"];
+        post: operations["postOpportunities"];
         delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/opportunities/stats": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** GET /opportunities/stats — server-wide KPIs honouring the SAME filters as the list. */
+        get: operations["getOpportunitiesStats"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/opportunities/{opportunity}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The opportunity.
+                 * @example architecto
+                 */
+                opportunity: string;
+            };
+            cookie?: never;
+        };
+        /** GET /opportunities/{id} — single deal (resolved inside the tenant context). */
+        get: operations["getOpportunitiesOpportunity"];
+        /** PATCH /opportunities/{id} — partial update. Audited via AuditsChanges (old→new diff). */
+        put: operations["putOpportunitiesOpportunity"];
+        post?: never;
+        /** DELETE /opportunities/{id} — soft-delete; the audited 'deleted' event is the trail. */
+        delete: operations["deleteOpportunitiesOpportunity"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/opportunities/{opportunity}/notes": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The opportunity.
+                 * @example architecto
+                 */
+                opportunity: string;
+            };
+            cookie?: never;
+        };
+        /** GET /opportunities/{id}/notes — the thread, newest first. */
+        get: operations["getOpportunitiesOpportunityNotes"];
+        put?: never;
+        /** POST /opportunities/{id}/notes { body, type? } — add a note authored by the current user. */
+        post: operations["postOpportunitiesOpportunityNotes"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/opportunities/{opportunity}/activity": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The opportunity.
+                 * @example architecto
+                 */
+                opportunity: string;
+            };
+            cookie?: never;
+        };
+        /**
+         * GET /opportunities/{id}/activity — the deal's changelog feed (OPP-ACTIVITY-1),
+         *     same shared shape/trait as the customer/candidate changelog (CHANGELOG-3). No
+         *     child subjects widened — a deal has no sub-entities of its own yet.
+         */
+        get: operations["getOpportunitiesOpportunityActivity"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/opportunities/{opportunity}/restore": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The opportunity.
+                 * @example architecto
+                 */
+                opportunity: string;
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** D-3: POST /opportunities/{id}/restore — un-archive a soft-deleted opportunity. */
+        post: operations["postOpportunitiesOpportunityRestore"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/opportunities/bulk/stage": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** C-41: POST /opportunities/bulk/stage { opportunity_ids:[], opportunity_stage_id }. */
+        post: operations["postOpportunitiesBulkStage"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/opportunities/bulk/owner": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** C-41: POST /opportunities/bulk/owner { opportunity_ids:[], owner_id|null }. */
+        post: operations["postOpportunitiesBulkOwner"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/opportunities/bulk/client": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** C-41: POST /opportunities/bulk/client { opportunity_ids:[], customer_id|null }. */
+        post: operations["postOpportunitiesBulkClient"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/opportunities/bulk/tags": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** C-41: POST /opportunities/bulk/tags { opportunity_ids:[], tags:[] } — add tags (merge unique). */
+        post: operations["postOpportunitiesBulkTags"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/opportunities/bulk/tags/remove": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** C-41: POST /opportunities/bulk/tags/remove { opportunity_ids:[], tags:[] } — strip tags. */
+        post: operations["postOpportunitiesBulkTagsRemove"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/opportunities/{opportunity}/notes/{note}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The opportunity.
+                 * @example architecto
+                 */
+                opportunity: string;
+                /**
+                 * @description The note.
+                 * @example architecto
+                 */
+                note: string;
+            };
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * PUT /opportunities/{id}/notes/{note} — edit a note's body/type/language. G23
+         *     (OPP-NOTE-EDIT-1): parity with task_comments/candidate/customer notes, which are
+         *     editable. Author stays the creator; updated_by records who edited (changelog).
+         */
+        put: operations["putOpportunitiesOpportunityNotesNote"];
+        post?: never;
+        /** DELETE /opportunities/{id}/notes/{note} — remove a note (scoped to the deal). */
+        delete: operations["deleteOpportunitiesOpportunityNotesNote"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/opportunities/bulk/archive": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** D-2: POST /opportunities/bulk/archive { opportunity_ids:[…] } — soft-delete a set. */
+        post: operations["postOpportunitiesBulkArchive"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/opportunity-stages": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** GET /opportunity-stages — ordered list, each carrying in_use. */
+        get: operations["getOpportunityStages"];
+        put?: never;
+        /** POST /opportunity-stages — create a stage (accepts label or name). */
+        post: operations["postOpportunityStages"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/opportunity-stages/reorder": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * PUT /opportunity-stages/reorder  body: { ids: [.
+         * @description ..] }
+         */
+        put: operations["putOpportunityStagesReorder"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/opportunity-stages/{opportunityStage}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @example architecto */
+                opportunityStage: string;
+            };
+            cookie?: never;
+        };
+        get?: never;
+        /** PUT /opportunity-stages/{opportunityStage} — resolved by id (no implicit binding). */
+        put: operations["putOpportunityStagesOpportunityStage"];
+        post?: never;
+        /** DELETE /opportunity-stages/{opportunityStage} — 409 while still referenced. */
+        delete: operations["deleteOpportunityStagesOpportunityStage"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/opportunity-service-types": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** GET — ordered list, each carrying in_use. */
+        get: operations["getOpportunityServiceTypes"];
+        put?: never;
+        /** POST — create a lookup value (accepts label or name). */
+        post: operations["postOpportunityServiceTypes"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/opportunity-agreement-types": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** GET — ordered list, each carrying in_use. */
+        get: operations["getOpportunityAgreementTypes"];
+        put?: never;
+        /** POST — create a lookup value (accepts label or name). */
+        post: operations["postOpportunityAgreementTypes"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/opportunity-deal-types": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** GET /opportunity-deal-types — ordered list, each carrying in_use. */
+        get: operations["getOpportunityDealTypes"];
+        put?: never;
+        /** POST /opportunity-deal-types — create (accepts label or name). */
+        post: operations["postOpportunityDealTypes"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/opportunity-service-types/reorder": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * PUT /reorder  body: { ids: [.
+         * @description ..] }
+         */
+        put: operations["putOpportunityServiceTypesReorder"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/opportunity-service-types/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The ID of the opportunity service type.
+                 * @example architecto
+                 */
+                id: string;
+            };
+            cookie?: never;
+        };
+        get?: never;
+        /** PUT /{id} — resolved by id inside the tenant context (no implicit binding). */
+        put: operations["putOpportunityServiceTypesId"];
+        post?: never;
+        /** DELETE /{id} — 409 while still referenced by a deal. */
+        delete: operations["deleteOpportunityServiceTypesId"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/opportunity-agreement-types/reorder": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * PUT /reorder  body: { ids: [.
+         * @description ..] }
+         */
+        put: operations["putOpportunityAgreementTypesReorder"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/opportunity-agreement-types/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The ID of the opportunity agreement type.
+                 * @example architecto
+                 */
+                id: string;
+            };
+            cookie?: never;
+        };
+        get?: never;
+        /** PUT /{id} — resolved by id inside the tenant context (no implicit binding). */
+        put: operations["putOpportunityAgreementTypesId"];
+        post?: never;
+        /** DELETE /{id} — 409 while still referenced by a deal. */
+        delete: operations["deleteOpportunityAgreementTypesId"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/opportunity-deal-types/reorder": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * PUT /opportunity-deal-types/reorder  body: { ids: [.
+         * @description ..] }
+         */
+        put: operations["putOpportunityDealTypesReorder"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/opportunity-deal-types/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The ID of the opportunity deal type.
+                 * @example architecto
+                 */
+                id: string;
+            };
+            cookie?: never;
+        };
+        get?: never;
+        /** PUT /opportunity-deal-types/{id} — resolved by id inside the tenant context. */
+        put: operations["putOpportunityDealTypesId"];
+        post?: never;
+        /** DELETE /opportunity-deal-types/{id} — 409 while still referenced by a deal. */
+        delete: operations["deleteOpportunityDealTypesId"];
         options?: never;
         head?: never;
         patch?: never;
@@ -7734,24 +10701,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/settings/rejection": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** GET /settings/rejection. */
-        get: operations["getSettingsRejection"];
-        /** PUT /settings/rejection. */
-        put: operations["putSettingsRejection"];
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/api/vacancies/{id}/activity": {
         parameters: {
             query?: never;
@@ -7832,142 +10781,6 @@ export interface paths {
             cookie?: never;
         };
         get: operations["getMatchesIdActivity"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/reports/intakes": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get: operations["getReportsIntakes"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/reports/flow": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * GET /reports/flow — application-funnel throughput (count per phase, conversion
-         *     between phases, avg days-in-phase). Phases come from the tenant funnel lookup.
-         */
-        get: operations["getReportsFlow"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/reports/recruiters": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * GET /reports/recruiters — productivity per recruiter (candidates, intakes,
-         *     applications per phase, matches, open/overdue tasks, not-contacted > N months).
-         */
-        get: operations["getReportsRecruiters"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/reports/vacancies": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * GET /reports/vacancies — demand per vacancy (status, #applications, #per phase,
-         *     matched/filled, time-to-fill) + a summary (open/filled, fill-rate, avg time-to-fill).
-         */
-        get: operations["getReportsVacancies"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/reports/matches": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * GET /reports/matches — matches/placements (funnel vs direct, contract-status
-         *     breakdown). avg_placement_duration_days is null until HelloFlex provides dates.
-         */
-        get: operations["getReportsMatches"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/reports/outreach": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * GET /reports/outreach (REPORTS-2 fase 1) — tenant-wide bellijst ratios:
-         *     reach-rate + outcome shares over the targets that entered a list in the window.
-         */
-        get: operations["getReportsOutreach"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/reports/sources": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * GET /reports/sources (REPORTS-2 fase 2) — bron-ROI: per candidate source the
-         *     intake cohort, its applications and its placements (+ placement rate).
-         */
-        get: operations["getReportsSources"];
         put?: never;
         post?: never;
         delete?: never;
@@ -8505,6 +11318,451 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/reports/intakes": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["getReportsIntakes"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/reports/flow": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * GET /reports/flow — application-funnel throughput (count per phase, conversion
+         *     between phases, avg days-in-phase). Phases come from the tenant funnel lookup.
+         */
+        get: operations["getReportsFlow"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/reports/recruiters": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * GET /reports/recruiters — productivity per recruiter (candidates, intakes,
+         *     applications per phase, matches, open/overdue tasks, not-contacted > N months).
+         */
+        get: operations["getReportsRecruiters"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/reports/vacancies": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * GET /reports/vacancies — demand per vacancy (status, #applications, #per phase,
+         *     matched/filled, time-to-fill) + a summary (open/filled, fill-rate, avg time-to-fill).
+         */
+        get: operations["getReportsVacancies"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/reports/matches": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * GET /reports/matches — matches (funnel vs direct, contract-status breakdown),
+         *     plus terminations (per stop reason/customer/recruiter), renewals (chain-depth
+         *     distribution) and the current active/expiring-soon standing (MATCH-REPORT-2).
+         * @description avg_placement_duration_days is null until HelloFlex provides dates.
+         */
+        get: operations["getReportsMatches"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/reports/outreach": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * GET /reports/outreach (REPORTS-2 fase 1) — tenant-wide bellijst ratios:
+         *     reach-rate + outcome shares over the targets that entered a list in the window.
+         */
+        get: operations["getReportsOutreach"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/reports/sources": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["getReportsSources"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/reports/opportunities": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * GET /reports/opportunities (KANSEN-REPORT-1, Danny 2026-07-28) — the sales
+         *     pipeline: open/won/lost with a win rate over DECIDED deals, value and hours per
+         *     stage, per owner and per customer, a forecast on expected close date, and the
+         *     stale/overdue nudge list. Runs entirely on existing columns.
+         */
+        get: operations["getReportsOpportunities"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/reports/flow/drill": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** GET /reports/flow/drill — the period-total segment, or one funnel phase (current OR reached view). */
+        get: operations["getReportsFlowDrill"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/reports/matches/drill": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** GET /reports/matches/drill — one origin segment (funnel = grew out of an application, direct = not). */
+        get: operations["getReportsMatchesDrill"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/reports/recruiters/drill": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** GET /reports/recruiters/drill — one recruiter's own candidate book (snapshot: deliberately unwindowed, like the report's own metric). */
+        get: operations["getReportsRecruitersDrill"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/reports/vacancies/drill": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** GET /reports/vacancies/drill — `status` (vacancies, incl. the 'none' bucket) XOR `vacancy` (its own applications). */
+        get: operations["getReportsVacanciesDrill"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/reports/flow/advice": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** GET /reports/flow/advice */
+        get: operations["getReportsFlowAdvice"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/reports/matches/advice": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** GET /reports/matches/advice */
+        get: operations["getReportsMatchesAdvice"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/reports/recruiters/advice": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** GET /reports/recruiters/advice */
+        get: operations["getReportsRecruitersAdvice"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/reports/vacancies/advice": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** GET /reports/vacancies/advice */
+        get: operations["getReportsVacanciesAdvice"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/files/tenant-logo/{tenant}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @example architecto */
+                tenant: string;
+            };
+            cookie?: never;
+        };
+        /**
+         * GET (signed, UNAUTHENTICATED) /files/tenant-logo/{tenant} — stream the tenant logo.
+         * @description `signed` already verified the short-lived signature and `tenant.param` initialised
+         *     the bureau from the signed {tenant} segment, so a plain lookup here is IDOR-safe.
+         */
+        get: operations["getFilesTenantLogoTenant"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/files/tenant-banner/{tenant}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @example architecto */
+                tenant: string;
+            };
+            cookie?: never;
+        };
+        /** GET (signed) /files/tenant-banner/{tenant} — stream the banner (same CSP hardening). */
+        get: operations["getFilesTenantBannerTenant"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/settings": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** GET /settings — return all settings as a key=>value map, masking secrets. */
+        get: operations["getSettings"];
+        put?: never;
+        /** POST /settings — upsert one or more settings (encrypting the sensitive ones). */
+        post: operations["postSettings"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/settings/logo": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** POST /settings/logo — replace the tenant logo with an uploaded image. */
+        post: operations["postSettingsLogo"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/settings/banner": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * POST /settings/banner (BANNER-UPLOAD-1) — replace the tenant's company banner.
+         * @description Mirrors the logo flow exactly: private-disk path persisted (`company_banner_path`),
+         *     a short-lived signed URL minted on read — never a static/public path, and never
+         *     the FE's old session-local blob: string (the bug this endpoint replaces).
+         */
+        post: operations["postSettingsBanner"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/settings/messaging-limits": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** GET /api/settings/messaging-limits — caps per lane + the hard ceilings. */
+        get: operations["getSettingsMessagingLimits"];
+        /** PUT /api/settings/messaging-limits — set caps (clamped to the ceiling). */
+        put: operations["putSettingsMessagingLimits"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/settings/rejection": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** GET /settings/rejection. */
+        get: operations["getSettingsRejection"];
+        /** PUT /settings/rejection. */
+        put: operations["putSettingsRejection"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/settings/matching": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["getSettingsMatching"];
+        put: operations["putSettingsMatching"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/sm_candidates/stats": {
         parameters: {
             query?: never;
@@ -8514,7 +11772,7 @@ export interface paths {
         };
         /**
          * GET /sm_candidates/stats — SM-STATS-1, answering the FE request of 2026-07-07
-         *     that was never picked up: the ShiftManager candidates report used to pull the
+         *     that was never picked up: the Shiftmanager candidates report used to pull the
          *     whole candidate set into the browser just to draw its charts. That is both a
          *     scale problem and a data-minimisation one (§9) on health-adjacent data — the
          *     browser only needed COUNTS, never the people.
@@ -8759,7 +12017,7 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * POST /candidates/sync — queue a full ShiftManager employee sync.
+         * POST /candidates/sync — queue a full Shiftmanager employee sync.
          * @description The heavy paging/upsert runs on the queue (SyncSmCandidates); we only verify
          *     a usable connection up front so the caller gets immediate feedback, then
          *     return 202 Accepted. Requires a running queue worker.
@@ -8783,7 +12041,7 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** POST /candidates/sync/{externalId} — refresh a single candidate from ShiftManager. */
+        /** POST /candidates/sync/{externalId} — refresh a single candidate from Shiftmanager. */
         post: operations["postSmCandidatesSyncExternalId"];
         delete?: never;
         options?: never;
@@ -8801,7 +12059,7 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * POST /customers/sync — queue a full ShiftManager customer sync.
+         * POST /customers/sync — queue a full Shiftmanager customer sync.
          * @description The heavy work (paging customers + an extra department call per customer +
          *     upserts) runs on the queue (SyncSmCustomers); we only verify a usable
          *     connection up front, then return 202 Accepted. Requires a running queue worker.
@@ -8825,7 +12083,7 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** POST /customers/{customer}/contacts/sync — refresh one customer's contacts from ShiftManager. */
+        /** POST /customers/{customer}/contacts/sync — refresh one customer's contacts from Shiftmanager. */
         post: operations["postSmCustomersCustomerContactsSync"];
         delete?: never;
         options?: never;
@@ -8840,7 +12098,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** GET /reports/dashboard — headline KPIs for the ShiftManager dashboard. */
+        /** GET /reports/dashboard — headline KPIs for the Shiftmanager dashboard. */
         get: operations["getSmReportsDashboard"];
         put?: never;
         post?: never;
@@ -9009,372 +12267,114 @@ export interface paths {
         patch: operations["patchSmReportsSavedFiltersId"];
         trace?: never;
     };
-    "/api/applications": {
+    "/api/applications/bulk/owner": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        /** GET /applications — paginated, filtered list ({ data, meta }). */
-        get: operations["getApplications"];
+        get?: never;
         put?: never;
-        /**
-         * POST /applications — couple an EXISTING candidate to a vacancy on the first
-         *     funnel phase (lowest sort_order; never hardcoded). A candidate may apply many
-         *     times (incl. repeats), so there is NO hard uniqueness — a still-open identical
-         *     candidate×vacancy only yields a soft warning. Gated by applications.create.
-         */
-        post: operations["postApplications"];
+        /** POST /applications/bulk/owner — reassign the recruiter for a batch. */
+        post: operations["postApplicationsBulkOwner"];
         delete?: never;
         options?: never;
         head?: never;
         patch?: never;
         trace?: never;
     };
-    "/api/applications/stats": {
+    "/api/applications/bulk/note": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        /**
-         * GET /applications/stats — KPI strip. Honours the SCOPE filters (vacancy/owner/
-         *     search) but never the segment selectors (bucket/phase_key), so the strip keeps
-         *     showing the full distribution the user is choosing between.
-         */
-        get: operations["getApplicationsStats"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/applications/{application}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /**
-                 * @description The application.
-                 * @example architecto
-                 */
-                application: string;
-            };
-            cookie?: never;
-        };
-        /** GET /applications/{id} — the wide drawer detail ({ data }). */
-        get: operations["getApplicationsApplication"];
-        /** PATCH /applications/{id} — move phase and/or reassign owner. */
-        put: operations["putApplicationsApplication"];
-        post?: never;
-        /** DELETE /applications/{id} — detach (restores prior lifecycle status). */
-        delete: operations["deleteApplicationsApplication"];
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/applications/{application}/proposals": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /**
-                 * @description The application.
-                 * @example architecto
-                 */
-                application: string;
-            };
-            cookie?: never;
-        };
-        /** GET /applications/{id}/proposals — newest first, never emits subject/body. */
-        get: operations["getApplicationsApplicationProposals"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/applications/{application}/reject": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /**
-                 * @description The application.
-                 * @example architecto
-                 */
-                application: string;
-            };
-            cookie?: never;
-        };
         get?: never;
         put?: never;
-        /** POST /applications/{id}/reject — reject (keeps the row) + send (Opdracht 3). */
-        post: operations["postApplicationsApplicationReject"];
+        /** POST /applications/bulk/note — add the same recruiter note to a batch. */
+        post: operations["postApplicationsBulkNote"];
         delete?: never;
         options?: never;
         head?: never;
         patch?: never;
         trace?: never;
     };
-    "/api/applications/{application}/score": {
+    "/api/applications/bulk/stage": {
         parameters: {
             query?: never;
             header?: never;
-            path: {
-                /**
-                 * @description The application.
-                 * @example architecto
-                 */
-                application: string;
-            };
+            path?: never;
             cookie?: never;
         };
         get?: never;
         put?: never;
         /**
-         * POST /applications/{id}/score — (re)run the deterministic scoring engine,
-         *     bounded by the vacancy's effective assessment, and persist the result flat.
+         * APPSURF: POST /applications/bulk/stage { application_ids:[], stage_id } — move the
+         *     funnel stage for a batch. Delegates EVERY row to StageMover::moveByStageId — the
+         *     SAME service path the single PATCH uses for a stage move (§2: one guard path, no
+         *     clone) — so the AXIS-MATRIX-2 is_proposal guards (blacklisted/archived candidate,
+         *     blocked customer) and the reject-reason guard hold identically here. A row whose
+         *     guard trips is skipped with a reason instead of aborting the whole batch.
          */
-        post: operations["postApplicationsApplicationScore"];
+        post: operations["postApplicationsBulkStage"];
         delete?: never;
         options?: never;
         head?: never;
         patch?: never;
         trace?: never;
     };
-    "/api/applications/{application}/notes": {
+    "/api/applications/bulk/archive": {
         parameters: {
             query?: never;
             header?: never;
-            path: {
-                /**
-                 * @description The application.
-                 * @example architecto
-                 */
-                application: string;
-            };
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** POST /applications/bulk/archive — soft-delete a batch (legacy, no-reason). Reversible → applications.update. */
+        post: operations["postApplicationsBulkArchive"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/applications/bulk/detach": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
             cookie?: never;
         };
         get?: never;
         put?: never;
         /**
-         * POST /applications/{id}/notes — add a recruiter note to a sollicitatie.
-         * @description Returns the full detail so the drawer can refresh in one call.
-         *     Gated by applications.update (same as other writes on this resource).
+         * APPSURF: POST /applications/bulk/detach { application_ids:[], reason } — the real
+         *     bulk mirror of the single DELETE detach: requires a reason (S15), writes it as a
+         *     timeline note, soft-deletes, and pulls the candidate off the is_applicant phase via
+         *     ApplicantStatusTransition::onClosed when no application remains open (C-10).
          */
-        post: operations["postApplicationsApplicationNotes"];
+        post: operations["postApplicationsBulkDetach"];
         delete?: never;
         options?: never;
         head?: never;
         patch?: never;
         trace?: never;
     };
-    "/api/applications/{application}/propose": {
+    "/api/applications/bulk/restore": {
         parameters: {
             query?: never;
             header?: never;
-            path: {
-                /**
-                 * @description The application.
-                 * @example architecto
-                 */
-                application: string;
-            };
+            path?: never;
             cookie?: never;
         };
         get?: never;
         put?: never;
-        /** POST /applications/{id}/propose — snapshot the contact + send. */
-        post: operations["postApplicationsApplicationPropose"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/proposals/{proposal}/revoke": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /**
-                 * @description The proposal.
-                 * @example architecto
-                 */
-                proposal: string;
-            };
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** POST /proposals/{id}/revoke — idempotent: already-revoked stays revoked, no error. */
-        post: operations["postProposalsProposalRevoke"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/applications/{application}/stop-interview": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /**
-                 * @description The application.
-                 * @example architecto
-                 */
-                application: string;
-            };
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * INTERVIEW-STOP-1: POST /applications/{id}/stop-interview — recruiter takeover.
-         * @description Pauses the AI so the human answers; the engine never auto-resumes a paused session
-         *     (see InterviewEngine::handleInbound). Idempotent; reversible via resume-interview.
-         */
-        post: operations["postApplicationsApplicationStopInterview"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/applications/{application}/resume-interview": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /**
-                 * @description The application.
-                 * @example architecto
-                 */
-                application: string;
-            };
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** INTERVIEW-STOP-1: POST /applications/{id}/resume-interview — hand the flow back to the AI. */
-        post: operations["postApplicationsApplicationResumeInterview"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/applications/{application}/interview": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /**
-                 * @description The application.
-                 * @example architecto
-                 */
-                application: string;
-            };
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * INTERVIEW-PERAPP-1: POST /applications/{id}/interview {agent_id} — start the AI interview
-         *     for THIS application with a CHOSEN agent (its own flow), independent of the vacancy's
-         *     coupled agent. Returns the live interview block (id + agent). A candidate that already has
-         *     an (open) session gets that session back (200); a guard skip is a 422 with the reason.
-         */
-        post: operations["postApplicationsApplicationInterview"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/vacancies/{vacancy}/start-interviews": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /**
-                 * @description The vacancy.
-                 * @example architecto
-                 */
-                vacancy: string;
-            };
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * INTERVIEW-BACKFILL-1: POST /vacancies/{id}/start-interviews — start the AI interview for
-         *     every ELIGIBLE existing applicant of a vacancy (coupling an agent only auto-starts NEW
-         *     applications). Sends real WhatsApp, so the FE confirms first (AVG, no auto-fire).
-         * @description Idempotent + guard-driven; reports per application what happened.
-         */
-        post: operations["postVacanciesVacancyStartInterviews"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/applications/{application}/rejection": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /**
-                 * @description The application.
-                 * @example architecto
-                 */
-                application: string;
-            };
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        /**
-         * PATCH /applications/{id}/rejection — APP-REJECTION-EDIT-1: correct the reason
-         *     and/or internal note of an ALREADY rejected application. Writes ONLY
-         *     rejection_reason_id/rejection_note — never the stage, never re-delivers (the
-         *     candidate must NOT get a second rejection message). 404 when the application
-         *     isn't currently rejected — there is nothing to correct.
-         */
-        patch: operations["patchApplicationsApplicationRejection"];
-        trace?: never;
-    };
-    "/api/applications/{application}/restore": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /**
-                 * @description The application.
-                 * @example architecto
-                 */
-                application: string;
-            };
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** POST /applications/{id}/restore — un-detach a soft-deleted application (A1). */
-        post: operations["postApplicationsApplicationRestore"];
+        /** POST /applications/bulk/restore — un-archive a batch. Reversible pair of archive. */
+        post: operations["postApplicationsBulkRestore"];
         delete?: never;
         options?: never;
         head?: never;
@@ -9416,44 +12416,6 @@ export interface paths {
         post?: never;
         /** DELETE /assessment-criteria-groups/{id} — 409 when a vacancy still links to it. */
         delete: operations["deleteAssessmentCriteriaGroupsGroup"];
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/application-statuses": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get: operations["getApplicationStatuses"];
-        put?: never;
-        post: operations["postApplicationStatuses"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/application-statuses/{id}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /**
-                 * @description The ID of the application status.
-                 * @example architecto
-                 */
-                id: string;
-            };
-            cookie?: never;
-        };
-        get: operations["getApplicationStatusesId"];
-        put: operations["putApplicationStatusesId"];
-        post?: never;
-        delete: operations["deleteApplicationStatusesId"];
         options?: never;
         head?: never;
         patch?: never;
@@ -9558,6 +12520,46 @@ export interface paths {
          */
         post: operations["postAuthMfaVerify"];
         delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/teams": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** GET — name-ordered list; every row carries an `in_use` flag (false when nothing references it). */
+        get: operations["getTeams"];
+        put?: never;
+        post: operations["postTeams"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/teams/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The ID of the team.
+                 * @example architecto
+                 */
+                id: string;
+            };
+            cookie?: never;
+        };
+        get: operations["getTeamsId"];
+        put: operations["putTeamsId"];
+        post?: never;
+        /** DELETE — 409 when still referenced (only if a source is declared). */
+        delete: operations["deleteTeamsId"];
         options?: never;
         head?: never;
         patch?: never;
@@ -9943,8 +12945,8 @@ export interface paths {
         };
         get?: never;
         /**
-         * PATCH /tasks/{id}/notes/{note} — edit a note's body (NOTES-4b: the task thread
-         *     became Notities, so it gets the same edit affordance as candidate notes).
+         * PATCH /tasks/{id}/notes/{note} — edit a note's body/type (NOTES-4b: the task
+         *     thread became Notities, so it gets the same edit affordance as candidate notes).
          * @description Records WHO edited (name) so the UI can show "gewijzigd door …".
          */
         put: operations["putTasksTaskNotesComment"];
@@ -10024,6 +13026,57 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/tasks/bulk/status": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** TASK-BULK-1: POST /tasks/bulk/status { task_ids:[], status_id } — status is a not-null column, so it can move, not clear. */
+        post: operations["postTasksBulkStatus"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/tasks/bulk/assignee": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** TASK-BULK-1: POST /tasks/bulk/assignee { task_ids:[], assignee_id|null } — null = bureau. */
+        post: operations["postTasksBulkAssignee"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/tasks/bulk/priority": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** TASK-BULK-1: POST /tasks/bulk/priority { task_ids:[], priority_id|null }. */
+        post: operations["postTasksBulkPriority"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/files/vacancy-documents/{tenant}/{parent}/{document}": {
         parameters: {
             query?: never;
@@ -10062,12 +13115,7 @@ export interface paths {
         /** GET /vacancies — paginated, server-filtered list ({ data, meta }). */
         get: operations["getVacancies"];
         put?: never;
-        /**
-         * POST /vacancies — create + return the detail. Audited by the model itself
-         *     (AuditsChanges: field diff + causer) — no duplicate ids-only manual log
-         *     (CHANGELOG-2/3).
-         */
-        post: operations["postVacancies"];
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -10159,6 +13207,29 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/vacancies/bulk/ai-agent": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * POST /vacancies/bulk/ai-agent — couple one AI-agent to a batch (VAC-BULK-AGENT-1).
+         * @description `ai_agent_id` must be PRESENT so the intent is explicit, and may be null to
+         *     DEcouple ("Geen agent"). The exists rule runs on the ACTIVE TENANT connection
+         *     (ai_agents is a tenant table), so an agent id from another tenant is a 422 and can
+         *     never be written here — the id from the request never implies access (§5).
+         */
+        post: operations["postVacanciesBulkAiAgent"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/vacancies/bulk/tags/remove": {
         parameters: {
             query?: never;
@@ -10210,6 +13281,33 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/vacancies/{vacancy}/matches": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The vacancy.
+                 * @example BcECdBDA-CdED-bFEA-CbCE-BcCdeBfbbebc
+                 */
+                vacancy: string;
+            };
+            cookie?: never;
+        };
+        /**
+         * GET /vacancies/{id}/matches — the matches coupled to this vacancy (V-table-2 read
+         *     endpoint for the drawer's Matches tab). Gated on matches.view (route middleware) —
+         *     a stray id from another tenant 404s here, never a silently empty page.
+         */
+        get: operations["getVacanciesVacancyMatches"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/vacancies/{vacancy}": {
         parameters: {
             query?: never;
@@ -10225,8 +13323,7 @@ export interface paths {
         };
         /** GET /vacancies/{id} — full drawer detail ({ data }). */
         get: operations["getVacanciesVacancy"];
-        /** PATCH /vacancies/{id} — partial update. Audited via AuditsChanges (old→new diff). */
-        put: operations["putVacanciesVacancy"];
+        put?: never;
         post?: never;
         /**
          * DELETE /vacancies/{id} — soft-delete (archive). Refused with 409 + the blocking
@@ -10258,6 +13355,29 @@ export interface paths {
          *     from another tenant 404s instead of silently returning an empty page.
          */
         get: operations["getVacanciesVacancyLeads"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/vacancies/{id}/timeline": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The ID of the vacancy.
+                 * @example BcECdBDA-CdED-bFEA-CbCE-BcCdeBfbbebc
+                 */
+                id: string;
+            };
+            cookie?: never;
+        };
+        /** GET /vacancies/{id}/timeline — the merged lifecycle + record-event stream. */
+        get: operations["getVacanciesIdTimeline"];
         put?: never;
         post?: never;
         delete?: never;
@@ -10328,10 +13448,15 @@ export interface paths {
             };
             cookie?: never;
         };
-        /** GET /{prefix}/{parent}/documents — the list, newest first. */
+        /**
+         * GET /{prefix}/{parent}/documents — the list, newest first.
+         * @description DOC-EXPIRY-1: optional "verloopt binnen X dagen" filter (?expires_within_days=N)
+         *     for entities whose document table tracks expiry — mirrors the candidate documents
+         *     endpoint and the other expiry-window filters in this repo.
+         */
         get: operations["getVacanciesVacancyDocuments"];
         put?: never;
-        /** POST /{prefix}/{parent}/documents — multipart: file, name?, type?. */
+        /** POST /{prefix}/{parent}/documents — multipart: file, name?, type?, expires_at?. */
         post: operations["postVacanciesVacancyDocuments"];
         delete?: never;
         options?: never;
@@ -10392,7 +13517,11 @@ export interface paths {
         delete: operations["deleteVacanciesVacancyDocumentsDocument"];
         options?: never;
         head?: never;
-        /** PATCH /{prefix}/{parent}/documents/{document} — rename only. */
+        /**
+         * PATCH /{prefix}/{parent}/documents/{document} — rename and/or (when this entity
+         *     tracks it) correct the DOC-EXPIRY-1 validity date; name stays required so an
+         *     existing caller sending only `name` keeps working exactly as before.
+         */
         patch: operations["patchVacanciesVacancyDocumentsDocument"];
         trace?: never;
     };
@@ -10424,7 +13553,7 @@ export interface paths {
         /** GET /vacancy-phases — the funnel phases (value = the stable stage key). */
         get: operations["getVacancyPhases"];
         put?: never;
-        /** POST /vacancy-phases — accepts name or label. */
+        /** POST /vacancy-phases — accepts name or label; the stable key is derived. */
         post: operations["postVacancyPhases"];
         delete?: never;
         options?: never;
@@ -10514,26 +13643,8 @@ export interface paths {
          */
         put: operations["putVacancyPhasesVacancyPhase"];
         post?: never;
-        /** DELETE /vacancy-phases/{vacancyPhase} */
+        /** DELETE /vacancy-phases/{vacancyPhase} — 409 while still referenced. */
         delete: operations["deleteVacancyPhasesVacancyPhase"];
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/vacancy-employment-types": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** GET — ordered list, each row carrying an `in_use` flag. */
-        get: operations["getVacancyEmploymentTypes"];
-        put?: never;
-        /** POST — create (accepts name or label + optional colour/sort_order). */
-        post: operations["postVacancyEmploymentTypes"];
-        delete?: never;
         options?: never;
         head?: never;
         patch?: never;
@@ -10588,50 +13699,6 @@ export interface paths {
         /** POST /vacancy-channels — accepts name or label (+ optional icon/active). */
         post: operations["postVacancyChannels"];
         delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/vacancy-employment-types/reorder": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        /**
-         * PUT /reorder  body: { ids: [.
-         * @description ..] } — persist the drag order as sort_order.
-         */
-        put: operations["putVacancyEmploymentTypesReorder"];
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/vacancy-employment-types/{id}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /**
-                 * @description The ID of the vacancy employment type.
-                 * @example architecto
-                 */
-                id: string;
-            };
-            cookie?: never;
-        };
-        get?: never;
-        /** PUT /{id} — update. */
-        put: operations["putVacancyEmploymentTypesId"];
-        post?: never;
-        /** DELETE /{id} — 409 while still referenced by a business record. */
-        delete: operations["deleteVacancyEmploymentTypesId"];
         options?: never;
         head?: never;
         patch?: never;
@@ -10898,68 +13965,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/whatsapp-message-types": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** GET — active, ordered, each row carrying an `in_use` flag. */
-        get: operations["getWhatsappMessageTypes"];
-        put?: never;
-        /** POST — create (value is the immutable slug). */
-        post: operations["postWhatsappMessageTypes"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/whatsapp-message-types/reorder": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        /**
-         * PUT /reorder  body: { ids: [.
-         * @description ..] }
-         */
-        put: operations["putWhatsappMessageTypesReorder"];
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/whatsapp-message-types/{id}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /**
-                 * @description The ID of the whatsapp message type.
-                 * @example architecto
-                 */
-                id: string;
-            };
-            cookie?: never;
-        };
-        get?: never;
-        /** PUT /{id} — value (slug) is immutable; only label/color/sort_order/active change. */
-        put: operations["putWhatsappMessageTypesId"];
-        post?: never;
-        /** DELETE /{id} — 409 while still referenced. */
-        delete: operations["deleteWhatsappMessageTypesId"];
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/api/escalation-reasons": {
         parameters: {
             query?: never;
@@ -10967,7 +13972,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** GET — name-ordered list; every row carries an `in_use` flag (false when nothing references it). */
+        /** GET — sort_order-ordered list (falls back to name), each row carrying `in_use`. */
         get: operations["getEscalationReasons"];
         put?: never;
         post: operations["postEscalationReasons"];
@@ -10995,6 +14000,60 @@ export interface paths {
         post?: never;
         /** DELETE — 409 when still referenced (only if a source is declared). */
         delete: operations["deleteEscalationReasonsId"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/escalation-reasons/reorder": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * PUT /reorder  body: { ids: [.
+         * @description ..] } — persist the drag order as sort_order.
+         */
+        put: operations["putEscalationReasonsReorder"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/whatsapp-phone-numbers": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** GET /whatsapp-phone-numbers — active sender numbers as {value,label} options. */
+        get: operations["getWhatsappPhoneNumbers"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/whatsapp-templates": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** GET /whatsapp-templates — approved templates incl. components (the {{n}} slots). */
+        get: operations["getWhatsappTemplates"];
+        put?: never;
+        post?: never;
+        delete?: never;
         options?: never;
         head?: never;
         patch?: never;
@@ -11070,40 +14129,6 @@ export interface paths {
          *     lookup options for sync-step config (value + label only; never credentials).
          */
         get: operations["getPlanningConnections"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/whatsapp-phone-numbers": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** GET /whatsapp-phone-numbers — active sender numbers as {value,label} options. */
-        get: operations["getWhatsappPhoneNumbers"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/whatsapp-templates": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** GET /whatsapp-templates — approved templates incl. components (the {{n}} slots). */
-        get: operations["getWhatsappTemplates"];
         put?: never;
         post?: never;
         delete?: never;
@@ -11506,6 +14531,748 @@ export interface operations {
             };
         };
     };
+    getApplications: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    postApplications: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /**
+                     * @description Must be a valid UUID. Must match an existing stored value.
+                     * @example 6ff8f7f6-1eb3-3525-be4a-3932c805afed
+                     */
+                    candidate_id: string;
+                    /**
+                     * @description Must be a valid UUID. Must match an existing stored value.
+                     * @example 6b72fe4a-5b40-307c-bc24-f79acf9a1bb9
+                     */
+                    vacancy_id?: string | null;
+                    /**
+                     * @description Must be a valid UUID.
+                     * @example 977e5426-8d13-3824-86aa-b092f8ae52c5
+                     */
+                    owner_id?: string | null;
+                    /**
+                     * @description Must be a valid UUID. Must match an existing stored value.
+                     * @example d6fa562b-acd5-35ff-babb-d11194d3737b
+                     */
+                    application_stage_id?: string | null;
+                    /**
+                     * @description Must not be greater than 64 characters.
+                     * @example d
+                     */
+                    source?: string | null;
+                    /** @example null */
+                    custom_fields?: Record<string, never> | null;
+                };
+            };
+        };
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    getApplicationsStats: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    getApplicationsApplication: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The application.
+                 * @example architecto
+                 */
+                application: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    putApplicationsApplication: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The application.
+                 * @example architecto
+                 */
+                application: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": {
+                    /**
+                     * @description Must not be greater than 64 characters.
+                     * @example b
+                     */
+                    source?: string | null;
+                    /**
+                     * @description Must match an existing stored value.
+                     * @example architecto
+                     */
+                    phase_key?: string;
+                    /**
+                     * @description Must be a valid UUID. Must match an existing stored value.
+                     * @example a4855dc5-0acb-33c3-b921-f4291f719ca0
+                     */
+                    application_stage_id?: string | null;
+                    /**
+                     * @description Must be a valid UUID. Must match an existing stored value.
+                     * @example c90237e9-ced5-3af6-88ea-84aeaa148878
+                     */
+                    rejection_reason_id?: string | null;
+                    /**
+                     * @description Must be a valid UUID. Must match an existing stored value.
+                     * @example a1a0a47d-e8c3-3cf0-8e6e-c1ff9dca5d1f
+                     */
+                    vacancy_id?: string | null;
+                    /**
+                     * @description Must be a valid UUID.
+                     * @example 21c4122b-d554-3723-966c-6d723ea5293f
+                     */
+                    owner_id?: string | null;
+                    /**
+                     * @description Must be between 0 and 100.
+                     * @example 1
+                     */
+                    match_score?: number;
+                    /** @example null */
+                    match_criteria?: {
+                        /** @example architecto */
+                        key?: string | null;
+                        /** @example architecto */
+                        label?: string | null;
+                        /**
+                         * @description Must be between 0 and 100.
+                         * @example 1
+                         */
+                        score?: number | null;
+                        /** @example 16 */
+                        weight?: number;
+                        /** @example false */
+                        hard?: boolean;
+                        /** @example architecto */
+                        note?: string | null;
+                    }[];
+                    /** @example null */
+                    custom_fields?: Record<string, never> | null;
+                };
+            };
+        };
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    deleteApplicationsApplication: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The application.
+                 * @example architecto
+                 */
+                application: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /**
+                     * @description Must not be greater than 1000 characters.
+                     * @example b
+                     */
+                    reason: string;
+                };
+            };
+        };
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    getApplicationsApplicationProposals: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The application.
+                 * @example architecto
+                 */
+                application: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    postApplicationsApplicationReject: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The application.
+                 * @example architecto
+                 */
+                application: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /**
+                     * @description Must be a valid UUID. Must match an existing stored value.
+                     * @example 6ff8f7f6-1eb3-3525-be4a-3932c805afed
+                     */
+                    reason_id: string;
+                    /** @example architecto */
+                    note?: string | null;
+                    /**
+                     * @example whatsapp
+                     * @enum {string|null}
+                     */
+                    channel?: "email" | "whatsapp" | null;
+                    /** @example architecto */
+                    message?: string | null;
+                };
+            };
+        };
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    postApplicationsApplicationScore: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The application.
+                 * @example architecto
+                 */
+                application: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    postApplicationsApplicationNotes: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The application.
+                 * @example architecto
+                 */
+                application: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /**
+                     * @description NOTE-TYPES-2: validate against the TENANT lookup (note_types), not a
+                     *     hardcoded list — a tenant/entity-scoped type must not 422 (mirrors the
+                     *     candidate notes NOTES-3 fix). NOTES-3-GAP-1: this was a BARE exists rule
+                     *     (no entity filter), so a 'customer'/'opportunity'-only slug validated fine
+                     *     on an application note — scoped to entity=application (plus legacy
+                     *     entity=NULL rows), the same way candidate/customer/opportunity notes do it.
+                     * @example architecto
+                     */
+                    type?: string;
+                    /**
+                     * @description Must not be greater than 255 characters.
+                     * @example n
+                     */
+                    title?: string | null;
+                    /**
+                     * @description Must not be greater than 10000 characters.
+                     * @example g
+                     */
+                    body: string;
+                    /**
+                     * @description NOTE-TAAL-1: optional per-note language code for FE spellcheck + AI. Must not be greater than 8 characters.
+                     * @example zmiyvdlj
+                     */
+                    language?: string | null;
+                };
+            };
+        };
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    patchApplicationsApplicationNotesNote: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The application.
+                 * @example architecto
+                 */
+                application: string;
+                /**
+                 * @description The note.
+                 * @example architecto
+                 */
+                note: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": {
+                    /** @example architecto */
+                    type?: string;
+                    /**
+                     * @description Must not be greater than 255 characters.
+                     * @example n
+                     */
+                    title?: string | null;
+                    /**
+                     * @description Must not be greater than 10000 characters.
+                     * @example g
+                     */
+                    body?: string;
+                    /**
+                     * @description Must not be greater than 8 characters.
+                     * @example zmiyvdlj
+                     */
+                    language?: string | null;
+                };
+            };
+        };
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    postApplicationsApplicationPropose: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The application.
+                 * @example architecto
+                 */
+                application: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /**
+                     * @description Must be a valid UUID. Must match an existing stored value.
+                     * @example 6ff8f7f6-1eb3-3525-be4a-3932c805afed
+                     */
+                    contact_id: string;
+                    /**
+                     * @description Must not be greater than 64 characters.
+                     * @example g
+                     */
+                    cv_variant?: string | null;
+                    /**
+                     * @description Must not be greater than 5000 characters.
+                     * @example z
+                     */
+                    subject?: string | null;
+                    /**
+                     * @description Must not be greater than 5000 characters.
+                     * @example m
+                     */
+                    body?: string | null;
+                };
+            };
+        };
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    postProposalsProposalRevoke: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The proposal.
+                 * @example architecto
+                 */
+                proposal: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    postApplicationsApplicationStopInterview: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The application.
+                 * @example architecto
+                 */
+                application: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    postApplicationsApplicationResumeInterview: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The application.
+                 * @example architecto
+                 */
+                application: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    postApplicationsApplicationInterview: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The application.
+                 * @example architecto
+                 */
+                application: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /**
+                     * @description Must be a valid UUID. Must match an existing stored value.
+                     * @example 6ff8f7f6-1eb3-3525-be4a-3932c805afed
+                     */
+                    agent_id: string;
+                };
+            };
+        };
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    postVacanciesVacancyStartInterviews: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The vacancy.
+                 * @example architecto
+                 */
+                vacancy: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    patchApplicationsApplicationRejection: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The application.
+                 * @example architecto
+                 */
+                application: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": {
+                    /**
+                     * @description Must be a valid UUID. Must match an existing stored value.
+                     * @example 6ff8f7f6-1eb3-3525-be4a-3932c805afed
+                     */
+                    reason_id?: string;
+                    /**
+                     * @description Must not be greater than 2000 characters.
+                     * @example g
+                     */
+                    note?: string | null;
+                };
+            };
+        };
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    postApplicationsApplicationRestore: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The application.
+                 * @example architecto
+                 */
+                application: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
     getAppointments: {
         parameters: {
             query?: never;
@@ -11532,12 +15299,12 @@ export interface operations {
                     location_id?: string;
                     /**
                      * @description Must be a valid date.
-                     * @example 2026-07-27T21:50:38
+                     * @example 2026-08-13T18:23:29
                      */
                     from?: string;
                     /**
                      * @description Must be a valid date.
-                     * @example 2026-07-27T21:50:38
+                     * @example 2026-08-13T18:23:29
                      */
                     to?: string;
                     /**
@@ -11575,96 +15342,14 @@ export interface operations {
             };
             cookie?: never;
         };
-        requestBody?: never;
-        responses: {
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        /** @example Unauthenticated. */
-                        message?: string;
-                    };
-                };
-            };
-        };
-    };
-    postCandidatesCandidateAppointments: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /**
-                 * @description The candidate.
-                 * @example architecto
-                 */
-                candidate: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
+        requestBody?: {
             content: {
                 "application/json": {
                     /**
-                     * @description Must not be greater than 64 characters.
-                     * @example b
-                     */
-                    type?: string;
-                    /**
-                     * @description Must be a valid date.
-                     * @example 2026-07-27T21:50:38
-                     */
-                    scheduled_at: string;
-                    /**
-                     * @description Must be at least 0. Must not be greater than 1440.
-                     * @example 22
-                     */
-                    duration_min?: number | null;
-                    /**
-                     * @example phone
-                     * @enum {string|null}
-                     */
-                    modality?: "office" | "remote" | "phone" | null;
-                    /**
-                     * @description Must match an existing stored value.
-                     * @example architecto
-                     */
-                    appointment_location?: string | null;
-                    /**
-                     * @description Must be a valid UUID. Must match an existing stored value.
-                     * @example a4855dc5-0acb-33c3-b921-f4291f719ca0
+                     * @description Must be a valid UUID.
+                     * @example 6ff8f7f6-1eb3-3525-be4a-3932c805afed
                      */
                     application_id?: string | null;
-                    /**
-                     * @description Must be a valid UUID. Must match an existing stored value.
-                     * @example c90237e9-ced5-3af6-88ea-84aeaa148878
-                     */
-                    vacancy_id?: string | null;
-                    /**
-                     * @description Must be a valid UUID. Must match an existing stored value.
-                     * @example a1a0a47d-e8c3-3cf0-8e6e-c1ff9dca5d1f
-                     */
-                    location_id?: string | null;
-                    /**
-                     * @example no_show
-                     * @enum {string}
-                     */
-                    status?: "planned" | "completed" | "no_show" | "cancelled";
-                    /**
-                     * @description Must not be greater than 120 characters.
-                     * @example v
-                     */
-                    source?: string | null;
-                    /** @example architecto */
-                    outcome?: string | null;
-                    /** @example architecto */
-                    notes?: string | null;
-                    /**
-                     * @description Must be a valid UUID.
-                     * @example a4855dc5-0acb-33c3-b921-f4291f719ca0
-                     */
-                    owner_id?: string | null;
                 };
             };
         };
@@ -11715,16 +15400,11 @@ export interface operations {
             };
         };
     };
-    patchCandidatesCandidateAppointmentsAppointment: {
+    deleteAppointmentsAppointment: {
         parameters: {
             query?: never;
             header?: never;
             path: {
-                /**
-                 * @description The candidate.
-                 * @example architecto
-                 */
-                candidate: string;
                 /**
                  * @description The appointment.
                  * @example architecto
@@ -11733,71 +15413,275 @@ export interface operations {
             };
             cookie?: never;
         };
+        requestBody?: never;
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    getAppointmentTypes: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    postAppointmentTypes: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    getAppointmentLocations: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    postAppointmentLocations: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    putAppointmentTypesReorder: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
         requestBody?: {
             content: {
                 "application/json": {
                     /**
-                     * @description Must not be greater than 64 characters.
-                     * @example b
-                     */
-                    type?: string;
-                    /**
-                     * @description Must be a valid date.
-                     * @example 2026-07-27T21:50:38
-                     */
-                    scheduled_at?: string;
-                    /**
-                     * @description Must be at least 0. Must not be greater than 1440.
-                     * @example 22
-                     */
-                    duration_min?: number | null;
-                    /**
-                     * @example office
-                     * @enum {string|null}
-                     */
-                    modality?: "office" | "remote" | "phone" | null;
-                    /**
-                     * @description Must match an existing stored value.
-                     * @example architecto
-                     */
-                    appointment_location?: string | null;
-                    /**
-                     * @description Must be a valid UUID. Must match an existing stored value.
-                     * @example a4855dc5-0acb-33c3-b921-f4291f719ca0
-                     */
-                    application_id?: string | null;
-                    /**
-                     * @description Must be a valid UUID. Must match an existing stored value.
-                     * @example c90237e9-ced5-3af6-88ea-84aeaa148878
-                     */
-                    vacancy_id?: string | null;
-                    /**
-                     * @description Must be a valid UUID. Must match an existing stored value.
-                     * @example a1a0a47d-e8c3-3cf0-8e6e-c1ff9dca5d1f
-                     */
-                    location_id?: string | null;
-                    /**
-                     * @example planned
-                     * @enum {string}
-                     */
-                    status?: "planned" | "completed" | "no_show" | "cancelled";
-                    /**
-                     * @description Must not be greater than 120 characters.
-                     * @example v
-                     */
-                    source?: string | null;
-                    /** @example architecto */
-                    outcome?: string | null;
-                    /** @example architecto */
-                    notes?: string | null;
-                    /**
                      * @description Must be a valid UUID.
-                     * @example a4855dc5-0acb-33c3-b921-f4291f719ca0
+                     * @example [
+                     *       "6ff8f7f6-1eb3-3525-be4a-3932c805afed"
+                     *     ]
                      */
-                    owner_id?: string | null;
+                    ids?: string[];
                 };
             };
         };
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    putAppointmentTypesId: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The ID of the appointment type.
+                 * @example BcECdBDA-CdED-bFEA-CbCE-BcCdeBfbbebc
+                 */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    deleteAppointmentTypesId: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The ID of the appointment type.
+                 * @example BcECdBDA-CdED-bFEA-CbCE-BcCdeBfbbebc
+                 */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    putAppointmentLocationsReorder: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": {
+                    /**
+                     * @description Must be a valid UUID.
+                     * @example [
+                     *       "6ff8f7f6-1eb3-3525-be4a-3932c805afed"
+                     *     ]
+                     */
+                    ids?: string[];
+                };
+            };
+        };
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    putAppointmentLocationsId: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The ID of the appointment location.
+                 * @example BcECdBDA-CdED-bFEA-CbCE-BcCdeBfbbebc
+                 */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    deleteAppointmentLocationsId: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The ID of the appointment location.
+                 * @example BcECdBDA-CdED-bFEA-CbCE-BcCdeBfbbebc
+                 */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
         responses: {
             401: {
                 headers: {
@@ -11832,7 +15716,7 @@ export interface operations {
                      */
                     ids?: string[];
                     /**
-                     * @example shiftmanager
+                     * @example helloflex
                      * @enum {string}
                      */
                     system: "helloflex" | "shiftmanager";
@@ -11872,11 +15756,11 @@ export interface operations {
             content: {
                 "application/json": {
                     /**
-                     * @example shiftmanager
+                     * @example helloflex
                      * @enum {string}
                      */
                     system: "helloflex" | "shiftmanager";
-                    /** @example true */
+                    /** @example false */
                     include_children?: boolean;
                 };
             };
@@ -11889,50 +15773,6 @@ export interface operations {
                 content: {
                     "application/json": {
                         /** @example The route api/sync/candidates|customers|locations|departments|contacts|matches/architecto could not be found. */
-                        message?: string;
-                    };
-                };
-            };
-        };
-    };
-    getNotifications: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        /** @example Unauthenticated. */
-                        message?: string;
-                    };
-                };
-            };
-        };
-    };
-    postNotificationsSeen: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        /** @example Unauthenticated. */
                         message?: string;
                     };
                 };
@@ -12007,7 +15847,7 @@ export interface operations {
             path: {
                 /**
                  * @description The ID of the tenant.
-                 * @example demo
+                 * @example aenf
                  */
                 id: string;
             };
@@ -12035,7 +15875,7 @@ export interface operations {
             path: {
                 /**
                  * @description The ID of the tenant.
-                 * @example demo
+                 * @example aenf
                  */
                 id: string;
             };
@@ -12121,7 +15961,7 @@ export interface operations {
             path: {
                 /**
                  * @description The tenant.
-                 * @example demo
+                 * @example aenf
                  */
                 tenant: string;
             };
@@ -12132,7 +15972,7 @@ export interface operations {
                 "application/json": {
                     /**
                      * @description Must be a valid date in the format <code>Y-m</code>.
-                     * @example 2026-07
+                     * @example 2026-08
                      */
                     month?: string;
                 };
@@ -12233,87 +16073,20 @@ export interface operations {
             };
         };
     };
-    getUsersId: {
+    getUsersUserId: {
         parameters: {
             query?: never;
             header?: never;
             path: {
                 /**
                  * @description The ID of the user.
-                 * @example 019f6f5e-4418-7136-af8c-00cf6071e88b
-                 */
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        /** @example Unauthenticated. */
-                        message?: string;
-                    };
-                };
-            };
-        };
-    };
-    deleteUsersId: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /**
-                 * @description The ID of the user.
-                 * @example 019f6f5e-4418-7136-af8c-00cf6071e88b
-                 */
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        /** @example Unauthenticated. */
-                        message?: string;
-                    };
-                };
-            };
-        };
-    };
-    putUsersUserIdRoles: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /**
-                 * @description The ID of the user.
-                 * @example 019f6f5e-4418-7136-af8c-00cf6071e88b
+                 * @example 019ffa63-0452-70b5-b76d-9c87f55a834f
                  */
                 user_id: string;
             };
             cookie?: never;
         };
-        requestBody: {
-            content: {
-                "application/json": {
-                    /**
-                     * @example [
-                     *       "architecto"
-                     *     ]
-                     */
-                    roles: string[];
-                };
-            };
-        };
+        requestBody?: never;
         responses: {
             401: {
                 headers: {
@@ -12335,7 +16108,7 @@ export interface operations {
             path: {
                 /**
                  * @description The ID of the user.
-                 * @example 019f6f5e-4418-7136-af8c-00cf6071e88b
+                 * @example 019ffa63-0452-70b5-b76d-9c87f55a834f
                  */
                 user_id: string;
             };
@@ -12378,6 +16151,73 @@ export interface operations {
                      * @example null
                      */
                     ui_preferences?: Record<string, never> | null;
+                };
+            };
+        };
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    deleteUsersUserId: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The ID of the user.
+                 * @example 019ffa63-0452-70b5-b76d-9c87f55a834f
+                 */
+                user_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    putUsersUserIdRoles: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The ID of the user.
+                 * @example 019ffa63-0452-70b5-b76d-9c87f55a834f
+                 */
+                user_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /**
+                     * @example [
+                     *       "architecto"
+                     *     ]
+                     */
+                    roles: string[];
                 };
             };
         };
@@ -12653,7 +16493,7 @@ export interface operations {
             path: {
                 /**
                  * @description The ID of the user.
-                 * @example 019f6f5e-4418-7136-af8c-00cf6071e88b
+                 * @example 019ffa63-0452-70b5-b76d-9c87f55a834f
                  */
                 id: string;
             };
@@ -12681,7 +16521,7 @@ export interface operations {
             path: {
                 /**
                  * @description The ID of the user.
-                 * @example 019f6f5e-4418-7136-af8c-00cf6071e88b
+                 * @example 019ffa63-0452-70b5-b76d-9c87f55a834f
                  */
                 id: string;
             };
@@ -12854,7 +16694,7 @@ export interface operations {
                     password: string;
                     /**
                      * @description anonymize (default, safe) keeps a non-identifiable shell; delete physically removes.
-                     * @example delete
+                     * @example anonymize
                      * @enum {string}
                      */
                     mode?: "anonymize" | "delete";
@@ -12971,6 +16811,363 @@ export interface operations {
             cookie?: never;
         };
         requestBody?: never;
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    getExportsContactsCsv: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    getExportsLocationsCsv: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    getExportsDepartmentsCsv: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    getExportsMatchesCsv: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    getExportsTasksCsv: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    getExportsOpportunitiesCsv: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    getExportsOutreachCsv: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    getImportsTemplates: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    getImportsVacanciesTemplateCsv: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    getImportsEntityTemplateCsv: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @example architecto */
+                entity: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    postImportsVacanciesDryRun: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "multipart/form-data": {
+                    /**
+                     * Format: binary
+                     * @description Must be a file. Must not be greater than 5120 kilobytes.
+                     */
+                    file: string;
+                };
+            };
+        };
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    postImportsVacancies: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "multipart/form-data": {
+                    /**
+                     * Format: binary
+                     * @description Must be a file. Must not be greater than 5120 kilobytes.
+                     */
+                    file: string;
+                };
+            };
+        };
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    postImportsEntityDryRun: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @example architecto */
+                entity: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "multipart/form-data": {
+                    /**
+                     * Format: binary
+                     * @description Must be a file. Must not be greater than 5120 kilobytes.
+                     */
+                    file: string;
+                };
+            };
+        };
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    postImportsEntity: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @example architecto */
+                entity: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "multipart/form-data": {
+                    /**
+                     * Format: binary
+                     * @description Must be a file. Must not be greater than 5120 kilobytes.
+                     */
+                    file: string;
+                };
+            };
+        };
         responses: {
             401: {
                 headers: {
@@ -13172,7 +17369,7 @@ export interface operations {
                     /** @example architecto */
                     webhook_verify_token?: string | null;
                     /**
-                     * @example meta
+                     * @example 360dialog
                      * @enum {string}
                      */
                     provider?: "meta" | "360dialog";
@@ -13205,7 +17402,7 @@ export interface operations {
             path: {
                 /**
                  * @description The ID of the whatsappConnection.
-                 * @example 019f6f5e-5756-73e2-ac73-a51b2eed7356
+                 * @example 019ffbe8-a821-7218-a25d-ccce8d51f818
                  */
                 whatsappConnection_id: string;
             };
@@ -13233,7 +17430,7 @@ export interface operations {
             path: {
                 /**
                  * @description The ID of the whatsappConnection.
-                 * @example 019f6f5e-5756-73e2-ac73-a51b2eed7356
+                 * @example 019ffbe8-a821-7218-a25d-ccce8d51f818
                  */
                 whatsappConnection_id: string;
             };
@@ -13249,7 +17446,7 @@ export interface operations {
                     /** @example architecto */
                     webhook_verify_token?: string;
                     /**
-                     * @example 360dialog
+                     * @example meta
                      * @enum {string}
                      */
                     provider?: "meta" | "360dialog";
@@ -13277,7 +17474,7 @@ export interface operations {
             path: {
                 /**
                  * @description The ID of the whatsappConnection.
-                 * @example 019f6f5e-5756-73e2-ac73-a51b2eed7356
+                 * @example 019ffbe8-a821-7218-a25d-ccce8d51f818
                  */
                 whatsappConnection_id: string;
             };
@@ -13305,7 +17502,7 @@ export interface operations {
             path: {
                 /**
                  * @description The ID of the whatsappConnection.
-                 * @example 019f6f5e-5756-73e2-ac73-a51b2eed7356
+                 * @example 019ffbe8-a821-7218-a25d-ccce8d51f818
                  */
                 whatsappConnection_id: string;
             };
@@ -13333,7 +17530,7 @@ export interface operations {
             path: {
                 /**
                  * @description The ID of the whatsappConnection.
-                 * @example 019f6f5e-5756-73e2-ac73-a51b2eed7356
+                 * @example 019ffbe8-a821-7218-a25d-ccce8d51f818
                  */
                 whatsappConnection_id: string;
             };
@@ -13361,7 +17558,7 @@ export interface operations {
             path: {
                 /**
                  * @description The ID of the whatsappConnection.
-                 * @example 019f6f5e-5756-73e2-ac73-a51b2eed7356
+                 * @example 019ffbe8-a821-7218-a25d-ccce8d51f818
                  */
                 whatsappConnection_id: string;
             };
@@ -13382,11 +17579,22 @@ export interface operations {
             };
         };
     };
-    getSettingsMessagingLimits: {
+    getWhatsappWhatsappConnectionIdTemplatesTemplate: {
         parameters: {
             query?: never;
             header?: never;
-            path?: never;
+            path: {
+                /**
+                 * @description The ID of the whatsappConnection.
+                 * @example 019ffbe8-a821-7218-a25d-ccce8d51f818
+                 */
+                whatsappConnection_id: string;
+                /**
+                 * @description The template.
+                 * @example architecto
+                 */
+                template: string;
+            };
             cookie?: never;
         };
         requestBody?: never;
@@ -13404,39 +17612,22 @@ export interface operations {
             };
         };
     };
-    putSettingsMessagingLimits: {
+    getWhatsappWhatsappConnectionIdPhoneNumbersPhoneNumber: {
         parameters: {
             query?: never;
             header?: never;
-            path?: never;
+            path: {
+                /**
+                 * @description The ID of the whatsappConnection.
+                 * @example 019ffbe8-a821-7218-a25d-ccce8d51f818
+                 */
+                whatsappConnection_id: string;
+                /** @example architecto */
+                phoneNumber: string;
+            };
             cookie?: never;
         };
-        requestBody: {
-            content: {
-                "application/json": {
-                    /**
-                     * @description Must have at least 1 items.
-                     * @example [
-                     *       []
-                     *     ]
-                     */
-                    lanes: {
-                        /** @example architecto */
-                        lane: string;
-                        /**
-                         * @description Must be at least 0.
-                         * @example 39
-                         */
-                        per_day: number;
-                        /**
-                         * @description Must be at least 0.
-                         * @example 84
-                         */
-                        per_week: number;
-                    }[];
-                };
-            };
-        };
+        requestBody?: never;
         responses: {
             401: {
                 headers: {
@@ -13638,7 +17829,39 @@ export interface operations {
             path?: never;
             cookie?: never;
         };
-        requestBody?: never;
+        requestBody?: {
+            content: {
+                "application/json": {
+                    /**
+                     * @description Must be a valid UUID.
+                     * @example 6ff8f7f6-1eb3-3525-be4a-3932c805afed
+                     */
+                    candidate_id?: string;
+                    /**
+                     * @description Must be a valid UUID.
+                     * @example 6b72fe4a-5b40-307c-bc24-f79acf9a1bb9
+                     */
+                    application_id?: string;
+                    /**
+                     * @description Must not be greater than 64 characters.
+                     * @example m
+                     */
+                    status?: string;
+                    /** @example false */
+                    escalated?: boolean;
+                    /**
+                     * @description Must not be greater than 120 characters.
+                     * @example i
+                     */
+                    search?: string;
+                    /**
+                     * @description Must be at least 1.
+                     * @example 43
+                     */
+                    per_page?: number;
+                };
+            };
+        };
         responses: {
             401: {
                 headers: {
@@ -13810,7 +18033,7 @@ export interface operations {
                     /** @example architecto */
                     context_wamid?: string | null;
                     /**
-                     * @example outbound
+                     * @example inbound
                      * @enum {string}
                      */
                     direction: "inbound" | "outbound";
@@ -13822,9 +18045,14 @@ export interface operations {
                     message_content?: string;
                     /**
                      * @description Must be a valid date.
-                     * @example 2026-07-27T21:50:39
+                     * @example 2026-08-13T18:23:30
                      */
                     sent_at?: string;
+                    /**
+                     * @description WA-SEND-TRANSPORT-1: the composer may name the sending number explicitly.
+                     * @example architecto
+                     */
+                    phone_number_id?: string | null;
                     /**
                      * @description MSG-PURPOSE-1: waarom dit bericht bestaat — slug uit de tenant-lookup. Must match an existing stored value.
                      * @example architecto
@@ -13864,7 +18092,7 @@ export interface operations {
             content: {
                 "application/json": {
                     /**
-                     * @example read
+                     * @example delivered
                      * @enum {string}
                      */
                     status: "delivered" | "read";
@@ -13929,6 +18157,393 @@ export interface operations {
             };
         };
     };
+    getOutreachCampaigns: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    postOutreachCampaigns: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /**
+                     * @description Must not be greater than 255 characters.
+                     * @example b
+                     */
+                    name: string;
+                    /**
+                     * @example call
+                     * @enum {string}
+                     */
+                    channel: "call" | "email" | "whatsapp";
+                    /**
+                     * @example active
+                     * @enum {string}
+                     */
+                    status?: "draft" | "active" | "done";
+                    /**
+                     * @description Must be a valid UUID. Must match an existing stored value.
+                     * @example a4855dc5-0acb-33c3-b921-f4291f719ca0
+                     */
+                    source_pool_id?: string | null;
+                    /**
+                     * @description Must be a valid UUID. Must match an existing stored value.
+                     * @example c90237e9-ced5-3af6-88ea-84aeaa148878
+                     */
+                    from_pool_id?: string | null;
+                    /**
+                     * @description Must be a valid UUID.
+                     * @example a1a0a47d-e8c3-3cf0-8e6e-c1ff9dca5d1f
+                     */
+                    owner_id?: string | null;
+                    /** @example null */
+                    custom_fields?: Record<string, never> | null;
+                };
+            };
+        };
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    getOutreachCampaignsCampaign: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @example architecto */
+                campaign: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    putOutreachCampaignsCampaign: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @example architecto */
+                campaign: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": {
+                    /**
+                     * @description Must not be greater than 255 characters.
+                     * @example b
+                     */
+                    name?: string;
+                    /**
+                     * @example email
+                     * @enum {string}
+                     */
+                    channel?: "call" | "email" | "whatsapp";
+                    /**
+                     * @example done
+                     * @enum {string}
+                     */
+                    status?: "draft" | "active" | "done";
+                    /**
+                     * @description Must be a valid UUID. Must match an existing stored value.
+                     * @example a4855dc5-0acb-33c3-b921-f4291f719ca0
+                     */
+                    source_pool_id?: string | null;
+                    /**
+                     * @description Must be a valid UUID.
+                     * @example c90237e9-ced5-3af6-88ea-84aeaa148878
+                     */
+                    owner_id?: string | null;
+                    /** @example null */
+                    custom_fields?: Record<string, never> | null;
+                };
+            };
+        };
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    deleteOutreachCampaignsCampaign: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @example architecto */
+                campaign: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    getOutreachCampaignsCampaignStats: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @example architecto */
+                campaign: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    getOutreachCampaignsCampaignActivity: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @example architecto */
+                campaign: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    postOutreachCampaignsCampaignGenerate: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @example architecto */
+                campaign: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": {
+                    /**
+                     * @description Must be a valid UUID. Must match an existing stored value.
+                     * @example 6ff8f7f6-1eb3-3525-be4a-3932c805afed
+                     */
+                    pool_id?: string | null;
+                };
+            };
+        };
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    postOutreachCampaignsCampaignTargetsAssign: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @example architecto */
+                campaign: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": {
+                    /**
+                     * @description Must be a valid UUID.
+                     * @example [
+                     *       "6ff8f7f6-1eb3-3525-be4a-3932c805afed"
+                     *     ]
+                     */
+                    target_ids?: string[];
+                    /**
+                     * @description Must be a valid UUID.
+                     * @example [
+                     *       "6b72fe4a-5b40-307c-bc24-f79acf9a1bb9"
+                     *     ]
+                     */
+                    recruiter_ids?: string[];
+                };
+            };
+        };
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    patchOutreachTargetsTarget: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @example architecto */
+                target: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /**
+                     * @example skipped
+                     * @enum {string}
+                     */
+                    status: "todo" | "contacted" | "skipped" | "answered";
+                    /**
+                     * @description Must match an existing stored value.
+                     * @example architecto
+                     */
+                    outcome?: string | null;
+                    /**
+                     * @description Must not be greater than 2000 characters.
+                     * @example n
+                     */
+                    note?: string | null;
+                };
+            };
+        };
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    postOutreachCampaignsCampaignRestore: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @example architecto */
+                campaign: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
     postCandidateAuthLogin: {
         parameters: {
             query?: never;
@@ -13958,7 +18573,7 @@ export interface operations {
                     "application/json": {
                         /** @example Te veel aanvragen. Wacht even voor je opnieuw probeert. */
                         message?: string;
-                        /** @example 60 */
+                        /** @example 59 */
                         retry_after?: number;
                     };
                 };
@@ -13994,7 +18609,7 @@ export interface operations {
                     "application/json": {
                         /** @example Te veel aanvragen. Wacht even voor je opnieuw probeert. */
                         message?: string;
-                        /** @example 60 */
+                        /** @example 59 */
                         retry_after?: number;
                     };
                 };
@@ -14150,7 +18765,7 @@ export interface operations {
                     message_id?: string | null;
                     /**
                      * @description Must be a valid date.
-                     * @example 2026-07-27T21:50:37
+                     * @example 2026-08-13T18:23:27
                      */
                     sent_at?: string | null;
                 };
@@ -14315,7 +18930,7 @@ export interface operations {
             content: {
                 "application/json": {
                     /**
-                     * @example inbound
+                     * @example out
                      * @enum {string}
                      */
                     direction?: "in" | "out" | "inbound" | "outbound";
@@ -14334,6 +18949,11 @@ export interface operations {
                      * @example 10b3f4c6-2aaf-32e1-a52d-6bf43d9ddd70
                      */
                     entity_id?: string;
+                    /**
+                     * @description Must be at least 1.
+                     * @example 13
+                     */
+                    per_page?: number;
                 };
             };
         };
@@ -14364,7 +18984,22 @@ export interface operations {
             };
             cookie?: never;
         };
-        requestBody?: never;
+        requestBody?: {
+            content: {
+                "application/json": {
+                    /**
+                     * @description Must not be greater than 64 characters.
+                     * @example b
+                     */
+                    entity_type?: string;
+                    /**
+                     * @description Must be a valid UUID.
+                     * @example a4855dc5-0acb-33c3-b921-f4291f719ca0
+                     */
+                    entity_id?: string;
+                };
+            };
+        };
         responses: {
             401: {
                 headers: {
@@ -14430,7 +19065,7 @@ export interface operations {
                     "application/json": {
                         /** @example Te veel aanvragen. Wacht even voor je opnieuw probeert. */
                         message?: string;
-                        /** @example 60 */
+                        /** @example 59 */
                         retry_after?: number;
                     };
                 };
@@ -14872,7 +19507,17 @@ export interface operations {
             path?: never;
             cookie?: never;
         };
-        requestBody?: never;
+        requestBody?: {
+            content: {
+                "application/json": {
+                    /**
+                     * @description Must not be greater than 120 characters.
+                     * @example b
+                     */
+                    queue?: string;
+                };
+            };
+        };
         responses: {
             401: {
                 headers: {
@@ -14937,6 +19582,78 @@ export interface operations {
             };
         };
     };
+    getAdminJobsQueues: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    postAdminJobsQueuesLanePause: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @example architecto */
+                lane: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    postAdminJobsQueuesLaneResume: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @example architecto */
+                lane: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
     deleteAdminJobsId: {
         parameters: {
             query?: never;
@@ -14972,7 +19689,50 @@ export interface operations {
             path?: never;
             cookie?: never;
         };
-        requestBody?: never;
+        requestBody?: {
+            content: {
+                "application/json": {
+                    /**
+                     * @description Must not be greater than 100 characters.
+                     * @example b
+                     */
+                    subject_type?: string | null;
+                    /**
+                     * @description CHANGELOG-OVERAL-1 (Danny 13-08): per-object drilldown — the drawer
+                     *     changelog icon narrows to ONE record's history. Only meaningful
+                     *     combined with subject_type (an id alone spans morph types). Must be a valid UUID.
+                     * @example a4855dc5-0acb-33c3-b921-f4291f719ca0
+                     */
+                    subject_id?: string | null;
+                    /**
+                     * @description Must be a valid UUID.
+                     * @example c90237e9-ced5-3af6-88ea-84aeaa148878
+                     */
+                    causer_id?: string | null;
+                    /** @example null */
+                    event?: string | null;
+                    /**
+                     * @description Must not be greater than 100 characters.
+                     * @example i
+                     */
+                    log_name?: string | null;
+                    /**
+                     * @description Must be a valid date.
+                     * @example 2026-08-13T18:23:28
+                     */
+                    date_from?: string | null;
+                    /**
+                     * @description Must be a valid date. Must be a date after or equal to <code>date_from</code>.
+                     * @example 2052-09-05
+                     */
+                    date_to?: string | null;
+                    /** @example false */
+                    include_system?: boolean | null;
+                    /** @example 16 */
+                    per_page?: number | null;
+                };
+            };
+        };
         responses: {
             401: {
                 headers: {
@@ -15459,6 +20219,35 @@ export interface operations {
             };
         };
     };
+    postAuthMfaRecoveryCodes: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /** @example architecto */
+                    code: string;
+                };
+            };
+        };
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
     getVacanciesVacancyNotes: {
         parameters: {
             query?: never;
@@ -15513,6 +20302,18 @@ export interface operations {
                      * @example n
                      */
                     text?: string | null;
+                    /**
+                     * @description NOTE-TYPES-2: validate against the TENANT lookup (note_types), scoped to
+                     *     THIS entity (plus legacy entity=NULL rows) — a bare exists rule accepted a
+                     *     slug seeded for a DIFFERENT entity before (NOTES-3-GAP-1).
+                     * @example null
+                     */
+                    type?: string | null;
+                    /**
+                     * @description NOTE-TAAL-1: optional per-note language for FE spellcheck + AI. Must not be greater than 8 characters.
+                     * @example gzmiyvdl
+                     */
+                    language?: string | null;
                 };
             };
         };
@@ -15563,88 +20364,16 @@ export interface operations {
             };
         };
     };
-    getOpportunitiesOpportunityNotes: {
+    deleteCustomersCustomerNotesNote: {
         parameters: {
             query?: never;
             header?: never;
             path: {
                 /**
-                 * @description The opportunity.
+                 * @description The customer.
                  * @example architecto
                  */
-                opportunity: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        /** @example Unauthenticated. */
-                        message?: string;
-                    };
-                };
-            };
-        };
-    };
-    postOpportunitiesOpportunityNotes: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /**
-                 * @description The opportunity.
-                 * @example architecto
-                 */
-                opportunity: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": {
-                    /**
-                     * @description Must not be greater than 5000 characters.
-                     * @example b
-                     */
-                    body: string;
-                    /**
-                     * @description NOTE-TYPES-2: validate against the TENANT lookup (note_types), not a
-                     *     hardcoded enum — a tenant/entity-scoped type must not 422.
-                     * @example null
-                     */
-                    type?: string | null;
-                };
-            };
-        };
-        responses: {
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        /** @example Unauthenticated. */
-                        message?: string;
-                    };
-                };
-            };
-        };
-    };
-    deleteOpportunitiesOpportunityNotesNote: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /**
-                 * @description The opportunity.
-                 * @example architecto
-                 */
-                opportunity: string;
+                customer: string;
                 /**
                  * @description The note.
                  * @example architecto
@@ -15668,390 +20397,21 @@ export interface operations {
             };
         };
     };
-    getOpportunityServiceTypes: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        /** @example Unauthenticated. */
-                        message?: string;
-                    };
-                };
-            };
-        };
-    };
-    postOpportunityServiceTypes: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        /** @example Unauthenticated. */
-                        message?: string;
-                    };
-                };
-            };
-        };
-    };
-    getOpportunityAgreementTypes: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        /** @example Unauthenticated. */
-                        message?: string;
-                    };
-                };
-            };
-        };
-    };
-    postOpportunityAgreementTypes: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        /** @example Unauthenticated. */
-                        message?: string;
-                    };
-                };
-            };
-        };
-    };
-    getOpportunityDealTypes: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        /** @example Unauthenticated. */
-                        message?: string;
-                    };
-                };
-            };
-        };
-    };
-    postOpportunityDealTypes: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        /** @example Unauthenticated. */
-                        message?: string;
-                    };
-                };
-            };
-        };
-    };
-    putOpportunityServiceTypesReorder: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: {
-            content: {
-                "application/json": {
-                    /**
-                     * @description Must be a valid UUID.
-                     * @example [
-                     *       "6ff8f7f6-1eb3-3525-be4a-3932c805afed"
-                     *     ]
-                     */
-                    ids?: string[];
-                };
-            };
-        };
-        responses: {
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        /** @example Unauthenticated. */
-                        message?: string;
-                    };
-                };
-            };
-        };
-    };
-    putOpportunityServiceTypesId: {
+    patchCustomersCustomerNotesNote: {
         parameters: {
             query?: never;
             header?: never;
             path: {
                 /**
-                 * @description The ID of the opportunity service type.
+                 * @description The customer.
                  * @example architecto
                  */
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        /** @example Unauthenticated. */
-                        message?: string;
-                    };
-                };
-            };
-        };
-    };
-    deleteOpportunityServiceTypesId: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
+                customer: string;
                 /**
-                 * @description The ID of the opportunity service type.
+                 * @description The note.
                  * @example architecto
                  */
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        /** @example Unauthenticated. */
-                        message?: string;
-                    };
-                };
-            };
-        };
-    };
-    putOpportunityAgreementTypesReorder: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: {
-            content: {
-                "application/json": {
-                    /**
-                     * @description Must be a valid UUID.
-                     * @example [
-                     *       "6ff8f7f6-1eb3-3525-be4a-3932c805afed"
-                     *     ]
-                     */
-                    ids?: string[];
-                };
-            };
-        };
-        responses: {
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        /** @example Unauthenticated. */
-                        message?: string;
-                    };
-                };
-            };
-        };
-    };
-    putOpportunityAgreementTypesId: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /**
-                 * @description The ID of the opportunity agreement type.
-                 * @example architecto
-                 */
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        /** @example Unauthenticated. */
-                        message?: string;
-                    };
-                };
-            };
-        };
-    };
-    deleteOpportunityAgreementTypesId: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /**
-                 * @description The ID of the opportunity agreement type.
-                 * @example architecto
-                 */
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        /** @example Unauthenticated. */
-                        message?: string;
-                    };
-                };
-            };
-        };
-    };
-    putOpportunityDealTypesReorder: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: {
-            content: {
-                "application/json": {
-                    /**
-                     * @description Must be a valid UUID.
-                     * @example [
-                     *       "6ff8f7f6-1eb3-3525-be4a-3932c805afed"
-                     *     ]
-                     */
-                    ids?: string[];
-                };
-            };
-        };
-        responses: {
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        /** @example Unauthenticated. */
-                        message?: string;
-                    };
-                };
-            };
-        };
-    };
-    putOpportunityDealTypesId: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /**
-                 * @description The ID of the opportunity deal type.
-                 * @example architecto
-                 */
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        /** @example Unauthenticated. */
-                        message?: string;
-                    };
-                };
-            };
-        };
-    };
-    deleteOpportunityDealTypesId: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /**
-                 * @description The ID of the opportunity deal type.
-                 * @example architecto
-                 */
-                id: string;
+                note: string;
             };
             cookie?: never;
         };
@@ -16192,6 +20552,55 @@ export interface operations {
             };
         };
     };
+    postConversationsStart: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /**
+                     * @description Must be a valid UUID.
+                     * @example 6ff8f7f6-1eb3-3525-be4a-3932c805afed
+                     */
+                    candidate_id: string;
+                    /** @example architecto */
+                    phone_number_id: string;
+                    /** @example architecto */
+                    template_name: string;
+                    /**
+                     * @description Optional: defaults to the template row's own language below. Must not be greater than 8 characters.
+                     * @example ngzmiyvd
+                     */
+                    language?: string;
+                    /**
+                     * @description CONV-START-AGENT-1: optional AI agent that will handle INBOUND replies on
+                     *     this thread. Validated against the TENANT's own ai_agents (the exists rule
+                     *     runs on the initialized tenant connection, §4) — an unknown or another
+                     *     bureau's agent id is a 422 here, never a silently ignored key (§7). Must be a valid UUID. Must match an existing stored value.
+                     * @example add3503c-ebff-3875-93af-b8c6a695762b
+                     */
+                    agent_id?: string | null;
+                };
+            };
+        };
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
     getHealthConnectors: {
         parameters: {
             query?: never;
@@ -16229,164 +20638,6 @@ export interface operations {
                 };
                 content: {
                     "text/plain": string;
-                };
-            };
-        };
-    };
-    getFilesTenantLogoTenant: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @example architecto */
-                tenant: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        /** @example Invalid signature. */
-                        message?: string;
-                    };
-                };
-            };
-        };
-    };
-    getFilesTenantBannerTenant: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @example architecto */
-                tenant: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        /** @example Invalid signature. */
-                        message?: string;
-                    };
-                };
-            };
-        };
-    };
-    getSettings: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        /** @example Unauthenticated. */
-                        message?: string;
-                    };
-                };
-            };
-        };
-    };
-    postSettings: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        /** @example Unauthenticated. */
-                        message?: string;
-                    };
-                };
-            };
-        };
-    };
-    postSettingsLogo: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "multipart/form-data": {
-                    /**
-                     * Format: binary
-                     * @description Must be a file. Must not be greater than 2048 kilobytes.
-                     */
-                    logo: string;
-                };
-            };
-        };
-        responses: {
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        /** @example Unauthenticated. */
-                        message?: string;
-                    };
-                };
-            };
-        };
-    };
-    postSettingsBanner: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "multipart/form-data": {
-                    /**
-                     * Format: binary
-                     * @description Must be a file. Must not be greater than 4096 kilobytes.
-                     */
-                    banner: string;
-                };
-            };
-        };
-        responses: {
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        /** @example Unauthenticated. */
-                        message?: string;
-                    };
                 };
             };
         };
@@ -16495,6 +20746,117 @@ export interface operations {
             };
         };
     };
+    getSettingsMyNotifications: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    putSettingsMyNotifications: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": {
+                    /**
+                     * @example [
+                     *       true
+                     *     ]
+                     */
+                    contexts?: (boolean | null)[];
+                };
+            };
+        };
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    getSettingsMyKoiosMode: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    putSettingsMyKoiosMode: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": {
+                    /**
+                     * @example auto
+                     * @enum {string}
+                     */
+                    mode?: "wizard" | "auto";
+                    /** @example false */
+                    auto_messages?: boolean;
+                };
+            };
+        };
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
     getSettingsApps: {
         parameters: {
             query?: never;
@@ -16518,6 +20880,50 @@ export interface operations {
         };
     };
     putSettingsApps: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    getCountries: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    getNumberingEntities: {
         parameters: {
             query?: never;
             header?: never;
@@ -16764,6 +21170,40 @@ export interface operations {
             };
         };
     };
+    putNationalitiesReorder: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": {
+                    /**
+                     * @description Must be a valid UUID.
+                     * @example [
+                     *       "6ff8f7f6-1eb3-3525-be4a-3932c805afed"
+                     *     ]
+                     */
+                    ids?: string[];
+                };
+            };
+        };
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
     putNationalitiesId: {
         parameters: {
             query?: never;
@@ -16864,7 +21304,7 @@ export interface operations {
                      */
                     contract_guid: string;
                     /**
-                     * @example sent
+                     * @example ended
                      * @enum {string}
                      */
                     status: "sent" | "active" | "ended";
@@ -16933,7 +21373,7 @@ export interface operations {
                      */
                     admin_url?: string | null;
                     /**
-                     * @example oauth2
+                     * @example company_token
                      * @enum {string}
                      */
                     auth_type: "bearer_token" | "oauth2" | "api_key" | "company_token";
@@ -16968,7 +21408,7 @@ export interface operations {
             path: {
                 /**
                  * @description The ID of the planningConnection.
-                 * @example 019f6f5e-5759-70cc-a3d6-bf7831628164
+                 * @example architecto
                  */
                 planningConnection_id: string;
             };
@@ -16996,7 +21436,7 @@ export interface operations {
             path: {
                 /**
                  * @description The ID of the planningConnection.
-                 * @example 019f6f5e-5759-70cc-a3d6-bf7831628164
+                 * @example architecto
                  */
                 planningConnection_id: string;
             };
@@ -17016,7 +21456,7 @@ export interface operations {
                      */
                     admin_url?: string | null;
                     /**
-                     * @example api_key
+                     * @example bearer_token
                      * @enum {string}
                      */
                     auth_type?: "bearer_token" | "oauth2" | "api_key" | "company_token";
@@ -17048,7 +21488,7 @@ export interface operations {
             path: {
                 /**
                  * @description The ID of the planningConnection.
-                 * @example 019f6f5e-5759-70cc-a3d6-bf7831628164
+                 * @example architecto
                  */
                 planningConnection_id: string;
             };
@@ -17076,7 +21516,7 @@ export interface operations {
             path: {
                 /**
                  * @description The ID of the planningConnection.
-                 * @example 019f6f5e-5759-70cc-a3d6-bf7831628164
+                 * @example architecto
                  */
                 planningConnection_id: string;
             };
@@ -17141,7 +21581,7 @@ export interface operations {
                     description?: string | null;
                     /**
                      * @description Opt-in: when true, callers MUST send a valid HMAC X-Signature header.
-                     * @example false
+                     * @example true
                      */
                     require_signature?: boolean;
                 };
@@ -17300,11 +21740,11 @@ export interface operations {
                     url: string;
                     /**
                      * @example [
-                     *       "backoffice.link.updated"
+                     *       "vacancy.published"
                      *     ]
                      */
-                    events?: ("candidate.created" | "candidate.status_changed" | "candidate.reactivated" | "application.created" | "application.stage_changed" | "match.created" | "match.updated" | "match.deleted" | "vacancy.created" | "vacancy.status_changed" | "task.created" | "appointment.created" | "message.received" | "message.sent" | "backoffice.link.updated" | "ai_agent.webhook_received")[];
-                    /** @example true */
+                    events?: ("candidate.created" | "candidate.status_changed" | "candidate.reactivated" | "application.created" | "application.stage_changed" | "match.created" | "match.updated" | "match.deleted" | "match.terminated" | "match.expiring" | "candidate.document_expiring" | "candidate.availability_changed" | "candidate.no_contact" | "vacancy.created" | "vacancy.status_changed" | "vacancy.published" | "vacancy.updated" | "task.created" | "appointment.created" | "message.received" | "message.sent" | "backoffice.link.updated" | "ai_agent.webhook_received" | "candidate.birthday" | "candidate.retention_due" | "appointment.upcoming" | "facebook.lead_received" | "whatsapp.connection_down" | "whatsapp.connection_restored" | "interview.started" | "interview.completed" | "interview.disqualified" | "candidate.status_stale" | "candidate.phase_stale" | "task.overdue" | "conversation.unanswered" | "customer.no_contact" | "customer.contract_ending" | "customer.task_overdue" | "customer.match_ending" | "customer.vacancy_stale")[];
+                    /** @example false */
                     active?: boolean;
                 };
             };
@@ -17379,10 +21819,10 @@ export interface operations {
                     url?: string;
                     /**
                      * @example [
-                     *       "message.received"
+                     *       "candidate.retention_due"
                      *     ]
                      */
-                    events?: ("candidate.created" | "candidate.status_changed" | "candidate.reactivated" | "application.created" | "application.stage_changed" | "match.created" | "match.updated" | "match.deleted" | "vacancy.created" | "vacancy.status_changed" | "task.created" | "appointment.created" | "message.received" | "message.sent" | "backoffice.link.updated" | "ai_agent.webhook_received")[];
+                    events?: ("candidate.created" | "candidate.status_changed" | "candidate.reactivated" | "application.created" | "application.stage_changed" | "match.created" | "match.updated" | "match.deleted" | "match.terminated" | "match.expiring" | "candidate.document_expiring" | "candidate.availability_changed" | "candidate.no_contact" | "vacancy.created" | "vacancy.status_changed" | "vacancy.published" | "vacancy.updated" | "task.created" | "appointment.created" | "message.received" | "message.sent" | "backoffice.link.updated" | "ai_agent.webhook_received" | "candidate.birthday" | "candidate.retention_due" | "appointment.upcoming" | "facebook.lead_received" | "whatsapp.connection_down" | "whatsapp.connection_restored" | "interview.started" | "interview.completed" | "interview.disqualified" | "candidate.status_stale" | "candidate.phase_stale" | "task.overdue" | "conversation.unanswered" | "customer.no_contact" | "customer.contract_ending" | "customer.task_overdue" | "customer.match_ending" | "customer.vacancy_stale")[];
                     /** @example false */
                     active?: boolean;
                 };
@@ -17524,7 +21964,7 @@ export interface operations {
                      */
                     friendly_name: string;
                     /**
-                     * @example primary
+                     * @example additional
                      * @enum {string}
                      */
                     type: "primary" | "additional";
@@ -17664,7 +22104,7 @@ export interface operations {
                     allowed_ips?: string[];
                     /**
                      * @example [
-                     *       "read_write"
+                     *       "read"
                      *     ]
                      */
                     scopes?: ("read" | "read_write")[];
@@ -17753,11 +22193,8 @@ export interface operations {
                 "application/json": {
                     /** @example architecto */
                     entity_type: string;
-                    /**
-                     * @example hf_id
-                     * @enum {string}
-                     */
-                    field: "sm_id" | "hf_id" | "aelio_id" | "elanza_id" | "intus_id";
+                    /** @example architecto */
+                    field: string;
                     /** @example architecto */
                     external_id: string;
                 };
@@ -17828,31 +22265,6 @@ export interface operations {
                      * @example a4855dc5-0acb-33c3-b921-f4291f719ca0
                      */
                     entity_id: string;
-                    /**
-                     * @description Must not be greater than 255 characters.
-                     * @example z
-                     */
-                    sm_id?: string | null;
-                    /**
-                     * @description Must not be greater than 255 characters.
-                     * @example m
-                     */
-                    hf_id?: string | null;
-                    /**
-                     * @description Must not be greater than 255 characters.
-                     * @example i
-                     */
-                    aelio_id?: string | null;
-                    /**
-                     * @description Must not be greater than 255 characters.
-                     * @example y
-                     */
-                    elanza_id?: string | null;
-                    /**
-                     * @description Must not be greater than 255 characters.
-                     * @example v
-                     */
-                    intus_id?: string | null;
                 };
             };
         };
@@ -18036,7 +22448,7 @@ export interface operations {
                     color?: string | null;
                     /** @example 16 */
                     order?: number;
-                    /** @example true */
+                    /** @example false */
                     active?: boolean;
                 };
             };
@@ -18533,6 +22945,134 @@ export interface operations {
             };
         };
     };
+    getEducationLevels: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    postEducationLevels: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    getEducationLevelsId: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The ID of the education level.
+                 * @example architecto
+                 */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    putEducationLevelsId: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The ID of the education level.
+                 * @example architecto
+                 */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    deleteEducationLevelsId: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The ID of the education level.
+                 * @example architecto
+                 */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
     putCandidateGendersGender: {
         parameters: {
             query?: never;
@@ -18556,7 +23096,7 @@ export interface operations {
                      * @example n
                      */
                     color?: string | null;
-                    /** @example false */
+                    /** @example true */
                     active?: boolean;
                 };
             };
@@ -18600,6 +23140,108 @@ export interface operations {
             };
         };
     };
+    putCandidateBlacklistReasonsReorder: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": {
+                    /**
+                     * @description Must be a valid UUID.
+                     * @example [
+                     *       "6ff8f7f6-1eb3-3525-be4a-3932c805afed"
+                     *     ]
+                     */
+                    ids?: string[];
+                };
+            };
+        };
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    putBlacklistReasonsReorder: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": {
+                    /**
+                     * @description Must be a valid UUID.
+                     * @example [
+                     *       "6ff8f7f6-1eb3-3525-be4a-3932c805afed"
+                     *     ]
+                     */
+                    ids?: string[];
+                };
+            };
+        };
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    putEducationLevelsReorder: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": {
+                    /**
+                     * @description Must be a valid UUID.
+                     * @example [
+                     *       "6ff8f7f6-1eb3-3525-be4a-3932c805afed"
+                     *     ]
+                     */
+                    ids?: string[];
+                };
+            };
+        };
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
     getCandidatesCandidateDocuments: {
         parameters: {
             query?: never;
@@ -18613,7 +23255,17 @@ export interface operations {
             };
             cookie?: never;
         };
-        requestBody?: never;
+        requestBody?: {
+            content: {
+                "application/json": {
+                    /**
+                     * @description Must be between 1 and 365.
+                     * @example 2
+                     */
+                    expires_within_days?: number;
+                };
+            };
+        };
         responses: {
             401: {
                 headers: {
@@ -18654,11 +23306,13 @@ export interface operations {
                      * @example b
                      */
                     name?: string | null;
+                    /** @example null */
+                    type?: string;
                     /**
-                     * @description Must not be greater than 100 characters.
-                     * @example n
+                     * @description DOC-EXPIRY-1: optional validity date (VOG/BIG/diploma-style uploads). Must be a valid date.
+                     * @example 2026-08-13T18:23:29
                      */
-                    type?: string | null;
+                    expires_at?: string | null;
                 };
             };
         };
@@ -18768,6 +23422,130 @@ export interface operations {
                      * @example b
                      */
                     name: string;
+                    /**
+                     * @description Must be a valid date.
+                     * @example 2026-08-13T18:23:29
+                     */
+                    expires_at?: string | null;
+                };
+            };
+        };
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    postCandidatesCandidateDocumentsDocumentReplace: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The candidate.
+                 * @example architecto
+                 */
+                candidate: string;
+                /**
+                 * @description The document.
+                 * @example architecto
+                 */
+                document: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "multipart/form-data": {
+                    /**
+                     * Format: binary
+                     * @description Must be a file. Must not be greater than 20480 kilobytes.
+                     */
+                    file: string;
+                };
+            };
+        };
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    getCandidatesCandidateDocumentsDocumentVersionsVersionDownload: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The candidate.
+                 * @example architecto
+                 */
+                candidate: string;
+                /**
+                 * @description The document.
+                 * @example architecto
+                 */
+                document: string;
+                /**
+                 * @description The version.
+                 * @example architecto
+                 */
+                version: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    postCandidatesCandidateContactMoments: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The candidate.
+                 * @example BcECdBDA-CdED-bFEA-CbCE-BcCdeBfbbebc
+                 */
+                candidate: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /**
+                     * @description Must not be greater than 64 characters.
+                     * @example b
+                     */
+                    channel: string;
                 };
             };
         };
@@ -18848,55 +23626,77 @@ export interface operations {
                      */
                     mobile?: string | null;
                     /**
+                     * @description Must match an existing stored value. Must not be greater than 255 characters.
+                     * @example j
+                     */
+                    nationality?: string | null;
+                    /**
                      * @description Must be a valid date.
-                     * @example 2026-07-27T21:50:38
+                     * @example 2026-08-13T18:23:29
                      */
                     date_of_birth?: string | null;
                     /**
                      * @description Must not be greater than 32 characters.
-                     * @example j
+                     * @example n
                      */
                     gender?: string | null;
                     /**
                      * @description Must not be greater than 255 characters.
-                     * @example n
+                     * @example i
                      */
                     street?: string | null;
                     /**
                      * @description Must not be greater than 20 characters.
-                     * @example ikhwaykcmyuwpwlv
+                     * @example khwaykcmyuwpwlvq
                      */
                     house_number?: string | null;
                     /**
                      * @description Must not be greater than 20 characters.
-                     * @example qwrsitcpscqldzsn
+                     * @example wrsitcpscqldzsnr
                      */
                     house_number_suffix?: string | null;
                     /**
                      * @description Must not be greater than 20 characters.
-                     * @example rwtujwvlxjklqppw
+                     * @example wtujwvlxjklqppwq
                      */
                     postcode?: string | null;
                     /**
                      * @description Must not be greater than 120 characters.
-                     * @example q
+                     * @example b
                      */
                     city?: string | null;
                     /**
                      * @description Must not be greater than 120 characters.
-                     * @example b
+                     * @example e
                      */
                     province?: string | null;
                     /**
                      * @description Must not be greater than 120 characters.
-                     * @example e
-                     */
-                    country?: string | null;
-                    /**
-                     * @description Must not be greater than 255 characters.
                      * @example w
                      */
+                    country?: string | null;
+                    /** @example null */
+                    iban?: string | null;
+                    /**
+                     * @description Must not be greater than 255 characters.
+                     * @example t
+                     */
+                    account_holder_name?: string | null;
+                    /**
+                     * @description Must be a valid UUID.
+                     * @example 45e62725-5da9-35c7-82db-977f64d08292
+                     */
+                    bank_document_id?: string | null;
+                    /**
+                     * @description Must not be greater than 255 characters.
+                     * @example o
+                     */
                     function_title?: string | null;
+                    /**
+                     * @description Must match the regex /^[^\s\/]+$/. Must not be greater than 255 characters.
+                     * @example q
+                     */
+                    linkedin_slug?: string | null;
                     /** @example architecto */
                     summary?: string | null;
                     /**
@@ -18905,18 +23705,23 @@ export interface operations {
                      */
                     source?: string | null;
                     /**
-                     * @description Must not be greater than 64 characters.
+                     * @description Must not be greater than 255 characters.
                      * @example g
+                     */
+                    source_detail?: string | null;
+                    /**
+                     * @description Must not be greater than 64 characters.
+                     * @example z
                      */
                     facebook_leads_id?: string | null;
                     /**
                      * @description Must be a valid UUID.
-                     * @example c90237e9-ced5-3af6-88ea-84aeaa148878
+                     * @example 977e5426-8d13-3824-86aa-b092f8ae52c5
                      */
                     owner_id?: string | null;
                     /**
                      * @description Must be a valid UUID. Must match an existing stored value.
-                     * @example a1a0a47d-e8c3-3cf0-8e6e-c1ff9dca5d1f
+                     * @example d6fa562b-acd5-35ff-babb-d11194d3737b
                      */
                     location_id?: string | null;
                     /**
@@ -18936,7 +23741,7 @@ export interface operations {
                     status_reason?: string | null;
                     /**
                      * @description Must be a valid date.
-                     * @example 2026-07-27T21:50:38
+                     * @example 2026-08-13T18:23:29
                      */
                     available_again_date?: string | null;
                     /**
@@ -18953,9 +23758,9 @@ export interface operations {
                     candidate_types?: string[];
                     /** @example null */
                     consent?: {
-                        /** @example false */
+                        /** @example true */
                         whatsapp_opt_in?: boolean;
-                        /** @example false */
+                        /** @example true */
                         email_opt_in?: boolean;
                         /** @example false */
                         newsletter_opt_in?: boolean;
@@ -18975,6 +23780,219 @@ export interface operations {
                      *     ]
                      */
                     location_ids?: string[];
+                    /**
+                     * @description Must be a valid UUID.
+                     * @example d6fa562b-acd5-35ff-babb-d11194d3737b
+                     */
+                    cv_parse_token?: string | null;
+                    /**
+                     * @description Must match an existing stored value.
+                     * @example architecto
+                     */
+                    work_permit_type?: string | null;
+                    /**
+                     * @description Must be a valid date.
+                     * @example 2026-08-13T18:23:29
+                     */
+                    work_permit_valid_until?: string | null;
+                    /** @example null */
+                    preferences?: {
+                        /**
+                         * @description Must be a valid date.
+                         * @example 2026-08-13T18:23:29
+                         */
+                        available_from?: string | null;
+                        /**
+                         * @description Must be between 0 and 80.
+                         * @example 1
+                         */
+                        hours_per_week?: number | null;
+                        /**
+                         * @description Must be between 0 and 52.
+                         * @example 0
+                         */
+                        notice_period_weeks?: number | null;
+                        /**
+                         * @description Must not be greater than 16 characters.
+                         * @example [
+                         *       "zmiyvdljnikhwayk"
+                         *     ]
+                         */
+                        preferred_days?: string[];
+                        /**
+                         * @description Must not be greater than 128 characters.
+                         * @example c
+                         */
+                        function_pref?: string | null;
+                        /**
+                         * @description Must not be greater than 128 characters.
+                         * @example [
+                         *       "m"
+                         *     ]
+                         */
+                        sector_pref?: string[];
+                        /**
+                         * @description Must not be greater than 64 characters.
+                         * @example y
+                         */
+                        contract_pref?: string | null;
+                        /**
+                         * @description Must not be greater than 8 characters.
+                         * @example [
+                         *       "uwpwlvqw"
+                         *     ]
+                         */
+                        license_categories?: string[];
+                        /** @example false */
+                        own_transport?: boolean | null;
+                        /**
+                         * @description Must be at least 0.
+                         * @example 4
+                         */
+                        max_travel_km?: number | null;
+                        /** @example true */
+                        wage_tax?: boolean | null;
+                        /**
+                         * @description Must be a valid date.
+                         * @example 2026-08-13T18:23:29
+                         */
+                        wage_tax_from?: string | null;
+                        /** @example 4326.41688 */
+                        min_rate?: number | null;
+                        /** @example architecto */
+                        remarks?: string | null;
+                        /**
+                         * @description Must not be greater than 255 characters.
+                         * @example n
+                         */
+                        emergency_contact_first_name?: string | null;
+                        /**
+                         * @description Must not be greater than 255 characters.
+                         * @example g
+                         */
+                        emergency_contact_middle_name?: string | null;
+                        /**
+                         * @description Must not be greater than 255 characters.
+                         * @example z
+                         */
+                        emergency_contact_last_name?: string | null;
+                        /**
+                         * @description Must not be greater than 50 characters.
+                         * @example m
+                         */
+                        emergency_contact_phone?: string | null;
+                        /**
+                         * @description Must not be greater than 50 characters.
+                         * @example i
+                         */
+                        emergency_contact_mobile?: string | null;
+                        /**
+                         * @description Must be a valid UUID. Must match an existing stored value.
+                         * @example d6fa562b-acd5-35ff-babb-d11194d3737b
+                         */
+                        emergency_contact_relation_id?: string | null;
+                    } | null;
+                    /** @example null */
+                    freelance?: {
+                        /**
+                         * @description Must not be greater than 255 characters.
+                         * @example d
+                         */
+                        company_name?: string | null;
+                        /**
+                         * @description Must be 8 digits.
+                         * @example 22569775
+                         */
+                        kvk_number?: string | null;
+                        /**
+                         * @description Must match the regex /^NL[0-9]{9}B[0-9]{2}$/.
+                         * @example NL642559314B23
+                         */
+                        vat_number?: string | null;
+                        /** @example false */
+                        kor?: boolean | null;
+                        /** @example true */
+                        intracommunity?: boolean | null;
+                        /**
+                         * @description Must not be greater than 255 characters.
+                         * @example w
+                         */
+                        street?: string | null;
+                        /**
+                         * @description Must not be greater than 20 characters.
+                         * @example aykcmyuwpwlvqwrs
+                         */
+                        house_number?: string | null;
+                        /**
+                         * @description Must not be greater than 20 characters.
+                         * @example itcpscqldzsnrwtu
+                         */
+                        house_number_suffix?: string | null;
+                        /**
+                         * @description Must not be greater than 20 characters.
+                         * @example jwvlxjklqppwqbew
+                         */
+                        postal_code?: string | null;
+                        /**
+                         * @description Must not be greater than 120 characters.
+                         * @example t
+                         */
+                        city?: string | null;
+                        /**
+                         * @description Must not be greater than 120 characters.
+                         * @example n
+                         */
+                        province?: string | null;
+                        /**
+                         * @description Must not be greater than 120 characters.
+                         * @example n
+                         */
+                        country?: string | null;
+                        /**
+                         * @description Must not be greater than 64 characters.
+                         * @example o
+                         */
+                        creditor_number?: string | null;
+                        /**
+                         * @description Must be a valid email address.
+                         * @example balistreri.josiane@example.net
+                         */
+                        business_email?: string | null;
+                        /**
+                         * @description Must be a valid email address.
+                         * @example lward@example.com
+                         */
+                        invoice_email?: string | null;
+                        /** @example null */
+                        iban?: string | null;
+                        /**
+                         * @description Must not be greater than 255 characters.
+                         * @example c
+                         */
+                        account_holder_name?: string | null;
+                        /**
+                         * @description Must be a valid UUID.
+                         * @example b3dfd3b4-abf6-34e6-9ab5-ef739060a5da
+                         */
+                        bank_document_id?: string | null;
+                        /** @example false */
+                        self_billing?: boolean | null;
+                        /**
+                         * @description Must not be greater than 255 characters.
+                         * @example p
+                         */
+                        payment_discount?: string | null;
+                        /**
+                         * @description Must not be greater than 255 characters.
+                         * @example o
+                         */
+                        mediation_costs?: string | null;
+                        /**
+                         * @description Must not be greater than 255 characters.
+                         * @example j
+                         */
+                        payment_term?: string | null;
+                    } | null;
                 };
             };
         };
@@ -19021,27 +24039,179 @@ export interface operations {
             path?: never;
             cookie?: never;
         };
-        requestBody?: {
-            content: {
-                "application/json": {
-                    /**
-                     * @description Must be a valid email address.
-                     * @example gbailey@example.net
-                     */
-                    email?: string | null;
-                    /**
-                     * @description Must not be greater than 50 characters.
-                     * @example m
-                     */
-                    mobile?: string | null;
-                    /**
-                     * @description Must not be greater than 50 characters.
-                     * @example i
-                     */
-                    phone?: string | null;
+        requestBody?: never;
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
                 };
             };
         };
+    };
+    postCandidatesCheckDuplicate: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    postCandidatesParseCv: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "multipart/form-data": {
+                    /**
+                     * Format: binary
+                     * @description This field is required when <code>raw_text</code> is not present. Must be a file. Must not be greater than 10240 kilobytes.
+                     */
+                    file?: string;
+                    /**
+                     * @description This field is required when <code>file</code> is not present. Must be at least 30 characters. Must not be greater than 50000 characters.
+                     * @example b
+                     */
+                    raw_text?: string;
+                };
+            };
+        };
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    getCandidatesParseCvToken: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @example BcECdBDA-CdED-bFEA-CbCE-BcCdeBfbbebc */
+                token: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    getCandidatesCandidateCvParseProposals: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The candidate.
+                 * @example BcECdBDA-CdED-bFEA-CbCE-BcCdeBfbbebc
+                 */
+                candidate: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    postCandidatesCandidateCvParseProposalsProposalAccept: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The candidate.
+                 * @example BcECdBDA-CdED-bFEA-CbCE-BcCdeBfbbebc
+                 */
+                candidate: string;
+                /** @example BcECdBDA-CdED-bFEA-CbCE-BcCdeBfbbebc */
+                proposal: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    postCandidatesCandidateCvParseProposalsProposalReject: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The candidate.
+                 * @example BcECdBDA-CdED-bFEA-CbCE-BcCdeBfbbebc
+                 */
+                candidate: string;
+                /** @example BcECdBDA-CdED-bFEA-CbCE-BcCdeBfbbebc */
+                proposal: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
         responses: {
             401: {
                 headers: {
@@ -19169,55 +24339,77 @@ export interface operations {
                      */
                     mobile?: string | null;
                     /**
+                     * @description Must match an existing stored value. Must not be greater than 255 characters.
+                     * @example j
+                     */
+                    nationality?: string | null;
+                    /**
                      * @description Must be a valid date.
-                     * @example 2026-07-27T21:50:38
+                     * @example 2026-08-13T18:23:29
                      */
                     date_of_birth?: string | null;
                     /**
                      * @description Must not be greater than 32 characters.
-                     * @example j
+                     * @example n
                      */
                     gender?: string | null;
                     /**
                      * @description Must not be greater than 255 characters.
-                     * @example n
+                     * @example i
                      */
                     street?: string | null;
                     /**
                      * @description Must not be greater than 20 characters.
-                     * @example ikhwaykcmyuwpwlv
+                     * @example khwaykcmyuwpwlvq
                      */
                     house_number?: string | null;
                     /**
                      * @description Must not be greater than 20 characters.
-                     * @example qwrsitcpscqldzsn
+                     * @example wrsitcpscqldzsnr
                      */
                     house_number_suffix?: string | null;
                     /**
                      * @description Must not be greater than 20 characters.
-                     * @example rwtujwvlxjklqppw
+                     * @example wtujwvlxjklqppwq
                      */
                     postcode?: string | null;
                     /**
                      * @description Must not be greater than 120 characters.
-                     * @example q
+                     * @example b
                      */
                     city?: string | null;
                     /**
                      * @description Must not be greater than 120 characters.
-                     * @example b
+                     * @example e
                      */
                     province?: string | null;
                     /**
                      * @description Must not be greater than 120 characters.
-                     * @example e
-                     */
-                    country?: string | null;
-                    /**
-                     * @description Must not be greater than 255 characters.
                      * @example w
                      */
+                    country?: string | null;
+                    /** @example null */
+                    iban?: string | null;
+                    /**
+                     * @description Must not be greater than 255 characters.
+                     * @example t
+                     */
+                    account_holder_name?: string | null;
+                    /**
+                     * @description Must be a valid UUID.
+                     * @example 45e62725-5da9-35c7-82db-977f64d08292
+                     */
+                    bank_document_id?: string | null;
+                    /**
+                     * @description Must not be greater than 255 characters.
+                     * @example o
+                     */
                     function_title?: string | null;
+                    /**
+                     * @description Must match the regex /^[^\s\/]+$/. Must not be greater than 255 characters.
+                     * @example q
+                     */
+                    linkedin_slug?: string | null;
                     /** @example architecto */
                     summary?: string | null;
                     /**
@@ -19226,18 +24418,23 @@ export interface operations {
                      */
                     source?: string | null;
                     /**
-                     * @description Must not be greater than 64 characters.
+                     * @description Must not be greater than 255 characters.
                      * @example g
+                     */
+                    source_detail?: string | null;
+                    /**
+                     * @description Must not be greater than 64 characters.
+                     * @example z
                      */
                     facebook_leads_id?: string | null;
                     /**
                      * @description Must be a valid UUID.
-                     * @example c90237e9-ced5-3af6-88ea-84aeaa148878
+                     * @example 977e5426-8d13-3824-86aa-b092f8ae52c5
                      */
                     owner_id?: string | null;
                     /**
                      * @description Must be a valid UUID. Must match an existing stored value.
-                     * @example a1a0a47d-e8c3-3cf0-8e6e-c1ff9dca5d1f
+                     * @example d6fa562b-acd5-35ff-babb-d11194d3737b
                      */
                     location_id?: string | null;
                     /**
@@ -19257,7 +24454,7 @@ export interface operations {
                     status_reason?: string | null;
                     /**
                      * @description Must be a valid date.
-                     * @example 2026-07-27T21:50:38
+                     * @example 2026-08-13T18:23:29
                      */
                     available_again_date?: string | null;
                     /**
@@ -19276,11 +24473,11 @@ export interface operations {
                     consent?: {
                         /** @example false */
                         whatsapp_opt_in?: boolean;
-                        /** @example false */
-                        email_opt_in?: boolean;
                         /** @example true */
-                        newsletter_opt_in?: boolean;
+                        email_opt_in?: boolean;
                         /** @example false */
+                        newsletter_opt_in?: boolean;
+                        /** @example true */
                         retention_opt_in?: boolean;
                     };
                     /** @example null */
@@ -19296,9 +24493,250 @@ export interface operations {
                      *     ]
                      */
                     location_ids?: string[];
+                    /**
+                     * @description Must be a valid UUID.
+                     * @example d6fa562b-acd5-35ff-babb-d11194d3737b
+                     */
+                    cv_parse_token?: string | null;
+                    /**
+                     * @description Must match an existing stored value.
+                     * @example architecto
+                     */
+                    work_permit_type?: string | null;
+                    /**
+                     * @description Must be a valid date.
+                     * @example 2026-08-13T18:23:29
+                     */
+                    work_permit_valid_until?: string | null;
+                    /** @example null */
+                    preferences?: {
+                        /**
+                         * @description Must be a valid date.
+                         * @example 2026-08-13T18:23:29
+                         */
+                        available_from?: string | null;
+                        /**
+                         * @description Must be between 0 and 80.
+                         * @example 1
+                         */
+                        hours_per_week?: number | null;
+                        /**
+                         * @description Must be between 0 and 52.
+                         * @example 0
+                         */
+                        notice_period_weeks?: number | null;
+                        /**
+                         * @description Must not be greater than 16 characters.
+                         * @example [
+                         *       "zmiyvdljnikhwayk"
+                         *     ]
+                         */
+                        preferred_days?: string[];
+                        /**
+                         * @description Must not be greater than 128 characters.
+                         * @example c
+                         */
+                        function_pref?: string | null;
+                        /**
+                         * @description Must not be greater than 128 characters.
+                         * @example [
+                         *       "m"
+                         *     ]
+                         */
+                        sector_pref?: string[];
+                        /**
+                         * @description Must not be greater than 64 characters.
+                         * @example y
+                         */
+                        contract_pref?: string | null;
+                        /**
+                         * @description Must not be greater than 8 characters.
+                         * @example [
+                         *       "uwpwlvqw"
+                         *     ]
+                         */
+                        license_categories?: string[];
+                        /** @example false */
+                        own_transport?: boolean | null;
+                        /**
+                         * @description Must be at least 0.
+                         * @example 4
+                         */
+                        max_travel_km?: number | null;
+                        /** @example true */
+                        wage_tax?: boolean | null;
+                        /**
+                         * @description Must be a valid date.
+                         * @example 2026-08-13T18:23:29
+                         */
+                        wage_tax_from?: string | null;
+                        /** @example 4326.41688 */
+                        min_rate?: number | null;
+                        /** @example architecto */
+                        remarks?: string | null;
+                        /**
+                         * @description Must not be greater than 255 characters.
+                         * @example n
+                         */
+                        emergency_contact_first_name?: string | null;
+                        /**
+                         * @description Must not be greater than 255 characters.
+                         * @example g
+                         */
+                        emergency_contact_middle_name?: string | null;
+                        /**
+                         * @description Must not be greater than 255 characters.
+                         * @example z
+                         */
+                        emergency_contact_last_name?: string | null;
+                        /**
+                         * @description Must not be greater than 50 characters.
+                         * @example m
+                         */
+                        emergency_contact_phone?: string | null;
+                        /**
+                         * @description Must not be greater than 50 characters.
+                         * @example i
+                         */
+                        emergency_contact_mobile?: string | null;
+                        /**
+                         * @description Must be a valid UUID. Must match an existing stored value.
+                         * @example d6fa562b-acd5-35ff-babb-d11194d3737b
+                         */
+                        emergency_contact_relation_id?: string | null;
+                    } | null;
+                    /** @example null */
+                    freelance?: {
+                        /**
+                         * @description Must not be greater than 255 characters.
+                         * @example d
+                         */
+                        company_name?: string | null;
+                        /**
+                         * @description Must be 8 digits.
+                         * @example 22569775
+                         */
+                        kvk_number?: string | null;
+                        /**
+                         * @description Must match the regex /^NL[0-9]{9}B[0-9]{2}$/.
+                         * @example NL642559314B23
+                         */
+                        vat_number?: string | null;
+                        /** @example true */
+                        kor?: boolean | null;
+                        /** @example true */
+                        intracommunity?: boolean | null;
+                        /**
+                         * @description Must not be greater than 255 characters.
+                         * @example w
+                         */
+                        street?: string | null;
+                        /**
+                         * @description Must not be greater than 20 characters.
+                         * @example aykcmyuwpwlvqwrs
+                         */
+                        house_number?: string | null;
+                        /**
+                         * @description Must not be greater than 20 characters.
+                         * @example itcpscqldzsnrwtu
+                         */
+                        house_number_suffix?: string | null;
+                        /**
+                         * @description Must not be greater than 20 characters.
+                         * @example jwvlxjklqppwqbew
+                         */
+                        postal_code?: string | null;
+                        /**
+                         * @description Must not be greater than 120 characters.
+                         * @example t
+                         */
+                        city?: string | null;
+                        /**
+                         * @description Must not be greater than 120 characters.
+                         * @example n
+                         */
+                        province?: string | null;
+                        /**
+                         * @description Must not be greater than 120 characters.
+                         * @example n
+                         */
+                        country?: string | null;
+                        /**
+                         * @description Must not be greater than 64 characters.
+                         * @example o
+                         */
+                        creditor_number?: string | null;
+                        /**
+                         * @description Must be a valid email address.
+                         * @example balistreri.josiane@example.net
+                         */
+                        business_email?: string | null;
+                        /**
+                         * @description Must be a valid email address.
+                         * @example lward@example.com
+                         */
+                        invoice_email?: string | null;
+                        /** @example null */
+                        iban?: string | null;
+                        /**
+                         * @description Must not be greater than 255 characters.
+                         * @example c
+                         */
+                        account_holder_name?: string | null;
+                        /**
+                         * @description Must be a valid UUID.
+                         * @example b3dfd3b4-abf6-34e6-9ab5-ef739060a5da
+                         */
+                        bank_document_id?: string | null;
+                        /** @example true */
+                        self_billing?: boolean | null;
+                        /**
+                         * @description Must not be greater than 255 characters.
+                         * @example p
+                         */
+                        payment_discount?: string | null;
+                        /**
+                         * @description Must not be greater than 255 characters.
+                         * @example o
+                         */
+                        mediation_costs?: string | null;
+                        /**
+                         * @description Must not be greater than 255 characters.
+                         * @example j
+                         */
+                        payment_term?: string | null;
+                    } | null;
                 };
             };
         };
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    postCandidatesCandidateFreelanceVerifyVat: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The candidate.
+                 * @example BcECdBDA-CdED-bFEA-CbCE-BcCdeBfbbebc
+                 */
+                candidate: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
         responses: {
             401: {
                 headers: {
@@ -19719,7 +25157,21 @@ export interface operations {
             path?: never;
             cookie?: never;
         };
-        requestBody?: never;
+        requestBody?: {
+            content: {
+                "application/json": {
+                    /** @example false */
+                    only_missing?: boolean;
+                    /**
+                     * @description Must be a valid UUID.
+                     * @example [
+                     *       "6ff8f7f6-1eb3-3525-be4a-3932c805afed"
+                     *     ]
+                     */
+                    candidate_ids?: string[];
+                };
+            };
+        };
         responses: {
             401: {
                 headers: {
@@ -20404,6 +25856,124 @@ export interface operations {
             };
         };
     };
+    postCandidatesCandidateReferences: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The candidate.
+                 * @example architecto
+                 */
+                candidate: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    deleteCandidatesCandidateReferencesItem: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The candidate.
+                 * @example architecto
+                 */
+                candidate: string;
+                /** @example architecto */
+                item: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    patchCandidatesCandidateReferencesItem: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The candidate.
+                 * @example architecto
+                 */
+                candidate: string;
+                /** @example architecto */
+                item: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    postCandidatesCandidateReferencesItemVerify: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The candidate.
+                 * @example architecto
+                 */
+                candidate: string;
+                /** @example architecto */
+                item: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
     getLanguages: {
         parameters: {
             query?: never;
@@ -20709,6 +26279,11 @@ export interface operations {
                      * @example b
                      */
                     name: string;
+                    /**
+                     * @description ICON-KAND-1: optional icon/emoji for the dropdown display (task-types R-2 mirror). Must not be greater than 64 characters.
+                     * @example n
+                     */
+                    icon?: string | null;
                 };
             };
         };
@@ -20744,6 +26319,11 @@ export interface operations {
                      * @example b
                      */
                     name?: string;
+                    /**
+                     * @description ICON-KAND-1: optional icon/emoji for the dropdown display (task-types R-2 mirror). Must not be greater than 64 characters.
+                     * @example n
+                     */
+                    icon?: string | null;
                 };
             };
         };
@@ -20986,22 +26566,7 @@ export interface operations {
             path?: never;
             cookie?: never;
         };
-        requestBody: {
-            content: {
-                "application/json": {
-                    /**
-                     * @description Must not be greater than 120 characters.
-                     * @example b
-                     */
-                    name: string;
-                    /**
-                     * @description Must be at least 0.
-                     * @example 39
-                     */
-                    position?: number;
-                };
-            };
-        };
+        requestBody?: never;
         responses: {
             401: {
                 headers: {
@@ -21129,24 +26694,7 @@ export interface operations {
             };
             cookie?: never;
         };
-        requestBody?: {
-            content: {
-                "application/json": {
-                    /**
-                     * @description Must not be greater than 120 characters.
-                     * @example b
-                     */
-                    name?: string;
-                    /**
-                     * @description Must be at least 0.
-                     * @example 39
-                     */
-                    position?: number;
-                    /** @example false */
-                    active?: boolean;
-                };
-            };
-        };
+        requestBody?: never;
         responses: {
             401: {
                 headers: {
@@ -21405,6 +26953,408 @@ export interface operations {
             };
         };
     };
+    getWorkPermitTypes: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    postWorkPermitTypes: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    getEmergencyContactRelations: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    postEmergencyContactRelations: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    getReferenceRelations: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    postReferenceRelations: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    putWorkPermitTypesReorder: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": {
+                    /**
+                     * @description Must be a valid UUID.
+                     * @example [
+                     *       "6ff8f7f6-1eb3-3525-be4a-3932c805afed"
+                     *     ]
+                     */
+                    ids?: string[];
+                };
+            };
+        };
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    putWorkPermitTypesId: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The ID of the work permit type.
+                 * @example BcECdBDA-CdED-bFEA-CbCE-BcCdeBfbbebc
+                 */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    deleteWorkPermitTypesId: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The ID of the work permit type.
+                 * @example BcECdBDA-CdED-bFEA-CbCE-BcCdeBfbbebc
+                 */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    putEmergencyContactRelationsReorder: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": {
+                    /**
+                     * @description Must be a valid UUID.
+                     * @example [
+                     *       "6ff8f7f6-1eb3-3525-be4a-3932c805afed"
+                     *     ]
+                     */
+                    ids?: string[];
+                };
+            };
+        };
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    putEmergencyContactRelationsId: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The ID of the emergency contact relation.
+                 * @example BcECdBDA-CdED-bFEA-CbCE-BcCdeBfbbebc
+                 */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    deleteEmergencyContactRelationsId: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The ID of the emergency contact relation.
+                 * @example BcECdBDA-CdED-bFEA-CbCE-BcCdeBfbbebc
+                 */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    putReferenceRelationsReorder: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": {
+                    /**
+                     * @description Must be a valid UUID.
+                     * @example [
+                     *       "6ff8f7f6-1eb3-3525-be4a-3932c805afed"
+                     *     ]
+                     */
+                    ids?: string[];
+                };
+            };
+        };
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    putReferenceRelationsId: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The ID of the reference relation.
+                 * @example BcECdBDA-CdED-bFEA-CbCE-BcCdeBfbbebc
+                 */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    deleteReferenceRelationsId: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The ID of the reference relation.
+                 * @example BcECdBDA-CdED-bFEA-CbCE-BcCdeBfbbebc
+                 */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
     putLastContactTypesReorder: {
         parameters: {
             query?: never;
@@ -21565,274 +27515,6 @@ export interface operations {
                 /**
                  * @description The ID of the note type.
                  * @example architecto
-                 */
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        /** @example Unauthenticated. */
-                        message?: string;
-                    };
-                };
-            };
-        };
-    };
-    getAppointmentTypes: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        /** @example Unauthenticated. */
-                        message?: string;
-                    };
-                };
-            };
-        };
-    };
-    postAppointmentTypes: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        /** @example Unauthenticated. */
-                        message?: string;
-                    };
-                };
-            };
-        };
-    };
-    getAppointmentLocations: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        /** @example Unauthenticated. */
-                        message?: string;
-                    };
-                };
-            };
-        };
-    };
-    postAppointmentLocations: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        /** @example Unauthenticated. */
-                        message?: string;
-                    };
-                };
-            };
-        };
-    };
-    putAppointmentTypesReorder: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: {
-            content: {
-                "application/json": {
-                    /**
-                     * @description Must be a valid UUID.
-                     * @example [
-                     *       "6ff8f7f6-1eb3-3525-be4a-3932c805afed"
-                     *     ]
-                     */
-                    ids?: string[];
-                };
-            };
-        };
-        responses: {
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        /** @example Unauthenticated. */
-                        message?: string;
-                    };
-                };
-            };
-        };
-    };
-    putAppointmentTypesId: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /**
-                 * @description The ID of the appointment type.
-                 * @example BcECdBDA-CdED-bFEA-CbCE-BcCdeBfbbebc
-                 */
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        /** @example Unauthenticated. */
-                        message?: string;
-                    };
-                };
-            };
-        };
-    };
-    deleteAppointmentTypesId: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /**
-                 * @description The ID of the appointment type.
-                 * @example BcECdBDA-CdED-bFEA-CbCE-BcCdeBfbbebc
-                 */
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        /** @example Unauthenticated. */
-                        message?: string;
-                    };
-                };
-            };
-        };
-    };
-    putAppointmentLocationsReorder: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: {
-            content: {
-                "application/json": {
-                    /**
-                     * @description Must be a valid UUID.
-                     * @example [
-                     *       "6ff8f7f6-1eb3-3525-be4a-3932c805afed"
-                     *     ]
-                     */
-                    ids?: string[];
-                };
-            };
-        };
-        responses: {
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        /** @example Unauthenticated. */
-                        message?: string;
-                    };
-                };
-            };
-        };
-    };
-    putAppointmentLocationsId: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /**
-                 * @description The ID of the appointment location.
-                 * @example BcECdBDA-CdED-bFEA-CbCE-BcCdeBfbbebc
-                 */
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        /** @example Unauthenticated. */
-                        message?: string;
-                    };
-                };
-            };
-        };
-    };
-    deleteAppointmentLocationsId: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /**
-                 * @description The ID of the appointment location.
-                 * @example BcECdBDA-CdED-bFEA-CbCE-BcCdeBfbbebc
                  */
                 id: string;
             };
@@ -22030,7 +27712,7 @@ export interface operations {
                      */
                     color?: string | null;
                     /**
-                     * @example planning
+                     * @example recruitment
                      * @enum {string}
                      */
                     context?: "recruitment" | "planning";
@@ -22041,6 +27723,11 @@ export interface operations {
                      * @enum {string}
                      */
                     type?: "static" | "dynamic" | "ai";
+                    /**
+                     * @description ICON-KAND-1: optional icon/emoji for the dropdown display (task-types R-2 mirror). Must not be greater than 64 characters.
+                     * @example v
+                     */
+                    icon?: string | null;
                 };
             };
         };
@@ -22121,14 +27808,19 @@ export interface operations {
                     /** @example Eius et animi quos velit et. */
                     description?: string | null;
                     /**
-                     * @example static
+                     * @example ai
                      * @enum {string}
                      */
                     type?: "static" | "dynamic" | "ai";
                     /** @example null */
                     criteria?: Record<string, never> | null;
-                    /** @example true */
+                    /** @example false */
                     active?: boolean;
+                    /**
+                     * @description ICON-KAND-1: optional icon/emoji for the dropdown display (task-types R-2 mirror). Must not be greater than 64 characters.
+                     * @example v
+                     */
+                    icon?: string | null;
                 };
             };
         };
@@ -22254,703 +27946,6 @@ export interface operations {
             };
         };
     };
-    getOpportunities: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        /** @example Unauthenticated. */
-                        message?: string;
-                    };
-                };
-            };
-        };
-    };
-    postOpportunities: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": {
-                    /**
-                     * @description Must not be greater than 255 characters.
-                     * @example b
-                     */
-                    title: string;
-                    /**
-                     * @description Must be a valid UUID. Must match an existing stored value.
-                     * @example a4855dc5-0acb-33c3-b921-f4291f719ca0
-                     */
-                    customer_id?: string | null;
-                    /**
-                     * @description Must be a valid UUID. Must match an existing stored value.
-                     * @example c90237e9-ced5-3af6-88ea-84aeaa148878
-                     */
-                    opportunity_stage_id?: string | null;
-                    /**
-                     * @description Must be a valid UUID. Must match an existing stored value.
-                     * @example a1a0a47d-e8c3-3cf0-8e6e-c1ff9dca5d1f
-                     */
-                    deal_type_id?: string | null;
-                    /**
-                     * @description Must be at least 0. Must not be greater than 99999999.99.
-                     * @example 1
-                     */
-                    value?: number | null;
-                    /**
-                     * @description Must be 3 characters.
-                     * @example dlj
-                     */
-                    currency?: string;
-                    /**
-                     * @description Must be a valid date.
-                     * @example 2026-07-27T21:50:38
-                     */
-                    expected_close_at?: string | null;
-                    /**
-                     * @description Must be a valid UUID.
-                     * @example c3b6b42e-3a0f-3935-b28d-cb767f8a2a0a
-                     */
-                    owner_id?: string | null;
-                    /**
-                     * @description Must be a valid UUID. Must match an existing stored value.
-                     * @example 51c7cf5e-fac2-3ac6-8ef8-61e6050503af
-                     */
-                    location_id?: string | null;
-                    /**
-                     * @description Must be a valid UUID. Must match an existing stored value.
-                     * @example d207102d-bce0-31f9-8c36-aa9cf4cfe75a
-                     */
-                    customer_location_id?: string | null;
-                    /**
-                     * @description Must be at least 0. Must not be greater than 9999.99.
-                     * @example 24
-                     */
-                    hours?: number | null;
-                    /**
-                     * @example week
-                     * @enum {string|null}
-                     */
-                    hours_period?: "week" | "month" | "total" | null;
-                    /**
-                     * @description Must be a valid date.
-                     * @example 2026-07-27T21:50:38
-                     */
-                    start_date?: string | null;
-                    /**
-                     * @description Must be a valid date. Must be a date after or equal to <code>start_date</code>.
-                     * @example 2052-08-19
-                     */
-                    end_date?: string | null;
-                    /**
-                     * @description Must be a valid UUID. Must match an existing stored value.
-                     * @example a4855dc5-0acb-33c3-b921-f4291f719ca0
-                     */
-                    service_type_id?: string | null;
-                    /**
-                     * @description Must be a valid UUID. Must match an existing stored value.
-                     * @example c90237e9-ced5-3af6-88ea-84aeaa148878
-                     */
-                    agreement_type_id?: string | null;
-                    /**
-                     * @description Must be a valid UUID. Must match an existing stored value.
-                     * @example a1a0a47d-e8c3-3cf0-8e6e-c1ff9dca5d1f
-                     */
-                    department_id?: string | null;
-                    /**
-                     * @description Must be a valid UUID. Must match an existing stored value.
-                     * @example 21c4122b-d554-3723-966c-6d723ea5293f
-                     */
-                    contact_id?: string | null;
-                    /**
-                     * @description Must not be greater than 50 characters.
-                     * @example [
-                     *       "l"
-                     *     ]
-                     */
-                    tags?: string[];
-                    /** @example null */
-                    custom_fields?: Record<string, never> | null;
-                };
-            };
-        };
-        responses: {
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        /** @example Unauthenticated. */
-                        message?: string;
-                    };
-                };
-            };
-        };
-    };
-    getOpportunitiesStats: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        /** @example Unauthenticated. */
-                        message?: string;
-                    };
-                };
-            };
-        };
-    };
-    getOpportunitiesOpportunity: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /**
-                 * @description The opportunity.
-                 * @example architecto
-                 */
-                opportunity: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        /** @example Unauthenticated. */
-                        message?: string;
-                    };
-                };
-            };
-        };
-    };
-    putOpportunitiesOpportunity: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /**
-                 * @description The opportunity.
-                 * @example architecto
-                 */
-                opportunity: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: {
-            content: {
-                "application/json": {
-                    /**
-                     * @description Must not be greater than 255 characters.
-                     * @example b
-                     */
-                    title?: string;
-                    /**
-                     * @description Must be a valid UUID. Must match an existing stored value.
-                     * @example a4855dc5-0acb-33c3-b921-f4291f719ca0
-                     */
-                    customer_id?: string | null;
-                    /**
-                     * @description Must be a valid UUID. Must match an existing stored value.
-                     * @example c90237e9-ced5-3af6-88ea-84aeaa148878
-                     */
-                    opportunity_stage_id?: string | null;
-                    /**
-                     * @description Must be a valid UUID. Must match an existing stored value.
-                     * @example a1a0a47d-e8c3-3cf0-8e6e-c1ff9dca5d1f
-                     */
-                    deal_type_id?: string | null;
-                    /**
-                     * @description Must be at least 0. Must not be greater than 99999999.99.
-                     * @example 1
-                     */
-                    value?: number | null;
-                    /**
-                     * @description Must be 3 characters.
-                     * @example dlj
-                     */
-                    currency?: string;
-                    /**
-                     * @description Must be a valid date.
-                     * @example 2026-07-27T21:50:38
-                     */
-                    expected_close_at?: string | null;
-                    /**
-                     * @description Must be a valid UUID.
-                     * @example c3b6b42e-3a0f-3935-b28d-cb767f8a2a0a
-                     */
-                    owner_id?: string | null;
-                    /**
-                     * @description Must be a valid UUID. Must match an existing stored value.
-                     * @example 51c7cf5e-fac2-3ac6-8ef8-61e6050503af
-                     */
-                    location_id?: string | null;
-                    /**
-                     * @description Must be a valid UUID. Must match an existing stored value.
-                     * @example d207102d-bce0-31f9-8c36-aa9cf4cfe75a
-                     */
-                    customer_location_id?: string | null;
-                    /**
-                     * @description Must be at least 0. Must not be greater than 9999.99.
-                     * @example 24
-                     */
-                    hours?: number | null;
-                    /**
-                     * @example week
-                     * @enum {string|null}
-                     */
-                    hours_period?: "week" | "month" | "total" | null;
-                    /**
-                     * @description Must be a valid date.
-                     * @example 2026-07-27T21:50:38
-                     */
-                    start_date?: string | null;
-                    /**
-                     * @description Must be a valid date. Must be a date after or equal to <code>start_date</code>.
-                     * @example 2052-08-19
-                     */
-                    end_date?: string | null;
-                    /**
-                     * @description Must be a valid UUID. Must match an existing stored value.
-                     * @example a4855dc5-0acb-33c3-b921-f4291f719ca0
-                     */
-                    service_type_id?: string | null;
-                    /**
-                     * @description Must be a valid UUID. Must match an existing stored value.
-                     * @example c90237e9-ced5-3af6-88ea-84aeaa148878
-                     */
-                    agreement_type_id?: string | null;
-                    /**
-                     * @description Must be a valid UUID. Must match an existing stored value.
-                     * @example a1a0a47d-e8c3-3cf0-8e6e-c1ff9dca5d1f
-                     */
-                    department_id?: string | null;
-                    /**
-                     * @description Must be a valid UUID. Must match an existing stored value.
-                     * @example 21c4122b-d554-3723-966c-6d723ea5293f
-                     */
-                    contact_id?: string | null;
-                    /**
-                     * @description Must not be greater than 50 characters.
-                     * @example [
-                     *       "l"
-                     *     ]
-                     */
-                    tags?: string[];
-                    /** @example null */
-                    custom_fields?: Record<string, never> | null;
-                };
-            };
-        };
-        responses: {
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        /** @example Unauthenticated. */
-                        message?: string;
-                    };
-                };
-            };
-        };
-    };
-    deleteOpportunitiesOpportunity: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /**
-                 * @description The opportunity.
-                 * @example architecto
-                 */
-                opportunity: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        /** @example Unauthenticated. */
-                        message?: string;
-                    };
-                };
-            };
-        };
-    };
-    postOpportunitiesOpportunityRestore: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /**
-                 * @description The opportunity.
-                 * @example architecto
-                 */
-                opportunity: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        /** @example Unauthenticated. */
-                        message?: string;
-                    };
-                };
-            };
-        };
-    };
-    postOpportunitiesBulkStage: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": {
-                    /**
-                     * @description Must be a valid UUID.
-                     * @example [
-                     *       "6ff8f7f6-1eb3-3525-be4a-3932c805afed"
-                     *     ]
-                     */
-                    opportunity_ids?: string[];
-                    /**
-                     * @description Must be a valid UUID. Must match an existing stored value.
-                     * @example 6b72fe4a-5b40-307c-bc24-f79acf9a1bb9
-                     */
-                    opportunity_stage_id: string;
-                };
-            };
-        };
-        responses: {
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        /** @example Unauthenticated. */
-                        message?: string;
-                    };
-                };
-            };
-        };
-    };
-    postOpportunitiesBulkOwner: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: {
-            content: {
-                "application/json": {
-                    /**
-                     * @description Must be a valid UUID.
-                     * @example [
-                     *       "6ff8f7f6-1eb3-3525-be4a-3932c805afed"
-                     *     ]
-                     */
-                    opportunity_ids?: string[];
-                    /**
-                     * @description Must be a valid UUID.
-                     * @example 6b72fe4a-5b40-307c-bc24-f79acf9a1bb9
-                     */
-                    owner_id?: string | null;
-                };
-            };
-        };
-        responses: {
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        /** @example Unauthenticated. */
-                        message?: string;
-                    };
-                };
-            };
-        };
-    };
-    postOpportunitiesBulkClient: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: {
-            content: {
-                "application/json": {
-                    /**
-                     * @description Must be a valid UUID.
-                     * @example [
-                     *       "6ff8f7f6-1eb3-3525-be4a-3932c805afed"
-                     *     ]
-                     */
-                    opportunity_ids?: string[];
-                    /**
-                     * @description Must be a valid UUID. Must match an existing stored value.
-                     * @example 6b72fe4a-5b40-307c-bc24-f79acf9a1bb9
-                     */
-                    customer_id?: string | null;
-                };
-            };
-        };
-        responses: {
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        /** @example Unauthenticated. */
-                        message?: string;
-                    };
-                };
-            };
-        };
-    };
-    postOpportunitiesBulkTags: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        /** @example Unauthenticated. */
-                        message?: string;
-                    };
-                };
-            };
-        };
-    };
-    postOpportunitiesBulkTagsRemove: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        /** @example Unauthenticated. */
-                        message?: string;
-                    };
-                };
-            };
-        };
-    };
-    postOpportunitiesBulkArchive: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        /** @example Unauthenticated. */
-                        message?: string;
-                    };
-                };
-            };
-        };
-    };
-    getOpportunityStages: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        /** @example Unauthenticated. */
-                        message?: string;
-                    };
-                };
-            };
-        };
-    };
-    postOpportunityStages: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        /** @example Unauthenticated. */
-                        message?: string;
-                    };
-                };
-            };
-        };
-    };
-    putOpportunityStagesReorder: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: {
-            content: {
-                "application/json": {
-                    /**
-                     * @description Must be a valid UUID.
-                     * @example [
-                     *       "6ff8f7f6-1eb3-3525-be4a-3932c805afed"
-                     *     ]
-                     */
-                    ids?: string[];
-                };
-            };
-        };
-        responses: {
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        /** @example Unauthenticated. */
-                        message?: string;
-                    };
-                };
-            };
-        };
-    };
-    putOpportunityStagesOpportunityStage: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @example architecto */
-                opportunityStage: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        /** @example Unauthenticated. */
-                        message?: string;
-                    };
-                };
-            };
-        };
-    };
-    deleteOpportunityStagesOpportunityStage: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @example architecto */
-                opportunityStage: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        /** @example Unauthenticated. */
-                        message?: string;
-                    };
-                };
-            };
-        };
-    };
     getFilesCustomerDocumentsTenantParentDocument: {
         parameters: {
             query?: never;
@@ -22962,6 +27957,33 @@ export interface operations {
                 parent: string;
                 /** @example architecto */
                 document: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Invalid signature. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    getFilesCustomerLocationLogosTenantLocation: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @example architecto */
+                tenant: string;
+                /** @example architecto */
+                location: string;
             };
             cookie?: never;
         };
@@ -23037,31 +28059,7 @@ export interface operations {
             };
             cookie?: never;
         };
-        requestBody: {
-            content: {
-                "application/json": {
-                    /**
-                     * @description Must match the regex /^[a-z0-9_]+$/. Must not be greater than 64 characters.
-                     * @example b
-                     */
-                    value: string;
-                    /**
-                     * @description Must not be greater than 120 characters.
-                     * @example n
-                     */
-                    label: string;
-                    /**
-                     * @description Must not be greater than 32 characters.
-                     * @example g
-                     */
-                    color?: string | null;
-                    /** @example 16 */
-                    order?: number;
-                    /** @example true */
-                    active?: boolean;
-                };
-            };
-        };
+        requestBody?: never;
         responses: {
             401: {
                 headers: {
@@ -23127,26 +28125,7 @@ export interface operations {
             };
             cookie?: never;
         };
-        requestBody?: {
-            content: {
-                "application/json": {
-                    /**
-                     * @description Must not be greater than 120 characters.
-                     * @example b
-                     */
-                    label?: string;
-                    /**
-                     * @description Must not be greater than 32 characters.
-                     * @example n
-                     */
-                    color?: string | null;
-                    /** @example 16 */
-                    order?: number;
-                    /** @example false */
-                    active?: boolean;
-                };
-            };
-        };
+        requestBody?: never;
         responses: {
             401: {
                 headers: {
@@ -23191,6 +28170,140 @@ export interface operations {
             };
         };
     };
+    getCustomerPhases: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    postCustomerPhases: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    putCustomerPhasesReorder: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": {
+                    /**
+                     * @description Must be a valid UUID.
+                     * @example [
+                     *       "6ff8f7f6-1eb3-3525-be4a-3932c805afed"
+                     *     ]
+                     */
+                    ids?: string[];
+                };
+            };
+        };
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    putCustomerPhasesId: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The ID of the customer phase.
+                 * @example BcECdBDA-CdED-bFEA-CbCE-BcCdeBfbbebc
+                 */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    deleteCustomerPhasesId: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The ID of the customer phase.
+                 * @example BcECdBDA-CdED-bFEA-CbCE-BcCdeBfbbebc
+                 */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
     getLocations: {
         parameters: {
             query?: never;
@@ -23202,18 +28315,24 @@ export interface operations {
             content: {
                 "application/json": {
                     /**
+                     * @description NUMMER-2: exact reference-number lookup (e.g. VE-001) — takes precedence
+                     *     over every other filter when present. Must not be greater than 32 characters.
+                     * @example b
+                     */
+                    ref?: string;
+                    /**
                      * @description Must be between -90 and 90.
                      * @example -89
                      */
                     lat?: number;
                     /**
                      * @description Must be between -180 and 180.
-                     * @example -179
+                     * @example -180
                      */
                     lng?: number;
                     /**
                      * @description Must be between 1 and 500.
-                     * @example 1
+                     * @example 2
                      */
                     radius?: number;
                 };
@@ -23244,65 +28363,85 @@ export interface operations {
             content: {
                 "application/json": {
                     /**
-                     * @description Must not be greater than 255 characters.
+                     * @description Must not be greater than 32 characters.
                      * @example b
                      */
+                    color?: string | null;
+                    /**
+                     * @description Must not be greater than 40 characters.
+                     * @example n
+                     */
+                    icon?: string | null;
+                    /**
+                     * @description Must not be greater than 255 characters.
+                     * @example g
+                     */
                     name: string;
-                    /** @example false */
+                    /** @example true */
                     is_default?: boolean;
                     /**
                      * @description Must not be greater than 255 characters.
-                     * @example n
+                     * @example z
                      */
                     street?: string | null;
                     /**
                      * @description Must not be greater than 32 characters.
-                     * @example g
+                     * @example m
                      */
                     house_number?: string | null;
                     /**
                      * @description Must not be greater than 32 characters.
-                     * @example z
+                     * @example i
                      */
                     house_number_suffix?: string | null;
                     /**
                      * @description Must not be greater than 16 characters.
-                     * @example miyvdljnikhwaykc
+                     * @example yvdljnikhwaykcmy
+                     */
+                    postcode?: string | null;
+                    /**
+                     * @description Must not be greater than 16 characters.
+                     * @example uwpwlvqwrsitcpsc
                      */
                     postal_code?: string | null;
                     /**
                      * @description Must not be greater than 120 characters.
-                     * @example m
+                     * @example q
                      */
                     city?: string | null;
                     /**
                      * @description Must not be greater than 120 characters.
-                     * @example y
+                     * @example l
+                     */
+                    province?: string | null;
+                    /**
+                     * @description Must not be greater than 120 characters.
+                     * @example d
                      */
                     country?: string | null;
                     /**
                      * @description Must not be greater than 32 characters.
-                     * @example u
+                     * @example z
                      */
                     coc_number?: string | null;
                     /**
                      * @description Must not be greater than 32 characters.
-                     * @example w
+                     * @example s
                      */
                     vat_number?: string | null;
                     /**
                      * @description Must not be greater than 255 characters.
-                     * @example p
+                     * @example n
                      */
                     contact_name?: string | null;
                     /**
                      * @description Must not be greater than 64 characters.
-                     * @example w
+                     * @example r
                      */
                     phone?: string | null;
                     /**
                      * @description Must be a valid email address. Must not be greater than 255 characters.
-                     * @example emelie.baumbach@example.net
+                     * @example feeney.demarcus@example.com
                      */
                     email?: string | null;
                 };
@@ -23367,63 +28506,83 @@ export interface operations {
             content: {
                 "application/json": {
                     /**
-                     * @description Must not be greater than 255 characters.
+                     * @description Must not be greater than 32 characters.
                      * @example b
+                     */
+                    color?: string | null;
+                    /**
+                     * @description Must not be greater than 40 characters.
+                     * @example n
+                     */
+                    icon?: string | null;
+                    /**
+                     * @description Must not be greater than 255 characters.
+                     * @example g
                      */
                     name?: string;
                     /**
                      * @description Must not be greater than 255 characters.
-                     * @example n
+                     * @example z
                      */
                     street?: string | null;
                     /**
                      * @description Must not be greater than 32 characters.
-                     * @example g
+                     * @example m
                      */
                     house_number?: string | null;
                     /**
                      * @description Must not be greater than 32 characters.
-                     * @example z
+                     * @example i
                      */
                     house_number_suffix?: string | null;
                     /**
                      * @description Must not be greater than 16 characters.
-                     * @example miyvdljnikhwaykc
+                     * @example yvdljnikhwaykcmy
+                     */
+                    postcode?: string | null;
+                    /**
+                     * @description Must not be greater than 16 characters.
+                     * @example uwpwlvqwrsitcpsc
                      */
                     postal_code?: string | null;
                     /**
                      * @description Must not be greater than 120 characters.
-                     * @example m
+                     * @example q
                      */
                     city?: string | null;
                     /**
                      * @description Must not be greater than 120 characters.
-                     * @example y
+                     * @example l
+                     */
+                    province?: string | null;
+                    /**
+                     * @description Must not be greater than 120 characters.
+                     * @example d
                      */
                     country?: string | null;
                     /**
                      * @description Must not be greater than 32 characters.
-                     * @example u
+                     * @example z
                      */
                     coc_number?: string | null;
                     /**
                      * @description Must not be greater than 32 characters.
-                     * @example w
+                     * @example s
                      */
                     vat_number?: string | null;
                     /**
                      * @description Must not be greater than 255 characters.
-                     * @example p
+                     * @example n
                      */
                     contact_name?: string | null;
                     /**
                      * @description Must not be greater than 64 characters.
-                     * @example w
+                     * @example r
                      */
                     phone?: string | null;
                     /**
                      * @description Must be a valid email address. Must not be greater than 255 characters.
-                     * @example emelie.baumbach@example.net
+                     * @example feeney.demarcus@example.com
                      */
                     email?: string | null;
                 };
@@ -23499,6 +28658,168 @@ export interface operations {
             };
         };
     };
+    getCustomerBlacklistReasons: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    postCustomerBlacklistReasons: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    getCustomerBlacklistReasonsId: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The ID of the customer blacklist reason.
+                 * @example architecto
+                 */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    putCustomerBlacklistReasonsId: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The ID of the customer blacklist reason.
+                 * @example architecto
+                 */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    deleteCustomerBlacklistReasonsId: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The ID of the customer blacklist reason.
+                 * @example architecto
+                 */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    putCustomerBlacklistReasonsReorder: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": {
+                    /**
+                     * @description Must be a valid UUID.
+                     * @example [
+                     *       "6ff8f7f6-1eb3-3525-be4a-3932c805afed"
+                     *     ]
+                     */
+                    ids?: string[];
+                };
+            };
+        };
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
     getCustomers: {
         parameters: {
             query?: never;
@@ -23532,109 +28853,196 @@ export interface operations {
             content: {
                 "application/json": {
                     /**
-                     * @description Must not be greater than 255 characters.
+                     * @description Must not be greater than 64 characters.
                      * @example b
+                     */
+                    coc_number?: string | null;
+                    /**
+                     * @description Must not be greater than 64 characters.
+                     * @example n
+                     */
+                    vat_number?: string | null;
+                    /**
+                     * @description Must not be greater than 255 characters.
+                     * @example g
                      */
                     name: string;
                     /**
                      * @description Must not be greater than 255 characters.
-                     * @example n
+                     * @example z
                      */
                     debtor_number?: string | null;
                     /**
+                     * @description Must match an existing stored value.
+                     * @example architecto
+                     */
+                    phase?: string;
+                    /**
                      * @description Must be a valid UUID. Must match an existing stored value.
-                     * @example 6b72fe4a-5b40-307c-bc24-f79acf9a1bb9
+                     * @example a4855dc5-0acb-33c3-b921-f4291f719ca0
                      */
                     status_id?: string | null;
                     /**
                      * @description Must be a valid UUID. Must match an existing stored value.
-                     * @example 977e5426-8d13-3824-86aa-b092f8ae52c5
+                     * @example c90237e9-ced5-3af6-88ea-84aeaa148878
                      */
                     industry_id?: string | null;
                     /**
+                     * @description Must match an existing stored value.
+                     * @example architecto
+                     */
+                    blacklist_reason?: string | null;
+                    /**
                      * @description Must be a valid UUID.
-                     * @example d6fa562b-acd5-35ff-babb-d11194d3737b
+                     * @example a4855dc5-0acb-33c3-b921-f4291f719ca0
                      */
                     owner_id?: string | null;
                     /**
                      * @description Must be a valid UUID. Must match an existing stored value.
-                     * @example 5707ca55-f609-3528-be8b-1baeaee1567e
+                     * @example c90237e9-ced5-3af6-88ea-84aeaa148878
                      */
                     location_id?: string | null;
                     /**
+                     * @description Must be a valid UUID. Must match an existing stored value.
+                     * @example [
+                     *       "a1a0a47d-e8c3-3cf0-8e6e-c1ff9dca5d1f"
+                     *     ]
+                     */
+                    branch_ids?: string[];
+                    /**
+                     * @description Must be a valid UUID. Must match an existing stored value.
+                     * @example 21c4122b-d554-3723-966c-6d723ea5293f
+                     */
+                    billing_branch_id?: string | null;
+                    /**
                      * @description Must not be greater than 120 characters.
-                     * @example j
+                     * @example l
                      */
                     cost_center?: string | null;
                     /**
                      * @description Must be a valid email address.
-                     * @example lafayette.considine@example.com
+                     * @example idickens@example.org
                      */
                     billing_email?: string | null;
                     /**
+                     * @description Must be a valid date.
+                     * @example 2026-08-13T18:23:29
+                     */
+                    contract_end_date?: string | null;
+                    /**
                      * @description Must not be greater than 255 characters.
-                     * @example a
+                     * @example h
                      */
                     website?: string | null;
                     /**
                      * @description Must be at least 0.
-                     * @example 50
+                     * @example 87
                      */
                     employee_count?: number | null;
-                    /**
-                     * @description Must not be greater than 255 characters.
-                     * @example k
-                     */
-                    tone_of_voice?: string | null;
                     /** @example Eius et animi quos velit et. */
                     description?: string | null;
-                    /** @example architecto */
-                    recruitment_problems?: string | null;
-                    /**
-                     * @description Must not be greater than 255 characters.
-                     * @example http://bailey.com/
-                     */
-                    privacy_policy_url?: string | null;
-                    /**
-                     * @description Must not be greater than 120 characters.
-                     * @example m
-                     */
-                    city?: string | null;
-                    /** @example true */
-                    hide_company_name?: boolean;
-                    /** @example true */
-                    has_career_page?: boolean;
-                    /** @example false */
-                    show_in_my_vacancies?: boolean;
-                    /** @example true */
-                    exclude_from_sourcing?: boolean;
-                    /**
-                     * @description Must not be greater than 255 characters.
-                     * @example i
-                     */
-                    slug?: string | null;
-                    /**
-                     * @description Must not be greater than 255 characters.
-                     * @example y
-                     */
-                    avatar?: string | null;
                     /**
                      * @description Must not be greater than 255 characters.
                      * @example v
                      */
-                    banner_image?: string | null;
+                    street?: string | null;
+                    /**
+                     * @description Must not be greater than 20 characters.
+                     * @example dljnikhwaykcmyuw
+                     */
+                    house_number?: string | null;
+                    /**
+                     * @description Must not be greater than 20 characters.
+                     * @example pwlvqwrsitcpscql
+                     */
+                    house_number_suffix?: string | null;
+                    /**
+                     * @description Must not be greater than 20 characters.
+                     * @example dzsnrwtujwvlxjkl
+                     */
+                    postcode?: string | null;
+                    /**
+                     * @description Must not be greater than 120 characters.
+                     * @example q
+                     */
+                    city?: string | null;
+                    /**
+                     * @description Must not be greater than 120 characters.
+                     * @example p
+                     */
+                    state?: string | null;
+                    /**
+                     * @description Must not be greater than 120 characters.
+                     * @example p
+                     */
+                    country?: string | null;
+                    /**
+                     * @description Must not be greater than 120 characters.
+                     * @example w
+                     */
+                    province?: string | null;
+                    /**
+                     * @description Must not be greater than 40 characters.
+                     * @example q
+                     */
+                    billing_po_box?: string | null;
+                    /**
+                     * @description Must not be greater than 255 characters.
+                     * @example b
+                     */
+                    billing_street?: string | null;
+                    /**
+                     * @description Must not be greater than 20 characters.
+                     * @example ewtnnoqitpxntltc
+                     */
+                    billing_house_number?: string | null;
+                    /**
+                     * @description Must not be greater than 20 characters.
+                     * @example vipojsausgioglrb
+                     */
+                    billing_house_number_suffix?: string | null;
+                    /**
+                     * @description Must not be greater than 20 characters.
+                     * @example chgsrzyhcttwbkmk
+                     */
+                    billing_postcode?: string | null;
+                    /**
+                     * @description Must not be greater than 120 characters.
+                     * @example f
+                     */
+                    billing_city?: string | null;
+                    /**
+                     * @description Must not be greater than 120 characters.
+                     * @example t
+                     */
+                    billing_country?: string | null;
+                    /** @example true */
+                    hide_company_name?: boolean;
+                    /** @example false */
+                    has_career_page?: boolean;
+                    /** @example true */
+                    show_in_my_vacancies?: boolean;
+                    /** @example true */
+                    exclude_from_sourcing?: boolean;
                     /**
                      * @description Must be a valid email address.
-                     * @example jdach@example.org
+                     * @example tobin24@example.org
                      */
                     email?: string | null;
                     /**
                      * @description Must not be greater than 50 characters.
-                     * @example i
+                     * @example t
                      */
                     phone?: string | null;
                     /** @example null */
                     custom_fields?: Record<string, never> | null;
+                    /**
+                     * @description Must match an existing stored value.
+                     * @example [
+                     *       "architecto"
+                     *     ]
+                     */
+                    contract_types?: string[];
                 };
             };
         };
@@ -23719,109 +29127,196 @@ export interface operations {
             content: {
                 "application/json": {
                     /**
-                     * @description Must not be greater than 255 characters.
+                     * @description Must not be greater than 64 characters.
                      * @example b
+                     */
+                    coc_number?: string | null;
+                    /**
+                     * @description Must not be greater than 64 characters.
+                     * @example n
+                     */
+                    vat_number?: string | null;
+                    /**
+                     * @description Must not be greater than 255 characters.
+                     * @example g
                      */
                     name?: string;
                     /**
                      * @description Must not be greater than 255 characters.
-                     * @example n
+                     * @example z
                      */
                     debtor_number?: string | null;
                     /**
+                     * @description Must match an existing stored value.
+                     * @example architecto
+                     */
+                    phase?: string;
+                    /**
                      * @description Must be a valid UUID. Must match an existing stored value.
-                     * @example 6b72fe4a-5b40-307c-bc24-f79acf9a1bb9
+                     * @example a4855dc5-0acb-33c3-b921-f4291f719ca0
                      */
                     status_id?: string | null;
                     /**
                      * @description Must be a valid UUID. Must match an existing stored value.
-                     * @example 977e5426-8d13-3824-86aa-b092f8ae52c5
+                     * @example c90237e9-ced5-3af6-88ea-84aeaa148878
                      */
                     industry_id?: string | null;
                     /**
+                     * @description Must match an existing stored value.
+                     * @example architecto
+                     */
+                    blacklist_reason?: string | null;
+                    /**
                      * @description Must be a valid UUID.
-                     * @example d6fa562b-acd5-35ff-babb-d11194d3737b
+                     * @example a4855dc5-0acb-33c3-b921-f4291f719ca0
                      */
                     owner_id?: string | null;
                     /**
                      * @description Must be a valid UUID. Must match an existing stored value.
-                     * @example 5707ca55-f609-3528-be8b-1baeaee1567e
+                     * @example c90237e9-ced5-3af6-88ea-84aeaa148878
                      */
                     location_id?: string | null;
                     /**
+                     * @description Must be a valid UUID. Must match an existing stored value.
+                     * @example [
+                     *       "a1a0a47d-e8c3-3cf0-8e6e-c1ff9dca5d1f"
+                     *     ]
+                     */
+                    branch_ids?: string[];
+                    /**
+                     * @description Must be a valid UUID. Must match an existing stored value.
+                     * @example 21c4122b-d554-3723-966c-6d723ea5293f
+                     */
+                    billing_branch_id?: string | null;
+                    /**
                      * @description Must not be greater than 120 characters.
-                     * @example j
+                     * @example l
                      */
                     cost_center?: string | null;
                     /**
                      * @description Must be a valid email address.
-                     * @example lafayette.considine@example.com
+                     * @example idickens@example.org
                      */
                     billing_email?: string | null;
                     /**
+                     * @description Must be a valid date.
+                     * @example 2026-08-13T18:23:29
+                     */
+                    contract_end_date?: string | null;
+                    /**
                      * @description Must not be greater than 255 characters.
-                     * @example a
+                     * @example h
                      */
                     website?: string | null;
                     /**
                      * @description Must be at least 0.
-                     * @example 50
+                     * @example 87
                      */
                     employee_count?: number | null;
-                    /**
-                     * @description Must not be greater than 255 characters.
-                     * @example k
-                     */
-                    tone_of_voice?: string | null;
                     /** @example Eius et animi quos velit et. */
                     description?: string | null;
-                    /** @example architecto */
-                    recruitment_problems?: string | null;
-                    /**
-                     * @description Must not be greater than 255 characters.
-                     * @example http://bailey.com/
-                     */
-                    privacy_policy_url?: string | null;
-                    /**
-                     * @description Must not be greater than 120 characters.
-                     * @example m
-                     */
-                    city?: string | null;
-                    /** @example false */
-                    hide_company_name?: boolean;
-                    /** @example true */
-                    has_career_page?: boolean;
-                    /** @example true */
-                    show_in_my_vacancies?: boolean;
-                    /** @example true */
-                    exclude_from_sourcing?: boolean;
-                    /**
-                     * @description Must not be greater than 255 characters.
-                     * @example i
-                     */
-                    slug?: string | null;
-                    /**
-                     * @description Must not be greater than 255 characters.
-                     * @example y
-                     */
-                    avatar?: string | null;
                     /**
                      * @description Must not be greater than 255 characters.
                      * @example v
                      */
-                    banner_image?: string | null;
+                    street?: string | null;
+                    /**
+                     * @description Must not be greater than 20 characters.
+                     * @example dljnikhwaykcmyuw
+                     */
+                    house_number?: string | null;
+                    /**
+                     * @description Must not be greater than 20 characters.
+                     * @example pwlvqwrsitcpscql
+                     */
+                    house_number_suffix?: string | null;
+                    /**
+                     * @description Must not be greater than 20 characters.
+                     * @example dzsnrwtujwvlxjkl
+                     */
+                    postcode?: string | null;
+                    /**
+                     * @description Must not be greater than 120 characters.
+                     * @example q
+                     */
+                    city?: string | null;
+                    /**
+                     * @description Must not be greater than 120 characters.
+                     * @example p
+                     */
+                    state?: string | null;
+                    /**
+                     * @description Must not be greater than 120 characters.
+                     * @example p
+                     */
+                    country?: string | null;
+                    /**
+                     * @description Must not be greater than 120 characters.
+                     * @example w
+                     */
+                    province?: string | null;
+                    /**
+                     * @description Must not be greater than 40 characters.
+                     * @example q
+                     */
+                    billing_po_box?: string | null;
+                    /**
+                     * @description Must not be greater than 255 characters.
+                     * @example b
+                     */
+                    billing_street?: string | null;
+                    /**
+                     * @description Must not be greater than 20 characters.
+                     * @example ewtnnoqitpxntltc
+                     */
+                    billing_house_number?: string | null;
+                    /**
+                     * @description Must not be greater than 20 characters.
+                     * @example vipojsausgioglrb
+                     */
+                    billing_house_number_suffix?: string | null;
+                    /**
+                     * @description Must not be greater than 20 characters.
+                     * @example chgsrzyhcttwbkmk
+                     */
+                    billing_postcode?: string | null;
+                    /**
+                     * @description Must not be greater than 120 characters.
+                     * @example f
+                     */
+                    billing_city?: string | null;
+                    /**
+                     * @description Must not be greater than 120 characters.
+                     * @example t
+                     */
+                    billing_country?: string | null;
+                    /** @example true */
+                    hide_company_name?: boolean;
+                    /** @example false */
+                    has_career_page?: boolean;
+                    /** @example false */
+                    show_in_my_vacancies?: boolean;
+                    /** @example true */
+                    exclude_from_sourcing?: boolean;
                     /**
                      * @description Must be a valid email address.
-                     * @example jdach@example.org
+                     * @example tobin24@example.org
                      */
                     email?: string | null;
                     /**
                      * @description Must not be greater than 50 characters.
-                     * @example i
+                     * @example t
                      */
                     phone?: string | null;
                     /** @example null */
                     custom_fields?: Record<string, never> | null;
+                    /**
+                     * @description Must match an existing stored value.
+                     * @example [
+                     *       "architecto"
+                     *     ]
+                     */
+                    contract_types?: string[];
                 };
             };
         };
@@ -23923,6 +29418,117 @@ export interface operations {
             };
         };
     };
+    getCustomersCustomerNotes: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The customer.
+                 * @example architecto
+                 */
+                customer: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    postCustomersCustomerNotes: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The customer.
+                 * @example architecto
+                 */
+                customer: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /**
+                     * @description Must not be greater than 2000 characters.
+                     * @example b
+                     */
+                    text: string;
+                    /**
+                     * @description NOTE-TAAL-1: optional language tag of the note body ('nl', 'en-GB') —
+                     *     FE spellcheck + Koios AI language hint. Must not be greater than 8 characters.
+                     * @example ngzmiyvd
+                     */
+                    language?: string | null;
+                    /**
+                     * @description CONTACT-NOTITIES-1: the person the note is about. Optional (a company-level
+                     *     note has none). The exists rule runs on the TENANT connection AND pins
+                     *     customer_id to THIS customer, so another customer's contact id is a 422 and
+                     *     never an IDOR — the id from the request never implies access (§5). Must be a valid UUID.
+                     * @example add3503c-ebff-3875-93af-b8c6a695762b
+                     */
+                    customer_contact_id?: string | null;
+                    /**
+                     * @description NOTES-LOC-DEPT-1: the OPTIONAL deeper link — a note may hang off one
+                     *     location or one department of THIS customer instead of the company as a
+                     *     whole. Format only here (uuid) — WHETHER it actually belongs to this
+                     *     customer (and, for a department, to the named location) is the
+                     *     consistency invariant a model event enforces (CustomerTreeLinkGuard),
+                     *     never a controller check, so it holds on every write path (§2/§12). Must be a valid UUID.
+                     * @example c3b6b42e-3a0f-3935-b28d-cb767f8a2a0a
+                     */
+                    customer_location_id?: string | null;
+                    /**
+                     * @description Must be a valid UUID.
+                     * @example 51c7cf5e-fac2-3ac6-8ef8-61e6050503af
+                     */
+                    customer_department_id?: string | null;
+                    /**
+                     * @description NOTE-FIELDS-1: the type was hardcoded to 'general' while the column AND the
+                     *     tenant lookup both exist — every klant-notitie landed untyped and the timeline
+                     *     could never colour or filter one. Validated against the TENANT lookup, never a
+                     *     hardcoded list, so a renamed/added tenant type keeps working (§3).
+                     *     NOTE-TYPES-3-GAP-1: scope depends on WHO the note is about — a note filed
+                     *     against a contactpersoon validates against entity=contact (NoteTypeLookupSeeder
+                     *     seeds a distinct set: call/meeting/email/complaint), a company-level note
+                     *     against entity=customer; plus the legacy entity=NULL rows either way. Before
+                     *     this fix every note validated against entity=customer regardless of
+                     *     customer_contact_id, so the entity=contact types seeded for "ieder zijn eigen"
+                     *     (NOTE-TYPES-3) could never actually be picked — a settings tab that landed
+                     *     nowhere on the one write path that could use it without a schema change.
+                     * @example architecto
+                     */
+                    type?: string | null;
+                };
+            };
+        };
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
     getCustomersCustomerPlanningSummary: {
         parameters: {
             query?: never;
@@ -23974,6 +29580,49 @@ export interface operations {
                 /**
                  * @description The customer.
                  * @example architecto
+                 */
+                customer: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": {
+                    /**
+                     * @description Must be a valid UUID.
+                     * @example 6ff8f7f6-1eb3-3525-be4a-3932c805afed
+                     */
+                    location_id?: string;
+                    /**
+                     * @description Must be a valid UUID.
+                     * @example 6b72fe4a-5b40-307c-bc24-f79acf9a1bb9
+                     */
+                    department_id?: string;
+                };
+            };
+        };
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    getCustomersCustomerTimeline: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The customer.
+                 * @example BcECdBDA-CdED-bFEA-CbCE-BcCdeBfbbebc
                  */
                 customer: string;
             };
@@ -24043,6 +29692,13 @@ export interface operations {
                      * @example 6ff8f7f6-1eb3-3525-be4a-3932c805afed
                      */
                     location_id: string;
+                    /**
+                     * @description FACTURATIE-VOLGT-VESTIGING-1: couple AND make it the billing branch in one
+                     *     call — the "new klant, this is where it invoices" flow, so the FE does not
+                     *     have to fire two requests and risk landing halfway.
+                     * @example true
+                     */
+                    is_billing?: boolean;
                 };
             };
         };
@@ -24093,6 +29749,39 @@ export interface operations {
             };
         };
     };
+    putCustomersCustomerBranchesBranchBilling: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The customer.
+                 * @example BcECdBDA-CdED-bFEA-CbCE-BcCdeBfbbebc
+                 */
+                customer: string;
+                /**
+                 * @description The branch.
+                 * @example BcECdBDA-CdED-bFEA-CbCE-BcCdeBfbbebc
+                 */
+                branch: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
     postCustomersCustomerGeocode: {
         parameters: {
             query?: never;
@@ -24121,146 +29810,14 @@ export interface operations {
             };
         };
     };
-    postCustomersBulkOwner: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        /** @example Unauthenticated. */
-                        message?: string;
-                    };
-                };
-            };
-        };
-    };
-    postCustomersBulkGeocode: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        /** @example Unauthenticated. */
-                        message?: string;
-                    };
-                };
-            };
-        };
-    };
-    postCustomersBulkStatus: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        /** @example Unauthenticated. */
-                        message?: string;
-                    };
-                };
-            };
-        };
-    };
-    postCustomersBulkTagsRemove: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        /** @example Unauthenticated. */
-                        message?: string;
-                    };
-                };
-            };
-        };
-    };
-    postCustomersBulkTags: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        /** @example Unauthenticated. */
-                        message?: string;
-                    };
-                };
-            };
-        };
-    };
-    postCustomersBulkNotes: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        /** @example Unauthenticated. */
-                        message?: string;
-                    };
-                };
-            };
-        };
-    };
-    postCustomersCustomerNotes: {
+    postCustomersCustomerMerge: {
         parameters: {
             query?: never;
             header?: never;
             path: {
                 /**
                  * @description The customer.
-                 * @example architecto
+                 * @example BcECdBDA-CdED-bFEA-CbCE-BcCdeBfbbebc
                  */
                 customer: string;
             };
@@ -24270,496 +29827,14 @@ export interface operations {
             content: {
                 "application/json": {
                     /**
-                     * @description Must not be greater than 2000 characters.
-                     * @example b
-                     */
-                    text: string;
-                };
-            };
-        };
-        responses: {
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        /** @example Unauthenticated. */
-                        message?: string;
-                    };
-                };
-            };
-        };
-    };
-    postCustomersBulkArchive: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        /** @example Unauthenticated. */
-                        message?: string;
-                    };
-                };
-            };
-        };
-    };
-    getCustomersCustomerDocuments: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /**
-                 * @description The customer.
-                 * @example architecto
-                 */
-                customer: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        /** @example Unauthenticated. */
-                        message?: string;
-                    };
-                };
-            };
-        };
-    };
-    postCustomersCustomerDocuments: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /**
-                 * @description The customer.
-                 * @example architecto
-                 */
-                customer: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "multipart/form-data": {
-                    /**
-                     * Format: binary
-                     * @description Must be a file. Must not be greater than 20480 kilobytes.
-                     */
-                    file: string;
-                    /**
-                     * @description 20 MB; size enforced server-side. Must not be greater than 255 characters.
-                     * @example b
-                     */
-                    name?: string | null;
-                    /**
-                     * @description Must not be greater than 100 characters.
-                     * @example n
-                     */
-                    type?: string | null;
-                };
-            };
-        };
-        responses: {
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        /** @example Unauthenticated. */
-                        message?: string;
-                    };
-                };
-            };
-        };
-    };
-    getCustomersCustomerDocumentsDocumentDownload: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /**
-                 * @description The customer.
-                 * @example architecto
-                 */
-                customer: string;
-                /**
-                 * @description The document.
-                 * @example architecto
-                 */
-                document: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        /** @example Unauthenticated. */
-                        message?: string;
-                    };
-                };
-            };
-        };
-    };
-    deleteCustomersCustomerDocumentsDocument: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /**
-                 * @description The customer.
-                 * @example architecto
-                 */
-                customer: string;
-                /**
-                 * @description The document.
-                 * @example architecto
-                 */
-                document: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        /** @example Unauthenticated. */
-                        message?: string;
-                    };
-                };
-            };
-        };
-    };
-    patchCustomersCustomerDocumentsDocument: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /**
-                 * @description The customer.
-                 * @example architecto
-                 */
-                customer: string;
-                /**
-                 * @description The document.
-                 * @example architecto
-                 */
-                document: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        /** @example Unauthenticated. */
-                        message?: string;
-                    };
-                };
-            };
-        };
-    };
-    getContacts: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: {
-            content: {
-                "application/json": {
-                    /**
-                     * @description Must not be greater than 255 characters.
-                     * @example b
-                     */
-                    q?: string;
-                    /**
-                     * @description Must be between 1 and 200.
-                     * @example 2
-                     */
-                    per_page?: number;
-                };
-            };
-        };
-        responses: {
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        /** @example Unauthenticated. */
-                        message?: string;
-                    };
-                };
-            };
-        };
-    };
-    getContactsId: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /**
-                 * @description The ID of the contact.
-                 * @example architecto
-                 */
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        /** @example Unauthenticated. */
-                        message?: string;
-                    };
-                };
-            };
-        };
-    };
-    getDepartments: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: {
-            content: {
-                "application/json": {
-                    /**
-                     * @description Must not be greater than 255 characters.
-                     * @example b
-                     */
-                    q?: string;
-                    /**
-                     * @description Must be between 1 and 200.
-                     * @example 2
-                     */
-                    per_page?: number;
-                };
-            };
-        };
-        responses: {
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        /** @example Unauthenticated. */
-                        message?: string;
-                    };
-                };
-            };
-        };
-    };
-    getCustomersCustomerIdLocations: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @example architecto */
-                customerId: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        /** @example Unauthenticated. */
-                        message?: string;
-                    };
-                };
-            };
-        };
-    };
-    postCustomersCustomerIdLocations: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @example architecto */
-                customerId: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        /** @example Unauthenticated. */
-                        message?: string;
-                    };
-                };
-            };
-        };
-    };
-    getCustomersCustomerIdDepartments: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @example architecto */
-                customerId: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        /** @example Unauthenticated. */
-                        message?: string;
-                    };
-                };
-            };
-        };
-    };
-    postCustomersCustomerIdDepartments: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @example architecto */
-                customerId: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": {
-                    /**
-                     * @description Must be a valid UUID.
+                     * @description The survivor. Must differ from {customer} — merging into itself would
+                     *     soft-delete the very row it just absorbed. Must be a valid UUID.
                      * @example 6ff8f7f6-1eb3-3525-be4a-3932c805afed
                      */
-                    location_id: string;
-                    /**
-                     * @description Must not be greater than 255 characters.
-                     * @example g
-                     */
-                    name: string;
-                    /** @example Eius et animi quos velit et. */
-                    description?: string | null;
-                    /**
-                     * @description DEPT-BILLING-1: cost centre + billing e-mail (lowest inheritance level). Must not be greater than 64 characters.
-                     * @example v
-                     */
-                    cost_center?: string | null;
-                    /**
-                     * @description Must be a valid email address. Must not be greater than 255 characters.
-                     * @example jdach@example.org
-                     */
-                    billing_email?: string | null;
-                    /**
-                     * @description SUB-STATUS-1: lifecycle status — the tenant-scoped lookup uuid. Must be a valid UUID. Must match an existing stored value.
-                     * @example cd1eb1ea-4697-3b9a-9dd0-988044a83af6
-                     */
-                    status_id?: string | null;
-                    /** @example null */
-                    custom_fields?: Record<string, never> | null;
+                    target_customer_id: string;
                 };
             };
         };
-        responses: {
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        /** @example Unauthenticated. */
-                        message?: string;
-                    };
-                };
-            };
-        };
-    };
-    getCustomersCustomerIdContacts: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @example architecto */
-                customerId: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        /** @example Unauthenticated. */
-                        message?: string;
-                    };
-                };
-            };
-        };
-    };
-    postCustomersCustomerIdContacts: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @example architecto */
-                customerId: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
         responses: {
             401: {
                 headers: {
@@ -24988,6 +30063,1375 @@ export interface operations {
             };
         };
     };
+    postCustomersBulkOwner: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    postCustomersBulkGeocode: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    postCustomersBulkStatus: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    postCustomersBulkPhase: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    postCustomersBulkTagsRemove: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    postCustomersBulkTags: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    postCustomersBulkNotes: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    postCustomersBulkArchive: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    getCustomersCustomerDocuments: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The customer.
+                 * @example architecto
+                 */
+                customer: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    postCustomersCustomerDocuments: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The customer.
+                 * @example architecto
+                 */
+                customer: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "multipart/form-data": {
+                    /**
+                     * Format: binary
+                     * @description Must be a file. Must not be greater than 20480 kilobytes.
+                     */
+                    file: string;
+                    /**
+                     * @description 20 MB; size enforced server-side. Must not be greater than 255 characters.
+                     * @example b
+                     */
+                    name?: string | null;
+                    /**
+                     * @description DOCTYPES-1 (Danny 2026-07-28): the type must be a real, ACTIVE lookup value
+                     *     for THIS entity — free text is how "Contract", "contract" and "Kontrakt"
+                     *     end up as three types nobody can filter on. The scoped lookup already
+                     *     existed (candidate_document_types.entity); only the upload never used it.
+                     *     Global rows (entity = null) count for every entity, same as the picker.
+                     * @example null
+                     */
+                    type?: string;
+                    /**
+                     * @description DOC-EXPIRY-1: only validated for entities whose document table has the
+                     *     column — vacancy_documents has none, so `key => null` would 500 on insert.
+                     * @example null
+                     */
+                    expires_at?: string;
+                    /**
+                     * @description DOCS-LOC-DEPT-1: the OPTIONAL deeper link — format only (uuid) here.
+                     *     WHETHER it actually belongs to this customer (and a department to the
+                     *     named location) is the consistency invariant a model event enforces
+                     *     (CustomerTreeLinkGuard), never a controller check (§2/§12).
+                     * @example null
+                     */
+                    customer_location_id?: string;
+                    /** @example null */
+                    customer_department_id?: string;
+                };
+            };
+        };
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    getCustomersCustomerDocumentsDocumentDownload: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The customer.
+                 * @example architecto
+                 */
+                customer: string;
+                /**
+                 * @description The document.
+                 * @example architecto
+                 */
+                document: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    deleteCustomersCustomerDocumentsDocument: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The customer.
+                 * @example architecto
+                 */
+                customer: string;
+                /**
+                 * @description The document.
+                 * @example architecto
+                 */
+                document: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    patchCustomersCustomerDocumentsDocument: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The customer.
+                 * @example architecto
+                 */
+                customer: string;
+                /**
+                 * @description The document.
+                 * @example architecto
+                 */
+                document: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /**
+                     * @description The document's display name.
+                     * @example Contract 2027.pdf
+                     */
+                    name: string;
+                    /**
+                     * @description The document's validity date (Y-m-d).
+                     * @example 2027-06-01
+                     */
+                    expires_at?: string;
+                    /**
+                     * @description The optional linked location's UUID.
+                     * @example 0198c1b2-3a4d-4e5f-8b9c-1a2b3c4d5e6f
+                     */
+                    customer_location_id?: string;
+                    /**
+                     * @description The optional linked department's UUID.
+                     * @example 0198c1b2-3a4d-4e5f-8b9c-1a2b3c4d5e6f
+                     */
+                    customer_department_id?: string;
+                };
+            };
+        };
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    getContacts: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": {
+                    /**
+                     * @description Must not be greater than 255 characters.
+                     * @example b
+                     */
+                    q?: string;
+                    /**
+                     * @description Must be between 1 and 200.
+                     * @example 2
+                     */
+                    per_page?: number;
+                };
+            };
+        };
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    getContactsId: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The ID of the contact.
+                 * @example architecto
+                 */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    getDepartments: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": {
+                    /**
+                     * @description Must not be greater than 255 characters.
+                     * @example b
+                     */
+                    q?: string;
+                    /**
+                     * @description Must be between 1 and 200.
+                     * @example 2
+                     */
+                    per_page?: number;
+                };
+            };
+        };
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    getCustomersCustomerIdContactsIdConversations: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @example architecto */
+                customerId: string;
+                /**
+                 * @description The ID of the contact.
+                 * @example architecto
+                 */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": {
+                    /**
+                     * @description Must be at least 1. Must not be greater than 200.
+                     * @example 1
+                     */
+                    per_page?: number;
+                };
+            };
+        };
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    getCustomersCustomerIdLocations: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @example architecto */
+                customerId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    postCustomersCustomerIdLocations: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @example architecto */
+                customerId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    getCustomersCustomerIdDepartments: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @example architecto */
+                customerId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    postCustomersCustomerIdDepartments: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @example architecto */
+                customerId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /**
+                     * @description Must be a valid UUID.
+                     * @example 6ff8f7f6-1eb3-3525-be4a-3932c805afed
+                     */
+                    location_id: string;
+                    /**
+                     * @description Must not be greater than 255 characters.
+                     * @example g
+                     */
+                    name: string;
+                    /** @example Eius et animi quos velit et. */
+                    description?: string | null;
+                    /**
+                     * @description DEPT-BILLING-1: cost centre + billing e-mail (lowest inheritance level). Must not be greater than 64 characters.
+                     * @example v
+                     */
+                    cost_center?: string | null;
+                    /**
+                     * @description Must be a valid email address. Must not be greater than 255 characters.
+                     * @example jdach@example.org
+                     */
+                    billing_email?: string | null;
+                    /**
+                     * @description SUB-STATUS-1: lifecycle status — the tenant-scoped lookup uuid. Must be a valid UUID. Must match an existing stored value.
+                     * @example cd1eb1ea-4697-3b9a-9dd0-988044a83af6
+                     */
+                    status_id?: string | null;
+                    /** @example null */
+                    custom_fields?: Record<string, never> | null;
+                };
+            };
+        };
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    getCustomersCustomerIdContacts: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @example architecto */
+                customerId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    postCustomersCustomerIdContacts: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @example architecto */
+                customerId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    getCustomersCustomerIdLocationsIdNotes: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @example architecto */
+                customerId: string;
+                /**
+                 * @description The ID of the location.
+                 * @example architecto
+                 */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    getCustomersCustomerIdDepartmentsIdNotes: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @example architecto */
+                customerId: string;
+                /**
+                 * @description The ID of the department.
+                 * @example architecto
+                 */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    getCustomersCustomerIdLocationsIdDocuments: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @example architecto */
+                customerId: string;
+                /**
+                 * @description The ID of the location.
+                 * @example architecto
+                 */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    getCustomersCustomerIdDepartmentsIdDocuments: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @example architecto */
+                customerId: string;
+                /**
+                 * @description The ID of the department.
+                 * @example architecto
+                 */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    getCustomersCustomerIdLocationsIdActivity: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @example architecto */
+                customerId: string;
+                /**
+                 * @description The ID of the location.
+                 * @example architecto
+                 */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    getCustomersCustomerIdDepartmentsIdActivity: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @example architecto */
+                customerId: string;
+                /**
+                 * @description The ID of the department.
+                 * @example architecto
+                 */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    getCustomersCustomerIdContactsIdActivity: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @example architecto */
+                customerId: string;
+                /**
+                 * @description The ID of the contact.
+                 * @example architecto
+                 */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    postCustomersCustomerIdLocationsIdArchive: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @example architecto */
+                customerId: string;
+                /**
+                 * @description The ID of the location.
+                 * @example architecto
+                 */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    postCustomersCustomerIdLocationsIdRestore: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @example architecto */
+                customerId: string;
+                /**
+                 * @description The ID of the location.
+                 * @example architecto
+                 */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    postCustomersCustomerIdLocationsIdGeocode: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @example architecto */
+                customerId: string;
+                /**
+                 * @description The ID of the location.
+                 * @example architecto
+                 */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    postCustomersCustomerIdLocationsIdLogo: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @example architecto */
+                customerId: string;
+                /**
+                 * @description The ID of the location.
+                 * @example architecto
+                 */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "multipart/form-data": {
+                    /**
+                     * Format: binary
+                     * @description Must be a file. Must not be greater than 2048 kilobytes.
+                     */
+                    logo: string;
+                };
+            };
+        };
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    postCustomersCustomerIdDepartmentsIdArchive: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @example architecto */
+                customerId: string;
+                /**
+                 * @description The ID of the department.
+                 * @example architecto
+                 */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    postCustomersCustomerIdDepartmentsIdRestore: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @example architecto */
+                customerId: string;
+                /**
+                 * @description The ID of the department.
+                 * @example architecto
+                 */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    postCustomersCustomerIdContactsIdArchive: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @example architecto */
+                customerId: string;
+                /**
+                 * @description The ID of the contact.
+                 * @example architecto
+                 */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    postCustomersCustomerIdContactsIdRestore: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @example architecto */
+                customerId: string;
+                /**
+                 * @description The ID of the contact.
+                 * @example architecto
+                 */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    postCustomersCustomerIdContactsIdMerge: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @example architecto */
+                customerId: string;
+                /**
+                 * @description The ID of the contact.
+                 * @example architecto
+                 */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /**
+                     * @description The survivor. Must differ from {id} — merging a contact into itself would
+                     *     delete the very row it just absorbed. Must be a valid UUID.
+                     * @example 6ff8f7f6-1eb3-3525-be4a-3932c805afed
+                     */
+                    target_contact_id: string;
+                };
+            };
+        };
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    putCustomersCustomerIdContactsIdLocationsLocationIdPrimary: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @example architecto */
+                customerId: string;
+                /**
+                 * @description The ID of the contact.
+                 * @example architecto
+                 */
+                id: string;
+                /** @example architecto */
+                locationId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    putCustomersCustomerIdContactsIdDepartmentsDepartmentIdPrimary: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @example architecto */
+                customerId: string;
+                /**
+                 * @description The ID of the contact.
+                 * @example architecto
+                 */
+                id: string;
+                /** @example architecto */
+                departmentId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    postCustomersCustomerIdLocationsIdMerge: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @example architecto */
+                customerId: string;
+                /**
+                 * @description The ID of the location.
+                 * @example architecto
+                 */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /**
+                     * @description Must differ from {id} — merging a location into itself would soft-delete
+                     *     the very row it just absorbed. Must be a valid UUID.
+                     * @example 6ff8f7f6-1eb3-3525-be4a-3932c805afed
+                     */
+                    target_id: string;
+                };
+            };
+        };
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    postCustomersCustomerIdDepartmentsIdMerge: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @example architecto */
+                customerId: string;
+                /**
+                 * @description The ID of the department.
+                 * @example architecto
+                 */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /**
+                     * @description Must differ from {id} — merging a department into itself would
+                     *     soft-delete the very row it just absorbed. Must be a valid UUID.
+                     * @example 6ff8f7f6-1eb3-3525-be4a-3932c805afed
+                     */
+                    target_id: string;
+                };
+            };
+        };
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
     getContactFunctions: {
         parameters: {
             query?: never;
@@ -25017,22 +31461,7 @@ export interface operations {
             path?: never;
             cookie?: never;
         };
-        requestBody: {
-            content: {
-                "application/json": {
-                    /**
-                     * @description Must not be greater than 120 characters.
-                     * @example b
-                     */
-                    name: string;
-                    /**
-                     * @description Must be at least 0.
-                     * @example 39
-                     */
-                    position?: number;
-                };
-            };
-        };
+        requestBody?: never;
         responses: {
             401: {
                 headers: {
@@ -25160,24 +31589,7 @@ export interface operations {
             };
             cookie?: never;
         };
-        requestBody?: {
-            content: {
-                "application/json": {
-                    /**
-                     * @description Must not be greater than 120 characters.
-                     * @example b
-                     */
-                    name?: string;
-                    /**
-                     * @description Must be at least 0.
-                     * @example 39
-                     */
-                    position?: number;
-                    /** @example false */
-                    active?: boolean;
-                };
-            };
-        };
+        requestBody?: never;
         responses: {
             401: {
                 headers: {
@@ -25554,7 +31966,7 @@ export interface operations {
                      *     ]
                      */
                     faq_ids?: string[];
-                    /** @example false */
+                    /** @example true */
                     use_knowledge?: boolean;
                     /**
                      * @description Must be at least 1. Must not be greater than 50.
@@ -25685,7 +32097,7 @@ export interface operations {
                     /** @example null */
                     conversation_history?: ({
                         /**
-                         * @example user
+                         * @example assistant
                          * @enum {string}
                          */
                         role: "user" | "assistant";
@@ -25977,7 +32389,7 @@ export interface operations {
                      *     ]
                      */
                     faq_ids?: string[];
-                    /** @example false */
+                    /** @example true */
                     use_knowledge?: boolean;
                     /**
                      * @description Must be at least 1. Must not be greater than 50.
@@ -26256,7 +32668,7 @@ export interface operations {
                     model?: string;
                     /**
                      * @description Confirmation of the cost estimate (the confirm_costs reply).
-                     * @example true
+                     * @example false
                      */
                     confirm_costs?: boolean;
                     /**
@@ -26289,11 +32701,341 @@ export interface operations {
             };
         };
     };
-    getAiKoiosSettings: {
+    postAiKoiosNotesAssist: {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /**
+                     * @description Must not be greater than 20000 characters.
+                     * @example b
+                     */
+                    text: string;
+                    /**
+                     * @description Must not be greater than 8 characters.
+                     * @example ngzmiyvd
+                     */
+                    language?: string | null;
+                    /**
+                     * @example actions
+                     * @enum {string}
+                     */
+                    mode: "improve" | "summarize" | "actions";
+                };
+            };
+        };
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    postAiKoiosGenerate: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /** @example architecto */
+                    entity: string;
+                    /**
+                     * @description id XOR fields: exactly one of the two data sources may be supplied. This field is required when <code>fields</code> is not present. Must be a valid UUID.
+                     * @example a4855dc5-0acb-33c3-b921-f4291f719ca0
+                     */
+                    id?: string;
+                    /**
+                     * @example [
+                     *       "architecto"
+                     *     ]
+                     */
+                    fields?: string[];
+                    /**
+                     * @description Must not be greater than 2000 characters.
+                     * @example n
+                     */
+                    instructions?: string | null;
+                };
+            };
+        };
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    postAiKoiosConversationsIdAssist: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The ID of the conversation.
+                 * @example architecto
+                 */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /**
+                     * @example actions
+                     * @enum {string}
+                     */
+                    mode: "summarize" | "actions";
+                    /**
+                     * @description Must not be greater than 8 characters.
+                     * @example bngzmiyv
+                     */
+                    language?: string | null;
+                };
+            };
+        };
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    postAiKoiosNotesActionsExecute: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /**
+                     * @description Must have at least 1 items. Must not have more than 20 items.
+                     * @example [
+                     *       []
+                     *     ]
+                     */
+                    items: {
+                        /**
+                         * @description Must not be greater than 200 characters.
+                         * @example n
+                         */
+                        title: string;
+                        /**
+                         * @description K3-BRUG-1: application actions joined the closed vocabulary; the two
+                         *     O-17 selection decisions in it are WIZARD_ONLY (enforced below, 403).
+                         *     V18: the vacancy actions joined the same closed vocabulary; publishing is
+                         *     Auto-allowed, vacancy_start_interviews is WIZARD_ONLY (fan-out, see bridge).
+                         *     K4 (match_*) + K5 (calllist, opportunity_*) joined the closed vocabulary.
+                         *     match_terminate is WIZARD_ONLY (ends a placement); the rest are Auto-allowed
+                         *     neutral acts. calllist is a template-lane type; the others take the service lane.
+                         * @example vacancy_publish
+                         * @enum {string}
+                         */
+                        type: "task" | "whatsapp" | "email" | "appointment" | "notification" | "application_reject" | "application_propose" | "application_stage_move" | "interview_start" | "vacancy_publish" | "vacancy_start_interviews" | "vacancy_create_task" | "match_checkin" | "match_extend" | "match_terminate" | "calllist" | "opportunity_next_step" | "opportunity_follow_up";
+                        /**
+                         * @description Must be a valid date in the format <code>Y-m-d</code>.
+                         * @example 2026-08-13
+                         */
+                        due_date?: string | null;
+                        /**
+                         * @description Red-team: per-item confirm (wizard-only NEEDS it) + template params.
+                         * @example false
+                         */
+                        confirmed?: boolean;
+                        /**
+                         * @description Must be a valid date.
+                         * @example 2026-08-13T18:23:30
+                         */
+                        start?: string | null;
+                        /**
+                         * @description Must not be greater than 1000 characters.
+                         * @example g
+                         */
+                        message?: string | null;
+                        /**
+                         * @description Eindveeg: template placeholders (recipient/appointment owner + email/
+                         *     notification/appointment content) — without these the seeded templates
+                         *     render empty and Laravel strips any unruled key before the bridge sees it. Must not be greater than 64 characters.
+                         * @example z
+                         */
+                        candidate_id?: string | null;
+                        /**
+                         * @description Must not be greater than 200 characters.
+                         * @example m
+                         */
+                        subject?: string | null;
+                        /**
+                         * @description Must not be greater than 2000 characters.
+                         * @example i
+                         */
+                        body?: string | null;
+                        /**
+                         * @description Must not be greater than 255 characters.
+                         * @example y
+                         */
+                        location?: string | null;
+                        /**
+                         * @description Must not be greater than 500 characters.
+                         * @example v
+                         */
+                        notes?: string | null;
+                        /**
+                         * @description Must not be greater than 500 characters.
+                         * @example d
+                         */
+                        note_excerpt?: string | null;
+                        /**
+                         * @description Application-action params — required-per-type is the bridge's 422 net. Must not be greater than 64 characters.
+                         * @example l
+                         */
+                        application_id?: string | null;
+                        /**
+                         * @description Must not be greater than 64 characters.
+                         * @example j
+                         */
+                        rejection_reason_id?: string | null;
+                        /**
+                         * @description Must not be greater than 64 characters.
+                         * @example n
+                         */
+                        contact_id?: string | null;
+                        /**
+                         * @description Must not be greater than 64 characters.
+                         * @example i
+                         */
+                        phase_key?: string | null;
+                        /**
+                         * @description V18 vacancy-action param — required-per-type is the bridge's 422 net. Must not be greater than 64 characters.
+                         * @example k
+                         */
+                        vacancy_id?: string | null;
+                        /**
+                         * @description K4 match-action params + K5 outreach/opportunity params — required-per-type
+                         *     is the bridge's 422 net. `message` (reused for check-in/follow-up) and
+                         *     `candidate_id`/`title` are already ruled above. Must not be greater than 64 characters.
+                         * @example h
+                         */
+                        match_id?: string | null;
+                        /**
+                         * @description Must be a valid date in the format <code>Y-m-d</code>.
+                         * @example 2026-08-13
+                         */
+                        end_date?: string | null;
+                        /**
+                         * @description Must not be greater than 255 characters.
+                         * @example w
+                         */
+                        reason?: string | null;
+                        /**
+                         * @description Must not be greater than 200 characters.
+                         * @example a
+                         */
+                        campaign_name?: string | null;
+                        /**
+                         * @description Must not be greater than 64 characters.
+                         * @example y
+                         */
+                        opportunity_id?: string | null;
+                    }[];
+                    /** @example true */
+                    confirmed?: boolean;
+                    /** @example null */
+                    source?: {
+                        /**
+                         * @description Must not be greater than 64 characters.
+                         * @example b
+                         */
+                        note_id?: string;
+                    };
+                };
+            };
+        };
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    postAiKoiosActionsIdConfirm: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The ID of the action.
+                 * @example architecto
+                 */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    postAiKoiosActionsIdCancel: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The ID of the action.
+                 * @example architecto
+                 */
+                id: string;
+            };
             cookie?: never;
         };
         requestBody?: never;
@@ -26326,6 +33068,28 @@ export interface operations {
                 };
             };
         };
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    getAiKoiosSettings: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
         responses: {
             401: {
                 headers: {
@@ -26428,6 +33192,67 @@ export interface operations {
             };
         };
     };
+    getAiKoiosUsageBilling: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": {
+                    /**
+                     * @description Must be a valid date in the format <code>Y-m</code>.
+                     * @example 2026-08
+                     */
+                    month?: string;
+                };
+            };
+        };
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    getAiKoiosForYou: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": {
+                    /** @example null */
+                    days?: string;
+                };
+            };
+        };
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
     getAiKoiosAdminUsage: {
         parameters: {
             query?: never;
@@ -26472,7 +33297,7 @@ export interface operations {
             };
         };
     };
-    getSettingsMatching: {
+    getWhatsappMessageTypes: {
         parameters: {
             query?: never;
             header?: never;
@@ -26494,7 +33319,29 @@ export interface operations {
             };
         };
     };
-    putSettingsMatching: {
+    postWhatsappMessageTypes: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    putWhatsappMessageTypesReorder: {
         parameters: {
             query?: never;
             header?: never;
@@ -26504,21 +33351,72 @@ export interface operations {
         requestBody?: {
             content: {
                 "application/json": {
-                    /** @example architecto */
-                    strictness?: string;
                     /**
-                     * @description MATCH-PLACEMENT-1 fase 4: the placement approval mode (Settings → Matches).
-                     * @example architecto
+                     * @description Must be a valid UUID.
+                     * @example [
+                     *       "6ff8f7f6-1eb3-3525-be4a-3932c805afed"
+                     *     ]
                      */
-                    approval_mode?: string;
-                    /**
-                     * @description MATCH-PLACEMENT-1 fase A: kostprijs→verkooptarief factor; nullable clears it. Must be at least 0.01.
-                     * @example 39
-                     */
-                    conversion_factor?: number | null;
+                    ids?: string[];
                 };
             };
         };
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    putWhatsappMessageTypesId: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The ID of the whatsapp message type.
+                 * @example architecto
+                 */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    deleteWhatsappMessageTypesId: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The ID of the whatsapp message type.
+                 * @example architecto
+                 */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
         responses: {
             401: {
                 headers: {
@@ -26712,18 +33610,21 @@ export interface operations {
                      */
                     function_title?: string | null;
                     /**
-                     * @description Must not be greater than 120 characters.
-                     * @example z
+                     * @description D.3: the CAO must be a real lookup value here too — price_agreements.cao
+                     *     stores that same slug, so a typo would silently propose the wildcard rate.
+                     *     No carve-out: this is a read-only FILTER, not a row being edited — nothing
+                     *     is stored, and the frontend treats a failed proposal as "no hint" (§3B).
+                     * @example null
                      */
-                    cao?: string | null;
+                    cao?: string;
                     /**
                      * @description Must not be greater than 60 characters.
-                     * @example m
+                     * @example z
                      */
                     scale?: string | null;
                     /**
                      * @description Must not be greater than 60 characters.
-                     * @example i
+                     * @example m
                      */
                     step?: string | null;
                 };
@@ -26759,7 +33660,8 @@ export interface operations {
                      */
                     page?: number;
                     /**
-                     * @description Must be between 1 and 200.
+                     * @description PER-PAGE-CAP-1: 500, the candidate-list precedent — the FE virtual
+                     *     scroller asks big pages; the queries stay indexed + resource-bounded. Must be between 1 and 500.
                      * @example 2
                      */
                     per_page?: number;
@@ -26780,30 +33682,51 @@ export interface operations {
                      */
                     vacancy_id?: string;
                     /**
-                     * @description Must be a valid UUID.
+                     * @description KLANT-MATCH-TAB-1: the customer drilldown's Match sub-tab — matches placed
+                     *     AT this customer. `matches.customer_id` is a plain column (MATCH-PLACEMENT-1),
+                     *     so this is a direct filter, no join. exists() is tenant-scoped by connection
+                     *     (isolation), same hygiene as the branch_id filter below. Must be a valid UUID.
                      * @example 21c4122b-d554-3723-966c-6d723ea5293f
+                     */
+                    customer_id?: string;
+                    /**
+                     * @description LOC-DEPT-TAB-1: the customer drilldown's LOCATION/DEPARTMENT drilldown —
+                     *     one level deeper than the customer_id filter above, same single-value shape.
+                     *     Feeds the Matches sub-tab when the caller is browsing one site/afdeling
+                     *     rather than the whole customer. Must be a valid UUID.
+                     * @example add3503c-ebff-3875-93af-b8c6a695762b
+                     */
+                    customer_location_id?: string;
+                    /**
+                     * @description Must be a valid UUID.
+                     * @example c3b6b42e-3a0f-3935-b28d-cb767f8a2a0a
+                     */
+                    customer_department_id?: string;
+                    /**
+                     * @description Must be a valid UUID.
+                     * @example 51c7cf5e-fac2-3ac6-8ef8-61e6050503af
                      */
                     owner_id?: string;
                     /**
                      * @description Must be a valid UUID.
                      * @example [
-                     *       "add3503c-ebff-3875-93af-b8c6a695762b"
+                     *       "d207102d-bce0-31f9-8c36-aa9cf4cfe75a"
                      *     ]
                      */
                     branch_id?: string[];
                     /**
                      * @description Must not be greater than 64 characters.
-                     * @example n
+                     * @example y
                      */
                     status?: string;
                     /**
-                     * @example active
+                     * @example none
                      * @enum {string}
                      */
                     contract_status?: "none" | "sent" | "active" | "ended";
                     /**
                      * @description Must not be greater than 255 characters.
-                     * @example i
+                     * @example k
                      */
                     search?: string;
                     /**
@@ -26811,146 +33734,8 @@ export interface operations {
                      * @example false
                      */
                     include_archived?: boolean;
-                    /** @example false */
+                    /** @example true */
                     archived?: boolean;
-                };
-            };
-        };
-        responses: {
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        /** @example Unauthenticated. */
-                        message?: string;
-                    };
-                };
-            };
-        };
-    };
-    postMatches: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": {
-                    /**
-                     * @description Must be a valid UUID. Must match an existing stored value.
-                     * @example 6ff8f7f6-1eb3-3525-be4a-3932c805afed
-                     */
-                    candidate_id: string;
-                    /**
-                     * @description Must be a valid UUID. Must match an existing stored value.
-                     * @example 6b72fe4a-5b40-307c-bc24-f79acf9a1bb9
-                     */
-                    vacancy_id?: string | null;
-                    /** @example null */
-                    custom_fields?: Record<string, never> | null;
-                    /**
-                     * @description Must be a valid UUID.
-                     * @example 977e5426-8d13-3824-86aa-b092f8ae52c5
-                     */
-                    owner_id?: string | null;
-                    /**
-                     * @description Must be a valid UUID. Must match an existing stored value.
-                     * @example d6fa562b-acd5-35ff-babb-d11194d3737b
-                     */
-                    customer_id?: string | null;
-                    /**
-                     * @description Must be a valid UUID. Must match an existing stored value.
-                     * @example 5707ca55-f609-3528-be8b-1baeaee1567e
-                     */
-                    customer_location_id?: string | null;
-                    /**
-                     * @description Must be a valid UUID. Must match an existing stored value.
-                     * @example 947170af-7488-3f30-a16d-723355a9502f
-                     */
-                    customer_department_id?: string | null;
-                    /**
-                     * @description Must be a valid UUID. Must match an existing stored value.
-                     * @example cd1eb1ea-4697-3b9a-9dd0-988044a83af6
-                     */
-                    contact_id?: string | null;
-                    /**
-                     * @description Must be a valid UUID. Must match an existing stored value.
-                     * @example 5e4f00df-4238-35bd-9edc-0b98dc359c80
-                     */
-                    branch_id?: string | null;
-                    /**
-                     * @description Must not be greater than 255 characters.
-                     * @example a
-                     */
-                    function_title?: string | null;
-                    /**
-                     * @description Must not be greater than 120 characters.
-                     * @example y
-                     */
-                    contract_type?: string | null;
-                    /**
-                     * @description Must be a valid date.
-                     * @example 2026-07-27T21:50:38
-                     */
-                    start_date?: string | null;
-                    /**
-                     * @description Must be a valid date. Must be a date after or equal to <code>start_date</code>.
-                     * @example 2052-08-19
-                     */
-                    end_date?: string | null;
-                    /**
-                     * @description Must be at least 0. Must not be greater than 168.
-                     * @example 22
-                     */
-                    hours_per_week?: number | null;
-                    /**
-                     * @description Must not be greater than 120 characters.
-                     * @example g
-                     */
-                    cao?: string | null;
-                    /**
-                     * @description Must not be greater than 60 characters.
-                     * @example z
-                     */
-                    scale?: string | null;
-                    /**
-                     * @description Must not be greater than 60 characters.
-                     * @example m
-                     */
-                    step?: string | null;
-                    /**
-                     * @description Must not be greater than 60 characters.
-                     * @example i
-                     */
-                    surcharge?: string | null;
-                    /**
-                     * @description Must be at least 0.
-                     * @example 76
-                     */
-                    purchase_rate?: number | null;
-                    /**
-                     * @description Must be at least 0.
-                     * @example 60
-                     */
-                    sell_rate?: number | null;
-                    /**
-                     * @description Must not be greater than 120 characters.
-                     * @example d
-                     */
-                    cost_center?: string | null;
-                    /**
-                     * @description Must be a valid email address.
-                     * @example [
-                     *       "jermaine.tillman@example.org"
-                     *     ]
-                     */
-                    billing_emails?: string[];
-                    /** @example architecto */
-                    remarks?: string | null;
                 };
             };
         };
@@ -26996,7 +33781,7 @@ export interface operations {
             };
         };
     };
-    putMatchesMatch: {
+    deleteMatchesMatch: {
         parameters: {
             query?: never;
             header?: never;
@@ -27009,115 +33794,83 @@ export interface operations {
             };
             cookie?: never;
         };
-        requestBody?: {
+        requestBody?: never;
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    getMatchesMatchNotes: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The match.
+                 * @example BcECdBDA-CdED-bFEA-CbCE-BcCdeBfbbebc
+                 */
+                match: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    postMatchesMatchNotes: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The match.
+                 * @example BcECdBDA-CdED-bFEA-CbCE-BcCdeBfbbebc
+                 */
+                match: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
             content: {
                 "application/json": {
                     /**
-                     * @example closed
-                     * @enum {string}
+                     * @description Must not be greater than 5000 characters.
+                     * @example b
                      */
-                    status?: "open" | "closed";
-                    /** @example null */
-                    custom_fields?: Record<string, never> | null;
+                    body: string;
                     /**
-                     * @description Must be a valid UUID.
-                     * @example 6ff8f7f6-1eb3-3525-be4a-3932c805afed
+                     * @description NOTE-TYPES-2: validate against the TENANT lookup (note_types), scoped to
+                     *     THIS entity (plus legacy entity=NULL rows) — a bare exists rule accepted a
+                     *     slug seeded for a DIFFERENT entity before (NOTES-3-GAP-1), so a match note
+                     *     must not accept e.g. a customer- or opportunity-only type.
+                     * @example null
                      */
-                    owner_id?: string | null;
+                    type?: string | null;
                     /**
-                     * @description Must be a valid UUID. Must match an existing stored value.
-                     * @example 6b72fe4a-5b40-307c-bc24-f79acf9a1bb9
+                     * @description NOTE-TAAL-1: optional per-note language code for FE spellcheck + AI. Must not be greater than 8 characters.
+                     * @example ngzmiyvd
                      */
-                    customer_id?: string | null;
-                    /**
-                     * @description Must be a valid UUID. Must match an existing stored value.
-                     * @example 977e5426-8d13-3824-86aa-b092f8ae52c5
-                     */
-                    customer_location_id?: string | null;
-                    /**
-                     * @description Must be a valid UUID. Must match an existing stored value.
-                     * @example d6fa562b-acd5-35ff-babb-d11194d3737b
-                     */
-                    customer_department_id?: string | null;
-                    /**
-                     * @description Must be a valid UUID. Must match an existing stored value.
-                     * @example 5707ca55-f609-3528-be8b-1baeaee1567e
-                     */
-                    contact_id?: string | null;
-                    /**
-                     * @description Must be a valid UUID. Must match an existing stored value.
-                     * @example 947170af-7488-3f30-a16d-723355a9502f
-                     */
-                    branch_id?: string | null;
-                    /**
-                     * @description Must not be greater than 255 characters.
-                     * @example i
-                     */
-                    function_title?: string | null;
-                    /**
-                     * @description Must not be greater than 120 characters.
-                     * @example k
-                     */
-                    contract_type?: string | null;
-                    /**
-                     * @description Must be a valid date.
-                     * @example 2026-07-27T21:50:38
-                     */
-                    start_date?: string | null;
-                    /**
-                     * @description Must be a valid date. Must be a date after or equal to <code>start_date</code>.
-                     * @example 2052-08-19
-                     */
-                    end_date?: string | null;
-                    /**
-                     * @description Must be at least 0. Must not be greater than 168.
-                     * @example 22
-                     */
-                    hours_per_week?: number | null;
-                    /**
-                     * @description Must not be greater than 120 characters.
-                     * @example g
-                     */
-                    cao?: string | null;
-                    /**
-                     * @description Must not be greater than 60 characters.
-                     * @example z
-                     */
-                    scale?: string | null;
-                    /**
-                     * @description Must not be greater than 60 characters.
-                     * @example m
-                     */
-                    step?: string | null;
-                    /**
-                     * @description Must not be greater than 60 characters.
-                     * @example i
-                     */
-                    surcharge?: string | null;
-                    /**
-                     * @description Must be at least 0.
-                     * @example 76
-                     */
-                    purchase_rate?: number | null;
-                    /**
-                     * @description Must be at least 0.
-                     * @example 60
-                     */
-                    sell_rate?: number | null;
-                    /**
-                     * @description Must not be greater than 120 characters.
-                     * @example d
-                     */
-                    cost_center?: string | null;
-                    /**
-                     * @description Must be a valid email address.
-                     * @example [
-                     *       "jermaine.tillman@example.org"
-                     *     ]
-                     */
-                    billing_emails?: string[];
-                    /** @example architecto */
-                    remarks?: string | null;
+                    language?: string | null;
                 };
             };
         };
@@ -27135,7 +33888,7 @@ export interface operations {
             };
         };
     };
-    deleteMatchesMatch: {
+    getMatchesMatchAdvice: {
         parameters: {
             query?: never;
             header?: never;
@@ -27245,16 +33998,16 @@ export interface operations {
                     hours_per_week?: number | null;
                     /**
                      * @description Must be a valid date.
-                     * @example 2026-07-27T21:50:38
+                     * @example 2026-08-13T18:23:29
                      */
                     start_date: string;
                     /**
                      * @description Must be a valid date. Must be a date after or equal to <code>start_date</code>.
-                     * @example 2052-08-19
+                     * @example 2052-09-05
                      */
                     end_date?: string | null;
                     /**
-                     * @description Must not be greater than 100 characters.
+                     * @description Must not be greater than 120 characters.
                      * @example n
                      */
                     contract_type: string;
@@ -27353,6 +34106,184 @@ export interface operations {
             };
         };
     };
+    postMatchesMatchRenew: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The match.
+                 * @example architecto
+                 */
+                match: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /**
+                     * @description The new end date; must be strictly after the match's current end date (Y-m-d).
+                     * @example 2027-03-01
+                     */
+                    new_end_date: string;
+                };
+            };
+        };
+        responses: {
+            /** @description Renewed */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data?: {
+                            /** @example 0198c1b2-3a4d-4e5f-8b9c-1a2b3c4d5e6f */
+                            id?: string;
+                            /** @example open */
+                            status?: string;
+                            /** @example 2027-03-01 */
+                            end_date?: string;
+                        };
+                    };
+                };
+            };
+            /** @description Match not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example No query results for model [App\Models\JobMatch]. */
+                        message?: string;
+                    };
+                };
+            };
+            /** @description End date not after current end date */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example De nieuwe einddatum moet na de huidige einddatum liggen. */
+                        message?: string;
+                        errors?: {
+                            /**
+                             * @example [
+                             *       "De nieuwe einddatum moet na de huidige einddatum liggen."
+                             *     ]
+                             */
+                            new_end_date?: string[];
+                        };
+                    };
+                };
+            };
+        };
+    };
+    postMatchesMatchTerminate: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The match.
+                 * @example architecto
+                 */
+                match: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /**
+                     * @description The stop reason's lookup slug (must exist in match_stop_reasons).
+                     * @example assignment_ended
+                     */
+                    stop_reason: string;
+                    /**
+                     * @description The date the match actually stops (Y-m-d).
+                     * @example 2027-01-15
+                     */
+                    effective_date: string;
+                    /**
+                     * @description The internal note explaining the termination (never logged, max 2000 chars).
+                     * @example Klant heeft de opdracht ingetrokken.
+                     */
+                    note?: string | null;
+                };
+            };
+        };
+        responses: {
+            /** @description Terminated */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data?: {
+                            /** @example 0198c1b2-3a4d-4e5f-8b9c-1a2b3c4d5e6f */
+                            id?: string;
+                            /** @example closed */
+                            status?: string;
+                            /** @example 2027-06-30 */
+                            end_date?: string;
+                            /** @example Opdracht beëindigd */
+                            stop_reason_label?: string;
+                            termination?: {
+                                /** @example assignment_ended */
+                                stop_reason?: string;
+                                /** @example Opdracht beëindigd */
+                                stop_reason_label?: string;
+                                /** @example 2027-01-15 */
+                                effective_date?: string;
+                                /** @example 0198c1b2-3a4d-4e5f-8b9c-1a2b3c4d5e6f */
+                                terminated_by?: string;
+                                /** @example 2027-01-15T09:00:00+00:00 */
+                                terminated_at?: string;
+                            };
+                        };
+                    };
+                };
+            };
+            /** @description Match not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example No query results for model [App\Models\JobMatch]. */
+                        message?: string;
+                    };
+                };
+            };
+            /** @description Validation error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example The stop reason field is required. */
+                        message?: string;
+                        errors?: {
+                            /**
+                             * @example [
+                             *       "The stop reason field is required."
+                             *     ]
+                             */
+                            stop_reason?: string[];
+                        };
+                    };
+                };
+            };
+        };
+    };
     postMatchesMatchRestore: {
         parameters: {
             query?: never;
@@ -27363,6 +34294,39 @@ export interface operations {
                  * @example BcECdBDA-CdED-bFEA-CbCE-BcCdeBfbbebc
                  */
                 match: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    deleteMatchesMatchNotesNote: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The match.
+                 * @example BcECdBDA-CdED-bFEA-CbCE-BcCdeBfbbebc
+                 */
+                match: string;
+                /**
+                 * @description The note.
+                 * @example architecto
+                 */
+                note: string;
             };
             cookie?: never;
         };
@@ -27579,6 +34543,50 @@ export interface operations {
             };
         };
     };
+    getMatchStopReasons: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    postMatchStopReasons: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
     putMatchStatusesReorder: {
         parameters: {
             query?: never;
@@ -27759,6 +34767,96 @@ export interface operations {
             };
         };
     };
+    putMatchStopReasonsReorder: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": {
+                    /**
+                     * @description Must be a valid UUID.
+                     * @example [
+                     *       "6ff8f7f6-1eb3-3525-be4a-3932c805afed"
+                     *     ]
+                     */
+                    ids?: string[];
+                };
+            };
+        };
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    putMatchStopReasonsId: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The ID of the match stop reason.
+                 * @example architecto
+                 */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    deleteMatchStopReasonsId: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The ID of the match stop reason.
+                 * @example architecto
+                 */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
     getVacanciesIdCandidateMatches: {
         parameters: {
             query?: never;
@@ -27802,13 +34900,28 @@ export interface operations {
                      */
                     contract_form?: string[];
                     /**
+                     * @description Must be at least 0.
+                     * @example 77
+                     */
+                    hours_per_week_min?: number;
+                    /**
+                     * @description Must be at least 0.
+                     * @example 8
+                     */
+                    hours_per_week_max?: number;
+                    /**
+                     * @description Must be a valid date.
+                     * @example 2026-08-13T18:23:28
+                     */
+                    available_from_before?: string;
+                    /**
                      * @description Must be at least 1.
-                     * @example 27
+                     * @example 43
                      */
                     page?: number;
                     /**
                      * @description Must be at least 1. Must not be greater than 100.
-                     * @example 15
+                     * @example 1
                      */
                     per_page?: number;
                 };
@@ -27899,13 +35012,28 @@ export interface operations {
                      */
                     contract_form?: string[];
                     /**
+                     * @description Must be at least 0.
+                     * @example 77
+                     */
+                    hours_per_week_min?: number;
+                    /**
+                     * @description Must be at least 0.
+                     * @example 8
+                     */
+                    hours_per_week_max?: number;
+                    /**
+                     * @description Must be a valid date.
+                     * @example 2026-08-13T18:23:29
+                     */
+                    available_from_before?: string;
+                    /**
                      * @description Must be at least 1.
-                     * @example 27
+                     * @example 43
                      */
                     page?: number;
                     /**
                      * @description Must be at least 1. Must not be greater than 100.
-                     * @example 15
+                     * @example 1
                      */
                     per_page?: number;
                 };
@@ -27925,7 +35053,7 @@ export interface operations {
             };
         };
     };
-    getOutreachCampaigns: {
+    getPushVapidKey: {
         parameters: {
             query?: never;
             header?: never;
@@ -27947,7 +35075,150 @@ export interface operations {
             };
         };
     };
-    postOutreachCampaigns: {
+    postPushSubscriptions: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /**
+                     * @description Push endpoints are long https-URLs; 500 mirrors the column contract. Must be a valid URL. Must not be greater than 500 characters.
+                     * @example b
+                     */
+                    endpoint: string;
+                    /** @example [] */
+                    keys: {
+                        /**
+                         * @description Must not be greater than 255 characters.
+                         * @example b
+                         */
+                        p256dh: string;
+                        /**
+                         * @description Must not be greater than 255 characters.
+                         * @example n
+                         */
+                        auth: string;
+                    };
+                };
+            };
+        };
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    deletePushSubscriptions: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /**
+                     * @description Must be a valid URL. Must not be greater than 500 characters.
+                     * @example b
+                     */
+                    endpoint: string;
+                };
+            };
+        };
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    getNotifications: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    postNotificationsSeen: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    getOpportunities: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    postOpportunities: {
         parameters: {
             query?: never;
             header?: never;
@@ -27961,32 +35232,104 @@ export interface operations {
                      * @description Must not be greater than 255 characters.
                      * @example b
                      */
-                    name: string;
+                    title: string;
                     /**
-                     * @example email
-                     * @enum {string}
+                     * @description Must not be greater than 20000 characters.
+                     * @example Et animi quos velit et fugiat.
                      */
-                    channel: "call" | "email" | "whatsapp";
+                    description?: string | null;
                     /**
-                     * @example active
-                     * @enum {string}
+                     * @description Must be a valid UUID. Must match an existing stored value.
+                     * @example 5707ca55-f609-3528-be8b-1baeaee1567e
                      */
-                    status?: "draft" | "active" | "done";
+                    customer_id?: string | null;
+                    /**
+                     * @description Must be a valid UUID. Must match an existing stored value.
+                     * @example 947170af-7488-3f30-a16d-723355a9502f
+                     */
+                    opportunity_stage_id?: string | null;
+                    /**
+                     * @description Must be a valid UUID. Must match an existing stored value.
+                     * @example cd1eb1ea-4697-3b9a-9dd0-988044a83af6
+                     */
+                    deal_type_id?: string | null;
+                    /**
+                     * @description Must be at least 0. Must not be greater than 99999999.99.
+                     * @example 14
+                     */
+                    value?: number | null;
+                    /**
+                     * @description Must be 3 characters.
+                     * @example way
+                     */
+                    currency?: string;
+                    /**
+                     * @description Must be a valid date.
+                     * @example 2026-08-13T18:23:29
+                     */
+                    expected_close_at?: string | null;
+                    /**
+                     * @description Must be a valid UUID.
+                     * @example e2398df3-051c-3810-a269-3a15e327b316
+                     */
+                    owner_id?: string | null;
+                    /**
+                     * @description Must be a valid UUID. Must match an existing stored value.
+                     * @example a232abbe-3006-3f67-bed4-124abab91dce
+                     */
+                    location_id?: string | null;
+                    /**
+                     * @description Must be a valid UUID. Must match an existing stored value.
+                     * @example bfc53181-d647-36b2-9080-f9c2b76006f4
+                     */
+                    customer_location_id?: string | null;
+                    /**
+                     * @description Must be at least 0. Must not be greater than 9999.99.
+                     * @example 25
+                     */
+                    hours?: number | null;
+                    /**
+                     * @example total
+                     * @enum {string|null}
+                     */
+                    hours_period?: "week" | "month" | "total" | null;
+                    /**
+                     * @description Must be a valid date.
+                     * @example 2026-08-13T18:23:29
+                     */
+                    start_date?: string | null;
+                    /**
+                     * @description Must be a valid date. Must be a date after or equal to <code>start_date</code>.
+                     * @example 2052-09-05
+                     */
+                    end_date?: string | null;
                     /**
                      * @description Must be a valid UUID. Must match an existing stored value.
                      * @example a4855dc5-0acb-33c3-b921-f4291f719ca0
                      */
-                    source_pool_id?: string | null;
+                    service_type_id?: string | null;
                     /**
                      * @description Must be a valid UUID. Must match an existing stored value.
                      * @example c90237e9-ced5-3af6-88ea-84aeaa148878
                      */
-                    from_pool_id?: string | null;
+                    agreement_type_id?: string | null;
                     /**
-                     * @description Must be a valid UUID.
+                     * @description Must be a valid UUID. Must match an existing stored value.
                      * @example a1a0a47d-e8c3-3cf0-8e6e-c1ff9dca5d1f
                      */
-                    owner_id?: string | null;
+                    department_id?: string | null;
+                    /**
+                     * @description Must be a valid UUID. Must match an existing stored value.
+                     * @example 21c4122b-d554-3723-966c-6d723ea5293f
+                     */
+                    contact_id?: string | null;
+                    /**
+                     * @description Must not be greater than 50 characters.
+                     * @example [
+                     *       "l"
+                     *     ]
+                     */
+                    tags?: string[];
                     /** @example null */
                     custom_fields?: Record<string, never> | null;
                 };
@@ -28006,13 +35349,38 @@ export interface operations {
             };
         };
     };
-    getOutreachCampaignsCampaign: {
+    getOpportunitiesStats: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    getOpportunitiesOpportunity: {
         parameters: {
             query?: never;
             header?: never;
             path: {
-                /** @example architecto */
-                campaign: string;
+                /**
+                 * @description The opportunity.
+                 * @example architecto
+                 */
+                opportunity: string;
             };
             cookie?: never;
         };
@@ -28031,13 +35399,16 @@ export interface operations {
             };
         };
     };
-    putOutreachCampaignsCampaign: {
+    putOpportunitiesOpportunity: {
         parameters: {
             query?: never;
             header?: never;
             path: {
-                /** @example architecto */
-                campaign: string;
+                /**
+                 * @description The opportunity.
+                 * @example architecto
+                 */
+                opportunity: string;
             };
             cookie?: never;
         };
@@ -28048,27 +35419,104 @@ export interface operations {
                      * @description Must not be greater than 255 characters.
                      * @example b
                      */
-                    name?: string;
+                    title?: string;
                     /**
-                     * @example call
-                     * @enum {string}
+                     * @description Must not be greater than 20000 characters.
+                     * @example Et animi quos velit et fugiat.
                      */
-                    channel?: "call" | "email" | "whatsapp";
+                    description?: string | null;
                     /**
-                     * @example active
-                     * @enum {string}
+                     * @description Must be a valid UUID. Must match an existing stored value.
+                     * @example 5707ca55-f609-3528-be8b-1baeaee1567e
                      */
-                    status?: "draft" | "active" | "done";
+                    customer_id?: string | null;
+                    /**
+                     * @description Must be a valid UUID. Must match an existing stored value.
+                     * @example 947170af-7488-3f30-a16d-723355a9502f
+                     */
+                    opportunity_stage_id?: string | null;
+                    /**
+                     * @description Must be a valid UUID. Must match an existing stored value.
+                     * @example cd1eb1ea-4697-3b9a-9dd0-988044a83af6
+                     */
+                    deal_type_id?: string | null;
+                    /**
+                     * @description Must be at least 0. Must not be greater than 99999999.99.
+                     * @example 14
+                     */
+                    value?: number | null;
+                    /**
+                     * @description Must be 3 characters.
+                     * @example way
+                     */
+                    currency?: string;
+                    /**
+                     * @description Must be a valid date.
+                     * @example 2026-08-13T18:23:29
+                     */
+                    expected_close_at?: string | null;
+                    /**
+                     * @description Must be a valid UUID.
+                     * @example e2398df3-051c-3810-a269-3a15e327b316
+                     */
+                    owner_id?: string | null;
+                    /**
+                     * @description Must be a valid UUID. Must match an existing stored value.
+                     * @example a232abbe-3006-3f67-bed4-124abab91dce
+                     */
+                    location_id?: string | null;
+                    /**
+                     * @description Must be a valid UUID. Must match an existing stored value.
+                     * @example bfc53181-d647-36b2-9080-f9c2b76006f4
+                     */
+                    customer_location_id?: string | null;
+                    /**
+                     * @description Must be at least 0. Must not be greater than 9999.99.
+                     * @example 25
+                     */
+                    hours?: number | null;
+                    /**
+                     * @example month
+                     * @enum {string|null}
+                     */
+                    hours_period?: "week" | "month" | "total" | null;
+                    /**
+                     * @description Must be a valid date.
+                     * @example 2026-08-13T18:23:29
+                     */
+                    start_date?: string | null;
+                    /**
+                     * @description Must be a valid date. Must be a date after or equal to <code>start_date</code>.
+                     * @example 2052-09-05
+                     */
+                    end_date?: string | null;
                     /**
                      * @description Must be a valid UUID. Must match an existing stored value.
                      * @example a4855dc5-0acb-33c3-b921-f4291f719ca0
                      */
-                    source_pool_id?: string | null;
+                    service_type_id?: string | null;
                     /**
-                     * @description Must be a valid UUID.
+                     * @description Must be a valid UUID. Must match an existing stored value.
                      * @example c90237e9-ced5-3af6-88ea-84aeaa148878
                      */
-                    owner_id?: string | null;
+                    agreement_type_id?: string | null;
+                    /**
+                     * @description Must be a valid UUID. Must match an existing stored value.
+                     * @example a1a0a47d-e8c3-3cf0-8e6e-c1ff9dca5d1f
+                     */
+                    department_id?: string | null;
+                    /**
+                     * @description Must be a valid UUID. Must match an existing stored value.
+                     * @example 21c4122b-d554-3723-966c-6d723ea5293f
+                     */
+                    contact_id?: string | null;
+                    /**
+                     * @description Must not be greater than 50 characters.
+                     * @example [
+                     *       "l"
+                     *     ]
+                     */
+                    tags?: string[];
                     /** @example null */
                     custom_fields?: Record<string, never> | null;
                 };
@@ -28088,13 +35536,16 @@ export interface operations {
             };
         };
     };
-    deleteOutreachCampaignsCampaign: {
+    deleteOpportunitiesOpportunity: {
         parameters: {
             query?: never;
             header?: never;
             path: {
-                /** @example architecto */
-                campaign: string;
+                /**
+                 * @description The opportunity.
+                 * @example architecto
+                 */
+                opportunity: string;
             };
             cookie?: never;
         };
@@ -28113,13 +35564,16 @@ export interface operations {
             };
         };
     };
-    getOutreachCampaignsCampaignStats: {
+    getOpportunitiesOpportunityNotes: {
         parameters: {
             query?: never;
             header?: never;
             path: {
-                /** @example architecto */
-                campaign: string;
+                /**
+                 * @description The opportunity.
+                 * @example architecto
+                 */
+                opportunity: string;
             };
             cookie?: never;
         };
@@ -28138,48 +35592,16 @@ export interface operations {
             };
         };
     };
-    postOutreachCampaignsCampaignGenerate: {
+    postOpportunitiesOpportunityNotes: {
         parameters: {
             query?: never;
             header?: never;
             path: {
-                /** @example architecto */
-                campaign: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: {
-            content: {
-                "application/json": {
-                    /**
-                     * @description Must be a valid UUID. Must match an existing stored value.
-                     * @example 6ff8f7f6-1eb3-3525-be4a-3932c805afed
-                     */
-                    pool_id?: string | null;
-                };
-            };
-        };
-        responses: {
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        /** @example Unauthenticated. */
-                        message?: string;
-                    };
-                };
-            };
-        };
-    };
-    patchOutreachTargetsTarget: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @example architecto */
-                target: string;
+                /**
+                 * @description The opportunity.
+                 * @example architecto
+                 */
+                opportunity: string;
             };
             cookie?: never;
         };
@@ -28187,20 +35609,25 @@ export interface operations {
             content: {
                 "application/json": {
                     /**
-                     * @example contacted
-                     * @enum {string}
+                     * @description Must not be greater than 5000 characters.
+                     * @example b
                      */
-                    status: "todo" | "contacted" | "skipped" | "answered";
+                    body: string;
                     /**
-                     * @description Must match an existing stored value.
-                     * @example architecto
+                     * @description NOTE-TYPES-2: validate against the TENANT lookup (note_types), not a
+                     *     hardcoded enum — a tenant/entity-scoped type must not 422.
+                     *     NOTE-TYPES-2: scoped to THIS entity (plus the legacy entity=NULL rows), the
+                     *     same way the customer note does it. A bare exists rule accepted a
+                     *     customer-only slug on a opportunity note, so the dropdown and the
+                     *     validator disagreed about what is a valid type here.
+                     * @example null
                      */
-                    outcome?: string | null;
+                    type?: string | null;
                     /**
-                     * @description Must not be greater than 2000 characters.
-                     * @example n
+                     * @description NOTE-TAAL-1: optional per-note language for FE spellcheck + AI. Must not be greater than 8 characters.
+                     * @example ngzmiyvd
                      */
-                    note?: string | null;
+                    language?: string | null;
                 };
             };
         };
@@ -28218,13 +35645,843 @@ export interface operations {
             };
         };
     };
-    postOutreachCampaignsCampaignRestore: {
+    getOpportunitiesOpportunityActivity: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The opportunity.
+                 * @example architecto
+                 */
+                opportunity: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    postOpportunitiesOpportunityRestore: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The opportunity.
+                 * @example architecto
+                 */
+                opportunity: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    postOpportunitiesBulkStage: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /**
+                     * @description Must be a valid UUID.
+                     * @example [
+                     *       "6ff8f7f6-1eb3-3525-be4a-3932c805afed"
+                     *     ]
+                     */
+                    opportunity_ids?: string[];
+                    /**
+                     * @description Must be a valid UUID. Must match an existing stored value.
+                     * @example 6b72fe4a-5b40-307c-bc24-f79acf9a1bb9
+                     */
+                    opportunity_stage_id: string;
+                };
+            };
+        };
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    postOpportunitiesBulkOwner: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": {
+                    /**
+                     * @description Must be a valid UUID.
+                     * @example [
+                     *       "6ff8f7f6-1eb3-3525-be4a-3932c805afed"
+                     *     ]
+                     */
+                    opportunity_ids?: string[];
+                    /**
+                     * @description Must be a valid UUID.
+                     * @example 6b72fe4a-5b40-307c-bc24-f79acf9a1bb9
+                     */
+                    owner_id?: string | null;
+                };
+            };
+        };
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    postOpportunitiesBulkClient: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": {
+                    /**
+                     * @description Must be a valid UUID.
+                     * @example [
+                     *       "6ff8f7f6-1eb3-3525-be4a-3932c805afed"
+                     *     ]
+                     */
+                    opportunity_ids?: string[];
+                    /**
+                     * @description Must be a valid UUID. Must match an existing stored value.
+                     * @example 6b72fe4a-5b40-307c-bc24-f79acf9a1bb9
+                     */
+                    customer_id?: string | null;
+                };
+            };
+        };
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    postOpportunitiesBulkTags: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    postOpportunitiesBulkTagsRemove: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    putOpportunitiesOpportunityNotesNote: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The opportunity.
+                 * @example architecto
+                 */
+                opportunity: string;
+                /**
+                 * @description The note.
+                 * @example architecto
+                 */
+                note: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /**
+                     * @description Must not be greater than 5000 characters.
+                     * @example b
+                     */
+                    body: string;
+                    /**
+                     * @description Same tenant/entity-scoped lookup as store() — dropdown and validator agree.
+                     * @example null
+                     */
+                    type?: string | null;
+                    /**
+                     * @description Must not be greater than 8 characters.
+                     * @example ngzmiyvd
+                     */
+                    language?: string | null;
+                };
+            };
+        };
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    deleteOpportunitiesOpportunityNotesNote: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The opportunity.
+                 * @example architecto
+                 */
+                opportunity: string;
+                /**
+                 * @description The note.
+                 * @example architecto
+                 */
+                note: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    postOpportunitiesBulkArchive: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    getOpportunityStages: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    postOpportunityStages: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    putOpportunityStagesReorder: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": {
+                    /**
+                     * @description Must be a valid UUID.
+                     * @example [
+                     *       "6ff8f7f6-1eb3-3525-be4a-3932c805afed"
+                     *     ]
+                     */
+                    ids?: string[];
+                };
+            };
+        };
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    putOpportunityStagesOpportunityStage: {
         parameters: {
             query?: never;
             header?: never;
             path: {
                 /** @example architecto */
-                campaign: string;
+                opportunityStage: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    deleteOpportunityStagesOpportunityStage: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @example architecto */
+                opportunityStage: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    getOpportunityServiceTypes: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    postOpportunityServiceTypes: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    getOpportunityAgreementTypes: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    postOpportunityAgreementTypes: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    getOpportunityDealTypes: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    postOpportunityDealTypes: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    putOpportunityServiceTypesReorder: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": {
+                    /**
+                     * @description Must be a valid UUID.
+                     * @example [
+                     *       "6ff8f7f6-1eb3-3525-be4a-3932c805afed"
+                     *     ]
+                     */
+                    ids?: string[];
+                };
+            };
+        };
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    putOpportunityServiceTypesId: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The ID of the opportunity service type.
+                 * @example architecto
+                 */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    deleteOpportunityServiceTypesId: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The ID of the opportunity service type.
+                 * @example architecto
+                 */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    putOpportunityAgreementTypesReorder: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": {
+                    /**
+                     * @description Must be a valid UUID.
+                     * @example [
+                     *       "6ff8f7f6-1eb3-3525-be4a-3932c805afed"
+                     *     ]
+                     */
+                    ids?: string[];
+                };
+            };
+        };
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    putOpportunityAgreementTypesId: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The ID of the opportunity agreement type.
+                 * @example architecto
+                 */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    deleteOpportunityAgreementTypesId: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The ID of the opportunity agreement type.
+                 * @example architecto
+                 */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    putOpportunityDealTypesReorder: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": {
+                    /**
+                     * @description Must be a valid UUID.
+                     * @example [
+                     *       "6ff8f7f6-1eb3-3525-be4a-3932c805afed"
+                     *     ]
+                     */
+                    ids?: string[];
+                };
+            };
+        };
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    putOpportunityDealTypesId: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The ID of the opportunity deal type.
+                 * @example architecto
+                 */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    deleteOpportunityDealTypesId: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The ID of the opportunity deal type.
+                 * @example architecto
+                 */
+                id: string;
             };
             cookie?: never;
         };
@@ -28511,72 +36768,6 @@ export interface operations {
             };
         };
     };
-    getSettingsRejection: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        /** @example Unauthenticated. */
-                        message?: string;
-                    };
-                };
-            };
-        };
-    };
-    putSettingsRejection: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": {
-                    /**
-                     * @example whatsapp
-                     * @enum {string}
-                     */
-                    default_channel: "email" | "whatsapp";
-                    /** @example null */
-                    templates?: {
-                        /**
-                         * @description Each template is keyed by reason id; validate the inner shape loosely. Must not be greater than 255 characters.
-                         * @example b
-                         */
-                        email_subject?: string | null;
-                        /** @example architecto */
-                        email_body?: string | null;
-                        /** @example architecto */
-                        whatsapp_body?: string | null;
-                    }[];
-                };
-            };
-        };
-        responses: {
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        /** @example Unauthenticated. */
-                        message?: string;
-                    };
-                };
-            };
-        };
-    };
     getVacanciesIdActivity: {
         parameters: {
             query?: never;
@@ -28689,195 +36880,6 @@ export interface operations {
             };
         };
     };
-    getReportsIntakes: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: {
-            content: {
-                "application/json": {
-                    /**
-                     * @example month
-                     * @enum {string}
-                     */
-                    bucket?: "day" | "week" | "month";
-                    /**
-                     * @description Must be a valid date.
-                     * @example 2026-07-27T21:50:38
-                     */
-                    from?: string;
-                    /**
-                     * @description Must be a valid date.
-                     * @example 2026-07-27T21:50:38
-                     */
-                    to?: string;
-                    /**
-                     * @example region
-                     * @enum {string}
-                     */
-                    group_by?: "recruiter" | "location" | "source" | "function" | "region";
-                    /**
-                     * @description Must be a valid UUID.
-                     * @example 6ff8f7f6-1eb3-3525-be4a-3932c805afed
-                     */
-                    owner_id?: string;
-                    /**
-                     * @description Must be a valid UUID.
-                     * @example 6b72fe4a-5b40-307c-bc24-f79acf9a1bb9
-                     */
-                    location_id?: string;
-                };
-            };
-        };
-        responses: {
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        /** @example Unauthenticated. */
-                        message?: string;
-                    };
-                };
-            };
-        };
-    };
-    getReportsFlow: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        /** @example Unauthenticated. */
-                        message?: string;
-                    };
-                };
-            };
-        };
-    };
-    getReportsRecruiters: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        /** @example Unauthenticated. */
-                        message?: string;
-                    };
-                };
-            };
-        };
-    };
-    getReportsVacancies: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        /** @example Unauthenticated. */
-                        message?: string;
-                    };
-                };
-            };
-        };
-    };
-    getReportsMatches: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        /** @example Unauthenticated. */
-                        message?: string;
-                    };
-                };
-            };
-        };
-    };
-    getReportsOutreach: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        /** @example Unauthenticated. */
-                        message?: string;
-                    };
-                };
-            };
-        };
-    };
-    getReportsSources: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        /** @example Unauthenticated. */
-                        message?: string;
-                    };
-                };
-            };
-        };
-    };
     getCandidatesCandidateAvailability: {
         parameters: {
             query?: never;
@@ -28896,12 +36898,12 @@ export interface operations {
                 "application/json": {
                     /**
                      * @description Must be a valid date.
-                     * @example 2026-07-27T21:50:38
+                     * @example 2026-08-13T18:23:29
                      */
                     from?: string;
                     /**
                      * @description Must be a valid date.
-                     * @example 2026-07-27T21:50:38
+                     * @example 2026-08-13T18:23:29
                      */
                     to?: string;
                 };
@@ -29324,15 +37326,15 @@ export interface operations {
                     function?: string;
                     /**
                      * @description Must be a valid date.
-                     * @example 2026-07-27T21:50:39
+                     * @example 2026-08-13T18:23:30
                      */
                     from?: string;
                     /**
                      * @description Must be a valid date.
-                     * @example 2026-07-27T21:50:39
+                     * @example 2026-08-13T18:23:30
                      */
                     to?: string;
-                    /** @example true */
+                    /** @example false */
                     open_only?: boolean;
                     /**
                      * @description Must be between 1 and 200.
@@ -29486,12 +37488,12 @@ export interface operations {
                     status?: string;
                     /**
                      * @description Must be a valid date.
-                     * @example 2026-07-27T21:50:39
+                     * @example 2026-08-13T18:23:30
                      */
                     from?: string;
                     /**
                      * @description Must be a valid date.
-                     * @example 2026-07-27T21:50:39
+                     * @example 2026-08-13T18:23:30
                      */
                     to?: string;
                     /**
@@ -29618,12 +37620,12 @@ export interface operations {
                     status?: string;
                     /**
                      * @description Must be a valid date.
-                     * @example 2026-07-27T21:50:39
+                     * @example 2026-08-13T18:23:30
                      */
                     from?: string;
                     /**
                      * @description Must be a valid date.
-                     * @example 2026-07-27T21:50:39
+                     * @example 2026-08-13T18:23:30
                      */
                     to?: string;
                     /**
@@ -30008,6 +38010,747 @@ export interface operations {
             };
         };
     };
+    getReportsIntakes: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": {
+                    /**
+                     * @example week
+                     * @enum {string}
+                     */
+                    bucket?: "day" | "week" | "month";
+                    /**
+                     * @description Must be a valid date.
+                     * @example 2026-08-13T18:23:29
+                     */
+                    from?: string;
+                    /**
+                     * @description Must be a valid date.
+                     * @example 2026-08-13T18:23:29
+                     */
+                    to?: string;
+                    /**
+                     * @example source
+                     * @enum {string}
+                     */
+                    group_by?: "recruiter" | "location" | "source" | "function" | "region";
+                    /**
+                     * @description Must be a valid UUID.
+                     * @example 6ff8f7f6-1eb3-3525-be4a-3932c805afed
+                     */
+                    owner_id?: string;
+                    /**
+                     * @description Must be a valid UUID.
+                     * @example 6b72fe4a-5b40-307c-bc24-f79acf9a1bb9
+                     */
+                    location_id?: string;
+                };
+            };
+        };
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    getReportsFlow: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    getReportsRecruiters: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    getReportsVacancies: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    getReportsMatches: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    getReportsOutreach: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    getReportsSources: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    getReportsOpportunities: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    getReportsFlowDrill: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    getReportsMatchesDrill: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    getReportsRecruitersDrill: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    getReportsVacanciesDrill: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    getReportsFlowAdvice: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    getReportsMatchesAdvice: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    getReportsRecruitersAdvice: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    getReportsVacanciesAdvice: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    getFilesTenantLogoTenant: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @example architecto */
+                tenant: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Invalid signature. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    getFilesTenantBannerTenant: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @example architecto */
+                tenant: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Invalid signature. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    getSettings: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    postSettings: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    postSettingsLogo: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "multipart/form-data": {
+                    /**
+                     * Format: binary
+                     * @description Must be a file. Must not be greater than 2048 kilobytes.
+                     */
+                    logo: string;
+                };
+            };
+        };
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    postSettingsBanner: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "multipart/form-data": {
+                    /**
+                     * Format: binary
+                     * @description Must be a file. Must not be greater than 4096 kilobytes.
+                     */
+                    banner: string;
+                };
+            };
+        };
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    getSettingsMessagingLimits: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    putSettingsMessagingLimits: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /**
+                     * @description Must have at least 1 items.
+                     * @example [
+                     *       []
+                     *     ]
+                     */
+                    lanes: {
+                        /** @example architecto */
+                        lane: string;
+                        /**
+                         * @description Must be at least 0.
+                         * @example 39
+                         */
+                        per_day: number;
+                        /**
+                         * @description Must be at least 0.
+                         * @example 84
+                         */
+                        per_week: number;
+                    }[];
+                };
+            };
+        };
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    getSettingsRejection: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    putSettingsRejection: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /**
+                     * @example email
+                     * @enum {string}
+                     */
+                    default_channel: "email" | "whatsapp";
+                    /** @example null */
+                    templates?: {
+                        /**
+                         * @description Each template is keyed by reason id; validate the inner shape loosely. Must not be greater than 255 characters.
+                         * @example b
+                         */
+                        email_subject?: string | null;
+                        /** @example architecto */
+                        email_body?: string | null;
+                        /** @example architecto */
+                        whatsapp_body?: string | null;
+                    }[];
+                };
+            };
+        };
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    getSettingsMatching: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    putSettingsMatching: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": {
+                    /** @example architecto */
+                    strictness?: string;
+                    /**
+                     * @description MATCH-PLACEMENT-1 fase 4: the match approval mode (Settings → Matches).
+                     * @example architecto
+                     */
+                    approval_mode?: string;
+                    /**
+                     * @description MATCH-PLACEMENT-1 fase A: kostprijs→verkooptarief factor; nullable clears it. Must be at least 0.01.
+                     * @example 39
+                     */
+                    conversion_factor?: number | null;
+                };
+            };
+        };
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
     getSmCandidatesStats: {
         parameters: {
             query?: never;
@@ -30092,7 +38835,7 @@ export interface operations {
                 "application/json": {
                     /** @example false */
                     ai_enabled?: boolean;
-                    /** @example false */
+                    /** @example true */
                     active?: boolean;
                 };
             };
@@ -30770,7 +39513,7 @@ export interface operations {
             };
         };
     };
-    getApplications: {
+    postApplicationsBulkOwner: {
         parameters: {
             query?: never;
             header?: never;
@@ -30792,56 +39535,7 @@ export interface operations {
             };
         };
     };
-    postApplications: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": {
-                    /**
-                     * @description Must be a valid UUID. Must match an existing stored value.
-                     * @example 6ff8f7f6-1eb3-3525-be4a-3932c805afed
-                     */
-                    candidate_id: string;
-                    /**
-                     * @description Must be a valid UUID. Must match an existing stored value.
-                     * @example 6b72fe4a-5b40-307c-bc24-f79acf9a1bb9
-                     */
-                    vacancy_id: string;
-                    /**
-                     * @description Must be a valid UUID.
-                     * @example 977e5426-8d13-3824-86aa-b092f8ae52c5
-                     */
-                    owner_id?: string | null;
-                    /**
-                     * @description Must be a valid UUID. Must match an existing stored value.
-                     * @example d6fa562b-acd5-35ff-babb-d11194d3737b
-                     */
-                    application_stage_id?: string | null;
-                    /** @example null */
-                    custom_fields?: Record<string, never> | null;
-                };
-            };
-        };
-        responses: {
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        /** @example Unauthenticated. */
-                        message?: string;
-                    };
-                };
-            };
-        };
-    };
-    getApplicationsStats: {
+    postApplicationsBulkNote: {
         parameters: {
             query?: never;
             header?: never;
@@ -30863,17 +39557,11 @@ export interface operations {
             };
         };
     };
-    getApplicationsApplication: {
+    postApplicationsBulkStage: {
         parameters: {
             query?: never;
             header?: never;
-            path: {
-                /**
-                 * @description The application.
-                 * @example architecto
-                 */
-                application: string;
-            };
+            path?: never;
             cookie?: never;
         };
         requestBody?: never;
@@ -30891,143 +39579,11 @@ export interface operations {
             };
         };
     };
-    putApplicationsApplication: {
+    postApplicationsBulkArchive: {
         parameters: {
             query?: never;
             header?: never;
-            path: {
-                /**
-                 * @description The application.
-                 * @example architecto
-                 */
-                application: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: {
-            content: {
-                "application/json": {
-                    /**
-                     * @description Must not be greater than 64 characters.
-                     * @example b
-                     */
-                    source?: string | null;
-                    /**
-                     * @description Must match an existing stored value.
-                     * @example architecto
-                     */
-                    phase_key?: string;
-                    /**
-                     * @description Must be a valid UUID. Must match an existing stored value.
-                     * @example a4855dc5-0acb-33c3-b921-f4291f719ca0
-                     */
-                    application_stage_id?: string | null;
-                    /**
-                     * @description Must be a valid UUID. Must match an existing stored value.
-                     * @example c90237e9-ced5-3af6-88ea-84aeaa148878
-                     */
-                    rejection_reason_id?: string | null;
-                    /**
-                     * @description Must be a valid UUID. Must match an existing stored value.
-                     * @example a1a0a47d-e8c3-3cf0-8e6e-c1ff9dca5d1f
-                     */
-                    vacancy_id?: string | null;
-                    /**
-                     * @description Must be a valid UUID.
-                     * @example 21c4122b-d554-3723-966c-6d723ea5293f
-                     */
-                    owner_id?: string | null;
-                    /**
-                     * @description Must be between 0 and 100.
-                     * @example 1
-                     */
-                    match_score?: number;
-                    /** @example null */
-                    match_criteria?: {
-                        /** @example architecto */
-                        key?: string | null;
-                        /** @example architecto */
-                        label?: string | null;
-                        /**
-                         * @description Must be between 0 and 100.
-                         * @example 1
-                         */
-                        score?: number | null;
-                        /** @example 16 */
-                        weight?: number;
-                        /** @example false */
-                        hard?: boolean;
-                        /** @example architecto */
-                        note?: string | null;
-                    }[];
-                    /** @example null */
-                    custom_fields?: Record<string, never> | null;
-                };
-            };
-        };
-        responses: {
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        /** @example Unauthenticated. */
-                        message?: string;
-                    };
-                };
-            };
-        };
-    };
-    deleteApplicationsApplication: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /**
-                 * @description The application.
-                 * @example architecto
-                 */
-                application: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": {
-                    /**
-                     * @description Must not be greater than 1000 characters.
-                     * @example b
-                     */
-                    reason: string;
-                };
-            };
-        };
-        responses: {
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        /** @example Unauthenticated. */
-                        message?: string;
-                    };
-                };
-            };
-        };
-    };
-    getApplicationsApplicationProposals: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /**
-                 * @description The application.
-                 * @example architecto
-                 */
-                application: string;
-            };
+            path?: never;
             cookie?: never;
         };
         requestBody?: never;
@@ -31045,64 +39601,11 @@ export interface operations {
             };
         };
     };
-    postApplicationsApplicationReject: {
+    postApplicationsBulkDetach: {
         parameters: {
             query?: never;
             header?: never;
-            path: {
-                /**
-                 * @description The application.
-                 * @example architecto
-                 */
-                application: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": {
-                    /**
-                     * @description Must be a valid UUID. Must match an existing stored value.
-                     * @example 6ff8f7f6-1eb3-3525-be4a-3932c805afed
-                     */
-                    reason_id: string;
-                    /** @example architecto */
-                    note?: string | null;
-                    /**
-                     * @example whatsapp
-                     * @enum {string|null}
-                     */
-                    channel?: "email" | "whatsapp" | null;
-                    /** @example architecto */
-                    message?: string | null;
-                };
-            };
-        };
-        responses: {
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        /** @example Unauthenticated. */
-                        message?: string;
-                    };
-                };
-            };
-        };
-    };
-    postApplicationsApplicationScore: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /**
-                 * @description The application.
-                 * @example architecto
-                 */
-                application: string;
-            };
+            path?: never;
             cookie?: never;
         };
         requestBody?: never;
@@ -31120,313 +39623,11 @@ export interface operations {
             };
         };
     };
-    postApplicationsApplicationNotes: {
+    postApplicationsBulkRestore: {
         parameters: {
             query?: never;
             header?: never;
-            path: {
-                /**
-                 * @description The application.
-                 * @example architecto
-                 */
-                application: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": {
-                    /**
-                     * @description NOTE-TYPES-2: validate against the TENANT lookup (note_types), not a
-                     *     hardcoded list — a tenant/entity-scoped type must not 422 (mirrors the
-                     *     candidate notes NOTES-3 fix).
-                     * @example architecto
-                     */
-                    type?: string;
-                    /**
-                     * @description Must not be greater than 255 characters.
-                     * @example n
-                     */
-                    title?: string | null;
-                    /**
-                     * @description Must not be greater than 10000 characters.
-                     * @example g
-                     */
-                    body: string;
-                };
-            };
-        };
-        responses: {
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        /** @example Unauthenticated. */
-                        message?: string;
-                    };
-                };
-            };
-        };
-    };
-    postApplicationsApplicationPropose: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /**
-                 * @description The application.
-                 * @example architecto
-                 */
-                application: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": {
-                    /**
-                     * @description Must be a valid UUID. Must match an existing stored value.
-                     * @example 6ff8f7f6-1eb3-3525-be4a-3932c805afed
-                     */
-                    contact_id: string;
-                    /**
-                     * @description Must not be greater than 64 characters.
-                     * @example g
-                     */
-                    cv_variant?: string | null;
-                    /**
-                     * @description Must not be greater than 5000 characters.
-                     * @example z
-                     */
-                    subject?: string | null;
-                    /**
-                     * @description Must not be greater than 5000 characters.
-                     * @example m
-                     */
-                    body?: string | null;
-                };
-            };
-        };
-        responses: {
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        /** @example Unauthenticated. */
-                        message?: string;
-                    };
-                };
-            };
-        };
-    };
-    postProposalsProposalRevoke: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /**
-                 * @description The proposal.
-                 * @example architecto
-                 */
-                proposal: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        /** @example Unauthenticated. */
-                        message?: string;
-                    };
-                };
-            };
-        };
-    };
-    postApplicationsApplicationStopInterview: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /**
-                 * @description The application.
-                 * @example architecto
-                 */
-                application: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        /** @example Unauthenticated. */
-                        message?: string;
-                    };
-                };
-            };
-        };
-    };
-    postApplicationsApplicationResumeInterview: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /**
-                 * @description The application.
-                 * @example architecto
-                 */
-                application: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        /** @example Unauthenticated. */
-                        message?: string;
-                    };
-                };
-            };
-        };
-    };
-    postApplicationsApplicationInterview: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /**
-                 * @description The application.
-                 * @example architecto
-                 */
-                application: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": {
-                    /**
-                     * @description Must be a valid UUID. Must match an existing stored value.
-                     * @example 6ff8f7f6-1eb3-3525-be4a-3932c805afed
-                     */
-                    agent_id: string;
-                };
-            };
-        };
-        responses: {
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        /** @example Unauthenticated. */
-                        message?: string;
-                    };
-                };
-            };
-        };
-    };
-    postVacanciesVacancyStartInterviews: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /**
-                 * @description The vacancy.
-                 * @example architecto
-                 */
-                vacancy: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        /** @example Unauthenticated. */
-                        message?: string;
-                    };
-                };
-            };
-        };
-    };
-    patchApplicationsApplicationRejection: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /**
-                 * @description The application.
-                 * @example architecto
-                 */
-                application: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: {
-            content: {
-                "application/json": {
-                    /**
-                     * @description Must be a valid UUID. Must match an existing stored value.
-                     * @example 6ff8f7f6-1eb3-3525-be4a-3932c805afed
-                     */
-                    reason_id?: string;
-                    /**
-                     * @description Must not be greater than 2000 characters.
-                     * @example g
-                     */
-                    note?: string | null;
-                };
-            };
-        };
-        responses: {
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        /** @example Unauthenticated. */
-                        message?: string;
-                    };
-                };
-            };
-        };
-    };
-    postApplicationsApplicationRestore: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /**
-                 * @description The application.
-                 * @example architecto
-                 */
-                application: string;
-            };
+            path?: never;
             cookie?: never;
         };
         requestBody?: never;
@@ -31545,154 +39746,6 @@ export interface operations {
             path: {
                 /** @example architecto */
                 group: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        /** @example Unauthenticated. */
-                        message?: string;
-                    };
-                };
-            };
-        };
-    };
-    getApplicationStatuses: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        /** @example Unauthenticated. */
-                        message?: string;
-                    };
-                };
-            };
-        };
-    };
-    postApplicationStatuses: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": {
-                    /**
-                     * @description Must not be greater than 255 characters.
-                     * @example b
-                     */
-                    name: string;
-                };
-            };
-        };
-        responses: {
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        /** @example Unauthenticated. */
-                        message?: string;
-                    };
-                };
-            };
-        };
-    };
-    getApplicationStatusesId: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /**
-                 * @description The ID of the application status.
-                 * @example architecto
-                 */
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        /** @example Unauthenticated. */
-                        message?: string;
-                    };
-                };
-            };
-        };
-    };
-    putApplicationStatusesId: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /**
-                 * @description The ID of the application status.
-                 * @example architecto
-                 */
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": {
-                    /**
-                     * @description Must not be greater than 255 characters.
-                     * @example b
-                     */
-                    name: string;
-                };
-            };
-        };
-        responses: {
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        /** @example Unauthenticated. */
-                        message?: string;
-                    };
-                };
-            };
-        };
-    };
-    deleteApplicationStatusesId: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /**
-                 * @description The ID of the application status.
-                 * @example architecto
-                 */
-                id: string;
             };
             cookie?: never;
         };
@@ -31899,8 +39952,136 @@ export interface operations {
                     "application/json": {
                         /** @example Te veel aanvragen. Wacht even voor je opnieuw probeert. */
                         message?: string;
-                        /** @example 60 */
+                        /** @example 59 */
                         retry_after?: number;
+                    };
+                };
+            };
+        };
+    };
+    getTeams: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    postTeams: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    getTeamsId: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The ID of the team.
+                 * @example architecto
+                 */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    putTeamsId: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The ID of the team.
+                 * @example architecto
+                 */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    deleteTeamsId: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The ID of the team.
+                 * @example architecto
+                 */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
                     };
                 };
             };
@@ -31983,7 +40164,7 @@ export interface operations {
                     color?: string | null;
                     /** @example 16 */
                     sort_order?: number;
-                    /** @example true */
+                    /** @example false */
                     is_done?: boolean;
                     /** @example false */
                     active?: boolean;
@@ -32058,8 +40239,19 @@ export interface operations {
                     icon?: string | null;
                     /** @example 16 */
                     sort_order?: number;
+                    /**
+                     * @description TASKTYPE-DEFAULT-1: at most one default, demoted by the model's singleton
+                     *     flag rather than here — the invariant must hold for the seeder too (§2).
+                     * @example false
+                     */
+                    is_default?: boolean;
                     /** @example true */
                     active?: boolean;
+                    /**
+                     * @description KAND-CONTACT-STEMPELS-1: whether completing a task of this type stamps last_contact_at.
+                     * @example false
+                     */
+                    counts_as_contact?: boolean;
                 };
             };
         };
@@ -32128,7 +40320,7 @@ export interface operations {
                     sort_order?: number;
                     /** @example true */
                     is_default?: boolean;
-                    /** @example true */
+                    /** @example false */
                     active?: boolean;
                 };
             };
@@ -32206,7 +40398,7 @@ export interface operations {
                     color?: string | null;
                     /** @example 16 */
                     sort_order?: number;
-                    /** @example false */
+                    /** @example true */
                     is_done?: boolean;
                     /** @example true */
                     active?: boolean;
@@ -32317,7 +40509,14 @@ export interface operations {
                     /** @example 16 */
                     sort_order?: number;
                     /** @example true */
+                    is_default?: boolean;
+                    /** @example true */
                     active?: boolean;
+                    /**
+                     * @description KAND-CONTACT-STEMPELS-1: whether completing a task of this type stamps last_contact_at.
+                     * @example true
+                     */
+                    counts_as_contact?: boolean;
                 };
             };
         };
@@ -32421,7 +40620,7 @@ export interface operations {
                     sort_order?: number;
                     /** @example true */
                     is_default?: boolean;
-                    /** @example false */
+                    /** @example true */
                     active?: boolean;
                 };
             };
@@ -32531,26 +40730,36 @@ export interface operations {
                      * @description Must be a valid UUID. Must match an existing stored value.
                      * @example c3b6b42e-3a0f-3935-b28d-cb767f8a2a0a
                      */
+                    assignee_team_id?: string | null;
+                    /**
+                     * @description Must be a valid UUID. Must match an existing stored value.
+                     * @example 51c7cf5e-fac2-3ac6-8ef8-61e6050503af
+                     */
                     location_id?: string | null;
                     /**
                      * @description Must be a valid date.
-                     * @example 2026-07-27T21:50:38
+                     * @example 2026-08-13T18:23:29
+                     */
+                    start_date?: string | null;
+                    /**
+                     * @description Must be a valid date.
+                     * @example 2026-08-13T18:23:29
                      */
                     due_date?: string | null;
                     /**
                      * @description Must be a valid date in the format <code>H:i</code>.
-                     * @example 21:50
+                     * @example 18:23
                      */
                     due_time?: string | null;
                     /**
                      * @description Must not be greater than 5000 characters.
-                     * @example Deserunt aut ab provident perspiciatis quo omnis nostrum.
+                     * @example Ab provident perspiciatis quo omnis nostrum aut adipisci.
                      */
                     description?: string | null;
                     /**
                      * @description Must not be greater than 50 characters.
                      * @example [
-                     *       "u"
+                     *       "p"
                      *     ]
                      */
                     tags?: string[];
@@ -32560,13 +40769,13 @@ export interface operations {
                     links?: {
                         /**
                          * @description This field is required when <code>links</code> is present.
-                         * @example match
+                         * @example customer
                          * @enum {string}
                          */
-                        type?: "candidate" | "application" | "vacancy" | "match" | "customer" | "opportunity" | "location" | "department" | "contact" | "workflow";
+                        type?: "candidate" | "application" | "vacancy" | "match" | "customer" | "opportunity" | "location" | "customer_location" | "department" | "contact" | "workflow";
                         /**
                          * @description This field is required when <code>links</code> is present. Must be a valid UUID.
-                         * @example d03cceb8-0e59-3c26-8133-808072ac8a4c
+                         * @example 7212c28d-f9ab-3dd7-af8a-06584a0d4cb7
                          */
                         id?: string;
                     }[];
@@ -32687,26 +40896,36 @@ export interface operations {
                      * @description Must be a valid UUID. Must match an existing stored value.
                      * @example c3b6b42e-3a0f-3935-b28d-cb767f8a2a0a
                      */
+                    assignee_team_id?: string | null;
+                    /**
+                     * @description Must be a valid UUID. Must match an existing stored value.
+                     * @example 51c7cf5e-fac2-3ac6-8ef8-61e6050503af
+                     */
                     location_id?: string | null;
                     /**
                      * @description Must be a valid date.
-                     * @example 2026-07-27T21:50:38
+                     * @example 2026-08-13T18:23:29
+                     */
+                    start_date?: string | null;
+                    /**
+                     * @description Must be a valid date.
+                     * @example 2026-08-13T18:23:29
                      */
                     due_date?: string | null;
                     /**
                      * @description Must be a valid date in the format <code>H:i</code>.
-                     * @example 21:50
+                     * @example 18:23
                      */
                     due_time?: string | null;
                     /**
                      * @description Must not be greater than 5000 characters.
-                     * @example Deserunt aut ab provident perspiciatis quo omnis nostrum.
+                     * @example Ab provident perspiciatis quo omnis nostrum aut adipisci.
                      */
                     description?: string | null;
                     /**
                      * @description Must not be greater than 50 characters.
                      * @example [
-                     *       "u"
+                     *       "p"
                      *     ]
                      */
                     tags?: string[];
@@ -32716,13 +40935,13 @@ export interface operations {
                     links?: {
                         /**
                          * @description This field is required when <code>links</code> is present.
-                         * @example vacancy
+                         * @example opportunity
                          * @enum {string}
                          */
-                        type?: "candidate" | "application" | "vacancy" | "match" | "customer" | "opportunity" | "location" | "department" | "contact" | "workflow";
+                        type?: "candidate" | "application" | "vacancy" | "match" | "customer" | "opportunity" | "location" | "customer_location" | "department" | "contact" | "workflow";
                         /**
                          * @description This field is required when <code>links</code> is present. Must be a valid UUID.
-                         * @example d03cceb8-0e59-3c26-8133-808072ac8a4c
+                         * @example 7212c28d-f9ab-3dd7-af8a-06584a0d4cb7
                          */
                         id?: string;
                     }[];
@@ -32820,6 +41039,19 @@ export interface operations {
                      * @example b
                      */
                     body: string;
+                    /**
+                     * @description TASK-NOTE-TYPE-1: validate against the TENANT lookup (note_types), scoped
+                     *     to THIS entity (plus legacy entity=NULL rows) — mirrors candidate/customer/
+                     *     opportunity/vacancy notes (NOTE-TYPES-2); never a bare cross-entity exists
+                     *     rule (NOTES-3-GAP-1).
+                     * @example null
+                     */
+                    type?: string | null;
+                    /**
+                     * @description NOTE-TAAL-1: optional per-note language code for FE spellcheck + AI. Must not be greater than 8 characters.
+                     * @example ngzmiyvd
+                     */
+                    language?: string | null;
                 };
             };
         };
@@ -32886,6 +41118,19 @@ export interface operations {
                      * @example b
                      */
                     body: string;
+                    /**
+                     * @description TASK-NOTE-TYPE-1: validate against the TENANT lookup (note_types), scoped
+                     *     to THIS entity (plus legacy entity=NULL rows) — mirrors candidate/customer/
+                     *     opportunity/vacancy notes (NOTE-TYPES-2); never a bare cross-entity exists
+                     *     rule (NOTES-3-GAP-1).
+                     * @example null
+                     */
+                    type?: string | null;
+                    /**
+                     * @description NOTE-TAAL-1: optional per-note language code for FE spellcheck + AI. Must not be greater than 8 characters.
+                     * @example ngzmiyvd
+                     */
+                    language?: string | null;
                 };
             };
         };
@@ -33010,6 +41255,13 @@ export interface operations {
                      * @example b
                      */
                     body: string;
+                    /** @example null */
+                    type?: string | null;
+                    /**
+                     * @description NOTE-TAAL-1: optional per-note language code for FE spellcheck + AI. Must not be greater than 8 characters.
+                     * @example ngzmiyvd
+                     */
+                    language?: string | null;
                 };
             };
         };
@@ -33140,6 +41392,123 @@ export interface operations {
             };
         };
     };
+    postTasksBulkStatus: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /**
+                     * @description Must be a valid UUID.
+                     * @example [
+                     *       "6ff8f7f6-1eb3-3525-be4a-3932c805afed"
+                     *     ]
+                     */
+                    task_ids?: string[];
+                    /**
+                     * @description Must be a valid UUID. Must match an existing stored value.
+                     * @example 6b72fe4a-5b40-307c-bc24-f79acf9a1bb9
+                     */
+                    status_id: string;
+                };
+            };
+        };
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    postTasksBulkAssignee: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": {
+                    /**
+                     * @description Must be a valid UUID.
+                     * @example [
+                     *       "6ff8f7f6-1eb3-3525-be4a-3932c805afed"
+                     *     ]
+                     */
+                    task_ids?: string[];
+                    /**
+                     * @description Must be a valid UUID.
+                     * @example 6b72fe4a-5b40-307c-bc24-f79acf9a1bb9
+                     */
+                    assignee_id?: string | null;
+                };
+            };
+        };
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    postTasksBulkPriority: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": {
+                    /**
+                     * @description Must be a valid UUID.
+                     * @example [
+                     *       "6ff8f7f6-1eb3-3525-be4a-3932c805afed"
+                     *     ]
+                     */
+                    task_ids?: string[];
+                    /**
+                     * @description Must be a valid UUID. Must match an existing stored value.
+                     * @example 6b72fe4a-5b40-307c-bc24-f79acf9a1bb9
+                     */
+                    priority_id?: string | null;
+                };
+            };
+        };
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
     getFilesVacancyDocumentsTenantParentDocument: {
         parameters: {
             query?: never;
@@ -33177,243 +41546,6 @@ export interface operations {
             cookie?: never;
         };
         requestBody?: never;
-        responses: {
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        /** @example Unauthenticated. */
-                        message?: string;
-                    };
-                };
-            };
-        };
-    };
-    postVacancies: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": {
-                    /**
-                     * @description Must not be greater than 255 characters.
-                     * @example b
-                     */
-                    title: string;
-                    /** @example null */
-                    custom_fields?: Record<string, never> | null;
-                    /**
-                     * @description Must not be greater than 50 characters.
-                     * @example n
-                     */
-                    code?: string | null;
-                    /** @example Eius et animi quos velit et. */
-                    description?: string | null;
-                    /**
-                     * @description Must not be greater than 64 characters.
-                     * @example v
-                     */
-                    status?: string | null;
-                    /**
-                     * @description Must not be greater than 64 characters.
-                     * @example d
-                     */
-                    employment_type?: string | null;
-                    /**
-                     * @description Must not be greater than 64 characters.
-                     * @example l
-                     */
-                    seniority?: string | null;
-                    /**
-                     * @description Must not be greater than 64 characters.
-                     * @example j
-                     */
-                    education?: string | null;
-                    /**
-                     * @description Must not be greater than 255 characters.
-                     * @example n
-                     */
-                    industry?: string | null;
-                    /**
-                     * @description Must be a valid UUID. Must match an existing stored value.
-                     * @example cd1eb1ea-4697-3b9a-9dd0-988044a83af6
-                     */
-                    customer_location_id?: string | null;
-                    /**
-                     * @description Must be a valid UUID. Must match an existing stored value.
-                     * @example 5e4f00df-4238-35bd-9edc-0b98dc359c80
-                     */
-                    customer_department_id?: string | null;
-                    /**
-                     * @description Must be a valid UUID. Must match an existing stored value.
-                     * @example 3c85cf54-98c1-36ed-b65a-abaafdecdfa9
-                     */
-                    contact_id?: string | null;
-                    /**
-                     * @description Must be a valid date.
-                     * @example 2026-07-27T21:50:38
-                     */
-                    start_date?: string | null;
-                    /**
-                     * @description Must be a valid date. Must be a date after or equal to <code>start_date</code>.
-                     * @example 2052-08-19
-                     */
-                    end_date?: string | null;
-                    /**
-                     * @description Must be a valid UUID. Must match an existing stored value.
-                     * @example a4855dc5-0acb-33c3-b921-f4291f719ca0
-                     */
-                    interview_flow_id?: string | null;
-                    /**
-                     * @description Must be a valid UUID. Must match an existing stored value.
-                     * @example c90237e9-ced5-3af6-88ea-84aeaa148878
-                     */
-                    ai_agent_id?: string | null;
-                    /**
-                     * @description Must not be greater than 255 characters.
-                     * @example i
-                     */
-                    category?: string | null;
-                    /**
-                     * @description Must not be greater than 255 characters.
-                     * @example y
-                     */
-                    location?: string | null;
-                    /**
-                     * @description Must not be greater than 255 characters.
-                     * @example v
-                     */
-                    street?: string | null;
-                    /**
-                     * @description Must not be greater than 20 characters.
-                     * @example dljnikhwaykcmyuw
-                     */
-                    house_number?: string | null;
-                    /**
-                     * @description Must not be greater than 20 characters.
-                     * @example pwlvqwrsitcpscql
-                     */
-                    house_number_suffix?: string | null;
-                    /**
-                     * @description Must not be greater than 20 characters.
-                     * @example dzsnrwtujwvlxjkl
-                     */
-                    postcode?: string | null;
-                    /**
-                     * @description Must not be greater than 120 characters.
-                     * @example q
-                     */
-                    city?: string | null;
-                    /**
-                     * @description Must not be greater than 120 characters.
-                     * @example p
-                     */
-                    province?: string | null;
-                    /**
-                     * @description Must not be greater than 120 characters.
-                     * @example p
-                     */
-                    country?: string | null;
-                    /**
-                     * @description Must match an existing stored value.
-                     * @example [
-                     *       "architecto"
-                     *     ]
-                     */
-                    contract_types?: string[];
-                    /**
-                     * @description Must be at least 0.
-                     * @example 39
-                     */
-                    salary_min?: number | null;
-                    /**
-                     * @description Must be at least 0.
-                     * @example 84
-                     */
-                    salary_max?: number | null;
-                    /**
-                     * @description Must not be greater than 32 characters.
-                     * @example z
-                     */
-                    salary_period?: string | null;
-                    /**
-                     * @description Must be between 0 and 168.
-                     * @example 0
-                     */
-                    hours_min?: number | null;
-                    /**
-                     * @description Must be between 0 and 168.
-                     * @example 0
-                     */
-                    hours_max?: number | null;
-                    /**
-                     * @description Must be between 0 and 60.
-                     * @example 0
-                     */
-                    experience_years?: number | null;
-                    /** @example true */
-                    published?: boolean;
-                    /**
-                     * @description Must be a valid UUID. Must match an existing stored value.
-                     * @example 21c4122b-d554-3723-966c-6d723ea5293f
-                     */
-                    customer_id?: string | null;
-                    /**
-                     * @description Must be a valid UUID.
-                     * @example add3503c-ebff-3875-93af-b8c6a695762b
-                     */
-                    owner_id?: string | null;
-                    /**
-                     * @description Must be a valid UUID. Must match an existing stored value.
-                     * @example c3b6b42e-3a0f-3935-b28d-cb767f8a2a0a
-                     */
-                    location_id?: string | null;
-                    /**
-                     * @description Must not be greater than 120 characters.
-                     * @example [
-                     *       "k"
-                     *     ]
-                     */
-                    tags?: string[];
-                    /**
-                     * @description Must not be greater than 120 characters.
-                     * @example [
-                     *       "h"
-                     *     ]
-                     */
-                    skills?: string[];
-                    /** @example null */
-                    application_settings?: Record<string, never> | null;
-                    /** @example null */
-                    published_channels?: Record<string, never>;
-                    /**
-                     * @description Must be a valid UUID. Must match an existing stored value.
-                     * @example d207102d-bce0-31f9-8c36-aa9cf4cfe75a
-                     */
-                    criteria_group_id?: string | null;
-                    /** @example null */
-                    criteria_overrides?: Record<string, never> | null;
-                    /**
-                     * @description Must be between 1 and 5.
-                     * @example [
-                     *       1
-                     *     ]
-                     */
-                    match_weights?: number[];
-                    /**
-                     * @description Must be a valid UUID. Must match an existing stored value.
-                     * @example e2398df3-051c-3810-a269-3a15e327b316
-                     */
-                    match_weight_template_id?: string | null;
-                };
-            };
-        };
         responses: {
             401: {
                 headers: {
@@ -33538,6 +41670,28 @@ export interface operations {
             };
         };
     };
+    postVacanciesBulkAiAgent: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
     postVacanciesBulkTagsRemove: {
         parameters: {
             query?: never;
@@ -33604,20 +41758,30 @@ export interface operations {
             };
         };
     };
-    getVacanciesVacancy: {
+    getVacanciesVacancyMatches: {
         parameters: {
             query?: never;
             header?: never;
             path: {
                 /**
                  * @description The vacancy.
-                 * @example architecto
+                 * @example BcECdBDA-CdED-bFEA-CbCE-BcCdeBfbbebc
                  */
                 vacancy: string;
             };
             cookie?: never;
         };
-        requestBody?: never;
+        requestBody?: {
+            content: {
+                "application/json": {
+                    /**
+                     * @description Must be between 1 and 500.
+                     * @example 2
+                     */
+                    per_page?: number;
+                };
+            };
+        };
         responses: {
             401: {
                 headers: {
@@ -33632,7 +41796,7 @@ export interface operations {
             };
         };
     };
-    putVacanciesVacancy: {
+    getVacanciesVacancy: {
         parameters: {
             query?: never;
             header?: never;
@@ -33645,222 +41809,7 @@ export interface operations {
             };
             cookie?: never;
         };
-        requestBody?: {
-            content: {
-                "application/json": {
-                    /**
-                     * @description Must not be greater than 255 characters.
-                     * @example b
-                     */
-                    title?: string;
-                    /** @example null */
-                    custom_fields?: Record<string, never> | null;
-                    /**
-                     * @description Must not be greater than 50 characters.
-                     * @example n
-                     */
-                    code?: string | null;
-                    /** @example Eius et animi quos velit et. */
-                    description?: string | null;
-                    /**
-                     * @description Must not be greater than 64 characters.
-                     * @example v
-                     */
-                    status?: string | null;
-                    /**
-                     * @description Must not be greater than 64 characters.
-                     * @example d
-                     */
-                    employment_type?: string | null;
-                    /**
-                     * @description Must not be greater than 64 characters.
-                     * @example l
-                     */
-                    seniority?: string | null;
-                    /**
-                     * @description Must not be greater than 64 characters.
-                     * @example j
-                     */
-                    education?: string | null;
-                    /**
-                     * @description Must not be greater than 255 characters.
-                     * @example n
-                     */
-                    industry?: string | null;
-                    /**
-                     * @description Must be a valid UUID. Must match an existing stored value.
-                     * @example cd1eb1ea-4697-3b9a-9dd0-988044a83af6
-                     */
-                    customer_location_id?: string | null;
-                    /**
-                     * @description Must be a valid UUID. Must match an existing stored value.
-                     * @example 5e4f00df-4238-35bd-9edc-0b98dc359c80
-                     */
-                    customer_department_id?: string | null;
-                    /**
-                     * @description Must be a valid UUID. Must match an existing stored value.
-                     * @example 3c85cf54-98c1-36ed-b65a-abaafdecdfa9
-                     */
-                    contact_id?: string | null;
-                    /**
-                     * @description Must be a valid date.
-                     * @example 2026-07-27T21:50:38
-                     */
-                    start_date?: string | null;
-                    /**
-                     * @description Must be a valid date. Must be a date after or equal to <code>start_date</code>.
-                     * @example 2052-08-19
-                     */
-                    end_date?: string | null;
-                    /**
-                     * @description Must be a valid UUID. Must match an existing stored value.
-                     * @example a4855dc5-0acb-33c3-b921-f4291f719ca0
-                     */
-                    interview_flow_id?: string | null;
-                    /**
-                     * @description Must be a valid UUID. Must match an existing stored value.
-                     * @example c90237e9-ced5-3af6-88ea-84aeaa148878
-                     */
-                    ai_agent_id?: string | null;
-                    /**
-                     * @description Must not be greater than 255 characters.
-                     * @example i
-                     */
-                    category?: string | null;
-                    /**
-                     * @description Must not be greater than 255 characters.
-                     * @example y
-                     */
-                    location?: string | null;
-                    /**
-                     * @description Must not be greater than 255 characters.
-                     * @example v
-                     */
-                    street?: string | null;
-                    /**
-                     * @description Must not be greater than 20 characters.
-                     * @example dljnikhwaykcmyuw
-                     */
-                    house_number?: string | null;
-                    /**
-                     * @description Must not be greater than 20 characters.
-                     * @example pwlvqwrsitcpscql
-                     */
-                    house_number_suffix?: string | null;
-                    /**
-                     * @description Must not be greater than 20 characters.
-                     * @example dzsnrwtujwvlxjkl
-                     */
-                    postcode?: string | null;
-                    /**
-                     * @description Must not be greater than 120 characters.
-                     * @example q
-                     */
-                    city?: string | null;
-                    /**
-                     * @description Must not be greater than 120 characters.
-                     * @example p
-                     */
-                    province?: string | null;
-                    /**
-                     * @description Must not be greater than 120 characters.
-                     * @example p
-                     */
-                    country?: string | null;
-                    /**
-                     * @description Must match an existing stored value.
-                     * @example [
-                     *       "architecto"
-                     *     ]
-                     */
-                    contract_types?: string[];
-                    /**
-                     * @description Must be at least 0.
-                     * @example 39
-                     */
-                    salary_min?: number | null;
-                    /**
-                     * @description Must be at least 0.
-                     * @example 84
-                     */
-                    salary_max?: number | null;
-                    /**
-                     * @description Must not be greater than 32 characters.
-                     * @example z
-                     */
-                    salary_period?: string | null;
-                    /**
-                     * @description Must be between 0 and 168.
-                     * @example 0
-                     */
-                    hours_min?: number | null;
-                    /**
-                     * @description Must be between 0 and 168.
-                     * @example 0
-                     */
-                    hours_max?: number | null;
-                    /**
-                     * @description Must be between 0 and 60.
-                     * @example 0
-                     */
-                    experience_years?: number | null;
-                    /** @example false */
-                    published?: boolean;
-                    /**
-                     * @description Must be a valid UUID. Must match an existing stored value.
-                     * @example 21c4122b-d554-3723-966c-6d723ea5293f
-                     */
-                    customer_id?: string | null;
-                    /**
-                     * @description Must be a valid UUID.
-                     * @example add3503c-ebff-3875-93af-b8c6a695762b
-                     */
-                    owner_id?: string | null;
-                    /**
-                     * @description Must be a valid UUID. Must match an existing stored value.
-                     * @example c3b6b42e-3a0f-3935-b28d-cb767f8a2a0a
-                     */
-                    location_id?: string | null;
-                    /**
-                     * @description Must not be greater than 120 characters.
-                     * @example [
-                     *       "k"
-                     *     ]
-                     */
-                    tags?: string[];
-                    /**
-                     * @description Must not be greater than 120 characters.
-                     * @example [
-                     *       "h"
-                     *     ]
-                     */
-                    skills?: string[];
-                    /** @example null */
-                    application_settings?: Record<string, never> | null;
-                    /** @example null */
-                    published_channels?: Record<string, never>;
-                    /**
-                     * @description Must be a valid UUID. Must match an existing stored value.
-                     * @example d207102d-bce0-31f9-8c36-aa9cf4cfe75a
-                     */
-                    criteria_group_id?: string | null;
-                    /** @example null */
-                    criteria_overrides?: Record<string, never> | null;
-                    /**
-                     * @description Must be between 1 and 5.
-                     * @example [
-                     *       1
-                     *     ]
-                     */
-                    match_weights?: number[];
-                    /**
-                     * @description Must be a valid UUID. Must match an existing stored value.
-                     * @example e2398df3-051c-3810-a269-3a15e327b316
-                     */
-                    match_weight_template_id?: string | null;
-                };
-            };
-        };
+        requestBody?: never;
         responses: {
             401: {
                 headers: {
@@ -33913,6 +41862,34 @@ export interface operations {
                  * @example architecto
                  */
                 vacancy: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    getVacanciesIdTimeline: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The ID of the vacancy.
+                 * @example BcECdBDA-CdED-bFEA-CbCE-BcCdeBfbbebc
+                 */
+                id: string;
             };
             cookie?: never;
         };
@@ -34042,10 +42019,30 @@ export interface operations {
                      */
                     name?: string | null;
                     /**
-                     * @description Must not be greater than 100 characters.
-                     * @example n
+                     * @description DOCTYPES-1 (Danny 2026-07-28): the type must be a real, ACTIVE lookup value
+                     *     for THIS entity — free text is how "Contract", "contract" and "Kontrakt"
+                     *     end up as three types nobody can filter on. The scoped lookup already
+                     *     existed (candidate_document_types.entity); only the upload never used it.
+                     *     Global rows (entity = null) count for every entity, same as the picker.
+                     * @example null
                      */
-                    type?: string | null;
+                    type?: string;
+                    /**
+                     * @description DOC-EXPIRY-1: only validated for entities whose document table has the
+                     *     column — vacancy_documents has none, so `key => null` would 500 on insert.
+                     * @example null
+                     */
+                    expires_at?: string;
+                    /**
+                     * @description DOCS-LOC-DEPT-1: the OPTIONAL deeper link — format only (uuid) here.
+                     *     WHETHER it actually belongs to this customer (and a department to the
+                     *     named location) is the consistency invariant a model event enforces
+                     *     (CustomerTreeLinkGuard), never a controller check (§2/§12).
+                     * @example null
+                     */
+                    customer_location_id?: string;
+                    /** @example null */
+                    customer_department_id?: string;
                 };
             };
         };
@@ -34147,7 +42144,27 @@ export interface operations {
             };
             cookie?: never;
         };
-        requestBody?: never;
+        requestBody: {
+            content: {
+                "application/json": {
+                    /**
+                     * @description The document's display name.
+                     * @example Contract 2027.pdf
+                     */
+                    name: string;
+                    /** @example null */
+                    expires_at?: string;
+                    /**
+                     * @description DOCS-LOC-DEPT-1: correctable after upload too — same format-only rule,
+                     *     same model-event invariant as store() above.
+                     * @example null
+                     */
+                    customer_location_id?: string;
+                    /** @example null */
+                    customer_department_id?: string;
+                };
+            };
+        };
         responses: {
             401: {
                 headers: {
@@ -34424,50 +42441,6 @@ export interface operations {
             };
         };
     };
-    getVacancyEmploymentTypes: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        /** @example Unauthenticated. */
-                        message?: string;
-                    };
-                };
-            };
-        };
-    };
-    postVacancyEmploymentTypes: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        /** @example Unauthenticated. */
-                        message?: string;
-                    };
-                };
-            };
-        };
-    };
     getVacancySeniorityLevels: {
         parameters: {
             query?: never;
@@ -34583,96 +42556,6 @@ export interface operations {
             query?: never;
             header?: never;
             path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        /** @example Unauthenticated. */
-                        message?: string;
-                    };
-                };
-            };
-        };
-    };
-    putVacancyEmploymentTypesReorder: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: {
-            content: {
-                "application/json": {
-                    /**
-                     * @description Must be a valid UUID.
-                     * @example [
-                     *       "6ff8f7f6-1eb3-3525-be4a-3932c805afed"
-                     *     ]
-                     */
-                    ids?: string[];
-                };
-            };
-        };
-        responses: {
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        /** @example Unauthenticated. */
-                        message?: string;
-                    };
-                };
-            };
-        };
-    };
-    putVacancyEmploymentTypesId: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /**
-                 * @description The ID of the vacancy employment type.
-                 * @example architecto
-                 */
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        /** @example Unauthenticated. */
-                        message?: string;
-                    };
-                };
-            };
-        };
-    };
-    deleteVacancyEmploymentTypesId: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /**
-                 * @description The ID of the vacancy employment type.
-                 * @example architecto
-                 */
-                id: string;
-            };
             cookie?: never;
         };
         requestBody?: never;
@@ -35255,140 +43138,6 @@ export interface operations {
             };
         };
     };
-    getWhatsappMessageTypes: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        /** @example Unauthenticated. */
-                        message?: string;
-                    };
-                };
-            };
-        };
-    };
-    postWhatsappMessageTypes: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        /** @example Unauthenticated. */
-                        message?: string;
-                    };
-                };
-            };
-        };
-    };
-    putWhatsappMessageTypesReorder: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: {
-            content: {
-                "application/json": {
-                    /**
-                     * @description Must be a valid UUID.
-                     * @example [
-                     *       "6ff8f7f6-1eb3-3525-be4a-3932c805afed"
-                     *     ]
-                     */
-                    ids?: string[];
-                };
-            };
-        };
-        responses: {
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        /** @example Unauthenticated. */
-                        message?: string;
-                    };
-                };
-            };
-        };
-    };
-    putWhatsappMessageTypesId: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /**
-                 * @description The ID of the whatsapp message type.
-                 * @example architecto
-                 */
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        /** @example Unauthenticated. */
-                        message?: string;
-                    };
-                };
-            };
-        };
-    };
-    deleteWhatsappMessageTypesId: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /**
-                 * @description The ID of the whatsapp message type.
-                 * @example architecto
-                 */
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        /** @example Unauthenticated. */
-                        message?: string;
-                    };
-                };
-            };
-        };
-    };
     getEscalationReasons: {
         parameters: {
             query?: never;
@@ -35517,7 +43266,41 @@ export interface operations {
             };
         };
     };
-    getWorkflowRuns: {
+    putEscalationReasonsReorder: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": {
+                    /**
+                     * @description Must be a valid UUID.
+                     * @example [
+                     *       "6ff8f7f6-1eb3-3525-be4a-3932c805afed"
+                     *     ]
+                     */
+                    ids?: string[];
+                };
+            };
+        };
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    getWhatsappPhoneNumbers: {
         parameters: {
             query?: never;
             header?: never;
@@ -35525,6 +43308,60 @@ export interface operations {
             cookie?: never;
         };
         requestBody?: never;
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    getWhatsappTemplates: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    getWorkflowRuns: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": {
+                    /**
+                     * @description Must be a valid UUID.
+                     * @example 6ff8f7f6-1eb3-3525-be4a-3932c805afed
+                     */
+                    candidate_id?: string;
+                };
+            };
+        };
         responses: {
             401: {
                 headers: {
@@ -35587,50 +43424,6 @@ export interface operations {
         };
     };
     getPlanningConnections: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        /** @example Unauthenticated. */
-                        message?: string;
-                    };
-                };
-            };
-        };
-    };
-    getWhatsappPhoneNumbers: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        /** @example Unauthenticated. */
-                        message?: string;
-                    };
-                };
-            };
-        };
-    };
-    getWhatsappTemplates: {
         parameters: {
             query?: never;
             header?: never;

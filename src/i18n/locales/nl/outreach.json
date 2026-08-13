@@ -178,5 +178,15 @@
       "noTargets": "Deze actieve bellijst heeft nog geen contacten geladen.",
       "staleDraft": "Dit concept heeft contacten geladen maar is nooit geactiveerd."
     }
+  },
+  "filters": {
+    "owner": "Eigenaar",
+    "targetGroup": "Doelgroep",
+    "archived": "Gearchiveerd",
+    "categories": {
+      "campaign": "Campagne",
+      "organisation": "Organisatie",
+      "display": "Weergave"
+    }
   }
 }

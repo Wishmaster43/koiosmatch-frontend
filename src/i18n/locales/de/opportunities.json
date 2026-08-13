@@ -169,5 +169,13 @@
   },
   "richText": {
     "empty": "Noch nichts erfasst"
+  },
+  "filters": {
+    "archived": "Archiviert",
+    "categories": {
+      "lifecycle": "Lebenszyklus",
+      "organisation": "Organisation",
+      "display": "Ansicht"
+    }
   }
 }

@@ -217,5 +217,16 @@
     "linksLabel": "Koppeling",
     "noLinks": "Deze taak is aan geen enkel record gekoppeld — koppel een kandidaat, klant of ander record voor context.",
     "linked": "Gekoppeld aan {{count}} record(en)."
+  },
+  "filters": {
+    "team": "Team",
+    "linkedEntity": "Gekoppelde entiteit",
+    "deadlineRange": "Deadline periode",
+    "archived": "Gearchiveerd",
+    "categories": {
+      "work": "Werk",
+      "organisation": "Organisatie",
+      "display": "Weergave"
+    }
   }
 }

@@ -24,6 +24,7 @@ import { usePageMemory } from '@/lib/usePageMemory'
 import { useListPageSize } from '@/hooks/useListPageSize'
 import { isReferenceQuery } from '@/lib/referenceNumber'
 import { BTN_H } from '@/config/buttonMetrics'
+import { buildOpportunityFilterGroups } from './data/opportunityFilterGroups'
 
 // Single-select donut pick: clicking the active segment clears it.
 const pickOne = (set: Dispatch<SetStateAction<string[]>>) => (d: unknown) => {
@@ -129,15 +130,12 @@ export default function OpportunitiesPage({ intent }: { intent?: unknown } = {})
     rows.forEach(r => { const v = r[key]; if (v) m.set(v, (m.get(v) ?? 0) + 1) })
     return [...m.entries()].map(([value, count]) => ({ value, label: value, count }))
   }
-  const filterGroups = useMemo(() => [
-    { key: 'stage',  type: 'search-select', label: t('insights.stage'), selected: stage,  options: optionsFrom('stage'),  onToggle: tog(setStage) },
-    { key: 'owner',  type: 'search-select', label: t('insights.owner'), selected: owner,  options: optionsFrom('owner'),  onToggle: tog(setOwner) },
-    { key: 'client', type: 'search-select', label: t('cols.client'),    selected: client, options: optionsFrom('client'), onToggle: tog(setClient) },
-    // VESTIGING-2: inherited from the customer; values limited to the user's own
-    // branch scope (measured above) — never a widening.
-    { key: 'branch', type: 'search-select', label: t('common:filters.branch'), selected: selectedBranch, options: branchOptions, onToggle: tog(setSelectedBranch) },
+  const filterGroups = useMemo(() => buildOpportunityFilterGroups({
+    t, tog, stage, setStage, owner, setOwner, client, setClient,
+    selectedBranch, setSelectedBranch, showArchived, setShowArchived,
+    optionsFrom, branchOptions,
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  ], [t, rows, stage, owner, client, selectedBranch, branchOptions])
+  }), [t, rows, stage, owner, client, selectedBranch, branchOptions, showArchived])
 
   // Publish/retract the filters for the topbar filter button + right panel.
   useEffect(() => {

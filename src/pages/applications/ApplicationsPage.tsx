@@ -35,6 +35,7 @@ import {
   buildVacOptions, buildClientOptions, asOptions,
   bucketCount, computeAvgScore, computeAiTaskCount, buildApplicationInsights,
 } from './data/applicationInsights'
+import { buildApplicationFilterGroups } from './data/applicationFilterGroups'
 import type { Application } from '@/types/application'
 import type { Id } from '@/types/common'
 
@@ -93,10 +94,11 @@ export default function ApplicationsPage({ intent }: { intent?: unknown } = {}) 
     bucket, setBucket, selectedPhase, setSelectedPhase, attention, setAttention,
     selectedOwner, setSelectedOwner, selectedSource, setSelectedSource,
     selectedVac, setSelectedVac, selectedClient, setSelectedClient,
-    showArchived, setShowArchived, query, setQuery,
+    showArchived, setShowArchived, showTrash, setShowTrash, query, setQuery,
     interviewBusy, setInterviewBusy, interviewPaused, setInterviewPaused, refMode,
     selectedBranch, setSelectedBranch,
     selectedCandidateIds, setSelectedCandidateIds,
+    dateRange, setDateRange,
     anyFilterActive, clearAllFilters, searchEpoch, matchesFilters,
     filterParams, bucketParam,
   } = useApplicationFilters()
@@ -111,7 +113,7 @@ export default function ApplicationsPage({ intent }: { intent?: unknown } = {}) 
 
   // Clear the selection whenever the visible set changes (bucket/filters/paging).
   useEffect(() => { setSelectedIds(new Set()) },
-    [bucket, showArchived, interviewBusy, interviewPaused, page, pageSize,
+    [bucket, showArchived, showTrash, interviewBusy, interviewPaused, page, pageSize,
       selectedPhase, selectedOwner, selectedSource, selectedVac, selectedClient, query])
 
   // Board columns = the funnel lookup, normalised to { key, label, color }.
@@ -149,18 +151,23 @@ export default function ApplicationsPage({ intent }: { intent?: unknown } = {}) 
   // W27: customer/client filter options — new dimension (customer_id[]).
   const clientOptions = useMemo(() => buildClientOptions(wideRows), [wideRows])
 
-  // Register the right-panel filters (phase + recruiter + source + vacancy + client).
-  const filterGroups = useMemo(() => [
-    { key: 'phase',   label: t('insights.phase'),  selected: selectedPhase,  options: asOptions(phaseData),  onToggle: tog(setSelectedPhase) },
-    { key: 'owner',   label: t('insights.owner'),  selected: selectedOwner,  options: asOptions(ownerData),  onToggle: tog(setSelectedOwner) },
-    { key: 'source',  label: t('insights.source'), selected: selectedSource, options: asOptions(sourceData), onToggle: tog(setSelectedSource) },
-    { key: 'vacancy', label: t('cols.vacancy'),    selected: selectedVac,    options: vacOptions,            onToggle: tog(setSelectedVac) },
-    { key: 'client',  label: t('cols.client'),     selected: selectedClient, options: clientOptions,         onToggle: tog(setSelectedClient) },
-    // VESTIGING-2: inherited from the candidate; values limited to the user's own
-    // branch scope (measured above) — never a widening.
-    { key: 'branch',  label: t('common:filters.branch'), selected: selectedBranch, options: branchOptions, onToggle: tog(setSelectedBranch) },
-  ], [t, selectedPhase, selectedOwner, selectedSource, selectedVac, selectedClient, selectedBranch,
-    phaseData, ownerData, sourceData, vacOptions, clientOptions, branchOptions])
+  // Register the right-panel filters. Config lives in the data/ builder (mirrors
+  // buildCandidateFilterGroups/buildCustomerFilterGroups) — categorised groups +
+  // archived/trash/period, not just the bare phase/owner/source/vacancy/client set.
+  const filterGroups = useMemo(() => buildApplicationFilterGroups({
+    t, tog,
+    filters: {
+      selectedPhase, setSelectedPhase, selectedOwner, setSelectedOwner,
+      selectedSource, setSelectedSource, selectedVac, setSelectedVac,
+      selectedClient, setSelectedClient, selectedBranch, setSelectedBranch,
+      showArchived, setShowArchived, showTrash, setShowTrash, dateRange, setDateRange,
+    },
+    options: {
+      phaseOptions: asOptions(phaseData), ownerOptions: asOptions(ownerData), sourceOptions: asOptions(sourceData),
+      vacOptions, clientOptions, branchOptions,
+    },
+  }), [t, selectedPhase, selectedOwner, selectedSource, selectedVac, selectedClient, selectedBranch,
+    showArchived, showTrash, dateRange, phaseData, ownerData, sourceData, vacOptions, clientOptions, branchOptions]) // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     registerFilters('applications-page', filterGroups)
@@ -170,7 +177,7 @@ export default function ApplicationsPage({ intent }: { intent?: unknown } = {}) 
   // Reset to the first page whenever the bucket, any filter, or the sort changes
   // (DATATABLE-SORT-1: a new order restarts pagination, same as every filter above).
   useEffect(() => { setPage(1) }, [bucket, attention, selectedPhase, selectedOwner, selectedSource, selectedVac,
-    selectedClient, showArchived, interviewBusy, interviewPaused, query, selectedCandidateIds, sort])
+    selectedClient, showArchived, showTrash, dateRange, interviewBusy, interviewPaused, query, selectedCandidateIds, sort])
 
   // TABLE rows: the server's page — W27: now narrowed server-side by every filter
   // (bucket/phase_key/vacancy_id/owner_id/source/customer_id/search-or-ref/

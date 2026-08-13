@@ -178,5 +178,15 @@
       "noTargets": "Esta campaña activa aún no tiene contactos cargados.",
       "staleDraft": "Este borrador tiene contactos cargados pero nunca se activó."
     }
+  },
+  "filters": {
+    "owner": "Propietario",
+    "targetGroup": "Grupo objetivo",
+    "archived": "Archivado",
+    "categories": {
+      "campaign": "Campaña",
+      "organisation": "Organización",
+      "display": "Visualización"
+    }
   }
 }

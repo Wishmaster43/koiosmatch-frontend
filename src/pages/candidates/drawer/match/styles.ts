@@ -21,12 +21,14 @@ export const errMsg: React.CSSProperties = { fontSize: 11, color: 'var(--color-d
 export const lbl: React.CSSProperties = { fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em', color: 'var(--text-muted)', marginBottom: 5 }
 
 // P33 label-left row: the canon 120px label column, field takes the rest.
-export const labelLeftRow: React.CSSProperties = { display: 'flex', alignItems: 'flex-start', gap: 10, marginBottom: 12 }
+// No own marginBottom: the cardBox's flex gap (modalCards) already spaces rows —
+// a per-row margin ON TOP doubled every gap to 24px (Danny 14-08 "spacing te veel").
+export const labelLeftRow: React.CSSProperties = { display: 'flex', alignItems: 'flex-start', gap: 10 }
 export const rowLabel = CANON_LABEL_STYLE
 export const rowField: React.CSSProperties = { flex: 1, minWidth: 0 }
 // Two label-left rows side by side — for short fields (CAO, dates, rates, …)
 // that don't need the full row width. Each cell renders its OWN labelLeftRow.
-export const pairRow: React.CSSProperties = { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14, marginBottom: 12 }
+export const pairRow: React.CSSProperties = { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }
 
 // Consistent search-box width for the relational pickers below — the panel
 // gives the field column plenty of room, so a wider menu than the shared

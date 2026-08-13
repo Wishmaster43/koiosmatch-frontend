@@ -6,7 +6,7 @@
  * CandidatesPage:113 consumes { attention: 'stale6m' }.
  */
 import { describe, it, expect, vi } from 'vitest'
-import { render } from '@testing-library/react'
+import { act, render } from '@testing-library/react'
 import { useState } from 'react'
 import VacanciesPage from './VacanciesPage'
 
@@ -14,7 +14,11 @@ import VacanciesPage from './VacanciesPage'
 // request the page would send to the server (list + stats both receive it).
 const dataHookCalls: Array<Record<string, unknown>> = []
 
-vi.mock('@/context/RightPanelContext', () => ({ useRightPanel: () => ({ registerFilters: vi.fn(), unregisterFilters: vi.fn() }) }))
+interface FilterGroup { key: string; selected: string[]; onToggle: (v: string) => void }
+let capturedGroups: FilterGroup[] = []
+vi.mock('@/context/RightPanelContext', () => ({
+  useRightPanel: () => ({ registerFilters: (_k: string, groups: FilterGroup[]) => { capturedGroups = groups }, unregisterFilters: vi.fn() }),
+}))
 vi.mock('@/context/AuthContext', () => ({ useAuth: () => ({ hasPermission: () => true }) }))
 vi.mock('@/lib/queries', () => ({ useUsers: () => ({ data: [] }) }))
 vi.mock('@/lib/useBranchOptions', () => ({ useBranchOptions: () => [] }))
@@ -89,5 +93,32 @@ describe('VacanciesPage · D1(a) dashboard intent seam', () => {
     const last = dataHookCalls[dataHookCalls.length - 1]
     expect(last.closing_soon).toBeUndefined()
     expect(last.stale_status).toBeUndefined()
+  })
+})
+
+// FILTER-PARITY-1: status/published/agent/has-applications/archived filter groups
+// exist in the right panel and reach the real request params — the CLAUDE.md §13
+// seam test (a mutation/request test, never only "a callback fired").
+describe('VacanciesPage · filter-panel parity (status/published/agent/archived)', () => {
+  it('registers the new filter groups and toggling published/archived reaches filterParams', () => {
+    dataHookCalls.length = 0
+    render(<VacanciesPage />)
+
+    expect(capturedGroups.find(g => g.key === 'status')).toBeTruthy()
+    expect(capturedGroups.find(g => g.key === 'published')).toBeTruthy()
+    expect(capturedGroups.find(g => g.key === 'agent')).toBeTruthy()
+    expect(capturedGroups.find(g => g.key === 'hasApplications')).toBeTruthy()
+    expect(capturedGroups.find(g => g.key === 'archived')).toBeTruthy()
+    expect(capturedGroups.find(g => g.key === 'geo')).toBeTruthy()
+
+    const publishedGroup = capturedGroups.find(g => g.key === 'published')!
+    act(() => publishedGroup.onToggle('published'))
+    let last = dataHookCalls[dataHookCalls.length - 1]
+    expect(last.published).toBe(1)
+
+    const archivedGroup = capturedGroups.find(g => g.key === 'archived')!
+    act(() => archivedGroup.onToggle('archived'))
+    last = dataHookCalls[dataHookCalls.length - 1]
+    expect(last.include_archived).toBe(1)
   })
 })

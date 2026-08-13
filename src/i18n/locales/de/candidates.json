@@ -268,6 +268,12 @@
         "timeout": "Das Lesen dieses Lebenslaufs hat zu lange gedauert. Versuchen Sie es erneut oder tragen Sie die Daten manuell ein.",
         "generic": "Der Lebenslauf konnte nicht gelesen werden."
       }
+    },
+    "cvPaste": {
+      "title": "Kandidat aus eingefügtem Lebenslauftext",
+      "placeholder": "Lebenslauftext hier einfügen…",
+      "submit": "Text lesen",
+      "tooShort": "Füge mindestens {{min}} Zeichen ein. Koios braucht genug Text zum Lesen."
     }
   },
   "drawer": {
@@ -1298,5 +1304,15 @@
     "summaryWindowTitle": "Profiltext — {{name}}",
     "noteNotFound": "Notiz nicht gefunden. Sie wurde möglicherweise gelöscht oder gehört zu einem anderen Kandidaten.",
     "noteReadOnly": "Diese Notiz gehört einem anderen Benutzer. Sie können sie hier nur lesen."
+  },
+  "generate": {
+    "button": "Mit Koios generieren",
+    "cta": "Generieren",
+    "generating": "Koios erstellt einen Entwurf für den Profiltext…",
+    "error": "Generieren fehlgeschlagen. Bitte erneut versuchen.",
+    "previewLabel": "Vorschlag (Entwurf), noch nicht gespeichert",
+    "apply": "Übernehmen",
+    "discard": "Verwerfen",
+    "needsFieldsFirst": "Geben Sie zuerst einen Namen oder eine Funktionsbezeichnung ein, um einen Entwurf zu generieren."
   }
 }

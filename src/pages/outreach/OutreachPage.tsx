@@ -5,12 +5,14 @@
  * and an archived text-toggle + table/board view toggle on the RIGHT, a bulk bar
  * over the table, and a kanban board. The per-bellijst call-list detail is step 2.
  */
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect, useMemo, type Dispatch, type SetStateAction } from 'react'
 import { useTranslation } from 'react-i18next'
 import { LayoutList, Kanban, Archive, Plus } from 'lucide-react'
 import { notifyError, notifySuccess } from '@/lib/notify'
 import { useAuth } from '@/context/AuthContext'
+import { useRightPanel } from '@/context/RightPanelContext'
 import InsightsRow from '@/components/insights/InsightsRow'
+import { buildOutreachFilterGroups } from './data/outreachFilterGroups'
 import HeaderSearch from '@/components/ui/HeaderSearch'
 import QuickViewToggle from '@/components/ui/QuickViewToggle'
 import ViewModeToggle from '@/components/ui/ViewModeToggle'
@@ -46,6 +48,19 @@ const CHANNELS = [
 const statusKey  = (c: Campaign) => c.status ?? 'draft'
 const channelKey = (c: Campaign) => c.channel ?? 'call'
 const targetsOf  = (c: Campaign) => c.targets_count ?? c.target_count ?? 0
+// The owner/target-group filters read defensively — a campaign row may carry
+// either a nested object or a flat *_name field depending on which endpoint
+// populated it, so neither shape is assumed.
+const ownerNameOf = (c: Campaign) => (c.owner as { name?: string } | null)?.name ?? (c as Record<string, unknown>).owner_name as string | undefined ?? ''
+const targetGroupNameOf = (c: Campaign) => {
+  const rec = c as Record<string, unknown>
+  const pool = (rec.pool ?? rec.from_pool ?? rec.target_group) as { name?: string } | string | null | undefined
+  return typeof pool === 'string' ? pool : pool?.name ?? (rec.pool_name as string | undefined) ?? ''
+}
+
+// Right-panel multi-toggle for a filter dimension.
+const tog = (set: Dispatch<SetStateAction<string[]>>) => (v: string) =>
+  set(p => p.includes(v) ? p.filter(x => x !== v) : [...p, v])
 
 export default function OutreachPage() {
   const { t } = useTranslation('outreach')
@@ -54,6 +69,7 @@ export default function OutreachPage() {
   // Restore is update-class (BE gates the /restore route on outreach.update).
   const canRestore = (auth as unknown as { hasPermission?: (p: string) => boolean })?.hasPermission?.('outreach.update') ?? false
   const { campaigns, loading, error, reload, add, patch, drop } = useOutreachCampaigns()
+  const { registerFilters, unregisterFilters } = useRightPanel()
 
   const [view, setView] = useState<'table' | 'board'>('table')
   // Pagination (audit 2026-08-05: "Bellijsten heeft niet eens een footer??") —
@@ -73,6 +89,9 @@ export default function OutreachPage() {
   // Channel filter (second donut) + targets-only KPI toggle.
   const [selectedChannel, setSelectedChannel] = useState<string[]>([])
   const [kpiTargets, setKpiTargets] = useState(false)
+  // Right-panel-only filters: owner + target group (source pool).
+  const [selectedOwner, setSelectedOwner] = useState<string[]>([])
+  const [selectedTargetGroup, setSelectedTargetGroup] = useState<string[]>([])
   const [selectedIds, setSelectedIds] = useState<Set<string>>(() => new Set())
   const [query, setQuery] = useState('')  // shared header search (client-side, R-5)
 
@@ -103,7 +122,7 @@ export default function OutreachPage() {
   const archived = archivedRaw
 
   // Clear the selection whenever the filter/view/archived toggle changes.
-  useEffect(() => { setSelectedIds(new Set()) }, [selectedStatus, selectedChannel, kpiTargets, view, showArchived])
+  useEffect(() => { setSelectedIds(new Set()) }, [selectedStatus, selectedChannel, selectedOwner, selectedTargetGroup, kpiTargets, view, showArchived])
 
   // Board columns + donut items, labelled via i18n.
   const columns = useMemo(() => STATUSES.map((s) => ({ key: s.key, label: t(`status.${s.key}`), color: s.color })), [t])
@@ -113,17 +132,45 @@ export default function OutreachPage() {
   const statusData  = useMemo(() => donutBy(STATUSES, 'status', statusKey), [campaigns, t]) // eslint-disable-line react-hooks/exhaustive-deps
   const channelData = useMemo(() => donutBy(CHANNELS, 'channel', channelKey), [campaigns, t]) // eslint-disable-line react-hooks/exhaustive-deps
 
+  // Right-panel-only options: owner + target group (source pool), derived from
+  // the loaded rows — never a hardcoded list.
+  const optionsFrom = (nameOf: (c: Campaign) => string): { value: string; label: string; count: number }[] => {
+    const m = new Map<string, number>()
+    campaigns.forEach((c) => { const n = nameOf(c); if (n) m.set(n, (m.get(n) ?? 0) + 1) })
+    return [...m.entries()].map(([value, count]) => ({ value, label: value, count }))
+  }
+  const ownerOptions = useMemo(() => optionsFrom(ownerNameOf), [campaigns])
+  const targetGroupOptions = useMemo(() => optionsFrom(targetGroupNameOf), [campaigns])
+
+  // Register the right-panel filters (status/channel/owner/target-group/archived).
+  const filterGroups = useMemo(() => buildOutreachFilterGroups({
+    t, tog,
+    selectedStatus, setSelectedStatus, selectedChannel, setSelectedChannel,
+    selectedOwner, setSelectedOwner, selectedTargetGroup, setSelectedTargetGroup,
+    showArchived, setShowArchived,
+    statusOptions: statusData.map(d => ({ value: d.key, label: d.name, count: d.value })),
+    channelOptions: channelData.map(d => ({ value: d.key, label: d.name, count: d.value })),
+    ownerOptions, targetGroupOptions,
+  }), [t, selectedStatus, selectedChannel, selectedOwner, selectedTargetGroup, showArchived, statusData, channelData, ownerOptions, targetGroupOptions])
+
+  useEffect(() => {
+    registerFilters('outreach-page', filterGroups)
+    return () => unregisterFilters('outreach-page')
+  }, [filterGroups, registerFilters, unregisterFilters])
+
   // Base rows = active list, or the archived list when the archived toggle is on.
   const baseRows = showArchived ? archived : campaigns
   // Status filter (from the donut/KPI) narrows both the table and the board.
   const filtered = useMemo(() => {
     let byStatus = selectedStatus.length ? baseRows.filter((c) => selectedStatus.includes(statusKey(c))) : baseRows
     if (selectedChannel.length) byStatus = byStatus.filter((c) => selectedChannel.includes(channelKey(c)))
+    if (selectedOwner.length) byStatus = byStatus.filter((c) => selectedOwner.includes(ownerNameOf(c)))
+    if (selectedTargetGroup.length) byStatus = byStatus.filter((c) => selectedTargetGroup.includes(targetGroupNameOf(c)))
     if (kpiTargets) byStatus = byStatus.filter((c) => targetsOf(c) > 0)
     if (!query.trim()) return byStatus
     const q = query.trim().toLowerCase()
     return byStatus.filter((c) => `${(c as { name?: string }).name ?? ''}`.toLowerCase().includes(q))
-  }, [baseRows, selectedStatus, selectedChannel, kpiTargets, query])
+  }, [baseRows, selectedStatus, selectedChannel, selectedOwner, selectedTargetGroup, kpiTargets, query])
 
   // Pagination — the table view only; the board shows the whole filtered set
   // (mirrors MatchesPage/TasksPage/OpportunitiesPage's identical split).
@@ -131,7 +178,7 @@ export default function OutreachPage() {
   const lastPage   = Math.max(1, Math.ceil(totalRows / pageSize))
   const paged      = useMemo(() => filtered.slice((page - 1) * pageSize, page * pageSize), [filtered, page, pageSize])
   // Reset to the first page whenever the filtered set's shape changes.
-  useEffect(() => { setPage(1) }, [selectedStatus, selectedChannel, kpiTargets, query, showArchived]) // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => { setPage(1) }, [selectedStatus, selectedChannel, selectedOwner, selectedTargetGroup, kpiTargets, query, showArchived]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // Donut/KPI click = set exactly one status value (or clear when clicked again).
   const pickStatus  = (v?: string) => { if (v != null) setSelectedStatus((p) => (p.length === 1 && p[0] === v) ? [] : [v]) }

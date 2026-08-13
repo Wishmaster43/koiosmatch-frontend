@@ -17,7 +17,9 @@ import { useUsers } from '@/lib/queries'
 import { useCustomerLookups } from '@/lib/useCustomerLookups'
 import { useCustomerPhases } from '@/lib/useCustomerPhases'
 import { useBranchOptions } from '@/lib/useBranchOptions'
-import { pickCustomerStatusSegment, buildCustomerStatusOptions, NO_STATUS_KEY } from './data/customerInsights'
+import { pickCustomerStatusSegment, buildCustomerStatusOptions } from './data/customerInsights'
+import { buildCustomerFilterGroups } from './data/customerFilterGroups'
+import type { CustomerDateRange } from './data/customerFilterGroups'
 import InsightsRow from '@/components/insights/InsightsRow'
 import type { DonutSpec, KpiSpec } from '@/components/insights/InsightsRow'
 import PaginationBar from '@/components/ui/PaginationBar'
@@ -108,10 +110,13 @@ export default function CustomersPage({ intent }: { intent?: unknown } = {}) {
   const [selectedPhase,    setSelectedPhase]    = usePageMemory<string[]>('cust.phase', [])
   const [selectedOwner,    setSelectedOwner]    = usePageMemory<string[]>('cust.owner', [])
   const [selectedCity,     setSelectedCity]     = usePageMemory<string[]>('cust.city', [])
+  const [selectedProvince, setSelectedProvince] = usePageMemory<string[]>('cust.province', [])
   const [selectedIndustry, setSelectedIndustry] = usePageMemory<string[]>('cust.industry', [])
   // VESTIGING-2: explicit branch filter (narrows within what the user may already
   // see — never a widening; server excludes records with no branch, see the notice below).
   const [selectedBranch, setSelectedBranch] = usePageMemory<string[]>('cust.branch', [])
+  // Period (created date range) from a dashboard bar click — mirrors the candidate page.
+  const [dateRange, setDateRange] = usePageMemory<CustomerDateRange | null>('cust.dateRange', null)
 
   const filterParams = useMemo(() => {
     const p: Record<string, unknown> = {}
@@ -126,17 +131,19 @@ export default function CustomersPage({ intent }: { intent?: unknown } = {}) {
     if (selectedPhase.length)    p.phase    = selectedPhase
     if (selectedOwner.length)    p.owner_id = selectedOwner
     if (selectedCity.length)     p.city     = selectedCity
+    if (selectedProvince.length) p.state    = selectedProvince
     if (selectedIndustry.length) p.industry = selectedIndustry
     // VESTIGING-2: server-side ?branch_id[]= — a narrowing only, gated behind the
     // tenant's own branch_authz_enabled axis on the backend (off = no effect).
     if (selectedBranch.length)  p.branch_id = selectedBranch
     if (showArchived)            p.include_archived = 1
+    if (dateRange)               p[dateRange.param] = [dateRange.from, dateRange.to]
     // Map view narrows the list server-side to the chosen circle (STRAAL-1);
     // in table view the sidebar's straal-blok drives the same params.
     if (view === 'map') { p.lat = mapCenter.lat; p.lng = mapCenter.lng; p.radius = mapRadius }
     else if (geoFilter) { p.lat = geoFilter.lat; p.lng = geoFilter.lng; p.radius = geoFilter.km }
     return p
-  }, [globalSearch, selectedStatus, selectedPhase, selectedOwner, selectedCity, selectedIndustry, selectedBranch, showArchived, view, mapCenter, mapRadius, geoFilter])
+  }, [globalSearch, selectedStatus, selectedPhase, selectedOwner, selectedCity, selectedProvince, selectedIndustry, selectedBranch, showArchived, dateRange, view, mapCenter, mapRadius, geoFilter])
   const filterKey = JSON.stringify(filterParams)
 
   useEffect(() => { setPage(1) }, [filterKey])
@@ -191,7 +198,9 @@ export default function CustomersPage({ intent }: { intent?: unknown } = {}) {
     return Object.values(m)
   }, [stats, customers])
   const cityOptions     = useMemo(() => optsFrom(customers.map(c => c.city).filter(Boolean)), [customers])
+  const provinceOptions = useMemo(() => optsFrom(customers.map(c => c.state).filter(Boolean)), [customers])
   const industryOptions = useMemo(() => optsFrom(customers.map(c => c.industry).filter(Boolean)), [customers])
+  const phaseOptions = useMemo<Opt[]>(() => customerPhases.map(p => ({ value: p.value, label: p.label, count: 0, color: p.color })), [customerPhases])
 
   const tog = (set: Dispatch<SetStateAction<string[]>>) => (v: string) => set(p => p.includes(v) ? p.filter(x => x !== v) : [...p, v])
   const pickOne = (set: Dispatch<SetStateAction<string[]>>) => (v: string | undefined) => { if (v != null) toggleOneValue(set, v) }
@@ -205,24 +214,20 @@ export default function CustomersPage({ intent }: { intent?: unknown } = {}) {
     setMapCenter({ lat: hit.lat, lng: hit.lng }); setMapRadius(km)
   }
 
-  const catGeneral = t('filters.categories.general')
-  const catOrg     = t('filters.categories.organisation')
-
-  const filterGroups = useMemo(() => [
-    // The '__none' (no-status/entry-phase) bucket is donut-only (its click routes
-    // to the PHASE axis, not a plain toggle) — never offered in this sidebar list,
-    // which would otherwise reintroduce "Prospect" as a selectable status.
-    { key: 'status',   type: 'search-select', category: catGeneral, label: t('filters.status'),         selected: selectedStatus,   options: statusOptions.filter(o => o.value !== NO_STATUS_KEY), onToggle: tog(setSelectedStatus) },
-    { key: 'industry', type: 'search-select', category: catGeneral, label: t('filters.industry'),       selected: selectedIndustry, options: industryOptions, onToggle: tog(setSelectedIndustry) },
-    { key: 'city',     type: 'search-select', category: catGeneral, label: t('filters.city'),           selected: selectedCity,     options: cityOptions,     onToggle: tog(setSelectedCity) },
-    { key: 'geo', type: 'geo-radius', category: catGeneral, label: t('common:filters.radius'),
-      applied: geoFilter ? { label: geoFilter.label } : null, hint: geoHint, km: geoFilter?.km ?? 30,
-      onApply: applyGeo, onClear: () => { setGeoFilter(null); setGeoHint(null) } },
-    { key: 'owner',    type: 'search-select', category: catOrg,     label: t('filters.accountManager'), selected: selectedOwner,    options: ownerOptions,    onToggle: tog(setSelectedOwner) },
-    // VESTIGING-2: values limited to the user's own branch scope (measured above) —
-    // filtering outside it is pointless, never a widening.
-    { key: 'branch',   type: 'search-select', category: catOrg,     label: t('common:filters.branch'),   selected: selectedBranch,   options: branchOptions,   onToggle: tog(setSelectedBranch) },
-  ], [t, catGeneral, catOrg, selectedStatus, selectedIndustry, selectedCity, selectedOwner, selectedBranch, statusOptions, industryOptions, cityOptions, ownerOptions, branchOptions, geoFilter, geoHint]) // eslint-disable-line react-hooks/exhaustive-deps
+  // Filter panel config lives in the data/ builder (mirrors buildCandidateFilterGroups).
+  const filterGroups = useMemo(() => buildCustomerFilterGroups({
+    t, tog,
+    filters: {
+      selectedStatus, setSelectedStatus, selectedPhase, setSelectedPhase,
+      selectedIndustry, setSelectedIndustry, selectedCity, setSelectedCity,
+      selectedProvince, setSelectedProvince, selectedOwner, setSelectedOwner,
+      selectedBranch, setSelectedBranch, showArchived, setShowArchived,
+      dateRange, setDateRange, geoFilter, geoHint, applyGeo,
+      clearGeo: () => { setGeoFilter(null); setGeoHint(null) },
+    },
+    options: { statusOptions, phaseOptions, industryOptions, cityOptions, provinceOptions, ownerOptions, branchOptions },
+  }), [t, selectedStatus, selectedPhase, selectedIndustry, selectedCity, selectedProvince, selectedOwner, selectedBranch,
+      showArchived, dateRange, geoFilter, geoHint, statusOptions, phaseOptions, industryOptions, cityOptions, provinceOptions, ownerOptions, branchOptions]) // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     registerFilters('customers-page', filterGroups)
@@ -239,13 +244,13 @@ export default function CustomersPage({ intent }: { intent?: unknown } = {}) {
   const [kpiFilter, setKpiFilter] = usePageMemory<string | null>('cust.kpi', null)
   const toggleKpi = (k: string) => setKpiFilter(p => (p === k ? null : k))
   // Shared clear-all (page memory keeps filters sticky).
-  const anyFilterActive = Boolean(globalSearch.trim() || showArchived || kpiFilter || geoFilter
-    || selectedStatus.length || selectedPhase.length || selectedOwner.length || selectedCity.length || selectedIndustry.length || selectedBranch.length)
+  const anyFilterActive = Boolean(globalSearch.trim() || showArchived || kpiFilter || geoFilter || dateRange
+    || selectedStatus.length || selectedPhase.length || selectedOwner.length || selectedCity.length || selectedProvince.length || selectedIndustry.length || selectedBranch.length)
   const [searchEpoch, setSearchEpoch] = useState(0)
   const clearAllFilters = () => {
     setSearchEpoch(e => e + 1); setGlobalSearch(''); setShowArchived(false); setKpiFilter(null)
-    setSelectedStatus([]); setSelectedPhase([]); setSelectedOwner([]); setSelectedCity([]); setSelectedIndustry([]); setSelectedBranch([])
-    setGeoFilter(null); setGeoHint(null); setPage(1)
+    setSelectedStatus([]); setSelectedPhase([]); setSelectedOwner([]); setSelectedCity([]); setSelectedProvince([]); setSelectedIndustry([]); setSelectedBranch([])
+    setGeoFilter(null); setGeoHint(null); setDateRange(null); setPage(1)
   }
 
   // One visible-rows list for BOTH the table and the map pane (STRAAL-1 split view):

@@ -29,7 +29,8 @@
     "avgScore": "Avg score",
     "closed": "Closed",
     "newThisMonth": "New this month",
-    "unscored": "Unscored"
+    "unscored": "Unscored",
+    "scored": "Scored"
   },
   "drawer": {
     "label": "Match",
@@ -205,7 +206,15 @@
     "client": "Client",
     "moreFilters": "More filters",
     "moreFiltersTitle": "More filters",
-    "removeFilter": "Remove '{{label}}' filter"
+    "removeFilter": "Remove '{{label}}' filter",
+    "scoreState": "Score",
+    "dateRange": "Date range",
+    "archived": "Archived",
+    "categories": {
+      "match": "Match",
+      "organisation": "Organisation",
+      "display": "Display"
+    }
   },
   "view": {
     "matches": "Matches",

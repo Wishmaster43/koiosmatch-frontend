@@ -268,6 +268,12 @@
         "timeout": "La lectura de este CV ha tardado demasiado. Inténtalo de nuevo o introduce los datos manualmente.",
         "generic": "El CV no se ha podido leer."
       }
+    },
+    "cvPaste": {
+      "title": "Candidato a partir de texto de CV pegado",
+      "placeholder": "Pegue aquí el texto del CV…",
+      "submit": "Leer texto",
+      "tooShort": "Pegue al menos {{min}} caracteres. Koios necesita suficiente texto para leer."
     }
   },
   "drawer": {
@@ -1298,5 +1304,15 @@
     "summaryWindowTitle": "Texto de perfil — {{name}}",
     "noteNotFound": "Nota no encontrada. Puede que se haya eliminado o pertenezca a otro candidato.",
     "noteReadOnly": "Esta nota pertenece a otro usuario. Aquí solo puedes leerla."
+  },
+  "generate": {
+    "button": "Generar con Koios",
+    "cta": "Generar",
+    "generating": "Koios está generando un texto de perfil provisional…",
+    "error": "Error al generar. Inténtelo de nuevo.",
+    "previewLabel": "Propuesta (borrador), aún no guardada",
+    "apply": "Aplicar",
+    "discard": "Descartar",
+    "needsFieldsFirst": "Complete primero un nombre o un cargo para generar un borrador."
   }
 }

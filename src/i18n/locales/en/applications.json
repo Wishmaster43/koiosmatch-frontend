@@ -534,5 +534,14 @@
     "total_other": "{{count}} applicants for this vacancy",
     "inPhase_one": "This candidate is in {{phase}}, together with 1 other.",
     "inPhase_other": "This candidate is in {{phase}}, together with {{count}} others."
+  },
+  "filters": {
+    "categories": {
+      "lifecycle": "Recruiting",
+      "organisation": "Organisation",
+      "display": "Display"
+    },
+    "trash": "Trash",
+    "periodCreated": "Period (created)"
   }
 }

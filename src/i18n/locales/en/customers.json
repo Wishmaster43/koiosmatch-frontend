@@ -39,10 +39,15 @@
     "industry": "Industry",
     "categories": {
       "general": "General",
-      "organisation": "Organisation"
+      "organisation": "Organisation",
+      "display": "Display"
     },
     "allStatuses": "All statuses",
-    "statusFilter": "Filter by status"
+    "statusFilter": "Filter by status",
+    "phase": "Phase",
+    "province": "Province",
+    "archived": "Archived",
+    "periodCreated": "Period (created)"
   },
   "insights": {
     "statusTitle": "Status",

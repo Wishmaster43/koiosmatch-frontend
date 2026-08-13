@@ -217,5 +217,16 @@
     "linksLabel": "Link",
     "noLinks": "This task isn't linked to any record — link a candidate, client or other record for context.",
     "linked": "Linked to {{count}} record(s)."
+  },
+  "filters": {
+    "team": "Team",
+    "linkedEntity": "Linked entity",
+    "deadlineRange": "Deadline range",
+    "archived": "Archived",
+    "categories": {
+      "work": "Work",
+      "organisation": "Organisation",
+      "display": "Display"
+    }
   }
 }

@@ -142,3 +142,42 @@ describe('CustomersPage · picking a branch (VESTIGING-2)', () => {
     act(() => branchGroup.onToggle('b1')) // clean up, see note above
   })
 })
+
+// FILTER-PARITY-1: province/phase/archived groups exist and their onToggle reaches
+// the real server-side filterParams — the seam test the CLAUDE.md §13 rule asks for.
+describe('CustomersPage · filter-panel parity (province/phase/archived)', () => {
+  it('registers province and phase filter groups, and toggling them sets state/phase in filterParams', async () => {
+    useCustomersDataMock.mockReturnValue(baseResult)
+    render(<CustomersPage />)
+    await waitFor(() => expect(apiGet).toHaveBeenCalled())
+
+    const provinceGroup = capturedGroups.find(g => g.key === 'province')
+    const phaseGroup = capturedGroups.find(g => g.key === 'phase')
+    expect(provinceGroup).toBeTruthy()
+    expect(phaseGroup).toBeTruthy()
+
+    act(() => provinceGroup!.onToggle('Utrecht'))
+    let lastCall = useCustomersDataMock.mock.calls.at(-1)![0]
+    expect(lastCall.filterParams.state).toEqual(['Utrecht'])
+    act(() => provinceGroup!.onToggle('Utrecht')) // clean up
+
+    act(() => phaseGroup!.onToggle('klant'))
+    lastCall = useCustomersDataMock.mock.calls.at(-1)![0]
+    expect(lastCall.filterParams.phase).toEqual(['klant'])
+    act(() => phaseGroup!.onToggle('klant')) // clean up
+  })
+
+  it('registers an archived filter group whose onToggle sets include_archived=1', async () => {
+    useCustomersDataMock.mockReturnValue(baseResult)
+    render(<CustomersPage />)
+    await waitFor(() => expect(apiGet).toHaveBeenCalled())
+
+    const archivedGroup = capturedGroups.find(g => g.key === 'archived')
+    expect(archivedGroup).toBeTruthy()
+
+    act(() => archivedGroup!.onToggle('archived'))
+    const lastCall = useCustomersDataMock.mock.calls.at(-1)![0]
+    expect(lastCall.filterParams.include_archived).toBe(1)
+    act(() => archivedGroup!.onToggle('archived')) // clean up
+  })
+})

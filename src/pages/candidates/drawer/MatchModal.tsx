@@ -23,7 +23,9 @@
  * frame. Every field is now its own label-LEFT row (P33, `match/styles` +
  * `FormField`) — the label sits at the shared CANON_LABEL_WIDTH, the field
  * takes the rest, so a row reads left-to-right instead of stacking label-above-
- * field. The panel itself narrowed to ~640px (was 94vw/1060px) and the four
+ * field. The panel opens WIDE by default (1060px — Danny 14-08 "scherm moet
+ * breder, anders past de klantnaam niet eens"; the brief 640px default truncated
+ * every picker label) and the four
  * sections stack as single-column titled cards — Relaties, Contract,
  * Financieel, Opmerkingen — mirroring PlanIntakeModal's own scrollBody={false}
  * + own scroll area (padding 22) + a pinned footer with borderTop, instead of
@@ -130,7 +132,7 @@ export default function MatchModal({
     // scroll area below mirrors PlanIntakeModal/AddApplicationModal exactly, so
     // the footer buttons stay pinned instead of scrolling with the form.
     <FloatingPanel open onClose={onClose} title={title} ariaLabel={title}
-      persistKey="candidate-match" width={640} maxWidth="92vw" scrollBody={false} bodyStyle={{ padding: 0 }}>
+      persistKey="candidate-match" width={1060} maxWidth="92vw" scrollBody={false} bodyStyle={{ padding: 0 }}>
 
       {/* Fields scroll in their own area so the footer buttons stay pinned (mirrors PlanIntakeModal, Danny 13-08). */}
       <div style={{ overflow: 'auto', flex: 1, minHeight: 0, padding: 22 }}>
@@ -152,7 +154,7 @@ export default function MatchModal({
             column, each a bordered `cardBox` under an 11px uppercase `cardHead`
             — the addmodal card idiom, now stacked instead of paired columns.
             Every field inside a card is its own label-LEFT row (P33). ── */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 16, marginTop: 4 }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginTop: 4 }}>
           <div>
             <div style={cardHead}>{t('placement.relations')}</div>
             <div style={cardBox}>

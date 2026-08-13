@@ -534,5 +534,14 @@
     "total_other": "{{count}} sollicitanten op deze vacature",
     "inPhase_one": "Deze kandidaat staat in {{phase}}, samen met nog 1 andere.",
     "inPhase_other": "Deze kandidaat staat in {{phase}}, samen met nog {{count}} anderen."
+  },
+  "filters": {
+    "categories": {
+      "lifecycle": "Werving",
+      "organisation": "Organisatie",
+      "display": "Weergave"
+    },
+    "trash": "Prullenbak",
+    "periodCreated": "Periode (aangemaakt)"
   }
 }

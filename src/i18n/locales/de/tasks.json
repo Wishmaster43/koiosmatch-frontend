@@ -217,5 +217,16 @@
     "linksLabel": "Verknüpfung",
     "noLinks": "Diese Aufgabe ist mit keinem Datensatz verknüpft — verknüpfen Sie einen Kandidaten, Kunden oder Datensatz für mehr Kontext.",
     "linked": "Verknüpft mit {{count}} Datensatz/Datensätzen."
+  },
+  "filters": {
+    "team": "Team",
+    "linkedEntity": "Verknüpfte Entität",
+    "deadlineRange": "Frist-Zeitraum",
+    "archived": "Archiviert",
+    "categories": {
+      "work": "Arbeit",
+      "organisation": "Organisation",
+      "display": "Ansicht"
+    }
   }
 }

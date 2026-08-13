@@ -71,8 +71,13 @@
     "employmentType": "Employment type",
     "categories": {
       "general": "General",
-      "organisation": "Organisation"
-    }
+      "organisation": "Organisation",
+      "display": "Display"
+    },
+    "published": "Published",
+    "publishedYes": "Published",
+    "publishedNo": "Not published",
+    "archived": "Archived"
   },
   "bulk": {
     "selected": "{{count}} selected",

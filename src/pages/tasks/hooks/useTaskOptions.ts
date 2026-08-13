@@ -38,11 +38,27 @@ export function useTaskOptions({ all, statuses, priorities, types }: UseTaskOpti
     return Object.values(m)
   }, [all])
 
+  // TEAM-1: team filter options (value/label/count) — the internal department a
+  // task waits at. Derived from the loaded rows, never a hardcoded list.
+  const teamOptions = useMemo(() => {
+    const m: Record<string, { value: string; label: string; count: number }> = {}
+    all.forEach(x => { const n = x.team?.name; if (n) (m[n] ??= { value: n, label: n, count: 0 }).count++ })
+    return Object.values(m)
+  }, [all])
+
+  // Linked-entity type filter options (candidate/vacancy/customer/…) — the raw
+  // `type` token per link; the panel labels it via the shared links.* i18n keys.
+  const linkTypeOptions = useMemo(() => {
+    const m: Record<string, number> = {}
+    all.forEach(x => (x.links ?? []).forEach(l => { if (l.type) m[l.type] = (m[l.type] ?? 0) + 1 }))
+    return Object.entries(m).map(([value, count]) => ({ value, count }))
+  }, [all])
+
   // Overdue is time-aware (TASK-DUE-TIME-1): a timed task counts from its due moment.
   const overdue  = all.filter(x => isTaskOverdue(x)).length
   const dueToday = all.filter(x => x.due && !x.statusIsDone && new Date(x.due).toDateString() === todayStart().toDateString()).length
   const openCount = all.filter(x => !x.statusIsDone).length
   const completedCount = all.filter(x => x.statusIsDone).length
 
-  return { statusData, priorityData, typeData, assigneeOptions, overdue, dueToday, openCount, completedCount }
+  return { statusData, priorityData, typeData, assigneeOptions, teamOptions, linkTypeOptions, overdue, dueToday, openCount, completedCount }
 }

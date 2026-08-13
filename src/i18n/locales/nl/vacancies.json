@@ -71,8 +71,13 @@
     "employmentType": "Soort dienstverband",
     "categories": {
       "general": "Algemeen",
-      "organisation": "Organisatie"
-    }
+      "organisation": "Organisatie",
+      "display": "Weergave"
+    },
+    "published": "Gepubliceerd",
+    "publishedYes": "Gepubliceerd",
+    "publishedNo": "Niet gepubliceerd",
+    "archived": "Gearchiveerd"
   },
   "bulk": {
     "selected": "{{count}} geselecteerd",

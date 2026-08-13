@@ -29,7 +29,8 @@
     "avgScore": "Ø Score",
     "closed": "Abgeschlossen",
     "newThisMonth": "Neu diesen Monat",
-    "unscored": "Ohne Score"
+    "unscored": "Ohne Score",
+    "scored": "Bewertet"
   },
   "drawer": {
     "label": "Match",
@@ -205,7 +206,15 @@
     "client": "Kunde",
     "moreFilters": "Weitere Filter",
     "moreFiltersTitle": "Weitere Filter",
-    "removeFilter": "Filter '{{label}}' entfernen"
+    "removeFilter": "Filter '{{label}}' entfernen",
+    "scoreState": "Bewertung",
+    "dateRange": "Datumsbereich",
+    "archived": "Archiviert",
+    "categories": {
+      "match": "Match",
+      "organisation": "Organisation",
+      "display": "Ansicht"
+    }
   },
   "view": {
     "matches": "Matches",

@@ -268,6 +268,12 @@
         "timeout": "La lecture de ce CV a pris trop de temps. Réessayez ou saisissez les données manuellement.",
         "generic": "Le CV n'a pas pu être lu."
       }
+    },
+    "cvPaste": {
+      "title": "Candidat à partir d'un texte de CV collé",
+      "placeholder": "Collez ici le texte du CV…",
+      "submit": "Lire le texte",
+      "tooShort": "Collez au moins {{min}} caractères. Koios a besoin de suffisamment de texte pour lire."
     }
   },
   "drawer": {
@@ -1298,5 +1304,15 @@
     "summaryWindowTitle": "Texte de profil — {{name}}",
     "noteNotFound": "Note introuvable. Elle a peut-être été supprimée ou appartient à un autre candidat.",
     "noteReadOnly": "Cette note appartient à un autre utilisateur. Vous pouvez uniquement la lire ici."
+  },
+  "generate": {
+    "button": "Générer avec Koios",
+    "cta": "Générer",
+    "generating": "Koios génère un texte de profil provisoire…",
+    "error": "La génération a échoué. Veuillez réessayer.",
+    "previewLabel": "Proposition (brouillon), pas encore enregistrée",
+    "apply": "Appliquer",
+    "discard": "Rejeter",
+    "needsFieldsFirst": "Renseignez d'abord un nom ou un intitulé de poste pour générer un brouillon."
   }
 }

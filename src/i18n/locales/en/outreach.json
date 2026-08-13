@@ -178,5 +178,15 @@
       "noTargets": "This active campaign has no targets loaded yet.",
       "staleDraft": "This draft campaign has targets loaded but was never activated."
     }
+  },
+  "filters": {
+    "owner": "Owner",
+    "targetGroup": "Target group",
+    "archived": "Archived",
+    "categories": {
+      "campaign": "Campaign",
+      "organisation": "Organisation",
+      "display": "Display"
+    }
   }
 }

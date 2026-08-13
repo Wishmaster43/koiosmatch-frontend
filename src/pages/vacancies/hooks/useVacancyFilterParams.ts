@@ -33,12 +33,16 @@ export interface VacancyFilterState {
   mapStraalActive: boolean
   // D1(a) dashboard-intent attention value: null | 'closingSoon' | 'staleStatus'.
   attention: string | null
+  // FILTER-PARITY-1: a place/postcode geocoded via the sidebar's radius filter
+  // (mirrors the customer page's geoFilter) — applied outside the map view, since
+  // the map's own straal control already covers the map-view case above.
+  geoFilter?: { lat: number; lng: number; km: number } | null
 }
 
 export function useVacancyFilterParams({
   globalSearch, statusBucket, selectedOwner, selectedClient, selectedCategory, selectedBranch,
   showArchived, showWithoutAgent, selectedAgentId, hasApplications, publishedBucket,
-  view, mapCenter, mapRadius, mapStraalActive, attention,
+  view, mapCenter, mapRadius, mapStraalActive, attention, geoFilter,
 }: VacancyFilterState): Record<string, unknown> {
   return useMemo(() => {
     const p: Record<string, unknown> = {}
@@ -70,8 +74,10 @@ export function useVacancyFilterParams({
     if (hasApplications)        p.has_applications = 1
     // V27: server-side published/unpublished filter (honoured by both the list and stats).
     if (publishedBucket !== 'all') p.published = publishedBucket === 'published' ? 1 : 0
-    // Map view narrows the list server-side to the chosen circle (STRAAL-1).
+    // Map view narrows the list server-side to the chosen circle (STRAAL-1); the
+    // sidebar's own radius filter (FILTER-PARITY-1) applies outside the map view.
     if (view === 'map' && mapStraalActive) { p.lat = mapCenter.lat; p.lng = mapCenter.lng; p.radius = mapRadius }
+    else if (geoFilter) { p.lat = geoFilter.lat; p.lng = geoFilter.lng; p.radius = geoFilter.km }
     // D1(a) (dashboard tile → intent seam): VacancyQuery attention.closing_soon /
     // attention.stale_status, same server-wide filters the dashboard KPI itself reads.
     if (attention === 'closingSoon')       p.closing_soon = 1
@@ -79,5 +85,5 @@ export function useVacancyFilterParams({
     return p
   }, [globalSearch, statusBucket, selectedOwner, selectedClient, selectedCategory, selectedBranch,
     showArchived, showWithoutAgent, selectedAgentId, hasApplications, publishedBucket,
-    view, mapCenter, mapRadius, mapStraalActive, attention])
+    view, mapCenter, mapRadius, mapStraalActive, attention, geoFilter])
 }

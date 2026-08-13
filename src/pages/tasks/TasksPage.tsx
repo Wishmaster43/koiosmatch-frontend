@@ -75,6 +75,8 @@ function TasksPageInner({ intent }: { intent?: unknown }) {
     showArchived, setShowArchived, query, setQuery, refQuery,
     selectedStatus, setSelectedStatus, selectedPriority, setSelectedPriority,
     selectedType, setSelectedType, selectedAssignee, setSelectedAssignee,
+    selectedTeam, setSelectedTeam, selectedLinkType, setSelectedLinkType,
+    dueRange, setDueRange,
     kpiFilter, setKpiFilter,
     anyFilterActive, clearAllFilters, searchEpoch, matchesFilters,
   } = useTaskFilters()
@@ -101,16 +103,20 @@ function TasksPageInner({ intent }: { intent?: unknown }) {
   })
 
   // Donut/filter/KPI derivations from the decorated list (§0.3 split → hook).
-  const { statusData, priorityData, typeData, assigneeOptions, overdue, dueToday, openCount, completedCount } =
+  const { statusData, priorityData, typeData, assigneeOptions, teamOptions, linkTypeOptions, overdue, dueToday, openCount, completedCount } =
     useTaskOptions({ all, statuses, priorities, types })
 
-  // Register the right-panel filters (status + priority + type + assignee) — pure builder (§0.3 split).
+  // Register the right-panel filters (status/priority/type/assignee/team/linked
+  // entity/deadline/archived) — pure builder (§0.3 split).
   const filterGroups = useMemo(() => buildTaskFilterGroups({
     t, tog,
     selectedStatus, setSelectedStatus, selectedPriority, setSelectedPriority,
     selectedType, setSelectedType, selectedAssignee, setSelectedAssignee,
-    statusData, priorityData, typeData, assigneeOptions,
-  }), [t, selectedStatus, selectedPriority, selectedType, selectedAssignee, statusData, priorityData, typeData, assigneeOptions])
+    selectedTeam, setSelectedTeam, selectedLinkType, setSelectedLinkType,
+    dueRange, setDueRange, showArchived, setShowArchived,
+    statusData, priorityData, typeData, assigneeOptions, teamOptions, linkTypeOptions,
+  }), [t, selectedStatus, selectedPriority, selectedType, selectedAssignee, selectedTeam, selectedLinkType,
+       dueRange, showArchived, statusData, priorityData, typeData, assigneeOptions, teamOptions, linkTypeOptions])
 
   useEffect(() => {
     registerFilters('tasks-page', filterGroups)
@@ -118,7 +124,7 @@ function TasksPageInner({ intent }: { intent?: unknown }) {
   }, [filterGroups, registerFilters, unregisterFilters])
 
   // Reset to the first page + clear the selection whenever a filter/KPI tile changes.
-  useEffect(() => { setPage(1); setSelectedIds(new Set()) }, [selectedStatus, selectedPriority, selectedType, selectedAssignee, kpiFilter, showArchived, query])
+  useEffect(() => { setPage(1); setSelectedIds(new Set()) }, [selectedStatus, selectedPriority, selectedType, selectedAssignee, selectedTeam, selectedLinkType, dueRange, kpiFilter, showArchived, query])
 
   // The visible rows: the hook predicate (panel filters + search + KPI tile).
   const filteredAll = useMemo(() => all.filter(matchesFilters), [all, matchesFilters])

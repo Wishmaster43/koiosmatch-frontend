@@ -29,7 +29,8 @@
     "avgScore": "Gem. score",
     "closed": "Afgesloten",
     "newThisMonth": "Nieuw deze maand",
-    "unscored": "Zonder score"
+    "unscored": "Zonder score",
+    "scored": "Gescoord"
   },
   "drawer": {
     "label": "Match",
@@ -205,7 +206,15 @@
     "client": "Klant",
     "moreFilters": "Meer filters",
     "moreFiltersTitle": "Meer filters",
-    "removeFilter": "Filter '{{label}}' verwijderen"
+    "removeFilter": "Filter '{{label}}' verwijderen",
+    "scoreState": "Score",
+    "dateRange": "Datumbereik",
+    "archived": "Gearchiveerd",
+    "categories": {
+      "match": "Match",
+      "organisation": "Organisatie",
+      "display": "Weergave"
+    }
   },
   "view": {
     "matches": "Matches",

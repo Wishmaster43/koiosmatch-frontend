@@ -217,5 +217,16 @@
     "linksLabel": "Lien",
     "noLinks": "Cette tâche n'est liée à aucun enregistrement — associez un candidat, un client ou un autre enregistrement pour plus de contexte.",
     "linked": "Liée à {{count}} enregistrement(s)."
+  },
+  "filters": {
+    "team": "Équipe",
+    "linkedEntity": "Entité liée",
+    "deadlineRange": "Plage d’échéance",
+    "archived": "Archivé",
+    "categories": {
+      "work": "Travail",
+      "organisation": "Organisation",
+      "display": "Affichage"
+    }
   }
 }

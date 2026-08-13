@@ -217,5 +217,16 @@
     "linksLabel": "Vínculo",
     "noLinks": "Esta tarea no está vinculada a ningún registro — vincule un candidato, cliente u otro registro para dar contexto.",
     "linked": "Vinculada a {{count}} registro(s)."
+  },
+  "filters": {
+    "team": "Equipo",
+    "linkedEntity": "Entidad vinculada",
+    "deadlineRange": "Rango de fecha límite",
+    "archived": "Archivado",
+    "categories": {
+      "work": "Trabajo",
+      "organisation": "Organización",
+      "display": "Visualización"
+    }
   }
 }

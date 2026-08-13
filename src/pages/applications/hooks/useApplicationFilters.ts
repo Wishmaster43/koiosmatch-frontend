@@ -38,6 +38,10 @@ import type { Id } from '@/types/common'
 // The owner facet key for unowned rows (kept identical to the donut slice key).
 export const OWNER_NONE = '__none'
 
+// FILTER-PARITY-1: created-date range from a dashboard bar click (mirrors the
+// candidate page's DateRangeFilter) — a single removable panel value.
+export interface AppDateRangeFilter { param: 'created_between'; from: string; to: string }
+
 // The row fields the predicate reads — structurally typed so the page's
 // Application model satisfies it without an import cycle.
 interface FilterableApplication {
@@ -72,7 +76,13 @@ export function useApplicationFilters() {
   // ApplicationsPage empty-state notice.
   const [selectedBranch, setSelectedBranch] = usePageMemory<string[]>('apps.branch', [])
   const [showArchived,   setShowArchived]   = usePageMemory('apps.archived', false)
+  // FILTER-PARITY-1: a separate "trash" quick view (mirrors useCandidateFilters'
+  // showTrash) — a distinct UI toggle, same underlying include_archived=1 reveal
+  // as showArchived (the server has one soft-delete reveal flag, not two).
+  const [showTrash,      setShowTrash]      = usePageMemory('apps.trash', false)
   const [query,          setQuery]          = usePageMemory('apps.search', '')
+  // FILTER-PARITY-1: created-date range picked from a dashboard bar click.
+  const [dateRange, setDateRange] = usePageMemory<AppDateRangeFilter | null>('apps.dateRange', null)
   // INTERVIEW-PHASE-1: two independent quick-views — the page's click handlers
   // keep them mutually exclusive (each clears its sibling before toggling on).
   const [interviewBusy,   setInterviewBusy]   = usePageMemory('apps.interviewBusy', false)
@@ -83,16 +93,16 @@ export function useApplicationFilters() {
   const [selectedCandidateIds, setSelectedCandidateIds] = useState<Id[]>([])
 
   // Anything narrowing the default view → the shared clear-button shows.
-  const anyFilterActive = Boolean(query.trim() || attention || showArchived || interviewBusy || interviewPaused
+  const anyFilterActive = Boolean(query.trim() || attention || showArchived || showTrash || dateRange || interviewBusy || interviewPaused
     || (bucket !== 'active' && bucket !== 'allActive')
     || selectedPhase.length || selectedOwner.length || selectedSource.length || selectedVac.length
     || selectedClient.length || selectedBranch.length || selectedCandidateIds.length)
   // Remount the (self-stateful) search input on clear so the visible text resets too.
   const [searchEpoch, setSearchEpoch] = useState(0)
   const clearAllFilters = () => {
-    setSearchEpoch(e => e + 1); setQuery(''); setAttention(null); setShowArchived(false); setBucket('active')
+    setSearchEpoch(e => e + 1); setQuery(''); setAttention(null); setShowArchived(false); setShowTrash(false); setBucket('active')
     setSelectedPhase([]); setSelectedOwner([]); setSelectedSource([]); setSelectedVac([]); setInterviewBusy(false)
-    setInterviewPaused(false); setSelectedClient([]); setSelectedBranch([]); setSelectedCandidateIds([])
+    setInterviewPaused(false); setSelectedClient([]); setSelectedBranch([]); setSelectedCandidateIds([]); setDateRange(null)
   }
 
   // NUMMER-1: is the CURRENT search text a well-formed reference number? Drives
@@ -111,8 +121,8 @@ export function useApplicationFilters() {
   // bucket/phase/owner/… check. Only archived-visibility still applies (matches the
   // backend: include_archived is resolved before the ref shortcut).
   const matchesFilters = useCallback((a: FilterableApplication, opts?: { ignoreBucket?: boolean; ignoreQuery?: boolean; refMode?: boolean }): boolean => {
-    // Detached rows only surface in the dedicated archived view (any bucket).
-    if (showArchived) return Boolean(a.archived)
+    // Detached rows only surface in the dedicated archived/trash view (any bucket).
+    if (showArchived || showTrash) return Boolean(a.archived)
     if (a.archived) return false
     if (opts?.refMode) return true
     // 'allActive' (TOTAAL ACTIEF-kaart) spans the active + matched buckets together.
@@ -141,7 +151,7 @@ export function useApplicationFilters() {
       if (!`${a.candidateName ?? ''} ${a.vacancyTitle ?? ''} ${a.source ?? ''}`.toLowerCase().includes(q)) return false
     }
     return true
-  }, [bucket, showArchived, attention, selectedPhase, selectedOwner, selectedSource, selectedVac, selectedClient, query])
+  }, [bucket, showArchived, showTrash, attention, selectedPhase, selectedOwner, selectedSource, selectedVac, selectedClient, query])
 
   // ── Server-side filter params (W27: every filter the backend supports goes
   // here now — see ApplicationQuery.php's rules()/ARRAY_FILTERS, measured 2026-08-07). ──
@@ -168,8 +178,11 @@ export function useApplicationFilters() {
       else p.search = q
     }
     // include_archived REVEALS trashed rows alongside the active set (it does not
-    // isolate them) — matchesFilters' `showArchived` branch still isolates client-side.
-    if (showArchived) p.include_archived = 1
+    // isolate them) — matchesFilters' `showArchived`/`showTrash` branch still
+    // isolates client-side. One server flag, two UI quick views (mirrors candidates).
+    if (showArchived || showTrash) p.include_archived = 1
+    // FILTER-PARITY-1: created-date range (dashboard bar click / panel chip).
+    if (dateRange) p[dateRange.param] = [dateRange.from, dateRange.to]
     // INTERVIEW-PHASE-1: the universal category filter — busy wins if somehow both
     // are true (the page's click handlers keep them mutually exclusive already).
     if (interviewBusy) p.interview_status = 'busy'
@@ -180,13 +193,13 @@ export function useApplicationFilters() {
     // tenant's own branch_authz_enabled axis on the backend (off = no effect).
     if (selectedBranch.length) p.branch_id = selectedBranch
     return p
-  }, [selectedPhase, selectedVac, selectedClient, selectedSource, selectedOwner, query, showArchived,
-    interviewBusy, interviewPaused, selectedCandidateIds, selectedBranch, attention])
+  }, [selectedPhase, selectedVac, selectedClient, selectedSource, selectedOwner, query, showArchived, showTrash,
+    interviewBusy, interviewPaused, selectedCandidateIds, selectedBranch, attention, dateRange])
 
   // Bucket param — TABLE query only (never board/stats): 'allActive' has no server
-  // equivalent (spans two buckets) and showArchived's reveal must not be narrowed by
-  // it (matchesFilters ignores bucket entirely once showArchived is true).
-  const bucketParam = (!showArchived && (bucket === 'active' || bucket === 'matched' || bucket === 'rejected'))
+  // equivalent (spans two buckets) and showArchived's/showTrash's reveal must not be
+  // narrowed by it (matchesFilters ignores bucket entirely once either is true).
+  const bucketParam = (!showArchived && !showTrash && (bucket === 'active' || bucket === 'matched' || bucket === 'rejected'))
     ? bucket : undefined
   const filterKey = JSON.stringify({ ...filterParams, bucket: bucketParam })
 
@@ -194,10 +207,11 @@ export function useApplicationFilters() {
     bucket, setBucket, selectedPhase, setSelectedPhase, attention, setAttention,
     selectedOwner, setSelectedOwner, selectedSource, setSelectedSource,
     selectedVac, setSelectedVac, selectedClient, setSelectedClient,
-    showArchived, setShowArchived, query, setQuery,
+    showArchived, setShowArchived, showTrash, setShowTrash, query, setQuery,
     interviewBusy, setInterviewBusy, interviewPaused, setInterviewPaused, refMode,
     selectedBranch, setSelectedBranch,
     selectedCandidateIds, setSelectedCandidateIds,
+    dateRange, setDateRange,
     anyFilterActive, clearAllFilters, searchEpoch, matchesFilters,
     filterParams, bucketParam, filterKey,
   }

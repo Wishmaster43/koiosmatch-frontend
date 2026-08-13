@@ -19,12 +19,30 @@ interface FilterableTask {
   priorityKey?: string | number
   typeKey?: string | number
   assignee?: { name?: string } | null
+  // TEAM-1: the internal department the task waits at — its own filter axis.
+  team?: { name?: string } | null
   statusIsDone?: boolean
   due?: string | null
   // TASK-DUE-TIME-1: read by isTaskOverdue for the time-aware 'overdue' KPI tile.
   dueTime?: string
   title?: string
   description?: string
+  archived?: boolean
+  // Polymorphic link targets (candidate/vacancy/customer/…) — filtered by type.
+  links?: { type?: string }[]
+}
+
+// A due-date range filter (inclusive both ends, either side optional).
+export interface DueRangeFilter { from: string; to: string }
+
+// Does a task's due date fall inside the selected range?
+const inDueRange = (due: string | null | undefined, range: DueRangeFilter | null): boolean => {
+  if (!range || (!range.from && !range.to)) return true
+  if (!due) return false
+  const d = new Date(due).getTime()
+  if (range.from && d < new Date(range.from).getTime()) return false
+  if (range.to && d > new Date(range.to).getTime()) return false
+  return true
 }
 
 export function useTaskFilters() {
@@ -34,6 +52,12 @@ export function useTaskFilters() {
   const [selectedPriority, setSelectedPriority] = usePageMemory<string[]>('tasks.priority', [])
   const [selectedType,     setSelectedType]     = usePageMemory<string[]>('tasks.type', [])
   const [selectedAssignee, setSelectedAssignee] = useState<string[]>([])
+  // TEAM-1: filter by the internal department a task waits at.
+  const [selectedTeam,     setSelectedTeam]     = usePageMemory<string[]>('tasks.team', [])
+  // Filter by the type of a task's linked entity (candidate/vacancy/customer/…).
+  const [selectedLinkType, setSelectedLinkType] = usePageMemory<string[]>('tasks.linkType', [])
+  // Deadline range (due-date window) — a single removable range, not multi-value.
+  const [dueRange, setDueRange] = useState<DueRangeFilter | null>(null)
   // KPI tile filter (one at a time): null | 'open' | 'overdue' | 'dueToday' | 'completed'.
   const [kpiFilter, setKpiFilter] = useState<string | null>(null)
 
@@ -45,12 +69,14 @@ export function useTaskFilters() {
 
   // Anything narrowing the default view → the shared clear-button shows.
   const anyFilterActive = Boolean(query.trim() || showArchived || kpiFilter
-    || selectedStatus.length || selectedPriority.length || selectedType.length || selectedAssignee.length)
+    || selectedStatus.length || selectedPriority.length || selectedType.length || selectedAssignee.length
+    || selectedTeam.length || selectedLinkType.length || dueRange)
   // Remount the (self-stateful) search input on clear so the visible text resets too.
   const [searchEpoch, setSearchEpoch] = useState(0)
   const clearAllFilters = () => {
     setSearchEpoch(e => e + 1); setQuery(''); setShowArchived(false); setKpiFilter(null)
     setSelectedStatus([]); setSelectedPriority([]); setSelectedType([]); setSelectedAssignee([])
+    setSelectedTeam([]); setSelectedLinkType([]); setDueRange(null)
   }
 
   // One row predicate for table + board: panel filters + search + the KPI tile.
@@ -59,6 +85,9 @@ export function useTaskFilters() {
     if (selectedPriority.length && !selectedPriority.includes(String(x.priorityKey)))  return false
     if (selectedType.length     && !selectedType.includes(String(x.typeKey)))          return false
     if (selectedAssignee.length && !selectedAssignee.includes(x.assignee?.name ?? '')) return false
+    if (selectedTeam.length     && !selectedTeam.includes(x.team?.name ?? ''))         return false
+    if (selectedLinkType.length && !(x.links ?? []).some(l => l.type && selectedLinkType.includes(l.type))) return false
+    if (!inDueRange(x.due, dueRange)) return false
     // A reference-number query already narrowed the fetch server-side (exact `?ref=`),
     // so skip the free-text re-filter — the matched task carries the number in a field
     // this predicate doesn't read and would otherwise be filtered straight back out.
@@ -72,12 +101,14 @@ export function useTaskFilters() {
     if (kpiFilter === 'overdue')   return isTaskOverdue(x)
     if (kpiFilter === 'dueToday')  return !!(due && !x.statusIsDone && due.toDateString() === todayStart().toDateString())
     return true
-  }, [selectedStatus, selectedPriority, selectedType, selectedAssignee, kpiFilter, query, refQuery])
+  }, [selectedStatus, selectedPriority, selectedType, selectedAssignee, selectedTeam, selectedLinkType, dueRange, kpiFilter, query, refQuery])
 
   return {
     showArchived, setShowArchived, query, setQuery, refQuery,
     selectedStatus, setSelectedStatus, selectedPriority, setSelectedPriority,
     selectedType, setSelectedType, selectedAssignee, setSelectedAssignee,
+    selectedTeam, setSelectedTeam, selectedLinkType, setSelectedLinkType,
+    dueRange, setDueRange,
     kpiFilter, setKpiFilter,
     anyFilterActive, clearAllFilters, searchEpoch, matchesFilters,
   }

@@ -178,5 +178,15 @@
       "noTargets": "Cette campagne active n'a aucun contact chargé.",
       "staleDraft": "Ce brouillon a des contacts chargés mais n'a jamais été activé."
     }
+  },
+  "filters": {
+    "owner": "Propriétaire",
+    "targetGroup": "Groupe cible",
+    "archived": "Archivé",
+    "categories": {
+      "campaign": "Campagne",
+      "organisation": "Organisation",
+      "display": "Affichage"
+    }
   }
 }

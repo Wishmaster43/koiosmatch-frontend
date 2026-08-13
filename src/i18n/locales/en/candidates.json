@@ -290,6 +290,12 @@
         "timeout": "Reading this CV took too long. Try again or fill in the details manually.",
         "generic": "The CV could not be read."
       }
+    },
+    "cvPaste": {
+      "title": "Candidate from pasted CV text",
+      "placeholder": "Paste the CV text here…",
+      "submit": "Read text",
+      "tooShort": "Paste at least {{min}} characters. Koios needs enough text to read."
     }
   },
   "drawer": {
@@ -1298,5 +1304,15 @@
     "summaryWindowTitle": "Profile text — {{name}}",
     "noteNotFound": "Note not found. It may have been deleted or belongs to another candidate.",
     "noteReadOnly": "This note belongs to another user. You can only read it here."
+  },
+  "generate": {
+    "button": "Generate with Koios",
+    "cta": "Generate",
+    "generating": "Koios is generating a concept profile text…",
+    "error": "Generating failed. Please try again.",
+    "previewLabel": "Proposal (concept), not saved yet",
+    "apply": "Apply",
+    "discard": "Discard",
+    "needsFieldsFirst": "Fill in a name or function title first to generate a concept."
   }
 }

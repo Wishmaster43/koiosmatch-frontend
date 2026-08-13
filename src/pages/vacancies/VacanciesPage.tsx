@@ -36,6 +36,8 @@ import { useVacanciesData, VACANCIES_MAX_PER_PAGE } from './hooks/useVacanciesDa
 import type { VacancySort } from './hooks/useVacanciesData'
 import type { ControlledSort } from '@/components/ui/DataTable'
 import { useVacancyFilterParams } from './hooks/useVacancyFilterParams'
+import { buildVacancyFilterGroups } from './data/vacancyFilterGroups'
+import { geocodeNL } from '@/lib/geocode'
 import { useAiAgents } from './hooks/useAiAgents'
 import { useVacancyRecord } from './hooks/useVacancyRecord'
 import { useVacancyInsights } from './hooks/useVacancyInsights'
@@ -119,6 +121,10 @@ function VacanciesPageInner({ intent }: { intent?: unknown }) {
   const [mapStraalActive, setMapStraalActive] = usePageMemory('vac.mapStraal', false)
   // D1(a): the dashboard tiles' semantic attention intent — null | 'closingSoon' | 'staleStatus'.
   const [attention, setAttention] = usePageMemory<string | null>('vac.attention', null)
+  // FILTER-PARITY-1: sidebar radius filter (mirrors the customer page's geoFilter),
+  // separate from the map view's own straal control above.
+  const [geoFilter, setGeoFilter] = usePageMemory<{ q: string; km: number; lat: number; lng: number; label: string } | null>('vac.geo', null)
+  const [geoHint, setGeoHint] = useState<string | null>(null)
 
   const handlePageSizeChange = (newSize: number) => { setPageSize(newSize); setPage(1) }
 
@@ -128,6 +134,7 @@ function VacanciesPageInner({ intent }: { intent?: unknown }) {
     globalSearch, statusBucket, selectedOwner, selectedClient, selectedCategory, selectedBranch,
     showArchived, showWithoutAgent, selectedAgentId, hasApplications, publishedBucket,
     view, mapCenter, mapRadius, mapStraalActive, attention,
+    geoFilter: geoFilter ? { lat: geoFilter.lat, lng: geoFilter.lng, km: geoFilter.km } : null,
   })
   const filterKey = JSON.stringify(filterParams)
 
@@ -196,11 +203,25 @@ function VacanciesPageInner({ intent }: { intent?: unknown }) {
   const ownerOptions    = useMemo(() => ownerData.map(d => ({ value: d.key, label: d.name, count: d.value })), [ownerData])
   const clientOptions   = useMemo(() => clientData.map(d => ({ value: d.key, label: d.name, count: d.value })), [clientData])
   const categoryOptions = useMemo(() => categoryData.map(d => ({ value: d.key, label: d.name, count: d.value })), [categoryData])
+  const statusOptions   = useMemo(() => statuses.map(s => ({ value: s.value, label: s.label, color: s.color })), [statuses])
+  const agentOptions    = useMemo(() => agentData.map(d => ({ value: d.key, label: d.name, count: d.value })), [agentData])
 
   const tog = (set: Dispatch<SetStateAction<string[]>>) => (v: string) => set(p => p.includes(v) ? p.filter(x => x !== v) : [...p, v])
   const pickOne = (set: Dispatch<SetStateAction<string[]>>) => (v: string | undefined) => { if (v != null) toggleOneValue(set, v) }
 
-  // Register the right-panel filters (owner + client + functie; status is the tab bar).
+  // FILTER-PARITY-1: PDOK-geocode a place/postcode for the sidebar radius filter
+  // (mirrors CustomersPage's own applyGeo).
+  const applyGeo = async (q: string, km: number) => {
+    setGeoHint(null)
+    const hit = await geocodeNL(q)
+    if (!hit) { setGeoHint(t('common:filters.notFound')); return }
+    setGeoFilter({ q, km, lat: hit.lat, lng: hit.lng, label: `${hit.label} · ${km} km` })
+  }
+  const clearGeo = () => { setGeoFilter(null); setGeoHint(null) }
+
+  // Register the right-panel filters. Config lives in the data/ builder (mirrors
+  // buildCandidateFilterGroups/buildCustomerFilterGroups) — owner/client/functie/
+  // branch here, status/published/agent/has-applications/archived/geo there.
   const catOrg = t('filters.categories.organisation')
   const filterGroups = useMemo(() => [
     { key: 'owner',    type: 'search-select', category: catOrg, label: t('filters.owner'),    selected: selectedOwner,    options: ownerOptions,    onToggle: tog(setSelectedOwner) },
@@ -208,7 +229,18 @@ function VacanciesPageInner({ intent }: { intent?: unknown }) {
     { key: 'category', type: 'search-select', category: catOrg, label: t('filters.category'), selected: selectedCategory, options: categoryOptions, onToggle: tog(setSelectedCategory) },
     // VESTIGING-2: values limited to the user's own branch scope (measured above).
     { key: 'branch',   type: 'search-select', category: catOrg, label: t('common:filters.branch'), selected: selectedBranch, options: branchOptions, onToggle: tog(setSelectedBranch) },
-  ], [t, catOrg, selectedOwner, selectedClient, selectedCategory, selectedBranch, ownerOptions, clientOptions, categoryOptions, branchOptions])
+    ...buildVacancyFilterGroups({
+      t,
+      filters: {
+        statusBucket, setStatusBucket, publishedBucket, setPublishedBucket,
+        selectedAgentId, setSelectedAgentId, showWithoutAgent, setShowWithoutAgent,
+        hasApplications, setHasApplications, showArchived, setShowArchived,
+        geoFilter, geoHint, applyGeo, clearGeo,
+      },
+      options: { statusOptions, agentOptions },
+    }),
+  ], [t, catOrg, selectedOwner, selectedClient, selectedCategory, selectedBranch, ownerOptions, clientOptions, categoryOptions, branchOptions,
+    statusBucket, publishedBucket, selectedAgentId, showWithoutAgent, hasApplications, showArchived, geoFilter, geoHint, statusOptions, agentOptions]) // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     registerFilters('vacancies-page', filterGroups)
@@ -245,11 +277,12 @@ function VacanciesPageInner({ intent }: { intent?: unknown }) {
   })
   // Shared clear-all (page memory keeps filters sticky).
   const anyFilterActive = Boolean(globalSearch.trim() || showArchived || showWithoutAgent || Boolean(selectedAgentId) || statusBucket !== 'all'
-    || selectedOwner.length || selectedClient.length || selectedCategory.length || selectedBranch.length || publishedBucket !== 'all' || hasApplications || attention)
+    || selectedOwner.length || selectedClient.length || selectedCategory.length || selectedBranch.length || publishedBucket !== 'all' || hasApplications || attention || geoFilter)
   const [searchEpoch, setSearchEpoch] = useState(0)
   const clearAllFilters = () => {
     setSearchEpoch(e => e + 1); setGlobalSearch(''); setShowArchived(false); setShowWithoutAgent(false); setSelectedAgentId(null); setStatusBucket('all')
-    setSelectedOwner([]); setSelectedClient([]); setSelectedCategory([]); setSelectedBranch([]); setPublishedBucket('all'); setHasApplications(false); setAttention(null); setPage(1)
+    setSelectedOwner([]); setSelectedClient([]); setSelectedCategory([]); setSelectedBranch([]); setPublishedBucket('all'); setHasApplications(false); setAttention(null)
+    clearGeo(); setPage(1)
   }
 
   // Status tab bar: "All" + one button per configured status.
