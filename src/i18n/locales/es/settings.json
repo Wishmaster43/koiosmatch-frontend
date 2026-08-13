@@ -1610,7 +1610,7 @@
     "valueField": "Slug (valor)",
     "valueHint": "Clave estable; déjalo vacío para generar una a partir de la etiqueta.",
     "valueImmutable": "El slug no se puede cambiar tras la creación.",
-    "labelLocked": "La etiqueta est\u00e1 bloqueada porque esta fase es estructural: las automatizaciones dependen de ella. El color y otros indicadores siguen siendo editables.",
+    "labelLocked": "La etiqueta está bloqueada porque esta fase es estructural: las automatizaciones dependen de ella. El color y otros indicadores siguen siendo editables.",
     "candidate_types": {
       "title": "Tipos de contrato",
       "subtitle": "Varios por candidato (p. ej. Eventual, Autónomo, Payroll)."
@@ -1648,7 +1648,8 @@
     "isProposalHint": "Esta etapa significa que el candidato ha sido propuesto al cliente.",
     "phaseApplicant": "Es la fase de solicitante",
     "phaseApplicantHint": "Los nuevos leads pasan automáticamente a esta fase en su primera solicitud (Lead → Candidato).",
-    "phaseApplicantBadge": "Fase de solicitante"
+    "phaseApplicantBadge": "Fase de solicitante",
+    "iconField": "Icono"
   },
   "planning": {
     "shiftTypes": {
@@ -1735,7 +1736,16 @@
     "noContactDaysTitle": "Aviso de falta de contacto",
     "noContactDaysHint": "Después de cuántos días sin un último contacto registrado se marca a un candidato como 'no contactado' para la automatización (flujos de trabajo y webhooks).",
     "noContactDaysLabel": "Días (1-365)",
-    "noContactDaysSaveFailed": "No se pudo guardar el periodo de falta de contacto."
+    "noContactDaysSaveFailed": "No se pudo guardar el periodo de falta de contacto.",
+    "dedupeKeysTitle": "Detección de duplicados",
+    "dedupeKeysHint": "En qué campos se comprueba si un nuevo candidato coincide con uno existente (al crear).",
+    "dedupeKeys": {
+      "email": "Email",
+      "mobile": "Móvil",
+      "phone": "Teléfono"
+    },
+    "dedupeKeysSaveFailed": "No se pudieron guardar los campos de detección de duplicados.",
+    "dedupeKeysMinOne": "Al menos un campo sigue siendo obligatorio — sin selección, el control vuelve a email + móvil."
   },
   "noteTypes": {
     "title": "Tipos de nota — {{entity}}",

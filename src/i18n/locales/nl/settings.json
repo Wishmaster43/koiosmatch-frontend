@@ -574,7 +574,7 @@
     "valueField": "Slug (waarde)",
     "valueHint": "Stabiele sleutel; leeg laten genereert er een uit het label.",
     "valueImmutable": "De slug kan na aanmaken niet meer gewijzigd worden.",
-    "labelLocked": "Het label is vergrendeld omdat deze fase structureel is \u2014 automatiseringen leunen erop. Kleur en andere vlaggen blijven bewerkbaar.",
+    "labelLocked": "Het label is vergrendeld omdat deze fase structureel is — automatiseringen leunen erop. Kleur en andere vlaggen blijven bewerkbaar.",
     "colorField": "Kleur",
     "confirmDelete": "\"{{name}}\" verwijderen? Als deze in gebruik is, wordt hij gearchiveerd.",
     "isApplicant": "Toont de sollicitatie-funnel",
@@ -617,7 +617,8 @@
     "isProposalHint": "Deze fase betekent dat de kandidaat is voorgesteld aan de klant.",
     "phaseApplicant": "Is de sollicitant-fase",
     "phaseApplicantHint": "Nieuwe leads komen automatisch in deze fase terecht bij hun eerste sollicitatie (Lead → Kandidaat).",
-    "phaseApplicantBadge": "Sollicitant-fase"
+    "phaseApplicantBadge": "Sollicitant-fase",
+    "iconField": "Icoon"
   },
   "vacancy": {
     "title": "Statussen",
@@ -1939,7 +1940,16 @@
     "noContactDaysTitle": "Geen-contact-signalering",
     "noContactDaysHint": "Na hoeveel dagen zonder geregistreerd laatste contact een kandidaat als 'niet gecontacteerd' geldt voor automatisering (workflows en webhooks).",
     "noContactDaysLabel": "Dagen (1-365)",
-    "noContactDaysSaveFailed": "Opslaan van de geen-contact-periode is mislukt."
+    "noContactDaysSaveFailed": "Opslaan van de geen-contact-periode is mislukt.",
+    "dedupeKeysTitle": "Duplicaatdetectie",
+    "dedupeKeysHint": "Op welke velden een nieuwe kandidaat wordt gecontroleerd op een bestaande match (bij aanmaken).",
+    "dedupeKeys": {
+      "email": "E-mail",
+      "mobile": "Mobiel",
+      "phone": "Telefoon"
+    },
+    "dedupeKeysSaveFailed": "Opslaan van de duplicaatvelden is mislukt.",
+    "dedupeKeysMinOne": "Minstens één veld blijft vereist — zonder velden valt de controle terug op e-mail + mobiel."
   },
   "noteTypes": {
     "title": "Notitietypes — {{entity}}",

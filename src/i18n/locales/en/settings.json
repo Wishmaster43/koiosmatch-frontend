@@ -574,7 +574,7 @@
     "valueField": "Slug (value)",
     "valueHint": "Stable key; leave empty to generate one from the label.",
     "valueImmutable": "The slug cannot be changed after creation.",
-    "labelLocked": "The label is locked because this phase is structural \u2014 automations rely on it. Colour and other flags stay editable.",
+    "labelLocked": "The label is locked because this phase is structural — automations rely on it. Colour and other flags stay editable.",
     "colorField": "Colour",
     "confirmDelete": "Delete \"{{name}}\"? If it is in use it will be archived.",
     "isApplicant": "Reveals the application funnel",
@@ -617,7 +617,8 @@
     "isProposalHint": "This stage means the candidate has been proposed to the customer.",
     "phaseApplicant": "Is the applicant phase",
     "phaseApplicantHint": "New leads automatically move to this phase on their first application (Lead → Candidate).",
-    "phaseApplicantBadge": "Applicant phase"
+    "phaseApplicantBadge": "Applicant phase",
+    "iconField": "Icon"
   },
   "vacancy": {
     "title": "Statuses",
@@ -1939,7 +1940,16 @@
     "noContactDaysTitle": "No-contact reminder",
     "noContactDaysHint": "How many days without a recorded last contact before a candidate is flagged as 'not contacted' for automation (workflows and webhooks).",
     "noContactDaysLabel": "Days (1-365)",
-    "noContactDaysSaveFailed": "Saving the no-contact window failed."
+    "noContactDaysSaveFailed": "Saving the no-contact window failed.",
+    "dedupeKeysTitle": "Duplicate detection",
+    "dedupeKeysHint": "Which fields a new candidate is checked against for an existing match (on create).",
+    "dedupeKeys": {
+      "email": "Email",
+      "mobile": "Mobile",
+      "phone": "Phone"
+    },
+    "dedupeKeysSaveFailed": "Saving the duplicate-detection fields failed.",
+    "dedupeKeysMinOne": "At least one field stays required — with none selected the check falls back to email + mobile."
   },
   "noteTypes": {
     "title": "Note types — {{entity}}",

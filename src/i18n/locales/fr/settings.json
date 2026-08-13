@@ -1610,7 +1610,7 @@
     "valueField": "Slug (valeur)",
     "valueHint": "Clé stable ; laissez vide pour en générer une à partir du libellé.",
     "valueImmutable": "Le slug ne peut plus être modifié après la création.",
-    "labelLocked": "Le libell\u00e9 est verrouill\u00e9 car cette phase est structurelle \u2014 les automatisations s'appuient dessus. La couleur et les autres indicateurs restent modifiables.",
+    "labelLocked": "Le libellé est verrouillé car cette phase est structurelle — les automatisations s'appuient dessus. La couleur et les autres indicateurs restent modifiables.",
     "candidate_types": {
       "title": "Types de contrat",
       "subtitle": "Plusieurs par candidat (ex. Extra, Indépendant, Payroll)."
@@ -1648,7 +1648,8 @@
     "isProposalHint": "Cette étape signifie que le candidat a été proposé au client.",
     "phaseApplicant": "Est la phase de candidature",
     "phaseApplicantHint": "Les nouveaux leads passent automatiquement à cette phase lors de leur première candidature (Lead → Candidat).",
-    "phaseApplicantBadge": "Phase de candidat"
+    "phaseApplicantBadge": "Phase de candidat",
+    "iconField": "Icône"
   },
   "planning": {
     "shiftTypes": {
@@ -1735,7 +1736,16 @@
     "noContactDaysTitle": "Rappel d'absence de contact",
     "noContactDaysHint": "Au bout de combien de jours sans dernier contact enregistré un candidat est marqué « non contacté » pour l'automatisation (workflows et webhooks).",
     "noContactDaysLabel": "Jours (1-365)",
-    "noContactDaysSaveFailed": "Échec de l'enregistrement du délai d'absence de contact."
+    "noContactDaysSaveFailed": "Échec de l'enregistrement du délai d'absence de contact.",
+    "dedupeKeysTitle": "Détection des doublons",
+    "dedupeKeysHint": "Sur quels champs un nouveau candidat est vérifié par rapport à une correspondance existante (à la création).",
+    "dedupeKeys": {
+      "email": "E-mail",
+      "mobile": "Mobile",
+      "phone": "Téléphone"
+    },
+    "dedupeKeysSaveFailed": "Échec de l'enregistrement des champs de détection des doublons.",
+    "dedupeKeysMinOne": "Au moins un champ reste requis — sans sélection, le contrôle revient à e-mail + mobile."
   },
   "noteTypes": {
     "title": "Types de note — {{entity}}",

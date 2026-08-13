@@ -11,7 +11,8 @@ const funnelMeta = vi.fn((v?: string) => (
 ))
 const statusMeta = vi.fn((v?: string) => (
   v === 'sick' ? { label: 'Ziek', color: '#000', requires_reason: true }
-    : v === 'placed' ? { label: 'Geplaatst', color: '#000', requires_match: true }
+    // icon rides along since the BE icon column (13-08) — the row must render it.
+    : v === 'placed' ? { label: 'Geplaatst', color: '#000', requires_match: true, icon: 'briefcase' }
     : { label: 'Beschikbaar', color: '#000' }
 ))
 vi.mock('@/context/LookupsContext', () => ({
@@ -171,4 +172,13 @@ describe('CandidatesTable · Koios column (Danny 05-08)', () => {
     expect(screen.getByRole('img', { name: 'Koios AI' })).toBeInTheDocument()
     expect(screen.getByText('Koios')).toBeInTheDocument()
   })
+})
+
+// LOOKUP-ICON-1 control-round regression: the status icon must actually REACH the
+// row — the earlier mock bypassed normalize() and hid that the icon was dropped.
+it('renders the status lookup icon in the row when the lookup carries one', () => {
+  const row = { ...baseCandidate, id: 99, status: 'placed' }
+  const { container } = render(<CandidatesTable rows={[row]} onOpenTab={vi.fn()} />)
+  // LookupIcon renders a lucide svg for the curated 'briefcase' key.
+  expect(container.querySelector('svg.lucide-briefcase, svg[class*="briefcase"]')).toBeTruthy()
 })

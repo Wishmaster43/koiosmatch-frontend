@@ -37,7 +37,7 @@ import ModalHeader from './addmodal/ModalHeader'
 import ModalFooter from './addmodal/ModalFooter'
 import NoStatusNotice from './addmodal/NoStatusNotice'
 import DuplicateNotice from './addmodal/DuplicateNotice'
-import { useRestoreDuplicate } from './addmodal/useDuplicateProbe'
+import { useDuplicateProbe, useRestoreDuplicate } from './addmodal/useDuplicateProbe'
 import type { DuplicateMatch } from './addmodal/useDuplicateProbe'
 import PersonalCard from './addmodal/PersonalCard'
 import ContactCard from './addmodal/ContactCard'
@@ -141,6 +141,10 @@ export default function AddCandidateModal({ onClose, onCreated }: AddCandidateMo
     linkedin: '',
   })
 
+  // DUPPOST: live "warn while you type" probe over the POST endpoint (§7-safe — body,
+  // not query string). Advisory only; the create 409 stays the real gate (dupBlock).
+  const { probeMatch, clearProbeMatch } = useDuplicateProbe(form.email, form.mobile, form.phone)
+
   // Once the real statuses arrive from the API, default to Lead if nothing chosen.
   useEffect(() => { if (!status && phases.length) setStatus(defaultStatus()) }, [phases]) // eslint-disable-line
 
@@ -178,16 +182,15 @@ export default function AddCandidateModal({ onClose, onCreated }: AddCandidateMo
     // Editing anything invalidates the refused-create verdict; the next submit re-asks
     // the server (which stays the only authority on what is a duplicate).
     setDupBlock(null)
+    // Editing email/mobile/phone clears the last probe verdict too — the debounced
+    // effect in useDuplicateProbe re-asks the server for the new value.
+    clearProbeMatch()
   }
 
-  // The duplicate panel is driven by the create 409 alone. A live "warn while you
-  // type" probe was built here and removed the same day: GET /candidates/check-duplicate
-  // takes the email and mobile as QUERY PARAMETERS, so every keystroke would have written
-  // a candidate's contact details into web-server access logs, proxies and browser
-  // history — exactly what §7 forbids. A POST variant is requested from the backend; the
-  // 409 was always the real gate, so nothing protective was lost.
-  const dupNotice = dupBlock
-  const dismissNotice = () => setDupBlock(null)
+  // The blocked panel (create 409) takes priority over the ambient live-probe warning;
+  // dismissing the warning only clears the probe verdict, never the (absent) 409 one.
+  const dupNotice = dupBlock ?? probeMatch
+  const dismissNotice = () => { setDupBlock(null); clearProbeMatch() }
 
   // Leave the create form and open the existing dossier (nothing was created here).
   const openExisting = (id: Id) => { onClose(); openEntity('candidates', id) }

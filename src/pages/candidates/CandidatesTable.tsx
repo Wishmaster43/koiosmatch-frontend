@@ -86,7 +86,7 @@ export default function CandidatesTable({ rows, loading, selectedId, onSelect, o
   const { funnelTypes, funnelMeta, statusMeta, phaseMeta, typeMeta } = useLookups() as unknown as {
     funnelTypes: Array<{ value: string }>
     funnelMeta: (v: string) => { label: string; color: string; is_match?: boolean }
-    statusMeta: (v: string) => { label: string; color: string; requires_match?: boolean; requires_reason?: boolean; expects_return_date?: boolean; is_blacklist?: boolean }
+    statusMeta: (v: string) => { label: string; color: string; requires_match?: boolean; requires_reason?: boolean; expects_return_date?: boolean; is_blacklist?: boolean; icon?: string }
     phaseMeta: (v: string) => { label: string; color: string }
     typeMeta: (v: string) => { label: string; color: string }
   }
@@ -172,7 +172,17 @@ export default function CandidatesTable({ rows, loading, selectedId, onSelect, o
         render: c => {
           if (c.lifecycle === 'pending_erase') return <SoftChip label={t('lifecycle.pendingErase')} color="var(--color-danger)" round />
           if (c.lifecycle === 'archived') return <SoftChip label={t('lifecycle.archived')} color="var(--text-muted)" round />
-          const chip = <CandidateStatusChip status={c.status} phase={c.phase} plain={!colorStatus} round />
+          // LOOKUP-ICON-1 (batch 12, P22-30): the tenant status lookup can carry an icon
+          // (lucide slug or emoji) — shown next to the chip, same passthrough pattern as
+          // the last-contact column above. CandidateStatusChip itself stays icon-less
+          // (used on many entities without this lookup shape); the icon rides alongside it.
+          const statusIcon = c.status ? statusMeta(c.status).icon : null
+          const chip = (
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+              {statusIcon && <LookupIcon icon={statusIcon} size={12} />}
+              <CandidateStatusChip status={c.status} phase={c.phase} plain={!colorStatus} round />
+            </span>
+          )
           // requires_match -> Matches, requires_reason/expects_return_date/is_blacklist ->
           // Voorkeuren (where the status window + edit pencil live); no flag -> plain click.
           const target = c.status ? statusTarget(statusMeta(c.status)) : null

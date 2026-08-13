@@ -1610,7 +1610,7 @@
     "valueField": "Slug (Wert)",
     "valueHint": "Stabiler Schlüssel; leer lassen, um einen aus dem Label zu generieren.",
     "valueImmutable": "Der Slug kann nach der Erstellung nicht mehr geändert werden.",
-    "labelLocked": "Die Beschriftung ist gesperrt, da diese Phase strukturell ist \u2014 Automatisierungen verlassen sich darauf. Farbe und andere Kennzeichen bleiben bearbeitbar.",
+    "labelLocked": "Die Beschriftung ist gesperrt, da diese Phase strukturell ist — Automatisierungen verlassen sich darauf. Farbe und andere Kennzeichen bleiben bearbeitbar.",
     "candidate_types": {
       "title": "Vertragsarten",
       "subtitle": "Mehrere pro Kandidat (z. B. Aushilfe, Freiberufler, Payroll)."
@@ -1648,7 +1648,8 @@
     "isProposalHint": "Diese Phase bedeutet, dass der Kandidat dem Kunden vorgeschlagen wurde.",
     "phaseApplicant": "Ist die Bewerber-Phase",
     "phaseApplicantHint": "Neue Leads wechseln bei ihrer ersten Bewerbung automatisch in diese Phase (Lead → Kandidat).",
-    "phaseApplicantBadge": "Bewerber-Phase"
+    "phaseApplicantBadge": "Bewerber-Phase",
+    "iconField": "Symbol"
   },
   "planning": {
     "shiftTypes": {
@@ -1735,7 +1736,16 @@
     "noContactDaysTitle": "Erinnerung bei fehlendem Kontakt",
     "noContactDaysHint": "Nach wie vielen Tagen ohne registrierten letzten Kontakt ein Kandidat für die Automatisierung (Workflows und Webhooks) als 'nicht kontaktiert' markiert wird.",
     "noContactDaysLabel": "Tage (1-365)",
-    "noContactDaysSaveFailed": "Speichern des Zeitfensters für fehlenden Kontakt fehlgeschlagen."
+    "noContactDaysSaveFailed": "Speichern des Zeitfensters für fehlenden Kontakt fehlgeschlagen.",
+    "dedupeKeysTitle": "Duplikaterkennung",
+    "dedupeKeysHint": "Anhand welcher Felder ein neuer Kandidat beim Anlegen auf eine bestehende Übereinstimmung geprüft wird.",
+    "dedupeKeys": {
+      "email": "E-Mail",
+      "mobile": "Mobil",
+      "phone": "Telefon"
+    },
+    "dedupeKeysSaveFailed": "Speichern der Duplikaterkennungsfelder fehlgeschlagen.",
+    "dedupeKeysMinOne": "Mindestens ein Feld bleibt erforderlich — ohne Auswahl fällt die Prüfung auf E-Mail + Mobil zurück."
   },
   "noteTypes": {
     "title": "Notiztypen — {{entity}}",
