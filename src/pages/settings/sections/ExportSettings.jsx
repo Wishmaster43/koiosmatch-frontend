@@ -119,8 +119,9 @@ export default function ExportSettings() {
                        borderRadius: 8, border: 'none', cursor: 'pointer', fontSize: 13, textAlign: 'left',
                        fontWeight: active ? 600 : 400, marginBottom: 2,
                        background: active ? 'var(--color-primary-bg)' : 'transparent',
-                       color: active ? 'var(--color-primary)' : 'var(--text)' }}>
-              <EIcon size={14} style={{ color: active ? 'var(--color-primary)' : 'var(--text-muted)' }} />
+                       // Text-colour accent uses the AA-contrast text token, not the raw brand primary.
+                       color: active ? 'var(--color-primary-text)' : 'var(--text)' }}>
+              <EIcon size={14} style={{ color: active ? 'var(--color-primary-text)' : 'var(--text-muted)' }} />
               {t(`export.entities.${e.id}.title`)}
             </button>
           )

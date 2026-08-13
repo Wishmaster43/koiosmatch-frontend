@@ -78,7 +78,8 @@ export function EventCombobox({ value, onChange, label }: {
                 style={{ display: 'flex', alignItems: 'center', gap: 8, width: '100%', textAlign: 'left',
                          padding: '9px 12px', border: 'none', cursor: 'pointer', fontSize: 13,
                          background: active ? 'var(--color-primary-bg)' : 'transparent',
-                         color: active ? 'var(--color-primary)' : 'var(--text)' }}>
+                         // Text-colour accent uses the AA-contrast text token, not the raw brand primary.
+                         color: active ? 'var(--color-primary-text)' : 'var(--text)' }}>
                 <span style={{ width: 14, flexShrink: 0, display: 'flex' }}>{active && <Check size={13} />}</span>
                 <span style={{ flex: 1 }}>{labelFor(key)}</span>
                 <span style={{ fontSize: 10.5, color: 'var(--text-muted)', fontFamily: "'JetBrains Mono', monospace" }}>{key}</span>

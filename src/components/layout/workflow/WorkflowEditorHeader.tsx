@@ -141,7 +141,8 @@ export default function WorkflowEditorHeader({
           style={{
             display: 'flex', alignItems: 'center', gap: 6, padding: '6px 12px', borderRadius: 8, fontSize: 12, fontWeight: 500,
             background: showLogs ? 'var(--color-primary-bg)' : 'var(--hover-bg)',
-            color:      showLogs ? 'var(--color-primary)'    : 'var(--text-muted)',
+            // Text-colour accent uses the AA-contrast text token, not the raw brand primary.
+            color:      showLogs ? 'var(--color-primary-text)'    : 'var(--text-muted)',
             border:     `1px solid ${showLogs ? 'var(--color-primary)' : 'var(--border)'}`,
             cursor: 'pointer',
           }}>
@@ -181,7 +182,8 @@ export default function WorkflowEditorHeader({
         style={{
           display: 'flex', alignItems: 'center', gap: 6, padding: '6px 14px', borderRadius: 8, fontSize: 12, fontWeight: 500,
           background: running ? 'var(--border)' : 'var(--color-primary-bg)',
-          color:      running ? 'var(--text-muted)' : 'var(--color-primary)',
+          // Text-colour accent uses the AA-contrast text token, not the raw brand primary.
+          color:      running ? 'var(--text-muted)' : 'var(--color-primary-text)',
           border: 'none', cursor: running ? 'not-allowed' : 'pointer',
         }}>
         {running ? <Loader2 size={13} className="animate-spin" /> : <Play size={13} />}

@@ -117,7 +117,8 @@ export default function SettingsSearch({ open, onClose, groups, onSelect }: Sett
                   border: 'none', borderRadius: 8, cursor: 'pointer', textAlign: 'left',
                   background: isActive ? 'var(--color-primary-bg)' : 'transparent',
                 }}>
-                {Icon && <Icon size={15} style={{ flexShrink: 0, color: isActive ? 'var(--color-primary)' : 'var(--text-muted)' }} aria-hidden="true" />}
+                {/* Text-colour accent uses the AA-contrast text token, not the raw brand primary. */}
+                {Icon && <Icon size={15} style={{ flexShrink: 0, color: isActive ? 'var(--color-primary-text)' : 'var(--text-muted)' }} aria-hidden="true" />}
                 <span style={{ fontSize: 13, fontWeight: 500, color: 'var(--text)' }}>{entry.label}</span>
                 <span style={{ fontSize: 11, color: 'var(--text-muted)', marginLeft: 'auto' }}>{entry.group}</span>
                 {isActive && <CornerDownLeft size={13} style={{ color: 'var(--text-muted)', flexShrink: 0 }} aria-hidden="true" />}

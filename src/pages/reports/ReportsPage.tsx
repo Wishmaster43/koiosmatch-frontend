@@ -42,7 +42,8 @@ export default function ReportsPage({ initialTab = 'flow' }: { initialTab?: stri
           <button key={tb.id} type="button" onClick={() => setTab(tb.id)}
             style={{
               padding: '8px 14px', fontSize: 13, fontWeight: tab === tb.id ? 600 : 400,
-              color: tab === tb.id ? 'var(--color-primary)' : 'var(--text-muted)',
+              // Text-colour accent uses the AA-contrast text token, not the raw brand primary.
+              color: tab === tb.id ? 'var(--color-primary-text)' : 'var(--text-muted)',
               background: 'none', border: 'none', cursor: 'pointer',
               borderBottom: tab === tb.id ? '2px solid var(--color-primary)' : '2px solid transparent',
               marginBottom: -1,

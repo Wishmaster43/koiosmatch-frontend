@@ -72,7 +72,8 @@ export default function PendingUploadQueue({
               style={{ padding: '4px 10px', fontSize: 11, borderRadius: 99, cursor: 'pointer', fontWeight: active ? 600 : 400,
                 border: `1px solid ${active ? 'color-mix(in srgb, var(--color-primary) 45%, transparent)' : 'var(--border)'}`,
                 background: active ? 'color-mix(in srgb, var(--color-primary) 14%, transparent)' : 'var(--surface)',
-                color: active ? 'var(--color-primary)' : 'var(--text)' }}>{dt.label}</button>
+                // Text-colour accent uses the AA-contrast text token, not the raw brand primary.
+                color: active ? 'var(--color-primary-text)' : 'var(--text)' }}>{dt.label}</button>
           )
         })}
       </div>

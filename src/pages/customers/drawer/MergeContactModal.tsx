@@ -114,7 +114,8 @@ export default function MergeContactModal({ customerId, current, others, onClose
         <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--text)' }}>{contactOptionLabel(c)}</div>
         <div style={{ fontSize: 11, color: 'var(--text-muted)', fontFamily: "'JetBrains Mono', monospace" }}>{c.code ?? '—'}</div>
         {c.email && <div style={{ fontSize: 11, color: 'var(--text-muted)', overflow: 'hidden', textOverflow: 'ellipsis' }}>{c.email}</div>}
-        <div style={{ fontSize: 10, marginTop: 4, fontWeight: active ? 600 : 400, color: active ? 'var(--color-primary)' : 'var(--text-muted)' }}>
+        {/* Text-colour accent uses the AA-contrast text token, not the raw brand primary. */}
+        <div style={{ fontSize: 10, marginTop: 4, fontWeight: active ? 600 : 400, color: active ? 'var(--color-primary-text)' : 'var(--text-muted)' }}>
           {active ? t('contacts.merge.stays') : (isCurrent ? t('contacts.merge.thisRecord') : t('contacts.merge.otherRecord'))}
         </div>
       </button>

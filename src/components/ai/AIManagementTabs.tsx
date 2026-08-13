@@ -340,7 +340,8 @@ export function ToolsTab() {
               {on && <Check size={9} color="white" />}
             </div>
             <div>
-              <div style={{ fontSize: 12, fontWeight: 500, color: on ? 'var(--color-primary)' : 'var(--text)' }}>{t(`ai.tools.items.${toolId}.label`)}</div>
+              {/* Text-colour accent uses the AA-contrast text token, not the raw brand primary. */}
+              <div style={{ fontSize: 12, fontWeight: 500, color: on ? 'var(--color-primary-text)' : 'var(--text)' }}>{t(`ai.tools.items.${toolId}.label`)}</div>
               <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 1 }}>{t(`ai.tools.items.${toolId}.description`)}</div>
             </div>
           </div>

@@ -227,7 +227,8 @@ export function AgentForm({ agent, prompts, faqs, onSaved, onDelete }: {
               style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '5px 10px', fontSize: 12, fontWeight: 500,
                 borderRadius: 8, border: '1px solid var(--border)',
                 background: chatOpen ? 'var(--color-primary-bg)' : 'var(--surface)',
-                color: chatOpen ? 'var(--color-primary)' : 'var(--text-muted)', cursor: 'pointer' }}>
+                // Text-colour accent uses the AA-contrast text token, not the raw brand primary.
+                color: chatOpen ? 'var(--color-primary-text)' : 'var(--text-muted)', cursor: 'pointer' }}>
               <MessageSquare size={12} /> {t('ai.chat.test')}
             </button>
           )}

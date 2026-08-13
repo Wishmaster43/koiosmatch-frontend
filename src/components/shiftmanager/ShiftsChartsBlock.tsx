@@ -255,7 +255,8 @@ export default function ShiftsChartsBlock({
                 <button key={u} type="button" onClick={() => setShiftUnit(u)}
                   style={{ padding: '4px 12px', fontSize: 11, fontWeight: shiftUnit === u ? 600 : 400, border: 'none', cursor: 'pointer',
                     background: shiftUnit === u ? 'var(--color-primary-bg)' : 'transparent',
-                    color: shiftUnit === u ? 'var(--color-primary)' : 'var(--text-muted)' }}>
+                    // Text-colour accent uses the AA-contrast text token, not the raw brand primary.
+                    color: shiftUnit === u ? 'var(--color-primary-text)' : 'var(--text-muted)' }}>
                   {u === 'hours' ? t('charts.inHours') : t('charts.inShifts')}
                 </button>
               ))}

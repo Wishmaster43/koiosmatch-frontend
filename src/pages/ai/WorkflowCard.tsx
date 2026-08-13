@@ -114,7 +114,8 @@ export default function WorkflowCard({ workflow, onRun, onEdit }: WorkflowCardPr
             className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium"
             style={{
               background: running ? 'var(--border)' : 'var(--color-primary-bg)',
-              color: running ? 'var(--text-muted)' : 'var(--color-primary)',
+              // Text-colour accent uses the AA-contrast text token, not the raw brand primary.
+              color: running ? 'var(--text-muted)' : 'var(--color-primary-text)',
               border: 'none',
               cursor: running ? 'not-allowed' : 'pointer',
             }}

@@ -161,7 +161,8 @@ export default function EmailSettings({ context = 'klanten' }) {
                          background: provider === p.id ? 'var(--color-primary-bg, var(--color-secondary-bg))' : 'var(--hover-bg)',
                          transition: 'all 0.15s' }}>
                 <div style={{ fontSize: 13, fontWeight: 600,
-                              color: provider === p.id ? 'var(--color-primary)' : 'var(--text)', marginBottom: 2 }}>
+                              // Text-colour accent uses the AA-contrast text token, not the raw brand primary.
+                              color: provider === p.id ? 'var(--color-primary-text)' : 'var(--text)', marginBottom: 2 }}>
                   {p.label}
                 </div>
                 <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>{p.desc}</div>
@@ -244,7 +245,8 @@ export default function EmailSettings({ context = 'klanten' }) {
                     style={{ padding: '6px 14px', borderRadius: 20, fontSize: 12, cursor: 'pointer',
                              border: `1px solid ${smtpSecure === s.id ? 'var(--color-primary)' : 'var(--border)'}`,
                              background: smtpSecure === s.id ? 'var(--color-primary-bg, var(--color-secondary-bg))' : 'var(--hover-bg)',
-                             color: smtpSecure === s.id ? 'var(--color-primary)' : 'var(--text)',
+                             // Text-colour accent uses the AA-contrast text token, not the raw brand primary.
+                             color: smtpSecure === s.id ? 'var(--color-primary-text)' : 'var(--text)',
                              fontWeight: smtpSecure === s.id ? 500 : 400 }}>
                     {s.label}
                   </button>

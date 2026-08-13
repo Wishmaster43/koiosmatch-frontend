@@ -52,7 +52,8 @@ export function ScheduleFields({ form }: { form: ScheduleForm }) {
                 padding: '8px 4px', borderRadius: 8, fontSize: 12, fontWeight: sType === o.id ? 600 : 400,
                 border: `1.5px solid ${sType === o.id ? 'var(--color-primary)' : 'var(--border)'}`,
                 background: sType === o.id ? 'var(--color-primary-bg)' : 'var(--surface)',
-                color: sType === o.id ? 'var(--color-primary)' : 'var(--text)',
+                // Text-colour accent uses the AA-contrast text token, not the raw brand primary.
+                color: sType === o.id ? 'var(--color-primary-text)' : 'var(--text)',
                 cursor: 'pointer',
               }}>{o.label}</button>
           ))}

@@ -97,7 +97,8 @@ export default function MergeSubEntityModal({ scope, customerId, current, others
           background: active ? 'var(--color-primary-bg)' : 'var(--surface)' }}>
         <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--text)' }}>{c.name}</div>
         <div style={{ fontSize: 11, color: 'var(--text-muted)', fontFamily: "'JetBrains Mono', monospace" }}>{c.code ?? '—'}</div>
-        <div style={{ fontSize: 10, marginTop: 4, fontWeight: active ? 600 : 400, color: active ? 'var(--color-primary)' : 'var(--text-muted)' }}>
+        {/* Text-colour accent uses the AA-contrast text token, not the raw brand primary. */}
+        <div style={{ fontSize: 10, marginTop: 4, fontWeight: active ? 600 : 400, color: active ? 'var(--color-primary-text)' : 'var(--text-muted)' }}>
           {active ? t(`${ns}.merge.stays`) : (isCurrent ? t(`${ns}.merge.thisRecord`) : t(`${ns}.merge.otherRecord`))}
         </div>
       </button>

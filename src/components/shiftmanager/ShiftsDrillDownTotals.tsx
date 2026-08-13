@@ -112,7 +112,8 @@ export default function ShiftsDrillDownTotals({ shifts, locationMeta }: {
             <button key={u} type="button" onClick={() => setUnit(u)}
               style={{ padding: '4px 12px', fontSize: 11, fontWeight: unit === u ? 600 : 400, border: 'none', cursor: 'pointer',
                 background: unit === u ? 'var(--color-primary-bg)' : 'transparent',
-                color: unit === u ? 'var(--color-primary)' : 'var(--text-muted)' }}>
+                // Text-colour accent uses the AA-contrast text token, not the raw brand primary.
+                color: unit === u ? 'var(--color-primary-text)' : 'var(--text-muted)' }}>
               {u === 'count' ? t('shiftsDrawer.countCol') : t('shiftsDrawer.byHours')}
             </button>
           ))}

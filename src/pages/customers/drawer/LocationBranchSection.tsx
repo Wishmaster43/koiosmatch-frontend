@@ -52,7 +52,8 @@ export default function LocationBranchSection({ branchIds, branches, inherited, 
           {/* State badge: which of the two situations you are looking at, in words —
               never colour alone (§6). */}
           <span style={{ fontSize: 10, fontWeight: 600, padding: '2px 7px', borderRadius: 99, whiteSpace: 'nowrap',
-            color: inherited ? 'var(--text-muted)' : 'var(--color-primary)',
+            // Text-colour accent uses the AA-contrast text token, not the raw brand primary.
+            color: inherited ? 'var(--text-muted)' : 'var(--color-primary-text)',
             background: inherited ? 'var(--bg)' : 'color-mix(in srgb, var(--color-primary) 12%, transparent)',
             border: `1px solid ${inherited ? 'var(--border)' : 'color-mix(in srgb, var(--color-primary) 35%, transparent)'}` }}>
             {inherited ? t('locations.detail.branchInherited') : t('locations.detail.branchOwn')}

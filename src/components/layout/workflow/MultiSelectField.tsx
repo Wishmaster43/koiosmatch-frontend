@@ -119,7 +119,8 @@ export default function MultiSelectField({ field, value, onChange }: {
                 style={{ display: 'flex', alignItems: 'center', gap: 8, width: '100%', textAlign: 'left',
                          padding: '8px 12px', border: 'none', cursor: 'pointer', fontSize: 13,
                          background: active ? 'var(--color-primary-bg)' : 'transparent',
-                         color: active ? 'var(--color-primary)' : 'var(--text)' }}>
+                         // Text-colour accent uses the AA-contrast text token, not the raw brand primary.
+                         color: active ? 'var(--color-primary-text)' : 'var(--text)' }}>
                 <span style={{ width: 14, height: 14, borderRadius: 4, flexShrink: 0,
                                border: `1.5px solid ${active ? 'var(--color-primary)' : 'var(--border)'}`,
                                background: active ? 'var(--color-primary)' : 'transparent' }} />

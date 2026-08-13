@@ -111,7 +111,8 @@ export default function PeriodGroup({ group }: { group: ReportFilterGroup }) {
               <button key={sub} onClick={() => setSub(sub)}
                 style={{ ...btnBase, padding: '4px 0', textAlign: 'center',
                          background: active ? 'var(--color-primary-bg)' : 'var(--hover-bg)',
-                         color:      active ? 'var(--color-primary)'    : 'var(--text)',
+                         // Text-colour accent uses the AA-contrast text token, not the raw brand primary.
+                         color:      active ? 'var(--color-primary-text)'    : 'var(--text)',
                          border: `1px solid ${active ? 'var(--color-primary)' : 'var(--border)'}`,
                          fontWeight: active ? 600 : 400 }}>
                 {monthAbbr(i)}
@@ -131,7 +132,8 @@ export default function PeriodGroup({ group }: { group: ReportFilterGroup }) {
               <button key={sub} onClick={() => setSub(sub)}
                 style={{ ...btnBase, padding: '6px 0', textAlign: 'center',
                          background: active ? 'var(--color-primary-bg)' : 'var(--hover-bg)',
-                         color:      active ? 'var(--color-primary)'    : 'var(--text)',
+                         // Text-colour accent uses the AA-contrast text token, not the raw brand primary.
+                         color:      active ? 'var(--color-primary-text)'    : 'var(--text)',
                          border: `1px solid ${active ? 'var(--color-primary)' : 'var(--border)'}`,
                          fontWeight: active ? 600 : 400, fontSize: 12 }}>
                 {q}

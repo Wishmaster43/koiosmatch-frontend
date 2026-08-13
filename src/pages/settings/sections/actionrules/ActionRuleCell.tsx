@@ -79,7 +79,8 @@ export default function ActionRuleCell({
           style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: 18, height: 18,
                    borderRadius: '50%', border: 'none', cursor: 'pointer', flexShrink: 0,
                    background: selected ? 'var(--color-primary-bg)' : 'transparent',
-                   color: selected ? 'var(--color-primary)' : 'var(--text-muted)' }}>
+                   // Text-colour accent uses the AA-contrast text token, not the raw brand primary.
+                   color: selected ? 'var(--color-primary-text)' : 'var(--text-muted)' }}>
           <Info size={12} />
         </button>
       )}

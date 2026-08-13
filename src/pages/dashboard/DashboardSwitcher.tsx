@@ -47,7 +47,8 @@ export default function DashboardSwitcher({ value, options, onChange }: {
                 style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', gap: 8,
                   padding: '8px 10px', fontSize: 12.5, borderRadius: 6, border: 'none', cursor: 'pointer', textAlign: 'left',
                   background: active ? 'var(--color-primary-bg)' : 'transparent',
-                  color: active ? 'var(--color-primary)' : 'var(--text)', fontWeight: active ? 600 : 400 }}>
+                  // Text-colour accent uses the AA-contrast text token, not the raw brand primary.
+                  color: active ? 'var(--color-primary-text)' : 'var(--text)', fontWeight: active ? 600 : 400 }}>
                 {t(`types.${opt}`)}
                 {active && <span style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--color-primary)', flexShrink: 0 }} />}
               </button>

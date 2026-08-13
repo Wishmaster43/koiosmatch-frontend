@@ -238,7 +238,8 @@ export function ListView({ shifts, today, onDayClick }: Omit<ViewProps, 'current
             <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 0',
               borderBottom: '2px solid var(--border)', marginBottom: 10 }}>
               <span style={{ fontSize: 13, fontWeight: 700,
-                color: isToday ? 'var(--color-primary)' : 'var(--text)' }}>
+                // Text-colour accent uses the AA-contrast text token, not the raw brand primary.
+                color: isToday ? 'var(--color-primary-text)' : 'var(--text)' }}>
                 {isToday ? `${t('today')} — ` : ''}{formatDate(date)}
               </span>
               <button onClick={() => onDayClick(date)}

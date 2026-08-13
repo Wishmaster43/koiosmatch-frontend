@@ -85,7 +85,8 @@ export default function ActionRuleDetailPanel({
         ) : (
           <>
             <span style={{ fontSize: 12, fontWeight: 500,
-                            color: isOverride ? 'var(--color-primary)' : 'var(--text-muted)' }}>
+                            // Text-colour accent uses the AA-contrast text token, not the raw brand primary.
+                            color: isOverride ? 'var(--color-primary-text)' : 'var(--text-muted)' }}>
               {isOverride ? t('actionRules.detail.isOverride') : t('actionRules.detail.isDefault')}
             </span>
             {isOverride && (

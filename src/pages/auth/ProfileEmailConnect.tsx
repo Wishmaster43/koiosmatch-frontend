@@ -89,7 +89,8 @@ export default function ProfileEmailConnect() {
                 style={{ flex: 1, padding: '11px 12px', borderRadius: 10, cursor: 'pointer', fontSize: 13, fontWeight: 600,
                          border: `1.5px solid ${choice === p.id ? 'var(--color-primary)' : 'var(--border)'}`,
                          background: choice === p.id ? 'var(--color-primary-bg)' : 'var(--input-bg)',
-                         color: choice === p.id ? 'var(--color-primary)' : 'var(--text-muted)' }}>
+                         // Text-colour accent uses the AA-contrast text token, not the raw brand primary.
+                         color: choice === p.id ? 'var(--color-primary-text)' : 'var(--text-muted)' }}>
                 {p.label}
               </button>
             ))}
@@ -144,7 +145,8 @@ export default function ProfileEmailConnect() {
                       style={{ padding: '6px 14px', borderRadius: 20, fontSize: 12, cursor: 'pointer',
                                border: `1px solid ${smtp.secure === s ? 'var(--color-primary)' : 'var(--border)'}`,
                                background: smtp.secure === s ? 'var(--color-primary-bg)' : 'var(--input-bg)',
-                               color: smtp.secure === s ? 'var(--color-primary)' : 'var(--text-muted)' }}>
+                               // Text-colour accent uses the AA-contrast text token, not the raw brand primary.
+                               color: smtp.secure === s ? 'var(--color-primary-text)' : 'var(--text-muted)' }}>
                       {t(`profile.email.sec_${s}`)}
                     </button>
                   ))}

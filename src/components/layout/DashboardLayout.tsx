@@ -239,7 +239,8 @@ export default function DashboardLayout() {
                   width: 30, height: 30,
                   background: rightPanelOpen ? 'var(--color-primary-bg)' : 'var(--hover-bg)',
                   border:     `1px solid ${rightPanelOpen ? 'var(--color-primary)' : 'var(--border)'}`,
-                  color:      rightPanelOpen ? 'var(--color-primary)' : 'var(--text-muted)',
+                  // Text-colour accent uses the AA-contrast text token, not the raw brand primary.
+                  color:      rightPanelOpen ? 'var(--color-primary-text)' : 'var(--text-muted)',
                   cursor: 'pointer',
                 }}
               >

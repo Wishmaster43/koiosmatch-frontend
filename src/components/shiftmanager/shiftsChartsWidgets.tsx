@@ -202,7 +202,8 @@ export function PctToggle({ pct, onChange, deltaMode = false }: { pct: boolean; 
         <button key={String(val)} type="button" onClick={() => onChange(val)}
           style={{ padding: '3px 10px', fontSize: 11, fontWeight: pct === val ? 600 : 400, border: 'none', cursor: 'pointer',
             background: pct === val ? 'var(--color-primary-bg)' : 'transparent',
-            color: pct === val ? 'var(--color-primary)' : 'var(--text-muted)' }}>{label}</button>
+            // Text-colour accent uses the AA-contrast text token, not the raw brand primary.
+            color: pct === val ? 'var(--color-primary-text)' : 'var(--text-muted)' }}>{label}</button>
       ))}
     </div>
   )

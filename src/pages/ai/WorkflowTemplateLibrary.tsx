@@ -32,7 +32,8 @@ function CategoryRow({ active, label, icon, onClick }: { active: boolean; label:
         display: 'flex', alignItems: 'center', gap: 8, width: '100%', textAlign: 'left',
         padding: '7px 10px', borderRadius: 6, border: 'none', cursor: 'pointer', marginBottom: 2,
         background: active ? 'var(--color-primary-bg)' : 'transparent',
-        color: active ? 'var(--color-primary)' : 'var(--text)', fontSize: 13, fontWeight: active ? 600 : 400,
+        // Text-colour accent uses the AA-contrast text token, not the raw brand primary.
+        color: active ? 'var(--color-primary-text)' : 'var(--text)', fontSize: 13, fontWeight: active ? 600 : 400,
       }}>
       {icon && <span aria-hidden="true" style={{ display: 'flex' }}>{icon}</span>}
       <span style={{ flex: 1, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{label}</span>

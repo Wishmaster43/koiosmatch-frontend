@@ -45,7 +45,8 @@ export default function IconPickerControl({ icons, resolve, value, color, label,
                 style={{ width: 32, height: 32, display: 'flex', alignItems: 'center', justifyContent: 'center',
                   background: active ? 'color-mix(in srgb, var(--color-primary) 14%, transparent)' : 'var(--bg)',
                   border: `1px solid ${active ? 'color-mix(in srgb, var(--color-primary) 45%, transparent)' : 'var(--border)'}`,
-                  borderRadius: 7, cursor: 'pointer', color: active ? 'var(--color-primary)' : 'var(--text)' }}>
+                  // Text-colour accent uses the AA-contrast text token, not the raw brand primary.
+                  borderRadius: 7, cursor: 'pointer', color: active ? 'var(--color-primary-text)' : 'var(--text)' }}>
                 <OptionIcon size={15} />
               </button>
             )

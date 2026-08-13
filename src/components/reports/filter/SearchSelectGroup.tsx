@@ -37,7 +37,8 @@ export default function SearchSelectGroup({ group }: { group: ReportFilterGroup 
           padding: '5px 8px', borderRadius: 6, fontSize: 12, cursor: 'pointer',
           background: hasSelected ? 'var(--color-primary-bg)' : 'var(--hover-bg)',
           border: `1px solid ${hasSelected ? 'var(--color-primary)' : 'var(--border)'}`,
-          color: hasSelected ? 'var(--color-primary)' : 'var(--text)',
+          // Text-colour accent uses the AA-contrast text token, not the raw brand primary.
+          color: hasSelected ? 'var(--color-primary-text)' : 'var(--text)',
         }}
       >
         <span className="truncate">
@@ -102,7 +103,8 @@ export default function SearchSelectGroup({ group }: { group: ReportFilterGroup 
                   <input type="checkbox" checked={checked}
                     onChange={() => group.onToggle?.(opt.value)}
                     style={{ accentColor: 'var(--color-primary)', width: 12, height: 12, flexShrink: 0 }} />
-                  <span style={{ fontSize: 12, color: checked ? 'var(--color-primary)' : 'var(--text)',
+                  {/* Text-colour accent uses the AA-contrast text token, not the raw brand primary. */}
+                  <span style={{ fontSize: 12, color: checked ? 'var(--color-primary-text)' : 'var(--text)',
                                  fontWeight: checked ? 500 : 400, overflow: 'hidden',
                                  textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                     {opt.label}

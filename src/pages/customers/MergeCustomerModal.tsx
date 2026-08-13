@@ -111,7 +111,8 @@ export default function MergeCustomerModal({ current, onClose, onMerged }: {
       <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--text)' }}>{cust.name}</div>
       <div style={{ fontSize: 11, color: 'var(--text-muted)', fontFamily: "'JetBrains Mono', monospace" }}>{cust.code ?? '—'}</div>
       {cust.city && <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>{cust.city}</div>}
-      <div style={{ fontSize: 10, marginTop: 4, fontWeight: isSurvivor ? 600 : 400, color: isSurvivor ? 'var(--color-primary)' : 'var(--color-danger)' }}>
+      {/* Text-colour accent uses the AA-contrast text token, not the raw brand primary. */}
+      <div style={{ fontSize: 10, marginTop: 4, fontWeight: isSurvivor ? 600 : 400, color: isSurvivor ? 'var(--color-primary-text)' : 'var(--color-danger)' }}>
         {isSurvivor ? t('merge.staysLabel') : t('merge.duplicateLabel')}
       </div>
     </div>

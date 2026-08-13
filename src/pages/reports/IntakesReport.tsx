@@ -97,7 +97,8 @@ export default function IntakesReport({ period, tabsSlot }: { period: ReportPeri
                         style={{
                           padding: '4px 10px', fontSize: 12, borderRadius: 999, cursor: 'pointer',
                           fontWeight: on ? 600 : 400,
-                          color: on ? 'var(--color-primary)' : 'var(--text-muted)',
+                          // Text-colour accent uses the AA-contrast text token, not the raw brand primary.
+                          color: on ? 'var(--color-primary-text)' : 'var(--text-muted)',
                           background: on ? 'color-mix(in srgb, var(--color-primary) 12%, transparent)' : 'transparent',
                           border: `1px solid ${on ? 'color-mix(in srgb, var(--color-primary) 40%, transparent)' : 'var(--border)'}`,
                         }}>

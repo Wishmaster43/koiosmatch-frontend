@@ -51,7 +51,8 @@ export default function ProfileDisplayTab({ form, setForm, theme, setTheme, lang
                   padding: '7px 16px', borderRadius: 8, fontSize: 13, fontWeight: 500,
                   cursor: 'pointer', border: `1.5px solid ${active ? 'var(--color-primary)' : 'var(--border)'}`,
                   background: active ? 'var(--color-primary-bg)' : 'var(--input-bg)',
-                  color: active ? 'var(--color-primary)' : 'var(--text-muted)',
+                  // Text-colour accent uses the AA-contrast text token, not the raw brand primary.
+                  color: active ? 'var(--color-primary-text)' : 'var(--text-muted)',
                   transition: 'all 0.15s',
                 }}>
                 {n}
@@ -77,7 +78,8 @@ export default function ProfileDisplayTab({ form, setForm, theme, setTheme, lang
                 cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
                 border: `1.5px solid ${theme === opt.value ? 'var(--color-primary)' : 'var(--border)'}`,
                 background: theme === opt.value ? 'var(--color-primary-bg)' : 'var(--input-bg)',
-                color: theme === opt.value ? 'var(--color-primary)' : 'var(--text-muted)',
+                // Text-colour accent uses the AA-contrast text token, not the raw brand primary.
+                color: theme === opt.value ? 'var(--color-primary-text)' : 'var(--text-muted)',
                 transition: 'all 0.15s',
               }}>
               {opt.icon} {opt.label}
@@ -110,7 +112,8 @@ export default function ProfileDisplayTab({ form, setForm, theme, setTheme, lang
                   style={{
                     width: '100%', padding: '10px 14px', fontSize: 13, textAlign: 'left',
                     background: language === lang.value ? 'var(--color-primary-bg)' : 'transparent',
-                    color: language === lang.value ? 'var(--color-primary)' : 'var(--text)',
+                    // Text-colour accent uses the AA-contrast text token, not the raw brand primary.
+                    color: language === lang.value ? 'var(--color-primary-text)' : 'var(--text)',
                     border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8,
                   }}
                   onMouseEnter={e => { if (language !== lang.value) e.currentTarget.style.background = 'var(--hover-bg)' }}
@@ -153,7 +156,8 @@ export default function ProfileDisplayTab({ form, setForm, theme, setTheme, lang
                     cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
                     border: `1.5px solid ${koios.mode === opt.value ? 'var(--color-primary)' : 'var(--border)'}`,
                     background: koios.mode === opt.value ? 'var(--color-primary-bg)' : 'var(--input-bg)',
-                    color: koios.mode === opt.value ? 'var(--color-primary)' : 'var(--text-muted)',
+                    // Text-colour accent uses the AA-contrast text token, not the raw brand primary.
+                    color: koios.mode === opt.value ? 'var(--color-primary-text)' : 'var(--text-muted)',
                     transition: 'all 0.15s',
                   }}>
                   {opt.label}

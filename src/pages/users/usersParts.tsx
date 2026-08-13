@@ -147,7 +147,8 @@ export function RoleSelector({ user: u, availableRoles, onChanged }: {
                   style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 8,
                            padding: '9px 12px', border: 'none', textAlign: 'left', cursor: 'pointer',
                            background: isCurrent ? 'var(--hover-bg)' : 'transparent',
-                           fontSize: 13, color: isCurrent ? 'var(--color-primary)' : 'var(--text)',
+                           // Text-colour accent uses the AA-contrast text token, not the raw brand primary.
+                           fontSize: 13, color: isCurrent ? 'var(--color-primary-text)' : 'var(--text)',
                            fontWeight: isCurrent ? 600 : 400 }}
                   onMouseEnter={e => { if (!isCurrent) e.currentTarget.style.background = 'var(--hover-bg)' }}
                   onMouseLeave={e => { if (!isCurrent) e.currentTarget.style.background = 'transparent' }}>
@@ -196,7 +197,8 @@ export function EditableAvatar({ user: u, onPick }: { user: ManagedUser; onPick?
     width: 30, height: 30, borderRadius: '50%', flexShrink: 0, boxSizing: 'border-box',
     display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 700,
     background: c ? c + '22' : 'var(--color-primary-bg)',
-    color: c || 'var(--color-primary)',
+    // Text-colour accent uses the AA-contrast text token, not the raw brand primary.
+    color: c || 'var(--color-primary-text)',
     border: c ? `1px solid ${c}55` : '1px solid transparent',
   }
   if (!onPick) return <div style={bubble}>{avatarInitials(u)}</div>

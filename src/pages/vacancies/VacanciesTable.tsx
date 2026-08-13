@@ -177,7 +177,8 @@ export default function VacanciesTable({ rows, loading, selectedId, onSelect, on
             style={{ display: 'inline-block', width: 6, height: 6, borderRadius: '50%', background: 'var(--text-muted)', marginLeft: 5 }} />
         ) : null
         return onOpenCandidateSearch ? (
-          <button type="button" style={{ ...leadsBtn, color: known ? 'var(--color-primary)' : 'var(--text-muted)' }}
+          // Text-colour accent uses the AA-contrast text token, not the raw brand primary.
+          <button type="button" style={{ ...leadsBtn, color: known ? 'var(--color-primary-text)' : 'var(--text-muted)' }}
             aria-label={t('columns.leadsOpenSearch')} title={title}
             onClick={e => { e.stopPropagation(); onOpenCandidateSearch(r.id as Id) }}
             onMouseEnter={e => { e.currentTarget.style.textDecoration = 'underline' }}

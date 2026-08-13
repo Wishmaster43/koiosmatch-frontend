@@ -188,7 +188,8 @@ export function ListRow<T>({ item, active, onSelect, label, sublabel, leading, o
       onMouseLeave={e => { if (!active) e.currentTarget.style.background = 'transparent' }}>
       {leading}
       <div style={{ flex: 1, overflow: 'hidden' }}>
-        <div style={{ fontWeight: 500, color: active ? 'var(--color-primary)' : 'var(--text)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{label}</div>
+        {/* Text-colour accent uses the AA-contrast text token, not the raw brand primary. */}
+        <div style={{ fontWeight: 500, color: active ? 'var(--color-primary-text)' : 'var(--text)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{label}</div>
         {sublabel && <div style={{ fontSize: 10, color: 'var(--text-muted)', marginTop: 1 }}>{sublabel}</div>}
       </div>
       {onDelete && (

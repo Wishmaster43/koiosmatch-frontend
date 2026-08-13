@@ -51,7 +51,8 @@ export default function DrawerAddButton({ onClick, label, icon: Icon = Plus, dis
         display: 'inline-flex', alignItems: 'center', gap: 5, height: 26, padding: iconOnly ? '0 7px' : '0 10px',
         whiteSpace: 'nowrap', flexShrink: 0, fontSize: 11.5, fontWeight: 500, borderRadius: 6,
         cursor: disabled ? 'not-allowed' : 'pointer',
-        color: disabled ? 'var(--text-muted)' : 'var(--color-primary)',
+        // Text-colour accent uses the AA-contrast text token, not the raw brand primary.
+        color: disabled ? 'var(--text-muted)' : 'var(--color-primary-text)',
         background: disabled ? 'var(--bg)' : 'color-mix(in srgb, var(--color-primary) 10%, transparent)',
         border: `1px solid ${disabled ? 'var(--border)' : 'color-mix(in srgb, var(--color-primary) 30%, transparent)'}`,
         opacity: disabled ? 0.7 : 1,

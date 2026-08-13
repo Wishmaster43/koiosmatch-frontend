@@ -31,7 +31,8 @@ export default function AuditLogTable({ rows, sortCol, sortDir, onSort, onRowCli
   // Sticky TH style — header stays visible while scrolling the table.
   const TH = (col) => ({
     padding: '8px 10px', textAlign: 'left', fontSize: 11, fontWeight: 600,
-    color: sortCol === col ? 'var(--color-primary)' : 'var(--text-muted)',
+    // Text-colour accent uses the AA-contrast text token, not the raw brand primary.
+    color: sortCol === col ? 'var(--color-primary-text)' : 'var(--text-muted)',
     background: 'var(--hover-bg)', borderBottom: '1px solid var(--border)',
     whiteSpace: 'nowrap', cursor: col ? 'pointer' : 'default',
     position: 'sticky', top: 0, zIndex: 2,

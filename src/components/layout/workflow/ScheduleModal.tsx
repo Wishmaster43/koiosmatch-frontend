@@ -67,8 +67,9 @@ export function ScheduleModal({ trigger, scheduleConfig, onSave, onClose }: {
                   border: `2px solid ${type === id ? 'var(--color-primary)' : 'var(--border)'}`,
                   background: type === id ? 'var(--color-primary-bg)' : 'var(--surface)',
                 }}>
-                <Ic size={22} color={type === id ? 'var(--color-primary)' : 'var(--text-muted)'} />
-                <span style={{ fontSize: 13, fontWeight: 600, color: type === id ? 'var(--color-primary)' : 'var(--text)' }}>{label}</span>
+                {/* Text-colour accent uses the AA-contrast text token, not the raw brand primary. */}
+                <Ic size={22} color={type === id ? 'var(--color-primary-text)' : 'var(--text-muted)'} />
+                <span style={{ fontSize: 13, fontWeight: 600, color: type === id ? 'var(--color-primary-text)' : 'var(--text)' }}>{label}</span>
                 <span style={{ fontSize: 11, color: 'var(--text-muted)', textAlign: 'center', lineHeight: 1.35 }}>{desc}</span>
               </button>
             ))}

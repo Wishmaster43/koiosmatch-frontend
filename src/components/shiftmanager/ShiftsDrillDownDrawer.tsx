@@ -214,7 +214,8 @@ export default function ShiftsDrillDownDrawer({ metric, metricOptions, periods, 
               <button key={v} type="button" onClick={() => setView(v)}
                 style={{ padding: '5px 12px', fontSize: 12, fontWeight: view === v ? 600 : 400, border: 'none', cursor: 'pointer',
                   background: view === v ? 'var(--color-primary-bg)' : 'transparent',
-                  color: view === v ? 'var(--color-primary)' : 'var(--text-muted)' }}>
+                  // Text-colour accent uses the AA-contrast text token, not the raw brand primary.
+                  color: view === v ? 'var(--color-primary-text)' : 'var(--text-muted)' }}>
                 {v === 'totals' ? t('shiftsDrawer.viewTotals') : t('shiftsDrawer.viewDetails')}
               </button>
             ))}

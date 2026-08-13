@@ -149,7 +149,8 @@ export default function WhatsAppSettings() {
               style={{ display: 'flex', alignItems: 'center', gap: 7, padding: '8px 14px', background: 'none',
                        border: 'none', borderBottom: `2px solid ${active ? 'var(--color-primary)' : 'transparent'}`,
                        marginBottom: -1, cursor: 'pointer', fontSize: 13, fontWeight: active ? 600 : 500,
-                       color: active ? 'var(--color-primary)' : 'var(--text-muted)' }}>
+                       // Text-colour accent uses the AA-contrast text token, not the raw brand primary.
+                       color: active ? 'var(--color-primary-text)' : 'var(--text-muted)' }}>
               {tb.label}
               {tb.count > 0 && (
                 <span style={{ fontSize: 11, fontWeight: 600, borderRadius: 999, padding: '1px 7px',

@@ -134,7 +134,8 @@ export default function ConfigPanel({ node, onUpdate, onDelete, onTabChange, var
           <button key={tab.id} type="button" onClick={() => switchTab(tab.id)}
             style={{
               padding: '5px 10px', fontSize: 12, fontWeight: activeTab === tab.id ? 600 : 400,
-              color: activeTab === tab.id ? 'var(--color-primary)' : 'var(--text-muted)',
+              // Text-colour accent uses the AA-contrast text token, not the raw brand primary.
+              color: activeTab === tab.id ? 'var(--color-primary-text)' : 'var(--text-muted)',
               background: 'none', border: 'none',
               borderBottom: activeTab === tab.id ? '2px solid var(--color-primary)' : '2px solid transparent',
               cursor: 'pointer', marginBottom: -1, whiteSpace: 'nowrap',

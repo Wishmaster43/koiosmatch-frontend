@@ -36,7 +36,8 @@ export default function NoteKoiosModeToggle() {
             style={{
               padding: '3px 10px', fontSize: 10, fontWeight: active ? 600 : 500, cursor: 'pointer', border: 'none',
               background: active ? 'color-mix(in srgb, var(--color-primary) 14%, transparent)' : 'transparent',
-              color: active ? 'var(--color-primary)' : 'var(--text-muted)',
+              // Text-colour accent uses the AA-contrast text token, not the raw brand primary.
+              color: active ? 'var(--color-primary-text)' : 'var(--text-muted)',
             }}>
             {t(`notesAssist.koiosMode.${m}`, { defaultValue: m === 'wizard' ? 'Wizard' : 'Auto' })}
           </button>

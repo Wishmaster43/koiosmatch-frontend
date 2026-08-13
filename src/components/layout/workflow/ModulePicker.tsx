@@ -130,7 +130,8 @@ export default function ModulePicker({ insertAfterEdgeId, onSelect, onClose }: {
             <button key={cat} type="button" onClick={() => { setTab(cat); }}
               style={{
                 padding: '7px 12px', fontSize: 12, fontWeight: tab === cat ? 700 : 400,
-                color: tab === cat ? 'var(--color-primary)' : 'var(--text-muted)',
+                // Text-colour accent uses the AA-contrast text token, not the raw brand primary.
+                color: tab === cat ? 'var(--color-primary-text)' : 'var(--text-muted)',
                 background: 'none', border: 'none', borderBottom: tab === cat ? '2px solid var(--color-primary)' : '2px solid transparent',
                 cursor: 'pointer', whiteSpace: 'nowrap', marginBottom: -1,
               }}>

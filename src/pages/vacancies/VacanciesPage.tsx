@@ -294,7 +294,8 @@ function VacanciesPageInner({ intent }: { intent?: unknown }) {
                 <button key={b.value} onClick={() => setStatusBucket(b.value)}
                   style={{ padding: '5px 14px', fontSize: 13, fontWeight: statusBucket === b.value ? 600 : 400, borderRadius: 7, cursor: 'pointer',
                     background: statusBucket === b.value ? 'color-mix(in srgb, var(--color-primary) 14%, transparent)' : 'transparent',
-                    color: statusBucket === b.value ? 'var(--color-primary)' : 'var(--text)',
+                    // Text-colour accent uses the AA-contrast text token, not the raw brand primary.
+                    color: statusBucket === b.value ? 'var(--color-primary-text)' : 'var(--text)',
                     border: `1px solid ${statusBucket === b.value ? 'color-mix(in srgb, var(--color-primary) 45%, transparent)' : 'var(--border)'}` }}>
                   {b.label}
                 </button>

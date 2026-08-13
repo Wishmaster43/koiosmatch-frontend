@@ -22,7 +22,8 @@ function StatTile({ label, value, accent }: { label: string; value: number; acce
     <div style={{ flex: 1, minWidth: 120, padding: '14px 16px', borderRadius: 10,
                   background: 'var(--bg)', border: '1px solid var(--border)' }}>
       <div style={{ fontSize: 22, fontWeight: 700, fontVariantNumeric: 'tabular-nums',
-                    color: accent ? 'var(--color-primary)' : 'var(--text)' }}>{value}</div>
+                    // Text-colour accent uses the AA-contrast text token, not the raw brand primary.
+                    color: accent ? 'var(--color-primary-text)' : 'var(--text)' }}>{value}</div>
       <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>{label}</div>
     </div>
   )

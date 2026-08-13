@@ -292,7 +292,8 @@ export default function ApplicationsPage({ intent }: { intent?: unknown } = {}) 
             <button key={b} onClick={() => { setShowArchived(false); setBucket(b) }} style={{ padding: '5px 14px', fontSize: 13,
               fontWeight: on ? 600 : 400, borderRadius: 7, cursor: 'pointer',
               background: on ? 'color-mix(in srgb, var(--color-primary) 14%, transparent)' : 'transparent',
-              color: on ? 'var(--color-primary)' : 'var(--text)',
+              // Text-colour accent uses the AA-contrast text token, not the raw brand primary.
+              color: on ? 'var(--color-primary-text)' : 'var(--text)',
               border: `1px solid ${on ? 'color-mix(in srgb, var(--color-primary) 45%, transparent)' : 'var(--border)'}` }}>
               {t(`buckets.${b}`)}
             </button>

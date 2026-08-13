@@ -257,7 +257,8 @@ export default function MatchTemplatesSettings() {
               </div>
               <span style={{ fontSize: 10, fontWeight: 600, padding: '2px 8px', borderRadius: 999, whiteSpace: 'nowrap',
                 background: linked > 0 ? 'var(--color-primary-bg)' : 'var(--hover-bg)',
-                color: linked > 0 ? 'var(--color-primary)' : 'var(--text-muted)' }}>
+                // Text-colour accent uses the AA-contrast text token, not the raw brand primary.
+                color: linked > 0 ? 'var(--color-primary-text)' : 'var(--text-muted)' }}>
                 {t('matchTemplatesSettings.linkedCount', { count: linked })}
               </span>
               <button onClick={() => (isOpen ? setExpanded(null) : openEdit(tpl))}

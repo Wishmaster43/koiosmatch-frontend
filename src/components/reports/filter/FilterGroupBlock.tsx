@@ -126,7 +126,8 @@ export default function FilterGroupBlock({
                         flexShrink: 0, fontFamily: 'monospace', borderRadius: 999,
                         padding: '1px 5px', fontSize: 10,
                         background: checked ? 'var(--color-primary-bg)' : 'var(--border)',
-                        color:      checked ? 'var(--color-primary)'    : 'var(--text-muted)',
+                        // Text-colour accent uses the AA-contrast text token, not the raw brand primary.
+                        color:      checked ? 'var(--color-primary-text)'    : 'var(--text-muted)',
                       }}>
                         {opt.count}
                       </span>

@@ -30,11 +30,13 @@ function SidebarRow({ label, icon, active, isDragOver, onClick, onDragOver, onDr
         cursor: 'pointer', borderRadius: 6, margin: '1px 6px',
         background: isDragOver ? 'var(--color-secondary-bg)' : active ? 'var(--color-primary-bg)' : hover ? 'var(--hover-bg)' : 'transparent',
         border: isDragOver ? '1.5px dashed var(--color-secondary)' : '1.5px solid transparent',
-        color: active ? 'var(--color-primary)' : 'var(--text)',
+        // Text-colour accent uses the AA-contrast text token, not the raw brand primary.
+        color: active ? 'var(--color-primary-text)' : 'var(--text)',
         transition: 'background 0.1s',
       }}
     >
-      <span style={{ color: isDragOver ? 'var(--color-secondary)' : active ? 'var(--color-primary)' : 'var(--text-muted)', flexShrink: 0 }}>{icon}</span>
+      {/* Text-colour accent uses the AA-contrast text token, not the raw brand primary. */}
+      <span style={{ color: isDragOver ? 'var(--color-secondary)' : active ? 'var(--color-primary-text)' : 'var(--text-muted)', flexShrink: 0 }}>{icon}</span>
       <span style={{ fontSize: 13, flex: 1, fontWeight: active ? 600 : 400, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{label}</span>
       {onDelete && (
         <button onClick={e => { e.stopPropagation(); onDelete() }}

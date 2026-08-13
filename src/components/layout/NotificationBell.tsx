@@ -45,7 +45,8 @@ export default function NotificationBell() {
           position: 'relative', width: 30, height: 30,
           background: open ? 'var(--color-primary-bg)' : 'var(--hover-bg)',
           border: `1px solid ${open ? 'var(--color-primary)' : 'var(--border)'}`,
-          color: open ? 'var(--color-primary)' : 'var(--text-muted)',
+          // Text-colour accent uses the AA-contrast text token, not the raw brand primary.
+          color: open ? 'var(--color-primary-text)' : 'var(--text-muted)',
           cursor: 'pointer',
         }}
       >

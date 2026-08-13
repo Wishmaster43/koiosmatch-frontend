@@ -29,7 +29,8 @@ export default function OpenCheckGroup({ group }: { group: ReportFilterGroup }) 
                 border: `1px solid ${opt.color}` }} />
             )}
             <span style={{ flex: 1, fontSize: 12, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis',
-                           whiteSpace: 'nowrap', color: checked ? 'var(--color-primary)' : 'var(--text)',
+                           // Text-colour accent uses the AA-contrast text token, not the raw brand primary.
+                           whiteSpace: 'nowrap', color: checked ? 'var(--color-primary-text)' : 'var(--text)',
                            fontWeight: checked ? 500 : 400 }}>
               {opt.label}
             </span>

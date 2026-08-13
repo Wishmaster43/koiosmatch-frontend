@@ -268,7 +268,8 @@ export default function AddCustomerModal({ onClose, onCreate, onImported, users 
                     background: active ? (ph.color ?? 'var(--color-primary)') + '14' : 'var(--surface)' }}>
                   <div style={{ width: 8, height: 8, borderRadius: '50%', background: ph.color ?? 'var(--color-primary)', flexShrink: 0 }} />
                   <span style={{ fontSize: 13, fontWeight: active ? 600 : 500,
-                    color: active ? (ph.color ?? 'var(--color-primary)') : 'var(--text)' }}>{ph.label}</span>
+                    // Text-colour accent uses the AA-contrast text token, not the raw brand primary.
+                    color: active ? (ph.color ?? 'var(--color-primary-text)') : 'var(--text)' }}>{ph.label}</span>
                 </button>
               )
             })}
