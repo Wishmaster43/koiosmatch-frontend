@@ -178,7 +178,9 @@ export default function PriceAgreementsTab({ customerId, c, onSave }: { customer
             {/* Only while editing: the emptying rule is a property of the FORM, and
                 repeating it in read mode would just restate the fallback line above. */}
             {editingBillingAddress && (
-              <p style={{ fontSize: 11, color: 'var(--text-muted)', margin: '-6px 0 0' }}>
+              // K13a — horizontal padding matches the card rows' '7px 12px' (EditableFieldTable
+              // .106/.358) so the hint's left edge lines up with the field labels above it.
+              <p style={{ fontSize: 11, color: 'var(--text-muted)', margin: '4px 0 0', padding: '0 12px' }}>
                 {t('overview.billingAddress.hint')}
               </p>
             )}
