@@ -20,7 +20,14 @@ These are absolute. If a request conflicts with them, say so and propose a
 compliant alternative.
 
 1. **English only** — all code, identifiers, comments, commit messages, and
-   docs are in English. No Dutch in the codebase.
+   docs are in English. No Dutch in the codebase. **This explicitly includes every
+   URL/route segment and settings slug (Danny 2026-08-13):** settings section ids,
+   sub-tab slugs, registry keys and folder names (everything after `#settings/…`)
+   are English-only — `importeren`, `notif_kandidaten`, `email_kandidaten`-style
+   Dutch slugs are findings. New slugs ship in English; renaming an existing Dutch
+   slug is a deliberate migration (old deep-links must keep resolving via a
+   redirect/alias), never an ad-hoc rename. The user-visible LABEL stays translated
+   via i18n — only the identifier underneath is English.
 2. **One short English comment per logical block** — above each meaningful
    block (function, hook, effect, handler, mapping), write a single concise
    line describing _what it does and why_. The developer learns by reading.
@@ -241,8 +248,12 @@ same validation/UX, lookups via `useX()` hooks (never hardcoded option lists).
   lists, …) with `SafeHtml` display and its OWN pencil → save/✕ — mirror the
   candidate profile text. A bare `<textarea>` for user-facing prose is a finding.
   (Single-line inputs and code/ID fields are exempt.)
-- **Field layout:** label-above; pair short fields into two columns; group related
-  fields into titled cards (Persoonlijk / Contact / Adres …).
+- **Field layout (Danny 2026-08-13, supersedes label-above):** modals/popups mirror
+  the drill-down — **label LEFT of the field** (EditableFieldTable look, canon label
+  width ~120px), grouped into titled cards (Persoonlijk / Contact / Adres …); short
+  fields may still pair into columns. Applies app-wide (candidates, customers,
+  vacancies, applications); implemented as ONE sweep from the shared form kit
+  (`components/forms/fields.tsx`) — never restyled per modal.
 
 **Controlled vocabularies are tenant lookups, never hardcoded.** Status, types, funnel,
 functions, industries, genders, languages, levels, pools → a Settings-managed lookup +
