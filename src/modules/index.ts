@@ -51,6 +51,7 @@ import knowledge_search  from './knowledge_search'
 import router            from './router'
 import filter            from './filter'
 import email_send        from './email_send'
+import notification_send from './notification_send'
 import delay             from './delay'
 import html_parser       from './html_parser'
 import html_to_text      from './html_to_text'
@@ -132,6 +133,7 @@ const MODULES: ModuleDef[] = [
   router,
   filter,
   email_send,
+  notification_send,
   delay,
   html_parser,
   html_to_text,

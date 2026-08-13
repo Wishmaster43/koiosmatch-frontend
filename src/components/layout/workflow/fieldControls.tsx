@@ -178,8 +178,11 @@ export function WebhookSelectField({ value, onChange, fieldKey }: { value?: unkn
 // Options come from a tenant lookup endpoint (e.g. /whatsapp-message-types) instead of
 // a hardcoded list (§10: no hardcoded vocabularies in workflow nodes). Lazy api import,
 // mirroring WebhookSelectField. Fail-soft to an empty list.
-export function LookupSelectField({ value, onChange, fieldKey, endpoint }: {
-  value?: unknown; onChange: OnChange; fieldKey: string; endpoint: string
+export function LookupSelectField({ value, onChange, fieldKey, endpoint, valueKey }: {
+  // valueKey: which row property becomes the STORED value. Roles resolve server-side
+  // by roles.name (NotificationSendModule::resolveRecipients), so the role field
+  // stores the name — a numeric Spatie id would silently match nobody (§3).
+  value?: unknown; onChange: OnChange; fieldKey: string; endpoint: string; valueKey?: string
 }) {
   const { t } = useTranslation('workflows')
   const [opts, setOpts] = useState<Array<{ value: string; label: string }>>([])
@@ -195,12 +198,12 @@ export function LookupSelectField({ value, onChange, fieldKey, endpoint }: {
       .then(r => {
         const rows = (unwrapList(r).rows) as Array<Record<string, unknown>>
         if (alive) setOpts(rows
-          .map(o => ({ value: String(o.value ?? o.id ?? ''), label: String(o.label ?? o.name ?? o.value ?? '') }))
+          .map(o => ({ value: String((valueKey ? o[valueKey] : undefined) ?? o.value ?? o.id ?? ''), label: String(o.label ?? o.name ?? o.value ?? '') }))
           .filter(o => o.value))
       })
       .catch(() => {})
     return () => { alive = false }
-  }, [endpoint])
+  }, [endpoint, valueKey])
 
   return (
     <>

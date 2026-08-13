@@ -187,7 +187,8 @@
     "candidates_fetch": "Candidats Koios Match",
     "pdok_geocode": "Géocoder l’adresse (PDOK)",
     "backoffice_sync": "Lier au backoffice",
-    "interview_start": "Démarrer l'entretien IA"
+    "interview_start": "Démarrer l'entretien IA",
+    "notification_send": "Envoyer une notification"
   },
   "status": {
     "active": "Actif",
@@ -728,7 +729,10 @@
     "Geen contact sinds (maanden)": "Aucun contact depuis (mois)",
     "Inclusief onderliggende locaties/afdelingen/contacten": "Y compris les sites/services/contacts associés",
     "Max aantal": "Max. nombre",
-    "Systeem": "Système"
+    "Systeem": "Système",
+    "Ontvangers": "Destinataires",
+    "Rol": "Rôle",
+    "Type (event)": "Type (événement)"
   },
   "fieldOptions": {
     "Array (meerdere bundles)": "Tableau (plusieurs bundles)",
@@ -839,7 +843,25 @@
     "vacancy": "poste",
     "verwijderd": "supprimé",
     "Gemini 25 Flash": "Gemini 2.5 Flash",
-    "Gemini 25 Pro": "Gemini 2.5 Pro"
+    "Gemini 25 Pro": "Gemini 2.5 Pro",
+    "all": "tous",
+    "role": "rôle",
+    "candidate_owner": "propriétaire du candidat",
+    "owner": "propriétaire",
+    "applicationcreated": "candidature créée",
+    "applicationstage_changed": "étape modifiée (candidature)",
+    "applicationmatched": "candidature mise en correspondance",
+    "applicationrejected": "candidature rejetée",
+    "vacancycreated": "offre créée",
+    "vacancyupdated": "offre mise à jour",
+    "vacancypublished": "offre publiée",
+    "candidatecreated": "candidat créé",
+    "candidatestatus_changed": "statut modifié (candidat)",
+    "candidateno_contact": "aucun contact (candidat)",
+    "matchcreated": "correspondance créée",
+    "taskcreated": "tâche créée",
+    "taskdue": "tâche à échéance",
+    "workflowcustom": "personnalisé (workflow)"
   },
   "agentTest": {
     "title": "Variables de test",
@@ -942,7 +964,9 @@
     "naam_1 naam_2": "nom_1\nnom_2",
     "optioneel — leeg = alle redenen": "facultatif — vide = tous les motifs",
     "{{1output}} of leeg laten voor volledige output": "{{1.output}} ou laisser vide pour la sortie complète",
-    "{{vraag van kandidaat}}": "{{question du candidat}}"
+    "{{vraag van kandidaat}}": "{{question du candidat}}",
+    "Nieuwe match": "Nouveau match",
+    "Er is een nieuwe match aangemaakt": "Un nouveau match a été créé."
   },
   "fieldHints": {
     "0 = deterministisch · 1 = creatief Standaard 07": "0 = déterministe · 1 = créatif. Par défaut 0,7.",

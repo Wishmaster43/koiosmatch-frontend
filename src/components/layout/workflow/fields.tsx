@@ -41,7 +41,7 @@ export function FieldInput({ field, value, onChange, variables, config }: {
     return <FaqSelectField value={value} onChange={onChange} fieldKey={field.key} />
   }
   if (field.type === 'lookup_select') {
-    return <LookupSelectField value={value} onChange={onChange} fieldKey={field.key} endpoint={String(field.endpoint ?? '')} />
+    return <LookupSelectField value={value} onChange={onChange} fieldKey={field.key} endpoint={String(field.endpoint ?? '')} valueKey={typeof field.valueKey === 'string' ? field.valueKey : undefined} />
   }
   if (field.type === 'response_structure') {
     return <ResponseStructureField value={value} onChange={onChange} fieldKey={field.key} />
