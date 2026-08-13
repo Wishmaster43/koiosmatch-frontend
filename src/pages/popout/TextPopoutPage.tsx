@@ -15,11 +15,13 @@ import { useParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import PopoutShell from './PopoutShell'
 import CandidateSummaryPopout from './CandidateSummaryPopout'
+import MatchRemarksPopout from './MatchRemarksPopout'
 
 // One entry per supported `<entity>:<field>` pair — keep in sync with
 // PopoutTextField / openTextPopout in lib/secondScreen.ts.
 const TEXT_POPOUT_PAGES: Record<string, ComponentType<{ id: string | undefined }>> = {
   'candidate:summary': CandidateSummaryPopout,
+  'candidate:matchRemarks': MatchRemarksPopout,
 }
 
 export default function TextPopoutPage() {

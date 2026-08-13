@@ -13,10 +13,11 @@ import { noteDraftTopic } from '@/lib/secondScreen'
 
 // The second-screen window opener — jsdom's window.open does nothing useful, and
 // the handoff needs to distinguish "window opened" from "popup blocked".
-const { openNotesPopoutMock } = vi.hoisted(() => ({ openNotesPopoutMock: vi.fn() }))
+const { openNotesPopoutMock, openNoteEditPopoutMock } = vi.hoisted(() => ({ openNotesPopoutMock: vi.fn(), openNoteEditPopoutMock: vi.fn() }))
 vi.mock('@/lib/secondScreen', async importOriginal => ({
   ...(await importOriginal<typeof import('@/lib/secondScreen')>()),
   openNotesPopout: openNotesPopoutMock,
+  openNoteEditPopout: openNoteEditPopoutMock,
 }))
 
 // Tiptap is out of scope here (mirrors NoteComposer.test.tsx's own convention);
@@ -378,15 +379,17 @@ describe('NotesTab · per-note pop-out (NOTITIE-POPOUT-EDIT-1)', () => {
     expect(screen.getAllByRole('button', { name: 'openSecondScreen' })).toHaveLength(1)
   })
 
-  it('clicking it opens THAT record\'s window and asks for THAT note — by id, no text on the wire', async () => {
+  it('clicking it opens THAT note\'s OWN window by URL — id in the address, no channel handoff (NOTITIE-POPOUT-URL-1)', async () => {
+    openNoteEditPopoutMock.mockReturnValue({} as Window)
     const user = userEvent.setup()
     render(<NotesTab notes={[first, second]} labels={editLabels} popout={target}
       onEditNote={vi.fn()} showTimeline={false} showConversations={false} />)
     // The second note's own icon (both notes carry one).
     await user.click(screen.getAllByRole('button', { name: 'openSecondScreen' })[1])
 
-    expect(openNotesPopoutMock).toHaveBeenCalledWith('candidate', 'c1')
-    expect(seen).toContainEqual({ kind: 'edit', noteId: 'n2' })
+    expect(openNoteEditPopoutMock).toHaveBeenCalledWith('candidate', 'c1', 'n2')
+    // No message travels: the URL carries the whole identity now.
+    expect(seen).toEqual([])
     // The drill-down composer must NOT open here — the editing happens over there.
     expect(screen.queryByRole('dialog')).toBeNull()
   })

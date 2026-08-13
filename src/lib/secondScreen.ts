@@ -92,6 +92,18 @@ export const noteDraftTopic = (entity: PopoutEntity, id: string | number) => `ko
 export const NOTE_EDIT_POPOUT_ENTITIES: ReadonlySet<PopoutEntity> = new Set<PopoutEntity>(['candidate'])
 
 /**
+ * NOTITIE-POPOUT-URL-1 (Danny 11-08 "zet het notitie-id in de URL", live 13-08
+ * "zoals de pop-out van de profieltekst"): ONE existing note edits in a window of
+ * its OWN, addressed by URL — no channel handoff to resolve, no race against the
+ * thread window's own loading, and re-opening the same note re-focuses its
+ * window. Only entities in NOTE_EDIT_POPOUT_ENTITIES have this route (the window
+ * must be able to really PATCH the note — see that set's docblock).
+ */
+export function openNoteEditPopout(entity: PopoutEntity, id: string | number, noteId: string): Window | null {
+  return window.open(`/popout/notes/${entity}/${id}/${noteId}`, `koios-note-${entity}-${id}-${noteId}`, popupFeatures())
+}
+
+/**
  * TEKST-POPOUT-1 (Danny 08-08, punt 2): the SAME second-screen mechanism for a
  * single free-text field — today the candidate's profile text. Notes pop out a
  * whole thread; this pops out ONE field so the recruiter can write it full-size
@@ -101,7 +113,11 @@ export const NOTE_EDIT_POPOUT_ENTITIES: ReadonlySet<PopoutEntity> = new Set<Popo
  */
 // The free-text fields that own a second-screen editor. One entry per field the
 // route dispatcher (pages/popout/TextPopoutPage.tsx) knows how to render.
-export type PopoutTextField = 'summary'
+// `matchRemarks` (batch 5, P34) mirrors the "+Match" Opmerkingen field — keyed by
+// the candidate id since a not-yet-created match has none of its own; it only
+// mirrors the draft between windows (no independent server save — the real
+// persistence is the match form's own submit).
+export type PopoutTextField = 'summary' | 'matchRemarks'
 
 // Identity of ONE popped-out field: the OS window name AND the BroadcastChannel
 // topic the two windows sync their draft over (hooks/useTextPopoutSync). Scoped

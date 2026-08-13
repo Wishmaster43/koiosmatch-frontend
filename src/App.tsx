@@ -26,6 +26,7 @@ const MfaEnrollmentGate = lazy(() => import('./pages/auth/MfaEnrollmentGate'))
 // Lazy: NOTITIE-POPOUT-1 F5 — the standalone second-screen notes window, only
 // loaded when a recruiter actually opens one (route-level code splitting, §9).
 const NotesPopoutPage = lazy(() => import('./pages/popout/NotesPopoutPage'))
+const NoteEditPopout = lazy(() => import('./pages/popout/NoteEditPopout'))
 // Lazy: F5-uitbreiding — legacy alias for the originally shipped candidate-only
 // popout URL (`/popout/notes/:candidateId`), redirecting to the new entity-aware route.
 const CandidatePopoutRedirect = lazy(() => import('./pages/popout/CandidatePopoutRedirect'))
@@ -101,6 +102,19 @@ export default function App() {
                   <TenantThemed>
                     <Suspense fallback={<BootLoader />}>
                       <NotesPopoutPage />
+                    </Suspense>
+                  </TenantThemed>
+                </ProtectedRoute>
+              } />
+              {/* NOTITIE-POPOUT-URL-1 (Danny 11-08/13-08): ONE existing note on a route
+                  of its own — the profile-text treatment for a note. The id in the URL
+                  is what makes it robust: no channel handoff, no race against a thread
+                  window's own loading. */}
+              <Route path="/popout/notes/:entity/:id/:noteId" element={
+                <ProtectedRoute>
+                  <TenantThemed>
+                    <Suspense fallback={<BootLoader />}>
+                      <NoteEditPopout />
                     </Suspense>
                   </TenantThemed>
                 </ProtectedRoute>

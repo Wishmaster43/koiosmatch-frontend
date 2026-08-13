@@ -18,18 +18,13 @@
  * mirrors the drill-down's own field one-for-one — see this component's
  * `generate` prop.
  *
- * CLOSING NEVER EATS TEXT (Danny's explicit requirement): a native beforeunload
- * guard fires while the draft is dirty, so closing or reloading this window
- * always asks first. It is written out here rather than extracted into a shared
- * hook because the only other beforeunload in the app (workflow
- * useEditorExitGuards) is entangled with that editor's history/confirm guards —
- * a "shared" hook neither side could adopt is not a shared hook (§11).
+ * CLOSING NEVER EATS TEXT (Danny's explicit requirement) — the state row, the
+ * confirmed close, the save-and-close, the beforeunload guard and Cmd+S all live
+ * in the shared PopoutSaveFooter since NOTITIE-POPOUT-URL-1 gave the per-note
+ * window the exact same closing contract (§11: one guard, never two copies).
  */
-import { useEffect, useRef } from 'react'
-import { useTranslation } from 'react-i18next'
-import { useConfirm } from '@/hooks/useConfirm'
-import { Save, X } from 'lucide-react'
 import RichTextEditor from '@/components/ui/RichTextEditor'
+import PopoutSaveFooter from './PopoutSaveFooter'
 import type { GenerateEntity } from '@/components/ui/richtext/richTextAssistApi'
 
 interface TextPopoutEditorProps {
@@ -45,82 +40,12 @@ interface TextPopoutEditorProps {
 }
 
 export default function TextPopoutEditor({ value, onChange, onSave, dirty, generate }: TextPopoutEditorProps) {
-  const { t } = useTranslation('common')
-  const { confirm, dialog: confirmDialog } = useConfirm()
-
-  // Warn before this window is closed/reloaded with unsaved text. The browser
-  // shows its own generic wording — returnValue only arms it.
-  useEffect(() => {
-    if (!dirty) return
-    const handler = (e: BeforeUnloadEvent) => { e.preventDefault(); e.returnValue = '' }
-    window.addEventListener('beforeunload', handler)
-    return () => window.removeEventListener('beforeunload', handler)
-  }, [dirty])
-
-  // Save AND close (Danny 09-08: "bij opslaan van pop-out sluit het venster niet").
-  // This window exists to write ONE field, so finishing it is finishing the window.
-  // It closes only on a landed write — closing on a REJECTED save would take the
-  // recruiter's text with it. The button says "en sluiten" so the closing is never
-  // a surprise (§3); Cmd+S below stays a plain checkpoint that keeps you writing.
-  const saveAndClose = async () => { if (await onSave()) window.close() }
-
-  // Close WITHOUT saving (Danny 10-08: "naast opslaan en sluiten een knop
-  // annuleren of sluiten"). The window had only one way out, so leaving text you
-  // did not want meant saving it first. Unsaved text is confirmed before it goes:
-  // this window may hold the only copy, and a silent discard is the one thing a
-  // second screen must never do.
-  const close = () => {
-    // The house dialog, not window.confirm: 42 call sites already use it and a
-    // native prompt would be the only one left in src/ (§9 consistency, and the
-    // browser box cannot be translated or styled).
-    if (!dirty) { window.close(); return }
-    confirm(t('discardChangesConfirm'), () => window.close(), { danger: true, confirmLabel: t('close') })
-  }
-
-  // Cmd/Ctrl+S saves without reaching for the mouse — the whole point of a
-  // full-screen writing window (§6 keyboard operability). The handler reads the
-  // save action off a ref so the listener is bound ONCE, not re-bound per
-  // keystroke (the parent re-renders on every character).
-  const saveRef = useRef(onSave)
-  useEffect(() => { saveRef.current = onSave })
-  useEffect(() => {
-    const handler = (e: KeyboardEvent) => {
-      if (!(e.key === 's' && (e.metaKey || e.ctrlKey))) return
-      e.preventDefault()
-      saveRef.current()
-    }
-    window.addEventListener('keydown', handler)
-    return () => window.removeEventListener('keydown', handler)
-  }, [])
-
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 10, height: '100%', minHeight: 0 }}>
       {/* `fill` makes the editor the one growing item, so a resized window grows
           the WRITING space instead of empty padding (mirrors the note composer). */}
       <RichTextEditor value={value} onChange={onChange} fill minHeight={220} assistGenerate={generate} />
-      {confirmDialog}
-
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10, flexShrink: 0 }}>
-        {/* Honest, announced save state — never a silent "did that land?" window. */}
-        <span aria-live="polite" data-testid="text-popout-state"
-          style={{ fontSize: 11, color: dirty ? 'var(--color-warning)' : 'var(--text-muted)' }}>
-          {dirty ? t('unsavedChanges') : t('allChangesSaved')}
-        </span>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-        <button type="button" onClick={close} data-testid="text-popout-close"
-          style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '6px 12px', fontSize: 12, fontWeight: 500,
-            borderRadius: 8, border: '1px solid var(--border)', cursor: 'pointer',
-            background: 'var(--surface)', color: 'var(--text-muted)' }}>
-          <X size={13} /> {t('close')}
-        </button>
-        <button type="button" onClick={saveAndClose} disabled={!dirty} data-testid="text-popout-save"
-          style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '6px 12px', fontSize: 12, fontWeight: 600,
-            borderRadius: 8, border: 'none', cursor: dirty ? 'pointer' : 'default', opacity: dirty ? 1 : 0.5,
-            background: 'var(--color-primary)', color: 'var(--color-on-accent)' }}>
-          <Save size={13} /> {t('popout.saveAndClose')}
-        </button>
-        </div>
-      </div>
+      <PopoutSaveFooter dirty={dirty} onSave={onSave} />
     </div>
   )
 }

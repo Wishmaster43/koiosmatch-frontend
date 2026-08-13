@@ -78,9 +78,13 @@ import { useNotesPopout } from '@/hooks/useNotesPopout'
 import type { NotesPopoutTarget } from '@/hooks/useNotesPopout'
 import { useDateFormat } from '@/lib/datetime'
 import { initialsOf } from '@/lib/initials'
-import { SYSTEM_NOTE_TYPES } from '@/lib/useNoteTypes'
+import { notifyError } from '@/lib/notify'
+import { openNoteEditPopout } from '@/lib/secondScreen'
 import NoteComposer from './notes/NoteComposer'
 import { NoteTypeChip, NoteChannelChip } from './notes/NoteChips'
+// Rights + system-note rule — the SAME module the per-note popout window applies
+// (noteRights, §11: one rule, two surfaces — they must never disagree).
+import { canManageNote as canManageNoteRule, isSystemNote } from './notes/noteRights'
 
 // Strip tags for search matching only (display still goes through SafeHtml) —
 // a raw substring match against the stored HTML would miss/false-match on markup.
@@ -242,7 +246,7 @@ export default function NotesTab({
   // the hook (§3). Only a DRAFT handoff closes the composer here: an edit handoff
   // left the note in the list untouched, so closing on its ack would throw away
   // whatever else the recruiter happened to have open.
-  const { isWindow: isPopoutWindow, handOff, handOffNote, canHandOffNote, pending: handoffPending, incoming, incomingNoteId, ack, clearIncoming } =
+  const { isWindow: isPopoutWindow, handOff, canHandOffNote, pending: handoffPending, incoming, incomingNoteId, ack, clearIncoming } =
     useNotesPopout({ target: popout, onHandedOver: kind => { if (kind === 'draft') { setAdding(false); setEditingIdx(null) } } })
   // A handed-over draft is only taken over while THIS composer is free: overwriting
   // a note being written here would just move the text loss elsewhere. Not taken
@@ -300,19 +304,20 @@ export default function NotesTab({
   const noteEditor = (n: NoteItem) =>
     (typeof n.updated_by === 'object' ? n.updated_by?.name : n.updated_by) ?? n.edited_by ?? ''
   const noteEdited = (n: NoteItem) => Boolean(noteEditor(n) && n.updated_at && n.updated_at !== n.created_at)
-  // Ownership gate (RECHTEN-DETAIL-1) — see the RIGHTS doc comment at the top of
-  // this file for the undefined-vs-null distinction that keeps non-migrated hosts
-  // unrestricted while candidates get the real BE-mirrored rule.
-  const canManageNote = (n: NoteItem) => {
-    if (n.author_id === undefined) return true
-    const isOwn = n.author_id !== null && currentUserId != null && String(n.author_id) === String(currentUserId)
-    return isOwn || hasPermission(managePermission)
-  }
+  // Ownership gate (RECHTEN-DETAIL-1) — the shared noteRights rule, bound to this
+  // host's user/permission (see noteRights for the undefined-vs-null distinction).
+  const canManageNote = (n: NoteItem) => canManageNoteRule(n, currentUserId, hasPermission, managePermission)
   // Per-note second-screen affordance (NOTITIE-POPOUT-EDIT-1): only where the
   // receiving window can actually PATCH the note (canHandOffNote) AND this surface
   // edits notes at all — the icon sits in the pencil's group and must never promise
   // more than the pencil does.
   const canPopOutNote = canHandOffNote && Boolean(onEditNote)
+  // NOTITIE-POPOUT-URL-1 (live 13-08 "zoals de profieltekst"): the row icon opens
+  // the note's OWN window by URL — no channel handoff, no race, no pending state.
+  const openNoteWindow = (noteId: string) => {
+    if (!popout) return
+    if (!openNoteEditPopout(popout.entity, popout.id, noteId)) notifyError(t('popupBlocked'))
+  }
   // Search narrows on body text (HTML stripped) + author name. The original index
   // is kept alongside each note (not just filtered away) because openEdit/
   // onEditNote key off a note's position in the FULL `notes` array, not the
@@ -325,7 +330,7 @@ export default function NotesTab({
     .filter(({ n }) => !channelFilter || String(n.channel ?? '') === channelFilter)
   // System notes (backend-written status/phase changes) render as a calm event row —
   // no avatar, no edit pencil, just the "Statuswissel" chip + who/when (N-1-FE).
-  const isSystemNote = (n: NoteItem) => Boolean(n.is_system) || SYSTEM_NOTE_TYPES.has(String(n.type ?? ''))
+  // (isSystemNote now imports from noteRights — same rule as the popout window.)
 
   // NOTE-FILTERS-1 (Danny 08-08): type + contact-channel rows for the shared
   // DrawerFilterMenu — each only exists once the host actually offers that
@@ -498,19 +503,18 @@ export default function NotesTab({
                         <Trash2 size={13} />
                       </button>
                     )}
-                    {/* NOTITIE-POPOUT-EDIT-1: third icon of the same group — same
-                        borderless, muted, 6px-left footprint as the pencil and the
-                        bin, so they read as one set. Opens the second screen with
-                        THIS note in its editor; only the id travels, the window
-                        patches its own record (never a copy → never a duplicate).
-                        Same edit rights as the pencil, only where the receiving
-                        window can really save an edit, and never inside that window. */}
+                    {/* NOTITIE-POPOUT-EDIT-1 → URL-1: third icon of the same group —
+                        same borderless, muted, 6px-left footprint as the pencil and
+                        the bin. Opens THIS note's own second-screen window by URL
+                        (the profile-text treatment): the id is in the address, so
+                        there is no handoff to race and re-opening re-focuses the
+                        same OS window. Same edit rights as the pencil, only where
+                        that window can really save, never inside that window. */}
                     {canPopOutNote && canManageNote(n) && noteIdOf(n) && (
-                      <button type="button" onClick={() => handOffNote(noteIdOf(n) as string)}
-                        disabled={handoffPending} aria-busy={handoffPending}
+                      <button type="button" onClick={() => openNoteWindow(noteIdOf(n) as string)}
                         title={t('openSecondScreen')} aria-label={t('openSecondScreen')}
-                        style={{ background: 'none', border: 'none', cursor: handoffPending ? 'default' : 'pointer',
-                          color: 'var(--text-muted)', padding: '0 0 0 6px', display: 'flex', opacity: handoffPending ? 0.5 : 1 }}>
+                        style={{ background: 'none', border: 'none', cursor: 'pointer',
+                          color: 'var(--text-muted)', padding: '0 0 0 6px', display: 'flex' }}>
                         <ExternalLink size={13} />
                       </button>
                     )}

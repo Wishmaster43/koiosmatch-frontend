@@ -51,15 +51,12 @@
  * (hooks/useNotesPopout) instead of opening an empty sheet. This composer closes
  * only once that window confirms it holds the draft — never on the click itself.
  */
-import { useEffect, useState } from 'react'
 import type { CSSProperties, ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { ExternalLink, Save, X } from 'lucide-react'
 import FloatingPanel from '@/components/ui/FloatingPanel'
-import RichTextEditor from '@/components/ui/RichTextEditor'
-import RichTextAssistBar from '@/components/ui/RichTextAssistBar'
-import NoteAssistSection from './NoteAssistSection'
-import { CHANNEL_ICON } from './channelIcons'
+import NoteFields from './NoteFields'
+import { useNoteFields } from './useNoteFields'
 import type { NoteDraft } from '@/hooks/useNotesPopout'
 import type { NoteItem, NoteType, NotePayload, NotesLabels } from '../NotesTab'
 
@@ -103,28 +100,15 @@ export default function NoteComposer({ open, initialNote, noteTypes, channels, l
   const noteId = initialNote && typeof initialNote.id === 'string' ? initialNote.id : undefined
   // One seed for all fields: a draft handed over from another window wins, else
   // the note being edited. Both fill the SAME fields — only `isNew` differs.
+  // The five fields themselves live in the shared useNoteFields/NoteFields pair
+  // (NOTITIE-POPOUT-URL-1: the per-note window shows the same form — one
+  // implementation, no second form to drift, §11).
   const seed = initialDraft
     ? { type: initialDraft.type, channel: initialDraft.channel, title: initialDraft.title, body: initialDraft.body, language: initialDraft.language }
     : { type: initialNote?.type ?? '', channel: initialNote?.channel ?? '', title: initialNote?.title ?? '', body: initialNote?.text ?? initialNote?.body ?? '', language: initialNote?.language }
-  const [type, setType] = useState(seed.type || noteTypes[0]?.value || '')
-  const [channel, setChannel] = useState(seed.channel)
-  const [title, setTitle] = useState(seed.title)
-  const [body, setBody] = useState(seed.body)
-  // NOTE-TAAL-1: prefilled from the note being edited; undefined for a new note
-  // (RichTextEditor then falls back to the app's own locale — its normal default).
-  const [language, setLanguage] = useState<string | undefined>(seed.language)
+  const fields = useNoteFields(seed, noteTypes)
 
-  // Resync when the host swaps the writable type list mid-compose (the customer
-  // tab's link-level picker switches scope INSIDE the composer) — a stale type
-  // from the previous scope would 422 on save. Unchanged from the old inline
-  // composer's own effect, just relocated.
-  useEffect(() => {
-    if (noteTypes.length === 0 || noteTypes.some(nt => nt.value === type)) return
-    setType(noteTypes[0].value)
-  }, [noteTypes, type])
-
-  const typeLabel = noteTypes.find(n => n.value === type)?.label ?? ''
-  const save = () => onSave({ type, title, body, channel: channel || undefined, language: language || undefined })
+  const save = () => onSave(fields.payload)
   // Only a NEW note is handed over from HERE: a draft carries no note id, so a
   // window receiving one saves it as a new note. An existing note has its own,
   // id-based route to the second screen since NOTITIE-POPOUT-EDIT-1 — the pop-out
@@ -132,7 +116,7 @@ export default function NoteComposer({ open, initialNote, noteTypes, channels, l
   // none while editing, rather than a button that would duplicate the note.
   const canHandOff = Boolean(onPopOutDraft) && isNew
   // Hand the WHOLE composed note over; the host waits for the window's ack.
-  const popOut = () => onPopOutDraft?.({ type, channel, title, body, language })
+  const popOut = () => onPopOutDraft?.({ type: fields.type, channel: fields.channel, title: fields.title, body: fields.body, language: fields.language })
   // FloatingPanel wants a plain string; every host's newNote/edit label is one
   // in practice (ReactNode on the type only because DrawerAddButton's `label`
   // slot accepts richer content elsewhere) — coerce defensively, never throw.
@@ -153,83 +137,18 @@ export default function NoteComposer({ open, initialNote, noteTypes, channels, l
         {/* Host-supplied composer row (e.g. the customer tab's link-level picker) —
             sits ABOVE the type row because the picked scope drives the type list. */}
         {isNew && composerExtra}
-        <div>
-          <div style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 6 }}>{labels.type}</div>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
-            {/* §4 soft-tint: active is tinted (never a solid fill), inactive uses the surface token. */}
-            {noteTypes.map(nt => (
-              <button key={nt.value} onClick={() => setType(nt.value)}
-                style={{ padding: '4px 10px', fontSize: 11, borderRadius: 99, cursor: 'pointer',
-                  border: `1px solid ${type === nt.value ? 'color-mix(in srgb, var(--color-primary) 45%, transparent)' : 'var(--border)'}`,
-                  background: type === nt.value ? 'color-mix(in srgb, var(--color-primary) 14%, transparent)' : 'var(--surface)',
-                  // Text-colour accent uses the AA-contrast text token, not the raw brand primary.
-                  color: type === nt.value ? 'var(--color-primary-text)' : 'var(--text)', fontWeight: type === nt.value ? 600 : 400 }}>
-                {nt.label}
-              </button>
-            ))}
-          </div>
-        </div>
-        {/* Contact channel — optional; picking one marks this note a contact moment.
-            No "internal" button: no channel selected = internal note (that's the note TYPE). */}
-        {channels.length > 0 && (
-          <div>
-            <div style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 6 }}>{labels.channel}</div>
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
-              {/* PICKER contrast: only the SELECTED chip wears its channel colour; the rest
-                  sit neutral on --surface/--border — the exact treatment the Type row above
-                  uses. Every chip tinted in its own colour made 16%-blue vs 8%-green an
-                  impossible comparison, so the selection was invisible. The icon stays on
-                  every chip (colour is never the only signal) and aria-pressed exposes the
-                  selection to screen readers (§6). The note LIST chip keeps its own colour —
-                  there the colour answers "which channel was this". */}
-              {channels.map(ch => {
-                const active = channel === ch.value
-                const col = ch.color ?? 'var(--color-primary)'
-                const Icon = CHANNEL_ICON[ch.value]
-                return (
-                  <button key={ch.value} type="button" aria-pressed={active} onClick={() => setChannel(active ? '' : ch.value)}
-                    style={{ display: 'inline-flex', alignItems: 'center', gap: 5, padding: '4px 10px', fontSize: 11,
-                      fontWeight: active ? 600 : 500, borderRadius: 99, cursor: 'pointer',
-                      color: active ? col : 'var(--text-muted)',
-                      background: active ? `color-mix(in srgb, ${col} 16%, transparent)` : 'var(--surface)',
-                      border: active ? `1px solid color-mix(in srgb, ${col} 50%, transparent)` : '1px solid var(--border)' }}>
-                    {Icon && <Icon size={12} />} {ch.label}
-                  </button>
-                )
-              })}
-            </div>
-          </div>
-        )}
-        {/* Title row OF THE NOTE BLOCK — the pop-out icon lives here now, directly
-            above the editor and part of the content, exactly like the profile
-            text's own title row (Danny 09/10-08). Hidden while editing an existing
-            note: see canHandOff. */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0 }}>
-          <input value={title} onChange={e => setTitle(e.target.value)} placeholder={labels.notePlaceholder?.(typeLabel)}
-            style={{ flex: 1, minWidth: 0, padding: '8px 12px', fontSize: 13, fontWeight: 500, borderRadius: 8, border: '1px solid var(--border)', background: 'var(--surface)', color: 'var(--text)', boxSizing: 'border-box', outline: 'none' }} />
-          {canHandOff && (
+        {/* The five shared fields (type · channel · title · editor · assist) — the
+            SAME NoteFields the per-note popout window renders. The pop-out icon
+            rides the title row via titleExtra, NEW notes only (see canHandOff). */}
+        <NoteFields fields={fields} noteTypes={noteTypes} channels={channels} labels={labels}
+          editorLabels={editorLabels} noteId={noteId} editorMinHeight={160}
+          titleExtra={canHandOff ? (
             <button type="button" onClick={popOut} disabled={popOutPending} aria-busy={popOutPending}
               title={t('openSecondScreen')} aria-label={t('openSecondScreen')}
               style={{ ...popOutBtn, opacity: popOutPending ? 0.5 : 1, cursor: popOutPending ? 'default' : 'pointer' }}>
               <ExternalLink size={13} />
             </button>
-          )}
-        </div>
-        {/* TAAL-SPELL-1: language/onLanguageChange controlled here so the pick rides
-            into the save payload. NOTITIE-VOICE-1 (Danny 08-08 "mic naast de taal,
-            tenant kleur"): the dictation mic rides the editor's own toolbar slot,
-            directly next to the language picker — one `language` state drives both
-            the spellcheck AND the recognition locale. No expand button (Danny
-            08-08): the FloatingPanel itself resizes, the toggle did nothing useful.
-            `fill` + a real minHeight floor: the editor is the flexible item that
-            absorbs a bigger/smaller panel (see the RESIZE-GROWS-EDITOR docblock). */}
-        <RichTextEditor value={body} onChange={setBody}
-          assist={false}
-          toolbarExtra={<RichTextAssistBar value={body} onChange={setBody} language={language} modes={[]} />}
-          labels={editorLabels} language={language} onLanguageChange={setLanguage} fill minHeight={160} />
-
-        {/* NOTE-ASSIST-1: Koios AI assist — always visible under the editor. */}
-        <NoteAssistSection body={body} onApply={setBody} language={language} noteId={noteId} />
+          ) : undefined} />
       </div>
 
       {/* Pinned footer — OUTSIDE the scroll area (mirrors AddTaskModal's
