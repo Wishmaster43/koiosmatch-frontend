@@ -5,10 +5,13 @@
  * renders nothing — only `warn`/`block` carry a banner. Colour is never the only
  * signal (§6): an icon + a fixed i18n title always accompany the tint, and the
  * server's own `message` (tenant-configurable, §3A action-rules matrix) is shown
- * verbatim — never re-translated or paraphrased client-side.
+ * verbatim — never re-translated or paraphrased client-side. ONE presentation
+ * exception (DATUM-1, Danny 13-08): embedded ISO dates ("tot 2027-08-08") are
+ * rewritten to the house DD-MM-YYYY before display — notation, not wording.
  */
 import { AlertTriangle, Ban } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
+import { humanizeIsoDates } from '@/lib/localDate'
 import type { ActionRuleDecision } from './actionRuleTypes'
 
 export default function ActionRuleBanner({ decision }: { decision: ActionRuleDecision | null | undefined }) {
@@ -30,7 +33,7 @@ export default function ActionRuleBanner({ decision }: { decision: ActionRuleDec
       <div style={{ minWidth: 0 }}>
         <div style={{ fontSize: 11, fontWeight: 600, color }}>{t(titleKey)}</div>
         {decision.message && (
-          <div style={{ fontSize: 12, color: 'var(--text)', marginTop: 2 }}>{decision.message}</div>
+          <div style={{ fontSize: 12, color: 'var(--text)', marginTop: 2 }}>{humanizeIsoDates(decision.message)}</div>
         )}
       </div>
     </div>

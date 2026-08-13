@@ -9,7 +9,7 @@ import { useTranslation } from 'react-i18next'
 import { LOCALE_BY_LANG } from '../i18n'
 // Re-exported so existing importers keep working; it lives in localDate because
 // it needs no locale and this module's i18n import has an initialising side effect.
-export { toLocalIsoDate } from './localDate'
+export { toLocalIsoDate, humanizeIsoDates } from './localDate'
 
 type DateInput = string | number | Date | null | undefined
 

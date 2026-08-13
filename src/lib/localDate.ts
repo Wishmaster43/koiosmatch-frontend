@@ -27,3 +27,17 @@ export function toLocalIsoDate(d: Date): string {
   const day = String(d.getDate()).padStart(2, '0')
   return `${year}-${month}-${day}`
 }
+
+// DATUM-1 (Danny 13-08: a user must NEVER see a raw ISO date): rewrites every
+// embedded ISO date/timestamp inside a server-composed sentence to the house
+// DD-MM-YYYY (+ HH:mm) format — e.g. the AXIS preflight "tot 2027-08-08".
+// Text-level on purpose: these strings are tenant-configurable prose we render
+// verbatim, so we cannot format a field — only repair the date notation inside.
+const ISO_TIMESTAMP_RE = /\b(\d{4})-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])[T ](\d{2}):(\d{2})(?::\d{2}(?:\.\d+)?)?(?:Z|[+-]\d{2}:?\d{2})?\b/g
+const ISO_DATE_RE = /\b(\d{4})-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])\b/g
+export function humanizeIsoDates(text: string | null | undefined): string {
+  if (!text) return ''
+  return text
+    .replace(ISO_TIMESTAMP_RE, (_, y, m, d, hh, mm) => `${d}-${m}-${y} ${hh}:${mm}`)
+    .replace(ISO_DATE_RE, (_, y, m, d) => `${d}-${m}-${y}`)
+}

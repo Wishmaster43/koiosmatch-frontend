@@ -38,4 +38,13 @@ describe('ActionRuleBanner', () => {
     render(<ActionRuleBanner decision={{ effect: 'warn' }} />)
     expect(screen.getByTestId('action-rule-banner')).toBeInTheDocument()
   })
+
+  // DATUM-1 (Danny 13-08): an ISO date inside the server's prose reaches the
+  // user as DD-MM-YYYY — the wording stays verbatim, only the notation is fixed.
+  it('rewrites embedded ISO dates in the server message to DD-MM-YYYY', () => {
+    render(<ActionRuleBanner decision={{ effect: 'warn', popup_code: 'P3',
+      message: 'Noud is Geplaatst (match: X, tot 2027-08-08). Toch doorgaan?' }} />)
+    expect(screen.getByText('Noud is Geplaatst (match: X, tot 08-08-2027). Toch doorgaan?')).toBeInTheDocument()
+    expect(screen.queryByText(/2027-08-08/)).toBeNull()
+  })
 })

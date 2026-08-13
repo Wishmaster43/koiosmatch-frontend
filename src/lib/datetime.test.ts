@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import { renderHook } from '@testing-library/react'
-import { useDateFormat, calcAge, daysUntilBirthday, toLocalIsoDate } from './datetime'
+import { useDateFormat, calcAge, daysUntilBirthday, toLocalIsoDate, humanizeIsoDates } from './datetime'
 
 // Note: i18n is not initialised in tests → locale falls back to nl-NL (§3B).
 describe('useDateFormat', () => {
@@ -104,5 +104,21 @@ describe('daysUntilBirthday', () => {
   it('returns null for missing/unparseable values', () => {
     expect(daysUntilBirthday(undefined, now)).toBeNull()
     expect(daysUntilBirthday('nope', now)).toBeNull()
+  })
+})
+
+// DATUM-1 — a raw ISO date inside server-composed prose must reach the user as DD-MM-YYYY.
+describe('humanizeIsoDates', () => {
+  it('rewrites a bare ISO date inside a sentence', () => {
+    expect(humanizeIsoDates('Geplaatst (match: X, tot 2027-08-08). Toch doorgaan?'))
+      .toBe('Geplaatst (match: X, tot 08-08-2027). Toch doorgaan?')
+  })
+  it('rewrites an ISO timestamp to DD-MM-YYYY HH:mm', () => {
+    expect(humanizeIsoDates('Afspraak op 2026-08-13T17:45:00Z.')).toBe('Afspraak op 13-08-2026 17:45.')
+    expect(humanizeIsoDates('Vanaf 2026-01-05 09:00 beschikbaar.')).toBe('Vanaf 05-01-2026 09:00 beschikbaar.')
+  })
+  it('leaves non-date digits and already-Dutch dates alone', () => {
+    expect(humanizeIsoDates('Sinds 31-05-2026 actief, dossier 2026-13-99.')).toBe('Sinds 31-05-2026 actief, dossier 2026-13-99.')
+    expect(humanizeIsoDates(null)).toBe('')
   })
 })
