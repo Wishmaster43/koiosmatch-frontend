@@ -66,6 +66,9 @@ export default function MatchTextBlock({ value, present, loading, save }: Props)
   const { t } = useTranslation('matches')
 
   const [editing, setEditing] = useState(false)
+  // P34-expand: local expand state, same idiom as OpportunityDescriptionBlock —
+  // grows the editor's min-height 120→320 via RichTextEditor's own expanded prop.
+  const [expanded, setExpanded] = useState(false)
   const [draft, setDraft] = useState('')
   // Seed the draft once the fetch resolves (not on every render) — mirrors
   // MatchRemarksBlock's uncontrolled-then-synced pattern for a detail-only field.
@@ -116,7 +119,7 @@ export default function MatchTextBlock({ value, present, loading, save }: Props)
       {loading ? (
         <div style={{ ...blockStyle, padding: '10px 12px', fontSize: 12, color: 'var(--text-muted)' }}>{t('drawer.contract.loading')}</div>
       ) : editing ? (
-        <RichTextEditor value={draft} onChange={setDraft} />
+        <RichTextEditor value={draft} onChange={setDraft} expanded={expanded} onToggleExpand={() => setExpanded(v => !v)} />
       ) : value ? (
         <div style={{ ...blockStyle, padding: '10px 12px', maxHeight: 220, overflow: 'auto' }}>
           <SafeHtml html={value} style={{ fontSize: 12, color: 'var(--text)', lineHeight: 1.5 }} />

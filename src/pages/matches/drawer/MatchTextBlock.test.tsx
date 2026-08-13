@@ -96,4 +96,15 @@ describe('MatchTextBlock', () => {
 
     expect(save).toHaveBeenCalledWith({ match_text: null })
   })
+
+  it('P34-expand: the expand toggle grows the editor and flips to a collapse control', async () => {
+    const user = userEvent.setup()
+    render(<MatchTextBlock value="<p>Oud</p>" present loading={false} save={vi.fn()} />)
+
+    await user.click(screen.getByTitle('common:edit'))
+    const expandBtn = screen.getByTitle('editor.expand')
+    await user.click(expandBtn)
+
+    expect(screen.getByTitle('editor.collapse')).toBeInTheDocument()
+  })
 })

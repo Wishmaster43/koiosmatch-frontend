@@ -28,6 +28,24 @@ const sharesFooterRow = (labelText: string) => {
   return label.parentElement === save.parentElement?.parentElement
 }
 
+// EXPAND-1 (P16, batch 4): richtext fields carry the same Maximize2 expand
+// toggle as the profile text (ProfileTab), driven by RichTextEditor's own
+// expanded/onToggleExpand API.
+const referenceFields = [
+  { key: 'name', label: 'Naam' },
+  { key: 'notes', label: 'Notities', richtext: true },
+]
+
+describe('AddForm richtext expand toggle', () => {
+  it('renders the expand toggle on a richtext field and flips its title on click', () => {
+    render(<AddForm fields={referenceFields} onSave={vi.fn()} onCancel={vi.fn()} />)
+    const toggle = screen.getByTitle('Vergroten')
+    expect(toggle).toBeTruthy()
+    fireEvent.click(toggle)
+    expect(screen.getByTitle('Verkleinen')).toBeTruthy()
+  })
+})
+
 describe('AddForm footer checkbox', () => {
   it('puts a trailing checkbox (experience "current") on the save/cancel line', () => {
     render(<AddForm fields={expFields} onSave={vi.fn()} onCancel={vi.fn()} />)

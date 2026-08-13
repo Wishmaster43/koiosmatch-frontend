@@ -48,6 +48,17 @@ export interface FieldDef {
 
 export type FormValues = Record<string, unknown>
 
+// Small stateful wrapper so a richtext AddForm field carries its own expand
+// state (mirrors ProfileTab's summaryExpanded) without lifting it into the
+// whole form's FormValues.
+function RichTextFieldBlock({ value, onChange }: { value: string | undefined; onChange: (v: string) => void }) {
+  const [expanded, setExpanded] = useState(false)
+  return (
+    <RichTextEditor value={value} onChange={onChange} minHeight={110} resizable
+      expanded={expanded} onToggleExpand={() => setExpanded(v => !v)} />
+  )
+}
+
 function FieldInput({ f, value, onChange, values, disabled }: {
   f: FieldDef; value: unknown; onChange: (v: string | boolean) => void; values: FormValues; disabled?: boolean
 }) {
@@ -68,6 +79,10 @@ function FieldInput({ f, value, onChange, values, disabled }: {
   // Compact rich-text block: a small caption label above (RichTextEditor has no
   // placeholder slot) + the shared editor at minHeight 48 (the row it belongs to
   // is a couple of lines, not a full page — Danny punt 48, "rode blok te groot").
+  // EXPAND-1 (P16, batch 4): every richtext AddForm field gets the same expand
+  // toggle as the profile text (ProfileTab.tsx) — a small local-state wrapper
+  // owns `expanded` and hands it to RichTextEditor's own expanded/onToggleExpand
+  // API; `resizable` stays so the drag handle still works inside the small row form.
   if (f.richtext) return wrap(
     <div>
       {labelText && (
@@ -79,7 +94,7 @@ function FieldInput({ f, value, onChange, values, disabled }: {
           shared editor already ships a drag-to-grow handle (MEMORY-RESIZE-1); this
           form never opted in, so a longer note had no room. minHeight raised from
           48 to 110 so a note starts readable and can be dragged taller from there. */}
-      <RichTextEditor value={value as string | undefined} onChange={onChange} minHeight={110} resizable />
+      <RichTextFieldBlock value={value as string | undefined} onChange={onChange} />
     </div>
   )
   if (f.textarea) return wrap(<TextArea placeholder={labelText} value={value as string | undefined} onChange={onChange} rows={2} />)
