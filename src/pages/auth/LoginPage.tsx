@@ -18,6 +18,15 @@ import ErrorBanner from '@/components/ui/ErrorBanner'
 // Read a server-provided error message off an axios-style error, if present.
 const messageOf = (e: unknown) => (e as { response?: { data?: { message?: string } } })?.response?.data?.message
 
+// Read the login throttle's machine field off a 429 (LOGIN-THROTTLE-1, Danny 13-08):
+// the backend sends retry_after (integer seconds) beside its message; we count that
+// down live instead of parroting the raw — static, Dutch-only — server string (§10).
+const retryAfterOf = (e: unknown): number | null => {
+  const res = (e as { response?: { status?: number; data?: { retry_after?: unknown } } })?.response
+  const secs = res?.status === 429 ? Number(res.data?.retry_after) : NaN
+  return Number.isFinite(secs) && secs > 0 ? Math.ceil(secs) : null
+}
+
 // Typographic wordmark — a crisp placeholder until the final logo asset is delivered
 // (then swap <Wordmark/> for an <img>). Reads well on any background via tokens.
 function Wordmark({ className }: { className?: string }) {
@@ -88,13 +97,25 @@ function CredentialForm({ onMfaRequired }: { onMfaRequired: (token: string) => v
   const [showPw,   setShowPw]  = useState(false)
   const [loading,  setLoading] = useState(false)
   const [error,    setError]   = useState('')
+  // Seconds until the login throttle lifts (null = not throttled). Counted down live.
+  const [retryAfter, setRetryAfter] = useState<number | null>(null)
   // Set by api.js when a 401 ended the previous session — show a hint, then clear.
   const [expired] = useState(() => sessionStorage.getItem('km_session_expired') === '1')
   useEffect(() => { if (expired) sessionStorage.removeItem('km_session_expired') }, [expired])
 
+  // Tick the throttle countdown once per second; at 0 the notice clears and the
+  // submit button re-enables — the promise in the text stays true.
+  useEffect(() => {
+    if (retryAfter === null) return
+    if (retryAfter <= 0) { setRetryAfter(null); return }
+    const timer = setTimeout(() => setRetryAfter(s => (s === null ? null : s - 1)), 1000)
+    return () => clearTimeout(timer)
+  }, [retryAfter])
+
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault()
     setError('')
+    setRetryAfter(null)
     setLoading(true)
     try {
       const result = await login?.(email, password)
@@ -104,11 +125,17 @@ function CredentialForm({ onMfaRequired }: { onMfaRequired: (token: string) => v
         navigate('/')
       }
     } catch (err) {
-      setError(messageOf(err) || t('login.failed'))
+      // A throttled 429 gets the live countdown; every other failure keeps the
+      // existing message path.
+      const secs = retryAfterOf(err)
+      if (secs !== null) setRetryAfter(secs)
+      else setError(messageOf(err) || t('login.failed'))
     } finally {
       setLoading(false)
     }
   }
+
+  const throttled = retryAfter !== null && retryAfter > 0
 
   return (
     <>
@@ -154,11 +181,18 @@ function CredentialForm({ onMfaRequired }: { onMfaRequired: (token: string) => v
 
         {error && <ErrorBanner>{error}</ErrorBanner>}
 
-        <button type="submit" disabled={loading}
+        {/* Throttle notice — calm (expected state, not an error), with a LIVE countdown. */}
+        {throttled && (
+          <div role="status" className="rounded-lg px-3 py-2.5 text-sm text-amber-700 bg-amber-50 border border-amber-200">
+            {t('login.throttled', { seconds: retryAfter })}
+          </div>
+        )}
+
+        <button type="submit" disabled={loading || throttled}
           className="flex items-center justify-center w-full gap-2 text-sm font-medium transition-opacity rounded-lg"
-          style={{ padding: '11px', background: loading ? 'var(--text-muted)' : 'var(--color-primary)',
-                   color: loading ? '#fff' : 'var(--color-on-accent)',
-                   border: 'none', cursor: loading ? 'not-allowed' : 'pointer' }}>
+          style={{ padding: '11px', background: loading || throttled ? 'var(--text-muted)' : 'var(--color-primary)',
+                   color: loading || throttled ? '#fff' : 'var(--color-on-accent)',
+                   border: 'none', cursor: loading || throttled ? 'not-allowed' : 'pointer' }}>
           {loading && <Loader2 size={15} className="animate-spin" />}
           {loading ? t('login.busy') : t('login.signIn')}
         </button>
