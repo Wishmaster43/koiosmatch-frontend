@@ -77,3 +77,18 @@ describe('DetailsGeneralTab · function/industry pickers (G35)', () => {
     expect(screen.queryByRole('button', { name: 'Helpende' })).not.toBeInTheDocument()
   })
 })
+
+// CLEAR-SWEEP (Danny 13-08): function/industry are `sometimes|nullable` server-side
+// (StoreVacancyRequest) — a picked value must be releasable, not stuck forever.
+describe('DetailsGeneralTab · function/industry clear (CLEAR-SWEEP)', () => {
+  it('clears a picked function back to the placeholder and writes the empty value', async () => {
+    const user = userEvent.setup()
+    const general = makeGeneral({ editing: true })
+    render(<DetailsGeneralTab vacancy={vacancy} general={general}
+      candidateTypes={[]} typeMeta={() => ({ label: '', color: '#000' })}
+      industries={industries} fnOptions={fnOptions} formatDate={d => d} />)
+    const clear = screen.getAllByTitle(/clearField/i)[0]
+    await user.click(clear)
+    expect(general.setF).toHaveBeenCalledWith('category', '')
+  })
+})

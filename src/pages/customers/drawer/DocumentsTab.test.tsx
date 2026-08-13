@@ -63,11 +63,12 @@ const getFileInput = (container: HTMLElement) => container.querySelector('input[
 // `getAllByRole` + index picks the wanted row; opening it scopes the option query to
 // its OWN wrapper div, so it never collides with the always-visible "apply to all" chips.
 const getTypeTriggers = () => screen.getAllByRole('button', { name: /documents\.docTypeFor/ })
+// PORTAL-MARKER-1: the open menu is PORTALLED into document.body now — scope the
+// option query to the one open portal menu (only one exists at a time).
+const openPortalMenu = () => document.querySelector('[data-dropdown-portal]') as HTMLElement
 const pickRowType = async (user: ReturnType<typeof userEvent.setup>, rowIndex: number, label: string) => {
-  const trigger = getTypeTriggers()[rowIndex]
-  await user.click(trigger)
-  const menu = trigger.closest('div') as HTMLElement
-  await user.click(await within(menu).findByRole('button', { name: label }))
+  await user.click(getTypeTriggers()[rowIndex])
+  await user.click(await within(openPortalMenu()).findByRole('button', { name: label }))
 }
 
 describe('DocumentsTab · multi-file upload queue', () => {

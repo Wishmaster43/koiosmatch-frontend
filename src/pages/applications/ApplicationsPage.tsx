@@ -202,11 +202,14 @@ export default function ApplicationsPage({ intent }: { intent?: unknown } = {}) 
   // `candidate_ids` — seeded into the (transient, not sticky) selectedCandidateIds
   // scope, see useApplicationFilters' header comment for the honest-gate reasoning.
   useEffect(() => {
-    const i = intent as { stage?: string; vacancy?: string; candidate_ids?: Id[] } | undefined
+    const i = intent as { stage?: string; vacancy?: string; candidate_ids?: Id[]; attention?: string } | undefined
     if (i?.stage) setSelectedPhase([i.stage])
     // A vacancy statistics-bar click carries the vacancy too — scope the list to it.
     if (i?.vacancy) setSelectedVac([String(i.vacancy)])
     if (i?.candidate_ids?.length) setSelectedCandidateIds(i.candidate_ids)
+    // D6 dashboard tiles ("too long in stage" / "missing appointment") arrive as a
+    // semantic attention intent — activate the matching server-wide filter.
+    if (i?.attention) setAttention(i.attention)
   }, [intent])
 
   // A freshly created application: prepend to the list, bump the server-total

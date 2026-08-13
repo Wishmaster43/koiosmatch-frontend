@@ -48,8 +48,12 @@ export default function OpportunityGeneralCard({
         <div style={row2}>
           <Field label={t('modal.fields.client')}>
             {/* Searchable, pick-only (allowCreate=false) — a customer is a real
-                relational id, never a free-text create. */}
+                relational id, never a free-text create.
+                CLEAR-SWEEP (Danny 13-08): every field here rides `|| null` in the
+                submit body (AddOpportunityModal.handleSubmit) — genuinely optional,
+                so clearable. */}
             <CreatableSelect allowCreate={false} value={clientId || null} onChange={onClientChange}
+              clearable clearLabel={t('modal.fields.client')}
               placeholder={t('common:select')} options={customerOptions} />
           </Field>
           <Field label={t('modal.fields.contact')}>
@@ -58,28 +62,33 @@ export default function OpportunityGeneralCard({
                 function title, mirroring RelationsSection's contact picker
                 (resolved in the parent's contactOptions). */}
             <CreatableSelect value={contactId || null} onChange={onContactChange} allowCreate={false}
+              clearable clearLabel={t('modal.fields.contact')}
               placeholder={cascadePlaceholder} options={contactOptions} />
           </Field>
         </div>
         <div style={row2}>
           <Field label={t('modal.fields.location')}>
             <CreatableSelect value={locationId || null} onChange={onLocationChange} allowCreate={false}
+              clearable clearLabel={t('modal.fields.location')}
               placeholder={cascadePlaceholder} options={locationOptions} />
           </Field>
           <Field label={t('modal.fields.department')}>
             <CreatableSelect value={departmentId || null} onChange={onDepartmentChange} allowCreate={false}
+              clearable clearLabel={t('modal.fields.department')}
               placeholder={cascadePlaceholder} options={departmentOptions} />
           </Field>
         </div>
         <div style={row2}>
           <Field label={t('modal.fields.owner')}>
             <CreatableSelect value={ownerId || null} onChange={onOwnerChange} allowCreate={false}
+              clearable clearLabel={t('modal.fields.owner')}
               placeholder={t('common:select')} options={ownerOptions} />
           </Field>
           {/* K2: Vestiging — the bureau's own branch handling this deal
               (`location_id`, distinct from the customer's site above). */}
           <Field label={t('modal.fields.branch')}>
             <CreatableSelect value={branchId || null} onChange={onBranchChange} allowCreate={false}
+              clearable clearLabel={t('modal.fields.branch')}
               placeholder={t('common:select')} options={branchOptions} />
           </Field>
         </div>

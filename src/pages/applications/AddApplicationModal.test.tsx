@@ -143,14 +143,33 @@ describe('AddApplicationModal', () => {
     // CreatableSelect) — the owner one already shows the pre-selected logged-in
     // user's name (APP-OWNER-1 default).
     expect(screen.getByText('Piet Recruiter')).toBeInTheDocument()
-    expect(document.querySelectorAll('button[type="button"]').length).toBe(4)
+    // 4 picker triggers (candidate/vacancy/owner/phase) + 2 VAC-CLEAR-1 clear crosses
+    // (owner + phase — CLEAR-SWEEP 13-08: both start out pre-seeded, so their clear
+    // cross is already visible on first render, unlike candidate/vacancy which start empty).
+    expect(document.querySelectorAll('button[type="button"]').length).toBe(6)
   })
 
   it('shows the vacancy as a locked, non-editable display when opened from a vacancy', () => {
     render(<AddApplicationModal onClose={vi.fn()} onCreated={vi.fn()} lockedVacancy={{ id: 'v1', title: 'Verpleegkundige', client: 'Yesway' }} />)
     expect(screen.getByText('Verpleegkundige · Yesway')).toBeInTheDocument()
-    // Locked vacancy: 3 picker toggle buttons remain (candidate + owner + phase).
-    expect(document.querySelectorAll('button[type="button"]').length).toBe(3)
+    // Locked vacancy: 3 picker triggers (candidate + owner + phase) + 2 clear crosses
+    // (owner + phase, both pre-seeded — see CLEAR-SWEEP note above).
+    expect(document.querySelectorAll('button[type="button"]').length).toBe(5)
+  })
+
+  // CLEAR-SWEEP (Danny 13-08, "eenmaal gekozen blijft hij staan"): owner and start
+  // stage are both optional (owner_id sent as null, application_stage_id omitted when
+  // empty — see AddApplicationModal's `create`) — once auto-seeded, both must be
+  // releasable back to "let the server decide" via the VAC-CLEAR-1 cross.
+  it('clears the auto-seeded owner and default phase back to unset', async () => {
+    const user = userEvent.setup()
+    render(<AddApplicationModal onClose={vi.fn()} onCreated={vi.fn()} />)
+    const clears = await screen.findAllByTitle(/clearField/i)
+    expect(clears).toHaveLength(2)
+    await user.click(clears[0])
+    await user.click((await screen.findAllByTitle(/clearField/i))[0])
+    expect(screen.getByText('add.ownerPlaceholder')).toBeInTheDocument()
+    expect(screen.getByText('add.phasePlaceholder')).toBeInTheDocument()
   })
 })
 

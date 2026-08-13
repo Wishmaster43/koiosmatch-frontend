@@ -209,9 +209,17 @@ export default function AddApplicationModal({ onClose, onCreated, lockedVacancy 
   const stageOptions = useMemo(() => stages.filter(s => isUuid(s.id)), [stages])
   const defaultStageId = stageOptions.find(s => s.is_default)?.id ?? ''
   const [phaseId, setPhaseId] = useState('')
+  // CLEAR-SWEEP (Danny 13-08): a manual pick — INCLUDING an explicit clear back to
+  // '' via the VAC-CLEAR-1 cross — must stick. Without this guard the effect below
+  // treated a cleared '' exactly like "not yet seeded" and instantly reproposed the
+  // default, so the clear cross never actually reached the persisted state.
+  const phaseManualRef = useRef(false)
+  const setPhaseIdManual = (v: string) => { phaseManualRef.current = true; setPhaseId(v) }
   // Propose the tenant's flagged default as soon as the real lookup lands (the seed is
-  // gone by then); re-sync whenever the held value is not a real, submittable option.
+  // gone by then); re-sync whenever the held value is not a real, submittable option —
+  // but never once the recruiter has manually picked or cleared it.
   useEffect(() => {
+    if (phaseManualRef.current) return
     if (phaseId && stageOptions.some(s => s.id === phaseId)) return
     setPhaseId(defaultStageId)
   }, [defaultStageId, stageOptions, phaseId])
@@ -270,8 +278,12 @@ export default function AddApplicationModal({ onClose, onCreated, lockedVacancy 
   }
 
   // Declared once — it renders either on its own row or paired with the phase picker.
+  // CLEAR-SWEEP (Danny 13-08): owner is optional (submitted as `owner_id: ownerId ||
+  // null` above) — once auto-seeded or manually picked, it must be releasable back
+  // to "let the server decide" rather than stuck on whatever was last chosen.
   const ownerField = (
     <PickField label={t('add.owner')} placeholder={t('add.ownerPlaceholder')}
+      clearable clearLabel={t('add.owner')}
       options={ownerOptions} value={ownerId} onChange={setOwnerId}
       style={errors.ownerId ? { borderColor: 'var(--color-danger)' } : undefined} />
   )
@@ -311,9 +323,13 @@ export default function AddApplicationModal({ onClose, onCreated, lockedVacancy 
           {stageOptions.length > 0 ? (
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
               {ownerField}
+              {/* CLEAR-SWEEP (Danny 13-08): start stage is optional too — omitted from
+                  the POST body entirely when empty (see `create` above), so the server's
+                  own default-stage fallback decides. Must be releasable, not sticky. */}
               <PickField label={t('add.phase')} placeholder={t('add.phasePlaceholder')}
+                clearable clearLabel={t('add.phase')}
                 options={stageOptions.map(s => ({ value: s.id, label: s.label }))}
-                value={phaseId} onChange={setPhaseId}
+                value={phaseId} onChange={setPhaseIdManual}
                 style={errors.phase ? { borderColor: 'var(--color-danger)' } : undefined} />
             </div>
           ) : ownerField}

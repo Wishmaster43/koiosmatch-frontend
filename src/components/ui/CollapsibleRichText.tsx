@@ -14,7 +14,7 @@
  * shared by candidates AND customers.
  */
 import { useRef } from 'react'
-import { Pencil, X } from 'lucide-react'
+import { Pencil, X, ExternalLink } from 'lucide-react'
 import type { TFunction } from 'i18next'
 import RichTextEditor from './RichTextEditor'
 import type { RichTextAssistMode } from './richtext/richTextAssistApi'
@@ -49,10 +49,18 @@ export interface CollapsibleRichTextProps {
    * attachments note) pass `['improve', 'summarize', 'actions']` explicitly.
    */
   assistModes?: RichTextAssistMode[]
+  /**
+   * MATCH-REMARKS-POPOUT (batch 5, P34): optional second-screen affordance,
+   * mirroring ProfileTab's own ExternalLink icon (openSummaryPopout). Omitted
+   * by every existing caller (customer/location/department text) so this stays
+   * fully backward compatible — only a caller that wires useTextPopoutHost
+   * passes it.
+   */
+  onPopout?: () => void
 }
 
 export default function CollapsibleRichText({
-  t, value, onChange, expanded, setExpanded, editing, setEditing, placeholder, ariaLabel, assistModes,
+  t, value, onChange, expanded, setExpanded, editing, setEditing, placeholder, ariaLabel, assistModes, onPopout,
 }: CollapsibleRichTextProps) {
   // Snapshot at open, so ✕ can revert unsaved edits (form-local, no server call).
   const openedWithRef = useRef('')
@@ -62,8 +70,18 @@ export default function CollapsibleRichText({
 
   return editing ? (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-      {/* Cancel above the block, house in-place-edit idiom (§3A). */}
-      <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+      {/* Cancel above the block, house in-place-edit idiom (§3A). Pop-out sits
+          left of cancel, same icon+footprint as ProfileTab's own second-screen
+          button — only rendered when the caller wired one. */}
+      <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 4 }}>
+        {onPopout && (
+          <button type="button" onClick={onPopout} title={t('common:openSecondScreen')} aria-label={t('common:openSecondScreen')}
+            style={{ width: 26, height: 26, display: 'flex', alignItems: 'center', justifyContent: 'center',
+              borderRadius: 6, cursor: 'pointer', background: 'var(--bg)', color: 'var(--text-muted)',
+              border: '1px solid var(--border)' }}>
+            <ExternalLink size={13} />
+          </button>
+        )}
         <button type="button" onClick={cancel} title={t('common:cancel')} aria-label={t('common:cancel')}
           style={{ width: 26, height: 26, display: 'flex', alignItems: 'center', justifyContent: 'center',
             borderRadius: 6, cursor: 'pointer', background: 'var(--bg)', color: 'var(--text-muted)',

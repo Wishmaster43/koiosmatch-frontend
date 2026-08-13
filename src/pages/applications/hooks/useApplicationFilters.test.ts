@@ -234,3 +234,35 @@ describe('useApplicationFilters — branch filter (VESTIGING-2)', () => {
     expect(result.current.filterParams.branch_id).toBeUndefined()
   })
 })
+
+// D6: the dashboard's "too long in stage" / "missing appointment" tiles land here
+// via ApplicationsPage's own semantic { attention } intent-seeding effect — this
+// asserts the REQUEST the hook produces from that intent (§13: never just a setter).
+describe('useApplicationFilters — D6 dashboard attention intent', () => {
+  it('sends no attention filter by default', () => {
+    const { result } = renderHook(() => useApplicationFilters())
+    expect(result.current.filterParams.too_long_in_stage).toBeUndefined()
+    expect(result.current.filterParams.missing_appointment).toBeUndefined()
+  })
+
+  it('sends too_long_in_stage=1 for the tooLongInStage intent', () => {
+    const { result } = renderHook(() => useApplicationFilters())
+    act(() => { result.current.setAttention('tooLongInStage') })
+    expect(result.current.filterParams.too_long_in_stage).toBe(1)
+    expect(result.current.anyFilterActive).toBe(true)
+  })
+
+  it('sends missing_appointment=1 for the missingAppointment intent', () => {
+    const { result } = renderHook(() => useApplicationFilters())
+    act(() => { result.current.setAttention('missingAppointment') })
+    expect(result.current.filterParams.missing_appointment).toBe(1)
+  })
+
+  it('clearAllFilters resets the attention intent', () => {
+    const { result } = renderHook(() => useApplicationFilters())
+    act(() => { result.current.setAttention('tooLongInStage') })
+    act(() => { result.current.clearAllFilters() })
+    expect(result.current.attention).toBeNull()
+    expect(result.current.filterParams.too_long_in_stage).toBeUndefined()
+  })
+})

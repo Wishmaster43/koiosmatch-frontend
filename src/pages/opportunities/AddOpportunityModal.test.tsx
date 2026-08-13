@@ -71,7 +71,10 @@ const noop = () => {}
 // Scope a CreatableSelect trigger by its Field label (the house pattern for
 // pickers that share a generic placeholder like 'common:select' — mirrors
 // MatchModal.test.tsx's branchField/ownerField helpers).
-const fieldTrigger = (label: string) => within(screen.getByText(label).parentElement as HTMLElement).getByRole('button')
+// CLEAR-SWEEP (Danny 13-08): once a field carries a value its clearable cross
+// renders too — the trigger is always the FIRST button (DOM order), the clear
+// cross (when present) the second, so this picks index 0 explicitly.
+const fieldTrigger = (label: string) => within(screen.getByText(label).parentElement as HTMLElement).getAllByRole('button')[0]
 
 beforeEach(() => vi.clearAllMocks())
 
@@ -150,6 +153,20 @@ describe('AddOpportunityModal · same POST payload as before, searchable picks i
       contact_id: null,
     }))
     expect(onCreated).toHaveBeenCalledTimes(1)
+  })
+
+  // CLEAR-SWEEP (Danny 13-08): the customer picker is genuinely optional (body
+  // sends `customer_id: form.clientId || null`) — a pick must be releasable.
+  it('CLEAR-SWEEP: clears a picked customer back to the placeholder', async () => {
+    const user = userEvent.setup()
+    render(<AddOpportunityModal onClose={noop} customers={[{ id: 'cust-1', name: 'Acme' }]} />)
+    await user.click(fieldTrigger('modal.fields.client'))
+    await user.click(await screen.findByRole('button', { name: 'Acme' }))
+    expect(fieldTrigger('modal.fields.client')).toHaveTextContent('Acme')
+
+    const clear = within(screen.getByText('modal.fields.client').parentElement as HTMLElement).getByTitle(/clearField/i)
+    await user.click(clear)
+    expect(fieldTrigger('modal.fields.client')).toHaveTextContent('common:select')
   })
 
   it('the location/department/contact cascade rides the body once picked', async () => {

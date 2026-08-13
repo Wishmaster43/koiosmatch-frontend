@@ -38,18 +38,23 @@ export default function OpportunityDealStageCard({
       <div style={cardHead}>{t('modal.groups.dealStage')}</div>
       <div style={cardBox}>
         <div style={row2}>
+          {/* CLEAR-SWEEP (Danny 13-08): stage/service/agreement all ride `|| null`
+              in the submit body (AddOpportunityModal.handleSubmit) — optional. */}
           <Field label={t('modal.fields.stage')}>
             <CreatableSelect value={stageId || null} onChange={onStageChange} allowCreate={false}
+              clearable clearLabel={t('modal.fields.stage')}
               placeholder={t('common:select')} options={stageOptions} />
           </Field>
           <Field label={t('modal.fields.serviceType')}>
             <CreatableSelect value={serviceTypeId || null} onChange={onServiceTypeChange} allowCreate={false}
+              clearable clearLabel={t('modal.fields.serviceType')}
               placeholder={t('common:select')} options={serviceOptions} />
           </Field>
         </div>
         <div style={row2}>
           <Field label={t('modal.fields.agreementType')}>
             <CreatableSelect value={agreementTypeId || null} onChange={onAgreementTypeChange} allowCreate={false}
+              clearable clearLabel={t('modal.fields.agreementType')}
               placeholder={t('common:select')} options={agreementOptions} />
           </Field>
           <Field label={t('modal.fields.value')}>

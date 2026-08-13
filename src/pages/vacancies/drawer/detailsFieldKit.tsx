@@ -83,8 +83,13 @@ export function makeFieldHelpers<K extends string>(form: Record<K, string>, setF
   // same placeholder) so seniority/education/function/industry use ONE control in
   // both the add modal and the drawer instead of a native <select> here vs a
   // combobox there.
-  const creatable = (k: K, options: Array<string | { value: string; label: string }>) => (
+  // CLEAR-SWEEP (Danny 13-08): `clearLabel` is opt-in per call — most callers of this
+  // shared helper (seniority/education elsewhere) stay as-is; only fields the caller
+  // KNOWS are optional (validated `sometimes|nullable` server-side) pass a label to
+  // get the clear cross, so a required field never silently gains one.
+  const creatable = (k: K, options: Array<string | { value: string; label: string }>, clearLabel?: string) => (
     <CreatableSelect value={form[k] || null} onChange={(v: string) => setF(k, v)} allowCreate={false}
+      {...(clearLabel ? { clearable: true, clearLabel } : {})}
       placeholder={t('common:select')} options={options} />
   )
   const text = (k: K, placeholder?: string) => (

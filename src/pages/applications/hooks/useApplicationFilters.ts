@@ -132,6 +132,9 @@ export function useApplicationFilters() {
     if (attention === 'new'     && !(a.isNew && a.bucket === 'active'))                          return false
     if (attention === 'scored'  && !(typeof a.score === 'number' && a.bucket !== 'rejected'))    return false
     if (attention === 'aiTasks' && !(a.task && a.bucket === 'active'))                           return false
+    // D6 dashboard-intent attention values ('tooLongInStage' / 'missingAppointment') are
+    // real server-wide filters (see filterParams below) — no client-side row shape to
+    // check them against here, so they fall through and rely on the server's narrowing.
     // Free-text search across candidate · vacancy · source (client-side; mirrors candidates).
     if (!opts?.ignoreQuery && query.trim()) {
       const q = query.trim().toLowerCase()
@@ -152,6 +155,10 @@ export function useApplicationFilters() {
     // translate the client-only OWNER_NONE constant to the wire value 'none' so a
     // "No owner" pick (alone or mixed with real ids) narrows server-side too.
     if (selectedOwner.length) p.owner_id = selectedOwner.map(o => (o === OWNER_NONE ? 'none' : o))
+    // D6 (dashboard tile → intent seam): the two attention values dashboardKpis emits
+    // for applications carry real server-wide filters (ApplicationQuery attention.*).
+    if (attention === 'tooLongInStage')    p.too_long_in_stage  = 1
+    else if (attention === 'missingAppointment') p.missing_appointment = 1
     // NUMMER-1: a well-formed reference number does an exact server-side `?ref=`
     // lookup instead of the normal free-text search; the server ignores every other
     // filter for it (see the header comment / matchesFilters' refMode).
@@ -174,7 +181,7 @@ export function useApplicationFilters() {
     if (selectedBranch.length) p.branch_id = selectedBranch
     return p
   }, [selectedPhase, selectedVac, selectedClient, selectedSource, selectedOwner, query, showArchived,
-    interviewBusy, interviewPaused, selectedCandidateIds, selectedBranch])
+    interviewBusy, interviewPaused, selectedCandidateIds, selectedBranch, attention])
 
   // Bucket param — TABLE query only (never board/stats): 'allActive' has no server
   // equivalent (spans two buckets) and showArchived's reveal must not be narrowed by

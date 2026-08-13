@@ -11,6 +11,7 @@ const base = (over: Partial<VacancyFilterState> = {}): VacancyFilterState => ({
   showArchived: false, showWithoutAgent: false, selectedAgentId: null,
   hasApplications: false, publishedBucket: 'all',
   view: 'table', mapCenter: { lat: 52, lng: 5 }, mapRadius: 30, mapStraalActive: false,
+  attention: null,
   ...over,
 })
 const params = (over: Partial<VacancyFilterState> = {}) =>
@@ -58,5 +59,25 @@ describe('useVacancyFilterParams · the existing filter shapes stay intact', () 
   it('only sends the radius circle once the map filter is activated', () => {
     expect(params({ view: 'map' })).not.toHaveProperty('radius')
     expect(params({ view: 'map', mapStraalActive: true })).toMatchObject({ lat: 52, lng: 5, radius: 30 })
+  })
+})
+
+// D1(a): the dashboard's "closing soon" / "stale status" tiles land here via a
+// semantic { attention } intent (VacanciesPage's own intent-seeding effect) —
+// this asserts the REQUEST the hook actually produces from that intent, not
+// merely that a setter fired.
+describe('useVacancyFilterParams · D1(a) dashboard attention intent', () => {
+  it('omits both attention filters while none is active', () => {
+    const p = params()
+    expect(p).not.toHaveProperty('closing_soon')
+    expect(p).not.toHaveProperty('stale_status')
+  })
+
+  it('sends closing_soon=1 for the closingSoon intent', () => {
+    expect(params({ attention: 'closingSoon' })).toMatchObject({ closing_soon: 1 })
+  })
+
+  it('sends stale_status=1 for the staleStatus intent', () => {
+    expect(params({ attention: 'staleStatus' })).toMatchObject({ stale_status: 1 })
   })
 })

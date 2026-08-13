@@ -17,7 +17,7 @@ import ShiftsSummary from './blocks/ShiftsSummary'
 import TouchpointsFeed from './blocks/TouchpointsFeed'
 import AttentionCandidates from './blocks/AttentionCandidates'
 import KoiosForYouCard from './KoiosForYouCard'
-import type { DashStats, DashOpp, DashData } from '@/types/dashboard'
+import type { DashStats, DashOpp, DashData, DashAppStats, DashVacStats } from '@/types/dashboard'
 import { useAllSettings, getJsonSetting, getBoolSetting } from '@/lib/settings/useAllSettings'
 import { useNumberFormat } from '@/lib/formatters'
 import { useDateFormat } from '@/lib/datetime'
@@ -67,8 +67,8 @@ export default function Dashboard({ onNavigate, viewType }: { onNavigate?: (page
   // `loading`/`error` cover the two CRITICAL feeds (/candidates/stats + /dashboard) —
   // a failure there must render an explicit error notice, never a KPI strip full of
   // "—" that reads as real zeros (audit finding).
-  const { stats, opp, dash, dashCharts, matchesTotal, vacanciesTotal, loading, error, retry } =
-    useDashboardData<DashStats, DashOpp, DashData, { timeseries?: Record<string, unknown>; net?: unknown }>({
+  const { stats, opp, dash, dashCharts, matchesTotal, vacanciesTotal, appStats, vacStats, loading, error, retry } =
+    useDashboardData<DashStats, DashOpp, DashData, { timeseries?: Record<string, unknown>; net?: unknown }, DashAppStats, DashVacStats>({
       tenantId: activeTenant?.id, filterParams: dashFilterParams,
     })
 
@@ -84,7 +84,7 @@ export default function Dashboard({ onNavigate, viewType }: { onNavigate?: (page
   } = useDashboardViewModel({
     t, formatNumber, stats, opp, dash, dashCharts, statusMeta, funnelMeta, funnelTypes,
     activeType, hiddenBlocks, hiddenKpis, hasPlanning, valueInHours, candidateTotalLabel,
-    matchesTotal, vacanciesTotal, onNavigate,
+    matchesTotal, vacanciesTotal, appStats, vacStats, onNavigate,
   })
 
   // Registers this page's right-panel filter groups (period/location/status options).

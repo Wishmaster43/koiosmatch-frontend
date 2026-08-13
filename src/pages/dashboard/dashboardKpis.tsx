@@ -5,7 +5,7 @@
  * KPI_ROWS (templates.ts) decides per role which of these render.
  */
 import type { ReactNode } from 'react'
-import { Users, CheckCircle, AlertCircle, AlertTriangle, Target, Euro, Briefcase, CalendarCheck, TrendingUp, MessageSquare, Zap, FileText, CalendarClock, Link2, PhoneOff } from 'lucide-react'
+import { Users, CheckCircle, AlertCircle, AlertTriangle, Target, Euro, Briefcase, CalendarCheck, TrendingUp, MessageSquare, Zap, FileText, CalendarClock, Link2, PhoneOff, Hourglass, CalendarX2 } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 
 export interface DashboardKpi { id: string; label: string; value: ReactNode; sub: string; color: string; bg: string; Icon: LucideIcon; onClick?: () => void }
@@ -58,5 +58,15 @@ export function buildDashboardKpis({ t, att, num, eur, opp, valueInHours, candid
     tasksOverdue:      { id: 'tasksOverdue', label: t('kpi.tasksOverdue'), value: num(att.tasks_overdue), sub: t('kpi.tasksOverdueSub'), color: 'var(--color-warning)', bg: 'var(--color-warning-bg)', Icon: AlertCircle, onClick: () => onNavigate?.('tasks', { kpi: 'overdue' }) },
     uncalledCallist:   { id: 'uncalledCallist', label: t('kpi.uncalledCallist'), value: num(att.calllist_uncalled), sub: t('kpi.uncalledCallistSub'), color: 'var(--color-warning)', bg: 'var(--color-warning-bg)', Icon: PhoneOff, onClick: () => onNavigate?.('outreach', {}) },
     expiringOpps:      { id: 'expiringOpps', label: t('kpi.expiringOpps'), value: num(att.expiring_opps), sub: t('kpi.expiringOppsSub'), color: 'var(--color-warning)', bg: 'var(--color-warning-bg)', Icon: CalendarClock, onClick: () => onNavigate?.('opportunities', { kpi: 'expiring' }) },
+    // D6 — /applications/stats attention.too_long_in_stage / attention.missing_appointment
+    // (new live keys, P36 fase 1). Tile self-hides when the key is absent (useDashboardViewModel).
+    // SEMANTIC-INTENT-1: tiles emit an intent, not a raw server param — the destination
+    // page (ApplicationsPage) interprets it and activates its own server filter, mirroring
+    // onNavigate('candidates', { attention: 'stale6m' }) / ('tasks', { kpi: 'overdue' }).
+    tooLongInStage:    { id: 'tooLongInStage', label: t('kpi.tooLongInStage'), value: num(att.app_too_long_in_stage), sub: t('kpi.tooLongInStageSub'), color: 'var(--color-warning)', bg: 'var(--color-warning-bg)', Icon: Hourglass, onClick: () => onNavigate?.('applications', { attention: 'tooLongInStage' }) },
+    missingApptApps:   { id: 'missingApptApps', label: t('kpi.missingApptApps'), value: num(att.app_missing_appointment), sub: t('kpi.missingApptAppsSub'), color: 'var(--color-warning)', bg: 'var(--color-warning-bg)', Icon: CalendarX2, onClick: () => onNavigate?.('applications', { attention: 'missingAppointment' }) },
+    // D1(a) — /vacancies/stats attention.closing_soon / attention.stale_status, same intent pattern.
+    closingSoon:       { id: 'closingSoon', label: t('kpi.closingSoon'), value: num(att.vac_closing_soon), sub: t('kpi.closingSoonSub'), color: 'var(--color-warning)', bg: 'var(--color-warning-bg)', Icon: CalendarClock, onClick: () => onNavigate?.('vacancies', { attention: 'closingSoon' }) },
+    staleStatusVac:    { id: 'staleStatusVac', label: t('kpi.staleStatusVac'), value: num(att.vac_stale_status), sub: t('kpi.staleStatusVacSub'), color: 'var(--color-danger)', bg: 'var(--color-danger-bg)', Icon: AlertTriangle, onClick: () => onNavigate?.('vacancies', { attention: 'staleStatus' }) },
   }
 }

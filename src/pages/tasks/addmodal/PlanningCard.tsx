@@ -31,15 +31,24 @@ export default function PlanningCard({ t, form, set, priorities, statuses }: {
             <TextField type="time" value={form.dueTime} onChange={v => set('dueTime', v)} />
           </Field>
         </div>
-        {/* Priority/status — searchable tenant lookups (allowCreate=false). */}
+        {/* Priority/status — searchable tenant lookups (allowCreate=false).
+            CLEAR-SWEEP (Danny 13-08): neither is in AddTaskModal's `validateRequired`
+            (only title/type are), and both are submitted as `null` when empty (see
+            AddTaskModal's `handleSubmit`/`handleUpdate` body) — a picked default must
+            stay releasable back to "no priority/status set" rather than sticky. */}
         <div style={row2}>
           <Field label={t('modal.priority')}>
             <CreatableSelect value={form.priority || null} onChange={(v: string) => set('priority', v)} allowCreate={false}
+              clearable clearLabel={t('modal.priority')}
               style={pickerStyle} menuWidth={PICKER_MENU_W}
               options={priorities.map(x => ({ value: x.value, label: x.label }))} />
           </Field>
           <Field label={t('modal.status')}>
             <CreatableSelect value={form.status || null} onChange={(v: string) => set('status', v)} allowCreate={false}
+              /* NO clear cross: UpdateTaskRequest documents 'status_id cannot be
+                 cleared' (sometimes|uuid, not nullable) — a cross here showed
+                 'cleared' while the server kept the old status (control round
+                 13-08, fake affordance §3). The drawer's DetailsTab agrees. */
               style={pickerStyle} menuWidth={PICKER_MENU_W}
               options={statuses.map(x => ({ value: x.value, label: x.label }))} />
           </Field>

@@ -111,6 +111,8 @@ function VacanciesPageInner({ intent }: { intent?: unknown }) {
   // change) — switching to Kaart used to hide everything outside a silent
   // 30km-Utrecht circle (Danny 14/7).
   const [mapStraalActive, setMapStraalActive] = usePageMemory('vac.mapStraal', false)
+  // D1(a): the dashboard tiles' semantic attention intent — null | 'closingSoon' | 'staleStatus'.
+  const [attention, setAttention] = usePageMemory<string | null>('vac.attention', null)
 
   const handlePageSizeChange = (newSize: number) => { setPageSize(newSize); setPage(1) }
 
@@ -119,7 +121,7 @@ function VacanciesPageInner({ intent }: { intent?: unknown }) {
   const filterParams = useVacancyFilterParams({
     globalSearch, statusBucket, selectedOwner, selectedClient, selectedCategory, selectedBranch,
     showArchived, showWithoutAgent, selectedAgentId, hasApplications, publishedBucket,
-    view, mapCenter, mapRadius, mapStraalActive,
+    view, mapCenter, mapRadius, mapStraalActive, attention,
   })
   const filterKey = JSON.stringify(filterParams)
 
@@ -157,6 +159,14 @@ function VacanciesPageInner({ intent }: { intent?: unknown }) {
 
   // Open a vacancy drawer when arriving via a cross-entity link (intent).
   useOpenFromIntent(intent, (id) => openVacancy({ id } as Parameters<typeof selectVacancy>[0]))
+
+  // D1(a): seed the closing-soon / stale-status filter from a dashboard tile's
+  // semantic attention intent (mirrors ApplicationsPage/CandidatesPage's own intent seam).
+  useEffect(() => {
+    const i = intent as { attention?: string } | undefined
+    if (i?.attention) setAttention(i.attention)
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- setAttention is a stable usePageMemory setter; seeding fires per new intent only (house pattern, see AddApplicationModal:198)
+  }, [intent])
 
   // Mirror the open drawer in the URL (?open=<id>): browser back/forward walks
   // through it and a copied link reopens the same vacancy (NAV-BACK-1;
@@ -225,11 +235,11 @@ function VacanciesPageInner({ intent }: { intent?: unknown }) {
   })
   // Shared clear-all (page memory keeps filters sticky).
   const anyFilterActive = Boolean(globalSearch.trim() || showArchived || showWithoutAgent || Boolean(selectedAgentId) || statusBucket !== 'all'
-    || selectedOwner.length || selectedClient.length || selectedCategory.length || selectedBranch.length || publishedBucket !== 'all' || hasApplications)
+    || selectedOwner.length || selectedClient.length || selectedCategory.length || selectedBranch.length || publishedBucket !== 'all' || hasApplications || attention)
   const [searchEpoch, setSearchEpoch] = useState(0)
   const clearAllFilters = () => {
     setSearchEpoch(e => e + 1); setGlobalSearch(''); setShowArchived(false); setShowWithoutAgent(false); setSelectedAgentId(null); setStatusBucket('all')
-    setSelectedOwner([]); setSelectedClient([]); setSelectedCategory([]); setSelectedBranch([]); setPublishedBucket('all'); setHasApplications(false); setPage(1)
+    setSelectedOwner([]); setSelectedClient([]); setSelectedCategory([]); setSelectedBranch([]); setPublishedBucket('all'); setHasApplications(false); setAttention(null); setPage(1)
   }
 
   // Status tab bar: "All" + one button per configured status.

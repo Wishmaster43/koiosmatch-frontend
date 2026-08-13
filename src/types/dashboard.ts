@@ -27,6 +27,18 @@ export interface DashStats {
   [k: string]: unknown
 }
 
+// /applications/stats (D6) — only the attention block is read here.
+export interface DashAppStats {
+  attention?: Record<string, number | null | undefined>
+  [k: string]: unknown
+}
+
+// /vacancies/stats (D1a) — only the attention block is read here.
+export interface DashVacStats {
+  attention?: Record<string, number | null | undefined>
+  [k: string]: unknown
+}
+
 // /opportunities/stats
 export interface DashOpp {
   by_stage?: StatItem[]

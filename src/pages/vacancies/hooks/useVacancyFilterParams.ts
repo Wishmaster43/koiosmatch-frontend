@@ -31,12 +31,14 @@ export interface VacancyFilterState {
   mapCenter: { lat: number; lng: number }
   mapRadius: number
   mapStraalActive: boolean
+  // D1(a) dashboard-intent attention value: null | 'closingSoon' | 'staleStatus'.
+  attention: string | null
 }
 
 export function useVacancyFilterParams({
   globalSearch, statusBucket, selectedOwner, selectedClient, selectedCategory, selectedBranch,
   showArchived, showWithoutAgent, selectedAgentId, hasApplications, publishedBucket,
-  view, mapCenter, mapRadius, mapStraalActive,
+  view, mapCenter, mapRadius, mapStraalActive, attention,
 }: VacancyFilterState): Record<string, unknown> {
   return useMemo(() => {
     const p: Record<string, unknown> = {}
@@ -70,8 +72,12 @@ export function useVacancyFilterParams({
     if (publishedBucket !== 'all') p.published = publishedBucket === 'published' ? 1 : 0
     // Map view narrows the list server-side to the chosen circle (STRAAL-1).
     if (view === 'map' && mapStraalActive) { p.lat = mapCenter.lat; p.lng = mapCenter.lng; p.radius = mapRadius }
+    // D1(a) (dashboard tile → intent seam): VacancyQuery attention.closing_soon /
+    // attention.stale_status, same server-wide filters the dashboard KPI itself reads.
+    if (attention === 'closingSoon')       p.closing_soon = 1
+    else if (attention === 'staleStatus')  p.stale_status = 1
     return p
   }, [globalSearch, statusBucket, selectedOwner, selectedClient, selectedCategory, selectedBranch,
     showArchived, showWithoutAgent, selectedAgentId, hasApplications, publishedBucket,
-    view, mapCenter, mapRadius, mapStraalActive])
+    view, mapCenter, mapRadius, mapStraalActive, attention])
 }

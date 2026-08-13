@@ -567,11 +567,12 @@ describe('AddVacancyModal · Publicatie (punt 20)', () => {
     await user.click(screen.getByRole('switch', { name: 'columns.published' }))
     // One job-board channel toggle.
     await user.click(screen.getByRole('switch', { name: 'Indeed' }))
-    // One application-setting change — scoped to the CV row so it never
-    // collides with the other fields' own (identically-labelled) triggers/options.
+    // One application-setting change — the trigger is scoped to the CV row; the
+    // OPTIONS live in the portalled menu (PORTAL-MARKER-1), the only one open.
     const cvRow = screen.getByText('publishing.fields.cv').parentElement as HTMLElement
     await user.click(within(cvRow).getByRole('button'))
-    await user.click(within(cvRow).getByRole('button', { name: 'publishing.values.optional' }))
+    const menu = document.querySelector('[data-dropdown-portal]') as HTMLElement
+    await user.click(within(menu).getByRole('button', { name: 'publishing.values.optional' }))
 
     await fillTitleAndSubmit(user)
     expect(mockPost).toHaveBeenCalledWith('/vacancies', expect.objectContaining({

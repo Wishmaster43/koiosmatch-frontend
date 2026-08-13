@@ -506,12 +506,16 @@ describe('AddTaskModal · internal department (TEAM-1), non-exclusive with the a
 
   it('clearing the department PATCHes an explicit null — an omitted key could never clear it', async () => {
     const user = userEvent.setup()
-    const { container } = render(<AddTaskModal editId={EDIT_ID} onClose={noop} onSaved={noop} />)
+    render(<AddTaskModal editId={EDIT_ID} onClose={noop} onSaved={noop} />)
 
     await screen.findByDisplayValue('Bel kandidaat terug')
     // The clear affordance is CreatableSelect's opt-in X, rendered next to the
     // trigger whose id ends in -clear (mirrors DetailsTab's own branch-clear test).
-    const clearBtn = container.querySelector('button[id$="-clear"]')
+    // CLEAR-SWEEP (Danny 13-08): priority is now ALSO clearable and pre-filled, so a
+    // bare `container.querySelector` would grab priority's clear cross first — scope
+    // to the team field specifically via its own trigger container.
+    const teamTrigger = screen.getByRole('button', { name: /modal\.team/ })
+    const clearBtn = teamTrigger.parentElement!.querySelector('button[id$="-clear"]')
     expect(clearBtn).toBeTruthy()
     await user.click(clearBtn!)
     await user.click(screen.getByRole('button', { name: 'modal.save' }))

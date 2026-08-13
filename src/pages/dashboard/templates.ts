@@ -24,7 +24,7 @@ export const KPI_ROWS: Record<DashboardType, string[]> = {
   // vacatures · Taken over tijd · Actieve gesprekken (alle drie live) = 9 blokjes.
   admin:       ['candidates', 'opps', 'pipeline', 'expiringOpps', 'placements', 'intakes', 'openVacancies', 'tasksOverdue', 'activeConv'],
   management:  ['candidates', 'opps', 'pipeline', 'expiringOpps', 'placements', 'intakes', 'openVacancies', 'tasksOverdue', 'activeConv'],
-  recruitment: ['candidates', 'never', 'stale', 'tasksOverdue', 'failedWf', 'uncalledCallist', 'intakes'],
+  recruitment: ['candidates', 'never', 'stale', 'tasksOverdue', 'failedWf', 'uncalledCallist', 'intakes', 'tooLongInStage', 'missingApptApps', 'closingSoon', 'staleStatusVac'],
   backoffice:  ['tasks', 'placements', 'missingDocs', 'expiringContracts', 'couplingErrors', 'incompleteRuns'],
   sales:       ['opps', 'pipeline', 'expiringOpps', 'fillRate', 'placements', 'activeConv'],
   planning:    ['failedWf', 'incompleteRuns', 'openShifts', 'occupancy'],
@@ -56,6 +56,9 @@ export const KPI_LABEL_KEY: Record<string, string> = {
   // Was missing — Settings → Dashboards fell back to the raw id ("openVacancies")
   // instead of the translated label used by the live dashboard (dashboardKpis.tsx).
   openVacancies: 'kpi.openVacancies',
+  // D6/D1(a) — new attention tiles (P36 fase 1).
+  tooLongInStage: 'kpi.tooLongInStage', missingApptApps: 'kpi.missingApptApps',
+  closingSoon: 'kpi.closingSoon', staleStatusVac: 'kpi.staleStatusVac',
 }
 export const BLOCK_LABEL_KEY: Record<string, string> = {
   'chart.status': 'chart.byStatus', 'chart.funnel': 'chart.funnel', 'chart.funnelConversion': 'chart.funnelConversion',

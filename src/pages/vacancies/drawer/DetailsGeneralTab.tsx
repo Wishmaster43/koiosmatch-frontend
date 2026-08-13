@@ -87,7 +87,9 @@ export default function DetailsGeneralTab({ vacancy: v, general, candidateTypes,
     {/* G35: function/industry now use the SAME searchable CreatableSelect as
         AddVacancyModal's GeneralCard (was a native <select> here, a different
         control for the same lookup data). */}
-    {row(t('details.function'), v.category || dash, creatable('category', fnOptions), editing)}
-    {row(t('details.preferredIndustry'), v.industry || dash, creatable('industry', industries), editing)}
+    {/* CLEAR-SWEEP (Danny 13-08): both fields are `sometimes|nullable` server-side
+        (StoreVacancyRequest) — the clear cross is real, not decorative. */}
+    {row(t('details.function'), v.category || dash, creatable('category', fnOptions, t('details.function')), editing)}
+    {row(t('details.preferredIndustry'), v.industry || dash, creatable('industry', industries, t('details.preferredIndustry')), editing)}
   </>, controls(t, editing, save, cancel, () => setEditing(true)))
 }
