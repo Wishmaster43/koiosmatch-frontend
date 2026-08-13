@@ -2998,6 +2998,7 @@
     "status": {
       "draft": "Draft",
       "final": "Final"
-    }
+    },
+    "generateResult": "{{generated}} generated, {{alreadyFinal}} already final."
   }
 }

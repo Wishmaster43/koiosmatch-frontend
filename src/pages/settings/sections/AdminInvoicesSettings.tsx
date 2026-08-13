@@ -96,8 +96,13 @@ export default function AdminInvoicesSettings() {
   const handleGenerate = async () => {
     setGenerating(true)
     try {
-      await api.post('/admin/invoices/generate', { month })
-      notifySuccess(t('adminInvoices.generateSuccess'))
+      // Response shape per contract (aa48ba1c): { month, generated, already_final } —
+      // the toast reports what really happened instead of a generic "done".
+      const res = await api.post('/admin/invoices/generate', { month })
+      const body = (res?.data?.data ?? res?.data ?? {}) as { generated?: number; already_final?: number }
+      notifySuccess(body.generated != null
+        ? t('adminInvoices.generateResult', { generated: body.generated, alreadyFinal: body.already_final ?? 0 })
+        : t('adminInvoices.generateSuccess'))
       await reload()
     } catch (err) {
       notifyError(extractApiError(err, t('adminInvoices.generateFailed')))
