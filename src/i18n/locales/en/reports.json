@@ -337,7 +337,8 @@
       "status": "Status",
       "candidates": "Candidates",
       "duration": "Duration",
-      "trigger": "Trigger"
+      "trigger": "Trigger",
+      "expand": "Expand/collapse row"
     },
     "status": {
       "success": "Succeeded",

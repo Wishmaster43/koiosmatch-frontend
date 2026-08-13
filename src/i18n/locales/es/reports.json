@@ -337,7 +337,8 @@
       "status": "Estado",
       "candidates": "Candidatos",
       "duration": "Duración",
-      "trigger": "Disparador"
+      "trigger": "Disparador",
+      "expand": "Expandir/contraer fila"
     },
     "status": {
       "success": "Correcto",

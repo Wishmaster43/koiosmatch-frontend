@@ -337,7 +337,8 @@
       "status": "Statut",
       "candidates": "Candidats",
       "duration": "Durée",
-      "trigger": "Déclencheur"
+      "trigger": "Déclencheur",
+      "expand": "Développer/réduire la ligne"
     },
     "status": {
       "success": "Réussi",

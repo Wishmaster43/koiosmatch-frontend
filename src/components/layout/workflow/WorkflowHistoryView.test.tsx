@@ -69,4 +69,29 @@ describe('WorkflowHistoryView', () => {
     render(<WorkflowHistoryView workflowId={1} />)
     expect(await screen.findByText('23/06/2026')).toBeInTheDocument()
   })
+
+  // P39: the chevron expands the row inline WITHOUT opening the drawer, reading
+  // straight off the already-fetched list row (step data rides `run`, not a new fetch).
+  it('expands a row inline on chevron click without opening the drawer', async () => {
+    const runWithSteps = { ...run, step_results: [{ label: 'Sync candidates', status: 'success' }] }
+    vi.mocked(api.get).mockResolvedValue({ data: [runWithSteps] })
+    render(<WorkflowHistoryView workflowId={1} />)
+    await screen.findByText('manual')
+
+    const toggle = screen.getByRole('button', { name: 'runs.cols.expand' })
+    expect(toggle).toHaveAttribute('aria-expanded', 'false')
+    fireEvent.click(toggle)
+
+    expect(toggle).toHaveAttribute('aria-expanded', 'true')
+    expect(await screen.findByText('Sync candidates')).toBeInTheDocument()
+    expect(screen.queryByText('runs.drawer.timeline')).not.toBeInTheDocument()
+  })
+
+  it('still opens the drawer when clicking the row outside the chevron', async () => {
+    vi.mocked(api.get).mockResolvedValue({ data: [run] })
+    render(<WorkflowHistoryView workflowId={1} />)
+    const triggerCell = await screen.findByText('manual')
+    fireEvent.click(triggerCell)
+    expect(await screen.findByText('runs.drawer.timeline')).toBeInTheDocument()
+  })
 })

@@ -337,7 +337,8 @@
       "status": "Status",
       "candidates": "Kandidaten",
       "duration": "Duur",
-      "trigger": "Trigger"
+      "trigger": "Trigger",
+      "expand": "Rij uit-/inklappen"
     },
     "status": {
       "success": "Geslaagd",
