@@ -13,7 +13,7 @@
  * the scrim and lets pointer events pass through everywhere except the panel; the
  * caller keeps its own outside-click rule. Escape/tab behaviour is unchanged.
  */
-import { type CSSProperties, type ReactNode, useState } from 'react'
+import { type CSSProperties, type ReactNode, useCallback, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { ExternalLink, X } from 'lucide-react'
 import { useFocusTrap } from '@/hooks/useFocusTrap'
@@ -67,6 +67,12 @@ function Panel({ onClose, ariaLabel, title, header, children, width, maxWidth, p
   const { t } = useTranslation('common')
   const panelTrapRef = useFocusTrap<HTMLDivElement>(onClose)
   const { panelRef, placement, dragging, onDragPointerDown, onResizePointerDown, onDragHandleDoubleClick } = useDraggablePanel(persistKey, resizable !== false)
+  // See the ref comment below: stable merged ref, or the trap re-arms per render.
+  const mergedPanelRef = useCallback((node: HTMLDivElement | null) => {
+    panelTrapRef.current = node
+    panelRef.current = node
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- both targets are stable ref objects
+  }, [])
   const reducedMotion = usePrefersReducedMotion()
   // Claim a fresh slot in the floating band once per mount; pointerdown re-claims
   // so the last-touched window wins (multi-window ready, harmless for one).
@@ -85,11 +91,13 @@ function Panel({ onClose, ariaLabel, title, header, children, width, maxWidth, p
       pointerEvents: overlay ? undefined : 'none' }}
       onMouseDown={e => { if (overlay && e.target === e.currentTarget) onClose() }}>
       <div
-        // Two refs on one node: the focus trap + the drag geometry.
-        ref={node => {
-          panelTrapRef.current = node
-          panelRef.current = node
-        }}
+        // Two refs on one node: the focus trap + the drag geometry. The merged
+        // callback MUST be render-stable (useCallback []): an inline function is a
+        // new identity every render, so React detaches (null) and re-attaches the
+        // ref each render — which, now that useFocusTrap arms/disarms on node
+        // attachment, would tear the trap down on every keystroke (the K11b bug in
+        // a new coat). Stable identity = ref calls only on real mount/unmount.
+        ref={mergedPanelRef}
         role="dialog" aria-modal={overlay ? true : undefined} aria-label={ariaLabel ?? title ?? 'dialog'} tabIndex={-1}
         onPointerDown={() => { if (!zIndex) setZ(nextFloatingZ()) }}
         style={{ ...positioned, maxWidth: maxWidth ?? 'min(94vw, 1100px)', maxHeight: '92vh',
