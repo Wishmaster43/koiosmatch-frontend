@@ -54,7 +54,7 @@ describe('RelationsSection · vacancy clear (point 1.8.4)', () => {
     const user = userEvent.setup()
     const setVacancyId = vi.fn()
     render(<RelationsSection {...baseProps} vacancyId="" setVacancyId={setVacancyId} />)
-    await user.click(screen.getByRole('button', { name: 'placement.noVacancy' }))
+    await user.click(screen.getByRole('button', { name: /placement\.noVacancy$/ }))
     await user.click(await screen.findByRole('button', { name: /Verzorgende IG/ }))
     expect(setVacancyId).toHaveBeenCalledWith('vac-1')
   })

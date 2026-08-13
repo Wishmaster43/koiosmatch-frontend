@@ -7,6 +7,8 @@
  * the sibling match/styles.ts.
  */
 
+import { CANON_LABEL_STYLE } from '@/components/drawer/fieldRowCanon'
+
 export const overlay: React.CSSProperties = { position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.3)', zIndex: 60 }
 // S24a root-cause fix: this panel used to carry `overflowY:'auto', maxHeight:'88vh'`.
 // An ancestor with a non-visible `overflow` clips ANY absolutely-positioned descendant
@@ -25,3 +27,10 @@ export const input: React.CSSProperties = { width: '100%', padding: '8px 11px', 
 // The exact combobox footprint (mirrors addmodal/fields.tsx's CreatableSelect wrapper).
 export const fieldFootprint: React.CSSProperties = { padding: '8px 11px', borderRadius: 8, fontSize: 13 }
 export const errMsg: React.CSSProperties = { fontSize: 11, color: 'var(--color-danger)', marginTop: 3 }
+
+// P33 (13-08 decision 33-layout, batch 5): every field its own full-width
+// label-left row — the canon 120px label column (fieldRowCanon), field takes
+// the rest. Replaces the old two-up flex rows this modal used to render.
+export const labelLeftRow: React.CSSProperties = { display: 'flex', alignItems: 'center', gap: 10, marginBottom: 14 }
+export const rowLabel = CANON_LABEL_STYLE
+export const rowField: React.CSSProperties = { flex: 1, minWidth: 0 }

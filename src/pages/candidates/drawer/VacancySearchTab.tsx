@@ -209,17 +209,22 @@ function VacancySearchTabInner({ candidate }: { candidate: Candidate }) {
           </div>
           <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>{[selectedRow.customer, selectedRow.city].filter(Boolean).join(' · ') || '—'}</div>
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0 }}>
+        {/* Right column (Danny 13-08 screenshot): pager+close on top, Solliciteren
+            BENEATH them — the title row keeps its full width so long vacancy names
+            no longer truncate against the primary action. */}
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 6, flexShrink: 0 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+            {/* Browse through the current result list (Danny 05-08, point 3) — same
+                corner as every other detail pager (ContactDetail/LocationDetail). */}
+            <DrillPager index={selectedIndex + 1} total={rows.length} onPrev={goPrev} onNext={goNext} />
+            <button onClick={() => setSelectedId(null)} aria-label={t('common:close')}
+              style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: 2, display: 'flex' }}>
+              <X size={14} />
+            </button>
+          </div>
           {/* Solliciteren (Danny 06-08): the primary action for this open score panel —
               opens the shared AddApplicationModal with this vacancy prefilled. */}
           <DrawerAddButton onClick={() => setShowApply(true)} label={t('vacancySearch.apply')} />
-          {/* Browse through the current result list (Danny 05-08, point 3) — same
-              corner as every other detail pager (ContactDetail/LocationDetail). */}
-          <DrillPager index={selectedIndex + 1} total={rows.length} onPrev={goPrev} onNext={goNext} />
-          <button onClick={() => setSelectedId(null)} aria-label={t('common:close')}
-            style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: 2, display: 'flex' }}>
-            <X size={14} />
-          </button>
         </div>
       </div>
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>

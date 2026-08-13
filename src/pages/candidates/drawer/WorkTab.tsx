@@ -153,7 +153,10 @@ export default function WorkTab({ c, onRefresh, initialSubTab }: { c: Candidate;
   // 0 or 2+ distinct vacancies is genuinely ambiguous — left to the modal's own
   // searchable vacancy picker rather than guessing (never string-match stage
   // labels here: funnel stages are tenant lookups, not a fixed vocabulary). This
-  // stays over the FULL (unfiltered) `apps` — it is unrelated to the display filter above.
+  // KOIOS-VOORSTEL-1 (Danny 13-08, superseding the brief ALTIJD-LEEG interlude the
+  // same afternoon): the sole-distinct-vacancy derivation returns — but as a MARKED
+  // Koios suggestion in both modals (badge beside the field), never as the silent
+  // prefill it briefly was. Koios is the face of every system proposal (§3A).
   const distinctVacancyIds = Array.from(new Set(
     apps.map(s => s.vacancy?.id).filter((id): id is Id => id != null).map(String)
   ))
@@ -254,10 +257,10 @@ export default function WorkTab({ c, onRefresh, initialSubTab }: { c: Candidate;
 
       {/* OWNER-DEVIATION-1: candidate owner passed from this already-loaded record
           (no refetch) so the modal can flag a recruiter/owner deviation. */}
-      {modal === 'apply'  && <AddApplicationModal candidateId={c.id} candidateOwnerId={c.ownerId} candidateOwnerName={c.owner} onClose={() => setModal(null)} onCreated={reload} />}
+      {modal === 'apply'  && <AddApplicationModal candidateId={c.id} candidateOwnerId={c.ownerId} candidateOwnerName={c.owner} suggestedVacancyId={soleVacancyId} onClose={() => setModal(null)} onCreated={reload} />}
       {/* RECRUITER-DEFAULT-1 (Danny 05-08): same candidate owner, threaded so the
           intake modal's recruiter picker can prefer it over the logged-in-user fallback. */}
-      {modal === 'intake' && <PlanIntakeModal     candidateId={c.id} candidateOwnerId={c.ownerId} onClose={() => setModal(null)} onCreated={reload} defaultVacancyId={soleVacancyId} />}
+      {modal === 'intake' && <PlanIntakeModal     candidateId={c.id} candidateOwnerId={c.ownerId} suggestedVacancyId={soleVacancyId} onClose={() => setModal(null)} onCreated={reload} />}
       {/* RECRUITER-DEFAULT-1 (point 3, Danny's ten-point round): same candidate
           owner, threaded so the match form's recruiter picker can prefer it over
           the logged-in-user fallback — mirrors the intake modal one line above. */}

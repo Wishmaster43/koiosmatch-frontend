@@ -124,8 +124,12 @@ export default function WorkPermitBlock({ c, onSave, autoEditSignal }: {
     // never a plain <select> (CLAUDE.md §4 standing rule). Sends the option's
     // `value` (the same lookup slug PATCH validates), mirrors ProfilePersonalTab's
     // gender/nationality fields exactly.
+    // CLEAR-SWEEP (Danny 13-08): both fields are optional (see the docblock above,
+    // "no tenant-required flag exists" and no `validateRequired`-style check anywhere
+    // in this file) — once picked, a work-permit type must be releasable back to none.
     return (
       <CreatableSelect value={form.workPermitType || null} onChange={(v: string) => setF('workPermitType', v)} allowCreate={false}
+        clearable clearLabel={t('profile.workPermitType', { defaultValue: 'Type werkvergunning' })}
         placeholder={t('common:select')} style={inputStyle}
         options={workPermitTypes.map(w => ({ value: w.value, label: w.label }))} />
     )

@@ -55,6 +55,10 @@ interface NotePayload { type: string; title: string; body: string; channel?: str
 export function useCandidateNotes(candidateId: string | number | undefined, opts?: { onContactStamped?: () => void }) {
   const { t } = useTranslation()
   const [notes, setNotes] = useState<CandidateNote[]>([])
+  // NOTITIE-POPOUT-URL-1: true once the FIRST fetch settled — the per-note window
+  // needs to tell "still loading" apart from "note really absent" (both render an
+  // empty `notes` here). Additive; existing hosts simply ignore it.
+  const [loaded, setLoaded] = useState(false)
 
   // One loader — the effect uses it, and every successful write RE-FETCHES the thread so
   // the server truth (author, updated_by/updated_at, stamped last-contact) shows at once.
@@ -64,6 +68,7 @@ export function useCandidateNotes(candidateId: string | number | undefined, opts
       .then(res => setNotes(unwrapList<CandidateNote>(res).rows))
       // GET degrades to an empty thread; the dev interceptor already surfaces write errors.
       .catch(() => setNotes([]))
+      .finally(() => setLoaded(true))
   }, [candidateId])
 
   // Load the thread whenever the candidate changes (server returns newest-first).
@@ -83,15 +88,17 @@ export function useCandidateNotes(candidateId: string | number | undefined, opts
   }, [candidateId, load, t])
 
   // Edit — NotesTab passes a list index; optimistic, then reload so "edited by ·when" shows.
-  const editNote = useCallback((index: number, payload: NotePayload) => {
-    if (!candidateId) return
+  // Returns whether the write LANDED (NOTITIE-POPOUT-URL-1: the per-note window may
+  // only close itself on a landed save); existing hosts simply ignore the promise.
+  const editNote = useCallback((index: number, payload: NotePayload): Promise<boolean> => {
+    if (!candidateId) return Promise.resolve(false)
     const target = notes[index]
-    if (!target) return
+    if (!target) return Promise.resolve(false)
     const snapshot = notes
     setNotes(prev => prev.map((n, i) => (i === index ? { ...n, type: payload.type, channel: payload.channel, body: payload.body, language: payload.language } : n)))
-    api.patch(`/candidates/${candidateId}/notes/${target.id}`, { text: payload.body, type: payload.type, channel: payload.channel, language: payload.language })
-      .then(() => load())
-      .catch(() => { setNotes(snapshot); notifyError(t('common:actionFailed')) })
+    return api.patch(`/candidates/${candidateId}/notes/${target.id}`, { text: payload.body, type: payload.type, channel: payload.channel, language: payload.language })
+      .then(() => { load(); return true })
+      .catch(() => { setNotes(snapshot); notifyError(t('common:actionFailed')); return false })
   }, [candidateId, notes, load, t])
 
   // Delete — optimistic remove with revert. NotesTab now has the gated delete
@@ -108,5 +115,5 @@ export function useCandidateNotes(candidateId: string | number | undefined, opts
       .catch(() => { setNotes(snapshot); notifyError(t('common:actionFailed')) })
   }, [candidateId, notes, t])
 
-  return { notes, addNote, editNote, deleteNote }
+  return { notes, loaded, addNote, editNote, deleteNote }
 }

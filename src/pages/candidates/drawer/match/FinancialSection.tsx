@@ -32,14 +32,22 @@ export default function FinancialSection({
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
       <div style={row2}>
-        <F label={t('placement.scale')} error={errors.scale}><input value={scale} onChange={e => setScale(e.target.value)} style={input} /></F>
-        <F label={t('placement.step')} error={errors.step}><input value={step} onChange={e => setStep(e.target.value)} style={input} /></F>
+        <F label={t('placement.scale')} error={errors.scale}>
+          {(labelId: string) => <input value={scale} onChange={e => setScale(e.target.value)} style={input} aria-labelledby={labelId} />}
+        </F>
+        <F label={t('placement.step')} error={errors.step}>
+          {(labelId: string) => <input value={step} onChange={e => setStep(e.target.value)} style={input} aria-labelledby={labelId} />}
+        </F>
       </div>
       {/* S24c: the live margin joins the rate row as a compact read-only cell —
           derived, never entered; sits right next to the rates it derives from. */}
       <div style={row3}>
-        <F label={t('placement.purchaseRate')} error={errors.purchase}><input type="number" step="0.01" value={purchase} onChange={e => setPurchase(e.target.value)} style={input} placeholder="22,18" /></F>
-        <F label={t('placement.sellRate')} error={errors.sell}><input type="number" step="0.01" value={sell} onChange={e => setSell(e.target.value)} style={input} placeholder="62,10" /></F>
+        <F label={t('placement.purchaseRate')} error={errors.purchase}>
+          {(labelId: string) => <input type="number" step="0.01" value={purchase} onChange={e => setPurchase(e.target.value)} style={input} placeholder="22,18" aria-labelledby={labelId} />}
+        </F>
+        <F label={t('placement.sellRate')} error={errors.sell}>
+          {(labelId: string) => <input type="number" step="0.01" value={sell} onChange={e => setSell(e.target.value)} style={input} placeholder="62,10" aria-labelledby={labelId} />}
+        </F>
         <F label={t('placement.margin')}>
           <div style={{ ...input, display: 'flex', alignItems: 'center', fontSize: 13,
             background: 'var(--surface-2, var(--bg))',

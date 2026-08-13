@@ -40,11 +40,12 @@
  */
 import SelectMenu from '@/components/ui/SelectMenu'
 import CreatableSelect from '@/components/ui/CreatableSelect'
+import KoiosSuggestionBadge from '@/components/ui/KoiosSuggestionBadge'
 import FloatingPanel from '@/components/ui/FloatingPanel'
 import { ActionRuleBanner } from '@/components/actionrules'
 import { usePlanIntakeForm } from './planIntake/usePlanIntakeForm'
 import type { PlanIntakeFormOptions } from './planIntake/usePlanIntakeForm'
-import { fieldLabel, input, fieldFootprint, errMsg } from './planIntake/styles'
+import { input, fieldFootprint, errMsg, labelLeftRow, rowLabel, rowField } from './planIntake/styles'
 
 // Re-exported from their new homes so every caller/test keeps importing them from
 // this module (WorkTab + AppointmentsTab take the type, the unit test the helper).
@@ -62,58 +63,71 @@ export default function PlanIntakeModal(props: PlanIntakeFormOptions) {
     // POPUP-SLEEP-1: migrated onto the shared FloatingPanel — draggable header,
     // remembered position; same 440px footprint as the old panel.
     <FloatingPanel open onClose={onClose} title={heading} ariaLabel={heading}
-      persistKey="plan-intake" width={440} maxWidth="92vw" bodyStyle={{ padding: 22 }}>
+      persistKey="plan-intake" width={580} maxWidth="92vw" scrollBody={false} bodyStyle={{ padding: 0 }}>
+
+      {/* Fields scroll in their own area so the footer buttons stay pinned and never clip (Danny 13-08). */}
+      <div style={{ overflow: 'auto', flex: 1, minHeight: 0, padding: 22 }}>
 
         {/* AXIS-MATRIX-2 preflight — warn/block on this candidate before scheduling (create only). */}
         {form.apptRuleDecision && form.apptRuleDecision.effect !== 'allow' && (
           <div style={{ marginBottom: 14 }}><ActionRuleBanner decision={form.apptRuleDecision} /></div>
         )}
 
+        {/* P33: every field its own full-width label-left row (canon 120px label). */}
         {/* Type → proposes duration + modality. */}
-        <div style={{ marginBottom: 14 }}>
-          <div style={fieldLabel}>{t('work.appointmentType')}</div>
-          <SelectMenu style={fieldFootprint} value={form.type || null} onChange={form.pickType} placeholder={t('work.pickType')}
-            options={form.typeOptions.map(x => ({ value: x.value, label: x.label }))} />
-          {errors.type && <div style={errMsg}>{t('common:required')}</div>}
+        <div style={labelLeftRow}>
+          <span style={rowLabel}>{t('work.appointmentType')}</span>
+          <div style={rowField}>
+            <SelectMenu style={fieldFootprint} value={form.type || null} onChange={form.pickType} placeholder={t('work.pickType')}
+              options={form.typeOptions.map(x => ({ value: x.value, label: x.label }))} />
+            {errors.type && <div style={errMsg}>{t('common:required')}</div>}
+          </div>
         </div>
 
-        {/* Date/time (default = today, rounded up to the quarter) + duration override
-            + the live-computed end time (S24a-b) so "tot 22:15" needs no mental maths. */}
-        <div style={{ display: 'flex', gap: 10, marginBottom: 14 }}>
-          <div style={{ flex: 1 }}>
-            <label htmlFor="intake-when" style={fieldLabel as React.CSSProperties}>{t('work.intakeWhen')}</label>
+        {/* Date/time (default = today, rounded up to the quarter). */}
+        <div style={labelLeftRow}>
+          <label htmlFor="intake-when" style={rowLabel as React.CSSProperties}>{t('work.intakeWhen')}</label>
+          <div style={rowField}>
             <input id="intake-when" type="datetime-local" value={form.when} onChange={e => form.setWhen(e.target.value)} style={input} />
             {errors.when && <div style={errMsg}>{t('common:required')}</div>}
           </div>
-          <div style={{ width: 90 }}>
-            <label htmlFor="intake-dur" style={fieldLabel as React.CSSProperties}>{t('work.duration')}</label>
+        </div>
+
+        {/* Duration override. */}
+        <div style={labelLeftRow}>
+          <label htmlFor="intake-dur" style={rowLabel as React.CSSProperties}>{t('work.duration')}</label>
+          <div style={rowField}>
             <input id="intake-dur" type="number" min={5} max={480} step={5} value={form.duration}
-              onChange={e => form.setDuration(Number(e.target.value) || 0)} style={input} />
+              onChange={e => form.setDuration(Number(e.target.value) || 0)} style={{ ...input, width: 90 }} />
             {errors.duration && <div style={errMsg}>{t('common:required')}</div>}
-          </div>
-          <div style={{ width: 110 }}>
-            <div style={fieldLabel}>{t('work.endTime')}</div>
-            {/* Read-only display, not an input — still box-modeled like one (padding +
-                transparent border, S24c) so it lines up with When/Duur in the same row. */}
-            {/* Read-only but BOXED like its row-mates — the floating "tot 19:15"
-                text read as broken layout (Danny 24-07). */}
-            <div style={{ padding: '8px 11px', border: '1px solid var(--border)', background: 'var(--hover-bg)', borderRadius: 8, boxSizing: 'border-box', display: 'flex', alignItems: 'center', whiteSpace: 'nowrap', fontSize: 13, color: form.endTime ? 'var(--text)' : 'var(--text-muted)', fontFamily: "'JetBrains Mono', monospace" }}>
-              {form.endTime ? t('work.endTimeAt', { time: form.endTime }) : '—'}
-            </div>
           </div>
         </div>
 
-        {/* Office / remote / phone / a real tenant location, + recruiter. */}
-        <div style={{ display: 'flex', gap: 10, marginBottom: 14 }}>
-          <div style={{ flex: 1 }}>
-            <div style={fieldLabel}>{t('work.modality')}</div>
+        {/* End time — read-only, still box-modeled (padding + border, S24c) so it
+            lines up with the other rows; the floating "tot 19:15" text read as
+            broken layout (Danny 24-07), hence the box, now in its own row (P33). */}
+        <div style={labelLeftRow}>
+          <span style={rowLabel}>{t('work.endTime')}</span>
+          <div style={{ padding: '8px 11px', border: '1px solid var(--border)', background: 'var(--hover-bg)', borderRadius: 8, boxSizing: 'border-box', display: 'flex', alignItems: 'center', whiteSpace: 'nowrap', fontSize: 13, width: 110, color: form.endTime ? 'var(--text)' : 'var(--text-muted)', fontFamily: "'JetBrains Mono', monospace" }}>
+            {form.endTime ? t('work.endTimeAt', { time: form.endTime }) : '—'}
+          </div>
+        </div>
+
+        {/* Office / remote / phone / a real tenant location. */}
+        <div style={labelLeftRow}>
+          <span style={rowLabel}>{t('work.modality')}</span>
+          <div style={rowField}>
             {/* Searchable (Danny 24-07: "Locatie ook!!") — same modal combobox as the rest. */}
             <CreatableSelect style={fieldFootprint} value={form.whereValue || null} onChange={form.pickWhere}
               allowCreate={false} options={form.whereOptions} menuWidth={260} />
             {(errors.modality || errors.locationId || errors.appointmentLocation) && <div style={errMsg}>{t('common:required')}</div>}
           </div>
-          <div style={{ flex: 1 }}>
-            <div style={fieldLabel}>{t('work.owner')}</div>
+        </div>
+
+        {/* Recruiter/owner. */}
+        <div style={labelLeftRow}>
+          <span style={rowLabel}>{t('work.owner')}</span>
+          <div style={rowField}>
             {/* Searchable (Danny 24-07: "recruiter zoekbare dropdown!"). */}
             <CreatableSelect style={fieldFootprint} value={form.ownerId || null} onChange={form.setOwnerId} allowCreate={false} placeholder={t('work.pickOwner')} menuWidth={260}
               options={form.ownerOptions} />
@@ -122,16 +136,26 @@ export default function PlanIntakeModal(props: PlanIntakeFormOptions) {
         </div>
 
         {/* Vacancy optional — searchable pick-only combobox; empty = vacancy-less intake application. */}
-        <div style={{ marginBottom: 20 }}>
-          <div style={fieldLabel}>{t('work.vacancyOptional')}</div>
-          <CreatableSelect value={form.vacancyId || null} onChange={form.setVacancyId} placeholder={t('work.noVacancy')}
-            allowCreate={false} menuWidth={340} style={fieldFootprint}
-            options={[
-              ...form.vacancyOptions.map(v => ({ value: String(v.value), label: v.client ? `${v.label} · ${v.client}` : v.label })),
-              ...(form.vacancyFallback ? [form.vacancyFallback] : []),
-            ]} />
-          <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 5 }}>{form.vacancyHint}</div>
-          {(errors.vacancyId || errors.applicationId) && <div style={errMsg}>{t('common:required')}</div>}
+        <div style={{ ...labelLeftRow, marginBottom: 20 }}>
+          <span style={rowLabel}>{t('work.vacancyOptional')}</span>
+          <div style={rowField}>
+            {/* Clearable (Danny 13-08: 'kan vacature niet leeg maken?') — the hint
+                promises 'laat leeg', so the picker must honour letting go: the
+                VAC-CLEAR-1 cross clears back to an intake without a vacancy. */}
+            <CreatableSelect value={form.vacancyId || null} onChange={form.setVacancyId} placeholder={t('work.noVacancy')}
+              clearable clearLabel={t('work.vacancyOptional')}
+              allowCreate={false} menuWidth={340} style={fieldFootprint}
+              options={[
+                ...form.vacancyOptions.map(v => ({ value: String(v.value), label: v.client ? `${v.label} · ${v.client}` : v.label })),
+                ...(form.vacancyFallback ? [form.vacancyFallback] : []),
+              ]} />
+            {/* The badge lives exactly as long as the suggestion: clearing or
+                repicking dissolves it — then the value is the recruiter's own. */}
+            {props.suggestedVacancyId != null && String(form.vacancyId) === String(props.suggestedVacancyId) && !props.existing
+              ? <KoiosSuggestionBadge />
+              : <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 5 }}>{form.vacancyHint}</div>}
+            {(errors.vacancyId || errors.applicationId) && <div style={errMsg}>{t('common:required')}</div>}
+          </div>
         </div>
 
         {/* Server-side rejection (non-field 422 / other failure) — shown in place, modal stays open. */}
@@ -143,7 +167,10 @@ export default function PlanIntakeModal(props: PlanIntakeFormOptions) {
           </div>
         )}
 
-        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8 }}>
+      </div>
+
+      {/* Pinned footer — buttons stay visible whatever the content height (Danny 13-08). */}
+      <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, padding: '14px 22px', borderTop: '1px solid var(--border)', flexShrink: 0 }}>
           <button onClick={onClose} style={{ height: 34, padding: '0 16px', fontSize: 13, border: '1px solid var(--border)', borderRadius: 8, background: 'var(--surface)', cursor: 'pointer', color: 'var(--text)' }}>{t('common:cancel')}</button>
           {/* Disabled when `when` OR `type` is missing (no hardcoded type fallback —
               a tenant with zero configured appointment types has nothing valid to

@@ -45,8 +45,12 @@ import api from '@/lib/api'
 // an edit fetches GET /matches/{id} — a mutable holder so individual tests can set
 // the fixture the mocked `api.get` below returns for that ONE url prefix; null (the
 // reset default) means "not in edit mode", which every OTHER test in this file is.
-const { mockCustomer, editMatchFixture } = vi.hoisted(() => ({
+const { mockCustomer, editMatchFixture, candidateListFixture } = vi.hoisted(() => ({
   editMatchFixture: { current: null as Record<string, unknown> | null },
+  // MODAL34-REPAIR: mutable holder for the un-fixed candidate picker's own GET
+  // /candidates rows — mirrors editMatchFixture's pattern so one test's row list
+  // never leaks into the next (reset in beforeEach below).
+  candidateListFixture: { current: null as Array<{ id: string; name: string }> | null },
   mockCustomer: {
     id: 'cust-1', name: 'Zorggroep A',
     cost_center: 'KP-KLANT', billing_email: 'klant@factuur.nl', branch_id: 'branch-1',
@@ -93,6 +97,7 @@ vi.mock('@/lib/useContractTypes', () => ({ useContractTypes: useContractTypesMoc
 beforeEach(() => {
   vi.clearAllMocks()
   editMatchFixture.current = null // every test defaults to create-mode unless it opts in
+  candidateListFixture.current = null // every test defaults to no picker rows unless it opts in
   useContractTypesMock.mockReturnValue({
     types: ['Fase 1-2 z.u.b. (Works)', 'ZZP Flex'],
     options: [
@@ -142,6 +147,8 @@ vi.mock('@/components/ui/RichTextEditor', () => ({
 vi.mock('@/lib/api', async () => {
   const actual = await vi.importActual('@/lib/api')
   const get = vi.fn((url: string) => {
+    // MODAL34-REPAIR: only ever hit by the un-fixed candidate picker (candidateListFixture opts in).
+    if (url === '/candidates' && candidateListFixture.current) return Promise.resolve({ data: { data: candidateListFixture.current } })
     if (url.startsWith('/customers/')) return Promise.resolve({ data: { data: mockCustomer } })
     if (url.startsWith('/candidates/')) return Promise.resolve({ data: { data: { branch_id: null, location: null } } })
     // EDIT-MATCH-1: only ever hit by editMatchId tests (editMatchFixture opts in).
@@ -173,7 +180,7 @@ describe('MatchModal · searchable pickers (job 18)', () => {
   it('the customer picker is a typeable searchable combobox, not a plain select', async () => {
     const user = userEvent.setup()
     render(<MatchModal candidateId="cand-1" onClose={noop} onCreated={noop} />)
-    await user.click(screen.getByRole('button', { name: 'placement.pickCustomer' }))
+    await user.click(screen.getByRole('button', { name: /placement\.pickCustomer$/ }))
     await user.type(screen.getByPlaceholderText('placement.pickCustomer'), 'Andere')
     // Typing filters down to the matching option only.
     expect(screen.getByRole('button', { name: 'Andere Zorg BV' })).toBeInTheDocument()
@@ -183,7 +190,7 @@ describe('MatchModal · searchable pickers (job 18)', () => {
   it('is pick-only (allowCreate=false) — typing an unknown value never offers to create it', async () => {
     const user = userEvent.setup()
     render(<MatchModal candidateId="cand-1" onClose={noop} onCreated={noop} />)
-    await user.click(screen.getByRole('button', { name: 'placement.pickCustomer' }))
+    await user.click(screen.getByRole('button', { name: /placement\.pickCustomer$/ }))
     await user.type(screen.getByPlaceholderText('placement.pickCustomer'), 'NoSuchCustomerXYZ')
     expect(screen.queryByText(/NoSuchCustomerXYZ/)).toBeNull()
   })
@@ -191,9 +198,9 @@ describe('MatchModal · searchable pickers (job 18)', () => {
   it('the location picker becomes searchable once a customer is picked', async () => {
     const user = userEvent.setup()
     render(<MatchModal candidateId="cand-1" onClose={noop} onCreated={noop} />)
-    await user.click(screen.getByRole('button', { name: 'placement.pickCustomer' }))
+    await user.click(screen.getByRole('button', { name: /placement\.pickCustomer$/ }))
     await user.click(await screen.findByRole('button', { name: 'Zorggroep A' }))
-    await user.click(screen.getByRole('button', { name: 'placement.pickLocation' }))
+    await user.click(screen.getByRole('button', { name: /placement\.pickLocation$/ }))
     await user.type(screen.getByPlaceholderText('placement.pickLocation'), 'Noord')
     expect(screen.getByRole('button', { name: 'Locatie Noord' })).toBeInTheDocument()
     expect(screen.queryByRole('button', { name: 'Locatie Zuid' })).toBeNull()
@@ -207,9 +214,9 @@ describe('MatchModal · searchable pickers (job 18)', () => {
   it('the department picker becomes searchable once a location is picked', async () => {
     const user = userEvent.setup()
     render(<MatchModal candidateId="cand-1" onClose={noop} onCreated={noop} />)
-    await user.click(screen.getByRole('button', { name: 'placement.pickCustomer' }))
+    await user.click(screen.getByRole('button', { name: /placement\.pickCustomer$/ }))
     await user.click(await screen.findByRole('button', { name: 'Zorggroep A' }))
-    await user.click(screen.getByRole('button', { name: 'placement.pickLocation' }))
+    await user.click(screen.getByRole('button', { name: /placement\.pickLocation$/ }))
     await user.click(await screen.findByRole('button', { name: 'Locatie Noord' }))
     const deptField = screen.getByText('placement.department').parentElement as HTMLElement
     await user.click(within(deptField).getByRole('button'))
@@ -225,9 +232,9 @@ describe('MatchModal · searchable pickers (job 18)', () => {
   it('the department picker is pick-only (allowCreate=false) — typing an unknown value never offers to create it', async () => {
     const user = userEvent.setup()
     render(<MatchModal candidateId="cand-1" onClose={noop} onCreated={noop} />)
-    await user.click(screen.getByRole('button', { name: 'placement.pickCustomer' }))
+    await user.click(screen.getByRole('button', { name: /placement\.pickCustomer$/ }))
     await user.click(await screen.findByRole('button', { name: 'Zorggroep A' }))
-    await user.click(screen.getByRole('button', { name: 'placement.pickLocation' }))
+    await user.click(screen.getByRole('button', { name: /placement\.pickLocation$/ }))
     await user.click(await screen.findByRole('button', { name: 'Locatie Noord' }))
     const deptField = screen.getByText('placement.department').parentElement as HTMLElement
     await user.click(within(deptField).getByRole('button'))
@@ -238,9 +245,9 @@ describe('MatchModal · searchable pickers (job 18)', () => {
   it('the contact picker is a typeable searchable combobox once a customer is picked', async () => {
     const user = userEvent.setup()
     render(<MatchModal candidateId="cand-1" onClose={noop} onCreated={noop} />)
-    await user.click(screen.getByRole('button', { name: 'placement.pickCustomer' }))
+    await user.click(screen.getByRole('button', { name: /placement\.pickCustomer$/ }))
     await user.click(await screen.findByRole('button', { name: 'Zorggroep A' }))
-    await user.click(screen.getByRole('button', { name: 'placement.pickContact' }))
+    await user.click(screen.getByRole('button', { name: /placement\.pickContact$/ }))
     await user.type(screen.getByPlaceholderText('placement.pickContact'), 'Jan')
     expect(screen.getByRole('button', { name: 'Jan Jansen' })).toBeInTheDocument()
     expect(screen.queryByRole('button', { name: 'Marie Bakker' })).toBeNull()
@@ -267,7 +274,7 @@ describe('MatchModal · cost centre / billing email cascade (job 21/22)', () => 
   it('proposes the customer-level values once the customer is picked', async () => {
     const user = userEvent.setup()
     render(<MatchModal candidateId="cand-1" onClose={noop} onCreated={noop} />)
-    await user.click(screen.getByRole('button', { name: 'placement.pickCustomer' }))
+    await user.click(screen.getByRole('button', { name: /placement\.pickCustomer$/ }))
     await user.click(await screen.findByRole('button', { name: 'Zorggroep A' }))
     expect(await screen.findByDisplayValue('KP-KLANT')).toBeInTheDocument()
     expect(screen.getByDisplayValue('klant@factuur.nl')).toBeInTheDocument()
@@ -276,10 +283,10 @@ describe('MatchModal · cost centre / billing email cascade (job 21/22)', () => 
   it('cost centre follows the deepest picked level (location), but billing email stays the customer\'s (Danny 2026-07-22)', async () => {
     const user = userEvent.setup()
     render(<MatchModal candidateId="cand-1" onClose={noop} onCreated={noop} />)
-    await user.click(screen.getByRole('button', { name: 'placement.pickCustomer' }))
+    await user.click(screen.getByRole('button', { name: /placement\.pickCustomer$/ }))
     await user.click(await screen.findByRole('button', { name: 'Zorggroep A' }))
     await screen.findByDisplayValue('KP-KLANT')
-    await user.click(screen.getByRole('button', { name: 'placement.pickLocation' }))
+    await user.click(screen.getByRole('button', { name: /placement\.pickLocation$/ }))
     await user.click(screen.getByRole('button', { name: 'Locatie Noord' }))
     expect(await screen.findByDisplayValue('KP-LOC1')).toBeInTheDocument()
     // Billing NEVER cascades — the location's own billing_email ('loc1@factuur.nl')
@@ -291,9 +298,9 @@ describe('MatchModal · cost centre / billing email cascade (job 21/22)', () => 
   it('never overwrites a manually-edited cost centre after a later location pick (the fixed bug)', async () => {
     const user = userEvent.setup()
     render(<MatchModal candidateId="cand-1" onClose={noop} onCreated={noop} />)
-    await user.click(screen.getByRole('button', { name: 'placement.pickCustomer' }))
+    await user.click(screen.getByRole('button', { name: /placement\.pickCustomer$/ }))
     await user.click(await screen.findByRole('button', { name: 'Zorggroep A' }))
-    await user.click(screen.getByRole('button', { name: 'placement.pickLocation' }))
+    await user.click(screen.getByRole('button', { name: /placement\.pickLocation$/ }))
     await user.click(screen.getByRole('button', { name: 'Locatie Noord' }))
     const costInput = await screen.findByDisplayValue('KP-LOC1')
     await user.clear(costInput)
@@ -301,7 +308,7 @@ describe('MatchModal · cost centre / billing email cascade (job 21/22)', () => 
 
     // Switch to a location with NO cost centre of its own — previously this
     // effect ran unconditionally and would have overwritten the manual edit.
-    await user.click(screen.getByRole('button', { name: 'Locatie Noord' }))
+    await user.click(screen.getByRole('button', { name: /Locatie Noord$/ }))
     await user.click(screen.getByRole('button', { name: 'Locatie Zuid' }))
     expect(screen.getByDisplayValue('KP-EIGEN')).toBeInTheDocument()
     expect(screen.queryByDisplayValue('KP-KLANT')).toBeNull()
@@ -347,19 +354,19 @@ describe('MatchModal · Vestiging default (7.4)', () => {
   it('proposes the customer\'s own branch once the customer is picked', async () => {
     const user = userEvent.setup()
     render(<MatchModal candidateId="cand-1" onClose={noop} onCreated={noop} />)
-    await user.click(screen.getByRole('button', { name: 'placement.pickCustomer' }))
+    await user.click(screen.getByRole('button', { name: /placement\.pickCustomer$/ }))
     await user.click(await screen.findByRole('button', { name: 'Zorggroep A' }))
-    expect(await within(branchField()).findByRole('button', { name: 'Hoofdkantoor' })).toBeInTheDocument()
+    expect(await within(branchField()).findByRole('button', { name: /Hoofdkantoor$/ })).toBeInTheDocument()
   })
 
   it('sends the proposed branch_id on submit', async () => {
     const user = userEvent.setup()
     render(<MatchModal candidateId="cand-1" onClose={noop} onCreated={noop} />)
-    await user.click(screen.getByRole('button', { name: 'placement.pickCustomer' }))
+    await user.click(screen.getByRole('button', { name: /placement\.pickCustomer$/ }))
     await user.click(await screen.findByRole('button', { name: 'Zorggroep A' }))
-    await user.click(screen.getByRole('button', { name: 'placement.pickFunction' }))
+    await user.click(screen.getByRole('button', { name: /placement\.pickFunction$/ }))
     await user.click(await screen.findByRole('button', { name: 'Verzorgende IG' }))
-    await within(branchField()).findByRole('button', { name: 'Hoofdkantoor' })
+    await within(branchField()).findByRole('button', { name: /Hoofdkantoor$/ })
 
     await user.click(screen.getByRole('button', { name: 'placement.create' }))
     expect(api.post).toHaveBeenCalledWith('/matches', expect.objectContaining({ branch_id: 'branch-1' }))
@@ -368,14 +375,14 @@ describe('MatchModal · Vestiging default (7.4)', () => {
   it('an overridden branch wins over the proposal', async () => {
     const user = userEvent.setup()
     render(<MatchModal candidateId="cand-1" onClose={noop} onCreated={noop} />)
-    await user.click(screen.getByRole('button', { name: 'placement.pickCustomer' }))
+    await user.click(screen.getByRole('button', { name: /placement\.pickCustomer$/ }))
     await user.click(await screen.findByRole('button', { name: 'Zorggroep A' }))
-    await user.click(screen.getByRole('button', { name: 'placement.pickFunction' }))
+    await user.click(screen.getByRole('button', { name: /placement\.pickFunction$/ }))
     await user.click(await screen.findByRole('button', { name: 'Verzorgende IG' }))
-    await within(branchField()).findByRole('button', { name: 'Hoofdkantoor' })
+    await within(branchField()).findByRole('button', { name: /Hoofdkantoor$/ })
 
     // Manual override — picks a different branch than the proposal.
-    await user.click(within(branchField()).getByRole('button', { name: 'Hoofdkantoor' }))
+    await user.click(within(branchField()).getByRole('button', { name: /Hoofdkantoor$/ }))
     await user.click(screen.getByRole('button', { name: 'Bijkantoor' }))
 
     await user.click(screen.getByRole('button', { name: 'placement.create' }))
@@ -403,7 +410,7 @@ describe('MatchModal · end-date proposal from contract type (7.1)', () => {
     const now = new Date()
     const today = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`
 
-    await user.click(screen.getByRole('button', { name: 'placement.pickContractType' }))
+    await user.click(screen.getByRole('button', { name: /placement\.pickContractType$/ }))
     await user.click(await screen.findByRole('button', { name: 'Fase 1-2 z.u.b. (Works)' }))
 
     const dateInputs = container.querySelectorAll('input[type="date"]')
@@ -415,7 +422,7 @@ describe('MatchModal · end-date proposal from contract type (7.1)', () => {
     const { container } = render(<MatchModal candidateId="cand-1" onClose={noop} onCreated={noop} />)
     await screen.findByRole('dialog')
 
-    await user.click(screen.getByRole('button', { name: 'placement.pickContractType' }))
+    await user.click(screen.getByRole('button', { name: /placement\.pickContractType$/ }))
     await user.click(await screen.findByRole('button', { name: 'Fase 1-2 z.u.b. (Works)' }))
     const dateInputs = container.querySelectorAll('input[type="date"]')
     const endDateInput = dateInputs[1] as HTMLInputElement
@@ -438,9 +445,9 @@ describe('MatchModal · end-date proposal from contract type (7.1)', () => {
 // matching field, fall back to a server message/generic banner otherwise.
 describe('MatchModal · 422 field mapping', () => {
   const pickCustomerAndFunction = async (user: ReturnType<typeof userEvent.setup>) => {
-    await user.click(screen.getByRole('button', { name: 'placement.pickCustomer' }))
+    await user.click(screen.getByRole('button', { name: /placement\.pickCustomer$/ }))
     await user.click(await screen.findByRole('button', { name: 'Zorggroep A' }))
-    await user.click(screen.getByRole('button', { name: 'placement.pickFunction' }))
+    await user.click(screen.getByRole('button', { name: /placement\.pickFunction$/ }))
     await user.click(await screen.findByRole('button', { name: 'Verzorgende IG' }))
   }
 
@@ -476,9 +483,9 @@ describe('MatchModal · Contractsoort/Vestiging/CAO/Recruiter are searchable (Da
   it('Contractsoort filters by typing and is pick-only', async () => {
     const user = userEvent.setup()
     render(<MatchModal candidateId="cand-1" onClose={noop} onCreated={noop} />)
-    await user.click(screen.getByRole('button', { name: 'placement.pickContractType' }))
+    await user.click(screen.getByRole('button', { name: /placement\.pickContractType$/ }))
     await user.type(screen.getByPlaceholderText('placement.pickContractType'), 'ZZP')
-    expect(screen.getByRole('button', { name: 'ZZP Flex' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /ZZP Flex/ })).toBeInTheDocument()
     expect(screen.queryByRole('button', { name: 'Fase 1-2 z.u.b. (Works)' })).toBeNull()
   })
 
@@ -495,12 +502,12 @@ describe('MatchModal · Contractsoort/Vestiging/CAO/Recruiter are searchable (Da
   it('CAO is searchable (fed by useCao\'s seed fallback) and its picked value rides the POST body', async () => {
     const user = userEvent.setup()
     render(<MatchModal candidateId="cand-1" onClose={noop} onCreated={noop} />)
-    await user.click(screen.getByRole('button', { name: 'placement.pickCustomer' }))
+    await user.click(screen.getByRole('button', { name: /placement\.pickCustomer$/ }))
     await user.click(await screen.findByRole('button', { name: 'Zorggroep A' }))
-    await user.click(screen.getByRole('button', { name: 'placement.pickFunction' }))
+    await user.click(screen.getByRole('button', { name: /placement\.pickFunction$/ }))
     await user.click(await screen.findByRole('button', { name: 'Verzorgende IG' }))
 
-    await user.click(screen.getByRole('button', { name: 'placement.pickCao' }))
+    await user.click(screen.getByRole('button', { name: /placement\.pickCao$/ }))
     await user.type(screen.getByPlaceholderText('placement.pickCao'), 'GGZ')
     expect(screen.getByRole('button', { name: 'GGZ' })).toBeInTheDocument()
     expect(screen.queryByRole('button', { name: 'VVT' })).toBeNull()
@@ -524,13 +531,13 @@ describe('MatchModal · Contractsoort/Vestiging/CAO/Recruiter are searchable (Da
     await user.click(within(ownerField).getByRole('button'))
     await user.type(screen.getByPlaceholderText('placement.optional'), 'Sanne')
     expect(screen.getByRole('button', { name: 'Sanne Planner' })).toBeInTheDocument()
-    expect(screen.getAllByRole('button', { name: 'Piet Recruiter' })).toHaveLength(1)
+    expect(screen.getAllByRole('button', { name: /Piet Recruiter$/ })).toHaveLength(1)
     await user.click(screen.getByRole('button', { name: 'Sanne Planner' }))
 
     // Optional: left untouched, no owner_id rides the body at all.
-    await user.click(screen.getByRole('button', { name: 'placement.pickCustomer' }))
+    await user.click(screen.getByRole('button', { name: /placement\.pickCustomer$/ }))
     await user.click(await screen.findByRole('button', { name: 'Zorggroep A' }))
-    await user.click(screen.getByRole('button', { name: 'placement.pickFunction' }))
+    await user.click(screen.getByRole('button', { name: /placement\.pickFunction$/ }))
     await user.click(await screen.findByRole('button', { name: 'Verzorgende IG' }))
     await user.click(screen.getByRole('button', { name: 'placement.create' }))
     expect(api.post).toHaveBeenCalledWith('/matches', expect.objectContaining({ owner_id: 'u2' }))
@@ -551,7 +558,7 @@ describe('MatchModal · default contract-type proposal (Danny 24-07 point 4)', (
     })
     render(<MatchModal candidateId="cand-1" onClose={noop} onCreated={noop} />)
     await screen.findByRole('dialog')
-    expect(screen.getByRole('button', { name: 'ZZP Flex' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /ZZP Flex/ })).toBeInTheDocument()
   })
 
   it('never overrides a value the recruiter already picked', async () => {
@@ -566,9 +573,9 @@ describe('MatchModal · default contract-type proposal (Danny 24-07 point 4)', (
     render(<MatchModal candidateId="cand-1" onClose={noop} onCreated={noop} />)
     await screen.findByRole('dialog')
     // Manually pick the OTHER type before the default would land.
-    await user.click(screen.getByRole('button', { name: 'ZZP Flex' }))
+    await user.click(screen.getByRole('button', { name: /ZZP Flex/ }))
     await user.click(await screen.findByRole('button', { name: 'Fase 1-2 z.u.b. (Works)' }))
-    expect(screen.getByRole('button', { name: 'Fase 1-2 z.u.b. (Works)' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /Fase 1-2 z\.u\.b\. \(Works\)/ })).toBeInTheDocument()
   })
 })
 
@@ -578,9 +585,9 @@ describe('MatchModal · contact picker shows the function title', () => {
   it('renders "Naam — Functietitel" for contacts that carry a function', async () => {
     const user = userEvent.setup()
     render(<MatchModal candidateId="cand-1" onClose={noop} onCreated={noop} />)
-    await user.click(screen.getByRole('button', { name: 'placement.pickCustomer' }))
+    await user.click(screen.getByRole('button', { name: /placement\.pickCustomer$/ }))
     await user.click(await screen.findByRole('button', { name: 'Zorggroep A' }))
-    await user.click(screen.getByRole('button', { name: 'placement.pickContact' }))
+    await user.click(screen.getByRole('button', { name: /placement\.pickContact$/ }))
     expect(screen.getByRole('button', { name: 'Eva Bos — Locatiemanager' })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Eva Bos — Regiomanager' })).toBeInTheDocument()
   })
@@ -588,18 +595,18 @@ describe('MatchModal · contact picker shows the function title', () => {
   it('falls back to the bare name — never a dangling dash — when no function is present', async () => {
     const user = userEvent.setup()
     render(<MatchModal candidateId="cand-1" onClose={noop} onCreated={noop} />)
-    await user.click(screen.getByRole('button', { name: 'placement.pickCustomer' }))
+    await user.click(screen.getByRole('button', { name: /placement\.pickCustomer$/ }))
     await user.click(await screen.findByRole('button', { name: 'Zorggroep A' }))
-    await user.click(screen.getByRole('button', { name: 'placement.pickContact' }))
+    await user.click(screen.getByRole('button', { name: /placement\.pickContact$/ }))
     expect(screen.getByRole('button', { name: 'Jan Jansen' })).toBeInTheDocument()
   })
 
   it('search also matches the function text, not just the name', async () => {
     const user = userEvent.setup()
     render(<MatchModal candidateId="cand-1" onClose={noop} onCreated={noop} />)
-    await user.click(screen.getByRole('button', { name: 'placement.pickCustomer' }))
+    await user.click(screen.getByRole('button', { name: /placement\.pickCustomer$/ }))
     await user.click(await screen.findByRole('button', { name: 'Zorggroep A' }))
-    await user.click(screen.getByRole('button', { name: 'placement.pickContact' }))
+    await user.click(screen.getByRole('button', { name: /placement\.pickContact$/ }))
     await user.type(screen.getByPlaceholderText('placement.pickContact'), 'Regiomanager')
     expect(screen.getByRole('button', { name: 'Eva Bos — Regiomanager' })).toBeInTheDocument()
     expect(screen.queryByRole('button', { name: 'Eva Bos — Locatiemanager' })).toBeNull()
@@ -612,7 +619,7 @@ describe('MatchModal · contact picker shows the function title', () => {
 // not enforce.
 describe('MatchModal · inline new-contact form (Danny 24-07 addendum)', () => {
   const openCreateForm = async (user: ReturnType<typeof userEvent.setup>) => {
-    await user.click(screen.getByRole('button', { name: 'placement.pickCustomer' }))
+    await user.click(screen.getByRole('button', { name: /placement\.pickCustomer$/ }))
     await user.click(await screen.findByRole('button', { name: 'Zorggroep A' }))
     await user.click(screen.getByRole('button', { name: 'placement.newContact' }))
   }
@@ -713,8 +720,8 @@ describe('MatchModal · edit mode (point 2, Danny live P1)', () => {
     editMatchFixture.current = editMatch
     render(<MatchModal candidateId="cand-1" editMatchId="match-1" onClose={noop} onCreated={noop} />)
     // Customer AND function prefill from the fetched record, not the thin row.
-    expect(await screen.findByRole('button', { name: 'Zorggroep A' })).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: 'Verzorgende IG' })).toBeInTheDocument()
+    expect(await screen.findByRole('button', { name: /Zorggroep A$/ })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /Verzorgende IG$/ })).toBeInTheDocument()
     // Cost centre is a plain input — the loaded value must survive the cascade's
     // OWN "propose from customer" effect (frozen via setCostCenterDirty(true)).
     expect(screen.getByDisplayValue('KP-EXISTING')).toBeInTheDocument()
@@ -723,7 +730,7 @@ describe('MatchModal · edit mode (point 2, Danny live P1)', () => {
   it('renders the vacancy field read-only (identity is not editable via PATCH)', async () => {
     editMatchFixture.current = editMatch
     render(<MatchModal candidateId="cand-1" editMatchId="match-1" onClose={noop} onCreated={noop} />)
-    await screen.findByRole('button', { name: 'Zorggroep A' })
+    await screen.findByRole('button', { name: /Zorggroep A$/ })
     // No interactive combobox for Vacature while editing — a plain text value instead.
     expect(screen.queryByRole('button', { name: 'placement.noVacancy' })).toBeNull()
     expect(screen.getByText('placement.noVacancy')).toBeInTheDocument()
@@ -733,7 +740,7 @@ describe('MatchModal · edit mode (point 2, Danny live P1)', () => {
     editMatchFixture.current = editMatch
     const user = userEvent.setup()
     render(<MatchModal candidateId="cand-1" editMatchId="match-1" onClose={noop} onCreated={noop} />)
-    await screen.findByRole('button', { name: 'Zorggroep A' })
+    await screen.findByRole('button', { name: /Zorggroep A$/ })
     // Change one field by hand before saving.
     const costInput = screen.getByDisplayValue('KP-EXISTING')
     await user.clear(costInput)
@@ -751,15 +758,66 @@ describe('MatchModal · edit mode (point 2, Danny live P1)', () => {
   })
 })
 
+// MODAL34-REPAIR (control round): MatchModal wires MATCH-REMARKS-POPOUT onto its
+// Opmerkingen card — pins the card heading and that the pop-out affordance really
+// depends on a KNOWN candidate id (fixed prop OR a candidate picked through the
+// on-page picker), never rendered before one exists (the sync channel has nothing
+// to key on otherwise — see MatchModal.tsx's own docblock on `remarksCandidateId`).
+describe('MatchModal · Match opmerkingen card + pop-out wiring (MODAL34-REPAIR)', () => {
+  it('renders the "Match opmerkingen" card heading', async () => {
+    render(<MatchModal candidateId="cand-1" onClose={noop} onCreated={noop} />)
+    await screen.findByRole('dialog')
+    expect(screen.getByText('placement.matchRemarks')).toBeInTheDocument()
+  })
+
+  it('shows the pop-out button once the fixed candidate id is known, after opening the editor', async () => {
+    const user = userEvent.setup()
+    render(<MatchModal candidateId="cand-1" onClose={noop} onCreated={noop} />)
+    await screen.findByRole('dialog')
+    await user.click(screen.getByRole('button', { name: 'placement.remarksAdd' }))
+    expect(screen.getByTitle('common:openSecondScreen')).toBeInTheDocument()
+  })
+
+  it('renders NO pop-out button while no candidate is known yet (no fixed id, none picked)', async () => {
+    const user = userEvent.setup()
+    // The Matches page opens this SAME form without a fixed candidateId — a
+    // picker appears at the top of Relaties instead (see useMatchForm).
+    render(<MatchModal onClose={noop} onCreated={noop} />)
+    await screen.findByRole('dialog')
+    await user.click(screen.getByRole('button', { name: 'placement.remarksAdd' }))
+    expect(screen.queryByTitle('common:openSecondScreen')).not.toBeInTheDocument()
+  })
+
+  it('the pop-out button appears the moment a candidate is picked through the on-page picker', async () => {
+    // GET /candidates (the un-fixed candidate picker's own option source) — the
+    // shared api.get mock reads this fixture for that ONE url, mirroring
+    // editMatchFixture's pattern (never a one-off mockImplementation override,
+    // which would leak into every later test in this file). Set BEFORE render:
+    // the picker's option fetch runs once on mount.
+    candidateListFixture.current = [{ id: 'cand-9', name: 'Piet Kandidaat' }]
+    const user = userEvent.setup()
+    render(<MatchModal onClose={noop} onCreated={noop} />)
+    await screen.findByRole('dialog')
+    await user.click(screen.getByRole('button', { name: 'placement.remarksAdd' }))
+    expect(screen.queryByTitle('common:openSecondScreen')).not.toBeInTheDocument()
+
+    const candidateField = screen.getByText('placement.candidate').parentElement as HTMLElement
+    await user.click(within(candidateField).getByRole('button'))
+    await user.click(await screen.findByRole('button', { name: 'Piet Kandidaat' }))
+
+    expect(await screen.findByTitle('common:openSecondScreen')).toBeInTheDocument()
+  })
+})
+
 // MATCH-EXPERIENCE-AUTO-1 (CMBE, 2026-07-25): the backend's MatchMaker now writes
 // the work-experience entry itself on every match create — with and without a
 // vacancy, idempotent on employer+start date — so the frontend must NEVER post
 // one. Replaces the old interim-bridge tests (which asserted the FE posted it).
 describe('MatchModal · never posts a work-experience entry (backend owns it, MATCH-EXPERIENCE-AUTO-1)', () => {
   const pickCustomerAndFunction = async (user: ReturnType<typeof userEvent.setup>) => {
-    await user.click(screen.getByRole('button', { name: 'placement.pickCustomer' }))
+    await user.click(screen.getByRole('button', { name: /placement\.pickCustomer$/ }))
     await user.click(await screen.findByRole('button', { name: 'Zorggroep A' }))
-    await user.click(screen.getByRole('button', { name: 'placement.pickFunction' }))
+    await user.click(screen.getByRole('button', { name: /placement\.pickFunction$/ }))
     await user.click(await screen.findByRole('button', { name: 'Verzorgende IG' }))
   }
 
@@ -784,7 +842,7 @@ describe('MatchModal · never posts a work-experience entry (backend owns it, MA
     }
     const user = userEvent.setup()
     render(<MatchModal candidateId="cand-1" editMatchId="match-1" onClose={noop} onCreated={noop} />)
-    await screen.findByRole('button', { name: 'Zorggroep A' })
+    await screen.findByRole('button', { name: /Zorggroep A$/ })
     await user.click(screen.getByRole('button', { name: 'common:save' }))
     await waitFor(() => expect(api.patch).toHaveBeenCalledWith('/matches/match-1', expect.anything()))
     expect(api.post).not.toHaveBeenCalledWith('/candidates/cand-1/experiences', expect.anything())

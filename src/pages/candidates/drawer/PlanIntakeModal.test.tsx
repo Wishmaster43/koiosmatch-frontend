@@ -13,7 +13,7 @@
  * disables the submit button.
  */
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { render, screen, fireEvent } from '@testing-library/react'
+import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import PlanIntakeModal, { endTimeOf } from './PlanIntakeModal'
 import api from '@/lib/api'
@@ -313,5 +313,46 @@ describe('PlanIntakeModal · AXIS-MATRIX-2 preflight (CMFE audit R1)', () => {
       existing={{ id: 'appt-1', scheduled_at: '2026-07-20T10:00:00Z', type: 'intake_flex' }} />)
     expect(screen.queryByTestId('action-rule-banner')).not.toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'common:save' })).toBeEnabled()
+  })
+})
+
+// VAC-CLEAR in the intake modal (Danny 13-08): the hint says 'laat leeg', so a
+// picked vacancy must be releasable — the clear cross resets to no-vacancy.
+it('clears a picked vacancy back to an intake without vacancy', async () => {
+  render(<PlanIntakeModal candidateId="cand-1" defaultVacancyId="v1" onClose={noop} onCreated={noop} />)
+  // The VAC-CLEAR cross carries the field name in its accessible name.
+  const clear = await screen.findByTitle(/clearField/i)
+  fireEvent.click(clear)
+  // The picker shows its placeholder again — nothing selected.
+  expect(await screen.findByText(/work\.noVacancy/i)).toBeInTheDocument()
+})
+
+// KOIOS-VOORSTEL-1: the suggested vacancy renders the Koios badge — and the badge
+// dissolves the moment the recruiter clears the proposal (then it is their choice).
+it('shows the Koios badge on a SUGGESTED vacancy and dissolves it on clear', async () => {
+  render(<PlanIntakeModal candidateId="cand-1" suggestedVacancyId="v1" onClose={noop} onCreated={noop} />)
+  expect(await screen.findByTestId('koios-suggestion')).toBeInTheDocument()
+  fireEvent.click(await screen.findByTitle(/clearField/i))
+  expect(screen.queryByTestId('koios-suggestion')).toBeNull()
+})
+
+it('shows NO badge for an explicit defaultVacancyId (context, not a proposal)', async () => {
+  render(<PlanIntakeModal candidateId="cand-1" defaultVacancyId="v1" onClose={noop} onCreated={noop} />)
+  fireEvent.click(await screen.findByTitle(/clearField/i)) // sanity: field seeded
+  expect(screen.queryByTestId('koios-suggestion')).toBeNull()
+})
+
+// CLEAR-SWEEP seam test (control round 13-08: placeholder-asserts let a dead edit
+// path ship green). Editing an appointment, clearing the vacancy and saving must
+// PATCH vacancy_id: null — an omitted key means 'unchanged' server-side.
+it('edit + clear + save PATCHes vacancy_id: null (the request, not the placeholder)', async () => {
+  render(<PlanIntakeModal candidateId="cand-1"
+    existing={{ id: 'appt-1', scheduled_at: '2026-08-14T10:00', vacancy_id: 'v1' }}
+    onClose={noop} onCreated={noop} />)
+  fireEvent.click(await screen.findByTitle(/clearField/i))
+  fireEvent.click(screen.getByRole('button', { name: /work\.saveAppointment|common:save|save/i }))
+  await waitFor(() => {
+    const patch = vi.mocked(api.patch).mock.calls.at(-1)
+    expect(patch?.[1]).toMatchObject({ vacancy_id: null })
   })
 })

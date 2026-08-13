@@ -41,8 +41,8 @@ vi.mock('./constants', () => ({ sectionBlock: {}, rememberReturnTab: vi.fn(), pe
 // vacancy-options hooks) — stand in with a marker exposing the props INTAKE-
 // VACANCY-ID-1 cares about, so the wiring is observable without those hooks.
 vi.mock('./PlanIntakeModal', () => ({
-  default: ({ defaultVacancyId, existing }: { defaultVacancyId?: string | number | null; existing?: { vacancy_id?: string | number | null } }) => (
-    <div data-testid="plan-intake-modal" data-default-vacancy-id={defaultVacancyId ?? ''} data-existing-vacancy-id={existing?.vacancy_id ?? ''} />
+  default: ({ defaultVacancyId, suggestedVacancyId, existing }: { defaultVacancyId?: string | number | null; suggestedVacancyId?: string | number | null; existing?: { vacancy_id?: string | number | null } }) => (
+    <div data-testid="plan-intake-modal" data-default-vacancy-id={defaultVacancyId ?? ''} data-suggested-vacancy-id={suggestedVacancyId ?? ''} data-existing-vacancy-id={existing?.vacancy_id ?? ''} />
   ),
 }))
 // MatchModal is a different file's scope (customer/vacancy/rate hooks) —
@@ -246,11 +246,15 @@ describe('WorkTab · sub-tabs (kandidaten-ronde-2, punt C)', () => {
 // intake appointments carrying `vacancy_id` — a "Intake plannen" booked from the
 // candidate side must thread that id whenever it is unambiguous.
 describe('WorkTab · INTAKE-VACANCY-ID-1 (vacancy_id wiring for the shared appointment modal)', () => {
-  it('defaults "Intake plannen" to the single distinct vacancy across the applications', async () => {
+  // KOIOS-VOORSTEL-1 (Danny 13-08): with exactly one distinct vacancy in the history,
+  // both modals receive it as a MARKED Koios suggestion — not a silent default.
+  it('threads the sole history vacancy into "Intake plannen" as a Koios SUGGESTION', async () => {
     const user = userEvent.setup()
     render(<WorkTab c={candidate([{ id: 'app-1', vacancy: { id: 'vac-1', title: 'Verpleegkundige' }, created_at: '2026-07-01' }])} />)
     await user.click(screen.getByRole('button', { name: 'work.planIntake' }))
-    expect(screen.getByTestId('plan-intake-modal')).toHaveAttribute('data-default-vacancy-id', 'vac-1')
+    const modal = screen.getByTestId('plan-intake-modal')
+    expect(modal).toHaveAttribute('data-suggested-vacancy-id', 'vac-1')
+    expect(modal).not.toHaveAttribute('data-default-vacancy-id', 'vac-1')
   })
 
   it('leaves the default empty when the candidate has two DIFFERENT vacancies (ambiguous — the modal picker decides)', async () => {

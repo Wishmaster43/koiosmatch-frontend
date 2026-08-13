@@ -31,24 +31,38 @@ export default function ContractSection({
       <div style={row2}>
         {/* Contractsoort — searchable tenant lookup (Danny 24-07 point 1), was a
             plain non-searchable SelectMenu; may PROPOSE a tenant-marked default
-            (useMatchForm, is_default) into an otherwise empty field. */}
+            (useMatchForm, is_default) into an otherwise empty field.
+            A11Y FIX (control round): the shortened 'Soort' label now names the
+            trigger for real via aria-labelledby, not just visible text next to it. */}
         <F label={t('placement.contractType')} error={errors.contractType}>
-          <CreatableSelect value={contractType || null} onChange={setContractType} allowCreate={false}
-            placeholder={t('placement.pickContractType')} menuWidth={pickerMenuWidth}
-            options={contractTypes.map(c => ({ value: c, label: c }))} />
+          {(labelId: string) => (
+            <CreatableSelect value={contractType || null} onChange={setContractType} allowCreate={false}
+              placeholder={t('placement.pickContractType')} menuWidth={pickerMenuWidth}
+              aria-labelledby={labelId}
+              options={contractTypes.map(c => ({ value: c, label: c }))} />
+          )}
         </F>
         {/* CAO — searchable tenant lookup (useCao, Settings → Klanten → CAO), was a
             bare free-text input (Danny 24-07 point 5 finding) — never wired to the
             lookup every other CAO field in the app already uses. */}
         <F label={t('placement.cao')} error={errors.cao}>
-          <CreatableSelect value={cao || null} onChange={setCao} allowCreate={false}
-            placeholder={t('placement.pickCao')} menuWidth={pickerMenuWidth} options={caoOptions} />
+          {(labelId: string) => (
+            <CreatableSelect value={cao || null} onChange={setCao} allowCreate={false}
+              placeholder={t('placement.pickCao')} menuWidth={pickerMenuWidth} options={caoOptions}
+              aria-labelledby={labelId} />
+          )}
         </F>
       </div>
-      {/* S24c: hours joins the date row (compact third column) — one row less to scroll. */}
+      {/* S24c: hours joins the date row (compact third column) — one row less to scroll.
+          A11Y FIX (control round): the two date inputs get their own accessible name
+          too — a bare label <div> next to an <input> is not a real association. */}
       <div style={row3}>
-        <F label={t('placement.startDate')} error={errors.startDate}><input type="date" value={startDate} onChange={e => setStartDate(e.target.value)} style={input} /></F>
-        <F label={t('placement.endDate')} error={errors.endDate}><input type="date" value={endDate} onChange={e => { setEndDateDirty(true); setEndDate(e.target.value) }} style={input} /></F>
+        <F label={t('placement.startDate')} error={errors.startDate}>
+          {(labelId: string) => <input type="date" value={startDate} onChange={e => setStartDate(e.target.value)} style={input} aria-labelledby={labelId} />}
+        </F>
+        <F label={t('placement.endDate')} error={errors.endDate}>
+          {(labelId: string) => <input type="date" value={endDate} onChange={e => { setEndDateDirty(true); setEndDate(e.target.value) }} style={input} aria-labelledby={labelId} />}
+        </F>
         <F label={t('placement.hoursShort')} error={errors.hours}><input type="number" min={1} max={40} value={hours} onChange={e => setHours(e.target.value)} style={input} aria-label={t('placement.hoursPerWeek')} /></F>
       </div>
     </div>

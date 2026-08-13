@@ -19,7 +19,7 @@
  * recruiter differs — proceeding always stays allowed (never a block).
  */
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { render, screen } from '@testing-library/react'
+import { fireEvent, render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import AddApplicationModal from './AddApplicationModal'
 import api from '@/lib/api'
@@ -395,4 +395,28 @@ describe('AddApplicationModal · EDIT mode (punt 5)', () => {
     expect(api.post).not.toHaveBeenCalled()
     expect(onClose).toHaveBeenCalled()
   })
+})
+
+// VAC-CLEAR in the apply modal (Danny 13-08): a picked optional vacancy must be
+// releasable — the clear cross returns the picker to its placeholder.
+it('clears a picked vacancy back to an open application', async () => {
+  render(<AddApplicationModal candidateId="cand-1" initialVacancyId="v1" onClose={noop} onCreated={noop} />)
+  const clear = await screen.findByTitle(/clearField/i)
+  fireEvent.click(clear)
+  expect(await screen.findByText(/work\.pickVacancy/i)).toBeInTheDocument()
+})
+
+// KOIOS-VOORSTEL-1: same contract as the intake modal — suggested = badged,
+// cleared = recruiter's own; the score-panel's initialVacancyId stays badge-less.
+it('shows the Koios badge on a SUGGESTED vacancy and dissolves it on clear', async () => {
+  render(<AddApplicationModal candidateId="cand-1" suggestedVacancyId="v1" onClose={noop} onCreated={noop} />)
+  expect(await screen.findByTestId('koios-suggestion')).toBeInTheDocument()
+  fireEvent.click(await screen.findByTitle(/clearField/i))
+  expect(screen.queryByTestId('koios-suggestion')).toBeNull()
+})
+
+it('shows NO badge for the score-panel initialVacancyId (own click, not a proposal)', async () => {
+  render(<AddApplicationModal candidateId="cand-1" initialVacancyId="v1" onClose={noop} onCreated={noop} />)
+  fireEvent.click(await screen.findByTitle(/clearField/i))
+  expect(screen.queryByTestId('koios-suggestion')).toBeNull()
 })

@@ -59,15 +59,19 @@ import api, { unwrap } from '@/lib/api'
 import { notifyError, notifySuccess } from '@/lib/notify'
 import { extractApiError } from '@/lib/extractApiError'
 import CreatableSelect from '@/components/ui/CreatableSelect'
+import KoiosSuggestionBadge from '@/components/ui/KoiosSuggestionBadge'
 import FloatingPanel from '@/components/ui/FloatingPanel'
 import { useVacancyOptions } from '../hooks/useVacancyOptions'
 import { useApplicationStages } from '@/hooks/useApplicationStages'
 import { useActionRulePreflight, ActionRuleBanner } from '@/components/actionrules'
 import { useAuth } from '@/context/AuthContext'
 import { useUsers } from '@/lib/queries'
+import { CANON_LABEL_STYLE } from '@/components/drawer/fieldRowCanon'
 import type { Id } from '@/types/common'
 
-const fieldLabel: React.CSSProperties = { fontSize: 12, color: 'var(--text-muted)', marginBottom: 5 }
+// Label-left canon (P32, batch 5): label column fixed at CANON_LABEL_WIDTH, control fills the rest.
+const fieldRow: React.CSSProperties = { display: 'flex', alignItems: 'center', gap: 10 }
+const fieldControl: React.CSSProperties = { flex: 1, minWidth: 0 }
 // Consistent searchable-menu width (mirrors PlanIntakeModal/MatchModal's vacancy picker).
 const pickerMenuWidth = 340
 // S24c (Danny 24-07): the exact "+ Kandidaat toevoegen" combobox footprint
@@ -78,7 +82,7 @@ const fieldFootprint: React.CSSProperties = { padding: '8px 11px', borderRadius:
 // 422 field-error keys are snake_case; map them back to this form's field names.
 const API_TO_FORM: Record<string, string> = { candidate_id: 'candidateId', vacancy_id: 'vacancyId', owner_id: 'ownerId', application_stage_id: 'phase' }
 
-export default function AddApplicationModal({ candidateId, candidateOwnerId, candidateOwnerName, initialVacancyId, editApplicationId, onClose, onCreated }: {
+export default function AddApplicationModal({ candidateId, candidateOwnerId, candidateOwnerName, initialVacancyId, suggestedVacancyId, editApplicationId, onClose, onCreated }: {
   candidateId: Id
   // OWNER-DEVIATION-1: the candidate's own owner, passed down from the already-
   // loaded drawer record (WorkTab's `c.ownerId`/`c.owner`) — never refetched.
@@ -87,6 +91,11 @@ export default function AddApplicationModal({ candidateId, candidateOwnerId, can
   // VACANCY-PREFILL-1: a vacancy already chosen by the caller (e.g. the score panel
   // in VacancySearchTab) — seeds the picker once, still freely changeable.
   initialVacancyId?: Id
+  // KOIOS-VOORSTEL-1 (Danny 13-08): vacancy Koios suggests from the candidate's
+  // history — seeds the picker AND shows the Koios mark while it still holds.
+  // initialVacancyId (score panel: user clicked THAT vacancy) stays badge-less:
+  // explicit context is the user's own choice, not a proposal.
+  suggestedVacancyId?: Id | null
   // Punt 5: set from an application row's pencil — prefill + PATCH instead of POST.
   editApplicationId?: Id
   onClose: () => void
@@ -121,7 +130,11 @@ export default function AddApplicationModal({ candidateId, candidateOwnerId, can
 
   // VACANCY-PREFILL-1: seed once from the caller's prop (a lazy initializer, read
   // only at mount) — the picker still lets the recruiter pick a different vacancy.
-  const [vacancyId, setVacancyId] = useState(() => (initialVacancyId != null ? String(initialVacancyId) : ''))
+  const [vacancyId, setVacancyId] = useState(() => {
+    if (initialVacancyId != null) return String(initialVacancyId)
+    // Koios suggestion seeds last — a marked proposal, never a silent guess.
+    return suggestedVacancyId != null ? String(suggestedVacancyId) : ''
+  })
   // Default to the tenant's flagged start stage (APP-CREATE-STAGE-1), falling back to the first.
   const [phaseId, setPhaseId] = useState(() => defaultStage?.id ?? '')
   const [saving, setSaving] = useState(false)
@@ -276,7 +289,10 @@ export default function AddApplicationModal({ candidateId, candidateOwnerId, can
     // POPUP-SLEEP-1: migrated onto the shared FloatingPanel — draggable header,
     // SE-resize, remembered position; same overlay/Esc/backdrop semantics as before.
     <FloatingPanel open onClose={onClose} title={title} ariaLabel={title}
-      persistKey="candidate-add-application" width={420} maxWidth="92vw" bodyStyle={{ padding: 22 }}>
+      persistKey="candidate-add-application" width={560} maxWidth="92vw" scrollBody={false} bodyStyle={{ padding: 0 }}>
+
+      {/* Fields scroll in their own area so the footer buttons stay pinned and never clip (Danny 13-08). */}
+      <div style={{ overflow: 'auto', flex: 1, minHeight: 0, padding: 22 }}>
 
         {/* AXIS-MATRIX-2 preflight — warn/block on this candidate before the recruiter
             picks a vacancy. Create only: editing an existing application is not a create. */}
@@ -290,26 +306,45 @@ export default function AddApplicationModal({ candidateId, candidateOwnerId, can
             S24c (Danny 24-07): resized to the AddCandidateModal text-input footprint
             (padding '8px 11px' / fontSize 13) so every drawer combobox reads as one system. */}
         <div style={{ marginBottom: 14 }}>
-          <div style={fieldLabel}>{t('work.vacancyOptional')}</div>
-          <CreatableSelect value={vacancyId || null} onChange={setVacancyId} placeholder={t('work.pickVacancy')}
-            allowCreate={false} menuWidth={pickerMenuWidth} style={fieldFootprint}
-            options={vacancyOptions.map(v => ({ value: String(v.value), label: v.client ? `${v.label} · ${v.client}` : v.label }))} />
+          <div style={fieldRow}>
+            <div style={CANON_LABEL_STYLE}>{t('work.vacancyOptional')}</div>
+            <div style={fieldControl}>
+              {/* Clearable (Danny 13-08 'hier ook niet — eenmaal gekozen blijft hij
+                  staan'): an OPTIONAL vacancy must be releasable back to an open
+                  application — VAC-CLEAR-1 cross, same as the intake modal. */}
+              <CreatableSelect value={vacancyId || null} onChange={setVacancyId} placeholder={t('work.pickVacancy')}
+                clearable clearLabel={t('work.vacancyOptional')}
+                allowCreate={false} menuWidth={pickerMenuWidth} style={fieldFootprint}
+                options={vacancyOptions.map(v => ({ value: String(v.value), label: v.client ? `${v.label} · ${v.client}` : v.label }))} />
+              {/* The badge lives exactly as long as the suggestion holds — cleared
+                  or repicked means the value is the recruiter's own again. */}
+              {suggestedVacancyId != null && String(vacancyId) === String(suggestedVacancyId) && !editApplicationId && <KoiosSuggestionBadge />}
+            </div>
+          </div>
           {errors.vacancyId && <div style={{ fontSize: 11, color: 'var(--color-danger)', marginTop: 3 }}>{t('work.applicationFailed')}</div>}
         </div>
         {/* Fase — searchable pick-only combobox; now submits the real stage id (S24b). */}
         <div style={{ marginBottom: 14 }}>
-          <div style={fieldLabel}>{t('work.phase')}</div>
-          <CreatableSelect value={phaseId || null} onChange={setPhaseId} allowCreate={false} menuWidth={pickerMenuWidth}
-            style={fieldFootprint} options={stages.map(s => ({ value: s.id, label: s.label }))} />
+          <div style={fieldRow}>
+            <div style={CANON_LABEL_STYLE}>{t('work.phase')}</div>
+            <div style={fieldControl}>
+              <CreatableSelect value={phaseId || null} onChange={setPhaseId} allowCreate={false} menuWidth={pickerMenuWidth}
+                style={fieldFootprint} options={stages.map(s => ({ value: s.id, label: s.label }))} />
+            </div>
+          </div>
           {errors.phase && <div style={{ fontSize: 11, color: 'var(--color-danger)', marginTop: 3 }}>{t('work.applicationFailed')}</div>}
         </div>
         {/* APP-OWNER-1: recruiter picker, seeded from the derivation chain above
             (vacancy recruiter > candidate owner > logged-in user) but always
             changeable via the house user-picker, same footprint as the fields above. */}
         <div style={{ marginBottom: 14 }}>
-          <div style={fieldLabel}>{t('work.owner')}</div>
-          <CreatableSelect value={ownerId || null} onChange={setOwnerId} placeholder={t('work.pickOwner')}
-            allowCreate={false} menuWidth={pickerMenuWidth} style={fieldFootprint} options={userOptions} />
+          <div style={fieldRow}>
+            <div style={CANON_LABEL_STYLE}>{t('work.owner')}</div>
+            <div style={fieldControl}>
+              <CreatableSelect value={ownerId || null} onChange={setOwnerId} placeholder={t('work.pickOwner')}
+                allowCreate={false} menuWidth={pickerMenuWidth} style={fieldFootprint} options={userOptions} />
+            </div>
+          </div>
           {errors.ownerId && <div style={{ fontSize: 11, color: 'var(--color-danger)', marginTop: 3 }}>{t('work.applicationFailed')}</div>}
         </div>
         {/* Soft warning (never a block, Danny: "wel een melding") — mirrors the
@@ -336,7 +371,10 @@ export default function AddApplicationModal({ candidateId, candidateOwnerId, can
             </div>
           </div>
         )}
-        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8 }}>
+      </div>
+
+      {/* Pinned footer — buttons stay visible whatever the content height (Danny 13-08). */}
+      <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, padding: '14px 22px', borderTop: '1px solid var(--border)', flexShrink: 0 }}>
           <button onClick={onClose} style={{ height: 34, padding: '0 16px', fontSize: 13, border: '1px solid var(--border)', borderRadius: 8, background: 'var(--surface)', cursor: 'pointer', color: 'var(--text)' }}>{t('common:cancel')}</button>
           <button onClick={submit} disabled={saving || appRuleBlocked}
             style={{ height: 34, padding: '0 16px', fontSize: 13, fontWeight: 500, border: 'none', borderRadius: 8, background: 'var(--color-primary)', color: 'var(--color-on-accent)', cursor: !appRuleBlocked ? 'pointer' : 'default', opacity: !appRuleBlocked ? 1 : 0.4 }}>

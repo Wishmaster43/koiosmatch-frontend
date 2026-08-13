@@ -40,6 +40,10 @@ export interface PlanIntakeFormOptions {
   applicationId?: Id | null
   // Prefills the vacancy select when there is no existing appointment (booking from a vacancy/application).
   defaultVacancyId?: Id | null
+  // KOIOS-VOORSTEL-1 (Danny 13-08): a vacancy KOIOS suggests from the candidate's
+  // history (sole distinct vacancy across their applications). Seeds like
+  // defaultVacancyId but the modal shows the Koios mark while it still holds.
+  suggestedVacancyId?: Id | null
   // RECRUITER-DEFAULT-1 (Danny 05-08): the candidate's own owner, passed down from the
   // already-loaded drawer record (WorkTab's `c.ownerId`) — the highest-priority
   // recruiter default below; mirrors AddApplicationModal's candidateOwnerId (never refetched).
@@ -53,7 +57,7 @@ const LOC_PREFIX = 'loc:'
 
 export function usePlanIntakeForm({
   candidateId, onClose, onCreated, existing, applicationId = null, defaultVacancyId = null,
-  candidateOwnerId = null, mode = 'intake',
+  suggestedVacancyId = null, candidateOwnerId = null, mode = 'intake',
 }: PlanIntakeFormOptions) {
   const { t } = useTranslation(['candidates', 'common'])
   const { types, intakeTypes, metaOf } = useAppointmentTypes()
@@ -98,7 +102,9 @@ export function usePlanIntakeForm({
   const [ownerId, setOwnerId] = useState(() => existing?.owner_id ? String(existing.owner_id) : '')
   const [vacancyId, setVacancyId] = useState(() => {
     if (existing?.vacancy_id) return String(existing.vacancy_id)
-    return defaultVacancyId ? String(defaultVacancyId) : ''
+    if (defaultVacancyId) return String(defaultVacancyId)
+    // Koios suggestion seeds LAST — visible as a marked proposal, never a silent guess.
+    return suggestedVacancyId ? String(suggestedVacancyId) : ''
   })
   useEffect(() => {
     if (!vacancyId || vacancyOptions.some(v => String(v.value) === String(vacancyId))) { setExtraVacancy(null); return }
@@ -242,7 +248,10 @@ export function usePlanIntakeForm({
       location_id: locationId || null,
       appointment_location: appointmentLocation || null,
       ...(ownerId ? { owner_id: ownerId } : {}),
-      ...(vacancyId ? { vacancy_id: vacancyId } : {}),
+      // CLEAR-SWEEP (Danny 13-08): on EDIT '' means CLEARED and cleared must persist,
+    // so the key is sent as null (sometimes|nullable: omitted = unchanged server-side).
+    // On CREATE an empty vacancy stays an OMITTED key (CONSIST-2: no fake requirement).
+    ...(existing ? { vacancy_id: vacancyId || null } : (vacancyId ? { vacancy_id: vacancyId } : {})),
       ...(!editing && applicationId ? { application_id: applicationId } : {}),
     }
     try {

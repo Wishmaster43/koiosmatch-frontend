@@ -47,6 +47,7 @@
  */
 import { RateDeviationWarning } from './RateProposalNotice'
 import { useDateFormat } from '@/lib/datetime'
+import { useTextPopoutHost } from '@/hooks/useTextPopoutHost'
 import { ActionRuleBanner } from '@/components/actionrules'
 import { useMatchForm } from './match/useMatchForm'
 import RelationsSection from './match/RelationsSection'
@@ -98,6 +99,22 @@ export default function MatchModal({
   const title = t(editing ? 'placement.editTitle' : 'placement.title')
   // DD-MM-YYYY everywhere (§3B) — used only for the overlap banner's period text.
   const { formatDate } = useDateFormat()
+
+  // MATCH-REMARKS-POPOUT (batch 5, P34): the SAME second-screen recipe
+  // ProfileTab's profile text uses (useTextPopoutHost), keyed by the candidate
+  // id — a match may not exist as a record yet, so there is nothing else to key
+  // the sync channel on. Guarded to the fixed/picked candidate id; the icon
+  // only renders once one is known (see ContractSection's sibling card below).
+  const remarksCandidateId = form.fixedCandidateId ?? form.pickedCandidateId
+  const remarksPopout = useTextPopoutHost({
+    entity: 'candidate', id: remarksCandidateId ?? '', field: 'matchRemarks',
+    value: form.remarks, dirty: form.remarks !== '',
+    onDraft: html => { form.setRemarks(html); form.setRemarksEditing(true) },
+    onSaved: html => { form.setRemarks(html) },
+  })
+  // Publish every local edit (typing, dictation, Koios assist) to the popped-
+  // out window, mirroring ProfileTab's changeSummary.
+  const changeRemarks = (html: string) => { form.setRemarks(html); remarksPopout.publishDraft(html) }
 
   return (
     // POPUP-SLEEP-1: migrated onto the shared FloatingPanel — draggable header,
@@ -166,17 +183,20 @@ export default function MatchModal({
                 </div>
               </div>
               <div>
-                <div style={cardHead}>{t('placement.remarks')}</div>
+                <div style={cardHead}>{t('placement.matchRemarks')}</div>
                 <div style={cardBox}>
-                  {/* ACTIONS-SCOPE-DEFAULT-FLIP: "Opmerkingen" reads as a
+                  {/* ACTIONS-SCOPE-DEFAULT-FLIP: "Match opmerkingen" reads as a
                       conversation (like a note), not a description — keep all
-                      three Koios modes, including Actiepunten, explicitly. */}
+                      three Koios modes, including Actiepunten, explicitly.
+                      onPopout only wires when a candidate id is known — the
+                      remarks sync channel is keyed on it (see the hook above). */}
                   <CollapsibleRichText
-                    t={t} value={form.remarks} onChange={form.setRemarks}
+                    t={t} value={form.remarks} onChange={changeRemarks}
                     expanded={form.remarksExpanded} setExpanded={form.setRemarksExpanded}
                     editing={form.remarksEditing} setEditing={form.setRemarksEditing}
                     placeholder={t('placement.remarksAdd')}
                     assistModes={['improve', 'summarize', 'actions']}
+                    onPopout={remarksCandidateId ? remarksPopout.open : undefined}
                   />
                 </div>
               </div>

@@ -81,20 +81,20 @@ const getReplaceFileInput = (container: HTMLElement) => container.querySelector(
 // scopes the option query to its OWN wrapper div, so it never collides with the
 // always-visible "apply to all" chips or another row's picker.
 const getTypeTriggers = () => screen.getAllByRole('button', { name: /documents\.docTypeFor/ })
+// PORTAL-MARKER-1: the open menu is PORTALLED into document.body now — scope the
+// option query to the one open portal menu (only one exists at a time), which
+// keeps the original intent: never collide with in-page chips or other rows.
+const openPortalMenu = () => document.querySelector('[data-dropdown-portal]') as HTMLElement
 const pickRowType = async (user: ReturnType<typeof userEvent.setup>, rowIndex: number, label: string) => {
-  const trigger = getTypeTriggers()[rowIndex]
-  await user.click(trigger)
-  const menu = trigger.closest('div') as HTMLElement
-  await user.click(await within(menu).findByRole('button', { name: label }))
+  await user.click(getTypeTriggers()[rowIndex])
+  await user.click(await within(openPortalMenu()).findByRole('button', { name: label }))
 }
 // G34: the "Koppelen aan" link picker (DocumentLinkPicker) is the house SelectMenu
 // too — same idiom, distinct accessible-name prefix (documents.linkToFor).
 const getLinkTriggers = () => screen.queryAllByRole('button', { name: /documents\.linkToFor/ })
 const pickLink = async (user: ReturnType<typeof userEvent.setup>, rowIndex: number, label: string) => {
-  const trigger = getLinkTriggers()[rowIndex]
-  await user.click(trigger)
-  const menu = trigger.closest('div') as HTMLElement
-  await user.click(await within(menu).findByRole('button', { name: label }))
+  await user.click(getLinkTriggers()[rowIndex])
+  await user.click(await within(openPortalMenu()).findByRole('button', { name: label }))
 }
 
 describe('DocumentsSection · multi-file upload queue', () => {
@@ -716,9 +716,9 @@ describe('DocumentsSection · DOC-1-EIGENAAR-1 occupied entries are not offered 
     } as unknown as Candidate
     render(<DocumentsSection c={c} />)
     await user.click(screen.getByRole('button', { name: 'documents.changeLink' }))
-    const trigger = getLinkTriggers()[0]
-    await user.click(trigger)
-    const menu = trigger.closest('div') as HTMLElement
+    await user.click(getLinkTriggers()[0])
+    // PORTAL-MARKER-1: the open menu lives in document.body now — scope to it.
+    const menu = openPortalMenu()
     expect(within(menu).queryByRole('button', { name: 'sections.education · Verpleegkunde' })).toBeNull()
     expect(await within(menu).findByRole('button', { name: 'sections.education · Anatomie' })).toBeInTheDocument()
   })

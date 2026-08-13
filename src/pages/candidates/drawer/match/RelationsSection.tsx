@@ -15,7 +15,7 @@
  * the shared `DrawerAddButton` (the house soft-tint chip) instead of a bare
  * text link. No plain SelectMenu is left in this section.
  */
-import type { Dispatch, SetStateAction } from 'react'
+import { useId, type Dispatch, type SetStateAction } from 'react'
 import type { TFunction } from 'i18next'
 import CreatableSelect from '@/components/ui/CreatableSelect'
 import DrawerAddButton from '@/components/drawer/DrawerAddButton'
@@ -81,30 +81,43 @@ export default function RelationsSection({
   branchMismatch: boolean; candBranch: { id: Id | null; name: string } | null; detail: CustomerCascadeDetail | null
   mismatchChoice: 'match' | 'candidate'; setMismatchChoice: (v: 'match' | 'candidate') => void
 }) {
+  // Manual label id (Contactpersoon isn't wrapped by the shared F helper — its
+  // label row also carries the "+ nieuw" button) so the picker below can still
+  // be named via aria-labelledby, same recipe as every F-wrapped field here.
+  const contactLabelId = useId()
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
       {/* Candidate picker — only when the modal wasn't opened from a candidate.
           Searchable (job 18): the candidate list can run into the hundreds. */}
       {!fixedCandidateId && (
         <F label={t('placement.candidate')} error={errors.pickedCandidateId}>
-          <CreatableSelect value={pickedCandidateId || null} onChange={setPickedCandidateId} allowCreate={false}
-            placeholder={t('placement.pickCandidate')} menuWidth={pickerMenuWidth}
-            options={candidateOptions.map(c => ({ value: String(c.id), label: c.name ?? '—' }))} />
+          {(labelId: string) => (
+            <CreatableSelect value={pickedCandidateId || null} onChange={setPickedCandidateId} allowCreate={false}
+              placeholder={t('placement.pickCandidate')} menuWidth={pickerMenuWidth}
+              aria-labelledby={labelId}
+              options={candidateOptions.map(c => ({ value: String(c.id), label: c.name ?? '—' }))} />
+          )}
         </F>
       )}
       <div style={row2}>
         {/* Klant/locatie — typeable searchable pickers (job 17/18), never free-text
             create (allowCreate={false}: a customer/location is a real relational id). */}
         <F label={t('placement.customer')} error={errors.customerId}>
-          <CreatableSelect value={customerId || null} onChange={setCustomerId} allowCreate={false}
-            placeholder={t('placement.pickCustomer')} menuWidth={pickerMenuWidth}
-            options={customerOptions.map(c => ({ value: String(c.value), label: c.label }))} />
+          {(labelId: string) => (
+            <CreatableSelect value={customerId || null} onChange={setCustomerId} allowCreate={false}
+              placeholder={t('placement.pickCustomer')} menuWidth={pickerMenuWidth}
+              aria-labelledby={labelId}
+              options={customerOptions.map(c => ({ value: String(c.value), label: c.label }))} />
+          )}
         </F>
         <F label={t('placement.location')} error={errors.locationId}>
-          <CreatableSelect value={locationId || null} onChange={v => { setLocationId(v); setDepartmentId('') }}
-            allowCreate={false} menuWidth={pickerMenuWidth}
-            placeholder={customerId ? t('placement.pickLocation') : t('placement.pickCustomerFirst')}
-            options={opt(locations)} />
+          {(labelId: string) => (
+            <CreatableSelect value={locationId || null} onChange={v => { setLocationId(v); setDepartmentId('') }}
+              allowCreate={false} menuWidth={pickerMenuWidth}
+              placeholder={customerId ? t('placement.pickLocation') : t('placement.pickCustomerFirst')}
+              aria-labelledby={labelId}
+              options={opt(locations)} />
+          )}
         </F>
       </div>
       <div style={row2}>
@@ -113,12 +126,15 @@ export default function RelationsSection({
             a department is a real relational id like customer/location/contact,
             never a free-text create — the file header already claimed this. */}
         <F label={t('placement.department')} error={errors.departmentId}>
-          <CreatableSelect value={departmentId || null} onChange={setDepartmentId} allowCreate={false}
-            placeholder={t('placement.optional')} menuWidth={pickerMenuWidth} options={opt(departments)} />
+          {(labelId: string) => (
+            <CreatableSelect value={departmentId || null} onChange={setDepartmentId} allowCreate={false}
+              placeholder={t('placement.optional')} menuWidth={pickerMenuWidth} options={opt(departments)}
+              aria-labelledby={labelId} />
+          )}
         </F>
         <div>
           <div style={{ ...lbl, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <span>{t('placement.contact')}</span>
+            <span id={contactLabelId}>{t('placement.contact')}</span>
             {/* House soft-tint chip (Danny 24-07 screenshot feedback) — the shared
                 DrawerAddButton, not a bare text link. */}
             {customerId && !creatingContact && (
@@ -159,7 +175,8 @@ export default function RelationsSection({
             </div>
           ) : (
             <CreatableSelect value={contactId || null} onChange={setContactId} allowCreate={false} menuWidth={pickerMenuWidth}
-              placeholder={customerId ? t('placement.pickContact') : t('placement.pickCustomerFirst')} options={contactOpt(contacts)} />
+              placeholder={customerId ? t('placement.pickContact') : t('placement.pickCustomerFirst')} options={contactOpt(contacts)}
+              aria-labelledby={contactLabelId} />
           )}
           {errors.contactId && <div style={errMsg}>{t('common:required')}</div>}
         </div>
@@ -173,22 +190,31 @@ export default function RelationsSection({
             "none" meaning, unchanged here). Vestiging (7.4) is searchable too
             (point 2). */}
         <F label={t('placement.function')} error={errors.func}>
-          <CreatableSelect value={func || null} onChange={setFunc} allowCreate={false}
-            placeholder={t('placement.pickFunction')} menuWidth={pickerMenuWidth}
-            options={functions.map(f => ({ value: f, label: f }))} />
+          {(labelId: string) => (
+            <CreatableSelect value={func || null} onChange={setFunc} allowCreate={false}
+              placeholder={t('placement.pickFunction')} menuWidth={pickerMenuWidth}
+              aria-labelledby={labelId}
+              options={functions.map(f => ({ value: f, label: f }))} />
+          )}
         </F>
         <F label={t('placement.owner')} error={errors.ownerId}>
-          <CreatableSelect value={ownerId || null} onChange={setOwnerId} allowCreate={false}
-            placeholder={t('placement.optional')} menuWidth={pickerMenuWidth}
-            options={users.map(u => ({ value: String(u.id), label: u.name ?? '—' }))} />
+          {(labelId: string) => (
+            <CreatableSelect value={ownerId || null} onChange={setOwnerId} allowCreate={false}
+              placeholder={t('placement.optional')} menuWidth={pickerMenuWidth}
+              aria-labelledby={labelId}
+              options={users.map(u => ({ value: String(u.id), label: u.name ?? '—' }))} />
+          )}
         </F>
         {/* Vestiging (7.4) — proposes from the customer's own branch, then the
             recruiter's, then the tenant default (useBranchDefault); editing it by
             hand freezes the proposal (setBranchDirty), same pattern as cost centre. */}
         <F label={t('placement.branch')} error={errors.branchId}>
-          <CreatableSelect value={branchId || null} onChange={v => { setBranchDirty(true); setBranchId(v) }}
-            allowCreate={false} menuWidth={pickerMenuWidth} placeholder={t('placement.optional')}
-            options={branchLocations.map(l => ({ value: String(l.value), label: l.label }))} />
+          {(labelId: string) => (
+            <CreatableSelect value={branchId || null} onChange={v => { setBranchDirty(true); setBranchId(v) }}
+              allowCreate={false} menuWidth={pickerMenuWidth} placeholder={t('placement.optional')}
+              aria-labelledby={labelId}
+              options={branchLocations.map(l => ({ value: String(l.value), label: l.label }))} />
+          )}
         </F>
       </div>
       {/* Vacature — searchable, mirrors PlanIntakeModal's vacancy picker. Read-only
@@ -210,9 +236,12 @@ export default function RelationsSection({
               duplicate). Both a fresh pick AND this X funnel through the SAME
               `onChange`/`setVacancyId`, which reverts whatever the PREVIOUS vacancy
               auto-filled and is still untouched (useVacancyPrefillApply). */}
-          <CreatableSelect value={vacancyId || null} onChange={setVacancyId} allowCreate={false}
-            placeholder={t('placement.noVacancy')} menuWidth={340} clearable clearLabel={t('work.vacancy')}
-            options={vacancyOptions.map(v => ({ value: String(v.value), label: v.client ? `${v.label} · ${v.client}` : v.label }))} />
+          {(labelId: string) => (
+            <CreatableSelect value={vacancyId || null} onChange={setVacancyId} allowCreate={false}
+              placeholder={t('placement.noVacancy')} menuWidth={340} clearable clearLabel={t('work.vacancy')}
+              aria-labelledby={labelId}
+              options={vacancyOptions.map(v => ({ value: String(v.value), label: v.client ? `${v.label} · ${v.client}` : v.label }))} />
+          )}
         </F>
       )}
 

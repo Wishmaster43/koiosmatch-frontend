@@ -88,6 +88,26 @@ describe('WorkPermitBlock · rendering + save (KAND-WERKVERGUNNING-2)', () => {
     expect(onSave).toHaveBeenCalledWith({ workPermitType: 'gvva', workPermitValidUntil: '' })
   })
 
+  // CLEAR-SWEEP (Danny 13-08, "eenmaal gekozen blijft hij staan"): work-permit type
+  // is optional (no tenant-required flag exists, see the docblock) — once picked, it
+  // must be releasable back to none via the VAC-CLEAR-1 cross, mirroring PlanIntakeModal.
+  it('clears a picked work-permit type back to none', async () => {
+    const user = userEvent.setup()
+    const onSave = vi.fn()
+    render(<WorkPermitBlock c={candidate} onSave={onSave} />)
+    await user.click(screen.getByTitle('Bewerken'))
+    const typeField = screen.getByText('Type werkvergunning').parentElement as HTMLElement
+    await user.click(within(typeField).getAllByRole('button')[0])
+    await user.click(screen.getByRole('button', { name: 'Gecombineerde vergunning (GVVA)' }))
+    // Real i18n resolves clearField('...') to Dutch "<field> wissen" here (unlike
+    // PlanIntakeModal.test.tsx, which mocks t() to the raw key).
+    const clear = await screen.findByTitle(/wissen/i)
+    await user.click(clear)
+    expect(screen.getByText('Selecteer')).toBeInTheDocument()
+    await user.click(screen.getByTitle('Opslaan'))
+    expect(onSave).toHaveBeenCalledWith(expect.objectContaining({ workPermitType: '' }))
+  })
+
   it('cancel restores the original value without calling onSave', async () => {
     const user = userEvent.setup()
     const onSave = vi.fn()
@@ -97,7 +117,9 @@ describe('WorkPermitBlock · rendering + save (KAND-WERKVERGUNNING-2)', () => {
     render(<WorkPermitBlock c={withValue} onSave={onSave} />)
     await user.click(screen.getByTitle('Bewerken'))
     const typeField = screen.getByText('Type werkvergunning').parentElement as HTMLElement
-    await user.click(within(typeField).getByRole('button'))
+    // CLEAR-SWEEP note: with a value already set (twv), the field now also renders a
+    // clear cross alongside its trigger — index [0] is always the trigger itself.
+    await user.click(within(typeField).getAllByRole('button')[0])
     await user.click(screen.getByRole('button', { name: 'Gecombineerde vergunning (GVVA)' }))
     await user.click(screen.getByTitle('Annuleren'))
     expect(onSave).not.toHaveBeenCalled()
