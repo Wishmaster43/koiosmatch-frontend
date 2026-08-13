@@ -72,19 +72,31 @@ export default function ApplicantsTab({ vacancy: v }: { vacancy: VacancyDetail }
   return (
     <div>
       {/* Per-phase breakdown — only phases with a count, in the configured order.
-          Canon (05-08): the shared sectionTitle, reused instead of a hand-rolled heading. */}
+          V-count-1: each chip is now a clickable toggle onto the SAME phase filter
+          the toolbar's StatusFilterSelect drives (togglePhase/phaseFilter from
+          useStatusFilter above) — mirrors StatisticsTab's active-tint convention
+          (stronger tint + fontWeight 600 when selected, §4 soft-chip rule). */}
       <div style={{ ...sectionTitle, marginBottom: 8 }}>{t('applicants.byPhase')}</div>
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 20 }}>
         {phases.filter(p => (byPhase[p.value] ?? 0) > 0).length === 0 ? (
           <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>—</span>
-        ) : phases.filter(p => (byPhase[p.value] ?? 0) > 0).map(p => (
-          <span key={p.value} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 12,
-            padding: '4px 10px', borderRadius: 8, background: 'var(--surface)', border: '1px solid var(--border)' }}>
-            <span style={{ width: 8, height: 8, borderRadius: '50%', background: p.color }} />
-            {p.label}
-            <strong style={{ color: 'var(--text)' }}>{byPhase[p.value]}</strong>
-          </span>
-        ))}
+        ) : phases.filter(p => (byPhase[p.value] ?? 0) > 0).map(p => {
+          const active = phaseFilter.includes(p.value)
+          return (
+            <button key={p.value} type="button" onClick={() => togglePhase(p.value)}
+              aria-pressed={active} title={p.label}
+              style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 12,
+                fontWeight: active ? 600 : 400, cursor: 'pointer',
+                padding: '4px 10px', borderRadius: 8,
+                background: `color-mix(in srgb, ${p.color} ${active ? 16 : 8}%, transparent)`,
+                border: `1px solid color-mix(in srgb, ${p.color} ${active ? 50 : 28}%, transparent)`,
+                color: p.color }}>
+              <span style={{ width: 8, height: 8, borderRadius: '50%', background: p.color }} />
+              {p.label}
+              <strong style={{ color: 'var(--text)' }}>{byPhase[p.value]}</strong>
+            </button>
+          )
+        })}
       </div>
 
       {/* Applications list header + house toolbar: search (grows) → phase filter →

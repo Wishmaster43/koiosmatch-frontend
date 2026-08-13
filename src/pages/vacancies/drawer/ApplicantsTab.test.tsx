@@ -43,3 +43,32 @@ describe('ApplicantsTab · house toolbar (V14)', () => {
     expect(screen.queryByText('Piet Pietersen')).toBeNull()
   })
 })
+
+// V-count-1: the per-phase breakdown chips above the list become clickable
+// filters onto the SAME phase filter the toolbar's StatusFilterSelect drives.
+describe('ApplicantsTab · phase chips are clickable filters (V-count-1)', () => {
+  it('clicking a phase chip narrows the list to that phase and marks it active', async () => {
+    render(<ApplicantsTab vacancy={vacancy([
+      { id: 'a1', candidate_id: 'c1', candidate_name: 'Jan Jansen', phase: { value: 'applied' } },
+      { id: 'a2', candidate_id: 'c2', candidate_name: 'Piet Pietersen', phase: { value: 'hired' } },
+    ])} />)
+
+    const appliedChip = screen.getByRole('button', { name: /^Applied/ })
+    const hiredChip = screen.getByRole('button', { name: /^Hired/ })
+    expect(appliedChip).toHaveAttribute('aria-pressed', 'false')
+    expect(hiredChip).toHaveAttribute('aria-pressed', 'false')
+    expect(screen.getByText('Jan Jansen')).toBeInTheDocument()
+    expect(screen.getByText('Piet Pietersen')).toBeInTheDocument()
+
+    await userEvent.click(appliedChip)
+
+    expect(appliedChip).toHaveAttribute('aria-pressed', 'true')
+    expect(screen.getByText('Jan Jansen')).toBeInTheDocument()
+    expect(screen.queryByText('Piet Pietersen')).toBeNull()
+
+    // Clicking again clears the filter — both applicants show again.
+    await userEvent.click(appliedChip)
+    expect(appliedChip).toHaveAttribute('aria-pressed', 'false')
+    expect(screen.getByText('Piet Pietersen')).toBeInTheDocument()
+  })
+})

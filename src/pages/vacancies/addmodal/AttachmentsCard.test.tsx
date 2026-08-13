@@ -31,3 +31,24 @@ describe('AttachmentsCard · note assist modes (ACTIONS-SCOPE-DEFAULT-FLIP)', ()
     expect(screen.getByTestId('rte')).toHaveAttribute('data-assist-modes', 'improve,summarize,actions')
   })
 })
+
+// S-add-1: the bare coloured "+ toevoegen" text link becomes the shared
+// DrawerAddButton (short variant) — never a hand-rolled text link.
+describe('AttachmentsCard · document add affordance is a real button (S-add-1)', () => {
+  it('opens the file picker via the shared DrawerAddButton, not a bare text link', async () => {
+    const user = userEvent.setup()
+    render(<AttachmentsCard files={[]} onAddFile={vi.fn()} onRemoveFile={vi.fn()} noteText="" onNoteChange={vi.fn()} />)
+
+    // Full label ("drawer.tabs.documents") is the accessible name/title even in
+    // `short` mode (DRAWER-ADD-SHORT-1) — the visible text collapses, the a11y
+    // name does not.
+    const addButton = screen.getByRole('button', { name: 'drawer.tabs.documents' })
+    expect(addButton.tagName).toBe('BUTTON')
+
+    const clickSpy = vi.fn()
+    const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement
+    fileInput.addEventListener('click', clickSpy)
+    await user.click(addButton)
+    expect(clickSpy).toHaveBeenCalled()
+  })
+})

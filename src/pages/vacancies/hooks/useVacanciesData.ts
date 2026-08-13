@@ -16,7 +16,30 @@ import type { Id } from '@/types/common'
 export interface VacancyCustomer { id: Id | undefined; name: string }
 export type VacancyStats = Record<string, unknown>
 
-interface UseVacanciesDataArgs { filterParams: Record<string, unknown>; page: number; pageSize: number; t: TFunction }
+// FE column-key ⇄ sort_by/sort_dir. Column sort (Danny's item 4, PLAN-VACATURES-
+// SOLLICITATIES.md): a NEW, SEPARATE pair from the old `sort=status` param — that
+// one stays whitelisted and unwired here on purpose (VacancyQuery::rules() keeps
+// both accepted independently; never send both for the same click). Only the two
+// columns the backend actually whitelists (`created_at`, `applications_count`)
+// map here — an unmapped FE key (e.g. clicking Title) simply reorders the loaded
+// page locally via DataTable's own sortedRows, exactly like the applications
+// reference adoption (useApplicationsData.ts).
+export const VACANCY_SORT_KEYS: Record<string, string> = {
+  createdAt: 'created_at',
+  applications: 'applications_count',
+}
+
+export interface VacancySort { by: string; dir: 'asc' | 'desc' }
+
+// Translate the page's FE-column-keyed sort into sort_by/sort_dir request params —
+// empty object (no keys added) for no sort or an unmapped column, so the request
+// shape is unchanged either way and never 422s on an unwhitelisted sort_by.
+export function vacancySortParams(sort?: VacancySort | null): Record<string, string> {
+  const sortBy = sort ? VACANCY_SORT_KEYS[sort.by] : undefined
+  return sortBy ? { sort_by: sortBy, sort_dir: sort!.dir } : {}
+}
+
+interface UseVacanciesDataArgs { filterParams: Record<string, unknown>; page: number; pageSize: number; t: TFunction; sort?: VacancySort | null }
 interface UseVacanciesDataResult {
   vacancies: Vacancy[]
   setVacancies: Dispatch<SetStateAction<Vacancy[]>>
@@ -42,8 +65,9 @@ const EMPTY_CUSTOMERS: VacancyCustomer[] = []
 // one source of truth for both the table's page size and this defensive re-clamp.
 export const VACANCIES_MAX_PER_PAGE = 500
 
-export function useVacanciesData({ filterParams, page, pageSize, t }: UseVacanciesDataArgs): UseVacanciesDataResult {
+export function useVacanciesData({ filterParams, page, pageSize, t, sort }: UseVacanciesDataArgs): UseVacanciesDataResult {
   const queryClient = useQueryClient()
+  const sortQuery = vacancySortParams(sort)
 
   // Customers once, for the filters/drawer/modal/bulk pickers.
   const { data: customers = EMPTY_CUSTOMERS } = useQuery({
@@ -57,15 +81,17 @@ export function useVacanciesData({ filterParams, page, pageSize, t }: UseVacanci
   })
 
   // List (paginated, server-filtered). 404 = endpoint not built → empty, not an error.
+  // sort rides in the key too (DATATABLE-SORT-1 reference adoption) — a header
+  // click that maps to a real sort_by cleanly refetches.
   const listQuery = useQuery({
-    queryKey: ['vacancies', filterParams, page, pageSize],
+    queryKey: ['vacancies', filterParams, page, pageSize, sort],
     queryFn: async ({ signal }): Promise<ListResult> => {
       try {
         // Defensive re-clamp (belt-and-braces): the page already clamps pageSize to
         // VACANCIES_MAX_PER_PAGE via useListPageSize, but this hook never trusts a
         // caller to have done it — a 422 here is expensive to diagnose (mirrors
         // useApplicationsData's identical guard).
-        const res = await api.get('/vacancies', { params: { ...filterParams, page, per_page: Math.min(pageSize, VACANCIES_MAX_PER_PAGE) }, signal })
+        const res = await api.get('/vacancies', { params: { ...filterParams, ...sortQuery, page, per_page: Math.min(pageSize, VACANCIES_MAX_PER_PAGE) }, signal })
         const { rows, total, lastPage } = unwrapList<ApiVacancy>(res)
         return { vacancies: rows.map(mapVacancy), total, lastPage }
       } catch (err) {
@@ -93,18 +119,18 @@ export function useVacanciesData({ filterParams, page, pageSize, t }: UseVacanci
 
   // Setter wrappers over the list cache — keep the container's optimistic mutations working.
   const setVacancies = useCallback<Dispatch<SetStateAction<Vacancy[]>>>(updater => {
-    queryClient.setQueryData<ListResult>(['vacancies', filterParams, page, pageSize], prev => {
+    queryClient.setQueryData<ListResult>(['vacancies', filterParams, page, pageSize, sort], prev => {
       const cur = prev ?? { vacancies: [], total: 0, lastPage: 1 }
       return { ...cur, vacancies: typeof updater === 'function' ? (updater as (p: Vacancy[]) => Vacancy[])(cur.vacancies) : updater }
     })
-  }, [queryClient, filterParams, page, pageSize])
+  }, [queryClient, filterParams, page, pageSize, sort])
 
   const setTotal = useCallback<Dispatch<SetStateAction<number>>>(updater => {
-    queryClient.setQueryData<ListResult>(['vacancies', filterParams, page, pageSize], prev => {
+    queryClient.setQueryData<ListResult>(['vacancies', filterParams, page, pageSize, sort], prev => {
       const cur = prev ?? { vacancies: [], total: 0, lastPage: 1 }
       return { ...cur, total: typeof updater === 'function' ? (updater as (p: number) => number)(cur.total) : updater }
     })
-  }, [queryClient, filterParams, page, pageSize])
+  }, [queryClient, filterParams, page, pageSize, sort])
 
   return { vacancies, setVacancies, loading, error, total, setTotal, lastPage, stats, customers }
 }

@@ -1,8 +1,9 @@
 import { useRef, useState } from 'react'
 import type { ChangeEvent } from 'react'
 import { useTranslation } from 'react-i18next'
-import { FileText, Plus, X } from 'lucide-react'
+import { FileText, X } from 'lucide-react'
 import CollapsibleRichText from '@/components/ui/CollapsibleRichText'
+import DrawerAddButton from '@/components/drawer/DrawerAddButton'
 import { cardBox } from '@/components/ui/modalCards'
 import type { PendingFile } from './usePostCreateAttachments'
 
@@ -47,10 +48,10 @@ export default function AttachmentsCard({ files, onAddFile, onRemoveFile, noteTe
           <span style={{ fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em', color: 'var(--text-muted)' }}>
             {t('drawer.tabs.documents')}
           </span>
-          <button type="button" onClick={() => fileRef.current?.click()}
-            style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 11, fontWeight: 500, color: 'var(--color-primary-text)', background: 'none', border: 'none', cursor: 'pointer' }}>
-            <Plus size={11} /> {t('common:add')}
-          </button>
+          {/* S-add-1: the shared DrawerAddButton (short variant, no "documents"
+              repeat — the card title already names the entity) replaces the old
+              bare coloured text link. */}
+          <DrawerAddButton onClick={() => fileRef.current?.click()} label={t('drawer.tabs.documents')} short />
         </div>
         {files.length > 0 && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>

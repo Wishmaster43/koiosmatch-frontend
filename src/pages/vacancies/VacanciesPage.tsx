@@ -33,6 +33,8 @@ import { useDrawerUrl } from '@/hooks/useDrawerUrl'
 import { usePageMemory } from '@/lib/usePageMemory'
 import { useListPageSize } from '@/hooks/useListPageSize'
 import { useVacanciesData, VACANCIES_MAX_PER_PAGE } from './hooks/useVacanciesData'
+import type { VacancySort } from './hooks/useVacanciesData'
+import type { ControlledSort } from '@/components/ui/DataTable'
 import { useVacancyFilterParams } from './hooks/useVacancyFilterParams'
 import { useAiAgents } from './hooks/useAiAgents'
 import { useVacancyRecord } from './hooks/useVacancyRecord'
@@ -66,6 +68,10 @@ function VacanciesPageInner({ intent }: { intent?: unknown }) {
   const branchOptions = useBranchOptions()
 
   const [page,      setPage]      = usePageMemory('vac.page', 1)
+  // Column sort item 4 (DATATABLE-SORT-1 reference adoption): lifted controlled
+  // sort, mirrors ApplicationsPage's `sort`/`setSort`. Unmapped columns (see
+  // VACANCY_SORT_KEYS) still reorder the loaded page locally via DataTable.
+  const [sort, setSort] = usePageMemory<VacancySort | null>('vac.sort', null)
   // Shared page-size hook (§ audit 2026-08-05): seeds from the user's
   // default_per_page, clamps to VacancyQuery's real per_page ceiling (200) so a
   // 500 preference never 422s ("klapt eruit"), and stays sticky across the
@@ -127,6 +133,8 @@ function VacanciesPageInner({ intent }: { intent?: unknown }) {
 
   // Filters changed → back to page 1; the visible rows change → drop the selection.
   useEffect(() => { setPage(1) }, [filterKey])
+  // Column sort item 4: a new sort also resets to page 1 (mirrors ApplicationsPage).
+  useEffect(() => { setPage(1) }, [sort])
   useEffect(() => { setSelectedIds(new Set()) }, [filterKey, page, pageSize])
 
   const notify = (type: string, text: string) => {
@@ -138,7 +146,7 @@ function VacanciesPageInner({ intent }: { intent?: unknown }) {
 
   // ── Data layer ──
   const { vacancies, setVacancies, loading, error, total, setTotal, lastPage, stats, customers } =
-    useVacanciesData({ filterParams, page, pageSize, t })
+    useVacanciesData({ filterParams, page, pageSize, t, sort })
   const customerList = customers as { id: Id; name: string }[]
 
   // ── Drawer/record data layer (§3): selection + detail fetch + optimistic edits ──
@@ -345,6 +353,8 @@ function VacanciesPageInner({ intent }: { intent?: unknown }) {
                       onToggleAll={toggleAll}
                       stickyHeader
                       scrollParentRef={tableScrollRef}
+                      sort={sort as ControlledSort | null}
+                      onSortChange={next => setSort(next as VacancySort)}
                     />
                   </div>
 

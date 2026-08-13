@@ -189,7 +189,11 @@ export default function VacanciesTable({ rows, loading, selectedId, onSelect, on
       },
     },
     {
-      key: 'applications', header: t('columns.applications'), sortable: true, sortValue: r => r.applicationsCount,
+      // Column sort item 4: serverKey maps to VacancyQuery's applications_count
+      // sort_by whitelist entry (useVacanciesData.ts's VACANCY_SORT_KEYS) — a
+      // NEW, separate pair from the old `sort=status` param, which stays wired
+      // untouched via the status column's own `serverKey: 'status'` above.
+      key: 'applications', header: t('columns.applications'), sortable: true, serverKey: 'applications_count', sortValue: r => r.applicationsCount,
       cellStyle: { fontFamily: 'JetBrains Mono, monospace', fontSize: 12, color: 'var(--text)' },
       // V4 (vacatures-tabel-cluster): same ghost-button deep-link treatment as the
       // Leads column — clicking the count opens the drawer on the Sollicitaties
@@ -228,7 +232,8 @@ export default function VacanciesTable({ rows, loading, selectedId, onSelect, on
       render: r => r.aiAgentName ? <AiAgentAvatar name={r.aiAgentName} /> : <span style={{ color: 'var(--text-muted)' }}>—</span>,
     },
     {
-      key: 'createdAt', header: t('columns.createdAt'), nowrap: true, cellStyle: mutedCell,
+      // Column sort item 4: serverKey maps to VacancyQuery's created_at sort_by.
+      key: 'createdAt', header: t('columns.createdAt'), nowrap: true, cellStyle: mutedCell, serverKey: 'created_at',
       sortable: true, sortValue: r => r.createdSort ?? r.created, render: r => formatDate(r.created),
     },
     {
