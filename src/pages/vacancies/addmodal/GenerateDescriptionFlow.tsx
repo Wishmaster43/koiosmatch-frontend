@@ -3,6 +3,7 @@ import type { CSSProperties } from 'react'
 import { Loader2, Sparkles, X, Check } from 'lucide-react'
 import KoiosAiMark from '@/components/ui/KoiosAiMark'
 import AiGeneratedLabel from '@/components/ui/AiGeneratedLabel'
+import CalloutBox from '@/components/ui/CalloutBox'
 import { useGenerateDescription } from './useGenerateDescription'
 import type { GenerateFormFields } from './useGenerateDescription'
 
@@ -81,11 +82,24 @@ export default function GenerateDescriptionFlow({ fields, onApply }: GenerateDes
         </div>
       )}
 
+      {/* 503 — genuinely down right now; honest outage copy, no credit wording. */}
       {status === 'unavailable' && (
-        <div aria-live="polite" style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: 12, color: 'var(--color-warning)' }}>
-          <span>{t('generate.unavailable')}</span>
-          <button type="button" onClick={generate} style={linkBtn}>{t('common:error.retry')}</button>
-        </div>
+        <CalloutBox variant="warning">
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <span>{t('common:errors.koiosUnavailable')}</span>
+            <button type="button" onClick={generate} style={linkBtn}>{t('common:error.retry')}</button>
+          </div>
+        </CalloutBox>
+      )}
+
+      {/* 402 — tenant credit spent/not activated; calm warning tone (never red), retry stays enabled. */}
+      {status === 'creditExhausted' && (
+        <CalloutBox variant="warning">
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <span>{t('common:errors.koiosCreditExhausted')}</span>
+            <button type="button" onClick={generate} style={linkBtn}>{t('common:error.retry')}</button>
+          </div>
+        </CalloutBox>
       )}
 
       {status === 'noProfile' && (

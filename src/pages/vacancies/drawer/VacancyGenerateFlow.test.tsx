@@ -78,11 +78,24 @@ describe('VacancyGenerateFlow · loading', () => {
 })
 
 describe('VacancyGenerateFlow · 503 soft-fail', () => {
-  it('shows a calm "unavailable" message (never a crash) with a retry that re-calls generate()', async () => {
+  it('shows a calm "unavailable" message (never a crash, never the credit wording) with a retry that re-calls generate()', async () => {
     mockState = { ...mockState, open: true, status: 'unavailable' }
     render(<VacancyGenerateFlow vacancy={vacancy} onApply={vi.fn()} />)
-    expect(screen.getByText(nl.generate.unavailable)).toBeInTheDocument()
+    expect(screen.getByText(nlCommon.errors.koiosUnavailable)).toBeInTheDocument()
+    expect(screen.queryByText(nlCommon.errors.koiosCreditExhausted)).toBeNull()
     await userEvent.click(screen.getByRole('button', { name: nlCommon.error.retry }))
+    expect(generate).toHaveBeenCalledTimes(1)
+  })
+})
+
+describe('VacancyGenerateFlow · 402 credit exhausted', () => {
+  it('shows the calm credit-exhausted notice and keeps the retry button enabled', async () => {
+    mockState = { ...mockState, open: true, status: 'creditExhausted', errorKey: 'errors.koiosCreditExhausted' }
+    render(<VacancyGenerateFlow vacancy={vacancy} onApply={vi.fn()} />)
+    expect(screen.getByText(nlCommon.errors.koiosCreditExhausted)).toBeInTheDocument()
+    const retryBtn = screen.getByRole('button', { name: nlCommon.error.retry })
+    expect(retryBtn).not.toBeDisabled()
+    await userEvent.click(retryBtn)
     expect(generate).toHaveBeenCalledTimes(1)
   })
 })

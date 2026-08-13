@@ -268,7 +268,6 @@
     "noProfile": "No generation profile is configured for this tenant yet. Ask an administrator to set one up in Settings.",
     "cta": "Generate",
     "generating": "Koios is generating a concept vacancy text…",
-    "unavailable": "No AI credit is available right now. Please try again later.",
     "error": "Generating failed. Please try again.",
     "previewLabel": "Proposal (concept) — not saved yet",
     "apply": "Apply",

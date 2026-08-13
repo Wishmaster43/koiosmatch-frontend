@@ -88,15 +88,17 @@ interface GeneratePayload { profileId?: string; baseVacancyId?: string; fields: 
 
 /**
  * POST /vacancies/generate — sync, throttled, returns a CONCEPT (never persists,
- * never publishes). 503 = soft-fail (no AI credit) and 404 = no profile could be
- * resolved — both expected, caller-handled outcomes; quietStatuses keeps the dev
- * console/toast quiet (mirrors the 429/503 conventions already in lib/api). A
- * longer timeout than the 20s default: this is a real Anthropic round-trip, not
- * a CRUD call, and `/vacancies/generate` isn't on the SLOW_PATHS allowlist.
+ * never publishes). 402 = the tenant's Koios credit is exhausted, 503 = the
+ * service is temporarily unavailable, and 404 = no profile could be resolved —
+ * all three are expected, caller-handled outcomes; quietStatuses keeps the dev
+ * console/toast quiet, mirroring the richTextAssistApi contract (§ house
+ * convention: 402/422/503 read calm). A longer timeout than the 20s default:
+ * this is a real Anthropic round-trip, not a CRUD call, and
+ * `/vacancies/generate` isn't on the SLOW_PATHS allowlist.
  */
 export async function generateVacancyText({ profileId, baseVacancyId, fields }: GeneratePayload, signal?: AbortSignal): Promise<GenerateResult> {
   const res = await api.post<ApiGenerateSuccess>('/vacancies/generate', {
     profile_id: profileId, base_vacancy_id: baseVacancyId, fields,
-  }, { signal, timeout: 60000, quietStatuses: [404, 503] })
+  }, { signal, timeout: 60000, quietStatuses: [402, 404, 503] })
   return { concept: res.data.concept, model: res.data.model, profileId: res.data.profile_id }
 }

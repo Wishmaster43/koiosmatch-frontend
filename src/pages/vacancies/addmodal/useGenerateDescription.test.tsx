@@ -64,6 +64,37 @@ describe('useGenerateDescription', () => {
     expect(result.current.concept).toBe('')
   })
 
+  // Regression (PLAN-KANDIDATEN batch 2): 402 used to fall through to the
+  // generic 'error' status while a real 503 wore the "no AI credit" copy — the
+  // 402/503 semantics were reversed. A 402 must map to its OWN 'creditExhausted'
+  // status and carry the house apiErrorKey, never the generic failure.
+  it('maps a 402 to the "creditExhausted" status with the apiErrorKey code, never the generic error', async () => {
+    mockGet.mockResolvedValue({ data: { profile: { id: 'p1', name: 'Zorg' }, specificity: 1, matched_dims: [] } })
+    mockPost.mockRejectedValue({ response: { status: 402, data: { code: 'koios_credit_exhausted' } } })
+
+    const { result } = renderHook(() => useGenerateDescription(fields), { wrapper })
+    act(() => result.current.openFlow())
+    await waitFor(() => expect(result.current.profile).not.toBeNull())
+    await act(async () => { await result.current.generate() })
+
+    expect(result.current.status).toBe('creditExhausted')
+    expect(result.current.errorKey).toBe('errors.koiosCreditExhausted')
+    expect(result.current.concept).toBe('')
+  })
+
+  // A real 500 must never be silenced as one of the calm known-code states.
+  it('maps a 500 to the generic "error" status, not "creditExhausted"/"unavailable"', async () => {
+    mockGet.mockResolvedValue({ data: { profile: { id: 'p1', name: 'Zorg' }, specificity: 1, matched_dims: [] } })
+    mockPost.mockRejectedValue({ response: { status: 500 } })
+
+    const { result } = renderHook(() => useGenerateDescription(fields), { wrapper })
+    act(() => result.current.openFlow())
+    await waitFor(() => expect(result.current.profile).not.toBeNull())
+    await act(async () => { await result.current.generate() })
+
+    expect(result.current.status).toBe('error')
+  })
+
   it('maps a 404 to "noProfile" (no dead retry loop)', async () => {
     mockGet.mockResolvedValue({ data: { profile: { id: 'p1', name: 'Zorg' }, specificity: 1, matched_dims: [] } })
     mockPost.mockRejectedValue({ response: { status: 404 } })

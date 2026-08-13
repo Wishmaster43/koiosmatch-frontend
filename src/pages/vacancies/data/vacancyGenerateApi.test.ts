@@ -37,17 +37,22 @@ describe('resolveGenerationProfile', () => {
 })
 
 describe('generateVacancyText', () => {
-  it('POSTs /vacancies/generate with profile_id/base_vacancy_id/fields and a long timeout + quiet 404/503', async () => {
+  it('POSTs /vacancies/generate with profile_id/base_vacancy_id/fields and a long timeout + quiet 402/404/503', async () => {
     mockPost.mockResolvedValue({ data: { ok: true, concept: 'Wij zoeken een verpleegkundige…', model: 'claude-x', profile_id: 'p1' } })
     const result = await generateVacancyText({ profileId: 'p1', baseVacancyId: 'v9', fields: { industry: 'Zorg' } })
 
     expect(mockPost).toHaveBeenCalledWith('/vacancies/generate',
       { profile_id: 'p1', base_vacancy_id: 'v9', fields: { industry: 'Zorg' } },
-      expect.objectContaining({ timeout: 60000, quietStatuses: [404, 503] }))
+      expect.objectContaining({ timeout: 60000, quietStatuses: [402, 404, 503] }))
     expect(result).toEqual({ concept: 'Wij zoeken een verpleegkundige…', model: 'claude-x', profileId: 'p1' })
   })
 
-  it('propagates a 503 soft-fail (no AI credit) as a rejected promise for the caller to map to a calm message', async () => {
+  it('propagates a 402 soft-fail (credit exhausted) as a rejected promise for the caller to map to a calm message', async () => {
+    mockPost.mockRejectedValue({ response: { status: 402, data: { code: 'koios_credit_exhausted' } } })
+    await expect(generateVacancyText({ fields: {} })).rejects.toMatchObject({ response: { status: 402 } })
+  })
+
+  it('propagates a 503 soft-fail (service unavailable) as a rejected promise for the caller to map to a calm message', async () => {
     mockPost.mockRejectedValue({ response: { status: 503, data: { ok: false, reason: 'no credit' } } })
     await expect(generateVacancyText({ fields: {} })).rejects.toMatchObject({ response: { status: 503 } })
   })

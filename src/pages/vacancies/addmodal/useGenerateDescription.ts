@@ -12,8 +12,11 @@ import { useCallback, useMemo, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { resolveGenerationProfile, generateVacancyText } from '../data/vacancyGenerateApi'
 import type { GenerationTraits } from '../data/vacancyGenerateApi'
+import { apiErrorKey } from '@/lib/extractApiError'
 
-type GenerateStatus = 'idle' | 'loading' | 'success' | 'unavailable' | 'noProfile' | 'error'
+// 'creditExhausted' (402) is distinct from 'unavailable' (503) — a spent
+// tenant budget and a temporary outage need different copy/next-step.
+type GenerateStatus = 'idle' | 'loading' | 'success' | 'unavailable' | 'creditExhausted' | 'noProfile' | 'error'
 
 // The subset of create-form fields the generate flow reads — kept narrow so the
 // card only has to hand over what this flow actually needs.
@@ -55,6 +58,9 @@ export function useGenerateDescription(fields: GenerateFormFields) {
   const [open, setOpen] = useState(false)
   const [status, setStatus] = useState<GenerateStatus>('idle')
   const [concept, setConcept] = useState('')
+  // The house-mapped `common:errors.*` key for the current failure (apiErrorKey,
+  // §10 code contract), or null when the caller falls back to a status-only copy.
+  const [errorKey, setErrorKey] = useState<string | null>(null)
 
   const traits = useMemo(() => buildTraits(fields), [fields])
 
@@ -67,28 +73,34 @@ export function useGenerateDescription(fields: GenerateFormFields) {
   })
 
   // Open the flow — reset any previous concept so re-opening never shows stale text.
-  const openFlow = useCallback(() => { setOpen(true); setStatus('idle'); setConcept('') }, [])
-  const closeFlow = useCallback(() => { setOpen(false); setStatus('idle'); setConcept('') }, [])
+  const openFlow = useCallback(() => { setOpen(true); setStatus('idle'); setConcept(''); setErrorKey(null) }, [])
+  const closeFlow = useCallback(() => { setOpen(false); setStatus('idle'); setConcept(''); setErrorKey(null) }, [])
 
   // Generate — a one-shot action; the concept never auto-applies, only the
   // caller's explicit onApply (via "Toepassen") reaches the form's description.
   const generate = useCallback(async () => {
     if (!resolveQuery.data?.profileId) { setStatus('noProfile'); return }
     setStatus('loading')
+    setErrorKey(null)
     try {
       const result = await generateVacancyText({ profileId: resolveQuery.data.profileId, fields: buildFields(fields) })
       setConcept(result.concept)
       setStatus('success')
     } catch (err) {
       const httpStatus = (err as { response?: { status?: number } })?.response?.status
-      if (httpStatus === 503) setStatus('unavailable')
-      else if (httpStatus === 404) setStatus('noProfile')
+      // 404 = no profile resolved. 402 = tenant credit exhausted. 503 = the
+      // service is temporarily down. Anything else is a real failure — never
+      // silenced as one of the calm states. The code-based key (apiErrorKey)
+      // wins over the status heuristic when the backend supplies one (§10).
+      if (httpStatus === 404) setStatus('noProfile')
+      else if (httpStatus === 402) { setStatus('creditExhausted'); setErrorKey(apiErrorKey(err) ?? 'errors.koiosCreditExhausted') }
+      else if (httpStatus === 503) { setStatus('unavailable'); setErrorKey(apiErrorKey(err) ?? 'errors.koiosUnavailable') }
       else setStatus('error')
     }
   }, [resolveQuery.data, fields])
 
   // Discard the concept but keep the flow open so the recruiter can regenerate.
-  const discard = useCallback(() => { setConcept(''); setStatus('idle') }, [])
+  const discard = useCallback(() => { setConcept(''); setStatus('idle'); setErrorKey(null) }, [])
 
   return {
     open, openFlow, closeFlow,
@@ -96,6 +108,6 @@ export function useGenerateDescription(fields: GenerateFormFields) {
     resolving: open && resolveQuery.isLoading,
     resolveFailed: open && resolveQuery.isError,
     noProfileConfigured: open && !resolveQuery.isLoading && !resolveQuery.isError && !resolveQuery.data,
-    status, concept, generate, discard,
+    status, concept, errorKey, generate, discard,
   }
 }
