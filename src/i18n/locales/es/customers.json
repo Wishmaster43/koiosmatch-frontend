@@ -447,7 +447,8 @@
       "status": "Estado"
     },
     "add": "Nueva vacante",
-    "searchPlaceholder": "Buscar vacante…"
+    "searchPlaceholder": "Buscar vacante…",
+    "showUnpublished": "Incluir no publicadas"
   },
   "opportunities": {
     "title": "Oportunidades",

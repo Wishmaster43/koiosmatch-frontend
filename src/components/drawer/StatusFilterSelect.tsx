@@ -93,6 +93,25 @@ export const STATUS_FILTER_ALL = 'all'
  * then fall back to inferring `T = HasStatus`, breaking a caller's own `keyOf` callback too.
  * The default `keyOf` below casts internally instead, so callers that DO carry `statusId`/
  * `status` (locations/departments/contacts) keep working unchanged via the same default.
+ *
+ * `guessDefault` (K2-FE, 13-08): an optional MULTI-value replacement for the single-value
+ * `isActiveValue` slug guess above. The original guess only ever matches a status literally
+ * named "active"/"actief"/"open" — a lookup whose values are UUIDs (vacancy statuses since
+ * 28-07) never matches it, so the tab silently fell back to showing everything. When a
+ * caller passes `guessDefault`, it is called with the resolved `statuses` and must return the
+ * KEYS that should be selected by default (e.g. every not-`is_closed` status); those keys are
+ * still filtered down to ones at least one row actually carries, the same "never hide
+ * everything against a phantom value" guard the single-value guess already applies. Callers
+ * that don't pass it keep the original single-value behaviour byte-for-byte.
+ *
+ * `alwaysMatch` (K2-FE, 13-08): an optional predicate for rows that must pass the status
+ * filter NO MATTER what is selected — the BE's "a vacancy without a status stays eligible"
+ * rule (CustomerController::open_vacancies_count / VacancyStatus::excludeClosed) has no
+ * lookup value to select in the first place, so a status-less row can never be represented
+ * by a key in `value`. Without this, a status-less row's `keyOf` returns `''`, which matches
+ * no selected id, so it silently vanished from the "open" default the moment the guess
+ * proposed a non-empty selection — the exact gap this predicate closes. Callers that don't
+ * pass it keep the original behaviour (a status-less row only shows while nothing is selected).
  */
 export function useStatusFilter<T>(
   rows: T[],
@@ -100,6 +119,14 @@ export function useStatusFilter<T>(
   keyOf: (row: T) => string = r => String((r as HasStatus).statusId ?? (r as HasStatus).status ?? ''),
   tenantDefault?: string | null,
   settingsLoaded: boolean = true,
+  guessDefault?: (statuses: LookupOption[]) => string[],
+  alwaysMatch?: (row: T) => boolean,
+  // strictGuess: apply guessDefault from the LOOKUP alone — no waiting for rows and
+  // no row-intersection. For flag-derived guesses (e.g. "every NOT-is_closed status")
+  // an empty result list is a CORRECT answer (a customer whose vacancies are all
+  // closed must show 0, matching its open_vacancies_count of 0); the row-intersection
+  // below exists only to protect name-based guesses from hiding every row.
+  strictGuess: boolean = false,
 ) {
   const [value, setValue] = useState<string[]>([])
   const [proposed, setProposed] = useState(false)
@@ -121,16 +148,28 @@ export function useStatusFilter<T>(
         const stillExists = statuses.some(s => String(s.id ?? s.value) === tenantDefault)
         if (stillExists) setValue([tenantDefault])
       }
+    } else if (strictGuess && guessDefault) {
+      // Flag-derived guess: the lookup alone decides; zero matching rows is honest.
+      setProposed(true)
+      const keys = guessDefault(statuses)
+      if (keys.length) setValue(keys)
     } else if (rows.length > 0) {
       setProposed(true)
-      if (activeKey && rows.some(r => keyOf(r) === activeKey)) setValue([activeKey])
+      // Multi-value guess (e.g. "all not-closed" statuses) when the caller supplies one;
+      // still guarded to keys at least one row carries, so a renamed/removed status can
+      // never propose a default that hides every row.
+      if (guessDefault) {
+        const keys = guessDefault(statuses).filter(k => rows.some(r => keyOf(r) === k))
+        if (keys.length) setValue(keys)
+      } else if (activeKey && rows.some(r => keyOf(r) === activeKey)) setValue([activeKey])
     }
   }
 
   const toggle = (v: string) => setValue(p => (p.includes(v) ? p.filter(x => x !== v) : [...p, v]))
   // Nothing selected = everything. A status deleted in Settings simply stops matching, so
-  // no pruning pass is needed to keep rows from disappearing behind a dead value.
-  const filtered = value.length === 0 ? rows : rows.filter(r => value.includes(keyOf(r)))
+  // no pruning pass is needed to keep rows from disappearing behind a dead value. A row
+  // matched by `alwaysMatch` (e.g. status-less) bypasses the selection entirely.
+  const filtered = value.length === 0 ? rows : rows.filter(r => alwaysMatch?.(r) || value.includes(keyOf(r)))
   return { value, setValue, toggle, filtered }
 }
 

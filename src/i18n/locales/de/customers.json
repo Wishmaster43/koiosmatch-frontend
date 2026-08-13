@@ -447,7 +447,8 @@
       "status": "Status"
     },
     "add": "Neue Stelle",
-    "searchPlaceholder": "Stelle suchen…"
+    "searchPlaceholder": "Stelle suchen…",
+    "showUnpublished": "Auch unveröffentlicht"
   },
   "opportunities": {
     "title": "Chancen",

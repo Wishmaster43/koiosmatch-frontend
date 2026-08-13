@@ -447,7 +447,8 @@
       "status": "Status"
     },
     "add": "Nieuwe vacature",
-    "searchPlaceholder": "Zoek vacature…"
+    "searchPlaceholder": "Zoek vacature…",
+    "showUnpublished": "Ook niet-gepubliceerd"
   },
   "opportunities": {
     "title": "Kansen",

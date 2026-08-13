@@ -12,7 +12,7 @@
  * component itself — see StatusFilterSelect.tsx's own docblock for why.
  */
 import { describe, it, expect } from 'vitest'
-import { render, screen } from '@testing-library/react'
+import { render, renderHook, screen } from '@testing-library/react'
 import { useStatusFilter, STATUS_FILTER_ALL } from './StatusFilterSelect'
 import type { LookupOption } from '@/types/common'
 
@@ -103,5 +103,57 @@ describe('useStatusFilter · settingsLoaded guards the SECOND async race (the /s
     rerender(<Harness rows={rows} statuses={statuses} tenantDefault="s-inactive" settingsLoaded />)
     const el = screen.getByTestId('result')
     expect(el).toHaveAttribute('data-value', 's-inactive')
+  })
+})
+
+// K2-FE (13-08): `alwaysMatch` — the BE's "a vacancy without a status stays eligible"
+// rule has no lookup value a status-less row could be selected by, so it needs a row
+// to bypass the selection entirely rather than being represented by a key in `value`.
+interface GuessRow { statusId: string }
+function GuessHarness({ rows, statuses, alwaysMatch }: {
+  rows: GuessRow[]; statuses: Status[]; alwaysMatch?: (row: GuessRow) => boolean
+}) {
+  const { filtered } = useStatusFilter(rows, statuses, r => r.statusId, undefined, true,
+    opts => opts.map(o => String(o.id)), alwaysMatch)
+  return <div data-testid="result" data-titles={filtered.map(r => r.statusId).join(',')} />
+}
+
+describe('useStatusFilter · alwaysMatch bypasses the selection', () => {
+  it('keeps a status-less row visible even though the default selection only carries real status ids', () => {
+    const rowsWithStatusless: GuessRow[] = [...rows, { statusId: '' }]
+    render(<GuessHarness rows={rowsWithStatusless} statuses={statuses} alwaysMatch={r => r.statusId === ''} />)
+    const el = screen.getByTestId('result')
+    // Both real-status rows (matched by the guess) AND the status-less row (matched by
+    // `alwaysMatch`) survive the filter.
+    expect(el).toHaveAttribute('data-titles', 's-active,s-inactive,')
+  })
+
+  it('without alwaysMatch, a row whose key matches nothing selected is dropped (original behaviour unchanged)', () => {
+    const rowsWithStatusless: GuessRow[] = [...rows, { statusId: '' }]
+    render(<GuessHarness rows={rowsWithStatusless} statuses={statuses} />)
+    const el = screen.getByTestId('result')
+    expect(el).toHaveAttribute('data-titles', 's-active,s-inactive')
+  })
+})
+
+// K2-FE control-round regression: a flag-derived guess must apply even when it
+// matches ZERO rows — an all-closed customer shows an honest empty list, exactly
+// like its open_vacancies_count column. The row-intersection guard only protects
+// name-based guesses.
+describe('useStatusFilter · strictGuess', () => {
+  it('applies the flag-derived default even when no row carries a matching status', () => {
+    const statuses = [
+      { id: 'u1', value: 'u1', label: 'Open', isClosed: false },
+      { id: 'u2', value: 'u2', label: 'Gesloten', isClosed: true },
+    ]
+    const rows = [{ statusId: 'u2' }, { statusId: 'u2' }] // all closed
+    const { result } = renderHook(() => useStatusFilter(
+      rows, statuses, r => String(r.statusId), null, true,
+      opts => opts.filter(o => (o as { isClosed?: boolean }).isClosed !== true).map(o => String(o.value)),
+      undefined,
+      true, // strictGuess
+    ))
+    expect(result.current.value).toEqual(['u1'])
+    expect(result.current.filtered).toEqual([]) // honest zero — column parity
   })
 })

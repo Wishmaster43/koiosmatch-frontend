@@ -12,10 +12,18 @@
  */
 import { describe, it, expect, vi, afterEach } from 'vitest'
 import { render, screen, cleanup } from '@testing-library/react'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import userEvent from '@testing-library/user-event'
 import '@/i18n'
 import VacanciesTab from './VacanciesTab'
-import type { VacancyRow } from '../hooks/useCustomerDrawerData'
+
+// K2-FE (13-08): the Vacatures sub-tab's vacancy fetch now runs through a real
+// `useQuery`, so every render needs a real QueryClientProvider (see VacanciesTab.test.tsx's
+// own comment on the same helper).
+function renderTab(props: { customerId: string; customerName: string }) {
+  const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } })
+  return render(<QueryClientProvider client={queryClient}><VacanciesTab {...props} /></QueryClientProvider>)
+}
 
 // See VacanciesTab.test.tsx's own comment on this same line: a bare replacement
 // drops the real `QueryClient` class that `lib/queryClient.ts` instantiates at
@@ -25,11 +33,10 @@ vi.mock('@tanstack/react-query', async (importOriginal) => {
   const actual = await importOriginal<typeof import('@tanstack/react-query')>()
   return { ...actual, useQueryClient: () => ({ invalidateQueries: vi.fn() }) }
 })
-// Only the Vacatures sub-tab's own data hook is needed here — CustomerApplicationsList
-// is stubbed below, so its useCustomerApplications import never runs in this file.
-vi.mock('../hooks/useCustomerDrawerData', () => ({
-  useCustomerVacancies: () => ({ rows: [] as VacancyRow[], loading: false }),
-}))
+// K2-FE (13-08): the Vacatures sub-tab no longer goes through `useCustomerVacancies` —
+// it fetches `/vacancies` itself (see VacanciesTab.test.tsx's own docblock), which the
+// blanket `api.get` mock below already answers with an empty list, so no hooks-module
+// mock is needed here any more; `mapVacancyRow` stays the real (pure) implementation.
 vi.mock('@/lib/api', () => ({
   default: { get: vi.fn(() => Promise.resolve({ data: { data: [] } })), post: vi.fn(), patch: vi.fn(), delete: vi.fn() },
   unwrapList: (r: { data?: { data?: unknown[] } }) => ({ rows: r?.data?.data ?? [], total: 0 }),
@@ -49,7 +56,7 @@ afterEach(() => cleanup())
 
 describe('VacanciesTab · Sollicitaties sub-tab', () => {
   it('renders both sub-tab labels, Vacatures active by default', async () => {
-    render(<VacanciesTab customerId="cust-1" customerName="Acme" />)
+    renderTab({ customerId: 'cust-1', customerName: 'Acme' })
     // Async query settles the Vacatures sub-tab's own /vacancy-statuses effect
     // before asserting, so it runs inside act() like the rest of this render.
     expect(await screen.findByRole('tab', { name: 'Vacatures' })).toHaveAttribute('aria-selected', 'true')
@@ -58,14 +65,14 @@ describe('VacanciesTab · Sollicitaties sub-tab', () => {
   })
 
   it('does not mount the applications list before the sub-tab is opened (lazy)', async () => {
-    render(<VacanciesTab customerId="cust-1" customerName="Acme" />)
+    renderTab({ customerId: 'cust-1', customerName: 'Acme' })
     await screen.findByRole('tab', { name: 'Vacatures' })
     expect(listProps).not.toHaveBeenCalled()
   })
 
   it('mounts the applications list, passed this customer id, once opened', async () => {
     const user = userEvent.setup()
-    render(<VacanciesTab customerId="cust-1" customerName="Acme" />)
+    renderTab({ customerId: 'cust-1', customerName: 'Acme' })
     await user.click(screen.getByRole('tab', { name: 'Sollicitaties' }))
     expect(screen.getByTestId('applications-list')).toBeInTheDocument()
     expect(listProps).toHaveBeenCalledWith(expect.objectContaining({ customerId: 'cust-1' }))

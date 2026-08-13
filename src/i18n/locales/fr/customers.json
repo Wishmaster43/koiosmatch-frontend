@@ -447,7 +447,8 @@
       "status": "Statut"
     },
     "add": "Nouvelle offre",
-    "searchPlaceholder": "Rechercher une offre…"
+    "searchPlaceholder": "Rechercher une offre…",
+    "showUnpublished": "Inclure non publiées"
   },
   "opportunities": {
     "title": "Opportunités",

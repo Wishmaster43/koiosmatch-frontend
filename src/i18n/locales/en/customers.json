@@ -447,7 +447,8 @@
       "status": "Status"
     },
     "add": "New vacancy",
-    "searchPlaceholder": "Search vacancy…"
+    "searchPlaceholder": "Search vacancy…",
+    "showUnpublished": "Include unpublished"
   },
   "opportunities": {
     "title": "Opportunities",
