@@ -26,7 +26,7 @@ const billingUsage = (over = {}) => ({
   ...over,
 })
 
-const eur = (v) => new Intl.NumberFormat('nl-NL', { style: 'currency', currency: 'EUR' }).format(v).replace(/ /g, ' ')
+const eur = (v) => new Intl.NumberFormat('nl-NL', { style: 'currency', currency: 'EUR' }).format(v).replace(/\u00a0/g, ' ')
 
 function mockApi(credits = billingUsage()) {
   // Real API wraps in { data: { workflow, ai } } (Laravel-style envelope) — unwrap() strips it.
@@ -47,7 +47,7 @@ describe('CreditsUsageCard', () => {
     // credit_price 0.0125 must render with its real precision — never rounded
     // down to two decimals ("€ 0,01"); formatCurrency(…, 4, 2) is the component's
     // own call, reused here so the test can't silently drift from it.
-    expect(screen.getByText(formatCurrency(0.0125, 'EUR', 'nl-NL', 4, 2).replace(/ /g, ' '))).toBeInTheDocument()
+    expect(screen.getByText(formatCurrency(0.0125, 'EUR', 'nl-NL', 4, 2).replace(/\u00a0/g, ' '))).toBeInTheDocument()
     expect(screen.getByText(eur(100))).toBeInTheDocument()   // workflow.amount
     expect(screen.getByText(eur(12.5))).toBeInTheDocument()  // ai.amount
   })

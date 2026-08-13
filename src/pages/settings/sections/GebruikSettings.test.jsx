@@ -59,7 +59,7 @@ const koiosBilling = (over = {}) => ({
 // Same Intl call the component uses (§5 -- never hardcode a locale-formatted string).
 // RTL's default normalizer collapses the non-breaking space Intl inserts after "€"
 // into a regular space before matching, so do the same here.
-const eur = (v) => new Intl.NumberFormat('nl-NL', { style: 'currency', currency: 'EUR' }).format(v).replace(/ /g, ' ')
+const eur = (v) => new Intl.NumberFormat('nl-NL', { style: 'currency', currency: 'EUR' }).format(v).replace(/\u00a0/g, ' ')
 
 function mockApi({ ai = aiUsage(), wa = messagingCosts(), billing = koiosBilling() } = {}) {
   api.get.mockImplementation((url) => {
