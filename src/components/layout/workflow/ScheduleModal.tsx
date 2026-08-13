@@ -14,13 +14,14 @@
  * come from Intl (locale-aware) so there are no hardcoded NL arrays.
  */
 import { useTranslation } from 'react-i18next'
-import { CalendarDays, Play, Zap, Bell, Webhook } from 'lucide-react'
+import { CalendarDays, Play, Zap, Bell, Webhook, CalendarClock } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import FloatingPanel from '@/components/ui/FloatingPanel'
 import type { ScheduleConfig } from '@/types/workflow'
 import { EventCombobox } from './EventCombobox'
 import { WebhookAgentSelect } from './WebhookAgentSelect'
 import { ScheduleFields } from './ScheduleFields'
+import { DateRelativeFields } from './DateRelativeFields'
 import { useScheduleForm } from './useScheduleForm'
 import { scheduleLabel } from './scheduleLabel'
 import { sectionStyle, sectionLabel } from './scheduleModalStyles'
@@ -50,7 +51,7 @@ export function ScheduleModal({ trigger, scheduleConfig, onSave, onClose }: {
         <div style={{ overflowY: 'auto', flex: 1, padding: 20, display: 'flex', flexDirection: 'column', gap: 20 }}>
 
           {/* Trigger type selector — roomier cards in the wider modal (TRIGGER-POPUP-2) */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr 1fr', gap: 10 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(6, 1fr)', gap: 10 }}>
             {[
               { id: 'manual',    label: t('scheduleModal.trigger.manual'),    desc: t('scheduleModal.trigger.manualDesc'),    Icon: Play },
               { id: 'instant',   label: t('scheduleModal.trigger.instant'),   desc: t('scheduleModal.trigger.instantDesc'),   Icon: Zap },
@@ -59,6 +60,9 @@ export function ScheduleModal({ trigger, scheduleConfig, onSave, onClose }: {
               // AI-AGENTS-3: fifth trigger type — this workflow starts on ONE AI
               // agent's own inbound webhook (config key `agent`, matched by name).
               { id: 'webhook',   label: t('scheduleModal.trigger.webhook'),   desc: t('scheduleModal.trigger.webhookDesc'),   Icon: Webhook },
+              // Date-relative trigger (BE live): fires N days before a whitelisted
+              // date field (available_again_date / match.end_date).
+              { id: 'date_relative', label: t('scheduleModal.trigger.dateRelative'), desc: t('scheduleModal.trigger.dateRelativeDesc'), Icon: CalendarClock },
             ].map(({ id, label, desc, Icon: Ic }: { id: string; label: string; desc: string; Icon: LucideIcon }) => (
               <button key={id} type="button" onClick={() => setType(id)}
                 style={{
@@ -95,6 +99,15 @@ export function ScheduleModal({ trigger, scheduleConfig, onSave, onClose }: {
 
           {/* Schedule type — one section card: frequency row + its detail fields */}
           {type === 'scheduled' && <ScheduleFields form={form} />}
+
+          {/* Date-relative — the shared rijtje, same shape as the Automations settings row */}
+          {type === 'date_relative' && (
+            <div style={sectionStyle}>
+              <label style={sectionLabel}>{t('scheduleModal.trigger.dateRelative')}</label>
+              <DateRelativeFields dateField={form.dateField} onDateFieldChange={form.setDateField}
+                days={form.offsetDays} onDaysChange={form.setOffsetDays} />
+            </div>
+          )}
 
           {/* Preview — ALWAYS visible, for every trigger type (TRIGGER-POPUP-2):
               exactly the label the trigger node will show after saving. */}

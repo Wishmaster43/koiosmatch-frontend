@@ -73,11 +73,15 @@ describe('RadiusMapPanel · radius slider passes the same values the native rang
   })
 })
 
-describe('RadiusMapPanel · merged hint line', () => {
-  it('keeps both the click-hint and the point-count text, on one line', () => {
+// FILTER-VLAK-1 (Danny 13-08, rustplan step 3): the click hint no longer runs
+// as visible text next to the point count — it moved into a `title` tooltip on
+// the same short caption, so the line stays just "{{n}} on the map".
+describe('RadiusMapPanel · short point-count caption with a tooltip hint', () => {
+  it('shows only the short point-count text, with the click hint as a title tooltip', () => {
     render(<RadiusMapPanel {...baseProps} radiusKm={30} onRadiusChange={vi.fn()} pointsLabel="3 vacatures op de kaart" />)
-    const hint = screen.getByText((_, el) => el?.textContent === '3 vacatures op de kaart · Klik op de kaart om het middelpunt te verplaatsen')
-    expect(hint).toBeInTheDocument()
+    const caption = screen.getByText('3 vacatures op de kaart')
+    expect(caption).toBeInTheDocument()
+    expect(caption).toHaveAttribute('title', 'Klik op de kaart om het middelpunt te verplaatsen')
   })
 })
 

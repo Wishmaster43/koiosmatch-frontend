@@ -18,6 +18,7 @@ import { useAuth } from '@/context/AuthContext'
 import { BTN_H } from '@/config/buttonMetrics'
 import SegmentedControl from '@/components/ui/SegmentedControl'
 import Toggle from '@/components/ui/Toggle'
+import PlatformPricingCard from './PlatformPricingCard'
 
 // Base tiers (the "size bar"). `desc` lists what each tier adds over the previous one.
 const TIERS = [
@@ -123,6 +124,10 @@ export default function ModulesSettings() {
 
   return (
     <div style={{ maxWidth: 720 }}>
+      {/* Platform pricing (CREDITS-1) — the AI markup % and the workflow credit
+          price knobs; superadmin-only, same screen as package/add-on config. */}
+      <PlatformPricingCard />
+
       {/* Base package (one of three) */}
       <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase',
                     letterSpacing: '0.07em', marginBottom: 10 }}>

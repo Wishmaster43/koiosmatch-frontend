@@ -24,6 +24,7 @@ import { SettingsDirtyContext } from './lib/settingsDirty'
 import SettingItem from './components/SettingItem'
 import SettingsTabs from './components/SettingsTabs'
 import SettingsSearch from './components/SettingsSearch'
+import SettingsChangelogButton from './components/SettingsChangelogButton'
 // THE RULE (Danny 08-08, §4): searchable dropdown everywhere, no exceptions for
 // short lists — replaces the mobile category native <select> below.
 import SelectMenu from '@/components/ui/SelectMenu'
@@ -53,7 +54,7 @@ function parseHash() {
 
 export default function SettingsPage() {
   const auth = useAuth()
-  const { isSuperAdmin, hasModule } = auth
+  const { isSuperAdmin, hasModule, hasPermission } = auth
   const { t } = useTranslation('settings')
   // Shiftmanager settings (SM-MODULE-TABS-1) reads the app/koppeling flag from
   // AppsContext — a nav item may declare requiresModuleOrApp to be visible on
@@ -71,6 +72,10 @@ export default function SettingsPage() {
           if (it.superAdminOnly && !isSuperAdmin()) return false
           if (it.requiresPage && !canAccessPage(it.requiresPage, auth)) return false
           if (it.requiresModuleOrApp && !passesModuleOrApp(it.requiresModuleOrApp, { hasModule, isAppEnabled })) return false
+          // CREDITS-1: a nav item may declare `requiresPermission` — a bare user/role
+          // permission check (billing.view et al), independent of the page/module axes
+          // above. Hidden, never disabled (§3) — settings.view alone must not surface it.
+          if (it.requiresPermission && !hasPermission(it.requiresPermission)) return false
           if (it.id === 'users' && !canAccessPage('users', auth)) return false
           return true
         })
@@ -79,7 +84,7 @@ export default function SettingsPage() {
     .filter(group => group.items.length > 0)
     // Sidebar categories alphabetical too (by translated group label).
     .sort((a, b) => t(`groups.${a.key}`).localeCompare(t(`groups.${b.key}`), undefined, { sensitivity: 'base' })),
-    [auth, isSuperAdmin, hasModule, isAppEnabled, t])
+    [auth, isSuperAdmin, hasModule, hasPermission, isAppEnabled, t])
 
   const findLocation = (groupKey, tabId) => {
     const group = visibleGroups.find(g => g.key === groupKey)
@@ -248,6 +253,9 @@ export default function SettingsPage() {
 
           {currentItem && currentGroup && (
             <>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', marginBottom: -8 }}>
+                <SettingsChangelogButton />
+              </div>
               <SettingsTabs items={currentGroup.items} active={tab}
                 onSelect={(id) => goTo(category, id)} />
               <SettingItem key={`${category}/${tab}`} item={currentItem} />

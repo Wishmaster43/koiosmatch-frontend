@@ -11,12 +11,16 @@
 import { useState, useEffect, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useRightPanel } from '@/context/RightPanelContext'
-import { isAccessEvent } from './auditShared'
+import { isAccessEvent, entityLabel } from './auditShared'
 
 export function useAuditFilters(logs) {
   const { t } = useTranslation('settings')
   const [search,        setSearch]        = useState('')
   const [selectedTypes, setSelectedTypes] = useState([])
+  // Entity-type filter (CHANGELOG-OVERAL-1): filters on `subject_type` — which KIND
+  // of record changed (Candidate, Vacancy, Location, …) — distinct from the existing
+  // `selectedTypes`/log_name filter above (which is the log DOMAIN: auth/settings/…).
+  const [selectedSubjectTypes, setSelectedSubjectTypes] = useState([])
   const [selectedUsers, setSelectedUsers] = useState([])
   const [selectedRoles, setSelectedRoles] = useState([])
   // Actor-type filter: '' = all, 'user' = human causer, 'system' = automation/service (no email).
@@ -31,6 +35,7 @@ export function useAuditFilters(logs) {
   const { registerFilters, unregisterFilters } = useRightPanel()
 
   const typeOptions  = useMemo(() => [...new Set(logs.map(l => l.log_name).filter(Boolean))].sort(), [logs])
+  const subjectTypeOptions = useMemo(() => [...new Set(logs.map(l => l.subject_type).filter(Boolean))].sort(), [logs])
   const userOptions  = useMemo(() => [...new Set(logs.map(l => l.causer_name).filter(Boolean))].sort(), [logs])
   const roleOptions  = useMemo(() => [...new Set(
     logs.filter(l => l.log_name === 'roles').map(l => l.properties?.role ?? l.properties?.name).filter(Boolean)
@@ -41,6 +46,7 @@ export function useAuditFilters(logs) {
     const q = search.trim().toLowerCase()
     return logs.filter(l => {
       if (selectedTypes.length && !selectedTypes.includes(l.log_name))    return false
+      if (selectedSubjectTypes.length && !selectedSubjectTypes.includes(l.subject_type)) return false
       if (selectedUsers.length && !selectedUsers.includes(l.causer_name)) return false
       if (selectedRoles.length) {
         const role = l.properties?.role ?? l.properties?.name
@@ -60,14 +66,14 @@ export function useAuditFilters(logs) {
       )
       return true
     })
-  }, [logs, search, selectedTypes, selectedUsers, selectedRoles, selectedActor, selectedKind, dateFrom, dateTo])
+  }, [logs, search, selectedTypes, selectedSubjectTypes, selectedUsers, selectedRoles, selectedActor, selectedKind, dateFrom, dateTo])
 
   // One dependency the caller can reset its pagination on: it changes exactly when a
   // filter VALUE changes (a variable-length dependency array is not an option, and
   // depending on `filteredAll` would also fire when the row set itself reloads).
   const filterKey = useMemo(
-    () => JSON.stringify([search, selectedTypes, selectedUsers, selectedRoles, selectedActor, selectedKind, dateFrom, dateTo]),
-    [search, selectedTypes, selectedUsers, selectedRoles, selectedActor, selectedKind, dateFrom, dateTo],
+    () => JSON.stringify([search, selectedTypes, selectedSubjectTypes, selectedUsers, selectedRoles, selectedActor, selectedKind, dateFrom, dateTo]),
+    [search, selectedTypes, selectedSubjectTypes, selectedUsers, selectedRoles, selectedActor, selectedKind, dateFrom, dateTo],
   )
 
   // Register filter groups in the right filter panel — search, date-range, type, user, role.
@@ -91,6 +97,18 @@ export function useAuditFilters(logs) {
       })),
       onToggle: v => setSelectedTypes(p => p.includes(v) ? p.filter(x => x !== v) : [...p, v]),
     },
+    // CHANGELOG-OVERAL-1: entity-type filter on `subject_type` (Candidate, Vacancy,
+    // Location, Setting, …) — sits next to the date-range filter, distinct from the
+    // log-domain filter above.
+    ...(subjectTypeOptions.length > 0 ? [{
+      key: 'subjectType', label: t('audit.filterEntity'), type: 'search-select',
+      selected: selectedSubjectTypes,
+      options: subjectTypeOptions.map(st => ({
+        value: st, label: entityLabel(st, t),
+        count: logs.filter(l => l.subject_type === st).length,
+      })),
+      onToggle: v => setSelectedSubjectTypes(p => p.includes(v) ? p.filter(x => x !== v) : [...p, v]),
+    }] : []),
     {
       key: 'actor', label: t('audit.filterActor'), type: 'search-select',
       selected: selectedActor,
@@ -139,7 +157,7 @@ export function useAuditFilters(logs) {
     // reached it) until another filter forced a fresh registration. `onChange`
     // itself was never stale — it is the `setSearch` state setter, which React
     // guarantees is referentially stable across renders.
-  ], [search, selectedTypes, selectedUsers, selectedRoles, selectedActor, selectedKind, typeOptions, userOptions, roleOptions, logs, dateFrom, dateTo, t])
+  ], [search, selectedTypes, selectedSubjectTypes, selectedUsers, selectedRoles, selectedActor, selectedKind, typeOptions, subjectTypeOptions, userOptions, roleOptions, logs, dateFrom, dateTo, t])
 
   useEffect(() => {
     registerFilters('audit-log', filterGroups)

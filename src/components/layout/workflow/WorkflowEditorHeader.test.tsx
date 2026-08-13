@@ -7,6 +7,12 @@ import { describe, it, expect, vi } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import WorkflowEditorHeader from './WorkflowEditorHeader'
 
+// EntityChangelog pulls in lib/datetime → src/i18n (which self-initializes real
+// i18next as a module side effect) — stubbed out here so this file's "raw key"
+// assumption (see docblock) keeps holding. None of these tests pass `workflowId`,
+// so the real component would never render anyway (see the icon's own guard).
+vi.mock('@/components/drawer/EntityChangelog', () => ({ default: () => null }))
+
 // Every prop the header needs; each test overrides only what it cares about.
 const baseProps = {
   name: 'My workflow',

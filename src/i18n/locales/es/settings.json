@@ -233,7 +233,8 @@
     "notif_escalation": "Escalada",
     "koios_advice": "Umbrales de aviso",
     "notif_my": "Mis notificaciones",
-    "customer_identifier_validation": "Validación de números"
+    "customer_identifier_validation": "Validación de números",
+    "automations": "Automatizaciones"
   },
   "kpis": {
     "title": "Configuración de KPI",
@@ -849,9 +850,7 @@
         "claude": {
           "tokensIn": "Tokens de entrada",
           "tokensOut": "Tokens de salida",
-          "cost": "Coste bruto",
           "freeAllowance": "Cuota gratuita (tokens)",
-          "margin": "Margen",
           "billable": "Coste facturable de Claude"
         },
         "workflow": {
@@ -861,6 +860,19 @@
           "colAmount": "Importe"
         },
         "total": "Total"
+      },
+      "credits": {
+        "title": "Créditos",
+        "subtitle": "Precio de venta del uso de workflow e IA para este período.",
+        "periodPrevMonth": "Mes anterior",
+        "loadError": "No se pudo cargar el uso de créditos.",
+        "unavailable": "No tienes permiso para ver esto.",
+        "empty": "Aún no hay uso de créditos en este período.",
+        "workflowTitle": "Créditos de workflow",
+        "totalCredits": "Créditos totales",
+        "creditPrice": "Precio por crédito",
+        "amount": "Importe",
+        "aiTitle": "Uso de IA"
       }
     },
     "invoices": {
@@ -1524,6 +1536,7 @@
     "keysUpdated": "{{count}} clave(s) actualizada(s)",
     "emptyValue": "Vacío",
     "filterType": "Tipo",
+    "filterEntity": "Entidad",
     "filterWho": "Por quién",
     "filterRole": "Rol",
     "filterKind": "Clase",
@@ -2897,5 +2910,22 @@
     "colCoc": "Número de registro",
     "colVat": "Número de IVA",
     "unknownCountryHint": "Para países sin una regla arriba no se bloquea nada: solo recibirás un aviso suave."
+  },
+  "automations": {
+    "title": "Automatizaciones",
+    "subtitle": "Todos los flujos de trabajo del tenant en una lista: actívalos o desactívalos, define con cuántos días de antelación se dispara un disparador relativo a una fecha y elige a qué candidatos se dirige.",
+    "loadError": "No se pudieron cargar los flujos de trabajo.",
+    "empty": "Aún no hay flujos de trabajo. Crea uno en el generador de flujos de trabajo.",
+    "dateFieldReadOnly": "Se dispara en relación con: {{field}}",
+    "toggleAriaLabel": "Activar o desactivar {{name}}",
+    "segmentStatusLabel": "Estado objetivo",
+    "segmentPhaseLabel": "Fase objetivo"
+  },
+  "platformPricing": {
+    "title": "Precios de la plataforma",
+    "subtitle": "Margen de IA y precio del crédito de workflow para toda la plataforma (superadmin).",
+    "markupLabel": "Margen de IA (%)",
+    "creditPriceLabel": "Precio del crédito de workflow (€)",
+    "loadError": "No se pudo cargar los precios de la plataforma."
   }
 }

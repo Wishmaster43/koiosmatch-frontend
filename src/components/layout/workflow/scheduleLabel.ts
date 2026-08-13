@@ -13,6 +13,7 @@
 import type { TFunction } from 'i18next'
 import type { ScheduleConfig } from '@/types/workflow'
 import { WORKFLOW_EVENT_KEYS, eventKeyToI18nKey } from './eventCatalog'
+import { dateRelativeFieldLabel } from './DateRelativeFields'
 
 // Localized short day/month names from Intl (week starts Sunday = index 0).
 export const dayName   = (locale: string, i: number) => new Date(Date.UTC(2024, 0, 7 + i)).toLocaleDateString(locale, { weekday: 'short', timeZone: 'UTC' })
@@ -32,6 +33,12 @@ export function scheduleLabel(t: TFunction, locale: string, trigger?: string, cf
   // falls back to a plain "Webhook" label instead of misreading as "Gepland".
   if (trigger === 'Webhook') {
     return cfg?.agent ? t('scheduleModal.label.webhookAgent', { agent: cfg.agent }) : t('scheduleModal.label.webhook')
+  }
+  // Date-relative trigger: "N days before <field>" — offset_days is stored
+  // negative, so the preview always shows its absolute value (§ positive UI rule).
+  if (trigger === 'DateRelative') {
+    const days = Math.abs(Number(cfg?.offset_days ?? 0))
+    return t('scheduleModal.label.dateRelative', { count: days, field: dateRelativeFieldLabel(t, cfg?.date_field as string | undefined) })
   }
   if (!cfg) return t('scheduleModal.label.scheduled')
   const ty = cfg.schedule_type

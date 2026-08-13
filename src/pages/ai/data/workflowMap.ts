@@ -61,6 +61,12 @@ function parseTrigger(trigger?: string, config?: Record<string, unknown>): { tri
   // Event trigger (BIRTHDAY-FLOW-2): keep the editor's { event } config verbatim —
   // falling through to the scheduled-regex would silently ship trigger_type 'scheduled'.
   if (trigger.toLowerCase() === 'event') return { trigger_type: 'event', trigger_config: { event: config?.event ?? null } }
+  // Date-relative trigger (DATE-REL-RUNNER-1): keep date_field + the NEGATIVE
+  // offset_days verbatim — the same fall-through class as event/webhook above
+  // (this branch was missing; a builder save silently re-tagged it 'scheduled').
+  if (trigger === 'DateRelative') {
+    return { trigger_type: 'date_relative', trigger_config: { date_field: config?.date_field ?? null, offset_days: config?.offset_days ?? null } }
+  }
   // "Dagelijks 08:00", "Elk uur", "Maandag 07:00" → scheduled
   const timeMatch = trigger.match(/(\d{2}:\d{2})/)
   return {

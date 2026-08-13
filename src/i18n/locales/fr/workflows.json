@@ -67,7 +67,9 @@
       "event": "Événement",
       "eventDesc": "Lors d'un événement dans Koios Match",
       "webhook": "Agent IA propre",
-      "webhookDesc": "Démarre via le webhook propre d'un agent IA"
+      "webhookDesc": "Démarre via le webhook propre d'un agent IA",
+      "dateRelative": "Relatif à une date",
+      "dateRelativeDesc": "Se déclenche N jours avant un champ de date"
     },
     "eventLabel": "Événement",
     "eventHint": "Choisissez l'événement qui doit démarrer ce workflow.",
@@ -111,7 +113,9 @@
       "quarterlyAt": "Chaque trimestre {{time}}",
       "yearlyAt": "Annuel {{month}} {{day}} {{time}}",
       "webhook": "Webhook",
-      "webhookAgent": "Webhook : {{agent}}"
+      "webhookAgent": "Webhook : {{agent}}",
+      "dateRelative_one": "{{count}} jour avant {{field}}",
+      "dateRelative_other": "{{count}} jours avant {{field}}"
     },
     "agentLabel": "Agent IA",
     "agentHint": "Choisissez l'agent IA dont le webhook propre doit démarrer ce workflow.",
@@ -1056,5 +1060,13 @@
     "error": "Impossible de charger les modèles.",
     "empty": "Aucun modèle dans cette catégorie pour le moment.",
     "useTemplate": "Utiliser le modèle"
+  },
+  "dateRelative": {
+    "dateFieldLabel": "Champ de date",
+    "daysBeforeLabel": "Jours à l'avance",
+    "daysBeforeSuffix_one": "jour à l'avance",
+    "daysBeforeSuffix_other": "jours à l'avance",
+    "fieldAvailableAgain": "Date de disponibilité du candidat",
+    "fieldMatchEnd": "Date de fin du match"
   }
 }

@@ -71,7 +71,9 @@
       "event": "Event",
       "eventDesc": "On an event in Koios Match",
       "webhook": "Own AI agent",
-      "webhookDesc": "Starts via an AI agent's own webhook"
+      "webhookDesc": "Starts via an AI agent's own webhook",
+      "dateRelative": "Date-relative",
+      "dateRelativeDesc": "Fires N days before a date field"
     },
     "eventLabel": "Event",
     "eventHint": "Choose the event that should start this workflow.",
@@ -115,7 +117,9 @@
       "quarterlyAt": "Every quarter {{time}}",
       "yearlyAt": "Yearly {{month}} {{day}} {{time}}",
       "webhook": "Webhook",
-      "webhookAgent": "Webhook: {{agent}}"
+      "webhookAgent": "Webhook: {{agent}}",
+      "dateRelative_one": "{{count}} day before {{field}}",
+      "dateRelative_other": "{{count}} days before {{field}}"
     },
     "agentLabel": "AI agent",
     "agentHint": "Choose the AI agent whose own webhook should start this workflow.",
@@ -1056,5 +1060,13 @@
     "error": "Couldn't load the templates.",
     "empty": "No templates in this category yet.",
     "useTemplate": "Use template"
+  },
+  "dateRelative": {
+    "dateFieldLabel": "Date field",
+    "daysBeforeLabel": "Days in advance",
+    "daysBeforeSuffix_one": "day in advance",
+    "daysBeforeSuffix_other": "days in advance",
+    "fieldAvailableAgain": "Candidate available-again date",
+    "fieldMatchEnd": "Match end date"
   }
 }

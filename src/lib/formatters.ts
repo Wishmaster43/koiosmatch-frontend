@@ -43,9 +43,15 @@ export function formatNumberCompact(value: NumberInput, locale: string = 'nl-NL'
 // KoiosPricingCard/GebruikSettings' prior inline helpers).
 // `maximumFractionDigits` caps decimals for whole-amount screens (opportunities
 // show "€ 17.000", not "€ 17.000,00"); omitted = the locale's own default.
-export function formatCurrency(value: NumberInput, currency: string = 'EUR', locale: string = 'nl-NL', maximumFractionDigits?: number): string {
+// `minimumFractionDigits` (CREDITS-1) lets a sub-cent price render UNROUNDED as
+// delivered — e.g. a credit_price of 0.005 needs min 2/max 4 so Intl doesn't clip
+// it back down to "€ 0,01"; never round such a value client-side before calling this.
+export function formatCurrency(
+  value: NumberInput, currency: string = 'EUR', locale: string = 'nl-NL',
+  maximumFractionDigits?: number, minimumFractionDigits?: number,
+): string {
   const n = toFiniteNumber(value)
-  return n === null ? '—' : new Intl.NumberFormat(locale, { style: 'currency', currency, maximumFractionDigits }).format(n)
+  return n === null ? '—' : new Intl.NumberFormat(locale, { style: 'currency', currency, maximumFractionDigits, minimumFractionDigits }).format(n)
 }
 
 // React hook: binds all three formatters to the app's active locale (see useLocale
@@ -56,6 +62,7 @@ export function useNumberFormat() {
     locale,
     formatNumber: (value: NumberInput) => formatNumber(value, locale),
     formatNumberCompact: (value: NumberInput, threshold?: number) => formatNumberCompact(value, locale, threshold),
-    formatCurrency: (value: NumberInput, currency?: string) => formatCurrency(value, currency, locale),
+    formatCurrency: (value: NumberInput, currency?: string, maximumFractionDigits?: number, minimumFractionDigits?: number) =>
+      formatCurrency(value, currency, locale, maximumFractionDigits, minimumFractionDigits),
   }
 }

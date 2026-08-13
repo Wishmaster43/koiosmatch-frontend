@@ -14,11 +14,15 @@ import { useTranslation } from 'react-i18next'
 import { scheduleLabel } from './ScheduleModal'
 import { StopRunButton } from './runControl'
 import type { ScheduleConfig } from '@/types/workflow'
+import ChangelogPopover from '@/components/drawer/ChangelogPopover'
+import EntityChangelog from '@/components/drawer/EntityChangelog'
+import type { Id } from '@/types/common'
 
 // Top-level editor view: the node diagram, or this workflow's run history.
 export type EditorView = 'diagram' | 'history'
 
 export default function WorkflowEditorHeader({
+  workflowId,
   name, onNameChange,
   view, onViewChange,
   trigger, scheduleConfig, onOpenSchedule,
@@ -30,6 +34,9 @@ export default function WorkflowEditorHeader({
   saved, onSave, onSaveClose,
   onClose,
 }: {
+  // Undefined for a brand-new, not-yet-saved workflow — the changelog icon then
+  // has nothing to look up and stays hidden (§3A(d) still just an icon, never a tab).
+  workflowId?: Id
   // Optional like `Workflow.name` itself — a brand-new workflow can still be nameless.
   name?: string
   onNameChange: (name: string) => void
@@ -79,6 +86,10 @@ export default function WorkflowEditorHeader({
           aria-label={t('editor.nameAriaLabel')}
           style={{ fontSize: 14, fontWeight: 600, color: 'var(--text)', border: 'none', background: 'transparent', outline: 'none', minWidth: 60, maxWidth: 240 }}
         />
+        {/* §3A(d): record history is a changelog icon-popover in the title row, never a tab. */}
+        {workflowId !== undefined && (
+          <ChangelogPopover><EntityChangelog subjectType="Workflow" subjectId={workflowId} /></ChangelogPopover>
+        )}
       </div>
 
       <div style={{ width: 1, height: 20, background: 'var(--border)', flexShrink: 0 }} />

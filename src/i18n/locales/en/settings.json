@@ -233,7 +233,8 @@
     "notif_escalation": "Escalation",
     "koios_advice": "Advice thresholds",
     "notif_my": "My notifications",
-    "customer_identifier_validation": "Number validation"
+    "customer_identifier_validation": "Number validation",
+    "automations": "Automations"
   },
   "kpis": {
     "title": "KPI settings",
@@ -1083,9 +1084,7 @@
         "claude": {
           "tokensIn": "Tokens in",
           "tokensOut": "Tokens out",
-          "cost": "Raw cost",
           "freeAllowance": "Free allowance (tokens)",
-          "margin": "Margin",
           "billable": "Billable Claude cost"
         },
         "workflow": {
@@ -1095,6 +1094,19 @@
           "colAmount": "Amount"
         },
         "total": "Total"
+      },
+      "credits": {
+        "title": "Credits",
+        "subtitle": "Sale-price workflow and AI usage for this period.",
+        "periodPrevMonth": "Previous month",
+        "loadError": "Failed to load credits usage.",
+        "unavailable": "You don't have permission to view this.",
+        "empty": "No credits usage yet in this period.",
+        "workflowTitle": "Workflow credits",
+        "totalCredits": "Total credits",
+        "creditPrice": "Price per credit",
+        "amount": "Amount",
+        "aiTitle": "AI usage"
       }
     },
     "invoices": {
@@ -1761,6 +1773,7 @@
     "emptyValue": "Empty",
     "filterDate": "Period",
     "filterType": "Type",
+    "filterEntity": "Entity",
     "filterWho": "By whom",
     "filterRole": "Role",
     "filterKind": "Kind",
@@ -2897,5 +2910,22 @@
     "colCoc": "Company register number",
     "colVat": "VAT number",
     "unknownCountryHint": "For countries without a rule above nothing is blocked. You only get a soft hint."
+  },
+  "automations": {
+    "title": "Automations",
+    "subtitle": "Every tenant workflow in one list: switch it on or off, set how many days in advance a date-relative trigger fires, and pick which candidates it targets.",
+    "loadError": "Could not load workflows.",
+    "empty": "No workflows yet. Create one in the workflow builder.",
+    "dateFieldReadOnly": "Fires relative to: {{field}}",
+    "toggleAriaLabel": "Turn {{name}} on or off",
+    "segmentStatusLabel": "Target status",
+    "segmentPhaseLabel": "Target phase"
+  },
+  "platformPricing": {
+    "title": "Platform pricing",
+    "subtitle": "AI markup and workflow credit price for the whole platform (superadmin).",
+    "markupLabel": "AI markup (%)",
+    "creditPriceLabel": "Workflow credit price (€)",
+    "loadError": "Failed to load platform pricing."
   }
 }

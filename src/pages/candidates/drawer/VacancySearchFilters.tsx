@@ -1,4 +1,4 @@
-import type { CSSProperties, ReactNode } from 'react'
+import type { CSSProperties } from 'react'
 import { useTranslation } from 'react-i18next'
 import { RotateCcw, X } from 'lucide-react'
 import SearchSelect from '@/components/ui/SearchSelect'
@@ -7,17 +7,26 @@ import type { DrawerFilterConfig } from '@/components/drawer/DrawerFilterMenu'
 import { useDateFormat } from '@/lib/datetime'
 import type { HoursRange } from '../hooks/vacancySearchFilters'
 
-// Inline label — sits BESIDE its control instead of above it (Danny 09-08: a
-// label-above-every-filter layout ran the bar over four lines with dead space).
-const filterLabelInline: CSSProperties = { fontSize: 11, color: 'var(--text-muted)', whiteSpace: 'nowrap', flexShrink: 0 }
-// Reset trigger — a REAL button in the §4 soft-tint convention (tinted background,
-// token text/icon, tinted border), never coloured text with an icon glued to it.
-const resetButton: CSSProperties = {
-  display: 'inline-flex', alignItems: 'center', gap: 6, padding: '6px 10px',
-  fontSize: 12, fontWeight: 600, borderRadius: 8, cursor: 'pointer',
-  color: 'var(--color-primary-text)',
-  background: 'color-mix(in srgb, var(--color-primary) 12%, transparent)',
-  border: '1px solid color-mix(in srgb, var(--color-primary) 40%, transparent)',
+// FILTER-VLAK-1 (Danny 13-08, rustplan step 4): the ONE soft-tint recipe every
+// trigger/chip/action in this bar shares — pulled out of the three near-duplicate
+// inline style objects the previous version carried, so a future tweak (e.g. the
+// tint percentage) lands once instead of three times.
+const softTint = (activeOrOpen: boolean) => ({
+  background: `color-mix(in srgb, var(--color-primary) ${activeOrOpen ? 16 : 10}%, transparent)`,
+  border: `1px solid color-mix(in srgb, var(--color-primary) ${activeOrOpen ? 45 : 30}%, transparent)`,
+})
+// Primary-field trigger — same footprint/idiom as DrawerFilterMenu's own "More
+// filters" button (height 26, fontSize 11.5, radius 6, badge-on-active) so the
+// three fixed filters and the popover trigger read as ONE family of controls.
+const filterTrigger = (active: boolean): CSSProperties => ({
+  display: 'inline-flex', alignItems: 'center', gap: 5, height: 26, padding: '0 10px',
+  whiteSpace: 'nowrap', fontSize: 11.5, fontWeight: active ? 600 : 500, borderRadius: 6,
+  cursor: 'pointer', color: 'var(--color-primary-text)', ...softTint(active),
+})
+const filterTriggerBadge: CSSProperties = {
+  display: 'inline-flex', alignItems: 'center', justifyContent: 'center', minWidth: 15, height: 15,
+  padding: '0 4px', borderRadius: 999, background: 'var(--color-primary)', color: 'var(--color-on-accent)',
+  fontSize: 10, fontWeight: 700, lineHeight: 1,
 }
 // Removable soft-chip (§4 convention) for an ACTIVE secondary filter parked in
 // the DrawerFilterMenu popover — CALM-1 (P8-more-filters, batch 8): a filter
@@ -26,24 +35,19 @@ const resetButton: CSSProperties = {
 const secondaryChip: CSSProperties = {
   display: 'inline-flex', alignItems: 'center', gap: 5, padding: '4px 6px 4px 9px',
   fontSize: 11.5, fontWeight: 600, borderRadius: 999,
-  color: 'var(--color-primary-text)',
-  background: 'color-mix(in srgb, var(--color-primary) 12%, transparent)',
-  border: '1px solid color-mix(in srgb, var(--color-primary) 40%, transparent)',
+  color: 'var(--color-primary-text)', ...softTint(true),
 }
 const secondaryChipRemove: CSSProperties = {
   display: 'flex', alignItems: 'center', justifyContent: 'center', width: 15, height: 15,
   background: 'none', border: 'none', cursor: 'pointer', color: 'inherit', padding: 0,
 }
-
-// One label-beside-control filter unit — every filter is one line tall instead
-// of two, wrapping as a single flex item instead of a fixed-width column.
-function FilterField({ label, align = 'center', children }: { label: string; align?: CSSProperties['alignItems']; children: ReactNode }) {
-  return (
-    <div style={{ display: 'flex', alignItems: align, gap: 6 }}>
-      <span style={filterLabelInline}>{label}</span>
-      {children}
-    </div>
-  )
+// Reset — FILTER-VLAK-1 step 2: downgraded from a bordered/tinted button to a
+// small text item, since it now lives on the situational second row beside the
+// active-filter chips instead of competing with them as a second big button.
+const resetTextItem: CSSProperties = {
+  display: 'inline-flex', alignItems: 'center', gap: 4, padding: 0,
+  fontSize: 11.5, fontWeight: 600, color: 'var(--color-primary-text)',
+  background: 'none', border: 'none', cursor: 'pointer',
 }
 
 // A removable soft-chip beside the DrawerFilterMenu trigger — clicking × clears
@@ -55,6 +59,19 @@ function SecondaryFilterChip({ label, ariaLabel, onRemove }: { label: string; ar
       <button type="button" onClick={onRemove} aria-label={ariaLabel} style={secondaryChipRemove}>
         <X size={11} />
       </button>
+    </span>
+  )
+}
+
+// One primary-field trigger: the field's own label lives INSIDE the button
+// ("Vacaturestatus · 2"), mirroring the DrawerFilterMenu "More filters" idiom —
+// FILTER-VLAK-1 step 1: this replaces the separate label-beside-control layout,
+// halving the number of elements on the row.
+function PrimaryFilterTrigger({ label, count }: { label: string; count: number }) {
+  return (
+    <span style={filterTrigger(count > 0)}>
+      {label}
+      {count > 0 && <span aria-hidden="true" style={filterTriggerBadge}>{count}</span>}
     </span>
   )
 }
@@ -92,12 +109,14 @@ interface VacancySearchFiltersProps {
  * prop, no API calls and no business logic (§3 container/presentational split).
  * Every list is a searchable dropdown (SearchSelect), never a native <select>.
  *
- * P8-MORE-FILTERS (batch 8, decision = option B, approved): the primary row now
- * carries only Status/Functie/Contractvorm — the three filters used on nearly
- * every search. "Uren per week" and "Inzetbaar vanaf" moved into the shared
- * DrawerFilterMenu popover (its new 'range'/'date' row types) so the bar stays
- * calm; either one still shows as a REMOVABLE soft-chip beside the trigger the
- * moment it actually narrows the search — never hidden-but-active (§3).
+ * FILTER-VLAK-1 (Danny 13-08, rustplan approved, 4 steps): ONE fixed line at the
+ * canon toolbar size (minHeight 36, gap 10) carries only the three trigger
+ * buttons + the "More filters" popover — Status/Functie/Contractvorm no longer
+ * get their own text label beside the control, the label now lives INSIDE the
+ * trigger ("Vacaturestatus · 2"), same idiom the popover trigger already used.
+ * Active secondary-filter chips + "Filters herstellen" move together onto a
+ * SITUATIONAL second row that only renders while something is actually active —
+ * herstellen is now a small text item, never a second full-size button.
  */
 export default function VacancySearchFilters({
   candidateTitle, statusOptions, statuses, onStatusesChange,
@@ -113,11 +132,6 @@ export default function VacancySearchFilters({
   // Add/remove one value from a multi-select filter list.
   const toggle = (list: string[], value: string) =>
     list.includes(value) ? list.filter(v => v !== value) : [...list, value]
-
-  // Trigger text mirrors the shared filter-panel idiom (SearchSelectGroup / report
-  // filters): a count once something is selected, else a calm "choose X" prompt.
-  const triggerText = (selected: string[], label: string) =>
-    selected.length > 0 ? t('common:filters.selectedCount', { count: selected.length }) : t('common:filters.choose', { label: label.toLowerCase() })
 
   // "Uren per week" is ACTIVE only once a handle actually left a domain end — a
   // handle parked at 0/max means "unbounded on that side" (see hoursOverlap),
@@ -147,22 +161,36 @@ export default function VacancySearchFilters({
     }] : []),
   ]
 
+  // Situational second row (step 2): only rendered once something is actually
+  // active — the reset flag already covers radius/status/functions/contractvorm
+  // too, so it is the row's own visibility condition; the hours/availableFrom
+  // checks are additionally listed so a future filter that skips filtersDirty
+  // (unlikely, but never silently swallowed) still surfaces its chip.
+  const showSecondaryRow = filtersDirty || hoursActive || availableFromActive
+
   return (
-    <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '8px 16px' }}>
-      <FilterField label={t('vacancySearch.statuses')}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+      {/* Fixed line, canon toolbar size (§4: minHeight 36, gap 10, centered, no
+          background/divider) — step 1+2: only the three trigger buttons + "More
+          filters" ever live here, so it never grows past one line. */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10, minHeight: 36, flexWrap: 'wrap' }}>
         <SearchSelect
           options={statusOptions.map(s => ({ value: s.value, label: s.label }))}
           selected={statuses} onToggle={v => onStatusesChange(toggle(statuses, v))}
-          triggerLabel={triggerText(statuses, t('vacancySearch.statuses'))}
+          renderTrigger={toggleOpen => (
+            <button type="button" onClick={toggleOpen} aria-label={t('vacancySearch.statuses')} style={{ background: 'none', border: 'none', padding: 0 }}>
+              <PrimaryFilterTrigger label={t('vacancySearch.statuses')} count={statuses.length} />
+            </button>
+          )}
         />
-      </FilterField>
-      {/* flex-start only when the ghost-filter hint below the control makes this field
-          two lines tall; otherwise center like every other single-line filter field. */}
-      <FilterField label={t('vacancySearch.functions')} align={functionNotInLookup ? 'flex-start' : 'center'}>
         <div>
           <SearchSelect
             options={functionOptions} selected={functions} onToggle={v => onFunctionsChange(toggle(functions, v))}
-            triggerLabel={triggerText(functions, t('vacancySearch.functions'))}
+            renderTrigger={toggleOpen => (
+              <button type="button" onClick={toggleOpen} aria-label={t('vacancySearch.functions')} style={{ background: 'none', border: 'none', padding: 0 }}>
+                <PrimaryFilterTrigger label={t('vacancySearch.functions')} count={functions.length} />
+              </button>
+            )}
           />
           {/* Ghost-filter hint (Danny 06-08 live feedback): the candidate's own title has
               no exact lookup match, so the filter above seeded empty (searches ALL functions)
@@ -173,37 +201,42 @@ export default function VacancySearchFilters({
             </span>
           )}
         </div>
-      </FilterField>
-      <FilterField label={t('vacancySearch.contractForm')}>
         <SearchSelect
           options={contractvormOptions} selected={contractvorm} onToggle={v => onContractvormChange(toggle(contractvorm, v))}
-          triggerLabel={triggerText(contractvorm, t('vacancySearch.contractForm'))}
+          renderTrigger={toggleOpen => (
+            <button type="button" onClick={toggleOpen} aria-label={t('vacancySearch.contractForm')} style={{ background: 'none', border: 'none', padding: 0 }}>
+              <PrimaryFilterTrigger label={t('vacancySearch.contractForm')} count={contractvorm.length} />
+            </button>
+          )}
         />
-      </FilterField>
-      {/* P8-more-filters: "Uren per week" + "Inzetbaar vanaf" now live behind this
-          popover — the shared DrawerFilterMenu, its 'range'/'date' rows added for
-          this card. No-op (renders nothing) once neither is offered. */}
-      <DrawerFilterMenu filters={moreFilters} label={t('vacancySearch.moreFilters')}
-        title={t('vacancySearch.moreFiltersTitle')} clearAllLabel={t('common:filters.clearAll')} />
-      {/* Removable chips for whichever secondary filter is actually active — the
-          "never hidden-but-active" half of the popover move. */}
-      {hoursActive && (
-        <SecondaryFilterChip label={t('vacancySearch.cardHours', { range: hoursValueLabel })}
-          ariaLabel={t('vacancySearch.removeFilter', { label: t('vacancySearch.hoursPerWeek') })} onRemove={resetHours} />
-      )}
-      {availableFromActive && (
-        <SecondaryFilterChip label={`${t('vacancySearch.availableFromFilter')}: ${formatDate(availableFrom)}`}
-          ariaLabel={t('vacancySearch.removeFilter', { label: t('vacancySearch.availableFromFilter') })} onRemove={clearAvailableFrom} />
-      )}
-      {/* Reset (Danny 08-08, point 8) — only rendered when it would actually change
-          something; a button that does nothing is noise. Lives in the SAME wrap
-          flow as the filters: auto-margin pushes it right when there's room, and
-          it wraps onto its own line (still right-aligned) when there isn't. */}
-      {filtersDirty && (
-        <button type="button" onClick={onReset} style={{ ...resetButton, marginLeft: 'auto' }}>
-          <RotateCcw size={13} aria-hidden="true" />
-          {t('vacancySearch.resetFilters')}
-        </button>
+        {/* P8-more-filters: "Uren per week" + "Inzetbaar vanaf" now live behind this
+            popover — the shared DrawerFilterMenu, its 'range'/'date' rows added for
+            this card. No-op (renders nothing) once neither is offered. */}
+        <DrawerFilterMenu filters={moreFilters} label={t('vacancySearch.moreFilters')}
+          title={t('vacancySearch.moreFiltersTitle')} clearAllLabel={t('common:filters.clearAll')} />
+      </div>
+      {/* Situational second row (step 2): active secondary chips + the reset text
+          item, together, only while at least one filter narrows the search. */}
+      {showSecondaryRow && (
+        <div style={{ display: 'flex', alignItems: 'center', gap: '6px 10px', flexWrap: 'wrap' }}>
+          {hoursActive && (
+            <SecondaryFilterChip label={t('vacancySearch.cardHours', { range: hoursValueLabel })}
+              ariaLabel={t('vacancySearch.removeFilter', { label: t('vacancySearch.hoursPerWeek') })} onRemove={resetHours} />
+          )}
+          {availableFromActive && (
+            <SecondaryFilterChip label={`${t('vacancySearch.availableFromFilter')}: ${formatDate(availableFrom)}`}
+              ariaLabel={t('vacancySearch.removeFilter', { label: t('vacancySearch.availableFromFilter') })} onRemove={clearAvailableFrom} />
+          )}
+          {/* Reset (Danny 08-08, point 8) — only rendered when it would actually change
+              something; a button that does nothing is noise. Step 2: a small text item
+              now, pushed to the row's end via auto-margin. */}
+          {filtersDirty && (
+            <button type="button" onClick={onReset} style={{ ...resetTextItem, marginLeft: 'auto' }}>
+              <RotateCcw size={12} aria-hidden="true" />
+              {t('vacancySearch.resetFilters')}
+            </button>
+          )}
+        </div>
       )}
     </div>
   )

@@ -233,7 +233,8 @@
     "notif_escalation": "Escalade",
     "koios_advice": "Seuils de conseils",
     "notif_my": "Mes notifications",
-    "customer_identifier_validation": "Validation des numéros"
+    "customer_identifier_validation": "Validation des numéros",
+    "automations": "Automatisations"
   },
   "kpis": {
     "title": "Paramètres KPI",
@@ -849,9 +850,7 @@
         "claude": {
           "tokensIn": "Jetons entrants",
           "tokensOut": "Jetons sortants",
-          "cost": "Coût brut",
           "freeAllowance": "Quota gratuit (jetons)",
-          "margin": "Marge",
           "billable": "Coût Claude facturable"
         },
         "workflow": {
@@ -861,6 +860,19 @@
           "colAmount": "Montant"
         },
         "total": "Total"
+      },
+      "credits": {
+        "title": "Crédits",
+        "subtitle": "Prix de vente de l'utilisation workflow et IA pour cette période.",
+        "periodPrevMonth": "Mois précédent",
+        "loadError": "Échec du chargement de l'utilisation des crédits.",
+        "unavailable": "Vous n'avez pas la permission de voir ceci.",
+        "empty": "Aucune utilisation de crédits pour cette période.",
+        "workflowTitle": "Crédits workflow",
+        "totalCredits": "Total des crédits",
+        "creditPrice": "Prix par crédit",
+        "amount": "Montant",
+        "aiTitle": "Utilisation IA"
       }
     },
     "invoices": {
@@ -1524,6 +1536,7 @@
     "keysUpdated": "{{count}} clé(s) mise(s) à jour",
     "emptyValue": "Vide",
     "filterType": "Type",
+    "filterEntity": "Entité",
     "filterWho": "Par qui",
     "filterRole": "Rôle",
     "filterKind": "Genre",
@@ -2897,5 +2910,22 @@
     "colCoc": "Numéro de registre",
     "colVat": "Numéro de TVA",
     "unknownCountryHint": "Pour les pays sans règle ci-dessus, rien n'est bloqué. Vous recevez tout au plus une indication discrète."
+  },
+  "automations": {
+    "title": "Automatisations",
+    "subtitle": "Tous les workflows du tenant en une liste : activer ou désactiver, définir le nombre de jours d'avance d'un déclencheur relatif à une date, et choisir les candidats ciblés.",
+    "loadError": "Impossible de charger les workflows.",
+    "empty": "Aucun workflow pour l'instant. Créez-en un dans le générateur de workflows.",
+    "dateFieldReadOnly": "Se déclenche par rapport à : {{field}}",
+    "toggleAriaLabel": "Activer ou désactiver {{name}}",
+    "segmentStatusLabel": "Statut ciblé",
+    "segmentPhaseLabel": "Phase ciblée"
+  },
+  "platformPricing": {
+    "title": "Tarification de la plateforme",
+    "subtitle": "Marge IA et prix du crédit workflow pour toute la plateforme (superadmin).",
+    "markupLabel": "Marge IA (%)",
+    "creditPriceLabel": "Prix du crédit workflow (€)",
+    "loadError": "Échec du chargement de la tarification de la plateforme."
   }
 }

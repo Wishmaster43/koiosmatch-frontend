@@ -106,7 +106,9 @@
       "event": "Gebeurtenis",
       "eventDesc": "Bij een gebeurtenis in Koios Match",
       "webhook": "Eigen AI-agent",
-      "webhookDesc": "Start via de eigen webhook van een AI-agent"
+      "webhookDesc": "Start via de eigen webhook van een AI-agent",
+      "dateRelative": "Datum-gerelateerd",
+      "dateRelativeDesc": "Gaat af N dagen voor een datumveld"
     },
     "eventLabel": "Gebeurtenis",
     "eventHint": "Kies de gebeurtenis die deze workflow moet starten.",
@@ -150,7 +152,9 @@
       "quarterlyAt": "Elk kwartaal {{time}}",
       "yearlyAt": "Jaarlijks {{month}} {{day}} {{time}}",
       "webhook": "Webhook",
-      "webhookAgent": "Webhook: {{agent}}"
+      "webhookAgent": "Webhook: {{agent}}",
+      "dateRelative_one": "{{count}} dag voor {{field}}",
+      "dateRelative_other": "{{count}} dagen voor {{field}}"
     },
     "agentLabel": "AI-agent",
     "agentHint": "Kies de AI-agent van wie de eigen webhook deze workflow moet starten.",
@@ -1056,5 +1060,13 @@
     "error": "Templates laden is mislukt.",
     "empty": "Nog geen templates in deze categorie.",
     "useTemplate": "Gebruik template"
+  },
+  "dateRelative": {
+    "dateFieldLabel": "Datumveld",
+    "daysBeforeLabel": "Dagen van tevoren",
+    "daysBeforeSuffix_one": "dag van tevoren",
+    "daysBeforeSuffix_other": "dagen van tevoren",
+    "fieldAvailableAgain": "Weer-beschikbaar-datum kandidaat",
+    "fieldMatchEnd": "Einddatum match"
   }
 }

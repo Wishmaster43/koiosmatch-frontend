@@ -83,6 +83,7 @@ function EditorInner({ workflow, onClose, onSave, initialRunId }: {
 
         {/* ── Header ── */}
         <WorkflowEditorHeader
+          workflowId={workflow.id}
           name={name} onNameChange={setName}
           view={view} onViewChange={setView}
           trigger={trigger} scheduleConfig={scheduleConfig} onOpenSchedule={() => setShowSchedule(true)}

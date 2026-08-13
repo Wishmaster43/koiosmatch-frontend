@@ -69,10 +69,11 @@ export default function RadiusMapPanel({ points, center, radiusKm, onCenterChang
           </button>
         )}
       </div>
-      {/* The click-hint + point count used to be two separate spans crowding the
-          radius row (Danny 09-08) — now ONE subtle, italic helper line below it. */}
-      <span style={{ fontSize: 11, color: 'var(--text-muted)', fontStyle: 'italic' }}>
-        {(pointsLabel ?? t('map.pointCount', { count: points.length }))} · {t('map.clickHint')}
+      {/* FILTER-VLAK-1 (Danny 13-08, rustplan step 3): the click hint used to be
+          appended as visible text next to the point count, making this caption
+          run long — it now lives in a `title` tooltip on the same short line. */}
+      <span title={t('map.clickHint')} style={{ fontSize: 11, color: 'var(--text-muted)', fontStyle: 'italic' }}>
+        {pointsLabel ?? t('map.pointCount', { count: points.length })}
       </span>
       {/* The map fills the remaining pane height; hosts (drawer tabs) can force a
           taller map via mapHeight (Danny 23-07: "kaart kan langer"). */}

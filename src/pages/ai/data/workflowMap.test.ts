@@ -94,6 +94,11 @@ describe('denormalizeWorkflow', () => {
     expect(denormalizeWorkflow(base({ trigger: undefined }))).toMatchObject({ trigger_type: 'manual', trigger_config: {} })
   })
 
+  it('keeps a DateRelative trigger verbatim — never re-tagged scheduled (DATE-REL-RUNNER-1)', () => {
+    expect(denormalizeWorkflow(base({ trigger: 'DateRelative', trigger_config: { date_field: 'match.end_date', offset_days: -28 } } as Partial<Workflow>)))
+      .toMatchObject({ trigger_type: 'date_relative', trigger_config: { date_field: 'match.end_date', offset_days: -28 } })
+  })
+
   it('recognizes any trigger string containing "webhook" (case-insensitive)', () => {
     expect(denormalizeWorkflow(base({ trigger: 'Webhook' }))).toMatchObject({ trigger_type: 'webhook' })
     expect(denormalizeWorkflow(base({ trigger: 'via webhook' }))).toMatchObject({ trigger_type: 'webhook' })

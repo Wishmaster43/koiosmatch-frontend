@@ -67,7 +67,9 @@
       "event": "Ereignis",
       "eventDesc": "Bei einem Ereignis in Koios Match",
       "webhook": "Eigener KI-Agent",
-      "webhookDesc": "Startet über den eigenen Webhook eines KI-Agenten"
+      "webhookDesc": "Startet über den eigenen Webhook eines KI-Agenten",
+      "dateRelative": "Datumsbezogen",
+      "dateRelativeDesc": "Löst N Tage vor einem Datumfeld aus"
     },
     "eventLabel": "Ereignis",
     "eventHint": "Wählen Sie das Ereignis, das diesen Workflow starten soll.",
@@ -111,7 +113,9 @@
       "quarterlyAt": "Jedes Quartal {{time}}",
       "yearlyAt": "Jährlich {{month}} {{day}} {{time}}",
       "webhook": "Webhook",
-      "webhookAgent": "Webhook: {{agent}}"
+      "webhookAgent": "Webhook: {{agent}}",
+      "dateRelative_one": "{{count}} Tag vor {{field}}",
+      "dateRelative_other": "{{count}} Tage vor {{field}}"
     },
     "agentLabel": "KI-Agent",
     "agentHint": "Wählen Sie den KI-Agenten, dessen eigener Webhook diesen Workflow starten soll.",
@@ -1056,5 +1060,13 @@
     "error": "Vorlagen konnten nicht geladen werden.",
     "empty": "Noch keine Vorlagen in dieser Kategorie.",
     "useTemplate": "Vorlage verwenden"
+  },
+  "dateRelative": {
+    "dateFieldLabel": "Datumfeld",
+    "daysBeforeLabel": "Tage im Voraus",
+    "daysBeforeSuffix_one": "Tag im Voraus",
+    "daysBeforeSuffix_other": "Tage im Voraus",
+    "fieldAvailableAgain": "Wieder-verfügbar-Datum Kandidat",
+    "fieldMatchEnd": "Enddatum Match"
   }
 }

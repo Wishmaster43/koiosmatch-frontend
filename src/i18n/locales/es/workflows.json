@@ -67,7 +67,9 @@
       "event": "Evento",
       "eventDesc": "Ante un evento en Koios Match",
       "webhook": "Agente de IA propio",
-      "webhookDesc": "Se inicia mediante el webhook propio de un agente de IA"
+      "webhookDesc": "Se inicia mediante el webhook propio de un agente de IA",
+      "dateRelative": "Relativo a fecha",
+      "dateRelativeDesc": "Se dispara N días antes de un campo de fecha"
     },
     "eventLabel": "Evento",
     "eventHint": "Elige el evento que debe iniciar este flujo de trabajo.",
@@ -111,7 +113,9 @@
       "quarterlyAt": "Cada trimestre {{time}}",
       "yearlyAt": "Anual {{month}} {{day}} {{time}}",
       "webhook": "Webhook",
-      "webhookAgent": "Webhook: {{agent}}"
+      "webhookAgent": "Webhook: {{agent}}",
+      "dateRelative_one": "{{count}} día antes de {{field}}",
+      "dateRelative_other": "{{count}} días antes de {{field}}"
     },
     "agentLabel": "Agente de IA",
     "agentHint": "Elige el agente de IA cuyo webhook propio debe iniciar este flujo de trabajo.",
@@ -1056,5 +1060,13 @@
     "error": "No se pudieron cargar las plantillas.",
     "empty": "Todavía no hay plantillas en esta categoría.",
     "useTemplate": "Usar plantilla"
+  },
+  "dateRelative": {
+    "dateFieldLabel": "Campo de fecha",
+    "daysBeforeLabel": "Días de antelación",
+    "daysBeforeSuffix_one": "día de antelación",
+    "daysBeforeSuffix_other": "días de antelación",
+    "fieldAvailableAgain": "Fecha de disponibilidad del candidato",
+    "fieldMatchEnd": "Fecha de fin del match"
   }
 }

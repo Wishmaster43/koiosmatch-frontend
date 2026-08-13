@@ -304,11 +304,10 @@ describe('VacancySearchTab · status filter (searchable dropdown)', () => {
     render(<VacancySearchTab candidate={candidateWithLocation} />)
     await waitFor(() => expect(mockGet).toHaveBeenCalledTimes(1))
 
-    // Statuses are a searchable SearchSelect checklist now, not chips — open the
-    // ONE scoped to the "Vacaturestatus" label (the functions dropdown reads the
-    // same trigger text when exactly one option is selected too).
-    const statusesLabel = screen.getByText(nl.vacancySearch.statuses)
-    const statusesTrigger = within(statusesLabel.parentElement as HTMLElement).getByRole('button')
+    // Statuses are a searchable SearchSelect checklist now, not chips — FILTER-VLAK-1
+    // (13-08): the field's own label now lives INSIDE the trigger button's
+    // accessible name, so it is queried directly, no more label-then-sibling.
+    const statusesTrigger = screen.getByRole('button', { name: nl.vacancySearch.statuses })
     await userEvent.click(statusesTrigger)
     await userEvent.click(await screen.findByRole('button', { name: 'Gesloten' }))
 
@@ -536,8 +535,11 @@ describe('VacancySearchTab · function filter seeding (ghost-filter fix, Danny 0
       params: { radius: 30, status: ['open'], per_page: 100 },
       signal: expect.anything(),
     }))
-    // The trigger shows the neutral "choose" prompt, never a "1 selected" ghost count.
-    expect(screen.getByText('Kies functie…')).toBeInTheDocument()
+    // The trigger shows the plain field label, never a "1 selected" ghost count —
+    // FILTER-VLAK-1 (13-08): the label lives inside the trigger, no count badge.
+    const trigger = screen.getByRole('button', { name: nl.vacancySearch.functions })
+    expect(trigger).toHaveTextContent(nl.vacancySearch.functions)
+    expect(within(trigger).queryByText(/^\d+$/)).toBeNull()
   })
 
   it('a manual user pick is never clobbered once the tenant lookup changes (userTouched wins)', async () => {
@@ -548,9 +550,9 @@ describe('VacancySearchTab · function filter seeding (ghost-filter fix, Danny 0
     const { rerender } = render(<VacancySearchTab candidate={candidate} />)
     await waitFor(() => expect(mockGet).toHaveBeenCalledTimes(1))
 
-    // User manually picks ONE function via the dropdown.
-    const functionsLabel = screen.getByText(nl.vacancySearch.functions)
-    const functionsTrigger = within(functionsLabel.parentElement as HTMLElement).getByRole('button')
+    // User manually picks ONE function via the dropdown. FILTER-VLAK-1 (13-08):
+    // the label lives inside the trigger's accessible name now.
+    const functionsTrigger = screen.getByRole('button', { name: nl.vacancySearch.functions })
     await userEvent.click(functionsTrigger)
     await userEvent.click(await screen.findByRole('button', { name: 'Verpleegkundige N4' }))
     await waitFor(() => expect(mockGet).toHaveBeenLastCalledWith('/candidates/cand1/vacancy-matches', {
@@ -619,8 +621,8 @@ describe('VacancySearchTab · contract-form filter (Contractvorm, Danny 06-08)',
 
     // Toggling in 'Tijdelijk' — an option OUTSIDE the tenant lookup, offered only
     // because a fetched row carries it — brings the second vacancy back.
-    const label = screen.getByText('Contractvorm')
-    const trigger = within(label.parentElement as HTMLElement).getByRole('button')
+    // FILTER-VLAK-1 (13-08): the label lives inside the trigger's accessible name.
+    const trigger = screen.getByRole('button', { name: 'Contractvorm' })
     await userEvent.click(trigger)
     await userEvent.click(await screen.findByRole('button', { name: 'Tijdelijk' }))
 
@@ -636,9 +638,11 @@ describe('VacancySearchTab · contract-form filter (Contractvorm, Danny 06-08)',
     // label) isn't offered by any lookup entry or fetched row, so nothing seeds.
     await waitFor(() => expect(screen.getByText('ZZP-vacature | Ede')).toBeInTheDocument())
     expect(screen.getByText('Tijdelijk-vacature | Arnhem')).toBeInTheDocument()
-    const label = screen.getByText('Contractvorm')
-    const trigger = within(label.parentElement as HTMLElement).getByRole('button')
-    expect(trigger).toHaveTextContent('Kies contractvorm…')
+    // FILTER-VLAK-1 (13-08): an empty selection shows just the field label, no
+    // count badge — the old "Kies contractvorm…" placeholder text is gone.
+    const trigger = screen.getByRole('button', { name: 'Contractvorm' })
+    expect(trigger).toHaveTextContent('Contractvorm')
+    expect(within(trigger).queryByText(/^\d+$/)).toBeNull()
   })
 })
 
@@ -887,8 +891,8 @@ describe('VacancySearchTab · reset filters (Danny 08-08, point 8)', () => {
     }))
 
     // Deviate on TWO axes at once: an extra status and a bigger radius.
-    const statusesLabel = screen.getByText(nl.vacancySearch.statuses)
-    await userEvent.click(within(statusesLabel.parentElement as HTMLElement).getByRole('button'))
+    // FILTER-VLAK-1 (13-08): the label lives inside the trigger's accessible name.
+    await userEvent.click(screen.getByRole('button', { name: nl.vacancySearch.statuses }))
     await userEvent.click(await screen.findByRole('button', { name: 'Gesloten' }))
     await userEvent.click(screen.getByRole('button', { name: 'stub-set-radius' }))
     await waitFor(() => expect(mockGet).toHaveBeenLastCalledWith('/candidates/cand1/vacancy-matches', {
@@ -939,9 +943,9 @@ describe('VacancySearchTab · reset filters (Danny 08-08, point 8)', () => {
     await waitFor(() => expect(screen.getByText('ZZP-vacature | Ede')).toBeInTheDocument())
     expect(screen.queryByRole('button', { name: 'Filters herstellen' })).toBeNull()
 
-    // Add a second contract form, then reset back to the seed.
-    const label = screen.getByText('Contractvorm')
-    await userEvent.click(within(label.parentElement as HTMLElement).getByRole('button'))
+    // Add a second contract form, then reset back to the seed. FILTER-VLAK-1
+    // (13-08): the label lives inside the trigger's accessible name.
+    await userEvent.click(screen.getByRole('button', { name: 'Contractvorm' }))
     await userEvent.click(await screen.findByRole('button', { name: 'Tijdelijk' }))
     await waitFor(() => expect(screen.getByText('Tijdelijk-vacature | Arnhem')).toBeInTheDocument())
 

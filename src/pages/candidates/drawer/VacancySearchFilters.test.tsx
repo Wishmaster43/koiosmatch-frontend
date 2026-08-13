@@ -159,6 +159,32 @@ describe('VacancySearchFilters · secondary filters as removable chips (P8-more-
   })
 })
 
+// FILTER-VLAK-1 (Danny 13-08, rustplan step 1+2): the three fixed triggers
+// carry their own label + count, no separate field label; the reset link and
+// the active secondary chips only render on a SITUATIONAL second row, and only
+// while something is genuinely active — this pins that structure.
+describe('VacancySearchFilters · single-row structure (FILTER-VLAK-1)', () => {
+  it('renders no bare field labels beside the three fixed triggers — the label lives inside the trigger', () => {
+    render(<VacancySearchFilters {...baseProps} statuses={['open']} />)
+    // The trigger carries the label + a count badge, never a separate label span.
+    const trigger = screen.getByRole('button', { name: 'Vacaturestatus' })
+    expect(trigger).toHaveTextContent('Vacaturestatus')
+    expect(trigger).toHaveTextContent('1')
+  })
+
+  it('shows no second row at all while every filter is at rest', () => {
+    render(<VacancySearchFilters {...baseProps} />)
+    expect(screen.queryByRole('button', { name: 'Filters herstellen' })).toBeNull()
+    expect(screen.queryByText(/uur\/week/)).toBeNull()
+  })
+
+  it('the active hours chip and the reset link appear TOGETHER once a filter narrows the search', () => {
+    render(<VacancySearchFilters {...baseProps} hasHoursData hoursRange={[8, 32]} filtersDirty />)
+    expect(screen.getByText('8–32 uur/week')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Filters herstellen' })).toBeInTheDocument()
+  })
+})
+
 describe('VacancySearchFilters · reset button only shows when something actually changed', () => {
   it('is absent while filtersDirty is false', () => {
     render(<VacancySearchFilters {...baseProps} filtersDirty={false} />)

@@ -10,7 +10,7 @@
  *   component: Component  — a custom section component
  *
  * Labels: groups.<key> and nav.<id> in the `settings` i18n namespace.
- * Gating: superAdminOnly | requiresPage | (id === 'users') handled by the shell.
+ * Gating: superAdminOnly | requiresPage | requiresPermission | (id === 'users') handled by the shell.
  *
  * Add a setting = one item here. A simple toggle/number setting = add a `schema`
  * (or a line to an existing schema) and skip writing a component entirely.
@@ -119,6 +119,7 @@ import outreachDisplay from './schemas/outreachDisplay'
 import DriverLicenseSettings from './sections/DriverLicenseSettings'
 import ActionRulesSettings from './sections/ActionRulesSettings'
 import workflowRunHistory from './schemas/workflowRunHistory'
+import AutomationsSettings from './sections/AutomationsSettings'
 
 export const NAV_GROUPS = [
   {
@@ -538,6 +539,7 @@ export const NAV_GROUPS = [
     // workflows module has nothing to retain, so the group auto-hides for them.
     key: 'workflows', icon: History,
     items: [
+      { id: 'automations', icon: CalendarCheck, component: AutomationsSettings, requiresPage: 'workflows' },
       { id: 'workflow_run_history', icon: History, schema: workflowRunHistory, requiresPage: 'workflows' },
     ],
   },
@@ -655,7 +657,9 @@ export const NAV_GROUPS = [
     key: 'billing', icon: CreditCard,
     items: [
       // billing_pay (payment methods + auto top-up) dropped per Danny (R-1).
-      { id: 'billing_usage', icon: BarChart2, component: GebruikSettings },
+      // CREDITS-1: gated on the new `billing.view` permission — settings.view alone
+      // is NOT enough (tenant_admin/admin/manager only); hidden, never disabled (§3).
+      { id: 'billing_usage', icon: BarChart2, component: GebruikSettings, requiresPermission: 'billing.view' },
       { id: 'billing_invoices', icon: FileText, component: FacturenSettings },
     ],
   },

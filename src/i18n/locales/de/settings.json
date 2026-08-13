@@ -233,7 +233,8 @@
     "notif_escalation": "Eskalation",
     "koios_advice": "Hinweis-Schwellenwerte",
     "notif_my": "Meine Benachrichtigungen",
-    "customer_identifier_validation": "Nummernprüfung"
+    "customer_identifier_validation": "Nummernprüfung",
+    "automations": "Automatisierungen"
   },
   "kpis": {
     "title": "KPI-Einstellungen",
@@ -849,9 +850,7 @@
         "claude": {
           "tokensIn": "Tokens ein",
           "tokensOut": "Tokens aus",
-          "cost": "Selbstkosten",
           "freeAllowance": "Freikontingent (Tokens)",
-          "margin": "Marge",
           "billable": "Abrechenbare Claude-Kosten"
         },
         "workflow": {
@@ -861,6 +860,19 @@
           "colAmount": "Betrag"
         },
         "total": "Gesamt"
+      },
+      "credits": {
+        "title": "Credits",
+        "subtitle": "Verkaufspreis für Workflow- und KI-Verbrauch in diesem Zeitraum.",
+        "periodPrevMonth": "Vorheriger Monat",
+        "loadError": "Credits-Verbrauch konnte nicht geladen werden.",
+        "unavailable": "Sie haben keine Berechtigung, dies anzuzeigen.",
+        "empty": "Noch kein Credits-Verbrauch in diesem Zeitraum.",
+        "workflowTitle": "Workflow-Credits",
+        "totalCredits": "Credits insgesamt",
+        "creditPrice": "Preis pro Credit",
+        "amount": "Betrag",
+        "aiTitle": "KI-Verbrauch"
       }
     },
     "invoices": {
@@ -1524,6 +1536,7 @@
     "keysUpdated": "{{count}} Schlüssel aktualisiert",
     "emptyValue": "Leer",
     "filterType": "Typ",
+    "filterEntity": "Entität",
     "filterWho": "Von wem",
     "filterRole": "Rolle",
     "filterKind": "Art",
@@ -2897,5 +2910,22 @@
     "colCoc": "Handelsregisternummer",
     "colVat": "USt-IdNr.",
     "unknownCountryHint": "Für Länder ohne obige Regel wird nichts blockiert. Es erscheint höchstens ein dezenter Hinweis."
+  },
+  "automations": {
+    "title": "Automatisierungen",
+    "subtitle": "Alle Mandanten-Workflows in einer Liste: ein- oder ausschalten, einstellen, wie viele Tage vorher ein datumsbezogener Auslöser startet, und die Zielkandidaten wählen.",
+    "loadError": "Workflows konnten nicht geladen werden.",
+    "empty": "Noch keine Workflows. Erstellen Sie einen im Workflow-Builder.",
+    "dateFieldReadOnly": "Löst aus relativ zu: {{field}}",
+    "toggleAriaLabel": "{{name}} ein- oder ausschalten",
+    "segmentStatusLabel": "Zielstatus",
+    "segmentPhaseLabel": "Zielphase"
+  },
+  "platformPricing": {
+    "title": "Plattformpreise",
+    "subtitle": "KI-Marge und Workflow-Creditpreis für die gesamte Plattform (Superadmin).",
+    "markupLabel": "KI-Marge (%)",
+    "creditPriceLabel": "Workflow-Creditpreis (€)",
+    "loadError": "Plattformpreise konnten nicht geladen werden."
   }
 }

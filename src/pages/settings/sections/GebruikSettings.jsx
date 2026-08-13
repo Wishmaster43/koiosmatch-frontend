@@ -1,10 +1,18 @@
 /**
- * GebruikSettings (billing_usage, USAGE-LIMITS-1) — cross-domain usage & limits
- * overview. Three sections show REAL data, verified against koiosmatch-api:
+ * GebruikSettings (billing_usage, USAGE-LIMITS-1 + CREDITS-1) — cross-domain usage
+ * & limits overview. Gated on the `billing.view` permission at the registry level
+ * (SettingsPage) — settings.view alone never surfaces this screen (§3). Sections,
+ * all REAL data verified against koiosmatch-api:
+ *   - Credits (workflow + AI, sale-price) — GET /billing/usage?period=month|prev_month
+ *     (CREDITS-1 fase 1, the new headline block; credit_price renders UNROUNDED)
  *   - AI usage (Koios)   — GET /ai/koios/usage?period=today|month
  *   - WhatsApp usage     — GET /settings/messaging-costs (always "this month")
  *   - Koios AI billing   — GET /ai/koios/usage/billing?month=YYYY-MM (K0, invoice-
  *     ready Claude + workflow-token totals; see the block below for detail)
+ * CREDITS-1 §9-reparatie: the AI usage/billing shapes are SALE-PRICE only now
+ * (totals.amount, per_activity[].amount, billable_cost) — claude.cost/margin_pct
+ * are gone from the billing endpoint; never render a purchase price here, that
+ * inkoop view lives on the superadmin tenant-usage screen only.
  * Two pieces of the reference screenshot have NO backend behind them at all yet
  * — (1) current plan + credit progress bar + reset date, and (3) credit balance
  * need a plan/credit model that does not exist (Tenant only has package/add-on
@@ -21,31 +29,14 @@ import { Clock, ChevronDown, ChevronRight } from 'lucide-react'
 import api, { unwrap } from '@/lib/api'
 import { useNumberFormat } from '@/lib/formatters'
 import QuickViewToggle from '@/components/ui/QuickViewToggle'
+import { card, cardTitle, sub, th, td, numCell, notice, Tile } from './usageCardStyles'
+import CreditsUsageCard from './CreditsUsageCard'
 
 // Current month as 'YYYY-MM' — the default billing period shown on first load
 // (matches the `month` query param the K0 billing endpoint expects).
 function currentMonthKey() {
   const d = new Date()
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`
-}
-
-// Shared card chrome — mirrors the Koios settings cards (KoiosStatusCard/KoiosPricingCard).
-const card = { border: '1px solid var(--border)', borderRadius: 10, padding: 16, marginBottom: 14, background: 'var(--surface)' }
-const cardTitle = { fontSize: 13, fontWeight: 600, color: 'var(--text)', marginBottom: 4 }
-const sub = { fontSize: 12, color: 'var(--text-muted)', marginBottom: 12 }
-const th = { textAlign: 'left', fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', padding: '6px 8px', borderBottom: '1px solid var(--border)' }
-const td = { fontSize: 12, color: 'var(--text)', padding: '8px', borderBottom: '1px solid var(--border)' }
-const numCell = { ...td, fontFamily: 'monospace', textAlign: 'right' }
-const notice = { fontSize: 13, color: 'var(--text-muted)' }
-
-// One metric tile (label above a bold value) — mirrors TenantUsageSettings' Tile.
-function Tile({ label, value }) {
-  return (
-    <div style={{ flex: '1 1 0', minWidth: 120, background: 'var(--hover-bg)', borderRadius: 10, padding: '10px 14px' }}>
-      <div style={{ fontSize: 11, color: 'var(--text-muted)', fontWeight: 500, marginBottom: 4 }}>{label}</div>
-      <div style={{ fontSize: 18, fontWeight: 700, color: 'var(--text)', fontFamily: "'JetBrains Mono', monospace" }}>{value}</div>
-    </div>
-  )
 }
 
 // A calm "not built yet" notice — never a fake number (§3 no fake affordances).
@@ -139,6 +130,10 @@ export default function GebruikSettings() {
       {/* Blocked: no plan/credit model exists in the backend yet. */}
       <ComingSoonNotice title={t('billing.usage.plan.title')} text={t('billing.usage.plan.notice')} />
 
+      {/* Credits (CREDITS-1) — sale-price workflow + AI usage, own file (§3 size
+          discipline). credit_price renders UNROUNDED, see CreditsUsageCard. */}
+      <CreditsUsageCard />
+
       {/* AI usage (Koios) — real data, period-scoped via the shared QuickViewToggle. */}
       <div style={card}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
@@ -159,14 +154,14 @@ export default function GebruikSettings() {
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10, marginBottom: 14 }}>
               <Tile label={t('billing.usage.ai.calls')} value={formatNumber(ai?.totals?.calls)} />
               <Tile label={t('billing.usage.ai.tokens')} value={formatNumber((ai?.totals?.input_tokens ?? 0) + (ai?.totals?.output_tokens ?? 0))} />
-              <Tile label={t('billing.usage.ai.cost')} value={formatCurrency(ai?.totals?.cost, ai?.totals?.currency)} />
+              <Tile label={t('billing.usage.ai.cost')} value={formatCurrency(ai?.totals?.amount, ai?.totals?.currency)} />
             </div>
 
             {ai?.forecast && (
               <p style={{ ...notice, marginBottom: 12 }}>
                 {t('billing.usage.ai.forecastLine', {
-                  avg: formatCurrency(ai.forecast.avg_daily_cost, ai.forecast.currency),
-                  projected: formatCurrency(ai.forecast.projected_month_cost, ai.forecast.currency),
+                  avg: formatCurrency(ai.forecast.avg_daily_amount, ai.forecast.currency),
+                  projected: formatCurrency(ai.forecast.projected_month_amount, ai.forecast.currency),
                 })}
               </p>
             )}
@@ -187,7 +182,7 @@ export default function GebruikSettings() {
                       <td style={{ ...td, fontFamily: 'monospace' }}>{row.activity}</td>
                       <td style={numCell}>{formatNumber(row.calls)}</td>
                       <td style={numCell}>{formatNumber((row.input_tokens ?? 0) + (row.output_tokens ?? 0))}</td>
-                      <td style={numCell}>{formatCurrency(row.cost, ai?.totals?.currency)}</td>
+                      <td style={numCell}>{formatCurrency(row.amount, ai?.totals?.currency)}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -220,7 +215,9 @@ export default function GebruikSettings() {
 
         {billingPhase === 'ready' && billing && (
           <>
-            {/* Claude cost lines — usage, free allowance and the marked-up billable cost. */}
+            {/* Claude token/cost lines — CREDITS-1 §9-reparatie: cost + margin_pct are
+                GONE from this endpoint (purchase-price leak); billable_cost is the
+                actual sale price and stays the only money line here. */}
             <table style={{ width: '100%', borderCollapse: 'collapse', marginBottom: 4 }}>
               <tbody>
                 <tr>
@@ -232,16 +229,8 @@ export default function GebruikSettings() {
                   <td style={numCell}>{formatNumber(billing.claude?.tokens_out)}</td>
                 </tr>
                 <tr>
-                  <td style={td}>{t('billing.usage.koios.claude.cost')}</td>
-                  <td style={numCell}>{formatCurrency(billing.claude?.cost, billing.currency)}</td>
-                </tr>
-                <tr>
                   <td style={td}>{t('billing.usage.koios.claude.freeAllowance')}</td>
                   <td style={numCell}>{formatNumber(billing.claude?.free_allowance)}</td>
-                </tr>
-                <tr>
-                  <td style={td}>{t('billing.usage.koios.claude.margin')}</td>
-                  <td style={numCell}>{formatNumber(billing.claude?.margin_pct)}%</td>
                 </tr>
                 <tr>
                   <td style={{ ...td, fontWeight: 600, borderBottom: 'none' }}>{t('billing.usage.koios.claude.billable')}</td>
