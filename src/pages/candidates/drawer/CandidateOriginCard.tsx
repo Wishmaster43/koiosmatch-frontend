@@ -48,8 +48,18 @@ export default function CandidateOriginCard({ c }: { c: Candidate }) {
       <GroupHeader title={t('profile.groupOrigin')}>{null}</GroupHeader>
       <GroupCard>
         {/* Source carries no lock: it is not a server stamp, it just has no edit
-            path here (§3 — the icon would claim something untrue about the field). */}
-        <FieldRow label={t('profile.source')}><Stamp value={c.source} locked={false} /></FieldRow>
+            path here (§3 — the icon would claim something untrue about the field).
+            SOURCE-DETAIL-1: the careersite-filled snapshot renders as muted text
+            under the source label — text-only by design, so it survives vacancy
+            deletion; no link is invented here. */}
+        <FieldRow label={t('profile.source')}>
+          <span style={{ display: 'inline-flex', flexDirection: 'column', gap: 2 }}>
+            <Stamp value={c.source} locked={false} />
+            {c.sourceDetail && (
+              <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>{c.sourceDetail}</span>
+            )}
+          </span>
+        </FieldRow>
         <FieldRow label={t('profile.createdBy')}><Stamp value={c.createdBy?.name} /></FieldRow>
         <FieldRow label={t('profile.createdAt')}><Stamp value={c.created ? formatDateTime(c.created) : null} /></FieldRow>
       </GroupCard>

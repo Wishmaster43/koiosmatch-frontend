@@ -45,8 +45,8 @@ import StatusPill from '@/components/ui/StatusPill'
 import ApplicationRowDetails from './ApplicationRowDetails'
 import { useDateFormat } from '@/lib/datetime'
 import { rememberReturnTab } from './constants'
-import { APPLICATION_COL_STATUS, APPLICATION_COL_DATE, APPLICATION_COL_ACTIONS, APPLICATION_COL_TITLE } from './applicationRowColumns'
-import { vacancyLabelOf, vacancyUrlOf } from './applicationRowModel'
+import { APPLICATION_COL_STATUS, APPLICATION_COL_DATE, APPLICATION_COL_ACTIONS, APPLICATION_COL_TITLE, APPLICATION_COL_CLIENT } from './applicationRowColumns'
+import { vacancyLabelOf, vacancyUrlOf, clientNameOf } from './applicationRowModel'
 import type { AppRow, Appt } from './applicationRowModel'
 import type { ExistingAppointment } from './PlanIntakeModal'
 import type { Id } from '@/types/common'
@@ -88,8 +88,11 @@ export default function ApplicationRow({ candidateId, row, appointment, canManag
   const { t } = useTranslation(['candidates', 'common'])
   const { formatDate, locale } = useDateFormat()
 
-  // Vacancy-less intake applications have no title → show a dash (CONSIST-2).
-  const label = vacancyLabelOf(row) ?? '—'
+  // Vacancy-less intake applications have no title → show "Intake" (or "Intake —
+  // <klant>" when the row carries a client_name) instead of a bare dash, so the
+  // identity row still reads as an intake for THIS client (batch 14, 4-dash decision).
+  const client = clientNameOf(row)
+  const label = vacancyLabelOf(row) ?? (client ? t('work.intakeLabelWithClient', { client }) : t('work.intakeLabel'))
   const url = vacancyUrlOf(row)
   const vacancyId = row.vacancy?.id ?? null
   const applicationId = row.id ?? null
@@ -141,6 +144,9 @@ export default function ApplicationRow({ candidateId, row, appointment, canManag
                   <EntityLink page="vacancies" id={vacancyId} title={label}>{label}</EntityLink>
                 </span>
               : <span style={titleCell}>{label}</span>}
+        {/* Klant column (batch 14): the vacancy's customer name, dash when the row
+            carries none — same fixed-width cell WorkTab's header labels. */}
+        <span style={APPLICATION_COL_CLIENT}>{client ?? '—'}</span>
         {/* Status column (APPLICATION-COL-1, Danny 09-08): the pill sits inside the
             SAME fixed-width cell the header labels — always rendered (even when
             this row genuinely has no stage) so a missing pill never shifts the

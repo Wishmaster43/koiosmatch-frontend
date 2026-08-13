@@ -136,6 +136,9 @@ export function mapCandidate(c: ApiCandidate): Candidate {
       : null,
     // Acquisition source (website/facebook/…) — feeds the source filter once the list sends it.
     source:          (c.source as string | undefined) ?? null,
+    // SOURCE-DETAIL-1: careersite snapshot string (e.g. exact vacancy/page title) —
+    // tolerant string mapping, kept as free text since it must outlive the vacancy.
+    sourceDetail:    (c.source_detail as string | undefined) ?? null,
     province:        c.province ?? '',
     lastContactAt:   c.last_contact_at ?? c.last_contacted_at ?? null,
     // Backend sends these flat (last_contact_at / last_contact_type); keep the

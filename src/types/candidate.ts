@@ -172,6 +172,9 @@ export interface Candidate {
   lastContactType: string | null
   lastContactBy: string | null
   source?: string | null
+  // SOURCE-DETAIL-1: careersite-filled snapshot text (e.g. which vacancy/page the
+  // candidate applied through) — survives vacancy deletion by design, text-only.
+  sourceDetail?: string | null
   client: string
   created: string
   // CREATED-BY-SOURCE-1: who created this dossier — a CENTRAL user; null on legacy rows.
@@ -378,6 +381,8 @@ export interface ApiCandidate {
   created?: string
   // CREATED-BY-SOURCE-1: acquisition channel + who created this dossier (a CENTRAL user).
   source?: string | null
+  // SOURCE-DETAIL-1: raw snapshot string from the backend (careersite fills it automatically).
+  source_detail?: string | null
   created_by?: { id?: string | number; name?: string } | null
   email?: string
   phone?: string

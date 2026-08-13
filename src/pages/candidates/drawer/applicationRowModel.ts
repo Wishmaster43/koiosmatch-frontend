@@ -10,7 +10,10 @@ import type { Id } from '@/types/common'
 // One application row as nested under the candidate (read defensively). The
 // funnel stage (label + colour) used to live in the header chips — shown in the
 // row now. APP-EMBED-1: vacancy.id + created_at (applied-on date).
-export interface AppRow { id?: Id; logo_url?: string; vacancy?: { logo_url?: string; title?: string; url?: string; id?: Id }; vacature?: string; title?: string; url?: string; stageLabel?: string; stageColor?: string; created_at?: string }
+// CMBE wave 1 (batch 14): the embedded application row now carries client_name
+// directly (the vacancy's own customer) so the Klant column never has to load
+// the full application detail just to show who the vacancy is for.
+export interface AppRow { id?: Id; logo_url?: string; vacancy?: { logo_url?: string; title?: string; url?: string; id?: Id }; vacature?: string; title?: string; url?: string; stageLabel?: string; stageColor?: string; created_at?: string; client_name?: string | null }
 
 // A linked appointment as returned by /candidates/{id}/appointments.
 export interface Appt { id: Id; application_id?: Id | null; type?: string; scheduled_at?: string; duration_min?: number | null; modality?: string; owner?: { id?: Id; name?: string }; location_name?: string; status?: string }
@@ -26,3 +29,8 @@ export const vacancyUrlOf = (s: AppRow): string | null => {
 // shared by the row render (dash fallback) and WorkTab's search filter, so the two
 // never drift into two different ideas of "the label".
 export const vacancyLabelOf = (s: AppRow): string | null => s.vacature ?? s.vacancy?.title ?? s.title ?? null
+
+// The row's client (customer) name — tolerant read, null when the row genuinely
+// carries none (e.g. a seed row predating CMBE wave 1). Shared by the row's own
+// Klant column and its "Intake — <klant>" label so both read one source.
+export const clientNameOf = (s: AppRow): string | null => s.client_name ?? null

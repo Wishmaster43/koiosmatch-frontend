@@ -175,6 +175,36 @@ describe('ApplicationRow · the existing row actions keep working', () => {
 })
 
 /**
+ * Batch 14 (P4, unlocked by CMBE wave 1): the embedded application row now
+ * carries `client_name` — a Klant column, and the '—' intake-identity fallback
+ * becomes 'Intake' / 'Intake — <klant>' (the 4-dash decision) instead of a bare dash.
+ */
+describe('ApplicationRow · Klant column + Intake label (batch 14)', () => {
+  it('renders the client_name in its own Klant column for a normal application', () => {
+    renderRow({ row: { ...row, client_name: 'Inovum' } })
+    expect(screen.getByText('Inovum')).toBeInTheDocument()
+  })
+
+  it('shows a dash in the Klant column when the row carries no client_name', () => {
+    renderRow({ row: { ...row, client_name: null } })
+    // The title itself renders "Activiteitenbegeleider"; the Klant cell is a
+    // separate dash next to it.
+    const cells = screen.getAllByText('—')
+    expect(cells.length).toBeGreaterThan(0)
+  })
+
+  it('shows plain "Intake" for a vacancy-less row without a client_name', () => {
+    renderRow({ row: { id: 'app-2', created_at: '2026-08-08T19:35:55+00:00' } })
+    expect(screen.getByText(ct('work.intakeLabel'))).toBeInTheDocument()
+  })
+
+  it('shows "Intake — <klant>" for a vacancy-less row that DOES carry a client_name', () => {
+    renderRow({ row: { id: 'app-3', created_at: '2026-08-08T19:35:55+00:00', client_name: 'Inovum' } })
+    expect(screen.getByText('Intake — Inovum')).toBeInTheDocument()
+  })
+})
+
+/**
  * Danny 09-08: the unlink button used a SOLID `--color-danger-bg` fill with no
  * border, standing out next to the borderless pencil right beside it. Now the
  * real §4 soft-tint (background color-mix 8-16%, icon/text = the colour

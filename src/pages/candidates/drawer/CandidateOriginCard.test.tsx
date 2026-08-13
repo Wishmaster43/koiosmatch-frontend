@@ -70,4 +70,24 @@ describe('CandidateOriginCard · the three Herkomst lines', () => {
     expect(dashes).toHaveLength(3)
     expect(screen.queryByText(/onbekend|unknown/i)).toBeNull()
   })
+
+  // SOURCE-DETAIL-1: the careersite snapshot renders as muted text under the
+  // source value, and stays absent (no empty row/placeholder) when unset.
+  it('renders the sourceDetail snapshot under the source, text-only', () => {
+    render(<CandidateOriginCard c={candidate({
+      source: 'werkzoeken', sourceDetail: 'Vacature: Verpleegkundige IC (Amsterdam)',
+    })} />)
+    expect(screen.getByText('werkzoeken')).toBeInTheDocument()
+    expect(screen.getByText('Vacature: Verpleegkundige IC (Amsterdam)')).toBeInTheDocument()
+  })
+
+  it('omits the detail line entirely when sourceDetail is absent', () => {
+    render(<CandidateOriginCard c={candidate({ source: 'werkzoeken' })} />)
+    // The real assertion: the source renders, and NO detail text node exists —
+    // not a wrapper count (the control round flagged the old selector as vacuous:
+    // it matched one element regardless of whether a detail line rendered).
+    expect(screen.getByText('werkzoeken')).toBeInTheDocument()
+    expect(screen.queryByText(/Vacature:/)).toBeNull()
+    expect(screen.getByText('werkzoeken').parentElement?.querySelectorAll('span').length).toBeLessThanOrEqual(2)
+  })
 })

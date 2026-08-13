@@ -33,6 +33,11 @@ export const APPLICATION_COL_TITLE: CSSProperties = { flex: 1, minWidth: 140, ov
 // never do. The format has a known maximum length, so the column is sized to it.
 export const APPLICATION_COL_DATE: CSSProperties = { width: 78, flexShrink: 0, textAlign: 'right', whiteSpace: 'nowrap' }
 
+// Klant (client) column — batch 14: the vacancy's customer name, sized like the
+// status pill column (short label, never wraps) and placed between title and
+// status so the row reads Vacature → Klant → Status → Datum → actions.
+export const APPLICATION_COL_CLIENT: CSSProperties = { width: 110, flexShrink: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', color: 'var(--text-muted)' }
+
 // Trailing actions cluster: pencil (22px) + unlink (22px) + external-link link
 // (24px) + disclosure chevron (22px), three 8px gaps between up to four icons —
 // 22 + 22 + 24 + 22 + 3*8 = 114. Reserved at this FIXED width regardless of how
