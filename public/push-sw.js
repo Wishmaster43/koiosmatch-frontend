@@ -7,7 +7,7 @@
 // CONTRACT-CHANGELOG P11-FASE5) — same AVG-lean content as the phone bell.
 self.addEventListener('push', (event) => {
   if (!event.data) return
-  let payload = {}
+  let payload
   try { payload = event.data.json() } catch { payload = { title: event.data.text() } }
   const title = payload.title || 'Koios Match'
   const options = {
