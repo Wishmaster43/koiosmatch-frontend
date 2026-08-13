@@ -64,6 +64,9 @@ export function mapVacancy(v: ApiVacancy = {}): Vacancy {
     applicationsCount: v.applications_count ?? v.applicationsCount ?? sumPhases(byPhase),
     applicationsByPhase: byPhase,
     published: Boolean(v.published ?? false),
+    // Wave-2 contract (13-08): stale_online counts from COALESCE(published_at,
+    // created_at) — map the timestamp tolerantly so the FE measures the same clock.
+    publishedAt: (v.published_at ?? v.publishedAt) != null ? String(v.published_at ?? v.publishedAt) : null,
     publishedChannels: v.published_channels ?? v.publishedChannels ?? [],
     owner: {
       id: owner.id ?? v.owner_id ?? null,

@@ -38,3 +38,16 @@ describe('deriveVacancyAdvice', () => {
     expect(rule.action).toBe('none')
   })
 })
+
+// Wave-2 clock parity: a vacancy created long ago but (re)published RECENTLY is
+// not stale — the server counts from COALESCE(published_at, created_at) and so do we.
+it('measures staleness from publishedAt when present, falling back to created', () => {
+  const now = new Date('2026-08-13T12:00:00Z')
+  const old = '2026-01-01T00:00:00Z'
+  const fresh = '2026-08-12T00:00:00Z'
+  const base = { archived: false, published: true, applicationsCount: 0, created: old, createdSort: old }
+  // Republished yesterday → 1 day old → below any sane threshold: no advice.
+  expect(deriveVacancyAdvice({ ...base, publishedAt: fresh } as never, { staleDays: 7, now }).action).toBe('none')
+  // Never published-stamped → falls back to created → stale.
+  expect(deriveVacancyAdvice({ ...base, publishedAt: null } as never, { staleDays: 7, now }).action).toBe('attention')
+})

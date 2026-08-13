@@ -57,6 +57,8 @@ export interface Vacancy {
   applicationsCount: number
   applicationsByPhase: Loose
   published: boolean
+  // ISO moment of publication; null when never published (stale clock = publishedAt ?? created).
+  publishedAt?: string | null
   publishedChannels: unknown[]
   owner: VacancyOwner
   clientId: Id | null

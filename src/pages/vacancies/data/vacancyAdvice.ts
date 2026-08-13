@@ -3,7 +3,7 @@ import type { Vacancy } from '@/types/vacancy'
 /**
  * vacancyAdvice — the ONE deterministic rule engine behind the vacancies table's
  * "Koios" column. Mirrors candidateAdvice.ts's reference design: rules only read
- * fields the LIST row already carries (published, applicationsCount, createdSort,
+ * fields the LIST row already carries (published, publishedAt, applicationsCount, createdSort,
  * archived) — no new fetch, no invented data.
  */
 
@@ -36,7 +36,10 @@ export function deriveVacancyAdvice(v: Vacancy, opts: VacancyAdviceOptions): Vac
 
   // Rule 3: published, zero applications, older than the stale threshold —
   // Danny's own example rule ("geen sollicitaties + ouder dan X → Aandacht").
-  const days = daysSince(v.createdSort || v.created, opts.now ?? new Date())
+  // Clock parity with the BE stale_online stat (wave 2, 13-08): the server counts
+  // from COALESCE(published_at, created_at) — measure from the same moment, or the
+  // KPI tile and this row badge disagree on republished vacancies.
+  const days = daysSince(v.publishedAt || v.createdSort || v.created, opts.now ?? new Date())
   if ((v.applicationsCount ?? 0) === 0 && days != null && days >= opts.staleDays) {
     return { action: 'attention', reasonKey: 'koios.reasons.staleNoApplications', reasonParams: { days } }
   }
