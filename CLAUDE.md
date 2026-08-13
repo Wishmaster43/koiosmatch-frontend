@@ -232,6 +232,34 @@ same validation/UX, lookups via `useX()` hooks (never hardcoded option lists).
   `<select>`s die je tegenkomt, ook als ze niet in je opdracht stonden. Een
   nieuwe `<select>` toevoegen mag alleen met een geschreven reden in de code
   (bijv. een browser-native control die bewust nodig is) — anders is het een bug.
+- **Het systeem gokt nooit stil — een voorstel draagt het Koios-merkje (Danny
+  2026-08-13, "ALTIJD LEEG!!" + afbeelding).** Een veld dat de app zelf zou kunnen
+  invullen start LEEG; automatische voorinvulling op basis van een aanname (zoals
+  de oude "enige vacature"-gok in de intake-popup) is een finding. Wanneer Koios
+  later waarden VOORSTELT, staat er zichtbaar het Koios-teken bij (het gedeelde
+  `KoiosAiMark`, soft-variant — zoals het ✦-merkje in Danny's referentiebeeld,
+  maar dan ons eigen merk): de gebruiker ziet in één oogopslag "dit is een
+  voorstel, geen feit" en kan het wissen of overnemen. Eerste toepassingsgeval
+  (GEBOUWD 13-08): het vacature-voorstel in de intake-/solliciteren-popup — de
+  enige-geschiedenis-vacature seedt als `suggestedVacancyId` met de gedeelde
+  `KoiosSuggestionBadge` ernaast; wissen of anders kiezen lost het merkje op.
+  Uitzondering: expliciete
+  CONTEXT is geen gok — wie op "Solliciteren" klikt op een vacaturekaart, of een
+  intake plant vanuit een vacature, krijgt díe vacature gewoon ingevuld.
+  **Koios is het gezicht van álle systeemvoorstellen (Danny 13-08: "ondanks dat het
+  logica is die wij programmeren, doen we het voorkomen dat het Koios AI is").**
+  Ook een puur geprogrammeerde heuristiek (de enige-vacature-regel, een
+  standaard-afleiding) presenteert zich aan de eindgebruiker als Koios-voorstel
+  met hetzelfde merkje — implementatie (regel of model) is voor de gebruiker
+  onzichtbaar en irrelevant. Nooit een tweede "gewone-logica"-markering invoeren.
+- **Een OPTIONEEL kiesveld is altijd leeg te maken (Danny 2026-08-13, twee keer in
+  één uur: "kan vacature niet leeg maken?" / "ROOKIE MISTAKES!!").** Elke
+  CreatableSelect/SelectMenu die aan een optionele waarde hangt draagt het
+  VAC-CLEAR-1-wiskruis (`clearable` + `clearLabel`), en het wissen bereikt écht de
+  opgeslagen staat (een onChange die `''` negeert is een finding). Een VERPLICHT
+  veld krijgt juist géén wiskruis. Bij een SelectMenu zonder clear-support: een
+  expliciete "Geen …"-optie, nooit het component verbouwen. Elke gerepareerde
+  kiezer krijgt een pick→clear→placeholder-regressietest.
 - **Een toevoeg-actie IS een knop, geen tekstlink (Danny 2026-08-08).** Elke
   "+ X toevoegen"-affordance (vaardigheid, taal, opleiding, locatie, notitie, rij
   in een tabel …) rendert als de gedeelde `DrawerAddButton` / een echte knop met
@@ -393,6 +421,18 @@ never label it "Matched"; "matched" is the *application* bucket, a different axi
 ### Fields & formatting
 
 - Dates render **DD-MM-YYYY** (`nl-NL`, `lib/formatters`) — birthdate, available-from, everywhere.
+- **Een gebruiker ziet NOOIT "13/08/2026" of ISO "2027-08-08" (Danny 13-08, DATUM-1 — met
+  nadruk: "neem op in claude.md dat dit nooit zo weergegeven mag worden").** Elke
+  gebruikszichtbare datum is **DD-MM-YYYY** (+ ` HH:mm` waar tijd hoort) via
+  `useDateFormat`/`lib/formatters` — nooit een raw API-veld in JSX, nooit
+  `toLocaleDateString` met slash-locale, nooit handmatige stringbouw. Ook
+  **server-gecomponeerde prozateksten** (AXIS-preflightbanners e.d.) mogen geen ISO
+  lekken: render ze door `humanizeIsoDates` (`lib/localDate`) — herschrijft alléén de
+  notatie, nooit de bewoording — én meld de bron aan backend-Claude zodat de server
+  het zelf ook goed opstelt. De enige (tijdelijke) uitzondering is de weergave BINNEN
+  een native `<input type="date/datetime-local">` — die tekent de browser zelf in
+  OS-locale en is niet stuurbaar; overal buiten het invulveld geldt de regel hard.
+  Een nieuwe datumweergave zonder de huisformatter is een finding.
 - Add **birthplace** (`place_of_birth`); surface **Facebook Lead ID** (when present) in drawer + table.
 - `last_contact_at` + `last_contact_type` shown in table + drawer; seeder randomises both so KPIs test.
 - Skills render as a vertical **list** (edit/remove per row), not inline chips.
@@ -494,6 +534,12 @@ never label it "Matched"; "matched" is the *application* bucket, a different axi
 
 ## 5. Internationalization (mandatory)
 
+- **Geen kastlijntje (—) in lopende gebruikerstekst (Danny 2026-08-13: "zie je
+  dat het AI-gegenereerd is").** Een — als zinsinterpunctie in copy is een finding:
+  herschrijf met punt, dubbele punt, komma of een nieuwe zin. WEL toegestaan als
+  puur SCHEIDINGSTEKEN tussen twee gegevenswaarden ("{naam} — {functie}",
+  paginatitels "Sectie — App") — daar is het opmaak, geen proza. Geldt voor alle
+  vijf locales tegelijk.
 - **Zero hardcoded user-facing strings.** Every label, message, tooltip, error,
   empty-state, and button text comes from `react-i18next` (`t('...')`).
 - Translation files live in `locales/nl/*.json` and `locales/en/*.json`, namespaced
