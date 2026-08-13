@@ -38,8 +38,9 @@ export default function ImportEntityNav({ templates, phase, selected, onSelect, 
                  borderRadius: 8, border: 'none', cursor: 'pointer', fontSize: 13, textAlign: 'left',
                  fontWeight: active ? 600 : 400, marginBottom: 2,
                  background: active ? 'var(--color-primary-bg)' : 'transparent',
-                 color: active ? 'var(--color-primary)' : 'var(--text)' }}>
-        <Icon size={14} style={{ color: active ? 'var(--color-primary)' : 'var(--text-muted)', flexShrink: 0 }} />
+                 // Text/icon colour uses the AA-contrast primary-text token, not the raw accent (P2b).
+                 color: active ? 'var(--color-primary-text)' : 'var(--text)' }}>
+        <Icon size={14} style={{ color: active ? 'var(--color-primary-text)' : 'var(--text-muted)', flexShrink: 0 }} />
         {t(`import.entities.${tpl.entity}.label`, { defaultValue: tpl.entity })}
       </button>
     )

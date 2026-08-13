@@ -168,7 +168,8 @@ export default function RejectionModal({ application: a, onCancel, onConfirm, su
           <button onClick={submit} disabled={!reasonId || submitting}
             style={{ height: 34, padding: '0 16px', fontSize: 13, fontWeight: 600, border: 'none', borderRadius: 8,
               background: isCorrection ? 'var(--color-primary)' : 'var(--color-danger)',
-              color: isCorrection ? 'var(--color-on-accent)' : '#fff',
+              /* Text colour on a danger/primary fill uses the on-* contrast token, never raw white */
+              color: isCorrection ? 'var(--color-on-accent)' : 'var(--color-on-danger)',
               cursor: (!reasonId || submitting) ? 'not-allowed' : 'pointer',
               opacity: (!reasonId || submitting) ? 0.6 : 1 }}>
             {isCorrection ? t('rejection.saveCorrection') : t('rejection.confirm')}

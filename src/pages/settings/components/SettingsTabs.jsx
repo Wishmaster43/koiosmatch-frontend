@@ -23,7 +23,8 @@ export default function SettingsTabs({ items, active, onSelect }) {
               display: 'flex', alignItems: 'center', gap: 7, padding: '9px 12px',
               border: 'none', background: 'transparent', cursor: 'pointer', whiteSpace: 'nowrap',
               fontSize: 13, fontWeight: isActive ? 600 : 500,
-              color: isActive ? 'var(--color-primary)' : 'var(--text-muted)',
+              // Text colour uses the AA-contrast primary-text token, not the raw accent (P2b).
+              color: isActive ? 'var(--color-primary-text)' : 'var(--text-muted)',
               borderBottom: `2px solid ${isActive ? 'var(--color-primary)' : 'transparent'}`,
               marginBottom: -1, transition: 'color 0.12s',
             }}

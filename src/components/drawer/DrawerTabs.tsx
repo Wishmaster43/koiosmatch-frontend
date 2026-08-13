@@ -24,7 +24,8 @@ export default function DrawerTabs({ tabs = [], active, onChange }: {
           tabIndex={tabIndexFor(tab.id)} onClick={() => onChange(tab.id)}
           style={{ padding: '7px 10px', fontSize: 12, whiteSpace: 'nowrap', background: 'none', border: 'none',
             borderBottom: active === tab.id ? '2px solid var(--color-primary)' : '2px solid transparent',
-            color: active === tab.id ? 'var(--color-primary)' : 'var(--text-muted)',
+            // Active tab text uses the text-contrast token, not the raw brand color (readability on tinted primaries).
+            color: active === tab.id ? 'var(--color-primary-text)' : 'var(--text-muted)',
             fontWeight: active === tab.id ? 600 : 400, cursor: 'pointer', marginBottom: -1 }}>
           {tab.label}{tab.badge != null ? ` ${tab.badge}` : ''}
         </button>

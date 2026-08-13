@@ -23,7 +23,8 @@ export default function DrillTabs({ tabs, active, onChange }: {
             style={{ padding: '4px 10px', fontSize: 12, fontWeight: on ? 600 : 400, borderRadius: 999, cursor: 'pointer',
               border: `1px solid ${on ? 'var(--color-primary)' : 'var(--border)'}`,
               background: on ? 'var(--color-primary-bg)' : 'var(--surface)',
-              color: on ? 'var(--color-primary)' : 'var(--text-muted)' }}>
+              // Active tab text uses the text-contrast token, not the raw brand color (readability on tinted primaries).
+              color: on ? 'var(--color-primary-text)' : 'var(--text-muted)' }}>
             {tb.label}
             {tb.count != null && <span style={{ opacity: 0.7, marginLeft: 4 }}>{formatNumber(tb.count)}</span>}
           </button>

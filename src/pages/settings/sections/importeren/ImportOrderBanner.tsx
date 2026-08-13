@@ -35,7 +35,8 @@ export default function ImportOrderBanner({ entity, wholeTreeEntity, onSelectEnt
         <span style={{ fontWeight: 600, color: 'var(--text)' }}>{t('import.order.title')}:</span>
         {ORDER.map((id, index) => (
           <span key={id} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-            <span style={{ fontWeight: id === entity ? 700 : 400, color: id === entity ? 'var(--color-primary)' : 'var(--text-muted)' }}>
+            {/* Text colour uses the AA-contrast primary-text token, not the raw accent (P2b). */}
+            <span style={{ fontWeight: id === entity ? 700 : 400, color: id === entity ? 'var(--color-primary-text)' : 'var(--text-muted)' }}>
               {t(`import.entities.${id}.label`, { defaultValue: id })}
             </span>
             {index < ORDER.length - 1 && <ArrowRight size={11} style={{ color: 'var(--text-muted)' }} aria-hidden="true" />}

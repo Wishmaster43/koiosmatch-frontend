@@ -135,14 +135,16 @@ export default function WhatsAppPage({ intent }: { intent?: unknown } = {}) {
             <button key={id} role="tab" aria-selected={active} onClick={() => setTab(id)}
               style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '9px 14px', border: 'none', background: 'transparent',
                 cursor: 'pointer', fontSize: 13, fontWeight: active ? 600 : 500,
-                color: active ? 'var(--color-primary)' : 'var(--text-muted)',
+                // Text-colour accent uses the AA-contrast text token, not the raw brand primary.
+                color: active ? 'var(--color-primary-text)' : 'var(--text-muted)',
                 borderBottom: `2px solid ${active ? 'var(--color-primary)' : 'transparent'}`, marginBottom: -1 }}>
               {label}
               {badge > 0 && (
                 <span style={{ fontSize: 10, fontWeight: 700, minWidth: 16, height: 16, padding: '0 5px', borderRadius: 99,
                   display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
                   background: badgeDanger ? 'var(--color-danger)' : 'var(--color-primary)',
-                  color: badgeDanger ? '#fff' : 'var(--color-on-accent)' }}>
+                  /* Text colour on a danger/primary badge fill uses the on-* contrast token, never raw white */
+                  color: badgeDanger ? 'var(--color-on-danger)' : 'var(--color-on-accent)' }}>
                   {badge}
                 </span>
               )}

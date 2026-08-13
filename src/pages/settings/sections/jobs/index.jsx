@@ -41,7 +41,8 @@ export default function JobQueueSettings() {
           return (
             <button key={id} role="tab" aria-selected={active} onClick={() => setTab(id)}
               style={{ padding: '9px 14px', border: 'none', background: 'transparent', cursor: 'pointer', fontSize: 13,
-                fontWeight: active ? 600 : 500, color: active ? 'var(--color-primary)' : 'var(--text-muted)',
+                // Text colour uses the AA-contrast primary-text token, not the raw accent (P2b).
+                fontWeight: active ? 600 : 500, color: active ? 'var(--color-primary-text)' : 'var(--text-muted)',
                 borderBottom: `2px solid ${active ? 'var(--color-primary)' : 'transparent'}`, marginBottom: -1 }}>
               {t(`jobs.tab.${id}`)}
             </button>

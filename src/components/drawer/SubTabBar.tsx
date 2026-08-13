@@ -23,7 +23,8 @@ export default function SubTabBar({ tabs, active, onChange }: { tabs: SubTab[]; 
           tabIndex={tabIndexFor(sub.id)} onClick={() => onChange(sub.id)}
           style={{ padding: '6px 12px', fontSize: 12, whiteSpace: 'nowrap', background: 'none', border: 'none',
             borderBottom: active === sub.id ? '2px solid var(--color-primary)' : '2px solid transparent',
-            color: active === sub.id ? 'var(--color-primary)' : 'var(--text-muted)',
+            // Active tab text uses the text-contrast token, not the raw brand color (readability on tinted primaries).
+            color: active === sub.id ? 'var(--color-primary-text)' : 'var(--text-muted)',
             fontWeight: active === sub.id ? 600 : 400, cursor: 'pointer', marginBottom: -1 }}>
           {sub.label}
         </button>

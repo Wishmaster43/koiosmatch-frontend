@@ -23,4 +23,19 @@ describe('QuickViewToggle', () => {
     expect(btn).toHaveAttribute('aria-pressed', 'true')
     expect(btn.style.fontWeight).toBe('600')
   })
+
+  // Text colour must be darkened toward readable --text; background/border keep the raw colour.
+  it('darkens text colour for readability while background/border keep the raw colour', () => {
+    render(<QuickViewToggle active onToggle={() => {}} label="Sick" color="#ffdd00" />)
+    const btn = screen.getByRole('button', { name: 'Sick' })
+    expect(btn.style.color).toBe('color-mix(in srgb, #ffdd00 60%, var(--text))')
+    expect(btn.style.background).toBe('color-mix(in srgb, rgb(255, 221, 0) 16%, transparent)')
+    expect(btn.style.border).toContain('color-mix(in srgb, rgb(255, 221, 0)')
+  })
+
+  it('uses the readable primary-text token for the default primary colour', () => {
+    render(<QuickViewToggle active onToggle={() => {}} label="Default" />)
+    const btn = screen.getByRole('button', { name: 'Default' })
+    expect(btn.style.color).toBe('var(--color-primary-text)')
+  })
 })

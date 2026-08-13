@@ -37,6 +37,13 @@ interface QuickViewToggleProps {
 export default function QuickViewToggle({ active, onToggle, label, color = 'var(--color-primary)', icon: Icon, title, size = 'default', iconOnly = false }: QuickViewToggleProps) {
   const compact = size === 'compact'
   const squished = iconOnly && Boolean(Icon)
+  // Text/icon colour must stay readable: the primary token has a dedicated
+  // readable-text variant; any other colour is darkened toward --text via
+  // color-mix so light per-toggle colours never render as low-contrast text.
+  // Backgrounds/borders below keep the RAW colour — only text contrast changes.
+  const textColor = color === 'var(--color-primary)'
+    ? 'var(--color-primary-text)'
+    : `color-mix(in srgb, ${color} 60%, var(--text))`
   return (
     <button type="button" onClick={onToggle} title={title ?? label} aria-pressed={active}
       aria-label={squished ? label : undefined}
@@ -46,7 +53,7 @@ export default function QuickViewToggle({ active, onToggle, label, color = 'var(
           ? { height: compact ? 26 : 30, width: compact ? 26 : 30, padding: 0 }
           : compact ? { height: 26, padding: '0 10px' } : { padding: '6px 12px' }),
         fontSize: compact ? 11.5 : 12,
-        fontWeight: active ? 600 : 500, borderRadius: compact ? 6 : 8, cursor: 'pointer', color,
+        fontWeight: active ? 600 : 500, borderRadius: compact ? 6 : 8, cursor: 'pointer', color: textColor,
         background: `color-mix(in srgb, ${color} ${active ? 16 : 8}%, transparent)`,
         border: `1px solid color-mix(in srgb, ${color} ${active ? 50 : 28}%, transparent)`,
       }}>
