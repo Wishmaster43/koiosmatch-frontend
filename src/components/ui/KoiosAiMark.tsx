@@ -23,7 +23,9 @@ export default function KoiosAiMark({ size = 26, tone = 'soft', title = 'Koios A
         background: solid ? 'var(--color-primary)' : 'var(--color-primary-bg)',
         // The glyph sits ON the accent fill in 'solid' tone — use the tenant's
         // computed on-accent contrast token, not a hardcoded white (2026-08-08).
-        color: solid ? 'var(--color-on-accent)' : 'var(--color-primary)' }}>
+        // Soft glyph reads the READABLE accent token: raw primary on the pale tint
+        // was invisible for a light brand (AENF yellow — Danny 13-08, screenshot).
+        color: solid ? 'var(--color-on-accent)' : 'var(--color-primary-text)' }}>
       <BrainCircuit size={Math.round(size * 0.56)} />
     </span>
   )
