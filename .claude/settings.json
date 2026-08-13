@@ -287,6 +287,18 @@
       "/Users/danny/Herd/koiosmatch-api/app/Http/Controllers/*",
       "/Users/danny/Herd/koiosmatch-api/routes/api/tenant",
       "/Users/danny/Herd/koiosmatch-api/app/Http/Requests/*Vacancy*"
+    ],
+    "deny": [
+      "Bash(php artisan migrate:fresh*)",
+      "Bash(nohup php artisan migrate:fresh*)",
+      "Bash(php artisan db:wipe*)",
+      "Bash(nohup php artisan db:wipe*)",
+      "Bash(php artisan migrate:reset*)",
+      "Bash(nohup php artisan migrate:reset*)",
+      "Bash(php artisan migrate:rollback*)",
+      "Bash(nohup php artisan migrate:rollback*)",
+      "Bash(php artisan dev:reset*)",
+      "Bash(nohup php artisan dev:reset*)"
     ]
   }
 }
