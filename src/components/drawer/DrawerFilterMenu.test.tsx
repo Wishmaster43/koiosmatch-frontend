@@ -230,6 +230,89 @@ describe('DrawerFilterMenu · multi-select row', () => {
 })
 
 /**
+ * P8-MORE-FILTERS (batch 8, decision = option B): the 'range' and 'date' row
+ * types added so the vacancy-search card's secondary filters (Uren per week,
+ * Inzetbaar vanaf) can move behind this SAME shared popover — mirrors the
+ * multi-select coverage above (badge counts, clear-all, panel stays open).
+ */
+describe('DrawerFilterMenu · range row', () => {
+  const makeRangeFilters = (over: Partial<{ value: [number, number]; active: boolean; onChange: (v: [number, number]) => void; onReset: () => void }> = {}): DrawerFilterConfig[] => [{
+    type: 'range', key: 'hours', label: 'Hours', value: over.value ?? [0, 40], max: 40,
+    onChange: over.onChange ?? vi.fn(), valueLabel: `${(over.value ?? [0, 40])[0]}–${(over.value ?? [0, 40])[1]}`,
+    ariaLabels: ['Hours min', 'Hours max'], active: over.active ?? false, onReset: over.onReset ?? vi.fn(),
+  }]
+
+  it('renders two sliders (a two-thumb range control) for the row', async () => {
+    const user = userEvent.setup()
+    render(<DrawerFilterMenu filters={makeRangeFilters()} label="Filter" title="Filters" clearAllLabel="Clear all" />)
+    await user.click(screen.getByRole('button', { name: 'Filter' }))
+    expect(screen.getAllByRole('slider')).toHaveLength(2)
+  })
+
+  it('the badge counts an active range row as 1, an inactive one as 0', () => {
+    const { rerender } = render(<DrawerFilterMenu filters={makeRangeFilters({ active: false })} label="Filter" title="Filters" clearAllLabel="Clear all" />)
+    expect(screen.queryByText('1')).toBeNull()
+    rerender(<DrawerFilterMenu filters={makeRangeFilters({ active: true })} label="Filter" title="Filters" clearAllLabel="Clear all" />)
+    expect(screen.getByText('1')).toBeInTheDocument()
+  })
+
+  it('clear-all calls the range row\'s own onReset, only when active', async () => {
+    const user = userEvent.setup()
+    const onReset = vi.fn()
+    render(<DrawerFilterMenu filters={makeRangeFilters({ active: true, onReset })} label="Filter" title="Filters" clearAllLabel="Clear all" />)
+    await user.click(screen.getByRole('button', { name: 'Filter' }))
+    await user.click(screen.getByRole('button', { name: 'Clear all' }))
+    expect(onReset).toHaveBeenCalledTimes(1)
+  })
+})
+
+describe('DrawerFilterMenu · date row', () => {
+  const makeDateFilters = (over: Partial<{ value: string; onChange: (v: string) => void }> = {}): DrawerFilterConfig[] => [{
+    type: 'date', key: 'availableFrom', label: 'Available from', value: over.value ?? '',
+    onChange: over.onChange ?? vi.fn(), placeholder: 'Pick a date',
+  }]
+
+  it('renders a text input (the shared datepicker), never a native <input type="date">', async () => {
+    const user = userEvent.setup()
+    const { container } = render(<DrawerFilterMenu filters={makeDateFilters()} label="Filter" title="Filters" clearAllLabel="Clear all" />)
+    await user.click(screen.getByRole('button', { name: 'Filter' }))
+    expect(container.querySelector('input[type="date"]')).toBeNull()
+    expect(screen.getByPlaceholderText('Pick a date')).toBeInTheDocument()
+  })
+
+  it('the badge counts a set date value as active, an empty one as inactive', () => {
+    const { rerender } = render(<DrawerFilterMenu filters={makeDateFilters({ value: '' })} label="Filter" title="Filters" clearAllLabel="Clear all" />)
+    expect(screen.queryByText('1')).toBeNull()
+    rerender(<DrawerFilterMenu filters={makeDateFilters({ value: '2026-08-20' })} label="Filter" title="Filters" clearAllLabel="Clear all" />)
+    expect(screen.getByText('1')).toBeInTheDocument()
+  })
+
+  it('picking a day in the portal-rendered calendar does NOT close the panel (outside-click whitelist)', async () => {
+    const user = userEvent.setup()
+    const onChange = vi.fn()
+    render(<DrawerFilterMenu filters={makeDateFilters({ onChange })} label="Filter" title="Filters" clearAllLabel="Clear all" />)
+    await user.click(screen.getByRole('button', { name: 'Filter' }))
+    await user.click(screen.getByPlaceholderText('Pick a date'))
+    // The calendar renders into the shared #datepicker-portal node, OUTSIDE this
+    // panel's own DOM subtree — exactly the case the whitelist exists for.
+    const anyDay = document.querySelector('.react-datepicker__day:not(.react-datepicker__day--outside-month)') as HTMLElement
+    expect(anyDay).toBeTruthy()
+    await user.click(anyDay)
+    expect(onChange).toHaveBeenCalled()
+    expect(screen.getByRole('dialog')).toBeInTheDocument()
+  })
+
+  it('clear-all calls onChange(\'\') only for an active date row', async () => {
+    const user = userEvent.setup()
+    const onChange = vi.fn()
+    render(<DrawerFilterMenu filters={makeDateFilters({ value: '2026-08-20', onChange })} label="Filter" title="Filters" clearAllLabel="Clear all" />)
+    await user.click(screen.getByRole('button', { name: 'Filter' }))
+    await user.click(screen.getByRole('button', { name: 'Clear all' }))
+    expect(onChange).toHaveBeenCalledWith('')
+  })
+})
+
+/**
  * FILTER-WIDTH-1 (Danny 08-08, punt 13 "filter notities moet langer zijn" + punt 18
  * "filter bij documenten is te kort hierdoor kan je niet goed filteren"). The defect
  * was purely dimensional — a 230px panel whose option labels were clipped with an

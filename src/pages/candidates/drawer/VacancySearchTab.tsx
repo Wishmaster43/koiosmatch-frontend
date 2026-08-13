@@ -19,8 +19,36 @@ import { useVacancySearch } from '../hooks/useVacancySearch'
 import { useFunctions } from '@/lib/useFunctions'
 import { VacancyLookupsProvider, useVacancyLookups } from '@/context/VacancyLookupsContext'
 import { toCoord } from '@/lib/coords'
+import { formatCurrency } from '@/lib/formatters'
 import type { Candidate } from '@/types/candidate'
 import type { Id } from '@/types/common'
+
+// A tenant-lookup value carried on the FROZEN vacancyShape detail (education/
+// seniority) — either the resolved {value,label,color} object or absent.
+interface LookupChip { value?: string; label?: string; color?: string | null }
+
+// P8-result-cards: the extra detail fields the lazy GET /vacancies/{id} fetch
+// now also reads (FROZEN vacancyShape, CMBE wave 3) — salary/experience/hours
+// are tolerant numeric coercions (Laravel decimal-as-string, §10), education/
+// seniority arrive as {value,label,color}|null straight from the resource.
+interface VacancyDetail {
+  description?: string
+  salaryMin: number | null
+  salaryMax: number | null
+  salaryPeriod: string | null
+  experienceMin: number | null
+  experienceMax: number | null
+  education: LookupChip | null
+  seniority: LookupChip | null
+}
+
+// Renders a min/max pair as a compact range string ("20–32", "≥ 20", "≤ 32"),
+// or null when neither bound is present — the caller then omits the line entirely.
+function formatRange(min: number | null, max: number | null, format: (n: number) => string): string | null {
+  if (min == null && max == null) return null
+  if (min != null && max != null) return `${format(min)}–${format(max)}`
+  return format((min ?? max) as number)
+}
 
 const rowStyle: CSSProperties = { display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8, padding: '8px 10px', borderRadius: 8, cursor: 'pointer' }
 // Snippet length cap (2-3 lines of plain text) — a short teaser, not the full description.
@@ -82,20 +110,33 @@ function VacancySearchTabInner({ candidate }: { candidate: Candidate }) {
   const [showApply, setShowApply] = useState(false)
   useEffect(() => { setShowApply(false) }, [selectedId])
 
-  // Lazily fetch a short description snippet for the SELECTED vacancy only, once
-  // per selection — abortable so a fast re-select never lets a stale response win.
+  // Lazily fetch the description snippet AND the summary-card detail fields
+  // (salary/experience/education/seniority, P8-result-cards) for the SELECTED
+  // vacancy only, once per selection — abortable so a fast re-select never lets
+  // a stale response win. Quiet-404 + tolerant: a failed/empty fetch just omits
+  // the extra fields, never an error wall.
   const [description, setDescription] = useState<string | null>(null)
+  const [detail, setDetail] = useState<VacancyDetail | null>(null)
   useEffect(() => {
     setDescription(null)
+    setDetail(null)
     if (selectedId == null) return
     const ctrl = new AbortController()
     api.get(`/vacancies/${selectedId}`, { signal: ctrl.signal, quiet404: true })
       .then(res => {
-        const raw = unwrap<{ description?: string }>(res)
-        const snippet = toSnippet(raw?.description ?? '')
+        const raw = unwrap<Record<string, unknown>>(res)
+        const snippet = toSnippet(String(raw?.description ?? ''))
         if (snippet) setDescription(snippet)
+        setDetail({
+          salaryMin: toCoord(raw?.salary_min),
+          salaryMax: toCoord(raw?.salary_max),
+          salaryPeriod: typeof raw?.salary_period === 'string' ? raw.salary_period : null,
+          experienceMin: toCoord(raw?.experience_min_years),
+          experienceMax: toCoord(raw?.experience_max_years),
+          education: (raw?.education as LookupChip | null) ?? null,
+          seniority: (raw?.seniority as LookupChip | null) ?? null,
+        })
       })
-      // Tolerant: a failed/empty fetch just omits the snippet — never an error wall.
       .catch(() => {})
     return () => ctrl.abort()
   }, [selectedId])
@@ -186,7 +227,37 @@ function VacancySearchTabInner({ candidate }: { candidate: Candidate }) {
           <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 11, color: 'var(--text-muted)' }}>{selectedRow.distanceKm.toFixed(1)} km</span>
         )}
         <StatusPill label={statusMeta(selectedRow.status).label} color={statusMeta(selectedRow.status).color} />
+        {/* Already-fetched search-row fields (hours + contract form) — render on
+            the card too, no extra request needed. */}
+        {selectedRow.employmentType && <StatusPill label={selectedRow.employmentType} color="var(--text-muted)" />}
+        {formatRange(selectedRow.hoursMin, selectedRow.hoursMax, n => String(n)) && (
+          <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 11, color: 'var(--text-muted)' }}>
+            {t('vacancySearch.cardHours', { range: formatRange(selectedRow.hoursMin, selectedRow.hoursMax, n => String(n)) })}
+          </span>
+        )}
       </div>
+      {/* P8-result-cards: the lazily-fetched detail line (salary/experience) +
+          education/seniority soft-chips — summary card ONLY, list rows stay calm. */}
+      {detail && (formatRange(detail.salaryMin, detail.salaryMax, n => formatCurrency(n, 'EUR', 'nl-NL', 0)) || formatRange(detail.experienceMin, detail.experienceMax, n => String(n)) || detail.education || detail.seniority) && (
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+          {formatRange(detail.salaryMin, detail.salaryMax, n => formatCurrency(n, 'EUR', 'nl-NL', 0)) && (
+            <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 11, color: 'var(--text-muted)' }}>
+              {t('vacancySearch.cardSalary', {
+                range: formatRange(detail.salaryMin, detail.salaryMax, n => formatCurrency(n, 'EUR', 'nl-NL', 0)),
+                period: detail.salaryPeriod ? t(`vacancySearch.salaryPeriod.${detail.salaryPeriod}`, { defaultValue: detail.salaryPeriod }) : '',
+              })}
+            </span>
+          )}
+          {formatRange(detail.experienceMin, detail.experienceMax, n => String(n)) && (
+            <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>
+              {t('vacancySearch.cardExperience', { range: formatRange(detail.experienceMin, detail.experienceMax, n => String(n)) })}
+            </span>
+          )}
+          {/* Seniority uses its lookup colour (§4); education mirrors the same soft-chip look. */}
+          {detail.seniority?.label && <StatusPill label={detail.seniority.label} color={detail.seniority.color} />}
+          {detail.education?.label && <StatusPill label={detail.education.label} color={detail.education.color} />}
+        </div>
+      )}
       {description && <p style={{ fontSize: 12, color: 'var(--text)', lineHeight: 1.4, margin: 0 }}>{description}</p>}
       {/* Read-only LIVE score (CMBE MATCH-EXPLORER-1 fase 2+3) — no onSave, so
           MatchScoreBlock renders without its edit/adjust controls. */}

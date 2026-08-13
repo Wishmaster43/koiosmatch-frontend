@@ -5,6 +5,11 @@
  * convention (DD-MM-YYYY, mirrors ProfilePersonalTab's dob field); (2) the
  * reset button only renders while `filtersDirty` is genuinely true. These
  * tests pin both so the native inputs / the always-on button never regress.
+ *
+ * P8-MORE-FILTERS (batch 8, option B): "Uren per week" + "Inzetbaar vanaf"
+ * now live behind the shared DrawerFilterMenu popover — tests that reach
+ * those two controls open it ("Meer filters") first. A section below covers
+ * the popover trigger + the removable secondary-filter chips it feeds.
  */
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { render, screen } from '@testing-library/react'
@@ -41,17 +46,27 @@ const baseProps = {
   onReset: vi.fn(),
 }
 
+// Both secondary filters now live behind the "Meer filters" popover trigger —
+// open it before reaching their controls (mirrors how a real user gets there).
+const openMoreFilters = async (user: ReturnType<typeof userEvent.setup>) => {
+  await user.click(screen.getByRole('button', { name: 'Meer filters' }))
+}
+
 describe('VacancySearchFilters · no native browser controls (COMPACT-1 regression)', () => {
-  it('never renders a native <input type="date"> or <input type="range">, even with both gated filters on', () => {
+  it('never renders a native <input type="date"> or <input type="range">, even with both gated filters on', async () => {
+    const user = userEvent.setup()
     const { container } = render(
       <VacancySearchFilters {...baseProps} hasHoursData hasAvailableFromData availableFrom="2026-08-20" />,
     )
+    await openMoreFilters(user)
     expect(container.querySelector('input[type="date"]')).toBeNull()
     expect(container.querySelector('input[type="range"]')).toBeNull()
   })
 
-  it('renders the "Inzetbaar vanaf" value as DD-MM-YYYY via the shared datepicker', () => {
+  it('renders the "Inzetbaar vanaf" value as DD-MM-YYYY via the shared datepicker, once the popover is open', async () => {
+    const user = userEvent.setup()
     render(<VacancySearchFilters {...baseProps} hasAvailableFromData availableFrom="2026-08-20" />)
+    await openMoreFilters(user)
     expect(screen.getByDisplayValue('20-08-2026')).toBeInTheDocument()
   })
 
@@ -80,8 +95,10 @@ describe('VacancySearchFilters · no native browser controls (COMPACT-1 regressi
       const user = userEvent.setup()
       const onAvailableFromChange = vi.fn()
       render(<VacancySearchFilters {...baseProps} hasAvailableFromData availableFrom="" onAvailableFromChange={onAvailableFromChange} />)
+      await openMoreFilters(user)
       await user.click(screen.getByRole('textbox'))
-      // The calendar renders into the shared datepicker-portal, outside this filter row.
+      // The calendar renders into the shared datepicker-portal, outside this filter row —
+      // and outside the popover's own subtree, exercising the outside-click whitelist.
       const todayCell = document.querySelector('.react-datepicker__day--today') as HTMLElement
       expect(todayCell).toBeTruthy()
       await user.click(todayCell)
@@ -89,17 +106,56 @@ describe('VacancySearchFilters · no native browser controls (COMPACT-1 regressi
     })
   })
 
-  it('renders the hours-per-week range as the shared two-thumb Slider, not a raw input', () => {
+  it('renders the hours-per-week range as the shared two-thumb Slider, not a raw input', async () => {
+    const user = userEvent.setup()
     render(<VacancySearchFilters {...baseProps} hasHoursData />)
+    await openMoreFilters(user)
     expect(screen.getAllByRole('slider')).toHaveLength(2)
   })
 })
 
 describe('VacancySearchFilters · gated filters stay gated', () => {
-  it('omits the date and hours filters entirely when their data gate is off', () => {
+  it('omits the "Meer filters" trigger entirely when neither secondary filter is offered', () => {
     render(<VacancySearchFilters {...baseProps} />)
-    expect(screen.queryByRole('slider')).toBeNull()
-    expect(screen.queryByText('Inzetbaar vanaf')).toBeNull()
+    expect(screen.queryByRole('button', { name: 'Meer filters' })).toBeNull()
+  })
+})
+
+describe('VacancySearchFilters · secondary filters as removable chips (P8-more-filters)', () => {
+  it('an active hours-per-week narrowing shows as a removable chip beside the trigger', async () => {
+    render(<VacancySearchFilters {...baseProps} hasHoursData hoursRange={[8, 32]} />)
+    expect(screen.getByText('8–32 uur/week')).toBeInTheDocument()
+  })
+
+  it('the resting (unbounded) hours range shows NO chip — it has not actually narrowed anything', () => {
+    render(<VacancySearchFilters {...baseProps} hasHoursData hoursRange={[0, 40]} />)
+    expect(screen.queryByText(/uur\/week/)).toBeNull()
+  })
+
+  it('clicking the hours chip\'s × resets the range to fully open, without opening the popover', async () => {
+    const user = userEvent.setup()
+    const onHoursRangeChange = vi.fn()
+    render(<VacancySearchFilters {...baseProps} hasHoursData hoursRange={[8, 32]} onHoursRangeChange={onHoursRangeChange} />)
+    await user.click(screen.getByRole('button', { name: "Filter 'Uren per week' verwijderen" }))
+    expect(onHoursRangeChange).toHaveBeenCalledWith([0, 40])
+  })
+
+  it('an active "Inzetbaar vanaf" shows as a removable chip with a DD-MM-YYYY label', () => {
+    render(<VacancySearchFilters {...baseProps} hasAvailableFromData availableFrom="2026-08-20" />)
+    expect(screen.getByText('Inzetbaar vanaf: 20-08-2026')).toBeInTheDocument()
+  })
+
+  it('clicking the "Inzetbaar vanaf" chip\'s × clears it to \'\'', async () => {
+    const user = userEvent.setup()
+    const onAvailableFromChange = vi.fn()
+    render(<VacancySearchFilters {...baseProps} hasAvailableFromData availableFrom="2026-08-20" onAvailableFromChange={onAvailableFromChange} />)
+    await user.click(screen.getByRole('button', { name: "Filter 'Inzetbaar vanaf' verwijderen" }))
+    expect(onAvailableFromChange).toHaveBeenCalledWith('')
+  })
+
+  it('the badge on "Meer filters" counts exactly the active secondary filters', () => {
+    render(<VacancySearchFilters {...baseProps} hasHoursData hoursRange={[8, 32]} hasAvailableFromData availableFrom="2026-08-20" />)
+    expect(screen.getByText('2')).toBeInTheDocument()
   })
 })
 

@@ -43,6 +43,10 @@ i18n.addResourceBundle('nl', 'candidates', {
     // Danny 08-08, point 8 — the reset trigger and the range slider's mono readout.
     resetFilters: 'Filters herstellen',
     hoursRangeValue: '{{min}}–{{max}}',
+    // P8-more-filters (batch 8): the shared DrawerFilterMenu popover that now
+    // carries these two secondary filters.
+    moreFilters: 'Meer filters',
+    moreFiltersTitle: 'Meer filters',
   },
 }, true, true)
 
@@ -53,6 +57,12 @@ function nudgeSlider(name: string, key: 'ArrowLeft' | 'ArrowRight', times: numbe
   for (let i = 0; i < times; i += 1) {
     fireEvent.keyDown(screen.getByRole('slider', { name }), { key })
   }
+}
+
+// P8-more-filters: "Uren per week" + "Inzetbaar vanaf" now live behind the
+// "Meer filters" popover trigger — open it before reaching either control.
+async function openMoreFilters() {
+  await userEvent.click(await screen.findByRole('button', { name: 'Meer filters' }))
 }
 
 // Keep the real unwrap/unwrapList (importActual) — only the default client is stubbed.
@@ -164,7 +174,9 @@ const candidateNoLocation = { id: 'cand2', lat: null, lng: null, title: '', pref
 // (Laravel decimal-cast wire quirk) to prove the tolerant coercion too.
 const rawMatchRows = [
   {
-    vacancy: { id: 'v1', title: 'Verzorgende IG | Amersfoort', customer_name: 'Zorggroep B', location_city: 'Amersfoort', status: 'open', lat: '52.20', lng: '5.40' },
+    vacancy: { id: 'v1', title: 'Verzorgende IG | Amersfoort', customer_name: 'Zorggroep B', location_city: 'Amersfoort', status: 'open', lat: '52.20', lng: '5.40',
+      // Row-level fields the summary card renders WITHOUT the detail fetch.
+      hours_min: '24', hours_max: '32', employment_type: 'Uitzend' },
     distance_km: '5.2', score: '82',
     criteria: [{ key: 'distance', label: 'Reisafstand', score: '90', weight: '3', hard: false }],
     ai_advised: true, ai_advice_reason: 'Beste match binnen 5 km en juiste functie.',
@@ -395,6 +407,46 @@ describe('VacancySearchTab · row selection shows a summary card, not an immedia
     expect(screen.getAllByText('Open').length).toBeGreaterThan(0)
   })
 
+  // P8-result-cards: the lazy /vacancies/{id} fetch now also carries the FROZEN
+  // vacancyShape detail fields — proves they render as a compact meta line +
+  // soft-chips on the SUMMARY CARD only (list rows stay title+score+distance).
+  it('renders salary/experience/education/seniority + hours/employment-type on the summary card', async () => {
+    stubApi({
+      matches: () => Promise.resolve({ data: { data: rawMatchRows } }),
+      description: () => Promise.resolve({
+        data: {
+          description: '<p>Korte omschrijving.</p>',
+          salary_min: 1800, salary_max: 2200, salary_period: 'month',
+          experience_min_years: 1, experience_max_years: 3,
+          // eslint-disable-next-line no-restricted-syntax -- seed DATA mirroring a tenant lookup colour, not a UI styling choice
+          education: { value: 'mbo', label: 'MBO', color: '#5FB0AC' },
+          // eslint-disable-next-line no-restricted-syntax -- seed DATA mirroring a tenant lookup colour, not a UI styling choice
+          seniority: { value: 'medior', label: 'Medior', color: '#6E8FD6' },
+        },
+      }),
+    })
+    render(<VacancySearchTab candidate={candidateWithLocation} />)
+
+    await waitFor(() => expect(screen.getByText('Verzorgende IG | Amersfoort')).toBeInTheDocument())
+    await userEvent.click(screen.getByText('Zorggroep B · Amersfoort'))
+
+    // Currency via lib/formatters (nl-NL, no decimals) + the salary-period suffix.
+    await waitFor(() => expect(screen.getByText('€ 1.800–€ 2.200 per maand')).toBeInTheDocument())
+    expect(screen.getByText('1–3 jaar ervaring')).toBeInTheDocument()
+    expect(screen.getByText('MBO')).toBeInTheDocument()
+    expect(screen.getByText('Medior')).toBeInTheDocument()
+
+    // Row-level card fields (no detail fetch needed): hours range + employment type —
+    // the control round flagged the title claimed these without asserting them.
+    expect(screen.getByText('24–32 uur/week')).toBeInTheDocument()
+    expect(screen.getByText('Uitzend')).toBeInTheDocument()
+
+    // List rows stay calm — the enriched fields never leak into the row that
+    // stayed in the list (v2, not selected).
+    const rowSubtitle = screen.getByText('Zorggroep A · Utrecht')
+    expect(rowSubtitle.closest('[role="button"]')?.textContent).not.toContain('jaar ervaring')
+  })
+
   it('clicking the row TITLE navigates in-app (Match-style EntityLink), not the summary', async () => {
     stubApi({ matches: () => Promise.resolve({ data: { data: rawMatchRows } }) })
     render(<VacancySearchTab candidate={candidateWithLocation} />)
@@ -616,7 +668,8 @@ describe('VacancySearchTab · weekly-hours RANGE SLIDER (gated, Danny 08-08 poin
     stubApi({ matches: () => Promise.resolve({ data: { data: hoursRows } }) })
     render(<VacancySearchTab candidate={candidateWithLocation} />)
 
-    await waitFor(() => expect(screen.getByText('Uren per week')).toBeInTheDocument())
+    await openMoreFilters()
+    expect(screen.getByText('Uren per week')).toBeInTheDocument()
     const minThumb = screen.getByRole('slider', { name: 'Uren per week Min' })
     const maxThumb = screen.getByRole('slider', { name: 'Uren per week Max' })
     // Domain 0..40, both handles parked at their ends → an open range on load.
@@ -632,7 +685,7 @@ describe('VacancySearchTab · weekly-hours RANGE SLIDER (gated, Danny 08-08 poin
   it('the LOWER thumb sends the lower bound: 30 excludes the 8-16 vacancy, never the no-hours row', async () => {
     stubApi({ matches: () => Promise.resolve({ data: { data: hoursRows } }) })
     render(<VacancySearchTab candidate={candidateWithLocation} />)
-    await waitFor(() => expect(screen.getByText('Uren per week')).toBeInTheDocument())
+    await openMoreFilters()
 
     nudgeSlider('Uren per week Min', 'ArrowRight', 30)
 
@@ -646,7 +699,7 @@ describe('VacancySearchTab · weekly-hours RANGE SLIDER (gated, Danny 08-08 poin
   it('the UPPER thumb sends the upper bound: 20 excludes the 32-40 vacancy, never the no-hours row', async () => {
     stubApi({ matches: () => Promise.resolve({ data: { data: hoursRows } }) })
     render(<VacancySearchTab candidate={candidateWithLocation} />)
-    await waitFor(() => expect(screen.getByText('Uren per week')).toBeInTheDocument())
+    await openMoreFilters()
 
     nudgeSlider('Uren per week Max', 'ArrowLeft', 20)
 
@@ -662,7 +715,8 @@ describe('VacancySearchTab · weekly-hours RANGE SLIDER (gated, Danny 08-08 poin
     const candidate = { ...candidateWithLocation, preferences: { hours_per_week: 30 } } as unknown as Candidate
     render(<VacancySearchTab candidate={candidate} />)
 
-    await waitFor(() => expect(screen.getByRole('slider', { name: 'Uren per week Min' })).toHaveAttribute('aria-valuenow', '30'))
+    await openMoreFilters()
+    expect(screen.getByRole('slider', { name: 'Uren per week Min' })).toHaveAttribute('aria-valuenow', '30')
     // Already filtered on load — the 8-16 vacancy never overlaps a 30-hour minimum.
     expect(screen.queryByText('Parttime | Arnhem')).not.toBeInTheDocument()
     expect(screen.getByText('Fulltime | Ede')).toBeInTheDocument()
@@ -671,7 +725,7 @@ describe('VacancySearchTab · weekly-hours RANGE SLIDER (gated, Danny 08-08 poin
   it('neither thumb can cross the other', async () => {
     stubApi({ matches: () => Promise.resolve({ data: { data: hoursRows } }) })
     render(<VacancySearchTab candidate={candidateWithLocation} />)
-    await waitFor(() => expect(screen.getByText('Uren per week')).toBeInTheDocument())
+    await openMoreFilters()
 
     // Push the upper thumb all the way down, then the lower thumb all the way up.
     nudgeSlider('Uren per week Max', 'ArrowLeft', 30)
@@ -707,7 +761,8 @@ describe('VacancySearchTab · "Inzetbaar vanaf" date filter (gated, Danny 06-08)
     stubApi({ matches: () => Promise.resolve({ data: { data: startDateRows } }) })
     render(<VacancySearchTab candidate={candidateWithLocation} />)
 
-    await waitFor(() => expect(screen.getByText('Inzetbaar vanaf')).toBeInTheDocument())
+    await openMoreFilters()
+    expect(screen.getByText('Inzetbaar vanaf')).toBeInTheDocument()
     expect(screen.getByText('Vroeg beschikbaar | Ede')).toBeInTheDocument()
     expect(screen.getByText('Laat beschikbaar | Arnhem')).toBeInTheDocument()
     expect(screen.getByText('Onbekende datum | Nijmegen')).toBeInTheDocument()
@@ -728,7 +783,8 @@ describe('VacancySearchTab · "Inzetbaar vanaf" date filter (gated, Danny 06-08)
 
     // COMPACT-1 (Danny 09-08): displayed as DD-MM-YYYY now (the shared datepicker
     // convention), not the raw ISO value the old native input showed.
-    await waitFor(() => expect(screen.getByLabelText('Inzetbaar vanaf')).toHaveValue('01-07-2026'))
+    await openMoreFilters()
+    expect(screen.getByLabelText('Inzetbaar vanaf')).toHaveValue('01-07-2026')
     // Already filtered on load — the 2026-06-01 vacancy is before the seeded date.
     expect(screen.queryByText('Vroeg beschikbaar | Ede')).not.toBeInTheDocument()
     expect(screen.getByText('Laat beschikbaar | Arnhem')).toBeInTheDocument()
@@ -855,7 +911,8 @@ describe('VacancySearchTab · reset filters (Danny 08-08, point 8)', () => {
     render(<VacancySearchTab candidate={candidate} />)
 
     // Seeded lower bound 30 — the 8-16 vacancy is filtered out on load.
-    await waitFor(() => expect(screen.getByRole('slider', { name: 'Uren per week Min' })).toHaveAttribute('aria-valuenow', '30'))
+    await openMoreFilters()
+    expect(screen.getByRole('slider', { name: 'Uren per week Min' })).toHaveAttribute('aria-valuenow', '30')
     expect(screen.queryByText('Parttime | Arnhem')).not.toBeInTheDocument()
 
     // Widen the range fully open — the 8-16 vacancy comes back and reset appears.
@@ -864,9 +921,12 @@ describe('VacancySearchTab · reset filters (Danny 08-08, point 8)', () => {
     expect(screen.getByRole('button', { name: 'Filters herstellen' })).toBeInTheDocument()
 
     // Reset goes back to the candidate's OWN 30-hour seed, never to a blank 0.
+    // The reset button sits OUTSIDE the popover's own subtree, so clicking it
+    // also closes the popover (outside click) — reopen it to read the slider.
     await userEvent.click(screen.getByRole('button', { name: 'Filters herstellen' }))
-    await waitFor(() => expect(screen.getByRole('slider', { name: 'Uren per week Min' })).toHaveAttribute('aria-valuenow', '30'))
-    expect(screen.queryByText('Parttime | Arnhem')).not.toBeInTheDocument()
+    await waitFor(() => expect(screen.queryByText('Parttime | Arnhem')).not.toBeInTheDocument())
+    await openMoreFilters()
+    expect(screen.getByRole('slider', { name: 'Uren per week Min' })).toHaveAttribute('aria-valuenow', '30')
     expect(screen.queryByRole('button', { name: 'Filters herstellen' })).toBeNull()
   })
 

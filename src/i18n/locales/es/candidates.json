@@ -1003,7 +1003,19 @@
     "functionNotInLookup": "La función '{{title}}' no está en la lista de funciones — se buscarán todas las funciones.",
     "apply": "Postular",
     "resetFilters": "Restablecer filtros",
-    "hoursRangeValue": "{{min}}–{{max}}"
+    "moreFilters": "Más filtros",
+    "moreFiltersTitle": "Más filtros",
+    "removeFilter": "Eliminar filtro '{{label}}'",
+    "hoursRangeValue": "{{min}}–{{max}}",
+    "cardHours": "{{range}} h/semana",
+    "cardSalary": "{{range}} {{period}}",
+    "cardExperience": "{{range}} años de experiencia",
+    "salaryPeriod": {
+      "hour": "por hora",
+      "month": "por mes",
+      "year": "por año",
+      "week": "por semana"
+    }
   },
   "erase": {
     "trashView": "Papelera",

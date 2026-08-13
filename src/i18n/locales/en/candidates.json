@@ -1003,7 +1003,19 @@
     "functionNotInLookup": "Function '{{title}}' is not in the function list — all functions will be searched.",
     "apply": "Apply",
     "resetFilters": "Reset filters",
-    "hoursRangeValue": "{{min}}–{{max}}"
+    "moreFilters": "More filters",
+    "moreFiltersTitle": "More filters",
+    "removeFilter": "Remove '{{label}}' filter",
+    "hoursRangeValue": "{{min}}–{{max}}",
+    "cardHours": "{{range}} hrs/week",
+    "cardSalary": "{{range}} {{period}}",
+    "cardExperience": "{{range}} yrs experience",
+    "salaryPeriod": {
+      "hour": "per hour",
+      "month": "per month",
+      "year": "per year",
+      "week": "per week"
+    }
   },
   "erase": {
     "trashView": "Trash",

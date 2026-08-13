@@ -1003,7 +1003,19 @@
     "functionNotInLookup": "Functie '{{title}}' staat niet in de functielijst — alle functies worden doorzocht.",
     "apply": "Solliciteren",
     "resetFilters": "Filters herstellen",
-    "hoursRangeValue": "{{min}}–{{max}}"
+    "moreFilters": "Meer filters",
+    "moreFiltersTitle": "Meer filters",
+    "removeFilter": "Filter '{{label}}' verwijderen",
+    "hoursRangeValue": "{{min}}–{{max}}",
+    "cardHours": "{{range}} uur/week",
+    "cardSalary": "{{range}} {{period}}",
+    "cardExperience": "{{range}} jaar ervaring",
+    "salaryPeriod": {
+      "hour": "per uur",
+      "month": "per maand",
+      "year": "per jaar",
+      "week": "per week"
+    }
   },
   "erase": {
     "trashView": "Prullenbak",

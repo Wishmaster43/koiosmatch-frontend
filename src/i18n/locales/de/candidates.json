@@ -1003,7 +1003,19 @@
     "functionNotInLookup": "Funktion '{{title}}' steht nicht in der Funktionsliste — es werden alle Funktionen durchsucht.",
     "apply": "Bewerben",
     "resetFilters": "Filter zurücksetzen",
-    "hoursRangeValue": "{{min}}–{{max}}"
+    "moreFilters": "Weitere Filter",
+    "moreFiltersTitle": "Weitere Filter",
+    "removeFilter": "Filter '{{label}}' entfernen",
+    "hoursRangeValue": "{{min}}–{{max}}",
+    "cardHours": "{{range}} Std/Woche",
+    "cardSalary": "{{range}} {{period}}",
+    "cardExperience": "{{range}} Jahre Erfahrung",
+    "salaryPeriod": {
+      "hour": "pro Stunde",
+      "month": "pro Monat",
+      "year": "pro Jahr",
+      "week": "pro Woche"
+    }
   },
   "erase": {
     "trashView": "Papierkorb",

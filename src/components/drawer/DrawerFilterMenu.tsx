@@ -1,8 +1,12 @@
 import { useEffect, useId, useRef, useState } from 'react'
 import type { ReactNode } from 'react'
 import { SlidersHorizontal, RotateCcw, Search } from 'lucide-react'
+import DatePicker from 'react-datepicker'
 import SelectMenu from '@/components/ui/SelectMenu'
 import SelectAllRow from '@/components/ui/SelectAllRow'
+import Slider from '@/components/ui/Slider'
+import { parseDate } from '@/components/forms/fields'
+import { toLocalIsoDate } from '@/lib/localDate'
 import { useFocusTrap } from '@/hooks/useFocusTrap'
 import { useBatchToggle } from '@/hooks/useBatchToggle'
 
@@ -65,7 +69,43 @@ export interface DrawerMultiFilterConfig {
   noResultsLabel: string
 }
 
-export type DrawerFilterConfig = DrawerSingleFilterConfig | DrawerMultiFilterConfig
+// Range row (P8-more-filters, batch 8: "Uren per week") — a two-thumb Slider,
+// mirrors VacancySearchFilters' own hours row. `active`/`onReset` are supplied by
+// the HOST rather than derived here: a range's "off" position is whatever the
+// host's own domain considers unbounded (e.g. [0, max] for hours), which only the
+// host knows — the shared component stays generic over that choice.
+export interface DrawerRangeFilterConfig {
+  type: 'range'
+  key: string
+  label: ReactNode
+  value: [number, number]
+  max: number
+  step?: number
+  onChange: (next: [number, number]) => void
+  // Formatted numeric readout beside the slider (already localized, e.g. "0–40").
+  valueLabel: string
+  ariaLabels: [string, string]
+  // Whether the current value narrows anything (drives the badge + clear-all).
+  active: boolean
+  // Reset THIS row back to its host-defined "off" value — used by clear-all.
+  onReset: () => void
+}
+
+// Date row (P8-more-filters: "Inzetbaar vanaf") — the shared react-datepicker
+// convention (DD-MM-YYYY, §4), '' = no filter. Renders via the app-wide
+// #datepicker-portal DOM node (index.html) instead of inline, so the calendar
+// popper is never clipped by this panel's own bounds — see the outside-click
+// listener below for the whitelist that keeps that portal from closing the panel.
+export interface DrawerDateFilterConfig {
+  type: 'date'
+  key: string
+  label: ReactNode
+  value: string
+  onChange: (next: string) => void
+  placeholder: string
+}
+
+export type DrawerFilterConfig = DrawerSingleFilterConfig | DrawerMultiFilterConfig | DrawerRangeFilterConfig | DrawerDateFilterConfig
 
 interface DrawerFilterMenuProps {
   filters: DrawerFilterConfig[]
@@ -127,6 +167,44 @@ function DrawerMultiFilterRow({ config }: { config: DrawerMultiFilterConfig }) {
   )
 }
 
+// Range row: a two-thumb Slider + a JetBrains Mono readout (§4: numbers/IDs use
+// the mono face) — inline, no portal, so it never trips the outside-click check.
+function DrawerRangeFilterRow({ config }: { config: DrawerRangeFilterConfig }) {
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+      <div style={{ flex: 1 }}>
+        <Slider range={config.value} max={config.max} step={config.step ?? 1}
+          onRangeChange={config.onChange} ariaLabels={config.ariaLabels} />
+      </div>
+      <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 12, color: 'var(--text)', whiteSpace: 'nowrap' }}>
+        {config.valueLabel}
+      </span>
+    </div>
+  )
+}
+
+// Bare filter-bar date input (mirrors VacancySearchFilters' own filterInput look)
+// — the CONTROL_WIDTH constant keeps it flush with the single-select row above it.
+const dateInputStyle = { padding: '6px 9px', fontSize: 12, border: '1px solid var(--border)', borderRadius: 7, background: 'var(--surface)', color: 'var(--text)', outline: 'none', width: CONTROL_WIDTH }
+
+// Date row: the shared react-datepicker convention (DD-MM-YYYY). Renders via the
+// app-wide #datepicker-portal node, not inline — see DrawerDateFilterConfig's doc
+// comment and this file's outside-click listener for why that portal is whitelisted.
+function DrawerDateFilterRow({ config }: { config: DrawerDateFilterConfig }) {
+  return (
+    <DatePicker
+      selected={parseDate(config.value)}
+      onChange={(d: Date | null) => config.onChange(d ? toLocalIsoDate(d) : '')}
+      dateFormat="dd-MM-yyyy"
+      showMonthDropdown showYearDropdown dropdownMode="select"
+      placeholderText={config.placeholder}
+      portalId="datepicker-portal"
+      popperPlacement="bottom-start"
+      customInput={<input aria-label={config.placeholder} style={dateInputStyle} />}
+    />
+  )
+}
+
 /**
  * DrawerFilterMenu — the ONE shared "Filter" button + popover for drawer sub-tab
  * toolbars (NOTES-DOC-FILTER-MENU-1, Danny 08-08: "toolbar leest te druk" — the
@@ -185,7 +263,18 @@ export default function DrawerFilterMenu({ filters, label, title, clearAllLabel 
   // Close on outside click while open — mirrors ChangelogPopover's own convention.
   useEffect(() => {
     if (!open) return
-    const onClick = (e: MouseEvent) => { if (wrapRef.current && !wrapRef.current.contains(e.target as Node)) setOpen(false) }
+    const onClick = (e: MouseEvent) => {
+      const target = e.target as Node
+      if (wrapRef.current && wrapRef.current.contains(target)) return
+      // DATE-PORTAL-1: a 'date' row's DatePicker paints into the fixed
+      // #datepicker-portal DOM node (a body-level sibling of #root, index.html),
+      // OUTSIDE this panel's own subtree — without this check, every day-cell
+      // click reads as "outside" and closes the panel before onChange registers
+      // (same class of bug the multi-select row's non-portal design avoids above).
+      const portal = document.getElementById('datepicker-portal')
+      if (portal && portal.contains(target)) return
+      setOpen(false)
+    }
     document.addEventListener('mousedown', onClick)
     return () => document.removeEventListener('mousedown', onClick)
   }, [open])
@@ -196,10 +285,15 @@ export default function DrawerFilterMenu({ filters, label, title, clearAllLabel 
   // Active count: a single row contributes at most 1 ('' = inactive); a multi row
   // contributes its selected COUNT — mirrors ReportFilterSidebar's own
   // groupActiveCount convention, so the badge reads the same everywhere in the app.
-  const activeCount = filters.reduce((sum, f) => sum + (f.type === 'multi' ? f.selected.length : (f.value !== '' ? 1 : 0)), 0)
+  const activeCount = filters.reduce((sum, f) => {
+    if (f.type === 'multi') return sum + f.selected.length
+    if (f.type === 'range') return sum + (f.active ? 1 : 0)
+    return sum + (f.value !== '' ? 1 : 0)
+  }, 0)
   // Clear every active filter at once — generic over whatever the host passed in.
   const clearAll = () => filters.forEach(f => {
     if (f.type === 'multi') f.selected.forEach(v => f.onToggle(v))
+    else if (f.type === 'range') { if (f.active) f.onReset() }
     else if (f.value !== '') f.onChange('')
   })
 
@@ -274,8 +368,12 @@ export default function DrawerFilterMenu({ filters, label, title, clearAllLabel 
                   <SelectMenu value={f.value} onChange={f.onChange} menuWidth={CONTROL_WIDTH}
                     placeholder={f.allLabel} style={{ fontSize: 12, padding: '6px 9px' }}
                     options={[{ value: '', label: f.allLabel }, ...f.options]} />
-                ) : (
+                ) : f.type === 'multi' ? (
                   <DrawerMultiFilterRow config={f} />
+                ) : f.type === 'range' ? (
+                  <DrawerRangeFilterRow config={f} />
+                ) : (
+                  <DrawerDateFilterRow config={f} />
                 )}
               </div>
             ))}

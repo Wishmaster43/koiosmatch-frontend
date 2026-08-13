@@ -1,19 +1,15 @@
 import type { CSSProperties, ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
-import DatePicker from 'react-datepicker'
-import { RotateCcw } from 'lucide-react'
+import { RotateCcw, X } from 'lucide-react'
 import SearchSelect from '@/components/ui/SearchSelect'
-import Slider from '@/components/ui/Slider'
-import { parseDate } from '@/components/forms/fields'
-import { toLocalIsoDate } from '@/lib/localDate'
+import DrawerFilterMenu from '@/components/drawer/DrawerFilterMenu'
+import type { DrawerFilterConfig } from '@/components/drawer/DrawerFilterMenu'
+import { useDateFormat } from '@/lib/datetime'
 import type { HoursRange } from '../hooks/vacancySearchFilters'
 
 // Inline label — sits BESIDE its control instead of above it (Danny 09-08: a
 // label-above-every-filter layout ran the bar over four lines with dead space).
 const filterLabelInline: CSSProperties = { fontSize: 11, color: 'var(--text-muted)', whiteSpace: 'nowrap', flexShrink: 0 }
-// Bare filter-bar input (mirrors ChangelogTab's date-range inputStyle — the one
-// established "plain input in a filter row" look, not the EditableFieldTable form field).
-const filterInput: CSSProperties = { padding: '6px 9px', fontSize: 12, border: '1px solid var(--border)', borderRadius: 7, background: 'var(--surface)', color: 'var(--text)', outline: 'none', width: 128 }
 // Reset trigger — a REAL button in the §4 soft-tint convention (tinted background,
 // token text/icon, tinted border), never coloured text with an icon glued to it.
 const resetButton: CSSProperties = {
@@ -23,19 +19,43 @@ const resetButton: CSSProperties = {
   background: 'color-mix(in srgb, var(--color-primary) 12%, transparent)',
   border: '1px solid color-mix(in srgb, var(--color-primary) 40%, transparent)',
 }
-// Numeric readout of the hours range — JetBrains Mono per §4 (numbers/IDs).
-const hoursReadout: CSSProperties = { fontFamily: 'JetBrains Mono, monospace', fontSize: 12, color: 'var(--text)', whiteSpace: 'nowrap' }
+// Removable soft-chip (§4 convention) for an ACTIVE secondary filter parked in
+// the DrawerFilterMenu popover — CALM-1 (P8-more-filters, batch 8): a filter
+// that narrows the search must never be hidden-but-active, so it also surfaces
+// here beside the trigger, with its own × to clear just that one filter.
+const secondaryChip: CSSProperties = {
+  display: 'inline-flex', alignItems: 'center', gap: 5, padding: '4px 6px 4px 9px',
+  fontSize: 11.5, fontWeight: 600, borderRadius: 999,
+  color: 'var(--color-primary-text)',
+  background: 'color-mix(in srgb, var(--color-primary) 12%, transparent)',
+  border: '1px solid color-mix(in srgb, var(--color-primary) 40%, transparent)',
+}
+const secondaryChipRemove: CSSProperties = {
+  display: 'flex', alignItems: 'center', justifyContent: 'center', width: 15, height: 15,
+  background: 'none', border: 'none', cursor: 'pointer', color: 'inherit', padding: 0,
+}
 
-// One label-beside-control filter unit — replaces the old label-ABOVE block per
-// filter. Every filter is now one line tall instead of two, and wraps as a
-// single flex item instead of a fixed-width column with dead space around a
-// narrower trigger button (the gap Danny pointed at right of Contractvorm).
+// One label-beside-control filter unit — every filter is one line tall instead
+// of two, wrapping as a single flex item instead of a fixed-width column.
 function FilterField({ label, align = 'center', children }: { label: string; align?: CSSProperties['alignItems']; children: ReactNode }) {
   return (
     <div style={{ display: 'flex', alignItems: align, gap: 6 }}>
       <span style={filterLabelInline}>{label}</span>
       {children}
     </div>
+  )
+}
+
+// A removable soft-chip beside the DrawerFilterMenu trigger — clicking × clears
+// just this one secondary filter without opening the popover.
+function SecondaryFilterChip({ label, ariaLabel, onRemove }: { label: string; ariaLabel: string; onRemove: () => void }) {
+  return (
+    <span style={secondaryChip}>
+      {label}
+      <button type="button" onClick={onRemove} aria-label={ariaLabel} style={secondaryChipRemove}>
+        <X size={11} />
+      </button>
+    </span>
   )
 }
 
@@ -71,10 +91,13 @@ interface VacancySearchFiltersProps {
  * (VacancySearchTab). Purely presentational: every value and setter arrives as a
  * prop, no API calls and no business logic (§3 container/presentational split).
  * Every list is a searchable dropdown (SearchSelect), never a native <select>.
- * COMPACT-1 (Danny 09-08): one continuous flex-wrap row, label BESIDE each
- * control instead of above it — the bar used to run four lines tall with dead
- * space around fixed-width columns; now every filter is a single-line unit that
- * wraps on its own, and the reset button lives in the same wrap flow.
+ *
+ * P8-MORE-FILTERS (batch 8, decision = option B, approved): the primary row now
+ * carries only Status/Functie/Contractvorm — the three filters used on nearly
+ * every search. "Uren per week" and "Inzetbaar vanaf" moved into the shared
+ * DrawerFilterMenu popover (its new 'range'/'date' row types) so the bar stays
+ * calm; either one still shows as a REMOVABLE soft-chip beside the trigger the
+ * moment it actually narrows the search — never hidden-but-active (§3).
  */
 export default function VacancySearchFilters({
   candidateTitle, statusOptions, statuses, onStatusesChange,
@@ -85,6 +108,7 @@ export default function VacancySearchFilters({
   filtersDirty, onReset,
 }: VacancySearchFiltersProps) {
   const { t } = useTranslation('candidates')
+  const { formatDate } = useDateFormat()
 
   // Add/remove one value from a multi-select filter list.
   const toggle = (list: string[], value: string) =>
@@ -94,6 +118,34 @@ export default function VacancySearchFilters({
   // filters): a count once something is selected, else a calm "choose X" prompt.
   const triggerText = (selected: string[], label: string) =>
     selected.length > 0 ? t('common:filters.selectedCount', { count: selected.length }) : t('common:filters.choose', { label: label.toLowerCase() })
+
+  // "Uren per week" is ACTIVE only once a handle actually left a domain end — a
+  // handle parked at 0/max means "unbounded on that side" (see hoursOverlap),
+  // so that resting state must never read as narrowed-and-removable.
+  const hoursActive = hasHoursData && (hoursRange[0] > 0 || hoursRange[1] < hoursRangeMax)
+  const hoursValueLabel = t('vacancySearch.hoursRangeValue', { min: hoursRange[0], max: hoursRange[1] })
+  const resetHours = () => onHoursRangeChange([0, hoursRangeMax])
+  const availableFromActive = hasAvailableFromData && availableFrom !== ''
+  const clearAvailableFrom = () => onAvailableFromChange('')
+
+  // The two secondary filters, as DrawerFilterMenu row configs — each only
+  // offered once its own data is demonstrably present (offered-iff-read, mirrors
+  // the inline gating this bar always had).
+  const moreFilters: DrawerFilterConfig[] = [
+    ...(hasHoursData ? [{
+      type: 'range' as const, key: 'hours', label: t('vacancySearch.hoursPerWeek'),
+      value: hoursRange, max: hoursRangeMax, onChange: onHoursRangeChange, valueLabel: hoursValueLabel,
+      ariaLabels: [
+        `${t('vacancySearch.hoursPerWeek')} ${t('vacancySearch.hoursMinPlaceholder')}`,
+        `${t('vacancySearch.hoursPerWeek')} ${t('vacancySearch.hoursMaxPlaceholder')}`,
+      ] as [string, string],
+      active: hoursActive, onReset: resetHours,
+    }] : []),
+    ...(hasAvailableFromData ? [{
+      type: 'date' as const, key: 'availableFrom', label: t('vacancySearch.availableFromFilter'),
+      value: availableFrom, onChange: onAvailableFromChange, placeholder: t('vacancySearch.availableFromFilter'),
+    }] : []),
+  ]
 
   return (
     <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '8px 16px' }}>
@@ -128,39 +180,20 @@ export default function VacancySearchFilters({
           triggerLabel={triggerText(contractvorm, t('vacancySearch.contractForm'))}
         />
       </FilterField>
-      {/* Uren-per-week range — ONE slider with two thumbs (Danny 08-08, point 8),
-          gated (offered-iff-read) on the vacancy hours_min/hours_max fields. */}
-      {hasHoursData && (
-        <FilterField label={t('vacancySearch.hoursPerWeek')}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, width: 150 }}>
-            <div style={{ flex: 1 }}>
-              <Slider range={hoursRange} max={hoursRangeMax} step={1} onRangeChange={onHoursRangeChange}
-                ariaLabels={[
-                  `${t('vacancySearch.hoursPerWeek')} ${t('vacancySearch.hoursMinPlaceholder')}`,
-                  `${t('vacancySearch.hoursPerWeek')} ${t('vacancySearch.hoursMaxPlaceholder')}`,
-                ]} />
-            </div>
-            <span style={hoursReadout}>{t('vacancySearch.hoursRangeValue', { min: hoursRange[0], max: hoursRange[1] })}</span>
-          </div>
-        </FilterField>
+      {/* P8-more-filters: "Uren per week" + "Inzetbaar vanaf" now live behind this
+          popover — the shared DrawerFilterMenu, its 'range'/'date' rows added for
+          this card. No-op (renders nothing) once neither is offered. */}
+      <DrawerFilterMenu filters={moreFilters} label={t('vacancySearch.moreFilters')}
+        title={t('vacancySearch.moreFiltersTitle')} clearAllLabel={t('common:filters.clearAll')} />
+      {/* Removable chips for whichever secondary filter is actually active — the
+          "never hidden-but-active" half of the popover move. */}
+      {hoursActive && (
+        <SecondaryFilterChip label={t('vacancySearch.cardHours', { range: hoursValueLabel })}
+          ariaLabel={t('vacancySearch.removeFilter', { label: t('vacancySearch.hoursPerWeek') })} onRemove={resetHours} />
       )}
-      {/* Inzetbaar-vanaf date — gated the same way, on the vacancy start_date field.
-          FIX (Danny 09-08): was a bare <input type="date"> — browser-native icon,
-          non-NL date format and off-height. Now the shared react-datepicker convention
-          (mirrors ProfilePersonalTab's dob field), DD-MM-YYYY, same filter-bar input look. */}
-      {hasAvailableFromData && (
-        <FilterField label={t('vacancySearch.availableFromFilter')}>
-          <DatePicker
-            selected={parseDate(availableFrom)}
-            onChange={(d: Date | null) => onAvailableFromChange(d ? toLocalIsoDate(d) : '')}
-            dateFormat="dd-MM-yyyy"
-            showMonthDropdown showYearDropdown dropdownMode="select"
-            placeholderText={t('vacancySearch.availableFromFilter')}
-            portalId="datepicker-portal"
-            popperPlacement="bottom-start"
-            customInput={<input aria-label={t('vacancySearch.availableFromFilter')} style={filterInput} />}
-          />
-        </FilterField>
+      {availableFromActive && (
+        <SecondaryFilterChip label={`${t('vacancySearch.availableFromFilter')}: ${formatDate(availableFrom)}`}
+          ariaLabel={t('vacancySearch.removeFilter', { label: t('vacancySearch.availableFromFilter') })} onRemove={clearAvailableFrom} />
       )}
       {/* Reset (Danny 08-08, point 8) — only rendered when it would actually change
           something; a button that does nothing is noise. Lives in the SAME wrap
