@@ -570,7 +570,9 @@
       "department": "Departamento",
       "contact": "Persona de contacto"
     },
-    "newNoteFor": "Nueva nota para {{name}}"
+    "newNoteFor": "Nueva nota para {{name}}",
+    "timelineLoading": "Cargando la línea de tiempo…",
+    "timelineLoadError": "No se pudo cargar la línea de tiempo."
   },
   "bulk": {
     "selected": "{{count}} seleccionado(s)",
@@ -805,6 +807,8 @@
   },
   "popout": {
     "windowTitle": "Notas — {{name}}",
-    "loadError": "No se pudo cargar este cliente."
+    "loadError": "No se pudo cargar este cliente.",
+    "companyTextWindowTitle": "Texto de empresa — {{name}}",
+    "departmentTextWindowTitle": "Texto del departamento — {{name}}"
   }
 }

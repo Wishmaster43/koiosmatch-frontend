@@ -261,6 +261,12 @@ export interface Customer {
   departments: Department[]
   contacts: Contact[]
   notes: CustomerNote[]
+  // K17: event-typed timeline embedded on CustomerDetailResource (mirrors
+  // Candidate.timeline) — status changes, appointments, notes, tasks, matches.
+  // Undefined (not []) means the backend embed is absent, the SIGNAL the
+  // Tijdlijn sub-tab falls back to the standalone /activity GET on (§10,
+  // tolerant of a not-yet-shipped backend field).
+  timeline?: Array<Record<string, unknown>>
   locationsCount: number
   departmentsCount: number
   contactsCount: number
@@ -388,6 +394,10 @@ export interface ApiCustomer {
     customer_department_id?: Id | null; department_name?: string | null
     level?: string
   }>
+  // K17: embedded event-typed timeline (CustomerDetailResource, once CMBE ships
+  // it) — same raw shape as the candidate's own `timeline[]` (time/created_at +
+  // text/description per event).
+  timeline?: Array<Record<string, unknown>>
   locations_count?: number; departments_count?: number; contacts_count?: number
   open_vacancies_count?: number; openVacanciesCount?: number
   active_matches_count?: number; activeMatchesCount?: number

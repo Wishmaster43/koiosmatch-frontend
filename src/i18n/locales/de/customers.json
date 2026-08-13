@@ -570,7 +570,9 @@
       "department": "Abteilung",
       "contact": "Ansprechpartner"
     },
-    "newNoteFor": "Neue Notiz für {{name}}"
+    "newNoteFor": "Neue Notiz für {{name}}",
+    "timelineLoading": "Zeitleiste wird geladen…",
+    "timelineLoadError": "Die Zeitleiste konnte nicht geladen werden."
   },
   "bulk": {
     "selected": "{{count}} ausgewählt",
@@ -805,6 +807,8 @@
   },
   "popout": {
     "windowTitle": "Notizen — {{name}}",
-    "loadError": "Dieser Kunde konnte nicht geladen werden."
+    "loadError": "Dieser Kunde konnte nicht geladen werden.",
+    "companyTextWindowTitle": "Unternehmenstext — {{name}}",
+    "departmentTextWindowTitle": "Abteilungstext — {{name}}"
   }
 }

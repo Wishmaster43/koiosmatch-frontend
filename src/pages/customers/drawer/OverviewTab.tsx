@@ -177,8 +177,12 @@ export default function OverviewTab({ c, onSave }: { c: Customer; onSave?: (valu
           separate fields — Danny 28-07: both belong in this one text. Their data stays
           server-side until CMBE merges it into `description` (BEDRIJFSTEKST-1), so
           nothing is destroyed here, only hidden. */}
+      {/* K3 (batch 5): second-screen icon + Genereer, mirroring the candidate
+          profile text — 'customer' is already a known /ai/koios/generate entity. */}
       <EditableRichTextField label={t('overview.companyText')} value={c.description ?? ''}
-        onSave={html => onSave?.({ description: html })} />
+        onSave={html => onSave?.({ description: html })}
+        popout={c.id != null ? { entity: 'customer', id: c.id, field: 'companyText' } : undefined}
+        assistGenerate={c.id != null ? { entity: 'customer', id: String(c.id) } : undefined} />
 
       {/* Koios AI advisory — company/location completeness + relationship activity (§3A blueprint). */}
       <KoiosAdviceBlock namespace="customers" insights={buildCustomerAdviceInsights(c, t)} />

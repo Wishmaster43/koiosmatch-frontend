@@ -7,11 +7,12 @@
  * its own sub-tab. So: no task trigger on Notities, a complete tasks surface one
  * sub-tab over. Both lines are held by tests below.
  */
-import { describe, it, expect, vi } from 'vitest'
-import { render, screen } from '@testing-library/react'
+import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import type { ReactNode } from 'react'
 import CustomerNotesTab from './CustomerNotesTab'
+import api from '@/lib/api'
 
 vi.mock('@/lib/useNoteTypes', () => ({ useNoteTypes: () => ({ types: [], writableTypes: [] }) }))
 vi.mock('@/lib/mocks', () => ({ isAbortError: () => false }))
@@ -113,5 +114,38 @@ describe('CustomerNotesTab · K14 composer title carries the customer name', () 
     render(<CustomerNotesTab customerId="cust-1" notes={[]} onAddNote={vi.fn()} c={customer} onSave={vi.fn()} />)
     await user.click(screen.getByRole('button', { name: 'notes.newNote' }))
     expect(await screen.findByRole('dialog', { name: 'notes.newNote' })).toBeInTheDocument()
+  })
+})
+
+/** K17 (batch 5): the Tijdlijn sub-tab reads the CustomerDetailResource embed
+ *  (`c.timeline`) as its PRIMARY source, falling back to GET .../activity only
+ *  when the embed is absent (§10 tolerant — the field is not shipped by every
+ *  backend yet). These are request-shape regression tests, not just "a callback
+ *  fired" (§13). */
+describe('CustomerNotesTab · K17 timeline embed vs fallback', () => {
+  beforeEach(() => { vi.mocked(api.get).mockClear() })
+
+  it('embed present: renders the embedded events and never GETs /activity', async () => {
+    const user = userEvent.setup()
+    const withTimeline = { id: 'cust-1', name: 'Acme Zorg', timeline: [{ time: '2026-08-01T10:00:00Z', text: 'Status gewijzigd naar Klant' }] } as never
+    render(<CustomerNotesTab customerId="cust-1" customerName="Acme Zorg" notes={[]} onAddNote={vi.fn()} c={withTimeline} onSave={vi.fn()} />)
+    await user.click(screen.getByText('notes.timeline'))
+
+    expect(await screen.findByText('Status gewijzigd naar Klant')).toBeInTheDocument()
+    expect(api.get).not.toHaveBeenCalledWith(expect.stringContaining('/activity'), expect.anything())
+  })
+
+  it('embed absent: falls back to GET /customers/{id}/activity', async () => {
+    const user = userEvent.setup()
+    vi.mocked(api.get).mockImplementation((url: string) =>
+      url.includes('/activity')
+        ? Promise.resolve({ data: { data: [{ created_at: '2026-08-01T10:00:00Z', description: 'Klant aangemaakt' }] } })
+        : Promise.resolve({ data: { data: [] } }))
+    // `customer` (module scope) carries no `timeline` key at all — the absent-embed case.
+    render(<CustomerNotesTab customerId="cust-1" customerName="Acme Zorg" notes={[]} onAddNote={vi.fn()} c={customer} onSave={vi.fn()} />)
+    await user.click(screen.getByText('notes.timeline'))
+
+    await waitFor(() => expect(api.get).toHaveBeenCalledWith('/customers/cust-1/activity', expect.anything()))
+    expect(await screen.findByText('Klant aangemaakt')).toBeInTheDocument()
   })
 })

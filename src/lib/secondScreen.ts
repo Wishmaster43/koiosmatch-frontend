@@ -126,7 +126,28 @@ export function openNoteEditPopout(entity: PopoutEntity, id: string | number, no
 // the candidate id since a not-yet-created match has none of its own; it only
 // mirrors the draft between windows (no independent server save — the real
 // persistence is the match form's own submit).
-export type PopoutTextField = 'summary' | 'matchRemarks'
+// `companyText`/`departmentText` (K3/K5, batch 5): the customer's bedrijfstekst
+// and a department's omschrijving get the same profile-text treatment. Both ride
+// under entity 'customer' (there is no separate PopoutEntity for a department —
+// it is a sub-record of a customer, mirrors how its notes/documents already scope
+// under the customer). `departmentText`'s `id` is the COMPOSITE
+// `departmentPopoutId()` below, not a bare department id — the popped-out window
+// needs the customer id too (the nested PATCH route requires it, and there is no
+// standalone GET /departments/{id}).
+export type PopoutTextField = 'summary' | 'matchRemarks' | 'companyText' | 'departmentText'
+
+// K5a: encodes/decodes the composite id `departmentText` travels under —
+// `<customerId>:<departmentId>` — so ONE string still fits the existing
+// `id: string | number` shape every other popout field uses (§11: no second
+// identity shape). A malformed/legacy id decodes to nulls, which the popout page
+// treats as "unknown record" (§3), never a silent wrong fetch.
+export const departmentPopoutId = (customerId: string | number, departmentId: string | number): string =>
+  `${customerId}:${departmentId}`
+export const parseDepartmentPopoutId = (id: string | undefined): { customerId: string; departmentId: string } | null => {
+  if (!id) return null
+  const [customerId, departmentId] = id.split(':')
+  return customerId && departmentId ? { customerId, departmentId } : null
+}
 
 // Identity of ONE popped-out field: the OS window name AND the BroadcastChannel
 // topic the two windows sync their draft over (hooks/useTextPopoutSync). Scoped

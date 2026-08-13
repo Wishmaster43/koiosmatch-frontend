@@ -60,6 +60,7 @@ import DrillBreadcrumb from '@/components/drawer/DrillBreadcrumb'
 import type { DrillPagerProps } from '@/components/drawer/DrillPager'
 import type { Crumb } from '@/components/drawer/DrillBreadcrumb'
 import EditableRichTextField from './EditableRichTextField'
+import { departmentPopoutId } from '@/lib/secondScreen'
 // SCOPED-LIST-TAB-1: the department's own Vacatures/Matches sub-tabs (§3A —
 // shared config-driven tab, never a forked copy).
 import ScopedVacanciesTab from './ScopedVacanciesTab'
@@ -332,7 +333,13 @@ export default function DepartmentDetail({ department, locations, statuses, cont
           {/* Omschrijving AFTER the data blocks — Danny 02-08: every entity's prose block
               follows the customer Bedrijf-tab order (fields → text → Koios), so the
               earlier description-first placement was reversed on both location and here. */}
-          <EditableRichTextField label={t('departments.detail.description')} value={department.description ?? ''} onSave={saveDescription} />
+          {/* K5a (batch 5): second-screen icon, composite customerId:departmentId
+              (departmentPopoutId — no standalone GET for one department). No
+              `assistGenerate` yet — see CustomerDepartmentTextPopout's docblock
+              for the written reason (GenerateEntity type widening is out of scope
+              here). */}
+          <EditableRichTextField label={t('departments.detail.description')} value={department.description ?? ''} onSave={saveDescription}
+            popout={customerId != null ? { entity: 'customer', id: departmentPopoutId(customerId, department.id as Id), field: 'departmentText' } : undefined} />
 
           {/* Koios advice — pure FE completeness heuristics over this department's OWN
               fields, same slot LocationDetail/OverviewTab put it in (right after the

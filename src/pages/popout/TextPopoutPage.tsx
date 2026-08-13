@@ -16,12 +16,19 @@ import { useTranslation } from 'react-i18next'
 import PopoutShell from './PopoutShell'
 import CandidateSummaryPopout from './CandidateSummaryPopout'
 import MatchRemarksPopout from './MatchRemarksPopout'
+// K3/K5 (batch 5): the customer bedrijfstekst + department omschrijving popouts
+// live under pages/customers/popout (this task's own folder scope), not here —
+// this dispatcher only imports them.
+import CustomerCompanyTextPopout from '@/pages/customers/popout/CustomerCompanyTextPopout'
+import CustomerDepartmentTextPopout from '@/pages/customers/popout/CustomerDepartmentTextPopout'
 
 // One entry per supported `<entity>:<field>` pair — keep in sync with
 // PopoutTextField / openTextPopout in lib/secondScreen.ts.
 const TEXT_POPOUT_PAGES: Record<string, ComponentType<{ id: string | undefined }>> = {
   'candidate:summary': CandidateSummaryPopout,
   'candidate:matchRemarks': MatchRemarksPopout,
+  'customer:companyText': CustomerCompanyTextPopout,
+  'customer:departmentText': CustomerDepartmentTextPopout,
 }
 
 export default function TextPopoutPage() {

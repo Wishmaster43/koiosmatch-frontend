@@ -570,7 +570,9 @@
       "department": "Department",
       "contact": "Contact person"
     },
-    "newNoteFor": "New note for {{name}}"
+    "newNoteFor": "New note for {{name}}",
+    "timelineLoading": "Loading timeline…",
+    "timelineLoadError": "The timeline could not be loaded."
   },
   "bulk": {
     "selected": "{{count}} selected",
@@ -805,6 +807,8 @@
   },
   "popout": {
     "windowTitle": "Notes — {{name}}",
-    "loadError": "This customer could not be loaded."
+    "loadError": "This customer could not be loaded.",
+    "companyTextWindowTitle": "Company text — {{name}}",
+    "departmentTextWindowTitle": "Department text — {{name}}"
   }
 }

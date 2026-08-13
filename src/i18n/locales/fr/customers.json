@@ -570,7 +570,9 @@
       "department": "Département",
       "contact": "Personne de contact"
     },
-    "newNoteFor": "Nouvelle note pour {{name}}"
+    "newNoteFor": "Nouvelle note pour {{name}}",
+    "timelineLoading": "Chargement de la chronologie…",
+    "timelineLoadError": "La chronologie n'a pas pu être chargée."
   },
   "bulk": {
     "selected": "{{count}} sélectionné(s)",
@@ -805,6 +807,8 @@
   },
   "popout": {
     "windowTitle": "Notes — {{name}}",
-    "loadError": "Ce client n'a pas pu être chargé."
+    "loadError": "Ce client n'a pas pu être chargé.",
+    "companyTextWindowTitle": "Texte entreprise — {{name}}",
+    "departmentTextWindowTitle": "Texte du département — {{name}}"
   }
 }

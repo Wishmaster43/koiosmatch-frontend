@@ -18,8 +18,8 @@ export interface ApiCustomerNoteRow {
   customer_location_id?: Id | null; location_name?: string | null
   customer_department_id?: Id | null; department_name?: string | null
   level?: string
-  // K15NOTES: present on CustomerNoteResource; the embedded CustomerDetailResource
-  // list does not send these yet (BE gap — filed, not blocking this FE wiring).
+  // K15NOTES: sent by BOTH CustomerNoteResource and the embedded
+  // CustomerDetailResource list (parity regression-locked server-side, 13-08).
   author_id?: Id | null; updated_by?: string | null
 }
 
@@ -288,6 +288,15 @@ export function mapCustomer(c: ApiCustomer = {}): Customer {
     // NOTES-LOC-DEPT-1: shares the ONE row mapper with the scoped notes endpoints
     // (useScopedCustomerNotes) — never a second, drifting copy of this shape (§11).
     notes: (c.notes ?? []).map(mapCustomerNoteRow),
+    // K17: mirrors mapCandidate's own timeline mapping 1:1 (text/time fallback
+    // chains) — but stays UNDEFINED (never `?? []`) when the backend embed is
+    // absent, so the Tijdlijn sub-tab can tell "no events yet" apart from "this
+    // tenant's API doesn't send the field yet" and fall back to the /activity GET.
+    timeline: c.timeline?.map(ev => ({
+      ...ev,
+      text: ev.text ?? ev.description,
+      time: ev.time ?? ev.created_at,
+    })),
     locationsCount: c.locations_count ?? locations.length,
     departmentsCount: c.departments_count ?? departments.length,
     contactsCount: c.contacts_count ?? contacts.length,

@@ -12,10 +12,13 @@
  * any entity) conversations endpoint yet, so adding the sub-tab would only ever
  * render empty. Report this as a finding, not a customer-specific gap.
  *
- * Tijdlijn is fed from the SAME audit-trail endpoint the changelog-icon popover
- * already uses (GET /customers/{id}/activity) — Customer carries no separate
- * embedded `timeline` array the way Candidate does (candidates get theirs
- * straight from GET /candidates/{id}).
+ * K17 (batch 5): Tijdlijn now mirrors the candidate tab's own primary source —
+ * `c.timeline`, the event-typed embed on CustomerDetailResource (once CMBE
+ * ships it; see mapCustomer.ts). While the embed is absent (`undefined`, tracked
+ * distinctly from an empty-but-present array — see the Customer.timeline
+ * docblock) this tab tolerantly falls back to the SAME audit-trail endpoint the
+ * changelog-icon popover uses (GET /customers/{id}/activity), so nothing breaks
+ * before the backend field lands (§10).
  *
  * NO task trigger here (Danny 28-07: "+ nieuwe taak moet weg, hoort hier niet"). It sat
  * on this tab only because GET /tasks?customer={id} used to ignore its filter, so a real
@@ -36,7 +39,7 @@
  * "deepest level wins" rule — CustomerNote::levelContext()). A level only appears when the
  * customer actually HAS a record at it (no dead-end options, §3).
  */
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import type { ComponentType, ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import api, { unwrapList } from '@/lib/api'
@@ -100,8 +103,38 @@ export default function CustomerNotesTab({ customerId, customerName, customerIni
   const { writableTypes: customerNoteTypes, types: customerChipTypes } = useNoteTypes('customer')
   const { writableTypes: contactNoteTypes, types: contactChipTypes } = useNoteTypes('contact')
   const [subTab, setSubTab] = useState('notes')
-  const [timeline, setTimeline] = useState<TimelineEntry[]>([])
   const active = subTab
+
+  // K17: the embedded timeline is the PRIMARY source. `undefined` (embed absent,
+  // not "no events yet") is the tolerant fallback signal — see the type's own
+  // docblock and mapCustomer.ts.
+  const embeddedTimeline = c.timeline
+  const [fallbackTimeline, setFallbackTimeline] = useState<TimelineEntry[]>([])
+  const [timelineLoading, setTimelineLoading] = useState(false)
+  const [timelineError, setTimelineError] = useState(false)
+  // Bumped by the retry button to re-run the fallback fetch below without
+  // duplicating its body.
+  const [timelineRetryTick, setTimelineRetryTick] = useState(0)
+
+  // Fallback fetch — only ever runs when the embed is absent (see the effect's
+  // own guard). Four explicit states: loading while in flight, error on a
+  // rejected request, empty/success both resolve into `fallbackTimeline` (an
+  // empty array renders the shared NotesTab's own timelineEmpty copy — §3).
+  useEffect(() => {
+    if (active !== 'timeline' || !customerId || embeddedTimeline !== undefined) return
+    const ctrl = new AbortController()
+    setTimelineLoading(true); setTimelineError(false)
+    api.get(`/customers/${customerId}/activity`, { signal: ctrl.signal })
+      .then(r => setFallbackTimeline(((unwrapList(r).rows) as ActivityEntry[])
+        .map(ev => ({ time: ev.created_at, text: ev.description ?? ev.action ?? '' }))))
+      .catch(e => { if (!isAbortError(e)) setTimelineError(true) })
+      .finally(() => setTimelineLoading(false))
+    return () => ctrl.abort()
+  }, [active, customerId, embeddedTimeline, timelineRetryTick])
+
+  const timeline: TimelineEntry[] = embeddedTimeline !== undefined
+    ? embeddedTimeline.map(ev => ({ time: ev.time as string | undefined, text: ev.text as string | undefined }))
+    : fallbackTimeline
 
   // NOTES-LOC-DEPT-1: optionally file the next note against one of this customer's
   // own locations/departments/contacts (or leave it at "Klant", the default — no
@@ -185,16 +218,9 @@ export default function CustomerNotesTab({ customerId, customerName, customerIni
     onEditNote?.(notesWithChip[index]?.id as Id | undefined, payload)
   const handleDeleteNote = (index: number) => onDeleteNote?.(notesWithChip[index]?.id as Id | undefined)
 
-  // Fetch the activity feed lazily, only once the Tijdlijn sub-tab is opened.
-  useEffect(() => {
-    if (active !== 'timeline' || !customerId) return
-    const ctrl = new AbortController()
-    api.get(`/customers/${customerId}/activity`, { signal: ctrl.signal })
-      .then(r => setTimeline(((unwrapList(r).rows) as ActivityEntry[])
-        .map(ev => ({ time: ev.created_at, text: ev.description ?? ev.action ?? '' }))))
-      .catch(e => { if (!isAbortError(e)) setTimeline([]) })
-    return () => ctrl.abort()
-  }, [active, customerId])
+  // Manual retry for the fallback fetch above (embed-present path never errors
+  // here — the record is already loaded).
+  const retryTimeline = useCallback(() => setTimelineRetryTick(t => t + 1), [])
 
   // Shared NotesTab props — each sub-tab renders exactly one of its sections.
   const notesProps = {
@@ -217,6 +243,8 @@ export default function CustomerNotesTab({ customerId, customerName, customerIni
       // K15NOTES: the delete button's aria-label + confirm-dialog text (NotesTab requestDelete).
       deleteNote: t('notes.deleteNote'), deleteConfirm: t('notes.deleteConfirm'),
       notesEmpty: t('notes.notesEmpty'), timeline: t('notes.timeline'), timelineEmpty: t('notes.timelineEmpty'),
+      // K17: the fallback-fetch error row (embed-present path never sets this).
+      loadError: t('notes.timelineLoadError'), retry: t('common:error.retry'),
       notePlaceholder: () => t('notes.notePlaceholder'),
       // TAKEN-TOOLBAR/NOTES-SEARCH-1 (Danny 03-08): supplies the shared NotesTab's
       // search placeholder.
@@ -277,7 +305,16 @@ export default function CustomerNotesTab({ customerId, customerName, customerIni
           openTask: t('tasks.openTask'), searchPlaceholder: t('tasks.searchPlaceholder'),
         }} />
       )}
-      {active === 'timeline' && <NotesTab {...notesProps} showNotes={false} showConversations={false} />}
+      {/* K17: LOADING state only ever fires on the fallback path (the embed is
+          already loaded with the record) — an honest skeleton row, never a
+          blank tab (§3). ERROR/SUCCESS/EMPTY route through the shared NotesTab
+          itself (its own error+retry row, or timelineEmpty for zero events). */}
+      {active === 'timeline' && (
+        timelineLoading
+          ? <div aria-busy="true" style={{ fontSize: 12, color: 'var(--text-muted)', padding: '10px 2px' }}>{t('notes.timelineLoading')}</div>
+          : <NotesTab {...notesProps} showNotes={false} showConversations={false}
+              error={timelineError} onRetry={retryTimeline} />
+      )}
       {active === 'vacancySettings' && <VacancySettingsTab c={c} onSave={onSave} />}
 
     </div>

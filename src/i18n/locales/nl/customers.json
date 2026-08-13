@@ -570,7 +570,9 @@
       "department": "Afdeling",
       "contact": "Contactpersoon"
     },
-    "newNoteFor": "Nieuwe notitie voor {{name}}"
+    "newNoteFor": "Nieuwe notitie voor {{name}}",
+    "timelineLoading": "Tijdlijn laden…",
+    "timelineLoadError": "Tijdlijn kon niet worden geladen."
   },
   "bulk": {
     "selected": "{{count}} geselecteerd",
@@ -805,6 +807,8 @@
   },
   "popout": {
     "windowTitle": "Notities — {{name}}",
-    "loadError": "Deze klant kon niet worden geladen."
+    "loadError": "Deze klant kon niet worden geladen.",
+    "companyTextWindowTitle": "Bedrijfstekst — {{name}}",
+    "departmentTextWindowTitle": "Afdelingstekst — {{name}}"
   }
 }
