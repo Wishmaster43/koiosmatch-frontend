@@ -20,6 +20,7 @@
  */
 import { useCallback, useState } from 'react'
 import { sendChat } from './koiosApi'
+import { apiErrorKey } from '@/lib/extractApiError'
 import type { KoiosChatMessage, KoiosContextRef } from '@/types/koios'
 import './koiosTypes' // module augmentation: KoiosChatMessage.pendingAction, KoiosStep.refs
 
@@ -49,9 +50,12 @@ export function useKoiosChat() {
         pendingAction: data?.pending_action ?? null,
       }])
     } catch (e) {
-      // 403 = no module/permission → "no access"; anything else → calm retry notice.
-      const kind = (e as { response?: { status?: number } })?.response?.status === 403 ? 'forbidden' : 'error'
-      setMessages((prev) => [...prev, { role: 'assistant', kind }])
+      // A known backend error code (credit exhausted, outage) gets its own translated
+      // notice via apiErrorKey; 403 = no module/permission; anything else → generic retry.
+      const status = (e as { response?: { status?: number } })?.response?.status
+      const errorKey = apiErrorKey(e)
+      const kind = status === 403 ? 'forbidden' : errorKey ? 'knownError' : 'error'
+      setMessages((prev) => [...prev, { role: 'assistant', kind, errorKey: errorKey ?? undefined }])
     } finally {
       setLoading(false)
     }

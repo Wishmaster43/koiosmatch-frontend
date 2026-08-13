@@ -11,7 +11,10 @@
     "notConnected": "No conectado",
     "policy": "Política cargada",
     "loaded": "Cargada",
-    "notLoaded": "No cargada"
+    "notLoaded": "No cargada",
+    "live": "Comprobación en vivo",
+    "liveOk": "Funciona",
+    "liveBad": "Falla"
   },
   "models": {
     "title": "Modelos",

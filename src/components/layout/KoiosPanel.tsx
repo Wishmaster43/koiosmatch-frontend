@@ -37,6 +37,9 @@ function resolveMessage(msg: KoiosChatMessage, t: TFn) {
   if (msg.kind === 'welcome')   return { text: t('koios.welcome'),       notice: false }
   if (msg.kind === 'error')     return { text: t('koios.errorReply'),    notice: true }
   if (msg.kind === 'forbidden') return { text: t('koios.forbidden'),     notice: true }
+  // A known backend error code (credit exhausted, temporary outage) gets its own
+  // translated notice instead of the generic "couldn't reach Koios" line.
+  if (msg.kind === 'knownError') return { text: t(msg.errorKey ?? 'errorReply'), notice: true }
   if (msg.role === 'user')      return { text: msg.content,              notice: false }
   if (msg.stopReason === 'not_configured')
     return { text: msg.answer || t('koios.notConfigured'),               notice: true }
@@ -125,7 +128,9 @@ export default function KoiosPanel({ open, onClose, onNavigate }: { open?: boole
   // The toggle button still snaps between the two known presets — see the hook.
   const { width, minWidth, maxWidth, isExpanded, isDragging, toggle: toggleExpanded, startDrag, onHandleKeyDown } = useKoiosPanelWidth()
   // Connection status (optimistic until loaded; only `false` flips to "offline").
-  const connected = settings?.status?.claude_configured !== false
+  // `api_ok` is the backend's live probe — it also catches credit exhaustion, not
+  // just a missing key, so a tenant with an empty balance no longer shows "online".
+  const connected = settings?.status?.claude_configured !== false && settings?.status?.api_ok !== false
   const [input,       setInput]       = useState('')
   const [focused,     setFocused]     = useState(false)
   const [showMention, setShowMention] = useState(false)

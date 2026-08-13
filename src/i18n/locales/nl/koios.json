@@ -11,7 +11,10 @@
     "notConnected": "Niet gekoppeld",
     "policy": "Policy geladen",
     "loaded": "Geladen",
-    "notLoaded": "Niet geladen"
+    "notLoaded": "Niet geladen",
+    "live": "Live-check",
+    "liveOk": "Werkt",
+    "liveBad": "Faalt"
   },
   "models": {
     "title": "Modellen",

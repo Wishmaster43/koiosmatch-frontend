@@ -22,7 +22,8 @@ export interface KoiosUsageData {
 export interface KoiosChatMessage {
   role: string
   content?: string
-  kind?: string              // welcome | error | forbidden
+  kind?: string              // welcome | error | forbidden | knownError
+  errorKey?: string          // i18n key (common:errors.*) when kind === 'knownError'
   answer?: string
   steps?: KoiosStep[]
   usage?: KoiosUsageData | null
@@ -36,7 +37,7 @@ export interface KoiosSettings {
   models?: { active?: string; selectable?: string[] }
   pricing?: unknown
   currency?: string
-  status?: { claude_configured?: boolean; [k: string]: unknown }
+  status?: { claude_configured?: boolean; policy_loaded?: boolean; api_ok?: boolean; api_error?: string | null; [k: string]: unknown }
   [k: string]: unknown
 }
 

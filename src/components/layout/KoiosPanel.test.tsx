@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { render, screen } from '@testing-library/react'
+import { render, screen, fireEvent } from '@testing-library/react'
 import KoiosPanel from './KoiosPanel'
+import { sendChat } from './koios/koiosApi'
 
 // jsdom has no scrollIntoView implementation; KoiosPanel calls it to keep the
 // latest message in view on every messages/loading change.
@@ -58,5 +59,38 @@ describe('KoiosPanel — resizable width', () => {
     const { container } = render(<KoiosPanel open onClose={() => {}} onNavigate={() => {}} />)
     await screen.findByText('common:koios.radar.empty')
     expect((container.firstChild as HTMLElement).style.width).toBe('480px')
+  })
+})
+
+// PLAN-KANDIDATEN batch 2: a 402/koios_credit_exhausted reply must show the
+// translated credit notice, not the generic "couldn't reach Koios" line.
+describe('KoiosPanel — known backend error codes', () => {
+  const submitMessage = async (text: string) => {
+    render(<KoiosPanel open onClose={() => {}} onNavigate={() => {}} />)
+    await screen.findByText('common:koios.radar.empty')
+    const textarea = screen.getByPlaceholderText('koios.taskPlaceholder')
+    fireEvent.change(textarea, { target: { value: text } })
+    fireEvent.click(screen.getByRole('button', { name: 'koios.taskPlaceholder' }))
+  }
+
+  it('shows the translated credit-exhausted notice on a 402 koios_credit_exhausted error', async () => {
+    vi.mocked(sendChat).mockRejectedValueOnce({
+      response: { status: 402, data: { code: 'koios_credit_exhausted' } },
+    })
+    await submitMessage('hello')
+    expect(await screen.findByText('errors.koiosCreditExhausted')).toBeInTheDocument()
+    expect(screen.queryByText('koios.errorReply')).toBeNull()
+  })
+
+  it('still shows the generic forbidden notice on a 403', async () => {
+    vi.mocked(sendChat).mockRejectedValueOnce({ response: { status: 403, data: {} } })
+    await submitMessage('hello')
+    expect(await screen.findByText('koios.forbidden')).toBeInTheDocument()
+  })
+
+  it('falls back to the generic error notice for an unknown failure', async () => {
+    vi.mocked(sendChat).mockRejectedValueOnce(new Error('network down'))
+    await submitMessage('hello')
+    expect(await screen.findByText('koios.errorReply')).toBeInTheDocument()
   })
 })

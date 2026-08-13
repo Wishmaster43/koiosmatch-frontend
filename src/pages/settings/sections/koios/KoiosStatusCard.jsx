@@ -1,7 +1,11 @@
 /**
- * KoiosStatusCard — two connection indicators: the Claude API connection
- * (claude_configured) and whether the policy is loaded (policy_loaded).
- * State uses icon + colour + text (never colour alone) for accessibility.
+ * KoiosStatusCard — three connection indicators: the Claude API key
+ * (claude_configured), whether the policy is loaded (policy_loaded), and a
+ * live probe (api_ok) — a real call proving the connection actually works,
+ * which also surfaces credit exhaustion (a configured key with an empty
+ * balance is not "connected"). State uses icon + colour + text (never colour
+ * alone) for accessibility. `api_error` is a raw, untranslated backend string
+ * (§5) — never rendered; only its ok/not-ok boolean drives the UI.
  */
 import { CheckCircle2, XCircle } from 'lucide-react'
 
@@ -31,6 +35,12 @@ export default function KoiosStatusCard({ status, t }) {
         okText={t('status.connected')} badText={t('status.notConnected')} />
       <Indicator label={t('status.policy')} ok={s.policy_loaded === true}
         okText={t('status.loaded')} badText={t('status.notLoaded')} />
+      {/* Only shown once the backend has actually run the probe (api_ok present) —
+          an unset/undefined field means "not yet checked", not "failing". */}
+      {typeof s.api_ok === 'boolean' && (
+        <Indicator label={t('status.live')} ok={s.api_ok === true}
+          okText={t('status.liveOk')} badText={t('status.liveBad')} />
+      )}
     </div>
   )
 }

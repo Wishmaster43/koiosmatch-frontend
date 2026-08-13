@@ -11,7 +11,10 @@
     "notConnected": "Not connected",
     "policy": "Policy loaded",
     "loaded": "Loaded",
-    "notLoaded": "Not loaded"
+    "notLoaded": "Not loaded",
+    "live": "Live check",
+    "liveOk": "Working",
+    "liveBad": "Failing"
   },
   "models": {
     "title": "Models",
