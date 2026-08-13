@@ -179,6 +179,11 @@ export interface CustomerNote {
   departmentId: Id | null
   departmentName: string
   level?: string
+  // K15NOTES: creator's user id (null = system/legacy note, not self-claimable) +
+  // last editor's name — mirrors CandidateNote's author_id/updated_by so the shared
+  // NotesTab can gate the edit/delete buttons (own note or customers.notes.manage_all).
+  author_id?: Id | null
+  updated_by?: string | null
   // Loose backend note shape — keeps it compatible with the shared NotesTab item.
   [k: string]: unknown
 }

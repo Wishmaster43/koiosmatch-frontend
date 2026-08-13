@@ -9,13 +9,15 @@ import { usePopoutCustomerNotes } from './usePopoutCustomerNotes'
 
 vi.mock('@/lib/api', async () => {
   const actual = await vi.importActual<typeof import('@/lib/api')>('@/lib/api')
-  return { ...actual, default: { get: vi.fn(), post: vi.fn() } }
+  return { ...actual, default: { get: vi.fn(), post: vi.fn(), patch: vi.fn(), delete: vi.fn() } }
 })
 vi.mock('@/lib/notify', () => ({ notifyError: vi.fn() }))
 import api from '@/lib/api'
 import { notifyError } from '@/lib/notify'
 const apiGet = api.get as unknown as ReturnType<typeof vi.fn>
 const apiPost = api.post as unknown as ReturnType<typeof vi.fn>
+const apiPatch = api.patch as unknown as ReturnType<typeof vi.fn>
+const apiDelete = api.delete as unknown as ReturnType<typeof vi.fn>
 
 describe('usePopoutCustomerNotes', () => {
   beforeEach(() => vi.clearAllMocks())
@@ -56,5 +58,62 @@ describe('usePopoutCustomerNotes', () => {
     expect(result.current.notes).toHaveLength(1)
     await waitFor(() => expect(result.current.notes).toHaveLength(0))
     expect(notifyError).toHaveBeenCalledTimes(1)
+  })
+})
+
+/**
+ * K15NOTES — the popout window's edit/delete now exist alongside add. Asserts the
+ * exact PATCH/DELETE route + body, index-based lookup, and revert-on-failure.
+ */
+describe('usePopoutCustomerNotes · editNote/deleteNote (K15NOTES)', () => {
+  beforeEach(() => vi.clearAllMocks())
+
+  it('PATCHes the exact route + body for the note at that index', async () => {
+    apiGet.mockResolvedValue({ data: { data: [{ id: 'n1', type: 'general', body: 'Origineel', created_at: '2026-08-01T10:00:00Z' }] } })
+    apiPatch.mockResolvedValue({ data: { data: {} } })
+    const { result } = renderHook(() => usePopoutCustomerNotes('cust-1'))
+    await waitFor(() => expect(result.current.notes).toHaveLength(1))
+
+    act(() => { result.current.editNote(0, { type: 'general', title: '', body: 'Bijgewerkt' }) })
+
+    expect(apiPatch).toHaveBeenCalledWith('/customers/cust-1/notes/n1', { type: 'general', text: 'Bijgewerkt', language: undefined })
+    expect(result.current.notes[0]).toMatchObject({ text: 'Bijgewerkt' })
+    await waitFor(() => expect(apiGet).toHaveBeenCalledTimes(2)) // the post-edit reload
+  })
+
+  it('reverts the optimistic edit when the PATCH fails', async () => {
+    apiGet.mockResolvedValue({ data: { data: [{ id: 'n1', type: 'general', body: 'Origineel', created_at: '2026-08-01T10:00:00Z' }] } })
+    apiPatch.mockRejectedValue(new Error('network'))
+    const { result } = renderHook(() => usePopoutCustomerNotes('cust-1'))
+    await waitFor(() => expect(result.current.notes).toHaveLength(1))
+
+    act(() => { result.current.editNote(0, { type: 'general', title: '', body: 'Bijgewerkt' }) })
+    await waitFor(() => expect(notifyError).toHaveBeenCalled())
+
+    expect(result.current.notes[0]).toMatchObject({ text: 'Origineel' })
+  })
+
+  it('DELETEs the exact route for the note at that index', async () => {
+    apiGet.mockResolvedValue({ data: { data: [{ id: 'n1', type: 'general', body: 'Weg ermee', created_at: '2026-08-01T10:00:00Z' }] } })
+    apiDelete.mockResolvedValue({})
+    const { result } = renderHook(() => usePopoutCustomerNotes('cust-1'))
+    await waitFor(() => expect(result.current.notes).toHaveLength(1))
+
+    act(() => { result.current.deleteNote(0) })
+
+    expect(apiDelete).toHaveBeenCalledWith('/customers/cust-1/notes/n1')
+    expect(result.current.notes).toHaveLength(0)
+  })
+
+  it('reverts the optimistic delete when the DELETE fails', async () => {
+    apiGet.mockResolvedValue({ data: { data: [{ id: 'n1', type: 'general', body: 'Blijft staan', created_at: '2026-08-01T10:00:00Z' }] } })
+    apiDelete.mockRejectedValue(new Error('network'))
+    const { result } = renderHook(() => usePopoutCustomerNotes('cust-1'))
+    await waitFor(() => expect(result.current.notes).toHaveLength(1))
+
+    act(() => { result.current.deleteNote(0) })
+    await waitFor(() => expect(notifyError).toHaveBeenCalled())
+
+    expect(result.current.notes).toHaveLength(1)
   })
 })

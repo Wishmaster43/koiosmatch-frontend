@@ -18,6 +18,9 @@ export interface ApiCustomerNoteRow {
   customer_location_id?: Id | null; location_name?: string | null
   customer_department_id?: Id | null; department_name?: string | null
   level?: string
+  // K15NOTES: present on CustomerNoteResource; the embedded CustomerDetailResource
+  // list does not send these yet (BE gap — filed, not blocking this FE wiring).
+  author_id?: Id | null; updated_by?: string | null
 }
 
 /** mapCustomerNoteRow — raw API note row → flat UI shape (CONTACT-NOTITIES-1 + NOTES-LOC-DEPT-1). */
@@ -28,6 +31,9 @@ export function mapCustomerNoteRow(n: ApiCustomerNoteRow = {}): CustomerNote {
     locationId: n.customer_location_id ?? null, locationName: n.location_name ?? '',
     departmentId: n.customer_department_id ?? null, departmentName: n.department_name ?? '',
     level: n.level ?? '',
+    // K15NOTES: pass through the ownership/provenance fields (CustomerNoteResource /
+    // CustomerDetailResource) so the shared NotesTab can gate edit/delete per note.
+    author_id: n.author_id ?? null, updated_by: n.updated_by ?? null,
   }
 }
 

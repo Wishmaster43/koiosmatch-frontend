@@ -91,6 +91,10 @@ interface CustomerDrawerProps {
   onToggleExpand?: () => void
   onUpdate?: (id: Id | undefined, patch: Record<string, unknown>) => void
   onAddNote?: (id: Id | undefined, payload: NotePayload) => void
+  // K15NOTES: edit/delete a single existing note — mirrors onAddNote's (id, payload)
+  // shape, plus the note's own id so the host can resolve which note changed.
+  onEditNote?: (id: Id | undefined, noteId: Id | undefined, payload: NotePayload) => void
+  onDeleteNote?: (id: Id | undefined, noteId: Id | undefined) => void
   users?: DrawerUser[]
   statuses?: LookupOption[]
   // SUB-STATUS-1: the three sub-entity status lookups (one API call, lifted from
@@ -104,7 +108,7 @@ interface CustomerDrawerProps {
 }
 
 export default function CustomerDrawer({
-  customer: c, onClose, expanded, onToggleExpand, onUpdate, onAddNote,
+  customer: c, onClose, expanded, onToggleExpand, onUpdate, onAddNote, onEditNote, onDeleteNote,
   users = [], statuses = [], locationStatuses = [], departmentStatuses = [], contactStatuses = [], initialTab,
 }: CustomerDrawerProps) {
   const { t } = useTranslation('customers')
@@ -318,6 +322,8 @@ export default function CustomerDrawer({
           authorInitials={authorInitials}
           notes={c.notes ?? []}
           onAddNote={payload => onAddNote?.(c.id, payload)}
+          onEditNote={(noteId, payload) => onEditNote?.(c.id, noteId, payload)}
+          onDeleteNote={noteId => onDeleteNote?.(c.id, noteId)}
           c={c} onSave={v => onUpdate?.(c.id, v)}
         />
       )

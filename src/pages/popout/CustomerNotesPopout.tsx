@@ -41,7 +41,8 @@ function linkChip(label: string) {
 export default function CustomerNotesPopout({ id }: { id: string | undefined }) {
   const { t } = useTranslation('customers')
   const { customer, loading, error, reload } = useCustomerLite(id)
-  const { notes, addNote } = usePopoutCustomerNotes(id)
+  // K15NOTES: edit/delete now exist alongside add — mirrors CandidateNotesPopout's wiring.
+  const { notes, addNote, editNote, deleteNote } = usePopoutCustomerNotes(id)
   // Fallback avatar for a freshly-added note before the server's real author comes
   // back — the SIGNED-IN user's initials, exactly like CustomerDrawer's own
   // `authorInitials` (never the customer's own initials — that would misattribute
@@ -75,11 +76,14 @@ export default function CustomerNotesPopout({ id }: { id: string | undefined }) 
   })
 
   const notesProps = {
-    notes: notesWithChip, onAddNote: addNote, noteTypes: customerNoteTypes, chipTypes,
+    notes: notesWithChip, onAddNote: addNote, onEditNote: editNote, onDeleteNote: deleteNote,
+    managePermission: 'customers.notes.manage_all',
+    noteTypes: customerNoteTypes, chipTypes,
     authorInitials,
     labels: {
       notes: '', newNote: t('notes.newNote'), type: t('notes.type'),
       save: t('notes.save'), cancel: t('notes.cancel'), edit: t('notes.edit'),
+      deleteNote: t('notes.deleteNote'), deleteConfirm: t('notes.deleteConfirm'),
       notesEmpty: t('notes.notesEmpty'),
       notePlaceholder: () => t('notes.notePlaceholder'),
       searchPlaceholder: t('notes.searchPlaceholder'),

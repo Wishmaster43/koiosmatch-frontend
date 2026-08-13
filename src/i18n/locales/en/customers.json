@@ -552,6 +552,8 @@
     "save": "Save",
     "cancel": "Cancel",
     "edit": "Edit",
+    "deleteNote": "Delete note",
+    "deleteConfirm": "Delete this note?",
     "notesEmpty": "No notes yet.",
     "notePlaceholder": "Note title",
     "timeline": "Timeline",

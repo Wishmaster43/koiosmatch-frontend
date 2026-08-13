@@ -552,6 +552,8 @@
     "save": "Enregistrer",
     "cancel": "Annuler",
     "edit": "Modifier",
+    "deleteNote": "Supprimer la note",
+    "deleteConfirm": "Supprimer cette note ?",
     "notesEmpty": "Aucune note pour le moment.",
     "notePlaceholder": "Titre de la note",
     "timeline": "Chronologie",

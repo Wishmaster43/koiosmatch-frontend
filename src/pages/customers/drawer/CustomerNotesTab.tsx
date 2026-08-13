@@ -80,13 +80,17 @@ interface Props {
     type: string; title: string; body: string; language?: string
     customer_contact_id?: Id; customer_location_id?: Id; customer_department_id?: Id
   }) => void
+  // K15NOTES: edit/delete a single existing note — the host (CustomerDrawer)
+  // resolves the customer id, so this tab only needs the note's own id + payload.
+  onEditNote?: (noteId: Id | undefined, payload: { type: string; title: string; body: string; language?: string }) => void
+  onDeleteNote?: (noteId: Id | undefined) => void
   // The record itself + its save path, for the Vacature-zichtbaarheid sub-tab (it edits
   // three customer fields through the drawer's own optimistic PATCH).
   c: Customer
   onSave?: (values: Record<string, unknown>) => void
 }
 
-export default function CustomerNotesTab({ customerId, customerName, customerInitials, authorInitials, notes, onAddNote, c, onSave }: Props) {
+export default function CustomerNotesTab({ customerId, customerName, customerInitials, authorInitials, notes, onAddNote, onEditNote, onDeleteNote, c, onSave }: Props) {
   const { t } = useTranslation('customers')
   // Note categories from the tenant lookup (NOTE-TYPES-2/3). CustomerController::
   // addNote validates `type` against entity=contact when customer_contact_id is
@@ -174,6 +178,13 @@ export default function CustomerNotesTab({ customerId, customerName, customerIni
     return linkedName ? { ...n, title: linkChip(linkedName) } : n
   })
 
+  // K15NOTES: NotesTab hands back the note's INDEX in the array it was given
+  // (notesWithChip above) — resolve that to the note's own id before calling up,
+  // mirroring useCandidateNotes' index→id lookup.
+  const handleEditNote = (index: number, payload: { type: string; title: string; body: string; language?: string }) =>
+    onEditNote?.(notesWithChip[index]?.id as Id | undefined, payload)
+  const handleDeleteNote = (index: number) => onDeleteNote?.(notesWithChip[index]?.id as Id | undefined)
+
   // Fetch the activity feed lazily, only once the Tijdlijn sub-tab is opened.
   useEffect(() => {
     if (active !== 'timeline' || !customerId) return
@@ -187,7 +198,13 @@ export default function CustomerNotesTab({ customerId, customerName, customerIni
 
   // Shared NotesTab props — each sub-tab renders exactly one of its sections.
   const notesProps = {
-    notes: notesWithChip, onAddNote: handleAddNote, timeline, noteTypes, chipTypes,
+    notes: notesWithChip, onAddNote: handleAddNote,
+    // K15NOTES: only offer edit/delete once the host actually wires them (mirrors
+    // the candidate tab) — NotesTab itself re-gates per note via author_id/managePermission.
+    onEditNote: onEditNote ? handleEditNote : undefined,
+    onDeleteNote: onDeleteNote ? handleDeleteNote : undefined,
+    managePermission: 'customers.notes.manage_all',
+    timeline, noteTypes, chipTypes,
     authorInitials, timelineName: customerName, timelineInitials: customerInitials,
 
     labels: {
@@ -197,6 +214,8 @@ export default function CustomerNotesTab({ customerId, customerName, customerIni
       // one — NoteComposer itself is untouched (parallel-lane WIP, see file docblock).
       notes: t('notes.notes'), newNote: customerName ? t('notes.newNoteFor', { name: customerName }) : t('notes.newNote'), type: t('notes.type'),
       save: t('notes.save'), cancel: t('notes.cancel'), edit: t('notes.edit'),
+      // K15NOTES: the delete button's aria-label + confirm-dialog text (NotesTab requestDelete).
+      deleteNote: t('notes.deleteNote'), deleteConfirm: t('notes.deleteConfirm'),
       notesEmpty: t('notes.notesEmpty'), timeline: t('notes.timeline'), timelineEmpty: t('notes.timelineEmpty'),
       notePlaceholder: () => t('notes.notePlaceholder'),
       // TAKEN-TOOLBAR/NOTES-SEARCH-1 (Danny 03-08): supplies the shared NotesTab's

@@ -552,6 +552,8 @@
     "save": "Opslaan",
     "cancel": "Annuleren",
     "edit": "Bewerken",
+    "deleteNote": "Notitie verwijderen",
+    "deleteConfirm": "Deze notitie verwijderen?",
     "notesEmpty": "Nog geen notities.",
     "notePlaceholder": "Titel van de notitie",
     "timeline": "Tijdlijn",

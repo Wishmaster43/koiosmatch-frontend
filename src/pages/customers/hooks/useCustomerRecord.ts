@@ -247,8 +247,37 @@ export function useCustomerRecord({ setCustomers, setTotal, users, t }: Args) {
       })
   }
 
+  // K15NOTES: edit a single note (optimistic + PATCH /customers/{id}/notes/{note}),
+  // reverting on failure — mirrors addNote's revert-by-reference and useCandidateNotes'
+  // editNote. `noteId` is the note's own id (NotesTab passes the full note back to the
+  // host, which resolves its id off the current detail).
+  const editNote = (id: Id | undefined, noteId: Id | undefined, payload: NotePayload) => {
+    const snapshot = detail
+    setDetail(prev => (prev && prev.id === id
+      ? ({ ...prev, notes: (prev.notes ?? []).map(n => (n.id === noteId ? { ...n, type: payload.type, title: payload.title, text: payload.body } : n)) } as Customer)
+      : prev))
+    api.patch(`/customers/${id}/notes/${noteId}`, { type: payload.type, text: payload.body, language: payload.language })
+      .catch(err => {
+        setDetail(prev => (prev && prev.id === id ? snapshot : prev))
+        notifyError(extractApiError(err, t('common:actionFailed')))
+      })
+  }
+
+  // K15NOTES: delete a single note (optimistic remove + DELETE), reverting on failure.
+  const deleteNote = (id: Id | undefined, noteId: Id | undefined) => {
+    const snapshot = detail
+    setDetail(prev => (prev && prev.id === id
+      ? ({ ...prev, notes: (prev.notes ?? []).filter(n => n.id !== noteId) } as Customer)
+      : prev))
+    api.delete(`/customers/${id}/notes/${noteId}`)
+      .catch(err => {
+        setDetail(prev => (prev && prev.id === id ? snapshot : prev))
+        notifyError(extractApiError(err, t('common:actionFailed')))
+      })
+  }
+
   return {
     selected, detail, drawerExpanded, setDrawerExpanded, drawerTab,
-    closeDrawer, selectCustomer, updateCustomer, handleCreate, addNote,
+    closeDrawer, selectCustomer, updateCustomer, handleCreate, addNote, editNote, deleteNote,
   }
 }

@@ -552,6 +552,8 @@
     "save": "Speichern",
     "cancel": "Abbrechen",
     "edit": "Bearbeiten",
+    "deleteNote": "Notiz löschen",
+    "deleteConfirm": "Diese Notiz löschen?",
     "notesEmpty": "Noch keine Notizen.",
     "notePlaceholder": "Titel der Notiz",
     "timeline": "Verlauf",

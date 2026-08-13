@@ -19,8 +19,9 @@ import { extractApiError } from '@/lib/extractApiError'
 import { mapCustomerNoteRow, type ApiCustomerNoteRow } from '@/pages/customers/data/mapCustomer'
 import type { CustomerNote } from '@/types/customer'
 
-// NotesTab hands back the editor payload on save (add only — the API has no
-// PATCH for a single customer note, mirrors CustomerNotesTab's own onAddNote-only wiring).
+// NotesTab hands back the editor payload on save (add/edit share this shape).
+// K15NOTES: PATCH/DELETE /customers/{id}/notes/{note} now exist — this hook mirrors
+// useCandidateNotes' index-based edit/delete instead of staying add-only.
 interface NotePayload { type: string; title: string; body: string; language?: string }
 
 export function usePopoutCustomerNotes(customerId: string | undefined) {
@@ -56,5 +57,35 @@ export function usePopoutCustomerNotes(customerId: string | undefined) {
       })
   }, [customerId, load, t])
 
-  return { notes, addNote }
+  // K15NOTES: edit — index into the current `notes` array, optimistic + PATCH + reload
+  // (mirrors useCandidateNotes.editNote). Reverts to the pre-edit snapshot on failure.
+  const editNote = useCallback((index: number, payload: NotePayload) => {
+    if (!customerId) return
+    const target = notes[index]
+    if (!target) return
+    const snapshot = notes
+    setNotes(prev => prev.map((n, i) => (i === index ? { ...n, type: payload.type, text: payload.body } : n)))
+    api.patch(`/customers/${customerId}/notes/${target.id}`, { type: payload.type, text: payload.body, language: payload.language })
+      .then(() => load())
+      .catch(err => {
+        setNotes(snapshot)
+        notifyError(extractApiError(err, t('common:actionFailed')))
+      })
+  }, [customerId, notes, load, t])
+
+  // K15NOTES: delete — optimistic remove with revert (mirrors useCandidateNotes.deleteNote).
+  const deleteNote = useCallback((index: number) => {
+    if (!customerId) return
+    const target = notes[index]
+    if (!target) return
+    const snapshot = notes
+    setNotes(prev => prev.filter((_, i) => i !== index))
+    api.delete(`/customers/${customerId}/notes/${target.id}`)
+      .catch(err => {
+        setNotes(snapshot)
+        notifyError(extractApiError(err, t('common:actionFailed')))
+      })
+  }, [customerId, notes, t])
+
+  return { notes, addNote, editNote, deleteNote }
 }

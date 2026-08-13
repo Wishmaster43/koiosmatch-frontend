@@ -16,7 +16,7 @@ import type { Customer } from '@/types/customer'
 
 vi.mock('@/lib/api', async () => {
   const actual = await vi.importActual<typeof import('@/lib/api')>('@/lib/api')
-  return { ...actual, default: { get: vi.fn(), patch: vi.fn(), post: vi.fn() } }
+  return { ...actual, default: { get: vi.fn(), patch: vi.fn(), post: vi.fn(), delete: vi.fn() } }
 })
 vi.mock('@/lib/notify', () => ({ notifyError: vi.fn(), notifySuccess: vi.fn() }))
 
@@ -305,5 +305,72 @@ describe('useCustomerRecord · addNote (NOTES-LOC-DEPT-1)', () => {
 
     const optimisticNote = r.result.current.record.detail?.notes?.[0]
     expect(optimisticNote).toMatchObject({ locationId: 'loc-1', locationName: '', departmentId: null, contactId: null })
+  })
+})
+
+/**
+ * K15NOTES — edit/delete a single customer note. Asserts the REQUEST (§13): the
+ * exact PATCH/DELETE route + body, the optimistic write, and revert-on-failure.
+ */
+describe('useCustomerRecord · editNote/deleteNote (K15NOTES)', () => {
+  const withNote = customer({
+    id: 1,
+    notes: [{ id: 'n-1', type: 'general', title: '', text: 'Origineel', ago: '', contactId: null, contactName: '', locationId: null, locationName: '', departmentId: null, departmentName: '' }],
+  })
+
+  it('PATCHes the exact route + body and updates the note optimistically', async () => {
+    mockedGet.mockResolvedValue({ data: withNote })
+    mockedPatch.mockResolvedValue({})
+    const r = harness([withNote])
+    act(() => { r.result.current.record.selectCustomer(withNote) })
+    await waitFor(() => expect(r.result.current.record.detail?.id).toBe(1))
+
+    act(() => {
+      r.result.current.record.editNote(1, 'n-1', { type: 'general', title: '', body: 'Bijgewerkt' })
+    })
+
+    expect(mockedPatch).toHaveBeenCalledWith('/customers/1/notes/n-1', { type: 'general', text: 'Bijgewerkt', language: undefined })
+    expect(r.result.current.record.detail?.notes?.[0]).toMatchObject({ id: 'n-1', text: 'Bijgewerkt' })
+  })
+
+  it('reverts the optimistic edit when the PATCH fails', async () => {
+    mockedGet.mockResolvedValue({ data: withNote })
+    mockedPatch.mockRejectedValue({ response: { status: 500 } })
+    const r = harness([withNote])
+    act(() => { r.result.current.record.selectCustomer(withNote) })
+    await waitFor(() => expect(r.result.current.record.detail?.id).toBe(1))
+
+    act(() => {
+      r.result.current.record.editNote(1, 'n-1', { type: 'general', title: '', body: 'Bijgewerkt' })
+    })
+    await waitFor(() => expect(notifyError).toHaveBeenCalled())
+
+    expect(r.result.current.record.detail?.notes?.[0]).toMatchObject({ id: 'n-1', text: 'Origineel' })
+  })
+
+  it('DELETEs the exact route and removes the note optimistically', async () => {
+    mockedGet.mockResolvedValue({ data: withNote })
+    vi.mocked(api.delete).mockResolvedValue({})
+    const r = harness([withNote])
+    act(() => { r.result.current.record.selectCustomer(withNote) })
+    await waitFor(() => expect(r.result.current.record.detail?.id).toBe(1))
+
+    act(() => { r.result.current.record.deleteNote(1, 'n-1') })
+
+    expect(vi.mocked(api.delete)).toHaveBeenCalledWith('/customers/1/notes/n-1')
+    expect(r.result.current.record.detail?.notes ?? []).toHaveLength(0)
+  })
+
+  it('reverts the optimistic delete when the DELETE fails', async () => {
+    mockedGet.mockResolvedValue({ data: withNote })
+    vi.mocked(api.delete).mockRejectedValue({ response: { status: 500 } })
+    const r = harness([withNote])
+    act(() => { r.result.current.record.selectCustomer(withNote) })
+    await waitFor(() => expect(r.result.current.record.detail?.id).toBe(1))
+
+    act(() => { r.result.current.record.deleteNote(1, 'n-1') })
+    await waitFor(() => expect(notifyError).toHaveBeenCalled())
+
+    expect(r.result.current.record.detail?.notes ?? []).toHaveLength(1)
   })
 })

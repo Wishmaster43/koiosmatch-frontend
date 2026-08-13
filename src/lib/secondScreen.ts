@@ -78,16 +78,25 @@ export const noteDraftTopic = (entity: PopoutEntity, id: string | number) => `ko
  * NOTITIE-POPOUT-EDIT-1 (Danny 10-08: "icon moet onder change en prullenbakje
  * komen … en direct edit pop-out"): which entities' popout WINDOW can actually
  * SAVE an edit to an existing note. Measured against the running API on 10-08
- * (routes/api/tenant/*.php + the generated spec):
+ * (routes/api/tenant/*.php + the generated spec), re-verified 13-08 (K15NOTES):
  *   candidate → PATCH /candidates/{id}/notes/{note} exists AND CandidateNotesPopout
  *               wires onEditNote, so a handed-over note is patched in place.
- *   customer  → GET/POST /customers/{id}/notes only — no per-note PATCH at all.
+ *   customer  → PATCH/DELETE /customers/{id}/notes/{note} now exist (K15NOTES) and
+ *               the customer DRAWER + the whole-thread CustomerNotesPopout both
+ *               wire onEditNote/onDeleteNote (real edit works there today). This
+ *               set gates a DIFFERENT surface though — the per-note URL window
+ *               (NoteEditPopout.tsx, opened via openNoteEditPopout below) — which
+ *               is still hardcoded to useCandidateLite/useCandidateNotes; adding
+ *               'customer' here without also generalising THAT page would show a
+ *               pop-out icon that opens a window trying to load a candidate by a
+ *               customer id (broken, not merely a duplicate-note risk). Widen this
+ *               set ONLY once NoteEditPopout.tsx itself dispatches by entity.
  *   vacancy   → GET/POST + DELETE /vacancies/{id}/notes/{note} — still no PATCH.
  * Handing an EXISTING note to a window that can only ADD would persist it as a
  * SECOND note: a duplicate the recruiter cannot tell apart from the original and
- * that no undo removes. So those two surfaces render no per-note pop-out button
- * at all (§3, no fake affordance). Widen this set ONLY together with that
- * window's real edit wiring.
+ * that no undo removes. So customer/vacancy still render no per-note pop-out-to-
+ * new-window button (§3, no fake affordance) — only the inline drawer edit and
+ * the whole-thread popout's edit are live for customer today.
  */
 export const NOTE_EDIT_POPOUT_ENTITIES: ReadonlySet<PopoutEntity> = new Set<PopoutEntity>(['candidate'])
 

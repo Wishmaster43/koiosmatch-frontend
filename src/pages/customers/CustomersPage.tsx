@@ -151,7 +151,7 @@ export default function CustomersPage({ intent }: { intent?: unknown } = {}) {
     useCustomersData({ filterParams, page, pageSize, t })
   const {
     selected, detail, drawerExpanded, setDrawerExpanded, drawerTab,
-    closeDrawer, selectCustomer, updateCustomer, handleCreate, addNote,
+    closeDrawer, selectCustomer, updateCustomer, handleCreate, addNote, editNote, deleteNote,
   } = useCustomerRecord({ setCustomers, setTotal, users, t })
   const { toggleRow, toggleAll, bulkSetOwner, bulkSetStatus, bulkAddTag, bulkRemoveTag, bulkAddNote, bulkArchive, bulkGeocode, bulkCoupleBackoffice, selectedTags, dialog: bulkConfirmDialog } =
     useCustomerBulkActions({ customers, setCustomers, setTotal, selectedIds, setSelectedIds, notify, statusMeta, t })
@@ -402,6 +402,8 @@ export default function CustomersPage({ intent }: { intent?: unknown } = {}) {
           onToggleExpand={() => setDrawerExpanded(v => !v)}
           onUpdate={updateCustomer}
           onAddNote={addNote}
+          onEditNote={editNote}
+          onDeleteNote={deleteNote}
           users={users}
           statuses={statuses}
           locationStatuses={locationStatuses}

@@ -609,6 +609,11 @@ export const NAV_GROUPS = [
       { id: 'notif_sollicitaties', icon: Bell, render: () => <NotificationsSettings context="sollicitaties" /> },
       { id: 'notif_vacatures', icon: Bell, render: () => <NotificationsSettings context="vacatures" /> },
       { id: 'notif_kandidaten', icon: Bell, render: () => <NotificationsSettings context="kandidaten" /> },
+      // K22 (13-08): all five customer.* producers now fire as scheduled commands
+      // (never draft-only), so 'klanten' gets the same real settings row its
+      // siblings have — see NotificationsSettings.jsx's CONTEXTS_WITHOUT_EMITTER
+      // docblock for why 'vacatures'/'facturering' stay excluded from that set.
+      { id: 'notif_klanten', icon: Bell, render: () => <NotificationsSettings context="klanten" /> },
       { id: 'notif_matches', icon: Bell, render: () => <NotificationsSettings context="matches" /> },
       { id: 'notif_taken', icon: Bell, render: () => <NotificationsSettings context="taken" /> },
       { id: 'notif_facturering', icon: Bell, render: () => <NotificationsSettings context="facturering" /> },
