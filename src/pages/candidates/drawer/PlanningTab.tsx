@@ -44,7 +44,10 @@ export default function PlanningTab({ c }: { c: Candidate }) {
   // Vocabularies from the tenant lookups (no hardcoded role/pool/licence lists).
   const { functions: ALL_FUNCTIONS } = useFunctions() as { functions: string[] }
   const { pools: ALL_POOLS } = usePools()
-  const { licenses: DRIVING_LICENCES } = useDriverLicenses() as { licenses: string[] }
+  // LOOKUP-ICON-1: useDriverLicenses now returns full {value,label,icon} objects
+  // (was string[]) — this read-only planning list only needs the names.
+  const { licenses: driverLicenseItems } = useDriverLicenses() as { licenses: Array<{ value: string }> }
+  const DRIVING_LICENCES = driverLicenseItems.map(l => l.value)
   const plan = c.planningSettings ?? {}
   // Kept as local state purely to render whatever the candidate already carries —
   // none of the setters below are wired to a save call (see file header).

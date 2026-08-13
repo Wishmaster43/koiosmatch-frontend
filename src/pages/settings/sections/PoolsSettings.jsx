@@ -6,12 +6,14 @@ import StatusListEditor from './StatusListEditor'
 export default function PoolsSettings() {
   const { t } = useTranslation('settings')
   return (
+    // withIcon (batch 12, P22-30): icon picker in the row next to the colour swatch.
     <StatusListEditor
       title={t('poolsSettings.title')}
       subtitle={t('poolsSettings.subtitle')}
       endpoint="/pools"
       addLabel={t('poolsSettings.add')}
       withColor
+      withIcon
       extraField={{
         key: 'context',
         label: t('poolsSettings.contextLabel'),

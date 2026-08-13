@@ -227,6 +227,59 @@ describe('CandidateLookupsSettings — funnel is_proposal flag', () => {
 // failed PUT looked like it had succeeded, silently swallowed by catch {}).
 // Both now revert the optimistic state and notify the user (§13 — assert the
 // request AND the rolled-back state, never only that a callback fired).
+// Batch 12 (P22-30): icon support on statuses + contract forms only.
+describe('CandidateLookupsSettings — icon support (statuses + contract forms)', () => {
+  it('shows the in-row icon picker on statuses and saves a picked icon via PUT', async () => {
+    api.get.mockResolvedValue({ data: {
+      // eslint-disable-next-line no-restricted-syntax -- DATA: fixture status colour, not a style rule.
+      statuses: [{ id: 's1', value: 'available', label: 'Available', color: '#16A34A', icon: null }],
+    } })
+    api.put.mockResolvedValue({ data: {} })
+    const user = userEvent.setup()
+    render(<CandidateStatusesSettings />)
+
+    await screen.findByText('Available')
+    // The in-row IconPickerControl trigger is labelled "<icon-label>: <row label>".
+    await user.click(screen.getByRole('button', { name: `${st('documentTypes.icon')}: Available` }))
+    await user.click(screen.getAllByRole('menuitem')[0])
+
+    await waitFor(() => expect(api.put).toHaveBeenCalledWith(
+      '/settings/candidate-lookups/statuses/s1', expect.objectContaining({ icon: 'calendar' })))
+  })
+
+  it('does not render the icon picker on funnel stages', async () => {
+    api.get.mockResolvedValue({ data: {
+      funnel_types: [stage({ id: 'f1', label: 'Gesolliciteerd' })],
+    } })
+    render(<FunnelStagesSettings />)
+
+    await screen.findByText('Gesolliciteerd')
+    expect(screen.queryByRole('button', { name: `${st('documentTypes.icon')}: Gesolliciteerd` })).not.toBeInTheDocument()
+  })
+
+  it('saves a picked icon on a contract form via the edit modal', async () => {
+    api.get.mockResolvedValue({ data: {
+      // eslint-disable-next-line no-restricted-syntax -- DATA: fixture contract-form colour, not a style rule.
+      candidate_types: [{ id: 'c1', value: 'zzp', label: 'ZZP', color: '#3B8FD4', icon: null }],
+    } })
+    api.put.mockResolvedValue({ data: {} })
+    const user = userEvent.setup()
+    render(<ContractFormsSettings />)
+
+    await screen.findByText('ZZP')
+    await user.click(screen.getByTitle(st('lookups.edit')))
+    // Both the row and the modal render an icon-picker trigger with the same
+    // accessible name once the modal is open — the modal's is the last one.
+    const triggers = screen.getAllByRole('button', { name: `${st('documentTypes.icon')}: ZZP` })
+    await user.click(triggers[triggers.length - 1])
+    await user.click(screen.getAllByRole('menuitem')[1])
+    await user.click(screen.getByText(st('common.save')))
+
+    await waitFor(() => expect(api.put).toHaveBeenCalledWith(
+      '/settings/candidate-lookups/candidate-types/c1', expect.objectContaining({ icon: 'clock' })))
+  })
+})
+
 describe('CandidateLookupsSettings — colour + reorder revert on failure', () => {
   it('reverts the colour and notifies when the colour PUT fails', async () => {
     // eslint-disable-next-line no-restricted-syntax -- DATA: a fixture contract-form's tenant-picked colour, not a style rule.

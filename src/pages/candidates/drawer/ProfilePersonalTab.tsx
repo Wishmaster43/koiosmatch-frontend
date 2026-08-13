@@ -8,6 +8,7 @@ import { toLocalIsoDate } from '@/lib/localDate'
 import { useGenders } from '@/lib/useGenders'
 import { useNationalities } from '@/lib/useNationalities'
 import CreatableSelectJs from '@/components/ui/CreatableSelect'
+import LookupIcon from '@/components/ui/LookupIcon'
 import { FieldRow, EditControls, GroupCard, GroupHeader, inputStyle } from './profileFieldShared'
 import { useProfileRequiredKeys } from './useProfileRequiredKeys'
 import type { Candidate } from '@/types/candidate'
@@ -39,7 +40,10 @@ export default function ProfilePersonalTab({ c, onSave, autoEditSignal }: {
   const { formatDate } = useDateFormat()
   // Gender + nationality come from tenant lookups (CFG-1), never hardcoded lists.
   const { genders } = useGenders()
-  const { nationalities } = useNationalities()
+  // LOOKUP-ICON-1 (decision 22-30-vlaggen "emoji passthrough"): `flags` maps a
+  // nationality name to its ISO-2 flag emoji (derived from country_code) — fed to
+  // the shared LookupIcon, which renders emoji/free-text as-is.
+  const { nationalities, flags } = useNationalities()
   const requiredKeys = useProfileRequiredKeys(c.phase)
   const isReq = (key: PersonalKey) => { const bk = REQ_MAP[key]; return !!bk && requiredKeys.includes(bk) }
 
@@ -75,7 +79,7 @@ export default function ProfilePersonalTab({ c, onSave, autoEditSignal }: {
     if (key === 'nationality') return (
       <CreatableSelect value={form.nationality || null} onChange={(v: string) => setF('nationality', v)} allowCreate={false}
         placeholder={t('common:select')} style={inputStyle}
-        options={nationalities.map(n => ({ value: n, label: n }))} />
+        options={nationalities.map(n => ({ value: n, label: flags[n] ? `${flags[n]} ${n}` : n }))} />
     )
     if (key === 'dob') return (
       <DatePicker
@@ -124,6 +128,17 @@ export default function ProfilePersonalTab({ c, onSave, autoEditSignal }: {
     if (key === 'gender') {
       const label = genders.find(g => g.value === v || g.label === v)?.label ?? v
       return <span style={{ fontSize: 12, color: v ? 'var(--text)' : 'var(--text-muted)' }}>{label || '-'}</span>
+    }
+    // Nationality reads with its flag emoji in front (LookupIcon's emoji passthrough) —
+    // absent for a nationality with no country_code, so the plain name still shows.
+    if (key === 'nationality') {
+      const flag = v ? flags[String(v)] : null
+      return (
+        <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, fontSize: 12, color: v ? 'var(--text)' : 'var(--text-muted)' }}>
+          {flag && <LookupIcon icon={flag} size={13} />}
+          {v || '-'}
+        </span>
+      )
     }
     return <span style={{ fontSize: 12, color: v ? 'var(--text)' : 'var(--text-muted)' }}>{v || '-'}</span>
   }

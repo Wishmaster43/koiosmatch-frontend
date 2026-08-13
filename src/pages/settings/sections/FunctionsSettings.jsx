@@ -51,12 +51,16 @@ export default function FunctionsSettings() {
       </SettingCard>
 
       <div style={{ marginTop: 20 }}>
+        {/* withIcon (batch 12, P22-30): colourless lookup — the icon still renders,
+            tinted with the shared FALLBACK_SWATCH grey (StatusListEditor's
+            `item.color ?? FALLBACK_SWATCH`), so no colour meaning is implied. */}
         <StatusListEditor
           title={t('functionsSettings.title')}
           subtitle={t('functionsSettings.subtitle')}
           endpoint="/functions"
           addLabel={t('functionsSettings.add')}
           withColor={false}
+          withIcon
         />
       </div>
       {dialog}

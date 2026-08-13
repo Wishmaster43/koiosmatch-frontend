@@ -1,9 +1,16 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import StatusListEditor from './StatusListEditor'
 import { resolveGenericLookupIcon } from './lookupIcons'
-import { useAllSettings, saveSettingsKeys, invalidateAllSettingsCache, getNumberSetting } from '@/lib/settings/useAllSettings'
+import { useAllSettings, saveSettingsKeys, invalidateAllSettingsCache, getNumberSetting, getJsonSetting } from '@/lib/settings/useAllSettings'
 import { notifyError } from '@/lib/notify'
+
+// Tenant-setting key — the duplicate-detection field set (v1: email/mobile/phone).
+// Consumed TODAY by the backend DuplicateFinder (dedupeKeys(), default ['email','mobile'])
+// for the live check-duplicate endpoint and the create 409 guard.
+export const DEDUPE_KEYS_KEY = 'candidate_dedupe_keys'
+const DEDUPE_KEYS_DEFAULT = ['email', 'mobile']
+const DEDUPE_FIELDS = ['email', 'mobile', 'phone']
 
 // Curated contact-channel icon subset (mirrors DocumentTypesSettings' own bespoke
 // iconPicker) — a narrower slice of the generic lookupIcons set, scoped to the
@@ -62,6 +69,55 @@ function NoContactDaysField() {
   )
 }
 
+// Which fields count as a duplicate match on candidate create (email/mobile/phone).
+// Checkbox toggle per field, optimistic with revert-on-failure (house pattern), stored
+// as a JSON array so DuplicateFinder::dedupeKeys() can json_decode it directly.
+function DedupeKeysField() {
+  const { t } = useTranslation('settings')
+  const settings = useAllSettings()
+  const saved = getJsonSetting(settings, DEDUPE_KEYS_KEY, DEDUPE_KEYS_DEFAULT)
+  const [keys, setKeys] = useState(saved)
+  // Cold-cache sync: useAllSettings resolves async, so the initial state can be the
+  // seed default while the tenant's stored value arrives a render later (control
+  // round). Re-seed from the store until the user actually toggles.
+  const touchedRef = useRef(false)
+  useEffect(() => { if (!touchedRef.current) setKeys(saved) }, [JSON.stringify(saved)])
+
+  // Toggle one field in the set and persist the full array — optimistic, revert on failure.
+  const toggle = async (field) => {
+    touchedRef.current = true
+    const previous = keys
+    const next = keys.includes(field) ? keys.filter(k => k !== field) : [...keys, field]
+    // Never persist an empty set: the BE treats '[]' as falsy and silently falls
+    // back to email+mobile (DuplicateFinder.php:66-68) — an unchecked-everything UI
+    // claiming 'no dedupe' would lie (§3). At least one field stays required.
+    if (next.length === 0) { notifyError(t('lastContactTypes.dedupeKeysMinOne')); return }
+    setKeys(next)
+    try {
+      await saveSettingsKeys({ [DEDUPE_KEYS_KEY]: next })
+      invalidateAllSettingsCache()
+    } catch {
+      setKeys(previous)
+      notifyError(t('lastContactTypes.dedupeKeysSaveFailed'))
+    }
+  }
+
+  return (
+    <div style={{ marginBottom: 16, paddingBottom: 16, borderBottom: '1px solid var(--border)' }}>
+      <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)', marginBottom: 4 }}>{t('lastContactTypes.dedupeKeysTitle')}</div>
+      <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 8, maxWidth: 460 }}>{t('lastContactTypes.dedupeKeysHint')}</div>
+      <div style={{ display: 'flex', gap: 16 }}>
+        {DEDUPE_FIELDS.map(field => (
+          <label key={field} htmlFor={`candidate-dedupe-${field}`} style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, color: 'var(--text)', cursor: 'pointer' }}>
+            <input id={`candidate-dedupe-${field}`} type="checkbox" checked={keys.includes(field)} onChange={() => toggle(field)} />
+            {t(`lastContactTypes.dedupeKeys.${field}`)}
+          </label>
+        ))}
+      </div>
+    </div>
+  )
+}
+
 /** Last-contact types — the channel of the last contact (Email/Phone/WhatsApp).
  * Tenant-maintainable lookup, backed by /last-contact-types (C-21). Feeds the
  * candidate `last_contact_type` field + the list column. Backend `last_contact_types`
@@ -73,6 +129,7 @@ export function LastContactTypesSettings() {
   return (
     <div style={{ maxWidth: 640 }}>
       <NoContactDaysField />
+      <DedupeKeysField />
       <StatusListEditor
         title={t('lastContactTypes.title')} subtitle={t('lastContactTypes.subtitle')}
         endpoint="/last-contact-types" addLabel={t('lastContactTypes.add')}

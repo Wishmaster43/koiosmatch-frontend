@@ -38,7 +38,10 @@ export default function NationalitiesSettings() {
   const { options: countryOptions } = useCountriesLookup()
   return (
     <div style={{ maxWidth: 640 }}>
-      <StatusListEditor withColor={false} title={t('nationalities.title')} subtitle={t('nationalities.subtitle')}
+      {/* withIcon (batch 12, P22-30): colourless lookup, FALLBACK_SWATCH-tinted icon
+          alongside the existing flag-emoji rowPrefix — the flag stays the "which
+          country" signal, the icon is an independent generic adornment. */}
+      <StatusListEditor withColor={false} withIcon title={t('nationalities.title')} subtitle={t('nationalities.subtitle')}
         endpoint="/nationalities" addLabel={t('nationalities.add')}
         extraField={{ key: 'country_code', label: t('nationalities.countryCode'), options: countryOptions, default: null, hideRowBadge: true }}
         flagField={{ key: 'is_eu', label: t('nationalities.isEu'), description: t('nationalities.isEuDesc') }}

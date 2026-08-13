@@ -14,7 +14,9 @@ export default function EducationLevelsSettings() {
   const { t } = useTranslation('settings')
   return (
     <div style={{ maxWidth: 640 }}>
-      <StatusListEditor withColor
+      {/* withIcon (batch 12, P22-30): icon picker in the row next to colour — same
+          curated generic set as every other lookup, resolved via GENERIC_LOOKUP_ICON_MAP. */}
+      <StatusListEditor withColor withIcon
         title={t('educationLevels.title')} subtitle={t('educationLevels.subtitle')}
         endpoint="/education-levels" addLabel={t('educationLevels.add')} />
     </div>

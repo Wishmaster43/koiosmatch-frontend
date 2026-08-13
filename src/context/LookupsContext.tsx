@@ -146,6 +146,9 @@ function normalize(raw: unknown, fallback: LookupItem[]): LookupItem[] {
   return sortActiveRows(raw)
     // eslint-disable-next-line no-restricted-syntax -- DATA fallback, not a UI colour choice
     .map(it => ({ value: String(it.value), label: String(it.label ?? it.value), color: (it.color as string) ?? '#6B7280',
+      // icon travels with the lookup (BE wave 2, 13-08) — dropping it here was the
+      // dead seam that kept status icons out of every consumer (control round).
+      icon: typeof it.icon === 'string' && it.icon ? it.icon : undefined,
       requires_reason: flag(it, 'requires_reason'),
       requires_match: flag(it, 'requires_match'),
       expects_return_date: flag(it, 'expects_return_date'),

@@ -14,7 +14,8 @@ import type { Candidate } from '@/types/candidate'
 
 vi.mock('@/lib/useFunctions', () => ({ useFunctions: () => ({ functions: ['Verzorgende IG', 'Verpleegkundige'] }) }))
 vi.mock('@/lib/usePools', () => ({ usePools: () => ({ pools: ['Pool Noord', 'Pool Zuid'] }) }))
-vi.mock('@/lib/useDriverLicenses', () => ({ useDriverLicenses: () => ({ licenses: ['B', 'BE'] }) }))
+// LOOKUP-ICON-1: useDriverLicenses now returns full {value,label,icon} objects.
+vi.mock('@/lib/useDriverLicenses', () => ({ useDriverLicenses: () => ({ licenses: [{ value: 'B', label: 'B' }, { value: 'BE', label: 'BE' }] }) }))
 
 const candidate = (planningSettings?: Record<string, unknown>): Candidate =>
   ({ id: 'cand-1', planningSettings } as unknown as Candidate)

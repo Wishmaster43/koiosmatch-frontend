@@ -14,7 +14,9 @@ export function SkillLevelSettings() {
           (routes/api/tenant/candidate-lookups.php) — no PUT /skill-levels/reorder —
           so a drag-drop here would optimistically reorder, then 404-toast on the
           PUT and revert (§3: no dead CRUD affordance). */}
-      <StatusListEditor compact withColor={false} reorderable={false}
+      {/* withIcon (batch 12, P22-30): colourless lookup — icon renders with the shared
+          FALLBACK_SWATCH grey tint, no colour meaning implied. */}
+      <StatusListEditor compact withColor={false} withIcon reorderable={false}
         title={t('skillLevels.title')} subtitle={t('skillLevels.subtitle')}
         endpoint="/skill-levels" addLabel={t('skillLevels.add')} />
     </div>

@@ -24,9 +24,10 @@ export default function BlacklistReasonsSettings({ entity = 'candidate' }) {
   const { t } = useTranslation('settings')
   return (
     <div style={{ maxWidth: 640 }}>
+      {/* withIcon (batch 12, P22-30): same curated generic icon set as every other lookup. */}
       <StatusListEditor title={t(`blacklistReasons.${entity}.title`)}
         subtitle={t(`blacklistReasons.${entity}.subtitle`)}
-        endpoint={ENDPOINTS[entity]} addLabel={t('blacklistReasons.add')} withColor />
+        endpoint={ENDPOINTS[entity]} addLabel={t('blacklistReasons.add')} withColor withIcon />
     </div>
   )
 }

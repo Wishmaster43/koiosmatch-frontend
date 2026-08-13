@@ -29,6 +29,8 @@ import { useLookups } from '@/context/LookupsContext'
 import { useDateFormat } from '@/lib/datetime'
 import { useIndustries } from '@/lib/useIndustries'
 import { useDriverLicenses } from '@/lib/useDriverLicenses'
+import type { DriverLicenseItem } from '@/lib/useDriverLicenses'
+import LookupIcon from '@/components/ui/LookupIcon'
 import EmergencyContactCard from './EmergencyContactCard'
 import type { EmergencyContactValues } from './EmergencyContactCard'
 import BankAccountCard from './BankAccountCard'
@@ -65,7 +67,10 @@ export function PreferencesTab({ c, onSave, onTypesChange, onEditStatus }: { c: 
   const { t } = useTranslation('candidates')
   const { locale, formatDate } = useDateFormat()
   const { industries } = useIndustries() as { industries: string[] }
-  const { licenses } = useDriverLicenses() as { licenses: string[] }
+  // LOOKUP-ICON-1: useDriverLicenses now returns full {value,label,icon} objects
+  // (was string[]) — keep the icon around so licenseOptions/renderValue below can
+  // pass it to LookupIcon, mirroring last-contact's icon passthrough.
+  const { licenses } = useDriverLicenses() as { licenses: DriverLicenseItem[] }
   // Contract forms (colour per value) for the first chip row.
   const { candidateTypes, statusMeta } = useLookups() as unknown as { candidateTypes: Array<{ value: string; label: string; color?: string }>; statusMeta: (v?: string | null) => { label: string; color: string } }
   const pref = c.preferences
@@ -75,7 +80,11 @@ export function PreferencesTab({ c, onSave, onTypesChange, onEditStatus }: { c: 
   const cap = (s: string) => s.charAt(0).toUpperCase() + s.slice(1)
   const dayOptions = DAY_SLUGS.map((value, i) => ({ value, label: cap(new Intl.DateTimeFormat(locale, { weekday: 'long' }).format(new Date(2024, 0, 1 + i))) }))
   const industryOptions = industries.map(name => ({ value: name, label: name }))
-  const licenseOptions = licenses.map(name => ({ value: name, label: name }))
+  const licenseOptions = licenses.map(l => ({ value: l.value, label: l.label }))
+  // Read-mode-only icon lookup by value (the shared ChipMultiSelect/EditableFieldTable
+  // chip shape has no icon slot — LOOKUP-ICON-1 renders it via a custom renderValue
+  // instead of touching that shared component).
+  const licenseIconOf = (value: string) => licenses.find(l => l.value === value)?.icon
 
   // One shared field schema, sliced per section below (each with its own Save).
   // Multi-value chips sit as rows within their group: Contractvorm/Dagen/Branche
@@ -144,7 +153,29 @@ export function PreferencesTab({ c, onSave, onTypesChange, onEditStatus }: { c: 
     { key: 'reisafstand',     label: t('preferences.maxDistance'),   group: t('preferences.groupTravel'), inputType: 'number' },
     { key: 'reistijd',        label: t('preferences.maxTravelTime'), group: t('preferences.groupTravel'), inputType: 'number' },
     { key: 'eigen_vervoer',   label: t('preferences.ownTransport'),  group: t('preferences.groupTravel'), type: 'checkbox' },
-    { key: 'rijbewijs',       label: t('preferences.license'),       group: t('preferences.groupTravel'), type: 'chips', chipOptions: licenseOptions },
+    // LOOKUP-ICON-1: renderValue overrides ONLY the read-mode chip row (edit mode
+    // keeps the generic ChipMultiSelect) — each chip gets its tenant-set icon
+    // (lucide slug or emoji) in front of the label, same pattern as the candidate
+    // table's last-contact icon.
+    { key: 'rijbewijs',       label: t('preferences.license'),       group: t('preferences.groupTravel'), type: 'chips', chipOptions: licenseOptions,
+      renderValue: (v: unknown) => {
+        const arr = (Array.isArray(v) ? v : []).map(String)
+        if (arr.length === 0) return <span style={{ color: 'var(--text-muted)' }}>-</span>
+        return (
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 5 }}>
+            {arr.map(x => {
+              const icon = licenseIconOf(x)
+              return (
+                <span key={x} style={{ display: 'inline-flex', alignItems: 'center', gap: 4, padding: '2px 9px', borderRadius: 999, fontSize: 11, fontWeight: 500,
+                  background: 'var(--color-primary-bg)', color: 'var(--color-primary-text)', border: '1px solid var(--color-primary)' }}>
+                  {icon && <LookupIcon icon={icon} size={11} />}
+                  {x}
+                </span>
+              )
+            })}
+          </div>
+        )
+      } },
     { key: 'loonheffing',      label: t('preferences.wageTax'),       group: t('preferences.groupPayroll'), type: 'checkbox' },
     { key: 'loonheffing_vanaf', label: t('preferences.wageTaxFrom'),  group: t('preferences.groupPayroll'), type: 'date' },
     { key: 'desiredRateMin', label: t('preferences.desiredRateMin'), group: t('preferences.groupDesiredRate'), inputType: 'number', step: '0.01', mono: true },

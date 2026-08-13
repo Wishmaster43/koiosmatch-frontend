@@ -8,11 +8,16 @@ import type { LucideIcon } from 'lucide-react'
 import {
   Calendar, Clock, Phone, Smartphone, Mail, MessageCircle, MessageSquare, Video,
   MapPin, Building, Users, User, Briefcase, ClipboardList, CheckCircle,
-  AlertTriangle, Star, Flag, Tag, Bell, Coffee, Car, Home, Globe,
+  AlertTriangle, Star, Flag, Tag, Bell, Coffee, Car, Home, Globe, GraduationCap,
+  ShieldAlert, Award, Layers,
 } from 'lucide-react'
 
 // Curated generic set for lookups without their own bespoke icon vocabulary
-// (appointment types, task priorities, statuses, …). ~24 names, broad coverage.
+// (appointment types, task priorities, statuses, education levels, blacklist
+// reasons, functions, nationalities, driver licences, pools, skill levels, …).
+// Batch-12 additions: graduation-cap (education), shield-alert (blacklist),
+// award (skill levels), layers (functions/pools) — extends the set, never a
+// second hand-maintained icon map.
 export const GENERIC_LOOKUP_ICON_MAP: Record<string, LucideIcon> = {
   calendar: Calendar,
   clock: Clock,
@@ -38,6 +43,10 @@ export const GENERIC_LOOKUP_ICON_MAP: Record<string, LucideIcon> = {
   car: Car,
   home: Home,
   globe: Globe,
+  'graduation-cap': GraduationCap,
+  'shield-alert': ShieldAlert,
+  award: Award,
+  layers: Layers,
 }
 
 // Stable, curated order for the Settings icon-picker grid.
