@@ -17,7 +17,6 @@
 import { useTranslation } from 'react-i18next'
 import { RotateCcw } from 'lucide-react'
 import Toggle from '@/components/ui/Toggle'
-import EditableFieldTable from '@/components/forms/EditableFieldTable'
 import { useAllSettings, getBoolSetting } from '@/lib/settings/useAllSettings'
 import type { Customer } from '@/types/customer'
 
@@ -45,17 +44,6 @@ export default function VacancySettingsTab({ c, onSave }: Props) {
         </span>
         <p style={{ fontSize: 12, color: 'var(--text-muted)', margin: '4px 0 0' }}>{t('vacancySettings.subtitle')}</p>
       </div>
-
-      {/* The privacy-policy link belongs with the career-site settings, not on the
-          company tab (Danny 28-07). It is the URL an applicant is shown.
-          CANON-DIVIDER-1 (Danny 05-08): candidate ProfileTab canon — no line
-          between rows, 11px labels. */}
-      <EditableFieldTable
-        title={t('overview.online')}
-        fields={[{ key: 'privacyPolicyUrl', label: t('overview.privacyPolicyUrl') }]}
-        value={values}
-        onSave={onSave}
-      />
 
       {/* CANON-DIVIDER-1 (Danny 05-08): candidate ProfileTab canon — no line between
           rows, and the row's primary text drops from 13px to the canon's 12px body size. */}

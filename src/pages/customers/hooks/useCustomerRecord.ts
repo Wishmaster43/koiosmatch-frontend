@@ -94,7 +94,7 @@ const FIELD_MAP: Record<string, string> = {
   phase: 'phase',
   status: 'status', ownerId: 'owner_id', website: 'website', employeeCount: 'employee_count',
   toneOfVoice: 'tone_of_voice', description: 'description', recruitmentProblems: 'recruitment_problems',
-  privacyPolicyUrl: 'privacy_policy_url', hideCompanyName: 'hide_company_name', hasCareerPage: 'has_career_page',
+  hideCompanyName: 'hide_company_name', hasCareerPage: 'has_career_page',
   showInVacancies: 'show_in_my_vacancies', excludeFromSourcing: 'exclude_from_sourcing', tags: 'tags',
   // Kostenplaats + facturatie-email (Danny 2026-07-22) — the customer-level source.
   costCenter: 'cost_center', billingEmail: 'billing_email',

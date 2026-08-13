@@ -241,7 +241,6 @@ export interface Customer {
   toneOfVoice: string
   description: string
   recruitmentProblems: string
-  privacyPolicyUrl: string
   hideCompanyName: boolean
   hasCareerPage: boolean
   showInVacancies: boolean
@@ -369,7 +368,6 @@ export interface ApiCustomer {
   employee_count?: string | number; employeeCount?: string | number
   tone_of_voice?: string; toneOfVoice?: string; description?: string
   recruitment_problems?: string; recruitmentProblems?: string
-  privacy_policy_url?: string; privacyPolicyUrl?: string
   hide_company_name?: unknown; has_career_page?: unknown
   show_in_my_vacancies?: unknown; exclude_from_sourcing?: unknown
   // Kostenplaats + facturatie-email at the customer level (Danny 2026-07-22).

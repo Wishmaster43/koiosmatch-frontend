@@ -261,7 +261,6 @@ export function mapCustomer(c: ApiCustomer = {}): Customer {
     toneOfVoice: c.tone_of_voice ?? c.toneOfVoice ?? '',
     description: c.description ?? '',
     recruitmentProblems: c.recruitment_problems ?? c.recruitmentProblems ?? '',
-    privacyPolicyUrl: c.privacy_policy_url ?? c.privacyPolicyUrl ?? '',
     hideCompanyName: Boolean(c.hide_company_name),
     hasCareerPage: Boolean(c.has_career_page),
     showInVacancies: Boolean(c.show_in_my_vacancies),

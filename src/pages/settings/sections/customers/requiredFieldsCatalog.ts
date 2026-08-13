@@ -32,7 +32,6 @@ export const CUSTOMER_FIELDS: RequiredFieldDef[] = [
   { key: 'website', labelKey: 'customers:overview.website' },
   { key: 'employee_count', labelKey: 'customers:overview.employeeCount' },
   { key: 'description', labelKey: 'customers:overview.description' },
-  { key: 'privacy_policy_url', labelKey: 'customers:overview.privacyPolicyUrl' },
   { key: 'street', labelKey: 'customers:locations.detail.street' },
   { key: 'house_number', labelKey: 'customers:locations.detail.houseNumber' },
   { key: 'house_number_suffix', labelKey: 'customers:locations.detail.houseNumberSuffix' },
