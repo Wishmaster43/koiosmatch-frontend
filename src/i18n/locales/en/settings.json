@@ -1107,11 +1107,27 @@
         "creditPrice": "Price per credit",
         "amount": "Amount",
         "aiTitle": "AI usage"
-      }
+      },
+      "exportXlsx": "Export Excel",
+      "exportFailed": "Export failed."
     },
     "invoices": {
       "title": "Invoices",
-      "desc": "View and download your invoices."
+      "desc": "View and download your invoices.",
+      "colNumber": "Number",
+      "colPeriod": "Period",
+      "colTotal": "Total",
+      "colStatus": "Status",
+      "colDate": "Date",
+      "colAction": "Action",
+      "download": "Download",
+      "downloadError": "Download failed.",
+      "loadError": "Loading invoices failed.",
+      "empty": "No invoices yet.",
+      "status": {
+        "final": "Final",
+        "credited": "Credited"
+      }
     }
   },
   "apiKeys": {
@@ -2935,5 +2951,53 @@
     "markupLabel": "AI markup (%)",
     "creditPriceLabel": "Workflow credit price (€)",
     "loadError": "Failed to load platform pricing."
+  },
+  "invoiceSettings": {
+    "title": "Invoice settings",
+    "subtitle": "Company details and numbering for generated invoices.",
+    "loadError": "Loading failed.",
+    "saveFailed": "Saving failed.",
+    "notReadyTitle": "Not invoice-ready yet",
+    "notReadyDesc": "Fill in the company details below before the first real invoice is sent.",
+    "sectionCompany": "Company details",
+    "sectionNumbering": "Numbering & VAT",
+    "companyName": "Company name",
+    "address": "Address",
+    "postalCity": "Postal code and city",
+    "cocNumber": "Chamber of commerce number",
+    "vatNumber": "VAT number",
+    "iban": "IBAN",
+    "email": "Email address",
+    "vatPercent": "VAT percentage",
+    "numberPrefix": "Invoice number prefix",
+    "autoFinalize": "Auto-finalize",
+    "autoFinalizeHint": "Automatically finalize and send draft invoices."
+  },
+  "adminInvoices": {
+    "title": "Invoices",
+    "subtitle": "Monthly overview of all tenant invoices, drafts included.",
+    "generate": "Generate drafts",
+    "generateSuccess": "Draft invoices generated.",
+    "generateFailed": "Generating failed.",
+    "exportXlsx": "Export Excel",
+    "exportFailed": "Export failed.",
+    "loadError": "Loading invoices failed.",
+    "empty": "No invoices for this month yet.",
+    "colTenant": "Tenant",
+    "colNumber": "Number",
+    "colTotal": "Total",
+    "colStatus": "Status",
+    "colAction": "Action",
+    "finalize": "Finalize",
+    "finalizeSuccess": "Invoice finalized.",
+    "finalizeFailed": "Finalizing failed.",
+    "resend": "Resend",
+    "resendSuccess": "Invoice resent.",
+    "download": "Download",
+    "downloadFailed": "Download failed.",
+    "status": {
+      "draft": "Draft",
+      "final": "Final"
+    }
   }
 }

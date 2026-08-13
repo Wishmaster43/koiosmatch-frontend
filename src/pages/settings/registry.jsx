@@ -101,8 +101,10 @@ import NotificationsSettings from './sections/NotificationsSettings'
 import EscalationSettings from './sections/EscalationSettings'
 // Planning settings — gated on the 'plan' module (requiresPage: 'planning'); hidden until it is on.
 import { ShiftTypesSettings, AvailabilitySettings, AutoMatchSettings, PlanningBoardSettings } from './sections/PlanningSettings'
-import { FacturenSettings } from './sections/BillingSettings'
+import TenantInvoicesSettings from './sections/TenantInvoicesSettings'
 import GebruikSettings from './sections/GebruikSettings'
+import InvoiceCompanySettings from './sections/InvoiceCompanySettings'
+import AdminInvoicesSettings from './sections/AdminInvoicesSettings'
 
 import {
   kpisLeads, kpisCandidates, kpisApplications, kpisCustomers, kpisLocations,
@@ -660,7 +662,7 @@ export const NAV_GROUPS = [
       // CREDITS-1: gated on the new `billing.view` permission — settings.view alone
       // is NOT enough (tenant_admin/admin/manager only); hidden, never disabled (§3).
       { id: 'billing_usage', icon: BarChart2, component: GebruikSettings, requiresPermission: 'billing.view' },
-      { id: 'billing_invoices', icon: FileText, component: FacturenSettings },
+      { id: 'billing_invoices', icon: FileText, component: TenantInvoicesSettings, requiresPermission: 'billing.view' },
     ],
   },
   {
@@ -672,6 +674,10 @@ export const NAV_GROUPS = [
       { id: 'usage', icon: BarChart2, component: TenantUsageSettings, superAdminOnly: true },
       // Taakbeheer (T4.1, extended QUEUE-VIEW-1) — queue/job health, backlog list, failure log.
       { id: 'admin_jobs', icon: ListChecks, component: JobQueueSettings, superAdminOnly: true },
+      // INVOICE-1 (14-08): platform invoicing — seller details + numbering knobs,
+      // then the per-month draft/final list with generate/finalize/re-send actions.
+      { id: 'admin_invoice_settings', icon: FileText, component: InvoiceCompanySettings, superAdminOnly: true },
+      { id: 'admin_invoices', icon: FileText, component: AdminInvoicesSettings, superAdminOnly: true },
     ],
   },
   {

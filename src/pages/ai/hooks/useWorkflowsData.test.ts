@@ -17,6 +17,11 @@ vi.mock('@/lib/api', async () => {
 })
 vi.mock('@/lib/notify', () => ({ notify: vi.fn(), notifyError: vi.fn() }))
 vi.mock('@/context/AuthContext', () => ({ useAuth: () => ({ hasPermission: () => true }) }))
+// Auto-confirm every staged confirmation so archive's confirm-gated call fires
+// synchronously in tests, without rendering the real ConfirmDialog.
+vi.mock('@/hooks/useConfirm', () => ({
+  useConfirm: () => ({ confirm: (_msg: string, onConfirm: () => void) => onConfirm(), dialog: null }),
+}))
 // Minimal i18n stub that still interpolates {{msg}}-style options so handleSave's
 // alert(t('page.saveFailed', { msg })) stays inspectable in the assertions below.
 vi.mock('react-i18next', () => ({
@@ -24,10 +29,11 @@ vi.mock('react-i18next', () => ({
 }))
 
 import api from '@/lib/api'
-import { notifyError } from '@/lib/notify'
+import { notify, notifyError } from '@/lib/notify'
 const mockedGet    = vi.mocked(api.get)
 const mockedPost   = vi.mocked(api.post)
 const mockedPut    = vi.mocked(api.put)
+const mockedDelete = vi.mocked(api.delete)
 
 afterEach(() => vi.clearAllMocks())
 
@@ -101,5 +107,76 @@ describe('useWorkflowsData · handleSave error message (never raw axios/network 
 
     expect(alertSpy).toHaveBeenCalledWith('page.saveFailed::Step 2 has no connection.')
     alertSpy.mockRestore()
+  })
+})
+
+// TRASH-OVERAL-1b: DELETE = archive (soft-delete), POST .../restore reverses it.
+// Mutation tests assert the REQUEST (method/route), never only that a callback fired (§13).
+describe('useWorkflowsData · handleArchive / handleRestore (TRASH-OVERAL-1b)', () => {
+  it('archives via DELETE /workflows/{id} and refetches on success', async () => {
+    seedList()
+    mockedDelete.mockResolvedValue({ data: {} })
+    const { result } = renderHook(() => useWorkflowsData(false))
+    await waitFor(() => expect(result.current.loading).toBe(false))
+    const getCallsBefore = mockedGet.mock.calls.length
+
+    await act(async () => { result.current.handleArchive(result.current.workflows[0]) })
+
+    expect(mockedDelete).toHaveBeenCalledWith('/workflows/wf-1')
+    expect(notify).toHaveBeenCalledWith('success', 'page.archiveSuccess')
+    await waitFor(() => expect(mockedGet.mock.calls.length).toBeGreaterThan(getCallsBefore))
+  })
+
+  it('notifies (never silent) when the archive request fails', async () => {
+    seedList()
+    mockedDelete.mockRejectedValue(new Error('boom'))
+    const { result } = renderHook(() => useWorkflowsData(false))
+    await waitFor(() => expect(result.current.loading).toBe(false))
+
+    await act(async () => { result.current.handleArchive(result.current.workflows[0]) })
+
+    await waitFor(() => expect(notifyError).toHaveBeenCalledWith('common:actionFailed'))
+  })
+
+  it('restores via POST /workflows/{id}/restore and refetches on success', async () => {
+    seedList()
+    mockedPost.mockResolvedValue({ data: {} })
+    const { result } = renderHook(() => useWorkflowsData(true))
+    await waitFor(() => expect(result.current.loading).toBe(false))
+    const getCallsBefore = mockedGet.mock.calls.length
+
+    await act(async () => { await result.current.handleRestore(result.current.workflows[0]) })
+
+    expect(mockedPost).toHaveBeenCalledWith('/workflows/wf-1/restore')
+    expect(notify).toHaveBeenCalledWith('success', 'page.restoreSuccess')
+    await waitFor(() => expect(mockedGet.mock.calls.length).toBeGreaterThan(getCallsBefore))
+  })
+
+  it('notifies (never silent) when the restore request fails', async () => {
+    seedList()
+    mockedPost.mockRejectedValue(new Error('boom'))
+    const { result } = renderHook(() => useWorkflowsData(true))
+    await waitFor(() => expect(result.current.loading).toBe(false))
+
+    await act(async () => { await result.current.handleRestore(result.current.workflows[0]) })
+
+    expect(notifyError).toHaveBeenCalledWith('common:actionFailed')
+  })
+})
+
+// The list fetch itself is the naad this contract runs over — the archived toggle
+// must actually reach the request, not just filter client-side (mirrors the
+// candidate/customer include_archived requests below).
+describe('useWorkflowsData · list fetch carries include_archived on the request', () => {
+  it('omits include_archived when the archived view is off', async () => {
+    seedList()
+    renderHook(() => useWorkflowsData(false))
+    await waitFor(() => expect(mockedGet).toHaveBeenCalledWith('/workflows', { params: {} }))
+  })
+
+  it('sends include_archived=1 when the archived view is on', async () => {
+    seedList()
+    renderHook(() => useWorkflowsData(true))
+    await waitFor(() => expect(mockedGet).toHaveBeenCalledWith('/workflows', { params: { include_archived: 1 } }))
   })
 })

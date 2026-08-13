@@ -203,6 +203,9 @@ export function useArchivedCustomerLocations(customerId: Id | undefined, active:
   const load = useCallback((signal?: AbortSignal) => {
     if (!active || !customerId) { setLocations([]); return }
     setLoading(true)
+    // TRASH-OVERAL-1b (14-08): include_archived=1 now returns ONLY soft-deleted rows
+    // (semantics uniform across the customer sublists); the `.filter(archived)` below
+    // is a harmless belt-and-braces guard, not a workaround for a mixed response.
     api.get(`/customers/${customerId}/locations`, { params: { include_archived: 1 }, signal })
       .then(res => { if (!signal?.aborted) setLocations(unwrapList<ApiLocation>(res).rows.map(mapLocation).filter(l => l.archived)) })
       .catch(() => { /* the toggle simply shows nothing rather than crashing (§3) */ })

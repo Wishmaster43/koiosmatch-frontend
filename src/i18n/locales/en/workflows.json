@@ -212,7 +212,11 @@
     "triggerEvent": "Event",
     "setActive": "Set to active",
     "setInactive": "Set to inactive",
-    "editWorkflow": "Edit workflow"
+    "editWorkflow": "Edit workflow",
+    "archivedBadge": "Archived",
+    "restore": "Restore",
+    "restoreWorkflow": "Restore workflow",
+    "archiveWorkflow": "Archive workflow"
   },
   "page": {
     "notRun": "Not run yet",
@@ -235,7 +239,10 @@
     "addModuleAlert": "Add at least one module to the workflow before saving.",
     "saveFailed": "Saving failed: {{msg}}",
     "deleteFolderConfirm": "Delete folder \"{{name}}\"? The workflows will remain under \"Unassigned\".",
-    "deleteFolderInUse": "This folder still has active workflows and can't be deleted."
+    "deleteFolderInUse": "This folder still has active workflows and can't be deleted.",
+    "archiveConfirm": "Archive workflow \"{{name}}\"? Any open runs are closed immediately.",
+    "archiveSuccess": "Workflow archived.",
+    "restoreSuccess": "Workflow restored."
   },
   "ai": {
     "saved": "Saved",

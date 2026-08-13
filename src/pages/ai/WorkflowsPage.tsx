@@ -58,6 +58,9 @@ export default function WorkflowsPage() {
         openEditor={data.openEditor}
         handleRun={data.handleRun}
         handleToggleStatus={data.handleToggleStatus}
+        canManageFolders={data.canManageFolders}
+        handleArchive={data.handleArchive}
+        handleRestore={data.handleRestore}
       />
 
       {data.editingWorkflow && (

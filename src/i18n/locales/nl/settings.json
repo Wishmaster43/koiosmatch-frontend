@@ -1107,11 +1107,27 @@
         "creditPrice": "Prijs per credit",
         "amount": "Bedrag",
         "aiTitle": "AI-verbruik"
-      }
+      },
+      "exportXlsx": "Exporteer Excel",
+      "exportFailed": "Exporteren is mislukt."
     },
     "invoices": {
       "title": "Facturen",
-      "desc": "Bekijk en download je facturen."
+      "desc": "Bekijk en download je facturen.",
+      "colNumber": "Nummer",
+      "colPeriod": "Periode",
+      "colTotal": "Totaal",
+      "colStatus": "Status",
+      "colDate": "Datum",
+      "colAction": "Actie",
+      "download": "Downloaden",
+      "downloadError": "Downloaden is mislukt.",
+      "loadError": "Facturen laden is mislukt.",
+      "empty": "Nog geen facturen.",
+      "status": {
+        "final": "Definitief",
+        "credited": "Gecrediteerd"
+      }
     }
   },
   "apiKeys": {
@@ -2935,5 +2951,53 @@
     "markupLabel": "AI-marge (%)",
     "creditPriceLabel": "Workflow-creditprijs (€)",
     "loadError": "Platformprijzen laden is mislukt."
+  },
+  "invoiceSettings": {
+    "title": "Factuurinstellingen",
+    "subtitle": "Bedrijfsgegevens en nummering voor gegenereerde facturen.",
+    "loadError": "Laden is mislukt.",
+    "saveFailed": "Opslaan is mislukt.",
+    "notReadyTitle": "Nog niet factuurklaar",
+    "notReadyDesc": "Vul de bedrijfsgegevens hieronder in voordat de eerste echte factuur wordt verstuurd.",
+    "sectionCompany": "Bedrijfsgegevens",
+    "sectionNumbering": "Nummering & btw",
+    "companyName": "Bedrijfsnaam",
+    "address": "Adres",
+    "postalCity": "Postcode en plaats",
+    "cocNumber": "KvK-nummer",
+    "vatNumber": "Btw-nummer",
+    "iban": "IBAN",
+    "email": "E-mailadres",
+    "vatPercent": "Btw-percentage",
+    "numberPrefix": "Factuurnummer-prefix",
+    "autoFinalize": "Automatisch finaliseren",
+    "autoFinalizeHint": "Conceptfacturen automatisch definitief maken en versturen."
+  },
+  "adminInvoices": {
+    "title": "Facturen",
+    "subtitle": "Maandoverzicht van alle tenant-facturen, inclusief concepten.",
+    "generate": "Genereer conceptfacturen",
+    "generateSuccess": "Conceptfacturen gegenereerd.",
+    "generateFailed": "Genereren is mislukt.",
+    "exportXlsx": "Exporteer Excel",
+    "exportFailed": "Exporteren is mislukt.",
+    "loadError": "Facturen laden is mislukt.",
+    "empty": "Nog geen facturen voor deze maand.",
+    "colTenant": "Tenant",
+    "colNumber": "Nummer",
+    "colTotal": "Totaal",
+    "colStatus": "Status",
+    "colAction": "Actie",
+    "finalize": "Finaliseren",
+    "finalizeSuccess": "Factuur gefinaliseerd.",
+    "finalizeFailed": "Finaliseren is mislukt.",
+    "resend": "Opnieuw versturen",
+    "resendSuccess": "Factuur opnieuw verstuurd.",
+    "download": "Downloaden",
+    "downloadFailed": "Downloaden is mislukt.",
+    "status": {
+      "draft": "Concept",
+      "final": "Definitief"
+    }
   }
 }

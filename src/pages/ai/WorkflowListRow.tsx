@@ -10,7 +10,7 @@ import { useState } from 'react'
 import type { MouseEvent } from 'react'
 import type { LucideIcon } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
-import { AlertCircle, CheckCircle, Clock, HelpCircle, Loader2, MoreHorizontal, MousePointerClick, Play, Webhook, Zap, Bell } from 'lucide-react'
+import { AlertCircle, ArchiveRestore, CheckCircle, Clock, HelpCircle, Loader2, MoreHorizontal, MousePointerClick, Play, Trash2, Webhook, Zap, Bell } from 'lucide-react'
 import { interactive } from '@/lib/a11y'
 import { useDateFormat } from '@/lib/datetime'
 import { MODULE_META } from '@/modules/index'
@@ -24,6 +24,10 @@ interface WorkflowListRowProps {
   onRun: (id?: string | number) => void | Promise<void>
   onEdit: () => void
   onToggleStatus: () => void
+  // Archive/restore lifecycle (TRASH-OVERAL-1b) — both settings.update-gated.
+  canManageFolders?: boolean
+  onArchive?: () => void
+  onRestore?: () => void | Promise<void>
 }
 
 const BUBBLE_SIZE = 24
@@ -86,13 +90,24 @@ function triggerMeta(triggerType?: string): { Icon: LucideIcon; key: string } {
   return { Icon: MousePointerClick, key: 'list.triggerManual' }
 }
 
-export default function WorkflowListRow({ workflow, folderName, onRun, onEdit, onToggleStatus }: WorkflowListRowProps) {
+export default function WorkflowListRow({ workflow, folderName, onRun, onEdit, onToggleStatus, canManageFolders, onArchive, onRestore }: WorkflowListRowProps) {
   const { t } = useTranslation('workflows')
   const { formatDateTime } = useDateFormat()
   const [running, setRunning] = useState(false)
+  const [restoring, setRestoring] = useState(false)
   const [hover, setHover] = useState(false)
   const active = workflow.status === 'active'
+  const archived = Boolean(workflow.archived)
   const trig = triggerMeta(workflow.trigger_type)
+
+  // Restore is a distinct async action — keep the row responsive while it lands.
+  const handleRestoreClick = async (e: MouseEvent) => {
+    e.stopPropagation()
+    if (!onRestore) return
+    setRestoring(true)
+    await onRestore()
+    setRestoring(false)
+  }
 
   // Meta line — real fields only (never invented): last run time, folder, updated date.
   const metaParts: string[] = []
@@ -131,37 +146,77 @@ export default function WorkflowListRow({ workflow, folderName, onRun, onEdit, o
         <trig.Icon size={15} />
       </div>
 
-      {/* Run */}
-      <button onClick={handleRun} disabled={running}
-        className="flex items-center gap-1 rounded-lg px-2.5 py-1 text-xs font-medium flex-shrink-0"
-        style={{ background: running ? 'var(--border)' : 'var(--color-primary-bg)', color: running ? 'var(--text-muted)' : 'var(--color-primary)', border: 'none', cursor: running ? 'not-allowed' : 'pointer' }}
-      >
-        {running ? <Loader2 size={11} className="animate-spin" /> : <Play size={11} />}
-        {running ? t('page.running') : t('page.run')}
-      </button>
+      {archived ? (
+        <>
+          {/* Archived soft chip (§4 soft-chip convention) — read-only, no run/toggle for a deleted workflow */}
+          <span className="flex-shrink-0 rounded-full px-2 py-1" style={{
+            fontSize: 11, fontWeight: 600, color: 'var(--color-danger)',
+            background: 'color-mix(in srgb, var(--color-danger) 12%, transparent)',
+            border: '1px solid color-mix(in srgb, var(--color-danger) 40%, transparent)',
+          }}>
+            {t('list.archivedBadge')}
+          </span>
 
-      {/* Active/draft toggle — same semantics as the editor's status switch (active <-> inactive) */}
-      <button type="button" role="switch" aria-checked={active}
-        aria-label={t(active ? 'list.setInactive' : 'list.setActive')}
-        title={t(active ? 'list.setInactive' : 'list.setActive')}
-        onClick={e => { e.stopPropagation(); onToggleStatus() }}
-        style={{ width: 32, height: 18, borderRadius: 999, border: 'none', cursor: 'pointer', flexShrink: 0,
-          background: active ? 'var(--color-success)' : 'var(--border)', position: 'relative', transition: 'background 0.15s' }}
-      >
-        <div style={{ position: 'absolute', top: 2, left: active ? 16 : 2, width: 14, height: 14, borderRadius: '50%',
-          background: 'var(--surface)', transition: 'left 0.15s', boxShadow: '0 1px 3px rgba(0,0,0,0.2)' }} />
-      </button>
+          {/* Restore — settings.update-gated (mirrors deleteFolder's guard) */}
+          {canManageFolders && onRestore && (
+            <button onClick={handleRestoreClick} disabled={restoring}
+              aria-label={t('list.restoreWorkflow')} title={t('list.restoreWorkflow')}
+              className="flex items-center gap-1 rounded-lg px-2.5 py-1 text-xs font-medium flex-shrink-0"
+              style={{ background: 'var(--color-success-bg)', color: 'var(--color-success)', border: '1px solid var(--color-success)', cursor: restoring ? 'not-allowed' : 'pointer' }}
+            >
+              {restoring ? <Loader2 size={11} className="animate-spin" /> : <ArchiveRestore size={11} />}
+              {t('list.restore')}
+            </button>
+          )}
+        </>
+      ) : (
+        <>
+          {/* Run */}
+          <button onClick={handleRun} disabled={running}
+            className="flex items-center gap-1 rounded-lg px-2.5 py-1 text-xs font-medium flex-shrink-0"
+            style={{ background: running ? 'var(--border)' : 'var(--color-primary-bg)', color: running ? 'var(--text-muted)' : 'var(--color-primary)', border: 'none', cursor: running ? 'not-allowed' : 'pointer' }}
+          >
+            {running ? <Loader2 size={11} className="animate-spin" /> : <Play size={11} />}
+            {running ? t('page.running') : t('page.run')}
+          </button>
 
-      {/* "…" menu — today: same action as the row click (edit) */}
-      <button onClick={e => { e.stopPropagation(); onEdit() }}
-        aria-label={t('list.editWorkflow')} title={t('list.editWorkflow')}
-        className="flex items-center justify-center rounded-lg flex-shrink-0"
-        style={{ width: 26, height: 26, background: 'var(--hover-bg)', border: '1px solid var(--border)', cursor: 'pointer', color: 'var(--text-muted)' }}
-        onMouseEnter={e => (e.currentTarget.style.color = 'var(--text)')}
-        onMouseLeave={e => (e.currentTarget.style.color = 'var(--text-muted)')}
-      >
-        <MoreHorizontal size={13} />
-      </button>
+          {/* Active/draft toggle — same semantics as the editor's status switch (active <-> inactive) */}
+          <button type="button" role="switch" aria-checked={active}
+            aria-label={t(active ? 'list.setInactive' : 'list.setActive')}
+            title={t(active ? 'list.setInactive' : 'list.setActive')}
+            onClick={e => { e.stopPropagation(); onToggleStatus() }}
+            style={{ width: 32, height: 18, borderRadius: 999, border: 'none', cursor: 'pointer', flexShrink: 0,
+              background: active ? 'var(--color-success)' : 'var(--border)', position: 'relative', transition: 'background 0.15s' }}
+          >
+            <div style={{ position: 'absolute', top: 2, left: active ? 16 : 2, width: 14, height: 14, borderRadius: '50%',
+              background: 'var(--surface)', transition: 'left 0.15s', boxShadow: '0 1px 3px rgba(0,0,0,0.2)' }} />
+          </button>
+
+          {/* Archive (soft-delete) — settings.update-gated, opens the confirm with the open-runs notice */}
+          {canManageFolders && onArchive && (
+            <button onClick={e => { e.stopPropagation(); onArchive() }}
+              aria-label={t('list.archiveWorkflow')} title={t('list.archiveWorkflow')}
+              className="flex items-center justify-center rounded-lg flex-shrink-0"
+              style={{ width: 26, height: 26, background: 'var(--hover-bg)', border: '1px solid var(--border)', cursor: 'pointer', color: 'var(--text-muted)' }}
+              onMouseEnter={e => (e.currentTarget.style.color = 'var(--color-danger)')}
+              onMouseLeave={e => (e.currentTarget.style.color = 'var(--text-muted)')}
+            >
+              <Trash2 size={13} />
+            </button>
+          )}
+
+          {/* "…" menu — today: same action as the row click (edit) */}
+          <button onClick={e => { e.stopPropagation(); onEdit() }}
+            aria-label={t('list.editWorkflow')} title={t('list.editWorkflow')}
+            className="flex items-center justify-center rounded-lg flex-shrink-0"
+            style={{ width: 26, height: 26, background: 'var(--hover-bg)', border: '1px solid var(--border)', cursor: 'pointer', color: 'var(--text-muted)' }}
+            onMouseEnter={e => (e.currentTarget.style.color = 'var(--text)')}
+            onMouseLeave={e => (e.currentTarget.style.color = 'var(--text-muted)')}
+          >
+            <MoreHorizontal size={13} />
+          </button>
+        </>
+      )}
     </div>
   )
 }

@@ -154,6 +154,9 @@ export function useArchivedCustomerDepartments(customerId: Id | undefined, activ
   const load = useCallback((signal?: AbortSignal) => {
     if (!active || !customerId) { setDepartments([]); return }
     setLoading(true)
+    // TRASH-OVERAL-1b (14-08): include_archived=1 now returns ONLY soft-deleted rows
+    // (semantics uniform across the customer sublists); the `.filter(archived)` below
+    // is a harmless belt-and-braces guard, not a workaround for a mixed response.
     api.get(`/customers/${customerId}/departments`, { params: { include_archived: 1 }, signal })
       .then(res => { if (!signal?.aborted) setDepartments(unwrapList<ApiDepartment>(res).rows.map(mapDepartment).filter(d => d.archived)) })
       .catch(() => { /* the toggle simply shows nothing rather than crashing (§3) */ })

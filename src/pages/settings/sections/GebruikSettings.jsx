@@ -25,12 +25,29 @@
  */
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Clock, ChevronDown, ChevronRight } from 'lucide-react'
+import { Clock, ChevronDown, ChevronRight, FileSpreadsheet, Loader2 } from 'lucide-react'
 import api, { unwrap } from '@/lib/api'
 import { useNumberFormat } from '@/lib/formatters'
+import { notifyError } from '@/lib/notify'
+import { extractApiError } from '@/lib/extractApiError'
 import QuickViewToggle from '@/components/ui/QuickViewToggle'
+import { BTN_H } from '@/config/buttonMetrics'
 import { card, cardTitle, sub, th, td, numCell, notice, Tile } from './usageCardStyles'
 import CreditsUsageCard from './CreditsUsageCard'
+
+// EXCEL-1 — stream the usage xlsx (per day / per workflow / per user tabs, sale
+// prices only, §9) to disk via a temporary object URL, never a bare <a href>.
+async function downloadUsageXlsx(period) {
+  const res = await api.get('/billing/usage/export', { params: { period }, responseType: 'blob' })
+  const url = URL.createObjectURL(res.data)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = `usage-${period}.xlsx`
+  document.body.appendChild(a)
+  a.click()
+  document.body.removeChild(a)
+  URL.revokeObjectURL(url)
+}
 
 // Current month as 'YYYY-MM' — the default billing period shown on first load
 // (matches the `month` query param the K0 billing endpoint expects).
@@ -120,11 +137,35 @@ export default function GebruikSettings() {
     return () => { alive = false }
   }, [month])
 
+  const [exporting, setExporting] = useState(false)
+  const handleExport = async () => {
+    setExporting(true)
+    try {
+      await downloadUsageXlsx(period)
+    } catch (err) {
+      notifyError(extractApiError(err, t('billing.usage.exportFailed')))
+    } finally {
+      setExporting(false)
+    }
+  }
+
   return (
     <div style={{ maxWidth: 680 }}>
-      <div style={{ marginBottom: 20 }}>
-        <h2 style={{ fontSize: 15, fontWeight: 600, color: 'var(--text)' }}>{t('billing.usage.title')}</h2>
-        <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>{t('billing.usage.desc')}</p>
+      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12, marginBottom: 20 }}>
+        <div>
+          <h2 style={{ fontSize: 15, fontWeight: 600, color: 'var(--text)' }}>{t('billing.usage.title')}</h2>
+          <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>{t('billing.usage.desc')}</p>
+        </div>
+        {/* EXCEL-1 — xlsx export of the current period's usage. */}
+        <button type="button" onClick={handleExport} disabled={exporting}
+          title={t('billing.usage.exportXlsx')}
+          style={{ display: 'flex', alignItems: 'center', gap: 6, height: BTN_H, padding: '0 14px', flexShrink: 0,
+                   fontSize: 13, fontWeight: 500, borderRadius: 8, border: '1px solid var(--border)',
+                   background: 'var(--surface)', color: 'var(--text)',
+                   cursor: exporting ? 'not-allowed' : 'pointer', opacity: exporting ? 0.6 : 1 }}>
+          {exporting ? <Loader2 size={13} className="animate-spin" aria-hidden="true" /> : <FileSpreadsheet size={13} aria-hidden="true" />}
+          {t('billing.usage.exportXlsx')}
+        </button>
       </div>
 
       {/* Blocked: no plan/credit model exists in the backend yet. */}

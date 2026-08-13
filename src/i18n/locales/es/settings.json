@@ -873,11 +873,27 @@
         "creditPrice": "Precio por crédito",
         "amount": "Importe",
         "aiTitle": "Uso de IA"
-      }
+      },
+      "exportXlsx": "Exportar Excel",
+      "exportFailed": "Error al exportar."
     },
     "invoices": {
       "title": "Facturas",
-      "desc": "Consulta y descarga tus facturas."
+      "desc": "Consulta y descarga tus facturas.",
+      "colNumber": "Número",
+      "colPeriod": "Periodo",
+      "colTotal": "Total",
+      "colStatus": "Estado",
+      "colDate": "Fecha",
+      "colAction": "Acción",
+      "download": "Descargar",
+      "downloadError": "Error al descargar.",
+      "loadError": "Error al cargar las facturas.",
+      "empty": "Aún no hay facturas.",
+      "status": {
+        "final": "Definitiva",
+        "credited": "Abonada"
+      }
     }
   },
   "apiKeys": {
@@ -2935,5 +2951,53 @@
     "markupLabel": "Margen de IA (%)",
     "creditPriceLabel": "Precio del crédito de workflow (€)",
     "loadError": "No se pudo cargar los precios de la plataforma."
+  },
+  "invoiceSettings": {
+    "title": "Configuración de facturación",
+    "subtitle": "Datos de la empresa y numeración de las facturas generadas.",
+    "loadError": "Error al cargar.",
+    "saveFailed": "Error al guardar.",
+    "notReadyTitle": "Aún no está listo para facturar",
+    "notReadyDesc": "Completa los datos de la empresa antes de enviar la primera factura real.",
+    "sectionCompany": "Datos de la empresa",
+    "sectionNumbering": "Numeración e IVA",
+    "companyName": "Nombre de la empresa",
+    "address": "Dirección",
+    "postalCity": "Código postal y ciudad",
+    "cocNumber": "Número de registro mercantil",
+    "vatNumber": "Número de IVA",
+    "iban": "IBAN",
+    "email": "Correo electrónico",
+    "vatPercent": "Porcentaje de IVA",
+    "numberPrefix": "Prefijo del número de factura",
+    "autoFinalize": "Finalizar automáticamente",
+    "autoFinalizeHint": "Finalizar y enviar automáticamente las facturas en borrador."
+  },
+  "adminInvoices": {
+    "title": "Facturas",
+    "subtitle": "Vista mensual de todas las facturas de tenants, incluidos los borradores.",
+    "generate": "Generar borradores",
+    "generateSuccess": "Facturas en borrador generadas.",
+    "generateFailed": "Error al generar.",
+    "exportXlsx": "Exportar Excel",
+    "exportFailed": "Error al exportar.",
+    "loadError": "Error al cargar las facturas.",
+    "empty": "Aún no hay facturas para este mes.",
+    "colTenant": "Tenant",
+    "colNumber": "Número",
+    "colTotal": "Total",
+    "colStatus": "Estado",
+    "colAction": "Acción",
+    "finalize": "Finalizar",
+    "finalizeSuccess": "Factura finalizada.",
+    "finalizeFailed": "Error al finalizar.",
+    "resend": "Reenviar",
+    "resendSuccess": "Factura reenviada.",
+    "download": "Descargar",
+    "downloadFailed": "Error al descargar.",
+    "status": {
+      "draft": "Borrador",
+      "final": "Definitiva"
+    }
   }
 }

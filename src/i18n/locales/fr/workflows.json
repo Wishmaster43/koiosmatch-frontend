@@ -208,7 +208,11 @@
     "triggerEvent": "Événement",
     "setActive": "Activer",
     "setInactive": "Désactiver",
-    "editWorkflow": "Modifier le workflow"
+    "editWorkflow": "Modifier le workflow",
+    "archivedBadge": "Archivé",
+    "restore": "Restaurer",
+    "restoreWorkflow": "Restaurer le workflow",
+    "archiveWorkflow": "Archiver le workflow"
   },
   "page": {
     "notRun": "Pas encore exécuté",
@@ -231,7 +235,10 @@
     "addModuleAlert": "Ajoutez au moins un module au workflow avant d'enregistrer.",
     "saveFailed": "Échec de l'enregistrement : {{msg}}",
     "deleteFolderConfirm": "Supprimer le dossier « {{name}} » ? Les workflows resteront sous « Non attribué ».",
-    "deleteFolderInUse": "Ce dossier contient encore des workflows actifs et ne peut pas être supprimé."
+    "deleteFolderInUse": "Ce dossier contient encore des workflows actifs et ne peut pas être supprimé.",
+    "archiveConfirm": "Archiver le workflow \"{{name}}\" ? Les exécutions en cours seront fermées immédiatement.",
+    "archiveSuccess": "Workflow archivé.",
+    "restoreSuccess": "Workflow restauré."
   },
   "ai": {
     "saved": "Enregistré",

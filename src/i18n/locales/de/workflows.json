@@ -208,7 +208,11 @@
     "triggerEvent": "Ereignis",
     "setActive": "Auf aktiv setzen",
     "setInactive": "Auf inaktiv setzen",
-    "editWorkflow": "Workflow bearbeiten"
+    "editWorkflow": "Workflow bearbeiten",
+    "archivedBadge": "Archiviert",
+    "restore": "Wiederherstellen",
+    "restoreWorkflow": "Workflow wiederherstellen",
+    "archiveWorkflow": "Workflow archivieren"
   },
   "page": {
     "notRun": "Noch nicht ausgeführt",
@@ -231,7 +235,10 @@
     "addModuleAlert": "Fügen Sie mindestens ein Modul zum Workflow hinzu, bevor Sie speichern.",
     "saveFailed": "Speichern fehlgeschlagen: {{msg}}",
     "deleteFolderConfirm": "Ordner „{{name}}\" löschen? Die Workflows bleiben unter „Nicht zugewiesen\" bestehen.",
-    "deleteFolderInUse": "Dieser Ordner hat noch aktive Workflows und kann nicht gelöscht werden."
+    "deleteFolderInUse": "Dieser Ordner hat noch aktive Workflows und kann nicht gelöscht werden.",
+    "archiveConfirm": "Workflow \"{{name}}\" archivieren? Laufende Ausführungen werden sofort geschlossen.",
+    "archiveSuccess": "Workflow archiviert.",
+    "restoreSuccess": "Workflow wiederhergestellt."
   },
   "ai": {
     "saved": "Gespeichert",

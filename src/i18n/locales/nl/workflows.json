@@ -268,7 +268,11 @@
     "triggerEvent": "Gebeurtenis",
     "setActive": "Zet op actief",
     "setInactive": "Zet op inactief",
-    "editWorkflow": "Workflow bewerken"
+    "editWorkflow": "Workflow bewerken",
+    "archivedBadge": "Gearchiveerd",
+    "restore": "Herstellen",
+    "restoreWorkflow": "Workflow herstellen",
+    "archiveWorkflow": "Workflow archiveren"
   },
   "page": {
     "notRun": "Nog niet uitgevoerd",
@@ -291,7 +295,10 @@
     "addModuleAlert": "Voeg minimaal één module toe aan de workflow voordat je opslaat.",
     "saveFailed": "Opslaan mislukt: {{msg}}",
     "deleteFolderConfirm": "Map \"{{name}}\" verwijderen? De workflows blijven bestaan onder \"Niet toegewezen\".",
-    "deleteFolderInUse": "Deze map heeft nog actieve workflows en kan niet worden verwijderd."
+    "deleteFolderInUse": "Deze map heeft nog actieve workflows en kan niet worden verwijderd.",
+    "archiveConfirm": "Workflow \"{{name}}\" archiveren? Openstaande runs worden direct gesloten.",
+    "archiveSuccess": "Workflow gearchiveerd.",
+    "restoreSuccess": "Workflow hersteld."
   },
   "ai": {
     "saved": "Opgeslagen",

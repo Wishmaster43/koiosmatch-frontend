@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest'
-import { render, screen, fireEvent } from '@testing-library/react'
+import { render, screen, fireEvent, act } from '@testing-library/react'
 import WorkflowListRow from './WorkflowListRow'
 import type { Workflow } from '@/types/workflow'
 
@@ -58,5 +58,43 @@ describe('WorkflowListRow', () => {
   it('falls back to a single generic bubble when the workflow has no steps yet', () => {
     render(<WorkflowListRow workflow={{ ...baseWorkflow, steps: [] }} onRun={vi.fn()} onEdit={vi.fn()} onToggleStatus={vi.fn()} />)
     expect(screen.queryByText(/^\+\d+$/)).not.toBeInTheDocument()
+  })
+})
+
+// TRASH-OVERAL-1b: an archived row shows its state and a gated restore action —
+// never the run/toggle controls, which no longer apply to a soft-deleted workflow.
+describe('WorkflowListRow · archived (TRASH-OVERAL-1b)', () => {
+  const archivedWorkflow: Workflow = { ...baseWorkflow, archived: true, deleted_at: '2026-08-14T09:00:00Z' }
+
+  it('shows the archived badge and hides run/status-toggle controls', () => {
+    render(<WorkflowListRow workflow={archivedWorkflow} onRun={vi.fn()} onEdit={vi.fn()} onToggleStatus={vi.fn()}
+      canManageFolders onArchive={vi.fn()} onRestore={vi.fn()} />)
+    expect(screen.getByText('Gearchiveerd')).toBeInTheDocument()
+    expect(screen.queryByRole('switch')).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Uitvoeren' })).not.toBeInTheDocument()
+  })
+
+  it('the restore button calls onRestore without opening the editor, and is hidden without permission', async () => {
+    const onEdit = vi.fn()
+    const onRestore = vi.fn()
+    const { rerender } = render(<WorkflowListRow workflow={archivedWorkflow} onRun={vi.fn()} onEdit={onEdit} onToggleStatus={vi.fn()}
+      canManageFolders onArchive={vi.fn()} onRestore={onRestore} />)
+    await act(async () => { fireEvent.click(screen.getByLabelText('Workflow herstellen')) })
+    expect(onRestore).toHaveBeenCalledTimes(1)
+    expect(onEdit).not.toHaveBeenCalled()
+
+    rerender(<WorkflowListRow workflow={archivedWorkflow} onRun={vi.fn()} onEdit={onEdit} onToggleStatus={vi.fn()}
+      canManageFolders={false} onArchive={vi.fn()} onRestore={onRestore} />)
+    expect(screen.queryByLabelText('Workflow herstellen')).not.toBeInTheDocument()
+  })
+
+  it('a live (non-archived) row with permission shows a gated archive action that does not open the editor', () => {
+    const onEdit = vi.fn()
+    const onArchive = vi.fn()
+    render(<WorkflowListRow workflow={baseWorkflow} onRun={vi.fn()} onEdit={onEdit} onToggleStatus={vi.fn()}
+      canManageFolders onArchive={onArchive} onRestore={vi.fn()} />)
+    fireEvent.click(screen.getByLabelText('Workflow archiveren'))
+    expect(onArchive).toHaveBeenCalledTimes(1)
+    expect(onEdit).not.toHaveBeenCalled()
   })
 })

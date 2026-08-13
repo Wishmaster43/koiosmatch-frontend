@@ -873,11 +873,27 @@
         "creditPrice": "Preis pro Credit",
         "amount": "Betrag",
         "aiTitle": "KI-Verbrauch"
-      }
+      },
+      "exportXlsx": "Excel exportieren",
+      "exportFailed": "Export fehlgeschlagen."
     },
     "invoices": {
       "title": "Rechnungen",
-      "desc": "Rechnungen ansehen und herunterladen."
+      "desc": "Rechnungen ansehen und herunterladen.",
+      "colNumber": "Nummer",
+      "colPeriod": "Zeitraum",
+      "colTotal": "Gesamt",
+      "colStatus": "Status",
+      "colDate": "Datum",
+      "colAction": "Aktion",
+      "download": "Herunterladen",
+      "downloadError": "Herunterladen fehlgeschlagen.",
+      "loadError": "Rechnungen konnten nicht geladen werden.",
+      "empty": "Noch keine Rechnungen.",
+      "status": {
+        "final": "Endgültig",
+        "credited": "Gutgeschrieben"
+      }
     }
   },
   "apiKeys": {
@@ -2935,5 +2951,53 @@
     "markupLabel": "KI-Marge (%)",
     "creditPriceLabel": "Workflow-Creditpreis (€)",
     "loadError": "Plattformpreise konnten nicht geladen werden."
+  },
+  "invoiceSettings": {
+    "title": "Rechnungseinstellungen",
+    "subtitle": "Firmendaten und Nummerierung für erstellte Rechnungen.",
+    "loadError": "Laden fehlgeschlagen.",
+    "saveFailed": "Speichern fehlgeschlagen.",
+    "notReadyTitle": "Noch nicht rechnungsbereit",
+    "notReadyDesc": "Firmendaten unten ausfüllen, bevor die erste echte Rechnung versendet wird.",
+    "sectionCompany": "Firmendaten",
+    "sectionNumbering": "Nummerierung & MwSt.",
+    "companyName": "Firmenname",
+    "address": "Adresse",
+    "postalCity": "PLZ und Ort",
+    "cocNumber": "Handelsregisternummer",
+    "vatNumber": "USt-IdNr.",
+    "iban": "IBAN",
+    "email": "E-Mail-Adresse",
+    "vatPercent": "MwSt.-Satz",
+    "numberPrefix": "Rechnungsnummern-Präfix",
+    "autoFinalize": "Automatisch finalisieren",
+    "autoFinalizeHint": "Entwürfe automatisch finalisieren und versenden."
+  },
+  "adminInvoices": {
+    "title": "Rechnungen",
+    "subtitle": "Monatsübersicht aller Mandanten-Rechnungen, inklusive Entwürfe.",
+    "generate": "Entwürfe erstellen",
+    "generateSuccess": "Entwurfsrechnungen erstellt.",
+    "generateFailed": "Erstellen fehlgeschlagen.",
+    "exportXlsx": "Excel exportieren",
+    "exportFailed": "Export fehlgeschlagen.",
+    "loadError": "Rechnungen konnten nicht geladen werden.",
+    "empty": "Noch keine Rechnungen für diesen Monat.",
+    "colTenant": "Mandant",
+    "colNumber": "Nummer",
+    "colTotal": "Gesamt",
+    "colStatus": "Status",
+    "colAction": "Aktion",
+    "finalize": "Finalisieren",
+    "finalizeSuccess": "Rechnung finalisiert.",
+    "finalizeFailed": "Finalisieren fehlgeschlagen.",
+    "resend": "Erneut senden",
+    "resendSuccess": "Rechnung erneut gesendet.",
+    "download": "Herunterladen",
+    "downloadFailed": "Herunterladen fehlgeschlagen.",
+    "status": {
+      "draft": "Entwurf",
+      "final": "Endgültig"
+    }
   }
 }

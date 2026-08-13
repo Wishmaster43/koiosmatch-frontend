@@ -873,11 +873,27 @@
         "creditPrice": "Prix par crédit",
         "amount": "Montant",
         "aiTitle": "Utilisation IA"
-      }
+      },
+      "exportXlsx": "Exporter Excel",
+      "exportFailed": "L'exportation a échoué."
     },
     "invoices": {
       "title": "Factures",
-      "desc": "Consultez et téléchargez vos factures."
+      "desc": "Consultez et téléchargez vos factures.",
+      "colNumber": "Numéro",
+      "colPeriod": "Période",
+      "colTotal": "Total",
+      "colStatus": "Statut",
+      "colDate": "Date",
+      "colAction": "Action",
+      "download": "Télécharger",
+      "downloadError": "Le téléchargement a échoué.",
+      "loadError": "Le chargement des factures a échoué.",
+      "empty": "Pas encore de factures.",
+      "status": {
+        "final": "Définitive",
+        "credited": "Créditée"
+      }
     }
   },
   "apiKeys": {
@@ -2935,5 +2951,53 @@
     "markupLabel": "Marge IA (%)",
     "creditPriceLabel": "Prix du crédit workflow (€)",
     "loadError": "Échec du chargement de la tarification de la plateforme."
+  },
+  "invoiceSettings": {
+    "title": "Paramètres de facturation",
+    "subtitle": "Coordonnées de l'entreprise et numérotation des factures générées.",
+    "loadError": "Le chargement a échoué.",
+    "saveFailed": "L'enregistrement a échoué.",
+    "notReadyTitle": "Pas encore prêt pour la facturation",
+    "notReadyDesc": "Renseignez les coordonnées de l'entreprise ci-dessous avant l'envoi de la première vraie facture.",
+    "sectionCompany": "Coordonnées de l'entreprise",
+    "sectionNumbering": "Numérotation et TVA",
+    "companyName": "Nom de l'entreprise",
+    "address": "Adresse",
+    "postalCity": "Code postal et ville",
+    "cocNumber": "Numéro d'immatriculation",
+    "vatNumber": "Numéro de TVA",
+    "iban": "IBAN",
+    "email": "Adresse e-mail",
+    "vatPercent": "Taux de TVA",
+    "numberPrefix": "Préfixe du numéro de facture",
+    "autoFinalize": "Finalisation automatique",
+    "autoFinalizeHint": "Finaliser et envoyer automatiquement les factures brouillon."
+  },
+  "adminInvoices": {
+    "title": "Factures",
+    "subtitle": "Vue mensuelle de toutes les factures des tenants, brouillons inclus.",
+    "generate": "Générer les brouillons",
+    "generateSuccess": "Factures brouillon générées.",
+    "generateFailed": "La génération a échoué.",
+    "exportXlsx": "Exporter Excel",
+    "exportFailed": "L'exportation a échoué.",
+    "loadError": "Le chargement des factures a échoué.",
+    "empty": "Pas encore de factures pour ce mois.",
+    "colTenant": "Tenant",
+    "colNumber": "Numéro",
+    "colTotal": "Total",
+    "colStatus": "Statut",
+    "colAction": "Action",
+    "finalize": "Finaliser",
+    "finalizeSuccess": "Facture finalisée.",
+    "finalizeFailed": "La finalisation a échoué.",
+    "resend": "Renvoyer",
+    "resendSuccess": "Facture renvoyée.",
+    "download": "Télécharger",
+    "downloadFailed": "Le téléchargement a échoué.",
+    "status": {
+      "draft": "Brouillon",
+      "final": "Définitive"
+    }
   }
 }

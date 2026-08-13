@@ -184,6 +184,34 @@ export function useWorkflowsData(showArchived: boolean) {
     }, { danger: true })
   }
 
+  // Archive (soft-delete) a workflow — DELETE = archive here, never a hard delete
+  // (TRASH-OVERAL-1b). Warns that any open run of this workflow closes loudly
+  // (workflows:reap-stale), then refetches so the archived view picks it up.
+  const handleArchive = (wf: Workflow) => {
+    if (!canManageFolders) return
+    confirm(t('page.archiveConfirm', { name: wf.name }), async () => {
+      try {
+        await api.delete(`/workflows/${wf.id}`)
+        notify('success', t('page.archiveSuccess'))
+        setFetchTick(v => v + 1)
+      } catch {
+        notifyError(t('common:actionFailed'))
+      }
+    }, { danger: true })
+  }
+
+  // Restore an archived workflow (settings.update-gated, mirrors deleteFolder's guard).
+  const handleRestore = async (wf: Workflow) => {
+    if (!canManageFolders) return
+    try {
+      await api.post(`/workflows/${wf.id}/restore`)
+      notify('success', t('page.restoreSuccess'))
+      setFetchTick(v => v + 1)
+    } catch {
+      notifyError(t('common:actionFailed'))
+    }
+  }
+
   const moveToFolder = async (workflowId: string | number | null, folderId: FolderId) => {
     setWorkflows(prev => prev.map(w => w.id === workflowId ? { ...w, folder_id: folderId } : w))
     const wf = workflows.find(w => w.id === workflowId)
@@ -202,6 +230,7 @@ export function useWorkflowsData(showArchived: boolean) {
     selectedFolder, setSelectedFolder, dragOverFolder, setDragOverFolder, dragWf,
     retryLoad, openEditor, closeEditor,
     handleRun, handleToggleStatus, handleSave,
+    handleArchive, handleRestore,
     createFolder, deleteFolder, moveToFolder,
     dialog,
   }

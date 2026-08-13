@@ -212,7 +212,10 @@ export default function CandidatesPage({ intent }: { intent?: CandidateIntent } 
   // The only client-side refinement left is the attention tile (no server filter yet).
   const filtered = useMemo(() => {
     // Three lifecycle views (ERASE-1): trash = pending_erase, archived = archived,
-    // default = active. include_archived returns archived + trash together, so split here.
+    // default = active. TRASH-OVERAL-1b (14-08): include_archived=1 now returns
+    // ONLY soft-deleted rows (archived + pending_erase, never mixed with live rows) —
+    // the lifecycle filter below still narrows that to exactly one of the two, so it
+    // stays correct (a no-op when the server already returns a pure set).
     const base = candidates.filter(c =>
       showTrash    ? c.lifecycle === 'pending_erase'
       : showArchived ? c.lifecycle === 'archived'

@@ -176,3 +176,28 @@ describe('GebruikSettings — blocked pieces render an honest notice, never fake
     expect(screen.getByText(t('billing.usage.daily.notice'))).toBeInTheDocument()
   })
 })
+
+describe('GebruikSettings — EXCEL-1 usage export', () => {
+  it('GETs /billing/usage/export as a blob with the active period, real request seam', async () => {
+    vi.stubGlobal('URL', { ...URL, createObjectURL: vi.fn(() => 'blob:mock-url'), revokeObjectURL: vi.fn() })
+    mockApi()
+    // Override the generic mock so /billing/usage/export resolves a blob while
+    // every other route keeps flowing through the shared aiUsage/wa/billing stubs.
+    const originalImpl = api.get.getMockImplementation()
+    api.get.mockImplementation((url, config) => {
+      if (url === '/billing/usage/export') return Promise.resolve({ data: new Blob(['xlsx'], { type: 'application/vnd.openxmlformats' }) })
+      return originalImpl(url, config)
+    })
+    const clickSpy = vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(() => {})
+
+    render(<GebruikSettings />)
+    const exportBtn = await screen.findByRole('button', { name: t('billing.usage.exportXlsx') })
+    await userEvent.click(exportBtn)
+
+    await waitFor(() => expect(api.get).toHaveBeenCalledWith('/billing/usage/export', { params: { period: 'month' }, responseType: 'blob' }))
+    expect(clickSpy).toHaveBeenCalled()
+
+    clickSpy.mockRestore()
+    vi.unstubAllGlobals()
+  })
+})

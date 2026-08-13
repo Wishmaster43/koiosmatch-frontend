@@ -31,11 +31,15 @@ interface WorkflowsListPanelProps {
   openEditor: (wf: Workflow, runId?: string | number | null) => void
   handleRun: (id?: string | number) => void | Promise<void>
   handleToggleStatus: (wf: Workflow) => void
+  canManageFolders: boolean
+  handleArchive: (wf: Workflow) => void
+  handleRestore: (wf: Workflow) => void | Promise<void>
 }
 
 export default function WorkflowsListPanel({
   loading, error, retryLoad, visibleWorkflows, folders, viewMode, setViewMode,
   showArchived, setShowArchived, selectedFolder, dragWf, openEditor, handleRun, handleToggleStatus,
+  canManageFolders, handleArchive, handleRestore,
 }: WorkflowsListPanelProps) {
   const { t } = useTranslation(['workflows', 'common'])
   return (
@@ -108,6 +112,9 @@ export default function WorkflowsListPanel({
                 onRun={handleRun}
                 onEdit={() => openEditor(wf)}
                 onToggleStatus={() => handleToggleStatus(wf)}
+                canManageFolders={canManageFolders}
+                onArchive={() => handleArchive(wf)}
+                onRestore={() => handleRestore(wf)}
               />
             </div>
           ))}
