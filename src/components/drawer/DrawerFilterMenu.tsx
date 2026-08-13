@@ -7,6 +7,8 @@ import SelectAllRow from '@/components/ui/SelectAllRow'
 import Slider from '@/components/ui/Slider'
 import { parseDate } from '@/components/forms/fields'
 import { toLocalIsoDate } from '@/lib/localDate'
+// PORTAL-MARKER-1: a click inside an open portalled picker menu is never "outside".
+import { isInsideDropdownPortal } from '@/lib/useDropdownPlacement'
 import { useFocusTrap } from '@/hooks/useFocusTrap'
 import { useBatchToggle } from '@/hooks/useBatchToggle'
 
@@ -273,6 +275,9 @@ export default function DrawerFilterMenu({ filters, label, title, clearAllLabel 
       // (same class of bug the multi-select row's non-portal design avoids above).
       const portal = document.getElementById('datepicker-portal')
       if (portal && portal.contains(target)) return
+      // PORTAL-MARKER-1: same class, generalised — a select row's portalled menu
+      // (SelectMenu/CreatableSelect/SearchSelect) is "inside" too.
+      if (isInsideDropdownPortal(target)) return
       setOpen(false)
     }
     document.addEventListener('mousedown', onClick)

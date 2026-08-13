@@ -138,7 +138,9 @@ export default function ApplicationRow({ candidateId, row, appointment, canManag
               <EntityLink page="applications" id={applicationId} title={t('work.openApplication')}>{label}</EntityLink>
             </span>
           : url
-            ? <a href={url} target="_blank" rel="noopener noreferrer" onClick={stop} style={{ ...titleCell, color: 'var(--color-primary-text)', textDecoration: 'none' }}>{label}</a>
+            // Row title reads as CONTENT (Danny 13-08, PDF punt 4: only expanded was
+            // comfortably readable at AENF) — the external-link icon carries the affordance.
+            ? <a href={url} target="_blank" rel="noopener noreferrer" onClick={stop} style={{ ...titleCell, color: 'var(--text)', textDecoration: 'none' }}>{label}</a>
             : vacancyId != null
               ? <span style={titleCell} onClickCapture={() => rememberReturnTab(candidateId, 'work')} onClick={stop}>
                   <EntityLink page="vacancies" id={vacancyId} title={label}>{label}</EntityLink>

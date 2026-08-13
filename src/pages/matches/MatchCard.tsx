@@ -149,7 +149,7 @@ export default function MatchCard({
         {/* hideIcon: the explicit "Open match" ⧉ right after this is the ONE
             open-in-new icon for this row (Danny: "twee keer een icoon met
             open-in-nieuw-venster"). */}
-        <EntityLink page="vacancies" id={vacancyId} title={vacancyTitle || '—'} hideIcon>{vacancyTitle || '—'}</EntityLink>
+        <EntityLink page="vacancies" id={vacancyId} title={vacancyTitle || '—'} hideIcon tone="neutral">{vacancyTitle || '—'}</EntityLink>
       </span>
       {stageLabel && (
         <>
@@ -173,7 +173,7 @@ export default function MatchCard({
   const titleOnly = (
     <span style={{ flex: 1, minWidth: 140, fontSize: 12, fontWeight: 600, color: 'var(--text)', overflow: 'hidden' }}>
       <span onClickCapture={onBeforeOpen} onClick={e => e.stopPropagation()} style={{ minWidth: 0, overflow: 'hidden' }}>
-        <EntityLink page="vacancies" id={vacancyId} title={vacancyTitle || '—'} hideIcon>{vacancyTitle || '—'}</EntityLink>
+        <EntityLink page="vacancies" id={vacancyId} title={vacancyTitle || '—'} hideIcon tone="neutral">{vacancyTitle || '—'}</EntityLink>
       </span>
     </span>
   )

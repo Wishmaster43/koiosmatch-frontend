@@ -7,6 +7,8 @@ import { useState, useRef, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { LayoutDashboard, ChevronDown } from 'lucide-react'
 import type { DashboardType } from './templates'
+// PORTAL-MARKER-1: a click inside an open portalled picker menu is never "outside".
+import { isInsideDropdownPortal } from '@/lib/useDropdownPlacement'
 
 export default function DashboardSwitcher({ value, options, onChange }: {
   value: DashboardType
@@ -20,7 +22,7 @@ export default function DashboardSwitcher({ value, options, onChange }: {
   // Close on an outside click.
   useEffect(() => {
     if (!open) return
-    const h = (e: MouseEvent) => { if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false) }
+    const h = (e: MouseEvent) => { if (isInsideDropdownPortal(e.target as Node)) return; if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false) }
     document.addEventListener('mousedown', h)
     return () => document.removeEventListener('mousedown', h)
   }, [open])

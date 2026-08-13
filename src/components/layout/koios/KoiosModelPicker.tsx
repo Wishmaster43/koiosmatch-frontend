@@ -12,6 +12,8 @@ import { useEffect, useRef, useState } from 'react'
 import { ChevronDown, Check } from 'lucide-react'
 import { tierKeyForModel } from '@/lib/koiosModelTiers'
 import type { TFn } from '@/types/koios'
+// PORTAL-MARKER-1: a click inside an open portalled picker menu is never "outside".
+import { isInsideDropdownPortal } from '@/lib/useDropdownPlacement'
 
 export default function KoiosModelPicker({ models, value, onChange, t }: {
   models?: string[]; value?: string | null; onChange: (m: string) => void; t: TFn
@@ -28,7 +30,7 @@ export default function KoiosModelPicker({ models, value, onChange, t }: {
 
   // Close the menu on an outside click.
   useEffect(() => {
-    const h = (e: MouseEvent) => { if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false) }
+    const h = (e: MouseEvent) => { if (isInsideDropdownPortal(e.target as Node)) return; if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false) }
     document.addEventListener('mousedown', h)
     return () => document.removeEventListener('mousedown', h)
   }, [])

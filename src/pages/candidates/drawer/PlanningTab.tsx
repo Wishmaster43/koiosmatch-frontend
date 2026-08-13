@@ -8,6 +8,8 @@ import { usePools } from '@/lib/usePools'
 import { useDriverLicenses } from '@/lib/useDriverLicenses'
 import { fieldInputStyle } from '@/components/forms/fieldMetrics'
 import type { Candidate } from '@/types/candidate'
+// PORTAL-MARKER-1: a click inside an open portalled picker menu is never "outside".
+import { isInsideDropdownPortal } from '@/lib/useDropdownPlacement'
 
 // AXIS-MATRIX-2 audit R1 (CMFE 2026-07-17): this tab's fields never had a save
 // path — no PATCH/PUT endpoint writes `candidate_planning_settings` anywhere in
@@ -63,7 +65,7 @@ export default function PlanningTab({ c }: { c: Candidate }) {
   // trigger below is disabled and never opens it — kept so it re-activates for
   // free the moment a real save path lands and the gate above is lifted).
   useEffect(() => {
-    const h = (e: MouseEvent) => { if (rijRef.current && !rijRef.current.contains(e.target as Node)) setRowOpen(false) }
+    const h = (e: MouseEvent) => { if (isInsideDropdownPortal(e.target as Node)) return; if (rijRef.current && !rijRef.current.contains(e.target as Node)) setRowOpen(false) }
     document.addEventListener('mousedown', h); return () => document.removeEventListener('mousedown', h)
   }, [])
 

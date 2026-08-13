@@ -13,6 +13,8 @@ import type { Tenant } from '@/types/api'
 // each list row shows a DIFFERENT tenant's own brand colour, never the active
 // tenant's --color-on-accent token (which only reflects the active tenant).
 import { readableOn } from '@/hooks/useTenantTheme'
+// PORTAL-MARKER-1: a click inside an open portalled picker menu is never "outside".
+import { isInsideDropdownPortal } from '@/lib/useDropdownPlacement'
 
 // Only a real 6-digit hex is safe to feed into readableOn's luminance maths.
 const isHexColor = (v: unknown): v is string => typeof v === 'string' && /^#[0-9a-fA-F]{6}$/.test(v)
@@ -88,7 +90,7 @@ export default function TenantSwitcher({ expanded }: { expanded?: boolean }) {
   // Close on outside click / Escape; reset state when closing.
   useEffect(() => {
     if (!open) return
-    const onDoc = (e: MouseEvent) => { if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false) }
+    const onDoc = (e: MouseEvent) => { if (isInsideDropdownPortal(e.target as Node)) return; if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false) }
     const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') setOpen(false) }
     document.addEventListener('mousedown', onDoc)
     document.addEventListener('keydown', onKey)

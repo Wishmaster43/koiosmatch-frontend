@@ -29,7 +29,7 @@ import type { CSSProperties } from 'react'
 import { createPortal } from 'react-dom'
 import { useTranslation } from 'react-i18next'
 import { ChevronDown, Check, Plus, X } from 'lucide-react'
-import { useDropdownPlacement, DROPDOWN_SEARCH_ROW_HEIGHT, DROPDOWN_PORTAL_Z_INDEX } from '@/lib/useDropdownPlacement'
+import { useDropdownPlacement, DROPDOWN_SEARCH_ROW_HEIGHT, DROPDOWN_PORTAL_Z_INDEX, DROPDOWN_PORTAL_ATTR } from '@/lib/useDropdownPlacement'
 
 // Footprint of the opt-in clear button: a 24px WCAG 2.2 (2.5.8) target, parked
 // left of the chevron. The label span reserves exactly this much extra room so a
@@ -198,7 +198,7 @@ export default function CreatableSelect({
         </button>
       )}
       {open && createPortal(
-        <div ref={menuRef} style={{
+        <div ref={menuRef} {...{ [DROPDOWN_PORTAL_ATTR]: '' }} style={{
           position: 'fixed', zIndex: DROPDOWN_PORTAL_Z_INDEX, minWidth: menuWidth, maxHeight: menuMaxHeight,
           // Hidden until the first measurement lands (see useDropdownPlacement's
           // doc comment) — never painted at an unpositioned (0,0) spot.

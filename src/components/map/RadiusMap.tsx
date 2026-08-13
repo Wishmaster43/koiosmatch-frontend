@@ -28,8 +28,14 @@ export default function RadiusMap({ center, radiusKm, points, onCenterChange, on
   // must be visible next to the result pins) — absent on plain list-as-map pages.
   centerMarker?: { label: string; sub?: string }
 }) {
+  // MAP-Z-1 (Danny 13-08, screenshot: 'kaart gaat over solliciteren-popup heen'):
+  // Leaflet's internal panes carry z-indexes up to ~1000, which punch through any
+  // overlay whose z sits below that. isolation creates a stacking context of its
+  // own at z 0, trapping every Leaflet layer INSIDE this box — so any modal or
+  // popover above it always wins, on all nine map surfaces at once.
   return (
-    <div style={{ height, borderRadius: 12, overflow: 'hidden', border: '1px solid var(--border)' }}>
+    <div style={{ height, borderRadius: 12, overflow: 'hidden', border: '1px solid var(--border)',
+      position: 'relative', zIndex: 0, isolation: 'isolate' }}>
       <MapContainer center={[center.lat, center.lng]} zoom={9} style={{ height: '100%', width: '100%' }}>
         <TileLayer
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'

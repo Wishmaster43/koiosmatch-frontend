@@ -40,6 +40,18 @@ export const DROPDOWN_SEARCH_ROW_HEIGHT = 44
 // existing modal — comfortably below the Toaster.
 export const DROPDOWN_PORTAL_Z_INDEX = 1100
 
+// PORTAL-MARKER-1 (13-08): every portalled dropdown menu carries this attribute
+// on its root, so any host with its own outside-click-close (DrawerFilterMenu,
+// popovers) can recognise "this click is inside an open picker" even though the
+// portal lives in document.body, outside the host's subtree. Without it the host
+// closes on the option's mousedown before the pick registers — the same class of
+// bug DATE-PORTAL-1 fixed one-off for the DatePicker.
+export const DROPDOWN_PORTAL_ATTR = 'data-dropdown-portal'
+export function isInsideDropdownPortal(target: Node | null): boolean {
+  const el = target instanceof Element ? target : target?.parentElement ?? null
+  return el?.closest(`[${DROPDOWN_PORTAL_ATTR}]`) != null
+}
+
 // A plain (serialisable, stable-shape) copy of the anchor's DOMRect — viewport
 // coordinates, exactly what `position: fixed` consumes directly.
 export interface AnchorRect { top: number; bottom: number; left: number; right: number; width: number }

@@ -74,7 +74,7 @@ export default function ScopedMatchesTab({ scope, id, customerId }: {
 
   const columns: Column<ScopedMatchRow>[] = [
     { key: 'candidate', header: t('matches:cols.candidate'), sortable: true, sortValue: m => m.candidate,
-      render: m => <EntityLink page="candidates" id={m.candidateId}>{m.candidate}</EntityLink> },
+      render: m => <EntityLink tone="neutral" page="candidates" id={m.candidateId}>{m.candidate}</EntityLink> },
     // Point 2: vacancy + fase on one line, the fase in its own status colour —
     // mirrors MatchCard's title exactly, no separate Fase column.
     { key: 'vacancy', header: t('matches:cols.vacancy'), sortable: true, sortValue: m => m.vacancy,
@@ -83,7 +83,7 @@ export default function ScopedMatchesTab({ scope, id, customerId }: {
         const label = meta?.label ?? m.stage
         return (
           <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
-            <EntityLink page="vacancies" id={m.vacancyId}>{m.vacancy}</EntityLink>
+            <EntityLink tone="neutral" page="vacancies" id={m.vacancyId}>{m.vacancy}</EntityLink>
             {label && (
               <>
                 {/* Decorative separator, own element — mirrors MatchCard's title

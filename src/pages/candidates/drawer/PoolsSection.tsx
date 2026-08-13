@@ -5,6 +5,8 @@ import { useCandidatePools } from '../hooks/useCandidatePools'
 import { sectionBlock } from './constants'
 import DrawerAddButton from './DrawerAddButton'
 import type { Candidate } from '@/types/candidate'
+// PORTAL-MARKER-1: a click inside an open portalled picker menu is never "outside".
+import { isInsideDropdownPortal } from '@/lib/useDropdownPlacement'
 
 /**
  * PoolsSection — the talent pools a candidate belongs to (chips), with an add
@@ -22,7 +24,7 @@ export default function PoolsSection({ c }: { c: Candidate }) {
   // Close the add-dropdown on an outside click.
   useEffect(() => {
     if (!open) return
-    const h = (e: MouseEvent) => { if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false) }
+    const h = (e: MouseEvent) => { if (isInsideDropdownPortal(e.target as Node)) return; if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false) }
     document.addEventListener('mousedown', h); return () => document.removeEventListener('mousedown', h)
   }, [open])
 

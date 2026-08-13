@@ -9,10 +9,12 @@
  */
 import type { CSSProperties } from 'react'
 import { useState, useRef, useEffect, useId } from 'react'
+import { createPortal } from 'react-dom'
 import { useTranslation } from 'react-i18next'
 import type { ReactNode } from 'react'
 import { ChevronDown, Check } from 'lucide-react'
 import Avatar from './Avatar'
+import { useDropdownPlacement, DROPDOWN_PORTAL_Z_INDEX, DROPDOWN_PORTAL_ATTR } from '@/lib/useDropdownPlacement'
 
 interface SelectOption {
   value: string
@@ -48,7 +50,15 @@ export default function SelectMenu({ id, 'aria-labelledby': ariaLabelledBy, valu
   const { t } = useTranslation('common')
   const [open, setOpen] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
+  // The portalled menu lives outside `ref`'s subtree — it must ALSO count as
+  // "inside" for the outside-click check, or picking an option self-closes first.
+  const menuRef = useRef<HTMLDivElement>(null)
   const triggerRef = useRef<HTMLButtonElement>(null)
+  // PORTAL (S24a class fix, 13-08): the menu used to be position:absolute inside
+  // the tree, so ANY overflow ancestor (FloatingPanel scroll body, drawer tab)
+  // clipped it at its own box. Same cure as CreatableSelect: portal into
+  // document.body + fixed positioning off the shared flip/clamp hook.
+  const { openUp, maxHeight: menuMaxHeight, rect } = useDropdownPlacement(ref, open)
 
   // Close on outside click or Escape — both listeners only exist while open, so
   // a CLOSED menu never swallows an Escape meant for an ancestor (e.g. a
@@ -65,7 +75,11 @@ export default function SelectMenu({ id, 'aria-labelledby': ariaLabelledBy, valu
   // also reaching the modal; a second press, with no menu open, closes that.
   useEffect(() => {
     if (!open) return
-    const handleClick = (e: MouseEvent) => { if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false) }
+    const handleClick = (e: MouseEvent) => {
+      const target = e.target as Node
+      if (ref.current?.contains(target) || menuRef.current?.contains(target)) return
+      setOpen(false)
+    }
     const handleKey = (e: KeyboardEvent) => { if (e.key === 'Escape') { e.stopPropagation(); setOpen(false) } }
     document.addEventListener('mousedown', handleClick)
     document.addEventListener('keydown', handleKey, true)
@@ -119,11 +133,17 @@ export default function SelectMenu({ id, 'aria-labelledby': ariaLabelledBy, valu
         </span>
         <ChevronDown size={12} style={{ color: 'var(--text-muted)', flexShrink: 0 }} />
       </button>
-      {open && (
-        <div id={listId}
-          style={{ position: 'absolute', top: '100%', left: 0, zIndex: 200, marginTop: 4, minWidth: menuWidth,
+      {open && createPortal(
+        <div id={listId} ref={menuRef} {...{ [DROPDOWN_PORTAL_ATTR]: '' }}
+          style={{ position: 'fixed', zIndex: DROPDOWN_PORTAL_Z_INDEX, minWidth: menuWidth,
+          // Hidden until the first measurement lands — never painted at (0,0).
+          visibility: rect ? 'visible' : 'hidden',
+          left: rect ? rect.left : 0,
+          ...(rect
+            ? (openUp ? { bottom: window.innerHeight - rect.top + 4 } : { top: rect.bottom + 4 })
+            : {}),
           background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 8,
-          boxShadow: '0 4px 16px rgba(0,0,0,0.1)', overflow: 'hidden', maxHeight: 240, overflowY: 'auto' }}>
+          boxShadow: '0 4px 16px rgba(0,0,0,0.1)', overflow: 'hidden', maxHeight: menuMaxHeight, overflowY: 'auto' }}>
           {/* Filter box — autofocused so typing narrows immediately, Escape-safe
               (the outside-click/Escape handling above owns closing). */}
           <div style={{ padding: 6, borderBottom: '1px solid var(--border)', position: 'sticky', top: 0, background: 'var(--surface)' }}>
@@ -149,7 +169,8 @@ export default function SelectMenu({ id, 'aria-labelledby': ariaLabelledBy, valu
               {value === o.value && <Check size={13} style={{ color: 'var(--color-primary-text)', flexShrink: 0 }} />}
             </button>
           ))}
-        </div>
+        </div>,
+        document.body,
       )}
     </div>
   )

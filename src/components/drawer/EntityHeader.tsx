@@ -11,6 +11,8 @@ import { useTranslation } from 'react-i18next'
 import { X, Maximize2, Minimize2, Camera } from 'lucide-react'
 import AvatarJs from '../ui/Avatar'
 import SelectMenuJs from '../ui/SelectMenu'
+// PORTAL-MARKER-1: a click inside an open portalled picker menu is never "outside".
+import { isInsideDropdownPortal } from '@/lib/useDropdownPlacement'
 
 type AnyProps = Record<string, unknown>
 // Still-untyped JS UI — accept any props at the boundary.
@@ -30,7 +32,7 @@ function PhotoAvatar({ avatar, onChange, labels }: { avatar: AvatarConfig; onCha
 
   useEffect(() => {
     if (!menuOpen) return
-    const h = (e: MouseEvent) => { if (ref.current && !ref.current.contains(e.target as Node)) setMenuOpen(false) }
+    const h = (e: MouseEvent) => { if (isInsideDropdownPortal(e.target as Node)) return; if (ref.current && !ref.current.contains(e.target as Node)) setMenuOpen(false) }
     document.addEventListener('mousedown', h)
     return () => document.removeEventListener('mousedown', h)
   }, [menuOpen])

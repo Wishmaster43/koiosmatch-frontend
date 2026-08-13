@@ -27,6 +27,8 @@ import KoiosVoiceButton from './koios/KoiosVoiceButton'
 import type { KoiosEntityHit } from './koios/useKoiosEntitySearch'
 import type { KoiosResultRef } from './koios/koiosTypes'
 import type { KoiosChatMessage, KoiosContextRef, TFn } from '@/types/koios'
+// PORTAL-MARKER-1: a click inside an open portalled picker menu is never "outside".
+import { isInsideDropdownPortal } from '@/lib/useDropdownPlacement'
 
 // gradient used for the assistant avatar + user bubble.
 const GRADIENT = 'linear-gradient(135deg,var(--color-primary),var(--color-violet))'
@@ -167,6 +169,7 @@ export default function KoiosPanel({ open, onClose, onNavigate }: { open?: boole
   // Close the mention picker on an outside click.
   useEffect(() => {
     const handler = (e: MouseEvent) => {
+      if (isInsideDropdownPortal(e.target as Node)) return
       if (mentionRef.current && !mentionRef.current.contains(e.target as Node)) { setShowMention(false); setActiveCategory(null) }
     }
     document.addEventListener('mousedown', handler)

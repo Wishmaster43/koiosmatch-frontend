@@ -3,6 +3,8 @@ import { useTranslation } from 'react-i18next'
 import { History } from 'lucide-react'
 import { sectionTitle } from '@/components/ui/SectionCard'
 import FloatingPanel from '@/components/ui/FloatingPanel'
+// PORTAL-MARKER-1: a click inside an open portalled picker menu is never "outside".
+import { isInsideDropdownPortal } from '@/lib/useDropdownPlacement'
 
 /**
  * ChangelogPopover — THE one shared record-history affordance for every entity
@@ -44,7 +46,7 @@ export default function ChangelogPopover({ label, children }: { label?: string; 
   // its chrome — including a drag on the header — never counts as "outside".
   useEffect(() => {
     if (!open) return
-    const onClick = (e: MouseEvent) => { if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false) }
+    const onClick = (e: MouseEvent) => { if (isInsideDropdownPortal(e.target as Node)) return; if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false) }
     document.addEventListener('mousedown', onClick)
     return () => document.removeEventListener('mousedown', onClick)
   }, [open])

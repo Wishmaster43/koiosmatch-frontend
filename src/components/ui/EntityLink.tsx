@@ -23,7 +23,7 @@ export function buildEntityDeepLink(page: string, id: Id): string {
  * URL contract), per Danny's punt 16 (16-07): "drukken op icon = nieuw tabblad,
  * drukken op de naam = het item". Renders plain text when there is no target id.
  */
-export default function EntityLink({ page, id, children, title, hideIcon = false }: { page: string; id?: Id | null; children: ReactNode; title?: string; hideIcon?: boolean }) {
+export default function EntityLink({ page, id, children, title, hideIcon = false, tone = 'accent' }: { page: string; id?: Id | null; children: ReactNode; title?: string; hideIcon?: boolean; tone?: 'accent' | 'neutral' }) {
   const { t } = useTranslation('common')
   const { openEntity } = useNavigation()
   if (id == null) return <>{children}</>
@@ -34,7 +34,10 @@ export default function EntityLink({ page, id, children, title, hideIcon = false
     <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, minWidth: 0, maxWidth: '100%' }}>
       <button type="button" title={title} onClick={() => openEntity(page, id)}
         style={{ padding: 0, background: 'none', border: 'none', font: 'inherit', textAlign: 'left',
-          color: 'var(--color-primary-text)', cursor: 'pointer', textDecoration: 'none',
+          // tone 'neutral' (Danny 13-08, PDF punt 4/7a: rijen pas uitgeklapt leesbaar):
+          // a row TITLE reads as content — plain text colour; the link icon carries
+          // the affordance. Default 'accent' keeps every existing caller unchanged.
+          color: tone === 'neutral' ? 'var(--text)' : 'var(--color-primary-text)', cursor: 'pointer', textDecoration: 'none',
           minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
         onMouseEnter={e => { e.currentTarget.style.textDecoration = 'underline' }}
         onMouseLeave={e => { e.currentTarget.style.textDecoration = 'none' }}>

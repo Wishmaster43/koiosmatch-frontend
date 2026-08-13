@@ -13,6 +13,8 @@ import { ChevronDown, ChevronRight, ArrowLeft, Search, Check } from 'lucide-reac
 import { useTranslation } from 'react-i18next'
 import { BTN_H } from '@/config/buttonMetrics'
 import SelectAllRow from './SelectAllRow'
+// PORTAL-MARKER-1: a click inside an open portalled picker menu is never "outside".
+import { isInsideDropdownPortal } from '@/lib/useDropdownPlacement'
 
 // Icon contract shared by the trigger, nodes and options (lucide-compatible).
 type IconComponent = ComponentType<{ size?: number; style?: CSSProperties; color?: string }>
@@ -95,7 +97,7 @@ export default function ActionMenu({ label, icon: Icon, items = [], menuWidth = 
   // Close on outside click while open.
   useEffect(() => {
     if (!open) return
-    const h = (e: MouseEvent) => { if (ref.current && !ref.current.contains(e.target as Node)) close() }
+    const h = (e: MouseEvent) => { if (isInsideDropdownPortal(e.target as Node)) return; if (ref.current && !ref.current.contains(e.target as Node)) close() }
     document.addEventListener('mousedown', h)
     return () => document.removeEventListener('mousedown', h)
   }, [open])
