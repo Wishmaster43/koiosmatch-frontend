@@ -93,6 +93,17 @@ export default function SearchSelect({
     return () => document.removeEventListener('mousedown', h)
   }, [open])
 
+  // Document-level, CAPTURE-phase Escape (mirrors SelectMenu — see its doc comment
+  // for the full rationale): closes the popover no matter which element inside it
+  // holds focus — an option button, not just the search input — since only the
+  // search input's own onKeyDown previously handled the key.
+  useEffect(() => {
+    if (!open) return
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') { e.stopPropagation(); setOpen(false) } }
+    document.addEventListener('keydown', onKey, true)
+    return () => document.removeEventListener('keydown', onKey, true)
+  }, [open])
+
   // Restore focus to the trigger whenever the popover transitions open → closed —
   // the search input lives in a PORTAL and unmounts on every close path, so focus
   // would otherwise land on <body>. Inside a modal that is not cosmetic: the house

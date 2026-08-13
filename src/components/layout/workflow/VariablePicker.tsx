@@ -13,6 +13,7 @@ import { useTranslation } from 'react-i18next'
 import { Braces, Search, ChevronRight } from 'lucide-react'
 import { MODULE_META } from '@/modules/index'
 import { fieldLabel, fieldPlaceholder } from './moduleI18n'
+import { useFocusTrap } from '@/hooks/useFocusTrap'
 import type { WorkflowField, WorkflowVarField, WorkflowVarGroup } from '@/types/workflow'
 
 export type InsertMode = 'token' | 'path'
@@ -133,21 +134,29 @@ function PickerPopover({ variables, onInsert, onClose }: {
   const { t } = useTranslation('workflows')
   const [q, setQ] = useState('')
   const query = q.trim().toLowerCase()
+  // Traps Tab inside the popover, closes on Escape, and restores focus to the
+  // "{ }" toggle button on close — the public useFocusTrap contract (§6).
+  const trapRef = useFocusTrap<HTMLDivElement>(onClose)
 
   return (
     <>
       {/* Click-away backdrop */}
       <div style={{ position: 'fixed', inset: 0, zIndex: 20 }} onClick={onClose} />
 
-      <div role="dialog" aria-label={t('vars.title')}
+      <div ref={trapRef} role="dialog" aria-modal="true" aria-label={t('vars.title')} tabIndex={-1}
         style={{ position: 'absolute', top: '100%', right: 0, marginTop: 4, minWidth: 340, maxWidth: '90vw', maxHeight: 340,
                  display: 'flex', flexDirection: 'column', background: 'var(--surface)', zIndex: 21,
-                 border: '1px solid var(--border)', borderRadius: 10, boxShadow: '0 8px 24px rgba(0,0,0,0.14)', overflow: 'hidden' }}>
+                 border: '1px solid var(--border)', borderRadius: 10, boxShadow: '0 8px 24px rgba(0,0,0,0.14)', overflow: 'hidden', outline: 'none' }}>
 
         {/* Search */}
         <div style={{ position: 'relative', padding: 8, borderBottom: '1px solid var(--border)', flexShrink: 0 }}>
           <Search size={12} style={{ position: 'absolute', left: 16, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
-          <input autoFocus value={q} onChange={e => setQ(e.target.value)}
+          {/* No `autoFocus` here — useFocusTrap now owns moving focus into the panel
+              on open. The two used to race (autoFocus fires synchronously at DOM
+              insertion, before the trap's effect runs), which made the trap capture
+              this input — not the real trigger — as "previously focused", so
+              restoring focus on close landed nowhere once the input itself unmounted. */}
+          <input value={q} onChange={e => setQ(e.target.value)}
             placeholder={t('vars.search')} aria-label={t('vars.search')}
             style={{ width: '100%', padding: '5px 8px 5px 26px', fontSize: 12, border: '1px solid var(--border)',
                      borderRadius: 6, outline: 'none', background: 'var(--surface)', color: 'var(--text)' }} />

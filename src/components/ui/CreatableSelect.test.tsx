@@ -223,6 +223,23 @@ describe('CreatableSelect · clearable (opt-in)', () => {
   })
 })
 
+// PLAN-KLANTEN K1c: Escape must close the popover immediately after opening,
+// while focus is still on the trigger button (not yet moved into the search
+// input) — the input's own onKeyDown never sees the key in that window, so the
+// document-level capture listener (mirroring SelectMenu) is what has to catch it.
+describe('CreatableSelect · Escape closes immediately after opening', () => {
+  it('closes on Escape while focus is still on the trigger', () => {
+    render(<CreatableSelect value={null} onChange={() => {}} options={['A', 'B']} placeholder="Select" allowCreate={false} />)
+    const trigger = screen.getByRole('button', { name: 'Select' })
+    fireEvent.click(trigger)
+    expect(screen.getByPlaceholderText('Select')).toBeInTheDocument()
+    // Dispatched at the document (capture phase), same as a real keydown while
+    // the trigger button — not the portalled input — still has focus.
+    fireEvent.keyDown(document, { key: 'Escape' })
+    expect(screen.queryByPlaceholderText('Select')).not.toBeInTheDocument()
+  })
+})
+
 // The clear button is a sibling of the trigger and the existing close-focus
 // effect only restores focus when NOTHING else claimed it — clearing must not
 // regress that (the X keeps focus, it is what the user just pressed).

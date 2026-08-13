@@ -104,6 +104,17 @@ export default function CreatableSelect({
   }, [open])
   useEffect(() => { if (open) inputRef.current?.focus() }, [open])
 
+  // Document-level, CAPTURE-phase Escape (mirrors SelectMenu — see its doc comment
+  // for the full rationale): closes the popover even right after opening, before
+  // focus has moved into the portalled search input, instead of relying solely on
+  // that input's own onKeyDown (which only fires once focus already landed there).
+  useEffect(() => {
+    if (!open) return
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') { e.stopPropagation(); setOpen(false) } }
+    document.addEventListener('keydown', onKey, true)
+    return () => document.removeEventListener('keydown', onKey, true)
+  }, [open])
+
   // Restore focus to the trigger whenever the popover transitions open → closed
   // (pick / Escape / outside click — the search input unmounts with the portal
   // on every one of those paths, so focus would otherwise land nowhere). Never

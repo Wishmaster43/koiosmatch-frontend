@@ -116,6 +116,21 @@ describe('SearchSelect · flip + clamp + portal', () => {
   })
 })
 
+// PLAN-KLANTEN K1c: Escape must close the popover even when an OPTION button
+// (not the search input) holds focus — only the search input's own onKeyDown
+// handled the key before, so tabbing/clicking into an option left Escape dead.
+describe('SearchSelect · Escape closes regardless of which element has focus', () => {
+  it('closes on Escape while an option button holds focus', () => {
+    render(<SearchSelect triggerLabel="Vestiging toevoegen" options={['A', 'B']} onToggle={() => {}} />)
+    fireEvent.click(screen.getByRole('button', { name: /Vestiging toevoegen/ }))
+    const option = screen.getByRole('button', { name: 'A' })
+    option.focus()
+    expect(option).toHaveFocus()
+    fireEvent.keyDown(document, { key: 'Escape' })
+    expect(screen.queryByPlaceholderText('search')).not.toBeInTheDocument()
+  })
+})
+
 // `disabled` (2026-08): replaces the per-callsite onClick-guard emulation (e.g.
 // CustomFieldsSettings' locked type selector) with a first-class prop — the
 // dropdown must never open, via mouse OR keyboard, while disabled.
