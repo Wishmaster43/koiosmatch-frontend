@@ -58,7 +58,7 @@
     },
     "markDone": "Marquer comme terminé",
     "tags": "Tags",
-    "lookupNotReady": "Impossible d'enregistrer pour l'instant — cette option n'est pas encore disponible. Veuillez réessayer dans un instant."
+    "lookupNotReady": "Impossible d'enregistrer pour l'instant. Cette option n'est pas encore disponible. Veuillez réessayer dans un instant."
   },
   "details": {
     "title": "Détails de la tâche",
@@ -141,7 +141,7 @@
     "assigneeUnassigned": "Agence (personne d'assigné)",
     "assigneeUnassignedHint": "Personne n'est responsable : la tâche reste à l'agence jusqu'à ce qu'un collègue la prenne en charge.",
     "assigneeWithRole": "{{name}} · {{role}}",
-    "assigneeEmpty": "Aucun collègue à qui assigner pour l'instant — seule l'agence peut être choisie.",
+    "assigneeEmpty": "Aucun collègue à qui assigner pour l'instant. Seule l'agence peut être choisie.",
     "assigneeLoadError": "Impossible de charger les collègues.",
     "team": "Service",
     "teamPlaceholder": "Choisir un service",
@@ -212,10 +212,10 @@
     "dueOverdue": "Cette tâche est en retard de {{count}} jour(s).",
     "dueUpcoming": "Cette tâche arrive à échéance dans {{count}} jour(s).",
     "assigneeLabel": "Affectation",
-    "unassigned": "Cette tâche reste au niveau de l'agence — pas encore affectée à un collaborateur précis.",
+    "unassigned": "Cette tâche reste au niveau de l'agence. Pas encore affectée à un collaborateur précis.",
     "assignedTo": "Affectée à {{name}}.",
     "linksLabel": "Lien",
-    "noLinks": "Cette tâche n'est liée à aucun enregistrement — associez un candidat, un client ou un autre enregistrement pour plus de contexte.",
+    "noLinks": "Cette tâche n'est liée à aucun enregistrement. Associez un candidat, un client ou un autre enregistrement pour plus de contexte.",
     "linked": "Liée à {{count}} enregistrement(s)."
   },
   "filters": {

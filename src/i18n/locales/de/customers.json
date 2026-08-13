@@ -146,7 +146,7 @@
     "billingAddress": {
       "title": "Rechnungsadresse",
       "poBox": "Postfach",
-      "usesVisitAddress": "Leer — die Rechnung geht an die Besuchsadresse.",
+      "usesVisitAddress": "Leer. Die Rechnung geht an die Besuchsadresse.",
       "visitEmpty": "Keine Besuchsadresse hinterlegt",
       "hint": "Leer lassen, wenn die Rechnung an die Besuchsadresse geht. Nur bei abweichender Adresse oder Postfach ausfüllen."
     }
@@ -219,12 +219,12 @@
       "pickContactSearch": "Nach Name, Funktion oder E-Mail suchen",
       "pickContactLinks": "Aktuell verknüpft mit",
       "pickContactNoLinks": "Noch nicht verknüpft",
-      "coupleNote": "Das Verknüpfen VERSCHIEBT den Kontakt an diesen Standort — die bisherige Verknüpfung entfällt.",
+      "coupleNote": "Das Verknüpfen VERSCHIEBT den Kontakt an diesen Standort. Die bisherige Verknüpfung entfällt.",
       "branchTitle": "Standort",
       "branchInherited": "Folgt dem Kunden",
       "branchOwn": "Abweichend gesetzt",
       "branchLink": "Standort verknüpfen",
-      "branchEmpty": "Kein eigener Standort — dieser Standort folgt dem Kunden.",
+      "branchEmpty": "Kein eigener Standort. Dieser Standort folgt dem Kunden.",
       "branchHint": "Leer lassen bedeutet: gleiche Standorte wie beim Kunden. Eine eigene Verknüpfung weicht bewusst ab.",
       "isPrimaryContact": "Primärer Ansprechpartner dieses Standorts",
       "setPrimaryContact": "Zum primären Ansprechpartner dieses Standorts machen",
@@ -238,7 +238,7 @@
       "linkNamed": "{{name}} verknüpfen",
       "createAndLink": "Kontakt erstellen und verknüpfen",
       "description": "Standorttext",
-      "contactNotLinked": "Nur Text — noch nicht mit einem Ansprechpartner verknüpft",
+      "contactNotLinked": "Nur Text. Noch nicht mit einem Ansprechpartner verknüpft",
       "changePrimaryContact": "Ansprechpartner ändern",
       "mergeLocation": "Standort zusammenführen",
       "archiveLocation": "Standort archivieren",
@@ -256,7 +256,7 @@
     },
     "saveFailed": "Speichern fehlgeschlagen.",
     "deleteFailed": "Löschen fehlgeschlagen.",
-    "deleteInUse": "Löschen nicht möglich — dieser Standort wird noch verwendet.",
+    "deleteInUse": "Löschen nicht möglich. Dieser Standort wird noch verwendet.",
     "archivedBanner": {
       "since": "Archiviert am {{date}}",
       "flag": "Archiviert",
@@ -326,7 +326,7 @@
     "deleteConfirm": "Diese Abteilung löschen?",
     "saveFailed": "Speichern fehlgeschlagen.",
     "deleteFailed": "Löschen fehlgeschlagen.",
-    "deleteInUse": "Löschen nicht möglich — diese Abteilung wird noch verwendet.",
+    "deleteInUse": "Löschen nicht möglich. Diese Abteilung wird noch verwendet.",
     "archivedBanner": {
       "since": "Archiviert am {{date}}",
       "flag": "Archiviert",
@@ -400,7 +400,7 @@
     "deleteConfirm": "Diesen Kontakt löschen?",
     "saveFailed": "Speichern fehlgeschlagen.",
     "deleteFailed": "Löschen fehlgeschlagen.",
-    "deleteInUse": "Löschen nicht möglich — dieser Kontakt wird noch verwendet.",
+    "deleteInUse": "Löschen nicht möglich. Dieser Kontakt wird noch verwendet.",
     "archivedBanner": {
       "since": "Archiviert am {{date}}",
       "flag": "Archiviert",
@@ -517,8 +517,8 @@
     "downloadSelected": "Herunterladen ({{count}})",
     "preview": "Vorschau",
     "deleteTitle": "Dokument löschen",
-    "deleteOneMessage": "Sind Sie sicher? '{{name}}' wird endgültig gelöscht — dies kann nicht rückgängig gemacht werden.",
-    "deleteManyMessage": "Sind Sie sicher? {{count}} Dokumente werden endgültig gelöscht — dies kann nicht rückgängig gemacht werden.",
+    "deleteOneMessage": "Sind Sie sicher? '{{name}}' wird endgültig gelöscht. Dies kann nicht rückgängig gemacht werden.",
+    "deleteManyMessage": "Sind Sie sicher? {{count}} Dokumente werden endgültig gelöscht. Dies kann nicht rückgängig gemacht werden.",
     "deleteSelected": "Löschen ({{count}})",
     "linkLevelLabel": "Dokument verknüpfen mit",
     "allTypes": "Alle Typen"
@@ -540,7 +540,7 @@
     "delete": "Löschen",
     "confirmDelete": "Diese Preisvereinbarung löschen?",
     "deleteFailed": "Löschen fehlgeschlagen.",
-    "deleteInUse": "Löschen nicht möglich — diese Vereinbarung wird noch verwendet.",
+    "deleteInUse": "Löschen nicht möglich. Diese Vereinbarung wird noch verwendet.",
     "saveFailed": "Speichern fehlgeschlagen.",
     "loading": "Preisvereinbarungen werden geladen…",
     "loadError": "Laden der Preisvereinbarungen fehlgeschlagen.",
@@ -637,7 +637,7 @@
     },
     "import": {
       "title": "Kunde aus Datei",
-      "intro": "Der Import einer Datei legt diesen Kunden — mit Standorten, Abteilungen und Ansprechpartnern — sofort an. Das Formular unten wird dabei nicht ausgefüllt; prüfen Sie die Vorschau, bevor Sie bestätigen."
+      "intro": "Der Import einer Datei legt diesen Kunden (mit Standorten, Abteilungen und Ansprechpartnern) sofort an. Das Formular unten wird dabei nicht ausgefüllt; prüfen Sie die Vorschau, bevor Sie bestätigen."
     }
   },
   "subModal": {
@@ -709,9 +709,9 @@
     "gender": "Geschlecht",
     "import": {
       "title": "{{entity}} aus Datei",
-      "intro": "Beim Importieren einer Datei werden {{entity}} direkt angelegt — das Formular unten wird dabei nicht ausgefüllt. Prüfen Sie zuerst die Vorschau, bevor Sie bestätigen.",
-      "parentWarning": "Der Kundenname in der Datei bestimmt, welcher Kunde die Zeilen erhält — das muss nicht „{{customerName}}\" sein. Prüfen Sie die Vorschau.",
-      "mismatchWarning": "{{count}} Zeile(n) in dieser Datei gehören zu einem anderen Kunden als diesem ({{names}}) — diese Zeilen landen dort, nicht hier.",
+      "intro": "Beim Importieren einer Datei werden {{entity}} direkt angelegt. Das Formular unten wird dabei nicht ausgefüllt. Prüfen Sie zuerst die Vorschau, bevor Sie bestätigen.",
+      "parentWarning": "Der Kundenname in der Datei bestimmt, welcher Kunde die Zeilen erhält. Das muss nicht „{{customerName}}\" sein. Prüfen Sie die Vorschau.",
+      "mismatchWarning": "{{count}} Zeile(n) in dieser Datei gehören zu einem anderen Kunden als diesem ({{names}}). Diese Zeilen landen dort, nicht hier.",
       "mismatchConfirm": "{{count}} Zeile(n) dieser Datei werden bei einem anderen Kunden ({{names}}) angelegt oder aktualisiert, nicht bei dem Kunden, den Sie gerade geöffnet haben. Trotzdem fortfahren?",
       "mismatchTitle": "Anderer Kunde in Datei",
       "mismatchProceed": "Trotzdem importieren"
@@ -748,14 +748,14 @@
     "refresh": "Aktualisieren",
     "analyzing": "Koios AI analysiert das Kundenprofil…",
     "completeness": "Vollständigkeit",
-    "completeGood": "Kundenprofil ist gut ausgefüllt — keine fehlenden Kernfelder erkannt.",
+    "completeGood": "Kundenprofil ist gut ausgefüllt. Keine fehlenden Kernfelder erkannt.",
     "completePartial": "Kundenprofil ist zu {{pct}}% vollständig. Fügen Sie Handelsregisternummer, USt-IdNr., Branche und Kontaktdaten für ein vollständigeres Bild hinzu.",
     "relationshipLabel": "Beziehung",
     "relationshipActive": "{{vacancies}} offene Stelle(n) · {{matches}} aktive(s) Match(es).",
     "relationshipNone": "Keine offenen Stellen oder aktiven Matches erfasst.",
-    "locationComplete": "Dieser Standort ist gut gefüllt — Adresse, Registrierung und Kontakt sind bekannt.",
+    "locationComplete": "Dieser Standort ist gut gefüllt. Adresse, Registrierung und Kontakt sind bekannt.",
     "locationPartial": "Dieser Standort ist zu {{pct}}% vollständig. Ergänze Adresse, Neben-Handelsregisternr., USt-IdNr. und Kontaktdaten.",
-    "departmentComplete": "Diese Abteilung ist gut gefüllt — Beschreibung, Status und Kostenstelle sind bekannt.",
+    "departmentComplete": "Diese Abteilung ist gut gefüllt. Beschreibung, Status und Kostenstelle sind bekannt.",
     "departmentPartial": "Diese Abteilung ist zu {{pct}}% vollständig. Ergänze Beschreibung, Status und Kostenstelle."
   },
   "tasks": {
@@ -804,7 +804,7 @@
   },
   "koios": {
     "reasons": {
-      "noOpenVacancies": "Keine offenen Stellen — bei diesem Kunden nachfassen."
+      "noOpenVacancies": "Keine offenen Stellen. Bei diesem Kunden nachfassen."
     }
   },
   "validation": {

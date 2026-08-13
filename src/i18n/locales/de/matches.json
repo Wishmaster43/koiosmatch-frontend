@@ -39,7 +39,7 @@
     "archiveConfirm": "Diesen Match archivieren? Sie können ihn danach wiederherstellen.",
     "archived": "Match archiviert.",
     "archiveFailed": "Match konnte nicht archiviert werden.",
-    "archiveBlockedActiveContract": "Dieser Match hat einen aktiven Vertrag — beenden Sie ihn zuerst.",
+    "archiveBlockedActiveContract": "Dieser Match hat einen aktiven Vertrag. Beenden Sie ihn zuerst.",
     "archivedBanner": {
       "since": "Archiviert seit {{date}}",
       "flag": "Archiviert",
@@ -92,7 +92,7 @@
       "sellRate": "Verkaufstarif",
       "margin": "Marge",
       "costCenter": "Kostenstelle",
-      "billingEmails": "Rechnungs-E-Mail(s) — eine pro Zeile oder durch Komma getrennt",
+      "billingEmails": "Rechnungs-E-Mail(s), eine pro Zeile oder durch Komma getrennt",
       "remarks": "Anmerkungen",
       "loading": "Vertragsdetails werden geladen…",
       "error": "Vertragsdetails konnten nicht geladen werden.",
@@ -122,7 +122,7 @@
       "title": "Anmerkungen",
       "saved": "Anmerkungen gespeichert.",
       "saveError": "Anmerkungen konnten nicht gespeichert werden.",
-      "deprecated": "Dieses Feld entfällt. Verschieben Sie den Text in die Notizen — dort erhält er Autor, Datum, Typ und Kanal und erscheint in der Zeitleiste.",
+      "deprecated": "Dieses Feld entfällt. Verschieben Sie den Text in die Notizen. Dort erhält er Autor, Datum, Typ und Kanal und erscheint in der Zeitleiste.",
       "moveToNotes": "In Notizen verschieben",
       "moving": "Wird verschoben…",
       "moved": "Die Bemerkung wurde in die Notizen verschoben.",
@@ -159,7 +159,7 @@
       "mustBeAfterCurrent": "Das neue Enddatum muss nach dem aktuellen Enddatum liegen.",
       "success": "Match verlängert.",
       "error": "Der Match konnte nicht verlängert werden.",
-      "disabledArchived": "Archivierter Match — zuerst wiederherstellen.",
+      "disabledArchived": "Archivierter Match. Zuerst wiederherstellen.",
       "disabledClosed": "Dieser Match wurde bereits beendet."
     }
   },
@@ -226,7 +226,7 @@
   },
   "page": {
     "searchPlaceholder": "Matches suchen",
-    "openNotFound": "Match nicht gefunden — möglicherweise entfernt."
+    "openNotFound": "Match nicht gefunden. Möglicherweise entfernt."
   },
   "add": {
     "button": "Neuer Match"
@@ -250,18 +250,18 @@
     "analyzing": "Koios AI analysiert das Match…",
     "scoreLabel": "Score",
     "scoreGood": "Starkes Match ({{score}}).",
-    "scoreAverage": "Durchschnittliches Match ({{score}}) — Passung prüfen.",
-    "scorePoor": "Schwaches Match ({{score}}) — braucht Aufmerksamkeit.",
+    "scoreAverage": "Durchschnittliches Match ({{score}}). Passung prüfen.",
+    "scorePoor": "Schwaches Match ({{score}}). Braucht Aufmerksamkeit.",
     "scoreUnknown": "Noch keine Bewertung.",
     "windowLabel": "Vertragszeitraum",
     "windowExpired": "Das Enddatum liegt bereits {{days}} Tag(e) zurück.",
-    "windowWarning": "Noch {{days}} Tag(e) bis zum Enddatum — rechtzeitig verlängern oder abschließen.",
+    "windowWarning": "Noch {{days}} Tag(e) bis zum Enddatum. Rechtzeitig verlängern oder abschließen.",
     "windowFine": "Vertragszeitraum verläuft planmäßig.",
     "windowUnknown": "Kein Enddatum bekannt."
   },
   "koios": {
     "reasons": {
-      "endDateApproaching": "Das Vertragsende naht oder ist bereits verstrichen — Verlängerung erwägen."
+      "endDateApproaching": "Das Vertragsende naht oder ist bereits verstrichen. Verlängerung erwägen."
     }
   }
 }

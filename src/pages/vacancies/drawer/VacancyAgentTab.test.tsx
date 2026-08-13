@@ -202,7 +202,7 @@ describe('VacancyAgentTab · backfill existing applicants (INTERVIEW-BACKFILL-1)
     await user.click(screen.getByRole('button', { name: 'Bevestigen' }))
 
     await waitFor(() => expect(mockNotifySuccess).toHaveBeenCalledWith(
-      '2 van 5 gestart — 3 overgeslagen: 2 geen WhatsApp-toestemming, 1 loopt al.',
+      '2 van 5 gestart, 3 overgeslagen: 2 geen WhatsApp-toestemming, 1 loopt al.',
     ))
   })
 
@@ -220,7 +220,7 @@ describe('VacancyAgentTab · backfill existing applicants (INTERVIEW-BACKFILL-1)
     await user.click(screen.getByRole('button', { name: 'Bevestigen' }))
 
     await waitFor(() => expect(mockNotifySuccess).toHaveBeenCalledWith(
-      '1 van 2 gestart — 1 overgeslagen: 1 onbekende fout.',
+      '1 van 2 gestart, 1 overgeslagen: 1 onbekende fout.',
     ))
   })
 
@@ -251,7 +251,7 @@ describe('VacancyAgentTab · backfill existing applicants (INTERVIEW-BACKFILL-1)
     mockPost.mockRejectedValueOnce({ response: { status: 404 } })
     await user.click(screen.getByRole('button', { name: 'Bevestigen' }))
 
-    await waitFor(() => expect(mockNotifyError).toHaveBeenCalledWith('Interview starten voor bestaande sollicitanten is nog niet beschikbaar — wacht op de backend-koppeling.'))
+    await waitFor(() => expect(mockNotifyError).toHaveBeenCalledWith('Interview starten voor bestaande sollicitanten is nog niet beschikbaar. Wacht op de backend-koppeling.'))
     expect(screen.getByRole('button', { name: BACKFILL_BUTTON })).toBeDisabled()
   })
 })

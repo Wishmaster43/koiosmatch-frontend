@@ -1,8 +1,11 @@
 {
-  "filters": { "shift": "Dienst", "location": "Locatie" },
+  "filters": {
+    "shift": "Dienst",
+    "location": "Locatie"
+  },
   "addShift": "Dienst toevoegen",
-  "previewNotice": "Alleen voorbeeld — de diensten hier zijn demodata en niets wat je toevoegt wordt al opgeslagen in je live planning.",
-  "previewSaveTitle": "Nog niet gekoppeld — deze dienst wordt niet opgeslagen.",
+  "previewNotice": "Alleen voorbeeld. De diensten hier zijn demodata en niets wat je toevoegt wordt al opgeslagen in je live planning.",
+  "previewSaveTitle": "Nog niet gekoppeld. Deze dienst wordt niet opgeslagen.",
   "sectionOrder": "Order",
   "sectionLocation": "Locatie",
   "sectionColor": "Kleur",

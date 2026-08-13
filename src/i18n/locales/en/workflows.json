@@ -22,7 +22,7 @@
     "addModule": "Add module",
     "closeTitle": "Close without saving",
     "unsavedConfirm": "You have unsaved changes. Are you sure you want to close? Your changes will be lost.",
-    "liveRunConfirm": "A run is still in progress. It keeps running in the background if you close — use the Stop button to stop it. Close anyway?",
+    "liveRunConfirm": "A run is still in progress. It keeps running in the background if you close. Use the Stop button to stop it. Close anyway?",
     "nameAriaLabel": "Workflow name"
   },
   "fields": {
@@ -311,7 +311,7 @@
     },
     "tools": {
       "hint": "Activate which tools an agent may use",
-      "notAvailable": "Not linked to an agent yet — these choices are not saved.",
+      "notAvailable": "Not linked to an agent yet. These choices are not saved.",
       "items": {
         "shift_lookup": {
           "label": "Look up shift",
@@ -866,7 +866,7 @@
   "agentTest": {
     "title": "Test variables",
     "add": "Add",
-    "empty": "No variables — override inputs from earlier modules here.",
+    "empty": "No variables. Override inputs from earlier modules here.",
     "name": "name",
     "value": "value",
     "intro": "Send a message to test the agent",
@@ -893,7 +893,7 @@
     "template": "Template",
     "templateLoading": "Fetching templates…",
     "templateEmpty": "No approved templates found. Check the WhatsApp connection.",
-    "templateUnknown": "Unknown template — fill in the variables manually (one per line).",
+    "templateUnknown": "Unknown template. Fill in the variables manually (one per line).",
     "headerVars": "Header variables",
     "bodyVars": "Body variables",
     "headerVarsRaw": "Header variables (one per line)",
@@ -921,7 +921,7 @@
     "stopping": "Stopping…",
     "stopTitle": "Stop this run",
     "stopFailed": "Stopping failed",
-    "alreadyRunning": "This workflow is already running — view or stop the active run."
+    "alreadyRunning": "This workflow is already running. View or stop the active run."
   },
   "runViewer": {
     "output": "Output",
@@ -954,7 +954,7 @@
     "automatisch ingevuld": "filled automatically",
     "bijv Iterator (automatisch ingevuld)": "e.g. Iterator (filled automatically)",
     "bijv Yesway": "e.g. Yesway",
-    "bijv {{klant_id}} — leeg laten voor één grote groep": "e.g. {{klant_id}} — leave empty for one big group",
+    "bijv {{klant_id}} — leeg laten voor één grote groep": "e.g. {{klant_id}}. Leave empty for one big group",
     "klantnaam": "customer name",
     "leeg = mobiel van de kandidaat · eigen 06 = testmodus": "empty = candidate's mobile · your own number = test mode",
     "leeg = één groep": "empty = one group",
@@ -962,7 +962,7 @@
     "naam of e-mail": "name or e-mail",
     "naam, email, telefoon": "name, email, phone",
     "naam_1 naam_2": "name_1\nname_2",
-    "optioneel — leeg = alle redenen": "optional — empty = all reasons",
+    "optioneel — leeg = alle redenen": "optional. Empty = all reasons",
     "{{1output}} of leeg laten voor volledige output": "{{1.output}} or leave empty for the full output",
     "{{vraag van kandidaat}}": "{{question from candidate}}",
     "Nieuwe match": "New match",
@@ -977,7 +977,7 @@
     "De module waarvan de items worden samengevoegd Normaal de Iterator die voor deze module staat": "The module whose items are merged. Usually the Iterator right before this module.",
     "De uitvoering gaat door alsof de module deze waarde heeft teruggegeven": "The run continues as if the module had returned this value.",
     "Definieer de velden die de agent teruggeeft": "Define the fields the agent returns.",
-    "Eerst proefdraaien — rapporteert wat er ZOU wijzigen zonder iets te schrijven": "Dry-run first — reports what WOULD change without writing anything.",
+    "Eerst proefdraaien — rapporteert wat er ZOU wijzigen zonder iets te schrijven": "Dry-run first. Reports what WOULD change without writing anything.",
     "Elke regel of komma-gescheiden waarde wordt als apart dienst-ID behandeld": "Each line or comma-separated value is treated as a separate shift ID.",
     "Eén naam per regel": "One name per line.",
     "Geef de agent toegang tot de gekoppelde kennisbank": "Give the agent access to the linked knowledge base.",
@@ -1000,14 +1000,14 @@
     "Welk veld uit de vorige module bevat de array om over te itereren": "Which field from the previous module holds the array to iterate over.",
     "Welk veld wordt gebruikt als identifier in de volgende module": "Which field is used as the identifier in the next module.",
     "Wordt voor de instructies ingevoegd Gebruik dit voor tenant-brede regels": "Inserted before the instructions. Use this for tenant-wide rules.",
-    "Sla kandidaten over die al coördinaten hebben — aan te raden bij bulk": "Skip candidates that already have coordinates — recommended for bulk.",
+    "Sla kandidaten over die al coördinaten hebben — aan te raden bij bulk": "Skip candidates that already have coordinates. Recommended for bulk.",
     "Leeg = alle statussen (blacklist is altijd uitgesloten)": "Empty = all statuses (blacklist is always excluded).",
     "Leeg = alle fases (lead / kandidaat / …)": "Empty = all phases (lead / candidate / …).",
     "Bijv alleen uitzendkrachten of ZZP'ers Leeg = alle contractvormen": "E.g. only temp workers or freelancers. Empty = all contract forms.",
     "Leeg = alle plaatsen": "Empty = all cities.",
     "Leeg = veiligheidsplafond (10000)": "Empty = safety ceiling (10,000).",
     "Alleen relevant wanneer de gekoppelde entiteit een klant is": "Only relevant when the linked entity is a customer.",
-    "Sla records over die al een koppeling met dit systeem hebben — aan te raden bij bulk": "Skip records that already have a link with this system — recommended for bulk.",
+    "Sla records over die al een koppeling met dit systeem hebben — aan te raden bij bulk": "Skip records that already have a link with this system. Recommended for bulk.",
     "Leeg = geen contactfilter (alle kandidaten komen mee)": "Empty = no contact filter (all candidates are included).",
     "{{kandidaatid}} = draait per kandidaat uit de vorige stap (bulk; leeg werkt ook) Voor één kandidaat {{triggercandidate_id}} (drill-down-knop of adreswijziging)": "{{kandidaat.id}} = runs per candidate from the previous step (bulk; empty works too). For a single candidate: {{trigger.candidate_id}} (drill-down button or address change)."
   },

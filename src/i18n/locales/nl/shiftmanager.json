@@ -1,5 +1,5 @@
 {
-  "comingSoon": "{{label}} — komt eraan",
+  "comingSoon": "{{label}}. Komt eraan",
   "shiftAnalysis": {
     "title": "Kandidaten Shift-analyse",
     "subtitle": "Trend en aandachtssignalen per kandidaat op basis van geplande en gewerkte uren.",
@@ -188,7 +188,7 @@
       "choose": "Kies Shiftmanager-account…",
       "noPermission": "Geen rechten om te synchroniseren",
       "noConnection": "Geen actieve Shiftmanager-koppeling gevonden",
-      "started": "Synchronisatie gestart — kan enkele minuten duren",
+      "started": "Synchronisatie gestart. Kan enkele minuten duren",
       "failed": "Synchroniseren mislukt",
       "tooManyRequests": "Te veel pogingen, probeer over {{secs}}s opnieuw"
     },

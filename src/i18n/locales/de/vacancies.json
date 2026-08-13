@@ -27,10 +27,10 @@
     "client": "Kunde",
     "createdAt": "Erstellt am",
     "aiAgent": "KI-Agent",
-    "leadsUnknown": "Noch nicht berechnet — öffnen Sie die Vakanz, um die passenden Kandidaten zu sehen.",
-    "leadsStale": "Wird neu berechnet — Zahl vom {{date}}",
+    "leadsUnknown": "Noch nicht berechnet. Öffnen Sie die Vakanz, um die passenden Kandidaten zu sehen.",
+    "leadsStale": "Wird neu berechnet. Zahl vom {{date}}",
     "leadsGeoMissing": "Ohne Koordinaten konnte der Radius nicht angewendet werden",
-    "leadsPartial": "Teilweise gezählt — ein Limit wurde erreicht",
+    "leadsPartial": "Teilweise gezählt. Ein Limit wurde erreicht",
     "leadsComputedAt": "Aktualisiert am {{date}}",
     "age": "Alter",
     "applicationsOpen": "Bewerbungen öffnen",
@@ -182,7 +182,7 @@
     "adjust": "Anpassen",
     "hideAdjust": "Ausblenden",
     "templatesError": "Matchprofile konnten nicht geladen werden.",
-    "noTemplates": "Noch keine Matchprofile — erstellen Sie eines in den Einstellungen.",
+    "noTemplates": "Noch keine Matchprofile. Erstellen Sie eines in den Einstellungen.",
     "snapshotHint": "Die Gewichtung wird einmalig vom Profil auf diese Stelle kopiert; spätere Änderungen am Profil aktualisieren diese Stelle nicht automatisch.",
     "basedOn": "Basiert auf \"{{name}}\".",
     "dim": {
@@ -257,8 +257,8 @@
       "confirmWithCount_one": "Soll {{count}} bestehender Bewerber dieser Stelle auch vom Agenten übernommen werden? Dies verschickt WhatsApp-Nachrichten.",
       "confirmWithCount_other": "Sollen {{count}} bestehende Bewerber dieser Stelle auch vom Agenten übernommen werden? Dies verschickt WhatsApp-Nachrichten.",
       "resultToast": "{{started}} von {{eligibleTotal}} gestartet.",
-      "resultToastWithReasons": "{{started}} von {{eligibleTotal}} gestartet — {{skippedTotal}} übersprungen: {{reasons}}.",
-      "unavailable": "Interview für bestehende Bewerber starten ist noch nicht verfügbar — wartet auf die Backend-Anbindung.",
+      "resultToastWithReasons": "{{started}} von {{eligibleTotal}} gestartet, {{skippedTotal}} übersprungen: {{reasons}}.",
+      "unavailable": "Interview für bestehende Bewerber starten ist noch nicht verfügbar. Wartet auf die Backend-Anbindung.",
       "reasons": {
         "no_mobile_or_consent": "keine WhatsApp-Zustimmung",
         "already_has_session": "läuft bereits",
@@ -280,7 +280,7 @@
     "cta": "Generieren",
     "generating": "Koios generiert einen Konzepttext für die Vakanz…",
     "error": "Generieren ist fehlgeschlagen. Bitte versuchen Sie es erneut.",
-    "previewLabel": "Vorschlag (Konzept) — noch nicht gespeichert",
+    "previewLabel": "Vorschlag (Konzept). Noch nicht gespeichert",
     "apply": "Übernehmen",
     "discard": "Verwerfen",
     "needsTitleFirst": "Geben Sie zuerst einen Titel ein, um einen Entwurf zu erstellen."
@@ -328,7 +328,7 @@
     "detachDone": "Bewerbung entkoppelt"
   },
   "candidateSearch": {
-    "noLocation": "Diese Vakanz hat noch keine Standortkoordinaten — aktualisieren Sie zuerst die Adresse, dann erscheint hier die Karte.",
+    "noLocation": "Diese Vakanz hat noch keine Standortkoordinaten. Aktualisieren Sie zuerst die Adresse, dann erscheint hier die Karte.",
     "functions": "Funktion",
     "statuses": "Einsetzbarkeit",
     "contractForms": "Vertragsform",
@@ -336,7 +336,7 @@
     "empty": "Keine Kandidaten innerhalb dieser Filter gefunden.",
     "centerVacancy": "Standort der Stelle",
     "refreshAdvice": "Koios-Empfehlung aktualisieren",
-    "adviceQueued": "Die Empfehlung wird berechnet — die Liste aktualisiert sich gleich.",
+    "adviceQueued": "Die Empfehlung wird berechnet. Die Liste aktualisiert sich gleich.",
     "aiAdvised": "Von Koios empfohlen"
   },
   "statistics": {
@@ -404,7 +404,7 @@
     "refresh": "Aktualisieren",
     "analyzing": "Koios AI analysiert die Stelle…",
     "completeness": "Vollständigkeit",
-    "completeGood": "Stelle ist gut ausgefüllt — keine fehlenden Kernfelder erkannt.",
+    "completeGood": "Stelle ist gut ausgefüllt. Keine fehlenden Kernfelder erkannt.",
     "completePartial": "Stelle ist zu {{pct}}% vollständig. Fügen Sie Beschreibung, Gehaltsspanne, Stunden, Fähigkeiten, Standort und Status hinzu für bessere Ergebnisse.",
     "flowLabel": "Durchlauf",
     "flowOpen": "Seit {{days}} Tagen offen · {{count}} Bewerbung(en) erhalten.",
@@ -479,7 +479,7 @@
     }
   },
   "popout": {
-    "windowTitle": "Notizen — {{name}}",
+    "windowTitle": "Notizen. {{name}}",
     "loadError": "Diese Stelle konnte nicht geladen werden."
   },
   "matchesTab": {

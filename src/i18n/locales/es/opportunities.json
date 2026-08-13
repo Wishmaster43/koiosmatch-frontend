@@ -164,7 +164,7 @@
   },
   "koios": {
     "reasons": {
-      "expectedCloseOverdue": "La fecha de cierre prevista ya pasó — da seguimiento a esta oportunidad."
+      "expectedCloseOverdue": "La fecha de cierre prevista ya pasó. Da seguimiento a esta oportunidad."
     }
   },
   "richText": {

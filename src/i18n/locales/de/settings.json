@@ -392,11 +392,11 @@
     "buttonPreview": "Schaltflächen-Vorschau",
     "linkPreview": "Link-Vorschau",
     "logo": "Logo",
-    "logoHint": "PNG, JPG, WEBP oder SVG, max. 2 MB — SVG wird serverseitig geprüft. Wird in der Navigationsleiste angezeigt.",
+    "logoHint": "PNG, JPG, WEBP oder SVG, max. 2 MB. SVG wird serverseitig geprüft. Wird in der Navigationsleiste angezeigt.",
     "noLogo": "Kein Logo",
     "logoUploadError": "Logo-Upload fehlgeschlagen.",
     "textColor": "Textfarbe auf Akzentfarbe",
-    "textColorHint": "Die Textfarbe auf farbigen Schaltflächen und Chips. Automatisch wählt Schwarz oder Weiß anhand deiner Akzentfarbe — eine helle Farbe wie Gelb bekommt also dunklen Text.",
+    "textColorHint": "Die Textfarbe auf farbigen Schaltflächen und Chips. Automatisch wählt Schwarz oder Weiß anhand deiner Akzentfarbe. Eine helle Farbe wie Gelb bekommt also dunklen Text.",
     "textColorAuto": "Automatisch",
     "textColorLight": "Weiß",
     "textColorDark": "Dunkel",
@@ -441,8 +441,8 @@
     "confirmDelete": "Standort \"{{name}}\" löschen?",
     "deleteSuccess": "Standort gelöscht.",
     "deleteFailed": "Löschen des Standorts ist fehlgeschlagen.",
-    "deleteBlockedTooltip": "In Gebrauch — kann nicht gelöscht werden",
-    "deleteBlocked": "Kann nicht gelöscht werden — noch verknüpft mit: {{list}}",
+    "deleteBlockedTooltip": "In Gebrauch. Kann nicht gelöscht werden",
+    "deleteBlocked": "Kann nicht gelöscht werden, noch verknüpft mit: {{list}}",
     "usage": {
       "candidates_one": "{{count}} Kandidat",
       "candidates_other": "{{count}} Kandidaten",
@@ -484,7 +484,7 @@
     "contactName": "Ansprechpartner",
     "phone": "Telefon",
     "email": "E-Mail",
-    "mapNoCoords": "Noch keine Standorte mit Koordinaten — geben Sie die Adresse eines Standorts ein, dann erscheint er automatisch auf der Karte.",
+    "mapNoCoords": "Noch keine Standorte mit Koordinaten. Geben Sie die Adresse eines Standorts ein, dann erscheint er automatisch auf der Karte.",
     "color": "Farbe",
     "icon": "Symbol",
     "colorHint": "Farbe und Symbol machen einen Standort in Listen und auf der Karte erkennbar.",
@@ -520,7 +520,7 @@
     "confirmDelete": "„{{name}}\" wirklich löschen?",
     "edit": "Bearbeiten",
     "editTitle": "Bearbeiten",
-    "inUse": "In Verwendung — kann nicht gelöscht werden",
+    "inUse": "In Verwendung. Kann nicht gelöscht werden",
     "priorityRank": "Priorität (1 = zuerst gesendet)",
     "iconLabel": "Symbol (Emoji)",
     "iconPlaceholder": "z. B. 📞",
@@ -599,7 +599,7 @@
     "defaultVariantLabel": "Standard-CV-Variante",
     "variantProposal": "Vorschlags-Lebenslauf (Name sichtbar, Kontaktdaten verborgen)",
     "variantFull": "Vollständiger Lebenslauf (mit Kontaktdaten)",
-    "notSentYet": "Koios versendet den Vorschlag noch nicht selbst — der Recruiter lädt den Lebenslauf herunter und versendet ihn über das eigene E-Mail-Programm. Der automatische, widerrufbare Freigabelink folgt, sobald diese Funktion verfügbar ist.",
+    "notSentYet": "Koios versendet den Vorschlag noch nicht selbst. Der Recruiter lädt den Lebenslauf herunter und versendet ihn über das eigene E-Mail-Programm. Der automatische, widerrufbare Freigabelink folgt, sobald diese Funktion verfügbar ist.",
     "saveFailed": "Speichern fehlgeschlagen",
     "saved": "Gespeichert"
   },
@@ -623,12 +623,12 @@
     "moveSectionUp": "'{{section}}' nach oben verschieben",
     "moveSectionDown": "'{{section}}' nach unten verschieben",
     "preview": "Vorschau",
-    "previewHint": "A4 — mit Beispielkandidat"
+    "previewHint": "A4, mit Beispielkandidat"
   },
   "security": {
     "twoFactor": "Zwei-Faktor-Authentifizierung (2FA)",
-    "statusOn": "Aktiviert — Ihr Konto ist zusätzlich geschützt",
-    "statusOff": "Deaktiviert — fügen Sie eine zusätzliche Sicherheitsebene hinzu",
+    "statusOn": "Aktiviert. Ihr Konto ist zusätzlich geschützt",
+    "statusOff": "Deaktiviert. Fügen Sie eine zusätzliche Sicherheitsebene hinzu",
     "enable": "Aktivieren",
     "disable": "Deaktivieren",
     "enabledTitle": "Zwei-Faktor-Authentifizierung aktiviert",
@@ -710,13 +710,13 @@
     "email": {
       "label": "E-Mail-Benachrichtigungen",
       "desc": "Benachrichtigungen per E-Mail erhalten",
-      "notYetDelivered": "E-Mail-Zustellung existiert noch nicht — diese Einstellung wird aktiv, sobald der E-Mail-Kanal verfügbar ist."
+      "notYetDelivered": "E-Mail-Zustellung existiert noch nicht. Diese Einstellung wird aktiv, sobald der E-Mail-Kanal verfügbar ist."
     },
     "inApp": {
       "label": "In-App-Benachrichtigungen",
       "desc": "Benachrichtigungen in der Plattform erhalten",
       "notYetActive": "Noch nicht aktiv",
-      "notYetActiveReason": "Für diesen Typ wird noch keine Benachrichtigung gesendet — der Schalter ist bereits einstellbar."
+      "notYetActiveReason": "Für diesen Typ wird noch keine Benachrichtigung gesendet. Der Schalter ist bereits einstellbar."
     },
     "context": {
       "sollicitaties": {
@@ -746,14 +746,14 @@
     },
     "my": {
       "title": "Meine Benachrichtigungen",
-      "subtitle": "Deine eigene Ausnahme zusätzlich zu den mandantenweiten Benachrichtigungseinstellungen — wähle pro Thema, ob du immer, nie oder einfach die Einstellung deiner Organisation folgen möchtest.",
+      "subtitle": "Deine eigene Ausnahme zusätzlich zu den mandantenweiten Benachrichtigungseinstellungen. Wähle pro Thema, ob du immer, nie oder einfach die Einstellung deiner Organisation folgen möchtest.",
       "inherit": "Übernehmen",
       "on": "An",
       "off": "Aus",
       "empty": "Es sind noch keine Benachrichtigungsthemen konfiguriert.",
-      "saveFailed": "Speichern fehlgeschlagen — deine Auswahl wurde zurückgesetzt.",
+      "saveFailed": "Speichern fehlgeschlagen. Deine Auswahl wurde zurückgesetzt.",
       "emailNotAvailable": "Noch nicht verfügbar",
-      "emailNotAvailableReason": "Eine persönliche E-Mail-Ausnahme ist noch nicht möglich — hierfür folgst du der mandantenweiten E-Mail-Einstellung."
+      "emailNotAvailableReason": "Eine persönliche E-Mail-Ausnahme ist noch nicht möglich. Hierfür folgst du der mandantenweiten E-Mail-Einstellung."
     },
     "push": {
       "title": "Browserbenachrichtigungen",
@@ -806,7 +806,7 @@
       "periodMonth": "Diesen Monat",
       "plan": {
         "title": "Tarif & Guthaben",
-        "notice": "Aktueller Tarif, Guthaben-Fortschrittsbalken, Reset-Datum und Kreditguthaben sind noch nicht verfügbar — es gibt noch kein Backend-Modell für Tarife oder Guthaben."
+        "notice": "Aktueller Tarif, Guthaben-Fortschrittsbalken, Reset-Datum und Kreditguthaben sind noch nicht verfügbar. Es gibt noch kein Backend-Modell für Tarife oder Guthaben."
       },
       "ai": {
         "title": "KI-Nutzung (Koios)",
@@ -837,7 +837,7 @@
       },
       "daily": {
         "title": "Tägliche Nutzung",
-        "notice": "Eine Tagesübersicht pro Kategorie (Gesamt · KI · Leads · Telefonate · WhatsApp) ist noch nicht verfügbar — das Backend liefert derzeit nur Summen pro Zeitraum, keine Tageswerte."
+        "notice": "Eine Tagesübersicht pro Kategorie (Gesamt · KI · Leads · Telefonate · WhatsApp) ist noch nicht verfügbar. Das Backend liefert derzeit nur Summen pro Zeitraum, keine Tageswerte."
       },
       "koios": {
         "title": "Koios-KI-Abrechnung",
@@ -888,7 +888,7 @@
     "creating": "Wird erstellt…",
     "createError": "Erstellung fehlgeschlagen. Bitte erneut versuchen.",
     "done": "Fertig",
-    "secretOnce": "Kopieren Sie das Secret jetzt — es wird nicht erneut angezeigt.",
+    "secretOnce": "Kopieren Sie das Secret jetzt. Es wird nicht erneut angezeigt.",
     "copySecret": "Secret kopieren",
     "secretHidden": "nur bei Erstellung angezeigt",
     "dismiss": "Schließen",
@@ -998,7 +998,7 @@
       "createError": "Erstellung fehlgeschlagen. Bitte erneut versuchen.",
       "done": "Fertig",
       "eventsCount": "{{count}} Events",
-      "secretOnce": "Kopieren Sie das Signing-Secret jetzt — es wird nicht erneut angezeigt.",
+      "secretOnce": "Kopieren Sie das Signing-Secret jetzt. Es wird nicht erneut angezeigt.",
       "copySecret": "Secret kopieren",
       "signingHint": "Verwenden Sie dieses Secret, um die X-Koios-Signature (HMAC-SHA256) zu verifizieren.",
       "dismiss": "Schließen",
@@ -1052,7 +1052,7 @@
     "noPermission": "Sie haben keine Berechtigung zum Synchronisieren",
     "succeeded": "Erfolgreich",
     "failed": "Fehlgeschlagen",
-    "tooManyRequests": "Zu viele Anfragen — warten Sie {{secs}}s",
+    "tooManyRequests": "Zu viele Anfragen. Warten Sie {{secs}}s",
     "items": {
       "candidates": {
         "label": "Kandidaten",
@@ -1087,11 +1087,11 @@
         "desc": "Kandidaten-Einplanungen pro Schicht"
       }
     },
-    "started": "Synchronisierung gestartet — dies kann einige Minuten dauern. Aktualisieren Sie die Listen später für die neuen Daten."
+    "started": "Synchronisierung gestartet. Dies kann einige Minuten dauern. Aktualisieren Sie die Listen später für die neuen Daten."
   },
   "import": {
     "title": "Importieren",
-    "subtitle": "Übertragen Sie Ihre Kundendaten aus einer CSV-Datei — pro Entität, in der richtigen Reihenfolge.",
+    "subtitle": "Übertragen Sie Ihre Kundendaten aus einer CSV-Datei. Pro Entität, in der richtigen Reihenfolge.",
     "entities": {
       "customers": {
         "label": "Kunden",
@@ -1111,7 +1111,7 @@
       },
       "customer_tree": {
         "label": "Kunde (komplett)",
-        "desc": "Legt einen Kunden zusammen mit Standorten, Abteilungen und Kontakten in einem Schritt an — für einen Kunden, der noch nicht existiert."
+        "desc": "Legt einen Kunden zusammen mit Standorten, Abteilungen und Kontakten in einem Schritt an. Für einen Kunden, der noch nicht existiert."
       }
     },
     "groups": {
@@ -1120,17 +1120,17 @@
     },
     "order": {
       "title": "Importieren Sie in dieser Reihenfolge",
-      "hint": "Jede Zeile verknüpft sich per Name mit der vorherigen — importieren Sie diese zuerst.",
-      "customersHint": "Beginnen Sie hier — es muss noch nichts anderes existieren.",
-      "locationsHint": "Verknüpft sich mit einem bestehenden Kunden per Name (klant_naam) — importieren Sie zuerst Kunden.",
-      "departmentsHint": "Verknüpft sich mit einem bestehenden Kunden und Standort per Name (klant_naam, locatie_naam) — importieren Sie diese zuerst.",
-      "contactsHint": "Verknüpft sich mit einem bestehenden Kunden, Standort und einer Abteilung per Name (klant_naam, locatie_naam, afdeling_naam) — importieren Sie diese zuerst.",
+      "hint": "Jede Zeile verknüpft sich per Name mit der vorherigen. Importieren Sie diese zuerst.",
+      "customersHint": "Beginnen Sie hier. Es muss noch nichts anderes existieren.",
+      "locationsHint": "Verknüpft sich mit einem bestehenden Kunden per Name (klant_naam). Importieren Sie zuerst Kunden.",
+      "departmentsHint": "Verknüpft sich mit einem bestehenden Kunden und Standort per Name (klant_naam, locatie_naam). Importieren Sie diese zuerst.",
+      "contactsHint": "Verknüpft sich mit einem bestehenden Kunden, Standort und einer Abteilung per Name (klant_naam, locatie_naam, afdeling_naam). Importieren Sie diese zuerst.",
       "treeAlternative": "Bauen Sie einen komplett neuen Kunden auf?",
       "switchToTree": "Kombinierte Datei verwenden"
     },
     "tree": {
       "title": "Dieser Import erstellt",
-      "replacesOrder": "Keine feste Reihenfolge nötig — diese eine Datei ersetzt die vier einzelnen Schritte.",
+      "replacesOrder": "Keine feste Reihenfolge nötig. Diese eine Datei ersetzt die vier einzelnen Schritte.",
       "rowGrain": "Eine Zeile = eine Kontaktperson, mit wiederholten Angaben zu Kunde, Standort und Abteilung. Vierzig Zeilen sind also nicht vierzig Kunden.",
       "levelTruncation": "Lassen Sie auf einer Zeile ein Namensfeld leer (etwa die Abteilung), stoppt diese Zeile dort — für dieses und jedes weitere Niveau wird nichts angelegt.",
       "allOrNothing": "Eine Zeile ist alles oder nichts: Scheitert der Kontakt, werden auch Kunde, Standort und Abteilung dieser Zeile nicht angelegt. Ein Kunde, den eine frühere Zeile bereits angelegt hat, bleibt bestehen.",
@@ -1141,7 +1141,7 @@
     "loadTemplatesError": "Die Importtypen konnten nicht geladen werden. Bitte versuchen Sie es erneut.",
     "noTemplates": "Es sind noch keine Importtypen verfügbar.",
     "downloadTemplate": "Beispieldatei herunterladen",
-    "downloadTemplateHint": "Eine ausgefüllte Beispieldatei mit den genauen Spaltennamen — der schnellste Weg, Ihre Daten vorzubereiten.",
+    "downloadTemplateHint": "Eine ausgefüllte Beispieldatei mit den genauen Spaltennamen. Der schnellste Weg, Ihre Daten vorzubereiten.",
     "downloadError": "Die Beispieldatei konnte nicht heruntergeladen werden. Bitte versuchen Sie es erneut.",
     "noViewPermission": "Sie haben keine Berechtigung, diese Vorlage anzusehen.",
     "noImportPermission": "Sie können die Beispieldatei ansehen, haben aber keine Berechtigung, einen Import durchzuführen. Wenden Sie sich an einen Administrator.",
@@ -1157,7 +1157,7 @@
     "preview": {
       "title": "Vorschau",
       "subtitle": "Dies ist, was passieren WÜRDE. Es wurde noch nichts gespeichert.",
-      "nothingToImport": "Es würden keine Zeilen angelegt oder aktualisiert — es gibt nichts zu importieren.",
+      "nothingToImport": "Es würden keine Zeilen angelegt oder aktualisiert. Es gibt nichts zu importieren.",
       "confirm": "Echten Import ausführen",
       "running": "Wird importiert…",
       "back": "Andere Datei wählen",
@@ -1166,8 +1166,8 @@
     "result": {
       "title": "Importergebnis",
       "subtitleSuccess": "Alle Zeilen wurden erfolgreich importiert.",
-      "subtitleSuccessWithRemarks": "Alles wurde importiert, aber bei {{count}} Zeilen wurde etwas nicht übernommen — siehe unten.",
-      "subtitlePartial": "{{errorCount}} von {{total}} Zeilen konnten nicht importiert werden — siehe unten.",
+      "subtitleSuccessWithRemarks": "Alles wurde importiert, aber bei {{count}} Zeilen wurde etwas nicht übernommen. Siehe unten.",
+      "subtitlePartial": "{{errorCount}} von {{total}} Zeilen konnten nicht importiert werden. Siehe unten.",
       "newImport": "Weitere Datei importieren"
     },
     "stats": {
@@ -1178,11 +1178,11 @@
       "error": "Fehlgeschlagen",
       "remarks": "Anmerkungen",
       "rowsAreRows": "Diese Zahlen zählen Zeilen in der Datei.",
-      "rowsAreRowsTree": "Das sind Zeilen, keine Kunden — eine Zeile kann gleichzeitig einen Kunden, einen Standort, eine Abteilung und einen Kontakt anlegen."
+      "rowsAreRowsTree": "Das sind Zeilen, keine Kunden. Eine Zeile kann gleichzeitig einen Kunden, einen Standort, eine Abteilung und einen Kontakt anlegen."
     },
     "unknownColumns": {
       "title": "Unbekannte Spalten (ignoriert)",
-      "hint": "Diese Spalten in Ihrer Datei entsprechen keinem bekannten Feld. Sie wurden ignoriert — sonst wurde nichts beeinflusst."
+      "hint": "Diese Spalten in Ihrer Datei entsprechen keinem bekannten Feld. Sie wurden ignoriert. Sonst wurde nichts beeinflusst."
     },
     "rows": {
       "attentionTitle": "{{count}} Zeilen, die Aufmerksamkeit erfordern",
@@ -1204,7 +1204,7 @@
       },
       "mapping": {
         "title": "Spalten zuordnen",
-        "subtitle": "Wir haben zugeordnet, was wir erkannt haben — prüfen Sie den Rest und passen Sie ihn bei Bedarf an.",
+        "subtitle": "Wir haben zugeordnet, was wir erkannt haben. Prüfen Sie den Rest und passen Sie ihn bei Bedarf an.",
         "noColumns": "Diese Datei enthält keine Spalten zum Zuordnen.",
         "sourceColumn": "Spalte in Ihrer Datei",
         "targetField": "Zugeordnet zu",
@@ -1215,14 +1215,14 @@
       "preview": {
         "title": "Überprüfen Sie Ihre Daten",
         "subtitle": "Dies ist genau das, was gesendet wird. Klicken Sie auf eine Zelle, um sie zu ändern, und führen Sie die Vorschau danach erneut aus.",
-        "noRows": "Keine Zeilen zur Vorschau — überprüfen Sie Ihre Datei.",
+        "noRows": "Keine Zeilen zur Vorschau. Überprüfen Sie Ihre Datei.",
         "validateHint": "Führen Sie die Vorschau aus, um zu sehen, was passieren würde, und bestätigen Sie dann."
       }
     }
   },
   "facebookLeads": {
     "title": "Facebook Leads",
-    "subtitle": "Verbinden Sie die Facebook-Leads-App dieses Kunden — eingehende Leads landen automatisch als Kandidat.",
+    "subtitle": "Verbinden Sie die Facebook-Leads-App dieses Kunden. Eingehende Leads landen automatisch als Kandidat.",
     "verifyToken": "Verify-Token",
     "verifyTokenPlaceholder": "Token aus den Facebook-App-Einstellungen",
     "appSecret": "App-Secret",
@@ -1241,7 +1241,7 @@
   },
   "export": {
     "title": "Exportieren",
-    "subtitle": "Exportieren Sie Ihre Daten als CSV — dieselben Spalten wie die Tabelle, nur Datensätze, auf die Sie Zugriff haben.",
+    "subtitle": "Exportieren Sie Ihre Daten als CSV. Dieselben Spalten wie die Tabelle, nur Datensätze, auf die Sie Zugriff haben.",
     "button": "CSV exportieren",
     "noPermission": "Sie haben keine Berechtigung für diesen Export.",
     "rateLimited": "Zu viele Exporte hintereinander. Bitte versuche es in einer Minute erneut.",
@@ -1425,8 +1425,8 @@
     "usersCount_other": "{{count}} Benutzer",
     "edit": "Bearbeiten",
     "deleteTitle": "Rolle löschen",
-    "deleteBlocked_one": "Nicht löschbar — {{count}} Benutzer hat diese Rolle. Weisen Sie ihm zuerst eine andere Rolle zu.",
-    "deleteBlocked_other": "Nicht löschbar — {{count}} Benutzer haben diese Rolle. Weisen Sie ihnen zuerst eine andere Rolle zu.",
+    "deleteBlocked_one": "Nicht löschbar. {{count}} Benutzer hat diese Rolle. Weisen Sie ihm zuerst eine andere Rolle zu.",
+    "deleteBlocked_other": "Nicht löschbar. {{count}} Benutzer haben diese Rolle. Weisen Sie ihnen zuerst eine andere Rolle zu.",
     "confirmDelete": "Rolle „{{name}}\" löschen?",
     "empty": "Noch keine Rollen erstellt.",
     "groups": {
@@ -1481,8 +1481,8 @@
     "startDashboard": "Start-Dashboard",
     "startDashboardNone": "Standard",
     "branchesTemplate": "Standorte (Vorlage)",
-    "branchesTemplateHint": "Die Standortmenge, die neue Benutzer mit dieser Rolle als Ausgangspunkt erhalten. Bestehende Benutzer behalten ihre eigene Auswahl — dies bearbeitet nur die Vorlage.",
-    "branchesEmptyHint": "Keine Niederlassungen ausgewählt — neue Benutzer mit dieser Rolle starten ohne Niederlassungs-Zuordnung und sehen ALLE Kandidaten. Mit zugeordneten Niederlassungen sieht ein Benutzer nur Kandidaten dieser Niederlassungen.",
+    "branchesTemplateHint": "Die Standortmenge, die neue Benutzer mit dieser Rolle als Ausgangspunkt erhalten. Bestehende Benutzer behalten ihre eigene Auswahl. Dies bearbeitet nur die Vorlage.",
+    "branchesEmptyHint": "Keine Niederlassungen ausgewählt. Neue Benutzer mit dieser Rolle starten ohne Niederlassungs-Zuordnung und sehen ALLE Kandidaten. Mit zugeordneten Niederlassungen sieht ein Benutzer nur Kandidaten dieser Niederlassungen.",
     "branchesNoLocations": "Noch keine Standorte angelegt.",
     "branchesSaveFailed": "Die Standortvorlage konnte nicht gespeichert werden. Bitte erneut versuchen.",
     "appearanceSaveFailed": "Das Erscheinungsbild konnte nicht gespeichert werden. Bitte erneut versuchen.",
@@ -1531,7 +1531,7 @@
       "change": "Änderung",
       "access": "Zugriff (DSGVO)"
     },
-    "accessNotice": "Nur-Lese-Zugriff auf diese Akte — keine Änderung (DSGVO-Zugriffsprotokoll).",
+    "accessNotice": "Nur-Lese-Zugriff auf diese Akte, keine Änderung (DSGVO-Zugriffsprotokoll).",
     "http": {
       "method": "Methode",
       "path": "Pfad",
@@ -1670,7 +1670,7 @@
     "valueField": "Slug (Wert)",
     "valueHint": "Stabiler Schlüssel; leer lassen, um einen aus dem Label zu generieren.",
     "valueImmutable": "Der Slug kann nach der Erstellung nicht mehr geändert werden.",
-    "labelLocked": "Die Beschriftung ist gesperrt, da diese Phase strukturell ist — Automatisierungen verlassen sich darauf. Farbe und andere Kennzeichen bleiben bearbeitbar.",
+    "labelLocked": "Die Beschriftung ist gesperrt, da diese Phase strukturell ist. Automatisierungen verlassen sich darauf. Farbe und andere Kennzeichen bleiben bearbeitbar.",
     "candidate_types": {
       "title": "Vertragsarten",
       "subtitle": "Mehrere pro Kandidat (z. B. Aushilfe, Freiberufler, Payroll)."
@@ -1689,7 +1689,7 @@
     "requiresReason": "Begründung erforderlich",
     "requiresReasonHint": "Dieser Status erfordert eine Begründung (z. B. Inaktiv).",
     "reasonBadge": "Begründung",
-    "inUse": "In Verwendung — kann nicht gelöscht werden",
+    "inUse": "In Verwendung. Kann nicht gelöscht werden",
     "isMatch": "Erzeugt einen Match",
     "isMatchHint": "Sobald eine Bewerbung diese Phase erreicht, wird sie ein Match (der Matched-Bucket).",
     "isRejected": "Ist eine Ablehnung",
@@ -1805,7 +1805,7 @@
       "phone": "Telefon"
     },
     "dedupeKeysSaveFailed": "Speichern der Duplikaterkennungsfelder fehlgeschlagen.",
-    "dedupeKeysMinOne": "Mindestens ein Feld bleibt erforderlich — ohne Auswahl fällt die Prüfung auf E-Mail + Mobil zurück."
+    "dedupeKeysMinOne": "Mindestens ein Feld bleibt erforderlich. Ohne Auswahl fällt die Prüfung auf E-Mail + Mobil zurück."
   },
   "noteTypes": {
     "title": "Notiztypen — {{entity}}",
@@ -1814,7 +1814,7 @@
   },
   "poolsSettings": {
     "title": "Talentpools",
-    "subtitle": "Verwalten Sie Pools mit Name und Farbe — für Kandidatenlisten.",
+    "subtitle": "Verwalten Sie Pools mit Name und Farbe. Für Kandidatenlisten.",
     "add": "Pool hinzufügen",
     "contextLabel": "Pool-Typ",
     "contextRecruitment": "Recruitment (Talentpool)",
@@ -1838,7 +1838,7 @@
     "title": "Umrechnungsfaktor Einkauf→Verkauf",
     "subtitle": "Fällt auf Einkaufstarif × diesen Faktor zurück, wenn keine Preisvereinbarung zu Funktion/Tarifvertrag/Gruppe/Stufe passt.",
     "placeholder": "Z. B. 1,35",
-    "saveFailed": "Speichern fehlgeschlagen — der Wert wurde zurückgesetzt.",
+    "saveFailed": "Speichern fehlgeschlagen. Der Wert wurde zurückgesetzt.",
     "loadError": "Der Umrechnungsfaktor konnte nicht geladen werden."
   },
   "outreach": {
@@ -1909,7 +1909,7 @@
     "noCriteria": "Noch keine Kriterien.",
     "criteriaCount_one": "{{count}} Kriterium",
     "criteriaCount_other": "{{count}} Kriterien",
-    "inUse": "In Verwendung — mit einer Stelle verknüpft.",
+    "inUse": "In Verwendung. Mit einer Stelle verknüpft.",
     "save": "Speichern",
     "cancel": "Abbrechen",
     "newGroup": "Neue Gruppe",
@@ -1936,18 +1936,18 @@
       "title": "Genehmigung",
       "subtitle": "Wann ein Match zuerst genehmigt werden muss.",
       "off": "Aus",
-      "offDesc": "Nie eine Genehmigung nötig — jeder Match geht direkt durch.",
+      "offDesc": "Nie eine Genehmigung nötig. Jeder Match geht direkt durch.",
       "deviation": "Bei Abweichung",
       "deviationDesc": "Genehmigung nur, wenn der Match von den Vereinbarungen abweicht.",
       "always": "Immer",
       "alwaysDesc": "Jeder Match braucht zuerst eine Genehmigung.",
-      "saveFailed": "Speichern fehlgeschlagen — die Auswahl wurde zurückgesetzt."
+      "saveFailed": "Speichern fehlgeschlagen. Die Auswahl wurde zurückgesetzt."
     }
   },
   "matchTemplatesSettings": {
     "title": "Match-Profile",
-    "subtitle": "Wiederverwendbare Match-Gewichtungsprofile, die Sie bei einer Stelle auswählen können (Tab Matching). Ein Profil zuweisen kopiert dessen Gewichte auf diese Stelle — spätere Änderungen hier wirken sich nicht automatisch aus.",
-    "empty": "Noch keine Match-Profile — erstellen Sie unten eins.",
+    "subtitle": "Wiederverwendbare Match-Gewichtungsprofile, die Sie bei einer Stelle auswählen können (Tab Matching). Ein Profil zuweisen kopiert dessen Gewichte auf diese Stelle. Spätere Änderungen hier wirken sich nicht automatisch aus.",
+    "empty": "Noch keine Match-Profile. Erstellen Sie unten eins.",
     "loadError": "Match-Profile konnten nicht geladen werden.",
     "nameLabel": "Name",
     "namePlaceholder": "Z. B. Senior-Technikprofil",
@@ -1982,16 +1982,16 @@
   },
   "provinces": {
     "title": "Provinzen",
-    "subtitle": "Provinzen pro Land — verwendet in Adressfeldern und Filtern.",
+    "subtitle": "Provinzen pro Land, verwendet in Adressfeldern und Filtern.",
     "add": "Provinz hinzufügen",
     "country": "Land",
-    "empty": "Noch keine Provinzen für dieses Land — fügen Sie die erste hinzu.",
+    "empty": "Noch keine Provinzen für dieses Land. Fügen Sie die erste hinzu.",
     "loadError": "Die Provinzen konnten nicht geladen werden.",
     "retry": "Erneut versuchen"
   },
   "genderSettings": {
     "title": "Geschlecht",
-    "subtitle": "Geschlechter mit einer Farbe — bestimmt die Farbe des Kandidaten-Icons.",
+    "subtitle": "Geschlechter mit einer Farbe, bestimmt die Farbe des Kandidaten-Icons.",
     "add": "Geschlecht hinzufügen"
   },
   "documentTypes": {
@@ -2038,7 +2038,7 @@
     "defaultRadiusHint": "Radius, den der Tab „Kandidaten suchen“ standardmäßig verwendet, wenn eine Vakanz geöffnet wird (1–500 km).",
     "leadsCriteria": {
       "title": "Leads-Kriterien",
-      "subtitle": "Legen Sie fest, welche Kandidaten als „Lead“ für diese Stelle zählen — das speist sowohl den Leads-Zähler als auch den Tab „Kandidaten suchen“.",
+      "subtitle": "Legen Sie fest, welche Kandidaten als „Lead“ für diese Stelle zählen. Das speist sowohl den Leads-Zähler als auch den Tab „Kandidaten suchen“.",
       "countableStatusesTitle": "Stellenstatus, die zählen",
       "countableStatusesHint": "Keine Auswahl = jeder Stellenstatus zählt.",
       "radiusTitle": "Suchradius",
@@ -2050,7 +2050,7 @@
       "functionMatchExactDesc": "Nur Kandidaten mit genau derselben Funktion zählen.",
       "functionMatchCategory": "Kategorie",
       "functionMatchCategoryDesc": "Kandidaten mit derselben Funktionskategorie zählen.",
-      "functionMatchCategoryNote": "Verhält sich derzeit genauso wie „Exakt“ — Stellen haben noch keine Funktionskategorie.",
+      "functionMatchCategoryNote": "Verhält sich derzeit genauso wie „Exakt“. Stellen haben noch keine Funktionskategorie.",
       "functionMatchAll": "Alle",
       "functionMatchAllDesc": "Jede Funktion zählt; die Funktion spielt bei Leads keine Rolle.",
       "excludeAlreadyAppliedLabel": "Kandidaten mit laufender Bewerbung ausschließen",
@@ -2123,16 +2123,16 @@
     "add": "Funktion hinzufügen",
     "freeEntry": "Freie Eingabe erlauben",
     "freeEntryHint": "An: Recruiter können eine eigene Funktion eingeben (Combobox). Aus: nur aus der Liste wählen (strikte Auswahl).",
-    "confirmFreeEntry": "Sind Sie sicher? Freie Eingabe erlaubt Funktionen außerhalb der Liste — das kann die Datenqualität senken."
+    "confirmFreeEntry": "Sind Sie sicher? Freie Eingabe erlaubt Funktionen außerhalb der Liste. Das kann die Datenqualität senken."
   },
   "contactFunctionsSettings": {
     "title": "Kontaktfunktionen",
     "subtitle": "Verwalten Sie die Funktionsliste für Kontaktpersonen bei Kunden (z. B. Standortleiter, Teamleiter).",
     "add": "Funktion hinzufügen",
-    "notAvailable": "Noch nicht verfügbar — diese Liste wird aktiv, sobald die Backend-Anbindung besteht.",
+    "notAvailable": "Noch nicht verfügbar. Diese Liste wird aktiv, sobald die Backend-Anbindung besteht.",
     "freeEntry": "Freie Eingabe erlauben",
     "freeEntryHint": "An: eine eigene Funktion kann eingetippt werden (Combobox). Aus: nur aus der Liste wählen (strikte Auswahl).",
-    "confirmFreeEntry": "Sind Sie sicher? Freie Eingabe erlaubt Kontaktfunktionen außerhalb der Liste — das kann die Datenqualität senken."
+    "confirmFreeEntry": "Sind Sie sicher? Freie Eingabe erlaubt Kontaktfunktionen außerhalb der Liste. Das kann die Datenqualität senken."
   },
   "customerDisplay": {
     "title": "Tabellenanzeige",
@@ -2223,7 +2223,7 @@
       "title": "Standard-Statusfilter",
       "allOption": "Alle Status",
       "chosenHint": "Dieser Status ist direkt ausgewählt, sobald dieser Tab geöffnet wird.",
-      "autoHint": "Noch nicht gewählt — das ist derzeit automatisch der Status, der wie 'aktiv' aussieht (oder Alle, falls keiner existiert)."
+      "autoHint": "Noch nicht gewählt. Das ist derzeit automatisch der Status, der wie 'aktiv' aussieht (oder Alle, falls keiner existiert)."
     }
   },
   "customerVacancyDefaults": {
@@ -2267,7 +2267,7 @@
   "dashboardsAll": "Alle Diagramme & Listen",
   "dashboardsCanSwitch": "Kann wechseln",
   "dashboardsDesc": {
-    "admin": "Vollständige Übersicht — alle KPIs, Diagramme und Listen.",
+    "admin": "Vollständige Übersicht. Alle KPIs, Diagramme und Listen.",
     "management": "Steuerung von Zu- und Abgängen, Pipeline und Matches.",
     "recruitment": "Kandidatenfokus: Touchpoints, Nachverfolgung, Funnel und Gespräche.",
     "backoffice": "Dokumente, Verträge, Kopplungen und Runs.",
@@ -2343,7 +2343,7 @@
   },
   "numbering": {
     "title": "Nummerierung",
-    "subtitle": "Automatische laufende Nummer je Datensatz — Präfix, Ziffernanzahl und Startwert je Entität.",
+    "subtitle": "Automatische laufende Nummer je Datensatz. Präfix, Ziffernanzahl und Startwert je Entität.",
     "hint": "Änderungen gelten nur für NEUE Nummern; bestehende Nummern bleiben unverändert.",
     "entity": "Entität",
     "prefix": "Präfix",
@@ -2430,7 +2430,7 @@
     "optionsHint": "Kommagetrennt. Bestehende Werte bleiben erhalten, wenn Sie die Optionen ändern.",
     "hasData": "hat Daten",
     "delete": "Löschen",
-    "deleteBlocked": "Kann nicht gelöscht werden — Feld hat Daten",
+    "deleteBlocked": "Kann nicht gelöscht werden. Feld hat Daten",
     "activate": "Aktivieren",
     "deactivate": "Deaktivieren",
     "showInUi": "In der UI anzeigen",
@@ -2446,7 +2446,7 @@
     }
   },
   "usage": {
-    "subtitleTenant": "Verbrauch von {{name}} — nur Mengen für Ihre Abrechnung.",
+    "subtitleTenant": "Verbrauch von {{name}}. Nur Mengen für Ihre Abrechnung.",
     "month": "Monat",
     "loadError": "Verbrauch konnte nicht geladen werden.",
     "col": {
@@ -2459,7 +2459,7 @@
   },
   "jobs": {
     "title": "Aufgabenverwaltung",
-    "subtitle": "Warteschlangenstatus, einzelne Aufgaben und fehlgeschlagene Aufgaben — nur für Super-Admins.",
+    "subtitle": "Warteschlangenstatus, einzelne Aufgaben und fehlgeschlagene Aufgaben. Nur für Super-Admins.",
     "tab": {
       "overview": "Übersicht",
       "jobs": "Aufgaben",
@@ -2511,7 +2511,7 @@
     "empty": "Keine Aufgaben gefunden.",
     "emptyFailed": "Keine fehlgeschlagenen Aufgaben.",
     "cancel": "Abbrechen",
-    "cancelReservedError": "Abbrechen fehlgeschlagen — die Aufgabe wird bereits von einem Worker ausgeführt.",
+    "cancelReservedError": "Abbrechen fehlgeschlagen. Die Aufgabe wird bereits von einem Worker ausgeführt.",
     "retry": "Erneut versuchen",
     "retryAll": "Alle erneut versuchen",
     "retryAllConfirm_one": "{{count}} fehlgeschlagene Aufgabe erneut in die Warteschlange stellen?",
@@ -2527,8 +2527,8 @@
       "page": "Seite {{page}} von {{last}}"
     },
     "truncatedNotice": "Es werden nur die neuesten 5.000 fehlgeschlagenen Jobs angezeigt.",
-    "driverWarning": "Die Warteschlange läuft auf \"{{driver}}\" — dieser Bildschirm betrachtet die Datenbank-Warteschlange und zeigt dann möglicherweise nicht den echten Rückstand.",
-    "actionFailed": "Aktion fehlgeschlagen — der Job existiert möglicherweise nicht mehr. Aktualisieren Sie die Liste.",
+    "driverWarning": "Die Warteschlange läuft auf \"{{driver}}\". Dieser Bildschirm betrachtet die Datenbank-Warteschlange und zeigt dann möglicherweise nicht den echten Rückstand.",
+    "actionFailed": "Aktion fehlgeschlagen. Der Job existiert möglicherweise nicht mehr. Aktualisieren Sie die Liste.",
     "recent": {
       "tenantFilter": "Tenant-Filter",
       "allTenants": "Alle Tenants",
@@ -2558,7 +2558,7 @@
       "colQueue": "Warteschlange",
       "colThroughput": "Durchsatz",
       "colRuntime": "Ø Dauer",
-      "empty": "Noch keine Metriken — Horizon erstellt alle 5 Minuten einen Snapshot."
+      "empty": "Noch keine Metriken. Horizon erstellt alle 5 Minuten einen Snapshot."
     }
   },
   "actionRules": {
@@ -2576,7 +2576,7 @@
     "customerAxisTitle": "Kunden-Aktionen",
     "customerAxisSubtitle": "Aktionen von einem Kunden aus, je nach Kundenstatus.",
     "consentSectionTitle": "DSGVO-Ausnahme — WhatsApp-Einwilligung",
-    "consentSectionSubtitle": "Ein Kandidat ohne WhatsApp-Opt-in kann nie eine Nachricht erhalten — diese Regel ist gesperrt.",
+    "consentSectionSubtitle": "Ein Kandidat ohne WhatsApp-Opt-in kann nie eine Nachricht erhalten. Diese Regel ist gesperrt.",
     "actionCol": "Aktion",
     "effect": {
       "allow": "Erlaubt",
@@ -2598,8 +2598,8 @@
     "detail": {
       "title": "Zelldetails",
       "popupCode": "Popup-Code",
-      "noPopup": "Kein Popup — diese Aktion wird immer stillschweigend erlaubt.",
-      "noPopupOverrideWarning": "Für diese Zelle existiert kein Popup-Code — der Nutzer sieht nur den generischen Warnung/Blockiert-Titel, ohne erklärenden Text. Prüfen Sie, ob das so gewollt ist.",
+      "noPopup": "Kein Popup. Diese Aktion wird immer stillschweigend erlaubt.",
+      "noPopupOverrideWarning": "Für diese Zelle existiert kein Popup-Code. Der Nutzer sieht nur den generischen Warnung/Blockiert-Titel, ohne erklärenden Text. Prüfen Sie, ob das so gewollt ist.",
       "messageNote": "Der Nachrichtentext ist pro Popup-Code fest und (noch) nicht pro Mandant anpassbar.",
       "resetCell": "Diese Zelle auf Standard zurücksetzen",
       "isOverride": "Von der Standardregel geändert",
@@ -2704,7 +2704,7 @@
     "blocksHint": "Wählen Sie feste Textblöcke (Intro, CTA, rechtlich), die dieses Profil einbindet.",
     "blocksEmpty": "Noch keine wiederverwendbaren Blöcke angelegt.",
     "delete": "Löschen",
-    "deleteBlocked": "Kann nicht gelöscht werden — Profil wird verwendet.",
+    "deleteBlocked": "Kann nicht gelöscht werden. Profil wird verwendet.",
     "confirmDelete": "Profil „{{name}}\" löschen?"
   },
   "vacancyContentBlocksSettings": {
@@ -2723,7 +2723,7 @@
     },
     "bodyLabel": "Inhalt",
     "delete": "Löschen",
-    "deleteBlocked": "Kann nicht gelöscht werden — Block wird verwendet.",
+    "deleteBlocked": "Kann nicht gelöscht werden. Block wird verwendet.",
     "confirmDelete": "Block „{{name}}\" löschen?"
   },
   "careerSite": {
@@ -2733,7 +2733,7 @@
     "hint": "Schaltet die öffentliche Karriereseite (…/{tenant}/vacatures) ein oder aus. Das Backend erzwingt dies sofort: aus = die Seite zeigt einen Hinweis und Bewerbungen sind geschlossen.",
     "urls": {
       "title": "Öffentliche URLs",
-      "subtitle": "In eine Jobbörse oder einen Crawler einfügen — aus der eigenen Adresse dieses Mandanten aufgebaut.",
+      "subtitle": "In eine Jobbörse oder einen Crawler einfügen. Aus der eigenen Adresse dieses Mandanten aufgebaut.",
       "site": "Seiteninfo (Branding)",
       "vacancies": "Stellenangebote (JSON)",
       "sitemap": "Sitemap",
@@ -2753,25 +2753,25 @@
   "dashboardsItem": "Element",
   "customerRequiredFields": {
     "title": "Pflichtfelder",
-    "subtitle": "Pflichtfelder für den Kunden (pro Kundenphase) sowie für Standort, Abteilung und Ansprechpartner. Das Backend prüft dies bereits beim Anlegen und beim Bearbeiten — siehe Hinweis unter jedem Tab.",
+    "subtitle": "Pflichtfelder für den Kunden (pro Kundenphase) sowie für Standort, Abteilung und Ansprechpartner. Das Backend prüft dies bereits beim Anlegen und beim Bearbeiten. Siehe Hinweis unter jedem Tab.",
     "tabs": {
       "customer": "Kunde",
       "location": "Standort",
       "department": "Abteilung",
       "contact": "Ansprechpartner"
     },
-    "phaseHint": "Dies wird beim Anlegen und bei einem echten Phasenwechsel geprüft. Eine normale Bearbeitung, die die Phase nicht ändert, wird nie blockiert — unabhängig davon, welche anderen Felder noch fehlen.",
-    "flatHint": "Dies wird beim Anlegen vollständig geprüft. Beim Bearbeiten werden nur die Felder geprüft, die die Änderung selbst betrifft — ein bereits unvollständiger Datensatz bleibt bei den anderen Feldern frei bearbeitbar."
+    "phaseHint": "Dies wird beim Anlegen und bei einem echten Phasenwechsel geprüft. Eine normale Bearbeitung, die die Phase nicht ändert, wird nie blockiert. Unabhängig davon, welche anderen Felder noch fehlen.",
+    "flatHint": "Dies wird beim Anlegen vollständig geprüft. Beim Bearbeiten werden nur die Felder geprüft, die die Änderung selbst betrifft. Ein bereits unvollständiger Datensatz bleibt bei den anderen Feldern frei bearbeitbar."
   },
   "customerConversion": {
     "title": "Standardstatus nach Konvertierung",
-    "subtitle": "Der Status, den ein Kunde direkt nach der Konvertierung von Interessent zu Kunde erhält. Ohne Einstellung bleibt der Status leer — wählen Sie einen Status, um ihn automatisch anzuwenden.",
+    "subtitle": "Der Status, den ein Kunde direkt nach der Konvertierung von Interessent zu Kunde erhält. Ohne Einstellung bleibt der Status leer. Wählen Sie einen Status, um ihn automatisch anzuwenden.",
     "none": "Keine (manuell setzen)",
     "saveFailed": "Speichern fehlgeschlagen"
   },
   "vacancyDefaultStatus": {
     "title": "Standardstatus beim Erstellen",
-    "subtitle": "Der Status, den eine neue Stelle erhält, wenn keiner angegeben wird. Ohne Einstellung bleibt der Status leer — wählen Sie einen Status, um ihn automatisch anzuwenden.",
+    "subtitle": "Der Status, den eine neue Stelle erhält, wenn keiner angegeben wird. Ohne Einstellung bleibt der Status leer. Wählen Sie einen Status, um ihn automatisch anzuwenden.",
     "none": "Keine (manuell setzen)",
     "saveFailed": "Speichern fehlgeschlagen"
   },
@@ -2870,7 +2870,7 @@
     "matchRenewSaveFailed": "Speichern des Match-Verlängerungsfensters fehlgeschlagen."
   },
   "modShiftmanager": {
-    "reportingOff": "Shiftmanager-Berichterstattung ist noch nicht aktiviert — schalten Sie das Modul ein, um KPI-Ziele und Anzeigelimits zu konfigurieren."
+    "reportingOff": "Shiftmanager-Berichterstattung ist noch nicht aktiviert. Schalten Sie das Modul ein, um KPI-Ziele und Anzeigelimits zu konfigurieren."
   },
   "dashboardsEmpty": "Noch keine Dashboard-Elemente konfiguriert.",
   "settings": {
@@ -2896,6 +2896,6 @@
     "colCountry": "Land",
     "colCoc": "Handelsregisternummer",
     "colVat": "USt-IdNr.",
-    "unknownCountryHint": "Für Länder ohne obige Regel wird nichts blockiert — es erscheint höchstens ein dezenter Hinweis."
+    "unknownCountryHint": "Für Länder ohne obige Regel wird nichts blockiert. Es erscheint höchstens ein dezenter Hinweis."
   }
 }

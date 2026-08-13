@@ -20,18 +20,18 @@
     "title": "Modèles",
     "active": "Modèle actif",
     "selectable": "Modèles sélectionnables",
-    "pickHint": "Choisissez le niveau d'IA pour votre agence — les tarifs sont ci-dessous.",
+    "pickHint": "Choisissez le niveau d'IA pour votre agence. Les tarifs sont ci-dessous.",
     "tier": {
       "snel": "Rapide",
       "slim": "Malin",
       "max": "Max"
     },
     "tierDesc": {
-      "snel": "Volume maximal, tarif le plus bas — parfait pour le routinier.",
+      "snel": "Volume maximal, tarif le plus bas. Parfait pour le routinier.",
       "slim": "Le standard : grande qualité à tarif moyen.",
-      "max": "La meilleure qualité pour le plus difficile — tarif le plus élevé."
+      "max": "La meilleure qualité pour le plus difficile. Tarif le plus élevé."
     },
-    "saveError": "Le changement de modèle a échoué — réessayez."
+    "saveError": "Le changement de modèle a échoué. Réessayez."
   },
   "pricing": {
     "title": "Tarifs",
@@ -43,11 +43,11 @@
   "voice": {
     "start": "Dictez votre message",
     "stop": "Arrêtez l'écoute",
-    "denied": "Microphone refusé — autorisez l'accès dans votre navigateur",
-    "insecureContext": "La dictée nécessite une connexion sécurisée (https) — indisponible sur cette page",
-    "errorServiceNotAllowed": "La reconnaissance vocale a été bloquée par le navigateur — service non autorisé",
-    "errorAudioCapture": "Aucun microphone détecté — vérifiez votre appareil",
-    "errorNetwork": "Erreur réseau pendant la reconnaissance vocale — veuillez réessayer",
-    "errorGeneric": "La reconnaissance vocale a échoué — veuillez réessayer"
+    "denied": "Microphone refusé. Autorisez l'accès dans votre navigateur",
+    "insecureContext": "La dictée nécessite une connexion sécurisée (https). Indisponible sur cette page",
+    "errorServiceNotAllowed": "La reconnaissance vocale a été bloquée par le navigateur. Service non autorisé",
+    "errorAudioCapture": "Aucun microphone détecté. Vérifiez votre appareil",
+    "errorNetwork": "Erreur réseau pendant la reconnaissance vocale. Veuillez réessayer",
+    "errorGeneric": "La reconnaissance vocale a échoué. Veuillez réessayer"
   }
 }

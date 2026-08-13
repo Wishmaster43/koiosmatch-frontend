@@ -39,7 +39,7 @@
     "archiveConfirm": "¿Archivar este match? Podrás restaurarlo después.",
     "archived": "Match archivado.",
     "archiveFailed": "No se pudo archivar el match.",
-    "archiveBlockedActiveContract": "Este match tiene un contrato activo — finalízalo primero.",
+    "archiveBlockedActiveContract": "Este match tiene un contrato activo. Finalízalo primero.",
     "archivedBanner": {
       "since": "Archivado desde el {{date}}",
       "flag": "Archivado",
@@ -92,7 +92,7 @@
       "sellRate": "Tarifa de venta",
       "margin": "Margen",
       "costCenter": "Centro de costes",
-      "billingEmails": "Email(s) de facturación — uno por línea, o separados por coma",
+      "billingEmails": "Email(s) de facturación, uno por línea, o separados por coma",
       "remarks": "Observaciones",
       "loading": "Cargando detalles del contrato…",
       "error": "No se pudieron cargar los detalles del contrato.",
@@ -159,7 +159,7 @@
       "mustBeAfterCurrent": "La nueva fecha de fin debe ser posterior a la fecha de fin actual.",
       "success": "Match renovado.",
       "error": "No se pudo renovar el match.",
-      "disabledArchived": "Match archivado — restaura primero.",
+      "disabledArchived": "Match archivado. Restaura primero.",
       "disabledClosed": "Este match ya ha finalizado."
     }
   },
@@ -226,7 +226,7 @@
   },
   "page": {
     "searchPlaceholder": "Buscar coincidencias",
-    "openNotFound": "Match no encontrado — puede haber sido eliminado."
+    "openNotFound": "Match no encontrado. Puede haber sido eliminado."
   },
   "add": {
     "button": "Nuevo match"
@@ -250,18 +250,18 @@
     "analyzing": "Koios AI está analizando el match…",
     "scoreLabel": "Puntuación",
     "scoreGood": "Coincidencia sólida ({{score}}).",
-    "scoreAverage": "Coincidencia media ({{score}}) — revise la idoneidad.",
-    "scorePoor": "Coincidencia débil ({{score}}) — requiere atención.",
+    "scoreAverage": "Coincidencia media ({{score}}). Revise la idoneidad.",
+    "scorePoor": "Coincidencia débil ({{score}}). Requiere atención.",
     "scoreUnknown": "Aún sin puntuación.",
     "windowLabel": "Periodo de contrato",
     "windowExpired": "La fecha de fin ya pasó hace {{days}} día(s).",
-    "windowWarning": "Quedan {{days}} día(s) hasta la fecha de fin — renueva o cierra a tiempo.",
+    "windowWarning": "Quedan {{days}} día(s) hasta la fecha de fin. Renueva o cierra a tiempo.",
     "windowFine": "El periodo de contrato va bien.",
     "windowUnknown": "No se conoce fecha de fin."
   },
   "koios": {
     "reasons": {
-      "endDateApproaching": "La fecha de fin del contrato se acerca o ya pasó — considera renovarlo."
+      "endDateApproaching": "La fecha de fin del contrato se acerca o ya pasó. Considera renovarlo."
     }
   }
 }

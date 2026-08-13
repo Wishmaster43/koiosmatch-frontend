@@ -1,5 +1,5 @@
 {
-  "comingSoon": "{{label}} — coming soon",
+  "comingSoon": "{{label}}. Coming soon",
   "shiftAnalysis": {
     "title": "Candidate shift analysis",
     "subtitle": "Trend and attention signals per candidate based on planned and worked hours.",
@@ -188,7 +188,7 @@
       "choose": "Choose Shiftmanager account…",
       "noPermission": "No permission to sync",
       "noConnection": "No active Shiftmanager connection found",
-      "started": "Sync started — this can take a few minutes",
+      "started": "Sync started. This can take a few minutes",
       "failed": "Sync failed",
       "tooManyRequests": "Too many attempts, try again in {{secs}}s"
     },

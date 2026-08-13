@@ -20,18 +20,18 @@
     "title": "Models",
     "active": "Active model",
     "selectable": "Selectable models",
-    "pickHint": "Pick the AI tier for your agency — per-tier rates are below.",
+    "pickHint": "Pick the AI tier for your agency. Per-tier rates are below.",
     "tier": {
       "snel": "Fast",
       "slim": "Smart",
       "max": "Max"
     },
     "tierDesc": {
-      "snel": "Highest volume, lowest rate — great for routine work.",
+      "snel": "Highest volume, lowest rate. Great for routine work.",
       "slim": "The default: strong quality at an average rate.",
-      "max": "Best quality for the hardest work — highest rate."
+      "max": "Best quality for the hardest work. Highest rate."
     },
-    "saveError": "Changing the model failed — please try again."
+    "saveError": "Changing the model failed. Please try again."
   },
   "pricing": {
     "title": "Rates",
@@ -43,11 +43,11 @@
   "voice": {
     "start": "Dictate your message",
     "stop": "Stop listening",
-    "denied": "Microphone denied — allow access in your browser",
-    "insecureContext": "Dictation needs a secure connection (https) — unavailable on this page",
-    "errorServiceNotAllowed": "Speech recognition was blocked by the browser — service not allowed",
-    "errorAudioCapture": "No microphone found — check your device",
-    "errorNetwork": "Network error during speech recognition — please try again",
-    "errorGeneric": "Speech recognition failed — please try again"
+    "denied": "Microphone denied. Allow access in your browser",
+    "insecureContext": "Dictation needs a secure connection (https). Unavailable on this page",
+    "errorServiceNotAllowed": "Speech recognition was blocked by the browser. Service not allowed",
+    "errorAudioCapture": "No microphone found. Check your device",
+    "errorNetwork": "Network error during speech recognition. Please try again",
+    "errorGeneric": "Speech recognition failed. Please try again"
   }
 }

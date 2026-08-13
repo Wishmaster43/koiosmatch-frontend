@@ -135,7 +135,7 @@ describe('AgentsTab — delete failure must not remove the agent from the list',
     // Wait for the actual async signal (the toast fired from the .catch) rather than
     // the synchronous call args — the delete call is recorded before its promise settles.
     await waitFor(() => expect(dispatchSpy).toHaveBeenCalledWith(expect.objectContaining({
-      detail: { type: 'error', message: 'Actie mislukt — probeer het opnieuw.' },
+      detail: { type: 'error', message: 'Actie mislukt. Probeer het opnieuw.' },
     })))
     expect(api.delete).toHaveBeenCalledWith('/ai/agents/a1')
     // The row must still be there — a failed delete is not a silent success.
@@ -171,7 +171,7 @@ describe('PromptsTab — delete failure must not remove the prompt from the list
     fireEvent.click(await screen.findByRole('button', { name: 'Bevestigen' }))
 
     await waitFor(() => expect(dispatchSpy).toHaveBeenCalledWith(expect.objectContaining({
-      detail: { type: 'error', message: 'Actie mislukt — probeer het opnieuw.' },
+      detail: { type: 'error', message: 'Actie mislukt. Probeer het opnieuw.' },
     })))
     expect(api.delete).toHaveBeenCalledWith('/ai/prompts/p1')
     expect(screen.getByText('Openingsbericht')).toBeInTheDocument()
@@ -201,7 +201,7 @@ describe('FAQTab — delete failure must not remove the FAQ from the list', () =
     fireEvent.click(await screen.findByRole('button', { name: 'Bevestigen' }))
 
     await waitFor(() => expect(dispatchSpy).toHaveBeenCalledWith(expect.objectContaining({
-      detail: { type: 'error', message: 'Actie mislukt — probeer het opnieuw.' },
+      detail: { type: 'error', message: 'Actie mislukt. Probeer het opnieuw.' },
     })))
     expect(api.delete).toHaveBeenCalledWith('/ai/faqs/f1')
     expect(screen.getByText('Vergoeding')).toBeInTheDocument()
@@ -216,7 +216,7 @@ describe('ToolsTab — read-only honest notice (no backend endpoint exists yet)'
   it('shows the "not available" notice and renders every tool row as disabled', () => {
     render(<ToolsTab />)
 
-    expect(screen.getByText('Nog niet gekoppeld aan een agent — deze keuzes worden niet opgeslagen.')).toBeInTheDocument()
+    expect(screen.getByText('Nog niet gekoppeld aan een agent. Deze keuzes worden niet opgeslagen.')).toBeInTheDocument()
     expect(screen.getByText('Dienst opzoeken')).toBeInTheDocument()
     // No button/checkbox role anywhere — there is nothing left to click.
     expect(screen.queryByRole('button')).toBeNull()

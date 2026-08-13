@@ -146,7 +146,7 @@
     "billingAddress": {
       "title": "Factuuradres",
       "poBox": "Postbus",
-      "usesVisitAddress": "Leeg — de factuur gaat naar het bezoekadres.",
+      "usesVisitAddress": "Leeg. De factuur gaat naar het bezoekadres.",
       "visitEmpty": "Geen bezoekadres ingevuld",
       "hint": "Laat dit leeg als de factuur naar het bezoekadres mag. Vul het alleen in bij een afwijkend adres of een postbus."
     }
@@ -219,12 +219,12 @@
       "pickContactSearch": "Zoek op naam, functie of e-mail",
       "pickContactLinks": "Nu gekoppeld aan",
       "pickContactNoLinks": "Nog geen koppeling",
-      "coupleNote": "Koppelen VERPLAATST de contactpersoon naar deze locatie — hij raakt los van zijn huidige locatie.",
+      "coupleNote": "Koppelen VERPLAATST de contactpersoon naar deze locatie. Hij raakt los van zijn huidige locatie.",
       "branchTitle": "Vestiging",
       "branchInherited": "Volgt de klant",
       "branchOwn": "Afwijkend ingesteld",
       "branchLink": "Vestiging koppelen",
-      "branchEmpty": "Nog geen eigen vestiging — deze locatie volgt de klant.",
+      "branchEmpty": "Nog geen eigen vestiging. Deze locatie volgt de klant.",
       "branchHint": "Leeg laten betekent: deze locatie werkt onder dezelfde vestigingen als de klant. Koppel je er zelf een, dan wijkt deze locatie bewust af.",
       "isPrimaryContact": "Primaire contactpersoon van deze locatie",
       "setPrimaryContact": "Maak primaire contactpersoon van deze locatie",
@@ -238,7 +238,7 @@
       "linkNamed": "Koppel {{name}}",
       "createAndLink": "Maak contactpersoon en koppel",
       "description": "Locatietekst",
-      "contactNotLinked": "Alleen tekst — nog niet gekoppeld aan een contactpersoon",
+      "contactNotLinked": "Alleen tekst. Nog niet gekoppeld aan een contactpersoon",
       "changePrimaryContact": "Wijzig contactpersoon",
       "mergeLocation": "Locatie samenvoegen",
       "archiveLocation": "Locatie archiveren",
@@ -256,7 +256,7 @@
     },
     "saveFailed": "Opslaan is mislukt.",
     "deleteFailed": "Verwijderen is mislukt.",
-    "deleteInUse": "Verwijderen is niet mogelijk — deze locatie wordt nog gebruikt.",
+    "deleteInUse": "Verwijderen is niet mogelijk. Deze locatie wordt nog gebruikt.",
     "archivedBanner": {
       "since": "Gearchiveerd op {{date}}",
       "flag": "Gearchiveerd",
@@ -326,7 +326,7 @@
     "deleteConfirm": "Deze afdeling verwijderen?",
     "saveFailed": "Opslaan is mislukt.",
     "deleteFailed": "Verwijderen is mislukt.",
-    "deleteInUse": "Verwijderen is niet mogelijk — deze afdeling wordt nog gebruikt.",
+    "deleteInUse": "Verwijderen is niet mogelijk. Deze afdeling wordt nog gebruikt.",
     "archivedBanner": {
       "since": "Gearchiveerd op {{date}}",
       "flag": "Gearchiveerd",
@@ -400,7 +400,7 @@
     "deleteConfirm": "Deze contactpersoon verwijderen?",
     "saveFailed": "Opslaan is mislukt.",
     "deleteFailed": "Verwijderen is mislukt.",
-    "deleteInUse": "Verwijderen is niet mogelijk — deze contactpersoon wordt nog gebruikt.",
+    "deleteInUse": "Verwijderen is niet mogelijk. Deze contactpersoon wordt nog gebruikt.",
     "archivedBanner": {
       "since": "Gearchiveerd op {{date}}",
       "flag": "Gearchiveerd",
@@ -517,8 +517,8 @@
     "downloadSelected": "Download ({{count}})",
     "preview": "Voorbeeld",
     "deleteTitle": "Document verwijderen",
-    "deleteOneMessage": "Weet je het zeker? '{{name}}' wordt definitief verwijderd — dit kan niet ongedaan worden gemaakt.",
-    "deleteManyMessage": "Weet je het zeker? {{count}} documenten worden definitief verwijderd — dit kan niet ongedaan worden gemaakt.",
+    "deleteOneMessage": "Weet je het zeker? '{{name}}' wordt definitief verwijderd. Dit kan niet ongedaan worden gemaakt.",
+    "deleteManyMessage": "Weet je het zeker? {{count}} documenten worden definitief verwijderd. Dit kan niet ongedaan worden gemaakt.",
     "deleteSelected": "Verwijder ({{count}})",
     "linkLevelLabel": "Document koppelen aan",
     "allTypes": "Alle types"
@@ -540,7 +540,7 @@
     "delete": "Verwijderen",
     "confirmDelete": "Deze prijsafspraak verwijderen?",
     "deleteFailed": "Verwijderen is mislukt.",
-    "deleteInUse": "Verwijderen is niet mogelijk — deze afspraak wordt nog gebruikt.",
+    "deleteInUse": "Verwijderen is niet mogelijk. Deze afspraak wordt nog gebruikt.",
     "saveFailed": "Opslaan is mislukt.",
     "loading": "Prijsafspraken laden…",
     "loadError": "Prijsafspraken laden is mislukt.",
@@ -637,7 +637,7 @@
     },
     "import": {
       "title": "Klant uit bestand",
-      "intro": "Een bestand importeren maakt deze klant — met vestigingen, afdelingen en contactpersonen — meteen aan. Het vult het formulier hieronder niet in; controleer eerst de voorbeeldweergave voordat je bevestigt."
+      "intro": "Een bestand importeren maakt deze klant (met vestigingen, afdelingen en contactpersonen) meteen aan. Het vult het formulier hieronder niet in; controleer eerst de voorbeeldweergave voordat je bevestigt."
     }
   },
   "subModal": {
@@ -709,9 +709,9 @@
     "gender": "Geslacht",
     "import": {
       "title": "{{entity}} uit bestand",
-      "intro": "Een bestand importeren maakt {{entity}} rechtstreeks aan — dit vult het formulier hieronder niet in. Controleer eerst de voorbeeldweergave voordat je bevestigt.",
-      "parentWarning": "De klantnaam in het bestand bepaalt welke klant de rijen krijgt — dat hoeft niet \"{{customerName}}\" te zijn. Controleer de voorbeeldweergave.",
-      "mismatchWarning": "{{count}} rij(en) in dit bestand horen bij een andere klant dan deze ({{names}}) — die rijen komen daar terecht, niet hier.",
+      "intro": "Een bestand importeren maakt {{entity}} rechtstreeks aan. Dit vult het formulier hieronder niet in. Controleer eerst de voorbeeldweergave voordat je bevestigt.",
+      "parentWarning": "De klantnaam in het bestand bepaalt welke klant de rijen krijgt. Dat hoeft niet \"{{customerName}}\" te zijn. Controleer de voorbeeldweergave.",
+      "mismatchWarning": "{{count}} rij(en) in dit bestand horen bij een andere klant dan deze ({{names}}). Die rijen komen daar terecht, niet hier.",
       "mismatchConfirm": "{{count}} rij(en) van dit bestand worden aangemaakt of bijgewerkt bij een andere klant ({{names}}), niet bij de klant die je nu open hebt. Wil je toch doorgaan?",
       "mismatchTitle": "Andere klant in bestand",
       "mismatchProceed": "Toch importeren"
@@ -748,14 +748,14 @@
     "refresh": "Vernieuwen",
     "analyzing": "Koios AI analyseert het klantprofiel…",
     "completeness": "Volledigheid",
-    "completeGood": "Klantprofiel is goed gevuld — geen ontbrekende kernvelden gedetecteerd.",
+    "completeGood": "Klantprofiel is goed gevuld. Geen ontbrekende kernvelden gedetecteerd.",
     "completePartial": "Klantprofiel is {{pct}}% compleet. Vul KvK-nummer, btw-nummer, branche en contactgegevens aan voor een vollediger beeld.",
     "relationshipLabel": "Relatie",
     "relationshipActive": "{{vacancies}} open vacature(s) · {{matches}} actieve match(es).",
     "relationshipNone": "Geen open vacatures of actieve matches geregistreerd.",
-    "locationComplete": "Deze locatie is goed gevuld — adres, registratie en contact zijn bekend.",
+    "locationComplete": "Deze locatie is goed gevuld. Adres, registratie en contact zijn bekend.",
     "locationPartial": "Deze locatie is {{pct}}% compleet. Vul adres, Sub-KvK, BTW-nummer en contactgegevens aan.",
-    "departmentComplete": "Deze afdeling is goed gevuld — omschrijving, status en kostenplaats zijn bekend.",
+    "departmentComplete": "Deze afdeling is goed gevuld. Omschrijving, status en kostenplaats zijn bekend.",
     "departmentPartial": "Deze afdeling is {{pct}}% compleet. Vul omschrijving, status en kostenplaats aan."
   },
   "tasks": {
@@ -804,7 +804,7 @@
   },
   "koios": {
     "reasons": {
-      "noOpenVacancies": "Geen openstaande vacatures — neem contact op met deze klant."
+      "noOpenVacancies": "Geen openstaande vacatures. Neem contact op met deze klant."
     }
   },
   "validation": {

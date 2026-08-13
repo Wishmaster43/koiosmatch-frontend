@@ -66,7 +66,7 @@
     "namePlaceholder": "p. ej. Lista de llamadas cuidadores disponibles",
     "channel": "Canal",
     "pool": "Bolsa de origen (opcional)",
-    "poolNone": "Ninguna — rellenar más tarde",
+    "poolNone": "Ninguna, rellenar más tarde",
     "poolHint": "Elige una bolsa de talento para llenar la lista con candidatos de inmediato.",
     "submit": "Crear lista",
     "saving": "Creando…",

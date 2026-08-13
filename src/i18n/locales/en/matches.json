@@ -39,7 +39,7 @@
     "archiveConfirm": "Archive this match? You can restore it afterwards.",
     "archived": "Match archived.",
     "archiveFailed": "Couldn't archive the match.",
-    "archiveBlockedActiveContract": "This match has an active contract — end it first.",
+    "archiveBlockedActiveContract": "This match has an active contract. End it first.",
     "archivedBanner": {
       "since": "Archived since {{date}}",
       "flag": "Archived",
@@ -92,7 +92,7 @@
       "sellRate": "Sell rate",
       "margin": "Margin",
       "costCenter": "Cost center",
-      "billingEmails": "Billing email(s) — one per line, or comma-separated",
+      "billingEmails": "Billing email(s), one per line, or comma-separated",
       "remarks": "Remarks",
       "loading": "Loading contract details…",
       "error": "Couldn't load the contract details.",
@@ -122,7 +122,7 @@
       "title": "Remarks",
       "saved": "Remarks saved.",
       "saveError": "Couldn't save the remarks.",
-      "deprecated": "This field is being retired. Move the text to Notes — there it gets an author, a date, a type and a channel, and it appears in the timeline.",
+      "deprecated": "This field is being retired. Move the text to Notes. There it gets an author, a date, a type and a channel, and it appears in the timeline.",
       "moveToNotes": "Move to notes",
       "moving": "Moving…",
       "moved": "The remark was moved to notes.",
@@ -159,7 +159,7 @@
       "mustBeAfterCurrent": "The new end date must be after the current end date.",
       "success": "Match renewed.",
       "error": "The match could not be renewed.",
-      "disabledArchived": "Archived match — restore first.",
+      "disabledArchived": "Archived match. Restore first.",
       "disabledClosed": "This match has already been terminated."
     }
   },
@@ -226,7 +226,7 @@
   },
   "page": {
     "searchPlaceholder": "Search matches",
-    "openNotFound": "Match not found — it may have been removed."
+    "openNotFound": "Match not found. It may have been removed."
   },
   "add": {
     "button": "New match"
@@ -250,18 +250,18 @@
     "analyzing": "Koios AI is analysing the match…",
     "scoreLabel": "Score",
     "scoreGood": "Strong match ({{score}}).",
-    "scoreAverage": "Average match ({{score}}) — check the fit.",
-    "scorePoor": "Weak match ({{score}}) — needs attention.",
+    "scoreAverage": "Average match ({{score}}). Check the fit.",
+    "scorePoor": "Weak match ({{score}}). Needs attention.",
     "scoreUnknown": "No score yet.",
     "windowLabel": "Contract window",
     "windowExpired": "The end date passed {{days}} day(s) ago.",
-    "windowWarning": "{{days}} day(s) left until the end date — renew or wrap up in time.",
+    "windowWarning": "{{days}} day(s) left until the end date. Renew or wrap up in time.",
     "windowFine": "Contract window is on track.",
     "windowUnknown": "No end date known."
   },
   "koios": {
     "reasons": {
-      "endDateApproaching": "The contract end date is approaching or has passed — consider renewing."
+      "endDateApproaching": "The contract end date is approaching or has passed. Consider renewing."
     }
   }
 }

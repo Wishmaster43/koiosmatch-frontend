@@ -164,7 +164,7 @@
   },
   "koios": {
     "reasons": {
-      "expectedCloseOverdue": "De verwachte sluitingsdatum is verstreken — volg deze kans op."
+      "expectedCloseOverdue": "De verwachte sluitingsdatum is verstreken. Volg deze kans op."
     }
   },
   "richText": {

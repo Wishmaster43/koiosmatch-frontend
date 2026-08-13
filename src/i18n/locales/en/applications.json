@@ -37,7 +37,7 @@
     "searchErrorForbidden": "You don't have permission to search here.",
     "searchErrorValidation": "That search wasn't accepted. Adjust it and try again.",
     "searchErrorServer": "The server errored while searching. Try again shortly.",
-    "searchErrorNetwork": "No connection — the search failed."
+    "searchErrorNetwork": "No connection. The search failed."
   },
   "pagination": {
     "perPage": "Results per page",
@@ -85,7 +85,7 @@
     "source": "Source",
     "noOwner": "No owner",
     "clearFilter": "Clear filter",
-    "pageScopeNotice": "Server-wide totals are temporarily unavailable — these figures are based on a partial sample only."
+    "pageScopeNotice": "Server-wide totals are temporarily unavailable. These figures are based on a partial sample only."
   },
   "drawer": {
     "label": "Application",
@@ -150,7 +150,7 @@
     "readOn": "Read on {{date}}",
     "modelLabel": "Model: {{model}}",
     "badge": "cv",
-    "badgeTitle": "Read from the CV — check this value",
+    "badgeTitle": "Read from the CV. Check this value",
     "tableCaption": "What the record holds now, what the CV proposes and what accepting would do.",
     "status": {
       "pending": "Not reviewed yet",
@@ -265,19 +265,19 @@
       "label": "Start interview",
       "agentPlaceholder": "Choose an AI agent",
       "started": "Interview started.",
-      "alreadyRunning": "Interview already running — showing the existing session.",
+      "alreadyRunning": "Interview already running. Showing the existing session.",
       "alreadyHasSession": "This candidate already has an open interview on another application.",
-      "unavailable": "Starting an interview isn't available yet — waiting on the backend link.",
+      "unavailable": "Starting an interview isn't available yet. Waiting on the backend link.",
       "noAgentChosen": "Choose an AI agent first.",
       "loadError": "Failed to load AI agents.",
       "reasons": {
         "no_mobile_or_consent": "The candidate has no mobile number or no WhatsApp consent.",
         "no_active_connection": "No active WhatsApp connection for this vacancy.",
-        "rejected_stage": "This application is rejected — an interview can't be started.",
-        "placed_stage": "This application is already placed — an interview can't be started.",
+        "rejected_stage": "This application is rejected. An interview can't be started.",
+        "placed_stage": "This application is already placed. An interview can't be started.",
         "no_active_flow": "The chosen AI agent has no active interview flow.",
         "no_candidate": "No candidate linked to this application.",
-        "send_failed": "Sending failed — try again."
+        "send_failed": "Sending failed. Try again."
       }
     },
     "status": {
@@ -295,7 +295,7 @@
       "durationHours": "{{hours}}h {{minutes}}min",
       "durationDays": "{{days}}d {{hours}}h",
       "durationUnknown": "Unknown",
-      "durationHint": "Time elapsed since the interview started — nights and weekends included. This is not talk time.",
+      "durationHint": "Time elapsed since the interview started. Nights and weekends included. This is not talk time.",
       "visibilityPending": "Agent, turn and elapsed time aren't available for this session.",
       "takeover": "Stop agent / take over",
       "takeoverBusy": "Working…",
@@ -326,7 +326,7 @@
     },
     "conversation": {
       "title": "Conversation",
-      "noCandidate": "No candidate linked — nothing to show."
+      "noCandidate": "No candidate linked. Nothing to show."
     }
   },
   "appointments": {
@@ -396,7 +396,7 @@
     "confirm": "Reject",
     "rejected": "Rejected",
     "aiAdvice": "Koios advises rejection",
-    "aiAuto": "Hard criteria failed — auto-rejection eligible.",
+    "aiAuto": "Hard criteria failed. Auto-rejection eligible.",
     "aiConfirm": "Review and confirm before a message is sent.",
     "done": "Application rejected",
     "sentOn": "Message sent on {{date}}",
@@ -487,7 +487,7 @@
     "clearScope": "Clear selection filter"
   },
   "board": {
-    "movedHidden": "Moved — the card falls outside the current filter"
+    "movedHidden": "Moved. The card falls outside the current filter"
   },
   "ai": {
     "title": "Koios AI advises",
@@ -496,7 +496,7 @@
     "analyzing": "Koios AI is analysing the application…",
     "progressLabel": "Progress",
     "progressOk": "{{days}} days in process · current phase '{{phase}}'.",
-    "progressStale": "Already {{days}} days in process · phase '{{phase}}' — possibly stalled, check the follow-up.",
+    "progressStale": "Already {{days}} days in process · phase '{{phase}}'. Possibly stalled, check the follow-up.",
     "progressUnknown": "Date unknown · current phase '{{phase}}'.",
     "completeness": "Completeness",
     "missingVacancy": "No vacancy linked to this application."

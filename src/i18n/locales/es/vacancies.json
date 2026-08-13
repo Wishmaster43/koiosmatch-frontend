@@ -27,10 +27,10 @@
     "client": "Cliente",
     "createdAt": "Creada el",
     "aiAgent": "Agente IA",
-    "leadsUnknown": "Aún no calculado — abre la vacante para ver los candidatos que coinciden.",
-    "leadsStale": "Recalculando — cifra del {{date}}",
+    "leadsUnknown": "Aún no calculado. Abre la vacante para ver los candidatos que coinciden.",
+    "leadsStale": "Recalculando. Cifra del {{date}}",
     "leadsGeoMissing": "Sin coordenadas no se pudo aplicar el radio",
-    "leadsPartial": "Contado parcialmente — se alcanzó un límite",
+    "leadsPartial": "Contado parcialmente. Se alcanzó un límite",
     "leadsComputedAt": "Actualizado el {{date}}",
     "age": "Antigüedad",
     "applicationsOpen": "Abrir solicitudes",
@@ -182,7 +182,7 @@
     "adjust": "Ajustar",
     "hideAdjust": "Ocultar",
     "templatesError": "No se pudieron cargar los perfiles de matching.",
-    "noTemplates": "Aún no hay perfiles de matching — cree uno en Configuración.",
+    "noTemplates": "Aún no hay perfiles de matching. Cree uno en Configuración.",
     "snapshotHint": "Las ponderaciones se copian una sola vez del perfil a esta vacante; los cambios posteriores en el perfil no actualizan esta vacante automáticamente.",
     "basedOn": "Basado en «{{name}}».",
     "dim": {
@@ -257,8 +257,8 @@
       "confirmWithCount_one": "¿Debe el agente también encargarse del {{count}} candidato existente de esta vacante? Esto enviará mensajes de WhatsApp.",
       "confirmWithCount_other": "¿Debe el agente también encargarse de los {{count}} candidatos existentes de esta vacante? Esto enviará mensajes de WhatsApp.",
       "resultToast": "{{started}} de {{eligibleTotal}} iniciadas.",
-      "resultToastWithReasons": "{{started}} de {{eligibleTotal}} iniciadas — {{skippedTotal}} omitidas: {{reasons}}.",
-      "unavailable": "Iniciar entrevistas para los candidatos existentes aún no está disponible — a la espera de la conexión con el backend.",
+      "resultToastWithReasons": "{{started}} de {{eligibleTotal}} iniciadas, {{skippedTotal}} omitidas: {{reasons}}.",
+      "unavailable": "Iniciar entrevistas para los candidatos existentes aún no está disponible. A la espera de la conexión con el backend.",
       "reasons": {
         "no_mobile_or_consent": "sin consentimiento de WhatsApp",
         "already_has_session": "ya en curso",
@@ -280,7 +280,7 @@
     "cta": "Generar",
     "generating": "Koios está generando un texto de vacante provisional…",
     "error": "No se pudo generar. Inténtalo de nuevo.",
-    "previewLabel": "Propuesta (borrador) — aún no guardada",
+    "previewLabel": "Propuesta (borrador). Aún no guardada",
     "apply": "Aplicar",
     "discard": "Descartar",
     "needsTitleFirst": "Complete primero un título para generar un texto."
@@ -328,7 +328,7 @@
     "detachDone": "Candidatura desvinculada"
   },
   "candidateSearch": {
-    "noLocation": "Esta vacante aún no tiene coordenadas de ubicación — actualiza primero la dirección, luego aparecerá el mapa aquí.",
+    "noLocation": "Esta vacante aún no tiene coordenadas de ubicación. Actualiza primero la dirección, luego aparecerá el mapa aquí.",
     "functions": "Función",
     "statuses": "Disponibilidad",
     "contractForms": "Forma de contrato",
@@ -336,7 +336,7 @@
     "empty": "No se han encontrado candidatos con estos filtros.",
     "centerVacancy": "Ubicación de la vacante",
     "refreshAdvice": "Actualizar el consejo de Koios",
-    "adviceQueued": "El consejo se está calculando — la lista se actualizará en breve.",
+    "adviceQueued": "El consejo se está calculando. La lista se actualizará en breve.",
     "aiAdvised": "Recomendado por Koios"
   },
   "statistics": {
@@ -479,7 +479,7 @@
     }
   },
   "popout": {
-    "windowTitle": "Notas — {{name}}",
+    "windowTitle": "Notas. {{name}}",
     "loadError": "No se pudo cargar esta vacante."
   },
   "matchesTab": {

@@ -20,18 +20,18 @@
     "title": "Modelle",
     "active": "Aktives Modell",
     "selectable": "Auswählbare Modelle",
-    "pickHint": "Wählen Sie die KI-Stufe für Ihr Büro — die Tarife stehen darunter.",
+    "pickHint": "Wählen Sie die KI-Stufe für Ihr Büro. Die Tarife stehen darunter.",
     "tier": {
       "snel": "Schnell",
       "slim": "Smart",
       "max": "Max"
     },
     "tierDesc": {
-      "snel": "Höchstes Volumen, niedrigster Tarif — ideal für Routinearbeit.",
+      "snel": "Höchstes Volumen, niedrigster Tarif. Ideal für Routinearbeit.",
       "slim": "Der Standard: starke Qualität zum mittleren Tarif.",
-      "max": "Beste Qualität für die schwierigste Arbeit — höchster Tarif."
+      "max": "Beste Qualität für die schwierigste Arbeit. Höchster Tarif."
     },
-    "saveError": "Modellwechsel fehlgeschlagen — bitte erneut versuchen."
+    "saveError": "Modellwechsel fehlgeschlagen. Bitte erneut versuchen."
   },
   "pricing": {
     "title": "Tarife",
@@ -43,11 +43,11 @@
   "voice": {
     "start": "Nachricht einsprechen",
     "stop": "Zuhören stoppen",
-    "denied": "Mikrofonzugriff verweigert — erlauben Sie den Zugriff in Ihrem Browser",
-    "insecureContext": "Diktat erfordert eine sichere Verbindung (https) — auf dieser Seite nicht verfügbar",
-    "errorServiceNotAllowed": "Die Spracherkennung wurde vom Browser blockiert — Dienst nicht erlaubt",
-    "errorAudioCapture": "Kein Mikrofon gefunden — überprüfen Sie Ihr Gerät",
-    "errorNetwork": "Netzwerkfehler bei der Spracherkennung — bitte versuchen Sie es erneut",
-    "errorGeneric": "Spracherkennung fehlgeschlagen — bitte versuchen Sie es erneut"
+    "denied": "Mikrofonzugriff verweigert. Erlauben Sie den Zugriff in Ihrem Browser",
+    "insecureContext": "Diktat erfordert eine sichere Verbindung (https). Auf dieser Seite nicht verfügbar",
+    "errorServiceNotAllowed": "Die Spracherkennung wurde vom Browser blockiert. Dienst nicht erlaubt",
+    "errorAudioCapture": "Kein Mikrofon gefunden. Überprüfen Sie Ihr Gerät",
+    "errorNetwork": "Netzwerkfehler bei der Spracherkennung. Bitte versuchen Sie es erneut",
+    "errorGeneric": "Spracherkennung fehlgeschlagen. Bitte versuchen Sie es erneut"
   }
 }

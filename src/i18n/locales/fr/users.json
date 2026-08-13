@@ -55,12 +55,12 @@
   "branches": {
     "title": "Sites",
     "hint": "Détermine à quels sites cet utilisateur est rattaché. Cela limite déjà les candidats visibles et modifiables (les candidats en dehors de ces sites sont masqués) ; les autres domaines (offres, clients, …) ne sont pas encore limités par site.",
-    "emptyHint": "Aucun site sélectionné — cet utilisateur voit encore tous les candidats, sans restriction.",
+    "emptyHint": "Aucun site sélectionné. Cet utilisateur voit encore tous les candidats, sans restriction.",
     "noLocations": "Aucun site configuré pour le moment.",
     "saveFailed": "Impossible d'enregistrer les sites. Veuillez réessayer.",
     "loading": "Chargement…",
     "previewTitle": "Sites de ce rôle",
-    "previewEmpty": "Aucun ensemble de départ — ce rôle n'a aucun site ; le nouvel utilisateur démarre sans restriction."
+    "previewEmpty": "Aucun ensemble de départ. Ce rôle n'a aucun site ; le nouvel utilisateur démarre sans restriction."
   },
   "validation": {
     "emailFormat": "Saisissez une adresse e-mail valide."
@@ -74,8 +74,8 @@
   "delete": {
     "action": "Supprimer l'utilisateur",
     "title": "Supprimer l'utilisateur",
-    "explain_one": "{{name}} est encore propriétaire de {{count}} enregistrement. Choisissez un collègue qui le reprend — ce n'est qu'ensuite que l'utilisateur peut être supprimé.",
-    "explain_other": "{{name}} est encore propriétaire de {{count}} enregistrements. Choisissez un collègue qui les reprend — ce n'est qu'ensuite que l'utilisateur peut être supprimé.",
+    "explain_one": "{{name}} est encore propriétaire de {{count}} enregistrement. Choisissez un collègue qui le reprend. Ce n'est qu'ensuite que l'utilisateur peut être supprimé.",
+    "explain_other": "{{name}} est encore propriétaire de {{count}} enregistrements. Choisissez un collègue qui les reprend. Ce n'est qu'ensuite que l'utilisateur peut être supprimé.",
     "ownedTitle": "Ce qui sera transféré",
     "successor": "Transférer à",
     "successorPlaceholder": "Choisir un collègue",
@@ -115,7 +115,7 @@
   },
   "rolesModal": {
     "title": "Attribuer des rôles",
-    "hint": "Choisissez un ou plusieurs rôles. L'ensemble complet est enregistré — les rôles retirés sont révoqués.",
+    "hint": "Choisissez un ou plusieurs rôles. L'ensemble complet est enregistré. Les rôles retirés sont révoqués.",
     "none": "Aucun rôle choisi",
     "add": "Ajouter un rôle",
     "remove": "Retirer {{role}}"

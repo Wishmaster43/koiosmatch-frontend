@@ -6,7 +6,7 @@
     "escalations": "Escalaciones"
   },
   "drill": {
-    "noDetail": "Aún no hay datos de detalle para este KPI — el backend los proporcionará pronto."
+    "noDetail": "Aún no hay datos de detalle para este KPI. El backend los proporcionará pronto."
   },
   "overview": {
     "statusTitle": "Estado de mensajes",

@@ -37,7 +37,7 @@
     "searchErrorForbidden": "Du hast keine Berechtigung, hier zu suchen.",
     "searchErrorValidation": "Diese Suche wurde nicht akzeptiert. Passe sie an und versuche es erneut.",
     "searchErrorServer": "Der Server hat bei der Suche einen Fehler gemeldet. Bitte gleich erneut versuchen.",
-    "searchErrorNetwork": "Keine Verbindung — die Suche ist fehlgeschlagen."
+    "searchErrorNetwork": "Keine Verbindung. Die Suche ist fehlgeschlagen."
   },
   "pagination": {
     "perPage": "Ergebnisse pro Seite",
@@ -85,7 +85,7 @@
     "source": "Quelle",
     "clearFilter": "Filter zurücksetzen",
     "noOwner": "Kein Eigentümer",
-    "pageScopeNotice": "Serverweite Gesamtzahlen sind vorübergehend nicht verfügbar — diese Zahlen basieren nur auf einer teilweisen Stichprobe."
+    "pageScopeNotice": "Serverweite Gesamtzahlen sind vorübergehend nicht verfügbar. Diese Zahlen basieren nur auf einer teilweisen Stichprobe."
   },
   "drawer": {
     "label": "Bewerbung",
@@ -150,7 +150,7 @@
     "readOn": "Gelesen am {{date}}",
     "modelLabel": "Modell: {{model}}",
     "badge": "cv",
-    "badgeTitle": "Aus dem Lebenslauf gelesen — bitte prüfen",
+    "badgeTitle": "Aus dem Lebenslauf gelesen. Bitte prüfen",
     "tableCaption": "Was jetzt in der Akte steht, was der Lebenslauf vorschlägt und was die Übernahme bewirkt.",
     "status": {
       "pending": "Noch nicht geprüft",
@@ -265,19 +265,19 @@
       "label": "Interview starten",
       "agentPlaceholder": "KI-Agenten auswählen",
       "started": "Interview gestartet.",
-      "alreadyRunning": "Interview läuft bereits — bestehende Sitzung wird angezeigt.",
+      "alreadyRunning": "Interview läuft bereits. Bestehende Sitzung wird angezeigt.",
       "alreadyHasSession": "Dieser Kandidat hat bereits ein offenes Interview bei einer anderen Bewerbung.",
-      "unavailable": "Interview starten ist noch nicht verfügbar — wartet auf die Backend-Anbindung.",
+      "unavailable": "Interview starten ist noch nicht verfügbar. Wartet auf die Backend-Anbindung.",
       "noAgentChosen": "Wählen Sie zuerst einen KI-Agenten.",
       "loadError": "KI-Agenten konnten nicht geladen werden.",
       "reasons": {
         "no_mobile_or_consent": "Der Kandidat hat keine Mobilnummer oder keine WhatsApp-Zustimmung.",
         "no_active_connection": "Keine aktive WhatsApp-Verbindung für diese Stelle.",
-        "rejected_stage": "Diese Bewerbung ist abgelehnt — es kann kein Interview gestartet werden.",
-        "placed_stage": "Diese Bewerbung ist bereits platziert — es kann kein Interview gestartet werden.",
+        "rejected_stage": "Diese Bewerbung ist abgelehnt. Es kann kein Interview gestartet werden.",
+        "placed_stage": "Diese Bewerbung ist bereits platziert. Es kann kein Interview gestartet werden.",
         "no_active_flow": "Der gewählte KI-Agent hat keinen aktiven Interview-Flow.",
         "no_candidate": "Kein Kandidat mit dieser Bewerbung verknüpft.",
-        "send_failed": "Versand fehlgeschlagen — bitte erneut versuchen."
+        "send_failed": "Versand fehlgeschlagen. Bitte erneut versuchen."
       }
     },
     "status": {
@@ -295,7 +295,7 @@
       "durationHours": "{{hours}} Std. {{minutes}} Min.",
       "durationDays": "{{days}} T. {{hours}} Std.",
       "durationUnknown": "Unbekannt",
-      "durationHint": "Vergangene Zeit seit dem Start des Interviews — Nächte und Wochenenden eingeschlossen. Das ist keine Gesprächszeit.",
+      "durationHint": "Vergangene Zeit seit dem Start des Interviews. Nächte und Wochenenden eingeschlossen. Das ist keine Gesprächszeit.",
       "visibilityPending": "Agent, Gesprächsseite und Laufzeit sind für diese Sitzung nicht verfügbar.",
       "takeover": "Agent stoppen / übernehmen",
       "takeoverBusy": "Wird ausgeführt…",
@@ -326,7 +326,7 @@
     },
     "conversation": {
       "title": "Gespräch",
-      "noCandidate": "Kein Kandidat verknüpft — nichts anzuzeigen."
+      "noCandidate": "Kein Kandidat verknüpft. Nichts anzuzeigen."
     }
   },
   "appointments": {
@@ -385,7 +385,7 @@
     "confirm": "Ablehnen",
     "rejected": "Abgelehnt",
     "aiAdvice": "Koios empfiehlt Ablehnung",
-    "aiAuto": "Harte Kriterien nicht erfüllt — für Auto-Ablehnung geeignet.",
+    "aiAuto": "Harte Kriterien nicht erfüllt. Für Auto-Ablehnung geeignet.",
     "aiConfirm": "Prüfen und bestätigen, bevor eine Nachricht gesendet wird.",
     "done": "Bewerbung abgelehnt",
     "sentOn": "Nachricht gesendet am {{date}}",
@@ -487,7 +487,7 @@
     "clearScope": "Auswahlfilter entfernen"
   },
   "board": {
-    "movedHidden": "Verschoben — die Karte fällt außerhalb des aktuellen Filters"
+    "movedHidden": "Verschoben. Die Karte fällt außerhalb des aktuellen Filters"
   },
   "ai": {
     "title": "Koios AI empfiehlt",
@@ -496,7 +496,7 @@
     "analyzing": "Koios AI analysiert die Bewerbung…",
     "progressLabel": "Fortschritt",
     "progressOk": "{{days}} Tage in Bearbeitung · aktuelle Phase '{{phase}}'.",
-    "progressStale": "Bereits {{days}} Tage in Bearbeitung · Phase '{{phase}}' — möglicherweise ins Stocken geraten, Nachfassen prüfen.",
+    "progressStale": "Bereits {{days}} Tage in Bearbeitung · Phase '{{phase}}'. Möglicherweise ins Stocken geraten, Nachfassen prüfen.",
     "progressUnknown": "Datum unbekannt · aktuelle Phase '{{phase}}'.",
     "completeness": "Vollständigkeit",
     "missingVacancy": "Keine Stelle mit dieser Bewerbung verknüpft."

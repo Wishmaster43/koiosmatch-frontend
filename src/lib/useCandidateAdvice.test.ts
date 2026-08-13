@@ -47,7 +47,7 @@ describe('useCandidateAdvice — backend engine (source tagged)', () => {
     const advice = result.current(c)
     expect(advice).not.toBeNull()
     // Real (nl) translation, never the literal key, with the stale-months threshold interpolated.
-    expect(advice!.reason).toBe('Langer dan 6 maanden geen contact geregistreerd — plan een belmoment.')
+    expect(advice!.reason).toBe('Langer dan 6 maanden geen contact geregistreerd. Plan een belmoment.')
     expect(advice!.reason).not.toBe('advice.reason.stale_contact')
   })
 

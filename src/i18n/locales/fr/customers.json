@@ -146,7 +146,7 @@
     "billingAddress": {
       "title": "Adresse de facturation",
       "poBox": "Boîte postale",
-      "usesVisitAddress": "Vide — la facture est envoyée à l'adresse de visite.",
+      "usesVisitAddress": "Vide. La facture est envoyée à l'adresse de visite.",
       "visitEmpty": "Aucune adresse de visite renseignée",
       "hint": "Laissez vide pour facturer à l'adresse de visite. À remplir uniquement en cas d'adresse différente ou de boîte postale."
     }
@@ -219,12 +219,12 @@
       "pickContactSearch": "Rechercher par nom, fonction ou e-mail",
       "pickContactLinks": "Actuellement lié à",
       "pickContactNoLinks": "Pas encore lié",
-      "coupleNote": "Lier DÉPLACE le contact vers ce site — il est détaché de son site actuel.",
+      "coupleNote": "Lier DÉPLACE le contact vers ce site. Il est détaché de son site actuel.",
       "branchTitle": "Établissement",
       "branchInherited": "Suit le client",
       "branchOwn": "Défini séparément",
       "branchLink": "Lier un établissement",
-      "branchEmpty": "Aucun établissement propre — ce site suit le client.",
+      "branchEmpty": "Aucun établissement propre. Ce site suit le client.",
       "branchHint": "Laisser vide signifie : mêmes établissements que le client. En lier un ici crée une dérogation volontaire.",
       "isPrimaryContact": "Contact principal de ce site",
       "setPrimaryContact": "Définir comme contact principal de ce site",
@@ -238,7 +238,7 @@
       "linkNamed": "Lier {{name}}",
       "createAndLink": "Créer le contact et le lier",
       "description": "Texte du site",
-      "contactNotLinked": "Texte seul — pas encore lié à un contact",
+      "contactNotLinked": "Texte seul. Pas encore lié à un contact",
       "changePrimaryContact": "Modifier le contact",
       "mergeLocation": "Fusionner le site",
       "archiveLocation": "Archiver le site",
@@ -256,7 +256,7 @@
     },
     "saveFailed": "L'enregistrement a échoué.",
     "deleteFailed": "La suppression a échoué.",
-    "deleteInUse": "Suppression impossible — ce site est encore utilisé.",
+    "deleteInUse": "Suppression impossible. Ce site est encore utilisé.",
     "archivedBanner": {
       "since": "Archivé le {{date}}",
       "flag": "Archivé",
@@ -326,7 +326,7 @@
     "deleteConfirm": "Supprimer ce service ?",
     "saveFailed": "L'enregistrement a échoué.",
     "deleteFailed": "La suppression a échoué.",
-    "deleteInUse": "Suppression impossible — ce service est encore utilisé.",
+    "deleteInUse": "Suppression impossible. Ce service est encore utilisé.",
     "archivedBanner": {
       "since": "Archivé le {{date}}",
       "flag": "Archivé",
@@ -400,7 +400,7 @@
     "deleteConfirm": "Supprimer ce contact ?",
     "saveFailed": "L'enregistrement a échoué.",
     "deleteFailed": "La suppression a échoué.",
-    "deleteInUse": "Suppression impossible — ce contact est encore utilisé.",
+    "deleteInUse": "Suppression impossible. Ce contact est encore utilisé.",
     "archivedBanner": {
       "since": "Archivé le {{date}}",
       "flag": "Archivé",
@@ -517,8 +517,8 @@
     "downloadSelected": "Télécharger ({{count}})",
     "preview": "Aperçu",
     "deleteTitle": "Supprimer le document",
-    "deleteOneMessage": "Es-tu sûr ? '{{name}}' sera définitivement supprimé — cette action est irréversible.",
-    "deleteManyMessage": "Es-tu sûr ? {{count}} documents seront définitivement supprimés — cette action est irréversible.",
+    "deleteOneMessage": "Es-tu sûr ? '{{name}}' sera définitivement supprimé. Cette action est irréversible.",
+    "deleteManyMessage": "Es-tu sûr ? {{count}} documents seront définitivement supprimés. Cette action est irréversible.",
     "deleteSelected": "Supprimer ({{count}})",
     "linkLevelLabel": "Lier le document à",
     "allTypes": "Tous les types"
@@ -540,7 +540,7 @@
     "delete": "Supprimer",
     "confirmDelete": "Supprimer cet accord tarifaire ?",
     "deleteFailed": "La suppression a échoué.",
-    "deleteInUse": "Suppression impossible — cet accord est encore utilisé.",
+    "deleteInUse": "Suppression impossible. Cet accord est encore utilisé.",
     "saveFailed": "L'enregistrement a échoué.",
     "loading": "Chargement des accords tarifaires…",
     "loadError": "Le chargement des accords tarifaires a échoué.",
@@ -637,7 +637,7 @@
     },
     "import": {
       "title": "Client depuis un fichier",
-      "intro": "L'import d'un fichier crée ce client — avec ses sites, services et contacts — immédiatement. Il ne remplit pas le formulaire ci-dessous ; vérifiez l'aperçu avant de confirmer."
+      "intro": "L'import d'un fichier crée ce client (avec ses sites, services et contacts) immédiatement. Il ne remplit pas le formulaire ci-dessous ; vérifiez l'aperçu avant de confirmer."
     }
   },
   "subModal": {
@@ -709,9 +709,9 @@
     "gender": "Genre",
     "import": {
       "title": "{{entity}} depuis un fichier",
-      "intro": "L'importation d'un fichier crée directement {{entity}} — le formulaire ci-dessous n'est pas rempli. Vérifiez d'abord l'aperçu avant de confirmer.",
-      "parentWarning": "Le nom du client dans le fichier détermine quel client reçoit les lignes — ce n'est pas forcément « {{customerName}} ». Vérifiez l'aperçu.",
-      "mismatchWarning": "{{count}} ligne(s) de ce fichier appartiennent à un client différent de celui-ci ({{names}}) — ces lignes seront créées là-bas, pas ici.",
+      "intro": "L'importation d'un fichier crée directement {{entity}}. Le formulaire ci-dessous n'est pas rempli. Vérifiez d'abord l'aperçu avant de confirmer.",
+      "parentWarning": "Le nom du client dans le fichier détermine quel client reçoit les lignes. Ce n'est pas forcément « {{customerName}} ». Vérifiez l'aperçu.",
+      "mismatchWarning": "{{count}} ligne(s) de ce fichier appartiennent à un client différent de celui-ci ({{names}}). Ces lignes seront créées là-bas, pas ici.",
       "mismatchConfirm": "{{count}} ligne(s) de ce fichier seront créées ou mises à jour chez un autre client ({{names}}), pas chez le client actuellement ouvert. Continuer quand même ?",
       "mismatchTitle": "Client différent dans le fichier",
       "mismatchProceed": "Importer quand même"
@@ -748,14 +748,14 @@
     "refresh": "Actualiser",
     "analyzing": "Koios AI analyse le profil client…",
     "completeness": "Exhaustivité",
-    "completeGood": "Profil client bien rempli — aucun champ essentiel manquant détecté.",
+    "completeGood": "Profil client bien rempli. Aucun champ essentiel manquant détecté.",
     "completePartial": "Profil client complété à {{pct}}%. Ajoutez le numéro d'immatriculation, le numéro de TVA, le secteur et les coordonnées pour une vue plus complète.",
     "relationshipLabel": "Relation",
     "relationshipActive": "{{vacancies}} poste(s) ouvert(s) · {{matches}} match(es) actif(s).",
     "relationshipNone": "Aucun poste ouvert ni match actif enregistré.",
-    "locationComplete": "Ce site est bien renseigné — adresse, immatriculation et contact sont connus.",
+    "locationComplete": "Ce site est bien renseigné. Adresse, immatriculation et contact sont connus.",
     "locationPartial": "Ce site est complété à {{pct}}%. Ajoutez l’adresse, le sous-numéro RCS, le n° TVA et les coordonnées.",
-    "departmentComplete": "Ce service est bien renseigné — description, statut et centre de coût sont connus.",
+    "departmentComplete": "Ce service est bien renseigné. Description, statut et centre de coût sont connus.",
     "departmentPartial": "Ce service est complété à {{pct}}%. Ajoutez la description, le statut et le centre de coût."
   },
   "tasks": {
@@ -804,7 +804,7 @@
   },
   "koios": {
     "reasons": {
-      "noOpenVacancies": "Aucune offre ouverte — relancez ce client."
+      "noOpenVacancies": "Aucune offre ouverte. Relancez ce client."
     }
   },
   "validation": {

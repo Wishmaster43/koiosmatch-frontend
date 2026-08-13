@@ -37,7 +37,7 @@
     "searchErrorForbidden": "Je hebt geen rechten om hier te zoeken.",
     "searchErrorValidation": "Deze zoekopdracht werd niet geaccepteerd. Pas hem aan en probeer opnieuw.",
     "searchErrorServer": "De server gaf een fout bij het zoeken. Probeer het zo opnieuw.",
-    "searchErrorNetwork": "Geen verbinding — zoeken is niet gelukt."
+    "searchErrorNetwork": "Geen verbinding. Zoeken is niet gelukt."
   },
   "pagination": {
     "perPage": "Resultaten per pagina",
@@ -85,7 +85,7 @@
     "source": "Bron",
     "noOwner": "Geen eigenaar",
     "clearFilter": "Filter wissen",
-    "pageScopeNotice": "Serverbrede totalen zijn tijdelijk niet beschikbaar — deze cijfers zijn gebaseerd op een gedeeltelijke steekproef."
+    "pageScopeNotice": "Serverbrede totalen zijn tijdelijk niet beschikbaar. Deze cijfers zijn gebaseerd op een gedeeltelijke steekproef."
   },
   "drawer": {
     "label": "Sollicitatie",
@@ -150,7 +150,7 @@
     "readOn": "Gelezen op {{date}}",
     "modelLabel": "Model: {{model}}",
     "badge": "cv",
-    "badgeTitle": "Gelezen uit het cv — controleer deze waarde",
+    "badgeTitle": "Gelezen uit het cv. Controleer deze waarde",
     "tableCaption": "Wat er nu in het dossier staat, wat het cv voorstelt en wat overnemen ermee doet.",
     "status": {
       "pending": "Nog niet beoordeeld",
@@ -265,19 +265,19 @@
       "label": "Interview starten",
       "agentPlaceholder": "Kies een AI-agent",
       "started": "Interview gestart.",
-      "alreadyRunning": "Interview loopt al — bestaande sessie getoond.",
+      "alreadyRunning": "Interview loopt al. Bestaande sessie getoond.",
       "alreadyHasSession": "Deze kandidaat heeft al een open interview op een andere sollicitatie.",
-      "unavailable": "Interview starten is nog niet beschikbaar — wacht op de backend-koppeling.",
+      "unavailable": "Interview starten is nog niet beschikbaar. Wacht op de backend-koppeling.",
       "noAgentChosen": "Kies eerst een AI-agent.",
       "loadError": "AI-agenten laden is mislukt.",
       "reasons": {
         "no_mobile_or_consent": "Kandidaat heeft geen mobiel nummer of geen WhatsApp-toestemming.",
         "no_active_connection": "Geen actieve WhatsApp-koppeling voor deze vacature.",
-        "rejected_stage": "Deze sollicitatie is afgewezen — er kan geen interview gestart worden.",
-        "placed_stage": "Deze sollicitatie is al geplaatst — er kan geen interview gestart worden.",
+        "rejected_stage": "Deze sollicitatie is afgewezen. Er kan geen interview gestart worden.",
+        "placed_stage": "Deze sollicitatie is al geplaatst. Er kan geen interview gestart worden.",
         "no_active_flow": "De gekozen AI-agent heeft geen actieve interviewflow.",
         "no_candidate": "Geen kandidaat gekoppeld aan deze sollicitatie.",
-        "send_failed": "Verzenden is mislukt — probeer het opnieuw."
+        "send_failed": "Verzenden is mislukt. Probeer het opnieuw."
       }
     },
     "status": {
@@ -295,7 +295,7 @@
       "durationHours": "{{hours}}u {{minutes}}min",
       "durationDays": "{{days}}d {{hours}}u",
       "durationUnknown": "Onbekend",
-      "durationHint": "Verstreken tijd sinds de start van het interview — nachten en weekenden tellen mee. Dit is geen spreektijd.",
+      "durationHint": "Verstreken tijd sinds de start van het interview. Nachten en weekenden tellen mee. Dit is geen spreektijd.",
       "visibilityPending": "Agent, beurt en doorlooptijd zijn niet beschikbaar voor deze sessie.",
       "takeover": "Agent stoppen / overnemen",
       "takeoverBusy": "Bezig…",
@@ -326,7 +326,7 @@
     },
     "conversation": {
       "title": "Gesprek",
-      "noCandidate": "Geen kandidaat gekoppeld — niets om te tonen."
+      "noCandidate": "Geen kandidaat gekoppeld. Niets om te tonen."
     }
   },
   "appointments": {
@@ -396,7 +396,7 @@
     "confirm": "Afwijzen",
     "rejected": "Afgewezen",
     "aiAdvice": "Koios adviseert afwijzen",
-    "aiAuto": "Harde criteria niet gehaald — auto-afwijzen mogelijk.",
+    "aiAuto": "Harde criteria niet gehaald. Auto-afwijzen mogelijk.",
     "aiConfirm": "Beoordeel en bevestig voordat er een bericht uitgaat.",
     "done": "Sollicitatie afgewezen",
     "sentOn": "Bericht verstuurd op {{date}}",
@@ -487,7 +487,7 @@
     "clearScope": "Selectiefilter wissen"
   },
   "board": {
-    "movedHidden": "Verplaatst — de kaart valt buiten het huidige filter"
+    "movedHidden": "Verplaatst. De kaart valt buiten het huidige filter"
   },
   "ai": {
     "title": "Koios AI adviseert",
@@ -496,7 +496,7 @@
     "analyzing": "Koios AI analyseert de sollicitatie…",
     "progressLabel": "Voortgang",
     "progressOk": "{{days}} dagen in behandeling · huidige fase '{{phase}}'.",
-    "progressStale": "Al {{days}} dagen in behandeling · fase '{{phase}}' — mogelijk vastgelopen, controleer de opvolging.",
+    "progressStale": "Al {{days}} dagen in behandeling · fase '{{phase}}'. Mogelijk vastgelopen, controleer de opvolging.",
     "progressUnknown": "Datum onbekend · huidige fase '{{phase}}'.",
     "completeness": "Volledigheid",
     "missingVacancy": "Geen vacature gekoppeld aan deze sollicitatie."

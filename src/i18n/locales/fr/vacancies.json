@@ -27,10 +27,10 @@
     "client": "Client",
     "createdAt": "Créé le",
     "aiAgent": "Agent IA",
-    "leadsUnknown": "Pas encore calculé — ouvrez la vacance pour voir les candidats correspondants.",
-    "leadsStale": "Recalcul en cours — chiffre du {{date}}",
+    "leadsUnknown": "Pas encore calculé. Ouvrez la vacance pour voir les candidats correspondants.",
+    "leadsStale": "Recalcul en cours. Chiffre du {{date}}",
     "leadsGeoMissing": "Sans coordonnées, le rayon n'a pas pu être appliqué",
-    "leadsPartial": "Compté partiellement — une limite a été atteinte",
+    "leadsPartial": "Compté partiellement. Une limite a été atteinte",
     "leadsComputedAt": "Mis à jour le {{date}}",
     "age": "Âge",
     "applicationsOpen": "Ouvrir les candidatures",
@@ -182,7 +182,7 @@
     "adjust": "Ajuster",
     "hideAdjust": "Masquer",
     "templatesError": "Impossible de charger les profils de matching.",
-    "noTemplates": "Aucun profil de matching pour le moment — créez-en un dans les paramètres.",
+    "noTemplates": "Aucun profil de matching pour le moment. Créez-en un dans les paramètres.",
     "snapshotHint": "Les pondérations sont copiées une seule fois depuis le profil vers ce poste ; les modifications ultérieures du profil ne mettent pas ce poste à jour automatiquement.",
     "basedOn": "Basé sur « {{name}} ».",
     "dim": {
@@ -257,8 +257,8 @@
       "confirmWithCount_one": "L'agent doit-il aussi prendre en charge le {{count}} candidat existant de cette offre ? Cela enverra des messages WhatsApp.",
       "confirmWithCount_other": "L'agent doit-il aussi prendre en charge les {{count}} candidats existants de cette offre ? Cela enverra des messages WhatsApp.",
       "resultToast": "{{started}} sur {{eligibleTotal}} démarré(s).",
-      "resultToastWithReasons": "{{started}} sur {{eligibleTotal}} démarré(s) — {{skippedTotal}} ignoré(s) : {{reasons}}.",
-      "unavailable": "Démarrer l'entretien pour les candidats existants n'est pas encore disponible — en attente de la liaison backend.",
+      "resultToastWithReasons": "{{started}} sur {{eligibleTotal}} démarré(s), {{skippedTotal}} ignoré(s) : {{reasons}}.",
+      "unavailable": "Démarrer l'entretien pour les candidats existants n'est pas encore disponible. En attente de la liaison backend.",
       "reasons": {
         "no_mobile_or_consent": "pas de consentement WhatsApp",
         "already_has_session": "déjà en cours",
@@ -280,7 +280,7 @@
     "cta": "Générer",
     "generating": "Koios génère un texte de vacance provisoire…",
     "error": "La génération a échoué. Veuillez réessayer.",
-    "previewLabel": "Proposition (concept) — pas encore enregistrée",
+    "previewLabel": "Proposition (concept). Pas encore enregistrée",
     "apply": "Appliquer",
     "discard": "Rejeter",
     "needsTitleFirst": "Renseignez d'abord un titre pour générer un texte."
@@ -328,7 +328,7 @@
     "detachDone": "Candidature dissociée"
   },
   "candidateSearch": {
-    "noLocation": "Cette vacance n'a pas encore de coordonnées de localisation — mettez d'abord à jour l'adresse, la carte apparaîtra ensuite ici.",
+    "noLocation": "Cette vacance n'a pas encore de coordonnées de localisation. Mettez d'abord à jour l'adresse, la carte apparaîtra ensuite ici.",
     "functions": "Fonction",
     "statuses": "Disponibilité",
     "contractForms": "Forme de contrat",
@@ -336,7 +336,7 @@
     "empty": "Aucun candidat trouvé avec ces filtres.",
     "centerVacancy": "Lieu du poste",
     "refreshAdvice": "Actualiser l'avis Koios",
-    "adviceQueued": "L'avis est en cours de calcul — la liste va s'actualiser sous peu.",
+    "adviceQueued": "L'avis est en cours de calcul. La liste va s'actualiser sous peu.",
     "aiAdvised": "Recommandé par Koios"
   },
   "statistics": {
@@ -404,7 +404,7 @@
     "refresh": "Actualiser",
     "analyzing": "Koios AI analyse le poste…",
     "completeness": "Exhaustivité",
-    "completeGood": "Poste bien rempli — aucun champ essentiel manquant détecté.",
+    "completeGood": "Poste bien rempli. Aucun champ essentiel manquant détecté.",
     "completePartial": "Poste complété à {{pct}}%. Ajoutez description, fourchette salariale, heures, compétences, localisation et statut pour de meilleurs résultats.",
     "flowLabel": "Flux",
     "flowOpen": "Ouvert depuis {{days}} jours · {{count}} candidature(s) reçue(s).",
@@ -479,7 +479,7 @@
     }
   },
   "popout": {
-    "windowTitle": "Notes — {{name}}",
+    "windowTitle": "Notes. {{name}}",
     "loadError": "Cette offre d'emploi n'a pas pu être chargée."
   },
   "matchesTab": {

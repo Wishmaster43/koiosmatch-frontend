@@ -1,5 +1,5 @@
 {
-  "actionFailed": "Actie mislukt — probeer het opnieuw.",
+  "actionFailed": "Actie mislukt. Probeer het opnieuw.",
   "save": "Opslaan",
   "saving": "Opslaan…",
   "saveChanges": "Wijzigingen opslaan",
@@ -144,10 +144,10 @@
     "forbidden": "Je hebt geen toegang tot Koios.",
     "usageLine": "{{model}} · {{tokens}} tokens · {{cost}}",
     "offline": "Niet gekoppeld",
-    "contextPending": "Dit record kan nog niet als AI-context worden gekoppeld — alleen ter referentie vastgepind.",
+    "contextPending": "Dit record kan nog niet als AI-context worden gekoppeld. Alleen ter referentie vastgepind.",
     "radar": {
       "title": "Koios Advies",
-      "empty": "Niets dat nu je aandacht vraagt — vraag me gerust iets."
+      "empty": "Niets dat nu je aandacht vraagt. Vraag me gerust iets."
     },
     "mention": {
       "leads": "Leads",
@@ -166,7 +166,7 @@
       "expiresIn": "Verloopt over {{seconds}}s",
       "confirmed": "Gelukt.",
       "cancelled": "Geannuleerd.",
-      "expired": "Dit voorstel is verlopen — vraag het opnieuw.",
+      "expired": "Dit voorstel is verlopen. Vraag het opnieuw.",
       "error": "Er ging iets mis. Probeer het opnieuw."
     },
     "resizeHandle": "Paneelbreedte aanpassen",
@@ -222,7 +222,7 @@
     "refresh": "PDOK opnieuw ophalen",
     "started": "Opnieuw ophalen gestart…",
     "updated": "Coördinaten bijgewerkt.",
-    "notFound": "Adres niet gevonden — controleer de adresgegevens."
+    "notFound": "Adres niet gevonden. Controleer de adresgegevens."
   },
   "noAccess": "Geen toegang",
   "noAccessDesc": "Je hebt geen rechten voor deze pagina.",
@@ -302,7 +302,7 @@
   },
   "new": "Nieuw",
   "aiGenerated": "AI-gegenereerd",
-  "aiGeneratedHint": "Door Koios AI gegenereerd — controleer voor gebruik.",
+  "aiGeneratedHint": "Door Koios AI gegenereerd. Controleer voor gebruik.",
   "notesAssist": {
     "title": "Koios assistent",
     "needsText": "Voeg eerst tekst toe",

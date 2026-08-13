@@ -58,7 +58,7 @@
       "notes": "Notities",
       "related": "Gerelateerd"
     },
-    "lookupNotReady": "Nog niet op te slaan — deze optie is nog niet beschikbaar. Probeer het straks opnieuw."
+    "lookupNotReady": "Nog niet op te slaan. Deze optie is nog niet beschikbaar. Probeer het straks opnieuw."
   },
   "bulk": {
     "selected": "{{count}} geselecteerd",
@@ -155,7 +155,7 @@
     "assigneeUnassigned": "Bureau (niemand toegewezen)",
     "assigneeUnassignedHint": "Niemand is verantwoordelijk: de taak blijft op het bureau staan tot een collega hem oppakt.",
     "assigneeWithRole": "{{name}} · {{role}}",
-    "assigneeEmpty": "Nog geen collega's om aan toe te wijzen — alleen het bureau is te kiezen.",
+    "assigneeEmpty": "Nog geen collega's om aan toe te wijzen. Alleen het bureau is te kiezen.",
     "assigneeLoadError": "Collega's konden niet worden geladen.",
     "team": "Afdeling",
     "teamPlaceholder": "Kies een afdeling",
@@ -212,10 +212,10 @@
     "dueOverdue": "Deze taak is {{count}} dag(en) te laat.",
     "dueUpcoming": "Deze taak vervalt over {{count}} dag(en).",
     "assigneeLabel": "Toewijzing",
-    "unassigned": "Deze taak staat nog bij Bureau — nog niet toegewezen aan een specifieke medewerker.",
+    "unassigned": "Deze taak staat nog bij Bureau. Nog niet toegewezen aan een specifieke medewerker.",
     "assignedTo": "Toegewezen aan {{name}}.",
     "linksLabel": "Koppeling",
-    "noLinks": "Deze taak is aan geen enkel record gekoppeld — koppel een kandidaat, klant of ander record voor context.",
+    "noLinks": "Deze taak is aan geen enkel record gekoppeld. Koppel een kandidaat, klant of ander record voor context.",
     "linked": "Gekoppeld aan {{count}} record(en)."
   },
   "filters": {

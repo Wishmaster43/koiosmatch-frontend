@@ -146,7 +146,7 @@
     "billingAddress": {
       "title": "Invoice address",
       "poBox": "PO box",
-      "usesVisitAddress": "Empty — invoices go to the visit address.",
+      "usesVisitAddress": "Empty. Invoices go to the visit address.",
       "visitEmpty": "No visit address on file",
       "hint": "Leave this empty to invoice the visit address. Fill it in only for a different address or a PO box."
     }
@@ -219,12 +219,12 @@
       "pickContactSearch": "Search by name, role or email",
       "pickContactLinks": "Currently linked to",
       "pickContactNoLinks": "Not linked yet",
-      "coupleNote": "Linking MOVES the contact to this location — it is unlinked from its current one.",
+      "coupleNote": "Linking MOVES the contact to this location. It is unlinked from its current one.",
       "branchTitle": "Branch",
       "branchInherited": "Follows the customer",
       "branchOwn": "Set separately",
       "branchLink": "Link branch",
-      "branchEmpty": "No branch of its own — this location follows the customer.",
+      "branchEmpty": "No branch of its own. This location follows the customer.",
       "branchHint": "Leaving this empty means the location works under the same branches as the customer. Linking one here makes it deviate on purpose.",
       "isPrimaryContact": "Primary contact for this location",
       "setPrimaryContact": "Make primary contact for this location",
@@ -238,7 +238,7 @@
       "linkNamed": "Link {{name}}",
       "createAndLink": "Create contact and link",
       "description": "Location text",
-      "contactNotLinked": "Text only — not yet linked to a contact person",
+      "contactNotLinked": "Text only. Not yet linked to a contact person",
       "changePrimaryContact": "Change contact person",
       "mergeLocation": "Merge location",
       "archiveLocation": "Archive location",
@@ -256,7 +256,7 @@
     },
     "saveFailed": "Saving failed.",
     "deleteFailed": "Deleting failed.",
-    "deleteInUse": "Can't delete — this location is still in use.",
+    "deleteInUse": "Can't delete. This location is still in use.",
     "archivedBanner": {
       "since": "Archived on {{date}}",
       "flag": "Archived",
@@ -326,7 +326,7 @@
     "deleteConfirm": "Delete this department?",
     "saveFailed": "Saving failed.",
     "deleteFailed": "Deleting failed.",
-    "deleteInUse": "Can't delete — this department is still in use.",
+    "deleteInUse": "Can't delete. This department is still in use.",
     "archivedBanner": {
       "since": "Archived on {{date}}",
       "flag": "Archived",
@@ -400,7 +400,7 @@
     "deleteConfirm": "Delete this contact?",
     "saveFailed": "Saving failed.",
     "deleteFailed": "Deleting failed.",
-    "deleteInUse": "Can't delete — this contact is still in use.",
+    "deleteInUse": "Can't delete. This contact is still in use.",
     "archivedBanner": {
       "since": "Archived on {{date}}",
       "flag": "Archived",
@@ -517,8 +517,8 @@
     "downloadSelected": "Download ({{count}})",
     "preview": "Preview",
     "deleteTitle": "Delete document",
-    "deleteOneMessage": "Are you sure? '{{name}}' will be permanently deleted — this cannot be undone.",
-    "deleteManyMessage": "Are you sure? {{count}} documents will be permanently deleted — this cannot be undone.",
+    "deleteOneMessage": "Are you sure? '{{name}}' will be permanently deleted. This cannot be undone.",
+    "deleteManyMessage": "Are you sure? {{count}} documents will be permanently deleted. This cannot be undone.",
     "deleteSelected": "Delete ({{count}})",
     "linkLevelLabel": "Link document to",
     "allTypes": "All types"
@@ -540,7 +540,7 @@
     "delete": "Delete",
     "confirmDelete": "Delete this price agreement?",
     "deleteFailed": "Deleting failed.",
-    "deleteInUse": "Can't delete — this agreement is still in use.",
+    "deleteInUse": "Can't delete. This agreement is still in use.",
     "saveFailed": "Saving failed.",
     "loading": "Loading price agreements…",
     "loadError": "Loading price agreements failed.",
@@ -637,7 +637,7 @@
     },
     "import": {
       "title": "Customer from file",
-      "intro": "Importing a file creates this customer — with its locations, departments and contacts — directly. It does not fill in the form below; check the preview before confirming."
+      "intro": "Importing a file creates this customer (with its locations, departments and contacts) directly. It does not fill in the form below; check the preview before confirming."
     }
   },
   "subModal": {
@@ -709,9 +709,9 @@
     "gender": "Gender",
     "import": {
       "title": "{{entity}} from file",
-      "intro": "Importing a file creates {{entity}} directly — it does not fill in the form below. Check the preview before confirming.",
-      "parentWarning": "The customer name in the file decides which customer the rows land on — it does not have to be \"{{customerName}}\". Check the preview.",
-      "mismatchWarning": "{{count}} row(s) in this file belong to a different customer than this one ({{names}}) — those rows will land there, not here.",
+      "intro": "Importing a file creates {{entity}} directly. It does not fill in the form below. Check the preview before confirming.",
+      "parentWarning": "The customer name in the file decides which customer the rows land on. It does not have to be \"{{customerName}}\". Check the preview.",
+      "mismatchWarning": "{{count}} row(s) in this file belong to a different customer than this one ({{names}}). Those rows will land there, not here.",
       "mismatchConfirm": "{{count}} row(s) of this file will be created or updated under a different customer ({{names}}), not the customer you have open now. Continue anyway?",
       "mismatchTitle": "Different customer in file",
       "mismatchProceed": "Import anyway"
@@ -748,14 +748,14 @@
     "refresh": "Refresh",
     "analyzing": "Koios AI is analysing the customer profile…",
     "completeness": "Completeness",
-    "completeGood": "Customer profile is well filled — no missing core fields detected.",
+    "completeGood": "Customer profile is well filled. No missing core fields detected.",
     "completePartial": "Customer profile is {{pct}}% complete. Add company registration number, VAT number, industry and contact details for a fuller picture.",
     "relationshipLabel": "Relationship",
     "relationshipActive": "{{vacancies}} open vacancy(ies) · {{matches}} active match(es).",
     "relationshipNone": "No open vacancies or active matches recorded.",
-    "locationComplete": "This location is well filled in — address, registration and contact are known.",
+    "locationComplete": "This location is well filled in. Address, registration and contact are known.",
     "locationPartial": "This location is {{pct}}% complete. Add the address, sub CoC number, VAT number and contact details.",
-    "departmentComplete": "This department is well filled in — description, status and cost centre are known.",
+    "departmentComplete": "This department is well filled in. Description, status and cost centre are known.",
     "departmentPartial": "This department is {{pct}}% complete. Add the description, status and cost centre."
   },
   "tasks": {
@@ -804,7 +804,7 @@
   },
   "koios": {
     "reasons": {
-      "noOpenVacancies": "No open vacancies — follow up with this customer."
+      "noOpenVacancies": "No open vacancies. Follow up with this customer."
     }
   },
   "validation": {

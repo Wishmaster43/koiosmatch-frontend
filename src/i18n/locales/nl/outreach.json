@@ -66,7 +66,7 @@
     "namePlaceholder": "Bijv. Bellijst beschikbare verzorgenden",
     "channel": "Kanaal",
     "pool": "Bron-pool (optioneel)",
-    "poolNone": "Geen — later vullen",
+    "poolNone": "Geen, later vullen",
     "poolHint": "Kies een talentenpool om de bellijst meteen met kandidaten te vullen.",
     "submit": "Bellijst aanmaken",
     "saving": "Aanmaken…",

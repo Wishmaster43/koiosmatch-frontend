@@ -58,7 +58,7 @@
       "notes": "Notes",
       "related": "Related"
     },
-    "lookupNotReady": "Couldn't save yet — this option isn't available. Please try again in a moment."
+    "lookupNotReady": "Couldn't save yet. This option isn't available. Please try again in a moment."
   },
   "bulk": {
     "selected": "{{count}} selected",
@@ -155,7 +155,7 @@
     "assigneeUnassigned": "Agency (nobody assigned)",
     "assigneeUnassignedHint": "Nobody is responsible: the task stays with the agency until a colleague picks it up.",
     "assigneeWithRole": "{{name}} · {{role}}",
-    "assigneeEmpty": "No colleagues to assign to yet — only the agency can be chosen.",
+    "assigneeEmpty": "No colleagues to assign to yet. Only the agency can be chosen.",
     "assigneeLoadError": "Colleagues could not be loaded.",
     "team": "Department",
     "teamPlaceholder": "Choose a department",
@@ -212,10 +212,10 @@
     "dueOverdue": "This task is {{count}} day(s) overdue.",
     "dueUpcoming": "This task is due in {{count}} day(s).",
     "assigneeLabel": "Assignment",
-    "unassigned": "This task still sits with the agency — not yet assigned to a specific team member.",
+    "unassigned": "This task still sits with the agency. Not yet assigned to a specific team member.",
     "assignedTo": "Assigned to {{name}}.",
     "linksLabel": "Link",
-    "noLinks": "This task isn't linked to any record — link a candidate, client or other record for context.",
+    "noLinks": "This task isn't linked to any record. Link a candidate, client or other record for context.",
     "linked": "Linked to {{count}} record(s)."
   },
   "filters": {

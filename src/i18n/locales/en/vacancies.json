@@ -27,10 +27,10 @@
     "client": "Client",
     "createdAt": "Created on",
     "aiAgent": "AI agent",
-    "leadsUnknown": "Not yet computed — open the vacancy to see the matching candidates.",
-    "leadsStale": "Being recomputed — number as of {{date}}",
+    "leadsUnknown": "Not yet computed. Open the vacancy to see the matching candidates.",
+    "leadsStale": "Being recomputed. Number as of {{date}}",
     "leadsGeoMissing": "Without coordinates the radius could not be applied",
-    "leadsPartial": "Partially counted — a limit was hit",
+    "leadsPartial": "Partially counted. A limit was hit",
     "leadsComputedAt": "Updated on {{date}}",
     "age": "Age",
     "applicationsOpen": "Open applications",
@@ -184,7 +184,7 @@
     "adjust": "Adjust",
     "hideAdjust": "Hide",
     "templatesError": "Couldn't load match profiles.",
-    "noTemplates": "No match profiles yet — create one in Settings.",
+    "noTemplates": "No match profiles yet. Create one in Settings.",
     "snapshotHint": "Weights are copied from the profile onto this vacancy once; later changes to the profile do not update this vacancy automatically.",
     "basedOn": "Based on \"{{name}}\".",
     "dim": {
@@ -257,8 +257,8 @@
       "confirmWithCount_one": "Also have the agent pick up this vacancy's {{count}} existing applicant? This sends WhatsApp messages.",
       "confirmWithCount_other": "Also have the agent pick up this vacancy's {{count}} existing applicants? This sends WhatsApp messages.",
       "resultToast": "{{started}} of {{eligibleTotal}} started.",
-      "resultToastWithReasons": "{{started}} of {{eligibleTotal}} started — {{skippedTotal}} skipped: {{reasons}}.",
-      "unavailable": "Starting interviews for existing applicants isn't available yet — waiting on the backend link.",
+      "resultToastWithReasons": "{{started}} of {{eligibleTotal}} started, {{skippedTotal}} skipped: {{reasons}}.",
+      "unavailable": "Starting interviews for existing applicants isn't available yet. Waiting on the backend link.",
       "reasons": {
         "no_mobile_or_consent": "no WhatsApp consent",
         "already_has_session": "already running",
@@ -280,7 +280,7 @@
     "cta": "Generate",
     "generating": "Koios is generating a concept vacancy text…",
     "error": "Generating failed. Please try again.",
-    "previewLabel": "Proposal (concept) — not saved yet",
+    "previewLabel": "Proposal (concept). Not saved yet",
     "apply": "Apply",
     "discard": "Discard",
     "needsTitleFirst": "Fill in a title first to generate a concept."
@@ -328,7 +328,7 @@
     "detachDone": "Application detached"
   },
   "candidateSearch": {
-    "noLocation": "This vacancy has no location (coordinates) yet — update the address first, then the map appears here.",
+    "noLocation": "This vacancy has no location (coordinates) yet. Update the address first, then the map appears here.",
     "functions": "Function",
     "statuses": "Availability",
     "contractForms": "Contract form",
@@ -336,7 +336,7 @@
     "empty": "No candidates found within these filters.",
     "centerVacancy": "Vacancy location",
     "refreshAdvice": "Refresh Koios advice",
-    "adviceQueued": "Advice is being calculated — the list will refresh shortly.",
+    "adviceQueued": "Advice is being calculated. The list will refresh shortly.",
     "aiAdvised": "Advised by Koios"
   },
   "statistics": {
@@ -404,7 +404,7 @@
     "refresh": "Refresh",
     "analyzing": "Koios AI is analysing the vacancy…",
     "completeness": "Completeness",
-    "completeGood": "Vacancy is well filled — no missing core fields detected.",
+    "completeGood": "Vacancy is well filled. No missing core fields detected.",
     "completePartial": "Vacancy is {{pct}}% complete. Add description, salary range, hours, skills, location and status for better results.",
     "flowLabel": "Flow",
     "flowOpen": "Open for {{days}} days · {{count}} application(s) received.",
@@ -479,7 +479,7 @@
     }
   },
   "popout": {
-    "windowTitle": "Notes — {{name}}",
+    "windowTitle": "Notes. {{name}}",
     "loadError": "This vacancy could not be loaded."
   },
   "matchesTab": {

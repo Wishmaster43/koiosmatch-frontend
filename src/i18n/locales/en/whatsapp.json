@@ -6,7 +6,7 @@
     "escalations": "Escalations"
   },
   "drill": {
-    "noDetail": "No detail data for this KPI yet — the backend will provide it soon."
+    "noDetail": "No detail data for this KPI yet. The backend will provide it soon."
   },
   "overview": {
     "statusTitle": "Message status",

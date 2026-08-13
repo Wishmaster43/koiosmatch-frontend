@@ -27,10 +27,10 @@
     "client": "Klant",
     "createdAt": "Aangemaakt",
     "aiAgent": "AI-agent",
-    "leadsUnknown": "Nog niet berekend — open de vacature om de passende kandidaten te zien.",
-    "leadsStale": "Wordt opnieuw berekend — getal van {{date}}",
+    "leadsUnknown": "Nog niet berekend. Open de vacature om de passende kandidaten te zien.",
+    "leadsStale": "Wordt opnieuw berekend. Getal van {{date}}",
     "leadsGeoMissing": "Zonder coördinaten kon de straal niet worden toegepast",
-    "leadsPartial": "Gedeeltelijk geteld — er is een limiet geraakt",
+    "leadsPartial": "Gedeeltelijk geteld. Er is een limiet geraakt",
     "leadsComputedAt": "Bijgewerkt op {{date}}",
     "age": "Leeftijd",
     "applicationsOpen": "Open sollicitaties",
@@ -184,7 +184,7 @@
     "adjust": "Aanpassen",
     "hideAdjust": "Verbergen",
     "templatesError": "Matchprofielen konden niet worden geladen.",
-    "noTemplates": "Nog geen matchprofielen — maak er een aan via Instellingen.",
+    "noTemplates": "Nog geen matchprofielen. Maak er een aan via Instellingen.",
     "snapshotHint": "De gewichten worden eenmalig gekopieerd van het profiel naar deze vacature; latere wijzigingen aan het profiel werken deze vacature niet automatisch bij.",
     "basedOn": "Gebaseerd op \"{{name}}\".",
     "dim": {
@@ -257,8 +257,8 @@
       "confirmWithCount_one": "{{count}} bestaande sollicitant van deze vacature ook laten oppakken door de agent? Dit stuurt WhatsApp-berichten.",
       "confirmWithCount_other": "{{count}} bestaande sollicitanten van deze vacature ook laten oppakken door de agent? Dit stuurt WhatsApp-berichten.",
       "resultToast": "{{started}} van {{eligibleTotal}} gestart.",
-      "resultToastWithReasons": "{{started}} van {{eligibleTotal}} gestart — {{skippedTotal}} overgeslagen: {{reasons}}.",
-      "unavailable": "Interview starten voor bestaande sollicitanten is nog niet beschikbaar — wacht op de backend-koppeling.",
+      "resultToastWithReasons": "{{started}} van {{eligibleTotal}} gestart, {{skippedTotal}} overgeslagen: {{reasons}}.",
+      "unavailable": "Interview starten voor bestaande sollicitanten is nog niet beschikbaar. Wacht op de backend-koppeling.",
       "reasons": {
         "no_mobile_or_consent": "geen WhatsApp-toestemming",
         "already_has_session": "loopt al",
@@ -280,7 +280,7 @@
     "cta": "Genereren",
     "generating": "Koios genereert een conceptvacaturetekst…",
     "error": "Genereren is niet gelukt. Probeer het opnieuw.",
-    "previewLabel": "Voorstel (concept) — nog niet opgeslagen",
+    "previewLabel": "Voorstel (concept). Nog niet opgeslagen",
     "apply": "Toepassen",
     "discard": "Verwerpen",
     "needsTitleFirst": "Vul eerst een titel in om een concept te genereren."
@@ -328,7 +328,7 @@
     "detachDone": "Sollicitatie ontkoppeld"
   },
   "candidateSearch": {
-    "noLocation": "Deze vacature heeft nog geen locatie(-coördinaten) — werk eerst het adres bij, dan verschijnt hier de kaart.",
+    "noLocation": "Deze vacature heeft nog geen locatie(-coördinaten). Werk eerst het adres bij, dan verschijnt hier de kaart.",
     "functions": "Functie",
     "statuses": "Inzetbaarheid",
     "contractForms": "Contractvorm",
@@ -336,7 +336,7 @@
     "empty": "Geen kandidaten gevonden binnen deze filters.",
     "centerVacancy": "Vacaturelocatie",
     "refreshAdvice": "Koios-advies verversen",
-    "adviceQueued": "Advies wordt berekend — de lijst ververst zo.",
+    "adviceQueued": "Advies wordt berekend. De lijst ververst zo.",
     "aiAdvised": "Door Koios geadviseerd"
   },
   "statistics": {
@@ -404,7 +404,7 @@
     "refresh": "Vernieuwen",
     "analyzing": "Koios AI analyseert de vacature…",
     "completeness": "Volledigheid",
-    "completeGood": "Vacature is goed gevuld — geen ontbrekende kernvelden gedetecteerd.",
+    "completeGood": "Vacature is goed gevuld. Geen ontbrekende kernvelden gedetecteerd.",
     "completePartial": "Vacature is {{pct}}% compleet. Vul omschrijving, salarisindicatie, uren, vaardigheden, locatie en status aan voor betere resultaten.",
     "flowLabel": "Doorstroom",
     "flowOpen": "Open sinds {{days}} dagen · {{count}} sollicitatie(s) ontvangen.",
@@ -479,7 +479,7 @@
     }
   },
   "popout": {
-    "windowTitle": "Notities — {{name}}",
+    "windowTitle": "Notities. {{name}}",
     "loadError": "Deze vacature kon niet worden geladen."
   },
   "matchesTab": {

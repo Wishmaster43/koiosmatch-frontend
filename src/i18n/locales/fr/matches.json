@@ -39,7 +39,7 @@
     "archiveConfirm": "Archiver ce match ? Vous pourrez le restaurer ensuite.",
     "archived": "Match archivé.",
     "archiveFailed": "Impossible d'archiver le match.",
-    "archiveBlockedActiveContract": "Ce match a un contrat actif — mettez-y fin d'abord.",
+    "archiveBlockedActiveContract": "Ce match a un contrat actif. Mettez-y fin d'abord.",
     "archivedBanner": {
       "since": "Archivé depuis le {{date}}",
       "flag": "Archivé",
@@ -92,7 +92,7 @@
       "sellRate": "Tarif de vente",
       "margin": "Marge",
       "costCenter": "Centre de coûts",
-      "billingEmails": "E-mail(s) de facturation — un par ligne, ou séparés par une virgule",
+      "billingEmails": "E-mail(s) de facturation, un par ligne, ou séparés par une virgule",
       "remarks": "Remarques",
       "loading": "Chargement des détails du contrat…",
       "error": "Impossible de charger les détails du contrat.",
@@ -122,7 +122,7 @@
       "title": "Remarques",
       "saved": "Remarques enregistrées.",
       "saveError": "Impossible d'enregistrer les remarques.",
-      "deprecated": "Ce champ est supprimé. Déplacez le texte vers les Notes — il y reçoit un auteur, une date, un type et un canal, et apparaît dans la chronologie.",
+      "deprecated": "Ce champ est supprimé. Déplacez le texte vers les Notes. Il y reçoit un auteur, une date, un type et un canal, et apparaît dans la chronologie.",
       "moveToNotes": "Déplacer vers les notes",
       "moving": "Déplacement…",
       "moved": "La remarque a été déplacée vers les notes.",
@@ -159,7 +159,7 @@
       "mustBeAfterCurrent": "La nouvelle date de fin doit être postérieure à la date de fin actuelle.",
       "success": "Match renouvelé.",
       "error": "Le match n'a pas pu être renouvelé.",
-      "disabledArchived": "Match archivé — restaurez-le d'abord.",
+      "disabledArchived": "Match archivé. Restaurez-le d'abord.",
       "disabledClosed": "Ce match a déjà été résilié."
     }
   },
@@ -226,7 +226,7 @@
   },
   "page": {
     "searchPlaceholder": "Rechercher des matchs",
-    "openNotFound": "Match introuvable — peut-être supprimé."
+    "openNotFound": "Match introuvable. Peut-être supprimé."
   },
   "add": {
     "button": "Nouveau match"
@@ -250,18 +250,18 @@
     "analyzing": "Koios AI analyse le match…",
     "scoreLabel": "Score",
     "scoreGood": "Bonne correspondance ({{score}}).",
-    "scoreAverage": "Correspondance moyenne ({{score}}) — vérifiez l'adéquation.",
-    "scorePoor": "Correspondance faible ({{score}}) — nécessite attention.",
+    "scoreAverage": "Correspondance moyenne ({{score}}). Vérifiez l'adéquation.",
+    "scorePoor": "Correspondance faible ({{score}}). Nécessite attention.",
     "scoreUnknown": "Pas encore de score.",
     "windowLabel": "Période du contrat",
     "windowExpired": "La date de fin est dépassée depuis {{days}} jour(s).",
-    "windowWarning": "Encore {{days}} jour(s) avant la date de fin — à renouveler ou clôturer à temps.",
+    "windowWarning": "Encore {{days}} jour(s) avant la date de fin. À renouveler ou clôturer à temps.",
     "windowFine": "La période du contrat se déroule bien.",
     "windowUnknown": "Aucune date de fin connue."
   },
   "koios": {
     "reasons": {
-      "endDateApproaching": "La date de fin de contrat approche ou est dépassée — envisagez un renouvellement."
+      "endDateApproaching": "La date de fin de contrat approche ou est dépassée. Envisagez un renouvellement."
     }
   }
 }

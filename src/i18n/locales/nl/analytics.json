@@ -33,7 +33,7 @@
       "region": "Regio"
     }
   },
-  "comingSoon": "{{label}} — komt eraan",
+  "comingSoon": "{{label}}. Komt eraan",
   "period": {
     "label": "Periode",
     "day": "Dag",
@@ -49,7 +49,7 @@
     "phase": "Fase",
     "total": "Totaal sollicitaties",
     "overallConversion": "Totale conversie",
-    "cohortNote": "Cohort vult zich nog — pipeline-bezetting getoond tot er genoeg historie is.",
+    "cohortNote": "Cohort vult zich nog. Pipeline-bezetting getoond tot er genoeg historie is.",
     "conversion": "Conversie",
     "reached": "Bereikt",
     "current": "Nu in fase",

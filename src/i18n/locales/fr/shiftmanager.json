@@ -1,5 +1,5 @@
 {
-  "comingSoon": "{{label}} — bientôt disponible",
+  "comingSoon": "{{label}}. Bientôt disponible",
   "shiftAnalysis": {
     "title": "Analyse des shifts candidats",
     "subtitle": "Tendance et signaux d'attention par candidat selon les heures planifiées et travaillées.",
@@ -188,7 +188,7 @@
       "choose": "Choisir un compte Shiftmanager…",
       "noPermission": "Pas d'autorisation pour synchroniser",
       "noConnection": "Aucune connexion Shiftmanager active trouvée",
-      "started": "Synchronisation démarrée — cela peut prendre quelques minutes",
+      "started": "Synchronisation démarrée. Cela peut prendre quelques minutes",
       "failed": "Échec de la synchronisation",
       "tooManyRequests": "Trop de tentatives, réessayez dans {{secs}}s"
     },

@@ -18,7 +18,7 @@
     "template": "Template",
     "templateLoading": "Templates ophalen…",
     "templateEmpty": "Geen goedgekeurde templates gevonden. Controleer de WhatsApp-koppeling.",
-    "templateUnknown": "Onbekende template — vul de variabelen handmatig in (één per regel).",
+    "templateUnknown": "Onbekende template. Vul de variabelen handmatig in (één per regel).",
     "headerVars": "Header-variabelen",
     "bodyVars": "Body-variabelen",
     "headerVarsRaw": "Header-variabelen (één per regel)",
@@ -57,7 +57,7 @@
     "addModule": "Module toevoegen",
     "closeTitle": "Sluiten zonder opslaan",
     "unsavedConfirm": "Je hebt niet-opgeslagen wijzigingen. Weet je zeker dat je wilt sluiten? Je wijzigingen gaan dan verloren.",
-    "liveRunConfirm": "Er loopt nog een uitvoering. Die loopt op de achtergrond gewoon door als je sluit — stoppen kan met de Stoppen-knop. Toch sluiten?",
+    "liveRunConfirm": "Er loopt nog een uitvoering. Die loopt op de achtergrond gewoon door als je sluit. Stoppen kan met de Stoppen-knop. Toch sluiten?",
     "nameAriaLabel": "Naam workflow"
   },
   "fields": {
@@ -367,7 +367,7 @@
     },
     "tools": {
       "hint": "Activeer welke tools een agent mag gebruiken",
-      "notAvailable": "Nog niet gekoppeld aan een agent — deze keuzes worden niet opgeslagen.",
+      "notAvailable": "Nog niet gekoppeld aan een agent. Deze keuzes worden niet opgeslagen.",
       "items": {
         "shift_lookup": {
           "label": "Dienst opzoeken",
@@ -901,7 +901,7 @@
   "agentTest": {
     "title": "Test-variabelen",
     "add": "Toevoegen",
-    "empty": "Geen variabelen — inputs uit eerdere modules kun je hier overschrijven.",
+    "empty": "Geen variabelen. Inputs uit eerdere modules kun je hier overschrijven.",
     "name": "naam",
     "value": "waarde",
     "intro": "Stuur een bericht om de agent te testen",
@@ -921,7 +921,7 @@
     "stopping": "Stoppen…",
     "stopTitle": "Stop deze run",
     "stopFailed": "Stoppen mislukt",
-    "alreadyRunning": "Deze workflow draait al — bekijk of stop de lopende run."
+    "alreadyRunning": "Deze workflow draait al. Bekijk of stop de lopende run."
   },
   "runViewer": {
     "output": "Output",
@@ -954,7 +954,7 @@
     "automatisch ingevuld": "automatisch ingevuld",
     "bijv Iterator (automatisch ingevuld)": "bijv. Iterator (automatisch ingevuld)",
     "bijv Yesway": "bijv. Yesway",
-    "bijv {{klant_id}} — leeg laten voor één grote groep": "bijv. {{klant_id}} — leeg laten voor één grote groep",
+    "bijv {{klant_id}} — leeg laten voor één grote groep": "bijv. {{klant_id}}. Leeg laten voor één grote groep",
     "klantnaam": "klantnaam",
     "leeg = mobiel van de kandidaat · eigen 06 = testmodus": "leeg = mobiel van de kandidaat · eigen 06 = testmodus",
     "leeg = één groep": "leeg = één groep",
@@ -962,7 +962,7 @@
     "naam of e-mail": "naam of e-mail",
     "naam, email, telefoon": "naam, email, telefoon",
     "naam_1 naam_2": "naam_1\nnaam_2",
-    "optioneel — leeg = alle redenen": "optioneel — leeg = alle redenen",
+    "optioneel — leeg = alle redenen": "optioneel. Leeg = alle redenen",
     "{{1output}} of leeg laten voor volledige output": "{{1.output}} of leeg laten voor volledige output",
     "{{vraag van kandidaat}}": "{{vraag van kandidaat}}",
     "Nieuwe match": "Nieuwe match",
@@ -977,7 +977,7 @@
     "De module waarvan de items worden samengevoegd Normaal de Iterator die voor deze module staat": "De module waarvan de items worden samengevoegd. Normaal de Iterator die voor deze module staat.",
     "De uitvoering gaat door alsof de module deze waarde heeft teruggegeven": "De uitvoering gaat door alsof de module deze waarde heeft teruggegeven.",
     "Definieer de velden die de agent teruggeeft": "Definieer de velden die de agent teruggeeft.",
-    "Eerst proefdraaien — rapporteert wat er ZOU wijzigen zonder iets te schrijven": "Eerst proefdraaien — rapporteert wat er ZOU wijzigen zonder iets te schrijven.",
+    "Eerst proefdraaien — rapporteert wat er ZOU wijzigen zonder iets te schrijven": "Eerst proefdraaien. Rapporteert wat er ZOU wijzigen zonder iets te schrijven.",
     "Elke regel of komma-gescheiden waarde wordt als apart dienst-ID behandeld": "Elke regel of komma-gescheiden waarde wordt als apart dienst-ID behandeld.",
     "Eén naam per regel": "Eén naam per regel.",
     "Geef de agent toegang tot de gekoppelde kennisbank": "Geef de agent toegang tot de gekoppelde kennisbank.",
@@ -1000,14 +1000,14 @@
     "Welk veld uit de vorige module bevat de array om over te itereren": "Welk veld uit de vorige module bevat de array om over te itereren.",
     "Welk veld wordt gebruikt als identifier in de volgende module": "Welk veld wordt gebruikt als identifier in de volgende module.",
     "Wordt voor de instructies ingevoegd Gebruik dit voor tenant-brede regels": "Wordt voor de instructies ingevoegd. Gebruik dit voor tenant-brede regels.",
-    "Sla kandidaten over die al coördinaten hebben — aan te raden bij bulk": "Sla kandidaten over die al coördinaten hebben — aan te raden bij bulk.",
+    "Sla kandidaten over die al coördinaten hebben — aan te raden bij bulk": "Sla kandidaten over die al coördinaten hebben. Aan te raden bij bulk.",
     "Leeg = alle statussen (blacklist is altijd uitgesloten)": "Leeg = alle statussen (blacklist is altijd uitgesloten).",
     "Leeg = alle fases (lead / kandidaat / …)": "Leeg = alle fases (lead / kandidaat / …).",
     "Bijv alleen uitzendkrachten of ZZP'ers Leeg = alle contractvormen": "Bijv. alleen uitzendkrachten of ZZP'ers. Leeg = alle contractvormen.",
     "Leeg = alle plaatsen": "Leeg = alle plaatsen.",
     "Leeg = veiligheidsplafond (10000)": "Leeg = veiligheidsplafond (10.000).",
     "Alleen relevant wanneer de gekoppelde entiteit een klant is": "Alleen relevant wanneer de gekoppelde entiteit een klant is.",
-    "Sla records over die al een koppeling met dit systeem hebben — aan te raden bij bulk": "Sla records over die al een koppeling met dit systeem hebben — aan te raden bij bulk.",
+    "Sla records over die al een koppeling met dit systeem hebben — aan te raden bij bulk": "Sla records over die al een koppeling met dit systeem hebben. Aan te raden bij bulk.",
     "Leeg = geen contactfilter (alle kandidaten komen mee)": "Leeg = geen contactfilter (alle kandidaten komen mee).",
     "{{kandidaatid}} = draait per kandidaat uit de vorige stap (bulk; leeg werkt ook) Voor één kandidaat {{triggercandidate_id}} (drill-down-knop of adreswijziging)": "{{kandidaat.id}} = draait per kandidaat uit de vorige stap (bulk; leeg werkt ook). Voor één kandidaat: {{trigger.candidate_id}} (drill-down-knop of adreswijziging)."
   },

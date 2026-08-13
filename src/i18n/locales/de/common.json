@@ -144,10 +144,10 @@
     "forbidden": "Sie haben keinen Zugriff auf Koios.",
     "usageLine": "{{model}} · {{tokens}} Tokens · {{cost}}",
     "offline": "Nicht verbunden",
-    "contextPending": "Dieser Datensatz kann noch nicht als KI-Kontext verknüpft werden — nur zur Referenz angeheftet.",
+    "contextPending": "Dieser Datensatz kann noch nicht als KI-Kontext verknüpft werden. Nur zur Referenz angeheftet.",
     "radar": {
       "title": "Koios-Empfehlungen",
-      "empty": "Gerade braucht nichts Ihre Aufmerksamkeit — fragen Sie mich gern etwas."
+      "empty": "Gerade braucht nichts Ihre Aufmerksamkeit. Fragen Sie mich gern etwas."
     },
     "mention": {
       "leads": "Leads",
@@ -166,7 +166,7 @@
       "expiresIn": "Läuft ab in {{seconds}}s",
       "confirmed": "Erledigt.",
       "cancelled": "Abgebrochen.",
-      "expired": "Dieser Vorschlag ist abgelaufen — bitte erneut fragen.",
+      "expired": "Dieser Vorschlag ist abgelaufen. Bitte erneut fragen.",
       "error": "Etwas ist schiefgelaufen. Bitte erneut versuchen."
     },
     "resizeHandle": "Panelbreite anpassen",
@@ -222,7 +222,7 @@
     "refresh": "PDOK-Koordinaten erneut abrufen",
     "started": "Erneutes Abrufen gestartet…",
     "updated": "Koordinaten aktualisiert.",
-    "notFound": "Adresse nicht gefunden — Adressdaten prüfen."
+    "notFound": "Adresse nicht gefunden. Adressdaten prüfen."
   },
   "noAccess": "Kein Zugriff",
   "noAccessDesc": "Sie haben keine Berechtigung für diese Seite.",
@@ -302,7 +302,7 @@
   },
   "new": "Neu",
   "aiGenerated": "KI-generiert",
-  "aiGeneratedHint": "Von Koios AI generiert — vor Verwendung prüfen.",
+  "aiGeneratedHint": "Von Koios AI generiert. Vor Verwendung prüfen.",
   "notesAssist": {
     "title": "Koios-Assistent",
     "needsText": "Zuerst Text hinzufügen",

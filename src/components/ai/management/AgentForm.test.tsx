@@ -156,7 +156,7 @@ describe('AgentForm — save failure must notify (was a silent catch)', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Opslaan' }))
 
     await waitFor(() => expect(dispatchSpy).toHaveBeenCalledWith(expect.objectContaining({
-      detail: { type: 'error', message: 'Actie mislukt — probeer het opnieuw.' },
+      detail: { type: 'error', message: 'Actie mislukt. Probeer het opnieuw.' },
     })))
     expect(screen.queryByText('Opgeslagen')).toBeNull()
   })

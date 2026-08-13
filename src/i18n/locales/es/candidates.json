@@ -82,7 +82,7 @@
     "stageFailed": "{{count}} candidatos no actualizados.",
     "partialResult": "{{updated}} de {{total}} actualizados, {{skipped}} omitidos",
     "partialResultReasoned": "{{updated}} de {{total}} actualizados, {{skipped}} omitidos ({{breakdown}})",
-    "stageNote": "Cambia la etapa de la única solicitud en curso de cada candidato (sin elegir vacante — los candidatos con cero o varias solicitudes en curso se omiten).",
+    "stageNote": "Cambia la etapa de la única solicitud en curso de cada candidato (sin elegir vacante, los candidatos con cero o varias solicitudes en curso se omiten).",
     "manageByApplication": "Gestionar por solicitud →",
     "merge": "Fusionar…",
     "statusBlockedConfirm": "{{blocked}} de {{total}} candidatos no se pueden actualizar ({{reasons}}). ¿Continuar con {{proceed}}?",
@@ -134,7 +134,7 @@
     "neverContactedSub": "sin contacto aún",
     "staleMonths": "Sin contactar > {{months}} meses",
     "clearFilter": "Borrar filtro",
-    "pageScopeNotice": "Los totales globales no están disponibles temporalmente — estas cifras solo cubren la página cargada."
+    "pageScopeNotice": "Los totales globales no están disponibles temporalmente. Estas cifras solo cubren la página cargada."
   },
   "filters": {
     "search": "Buscar",
@@ -233,7 +233,7 @@
     "statusPanelHint": "Por defecto Lead. Un candidato nuevo empieza como Lead.",
     "cv": {
       "title": "Candidato a partir de un CV",
-      "intro": "Koios rellena este formulario a partir del CV — tú lo revisas y haces clic en crear.",
+      "intro": "Koios rellena este formulario a partir del CV. Tú lo revisas y haces clic en crear.",
       "choose": "Elegir CV",
       "hint": "Solo PDF · máx. 10 MB",
       "uploading": "Subiendo el CV…",
@@ -243,7 +243,7 @@
       "another": "Otro CV",
       "retry": "Intentar de nuevo",
       "badge": "cv",
-      "badgeTitle": "Tomado del CV — comprueba este valor",
+      "badgeTitle": "Tomado del CV. Comprueba este valor",
       "checkNotice": "Comprueba los campos marcados: las fechas y los empleadores se leen mal con frecuencia.",
       "filled_one": "{{count}} campo rellenado desde el CV",
       "filled_other": "{{count}} campos rellenados desde el CV",
@@ -348,7 +348,7 @@
     "tasksError": "No se pudieron cargar las tareas.",
     "tasksEmpty": "Sin tareas abiertas para este candidato.",
     "byWho": "por {{name}}",
-    "recordGone": "Este candidato ya no existe — fila eliminada de la lista.",
+    "recordGone": "Este candidato ya no existe. Fila eliminada de la lista.",
     "archivedOn": "Archivado el {{date}}",
     "archivedFlag": "Archivado",
     "restore": "Restaurar",
@@ -429,7 +429,7 @@
     "sourcePlaceholder": "P. ej. sitio web, Indeed, recomendación",
     "createdBy": "Creado por",
     "createdAt": "Creado el",
-    "readOnlyStamp": "Solo lectura — establecido por el sistema"
+    "readOnlyStamp": "Solo lectura. Establecido por el sistema"
   },
   "addFields": {
     "functionTitle": "Puesto",
@@ -686,7 +686,7 @@
     "noAvailability": "Aún no hay excepciones registradas.",
     "availabilityHint": "Por defecto, el candidato está disponible. Registra aquí las excepciones (p. ej. vacaciones o enfermedad).",
     "availDuplicate": "Esta parte del día ya está definida para esta fecha.",
-    "notPersistedYet": "Aún no se guarda — el módulo de planificación llegará pronto."
+    "notPersistedYet": "Aún no se guarda. El módulo de planificación llegará pronto."
   },
   "statuses": {
     "actief": "Activo",
@@ -834,8 +834,8 @@
     "selectOne": "Seleccionar {{name}}",
     "downloadSelected": "Descargar ({{count}})",
     "deleteTitle": "Eliminar documento",
-    "deleteOneMessage": "¿Estás seguro? '{{name}}' se eliminará definitivamente — esto no se puede deshacer.",
-    "deleteManyMessage": "¿Estás seguro? Se eliminarán definitivamente {{count}} documentos — esto no se puede deshacer.",
+    "deleteOneMessage": "¿Estás seguro? '{{name}}' se eliminará definitivamente. Esto no se puede deshacer.",
+    "deleteManyMessage": "¿Estás seguro? Se eliminarán definitivamente {{count}} documentos. Esto no se puede deshacer.",
     "deleteSelected": "Eliminar ({{count}})",
     "types": {
       "cv": "CV",
@@ -983,11 +983,11 @@
       "plan_intake": "Planificar entrevista"
     },
     "reasons": {
-      "neverContacted": "Nunca se ha registrado contacto — contacte para activar este expediente.",
-      "staleContact": "Sin contacto registrado desde hace más de {{months}} meses — programe una llamada.",
-      "leadNoApplication": "Lead sin solicitud — planifique una entrevista para calificarlo.",
-      "noPool": "Aún no está en ningún grupo de talento — añádalo para que sea localizable.",
-      "none": "No se requiere ninguna acción — este expediente está al día."
+      "neverContacted": "Nunca se ha registrado contacto. Contacte para activar este expediente.",
+      "staleContact": "Sin contacto registrado desde hace más de {{months}} meses. Programe una llamada.",
+      "leadNoApplication": "Lead sin solicitud. Planifique una entrevista para calificarlo.",
+      "noPool": "Aún no está en ningún grupo de talento. Añádalo para que sea localizable.",
+      "none": "No se requiere ninguna acción. Este expediente está al día."
     }
   },
   "cellLinks": {
@@ -1003,7 +1003,7 @@
     "pointCount": "{{count}} candidatos en el mapa"
   },
   "vacancySearch": {
-    "noLocation": "Este candidato aún no tiene coordenadas de ubicación — actualiza primero la dirección, luego aparecerá el mapa aquí.",
+    "noLocation": "Este candidato aún no tiene coordenadas de ubicación. Actualiza primero la dirección, luego aparecerá el mapa aquí.",
     "statuses": "Estado de la vacante",
     "functions": "Función",
     "onMap": "{{count}} vacantes en el mapa",
@@ -1016,7 +1016,7 @@
     "hoursMinPlaceholder": "Mín",
     "hoursMaxPlaceholder": "Máx",
     "availableFromFilter": "Desplegable desde",
-    "functionNotInLookup": "La función '{{title}}' no está en la lista de funciones — se buscarán todas las funciones.",
+    "functionNotInLookup": "La función '{{title}}' no está en la lista de funciones. Se buscarán todas las funciones.",
     "apply": "Postular",
     "resetFilters": "Restablecer filtros",
     "moreFilters": "Más filtros",
@@ -1061,8 +1061,8 @@
   },
   "archiveGuard": {
     "title": "Asuntos pendientes encontrados",
-    "body": "Atención — {{name}} todavía tiene asuntos pendientes. ¿Qué quieres hacer?",
-    "bodyAggregate": "Atención — {{blocked}} de los {{total}} candidatos seleccionados todavía tienen solicitudes o matches activos. ¿Qué quieres hacer?",
+    "body": "Atención. {{name}} todavía tiene asuntos pendientes. ¿Qué quieres hacer?",
+    "bodyAggregate": "Atención. {{blocked}} de los {{total}} candidatos seleccionados todavía tienen solicitudes o matches activos. ¿Qué quieres hacer?",
     "applicationsTitle": "Solicitud(es) pendiente(s)",
     "matchesTitle": "Match(es) activo(s)",
     "resolutionReject": "Rechazar solicitud(es)",
@@ -1071,8 +1071,8 @@
       "open": "Activo",
       "closed": "Cerrado"
     },
-    "matchConflict": "No se puede finalizar — todavía hay un contrato de HelloFlex activo vinculado.",
-    "stillBlocked": "No se pudo resolver todo — sigue bloqueado hasta solucionarlo.",
+    "matchConflict": "No se puede finalizar. Todavía hay un contrato de HelloFlex activo vinculado.",
+    "stillBlocked": "No se pudo resolver todo. Sigue bloqueado hasta solucionarlo.",
     "resolveButtonArchive": "Resolver y archivar",
     "resolveButtonTrash": "Resolver y mover a la papelera",
     "resolving": "Resolviendo…"
@@ -1133,26 +1133,26 @@
     "contactFunction": "Función",
     "phone": "Teléfono",
     "mobile": "Móvil",
-    "duplicateContact": "Ya existe: {{name}} — elige este de la lista",
+    "duplicateContact": "Ya existe: {{name}}, elige este de la lista",
     "billingEmailMain": "Email de facturación",
     "billingEmailExtra": "Email adicional",
     "addBillingEmail": "añadir email",
     "branchMismatch": "La sede difiere",
     "branchMismatchDesc": "La sede del candidato ({{candidate}}) difiere de la del cliente ({{customer}}).",
-    "branchKeep": "No — solo este match en esta sede",
-    "branchMove": "Sí — trasladar también al candidato a esta sede",
+    "branchKeep": "No. Solo este match en esta sede",
+    "branchMove": "Sí. Trasladar también al candidato a esta sede",
     "branchMoveFailed": "Match creado, pero el traslado de la sede del candidato ha fallado. Actualícelo manualmente.",
     "rateProposal": {
       "agreement": "Propuesta (acuerdo de tarifa): {{purchase}} compra / {{sell}} venta",
       "conversionFactor": "Propuesta (factor de conversión): {{purchase}} compra / {{sell}} venta",
-      "purchaseOnly": "Propuesta — solo se conoce la tarifa de compra: {{purchase}}",
-      "deviationWarning": "El acuerdo de tarifa propone {{proposalPurchase}} compra / {{proposalSell}} venta — has introducido {{enteredPurchase}} / {{enteredSell}}. ¿Estás seguro/a?",
+      "purchaseOnly": "Propuesta, solo se conoce la tarifa de compra: {{purchase}}",
+      "deviationWarning": "El acuerdo de tarifa propone {{proposalPurchase}} compra / {{proposalSell}} venta. Has introducido {{enteredPurchase}} / {{enteredSell}}. ¿Estás seguro/a?",
       "deviationConfirm": "Sí, crear el match de todos modos",
       "deviationCancel": "Ajustar tarifas"
     },
     "candidate": "Candidato",
     "pickCandidate": "Elige un candidato...",
-    "duplicateMatchWarning": "Ya existe un Match ({{label}}) para este candidato en este cliente — ¿quieres crear una renovación?",
+    "duplicateMatchWarning": "Ya existe un Match ({{label}}) para este candidato en este cliente. ¿quieres crear una renovación?",
     "overlapWarning": "El período indicado se solapa con un Match activo en {{label}} ({{period}}).",
     "overlapOngoing": "desde {{start}}",
     "overlapWarningHours": "El período indicado se solapa con un Match activo en {{label}}: juntos {{hours}} horas por semana en el período solapado ({{period}})."
@@ -1207,7 +1207,7 @@
       "requestedAtBy": "Solicitado el {{date}} por {{name}}",
       "refresh": "Actualizar",
       "refreshing": "Actualizando…",
-      "refreshStarted": "Actualización de PDOK iniciada — las coordenadas aparecerán en breve",
+      "refreshStarted": "Actualización de PDOK iniciada. Las coordenadas aparecerán en breve",
       "refreshFailed": "Error al actualizar"
     }
   },
@@ -1248,8 +1248,8 @@
     "started": "Conversación iniciada",
     "composerPlaceholder": "Escribe un mensaje…",
     "composerSendFailed": "No se pudo enviar el mensaje",
-    "sessionClosedHint": "La ventana de 24 horas está cerrada — inicia una nueva conversación con una plantilla para reabrirla.",
-    "composerUnavailable": "WhatsApp no está disponible en este momento — no se envió nada. Inténtalo de nuevo en unos instantes.",
+    "sessionClosedHint": "La ventana de 24 horas está cerrada. Inicia una nueva conversación con una plantilla para reabrirla.",
+    "composerUnavailable": "WhatsApp no está disponible en este momento. No se envió nada. Inténtalo de nuevo en unos instantes.",
     "pickAgent": "Agente de IA (opcional)",
     "agentPlaceholder": "Elegir un agente de IA…",
     "configureWhatsapp": "Configurar WhatsApp →",
@@ -1280,15 +1280,15 @@
     "templateSendFailed": "No se pudo enviar la plantilla",
     "templateLoading": "Cargando plantillas…",
     "templateNeedsCandidate": "Esta conversación no está vinculada a un candidato; todavía no se puede enviar una plantilla aquí.",
-    "templateVarsUnsupported_one": "Esta plantilla tiene {{count}} variable que aún no se puede rellenar aquí — elige una plantilla sin variables.",
-    "templateVarsUnsupported_other": "Esta plantilla tiene {{count}} variables que aún no se pueden rellenar aquí — elige una plantilla sin variables."
+    "templateVarsUnsupported_one": "Esta plantilla tiene {{count}} variable que aún no se puede rellenar aquí. Elige una plantilla sin variables.",
+    "templateVarsUnsupported_other": "Esta plantilla tiene {{count}} variables que aún no se pueden rellenar aquí. Elige una plantilla sin variables."
   },
   "advice": {
     "reason": {
-      "never_contacted": "Nunca se ha registrado contacto — contacte para activar este expediente.",
-      "stale_contact": "Sin contacto registrado desde hace más de {{months}} meses — programe una llamada.",
-      "lead_without_funnel": "Lead sin solicitud — planifique una entrevista para calificarlo.",
-      "no_pool": "Aún no está en ningún grupo de talento — añádalo para que sea localizable."
+      "never_contacted": "Nunca se ha registrado contacto. Contacte para activar este expediente.",
+      "stale_contact": "Sin contacto registrado desde hace más de {{months}} meses. Programe una llamada.",
+      "lead_without_funnel": "Lead sin solicitud. Planifique una entrevista para calificarlo.",
+      "no_pool": "Aún no está en ningún grupo de talento. Añádalo para que sea localizable."
     }
   },
   "references": {

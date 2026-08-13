@@ -219,12 +219,12 @@
       "pickContactSearch": "Buscar por nombre, función o correo",
       "pickContactLinks": "Vinculado actualmente a",
       "pickContactNoLinks": "Aún sin vincular",
-      "coupleNote": "Vincular MUEVE el contacto a esta ubicación — se desvincula de la actual.",
+      "coupleNote": "Vincular MUEVE el contacto a esta ubicación. Se desvincula de la actual.",
       "branchTitle": "Sede",
       "branchInherited": "Sigue al cliente",
       "branchOwn": "Definido aparte",
       "branchLink": "Vincular sede",
-      "branchEmpty": "Sin sede propia — esta ubicación sigue al cliente.",
+      "branchEmpty": "Sin sede propia. Esta ubicación sigue al cliente.",
       "branchHint": "Dejarlo vacío significa: mismas sedes que el cliente. Vincular una aquí crea una excepción deliberada.",
       "isPrimaryContact": "Contacto principal de esta ubicación",
       "setPrimaryContact": "Convertir en contacto principal de esta ubicación",
@@ -238,7 +238,7 @@
       "linkNamed": "Vincular a {{name}}",
       "createAndLink": "Crear contacto y vincular",
       "description": "Texto de la ubicación",
-      "contactNotLinked": "Solo texto — aún no vinculado a un contacto",
+      "contactNotLinked": "Solo texto. Aún no vinculado a un contacto",
       "changePrimaryContact": "Cambiar contacto",
       "mergeLocation": "Combinar ubicación",
       "archiveLocation": "Archivar ubicación",
@@ -256,7 +256,7 @@
     },
     "saveFailed": "Error al guardar.",
     "deleteFailed": "Error al eliminar.",
-    "deleteInUse": "No se puede eliminar — esta ubicación todavía está en uso.",
+    "deleteInUse": "No se puede eliminar. Esta ubicación todavía está en uso.",
     "archivedBanner": {
       "since": "Archivado el {{date}}",
       "flag": "Archivado",
@@ -326,7 +326,7 @@
     "deleteConfirm": "¿Eliminar este departamento?",
     "saveFailed": "Error al guardar.",
     "deleteFailed": "Error al eliminar.",
-    "deleteInUse": "No se puede eliminar — este departamento todavía está en uso.",
+    "deleteInUse": "No se puede eliminar. Este departamento todavía está en uso.",
     "archivedBanner": {
       "since": "Archivado el {{date}}",
       "flag": "Archivado",
@@ -400,7 +400,7 @@
     "deleteConfirm": "¿Eliminar este contacto?",
     "saveFailed": "Error al guardar.",
     "deleteFailed": "Error al eliminar.",
-    "deleteInUse": "No se puede eliminar — este contacto todavía está en uso.",
+    "deleteInUse": "No se puede eliminar. Este contacto todavía está en uso.",
     "archivedBanner": {
       "since": "Archivado el {{date}}",
       "flag": "Archivado",
@@ -517,8 +517,8 @@
     "downloadSelected": "Descargar ({{count}})",
     "preview": "Vista previa",
     "deleteTitle": "Eliminar documento",
-    "deleteOneMessage": "¿Estás seguro? '{{name}}' se eliminará definitivamente — esto no se puede deshacer.",
-    "deleteManyMessage": "¿Estás seguro? Se eliminarán definitivamente {{count}} documentos — esto no se puede deshacer.",
+    "deleteOneMessage": "¿Estás seguro? '{{name}}' se eliminará definitivamente. Esto no se puede deshacer.",
+    "deleteManyMessage": "¿Estás seguro? Se eliminarán definitivamente {{count}} documentos. Esto no se puede deshacer.",
     "deleteSelected": "Eliminar ({{count}})",
     "linkLevelLabel": "Vincular documento a",
     "allTypes": "Todos los tipos"
@@ -540,7 +540,7 @@
     "delete": "Eliminar",
     "confirmDelete": "¿Eliminar este acuerdo de tarifas?",
     "deleteFailed": "Error al eliminar.",
-    "deleteInUse": "No se puede eliminar — este acuerdo todavía está en uso.",
+    "deleteInUse": "No se puede eliminar. Este acuerdo todavía está en uso.",
     "saveFailed": "Error al guardar.",
     "loading": "Cargando acuerdos de tarifas…",
     "loadError": "Error al cargar los acuerdos de tarifas.",
@@ -637,7 +637,7 @@
     },
     "import": {
       "title": "Cliente desde archivo",
-      "intro": "Importar un archivo crea este cliente — con sus ubicaciones, departamentos y contactos — de inmediato. No rellena el formulario de abajo; revisa la vista previa antes de confirmar."
+      "intro": "Importar un archivo crea este cliente (con sus ubicaciones, departamentos y contactos) de inmediato. No rellena el formulario de abajo; revisa la vista previa antes de confirmar."
     }
   },
   "subModal": {
@@ -709,9 +709,9 @@
     "gender": "Género",
     "import": {
       "title": "{{entity}} desde archivo",
-      "intro": "Importar un archivo crea directamente {{entity}} — no rellena el formulario de abajo. Revisa primero la vista previa antes de confirmar.",
-      "parentWarning": "El nombre del cliente en el archivo decide qué cliente recibe las filas — no tiene por qué ser \"{{customerName}}\". Revisa la vista previa.",
-      "mismatchWarning": "{{count}} fila(s) de este archivo pertenecen a un cliente distinto de este ({{names}}) — esas filas se crearán allí, no aquí.",
+      "intro": "Importar un archivo crea directamente {{entity}}. No rellena el formulario de abajo. Revisa primero la vista previa antes de confirmar.",
+      "parentWarning": "El nombre del cliente en el archivo decide qué cliente recibe las filas. No tiene por qué ser \"{{customerName}}\". Revisa la vista previa.",
+      "mismatchWarning": "{{count}} fila(s) de este archivo pertenecen a un cliente distinto de este ({{names}}). Esas filas se crearán allí, no aquí.",
       "mismatchConfirm": "{{count}} fila(s) de este archivo se crearán o actualizarán en un cliente distinto ({{names}}), no en el cliente que tienes abierto ahora. ¿Continuar de todos modos?",
       "mismatchTitle": "Cliente distinto en el archivo",
       "mismatchProceed": "Importar de todos modos"
@@ -753,9 +753,9 @@
     "relationshipLabel": "Relación",
     "relationshipActive": "{{vacancies}} vacante(s) abierta(s) · {{matches}} match(es) activo(s).",
     "relationshipNone": "No hay vacantes abiertas ni matches activos registrados.",
-    "locationComplete": "Esta ubicación está bien completada — dirección, registro y contacto son conocidos.",
+    "locationComplete": "Esta ubicación está bien completada. Dirección, registro y contacto son conocidos.",
     "locationPartial": "Esta ubicación está al {{pct}}%. Añade la dirección, el sub-número CIF, el n.º IVA y los datos de contacto.",
-    "departmentComplete": "Este departamento está bien completado — descripción, estado y centro de coste son conocidos.",
+    "departmentComplete": "Este departamento está bien completado. Descripción, estado y centro de coste son conocidos.",
     "departmentPartial": "Este departamento está al {{pct}}% completo. Añade la descripción, el estado y el centro de coste."
   },
   "tasks": {
@@ -804,7 +804,7 @@
   },
   "koios": {
     "reasons": {
-      "noOpenVacancies": "Sin vacantes abiertas — haz seguimiento a este cliente."
+      "noOpenVacancies": "Sin vacantes abiertas. Haz seguimiento a este cliente."
     }
   },
   "validation": {

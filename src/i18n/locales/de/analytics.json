@@ -33,7 +33,7 @@
       "region": "Region"
     }
   },
-  "comingSoon": "{{label}} — folgt in Kürze",
+  "comingSoon": "{{label}}. Folgt in Kürze",
   "period": {
     "label": "Zeitraum",
     "day": "Tag",
@@ -49,7 +49,7 @@
     "phase": "Phase",
     "total": "Bewerbungen gesamt",
     "overallConversion": "Gesamtkonversion",
-    "cohortNote": "Kohorte füllt sich noch — Pipeline-Belegung wird angezeigt, bis genügend Historie vorhanden ist.",
+    "cohortNote": "Kohorte füllt sich noch. Pipeline-Belegung wird angezeigt, bis genügend Historie vorhanden ist.",
     "conversion": "Konversion",
     "reached": "Erreicht",
     "current": "Aktuell in Phase",

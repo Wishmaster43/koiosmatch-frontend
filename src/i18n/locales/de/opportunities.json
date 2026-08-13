@@ -164,7 +164,7 @@
   },
   "koios": {
     "reasons": {
-      "expectedCloseOverdue": "Das erwartete Abschlussdatum ist verstrichen — bei dieser Chance nachfassen."
+      "expectedCloseOverdue": "Das erwartete Abschlussdatum ist verstrichen. Bei dieser Chance nachfassen."
     }
   },
   "richText": {

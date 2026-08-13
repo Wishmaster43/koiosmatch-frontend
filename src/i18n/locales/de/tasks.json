@@ -141,7 +141,7 @@
     "assigneeUnassigned": "Agentur (niemand zugewiesen)",
     "assigneeUnassignedHint": "Niemand ist verantwortlich: Die Aufgabe bleibt bei der Agentur, bis ein Kollege sie übernimmt.",
     "assigneeWithRole": "{{name}} · {{role}}",
-    "assigneeEmpty": "Noch keine Kollegen zum Zuweisen — nur die Agentur ist wählbar.",
+    "assigneeEmpty": "Noch keine Kollegen zum Zuweisen. Nur die Agentur ist wählbar.",
     "assigneeLoadError": "Kollegen konnten nicht geladen werden.",
     "team": "Abteilung",
     "teamPlaceholder": "Abteilung wählen",
@@ -212,10 +212,10 @@
     "dueOverdue": "Diese Aufgabe ist {{count}} Tag(e) überfällig.",
     "dueUpcoming": "Diese Aufgabe ist in {{count}} Tag(en) fällig.",
     "assigneeLabel": "Zuweisung",
-    "unassigned": "Diese Aufgabe liegt noch beim Büro — noch keinem bestimmten Mitarbeiter zugewiesen.",
+    "unassigned": "Diese Aufgabe liegt noch beim Büro. Noch keinem bestimmten Mitarbeiter zugewiesen.",
     "assignedTo": "Zugewiesen an {{name}}.",
     "linksLabel": "Verknüpfung",
-    "noLinks": "Diese Aufgabe ist mit keinem Datensatz verknüpft — verknüpfen Sie einen Kandidaten, Kunden oder Datensatz für mehr Kontext.",
+    "noLinks": "Diese Aufgabe ist mit keinem Datensatz verknüpft. Verknüpfen Sie einen Kandidaten, Kunden oder Datensatz für mehr Kontext.",
     "linked": "Verknüpft mit {{count}} Datensatz/Datensätzen."
   },
   "filters": {

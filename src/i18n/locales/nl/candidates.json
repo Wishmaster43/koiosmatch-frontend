@@ -34,11 +34,11 @@
       "plan_intake": "Plan intake"
     },
     "reasons": {
-      "neverContacted": "Nog nooit contact geweest — neem contact op om dit dossier te activeren.",
-      "staleContact": "Langer dan {{months}} maanden geen contact geregistreerd — plan een belmoment.",
-      "leadNoApplication": "Lead zonder sollicitatie — plan een intake om te kwalificeren.",
-      "noPool": "Zit nog in geen enkele talentenpool — voeg toe zodat de kandidaat vindbaar is.",
-      "none": "Geen actie nodig — dit dossier is bij."
+      "neverContacted": "Nog nooit contact geweest. Neem contact op om dit dossier te activeren.",
+      "staleContact": "Langer dan {{months}} maanden geen contact geregistreerd. Plan een belmoment.",
+      "leadNoApplication": "Lead zonder sollicitatie. Plan een intake om te kwalificeren.",
+      "noPool": "Zit nog in geen enkele talentenpool. Voeg toe zodat de kandidaat vindbaar is.",
+      "none": "Geen actie nodig. Dit dossier is bij."
     }
   },
   "cellLinks": {
@@ -105,7 +105,7 @@
     "stageFailed": "{{count}} kandidaten niet bijgewerkt.",
     "partialResult": "{{updated}} van de {{total}} aangepast, {{skipped}} overgeslagen",
     "partialResultReasoned": "{{updated}} van de {{total}} aangepast, {{skipped}} overgeslagen ({{breakdown}})",
-    "stageNote": "Wijzigt de fase van de énige lopende sollicitatie per kandidaat (geen vacature-keuze — 0 of meerdere lopende sollicitaties worden overgeslagen).",
+    "stageNote": "Wijzigt de fase van de énige lopende sollicitatie per kandidaat (geen vacature-keuze, 0 of meerdere lopende sollicitaties worden overgeslagen).",
     "manageByApplication": "Beheer per sollicitatie →",
     "merge": "Samenvoegen…",
     "statusBlockedConfirm": "{{blocked}} van de {{total}} kandidaten kunnen niet worden aangepast ({{reasons}}). Doorgaan met {{proceed}}?",
@@ -157,7 +157,7 @@
     "neverContactedSub": "nog geen contactmoment",
     "staleMonths": "Niet benaderd > {{months}} mnd",
     "clearFilter": "Filter wissen",
-    "pageScopeNotice": "Serverbrede totalen zijn tijdelijk niet beschikbaar — deze cijfers gaan alleen over de geladen pagina."
+    "pageScopeNotice": "Serverbrede totalen zijn tijdelijk niet beschikbaar. Deze cijfers gaan alleen over de geladen pagina."
   },
   "filters": {
     "search": "Zoeken",
@@ -256,7 +256,7 @@
     "statusPanelHint": "Standaard Lead. Een nieuwe kandidaat begint als Lead.",
     "cv": {
       "title": "Kandidaat uit cv",
-      "intro": "Koios vult dit formulier in vanuit het cv — jij controleert en klikt zelf op aanmaken.",
+      "intro": "Koios vult dit formulier in vanuit het cv. Jij controleert en klikt zelf op aanmaken.",
       "choose": "Cv kiezen",
       "hint": "Alleen pdf · max. 10 MB",
       "uploading": "Cv wordt geüpload…",
@@ -266,7 +266,7 @@
       "another": "Ander cv",
       "retry": "Opnieuw proberen",
       "badge": "cv",
-      "badgeTitle": "Overgenomen uit het cv — controleer deze waarde",
+      "badgeTitle": "Overgenomen uit het cv. Controleer deze waarde",
       "checkNotice": "Controleer de gemarkeerde velden: datums en werkgevers worden regelmatig verkeerd gelezen.",
       "filled_one": "{{count}} veld ingevuld uit het cv",
       "filled_other": "{{count}} velden ingevuld uit het cv",
@@ -371,7 +371,7 @@
     "tasksError": "Taken laden is mislukt.",
     "tasksEmpty": "Geen open taken voor deze kandidaat.",
     "byWho": "door {{name}}",
-    "recordGone": "Deze kandidaat bestaat niet meer — rij verwijderd uit de lijst.",
+    "recordGone": "Deze kandidaat bestaat niet meer. Rij verwijderd uit de lijst.",
     "archivedOn": "Gearchiveerd per {{date}}",
     "archivedFlag": "Gearchiveerd",
     "restore": "Herstellen",
@@ -452,7 +452,7 @@
     "sourcePlaceholder": "Bijv. website, Indeed, doorverwijzing",
     "createdBy": "Aangemaakt door",
     "createdAt": "Aangemaakt op",
-    "readOnlyStamp": "Alleen-lezen — door het systeem vastgelegd"
+    "readOnlyStamp": "Alleen-lezen. Door het systeem vastgelegd"
   },
   "addFields": {
     "functionTitle": "Functietitel",
@@ -604,10 +604,10 @@
     "retentionTitle": "AVG-bewaartermijn",
     "retentionConsentNone": "Geen bewaartoestemming gegeven",
     "retentionConsentLoading": "Geldigheid wordt geladen…",
-    "retentionConsentWindowUnknown": "Geldigheid onbekend — instellingen niet geladen",
+    "retentionConsentWindowUnknown": "Geldigheid onbekend. Instellingen niet geladen",
     "retentionConsentValidUntil": "Toestemming geldig tot {{date}}",
     "retentionConsentIndefinite": "Toestemming verloopt niet (instelling van de organisatie)",
-    "retentionConsentUndated": "Toestemming zonder datum — telt als verlopen",
+    "retentionConsentUndated": "Toestemming zonder datum. Telt als verlopen",
     "retentionConsentLapsed": "Toestemming verlopen op {{date}}",
     "retentionConsentExpiryNote": "De bewaartoestemming verloopt automatisch. Een workflow kan de kandidaat om verlenging vragen; het verlopen zelf gebeurt hoe dan ook.",
     "timelinePlacedAt": "Geplaatst bij {{customer}}",
@@ -709,7 +709,7 @@
     "noAvailability": "Nog geen uitzonderingen vastgelegd.",
     "availabilityHint": "Standaard is de kandidaat beschikbaar. Leg hier uitzonderingen vast (bv. vakantie of ziekte).",
     "availDuplicate": "Dit dagdeel is al vastgelegd voor deze datum.",
-    "notPersistedYet": "Wordt nog niet opgeslagen — de planningmodule volgt."
+    "notPersistedYet": "Wordt nog niet opgeslagen. De planningmodule volgt."
   },
   "statuses": {
     "actief": "Actief",
@@ -857,8 +857,8 @@
     "selectOne": "Selecteer {{name}}",
     "downloadSelected": "Download ({{count}})",
     "deleteTitle": "Document verwijderen",
-    "deleteOneMessage": "Weet je het zeker? '{{name}}' wordt definitief verwijderd — dit kan niet ongedaan worden gemaakt.",
-    "deleteManyMessage": "Weet je het zeker? {{count}} documenten worden definitief verwijderd — dit kan niet ongedaan worden gemaakt.",
+    "deleteOneMessage": "Weet je het zeker? '{{name}}' wordt definitief verwijderd. Dit kan niet ongedaan worden gemaakt.",
+    "deleteManyMessage": "Weet je het zeker? {{count}} documenten worden definitief verwijderd. Dit kan niet ongedaan worden gemaakt.",
     "deleteSelected": "Verwijder ({{count}})",
     "types": {
       "cv": "CV",
@@ -888,7 +888,7 @@
     "refresh": "Vernieuwen",
     "analyzing": "Koios AI analyseert profiel…",
     "completeness": "Volledigheid",
-    "completeGood": "Profiel is goed gevuld — geen ontbrekende kernvelden gedetecteerd.",
+    "completeGood": "Profiel is goed gevuld. Geen ontbrekende kernvelden gedetecteerd.",
     "completePartial": "Profiel is {{pct}}% compleet. Voeg samenvatting, adres en geboortedatum toe voor betere matchresultaten.",
     "matchLabel": "Functiematch",
     "matchText": "Op basis van het profiel is de verwachte beste match: Verzorgende IG en Helpende Plus bij zorginstellingen in de regio.",
@@ -1003,7 +1003,7 @@
     "pointCount": "{{count}} kandidaten op de kaart"
   },
   "vacancySearch": {
-    "noLocation": "Deze kandidaat heeft nog geen locatie(-coördinaten) — werk eerst het adres bij, dan verschijnt hier de kaart.",
+    "noLocation": "Deze kandidaat heeft nog geen locatie(-coördinaten). Werk eerst het adres bij, dan verschijnt hier de kaart.",
     "statuses": "Vacaturestatus",
     "functions": "Functie",
     "onMap": "{{count}} vacatures op de kaart",
@@ -1016,7 +1016,7 @@
     "hoursMinPlaceholder": "Min",
     "hoursMaxPlaceholder": "Max",
     "availableFromFilter": "Inzetbaar vanaf",
-    "functionNotInLookup": "Functie '{{title}}' staat niet in de functielijst — alle functies worden doorzocht.",
+    "functionNotInLookup": "Functie '{{title}}' staat niet in de functielijst. Alle functies worden doorzocht.",
     "apply": "Solliciteren",
     "resetFilters": "Filters herstellen",
     "moreFilters": "Meer filters",
@@ -1061,8 +1061,8 @@
   },
   "archiveGuard": {
     "title": "Lopende zaken gevonden",
-    "body": "Let op — {{name}} heeft nog lopende zaken. Wat wil je ermee doen?",
-    "bodyAggregate": "Let op — {{blocked}} van de {{total}} geselecteerde kandidaten hebben nog lopende sollicitaties of matches. Wat wil je ermee doen?",
+    "body": "Let op. {{name}} heeft nog lopende zaken. Wat wil je ermee doen?",
+    "bodyAggregate": "Let op. {{blocked}} van de {{total}} geselecteerde kandidaten hebben nog lopende sollicitaties of matches. Wat wil je ermee doen?",
     "applicationsTitle": "Lopende sollicitatie(s)",
     "matchesTitle": "Actieve match(es)",
     "resolutionReject": "Sollicitatie(s) afwijzen",
@@ -1071,8 +1071,8 @@
       "open": "Actief",
       "closed": "Gesloten"
     },
-    "matchConflict": "Kan niet beëindigd worden — er loopt nog een actief HelloFlex-contract.",
-    "stillBlocked": "Niet alles kon worden afgehandeld — geblokkeerd totdat dit is opgelost.",
+    "matchConflict": "Kan niet beëindigd worden. Er loopt nog een actief HelloFlex-contract.",
+    "stillBlocked": "Niet alles kon worden afgehandeld. Geblokkeerd totdat dit is opgelost.",
     "resolveButtonArchive": "Afhandelen en archiveren",
     "resolveButtonTrash": "Afhandelen en naar prullenbak",
     "resolving": "Bezig met afhandelen…"
@@ -1133,26 +1133,26 @@
     "contactFunction": "Functie",
     "phone": "Telefoonnummer",
     "mobile": "Mobiel",
-    "duplicateContact": "Bestaat al: {{name}} — kies deze uit de lijst",
+    "duplicateContact": "Bestaat al: {{name}}, kies deze uit de lijst",
     "billingEmailMain": "Facturatie-e-mail",
     "billingEmailExtra": "Extra e-mail",
     "addBillingEmail": "e-mail toevoegen",
     "branchMismatch": "Vestiging wijkt af",
     "branchMismatchDesc": "Kandidaat-vestiging ({{candidate}}) wijkt af van de klant-vestiging ({{customer}}).",
-    "branchKeep": "Nee — alleen deze match bij deze vestiging",
-    "branchMove": "Ja — zet ook de kandidaat over naar deze vestiging",
+    "branchKeep": "Nee. Alleen deze match bij deze vestiging",
+    "branchMove": "Ja. Zet ook de kandidaat over naar deze vestiging",
     "branchMoveFailed": "Match aangemaakt, maar het overzetten van de kandidaat-vestiging is mislukt. Werk dit handmatig bij.",
     "rateProposal": {
       "agreement": "Voorstel (prijsafspraak): {{purchase}} inkoop / {{sell}} verkoop",
       "conversionFactor": "Voorstel (omrekenfactor): {{purchase}} inkoop / {{sell}} verkoop",
-      "purchaseOnly": "Voorstel — alleen inkooptarief bekend: {{purchase}}",
-      "deviationWarning": "De prijsafspraak stelt {{proposalPurchase}} inkoop / {{proposalSell}} verkoop voor — jij vult {{enteredPurchase}} / {{enteredSell}} in. Weet je het zeker?",
+      "purchaseOnly": "Voorstel, alleen inkooptarief bekend: {{purchase}}",
+      "deviationWarning": "De prijsafspraak stelt {{proposalPurchase}} inkoop / {{proposalSell}} verkoop voor. Jij vult {{enteredPurchase}} / {{enteredSell}} in. Weet je het zeker?",
       "deviationConfirm": "Ja, match toch aanmaken",
       "deviationCancel": "Tarieven aanpassen"
     },
     "candidate": "Kandidaat",
     "pickCandidate": "Kies een kandidaat...",
-    "duplicateMatchWarning": "Er bestaat al een match ({{label}}) voor deze kandidaat bij deze klant — wil je een verlenging maken?",
+    "duplicateMatchWarning": "Er bestaat al een match ({{label}}) voor deze kandidaat bij deze klant. Wil je een verlenging maken?",
     "overlapWarning": "De opgegeven periode overlapt met een actieve match bij {{label}} ({{period}}).",
     "overlapOngoing": "vanaf {{start}}",
     "overlapWarningHours": "De opgegeven periode overlapt met een actieve match bij {{label}}: samen {{hours}} uur per week in de overlappende periode ({{period}})."
@@ -1207,7 +1207,7 @@
       "requestedAtBy": "Aangevraagd {{date}} door {{name}}",
       "refresh": "Bijwerken",
       "refreshing": "Bijwerken…",
-      "refreshStarted": "PDOK-update gestart — coördinaten verschijnen zo",
+      "refreshStarted": "PDOK-update gestart. Coördinaten verschijnen zo",
       "refreshFailed": "Bijwerken mislukt"
     }
   },
@@ -1248,8 +1248,8 @@
     "started": "Conversatie gestart",
     "composerPlaceholder": "Typ een bericht…",
     "composerSendFailed": "Kon het bericht niet versturen",
-    "sessionClosedHint": "Het 24-uursvenster is gesloten — start een nieuwe conversatie met een template om opnieuw te openen.",
-    "composerUnavailable": "WhatsApp is nu niet bereikbaar — er is niets verzonden. Probeer het straks opnieuw.",
+    "sessionClosedHint": "Het 24-uursvenster is gesloten. Start een nieuwe conversatie met een template om opnieuw te openen.",
+    "composerUnavailable": "WhatsApp is nu niet bereikbaar. Er is niets verzonden. Probeer het straks opnieuw.",
     "pickAgent": "AI-agent (optioneel)",
     "agentPlaceholder": "Kies een AI-agent…",
     "configureWhatsapp": "WhatsApp instellen →",
@@ -1280,23 +1280,23 @@
     "templateSendFailed": "Kon de template niet versturen",
     "templateLoading": "Templates laden…",
     "templateNeedsCandidate": "Dit gesprek hoort niet bij een kandidaat; een template versturen kan hier nog niet.",
-    "templateVarsUnsupported_one": "Deze template heeft {{count}} variabele die hier nog niet ingevuld kan worden — kies een template zonder variabelen.",
-    "templateVarsUnsupported_other": "Deze template heeft {{count}} variabelen die hier nog niet ingevuld kunnen worden — kies een template zonder variabelen."
+    "templateVarsUnsupported_one": "Deze template heeft {{count}} variabele die hier nog niet ingevuld kan worden. Kies een template zonder variabelen.",
+    "templateVarsUnsupported_other": "Deze template heeft {{count}} variabelen die hier nog niet ingevuld kunnen worden. Kies een template zonder variabelen."
   },
   "advice": {
     "reason": {
-      "never_contacted": "Nog nooit contact geweest — neem contact op om dit dossier te activeren.",
-      "stale_contact": "Langer dan {{months}} maanden geen contact geregistreerd — plan een belmoment.",
-      "lead_without_funnel": "Lead zonder sollicitatie — plan een intake om te kwalificeren.",
-      "no_pool": "Zit nog in geen enkele talentenpool — voeg toe zodat de kandidaat vindbaar is."
+      "never_contacted": "Nog nooit contact geweest. Neem contact op om dit dossier te activeren.",
+      "stale_contact": "Langer dan {{months}} maanden geen contact geregistreerd. Plan een belmoment.",
+      "lead_without_funnel": "Lead zonder sollicitatie. Plan een intake om te kwalificeren.",
+      "no_pool": "Zit nog in geen enkele talentenpool. Voeg toe zodat de kandidaat vindbaar is."
     }
   },
   "references": {
     "verify": "Verifiëren",
     "verified": "Geverifieerd",
-    "experienceLinkUnavailable": "Koppelen aan een werkervaring kan nog niet — dit volgt zodra de API het veld ondersteunt.",
+    "experienceLinkUnavailable": "Koppelen aan een werkervaring kan nog niet. Dit volgt zodra de API het veld ondersteunt.",
     "linkedExperience": "Gekoppelde werkervaring",
-    "noExperiencesToLink": "Deze kandidaat heeft nog geen werkervaring — voeg er eerst een toe om een referentie eraan te koppelen."
+    "noExperiencesToLink": "Deze kandidaat heeft nog geen werkervaring. Voeg er eerst een toe om een referentie eraan te koppelen."
   },
   "validation": {
     "emailFormat": "Voer een geldig e-mailadres in.",

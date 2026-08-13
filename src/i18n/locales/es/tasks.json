@@ -212,10 +212,10 @@
     "dueOverdue": "Esta tarea lleva {{count}} día(s) de retraso.",
     "dueUpcoming": "Esta tarea vence en {{count}} día(s).",
     "assigneeLabel": "Asignación",
-    "unassigned": "Esta tarea sigue asignada a la agencia — aún no a un empleado concreto.",
+    "unassigned": "Esta tarea sigue asignada a la agencia. Aún no a un empleado concreto.",
     "assignedTo": "Asignada a {{name}}.",
     "linksLabel": "Vínculo",
-    "noLinks": "Esta tarea no está vinculada a ningún registro — vincule un candidato, cliente u otro registro para dar contexto.",
+    "noLinks": "Esta tarea no está vinculada a ningún registro. Vincule un candidato, cliente u otro registro para dar contexto.",
     "linked": "Vinculada a {{count}} registro(s)."
   },
   "filters": {

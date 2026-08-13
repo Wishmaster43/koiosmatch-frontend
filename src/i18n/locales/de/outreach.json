@@ -66,7 +66,7 @@
     "namePlaceholder": "z. B. Anrufliste verfügbare Pflegekräfte",
     "channel": "Kanal",
     "pool": "Quell-Pool (optional)",
-    "poolNone": "Keiner — später füllen",
+    "poolNone": "Keiner, später füllen",
     "poolHint": "Wählen Sie einen Talentpool, um die Anrufliste sofort mit Kandidaten zu füllen.",
     "submit": "Anrufliste erstellen",
     "saving": "Wird erstellt…",

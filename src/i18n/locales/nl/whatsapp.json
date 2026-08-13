@@ -6,7 +6,7 @@
     "escalations": "Escalaties"
   },
   "drill": {
-    "noDetail": "Nog geen detailgegevens voor deze KPI — backend levert dit binnenkort."
+    "noDetail": "Nog geen detailgegevens voor deze KPI. Backend levert dit binnenkort."
   },
   "overview": {
     "statusTitle": "Berichtstatus",

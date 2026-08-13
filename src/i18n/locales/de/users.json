@@ -55,12 +55,12 @@
   "branches": {
     "title": "Standorte",
     "hint": "Legt fest, welchen Standorten dieser Benutzer zugeordnet ist. Dies schränkt bereits ein, welche Kandidaten sichtbar und bearbeitbar sind (Kandidaten außerhalb dieser Standorte sind ausgeblendet); andere Bereiche (Stellen, Kunden, …) sind noch nicht standortgebunden.",
-    "emptyHint": "Keine Standorte ausgewählt — dieser Benutzer sieht weiterhin alle Kandidaten, ohne Einschränkung.",
+    "emptyHint": "Keine Standorte ausgewählt. Dieser Benutzer sieht weiterhin alle Kandidaten, ohne Einschränkung.",
     "noLocations": "Noch keine Standorte angelegt.",
     "saveFailed": "Die Standorte konnten nicht gespeichert werden. Bitte erneut versuchen.",
     "loading": "Wird geladen…",
     "previewTitle": "Standorte dieser Rolle",
-    "previewEmpty": "Keine Startauswahl — diese Rolle hat keine Standorte; der neue Benutzer startet ohne Einschränkung."
+    "previewEmpty": "Keine Startauswahl. Diese Rolle hat keine Standorte; der neue Benutzer startet ohne Einschränkung."
   },
   "validation": {
     "emailFormat": "Geben Sie eine gültige E-Mail-Adresse ein."
@@ -74,8 +74,8 @@
   "delete": {
     "action": "Benutzer löschen",
     "title": "Benutzer löschen",
-    "explain_one": "{{name}} besitzt noch {{count}} Datensatz. Wählen Sie eine Kollegin oder einen Kollegen zur Übernahme — erst danach kann der Benutzer gelöscht werden.",
-    "explain_other": "{{name}} besitzt noch {{count}} Datensätze. Wählen Sie eine Kollegin oder einen Kollegen zur Übernahme — erst danach kann der Benutzer gelöscht werden.",
+    "explain_one": "{{name}} besitzt noch {{count}} Datensatz. Wählen Sie eine Kollegin oder einen Kollegen zur Übernahme. Erst danach kann der Benutzer gelöscht werden.",
+    "explain_other": "{{name}} besitzt noch {{count}} Datensätze. Wählen Sie eine Kollegin oder einen Kollegen zur Übernahme. Erst danach kann der Benutzer gelöscht werden.",
     "ownedTitle": "Was übertragen wird",
     "successor": "Übertragen an",
     "successorPlaceholder": "Kollegin oder Kollegen wählen",
@@ -115,7 +115,7 @@
   },
   "rolesModal": {
     "title": "Rollen zuweisen",
-    "hint": "Wählen Sie eine oder mehrere Rollen. Der gesamte Satz wird gespeichert — entfernte Rollen werden entzogen.",
+    "hint": "Wählen Sie eine oder mehrere Rollen. Der gesamte Satz wird gespeichert. Entfernte Rollen werden entzogen.",
     "none": "Noch keine Rolle gewählt",
     "add": "Rolle hinzufügen",
     "remove": "{{role}} entfernen"

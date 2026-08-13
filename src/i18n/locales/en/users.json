@@ -55,12 +55,12 @@
   "branches": {
     "title": "Branches",
     "hint": "Determines which branches this user is coupled to. This already limits which candidates are visible and editable (candidates outside these branches are hidden); other areas (vacancies, customers, …) aren't branch-scoped yet.",
-    "emptyHint": "No branches selected — this user still sees every candidate, unrestricted.",
+    "emptyHint": "No branches selected. This user still sees every candidate, unrestricted.",
     "noLocations": "No branches configured yet.",
     "saveFailed": "Couldn't save branches. Please try again.",
     "loading": "Loading…",
     "previewTitle": "Branches for this role",
-    "previewEmpty": "No starting set — this role has no branches, so the new user starts unrestricted."
+    "previewEmpty": "No starting set. This role has no branches, so the new user starts unrestricted."
   },
   "validation": {
     "emailFormat": "Enter a valid e-mail address."
@@ -74,8 +74,8 @@
   "delete": {
     "action": "Delete user",
     "title": "Delete user",
-    "explain_one": "{{name}} still owns {{count}} record. Choose a colleague to take it over — only then can the user be deleted.",
-    "explain_other": "{{name}} still owns {{count}} records. Choose a colleague to take them over — only then can the user be deleted.",
+    "explain_one": "{{name}} still owns {{count}} record. Choose a colleague to take it over. Only then can the user be deleted.",
+    "explain_other": "{{name}} still owns {{count}} records. Choose a colleague to take them over. Only then can the user be deleted.",
     "ownedTitle": "What will be transferred",
     "successor": "Transfer to",
     "successorPlaceholder": "Choose a colleague",
@@ -115,7 +115,7 @@
   },
   "rolesModal": {
     "title": "Assign roles",
-    "hint": "Pick one or more roles. The complete set is saved — roles you remove are revoked.",
+    "hint": "Pick one or more roles. The complete set is saved. Roles you remove are revoked.",
     "none": "No role chosen yet",
     "add": "Add role",
     "remove": "Remove {{role}}"

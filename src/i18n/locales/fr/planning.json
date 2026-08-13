@@ -1,7 +1,7 @@
 {
   "addShift": "Ajouter une mission",
-  "previewNotice": "Aperçu uniquement — les missions affichées ici sont des données de démonstration, rien de ce qui est ajouté n'est encore enregistré dans votre planning réel.",
-  "previewSaveTitle": "Pas encore connecté — cette mission ne sera pas enregistrée.",
+  "previewNotice": "Aperçu uniquement. Les missions affichées ici sont des données de démonstration, rien de ce qui est ajouté n'est encore enregistré dans votre planning réel.",
+  "previewSaveTitle": "Pas encore connecté. Cette mission ne sera pas enregistrée.",
   "sectionOrder": "Commande",
   "sectionLocation": "Site",
   "sectionColor": "Couleur",

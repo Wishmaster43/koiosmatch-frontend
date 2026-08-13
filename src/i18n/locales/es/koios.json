@@ -20,18 +20,18 @@
     "title": "Modelos",
     "active": "Modelo activo",
     "selectable": "Modelos seleccionables",
-    "pickHint": "Elige el nivel de IA para tu agencia — las tarifas están debajo.",
+    "pickHint": "Elige el nivel de IA para tu agencia. Las tarifas están debajo.",
     "tier": {
       "snel": "Rápido",
       "slim": "Inteligente",
       "max": "Max"
     },
     "tierDesc": {
-      "snel": "Mayor volumen, tarifa más baja — ideal para trabajo rutinario.",
+      "snel": "Mayor volumen, tarifa más baja. Ideal para trabajo rutinario.",
       "slim": "El estándar: gran calidad a tarifa media.",
-      "max": "La mejor calidad para el trabajo más difícil — tarifa más alta."
+      "max": "La mejor calidad para el trabajo más difícil. Tarifa más alta."
     },
-    "saveError": "No se pudo cambiar el modelo — inténtalo de nuevo."
+    "saveError": "No se pudo cambiar el modelo. Inténtalo de nuevo."
   },
   "pricing": {
     "title": "Tarifas",
@@ -43,11 +43,11 @@
   "voice": {
     "start": "Dicta tu mensaje",
     "stop": "Deja de escuchar",
-    "denied": "Micrófono denegado — permite el acceso en tu navegador",
-    "insecureContext": "El dictado requiere una conexión segura (https) — no disponible en esta página",
-    "errorServiceNotAllowed": "El reconocimiento de voz fue bloqueado por el navegador — servicio no permitido",
-    "errorAudioCapture": "No se encontró micrófono — revisa tu dispositivo",
-    "errorNetwork": "Error de red durante el reconocimiento de voz — inténtalo de nuevo",
-    "errorGeneric": "El reconocimiento de voz falló — inténtalo de nuevo"
+    "denied": "Micrófono denegado. Permite el acceso en tu navegador",
+    "insecureContext": "El dictado requiere una conexión segura (https). No disponible en esta página",
+    "errorServiceNotAllowed": "El reconocimiento de voz fue bloqueado por el navegador. Servicio no permitido",
+    "errorAudioCapture": "No se encontró micrófono. Revisa tu dispositivo",
+    "errorNetwork": "Error de red durante el reconocimiento de voz. Inténtalo de nuevo",
+    "errorGeneric": "El reconocimiento de voz falló. Inténtalo de nuevo"
   }
 }

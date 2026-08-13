@@ -66,7 +66,7 @@
     "namePlaceholder": "p. ex. Liste d'appels soignants disponibles",
     "channel": "Canal",
     "pool": "Vivier source (facultatif)",
-    "poolNone": "Aucun — remplir plus tard",
+    "poolNone": "Aucun, remplir plus tard",
     "poolHint": "Choisissez un vivier de talents pour remplir la liste avec des candidats immédiatement.",
     "submit": "Créer la liste",
     "saving": "Création…",

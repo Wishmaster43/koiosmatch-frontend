@@ -85,7 +85,7 @@
     "source": "Origen",
     "clearFilter": "Borrar filtro",
     "noOwner": "Sin propietario",
-    "pageScopeNotice": "Los totales globales no están disponibles temporalmente — estas cifras se basan únicamente en una muestra parcial."
+    "pageScopeNotice": "Los totales globales no están disponibles temporalmente. Estas cifras se basan únicamente en una muestra parcial."
   },
   "drawer": {
     "label": "Candidatura",
@@ -150,7 +150,7 @@
     "readOn": "Leído el {{date}}",
     "modelLabel": "Modelo: {{model}}",
     "badge": "cv",
-    "badgeTitle": "Leído del CV — revisa este valor",
+    "badgeTitle": "Leído del CV. Revisa este valor",
     "tableCaption": "Lo que hay ahora en el expediente, lo que propone el CV y qué haría aceptarlo.",
     "status": {
       "pending": "Aún sin revisar",
@@ -265,19 +265,19 @@
       "label": "Iniciar entrevista",
       "agentPlaceholder": "Elegir un agente IA",
       "started": "Entrevista iniciada.",
-      "alreadyRunning": "La entrevista ya está en curso — mostrando la sesión existente.",
+      "alreadyRunning": "La entrevista ya está en curso. Mostrando la sesión existente.",
       "alreadyHasSession": "Este candidato ya tiene una entrevista abierta en otra solicitud.",
-      "unavailable": "Iniciar una entrevista aún no está disponible — a la espera de la conexión con el backend.",
+      "unavailable": "Iniciar una entrevista aún no está disponible. A la espera de la conexión con el backend.",
       "noAgentChosen": "Elige primero un agente IA.",
       "loadError": "No se pudieron cargar los agentes IA.",
       "reasons": {
         "no_mobile_or_consent": "El candidato no tiene número de móvil o consentimiento de WhatsApp.",
         "no_active_connection": "No hay conexión activa de WhatsApp para esta vacante.",
-        "rejected_stage": "Esta solicitud está rechazada — no se puede iniciar una entrevista.",
-        "placed_stage": "Esta solicitud ya está colocada — no se puede iniciar una entrevista.",
+        "rejected_stage": "Esta solicitud está rechazada. No se puede iniciar una entrevista.",
+        "placed_stage": "Esta solicitud ya está colocada. No se puede iniciar una entrevista.",
         "no_active_flow": "El agente IA elegido no tiene un flujo de entrevista activo.",
         "no_candidate": "No hay ningún candidato vinculado a esta solicitud.",
-        "send_failed": "El envío falló — inténtalo de nuevo."
+        "send_failed": "El envío falló. Inténtalo de nuevo."
       }
     },
     "status": {
@@ -295,7 +295,7 @@
       "durationHours": "{{hours}} h {{minutes}} min",
       "durationDays": "{{days}} d {{hours}} h",
       "durationUnknown": "Desconocida",
-      "durationHint": "Tiempo transcurrido desde que empezó la entrevista — noches y fines de semana incluidos. No es tiempo de conversación.",
+      "durationHint": "Tiempo transcurrido desde que empezó la entrevista. Noches y fines de semana incluidos. No es tiempo de conversación.",
       "visibilityPending": "El agente, el turno y el tiempo transcurrido no están disponibles para esta sesión.",
       "takeover": "Detener agente / retomar",
       "takeoverBusy": "Procesando…",
@@ -326,7 +326,7 @@
     },
     "conversation": {
       "title": "Conversación",
-      "noCandidate": "Ningún candidato vinculado — nada que mostrar."
+      "noCandidate": "Ningún candidato vinculado. Nada que mostrar."
     }
   },
   "appointments": {
@@ -385,7 +385,7 @@
     "confirm": "Rechazar",
     "rejected": "Rechazado",
     "aiAdvice": "Koios aconseja rechazar",
-    "aiAuto": "Criterios estrictos no cumplidos — apto para rechazo automático.",
+    "aiAuto": "Criterios estrictos no cumplidos. Apto para rechazo automático.",
     "aiConfirm": "Revisa y confirma antes de enviar un mensaje.",
     "done": "Candidatura rechazada",
     "sentOn": "Mensaje enviado el {{date}}",
@@ -487,7 +487,7 @@
     "clearScope": "Borrar filtro de selección"
   },
   "board": {
-    "movedHidden": "Movida — la tarjeta queda fuera del filtro actual"
+    "movedHidden": "Movida. La tarjeta queda fuera del filtro actual"
   },
   "ai": {
     "title": "Koios AI aconseja",
@@ -496,7 +496,7 @@
     "analyzing": "Koios AI está analizando la solicitud…",
     "progressLabel": "Progreso",
     "progressOk": "{{days}} días en trámite · fase actual «{{phase}}».",
-    "progressStale": "Ya {{days}} días en trámite · fase «{{phase}}» — posiblemente estancada, revise el seguimiento.",
+    "progressStale": "Ya {{days}} días en trámite · fase «{{phase}}». Posiblemente estancada, revise el seguimiento.",
     "progressUnknown": "Fecha desconocida · fase actual «{{phase}}».",
     "completeness": "Integridad",
     "missingVacancy": "No hay vacante vinculada a esta solicitud."

@@ -164,7 +164,7 @@
   },
   "koios": {
     "reasons": {
-      "expectedCloseOverdue": "The expected close date has passed — follow up on this deal."
+      "expectedCloseOverdue": "The expected close date has passed. Follow up on this deal."
     }
   },
   "richText": {

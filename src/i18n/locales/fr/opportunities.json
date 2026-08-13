@@ -164,7 +164,7 @@
   },
   "koios": {
     "reasons": {
-      "expectedCloseOverdue": "La date de clôture prévue est dépassée — relancez cette opportunité."
+      "expectedCloseOverdue": "La date de clôture prévue est dépassée. Relancez cette opportunité."
     }
   },
   "richText": {

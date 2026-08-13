@@ -414,11 +414,11 @@
     "buttonPreview": "Button preview",
     "linkPreview": "Link preview",
     "logo": "Logo",
-    "logoHint": "PNG, JPG, WEBP or SVG, max 2 MB — SVG is scanned server-side. Shown in the navigation bar.",
+    "logoHint": "PNG, JPG, WEBP or SVG, max 2 MB. SVG is scanned server-side. Shown in the navigation bar.",
     "noLogo": "No logo",
     "logoUploadError": "Failed to upload the logo.",
     "textColor": "Text colour on accent",
-    "textColorHint": "The colour of text on coloured buttons and chips. Automatic picks black or white based on your accent colour — so a light colour like yellow gets dark text.",
+    "textColorHint": "The colour of text on coloured buttons and chips. Automatic picks black or white based on your accent colour. So a light colour like yellow gets dark text.",
     "textColorAuto": "Automatic",
     "textColorLight": "White",
     "textColorDark": "Dark",
@@ -463,8 +463,8 @@
     "confirmDelete": "Delete location \"{{name}}\"?",
     "deleteSuccess": "Location deleted.",
     "deleteFailed": "Deleting the location failed.",
-    "deleteBlockedTooltip": "In use — cannot delete",
-    "deleteBlocked": "Cannot delete — still linked to: {{list}}",
+    "deleteBlockedTooltip": "In use. Cannot delete",
+    "deleteBlocked": "Cannot delete, still linked to: {{list}}",
     "usage": {
       "candidates_one": "{{count}} candidate",
       "candidates_other": "{{count}} candidates",
@@ -506,7 +506,7 @@
     "contactName": "Contact person",
     "phone": "Phone",
     "email": "Email",
-    "mapNoCoords": "No locations with coordinates yet — fill in a location's address and it will appear on the map automatically.",
+    "mapNoCoords": "No locations with coordinates yet. Fill in a location's address and it will appear on the map automatically.",
     "color": "Colour",
     "icon": "Icon",
     "colorHint": "Colour and icon make a branch recognisable in lists and on the map.",
@@ -542,7 +542,7 @@
     "confirmDelete": "Delete \"{{name}}\"?",
     "edit": "Edit",
     "editTitle": "Edit",
-    "inUse": "In use — cannot delete",
+    "inUse": "In use. Cannot delete",
     "priorityRank": "Priority (1 = sent first)",
     "iconLabel": "Icon (emoji)",
     "iconPlaceholder": "e.g. 📞",
@@ -563,7 +563,7 @@
   },
   "poolsSettings": {
     "title": "Talent pools",
-    "subtitle": "Manage pools with a name and colour — for candidate lists.",
+    "subtitle": "Manage pools with a name and colour. For candidate lists.",
     "add": "Add pool",
     "contextLabel": "Pool type",
     "contextRecruitment": "Recruitment (talent pool)",
@@ -580,7 +580,7 @@
     "valueField": "Slug (value)",
     "valueHint": "Stable key; leave empty to generate one from the label.",
     "valueImmutable": "The slug cannot be changed after creation.",
-    "labelLocked": "The label is locked because this phase is structural — automations rely on it. Colour and other flags stay editable.",
+    "labelLocked": "The label is locked because this phase is structural. Automations rely on it. Colour and other flags stay editable.",
     "colorField": "Colour",
     "confirmDelete": "Delete \"{{name}}\"? If it is in use it will be archived.",
     "isApplicant": "Reveals the application funnel",
@@ -598,7 +598,7 @@
       "title": "Status",
       "subtitle": "Can I deploy them now? (Available, Placed, Unavailable, Sick, Leave)."
     },
-    "inUse": "In use — cannot delete",
+    "inUse": "In use. Cannot delete",
     "requiresAppointment": "Requires an appointment",
     "requiresAppointmentHint": "This stage expects a planned appointment (intake). A missing one is flagged on the candidate.",
     "isMatch": "Creates a match",
@@ -674,7 +674,7 @@
     "title": "Purchase→sale conversion factor",
     "subtitle": "Falls back to purchase rate × this factor when no price agreement matches the function/CAO/scale/step.",
     "placeholder": "E.g. 1.35",
-    "saveFailed": "Saving failed — the value was reverted.",
+    "saveFailed": "Saving failed. The value was reverted.",
     "loadError": "Could not load the conversion factor."
   },
   "outreach": {
@@ -755,7 +755,7 @@
     "defaultVariantLabel": "Default CV variant",
     "variantProposal": "Proposal CV (name visible, contact details hidden)",
     "variantFull": "Full CV (with contact details)",
-    "notSentYet": "Koios does not send the proposal itself yet — the recruiter downloads the CV and sends it from their own mail program. The automatic, revocable share link follows once that capability ships.",
+    "notSentYet": "Koios does not send the proposal itself yet. The recruiter downloads the CV and sends it from their own mail program. The automatic, revocable share link follows once that capability ships.",
     "saveFailed": "Save failed",
     "saved": "Saved"
   },
@@ -779,7 +779,7 @@
     "noCriteria": "No criteria yet.",
     "criteriaCount_one": "{{count}} criterion",
     "criteriaCount_other": "{{count}} criteria",
-    "inUse": "In use — linked to a vacancy.",
+    "inUse": "In use. Linked to a vacancy.",
     "save": "Save",
     "cancel": "Cancel",
     "newGroup": "New group",
@@ -806,18 +806,18 @@
       "title": "Approval",
       "subtitle": "When a match needs approval before it goes ahead.",
       "off": "Off",
-      "offDesc": "Never requires approval — every match goes through immediately.",
+      "offDesc": "Never requires approval. Every match goes through immediately.",
       "deviation": "On deviation",
       "deviationDesc": "Approval only when the match deviates from the agreed terms.",
       "always": "Always",
       "alwaysDesc": "Every match requires approval first.",
-      "saveFailed": "Saving failed — your choice was reverted."
+      "saveFailed": "Saving failed. Your choice was reverted."
     }
   },
   "matchTemplatesSettings": {
     "title": "Match profiles",
-    "subtitle": "Reusable match-weight profiles you can pick on a vacancy (Matching tab). Assigning a profile copies its weights onto that vacancy — later changes here don't update it automatically.",
-    "empty": "No match profiles yet — create one below.",
+    "subtitle": "Reusable match-weight profiles you can pick on a vacancy (Matching tab). Assigning a profile copies its weights onto that vacancy. Later changes here don't update it automatically.",
+    "empty": "No match profiles yet. Create one below.",
     "loadError": "Couldn't load match profiles.",
     "nameLabel": "Name",
     "namePlaceholder": "E.g. Senior technical profile",
@@ -857,12 +857,12 @@
     "moveSectionUp": "Move '{{section}}' up",
     "moveSectionDown": "Move '{{section}}' down",
     "preview": "Preview",
-    "previewHint": "A4 — with sample candidate"
+    "previewHint": "A4, with sample candidate"
   },
   "security": {
     "twoFactor": "Two-factor authentication (2FA)",
-    "statusOn": "Enabled — your account has extra protection",
-    "statusOff": "Disabled — add an extra layer of security",
+    "statusOn": "Enabled. Your account has extra protection",
+    "statusOff": "Disabled. Add an extra layer of security",
     "enable": "Enable",
     "disable": "Disable",
     "enabledTitle": "Two-factor authentication enabled",
@@ -944,13 +944,13 @@
     "email": {
       "label": "Email notifications",
       "desc": "Receive notifications by email",
-      "notYetDelivered": "Email delivery does not exist yet — this preference becomes active once the email channel ships."
+      "notYetDelivered": "Email delivery does not exist yet. This preference becomes active once the email channel ships."
     },
     "inApp": {
       "label": "In-app notifications",
       "desc": "Receive notifications within the platform",
       "notYetActive": "Not active yet",
-      "notYetActiveReason": "No notification is sent for this type yet — the toggle is already configurable."
+      "notYetActiveReason": "No notification is sent for this type yet. The toggle is already configurable."
     },
     "context": {
       "sollicitaties": {
@@ -980,14 +980,14 @@
     },
     "my": {
       "title": "My notifications",
-      "subtitle": "Your own override on top of the tenant-wide notification settings — choose per topic whether you always want to be notified, never, or simply follow what your organisation has set.",
+      "subtitle": "Your own override on top of the tenant-wide notification settings. Choose per topic whether you always want to be notified, never, or simply follow what your organisation has set.",
       "inherit": "Inherit",
       "on": "On",
       "off": "Off",
       "empty": "No notification topics are configured yet.",
-      "saveFailed": "Saving failed — your choice was reverted.",
+      "saveFailed": "Saving failed. Your choice was reverted.",
       "emailNotAvailable": "Not available yet",
-      "emailNotAvailableReason": "A personal e-mail override isn't possible yet — you follow the tenant-wide e-mail setting for this."
+      "emailNotAvailableReason": "A personal e-mail override isn't possible yet. You follow the tenant-wide e-mail setting for this."
     },
     "push": {
       "title": "Browser notifications",
@@ -1040,7 +1040,7 @@
       "periodMonth": "This month",
       "plan": {
         "title": "Plan & credits",
-        "notice": "Current plan, credit progress bar, reset date and credit balance are not available yet — there is no backend model for plans or credits yet."
+        "notice": "Current plan, credit progress bar, reset date and credit balance are not available yet. There is no backend model for plans or credits yet."
       },
       "ai": {
         "title": "AI usage (Koios)",
@@ -1071,7 +1071,7 @@
       },
       "daily": {
         "title": "Daily usage",
-        "notice": "A daily breakdown per category (Total · AI · Leads · Phone calls · WhatsApp) is not available yet — the backend currently only returns period totals, no per-day figures."
+        "notice": "A daily breakdown per category (Total · AI · Leads · Phone calls · WhatsApp) is not available yet. The backend currently only returns period totals, no per-day figures."
       },
       "koios": {
         "title": "Koios AI billing",
@@ -1122,7 +1122,7 @@
     "creating": "Creating…",
     "createError": "Creation failed. Please try again.",
     "done": "Done",
-    "secretOnce": "Copy the secret now — it will not be shown again.",
+    "secretOnce": "Copy the secret now. It will not be shown again.",
     "copySecret": "Copy secret",
     "secretHidden": "shown only at creation",
     "dismiss": "Dismiss",
@@ -1232,7 +1232,7 @@
       "createError": "Creation failed. Please try again.",
       "done": "Done",
       "eventsCount": "{{count}} events",
-      "secretOnce": "Copy the signing secret now — it will not be shown again.",
+      "secretOnce": "Copy the signing secret now. It will not be shown again.",
       "copySecret": "Copy secret",
       "signingHint": "Use this secret to verify the X-Koios-Signature (HMAC-SHA256).",
       "dismiss": "Dismiss",
@@ -1286,7 +1286,7 @@
     "noPermission": "You do not have permission to synchronise",
     "succeeded": "Succeeded",
     "failed": "Failed",
-    "tooManyRequests": "Too many requests — wait {{secs}}s",
+    "tooManyRequests": "Too many requests. Wait {{secs}}s",
     "items": {
       "candidates": {
         "label": "Candidates",
@@ -1321,11 +1321,11 @@
         "desc": "Candidate schedulings per shift"
       }
     },
-    "started": "Sync started — this can take a few minutes. Refresh the lists later for the updated data."
+    "started": "Sync started. This can take a few minutes. Refresh the lists later for the updated data."
   },
   "import": {
     "title": "Import",
-    "subtitle": "Bring in your customer data from a CSV file — one entity at a time, in the right order.",
+    "subtitle": "Bring in your customer data from a CSV file. One entity at a time, in the right order.",
     "entities": {
       "customers": {
         "label": "Customers",
@@ -1345,7 +1345,7 @@
       },
       "customer_tree": {
         "label": "Customer (complete)",
-        "desc": "Builds a customer together with its locations, departments and contacts in one go — for a customer that doesn't exist yet."
+        "desc": "Builds a customer together with its locations, departments and contacts in one go. For a customer that doesn't exist yet."
       }
     },
     "groups": {
@@ -1354,17 +1354,17 @@
     },
     "order": {
       "title": "Import in this order",
-      "hint": "Each row links to the one before it by name — import that one first.",
-      "customersHint": "Start here — nothing else needs to exist yet.",
-      "locationsHint": "Links to an existing customer by name (klant_naam) — import customers first.",
-      "departmentsHint": "Links to an existing customer and location by name (klant_naam, locatie_naam) — import those first.",
-      "contactsHint": "Links to an existing customer, location and department by name (klant_naam, locatie_naam, afdeling_naam) — import those first.",
+      "hint": "Each row links to the one before it by name. Import that one first.",
+      "customersHint": "Start here. Nothing else needs to exist yet.",
+      "locationsHint": "Links to an existing customer by name (klant_naam). Import customers first.",
+      "departmentsHint": "Links to an existing customer and location by name (klant_naam, locatie_naam). Import those first.",
+      "contactsHint": "Links to an existing customer, location and department by name (klant_naam, locatie_naam, afdeling_naam). Import those first.",
       "treeAlternative": "Building a brand-new customer from scratch?",
       "switchToTree": "Use the combined file"
     },
     "tree": {
       "title": "This import builds",
-      "replacesOrder": "No fixed order needed — this one file replaces the four separate steps.",
+      "replacesOrder": "No fixed order needed. This one file replaces the four separate steps.",
       "rowGrain": "One row = one contact person, with the customer, location and department repeated alongside it. So forty rows isn't forty customers.",
       "levelTruncation": "Leave a name field blank on a row (say, the department) and that row stops there — nothing is created for that level or beyond.",
       "allOrNothing": "One row is all-or-nothing: if the contact fails, the customer, location and department on that same row aren't created either. A customer an earlier row already created stays put.",
@@ -1375,7 +1375,7 @@
     "loadTemplatesError": "Could not load the import types. Please try again.",
     "noTemplates": "No import types are available yet.",
     "downloadTemplate": "Download example file",
-    "downloadTemplateHint": "A filled-in example file with the exact column names — the fastest way to prepare your data.",
+    "downloadTemplateHint": "A filled-in example file with the exact column names. The fastest way to prepare your data.",
     "downloadError": "Could not download the example file. Please try again.",
     "noViewPermission": "You don't have permission to view this template.",
     "noImportPermission": "You can view the example file, but you don't have permission to run an import. Ask an administrator.",
@@ -1391,7 +1391,7 @@
     "preview": {
       "title": "Preview",
       "subtitle": "This is what WOULD happen. Nothing has been saved yet.",
-      "nothingToImport": "No rows would be created or updated — there is nothing to import.",
+      "nothingToImport": "No rows would be created or updated. There is nothing to import.",
       "confirm": "Run the real import",
       "running": "Importing…",
       "back": "Choose a different file",
@@ -1400,8 +1400,8 @@
     "result": {
       "title": "Import result",
       "subtitleSuccess": "All rows were imported successfully.",
-      "subtitleSuccessWithRemarks": "Everything was imported, but {{count}} rows landed with something left out — see below.",
-      "subtitlePartial": "{{errorCount}} of {{total}} rows could not be imported — see below.",
+      "subtitleSuccessWithRemarks": "Everything was imported, but {{count}} rows landed with something left out. See below.",
+      "subtitlePartial": "{{errorCount}} of {{total}} rows could not be imported. See below.",
       "newImport": "Import another file"
     },
     "stats": {
@@ -1412,11 +1412,11 @@
       "error": "Failed",
       "remarks": "Remarks",
       "rowsAreRows": "These counts are rows in the file.",
-      "rowsAreRowsTree": "These are rows, not customers — one row can create a customer, a location, a department and a contact all at once."
+      "rowsAreRowsTree": "These are rows, not customers. One row can create a customer, a location, a department and a contact all at once."
     },
     "unknownColumns": {
       "title": "Unrecognised columns (ignored)",
-      "hint": "These columns in your file don't match a known field. They were ignored — nothing else was affected."
+      "hint": "These columns in your file don't match a known field. They were ignored. Nothing else was affected."
     },
     "rows": {
       "attentionTitle": "{{count}} rows that need attention",
@@ -1438,7 +1438,7 @@
       },
       "mapping": {
         "title": "Match your columns",
-        "subtitle": "We matched what we recognised — check the rest and adjust where needed.",
+        "subtitle": "We matched what we recognised. Check the rest and adjust where needed.",
         "noColumns": "This file has no columns to map.",
         "sourceColumn": "Column in your file",
         "targetField": "Maps to",
@@ -1449,14 +1449,14 @@
       "preview": {
         "title": "Check your data",
         "subtitle": "This is exactly what will be sent. Click a cell to change it, then run the preview again.",
-        "noRows": "No rows to preview — check your file.",
+        "noRows": "No rows to preview. Check your file.",
         "validateHint": "Run the preview to see what would happen, then confirm."
       }
     }
   },
   "facebookLeads": {
     "title": "Facebook Leads",
-    "subtitle": "Connect this customer's Facebook Leads app — incoming leads arrive automatically as a candidate.",
+    "subtitle": "Connect this customer's Facebook Leads app. Incoming leads arrive automatically as a candidate.",
     "verifyToken": "Verify token",
     "verifyTokenPlaceholder": "Token from the Facebook app settings",
     "appSecret": "App secret",
@@ -1475,7 +1475,7 @@
   },
   "export": {
     "title": "Export",
-    "subtitle": "Export your data as CSV — the same columns as the table, only records you have access to.",
+    "subtitle": "Export your data as CSV. The same columns as the table, only records you have access to.",
     "button": "Export CSV",
     "noPermission": "You don't have permission to export this.",
     "rateLimited": "Too many exports in a row. Please try again in a minute.",
@@ -1659,8 +1659,8 @@
     "usersCount_other": "{{count}} users",
     "edit": "Edit",
     "deleteTitle": "Delete role",
-    "deleteBlocked_one": "Cannot delete — {{count}} user has this role. Assign them another role first.",
-    "deleteBlocked_other": "Cannot delete — {{count}} users have this role. Assign them another role first.",
+    "deleteBlocked_one": "Cannot delete. {{count}} user has this role. Assign them another role first.",
+    "deleteBlocked_other": "Cannot delete. {{count}} users have this role. Assign them another role first.",
     "confirmDelete": "Delete role \"{{name}}\"?",
     "empty": "No roles created yet.",
     "groups": {
@@ -1715,8 +1715,8 @@
     "startDashboard": "Start dashboard",
     "startDashboardNone": "Default",
     "branchesTemplate": "Branches (template)",
-    "branchesTemplateHint": "The starting set of branches new users with this role receive. Existing users keep their own set — this only edits the template.",
-    "branchesEmptyHint": "No branches selected — new users with this role start without a branch link and see ALL candidates. With linked branches, a user only sees candidates from those branches.",
+    "branchesTemplateHint": "The starting set of branches new users with this role receive. Existing users keep their own set. This only edits the template.",
+    "branchesEmptyHint": "No branches selected. New users with this role start without a branch link and see ALL candidates. With linked branches, a user only sees candidates from those branches.",
     "branchesNoLocations": "No branches configured yet.",
     "branchesSaveFailed": "Couldn't save the branch template. Please try again.",
     "appearanceSaveFailed": "Couldn't save the appearance. Please try again.",
@@ -1768,7 +1768,7 @@
       "change": "Change",
       "access": "Access (AVG)"
     },
-    "accessNotice": "Read-only access to this record — no change (AVG access log).",
+    "accessNotice": "Read-only access to this record, no change (AVG access log).",
     "http": {
       "method": "Method",
       "path": "Path",
@@ -1903,16 +1903,16 @@
   },
   "provinces": {
     "title": "Provinces",
-    "subtitle": "Provinces per country — used in address fields and filters.",
+    "subtitle": "Provinces per country, used in address fields and filters.",
     "add": "Add province",
     "country": "Country",
-    "empty": "No provinces yet for this country — add the first one.",
+    "empty": "No provinces yet for this country. Add the first one.",
     "loadError": "Could not load the provinces.",
     "retry": "Retry"
   },
   "genderSettings": {
     "title": "Gender",
-    "subtitle": "Genders with a colour — drives the candidate icon colour.",
+    "subtitle": "Genders with a colour, drives the candidate icon colour.",
     "add": "Add gender"
   },
   "planning": {
@@ -2009,7 +2009,7 @@
       "phone": "Phone"
     },
     "dedupeKeysSaveFailed": "Saving the duplicate-detection fields failed.",
-    "dedupeKeysMinOne": "At least one field stays required — with none selected the check falls back to email + mobile."
+    "dedupeKeysMinOne": "At least one field stays required. With none selected the check falls back to email + mobile."
   },
   "noteTypes": {
     "title": "Note types — {{entity}}",
@@ -2060,7 +2060,7 @@
     "defaultRadiusHint": "Radius the candidate-search tab uses by default when opening a vacancy (1–500 km).",
     "leadsCriteria": {
       "title": "Leads criteria",
-      "subtitle": "Decide which candidates count as a 'lead' for this vacancy — this feeds both the leads counter and the 'Find candidates' tab.",
+      "subtitle": "Decide which candidates count as a 'lead' for this vacancy. This feeds both the leads counter and the 'Find candidates' tab.",
       "countableStatusesTitle": "Vacancy statuses that count",
       "countableStatusesHint": "Empty selection = every vacancy status counts.",
       "radiusTitle": "Search radius",
@@ -2072,7 +2072,7 @@
       "functionMatchExactDesc": "Only candidates with the exact same function count.",
       "functionMatchCategory": "Category",
       "functionMatchCategoryDesc": "Candidates with the same function category count.",
-      "functionMatchCategoryNote": "Currently behaves the same as 'Exact' — vacancies don't have a function category yet.",
+      "functionMatchCategoryNote": "Currently behaves the same as 'Exact'. Vacancies don't have a function category yet.",
       "functionMatchAll": "All",
       "functionMatchAllDesc": "Every function counts; function plays no role in leads.",
       "excludeAlreadyAppliedLabel": "Exclude candidates with a live application",
@@ -2123,16 +2123,16 @@
     "add": "Add function",
     "freeEntry": "Allow free entry",
     "freeEntryHint": "On: recruiters can type their own function (combobox). Off: pick from the list only (strict dropdown).",
-    "confirmFreeEntry": "Are you sure? Free entry lets recruiters type functions that aren’t in the list — this can lower data quality."
+    "confirmFreeEntry": "Are you sure? Free entry lets recruiters type functions that aren’t in the list. This can lower data quality."
   },
   "contactFunctionsSettings": {
     "title": "Contact functions",
     "subtitle": "Manage the job-title list for customer contact persons (e.g. Location manager, Team lead).",
     "add": "Add function",
-    "notAvailable": "Not available yet — this list activates once the backend connection is live.",
+    "notAvailable": "Not available yet. This list activates once the backend connection is live.",
     "freeEntry": "Allow free entry",
     "freeEntryHint": "On: a custom function can be typed (combobox). Off: pick from the list only (strict dropdown).",
-    "confirmFreeEntry": "Are you sure? Free entry lets users type contact functions that are not in the list — this can lower data quality."
+    "confirmFreeEntry": "Are you sure? Free entry lets users type contact functions that are not in the list. This can lower data quality."
   },
   "opportunityDisplay": {
     "title": "Table display",
@@ -2241,7 +2241,7 @@
       "title": "Default status filter",
       "allOption": "All statuses",
       "chosenHint": "This status is preselected as soon as this tab opens.",
-      "autoHint": "Not chosen yet — this is currently the status that looks like 'active' (or All, if none exists)."
+      "autoHint": "Not chosen yet. This is currently the status that looks like 'active' (or All, if none exists)."
     }
   },
   "customerVacancyDefaults": {
@@ -2267,7 +2267,7 @@
   "dashboardsAll": "All charts & lists",
   "dashboardsCanSwitch": "Can switch",
   "dashboardsDesc": {
-    "admin": "Full overview — all KPIs, charts and lists.",
+    "admin": "Full overview. All KPIs, charts and lists.",
     "management": "Steering on inflow, outflow, pipeline and matches.",
     "recruitment": "Candidate-focused: touchpoints, follow-up, funnel and conversations.",
     "backoffice": "Documents, contracts, couplings and runs.",
@@ -2343,7 +2343,7 @@
   },
   "numbering": {
     "title": "Numbering",
-    "subtitle": "Automatic sequence number per record — prefix, digit padding and start value per entity.",
+    "subtitle": "Automatic sequence number per record. Prefix, digit padding and start value per entity.",
     "hint": "Changes only apply to NEW numbers; existing numbers stay unchanged.",
     "entity": "Entity",
     "prefix": "Prefix",
@@ -2430,7 +2430,7 @@
     "optionsHint": "Comma-separated. Existing values are preserved when you change the options.",
     "hasData": "has data",
     "delete": "Delete",
-    "deleteBlocked": "Cannot delete — field has data",
+    "deleteBlocked": "Cannot delete. Field has data",
     "activate": "Activate",
     "deactivate": "Deactivate",
     "showInUi": "Show in UI",
@@ -2446,7 +2446,7 @@
     }
   },
   "usage": {
-    "subtitleTenant": "Usage for {{name}} — quantities for your billing only.",
+    "subtitleTenant": "Usage for {{name}}. Quantities for your billing only.",
     "month": "Month",
     "loadError": "Failed to load usage.",
     "col": {
@@ -2459,7 +2459,7 @@
   },
   "jobs": {
     "title": "Task manager",
-    "subtitle": "Queue status, individual jobs and failed jobs — super admins only.",
+    "subtitle": "Queue status, individual jobs and failed jobs. Super admins only.",
     "tab": {
       "overview": "Overview",
       "jobs": "Jobs",
@@ -2511,7 +2511,7 @@
     "empty": "No jobs found.",
     "emptyFailed": "No failed jobs.",
     "cancel": "Cancel",
-    "cancelReservedError": "Cancel failed — a worker is already running this job.",
+    "cancelReservedError": "Cancel failed. A worker is already running this job.",
     "retry": "Retry",
     "retryAll": "Retry all",
     "retryAllConfirm_one": "Re-queue {{count}} failed job?",
@@ -2527,8 +2527,8 @@
       "page": "Page {{page}} of {{last}}"
     },
     "truncatedNotice": "Only the newest 5,000 failed jobs are shown.",
-    "driverWarning": "The queue runs on \"{{driver}}\" — this screen inspects the database queue and may not reflect the real backlog.",
-    "actionFailed": "Action failed — the job may no longer exist. Refresh the list.",
+    "driverWarning": "The queue runs on \"{{driver}}\". This screen inspects the database queue and may not reflect the real backlog.",
+    "actionFailed": "Action failed. The job may no longer exist. Refresh the list.",
     "recent": {
       "tenantFilter": "Tenant filter",
       "allTenants": "All tenants",
@@ -2558,7 +2558,7 @@
       "colQueue": "Queue",
       "colThroughput": "Throughput",
       "colRuntime": "Avg. duration",
-      "empty": "No metrics yet — Horizon snapshots every 5 minutes."
+      "empty": "No metrics yet. Horizon snapshots every 5 minutes."
     }
   },
   "actionRules": {
@@ -2576,7 +2576,7 @@
     "customerAxisTitle": "Customer actions",
     "customerAxisSubtitle": "Actions from a customer, per customer status.",
     "consentSectionTitle": "AVG exception — WhatsApp consent",
-    "consentSectionSubtitle": "A candidate without WhatsApp opt-in can never receive a message — this rule is locked.",
+    "consentSectionSubtitle": "A candidate without WhatsApp opt-in can never receive a message. This rule is locked.",
     "actionCol": "Action",
     "effect": {
       "allow": "Allowed",
@@ -2598,8 +2598,8 @@
     "detail": {
       "title": "Cell details",
       "popupCode": "Popup code",
-      "noPopup": "No popup — this action is always allowed silently.",
-      "noPopupOverrideWarning": "No popup code exists for this cell — the user will only see the generic warning/block title, with no explanatory message. Consider whether this override is intended.",
+      "noPopup": "No popup. This action is always allowed silently.",
+      "noPopupOverrideWarning": "No popup code exists for this cell. The user will only see the generic warning/block title, with no explanatory message. Consider whether this override is intended.",
       "messageNote": "The message text is fixed per popup code and not (yet) tenant-editable.",
       "resetCell": "Reset this cell to default",
       "isOverride": "Changed from the default rule",
@@ -2704,7 +2704,7 @@
     "blocksHint": "Pick fixed text blocks (intro, cta, legal) this profile includes.",
     "blocksEmpty": "No reusable blocks created yet.",
     "delete": "Delete",
-    "deleteBlocked": "Cannot delete — profile is in use.",
+    "deleteBlocked": "Cannot delete. Profile is in use.",
     "confirmDelete": "Delete profile \"{{name}}\"?"
   },
   "vacancyContentBlocksSettings": {
@@ -2723,7 +2723,7 @@
     },
     "bodyLabel": "Content",
     "delete": "Delete",
-    "deleteBlocked": "Cannot delete — block is in use.",
+    "deleteBlocked": "Cannot delete. Block is in use.",
     "confirmDelete": "Delete block \"{{name}}\"?"
   },
   "careerSite": {
@@ -2733,7 +2733,7 @@
     "hint": "Turn the public career site (…/{tenant}/vacatures) on or off. The backend enforces it immediately: off = the public site shows a calm inactive notice and applying is closed.",
     "urls": {
       "title": "Public URLs",
-      "subtitle": "Copy these into a job board or crawler — built from this tenant's own address.",
+      "subtitle": "Copy these into a job board or crawler. Built from this tenant's own address.",
       "site": "Site info (branding)",
       "vacancies": "Vacancies (JSON)",
       "sitemap": "Sitemap",
@@ -2753,25 +2753,25 @@
   "dashboardsItem": "Item",
   "customerRequiredFields": {
     "title": "Required fields",
-    "subtitle": "Required fields for the customer (per customer phase) and for Location, Department and Contact person. The backend already checks this on both create and edit — see the note under each tab.",
+    "subtitle": "Required fields for the customer (per customer phase) and for Location, Department and Contact person. The backend already checks this on both create and edit. See the note under each tab.",
     "tabs": {
       "customer": "Customer",
       "location": "Location",
       "department": "Department",
       "contact": "Contact person"
     },
-    "phaseHint": "This is checked on create and on a genuine phase transition. An ordinary edit that doesn't change the phase is never blocked — however incomplete the record already is on other fields.",
-    "flatHint": "This is checked in full on create. On edit, only the fields the change itself touches are checked — an already-incomplete record stays freely editable on its other fields."
+    "phaseHint": "This is checked on create and on a genuine phase transition. An ordinary edit that doesn't change the phase is never blocked. However incomplete the record already is on other fields.",
+    "flatHint": "This is checked in full on create. On edit, only the fields the change itself touches are checked. An already-incomplete record stays freely editable on its other fields."
   },
   "customerConversion": {
     "title": "Default status after conversion",
-    "subtitle": "The status a customer gets right after converting from Prospect to Customer. No setting configured leaves the status empty — pick a status to apply it automatically.",
+    "subtitle": "The status a customer gets right after converting from Prospect to Customer. No setting configured leaves the status empty. Pick a status to apply it automatically.",
     "none": "None (set manually)",
     "saveFailed": "Saving failed"
   },
   "vacancyDefaultStatus": {
     "title": "Default status on create",
-    "subtitle": "The status a new vacancy gets when none is specified. No setting configured leaves the status empty — pick a status to apply it automatically.",
+    "subtitle": "The status a new vacancy gets when none is specified. No setting configured leaves the status empty. Pick a status to apply it automatically.",
     "none": "None (set manually)",
     "saveFailed": "Saving failed"
   },
@@ -2870,7 +2870,7 @@
     "matchRenewSaveFailed": "Saving the match renewal window failed."
   },
   "modShiftmanager": {
-    "reportingOff": "Shiftmanager reporting isn't enabled yet — turn on the module to configure KPI targets and display limits."
+    "reportingOff": "Shiftmanager reporting isn't enabled yet. Turn on the module to configure KPI targets and display limits."
   },
   "dashboardsEmpty": "No dashboard items configured yet.",
   "settings": {
@@ -2896,6 +2896,6 @@
     "colCountry": "Country",
     "colCoc": "Company register number",
     "colVat": "VAT number",
-    "unknownCountryHint": "For countries without a rule above nothing is blocked — you only get a soft hint."
+    "unknownCountryHint": "For countries without a rule above nothing is blocked. You only get a soft hint."
   }
 }

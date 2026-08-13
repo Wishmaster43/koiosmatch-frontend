@@ -1,5 +1,5 @@
 {
-  "actionFailed": "La acción falló — inténtalo de nuevo.",
+  "actionFailed": "La acción falló. Inténtalo de nuevo.",
   "save": "Guardar",
   "saving": "Guardando…",
   "saveChanges": "Guardar cambios",
@@ -144,10 +144,10 @@
     "forbidden": "No tienes acceso a Koios.",
     "usageLine": "{{model}} · {{tokens}} tokens · {{cost}}",
     "offline": "No conectado",
-    "contextPending": "Este registro aún no se puede vincular como contexto de IA — fijado solo como referencia.",
+    "contextPending": "Este registro aún no se puede vincular como contexto de IA. Fijado solo como referencia.",
     "radar": {
       "title": "Consejos de Koios",
-      "empty": "Nada requiere tu atención ahora mismo — pregúntame lo que quieras."
+      "empty": "Nada requiere tu atención ahora mismo. Pregúntame lo que quieras."
     },
     "mention": {
       "leads": "Leads",
@@ -166,7 +166,7 @@
       "expiresIn": "Caduca en {{seconds}}s",
       "confirmed": "Hecho.",
       "cancelled": "Cancelado.",
-      "expired": "Esta propuesta ha caducado — vuelve a pedirlo.",
+      "expired": "Esta propuesta ha caducado. Vuelve a pedirlo.",
       "error": "Algo salió mal. Inténtalo de nuevo."
     },
     "resizeHandle": "Ajustar el ancho del panel",
@@ -222,7 +222,7 @@
     "refresh": "Actualizar coordenadas PDOK",
     "started": "Actualización iniciada…",
     "updated": "Coordenadas actualizadas.",
-    "notFound": "Dirección no encontrada — revisa los datos."
+    "notFound": "Dirección no encontrada. Revisa los datos."
   },
   "noAccess": "Sin acceso",
   "noAccessDesc": "No tienes permisos para esta página.",
@@ -302,7 +302,7 @@
   },
   "new": "Nuevo",
   "aiGenerated": "Generado por IA",
-  "aiGeneratedHint": "Generado por Koios AI — revisar antes de usar.",
+  "aiGeneratedHint": "Generado por Koios AI. Revisar antes de usar.",
   "notesAssist": {
     "title": "Asistente Koios",
     "needsText": "Añade texto primero",

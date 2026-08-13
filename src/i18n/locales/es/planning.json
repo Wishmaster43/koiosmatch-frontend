@@ -1,7 +1,7 @@
 {
   "addShift": "Añadir turno",
-  "previewNotice": "Solo vista previa — los turnos mostrados aquí son datos de demostración, nada de lo que añadas se guarda todavía en tu planificación real.",
-  "previewSaveTitle": "Aún no conectado — este turno no se guardará.",
+  "previewNotice": "Solo vista previa. Los turnos mostrados aquí son datos de demostración, nada de lo que añadas se guarda todavía en tu planificación real.",
+  "previewSaveTitle": "Aún no conectado. Este turno no se guardará.",
   "sectionOrder": "Pedido",
   "sectionLocation": "Ubicación",
   "sectionColor": "Color",

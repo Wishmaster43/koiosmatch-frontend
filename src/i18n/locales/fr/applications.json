@@ -37,7 +37,7 @@
     "searchErrorForbidden": "Vous n'avez pas le droit d'effectuer cette recherche.",
     "searchErrorValidation": "Cette recherche n'a pas été acceptée. Modifiez-la et réessayez.",
     "searchErrorServer": "Le serveur a renvoyé une erreur pendant la recherche. Réessayez dans un instant.",
-    "searchErrorNetwork": "Pas de connexion — la recherche a échoué."
+    "searchErrorNetwork": "Pas de connexion. La recherche a échoué."
   },
   "pagination": {
     "perPage": "Résultats par page",
@@ -85,7 +85,7 @@
     "source": "Source",
     "clearFilter": "Effacer le filtre",
     "noOwner": "Aucun propriétaire",
-    "pageScopeNotice": "Les totaux globaux sont temporairement indisponibles — ces chiffres reposent uniquement sur un échantillon partiel."
+    "pageScopeNotice": "Les totaux globaux sont temporairement indisponibles. Ces chiffres reposent uniquement sur un échantillon partiel."
   },
   "drawer": {
     "label": "Candidature",
@@ -150,7 +150,7 @@
     "readOn": "Lu le {{date}}",
     "modelLabel": "Modèle : {{model}}",
     "badge": "cv",
-    "badgeTitle": "Extrait du CV — vérifiez cette valeur",
+    "badgeTitle": "Extrait du CV. Vérifiez cette valeur",
     "tableCaption": "Ce que contient le dossier aujourd'hui, ce que propose le CV et l'effet d'une acceptation.",
     "status": {
       "pending": "Pas encore examiné",
@@ -265,19 +265,19 @@
       "label": "Démarrer l'entretien",
       "agentPlaceholder": "Choisir un agent IA",
       "started": "Entretien démarré.",
-      "alreadyRunning": "L'entretien est déjà en cours — la session existante s'affiche.",
+      "alreadyRunning": "L'entretien est déjà en cours. La session existante s'affiche.",
       "alreadyHasSession": "Ce candidat a déjà un entretien ouvert sur une autre candidature.",
-      "unavailable": "Démarrer un entretien n'est pas encore disponible — en attente de la liaison backend.",
+      "unavailable": "Démarrer un entretien n'est pas encore disponible. En attente de la liaison backend.",
       "noAgentChosen": "Choisissez d'abord un agent IA.",
       "loadError": "Impossible de charger les agents IA.",
       "reasons": {
         "no_mobile_or_consent": "Le candidat n'a pas de numéro de mobile ou de consentement WhatsApp.",
         "no_active_connection": "Aucune connexion WhatsApp active pour cette offre.",
-        "rejected_stage": "Cette candidature est rejetée — impossible de démarrer un entretien.",
-        "placed_stage": "Cette candidature est déjà placée — impossible de démarrer un entretien.",
+        "rejected_stage": "Cette candidature est rejetée. Impossible de démarrer un entretien.",
+        "placed_stage": "Cette candidature est déjà placée. Impossible de démarrer un entretien.",
         "no_active_flow": "L'agent IA choisi n'a aucun flux d'entretien actif.",
         "no_candidate": "Aucun candidat associé à cette candidature.",
-        "send_failed": "L'envoi a échoué — réessayez."
+        "send_failed": "L'envoi a échoué. Réessayez."
       }
     },
     "status": {
@@ -295,7 +295,7 @@
       "durationHours": "{{hours}} h {{minutes}} min",
       "durationDays": "{{days}} j {{hours}} h",
       "durationUnknown": "Inconnue",
-      "durationHint": "Temps écoulé depuis le début de l'entretien — nuits et week-ends compris. Il ne s'agit pas du temps de conversation.",
+      "durationHint": "Temps écoulé depuis le début de l'entretien. Nuits et week-ends compris. Il ne s'agit pas du temps de conversation.",
       "visibilityPending": "L'agent, le tour et le temps écoulé ne sont pas disponibles pour cette session.",
       "takeover": "Arrêter l'agent / reprendre la main",
       "takeoverBusy": "En cours…",
@@ -326,7 +326,7 @@
     },
     "conversation": {
       "title": "Conversation",
-      "noCandidate": "Aucun candidat lié — rien à afficher."
+      "noCandidate": "Aucun candidat lié. Rien à afficher."
     }
   },
   "appointments": {
@@ -385,7 +385,7 @@
     "confirm": "Refuser",
     "rejected": "Refusé",
     "aiAdvice": "Koios conseille le refus",
-    "aiAuto": "Critères stricts non remplis — éligible au refus automatique.",
+    "aiAuto": "Critères stricts non remplis. Éligible au refus automatique.",
     "aiConfirm": "Vérifiez et confirmez avant l'envoi d'un message.",
     "done": "Candidature rejetée",
     "sentOn": "Message envoyé le {{date}}",
@@ -487,7 +487,7 @@
     "clearScope": "Effacer le filtre de sélection"
   },
   "board": {
-    "movedHidden": "Déplacée — la carte sort du filtre actuel"
+    "movedHidden": "Déplacée. La carte sort du filtre actuel"
   },
   "ai": {
     "title": "Koios AI conseille",
@@ -496,7 +496,7 @@
     "analyzing": "Koios AI analyse la candidature…",
     "progressLabel": "Progression",
     "progressOk": "{{days}} jours en traitement · phase actuelle « {{phase}} ».",
-    "progressStale": "Déjà {{days}} jours en traitement · phase « {{phase}} » — possiblement bloquée, vérifiez le suivi.",
+    "progressStale": "Déjà {{days}} jours en traitement · phase « {{phase}} ». Possiblement bloquée, vérifiez le suivi.",
     "progressUnknown": "Date inconnue · phase actuelle « {{phase}} ».",
     "completeness": "Exhaustivité",
     "missingVacancy": "Aucun poste associé à cette candidature."

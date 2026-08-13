@@ -20,18 +20,18 @@
     "title": "Modellen",
     "active": "Actief model",
     "selectable": "Selecteerbare modellen",
-    "pickHint": "Kies de AI-smaak voor jouw bureau — het tarief per smaak staat hieronder.",
+    "pickHint": "Kies de AI-smaak voor jouw bureau. Het tarief per smaak staat hieronder.",
     "tier": {
       "snel": "Snel",
       "slim": "Slim",
       "max": "Max"
     },
     "tierDesc": {
-      "snel": "Hoogste volume, laagste tarief — prima voor routinewerk.",
+      "snel": "Hoogste volume, laagste tarief. Prima voor routinewerk.",
       "slim": "De standaard: sterke kwaliteit tegen een gemiddeld tarief.",
-      "max": "Beste kwaliteit voor het moeilijkste werk — hoogste tarief."
+      "max": "Beste kwaliteit voor het moeilijkste werk. Hoogste tarief."
     },
-    "saveError": "Model wijzigen is niet gelukt — probeer het opnieuw."
+    "saveError": "Model wijzigen is niet gelukt. Probeer het opnieuw."
   },
   "pricing": {
     "title": "Tarieven",
@@ -43,11 +43,11 @@
   "voice": {
     "start": "Spreek je bericht in",
     "stop": "Stop met luisteren",
-    "denied": "Microfoon geweigerd — sta toegang toe in je browser",
-    "insecureContext": "Dictee vereist een beveiligde verbinding (https) — niet beschikbaar op deze pagina",
-    "errorServiceNotAllowed": "Spraakherkenning is geblokkeerd door de browser — service niet toegestaan",
-    "errorAudioCapture": "Geen microfoon gevonden — controleer je apparaat",
-    "errorNetwork": "Netwerkfout tijdens spraakherkenning — probeer het opnieuw",
-    "errorGeneric": "Spraakherkenning is mislukt — probeer het opnieuw"
+    "denied": "Microfoon geweigerd. Sta toegang toe in je browser",
+    "insecureContext": "Dictee vereist een beveiligde verbinding (https). Niet beschikbaar op deze pagina",
+    "errorServiceNotAllowed": "Spraakherkenning is geblokkeerd door de browser. Service niet toegestaan",
+    "errorAudioCapture": "Geen microfoon gevonden. Controleer je apparaat",
+    "errorNetwork": "Netwerkfout tijdens spraakherkenning. Probeer het opnieuw",
+    "errorGeneric": "Spraakherkenning is mislukt. Probeer het opnieuw"
   }
 }

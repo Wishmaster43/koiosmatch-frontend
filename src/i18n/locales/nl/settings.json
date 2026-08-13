@@ -414,11 +414,11 @@
     "buttonPreview": "Knop voorbeeld",
     "linkPreview": "Link voorbeeld",
     "logo": "Logo",
-    "logoHint": "PNG, JPG, WEBP of SVG, max 2 MB — SVG wordt serverside gescand. Getoond in de navigatiebalk.",
+    "logoHint": "PNG, JPG, WEBP of SVG, max 2 MB. SVG wordt serverside gescand. Getoond in de navigatiebalk.",
     "noLogo": "Geen logo",
     "logoUploadError": "Logo uploaden is mislukt.",
     "textColor": "Tekstkleur op accentkleur",
-    "textColorHint": "De kleur van tekst op gekleurde knoppen en chips. Automatisch kiest zwart of wit op basis van je accentkleur — bij een lichte kleur zoals geel wordt de tekst dus donker.",
+    "textColorHint": "De kleur van tekst op gekleurde knoppen en chips. Automatisch kiest zwart of wit op basis van je accentkleur. Bij een lichte kleur zoals geel wordt de tekst dus donker.",
     "textColorAuto": "Automatisch",
     "textColorLight": "Wit",
     "textColorDark": "Donker",
@@ -463,8 +463,8 @@
     "confirmDelete": "Vestiging \"{{name}}\" verwijderen?",
     "deleteSuccess": "Vestiging verwijderd.",
     "deleteFailed": "Verwijderen van de vestiging is mislukt.",
-    "deleteBlockedTooltip": "In gebruik — kan niet verwijderen",
-    "deleteBlocked": "Kan niet verwijderen — nog gekoppeld aan: {{list}}",
+    "deleteBlockedTooltip": "In gebruik. Kan niet verwijderen",
+    "deleteBlocked": "Kan niet verwijderen, nog gekoppeld aan: {{list}}",
     "usage": {
       "candidates_one": "{{count}} kandidaat",
       "candidates_other": "{{count}} kandidaten",
@@ -506,7 +506,7 @@
     "contactName": "Contactpersoon",
     "phone": "Telefoon",
     "email": "E-mailadres",
-    "mapNoCoords": "Nog geen vestigingen met coördinaten — vul het adres van een locatie in, dan verschijnt die automatisch op de kaart.",
+    "mapNoCoords": "Nog geen vestigingen met coördinaten. Vul het adres van een locatie in, dan verschijnt die automatisch op de kaart.",
     "color": "Kleur",
     "icon": "Icoon",
     "colorHint": "Kleur en icoon maken een vestiging herkenbaar in lijsten en op de kaart.",
@@ -542,7 +542,7 @@
     "confirmDelete": "Weet je zeker dat je \"{{name}}\" wilt verwijderen?",
     "edit": "Bewerken",
     "editTitle": "Bewerken",
-    "inUse": "In gebruik — kan niet verwijderen",
+    "inUse": "In gebruik. Kan niet verwijderen",
     "priorityRank": "Prioriteit (1 = eerst verstuurd)",
     "iconLabel": "Icoon (emoji)",
     "iconPlaceholder": "bijv. 📞",
@@ -563,7 +563,7 @@
   },
   "poolsSettings": {
     "title": "Talentenpools",
-    "subtitle": "Beheer pools met naam en kleur — voor lijsten van kandidaten.",
+    "subtitle": "Beheer pools met naam en kleur. Voor lijsten van kandidaten.",
     "add": "Pool toevoegen",
     "contextLabel": "Soort pool",
     "contextRecruitment": "Recruitment (talentenpool)",
@@ -580,7 +580,7 @@
     "valueField": "Slug (waarde)",
     "valueHint": "Stabiele sleutel; leeg laten genereert er een uit het label.",
     "valueImmutable": "De slug kan na aanmaken niet meer gewijzigd worden.",
-    "labelLocked": "Het label is vergrendeld omdat deze fase structureel is — automatiseringen leunen erop. Kleur en andere vlaggen blijven bewerkbaar.",
+    "labelLocked": "Het label is vergrendeld omdat deze fase structureel is. Automatiseringen leunen erop. Kleur en andere vlaggen blijven bewerkbaar.",
     "colorField": "Kleur",
     "confirmDelete": "\"{{name}}\" verwijderen? Als deze in gebruik is, wordt hij gearchiveerd.",
     "isApplicant": "Toont de sollicitatie-funnel",
@@ -598,7 +598,7 @@
       "title": "Status",
       "subtitle": "Kan ik nu inzetten? (Beschikbaar, Geplaatst, Niet beschikbaar, Ziek, Verlof)."
     },
-    "inUse": "In gebruik — kan niet verwijderen",
+    "inUse": "In gebruik. Kan niet verwijderen",
     "requiresAppointment": "Vereist een afspraak",
     "requiresAppointmentHint": "Bij deze fase hoort een geplande afspraak (intake). Ontbreekt die, dan volgt een melding bij de kandidaat.",
     "isMatch": "Maakt een match",
@@ -674,7 +674,7 @@
     "title": "Omrekenfactor inkoop→verkoop",
     "subtitle": "Valt terug op inkooptarief × deze factor wanneer geen prijsafspraak past bij functie/CAO/schaal/trede.",
     "placeholder": "Bijv. 1,35",
-    "saveFailed": "Opslaan mislukt — de waarde is teruggezet.",
+    "saveFailed": "Opslaan mislukt. De waarde is teruggezet.",
     "loadError": "Kon de omrekenfactor niet laden."
   },
   "outreach": {
@@ -755,7 +755,7 @@
     "defaultVariantLabel": "Standaard CV-variant",
     "variantProposal": "Voorstel-CV (naam zichtbaar, contactgegevens verborgen)",
     "variantFull": "Volledig CV (met contactgegevens)",
-    "notSentYet": "Koios verstuurt het voorstel nog niet zelf — de recruiter downloadt het CV en verstuurt het vanuit het eigen mailprogramma. De automatische, herroepbare deellink volgt zodra deze functionaliteit gereed is.",
+    "notSentYet": "Koios verstuurt het voorstel nog niet zelf. De recruiter downloadt het CV en verstuurt het vanuit het eigen mailprogramma. De automatische, herroepbare deellink volgt zodra deze functionaliteit gereed is.",
     "saveFailed": "Opslaan mislukt",
     "saved": "Opgeslagen"
   },
@@ -779,7 +779,7 @@
     "noCriteria": "Nog geen criteria.",
     "criteriaCount_one": "{{count}} criterium",
     "criteriaCount_other": "{{count}} criteria",
-    "inUse": "In gebruik — gekoppeld aan een vacature.",
+    "inUse": "In gebruik. Gekoppeld aan een vacature.",
     "save": "Opslaan",
     "cancel": "Annuleren",
     "newGroup": "Nieuwe groep",
@@ -806,18 +806,18 @@
       "title": "Goedkeuring",
       "subtitle": "Wanneer een match eerst goedgekeurd moet worden.",
       "off": "Uit",
-      "offDesc": "Nooit goedkeuring nodig — elke match gaat direct door.",
+      "offDesc": "Nooit goedkeuring nodig. Elke match gaat direct door.",
       "deviation": "Bij afwijking",
       "deviationDesc": "Alleen goedkeuring wanneer de match afwijkt van de gemaakte afspraken.",
       "always": "Altijd",
       "alwaysDesc": "Elke match heeft eerst goedkeuring nodig.",
-      "saveFailed": "Opslaan mislukt — de keuze is teruggezet."
+      "saveFailed": "Opslaan mislukt. De keuze is teruggezet."
     }
   },
   "matchTemplatesSettings": {
     "title": "Matchprofielen",
-    "subtitle": "Herbruikbare matchgewicht-profielen die je op een vacature kunt kiezen (tab Matching). Een profiel toewijzen kopieert de gewichten naar die vacature — latere wijzigingen hier werken daar niet vanzelf door.",
-    "empty": "Nog geen matchprofielen — maak er hieronder een aan.",
+    "subtitle": "Herbruikbare matchgewicht-profielen die je op een vacature kunt kiezen (tab Matching). Een profiel toewijzen kopieert de gewichten naar die vacature. Latere wijzigingen hier werken daar niet vanzelf door.",
+    "empty": "Nog geen matchprofielen. Maak er hieronder een aan.",
     "loadError": "Kon matchprofielen niet laden.",
     "nameLabel": "Naam",
     "namePlaceholder": "Bijv. Senior technisch profiel",
@@ -857,12 +857,12 @@
     "moveSectionUp": "Verplaats '{{section}}' omhoog",
     "moveSectionDown": "Verplaats '{{section}}' omlaag",
     "preview": "Voorvertoning",
-    "previewHint": "A4 — met voorbeeldkandidaat"
+    "previewHint": "A4, met voorbeeldkandidaat"
   },
   "security": {
     "twoFactor": "Twee-factor verificatie (2FA)",
-    "statusOn": "Ingeschakeld — je account is extra beveiligd",
-    "statusOff": "Uitgeschakeld — voeg een extra beveiligingslaag toe",
+    "statusOn": "Ingeschakeld. Je account is extra beveiligd",
+    "statusOff": "Uitgeschakeld. Voeg een extra beveiligingslaag toe",
     "enable": "Inschakelen",
     "disable": "Uitschakelen",
     "enabledTitle": "Twee-factor verificatie geactiveerd",
@@ -944,13 +944,13 @@
     "email": {
       "label": "E-mail notificaties",
       "desc": "Ontvang meldingen via e-mail",
-      "notYetDelivered": "E-mailbezorging bestaat nog niet — deze voorkeur wordt actief zodra het e-mailkanaal er is."
+      "notYetDelivered": "E-mailbezorging bestaat nog niet. Deze voorkeur wordt actief zodra het e-mailkanaal er is."
     },
     "inApp": {
       "label": "In-app notificaties",
       "desc": "Ontvang meldingen binnen het platform",
       "notYetActive": "Nog niet actief",
-      "notYetActiveReason": "Voor dit type verstuurt het systeem nog geen melding — de schakelaar is alvast instelbaar."
+      "notYetActiveReason": "Voor dit type verstuurt het systeem nog geen melding. De schakelaar is alvast instelbaar."
     },
     "context": {
       "sollicitaties": {
@@ -980,14 +980,14 @@
     },
     "my": {
       "title": "Mijn meldingen",
-      "subtitle": "Jouw eigen uitzondering bovenop de organisatiebrede meldingsinstellingen — kies per onderwerp of je altijd, nooit, of gewoon de instelling van je organisatie wilt volgen.",
+      "subtitle": "Jouw eigen uitzondering bovenop de organisatiebrede meldingsinstellingen. Kies per onderwerp of je altijd, nooit, of gewoon de instelling van je organisatie wilt volgen.",
       "inherit": "Overnemen",
       "on": "Aan",
       "off": "Uit",
       "empty": "Er zijn nog geen meldingsonderwerpen ingesteld.",
-      "saveFailed": "Opslaan is mislukt — je keuze is teruggedraaid.",
+      "saveFailed": "Opslaan is mislukt. Je keuze is teruggedraaid.",
       "emailNotAvailable": "Nog niet beschikbaar",
-      "emailNotAvailableReason": "Een persoonlijke e-mailuitzondering is nog niet mogelijk — je volgt hiervoor de organisatiebrede e-mailinstelling."
+      "emailNotAvailableReason": "Een persoonlijke e-mailuitzondering is nog niet mogelijk. Je volgt hiervoor de organisatiebrede e-mailinstelling."
     },
     "push": {
       "title": "Browsermeldingen",
@@ -1040,7 +1040,7 @@
       "periodMonth": "Deze maand",
       "plan": {
         "title": "Abonnement & credits",
-        "notice": "Huidig plan, credit-voortgangsbalk, resetdatum en kredietsaldo zijn nog niet beschikbaar — er bestaat nog geen backend-model voor abonnementen of credits."
+        "notice": "Huidig plan, credit-voortgangsbalk, resetdatum en kredietsaldo zijn nog niet beschikbaar. Er bestaat nog geen backend-model voor abonnementen of credits."
       },
       "ai": {
         "title": "AI-verbruik (Koios)",
@@ -1071,7 +1071,7 @@
       },
       "daily": {
         "title": "Dagelijks verbruik",
-        "notice": "Een daggrafiek per categorie (Totaal · AI · Leads · Telefoongesprekken · WhatsApp) is nog niet beschikbaar — de backend levert nu alleen totalen per periode, geen cijfers per dag."
+        "notice": "Een daggrafiek per categorie (Totaal · AI · Leads · Telefoongesprekken · WhatsApp) is nog niet beschikbaar. De backend levert nu alleen totalen per periode, geen cijfers per dag."
       },
       "koios": {
         "title": "Koios AI-facturatie",
@@ -1122,7 +1122,7 @@
     "creating": "Aanmaken…",
     "createError": "Aanmaken mislukt. Probeer opnieuw.",
     "done": "Klaar",
-    "secretOnce": "Kopieer de secret nu — hij wordt niet meer getoond.",
+    "secretOnce": "Kopieer de secret nu. Hij wordt niet meer getoond.",
     "copySecret": "Kopieer secret",
     "secretHidden": "alleen bij aanmaken getoond",
     "dismiss": "Sluiten",
@@ -1232,7 +1232,7 @@
       "createError": "Aanmaken mislukt. Probeer opnieuw.",
       "done": "Klaar",
       "eventsCount": "{{count}} events",
-      "secretOnce": "Kopieer de signing-secret nu — hij wordt niet meer getoond.",
+      "secretOnce": "Kopieer de signing-secret nu. Hij wordt niet meer getoond.",
       "copySecret": "Kopieer secret",
       "signingHint": "Gebruik deze secret om de X-Koios-Signature (HMAC-SHA256) te verifiëren.",
       "dismiss": "Sluiten",
@@ -1286,7 +1286,7 @@
     "noPermission": "Je hebt geen toestemming om te synchroniseren",
     "succeeded": "Geslaagd",
     "failed": "Mislukt",
-    "tooManyRequests": "Te veel verzoeken — wacht {{secs}}s",
+    "tooManyRequests": "Te veel verzoeken. Wacht {{secs}}s",
     "items": {
       "candidates": {
         "label": "Kandidaten",
@@ -1321,11 +1321,11 @@
         "desc": "Kandidaatinplanningen per shift"
       }
     },
-    "started": "Synchronisatie gestart — dit kan enkele minuten duren. Ververs de lijsten later voor de bijgewerkte data."
+    "started": "Synchronisatie gestart. Dit kan enkele minuten duren. Ververs de lijsten later voor de bijgewerkte data."
   },
   "import": {
     "title": "Importeren",
-    "subtitle": "Breng je klantgegevens over vanuit een CSV-bestand — per entiteit, in de juiste volgorde.",
+    "subtitle": "Breng je klantgegevens over vanuit een CSV-bestand. Per entiteit, in de juiste volgorde.",
     "entities": {
       "customers": {
         "label": "Klanten",
@@ -1345,7 +1345,7 @@
       },
       "customer_tree": {
         "label": "Klant (compleet)",
-        "desc": "Bouwt een klant met locaties, afdelingen en contactpersonen in één keer op — voor een klant die nog niet bestaat."
+        "desc": "Bouwt een klant met locaties, afdelingen en contactpersonen in één keer op. Voor een klant die nog niet bestaat."
       }
     },
     "groups": {
@@ -1354,17 +1354,17 @@
     },
     "order": {
       "title": "Importeer in deze volgorde",
-      "hint": "Elke regel koppelt aan de vorige op naam — importeer die eerst.",
-      "customersHint": "Begin hier — er hoeft nog niets anders te bestaan.",
-      "locationsHint": "Koppelt aan een bestaande klant op naam (klant_naam) — importeer klanten eerst.",
-      "departmentsHint": "Koppelt aan een bestaande klant en locatie op naam (klant_naam, locatie_naam) — importeer die eerst.",
-      "contactsHint": "Koppelt aan een bestaande klant, locatie en afdeling op naam (klant_naam, locatie_naam, afdeling_naam) — importeer die eerst.",
+      "hint": "Elke regel koppelt aan de vorige op naam. Importeer die eerst.",
+      "customersHint": "Begin hier. Er hoeft nog niets anders te bestaan.",
+      "locationsHint": "Koppelt aan een bestaande klant op naam (klant_naam). Importeer klanten eerst.",
+      "departmentsHint": "Koppelt aan een bestaande klant en locatie op naam (klant_naam, locatie_naam). Importeer die eerst.",
+      "contactsHint": "Koppelt aan een bestaande klant, locatie en afdeling op naam (klant_naam, locatie_naam, afdeling_naam). Importeer die eerst.",
       "treeAlternative": "Ben je een compleet nieuwe klant aan het opbouwen?",
       "switchToTree": "Gebruik het complete bestand"
     },
     "tree": {
       "title": "Deze import bouwt",
-      "replacesOrder": "Er is geen vaste volgorde nodig — dit ene bestand vervangt de vier aparte stappen.",
+      "replacesOrder": "Er is geen vaste volgorde nodig. Dit ene bestand vervangt de vier aparte stappen.",
       "rowGrain": "Eén regel = één contactpersoon, met klant, locatie en afdeling erbij herhaald. Veertig regels zijn dus geen veertig klanten.",
       "levelTruncation": "Laat je op een regel een naamveld leeg (bijvoorbeeld de afdeling), dan stopt die regel dáár: er wordt niets voor dat niveau of erna aangemaakt.",
       "allOrNothing": "Eén regel is alles-of-niets: gaat er iets mis met de contactpersoon, dan worden ook de klant, locatie en afdeling van díe regel niet aangemaakt. Een klant die een eerdere regel al heeft aangemaakt, blijft gewoon staan.",
@@ -1375,7 +1375,7 @@
     "loadTemplatesError": "Kon de importtypen niet laden. Probeer het opnieuw.",
     "noTemplates": "Er zijn nog geen importtypen beschikbaar.",
     "downloadTemplate": "Download voorbeeldbestand",
-    "downloadTemplateHint": "Een ingevuld voorbeeldbestand met de exacte kolomnamen — de snelste manier om je gegevens voor te bereiden.",
+    "downloadTemplateHint": "Een ingevuld voorbeeldbestand met de exacte kolomnamen. De snelste manier om je gegevens voor te bereiden.",
     "downloadError": "Kon het voorbeeldbestand niet downloaden. Probeer het opnieuw.",
     "noViewPermission": "Je hebt geen rechten om dit voorbeeldbestand te bekijken.",
     "noImportPermission": "Je kunt het voorbeeldbestand bekijken, maar hebt geen rechten om een import uit te voeren. Vraag een beheerder.",
@@ -1391,7 +1391,7 @@
     "preview": {
       "title": "Voorbeeldweergave",
       "subtitle": "Dit is wat ER ZOU gebeuren. Er is nog niets opgeslagen.",
-      "nothingToImport": "Er zouden geen rijen worden aangemaakt of bijgewerkt — er is niets om te importeren.",
+      "nothingToImport": "Er zouden geen rijen worden aangemaakt of bijgewerkt. Er is niets om te importeren.",
       "confirm": "Voer de echte import uit",
       "running": "Bezig met importeren…",
       "back": "Kies een ander bestand",
@@ -1400,8 +1400,8 @@
     "result": {
       "title": "Importresultaat",
       "subtitleSuccess": "Alle rijen zijn succesvol geïmporteerd.",
-      "subtitleSuccessWithRemarks": "Alles is geïmporteerd, maar bij {{count}} rijen is iets niet meegenomen — zie hieronder.",
-      "subtitlePartial": "{{errorCount}} van {{total}} rijen konden niet worden geïmporteerd — zie hieronder.",
+      "subtitleSuccessWithRemarks": "Alles is geïmporteerd, maar bij {{count}} rijen is iets niet meegenomen. Zie hieronder.",
+      "subtitlePartial": "{{errorCount}} van {{total}} rijen konden niet worden geïmporteerd. Zie hieronder.",
       "newImport": "Nog een bestand importeren"
     },
     "stats": {
@@ -1412,11 +1412,11 @@
       "error": "Mislukt",
       "remarks": "Opmerkingen",
       "rowsAreRows": "Deze aantallen tellen rijen in het bestand.",
-      "rowsAreRowsTree": "Dit zijn rijen, geen klanten — één rij kan tegelijk een klant, een locatie, een afdeling én een contactpersoon aanmaken."
+      "rowsAreRowsTree": "Dit zijn rijen, geen klanten. Één rij kan tegelijk een klant, een locatie, een afdeling én een contactpersoon aanmaken."
     },
     "unknownColumns": {
       "title": "Onherkende kolommen (genegeerd)",
-      "hint": "Deze kolommen in je bestand komen niet overeen met een bekend veld. Ze zijn genegeerd — verder is er niets mee gebeurd."
+      "hint": "Deze kolommen in je bestand komen niet overeen met een bekend veld. Ze zijn genegeerd. Verder is er niets mee gebeurd."
     },
     "rows": {
       "attentionTitle": "{{count}} rijen die aandacht nodig hebben",
@@ -1438,7 +1438,7 @@
       },
       "mapping": {
         "title": "Koppel je kolommen",
-        "subtitle": "We hebben gekoppeld wat we herkenden — controleer de rest en pas aan waar nodig.",
+        "subtitle": "We hebben gekoppeld wat we herkenden. Controleer de rest en pas aan waar nodig.",
         "noColumns": "Dit bestand heeft geen kolommen om te koppelen.",
         "sourceColumn": "Kolom in je bestand",
         "targetField": "Wordt gekoppeld aan",
@@ -1449,14 +1449,14 @@
       "preview": {
         "title": "Controleer je gegevens",
         "subtitle": "Dit is precies wat verstuurd wordt. Klik op een cel om deze te wijzigen en voer de preview daarna opnieuw uit.",
-        "noRows": "Geen rijen om te bekijken — controleer je bestand.",
+        "noRows": "Geen rijen om te bekijken. Controleer je bestand.",
         "validateHint": "Voer de preview uit om te zien wat er zou gebeuren, en bevestig daarna."
       }
     }
   },
   "facebookLeads": {
     "title": "Facebook Leads",
-    "subtitle": "Koppel de Facebook Leads-app van deze klant — inkomende leads komen automatisch binnen als kandidaat.",
+    "subtitle": "Koppel de Facebook Leads-app van deze klant. Inkomende leads komen automatisch binnen als kandidaat.",
     "verifyToken": "Verify token",
     "verifyTokenPlaceholder": "Token uit de Facebook-app-instellingen",
     "appSecret": "App secret",
@@ -1475,7 +1475,7 @@
   },
   "export": {
     "title": "Exporteren",
-    "subtitle": "Exporteer je gegevens als CSV — dezelfde kolommen als de tabel, alleen records waar je toegang toe hebt.",
+    "subtitle": "Exporteer je gegevens als CSV. Dezelfde kolommen als de tabel, alleen records waar je toegang toe hebt.",
     "button": "Exporteer CSV",
     "noPermission": "Je hebt geen rechten om dit te exporteren.",
     "rateLimited": "Te veel exports achter elkaar. Probeer het over een minuut opnieuw.",
@@ -1659,8 +1659,8 @@
     "usersCount_other": "{{count}} gebruikers",
     "edit": "Bewerken",
     "deleteTitle": "Rol verwijderen",
-    "deleteBlocked_one": "Niet verwijderbaar — {{count}} gebruiker heeft deze rol. Wijs hen eerst een andere rol toe.",
-    "deleteBlocked_other": "Niet verwijderbaar — {{count}} gebruikers hebben deze rol. Wijs hen eerst een andere rol toe.",
+    "deleteBlocked_one": "Niet verwijderbaar. {{count}} gebruiker heeft deze rol. Wijs hen eerst een andere rol toe.",
+    "deleteBlocked_other": "Niet verwijderbaar. {{count}} gebruikers hebben deze rol. Wijs hen eerst een andere rol toe.",
     "confirmDelete": "Rol \"{{name}}\" verwijderen?",
     "empty": "Nog geen rollen aangemaakt.",
     "groups": {
@@ -1715,8 +1715,8 @@
     "startDashboard": "Startdashboard",
     "startDashboardNone": "Standaard",
     "branchesTemplate": "Vestigingen (template)",
-    "branchesTemplateHint": "De startset vestigingen die nieuwe gebruikers met deze rol krijgen. Bestaande gebruikers behouden hun eigen set — dit past alleen de template aan.",
-    "branchesEmptyHint": "Geen vestigingen geselecteerd — nieuwe gebruikers met deze rol starten zonder vestiging-koppeling en zien álle kandidaten. Mét gekoppelde vestigingen ziet een gebruiker alleen kandidaten van die vestigingen.",
+    "branchesTemplateHint": "De startset vestigingen die nieuwe gebruikers met deze rol krijgen. Bestaande gebruikers behouden hun eigen set. Dit past alleen de template aan.",
+    "branchesEmptyHint": "Geen vestigingen geselecteerd. Nieuwe gebruikers met deze rol starten zonder vestiging-koppeling en zien álle kandidaten. Mét gekoppelde vestigingen ziet een gebruiker alleen kandidaten van die vestigingen.",
     "branchesNoLocations": "Nog geen vestigingen ingericht.",
     "branchesSaveFailed": "Opslaan van de vestiging-template is mislukt. Probeer het opnieuw.",
     "appearanceSaveFailed": "Opslaan van het uiterlijk is mislukt. Probeer het opnieuw.",
@@ -1768,7 +1768,7 @@
       "change": "Wijziging",
       "access": "Toegang (AVG)"
     },
-    "accessNotice": "Alleen-lezen toegang tot dit dossier — geen wijziging (AVG-toegangslogboek).",
+    "accessNotice": "Alleen-lezen toegang tot dit dossier, geen wijziging (AVG-toegangslogboek).",
     "http": {
       "method": "Methode",
       "path": "Pad",
@@ -1903,16 +1903,16 @@
   },
   "provinces": {
     "title": "Provincies",
-    "subtitle": "Provincies per land — gebruikt in adresvelden en filters.",
+    "subtitle": "Provincies per land, gebruikt in adresvelden en filters.",
     "add": "Provincie toevoegen",
     "country": "Land",
-    "empty": "Nog geen provincies voor dit land — voeg de eerste toe.",
+    "empty": "Nog geen provincies voor dit land. Voeg de eerste toe.",
     "loadError": "Kon de provincies niet laden.",
     "retry": "Opnieuw proberen"
   },
   "genderSettings": {
     "title": "Geslacht",
-    "subtitle": "Geslachten met een kleur — bepaalt de kleur van het kandidaat-icoon.",
+    "subtitle": "Geslachten met een kleur, bepaalt de kleur van het kandidaat-icoon.",
     "add": "Geslacht toevoegen"
   },
   "planning": {
@@ -2009,7 +2009,7 @@
       "phone": "Telefoon"
     },
     "dedupeKeysSaveFailed": "Opslaan van de duplicaatvelden is mislukt.",
-    "dedupeKeysMinOne": "Minstens één veld blijft vereist — zonder velden valt de controle terug op e-mail + mobiel."
+    "dedupeKeysMinOne": "Minstens één veld blijft vereist. Zonder velden valt de controle terug op e-mail + mobiel."
   },
   "noteTypes": {
     "title": "Notitietypes — {{entity}}",
@@ -2060,7 +2060,7 @@
     "defaultRadiusHint": "Straal die de kandidaten-zoek-tab standaard gebruikt bij het openen van een vacature (1–500 km).",
     "leadsCriteria": {
       "title": "Leads-criteria",
-      "subtitle": "Bepaal welke kandidaten meetellen als 'lead' voor deze vacature — dit voedt zowel de leads-teller als het tabblad 'Kandidaten zoeken'.",
+      "subtitle": "Bepaal welke kandidaten meetellen als 'lead' voor deze vacature. Dit voedt zowel de leads-teller als het tabblad 'Kandidaten zoeken'.",
       "countableStatusesTitle": "Vacaturestatussen die meetellen",
       "countableStatusesHint": "Leeg geselecteerd = alle vacaturestatussen tellen mee.",
       "radiusTitle": "Zoekstraal",
@@ -2072,7 +2072,7 @@
       "functionMatchExactDesc": "Alleen kandidaten met exact dezelfde functie tellen mee.",
       "functionMatchCategory": "Categorie",
       "functionMatchCategoryDesc": "Kandidaten met dezelfde functiecategorie tellen mee.",
-      "functionMatchCategoryNote": "Werkt momenteel hetzelfde als 'Exact' — vacatures hebben nog geen functiecategorie.",
+      "functionMatchCategoryNote": "Werkt momenteel hetzelfde als 'Exact'. Vacatures hebben nog geen functiecategorie.",
       "functionMatchAll": "Alles",
       "functionMatchAllDesc": "Elke functie telt mee; functie speelt geen rol bij leads.",
       "excludeAlreadyAppliedLabel": "Kandidaten met een lopende sollicitatie uitsluiten",
@@ -2123,16 +2123,16 @@
     "add": "Functie toevoegen",
     "freeEntry": "Vrije invoer toestaan",
     "freeEntryHint": "Aan: recruiters kunnen een eigen functie typen (combobox). Uit: alleen kiezen uit de lijst (strikte dropdown).",
-    "confirmFreeEntry": "Weet je het zeker? Vrije invoer laat recruiters functies typen die niet in de lijst staan — dit kan de datakwaliteit verlagen."
+    "confirmFreeEntry": "Weet je het zeker? Vrije invoer laat recruiters functies typen die niet in de lijst staan. Dit kan de datakwaliteit verlagen."
   },
   "contactFunctionsSettings": {
     "title": "Contactfuncties",
     "subtitle": "Beheer de functielijst voor contactpersonen bij klanten (bijv. Locatiemanager, Teamleider).",
     "add": "Functie toevoegen",
-    "notAvailable": "Nog niet beschikbaar — deze lijst wordt actief zodra de backend-koppeling er is.",
+    "notAvailable": "Nog niet beschikbaar. Deze lijst wordt actief zodra de backend-koppeling er is.",
     "freeEntry": "Vrije invoer toestaan",
     "freeEntryHint": "Aan: een eigen functie typen kan (combobox). Uit: alleen kiezen uit de lijst (strikte dropdown).",
-    "confirmFreeEntry": "Weet je het zeker? Vrije invoer laat gebruikers contactfuncties typen die niet in de lijst staan — dit kan de datakwaliteit verlagen."
+    "confirmFreeEntry": "Weet je het zeker? Vrije invoer laat gebruikers contactfuncties typen die niet in de lijst staan. Dit kan de datakwaliteit verlagen."
   },
   "opportunityDisplay": {
     "title": "Tabelweergave",
@@ -2241,7 +2241,7 @@
       "title": "Standaard statusfilter",
       "allOption": "Alle statussen",
       "chosenHint": "Deze status is direct geselecteerd zodra dit tabblad opent.",
-      "autoHint": "Nog niet gekozen — dit is nu automatisch de status die op 'actief' lijkt (of Alle, als die niet bestaat)."
+      "autoHint": "Nog niet gekozen. Dit is nu automatisch de status die op 'actief' lijkt (of Alle, als die niet bestaat)."
     }
   },
   "customerVacancyDefaults": {
@@ -2267,7 +2267,7 @@
   "dashboardsAll": "Alle grafieken & lijsten",
   "dashboardsCanSwitch": "Kan wisselen",
   "dashboardsDesc": {
-    "admin": "Volledig overzicht — alle KPI's, grafieken en lijsten.",
+    "admin": "Volledig overzicht. Alle KPI's, grafieken en lijsten.",
     "management": "Sturing op instroom, uitstroom, pijplijn en matches.",
     "recruitment": "Kandidaatgericht: touchpoints, opvolging, funnel en gesprekken.",
     "backoffice": "Documenten, contracten, koppelingen en runs.",
@@ -2343,7 +2343,7 @@
   },
   "numbering": {
     "title": "Nummering",
-    "subtitle": "Automatisch reeksnummer per record — prefix, aantal cijfers en startwaarde per type.",
+    "subtitle": "Automatisch reeksnummer per record. Prefix, aantal cijfers en startwaarde per type.",
     "hint": "Wijzigingen gelden alleen voor NIEUWE nummers; bestaande nummers blijven ongewijzigd.",
     "entity": "Type",
     "prefix": "Prefix",
@@ -2430,7 +2430,7 @@
     "optionsHint": "Kommagescheiden. Bestaande waarden blijven bewaard als je opties wijzigt.",
     "hasData": "heeft data",
     "delete": "Verwijderen",
-    "deleteBlocked": "Kan niet verwijderd worden — veld heeft data",
+    "deleteBlocked": "Kan niet verwijderd worden. Veld heeft data",
     "activate": "Activeren",
     "deactivate": "Deactiveren",
     "showInUi": "Tonen in de UI",
@@ -2446,7 +2446,7 @@
     }
   },
   "usage": {
-    "subtitleTenant": "Verbruik van {{name}} — alleen hoeveelheden voor je facturatie.",
+    "subtitleTenant": "Verbruik van {{name}}. Alleen hoeveelheden voor je facturatie.",
     "month": "Maand",
     "loadError": "Verbruik laden is mislukt.",
     "col": {
@@ -2459,7 +2459,7 @@
   },
   "jobs": {
     "title": "Taakbeheer",
-    "subtitle": "Wachtrijstatus, individuele taken en mislukte taken — alleen zichtbaar voor super admins.",
+    "subtitle": "Wachtrijstatus, individuele taken en mislukte taken. Alleen zichtbaar voor super admins.",
     "tab": {
       "overview": "Overzicht",
       "jobs": "Taken",
@@ -2511,7 +2511,7 @@
     "empty": "Geen taken gevonden.",
     "emptyFailed": "Geen mislukte taken.",
     "cancel": "Annuleren",
-    "cancelReservedError": "Annuleren is mislukt — de taak wordt al door een worker uitgevoerd.",
+    "cancelReservedError": "Annuleren is mislukt. De taak wordt al door een worker uitgevoerd.",
     "retry": "Opnieuw proberen",
     "retryAll": "Alles opnieuw proberen",
     "retryAllConfirm_one": "{{count}} mislukte taak opnieuw in de wachtrij zetten?",
@@ -2527,8 +2527,8 @@
       "page": "Pagina {{page}} van {{last}}"
     },
     "truncatedNotice": "Alleen de nieuwste 5.000 mislukte taken worden getoond.",
-    "driverWarning": "De wachtrij draait op \"{{driver}}\" — dit scherm kijkt naar de database-wachtrij en toont dan mogelijk niet de echte werkvoorraad.",
-    "actionFailed": "Actie mislukt — de taak bestaat mogelijk niet meer. Ververs de lijst.",
+    "driverWarning": "De wachtrij draait op \"{{driver}}\". Dit scherm kijkt naar de database-wachtrij en toont dan mogelijk niet de echte werkvoorraad.",
+    "actionFailed": "Actie mislukt. De taak bestaat mogelijk niet meer. Ververs de lijst.",
     "recent": {
       "tenantFilter": "Tenant-filter",
       "allTenants": "Alle tenants",
@@ -2558,7 +2558,7 @@
       "colQueue": "Wachtrij",
       "colThroughput": "Doorvoer",
       "colRuntime": "Gem. duur",
-      "empty": "Nog geen metrics — Horizon snapshot draait elke 5 minuten."
+      "empty": "Nog geen metrics. Horizon snapshot draait elke 5 minuten."
     }
   },
   "actionRules": {
@@ -2576,7 +2576,7 @@
     "customerAxisTitle": "Klant-acties",
     "customerAxisSubtitle": "Acties vanuit een klant, per klantstatus.",
     "consentSectionTitle": "AVG-uitzondering — WhatsApp-toestemming",
-    "consentSectionSubtitle": "Een kandidaat zonder WhatsApp-opt-in kan nooit een bericht ontvangen — deze regel is vergrendeld.",
+    "consentSectionSubtitle": "Een kandidaat zonder WhatsApp-opt-in kan nooit een bericht ontvangen. Deze regel is vergrendeld.",
     "actionCol": "Actie",
     "effect": {
       "allow": "Toegestaan",
@@ -2598,8 +2598,8 @@
     "detail": {
       "title": "Celdetails",
       "popupCode": "Popup-code",
-      "noPopup": "Geen popup — deze actie wordt altijd stil toegestaan.",
-      "noPopupOverrideWarning": "Voor deze cel bestaat geen popup-code — de gebruiker ziet dus alleen de generieke waarschuw-/blokkadetitel, zonder toelichting. Overweeg of dit gewenst is.",
+      "noPopup": "Geen popup. Deze actie wordt altijd stil toegestaan.",
+      "noPopupOverrideWarning": "Voor deze cel bestaat geen popup-code. De gebruiker ziet dus alleen de generieke waarschuw-/blokkadetitel, zonder toelichting. Overweeg of dit gewenst is.",
       "messageNote": "De boodschap ligt per popup-code vast en is (nog) niet per tenant aan te passen.",
       "resetCell": "Herstel deze cel naar standaard",
       "isOverride": "Aangepast t.o.v. de standaardregel",
@@ -2704,7 +2704,7 @@
     "blocksHint": "Kies vaste tekstblokken (intro, cta, juridisch) die dit profiel meeneemt.",
     "blocksEmpty": "Nog geen herbruikbare blokken aangemaakt.",
     "delete": "Verwijderen",
-    "deleteBlocked": "Kan niet verwijderd worden — profiel is in gebruik.",
+    "deleteBlocked": "Kan niet verwijderd worden. Profiel is in gebruik.",
     "confirmDelete": "Profiel \"{{name}}\" verwijderen?"
   },
   "vacancyContentBlocksSettings": {
@@ -2723,7 +2723,7 @@
     },
     "bodyLabel": "Inhoud",
     "delete": "Verwijderen",
-    "deleteBlocked": "Kan niet verwijderd worden — blok is in gebruik.",
+    "deleteBlocked": "Kan niet verwijderd worden. Blok is in gebruik.",
     "confirmDelete": "Blok \"{{name}}\" verwijderen?"
   },
   "careerSite": {
@@ -2733,7 +2733,7 @@
     "hint": "Zet de publieke carrière-site (…/{tenant}/vacatures) aan of uit. De backend dwingt dit direct af: uit = de publieke site toont een nette niet-actief-melding en solliciteren is dicht.",
     "urls": {
       "title": "Publieke URL's",
-      "subtitle": "Kopieer deze naar een vacaturesite of crawler — opgebouwd uit het eigen adres van deze tenant.",
+      "subtitle": "Kopieer deze naar een vacaturesite of crawler. Opgebouwd uit het eigen adres van deze tenant.",
       "site": "Site-info (branding)",
       "vacancies": "Vacatures (JSON)",
       "sitemap": "Sitemap",
@@ -2753,25 +2753,25 @@
   "dashboardsItem": "Onderdeel",
   "customerRequiredFields": {
     "title": "Verplichte velden",
-    "subtitle": "Verplichte velden voor de klant (per klantfase) en voor Locatie, Afdeling en Contactpersoon. De backend controleert dit al bij aanmaken én bewerken — zie de toelichting per tabblad.",
+    "subtitle": "Verplichte velden voor de klant (per klantfase) en voor Locatie, Afdeling en Contactpersoon. De backend controleert dit al bij aanmaken én bewerken. Zie de toelichting per tabblad.",
     "tabs": {
       "customer": "Klant",
       "location": "Locatie",
       "department": "Afdeling",
       "contact": "Contactpersoon"
     },
-    "phaseHint": "Dit wordt gecontroleerd bij het aanmaken en bij een echte fase-overgang. Een gewone wijziging die de fase niet aanpast, wordt nooit geblokkeerd — ongeacht welke andere velden nog ontbreken.",
-    "flatHint": "Dit wordt volledig gecontroleerd bij het aanmaken. Bij bewerken wordt alleen gekeken naar de velden die de wijziging zelf aanraakt — een al onvolledig record blijft op de andere velden gewoon bewerkbaar."
+    "phaseHint": "Dit wordt gecontroleerd bij het aanmaken en bij een echte fase-overgang. Een gewone wijziging die de fase niet aanpast, wordt nooit geblokkeerd. Ongeacht welke andere velden nog ontbreken.",
+    "flatHint": "Dit wordt volledig gecontroleerd bij het aanmaken. Bij bewerken wordt alleen gekeken naar de velden die de wijziging zelf aanraakt. Een al onvolledig record blijft op de andere velden gewoon bewerkbaar."
   },
   "customerConversion": {
     "title": "Standaardstatus na conversie",
-    "subtitle": "De status die een klant direct krijgt na conversie van Prospect naar Klant. Een ontbrekende instelling laat de status leeg — kies een status om die automatisch toe te passen.",
+    "subtitle": "De status die een klant direct krijgt na conversie van Prospect naar Klant. Een ontbrekende instelling laat de status leeg. Kies een status om die automatisch toe te passen.",
     "none": "Geen (handmatig instellen)",
     "saveFailed": "Opslaan mislukt"
   },
   "vacancyDefaultStatus": {
     "title": "Standaardstatus bij aanmaken",
-    "subtitle": "De status die een nieuwe vacature krijgt wanneer er geen status wordt meegegeven. Een ontbrekende instelling laat de status leeg — kies een status om die automatisch toe te passen.",
+    "subtitle": "De status die een nieuwe vacature krijgt wanneer er geen status wordt meegegeven. Een ontbrekende instelling laat de status leeg. Kies een status om die automatisch toe te passen.",
     "none": "Geen (handmatig instellen)",
     "saveFailed": "Opslaan mislukt"
   },
@@ -2870,7 +2870,7 @@
     "matchRenewSaveFailed": "Opslaan van het match-verlengingsvenster is mislukt."
   },
   "modShiftmanager": {
-    "reportingOff": "Shiftmanager-rapportage staat nog niet aan — zet de module aan om KPI-doelen en weergavelimieten in te stellen."
+    "reportingOff": "Shiftmanager-rapportage staat nog niet aan. Zet de module aan om KPI-doelen en weergavelimieten in te stellen."
   },
   "dashboardsEmpty": "Nog geen dashboarditems geconfigureerd.",
   "settings": {
@@ -2896,6 +2896,6 @@
     "colCountry": "Land",
     "colCoc": "KvK-nummer",
     "colVat": "Btw-nummer",
-    "unknownCountryHint": "Voor landen zonder regel hierboven wordt niets geblokkeerd — je krijgt hooguit een zachte hint."
+    "unknownCountryHint": "Voor landen zonder regel hierboven wordt niets geblokkeerd. Je krijgt hooguit een zachte hint."
   }
 }

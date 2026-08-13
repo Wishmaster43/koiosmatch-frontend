@@ -33,7 +33,7 @@
       "region": "Région"
     }
   },
-  "comingSoon": "{{label}} — bientôt disponible",
+  "comingSoon": "{{label}}. Bientôt disponible",
   "period": {
     "label": "Période",
     "day": "Jour",
@@ -49,7 +49,7 @@
     "phase": "Étape",
     "total": "Total des candidatures",
     "overallConversion": "Conversion globale",
-    "cohortNote": "La cohorte se remplit encore — occupation du pipeline affichée jusqu'à un historique suffisant.",
+    "cohortNote": "La cohorte se remplit encore. Occupation du pipeline affichée jusqu'à un historique suffisant.",
     "conversion": "Conversion",
     "reached": "Atteint",
     "current": "Actuellement à l'étape",
