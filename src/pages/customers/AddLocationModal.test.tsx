@@ -14,7 +14,7 @@
  * once it exists (CONTACT-PRIMAIR-LOCATIE-1).
  */
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { render, screen, waitFor, fireEvent } from '@testing-library/react'
+import { render, screen, waitFor, fireEvent, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import i18n from '@/i18n'
 import AddLocationModal from './AddLocationModal'
@@ -164,6 +164,31 @@ describe('AddLocationModal · province picker (Danny 02-08: "provincie heeft gee
     // Sends `state` (the legacy-but-still-accepted wire key) — see this file's report
     // for why the key was not renamed to `province`.
     expect(onCreate).toHaveBeenCalledWith(expect.objectContaining({ state: 'Zuid-Holland' }))
+  })
+
+  // CLEAR-SWEEP (Danny 13-08): province is optional — useCustomerLocations.toApi sends
+  // `state` through as-is (nullable column), so an explicit clear must reach the payload.
+  it('CLEAR-SWEEP: pick then clear the province picker', async () => {
+    const onCreate = vi.fn().mockResolvedValue(undefined)
+    const user = userEvent.setup()
+    render(<AddLocationModal onClose={() => {}} onCreate={onCreate} statuses={statuses} />)
+
+    await user.type(screen.getByLabelText(ct('subModal.locationName'), { exact: false }), 'Hoofdlocatie')
+    // CLEAR-SWEEP (Danny 13-08): once picked, the clear cross ALSO matches the
+    // `/Provincie/` name regex (its own accessible name is "Provincie wissen") —
+    // scope to the field's first button (the trigger, DOM order) like the house
+    // `fieldTrigger` helper (OpportunityGeneralCard's own clear test).
+    const stateTrigger = () => within(screen.getByText(ct('subModal.state')).parentElement as HTMLElement).getAllByRole('button')[0]
+    await user.click(stateTrigger())
+    await user.click(await screen.findByRole('button', { name: 'Zuid-Holland' }))
+    expect(stateTrigger()).toHaveTextContent('Zuid-Holland')
+
+    const clear = screen.getByTitle(i18n.t('clearField', { ns: 'common', field: ct('subModal.state') }))
+    await user.click(clear)
+    expect(stateTrigger()).toHaveTextContent(i18n.t('select', { ns: 'common' }))
+
+    await user.click(screen.getByRole('button', { name: ct('subModal.create') }))
+    expect(onCreate).toHaveBeenCalledWith(expect.objectContaining({ state: '' }))
   })
 })
 

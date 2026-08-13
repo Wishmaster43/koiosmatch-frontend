@@ -14,7 +14,7 @@
  * name validation still blocking an incomplete submit.
  */
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { render, screen, waitFor, fireEvent } from '@testing-library/react'
+import { render, screen, waitFor, fireEvent, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import i18n from '@/i18n'
 import AddCustomerModal from './AddCustomerModal'
@@ -293,6 +293,58 @@ describe('AddCustomerModal · own address block (Danny 02-08: mirrors AddCandida
       street: 'Kerkstraat', houseNumber: '12', houseNumberSuffix: 'A',
       postalCode: '4201 AB', city: 'Gorinchem', province: 'Utrecht', country: 'NL',
     }))
+  })
+})
+
+// CLEAR-SWEEP (Danny 13-08): industry/province/country/owner are optional pickers —
+// each carries a real clear cross once picked, and clearing must reach the create
+// body as "left out" (CONSIST-2, verified in useCustomerRecord.test.ts), not just
+// reset the on-screen trigger. Mirrors OpportunityGeneralCard's own clear test.
+describe('AddCustomerModal · CLEAR-SWEEP optional pickers clear back to placeholder', () => {
+  it('pick then clear the industry picker', async () => {
+    const user = userEvent.setup()
+    render(<AddCustomerModal onClose={() => {}} users={users} statuses={statuses} />)
+    await user.click(screen.getByRole('button', { name: new RegExp(ct('modal.fields.industry')) }))
+    await user.click(await screen.findByRole('button', { name: 'Zorg' }))
+    expect(screen.getByText('Zorg')).toBeInTheDocument()
+
+    const clear = within(screen.getByText(ct('modal.fields.industry')).parentElement as HTMLElement).getByTitle(i18n.t('clearField', { ns: 'common', field: ct('modal.fields.industry') }))
+    await user.click(clear)
+    expect(screen.getByText(ct('modal.fields.selectIndustry'))).toBeInTheDocument()
+  })
+
+  it('pick then clear the account manager picker', async () => {
+    authState.user = { id: 'super-admin-1', name: 'Super Admin' } // not auto-proposed, stays empty until picked
+    const user = userEvent.setup()
+    render(<AddCustomerModal onClose={() => {}} users={users} statuses={statuses} />)
+    await user.click(screen.getByRole('button', { name: new RegExp(ct('modal.fields.accountManager')) }))
+    await user.click(await screen.findByRole('button', { name: 'Piet Recruiter' }))
+    expect(screen.getByText('Piet Recruiter')).toBeInTheDocument()
+
+    const clear = within(screen.getByText(ct('modal.fields.accountManager')).parentElement as HTMLElement).getByTitle(i18n.t('clearField', { ns: 'common', field: ct('modal.fields.accountManager') }))
+    await user.click(clear)
+    expect(screen.getByText(ct('modal.fields.selectOwner'))).toBeInTheDocument()
+  })
+
+  it('pick then clear the province/country pickers, and the create body omits both when left empty', async () => {
+    const onCreate = vi.fn().mockResolvedValue(undefined)
+    const user = userEvent.setup()
+    render(<AddCustomerModal onClose={() => {}} onCreate={onCreate} users={users} statuses={statuses} />)
+    await user.type(screen.getByLabelText(ct('modal.fields.name'), { exact: false }), 'Rivas Zorggroep')
+
+    await user.click(screen.getByRole('button', { name: new RegExp(ct('locations.detail.country')) }))
+    await user.click(await screen.findByRole('button', { name: 'Nederland' }))
+    await user.click(screen.getByRole('button', { name: new RegExp(ct('locations.detail.state')) }))
+    await user.click(await screen.findByRole('button', { name: 'Utrecht' }))
+
+    const clearProvince = within(screen.getByText(ct('locations.detail.state')).parentElement as HTMLElement).getByTitle(i18n.t('clearField', { ns: 'common', field: ct('locations.detail.state') }))
+    await user.click(clearProvince)
+    expect(screen.getByText(cm('select'))).toBeInTheDocument()
+    const clearCountry = within(screen.getByText(ct('locations.detail.country')).parentElement as HTMLElement).getByTitle(i18n.t('clearField', { ns: 'common', field: ct('locations.detail.country') }))
+    await user.click(clearCountry)
+
+    await user.click(screen.getByRole('button', { name: ct('modal.create') }))
+    expect(onCreate).toHaveBeenCalledWith(expect.objectContaining({ province: '', country: '' }))
   })
 })
 

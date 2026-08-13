@@ -68,16 +68,22 @@ export default function ContactLinkCard({
           <div style={row2}>
             {showLocationPicker && (
               <Field label={t('subModal.selectLocation')}>
+                {/* CLEAR-SWEEP (Danny 13-08): optional — useCustomerContacts.toApi
+                    already coerces an empty locationId to null on save. */}
                 <CreatableSelect value={locationId ? String(locationId) : null} allowCreate={false}
                   onChange={onLocationChange}
+                  clearable clearLabel={t('subModal.selectLocation')}
                   placeholder={t('subModal.noneOption')} options={locationOptions}
                   style={CREATABLE_STYLE} />
               </Field>
             )}
             {showDepartmentPicker && (
               <Field label={t('subModal.selectDepartment')}>
+                {/* CLEAR-SWEEP: optional — useCustomerContacts.toApi coerces an empty
+                    departmentId to null on save the same way. */}
                 <CreatableSelect value={departmentId ? String(departmentId) : null} allowCreate={false}
                   onChange={onDepartmentChange}
+                  clearable clearLabel={t('subModal.selectDepartment')}
                   placeholder={departmentPlaceholder} options={departmentOptions} style={CREATABLE_STYLE} />
               </Field>
             )}

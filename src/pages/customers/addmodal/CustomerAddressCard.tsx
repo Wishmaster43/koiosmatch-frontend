@@ -61,11 +61,17 @@ export default function AddressCard({ form, set, provinces }: AddressCardProps) 
           {/* Sends `province` (the backend's preferred key, per CustomerRequest — `state`
               is only a legacy input alias) — the same key the candidate's home address uses. */}
           <Field label={t('locations.detail.state')}>
+            {/* CLEAR-SWEEP (Danny 13-08): province is in OPTIONAL_CREATE_FIELDS
+                (useCustomerRecord) — omitted from the create body entirely when
+                empty — so clearable. */}
             <CreatableSelect value={form.province || null} onChange={(v: string) => set('province', v)} allowCreate={false}
+              clearable clearLabel={t('locations.detail.state')}
               placeholder={t('common:select')} options={provinces} menuWidth={260} />
           </Field>
           <Field label={t('locations.detail.country')}>
+            {/* CLEAR-SWEEP: country is in OPTIONAL_CREATE_FIELDS the same way. */}
             <CreatableSelect value={form.country || null} onChange={(v: string) => set('country', v)} allowCreate={false}
+              clearable clearLabel={t('locations.detail.country')}
               placeholder={t('common:select')} options={countryOptions} menuWidth={260} />
           </Field>
         </div>

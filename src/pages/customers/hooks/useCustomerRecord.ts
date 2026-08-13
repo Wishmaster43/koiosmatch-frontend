@@ -200,14 +200,16 @@ export function useCustomerRecord({ setCustomers, setTotal, users, t }: Args) {
     } as ApiCustomer)
     setCustomers(prev => [optimistic, ...prev]); setTotal(tt => tt + 1)
     const body: Record<string, unknown> = {
-      name: form.name, status: form.status,
-      city: form.city, industry: form.industry, owner_id: form.ownerId,
+      name: form.name, status: form.status, city: form.city,
     }
     // Only send an optional field once it carries a value — the rules are
-    // sometimes|nullable, so an empty string would fail the url/email/integer checks.
-    OPTIONAL_CREATE_FIELDS.forEach(([formKey, apiKey]) => {
-      const v = form[formKey]
-      if (typeof v === 'string' && v.trim() !== '') body[apiKey] = v.trim()
+    // sometimes|nullable, so an empty string would fail the url/email/integer/
+    // exists checks. CLEAR-SWEEP (Danny 13-08): industry/owner_id moved in here
+    // alongside the rest (CONSIST-2) once their pickers became clearable — a
+    // cleared value must reach the create call as "left out", never as ''.
+    ;[...OPTIONAL_CREATE_FIELDS, ['industry', 'industry'], ['ownerId', 'owner_id']].forEach(([formKey, apiKey]) => {
+      const v = form[formKey as keyof CreateForm]
+      if (typeof v === 'string' && v.trim() !== '') body[apiKey as string] = v.trim()
     })
     return api.post('/customers', body).then(r => { const c = mapCustomerDetail(unwrap<ApiCustomer>(r)); setCustomers(prev => prev.map(x => x.id === optimistic.id ? c : x)); return c })
       .catch(err => { setCustomers(prev => prev.filter(x => x.id !== tmpId)); setTotal(tt => tt - 1); throw err })

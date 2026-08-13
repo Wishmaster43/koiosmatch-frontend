@@ -31,7 +31,9 @@ export default function AiAgentCard({ agentId, onAgentChange }: Props) {
         <div style={{ fontSize: 12, color: 'var(--color-danger)' }}>{t('aiagent.loadError')}</div>
       ) : (
         <>
+          {/* VAC-CLEAR-1: `ai_agent_id` is `sometimes|nullable` server-side (StoreVacancyRequest, VAC-AGENT-1's "null unlinks") — optional, so the picker carries the clear cross. */}
           <CreatableSelect value={agentId || null} onChange={onAgentChange} allowCreate={false}
+            clearable clearLabel={t('aiagent.placeholder')}
             placeholder={loading ? t('common:loading') : t('aiagent.placeholder')} options={selectOptions} />
           {!loading && options.length === 0 && (
             <p style={{ fontSize: 11, color: 'var(--text-muted)', margin: 0 }}>{t('aiagent.empty')}</p>

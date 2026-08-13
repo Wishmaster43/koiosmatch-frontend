@@ -20,8 +20,10 @@ export default function RecruiterCard({ ownerId, onOwnerChange, userOptions }: P
     <div>
       <div style={cardHead}>{t('modal.fields.cardOwner')}</div>
       <div style={cardBox}>
+        {/* VAC-CLEAR-1: `owner_id` is `sometimes|nullable` server-side (StoreVacancyRequest) — optional, so the picker carries the clear cross. */}
         <Field label={t('modal.fields.owner')}>
           <CreatableSelect value={ownerId || null} onChange={onOwnerChange} allowCreate={false}
+            clearable clearLabel={t('modal.fields.owner')}
             placeholder={t('common:select')} options={userOptions} />
         </Field>
       </div>

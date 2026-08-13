@@ -256,6 +256,30 @@ describe('AddTaskModal · edit mode prefill + PATCH (Danny 20-07)', () => {
     })
   })
 
+  // CLEAR-SWEEP regression (Danny 13-08 follow-up): priority carries the clear cross
+  // (PlanningCard) but only the department's own clear had a body-asserting test —
+  // this closes that gap, mirroring the department test's pick→clear→PATCH-body shape.
+  it('clearing the priority PATCHes an explicit null — an omitted key could never clear it', async () => {
+    const user = userEvent.setup()
+    render(<AddTaskModal editId={EDIT_ID} onClose={noop} onSaved={noop} />)
+
+    await screen.findByDisplayValue('Bel kandidaat terug')
+    // The clear affordance is CreatableSelect's opt-in X, rendered next to the
+    // trigger whose id ends in -clear — scope to the priority field specifically
+    // via its own trigger container (mirrors the department-clear test above).
+    const priorityTrigger = screen.getByRole('button', { name: /modal\.priority/ })
+    expect(priorityTrigger).toHaveTextContent('Normaal')
+    const clearBtn = priorityTrigger.parentElement!.querySelector('button[id$="-clear"]')
+    expect(clearBtn).toBeTruthy()
+    await user.click(clearBtn!)
+    await user.click(screen.getByRole('button', { name: 'modal.save' }))
+
+    const api = (await import('@/lib/api')).default
+    expect(api.patch).toHaveBeenCalledWith(`/tasks/${EDIT_ID}`, expect.objectContaining({
+      priority_id: null,
+    }))
+  })
+
   it('a failed load notifies and closes — nothing sensible to edit', async () => {
     const onClose = vi.fn()
     const { notifyError } = await import('@/lib/notify')

@@ -62,7 +62,11 @@ export default function LocationAddressCard({
               (normaliseLegacyKeys) — verified in the controller source, so this
               is not a silently-dropped key, just the legacy name. */}
           <Field label={t('subModal.state')}>
+            {/* CLEAR-SWEEP (Danny 13-08): optional — useCustomerLocations.toApi sends
+                `state` through as-is (nullable column), so an explicit '' clear reaches
+                the saved state, never silently dropped. */}
             <CreatableSelect value={state || null} onChange={onStateChange} allowCreate={false}
+              clearable clearLabel={t('subModal.state')}
               placeholder={t('common:select')} options={provinces} menuWidth={260} style={pickerStyle} />
           </Field>
           {/* `country` stays free text on purpose — see file header comment. */}

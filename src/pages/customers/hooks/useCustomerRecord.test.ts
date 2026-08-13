@@ -224,6 +224,35 @@ describe('useCustomerRecord · customer phase (KLANT-FASE-1)', () => {
     const body = vi.mocked(api.post).mock.calls[0][1] as Record<string, unknown>
     expect(body).not.toHaveProperty('phase')
   })
+
+  // CLEAR-SWEEP (Danny 13-08): industry/owner_id moved into the conditional
+  // OPTIONAL_CREATE_FIELDS-style treatment once their pickers became clearable —
+  // this asserts the REQUEST body (§13), not only that handleCreate resolved.
+  it('sends industry and owner_id on the create body once picked', async () => {
+    vi.mocked(api.post).mockResolvedValue({ data: { id: 11, name: 'Nieuw' } })
+    const r = harness([])
+    await act(async () => {
+      await r.result.current.record.handleCreate({
+        name: 'Nieuw', debtorNumber: '', status: 'active', ownerId: 'u1', industry: 'Zorg', city: '', phase: '',
+      })
+    })
+
+    expect(vi.mocked(api.post)).toHaveBeenCalledWith('/customers', expect.objectContaining({ industry: 'Zorg', owner_id: 'u1' }))
+  })
+
+  it('CLEAR-SWEEP: omits industry and owner_id from the create body when cleared back to empty', async () => {
+    vi.mocked(api.post).mockResolvedValue({ data: { id: 12, name: 'Nieuw' } })
+    const r = harness([])
+    await act(async () => {
+      await r.result.current.record.handleCreate({
+        name: 'Nieuw', debtorNumber: '', status: 'active', ownerId: '', industry: '', city: '', phase: '',
+      })
+    })
+
+    const body = vi.mocked(api.post).mock.calls[0][1] as Record<string, unknown>
+    expect(body).not.toHaveProperty('industry')
+    expect(body).not.toHaveProperty('owner_id')
+  })
 })
 
 /**

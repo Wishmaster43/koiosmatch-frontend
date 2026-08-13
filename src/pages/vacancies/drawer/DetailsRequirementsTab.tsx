@@ -51,8 +51,9 @@ export default function DetailsRequirementsTab({ vacancy: v, requirements, senio
         {/* G35: seniority/education now use the SAME searchable CreatableSelect as
             AddVacancyModal's RequirementsCard (was a native <select> here, a
             different control for the same lookup-driven levels). */}
-        {row(t('details.seniority'), v.seniority || dash, creatable('seniority', seniorityLevels), editing)}
-        {row(t('details.education'), v.education || dash, creatable('education', educationLevels), editing)}
+        {/* VAC-CLEAR-1: both are `sometimes|nullable` server-side (StoreVacancyRequest) — optional, so both carry the clear cross. */}
+        {row(t('details.seniority'), v.seniority || dash, creatable('seniority', seniorityLevels, t('details.seniority')), editing)}
+        {row(t('details.education'), v.education || dash, creatable('education', educationLevels, t('details.education')), editing)}
       </>, controls(t, editing, save, cancel, () => setEditing(true)))}
 
       {/* VACANCY-SKILLS-PARITY-1: required skills — same list/add/edit/remove

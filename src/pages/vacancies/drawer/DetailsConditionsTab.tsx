@@ -48,7 +48,8 @@ export default function DetailsConditionsTab({ vacancy: v, conditions, contractT
   return card(t('details.groups.conditions'), <>
     {row(t('details.salary'), pair(v.salaryMin, v.salaryMax) || v.salary || dash, twoNumbers('salaryMin', 'salaryMax', 'min', 'max', { min: 0, step: 0.01 }), editing)}
     {row(t('details.hours'), pair(v.hoursMin, v.hoursMax) || v.hours || dash, twoNumbers('hoursMin', 'hoursMax', 'min', 'max', { min: 0, max: 168, step: 1 }), editing)}
-    {row(t('details.matchContractType'), contractTypeLabel || dash, creatable('contractType', contractTypeOptions), editing)}
-    {row(t('details.matchCao'), caoLabel || dash, creatable('cao', caoOptions), editing)}
+    {/* VAC-CLEAR-1: both are `sometimes|nullable` server-side (MatchRules::contractType/cao) — optional, so both carry the clear cross. */}
+    {row(t('details.matchContractType'), contractTypeLabel || dash, creatable('contractType', contractTypeOptions, t('details.matchContractType')), editing)}
+    {row(t('details.matchCao'), caoLabel || dash, creatable('cao', caoOptions, t('details.matchCao')), editing)}
   </>, controls(t, editing, save, cancel, () => setEditing(true)))
 }

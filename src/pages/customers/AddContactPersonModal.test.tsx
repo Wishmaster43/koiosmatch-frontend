@@ -491,6 +491,90 @@ describe('AddContactPersonModal · geslacht', () => {
     // The trigger shows the resolved LABEL for the stored slug.
     expect(screen.getByRole('button', { name: ct('subModal.gender') })).toHaveTextContent('Man')
   })
+
+  // CLEAR-SWEEP (Danny 13-08): gender is optional (useCustomerContacts.toApi
+  // coerces '' to null) — a picked value must be clearable back to nothing.
+  it('CLEAR-SWEEP: pick then clear the gender picker', async () => {
+    const user = userEvent.setup()
+    render(<AddContactPersonModal onClose={() => {}} onCreate={vi.fn()} locations={locations} statuses={statuses} />)
+
+    await user.click(screen.getByRole('button', { name: ct('subModal.gender') }))
+    await user.click(screen.getByRole('button', { name: 'Vrouw' }))
+    expect(screen.getByRole('button', { name: ct('subModal.gender') })).toHaveTextContent('Vrouw')
+
+    const clear = screen.getByTitle(i18n.t('clearField', { ns: 'common', field: ct('subModal.gender') }))
+    await user.click(clear)
+    expect(screen.getByRole('button', { name: ct('subModal.gender') })).toHaveTextContent(ct('subModal.noneOption'))
+  })
+})
+
+describe('AddContactPersonModal · functie (role) is clearable', () => {
+  // CLEAR-SWEEP (Danny 13-08): role is optional (useCustomerContacts.toApi sends
+  // `function` through as-is, nullable column) — clearing must reach the payload.
+  it('pick then clear the role picker', async () => {
+    const onCreate = vi.fn().mockResolvedValue(undefined)
+    const user = userEvent.setup()
+    render(<AddContactPersonModal onClose={() => {}} onCreate={onCreate} locations={locations} statuses={statuses} />)
+
+    await user.type(screen.getByLabelText(ct('subModal.firstName'), { exact: false }), 'Anna')
+    await user.type(screen.getByLabelText(ct('subModal.lastName'), { exact: false }), 'Bakker')
+    await user.click(screen.getByRole('button', { name: ct('subModal.role') }))
+    // Pick from the seed fallback list (DEFAULT_CONTACT_FUNCTIONS) rather than
+    // typing a new one — the tenant's own free-entry flag is not under test here.
+    await user.click(screen.getByRole('button', { name: 'Teamleider' }))
+    expect(screen.getByRole('button', { name: ct('subModal.role') })).toHaveTextContent('Teamleider')
+
+    const clear = screen.getByTitle(i18n.t('clearField', { ns: 'common', field: ct('subModal.role') }))
+    await user.click(clear)
+    expect(screen.getByRole('button', { name: ct('subModal.role') })).toHaveTextContent(ct('common:select'))
+
+    await user.click(screen.getByRole('button', { name: ct('subModal.create') }))
+    expect(onCreate).toHaveBeenCalledWith(expect.objectContaining({ role: '' }))
+  })
+})
+
+describe('AddContactPersonModal · locatie/afdeling koppeling is clearable', () => {
+  // CLEAR-SWEEP (Danny 13-08): both are optional relational ids — useCustomerContacts.
+  // toApi already coerces an empty id to null, so clearing must reach the payload too.
+  it('pick then clear the location picker', async () => {
+    const onCreate = vi.fn().mockResolvedValue(undefined)
+    const user = userEvent.setup()
+    render(<AddContactPersonModal onClose={() => {}} onCreate={onCreate} locations={locations} statuses={statuses} />)
+    await user.type(screen.getByLabelText(ct('subModal.firstName'), { exact: false }), 'Jan')
+    await user.type(screen.getByLabelText(ct('subModal.lastName'), { exact: false }), 'Jansen')
+
+    await user.click(screen.getByRole('button', { name: ct('subModal.selectLocation') }))
+    await user.click(screen.getByRole('button', { name: 'Locatie Noord' }))
+    expect(screen.getByRole('button', { name: ct('subModal.selectLocation') })).toHaveTextContent('Locatie Noord')
+
+    const clear = screen.getByTitle(i18n.t('clearField', { ns: 'common', field: ct('subModal.selectLocation') }))
+    await user.click(clear)
+    expect(screen.getByRole('button', { name: ct('subModal.selectLocation') })).toHaveTextContent(ct('subModal.noneOption'))
+
+    await user.click(screen.getByRole('button', { name: ct('subModal.create') }))
+    expect(onCreate).toHaveBeenCalledWith(expect.objectContaining({ locationId: null }))
+  })
+
+  it('pick then clear the department picker', async () => {
+    const onCreate = vi.fn().mockResolvedValue(undefined)
+    const user = userEvent.setup()
+    render(<AddContactPersonModal onClose={() => {}} onCreate={onCreate} locations={locations} departments={departments} statuses={statuses} />)
+    await user.type(screen.getByLabelText(ct('subModal.firstName'), { exact: false }), 'Jan')
+    await user.type(screen.getByLabelText(ct('subModal.lastName'), { exact: false }), 'Jansen')
+
+    await user.click(screen.getByRole('button', { name: ct('subModal.selectLocation') }))
+    await user.click(screen.getByRole('button', { name: 'Locatie Noord' }))
+    await user.click(screen.getByRole('button', { name: ct('subModal.selectDepartment') }))
+    await user.click(screen.getByRole('button', { name: 'Verpleging' }))
+    expect(screen.getByRole('button', { name: ct('subModal.selectDepartment') })).toHaveTextContent('Verpleging')
+
+    const clear = screen.getByTitle(i18n.t('clearField', { ns: 'common', field: ct('subModal.selectDepartment') }))
+    await user.click(clear)
+    expect(screen.getByRole('button', { name: ct('subModal.selectDepartment') })).toHaveTextContent(ct('subModal.noneOption'))
+
+    await user.click(screen.getByRole('button', { name: ct('subModal.create') }))
+    expect(onCreate).toHaveBeenCalledWith(expect.objectContaining({ departmentId: null }))
+  })
 })
 
 /**

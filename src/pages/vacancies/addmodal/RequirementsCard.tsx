@@ -30,12 +30,15 @@ export default function RequirementsCard({
       <div style={cardHead}>{t('details.groups.requirements')}</div>
       <div style={cardBox}>
         <div style={row2}>
+          {/* VAC-CLEAR-1: both are `sometimes|nullable` server-side (StoreVacancyRequest) — optional, so both carry the clear cross. */}
           <Field label={t('details.seniority')}>
             <CreatableSelect value={seniority || null} onChange={onSeniorityChange} allowCreate={false}
+              clearable clearLabel={t('details.seniority')}
               placeholder={t('common:select')} options={seniorityLevels} />
           </Field>
           <Field label={t('details.education')}>
             <CreatableSelect value={education || null} onChange={onEducationChange} allowCreate={false}
+              clearable clearLabel={t('details.education')}
               placeholder={t('common:select')} options={educationLevels} />
           </Field>
         </div>

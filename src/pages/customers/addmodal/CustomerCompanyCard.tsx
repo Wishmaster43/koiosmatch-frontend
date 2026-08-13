@@ -40,7 +40,11 @@ export default function CustomerCompanyCard({ form, set, errors, industries }: C
           {/* Branche (industry/sector) — searchable tenant lookup, distinct from the
               "Vestiging" (establishment) picker below. */}
           <Field label={t('modal.fields.industry')}>
+            {/* CLEAR-SWEEP (Danny 13-08): industry is genuinely optional (the create
+                body sends it unconditionally, empty string included — see
+                useCustomerRecord.handleCreate) — so clearable. */}
             <CreatableSelect value={form.industry || null} onChange={v => set('industry', v)} allowCreate={false}
+              clearable clearLabel={t('modal.fields.industry')}
               placeholder={t('modal.fields.selectIndustry')} options={industries} />
           </Field>
           <Field label={t('overview.employeeCount')}>

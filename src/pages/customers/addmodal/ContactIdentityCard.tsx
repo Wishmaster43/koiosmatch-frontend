@@ -59,13 +59,19 @@ export default function ContactIdentityCard({
             (Danny 27-07: "functie is lelijk groot zo"). */}
         <div style={row2}>
           <Field label={t('subModal.role')}>
+            {/* CLEAR-SWEEP (Danny 13-08): role is optional (useCustomerContacts.toApi
+                sends `function` as-is, empty string included, which the nullable
+                column accepts) — so clearable, independent of the create/strict toggle. */}
             <CreatableSelect value={role} onChange={onRoleChange} options={contactFunctions}
-              allowCreate={allowFreeEntry} placeholder={t('common:select')} style={CREATABLE_STYLE} />
+              allowCreate={allowFreeEntry} clearable clearLabel={t('subModal.role')}
+              placeholder={t('common:select')} style={CREATABLE_STYLE} />
           </Field>
           {/* Geslacht: options come from the tenant /genders lookup and the field
-              stores the VALUE SLUG the backend validates with exists:candidate_genders,value. */}
+              stores the VALUE SLUG the backend validates with exists:candidate_genders,value.
+              CLEAR-SWEEP: optional — useCustomerContacts.toApi coerces '' to null. */}
           <Field label={t('subModal.gender')}>
             <CreatableSelect value={gender || null} onChange={onGenderChange} allowCreate={false}
+              clearable clearLabel={t('subModal.gender')}
               placeholder={t('subModal.noneOption')} style={CREATABLE_STYLE} options={genders} />
           </Field>
         </div>

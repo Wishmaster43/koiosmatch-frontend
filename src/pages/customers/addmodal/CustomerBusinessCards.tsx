@@ -48,7 +48,11 @@ export default function CustomerBusinessCards({
         <div style={cardHead}>{t('modal.fields.cardOwner')}</div>
         <div style={cardBox}>
           <Field label={t('modal.fields.accountManager')}>
+            {/* CLEAR-SWEEP (Danny 13-08): owner is genuinely optional (the create
+                body sends owner_id unconditionally, including empty — see
+                useCustomerRecord.handleCreate) — so clearable. */}
             <CreatableSelect value={form.ownerId || null} onChange={v => set('ownerId', v)} allowCreate={false}
+              clearable clearLabel={t('modal.fields.accountManager')}
               placeholder={t('modal.fields.selectOwner')} options={userOptions} />
           </Field>
         </div>

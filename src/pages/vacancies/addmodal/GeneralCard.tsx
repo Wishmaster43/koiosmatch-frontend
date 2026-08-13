@@ -36,12 +36,15 @@ export default function GeneralCard({
               `category` (VacancyWriter aliases it onto `function_title`); only
               the i18n VALUE renames (see the delivery report's locale-key list —
               this file cannot edit locales, so the key name is unchanged). */}
+          {/* VAC-CLEAR-1: both fields are `sometimes|nullable` server-side (StoreVacancyRequest) — optional, so both carry the clear cross. */}
           <Field label={t('modal.fields.category')}>
             <CreatableSelect value={category || null} onChange={onCategoryChange} allowCreate={false}
+              clearable clearLabel={t('modal.fields.category')}
               placeholder={t('common:select')} options={functions} />
           </Field>
           <Field label={t('modal.fields.industry')}>
             <CreatableSelect value={industry || null} onChange={onIndustryChange} allowCreate={false}
+              clearable clearLabel={t('modal.fields.industry')}
               placeholder={t('common:select')} options={industries} />
           </Field>
         </div>
