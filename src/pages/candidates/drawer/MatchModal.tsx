@@ -17,10 +17,17 @@
  * picked level (afdeling > locatie > klant) carries a value, and freeze the
  * moment the recruiter edits them by hand (job 21/22).
  *
- * Widened again to a 900px panel (Danny kandidaten-ronde-2, punt C.2.1 — "lang en
- * smal, kan dit niet breder?"): Relaties stays full-width (its pickers are the
- * ones that needed to breathe), Contract + Financieel now sit side by side below
- * it so the form reads less like a tall scrolling strip.
+ * CARD-STACK-LABEL-LEFT (Danny 13-08, two live complaints — "alles onder elkaar
+ * en niet naast elkaar" + "Match opmerkingen is heel klein"): rebuilt onto the
+ * PlanIntakeModal/AddApplicationModal canon instead of the old wide two-column
+ * frame. Every field is now its own label-LEFT row (P33, `match/styles` +
+ * `FormField`) — the label sits at the shared CANON_LABEL_WIDTH, the field
+ * takes the rest, so a row reads left-to-right instead of stacking label-above-
+ * field. The panel itself narrowed to ~640px (was 94vw/1060px) and the four
+ * sections stack as single-column titled cards — Relaties, Contract,
+ * Financieel, Opmerkingen — mirroring PlanIntakeModal's own scrollBody={false}
+ * + own scroll area (padding 22) + a pinned footer with borderTop, instead of
+ * the previous inline-scrolling wide panel.
  *
  * This is a thin container (audit R1 item 1, MUST-SPLIT — used to be 532 lines
  * with 4 inline api-calls): all state/effects/submit/422-mapping now live in
@@ -29,14 +36,16 @@
  * only wires the hook to the shared drawer chrome (overlay/panel/focus-trap) and
  * composes the sections + footer.
  *
- * Danny 24-07 points 3/6: the panel now shares its exact frame footprint with
- * AddCandidateModal (modalMetrics.ts, via match/styles' panel), and each
- * section renders as a titled CARD — the shared `@/components/ui/modalCards`
+ * Each section renders as a titled CARD — the shared `@/components/ui/modalCards`
  * chrome (`cardHead`/`cardBox`, CLAUDE.md §11: one source instead of a per-entity
- * copy) — instead of a bare uppercase label over an unbordered block. Opmerkingen
- * is its OWN card, left column, stacked under Contract — Financieel (the tallest
- * section) sits alone on the right so the two columns balance visually (Danny
- * 24-07 layout point).
+ * copy) — instead of a bare uppercase label over an unbordered block.
+ *
+ * Opmerkingen is the GROWING element (RESIZE-GROWS-EDITOR, mirrors
+ * NoteComposer.tsx's docblock): its card carries a taller default footprint
+ * (minHeight 160) than the other cards so the rich-text block reads as the
+ * form's own note, not an afterthought — the collapsed-ghost-start and the
+ * pop-out icon are untouched (shared `CollapsibleRichText`, out of this file's
+ * scope to restyle further).
  *
  * VACANCY-PREFILL-1 (Danny's ten-point round): picking a vacancy prefills the
  * Relaties/Contract fields it knows (useVacancyPrefillApply), the recruiter/owner
@@ -59,8 +68,6 @@ import MatchConflictBanners from './match/MatchConflictBanners'
 // create modals get the same collapsed-ghost prose block — see its own docblock.
 import CollapsibleRichText from '@/components/ui/CollapsibleRichText'
 import FloatingPanel from '@/components/ui/FloatingPanel'
-import { WIDE_MODAL } from '@/components/ui/modalMetrics'
-import { twoColSections } from './match/styles'
 import { cardHead, cardBox } from '@/components/ui/modalCards'
 import type { Id } from '@/types/common'
 
@@ -118,10 +125,15 @@ export default function MatchModal({
 
   return (
     // POPUP-SLEEP-1: migrated onto the shared FloatingPanel — draggable header,
-    // SE-resize, remembered position; same WIDE_MODAL footprint as before.
+    // SE-resize, remembered position. Narrowed to the ~640px single-column
+    // card-stack footprint (Danny 13-08); scrollBody={false} + the modal's own
+    // scroll area below mirrors PlanIntakeModal/AddApplicationModal exactly, so
+    // the footer buttons stay pinned instead of scrolling with the form.
     <FloatingPanel open onClose={onClose} title={title} ariaLabel={title}
-      persistKey="candidate-match" width="94vw" maxWidth={`${WIDE_MODAL.maxWidth}px`}
-      bodyStyle={{ padding: 22 }}>
+      persistKey="candidate-match" width={640} maxWidth="92vw" scrollBody={false} bodyStyle={{ padding: 0 }}>
+
+      {/* Fields scroll in their own area so the footer buttons stay pinned (mirrors PlanIntakeModal, Danny 13-08). */}
+      <div style={{ overflow: 'auto', flex: 1, minHeight: 0, padding: 22 }}>
 
         {/* AXIS-MATRIX-2 preflight — warn/block on this candidate before the recruiter fills in the rest. */}
         {form.matchRuleDecision && form.matchRuleDecision.effect !== 'allow' && (
@@ -135,11 +147,11 @@ export default function MatchModal({
         <MatchConflictBanners duplicateMatch={form.duplicateMatch} overlappingMatches={form.overlappingMatches} formatDate={formatDate}
           draftHours={form.hours ? Number(form.hours) : null} />
 
-        {/* ── Titled cards (Danny 24-07 point 3) — the addmodal card idiom: an
-            11px uppercase muted heading above a bordered surface, mirroring the
-            drill-down ProfileTab exactly so both "wide form" modals read as one
-            system. Relaties stays full-width; Contract + Financieel pair up
-            side by side below it (kept from punt C.2.1). ── */}
+        {/* ── Titled card stack (Danny 13-08, "alles onder elkaar en niet naast
+            elkaar"): Relaties / Contract / Financieel / Opmerkingen, single
+            column, each a bordered `cardBox` under an 11px uppercase `cardHead`
+            — the addmodal card idiom, now stacked instead of paired columns.
+            Every field inside a card is its own label-LEFT row (P33). ── */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 16, marginTop: 4 }}>
           <div>
             <div style={cardHead}>{t('placement.relations')}</div>
@@ -165,54 +177,58 @@ export default function MatchModal({
             </div>
           </div>
 
-          <div style={twoColSections}>
-            {/* Left column: Contract + Opmerkingen stacked — Opmerkingen collapsed
-                by default keeps this column's height close to Financieel's. */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-              <div>
-                <div style={cardHead}>{t('placement.contract')}</div>
-                <div style={cardBox}>
-                  <ContractSection
-                    t={t} errors={form.errors}
-                    contractType={form.contractType} setContractType={form.setContractType} contractTypes={form.contractTypes}
-                    cao={form.cao} setCao={form.setCao} caoOptions={form.caoOptions}
-                    startDate={form.startDate} setStartDate={form.setStartDate}
-                    endDate={form.endDate} setEndDate={form.setEndDate} setEndDateDirty={form.setEndDateDirty}
-                    hours={form.hours} setHours={form.setHours}
-                  />
-                </div>
-              </div>
-              <div>
-                <div style={cardHead}>{t('placement.matchRemarks')}</div>
-                <div style={cardBox}>
-                  {/* ACTIONS-SCOPE-DEFAULT-FLIP: "Match opmerkingen" reads as a
-                      conversation (like a note), not a description — keep all
-                      three Koios modes, including Actiepunten, explicitly.
-                      onPopout only wires when a candidate id is known — the
-                      remarks sync channel is keyed on it (see the hook above). */}
-                  <CollapsibleRichText
-                    t={t} value={form.remarks} onChange={changeRemarks}
-                    expanded={form.remarksExpanded} setExpanded={form.setRemarksExpanded}
-                    editing={form.remarksEditing} setEditing={form.setRemarksEditing}
-                    placeholder={t('placement.remarksAdd')}
-                    assistModes={['improve', 'summarize', 'actions']}
-                    onPopout={remarksCandidateId ? remarksPopout.open : undefined}
-                  />
-                </div>
-              </div>
+          <div>
+            <div style={cardHead}>{t('placement.contract')}</div>
+            <div style={cardBox}>
+              <ContractSection
+                t={t} errors={form.errors}
+                contractType={form.contractType} setContractType={form.setContractType} contractTypes={form.contractTypes}
+                cao={form.cao} setCao={form.setCao} caoOptions={form.caoOptions}
+                startDate={form.startDate} setStartDate={form.setStartDate}
+                endDate={form.endDate} setEndDate={form.setEndDate} setEndDateDirty={form.setEndDateDirty}
+                hours={form.hours} setHours={form.setHours}
+              />
             </div>
-            <div>
-              <div style={cardHead}>{t('placement.financial')}</div>
-              <div style={cardBox}>
-                <FinancialSection
-                  t={t} errors={form.errors}
-                  scale={form.scale} setScale={form.setScale} step={form.step} setStep={form.setStep}
-                  purchase={form.purchase} setPurchase={form.setPurchase} sell={form.sell} setSell={form.setSell}
-                  margin={form.margin} hasRates={form.hasRates} proposal={form.proposal}
-                  costCenter={form.costCenter} setCostCenter={form.setCostCenter} setCostCenterDirty={form.setCostCenterDirty}
-                  billingEmails={form.billingEmails} setBillingEmails={form.setBillingEmails} setBillingDirty={form.setBillingDirty}
-                />
-              </div>
+          </div>
+
+          <div>
+            <div style={cardHead}>{t('placement.financial')}</div>
+            <div style={cardBox}>
+              <FinancialSection
+                t={t} errors={form.errors}
+                scale={form.scale} setScale={form.setScale} step={form.step} setStep={form.setStep}
+                purchase={form.purchase} setPurchase={form.setPurchase} sell={form.sell} setSell={form.setSell}
+                margin={form.margin} hasRates={form.hasRates} proposal={form.proposal}
+                costCenter={form.costCenter} setCostCenter={form.setCostCenter} setCostCenterDirty={form.setCostCenterDirty}
+                billingEmails={form.billingEmails} setBillingEmails={form.setBillingEmails} setBillingDirty={form.setBillingDirty}
+              />
+            </div>
+          </div>
+
+          <div>
+            <div style={cardHead}>{t('placement.matchRemarks')}</div>
+            {/* GROWING element (RESIZE-GROWS-EDITOR, mirrors NoteComposer.tsx):
+                a taller default footprint than the other cards — "Match
+                opmerkingen is heel klein" (Danny 13-08) — so the rich-text
+                block reads as the form's own note. The collapsed-ghost-start
+                and the pop-out icon are untouched (shared CollapsibleRichText). */}
+            <div style={{ ...cardBox, minHeight: 160 }}>
+              {/* ACTIONS-SCOPE-DEFAULT-FLIP: "Match opmerkingen" reads as a
+                  conversation (like a note), not a description — keep all
+                  three Koios modes, including Actiepunten, explicitly.
+                  onPopout only wires when a candidate id is known — the
+                  remarks sync channel is keyed on it (see the hook above). */}
+              <CollapsibleRichText
+                t={t} value={form.remarks} onChange={changeRemarks}
+                expanded={form.remarksExpanded} setExpanded={form.setRemarksExpanded}
+                editing={form.remarksEditing} setEditing={form.setRemarksEditing}
+                placeholder={t('placement.remarksAdd')}
+                assistModes={['improve', 'summarize', 'actions']}
+                onPopout={remarksCandidateId ? remarksPopout.open : undefined}
+                // RESIZE-GROWS-EDITOR (Danny 13-08 "heel klein"): the open editor is
+                // the growing element of the panel, with a real writing floor.
+                fill minHeight={160}
+              />
             </div>
           </div>
         </div>
@@ -232,7 +248,10 @@ export default function MatchModal({
           <RateDeviationWarning proposal={form.proposal} purchase={form.purchase} sell={form.sell} onCancel={() => form.setConfirmDeviation(false)} />
         )}
 
-        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, marginTop: 20 }}>
+      </div>
+
+      {/* Pinned footer — buttons stay visible whatever the content height (mirrors PlanIntakeModal). */}
+      <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, padding: '14px 22px', borderTop: '1px solid var(--border)', flexShrink: 0 }}>
           <button onClick={onClose} style={{ height: 34, padding: '0 16px', fontSize: 13, border: '1px solid var(--border)', borderRadius: 8, background: 'var(--surface)', cursor: 'pointer', color: 'var(--text)' }}>{t('common:cancel')}</button>
           <button onClick={form.handleSubmitClick} disabled={form.saving || !form.customerId || !form.func}
             style={{ height: 34, padding: '0 16px', fontSize: 13, fontWeight: 600, border: 'none', borderRadius: 8, background: 'var(--color-primary)', color: 'var(--color-on-accent)', cursor: (form.customerId && form.func) ? 'pointer' : 'default', opacity: (form.customerId && form.func) ? 1 : 0.4 }}>

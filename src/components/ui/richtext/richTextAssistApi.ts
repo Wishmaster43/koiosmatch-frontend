@@ -100,7 +100,8 @@ export async function assistRichText(
 // Entities KoiosEntityGenerateController can write a suggestion for — mirrors its
 // ENTITIES map 1:1. Kept as its OWN type (not folded into RichTextAssistMode):
 // generate is a different request shape entirely (entity+id, never text+mode).
-export type GenerateEntity = 'candidate' | 'customer' | 'location' | 'match'
+// 'department' + 'vacancy' verified live in KoiosEntityGenerateController::ENTITIES (13-08).
+export type GenerateEntity = 'candidate' | 'customer' | 'location' | 'match' | 'department' | 'vacancy'
 
 interface ApiGenerateResponse { text: string }
 

@@ -5,11 +5,14 @@
  * useMatchForm. Contract type + CAO are searchable single-pick combos
  * (Danny 24-07 points 1/5) — allowCreate={false}: both are tenant lookups, never
  * a free-text create.
+ *
+ * LABEL-LEFT (Danny 13-08): contract type/CAO and start/end date pair up as
+ * short fields (P33 `pairRow`); hours per week gets its own full-width row.
  */
 import type { TFunction } from 'i18next'
 import CreatableSelect from '@/components/ui/CreatableSelect'
 import { FormField as F } from './FormField'
-import { input, row2, row3, pickerMenuWidth } from './styles'
+import { input, pairRow, pickerMenuWidth } from './styles'
 
 export default function ContractSection({
   t, errors,
@@ -27,8 +30,8 @@ export default function ContractSection({
   hours: string; setHours: (v: string) => void
 }) {
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-      <div style={row2}>
+    <div style={{ display: 'flex', flexDirection: 'column' }}>
+      <div style={pairRow}>
         {/* Contractsoort — searchable tenant lookup (Danny 24-07 point 1), was a
             plain non-searchable SelectMenu; may PROPOSE a tenant-marked default
             (useMatchForm, is_default) into an otherwise empty field.
@@ -53,18 +56,19 @@ export default function ContractSection({
           )}
         </F>
       </div>
-      {/* S24c: hours joins the date row (compact third column) — one row less to scroll.
-          A11Y FIX (control round): the two date inputs get their own accessible name
-          too — a bare label <div> next to an <input> is not a real association. */}
-      <div style={row3}>
+      <div style={pairRow}>
+        {/* A11Y FIX (control round): the two date inputs get their own accessible
+            name too — a bare label <div> next to an <input> is not a real association. */}
         <F label={t('placement.startDate')} error={errors.startDate}>
           {(labelId: string) => <input type="date" value={startDate} onChange={e => setStartDate(e.target.value)} style={input} aria-labelledby={labelId} />}
         </F>
         <F label={t('placement.endDate')} error={errors.endDate}>
           {(labelId: string) => <input type="date" value={endDate} onChange={e => { setEndDateDirty(true); setEndDate(e.target.value) }} style={input} aria-labelledby={labelId} />}
         </F>
-        <F label={t('placement.hoursShort')} error={errors.hours}><input type="number" min={1} max={40} value={hours} onChange={e => setHours(e.target.value)} style={input} aria-label={t('placement.hoursPerWeek')} /></F>
       </div>
+      <F label={t('placement.hoursShort')} error={errors.hours}>
+        <input type="number" min={1} max={40} value={hours} onChange={e => setHours(e.target.value)} style={{ ...input, width: 110 }} aria-label={t('placement.hoursPerWeek')} />
+      </F>
     </div>
   )
 }

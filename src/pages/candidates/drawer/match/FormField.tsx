@@ -1,8 +1,12 @@
 /**
  * FormField (F) — a labelled field wrapper shared by every section of the
- * match form. Optional `error` shows the shared required-field message (the
- * 422 field mapping in useMatchForm sets these booleans). Split out of
- * MatchModal.tsx (audit R1 item 1, MUST-SPLIT).
+ * match form. LABEL-LEFT (Danny 13-08, P33 canon): the label sits LEFT at the
+ * shared CANON_LABEL_WIDTH (fieldRowCanon, mirrors PlanIntakeModal's own
+ * labelLeftRow) and the field takes the rest of the row width — replaces the
+ * old label-ABOVE-field stack that made the form read as one long strip.
+ * Optional `error` shows the shared required-field message (the 422 field
+ * mapping in useMatchForm sets these booleans). Split out of MatchModal.tsx
+ * (audit R1 item 1, MUST-SPLIT).
  *
  * A11Y FIX (control round, MODAL34-REPAIR): the label used to be a bare <div>
  * with no association to its picker/input — a CreatableSelect trigger is a
@@ -14,7 +18,7 @@
  */
 import { useId } from 'react'
 import { useTranslation } from 'react-i18next'
-import { lbl, errMsg } from './styles'
+import { labelLeftRow, rowLabel, rowField, errMsg } from './styles'
 
 export function FormField({ label, error, children, labelId: labelIdProp }: {
   label: string
@@ -27,10 +31,12 @@ export function FormField({ label, error, children, labelId: labelIdProp }: {
   const generatedId = useId()
   const labelId = labelIdProp ?? generatedId
   return (
-    <div>
-      <div id={labelId} style={lbl}>{label}</div>
-      {typeof children === 'function' ? children(labelId) : children}
-      {error && <div style={errMsg}>{t('required')}</div>}
+    <div style={labelLeftRow}>
+      <span id={labelId} style={rowLabel}>{label}</span>
+      <div style={rowField}>
+        {typeof children === 'function' ? children(labelId) : children}
+        {error && <div style={errMsg}>{t('required')}</div>}
+      </div>
     </div>
   )
 }

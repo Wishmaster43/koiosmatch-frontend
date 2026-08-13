@@ -164,15 +164,15 @@ vi.mock('@/lib/api', async () => {
 
 const noop = () => {}
 
-describe('MatchModal · layout (job 17; standardized frame, Danny 24-07 point 6)', () => {
-  it('shares the +Kandidaat modal frame footprint (max 1060px / 94vh), not the old narrower panel', async () => {
+describe('MatchModal · layout (card-stack canon, Danny 13-08)', () => {
+  it('renders the narrower ~640px card-stack panel, not the old 1060px wide two-column frame', async () => {
     render(<MatchModal candidateId="cand-1" onClose={noop} onCreated={noop} />)
     // Let the candidate-branch lookup effect settle before asserting (avoids an
     // act() warning from its microtask resolving after the test body returns).
     const dialogs = await screen.findAllByRole('dialog')
-    // POPUP-SLEEP-1: the shared FloatingPanel frame owns the footprint now —
-    // WIDE_MODAL width, the panel's own 92vh height cap.
-    expect(dialogs.some(d => d.style.maxWidth === '1060px' && d.style.maxHeight === '92vh')).toBe(true)
+    // POPUP-SLEEP-1: the shared FloatingPanel frame owns the footprint — the
+    // card-stack rebuild (Danny 13-08) narrowed it to 640/92vw (was 1060/94vh).
+    expect(dialogs.some(d => d.style.maxWidth === '92vw')).toBe(true)
   })
 })
 
@@ -846,5 +846,31 @@ describe('MatchModal · never posts a work-experience entry (backend owns it, MA
     await user.click(screen.getByRole('button', { name: 'common:save' }))
     await waitFor(() => expect(api.patch).toHaveBeenCalledWith('/matches/match-1', expect.anything()))
     expect(api.post).not.toHaveBeenCalledWith('/candidates/cand-1/experiences', expect.anything())
+  })
+})
+
+// CARD-STACK-LABEL-LEFT regression (Danny 13-08): pins the rebuilt structure —
+// four titled cards, single column, and every field its own label-LEFT row
+// (the label element precedes its field in the DOM, both inside one row).
+describe('MatchModal · card-stack layout (Danny 13-08)', () => {
+  it('renders all four titled cards — Relaties, Contract, Financieel, Opmerkingen', async () => {
+    render(<MatchModal candidateId="cand-1" onClose={noop} onCreated={noop} />)
+    await screen.findByRole('dialog')
+    for (const key of ['placement.relations', 'placement.contract', 'placement.financial', 'placement.matchRemarks']) {
+      expect(screen.getByText(key)).toBeInTheDocument()
+    }
+  })
+
+  it('renders the customer field as a label-left row — label precedes the field in the same row', async () => {
+    render(<MatchModal candidateId="cand-1" onClose={noop} onCreated={noop} />)
+    await screen.findByRole('dialog')
+    const label = screen.getByText('placement.customer')
+    const field = screen.getByRole('button', { name: /placement\.pickCustomer$/ })
+    // Label and field share one row container (the label-left row), with the
+    // label appearing FIRST in DOM order (left-to-right reading order).
+    const row = label.closest('div')?.parentElement
+    expect(row).toContainElement(field)
+    const position = label.compareDocumentPosition(field)
+    expect(position & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
   })
 })

@@ -14,13 +14,18 @@
  * and a duplicate-contact preflight message; the "+ nieuw" affordance is now
  * the shared `DrawerAddButton` (the house soft-tint chip) instead of a bare
  * text link. No plain SelectMenu is left in this section.
+ *
+ * LABEL-LEFT (Danny 13-08): every field is now its own full-width label-left
+ * row (FormField/styles' P33 canon) instead of a label-above two/three-up
+ * grid — customer/location and function/owner pair up via `pairRow` (each
+ * cell still its own label-left row), the rest stack one per row.
  */
 import { useId, type Dispatch, type SetStateAction } from 'react'
 import type { TFunction } from 'i18next'
 import CreatableSelect from '@/components/ui/CreatableSelect'
 import DrawerAddButton from '@/components/drawer/DrawerAddButton'
 import { FormField as F } from './FormField'
-import { lbl, errMsg, row2, row3Even, pickerMenuWidth, input } from './styles'
+import { errMsg, labelLeftRow, rowLabel, rowField, pairRow, pickerMenuWidth, input } from './styles'
 import type { CascadeOption, CascadeLocation, CascadeDepartment, CustomerCascadeDetail } from '@/hooks/useCustomerCascade'
 import type { CustomerOption } from '@/pages/vacancies/hooks/useCustomerOptions'
 import type { VacancyOption } from '@/pages/candidates/hooks/useVacancyOptions'
@@ -99,7 +104,7 @@ export default function RelationsSection({
           )}
         </F>
       )}
-      <div style={row2}>
+      <div style={pairRow}>
         {/* Klant/locatie — typeable searchable pickers (job 17/18), never free-text
             create (allowCreate={false}: a customer/location is a real relational id). */}
         <F label={t('placement.customer')} error={errors.customerId}>
@@ -120,7 +125,7 @@ export default function RelationsSection({
           )}
         </F>
       </div>
-      <div style={row2}>
+      <div style={pairRow}>
         {/* Afdeling/contactpersoon — same searchable pattern. allowCreate={false}
             was missing here (live-check finding, kandidaten-ronde-2 punt C.2.1):
             a department is a real relational id like customer/location/contact,
@@ -132,15 +137,17 @@ export default function RelationsSection({
               aria-labelledby={labelId} />
           )}
         </F>
-        <div>
-          <div style={{ ...lbl, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div style={labelLeftRow}>
+          <div style={{ ...rowLabel, display: 'flex', flexDirection: 'column', gap: 4 }}>
             <span id={contactLabelId}>{t('placement.contact')}</span>
             {/* House soft-tint chip (Danny 24-07 screenshot feedback) — the shared
-                DrawerAddButton, not a bare text link. */}
+                DrawerAddButton, not a bare text link. Wraps under the label in the
+                narrower label-left column. */}
             {customerId && !creatingContact && (
               <DrawerAddButton onClick={() => setCreatingContact(true)} label={t('placement.newContact')} />
             )}
           </div>
+          <div style={rowField}>
           {creatingContact ? (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 6, border: '1px solid var(--border)', borderRadius: 8, padding: 8, background: 'var(--bg)' }}>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 6 }}>
@@ -179,16 +186,17 @@ export default function RelationsSection({
               aria-labelledby={contactLabelId} />
           )}
           {errors.contactId && <div style={errMsg}>{t('common:required')}</div>}
+          </div>
         </div>
       </div>
-      <div style={row3Even}>
-        {/* Functie — searchable (tenant lookup, can run to dozens of job titles);
-            Recruiter is now searchable too (Danny 24-07 addendum, same treatment as
-            Contractsoort/Vestiging/CAO) — stays optional exactly like before: no
-            pick = empty value, same placeholder, no dedicated clear affordance
-            (neither widget offers one; only the STARTING empty state carried the
-            "none" meaning, unchanged here). Vestiging (7.4) is searchable too
-            (point 2). */}
+      {/* Functie — searchable (tenant lookup, can run to dozens of job titles);
+          Recruiter is now searchable too (Danny 24-07 addendum, same treatment as
+          Contractsoort/Vestiging/CAO) — stays optional exactly like before: no
+          pick = empty value, same placeholder, no dedicated clear affordance
+          (neither widget offers one; only the STARTING empty state carried the
+          "none" meaning, unchanged here). Functie/Eigenaar pair up (short fields,
+          P33); Vestiging (7.4) gets its own full-width row below. */}
+      <div style={pairRow}>
         <F label={t('placement.function')} error={errors.func}>
           {(labelId: string) => (
             <CreatableSelect value={func || null} onChange={setFunc} allowCreate={false}
@@ -205,18 +213,18 @@ export default function RelationsSection({
               options={users.map(u => ({ value: String(u.id), label: u.name ?? '—' }))} />
           )}
         </F>
-        {/* Vestiging (7.4) — proposes from the customer's own branch, then the
-            recruiter's, then the tenant default (useBranchDefault); editing it by
-            hand freezes the proposal (setBranchDirty), same pattern as cost centre. */}
-        <F label={t('placement.branch')} error={errors.branchId}>
-          {(labelId: string) => (
-            <CreatableSelect value={branchId || null} onChange={v => { setBranchDirty(true); setBranchId(v) }}
-              allowCreate={false} menuWidth={pickerMenuWidth} placeholder={t('placement.optional')}
-              aria-labelledby={labelId}
-              options={branchLocations.map(l => ({ value: String(l.value), label: l.label }))} />
-          )}
-        </F>
       </div>
+      {/* Vestiging (7.4) — proposes from the customer's own branch, then the
+          recruiter's, then the tenant default (useBranchDefault); editing it by
+          hand freezes the proposal (setBranchDirty), same pattern as cost centre. */}
+      <F label={t('placement.branch')} error={errors.branchId}>
+        {(labelId: string) => (
+          <CreatableSelect value={branchId || null} onChange={v => { setBranchDirty(true); setBranchId(v) }}
+            allowCreate={false} menuWidth={pickerMenuWidth} placeholder={t('placement.optional')}
+            aria-labelledby={labelId}
+            options={branchLocations.map(l => ({ value: String(l.value), label: l.label }))} />
+        )}
+      </F>
       {/* Vacature — searchable, mirrors PlanIntakeModal's vacancy picker. Read-only
           while editing: identity fields (candidate/vacancy) aren't accepted by the
           backend's PATCH /matches/{id} (UpdateMatchRequest), so a pick here would

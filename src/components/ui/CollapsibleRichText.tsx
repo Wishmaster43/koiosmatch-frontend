@@ -57,10 +57,18 @@ export interface CollapsibleRichTextProps {
    * passes it.
    */
   onPopout?: () => void
+  /**
+   * RESIZE-GROWS-EDITOR passthrough (Danny 13-08 "Match opmerkingen is heel klein"):
+   * `fill` makes the open editor the growing flex item of its host (a resized
+   * panel grows the WRITING space) and `minHeight` sets its floor — both forward
+   * straight to RichTextEditor. Optional: every existing caller renders unchanged.
+   */
+  fill?: boolean
+  minHeight?: number
 }
 
 export default function CollapsibleRichText({
-  t, value, onChange, expanded, setExpanded, editing, setEditing, placeholder, ariaLabel, assistModes, onPopout,
+  t, value, onChange, expanded, setExpanded, editing, setEditing, placeholder, ariaLabel, assistModes, onPopout, fill, minHeight,
 }: CollapsibleRichTextProps) {
   // Snapshot at open, so ✕ can revert unsaved edits (form-local, no server call).
   const openedWithRef = useRef('')
@@ -69,7 +77,8 @@ export default function CollapsibleRichText({
   const cancel = () => { onChange(openedWithRef.current); setEditing(false) }
 
   return editing ? (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+    // `fill` also makes THIS wrapper stretch, or the editor's own flex has no room.
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 6, ...(fill ? { flex: 1, minHeight: 0 } : {}) }}>
       {/* Cancel above the block, house in-place-edit idiom (§3A). Pop-out sits
           left of cancel, same icon+footprint as ProfileTab's own second-screen
           button — only rendered when the caller wired one. */}
@@ -94,7 +103,8 @@ export default function CollapsibleRichText({
           to RichTextEditor; unset means "inherit the shared default" (see the
           prop's own doc comment above). */}
       <RichTextEditor value={value} onChange={onChange}
-        expanded={expanded} onToggleExpand={() => setExpanded(v => !v)} assistModes={assistModes} />
+        expanded={expanded} onToggleExpand={() => setExpanded(v => !v)} assistModes={assistModes}
+        fill={fill} minHeight={minHeight} />
     </div>
   ) : (
     // Collapsed ghost affordance (dashed border) — shows a one-line preview when
