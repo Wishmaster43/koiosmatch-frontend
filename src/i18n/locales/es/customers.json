@@ -567,7 +567,8 @@
       "location": "Ubicación",
       "department": "Departamento",
       "contact": "Persona de contacto"
-    }
+    },
+    "newNoteFor": "Nueva nota para {{name}}"
   },
   "bulk": {
     "selected": "{{count}} seleccionado(s)",
@@ -713,7 +714,21 @@
     "linkedinPlaceholder": "linkedin.com/in/usuario"
   },
   "changelog": {
-    "empty": "Aún no hay cambios."
+    "empty": "Aún no hay cambios.",
+    "system": "Sistema",
+    "emptyValue": "Vacío",
+    "actions": {
+      "updated": "Actualizado",
+      "created": "Creado",
+      "deleted": "Archivado",
+      "restored": "Restaurado"
+    },
+    "subjectTypes": {
+      "location": "Ubicación",
+      "department": "Departamento",
+      "contact": "Contacto",
+      "document": "Documento"
+    }
   },
   "map": {
     "pointCount": "{{count}} clientes en el mapa"

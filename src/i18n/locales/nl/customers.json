@@ -567,7 +567,8 @@
       "location": "Locatie",
       "department": "Afdeling",
       "contact": "Contactpersoon"
-    }
+    },
+    "newNoteFor": "Nieuwe notitie voor {{name}}"
   },
   "bulk": {
     "selected": "{{count}} geselecteerd",
@@ -713,7 +714,21 @@
     "linkedinPlaceholder": "linkedin.com/in/gebruikersnaam"
   },
   "changelog": {
-    "empty": "Nog geen wijzigingen."
+    "empty": "Nog geen wijzigingen.",
+    "system": "Systeem",
+    "emptyValue": "Leeg",
+    "actions": {
+      "updated": "Bijgewerkt",
+      "created": "Aangemaakt",
+      "deleted": "Gearchiveerd",
+      "restored": "Hersteld"
+    },
+    "subjectTypes": {
+      "location": "Locatie",
+      "department": "Afdeling",
+      "contact": "Contactpersoon",
+      "document": "Document"
+    }
   },
   "map": {
     "pointCount": "{{count}} klanten op de kaart"

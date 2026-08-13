@@ -82,21 +82,25 @@ export default function PriceAgreementRow({ agreement, onSave, onDelete }: {
         </div>
       </div>
 
-      <div style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: 13, fontFamily: 'JetBrains Mono, monospace' }}>
-        <span style={{ color: 'var(--text)' }}>€ {agreement.purchaseRate != null ? agreement.purchaseRate.toFixed(2) : '—'}</span>
-        <span style={{ color: 'var(--text-muted)' }}>→</span>
-        <span style={{ color: 'var(--text)' }}>{agreement.saleRate != null ? `€ ${agreement.saleRate.toFixed(2)}` : '—'}</span>
-        {margin != null && (
-          <span style={{ fontSize: 11, color: margin >= 0 ? 'var(--color-success)' : 'var(--color-danger)' }}>
-            ({t('priceAgreements.margin')} € {margin.toFixed(2)})
-          </span>
-        )}
-      </div>
-
-      <div style={{ fontSize: 11.5, color: 'var(--text-muted)' }}>
-        {t('priceAgreements.validFrom')} {formatDate(agreement.validFrom)}
-        {' · '}
-        {agreement.validUntil ? `${t('priceAgreements.validUntil')} ${formatDate(agreement.validUntil)}` : t('priceAgreements.indefinite')}
+      {/* K11c (13-08): rate + validity share ONE row now — validity trails as a muted
+          suffix instead of its own stacked line, so a read-only card is two lines
+          (criteria, rate+validity) plus the optional remarks, not three. */}
+      <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, flexWrap: 'wrap' }}>
+        <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8, fontSize: 13, fontFamily: 'JetBrains Mono, monospace' }}>
+          <span style={{ color: 'var(--text)' }}>€ {agreement.purchaseRate != null ? agreement.purchaseRate.toFixed(2) : '—'}</span>
+          <span style={{ color: 'var(--text-muted)' }}>→</span>
+          <span style={{ color: 'var(--text)' }}>{agreement.saleRate != null ? `€ ${agreement.saleRate.toFixed(2)}` : '—'}</span>
+          {margin != null && (
+            <span style={{ fontSize: 11, color: margin >= 0 ? 'var(--color-success)' : 'var(--color-danger)' }}>
+              ({t('priceAgreements.margin')} € {margin.toFixed(2)})
+            </span>
+          )}
+        </span>
+        <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>
+          {t('priceAgreements.validFrom')} {formatDate(agreement.validFrom)}
+          {' · '}
+          {agreement.validUntil ? `${t('priceAgreements.validUntil')} ${formatDate(agreement.validUntil)}` : t('priceAgreements.indefinite')}
+        </span>
       </div>
 
       {/* Remarks is rich-text HTML (RichTextEditor in the form above) — sanitised render, never raw. */}

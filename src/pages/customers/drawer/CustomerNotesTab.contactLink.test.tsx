@@ -92,7 +92,7 @@ describe('CustomerNotesTab · "gekoppeld aan" picker (composer)', () => {
 
     // The picker defaults to "Klant" (no link) — open it and pick the contact.
     // Picker lives INSIDE the composer since 05-08 — open it first.
-    await user.click(screen.getByRole('button', { name: ct('notes.newNote') }))
+    await user.click(screen.getByRole('button', { name: ct('notes.newNoteFor', { name: 'Acme Zorg' }) }))
     await user.click(screen.getByRole('button', { name: ct('notes.linkLevelOptions.customer') }))
     await user.click(screen.getByRole('button', { name: 'Joost de Boer — Teamleider' }))
     await user.click(screen.getByTitle(ct('notes.save')))
@@ -109,7 +109,7 @@ describe('CustomerNotesTab · "gekoppeld aan" picker (composer)', () => {
       onAddNote={onAddNote} c={customerWithLinks} onSave={vi.fn()} />)
 
     // Picker lives INSIDE the composer since 05-08 — open it first.
-    await user.click(screen.getByRole('button', { name: ct('notes.newNote') }))
+    await user.click(screen.getByRole('button', { name: ct('notes.newNoteFor', { name: 'Acme Zorg' }) }))
     await user.click(screen.getByRole('button', { name: ct('notes.linkLevelOptions.customer') }))
     await user.click(screen.getByRole('button', { name: 'Hoofdlocatie' }))
     await user.click(screen.getByTitle(ct('notes.save')))
@@ -126,7 +126,7 @@ describe('CustomerNotesTab · "gekoppeld aan" picker (composer)', () => {
       onAddNote={onAddNote} c={customerWithLinks} onSave={vi.fn()} />)
 
     // Picker lives INSIDE the composer since 05-08 — open it first.
-    await user.click(screen.getByRole('button', { name: ct('notes.newNote') }))
+    await user.click(screen.getByRole('button', { name: ct('notes.newNoteFor', { name: 'Acme Zorg' }) }))
     await user.click(screen.getByRole('button', { name: ct('notes.linkLevelOptions.customer') }))
     await user.click(screen.getByRole('button', { name: 'Verpleging — Hoofdlocatie' }))
     await user.click(screen.getByTitle(ct('notes.save')))
@@ -142,7 +142,9 @@ describe('CustomerNotesTab · "gekoppeld aan" picker (composer)', () => {
     render(<CustomerNotesTab customerId="cust-1" customerName="Acme Zorg" notes={[]}
       onAddNote={onAddNote} c={customerWithLinks} onSave={vi.fn()} />)
 
-    await user.click(screen.getByRole('button', { name: ct('notes.newNote') }))
+    // K14 (13-08): the trigger's accessible name now carries the customer name too
+    // (labels.newNote drives both the button and the composer's own title).
+    await user.click(screen.getByRole('button', { name: ct('notes.newNoteFor', { name: 'Acme Zorg' }) }))
     await user.click(screen.getByTitle(ct('notes.save')))
 
     expect(onAddNote).toHaveBeenCalledWith(expect.objectContaining({

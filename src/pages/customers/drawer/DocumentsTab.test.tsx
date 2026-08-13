@@ -84,7 +84,7 @@ describe('DocumentsTab · multi-file upload queue', () => {
 
   it('queues every picked file (not just the first) and calls upload() once per file on Add', async () => {
     const upload = vi.fn()
-    vi.mocked(useEntityDocuments).mockReturnValue({ docs: [], upload, rename: vi.fn(), remove: vi.fn() })
+    vi.mocked(useEntityDocuments).mockReturnValue({ docs: [], loading: false, error: false, upload, rename: vi.fn(), remove: vi.fn() })
     const user = userEvent.setup()
     const { container } = render(<DocumentsTab customerId="cust-1" />)
     fireEvent.change(getFileInput(container), { target: { files: [fileA, fileB] } })
@@ -102,7 +102,7 @@ describe('DocumentsTab · multi-file upload queue', () => {
   })
 
   it('is no longer a native <select> — the per-row type picker is the house SelectMenu', async () => {
-    vi.mocked(useEntityDocuments).mockReturnValue({ docs: [], upload: vi.fn(), rename: vi.fn(), remove: vi.fn() })
+    vi.mocked(useEntityDocuments).mockReturnValue({ docs: [], loading: false, error: false, upload: vi.fn(), rename: vi.fn(), remove: vi.fn() })
     const { container } = render(<DocumentsTab customerId="cust-1" />)
     fireEvent.change(getFileInput(container), { target: { files: [fileA, fileB] } })
     expect(container.querySelector('select')).toBeNull()
@@ -110,7 +110,7 @@ describe('DocumentsTab · multi-file upload queue', () => {
 
   it('calls upload() with each queued file\'s OWN type when a row\'s type picker is changed', async () => {
     const upload = vi.fn()
-    vi.mocked(useEntityDocuments).mockReturnValue({ docs: [], upload, rename: vi.fn(), remove: vi.fn() })
+    vi.mocked(useEntityDocuments).mockReturnValue({ docs: [], loading: false, error: false, upload, rename: vi.fn(), remove: vi.fn() })
     const user = userEvent.setup()
     const { container } = render(<DocumentsTab customerId="cust-1" />)
     fireEvent.change(getFileInput(container), { target: { files: [fileA, fileB] } })
@@ -126,7 +126,7 @@ describe('DocumentsTab · multi-file upload queue', () => {
   })
 
   it('apply-to-all chip sets the SAME type on every queued item', async () => {
-    vi.mocked(useEntityDocuments).mockReturnValue({ docs: [], upload: vi.fn(), rename: vi.fn(), remove: vi.fn() })
+    vi.mocked(useEntityDocuments).mockReturnValue({ docs: [], loading: false, error: false, upload: vi.fn(), rename: vi.fn(), remove: vi.fn() })
     const user = userEvent.setup()
     const { container } = render(<DocumentsTab customerId="cust-1" />)
     fireEvent.change(getFileInput(container), { target: { files: [fileA, fileB] } })
@@ -139,7 +139,7 @@ describe('DocumentsTab · multi-file upload queue', () => {
   })
 
   it('a per-row remove drops only that item and revokes its own object URL', async () => {
-    vi.mocked(useEntityDocuments).mockReturnValue({ docs: [], upload: vi.fn(), rename: vi.fn(), remove: vi.fn() })
+    vi.mocked(useEntityDocuments).mockReturnValue({ docs: [], loading: false, error: false, upload: vi.fn(), rename: vi.fn(), remove: vi.fn() })
     const user = userEvent.setup()
     const { container } = render(<DocumentsTab customerId="cust-1" />)
     fireEvent.change(getFileInput(container), { target: { files: [fileA, fileB] } })
@@ -172,7 +172,7 @@ describe('DocumentsTab · delete confirmation', () => {
 
   it('single delete: stages then confirms before calling remove()', async () => {
     const remove = vi.fn()
-    vi.mocked(useEntityDocuments).mockReturnValue({ docs: [docA], upload: vi.fn(), rename: vi.fn(), remove })
+    vi.mocked(useEntityDocuments).mockReturnValue({ docs: [docA], loading: false, error: false, upload: vi.fn(), rename: vi.fn(), remove })
     const user = userEvent.setup()
     render(<DocumentsTab customerId="cust-1" />)
 
@@ -186,7 +186,7 @@ describe('DocumentsTab · delete confirmation', () => {
 
   it('cancelling the delete confirmation never calls remove()', async () => {
     const remove = vi.fn()
-    vi.mocked(useEntityDocuments).mockReturnValue({ docs: [docA], upload: vi.fn(), rename: vi.fn(), remove })
+    vi.mocked(useEntityDocuments).mockReturnValue({ docs: [docA], loading: false, error: false, upload: vi.fn(), rename: vi.fn(), remove })
     const user = userEvent.setup()
     render(<DocumentsTab customerId="cust-1" />)
 
@@ -199,7 +199,7 @@ describe('DocumentsTab · delete confirmation', () => {
 
   it('bulk delete: selecting both rows and confirming calls remove() for each', async () => {
     const remove = vi.fn()
-    vi.mocked(useEntityDocuments).mockReturnValue({ docs: [docA, docB], upload: vi.fn(), rename: vi.fn(), remove })
+    vi.mocked(useEntityDocuments).mockReturnValue({ docs: [docA, docB], loading: false, error: false, upload: vi.fn(), rename: vi.fn(), remove })
     const user = userEvent.setup()
     render(<DocumentsTab customerId="cust-1" />)
 
@@ -236,14 +236,14 @@ describe('DocumentsTab · preview opens the shared modal, never window.open', ()
   afterEach(() => vi.unstubAllGlobals())
 
   it('does not render the modal until the eye icon is clicked', () => {
-    vi.mocked(useEntityDocuments).mockReturnValue({ docs: [doc], upload: vi.fn(), rename: vi.fn(), remove: vi.fn() })
+    vi.mocked(useEntityDocuments).mockReturnValue({ docs: [doc], loading: false, error: false, upload: vi.fn(), rename: vi.fn(), remove: vi.fn() })
     render(<DocumentsTab customerId="cust-1" />)
     expect(screen.queryByTestId('doc-preview-modal')).not.toBeInTheDocument()
   })
 
   it('clicking the eye icon opens DocPreviewModal (scoped to "customer") instead of calling window.open', async () => {
     const openSpy = vi.spyOn(window, 'open').mockImplementation(() => null)
-    vi.mocked(useEntityDocuments).mockReturnValue({ docs: [doc], upload: vi.fn(), rename: vi.fn(), remove: vi.fn() })
+    vi.mocked(useEntityDocuments).mockReturnValue({ docs: [doc], loading: false, error: false, upload: vi.fn(), rename: vi.fn(), remove: vi.fn() })
     const user = userEvent.setup()
     render(<DocumentsTab customerId="cust-1" />)
 
@@ -281,14 +281,14 @@ describe('DocumentsTab · type filter (DOC-FILTER-PARITY-1)', () => {
   afterEach(() => vi.unstubAllGlobals())
 
   it('the toolbar renders the search box and a Filter button', () => {
-    vi.mocked(useEntityDocuments).mockReturnValue({ docs: [cvDoc, diplomaDoc], upload: vi.fn(), rename: vi.fn(), remove: vi.fn() })
+    vi.mocked(useEntityDocuments).mockReturnValue({ docs: [cvDoc, diplomaDoc], loading: false, error: false, upload: vi.fn(), rename: vi.fn(), remove: vi.fn() })
     render(<DocumentsTab customerId="cust-1" />)
     expect(screen.getByPlaceholderText('documents.search')).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'common:filters.button' })).toBeInTheDocument()
   })
 
   it('picking a TYPE in the menu narrows the visible documents', async () => {
-    vi.mocked(useEntityDocuments).mockReturnValue({ docs: [cvDoc, diplomaDoc], upload: vi.fn(), rename: vi.fn(), remove: vi.fn() })
+    vi.mocked(useEntityDocuments).mockReturnValue({ docs: [cvDoc, diplomaDoc], loading: false, error: false, upload: vi.fn(), rename: vi.fn(), remove: vi.fn() })
     const user = userEvent.setup()
     render(<DocumentsTab customerId="cust-1" />)
     expect(screen.getByText('a.pdf')).toBeInTheDocument()
@@ -303,7 +303,7 @@ describe('DocumentsTab · type filter (DOC-FILTER-PARITY-1)', () => {
   })
 
   it('clear-all resets the type filter back to "all"', async () => {
-    vi.mocked(useEntityDocuments).mockReturnValue({ docs: [cvDoc, diplomaDoc], upload: vi.fn(), rename: vi.fn(), remove: vi.fn() })
+    vi.mocked(useEntityDocuments).mockReturnValue({ docs: [cvDoc, diplomaDoc], loading: false, error: false, upload: vi.fn(), rename: vi.fn(), remove: vi.fn() })
     const user = userEvent.setup()
     render(<DocumentsTab customerId="cust-1" />)
 
@@ -318,7 +318,7 @@ describe('DocumentsTab · type filter (DOC-FILTER-PARITY-1)', () => {
   })
 
   it('the free-text search still narrows by name or type, unchanged', async () => {
-    vi.mocked(useEntityDocuments).mockReturnValue({ docs: [cvDoc, diplomaDoc], upload: vi.fn(), rename: vi.fn(), remove: vi.fn() })
+    vi.mocked(useEntityDocuments).mockReturnValue({ docs: [cvDoc, diplomaDoc], loading: false, error: false, upload: vi.fn(), rename: vi.fn(), remove: vi.fn() })
     const user = userEvent.setup()
     render(<DocumentsTab customerId="cust-1" />)
 
@@ -332,19 +332,19 @@ describe('DocumentsTab · docTypeScope (DOCTYPE-SCOPE-1)', () => {
   beforeEach(() => vi.clearAllMocks())
 
   it('defaults to the "customer" lookup when no scope is given', () => {
-    vi.mocked(useEntityDocuments).mockReturnValue({ docs: [], upload: vi.fn(), rename: vi.fn(), remove: vi.fn() })
+    vi.mocked(useEntityDocuments).mockReturnValue({ docs: [], loading: false, error: false, upload: vi.fn(), rename: vi.fn(), remove: vi.fn() })
     render(<DocumentsTab customerId="cust-1" />)
     expect(vi.mocked(useDocumentTypes)).toHaveBeenCalledWith('customer')
   })
 
   it('reads the location-scoped lookup and threads it into the preview modal', () => {
-    vi.mocked(useEntityDocuments).mockReturnValue({ docs: [], upload: vi.fn(), rename: vi.fn(), remove: vi.fn() })
+    vi.mocked(useEntityDocuments).mockReturnValue({ docs: [], loading: false, error: false, upload: vi.fn(), rename: vi.fn(), remove: vi.fn() })
     render(<DocumentsTab customerId="cust-1" docTypeScope="customer_location" />)
     expect(vi.mocked(useDocumentTypes)).toHaveBeenCalledWith('customer_location')
   })
 
   it('reads the department-scoped lookup', () => {
-    vi.mocked(useEntityDocuments).mockReturnValue({ docs: [], upload: vi.fn(), rename: vi.fn(), remove: vi.fn() })
+    vi.mocked(useEntityDocuments).mockReturnValue({ docs: [], loading: false, error: false, upload: vi.fn(), rename: vi.fn(), remove: vi.fn() })
     render(<DocumentsTab customerId="cust-1" docTypeScope="customer_department" />)
     expect(vi.mocked(useDocumentTypes)).toHaveBeenCalledWith('customer_department')
   })
@@ -365,7 +365,7 @@ describe('DocumentsTab · "gekoppeld aan" upload picker (DOCS-LOC-DEPT-1)', () =
   afterEach(() => vi.unstubAllGlobals())
 
   it('offers no picker at all when the caller passes no locations/departments', () => {
-    vi.mocked(useEntityDocuments).mockReturnValue({ docs: [], upload: vi.fn(), rename: vi.fn(), remove: vi.fn() })
+    vi.mocked(useEntityDocuments).mockReturnValue({ docs: [], loading: false, error: false, upload: vi.fn(), rename: vi.fn(), remove: vi.fn() })
     const { container } = render(<DocumentsTab customerId="cust-1" />)
     fireEvent.change(getFileInput(container), { target: { files: [fileA] } })
     expect(screen.queryByText('documents.linkLevelLabel')).not.toBeInTheDocument()
@@ -373,7 +373,7 @@ describe('DocumentsTab · "gekoppeld aan" upload picker (DOCS-LOC-DEPT-1)', () =
 
   it('an unlinked upload calls upload() with exactly its original 4 arguments (no stray 5th)', async () => {
     const upload = vi.fn()
-    vi.mocked(useEntityDocuments).mockReturnValue({ docs: [], upload, rename: vi.fn(), remove: vi.fn() })
+    vi.mocked(useEntityDocuments).mockReturnValue({ docs: [], loading: false, error: false, upload, rename: vi.fn(), remove: vi.fn() })
     const user = userEvent.setup()
     const { container } = render(<DocumentsTab customerId="cust-1"
       locations={[{ id: 'loc-1', name: 'Hoofdlocatie' }]} departments={[]} />)
@@ -391,7 +391,7 @@ describe('DocumentsTab · "gekoppeld aan" upload picker (DOCS-LOC-DEPT-1)', () =
 
   it('picking a location sends customer_location_id as upload()\'s 5th argument', async () => {
     const upload = vi.fn()
-    vi.mocked(useEntityDocuments).mockReturnValue({ docs: [], upload, rename: vi.fn(), remove: vi.fn() })
+    vi.mocked(useEntityDocuments).mockReturnValue({ docs: [], loading: false, error: false, upload, rename: vi.fn(), remove: vi.fn() })
     const user = userEvent.setup()
     const { container } = render(<DocumentsTab customerId="cust-1"
       locations={[{ id: 'loc-1', name: 'Hoofdlocatie' }]} departments={[]} />)
@@ -410,7 +410,7 @@ describe('DocumentsTab · "gekoppeld aan" upload picker (DOCS-LOC-DEPT-1)', () =
 
   it('picking a department sends customer_department_id as upload()\'s 5th argument', async () => {
     const upload = vi.fn()
-    vi.mocked(useEntityDocuments).mockReturnValue({ docs: [], upload, rename: vi.fn(), remove: vi.fn() })
+    vi.mocked(useEntityDocuments).mockReturnValue({ docs: [], loading: false, error: false, upload, rename: vi.fn(), remove: vi.fn() })
     const user = userEvent.setup()
     const { container } = render(<DocumentsTab customerId="cust-1"
       locations={[]} departments={[{ id: 'dep-1', name: 'Verpleging', locationName: 'Hoofdlocatie' }]} />)
@@ -429,7 +429,7 @@ describe('DocumentsTab · "gekoppeld aan" upload picker (DOCS-LOC-DEPT-1)', () =
 
   it('a locked scope (ScopedDocumentsTab) offers no picker and always sends the locked field', async () => {
     const upload = vi.fn()
-    vi.mocked(useEntityDocuments).mockReturnValue({ docs: [], upload, rename: vi.fn(), remove: vi.fn() })
+    vi.mocked(useEntityDocuments).mockReturnValue({ docs: [], loading: false, error: false, upload, rename: vi.fn(), remove: vi.fn() })
     const user = userEvent.setup()
     const { container } = render(<DocumentsTab customerId="cust-1"
       lockedLevelFields={{ customer_location_id: 'loc-1' }} />)
@@ -447,7 +447,7 @@ describe('DocumentsTab · "gekoppeld aan" upload picker (DOCS-LOC-DEPT-1)', () =
   it('renders the "linked to" chip on a document that carries a location/department name, department winning over location', () => {
     const docLinkedToLocation = { id: 'doc-a', name: 'a.pdf', type: 'CV', size: '10 KB', download_url: '/dl/a', location_name: 'Hoofdlocatie' }
     const docLinkedToDepartment = { id: 'doc-b', name: 'b.pdf', type: 'CV', size: '20 KB', download_url: '/dl/b', location_name: 'Hoofdlocatie', department_name: 'Verpleging' }
-    vi.mocked(useEntityDocuments).mockReturnValue({ docs: [docLinkedToLocation, docLinkedToDepartment], upload: vi.fn(), rename: vi.fn(), remove: vi.fn() })
+    vi.mocked(useEntityDocuments).mockReturnValue({ docs: [docLinkedToLocation, docLinkedToDepartment], loading: false, error: false, upload: vi.fn(), rename: vi.fn(), remove: vi.fn() })
     render(<DocumentsTab customerId="cust-1" />)
 
     // Both rows carry a chip — this test file's i18n falls back to echoing the raw
@@ -459,7 +459,7 @@ describe('DocumentsTab · "gekoppeld aan" upload picker (DOCS-LOC-DEPT-1)', () =
 
   it('renders no chip on a company-level document (no location/department link)', () => {
     const doc = { id: 'doc-a', name: 'a.pdf', type: 'CV', size: '10 KB', download_url: '/dl/a' }
-    vi.mocked(useEntityDocuments).mockReturnValue({ docs: [doc], upload: vi.fn(), rename: vi.fn(), remove: vi.fn() })
+    vi.mocked(useEntityDocuments).mockReturnValue({ docs: [doc], loading: false, error: false, upload: vi.fn(), rename: vi.fn(), remove: vi.fn() })
     render(<DocumentsTab customerId="cust-1" />)
 
     expect(screen.queryByText('notes.linkedTo')).not.toBeInTheDocument()

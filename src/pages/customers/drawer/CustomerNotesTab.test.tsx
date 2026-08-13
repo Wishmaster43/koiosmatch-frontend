@@ -89,3 +89,29 @@ describe('CustomerNotesTab · Taken sub-tab opens the task modal', () => {
     expect(JSON.parse(modal.getAttribute('data-extra-links') ?? '[]')).toEqual([{ type: 'customer', id: 'cust-1' }])
   })
 })
+
+/** K14 (13-08): the note composer opened FROM a customer's Notities tab shows the
+ *  customer's own name in its title — a host-prop into the shared `labels.newNote`
+ *  string (NoteComposer.tsx:123 reads `labels.newNote` as the panel title), not a
+ *  fork of the shared NoteComposer component. */
+describe('CustomerNotesTab · K14 composer title carries the customer name', () => {
+  it('shows "notes.newNoteFor" interpolated with the customer name when opening + Nieuwe notitie', async () => {
+    const user = userEvent.setup()
+    render(<CustomerNotesTab customerId="cust-1" customerName="Acme Zorg" notes={[]} onAddNote={vi.fn()} c={customer} onSave={vi.fn()} />)
+    // The "+ Nieuwe notitie" trigger shares the same `labels.newNote` string as
+    // the composer title, so its own accessible name already carries the
+    // customer-specific key too.
+    await user.click(screen.getByRole('button', { name: 'notes.newNoteFor' }))
+    // t() echoes the raw KEY here (uninitialised react-i18next, mirrors
+    // CustomerNotesPopout.test.tsx's own "popout.windowTitle" assertion) — the
+    // proof this test needs is that the customer-name KEY is chosen at all.
+    expect(await screen.findByRole('dialog', { name: 'notes.newNoteFor' })).toBeInTheDocument()
+  })
+
+  it('falls back to the generic "notes.newNote" title when no customer name is known', async () => {
+    const user = userEvent.setup()
+    render(<CustomerNotesTab customerId="cust-1" notes={[]} onAddNote={vi.fn()} c={customer} onSave={vi.fn()} />)
+    await user.click(screen.getByRole('button', { name: 'notes.newNote' }))
+    expect(await screen.findByRole('dialog', { name: 'notes.newNote' })).toBeInTheDocument()
+  })
+})

@@ -133,7 +133,11 @@ export default function PriceAgreementsTab({ customerId, c, onSave }: { customer
     <div>
       <SubTabBar
         tabs={[
-          { id: 'prices',  label: t('drawer.tabs.priceAgreements') },
+          // K11a (13-08): the count moves INTO the tab label — the section
+          // used to repeat "PRIJSAFSPRAKEN <count>" as a second uppercase
+          // heading right below this same tab, a dead duplicate of the label
+          // above it (same fix pattern as DocumentsTab 05-08).
+          { id: 'prices',  label: <>{t('drawer.tabs.priceAgreements')} <span style={{ opacity: 0.6 }}>{agreements.length}</span></> },
           { id: 'billing', label: t('drawer.tabs.billing') },
         ]}
         active={subTab}
@@ -189,16 +193,13 @@ export default function PriceAgreementsTab({ customerId, c, onSave }: { customer
       )}
       {subTab === 'prices' && (
       <>
-      <div style={{ display: 'flex', alignItems: 'center', margin: '14px 0 6px' }}>
-        <span style={{ fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em', color: 'var(--text-muted)' }}>
-          {t('drawer.tabs.priceAgreements')} <span style={{ fontWeight: 400 }}>{agreements.length}</span>
-        </span>
-      </div>
-
+      {/* K11a (13-08): the uppercase "PRIJSAFSPRAKEN <count>" heading that used to sit
+          here duplicated the sub-tab label directly above it — removed, count now lives
+          on the tab itself (see SubTabBar tabs above). */}
       {/* TOOLBAR-4 — house order (Danny, live 04-08): search left, status filter
           middle (derived active/expired, see the const above), "+" trigger last —
           mirrors Locaties/Afdelingen/Contactpersonen/Matches. */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, margin: '14px 0 10px' }}>
         <div style={searchWrap}>
           <Search size={13} color="var(--text-muted)" />
           <input value={search} onChange={e => setSearch(e.target.value)}

@@ -6,6 +6,7 @@
  * criterion on the backend (§ MATCH-PLC price-agreements). Mirrors the contract/
  * financial field layout of MatchModal.
  */
+import { useState } from 'react'
 import type { CSSProperties } from 'react'
 import { useTranslation } from 'react-i18next'
 import SelectMenu from '@/components/ui/SelectMenu'
@@ -84,6 +85,10 @@ export default function PriceAgreementForm({ draft, onChange, onSave, onCancel, 
   const { t } = useTranslation('customers')
   const { functions } = useFunctions()
   const { types: caoTypes } = useCao()
+  // K11d (13-08): the remarks editor can expand to a bigger window, same affordance
+  // as every other rich-text block — Generate/pop-out are deliberately skipped here
+  // per KD9, only the expand toggle ships.
+  const [remarksExpanded, setRemarksExpanded] = useState(false)
 
   // "Any" sits first in both lookups — selecting it clears the wildcard field.
   const functionOptions = [{ value: '', label: t('priceAgreements.any') }, ...functions.map(f => ({ value: f, label: f }))]
@@ -127,7 +132,8 @@ export default function PriceAgreementForm({ draft, onChange, onSave, onCancel, 
           field here (form context), no separate pencil; SafeHtml renders it
           read-only wherever the agreement is shown (PriceAgreementRow). */}
       <Field label={t('priceAgreements.remarks')}>
-        <RichTextEditor value={draft.remarks} onChange={v => onChange({ remarks: v })} />
+        <RichTextEditor value={draft.remarks} onChange={v => onChange({ remarks: v })}
+          expanded={remarksExpanded} onToggleExpand={() => setRemarksExpanded(v => !v)} />
       </Field>
       <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, marginTop: 2 }}>
         <button onClick={onCancel} style={{ height: 30, padding: '0 12px', fontSize: 12, border: '1px solid var(--border)', borderRadius: 7, background: 'var(--surface)', cursor: 'pointer', color: 'var(--text)' }}>

@@ -191,7 +191,11 @@ export default function CustomerNotesTab({ customerId, customerName, customerIni
     authorInitials, timelineName: customerName, timelineInitials: customerInitials,
 
     labels: {
-      notes: t('notes.notes'), newNote: t('notes.newNote'), type: t('notes.type'),
+      // K14 (13-08): the composer's panel title is the host's `labels.newNote` string
+      // (NoteComposer.tsx:123 — panelTitle = labels.newNote), so a customer-hosted
+      // composer just hands it a customer-specific string instead of the generic
+      // one — NoteComposer itself is untouched (parallel-lane WIP, see file docblock).
+      notes: t('notes.notes'), newNote: customerName ? t('notes.newNoteFor', { name: customerName }) : t('notes.newNote'), type: t('notes.type'),
       save: t('notes.save'), cancel: t('notes.cancel'), edit: t('notes.edit'),
       notesEmpty: t('notes.notesEmpty'), timeline: t('notes.timeline'), timelineEmpty: t('notes.timelineEmpty'),
       notePlaceholder: () => t('notes.notePlaceholder'),

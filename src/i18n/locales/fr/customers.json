@@ -567,7 +567,8 @@
       "location": "Site",
       "department": "Département",
       "contact": "Personne de contact"
-    }
+    },
+    "newNoteFor": "Nouvelle note pour {{name}}"
   },
   "bulk": {
     "selected": "{{count}} sélectionné(s)",
@@ -713,7 +714,21 @@
     "linkedinPlaceholder": "linkedin.com/in/nomdutilisateur"
   },
   "changelog": {
-    "empty": "Aucun changement pour le moment."
+    "empty": "Aucun changement pour le moment.",
+    "system": "Système",
+    "emptyValue": "Vide",
+    "actions": {
+      "updated": "Mis à jour",
+      "created": "Créé",
+      "deleted": "Archivé",
+      "restored": "Restauré"
+    },
+    "subjectTypes": {
+      "location": "Site",
+      "department": "Service",
+      "contact": "Contact",
+      "document": "Document"
+    }
   },
   "map": {
     "pointCount": "{{count}} clients sur la carte"

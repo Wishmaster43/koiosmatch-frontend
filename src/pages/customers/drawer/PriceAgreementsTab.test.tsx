@@ -339,3 +339,24 @@ describe('PriceAgreementsTab · Facturatie sub-tab: the invoice address', () => 
     expect(screen.queryByText('locations.detail.state')).not.toBeInTheDocument()
   })
 })
+
+// K11a (13-08): the tab used to render "PRIJSAFSPRAKEN <count>" as a second,
+// duplicate uppercase heading directly below the identically-labelled sub-tab —
+// the count now lives on the sub-tab itself and the standalone heading is gone.
+describe('PriceAgreementsTab · K11a no duplicate "Prijsafspraken" heading', () => {
+  it('shows the count once, inside the sub-tab, not as a second heading', () => {
+    vi.mocked(usePriceAgreements).mockReturnValue({
+      ...baseHook,
+      agreements: [{
+        id: 'pa-1', functionTitle: null, cao: null, scale: null, step: null,
+        purchaseRate: 10, saleRate: 15, validFrom: '2026-01-01', validUntil: null, remarks: null,
+      }],
+    })
+    render(<PriceAgreementsTab customerId="cust-1" />)
+    // The sub-tab carries "drawer.tabs.priceAgreements" once, with the count beside it.
+    const tab = screen.getByRole('tab', { name: /drawer\.tabs\.priceAgreements/ })
+    expect(tab).toHaveTextContent('1')
+    // No second, standalone occurrence of the same label outside the tab strip.
+    expect(screen.getAllByText('drawer.tabs.priceAgreements')).toHaveLength(1)
+  })
+})
