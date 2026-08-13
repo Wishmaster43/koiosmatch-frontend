@@ -9,7 +9,9 @@ import { useTranslation } from 'react-i18next'
 import { MessageCircle, RefreshCw, Search } from 'lucide-react'
 import api, { unwrap } from '@/lib/api'
 import { useAuth } from '@/context/AuthContext'
+import { useDateFormat } from '@/lib/datetime'
 import { BTN_H } from '@/config/buttonMetrics'
+import AddWhatsAppConnectionForm from './whatsapp/AddWhatsAppConnectionForm'
 
 // Phone-number quality ratings → colour. Label = t('whatsapp.quality<KEY>').
 const QUALITY_META = {
@@ -58,6 +60,9 @@ export default function WhatsAppSettings() {
   const [syncMsg,    setSyncMsg]    = useState(null)
   const [tab,        setTab]        = useState('connection') // sub-tab: connection | numbers | templates
 
+  // DATUM-1: the "checked at" stamp goes through the house formatter, never raw.
+  const { formatDate } = useDateFormat()
+
   const loadDetail = (id) =>
     api.get(`/whatsapp/${id}`).then(r => {
       const full = unwrap(r)
@@ -65,19 +70,25 @@ export default function WhatsAppSettings() {
       setTemplates(Array.isArray(full?.templates) ? full.templates : [])
     })
 
-  useEffect(() => {
-    api.get('/whatsapp')
+  // Named (not inline in the effect) so the WABA form can reload after creating
+  // the first connection — the same path the initial mount takes.
+  const load = () => {
+    setLoading(true)
+    return api.get('/whatsapp')
       .then(res => {
         const list = Array.isArray(res.data) ? res.data : (res.data?.data ?? [])
         if (list.length === 0) { setNoConn(true); return }
         const conn = list[0]
+        setNoConn(false)
         setConnection(conn)
         setConnId(conn.id)
         return loadDetail(conn.id)
       })
       .catch(() => setNoConn(true))
       .finally(() => setLoading(false))
-  }, [])
+  }
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- mount-only fetch; load is stable in practice
+  useEffect(() => { load() }, [])
 
   const syncNumbers = async () => {
     setSyncing('numbers'); setSyncMsg(null)
@@ -177,14 +188,19 @@ export default function WhatsAppSettings() {
       {tab === 'connection' && (
       <div>
         {noConn ? (
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '16px 18px',
-                        // eslint-disable-next-line no-restricted-syntax -- no exact/close index.css token match for this danger-banner border shade; kept literal to avoid changing the rendered tone
-                        background: 'var(--color-danger-bg)', border: '1px solid #FCA5A5', borderRadius: 12 }}>
-            <div style={{ width: 10, height: 10, borderRadius: '50%', background: 'var(--color-danger)', flexShrink: 0 }} />
-            <div>
-              <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--color-danger)' }}>{t('whatsapp.notConnected')}</div>
-              <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>{t('whatsapp.notConnectedDesc')}</div>
+          <div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '16px 18px',
+                          // eslint-disable-next-line no-restricted-syntax -- no exact/close index.css token match for this danger-banner border shade; kept literal to avoid changing the rendered tone
+                          background: 'var(--color-danger-bg)', border: '1px solid #FCA5A5', borderRadius: 12 }}>
+              <div style={{ width: 10, height: 10, borderRadius: '50%', background: 'var(--color-danger)', flexShrink: 0 }} />
+              <div>
+                <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--color-danger)' }}>{t('whatsapp.notConnected')}</div>
+                <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>{t('whatsapp.notConnectedDesc')}</div>
+              </div>
             </div>
+            {/* WA-CONN-FORM-1: the way back in after a wiped/absent connection —
+                same permission gate as every provision action on this screen. */}
+            {canProvision && <AddWhatsAppConnectionForm onCreated={load} />}
           </div>
         ) : cs ? (
             <div style={{ display: 'flex', alignItems: 'center', gap: 16, padding: '16px 18px',
@@ -205,7 +221,7 @@ export default function WhatsAppSettings() {
               </div>
               {connection.last_checked_at && (
                 <div style={{ fontSize: 11, color: 'var(--text-muted)', flexShrink: 0 }}>
-                  {t('whatsapp.checked')} {new Date(connection.last_checked_at).toLocaleDateString()}
+                  {t('whatsapp.checked')} {formatDate(connection.last_checked_at)}
                 </div>
               )}
               {/* CONN-CHECK-1: the one action this card was missing — re-verify the

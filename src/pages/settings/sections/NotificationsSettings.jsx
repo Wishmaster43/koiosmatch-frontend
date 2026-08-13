@@ -39,14 +39,15 @@ export default function NotificationsSettings({ context }) {
   const defaults = useMemo(() => ({ [inAppKey]: true, [emailKey]: false }), [inAppKey, emailKey])
   const form = useSettingsForm(defaults)
 
-  // Two channel rows per context, rendered side by side so both are visible at once for
-  // this one type. No "mail provider configured" gate exists to key the e-mail copy off
-  // (verified: GenericNotification::toMail sends through the app's own default mailer, not
-  // any per-tenant OAuth connection — there is no such signal anywhere in the /settings
-  // payload) — so the description makes no claim about provider state instead of inventing one.
-  const options = [
-    { key: inAppKey, label: t('notifications.inApp.label'), desc: t('notifications.inApp.desc') },
-    { key: emailKey, label: t('notifications.email.label'), desc: t('notifications.email.desc') },
+  // ONE block, TWO named toggles (Danny 13-08 "1 blok met 2 toggles"): the two
+  // channels of this one notification type live in a single SettingRow — the
+  // channel name sits directly beside its own switch, so "app of e-mail" reads
+  // as one decision, not two separate cards. No "mail provider configured" gate
+  // exists to key the e-mail copy off (GenericNotification::toMail uses the
+  // app-default mailer) — the copy makes no claim about provider state.
+  const channels = [
+    { key: inAppKey, label: t('notifications.inApp.label') },
+    { key: emailKey, label: t('notifications.email.label') },
   ]
 
   return (
@@ -54,26 +55,25 @@ export default function NotificationsSettings({ context }) {
       title={t(`notifications.context.${context}.title`, context)}
       subtitle={t(`notifications.context.${context}.desc`, '')}
       maxWidth={640} form={form}>
-      {/* Side by side, not stacked: both channels for this one notification type are
-          visible at once, each rendered through the exact same Toggle component. */}
-      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12 }}>
-        {options.map(opt => (
-          <div key={opt.key} style={{ flex: '1 1 260px', minWidth: 240 }}>
-            <SettingRow label={opt.label} description={opt.desc}>
-              {/* Honest gate (NOTIF-PARITY-1): a context with no real emitter never promises
-                  delivery it cannot make, on either channel — a calm muted marker replaces
-                  the working-toggle look, and the switch itself is disabled-with-reason. */}
-              {noEmitterYet && (
-                <SoftChip label={t('notifications.inApp.notYetActive')} color="var(--text-muted)"
-                  title={t('notifications.inApp.notYetActiveReason')} />
-              )}
-              <Toggle checked={!!form.values[opt.key]} onChange={v => form.set(opt.key, v)}
-                disabled={noEmitterYet} ariaLabel={opt.label}
+      <SettingRow label={t('notifications.channels.label')} description={t('notifications.channels.desc')}>
+        {/* Honest gate (NOTIF-PARITY-1): a context with no real emitter never promises
+            delivery it cannot make, on either channel — a calm muted marker replaces
+            the working-toggle look, and both switches are disabled-with-reason. */}
+        {noEmitterYet && (
+          <SoftChip label={t('notifications.inApp.notYetActive')} color="var(--text-muted)"
+            title={t('notifications.inApp.notYetActiveReason')} />
+        )}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 18, flexWrap: 'wrap' }}>
+          {channels.map(ch => (
+            <label key={ch.key} style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: noEmitterYet ? 'default' : 'pointer' }}>
+              <span style={{ fontSize: 12, color: 'var(--text)' }}>{ch.label}</span>
+              <Toggle checked={!!form.values[ch.key]} onChange={v => form.set(ch.key, v)}
+                disabled={noEmitterYet} ariaLabel={ch.label}
                 title={noEmitterYet ? t('notifications.inApp.notYetActiveReason') : undefined} />
-            </SettingRow>
-          </div>
-        ))}
-      </div>
+            </label>
+          ))}
+        </div>
+      </SettingRow>
     </SettingsScaffold>
   )
 }

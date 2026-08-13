@@ -81,14 +81,15 @@ describe.each(['sollicitaties', 'kandidaten', 'matches', 'taken'])(
 describe.each(['vacatures', 'facturering'])(
   'NotificationsSettings — context=%s has no backend emitter yet (NOTIF-PARITY-1)',
   context => {
-    it('renders BOTH switches disabled and shows the "not yet active" marker on both', async () => {
+    it('renders BOTH switches disabled and shows the "not yet active" marker once on the block', async () => {
       render(<NotificationsSettings context={context} />)
       const inApp = await screen.findByRole('switch', { name: t('notifications.inApp.label') })
       const email = screen.getByRole('switch', { name: t('notifications.email.label') })
 
       expect(inApp).toBeDisabled()
       expect(email).toBeDisabled()
-      expect(screen.getAllByText(t('notifications.inApp.notYetActive'))).toHaveLength(2)
+      // ONE block since "1 blok met 2 toggles" (Danny 13-08) — so one marker for both.
+      expect(screen.getAllByText(t('notifications.inApp.notYetActive'))).toHaveLength(1)
     })
 
     it('never lets a click flip either toggle or produce a save (§3: no fake affordance)', async () => {

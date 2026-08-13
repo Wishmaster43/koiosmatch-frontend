@@ -23,6 +23,8 @@ import type { Column } from '@/components/ui/DataTable'
 import type { WaMessage } from '@/types/whatsapp'
 import { useAllSettings, saveSettingsKeys, invalidateAllSettingsCache, getNumberSetting } from '@/lib/settings/useAllSettings'
 import { notifyError } from '@/lib/notify'
+// WA-LOG-LEESBAAR-1: row click opens the candidate's whole thread, readable.
+import WaConversationPanel from './whatsapp/WaConversationPanel'
 
 // Tenant-setting key — the generic /settings key/value store (no dedicated column).
 export const KOIOS_MEMORY_DAYS_KEY = 'koios_conversation_memory_days'
@@ -79,6 +81,8 @@ export default function WhatsAppLog() {
   const [search, setSearch] = useState('')
   const [selectedDir, setSelectedDir] = useState<string[]>([])
   const [selectedStatus, setSelectedStatus] = useState<string[]>([])
+  // WA-LOG-LEESBAAR-1: the clicked row whose conversation is open (null = closed).
+  const [openThread, setOpenThread] = useState<WaMessage | null>(null)
 
   const statusOptions = useMemo(() => [...new Set(messages.map(m => m.status).filter(Boolean))] as string[], [messages])
 
@@ -96,7 +100,12 @@ export default function WhatsAppLog() {
   const columns: Column<WaMessage>[] = [
     { key: 'direction', header: t('log.direction'), width: 120, render: m => <DirectionPill direction={m.direction} /> },
     { key: 'contact', header: t('waLog.contact'), width: 180, render: m => contactOf(m) },
-    { key: 'body', header: t('waLog.message'), render: m => <span style={{ display: 'block', maxWidth: 460, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{m.body ?? '—'}</span> },
+    // WA-LOG-LEESBAAR-1 (Danny 13-08): two wrapped lines instead of one ellipsis
+    // line — scannable but no longer misreadable; the row click shows the rest.
+    { key: 'body', header: t('waLog.message'), render: m => (
+      <span style={{ display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', maxWidth: 460,
+        overflow: 'hidden', whiteSpace: 'normal', lineHeight: 1.4 }}>{m.body ?? '—'}</span>
+    ) },
     { key: 'status', header: t('log.status'), width: 120, render: m => <StatusPill status={m.status} /> },
     { key: 'sent_at', header: t('log.date'), width: 150, nowrap: true, render: m => formatDateTime(m.sent_at) },
   ]
@@ -128,8 +137,11 @@ export default function WhatsAppLog() {
       <div style={{ flex: 1, minHeight: 0 }}>
         <LogView<WaMessage> rows={filtered} columns={columns} loading={loading.messages} filterKey="whatsapp-log"
           filterGroups={filterGroups} getRowId={m => m.id ?? ''} exportName="whatsapp-log"
+          onRowClick={setOpenThread}
           exportColumns={exportColumns} totalCount={messages.length} emptyText={t('waLog.empty')} />
       </div>
+      {/* WA-LOG-LEESBAAR-1: the clicked row's whole conversation, full-size. */}
+      {openThread && <WaConversationPanel message={openThread} messages={messages} onClose={() => setOpenThread(null)} />}
     </div>
   )
 }

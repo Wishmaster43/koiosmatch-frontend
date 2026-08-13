@@ -98,6 +98,7 @@ import WhatsAppLog from './sections/WhatsAppLog'
 import { WaMessageTypeSettings } from './sections/WaMessageTypeSettings'
 import KoiosSettings from './sections/koios'
 import NotificationsSettings from './sections/NotificationsSettings'
+import EscalationSettings from './sections/EscalationSettings'
 // Planning settings — gated on the 'plan' module (requiresPage: 'planning'); hidden until it is on.
 import { ShiftTypesSettings, AvailabilitySettings, AutoMatchSettings, PlanningBoardSettings } from './sections/PlanningSettings'
 import { FacturenSettings } from './sections/BillingSettings'
@@ -611,6 +612,8 @@ export const NAV_GROUPS = [
       { id: 'notif_matches', icon: Bell, render: () => <NotificationsSettings context="matches" /> },
       { id: 'notif_taken', icon: Bell, render: () => <NotificationsSettings context="taken" /> },
       { id: 'notif_facturering', icon: Bell, render: () => <NotificationsSettings context="facturering" /> },
+      // 11-escalatie (3b): per stilstand-signaal an optional day-threshold + target (user/role).
+      { id: 'notif_escalation', icon: Bell, component: EscalationSettings },
     ],
   },
   {
