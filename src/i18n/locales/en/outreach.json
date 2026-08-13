@@ -73,7 +73,7 @@
     "error": "Creating failed. Please try again."
   },
   "page": {
-    "searchPlaceholder": "Search call lists"
+    "searchPlaceholder": "Search call list, pool or candidate…"
   },
   "drawer": {
     "label": "Call list",

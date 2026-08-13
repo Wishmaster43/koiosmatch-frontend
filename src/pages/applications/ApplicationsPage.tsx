@@ -33,7 +33,7 @@ import { BTN_H } from '@/config/buttonMetrics'
 import {
   buildPhaseData, buildOwnerData, buildSourceData, buildOwnerDataFromStats, buildSourceDataFromStats,
   buildVacOptions, buildClientOptions, buildBucketData, asOptions,
-  bucketCount, computeAvgScore, computeAiTaskCount, buildApplicationInsights,
+  bucketCount, placedCount, computeAvgScore, computeAiTaskCount, buildApplicationInsights,
 } from './data/applicationInsights'
 import { buildApplicationFilterGroups } from './data/applicationFilterGroups'
 import type { Application } from '@/types/application'
@@ -150,12 +150,14 @@ export default function ApplicationsPage({ intent }: { intent?: unknown } = {}) 
   const clientOptions = useMemo(() => buildClientOptions(wideRows), [wideRows])
   // Bucket counts + donut data (Danny 14-08: replaces the old toolbar tab row) —
   // real server-wide totals via stats.by_bucket when available (bucketCount's
-  // own per-bucket fallback covers the rest). See buildBucketData's header
-  // comment for why "placed" isn't a 4th slice yet.
+  // own per-bucket fallback covers the rest). PLACED-1 (2026-08-14): "placed" is
+  // the 4th slice, a subset of "matched" (both come from the same additive
+  // stats.by_bucket.placed / row-level has_match — see placedCount).
   const bucketCounts = useMemo(() => ({
     active: bucketCount(stats, wideRows, 'active'),
     matched: bucketCount(stats, wideRows, 'matched'),
     rejected: bucketCount(stats, wideRows, 'rejected'),
+    placed: placedCount(stats, wideRows),
   }), [stats, wideRows])
   const bucketData = useMemo(() => buildBucketData(t, bucketCounts), [t, bucketCounts])
   // Bucket options for the right filter panel — one truth with the donut/deep-link

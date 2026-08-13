@@ -164,7 +164,7 @@
     "done": "{{count}} tâches mises à jour"
   },
   "page": {
-    "searchPlaceholder": "Rechercher des tâches"
+    "searchPlaceholder": "Rechercher une tâche, une description, un commentaire…"
   },
   "related": {
     "title": "Tâches de ce candidat",

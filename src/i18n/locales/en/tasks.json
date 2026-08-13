@@ -164,7 +164,7 @@
     "teamLoadError": "Internal departments could not be loaded."
   },
   "page": {
-    "searchPlaceholder": "Search tasks"
+    "searchPlaceholder": "Search task, description, comment…"
   },
   "related": {
     "title": "Tasks for this candidate",

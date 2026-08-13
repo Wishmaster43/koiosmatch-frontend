@@ -73,7 +73,7 @@
     "error": "Erstellung fehlgeschlagen. Bitte erneut versuchen."
   },
   "page": {
-    "searchPlaceholder": "Anruflisten suchen"
+    "searchPlaceholder": "Anrufliste, Pool oder Kandidat suchen…"
   },
   "drawer": {
     "label": "Anrufliste",

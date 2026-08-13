@@ -1,6 +1,6 @@
 import type { RefObject } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Clock } from 'lucide-react'
+import { Clock, CheckCircle2 } from 'lucide-react'
 import DataTable from '@/components/ui/DataTable'
 import type { Column, ControlledSort } from '@/components/ui/DataTable'
 import Avatar from '@/components/ui/Avatar'
@@ -118,6 +118,12 @@ export default function ApplicationsTable({ rows, loading, error, selectedId, on
           {r.tooLongInStage && (
             <Clock size={13} strokeWidth={2} color="var(--color-warning)"
               aria-label={t('kpi.tooLongInStage')} role="img" />
+          )}
+          {/* PLACED-1: subtle placed badge — colour never the only signal, the icon
+              shape + tooltip/aria text carry the meaning on their own. */}
+          {r.hasMatch && (
+            <CheckCircle2 size={13} strokeWidth={2} color="var(--color-success)"
+              aria-label={t('buckets.placed')} role="img" />
           )}
         </span>
       ) },

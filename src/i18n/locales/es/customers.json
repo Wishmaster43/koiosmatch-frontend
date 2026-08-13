@@ -8,7 +8,7 @@
   },
   "page": {
     "add": "Nuevo cliente",
-    "searchPlaceholder": "Buscar cliente, n.º deudor, gestor…",
+    "searchPlaceholder": "Buscar cliente, nota, documento…",
     "empty": "No se encontraron clientes.",
     "loading": "Cargando…",
     "loadError": "No se pudieron cargar los clientes.",

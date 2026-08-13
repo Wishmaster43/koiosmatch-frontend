@@ -73,7 +73,7 @@
     "error": "Échec de la création. Veuillez réessayer."
   },
   "page": {
-    "searchPlaceholder": "Rechercher des listes d'appel"
+    "searchPlaceholder": "Rechercher une liste d'appel, un pool ou un candidat…"
   },
   "drawer": {
     "label": "Liste d'appel",

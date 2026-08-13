@@ -164,7 +164,7 @@
     "done": "{{count}} tareas actualizadas"
   },
   "page": {
-    "searchPlaceholder": "Buscar tareas"
+    "searchPlaceholder": "Buscar tarea, descripción, comentario…"
   },
   "related": {
     "title": "Tareas de este candidato",

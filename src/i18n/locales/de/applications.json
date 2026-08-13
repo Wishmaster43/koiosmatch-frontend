@@ -13,7 +13,8 @@
   "buckets": {
     "active": "Aktiv",
     "matched": "Gematcht",
-    "rejected": "Abgelehnt"
+    "rejected": "Abgelehnt",
+    "placed": "Platziert"
   },
   "view": {
     "table": "Listenansicht",
@@ -63,6 +64,7 @@
     "invited": "Eingeladen",
     "proposed": "Vorschlag gesendet",
     "rejected": "Abgelehnt",
+    "placed": "Platziert",
     "matched": "Gematcht",
     "new": "Neu",
     "totalActiveSub": "Aktiv + Matched",
@@ -384,6 +386,7 @@
     "editNote": "Notiz bearbeiten",
     "confirm": "Ablehnen",
     "rejected": "Abgelehnt",
+    "placed": "Platziert",
     "aiAdvice": "Koios empfiehlt Ablehnung",
     "aiAuto": "Harte Kriterien nicht erfüllt. Für Auto-Ablehnung geeignet.",
     "aiConfirm": "Prüfen und bestätigen, bevor eine Nachricht gesendet wird.",

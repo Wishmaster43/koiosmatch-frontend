@@ -8,7 +8,7 @@
     "add": "Nieuwe kans",
     "selected": "{{count}} geselecteerd",
     "clearSelection": "Selectie wissen",
-    "searchPlaceholder": "Zoek naar kansen"
+    "searchPlaceholder": "Zoek kans, omschrijving, notitie…"
   },
   "cols": {
     "title": "Kans",

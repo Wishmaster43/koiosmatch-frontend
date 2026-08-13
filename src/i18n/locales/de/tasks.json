@@ -164,7 +164,7 @@
     "done": "{{count}} Aufgaben aktualisiert"
   },
   "page": {
-    "searchPlaceholder": "Aufgaben suchen"
+    "searchPlaceholder": "Aufgabe, Beschreibung, Kommentar suchen…"
   },
   "related": {
     "title": "Aufgaben dieses Kandidaten",

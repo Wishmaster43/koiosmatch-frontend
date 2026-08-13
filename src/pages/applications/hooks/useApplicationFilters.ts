@@ -57,6 +57,8 @@ interface FilterableApplication {
   task?: unknown
   candidateName?: string
   vacancyTitle?: string
+  // PLACED-1: batched EXISTS on `matches` — drives the 'placed' bucket pseudo-value.
+  hasMatch?: boolean
 }
 
 export function useApplicationFilters() {
@@ -126,8 +128,15 @@ export function useApplicationFilters() {
     if (a.archived) return false
     if (opts?.refMode) return true
     // 'allActive' (TOTAAL ACTIEF-kaart) spans the active + matched buckets together.
+    // 'placed' (PLACED-1) is a subset of 'matched' — a real Match must exist too,
+    // never a real server bucket value of its own (ApplicationQuery's enum stays
+    // active|matched|rejected — see filterParams' bucket translation below).
     // opts.ignoreBucket: the board view shows the whole funnel (all buckets).
-    if (!opts?.ignoreBucket && (bucket === 'allActive' ? !['active', 'matched'].includes(a.bucket ?? '') : a.bucket !== bucket)) return false
+    if (!opts?.ignoreBucket) {
+      if (bucket === 'allActive') { if (!['active', 'matched'].includes(a.bucket ?? '')) return false }
+      else if (bucket === 'placed') { if (a.bucket !== 'matched' || !a.hasMatch) return false }
+      else if (a.bucket !== bucket) return false
+    }
     if (selectedPhase.length  && !selectedPhase.includes(a.phaseKey ?? ''))              return false
     // Owner compares by ID now (W27) — falls back to OWNER_NONE for an unowned row,
     // same sentinel the donut/filter options use (see buildOwnerData/buildOwnerDataFromStats).
@@ -192,15 +201,21 @@ export function useApplicationFilters() {
     // VESTIGING-2: server-side ?branch_id[]= — a narrowing only, gated behind the
     // tenant's own branch_authz_enabled axis on the backend (off = no effect).
     if (selectedBranch.length) p.branch_id = selectedBranch
+    // PLACED-1: 'placed' has no server bucket value of its own — send the real
+    // 'matched' bucket (bucketParam below) plus `has_match=1` to narrow to the
+    // linked-Match subset (server-side EXISTS on `matches`, mirrors the row field).
+    if (!showArchived && !showTrash && bucket === 'placed') p.has_match = 1
     return p
   }, [selectedPhase, selectedVac, selectedClient, selectedSource, selectedOwner, query, showArchived, showTrash,
-    interviewBusy, interviewPaused, selectedCandidateIds, selectedBranch, attention, dateRange])
+    interviewBusy, interviewPaused, selectedCandidateIds, selectedBranch, attention, dateRange, bucket])
 
   // Bucket param — TABLE query only (never board/stats): 'allActive' has no server
   // equivalent (spans two buckets) and showArchived's/showTrash's reveal must not be
   // narrowed by it (matchesFilters ignores bucket entirely once either is true).
+  // PLACED-1: 'placed' rides the real 'matched' bucket server-side, narrowed further
+  // by `has_match=1` above — no `bucket=placed` value exists on ApplicationQuery.
   const bucketParam = (!showArchived && !showTrash && (bucket === 'active' || bucket === 'matched' || bucket === 'rejected'))
-    ? bucket : undefined
+    ? bucket : (!showArchived && !showTrash && bucket === 'placed') ? 'matched' : undefined
   const filterKey = JSON.stringify({ ...filterParams, bucket: bucketParam })
 
   return {

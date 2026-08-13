@@ -13,7 +13,8 @@
   "buckets": {
     "active": "Actives",
     "matched": "Matchées",
-    "rejected": "Refusées"
+    "rejected": "Refusées",
+    "placed": "Placées"
   },
   "view": {
     "table": "Vue liste",
@@ -76,7 +77,8 @@
     "missingAppointment": "Rendez-vous manquant",
     "missingAppointmentSub": "Lignes chargées uniquement, pas le total pour tout le locataire. Cliquer pour filtrer",
     "tooLongInStage": "Trop longtemps à cette étape",
-    "tooLongInStageSub": "Total pour tout le locataire. Cliquer pour filtrer"
+    "tooLongInStageSub": "Total pour tout le locataire. Cliquer pour filtrer",
+    "placed": "Placés"
   },
   "insights": {
     "bucket": "Statut",
@@ -401,7 +403,8 @@
     "correctAction": "Corriger le refus",
     "correctModalTitle": "Corriger le refus",
     "saveCorrection": "Enregistrer la correction",
-    "correctionDone": "Refus corrigé"
+    "correctionDone": "Refus corrigé",
+    "placed": "Placé"
   },
   "motivation": {
     "title": "Lettre de motivation",

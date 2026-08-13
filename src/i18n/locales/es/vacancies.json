@@ -3,7 +3,7 @@
     "title": "Vacantes",
     "subtitle": "Gestiona y publica fácilmente todas tus posiciones abiertas.",
     "add": "Nueva vacante",
-    "searchPlaceholder": "Buscar vacantes",
+    "searchPlaceholder": "Buscar vacante, nota, documento…",
     "loading": "Cargando vacantes…",
     "empty": "Aún no hay vacantes.",
     "loadError": "No se pudieron cargar las vacantes.",

@@ -225,7 +225,7 @@
     "empty": "Aucun match"
   },
   "page": {
-    "searchPlaceholder": "Rechercher des matchs",
+    "searchPlaceholder": "Rechercher un candidat, un poste ou un client…",
     "openNotFound": "Match introuvable. Peut-être supprimé."
   },
   "add": {

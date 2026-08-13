@@ -8,7 +8,7 @@
   },
   "page": {
     "add": "Nouveau client",
-    "searchPlaceholder": "Rechercher client, n° débiteur, gestionnaire…",
+    "searchPlaceholder": "Rechercher un client, une note, un document…",
     "empty": "Aucun client trouvé.",
     "loading": "Chargement…",
     "loadError": "Échec du chargement des clients.",

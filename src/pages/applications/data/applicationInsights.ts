@@ -48,25 +48,22 @@ export const phaseCount = (stats: AppStats | null, wideRows: Application[], key:
 }
 export const bucketCount = (stats: AppStats | null, wideRows: Application[], b: string): number =>
   stats?.by_bucket?.[b] ?? wideRows.filter(a => a.bucket === b).length
+// PLACED-1 (2026-08-14, backend commit 9ba44e54): `has_match` is now a real per-row
+// field and `stats.by_bucket.placed` a real server-wide count, additive to the
+// active/matched/rejected trio — placed ⊆ matched (a Match only exists post-Hired).
+export const placedCount = (stats: AppStats | null, wideRows: Application[]): number =>
+  stats?.by_bucket?.placed ?? wideRows.filter(a => a.hasMatch).length
 
 // Bucket donut data — replaces the old toolbar tab row (Danny 14-08). Counts are
 // the real server-wide `stats.by_bucket` totals whenever available (bucketCount's
-// own fallback covers the wide-sample case). NOTE (STATS-HONEST-1): a fourth
-// "placed" segment was requested but is NOT built here — `ApplicationQuery`'s
-// bucket enum is `active|matched|rejected` only (verified against the backend
-// query + stats aggregation) and the linked-Match summary that could distinguish
-// "matched" from an actually-placed application is a DETAIL-only field (`match`
-// on `ApplicationDetail`, never present on the list/board rows or the stats
-// response) — there is no honest signal to split "matched" further without a
-// backend addition. Per the domain model (CLAUDE.md §3B) the funnel's Hired
-// stage already IS the placement trigger (Hired → Match → deployability
-// Placed), so today "matched" already represents the placement bucket; a
-// distinct "placed" slice needs backend-Claude to add either a `by_bucket`
-// segment or a lightweight `has_match` list/stats field. Reported as a gap.
-export const buildBucketData = (t: TFunction, counts: { active: number; matched: number; rejected: number }): Aggregate[] => ([
+// own fallback covers the wide-sample case). "placed" is the 4th slice (PLACED-1),
+// a subset of "matched" shown alongside it — both may be non-zero at once, unlike
+// the other three which partition the set.
+export const buildBucketData = (t: TFunction, counts: { active: number; matched: number; rejected: number; placed: number }): Aggregate[] => ([
   { name: t('buckets.active'),   key: 'active',   color: 'var(--color-primary)', value: counts.active },
   { name: t('buckets.matched'),  key: 'matched',  color: 'var(--color-success)', value: counts.matched },
   { name: t('buckets.rejected'), key: 'rejected', color: 'var(--color-danger)',  value: counts.rejected },
+  { name: t('buckets.placed'),   key: 'placed',   color: 'var(--color-secondary)', value: counts.placed },
 ].filter(d => d.value > 0))
 
 // ── Donut data (phase / recruiter / source), each with counts ──
@@ -149,7 +146,7 @@ export const computeAiTaskCount = (wideRows: Application[]): number =>
 // `picked` = the chip label; phase filters store the SLUG, so resolve it to its label.
 const pickedLabel = (data: Aggregate[], v?: string): string | null => (v ? (data.find(d => d.key === v)?.name ?? v) : null)
 
-interface Counts { active: number; matched: number; rejected: number; new: number }
+interface Counts { active: number; matched: number; rejected: number; placed: number; new: number }
 
 interface BuildArgs {
   t: TFunction

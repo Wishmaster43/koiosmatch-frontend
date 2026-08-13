@@ -225,7 +225,7 @@
     "empty": "No matches"
   },
   "page": {
-    "searchPlaceholder": "Search matches",
+    "searchPlaceholder": "Search candidate, vacancy or customer…",
     "openNotFound": "Match not found. It may have been removed."
   },
   "add": {

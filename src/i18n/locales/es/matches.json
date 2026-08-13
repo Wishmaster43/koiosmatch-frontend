@@ -225,7 +225,7 @@
     "empty": "Sin matches"
   },
   "page": {
-    "searchPlaceholder": "Buscar coincidencias",
+    "searchPlaceholder": "Buscar candidato, vacante o cliente…",
     "openNotFound": "Match no encontrado. Puede haber sido eliminado."
   },
   "add": {

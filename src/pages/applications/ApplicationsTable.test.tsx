@@ -100,6 +100,17 @@ describe('ApplicationsTable · too-long-in-stage row icon (D6-KAART-2)', () => {
   })
 })
 
+// PLACED-1 (2026-08-14): the placed row badge — colour is never the only signal,
+// so the icon renders behind an accessible name (real nl i18n resolves it).
+describe('ApplicationsTable · placed row badge (PLACED-1)', () => {
+  it('shows the placed badge only on rows carrying hasMatch', () => {
+    const placed = { ...baseRow, id: 20, hasMatch: true }
+    const notPlaced = { ...baseRow, id: 21, hasMatch: false }
+    render(<ApplicationsTable rows={[placed, notPlaced]} />)
+    expect(screen.getAllByLabelText('Geplaatst')).toHaveLength(1)
+  })
+})
+
 // Danny 08-08: "Bezig 2/12 1 regel geen 2 regels" — the interview cell stacked
 // the chip above the progress text, costing a second row of height in every
 // table row. It must read as ONE line.

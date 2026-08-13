@@ -13,7 +13,8 @@
   "buckets": {
     "active": "Active",
     "matched": "Matched",
-    "rejected": "Rejected"
+    "rejected": "Rejected",
+    "placed": "Placed"
   },
   "view": {
     "table": "List view",
@@ -63,6 +64,7 @@
     "invited": "Invited",
     "proposed": "Proposal sent",
     "rejected": "Rejected",
+    "placed": "Placed",
     "matched": "Matched",
     "new": "New",
     "totalActiveSub": "Active + matched",
@@ -395,6 +397,7 @@
     "editNote": "Edit note",
     "confirm": "Reject",
     "rejected": "Rejected",
+    "placed": "Placed",
     "aiAdvice": "Koios advises rejection",
     "aiAuto": "Hard criteria failed. Auto-rejection eligible.",
     "aiConfirm": "Review and confirm before a message is sent.",

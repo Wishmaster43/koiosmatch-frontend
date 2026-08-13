@@ -8,7 +8,7 @@
   },
   "page": {
     "add": "Nieuwe klant",
-    "searchPlaceholder": "Zoek klant, debiteurnr, accountmanager…",
+    "searchPlaceholder": "Zoek klant, notitie, document…",
     "empty": "Geen klanten gevonden.",
     "loading": "Laden…",
     "loadError": "Klanten laden is mislukt.",

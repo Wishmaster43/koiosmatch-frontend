@@ -13,7 +13,8 @@
   "buckets": {
     "active": "Actief",
     "matched": "Matched",
-    "rejected": "Afgewezen"
+    "rejected": "Afgewezen",
+    "placed": "Geplaatst"
   },
   "view": {
     "table": "Lijstweergave",
@@ -63,6 +64,7 @@
     "invited": "Uitgenodigd",
     "proposed": "Voorstel gedaan",
     "rejected": "Afgewezen",
+    "placed": "Geplaatst",
     "matched": "Matched",
     "new": "Nieuw",
     "totalActiveSub": "Actief + matched",
@@ -395,6 +397,7 @@
     "editNote": "Toelichting bewerken",
     "confirm": "Afwijzen",
     "rejected": "Afgewezen",
+    "placed": "Geplaatst",
     "aiAdvice": "Koios adviseert afwijzen",
     "aiAuto": "Harde criteria niet gehaald. Auto-afwijzen mogelijk.",
     "aiConfirm": "Beoordeel en bevestig voordat er een bericht uitgaat.",

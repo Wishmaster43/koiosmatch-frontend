@@ -141,6 +141,10 @@ export interface Application {
   // (df9450dc) — flags a row whose current stage was entered before the tenant
   // stale-stage threshold, so the table can show a subtle per-row indicator.
   tooLongInStage: boolean
+  // PLACED-1: a real linked Match exists on this application (batched EXISTS,
+  // never a per-row query) — drives the row/card placed badge and the "placed"
+  // bucket-donut segment client-side. Tolerant default false when absent.
+  hasMatch: boolean
 }
 
 /** The enriched application model rendered by the drawer tabs. */
@@ -302,6 +306,9 @@ export interface ApiApplication {
   current_stage_entered_at?: string | null
   // V-appdetail-1: mirrors CandidateResource's own missing_appointment flag.
   missing_appointment?: boolean
+  // PLACED-1 (2026-08-14, backend commit 9ba44e54): batched EXISTS on `matches` —
+  // present on list/board/detail rows and the store/update echo alike.
+  has_match?: boolean
   task?: string
   ai_task?: string
   ai?: { task?: string }

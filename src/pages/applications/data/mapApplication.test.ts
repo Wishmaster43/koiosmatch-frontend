@@ -42,6 +42,14 @@ describe('mapApplication', () => {
     expect(mapApplication({ id: 9 }).missingAppointment).toBe(false)
   })
 
+  // PLACED-1 (2026-08-14, backend commit 9ba44e54): batched EXISTS on `matches`,
+  // tolerant/false when the field is absent (older cached payloads).
+  it('maps has_match to hasMatch, tolerant/false when absent', () => {
+    expect(mapApplication({ id: 10, has_match: true }).hasMatch).toBe(true)
+    expect(mapApplication({ id: 11, has_match: false }).hasMatch).toBe(false)
+    expect(mapApplication({ id: 12 }).hasMatch).toBe(false)
+  })
+
   // S12/13: ApplicationListResource sends the vacancy's client_id as customer_id.
   it('maps customer_id to customerId, null when absent', () => {
     expect(mapApplication({ id: 8, customer_id: 'cust1' }).customerId).toBe('cust1')

@@ -8,7 +8,7 @@
     "add": "New opportunity",
     "selected": "{{count}} selected",
     "clearSelection": "Clear selection",
-    "searchPlaceholder": "Search opportunities"
+    "searchPlaceholder": "Search opportunity, description, note…"
   },
   "cols": {
     "title": "Opportunity",

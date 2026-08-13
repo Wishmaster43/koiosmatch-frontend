@@ -155,6 +155,9 @@ export function mapApplication(a: ApiApplication = {}, funnelTypes: LookupItem[]
     missingAppointment: Boolean(a.missing_appointment),
     // D6-KAART-2: same predicate as the too_long_in_stage=1 filter / attention count.
     tooLongInStage: Boolean(a.too_long_in_stage),
+    // PLACED-1: batched EXISTS on `matches` — tolerant default false when the
+    // field is absent (older cached payloads, pre-9ba44e54 fixtures).
+    hasMatch: Boolean(a.has_match),
   }
 }
 

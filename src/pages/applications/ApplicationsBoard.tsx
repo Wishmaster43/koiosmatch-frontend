@@ -2,6 +2,7 @@ import { useRef } from 'react'
 import type { DragEvent } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useDateFormat } from '@/lib/datetime'
+import { CheckCircle2 } from 'lucide-react'
 import Avatar from '@/components/ui/Avatar'
 import KoiosAiMark from '@/components/ui/KoiosAiMark'
 import type { Application } from '@/types/application'
@@ -18,9 +19,9 @@ function BoardCard({ app, onDragStart, onClick, selected }: {
   app: Application; onDragStart: (e: DragEvent<HTMLDivElement>, id: Id | undefined) => void; onClick: (app: Application) => void; selected: boolean
 }) {
   const { formatDate } = useDateFormat()
-  // AI-Act disclosure hint (AI-ACT-1) for the AI-task mark below — 'common' only,
-  // this card has no other translated strings.
-  const { t } = useTranslation('common')
+  // AI-Act disclosure hint (AI-ACT-1) for the AI-task mark, plus the applications
+  // namespace for the placed-badge label (PLACED-1).
+  const { t } = useTranslation(['common', 'applications'])
   return (
     <div draggable onDragStart={e => onDragStart(e, app.id)} onClick={() => onClick(app)}
       style={{ background: 'var(--surface)', borderRadius: 10, padding: '12px 14px', marginBottom: 8,
@@ -31,6 +32,12 @@ function BoardCard({ app, onDragStart, onClick, selected }: {
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
         <Avatar initials={app.candidateInitials} size={28} />
         <span style={{ fontWeight: 600, fontSize: 13, color: 'var(--text)', flex: 1 }}>{app.candidateName}</span>
+        {/* PLACED-1: subtle placed badge — colour never the only signal, the icon
+            shape + aria/title text carry the meaning on their own. */}
+        {app.hasMatch && (
+          <CheckCircle2 size={14} strokeWidth={2} color="var(--color-success)" style={{ flexShrink: 0 }}
+            aria-label={t('applications:buckets.placed')} role="img" />
+        )}
         <span style={{ width: 8, height: 8, borderRadius: '50%', flexShrink: 0,
           background: app.isNew ? 'var(--color-danger)' : 'var(--border)' }} />
       </div>

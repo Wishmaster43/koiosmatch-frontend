@@ -164,7 +164,7 @@
     "teamLoadError": "Interne afdelingen konden niet worden geladen."
   },
   "page": {
-    "searchPlaceholder": "Zoek naar taken"
+    "searchPlaceholder": "Zoek taak, omschrijving, reactie…"
   },
   "related": {
     "title": "Taken van deze kandidaat",

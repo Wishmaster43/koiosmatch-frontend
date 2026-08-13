@@ -3,7 +3,7 @@
     "title": "Postes",
     "subtitle": "Gérez et publiez facilement tous vos postes ouverts.",
     "add": "Nouveau poste",
-    "searchPlaceholder": "Rechercher des postes",
+    "searchPlaceholder": "Rechercher un poste, une note, un document…",
     "loading": "Chargement des postes…",
     "empty": "Aucun poste pour le moment.",
     "loadError": "Impossible de charger les postes.",

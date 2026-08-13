@@ -57,6 +57,41 @@ describe('useApplicationFilters — server filterParams', () => {
 
 // INTERVIEW-PHASE-1: the v1 "In interview" quick-view sends the server's own
 // universal category filter (busy/completed/disqualified/none) directly.
+// PLACED-1 (2026-08-14): the 4th bucket-donut segment has no server bucket value
+// of its own (ApplicationQuery's enum stays active|matched|rejected) — it rides
+// the real 'matched' bucket plus a `has_match=1` narrowing param.
+describe('useApplicationFilters — placed bucket segment (PLACED-1)', () => {
+  it('sends bucket=matched + has_match=1 once the placed segment is picked', () => {
+    const { result } = renderHook(() => useApplicationFilters())
+    act(() => { result.current.setBucket('placed') })
+    expect(result.current.bucketParam).toBe('matched')
+    expect(result.current.filterParams.has_match).toBe(1)
+  })
+
+  it('drops has_match once the bucket is cleared back to active', () => {
+    const { result } = renderHook(() => useApplicationFilters())
+    act(() => { result.current.setBucket('placed') })
+    act(() => { result.current.setBucket('active') })
+    expect(result.current.bucketParam).toBe('active')
+    expect(result.current.filterParams.has_match).toBeUndefined()
+  })
+
+  it('drops the bucket/has_match narrowing while showArchived reveals the trash', () => {
+    const { result } = renderHook(() => useApplicationFilters())
+    act(() => { result.current.setBucket('placed'); result.current.setShowArchived(true) })
+    expect(result.current.bucketParam).toBeUndefined()
+    expect(result.current.filterParams.has_match).toBeUndefined()
+  })
+
+  it('matchesFilters narrows to matched rows that also carry hasMatch', () => {
+    const { result } = renderHook(() => useApplicationFilters())
+    act(() => { result.current.setBucket('placed') })
+    expect(result.current.matchesFilters({ bucket: 'matched', hasMatch: true })).toBe(true)
+    expect(result.current.matchesFilters({ bucket: 'matched', hasMatch: false })).toBe(false)
+    expect(result.current.matchesFilters({ bucket: 'active', hasMatch: true })).toBe(false)
+  })
+})
+
 describe('useApplicationFilters — interview quick-view (INTERVIEW-PHASE-1)', () => {
   it('sends no interview_status by default', () => {
     const { result } = renderHook(() => useApplicationFilters())

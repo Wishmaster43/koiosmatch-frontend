@@ -13,7 +13,8 @@
   "buckets": {
     "active": "Activas",
     "matched": "Emparejadas",
-    "rejected": "Rechazadas"
+    "rejected": "Rechazadas",
+    "placed": "Colocadas"
   },
   "view": {
     "table": "Vista de lista",
@@ -76,7 +77,8 @@
     "missingAppointment": "Cita pendiente",
     "missingAppointmentSub": "Solo filas cargadas, no el total del inquilino. Clic para filtrar",
     "tooLongInStage": "Demasiado tiempo en la fase",
-    "tooLongInStageSub": "Total del inquilino. Clic para filtrar"
+    "tooLongInStageSub": "Total del inquilino. Clic para filtrar",
+    "placed": "Colocados"
   },
   "insights": {
     "bucket": "Estado",
@@ -401,7 +403,8 @@
     "correctAction": "Corregir el rechazo",
     "correctModalTitle": "Corregir el rechazo",
     "saveCorrection": "Guardar corrección",
-    "correctionDone": "Rechazo corregido"
+    "correctionDone": "Rechazo corregido",
+    "placed": "Colocado"
   },
   "motivation": {
     "title": "Carta de motivación",
