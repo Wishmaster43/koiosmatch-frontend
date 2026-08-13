@@ -8,31 +8,32 @@ import { render, screen, fireEvent, cleanup } from '@testing-library/react'
 import { resolveNotificationTarget } from './NotificationBell'
 import NotificationBell from './NotificationBell'
 import * as useNotificationsModule from '@/hooks/useNotifications'
+import type { AppNotification } from '@/hooks/useNotifications'
 
 afterEach(() => { cleanup(); vi.restoreAllMocks(); window.location.hash = '' })
 
 describe('resolveNotificationTarget', () => {
   it('resolves an entity_type/entity_id row to its page + id', () => {
-    expect(resolveNotificationTarget({ id: 1, entity_type: 'task', entity_id: 42 } as any))
+    expect(resolveNotificationTarget({ id: 1, entity_type: 'task', entity_id: 42 } as unknown as AppNotification))
       .toEqual({ page: 'tasks', id: '42' })
   })
 
   it('resolves a nested meta.type/meta.id row', () => {
-    expect(resolveNotificationTarget({ id: 2, meta: { type: 'candidate', id: 'abc' } } as any))
+    expect(resolveNotificationTarget({ id: 2, meta: { type: 'candidate', id: 'abc' } } as unknown as AppNotification))
       .toEqual({ page: 'candidates', id: 'abc' })
   })
 
   it('resolves a same-app hash link', () => {
-    expect(resolveNotificationTarget({ id: 3, link: '#vacancies?open=9' } as any))
+    expect(resolveNotificationTarget({ id: 3, link: '#vacancies?open=9' } as unknown as AppNotification))
       .toEqual({ page: 'vacancies', id: '9' })
   })
 
   it('returns null when nothing on the row is a real target', () => {
-    expect(resolveNotificationTarget({ id: 4, title: 'System message' } as any)).toBeNull()
+    expect(resolveNotificationTarget({ id: 4, title: 'System message' } as unknown as AppNotification)).toBeNull()
   })
 
   it('returns null for an unmapped entity type', () => {
-    expect(resolveNotificationTarget({ id: 5, entity_type: 'unknown', entity_id: 1 } as any)).toBeNull()
+    expect(resolveNotificationTarget({ id: 5, entity_type: 'unknown', entity_id: 1 } as unknown as AppNotification)).toBeNull()
   })
 })
 
@@ -41,7 +42,7 @@ describe('NotificationBell row click-through', () => {
     vi.spyOn(useNotificationsModule, 'useNotifications').mockReturnValue({
       items: [{ id: 1, title: 'Match verloopt', entity_type: 'match', entity_id: '55', seen: false }],
       unseen: 1, markAllSeen: vi.fn(), reload: vi.fn(),
-    } as any)
+    } as unknown as ReturnType<typeof useNotificationsModule.useNotifications>)
     const onPopState = vi.fn()
     window.addEventListener('popstate', onPopState)
     render(<NotificationBell />)
@@ -56,7 +57,7 @@ describe('NotificationBell row click-through', () => {
     vi.spyOn(useNotificationsModule, 'useNotifications').mockReturnValue({
       items: [{ id: 2, title: 'System message', seen: false }],
       unseen: 1, markAllSeen: vi.fn(), reload: vi.fn(),
-    } as any)
+    } as unknown as ReturnType<typeof useNotificationsModule.useNotifications>)
     const onPopState = vi.fn()
     window.addEventListener('popstate', onPopState)
     render(<NotificationBell />)
