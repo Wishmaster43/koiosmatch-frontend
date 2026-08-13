@@ -201,6 +201,10 @@ export interface Candidate {
   linkedin: string
   photoUrl: string | null
   photo?: string
+  // Work-permit fields (KAND-WERKVERGUNNING-2): plain backend columns, needed by
+  // workPermitVisibility's dataState classification (see mapCandidate.ts).
+  workPermitType: string | null
+  workPermitValidUntil: string | null
   summary: string
   tags: string[]
   archived: boolean
@@ -401,6 +405,9 @@ export interface ApiCandidate {
   linkedin?: string
   photo_url?: string | null
   photoUrl?: string | null
+  // Work-permit source columns — see CandidateProfileRequest/WorkPermitGuard.
+  work_permit_type?: string | null
+  work_permit_valid_until?: string | null
   summary?: string
   bio?: string
   tags?: string[]

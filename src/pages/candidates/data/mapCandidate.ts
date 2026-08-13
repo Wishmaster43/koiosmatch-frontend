@@ -174,6 +174,11 @@ export function mapCandidate(c: ApiCandidate): Candidate {
     placeOfBirth:    c.place_of_birth ?? c.placeOfBirth ?? '',
     linkedin:        c.linkedin ?? '',
     photoUrl:        c.photo_url ?? c.photoUrl ?? null,
+    // KAND-WERKVERGUNNING-BUG-1: was missing here, so workPermitVisibility's
+    // dataState always classified as 'unobservable' even when the API sent values.
+    // Tolerant per §10 (never typeof-number gates); both are plain strings/nulls.
+    workPermitType:      c.work_permit_type ?? null,
+    workPermitValidUntil: c.work_permit_valid_until ?? null,
     summary:         c.summary ?? c.bio ?? '',
     tags:            c.tags ?? [],
     // Archived = soft-deleted (deleted_at set). Off by default in the list; the
