@@ -1,7 +1,6 @@
-import { useMemo } from 'react'
 import type { RefObject } from 'react'
 import { useTranslation } from 'react-i18next'
-import { useLocale, useDateFormat } from '@/lib/datetime'
+import { useDateFormat } from '@/lib/datetime'
 import DataTable from '@/components/ui/DataTable'
 import StatusPill from '@/components/ui/StatusPill'
 import SoftChip from '@/components/ui/SoftChip'
@@ -13,6 +12,7 @@ import type { KoiosAdvice } from '@/lib/koiosAdviceMeta'
 import { initialsOf } from '@/lib/initials'
 import { useAllSettings, getBoolSetting } from '@/lib/settings/useAllSettings'
 import { deriveOpportunityAdvice, isExpectedCloseOverdue } from './data/opportunityAdvice'
+import { opportunityValueOf, formatOpportunityValue } from './data/opportunityValue'
 import type { Opportunity } from '@/types/opportunity'
 import type { Id, LookupOption } from '@/types/common'
 
@@ -42,7 +42,6 @@ const NEUTRAL_AVATAR = '#9CA3AF'
 // OpportunitiesTable — declares columns only; the shared DataTable owns sorting + states.
 export default function OpportunitiesTable({ rows, loading, error, onRowClick, selectedId, valueInHours = false, stages = [], selectable, selectedIds, onToggleRow, onToggleAll, stickyHeader = false, scrollParentRef }: OpportunitiesTableProps) {
   const { t } = useTranslation('opportunities')
-  const locale = useLocale()
   const { formatDate } = useDateFormat()
   // Tenant display settings (Settings → Kansen → Tabelweergave). Coloured chips ON
   // by default, mirrors candidates/applications/customers.
@@ -50,12 +49,6 @@ export default function OpportunitiesTable({ rows, loading, error, onRowClick, s
   const colorStage = getBoolSetting(settings, 'opportunity_table_color_stage', true)
   const colorOwner = getBoolSetting(settings, 'opportunity_table_color_owner', true)
   const colorKoios = getBoolSetting(settings, 'opportunity_table_color_koios', false)
-
-  // Locale-aware EUR formatter (no decimals) for the value column.
-  const money = useMemo(
-    () => new Intl.NumberFormat(locale, { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }),
-    [locale],
-  )
 
   // Shared Koios advice resolver (opportunityAdvice.ts) — same overdue check the
   // expectedClose cell below uses for its red/bold styling (§11: one computation,
@@ -106,13 +99,18 @@ export default function OpportunitiesTable({ rows, loading, error, onRowClick, s
     // Value column follows the tenant setting: euro amount or hours. Regular weight,
     // same as the other plain-text columns (§4: bold is emphasis/active only, never
     // decoration on a data column — 500 still read as bold next to client/date/owner).
+    // Shared opportunityValueOf/formatOpportunityValue (K10c) — the customer drawer's
+    // OpportunitiesTab and this table now read the exact same formatting, including
+    // the EUR formatter locked to 'nl-NL' (the domain's canonical currency locale per
+    // §5, chosen over this table's previous `locale`-driven formatter — the tenant UI
+    // locale must never change the currency's decimal/grouping convention).
     { key: 'value',  header: t('cols.value'), align: 'right', sortable: true,
-      sortValue: r => (valueInHours ? r.hours : r.value) ?? -1,
+      sortValue: r => opportunityValueOf(r, valueInHours) ?? -1,
       render: r => {
-        const v = valueInHours ? r.hours : r.value
+        const v = opportunityValueOf(r, valueInHours)
         if (v == null) return <span style={{ color: 'var(--text-muted)' }}>—</span>
         return <span style={{ fontWeight: 400, color: 'var(--text)', fontVariantNumeric: 'tabular-nums' }}>
-          {valueInHours ? t('cols.hoursValue', { count: v }) : money.format(v)}
+          {formatOpportunityValue(r, valueInHours, t)}
         </span>
       } },
     // Expected close date — red + bold when past AND the stage isn't already won/lost

@@ -155,3 +155,35 @@ describe('OpportunitiesTab · stage colour toggle (customer_opportunity_table_co
     await waitFor(() => expect(screen.getByText('Lead')).toHaveStyle({ color: 'var(--text)' }))
   })
 })
+
+/**
+ * K10c (PLAN-KLANTEN batch 1): the tenant's "Kansen in uren" setting
+ * (`opportunity_value_in_hours`) must switch this tab's value column between
+ * euro and hours exactly like OpportunitiesTable already does — the drawer
+ * tab was ignoring it and always showing euro.
+ */
+describe('OpportunitiesTab · value column follows opportunity_value_in_hours (K10c)', () => {
+  const rowWithBoth: ApiOpportunity[] = [
+    { id: 'opp-value', title: 'Nieuwe zorgvraag', stage: { value: 'lead', label: 'Lead', color: '#94A3B8' }, value: 1234, hours: 40 } as ApiOpportunity,
+  ]
+
+  it('shows the euro amount when the setting is off (default)', async () => {
+    mockOpportunities(rowWithBoth)
+    render(<OpportunitiesTab customerId="cust-1" customerName="Acme" />)
+    expect(await screen.findByText('€ 1.234')).toBeInTheDocument()
+    expect(screen.queryByText('opportunities:cols.hoursValue')).not.toBeInTheDocument()
+  })
+
+  it('shows hours (via the shared cols.hoursValue key) when the setting is on', async () => {
+    vi.mocked(api.get).mockImplementation((url: string) =>
+      url === '/settings'
+        ? Promise.resolve({ data: { opportunity_value_in_hours: 'true' } })
+        : Promise.resolve({ data: {} }))
+    mockOpportunities(rowWithBoth)
+    render(<OpportunitiesTab customerId="cust-1" customerName="Acme" />)
+    // i18n is unmocked here, so t() echoes the raw explicit-namespace key with its
+    // interpolated count — proves the SAME shared key OpportunitiesTable uses, not a local copy.
+    expect(await screen.findByText('opportunities:cols.hoursValue')).toBeInTheDocument()
+    expect(screen.queryByText('€ 1.234')).not.toBeInTheDocument()
+  })
+})

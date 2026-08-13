@@ -81,3 +81,26 @@ describe('OpportunitiesTable · Koios column (Danny 05-08)', () => {
     expect(container.querySelectorAll('tbody tr')[0].children[col].textContent).toBe('—')
   })
 })
+
+// K10c-repair: the value column must render through the shared opportunityValue
+// helper (same one the customer drawer's OpportunitiesTab uses) in both euro
+// and hours mode — proving the page no longer carries its own formatter.
+describe('OpportunitiesTable · value column via shared opportunityValue helper', () => {
+  const getValueCell = (container: HTMLElement) => {
+    const headerCell = screen.getByText('Waarde').closest('th') as HTMLElement
+    const col = Array.from(headerCell.parentElement?.children ?? []).indexOf(headerCell)
+    return container.querySelectorAll('tbody tr')[0].children[col]
+  }
+
+  it('formats a euro value with the shared nl-NL EUR formatter (euro mode)', () => {
+    const row = { ...baseRow, id: 'o40', value: 12500, hours: null }
+    const { container } = render(<OpportunitiesTable rows={[row]} valueInHours={false} />)
+    expect(getValueCell(container).textContent).toBe('€ 12.500')
+  })
+
+  it('formats an hours value via the shared i18n key (hours mode)', () => {
+    const row = { ...baseRow, id: 'o41', value: null, hours: 40 }
+    const { container } = render(<OpportunitiesTable rows={[row]} valueInHours={true} />)
+    expect(getValueCell(container).textContent).toBe('40 u')
+  })
+})

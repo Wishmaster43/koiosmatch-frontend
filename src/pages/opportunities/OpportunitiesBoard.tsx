@@ -1,17 +1,21 @@
 import { useRef } from 'react'
+import { useTranslation } from 'react-i18next'
 import type { DragEvent } from 'react'
 import Avatar from '@/components/ui/Avatar'
 import type { Opportunity } from '@/types/opportunity'
 import type { Id } from '@/types/common'
 import { useDragAutoScroll } from '@/lib/useDragAutoScroll'
+import { opportunityValueOf, formatOpportunityValue } from './data/opportunityValue'
 
 interface StageCol { value: string | number; label: string; color?: string }
 
 // A single draggable opportunity card.
-function BoardCard({ opp, onDragStart, onClick, selected }: {
+function BoardCard({ opp, onDragStart, onClick, selected, valueInHours }: {
   opp: Opportunity; onDragStart: (e: DragEvent<HTMLDivElement>, id: Id | undefined) => void; onClick: (o: Opportunity) => void; selected: boolean
+  valueInHours: boolean
 }) {
   // ownerInitials/ownerColor/created are carried on the mapped row (not on the base type).
+  const { t } = useTranslation()
   const o = opp as Opportunity & { ownerInitials?: string; ownerColor?: string | null; created?: string }
   return (
     <div draggable onDragStart={e => onDragStart(e, opp.id)} onClick={() => onClick(opp)}
@@ -23,10 +27,11 @@ function BoardCard({ opp, onDragStart, onClick, selected }: {
       <div style={{ fontWeight: 600, fontSize: 13, color: 'var(--text)', marginBottom: 4 }}>{opp.title || '—'}</div>
       <div style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 8 }}>{opp.client || '—'}</div>
 
-      {/* Value */}
-      {opp.value != null && (
+      {/* Value — the SAME shared hours-vs-euro cell as the table and the customer
+          drawer tab (K10c): one formatting path, never a third hand-rolled copy. */}
+      {opportunityValueOf(o, valueInHours) != null && (
         <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--color-primary-text)', marginBottom: 8 }}>
-          {new Intl.NumberFormat('nl-NL', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(opp.value)}
+          {formatOpportunityValue(o, valueInHours, t)}
         </div>
       )}
 
@@ -40,13 +45,14 @@ function BoardCard({ opp, onDragStart, onClick, selected }: {
 }
 
 // A single stage column.
-function BoardColumn({ stage, items, onDragStart, onDrop, onDragOver, onSelect, selectedId }: {
+function BoardColumn({ stage, items, onDragStart, onDrop, onDragOver, onSelect, selectedId, valueInHours }: {
   stage: StageCol; items: Opportunity[]
   onDragStart: (e: DragEvent<HTMLDivElement>, id: Id | undefined) => void
   onDrop: (e: DragEvent<HTMLDivElement>, stageValue: string | number) => void
   onDragOver: (e: DragEvent<HTMLDivElement>) => void
   onSelect: (o: Opportunity) => void
   selectedId?: Id | null
+  valueInHours: boolean
 }) {
   return (
     <div style={{ width: 260, flexShrink: 0, display: 'flex', flexDirection: 'column' }}
@@ -58,7 +64,7 @@ function BoardColumn({ stage, items, onDragStart, onDrop, onDragOver, onSelect, 
         <span style={{ fontSize: 11, color: 'var(--text-muted)', fontWeight: 500 }}>{items.length}</span>
       </div>
       {items.map(o => (
-        <BoardCard key={o.id} opp={o} selected={o.id === selectedId}
+        <BoardCard valueInHours={valueInHours} key={o.id} opp={o} selected={o.id === selectedId}
           onDragStart={onDragStart} onClick={onSelect} />
       ))}
     </div>
@@ -66,8 +72,9 @@ function BoardColumn({ stage, items, onDragStart, onDrop, onDragOver, onSelect, 
 }
 
 // OpportunitiesBoard — Kanban board grouped by stage; supports drag-and-drop to move.
-export default function OpportunitiesBoard({ rows, stages, onMove, selectedId, onSelect }: {
+export default function OpportunitiesBoard({ rows, stages, onMove, selectedId, onSelect, valueInHours = false }: {
   rows: Opportunity[]; stages: StageCol[]; onMove: (id: Id, stageValue: string | number) => void; selectedId?: Id | null; onSelect: (o: Opportunity) => void
+  valueInHours?: boolean
 }) {
   // Edge-scroll the board while dragging (HTML5 DnD never scrolls itself).
   const { ref: boardScrollRef, onDragOver: boardAutoScroll } = useDragAutoScroll<HTMLDivElement>()
@@ -87,7 +94,7 @@ export default function OpportunitiesBoard({ rows, stages, onMove, selectedId, o
     <div ref={boardScrollRef} onDragOver={boardAutoScroll} style={{ flex: 1, overflowX: 'auto', overflowY: 'auto', padding: '0 20px 20px',
       display: 'flex', gap: 12, alignItems: 'flex-start' }}>
       {stages.map(s => (
-        <BoardColumn key={s.value} stage={s}
+        <BoardColumn valueInHours={valueInHours} key={s.value} stage={s}
           items={rows.filter(r => r.stage === s.label || r.stageValue === s.value)}
           onDragStart={onDragStart} onDrop={onDrop} onDragOver={onDragOver}
           onSelect={onSelect} selectedId={selectedId} />

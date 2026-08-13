@@ -41,9 +41,11 @@ export function formatNumberCompact(value: NumberInput, locale: string = 'nl-NL'
 // their own `new Intl.NumberFormat(locale, { style: 'currency', ... })` call.
 // Defaults to EUR since every backend money field falls back to it (mirrors
 // KoiosPricingCard/GebruikSettings' prior inline helpers).
-export function formatCurrency(value: NumberInput, currency: string = 'EUR', locale: string = 'nl-NL'): string {
+// `maximumFractionDigits` caps decimals for whole-amount screens (opportunities
+// show "€ 17.000", not "€ 17.000,00"); omitted = the locale's own default.
+export function formatCurrency(value: NumberInput, currency: string = 'EUR', locale: string = 'nl-NL', maximumFractionDigits?: number): string {
   const n = toFiniteNumber(value)
-  return n === null ? '—' : new Intl.NumberFormat(locale, { style: 'currency', currency }).format(n)
+  return n === null ? '—' : new Intl.NumberFormat(locale, { style: 'currency', currency, maximumFractionDigits }).format(n)
 }
 
 // React hook: binds all three formatters to the app's active locale (see useLocale

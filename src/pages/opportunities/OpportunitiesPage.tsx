@@ -253,7 +253,7 @@ export default function OpportunitiesPage({ intent }: { intent?: unknown } = {})
             {
               id: 'board',
               render: () => (
-                <OpportunitiesBoard rows={boardRows} stages={stages}
+                <OpportunitiesBoard rows={boardRows} stages={stages} valueInHours={valueInHours}
                   onMove={handleMove} selectedId={selected?.id} onSelect={selectOpportunity} />
               ),
             },

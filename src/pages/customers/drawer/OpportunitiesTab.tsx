@@ -38,12 +38,12 @@ import { mapOpportunity } from '@/pages/opportunities/data/mapOpportunity'
 import { useOpportunityStages } from '@/lib/useOpportunityStages'
 import StatusFilterSelect, { useStatusFilter } from '@/components/drawer/StatusFilterSelect'
 import { useAllSettings, getBoolSetting } from '@/lib/settings/useAllSettings'
+import { opportunityValueOf, formatOpportunityValue } from '@/pages/opportunities/data/opportunityValue'
 import type { Opportunity } from '@/types/opportunity'
 import { useCustomerOpenShifts, useCustomerOpportunities } from '../hooks/useCustomerDrawerData'
 import type { Id } from '@/types/common'
 
 const Muted = ({ text }: { text: ReactNode }) => <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{text}</div>
-const money = new Intl.NumberFormat('nl-NL', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 })
 // Plain-text fallback style for the stage chip toggled off (CHIPKLEUR-INSTELBAAR-1) —
 // mirrors the `plainCell` convention in DepartmentsPanel/LocationsTab.
 const plainCell = { color: 'var(--text)', fontSize: 12 }
@@ -110,6 +110,9 @@ export default function OpportunitiesTab({ customerId, customerName }: { custome
   // so an absent setting keeps today's coloured-chip look.
   const settings = useAllSettings()
   const colorStage = getBoolSetting(settings, 'customer_opportunity_table_color_stage', true)
+  // K10c: the tenant's "Kansen in uren" setting — mirrors OpportunitiesTable's own
+  // 'opportunity_value_in_hours' read so the drawer tab and the page never disagree.
+  const valueInHours = getBoolSetting(settings, 'opportunity_value_in_hours', false)
 
   const remove = (o: Opportunity) => {
     confirm(t('opportunities.deleteConfirm'), () => {
@@ -118,14 +121,17 @@ export default function OpportunitiesTab({ customerId, customerName }: { custome
   }
 
   const columns: Column<Opportunity>[] = [
+    // Title cell truncates with ellipsis inside a max-width (K10a) — a long title used
+    // to draw past the card edge instead of wrapping/scrolling with the rest of the row.
     { key: 'title', header: t('opportunities.col.title'), sortable: true, sortValue: o => o.title,
-      render: o => <button onClick={() => openEntity('opportunities', o.id)} style={{ padding: 0, background: 'none', border: 'none', font: 'inherit', color: 'var(--color-primary-text)', cursor: 'pointer', textAlign: 'left' }}>{o.title}</button> },
+      render: o => <button onClick={() => openEntity('opportunities', o.id)} title={o.title}
+        style={{ padding: 0, background: 'none', border: 'none', font: 'inherit', color: 'var(--color-primary-text)', cursor: 'pointer', textAlign: 'left', display: 'block', maxWidth: 260, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{o.title}</button> },
     { key: 'stage', header: t('opportunities.col.stage'), sortable: true, sortValue: o => o.stage,
       render: o => !o.stage ? '—' : colorStage
         ? <SoftChip label={o.stage} color={o.stageColor} />
         : <span style={plainCell}>{o.stage}</span> },
     { key: 'value', header: t('opportunities.col.value'), align: 'right', cellStyle: { color: 'var(--text)', fontSize: 12, fontFamily: 'JetBrains Mono, monospace' }, sortable: true,
-      sortValue: o => o.value ?? -1, render: o => o.value != null ? money.format(o.value) : '—' },
+      sortValue: o => opportunityValueOf(o, valueInHours) ?? -1, render: o => formatOpportunityValue(o, valueInHours, t) },
     { key: 'expectedClose', header: t('opportunities.col.expectedClose'), cellStyle: { color: 'var(--text-muted)', fontSize: 12 }, sortable: true,
       sortValue: o => o.expectedCloseAt ?? '', render: o => o.expectedCloseAt ? formatDate(o.expectedCloseAt) : '—' },
     { key: 'actions', header: '', align: 'right', render: o => (
@@ -167,9 +173,13 @@ export default function OpportunitiesTab({ customerId, customerName }: { custome
         </div>
       }>
         {error && <Muted text={t('opportunities.loadError')} />}
+        {/* Horizontal scroll owned here, same house fix as DepartmentsPanel — keeps the
+            table's own overflow off the drawer body so the card never draws past its edge. */}
         {!error && (
-          <DataTable columns={columns} rows={rows} loading={loading} loadingText={t('page.loading')} emptyText={t('opportunities.empty')}
-            onRowClick={o => openEntity('opportunities', o.id)} />
+          <div style={{ overflowX: 'auto' }}>
+            <DataTable columns={columns} rows={rows} loading={loading} loadingText={t('page.loading')} emptyText={t('opportunities.empty')}
+              onRowClick={o => openEntity('opportunities', o.id)} />
+          </div>
         )}
       </SectionCard>
 
