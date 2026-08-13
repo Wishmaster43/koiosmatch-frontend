@@ -18,6 +18,8 @@ import { ENTITIES } from './entities.mjs'
 // The exact Dutch label PaginationBar renders next to its <select> — the one string
 // that only exists when the shared footer component is actually mounted (see
 // components/ui/PaginationBar.tsx). Absence of this IS "no footer", not a fluke.
+// 13-08: probe rebuilt for the SelectMenu footer (the native <select> it used to
+// drive was replaced by the house searchable menu — the probe tested old furniture).
 const FOOTER_LABEL = 'Rijen per pagina'
 
 export async function paginering({ page, errors }) {
@@ -30,22 +32,34 @@ export async function paginering({ page, errors }) {
     const hasFooter = (await page.locator(`text=${FOOTER_LABEL}`).count()) > 0
     if (!hasFooter) { findings.push(`${nav}: GEEN paginering-footer gevonden`); continue }
 
-    const select = page.locator('select').last()
-    const options = await select.locator('option').allTextContents()
+    // The footer migrated from a native <select> to the shared searchable
+    // SelectMenu (house rule: never a bare <select>) — drive it like a user:
+    // the trigger is the button labelled by the FOOTER_LABEL element.
+    const labelId = await page.locator(`text=${FOOTER_LABEL}`).first().getAttribute('id')
+    // aria-labelledby carries an id LIST (label + trigger id) — match by word.
+    const trigger = page.locator(`button[aria-labelledby~="${labelId}"]`)
+    if ((await trigger.count()) === 0) { findings.push(`${nav}: geen footer-trigger (SelectMenu) gevonden`); continue }
+    await trigger.click()
+    const listId = await trigger.getAttribute('aria-controls')
+    // Options render as buttons inside the popup (the search input is not a button).
+    const options = await page.locator(`[id="${listId}"] button`).allTextContents()
+    await page.keyboard.press('Escape')
     if (options.length === 0) { findings.push(`${nav}: footer-select biedt geen opties aan`); continue }
 
     // 2/3. Every OFFERED size must round-trip cleanly — bail this page on the first bad one.
     for (const opt of options) {
       const at = errors.length
       const toastBefore = await page.locator('[role="alert"]').count()
-      await select.selectOption(opt)
+      await trigger.click()
+      const lid = await trigger.getAttribute('aria-controls')
+      await page.locator(`[id="${lid}"] button`, { hasText: opt }).first().click()
       await sleep(1300)
       const fresh = errors.slice(at)
       const toastAfter = await page.locator('[role="alert"]').count()
       if (fresh.length) { findings.push(`${nav} @ ${opt}/pagina: ${fresh.join(' | ')}`); break }
       if (toastAfter > toastBefore) { findings.push(`${nav} @ ${opt}/pagina: foutmelding (toast) verscheen`); break }
-      const shown = Number(await select.inputValue())
-      if (shown > Number(opt)) { findings.push(`${nav} @ ${opt}/pagina: select toont ${shown} (groter dan het gekozen ${opt} — onmogelijk, dode/foute clamp)`); break }
+      const shown = Number((await trigger.textContent())?.replace(/\D/g, ''))
+      if (shown > Number(opt)) { findings.push(`${nav} @ ${opt}/pagina: trigger toont ${shown} (groter dan het gekozen ${opt} — onmogelijk, dode/foute clamp)`); break }
     }
   }
   expect(findings.length === 0, findings.join('\n    '))
