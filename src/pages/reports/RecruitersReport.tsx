@@ -17,6 +17,7 @@ import type { Column } from '@/components/ui/DataTable'
 import ReportDrillDrawer from './ReportDrillDrawer'
 import type { DrillSpec } from './ReportDrillDrawer'
 import { useRecruitersReport } from './useRecruitersReport'
+import { gateDrillClick } from './reportDrillGate'
 import type { ReportPeriod, RecruiterRow } from '@/types/analytics'
 
 // Total applications = sum of the per-stage counts.
@@ -109,7 +110,7 @@ export default function RecruitersReport({ period, tabsSlot }: { period: ReportP
             columns={columns}
             rows={rows}
             getRowId={r => r.key}
-            onRowClick={openRecruiter}
+            onRowClick={gateDrillClick(openRecruiter)}
             loading={loading}
             loadingText={t('recruiters.loading')}
             emptyText={t('recruiters.empty')}

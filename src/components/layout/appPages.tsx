@@ -71,6 +71,9 @@ export const PAGE_TITLES: Record<string, string> = {
   'reports.recruiters':         'Reports — Recruiters',
   'reports.vacancies':          'Reports — Vacancies',
   'reports.matches':            'Reports — Matches',
+  'reports.intakes':            'Reports — Intakes',
+  'reports.outreach':           'Reports — Outreach',
+  'reports.sources':            'Reports — Sources',
   'customers.locations':        'Customers — Locations',
   'customers.departments':      'Customers — Departments',
   'customers.contacts':         'Customers — Contacts',
@@ -156,6 +159,9 @@ export function renderPage(activePage: string, { navIntent, goTo, dashView }: { 
     case 'reports.recruiters':     return <ReportsPage initialTab="recruiters" />
     case 'reports.vacancies':      return <ReportsPage initialTab="vacancies" />
     case 'reports.matches':        return <ReportsPage initialTab="matches" />
+    case 'reports.intakes':        return <ReportsPage initialTab="intakes" />
+    case 'reports.outreach':       return <ReportsPage initialTab="outreach" />
+    case 'reports.sources':        return <ReportsPage initialTab="sources" />
 
     // ── Shiftmanager module ───────────────────────────────────────────────
     case 'shiftmanager':

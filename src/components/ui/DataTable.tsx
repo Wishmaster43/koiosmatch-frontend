@@ -329,7 +329,7 @@ export default function DataTable<Row>({
                   isSelected={selectedId != null && id === selectedId}
                   isChecked={!!(selectable && selectedIds?.has(id))}
                   selectable={selectable} stickyOffsets={stickyOffsets}
-                  onRowClick={stableRowClick} onToggleRow={stableToggleRow}
+                  onRowClick={onRowClick ? stableRowClick : undefined} onToggleRow={stableToggleRow}
                   virtualIndex={vi.index} measureElement={rowVirtualizer.measureElement}
                   selectRowLabel={selectRowLabel} />
               )
@@ -344,7 +344,7 @@ export default function DataTable<Row>({
                 isSelected={selectedId != null && id === selectedId}
                 isChecked={!!(selectable && selectedIds?.has(id))}
                 selectable={selectable} stickyOffsets={stickyOffsets}
-                onRowClick={stableRowClick} onToggleRow={stableToggleRow}
+                onRowClick={onRowClick ? stableRowClick : undefined} onToggleRow={stableToggleRow}
                 selectRowLabel={selectRowLabel} />
             )
           })

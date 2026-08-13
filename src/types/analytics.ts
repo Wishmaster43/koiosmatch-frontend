@@ -118,3 +118,49 @@ export interface IntakesReportData {
 
 // Selectable aggregation period (mirrors the endpoint's ?period=).
 export type ReportPeriod = 'day' | 'week' | 'month'
+
+// ── Outreach report (GET /reports/outreach, REPORTS-2 fase 1) ────────────────
+// Hand-written from the backend Service (no 2xx schema in the generated spec yet,
+// §10) — mirrors App\Services\Report\OutreachReport::run() exactly.
+
+// One pipeline status tally. `status` is the tenant outreach-status slug — the
+// endpoint carries no label alongside it, so the UI renders the slug as-is.
+export interface OutreachStatusCount { status: string; count: number }
+
+// One outcome tally, projected over the tenant's outreach_outcomes lookup
+// (zero-count rows included). `share_of_reached` is null while nothing was reached.
+export interface OutreachOutcomeCount { outcome: string; label: string; count: number; share_of_reached: number | null }
+
+// GET /reports/outreach response. Windowed on `from`/`to` (defaults to the last 3
+// months) — this endpoint has no `period` bucket, unlike the other reports.
+export interface OutreachReportData {
+  from: string
+  to: string
+  total_targets: number
+  reached: number
+  reach_rate: number | null
+  by_status: OutreachStatusCount[]
+  by_outcome: OutreachOutcomeCount[]
+}
+
+// ── Sources report (GET /reports/sources, REPORTS-2 fase 2) ──────────────────
+// Hand-written from the backend Service (no 2xx schema in the generated spec yet,
+// §10) — mirrors App\Services\Report\SourcesReport::run() exactly.
+
+// One candidate source's intake cohort + yield. `match_rate` is null for a
+// zero-candidate source (never divide by zero into a fabricated 0%).
+export interface SourceRow {
+  source: string
+  candidates: number
+  applications: number
+  matches: number
+  match_rate: number | null
+}
+
+// GET /reports/sources response. Windowed on `from`/`to` (defaults to the last 3
+// months) — this endpoint has no `period` bucket either.
+export interface SourcesReportData {
+  from: string
+  to: string
+  sources: SourceRow[]
+}

@@ -60,6 +60,9 @@ const NAV_ITEMS = [
       { id: 'reports.recruiters', label: 'Recruiters' },
       { id: 'reports.vacancies',  label: 'Vacatures' },
       { id: 'reports.matches',    label: 'Matches' },
+      { id: 'reports.intakes',    label: 'Intakes' },
+      { id: 'reports.outreach',   label: 'Outreach' },
+      { id: 'reports.sources',    label: 'Sources' },
     ],
   },
 ]

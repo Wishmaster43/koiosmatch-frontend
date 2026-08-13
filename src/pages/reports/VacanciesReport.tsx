@@ -18,6 +18,7 @@ import SoftChip from '@/components/ui/SoftChip'
 import ReportDrillDrawer from './ReportDrillDrawer'
 import type { DrillSpec } from './ReportDrillDrawer'
 import { useVacanciesReport } from './useVacanciesReport'
+import { gateDrillClick } from './reportDrillGate'
 import type { ReportPeriod, VacancyReportRow } from '@/types/analytics'
 
 // Number cell: emphasised when > 0, muted when zero (mirrors the SM entity tables).
@@ -56,13 +57,14 @@ export default function VacanciesReport({ period, tabsSlot }: { period: ReportPe
   const kpis: KpiSpec[] = [
     { key: 'total',  label: t('vacancies.summary.total'),  value: s?.total ?? 0,
       active: drill != null && drill.rowsParams?.status == null,
-      onClick: () => openVacancies(t('vacancies.summary.total'), s?.total ?? 0) },
+      // Drill endpoints don't exist yet (reportDrillGate) — no click affordance until they do.
+      onClick: gateDrillClick(() => openVacancies(t('vacancies.summary.total'), s?.total ?? 0)) },
     { key: 'open',   label: t('vacancies.summary.open'),   value: s?.open ?? 0,
       active: drill?.rowsParams?.status === 'open',
-      onClick: () => openVacancies(t('vacancies.summary.open'), s?.open ?? 0, 'open') },
+      onClick: gateDrillClick(() => openVacancies(t('vacancies.summary.open'), s?.open ?? 0, 'open')) },
     { key: 'filled', label: t('vacancies.summary.filled'), value: s?.filled ?? 0,
       active: drill?.rowsParams?.status === 'filled',
-      onClick: () => openVacancies(t('vacancies.summary.filled'), s?.filled ?? 0, 'filled') },
+      onClick: gateDrillClick(() => openVacancies(t('vacancies.summary.filled'), s?.filled ?? 0, 'filled')) },
     { key: 'fillRate', label: t('vacancies.summary.fillRate'),
       value: s ? `${Math.round(s.fill_rate * 100)}%` : '—' },
     { key: 'ttf', label: t('vacancies.summary.avgTimeToFill'),
@@ -124,7 +126,7 @@ export default function VacanciesReport({ period, tabsSlot }: { period: ReportPe
             columns={columns}
             rows={rows}
             getRowId={v => v.key}
-            onRowClick={openVacancyRow}
+            onRowClick={gateDrillClick(openVacancyRow)}
             loading={loading}
             loadingText={t('vacancies.loading')}
             emptyText={t('vacancies.empty')}

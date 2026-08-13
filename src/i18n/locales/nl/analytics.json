@@ -13,7 +13,9 @@
     "recruiters": "Recruiters",
     "vacancies": "Vacatures",
     "matches": "Matches",
-    "intakes": "Intakes"
+    "intakes": "Intakes",
+    "outreach": "Outreach",
+    "sources": "Bronnen"
   },
   "intakes": {
     "loading": "Intakes laden…",
@@ -115,6 +117,35 @@
       "active": "Actief",
       "ended": "Beëindigd",
       "total": "Totaal"
+    }
+  },
+  "outreach": {
+    "loading": "Outreach laden…",
+    "error": "Kon de outreach niet laden",
+    "empty": "Geen bellijst-targets in deze periode",
+    "total": "Totaal targets",
+    "reached": "Bereikt",
+    "reachRate": "Bereikpercentage",
+    "byStatus": "Verdeling per status",
+    "byOutcome": "Verdeling per uitkomst",
+    "noOutcomes": "Nog geen uitkomsten geregistreerd"
+  },
+  "sources": {
+    "loading": "Bronnen laden…",
+    "error": "Kon de bronnen niet laden",
+    "empty": "Geen kandidaten in deze periode",
+    "summary": {
+      "sources": "Bronnen",
+      "candidates": "Kandidaten",
+      "applications": "Sollicitaties",
+      "matches": "Matches"
+    },
+    "cols": {
+      "source": "Bron",
+      "candidates": "Kandidaten",
+      "applications": "Sollicitaties",
+      "matches": "Matches",
+      "matchRate": "Matchpercentage"
     }
   }
 }

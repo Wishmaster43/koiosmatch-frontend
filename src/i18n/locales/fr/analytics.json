@@ -13,7 +13,9 @@
     "recruiters": "Recruteurs",
     "vacancies": "Postes",
     "matches": "Matchs",
-    "intakes": "Intakes"
+    "intakes": "Intakes",
+    "outreach": "Outreach",
+    "sources": "Sources"
   },
   "intakes": {
     "loading": "Chargement des intakes…",
@@ -115,6 +117,35 @@
       "active": "Actifs",
       "ended": "Terminés",
       "total": "Total"
+    }
+  },
+  "outreach": {
+    "loading": "Chargement de l’outreach…",
+    "error": "Impossible de charger l’outreach",
+    "empty": "Aucune cible d’appel sur cette période",
+    "total": "Total des cibles",
+    "reached": "Contactés",
+    "reachRate": "Taux de contact",
+    "byStatus": "Répartition par statut",
+    "byOutcome": "Répartition par résultat",
+    "noOutcomes": "Aucun résultat enregistré pour le moment"
+  },
+  "sources": {
+    "loading": "Chargement des sources…",
+    "error": "Impossible de charger les sources",
+    "empty": "Aucun candidat sur cette période",
+    "summary": {
+      "sources": "Sources",
+      "candidates": "Candidats",
+      "applications": "Candidatures",
+      "matches": "Matchs"
+    },
+    "cols": {
+      "source": "Source",
+      "candidates": "Candidats",
+      "applications": "Candidatures",
+      "matches": "Matchs",
+      "matchRate": "Taux de match"
     }
   }
 }

@@ -13,7 +13,9 @@
     "recruiters": "Recruiter",
     "vacancies": "Stellen",
     "matches": "Matches",
-    "intakes": "Intakes"
+    "intakes": "Intakes",
+    "outreach": "Outreach",
+    "sources": "Quellen"
   },
   "intakes": {
     "loading": "Intakes werden geladen…",
@@ -115,6 +117,35 @@
       "active": "Aktiv",
       "ended": "Beendet",
       "total": "Gesamt"
+    }
+  },
+  "outreach": {
+    "loading": "Outreach wird geladen…",
+    "error": "Outreach konnte nicht geladen werden",
+    "empty": "Keine Anrufzielpersonen in diesem Zeitraum",
+    "total": "Ziele gesamt",
+    "reached": "Erreicht",
+    "reachRate": "Erreichungsquote",
+    "byStatus": "Verteilung nach Status",
+    "byOutcome": "Verteilung nach Ergebnis",
+    "noOutcomes": "Noch keine Ergebnisse erfasst"
+  },
+  "sources": {
+    "loading": "Quellen werden geladen…",
+    "error": "Quellen konnten nicht geladen werden",
+    "empty": "Keine Kandidaten in diesem Zeitraum",
+    "summary": {
+      "sources": "Quellen",
+      "candidates": "Kandidaten",
+      "applications": "Bewerbungen",
+      "matches": "Matches"
+    },
+    "cols": {
+      "source": "Quelle",
+      "candidates": "Kandidaten",
+      "applications": "Bewerbungen",
+      "matches": "Matches",
+      "matchRate": "Match-Quote"
     }
   }
 }

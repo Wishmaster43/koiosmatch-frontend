@@ -13,7 +13,9 @@
     "recruiters": "Recruiters",
     "vacancies": "Vacancies",
     "matches": "Matches",
-    "intakes": "Intakes"
+    "intakes": "Intakes",
+    "outreach": "Outreach",
+    "sources": "Sources"
   },
   "intakes": {
     "loading": "Loading intakes…",
@@ -115,6 +117,35 @@
       "active": "Active",
       "ended": "Ended",
       "total": "Total"
+    }
+  },
+  "outreach": {
+    "loading": "Loading outreach…",
+    "error": "Could not load outreach",
+    "empty": "No call-list targets in this period",
+    "total": "Total targets",
+    "reached": "Reached",
+    "reachRate": "Reach rate",
+    "byStatus": "Breakdown by status",
+    "byOutcome": "Breakdown by outcome",
+    "noOutcomes": "No outcomes recorded yet"
+  },
+  "sources": {
+    "loading": "Loading sources…",
+    "error": "Could not load the sources",
+    "empty": "No candidates in this period",
+    "summary": {
+      "sources": "Sources",
+      "candidates": "Candidates",
+      "applications": "Applications",
+      "matches": "Matches"
+    },
+    "cols": {
+      "source": "Source",
+      "candidates": "Candidates",
+      "applications": "Applications",
+      "matches": "Matches",
+      "matchRate": "Match rate"
     }
   }
 }

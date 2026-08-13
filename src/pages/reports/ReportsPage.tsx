@@ -11,6 +11,8 @@ import RecruitersReport from './RecruitersReport'
 import VacanciesReport from './VacanciesReport'
 import MatchesReport from './MatchesReport'
 import IntakesReport from './IntakesReport'
+import OutreachReport from './OutreachReport'
+import SourcesReport from './SourcesReport'
 import CreatableSelect from '@/components/ui/CreatableSelect'
 import type { ReportPeriod } from '@/types/analytics'
 
@@ -29,6 +31,8 @@ export default function ReportsPage({ initialTab = 'flow' }: { initialTab?: stri
     { id: 'vacancies',  label: t('tabs.vacancies') },
     { id: 'matches',    label: t('tabs.matches') },
     { id: 'intakes',    label: t('tabs.intakes') },
+    { id: 'outreach',   label: t('tabs.outreach') },
+    { id: 'sources',    label: t('tabs.sources') },
   ]
 
   // Tab bar + shared period control on one row. Passed to each report as `tabsSlot`
@@ -81,6 +85,8 @@ export default function ReportsPage({ initialTab = 'flow' }: { initialTab?: stri
       {tab === 'vacancies'  && <VacanciesReport  period={period} tabsSlot={tabsBar} />}
       {tab === 'matches'    && <MatchesReport    period={period} tabsSlot={tabsBar} />}
       {tab === 'intakes'    && <IntakesReport    period={period} tabsSlot={tabsBar} />}
+      {tab === 'outreach'   && <OutreachReport   period={period} tabsSlot={tabsBar} />}
+      {tab === 'sources'    && <SourcesReport    period={period} tabsSlot={tabsBar} />}
     </div>
   )
 }

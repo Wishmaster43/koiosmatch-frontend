@@ -15,6 +15,7 @@ import type { KpiSpec } from '@/components/insights/InsightsRow'
 import ReportDrillDrawer from './ReportDrillDrawer'
 import type { DrillSpec } from './ReportDrillDrawer'
 import { useFlowReport } from './useFlowReport'
+import { gateDrillClick } from './reportDrillGate'
 import type { ReportPeriod, FlowPhase } from '@/types/analytics'
 
 // One funnel row: label, proportional bar, count and (cohort only) conversion + avg days.
@@ -76,7 +77,8 @@ export default function FlowReport({ period, tabsSlot }: { period: ReportPeriod;
     return {
       key: p.key, label: p.label, value, sub: pct(p.conversion_rate),
       active: drill?.rowsParams?.phase === p.key,
-      onClick: () => setDrill({
+      // Drill endpoints don't exist yet (reportDrillGate) — no click affordance until they do.
+      onClick: gateDrillClick(() => setDrill({
         title: p.label, value, subtitle: t(`period.${period}`),
         breakdown: [
           { label: t('flow.reached'), value: p.reached_count },
@@ -85,19 +87,19 @@ export default function FlowReport({ period, tabsSlot }: { period: ReportPeriod;
         ],
         rowsEndpoint: '/reports/flow/drill', rowsParams: { phase: p.key, period },
         adviceEndpoint: '/reports/flow/advice', adviceParams: { phase: p.key, period },
-      }),
+      })),
     }
   }
 
   const kpis: KpiSpec[] = [
     { key: 'total', label: t('flow.total'), value: data?.total ?? 0,
       active: drill != null && drill.rowsParams?.phase == null && drill.rowsEndpoint === '/reports/flow/drill',
-      onClick: () => setDrill({
+      onClick: gateDrillClick(() => setDrill({
         title: t('flow.total'), value: data?.total ?? 0, subtitle: t(`period.${period}`),
         breakdown: phases.map(p => ({ label: p.label, value: cohortReady ? p.reached_count : p.current_count })),
         rowsEndpoint: '/reports/flow/drill', rowsParams: { period },
         adviceEndpoint: '/reports/flow/advice', adviceParams: { period },
-      }) },
+      })) },
     ...(overallConv != null
       ? [{ key: 'conv', label: t('flow.overallConversion'), value: `${Math.round(overallConv * 100)}%` } as KpiSpec]
       : []),
@@ -145,9 +147,12 @@ export default function FlowReport({ period, tabsSlot }: { period: ReportPeriod;
               <span style={{ width: 64, flexShrink: 0, textAlign: 'right' }}>{cohortReady ? t('flow.conversion') : ''}</span>
               <span style={{ width: 120, flexShrink: 0 }} />
             </div>
-            {phases.map((p, i) => (
-              <div key={p.key} onClick={phaseKpi(p).onClick} style={{ cursor: 'pointer' }}
-                   title={t('drill.breakdown')}>
+            {phases.map((p, i) => {
+              // Same gate as the KPI cards: no click/cursor/tooltip until the drill endpoint exists.
+              const onPhaseClick = phaseKpi(p).onClick
+              return (
+              <div key={p.key} onClick={onPhaseClick} style={{ cursor: onPhaseClick ? 'pointer' : 'default' }}
+                   title={onPhaseClick ? t('drill.breakdown') : undefined}>
                 <PhaseRow
                   label={p.label}
                   value={cohortReady ? p.reached_count : p.current_count}
@@ -157,7 +162,8 @@ export default function FlowReport({ period, tabsSlot }: { period: ReportPeriod;
                   avgDays={p.avg_days_in_phase != null ? t('flow.avgDays', { days: Math.round(p.avg_days_in_phase) }) : null}
                 />
               </div>
-            ))}
+              )
+            })}
           </>
         )}
       </div>

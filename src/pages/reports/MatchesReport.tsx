@@ -14,6 +14,7 @@ import type { KpiSpec } from '@/components/insights/InsightsRow'
 import ReportDrillDrawer from './ReportDrillDrawer'
 import type { DrillSpec } from './ReportDrillDrawer'
 import { useMatchesReport } from './useMatchesReport'
+import { gateDrillClick } from './reportDrillGate'
 import type { ReportPeriod } from '@/types/analytics'
 
 // One match stat tile.
@@ -50,13 +51,14 @@ export default function MatchesReport({ period, tabsSlot }: { period: ReportPeri
   const kpis: KpiSpec[] = [
     { key: 'total',  label: t('matches.total'),     value: data?.total ?? 0,
       active: drill?.rowsParams?.origin == null && drill != null,
-      onClick: () => openMatches(t('matches.total'), data?.total ?? 0) },
+      // Drill endpoints don't exist yet (reportDrillGate) — no click affordance until they do.
+      onClick: gateDrillClick(() => openMatches(t('matches.total'), data?.total ?? 0)) },
     { key: 'funnel', label: t('matches.viaFunnel'), value: data?.by_origin.funnel ?? 0,
       active: drill?.rowsParams?.origin === 'funnel',
-      onClick: () => openMatches(t('matches.viaFunnel'), data?.by_origin.funnel ?? 0, 'funnel') },
+      onClick: gateDrillClick(() => openMatches(t('matches.viaFunnel'), data?.by_origin.funnel ?? 0, 'funnel')) },
     { key: 'direct', label: t('matches.direct'),    value: data?.by_origin.direct ?? 0,
       active: drill?.rowsParams?.origin === 'direct',
-      onClick: () => openMatches(t('matches.direct'), data?.by_origin.direct ?? 0, 'direct') },
+      onClick: gateDrillClick(() => openMatches(t('matches.direct'), data?.by_origin.direct ?? 0, 'direct')) },
     { key: 'dur',    label: t('matches.avgDuration'),
       value: data?.avg_placement_duration_days != null ? t('matches.daysValue', { days: Math.round(data.avg_placement_duration_days) }) : '—' },
   ]
