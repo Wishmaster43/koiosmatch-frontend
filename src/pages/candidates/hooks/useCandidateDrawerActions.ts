@@ -41,9 +41,13 @@ interface Args {
   // Optional action renders as a link-button in the page banner (e.g. "Openen").
   notifyMsg: (msg: { type: string; text: string; action?: { label: string; onClick: () => void } }) => void
   t: (key: string, opts?: Record<string, unknown>) => string
+  // GONE-BANNER-1: marks the drawer-URL hook's NEXT close as a replace instead
+  // of a push, so a stale `?open=<dead-id>` never survives a "record gone" close
+  // for back to re-trigger — optional so callers without a URL sync still work.
+  markGoneClose?: () => void
 }
 
-export function useCandidateDrawerActions({ candidates, setCandidates, setTotal, notifyMsg, t }: Args) {
+export function useCandidateDrawerActions({ candidates, setCandidates, setTotal, notifyMsg, t, markGoneClose }: Args) {
   const [selected,       setSelected]       = useState<Candidate | null>(null)
   const [detail,         setDetail]         = useState<Candidate | null>(null)
   const [drawerExpanded, setDrawerExpanded] = useState(false)
@@ -73,13 +77,18 @@ export function useCandidateDrawerActions({ candidates, setCandidates, setTotal,
       if (full === 'gone') {
         setCandidates(p => p.filter(x => x.id !== c.id))
         setTotal(v => Math.max(0, v - 1))
+        // GONE-BANNER-1: replace, not push, the dead `?open=<id>` URL entry — a
+        // push here would leave it one back-step away, re-triggering this exact
+        // fetch/banner on browser back.
+        markGoneClose?.()
         closeDrawer()
         notifyMsg({ type: 'error', text: t('drawer.recordGone') })
         return
       }
       if (full) setDetail(full)
     })
-    // fetchDetail/setCandidates/setTotal/notifyMsg/t are stable (hook/setState/i18n).
+    // fetchDetail/setCandidates/setTotal/notifyMsg/t/markGoneClose are stable
+    // (hook/setState/i18n/ref-wrapped).
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 

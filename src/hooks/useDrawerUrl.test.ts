@@ -131,6 +131,38 @@ describe('useDrawerUrl', () => {
     expect(replaceSpy).not.toHaveBeenCalled()
   })
 
+  // GONE-BANNER-1: markNextCloseReplace makes the very next close REPLACE the
+  // dead `?open=<id>` entry instead of pushing past it, so it drops out of
+  // history and back can no longer land on it.
+  it('markNextCloseReplace makes the next close replace instead of push', () => {
+    window.history.replaceState(null, '', '#candidates?open=abc')
+    const pushSpy = vi.spyOn(window.history, 'pushState')
+    const replaceSpy = vi.spyOn(window.history, 'replaceState')
+    const { result, rerender } = renderHook(
+      ({ selectedId }: { selectedId: string | null }) => useDrawerUrl({ selectedId, openById: vi.fn(), close: vi.fn() }),
+      { initialProps: { selectedId: 'abc' as string | null } },
+    )
+    result.current.markNextCloseReplace()
+    rerender({ selectedId: null })
+    expect(pushSpy).not.toHaveBeenCalled()
+    expect(replaceSpy).toHaveBeenCalledTimes(1)
+    expect(window.location.hash).toBe('#candidates')
+  })
+
+  it('a normal close after markNextCloseReplace was consumed still pushes (one-shot flag)', () => {
+    window.history.replaceState(null, '', '#candidates?open=abc')
+    const pushSpy = vi.spyOn(window.history, 'pushState')
+    const { result, rerender } = renderHook(
+      ({ selectedId }: { selectedId: string | null }) => useDrawerUrl({ selectedId, openById: vi.fn(), close: vi.fn() }),
+      { initialProps: { selectedId: 'abc' as string | null } },
+    )
+    result.current.markNextCloseReplace()
+    rerender({ selectedId: null })
+    rerender({ selectedId: 'xyz' })
+    rerender({ selectedId: null })
+    expect(pushSpy).toHaveBeenCalledTimes(2) // open('xyz') and the second, un-marked close
+  })
+
   it('closes on a browser-back popstate without pushing a new entry (no loop)', () => {
     window.history.replaceState(null, '', '#candidates?open=abc')
     const close = vi.fn()

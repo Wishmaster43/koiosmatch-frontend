@@ -19,6 +19,14 @@
  * action, and a single "back" would only strip the id instead of returning to
  * the previous page.
  *
+ * GONE-BANNER-1 (2026-08-13): a stale `?open=<dead-id>` must never survive a
+ * close, or pressing back re-lands on it and re-triggers the "record gone"
+ * fetch/banner. The normal close still PUSHES (NAV-BACK-1 above stays intact —
+ * closing is a real back-button stop). The one exception is `markNextCloseReplace()`,
+ * used EXCLUSIVELY by a "this record no longer exists" close: it REPLACEs the
+ * dead `?open=<id>` entry instead of pushing past it, so back skips straight
+ * over the id that no longer resolves.
+ *
  * SUB-TAB (NOTITIE-POPOUT-1 F5): `tab`/`setTab` are OPTIONAL and BACKWARD-
  * COMPATIBLE — every existing caller omits them and behaves exactly as before.
  * When supplied, the hook also mirrors the drawer's active sub-tab in `&tab=<id>`
@@ -134,6 +142,10 @@ export function useDrawerUrl({ selectedId, openById, close, intent, tab, setTab 
   useEffect(() => { selectedIdRef.current = selectedId }, [selectedId])
   const tabRef = useRef(tab)
   useEffect(() => { tabRef.current = tab }, [tab])
+  // GONE-BANNER-1: one-shot flag consumed by the very next close write below —
+  // set synchronously (refs update immediately, unlike state) right before the
+  // caller flips `selectedId` to null, so the write effect sees it in time.
+  const nextCloseModeRef = useRef<'push' | 'replace'>('push')
 
   // React state → URL: the user opened/closed/switched the drawer, OR (F5) only
   // switched its sub-tab, in this page. A tab-only change (id unchanged) always
@@ -145,7 +157,15 @@ export function useDrawerUrl({ selectedId, openById, close, intent, tab, setTab 
     if (curId === lastSynced.current && curTab === lastSyncedTab.current) return
     const idChanged = curId !== lastSynced.current
     const intentOpenId = (intent as { open?: Id } | null | undefined)?.open
-    const push = idChanged && resolveWriteMode(curId, intentOpenId) === 'push'
+    // GONE-BANNER-1: a close (curId null) honours the one-shot replace flag
+    // instead of the normal push-on-close default; consumed once then reset.
+    let push: boolean
+    if (idChanged && curId == null) {
+      push = nextCloseModeRef.current === 'push'
+      nextCloseModeRef.current = 'push'
+    } else {
+      push = idChanged && resolveWriteMode(curId, intentOpenId) === 'push'
+    }
     writeOpenId(curId, curTab, push)
     lastSynced.current = curId
     lastSyncedTab.current = curTab
@@ -179,4 +199,10 @@ export function useDrawerUrl({ selectedId, openById, close, intent, tab, setTab 
     return () => window.removeEventListener('popstate', sync)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
+
+  // GONE-BANNER-1: call right before the next close (`selectedId` → null) to make
+  // that one close REPLACE the current `?open=<id>` entry instead of pushing past
+  // it — see the file comment. Any close that does NOT call this still pushes.
+  const markNextCloseReplace = () => { nextCloseModeRef.current = 'replace' }
+  return { markNextCloseReplace }
 }

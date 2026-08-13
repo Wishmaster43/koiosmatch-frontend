@@ -125,9 +125,13 @@ export default function CandidatesPage({ intent }: { intent?: CandidateIntent } 
   useEffect(() => { setPage(1) }, [filterKey])
   useEffect(() => { setSelectedIds(new Set()) }, [filterKey, page, pageSize])
 
-  // Show a transient success/error message; replaces any previous one.
-  const notify = (type: string, text: string) => {
-    setActionMsg({ type, text })
+  // Show a transient success/error message; replaces any previous one. `action`
+  // is optional (e.g. the "Openen" follow-up after a restore/archive) so this
+  // stays the ONE banner mechanism — GONE-BANNER-1: the drawer's 404/"gone"
+  // branch routes through here too instead of writing actionMsg directly, so
+  // its message also expires after 4s instead of sticking until dismissed.
+  const notify = (type: string, text: string, action?: ActionMessage['action']) => {
+    setActionMsg({ type, text, action })
     if (msgTimer.current) clearTimeout(msgTimer.current)
     msgTimer.current = setTimeout(() => setActionMsg(null), 4000)
   }
@@ -220,6 +224,13 @@ export default function CandidatesPage({ intent }: { intent?: CandidateIntent } 
     return base
   }, [candidates, attentionFilter, showArchived, showTrash, staleMonths])
 
+  // GONE-BANNER-1: bridges useDrawerUrl's markNextCloseReplace (defined below,
+  // after selectedId is known) into useCandidateDrawerActions' gone-branch
+  // (defined above, since it owns closeDrawer) — a plain ref avoids a hook-order
+  // circular dependency; it's kept current every render, and only ever read
+  // asynchronously (inside the gone fetch's `.then`), so it's always fresh by then.
+  const markGoneCloseRef = useRef<() => void>(() => {})
+
   // Drawer open/close + single-record lifecycle mutations (§0.3 split → hook).
   const {
     selected, setSelected, detail, setDetail, drawerExpanded, setDrawerExpanded, drawerTab,
@@ -229,14 +240,18 @@ export default function CandidatesPage({ intent }: { intent?: CandidateIntent } 
     eraseTarget, setEraseTarget, hardDeleteOne, confirmHardDelete,
     dialog: lifecycleConfirmDialog,
   } = useCandidateDrawerActions({ candidates, setCandidates, setTotal,
-    notifyMsg: m => setActionMsg(m as ActionMessage), t })
+    notifyMsg: m => notify(m.type, m.text, m.action), t,
+    markGoneClose: () => markGoneCloseRef.current() })
   // Open a candidate drawer when arriving via a dashboard/cross-entity link ({ open: id }).
   useOpenFromIntent(intent, (id) => selectCandidate({ id } as Candidate))
 
   // Mirror the open drawer in the URL (?open=<id>): browser back/forward walks
   // through it and a copied link reopens the same candidate (NAV-BACK-1 — Danny
   // 2026-07-06: "opent ook niet vorige items"; supersedes the old memory-only remember).
-  useDrawerUrl({ selectedId: selected?.id, openById: (id) => selectCandidate({ id } as Candidate), close: closeDrawer, intent })
+  const { markNextCloseReplace } = useDrawerUrl({ selectedId: selected?.id, openById: (id) => selectCandidate({ id } as Candidate), close: closeDrawer, intent })
+  // Ref assignment in an effect, never during render (react-hooks/refs); the ref is
+  // only read asynchronously inside the gone-fetch .then, after mount.
+  useEffect(() => { markGoneCloseRef.current = markNextCloseReplace })
 
   // A freshly created candidate: prepend to the list and open its drawer.
   const handleCreated = (c: Candidate) => {
