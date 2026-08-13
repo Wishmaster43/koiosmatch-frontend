@@ -88,6 +88,62 @@ export function readableAccentText(brand: string, surface: string, target = ACCE
   return toward
 }
 
+// WCAG AA floor for the on-accent fill — the button LABEL must clear this
+// against whatever the accent fill actually is (brand, or the CSS default).
+const ON_ACCENT_AA = 4.5
+
+/**
+ * The on-accent colour to actually use: an explicit pick wins, but only when it
+ * is readable on `bg` — otherwise it silently falls back to the derived
+ * black/white choice (P2-clamp, Danny 13-08). This is a CLAMP, not a rejection:
+ * the tenant's pick still applies whenever it clears AA, so a deliberately
+ * bold-but-legible choice is never overridden.
+ */
+function clampedOnAccent(explicit: string | null | undefined, bg: string): string {
+  if (isHexColor(explicit) && contrastRatio(explicit, bg) >= ON_ACCENT_AA) return explicit
+  return readableOn(bg)
+}
+
+/**
+ * Sets the FULL brand token set on <html> — primary/-light/-bg/-text/on-accent —
+ * from one place, so the live Branding preview and the runtime hook can never
+ * drift into applying a partial subset (P2a, Danny 13-08: the preview used to
+ * only touch primary+on-accent, leaving -light/-bg/-text stale until reload).
+ */
+export function applyBrandTokens(brand: string | null | undefined, brandText: string | null | undefined): void {
+  const root = document.documentElement
+  if (isHexColor(brand)) {
+    root.style.setProperty('--color-primary', brand)
+    root.style.setProperty('--color-primary-light', `color-mix(in srgb, ${brand} 70%, white)`)
+    root.style.setProperty('--color-primary-bg', `color-mix(in srgb, ${brand} 12%, transparent)`)
+    // Text ON the accent (button labels, chips): explicit pick if it clears AA
+    // on this brand fill, else the higher-contrast of near-black/white.
+    root.style.setProperty('--color-on-accent', clampedOnAccent(brandText, brand))
+    // Accent used AS text (active menu item, tabs, links): a light brand fades
+    // into a light surface, a darkened one fades into the dark theme — mix
+    // toward whichever direction this theme needs, and only when needed.
+    const darkMode = root.getAttribute('data-theme') === 'dark'
+      || (!root.getAttribute('data-theme') && window.matchMedia?.('(prefers-color-scheme: dark)').matches)
+    const surface = darkMode ? '#13131F' : '#FFFFFF'
+    root.style.setProperty('--color-primary-text', readableAccentText(brand, surface))
+  } else {
+    // No (valid) tenant brand → the index.css defaults stay.
+    root.style.removeProperty('--color-primary')
+    root.style.removeProperty('--color-primary-light')
+    root.style.removeProperty('--color-primary-bg')
+    root.style.removeProperty('--color-primary-text')
+    // An explicit text colour still applies without a brand colour — clamped
+    // against the CSS default fill (read back after the removeProperty above),
+    // the same rule as the branded path, so a stray white-on-white can't happen.
+    if (isHexColor(brandText)) {
+      const defaultBg = getComputedStyle(root).getPropertyValue('--color-primary').trim()
+      root.style.setProperty('--color-on-accent', isHexColor(defaultBg) ? clampedOnAccent(brandText, defaultBg) : brandText)
+    } else {
+      root.style.removeProperty('--color-on-accent')
+    }
+  }
+}
+
 export function useTenantTheme(tenant?: { primary_color?: string | null; text_color?: string | null } | null): void {
   const settings = useAllSettings()
   // The Branding form saves settings.brand_color; some tenant payloads carry
@@ -104,32 +160,7 @@ export function useTenantTheme(tenant?: { primary_color?: string | null; text_co
     // THEME-REACTIVE (Danny 08-08 "als ik nu dark of light theme kies moet het ook
     // nog werken"): the readable accent depends on the SURFACE it sits on, so this
     // recomputes on a theme flip too — not only when the brand changes.
-    const apply = () => {
-      if (isHexColor(brand)) {
-        root.style.setProperty('--color-primary', brand)
-        root.style.setProperty('--color-primary-light', `color-mix(in srgb, ${brand} 70%, white)`)
-        root.style.setProperty('--color-primary-bg', `color-mix(in srgb, ${brand} 12%, transparent)`)
-        // Text ON the accent (button labels, chips): explicit pick, else the
-        // higher-contrast of near-black/white.
-        root.style.setProperty('--color-on-accent', isHexColor(brandText) ? brandText : readableOn(brand))
-        // Accent used AS text (active menu item, tabs, links): a light brand fades
-        // into a light surface, a darkened one fades into the dark theme — mix
-        // toward whichever direction this theme needs, and only when needed.
-        const darkMode = root.getAttribute('data-theme') === 'dark'
-          || (!root.getAttribute('data-theme') && window.matchMedia?.('(prefers-color-scheme: dark)').matches)
-        const surface = darkMode ? '#13131F' : '#FFFFFF'
-        root.style.setProperty('--color-primary-text', readableAccentText(brand, surface))
-      } else {
-        // No (valid) tenant brand → the index.css defaults stay.
-        root.style.removeProperty('--color-primary')
-        root.style.removeProperty('--color-primary-light')
-        root.style.removeProperty('--color-primary-bg')
-        root.style.removeProperty('--color-primary-text')
-        // An explicit text colour still applies without a brand colour.
-        if (isHexColor(brandText)) root.style.setProperty('--color-on-accent', brandText)
-        else root.style.removeProperty('--color-on-accent')
-      }
-    }
+    const apply = () => applyBrandTokens(brand, brandText)
 
     apply()
     // Theme changes two ways: the app stamps data-theme on <html>, or the OS

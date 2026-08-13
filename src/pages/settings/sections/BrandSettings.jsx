@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
-import { readableOn, contrastRatio } from '@/hooks/useTenantTheme'
+import { contrastRatio, applyBrandTokens } from '@/hooks/useTenantTheme'
 import { useTranslation } from 'react-i18next'
 import { Check, RefreshCw, Save, Upload, X } from 'lucide-react'
 import api from '@/lib/api'
@@ -62,13 +62,10 @@ export default function BrandSettings() {
 
   // BRAND-TEXT-COLOR-1 (Danny 08-08: "txt blijft wit"): the live preview used to
   // move ONLY --color-primary, so picking yellow kept the white default text until
-  // a save + reload let useTenantTheme recompute it. Preview both tokens together:
-  // an explicit pick wins, otherwise the same luminance rule the hook applies.
-  const applyAccentTokens = (color, text) => {
-    const root = document.documentElement
-    root.style.setProperty('--color-primary', color)
-    root.style.setProperty('--color-on-accent', /^#[0-9a-fA-F]{6}$/.test(text ?? '') ? text : readableOn(color))
-  }
+  // a save + reload let useTenantTheme recompute it. P2a (13-08): now shares the
+  // ONE applyBrandTokens implementation with the hook, so the preview sets the
+  // FULL token set (primary/-light/-bg/-text/on-accent) instead of a partial pair.
+  const applyAccentTokens = (color, text) => applyBrandTokens(color, text)
 
   const applyColor = (color) => {
     setPrimaryColor(color)

@@ -8,8 +8,8 @@
  * different tokens, so these tests assert the MEASURED ratio, never a colour literal
  * — a future tweak to the mixing rule stays free as long as the text stays legible.
  */
-import { describe, it, expect } from 'vitest'
-import { contrastRatio, readableOn, readableAccentText } from './useTenantTheme'
+import { describe, it, expect, afterEach } from 'vitest'
+import { contrastRatio, readableOn, readableAccentText, applyBrandTokens } from './useTenantTheme'
 
 // WCAG AA for normal-size text. Anything below this is a finding, not a taste call.
 const AA = 4.5
@@ -115,5 +115,42 @@ describe('readableAccentText — the brand AS text, adjusted only as far as need
   it('darkens yellow harder than orange, because yellow needs it', () => {
     expect(contrastRatio(readableAccentText('#ffde00', WHITE), WHITE)).toBeGreaterThanOrEqual(AA)
     expect(contrastRatio(readableAccentText(BRANDS.yeswayOrange, WHITE), WHITE)).toBeGreaterThanOrEqual(AA)
+  })
+})
+
+// P2-clamp (Danny 13-08): an EXPLICIT --color-on-accent pick must never win when it
+// is actually unreadable — BrandSettings still WARNS (r.208-212) but never blocks
+// saving, so a bad pick would otherwise reach production as a broken button.
+describe('applyBrandTokens — clamps an explicit on-accent pick that fails AA', () => {
+  afterEach(() => {
+    // Reset every token this function can touch so tests never leak into each other.
+    const root = document.documentElement
+    for (const prop of ['--color-primary', '--color-primary-light', '--color-primary-bg', '--color-primary-text', '--color-on-accent']) {
+      root.style.removeProperty(prop)
+    }
+  })
+
+  it('falls back to the derived colour when the explicit text fails AA on the brand', () => {
+    applyBrandTokens('#ffde00', '#FFFFFF') // yellow brand + white text: white on yellow is far under AA
+    const applied = document.documentElement.style.getPropertyValue('--color-on-accent').trim()
+    expect(applied).not.toBe('#FFFFFF')
+    expect(applied).toBe(readableOn('#ffde00'))
+    expect(contrastRatio(applied, '#ffde00')).toBeGreaterThanOrEqual(AA)
+  })
+
+  it('keeps the explicit text when it clears AA on the brand', () => {
+    applyBrandTokens(BRANDS.deepBlue, '#FFFFFF')
+    expect(document.documentElement.style.getPropertyValue('--color-on-accent').trim()).toBe('#FFFFFF')
+  })
+
+  it('clamps the r.129 path too — explicit text without a valid brand, against the CSS default fill', () => {
+    // No brand set → --color-primary resolves to the index.css default (#19A5CA);
+    // a near-white explicit pick fails AA against that default and must clamp.
+    applyBrandTokens(undefined, '#FAFAFA')
+    const bg = getComputedStyle(document.documentElement).getPropertyValue('--color-primary').trim()
+    const applied = document.documentElement.style.getPropertyValue('--color-on-accent').trim()
+    if (/^#[0-9a-fA-F]{6}$/.test(bg)) {
+      expect(contrastRatio(applied, bg)).toBeGreaterThanOrEqual(AA)
+    }
   })
 })
