@@ -52,13 +52,13 @@ export default function MatchesReport({ period, tabsSlot }: { period: ReportPeri
     { key: 'total',  label: t('matches.total'),     value: data?.total ?? 0,
       active: drill?.rowsParams?.origin == null && drill != null,
       // Drill endpoints don't exist yet (reportDrillGate) — no click affordance until they do.
-      onClick: gateDrillClick(() => openMatches(t('matches.total'), data?.total ?? 0)) },
+      onClick: gateDrillClick('matches', () => openMatches(t('matches.total'), data?.total ?? 0)) },
     { key: 'funnel', label: t('matches.viaFunnel'), value: data?.by_origin.funnel ?? 0,
       active: drill?.rowsParams?.origin === 'funnel',
-      onClick: gateDrillClick(() => openMatches(t('matches.viaFunnel'), data?.by_origin.funnel ?? 0, 'funnel')) },
+      onClick: gateDrillClick('matches', () => openMatches(t('matches.viaFunnel'), data?.by_origin.funnel ?? 0, 'funnel')) },
     { key: 'direct', label: t('matches.direct'),    value: data?.by_origin.direct ?? 0,
       active: drill?.rowsParams?.origin === 'direct',
-      onClick: gateDrillClick(() => openMatches(t('matches.direct'), data?.by_origin.direct ?? 0, 'direct')) },
+      onClick: gateDrillClick('matches', () => openMatches(t('matches.direct'), data?.by_origin.direct ?? 0, 'direct')) },
     { key: 'dur',    label: t('matches.avgDuration'),
       value: data?.avg_placement_duration_days != null ? t('matches.daysValue', { days: Math.round(data.avg_placement_duration_days) }) : '—' },
   ]

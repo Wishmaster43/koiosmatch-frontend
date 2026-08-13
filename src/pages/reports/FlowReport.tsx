@@ -78,15 +78,15 @@ export default function FlowReport({ period, tabsSlot }: { period: ReportPeriod;
       key: p.key, label: p.label, value, sub: pct(p.conversion_rate),
       active: drill?.rowsParams?.phase === p.key,
       // Drill endpoints don't exist yet (reportDrillGate) — no click affordance until they do.
-      onClick: gateDrillClick(() => setDrill({
+      onClick: gateDrillClick('flow', () => setDrill({
         title: p.label, value, subtitle: t(`period.${period}`),
         breakdown: [
           { label: t('flow.reached'), value: p.reached_count },
           { label: t('flow.current'), value: p.current_count },
           ...(p.conversion_rate != null ? [{ label: t('flow.conversion'), value: pct(p.conversion_rate)! }] : []),
         ],
-        rowsEndpoint: '/reports/flow/drill', rowsParams: { phase: p.key, period },
-        adviceEndpoint: '/reports/flow/advice', adviceParams: { phase: p.key, period },
+        rowsEndpoint: '/reports/flow/drill', rowsParams: { phase: p.key, period, view: cohortReady ? 'reached' : 'current' },
+        adviceEndpoint: '/reports/flow/advice', adviceParams: { phase: p.key, period, view: cohortReady ? 'reached' : 'current' },
       })),
     }
   }
@@ -94,11 +94,11 @@ export default function FlowReport({ period, tabsSlot }: { period: ReportPeriod;
   const kpis: KpiSpec[] = [
     { key: 'total', label: t('flow.total'), value: data?.total ?? 0,
       active: drill != null && drill.rowsParams?.phase == null && drill.rowsEndpoint === '/reports/flow/drill',
-      onClick: gateDrillClick(() => setDrill({
+      onClick: gateDrillClick('flow', () => setDrill({
         title: t('flow.total'), value: data?.total ?? 0, subtitle: t(`period.${period}`),
         breakdown: phases.map(p => ({ label: p.label, value: cohortReady ? p.reached_count : p.current_count })),
-        rowsEndpoint: '/reports/flow/drill', rowsParams: { period },
-        adviceEndpoint: '/reports/flow/advice', adviceParams: { period },
+        rowsEndpoint: '/reports/flow/drill', rowsParams: { period, view: cohortReady ? 'reached' : 'current' },
+        adviceEndpoint: '/reports/flow/advice', adviceParams: { period, view: cohortReady ? 'reached' : 'current' },
       })) },
     ...(overallConv != null
       ? [{ key: 'conv', label: t('flow.overallConversion'), value: `${Math.round(overallConv * 100)}%` } as KpiSpec]

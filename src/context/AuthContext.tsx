@@ -3,6 +3,7 @@ import type { ReactNode } from 'react'
 import api, { primeCsrf, unwrapList } from '../lib/api'
 import { hasModule as tenantHasModule } from '../lib/modules'
 import { queryClient } from '../lib/queryClient'
+import { unsubscribe as unsubscribePush } from '../lib/pushSubscription'
 import type { Tenant, User } from '../types/api'
 
 /**
@@ -332,6 +333,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   // ── Logout ────────────────────────────────────────────────────────────────────
   const logout = useCallback(async (): Promise<void> => {
+    // Best-effort push cleanup (P11-FASE5): fire-and-forget, never blocks logout
+    // on a failing browser/server call.
+    unsubscribePush().catch(() => {})
     try { await api.post('/auth/logout') } catch { /* clear local state regardless */ }
     localStorage.removeItem('auth_token')
     localStorage.removeItem('auth_user')

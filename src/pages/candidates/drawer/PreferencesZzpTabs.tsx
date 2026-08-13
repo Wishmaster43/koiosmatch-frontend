@@ -71,8 +71,8 @@ export function PreferencesTab({ c, onSave, onTypesChange, onEditStatus }: { c: 
   // (was string[]) — keep the icon around so licenseOptions/renderValue below can
   // pass it to LookupIcon, mirroring last-contact's icon passthrough.
   const { licenses } = useDriverLicenses() as { licenses: DriverLicenseItem[] }
-  // Contract forms (colour per value) for the first chip row.
-  const { candidateTypes, statusMeta } = useLookups() as unknown as { candidateTypes: Array<{ value: string; label: string; color?: string }>; statusMeta: (v?: string | null) => { label: string; color: string } }
+  // Contract forms (colour + icon per value) for the first chip row.
+  const { candidateTypes, statusMeta } = useLookups() as unknown as { candidateTypes: Array<{ value: string; label: string; color?: string; icon?: string | null }>; statusMeta: (v?: string | null) => { label: string; color: string } }
   const pref = c.preferences
 
   // Chip/dropdown option lists from the tenant lookups (never hardcoded vocab).
@@ -91,6 +91,10 @@ export function PreferencesTab({ c, onSave, onTypesChange, onEditStatus }: { c: 
   // under Beschikbaarheid, Rijbewijs under Reizen. Chips render as coloured soft
   // chips — Contractvorm keeps its per-value colours.
   const candidateTypeOptions = candidateTypes.map(ct => ({ value: ct.value, label: ct.label, color: ct.color }))
+  // LOOKUP-ICON-1: read-mode-only icon lookup by value (mirrors licenseIconOf
+  // above) — the shared ChipMultiSelect/EditableFieldTable chip shape has no
+  // icon slot, so the read view overrides via `renderValue` instead.
+  const candidateTypeIconOf = (value: string) => candidateTypes.find(ct => ct.value === value)?.icon
   const value = {
     contractvorm:    c.candidateTypes ?? [],
     beschikbaar_per: pref.available_from ?? '',
@@ -140,7 +144,34 @@ export function PreferencesTab({ c, onSave, onTypesChange, onEditStatus }: { c: 
     accountHolderName: (c as { accountHolderName?: string }).accountHolderName ?? '',
   }
   const fields = [
-    { key: 'contractvorm',    label: t('drawer.candidateType'),      group: t('preferences.groupAvailability'), type: 'chips', chipOptions: candidateTypeOptions },
+    // LOOKUP-ICON-1: renderValue overrides ONLY the read-mode chip row (edit mode
+    // keeps the generic ChipMultiSelect) — each contract-form chip gets its
+    // tenant-set icon in front of the label, mirroring the rijbewijs pattern below.
+    { key: 'contractvorm',    label: t('drawer.candidateType'),      group: t('preferences.groupAvailability'), type: 'chips', chipOptions: candidateTypeOptions,
+      renderValue: (v: unknown) => {
+        const arr = (Array.isArray(v) ? v : []).map(String)
+        if (arr.length === 0) return <span style={{ color: 'var(--text-muted)' }}>-</span>
+        return (
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 5 }}>
+            {arr.map(x => {
+              const opt = candidateTypeOptions.find(o => o.value === x)
+              const col = opt?.color
+              const icon = candidateTypeIconOf(x)
+              // Per-value colour when set (e.g. contract forms), else the primary accent —
+              // mirrors EditableFieldTable's own default chip-read style (no colour-var concat).
+              const s = col
+                ? { background: col + '1A', color: col, border: `1px solid ${col}55` }
+                : { background: 'var(--color-primary-bg)', color: 'var(--color-primary-text)', border: '1px solid var(--color-primary)' }
+              return (
+                <span key={x} style={{ display: 'inline-flex', alignItems: 'center', gap: 4, padding: '2px 9px', borderRadius: 999, fontSize: 11, fontWeight: 500, ...s }}>
+                  {icon && <LookupIcon icon={icon} size={11} color={col} />}
+                  {opt?.label ?? x}
+                </span>
+              )
+            })}
+          </div>
+        )
+      } },
     { key: 'beschikbaar_per', label: t('preferences.availableFrom'), group: t('preferences.groupAvailability'), type: 'date' },
     // KAND-OPZEGTERMIJN-2 (Danny 2026-08-08, punt 9): the notice period sits DIRECTLY
     // under "Inzetbaar vanaf" instead of in its own Overig card — they are one thing

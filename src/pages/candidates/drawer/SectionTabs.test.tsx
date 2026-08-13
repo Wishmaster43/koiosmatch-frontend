@@ -142,6 +142,19 @@ describe('EducationTab · education level (KAND-NIVEAU-1)', () => {
     expect(screen.queryByText('MBO-4')).toBeNull()
   })
 
+  // LOOKUP-ICON-1: the tenant education-level icon (lucide slug or emoji) rides
+  // inside the level chip, next to the label — never replacing it (§6).
+  it('shows the education level\'s tenant icon next to the chip label', () => {
+    vi.mocked(api.get).mockResolvedValue({ data: { data: [] } })
+    const item = { id: 'e1', title: 'Verpleegkunde', school: 'ROC', level_id: 'lvl-1',
+      // eslint-disable-next-line no-restricted-syntax -- DATA fixture (a tenant lookup's own colour), not a UI colour choice
+      level: { id: 'lvl-1', name: 'MBO-4', color: '#2563EB', icon: 'star' } }
+    render(<EducationTab items={[item]} />)
+    // lucide's GraduationCap renders as an <svg> — assert it landed inside the chip.
+    const chip = screen.getByText('MBO-4').closest('span')
+    expect(chip?.querySelector('svg')).toBeInTheDocument()
+  })
+
   // ALWAYS-SEARCHABLE-1 (Danny 08-08): AddForm's `options` field (level_id AND
   // document_id) is now the house CreatableSelect — never a native <select> again.
   it('renders no native <select> in the edit form (level_id + document_id both go through CreatableSelect)', async () => {
@@ -437,6 +450,20 @@ describe('SkillsTab · DOC-LANG-SKILL-LINK-1 linked-document icons + edit-form p
     const withReverse = [{ id: 'doc9', name: 'certificaat.pdf', url: '/x', skill_id: 's1' }]
     render(<SkillsTab items={[item]} documents={withReverse} />)
     expect(screen.getByTitle('Voorbeeld')).toBeInTheDocument()
+  })
+
+  // LOOKUP-ICON-1: useSkillLevels now returns full {value,label,icon,color}
+  // objects — the skill level's tenant icon shows next to the level text.
+  it('shows the skill level\'s tenant icon next to the level text', async () => {
+    vi.mocked(api.get).mockImplementation((url: string) =>
+      url === '/skill-levels'
+        ? Promise.resolve({ data: { data: [{ name: 'Gevorderd', icon: 'star' }] } })
+        : Promise.resolve({ data: { data: [] } }),
+    )
+    const item = { id: 's1', name: 'Heftruck rijden', level: 'Gevorderd' }
+    render(<SkillsTab items={[item]} documents={documents} />)
+    const levelNode = await screen.findByText(/Gevorderd/)
+    expect(levelNode.querySelector('svg')).toBeInTheDocument()
   })
 
   it('never crashes and shows no link icons for a legacy plain-string skill (no id to link by)', () => {

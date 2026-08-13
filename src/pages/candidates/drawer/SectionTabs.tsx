@@ -20,6 +20,7 @@ import SafeHtml from '@/components/ui/SafeHtml'
 import SoftChip from '@/components/ui/SoftChip'
 import DrawerAddButton from './DrawerAddButton'
 import DocPreviewModal from '@/components/drawer/DocPreviewModal'
+import LookupIcon from '@/components/ui/LookupIcon'
 import { useDateFormat } from '@/lib/datetime'
 import { useSkillLevels } from '@/lib/useSkillLevels'
 import { useEducationLevels } from '@/lib/useEducationLevels'
@@ -228,14 +229,17 @@ export function EducationTab({ items = [], onAdd, onEdit, onRemove, documents = 
       // date (C-12): the read view fell back to the diploma date, the form didn't.
       editInitial={(it: RelItem) => ({ ...it, inProgress: Boolean((it as { inProgress?: unknown; in_progress?: unknown }).inProgress ?? (it as { in_progress?: unknown }).in_progress), start: resolveEducationStartDate(it) })}
       renderItem={(raw: RelItem, i: number, arr: RelItem[]) => {
-        const o = raw as { id?: Id; title?: string; education?: string; school?: string; institution?: string; start?: string; start_date?: string; end?: string; end_date?: string; inProgress?: boolean; in_progress?: boolean; issued?: string; issue_date?: string; period?: string; year?: string; level_id?: string; level?: { id?: string; name?: string; color?: string } }
+        const o = raw as { id?: Id; title?: string; education?: string; school?: string; institution?: string; start?: string; start_date?: string; end?: string; end_date?: string; inProgress?: boolean; in_progress?: boolean; issued?: string; issue_date?: string; period?: string; year?: string; level_id?: string; level?: { id?: string; name?: string; color?: string; icon?: string | null } }
         const start = o.start ?? o.start_date, end = o.end ?? o.end_date
-        // KAND-NIVEAU-1: the nested {id,name,color} the API returns wins (no extra
+        // KAND-NIVEAU-1: the nested {id,name,color,icon} the API returns wins (no extra
         // lookup); a row just added/edited in THIS session (before the server echoes
         // it back) falls back to resolving the picked id against the loaded lookup.
         const localLevel = o.level_id ? levels.find(l => l.id === o.level_id) : undefined
         const levelName = o.level?.name ?? localLevel?.label
         const levelColor = o.level?.color ?? localLevel?.color
+        // LOOKUP-ICON-1: education-level icon (lucide slug or emoji), shown next to
+        // the label — never instead of it (§6, colour/icon is never the only signal).
+        const levelIcon = o.level?.icon ?? localLevel?.icon
         const inProgress = o.inProgress ?? o.in_progress
         // In progress: "start – heden" (issue date doubles as start on old rows;
         // Danny 14/7), else "Nog in opleiding" — never a dangling dash. Done:
@@ -258,8 +262,17 @@ export function EducationTab({ items = [], onAdd, onEdit, onRemove, documents = 
             <div style={{ flex: 1 }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                 <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)' }}>{o.title ?? o.education}</div>
-                {/* KAND-NIVEAU-1: the picked education level as a soft chip (§4 convention). */}
-                {levelName && <SoftChip label={levelName} color={levelColor} />}
+                {/* KAND-NIVEAU-1: the picked education level as a soft chip (§4 convention).
+                    LOOKUP-ICON-1: the tenant icon rides inside the chip label, next to
+                    the text — icon is additive, never the only signal. */}
+                {levelName && (
+                  <SoftChip color={levelColor} label={
+                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+                      {levelIcon && <LookupIcon icon={levelIcon} size={11} color={levelColor} />}
+                      {levelName}
+                    </span>
+                  } />
+                )}
               </div>
               {secondary && <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{secondary}</div>}
               <ProseField value={(o as { desc?: string }).desc} />
@@ -333,7 +346,11 @@ export function CertificationsTab({ items = [], onAdd, onEdit, onRemove, documen
 export function SkillsTab({ items = [], onAdd, onEdit, onRemove, documents = [], onJumpToDocuments }: RelTabProps) {
   const { t } = useTranslation('candidates')
   // Level is a tenant lookup dropdown (SKILL-LVL-1), mirroring the languages editor.
-  const { levels } = useSkillLevels()
+  // LOOKUP-ICON-1: useSkillLevels now returns full {value,label,icon,color}
+  // objects (was string[]) — the AddForm `options` field still only needs
+  // label text, so pass `names`; the icon lookup below reads the full `levels`.
+  const { levels, names: levelNames } = useSkillLevels()
+  const levelIconOf = (label: string) => levels.find(l => l.label === label)?.icon
   // DOC-LANG-SKILL-LINK-1: preview overlay for a row's linked proof document — the
   // shared house DocPreviewModal (never a fork), mirrors Education/Certifications.
   const [previewDoc, setPreviewDoc] = useState<RelItem | null>(null)
@@ -342,7 +359,7 @@ export function SkillsTab({ items = [], onAdd, onEdit, onRemove, documents = [],
   const documentOptions = linkedDocumentOptions(documents, items)
   const fields = [
     { key: 'name',  label: t('addFields.skill') },
-    { key: 'level', label: t('addFields.skillLevel'), options: levels },
+    { key: 'level', label: t('addFields.skillLevel'), options: levelNames },
     // DOC-LANG-SKILL-LINK-1: optionally link an already-uploaded proof document to this
     // entry (only offered once the candidate HAS documents — §3, no fake affordance).
     ...(documents.length > 0 ? [{ key: 'document_id', label: t('addFields.linkedDocument'), options: documentOptions }] : []),
@@ -356,6 +373,8 @@ export function SkillsTab({ items = [], onAdd, onEdit, onRemove, documents = [],
         const v = raw as { id?: Id; name?: string; skill?: string; level?: string }
         const name  = typeof raw === 'string' ? raw : (v.name ?? v.skill ?? '')
         const level = typeof raw === 'string' ? '' : (v.level ?? '')
+        // LOOKUP-ICON-1: the skill-level tenant icon, shown next to the level text.
+        const levelIcon = level ? levelIconOf(level) : undefined
         // DOC-LANG-SKILL-LINK-1: resolve the linked proof document, if any — icons
         // render only when found. A legacy plain-string skill has no id to link by.
         const linkedDoc = typeof raw === 'string' ? undefined : resolveLinkedDocument(raw, documents, 'skill_id')
@@ -366,7 +385,11 @@ export function SkillsTab({ items = [], onAdd, onEdit, onRemove, documents = [],
             <div style={{ flex: 1, minWidth: 0 }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                 <span style={{ fontSize: 13, fontWeight: 500, color: 'var(--text)' }}>{name}</span>
-                {level && <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>· {level}</span>}
+                {level && (
+                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: 3, fontSize: 12, color: 'var(--text-muted)' }}>
+                    · {levelIcon && <LookupIcon icon={levelIcon} size={11} />}{level}
+                  </span>
+                )}
               </div>
               {linkedDoc && <DocEntryLinks doc={linkedDoc} onPreview={() => setPreviewDoc(linkedDoc)} onJump={onJumpToDocuments} />}
             </div>

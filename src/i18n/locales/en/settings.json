@@ -985,6 +985,14 @@
       "emailNotAvailable": "Not available yet",
       "emailNotAvailableReason": "A personal e-mail override isn't possible yet — you follow the tenant-wide e-mail setting for this."
     },
+    "push": {
+      "title": "Browser notifications",
+      "desc": "Receive notifications as a browser pop-up, even when this tab isn't open.",
+      "unsupported": "Your browser doesn't support browser notifications.",
+      "blocked": "Your browser is blocking notifications for this site. Enable them in your browser settings to use this option.",
+      "subscribeFailed": "Subscribing to browser notifications failed.",
+      "unsubscribeFailed": "Unsubscribing from browser notifications failed."
+    },
     "channels": {
       "label": "Notify via",
       "desc": "Choose per channel whether these notifications arrive: in the app, by email, or both."

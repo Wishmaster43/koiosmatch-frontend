@@ -6,7 +6,8 @@
     "loading": "Laden…",
     "noRecords": "Keine zugrunde liegenden Datensätze.",
     "koios": "Koios KI-Rat",
-    "noAdvice": "Koios hat noch keinen Rat zu dieser Zahl."
+    "noAdvice": "Koios hat noch keinen Rat zu dieser Zahl.",
+    "truncated": "Zeigt {{shown}} von {{total}}"
   },
   "tabs": {
     "flow": "Flow",

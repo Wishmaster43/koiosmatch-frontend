@@ -985,6 +985,14 @@
       "emailNotAvailable": "Nog niet beschikbaar",
       "emailNotAvailableReason": "Een persoonlijke e-mailuitzondering is nog niet mogelijk — je volgt hiervoor de organisatiebrede e-mailinstelling."
     },
+    "push": {
+      "title": "Browsermeldingen",
+      "desc": "Ontvang meldingen als pop-up van je browser, ook als deze tab niet open staat.",
+      "unsupported": "Je browser ondersteunt geen browsermeldingen.",
+      "blocked": "Je browser blokkeert meldingen voor deze site. Zet dit aan via de browserinstellingen om deze optie te gebruiken.",
+      "subscribeFailed": "Inschrijven voor browsermeldingen is mislukt.",
+      "unsubscribeFailed": "Uitschrijven voor browsermeldingen is mislukt."
+    },
     "channels": {
       "label": "Melden via",
       "desc": "Kies per kanaal of deze meldingen aankomen: in de app, per e-mail of allebei."

@@ -6,7 +6,8 @@
     "loading": "Cargando…",
     "noRecords": "Sin registros subyacentes.",
     "koios": "Consejo de Koios AI",
-    "noAdvice": "Koios aún no tiene consejo para este número."
+    "noAdvice": "Koios aún no tiene consejo para este número.",
+    "truncated": "Mostrando {{shown}} de {{total}}"
   },
   "tabs": {
     "flow": "Flujo",

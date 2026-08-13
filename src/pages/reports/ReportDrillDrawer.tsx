@@ -38,7 +38,7 @@ export default function ReportDrillDrawer({ drill, onClose }: { drill: DrillSpec
   // (AI-ACT-1) is shared copy, not per-report.
   const { t } = useTranslation(['analytics', 'common'])
   // Data layer: the underlying records + Koios advice for the open drill (§3).
-  const { rows, rowsLoading, advice, adviceLoading } = useReportDrill(drill)
+  const { rows, rowsTotal, rowsLoading, rowsForbidden, advice, adviceLoading } = useReportDrill(drill)
 
   if (!drill) return null
 
@@ -70,8 +70,10 @@ export default function ReportDrillDrawer({ drill, onClose }: { drill: DrillSpec
         </section>
       )}
 
-      {/* Underlying records — dynamic (candidates / matches / applications) */}
-      {drill.rowsEndpoint && (
+      {/* Underlying records — dynamic (candidates / matches / applications). Hidden,
+          calmly, on a 403: the segment's own data permission was denied even though the
+          report itself rendered fine — no error banner, the advice section still shows. */}
+      {drill.rowsEndpoint && !rowsForbidden && (
         <section style={{ marginBottom: 20 }}>
           <h4 style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase',
                        letterSpacing: '0.05em', marginBottom: 8 }}>
@@ -82,14 +84,22 @@ export default function ReportDrillDrawer({ drill, onClose }: { drill: DrillSpec
             <div style={{ fontSize: 13, color: 'var(--text-muted)', padding: '8px 0' }}>{t('drill.noRecords')}</div>
           )}
           {!rowsLoading && rows.length > 0 && (
-            <div style={{ border: '1px solid var(--border)', borderRadius: 10, overflow: 'hidden' }}>
-              {rows.slice(0, 50).map((r, i) => (
-                <div key={i} style={{ padding: '9px 12px', borderTop: i ? '1px solid var(--border)' : 'none' }}>
-                  <div style={{ fontSize: 13, fontWeight: 500, color: 'var(--text)' }}>{rowTitle(r)}</div>
-                  {rowSub(r) && <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 1 }}>{rowSub(r)}</div>}
+            <>
+              <div style={{ border: '1px solid var(--border)', borderRadius: 10, overflow: 'hidden' }}>
+                {rows.map((r, i) => (
+                  <div key={i} style={{ padding: '9px 12px', borderTop: i ? '1px solid var(--border)' : 'none' }}>
+                    <div style={{ fontSize: 13, fontWeight: 500, color: 'var(--text)' }}>{rowTitle(r)}</div>
+                    {rowSub(r) && <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 1 }}>{rowSub(r)}</div>}
+                  </div>
+                ))}
+              </div>
+              {/* Server capped the row list — tell the recruiter how many are hidden. */}
+              {rows.length < rowsTotal && (
+                <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 6 }}>
+                  {t('drill.truncated', { shown: rows.length, total: rowsTotal })}
                 </div>
-              ))}
-            </div>
+              )}
+            </>
           )}
         </section>
       )}

@@ -9,6 +9,12 @@
  *
  * Fetch/cache/dedupe lives in useCachedLookup (audit item 8) — one GET per
  * session, shared across every mounted consumer.
+ *
+ * LOOKUP-ICON-1 (batch 12, P22-30): the backend now carries an optional `icon`
+ * per row (lucide slug or emoji, same convention as driver-licenses/last-contact-
+ * types), so this hook keeps it alongside id/label/color. Consumers that never
+ * cared about the icon (options built for a dropdown, e.g. `{value, label}`)
+ * are unaffected — `icon` is purely additive on the returned object.
  */
 import type { AxiosResponse } from 'axios'
 import { useCachedLookup } from './useCachedLookup'
@@ -18,6 +24,7 @@ export interface EducationLevelOption {
   id: string
   label: string
   color?: string
+  icon?: string | null
 }
 
 // Seed defaults (Dutch education system) — ids fall back to the label (only
@@ -31,11 +38,12 @@ export const DEFAULT_EDUCATION_LEVELS: EducationLevelOption[] = [
   { id: 'WO', label: 'WO' },
 ]
 
-// Normalise a raw /education-levels row ({id, name, color, sort_order, active, in_use}).
+// Normalise a raw /education-levels row ({id, name, color, icon, sort_order, active, in_use}).
 const toLevel = (r: Record<string, unknown>): EducationLevelOption => ({
   id: String(r.id ?? ''),
   label: String(r.name ?? r.label ?? ''),
   color: (r.color as string) ?? undefined,
+  icon: typeof r.icon === 'string' && r.icon ? r.icon : undefined,
 })
 
 // null = nothing usable in this response — useCachedLookup keeps the seed and retries next mount.

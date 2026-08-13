@@ -751,6 +751,14 @@
       "emailNotAvailable": "Noch nicht verfügbar",
       "emailNotAvailableReason": "Eine persönliche E-Mail-Ausnahme ist noch nicht möglich — hierfür folgst du der mandantenweiten E-Mail-Einstellung."
     },
+    "push": {
+      "title": "Browserbenachrichtigungen",
+      "desc": "Erhalte Benachrichtigungen als Browser-Pop-up, auch wenn dieser Tab nicht geöffnet ist.",
+      "unsupported": "Dein Browser unterstützt keine Browserbenachrichtigungen.",
+      "blocked": "Dein Browser blockiert Benachrichtigungen für diese Website. Aktiviere sie in den Browsereinstellungen, um diese Option zu nutzen.",
+      "subscribeFailed": "Das Abonnieren von Browserbenachrichtigungen ist fehlgeschlagen.",
+      "unsubscribeFailed": "Das Abbestellen von Browserbenachrichtigungen ist fehlgeschlagen."
+    },
     "channels": {
       "label": "Benachrichtigen über",
       "desc": "Wählen Sie pro Kanal, ob diese Benachrichtigungen ankommen: in der App, per E-Mail oder beides."

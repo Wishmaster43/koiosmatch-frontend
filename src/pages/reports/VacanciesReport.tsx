@@ -58,13 +58,13 @@ export default function VacanciesReport({ period, tabsSlot }: { period: ReportPe
     { key: 'total',  label: t('vacancies.summary.total'),  value: s?.total ?? 0,
       active: drill != null && drill.rowsParams?.status == null,
       // Drill endpoints don't exist yet (reportDrillGate) — no click affordance until they do.
-      onClick: gateDrillClick(() => openVacancies(t('vacancies.summary.total'), s?.total ?? 0)) },
+      onClick: gateDrillClick('vacancies', () => openVacancies(t('vacancies.summary.total'), s?.total ?? 0)) },
     { key: 'open',   label: t('vacancies.summary.open'),   value: s?.open ?? 0,
       active: drill?.rowsParams?.status === 'open',
-      onClick: gateDrillClick(() => openVacancies(t('vacancies.summary.open'), s?.open ?? 0, 'open')) },
+      onClick: gateDrillClick('vacancies', () => openVacancies(t('vacancies.summary.open'), s?.open ?? 0, 'open')) },
     { key: 'filled', label: t('vacancies.summary.filled'), value: s?.filled ?? 0,
       active: drill?.rowsParams?.status === 'filled',
-      onClick: gateDrillClick(() => openVacancies(t('vacancies.summary.filled'), s?.filled ?? 0, 'filled')) },
+      onClick: gateDrillClick('vacancies', () => openVacancies(t('vacancies.summary.filled'), s?.filled ?? 0, 'filled')) },
     { key: 'fillRate', label: t('vacancies.summary.fillRate'),
       value: s ? `${Math.round(s.fill_rate * 100)}%` : '—' },
     { key: 'ttf', label: t('vacancies.summary.avgTimeToFill'),
@@ -126,7 +126,7 @@ export default function VacanciesReport({ period, tabsSlot }: { period: ReportPe
             columns={columns}
             rows={rows}
             getRowId={v => v.key}
-            onRowClick={gateDrillClick(openVacancyRow)}
+            onRowClick={gateDrillClick('vacancies', openVacancyRow)}
             loading={loading}
             loadingText={t('vacancies.loading')}
             emptyText={t('vacancies.empty')}

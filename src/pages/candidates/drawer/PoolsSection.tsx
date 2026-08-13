@@ -4,6 +4,7 @@ import { Check, Sparkles } from 'lucide-react'
 import { useCandidatePools } from '../hooks/useCandidatePools'
 import { sectionBlock } from './constants'
 import DrawerAddButton from './DrawerAddButton'
+import LookupIcon from '@/components/ui/LookupIcon'
 import type { Candidate } from '@/types/candidate'
 // PORTAL-MARKER-1: a click inside an open portalled picker menu is never "outside".
 import { isInsideDropdownPortal } from '@/lib/useDropdownPlacement'
@@ -59,6 +60,9 @@ export default function PoolsSection({ c }: { c: Candidate }) {
                     // Fallback swatch colour when no tenant colour is set — a solid dot
                     // fill here (no alpha maths), so the token applies directly (§4).
                     const color = p.color || 'var(--text-muted)'
+                    // LOOKUP-ICON-1: the tenant pool icon (lucide slug or emoji), if set —
+                    // shown next to the swatch dot, never instead of it (§6).
+                    const icon = (p as { icon?: string | null }).icon
                     return (
                       <button key={p.id ?? p.name ?? i} onClick={() => toggle(p)}
                         style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between',
@@ -66,6 +70,7 @@ export default function PoolsSection({ c }: { c: Candidate }) {
                           border: 'none', cursor: 'pointer', textAlign: 'left', color: 'var(--text)' }}>
                         <span style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
                           <span style={{ width: 8, height: 8, borderRadius: '50%', background: color, flexShrink: 0 }} />
+                          {icon && <LookupIcon icon={icon} size={12} color={color} />}
                           {p.name}
                         </span>
                         {selected && <Check size={13} style={{ color: 'var(--color-primary-text)', flexShrink: 0 }} />}
@@ -93,6 +98,8 @@ export default function PoolsSection({ c }: { c: Candidate }) {
                 const color = p.color || 'var(--text-muted)'
                 const isHex = color.startsWith('#')
                 const ai = p.source === 'koios'
+                // LOOKUP-ICON-1: the tenant pool icon rides next to the AI marker/name.
+                const icon = (p as { icon?: string | null }).icon
                 return (
                   <span key={p.id ?? p.name ?? i} title={ai ? t('sections.poolKoios') : undefined}
                     style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 11, fontWeight: 500, padding: '3px 8px',
@@ -101,6 +108,7 @@ export default function PoolsSection({ c }: { c: Candidate }) {
                       background: isHex ? color + '1A' : `color-mix(in srgb, ${color} 12%, transparent)`,
                       color }}>
                     {ai && <Sparkles size={10} />}
+                    {icon && <LookupIcon icon={icon} size={11} color={color} />}
                     {p.name}
                     <button onClick={() => toggle(p)}
                       style={{ background: 'none', border: 'none', cursor: 'pointer', color, opacity: 0.7, padding: 0, lineHeight: 1, fontSize: 14 }}>×</button>

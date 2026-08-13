@@ -6,7 +6,8 @@
     "loading": "Laden…",
     "noRecords": "Geen onderliggende records.",
     "koios": "Koios AI-advies",
-    "noAdvice": "Koios heeft nog geen advies voor dit getal."
+    "noAdvice": "Koios heeft nog geen advies voor dit getal.",
+    "truncated": "Toont {{shown}} van {{total}}"
   },
   "tabs": {
     "flow": "Flow",

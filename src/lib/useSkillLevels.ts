@@ -6,23 +6,52 @@
  *
  * Fetch/cache/dedupe lives in useCachedLookup (audit item 8) — one GET per
  * session, shared across every mounted consumer.
+ *
+ * LOOKUP-ICON-1 (batch 12, P22-30): the backend now carries an optional `icon`
+ * (+ `color`) per row, same convention as the other eight lookups in this wave.
+ * This hook used to collapse rows to plain strings, which dropped the icon on
+ * the floor before any consumer could render it — it now returns full
+ * `{ value, label, icon, color }` objects, mirroring useDriverLicenses.
+ * BACKWARD COMPAT: `names` still exposes the old plain-string list, so any
+ * call-site that only needs label text (e.g. a bare CreatableSelect `options`
+ * prop expecting strings) keeps working without touching it.
  */
 import type { AxiosResponse } from 'axios'
 import { useCachedLookup } from './useCachedLookup'
 import { unwrapList } from '@/lib/api'
 
-// Seed defaults — labels tenant-facing, normally from the API.
-export const DEFAULT_SKILL_LEVELS = ['Basis', 'Gevorderd', 'Expert']
+export interface SkillLevelItem {
+  value: string
+  label: string
+  icon?: string | null
+  color?: string | null
+}
+
+const SEED_NAMES = ['Basis', 'Gevorderd', 'Expert']
+// Kept for any consumer still importing the old plain-string constant.
+export const DEFAULT_SKILL_LEVELS = SEED_NAMES
+export const DEFAULT_SKILL_LEVEL_ITEMS: SkillLevelItem[] = SEED_NAMES.map(name => ({ value: name, label: name, icon: null, color: null }))
+
+type Named = { name?: string; label?: string; value?: string; icon?: string; color?: string }
 
 // null = nothing usable in this response — useCachedLookup keeps the seed and retries next mount.
-const mapSkillLevels = (res: AxiosResponse): string[] | null => {
-  const rows = (unwrapList(res).rows) as Array<string | { name?: string; label?: string; value?: string }>
-  const names = rows.map(x => typeof x === 'string' ? x : (x.name ?? x.label ?? x.value ?? '')).filter(Boolean) as string[]
-  return names.length ? names : null
+const mapSkillLevels = (res: AxiosResponse): SkillLevelItem[] | null => {
+  const raw = (unwrapList(res).rows) as unknown[]
+  const items = raw
+    .map((x): SkillLevelItem | null => {
+      if (typeof x === 'string') return x ? { value: x, label: x, icon: null, color: null } : null
+      const n = x as Named
+      const name = n.name ?? n.label ?? n.value
+      return name ? { value: name, label: name, icon: n.icon ?? null, color: n.color ?? null } : null
+    })
+    .filter((v): v is SkillLevelItem => v !== null)
+  return items.length ? items : null
 }
 
 export function useSkillLevels() {
   // The endpoint now exists (item 11) — a real 404 should surface in the dev log again.
-  const { data: levels } = useCachedLookup('/skill-levels', mapSkillLevels, DEFAULT_SKILL_LEVELS)
-  return { levels }
+  const { data: levelItems } = useCachedLookup('/skill-levels', mapSkillLevels, DEFAULT_SKILL_LEVEL_ITEMS)
+  // `levels` stays the full-object shape (icon/color intact); `names` is the
+  // backward-compatible plain-string list for any old string[]-only call-site.
+  return { levels: levelItems, names: levelItems.map(l => l.label) }
 }

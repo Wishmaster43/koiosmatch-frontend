@@ -41,6 +41,8 @@ import api, { unwrap } from '@/lib/api'
 import { notifyError } from '@/lib/notify'
 import SegmentedControl from '@/components/ui/SegmentedControl'
 import SoftChip from '@/components/ui/SoftChip'
+import Toggle from '@/components/ui/Toggle'
+import { isSupported as isPushSupported, permissionState, isSubscribed, subscribe, unsubscribe } from '@/lib/pushSubscription'
 import { SettingCardList, SettingRow, SkeletonRows } from '../components/SettingsKit'
 
 // The API's tri-state per context: null = inherit the tenant default, true/false
@@ -84,6 +86,41 @@ function useMyNotifications() {
   return { contexts, loading, error, setContext }
 }
 
+/** Load + toggle the browser-push subscription (P11-FASE5). Subscribing IS the
+ * server-side opt-in — there is no separate setting key to persist here. */
+function useBrowserPush() {
+  const { t } = useTranslation('settings')
+  const supported = isPushSupported()
+  const permission = permissionState()
+  const [subscribed, setSubscribed] = useState(false)
+  const [busy, setBusy] = useState(false)
+
+  // Reflect the browser's actual subscription state on mount (no server flag needed).
+  useEffect(() => {
+    let alive = true
+    if (!supported) return
+    isSubscribed().then(v => { if (alive) setSubscribed(v) })
+    return () => { alive = false }
+  }, [supported])
+
+  const toggle = async (next: boolean) => {
+    setBusy(true)
+    const prev = subscribed
+    setSubscribed(next)
+    try {
+      if (next) await subscribe()
+      else await unsubscribe()
+    } catch {
+      setSubscribed(prev)
+      notifyError(t(next ? 'notifications.push.subscribeFailed' : 'notifications.push.unsubscribeFailed'))
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  return { supported, permission, subscribed, busy, toggle }
+}
+
 // Tri-state UI value <-> API value mapping, shared by every row.
 const toUi = (v: ContextValue): string => (v === null ? 'inherit' : v ? 'on' : 'off')
 const fromUi = (v: string): ContextValue => (v === 'inherit' ? null : v === 'on')
@@ -99,6 +136,7 @@ const captionStyle: CSSProperties = {
 export default function MyNotificationsSettings() {
   const { t } = useTranslation('settings')
   const { contexts, loading, error, setContext } = useMyNotifications()
+  const push = useBrowserPush()
   const known = Object.keys(contexts)
 
   // Inherit clears the override (null), On/Off force the context for the
@@ -115,6 +153,24 @@ export default function MyNotificationsSettings() {
         <h2 style={{ fontSize: 15, fontWeight: 600, color: 'var(--text)' }}>{t('notifications.my.title')}</h2>
         <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>{t('notifications.my.subtitle')}</p>
       </div>
+
+      {/* Browser-push toggle (P11-FASE5). Unsupported browser or a denied OS/browser
+          permission renders an honest disabled row (§3 — no fake affordance) instead
+          of a working control. Subscribing is the opt-in itself: no extra setting key. */}
+      <SettingCardList>
+        <SettingRow label={t('notifications.push.title')}
+          description={
+            !push.supported ? t('notifications.push.unsupported')
+            : push.permission === 'denied' ? t('notifications.push.blocked')
+            : t('notifications.push.desc')
+          }>
+          <Toggle checked={push.subscribed} onChange={push.toggle}
+            disabled={!push.supported || push.permission === 'denied' || push.busy}
+            ariaLabel={t('notifications.push.title')} />
+        </SettingRow>
+      </SettingCardList>
+
+      <div style={{ height: 20 }} />
 
       {/* Four explicit UI states: loading skeleton, load error, empty (no known
           contexts), and the real row list. */}

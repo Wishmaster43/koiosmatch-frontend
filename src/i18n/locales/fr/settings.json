@@ -751,6 +751,14 @@
       "emailNotAvailable": "Pas encore disponible",
       "emailNotAvailableReason": "Une exception e-mail personnelle n'est pas encore possible — pour cela, vous suivez le réglage e-mail commun à l'organisation."
     },
+    "push": {
+      "title": "Notifications du navigateur",
+      "desc": "Recevez les notifications sous forme de pop-up du navigateur, même quand cet onglet n'est pas ouvert.",
+      "unsupported": "Votre navigateur ne prend pas en charge les notifications du navigateur.",
+      "blocked": "Votre navigateur bloque les notifications pour ce site. Activez-les dans les paramètres du navigateur pour utiliser cette option.",
+      "subscribeFailed": "L'inscription aux notifications du navigateur a échoué.",
+      "unsubscribeFailed": "La désinscription des notifications du navigateur a échoué."
+    },
     "channels": {
       "label": "Notifier via",
       "desc": "Choisissez par canal si ces notifications arrivent : dans l’application, par e-mail ou les deux."

@@ -751,6 +751,14 @@
       "emailNotAvailable": "Aún no disponible",
       "emailNotAvailableReason": "Todavía no es posible una excepción de correo personal — para esto sigues el ajuste de correo de toda la organización."
     },
+    "push": {
+      "title": "Notificaciones del navegador",
+      "desc": "Recibe notificaciones como una ventana emergente del navegador, incluso cuando esta pestaña no está abierta.",
+      "unsupported": "Tu navegador no admite notificaciones del navegador.",
+      "blocked": "Tu navegador está bloqueando las notificaciones para este sitio. Actívalas en la configuración del navegador para usar esta opción.",
+      "subscribeFailed": "No se pudo suscribir a las notificaciones del navegador.",
+      "unsubscribeFailed": "No se pudo cancelar la suscripción a las notificaciones del navegador."
+    },
     "channels": {
       "label": "Notificar mediante",
       "desc": "Elige por canal si estas notificaciones llegan: en la aplicación, por correo electrónico o ambos."

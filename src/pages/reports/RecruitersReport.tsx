@@ -110,7 +110,7 @@ export default function RecruitersReport({ period, tabsSlot }: { period: ReportP
             columns={columns}
             rows={rows}
             getRowId={r => r.key}
-            onRowClick={gateDrillClick(openRecruiter)}
+            onRowClick={gateDrillClick('recruiters', openRecruiter)}
             loading={loading}
             loadingText={t('recruiters.loading')}
             emptyText={t('recruiters.empty')}
