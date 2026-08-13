@@ -229,6 +229,7 @@
     "notif_kandidaten": "Kandidaten",
     "notif_matches": "Matches",
     "notif_taken": "Aufgaben",
+    "notif_escalation": "Eskalation",
     "koios_advice": "Hinweis-Schwellenwerte",
     "notif_my": "Meine Benachrichtigungen",
     "customer_identifier_validation": "Nummernprüfung"
@@ -748,7 +749,41 @@
       "saveFailed": "Speichern fehlgeschlagen — deine Auswahl wurde zurückgesetzt.",
       "emailNotAvailable": "Noch nicht verfügbar",
       "emailNotAvailableReason": "Eine persönliche E-Mail-Ausnahme ist noch nicht möglich — hierfür folgst du der mandantenweiten E-Mail-Einstellung."
+    },
+    "channels": {
+      "label": "Benachrichtigen über",
+      "desc": "Wählen Sie pro Kanal, ob diese Benachrichtigungen ankommen: in der App, per E-Mail oder beides."
     }
+  },
+  "escalation": {
+    "title": "Eskalation",
+    "subtitle": "Bleibt ein Aufmerksamkeitssignal zu lange ohne Aktion offen, geht eine Benachrichtigung an die gewählte Person oder Rolle.",
+    "afterDaysLabel": "Eskalieren nach",
+    "afterDaysOff": "aus",
+    "targetLabel": "An",
+    "targetPlaceholder": "Person oder Rolle wählen",
+    "targetUserOption": "{{name}} (Benutzer)",
+    "targetRoleOption": "{{name}} (Rolle)",
+    "signal": {
+      "task_overdue": {
+        "title": "Aufgabe überfällig",
+        "desc": "Eine Aufgabe ist über dem Fälligkeitsdatum und noch nicht erledigt."
+      },
+      "candidate_status_stale": {
+        "title": "Kandidatenstatus stagniert",
+        "desc": "Der Einsatzstatus eines Kandidaten hat sich zu lange nicht geändert."
+      },
+      "conversation_unanswered": {
+        "title": "Gespräch unbeantwortet",
+        "desc": "Eine eingehende Nachricht wurde zu lange nicht beantwortet."
+      },
+      "candidate_phase_stale": {
+        "title": "Kandidatenphase stagniert",
+        "desc": "Die Lebenszyklusphase eines Kandidaten hat sich zu lange nicht geändert."
+      }
+    },
+    "missingTargetHint": "Wählen Sie eine Person oder Rolle zum Eskalieren, oder leeren Sie \"Eskalieren nach\", um es auszuschalten.",
+    "daysUnit": "Tage"
   },
   "billing": {
     "usage": {
@@ -1350,7 +1385,19 @@
     "syncFailed": "Synchronisierung fehlgeschlagen",
     "checkStatus": "Verbindung prüfen",
     "statusChecked": "Verbindung geprüft.",
-    "statusCheckFailed": "Die Verbindungsprüfung ist fehlgeschlagen."
+    "statusCheckFailed": "Die Verbindungsprüfung ist fehlgeschlagen.",
+    "addConnectionTitle": "Verbindung hinzufügen",
+    "addConnectionDesc": "Verbinden Sie das WhatsApp-Business-Konto (WABA) dieses Mandanten. Das Zugriffstoken wird sicher gespeichert und nie erneut angezeigt.",
+    "wabaId": "WABA-ID",
+    "wabaIdPlaceholder": "Z. B. 102290129340398",
+    "accessToken": "Zugriffstoken",
+    "appSecret": "App-Secret (optional)",
+    "verifyToken": "Webhook-Verifizierungstoken (optional)",
+    "provider": "Anbieter",
+    "addConnectionRequired": "Füllen Sie die Pflichtfelder aus: WABA-ID und Zugriffstoken.",
+    "addConnectionFailed": "Verbindung fehlgeschlagen. Prüfen Sie die Angaben und versuchen Sie es erneut.",
+    "addConnectionSaving": "Wird verbunden…",
+    "addConnectionSubmit": "Verbindung hinzufügen"
   },
   "roles": {
     "loading": "Rollen werden geladen…",
@@ -2241,7 +2288,10 @@
     "memoryDaysTitle": "Koios-Gesprächsgedächtnis",
     "memoryDaysHint": "Wie viele Tage WhatsApp-Gesprächsverlauf Koios beim Verfassen einer Antwort als Kontext einbezieht.",
     "memoryDaysLabel": "Tage (1-365)",
-    "memoryDaysSaveFailed": "Speichern des Gesprächsgedächtnisses fehlgeschlagen."
+    "memoryDaysSaveFailed": "Speichern des Gesprächsgedächtnisses fehlgeschlagen.",
+    "conversationUnknown": "Unbekannter Kontakt",
+    "conversationCount_one": "{{count}} Nachricht in diesem Protokoll",
+    "conversationCount_other": "{{count}} Nachrichten in diesem Protokoll"
   },
   "appointmentTypes": {
     "title": "Terminarten",

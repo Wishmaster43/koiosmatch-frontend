@@ -1084,10 +1084,10 @@
     "vacancyOptional": "Stelle (optional)",
     "noVacancy": "Keine Stelle",
     "contract": "Vertrag",
-    "contractType": "Vertragsart",
-    "pickContractType": "Vertragsart wählen",
+    "contractType": "Art",
+    "pickContractType": "Wählen…",
     "cao": "Tarifvertrag",
-    "pickCao": "Tarifvertrag wählen",
+    "pickCao": "Wählen…",
     "startDate": "Startdatum",
     "endDate": "Enddatum",
     "hoursPerWeek": "Stunden pro Woche",
@@ -1100,7 +1100,7 @@
     "margin": "Marge",
     "costCenter": "Kostenstelle",
     "billingEmail": "Rechnungs-E-Mail",
-    "remarks": "Anmerkungen",
+    "matchRemarks": "Match-Anmerkungen",
     "remarksAdd": "Klicken, um eine Anmerkung hinzuzufügen",
     "create": "Match erstellen",
     "created": "Match angelegt",
@@ -1290,6 +1290,8 @@
   "popout": {
     "windowTitle": "Notizen — {{name}}",
     "loadError": "Dieser Kandidat konnte nicht geladen werden.",
-    "summaryWindowTitle": "Profiltext — {{name}}"
+    "summaryWindowTitle": "Profiltext — {{name}}",
+    "noteNotFound": "Notiz nicht gefunden. Sie wurde möglicherweise gelöscht oder gehört zu einem anderen Kandidaten.",
+    "noteReadOnly": "Diese Notiz gehört einem anderen Benutzer. Sie können sie hier nur lesen."
   }
 }

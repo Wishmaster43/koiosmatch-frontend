@@ -229,6 +229,7 @@
     "notif_kandidaten": "Kandidaten",
     "notif_matches": "Matches",
     "notif_taken": "Taken",
+    "notif_escalation": "Escalatie",
     "koios_advice": "Advies-drempels",
     "notif_my": "Mijn meldingen",
     "customer_identifier_validation": "Nummervalidatie"
@@ -982,7 +983,41 @@
       "saveFailed": "Opslaan is mislukt — je keuze is teruggedraaid.",
       "emailNotAvailable": "Nog niet beschikbaar",
       "emailNotAvailableReason": "Een persoonlijke e-mailuitzondering is nog niet mogelijk — je volgt hiervoor de organisatiebrede e-mailinstelling."
+    },
+    "channels": {
+      "label": "Melden via",
+      "desc": "Kies per kanaal of deze meldingen aankomen: in de app, per e-mail of allebei."
     }
+  },
+  "escalation": {
+    "title": "Escalatie",
+    "subtitle": "Loopt een stilstand-signaal te lang door zonder actie, dan gaat er één melding naar de gekozen persoon of rol.",
+    "afterDaysLabel": "Escaleer na",
+    "afterDaysOff": "uit",
+    "targetLabel": "Naar",
+    "targetPlaceholder": "Kies persoon of rol",
+    "targetUserOption": "{{name}} (gebruiker)",
+    "targetRoleOption": "{{name}} (rol)",
+    "signal": {
+      "task_overdue": {
+        "title": "Taak te laat",
+        "desc": "Een taak is over de vervaldatum en nog niet afgerond."
+      },
+      "candidate_status_stale": {
+        "title": "Kandidaatstatus stilstand",
+        "desc": "De inzetbaarheidsstatus van een kandidaat is te lang niet gewijzigd."
+      },
+      "conversation_unanswered": {
+        "title": "Gesprek onbeantwoord",
+        "desc": "Een binnenkomend bericht is te lang niet beantwoord."
+      },
+      "candidate_phase_stale": {
+        "title": "Kandidaatfase stilstand",
+        "desc": "De levenscyclusfase van een kandidaat is te lang niet gewijzigd."
+      }
+    },
+    "missingTargetHint": "Kies een persoon of rol om te escaleren, of laat 'Escaleer na' leeg om uit te zetten.",
+    "daysUnit": "dagen"
   },
   "billing": {
     "usage": {
@@ -1584,7 +1619,19 @@
     "syncFailed": "Synchronisatie mislukt",
     "checkStatus": "Controleer verbinding",
     "statusChecked": "Verbinding gecontroleerd.",
-    "statusCheckFailed": "Controleren van de verbinding is mislukt."
+    "statusCheckFailed": "Controleren van de verbinding is mislukt.",
+    "addConnectionTitle": "Koppeling toevoegen",
+    "addConnectionDesc": "Koppel het WhatsApp Business-account (WABA) van deze tenant. Het toegangstoken wordt veilig opgeslagen en nooit opnieuw getoond.",
+    "wabaId": "WABA-ID",
+    "wabaIdPlaceholder": "Bijv. 102290129340398",
+    "accessToken": "Toegangstoken",
+    "appSecret": "App-secret (optioneel)",
+    "verifyToken": "Webhook-verificatietoken (optioneel)",
+    "provider": "Provider",
+    "addConnectionRequired": "Vul de verplichte velden in: WABA-ID en toegangstoken.",
+    "addConnectionFailed": "Koppelen is niet gelukt. Controleer de gegevens en probeer het opnieuw.",
+    "addConnectionSaving": "Bezig met koppelen…",
+    "addConnectionSubmit": "Koppeling toevoegen"
   },
   "roles": {
     "loading": "Rollen ophalen…",
@@ -2241,7 +2288,10 @@
     "memoryDaysTitle": "Koios-gespreksgeheugen",
     "memoryDaysHint": "Hoeveel dagen WhatsApp-gespreksgeschiedenis Koios meeneemt als context bij het opstellen van een antwoord.",
     "memoryDaysLabel": "Dagen (1-365)",
-    "memoryDaysSaveFailed": "Opslaan van het gespreksgeheugen is mislukt."
+    "memoryDaysSaveFailed": "Opslaan van het gespreksgeheugen is mislukt.",
+    "conversationUnknown": "Onbekend contact",
+    "conversationCount_one": "{{count}} bericht in dit log",
+    "conversationCount_other": "{{count}} berichten in dit log"
   },
   "appointmentTypes": {
     "title": "Afspraaktypes",

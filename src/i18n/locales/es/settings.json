@@ -229,6 +229,7 @@
     "notif_kandidaten": "Candidatos",
     "notif_matches": "Coincidencias",
     "notif_taken": "Tareas",
+    "notif_escalation": "Escalada",
     "koios_advice": "Umbrales de aviso",
     "notif_my": "Mis notificaciones",
     "customer_identifier_validation": "Validación de números"
@@ -748,7 +749,41 @@
       "saveFailed": "Error al guardar — tu elección se ha revertido.",
       "emailNotAvailable": "Aún no disponible",
       "emailNotAvailableReason": "Todavía no es posible una excepción de correo personal — para esto sigues el ajuste de correo de toda la organización."
+    },
+    "channels": {
+      "label": "Notificar mediante",
+      "desc": "Elige por canal si estas notificaciones llegan: en la aplicación, por correo electrónico o ambos."
     }
+  },
+  "escalation": {
+    "title": "Escalada",
+    "subtitle": "Si una señal de atención permanece demasiado tiempo sin acción, se envía una notificación a la persona o rol elegido.",
+    "afterDaysLabel": "Escalar después de",
+    "afterDaysOff": "desactivado",
+    "targetLabel": "A",
+    "targetPlaceholder": "Elegir persona o rol",
+    "targetUserOption": "{{name}} (usuario)",
+    "targetRoleOption": "{{name}} (rol)",
+    "signal": {
+      "task_overdue": {
+        "title": "Tarea vencida",
+        "desc": "Una tarea ha superado su fecha límite y aún no se ha completado."
+      },
+      "candidate_status_stale": {
+        "title": "Estado del candidato estancado",
+        "desc": "El estado de disponibilidad de un candidato no ha cambiado en demasiado tiempo."
+      },
+      "conversation_unanswered": {
+        "title": "Conversación sin responder",
+        "desc": "Un mensaje entrante ha quedado sin respuesta demasiado tiempo."
+      },
+      "candidate_phase_stale": {
+        "title": "Fase del candidato estancada",
+        "desc": "La fase del ciclo de vida de un candidato no ha cambiado en demasiado tiempo."
+      }
+    },
+    "missingTargetHint": "Elija una persona o rol para escalar, o borre 'Escalar después de' para desactivarlo.",
+    "daysUnit": "días"
   },
   "billing": {
     "usage": {
@@ -1350,7 +1385,19 @@
     "syncFailed": "Error de sincronización",
     "checkStatus": "Comprobar conexión",
     "statusChecked": "Conexión comprobada.",
-    "statusCheckFailed": "No se pudo comprobar la conexión."
+    "statusCheckFailed": "No se pudo comprobar la conexión.",
+    "addConnectionTitle": "Añadir conexión",
+    "addConnectionDesc": "Conecta la cuenta de WhatsApp Business (WABA) de este inquilino. El token de acceso se guarda de forma segura y no se vuelve a mostrar.",
+    "wabaId": "ID de WABA",
+    "wabaIdPlaceholder": "P. ej. 102290129340398",
+    "accessToken": "Token de acceso",
+    "appSecret": "Secreto de la aplicación (opcional)",
+    "verifyToken": "Token de verificación del webhook (opcional)",
+    "provider": "Proveedor",
+    "addConnectionRequired": "Rellena los campos obligatorios: ID de WABA y token de acceso.",
+    "addConnectionFailed": "No se pudo conectar. Comprueba los datos y vuelve a intentarlo.",
+    "addConnectionSaving": "Conectando…",
+    "addConnectionSubmit": "Añadir conexión"
   },
   "roles": {
     "loading": "Cargando roles…",
@@ -2241,7 +2288,10 @@
     "memoryDaysTitle": "Memoria de conversación de Koios",
     "memoryDaysHint": "Cuántos días de historial de WhatsApp usa Koios como contexto al redactar una respuesta.",
     "memoryDaysLabel": "Días (1-365)",
-    "memoryDaysSaveFailed": "No se pudo guardar la memoria de conversación."
+    "memoryDaysSaveFailed": "No se pudo guardar la memoria de conversación.",
+    "conversationUnknown": "Contacto desconocido",
+    "conversationCount_one": "{{count}} mensaje en este registro",
+    "conversationCount_other": "{{count}} mensajes en este registro"
   },
   "appointmentTypes": {
     "title": "Tipos de cita",

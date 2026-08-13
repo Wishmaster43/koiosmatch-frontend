@@ -47,7 +47,15 @@
     "expiringOppsSub": "sluiten binnenkort",
     "pipelineHours": "Pijplijn uren",
     "openVacancies": "Vacatures",
-    "openVacanciesSub": "Actief in beheer"
+    "openVacanciesSub": "Actief in beheer",
+    "tooLongInStage": "Te lang in fase",
+    "tooLongInStageSub": "geen fasewissel",
+    "missingApptApps": "Geen afspraak",
+    "missingApptAppsSub": "fase vereist een afspraak",
+    "closingSoon": "Sluit binnenkort",
+    "closingSoonSub": "vacature loopt af",
+    "staleStatusVac": "Verouderde status",
+    "staleStatusVacSub": "lang geen wijziging"
   },
   "chart": {
     "byStatus": "Kandidaten per status",

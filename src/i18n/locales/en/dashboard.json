@@ -47,7 +47,15 @@
     "expiringOppsSub": "closing soon",
     "pipelineHours": "Pipeline hours",
     "openVacancies": "Vacancies",
-    "openVacanciesSub": "Active under management"
+    "openVacanciesSub": "Active under management",
+    "tooLongInStage": "Too long in stage",
+    "tooLongInStageSub": "no stage change",
+    "missingApptApps": "Missing appointment",
+    "missingApptAppsSub": "stage requires one",
+    "closingSoon": "Closing soon",
+    "closingSoonSub": "vacancy deadline near",
+    "staleStatusVac": "Stale status",
+    "staleStatusVacSub": "no change in a while"
   },
   "chart": {
     "byStatus": "Candidates by status",

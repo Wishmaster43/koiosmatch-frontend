@@ -1084,10 +1084,10 @@
     "vacancyOptional": "Vacancy (optional)",
     "noVacancy": "No vacancy",
     "contract": "Contract",
-    "contractType": "Contract type",
-    "pickContractType": "Pick contract type",
+    "contractType": "Type",
+    "pickContractType": "Pick…",
     "cao": "CBA",
-    "pickCao": "Pick CBA",
+    "pickCao": "Pick…",
     "startDate": "Start date",
     "endDate": "End date",
     "hoursPerWeek": "Hours per week",
@@ -1100,7 +1100,7 @@
     "margin": "Margin",
     "costCenter": "Cost center",
     "billingEmail": "Billing email",
-    "remarks": "Remarks",
+    "matchRemarks": "Match remarks",
     "remarksAdd": "Click to add a remark",
     "create": "Create match",
     "created": "Match created",
@@ -1290,6 +1290,8 @@
   "popout": {
     "windowTitle": "Notes — {{name}}",
     "loadError": "This candidate could not be loaded.",
-    "summaryWindowTitle": "Profile text — {{name}}"
+    "summaryWindowTitle": "Profile text — {{name}}",
+    "noteNotFound": "Note not found. It may have been deleted or belongs to another candidate.",
+    "noteReadOnly": "This note belongs to another user. You can only read it here."
   }
 }

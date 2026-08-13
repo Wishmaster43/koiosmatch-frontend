@@ -47,7 +47,15 @@
     "expiringOppsSub": "clôture proche",
     "pipelineHours": "Heures pipeline",
     "openVacancies": "Postes",
-    "openVacanciesSub": "Actifs en gestion"
+    "openVacanciesSub": "Actifs en gestion",
+    "tooLongInStage": "Trop longtemps en phase",
+    "tooLongInStageSub": "pas de changement",
+    "missingApptApps": "Rendez-vous manquant",
+    "missingApptAppsSub": "requis à cette phase",
+    "closingSoon": "Clôture proche",
+    "closingSoonSub": "échéance approche",
+    "staleStatusVac": "Statut obsolète",
+    "staleStatusVacSub": "aucun changement récent"
   },
   "chart": {
     "byStatus": "Candidats par statut",

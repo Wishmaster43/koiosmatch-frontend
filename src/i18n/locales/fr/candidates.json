@@ -1084,10 +1084,10 @@
     "vacancyOptional": "Poste (facultatif)",
     "noVacancy": "Aucun poste",
     "contract": "Contrat",
-    "contractType": "Type de contrat",
-    "pickContractType": "Choisir le type",
+    "contractType": "Type",
+    "pickContractType": "Choisir…",
     "cao": "CCT",
-    "pickCao": "Choisir la CCT",
+    "pickCao": "Choisir…",
     "startDate": "Date de début",
     "endDate": "Date de fin",
     "hoursPerWeek": "Heures par semaine",
@@ -1100,7 +1100,7 @@
     "margin": "Marge",
     "costCenter": "Centre de coûts",
     "billingEmail": "E-mail de facturation",
-    "remarks": "Remarques",
+    "matchRemarks": "Remarques du match",
     "remarksAdd": "Cliquez pour ajouter une remarque",
     "create": "Créer un match",
     "created": "Match créé",
@@ -1290,6 +1290,8 @@
   "popout": {
     "windowTitle": "Notes — {{name}}",
     "loadError": "Ce candidat n'a pas pu être chargé.",
-    "summaryWindowTitle": "Texte de profil — {{name}}"
+    "summaryWindowTitle": "Texte de profil — {{name}}",
+    "noteNotFound": "Note introuvable. Elle a peut-être été supprimée ou appartient à un autre candidat.",
+    "noteReadOnly": "Cette note appartient à un autre utilisateur. Vous pouvez uniquement la lire ici."
   }
 }

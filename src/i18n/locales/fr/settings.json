@@ -229,6 +229,7 @@
     "notif_kandidaten": "Candidats",
     "notif_matches": "Matchs",
     "notif_taken": "Tâches",
+    "notif_escalation": "Escalade",
     "koios_advice": "Seuils de conseils",
     "notif_my": "Mes notifications",
     "customer_identifier_validation": "Validation des numéros"
@@ -748,7 +749,41 @@
       "saveFailed": "Échec de l'enregistrement — votre choix a été annulé.",
       "emailNotAvailable": "Pas encore disponible",
       "emailNotAvailableReason": "Une exception e-mail personnelle n'est pas encore possible — pour cela, vous suivez le réglage e-mail commun à l'organisation."
+    },
+    "channels": {
+      "label": "Notifier via",
+      "desc": "Choisissez par canal si ces notifications arrivent : dans l’application, par e-mail ou les deux."
     }
+  },
+  "escalation": {
+    "title": "Escalade",
+    "subtitle": "Si un signal d'attention reste trop longtemps sans action, une notification est envoyée à la personne ou au rôle choisi.",
+    "afterDaysLabel": "Escalader après",
+    "afterDaysOff": "désactivé",
+    "targetLabel": "Vers",
+    "targetPlaceholder": "Choisir une personne ou un rôle",
+    "targetUserOption": "{{name}} (utilisateur)",
+    "targetRoleOption": "{{name}} (rôle)",
+    "signal": {
+      "task_overdue": {
+        "title": "Tâche en retard",
+        "desc": "Une tâche a dépassé sa date d'échéance et n'est pas encore terminée."
+      },
+      "candidate_status_stale": {
+        "title": "Statut candidat stagnant",
+        "desc": "Le statut de disponibilité d'un candidat n'a pas changé depuis trop longtemps."
+      },
+      "conversation_unanswered": {
+        "title": "Conversation sans réponse",
+        "desc": "Un message entrant est resté sans réponse trop longtemps."
+      },
+      "candidate_phase_stale": {
+        "title": "Phase candidat stagnante",
+        "desc": "La phase du cycle de vie d'un candidat n'a pas changé depuis trop longtemps."
+      }
+    },
+    "missingTargetHint": "Choisissez une personne ou un rôle vers qui escalader, ou videz « Escalader après » pour désactiver.",
+    "daysUnit": "jours"
   },
   "billing": {
     "usage": {
@@ -1350,7 +1385,19 @@
     "syncFailed": "Échec de la synchronisation",
     "checkStatus": "Vérifier la connexion",
     "statusChecked": "Connexion vérifiée.",
-    "statusCheckFailed": "La vérification de la connexion a échoué."
+    "statusCheckFailed": "La vérification de la connexion a échoué.",
+    "addConnectionTitle": "Ajouter une connexion",
+    "addConnectionDesc": "Connectez le compte WhatsApp Business (WABA) de ce locataire. Le jeton d’accès est stocké en toute sécurité et ne sera plus jamais affiché.",
+    "wabaId": "ID WABA",
+    "wabaIdPlaceholder": "Ex. 102290129340398",
+    "accessToken": "Jeton d’accès",
+    "appSecret": "Secret d’application (facultatif)",
+    "verifyToken": "Jeton de vérification du webhook (facultatif)",
+    "provider": "Fournisseur",
+    "addConnectionRequired": "Renseignez les champs obligatoires : ID WABA et jeton d’accès.",
+    "addConnectionFailed": "La connexion a échoué. Vérifiez les informations et réessayez.",
+    "addConnectionSaving": "Connexion en cours…",
+    "addConnectionSubmit": "Ajouter une connexion"
   },
   "roles": {
     "loading": "Chargement des rôles…",
@@ -2241,7 +2288,10 @@
     "memoryDaysTitle": "Mémoire de conversation Koios",
     "memoryDaysHint": "Nombre de jours d’historique WhatsApp que Koios utilise comme contexte pour rédiger une réponse.",
     "memoryDaysLabel": "Jours (1-365)",
-    "memoryDaysSaveFailed": "Échec de l’enregistrement de la mémoire de conversation."
+    "memoryDaysSaveFailed": "Échec de l’enregistrement de la mémoire de conversation.",
+    "conversationUnknown": "Contact inconnu",
+    "conversationCount_one": "{{count}} message dans ce journal",
+    "conversationCount_other": "{{count}} messages dans ce journal"
   },
   "appointmentTypes": {
     "title": "Types de rendez-vous",

@@ -1084,10 +1084,10 @@
     "vacancyOptional": "Vacante (opcional)",
     "noVacancy": "Sin vacante",
     "contract": "Contrato",
-    "contractType": "Tipo de contrato",
-    "pickContractType": "Elige tipo",
+    "contractType": "Tipo",
+    "pickContractType": "Elige…",
     "cao": "Convenio",
-    "pickCao": "Elige convenio",
+    "pickCao": "Elige…",
     "startDate": "Fecha inicio",
     "endDate": "Fecha fin",
     "hoursPerWeek": "Horas por semana",
@@ -1100,7 +1100,7 @@
     "margin": "Margen",
     "costCenter": "Centro de costes",
     "billingEmail": "Email de facturación",
-    "remarks": "Observaciones",
+    "matchRemarks": "Observaciones del match",
     "remarksAdd": "Haz clic para añadir una observación",
     "create": "Crear match",
     "created": "Match creado",
@@ -1290,6 +1290,8 @@
   "popout": {
     "windowTitle": "Notas — {{name}}",
     "loadError": "No se pudo cargar este candidato.",
-    "summaryWindowTitle": "Texto de perfil — {{name}}"
+    "summaryWindowTitle": "Texto de perfil — {{name}}",
+    "noteNotFound": "Nota no encontrada. Puede que se haya eliminado o pertenezca a otro candidato.",
+    "noteReadOnly": "Esta nota pertenece a otro usuario. Aquí solo puedes leerla."
   }
 }

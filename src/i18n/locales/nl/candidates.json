@@ -1084,10 +1084,10 @@
     "vacancyOptional": "Vacature (optioneel)",
     "noVacancy": "Geen vacature",
     "contract": "Contract",
-    "contractType": "Contractsoort",
-    "pickContractType": "Kies contractsoort",
+    "contractType": "Soort",
+    "pickContractType": "Kies…",
     "cao": "CAO",
-    "pickCao": "Kies CAO",
+    "pickCao": "Kies…",
     "startDate": "Begindatum",
     "endDate": "Einddatum",
     "hoursPerWeek": "Uren per week",
@@ -1100,7 +1100,7 @@
     "margin": "Marge",
     "costCenter": "Kostenplaats",
     "billingEmail": "Facturatie-e-mail",
-    "remarks": "Opmerkingen",
+    "matchRemarks": "Match opmerkingen",
     "remarksAdd": "Klik om een opmerking toe te voegen",
     "create": "Match aanmaken",
     "created": "Match aangemaakt",
@@ -1290,6 +1290,8 @@
   "popout": {
     "windowTitle": "Notities — {{name}}",
     "loadError": "Deze kandidaat kon niet worden geladen.",
-    "summaryWindowTitle": "Profieltekst — {{name}}"
+    "summaryWindowTitle": "Profieltekst — {{name}}",
+    "noteNotFound": "Notitie niet gevonden. Mogelijk is hij verwijderd of hoort hij bij een andere kandidaat.",
+    "noteReadOnly": "Deze notitie is van een andere gebruiker. Je kunt hem hier alleen lezen."
   }
 }

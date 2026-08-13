@@ -229,6 +229,7 @@
     "notif_kandidaten": "Candidates",
     "notif_matches": "Matches",
     "notif_taken": "Tasks",
+    "notif_escalation": "Escalation",
     "koios_advice": "Advice thresholds",
     "notif_my": "My notifications",
     "customer_identifier_validation": "Number validation"
@@ -982,7 +983,41 @@
       "saveFailed": "Saving failed — your choice was reverted.",
       "emailNotAvailable": "Not available yet",
       "emailNotAvailableReason": "A personal e-mail override isn't possible yet — you follow the tenant-wide e-mail setting for this."
+    },
+    "channels": {
+      "label": "Notify via",
+      "desc": "Choose per channel whether these notifications arrive: in the app, by email, or both."
     }
+  },
+  "escalation": {
+    "title": "Escalation",
+    "subtitle": "When an attention signal stays open too long without action, one notification goes out to the chosen person or role.",
+    "afterDaysLabel": "Escalate after",
+    "afterDaysOff": "off",
+    "targetLabel": "To",
+    "targetPlaceholder": "Choose person or role",
+    "targetUserOption": "{{name}} (user)",
+    "targetRoleOption": "{{name}} (role)",
+    "signal": {
+      "task_overdue": {
+        "title": "Task overdue",
+        "desc": "A task is past its due date and not yet completed."
+      },
+      "candidate_status_stale": {
+        "title": "Candidate status stale",
+        "desc": "A candidate's deployability status has not changed in too long."
+      },
+      "conversation_unanswered": {
+        "title": "Conversation unanswered",
+        "desc": "An incoming message has gone unanswered for too long."
+      },
+      "candidate_phase_stale": {
+        "title": "Candidate phase stale",
+        "desc": "A candidate's lifecycle phase has not changed in too long."
+      }
+    },
+    "missingTargetHint": "Choose a person or role to escalate to, or clear 'Escalate after' to turn it off.",
+    "daysUnit": "days"
   },
   "billing": {
     "usage": {
@@ -1584,7 +1619,19 @@
     "syncFailed": "Synchronisation failed",
     "checkStatus": "Check connection",
     "statusChecked": "Connection checked.",
-    "statusCheckFailed": "Checking the connection failed."
+    "statusCheckFailed": "Checking the connection failed.",
+    "addConnectionTitle": "Add connection",
+    "addConnectionDesc": "Connect this tenant’s WhatsApp Business account (WABA). The access token is stored securely and never shown again.",
+    "wabaId": "WABA ID",
+    "wabaIdPlaceholder": "E.g. 102290129340398",
+    "accessToken": "Access token",
+    "appSecret": "App secret (optional)",
+    "verifyToken": "Webhook verify token (optional)",
+    "provider": "Provider",
+    "addConnectionRequired": "Fill in the required fields: WABA ID and access token.",
+    "addConnectionFailed": "Connecting failed. Check the details and try again.",
+    "addConnectionSaving": "Connecting…",
+    "addConnectionSubmit": "Add connection"
   },
   "roles": {
     "loading": "Loading roles…",
@@ -2241,7 +2288,10 @@
     "memoryDaysTitle": "Koios conversation memory",
     "memoryDaysHint": "How many days of WhatsApp conversation history Koios uses as context when drafting a reply.",
     "memoryDaysLabel": "Days (1-365)",
-    "memoryDaysSaveFailed": "Saving the conversation memory failed."
+    "memoryDaysSaveFailed": "Saving the conversation memory failed.",
+    "conversationUnknown": "Unknown contact",
+    "conversationCount_one": "{{count}} message in this log",
+    "conversationCount_other": "{{count}} messages in this log"
   },
   "appointmentTypes": {
     "title": "Appointment types",
