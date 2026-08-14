@@ -13,7 +13,8 @@
     "coupling": "Link",
     "owner": "Owner",
     "date": "Created",
-    "status": "Status"
+    "status": "Status",
+    "contractForm": "Contract form"
   },
   "insights": {
     "stage": "Stage",
@@ -100,7 +101,8 @@
       "saveError": "Couldn't save the change.",
       "saved": "Contract details saved.",
       "functionTitle": "Function title",
-      "surcharge": "Surcharge"
+      "surcharge": "Surcharge",
+      "contractForm": "Contract form"
     },
     "ownerUnassigned": "No owner",
     "terminate": {
@@ -197,7 +199,11 @@
     "coupleQueued": "{{count}} match(es) queued for coupling with {{target}}.",
     "coupleUnavailable": "Backoffice coupling isn't available yet.",
     "noPermission": "You don't have permission for bulk actions.",
-    "coupleQueuedPartial": "{{queued}} of {{total}} queued for coupling with {{target}}; {{skipped}} skipped."
+    "coupleQueuedPartial": "{{queued}} of {{total}} queued for coupling with {{target}}; {{skipped}} skipped.",
+    "coupleQueuedPartialReasoned": "{{queued}} of {{total}} queued for linking with {{target}}; {{skipped}} skipped ({{breakdown}}).",
+    "skipReasons": {
+      "helloflex_contract_type_unmapped": "no HelloFlex contract type linked"
+    }
   },
   "filters": {
     "stage": "Stage",

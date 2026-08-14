@@ -23,6 +23,7 @@ import { sectionTitle } from '@/components/ui/SectionCard'
 import { notifySuccess, notifyError } from '@/lib/notify'
 import { useContractTypes } from '@/lib/useContractTypes'
 import { useCao } from '@/lib/useCao'
+import ContractFormChip from '../ContractFormChip'
 import { useMatchContract } from '../hooks/useMatchContract'
 import type { MatchContract } from '../hooks/useMatchContract'
 import type { MatchRow } from '@/types/match'
@@ -146,6 +147,30 @@ export default function MatchContractSection({ matchId, onUpdate }: Props) {
     <div>
       {/* Canon (05-08): the shared sectionTitle, reused instead of a hand-rolled heading. */}
       <div style={{ ...sectionTitle, marginBottom: 6 }}>{t('drawer.contract.title')}</div>
+      {/* MATCH-SOORT-1: Contractvorm chip + its CONTRACTREGELS read-list — edited
+          only via MatchModal (the popup owns the write path); this section only
+          displays what was set there, mirroring the changelog's split (§2). */}
+      {data.contractForm && (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 6, marginBottom: 10 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>{t('drawer.contract.contractForm')}</span>
+            <ContractFormChip contractForm={data.contractForm} />
+          </div>
+          {data.contractLines.length > 0 && (
+            <ul style={{ margin: 0, padding: 0, listStyle: 'none', display: 'flex', flexDirection: 'column', gap: 3 }}>
+              {data.contractLines.map((l, i) => (
+                <li key={l.id ?? i} style={{ display: 'flex', justifyContent: 'space-between', gap: 8, fontSize: 12,
+                  padding: '4px 8px', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 6 }}>
+                  <span style={{ color: 'var(--text)' }}>{l.functionTitle || '—'}</span>
+                  <span style={{ fontFamily: 'JetBrains Mono, monospace', color: 'var(--text-muted)' }}>
+                    {l.rate != null ? l.rate.toFixed(2) : '—'}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      )}
       {/* Remount only on a failed save (revertTick) or a match switch, so the
           uncontrolled table re-seeds its draft from the reverted/fresh data. */}
       {/* Canon (05-08): clean cards — no row dividers, 11px labels (candidate = leading);

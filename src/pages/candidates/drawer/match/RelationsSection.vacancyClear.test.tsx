@@ -18,6 +18,8 @@ import RelationsSection from './RelationsSection'
 const baseProps = {
   t: ((k: string) => k) as unknown as import('i18next').TFunction,
   errors: {},
+  candidateTypes: [], contractForm: '', setContractForm: vi.fn(),
+  hasContractLines: false, contractLines: [], setContractLines: vi.fn(),
   fixedCandidateId: 'cand-1', pickedCandidateId: '', setPickedCandidateId: vi.fn(),
   candidateOptions: [],
   customerId: '', setCustomerId: vi.fn(), customerOptions: [],

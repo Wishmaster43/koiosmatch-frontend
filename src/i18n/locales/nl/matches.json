@@ -13,7 +13,8 @@
     "coupling": "Koppeling",
     "owner": "Eigenaar",
     "date": "Aangemaakt",
-    "status": "Status"
+    "status": "Status",
+    "contractForm": "Contractvorm"
   },
   "insights": {
     "stage": "Fase",
@@ -100,7 +101,8 @@
       "saveError": "Wijziging kon niet worden opgeslagen.",
       "saved": "Contractgegevens opgeslagen.",
       "functionTitle": "Functietitel",
-      "surcharge": "Toeslag"
+      "surcharge": "Toeslag",
+      "contractForm": "Contractvorm"
     },
     "ownerUnassigned": "Geen eigenaar",
     "terminate": {
@@ -197,7 +199,11 @@
     "coupleQueued": "{{count}} match(es) in wachtrij gezet voor koppeling met {{target}}.",
     "coupleUnavailable": "Backoffice-koppeling is nog niet beschikbaar.",
     "noPermission": "Je hebt geen rechten voor massa-acties.",
-    "coupleQueuedPartial": "{{queued}} van {{total}} in wachtrij gezet voor koppeling met {{target}}; {{skipped}} overgeslagen."
+    "coupleQueuedPartial": "{{queued}} van {{total}} in wachtrij gezet voor koppeling met {{target}}; {{skipped}} overgeslagen.",
+    "coupleQueuedPartialReasoned": "{{queued}} van {{total}} in wachtrij gezet voor koppeling met {{target}}; {{skipped}} overgeslagen ({{breakdown}}).",
+    "skipReasons": {
+      "helloflex_contract_type_unmapped": "geen HelloFlex-contracttype gekoppeld"
+    }
   },
   "filters": {
     "stage": "Fase",

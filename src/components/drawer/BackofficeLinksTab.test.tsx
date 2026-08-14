@@ -75,6 +75,17 @@ describe('BackofficeLinksTab · entity-agnostic "Koppelen" POST (§13: asserts t
     await waitFor(() => expect(mockNotifySuccess).toHaveBeenCalledWith('backofficeLinks.common.linkStarted'))
   })
 
+  // HF-CONTRACTMAP-1: a 409 `helloflex_contract_type_unmapped` is a known, honest
+  // notice (points at Settings → HelloFlex), never the raw server message.
+  it('shows the translated "unmapped" notice on a 409 helloflex_contract_type_unmapped, not the raw message', async () => {
+    mockPost.mockRejectedValue({ response: { status: 409, data: { code: 'helloflex_contract_type_unmapped', message: 'Geen HelloFlex-contracttype gekoppeld.' } } })
+    const user = userEvent.setup()
+    render(<BackofficeLinksTab entity="matches" id="7" helloflexLink={null} shiftmanagerLink={null} canLink />)
+    const [helloflexBtn] = screen.getAllByRole('button', { name: /backofficeLinks.common.linkButton/ })
+    await user.click(helloflexBtn)
+    await waitFor(() => expect(mockNotifyError).toHaveBeenCalledWith('errors.helloflexContractTypeUnmapped'))
+  })
+
   it('POSTs /sync/{entity}/{id} for locations/departments/contacts too (same generic route)', async () => {
     mockPost.mockResolvedValue({ data: { link: { status: 'pending' } } })
     for (const entity of ['locations', 'departments', 'contacts']) {

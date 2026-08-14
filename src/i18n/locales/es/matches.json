@@ -13,7 +13,8 @@
     "coupling": "Vínculo",
     "owner": "Responsable",
     "date": "Creado",
-    "status": "Estado"
+    "status": "Estado",
+    "contractForm": "Forma de contrato"
   },
   "insights": {
     "stage": "Fase",
@@ -100,7 +101,8 @@
       "saveError": "No se pudo guardar el cambio.",
       "saved": "Detalles del contrato guardados.",
       "functionTitle": "Titulo de funcion",
-      "surcharge": "Recargo"
+      "surcharge": "Recargo",
+      "contractForm": "Forma de contrato"
     },
     "ownerUnassigned": "Sin responsable",
     "terminate": {
@@ -197,7 +199,11 @@
     "coupleQueued": "{{count}} match(es) en cola para vincular con {{target}}.",
     "coupleUnavailable": "La vinculación con el backoffice aún no está disponible.",
     "noPermission": "No tienes permiso para acciones masivas.",
-    "coupleQueuedPartial": "{{queued}} de {{total}} en cola para vincular con {{target}}; {{skipped}} omitido(s)."
+    "coupleQueuedPartial": "{{queued}} de {{total}} en cola para vincular con {{target}}; {{skipped}} omitido(s).",
+    "coupleQueuedPartialReasoned": "{{queued}} de {{total}} en cola para vincular con {{target}}; {{skipped}} omitidos ({{breakdown}}).",
+    "skipReasons": {
+      "helloflex_contract_type_unmapped": "sin tipo de contrato de HelloFlex vinculado"
+    }
   },
   "filters": {
     "stage": "Fase",

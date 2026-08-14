@@ -92,6 +92,11 @@ export interface MatchesReportData {
   total: number
   // funnel = from an application; direct = created without one.
   by_origin: { funnel: number; direct: number }
+  // Soort-as (MATCH-SOORT-1): contract_form segments, sums to total. Includes a
+  // 'none' sentinel for matches without a contract form, and any orphaned
+  // (deleted-lookup) slug as its own segment — same shape/handling as the other
+  // reports' segment axes (SegmentBars needs no special-casing for either).
+  by_contract_form: CandidateSegment[]
   // Match counts by HelloFlex contract status.
   placements: { sent: number; active: number; ended: number; total: number }
   // Deliberately null until the HelloFlex coupling fills match start/end.

@@ -146,7 +146,7 @@ export default function MatchesTab({ c, onEdit, onAdd }: { c: Candidate
             // Point 2 (Danny live P1): reopens MatchModal in EDIT mode.
             onEdit={onEdit && m.id != null ? () => onEdit(m.id as Id) : undefined}
             otherPartyLabel={t('matchesView.client')} otherPartyValue={m.client || '—'}
-            contractType={m.contractType} contractStatus={m.contractStatus}
+            contractType={m.contractType} contractForm={m.contractForm} contractStatus={m.contractStatus}
             functionTitle={m.functionTitle} startDate={m.startDate} endDate={m.endDate}
             isClosed={statusMeta?.is_closed}
             // Compact mode (Danny live review, 04-08): collapsed by default, one

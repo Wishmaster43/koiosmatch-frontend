@@ -993,7 +993,7 @@
     "title": "Matches",
     "empty": "Nog geen matches.",
     "client": "Klant",
-    "contractType": "Contractvorm",
+    "contractType": "Contractsoort",
     "stage": "Fase",
     "contract": "Contract",
     "functionTitle": "Functietitel",
@@ -1010,7 +1010,8 @@
       "ended": "Beëindigd"
     },
     "openMatch": "Match openen",
-    "searchPlaceholder": "Zoek match…"
+    "searchPlaceholder": "Zoek match…",
+    "contractForm": "Contractvorm"
   },
   "map": {
     "pointCount": "{{count}} kandidaten op de kaart"
@@ -1113,7 +1114,7 @@
     "vacancyOptional": "Vacature (optioneel)",
     "noVacancy": "Geen vacature",
     "contract": "Contract",
-    "contractType": "Soort",
+    "contractType": "Contractsoort",
     "pickContractType": "Kies…",
     "cao": "CAO",
     "pickCao": "Kies…",
@@ -1168,7 +1169,15 @@
     "duplicateMatchWarning": "Er bestaat al een match ({{label}}) voor deze kandidaat bij deze klant. Wil je een verlenging maken?",
     "overlapWarning": "De opgegeven periode overlapt met een actieve match bij {{label}} ({{period}}).",
     "overlapOngoing": "vanaf {{start}}",
-    "overlapWarningHours": "De opgegeven periode overlapt met een actieve match bij {{label}}: samen {{hours}} uur per week in de overlappende periode ({{period}})."
+    "overlapWarningHours": "De opgegeven periode overlapt met een actieve match bij {{label}}: samen {{hours}} uur per week in de overlappende periode ({{period}}).",
+    "contractForm": "Contractvorm",
+    "pickContractForm": "Kies…",
+    "contractLines": {
+      "title": "Contractregels",
+      "add": "regel toevoegen",
+      "empty": "Nog geen regels.",
+      "rate": "Tarief"
+    }
   },
   "merge": {
     "title": "Kandidaat samenvoegen",

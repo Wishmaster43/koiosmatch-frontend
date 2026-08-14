@@ -25,12 +25,15 @@ import type { TFunction } from 'i18next'
 import CreatableSelect from '@/components/ui/CreatableSelect'
 import DrawerAddButton from '@/components/drawer/DrawerAddButton'
 import { FormField as F } from './FormField'
+import ContractLinesSection from './ContractLinesSection'
 import { errMsg, labelLeftRow, rowLabel, rowField, pairRow, pickerMenuWidth, input } from './styles'
 import type { CascadeOption, CascadeLocation, CascadeDepartment, CustomerCascadeDetail } from '@/hooks/useCustomerCascade'
 import type { CustomerOption } from '@/pages/vacancies/hooks/useCustomerOptions'
 import type { VacancyOption } from '@/pages/candidates/hooks/useVacancyOptions'
 import type { LocationOption } from '@/lib/useLocations'
 import type { Id } from '@/types/common'
+import type { LookupItem } from '@/context/LookupsContext'
+import type { MatchContractLine } from '@/types/match'
 import { contactOptionLabel } from '@/lib/contactLabel'
 
 interface UserLike { id?: Id; name?: string }
@@ -46,6 +49,7 @@ const contactOpt = (arr: CascadeOption[]) => arr.map(c => ({ value: String(c.id)
 
 export default function RelationsSection({
   t, errors, editing,
+  candidateTypes, contractForm, setContractForm, hasContractLines, contractLines, setContractLines,
   fixedCandidateId, pickedCandidateId, setPickedCandidateId, candidateOptions,
   customerId, setCustomerId, customerOptions,
   locationId, setLocationId, locations,
@@ -65,6 +69,12 @@ export default function RelationsSection({
   // backend's PATCH — the vacancy field renders read-only while editing an
   // existing match instead of a pick that would silently never persist (§3).
   editing?: boolean
+  // MATCH-SOORT-1: Contractvorm (§1 of the changelog) — the FIRST field in this
+  // card, feeding the conditional CONTRACTREGELS editor below it.
+  candidateTypes: LookupItem[]
+  contractForm: string; setContractForm: (v: string) => void
+  hasContractLines: boolean
+  contractLines: MatchContractLine[]; setContractLines: (v: MatchContractLine[]) => void
   fixedCandidateId?: Id; pickedCandidateId: string; setPickedCandidateId: (v: string) => void
   candidateOptions: Array<{ id?: Id; name?: string }>
   customerId: string; setCustomerId: (v: string) => void; customerOptions: CustomerOption[]
@@ -92,6 +102,21 @@ export default function RelationsSection({
   const contactLabelId = useId()
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+      {/* MATCH-SOORT-1 (§1 of the changelog): Contractvorm is the FIRST choice in
+          this card — pick-only (allowCreate=false, a real lookup value), clearable
+          (an optional field per CLAUDE.md §3A's VAC-CLEAR-1 rule). Picking a
+          flagged value reveals CONTRACTREGELS right under it. */}
+      <F label={t('placement.contractForm')} error={errors.contractForm}>
+        {(labelId: string) => (
+          <CreatableSelect value={contractForm || null} onChange={setContractForm} allowCreate={false}
+            placeholder={t('placement.pickContractForm')} menuWidth={pickerMenuWidth} clearable clearLabel={t('placement.contractForm')}
+            aria-labelledby={labelId}
+            options={candidateTypes.map(c => ({ value: c.value, label: c.label }))} />
+        )}
+      </F>
+      {hasContractLines && (
+        <ContractLinesSection t={t} lines={contractLines} setLines={setContractLines} functions={functions} />
+      )}
       {/* Candidate picker — only when the modal wasn't opened from a candidate.
           Searchable (job 18): the candidate list can run into the hundreds. */}
       {!fixedCandidateId && (

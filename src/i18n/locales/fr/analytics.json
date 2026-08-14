@@ -130,6 +130,9 @@
     "avgDuration": "Durée moyenne du match",
     "daysValue": "{{days}} jours",
     "durationNote": "La durée du match suivra dès que le couplage HelloFlex fournira les dates de début/fin.",
+    "axes": {
+      "contractForm": "Forme de contrat"
+    },
     "placements": {
       "title": "Statut des matchs",
       "sent": "Envoyés",

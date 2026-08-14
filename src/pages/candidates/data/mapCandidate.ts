@@ -289,6 +289,9 @@ export function mapCandidate(c: ApiCandidate): Candidate {
       functionTitle:  m.function_title ?? m.functionTitle ?? null,
       startDate:      m.start_date ?? m.startDate ?? null,
       endDate:        m.end_date ?? m.endDate ?? null,
+      // MATCH-SOORT-1: Contractvorm chip — resolved {value,label,color} straight
+      // off the candidate-embedded MatchResource, or null when unset.
+      contractForm:   ((m.contract_form ?? m.contractForm ?? null) as CandidateMatch['contractForm']),
     })),
     notes:           c.notes ?? [],
     timeline:        (c.timeline ?? []).map(ev => ({

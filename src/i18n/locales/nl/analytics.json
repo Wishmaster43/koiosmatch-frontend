@@ -130,6 +130,9 @@
     "avgDuration": "Gem. matchduur",
     "daysValue": "{{days}} dagen",
     "durationNote": "Matchduur volgt zodra de HelloFlex-koppeling de start/einddata levert.",
+    "axes": {
+      "contractForm": "Contractvorm"
+    },
     "placements": {
       "title": "Matchstatus",
       "sent": "Verzonden",

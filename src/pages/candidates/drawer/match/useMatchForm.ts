@@ -62,6 +62,7 @@ import { useTranslation } from 'react-i18next'
 import api, { unwrap } from '@/lib/api'
 import { notifyError, notifySuccess } from '@/lib/notify'
 import { useUsers } from '@/lib/queries'
+import { useLookups } from '@/context/LookupsContext'
 import { useCustomerOptions } from '@/pages/vacancies/hooks/useCustomerOptions'
 import { useVacancyOptions } from '@/pages/candidates/hooks/useVacancyOptions'
 import { useFunctions } from '@/lib/useFunctions'
@@ -83,6 +84,7 @@ import { useMatchSubmit } from './useMatchSubmit'
 import { todayISO, findDuplicateContact } from './helpers'
 import type { CascadeOption } from '@/hooks/useCustomerCascade'
 import type { Id } from '@/types/common'
+import type { MatchContractLine } from '@/types/match'
 
 interface UserLike { id?: Id; name?: string }
 
@@ -115,6 +117,20 @@ export function useMatchForm({
   const { data: users = [] } = useUsers() as { data?: UserLike[] }
   const customerOptions = useCustomerOptions(true)
   const vacancyOptions = useVacancyOptions(true)
+
+  // MATCH-SOORT-1: Contractvorm (candidateTypes lookup) — the FIRST choice in the
+  // Relaties card. `hasContractLines` reads the picked value's own flag, never a
+  // hardcoded slug — a tenant can point the flag at any Contractvorm row.
+  const { candidateTypes } = useLookups()
+  const [contractForm, setContractFormRaw] = useState('')
+  const setContractForm = (v: string) => setContractFormRaw(v)
+  const hasContractLines = Boolean(candidateTypes.find(ct => ct.value === contractForm)?.has_contract_lines)
+  const [contractLines, setContractLinesRaw] = useState<MatchContractLine[]>([])
+  // Switching AWAY from a flagged Contractvorm clears the local draft — the
+  // section disappears (§1 of the changelog: the backend cleans up orphaned
+  // rows server-side, this is only the FE's own visible-state hygiene).
+  useEffect(() => { if (!hasContractLines && contractLines.length) setContractLinesRaw([]) }, [hasContractLines]) // eslint-disable-line react-hooks/exhaustive-deps -- only react to the flag flipping, never to the recruiter's own row edits
+  const setContractLines = (v: MatchContractLine[]) => setContractLinesRaw(v)
 
   // Candidate picker (only when no fixed candidate): light option list from the API.
   const [pickedCandidateId, setPickedCandidateId] = useState('')
@@ -315,6 +331,7 @@ export function useMatchForm({
   const { saving, errors, submitErr, handleSubmitClick } = useMatchSubmit({
     editing, editMatchId, candidateId, t, onClose, onCreated,
     customerId, locationId, departmentId, contactId, branchId,
+    contractForm, contractLines, hasContractLines,
     func, contractType, startDate, endDate, hours, cao, scale, step,
     purchase, sell, costCenter, billingEmails, remarks, ownerId, vacancyId,
     branchMismatch, mismatchChoice, detail,
@@ -328,6 +345,7 @@ export function useMatchForm({
     setContractType: setContractTypeRaw, setStartDateRaw, setEndDateRaw, setEndDateDirty, setHoursRaw,
     setCao: setCaoRaw, setScale, setStep, setPurchase, setSell,
     setCostCenter, setCostCenterDirty, setBillingEmails, setBillingDirty, setRemarks,
+    setContractFormRaw, setContractLinesRaw,
   })
 
   // Create a contact for the current customer, coupled to the picked location, then
@@ -374,6 +392,8 @@ export function useMatchForm({
     branchId, setBranchId, setBranchDirty, branchLocations,
     branchMismatch, candBranch, mismatchChoice, setMismatchChoice,
     contractType, setContractType, startDate, setStartDate, endDate, setEndDate, setEndDateDirty, hours, setHours, cao, setCao,
+    // MATCH-SOORT-1: Contractvorm + its conditional CONTRACTREGELS editor.
+    candidateTypes, contractForm, setContractForm, hasContractLines, contractLines, setContractLines,
     scale, setScale, step, setStep, purchase, setPurchase, sell, setSell,
     costCenter, setCostCenter, setCostCenterDirty, billingEmails, setBillingEmails, setBillingDirty,
     remarks, setRemarks, remarksExpanded, setRemarksExpanded, remarksEditing, setRemarksEditing,

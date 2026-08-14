@@ -234,7 +234,8 @@
     "koios_advice": "Umbrales de aviso",
     "notif_my": "Mis notificaciones",
     "customer_identifier_validation": "Validación de números",
-    "automations": "Automatizaciones"
+    "automations": "Automatizaciones",
+    "hf_contract_map": "Correspondencia de contratos de HelloFlex"
   },
   "kpis": {
     "title": "Configuración de KPI",
@@ -3000,5 +3001,15 @@
       "final": "Definitiva"
     },
     "generateResult": "{{generated}} generadas, {{alreadyFinal}} ya definitivas."
+  },
+  "helloflexContractMap": {
+    "title": "Correspondencia de contratos de HelloFlex",
+    "subtitle": "Vincula cada forma de contrato con el tipo de contrato de HelloFlex correspondiente (GUID). Se permite una correspondencia vacía: la vinculación con HelloFlex quedará entonces bloqueada honestamente para esa forma de contrato.",
+    "guid": "GUID de HelloFlex",
+    "guidPlaceholder": "p. ej. 3f7a1c9e-…",
+    "label": "Etiqueta",
+    "labelPlaceholder": "Nombre reconocible",
+    "empty": "Todavía no hay formas de contrato configuradas.",
+    "saveError": "No se pudo guardar la correspondencia de contratos."
   }
 }

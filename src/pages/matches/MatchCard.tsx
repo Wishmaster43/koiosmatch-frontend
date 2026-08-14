@@ -4,6 +4,8 @@ import { useTranslation } from 'react-i18next'
 import type { ReactNode } from 'react'
 import SoftChip from '@/components/ui/SoftChip'
 import StatusPill from '@/components/ui/StatusPill'
+import ContractFormChip from './ContractFormChip'
+import type { MatchContractForm } from '@/types/match'
 import { MATCH_COLUMN_WIDTH, MATCH_COL_STATUS, MATCH_COL_OTHER_PARTY, MATCH_COL_SCORE, MATCH_COL_ACTIONS } from './matchRowColumns'
 import EntityLink, { buildEntityDeepLink } from '@/components/ui/EntityLink'
 import BackofficeCouplingIndicator from '@/components/ui/BackofficeCouplingIndicator'
@@ -42,6 +44,8 @@ export interface MatchCardProps {
   otherPartyLabel: ReactNode
   otherPartyValue: ReactNode
   contractType?: string | null
+  // MATCH-SOORT-1: the Contractvorm chip — a distinct axis from contractType above.
+  contractForm?: MatchContractForm | null
   contractStatus?: string | null
   functionTitle?: string | null
   branchName?: string | null
@@ -102,7 +106,7 @@ export default function MatchCard({
   helloflexGuid, helloflexLink, shiftmanagerLink, showHelloflex = false, showShiftmanager = false,
   onEdit,
   otherPartyLabel, otherPartyValue,
-  contractType, contractStatus, functionTitle, branchName, ownerName, startDate, endDate,
+  contractType, contractForm, contractStatus, functionTitle, branchName, ownerName, startDate, endDate,
   isClosed = false, archived = false,
   collapsible = false, flatRow = false,
 }: MatchCardProps) {
@@ -123,6 +127,9 @@ export default function MatchCard({
     { key: 'otherParty', label: otherPartyLabel, value: otherPartyValue },
     { key: 'functionTitle', label: t('matchesView.functionTitle'), value: functionTitle || '—' },
     { key: 'contractType', label: t('matchesView.contractType'), value: contractType || '—' },
+    // MATCH-SOORT-1: the Contractvorm chip — one shared component, never a
+    // per-screen restyle (§3A/§4).
+    { key: 'contractForm', label: t('matchesView.contractForm'), value: contractForm ? <ContractFormChip contractForm={contractForm} /> : '—' },
     { key: 'period', label: t('matchesView.period'), value: (
       <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
         {periodValue}

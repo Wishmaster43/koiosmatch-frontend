@@ -14,6 +14,9 @@ export const API_TO_FORM: Record<string, string> = {
   hours_per_week: 'hours', cao: 'cao', scale: 'scale', step: 'step',
   purchase_rate: 'purchase', sell_rate: 'sell', cost_center: 'costCenter', billing_emails: 'billingEmails',
   remarks: 'remarks', vacancy_id: 'vacancyId', owner_id: 'ownerId', branch_id: 'branchId',
+  // MATCH-SOORT-1: a 422 on either key highlights the Contractvorm field itself —
+  // the CONTRACTREGELS editor has no single "errors.x" slot of its own yet.
+  contract_form: 'contractForm', contract_lines: 'contractForm',
 }
 
 // Deepest-first takeover-default lookup for the COST-CENTRE field only (afdeling >

@@ -117,6 +117,8 @@ export interface CandidateMatch {
   endDate?: string | null
   // The backoffice link GUID — the candidate card's simple "linked" glyph (MatchCard).
   helloflex_contract_guid?: string | null
+  // MATCH-SOORT-1: the resolved Contractvorm chip value — null when unset.
+  contractForm?: { value: string; label: string; color: string } | null
   [k: string]: unknown
 }
 

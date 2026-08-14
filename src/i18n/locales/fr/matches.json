@@ -13,7 +13,8 @@
     "coupling": "Connexion",
     "owner": "Responsable",
     "date": "Créé",
-    "status": "Statut"
+    "status": "Statut",
+    "contractForm": "Forme de contrat"
   },
   "insights": {
     "stage": "Phase",
@@ -100,7 +101,8 @@
       "saveError": "Impossible d'enregistrer la modification.",
       "saved": "Détails du contrat enregistrés.",
       "functionTitle": "Intitule de fonction",
-      "surcharge": "Majoration"
+      "surcharge": "Majoration",
+      "contractForm": "Forme de contrat"
     },
     "ownerUnassigned": "Aucun responsable",
     "terminate": {
@@ -197,7 +199,11 @@
     "coupleQueued": "{{count}} match(es) mis en file pour le couplage avec {{target}}.",
     "coupleUnavailable": "Le couplage backoffice n'est pas encore disponible.",
     "noPermission": "Vous n'avez pas l'autorisation pour les actions groupées.",
-    "coupleQueuedPartial": "{{queued}} sur {{total}} mis en file pour le couplage avec {{target}} ; {{skipped}} ignoré(s)."
+    "coupleQueuedPartial": "{{queued}} sur {{total}} mis en file pour le couplage avec {{target}} ; {{skipped}} ignoré(s).",
+    "coupleQueuedPartialReasoned": "{{queued}} sur {{total}} mis en file pour la liaison avec {{target}} ; {{skipped}} ignorés ({{breakdown}}).",
+    "skipReasons": {
+      "helloflex_contract_type_unmapped": "aucun type de contrat HelloFlex lié"
+    }
   },
   "filters": {
     "stage": "Phase",

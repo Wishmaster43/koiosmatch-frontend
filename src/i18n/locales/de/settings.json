@@ -234,7 +234,8 @@
     "koios_advice": "Hinweis-Schwellenwerte",
     "notif_my": "Meine Benachrichtigungen",
     "customer_identifier_validation": "Nummernprüfung",
-    "automations": "Automatisierungen"
+    "automations": "Automatisierungen",
+    "hf_contract_map": "HelloFlex-Vertragszuordnung"
   },
   "kpis": {
     "title": "KPI-Einstellungen",
@@ -3000,5 +3001,15 @@
       "final": "Endgültig"
     },
     "generateResult": "{{generated}} erzeugt, {{alreadyFinal}} bereits endgültig."
+  },
+  "helloflexContractMap": {
+    "title": "HelloFlex-Vertragszuordnung",
+    "subtitle": "Verknüpfe jede Vertragsform mit dem passenden HelloFlex-Vertragstyp (GUID). Eine leere Zuordnung ist erlaubt: Die Verknüpfung mit HelloFlex wird für diese Vertragsform dann ehrlich blockiert.",
+    "guid": "HelloFlex-GUID",
+    "guidPlaceholder": "z. B. 3f7a1c9e-…",
+    "label": "Bezeichnung",
+    "labelPlaceholder": "Erkennbarer Name",
+    "empty": "Es sind noch keine Vertragsformen eingerichtet.",
+    "saveError": "Speichern der Vertragszuordnung fehlgeschlagen."
   }
 }

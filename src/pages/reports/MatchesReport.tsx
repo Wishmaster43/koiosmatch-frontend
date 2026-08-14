@@ -15,6 +15,7 @@ import ReportDrillDrawer from './ReportDrillDrawer'
 import type { DrillSpec } from './ReportDrillDrawer'
 import { useMatchesReport } from './useMatchesReport'
 import { gateDrillClick } from './reportDrillGate'
+import SegmentBars from './SegmentBars'
 import type { ReportPeriod } from '@/types/analytics'
 
 // One match stat tile.
@@ -46,6 +47,20 @@ export default function MatchesReport({ period, tabsSlot }: { period: ReportPeri
     ],
     rowsEndpoint: '/reports/matches/drill', rowsParams: { origin, period },
     adviceEndpoint: '/reports/matches/advice', adviceParams: { origin, period },
+  })
+
+  // Soort-as (MATCH-SOORT-1): by_contract_form bars, `contract_form` is the OTHER
+  // half of the drill's XOR pair (origin vs contract_form — never both at once).
+  const openContractForm = (label: string, value: number, slug: string) => setDrill({
+    title: label, value, subtitle: t(`period.${period}`),
+    rowsEndpoint: '/reports/matches/drill', rowsParams: { contract_form: slug, period },
+    adviceEndpoint: '/reports/matches/advice', adviceParams: { contract_form: slug, period },
+  })
+  const contractFormSegs = data?.by_contract_form ?? []
+  const contractFormMax = contractFormSegs.reduce((m, s) => Math.max(m, s.count), 0)
+  const onContractFormPick = gateDrillClick('matches', (value: string) => {
+    const seg = contractFormSegs.find(s => s.value === value)
+    if (seg) openContractForm(seg.label, seg.count, seg.value)
   })
 
   const kpis: KpiSpec[] = [
@@ -96,6 +111,14 @@ export default function MatchesReport({ period, tabsSlot }: { period: ReportPeri
 
       {!loading && !error && !isEmpty && data && (
         <>
+          {/* Soort-as (MATCH-SOORT-1): by_contract_form bars, sums to total incl. the
+              'none' sentinel and any orphaned slug — SegmentBars needs no special-casing. */}
+          <div style={{ background: 'var(--surface)', borderRadius: 12, border: '1px solid var(--border)', padding: 20, marginBottom: 16 }}>
+            <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)', marginBottom: 12 }}>{t('matches.axes.contractForm')}</div>
+            <SegmentBars max={contractFormMax} onPick={onContractFormPick}
+              items={contractFormSegs.map(s => ({ key: s.value, label: s.label, count: s.count, color: s.color }))} />
+          </div>
+
           {/* Matches breakdown (KPI strip is rendered above the tabs) */}
           <div style={{ background: 'var(--surface)', borderRadius: 12, border: '1px solid var(--border)', padding: 20 }}>
             <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)', marginBottom: 12 }}>{t('matches.placements.title')}</div>

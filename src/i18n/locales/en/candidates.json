@@ -1010,7 +1010,8 @@
       "ended": "Ended"
     },
     "openMatch": "Open match",
-    "searchPlaceholder": "Search match…"
+    "searchPlaceholder": "Search match…",
+    "contractForm": "Contract form"
   },
   "map": {
     "pointCount": "{{count}} candidates on the map"
@@ -1113,7 +1114,7 @@
     "vacancyOptional": "Vacancy (optional)",
     "noVacancy": "No vacancy",
     "contract": "Contract",
-    "contractType": "Type",
+    "contractType": "Contract type",
     "pickContractType": "Pick…",
     "cao": "CBA",
     "pickCao": "Pick…",
@@ -1168,7 +1169,15 @@
     "duplicateMatchWarning": "A match already exists ({{label}}) for this candidate at this customer. Do you want to create a renewal?",
     "overlapWarning": "The entered period overlaps with an active match at {{label}} ({{period}}).",
     "overlapOngoing": "from {{start}}",
-    "overlapWarningHours": "The entered period overlaps with an active match at {{label}}: together {{hours}} hours per week in the overlapping period ({{period}})."
+    "overlapWarningHours": "The entered period overlaps with an active match at {{label}}: together {{hours}} hours per week in the overlapping period ({{period}}).",
+    "contractForm": "Contract form",
+    "pickContractForm": "Pick…",
+    "contractLines": {
+      "title": "Contract lines",
+      "add": "add line",
+      "empty": "No lines yet.",
+      "rate": "Rate"
+    }
   },
   "merge": {
     "title": "Merge candidate",

@@ -130,6 +130,9 @@
     "avgDuration": "Avg. match duration",
     "daysValue": "{{days}} days",
     "durationNote": "Match duration follows once the HelloFlex coupling provides start/end dates.",
+    "axes": {
+      "contractForm": "Contract form"
+    },
     "placements": {
       "title": "Match status",
       "sent": "Sent",

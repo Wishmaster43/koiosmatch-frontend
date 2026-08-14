@@ -96,6 +96,9 @@ export function mapMatch(m: RawMatch): MatchRow {
     // already serialises `contract_type` on every list row; only the mapper
     // never picked it up, so Overview had no way to show it without a second fetch.
     contractType:  m.contract_type ?? null,
+    // MATCH-SOORT-1: Contractvorm chip — resolved {value,label,color} straight
+    // off the list resource, or null when unset.
+    contractForm: m.contract_form ?? null,
   }
 }
 

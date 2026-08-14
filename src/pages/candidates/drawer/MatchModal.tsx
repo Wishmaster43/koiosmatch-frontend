@@ -160,6 +160,8 @@ export default function MatchModal({
             <div style={cardBox}>
               <RelationsSection
                 t={t} errors={form.errors} editing={editing}
+                candidateTypes={form.candidateTypes} contractForm={form.contractForm} setContractForm={form.setContractForm}
+                hasContractLines={form.hasContractLines} contractLines={form.contractLines} setContractLines={form.setContractLines}
                 fixedCandidateId={form.fixedCandidateId} pickedCandidateId={form.pickedCandidateId} setPickedCandidateId={form.setPickedCandidateId}
                 candidateOptions={form.candidateOptions}
                 customerId={form.customerId} setCustomerId={form.setCustomerId} customerOptions={form.customerOptions}

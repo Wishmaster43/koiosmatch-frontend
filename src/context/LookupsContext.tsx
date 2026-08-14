@@ -39,6 +39,9 @@ export interface LookupItem {
   // guard). Carried through so applications never fall back to hardcoded 'hired'/'rejected'
   // slug checks (A1 — the funnel-flags root-cause fix, 2026-07-15).
   is_match?: boolean; is_rejected?: boolean
+  // MATCH-SOORT-1: a Contractvorm (candidateTypes) row flagged with this shows the
+  // match popup's CONTRACTREGELS section — flag-driven, never a hardcoded slug.
+  has_contract_lines?: boolean
   // PROPOSE-STAGE-FLAG-1 (verified live 2026-07-27): the funnel row that represents
   // "proposed to the customer" now carries is_proposal, so the proposal stage
   // resolves by flag rather than the literal 'proposal' slug — a tenant may rename it.

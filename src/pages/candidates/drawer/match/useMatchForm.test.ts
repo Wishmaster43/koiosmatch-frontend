@@ -27,6 +27,7 @@ const mockCustomer = {
 // about the branch-mismatch resolution PATCH, not the rest of the form's wiring.
 // useCustomerCascade/useBranchMismatch stay REAL (driven by the mocked api.get
 // below) since the mismatch itself is what's under test.
+vi.mock('@/context/LookupsContext', () => ({ useLookups: () => ({ candidateTypes: [] }) }))
 vi.mock('@/lib/queries', () => ({ useUsers: () => ({ data: [] }) }))
 vi.mock('@/pages/vacancies/hooks/useCustomerOptions', () => ({ useCustomerOptions: () => [] }))
 vi.mock('@/pages/candidates/hooks/useVacancyOptions', () => ({ useVacancyOptions: () => [] }))

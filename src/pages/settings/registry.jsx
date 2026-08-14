@@ -83,6 +83,7 @@ import EmailSettings from './sections/EmailSettings'
 import AuditLog from './sections/AuditLog'
 import RolesSettings from './sections/RolesSettings'
 import ShiftmanagerModuleSettings from './sections/ShiftmanagerModuleSettings'
+import HelloflexContractMapSettings from './sections/HelloflexContractMapSettings'
 import WebhooksSettings from './sections/webhooks'
 import AppsSettings from './sections/AppsSettings'
 import ModulesSettings from './sections/ModulesSettings'
@@ -653,6 +654,10 @@ export const NAV_GROUPS = [
     key: 'modules', icon: Boxes,
     items: [
       { id: 'mod_shiftmanager', icon: BarChart2, component: ShiftmanagerModuleSettings, requiresPage: 'shiftmanager' },
+      // HelloFlex contract-type mapping (HF-CONTRACTMAP-1) — module-gated on
+      // `requiresPage: 'helloflex'` (canAccessPage → hasModule('helloflex')), mirrors
+      // mod_shiftmanager above. Auto-hides for tenants without the HelloFlex module.
+      { id: 'hf_contract_map', icon: Boxes, component: HelloflexContractMapSettings, requiresPage: 'helloflex' },
     ],
   },
   {

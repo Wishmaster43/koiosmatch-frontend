@@ -23,6 +23,7 @@ import { extractApiError } from '@/lib/extractApiError'
 import { API_TO_FORM } from './helpers'
 import type { CustomerCascadeDetail } from '@/hooks/useCustomerCascade'
 import type { Id } from '@/types/common'
+import type { MatchContractForm, MatchContractLine } from '@/types/match'
 
 // The GET /matches/{id} shape this hook prefills from (MatchDetailResource — the
 // list row's fields plus the full block that resource builds). That method is still
@@ -38,11 +39,15 @@ interface MatchEditDetail {
   cao?: string | null; scale?: string | null; step?: string | null
   purchase_rate?: number | string | null; sell_rate?: number | string | null
   cost_center?: string | null; billing_emails?: string[] | null; remarks?: string | null
+  // MATCH-SOORT-1: resolved chip on read; echoed rows (with id) on read.
+  contract_form?: MatchContractForm | null
+  contract_lines?: Array<{ id?: Id; function_title?: string | null; rate?: number | string | null }> | null
 }
 
 export function useMatchSubmit({
   editing, editMatchId, candidateId, t, onClose, onCreated,
   customerId, locationId, departmentId, contactId, branchId,
+  contractForm, contractLines, hasContractLines,
   func, contractType, startDate, endDate, hours, cao, scale, step,
   purchase, sell, costCenter, billingEmails, remarks, ownerId, vacancyId,
   branchMismatch, mismatchChoice, detail,
@@ -53,10 +58,15 @@ export function useMatchSubmit({
   setContractType, setStartDateRaw, setEndDateRaw, setEndDateDirty, setHoursRaw,
   setCao, setScale, setStep, setPurchase, setSell,
   setCostCenter, setCostCenterDirty, setBillingEmails, setBillingDirty, setRemarks,
+  setContractFormRaw, setContractLinesRaw,
 }: {
   editing: boolean; editMatchId?: Id; candidateId: Id | string; t: TFunction
   onClose: () => void; onCreated: () => void
   customerId: string; locationId: string; departmentId: string; contactId: string; branchId: string
+  // MATCH-SOORT-1: Contractvorm slug + its CONTRACTREGELS draft; hasContractLines
+  // gates whether the draft is actually sent (the section may hold a stale
+  // draft from a form the recruiter typed into before switching the form away).
+  contractForm: string; contractLines: MatchContractLine[]; hasContractLines: boolean
   func: string; contractType: string; startDate: string; endDate: string; hours: string; cao: string
   scale: string; step: string; purchase: string; sell: string; costCenter: string
   billingEmails: string[]; remarks: string; ownerId: string; vacancyId: string
@@ -88,6 +98,8 @@ export function useMatchSubmit({
   setCostCenter: (v: string) => void; setCostCenterDirty: (v: boolean) => void
   setBillingEmails: (v: string[]) => void; setBillingDirty: (v: boolean) => void
   setRemarks: (v: string) => void
+  setContractFormRaw: (v: string) => void
+  setContractLinesRaw: (v: MatchContractLine[]) => void
 }) {
   // 422 field errors (house pattern, mirrors AddCandidateModal/AddCustomerModal) +
   // a non-field fallback banner — replaces the old generic-toast-only handling.
@@ -138,6 +150,15 @@ export function useMatchSubmit({
     setBillingEmails(editDetail.billing_emails?.length ? editDetail.billing_emails : [''])
     setBillingDirty(true)
     setRemarks(editDetail.remarks ?? '')
+    // MATCH-SOORT-1: prefill the Contractvorm slug + its echoed CONTRACTREGELS
+    // (dropping the server id — this hook always resends the array as a fresh
+    // full replacing set, never a partial patch keyed on the old ids).
+    setContractFormRaw(editDetail.contract_form?.value ?? '')
+    setContractLinesRaw(
+      editDetail.contract_lines?.length
+        ? editDetail.contract_lines.map(l => ({ functionTitle: l.function_title ?? '', rate: l.rate != null ? String(l.rate) : '' }))
+        : [],
+    )
     // Every setter above is a stable useState/sibling-hook setter — only react to a NEW record.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [editDetail])
@@ -171,6 +192,16 @@ export function useMatchSubmit({
       billing_emails: billingEmails.map(e => e.trim()).filter(Boolean),
       remarks: remarks || null,
       ...(ownerId ? { owner_id: ownerId } : {}),
+      // MATCH-SOORT-1 (§1/§2 of the changelog): contract_form + contract_lines as
+      // a FULL replacing set every save. A switch to a non-flagged form (or no
+      // form at all) always sends `[]` — never the stale local draft — so the
+      // backend's own orphan cleanup is never fighting a client-sent value.
+      contract_form: contractForm || null,
+      contract_lines: hasContractLines
+        ? contractLines
+            .filter(l => l.functionTitle.trim())
+            .map((l, i) => ({ function_title: l.functionTitle, rate: l.rate !== '' ? Number(l.rate) : null, sort_order: i }))
+        : [],
     }
     const body: Record<string, unknown> = editing
       ? match // PATCH — no candidate_id/vacancy_id (identity stays fixed).

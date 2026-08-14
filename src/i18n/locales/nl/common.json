@@ -370,7 +370,8 @@
   },
   "errors": {
     "koiosCreditExhausted": "Het Koios-tegoed van deze organisatie is op of nog niet geactiveerd. Vul het tegoed aan of neem contact op met de beheerder.",
-    "koiosUnavailable": "Koios is op dit moment niet beschikbaar. Probeer het zo opnieuw."
+    "koiosUnavailable": "Koios is op dit moment niet beschikbaar. Probeer het zo opnieuw.",
+    "helloflexContractTypeUnmapped": "Geen HelloFlex-contracttype gekoppeld voor deze contractvorm. Stel dit in bij Instellingen → HelloFlex."
   },
   "timeline": {
     "today": "Vandaag",

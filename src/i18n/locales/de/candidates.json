@@ -987,7 +987,8 @@
       "ended": "Beendet"
     },
     "openMatch": "Match öffnen",
-    "searchPlaceholder": "Match suchen…"
+    "searchPlaceholder": "Match suchen…",
+    "contractForm": "Vertragsform"
   },
   "koios": {
     "actions": {
@@ -1113,7 +1114,7 @@
     "vacancyOptional": "Stelle (optional)",
     "noVacancy": "Keine Stelle",
     "contract": "Vertrag",
-    "contractType": "Art",
+    "contractType": "Vertragsart",
     "pickContractType": "Wählen…",
     "cao": "Tarifvertrag",
     "pickCao": "Wählen…",
@@ -1168,7 +1169,15 @@
     "duplicateMatchWarning": "Für diesen Kandidaten besteht bei diesem Kunden bereits ein Match ({{label}}). Möchtest du eine Verlängerung erstellen?",
     "overlapWarning": "Der eingegebene Zeitraum überschneidet sich mit einem aktiven Match bei {{label}} ({{period}}).",
     "overlapOngoing": "seit {{start}}",
-    "overlapWarningHours": "Der eingegebene Zeitraum überschneidet sich mit einem aktiven Match bei {{label}}: zusammen {{hours}} Stunden pro Woche im überschneidenden Zeitraum ({{period}})."
+    "overlapWarningHours": "Der eingegebene Zeitraum überschneidet sich mit einem aktiven Match bei {{label}}: zusammen {{hours}} Stunden pro Woche im überschneidenden Zeitraum ({{period}}).",
+    "contractForm": "Vertragsform",
+    "pickContractForm": "Wählen…",
+    "contractLines": {
+      "title": "Vertragszeilen",
+      "add": "Zeile hinzufügen",
+      "empty": "Noch keine Zeilen.",
+      "rate": "Tarif"
+    }
   },
   "merge": {
     "title": "Kandidat zusammenführen",

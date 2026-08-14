@@ -234,7 +234,8 @@
     "koios_advice": "Advice thresholds",
     "notif_my": "My notifications",
     "customer_identifier_validation": "Number validation",
-    "automations": "Automations"
+    "automations": "Automations",
+    "hf_contract_map": "HelloFlex contract map"
   },
   "kpis": {
     "title": "KPI settings",
@@ -3000,5 +3001,15 @@
       "final": "Final"
     },
     "generateResult": "{{generated}} generated, {{alreadyFinal}} already final."
+  },
+  "helloflexContractMap": {
+    "title": "HelloFlex contract map",
+    "subtitle": "Link each contract form to its matching HelloFlex contract type (GUID). An empty mapping is allowed: linking to HelloFlex is then honestly blocked for that contract form.",
+    "guid": "HelloFlex GUID",
+    "guidPlaceholder": "e.g. 3f7a1c9e-…",
+    "label": "Label",
+    "labelPlaceholder": "Recognisable name",
+    "empty": "No contract forms are configured yet.",
+    "saveError": "Saving the contract map failed."
   }
 }

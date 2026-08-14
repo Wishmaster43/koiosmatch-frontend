@@ -75,6 +75,17 @@ describe('useMatchesBulkActions · bulkCouple', () => {
     expect(notify).not.toHaveBeenCalledWith('success', expect.anything())
   })
 
+  // HF-CONTRACTMAP-1: `skipped` may carry [{id, reason}] (e.g. a match whose
+  // contract form has no HelloFlex GUID mapped yet) — the toast must show WHY,
+  // not just a bare skipped count.
+  it('shows a reasoned breakdown when skipped entries carry a reason', async () => {
+    post.mockResolvedValue({ data: { queued: [1], skipped: [{ id: 2, reason: 'helloflex_contract_type_unmapped' }] } })
+    const r = harness()
+    act(() => r.result.current.actions.bulkCoupleHelloFlex())
+    await waitFor(() => expect(notify).toHaveBeenCalledWith('info', 'bulk.coupleQueuedPartialReasoned'))
+    expect(notify).not.toHaveBeenCalledWith('info', 'bulk.coupleQueuedPartial')
+  })
+
   it('a 404 (endpoint not built yet) is treated as "not available", never a hard error', async () => {
     post.mockRejectedValue({ response: { status: 404 } })
     const r = harness()

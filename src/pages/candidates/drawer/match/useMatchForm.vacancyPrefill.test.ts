@@ -38,6 +38,7 @@ const vacancyNoBranch = { customer: { id: 'cust-1' }, location_id: null }
 // vac-range: an hours RANGE (min !== max) — never guessed into a single value.
 const vacancyHoursRange = { customer: { id: 'cust-1' }, hours_min: 24, hours_max: 40 }
 
+vi.mock('@/context/LookupsContext', () => ({ useLookups: () => ({ candidateTypes: [] }) }))
 vi.mock('@/lib/queries', () => ({ useUsers: () => ({ data: [] }) }))
 vi.mock('@/pages/vacancies/hooks/useCustomerOptions', () => ({ useCustomerOptions: () => [] }))
 vi.mock('@/pages/candidates/hooks/useVacancyOptions', () => ({ useVacancyOptions: () => [] }))

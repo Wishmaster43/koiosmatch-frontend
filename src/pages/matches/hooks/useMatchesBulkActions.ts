@@ -46,6 +46,23 @@ export function useMatchesBulkActions({ selectedIds, setSelectedIds, t }: UseMat
   // failing the whole batch, so the toast must say so instead of a blanket
   // "success". 404 (route not deployed) and 503 (module not configured for this
   // tenant — C-15) both mean "not available right now" → the same calm info toast.
+  // HF-CONTRACTMAP-1: `skipped` may carry [{id, reason}] (mirrors the candidate
+  // bulk BULK-SKIP-REASONS-1 pattern) — the resolver skips a match whose contract
+  // form has no HelloFlex mapping yet with reason `helloflex_contract_type_unmapped`.
+  // Group reasoned entries into a human "N reason" breakdown; falls back to '' for
+  // the bare-id `skipped` shape other targets/routes still return.
+  const reasonBreakdown = (skipped?: unknown[]): string => {
+    const reasoned = (skipped ?? []).filter(
+      (s): s is { id: Id; reason: string } => typeof s === 'object' && s !== null && 'reason' in s,
+    )
+    if (!reasoned.length) return ''
+    const counts: Record<string, number> = {}
+    reasoned.forEach(s => { counts[s.reason] = (counts[s.reason] ?? 0) + 1 })
+    return Object.entries(counts)
+      .map(([reason, count]) => `${count} ${t(`bulk.skipReasons.${reason}`, { defaultValue: reason })}`)
+      .join(', ')
+  }
+
   const bulkCouple = (target: CoupleTarget) => {
     const ids = [...selectedIds]
     if (!ids.length) return
@@ -54,9 +71,13 @@ export function useMatchesBulkActions({ selectedIds, setSelectedIds, t }: UseMat
     api.post('/sync/matches/bulk', { ids, system: target })
       .then(res => {
         const queued = Array.isArray(res.data?.queued) ? res.data.queued.length : 0
-        const skipped = Array.isArray(res.data?.skipped) ? res.data.skipped.length : 0
-        if (skipped > 0) notify('info', t('bulk.coupleQueuedPartial', { target: targetLabel, queued, total: queued + skipped, skipped }))
-        else notify('success', t('bulk.coupleQueued', { target: targetLabel, count: queued }))
+        const skippedArr = Array.isArray(res.data?.skipped) ? res.data.skipped : []
+        const skipped = skippedArr.length
+        if (skipped > 0) {
+          const breakdown = reasonBreakdown(skippedArr)
+          if (breakdown) notify('info', t('bulk.coupleQueuedPartialReasoned', { target: targetLabel, queued, total: queued + skipped, skipped, breakdown }))
+          else notify('info', t('bulk.coupleQueuedPartial', { target: targetLabel, queued, total: queued + skipped, skipped }))
+        } else notify('success', t('bulk.coupleQueued', { target: targetLabel, count: queued }))
       })
       .catch(err => {
         if (err?.response?.status === 404 || isServiceUnavailable(err)) notify('info', t('bulk.coupleUnavailable'))

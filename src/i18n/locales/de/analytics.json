@@ -130,6 +130,9 @@
     "avgDuration": "Ø Match-Dauer",
     "daysValue": "{{days}} Tage",
     "durationNote": "Die Match-Dauer folgt, sobald die HelloFlex-Anbindung Start/Ende liefert.",
+    "axes": {
+      "contractForm": "Vertragsform"
+    },
     "placements": {
       "title": "Match-Status",
       "sent": "Gesendet",

@@ -17,7 +17,7 @@ import type { ReactNode } from 'react'
 import { useApps } from '@/context/AppsContext'
 import api from '@/lib/api'
 import { notifySuccess, notifyError } from '@/lib/notify'
-import { extractApiError } from '@/lib/extractApiError'
+import { extractApiError, apiErrorKey } from '@/lib/extractApiError'
 import { useTranslation } from 'react-i18next'
 import { HelloflexCard, ShiftmanagerCard } from './backofficeLinkCards'
 import type { BackofficeLink } from '@/lib/backofficeLink'
@@ -73,7 +73,10 @@ export default function BackofficeLinksTab({ entity, id, helloflexLink, shiftman
       setQueuedStatus(s => ({ ...s, [system]: data?.link?.status ?? 'pending' }))
       notifySuccess(t('backofficeLinks.common.linkStarted'))
     } catch (err) {
-      notifyError(extractApiError(err, t('backofficeLinks.common.linkFailed')))
+      // HF-CONTRACTMAP-1: an unmapped contract form is an honest, actionable notice
+      // (points at Settings → HelloFlex), never the raw 409 server message.
+      const key = apiErrorKey(err)
+      notifyError(key ? t(key) : extractApiError(err, t('backofficeLinks.common.linkFailed')))
     } finally {
       setLinking(s => ({ ...s, [system]: false }))
     }

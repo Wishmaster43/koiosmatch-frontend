@@ -13,7 +13,8 @@
     "coupling": "Verknüpfung",
     "owner": "Inhaber",
     "date": "Erstellt",
-    "status": "Status"
+    "status": "Status",
+    "contractForm": "Vertragsform"
   },
   "insights": {
     "stage": "Phase",
@@ -100,7 +101,8 @@
       "saveError": "Änderung konnte nicht gespeichert werden.",
       "saved": "Vertragsdetails gespeichert.",
       "functionTitle": "Funktionstitel",
-      "surcharge": "Zuschlag"
+      "surcharge": "Zuschlag",
+      "contractForm": "Vertragsform"
     },
     "ownerUnassigned": "Kein Inhaber",
     "terminate": {
@@ -197,7 +199,11 @@
     "coupleQueued": "{{count}} Match(es) zur Kopplung mit {{target}} eingereiht.",
     "coupleUnavailable": "Backoffice-Kopplung ist noch nicht verfügbar.",
     "noPermission": "Sie haben keine Berechtigung für Massenaktionen.",
-    "coupleQueuedPartial": "{{queued}} von {{total}} zur Kopplung mit {{target}} eingereiht; {{skipped}} übersprungen."
+    "coupleQueuedPartial": "{{queued}} von {{total}} zur Kopplung mit {{target}} eingereiht; {{skipped}} übersprungen.",
+    "coupleQueuedPartialReasoned": "{{queued}} von {{total}} für die Verknüpfung mit {{target}} eingereiht; {{skipped}} übersprungen ({{breakdown}}).",
+    "skipReasons": {
+      "helloflex_contract_type_unmapped": "kein HelloFlex-Vertragstyp verknüpft"
+    }
   },
   "filters": {
     "stage": "Phase",

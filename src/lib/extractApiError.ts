@@ -23,6 +23,10 @@ export function extractApiError(err: unknown, fallback: string): string {
 const ERROR_CODE_KEYS: Record<string, string> = {
   koios_credit_exhausted: 'errors.koiosCreditExhausted',
   koios_unavailable: 'errors.koiosUnavailable',
+  // HF-CONTRACTMAP-1: the manual send-to-HelloFlex path returns this 409 when the
+  // match's contract form has no row in Settings → HelloFlex → Contractmap yet —
+  // an honest "not configured" notice, never a raw server message.
+  helloflex_contract_type_unmapped: 'errors.helloflexContractTypeUnmapped',
 }
 
 /**

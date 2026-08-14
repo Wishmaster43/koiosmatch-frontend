@@ -73,7 +73,7 @@ export default function MatchesTab({ vacancyId }: { vacancyId?: Id }) {
             showHelloflex={showHelloflex} showShiftmanager={showShiftmanager}
             otherPartyLabel={t('matches:cols.candidate')}
             otherPartyValue={<EntityLink page="candidates" id={m.candidateId}>{m.candidate || '—'}</EntityLink>}
-            contractType={m.contractType}
+            contractType={m.contractType} contractForm={m.contractForm}
             functionTitle={m.functionTitle} branchName={m.branchName} ownerName={m.owner}
             startDate={m.startDate} endDate={m.endDate}
             isClosed={statusMeta?.is_closed} archived={m.archived}

@@ -234,7 +234,8 @@
     "koios_advice": "Advies-drempels",
     "notif_my": "Mijn meldingen",
     "customer_identifier_validation": "Nummervalidatie",
-    "automations": "Automatiseringen"
+    "automations": "Automatiseringen",
+    "hf_contract_map": "HelloFlex contractmap"
   },
   "kpis": {
     "title": "KPI-instellingen",
@@ -3000,5 +3001,15 @@
       "final": "Definitief"
     },
     "generateResult": "{{generated}} gegenereerd, {{alreadyFinal}} al definitief."
+  },
+  "helloflexContractMap": {
+    "title": "HelloFlex contractmap",
+    "subtitle": "Koppel elke contractvorm aan het bijbehorende HelloFlex-contracttype (GUID). Een lege koppeling is toegestaan: het koppelen naar HelloFlex wordt dan eerlijk geblokkeerd voor die soort.",
+    "guid": "HelloFlex GUID",
+    "guidPlaceholder": "bijv. 3f7a1c9e-…",
+    "label": "Label",
+    "labelPlaceholder": "Herkenbare naam",
+    "empty": "Er zijn nog geen contractvormen ingericht.",
+    "saveError": "Opslaan van de contractmap is mislukt."
   }
 }

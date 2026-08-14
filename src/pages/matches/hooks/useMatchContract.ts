@@ -12,8 +12,12 @@
  */
 import { useState, useEffect, useCallback } from 'react'
 import api, { unwrap, isServiceUnavailable } from '@/lib/api'
-import type { MatchRow } from '@/types/match'
+import type { MatchRow, MatchContractForm } from '@/types/match'
 import type { Id } from '@/types/common'
+
+// MATCH-SOORT-1: one CONTRACTREGELS row as read here — detail-only, echoed with
+// its server id (never resent by this read-only hook, only MatchModal writes it).
+export interface MatchContractLineRead { id?: Id; functionTitle: string; rate: number | null; sortOrder: number | null }
 
 // The editable contract/financial fields — flat, mirrors the PATCH body shape.
 export interface MatchContract {
@@ -34,6 +38,11 @@ export interface MatchContract {
   // column still holds data), but the only write left is clearing it after its
   // content was copied into a note — see MatchRemarksBlock.
   remarks: string | null
+  // MATCH-SOORT-1: Contractvorm chip + its CONTRACTREGELS read-list — read-only
+  // here (the edit path is MatchModal's own contract_form/contract_lines write,
+  // §2 of the changelog); this section only DISPLAYS the resolved values.
+  contractForm: MatchContractForm | null
+  contractLines: MatchContractLineRead[]
   // M17: customer-facing match text — the backend column doesn't exist yet
   // (MATCH-TEXT-FIELD-1), so callers must check `matchTextPresent` (below)
   // before trusting this value: absent-key and present-but-null both map here.
@@ -45,7 +54,7 @@ export interface MatchContract {
 const EMPTY: MatchContract = {
   function_title: null, contract_type: null, start_date: null, end_date: null, hours_per_week: null,
   cao: null, scale: null, step: null, surcharge: null, purchase_rate: null, sell_rate: null,
-  cost_center: null, billing_emails: [], remarks: null, match_text: null, margin: null,
+  cost_center: null, billing_emails: [], remarks: null, contractForm: null, contractLines: [], match_text: null, margin: null,
 }
 
 // Pull just the contract/financial keys off a raw API row (tolerant of extras).
@@ -66,6 +75,15 @@ function pick(d: Record<string, unknown>): MatchContract {
     cost_center:    (d.cost_center as string) ?? null,
     billing_emails: Array.isArray(d.billing_emails) ? (d.billing_emails as unknown[]).map(String) : [],
     remarks:        (d.remarks as string) ?? null,
+    contractForm:   (d.contract_form as MatchContractForm) ?? null,
+    contractLines:  Array.isArray(d.contract_lines)
+      ? (d.contract_lines as Array<Record<string, unknown>>).map(l => ({
+          id: l.id as Id | undefined,
+          functionTitle: (l.function_title as string) ?? '',
+          rate: num(l.rate),
+          sortOrder: l.sort_order != null ? Number(l.sort_order) : null,
+        }))
+      : [],
     match_text:     (d.match_text as string) ?? null,
     margin:         num(d.margin),
   }

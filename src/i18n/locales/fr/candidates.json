@@ -987,7 +987,8 @@
       "ended": "Terminé"
     },
     "openMatch": "Ouvrir le match",
-    "searchPlaceholder": "Rechercher un match…"
+    "searchPlaceholder": "Rechercher un match…",
+    "contractForm": "Forme de contrat"
   },
   "koios": {
     "actions": {
@@ -1113,7 +1114,7 @@
     "vacancyOptional": "Poste (facultatif)",
     "noVacancy": "Aucun poste",
     "contract": "Contrat",
-    "contractType": "Type",
+    "contractType": "Type de contrat",
     "pickContractType": "Choisir…",
     "cao": "CCT",
     "pickCao": "Choisir…",
@@ -1168,7 +1169,15 @@
     "duplicateMatchWarning": "Un match existe déjà ({{label}}) pour ce candidat chez ce client. Voulez-vous créer un renouvellement ?",
     "overlapWarning": "La période saisie chevauche un match actif chez {{label}} ({{period}}).",
     "overlapOngoing": "depuis {{start}}",
-    "overlapWarningHours": "La période saisie chevauche un match actif chez {{label}} : ensemble {{hours}} heures par semaine sur la période de chevauchement ({{period}})."
+    "overlapWarningHours": "La période saisie chevauche un match actif chez {{label}} : ensemble {{hours}} heures par semaine sur la période de chevauchement ({{period}}).",
+    "contractForm": "Forme de contrat",
+    "pickContractForm": "Choisir…",
+    "contractLines": {
+      "title": "Lignes de contrat",
+      "add": "ajouter une ligne",
+      "empty": "Pas encore de lignes.",
+      "rate": "Tarif"
+    }
   },
   "merge": {
     "title": "Fusionner le candidat",

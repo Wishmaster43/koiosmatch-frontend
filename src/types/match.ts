@@ -6,6 +6,21 @@
 import type { Id } from './common'
 import type { ApiBackofficeLink, BackofficeLink } from '@/lib/backofficeLink'
 
+// MATCH-SOORT-1: the contract-form axis on a match — a candidate_types/
+// Contractvorm lookup value, echoed as a resolved {value,label,color} object
+// (never a bare slug) on every list AND detail row per the backend contract.
+export interface MatchContractForm { value: string; label: string; color: string }
+
+// One CONTRACTREGELS row (function + optional rate), only meaningful when the
+// picked contract form carries `has_contract_lines`. `sortOrder` mirrors array
+// position — the backend accepts a full replacing set on every write.
+export interface MatchContractLine {
+  id?: Id
+  functionTitle: string
+  rate: string
+  sortOrder?: number
+}
+
 // The raw match as it can arrive from the API (snake_case-tolerant, nested or flat).
 export interface RawMatch {
   id?: string | number
@@ -47,6 +62,11 @@ export interface RawMatch {
   // M1 (overzicht-data cluster): the list resource already serialises this
   // (MatchListResource.php `contract_type`) — the mapper just never picked it up.
   contract_type?: string | null
+  // MATCH-SOORT-1: contract FORM (Contractvorm) — distinct axis from
+  // contract_type above; resolved {value,label,color} on list + detail rows.
+  contract_form?: MatchContractForm | null
+  // MATCH-SOORT-1: CONTRACTREGELS — detail-only (echoed with id on GET /matches/{id}).
+  contract_lines?: Array<{ id?: Id; function_title?: string | null; rate?: number | string | null; sort_order?: number | null }> | null
   start_date?: string | null
   end_date?: string | null
   // MATCH-ARCHIVED-LIST-1: soft-delete state (both list + detail rows now carry it —
@@ -120,5 +140,7 @@ export interface MatchRow {
   endDate?: string | null
   // M1 (overzicht-data cluster): contract form/type, straight off the list resource.
   contractType?: string | null
+  // MATCH-SOORT-1: the resolved Contractvorm chip value — null when unset.
+  contractForm?: MatchContractForm | null
   [k: string]: unknown
 }

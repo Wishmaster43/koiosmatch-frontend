@@ -32,6 +32,7 @@ const mockCustomer = { id: 'cust-1', name: 'Zorggroep A', branch_id: null, locat
 // over the network, so it lands AFTER the GET /matches/{id} prefill (a microtask).
 // That ordering is what an edit form actually sees, and it is where a create-only
 // proposal would otherwise overwrite the record the recruiter just opened.
+vi.mock('@/context/LookupsContext', () => ({ useLookups: () => ({ candidateTypes: [] }) }))
 vi.mock('@/lib/useContractTypes', async () => {
   const actual = await vi.importActual<typeof import('@/lib/useContractTypes')>('@/lib/useContractTypes')
   const { useState, useEffect } = await vi.importActual<typeof import('react')>('react')

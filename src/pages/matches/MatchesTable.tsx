@@ -15,6 +15,7 @@ import { useApps } from '@/context/AppsContext'
 import { useAllSettings, getBoolSetting, getNumberSetting } from '@/lib/settings/useAllSettings'
 import { deriveMatchAdvice } from './data/matchAdvice'
 import ScorePill from './ScorePill'
+import ContractFormChip from './ContractFormChip'
 import type { MatchRow } from '@/types/match'
 import type { Id } from '@/types/common'
 
@@ -111,6 +112,10 @@ export default function MatchesTable({
     // column), muted text keeps it reading as a secondary reference.
     { key: 'client',  header: t('cols.client'),  sortable: true, nowrap: true,
       render: r => <EntityNameCell name={r.client} textStyle={{ color: 'var(--text-muted)' }} /> },
+    // MATCH-SOORT-1: Contractvorm — the ONE shared chip, sortable on its label
+    // (mirrors the stage column's own lookup-driven soft chip).
+    { key: 'contractForm', header: t('cols.contractForm'), sortable: true, sortValue: r => r.contractForm?.label ?? '',
+      render: r => r.contractForm ? <ContractFormChip contractForm={r.contractForm} /> : <span style={{ color: 'var(--text-muted)' }}>—</span> },
     { key: 'score',   header: t('cols.score'), align: 'right', sortable: true,
       sortValue: r => r.score ?? -1, render: r => <ScorePill value={r.score} /> },
     { key: 'stage',   header: t('cols.status'),
