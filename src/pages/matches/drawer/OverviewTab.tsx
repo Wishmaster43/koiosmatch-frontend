@@ -39,6 +39,8 @@ import { useDateFormat } from '@/lib/datetime'
 import StatusPill from '@/components/ui/StatusPill'
 import EntityLink from '@/components/ui/EntityLink'
 import KoiosAdviceBlock from '@/components/ai/KoiosAdviceBlock'
+import { useMatchAdvice } from '@/lib/useMatchAdvice'
+import { adviceInsightRows } from '@/lib/koiosAdviceInsight'
 import ScorePill from '../ScorePill'
 import SelectMenu from '@/components/ui/SelectMenu'
 import { useMatchStatuses } from '@/lib/useMatchStatuses'
@@ -83,6 +85,9 @@ interface OverviewTabProps {
 export default function OverviewTab({ match, onSetStatus, onUpdate, ordinals, onOpenNotes }: OverviewTabProps) {
   const { t } = useTranslation(['matches', 'candidates'])
   const { formatDate, formatDateTime } = useDateFormat()
+  // KOIOS-ADVIES-OVERAL-1: the SAME resolver the matches table's Koios column
+  // uses — the advisory block below prepends its advice so the two never disagree.
+  const resolveAdvice = useMatchAdvice()
   // Lifecycle status from the tenant lookup — the is_closed FLAG ends the match (R-1b).
   const { statuses, metaOf } = useMatchStatuses()
   const statusMeta = metaOf(match.status)
@@ -196,8 +201,10 @@ export default function OverviewTab({ match, onSetStatus, onUpdate, ordinals, on
         </div>
       </SectionCard>
 
-      {/* M18: Koios AI advice — pure FE heuristic (score reading + contract-window reading). */}
-      <KoiosAdviceBlock namespace="matches" insights={buildMatchAdviceInsights(match, t)} />
+      {/* M18: Koios AI advice — the table-identical advice row first (KOIOS-ADVIES-
+          OVERAL-1; [] when there is none), then the score/contract-window heuristics. */}
+      <KoiosAdviceBlock namespace="matches"
+        insights={[...adviceInsightRows(resolveAdvice(match)), ...buildMatchAdviceInsights(match, t)]} />
 
       {/* M17/optie A: Matchtekst — OFFERED-IFF-READ, hidden until the backend
           payload actually carries the `match_text` key (see file header). Koios

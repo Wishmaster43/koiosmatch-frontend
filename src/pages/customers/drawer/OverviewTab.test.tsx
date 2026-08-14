@@ -21,10 +21,11 @@
  * the widen-on-last-removal confirm only fires while that tenant flag is on.
  */
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { render, screen, waitFor } from '@testing-library/react'
+import { render, screen, waitFor, renderHook } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import i18n from '@/i18n'
 import OverviewTab from './OverviewTab'
+import { useCustomerAdvice } from '@/lib/useCustomerAdvice'
 import type { Customer } from '@/types/customer'
 
 vi.mock('@/lib/useIndustries', () => ({ useIndustries: () => ({ industries: ['Zorg', 'IT'] }) }))
@@ -224,5 +225,31 @@ describe('OverviewTab · removing the LAST branch widens visibility (VESTIGING-2
     await user.click(screen.getAllByRole('button', { name: cm('remove') })[0])
     expect(apiDelete).toHaveBeenCalledWith('/customers/1/branches/loc-1')
     expect(screen.queryByText(cm('branchSection.widenTitle'))).toBeNull()
+  })
+})
+
+// KOIOS-ADVIES-OVERAL-1: the drawer's advice block shows EXACTLY the advice the
+// customers table's Koios column derives — asserted through the SAME resolver
+// (useCustomerAdvice), never a copied literal.
+describe('OverviewTab · table-identical Koios advice (KOIOS-ADVIES-OVERAL-1)', () => {
+  // Resolve the advice through the shared hook, exactly as CustomersTable does.
+  const resolveVia = (c: Customer) => renderHook(() => useCustomerAdvice()).result.current(c)
+
+  it('shows the same label the table pill derives for a customer without open vacancies', async () => {
+    const quiet = customer() // openVacanciesCount: 0 → the follow-up rule fires
+    const expected = resolveVia(quiet)?.label
+    expect(expected).toBeTruthy()
+    render(<OverviewTab c={quiet} onSave={vi.fn()} />)
+    expect(screen.getByText(expected as string)).toBeInTheDocument()
+    await waitFor(() => expect(apiGet).toHaveBeenCalled())
+  })
+
+  it('renders no advice row on a clean customer (open vacancies present) — heuristics only', async () => {
+    const active = customer({ openVacanciesCount: 2 })
+    expect(resolveVia(active)).toBeNull()
+    const adviceLabel = resolveVia(customer())?.label
+    render(<OverviewTab c={active} onSave={vi.fn()} />)
+    expect(screen.queryByText(adviceLabel as string)).not.toBeInTheDocument()
+    await waitFor(() => expect(apiGet).toHaveBeenCalled())
   })
 })

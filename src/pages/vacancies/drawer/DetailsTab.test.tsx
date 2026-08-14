@@ -10,9 +10,10 @@
  * needed to mount it.
  */
 import { describe, it, expect, vi } from 'vitest'
-import { render, screen } from '@testing-library/react'
+import { render, screen, renderHook } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import DetailsTab from './DetailsTab'
+import { useVacancyAdvice } from '@/lib/useVacancyAdvice'
 import type { VacancyDetail } from '@/types/vacancy'
 
 // Deterministic stand-in for the real ISO-3166 + Intl.DisplayNames lookup — the
@@ -21,8 +22,19 @@ vi.mock('@/lib/countries', () => ({
   getCountryOptions: () => [{ value: 'NL', label: 'Netherlands' }, { value: 'BE', label: 'Belgium' }],
   getCountryName: (code: string) => (code === 'NL' ? 'Netherlands' : code),
 }))
-// Not under test here — makes its own API/insight calls, irrelevant to this guard.
-vi.mock('@/components/ai/KoiosAdviceBlock', () => ({ default: () => null }))
+// The advice-block WIRING is under test (KOIOS-ADVIES-OVERAL-1), not its chrome —
+// the stub exposes each insight's collapsed label as plain text.
+vi.mock('@/components/ai/KoiosAdviceBlock', () => ({
+  default: ({ insights }: { insights: { type: string }[] }) => (
+    <div data-testid="koios-advice">{insights.map((i, idx) => <span key={idx}>{i.type}</span>)}</div>
+  ),
+}))
+// useVacancyAdvice reads the tenant settings blob — stubbed so no /settings GET
+// fires from jsdom (real getNumberSetting keeps the 14-day default in play).
+vi.mock('@/lib/settings/useAllSettings', async () => {
+  const actual = await vi.importActual<typeof import('@/lib/settings/useAllSettings')>('@/lib/settings/useAllSettings')
+  return { ...actual, useAllSettings: () => ({}) }
+})
 
 // One section's mock shape — every Details<X>Tab only ever reads/calls its OWN
 // section, so each test can override just the bits it needs (e.g. `editing: true`).
@@ -128,6 +140,33 @@ describe('DetailsTab · the AI-agent card is gone (moved to VacancyAgentTab)', (
     expect(screen.queryByText('details.aiAgent.none')).not.toBeInTheDocument()
     // The vacancy DOES carry a linked agent name — it must not leak into this tab.
     expect(screen.queryByText('Kelly')).not.toBeInTheDocument()
+  })
+})
+
+// KOIOS-ADVIES-OVERAL-1: the drawer block shows EXACTLY the advice the table's
+// Koios column derives — asserted through the SAME resolver (useVacancyAdvice),
+// never a copied literal.
+describe('DetailsTab · table-identical Koios advice (KOIOS-ADVIES-OVERAL-1)', () => {
+  // Published long ago with zero applications → the stale rule fires.
+  const staleVacancy = { ...vacancy, published: true, publishedAt: '2026-01-01', applicationsCount: 0 } as unknown as VacancyDetail
+
+  it('shows the same label the table pill derives for a stale published vacancy', () => {
+    hookReturn = makeHookReturn()
+    const { result } = renderHook(() => useVacancyAdvice())
+    const expected = result.current(staleVacancy)?.label
+    expect(expected).toBeTruthy()
+    render(<DetailsTab vacancy={staleVacancy} onUpdate={vi.fn()} />)
+    expect(screen.getByTestId('koios-advice')).toHaveTextContent(expected as string)
+  })
+
+  it('renders no advice row on a clean (unpublished) vacancy — heuristics only', () => {
+    hookReturn = makeHookReturn()
+    const { result } = renderHook(() => useVacancyAdvice())
+    expect(result.current(vacancy as unknown as VacancyDetail)).toBeNull()
+    render(<DetailsTab vacancy={vacancy} onUpdate={vi.fn()} />)
+    // The FIRST rendered row is the completeness heuristic — nothing was prepended.
+    const rows = screen.getByTestId('koios-advice').querySelectorAll('span')
+    expect(rows[0]).toHaveTextContent('ai.completeness')
   })
 })
 

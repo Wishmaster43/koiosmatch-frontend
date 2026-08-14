@@ -2,6 +2,8 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import SubTabBar from '@/components/drawer/SubTabBar'
 import KoiosAdviceBlock from '@/components/ai/KoiosAdviceBlock'
+import { useVacancyAdvice } from '@/lib/useVacancyAdvice'
+import { adviceInsightRows } from '@/lib/koiosAdviceInsight'
 import { buildVacancyAdviceInsights } from './vacancyAiInsights'
 import { useVacancyDetailsForm } from '../hooks/useVacancyDetailsForm'
 import DetailsGeneralTab from './DetailsGeneralTab'
@@ -26,6 +28,9 @@ type UpdateFn = (id: Id | undefined, patch: Record<string, unknown>) => void
  */
 export default function DetailsTab({ vacancy: v, onUpdate }: { vacancy: VacancyDetail; onUpdate?: UpdateFn }) {
   const { t } = useTranslation('vacancies')
+  // KOIOS-ADVIES-OVERAL-1: the SAME resolver the vacancies table's Koios column
+  // uses — the advisory block below prepends its advice so the two never disagree.
+  const resolveAdvice = useVacancyAdvice()
   const { candidateTypes, typeMeta, seniorityLevels, educationLevels, industries, formatDate, fnOptions,
     contractTypeOptions, caoOptions,
     general, location, requirements, conditions } = useVacancyDetailsForm(v, onUpdate)
@@ -49,7 +54,8 @@ export default function DetailsTab({ vacancy: v, onUpdate }: { vacancy: VacancyD
               BELOW the fields cards — the same bottom placement as the customer tab. */}
           <DetailsGeneralTab vacancy={v} general={general} candidateTypes={candidateTypes} typeMeta={typeMeta}
             industries={industries} fnOptions={fnOptions} formatDate={formatDate} />
-          <KoiosAdviceBlock namespace="vacancies" insights={buildVacancyAdviceInsights(v, t)} />
+          <KoiosAdviceBlock namespace="vacancies"
+            insights={[...adviceInsightRows(resolveAdvice(v)), ...buildVacancyAdviceInsights(v, t)]} />
         </>
       )}
       {subTab === 'location' && <DetailsLocationTab vacancy={v} location={location} />}

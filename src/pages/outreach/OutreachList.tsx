@@ -10,11 +10,10 @@ import StatusBadge from '@/components/ui/StatusBadge'
 import SoftChip from '@/components/ui/SoftChip'
 import Avatar from '@/components/ui/Avatar'
 import { makeKoiosColumn } from '@/components/ui/koiosColumn'
-import type { KoiosAdvice } from '@/lib/koiosAdviceMeta'
 import { initialsOf } from '@/lib/initials'
 import { useDateFormat } from '@/lib/datetime'
 import { useAllSettings, getBoolSetting } from '@/lib/settings/useAllSettings'
-import { deriveCampaignAdvice } from './data/campaignAdvice'
+import { useCampaignAdvice } from '@/lib/useCampaignAdvice'
 import type { Campaign } from './hooks/useOutreachCampaigns'
 
 // Icon + colour per outreach channel (soft-chip convention) — fixed channel enum,
@@ -55,18 +54,9 @@ export default function OutreachList({ campaigns, loading, error, onReload, onOp
   const colorStatus  = getBoolSetting(settings, 'outreach_table_color_status', true)
   const colorOwner   = getBoolSetting(settings, 'outreach_table_color_owner', true)
   const colorKoios   = getBoolSetting(settings, 'outreach_table_color_koios', false)
-  // Shared Koios advice resolver (campaignAdvice.ts) — honest: an active campaign
-  // with nothing to call/mail/message, or a stale draft that never activated.
-  const adviceOf = (c: Campaign): KoiosAdvice | null => {
-    const rule = deriveCampaignAdvice(c)
-    if (rule.action === 'none') return null
-    return {
-      action: rule.action,
-      label: t('common:koios.actions.attention', { defaultValue: 'Attention' }),
-      reason: t(rule.reasonKey, { defaultValue: 'This campaign needs a look.' }),
-      source: 'rules',
-    }
-  }
+  // The ONE shared Koios advice resolver (KOIOS-ADVIES-OVERAL-1) — the drawer
+  // calls the same hook, so table and drill-down can never disagree.
+  const adviceOf = useCampaignAdvice()
 
   // Status pill colours for draft / active / done.
   const statusMap = {

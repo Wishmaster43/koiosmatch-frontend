@@ -5,10 +5,11 @@
  * centre, billing e-mail, HelloFlex last-sync) fetched via useMatchContract.
  */
 import { describe, it, expect, vi, afterEach } from 'vitest'
-import { render, screen, waitFor } from '@testing-library/react'
+import { render, screen, waitFor, renderHook } from '@testing-library/react'
 import { I18nextProvider } from 'react-i18next'
 import i18n from '@/i18n'
 import OverviewTab from './OverviewTab'
+import { useMatchAdvice } from '@/lib/useMatchAdvice'
 import api from '@/lib/api'
 import type { MatchRow } from '@/types/match'
 
@@ -100,5 +101,37 @@ describe('OverviewTab · overzicht-data cluster', () => {
     renderTab(baseMatch)
     await waitFor(() => expect(mockedGet).toHaveBeenCalledWith('/matches/m1'))
     expect(screen.queryByText(i18n.t('matches:drawer.remarks.title'))).not.toBeInTheDocument()
+  })
+})
+
+// KOIOS-ADVIES-OVERAL-1: the drawer block shows EXACTLY the advice the table's
+// Koios column derives — asserted through the SAME resolver (useMatchAdvice),
+// never a copied literal.
+describe('OverviewTab · table-identical Koios advice (KOIOS-ADVIES-OVERAL-1)', () => {
+  // Resolve the advice through the shared hook, exactly as MatchesTable does.
+  const resolveVia = (match: MatchRow) => {
+    const { result } = renderHook(() => useMatchAdvice(), {
+      wrapper: ({ children }) => <I18nextProvider i18n={i18n}>{children}</I18nextProvider>,
+    })
+    return result.current(match)
+  }
+
+  it('shows the same label the table pill derives for an open match past its end date', async () => {
+    mockedGet.mockResolvedValue({ data: { data: {} } })
+    const expected = resolveVia(baseMatch)?.label
+    expect(expected).toBeTruthy()
+    renderTab(baseMatch)
+    expect(await screen.findByText(expected as string)).toBeInTheDocument()
+  })
+
+  it('renders no advice row on a clean match (end date far away) — heuristics only', async () => {
+    mockedGet.mockResolvedValue({ data: { data: {} } })
+    const clean: MatchRow = { ...baseMatch, endDate: '2031-12-31' }
+    expect(resolveVia(clean)).toBeNull()
+    // The label an advice-worthy match WOULD show must be absent here.
+    const adviceLabel = resolveVia(baseMatch)?.label
+    renderTab(clean)
+    await waitFor(() => expect(mockedGet).toHaveBeenCalledWith('/matches/m1'))
+    expect(screen.queryByText(adviceLabel as string)).not.toBeInTheDocument()
   })
 })

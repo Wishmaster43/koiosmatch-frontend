@@ -9,6 +9,8 @@ import RichTextEditor from '@/components/ui/RichTextEditor'
 import SafeHtml from '@/components/ui/SafeHtml'
 import { sectionTitle } from '@/components/ui/SectionCard'
 import KoiosAdviceBlock from '@/components/ai/KoiosAdviceBlock'
+import { useTaskAdvice } from '@/lib/useTaskAdvice'
+import { adviceInsightRows } from '@/lib/koiosAdviceInsight'
 import { buildTaskAdviceInsights } from './taskAiInsights'
 import { useTaskLookups } from '@/context/TaskLookupsContext'
 import type { TaskLookupItem } from '@/context/TaskLookupsContext'
@@ -73,6 +75,9 @@ function EditControls({ onSave, onCancel, saveLabel, cancelLabel }: { onSave: ()
  */
 export default function DetailsTab({ task, onUpdate }: { task: TaskDetail; onUpdate: (patch: Record<string, unknown>) => void }) {
   const { t } = useTranslation('tasks')
+  // KOIOS-ADVIES-OVERAL-1: the SAME resolver the tasks table's Koios column
+  // uses — the advisory block below prepends its advice so the two never disagree.
+  const resolveAdvice = useTaskAdvice()
   const { formatDate, formatDateTime } = useDateFormat()
   const { statuses, types, priorities } = useTaskLookups()
   const { data: users = [] } = useUsers() as { data?: UserLike[] }
@@ -242,9 +247,11 @@ export default function DetailsTab({ task, onUpdate }: { task: TaskDetail; onUpd
       </div>
 
       {/* T4: Koios advice block, bottom of Details (mirrors the vacancy drawer's own
-          bottom placement) — pure FE heuristics from data already on the record
-          (deadline health, assignment, links), no AI/API call. */}
-      <KoiosAdviceBlock namespace="tasks" insights={buildTaskAdviceInsights(task, t)} />
+          bottom placement) — the table-identical advice row first (KOIOS-ADVIES-
+          OVERAL-1; [] when there is none), then the deadline/assignment/links
+          heuristics from data already on the record, no AI/API call. */}
+      <KoiosAdviceBlock namespace="tasks"
+        insights={[...adviceInsightRows(resolveAdvice(task)), ...buildTaskAdviceInsights(task, t)]} />
 
       {/* T3 / TASK-LOCATION-READ-1: the Vestiging (branch) picker, below the advice
           block per Danny's layout. Previously blocked (write-only field — the

@@ -8,11 +8,10 @@ import StatusPill from '@/components/ui/StatusPill'
 import SoftChip from '@/components/ui/SoftChip'
 import AiAgentAvatar from '@/components/ui/AiAgentAvatar'
 import { makeKoiosColumn } from '@/components/ui/koiosColumn'
-import type { KoiosAdvice } from '@/lib/koiosAdviceMeta'
 import { useDateFormat, relativeAge } from '@/lib/datetime'
 import { useVacancyLookups } from '@/context/VacancyLookupsContext'
-import { useAllSettings, getBoolSetting, getNumberSetting } from '@/lib/settings/useAllSettings'
-import { deriveVacancyAdvice } from './data/vacancyAdvice'
+import { useAllSettings, getBoolSetting } from '@/lib/settings/useAllSettings'
+import { useVacancyAdvice } from '@/lib/useVacancyAdvice'
 import type { Vacancy } from '@/types/vacancy'
 import type { Id } from '@/types/common'
 
@@ -74,21 +73,9 @@ export default function VacanciesTable({ rows, loading, selectedId, onSelect, on
   const colorPublished = getBoolSetting(settings, 'vacancy_table_color_published', true)
   const colorOwner     = getBoolSetting(settings, 'vacancy_table_color_owner', true)
   const colorKoios     = getBoolSetting(settings, 'vacancy_table_color_koios', false)
-  // How many days without an application counts as "stale" (mirrors candidates'
-  // no_contact_alert_months threshold) — tenant-configurable, sensible default.
-  const staleDays = getNumberSetting(settings, 'vacancy_advice_stale_days', 14)
-  // Shared Koios advice resolver (vacancyAdvice.ts) — honest: published + zero
-  // applications + past the stale threshold, an em-dash for everything else.
-  const adviceOf = (v: Vacancy): KoiosAdvice | null => {
-    const rule = deriveVacancyAdvice(v, { staleDays })
-    if (rule.action === 'none') return null
-    return {
-      action: rule.action,
-      label: t('common:koios.actions.attention', { defaultValue: 'Attention' }),
-      reason: t(rule.reasonKey, { ...rule.reasonParams, defaultValue: 'No applications yet, posted {{days}} days ago.' }),
-      source: 'rules',
-    }
-  }
+  // The ONE shared Koios advice resolver (KOIOS-ADVIES-OVERAL-1) — the drawer
+  // calls the same hook, so table and drill-down can never disagree.
+  const adviceOf = useVacancyAdvice()
 
   // Column order mirrors the candidates blueprint (§3A): identity → client → status
   // → counts → dates → owner LAST (Danny 2026-07-14 table standardization).

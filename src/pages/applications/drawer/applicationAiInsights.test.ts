@@ -46,16 +46,11 @@ describe('buildApplicationAdviceInsights', () => {
     expect(progress.text).toBe("ai.progressUnknown|{\"phase\":\"applied\"}")
   })
 
-  // DUPLICATE-AI-BLOCK-1: the AI task now folds into this insight list (as the
-  // first entry) instead of rendering its own separate block in the tab.
-  it('prepends the AI task as its own insight when the application carries one', () => {
+  // KOIOS-ADVIES-OVERAL-1: the AI-task advice row moved OUT of this builder to
+  // the table's own resolver (useApplicationAdvice → adviceInsightRows, prepended
+  // by ContextSubTab) — the builder emitting it too would render the advice twice.
+  it('never emits the AI task itself — that row comes from the shared table resolver', () => {
     const insights = buildApplicationAdviceInsights(base({ task: 'Bel de kandidaat terug' }), t)
-    expect(insights).toHaveLength(2)
-    expect(insights[0]).toMatchObject({ type: 'drawer.task', text: 'Bel de kandidaat terug', color: 'var(--color-primary)' })
-  })
-
-  it('omits the task insight when the application has no task', () => {
-    const insights = buildApplicationAdviceInsights(base({ task: '' }), t)
-    expect(insights.every(i => i.type !== 'drawer.task')).toBe(true)
+    expect(insights.every(i => i.text !== 'Bel de kandidaat terug' && i.type !== 'drawer.task')).toBe(true)
   })
 })

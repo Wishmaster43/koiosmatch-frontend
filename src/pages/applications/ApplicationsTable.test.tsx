@@ -18,10 +18,13 @@ vi.mock('@/context/LookupsContext', () => ({
   }),
 }))
 // Stub the API-backed settings loader so the table renders without a live
-// /settings fetch (mirrors every other entity table's test convention).
+// /settings fetch (mirrors every other entity table's test convention). The
+// overrides map lets one test flip a flag (e.g. the koios colour toggle)
+// without touching the fallback behaviour every other test relies on.
+const boolSettingOverrides = vi.hoisted(() => ({} as Record<string, boolean>))
 vi.mock('@/lib/settings/useAllSettings', () => ({
   useAllSettings: () => ({}),
-  getBoolSetting: (_s: unknown, _key: string, fallback: boolean) => fallback,
+  getBoolSetting: (_s: unknown, key: string, fallback: boolean) => boolSettingOverrides[key] ?? fallback,
 }))
 
 const baseRow = {
@@ -64,6 +67,28 @@ describe('ApplicationsTable · Koios column', () => {
     const rows = document.querySelectorAll('tbody tr')
     const values = Array.from(rows).map(r => r.children[col].textContent)
     expect(values).toEqual(['Volg op', '—'])
+  })
+})
+
+// KOIOS-ADVIES-OVERAL-1 regression: the free-text task advice used to bypass
+// ADVICE_META (inline adviceOfTask, no source tag, default sparkle icon). It now
+// flows through useApplicationAdvice → the shared KoiosAdvicePill, so with the
+// colour toggle on it renders the soft chip with ADVICE_META's task icon.
+describe('ApplicationsTable · task advice through the shared pill (KOIOS-ADVIES-OVERAL-1)', () => {
+  it('renders the coloured pill with the clipboard task icon, never a raw-text bypass', () => {
+    boolSettingOverrides['application_table_color_koios'] = true
+    try {
+      const withTask = { ...baseRow, id: 30, task: 'Bel de kandidaat terug' }
+      render(<ApplicationsTable rows={[withTask]} />)
+      const label = screen.getByText('Bel de kandidaat terug')
+      // The pill wrapper (SoftChip) carries the icon SVG next to the label —
+      // ADVICE_META's dedicated `task` entry, not the default sparkle fallback.
+      const chip = label.closest('span[style]') as HTMLElement
+      expect(chip.querySelector('svg.lucide-clipboard-list')).toBeInTheDocument()
+      expect(chip.querySelector('svg.lucide-sparkles')).toBeNull()
+    } finally {
+      delete boolSettingOverrides['application_table_color_koios']
+    }
   })
 })
 

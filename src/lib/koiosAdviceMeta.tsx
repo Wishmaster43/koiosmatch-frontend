@@ -1,5 +1,5 @@
 import type { ComponentType, CSSProperties, ReactNode } from 'react'
-import { Target, Phone, CalendarPlus, Sparkles, AlertTriangle, RefreshCw, Clock } from 'lucide-react'
+import { Target, Phone, CalendarPlus, Sparkles, AlertTriangle, RefreshCw, Clock, ClipboardList } from 'lucide-react'
 import SoftChip from '@/components/ui/SoftChip'
 
 type LucideIcon = ComponentType<{ size?: number; style?: CSSProperties }>
@@ -13,8 +13,9 @@ interface AdviceMeta { icon: LucideIcon; color: string }
 // CSS-var tokens):
 //   add_to_pool --color-primary · contact/attention --color-warning
 //   plan_intake/follow_up --color-map · renew --color-info · overdue --color-danger
-//   default --text-muted (also the fallback for the free-text 'task' action —
-//   applications' raw AI-suggested text has no dedicated meta, see koiosColumn rollout)
+//   task --text-muted (applications' free-text advice: the kind of task is unknown,
+//   so the colour stays neutral while the clipboard glyph says "suggested task")
+//   default --text-muted
 export const ADVICE_META: Record<string, AdviceMeta> = {
   add_to_pool: { icon: Target,       color: 'var(--color-primary-text)' },
   contact:     { icon: Phone,        color: 'var(--color-warning)' },
@@ -28,6 +29,8 @@ export const ADVICE_META: Record<string, AdviceMeta> = {
   renew:       { icon: RefreshCw,     color: 'var(--color-info)' },
   // Tasks: past its due date — mirrors the due-column's own overdue colour.
   overdue:     { icon: Clock,         color: 'var(--color-danger)' },
+  // Applications: the backend's free-text suggested next action (useApplicationAdvice).
+  task:        { icon: ClipboardList, color: 'var(--text-muted)' },
   default:     { icon: Sparkles,     color: 'var(--text-muted)' },
 }
 

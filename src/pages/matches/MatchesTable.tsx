@@ -9,11 +9,10 @@ import StatusPill from '@/components/ui/StatusPill'
 import SoftChip from '@/components/ui/SoftChip'
 import BackofficeCouplingIndicator from '@/components/ui/BackofficeCouplingIndicator'
 import { makeKoiosColumn } from '@/components/ui/koiosColumn'
-import type { KoiosAdvice } from '@/lib/koiosAdviceMeta'
 import { useMatchStatuses } from '@/lib/useMatchStatuses'
 import { useApps } from '@/context/AppsContext'
-import { useAllSettings, getBoolSetting, getNumberSetting } from '@/lib/settings/useAllSettings'
-import { deriveMatchAdvice } from './data/matchAdvice'
+import { useAllSettings, getBoolSetting } from '@/lib/settings/useAllSettings'
+import { useMatchAdvice } from '@/lib/useMatchAdvice'
 import ScorePill from './ScorePill'
 import ContractFormChip from './ContractFormChip'
 import type { MatchRow } from '@/types/match'
@@ -55,22 +54,9 @@ export default function MatchesTable({
   const colorStatus = getBoolSetting(settings, 'match_table_color_status', true)
   const colorOwner  = getBoolSetting(settings, 'match_table_color_owner', true)
   const colorKoios  = getBoolSetting(settings, 'match_table_color_koios', false)
-  // How many days before (or past) the end date counts as "approaching" — tenant-
-  // configurable, mirrors vacancies' staleDays.
-  const renewWithinDays = getNumberSetting(settings, 'match_advice_renew_days', 30)
-  // Shared Koios advice resolver (matchAdvice.ts) — honest: an open match whose
-  // end date is approaching or passed, an em-dash for everything else (closed,
-  // open-ended, or a comfortable runway).
-  const adviceOf = (m: MatchRow): KoiosAdvice | null => {
-    const rule = deriveMatchAdvice(m, { isClosed: Boolean(statusMeta(m.status)?.is_closed), renewWithinDays })
-    if (rule.action === 'none') return null
-    return {
-      action: rule.action,
-      label: t('common:koios.actions.renew'),
-      reason: t(rule.reasonKey, { ...rule.reasonParams, defaultValue: 'The contract end date is approaching.' }),
-      source: 'rules',
-    }
-  }
+  // The ONE shared Koios advice resolver (KOIOS-ADVIES-OVERAL-1) — the drawer
+  // calls the same hook, so table and drill-down can never disagree.
+  const adviceOf = useMatchAdvice()
   // Backoffice coupling column (JOB2): only shown for systems the tenant actually
   // enabled — mirrors BackofficeLinksTab's own isAppEnabled('hf'/'shiftmanager') gate.
   const apps = useApps()

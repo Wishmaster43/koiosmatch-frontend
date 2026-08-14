@@ -41,6 +41,8 @@ import type { FieldRow } from '@/components/forms/EditableFieldTable'
 import { useIndustries } from '@/lib/useIndustries'
 import { useLocations } from '@/lib/useLocations'
 import KoiosAdviceBlock from '@/components/ai/KoiosAdviceBlock'
+import { useCustomerAdvice } from '@/lib/useCustomerAdvice'
+import { adviceInsightRows } from '@/lib/koiosAdviceInsight'
 import BranchSection from '@/components/drawer/BranchSection'
 import ConfirmDialog from '@/components/ui/ConfirmDialog'
 import { emailValue, phoneValue, websiteValue, kvkValue, vatValue } from '@/components/drawer/contactLinks'
@@ -55,6 +57,9 @@ import type { Customer } from '@/types/customer'
 
 export default function OverviewTab({ c, onSave }: { c: Customer; onSave?: (values: Record<string, unknown>) => void }) {
   const { t, i18n } = useTranslation('customers')
+  // KOIOS-ADVIES-OVERAL-1: the SAME resolver the customers table's Koios column
+  // uses — the drawer block below prepends its advice so the two never disagree.
+  const resolveAdvice = useCustomerAdvice()
   const { industries } = useIndustries()
   // The tenant's own establishments (GET /locations) — the same source the match
   // form's Vestiging picker uses, so both screens offer exactly one list.
@@ -184,8 +189,11 @@ export default function OverviewTab({ c, onSave }: { c: Customer; onSave?: (valu
         popout={c.id != null ? { entity: 'customer', id: c.id, field: 'companyText' } : undefined}
         assistGenerate={c.id != null ? { entity: 'customer', id: String(c.id) } : undefined} />
 
-      {/* Koios AI advisory — company/location completeness + relationship activity (§3A blueprint). */}
-      <KoiosAdviceBlock namespace="customers" insights={buildCustomerAdviceInsights(c, t)} />
+      {/* Koios AI advisory — the table-identical advice row first (KOIOS-ADVIES-
+          OVERAL-1; [] when there is none), then company/location completeness +
+          relationship activity (§3A blueprint). */}
+      <KoiosAdviceBlock namespace="customers"
+        insights={[...adviceInsightRows(resolveAdvice(c)), ...buildCustomerAdviceInsights(c, t)]} />
 
       {/* VESTIGING — which of the tenant's establishments may see this customer. The
           single routing/invoicing branch that used to sit above it moved to the

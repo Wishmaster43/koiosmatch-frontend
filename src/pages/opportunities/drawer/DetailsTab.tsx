@@ -3,13 +3,16 @@ import EditableFieldTable from '@/components/forms/EditableFieldTable'
 import type { FieldRow } from '@/components/forms/EditableFieldTable'
 import { useOpportunityServiceTypes, useOpportunityAgreementTypes } from '@/lib/useOpportunityLookups'
 import OpportunityDescriptionBlock from './OpportunityDescriptionBlock'
+import OpportunityKoiosBlock from './OpportunityKoiosBlock'
 import { hasDescriptionText } from '../data/descriptionText'
 import type { Opportunity } from '@/types/opportunity'
-import type { Id } from '@/types/common'
+import type { Id, LookupOption } from '@/types/common'
 
 interface DetailsTabProps {
   opportunity: Opportunity
   onUpdate?: (id: Id | undefined, patch: Record<string, unknown>) => void
+  // Stage lookup (won/lost flags) for the Koios advice — same list the table gets.
+  stages?: LookupOption[]
 }
 
 /**
@@ -22,7 +25,7 @@ interface DetailsTabProps {
  * the deal fields — its own house pencil → save/cancel, PATCHing `description`
  * straight through (OpportunityRequest::sharedRules, nullable HTML, max 20000).
  */
-export default function DetailsTab({ opportunity: o, onUpdate }: DetailsTabProps) {
+export default function DetailsTab({ opportunity: o, onUpdate, stages = [] }: DetailsTabProps) {
   const { t } = useTranslation('opportunities')
   const { serviceTypes }   = useOpportunityServiceTypes()
   const { agreementTypes } = useOpportunityAgreementTypes()
@@ -93,6 +96,10 @@ export default function DetailsTab({ opportunity: o, onUpdate }: DetailsTabProps
       <EditableFieldTable title={t('details.groups.deal')} fields={dealFields} value={dealValue}
         onSave={onUpdate ? saveDeal : undefined} />
       {/* Organisation card dropped (Danny 2026-07-13): fase/eigenaar/aangemaakt all live in the drawer header already. */}
+      {/* KOIOS-ADVIES-OVERAL-1: the SAME advice the table's Koios column shows,
+          bottom of the main tab (mirrors the other drawers); renders nothing
+          when there is no advice. */}
+      <OpportunityKoiosBlock opportunity={o} stages={stages} />
     </div>
   )
 }

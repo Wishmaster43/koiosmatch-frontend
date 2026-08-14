@@ -1,11 +1,12 @@
 import { describe, it, expect, vi } from 'vitest'
-import { render, screen, fireEvent } from '@testing-library/react'
+import { render, screen, fireEvent, renderHook } from '@testing-library/react'
 // Real i18n (nl) instance — kept as a binding (not just the side-effect import) so
 // the T4 advice-block test below can read the SAME resolved string the component
 // renders, whether or not the reported nl copy for the new 'ai.*' keys has landed
 // in tasks.json yet (mirrors TaskDrawer.test.tsx's NT-TASK-1 pattern).
 import i18n from '@/i18n'
 import DetailsTab from './DetailsTab'
+import { useTaskAdvice } from '@/lib/useTaskAdvice'
 import type { TaskDetail } from '@/types/task'
 
 // Lookups/users arrive via mocked hooks — no providers needed.
@@ -179,6 +180,30 @@ describe('tasks DetailsTab — Koios advice block (T4)', () => {
     // just assert the two heuristic rows this fixture (no assignee, no links) drives.
     expect(screen.getByText(i18n.t('tasks:ai.assigneeLabel'))).toBeInTheDocument()
     expect(screen.getByText(i18n.t('tasks:ai.linksLabel'))).toBeInTheDocument()
+  })
+})
+
+// KOIOS-ADVIES-OVERAL-1: the drawer block shows EXACTLY the advice the table's
+// Koios column derives — asserted through the SAME resolver (useTaskAdvice),
+// never a copied literal.
+describe('tasks DetailsTab — table-identical Koios advice (KOIOS-ADVIES-OVERAL-1)', () => {
+  // Resolve the advice through the shared hook, exactly as TasksTable does.
+  const resolveVia = (fixture: TaskDetail) => renderHook(() => useTaskAdvice()).result.current(fixture)
+
+  it('shows the same label the table pill derives for an overdue task', () => {
+    // The base fixture's due date (2026-08-01) lies in the past and it is not done.
+    const expected = resolveVia(task)?.label
+    expect(expected).toBeTruthy()
+    render(<DetailsTab task={task} onUpdate={vi.fn()} />)
+    expect(screen.getByText(expected as string)).toBeInTheDocument()
+  })
+
+  it('renders no advice row on a clean (completed) task — heuristics only', () => {
+    const done: TaskDetail = { ...task, statusIsDone: true }
+    expect(resolveVia(done)).toBeNull()
+    const adviceLabel = resolveVia(task)?.label
+    render(<DetailsTab task={done} onUpdate={vi.fn()} />)
+    expect(screen.queryByText(adviceLabel as string)).not.toBeInTheDocument()
   })
 })
 

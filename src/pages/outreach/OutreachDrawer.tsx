@@ -42,6 +42,8 @@ import ChangelogPopover from '@/components/drawer/ChangelogPopover'
 import { initialsOf } from '@/lib/initials'
 import { useUsers } from '@/lib/queries'
 import { useOutreachDetail } from './hooks/useOutreachDetail'
+import type { Campaign } from './hooks/useOutreachCampaigns'
+import CampaignKoiosBlock from './drawer/CampaignKoiosBlock'
 import TargetsTab from './drawer/TargetsTab'
 import ChangelogTab from './drawer/ChangelogTab'
 import CampaignStatsTab from './drawer/CampaignStatsTab'
@@ -123,6 +125,18 @@ export default function OutreachDrawer({ id, createdAt, archived = false, archiv
   // the assign picker is a fresh multi-select, not a single current-value field).
   const recruiterOptions = users.map(u => ({ value: String(u.id), label: userName(u) }))
 
+  // KOIOS-ADVIES-OVERAL-1: feed the SAME resolver the table rows go through
+  // (useCampaignAdvice reads the list-row shape; CampaignDetail extends it).
+  // List/page fallbacks only fill fields the detail payload may lack, so the
+  // drawer's advice can never diverge from the row's. Null while loading: the
+  // advice block simply doesn't render yet (no empty shell).
+  const campaignRow: Campaign | null = detail ? {
+    ...detail,
+    targets_count: detail.targets_count ?? detail.targets?.length,
+    created_at: detail.created_at ?? createdAt,
+    archived: detail.archived ?? archived,
+  } : null
+
   // G31 — one shared filter axis, set by a Stats-tab donut click and read by the
   // Targets tab; clicking the SAME value again clears it (mirrors the page-level
   // insights row's donut toggle convention).
@@ -134,10 +148,17 @@ export default function OutreachDrawer({ id, createdAt, archived = false, archiv
   // by_status/by_outcome/by_assignee breakdown (G31); Extra is appended when defined.
   const tabs: EntityTab[] = [
     { id: 'targets', label: t('drawer.tabs.targets'), render: () => (
-      <TargetsTab targets={detail?.targets ?? []} loading={loading} error={error}
-        onSetStatus={setTargetStatus} onSetOutcome={setTargetOutcome} onSetNote={setTargetNote}
-        recruiters={recruiterOptions} onAssignTargets={assignTargets}
-        filter={targetFilter} onClearFilter={onClearFilter} />
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+        {/* KOIOS-ADVIES-OVERAL-1: the SAME advice the table's Koios column shows.
+            TOP of the main tab (written deviation from the other drawers' bottom
+            placement, §4 checklist): the call list below can be hundreds of rows,
+            and the block only mounts when there IS advice — absent it adds nothing. */}
+        {campaignRow && <CampaignKoiosBlock campaign={campaignRow} />}
+        <TargetsTab targets={detail?.targets ?? []} loading={loading} error={error}
+          onSetStatus={setTargetStatus} onSetOutcome={setTargetOutcome} onSetNote={setTargetNote}
+          recruiters={recruiterOptions} onAssignTargets={assignTargets}
+          filter={targetFilter} onClearFilter={onClearFilter} />
+      </div>
     ) },
     { id: 'stats', label: t('drawer.tabs.stats', { defaultValue: 'Stats' }), render: () => (
       <CampaignStatsTab campaignId={id} filter={targetFilter} onPick={onPickFilter} onClear={onClearFilter} />

@@ -8,10 +8,10 @@ import type { Column } from '@/components/ui/DataTable'
 import Avatar from '@/components/ui/Avatar'
 import EntityNameCell from '@/components/ui/EntityNameCell'
 import { makeKoiosColumn } from '@/components/ui/koiosColumn'
-import type { KoiosAdvice } from '@/lib/koiosAdviceMeta'
 import { initialsOf } from '@/lib/initials'
 import { useAllSettings, getBoolSetting } from '@/lib/settings/useAllSettings'
-import { deriveOpportunityAdvice, isExpectedCloseOverdue } from './data/opportunityAdvice'
+import { useOpportunityAdvice } from '@/lib/useOpportunityAdvice'
+import { isExpectedCloseOverdue } from './data/opportunityAdvice'
 import { opportunityValueOf, formatOpportunityValue } from './data/opportunityValue'
 import type { Opportunity } from '@/types/opportunity'
 import type { Id, LookupOption } from '@/types/common'
@@ -50,19 +50,10 @@ export default function OpportunitiesTable({ rows, loading, error, onRowClick, s
   const colorOwner = getBoolSetting(settings, 'opportunity_table_color_owner', true)
   const colorKoios = getBoolSetting(settings, 'opportunity_table_color_koios', false)
 
-  // Shared Koios advice resolver (opportunityAdvice.ts) — same overdue check the
-  // expectedClose cell below uses for its red/bold styling (§11: one computation,
-  // two consumers, never a second copy).
-  const adviceOf = (r: Opportunity): KoiosAdvice | null => {
-    const rule = deriveOpportunityAdvice(r, stages)
-    if (rule.action === 'none') return null
-    return {
-      action: rule.action,
-      label: t('common:koios.actions.follow_up'),
-      reason: t(rule.reasonKey, { defaultValue: 'The expected close date has passed.' }),
-      source: 'rules',
-    }
-  }
+  // The ONE shared Koios advice resolver (KOIOS-ADVIES-OVERAL-1) — the drawer
+  // calls the same hook, so table and drill-down can never disagree. Same
+  // overdue check the expectedClose cell below uses for its red/bold styling.
+  const adviceOf = useOpportunityAdvice(stages)
 
   const columns: Column<Opportunity>[] = [
     { key: 'title', header: t('cols.title'), sortable: true, sticky: true, width: 300, nowrap: true,

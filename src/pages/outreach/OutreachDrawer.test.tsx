@@ -8,7 +8,7 @@
  * way). (The live seed has no archived campaigns, so this wiring is verified here.)
  */
 import { describe, it, expect, vi, afterEach } from 'vitest'
-import { render, screen, fireEvent, act } from '@testing-library/react'
+import { render, screen, fireEvent, act, renderHook } from '@testing-library/react'
 // Real i18n (nl) side-effect init so t() resolves genuine Dutch text.
 import '@/i18n'
 import nlCommon from '@/i18n/locales/nl/common.json'
@@ -18,6 +18,8 @@ import nlOutreach from '@/i18n/locales/nl/outreach.json'
 // defaultValue ("Stats") and now resolves the real key, so hardcoding either one
 // makes this test a hostage of translation work.
 import OutreachDrawer from './OutreachDrawer'
+import { useCampaignAdvice } from '@/lib/useCampaignAdvice'
+import type { Campaign } from './hooks/useOutreachCampaigns'
 
 const statsTabLabel = (nlOutreach as { drawer: { tabs: { stats: string } } }).drawer.tabs.stats
 
@@ -191,5 +193,35 @@ describe('OutreachDrawer — G29/G30/G31 wiring (assign, note, stats filter)', (
     // still mounted on this render pass.
     rerender(<OutreachDrawer id="c2" onClose={() => {}} />)
     expect(targetsTabProps.current?.filter).toBeNull()
+  })
+})
+
+// KOIOS-ADVIES-OVERAL-1: the drawer shows EXACTLY the advice the bellijsten
+// table's Koios column derives — asserted through the SAME resolver
+// (useCampaignAdvice), never a copied literal. Without advice the section stays
+// unmounted entirely (no empty shell above the call list).
+describe('OutreachDrawer — table-identical Koios advice (KOIOS-ADVIES-OVERAL-1)', () => {
+  const aiTitle = (nlCommon as { ai: { title: string } }).ai.title
+  afterEach(() => { detailReturn.current = null })
+
+  // Resolve the advice through the shared hook, exactly as OutreachList does.
+  const resolveVia = (c: Campaign) => renderHook(() => useCampaignAdvice()).result.current(c)
+
+  it('shows the block with the same label the table pill derives for an active list without targets', () => {
+    const campaign: Campaign = { id: 'c1', name: 'Bellijst Zorg', status: 'active', targets_count: 0 }
+    detailReturn.current = { ...campaign, targets: [] }
+    const expected = resolveVia(campaign)?.label
+    expect(expected).toBeTruthy()
+    render(<OutreachDrawer id="c1" onClose={() => {}} />)
+    expect(screen.getByText(aiTitle)).toBeInTheDocument()
+    expect(screen.getByText(expected as string)).toBeInTheDocument()
+  })
+
+  it('renders NO advice block on a clean campaign (resolver returns null)', () => {
+    const campaign: Campaign = { id: 'c1', name: 'Bellijst Zorg', status: 'done', targets_count: 0 }
+    expect(resolveVia(campaign)).toBeNull()
+    detailReturn.current = { ...campaign, targets: [] }
+    render(<OutreachDrawer id="c1" onClose={() => {}} />)
+    expect(screen.queryByText(aiTitle)).not.toBeInTheDocument()
   })
 })

@@ -7,13 +7,16 @@
  * this file focuses on the new description wiring only.
  */
 import { describe, it, expect, vi } from 'vitest'
-import { render, screen, within } from '@testing-library/react'
+import { render, screen, within, renderHook } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-// Real i18n (nl) side-effect init so common:edit/save (OpportunityDescriptionBlock)
-// resolve genuine Dutch text — mirrors OpportunityDrawer.test.tsx.
-import '@/i18n'
+// Real i18n (nl) instance so common:edit/save (OpportunityDescriptionBlock)
+// resolve genuine Dutch text — mirrors OpportunityDrawer.test.tsx. Kept as a
+// binding so the Koios tests below can read the shared common:ai.title copy.
+import i18n from '@/i18n'
 import DetailsTab from './DetailsTab'
+import { useOpportunityAdvice } from '@/lib/useOpportunityAdvice'
 import type { Opportunity } from '@/types/opportunity'
+import type { LookupOption } from '@/types/common'
 
 vi.mock('@/lib/useOpportunityLookups', () => ({
   useOpportunityServiceTypes: () => ({ serviceTypes: [] }),
@@ -86,5 +89,40 @@ describe('DetailsTab · Kanstekst wiring (OPP-DESCRIPTION-1)', () => {
     await user.click(descriptionSaveButton())
 
     expect(onUpdate).toHaveBeenCalledWith('opp-1', { description: null })
+  })
+})
+
+// KOIOS-ADVIES-OVERAL-1: the drawer's advice section shows EXACTLY the advice
+// the opportunities table's Koios column derives — asserted through the SAME
+// resolver (useOpportunityAdvice), never a copied literal. With no advice the
+// whole section stays unmounted (no empty shell).
+describe('DetailsTab · table-identical Koios advice (KOIOS-ADVIES-OVERAL-1)', () => {
+  const stages: LookupOption[] = [
+    { value: 'open', label: 'Open' },
+    { value: 'won', label: 'Gewonnen', isWon: true },
+  ]
+  // Resolve the advice through the shared hook, exactly as OpportunitiesTable does.
+  const resolveVia = (o: Opportunity) => renderHook(() => useOpportunityAdvice(stages)).result.current(o)
+  const overdueDeal = { ...baseOpportunity, stageValue: 'open', expectedCloseAt: '2026-01-01' } as unknown as Opportunity
+
+  it('shows the block with the same label the table pill derives for an overdue open deal', () => {
+    const expected = resolveVia(overdueDeal)?.label
+    expect(expected).toBeTruthy()
+    render(<DetailsTab opportunity={overdueDeal} onUpdate={vi.fn()} stages={stages} />)
+    expect(screen.getByText(expected as string)).toBeInTheDocument()
+    expect(screen.getByText(i18n.t('ai.title', { ns: 'common' }))).toBeInTheDocument()
+  })
+
+  it('renders NO advice block at all on a clean deal (resolver returns null)', () => {
+    expect(resolveVia(baseOpportunity)).toBeNull()
+    render(<DetailsTab opportunity={baseOpportunity} onUpdate={vi.fn()} stages={stages} />)
+    expect(screen.queryByText(i18n.t('ai.title', { ns: 'common' }))).not.toBeInTheDocument()
+  })
+
+  it('renders NO advice block on a WON deal even when its close date has passed', () => {
+    const wonDeal = { ...overdueDeal, stageValue: 'won' } as unknown as Opportunity
+    expect(resolveVia(wonDeal)).toBeNull()
+    render(<DetailsTab opportunity={wonDeal} onUpdate={vi.fn()} stages={stages} />)
+    expect(screen.queryByText(i18n.t('ai.title', { ns: 'common' }))).not.toBeInTheDocument()
   })
 })

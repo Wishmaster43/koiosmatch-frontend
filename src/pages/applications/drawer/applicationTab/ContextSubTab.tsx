@@ -3,6 +3,8 @@ import { useTranslation } from 'react-i18next'
 import { ShieldCheck } from 'lucide-react'
 import { useDateFormat } from '@/lib/datetime'
 import KoiosAdviceBlock from '@/components/ai/KoiosAdviceBlock'
+import { useApplicationAdvice } from '@/lib/useApplicationAdvice'
+import { adviceInsightRows } from '@/lib/koiosAdviceInsight'
 import SectionCard from '@/components/ui/SectionCard'
 import SafeHtml from '@/components/ui/SafeHtml'
 import { buildApplicationAdviceInsights } from '../applicationAiInsights'
@@ -38,6 +40,9 @@ const collapsedHeight = 160
 export default function ContextSubTab({ application: a }: ContextSubTabProps) {
   const { t } = useTranslation(['applications', 'common'])
   const { formatDateTime } = useDateFormat()
+  // KOIOS-ADVIES-OVERAL-1: the SAME resolver the applications table's Koios
+  // column uses (the AI task) — prepended below so the two never disagree.
+  const resolveAdvice = useApplicationAdvice()
   // V-appdetail-4: motivation letter expand — read-only, no persistence involved.
   const [letterExpanded, setLetterExpanded] = useState(false)
   const letterIsLong = (a.coverLetter?.replace(/<[^>]*>/g, '').length ?? 0) > COLLAPSE_THRESHOLD
@@ -87,10 +92,13 @@ export default function ContextSubTab({ application: a }: ContextSubTabProps) {
         </div>
       )}
 
-      {/* Koios AI advisory — the AI task (if any, DUPLICATE-AI-BLOCK-1), phase
-          progress and vacancy-link completeness (§3A blueprint), all in ONE
-          AI-branded block (no more standalone "Taak" block next to it). */}
-      <KoiosAdviceBlock namespace="applications" insights={buildApplicationAdviceInsights(a, t)} />
+      {/* Koios AI advisory — the table-identical AI-task advice first (KOIOS-
+          ADVIES-OVERAL-1, resolved by useApplicationAdvice; [] when there is
+          none), then phase progress and vacancy-link completeness (§3A
+          blueprint), all in ONE AI-branded block (DUPLICATE-AI-BLOCK-1: no
+          standalone "Taak" block next to it). */}
+      <KoiosAdviceBlock namespace="applications"
+        insights={[...adviceInsightRows(resolveAdvice(a)), ...buildApplicationAdviceInsights(a, t)]} />
     </div>
   )
 }
