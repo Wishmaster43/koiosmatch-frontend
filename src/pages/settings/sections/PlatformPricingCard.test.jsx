@@ -9,6 +9,12 @@ import userEvent from '@testing-library/user-event'
 import i18n from '@/i18n'
 import api from '@/lib/api'
 import PlatformPricingCard from './PlatformPricingCard'
+import { notifySuccess } from '@/lib/notify'
+
+vi.mock('@/lib/notify', async () => {
+  const actual = await vi.importActual('@/lib/notify')
+  return { ...actual, notifyError: vi.fn(), notifySuccess: vi.fn() }
+})
 
 vi.mock('@/lib/api', async () => {
   const actual = await vi.importActual('@/lib/api')
@@ -46,6 +52,8 @@ describe('PlatformPricingCard', () => {
     await waitFor(() => expect(api.put).toHaveBeenCalledWith('/admin/platform-pricing', {
       ai_markup_percent: 75, workflow_credit_price: 0,
     }))
+    // A successful autosave surfaces a visible confirmation toast.
+    await waitFor(() => expect(notifySuccess).toHaveBeenCalledWith(t('platformPricing.saved')))
   })
 
   it('reverts the field and toasts on a save failure (optimistic-with-revert)', async () => {
@@ -61,5 +69,6 @@ describe('PlatformPricingCard', () => {
     await waitFor(() => expect(api.put).toHaveBeenCalled())
     // Reverted back to the last server-confirmed value (0) after the failed save.
     await waitFor(() => expect(priceInput).toHaveValue(0))
+    expect(notifySuccess).not.toHaveBeenCalled()
   })
 })

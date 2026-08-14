@@ -102,6 +102,8 @@
     "modules": "Forfait",
     "apps": "Apps (connecteurs)",
     "admin_jobs": "Gestion des tâches",
+    "admin_invoice_settings": "Paramètres de facturation",
+    "admin_invoices": "Factures (admin)",
     "roles": "Rôles et droits",
     "users": "Utilisateurs",
     "sync": "Synchronisation",
@@ -2491,6 +2493,24 @@
       "waBusiness": "WhatsApp Business",
       "hours": "Heures traitées",
       "connectors": "Connecteurs"
+    },
+    "details": {
+      "title": "Détails de consommation par mois",
+      "colMonth": "Mois",
+      "colAiTokens": "Jetons IA",
+      "colAiCalls": "Appels IA",
+      "colWorkflowRuns": "Exécutions de workflow",
+      "colTotalAmount": "Montant total",
+      "expandLabel": "Afficher les détails",
+      "empty": "Aucun historique de consommation pour le moment.",
+      "noData": "Aucune donnée.",
+      "aiCost": "Coût IA",
+      "purchase": "Achat",
+      "sale": "Vente",
+      "margin": "Marge",
+      "workflowPerModule": "Exécutions de workflow par module",
+      "colModule": "Module",
+      "colRuns": "Exécutions"
     }
   },
   "jobs": {
@@ -2957,7 +2977,8 @@
     "subtitle": "Marge IA et prix du crédit workflow pour toute la plateforme (superadmin).",
     "markupLabel": "Marge IA (%)",
     "creditPriceLabel": "Prix du crédit workflow (€)",
-    "loadError": "Échec du chargement de la tarification de la plateforme."
+    "loadError": "Échec du chargement de la tarification de la plateforme.",
+    "saved": "Tarification de la plateforme enregistrée."
   },
   "invoiceSettings": {
     "title": "Paramètres de facturation",

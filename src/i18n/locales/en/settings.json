@@ -106,6 +106,8 @@
     "usage": "Usage",
     "apps": "Connectors",
     "admin_jobs": "Task manager",
+    "admin_invoice_settings": "Invoice settings",
+    "admin_invoices": "Invoices (admin)",
     "roles": "Roles & permissions",
     "users": "Users",
     "sync": "Synchronisation",
@@ -2491,6 +2493,24 @@
       "waBusiness": "WhatsApp Business",
       "hours": "Processed hours",
       "connectors": "Connectors"
+    },
+    "details": {
+      "title": "Usage details per month",
+      "colMonth": "Month",
+      "colAiTokens": "AI tokens",
+      "colAiCalls": "AI calls",
+      "colWorkflowRuns": "Workflow runs",
+      "colTotalAmount": "Total amount",
+      "expandLabel": "Show details",
+      "empty": "No usage history yet.",
+      "noData": "No data.",
+      "aiCost": "AI cost",
+      "purchase": "Purchase",
+      "sale": "Sale",
+      "margin": "Margin",
+      "workflowPerModule": "Workflow runs per module",
+      "colModule": "Module",
+      "colRuns": "Runs"
     }
   },
   "jobs": {
@@ -2957,7 +2977,8 @@
     "subtitle": "AI markup and workflow credit price for the whole platform (superadmin).",
     "markupLabel": "AI markup (%)",
     "creditPriceLabel": "Workflow credit price (€)",
-    "loadError": "Failed to load platform pricing."
+    "loadError": "Failed to load platform pricing.",
+    "saved": "Platform pricing saved."
   },
   "invoiceSettings": {
     "title": "Invoice settings",

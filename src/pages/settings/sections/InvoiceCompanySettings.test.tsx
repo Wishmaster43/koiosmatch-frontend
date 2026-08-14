@@ -45,6 +45,29 @@ describe('InvoiceCompanySettings', () => {
     await waitFor(() => expect(api.put).toHaveBeenCalledWith('/admin/invoice-settings', expect.objectContaining({ invoice_company_name: 'Yesway Flex B.V.' })))
   })
 
+  // i18n coverage: every label renders the translated key value, never a raw
+  // Dutch/English literal or an unresolved 'invoiceSettings.*' key string.
+  it('renders every visible label from t() in both nl and en, never a raw literal or unresolved key', async () => {
+    for (const lng of ['nl', 'en']) {
+      i18n.changeLanguage(lng)
+      api.get.mockResolvedValueOnce({ data: {
+        invoice_company_name: 'Yesway Flex B.V.', invoice_address: 'Straat 1', invoice_postal_city: '1234 AB Stad',
+        invoice_coc_number: '12345678', invoice_vat_number: 'NL123456789B01', invoice_iban: 'NL00BANK0123456789',
+        invoice_email: 'facturen@yesway.nl', invoice_vat_percent: 21, invoice_number_prefix: 'KM-', invoice_auto_finalize: false,
+      } })
+      const { unmount } = renderScreen()
+      expect(await screen.findByText(i18n.t('invoiceSettings.title', { ns: 'settings' }))).toBeInTheDocument()
+      expect(screen.getByText(i18n.t('invoiceSettings.sectionCompany', { ns: 'settings' }))).toBeInTheDocument()
+      expect(screen.getByText(i18n.t('invoiceSettings.sectionNumbering', { ns: 'settings' }))).toBeInTheDocument()
+      expect(screen.getByText(i18n.t('invoiceSettings.companyName', { ns: 'settings' }))).toBeInTheDocument()
+      expect(screen.getByText(i18n.t('invoiceSettings.vatPercent', { ns: 'settings' }))).toBeInTheDocument()
+      expect(screen.getByText(i18n.t('invoiceSettings.autoFinalize', { ns: 'settings' }))).toBeInTheDocument()
+      expect(screen.getByRole('button', { name: i18n.t('common.save', { ns: 'settings' }) })).toBeInTheDocument()
+      expect(screen.queryByText(/invoiceSettings\./)).not.toBeInTheDocument()
+      unmount()
+    }
+  })
+
   it('reverts the form to the last saved snapshot when the PUT fails', async () => {
     api.get.mockResolvedValueOnce({ data: {
       invoice_company_name: 'Yesway Flex B.V.', invoice_address: '', invoice_postal_city: '',

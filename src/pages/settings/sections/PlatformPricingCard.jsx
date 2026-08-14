@@ -5,12 +5,16 @@
  * ik prijzen in"). House pattern: optimistic save-on-blur with revert + toast on
  * failure (mirrors MatchRatesSettings' conversion-factor field). Units are always
  * shown next to the input (% / €) so a bare number never reads as ambiguous.
+ * Danny 14-08 asked "where is the save button" — this field already persists
+ * automatically on blur, so instead of adding a redundant explicit button we
+ * made the existing autosave visible: a success toast confirms the write, so
+ * the recruiter never wonders whether a typed value actually landed.
  */
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Percent, Euro } from 'lucide-react'
 import api, { unwrap } from '@/lib/api'
-import { notifyError } from '@/lib/notify'
+import { notifyError, notifySuccess } from '@/lib/notify'
 import { extractApiError } from '@/lib/extractApiError'
 
 const card = { border: '1px solid var(--border)', borderRadius: 10, padding: 16, marginBottom: 28, background: 'var(--surface)' }
@@ -57,6 +61,7 @@ export default function PlatformPricingCard() {
     try {
       await api.put('/admin/platform-pricing', { ai_markup_percent: mNum, workflow_credit_price: pNum })
       setSaved({ markup: nextMarkup, price: nextPrice })
+      notifySuccess(t('platformPricing.saved'))
     } catch (err) {
       setMarkup(saved.markup); setPrice(saved.price)
       notifyError(extractApiError(err, t('common:actionFailed')))

@@ -102,6 +102,8 @@
     "modules": "Paquete",
     "apps": "Apps (conectores)",
     "admin_jobs": "Gestión de tareas",
+    "admin_invoice_settings": "Configuración de facturación",
+    "admin_invoices": "Facturas (admin)",
     "roles": "Roles y permisos",
     "users": "Usuarios",
     "sync": "Sincronización",
@@ -2491,6 +2493,24 @@
       "waBusiness": "WhatsApp Business",
       "hours": "Horas procesadas",
       "connectors": "Conectores"
+    },
+    "details": {
+      "title": "Detalles de consumo por mes",
+      "colMonth": "Mes",
+      "colAiTokens": "Tokens de IA",
+      "colAiCalls": "Llamadas de IA",
+      "colWorkflowRuns": "Ejecuciones de workflow",
+      "colTotalAmount": "Importe total",
+      "expandLabel": "Mostrar detalles",
+      "empty": "Todavía no hay historial de consumo.",
+      "noData": "Sin datos.",
+      "aiCost": "Coste de IA",
+      "purchase": "Compra",
+      "sale": "Venta",
+      "margin": "Margen",
+      "workflowPerModule": "Ejecuciones de workflow por módulo",
+      "colModule": "Módulo",
+      "colRuns": "Ejecuciones"
     }
   },
   "jobs": {
@@ -2957,7 +2977,8 @@
     "subtitle": "Margen de IA y precio del crédito de workflow para toda la plataforma (superadmin).",
     "markupLabel": "Margen de IA (%)",
     "creditPriceLabel": "Precio del crédito de workflow (€)",
-    "loadError": "No se pudo cargar los precios de la plataforma."
+    "loadError": "No se pudo cargar los precios de la plataforma.",
+    "saved": "Precios de la plataforma guardados."
   },
   "invoiceSettings": {
     "title": "Configuración de facturación",

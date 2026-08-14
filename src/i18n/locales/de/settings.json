@@ -102,6 +102,8 @@
     "modules": "Paket",
     "apps": "Apps (Connectors)",
     "admin_jobs": "Aufgabenverwaltung",
+    "admin_invoice_settings": "Rechnungseinstellungen",
+    "admin_invoices": "Rechnungen (Admin)",
     "roles": "Rollen & Rechte",
     "users": "Benutzer",
     "sync": "Synchronisierung",
@@ -2491,6 +2493,24 @@
       "waBusiness": "WhatsApp Business",
       "hours": "Verarbeitete Stunden",
       "connectors": "Konnektoren"
+    },
+    "details": {
+      "title": "Verbrauchsdetails pro Monat",
+      "colMonth": "Monat",
+      "colAiTokens": "KI-Tokens",
+      "colAiCalls": "KI-Aufrufe",
+      "colWorkflowRuns": "Workflow-Ausführungen",
+      "colTotalAmount": "Gesamtbetrag",
+      "expandLabel": "Details anzeigen",
+      "empty": "Noch keine Verbrauchshistorie.",
+      "noData": "Keine Daten.",
+      "aiCost": "KI-Kosten",
+      "purchase": "Einkauf",
+      "sale": "Verkauf",
+      "margin": "Marge",
+      "workflowPerModule": "Workflow-Ausführungen pro Modul",
+      "colModule": "Modul",
+      "colRuns": "Ausführungen"
     }
   },
   "jobs": {
@@ -2957,7 +2977,8 @@
     "subtitle": "KI-Marge und Workflow-Creditpreis für die gesamte Plattform (Superadmin).",
     "markupLabel": "KI-Marge (%)",
     "creditPriceLabel": "Workflow-Creditpreis (€)",
-    "loadError": "Plattformpreise konnten nicht geladen werden."
+    "loadError": "Plattformpreise konnten nicht geladen werden.",
+    "saved": "Plattformpreise gespeichert."
   },
   "invoiceSettings": {
     "title": "Rechnungseinstellungen",

@@ -15,6 +15,7 @@ import { useTranslation } from 'react-i18next'
 import { Download, FileSpreadsheet, Loader2, RefreshCw, Send } from 'lucide-react'
 import api, { unwrap } from '@/lib/api'
 import { useNumberFormat } from '@/lib/formatters'
+import { useLocale } from '@/lib/datetime'
 import { notifyError, notifySuccess } from '@/lib/notify'
 import { extractApiError } from '@/lib/extractApiError'
 import StatusPill from '@/components/ui/StatusPill'
@@ -37,13 +38,15 @@ type AdminInvoice = Required<
 type GenerateResult = operations['postAdminInvoicesGenerate']['responses'][200]['content']['application/json']
 
 // Last 12 months as { value: 'YYYY-MM', label } — newest first (mirrors TenantUsageSettings).
-function buildMonths() {
+// Locale comes from the caller (house `useLocale()`) so the month name follows
+// the active UI language instead of a hardcoded 'nl-NL' (§5 locale-aware formatting).
+function buildMonths(locale: string) {
   return Array.from({ length: 12 }, (_, i) => {
     const d = new Date()
     d.setDate(1)
     d.setMonth(d.getMonth() - i)
     const value = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`
-    const label = d.toLocaleDateString('nl-NL', { month: 'long', year: 'numeric' })
+    const label = d.toLocaleDateString(locale, { month: 'long', year: 'numeric' })
     return { value, label }
   })
 }
@@ -65,7 +68,8 @@ async function downloadBlob(route: string, params: Record<string, string>, filen
 export default function AdminInvoicesSettings() {
   const { t } = useTranslation('settings')
   const { formatCurrency } = useNumberFormat()
-  const months = useMemo(() => buildMonths(), [])
+  const locale = useLocale()
+  const months = useMemo(() => buildMonths(locale), [locale])
   const [month, setMonth] = useState(months[0].value)
   const [invoices, setInvoices] = useState<AdminInvoice[]>([])
   const [phase, setPhase] = useState<'loading' | 'error' | 'empty' | 'ready'>('loading')

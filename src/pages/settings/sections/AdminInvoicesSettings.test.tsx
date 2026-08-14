@@ -87,6 +87,28 @@ describe('AdminInvoicesSettings', () => {
     vi.unstubAllGlobals()
   })
 
+  // i18n coverage: every label renders the translated key value, never a raw
+  // Dutch/English literal or an unresolved 'adminInvoices.*' key string.
+  it('renders every visible label from t() in both nl and en, never a raw literal or unresolved key', async () => {
+    for (const lng of ['nl', 'en']) {
+      i18n.changeLanguage(lng)
+      api.get.mockResolvedValueOnce({ data: [
+        { id: 'inv-d', tenant_id: 't1', tenant_name: 'Yesway', number: null, period: '2026-08', status: 'draft', total: 100, vat_amount: 21, finalized_at: null, sent_at: null },
+      ] })
+      const { unmount } = renderScreen()
+      expect(await screen.findByText(i18n.t('adminInvoices.title', { ns: 'settings' }))).toBeInTheDocument()
+      expect(screen.getByText(i18n.t('adminInvoices.colTenant', { ns: 'settings' }))).toBeInTheDocument()
+      expect(screen.getByText(i18n.t('adminInvoices.colNumber', { ns: 'settings' }))).toBeInTheDocument()
+      expect(screen.getByText(i18n.t('adminInvoices.colTotal', { ns: 'settings' }))).toBeInTheDocument()
+      expect(screen.getByText(i18n.t('adminInvoices.colStatus', { ns: 'settings' }))).toBeInTheDocument()
+      expect(screen.getByText(i18n.t('adminInvoices.status.draft', { ns: 'settings' }))).toBeInTheDocument()
+      expect(screen.getByRole('button', { name: i18n.t('adminInvoices.generate', { ns: 'settings' }) })).toBeInTheDocument()
+      expect(screen.getByRole('button', { name: i18n.t('adminInvoices.exportXlsx', { ns: 'settings' }) })).toBeInTheDocument()
+      expect(screen.queryByText(/adminInvoices\./)).not.toBeInTheDocument()
+      unmount()
+    }
+  })
+
   it('exports xlsx via GET /admin/invoices/export with the selected month', async () => {
     vi.stubGlobal('URL', { ...URL, createObjectURL, revokeObjectURL })
     api.get.mockResolvedValueOnce({ data: [

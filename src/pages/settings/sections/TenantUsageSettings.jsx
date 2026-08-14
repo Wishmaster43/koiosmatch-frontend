@@ -9,6 +9,7 @@ import { useTranslation } from 'react-i18next'
 import api, { unwrap } from '@/lib/api'
 import { useAuth } from '@/context/AuthContext'
 import SearchSelect from '@/components/ui/SearchSelect'
+import TenantUsageDetailsTable from './TenantUsageDetailsTable'
 
 const num = (v) => (v == null ? '—' : Number(v).toLocaleString('nl-NL'))
 
@@ -116,6 +117,15 @@ export default function TenantUsageSettings() {
                 </div>
               ))}
           </div>
+
+          {/* Per-month detail — the 12-month history the endpoint already returns,
+              expandable per row into AI cost / workflow-per-module / connector
+              breakdowns (§ usage details, 14-08). */}
+          <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase',
+            letterSpacing: '0.05em', marginTop: 24, marginBottom: 10 }}>
+            {t('usage.details.title')}
+          </div>
+          <TenantUsageDetailsTable history={usage?.history} />
         </>
       )}
     </div>
