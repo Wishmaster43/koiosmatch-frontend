@@ -95,14 +95,39 @@ export function useCustomerOpportunities(customerId?: Id) {
 
 export interface ShiftRow { id?: Id; date?: string; shift?: string; department?: string }
 
+// PLANNING-CONFIG-1: `meta.planning_configured === false` marks the backend's honest
+// "this agency has no active planning coupling yet" state — a 200 with the same empty
+// shape a real success would have, NOT an error. `reason` is the server's own (Dutch,
+// untranslated) sentence, kept only as an optional detail/tooltip — the primary copy the
+// UI renders is our own translated string (never print `reason` as the headline).
+export interface PlanningMeta { planning_configured: boolean; reason?: string }
+
+// A response's `meta` block, read straight off the raw payload since unwrap()/unwrapList()
+// intentionally drop it (they only carry pagination meta). A response with no meta at all
+// (a genuine success) is treated as configured.
+function readPlanningMeta(res: { data?: unknown }): PlanningMeta {
+  const body = (res as { data?: { meta?: { planning_configured?: boolean; reason?: string } } })?.data ?? {}
+  const meta = body?.meta
+  return { planning_configured: meta?.planning_configured !== false, reason: meta?.reason }
+}
+
 // Open flex shifts for a customer (GET /customers/{id}/open-shifts); planning-gated by `enabled`.
 export function useCustomerOpenShifts(customerId: Id | undefined, enabled: boolean) {
-  const { data = [], isLoading: loading } = useQuery({
+  const { data, isLoading: loading, isError: error } = useQuery({
     queryKey: ['customers', customerId, 'open-shifts'],
     enabled: enabled && !!customerId,
-    queryFn: async ({ signal }): Promise<ShiftRow[]> => unwrapList<ShiftRow>(await api.get(`/customers/${customerId}/open-shifts`, { signal })).rows,
+    queryFn: async ({ signal }): Promise<{ rows: ShiftRow[]; planning: PlanningMeta }> => {
+      const res = await api.get(`/customers/${customerId}/open-shifts`, { signal })
+      return { rows: unwrapList<ShiftRow>(res).rows, planning: readPlanningMeta(res) }
+    },
   })
-  return { rows: data, loading }
+  return {
+    rows: data?.rows ?? [],
+    loading,
+    error,
+    planningConfigured: data?.planning.planning_configured ?? true,
+    planningReason: data?.planning.reason,
+  }
 }
 
 export interface UpcomingShift { id?: Id; date?: string; shift?: string; department?: string; candidate?: { name?: string } | string | null }
@@ -110,15 +135,21 @@ export interface PlanningData { active_now?: number; upcoming?: UpcomingShift[] 
 
 // Planning summary for a customer scope (GET /customers/{id}/planning-summary); planning-gated.
 export function useCustomerPlanning(customerId: Id | undefined, enabled: boolean, params?: Record<string, unknown>) {
-  const { data = null, isLoading: loading } = useQuery({
+  const { data, isLoading: loading, isError: error } = useQuery({
     queryKey: ['customers', customerId, 'planning-summary', params ?? {}],
     enabled: enabled && !!customerId,
-    queryFn: async ({ signal }): Promise<PlanningData | null> => {
+    queryFn: async ({ signal }): Promise<{ data: PlanningData | null; planning: PlanningMeta }> => {
       const r = await api.get(`/customers/${customerId}/planning-summary`, { params, signal })
-      return (unwrap(r) ?? null) as PlanningData | null
+      return { data: (unwrap(r) ?? null) as PlanningData | null, planning: readPlanningMeta(r) }
     },
   })
-  return { data, loading }
+  return {
+    data: data?.data ?? null,
+    loading,
+    error,
+    planningConfigured: data?.planning.planning_configured ?? true,
+    planningReason: data?.planning.reason,
+  }
 }
 
 // A customer's match row = the shared MatchRow (mapMatch, matches/hooks/useMatches)

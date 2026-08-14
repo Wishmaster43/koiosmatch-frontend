@@ -260,6 +260,12 @@ export interface ApplicationBucketCounts { active: number; matched: number; reje
 // as the drill/advice XOR param — 'none' and 'others' are both real, clickable rows.
 export interface ApplicationTopSegment { value: string; label: string; count: number }
 
+// FASE-DUUR-1: the pipeline-NOW occupancy per active funnel stage + its average
+// days-in-phase (ApplicationsReport::stageDurationDistribution). `value` doubles as
+// the `stage_duration` drill XOR param — the SAME stage-key vocabulary as `by_stage`,
+// a different axis (longest-hanging rows, not just "in this stage").
+export interface ApplicationStageDurationSegment { value: string; label: string; count: number; avg_days_in_phase: number | null }
+
 export interface ApplicationsReportData {
   period: string
   from: string
@@ -272,6 +278,7 @@ export interface ApplicationsReportData {
   by_owner: CandidateOwnerSegment[]
   by_customer: ApplicationTopSegment[]
   by_vacancy: ApplicationTopSegment[]
+  by_stage_duration: ApplicationStageDurationSegment[]
 }
 
 // ── Customers report (GET /reports/customers, RAPPORTEN-SUITE-1 "portie 3") ──

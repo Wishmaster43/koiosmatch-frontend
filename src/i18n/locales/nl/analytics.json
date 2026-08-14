@@ -266,7 +266,8 @@
       "source": "Bron",
       "owner": "Eigenaar",
       "customer": "Klant",
-      "vacancy": "Vacature"
+      "vacancy": "Vacature",
+      "stageDuration": "Te lang in fase"
     },
     "buckets": {
       "active": "Actief",
@@ -529,5 +530,18 @@
       "ai": "Koios AI",
       "workflows": "Workflows"
     }
+  },
+  "compare": {
+    "label": "Vergelijk met",
+    "mode": {
+      "off": "Geen vergelijking",
+      "previous_period": "Vorige periode",
+      "previous_year": "Vorig jaar",
+      "custom": "Aangepaste periode"
+    },
+    "customFrom": "Vergelijk vanaf",
+    "customTo": "Vergelijk tot",
+    "rangeSeparator": "tot en met",
+    "previousValue": "vorige: {{value}}"
   }
 }

@@ -480,7 +480,9 @@
       "shift": "Mission",
       "department": "Service"
     },
-    "searchPlaceholder": "Rechercher une opportunité…"
+    "searchPlaceholder": "Rechercher une opportunité…",
+    "notConfigured": "Le planning n'est pas encore connecté pour cette agence.",
+    "openShiftsError": "Impossible de charger les données de planning."
   },
   "planning": {
     "title": "Planning",
@@ -489,7 +491,9 @@
     "upcoming": "Missions à venir",
     "upcomingEmpty": "Aucune mission à venir.",
     "off": "Les informations de planning apparaissent dès que le module Planning est actif.",
-    "open": "Ouvert"
+    "open": "Ouvert",
+    "notConfigured": "Le planning n'est pas encore connecté pour cette agence.",
+    "loadError": "Impossible de charger les données de planning."
   },
   "statistics": {
     "matchesTotal": "Total des matchs",

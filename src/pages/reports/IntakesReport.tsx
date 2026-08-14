@@ -5,6 +5,13 @@
  * the total, the intake time series, and a switchable breakdown (recruiter/location/
  * source/function/region). Pure presentation; data lives in useIntakesReport. The
  * endpoint is gated `candidates.view` server-side.
+ *
+ * REPORTS-DRILL-2: the "total" KPI card and each breakdown bar drill through the
+ * SAME shared mechanism every other report uses — GET /reports/intakes/drill
+ * (ReportDrillController::intakes), gated candidates.view, one row per appointment
+ * (date/time, candidate, recruiter, branch, status). At most one of recruiter/
+ * location/source/function/region narrows the drill; the plain unnarrowed call is
+ * itself a valid drill (the window-total row list, per the controller's docblock).
  */
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -14,8 +21,12 @@ import ReportStateBlock from './ReportStateBlock'
 import type { KpiSpec } from '@/components/insights/InsightsRow'
 import SegmentBars from './SegmentBars'
 import type { SegmentBarItem } from './SegmentBars'
+import ReportChartWithDrillList from './ReportChartWithDrillList'
+import ReportDrillDrawer from './ReportDrillDrawer'
+import type { DrillSpec } from './ReportDrillDrawer'
 import ReportTimeseriesChart from './ReportTimeseriesChart'
 import { useIntakesReport } from './useIntakesReport'
+import { gateDrillClick } from './reportDrillGate'
 import type { ReportPeriod, IntakeBucket } from '@/types/analytics'
 import { useAllSettings, getJsonSetting } from '@/lib/settings/useAllSettings'
 import { getReportKpiCatalog, getReportKpiDefaultOrder, reportKpiSettingsKey } from './kpiCatalog'
@@ -34,7 +45,6 @@ const toSegments = (items: IntakeBucket[]): SegmentBarItem[] =>
   items.map((it, i) => ({ key: it.key ?? String(i), label: it.label, count: it.count, color: null }))
 
 // Maps the intake date series onto the shared timeseries chart's point shape.
-// No drill exists yet (reportDrillGate.intakes=false), so no onPick is wired.
 const toTimeseries = (items: IntakeBucket[]) =>
   items.map((it, i) => ({ date: it.key ?? String(i), label: it.label, value: it.count }))
 
@@ -48,16 +58,42 @@ export default function IntakesReport({ period }: { period: ReportPeriod }) {
   const breakdown = data?.[GROUP_KEY[group]] ?? []
   const hasData   = !loading && !error && total > 0
 
-  // Nine honest cards: total + distinct-category counts off every breakdown axis
-  // + the top segment per dimension (label/count straight from the response). No
-  // drill endpoint exists for intakes yet, so every card here stays a plain stat.
+  // REPORTS-DRILL-2: one drill list per section (breakdown bars own key, the
+  // timeseries owns its own) — mirrors the ApplicationsReport/VacanciesReport
+  // pattern, never a single global drill. `from`/`to` stay unsent (the
+  // intakes drill's window params are `sometimes` — no narrowing means the
+  // report-wide unwindowed segment, itself a valid drill per the controller's
+  // own docblock); the ONE segment key sent is always the exact axis param
+  // (recruiter/location/source/function/region), never combined with another.
+  const [breakdownDrill, setBreakdownDrill] = useState<DrillSpec | null>(null)
+  const openBreakdown = (it: IntakeBucket, param: Record<string, unknown>) => setBreakdownDrill({
+    title: it.label, value: it.count,
+    rowsEndpoint: '/reports/intakes/drill', rowsParams: param,
+  })
+  const onBreakdownPick = gateDrillClick('intakes', (key: string) => {
+    const it = breakdown.find((x, i) => (x.key ?? String(i)) === key)
+    if (it) openBreakdown(it, { [group]: it.key ?? it.label })
+  })
+
+  // The "total" KPI card's own drill: the endpoint's zero-param unnarrowed
+  // segment (intakeSegmentRules' docblock: no field is required, only mutually
+  // exclusive if present — the plain windowed total IS itself a valid drill).
+  const [totalDrill, setTotalDrill] = useState<DrillSpec | null>(null)
+  const openTotal = () => setTotalDrill({ title: t('intakes.total'), value: total, rowsEndpoint: '/reports/intakes/drill', rowsParams: {} })
+
+  // Nine honest cards: total (clickable, see openTotal above) + distinct-category
+  // counts off every breakdown axis + the top segment per dimension (label/count
+  // straight from the response). The eight non-total cards stay plain stats — no
+  // single XOR drill value represents "how many distinct recruiters", only a
+  // recruiter's own bar does (wired above via onBreakdownPick).
   const topOf = (items: IntakeBucket[]) =>
     items.reduce<IntakeBucket | null>((best, x) => (!best || x.count > best.count ? x : best), null)
   const topRecruiter = data ? topOf(data.by_recruiter) : null
   const topSource    = data ? topOf(data.by_source) : null
   const topFunction  = data ? topOf(data.by_function) : null
   const kpiByKey: Record<string, KpiSpec> = {
-    total: { key: 'total', label: t('intakes.total'), value: total },
+    total: { key: 'total', label: t('intakes.total'), value: total, active: totalDrill != null,
+      onClick: gateDrillClick('intakes', openTotal) },
     recruitersCount: { key: 'recruitersCount', label: t('intakes.summary.recruitersCount'), value: data?.by_recruiter.length ?? 0 },
     locationsCount: { key: 'locationsCount', label: t('intakes.summary.locationsCount'), value: data?.by_location.length ?? 0 },
     sourcesCount: { key: 'sourcesCount', label: t('intakes.summary.sourcesCount'), value: data?.by_source.length ?? 0 },
@@ -107,7 +143,7 @@ export default function IntakesReport({ period }: { period: ReportPeriod }) {
                   {GROUPS.map(g => {
                     const on = group === g
                     return (
-                      <button key={g} type="button" onClick={() => setGroup(g)}
+                      <button key={g} type="button" onClick={() => { setGroup(g); setBreakdownDrill(null) }}
                         style={{
                           padding: '4px 10px', fontSize: 12, borderRadius: 999, cursor: 'pointer',
                           fontWeight: on ? 600 : 400,
@@ -122,12 +158,16 @@ export default function IntakesReport({ period }: { period: ReportPeriod }) {
                   })}
                 </div>
               </div>
-              <SegmentBars items={toSegments(breakdown)}
-                max={breakdown.reduce((m, i) => Math.max(m, i.count), 0)} />
+              <ReportChartWithDrillList drill={breakdownDrill} placeholderLabel={t(`intakes.by.${group}`)}
+                chart={<SegmentBars items={toSegments(breakdown)} onPick={onBreakdownPick}
+                  max={breakdown.reduce((m, i) => Math.max(m, i.count), 0)} />} />
             </section>
           </div>
         )}
       </div>
+
+      {/* The "total" KPI card's own drill — same shared drawer every report uses. */}
+      <ReportDrillDrawer drill={totalDrill} onClose={() => setTotalDrill(null)} />
     </div>
   )
 }

@@ -480,7 +480,9 @@
       "shift": "Dienst",
       "department": "Abteilung"
     },
-    "searchPlaceholder": "Chance suchen…"
+    "searchPlaceholder": "Chance suchen…",
+    "notConfigured": "Die Planung ist für dieses Büro noch nicht verbunden.",
+    "openShiftsError": "Planungsdaten konnten nicht geladen werden."
   },
   "planning": {
     "title": "Planung",
@@ -489,7 +491,9 @@
     "upcoming": "Kommende Dienste",
     "upcomingEmpty": "Keine kommenden Dienste.",
     "off": "Planungsinformationen erscheinen, sobald das Planungsmodul aktiv ist.",
-    "open": "Offen"
+    "open": "Offen",
+    "notConfigured": "Die Planung ist für dieses Büro noch nicht verbunden.",
+    "loadError": "Planungsdaten konnten nicht geladen werden."
   },
   "statistics": {
     "matchesTotal": "Matches gesamt",

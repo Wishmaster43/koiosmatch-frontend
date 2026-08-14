@@ -480,7 +480,9 @@
       "shift": "Dienst",
       "department": "Afdeling"
     },
-    "searchPlaceholder": "Zoek kans…"
+    "searchPlaceholder": "Zoek kans…",
+    "notConfigured": "Planning is voor dit bureau nog niet gekoppeld.",
+    "openShiftsError": "Planningsgegevens konden niet worden geladen."
   },
   "planning": {
     "title": "Planning",
@@ -489,7 +491,9 @@
     "upcoming": "Aankomende diensten",
     "upcomingEmpty": "Geen aankomende diensten.",
     "off": "Planning-informatie komt zodra de Planning-module actief is.",
-    "open": "Open"
+    "open": "Open",
+    "notConfigured": "Planning is voor dit bureau nog niet gekoppeld.",
+    "loadError": "Planningsgegevens konden niet worden geladen."
   },
   "statistics": {
     "matchesTotal": "Matches totaal",

@@ -6,7 +6,9 @@ import { gateDrillClick, REPORT_DRILL_AVAILABLE } from './reportDrillGate'
 // gets a click affordance. Regression for REPORTS-DRILL-1 (2026-08-13): flow/matches/
 // recruiters/vacancies now have a live /reports/{r}/drill|advice contract and must be
 // clickable; RAPPORTEN-SUITE-1 (2026-08-14) added candidates and later flipped
-// outreach ("portie 6"); intakes has no matching endpoint yet and must stay off.
+// outreach ("portie 6"); REPORTS-DRILL-2 (2026-08-15) flipped intakes after
+// re-verifying the real controller (was previously reported landed while the route
+// 422'd — checked the validation rules this time, not just the route list).
 describe('reportDrillGate', () => {
   it('is on for the reports with a shipped drill contract', () => {
     expect(REPORT_DRILL_AVAILABLE.flow).toBe(true)
@@ -17,21 +19,22 @@ describe('reportDrillGate', () => {
     expect(REPORT_DRILL_AVAILABLE.applications).toBe(true)
     expect(REPORT_DRILL_AVAILABLE.customers).toBe(true)
     expect(REPORT_DRILL_AVAILABLE.outreach).toBe(true)
+    expect(REPORT_DRILL_AVAILABLE.intakes).toBe(true)
   })
 
-  it('stays off for the reports without a drill endpoint yet', () => {
-    expect(REPORT_DRILL_AVAILABLE.intakes).toBe(false)
+  it('stays off for the reports without a drill endpoint', () => {
     expect(REPORT_DRILL_AVAILABLE.ai).toBe(false)
   })
 
   it('gateDrillClick returns the handler unchanged for an available report', () => {
     const handler = vi.fn()
     expect(gateDrillClick('flow', handler)).toBe(handler)
+    expect(gateDrillClick('intakes', handler)).toBe(handler)
   })
 
   it('gateDrillClick returns undefined for a report without a drill endpoint', () => {
     const handler = vi.fn()
-    expect(gateDrillClick('intakes', handler)).toBeUndefined()
+    expect(gateDrillClick('ai', handler)).toBeUndefined()
   })
 })
 
@@ -58,7 +61,7 @@ describe('reportDrillGate — wired into a click affordance', () => {
 
   it('a gated report gets no onClick and no pointer cursor', () => {
     const handler = vi.fn()
-    render(<FakeKpiCard onClick={gateDrillClick('intakes', handler)} />)
+    render(<FakeKpiCard onClick={gateDrillClick('ai', handler)} />)
     const kpi = screen.getByTestId('kpi')
     expect(kpi).toHaveStyle({ cursor: 'default' })
     kpi.click()

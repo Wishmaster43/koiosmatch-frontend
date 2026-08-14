@@ -14,7 +14,14 @@
  * same pair for **opportunities** (five-way XOR: stage|customer|owner|branch|date).
  * "Portie 6" (2026-08-14) added the same pair for **tasks** (seven-way XOR:
  * status|type|priority|assignee|team|branch|date — status/type/priority key on
- * the lookup ID, never the slug). The outreach upgrade ("portie 6", 2026-08-14)
+ * the lookup ID, never the slug).
+ * REPORTS-DRILL-2 (2026-08-15): **intakes** verified live against the real
+ * controller (`GET /reports/intakes/drill`, ReportDrillController::intakes —
+ * candidates.view gate, at most one of recruiter|location|source|function|region)
+ * — flipped from false to true now the route genuinely accepts and answers it
+ * (was previously reported landed while the route 422'd; re-verified this time
+ * against the controller's validation rules, not just the route list). The
+ * outreach upgrade ("portie 6", 2026-08-14)
  * flipped the last fase-1 report to the same pair (six-way XOR: campaign|assignee|
  * channel|status|outcome|date — campaign accepts any uuid AND 'others' for the
  * exact top-20 complement; rows carry candidate names, so the drill sits behind
@@ -46,8 +53,10 @@ export const REPORT_DRILL_AVAILABLE: Record<DrillableReport, boolean> = {
   locations: true,
   departments: true,
   workflows: true,
-  // Not shipped yet — no /reports/{r}/drill|advice endpoint on the backend.
-  intakes: false,
+  // REPORTS-DRILL-2: verified against ReportDrillController::intakes() — the route
+  // exists AND accepts the validated params (was the "reported landed but 422s"
+  // trap once before; re-checked this time).
+  intakes: true,
   // AI usage rows are consumption lines, not entity records: the backend ships NO
   // /reports/ai/drill on purpose, so its bars stay non-clickable (§3 no fake affordances).
   ai: false,

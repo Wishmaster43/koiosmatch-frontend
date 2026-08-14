@@ -20,11 +20,16 @@ export default function PlanningSummary({ customerId, params }: { customerId: Id
   const hasModule = auth?.hasModule ?? (() => false)
   const { formatDate } = useDateFormat()
   const enabled = hasModule('plan')
-  const { data, loading } = useCustomerPlanning(customerId, enabled, params)
+  const { data, loading, error, planningConfigured, planningReason } = useCustomerPlanning(customerId, enabled, params)
 
   // Planning module not active for this tenant → calm placeholder.
   if (!enabled) return <Muted text={t('planning.off')} />
   if (loading)  return <Muted text={t('page.loading')} />
+  // A genuine failure stays an error, distinct from the "not configured" state below.
+  if (error) return <Muted text={t('planning.loadError')} />
+  // PLANNING-CONFIG-1: the agency has no active planning coupling yet — a configuration
+  // state, not an error. Own translated copy; the server's sentence rides as a tooltip.
+  if (!planningConfigured) return <Muted text={<span title={planningReason}>{t('planning.notConfigured')}</span>} />
 
   const activeNow = data?.active_now ?? 0
   const upcoming  = data?.upcoming ?? []

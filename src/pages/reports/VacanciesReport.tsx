@@ -108,6 +108,13 @@ export default function VacanciesReport({ period, filters = EMPTY_REPORT_FILTERS
   // and a configurable threshold the backend does not expose yet — not built here,
   // see the backend ask in the handoff notes).
   const zeroApplicantRows = rows.filter(v => v.applications === 0)
+  // REPORTS-DRILL-2 (verified live): the section header's own click into the
+  // backend's real `zero_applications=1` drill — gated the same way every other
+  // segment click is, never a bespoke fetch.
+  const zeroApplicationsDrillHandler = gateDrillClick('vacancies', () => openSegment(
+    { label: t('vacancies.noApplicants.title', { count: zeroApplicantRows.length }), count: zeroApplicantRows.length },
+    { zero_applications: 1 },
+  ))
 
   const kpiByKey: Record<string, KpiSpec> = {
     total: { key: 'total',  label: t('vacancies.summary.total'),  value: s?.total ?? 0,
@@ -125,12 +132,13 @@ export default function VacanciesReport({ period, filters = EMPTY_REPORT_FILTERS
       value: s?.avg_time_to_fill_days != null ? t('vacancies.daysValue', { days: Math.round(s.avg_time_to_fill_days) }) : '—' },
     // PDF-VACATURES point 31: "vacature staat online maar geen kandidaten na X
     // dagen" — the real, tenant-threshold-driven backend count (VacanciesReport
-    // ::applySignal SIGNAL_STALE_ONLINE), the same predicate the row-level
-    // vacancyAdvice.ts rule and the list's stale_online filter already use. No
-    // drill route exists yet for this signal (the drill endpoint's eight-way XOR
-    // does not include `signal` — see the handoff note below), so this card is a
-    // plain, non-fabricated stat, not clickable.
-    staleOnline: { key: 'staleOnline', label: t('vacancies.summary.staleOnline'), value: s?.stale_online ?? 0 },
+    // ::applySignal SIGNAL_STALE_ONLINE), the SAME predicate the row-level
+    // vacancyAdvice.ts rule, the list's stale_online filter AND (REPORTS-DRILL-2,
+    // verified live) the drill's own `stale_online=1` XOR param all share — so
+    // this card's count and the drawer's rows can never disagree.
+    staleOnline: { key: 'staleOnline', label: t('vacancies.summary.staleOnline'), value: s?.stale_online ?? 0,
+      active: drill?.rowsParams?.stale_online === 1,
+      onClick: gateDrillClick('vacancies', () => openSegment({ label: t('vacancies.summary.staleOnline'), count: s?.stale_online ?? 0 }, { stale_online: 1 })) },
     // Plain stat — no single XOR value represents "distinct customers", so not clickable.
     customersCount: { key: 'customersCount', label: t('vacancies.summary.customersCount'), value: customersCount },
     topIndustry: { key: 'topIndustry', label: t('vacancies.summary.topIndustry'),
@@ -229,13 +237,23 @@ export default function VacanciesReport({ period, filters = EMPTY_REPORT_FILTERS
           </div>
 
           {/* PDF notification signal: vacancies with zero applications this window.
-              Real rows, not a fabricated count — see zeroApplicantRows above. Only
-              rendered when it has something to show (an all-zero-row empty state
-              here would just duplicate the table's own empty text above it). */}
+              The table rows are real, not fabricated — see zeroApplicantRows above
+              (the exact array driving both this header's count AND the rows right
+              below it, so they can never disagree). REPORTS-DRILL-2 (verified live):
+              the header title ALSO opens the backend's own `zero_applications=1`
+              drill (published + whereDoesntHave('applications'), a narrower/different
+              predicate than this window's client-side "applications === 0 regardless
+              of published" list) so the tenant-wide, unwindowed signal stays reachable
+              alongside this window's own honest table. Only rendered when the client
+              list has something to show (an all-zero-row empty state here would just
+              duplicate the table's own empty text above it). */}
           {zeroApplicantRows.length > 0 && (
             <div style={{ ...card, overflow: 'hidden', marginTop: 16 }}>
               <div style={{ padding: '16px 20px 0' }}>
-                <h3 style={reportSectionHeadStyle}>
+                <h3 style={{ ...reportSectionHeadStyle, ...(zeroApplicationsDrillHandler ? { cursor: 'pointer' } : {}) }}
+                  role={zeroApplicationsDrillHandler ? 'button' : undefined}
+                  tabIndex={zeroApplicationsDrillHandler ? 0 : undefined}
+                  onClick={zeroApplicationsDrillHandler}>
                   {t('vacancies.noApplicants.title', { count: zeroApplicantRows.length })}
                 </h3>
                 <p style={{ fontSize: 12, color: 'var(--text-muted)', margin: '4px 0 12px' }}>

@@ -18,8 +18,10 @@ vi.mock('./ReportTimeseriesChart', () => ({
 const mockUseIntakesReport = vi.fn()
 vi.mock('./useIntakesReport', () => ({ useIntakesReport: () => mockUseIntakesReport() }))
 
-// Spy on the underlying axios client — the intakes report has NO drill endpoint yet
-// (reportDrillGate: intakes=false), so this proves no click ever calls out.
+// Spy on the underlying axios client so we can assert the exact request shape
+// (route + params) that a card/bar click sends — mutation tests must assert the
+// request, never only that a callback fired (CLAUDE.md §13). REPORTS-DRILL-2:
+// intakes is now gated on (verified live against the real controller).
 const getSpy = vi.fn()
 vi.mock('@/lib/api', () => ({
   default: { get: (...args: unknown[]) => getSpy(...args) },
@@ -160,15 +162,39 @@ describe('IntakesReport', () => {
     spy.mockRestore()
   })
 
-  // No drill endpoint exists for intakes (reportDrillGate: intakes=false) — nothing
-  // on this screen should ever call out to a /reports/intakes/drill|advice route.
-  it('never calls a drill/advice endpoint — intakes has no drill contract yet', async () => {
+  // REPORTS-DRILL-2 (verified live): clicking the "total" KPI opens the drill's
+  // own zero-param unnarrowed call — no segment key, just the shared drawer.
+  it('clicking the total KPI drills with no segment param', async () => {
     const user = userEvent.setup()
     mockUseIntakesReport.mockReturnValue({ data, loading: false, error: false })
     renderReport()
     await user.click(screen.getByText('Totaal intakes'))
-    await user.click(screen.getByText('Wk 31'))
-    await user.click(screen.getAllByText('Anna de Vries')[0])
-    expect(getSpy).not.toHaveBeenCalled()
+    expect(getSpy).toHaveBeenCalledWith('/reports/intakes/drill', expect.objectContaining({ params: {} }))
+  })
+
+  // REPORTS-DRILL-2: clicking a recruiter bar drills with the `recruiter` XOR
+  // param — the count on the bar and the rows behind it share the SAME backend
+  // predicate (ReportDrillController::intakes → IntakesReport::drillRows()).
+  it('clicking a recruiter bar drills with the recruiter param', async () => {
+    const user = userEvent.setup()
+    mockUseIntakesReport.mockReturnValue({ data, loading: false, error: false })
+    renderReport()
+    await user.click(screen.getByRole('button', { name: /Anna de Vries/ }))
+    expect(getSpy).toHaveBeenCalledWith('/reports/intakes/drill', expect.objectContaining({ params: { recruiter: 'r1' } }))
+  })
+
+  // Switching the group resets the breakdown drill list — a stale param from the
+  // previous axis (e.g. `recruiter`) must never leak into the new axis' request.
+  it('switching the breakdown group clears the previous axis drill', async () => {
+    const user = userEvent.setup()
+    mockUseIntakesReport.mockReturnValue({ data, loading: false, error: false })
+    renderReport()
+    await user.click(screen.getByRole('button', { name: /Anna de Vries/ }))
+    getSpy.mockClear()
+    await user.click(screen.getByText('Locatie'))
+    await user.click(screen.getByRole('button', { name: /Utrecht/ }))
+    expect(getSpy).toHaveBeenCalledWith('/reports/intakes/drill', expect.objectContaining({ params: { location: 'loc1' } }))
+    const call = getSpy.mock.calls.find(c => c[0] === '/reports/intakes/drill')
+    expect(call?.[1].params).not.toHaveProperty('recruiter')
   })
 })

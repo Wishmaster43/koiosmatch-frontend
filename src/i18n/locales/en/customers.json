@@ -480,7 +480,9 @@
       "shift": "Shift",
       "department": "Department"
     },
-    "searchPlaceholder": "Search opportunity…"
+    "searchPlaceholder": "Search opportunity…",
+    "notConfigured": "Planning is not connected for this agency yet.",
+    "openShiftsError": "Could not load planning data."
   },
   "planning": {
     "title": "Planning",
@@ -489,7 +491,9 @@
     "upcoming": "Upcoming shifts",
     "upcomingEmpty": "No upcoming shifts.",
     "off": "Planning information appears once the Planning module is active.",
-    "open": "Open"
+    "open": "Open",
+    "notConfigured": "Planning is not connected for this agency yet.",
+    "loadError": "Could not load planning data."
   },
   "statistics": {
     "matchesTotal": "Matches total",

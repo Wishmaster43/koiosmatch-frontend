@@ -480,7 +480,9 @@
       "shift": "Turno",
       "department": "Departamento"
     },
-    "searchPlaceholder": "Buscar oportunidad…"
+    "searchPlaceholder": "Buscar oportunidad…",
+    "notConfigured": "La planificación aún no está conectada para esta agencia.",
+    "openShiftsError": "No se pudieron cargar los datos de planificación."
   },
   "planning": {
     "title": "Planificación",
@@ -489,7 +491,9 @@
     "upcoming": "Próximos turnos",
     "upcomingEmpty": "No hay próximos turnos.",
     "off": "La información de planificación aparece cuando el módulo de Planificación esté activo.",
-    "open": "Abierto"
+    "open": "Abierto",
+    "notConfigured": "La planificación aún no está conectada para esta agencia.",
+    "loadError": "No se pudieron cargar los datos de planificación."
   },
   "statistics": {
     "matchesTotal": "Matches totales",

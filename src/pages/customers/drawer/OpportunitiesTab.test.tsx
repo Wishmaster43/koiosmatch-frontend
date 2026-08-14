@@ -33,7 +33,7 @@ vi.mock('@/lib/datetime', () => ({ useDateFormat: () => ({ formatDate: (v: strin
 vi.mock('@/lib/queries', () => ({ useUsers: () => ({ data: [] }) }))
 vi.mock('../hooks/useCustomerDrawerData', () => ({
   useCustomerOpportunities: () => useCustomerOpportunitiesMock(),
-  useCustomerOpenShifts: () => ({ rows: [], loading: false }),
+  useCustomerOpenShifts: () => ({ rows: [], loading: false, error: false, planningConfigured: true, planningReason: undefined }),
 }))
 // The customer drawer's own tenant-settings blob — only the colour toggle below
 // needs to control it; every other test relies on the default (colour ON, fallback true).

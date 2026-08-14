@@ -48,6 +48,12 @@ import { useAllSettings, getJsonSetting } from '@/lib/settings/useAllSettings'
 import { getReportKpiCatalog, getReportKpiDefaultOrder, reportKpiSettingsKey } from './kpiCatalog'
 import type { ReportKpiScopeId } from './kpiCatalog'
 import { resolveReportKpiOrder } from './resolveReportKpiOrder'
+import { getCompareSlug } from './reportCompareSupport'
+import { useReportCompare } from './useReportCompare'
+import ReportCompareControl from './ReportCompareControl'
+import ReportCompareMetric from './ReportCompareMetric'
+import { COMPARE_OFF } from './reportCompareMode'
+import type { ReportCompareMode } from './reportCompareMode'
 
 // The five drillable axes; `param` is the XOR query key the drill/advice endpoints expect.
 type Axis = 'status' | 'phase' | 'source' | 'owner' | 'branch'
@@ -83,6 +89,19 @@ export default function CandidatesReport({ period, filters = EMPTY_REPORT_FILTER
 
   const total   = data?.total ?? 0
   const hasData = !loading && !error && total > 0
+
+  // RAPPORT-COMPARE-1: year-on-year / period-on-period, reference adoption
+  // (§reportCompareSupport.ts). Only the two switch positions the backend
+  // actually registered get the control — both map to the 'candidates' slug
+  // here, so no separate wiring per position.
+  const compareSlug = getCompareSlug('candidates', view)
+  const [compareMode, setCompareMode] = useState<ReportCompareMode>(COMPARE_OFF)
+  // Reuses the SAME window the plain report already resolved (data.from/data.to)
+  // and the SAME filter params (baseParams, defined below) — never a second,
+  // independently-derived window/filter set for the compare call.
+  const compareBaseParams = { ...buildReportQueryParams(period, 'candidates', filters), ...(phaseFilter ? { phase: phaseFilter } : {}) }
+  const { data: compareData } = useReportCompare(compareSlug, data?.from, data?.to, compareMode, compareBaseParams)
+  const totalCompare = compareMode.kind !== 'off' ? (compareData?.total as { current: number; previous: number; delta: number; delta_pct: number | null } | undefined) : undefined
 
   // Drill-down: every axis section and the timeseries own an ALWAYS-VISIBLE list
   // beside their chart (ReportChartWithDrillList) instead of a shared overlay — so
@@ -195,7 +214,12 @@ export default function CandidatesReport({ period, filters = EMPTY_REPORT_FILTER
   // "Total inflow" wording (a byte-identical default, zero regression), Leads
   // gets its own "Total leads" wording.
   const kpis: KpiSpec[] = [
-    { key: 'total', label: t(isLeads ? 'leads.total' : 'candidates.total'), value: total },
+    {
+      key: 'total', label: t(isLeads ? 'leads.total' : 'candidates.total'), value: total,
+      // Total inflow rising is unambiguously good — an increase in leads/candidates
+      // coming in is never bad news, so 'up-good' is safe here (unlike e.g. rejections).
+      sub: totalCompare ? <ReportCompareMetric metric={totalCompare} polarity="up-good" /> : undefined,
+    },
     ...axisKpis,
   ]
 
@@ -206,6 +230,15 @@ export default function CandidatesReport({ period, filters = EMPTY_REPORT_FILTER
           { value: 'candidates', label: t('candidates.viewSwitch.candidates') },
           { value: 'leads', label: t('candidates.viewSwitch.leads') },
         ]} />
+
+      {/* RAPPORT-COMPARE-1: only rendered when the backend actually registered this
+          slug (getCompareSlug) — a report/view without compare support gets no
+          control at all, never a disabled picker. */}
+      {hasData && compareSlug && (
+        <div style={{ marginBottom: 10 }}>
+          <ReportCompareControl mode={compareMode} onChange={setCompareMode} />
+        </div>
+      )}
 
       {/* KPI strip — total inflow, above the tabs (candidate-page order) */}
       {hasData && (

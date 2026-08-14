@@ -49,6 +49,10 @@ const data: ApplicationsReportData = {
     { value: 'v1', label: 'Verpleegkundige (gearchiveerd)', count: 9 },
     { value: 'others', label: 'Overig', count: 1 },
   ],
+  by_stage_duration: [
+    { value: 'applied', label: 'Applied (duration)', count: 5, avg_days_in_phase: 12.5 },
+    { value: 'intake', label: 'Intake (duration)', count: 3, avg_days_in_phase: 4 },
+  ],
 }
 
 function renderReport() {
@@ -168,6 +172,20 @@ describe('ApplicationsReport (RAPPORTEN-SUITE-1 portie 2)', () => {
     await user.click(screen.getByText('Geen fase'))
     expect(getSpy).toHaveBeenCalledWith('/reports/applications/drill',
       expect.objectContaining({ params: { stage: 'none', period: 'month' } }))
+  })
+
+  // REPORTS-DRILL-2: stage_duration is its OWN param, never mixed with `stage`
+  // even though both axes share the same stage-key vocabulary.
+  it('clicking a stage-duration bar drills with stage_duration, never stage', async () => {
+    const user = userEvent.setup()
+    mockUseApplicationsReport.mockReturnValue({ data, loading: false, error: false })
+    renderReport()
+    await user.click(screen.getByText('Intake (duration)'))
+    expect(getSpy).toHaveBeenCalledWith('/reports/applications/drill',
+      expect.objectContaining({ params: { stage_duration: 'intake', period: 'month' } }))
+    const call = getSpy.mock.calls.find(c => c[0] === '/reports/applications/drill'
+      && (c[1] as { params: Record<string, unknown> }).params.stage_duration === 'intake')
+    expect(call?.[1].params).not.toHaveProperty('stage')
   })
 
   it('clicking an owner bar drills with the owner XOR param (D2 shape: owner_id → owner)', async () => {

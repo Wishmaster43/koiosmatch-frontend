@@ -25,7 +25,7 @@ import ReportTimeseriesChart from './ReportTimeseriesChart'
 import { useDateFormat } from '@/lib/datetime'
 import type {
   ReportPeriod, CandidateSegment, CandidateOwnerSegment, CandidateTimeseriesPoint,
-  ApplicationTopSegment, ApplicationBucketCounts,
+  ApplicationTopSegment, ApplicationBucketCounts, ApplicationStageDurationSegment,
 } from '@/types/analytics'
 import { useAllSettings, getJsonSetting } from '@/lib/settings/useAllSettings'
 import { getReportKpiCatalog, getReportKpiDefaultOrder, reportKpiSettingsKey } from './kpiCatalog'
@@ -38,7 +38,10 @@ type Axis = 'stage' | 'source' | 'customer' | 'vacancy'
 
 // Every drillable section on this page, each owning its OWN always-visible list
 // (ReportChartWithDrillList) — one key per section, never a single global `drill`.
-type DrillKey = Axis | 'owner' | 'bucket' | 'series'
+// 'stageDuration' is its OWN key (not folded into 'stage') — same stage-key
+// vocabulary, a DIFFERENT XOR param (`stage_duration`, not `stage`) and a
+// different predicate (longest-hanging rows, not "currently in this stage").
+type DrillKey = Axis | 'owner' | 'bucket' | 'series' | 'stageDuration'
 
 // Fixed funnel-bucket vocabulary: flag-driven on the backend, not a tenant lookup,
 // so labels come from i18n and colour from the semantic tokens (§4) — never a
@@ -117,6 +120,20 @@ export default function ApplicationsReport({ period, filters = EMPTY_REPORT_FILT
     return <SegmentBars max={max} onPick={onPick} items={items} />
   }
 
+  // FASE-DUUR-1: the "too long in this stage" bars — same stage-key vocabulary as
+  // `bars('stage', ...)` but drills through the DIFFERENT `stage_duration` XOR
+  // param (backend ApplicationsReport::stageDurationDistribution / drillRows()),
+  // never the plain `stage` segment — see the DrillKey comment above.
+  const stageDurationBars = (segs: ApplicationStageDurationSegment[]) => {
+    const max = segs.reduce((m, s) => Math.max(m, s.count), 0)
+    const onPick = gateDrillClick('applications', (value: string) => {
+      const seg = segs.find(s => s.value === value)
+      if (seg) openSegment('stageDuration', seg, { stage_duration: value })
+    })
+    return <SegmentBars max={max} onPick={onPick}
+      items={segs.map(s => ({ key: s.value, label: s.label, count: s.count, color: null }))} />
+  }
+
   const onSeriesPick = gateDrillClick('applications', (dateKey: string) => {
     const pt = data?.timeseries.series.find(p => p.date === dateKey)
     if (pt) openBucket(pt)
@@ -138,6 +155,8 @@ export default function ApplicationsReport({ period, filters = EMPTY_REPORT_FILT
     if (topOwner) openSegment('owner', { label: topOwner.name, count: topOwner.count }, { owner: topOwner.owner_id })
     if (topCustomer) openSegment('customer', topCustomer, { customer: topCustomer.value })
     if (topVacancy) openSegment('vacancy', topVacancy, { vacancy: topVacancy.value })
+    const topStageDuration = top(data.by_stage_duration, s => s.count)
+    if (topStageDuration) openSegment('stageDuration', topStageDuration, { stage_duration: topStageDuration.value })
     if (topBucketKey) openSegment('bucket', { label: t(`applications.buckets.${topBucketKey}`), count: data.by_bucket[topBucketKey] }, { bucket: topBucketKey })
     if (data.timeseries.series.length) openBucket(data.timeseries.series[data.timeseries.series.length - 1])
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -225,6 +244,12 @@ export default function ApplicationsReport({ period, filters = EMPTY_REPORT_FILT
               <h3 style={{ ...head, marginBottom: 10 }}>{t('applications.axes.stage')}</h3>
               <ReportChartWithDrillList drill={drills.stage ?? null} placeholderLabel={t('applications.axes.stage')}
                 chart={bars('stage', data.by_stage)} />
+            </section>
+
+            <section>
+              <h3 style={{ ...head, marginBottom: 10 }}>{t('applications.axes.stageDuration')}</h3>
+              <ReportChartWithDrillList drill={drills.stageDuration ?? null} placeholderLabel={t('applications.axes.stageDuration')}
+                chart={stageDurationBars(data.by_stage_duration)} />
             </section>
 
             <section>

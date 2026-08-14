@@ -266,7 +266,8 @@
       "source": "Quelle",
       "owner": "Eigentümer",
       "customer": "Kunde",
-      "vacancy": "Stelle"
+      "vacancy": "Stelle",
+      "stageDuration": "Zu lange in Phase"
     },
     "buckets": {
       "active": "Aktiv",
@@ -529,5 +530,18 @@
       "ai": "Koios AI",
       "workflows": "Workflows"
     }
+  },
+  "compare": {
+    "label": "Vergleichen mit",
+    "mode": {
+      "off": "Kein Vergleich",
+      "previous_period": "Vorheriger Zeitraum",
+      "previous_year": "Vorjahr",
+      "custom": "Benutzerdefinierter Zeitraum"
+    },
+    "customFrom": "Vergleich ab",
+    "customTo": "Vergleich bis",
+    "rangeSeparator": "bis",
+    "previousValue": "vorher: {{value}}"
   }
 }

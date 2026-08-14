@@ -390,6 +390,34 @@ describe('VacanciesReport (RAPPORTEN-SUITE-1 portie 4, additive on C-34)', () =>
     expect(screen.getAllByText('Doktersassistent')).toHaveLength(2)
   })
 
+  // REPORTS-DRILL-2 (verified live): the "Online, geen kandidaten" KPI now drills
+  // with the real backend `stale_online=1` XOR param, the same predicate the
+  // card's own count comes from (summary.stale_online).
+  it('clicking the "Online, geen kandidaten" KPI drills with stale_online=1', async () => {
+    const user = userEvent.setup()
+    mockUseVacanciesReport.mockReturnValue({ data, loading: false, error: false })
+    renderReport()
+    await user.click(screen.getByText('Online, geen kandidaten'))
+    expect(lastDrillParams()).toEqual({ stale_online: 1, period: 'month' })
+  })
+
+  // REPORTS-DRILL-2 (verified live): the zero-applicants section header ALSO opens
+  // the backend's own `zero_applications=1` drill — a DIFFERENT XOR param than
+  // `stale_online`, so the two signals never collapse onto the same request.
+  it('clicking the zero-applicants section header drills with zero_applications=1, distinct from stale_online', async () => {
+    const user = userEvent.setup()
+    const zeroRow = { ...row, key: 'v2', label: 'Doktersassistent', applications: 0, matched: 0 }
+    mockUseVacanciesReport.mockReturnValue({ data: { ...data, vacancies: [row, zeroRow] }, loading: false, error: false })
+    renderReport()
+    await user.click(screen.getByText('Vacatures zonder sollicitaties (1)'))
+    expect(lastDrillParams()).toEqual({ zero_applications: 1, period: 'month' })
+    expect(lastDrillParams()).not.toHaveProperty('stale_online')
+
+    await user.click(screen.getByText('Online, geen kandidaten'))
+    expect(lastDrillParams()).toEqual({ stale_online: 1, period: 'month' })
+    expect(lastDrillParams()).not.toHaveProperty('zero_applications')
+  })
+
   // Integration proof (WCAG 2.2 AA audit, §6): the "Vacature" column stays wired with
   // `sortable: true` into the shared DataTable — keyboard-operable, aria-sort reflected.
   it('sorts the Vacature column via a keyboard Enter press and reflects it via aria-sort', async () => {

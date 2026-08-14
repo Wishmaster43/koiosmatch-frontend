@@ -56,10 +56,17 @@ function OpenShifts({ customerId }: { customerId?: Id }) {
   const hasModule = auth?.hasModule ?? (() => false)
   const { formatDate } = useDateFormat()
   const enabled = hasModule('plan')
-  const { rows, loading } = useCustomerOpenShifts(customerId, enabled)
+  const { rows, loading, error, planningConfigured, planningReason } = useCustomerOpenShifts(customerId, enabled)
 
   if (!enabled) return <Muted text={t('opportunities.planningOff')} />
   if (loading)  return <Muted text={t('page.loading')} />
+  // A genuine failure (e.g. the customer 404s under tenant isolation) stays an error —
+  // never mistaken for the honest "not configured yet" state below.
+  if (error) return <Muted text={t('opportunities.openShiftsError')} />
+  // PLANNING-CONFIG-1: the tenant has no active planning coupling yet. This is a
+  // configuration state, not a failure — the tab stays visible, own translated copy,
+  // the server's own sentence only as a title-attribute detail.
+  if (!planningConfigured) return <Muted text={<span title={planningReason}>{t('opportunities.notConfigured')}</span>} />
   if (rows.length === 0) return <Muted text={t('opportunities.openShiftsEmpty')} />
 
   return (
