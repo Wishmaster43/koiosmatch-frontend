@@ -13,6 +13,16 @@
  * entity's display schema: both thresholds are cross-entity Koios-rule config,
  * not a per-entity table-chip preference, so they sit with the other
  * AI-flavoured settings (Koios overview / memory / vacancy generation).
+ *
+ * Third field (SOLLICITATIES-23, 14-08): `application_stage_stale_days` — the
+ * threshold behind ApplicationQuery/ApplicationListResource's `too_long_in_stage`
+ * flag (verified against koiosmatch-api app/Services/Application/ApplicationQuery.php
+ * + ApplicationListResource.php), which already drives a REAL attention KPI/filter
+ * on the applications page. This screen was its missing write path — exactly the
+ * gap the other two fields already closed for vacancies/matches. No notification or
+ * escalation exists on this signal yet (no `application.stage_stale` domain event,
+ * no dispatcher, no Notifier::send call site) — only the threshold half is real
+ * today; do not read the presence of this field as "notifications are wired".
  */
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -23,8 +33,10 @@ import { notifyError } from '@/lib/notify'
 // the fallback numbers vacancyAdvice.ts/matchAdvice.ts's callers already use.
 export const VACANCY_ADVICE_STALE_DAYS_KEY = 'vacancy_advice_stale_days'
 export const MATCH_ADVICE_RENEW_DAYS_KEY = 'match_advice_renew_days'
+export const APPLICATION_STAGE_STALE_DAYS_KEY = 'application_stage_stale_days'
 const VACANCY_STALE_DEFAULT = 14
 const MATCH_RENEW_DEFAULT = 30
+const APPLICATION_STAGE_STALE_DEFAULT = 14
 const DAYS_MIN = 1
 const DAYS_MAX = 365
 
@@ -107,7 +119,48 @@ function MatchRenewDaysField() {
   )
 }
 
-/** Koios advice thresholds — the vacancy staleness window + the match renewal window. */
+// How many days an application can sit in its current funnel stage before
+// Koios flags it "too long in stage" (ApplicationsTable/ApplicationsPage
+// attention KPI). Same commit-on-blur pattern; no trailing border since this
+// is currently the last field in the list.
+function ApplicationStageStaleDaysField() {
+  const { t } = useTranslation('settings')
+  const settings = useAllSettings()
+  const saved = getNumberSetting(settings, APPLICATION_STAGE_STALE_DAYS_KEY, APPLICATION_STAGE_STALE_DEFAULT)
+  const [value, setValue] = useState(saved)
+
+  // Persist one clamped value — optimistic, revert + toast on failure (house pattern).
+  const commit = async (raw: number) => {
+    const clamped = Math.min(DAYS_MAX, Math.max(DAYS_MIN, Number(raw) || APPLICATION_STAGE_STALE_DEFAULT))
+    if (clamped === saved) { setValue(clamped); return }
+    setValue(clamped)
+    try {
+      await saveSettingsKeys({ [APPLICATION_STAGE_STALE_DAYS_KEY]: clamped })
+      invalidateAllSettingsCache()
+    } catch {
+      setValue(saved)
+      notifyError(t('koiosAdvice.applicationStaleSaveFailed'))
+    }
+  }
+
+  return (
+    <div>
+      <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)', marginBottom: 4 }}>{t('koiosAdvice.applicationStaleTitle')}</div>
+      <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 8, maxWidth: 460 }}>{t('koiosAdvice.applicationStaleHint')}</div>
+      <label htmlFor="application-stage-stale-days" style={{ fontSize: 11, fontWeight: 500, color: 'var(--text-muted)', display: 'block', marginBottom: 4 }}>
+        {t('koiosAdvice.applicationStaleLabel')}
+      </label>
+      <input id="application-stage-stale-days" type="number" min={DAYS_MIN} max={DAYS_MAX}
+        value={value}
+        onChange={e => setValue(Number(e.target.value))}
+        onBlur={e => commit(Number(e.target.value))}
+        style={{ width: 100, height: 32, padding: '0 8px', borderRadius: 6, border: '1px solid var(--border)',
+          background: 'var(--surface)', color: 'var(--text)', fontSize: 12 }} />
+    </div>
+  )
+}
+
+/** Koios advice thresholds — vacancy staleness, match renewal, application stage staleness. */
 export default function KoiosAdviceSettings() {
   const { t } = useTranslation('settings')
   return (
@@ -117,7 +170,10 @@ export default function KoiosAdviceSettings() {
         <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>{t('koiosAdvice.subtitle')}</p>
       </div>
       <VacancyStaleDaysField />
-      <MatchRenewDaysField />
+      <div style={{ marginBottom: 16, paddingBottom: 16, borderBottom: '1px solid var(--border)' }}>
+        <MatchRenewDaysField />
+      </div>
+      <ApplicationStageStaleDaysField />
     </div>
   )
 }

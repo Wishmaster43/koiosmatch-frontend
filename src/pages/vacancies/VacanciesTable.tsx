@@ -17,11 +17,19 @@ import type { Id } from '@/types/common'
 
 const mutedCell = { color: 'var(--text-muted)', fontSize: 12 }
 const plainCell = { color: 'var(--text)', fontSize: 12 }
-// Leads count → "Kandidaten zoeken" deep-link button (ghost, mono number, no chip
-// noise) — mirrors CustomersTable's count-cell deep-link buttons (§3A: extend the
+// Shared style for the three count deep-links (Leads → candidate search,
+// Sollicitaties → applicants tab, Matches → matches tab). Ghost button, mono
+// number, no chip noise — mirrors CustomersTable's count cells (§3A: extend the
 // established pattern, never a fresh inline copy).
+// COUNT-LINK-KLEUR-1 (Danny 14-08, with a screenshot of the three columns):
+// these numbers used to be painted in the brand accent, so the Leads/Applications/
+// Matches block read as a coloured island in an otherwise calm table. They are
+// data first and a link second, so they take the SAME text colour as every other
+// number in the row. The affordance stays: pointer cursor plus an underline on
+// hover and on keyboard focus, which is what actually says "clickable" (§4:
+// colour only where it carries meaning, never as decoration).
 const leadsBtn = { display: 'inline-flex', fontFamily: 'JetBrains Mono, monospace', fontSize: 12,
-  color: 'var(--color-primary-text)', background: 'none', border: 'none', padding: 0, cursor: 'pointer', font: 'inherit' }
+  color: 'var(--text)', background: 'none', border: 'none', padding: 0, cursor: 'pointer', font: 'inherit' }
 
 interface VacanciesTableProps {
   rows: Vacancy[]
@@ -168,10 +176,13 @@ export default function VacanciesTable({ rows, loading, selectedId, onSelect, on
             style={{ display: 'inline-block', width: 6, height: 6, borderRadius: '50%', background: 'var(--text-muted)', marginLeft: 5 }} />
         ) : null
         return onOpenCandidateSearch ? (
-          // Text-colour accent uses the AA-contrast text token, not the raw brand primary.
-          <button type="button" style={{ ...leadsBtn, color: known ? 'var(--color-primary-text)' : 'var(--text-muted)' }}
+          // A not-yet-computed count stays muted: the dash is genuinely less
+          // certain than a real number, which is a meaning worth colouring.
+          <button type="button" style={{ ...leadsBtn, color: known ? 'var(--text)' : 'var(--text-muted)' }}
             aria-label={t('columns.leadsOpenSearch')} title={title}
             onClick={e => { e.stopPropagation(); onOpenCandidateSearch(r.id as Id) }}
+            onFocus={e => { e.currentTarget.style.textDecoration = 'underline' }}
+            onBlur={e => { e.currentTarget.style.textDecoration = 'none' }}
             onMouseEnter={e => { e.currentTarget.style.textDecoration = 'underline' }}
             onMouseLeave={e => { e.currentTarget.style.textDecoration = 'none' }}>
             {label}{dot}
@@ -193,6 +204,8 @@ export default function VacanciesTable({ rows, loading, selectedId, onSelect, on
       render: r => onOpenApplicants ? (
         <button type="button" style={leadsBtn} aria-label={t('columns.applicationsOpen')}
           onClick={e => { e.stopPropagation(); onOpenApplicants(r.id as Id) }}
+          onFocus={e => { e.currentTarget.style.textDecoration = 'underline' }}
+          onBlur={e => { e.currentTarget.style.textDecoration = 'none' }}
           onMouseEnter={e => { e.currentTarget.style.textDecoration = 'underline' }}
           onMouseLeave={e => { e.currentTarget.style.textDecoration = 'none' }}>
           {r.applicationsCount ?? 0}
@@ -207,6 +220,8 @@ export default function VacanciesTable({ rows, loading, selectedId, onSelect, on
       render: r => onOpenMatches ? (
         <button type="button" style={leadsBtn} aria-label={t('columns.matchesOpen')}
           onClick={e => { e.stopPropagation(); onOpenMatches(r.id as Id) }}
+          onFocus={e => { e.currentTarget.style.textDecoration = 'underline' }}
+          onBlur={e => { e.currentTarget.style.textDecoration = 'none' }}
           onMouseEnter={e => { e.currentTarget.style.textDecoration = 'underline' }}
           onMouseLeave={e => { e.currentTarget.style.textDecoration = 'none' }}>
           {r.matchesCount ?? 0}

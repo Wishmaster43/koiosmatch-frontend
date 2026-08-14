@@ -9,7 +9,7 @@ import { describe, it, expect, vi, afterEach } from 'vitest'
 import { render, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import i18n from '@/i18n'
-import KoiosAdviceSettings, { VACANCY_ADVICE_STALE_DAYS_KEY, MATCH_ADVICE_RENEW_DAYS_KEY } from './KoiosAdviceSettings'
+import KoiosAdviceSettings, { VACANCY_ADVICE_STALE_DAYS_KEY, MATCH_ADVICE_RENEW_DAYS_KEY, APPLICATION_STAGE_STALE_DAYS_KEY } from './KoiosAdviceSettings'
 
 const st = (key: string) => i18n.t(key, { ns: 'settings' })
 
@@ -33,20 +33,22 @@ vi.mock('@/lib/notify', () => ({ notifyError }))
 afterEach(() => vi.clearAllMocks())
 
 describe('KoiosAdviceSettings — seeded defaults', () => {
-  it('shows the 14-day vacancy default and the 30-day match default when nothing is configured', () => {
+  it('shows the 14-day vacancy default, 30-day match default and 14-day application-stage default when nothing is configured', () => {
     mockSettings.mockReturnValue({})
     render(<KoiosAdviceSettings />)
     expect(document.getElementById('vacancy-advice-stale-days')!).toHaveValue(14)
     expect(document.getElementById('match-advice-renew-days')!).toHaveValue(30)
+    expect(document.getElementById('application-stage-stale-days')!).toHaveValue(14)
   })
 })
 
 describe('KoiosAdviceSettings — reads stored values', () => {
   it('shows the stored day counts, not the defaults', () => {
-    mockSettings.mockReturnValue({ [VACANCY_ADVICE_STALE_DAYS_KEY]: 21, [MATCH_ADVICE_RENEW_DAYS_KEY]: 60 })
+    mockSettings.mockReturnValue({ [VACANCY_ADVICE_STALE_DAYS_KEY]: 21, [MATCH_ADVICE_RENEW_DAYS_KEY]: 60, [APPLICATION_STAGE_STALE_DAYS_KEY]: 7 })
     render(<KoiosAdviceSettings />)
     expect(document.getElementById('vacancy-advice-stale-days')!).toHaveValue(21)
     expect(document.getElementById('match-advice-renew-days')!).toHaveValue(60)
+    expect(document.getElementById('application-stage-stale-days')!).toHaveValue(7)
   })
 })
 
@@ -88,6 +90,19 @@ describe('KoiosAdviceSettings — saves on blur', () => {
     await user.tab()
 
     await waitFor(() => expect(saveSettingsKeys).toHaveBeenCalledWith({ [VACANCY_ADVICE_STALE_DAYS_KEY]: 365 }))
+  })
+
+  it('persists the new application stage staleness window under application_stage_stale_days on blur', async () => {
+    mockSettings.mockReturnValue({})
+    const user = userEvent.setup()
+    render(<KoiosAdviceSettings />)
+    const input = document.getElementById('application-stage-stale-days')!
+
+    await user.clear(input)
+    await user.type(input, '5')
+    await user.tab()
+
+    await waitFor(() => expect(saveSettingsKeys).toHaveBeenCalledWith({ [APPLICATION_STAGE_STALE_DAYS_KEY]: 5 }))
   })
 })
 

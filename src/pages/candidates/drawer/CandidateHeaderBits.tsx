@@ -17,6 +17,7 @@ import { BTN_H } from '@/config/buttonMetrics'
 import { fieldInputStyle } from '@/components/forms/fieldMetrics'
 import CreatableSelect from '@/components/ui/CreatableSelect'
 import ReferenceNumberChip from '@/components/ui/ReferenceNumberChip'
+import DetachedCountBadge from '@/components/ui/DetachedCountBadge'
 import LookupIcon from '@/components/ui/LookupIcon'
 import type { Candidate } from '@/types/candidate'
 import type { Id, LookupOption } from '@/types/common'
@@ -69,6 +70,8 @@ export function CandidateTitle({ c, editing, hf, setHF, phaseInfo, showPhase }: 
         )}
         {/* NUMMER-1: human-readable reference number, click-to-copy — same spot on every drawer. */}
         <ReferenceNumberChip value={c.referenceNumber} />
+        {/* ONTKOPPEL-TELLER-1: whole-history CURRENTLY-detached count, warning-only (hidden at 0). */}
+        <DetachedCountBadge count={c.detachedCount} />
       </div>
       <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{c.title || '—'}</div>
     </>

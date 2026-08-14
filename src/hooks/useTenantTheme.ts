@@ -107,7 +107,7 @@ const ON_ACCENT_EXPLICIT_FLOOR = 3.0
  * the tenant's pick still applies whenever it clears AA, so a deliberately
  * bold-but-legible choice is never overridden.
  */
-function clampedOnAccent(explicit: string | null | undefined, bg: string): string {
+export function clampedOnAccent(explicit: string | null | undefined, bg: string): string {
   if (isHexColor(explicit) && contrastRatio(explicit, bg) >= ON_ACCENT_EXPLICIT_FLOOR) return explicit
   return readableOn(bg)
 }

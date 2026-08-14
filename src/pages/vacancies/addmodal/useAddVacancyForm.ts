@@ -26,6 +26,8 @@ import { useAllSettings, getJsonSetting } from '@/lib/settings/useAllSettings'
 import { VACANCY_APP_DEFAULTS_KEY, FALLBACK_APP_SETTINGS } from '../data/applicationSettingsDefaults'
 import { useCascadePickers } from '../hooks/useCascadePickers'
 import { useVacancyBranchDefault } from './useVacancyBranchDefault'
+import { useVacancyAgentDefault } from './useVacancyAgentDefault'
+import { useAiAgents } from '../hooks/useAiAgents'
 import { composeAddress } from '../hooks/useVacancyDetailsForm'
 import { mapVacancy } from '../data/mapVacancy'
 import type { PublicationChannel } from './PublicationCard'
@@ -249,6 +251,11 @@ export function useAddVacancyForm({
   // Punt 19: AI-agent — a single optional link (card only rendered when
   // showAiAgentCard is true, but the field itself is harmless either way).
   const [aiAgentId, setAiAgentId] = useState('')
+  // Punt 20: seed the vacancy owner's own linked AI agent (agent.user.id ===
+  // ownerId), empty when the owner has none — a Koios-marked derivation, never
+  // a silent guess (§0). Only fetched while the card can actually show.
+  const { agents: aiAgents } = useAiAgents(showAiAgentCard)
+  const { handleAiAgentChange, showAgentSuggestion } = useVacancyAgentDefault(form.ownerId, aiAgents, setAiAgentId)
 
   // Punt 20: Publicatie — published flag, per-channel publish state and the
   // application-form settings (cv/cover_letter/photo/remarks/interview_consent).
@@ -389,8 +396,8 @@ export function useAddVacancyForm({
     descExpanded, setDescExpanded, descEditing, setDescEditing, genFields,
     // Punt 18
     matchWeightTemplateId, setMatchWeightTemplateId, matchWeights, setMatchWeights,
-    // Punt 19
-    showAiAgentCard, aiAgentId, setAiAgentId,
+    // Punt 19 + punt 20 (owner-derived agent suggestion)
+    showAiAgentCard, aiAgentId, setAiAgentId: handleAiAgentChange, showAgentSuggestion,
     // Punt 20 — applicationSettingsTouched is exposed so the assembler's
     // CollapsedCard `filled` indicator (A+D layout, Danny 03-08) can tell a
     // touched-but-unpublished settings edit apart from the untouched default.

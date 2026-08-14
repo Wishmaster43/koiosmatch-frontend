@@ -116,9 +116,14 @@ vi.mock('./hooks/useMatchWeightTemplates', () => ({ useMatchWeightTemplates: () 
 // Hoisted, mutable agent list — the gating test flips authState on and needs
 // at least one real option to prove ai_agent_id rides the create body.
 const { aiAgentsState } = vi.hoisted(() => ({
-  aiAgentsState: { options: [] as Array<{ value: string; label: string }> },
+  aiAgentsState: {
+    options: [] as Array<{ value: string; label: string }>,
+    // Punt 20: the raw agent records — carries `user` so the owner-derived
+    // suggestion (useVacancyAgentDefault) has something to match against.
+    agents: [] as Array<{ id: string; name: string; user?: { id: string; name?: string } | null }>,
+  },
 }))
-vi.mock('./hooks/useAiAgents', () => ({ useAiAgents: () => ({ options: aiAgentsState.options, agents: [], loading: false, error: false }) }))
+vi.mock('./hooks/useAiAgents', () => ({ useAiAgents: () => ({ options: aiAgentsState.options, agents: aiAgentsState.agents, loading: false, error: false }) }))
 // PublicationCard's tenant-default lookup — mocked so it never depends on the
 // module-level useAllSettings cache/real `api.get('/settings')` round-trip
 // (that hook's own cache is shared across test files by design, §9).
@@ -175,6 +180,7 @@ beforeEach(() => {
   authState.hasModule = () => false
   authState.hasPermission = () => false
   aiAgentsState.options = []
+  aiAgentsState.agents = []
   matchTemplatesState.templates = []
   attachmentsState.hasPending = false
   attachmentsState.runSequence = async () => {}
@@ -669,6 +675,88 @@ describe('AddVacancyModal · AI-agent card gating (punt 19)', () => {
     await user.click(screen.getByRole('button', { name: 'Interview Bot' }))
     await fillTitleAndSubmit(user)
     expect(mockPost).toHaveBeenCalledWith('/vacancies', expect.objectContaining({ ai_agent_id: 'a1' }))
+  })
+})
+
+describe('AddVacancyModal · AI-agent seeds from the owner (punt 20, KOIOS-VOORSTEL-1)', () => {
+  const usersWithSecond = [{ id: 'u1', name: 'Piet Recruiter' }, { id: 'u2', name: 'Anne Manager' }]
+
+  beforeEach(() => {
+    authState.hasModule = k => k === 'aiagents'
+    authState.hasPermission = p => p === 'settings.view'
+  })
+
+  it('seeds the field with the owner-linked agent and shows the Koios mark', async () => {
+    aiAgentsState.agents = [{ id: 'a1', name: 'Interview Bot', user: { id: 'u1' } }]
+    // AiAgentCard's picker options come from `useAiAgents().options` (label lookup) —
+    // a SEPARATE field from `agents` (which useVacancyAgentDefault matches on) — mirror both.
+    aiAgentsState.options = [{ value: 'a1', label: 'Interview Bot' }]
+    render(<AddVacancyModal onClose={noop} users={users} customers={customers} />)
+    await screen.findByText('modal.fields.cardAiAgent')
+    // Owner (u1, the logged-in default) has an agent — the card shows it filled + suggested even collapsed.
+    expect(screen.getByText('modal.fields.cardAiAgent').closest('button')).toHaveAttribute('aria-expanded', 'false')
+    const user = userEvent.setup()
+    await user.click(screen.getByRole('button', { name: 'modal.fields.cardAiAgent' }))
+    expect(screen.getByRole('button', { name: 'Interview Bot' })).toBeInTheDocument()
+    expect(screen.getByTestId('koios-suggestion')).toBeInTheDocument()
+    expect(screen.getByTestId('koios-suggestion')).toHaveTextContent('koiosSuggestedOwnerAgent')
+    await fillTitleAndSubmit(user)
+    expect(mockPost).toHaveBeenCalledWith('/vacancies', expect.objectContaining({ ai_agent_id: 'a1' }))
+  })
+
+  it('stays empty and unmarked when the owner has no linked agent', async () => {
+    aiAgentsState.agents = [{ id: 'a1', name: 'Interview Bot', user: { id: 'u2' } }]
+    aiAgentsState.options = [{ value: 'a1', label: 'Interview Bot' }]
+    const user = userEvent.setup()
+    render(<AddVacancyModal onClose={noop} users={users} customers={customers} />)
+    await user.click(screen.getByRole('button', { name: 'modal.fields.cardAiAgent' }))
+    expect(screen.getByRole('button', { name: 'aiagent.placeholder' })).toBeInTheDocument()
+    expect(screen.queryByTestId('koios-suggestion')).not.toBeInTheDocument()
+    await fillTitleAndSubmit(user)
+    expect(mockPost).toHaveBeenCalledWith('/vacancies', expect.not.objectContaining({ ai_agent_id: expect.anything() }))
+  })
+
+  it('re-suggests when the owner changes', async () => {
+    aiAgentsState.agents = [
+      { id: 'a1', name: 'Interview Bot', user: { id: 'u1' } },
+      { id: 'a2', name: 'Zorg Bot', user: { id: 'u2' } },
+    ]
+    aiAgentsState.options = [{ value: 'a1', label: 'Interview Bot' }, { value: 'a2', label: 'Zorg Bot' }]
+    const user = userEvent.setup()
+    render(<AddVacancyModal onClose={noop} users={usersWithSecond} customers={customers} />)
+    await user.click(screen.getByRole('button', { name: 'modal.fields.cardAiAgent' }))
+    expect(screen.getByRole('button', { name: 'Interview Bot' })).toBeInTheDocument()
+
+    // Switch owner to Anne Manager (u2) — the suggestion re-proposes her own agent.
+    // (The owner trigger's accessible name is its FIELD LABEL, not the picked value —
+    // its <label> is aria-labelledby'd onto the button, so it never reads "Piet Recruiter".)
+    await user.click(screen.getByRole('button', { name: 'modal.fields.owner' }))
+    await user.click(screen.getByRole('button', { name: 'Anne Manager' }))
+    expect(screen.getByRole('button', { name: 'Zorg Bot' })).toBeInTheDocument()
+    expect(screen.getByTestId('koios-suggestion')).toBeInTheDocument()
+
+    await fillTitleAndSubmit(user)
+    expect(mockPost).toHaveBeenCalledWith('/vacancies', expect.objectContaining({ ai_agent_id: 'a2' }))
+  })
+
+  it('clearing the suggestion freezes it empty and the clear reaches the submitted payload', async () => {
+    aiAgentsState.agents = [{ id: 'a1', name: 'Interview Bot', user: { id: 'u1' } }]
+    aiAgentsState.options = [{ value: 'a1', label: 'Interview Bot' }]
+    const user = userEvent.setup()
+    render(<AddVacancyModal onClose={noop} users={users} customers={customers} />)
+    await user.click(screen.getByRole('button', { name: 'modal.fields.cardAiAgent' }))
+    expect(screen.getByTestId('koios-suggestion')).toBeInTheDocument()
+
+    // Clear the auto-seeded value by hand via the wiskruis (VAC-CLEAR-1) — the
+    // clear button's accessible name is the mocked `clearField` key for EVERY clearable
+    // picker (t() ignores interpolation), so the owner field's own clear-X shares the same
+    // name; the agent card's is the LAST one in DOM order (RecruiterCard renders first).
+    const clearButtons = screen.getAllByRole('button', { name: 'clearField' })
+    await user.click(clearButtons[clearButtons.length - 1])
+
+    expect(screen.queryByTestId('koios-suggestion')).not.toBeInTheDocument()
+    await fillTitleAndSubmit(user)
+    expect(mockPost).toHaveBeenCalledWith('/vacancies', expect.not.objectContaining({ ai_agent_id: expect.anything() }))
   })
 })
 

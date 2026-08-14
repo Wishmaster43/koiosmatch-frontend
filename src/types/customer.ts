@@ -197,6 +197,10 @@ export interface Customer {
   // NUMMER-1: human-readable reference number (D-4). Tenant-configurable
   // prefix/padding/start (Settings → Nummering); server-assigned, immutable.
   referenceNumber?: string
+  // ONTKOPPEL-TELLER-1: how many applications across ALL this customer's vacancies
+  // are CURRENTLY detached (soft-deleted, not restored) — the whole-history total,
+  // never a filtered-window count. 0/undefined when nothing is detached.
+  detachedCount?: number
   name: string
   initials: string
   debtorNumber: string

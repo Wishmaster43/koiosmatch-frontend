@@ -44,10 +44,15 @@ describe('VacancyNotesPopout', () => {
     expect(liteState.reload).toHaveBeenCalledTimes(1)
   })
 
-  it('renders the vacancy title + the shared notes surface on success', () => {
+  it('does not repeat the vacancy name in the notes header, and mounts the shared notes surface', () => {
     liteState.vacancy = { id: 'vac-1', name: 'Verzorgende IG', initials: 'VI' }
     render(<VacancyNotesPopout id="vac-1" />)
-    expect(screen.getByText('Verzorgende IG')).toBeInTheDocument()
+    // VAC-NOTES-CALM-1: the drawer/window title already names the vacancy —
+    // the in-page header must not repeat it (mirrors the candidate profile-text
+    // block, which only ever labels the SECTION, never the entity).
+    expect(screen.queryByText('Verzorgende IG')).not.toBeInTheDocument()
+    // The calm section label ("Notes") still identifies the surface.
+    expect(screen.getByText('notes.title')).toBeInTheDocument()
     // The shared NotesTab's own empty-state copy proves it actually mounted.
     expect(screen.getByText('notes.empty')).toBeInTheDocument()
   })

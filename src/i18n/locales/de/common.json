@@ -57,6 +57,10 @@
     "copy": "Nummer kopieren",
     "copied": "Nummer kopiert"
   },
+  "detachedCount": {
+    "label": "{{count}} getrennt",
+    "tooltip": "Aktuell getrennt: {{count}}"
+  },
   "loading": "Laden…",
   "noResults": "Keine Ergebnisse",
   "resultsCount": "{{count}} Ergebnisse",
@@ -444,5 +448,6 @@
   },
   "popoutHandoffFailed": "Der zweite Bildschirm hat die Notiz nicht übernommen. Dein Text ist noch hier.",
   "discardChangesConfirm": "Du hast noch nicht gespeicherten Text. Ohne Speichern schließen?",
-  "koiosSuggested": "Vorschlag von Koios AI auf Basis der Kandidatenhistorie"
+  "koiosSuggested": "Vorschlag von Koios AI auf Basis der Kandidatenhistorie",
+  "koiosSuggestedOwnerAgent": "Vorschlag von Koios AI auf Basis des Inhabers der Stelle"
 }

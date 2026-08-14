@@ -41,6 +41,10 @@ export interface Vacancy {
   code: string
   // NUMMER-1: human-readable reference number (V-12) — distinct from the manual `code`.
   referenceNumber?: string
+  // ONTKOPPEL-TELLER-1: how many of this vacancy's applications are CURRENTLY
+  // detached (soft-deleted, not restored) — the whole-history total, never a
+  // filtered-window count. 0/undefined when nothing is detached.
+  detachedCount?: number
   title: string
   statusValue: string | number | null
   statusLabel: string

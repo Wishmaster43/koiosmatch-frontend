@@ -218,6 +218,9 @@ export function mapCustomer(c: ApiCustomer = {}): Customer {
     id: c.id,
     // NUMMER-1: human-readable reference number (D-4).
     referenceNumber: c.reference_number ?? '',
+    // ONTKOPPEL-TELLER-1: detail-only, server-computed CURRENTLY-detached count,
+    // summed across ALL this customer's vacancies.
+    detachedCount: c.detached_count != null ? Number(c.detached_count) : undefined,
     name: c.name ?? '—',
     initials: initialsOf(c.name),
     debtorNumber: c.debtor_number ?? c.debtorNumber ?? '',

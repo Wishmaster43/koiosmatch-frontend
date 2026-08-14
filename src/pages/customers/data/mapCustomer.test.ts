@@ -92,3 +92,20 @@ describe('mapCustomer · lifecycle (TRASH-OVERAL-2)', () => {
     expect(c.pendingEraseAt).toBeNull()
   })
 })
+
+/**
+ * ONTKOPPEL-TELLER-1 — the detail-only, server-computed count of applications
+ * CURRENTLY detached (soft-deleted, not restored) across ALL this customer's
+ * vacancies. Whole-history, never the screen's active filter window.
+ */
+describe('mapCustomer · detachedCount', () => {
+  it('reads detached_count from the API payload', () => {
+    const c = mapCustomer({ id: 1, name: 'X', detached_count: 5 } as ApiCustomer)
+    expect(c.detachedCount).toBe(5)
+  })
+
+  it('leaves detachedCount undefined when the field is absent, never a fabricated 0', () => {
+    const c = mapCustomer({ id: 1, name: 'X' } as ApiCustomer)
+    expect(c.detachedCount).toBeUndefined()
+  })
+})

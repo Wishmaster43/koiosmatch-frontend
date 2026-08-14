@@ -24,6 +24,15 @@ interface PopoutShellProps {
   initials: string
   subtitle: string
   children: ReactNode
+  // VAC-NOTES-CALM-1 (Danny 14-08, PDF-VACATURES point 28): the vacancy notes
+  // popout drops the avatar+name row — the OS window title (document.title,
+  // set by the host page) already names the vacancy, so repeating it here read
+  // as noise; the header collapses to the calm section-label look the
+  // candidate profile-text block uses ("Summary"/"Notes", not the entity name).
+  // Optional and defaults to false: every other current caller (candidate/
+  // customer notes + the candidate summary popout) keeps its avatar+name header
+  // unchanged.
+  hideEntityName?: boolean
 }
 
 // Header + notes-area placeholder while the entity identity loads — never a
@@ -60,7 +69,7 @@ function PopoutErrorRow({ message, retryLabel, onRetry }: { message: string; ret
 
 // Loading → skeleton; error → retry row; success → calm avatar+name header above
 // the entity page's own notes surface (children).
-export default function PopoutShell({ loading, error, loadingLabel, errorLabel, retryLabel, onRetry, name, initials, subtitle, children }: PopoutShellProps) {
+export default function PopoutShell({ loading, error, loadingLabel, errorLabel, retryLabel, onRetry, name, initials, subtitle, children, hideEntityName = false }: PopoutShellProps) {
   if (loading) return <PopoutSkeleton loadingLabel={loadingLabel} />
   if (error) return <PopoutErrorRow message={errorLabel} retryLabel={retryLabel} onRetry={onRetry} />
 
@@ -70,16 +79,28 @@ export default function PopoutShell({ loading, error, loadingLabel, errorLabel, 
     // minHeight the body's flex:1 stayed auto, so the editor's own height:100%
     // collapsed to its content and left the rest of the window empty.
     <div style={{ height: '100vh', background: 'var(--bg)', display: 'flex', flexDirection: 'column' }}>
-      <header style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '14px 20px',
-        borderBottom: '1px solid var(--border)', flexShrink: 0 }}>
-        <Avatar initials={initials} soft size={32} />
-        <div style={{ minWidth: 0 }}>
-          <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--text)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-            {name}
+      {/* VAC-NOTES-CALM-1: hideEntityName swaps the avatar+name identity row for
+          the same calm uppercase section-label the candidate profile-text block
+          uses — the window title already carries the entity name, so this header
+          only needs to say WHAT the surface is, not WHOSE it is. */}
+      {hideEntityName ? (
+        <header style={{ padding: '14px 20px', borderBottom: '1px solid var(--border)', flexShrink: 0 }}>
+          <span style={{ fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em', color: 'var(--text-muted)' }}>
+            {subtitle}
+          </span>
+        </header>
+      ) : (
+        <header style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '14px 20px',
+          borderBottom: '1px solid var(--border)', flexShrink: 0 }}>
+          <Avatar initials={initials} soft size={32} />
+          <div style={{ minWidth: 0 }}>
+            <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--text)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+              {name}
+            </div>
+            <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>{subtitle}</div>
           </div>
-          <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>{subtitle}</div>
-        </div>
-      </header>
+        </header>
+      )}
       <div style={{ flex: 1, minHeight: 0, overflow: 'auto', padding: 20 }}>{children}</div>
     </div>
   )

@@ -426,7 +426,8 @@
     "textColorAuto": "Automatic",
     "textColorLight": "White",
     "textColorDark": "Dark",
-    "textColorLowContrast": "This text colour has too little contrast with your brand colour (ratio {{ratio}}; readable is 4.5). Pick \"Automatic\" for the most readable option."
+    "textColorLowContrast": "This text colour has too little contrast with your brand colour (ratio {{ratio}}; readable is 4.5). Pick \"Automatic\" for the most readable option.",
+    "textColorOverridden": "This text colour is NOT being used: the contrast with your brand colour is too low (ratio {{ratio}}). {{used}} is shown automatically so buttons stay readable. Pick another text colour, or another brand colour."
   },
   "company": {
     "title": "Company",
@@ -2959,7 +2960,11 @@
     "matchRenewTitle": "Match renewal window",
     "matchRenewHint": "How many days before (or past) a match's end date Koios suggests renewing it.",
     "matchRenewLabel": "Days (1-365)",
-    "matchRenewSaveFailed": "Saving the match renewal window failed."
+    "matchRenewSaveFailed": "Saving the match renewal window failed.",
+    "applicationStaleTitle": "Application stage staleness",
+    "applicationStaleHint": "How many days an application can sit in its current funnel stage before Koios flags it as too long in stage.",
+    "applicationStaleLabel": "Days (1-365)",
+    "applicationStaleSaveFailed": "Saving the application stage staleness window failed."
   },
   "modShiftmanager": {
     "reportingOff": "Shiftmanager reporting isn't enabled yet. Turn on the module to configure KPI targets and display limits."

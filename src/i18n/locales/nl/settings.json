@@ -426,7 +426,8 @@
     "textColorAuto": "Automatisch",
     "textColorLight": "Wit",
     "textColorDark": "Donker",
-    "textColorLowContrast": "Deze tekstkleur heeft te weinig contrast met je huisstijlkleur (ratio {{ratio}}; leesbaar is 4,5). Kies \"Automatisch\" voor de best leesbare kleur."
+    "textColorLowContrast": "Deze tekstkleur heeft te weinig contrast met je huisstijlkleur (ratio {{ratio}}; leesbaar is 4,5). Kies \"Automatisch\" voor de best leesbare kleur.",
+    "textColorOverridden": "Deze tekstkleur wordt NIET gebruikt: het contrast met je huisstijlkleur is te laag (ratio {{ratio}}). Er wordt automatisch {{used}} getoond, zodat knoppen leesbaar blijven. Kies een andere tekstkleur of een andere huisstijlkleur."
   },
   "company": {
     "title": "Bedrijf",
@@ -2959,7 +2960,11 @@
     "matchRenewTitle": "Match-verlengingsvenster",
     "matchRenewHint": "Hoeveel dagen vóór (of na) de einddatum van een match Koios voorstelt om deze te verlengen.",
     "matchRenewLabel": "Dagen (1-365)",
-    "matchRenewSaveFailed": "Opslaan van het match-verlengingsvenster is mislukt."
+    "matchRenewSaveFailed": "Opslaan van het match-verlengingsvenster is mislukt.",
+    "applicationStaleTitle": "Sollicitatie-stilstand in fase",
+    "applicationStaleHint": "Na hoeveel dagen in dezelfde funnelfase een sollicitatie door Koios als te lang in fase wordt gemarkeerd.",
+    "applicationStaleLabel": "Dagen (1-365)",
+    "applicationStaleSaveFailed": "Opslaan van het sollicitatie-fasevenster is mislukt."
   },
   "modShiftmanager": {
     "reportingOff": "Shiftmanager-rapportage staat nog niet aan. Zet de module aan om KPI-doelen en weergavelimieten in te stellen."

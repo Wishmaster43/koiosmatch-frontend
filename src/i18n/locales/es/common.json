@@ -57,6 +57,10 @@
     "copy": "Copiar número",
     "copied": "Número copiado"
   },
+  "detachedCount": {
+    "label": "{{count}} desvinculado",
+    "tooltip": "Actualmente desvinculado: {{count}}"
+  },
   "loading": "Cargando…",
   "noResults": "Sin resultados",
   "resultsCount": "{{count}} resultados",
@@ -444,5 +448,6 @@
   },
   "popoutHandoffFailed": "La segunda pantalla no ha recogido la nota. Tu texto sigue aquí.",
   "discardChangesConfirm": "Tienes texto sin guardar. ¿Cerrar sin guardar?",
-  "koiosSuggested": "Propuesto por Koios AI según el historial del candidato"
+  "koiosSuggested": "Propuesto por Koios AI según el historial del candidato",
+  "koiosSuggestedOwnerAgent": "Propuesto por Koios AI según el propietario de la vacante"
 }

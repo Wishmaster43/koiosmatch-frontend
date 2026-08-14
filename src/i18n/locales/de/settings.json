@@ -404,7 +404,8 @@
     "textColorAuto": "Automatisch",
     "textColorLight": "Weiß",
     "textColorDark": "Dunkel",
-    "textColorLowContrast": "Diese Textfarbe hat zu wenig Kontrast zur Markenfarbe (Verhältnis {{ratio}}; lesbar ist 4,5). Wähle „Automatisch“ für die beste Lesbarkeit."
+    "textColorLowContrast": "Diese Textfarbe hat zu wenig Kontrast zur Markenfarbe (Verhältnis {{ratio}}; lesbar ist 4,5). Wähle „Automatisch“ für die beste Lesbarkeit.",
+    "textColorOverridden": "Diese Textfarbe wird NICHT verwendet: der Kontrast zur Markenfarbe ist zu gering (Verhältnis {{ratio}}). Es wird automatisch {{used}} angezeigt, damit Schaltflächen lesbar bleiben. Wählen Sie eine andere Textfarbe oder eine andere Markenfarbe."
   },
   "company": {
     "title": "Unternehmen",
@@ -2959,7 +2960,11 @@
     "matchRenewTitle": "Match-Verlängerungsfenster",
     "matchRenewHint": "Wie viele Tage vor (oder nach) dem Enddatum eines Matches Koios eine Verlängerung vorschlägt.",
     "matchRenewLabel": "Tage (1-365)",
-    "matchRenewSaveFailed": "Speichern des Match-Verlängerungsfensters fehlgeschlagen."
+    "matchRenewSaveFailed": "Speichern des Match-Verlängerungsfensters fehlgeschlagen.",
+    "applicationStaleTitle": "Bewerbungsstillstand in Phase",
+    "applicationStaleHint": "Nach wie vielen Tagen in derselben Funnel-Phase eine Bewerbung von Koios als zu lange in Phase markiert wird.",
+    "applicationStaleLabel": "Tage (1-365)",
+    "applicationStaleSaveFailed": "Speichern des Bewerbungs-Phasenfensters fehlgeschlagen."
   },
   "modShiftmanager": {
     "reportingOff": "Shiftmanager-Berichterstattung ist noch nicht aktiviert. Schalten Sie das Modul ein, um KPI-Ziele und Anzeigelimits zu konfigurieren."

@@ -16,6 +16,7 @@ import ArchivedBanner from '@/components/drawer/ArchivedBanner'
 import TrashLifecycleSection from '@/components/drawer/TrashLifecycleSection'
 import type { TrashSectionConfig } from '@/components/drawer/TrashLifecycleSection'
 import ReferenceNumberChip from '@/components/ui/ReferenceNumberChip'
+import DetachedCountBadge from '@/components/ui/DetachedCountBadge'
 import CustomerHeaderActions from './drawer/CustomerHeaderActions'
 import MergeCustomerModal from './MergeCustomerModal'
 import PdokCard from '@/components/drawer/PdokCard'
@@ -371,6 +372,9 @@ export default function CustomerDrawer({
         )}
         {/* NUMMER-1: human-readable reference number, click-to-copy — same spot on every drawer. */}
         <ReferenceNumberChip value={c.referenceNumber} />
+        {/* ONTKOPPEL-TELLER-1: whole-history CURRENTLY-detached count across ALL this
+            customer's vacancies, warning-only (hidden at 0). */}
+        <DetachedCountBadge count={c.detachedCount} />
       </div>
       <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{[c.city, c.industry].filter(Boolean).join(' · ') || '—'}</div>
     </>

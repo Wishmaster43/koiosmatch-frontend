@@ -1,11 +1,15 @@
 import { useTranslation } from 'react-i18next'
 import CreatableSelect from '@/components/ui/CreatableSelect'
 import { cardBox } from '@/components/ui/modalCards'
+import KoiosSuggestionBadge from '@/components/ui/KoiosSuggestionBadge'
 import { useAiAgents } from '../hooks/useAiAgents'
 
 interface Props {
   agentId: string
   onAgentChange: (id: string) => void
+  // Punt 20: true while `agentId` still holds the owner-derived proposal
+  // (never after a manual pick/clear) — shows the shared Koios mark (§0).
+  showSuggestion?: boolean
 }
 
 /**
@@ -17,7 +21,7 @@ interface Props {
  * and the read-only interview-flow preview stay post-create (VacancyAgentTab);
  * this card is only the link, mirroring its picker.
  */
-export default function AiAgentCard({ agentId, onAgentChange }: Props) {
+export default function AiAgentCard({ agentId, onAgentChange, showSuggestion = false }: Props) {
   const { t } = useTranslation(['vacancies', 'common'])
   const { options, loading, error } = useAiAgents(true)
 
@@ -35,6 +39,8 @@ export default function AiAgentCard({ agentId, onAgentChange }: Props) {
           <CreatableSelect value={agentId || null} onChange={onAgentChange} allowCreate={false}
             clearable clearLabel={t('aiagent.placeholder')}
             placeholder={loading ? t('common:loading') : t('aiagent.placeholder')} options={selectOptions} />
+          {/* KOIOS-VOORSTEL-1: the field seeded itself from the vacancy owner's own agent — mark it a proposal, not a fact, until picked/cleared by hand. */}
+          {showSuggestion && agentId && <KoiosSuggestionBadge labelKey="koiosSuggestedOwnerAgent" />}
           {!loading && options.length === 0 && (
             <p style={{ fontSize: 11, color: 'var(--text-muted)', margin: 0 }}>{t('aiagent.empty')}</p>
           )}

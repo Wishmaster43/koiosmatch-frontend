@@ -5,17 +5,22 @@
  * suggestion, also plainly programmed heuristics — never a second marker.
  * Renders the shared KoiosAiMark + a translated "Koios AI" proposal line; the
  * caller shows it only while the suggestion still holds (cleared/repicked = gone).
+ * `labelKey` lets a caller point at a more specific i18n key describing WHAT was
+ * derived (e.g. the vacancy owner's AI agent) while keeping the same mark/shape —
+ * defaults to the original candidate-history copy so existing callers are unchanged.
  */
 import { useTranslation } from 'react-i18next'
 import KoiosAiMark from './KoiosAiMark'
 
-export default function KoiosSuggestionBadge() {
+interface Props { labelKey?: string }
+
+export default function KoiosSuggestionBadge({ labelKey = 'koiosSuggested' }: Props) {
   const { t } = useTranslation('common')
   return (
     <span data-testid="koios-suggestion" style={{ display: 'inline-flex', alignItems: 'center', gap: 5,
       fontSize: 11, color: 'var(--color-primary-text)', marginTop: 5 }}>
       <KoiosAiMark size={14} tone="soft" />
-      {t('koiosSuggested')}
+      {t(labelKey)}
     </span>
   )
 }

@@ -5,6 +5,7 @@ import { Globe, Edit2, Save, X } from 'lucide-react'
 import EntityDrawer from '@/components/drawer/EntityDrawer'
 import EntityHeader from '@/components/drawer/EntityHeader'
 import ReferenceNumberChip from '@/components/ui/ReferenceNumberChip'
+import DetachedCountBadge from '@/components/ui/DetachedCountBadge'
 import PdokCard from '@/components/drawer/PdokCard'
 import { channelIcon } from './data/channelIcons'
 import ChangelogPopover from '@/components/drawer/ChangelogPopover'
@@ -227,6 +228,8 @@ export default function VacancyDrawer({ vacancy: v, onClose, expanded, onToggleE
                 <span style={{ fontSize: 15, fontWeight: 700, color: 'var(--text)' }}>{v.title}</span>
                 {/* NUMMER-1: human-readable reference number, click-to-copy — same spot on every drawer. */}
                 <ReferenceNumberChip value={v.referenceNumber} />
+                {/* ONTKOPPEL-TELLER-1: whole-history CURRENTLY-detached count, warning-only (hidden at 0). */}
+                <DetachedCountBadge count={v.detachedCount} />
               </div>
               <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{v.clientName || '—'}</div>
             </>

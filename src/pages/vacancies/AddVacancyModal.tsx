@@ -165,7 +165,7 @@ export default function AddVacancyModal({
               CollapsedCard itself must not exist without access, not just its body. */}
           {f.showAiAgentCard && (
             <CollapsedCard title={f.t('modal.fields.cardAiAgent')} filled={!!f.aiAgentId}>
-              <AiAgentCard agentId={f.aiAgentId} onAgentChange={f.setAiAgentId} />
+              <AiAgentCard agentId={f.aiAgentId} onAgentChange={f.setAiAgentId} showSuggestion={f.showAgentSuggestion} />
             </CollapsedCard>
           )}
           <CollapsedCard title={f.t('modal.fields.cardPublication')}

@@ -139,6 +139,10 @@ export interface Candidate {
   // Human-readable sequence number (NUMMER-1), e.g. "K-00123". Tenant-configurable
   // prefix/padding/start (Settings → Nummering); server-assigned, immutable.
   referenceNumber?: string
+  // ONTKOPPEL-TELLER-1: how many of this candidate's applications are CURRENTLY
+  // detached (soft-deleted, not restored) — the whole-history total, never a
+  // filtered-window count. 0/undefined when nothing is detached.
+  detachedCount?: number
   name: string
   firstname?: string
   lastname?: string

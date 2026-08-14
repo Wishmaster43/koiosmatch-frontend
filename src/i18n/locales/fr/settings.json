@@ -404,7 +404,8 @@
     "textColorAuto": "Automatique",
     "textColorLight": "Blanc",
     "textColorDark": "Foncé",
-    "textColorLowContrast": "Cette couleur de texte contraste trop peu avec votre couleur de marque (ratio {{ratio}} ; lisible à partir de 4,5). Choisissez « Automatique » pour la meilleure lisibilité."
+    "textColorLowContrast": "Cette couleur de texte contraste trop peu avec votre couleur de marque (ratio {{ratio}} ; lisible à partir de 4,5). Choisissez « Automatique » pour la meilleure lisibilité.",
+    "textColorOverridden": "Cette couleur de texte n'est PAS utilisée : le contraste avec votre couleur de marque est trop faible (rapport {{ratio}}). {{used}} est affiché automatiquement afin que les boutons restent lisibles. Choisissez une autre couleur de texte ou une autre couleur de marque."
   },
   "company": {
     "title": "Entreprise",
@@ -2959,7 +2960,11 @@
     "matchRenewTitle": "Fenêtre de renouvellement du match",
     "matchRenewHint": "Combien de jours avant (ou après) la date de fin d'un match Koios suggère de le renouveler.",
     "matchRenewLabel": "Jours (1-365)",
-    "matchRenewSaveFailed": "Échec de l’enregistrement de la fenêtre de renouvellement du match."
+    "matchRenewSaveFailed": "Échec de l’enregistrement de la fenêtre de renouvellement du match.",
+    "applicationStaleTitle": "Stagnation de la candidature en phase",
+    "applicationStaleHint": "Au bout de combien de jours dans la même phase de l'entonnoir une candidature est signalée par Koios comme trop longue en phase.",
+    "applicationStaleLabel": "Jours (1-365)",
+    "applicationStaleSaveFailed": "Échec de l'enregistrement de la fenêtre de phase de la candidature."
   },
   "modShiftmanager": {
     "reportingOff": "Le reporting Shiftmanager n'est pas encore activé. Activez le module pour configurer les objectifs KPI et les limites d'affichage."

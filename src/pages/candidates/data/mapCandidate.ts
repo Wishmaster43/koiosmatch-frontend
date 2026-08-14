@@ -78,6 +78,8 @@ export function mapCandidate(c: ApiCandidate): Candidate {
     id:              c.id ?? '',
     // NUMMER-1: human-readable reference number (K-00123), shown in the drawer + table.
     referenceNumber: c.reference_number ?? '',
+    // ONTKOPPEL-TELLER-1: detail-only, server-computed CURRENTLY-detached count.
+    detachedCount: c.detached_count != null ? Number(c.detached_count) : undefined,
     name,
     initials:        initialsOf(name),
     // NAAMDELEN-1 (CMBE 2026-07-28): real first/middle/last name parts, straight

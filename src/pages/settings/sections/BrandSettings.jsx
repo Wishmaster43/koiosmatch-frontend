@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
-import { contrastRatio, applyBrandTokens } from '@/hooks/useTenantTheme'
+import { contrastRatio, applyBrandTokens, clampedOnAccent } from '@/hooks/useTenantTheme'
 import { useTranslation } from 'react-i18next'
 import { Check, RefreshCw, Save, Upload, X } from 'lucide-react'
 import api from '@/lib/api'
@@ -206,7 +206,19 @@ export default function BrandSettings() {
               <div role="status" style={{ marginTop: 10, fontSize: 11, padding: '7px 10px', borderRadius: 8,
                 color: 'var(--color-warning)', background: 'color-mix(in srgb, var(--color-warning) 10%, transparent)',
                 border: '1px solid color-mix(in srgb, var(--color-warning) 30%, transparent)' }}>
-                {t('brand.textColorLowContrast', { ratio: contrastRatio(textColor, primaryColor).toFixed(1) })}
+                {/* Two different things can be true below AA, and the screen used to
+                    say only one of them (Danny 14-08: "staat op wit maar is geen wit").
+                    Between the clamp floor and AA the pick IS in effect, just weak.
+                    BELOW the floor the theme silently swaps in the readable colour, so
+                    the chip reads "Wit" while the button renders dark. Name that out
+                    loud, including which colour is actually painted, or the control
+                    claims a state the app is not in (§3). */}
+                {clampedOnAccent(textColor, primaryColor).toLowerCase() !== textColor.toLowerCase()
+                  ? t('brand.textColorOverridden', {
+                      ratio: contrastRatio(textColor, primaryColor).toFixed(1),
+                      used: clampedOnAccent(textColor, primaryColor).toUpperCase(),
+                    })
+                  : t('brand.textColorLowContrast', { ratio: contrastRatio(textColor, primaryColor).toFixed(1) })}
               </div>
             )}
           </div>

@@ -57,6 +57,10 @@ export default function VacancyNotesPopout({ id }: { id: string | undefined }) {
       loading={loading} error={error || !vacancy} onRetry={reload}
       loadingLabel={t('common:loading')} errorLabel={t('popout.loadError')} retryLabel={t('common:error.retry')}
       name={vacancy?.name ?? ''} initials={vacancy?.initials ?? ''} subtitle={t('notes.title')}
+      // VAC-NOTES-CALM-1 (PDF-VACATURES point 28): no repeated vacancy name in
+      // the notes header — the window title (set below) already names it, and
+      // this surface should read like the candidate's calm profile-text block.
+      hideEntityName
     >
       {/* NOTITIE-POPOUT-HANDOFF-1: `role: 'window'` makes this the RECEIVING side —
           a note the recruiter was half-typing in the drill-down opens here, in the

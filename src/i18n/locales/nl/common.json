@@ -57,6 +57,10 @@
     "copy": "Kopieer nummer",
     "copied": "Nummer gekopieerd"
   },
+  "detachedCount": {
+    "label": "{{count}} ontkoppeld",
+    "tooltip": "Nu ontkoppeld: {{count}}"
+  },
   "loading": "Laden…",
   "noResults": "Geen resultaten",
   "resultsCount": "{{count}} resultaten",
@@ -444,5 +448,6 @@
   },
   "popoutHandoffFailed": "Het tweede scherm heeft de notitie niet overgenomen. Je tekst staat hier nog.",
   "discardChangesConfirm": "Je hebt tekst die nog niet is opgeslagen. Sluiten zonder opslaan?",
-  "koiosSuggested": "Voorstel van Koios AI op basis van de kandidaatgeschiedenis"
+  "koiosSuggested": "Voorstel van Koios AI op basis van de kandidaatgeschiedenis",
+  "koiosSuggestedOwnerAgent": "Voorstel van Koios AI op basis van de eigenaar van de vacature"
 }
