@@ -20,7 +20,8 @@
     "candidates": "Zulauf",
     "applications": "Bewerbungen",
     "customers": "Kunden",
-    "opportunities": "Chancen"
+    "opportunities": "Chancen",
+    "tasks": "Aufgaben"
   },
   "candidates": {
     "loading": "Zulauf wird geladen…",
@@ -128,6 +129,8 @@
     "error": "Matches konnten nicht geladen werden",
     "empty": "Keine Matches in diesem Zeitraum",
     "total": "Matches gesamt",
+    "window": "Matches {{from}} bis {{to}}",
+    "series": "Matches im Zeitverlauf",
     "viaFunnel": "Aus Bewerbung",
     "direct": "Direkt",
     "avgDuration": "Ø Match-Dauer",
@@ -141,7 +144,10 @@
       "sent": "Gesendet",
       "active": "Aktiv",
       "ended": "Beendet",
-      "total": "Gesamt"
+      "none": "Kein Vertrag"
+    },
+    "terminations": {
+      "title": "Beendigungsgründe"
     }
   },
   "outreach": {
@@ -151,9 +157,13 @@
     "total": "Ziele gesamt",
     "reached": "Erreicht",
     "reachRate": "Erreichungsquote",
-    "byStatus": "Verteilung nach Status",
-    "byOutcome": "Verteilung nach Ergebnis",
-    "noOutcomes": "Noch keine Ergebnisse erfasst"
+    "series": "Anrufzielpersonen im Zeitverlauf",
+    "window": "Anrufzielpersonen {{from}} bis {{to}}",
+    "axes": {
+      "campaign": "Anrufliste",
+      "channel": "Kanal",
+      "outcome": "Ergebnis"
+    }
   },
   "sources": {
     "loading": "Quellen werden geladen…",
@@ -207,6 +217,28 @@
       "won": "Gewonnen",
       "lost": "Verloren",
       "winRate": "Gewinnquote"
+    }
+  },
+  "tasks": {
+    "loading": "Aufgaben werden geladen…",
+    "error": "Aufgaben konnten nicht geladen werden",
+    "empty": "Keine Aufgaben in diesem Zeitraum",
+    "total": "Aufgaben gesamt",
+    "series": "Aufgaben im Zeitverlauf",
+    "window": "Aufgaben {{from}} bis {{to}}",
+    "summary": {
+      "open": "Offen",
+      "done": "Abgeschlossen",
+      "overdue": "Überfällig",
+      "doneRate": "Erledigungsquote"
+    },
+    "axes": {
+      "status": "Status",
+      "type": "Typ",
+      "priority": "Priorität",
+      "assignee": "Zugewiesen an",
+      "team": "Abteilung",
+      "branch": "Niederlassung"
     }
   },
   "customers": {

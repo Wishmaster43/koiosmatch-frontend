@@ -20,7 +20,8 @@
     "candidates": "Inflow",
     "applications": "Applications",
     "customers": "Customers",
-    "opportunities": "Opportunities"
+    "opportunities": "Opportunities",
+    "tasks": "Tasks"
   },
   "candidates": {
     "loading": "Loading inflow…",
@@ -128,6 +129,8 @@
     "error": "Could not load the matches",
     "empty": "No matches in this period",
     "total": "Total matches",
+    "window": "Matches {{from}} through {{to}}",
+    "series": "Matches over time",
     "viaFunnel": "From application",
     "direct": "Direct",
     "avgDuration": "Avg. match duration",
@@ -141,7 +144,10 @@
       "sent": "Sent",
       "active": "Active",
       "ended": "Ended",
-      "total": "Total"
+      "none": "No contract"
+    },
+    "terminations": {
+      "title": "Termination reasons"
     }
   },
   "outreach": {
@@ -151,9 +157,13 @@
     "total": "Total targets",
     "reached": "Reached",
     "reachRate": "Reach rate",
-    "byStatus": "Breakdown by status",
-    "byOutcome": "Breakdown by outcome",
-    "noOutcomes": "No outcomes recorded yet"
+    "series": "Call-list targets over time",
+    "window": "Call-list targets {{from}} through {{to}}",
+    "axes": {
+      "campaign": "Call list",
+      "channel": "Channel",
+      "outcome": "Outcome"
+    }
   },
   "sources": {
     "loading": "Loading sources…",
@@ -207,6 +217,28 @@
       "won": "Won",
       "lost": "Lost",
       "winRate": "Win rate"
+    }
+  },
+  "tasks": {
+    "loading": "Loading tasks…",
+    "error": "Could not load the tasks",
+    "empty": "No tasks in this period",
+    "total": "Total tasks",
+    "series": "Tasks over time",
+    "window": "Tasks {{from}} through {{to}}",
+    "summary": {
+      "open": "Open",
+      "done": "Done",
+      "overdue": "Overdue",
+      "doneRate": "Done rate"
+    },
+    "axes": {
+      "status": "Status",
+      "type": "Type",
+      "priority": "Priority",
+      "assignee": "Assigned to",
+      "team": "Department",
+      "branch": "Branch"
     }
   },
   "customers": {

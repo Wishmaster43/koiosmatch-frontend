@@ -2,8 +2,8 @@
  * reportDrillGate — the per-report-set capability flag for the report drill-down
  * affordance. REPORTS-DRILL-1 (verified live 2026-08-13, see
  * koiosmatch-api/docs/CONTRACT-CHANGELOG.md) shipped `GET /reports/{r}/drill|advice`
- * for **flow · matches · recruiters · vacancies** — intakes/outreach/sources have
- * no matching backend endpoint yet, so those three stay gated off until their own
+ * for **flow · matches · recruiters · vacancies** — intakes/sources have no
+ * matching backend endpoint yet, so those two stay gated off until their own
  * contract lands. RAPPORTEN-SUITE-1 (2026-08-14, "portie 1") added the same pair for
  * **candidates** (six-way XOR: status|phase|source|owner|branch|date). "Portie 2"
  * (2026-08-14) added the same pair for **applications** (six-way XOR: stage|bucket|
@@ -12,11 +12,18 @@
  * **customers** (five-way XOR: status|phase|industry|owner|branch|date — no
  * by_source, customers have no source column). "Portie 5" (2026-08-14) added the
  * same pair for **opportunities** (five-way XOR: stage|customer|owner|branch|date).
- * Every report reads its own key here; there is nothing left to flip per screen
- * once a report's endpoint exists.
+ * "Portie 6" (2026-08-14) added the same pair for **tasks** (seven-way XOR:
+ * status|type|priority|assignee|team|branch|date — status/type/priority key on
+ * the lookup ID, never the slug). The outreach upgrade ("portie 6", 2026-08-14)
+ * flipped the last fase-1 report to the same pair (six-way XOR: campaign|assignee|
+ * channel|status|outcome|date — campaign accepts any uuid AND 'others' for the
+ * exact top-20 complement; rows carry candidate names, so the drill sits behind
+ * the outreach.view data permission with the calm 403 degrade). Every report
+ * reads its own key here; there is nothing left to flip per screen once a
+ * report's endpoint exists.
  * Tests override via `vi.mock('./reportDrillGate', ...)`.
  */
-export type DrillableReport = 'flow' | 'matches' | 'recruiters' | 'vacancies' | 'intakes' | 'outreach' | 'sources' | 'candidates' | 'applications' | 'customers' | 'opportunities'
+export type DrillableReport = 'flow' | 'matches' | 'recruiters' | 'vacancies' | 'intakes' | 'outreach' | 'sources' | 'candidates' | 'applications' | 'customers' | 'opportunities' | 'tasks'
 
 export const REPORT_DRILL_AVAILABLE: Record<DrillableReport, boolean> = {
   flow: true,
@@ -27,9 +34,10 @@ export const REPORT_DRILL_AVAILABLE: Record<DrillableReport, boolean> = {
   applications: true,
   customers: true,
   opportunities: true,
+  tasks: true,
+  outreach: true,
   // Not shipped yet — no /reports/{r}/drill|advice endpoint on the backend.
   intakes: false,
-  outreach: false,
   sources: false,
 }
 

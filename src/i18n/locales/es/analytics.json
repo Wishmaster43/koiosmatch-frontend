@@ -20,7 +20,8 @@
     "candidates": "Entrada",
     "applications": "Solicitudes",
     "customers": "Clientes",
-    "opportunities": "Oportunidades"
+    "opportunities": "Oportunidades",
+    "tasks": "Tareas"
   },
   "candidates": {
     "loading": "Cargando entrada…",
@@ -128,6 +129,8 @@
     "error": "No se pudieron cargar los matches",
     "empty": "No hay matches en este período",
     "total": "Total de matches",
+    "window": "Matches del {{from}} al {{to}}",
+    "series": "Matches en el tiempo",
     "viaFunnel": "Desde candidatura",
     "direct": "Directo",
     "avgDuration": "Duración media del match",
@@ -141,7 +144,10 @@
       "sent": "Enviadas",
       "active": "Activas",
       "ended": "Finalizadas",
-      "total": "Total"
+      "none": "Sin contrato"
+    },
+    "terminations": {
+      "title": "Motivos de finalización"
     }
   },
   "outreach": {
@@ -151,9 +157,13 @@
     "total": "Total de objetivos",
     "reached": "Contactados",
     "reachRate": "Tasa de contacto",
-    "byStatus": "Desglose por estado",
-    "byOutcome": "Desglose por resultado",
-    "noOutcomes": "Aún no hay resultados registrados"
+    "series": "Objetivos de llamadas en el tiempo",
+    "window": "Objetivos de llamadas del {{from}} al {{to}}",
+    "axes": {
+      "campaign": "Lista de llamadas",
+      "channel": "Canal",
+      "outcome": "Resultado"
+    }
   },
   "sources": {
     "loading": "Cargando fuentes…",
@@ -207,6 +217,28 @@
       "won": "Ganadas",
       "lost": "Perdidas",
       "winRate": "Tasa de éxito"
+    }
+  },
+  "tasks": {
+    "loading": "Cargando tareas…",
+    "error": "No se pudieron cargar las tareas",
+    "empty": "Sin tareas en este período",
+    "total": "Total de tareas",
+    "series": "Tareas en el tiempo",
+    "window": "Tareas del {{from}} al {{to}}",
+    "summary": {
+      "open": "Abiertas",
+      "done": "Completadas",
+      "overdue": "Vencidas",
+      "doneRate": "Tasa de finalización"
+    },
+    "axes": {
+      "status": "Estado",
+      "type": "Tipo",
+      "priority": "Prioridad",
+      "assignee": "Asignada a",
+      "team": "Departamento",
+      "branch": "Sucursal"
     }
   },
   "customers": {

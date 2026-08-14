@@ -13,6 +13,7 @@ import FlowReport from './FlowReport'
 import RecruitersReport from './RecruitersReport'
 import VacanciesReport from './VacanciesReport'
 import OpportunitiesReport from './OpportunitiesReport'
+import TasksReport from './TasksReport'
 import MatchesReport from './MatchesReport'
 import IntakesReport from './IntakesReport'
 import OutreachReport from './OutreachReport'
@@ -38,6 +39,7 @@ export default function ReportsPage({ initialTab = 'candidates' }: { initialTab?
     { id: 'recruiters', label: t('tabs.recruiters') },
     { id: 'vacancies',  label: t('tabs.vacancies') },
     { id: 'opportunities', label: t('tabs.opportunities') },
+    { id: 'tasks',      label: t('tabs.tasks') },
     { id: 'matches',    label: t('tabs.matches') },
     { id: 'intakes',    label: t('tabs.intakes') },
     { id: 'outreach',   label: t('tabs.outreach') },
@@ -96,6 +98,7 @@ export default function ReportsPage({ initialTab = 'candidates' }: { initialTab?
       {tab === 'recruiters' && <RecruitersReport period={period} tabsSlot={tabsBar} />}
       {tab === 'vacancies'  && <VacanciesReport  period={period} tabsSlot={tabsBar} />}
       {tab === 'opportunities' && <OpportunitiesReport period={period} tabsSlot={tabsBar} />}
+      {tab === 'tasks'      && <TasksReport      period={period} tabsSlot={tabsBar} />}
       {tab === 'matches'    && <MatchesReport    period={period} tabsSlot={tabsBar} />}
       {tab === 'intakes'    && <IntakesReport    period={period} tabsSlot={tabsBar} />}
       {tab === 'outreach'   && <OutreachReport   period={period} tabsSlot={tabsBar} />}

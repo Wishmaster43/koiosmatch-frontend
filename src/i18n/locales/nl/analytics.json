@@ -20,7 +20,8 @@
     "candidates": "Instroom",
     "applications": "Sollicitaties",
     "customers": "Klanten",
-    "opportunities": "Kansen"
+    "opportunities": "Kansen",
+    "tasks": "Taken"
   },
   "candidates": {
     "loading": "Instroom laden…",
@@ -128,6 +129,8 @@
     "error": "Kon de matches niet laden",
     "empty": "Geen matches in deze periode",
     "total": "Totaal matches",
+    "window": "Matches {{from}} t/m {{to}}",
+    "series": "Matches over tijd",
     "viaFunnel": "Via sollicitatie",
     "direct": "Direct",
     "avgDuration": "Gem. matchduur",
@@ -141,7 +144,10 @@
       "sent": "Verzonden",
       "active": "Actief",
       "ended": "Beëindigd",
-      "total": "Totaal"
+      "none": "Geen contract"
+    },
+    "terminations": {
+      "title": "Beëindigingsredenen"
     }
   },
   "outreach": {
@@ -151,9 +157,13 @@
     "total": "Totaal targets",
     "reached": "Bereikt",
     "reachRate": "Bereikpercentage",
-    "byStatus": "Verdeling per status",
-    "byOutcome": "Verdeling per uitkomst",
-    "noOutcomes": "Nog geen uitkomsten geregistreerd"
+    "series": "Bellijst-targets over tijd",
+    "window": "Bellijst-targets {{from}} t/m {{to}}",
+    "axes": {
+      "campaign": "Bellijst",
+      "channel": "Kanaal",
+      "outcome": "Uitkomst"
+    }
   },
   "sources": {
     "loading": "Bronnen laden…",
@@ -207,6 +217,28 @@
       "won": "Gewonnen",
       "lost": "Verloren",
       "winRate": "Winratio"
+    }
+  },
+  "tasks": {
+    "loading": "Taken laden…",
+    "error": "Kon de taken niet laden",
+    "empty": "Geen taken in deze periode",
+    "total": "Totaal taken",
+    "series": "Taken over tijd",
+    "window": "Taken {{from}} t/m {{to}}",
+    "summary": {
+      "open": "Open",
+      "done": "Afgerond",
+      "overdue": "Te laat",
+      "doneRate": "Afrondingspercentage"
+    },
+    "axes": {
+      "status": "Status",
+      "type": "Type",
+      "priority": "Prioriteit",
+      "assignee": "Toegewezen aan",
+      "team": "Afdeling",
+      "branch": "Vestiging"
     }
   },
   "customers": {

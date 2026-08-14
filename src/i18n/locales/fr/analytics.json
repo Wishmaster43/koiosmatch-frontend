@@ -20,7 +20,8 @@
     "candidates": "Flux entrant",
     "applications": "Candidatures",
     "customers": "Clients",
-    "opportunities": "Opportunités"
+    "opportunities": "Opportunités",
+    "tasks": "Tâches"
   },
   "candidates": {
     "loading": "Chargement du flux entrant…",
@@ -128,6 +129,8 @@
     "error": "Impossible de charger les matchs",
     "empty": "Aucun match sur cette période",
     "total": "Total des matchs",
+    "window": "Matchs du {{from}} au {{to}}",
+    "series": "Matchs dans le temps",
     "viaFunnel": "Depuis une candidature",
     "direct": "Direct",
     "avgDuration": "Durée moyenne du match",
@@ -141,7 +144,10 @@
       "sent": "Envoyés",
       "active": "Actifs",
       "ended": "Terminés",
-      "total": "Total"
+      "none": "Sans contrat"
+    },
+    "terminations": {
+      "title": "Motifs d'arrêt"
     }
   },
   "outreach": {
@@ -151,9 +157,13 @@
     "total": "Total des cibles",
     "reached": "Contactés",
     "reachRate": "Taux de contact",
-    "byStatus": "Répartition par statut",
-    "byOutcome": "Répartition par résultat",
-    "noOutcomes": "Aucun résultat enregistré pour le moment"
+    "series": "Cibles d’appel dans le temps",
+    "window": "Cibles d’appel du {{from}} au {{to}}",
+    "axes": {
+      "campaign": "Liste d’appels",
+      "channel": "Canal",
+      "outcome": "Résultat"
+    }
   },
   "sources": {
     "loading": "Chargement des sources…",
@@ -207,6 +217,28 @@
       "won": "Gagnées",
       "lost": "Perdues",
       "winRate": "Taux de gain"
+    }
+  },
+  "tasks": {
+    "loading": "Chargement des tâches…",
+    "error": "Impossible de charger les tâches",
+    "empty": "Aucune tâche sur cette période",
+    "total": "Total des tâches",
+    "series": "Tâches dans le temps",
+    "window": "Tâches du {{from}} au {{to}}",
+    "summary": {
+      "open": "Ouvertes",
+      "done": "Terminées",
+      "overdue": "En retard",
+      "doneRate": "Taux d'achèvement"
+    },
+    "axes": {
+      "status": "Statut",
+      "type": "Type",
+      "priority": "Priorité",
+      "assignee": "Assignée à",
+      "team": "Service",
+      "branch": "Agence"
     }
   },
   "customers": {

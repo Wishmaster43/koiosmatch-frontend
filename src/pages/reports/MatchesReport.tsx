@@ -1,10 +1,12 @@
 /**
- * MatchesReport — matches summary (GET /reports/matches).
- *
- * KPI strip (total · via-funnel vs direct) over a matches breakdown
- * (sent/active/ended by HelloFlex contract status). `avg_placement_duration_days`
- * is honestly null until the HelloFlex coupling fills match start/end — we
- * show a note rather than a fabricated number. Data lives in useMatchesReport.
+ * MatchesReport — matches summary (GET /reports/matches, closed by RAPPORTEN-SUITE-1
+ * "portie 7"). KPI strip (total · via-funnel vs direct) + the shared timeseries,
+ * the contract-form axis (MATCH-SOORT-1), the under_contract contract-status tiles
+ * and the terminations-by-reason axis, window label from the RESPONSE. Drill/advice
+ * XOR params follow the four-way matches contract: origin | contract_form |
+ * contract_status | date (+bucket=week next to a week bar's date).
+ * `avg_placement_duration_days` is honestly null until the HelloFlex coupling
+ * fills match start/end — we show a note rather than a fabricated number.
  */
 import { useState } from 'react'
 import type { ReactNode } from 'react'
@@ -16,13 +18,18 @@ import type { DrillSpec } from './ReportDrillDrawer'
 import { useMatchesReport } from './useMatchesReport'
 import { gateDrillClick } from './reportDrillGate'
 import SegmentBars from './SegmentBars'
-import type { ReportPeriod } from '@/types/analytics'
+import { useDateFormat } from '@/lib/datetime'
+import type { ReportPeriod, CandidateTimeseriesPoint } from '@/types/analytics'
 
-// One match stat tile.
-function StatTile({ label, value, accent }: { label: string; value: number; accent?: boolean }) {
+// One match stat tile; with an onClick it becomes a drillable surface (keyboard
+// operable — same affordance pattern as SegmentBars).
+function StatTile({ label, value, accent, onClick }: { label: string; value: number; accent?: boolean; onClick?: () => void }) {
   return (
-    <div style={{ flex: 1, minWidth: 120, padding: '14px 16px', borderRadius: 10,
-                  background: 'var(--bg)', border: '1px solid var(--border)' }}>
+    <div role={onClick ? 'button' : undefined} tabIndex={onClick ? 0 : undefined}
+         onClick={onClick}
+         onKeyDown={onClick ? (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onClick() } } : undefined}
+         style={{ flex: 1, minWidth: 120, padding: '14px 16px', borderRadius: 10, background: 'var(--bg)',
+                  border: '1px solid var(--border)', cursor: onClick ? 'pointer' : 'default' }}>
       <div style={{ fontSize: 22, fontWeight: 700, fontVariantNumeric: 'tabular-nums',
                     // Text-colour accent uses the AA-contrast text token, not the raw brand primary.
                     color: accent ? 'var(--color-primary-text)' : 'var(--text)' }}>{value}</div>
@@ -31,16 +38,22 @@ function StatTile({ label, value, accent }: { label: string; value: number; acce
   )
 }
 
+// The under_contract tile keys — each drills contract_status=<key> (portie 7 XOR).
+const CONTRACT_STATUS_TILES = ['sent', 'active', 'ended', 'none'] as const
+
 export default function MatchesReport({ period, tabsSlot }: { period: ReportPeriod; tabsSlot?: ReactNode }) {
   const { t } = useTranslation('analytics')
+  const { formatDate } = useDateFormat()
   const { data, loading, error } = useMatchesReport(period)
   const isEmpty = !loading && !error && (!data || data.total === 0)
 
-  // Drill-down: clicking a matches KPI explains it (breakdown by origin + the
-  // matches behind it + Koios advice). Origin filter goes to the drill endpoint.
+  // Drill-down: clicking a KPI/segment/tile/bucket explains it (breakdown + the
+  // matches behind it + Koios advice). Exactly one XOR param per open drill.
   const [drill, setDrill] = useState<DrillSpec | null>(null)
+  // The report window from the RESPONSE, DD-MM-YYYY (§3B DATUM-1) — drawer subtitle.
+  const windowSub = () => `${formatDate(data?.from)} – ${formatDate(data?.to)}`
   const openMatches = (title: string, value: number, origin?: 'funnel' | 'direct') => setDrill({
-    title, value, subtitle: t(`period.${period}`),
+    title, value, subtitle: windowSub(),
     breakdown: [
       { label: t('matches.viaFunnel'), value: data?.by_origin.funnel ?? 0 },
       { label: t('matches.direct'),    value: data?.by_origin.direct ?? 0 },
@@ -49,10 +62,11 @@ export default function MatchesReport({ period, tabsSlot }: { period: ReportPeri
     adviceEndpoint: '/reports/matches/advice', adviceParams: { origin, period },
   })
 
-  // Soort-as (MATCH-SOORT-1): by_contract_form bars, `contract_form` is the OTHER
-  // half of the drill's XOR pair (origin vs contract_form — never both at once).
+  // Soort-as (MATCH-SOORT-1): by_contract_form bars — `contract_form` is one leg
+  // of the four-way XOR; drill AND advice both carry it (the advice gap the
+  // backend closed in portie 7 — labels read "Contractvorm: …" server-side).
   const openContractForm = (label: string, value: number, slug: string) => setDrill({
-    title: label, value, subtitle: t(`period.${period}`),
+    title: label, value, subtitle: windowSub(),
     rowsEndpoint: '/reports/matches/drill', rowsParams: { contract_form: slug, period },
     adviceEndpoint: '/reports/matches/advice', adviceParams: { contract_form: slug, period },
   })
@@ -63,16 +77,52 @@ export default function MatchesReport({ period, tabsSlot }: { period: ReportPeri
     if (seg) openContractForm(seg.label, seg.count, seg.value)
   })
 
+  // Under-contract tile drill: `contract_status` is the third XOR leg (portie 7).
+  const openContractStatus = (label: string, value: number, key: (typeof CONTRACT_STATUS_TILES)[number]) => setDrill({
+    title: label, value, subtitle: windowSub(),
+    rowsEndpoint: '/reports/matches/drill', rowsParams: { contract_status: key, period },
+    adviceEndpoint: '/reports/matches/advice', adviceParams: { contract_status: key, period },
+  })
+  // 'none' = matches without any contract, derived as total - under_contract.total —
+  // exact by contract (contract_status is NOT NULL server-side), never fabricated.
+  const noContract = Math.max(0, (data?.total ?? 0) - (data?.under_contract.total ?? 0))
+  const tileValue = (key: (typeof CONTRACT_STATUS_TILES)[number]) =>
+    key === 'none' ? noContract : data?.under_contract[key] ?? 0
+
+  // Timeseries bucket drill: `date` is the fourth XOR leg; a week bar widens the
+  // drawer to the WHOLE week (bucket=week) so bar and drawer totals always agree.
+  const openBucket = (pt: CandidateTimeseriesPoint) => setDrill({
+    title: pt.label, value: pt.value, subtitle: windowSub(),
+    rowsEndpoint: '/reports/matches/drill',
+    rowsParams: { date: pt.date, ...(data?.timeseries.bucket === 'week' ? { bucket: 'week' } : {}), period },
+    adviceEndpoint: '/reports/matches/advice',
+    adviceParams: { date: pt.date, ...(data?.timeseries.bucket === 'week' ? { bucket: 'week' } : {}), period },
+  })
+  const seriesMax = (data?.timeseries.series ?? []).reduce((m, p) => Math.max(m, p.value), 0)
+  const onSeriesPick = gateDrillClick('matches', (dateKey: string) => {
+    const pt = data?.timeseries.series.find(p => p.date === dateKey)
+    if (pt) openBucket(pt)
+  })
+
+  // Terminations by stop reason (portie 7: `value` mirrors `key` for SegmentBars
+  // parity). The live four-way XOR carries no stop_reason param, so this axis
+  // renders WITHOUT a drill affordance (no onPick — no fake affordances, §3).
+  const terminationSegs = data?.terminations.by_reason ?? []
+  const terminationsMax = terminationSegs.reduce((m, s) => Math.max(m, s.count), 0)
+
+  // The XOR axis of the OPEN drill (if any) — drives the KPI active states.
+  const openParams = drill?.rowsParams as Record<string, unknown> | undefined
+  const openAxis = openParams ? ['origin', 'contract_form', 'contract_status', 'date'].find(k => openParams[k] != null) : undefined
+
   const kpis: KpiSpec[] = [
     { key: 'total',  label: t('matches.total'),     value: data?.total ?? 0,
-      active: drill?.rowsParams?.origin == null && drill != null,
-      // Drill endpoints don't exist yet (reportDrillGate) — no click affordance until they do.
+      active: drill != null && openAxis == null,
       onClick: gateDrillClick('matches', () => openMatches(t('matches.total'), data?.total ?? 0)) },
     { key: 'funnel', label: t('matches.viaFunnel'), value: data?.by_origin.funnel ?? 0,
-      active: drill?.rowsParams?.origin === 'funnel',
+      active: openParams?.origin === 'funnel',
       onClick: gateDrillClick('matches', () => openMatches(t('matches.viaFunnel'), data?.by_origin.funnel ?? 0, 'funnel')) },
     { key: 'direct', label: t('matches.direct'),    value: data?.by_origin.direct ?? 0,
-      active: drill?.rowsParams?.origin === 'direct',
+      active: openParams?.origin === 'direct',
       onClick: gateDrillClick('matches', () => openMatches(t('matches.direct'), data?.by_origin.direct ?? 0, 'direct')) },
     { key: 'dur',    label: t('matches.avgDuration'),
       value: data?.avg_placement_duration_days != null ? t('matches.daysValue', { days: Math.round(data.avg_placement_duration_days) }) : '—' },
@@ -89,6 +139,14 @@ export default function MatchesReport({ period, tabsSlot }: { period: ReportPeri
 
       {/* Tab bar + period control (from the hub) */}
       {tabsSlot}
+
+      {/* The report's data window, rendered prominently from the RESPONSE —
+          DD-MM-YYYY (never ISO, §3B DATUM-1). */}
+      {!loading && !error && data && (
+        <div style={{ fontSize: 13, fontWeight: 500, color: 'var(--text)', marginBottom: 12 }}>
+          {t('matches.window', { from: formatDate(data.from), to: formatDate(data.to) })}
+        </div>
+      )}
 
       {loading && (
         <div style={{ textAlign: 'center', padding: 40, fontSize: 13, color: 'var(--text-muted)',
@@ -111,6 +169,14 @@ export default function MatchesReport({ period, tabsSlot }: { period: ReportPeri
 
       {!loading && !error && !isEmpty && data && (
         <>
+          {/* Matches over time — week/day timeseries, bucket set server-side;
+              every bar drills on its own date key (portie 7). */}
+          <div style={{ background: 'var(--surface)', borderRadius: 12, border: '1px solid var(--border)', padding: 20, marginBottom: 16 }}>
+            <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)', marginBottom: 12 }}>{t('matches.series')}</div>
+            <SegmentBars max={seriesMax} onPick={onSeriesPick}
+              items={data.timeseries.series.map(p => ({ key: p.date, label: p.label, count: p.value, color: null }))} />
+          </div>
+
           {/* Soort-as (MATCH-SOORT-1): by_contract_form bars, sums to total incl. the
               'none' sentinel and any orphaned slug — SegmentBars needs no special-casing. */}
           <div style={{ background: 'var(--surface)', borderRadius: 12, border: '1px solid var(--border)', padding: 20, marginBottom: 16 }}>
@@ -119,18 +185,27 @@ export default function MatchesReport({ period, tabsSlot }: { period: ReportPeri
               items={contractFormSegs.map(s => ({ key: s.value, label: s.label, count: s.count, color: s.color }))} />
           </div>
 
-          {/* Matches breakdown (KPI strip is rendered above the tabs) */}
-          <div style={{ background: 'var(--surface)', borderRadius: 12, border: '1px solid var(--border)', padding: 20 }}>
+          {/* Contract-status tiles (under_contract, MATCH-VOCABULAIRE-1): the four
+              tiles sum to the report total and each drills contract_status=<key>. */}
+          <div style={{ background: 'var(--surface)', borderRadius: 12, border: '1px solid var(--border)', padding: 20, marginBottom: 16 }}>
             <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)', marginBottom: 12 }}>{t('matches.placements.title')}</div>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12 }}>
-              <StatTile label={t('matches.placements.sent')}   value={data.placements.sent} />
-              <StatTile label={t('matches.placements.active')} value={data.placements.active} accent />
-              <StatTile label={t('matches.placements.ended')}  value={data.placements.ended} />
-              <StatTile label={t('matches.placements.total')}  value={data.placements.total} />
+              {CONTRACT_STATUS_TILES.map(key => (
+                <StatTile key={key} label={t(`matches.placements.${key}`)} value={tileValue(key)} accent={key === 'active'}
+                  onClick={gateDrillClick('matches', () => openContractStatus(t(`matches.placements.${key}`), tileValue(key), key))} />
+              ))}
             </div>
             {data.avg_placement_duration_days == null && (
               <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 14 }}>{t('matches.durationNote')}</p>
             )}
+          </div>
+
+          {/* Terminations by stop reason — zero-filled over every active reason;
+              display-only (see the terminationSegs comment above). */}
+          <div style={{ background: 'var(--surface)', borderRadius: 12, border: '1px solid var(--border)', padding: 20 }}>
+            <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)', marginBottom: 12 }}>{t('matches.terminations.title')}</div>
+            <SegmentBars max={terminationsMax}
+              items={terminationSegs.map(s => ({ key: s.value, label: s.label, count: s.count, color: s.color }))} />
           </div>
         </>
       )}

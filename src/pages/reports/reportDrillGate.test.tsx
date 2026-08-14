@@ -5,8 +5,8 @@ import { gateDrillClick, REPORT_DRILL_AVAILABLE } from './reportDrillGate'
 // gateDrillClick — the one place every report reads to decide whether a KPI/bar/row
 // gets a click affordance. Regression for REPORTS-DRILL-1 (2026-08-13): flow/matches/
 // recruiters/vacancies now have a live /reports/{r}/drill|advice contract and must be
-// clickable; RAPPORTEN-SUITE-1 (2026-08-14) added candidates; intakes/outreach/sources
-// have no matching endpoint yet and must stay off.
+// clickable; RAPPORTEN-SUITE-1 (2026-08-14) added candidates and later flipped
+// outreach ("portie 6"); intakes/sources have no matching endpoint yet and must stay off.
 describe('reportDrillGate', () => {
   it('is on for the reports with a shipped drill contract', () => {
     expect(REPORT_DRILL_AVAILABLE.flow).toBe(true)
@@ -16,11 +16,11 @@ describe('reportDrillGate', () => {
     expect(REPORT_DRILL_AVAILABLE.candidates).toBe(true)
     expect(REPORT_DRILL_AVAILABLE.applications).toBe(true)
     expect(REPORT_DRILL_AVAILABLE.customers).toBe(true)
+    expect(REPORT_DRILL_AVAILABLE.outreach).toBe(true)
   })
 
   it('stays off for the reports without a drill endpoint yet', () => {
     expect(REPORT_DRILL_AVAILABLE.intakes).toBe(false)
-    expect(REPORT_DRILL_AVAILABLE.outreach).toBe(false)
     expect(REPORT_DRILL_AVAILABLE.sources).toBe(false)
   })
 

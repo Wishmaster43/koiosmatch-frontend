@@ -74,6 +74,9 @@ export const DEFAULT_CANDIDATE_TYPES: LookupItem[] = [
   { value: 'payroll',     label: 'Payroll',       color: '#A98AD1' },
   { value: 'temp_agency', label: 'Uitzendkracht', color: '#DDA071' },
   { value: 'secondment',  label: 'Detachering',   color: '#6FA8C4' },
+  // Flex services carry per-function candidate contracts (Danny's vlagbesluit 14-08,
+  // BE commit 03ed1894): the ONLY seeded form with has_contract_lines.
+  { value: 'flex_services', label: 'Flex-diensten', color: '#79B58E', has_contract_lines: true },
   { value: 'on_demand',   label: 'Demand',        color: '#C98BBA' },
 ]
 /* eslint-enable no-restricted-syntax */

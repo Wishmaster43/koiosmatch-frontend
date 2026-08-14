@@ -102,21 +102,47 @@ export interface VacanciesReportData {
 }
 
 // ── Matches report (GET /reports/matches) ────────────────────────────────────
+// Portie-7 additions are ADDITIVE (RAPPORTEN-SUITE-1 slot): hand-written from the
+// backend Service (the generated spec carries request shapes + 401 only, no 2xx
+// schema — §10) — mirrors App\Services\Report\MatchesReport::run() for the fields
+// the FE consumes; the envelope carries more (renewals/active/top_candidates/
+// best_customers and extra terminations dimensions) not rendered yet.
+
+// One termination stop-reason segment (portie 7): `value` mirrors the legacy `key`
+// (SegmentBars parity), zero-filled over every active reason. The live drill XOR
+// (origin|contract_form|contract_status|date) has no stop_reason param, so this
+// axis renders WITHOUT a drill affordance.
+export interface MatchTerminationReasonSegment { key: string; value: string; label: string; color: string | null; count: number }
+
+// Match counts by HelloFlex contract status (MATCH-VOCABULAIRE-1 name). `total`
+// counts matches UNDER CONTRACT — the report total minus the 'none' bucket.
+export interface MatchUnderContract { sent: number; active: number; ended: number; total: number }
 
 export interface MatchesReportData {
   period: string
-  from?: string
-  to?: string
+  from: string
+  to: string
   total: number
   // funnel = from an application; direct = created without one.
   by_origin: { funnel: number; direct: number }
+  // Portie 7: the shared day/week timeseries over the same cohort. With week
+  // buckets series[0].date is the MONDAY of the week containing `from` (a
+  // pre-from Monday is the contract, not an error); day opens exactly on `from`.
+  timeseries: { bucket: 'day' | 'week'; series: CandidateTimeseriesPoint[] }
   // Soort-as (MATCH-SOORT-1): contract_form segments, sums to total. Includes a
   // 'none' sentinel for matches without a contract form, and any orphaned
   // (deleted-lookup) slug as its own segment — same shape/handling as the other
   // reports' segment axes (SegmentBars needs no special-casing for either).
   by_contract_form: CandidateSegment[]
-  // Match counts by HelloFlex contract status.
+  // The contract-status tile source — each tile drills contract_status=sent|
+  // active|ended|none ('none' count = total - under_contract.total, exact since
+  // contract_status is NOT NULL server-side).
+  under_contract: MatchUnderContract
+  // Legacy alias of under_contract's counts (ships one release for migration);
+  // the FE reads under_contract.
   placements: { sent: number; active: number; ended: number; total: number }
+  // Terminations slice (MATCH-REPORT-2): the FE renders total + by_reason.
+  terminations: { total: number; by_reason: MatchTerminationReasonSegment[] }
   // Deliberately null until the HelloFlex coupling fills match start/end.
   avg_placement_duration_days: number | null
 }
@@ -142,28 +168,44 @@ export interface IntakesReportData {
 // Selectable aggregation period (mirrors the endpoint's ?period=).
 export type ReportPeriod = 'day' | 'week' | 'month'
 
-// ── Outreach report (GET /reports/outreach, REPORTS-2 fase 1) ────────────────
+// ── Outreach report (GET /reports/outreach, REPORTS-2 fase 1 + "portie 6") ───
 // Hand-written from the backend Service (no 2xx schema in the generated spec yet,
-// §10) — mirrors App\Services\Report\OutreachReport::run() exactly.
+// §10) — mirrors App\Services\Report\OutreachReport::run() exactly. Portie 6 is
+// ADDITIVE: the fase-1 fields (total_targets/reached/reach_rate + the legacy
+// status/outcome keys) are unchanged; the new axes below sum to `total`.
 
-// One pipeline status tally. `status` is the tenant outreach-status slug — the
-// endpoint carries no label alongside it, so the UI renders the slug as-is.
-export interface OutreachStatusCount { status: string; count: number }
+// One pipeline status tally. Portie 6 added `value`/`label` ADDITIVELY next to
+// the legacy `status` slug: `value` is the drill XOR param — an "Onbekend"
+// orphan-string bar is a normal, drillable row.
+export interface OutreachStatusCount { status: string; value: string; label: string; count: number }
 
 // One outcome tally, projected over the tenant's outreach_outcomes lookup
-// (zero-count rows included). `share_of_reached` is null while nothing was reached.
-export interface OutreachOutcomeCount { outcome: string; label: string; count: number; share_of_reached: number | null }
+// (zero-count rows included) + the "Geen uitkomst" sentinel so the axis sums to
+// total. `value` (portie 6, additive next to the legacy `outcome`) is the drill
+// XOR param; `share_of_reached` is null while nothing was reached.
+export interface OutreachOutcomeCount { outcome: string; value: string; label: string; count: number; share_of_reached: number | null }
 
-// GET /reports/outreach response. Windowed on `from`/`to` (defaults to the last 3
-// months) — this endpoint has no `period` bucket, unlike the other reports.
+// GET /reports/outreach response. Windowed on `from`/`to` FROM THE RESPONSE;
+// `period` echoes the sibling ?period= preset (null when none was sent).
 export interface OutreachReportData {
+  period: string | null
   from: string
   to: string
   total_targets: number
   reached: number
   reach_rate: number | null
+  total: number
+  timeseries: { bucket: 'day' | 'week'; series: CandidateTimeseriesPoint[] }
   by_status: OutreachStatusCount[]
   by_outcome: OutreachOutcomeCount[]
+  // Top-20 + 'others' (the exact complement — a real, drillable row); an archived
+  // campaign keeps its real name. Same {value,label,count} field shape as
+  // ApplicationTopSegment; `value` accepts any uuid on the drill.
+  by_campaign: ApplicationTopSegment[]
+  // D2 shape; a NULL assignee arrives as the 'none' row ("Niet toegewezen").
+  by_assignee: CandidateOwnerSegment[]
+  // Zero-filled over the tenant channels + 'none'.
+  by_channel: ApplicationTopSegment[]
 }
 
 // ── Candidates/leads inflow report (GET /reports/candidates, RAPPORTEN-SUITE-1) ─
@@ -301,6 +343,39 @@ export interface OpportunitiesReportData {
   by_branch: ApplicationTopSegment[]
   forecast: OpportunityForecastRow[]
   stale: { untouched_days: number; untouched: number; overdue: number }
+}
+
+// ── Tasks report (GET /reports/tasks, RAPPORTEN-SUITE-1 "portie 6") ──────────
+// Hand-written from the backend Service (no 2xx schema in the generated spec yet,
+// §10) — mirrors the CONTRACT-CHANGELOG "portie 6" entry exactly.
+
+// One task-status segment. `value` is the status LOOKUP ID — never the slug
+// (task_statuses.value is not uniqueness-protected); 'none' (NULL/'' folding) and
+// a raw orphan uuid (deleted status) are both real, drillable rows. `is_done`
+// mirrors the flag the summary counts on; `color` comes from the tenant lookup.
+export interface TaskStatusSegment { value: string; label: string; color: string | null; is_done: boolean; count: number }
+
+// Flag-driven tallies: done/overdue always count via the status `is_done` flag,
+// never a slug. `done_rate` is null while nothing is countable (render a
+// placeholder, never a fabricated 0%).
+export interface TasksReportSummary { open: number; done: number; overdue: number; done_rate: number | null }
+
+export interface TasksReportData {
+  period: string
+  from: string
+  to: string
+  total: number
+  timeseries: { bucket: 'day' | 'week'; series: CandidateTimeseriesPoint[] }
+  summary: TasksReportSummary
+  by_status: TaskStatusSegment[]
+  // Type/priority key on the lookup ID too (+ 'none'); same {value,label,count}
+  // field shape as ApplicationTopSegment — no color on these axes.
+  by_type: ApplicationTopSegment[]
+  by_priority: ApplicationTopSegment[]
+  // D2 shape; a NULL assignee arrives as the 'none' row ("Niet toegewezen").
+  by_assignee: CandidateOwnerSegment[]
+  by_team: ApplicationTopSegment[]
+  by_branch: ApplicationTopSegment[]
 }
 
 // ── Sources report (GET /reports/sources, REPORTS-2 fase 2) ──────────────────
