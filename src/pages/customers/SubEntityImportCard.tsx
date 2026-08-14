@@ -74,9 +74,10 @@ interface SubEntityImportCardProps {
   canImport: boolean
 }
 
-// Mirrors ImportUploadRequest::rules (mimes:csv,txt) — an .xlsx must be refused
-// client-side with the one instruction that helps, never accepted only to 422 later.
-const ACCEPTED_EXTENSIONS = ['.csv', '.txt']
+// Mirrors ImportUploadRequest::rules (mimes:csv,txt,xlsx) — this card only forwards
+// the raw File to the backend (no client-side parsing), so .xlsx works exactly like
+// .csv/.txt here; the excel reader recognises it by its ZIP magic server-side.
+const ACCEPTED_EXTENSIONS = ['.csv', '.txt', '.xlsx']
 
 // A row that resolved a customer always carries a `reference` shaped
 // "CustomerName / …" (every EntityImporter built on ResolvesCustomerTree composes
@@ -294,7 +295,7 @@ export default function SubEntityImportCard({ entity, customerName, wizard, canV
 
         {/* The real input: labelled for assistive tech, kept out of the tab order and
             out of sight — the visible button is what drives it (§6). */}
-        <input ref={inputRef} type="file" accept=".csv,.txt" onChange={handleChange}
+        <input ref={inputRef} type="file" accept=".csv,.txt,.xlsx" onChange={handleChange}
           aria-label={t('import.selectCsv', { ns: 'settings' })} tabIndex={-1} disabled={!canImport}
           style={{ position: 'absolute', width: 0, height: 0, opacity: 0, border: 0, padding: 0 }} />
       </div>

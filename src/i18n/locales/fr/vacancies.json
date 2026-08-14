@@ -164,7 +164,8 @@
       "extra": "Extra",
       "changelog": "Modifications",
       "matches": "Matchs",
-      "tasks": "Tâches"
+      "tasks": "Tâches",
+      "appointments": "Rendez-vous"
     },
     "archivedBanner": {
       "since": "Archivé le {{date}}",
@@ -496,5 +497,13 @@
     "error": "Impossible de charger les tâches",
     "openTask": "Ouvrir la tâche",
     "searchPlaceholder": "Rechercher une tâche…"
+  },
+  "appointmentsTab": {
+    "noPermission": "Vous n'avez pas l'autorisation de voir les rendez-vous.",
+    "loadError": "Impossible de charger les rendez-vous.",
+    "empty": "Pas encore de rendez-vous pour cette offre d'emploi.",
+    "overdue": "En retard",
+    "noCandidate": "Aucun candidat",
+    "pageOf": "Page {{page}} sur {{lastPage}}"
   }
 }

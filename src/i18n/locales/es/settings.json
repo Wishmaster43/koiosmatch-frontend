@@ -1186,8 +1186,10 @@
     "noImportPermission": "Puedes ver el archivo de ejemplo, pero no tienes permiso para ejecutar una importación. Pide ayuda a un administrador.",
     "dropHere": "Arrastra tu archivo CSV aquí",
     "selectCsv": "Seleccionar archivo",
-    "acceptedTypes": "CSV o TXT, máx. 5 MB, hasta 2000 filas.",
-    "wrongFileType": "Esto parece un archivo de Excel. Guárdalo primero como CSV (Archivo → Guardar como → CSV) y sube ese archivo.",
+    "acceptedTypes": "CSV, TXT o Excel (.xlsx), máx. 5 MB, hasta 2000 filas.",
+    "wrongFileType": "Este tipo de archivo no es compatible. Sube un archivo CSV, TXT o Excel (.xlsx).",
+    "acceptedTypesCsvOnly": "CSV o TXT, máx. 5 MB, hasta 2000 filas.",
+    "wrongFileTypeCsvOnly": "Este tipo de archivo no es compatible aquí. Sube un archivo CSV o TXT (para Excel, usa la pantalla de importación en Ajustes).",
     "fileSelected": "Seleccionado: {{name}}",
     "replaceFile": "Elegir otro archivo",
     "runPreview": "Vista previa de la importación",
@@ -2515,6 +2517,28 @@
       "workflowPerModule": "Ejecuciones de workflow por módulo",
       "colModule": "Módulo",
       "colRuns": "Ejecuciones"
+    },
+    "breakdown": {
+      "title": "Desglose de uso",
+      "axisLabel": "Eje de desglose",
+      "axis": {
+        "activity": "Actividad",
+        "model": "Modelo",
+        "user": "Usuario",
+        "day": "Día"
+      },
+      "col": {
+        "activity": "Actividad",
+        "model": "Modelo",
+        "user": "Usuario",
+        "day": "Día",
+        "requests": "Solicitudes",
+        "inputTokens": "Tokens de entrada",
+        "outputTokens": "Tokens de salida",
+        "cost": "Coste"
+      },
+      "loadError": "No se pudo cargar el desglose de uso.",
+      "empty": "Sin uso en este período."
     }
   },
   "jobs": {

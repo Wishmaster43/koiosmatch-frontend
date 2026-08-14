@@ -35,7 +35,7 @@ import WholeTreeBanner from './importeren/WholeTreeBanner'
 import UploadStep from './importeren/UploadStep'
 import PreviewStep from './importeren/PreviewStep'
 import ResultStep from './importeren/ResultStep'
-import { groupTemplates, isWholeTreeTemplate, orderedTemplates } from './importeren/importTemplateShape'
+import { groupTemplates, importPermissionsFor, isWholeTreeTemplate, orderedTemplates } from './importeren/importTemplateShape'
 import { iconForTemplate } from './importeren/importEntityIcon'
 import type { ImportTemplateSummary } from './importeren/importApi'
 
@@ -113,10 +113,14 @@ export default function ImporterenSettings() {
     }
   }, [phase, templates, selected])
 
-  // Same permission pair for every entity here: locations/departments/contacts are
-  // sub-entities of the customer tree and share its rights (routes/api/tenant/exports.php).
-  const canView = hasPermission('customers.view')
-  const canImport = hasPermission('customers.create')
+  // Gated on the SELECTED entity's own permission pair (importPermissionsFor mirrors
+  // exports.php): vacancies needs vacancies.view/create, every other entity (a
+  // customer-tree sub-entity) needs customers.view/create. Previously hardcoded to
+  // the customers pair regardless of selection — a fake affordance for a user with
+  // e.g. vacancies.create but not customers.create.
+  const permissions = importPermissionsFor(selected)
+  const canView = hasPermission(permissions.view)
+  const canImport = hasPermission(permissions.create)
 
   const selectedTemplate: ImportTemplateSummary | undefined = templates.find((tpl) => tpl.entity === selected)
   const wholeTree = selectedTemplate ? isWholeTreeTemplate(selectedTemplate.columns) : false

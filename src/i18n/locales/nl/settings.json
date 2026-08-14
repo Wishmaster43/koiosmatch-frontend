@@ -1422,8 +1422,10 @@
     "noImportPermission": "Je kunt het voorbeeldbestand bekijken, maar hebt geen rechten om een import uit te voeren. Vraag een beheerder.",
     "dropHere": "Sleep je CSV-bestand hierheen",
     "selectCsv": "Selecteer bestand",
-    "acceptedTypes": "CSV of TXT, max. 5 MB, tot 2000 rijen.",
-    "wrongFileType": "Dit lijkt een Excel-bestand. Sla het eerst op als CSV (Bestand → Opslaan als → CSV) en upload dat bestand.",
+    "acceptedTypes": "CSV, TXT of Excel (.xlsx), max. 5 MB, tot 2000 rijen.",
+    "wrongFileType": "Dit bestandstype wordt niet ondersteund. Upload een CSV-, TXT- of Excel-bestand (.xlsx).",
+    "acceptedTypesCsvOnly": "CSV of TXT, max. 5 MB, tot 2000 rijen.",
+    "wrongFileTypeCsvOnly": "Dit bestandstype wordt hier niet ondersteund. Upload een CSV- of TXT-bestand (voor Excel: gebruik het importscherm bij Instellingen).",
     "fileSelected": "Geselecteerd: {{name}}",
     "replaceFile": "Kies een ander bestand",
     "runPreview": "Voorbeeld bekijken",
@@ -2515,6 +2517,28 @@
       "workflowPerModule": "Workflow-runs per module",
       "colModule": "Module",
       "colRuns": "Runs"
+    },
+    "breakdown": {
+      "title": "Verbruik uitgesplitst",
+      "axisLabel": "Uitsplitsing",
+      "axis": {
+        "activity": "Activiteit",
+        "model": "Model",
+        "user": "Gebruiker",
+        "day": "Dag"
+      },
+      "col": {
+        "activity": "Activiteit",
+        "model": "Model",
+        "user": "Gebruiker",
+        "day": "Dag",
+        "requests": "Verzoeken",
+        "inputTokens": "Input tokens",
+        "outputTokens": "Output tokens",
+        "cost": "Kosten"
+      },
+      "loadError": "Uitsplitsing laden mislukt.",
+      "empty": "Geen verbruik in deze periode."
     }
   },
   "jobs": {

@@ -144,4 +144,44 @@ describe('ImportWizardPage — mapping + editable preview', () => {
     expect(await screen.findByText('Bestand kon niet worden gelezen.')).toBeInTheDocument()
     expect(screen.queryByRole('button', { name: t('import.preview.confirm') })).not.toBeInTheDocument()
   })
+
+  // The .xlsx entry point lives on the raw-upload screens (settings importeren,
+  // CustomerImportCard, SubEntityImportCard) — THIS screen parses the file
+  // client-side for column mapping (no xlsx parser in the repo), so it stays
+  // .csv/.txt only on purpose.
+  it('the upload input stays .csv/.txt only — this screen parses client-side, it never got .xlsx', async () => {
+    render(<ImportWizardPage />)
+    const input = await screen.findByLabelText(t('import.selectCsv')) as HTMLInputElement
+    expect(input.accept).toBe('.csv,.txt')
+  })
+})
+
+// IMPORT-PERM-ENTITY-1: the permission gate follows the SELECTED entity, not a
+// hardcoded customers.* pair — mirrors routes/api/tenant/exports.php (K6c: vacancies
+// carries its own vacancies.view/vacancies.create right, every other entity here is
+// a customer-tree sub-entity sharing customers.view/customers.create).
+describe('ImportWizardPage — the permission gate follows the SELECTED entity (IMPORT-PERM-ENTITY-1)', () => {
+  const VACANCIES_TEMPLATE = { entity: 'vacancies', columns: ['title'], example_rows: 1, url: '/imports/vacancies/template.csv' }
+
+  it('a user with vacancies.create but NOT customers.create can proceed for the vacancies entity', async () => {
+    ;(api.get as MockFn).mockResolvedValue({ data: { data: [VACANCIES_TEMPLATE] } })
+    mockUseAuth.mockReturnValue({ hasPermission: (perm: string) => perm === 'vacancies.view' || perm === 'vacancies.create' })
+
+    render(<ImportWizardPage intent={{ entity: 'vacancies' }} />)
+
+    // No "no import permission" notice, upload input enabled for this entity.
+    expect(await screen.findByLabelText(t('import.selectCsv'))).toBeEnabled()
+    expect(screen.queryByText(t('import.noImportPermission'))).not.toBeInTheDocument()
+  })
+
+  it('that SAME user is correctly blocked on the customers entity', async () => {
+    ;(api.get as MockFn).mockResolvedValue({ data: { data: [{ ...TEMPLATE }, VACANCIES_TEMPLATE] } })
+    mockUseAuth.mockReturnValue({ hasPermission: (perm: string) => perm === 'vacancies.view' || perm === 'vacancies.create' })
+
+    // No intent → lands on the first template in display order (customers).
+    render(<ImportWizardPage />)
+
+    expect(await screen.findByText(t('import.noImportPermission'))).toBeInTheDocument()
+    expect(screen.getByLabelText(t('import.selectCsv'))).toBeDisabled()
+  })
 })

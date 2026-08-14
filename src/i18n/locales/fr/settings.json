@@ -1186,8 +1186,10 @@
     "noImportPermission": "Vous pouvez consulter le fichier d'exemple, mais vous n'avez pas le droit d'exécuter un import. Demandez à un administrateur.",
     "dropHere": "Glissez votre fichier CSV ici",
     "selectCsv": "Sélectionner un fichier",
-    "acceptedTypes": "CSV ou TXT, 5 Mo max, jusqu'à 2000 lignes.",
-    "wrongFileType": "Cela ressemble à un fichier Excel. Enregistrez-le d'abord en CSV (Fichier → Enregistrer sous → CSV) puis téléversez ce fichier.",
+    "acceptedTypes": "CSV, TXT ou Excel (.xlsx), 5 Mo max, jusqu'à 2000 lignes.",
+    "wrongFileType": "Ce type de fichier n'est pas pris en charge. Téléversez un fichier CSV, TXT ou Excel (.xlsx).",
+    "acceptedTypesCsvOnly": "CSV ou TXT, 5 Mo max, jusqu'à 2000 lignes.",
+    "wrongFileTypeCsvOnly": "Ce type de fichier n'est pas pris en charge ici. Téléversez un fichier CSV ou TXT (pour Excel, utilisez l'écran d'import dans les paramètres).",
     "fileSelected": "Sélectionné : {{name}}",
     "replaceFile": "Choisir un autre fichier",
     "runPreview": "Aperçu de l'import",
@@ -2515,6 +2517,28 @@
       "workflowPerModule": "Exécutions de workflow par module",
       "colModule": "Module",
       "colRuns": "Exécutions"
+    },
+    "breakdown": {
+      "title": "Répartition de l'utilisation",
+      "axisLabel": "Axe de répartition",
+      "axis": {
+        "activity": "Activité",
+        "model": "Modèle",
+        "user": "Utilisateur",
+        "day": "Jour"
+      },
+      "col": {
+        "activity": "Activité",
+        "model": "Modèle",
+        "user": "Utilisateur",
+        "day": "Jour",
+        "requests": "Requêtes",
+        "inputTokens": "Jetons d'entrée",
+        "outputTokens": "Jetons de sortie",
+        "cost": "Coût"
+      },
+      "loadError": "Échec du chargement de la répartition.",
+      "empty": "Aucune utilisation sur cette période."
     }
   },
   "jobs": {

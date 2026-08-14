@@ -164,7 +164,8 @@
       "statistics": "Statistieken",
       "changelog": "Wijzigingen",
       "matches": "Matches",
-      "tasks": "Taken"
+      "tasks": "Taken",
+      "appointments": "Afspraken"
     },
     "archivedBanner": {
       "since": "Gearchiveerd op {{date}}",
@@ -496,5 +497,13 @@
     "error": "Taken konden niet worden geladen",
     "openTask": "Open taak",
     "searchPlaceholder": "Zoek taak…"
+  },
+  "appointmentsTab": {
+    "noPermission": "Je hebt geen rechten om afspraken te bekijken.",
+    "loadError": "Afspraken konden niet worden geladen.",
+    "empty": "Nog geen afspraken voor deze vacature.",
+    "overdue": "Verlopen",
+    "noCandidate": "Geen kandidaat",
+    "pageOf": "Pagina {{page}} van {{lastPage}}"
   }
 }

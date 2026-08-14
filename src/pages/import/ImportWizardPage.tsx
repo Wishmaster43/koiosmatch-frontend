@@ -17,7 +17,7 @@ import { AlertTriangle } from 'lucide-react'
 import { useAuth } from '@/context/AuthContext'
 import ImportEntityNav from '@/pages/settings/sections/importeren/ImportEntityNav'
 import { useImportTemplates } from '@/pages/settings/sections/importeren/useImportTemplates'
-import { groupTemplates, orderedTemplates } from '@/pages/settings/sections/importeren/importTemplateShape'
+import { groupTemplates, importPermissionsFor, orderedTemplates } from '@/pages/settings/sections/importeren/importTemplateShape'
 import type { ImportTemplateSummary } from './api'
 import EntityImportWizard from './EntityImportWizard'
 
@@ -45,10 +45,14 @@ export default function ImportWizardPage({ intent }: ImportWizardPageProps = {})
     }
   }, [phase, templates, selected, intent])
 
-  // Locations/departments/contacts are sub-entities of the customer tree and share
-  // its rights, exactly like routes/api/tenant/exports.php gates every import route.
-  const canView = hasPermission('customers.view')
-  const canImport = hasPermission('customers.create')
+  // Gated on the SELECTED entity's own permission pair (importPermissionsFor mirrors
+  // exports.php): vacancies needs vacancies.view/create, every other entity (a
+  // customer-tree sub-entity) needs customers.view/create. Previously hardcoded to
+  // the customers pair regardless of selection — a fake affordance for a user with
+  // e.g. vacancies.create but not customers.create.
+  const permissions = importPermissionsFor(selected)
+  const canView = hasPermission(permissions.view)
+  const canImport = hasPermission(permissions.create)
 
   const selectedTemplate: ImportTemplateSummary | undefined = templates.find((tpl) => tpl.entity === selected)
   const groups = groupTemplates(templates)

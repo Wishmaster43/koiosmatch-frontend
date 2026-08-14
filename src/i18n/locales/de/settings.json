@@ -1186,8 +1186,10 @@
     "noImportPermission": "Sie können die Beispieldatei ansehen, haben aber keine Berechtigung, einen Import durchzuführen. Wenden Sie sich an einen Administrator.",
     "dropHere": "Ziehen Sie Ihre CSV-Datei hierher",
     "selectCsv": "Datei auswählen",
-    "acceptedTypes": "CSV oder TXT, max. 5 MB, bis zu 2000 Zeilen.",
-    "wrongFileType": "Das sieht nach einer Excel-Datei aus. Speichern Sie sie zuerst als CSV (Datei → Speichern unter → CSV) und laden Sie diese Datei hoch.",
+    "acceptedTypes": "CSV, TXT oder Excel (.xlsx), max. 5 MB, bis zu 2000 Zeilen.",
+    "wrongFileType": "Dieser Dateityp wird nicht unterstützt. Laden Sie eine CSV-, TXT- oder Excel-Datei (.xlsx) hoch.",
+    "acceptedTypesCsvOnly": "CSV oder TXT, max. 5 MB, bis zu 2000 Zeilen.",
+    "wrongFileTypeCsvOnly": "Dieser Dateityp wird hier nicht unterstützt. Laden Sie eine CSV- oder TXT-Datei hoch (für Excel: den Importbildschirm unter Einstellungen verwenden).",
     "fileSelected": "Ausgewählt: {{name}}",
     "replaceFile": "Andere Datei wählen",
     "runPreview": "Vorschau anzeigen",
@@ -2515,6 +2517,28 @@
       "workflowPerModule": "Workflow-Ausführungen pro Modul",
       "colModule": "Modul",
       "colRuns": "Ausführungen"
+    },
+    "breakdown": {
+      "title": "Nutzungsaufschlüsselung",
+      "axisLabel": "Aufschlüsselungsachse",
+      "axis": {
+        "activity": "Aktivität",
+        "model": "Modell",
+        "user": "Benutzer",
+        "day": "Tag"
+      },
+      "col": {
+        "activity": "Aktivität",
+        "model": "Modell",
+        "user": "Benutzer",
+        "day": "Tag",
+        "requests": "Anfragen",
+        "inputTokens": "Eingabe-Tokens",
+        "outputTokens": "Ausgabe-Tokens",
+        "cost": "Kosten"
+      },
+      "loadError": "Aufschlüsselung konnte nicht geladen werden.",
+      "empty": "Keine Nutzung in diesem Zeitraum."
     }
   },
   "jobs": {

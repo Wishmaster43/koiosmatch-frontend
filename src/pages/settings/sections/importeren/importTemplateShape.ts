@@ -48,3 +48,18 @@ export function orderedTemplates(templates: readonly ImportTemplateSummary[]): I
   const { wholeTree, perEntity } = groupTemplates(templates)
   return [...wholeTree, ...perEntity]
 }
+
+/**
+ * The permission pair the SELECTED entity actually needs, mirroring
+ * routes/api/tenant/exports.php 1:1: vacancies carries its own vacancies.view/
+ * vacancies.create right (K6c, least privilege); every other entity (customers,
+ * locations, departments, contacts, the combined customer_tree file, …) is a
+ * customer-tree sub-entity and shares customers.view/customers.create. This was
+ * previously hardcoded to the customers pair regardless of the selected entity,
+ * so a user with e.g. vacancies.create but not customers.create saw the button
+ * and then hit a dead upload step — a fake affordance (§3B).
+ */
+export function importPermissionsFor(entity: string | null | undefined): { view: string; create: string } {
+  if (entity === 'vacancies') return { view: 'vacancies.view', create: 'vacancies.create' }
+  return { view: 'customers.view', create: 'customers.create' }
+}

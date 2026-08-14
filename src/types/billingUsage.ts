@@ -109,3 +109,27 @@ export interface PlatformPricing {
   ai_markup_percent: number
   workflow_credit_price: number
 }
+
+// GET /admin/tenants/{tenant}/usage/details?month=YYYY-MM&group_by=activity|model|user|day
+// Superadmin-only detail breakdown alongside the monthly usage total (CMBE, 14-08).
+// HAND-WRITTEN: the generated OpenAPI spec does not carry a 2xx schema for this route
+// yet (CLAUDE.md §10). Per CMBE contract: the sum of `rows[].requests/tokens/cost`
+// over any group_by equals the corresponding /usage total for that month (server-tested),
+// and rows with no user_id come back under the sentinel key "__system__" with
+// label "System / unattributed" — that row must always render, never be filtered out.
+export type AdminUsageDetailsAxis = 'activity' | 'model' | 'user' | 'day'
+export interface AdminUsageDetailsRow {
+  key: string
+  // Resolved display name — only present for group_by=user (incl. the "__system__" sentinel).
+  label?: string
+  requests?: number
+  input_tokens?: number
+  output_tokens?: number
+  // Sale-side cost, computed with the same formula as the /usage block (never drifts).
+  cost?: number
+}
+export interface AdminUsageDetailsResponse {
+  group_by: AdminUsageDetailsAxis
+  month: string
+  rows: AdminUsageDetailsRow[]
+}

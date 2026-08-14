@@ -164,7 +164,8 @@
       "extra": "Extra",
       "changelog": "Änderungen",
       "matches": "Matches",
-      "tasks": "Aufgaben"
+      "tasks": "Aufgaben",
+      "appointments": "Termine"
     },
     "archivedBanner": {
       "since": "Archiviert am {{date}}",
@@ -496,5 +497,13 @@
     "error": "Aufgaben konnten nicht geladen werden",
     "openTask": "Aufgabe öffnen",
     "searchPlaceholder": "Aufgabe suchen…"
+  },
+  "appointmentsTab": {
+    "noPermission": "Sie haben keine Berechtigung, Termine anzuzeigen.",
+    "loadError": "Termine konnten nicht geladen werden.",
+    "empty": "Noch keine Termine für diese Stelle.",
+    "overdue": "Überfällig",
+    "noCandidate": "Kein Kandidat",
+    "pageOf": "Seite {{page}} von {{lastPage}}"
   }
 }

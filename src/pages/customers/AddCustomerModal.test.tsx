@@ -447,16 +447,34 @@ describe('AddCustomerModal · import card (Danny 02-08: replaces the italic impo
     rows: [{ row: 1, action: 'create', reference: 'Acme', id: null, messages: [] }],
   }
 
-  it('refuses an .xlsx file client-side with the save-as-CSV instruction, and never calls the dry run', () => {
+  it('the upload input advertises .csv, .txt AND .xlsx (backend: ImportUploadRequest mimes:csv,txt,xlsx)', () => {
+    render(<AddCustomerModal onClose={() => {}} users={users} statuses={statuses} />)
+    fireEvent.click(screen.getByRole('button', { name: importCardTitle }))
+    const input = screen.getByLabelText(st('import.selectCsv')) as HTMLInputElement
+    expect(input.accept).toBe('.csv,.txt,.xlsx')
+  })
+
+  it('accepts an .xlsx file dropped in — this card only forwards the raw File, never parses it client-side', () => {
     render(<AddCustomerModal onClose={() => {}} users={users} statuses={statuses} />)
     fireEvent.click(screen.getByRole('button', { name: importCardTitle }))
 
-    // Dropped rather than picked via the file dialog: the input's `accept=".csv,.txt"`
-    // only filters the OS picker, never a drag-and-drop delivery — exactly why the
-    // component's OWN extension check exists, and the realistic way a mismatched
-    // file actually reaches it.
+    // Dropped rather than picked via the file dialog: drag-and-drop bypasses the
+    // input's `accept` filter entirely, so this exercises the component's OWN
+    // extension check, not just the OS picker.
     const dropZone = screen.getByText(ct('modal.import.intro')).parentElement as HTMLElement
     fireEvent.drop(dropZone, { dataTransfer: { files: [xlsxFile] } })
+
+    expect(screen.queryByText(st('import.wrongFileType'))).not.toBeInTheDocument()
+    expect(screen.getByText(st('import.fileSelected', { name: 'acme.xlsx' }))).toBeInTheDocument()
+  })
+
+  it('refuses a genuinely unsupported file type client-side, and never calls the dry run', () => {
+    const pdfFile = new File(['binary'], 'acme.pdf', { type: 'application/pdf' })
+    render(<AddCustomerModal onClose={() => {}} users={users} statuses={statuses} />)
+    fireEvent.click(screen.getByRole('button', { name: importCardTitle }))
+
+    const dropZone = screen.getByText(ct('modal.import.intro')).parentElement as HTMLElement
+    fireEvent.drop(dropZone, { dataTransfer: { files: [pdfFile] } })
 
     expect(screen.getByText(st('import.wrongFileType'))).toBeInTheDocument()
     expect(dryRunImport).not.toHaveBeenCalled()

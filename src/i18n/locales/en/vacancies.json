@@ -164,7 +164,8 @@
       "statistics": "Statistics",
       "changelog": "Changelog",
       "matches": "Matches",
-      "tasks": "Tasks"
+      "tasks": "Tasks",
+      "appointments": "Appointments"
     },
     "archivedBanner": {
       "since": "Archived on {{date}}",
@@ -496,5 +497,13 @@
     "error": "Tasks could not be loaded",
     "openTask": "Open task",
     "searchPlaceholder": "Search task…"
+  },
+  "appointmentsTab": {
+    "noPermission": "You don't have permission to view appointments.",
+    "loadError": "Could not load appointments.",
+    "empty": "No appointments for this vacancy yet.",
+    "overdue": "Overdue",
+    "noCandidate": "No candidate",
+    "pageOf": "Page {{page}} of {{lastPage}}"
   }
 }

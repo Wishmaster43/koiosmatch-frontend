@@ -1422,8 +1422,10 @@
     "noImportPermission": "You can view the example file, but you don't have permission to run an import. Ask an administrator.",
     "dropHere": "Drag your CSV file here",
     "selectCsv": "Select file",
-    "acceptedTypes": "CSV or TXT, max 5 MB, up to 2,000 rows.",
-    "wrongFileType": "That looks like an Excel file. Save it as CSV first (File → Save As → CSV) and upload that file instead.",
+    "acceptedTypes": "CSV, TXT or Excel (.xlsx), max 5 MB, up to 2,000 rows.",
+    "wrongFileType": "That file type is not supported. Upload a CSV, TXT or Excel (.xlsx) file instead.",
+    "acceptedTypesCsvOnly": "CSV or TXT, max 5 MB, up to 2,000 rows.",
+    "wrongFileTypeCsvOnly": "That file type is not supported here. Upload a CSV or TXT file (for Excel, use the import screen under Settings).",
     "fileSelected": "Selected: {{name}}",
     "replaceFile": "Choose a different file",
     "runPreview": "Preview import",
@@ -2515,6 +2517,28 @@
       "workflowPerModule": "Workflow runs per module",
       "colModule": "Module",
       "colRuns": "Runs"
+    },
+    "breakdown": {
+      "title": "Usage breakdown",
+      "axisLabel": "Breakdown axis",
+      "axis": {
+        "activity": "Activity",
+        "model": "Model",
+        "user": "User",
+        "day": "Day"
+      },
+      "col": {
+        "activity": "Activity",
+        "model": "Model",
+        "user": "User",
+        "day": "Day",
+        "requests": "Requests",
+        "inputTokens": "Input tokens",
+        "outputTokens": "Output tokens",
+        "cost": "Cost"
+      },
+      "loadError": "Failed to load the usage breakdown.",
+      "empty": "No usage in this period."
     }
   },
   "jobs": {

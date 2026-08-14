@@ -10,8 +10,10 @@ import { CloudUpload, Download, Loader2 } from 'lucide-react'
 import { downloadImportTemplate } from './importApi'
 import { notifyError } from '@/lib/notify'
 
-// Only these extensions are ever accepted by the backend (ImportUploadRequest: mimes:csv,txt).
-const ACCEPTED_EXTENSIONS = ['.csv', '.txt']
+// Only these extensions are ever accepted by the backend (ImportUploadRequest:
+// mimes:csv,txt,xlsx) — .xlsx is read by its own reader (ZIP magic + Excel's own
+// sheet row numbers), never converted client-side.
+const ACCEPTED_EXTENSIONS = ['.csv', '.txt', '.xlsx']
 
 interface UploadStepProps {
   entity: string
@@ -34,8 +36,7 @@ export default function UploadStep({
   const fileRef = useRef<HTMLInputElement>(null)
   const checking = previewStatus === 'loading'
 
-  // Reject anything that isn't .csv/.txt with an honest, actionable message — an
-  // .xlsx must never be silently dropped, nor accepted only to fail server-side.
+  // Reject anything that isn't .csv/.txt/.xlsx with an honest, actionable message.
   const acceptFile = (candidate: File) => {
     const lower = candidate.name.toLowerCase()
     if (!ACCEPTED_EXTENSIONS.some((ext) => lower.endsWith(ext))) {
@@ -113,7 +114,7 @@ export default function UploadStep({
           {t('import.selectCsv')}
         </button>
         <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>{t('import.acceptedTypes')}</span>
-        <input ref={fileRef} type="file" accept=".csv,.txt" aria-label={t('import.selectCsv')}
+        <input ref={fileRef} type="file" accept=".csv,.txt,.xlsx" aria-label={t('import.selectCsv')}
           style={{ display: 'none' }} onChange={handleFileInput} disabled={!canImport} />
       </div>
 

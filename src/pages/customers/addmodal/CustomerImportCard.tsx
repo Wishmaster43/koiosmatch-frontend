@@ -37,9 +37,10 @@ import { downloadImportTemplate } from '@/pages/settings/sections/importeren/imp
 import type { useImportWizard } from '@/pages/settings/sections/importeren/useImportWizard'
 import { CUSTOMER_TREE_ENTITY } from './useCustomerImport'
 
-// Mirrors ImportUploadRequest::rules (mimes:csv,txt) — an .xlsx must be refused
-// client-side with the one instruction that helps, never accepted only to 422 later.
-const ACCEPTED_EXTENSIONS = ['.csv', '.txt']
+// Mirrors ImportUploadRequest::rules (mimes:csv,txt,xlsx) — this card only forwards
+// the raw File to the backend (no client-side parsing), so .xlsx works exactly like
+// .csv/.txt here; the excel reader recognises it by its ZIP magic server-side.
+const ACCEPTED_EXTENSIONS = ['.csv', '.txt', '.xlsx']
 
 type Wizard = ReturnType<typeof useImportWizard>
 
@@ -66,7 +67,7 @@ export default function CustomerImportCard({ wizard, canView, canImport }: Custo
   const [typeError, setTypeError] = useState<string | null>(null)
   const checking = preview.status === 'loading'
 
-  // Reject anything that isn't .csv/.txt with an honest, actionable message — an
+  // Reject anything that isn't .csv/.txt/.xlsx with an honest, actionable message — an
   // .xlsx must never be silently dropped, nor accepted only to fail server-side.
   const acceptFile = (candidate: File) => {
     const lower = candidate.name.toLowerCase()
@@ -197,7 +198,7 @@ export default function CustomerImportCard({ wizard, canView, canImport }: Custo
 
       {/* The real input: labelled for assistive tech, kept out of the tab order and
           out of sight — the visible button is what drives it (§6). */}
-      <input ref={inputRef} type="file" accept=".csv,.txt" onChange={handleChange}
+      <input ref={inputRef} type="file" accept=".csv,.txt,.xlsx" onChange={handleChange}
         aria-label={t('import.selectCsv', { ns: 'settings' })} tabIndex={-1} disabled={!canImport}
         style={{ position: 'absolute', width: 0, height: 0, opacity: 0, border: 0, padding: 0 }} />
     </div>

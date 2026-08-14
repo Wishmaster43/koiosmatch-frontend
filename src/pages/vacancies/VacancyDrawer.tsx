@@ -20,6 +20,7 @@ import { useDateFormat } from '@/lib/datetime'
 import DetailsTab from './drawer/DetailsTab'
 import DescriptionTab from './drawer/DescriptionTab'
 import ApplicantsTab from './drawer/ApplicantsTab'
+import AppointmentsTab from './drawer/AppointmentsTab'
 import VacancyAgentTab from './drawer/VacancyAgentTab'
 import PublishingTab from './drawer/PublishingTab'
 import DocumentsTab from './drawer/DocumentsTab'
@@ -49,6 +50,11 @@ const TABS: { id: string; tKey: string; autoExpand?: boolean; render: (v: Vacanc
   // right after Details so the vacancy text still reads next to the field grid).
   { id: 'description', tKey: 'description', render: (v, onUpdate) => <DescriptionTab vacancy={v} onUpdate={onUpdate} /> },
   { id: 'applicants', tKey: 'applicants', render: v => <ApplicantsTab vacancy={v} /> },
+  // AFSPRAKEN-VACATURE-1: every appointment tied to this vacancy across ALL
+  // candidates (GET /vacancies/{id}/appointments, permission:vacancies.view —
+  // the route CMBE delivered 14-08). Read-only, right after Sollicitanten since
+  // both surface candidate activity on this vacancy.
+  { id: 'appointments', tKey: 'appointments', render: v => <AppointmentsTab vacancy={v} /> },
   { id: 'matching',   tKey: 'matching',   render: (v, onUpdate) => <MatchingTab vacancy={v} onUpdate={onUpdate} /> },
   // V-table-2: read-only Matches tab (mirrors the candidate/customer drawer's
   // own read-only MatchesTab anatomy) — the table's Matches count deep-links here.

@@ -10,6 +10,7 @@ import api, { unwrap } from '@/lib/api'
 import { useAuth } from '@/context/AuthContext'
 import SearchSelect from '@/components/ui/SearchSelect'
 import TenantUsageDetailsTable from './TenantUsageDetailsTable'
+import TenantUsageBreakdownTable from './TenantUsageBreakdownTable'
 
 const num = (v) => (v == null ? '—' : Number(v).toLocaleString('nl-NL'))
 
@@ -126,6 +127,14 @@ export default function TenantUsageSettings() {
             {t('usage.details.title')}
           </div>
           <TenantUsageDetailsTable history={usage?.history} />
+
+          {/* Selected-month breakdown by activity/model/user/day — sums to the
+              total above by server contract (CMBE, 14-08). */}
+          <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase',
+            letterSpacing: '0.05em', marginTop: 24, marginBottom: 10 }}>
+            {t('usage.breakdown.title')}
+          </div>
+          <TenantUsageBreakdownTable tenantId={activeTenant?.id} month={month} />
         </>
       )}
     </div>

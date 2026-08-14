@@ -25,8 +25,15 @@ describe('taskLinkTypes', () => {
     expect(TASK_LINK_TYPES).toEqual(expect.arrayContaining(['customer', 'location', 'department', 'contact']))
   })
 
-  it('does NOT offer customer_location — it has no global list route (GET /customer-locations → 404)', () => {
-    expect(TASK_LINK_TYPES).not.toContain('customer_location')
+  it('offers customer_location now that the global list route exists (14-08)', () => {
+    expect(TASK_LINK_TYPES).toContain('customer_location')
+    expect(TASK_LINK_ENDPOINTS.customer_location.url).toBe('/customer-locations')
+  })
+
+  it('labels a customer_location row "Name (Customer)" from customer_name, falling back to the id', () => {
+    expect(TASK_LINK_ENDPOINTS.customer_location.label({ id: '1', name: 'Location X', customer_name: 'Customer Y' })).toBe('Location X (Customer Y)')
+    expect(TASK_LINK_ENDPOINTS.customer_location.label({ id: '1', name: 'Location X' })).toBe('Location X')
+    expect(TASK_LINK_ENDPOINTS.customer_location.label({ id: '1' })).toBe('#1')
   })
 
   it('gives every offered token a real endpoint and label function', () => {
@@ -63,11 +70,9 @@ describe('taskLinkTypes', () => {
   })
 
   it('keeps location (own branch) and customer_location (a customer\'s site) as distinct, non-overlapping tokens', () => {
-    // location IS offered with its own endpoint; customer_location is deliberately
-    // excluded (no global list route yet) so its label never appears attached to
-    // an actual picker — but the two tokens must never share a url or a label fn.
+    // Both offered, each with its own endpoint/label — never sharing a url or a label fn.
     expect(TASK_LINK_TYPES).toContain('location')
-    expect(TASK_LINK_TYPES).not.toContain('customer_location')
-    expect(TASK_LINK_ENDPOINTS.customer_location).toBeUndefined()
+    expect(TASK_LINK_TYPES).toContain('customer_location')
+    expect(TASK_LINK_ENDPOINTS.location.url).not.toBe(TASK_LINK_ENDPOINTS.customer_location.url)
   })
 })

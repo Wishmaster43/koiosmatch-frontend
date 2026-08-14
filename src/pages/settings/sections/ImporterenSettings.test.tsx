@@ -5,9 +5,13 @@
  * Covers: the real multipart shape (field name MUST be "file") for both dry-run and
  * run, that a real import is NEVER offered before a successful preview, the
  * partial-result report (some rows error) rendering honestly instead of a bare
- * checkmark, the unknown-columns notice staying non-fatal, an .xlsx being rejected
- * with an actionable message (never silently dropped or accepted), and the
- * permission gate disabling (never hiding) the template download / upload areas.
+ * checkmark, the unknown-columns notice staying non-fatal, .xlsx being ACCEPTED
+ * (this card only forwards the raw File — the backend's reader recognises it by
+ * its ZIP magic) while a genuinely unsupported type is still rejected with an
+ * actionable message, and the permission gate — disabling (never hiding) the
+ * template download / upload areas, and following the SELECTED entity's own
+ * permission pair (vacancies vs. the customer-tree entities), never a hardcoded
+ * customers.* pair regardless of selection.
  */
 import { describe, it, expect, vi, afterEach, beforeEach } from 'vitest'
 import { render, screen } from '@testing-library/react'
@@ -192,21 +196,55 @@ describe('ImporterenSettings — the wizard never claims success it did not earn
     expect(screen.getByRole('button', { name: t('import.preview.confirm') })).toBeDisabled()
   })
 
-  it('rejects an .xlsx file with an actionable message and never calls the API', async () => {
-    // applyAccept: false — the input's accept=".csv,.txt" already blocks an .xlsx pick
-    // in a real OS file dialog, but drag-and-drop bypasses `accept` entirely, so the
-    // component's OWN extension check (acceptFile in UploadStep) is what actually
+  it('the upload input advertises .csv, .txt AND .xlsx (backend: ImportUploadRequest mimes:csv,txt,xlsx)', async () => {
+    render(<ImporterenSettings />)
+    await screen.findByRole('button', { name: t('import.downloadTemplate') })
+    const input = screen.getByLabelText(t('import.selectCsv')) as HTMLInputElement
+    expect(input.accept).toBe('.csv,.txt,.xlsx')
+  })
+
+  it('accepts an .xlsx file — this card only forwards the raw File, never parses it client-side', async () => {
+    const user = userEvent.setup()
+    render(<ImporterenSettings />)
+    await screen.findByRole('button', { name: t('import.downloadTemplate') })
+
+    const file = new File(['binary'], 'customers.xlsx', {
+      type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    })
+    await user.upload(screen.getByLabelText(t('import.selectCsv')), file)
+
+    expect(await screen.findByText(t('import.fileSelected', { name: 'customers.xlsx' }))).toBeInTheDocument()
+    expect(screen.queryByText(t('import.wrongFileType'))).not.toBeInTheDocument()
+
+    const dryRunResult = {
+      entity: 'customers', dry_run: true,
+      summary: { rows: 1, create: 1, update: 0, skip: 0, error: 0 },
+      unknown_columns: [], rows: [{ row: 2, action: 'create', reference: 'Acme', id: null, messages: [] }],
+    }
+    ;(api.post as MockFn).mockResolvedValueOnce({ data: { data: dryRunResult } })
+    await user.click(screen.getByRole('button', { name: t('import.runPreview') }))
+
+    // The FormData reaching the backend still carries the actual .xlsx file, unmodified.
+    expect(api.post).toHaveBeenCalledWith('/imports/customers/dry-run', expect.any(FormData))
+    const form = (api.post as MockFn).mock.calls[0][1] as FormData
+    expect((form.get('file') as File).name).toBe('customers.xlsx')
+  })
+
+  it('rejects a genuinely unsupported file type with an actionable message and never calls the API', async () => {
+    // applyAccept: false — the input's accept=".csv,.txt,.xlsx" already blocks a .pdf
+    // pick in a real OS file dialog, but drag-and-drop bypasses `accept` entirely, so
+    // the component's OWN extension check (acceptFile in UploadStep) is what actually
     // guards that path. Disable user-event's accept-filtering to exercise that check
     // directly instead of relying on the (OS-dependent) native picker filter.
     const user = userEvent.setup({ applyAccept: false })
     render(<ImporterenSettings />)
     await screen.findByRole('button', { name: t('import.downloadTemplate') })
 
-    const file = new File(['binary'], 'customers.xlsx', { type: 'application/vnd.ms-excel' })
+    const file = new File(['binary'], 'customers.pdf', { type: 'application/pdf' })
     await user.upload(screen.getByLabelText(t('import.selectCsv')), file)
 
     expect(await screen.findByText(t('import.wrongFileType'))).toBeInTheDocument()
-    expect(screen.queryByText(t('import.fileSelected', { name: 'customers.xlsx' }))).not.toBeInTheDocument()
+    expect(screen.queryByText(t('import.fileSelected', { name: 'customers.pdf' }))).not.toBeInTheDocument()
     expect(api.post).not.toHaveBeenCalled()
   })
 
@@ -228,6 +266,41 @@ describe('ImporterenSettings — the wizard never claims success it did not earn
     const downloadBtn = screen.getByRole('button', { name: t('import.downloadTemplate') })
     expect(downloadBtn).toBeDisabled()
     expect(downloadBtn).toHaveAttribute('title', t('import.noViewPermission'))
+  })
+})
+
+// IMPORT-PERM-ENTITY-1: the permission gate follows the SELECTED entity, not a
+// hardcoded customers.* pair — mirrors routes/api/tenant/exports.php (K6c: vacancies
+// carries its own vacancies.view/vacancies.create right, every other entity here is
+// a customer-tree sub-entity sharing customers.view/customers.create).
+describe('ImporterenSettings — the permission gate follows the SELECTED entity (IMPORT-PERM-ENTITY-1)', () => {
+  const VACANCIES_TEMPLATE = { entity: 'vacancies', columns: ['titel'], example_rows: 2, url: '/imports/vacancies/template.csv' }
+  const TEMPLATES_WITH_VACANCIES = [...TEMPLATES, VACANCIES_TEMPLATE]
+
+  it('a user with vacancies.create but NOT customers.create can upload for the vacancies entity', async () => {
+    serveTemplates(TEMPLATES_WITH_VACANCIES)
+    mockUseAuth.mockReturnValue({ hasPermission: (perm: string) => perm === 'vacancies.view' || perm === 'vacancies.create' })
+    const user = userEvent.setup()
+    render(<ImporterenSettings />)
+
+    await user.click(await screen.findByRole('button', { name: t('import.entities.vacancies.label', { defaultValue: 'vacancies' }) }))
+
+    // No "no import permission" notice, upload input enabled, download enabled.
+    expect(screen.queryByText(t('import.noImportPermission'))).not.toBeInTheDocument()
+    expect(screen.getByLabelText(t('import.selectCsv'))).toBeEnabled()
+    expect(screen.getByRole('button', { name: t('import.downloadTemplate') })).toBeEnabled()
+  })
+
+  it('that SAME user is correctly blocked once they switch to a customer-tree entity (customers)', async () => {
+    serveTemplates(TEMPLATES_WITH_VACANCIES)
+    mockUseAuth.mockReturnValue({ hasPermission: (perm: string) => perm === 'vacancies.view' || perm === 'vacancies.create' })
+    render(<ImporterenSettings />)
+
+    // Lands on the first template in display order — customers here — where the
+    // user has neither customers.view nor customers.create.
+    await screen.findByRole('button', { name: t('import.entities.customers.label') })
+    expect(await screen.findByText(t('import.noImportPermission'))).toBeInTheDocument()
+    expect(screen.getByLabelText(t('import.selectCsv'))).toBeDisabled()
   })
 })
 

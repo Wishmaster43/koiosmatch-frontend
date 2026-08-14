@@ -164,7 +164,8 @@
       "extra": "Extra",
       "changelog": "Cambios",
       "matches": "Matches",
-      "tasks": "Tareas"
+      "tasks": "Tareas",
+      "appointments": "Citas"
     },
     "archivedBanner": {
       "since": "Archivada el {{date}}",
@@ -496,5 +497,13 @@
     "error": "No se pudieron cargar las tareas",
     "openTask": "Abrir tarea",
     "searchPlaceholder": "Buscar tarea…"
+  },
+  "appointmentsTab": {
+    "noPermission": "No tienes permiso para ver las citas.",
+    "loadError": "No se pudieron cargar las citas.",
+    "empty": "Todavía no hay citas para esta vacante.",
+    "overdue": "Vencida",
+    "noCandidate": "Sin candidato",
+    "pageOf": "Página {{page}} de {{lastPage}}"
   }
 }

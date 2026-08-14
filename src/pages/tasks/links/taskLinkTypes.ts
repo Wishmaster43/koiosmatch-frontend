@@ -21,14 +21,12 @@
  * merge their labels or endpoints, and never let one token's picker leak the
  * other's rows.
  *
- * One backend token is deliberately NOT offered (honest gate, §3 — never a picker
- * that cannot fill itself):
- *  - `customer_location`: there is still no global list route (GET
- *    /customer-locations → 404); the rows only exist nested under
- *    GET /customers/{id}/locations, so a tenant-wide picker has nothing to query.
- *    Needs a global route (or a `?customer_id=` filter) before it can join this
- *    table — flagged to backend-Claude, not silently worked around with a picker
- *    that would always come back empty.
+ * `customer_location` WAS gated out here (honest gate, §3 — never a picker that
+ * cannot fill itself): there was no global list route (GET /customer-locations
+ * → 404), only the nested GET /customers/{id}/locations. Backend delivered the
+ * global route 14-08 (`GET /customer-locations?customer_id=&q=&per_page=`, rows
+ * carry `customer_name`), so the token is now wired below like every other one.
+ *
  *  - `department` IS offered — /departments is a real global route (it returns
  *    the CUSTOMER's departments incl. `customer_name`, matching the backend's
  *    CustomerDepartment model behind the token).
@@ -51,6 +49,7 @@ export interface LinkRow {
   vacancyTitle?: string
   title?: string
   phone_number?: string
+  customer_name?: string
   [k: string]: unknown
 }
 
@@ -73,6 +72,12 @@ export const TASK_LINK_ENDPOINTS: Record<string, LinkEndpoint> = {
   customer:    { url: '/customers',     label: r => r.name || `#${r.id}` },
   opportunity: { url: '/opportunities', label: r => r.title || r.name || `#${r.id}` },
   location:    { url: '/locations',     label: r => r.name || `#${r.id}` },
+  // "(Customer Y)" secondary-line convention: every row carries customer_name,
+  // so a location's label disambiguates which client it belongs to (§3A).
+  customer_location: { url: '/customer-locations', label: r => {
+    const name = r.name || `#${r.id}`
+    return r.customer_name ? `${name} (${r.customer_name})` : name
+  } },
   department:  { url: '/departments',   label: r => r.name || `#${r.id}` },
   contact:     { url: '/contacts',      label: personName },
   workflow:    { url: '/workflows',     label: r => r.name || `#${r.id}` },

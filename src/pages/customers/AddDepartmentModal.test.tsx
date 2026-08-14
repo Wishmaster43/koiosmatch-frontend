@@ -238,7 +238,14 @@ describe('AddDepartmentModal · import card (Danny 02-08: "+ nieuwe afdeling ...
   // touches the card's contents must open it first.
   const importCardTitle = ct('subModal.import.title', { entity: st('import.entities.departments.label') })
 
-  it('refuses an .xlsx file client-side with the save-as-CSV instruction, and never calls the dry run', () => {
+  it('the upload input advertises .csv, .txt AND .xlsx (backend: ImportUploadRequest mimes:csv,txt,xlsx)', () => {
+    render(<AddDepartmentModal onClose={() => {}} locations={locations} statuses={statuses} customerName="Zorggroep Middenland" />)
+    fireEvent.click(screen.getByRole('button', { name: importCardTitle }))
+    const input = screen.getByLabelText(st('import.selectCsv')) as HTMLInputElement
+    expect(input.accept).toBe('.csv,.txt,.xlsx')
+  })
+
+  it('accepts an .xlsx file dropped in — this card only forwards the raw File, never parses it client-side', () => {
     render(<AddDepartmentModal onClose={() => {}} locations={locations} statuses={statuses} customerName="Zorggroep Middenland" />)
     fireEvent.click(screen.getByRole('button', { name: importCardTitle }))
 
@@ -247,6 +254,18 @@ describe('AddDepartmentModal · import card (Danny 02-08: "+ nieuwe afdeling ...
     // onDrop-bearing div) is the stable anchor to its parent.
     const dropZone = screen.getByText(ct('subModal.import.intro', { entity: st('import.entities.departments.label') })).parentElement as HTMLElement
     fireEvent.drop(dropZone, { dataTransfer: { files: [xlsxFile] } })
+
+    expect(screen.queryByText(st('import.wrongFileType'))).not.toBeInTheDocument()
+    expect(screen.getByText(st('import.fileSelected', { name: 'afdelingen.xlsx' }))).toBeInTheDocument()
+  })
+
+  it('refuses a genuinely unsupported file type client-side, and never calls the dry run', () => {
+    const pdfFile = new File(['binary'], 'afdelingen.pdf', { type: 'application/pdf' })
+    render(<AddDepartmentModal onClose={() => {}} locations={locations} statuses={statuses} customerName="Zorggroep Middenland" />)
+    fireEvent.click(screen.getByRole('button', { name: importCardTitle }))
+
+    const dropZone = screen.getByText(ct('subModal.import.intro', { entity: st('import.entities.departments.label') })).parentElement as HTMLElement
+    fireEvent.drop(dropZone, { dataTransfer: { files: [pdfFile] } })
 
     expect(screen.getByText(st('import.wrongFileType'))).toBeInTheDocument()
     expect(dryRunImport).not.toHaveBeenCalled()
