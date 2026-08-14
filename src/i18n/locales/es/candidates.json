@@ -108,7 +108,13 @@
     "couple": "Vincular al backoffice",
     "coupleQueued": "{{count}} candidato(s) en cola para vincular con {{target}}.",
     "coupleQueuedPartial": "{{queued}} de {{total}} en cola para vincular con {{target}}; {{skipped}} omitido(s).",
-    "coupleUnavailable": "La vinculación con el backoffice aún no está disponible."
+    "coupleUnavailable": "La vinculación con el backoffice aún no está disponible.",
+    "scopeSelected": "{{count}} seleccionado(s)",
+    "scopeUseFilters": "Los {{count}} resultados de estos filtros",
+    "scopeUseSelection": "Solo las filas marcadas",
+    "filteredConfirm": "Esto se aplicará a los {{count}} resultados de los filtros actuales, no solo a las filas marcadas. ¿Continuar?",
+    "emptyFilterError": "Elige al menos un filtro antes de aplicar una acción a todo el conjunto filtrado.",
+    "limitExceeded": "Demasiados resultados para una sola acción masiva (max {{limit}}). Reduce los filtros e inténtalo de nuevo."
   },
   "kpi": {
     "total": "Total",

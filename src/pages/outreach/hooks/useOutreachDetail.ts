@@ -8,6 +8,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { getCampaign, updateCampaign, updateTarget, assignTargets as assignTargetsApi } from '../data/outreachApi'
 import type { Campaign } from './useOutreachCampaigns'
+import type { TargetSelection, AssigneeAxes } from '../data/outreachApi'
 
 export interface OutreachTarget {
   id: string
@@ -85,14 +86,15 @@ export function useOutreachDetail(id: string | null) {
     catch (err) { setDetail(d => (d && prev ? { ...d, targets: prev } : d)); throw err }
   }, [])
 
-  // BELLIJST-ASSIGN-1 (G29): divide the given targets round-robin over the given
-  // recruiters. No optimistic guess at WHICH target gets WHICH recruiter (the
-  // backend owns the round-robin order) — the fresh campaign detail from the
-  // response replaces state once the request settles; the caller shows the
-  // { updated, skipped } summary. Throws on failure so the caller can notify.
-  const assignTargets = useCallback(async (targetIds: string[], recruiterIds: string[]): Promise<AssignResult> => {
+  // BELLIJST-ASSIGN-2: assign the given selection (manual `ids` OR a `filters`
+  // set that reaches beyond the loaded page, never both) to one person, team or
+  // role. No optimistic guess at the result (the backend owns which rows match a
+  // `filters` selection) — the fresh campaign detail from the response replaces
+  // state once the request settles; the caller shows the { updated, skipped }
+  // summary. Throws on failure so the caller can notify.
+  const assignTargets = useCallback(async (selection: TargetSelection, assignee: AssigneeAxes): Promise<AssignResult> => {
     if (!id) return { updated: [], skipped: [] }
-    const res = await assignTargetsApi(id, { target_ids: targetIds, recruiter_ids: recruiterIds }) as
+    const res = await assignTargetsApi(id, { ...selection, ...assignee }) as
       { data?: CampaignDetail; meta?: AssignResult }
     if (res?.data) setDetail(res.data)
     return res?.meta ?? { updated: [], skipped: [] }

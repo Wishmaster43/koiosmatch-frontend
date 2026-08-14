@@ -139,14 +139,26 @@
     "assign": {
       "button": "Asignar",
       "selected": "{{count}} seleccionados",
-      "pickRecruiters": "Elegir reclutadores",
-      "searchRecruiter": "Buscar un reclutador…",
-      "noRecruiters": "No se encontraron reclutadores",
       "confirm": "Confirmar asignación",
       "resultPartial": "{{updated}} asignados, {{skipped}} omitidos",
       "resultAll": "{{count}} asignados",
       "failed": "La asignación falló. Inténtalo de nuevo.",
-      "assignedTo": "Asignado a {{name}}"
+      "assignedTo": "Asignado a {{name}}",
+      "axisLabel": "Asignar a",
+      "axis": {
+        "person": "Persona",
+        "team": "Equipo",
+        "role": "Rol"
+      },
+      "pickPerson": "Elige un compañero…",
+      "pickTeam": "Elige un equipo…",
+      "pickRole": "Elige un rol…",
+      "roleModeLabel": "Asignación por rol",
+      "roleMode": {
+        "all": "Todos con este rol",
+        "one": "Una persona con este rol"
+      },
+      "assignAllMatching": "Asignar todo en esta selección ({{count}})"
     }
   },
   "changelog": {

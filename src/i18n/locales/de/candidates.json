@@ -108,7 +108,13 @@
     "couple": "Mit Backoffice koppeln",
     "coupleQueued": "{{count}} Kandidat(en) zur Kopplung mit {{target}} eingereiht.",
     "coupleQueuedPartial": "{{queued}} von {{total}} zur Kopplung mit {{target}} eingereiht; {{skipped}} übersprungen.",
-    "coupleUnavailable": "Backoffice-Kopplung ist noch nicht verfügbar."
+    "coupleUnavailable": "Backoffice-Kopplung ist noch nicht verfügbar.",
+    "scopeSelected": "{{count}} ausgewählt",
+    "scopeUseFilters": "Alle {{count}} Ergebnisse dieser Filter",
+    "scopeUseSelection": "Nur die ausgewählten Zeilen",
+    "filteredConfirm": "Dies wird auf alle {{count}} Ergebnisse der aktuellen Filter angewendet, nicht nur auf die ausgewählten Zeilen. Fortfahren?",
+    "emptyFilterError": "Wähle mindestens einen Filter, bevor du eine Aktion auf die gesamte gefilterte Menge anwendest.",
+    "limitExceeded": "Zu viele Ergebnisse für eine einzelne Massenaktion (max {{limit}}). Filter eingrenzen und erneut versuchen."
   },
   "kpi": {
     "total": "Gesamt",

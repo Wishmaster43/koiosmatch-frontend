@@ -87,7 +87,15 @@
     "location": "Branch",
     "locationPlaceholder": "Pick a branch",
     "team": "Department",
-    "teamPlaceholder": "Choose a department"
+    "teamPlaceholder": "Choose a department",
+    "subtasks": {
+      "title": "Subtasks",
+      "loading": "Loading subtasks…",
+      "error": "Subtasks could not be loaded.",
+      "empty": "No subtasks yet.",
+      "parentLabel": "Main task",
+      "progressLabel": "{{done}}/{{total}} subtasks done"
+    }
   },
   "comments": {
     "send": "Post"
@@ -111,7 +119,10 @@
     "open": "Open",
     "loadError": "Results could not be loaded.",
     "linkType": "Link type",
-    "opportunity": "Opportunity"
+    "opportunity": "Opportunity",
+    "outreach_campaign": "Call list",
+    "conversation": "Conversation",
+    "task": "Task"
   },
   "activity": {
     "empty": "No activity yet."

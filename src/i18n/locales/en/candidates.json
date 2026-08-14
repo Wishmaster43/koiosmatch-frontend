@@ -131,7 +131,13 @@
     "couple": "Couple to backoffice",
     "coupleQueued": "{{count}} candidate(s) queued for coupling with {{target}}.",
     "coupleQueuedPartial": "{{queued}} of {{total}} queued for coupling with {{target}}; {{skipped}} skipped.",
-    "coupleUnavailable": "Backoffice coupling isn't available yet."
+    "coupleUnavailable": "Backoffice coupling isn't available yet.",
+    "scopeSelected": "{{count}} selected",
+    "scopeUseFilters": "All {{count}} results matching these filters",
+    "scopeUseSelection": "Only the selected rows",
+    "filteredConfirm": "This will apply to all {{count}} results matching the current filters, not just the checked rows. Continue?",
+    "emptyFilterError": "Pick at least one filter before applying an action to the whole filtered set.",
+    "limitExceeded": "Too many results for one bulk action (max {{limit}}). Narrow the filters and try again."
   },
   "kpi": {
     "total": "Total",

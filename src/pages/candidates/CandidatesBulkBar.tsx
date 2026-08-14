@@ -14,6 +14,14 @@ interface BulkUser { id: Id; name: string }
 interface CandidatesBulkBarProps {
   count: number
   onClear: () => void
+  // BULK-FILTERSET-1: which rows the menu's actions target — checked rows (ids)
+  // or the whole active filter set (server-side, same query the list runs).
+  // Only offered when at least one filter narrows the list (`anyFilterActive`) —
+  // an empty filter set is never a valid "all" scope (the backend 422s it too).
+  bulkScope: 'selected' | 'filtered'
+  onSetBulkScope: (scope: 'selected' | 'filtered') => void
+  filteredTotal: number
+  anyFilterActive: boolean
   onAddToPool: (pool: CandidatePool) => void
   onRemoveFromPool: (pool: CandidatePool) => void
   onSetOwner: (user: BulkUser) => void
@@ -60,7 +68,8 @@ interface CandidatesBulkBarProps {
  * (users, lookups, tags) comes in via props so this stays a thin assembler.
  */
 export default function CandidatesBulkBar({
-  count, onClear, onAddToPool, onRemoveFromPool, onSetOwner, onSetStage, onSetTypes, onSetConsent,
+  count, onClear, bulkScope, onSetBulkScope, filteredTotal, anyFilterActive,
+  onAddToPool, onRemoveFromPool, onSetOwner, onSetStage, onSetTypes, onSetConsent,
   onConvertPhase, onSetStatus, onAddTag, onRemoveTag, onAddNote, onArchive, canArchive = false,
   onMerge, canMerge = false, onManageByApplication, onGeocode, canGeocode = false,
   onCoupleBackoffice,
@@ -171,8 +180,21 @@ export default function CandidatesBulkBar({
     <div style={{ display: 'flex', alignItems: 'center', gap: 10, width: '100%',
       padding: '8px 12px', borderRadius: 8, background: 'var(--color-primary-bg)', border: '1px solid var(--color-primary)' }}>
       <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--color-primary-text)' }}>
-        {t('bulk.selected', { count })}
+        {bulkScope === 'filtered' ? t('bulk.scopeSelected', { count: filteredTotal }) : t('bulk.selected', { count })}
       </span>
+
+      {/* BULK-FILTERSET-1: only offered when a filter narrows the list — an empty
+          filter set is never sent as "all" (the backend 422s it too, see the hook). */}
+      {anyFilterActive && (
+        <button
+          onClick={() => onSetBulkScope(bulkScope === 'filtered' ? 'selected' : 'filtered')}
+          style={{ display: 'flex', alignItems: 'center', height: BTN_H, padding: '0 10px', fontSize: 12, fontWeight: 500,
+            border: '1px solid var(--color-primary)', borderRadius: 7, cursor: 'pointer',
+            background: bulkScope === 'filtered' ? 'var(--color-primary)' : 'transparent',
+            color: bulkScope === 'filtered' ? 'var(--color-on-accent)' : 'var(--color-primary-text)' }}>
+          {bulkScope === 'filtered' ? t('bulk.scopeUseSelection') : t('bulk.scopeUseFilters', { count: filteredTotal })}
+        </button>
+      )}
 
       {/* Single bulk-mutations menu with drill-in submenus */}
       <ActionMenu label={t('bulk.actions')} icon={ListChecks} items={items} />

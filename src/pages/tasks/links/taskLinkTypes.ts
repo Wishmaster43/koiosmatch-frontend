@@ -6,24 +6,36 @@
  * offers the same couplings as the drawer tab, from this same table, never a
  * second hand-kept list that drifts).
  *
- * MEASURED against the backend (08-08, live): `TaskLinkResolver::MODELS`
- * declares eleven tokens — candidate · application · vacancy · match · customer
- * · opportunity · location · customer_location · department · contact ·
- * workflow — and both StoreTaskRequest and UpdateTaskRequest validate
- * `links.*.type` with `Rule::in(TaskLinkResolver::types())`. A live
- * `POST /tasks` with `{type:'department'}`, `{type:'location'}` and
+ * MEASURED against the backend (14-08, final vocabulary): `TaskLinkResolver::MODELS`
+ * declares FOURTEEN tokens — candidate · application · vacancy · match · customer
+ * · opportunity · location · customer_location · department · contact · workflow ·
+ * outreach_campaign · conversation · task — and both StoreTaskRequest and
+ * UpdateTaskRequest validate `links.*.type` with `Rule::in(TaskLinkResolver::types())`.
+ * A live `POST /tasks` with `{type:'department'}`, `{type:'location'}` and
  * `{type:'opportunity'}` came back 201 with all three links labelled, so every
  * token offered below is a real, round-tripping coupling.
  *
- * Two backend tokens are deliberately NOT offered (honest gate, §3 — never a
- * picker that cannot fill itself):
- *  - `customer_location`: there is no global list route (GET /customer-locations
- *    → 404); the rows only exist nested under GET /customers/{id}/locations, so
- *    a tenant-wide picker has nothing to query. Needs a global route (or a
- *    `?customer_id=` filter) before it can join this table.
+ * DEDUPE (14-08, Danny): `location` = the AGENCY's own branch (GET /locations);
+ * `customer_location` = a site BELONGING TO A CUSTOMER (nested under a customer).
+ * They read as near-synonyms in Dutch ("Vestiging" vs "Locatie van klant") — never
+ * merge their labels or endpoints, and never let one token's picker leak the
+ * other's rows.
+ *
+ * One backend token is deliberately NOT offered (honest gate, §3 — never a picker
+ * that cannot fill itself):
+ *  - `customer_location`: there is still no global list route (GET
+ *    /customer-locations → 404); the rows only exist nested under
+ *    GET /customers/{id}/locations, so a tenant-wide picker has nothing to query.
+ *    Needs a global route (or a `?customer_id=` filter) before it can join this
+ *    table — flagged to backend-Claude, not silently worked around with a picker
+ *    that would always come back empty.
  *  - `department` IS offered — /departments is a real global route (it returns
  *    the CUSTOMER's departments incl. `customer_name`, matching the backend's
  *    CustomerDepartment model behind the token).
+ *  - `outreach_campaign` (bellijst) → GET /outreach-campaigns, `conversation`
+ *    (WhatsApp-gesprek) → GET /conversations, `task` (een andere taak) →
+ *    GET /tasks — all three are real, already-used global list routes elsewhere
+ *    in the app, so they round-trip the same way the original eleven do.
  */
 import type { Id } from '@/types/common'
 
@@ -34,10 +46,11 @@ export interface LinkRow {
   name?: string
   first_name?: string
   last_name?: string
-  candidate?: { name?: string }
+  candidate?: { name?: string; first_name?: string; last_name?: string }
   candidateName?: string
   vacancyTitle?: string
   title?: string
+  phone_number?: string
   [k: string]: unknown
 }
 
@@ -63,6 +76,12 @@ export const TASK_LINK_ENDPOINTS: Record<string, LinkEndpoint> = {
   department:  { url: '/departments',   label: r => r.name || `#${r.id}` },
   contact:     { url: '/contacts',      label: personName },
   workflow:    { url: '/workflows',     label: r => r.name || `#${r.id}` },
+  outreach_campaign: { url: '/outreach-campaigns', label: r => r.name || `#${r.id}` },
+  conversation: { url: '/conversations', label: r => {
+    const candName = r.candidate ? [r.candidate.first_name, r.candidate.last_name].filter(Boolean).join(' ') : ''
+    return candName || r.phone_number || `#${r.id}`
+  } },
+  task: { url: '/tasks', label: r => r.title || r.name || `#${r.id}` },
 }
 
 // Every offered token, in menu order.

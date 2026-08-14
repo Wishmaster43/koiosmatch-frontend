@@ -73,7 +73,15 @@
     "location": "Niederlassung",
     "locationPlaceholder": "Niederlassung wählen",
     "team": "Abteilung",
-    "teamPlaceholder": "Abteilung wählen"
+    "teamPlaceholder": "Abteilung wählen",
+    "subtasks": {
+      "title": "Unteraufgaben",
+      "loading": "Unteraufgaben werden geladen…",
+      "error": "Unteraufgaben konnten nicht geladen werden.",
+      "empty": "Noch keine Unteraufgaben.",
+      "parentLabel": "Hauptaufgabe",
+      "progressLabel": "{{done}}/{{total}} Unteraufgaben erledigt"
+    }
   },
   "comments": {
     "send": "Senden"
@@ -97,7 +105,10 @@
     "open": "Öffnen",
     "loadError": "Ergebnisse konnten nicht geladen werden.",
     "linkType": "Verknüpfungstyp",
-    "opportunity": "Chance"
+    "opportunity": "Chance",
+    "outreach_campaign": "Anrufliste",
+    "conversation": "Gespräch",
+    "task": "Aufgabe"
   },
   "activity": {
     "empty": "Noch keine Aktivität."

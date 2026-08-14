@@ -139,14 +139,26 @@
     "assign": {
       "button": "Zuweisen",
       "selected": "{{count}} ausgewählt",
-      "pickRecruiters": "Recruiter auswählen",
-      "searchRecruiter": "Recruiter suchen…",
-      "noRecruiters": "Keine Recruiter gefunden",
       "confirm": "Zuweisung bestätigen",
       "resultPartial": "{{updated}} zugewiesen, {{skipped}} übersprungen",
       "resultAll": "{{count}} zugewiesen",
       "failed": "Zuweisung fehlgeschlagen. Bitte erneut versuchen.",
-      "assignedTo": "Zugewiesen an {{name}}"
+      "assignedTo": "Zugewiesen an {{name}}",
+      "axisLabel": "Zuweisen an",
+      "axis": {
+        "person": "Person",
+        "team": "Team",
+        "role": "Rolle"
+      },
+      "pickPerson": "Kollegen wählen…",
+      "pickTeam": "Team wählen…",
+      "pickRole": "Rolle wählen…",
+      "roleModeLabel": "Rollenzuweisung",
+      "roleMode": {
+        "all": "Alle mit dieser Rolle",
+        "one": "Eine Person mit dieser Rolle"
+      },
+      "assignAllMatching": "Alle in dieser Auswahl zuweisen ({{count}})"
     }
   },
   "changelog": {

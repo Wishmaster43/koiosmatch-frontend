@@ -38,6 +38,11 @@ interface CandidatesListPanelProps {
   selectedCount: number
   onClearSelection: () => void
   bulkBar: BulkBarProps
+  // BULK-FILTERSET-1: the bulk bar's ids-vs-filters scope choice — owned by
+  // useCandidateBulkActions, threaded through as plain props (this panel stays dumb).
+  bulkScope: 'selected' | 'filtered'
+  onSetBulkScope: (scope: 'selected' | 'filtered') => void
+  filteredTotal: number
   onAddOpen: () => void
   searchEpoch: number
   globalSearch: string
@@ -82,7 +87,7 @@ interface CandidatesListPanelProps {
 export default function CandidatesListPanel({
   insightDonuts, insightKpis, statsFailed, total, loadedCount,
   actionMsg, onDismissMessage,
-  selectedCount, onClearSelection, bulkBar, onAddOpen, searchEpoch, globalSearch, onSearch,
+  selectedCount, onClearSelection, bulkBar, bulkScope, onSetBulkScope, filteredTotal, onAddOpen, searchEpoch, globalSearch, onSearch,
   anyFilterActive, onClearFilters, blacklistActive, onToggleBlacklist,
   showArchived, onToggleArchived, showTrash, onToggleTrash, view, onToggleView,
   tableScrollRef, error, filtered, loading, selectedId, onSelectCandidate,
@@ -111,6 +116,7 @@ export default function CandidatesListPanel({
         selectedCount={selectedCount}
         onClearSelection={onClearSelection}
         bulkBar={bulkBar}
+        bulkScope={bulkScope} onSetBulkScope={onSetBulkScope} filteredTotal={filteredTotal}
         onAddOpen={onAddOpen}
         searchEpoch={searchEpoch} globalSearch={globalSearch} onSearch={onSearch}
         anyFilterActive={anyFilterActive} onClearFilters={onClearFilters}

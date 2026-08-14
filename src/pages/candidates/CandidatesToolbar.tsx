@@ -49,6 +49,10 @@ interface CandidatesToolbarProps {
   selectedCount: number
   onClearSelection: () => void
   bulkBar: BulkBarProps
+  // BULK-FILTERSET-1: ids-vs-filters scope, passed straight through to the bar.
+  bulkScope: 'selected' | 'filtered'
+  onSetBulkScope: (scope: 'selected' | 'filtered') => void
+  filteredTotal: number
   onAddOpen: () => void
   searchEpoch: number
   globalSearch: string
@@ -72,7 +76,7 @@ interface CandidatesToolbarProps {
  * item 1) — purely a thin layout + prop-forwarding component, no new behaviour.
  */
 export default function CandidatesToolbar({
-  selectedCount, onClearSelection, bulkBar, onAddOpen, searchEpoch, globalSearch, onSearch,
+  selectedCount, onClearSelection, bulkBar, bulkScope, onSetBulkScope, filteredTotal, onAddOpen, searchEpoch, globalSearch, onSearch,
   anyFilterActive, onClearFilters, blacklistActive, onToggleBlacklist,
   showArchived, onToggleArchived, showTrash, onToggleTrash, view, onToggleView,
 }: CandidatesToolbarProps) {
@@ -82,6 +86,7 @@ export default function CandidatesToolbar({
     <div style={{ padding: '0 24px 12px', display: 'flex', gap: 10, alignItems: 'center', minHeight: 36, flexShrink: 0 }}>
       {selectedCount > 0 ? (
         <CandidatesBulkBar count={selectedCount} onClear={onClearSelection}
+          bulkScope={bulkScope} onSetBulkScope={onSetBulkScope} filteredTotal={filteredTotal} anyFilterActive={anyFilterActive}
           onAddToPool={bulkBar.onAddToPool} onRemoveFromPool={bulkBar.onRemoveFromPool}
           onSetOwner={bulkBar.onSetOwner} onSetStage={bulkBar.onSetStage} onSetTypes={bulkBar.onSetTypes} onSetConsent={bulkBar.onSetConsent}
           onConvertPhase={bulkBar.onConvertPhase} onSetStatus={bulkBar.onSetStatus} onAddTag={bulkBar.onAddTag}

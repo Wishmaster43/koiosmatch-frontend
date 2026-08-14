@@ -35,6 +35,7 @@ import { useVacancyOptions } from '@/pages/candidates/hooks/useVacancyOptions'
 import AssignTargetsBar from './AssignTargetsBar'
 import TargetNoteField from './TargetNoteField'
 import type { OutreachTarget, AssignResult } from '../hooks/useOutreachDetail'
+import type { TargetSelection, AssigneeAxes } from '../data/outreachApi'
 import type { TargetFilter } from './targetFilter'
 
 interface RecruiterOption { value: string; label: string }
@@ -51,7 +52,7 @@ export default function TargetsTab({ targets, loading, error, onSetStatus, onSet
   // G29 — recruiters selectable in the assign picker + the mutation itself;
   // omitted (or empty) hides the whole assign affordance (no fake control).
   recruiters?: RecruiterOption[]
-  onAssignTargets?: (targetIds: string[], recruiterIds: string[]) => Promise<AssignResult>
+  onAssignTargets?: (selection: TargetSelection, assignee: AssigneeAxes) => Promise<AssignResult>
   // G31 — the Stats tab's active donut pick; narrows the visible rows.
   filter?: TargetFilter
   onClearFilter?: () => void
@@ -70,6 +71,12 @@ export default function TargetsTab({ targets, loading, error, onSetStatus, onSet
   const [matchSaving, setMatchSaving] = useState(false)
   // G29 — row selection feeding AssignTargetsBar; cleared once an assign settles.
   const [selected, setSelected] = useState<Set<string>>(new Set())
+  // BELLIJST-ASSIGN-2: "assign everyone matching the current filter" — a second
+  // entry point into AssignTargetsBar that sends `filters` instead of `ids`, so a
+  // filtered set larger than the loaded page (a filter is server-unaware today,
+  // client-side over what's loaded, but the SAME axis values the backend's own
+  // filter vocabulary understands) can be divided without ticking every row.
+  const [assignAllFiltered, setAssignAllFiltered] = useState(false)
   // Vacancy options only load while the match prompt is open.
   const vacancyOptions = useVacancyOptions(!!matchFor)
   // BELLIJST-SCALE-1 — rows expanded to show outcome/note; collapsed by default
@@ -129,6 +136,21 @@ export default function TargetsTab({ targets, loading, error, onSetStatus, onSet
   const visibleTargets = targets.filter(tg => matchesFilter(tg) && matchesLocalFilters(tg))
   const hasLocalFilters = !!search.trim() || !!statusPick || !!outcomePick || assigneePick !== null
   const filterLabel = filter?.axis ? t(`drawer.stats.axis.${filter.axis}`) : ''
+  // BELLIJST-ASSIGN-2: the active filter axes translated into the backend's
+  // `filters` selection shape — same field names the assignee/status/outcome
+  // pickers already use, so "assign all matching" reaches rows beyond this page.
+  const currentFilters = useMemo(() => {
+    const f: Record<string, unknown> = {}
+    if (filter?.axis === 'status') f.status = filter.value
+    if (filter?.axis === 'outcome') f.outcome = filter.value
+    if (filter?.axis === 'assignee') f.assignee_id = filter.value || null
+    if (statusPick) f.status = statusPick
+    if (outcomePick) f.outcome = outcomePick
+    if (assigneePick !== null) f.assignee_id = assigneePick || null
+    if (search.trim()) f.search = search.trim()
+    return f
+  }, [filter, statusPick, outcomePick, assigneePick, search])
+  const hasAnyFilter = hasLocalFilters || !!filter
 
   // G29 — selection toggles, scoped to the currently visible (filtered) rows.
   const visibleIds = visibleTargets.map(tg => tg.id)
@@ -207,17 +229,31 @@ export default function TargetsTab({ targets, loading, error, onSetStatus, onSet
         </div>
       )}
 
-      {/* G29 — select-all + count header; only meaningful once there is a real
-          bulk action (assign) to consume the selection. */}
+      {/* BELLIJST-ASSIGN-2 — select-all + count header, plus the "assign everyone
+          matching this filter" entry point (sends `filters`, no ids form
+          reachable) once ≥1 filter narrows the list; only meaningful once there
+          is a real bulk action (assign) to consume the selection. */}
       {onAssignTargets && visibleTargets.length > 0 && (
-        selected.size > 0 ? (
-          <AssignTargetsBar selectedCount={selected.size} selectedIds={[...selected]} recruiters={recruiters}
-            onAssign={onAssignTargets} onDone={() => setSelected(new Set())} />
+        assignAllFiltered ? (
+          <AssignTargetsBar selection={{ filters: currentFilters }} count={visibleTargets.length}
+            recruiters={recruiters} onAssign={onAssignTargets} onDone={() => setAssignAllFiltered(false)} />
+        ) : selected.size > 0 ? (
+          <AssignTargetsBar selection={{ ids: [...selected] }} count={selected.size}
+            recruiters={recruiters} onAssign={onAssignTargets} onDone={() => setSelected(new Set())} />
         ) : (
-          <div style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '2px 4px' }}>
-            <input type="checkbox" checked={allSelected} onChange={toggleAll}
-              style={{ cursor: 'pointer', accentColor: 'var(--color-primary)' }} aria-label={t('common:selectAll')} />
-            <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>{t('common:selectAll')}</span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '2px 4px', flexWrap: 'wrap' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+              <input type="checkbox" checked={allSelected} onChange={toggleAll}
+                style={{ cursor: 'pointer', accentColor: 'var(--color-primary)' }} aria-label={t('common:selectAll')} />
+              <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>{t('common:selectAll')}</span>
+            </div>
+            {hasAnyFilter && (
+              <button onClick={() => setAssignAllFiltered(true)}
+                style={{ fontSize: 11, fontWeight: 600, color: 'var(--color-primary)', background: 'none',
+                  border: 'none', cursor: 'pointer', padding: 0 }}>
+                {t('drawer.assign.assignAllMatching', { count: visibleTargets.length })}
+              </button>
+            )}
           </div>
         )
       )}

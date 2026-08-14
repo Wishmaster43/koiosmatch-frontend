@@ -62,6 +62,11 @@ export interface Task {
   // drives the Gearchiveerd/Prullenbak view split, mirrors Candidate.lifecycle.
   lifecycle?: string
   pendingEraseAt?: string | null
+  // SUBTASK-1 (BE confirmed 14-08): the parent task, id+title only, null when this
+  // task is not a subtask. `subtaskProgress` counts via the status `is_done` flag
+  // (never the label), so a tenant renaming a status never desyncs the count.
+  parent?: { id: Id; title: string } | null
+  subtaskProgress?: { done: number; total: number } | null
 }
 
 /** The enriched task model rendered by the drawer tabs. */
@@ -120,6 +125,10 @@ export interface ApiTask {
   // carries ('active'|'archived'|'pending_erase' + ISO stamp).
   lifecycle?: string
   pending_erase_at?: string | null
+  // SUBTASK-1: the parent task (id+title/name), null/absent when this task is not
+  // a subtask; `subtask_progress` = {done,total} counted server-side via is_done.
+  parent?: { id?: Id; title?: string; name?: string } | null
+  subtask_progress?: { done?: number; total?: number } | null
   tags?: string[]
   links?: Array<{ type?: string; linkable_type?: string; id?: Id; linkable_id?: Id; label?: string; name?: string }>
   comment_count?: number

@@ -139,14 +139,26 @@
     "assign": {
       "button": "Toewijzen",
       "selected": "{{count}} geselecteerd",
-      "pickRecruiters": "Kies recruiters",
-      "searchRecruiter": "Zoek een recruiter…",
-      "noRecruiters": "Geen recruiters gevonden",
       "confirm": "Toewijzing bevestigen",
       "resultPartial": "{{updated}} toegewezen, {{skipped}} overgeslagen",
       "resultAll": "{{count}} toegewezen",
       "failed": "Toewijzen is mislukt. Probeer het opnieuw.",
-      "assignedTo": "Toegewezen aan {{name}}"
+      "assignedTo": "Toegewezen aan {{name}}",
+      "axisLabel": "Toewijzen aan",
+      "axis": {
+        "person": "Persoon",
+        "team": "Team",
+        "role": "Rol"
+      },
+      "pickPerson": "Kies een collega…",
+      "pickTeam": "Kies een team…",
+      "pickRole": "Kies een rol…",
+      "roleModeLabel": "Rol-toewijzing",
+      "roleMode": {
+        "all": "Iedereen met deze rol",
+        "one": "Eén persoon met deze rol"
+      },
+      "assignAllMatching": "Alles in deze selectie toewijzen ({{count}})"
     }
   },
   "changelog": {

@@ -131,7 +131,13 @@
     "couple": "Koppelen aan backoffice",
     "coupleQueued": "{{count}} kandidaten in wachtrij gezet voor koppeling met {{target}}.",
     "coupleQueuedPartial": "{{queued}} van {{total}} in wachtrij gezet voor koppeling met {{target}}; {{skipped}} overgeslagen.",
-    "coupleUnavailable": "Backoffice-koppeling is nog niet beschikbaar."
+    "coupleUnavailable": "Backoffice-koppeling is nog niet beschikbaar.",
+    "scopeSelected": "{{count}} geselecteerd",
+    "scopeUseFilters": "Alle {{count}} resultaten van deze filters",
+    "scopeUseSelection": "Alleen de aangevinkte rijen",
+    "filteredConfirm": "Dit wordt toegepast op alle {{count}} resultaten van de huidige filters, niet alleen de aangevinkte rijen. Doorgaan?",
+    "emptyFilterError": "Kies eerst minimaal één filter voordat je een actie op de hele filterset toepast.",
+    "limitExceeded": "Te veel resultaten voor één bulkactie (max {{limit}}). Beperk de filters en probeer opnieuw."
   },
   "kpi": {
     "total": "Totaal",

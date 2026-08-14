@@ -15,6 +15,7 @@ const bulkBar = () => ({
 })
 const baseProps = () => ({
   selectedCount: 0, onClearSelection: vi.fn(), bulkBar: bulkBar(),
+  bulkScope: 'selected' as const, onSetBulkScope: vi.fn(), filteredTotal: 0,
   onAddOpen: vi.fn(), searchEpoch: 0, globalSearch: '', onSearch: vi.fn(),
   anyFilterActive: false, onClearFilters: vi.fn(),
   blacklistActive: false, onToggleBlacklist: vi.fn(),

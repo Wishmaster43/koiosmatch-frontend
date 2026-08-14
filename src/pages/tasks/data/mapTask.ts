@@ -82,6 +82,12 @@ export function mapTask(t: ApiTask = {}): Task {
     // derived from the stamps — a missing field stays 'active'/null (old fixtures).
     lifecycle: t.lifecycle ?? (t.pending_erase_at ? 'pending_erase' : (t.deleted_at || t.archived) ? 'archived' : 'active'),
     pendingEraseAt: t.pending_erase_at ?? null,
+    // SUBTASK-1: parent (id+title) and the done/total tally, both null when the
+    // task carries neither — never fabricated when the backend omits them.
+    parent: t.parent?.id != null ? { id: t.parent.id, title: t.parent.title ?? t.parent.name ?? '' } : null,
+    subtaskProgress: t.subtask_progress
+      ? { done: Number(t.subtask_progress.done ?? 0), total: Number(t.subtask_progress.total ?? 0) }
+      : null,
   }
 }
 

@@ -15,6 +15,7 @@ vi.mock('@/context/AppsContext', () => ({ useApps: () => mockUseApps() }))
 // i18n is not initialised in tests → t() returns the key, so we drive/assert on keys.
 const baseProps = () => ({
   count: 3, onClear: vi.fn(),
+  bulkScope: 'selected', onSetBulkScope: vi.fn(), filteredTotal: 42, anyFilterActive: false,
   onAddToPool: vi.fn(), onRemoveFromPool: vi.fn(),
   onSetOwner: vi.fn(), onSetStage: vi.fn(), onSetTypes: vi.fn(),
   onRemoveTag: vi.fn(), onAddNote: vi.fn(), onArchive: vi.fn(),
@@ -25,6 +26,26 @@ const baseProps = () => ({
 })
 
 describe('CandidatesBulkBar', () => {
+  it('hides the filter-set scope toggle when no filter is active', () => {
+    render(<CandidatesBulkBar {...baseProps()} anyFilterActive={false} />)
+    expect(screen.queryByText('bulk.scopeUseFilters')).toBeNull()
+  })
+
+  it('offers switching to the whole filtered set and back when a filter is active', async () => {
+    const user = userEvent.setup()
+    const props = { ...baseProps(), anyFilterActive: true }
+    render(<CandidatesBulkBar {...props} />)
+    const toggle = screen.getByText('bulk.scopeUseFilters')
+    await user.click(toggle)
+    expect(props.onSetBulkScope).toHaveBeenCalledWith('filtered')
+  })
+
+  it('shows the filtered total (not the checked count) once the filtered scope is active', () => {
+    render(<CandidatesBulkBar {...baseProps()} anyFilterActive bulkScope="filtered" />)
+    expect(screen.getByText('bulk.scopeSelected')).toBeInTheDocument()
+    expect(screen.getByText('bulk.scopeUseSelection')).toBeInTheDocument()
+  })
+
   it('hides Archive unless the user may delete', async () => {
     const user = userEvent.setup()
     render(<CandidatesBulkBar {...baseProps()} canArchive={false} />)

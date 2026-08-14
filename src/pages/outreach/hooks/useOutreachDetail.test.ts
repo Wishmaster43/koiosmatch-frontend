@@ -46,8 +46,8 @@ describe('useOutreachDetail · setTargetNote (G30)', () => {
   })
 })
 
-describe('useOutreachDetail · assignTargets (G29 — BELLIJST-ASSIGN-1)', () => {
-  it('POSTs target_ids + recruiter_ids to /outreach-campaigns/{id}/targets/assign and replaces detail from the response', async () => {
+describe('useOutreachDetail · assignTargets (BELLIJST-ASSIGN-2)', () => {
+  it('POSTs an ids-selection + assignee_id to /outreach-campaigns/{id}/targets/assign and replaces detail from the response', async () => {
     vi.mocked(api.get).mockResolvedValue({ data: { data: campaign } })
     const freshCampaign = { id: 'c1', name: 'Bellijst Zorg', targets: [{ id: 't1', status: 'todo', assignee: { id: 'r1', name: 'Nora' } }] }
     vi.mocked(api.post).mockResolvedValue({ data: { data: freshCampaign, meta: { updated: ['t1'], skipped: [] } } })
@@ -55,14 +55,26 @@ describe('useOutreachDetail · assignTargets (G29 — BELLIJST-ASSIGN-1)', () =>
     await waitFor(() => expect(result.current.detail).not.toBeNull())
 
     let summary
-    await act(async () => { summary = await result.current.assignTargets(['t1'], ['r1']) })
+    await act(async () => { summary = await result.current.assignTargets({ ids: ['t1'] }, { assignee_id: 'r1' }) })
 
-    // THE SEAM: exact route + body shape the backend validates (BELLIJST-ASSIGN-1).
-    expect(api.post).toHaveBeenCalledWith('/outreach-campaigns/c1/targets/assign', { target_ids: ['t1'], recruiter_ids: ['r1'] })
+    // THE SEAM: exact route + body shape the backend validates (BELLIJST-ASSIGN-2).
+    expect(api.post).toHaveBeenCalledWith('/outreach-campaigns/c1/targets/assign', { ids: ['t1'], assignee_id: 'r1' })
     // Honest result summary — never a bare "done".
     expect(summary).toEqual({ updated: ['t1'], skipped: [] })
     // Detail state replaced by the fresh server truth (assignee now attached).
     expect(result.current.detail?.targets?.[0].assignee).toEqual({ id: 'r1', name: 'Nora' })
+  })
+
+  it('POSTs a filters-selection, never mixed with ids', async () => {
+    vi.mocked(api.get).mockResolvedValue({ data: { data: campaign } })
+    vi.mocked(api.post).mockResolvedValue({ data: { data: campaign, meta: { updated: ['t1'], skipped: [] } } })
+    const { result } = renderHook(() => useOutreachDetail('c1'))
+    await waitFor(() => expect(result.current.detail).not.toBeNull())
+
+    await act(async () => { await result.current.assignTargets({ filters: { status: 'todo' } }, { assignee_team_id: 'team-1' }) })
+    expect(api.post).toHaveBeenCalledWith('/outreach-campaigns/c1/targets/assign', { filters: { status: 'todo' }, assignee_team_id: 'team-1' })
+    const sent = vi.mocked(api.post).mock.calls[0][1] as Record<string, unknown>
+    expect(sent).not.toHaveProperty('ids')
   })
 
   it('reports skipped ids honestly when some targets do not resolve (foreign/stale id)', async () => {
@@ -72,7 +84,7 @@ describe('useOutreachDetail · assignTargets (G29 — BELLIJST-ASSIGN-1)', () =>
     await waitFor(() => expect(result.current.detail).not.toBeNull())
 
     let summary
-    await act(async () => { summary = await result.current.assignTargets(['t9'], ['r1']) })
+    await act(async () => { summary = await result.current.assignTargets({ ids: ['t9'] }, { assignee_id: 'r1' }) })
     expect(summary).toEqual({ updated: [], skipped: ['t9'] })
   })
 })

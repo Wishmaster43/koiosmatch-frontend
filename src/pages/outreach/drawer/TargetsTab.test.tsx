@@ -1,10 +1,10 @@
 /**
  * TargetsTab (bellijst) — candidate link-through regression (Blueprint-7 audit
  * residue), the four UI states, and the G29/G30/G31 additions: row selection +
- * round-robin assign (BELLIJST-ASSIGN-1), the per-target note, and the Stats-tab
- * click-to-filter narrowing. §13: mutation tests assert the exact request the
- * caller (useOutreachDetail, via props here) is invoked with — never only that
- * a callback fired.
+ * person/team/role assign (BELLIJST-ASSIGN-2), the per-target note, and the
+ * Stats-tab click-to-filter narrowing. §13: mutation tests assert the exact
+ * request the caller (useOutreachDetail, via props here) is invoked with —
+ * never only that a callback fired.
  */
 import { describe, it, expect, vi } from 'vitest'
 import { render, screen } from '@testing-library/react'
@@ -45,6 +45,10 @@ vi.mock('@/lib/useOutreachStatuses', () => ({
 // The vacancy picker only loads while the match prompt is open — `vi.fn()` (not a
 // plain arrow) so the G34 dropdown test below can override it with real options.
 vi.mock('@/pages/candidates/hooks/useVacancyOptions', () => ({ useVacancyOptions: vi.fn(() => []) }))
+// BELLIJST-ASSIGN-2: AssignTargetsBar's team/role axes — empty lists are fine,
+// these tests exercise the (default) person axis.
+vi.mock('@/lib/useTeams', () => ({ useTeams: () => ({ teams: [], loading: false, error: false }) }))
+vi.mock('@/pages/users/hooks/useAssignableRoles', () => ({ useAssignableRoles: () => ({ roles: [], loading: false }) }))
 // CandidateStatusChip reads LookupsContext — stub the two fields it touches.
 vi.mock('@/context/LookupsContext', () => ({
   useLookups: () => ({ statusMeta: (v: string) => ({ label: v, color: '#000' }), phases: [{ value: 'lead' }] }),
@@ -101,32 +105,31 @@ describe('TargetsTab · selection + assign (G29)', () => {
     expect(screen.getAllByRole('checkbox')).toHaveLength(3)
   })
 
-  it('selects a target then assigns it — POSTs the exact target_ids/recruiter_ids via onAssignTargets', async () => {
+  it('selects a target then assigns it — POSTs the exact {ids} selection + assignee_id via onAssignTargets', async () => {
     const user = userEvent.setup()
     const onAssignTargets = vi.fn().mockResolvedValue({ updated: ['t1'], skipped: [] })
     render(<TargetsTab targets={[target]} loading={false} error={false} onSetStatus={vi.fn()} onSetOutcome={vi.fn()}
       recruiters={[{ value: 'r1', label: 'Nora Recruiter' }]} onAssignTargets={onAssignTargets} />)
 
     await user.click(screen.getByRole('checkbox', { name: 'Selecteer rij' }))
-    // The select-all bar swaps for the assign bar once ≥1 row is selected.
-    await user.click(screen.getByRole('button', { name: nlOutreach.drawer.assign.button }))
-    await user.click(screen.getByRole('menuitem', { name: nlOutreach.drawer.assign.pickRecruiters }))
-    await user.click(screen.getByRole('menuitemcheckbox', { name: 'Nora Recruiter' }))
-    // The confirm button's accessible name grows a live "(1)" selection count.
-    await user.click(screen.getByRole('button', { name: new RegExp(nlOutreach.drawer.assign.confirm) }))
+    // The select-all bar swaps for the assign bar once ≥1 row is selected; the
+    // default axis is Person, so the picker is the recruiters CreatableSelect.
+    await user.click(screen.getByRole('button', { name: nlOutreach.drawer.assign.pickPerson }))
+    await user.click(screen.getByRole('button', { name: 'Nora Recruiter' }))
+    await user.click(screen.getByRole('button', { name: nlOutreach.drawer.assign.confirm }))
 
-    // THE SEAM: exact ids passed through to the mutation.
-    expect(onAssignTargets).toHaveBeenCalledWith(['t1'], ['r1'])
+    // THE SEAM: exact {ids} selection body, never mixed with `filters`.
+    expect(onAssignTargets).toHaveBeenCalledWith({ ids: ['t1'] }, { assignee_id: 'r1' })
   })
 
-  it('disables the assign trigger with zero recruiters (no fake affordance)', async () => {
+  it('keeps the confirm button disabled until an axis value is actually picked (no fake affordance)', async () => {
     const user = userEvent.setup()
     render(<TargetsTab targets={[target]} loading={false} error={false} onSetStatus={vi.fn()} onSetOutcome={vi.fn()}
       recruiters={[]} onAssignTargets={vi.fn()} />)
     await user.click(screen.getByRole('checkbox', { name: 'Selecteer rij' }))
-    // No recruiters configured for this tenant → the trigger is disabled, never
-    // a menu that always resolves to "no results".
-    expect(screen.getByRole('button', { name: nlOutreach.drawer.assign.button })).toBeDisabled()
+    // No recruiters configured for this tenant → nothing to pick on the default
+    // (Person) axis → confirm stays disabled, never a submit to an empty axis.
+    expect(screen.getByRole('button', { name: nlOutreach.drawer.assign.confirm })).toBeDisabled()
   })
 })
 

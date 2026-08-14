@@ -73,7 +73,15 @@
     "location": "Sucursal",
     "locationPlaceholder": "Elige una sucursal",
     "team": "Departamento",
-    "teamPlaceholder": "Elige un departamento"
+    "teamPlaceholder": "Elige un departamento",
+    "subtasks": {
+      "title": "Subtareas",
+      "loading": "Cargando subtareas…",
+      "error": "No se pudieron cargar las subtareas.",
+      "empty": "Aún no hay subtareas.",
+      "parentLabel": "Tarea principal",
+      "progressLabel": "{{done}}/{{total}} subtareas completadas"
+    }
   },
   "comments": {
     "send": "Publicar"
@@ -97,7 +105,10 @@
     "open": "Abrir",
     "loadError": "No se pudieron cargar los resultados.",
     "linkType": "Tipo de vínculo",
-    "opportunity": "Oportunidad"
+    "opportunity": "Oportunidad",
+    "outreach_campaign": "Lista de llamadas",
+    "conversation": "Conversación",
+    "task": "Tarea"
   },
   "activity": {
     "empty": "Aún no hay actividad."

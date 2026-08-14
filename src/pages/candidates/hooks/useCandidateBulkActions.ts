@@ -58,7 +58,24 @@ interface UseCandidateBulkActionsParams {
   t: TFunction
   funnelTypes: LookupItem[]
   candidateTypes: LookupOption[]
+  // BULK-FILTERSET-1: the server-side filter params of the currently visible list
+  // (same shape the list query sends, §3 useCandidateFilters) and the honest
+  // server-reported total they match — both required to offer the "all N filtered
+  // results" scope. Optional so existing callers/tests keep compiling unchanged;
+  // the filtered scope is simply unavailable (never offered) without them.
+  filterParams?: Record<string, unknown>
+  filteredTotal?: number
+  // Called once a filtered-scope mutation succeeds, so the caller can refetch the
+  // list (rows outside the loaded page changed — no optimistic patch is possible
+  // without fabricating state for candidates never fetched).
+  onFilteredMutated?: () => void
 }
+
+// BULK-FILTERSET-1: the bulk bar's selection mode — either the checked rows
+// (today's only mode, ids-based) or the ENTIRE active filter set (server-side,
+// same query the list page itself runs). The two are mutually exclusive (XOR
+// on the request body, matches the backend contract) — never sent together.
+export type BulkScope = 'selected' | 'filtered'
 
 // Exported so useCandidateStageBulk (the extracted funnel/phase/status cluster)
 // can type the `bulkMutate` function it receives without a second declaration.
@@ -77,8 +94,14 @@ export interface BulkMutateArgs {
 
 export function useCandidateBulkActions({
   candidates, setCandidates, setTotal, selectedIds, setSelectedIds, notify, t, funnelTypes, candidateTypes,
+  filterParams, filteredTotal, onFilteredMutated,
 }: UseCandidateBulkActionsParams) {
   const { confirm, dialog } = useConfirm()
+  // BULK-FILTERSET-1: which rows a bulk action targets — resets to 'selected'
+  // whenever the checked selection is cleared (CandidatesToolbar's deselect),
+  // so a stale "all filtered" choice never survives a fresh selection.
+  const [bulkScope, setBulkScope] = useState<BulkScope>('selected')
+  const resetBulkScope = () => setBulkScope('selected')
   // 11.1: the shared cross-entity navigate — powers the funnel bulk-node's
   // "manage per application" deep-link (mirrors EntityLink's use of the same context).
   const { navigate } = useNavigation()
@@ -156,9 +179,48 @@ export function useCandidateBulkActions({
     }
   }
 
+  // BULK-FILTERSET-1: the filtered-scope branch of bulkMutate below. The backend
+  // XORs the body — either `ids` or `filters`, never both — and 422s an empty
+  // filter set (never a silent "everything"), so this refuses to call the API
+  // when there is nothing narrowing the list. No optimistic patch is possible
+  // (the mutation reaches rows outside the loaded page), so on success the
+  // caller's `onFilteredMutated` refetch is the only source of truth — and the
+  // count shown to the recruiter beforehand (`filteredTotal`) is the same
+  // server-reported total the list page itself renders, never guessed.
+  const bulkMutateFiltered = ({ url, body, onSuccess }: BulkMutateArgs) => {
+    const filters = filterParams ?? {}
+    if (!Object.keys(filters).length) { notify('error', t('bulk.emptyFilterError')); return }
+    const total = filteredTotal ?? 0
+    confirm(t('bulk.filteredConfirm', { count: total }), () => {
+      api.post(url, { filters, ...body })
+        .then((res) => {
+          const updated = typeof res.data?.updated === 'number' ? res.data.updated
+            : Array.isArray(res.data?.updated) ? res.data.updated.length : total
+          onSuccess(updated, total, Array.isArray(res.data?.skipped) ? res.data.skipped : undefined)
+          onFilteredMutated?.()
+        })
+        .catch((e) => {
+          // A dedicated upper-bound response (backend caps the filtered bulk instead
+          // of silently truncating it) surfaces its own readable message; anything
+          // else falls back to the generic mutate error.
+          if (e?.response?.status === 422 && e.response?.data?.code === 'bulk_limit_exceeded') {
+            notify('error', t('bulk.limitExceeded', { limit: e.response.data.limit ?? '' }))
+          } else {
+            notify('error', t('bulk.mutateError'))
+          }
+        })
+    }, { danger: true })
+    resetBulkScope()
+  }
+
   // Generic optimistic bulk field mutation: apply `patch` to the selected rows,
   // persist, reconcile against the server's `updated` list, revert on failure.
-  const bulkMutate = ({ url, body, patch, keys, onSuccess }: BulkMutateArgs) => {
+  // BULK-FILTERSET-1: when `bulkScope` is 'filtered', delegates to the filters-body
+  // branch above instead — the two request shapes are mutually exclusive (XOR),
+  // so this never sends `candidate_ids` and `filters` together.
+  const bulkMutate = (args: BulkMutateArgs) => {
+    if (bulkScope === 'filtered') { bulkMutateFiltered(args); return }
+    const { url, body, patch, keys, onSuccess } = args
     const ids = [...selectedIds]
     if (!ids.length) return
     const snap = new Map(candidates.filter(c => ids.includes(c.id)).map(c => [c.id, subsetOf(c, keys)]))
@@ -370,6 +432,10 @@ export function useCandidateBulkActions({
     selectedTags, bulkRemoveTag, bulkAddNote, bulkArchive, manageByApplication, bulkGeocode, bulkCoupleBackoffice,
     bulkArchiveGuard, setBulkArchiveGuard, resolveBulkArchiveGuard,
     bulkMergeTarget, bulkMergePrompt, resolveBulkMerge,
+    // BULK-FILTERSET-1: the ids-vs-filters scope toggle for the generic bulkMutate
+    // actions (owner, type, consent, funnel/phase/status) — CandidatesBulkBar reads
+    // it to render the "all N filtered results" choice and its confirm count.
+    bulkScope, setBulkScope, resetBulkScope, filteredTotal: filteredTotal ?? 0,
     dialog,
   }
 }

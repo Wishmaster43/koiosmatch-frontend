@@ -156,3 +156,21 @@ describe('mapTask · lifecycle (TRASH-OVERAL-2)', () => {
     expect(mapTask({ id: 't1' }).pendingEraseAt).toBeNull()
   })
 })
+
+// SUBTASK-1 (BE confirmed 14-08): parent (id+title) + subtask_progress (done/total,
+// counted via the status is_done flag server-side) — both null when absent, never
+// fabricated.
+describe('mapTask · subtasks (SUBTASK-1)', () => {
+  it('maps parent + subtask_progress when present', () => {
+    const t = mapTask({ id: 't1', parent: { id: 'p1', title: 'Onboarding' }, subtask_progress: { done: 2, total: 5 } })
+    expect(t.parent).toEqual({ id: 'p1', title: 'Onboarding' })
+    expect(t.subtaskProgress).toEqual({ done: 2, total: 5 })
+  })
+
+  it('falls back to parent.name when title is absent, and stays null on a bare payload', () => {
+    const t = mapTask({ id: 't1', parent: { id: 'p1', name: 'Onboarding (name)' } })
+    expect(t.parent).toEqual({ id: 'p1', title: 'Onboarding (name)' })
+    expect(mapTask({ id: 't1' }).parent).toBeNull()
+    expect(mapTask({ id: 't1' }).subtaskProgress).toBeNull()
+  })
+})

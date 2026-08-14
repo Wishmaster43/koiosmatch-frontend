@@ -65,15 +65,25 @@ describe('outreachApi', () => {
     expect(result).toEqual({ total: 3, by_status: [], by_outcome: [], by_assignee: [] })
   })
 
-  // G29: BELLIJST-ASSIGN-1 round-robin assign — pins the exact route/body shape the
-  // backend's assignTargets() validation requires (target_ids[] + recruiter_ids[]).
-  it('assignTargets POSTs target_ids + recruiter_ids and returns the raw {data, meta} envelope', async () => {
-    const body = { target_ids: ['t1', 't2'], recruiter_ids: ['r1'] }
+  // BELLIJST-ASSIGN-2: pins the ids/filters XOR + the person/team/role axes the
+  // backend's new contract validates, and that the RAW {data, meta} envelope
+  // survives untouched (the caller needs both the fresh campaign and the summary).
+  it('assignTargets POSTs an ids-selection + assignee_id and returns the raw {data, meta} envelope', async () => {
+    const body = { ids: ['t1', 't2'], assignee_id: 'r1' }
     vi.mocked(api.post).mockResolvedValue({
       data: { data: { id: 'abc-123' }, meta: { updated: ['t1', 't2'], skipped: [] } },
     })
     const result = await assignTargets('abc-123', body)
     expect(api.post).toHaveBeenCalledWith('/outreach-campaigns/abc-123/targets/assign', body)
     expect(result).toEqual({ data: { id: 'abc-123' }, meta: { updated: ['t1', 't2'], skipped: [] } })
+  })
+
+  it('assignTargets POSTs a filters-selection + role axes, never mixed with ids', async () => {
+    const body = { filters: { status: 'todo' }, assignee_role_id: 7, assignee_role_mode: 'all' as const }
+    vi.mocked(api.post).mockResolvedValue({ data: { data: { id: 'abc-123' }, meta: { updated: ['t1'], skipped: [] } } })
+    await assignTargets('abc-123', body)
+    expect(api.post).toHaveBeenCalledWith('/outreach-campaigns/abc-123/targets/assign', body)
+    const sent = vi.mocked(api.post).mock.calls[0][1] as Record<string, unknown>
+    expect(sent).not.toHaveProperty('ids')
   })
 })

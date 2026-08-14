@@ -8,6 +8,7 @@
 import { useState, useEffect, useMemo, useRef } from 'react'
 import type { ComponentType, Dispatch, SetStateAction } from 'react'
 import { useTranslation } from 'react-i18next'
+import { useQueryClient } from '@tanstack/react-query'
 import { useRightPanel } from '@/context/RightPanelContext'
 import { useAuth } from '@/context/AuthContext'
 import { useLookups } from '@/context/LookupsContext'
@@ -301,14 +302,23 @@ export default function CandidatesPage({ intent }: { intent?: CandidateIntent } 
   }
 
   // ── Bulk actions ──
+  // BULK-FILTERSET-1: invalidate the cached list/stats queries after a
+  // filtered-scope bulk mutation — rows outside the loaded page changed, so a
+  // refetch (not an optimistic patch) is the only honest way to reflect it.
+  const queryClient = useQueryClient()
   const {
     toggleRow, toggleAll, bulkAddToPool, bulkRemoveFromPool,
     bulkSetOwner, bulkSetStage, bulkSetTypes, bulkSetConsent, bulkConvertPhase, bulkSetStatus, bulkAddTag,
     selectedTags, bulkRemoveTag, bulkAddNote, bulkArchive, manageByApplication, bulkGeocode, bulkCoupleBackoffice,
     bulkArchiveGuard, setBulkArchiveGuard, resolveBulkArchiveGuard,
     bulkMergeTarget, bulkMergePrompt, resolveBulkMerge,
+    bulkScope, setBulkScope, resetBulkScope, filteredTotal,
     dialog: bulkConfirmDialog,
-  } = useCandidateBulkActions({ candidates, setCandidates, setTotal, selectedIds, setSelectedIds, notify, t, funnelTypes, candidateTypes })
+  } = useCandidateBulkActions({
+    candidates, setCandidates, setTotal, selectedIds, setSelectedIds, notify, t, funnelTypes, candidateTypes,
+    filterParams, filteredTotal: total,
+    onFilteredMutated: () => queryClient.invalidateQueries({ queryKey: ['candidates'] }),
+  })
 
   // Bulk-merge (punt 4): after a successful merge, close the modal, clear the
   // selection (resolveBulkMerge) and reopen the survivor's drawer fresh.
@@ -343,7 +353,8 @@ export default function CandidatesPage({ intent }: { intent?: CandidateIntent } 
           statsFailed={statsFailed} total={total} loadedCount={candidates.length}
           actionMsg={actionMsg} onDismissMessage={() => setActionMsg(null)}
           selectedCount={selectedIds.size}
-          onClearSelection={() => setSelectedIds(new Set())}
+          onClearSelection={() => { setSelectedIds(new Set()); resetBulkScope() }}
+          bulkScope={bulkScope} onSetBulkScope={setBulkScope} filteredTotal={filteredTotal}
           bulkBar={{
             onAddToPool: bulkAddToPool, onRemoveFromPool: bulkRemoveFromPool,
             onSetOwner: bulkSetOwner, onSetStage: bulkSetStage, onSetTypes: bulkSetTypes, onSetConsent: bulkSetConsent,

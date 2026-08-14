@@ -20,6 +20,7 @@ import { useLocations } from '@/lib/useLocations'
 import { useDateFormat } from '@/lib/datetime'
 import { initialsOf } from '@/lib/initials'
 import { isTaskOverdue, dueDateTime } from '../data/mapTask'
+import SubtasksSection from './SubtasksSection'
 import type { TaskDetail } from '@/types/task'
 import type { Id } from '@/types/common'
 import type { CSSProperties, ReactNode } from 'react'
@@ -216,6 +217,10 @@ export default function DetailsTab({ task, onUpdate }: { task: TaskDetail; onUpd
           </div>
         )}
       </div>
+
+      {/* SUBTASK-1: own subtasks (fetched with ?parent_id=) and/or a reference to the
+          main task when this task itself is a subtask — renders nothing otherwise. */}
+      <SubtasksSection task={task} />
 
       <div>
         {/* Description — free-text rich block, own pencil (§3A: every prose field gets

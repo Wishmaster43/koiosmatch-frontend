@@ -46,7 +46,9 @@ const cand = (overrides: Partial<Candidate> = {}): Candidate => ({
 } as Candidate)
 
 // Harness: real state, so we can observe optimistic update → reconcile/revert.
-function harness(initial: Candidate[]) {
+// BULK-FILTERSET-1: accepts the optional filterset args so scope tests can drive
+// them without disturbing every other test's default (no filters, ids-only).
+function harness(initial: Candidate[], filterArgs: { filterParams?: Record<string, unknown>; filteredTotal?: number; onFilteredMutated?: () => void } = {}) {
   return renderHook(() => {
     const [candidates, setCandidates] = useState<Candidate[]>(initial)
     const [total, setTotal] = useState(initial.length)
@@ -54,6 +56,7 @@ function harness(initial: Candidate[]) {
     const actions = useCandidateBulkActions({
       candidates, setCandidates, setTotal, selectedIds, setSelectedIds, notify, t,
       funnelTypes: FUNNEL, candidateTypes: CANDIDATE_TYPES,
+      ...filterArgs,
     })
     return { candidates, total, selectedIds, setSelectedIds, actions }
   })
@@ -92,6 +95,57 @@ describe('useCandidateBulkActions · bulkSetOwner (bulkMutate optimistic/reconci
     act(() => r.result.current.actions.bulkSetOwner({ id: 9, name: 'New' }))
     await waitFor(() => expect(notify).toHaveBeenCalledWith('error', 'bulk.mutateError'))
     expect(rowOf(r, 1)?.owner).toBe('Old')
+  })
+})
+
+// BULK-FILTERSET-1: the XOR ids-vs-filters contract on the shared bulkMutate path
+// (exercised via bulkSetOwner, one of its generic-mutate callers).
+describe('useCandidateBulkActions · filterset bulk scope (XOR ids/filters)', () => {
+  it('selected scope (default): the request body carries ids and never a filters key', async () => {
+    post.mockResolvedValue({ data: { updated: [1] } })
+    const r = harness([cand({ id: 1, owner: 'Old' })], { filterParams: { status: ['available'] }, filteredTotal: 50 })
+    act(() => r.result.current.setSelectedIds(new Set([1])))
+    act(() => r.result.current.actions.bulkSetOwner({ id: 9, name: 'New Owner' }))
+    await waitFor(() => expect(post).toHaveBeenCalled())
+    const body = post.mock.calls[0][1]
+    expect(body.candidate_ids).toEqual([1])
+    expect(body.filters).toBeUndefined()
+  })
+
+  it('filtered scope: the request body carries filters and never a candidate_ids key, after the honest confirm', async () => {
+    post.mockResolvedValue({ data: { updated: 50 } })
+    const onFilteredMutated = vi.fn()
+    const r = harness([cand({ id: 1, owner: 'Old' })], { filterParams: { status: ['available'] }, filteredTotal: 50, onFilteredMutated })
+    act(() => r.result.current.setSelectedIds(new Set([1])))
+    act(() => r.result.current.actions.setBulkScope('filtered'))
+    act(() => r.result.current.actions.bulkSetOwner({ id: 9, name: 'New Owner' }))
+    // Nothing fires before the recruiter confirms the honest "N results" count.
+    expect(post).not.toHaveBeenCalled()
+    act(() => r.result.current.actions.dialog.props.onConfirm())
+    await waitFor(() => expect(post).toHaveBeenCalled())
+    const body = post.mock.calls[0][1]
+    expect(body.filters).toEqual({ status: ['available'] })
+    expect(body.candidate_ids).toBeUndefined()
+    expect(onFilteredMutated).toHaveBeenCalled()
+  })
+
+  it('filtered scope with an empty filter set is refused before any call — never a silent "everything"', () => {
+    const r = harness([cand({ id: 1, owner: 'Old' })], { filterParams: {}, filteredTotal: 50 })
+    act(() => r.result.current.setSelectedIds(new Set([1])))
+    act(() => r.result.current.actions.setBulkScope('filtered'))
+    act(() => r.result.current.actions.bulkSetOwner({ id: 9, name: 'New Owner' }))
+    expect(post).not.toHaveBeenCalled()
+    expect(notify).toHaveBeenCalledWith('error', 'bulk.emptyFilterError')
+  })
+
+  it('surfaces the upper-bound error with a readable message instead of a silent truncation', async () => {
+    post.mockRejectedValue({ response: { status: 422, data: { code: 'bulk_limit_exceeded', limit: 1000 } } })
+    const r = harness([cand({ id: 1, owner: 'Old' })], { filterParams: { status: ['available'] }, filteredTotal: 5000 })
+    act(() => r.result.current.setSelectedIds(new Set([1])))
+    act(() => r.result.current.actions.setBulkScope('filtered'))
+    act(() => r.result.current.actions.bulkSetOwner({ id: 9, name: 'New Owner' }))
+    act(() => r.result.current.actions.dialog.props.onConfirm())
+    await waitFor(() => expect(notify).toHaveBeenCalledWith('error', 'bulk.limitExceeded'))
   })
 })
 

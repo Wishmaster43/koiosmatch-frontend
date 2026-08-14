@@ -73,7 +73,15 @@
     "location": "Agence",
     "locationPlaceholder": "Choisir une agence",
     "team": "Service",
-    "teamPlaceholder": "Choisir un service"
+    "teamPlaceholder": "Choisir un service",
+    "subtasks": {
+      "title": "Sous-tâches",
+      "loading": "Chargement des sous-tâches…",
+      "error": "Les sous-tâches n’ont pas pu être chargées.",
+      "empty": "Pas encore de sous-tâches.",
+      "parentLabel": "Tâche principale",
+      "progressLabel": "{{done}}/{{total}} sous-tâches terminées"
+    }
   },
   "comments": {
     "send": "Publier"
@@ -97,7 +105,10 @@
     "open": "Ouvrir",
     "loadError": "Impossible de charger les résultats.",
     "linkType": "Type de lien",
-    "opportunity": "Opportunité"
+    "opportunity": "Opportunité",
+    "outreach_campaign": "Liste d'appels",
+    "conversation": "Conversation",
+    "task": "Tâche"
   },
   "activity": {
     "empty": "Aucune activité pour le moment."

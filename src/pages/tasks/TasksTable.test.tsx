@@ -125,3 +125,22 @@ describe('TasksTable · internal department column (TEAM-1)', () => {
     expect(row).toHaveTextContent('Kelly Yesway')
   })
 })
+
+describe('TasksTable · subtask progress badge (SUBTASK-1)', () => {
+  it('shows the done/total badge in the title cell for a task with subtasks', () => {
+    const withSubtasks = { ...baseRow, id: 't7', subtaskProgress: { done: 2, total: 5 } } as unknown as Task
+    render(<TasksTable rows={[withSubtasks]} />)
+    expect(screen.getByText('2/5')).toBeInTheDocument()
+  })
+
+  it('renders no badge for a task without subtasks', () => {
+    render(<TasksTable rows={[baseRow]} />)
+    expect(screen.queryByText(/^\d+\/\d+$/)).toBeNull()
+  })
+
+  it('renders no badge when subtaskProgress.total is zero (no fake affordance)', () => {
+    const zero = { ...baseRow, id: 't8', subtaskProgress: { done: 0, total: 0 } } as unknown as Task
+    render(<TasksTable rows={[zero]} />)
+    expect(screen.queryByText('0/0')).toBeNull()
+  })
+})

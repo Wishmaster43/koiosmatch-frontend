@@ -75,9 +75,23 @@ export default function TasksTable({
   // → link → dates → assignee LAST (Danny 2026-07-14; due-asc default sort is a
   // deliberate exception — tasks stay sorted by urgency, not recency).
   const columns: Column<Task>[] = [
-    // Title — primary cell, pinned during horizontal scroll.
+    // Title — primary cell, pinned during horizontal scroll. SUBTASK-1: a parent
+    // task with subtasks carries a quiet "done/total" badge right after the title
+    // (no new column — fits the existing title cell, mirrors the reference-number
+    // chip's placement convention).
     { key: 'title', header: t('cols.task'), sortable: true, sortValue: r => r.title, sticky: true, width: 300, nowrap: true,
-      render: r => <span style={{ fontWeight: 500, color: 'var(--text)', ...titleEllipsis }} title={r.title}>{r.title}</span> },
+      render: r => (
+        <span style={{ display: 'flex', alignItems: 'center', gap: 6, minWidth: 0 }}>
+          <span style={{ fontWeight: 500, color: 'var(--text)', ...titleEllipsis }} title={r.title}>{r.title}</span>
+          {r.subtaskProgress && r.subtaskProgress.total > 0 && (
+            <span title={t('details.subtasks.progressLabel', { done: r.subtaskProgress.done, total: r.subtaskProgress.total })}
+              style={{ flexShrink: 0, fontSize: 11, fontWeight: 500, color: 'var(--text-muted)', fontFamily: 'JetBrains Mono, monospace',
+                padding: '1px 6px', borderRadius: 999, border: '1px solid var(--border)', background: 'var(--bg)' }}>
+              {r.subtaskProgress.done}/{r.subtaskProgress.total}
+            </span>
+          )}
+        </span>
+      ) },
     {
       // Human-readable reference number (T-00042) — an identifier, so it sits right
       // after the title, exactly where candidates/customers/vacancies/matches put it.

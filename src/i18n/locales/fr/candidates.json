@@ -108,7 +108,13 @@
     "couple": "Coupler au backoffice",
     "coupleQueued": "{{count}} candidat(s) mis en file pour le couplage avec {{target}}.",
     "coupleQueuedPartial": "{{queued}} sur {{total}} mis en file pour le couplage avec {{target}} ; {{skipped}} ignoré(s).",
-    "coupleUnavailable": "Le couplage backoffice n'est pas encore disponible."
+    "coupleUnavailable": "Le couplage backoffice n'est pas encore disponible.",
+    "scopeSelected": "{{count}} sélectionné(s)",
+    "scopeUseFilters": "Les {{count}} résultats de ces filtres",
+    "scopeUseSelection": "Seulement les lignes cochées",
+    "filteredConfirm": "Cette action s'appliquera aux {{count}} résultats des filtres actuels, pas seulement aux lignes cochées. Continuer ?",
+    "emptyFilterError": "Choisissez au moins un filtre avant d'appliquer une action à tout l'ensemble filtré.",
+    "limitExceeded": "Trop de résultats pour une seule action groupée (max {{limit}}). Affinez les filtres et réessayez."
   },
   "kpi": {
     "total": "Total",

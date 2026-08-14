@@ -49,9 +49,38 @@ export const getCampaignStats = (id: string, opts?: { signal?: AbortSignal }) =>
 export const updateTarget = (id: string, body: Record<string, unknown>) =>
   api.patch(`/outreach-targets/${id}`, body).then(unwrap)
 
-// BELLIJST-ASSIGN-1 (G29): divide selected targets over the chosen recruiters
-// round-robin. Returns the RAW envelope (not unwrapped) — the caller needs both
-// the fresh campaign `data` (targets carry their new assignee) and the
-// `meta.updated`/`meta.skipped` id lists for an honest result summary.
-export const assignTargets = (id: string, body: { target_ids: string[]; recruiter_ids: string[] }) =>
+// BELLIJST-ASSIGN-2 (2026-08-14): the backend's spec export lags this contract
+// (house rule §10 para 10 — hand-typed here, not from api-generated.ts), so the
+// shapes below are copied LITERALLY from what backend-Claude delivered today.
+//
+// The selection is an XOR — either `ids` (a manual multi-select of target rows)
+// or `filters` (the "everything matching the current search/filter, including
+// rows the drilldown never loaded") — never both, never neither (the backend
+// 422s on either violation). The assignment axes mirror the task assignee model
+// 1:1: a person (`assignee_id`, uuid), a team (`assignee_team_id`, uuid) or a
+// role (`assignee_role_id`, a BIGINT — NOT a uuid — + `assignee_role_mode`:
+// 'all' hands the pick to every user in that role, 'one' to a single member the
+// backend itself picks). Exactly one of the three axes is set per call.
+export type TargetSelection = { ids: string[] } | { filters: Record<string, unknown> }
+export interface AssigneeAxes {
+  assignee_id?: string | null
+  assignee_team_id?: string | null
+  assignee_role_id?: number | null
+  assignee_role_mode?: 'all' | 'one' | null
+}
+export type TargetsAssignBody = TargetSelection & AssigneeAxes
+
+// Divide selected/filtered targets over a person, team or role. Returns the RAW
+// envelope (not unwrapped) — the caller needs both the fresh campaign `data`
+// (targets carry their new assignee) and the `meta.updated`/`meta.skipped` id
+// lists for an honest result summary.
+export const assignTargets = (id: string, body: TargetsAssignBody) =>
   api.post(`/outreach-campaigns/${id}/targets/assign`, body).then((r) => r.data)
+
+// Same selection/axes contract, on the sibling `/targets/owner` route (backend
+// delivered it alongside `/assign` today). Out of scope for the current
+// divide-the-call-list UI (BELLIJST-ASSIGN-2 only wires `/assign`) — kept here so
+// the exact contract is in one place and a future "set owner" affordance never
+// re-derives the shape.
+export const setTargetsOwner = (id: string, body: TargetsAssignBody) =>
+  api.post(`/outreach-campaigns/${id}/targets/owner`, body).then((r) => r.data)

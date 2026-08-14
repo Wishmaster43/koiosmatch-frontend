@@ -87,7 +87,15 @@
     "location": "Vestiging",
     "locationPlaceholder": "Kies een vestiging",
     "team": "Afdeling",
-    "teamPlaceholder": "Kies een afdeling"
+    "teamPlaceholder": "Kies een afdeling",
+    "subtasks": {
+      "title": "Subtaken",
+      "loading": "Subtaken laden…",
+      "error": "Subtaken konden niet geladen worden.",
+      "empty": "Nog geen subtaken.",
+      "parentLabel": "Hoofdtaak",
+      "progressLabel": "{{done}}/{{total}} subtaken afgerond"
+    }
   },
   "comments": {
     "send": "Plaatsen"
@@ -111,7 +119,10 @@
     "open": "Openen",
     "loadError": "Resultaten konden niet geladen worden.",
     "linkType": "Soort koppeling",
-    "opportunity": "Kans"
+    "opportunity": "Kans",
+    "outreach_campaign": "Bellijst",
+    "conversation": "Gesprek",
+    "task": "Taak"
   },
   "activity": {
     "empty": "Nog geen activiteit."
