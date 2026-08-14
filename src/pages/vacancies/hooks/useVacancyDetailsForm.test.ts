@@ -31,6 +31,9 @@ vi.mock('@/lib/useCao', () => ({
 }))
 vi.mock('@/lib/datetime', () => ({ useDateFormat: () => ({ formatDate: (d: string) => d }) }))
 vi.mock('./useCustomerOptions', () => ({ useCustomerOptions: () => [] }))
+// VAC-VESTIGING-1: the bureau-branch lookup — stubbed (no QueryClient here,
+// mirrors every other lookup mock in this file).
+vi.mock('@/lib/useLocations', () => ({ useLocations: () => [{ value: 'branch-1', label: 'Hoofdkantoor Assen' }] }))
 vi.mock('./useCascadePickers', () => ({ useCascadePickers: () => ({ locationPicker: null, departmentPicker: null, contactPicker: null }) }))
 
 // The country cascade itself: a per-country list (mirrors useProvinces' real
@@ -89,6 +92,35 @@ describe('useVacancyDetailsForm · location section · province cascades on coun
     expect(patch).not.toHaveProperty('salaryMin')
     expect(patch).not.toHaveProperty('experienceMin')
     expect(patch).not.toHaveProperty('contractTypes')
+  })
+
+  // VAC-VESTIGING-1: the bureau branch (vestiging) round-trips through this
+  // same section — picking it PATCHes `branchId`, clearing it PATCHes `null`
+  // (never omitted), and Cancel reverts the draft to the last saved value.
+  it('picking a branch and saving PATCHes branchId + the resolved branchName', () => {
+    const onUpdate = vi.fn()
+    const { result } = renderHook(() => useVacancyDetailsForm(vacancy(), onUpdate))
+    act(() => { result.current.location.setBranchId('branch-1') })
+    act(() => { result.current.location.save() })
+    const [, patch] = onUpdate.mock.calls[0]
+    expect(patch).toEqual(expect.objectContaining({ branchId: 'branch-1', branchName: 'Hoofdkantoor Assen' }))
+  })
+
+  it('clearing a picked branch and saving PATCHes branchId: null, never omitting the key', () => {
+    const onUpdate = vi.fn()
+    const { result } = renderHook(() => useVacancyDetailsForm(vacancy({ branchId: 'branch-1' }), onUpdate))
+    act(() => { result.current.location.setBranchId('') })
+    act(() => { result.current.location.save() })
+    const [, patch] = onUpdate.mock.calls[0]
+    expect(patch).toHaveProperty('branchId', null)
+  })
+
+  it('Cancel reverts an unsaved branch pick back to the last saved value', () => {
+    const { result } = renderHook(() => useVacancyDetailsForm(vacancy({ branchId: 'branch-1' })))
+    act(() => { result.current.location.setBranchId('') })
+    expect(result.current.location.branchId).toBe('')
+    act(() => { result.current.location.cancel() })
+    expect(result.current.location.branchId).toBe('branch-1')
   })
 })
 

@@ -54,7 +54,9 @@ vi.mock('@/context/LookupsContext', () => ({
 }))
 vi.mock('@/lib/useIndustries', () => ({ useIndustries: () => ({ industries: ['Zorg', 'IT'] }) }))
 vi.mock('@/lib/useFunctions', () => ({ useFunctions: () => ({ functions: ['Verzorgende IG', 'Helpende'], allowFreeEntry: false }) }))
-vi.mock('@/lib/useLocations', () => ({ useLocations: () => [{ value: 'branch-1', label: 'Vestiging Noord' }] }))
+vi.mock('@/lib/useLocations', () => ({
+  useLocations: () => [{ value: 'branch-1', label: 'Vestiging Noord' }, { value: 'branch-2', label: 'Vestiging Zuid' }],
+}))
 vi.mock('@/hooks/useProvinces', () => ({ useProvinces: () => ({ provinces: ['Zuid-Holland', 'Utrecht'] }) }))
 // The cascade fetch itself — stubbed so only useCascadePickers' own pick/reset
 // logic is under test (no live fetch, mirrors useCascadePickers.test.tsx).
@@ -67,13 +69,25 @@ const { cascadeState } = vi.hoisted(() => ({
     byCustomer: {} as Record<string, {
       locations: Array<{ id: string; name: string; departments?: Array<{ id: string; name: string }> }>
       contacts: Array<{ id: string; name: string }>
+      // VAC-VESTIGING-1: the customer's own mirrored branch — feeds the create
+      // form's branch-proposal prediction (useVacancyBranchDefault).
+      branch_id?: string
     }>,
   },
 }))
+// A STABLE `detail` object per customer id (not a fresh literal every render) —
+// the real hook only replaces its `detail` state once per resolved fetch, so a
+// mock that hands out a new object identity on every render would fire any
+// `useEffect([detail, ...])` reader on every render too (an infinite loop this
+// exact mock shape once produced, VAC-VESTIGING-1).
+const detailByCustomer = new Map<string, { branch_id: string | null } | null>()
 vi.mock('@/hooks/useCustomerCascade', () => ({
   useCustomerCascade: (customerId: string) => {
     const data = cascadeState.byCustomer[customerId] ?? { locations: [], contacts: [] }
-    return { detail: null, locations: data.locations, contacts: data.contacts, refetch: vi.fn() }
+    if (!detailByCustomer.has(customerId)) {
+      detailByCustomer.set(customerId, customerId ? { branch_id: data.branch_id ?? null } : null)
+    }
+    return { detail: detailByCustomer.get(customerId) ?? null, locations: data.locations, contacts: data.contacts, refetch: vi.fn() }
   },
 }))
 // Hoisted, mutable auth state — defaults to no module/no permission (both
@@ -152,6 +166,7 @@ const customers = [{ id: 'c1', name: 'Rivas Zorggroep' }, { id: 'c2', name: 'Yes
 const noop = () => {}
 
 beforeEach(() => {
+  detailByCustomer.clear()
   lookupState.statuses = [
     { value: 'open', label: 'Open', color: '#79B58E' },
     { value: 'closed', label: 'Closed', color: '#8A94A6' },
@@ -434,6 +449,51 @@ describe('AddVacancyModal · cascade narrowing (V3-6, VACATURES-100)', () => {
   })
 })
 
+describe('AddVacancyModal · vestiging cosmetic prediction (VAC-VESTIGING-1)', () => {
+  beforeEach(() => {
+    cascadeState.byCustomer = {
+      c1: { locations: [], contacts: [], branch_id: 'branch-1' },
+      // A branch id NOT among the picker's own options (branch-1/branch-2) —
+      // proves the "freezes" test below can't pass by coincidence.
+      c2: { locations: [], contacts: [], branch_id: 'branch-9' },
+    }
+  })
+  async function pickCustomer(user: ReturnType<typeof userEvent.setup>, label: string) {
+    await user.click(screen.getByRole('button', { name: 'modal.fields.client' }))
+    await user.click(screen.getByRole('button', { name: label }))
+  }
+
+  it('proposes the picked customer\'s own mirrored branch onto the create body', async () => {
+    const user = userEvent.setup()
+    render(<AddVacancyModal onClose={noop} users={users} customers={customers} />)
+    await pickCustomer(user, 'Rivas Zorggroep')
+    await fillTitleAndSubmit(user)
+    expect(mockPost).toHaveBeenCalledWith('/vacancies', expect.objectContaining({ location_id: 'branch-1' }))
+  })
+
+  it('re-predicts the branch on a customer switch while the field stays untouched', async () => {
+    const user = userEvent.setup()
+    render(<AddVacancyModal onClose={noop} users={users} customers={customers} />)
+    await pickCustomer(user, 'Rivas Zorggroep')
+    await pickCustomer(user, 'Yesway Zorg')
+    await fillTitleAndSubmit(user)
+    expect(mockPost).toHaveBeenCalledWith('/vacancies', expect.objectContaining({ location_id: 'branch-9' }))
+  })
+
+  it('freezes the proposal once the recruiter picks the branch by hand — a later customer switch never overwrites it', async () => {
+    const user = userEvent.setup()
+    render(<AddVacancyModal onClose={noop} users={users} customers={customers} />)
+    await pickCustomer(user, 'Rivas Zorggroep')
+    // Manual pick overrides the proposed 'branch-1' with the other option.
+    await user.click(screen.getByRole('button', { name: 'modal.fields.branch' }))
+    await user.click(screen.getByRole('button', { name: 'Vestiging Zuid' }))
+    // Switching customer would otherwise re-propose 'branch-9' — must not happen now.
+    await pickCustomer(user, 'Yesway Zorg')
+    await fillTitleAndSubmit(user)
+    expect(mockPost).toHaveBeenCalledWith('/vacancies', expect.objectContaining({ location_id: 'branch-2' }))
+  })
+})
+
 describe('AddVacancyModal · Inzet card — contractvorm, adres, vestiging (punt 10/12/13)', () => {
   it('carries a toggled contract type and the structured address, absent when untouched', async () => {
     const user = userEvent.setup()
@@ -456,6 +516,32 @@ describe('AddVacancyModal · Inzet card — contractvorm, adres, vestiging (punt
     await user.click(screen.getByRole('button', { name: 'Vestiging Noord' }))
     await fillTitleAndSubmit(user)
     expect(mockPost).toHaveBeenCalledWith('/vacancies', expect.objectContaining({ location_id: 'branch-1' }))
+  })
+
+  // VAC-VESTIGING-1: optional at create — clearing it (or never picking it)
+  // must send NO `location_id` key at all, so the server can apply its own
+  // default (never a stray `location_id: ''`/`null` on the base create).
+  it('sends no location_id key at all when the vestiging is never picked', async () => {
+    const user = userEvent.setup()
+    render(<AddVacancyModal onClose={noop} users={users} customers={customers} />)
+    await fillTitleAndSubmit(user)
+    const [, body] = mockPost.mock.calls[0] as [string, Record<string, unknown>]
+    expect(body).not.toHaveProperty('location_id')
+  })
+
+  it('sends no location_id key when a picked vestiging is cleared again', async () => {
+    const user = userEvent.setup()
+    render(<AddVacancyModal onClose={noop} users={users} customers={customers} />)
+    await user.click(screen.getByRole('button', { name: 'modal.fields.branch' }))
+    await user.click(screen.getByRole('button', { name: 'Vestiging Noord' }))
+    // The shared CreatableSelect's own clear-X (VAC-CLEAR-1) — scoped to the
+    // branch FieldRow specifically (other fields elsewhere in the form may
+    // also carry a value + their own clear-X).
+    const branchLabel = screen.getByText('modal.fields.branch')
+    await user.click(within(branchLabel.parentElement as HTMLElement).getByRole('button', { name: 'clearField' }))
+    await fillTitleAndSubmit(user)
+    const [, body] = mockPost.mock.calls[0] as [string, Record<string, unknown>]
+    expect(body).not.toHaveProperty('location_id')
   })
 })
 

@@ -27,6 +27,7 @@ import { useContractTypes } from '@/lib/useContractTypes'
 import { useCao } from '@/lib/useCao'
 import { useDateFormat } from '@/lib/datetime'
 import { useProvinces } from '@/hooks/useProvinces'
+import { useLocations } from '@/lib/useLocations'
 import { useCustomerOptions } from './useCustomerOptions'
 import { useCascadePickers } from './useCascadePickers'
 import type { VacancyDetail } from '@/types/vacancy'
@@ -67,6 +68,11 @@ export interface LocationSection {
   form: LocationForm; setF: (k: LocationKey, val: string) => void
   save: () => void; cancel: () => void
   provinces: string[]
+  // VAC-VESTIGING-1: the tenant's own bureau branch (`location_id`) — a real
+  // relational id, kept OUTSIDE the text-only LocationForm above (mirrors how
+  // Algemeen keeps `clientId` beside its own text form).
+  branchId: string; setBranchId: (v: string) => void
+  branchOptions: Array<{ value: Id; label: string }>
 }
 export interface RequirementsSection {
   editing: boolean; setEditing: (v: boolean) => void
@@ -193,6 +199,11 @@ export function useVacancyDetailsForm(v: VacancyDetail, onUpdate?: UpdateFn) {
     province: v.province, country: v.country,
   })
   const locationForm = useEditableForm(seedLocation)
+  // VAC-VESTIGING-1: bureau branch — own id state (not a LocationForm text key),
+  // seeded from the mapped `branchId`, clearable (optional field, VAC-CLEAR-1).
+  const [branchId, setBranchId] = useState<string>(v.branchId ?? '')
+  const [savedBranchId, setSavedBranchId] = useState<string>(v.branchId ?? '')
+  const branchOptions = useLocations()
   // VAC-COUNTRY-1 (Danny 22-07, punt 2): province list CASCADES on the picked
   // country, mirroring the candidate ProfileTab/AddCandidateModal pattern exactly
   // — its own cache slot per country (useProvinces), so switching country never
@@ -209,10 +220,15 @@ export function useVacancyDetailsForm(v: VacancyDetail, onUpdate?: UpdateFn) {
     onUpdate?.(v.id, {
       street: locationForm.form.street, houseNumber: locationForm.form.houseNumber, houseNumberSuffix: locationForm.form.houseNumberSuffix,
       postalCode: locationForm.form.postalCode, city: locationForm.form.city, province: locationForm.form.province, country: locationForm.form.country, location,
+      // VAC-VESTIGING-1: `null` when cleared, never omitted — buildVacancyPatch
+      // gates on `'branchId' in patch`, so this always reaches the PATCH body.
+      branchId: branchId || null,
+      branchName: branchOptions.find(o => String(o.value) === branchId)?.label ?? '',
     })
+    setSavedBranchId(branchId)
     locationForm.setEditing(false)
   }
-  const cancelLocation = () => { locationForm.reset(); locationForm.setEditing(false) }
+  const cancelLocation = () => { locationForm.reset(); setBranchId(savedBranchId); locationForm.setEditing(false) }
 
   // ---- Eisen: ervaring/senioriteit/opleiding + the required-skills list ----
   const seedRequirements = (): RequirementsForm => ({
@@ -298,6 +314,7 @@ export function useVacancyDetailsForm(v: VacancyDetail, onUpdate?: UpdateFn) {
     location: {
       editing: locationForm.editing, setEditing: locationForm.setEditing, form: locationForm.form, setF: locationForm.setF,
       save: saveLocation, cancel: cancelLocation, provinces,
+      branchId, setBranchId, branchOptions,
     } satisfies LocationSection,
     requirements: {
       editing: requirementsForm.editing, setEditing: requirementsForm.setEditing, form: requirementsForm.form, setF: requirementsForm.setF,

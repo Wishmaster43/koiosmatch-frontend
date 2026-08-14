@@ -130,7 +130,7 @@ export default function AddVacancyModal({
                 street={f.form.street} houseNumber={f.form.houseNumber} houseNumberSuffix={f.form.houseNumberSuffix}
                 postalCode={f.form.postalCode} city={f.form.city} province={f.form.province} country={f.form.country}
                 onFieldChange={f.onAddressChange} provinces={f.provinces}
-                branchId={f.form.branchId} onBranchChange={v => f.set('branchId', v)} branchOptions={f.branchOptions}
+                branchId={f.form.branchId} onBranchChange={f.handleBranchChange} branchOptions={f.branchOptions}
               />
               <RecruiterCard ownerId={f.form.ownerId} onOwnerChange={v => f.set('ownerId', v)} userOptions={f.userOptions} />
             </div>

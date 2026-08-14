@@ -25,6 +25,7 @@ import { useAuth } from '@/context/AuthContext'
 import { useAllSettings, getJsonSetting } from '@/lib/settings/useAllSettings'
 import { VACANCY_APP_DEFAULTS_KEY, FALLBACK_APP_SETTINGS } from '../data/applicationSettingsDefaults'
 import { useCascadePickers } from '../hooks/useCascadePickers'
+import { useVacancyBranchDefault } from './useVacancyBranchDefault'
 import { composeAddress } from '../hooks/useVacancyDetailsForm'
 import { mapVacancy } from '../data/mapVacancy'
 import type { PublicationChannel } from './PublicationCard'
@@ -200,6 +201,10 @@ export function useAddVacancyForm({
   }))
   // Picking a different client resets the dependent cascade picks (integrity).
   const handleClientChange = (id: string) => { set('clientId', id); setCascade(emptyCascade) }
+  // VAC-VESTIGING-1: cosmetic branch (vestiging) proposal — the picked customer's
+  // own mirrored branch, re-proposed on every customer switch while untouched
+  // (see the hook's file header for the freeze-on-edit pattern).
+  const { handleBranchChange } = useVacancyBranchDefault(form.clientId, (v: string) => set('branchId', v))
   const { locationPicker, departmentPicker, contactPicker } = useCascadePickers({
     clientId: form.clientId,
     customerLocationId: cascade.customerLocationId,
@@ -367,7 +372,7 @@ export function useAddVacancyForm({
   return {
     t, form, set, onAddressChange, onConditionsChange, errors, saving, createError, canSubmit, handleSubmit,
     statuses, statusOptions: statuses.map(s => ({ value: s.value, label: s.label, color: s.color })),
-    industries, functions, branchOptions, candidateTypes, toggleContractType,
+    industries, functions, branchOptions, handleBranchChange, candidateTypes, toggleContractType,
     seniorityLevels, educationLevels, provinces,
     customerOptions: customers.map(c => ({ value: String(c.id), label: c.name })),
     userOptions,

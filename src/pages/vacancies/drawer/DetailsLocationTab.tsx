@@ -17,7 +17,11 @@ interface Props { vacancy: VacancyDetail; location: LocationSection }
  */
 export default function DetailsLocationTab({ vacancy: v, location }: Props) {
   const { t, i18n } = useTranslation('vacancies')
-  const { editing, setEditing, form, setF, save, cancel, provinces } = location
+  // Both lists default to empty: a hook still loading (or a caller on the older
+  // LocationSection shape) must never crash the whole drawer on a .map (VAC-VESTIGING-1).
+  const { editing, setEditing, form, setF, save, cancel, branchId, setBranchId } = location
+  const provinces = location.provinces ?? []
+  const branchOptions = location.branchOptions ?? []
   const { text } = makeFieldHelpers(form, setF, t)
   // VAC-COUNTRY-1 (Danny 22-07, punt 2): fixed ISO-3166 code list, localized to the
   // current UI language — never a tenant lookup (mirrors the candidate's country field).
@@ -58,13 +62,14 @@ export default function DetailsLocationTab({ vacancy: v, location }: Props) {
       <CreatableSelect value={form.country || null} onChange={(val: string) => setF('country', val)} allowCreate={false}
         clearable clearLabel={t('details.country')}
         placeholder={t('common:select')} options={countryOptions} />, editing)}
-    {/* SWEEP-VESTIGING: the vacancy's OWN bureau branch (vestiging, location_id)
+    {/* VAC-VESTIGING-1: the vacancy's OWN bureau branch (vestiging, location_id)
         — distinct from the country/province cascade above, which is the WORK
-        address. Read-only for now: `branchId`/`branchName` now round-trip through
-        mapVacancy.ts, but a picker (mirrors AddVacancyModal's PlacementCard —
-        useLocations() + CreatableSelect, POSTs the same `location_id` key) needs
-        this tab's own hook section (useVacancyDetailsForm.ts) to gain a save
-        path — tracked as a follow-up, not wired here to avoid a fake affordance. */}
-    {row(t('modal.fields.branch'), v.branchName || dash, v.branchName || dash, editing)}
+        address. Now a real editable relation (mirrors AddVacancyModal's
+        PlacementCard — same useLocations() source, same `location_id` key);
+        optional, so it carries the clear affordance (VAC-CLEAR-1). */}
+    {row(t('modal.fields.branch'), v.branchName || dash,
+      <CreatableSelect value={branchId || null} onChange={setBranchId} allowCreate={false}
+        clearable clearLabel={t('modal.fields.branch')}
+        placeholder={t('common:select')} options={branchOptions.map(o => ({ value: String(o.value), label: o.label }))} />, editing)}
   </>, controls(t, editing, save, cancel, () => setEditing(true)))
 }

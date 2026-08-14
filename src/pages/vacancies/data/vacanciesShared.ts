@@ -79,6 +79,10 @@ export const buildVacancyPatch = (patch: Record<string, unknown>): Record<string
   if ('customerLocationId'   in patch) body.customer_location_id   = patch.customerLocationId
   if ('customerDepartmentId' in patch) body.customer_department_id = patch.customerDepartmentId
   if ('contactId'             in patch) body.contact_id             = patch.contactId
+  // VAC-VESTIGING-1: the tenant's own bureau branch (Locatie sub-tab) — the SAME
+  // `location_id` column AddVacancyModal's create body writes; clearing it sends
+  // `null` (VAC-CLEAR-1), never omits the key, so an unset really persists.
+  if ('branchId'              in patch) body.location_id            = patch.branchId
   if ('tags'                in patch) body.tags                 = patch.tags
   if ('channels'            in patch) body.published_channels   = patch.channels
   if ('applicationSettings' in patch) body.application_settings = patch.applicationSettings

@@ -35,6 +35,9 @@ const makeLocation = (overrides: Partial<LocationSection> = {}): LocationSection
   editing: false, setEditing: vi.fn(),
   form: { street: 'Kerkstraat', houseNumber: '12', houseNumberSuffix: 'a', postalCode: '1234 AB', city: 'Utrecht', province: 'Utrecht', country: 'NL' },
   setF: vi.fn(), save: vi.fn(), cancel: vi.fn(), provinces: ['Utrecht'],
+  // VAC-VESTIGING-1: the bureau branch id/setter/options — defaults mirror the
+  // other sections' empty state (nothing picked, one option available).
+  branchId: '', setBranchId: vi.fn(), branchOptions: [{ value: 'branch-1', label: 'Hoofdkantoor Assen' }],
   ...overrides,
 })
 
@@ -71,12 +74,10 @@ describe('DetailsLocationTab · address canon (V9)', () => {
   })
 })
 
-// SWEEP-VESTIGING: the vacancy's own bureau branch (vestiging) now round-trips
-// through mapVacancy.ts — this proves the row actually renders the served
-// value (read-only for now; no picker in this pass, see the component's own
-// comment on why).
-describe('DetailsLocationTab · bureau branch / vestiging (SWEEP-VESTIGING)', () => {
-  it('renders the resolved branch name', () => {
+// VAC-VESTIGING-1: the vacancy's own bureau branch (vestiging) round-trips
+// through mapVacancy.ts and is now a real editable picker (was read-only).
+describe('DetailsLocationTab · bureau branch / vestiging (VAC-VESTIGING-1)', () => {
+  it('renders the resolved branch name in read mode', () => {
     // A name distinct from the fixture's own province ('Utrecht') so this
     // assertion can't accidentally match that unrelated row instead.
     const withBranch = { ...vacancy, branchName: 'Hoofdkantoor Assen' } as VacancyDetail
@@ -88,5 +89,19 @@ describe('DetailsLocationTab · bureau branch / vestiging (SWEEP-VESTIGING)', ()
     const noBranch = { ...vacancy, branchName: '' } as VacancyDetail
     render(<DetailsLocationTab vacancy={noBranch} location={makeLocation()} />)
     expect(screen.getAllByText('-').length).toBeGreaterThanOrEqual(1)
+  })
+
+  it('edit mode offers a searchable branch picker seeded with the tenant\'s branches', () => {
+    render(<DetailsLocationTab vacancy={vacancy} location={makeLocation({ editing: true, branchId: 'branch-1' })} />)
+    expect(screen.getByText('Hoofdkantoor Assen')).toBeInTheDocument()
+  })
+
+  it('picking a branch calls setBranchId with the picked id', async () => {
+    const setBranchId = vi.fn()
+    const { default: userEvent } = await import('@testing-library/user-event')
+    render(<DetailsLocationTab vacancy={vacancy} location={makeLocation({ editing: true, setBranchId })} />)
+    await userEvent.click(screen.getByRole('button', { name: 'Selecteer' }))
+    await userEvent.click(screen.getByRole('button', { name: 'Hoofdkantoor Assen' }))
+    expect(setBranchId).toHaveBeenCalledWith('branch-1')
   })
 })

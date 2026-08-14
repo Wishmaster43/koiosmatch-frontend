@@ -28,6 +28,9 @@ vi.mock('@/lib/useFunctions', () => ({ useFunctions: () => ({ functions: [] }) }
 // VACANCY-CONTRACT-FIELD-1: not under test here, stubbed like every other lookup.
 vi.mock('@/lib/useContractTypes', () => ({ useContractTypes: () => ({ types: [], options: [] }) }))
 vi.mock('@/lib/useCao', () => ({ useCao: () => ({ types: [], labelOf: (v: string) => v, colorOf: () => undefined }) }))
+// VAC-VESTIGING-1: the bureau-branch lookup is react-query backed — stubbed here so
+// this hook test needs no QueryClient (mirrors useVacancyDetailsForm.test.ts).
+vi.mock('@/lib/useLocations', () => ({ useLocations: () => [] }))
 vi.mock('@/lib/datetime', () => ({ useDateFormat: () => ({ formatDate: (d: string) => d }) }))
 vi.mock('./useCustomerOptions', () => ({ useCustomerOptions: () => [] }))
 vi.mock('./useCascadePickers', () => ({ useCascadePickers: () => ({ locationPicker: null, departmentPicker: null, contactPicker: null }) }))
