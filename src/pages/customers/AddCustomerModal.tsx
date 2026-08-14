@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Building2 } from 'lucide-react'
+import { Building2, Upload } from 'lucide-react'
 import FloatingPanel from '@/components/ui/FloatingPanel'
 import { useIndustries } from '@/lib/useIndustries'
 import { useLocations } from '@/lib/useLocations'
@@ -11,8 +11,7 @@ import { useLiveFieldValidation } from '@/hooks/useLiveFieldValidation'
 import { isValidEmailFormat } from '@/lib/contactFieldValidation'
 import { BTN_H } from '@/config/buttonMetrics'
 import { WIDE_MODAL } from '@/components/ui/modalMetrics'
-import { modalColumns } from '@/components/ui/modalCards'
-import CollapsedCard from '@/components/ui/CollapsedCard'
+import { modalColumns, cardBox, cardHead } from '@/components/ui/modalCards'
 import CustomerCompanyCard from './addmodal/CustomerCompanyCard'
 import CustomerAddressCard from './addmodal/CustomerAddressCard'
 import CustomerBusinessCards from './addmodal/CustomerBusinessCards'
@@ -100,10 +99,10 @@ const EMAIL_ERROR_KEYS = { billingEmail: 'validation.emailFormat' }
  * refreshes the list instead of leaving an untouched create form open behind a
  * customer that already exists (that invites a duplicate). While the import is
  * past its upload step, the manual submit below is disabled for the same reason
- * — never two creation paths armed at once. KLANT-LAYOUT-2 (Danny 03-08) moved
- * the card from its original top-of-modal spot to a collapsed-by-default section
- * at the bottom (see CollapsedCard below) — a rare, optional path shouldn't sit
- * above the name field the recruiter almost always fills by hand.
+ * — never two creation paths armed at once. KLANT-LAYOUT-3 (Danny 14-08,
+ * supersedes the 03-08 bottom-section spot): the import flow opens from a
+ * header button top-right and renders as the first card only while open — a
+ * rare, optional path stays out of the way until deliberately summoned.
  *
  * CARD SPLIT (§0.3 — the ~400-line split trigger, 2026-08-03): every card's JSX
  * moved to its own component in `addmodal/` (CustomerCompanyCard,
@@ -152,6 +151,8 @@ export default function AddCustomerModal({ onClose, onCreate, onImported, users 
   // Non-field 422/generic failure.
   const [createError, setCreateError] = useState<string | null>(null)
   const [saving, setSaving] = useState(false)
+  // KLANT-LAYOUT-3: the import flow is summoned from the header button (closed on open).
+  const [importOpen, setImportOpen] = useState(false)
   // COLLAPSIBLE-TEXT-1: Bedrijfstekst's own collapsed/editing state now lives
   // inside CustomerCompanyTextCard (nothing outside that card ever reads it).
   const [form, setForm] = useState<CustomerForm>({
@@ -274,6 +275,18 @@ export default function AddCustomerModal({ onClose, onCreate, onImported, users 
               )
             })}
           </div>
+          {/* KLANT-LAYOUT-3 (Danny 14-08): the import affordance lives top-right in the
+              header. Same accessible name as the old collapsed section, soft-tinted;
+              the tint deepens once a file is picked so a paused import stays visible. */}
+          <button type="button" onClick={() => setImportOpen(v => !v)} aria-expanded={importOpen}
+            style={{ display: 'flex', alignItems: 'center', gap: 6, height: BTN_H, padding: '0 12px', marginRight: 12,
+              flexShrink: 0, borderRadius: 8, cursor: 'pointer', fontSize: 12.5, fontWeight: 600,
+              color: 'var(--color-primary-text)',
+              border: `1px solid color-mix(in srgb, var(--color-primary) ${importWizard.file ? 50 : 32}%, transparent)`,
+              background: `color-mix(in srgb, var(--color-primary) ${importWizard.file ? 16 : 8}%, transparent)` }}>
+            <Upload size={13} />
+            {t('modal.import.title')}
+          </button>
         </div>
       }>
 
@@ -288,34 +301,35 @@ export default function AddCustomerModal({ onClose, onCreate, onImported, users 
             fully optional — moves out of the grid entirely to a collapsed
             section at the bottom (see below). */}
         <div style={{ flex: 1, overflowY: 'auto', padding: '20px 24px', display: 'flex', flexDirection: 'column', gap: 16 }}>
+          {/* CUSTOMER-IMPORT-1 / KLANT-LAYOUT-3 (Danny 14-08: "knop rechts boven in"):
+              the import flow opens from the header button and renders as the first
+              card while open — summoned deliberately, never in the way otherwise. */}
+          {importOpen && (
+            <div style={{ ...cardBox, padding: 16 }}>
+              <div style={cardHead}>{t('modal.import.title')}</div>
+              <CustomerImportCard wizard={importWizard} canView={canViewImportTemplate} canImport={canRunImport} />
+            </div>
+          )}
           <div style={modalColumns('repeat(auto-fit, minmax(340px, 1fr))')}>
-            {/* LEFT — required identity: name/industry/employeeCount + the full address. */}
+            {/* LEFT — required identity: name/industry/employeeCount + the full address,
+                plus the company text (KLANT-LAYOUT-3, Danny 14-08 screenshot: "bedrijfstekst
+                links" — it fills the gap under the address instead of stretching the right). */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
               <CustomerCompanyCard form={form} set={set} errors={errors} industries={industries} />
               {/* KLANT-ADRES-1 (Danny 02-08): the customer's own visiting address, the
                   same full-width card/field grouping as AddCandidateModal's AddressCard. */}
               <CustomerAddressCard form={form} set={set} provinces={provinces} />
+              <CustomerCompanyTextCard form={form} set={set} />
             </div>
 
-            {/* RIGHT — secondary/optional: owner, online/billing, company text, branch. */}
+            {/* RIGHT — secondary/optional: owner, online/billing, branch. */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
               <CustomerBusinessCards form={form} set={set} userOptions={userOptions}
                 billingEmailError={!!fieldMessage('billingEmail')} billingEmailMessage={fieldMessage('billingEmail')}
                 onBillingEmailBlur={() => markTouched('billingEmail')} />
-              <CustomerCompanyTextCard form={form} set={set} />
               <CustomerBranchesCard form={form} set={set} branchOptions={branchOptions} />
             </div>
           </div>
-
-          {/* CUSTOMER-IMPORT-1 / KLANT-LAYOUT-2: moved from the top of the modal (it used
-              to sit above the name field) to a collapsed-by-default section at the very
-              bottom — importing a whole customer tree from a file is a rare, secondary
-              path, not the first thing a recruiter should see. `filled` tints the
-              indicator dot once a file is picked, so a recruiter mid-import can tell the
-              section holds something even while collapsed. */}
-          <CollapsedCard title={t('modal.import.title')} filled={!!importWizard.file}>
-            <CustomerImportCard wizard={importWizard} canView={canViewImportTemplate} canImport={canRunImport} />
-          </CollapsedCard>
         </div>
 
         {/* Server-side rejection (non-field 422 / other failure) — shown in place, modal stays open. */}
