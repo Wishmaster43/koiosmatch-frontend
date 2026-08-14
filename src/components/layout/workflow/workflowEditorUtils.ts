@@ -78,7 +78,11 @@ export function computeWorkflowSnapshot(
   // loses its config, the exact fall-through bug the Event branch once had.
   if (trigger === 'Webhook' && scheduleConfig?.agent) triggerConfig = { agent: scheduleConfig.agent }
   else if (trigger === 'Webhook' && webhookId) triggerConfig = { webhook_id: webhookId }
-  else if (trigger === 'Scheduled' && scheduleConfig) triggerConfig = { schedule: scheduleConfig }
+  // WORKFLOW-SCHEMA-1: the scheduled trigger's fields (frequency/times/weekdays/
+  // monthday/month/interval_minutes) sit FLAT on trigger_config — no `schedule`
+  // wrapper — matching how Event/Webhook already store flat, and matching the
+  // backend's own trigger_config[frequency] validation contract.
+  else if (trigger === 'Scheduled' && scheduleConfig) triggerConfig = { ...scheduleConfig }
   // Event trigger (BIRTHDAY-FLOW-2): trigger_config carries only the event key,
   // matching the backend contract (Workflow::trigger_config['event']).
   else if (trigger === 'Event' && scheduleConfig?.event) triggerConfig = { event: scheduleConfig.event }

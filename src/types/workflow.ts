@@ -108,20 +108,23 @@ export interface EdgeFilters { logic?: string; conditions?: FilterCondition[] }
 // (see EdgeFilterPanel.tsx / serialization.ts for the exact conversion).
 export type FilterConditionGroup = FilterCondition[]
 
+// WORKFLOW-SCHEMA-1: the `scheduled` trigger's config matches the backend
+// contract's `trigger_config` fields directly (no wrapper). `[k: string]:
+// unknown` also carries the legacy read-only shapes (`schedule_time`,
+// `schedule: 'weekly'`, `day`, bare `times` with no `frequency`) that
+// normalizeScheduleConfig (scheduleLabel.ts) still knows how to read.
 export interface ScheduleConfig {
-  schedule_type?: string
-  interval_value?: number
-  interval_unit?: string
-  time?: string
+  frequency?: string
   times?: string[]
-  days_of_week?: number[]
-  day_of_month?: number
+  weekdays?: number[]
+  monthday?: number
+  month?: number
+  interval_minutes?: number
   // Event trigger (BIRTHDAY-FLOW-2): the chosen domain-event key.
   event?: string
   // Webhook trigger, AI-agent flavor (AI-AGENTS-3): the agent name this
   // workflow's own webhook is coupled to (backend matches by NAME, not id).
   agent?: string
-  month?: number
   [k: string]: unknown
 }
 

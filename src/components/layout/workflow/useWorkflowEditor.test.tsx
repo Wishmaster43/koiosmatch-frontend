@@ -259,10 +259,10 @@ describe('useWorkflowEditor · handleSave payload (denormalized per trigger)', (
       { trigger: 'Scheduled' },
     )
     await waitFor(() => expect(result.current.nodesWithFirst).toHaveLength(1))
-    act(() => result.current.setScheduleConfig({ schedule_type: 'daily', time: '08:00' }))
+    act(() => result.current.setScheduleConfig({ frequency: 'daily', times: ['08:00'] }))
     act(() => result.current.handleSave())
     const [payload] = onSave.mock.calls[0]
-    expect(payload.trigger_config).toEqual({ schedule: { schedule_type: 'daily', time: '08:00' } })
+    expect(payload.trigger_config).toEqual({ frequency: 'daily', times: ['08:00'] })
   })
 
   // BIRTHDAY-FLOW-2: an Event trigger's payload must carry ONLY { event: <key> } in

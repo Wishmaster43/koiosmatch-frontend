@@ -44,7 +44,7 @@ describe('ScheduleModal · event trigger', () => {
     expect(options).toHaveLength(1)
     fireEvent.click(options[0])
     fireEvent.click(screen.getByText('scheduleModal.save'))
-    expect(onSave).toHaveBeenCalledWith('Event', { schedule_type: 'event', event: 'match.created' })
+    expect(onSave).toHaveBeenCalledWith('Event', { event: 'match.created' })
   })
 
   it('Save on the event type calls onSave with trigger_type-ready shape { event: <key> }', () => {
@@ -52,7 +52,7 @@ describe('ScheduleModal · event trigger', () => {
     render(<ScheduleModal onSave={onSave} onClose={vi.fn()} />)
     fireEvent.click(screen.getByText('scheduleModal.trigger.event'))
     fireEvent.click(screen.getByText('scheduleModal.save'))
-    expect(onSave).toHaveBeenCalledWith('Event', { schedule_type: 'event', event: WORKFLOW_EVENT_KEYS[0] })
+    expect(onSave).toHaveBeenCalledWith('Event', { event: WORKFLOW_EVENT_KEYS[0] })
   })
 
   it('reopening on an existing Event trigger preselects its stored event key', () => {
@@ -123,7 +123,7 @@ describe('ScheduleModal · interval frequency', () => {
     const saveBtn = screen.getByText('scheduleModal.save') as HTMLButtonElement
     expect(saveBtn).not.toBeDisabled()
     fireEvent.click(saveBtn)
-    expect(onSave).toHaveBeenCalledWith('Scheduled', { schedule_type: 'interval', interval_value: 5, interval_unit: 'minutes' })
+    expect(onSave).toHaveBeenCalledWith('Scheduled', { frequency: 'interval', interval_minutes: 5 })
   })
 })
 
@@ -163,7 +163,7 @@ describe('ScheduleModal · webhook (AI-agent) trigger', () => {
     fireEvent.click(trigger)
     fireEvent.click(screen.getByRole('button', { name: 'Michelle' }))
     fireEvent.click(screen.getByText('scheduleModal.save'))
-    expect(onSave).toHaveBeenCalledWith('Webhook', { schedule_type: 'webhook', agent: 'Michelle' })
+    expect(onSave).toHaveBeenCalledWith('Webhook', { agent: 'Michelle' })
   })
 
   it('reopening on an existing Webhook(agent) trigger preselects its stored agent name', async () => {

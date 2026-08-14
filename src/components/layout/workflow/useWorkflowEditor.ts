@@ -42,18 +42,34 @@ export function useWorkflowEditor({ workflow, onSave, initialRunId = null }: {
   }, [])
 
   // Trigger config is opaque on the workflow; narrow it to the shapes we read.
-  const triggerConfig = workflow.trigger_config as {
-    schedule?: ScheduleConfig | null; webhook_id?: string | number | null; event?: string; agent?: string
-  } | undefined
+  // WORKFLOW-SCHEMA-1: the scheduled trigger's fields sit FLAT on trigger_config
+  // (frequency/times/weekdays/monthday/month/interval_minutes — no `schedule`
+  // wrapper), same as event/agent already did. A legacy `schedule` object (the
+  // old wrapped shape) is still read as a fallback so a workflow saved before
+  // this change keeps rendering correctly.
+  const triggerConfig = workflow.trigger_config as (ScheduleConfig & {
+    // `schedule` is ambiguous by design: the OLD wrapped shape nested a full
+    // ScheduleConfig object under it, the flat legacy shape uses it as a plain
+    // frequency string ('weekly') — both are read below, narrowed by typeof.
+    schedule?: ScheduleConfig | string | null; webhook_id?: string | number | null; event?: string; agent?: string
+  }) | undefined
 
-  // Reload seeding: the backend persists 'event'/'agent' flat on trigger_config (not
-  // nested under 'schedule'), so a reloaded Event/Webhook(agent) trigger rebuilds its
-  // ScheduleConfig here — otherwise a same-page reload + immediate re-save would wipe
-  // the binding (nextTriggerConfig falls through to undefined; the exact class of bug
-  // this whole trigger_config branch order guards against).
-  const initialScheduleConfig: ScheduleConfig | null = triggerConfig?.schedule
-    ?? (triggerConfig?.event ? { schedule_type: 'event', event: triggerConfig.event } : null)
-    ?? (triggerConfig?.agent ? { schedule_type: 'webhook', agent: triggerConfig.agent } : null)
+  // Reload seeding: 'event'/'agent' persist flat on trigger_config, so a reloaded
+  // Event/Webhook(agent) trigger rebuilds its ScheduleConfig here — otherwise a
+  // same-page reload + immediate re-save would wipe the binding (nextTriggerConfig
+  // falls through to undefined; the exact class of bug this whole trigger_config
+  // branch order guards against). For Scheduled, prefer the current flat shape
+  // (any `frequency`/legacy time key present) and fall back to the old `schedule`
+  // wrapper only for configs saved before this change.
+  const hasFlatSchedule = triggerConfig != null && (
+    'frequency' in triggerConfig || 'schedule_time' in triggerConfig || 'time' in triggerConfig
+    || 'times' in triggerConfig || triggerConfig.schedule === 'weekly'
+  )
+  const legacyWrappedSchedule = typeof triggerConfig?.schedule === 'object' ? triggerConfig.schedule : null
+  const initialScheduleConfig: ScheduleConfig | null = hasFlatSchedule ? (triggerConfig as ScheduleConfig)
+    : legacyWrappedSchedule
+    ?? (triggerConfig?.event ? { event: triggerConfig.event } : null)
+    ?? (triggerConfig?.agent ? { agent: triggerConfig.agent } : null)
 
   const [name,           setName]           = useState(workflow.name)
   const [trigger,        setTrigger]        = useState(workflow.trigger)
@@ -279,7 +295,9 @@ export function useWorkflowEditor({ workflow, onSave, initialRunId = null }: {
     // Same branch order as computeWorkflowSnapshot — agent flavor first (see there).
     if (trigger === 'Webhook' && scheduleConfig?.agent) nextTriggerConfig = { agent: scheduleConfig.agent }
     else if (trigger === 'Webhook' && webhookId) nextTriggerConfig = { webhook_id: webhookId }
-    else if (trigger === 'Scheduled' && scheduleConfig) nextTriggerConfig = { schedule: scheduleConfig }
+    // WORKFLOW-SCHEMA-1: flat on trigger_config, no `schedule` wrapper (see
+    // workflowEditorUtils.computeWorkflowSnapshot for the matching read side).
+    else if (trigger === 'Scheduled' && scheduleConfig) nextTriggerConfig = { ...scheduleConfig }
     // Event trigger (BIRTHDAY-FLOW-2): trigger_config carries only the event key,
     // matching the backend contract (Workflow::trigger_config['event']).
     else if (trigger === 'Event' && scheduleConfig?.event) nextTriggerConfig = { event: scheduleConfig.event }

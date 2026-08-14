@@ -4,6 +4,15 @@
  * shapes derived from them: the ScheduleConfig handed to `onSave` and the live
  * preview config.
  *
+ * WORKFLOW-SCHEMA-1: the `scheduled` recurrence fields mirror the backend
+ * contract directly — `frequency`, `times` (H:i list, every frequency except
+ * interval), `weekdays` (ISO 1-7, Monday=1, weekly only), `monthday`
+ * (monthly/quarterly/yearly), `month` (yearly only), `interval_minutes`
+ * (interval only). Loading seeds from `normalizeScheduleConfig` (scheduleLabel.ts)
+ * so the three legacy shapes (single `schedule_time`/`time`, a bare `times`
+ * array, `schedule: 'weekly'` + `day`) render into the right controls without
+ * ever rewriting the stored data until the user actually hits Save.
+ *
  * Pulled out of ScheduleModal so that component stays declarative markup (§3
  * "all logic in hooks"), and so the recurrence editor can be handed the whole
  * form as ONE prop instead of sixteen threaded setters. The state deliberately
@@ -14,6 +23,7 @@ import { useState } from 'react'
 import type { ScheduleConfig } from '@/types/workflow'
 import { WORKFLOW_EVENT_KEYS } from './eventCatalog'
 import { DATE_RELATIVE_FIELDS } from './DateRelativeFields'
+import { normalizeScheduleConfig } from './scheduleLabel'
 
 export function useScheduleForm(
   trigger: string | undefined,
@@ -26,7 +36,10 @@ export function useScheduleForm(
       : trigger === 'Event' ? 'event' : trigger === 'Webhook' ? 'webhook'
       : trigger === 'DateRelative' ? 'date_relative' : 'scheduled',
   )
-  const [sType,    setSType]    = useState(scheduleConfig?.schedule_type ?? 'daily')
+  // Seed the recurrence fields via the ONE normaliser shared with scheduleLabel,
+  // so the current contract shape AND the three legacy shapes all land correctly.
+  const seed = normalizeScheduleConfig(scheduleConfig)
+  const [frequency, setFrequency] = useState(seed.frequency)
   // Event trigger: the selected domain-event key (seeded from the catalogue fallback).
   const [eventKey, setEventKey] = useState(String(scheduleConfig?.event ?? WORKFLOW_EVENT_KEYS[0]))
   // Webhook trigger, AI-agent flavor (AI-AGENTS-3): the agent NAME this workflow's
@@ -38,56 +51,58 @@ export function useScheduleForm(
   const [offsetDays, setOffsetDays] = useState<number | string>(
     scheduleConfig?.offset_days != null ? Math.abs(Number(scheduleConfig.offset_days)) : 28,
   )
-  const [intVal,   setIntVal]   = useState<number | string>(scheduleConfig?.interval_value ?? 15)
-  const [intUnit,  setIntUnit]  = useState(scheduleConfig?.interval_unit  ?? 'minutes')
-  const [time,     setTime]     = useState(scheduleConfig?.time ?? '08:00')
-  const [times,    setTimes]    = useState<string[]>(scheduleConfig?.times ?? ['08:00'])
-  const [dow,      setDow]      = useState<number[]>(scheduleConfig?.days_of_week ?? [1, 2, 3, 4, 5])
-  const [dom,      setDom]      = useState(scheduleConfig?.day_of_month ?? 1)
-  const [month,    setMonth]    = useState(scheduleConfig?.month ?? 1)
-  const toggleDay = (d: number) => setDow(ds => ds.includes(d) ? ds.filter(x => x !== d) : [...ds, d].sort((a,b)=>a-b))
+  // Firing moments on a due day — applies to every frequency except interval.
+  const [times,    setTimes]    = useState<string[]>(seed.times)
+  // ISO weekdays (Monday=1..Sunday=7) — weekly only.
+  const [weekdays, setWeekdays] = useState<number[]>(seed.weekdays)
+  const [monthday, setMonthday] = useState(seed.monthday)
+  const [month,    setMonth]    = useState(seed.month)
+  const [intervalMinutes, setIntervalMinutes] = useState<number | string>(seed.intervalMinutes)
+  const toggleWeekday = (iso: number) => setWeekdays(ws => ws.includes(iso) ? ws.filter(x => x !== iso) : [...ws, iso].sort((a, b) => a - b))
 
-  const addTime    = () => setTimes(ts => [...ts, '08:00'])
+  const addTime    = () => setTimes(ts => (ts.length >= 12 ? ts : [...ts, '09:00']))
   const removeTime = (i: number)  => setTimes(ts => ts.filter((_, j) => j !== i))
   const updateTime = (i: number, v: string) => setTimes(ts => ts.map((t, j) => j === i ? v : t))
 
-  // Guards a Save that would persist an unusable config. `min={1}` on the interval
+  // Guards a Save that would persist an unusable config. `min={5}` on the interval
   // input does nothing outside a real form submit — this is a controlled string
-  // (`intVal`), so an emptied field becomes '' and `+''` is 0, silently saving an
-  // interval of zero. A webhook trigger with no agent chosen would likewise
-  // persist an empty `agent` value. Disabling Save is a hard backstop regardless
-  // of whether the field was ever blurred (a blur-only clamp would miss "delete
-  // then click Save" without tabbing out first).
+  // (`intervalMinutes`), so an emptied field becomes '' and `+''` is 0, silently
+  // saving an invalid interval. A webhook trigger with no agent chosen would
+  // likewise persist an empty `agent` value, and weekly needs at least one
+  // selected weekday. Disabling Save is a hard backstop regardless of whether the
+  // field was ever blurred (a blur-only clamp would miss "delete then click Save"
+  // without tabbing out first).
   const canSave = !(
-    (type === 'scheduled' && sType === 'interval' && (Number.isNaN(+intVal) || +intVal < 1)) ||
+    (type === 'scheduled' && frequency === 'interval' && (Number.isNaN(+intervalMinutes) || +intervalMinutes < 5 || +intervalMinutes > 10080)) ||
+    (type === 'scheduled' && frequency === 'weekly' && weekdays.length === 0) ||
+    (type === 'scheduled' && frequency !== 'interval' && times.length === 0) ||
     (type === 'webhook' && !agentName) ||
     (type === 'date_relative' && (!dateField || Number.isNaN(+offsetDays) || +offsetDays < 0))
   )
 
   // Build the trigger name + config the canvas stores; only the fields the
-  // chosen frequency actually uses are written, so no stale keys are persisted.
+  // chosen frequency actually uses are written, so no stale keys are persisted —
+  // this IS the flat trigger_config the backend contract validates directly.
   const handleSave = () => {
     if (!canSave) return
     if (type === 'manual')  { onSave('Handmatig', null); return }
     if (type === 'instant') { onSave('Direct', null); return }
     // Event trigger: carries the chosen event key, no schedule fields.
-    if (type === 'event')   { onSave('Event', { schedule_type: 'event', event: eventKey }); return }
+    if (type === 'event')   { onSave('Event', { event: eventKey }); return }
     // Webhook trigger (AI-agent flavor): carries only the chosen agent's name —
     // the backend couples this workflow to that agent's own inbound webhook.
-    if (type === 'webhook') { onSave('Webhook', { schedule_type: 'webhook', agent: agentName }); return }
+    if (type === 'webhook') { onSave('Webhook', { agent: agentName }); return }
     // Date-relative trigger: the UI's positive "days before" becomes a negative
     // offset_days on the wire (contract: -28 = "28 days before" the date field).
     if (type === 'date_relative') {
-      onSave('DateRelative', { schedule_type: 'date_relative', date_field: dateField, offset_days: -Math.abs(+offsetDays) })
+      onSave('DateRelative', { date_field: dateField, offset_days: -Math.abs(+offsetDays) })
       return
     }
-    const cfg: ScheduleConfig = { schedule_type: sType }
-    if (sType === 'interval') { cfg.interval_value = +intVal; cfg.interval_unit = intUnit }
-    else if (sType === 'daily')     { cfg.times = times }
-    else if (sType === 'weekly')    { cfg.days_of_week = dow; cfg.time = time }
-    else if (sType === 'monthly')   { cfg.day_of_month = +dom; cfg.time = time }
-    else if (sType === 'quarterly') { cfg.time = time }
-    else if (sType === 'yearly')    { cfg.day_of_month = +dom; cfg.month = +month; cfg.time = time }
+    if (frequency === 'interval') { onSave('Scheduled', { frequency, interval_minutes: +intervalMinutes }); return }
+    const cfg: ScheduleConfig = { frequency, times }
+    if (frequency === 'weekly')                                cfg.weekdays = weekdays
+    if (['monthly', 'quarterly', 'yearly'].includes(frequency)) cfg.monthday = +monthday
+    if (frequency === 'yearly')                                 cfg.month = +month
     onSave('Scheduled', cfg)
   }
 
@@ -95,18 +110,21 @@ export function useScheduleForm(
   const previewTrigger = type === 'manual' ? 'Handmatig' : type === 'instant' ? 'Direct'
     : type === 'event' ? 'Event' : type === 'webhook' ? 'Webhook'
     : type === 'date_relative' ? 'DateRelative' : 'Scheduled'
-  const previewCfg: ScheduleConfig | null = type === 'event' ? { schedule_type: 'event', event: eventKey }
-    : type === 'webhook' ? { schedule_type: 'webhook', agent: agentName }
-    : type === 'date_relative' ? { schedule_type: 'date_relative', date_field: dateField, offset_days: -Math.abs(+offsetDays) }
-    : type === 'scheduled' ? { schedule_type: sType, interval_value: +intVal, interval_unit: intUnit, time, times, days_of_week: dow, day_of_month: dom, month }
-    : null
+  const previewCfg: ScheduleConfig | null = type === 'event' ? { event: eventKey }
+    : type === 'webhook' ? { agent: agentName }
+    : type === 'date_relative' ? { date_field: dateField, offset_days: -Math.abs(+offsetDays) }
+    : type === 'scheduled'
+      ? (frequency === 'interval'
+        ? { frequency, interval_minutes: +intervalMinutes }
+        : { frequency, times, weekdays, monthday: +monthday, month: +month })
+      : null
 
   return {
-    type, setType, sType, setSType, eventKey, setEventKey, agentName, setAgentName,
+    type, setType, frequency, setFrequency, eventKey, setEventKey, agentName, setAgentName,
     dateField, setDateField, offsetDays, setOffsetDays,
-    intVal, setIntVal, intUnit, setIntUnit, time, setTime,
     times, addTime, removeTime, updateTime,
-    dow, toggleDay, dom, setDom, month, setMonth,
+    weekdays, toggleWeekday, monthday, setMonthday, month, setMonth,
+    intervalMinutes, setIntervalMinutes,
     handleSave, canSave, previewTrigger, previewCfg,
   }
 }
