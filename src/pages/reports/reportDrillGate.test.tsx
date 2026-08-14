@@ -6,7 +6,7 @@ import { gateDrillClick, REPORT_DRILL_AVAILABLE } from './reportDrillGate'
 // gets a click affordance. Regression for REPORTS-DRILL-1 (2026-08-13): flow/matches/
 // recruiters/vacancies now have a live /reports/{r}/drill|advice contract and must be
 // clickable; RAPPORTEN-SUITE-1 (2026-08-14) added candidates and later flipped
-// outreach ("portie 6"); intakes/sources have no matching endpoint yet and must stay off.
+// outreach ("portie 6"); intakes has no matching endpoint yet and must stay off.
 describe('reportDrillGate', () => {
   it('is on for the reports with a shipped drill contract', () => {
     expect(REPORT_DRILL_AVAILABLE.flow).toBe(true)
@@ -21,7 +21,7 @@ describe('reportDrillGate', () => {
 
   it('stays off for the reports without a drill endpoint yet', () => {
     expect(REPORT_DRILL_AVAILABLE.intakes).toBe(false)
-    expect(REPORT_DRILL_AVAILABLE.sources).toBe(false)
+    expect(REPORT_DRILL_AVAILABLE.ai).toBe(false)
   })
 
   it('gateDrillClick returns the handler unchanged for an available report', () => {
@@ -58,7 +58,7 @@ describe('reportDrillGate — wired into a click affordance', () => {
 
   it('a gated report gets no onClick and no pointer cursor', () => {
     const handler = vi.fn()
-    render(<FakeKpiCard onClick={gateDrillClick('sources', handler)} />)
+    render(<FakeKpiCard onClick={gateDrillClick('intakes', handler)} />)
     const kpi = screen.getByTestId('kpi')
     expect(kpi).toHaveStyle({ cursor: 'default' })
     kpi.click()

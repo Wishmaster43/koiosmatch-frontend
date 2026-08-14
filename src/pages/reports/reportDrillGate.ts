@@ -2,9 +2,9 @@
  * reportDrillGate — the per-report-set capability flag for the report drill-down
  * affordance. REPORTS-DRILL-1 (verified live 2026-08-13, see
  * koiosmatch-api/docs/CONTRACT-CHANGELOG.md) shipped `GET /reports/{r}/drill|advice`
- * for **flow · matches · recruiters · vacancies** — intakes/sources have no
- * matching backend endpoint yet, so those two stay gated off until their own
- * contract lands. RAPPORTEN-SUITE-1 (2026-08-14, "portie 1") added the same pair for
+ * for **flow · matches · recruiters · vacancies** — intakes has no matching
+ * backend endpoint yet, so it stays gated off until its own contract lands.
+ * RAPPORTEN-SUITE-1 (2026-08-14, "portie 1") added the same pair for
  * **candidates** (six-way XOR: status|phase|source|owner|branch|date). "Portie 2"
  * (2026-08-14) added the same pair for **applications** (six-way XOR: stage|bucket|
  * source|owner|customer|vacancy|date — bucket carries a dual role, see
@@ -22,8 +22,13 @@
  * reads its own key here; there is nothing left to flip per screen once a
  * report's endpoint exists.
  * Tests override via `vi.mock('./reportDrillGate', ...)`.
+ *
+ * RAPPORTEN-CONSOLIDATIE-1 (2026-08-14): 'sources' retired — the standalone
+ * Sources page folded into Instroom's pre-existing Source axis (reportIds.ts),
+ * so there is no longer any caller passing 'sources' here; removed rather than
+ * left as dead vocabulary.
  */
-export type DrillableReport = 'flow' | 'matches' | 'recruiters' | 'vacancies' | 'intakes' | 'outreach' | 'sources' | 'candidates' | 'applications' | 'customers' | 'opportunities' | 'tasks' | 'contacts' | 'locations' | 'departments' | 'ai' | 'workflows'
+export type DrillableReport = 'flow' | 'matches' | 'recruiters' | 'vacancies' | 'intakes' | 'outreach' | 'candidates' | 'applications' | 'customers' | 'opportunities' | 'tasks' | 'contacts' | 'locations' | 'departments' | 'ai' | 'workflows'
 
 export const REPORT_DRILL_AVAILABLE: Record<DrillableReport, boolean> = {
   flow: true,
@@ -43,7 +48,6 @@ export const REPORT_DRILL_AVAILABLE: Record<DrillableReport, boolean> = {
   workflows: true,
   // Not shipped yet — no /reports/{r}/drill|advice endpoint on the backend.
   intakes: false,
-  sources: false,
   // AI usage rows are consumption lines, not entity records: the backend ships NO
   // /reports/ai/drill on purpose, so its bars stay non-clickable (§3 no fake affordances).
   ai: false,

@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, afterEach } from 'vitest'
+import { describe, it, expect, vi, afterEach, beforeEach } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
@@ -237,5 +237,70 @@ describe('CandidatesReport (RAPPORTEN-SUITE-1 inflow report)', () => {
       expect.objectContaining({ params: { date: '2026-08-03', period: 'month' } }))
     const call = getSpy.mock.calls.find(c => c[0] === '/reports/candidates/drill')
     expect(call?.[1].params).not.toHaveProperty('bucket')
+  })
+})
+
+// RAPPORTEN-CONSOLIDATIE-1: the Kandidaten/Leads switch — a real server-side
+// filter (never a client-side slice), nine cards on BOTH positions, and the
+// drill list following whichever position is active.
+describe('CandidatesReport — Kandidaten/Leads switch (RAPPORTEN-CONSOLIDATIE-1)', () => {
+  afterEach(() => { getSpy.mockClear(); mockSettings.mockReturnValue({}) })
+  beforeEach(() => { window.history.replaceState(null, '', '#reports.candidates') })
+
+  it('clicking Leads re-fetches with the flag-resolved `phase` filter — the SERVER narrows, never a client-side slice', async () => {
+    const user = userEvent.setup()
+    mockUseCandidatesReport.mockReturnValue({ data, loading: false, error: false })
+    renderReport()
+    mockUseCandidatesReport.mockClear()
+    await user.click(screen.getByRole('radio', { name: 'Leads' }))
+    expect(mockUseCandidatesReport).toHaveBeenCalledWith('month', {
+      status: [], ownerId: [], locationId: [], customerId: [],
+    }, 'lead')
+  })
+
+  it('renders exactly nine KPI cards on the Leads position too, with its own "Total leads" card 1', () => {
+    mockUseCandidatesReport.mockReturnValue({ data, loading: false, error: false })
+    render(
+      <QueryClientProvider client={new QueryClient()}>
+        <CandidatesReport period="month" initialView="leads" />
+      </QueryClientProvider>,
+    )
+    expect(screen.getByText('Totaal leads')).toBeInTheDocument()
+    expect(screen.getByText('Status: Beschikbaar')).toBeInTheDocument()
+    expect(screen.getByText('Vestiging: Utrecht')).toBeInTheDocument()
+  })
+
+  it('a drill list opened on the Leads position carries the `phase` filter — bar, list and switch position never disagree', async () => {
+    const user = userEvent.setup()
+    mockUseCandidatesReport.mockReturnValue({ data, loading: false, error: false })
+    render(
+      <QueryClientProvider client={new QueryClient()}>
+        <CandidatesReport period="month" initialView="leads" />
+      </QueryClientProvider>,
+    )
+    getSpy.mockClear()
+    // "Geplaatst" is not the top status segment (Beschikbaar is, already
+    // auto-opened on mount) — clicking it guarantees a genuinely fresh request.
+    await user.click(screen.getByText('Geplaatst'))
+    expect(getSpy).toHaveBeenCalledWith('/reports/candidates/drill',
+      expect.objectContaining({ params: { status: 'placed', period: 'month', phase: 'lead' } }))
+  })
+
+  it('the active position lives in the URL — a link to Leads opens on Leads and survives a switch flip', async () => {
+    const user = userEvent.setup()
+    mockUseCandidatesReport.mockReturnValue({ data, loading: false, error: false })
+    renderReport()
+    await user.click(screen.getByRole('radio', { name: 'Leads' }))
+    expect(window.location.hash).toBe('#reports.candidates?view=leads')
+  })
+
+  it('a legacy reports.leads deep link (initialView="leads") opens directly on the Leads position', () => {
+    mockUseCandidatesReport.mockReturnValue({ data, loading: false, error: false })
+    render(
+      <QueryClientProvider client={new QueryClient()}>
+        <CandidatesReport period="month" initialView="leads" />
+      </QueryClientProvider>,
+    )
+    expect(screen.getByRole('radio', { name: 'Leads' })).toHaveAttribute('aria-checked', 'true')
   })
 })
