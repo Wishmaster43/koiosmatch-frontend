@@ -116,7 +116,8 @@ export interface MatchTerminationReasonSegment { key: string; value: string; lab
 
 // Match counts by HelloFlex contract status (MATCH-VOCABULAIRE-1 name). `total`
 // counts matches UNDER CONTRACT — the report total minus the 'none' bucket.
-export interface MatchUnderContract { sent: number; active: number; ended: number; total: number }
+// `none` explicit since 7925ce15; optional so a cached pre-update response still parses.
+export interface MatchUnderContract { sent: number; active: number; ended: number; none?: number; total: number }
 
 export interface MatchesReportData {
   period: string

@@ -83,9 +83,9 @@ export default function MatchesReport({ period, tabsSlot }: { period: ReportPeri
     rowsEndpoint: '/reports/matches/drill', rowsParams: { contract_status: key, period },
     adviceEndpoint: '/reports/matches/advice', adviceParams: { contract_status: key, period },
   })
-  // 'none' = matches without any contract, derived as total - under_contract.total —
-  // exact by contract (contract_status is NOT NULL server-side), never fabricated.
-  const noContract = Math.max(0, (data?.total ?? 0) - (data?.under_contract.total ?? 0))
+  // 'none' now arrives explicitly in the envelope (7925ce15); the old derivation
+  // stays as fallback for a cached pre-update response, never fabricated.
+  const noContract = data?.under_contract.none ?? Math.max(0, (data?.total ?? 0) - (data?.under_contract.total ?? 0))
   const tileValue = (key: (typeof CONTRACT_STATUS_TILES)[number]) =>
     key === 'none' ? noContract : data?.under_contract[key] ?? 0
 
@@ -104,15 +104,23 @@ export default function MatchesReport({ period, tabsSlot }: { period: ReportPeri
     if (pt) openBucket(pt)
   })
 
-  // Terminations by stop reason (portie 7: `value` mirrors `key` for SegmentBars
-  // parity). The live four-way XOR carries no stop_reason param, so this axis
-  // renders WITHOUT a drill affordance (no onPick — no fake affordances, §3).
+  // Terminations by stop reason — stop_reason is the FIFTH XOR leg (7925ce15).
+  // The axis is windowed on the termination EVENT server-side, so the drawer shows
+  // the matches whose termination fell in the window: drawer == bar, always.
   const terminationSegs = data?.terminations.by_reason ?? []
   const terminationsMax = terminationSegs.reduce((m, s) => Math.max(m, s.count), 0)
+  const openReason = gateDrillClick('matches', (value: string) => {
+    const seg = terminationSegs.find(s => s.value === value)
+    setDrill({
+      title: seg?.label ?? value, value: seg?.count ?? 0, subtitle: windowSub(),
+      rowsEndpoint: '/reports/matches/drill', rowsParams: { stop_reason: value, period },
+      adviceEndpoint: '/reports/matches/advice', adviceParams: { stop_reason: value, period },
+    })
+  })
 
   // The XOR axis of the OPEN drill (if any) — drives the KPI active states.
   const openParams = drill?.rowsParams as Record<string, unknown> | undefined
-  const openAxis = openParams ? ['origin', 'contract_form', 'contract_status', 'date'].find(k => openParams[k] != null) : undefined
+  const openAxis = openParams ? ['origin', 'contract_form', 'contract_status', 'date', 'stop_reason'].find(k => openParams[k] != null) : undefined
 
   const kpis: KpiSpec[] = [
     { key: 'total',  label: t('matches.total'),     value: data?.total ?? 0,
@@ -201,10 +209,10 @@ export default function MatchesReport({ period, tabsSlot }: { period: ReportPeri
           </div>
 
           {/* Terminations by stop reason — zero-filled over every active reason;
-              display-only (see the terminationSegs comment above). */}
+              each bar drills stop_reason=<value> (fifth XOR leg, 7925ce15). */}
           <div style={{ background: 'var(--surface)', borderRadius: 12, border: '1px solid var(--border)', padding: 20 }}>
             <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)', marginBottom: 12 }}>{t('matches.terminations.title')}</div>
-            <SegmentBars max={terminationsMax}
+            <SegmentBars max={terminationsMax} onPick={openReason}
               items={terminationSegs.map(s => ({ key: s.value, label: s.label, count: s.count, color: s.color }))} />
           </div>
         </>

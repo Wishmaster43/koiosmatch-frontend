@@ -36,7 +36,8 @@ const data: MatchesReportData = {
     { value: 'none', label: 'Geen contractvorm', color: null, count: 2 },
     { value: 'zzz-deleted-form', label: 'Onbekend (verwijderde contractvorm)', color: null, count: 1 },
   ],
-  under_contract: { sent: 5, active: 6, ended: 2, total: 13 },
+  // `none` explicit since 7925ce15 (16 total - 13 under contract = 3).
+  under_contract: { sent: 5, active: 6, ended: 2, none: 3, total: 13 },
   placements: { sent: 5, active: 6, ended: 2, total: 13 },
   terminations: { total: 3, by_reason: [
     { key: 'client_stop', value: 'client_stop', label: 'Klant stopt', color: '#dc2626', count: 2 },
@@ -57,6 +58,9 @@ function renderReport() {
 // The last drill call's raw params — for the XOR proofs (exactly ONE segment param).
 const lastDrillParams = () =>
   (getSpy.mock.calls.filter(c => c[0] === '/reports/matches/drill').at(-1)?.[1] as { params: Record<string, unknown> }).params
+// Same, for the advice endpoint (drill and advice must carry identical XOR params).
+const lastAdviceParams = () =>
+  (getSpy.mock.calls.filter(c => c[0] === '/reports/matches/advice').at(-1)?.[1] as { params: Record<string, unknown> }).params
 
 describe('MatchesReport (MATCH-SOORT-1, by_contract_form axis)', () => {
   beforeEach(() => {
@@ -210,17 +214,25 @@ describe('MatchesReport (RAPPORTEN-SUITE-1 portie 7, closing enrichment)', () =>
     expect(lastDrillParams()).toEqual({ contract_status: 'ended', period: 'month' })
   })
 
-  // The 'none' tile = matches without any contract (total - under_contract.total,
-  // exact since contract_status is NOT NULL) — drills contract_status=none.
-  it('renders the none tile with the derived count and drills contract_status=none', async () => {
+  // The 'none' tile reads the explicit envelope count (7925ce15), falling back to
+  // total - under_contract.total for a cached pre-update response.
+  it('renders the none tile with the envelope count and drills contract_status=none', async () => {
     const user = userEvent.setup()
     mockUseMatchesReport.mockReturnValue({ data, loading: false, error: false })
     renderReport()
     const tile = screen.getByText('Geen contract').closest('[role="button"]')
     expect(tile).not.toBeNull()
-    expect(tile).toHaveTextContent('3') // 16 total - 13 under contract
+    expect(tile).toHaveTextContent('3')
     await user.click(screen.getByText('Geen contract'))
     expect(lastDrillParams()).toEqual({ contract_status: 'none', period: 'month' })
+  })
+
+  it('falls back to the derived none count when the envelope predates the explicit key', () => {
+    const oldShape = { ...data.under_contract }
+    delete oldShape.none
+    mockUseMatchesReport.mockReturnValue({ data: { ...data, under_contract: oldShape }, loading: false, error: false })
+    renderReport()
+    expect(screen.getByText('Geen contract').closest('[role="button"]')).toHaveTextContent('3')
   })
 
   // ADVICE UN-GAP (portie 7): a contract_form bar requests BOTH drill and advice
@@ -254,16 +266,16 @@ describe('MatchesReport (RAPPORTEN-SUITE-1 portie 7, closing enrichment)', () =>
     expect(lastDrillParams()).toEqual({ origin: 'direct', period: 'month' })
   })
 
-  // terminations.by_reason renders through the shared SegmentBars (value mirrors
-  // key, portie 7) — WITHOUT a drill affordance: the live four-way XOR has no
-  // stop_reason param, so a clickable reason bar would be a fake affordance.
-  it('renders the terminations-by-reason axis without a drill affordance', () => {
+  // terminations.by_reason drills stop_reason=<value> — the FIFTH XOR leg
+  // (7925ce15); the axis is windowed on the termination event, drawer == bar.
+  it('clicking a termination-reason bar drills with stop_reason (drill + advice)', async () => {
+    const user = userEvent.setup()
     mockUseMatchesReport.mockReturnValue({ data, loading: false, error: false })
     renderReport()
     expect(screen.getByText('Beëindigingsredenen')).toBeInTheDocument()
-    expect(screen.getByText('Klant stopt')).toBeInTheDocument()
-    expect(screen.getByText('Eigen keuze')).toBeInTheDocument()
-    expect(screen.getByText('Klant stopt').closest('[role="button"]')).toBeNull()
+    await user.click(screen.getByText('Klant stopt'))
+    expect(lastDrillParams()).toEqual({ stop_reason: 'client_stop', period: 'month' })
+    expect(lastAdviceParams()).toEqual({ stop_reason: 'client_stop', period: 'month' })
   })
 
   // Every drill source targets the ONE matches drill/advice pair — never a sibling
