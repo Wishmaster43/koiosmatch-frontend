@@ -25,7 +25,8 @@
     "koios": "Koios",
     "phase": "Phase",
     "deployability": "Statut",
-    "contractForm": "Forme de contrat"
+    "contractForm": "Forme de contrat",
+    "missingAppointment": "Rendez-vous manquant"
   },
   "bulk": {
     "selected": "{{count}} sélectionné(s)",
@@ -173,7 +174,8 @@
       "hoursMinPlaceholder": "Min",
       "hoursMaxPlaceholder": "Max",
       "availableFromBefore": "Disponible avant"
-    }
+    },
+    "missingAppointment": "Rendez-vous manquant"
   },
   "modal": {
     "title": "Nouveau candidat",
@@ -809,7 +811,7 @@
     "paymentTerm": "Délai de paiement",
     "groupCompany": "Entreprise",
     "groupAddress": "Adresse",
-    "groupInvoicing": "Facturation",
+    "groupInvoicing": "Financier",
     "groupPayment": "Paiement",
     "openKvk": "Ouvrir dans le registre",
     "openVies": "Vérifier dans VIES (UE)",
@@ -1045,7 +1047,8 @@
       "month": "par mois",
       "year": "par an",
       "week": "par semaine"
-    }
+    },
+    "noLocationResults": "Ce candidat n'a pas encore de coordonnées, la recherche par distance est donc impossible. Mettez à jour l'adresse ou géocodez le candidat."
   },
   "erase": {
     "trashView": "Corbeille",

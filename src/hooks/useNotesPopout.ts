@@ -198,16 +198,6 @@ export function useNotesPopout({ target, onHandedOver }: NotesPopoutOptions) {
     setPending({ kind: 'draft', note: draft })
   }, [entity, id, t])
 
-  // Host side, note row (NOTITIE-POPOUT-EDIT-1): open the window AND ask it to put
-  // THIS existing note in its editor. Only the id travels; the window resolves it
-  // against its own thread and patches that same record, so this can never produce
-  // a second note. Same blocked-popup rule as handOff.
-  const handOffNote = useCallback((noteId: string) => {
-    if (!entity || !id) return
-    if (!openNotesPopout(entity, id)) { notifyError(t('popupBlocked')); return }
-    setPending({ kind: 'edit', noteId })
-  }, [entity, id, t])
-
   // May this surface hand an EXISTING note over at all? Only a host (never the
   // window itself) of an entity whose popout can really save an edit — see
   // NOTE_EDIT_POPOUT_ENTITIES. False = render no button (§3), never a button that
@@ -235,5 +225,5 @@ export function useNotesPopout({ target, onHandedOver }: NotesPopoutOptions) {
     setIncomingNoteId(null)
   }, [])
 
-  return { isWindow, handOff, handOffNote, canHandOffNote, pending: pending !== null, incoming, incomingNoteId, ack, clearIncoming }
+  return { isWindow, handOff, canHandOffNote, pending: pending !== null, incoming, incomingNoteId, ack, clearIncoming }
 }

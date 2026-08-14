@@ -20,6 +20,11 @@ export interface TimelineEvent {
   meta?: ReactNode
   // Right-aligned addendum on the primary line (e.g. the AI-generated label).
   trailing?: ReactNode
+  // NOTES-TIMELINE-CONVERGE-1: makes the marker itself a button (e.g. NotesTab's
+  // "open changelog" affordance on a status-change row) — omitted (every other
+  // event) keeps the marker an inert dot. `markerLabel` is its required aria-label.
+  onMarkerClick?: () => void
+  markerLabel?: string
 }
 
 interface EventTimelineProps {
@@ -127,7 +132,8 @@ export default function EventTimeline({
             const meta = ev.kind && kindMeta ? kindMeta(ev.kind) : undefined
             return (
               <div key={ev.id ?? index} style={{ display: 'flex', gap: 10, paddingBottom: 12 }}>
-                <TimelineRail isLast={index === lastIndex} icon={meta?.icon} color={meta?.color ?? 'var(--text-muted)'} />
+                <TimelineRail isLast={index === lastIndex} icon={meta?.icon} color={meta?.color ?? 'var(--text-muted)'}
+                  onClick={ev.onMarkerClick} ariaLabel={ev.markerLabel} />
                 {/* title = the full date+time, so the exact moment stays available
                     on hover without shouting it on every row. */}
                 <span style={timeStyle} title={formatDateTime(ev.time)}>{formatTime(ev.time) || '—'}</span>

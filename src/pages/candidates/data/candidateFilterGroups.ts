@@ -32,6 +32,7 @@ interface BuildArgs {
     selectedLocation: Array<string | number>; setSelectedLocation: Dispatch<SetStateAction<Array<string | number>>>
     selectedSource: string[]; setSelectedSource: Dispatch<SetStateAction<string[]>>
     showArchived: boolean; setShowArchived: (fn: (v: boolean) => boolean) => void
+    missingAppointmentFilter: boolean; setMissingAppointmentFilter: (fn: (v: boolean) => boolean) => void
     dateRange: DateRangeFilter | null; setDateRange: (v: DateRangeFilter | null) => void
     geoFilter: GeoFilter | null; geoHint: string | null
     applyGeo: (q: string, km: number) => void; clearGeo: () => void
@@ -70,6 +71,12 @@ export function buildCandidateFilterGroups({ t, tog, filters: f, options: o }: B
     // ── Weergave: archived + period (view-scoping, not recruiting data).
     // Archived mirrors the quick-view toggle; both share the showArchived state.
     { key: 'archived', type: 'checkbox', category: catDisplay, label: t('filters.archived'), selected: f.showArchived ? ['archived'] : [], options: [{ value: 'archived', label: t('page.archivedView') }], onToggle: () => f.setShowArchived(v => !v) },
+    // V-appdetail-1/2: findable client-side refine mirroring the table's attention
+    // icon — no server count is claimed here, just "show only these".
+    { key: 'missingAppointment', type: 'checkbox', category: catLifecycle, label: t('filters.missingAppointment'),
+      selected: f.missingAppointmentFilter ? ['missingAppointment'] : [],
+      options: [{ value: 'missingAppointment', label: t('filters.missingAppointment') }],
+      onToggle: () => f.setMissingAppointmentFilter(v => !v) },
     // Period (date range) from a dashboard bar click — a single removable value.
     ...(f.dateRange ? [{
       key: 'period', type: 'search-select', category: catDisplay,

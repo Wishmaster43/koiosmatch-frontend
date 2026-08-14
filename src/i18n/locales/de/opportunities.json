@@ -129,7 +129,8 @@
       "endDate": "Enddatum",
       "location": "Standort",
       "department": "Abteilung",
-      "contact": "Ansprechpartner"
+      "contact": "Ansprechpartner",
+      "branch": "Niederlassung"
     }
   },
   "view": {

@@ -255,5 +255,99 @@
       "owner": "Owner",
       "branch": "Branch"
     }
+  },
+  "contacts": {
+    "total": "Total contacts",
+    "window": "Contacts {{from}} to {{to}}",
+    "series": "Contacts over time",
+    "loading": "Loading…",
+    "error": "The report could not be loaded.",
+    "empty": "No data in this period yet.",
+    "axes": {
+      "customer": "By customer",
+      "location": "By location",
+      "department": "By department",
+      "function": "By function",
+      "status": "By status"
+    },
+    "summary": {
+      "primary": "Primary contact",
+      "withRecentContact": "Recently contacted",
+      "neverContacted": "Never contacted"
+    }
+  },
+  "locations": {
+    "total": "Total locations",
+    "window": "Locations {{from}} to {{to}}",
+    "series": "Locations over time",
+    "loading": "Loading…",
+    "error": "The report could not be loaded.",
+    "empty": "No data in this period yet.",
+    "axes": {
+      "customer": "By customer",
+      "city": "By city",
+      "province": "By province",
+      "status": "By status"
+    },
+    "summary": {
+      "withCustomer": "With customer",
+      "withoutCustomer": "Without customer"
+    }
+  },
+  "departments": {
+    "total": "Total departments",
+    "window": "Departments {{from}} to {{to}}",
+    "series": "Departments over time",
+    "loading": "Loading…",
+    "error": "The report could not be loaded.",
+    "empty": "No data in this period yet.",
+    "axes": {
+      "customer": "By customer",
+      "location": "By location",
+      "status": "By status"
+    },
+    "summary": {
+      "withLocation": "With location",
+      "withoutLocation": "Without location"
+    }
+  },
+  "ai": {
+    "total": "Total AI activity",
+    "window": "AI usage {{from}} to {{to}}",
+    "series": "Usage over time",
+    "loading": "Loading…",
+    "error": "The report could not be loaded.",
+    "empty": "No data in this period yet.",
+    "axes": {
+      "activity": "By activity",
+      "model": "By model",
+      "user": "By user"
+    },
+    "summary": {
+      "tokens": "Tokens",
+      "amount": "Sales amount"
+    }
+  },
+  "workflows": {
+    "total": "Total workflow runs",
+    "window": "Runs {{from}} to {{to}}",
+    "series": "Runs over time",
+    "loading": "Loading…",
+    "error": "The report could not be loaded.",
+    "empty": "No data in this period yet.",
+    "axes": {
+      "workflow": "By workflow",
+      "trigger": "By trigger",
+      "status": "By status"
+    },
+    "summary": {
+      "runs": "Runs",
+      "completed": "Completed",
+      "failed": "Failed",
+      "cancelled": "Cancelled",
+      "running": "Running",
+      "successRate": "Success rate",
+      "avgDuration": "Avg duration"
+    }
   }
 }

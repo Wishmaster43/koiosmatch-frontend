@@ -161,7 +161,8 @@
       "notes": "Notities",
       "statistics": "Statistieken",
       "changelog": "Wijzigingen",
-      "matches": "Matches"
+      "matches": "Matches",
+      "tasks": "Taken"
     },
     "archivedBanner": {
       "since": "Gearchiveerd op {{date}}",
@@ -485,5 +486,13 @@
   },
   "matchesTab": {
     "loadError": "Matches konden niet worden geladen."
+  },
+  "tasks": {
+    "newTask": "Nieuwe taak",
+    "empty": "Nog geen taken voor deze vacature",
+    "loading": "Taken laden…",
+    "error": "Taken konden niet worden geladen",
+    "openTask": "Open taak",
+    "searchPlaceholder": "Zoek taak…"
   }
 }

@@ -16,12 +16,15 @@
  * existing OS window instead of spawning a duplicate, so clicking "pop out" twice
  * on the same record never litters the desktop with two windows fighting over
  * one note thread.
+ *
+ * A-popout-1 (Danny, pop-out parity): 'application' joined the set — the whole-
+ * thread window mirrors customer/vacancy (add + PATCH-edit, no delete route).
  */
 
-// The three entities whose notes tab can pop out to a second screen. Mirrors the
+// The entities whose notes tab can pop out to a second screen. Mirrors the
 // dynamic `:entity` route segment in App.tsx and the entity dispatch in
-// pages/popout/NotesPopoutPage.tsx — keep the three in sync.
-export type PopoutEntity = 'candidate' | 'customer' | 'vacancy'
+// pages/popout/NotesPopoutPage.tsx — keep the set in sync.
+export type PopoutEntity = 'candidate' | 'customer' | 'vacancy' | 'application'
 
 /**
  * Feature string for every second-screen window this app opens, sized to the
@@ -92,6 +95,12 @@ export const noteDraftTopic = (entity: PopoutEntity, id: string | number) => `ko
  *               customer id (broken, not merely a duplicate-note risk). Widen this
  *               set ONLY once NoteEditPopout.tsx itself dispatches by entity.
  *   vacancy   → GET/POST + DELETE /vacancies/{id}/notes/{note} — still no PATCH.
+ *   application → PATCH /applications/{id}/notes/{note} now exists (A-popout-1)
+ *               and the whole-thread ApplicationNotesPopout wires onEditNote, so
+ *               THAT surface really edits. Same NoteEditPopout.tsx gap as
+ *               customer above still blocks the PER-NOTE URL window though — it
+ *               stays hardcoded to useCandidateLite/useCandidateNotes, so
+ *               'application' is deliberately NOT added to this set yet.
  * Handing an EXISTING note to a window that can only ADD would persist it as a
  * SECOND note: a duplicate the recruiter cannot tell apart from the original and
  * that no undo removes. So customer/vacancy still render no per-note pop-out-to-
@@ -136,7 +145,11 @@ export function openNoteEditPopout(entity: PopoutEntity, id: string | number, no
 // standalone GET /departments/{id}).
 // `description` (V-desc-1): the vacancy's own rich-text description gets the
 // same second-screen treatment — one entry, mirrors `companyText` 1:1.
-export type PopoutTextField = 'summary' | 'matchRemarks' | 'companyText' | 'departmentText' | 'description'
+// `locationText` (K3/K4c): a customer LOCATION's own omschrijving gets the same
+// treatment as `departmentText` — a standalone `GET/PATCH /locations/{id}`
+// route exists (unlike departments, no customer prefix needed), so this field's
+// `id` is the location's OWN id, not a composite.
+export type PopoutTextField = 'summary' | 'matchRemarks' | 'companyText' | 'departmentText' | 'description' | 'locationText'
 
 // K5a: encodes/decodes the composite id `departmentText` travels under —
 // `<customerId>:<departmentId>` — so ONE string still fits the existing

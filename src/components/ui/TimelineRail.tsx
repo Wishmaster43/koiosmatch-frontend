@@ -20,6 +20,13 @@ interface TimelineRailProps {
   // 'connector' — line only: carries the axis past a day heading
   // 'spacer'    — width only, no line: above the very first marker
   variant?: 'marker' | 'connector' | 'spacer'
+  // NOTES-TIMELINE-CONVERGE-1: when given, the marker becomes a real <button>
+  // (e.g. the candidate/customer "open changelog" affordance that used to sit on
+  // NotesTab's own hand-rolled system-event row). Omitted (every other caller) →
+  // the marker stays the previous inert, aria-hidden dot — zero behaviour change.
+  onClick?: () => void
+  // Accessible name for the button variant above; required together with onClick.
+  ariaLabel?: string
 }
 
 /**
@@ -33,6 +40,7 @@ interface TimelineRailProps {
  */
 export default function TimelineRail({
   isLast = false, color = 'var(--color-primary)', size = 8, icon: Icon, variant = 'marker',
+  onClick, ariaLabel,
 }: TimelineRailProps) {
   // The axis is structure, not decoration — it stays in the neutral border token
   // while only the marker carries the event's semantic colour (§4).
@@ -72,10 +80,19 @@ export default function TimelineRail({
   return (
     <div style={column}>
       {/* data-testid: purely a test hook (no visible/user-facing role) so callers
-          can assert the axis renders/terminates without scraping inline styles. */}
-      <span style={dot} data-testid="timeline-dot" aria-hidden="true">
-        {Icon && <Icon size={12} />}
-      </span>
+          can assert the axis renders/terminates without scraping inline styles.
+          onClick swaps the inert dot for a real button (same visual footprint,
+          no layout shift) — the only case where the marker itself is interactive. */}
+      {onClick ? (
+        <button type="button" onClick={onClick} title={ariaLabel} aria-label={ariaLabel}
+          style={{ ...dot, border: dot.border ?? 'none', cursor: 'pointer', padding: 0 }} data-testid="timeline-dot">
+          {Icon && <Icon size={12} />}
+        </button>
+      ) : (
+        <span style={dot} data-testid="timeline-dot" aria-hidden="true">
+          {Icon && <Icon size={12} />}
+        </span>
+      )}
       {!isLast && <span style={{ ...segment, marginTop: 2 }} data-testid="timeline-connector" />}
     </div>
   )

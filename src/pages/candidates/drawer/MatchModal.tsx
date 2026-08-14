@@ -69,6 +69,7 @@ import MatchConflictBanners from './match/MatchConflictBanners'
 // agnostic component (components/ui) so candidate/customer/location/department
 // create modals get the same collapsed-ghost prose block — see its own docblock.
 import CollapsibleRichText from '@/components/ui/CollapsibleRichText'
+import { WIDE_MODAL } from '@/components/ui/modalMetrics'
 import FloatingPanel from '@/components/ui/FloatingPanel'
 import { cardHead, cardBox } from '@/components/ui/modalCards'
 import type { Id } from '@/types/common'
@@ -132,7 +133,7 @@ export default function MatchModal({
     // scroll area below mirrors PlanIntakeModal/AddApplicationModal exactly, so
     // the footer buttons stay pinned instead of scrolling with the form.
     <FloatingPanel open onClose={onClose} title={title} ariaLabel={title}
-      persistKey="candidate-match" width={1060} maxWidth="92vw" scrollBody={false} bodyStyle={{ padding: 0 }}>
+      persistKey="candidate-match" width={WIDE_MODAL.maxWidth} maxWidth="92vw" scrollBody={false} bodyStyle={{ padding: 0 }}>
 
       {/* Fields scroll in their own area so the footer buttons stay pinned (mirrors PlanIntakeModal, Danny 13-08). */}
       <div style={{ overflow: 'auto', flex: 1, minHeight: 0, padding: 22 }}>

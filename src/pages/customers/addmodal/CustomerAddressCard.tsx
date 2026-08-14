@@ -38,10 +38,14 @@ export default function AddressCard({ form, set, provinces }: AddressCardProps) 
           the same concept in the create form and the drawer's address block. */}
       <div style={cardHead}>{t('overview.address')}</div>
       <div style={cardBox}>
-        <div style={row('2fr 1fr 1fr')}>
-          <FieldRow label={t('locations.detail.street')}>
-            <TextField value={form.street} onChange={v => set('street', v)} />
-          </FieldRow>
+        {/* KLANT-LAYOUT-4 (Danny 14-08 "Straat is veel te klein"): three label-left
+            fields on one grid row left each input a stub, since every cell also
+            carries the ~120px canon label. Street owns its own row; house number
+            and suffix stay paired below it. */}
+        <FieldRow label={t('locations.detail.street')}>
+          <TextField value={form.street} onChange={v => set('street', v)} />
+        </FieldRow>
+        <div style={row('1fr 1fr')}>
           <FieldRow label={t('locations.detail.houseNumber')}>
             <TextField value={form.houseNumber} onChange={v => set('houseNumber', v)} />
           </FieldRow>

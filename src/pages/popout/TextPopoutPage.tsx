@@ -21,6 +21,8 @@ import MatchRemarksPopout from './MatchRemarksPopout'
 // this dispatcher only imports them.
 import CustomerCompanyTextPopout from '@/pages/customers/popout/CustomerCompanyTextPopout'
 import CustomerDepartmentTextPopout from '@/pages/customers/popout/CustomerDepartmentTextPopout'
+// K3/K4c: a customer location's own description gets the same pop-out.
+import CustomerLocationTextPopout from '@/pages/customers/popout/CustomerLocationTextPopout'
 // V-desc-1: the vacancy description popout lives under pages/vacancies/popout
 // (this task's own folder scope), not here — this dispatcher only imports it.
 import VacancyDescriptionPopout from '@/pages/vacancies/popout/VacancyDescriptionPopout'
@@ -32,6 +34,7 @@ const TEXT_POPOUT_PAGES: Record<string, ComponentType<{ id: string | undefined }
   'candidate:matchRemarks': MatchRemarksPopout,
   'customer:companyText': CustomerCompanyTextPopout,
   'customer:departmentText': CustomerDepartmentTextPopout,
+  'customer:locationText': CustomerLocationTextPopout,
   'vacancy:description': VacancyDescriptionPopout,
 }
 

@@ -29,7 +29,8 @@
     "city": "Ciudad",
     "industry": "Sector",
     "createdAt": "Creado el",
-    "koios": "Koios AI"
+    "koios": "Koios AI",
+    "matches": "Coincidencias"
   },
   "filters": {
     "search": "Buscar",
@@ -445,14 +446,16 @@
     "col": {
       "title": "Título",
       "status": "Estado",
-      "applications": "Candidaturas"
+      "applications": "Candidaturas",
+      "applicationsOpen": "Abrir candidaturas"
     },
     "filter": {
       "status": "Estado"
     },
     "add": "Nueva vacante",
     "searchPlaceholder": "Buscar vacante…",
-    "showUnpublished": "Incluir no publicadas"
+    "showUnpublished": "Incluir no publicadas",
+    "editVacancy": "Editar vacante"
   },
   "opportunities": {
     "title": "Oportunidades",

@@ -12,21 +12,30 @@ import api, { isServiceUnavailable } from '@/lib/api'
 import type { TFunction } from 'i18next'
 import type { Dispatch, SetStateAction } from 'react'
 import type { Id } from '@/types/common'
+import type { Candidate } from '@/types/candidate'
 
 interface UseCandidateAsyncBulkParams {
   selectedIds: Set<Id>
   setSelectedIds: Dispatch<SetStateAction<Set<Id>>>
   notify: (type: string, msg: string) => void
   t: TFunction
+  // Full loaded candidate rows, so bulkGeocode can filter to rows missing coordinates.
+  candidates: Candidate[]
 }
 
-export function useCandidateAsyncBulk({ selectedIds, setSelectedIds, notify, t }: UseCandidateAsyncBulkParams) {
+export function useCandidateAsyncBulk({ selectedIds, setSelectedIds, notify, t, candidates }: UseCandidateAsyncBulkParams) {
   // GEO-REGEOCODE-1: manual "PDOK opnieuw ophalen" for the selection. The endpoint
   // is queued + rate-limited (202) — no optimistic row patch, no reconcile against
   // an `updated` list, just fire the bulk POST and say "started" (never "done";
   // the coordinates land later via the async worker, same honesty as the per-id button).
+  // 18-hygiene (2026-08-14): only rows that are actually missing coordinates are
+  // sent — re-geocoding an already-located candidate wastes PDOK rate-limit budget.
   const bulkGeocode = () => {
-    const ids = [...selectedIds]
+    const byId = new Map(candidates.map(c => [c.id, c]))
+    const ids = [...selectedIds].filter(id => {
+      const c = byId.get(id)
+      return !c || c.lat == null || c.lng == null
+    })
     if (!ids.length) return
     setSelectedIds(new Set())
     api.post('/candidates/bulk/geocode', { candidate_ids: ids })

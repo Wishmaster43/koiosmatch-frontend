@@ -291,7 +291,19 @@ function VacancySearchTabInner({ candidate }: { candidate: Candidate }) {
       </button>
     </div>
   ) : rows.length === 0 ? (
-    <div style={{ padding: 16, fontSize: 12, color: 'var(--text-muted)' }}>{t('vacancySearch.empty')}</div>
+    // GEO-EMPTY-1 (Danny 14-08 "bij de demo vind ik geen vacatures terwijl die er wel
+    // zijn"): the radius filter runs against the candidate's own coordinates, so an
+    // un-geocoded candidate can NEVER match — blaming the filters there sends the user
+    // hunting in the wrong place. Name the real cause and offer the geocode action.
+    <div style={{ padding: 16, display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
+      <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>
+        {noLocation ? t('vacancySearch.noLocationResults') : t('vacancySearch.empty')}
+      </span>
+      {noLocation && (
+        <GeocodeButton endpoint={`/candidates/${candidate.id}/geocode`} permission="candidates.update"
+          variant="row" disabled={!candidate.address} />
+      )}
+    </div>
   ) : (
     <div style={{ display: 'flex', flexDirection: 'column' }}>
       {/* The selected vacancy renders as the card above — drop its list row (no duplicate). */}

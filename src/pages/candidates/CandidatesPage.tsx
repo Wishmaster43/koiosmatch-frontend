@@ -95,6 +95,7 @@ export default function CandidatesPage({ intent }: { intent?: CandidateIntent } 
   // ALL filter state + derived filterParams live in one hook (§0.3 size split).
   const {
     showArchived, setShowArchived, showTrash, setShowTrash,
+    missingAppointmentFilter, setMissingAppointmentFilter,
     selectedStatus, setSelectedStatus, selectedPhase, setSelectedPhase, selectedFunnel, setSelectedFunnel,
     mapStraalActive, setMapStraalActive,
     selectedType, setSelectedType, selectedOwner, setSelectedOwner,
@@ -192,14 +193,14 @@ export default function CandidatesPage({ intent }: { intent?: CandidateIntent } 
       selectedProvince, setSelectedProvince, selectedGeslacht, setSelectedGeslacht,
       selectedOwner, setSelectedOwner, selectedLocation, setSelectedLocation,
       selectedSource, setSelectedSource,
-      showArchived, setShowArchived, dateRange, setDateRange,
+      showArchived, setShowArchived, missingAppointmentFilter, setMissingAppointmentFilter, dateRange, setDateRange,
       geoFilter, geoHint, applyGeo, clearGeo,
     },
     options: { statusOptions, phaseOptions, funnelOptions, typeOptions, titleOptions, poolOptions, cityOptions,
       provinceOptions, genderOptions, ownerOptions, locationOptions, sourceOptions },
   }),
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  [t, showArchived, dateRange, geoFilter, geoHint,
+  [t, showArchived, missingAppointmentFilter, dateRange, geoFilter, geoHint,
    selectedStatus, selectedPhase, selectedFunnel, selectedType, selectedTitle, selectedGeslacht, selectedProvince, selectedOwner, selectedLocation,
    selectedPool, selectedCity, selectedSource, poolOptions, cityOptions, sourceOptions,
    statusOptions, phaseOptions, funnelOptions, typeOptions, titleOptions, genderOptions, provinceOptions, ownerOptions, locationOptions])
@@ -222,10 +223,13 @@ export default function CandidatesPage({ intent }: { intent?: CandidateIntent } 
       : !c.archived)
     // stale/never keep a page-local refine (correct predicates); no-follow-up has no correct client
     // predicate → it's server-side only (the no_followup param), so don't page-filter it here.
-    if (attentionFilter === 'stale6m')        return base.filter(c => isStale(c, staleMonths))
-    if (attentionFilter === 'neverContacted') return base.filter(isNeverContacted)
-    return base
-  }, [candidates, attentionFilter, showArchived, showTrash, staleMonths])
+    const attended = attentionFilter === 'stale6m'        ? base.filter(c => isStale(c, staleMonths))
+      : attentionFilter === 'neverContacted' ? base.filter(isNeverContacted)
+      : base
+    // V-appdetail-1/2: "afspraak ontbreekt" checkbox — findable, purely client-side
+    // (see useCandidateFilters for why no server param exists yet).
+    return missingAppointmentFilter ? attended.filter(c => c.missingAppointment) : attended
+  }, [candidates, attentionFilter, showArchived, showTrash, staleMonths, missingAppointmentFilter])
 
   // GONE-BANNER-1: bridges useDrawerUrl's markNextCloseReplace (defined below,
   // after selectedId is known) into useCandidateDrawerActions' gone-branch

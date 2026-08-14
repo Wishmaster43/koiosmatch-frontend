@@ -34,7 +34,7 @@ import { useState, useEffect, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import DrawerAddButton from '@/components/drawer/DrawerAddButton'
-import { Search } from 'lucide-react'
+import { Search, Pencil } from 'lucide-react'
 import AddVacancyModal from '@/pages/vacancies/AddVacancyModal'
 import { VacancyLookupsProvider } from '@/context/VacancyLookupsContext'
 import DataTable from '@/components/ui/DataTable'
@@ -46,10 +46,18 @@ import StatusFilterSelect, { useStatusFilter } from '@/components/drawer/StatusF
 import SubTabBar from '@/components/drawer/SubTabBar'
 import CustomerApplicationsList from './CustomerApplicationsList'
 import { useAllSettings, useSettingsLoaded, getStringSetting } from '@/lib/settings/useAllSettings'
+import { useAuth } from '@/context/AuthContext'
+import { useNavigation } from '@/context/NavigationContext'
 import api, { unwrapList } from '@/lib/api'
 import { mapVacancyRow } from '../hooks/useCustomerDrawerData'
 import type { VacancyRow } from '../hooks/useCustomerDrawerData'
 import type { Id } from '@/types/common'
+
+// K7c/K7b: the same ghost-button count deep-link VacanciesTable.tsx uses for its
+// own Applications/Matches columns (leadsBtn there) — reused here under its own
+// name since this file has no shared style import for it.
+const applicationsBtn = { display: 'inline-flex', fontFamily: 'JetBrains Mono, monospace', fontSize: 12,
+  color: 'var(--text-muted)', background: 'none', border: 'none', padding: 0, cursor: 'pointer' } as const
 
 // K2-FE (13-08): `VacancyRow` (useCustomerDrawerData) has no `published` field, but the
 // BE's open definition needs it (see below), so this tab carries its own extended row
@@ -88,6 +96,10 @@ const SEED_STATUSES: StatusOpt[] = [
 
 export default function VacanciesTab({ customerId, customerName, params }: { customerId?: Id; customerName?: string; params?: Record<string, unknown> }) {
   const { t } = useTranslation(['customers', 'applications'])
+  const { openEntity } = useNavigation()
+  const auth = useAuth()
+  // K7b: same permission the Vacancies page itself gates editing on.
+  const canEditVacancies = auth?.hasPermission?.('vacancies.update') ?? false
   // Two sub-tabs (SubTabBar) — Vacatures stays the default so this tab's behaviour
   // is unchanged for anyone who never opens Sollicitaties.
   const [subTab, setSubTab] = useState<'vacancies' | 'applications'>('vacancies')
@@ -176,7 +188,32 @@ export default function VacanciesTab({ customerId, customerName, params }: { cus
     { key: 'title', header: t('vacancies.col.title'), sortable: true, sortValue: v => v.title, render: v => <EntityLink page="vacancies" id={v.id}>{v.title}</EntityLink> },
     // eslint-disable-next-line no-restricted-syntax -- DATA fallback, not a UI colour choice
     { key: 'status', header: t('vacancies.col.status'), render: v => <StatusPill label={v.status.label} color={v.status.color || '#9CA3AF'} /> },
-    { key: 'applications', header: t('vacancies.col.applications'), align: 'right', cellStyle: { color: 'var(--text-muted)', fontSize: 12 }, sortable: true, sortValue: v => v.applications, render: v => v.applications },
+    // K7c/S-custcount-1: ghost-button deep link to this vacancy's own Sollicitaties
+    // (applicants) tab — same visual/intent as VacanciesTable.tsx's own applications
+    // count column, routed cross-page via openEntity's optional tab argument.
+    { key: 'applications', header: t('vacancies.col.applications'), align: 'right', sortable: true, sortValue: v => v.applications,
+      render: v => (
+        <button type="button" style={applicationsBtn} aria-label={t('vacancies.col.applicationsOpen')}
+          onClick={e => { e.stopPropagation(); openEntity('vacancies', v.id, 'applicants') }}
+          onMouseEnter={e => { e.currentTarget.style.textDecoration = 'underline' }}
+          onMouseLeave={e => { e.currentTarget.style.textDecoration = 'none' }}>
+          {v.applications}
+        </button>
+      ) },
+    // K7b: row pencil opening the vacancy's own drawer for editing — mirrors
+    // CustomerApplicationsList's pencil action cluster (its edit lives in a modal;
+    // a vacancy's fields edit in-place inside its own drawer, so the pencil opens
+    // that drawer rather than a second, non-existent edit modal — no fake affordance).
+    ...(canEditVacancies ? [{
+      key: 'actions', header: '', align: 'right' as const,
+      render: (v: PublishedVacancyRow) => (
+        <button type="button" onClick={e => { e.stopPropagation(); openEntity('vacancies', v.id) }}
+          title={t('vacancies.editVacancy')} aria-label={t('vacancies.editVacancy')}
+          style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: 22, height: 22, border: 'none', background: 'none', borderRadius: 5, cursor: 'pointer', color: 'var(--text-muted)' }}>
+          <Pencil size={12} />
+        </button>
+      ),
+    }] : []),
   ]
 
   return (

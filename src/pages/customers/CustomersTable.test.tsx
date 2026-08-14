@@ -143,6 +143,20 @@ describe('CustomersTable · coupling column deep-link (KOPPELING-KOLOM)', () => 
   })
 })
 
+describe('CustomersTable · matches column deep-link (K8b)', () => {
+  it('clicking the matches count opens the drawer on the matches tab, not the row itself', async () => {
+    const user = userEvent.setup()
+    const row = { ...baseCustomer, id: 45, activeMatchesCount: 7 }
+    const onOpenTab = vi.fn()
+    const onSelect = vi.fn()
+    render(<CustomersTable rows={[row]} statusMeta={statusMeta} onOpenTab={onOpenTab} onSelect={onSelect} />)
+
+    await user.click(screen.getByRole('button', { name: '7' }))
+    expect(onOpenTab).toHaveBeenCalledWith(row, 'matches')
+    expect(onSelect).not.toHaveBeenCalled()
+  })
+})
+
 describe('CustomersTable · lifecycle phase chip (KLANT-FASE-1)', () => {
   it('renders the phase LABEL from the tenant lookup, not the stored slug', () => {
     const row = { ...baseCustomer, id: 50, phase: 'vaste_klant' } as Customer

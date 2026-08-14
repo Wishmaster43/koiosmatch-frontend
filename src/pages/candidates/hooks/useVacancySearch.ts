@@ -79,7 +79,13 @@ export function useVacancySearch(candidate: Candidate) {
   // the reset action and for the "is anything actually changed?" test behind it.
   const radiusSeed = defaultRadiusKm(candidate)
   const functionMatch = matchFunctionOption(candidate.title, functionOptions)
-  const functionSeed = functionMatch ? [functionMatch] : []
+  // KOIOS-VOORSTEL-2 (Danny 14-08, live: 250 km en toch nul resultaten): the search
+  // no longer PRE-APPLIES the candidate's own job title as a filter. Silently
+  // narrowing on a guess emptied the list before the recruiter touched anything —
+  // and the empty state then blamed "deze filters". The match stays available as a
+  // Koios SUGGESTION (`functionSuggestion`) the user can apply in one click.
+  const functionSeed: string[] = []
+  const functionSuggestion = functionMatch ?? null
   const statusSeed = canonicalizeToOptions(defaultStatusValues, statuses)
   const hoursRangeSeed = defaultHoursRange(candidate)
   const availableFromSeed = defaultAvailableFrom(candidate)
@@ -90,7 +96,7 @@ export function useVacancySearch(candidate: Candidate) {
   // request per tick — only once the value has settled for RADIUS_DEBOUNCE_MS.
   const [debouncedRadiusKm, setDebouncedRadiusKm] = useState(radiusKm)
   const [functions, setFunctionsState]  = useState<string[]>(functionSeed)
-  const [statusSel, setStatusSel] = useState<string[]>(defaultStatusValues)
+  const [statusSel, setStatusSel] = useState<string[]>(statusSeed)
 
   // A manual pick wins forever for this candidate — the tenant lookup arriving late
   // (async fallback → real data) must never clobber the user's own toggle. Plain
@@ -131,7 +137,7 @@ export function useVacancySearch(candidate: Candidate) {
     setDebouncedRadiusKm(radiusSeed)
     setUserTouchedFunctions(false)
     setFunctionsState(functionSeed)
-    setStatusSel(defaultStatusValues)
+    setStatusSel(statusSeed)
     // New candidate → blank contract-form pick (the seeding effect below re-derives
     // it once the fresh rows/lookup are in), and re-seed the plain preference filters.
     setUserTouchedContractvorm(false)
@@ -171,8 +177,6 @@ export function useVacancySearch(candidate: Candidate) {
   // OFFERED-IFF-READ (mirrors MatchTextBlock): whether ANY fetched row's vacancy
   // object carries the hours_min/hours_max/start_date KEY at all (even if null) —
   // a filter only appears once the data behind it is demonstrably there.
-  const [hasHoursData, setHasHoursData]         = useState(false)
-  const [hasAvailableFromData, setHasAvailableFromData] = useState(false)
 
   const lat = toCoord(candidate.lat)
   const lng = toCoord(candidate.lng)
@@ -213,8 +217,6 @@ export function useVacancySearch(candidate: Candidate) {
         const list = unwrapList<RawMatchRow>(res).rows
         // Presence gate on the RAW vacancy object — a KEY that exists (even null)
         // counts, so the filter shows the moment the backend starts sending it.
-        setHasHoursData(list.some(m => 'hours_min' in (m.vacancy ?? {}) || 'hours_max' in (m.vacancy ?? {})))
-        setHasAvailableFromData(list.some(m => 'start_date' in (m.vacancy ?? {})))
         const mapped: VacancySearchRow[] = list.map(m => {
           const v = m.vacancy ?? {}
           return {
@@ -311,10 +313,15 @@ export function useVacancySearch(candidate: Candidate) {
     rows, loading, error, retry: () => setReloadKey(k => k + 1),
     radiusKm, setRadiusKm,
     functions, setFunctions,
+    // The candidate's own job title as a Koios SUGGESTION — never pre-applied.
+    functionSuggestion,
     functionNotInLookup,
     contractvorm, setContractvorm, contractvormOptions,
-    hoursRange, setHoursRange, hoursRangeMax: HOURS_RANGE_MAX, hasHoursData,
-    availableFrom, setAvailableFrom, hasAvailableFromData,
+    hoursRange, setHoursRange, hoursRangeMax: HOURS_RANGE_MAX,
+    // FILTER-GELIJK-1: the endpoint always ships these fields, so the filters are
+    // always offered — a tenant must never see a DIFFERENT filter row (Danny 14-08).
+    hasHoursData: true,
+    availableFrom, setAvailableFrom, hasAvailableFromData: true,
     statuses: statusSel, setStatuses: setStatusSel,
     filtersDirty, resetFilters,
     noLocation,

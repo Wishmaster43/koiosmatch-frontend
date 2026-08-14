@@ -20,6 +20,7 @@ vi.mock('react-router-dom', async importOriginal => ({
 vi.mock('./CandidateNotesPopout', () => ({ default: ({ id }: { id?: string }) => <div>candidate-page:{id}</div> }))
 vi.mock('./CustomerNotesPopout', () => ({ default: ({ id }: { id?: string }) => <div>customer-page:{id}</div> }))
 vi.mock('./VacancyNotesPopout', () => ({ default: ({ id }: { id?: string }) => <div>vacancy-page:{id}</div> }))
+vi.mock('./ApplicationNotesPopout', () => ({ default: ({ id }: { id?: string }) => <div>application-page:{id}</div> }))
 
 describe('NotesPopoutPage', () => {
   it('renders CandidateNotesPopout for entity=candidate, forwarding the id', () => {
@@ -38,6 +39,12 @@ describe('NotesPopoutPage', () => {
     routeParams.entity = 'vacancy'; routeParams.id = 'vac-1'
     render(<NotesPopoutPage />)
     expect(screen.getByText('vacancy-page:vac-1')).toBeInTheDocument()
+  })
+
+  it('renders ApplicationNotesPopout for entity=application, forwarding the id (A-popout-1)', () => {
+    routeParams.entity = 'application'; routeParams.id = 'app-1'
+    render(<NotesPopoutPage />)
+    expect(screen.getByText('application-page:app-1')).toBeInTheDocument()
   })
 
   it('shows an honest error state for an unknown entity segment, never a blank screen', () => {

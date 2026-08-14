@@ -10,6 +10,11 @@ import type { ApplicationDetail } from '@/types/application'
  * cards); timeline/conversations are hidden here (the drawer has its own tabs).
  * All state/persistence logic lives in useApplicationNotes (§3 — components stay
  * declarative); this file only wires the hook to the shared UI's props/labels.
+ *
+ * A-popout-1: passes `popout` so the composer can hand a half-typed note over to
+ * the second-screen window (mirrors vacancies/customers) — read-side only, since
+ * this drawer's own onEditNote is not wired here (useApplicationNotes stays
+ * add-only in THIS tab; PATCH support lives in the popout window's own hook).
  */
 export default function NotesTab({ application: a }: { application: ApplicationDetail }) {
   const { t } = useTranslation('applications')
@@ -31,6 +36,7 @@ export default function NotesTab({ application: a }: { application: ApplicationD
       authorInitials={initials}
       showTimeline={false}
       showConversations={false}
+      popout={a.id ? { entity: 'application', id: String(a.id) } : undefined}
       labels={{
         notes: t('notes.title'),
         newNote: t('notes.new'),

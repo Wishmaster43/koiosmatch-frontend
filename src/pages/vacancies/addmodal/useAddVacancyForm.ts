@@ -215,11 +215,19 @@ export function useAddVacancyForm({
     onContactChange: p => setCascade(c => ({ ...c, contactId: p.id, contactName: p.name })),
   })
 
-  // Required skills — free strings, quick-add/remove (punt 15).
+  // Required skills — free strings, add/edit/remove (punt 15; K6e widened
+  // add to accept a name directly — RequiredSkillsSection's own inline form
+  // owns the input now, no separate `newSkill` field state needed here).
   const [skills, setSkills] = useState<string[]>([])
-  const [newSkill, setNewSkill] = useState('')
-  const addSkill = () => { const sk = newSkill.trim(); if (sk && !skills.includes(sk)) setSkills(s => [...s, sk]); setNewSkill('') }
+  const addSkill = (name: string) => { const sk = name.trim(); if (sk && !skills.includes(sk)) setSkills(s => [...s, sk]) }
   const removeSkill = (s: string) => setSkills(list => list.filter(x => x !== s))
+  // K6e: rename a staged skill in place (mirrors the drawer's RequiredSkillsSection
+  // edit pencil) — same list position, never a remove+re-add.
+  const editSkill = (i: number, name: string) => {
+    const sk = name.trim()
+    if (!sk) return
+    setSkills(list => list.map((x, idx) => (idx === i ? sk : x)))
+  }
 
   // Description — the collapsed-ghost rich-text block's own open/edit state
   // (punt 9). Punt 17: the Koios-AI generate flow reads a narrow projection of
@@ -377,7 +385,7 @@ export function useAddVacancyForm({
     customerOptions: customers.map(c => ({ value: String(c.id), label: c.name })),
     userOptions,
     handleClientChange, locationPicker, departmentPicker, contactPicker,
-    skills, newSkill, setNewSkill, addSkill, removeSkill,
+    skills, addSkill, removeSkill, editSkill,
     descExpanded, setDescExpanded, descEditing, setDescEditing, genFields,
     // Punt 18
     matchWeightTemplateId, setMatchWeightTemplateId, matchWeights, setMatchWeights,

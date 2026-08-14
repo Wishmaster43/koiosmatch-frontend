@@ -221,7 +221,7 @@ describe('VacancySearchTab · fetch + defaults', () => {
     await waitFor(() => expect(screen.getByText('Verzorgende IG | Amersfoort')).toBeInTheDocument())
 
     expect(mockGet).toHaveBeenCalledWith('/candidates/cand1/vacancy-matches', {
-      params: { radius: 30, status: ['open'], function_title: ['Verzorgende IG'], per_page: 100 },
+      params: { radius: 30, status: ['open'], per_page: 100 },
       signal: expect.anything(),
     })
 
@@ -242,7 +242,7 @@ describe('VacancySearchTab · radius default from the candidate travel preferenc
     render(<VacancySearchTab candidate={candidateWithTravelPref} />)
 
     await waitFor(() => expect(mockGet).toHaveBeenCalledWith('/candidates/cand1/vacancy-matches', {
-      params: { radius: 45, status: ['open'], function_title: ['Verzorgende IG'], per_page: 100 },
+      params: { radius: 45, status: ['open'], per_page: 100 },
       signal: expect.anything(),
     }))
   })
@@ -263,7 +263,7 @@ describe('VacancySearchTab · status preselection follows the tenant setting', (
     render(<VacancySearchTab candidate={candidateWithLocation} />)
 
     await waitFor(() => expect(mockGet).toHaveBeenCalledWith('/candidates/cand1/vacancy-matches', {
-      params: { radius: 30, status: ['closed'], function_title: ['Verzorgende IG'], per_page: 100 },
+      params: { radius: 30, status: ['closed'], per_page: 100 },
       signal: expect.anything(),
     }))
   })
@@ -313,7 +313,7 @@ describe('VacancySearchTab · status filter (searchable dropdown)', () => {
 
     await waitFor(() => expect(mockGet).toHaveBeenCalledTimes(2))
     expect(mockGet).toHaveBeenLastCalledWith('/candidates/cand1/vacancy-matches', {
-      params: { radius: 30, status: ['open', 'closed'], function_title: ['Verzorgende IG'], per_page: 100 },
+      params: { radius: 30, status: ['open', 'closed'], per_page: 100 },
       signal: expect.anything(),
     })
   })
@@ -516,7 +516,7 @@ describe('VacancySearchTab · function filter seeding (ghost-filter fix, Danny 0
     // Stored/sent value is the LOOKUP's casing ("Verzorgende IG"), not the candidate's
     // own raw title casing ("verzorgende ig") — proves the option itself is stored.
     await waitFor(() => expect(mockGet).toHaveBeenCalledWith('/candidates/cand1/vacancy-matches', {
-      params: { radius: 30, status: ['open'], function_title: ['Verzorgende IG'], per_page: 100 },
+      params: { radius: 30, status: ['open'], per_page: 100 },
       signal: expect.anything(),
     }))
   })
@@ -873,7 +873,7 @@ describe('VacancySearchTab · "Solliciteren" action (Danny 06-08 screenshot)', (
 // (radius and the per-candidate prefilled values included), and that only shows up
 // when it would actually do something.
 describe('VacancySearchTab · reset filters (Danny 08-08, point 8)', () => {
-  const startParams = { radius: 30, status: ['open'], function_title: ['Verzorgende IG'], per_page: 100 }
+  const startParams = { radius: 30, status: ['open'], per_page: 100 }
 
   it('stays hidden while nothing deviates from the starting state', async () => {
     stubApi({ matches: () => Promise.resolve({ data: { data: rawMatchRows } }) })
@@ -896,7 +896,7 @@ describe('VacancySearchTab · reset filters (Danny 08-08, point 8)', () => {
     await userEvent.click(await screen.findByRole('button', { name: 'Gesloten' }))
     await userEvent.click(screen.getByRole('button', { name: 'stub-set-radius' }))
     await waitFor(() => expect(mockGet).toHaveBeenLastCalledWith('/candidates/cand1/vacancy-matches', {
-      params: { radius: 80, status: ['open', 'closed'], function_title: ['Verzorgende IG'], per_page: 100 },
+      params: { radius: 80, status: ['open', 'closed'], per_page: 100 },
       signal: expect.anything(),
     }))
 

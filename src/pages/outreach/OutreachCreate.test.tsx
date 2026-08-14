@@ -30,7 +30,7 @@ describe('OutreachCreate · shared wide-form frame', () => {
     // Let the /pools fetch settle inside act() before asserting (avoids an
     // unwrapped state-update warning from the unrelated pool load).
     const dialog = await screen.findByRole('dialog')
-    expect(dialog).toHaveStyle({ maxWidth: '1060px', maxHeight: '94vh' })
+    expect(dialog).toHaveStyle({ maxWidth: '1320px', maxHeight: '94vh' })
     expect(dialog).toHaveAttribute('aria-label', 'create.title')
   })
 

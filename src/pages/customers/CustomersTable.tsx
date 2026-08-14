@@ -140,6 +140,11 @@ export default function CustomersTable({
       render: c => <button style={countBtn} onClick={e => { e.stopPropagation(); onOpenTab?.(c, 'contacts') }}>{c.contactsCount}</button> },
     { key: 'openVacancies', header: t('cols.openVacancies'), nowrap: true, align: 'right', cellStyle: mutedCell, sortable: true, sortValue: c => c.openVacanciesCount,
       render: c => <button style={countBtn} onClick={e => { e.stopPropagation(); onOpenTab?.(c, 'vacancies') }}>{c.openVacanciesCount}</button> },
+    // K8b: active-matches count, same ghost-button deep-link as openVacancies —
+    // deep-links to the drawer's own "matches" tab (mapCustomer.ts already maps
+    // activeMatchesCount, this column was simply missing).
+    { key: 'activeMatches', header: t('cols.matches'), nowrap: true, align: 'right', cellStyle: mutedCell, sortable: true, sortValue: c => c.activeMatchesCount,
+      render: c => <button style={countBtn} onClick={e => { e.stopPropagation(); onOpenTab?.(c, 'matches') }}>{c.activeMatchesCount}</button> },
     // Shared Koios column factory (Danny 05-08 consistency pass) — same header,
     // sort and cell as every other entity table; only the resolver differs.
     makeKoiosColumn({ adviceOf, colored: colorKoios, label: t('cols.koios') }),

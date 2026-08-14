@@ -117,7 +117,6 @@ describe('useNotesPopout · host side', () => {
   it('does nothing without a popout target (entity with no second-screen route)', () => {
     const { result } = renderHook(() => useNotesPopout({ target: undefined, onHandedOver: vi.fn() }))
     act(() => result.current.handOff(draft))
-    act(() => result.current.handOffNote('n1'))
     expect(openNotesPopoutMock).not.toHaveBeenCalled()
     expect(result.current.pending).toBe(false)
     expect(result.current.canHandOffNote).toBe(false)
@@ -143,41 +142,6 @@ describe('useNotesPopout · handing an EXISTING note over', () => {
     peer.onmessage = e => seen.push(e.data)
   })
   afterEach(() => vi.unstubAllGlobals())
-
-  it('opens the record\'s window and publishes the note ID — never the note text', () => {
-    const { result } = renderHook(() => useNotesPopout({ target, onHandedOver: vi.fn() }))
-    act(() => result.current.handOffNote('note-7'))
-    expect(openNotesPopoutMock).toHaveBeenCalledWith('candidate', 'c1')
-    expect(seen).toContainEqual({ kind: 'edit', noteId: 'note-7' })
-    // §8 / duplicate-safety: no body, title or type on the wire — the window reads
-    // its own copy, so there is nothing to save as a second note.
-    expect(JSON.stringify(seen)).not.toContain('Halve notitie')
-    expect(result.current.pending).toBe(true)
-  })
-
-  it('replays the edit request to a window that boots later and says hello', () => {
-    const { result } = renderHook(() => useNotesPopout({ target, onHandedOver: vi.fn() }))
-    act(() => result.current.handOffNote('note-7'))
-    seen.length = 0
-    act(() => peer.postMessage({ kind: 'hello' }))
-    expect(seen).toContainEqual({ kind: 'edit', noteId: 'note-7' })
-  })
-
-  it('publishes nothing when the popup was blocked', () => {
-    openNotesPopoutMock.mockReturnValue(null)
-    const { result } = renderHook(() => useNotesPopout({ target, onHandedOver: vi.fn() }))
-    act(() => result.current.handOffNote('note-7'))
-    expect(seen).toHaveLength(0)
-    expect(result.current.pending).toBe(false)
-  })
-
-  it('reports the ack as an EDIT, so the caller never closes a composer over it', () => {
-    const onHandedOver = vi.fn()
-    const { result } = renderHook(() => useNotesPopout({ target, onHandedOver }))
-    act(() => result.current.handOffNote('note-7'))
-    act(() => peer.postMessage({ kind: 'ack' }))
-    expect(onHandedOver).toHaveBeenCalledWith('edit')
-  })
 
   it('reports a DRAFT ack as a draft (the composer-closing case)', () => {
     const onHandedOver = vi.fn()

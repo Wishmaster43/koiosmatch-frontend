@@ -10,4 +10,7 @@
 // contactpersoon, kans) balloon to full height with dead space — eleven surfaces use
 // this constant, not just the tall six. Modals size to content up to the cap; the
 // perceived-size parity comes from the shared two-column layout system instead.
-export const WIDE_MODAL = { maxWidth: 1060, maxHeight: '94vh' } as const
+// KLANT-LAYOUT-4 / KANS-BREEDTE-1 (Danny 14-08 "moet breder want tekst past niet eens" —
+// the opportunity modal cut off its right column and scrolled sideways). 1060 -> 1200 here,
+// so every wide create modal gains the room at once.
+export const WIDE_MODAL = { maxWidth: 1320, maxHeight: '94vh' } as const

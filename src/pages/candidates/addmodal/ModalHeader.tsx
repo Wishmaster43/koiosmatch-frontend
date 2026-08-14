@@ -33,7 +33,9 @@ export default function ModalHeader({ status, pickStatuses, selectedStatus, stat
   return (
     <div style={{ padding: '18px 24px 14px', borderBottom: '1px solid var(--border)',
       display: 'flex', alignItems: 'center', gap: 16, flexShrink: 0 }}>
-      <div style={{ minWidth: 0 }}>
+      {/* KAND-KOP-1 (Danny 14-08 "tekst uitlijnen"): title and subtitle never wrap,
+          so the CV hint beside them keeps one shared baseline. */}
+      <div style={{ flexShrink: 0, whiteSpace: 'nowrap' }}>
         <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--text)' }}>
           {selectedStatus ? `${t('modal.newPrefix')} — ${statusLabel}` : t('modal.candidateData')}
         </div>
@@ -45,8 +47,9 @@ export default function ModalHeader({ status, pickStatuses, selectedStatus, stat
       {canParseCv && (
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
           <CvEntryIcons onFile={onCvFile} onSubmitText={onCvText} />
-          {/* Readable hint (Danny 14-08 "tekst uitschrijven, niet zo klein"). */}
-          <span style={{ fontSize: 12.5, color: 'var(--text)', maxWidth: 240, lineHeight: 1.35 }}>{t('modal.entryHint')}</span>
+          {/* Readable hint (Danny 14-08 "tekst uitschrijven, niet zo klein"), on ONE
+              line now the frame is wide enough — a wrapped hint broke the alignment. */}
+          <span style={{ fontSize: 12.5, color: 'var(--text)', lineHeight: 1.35, whiteSpace: 'nowrap' }}>{t('modal.entryHint')}</span>
         </div>
       )}
       {/* Phase choice — two compact pills, same colour semantics as the old cards. */}

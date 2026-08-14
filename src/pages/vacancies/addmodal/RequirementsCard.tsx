@@ -3,26 +3,33 @@
  * NO ervaring-min/max range: StoreVacancyRequest has no such field (measured:
  * zero hits for experience_min_years/experience_max_years in app/ + database/,
  * filed as a CMBE ticket) — adding a range picker here would be a fake
- * affordance §3 forbids) + the required-skills list (punt 15, vertical list +
- * quick-add mirroring DetailsRequirementsTab).
+ * affordance §3 forbids) + the required-skills list.
+ *
+ * K6e (pop-out parity): the skills list used to be remove-only, a second,
+ * simpler implementation of the same list the drawer's DetailsRequirementsTab
+ * already builds via RequiredSkillsSection (add/edit/remove, edit pencil per
+ * row). Reused here as-is instead of forking a rename UI — one component, one
+ * look, on both the create-modal and the drawer (§3A: extend, never duplicate).
  */
 import { useTranslation } from 'react-i18next'
-import { X, Plus } from 'lucide-react'
-import { FieldRow, TextField } from '@/components/forms/fields'
+import { FieldRow } from '@/components/forms/fields'
 import CreatableSelect from '@/components/ui/CreatableSelect'
 import { cardHead, cardBox } from '@/components/ui/modalCards'
+import RequiredSkillsSection from '../drawer/RequiredSkillsSection'
 
 interface Level { value: string; label: string }
 interface Props {
   seniority: string; onSeniorityChange: (v: string) => void; seniorityLevels: Level[]
   education: string; onEducationChange: (v: string) => void; educationLevels: Level[]
-  skills: string[]; newSkill: string; onNewSkillChange: (v: string) => void
-  onAddSkill: () => void; onRemoveSkill: (s: string) => void
+  skills: string[]
+  onAddSkill: (name: string) => void
+  onEditSkill: (i: number, name: string) => void
+  onRemoveSkill: (name: string) => void
 }
 
 export default function RequirementsCard({
   seniority, onSeniorityChange, seniorityLevels, education, onEducationChange, educationLevels,
-  skills, newSkill, onNewSkillChange, onAddSkill, onRemoveSkill,
+  skills, onAddSkill, onEditSkill, onRemoveSkill,
 }: Props) {
   const { t } = useTranslation(['vacancies', 'common'])
   return (
@@ -40,32 +47,9 @@ export default function RequirementsCard({
             clearable clearLabel={t('details.education')}
             placeholder={t('common:select')} options={educationLevels} />
         </FieldRow>
-        {/* Required skills — free strings, vertical list + quick-add (mirrors
-            DetailsRequirementsTab.tsx:42-61). */}
-        <FieldRow label={t('details.skills')}>
-          <div style={{ display: 'flex', gap: 6 }}>
-            <TextField value={newSkill} onChange={onNewSkillChange} placeholder={t('details.addSkill')} />
-            <button type="button" onClick={onAddSkill} title={t('details.addSkill')}
-              style={{ width: 34, height: 34, display: 'flex', alignItems: 'center', justifyContent: 'center',
-                borderRadius: 8, border: 'none', background: 'var(--color-primary)', color: 'var(--color-on-accent)', cursor: 'pointer', flexShrink: 0 }}>
-              <Plus size={14} />
-            </button>
-          </div>
-        </FieldRow>
-        {skills.length > 0 && (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-            {skills.map(s => (
-              <div key={s} style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 12, color: 'var(--text)',
-                padding: '6px 10px', borderRadius: 8, border: '1px solid var(--border)', background: 'var(--bg)' }}>
-                <span style={{ flex: 1, minWidth: 0 }}>{s}</span>
-                <button type="button" onClick={() => onRemoveSkill(s)} aria-label={t('common:remove')} title={t('common:remove')}
-                  style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: 0, display: 'flex' }}>
-                  <X size={13} />
-                </button>
-              </div>
-            ))}
-          </div>
-        )}
+        {/* K6e: required skills — the shared add/edit/remove list, mirrors
+            DetailsRequirementsTab.tsx (drawer) 1:1. */}
+        <RequiredSkillsSection skills={skills} onAddSkill={onAddSkill} onEditSkill={onEditSkill} onRemoveSkill={onRemoveSkill} />
       </div>
     </div>
   )

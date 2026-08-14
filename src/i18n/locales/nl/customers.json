@@ -29,7 +29,8 @@
     "city": "Plaats",
     "industry": "Branche",
     "createdAt": "Aangemaakt op",
-    "koios": "Koios AI"
+    "koios": "Koios AI",
+    "matches": "Matches"
   },
   "filters": {
     "search": "Zoeken",
@@ -445,14 +446,16 @@
     "col": {
       "title": "Titel",
       "status": "Status",
-      "applications": "Sollicitaties"
+      "applications": "Sollicitaties",
+      "applicationsOpen": "Sollicitaties openen"
     },
     "filter": {
       "status": "Status"
     },
     "add": "Nieuwe vacature",
     "searchPlaceholder": "Zoek vacature…",
-    "showUnpublished": "Ook niet-gepubliceerd"
+    "showUnpublished": "Ook niet-gepubliceerd",
+    "editVacancy": "Vacature bewerken"
   },
   "opportunities": {
     "title": "Kansen",

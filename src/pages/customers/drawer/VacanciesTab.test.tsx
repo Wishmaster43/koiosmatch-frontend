@@ -20,7 +20,14 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import '@/i18n'
 import api from '@/lib/api'
 import { invalidateAllSettingsCache } from '@/lib/settings/useAllSettings'
+import { NavigationProvider } from '@/context/NavigationContext'
 import VacanciesTab from './VacanciesTab'
+
+// K7b: the row pencil is permission-gated on vacancies.update — stub the auth
+// hook so it renders in these deep-link tests.
+vi.mock('@/context/AuthContext', () => ({
+  useAuth: () => ({ hasPermission: (p: string) => p === 'vacancies.update' }),
+}))
 
 // PRE-EXISTING FIX (found while adding the Sollicitaties sub-tab, unrelated to it —
 // proven by reproducing this same crash against the untouched file/component on
@@ -38,9 +45,14 @@ vi.mock('@tanstack/react-query', async (importOriginal) => {
 // (`useCustomerVacanciesWithPublished`) instead of a stubbed hook, so every render
 // needs a real QueryClientProvider — a fresh client per render so no cache leaks
 // between tests/assertions.
-function renderTab(props: ComponentProps<typeof VacanciesTab>) {
+function renderTab(props: ComponentProps<typeof VacanciesTab>, goTo = vi.fn()) {
   const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } })
-  return render(<QueryClientProvider client={queryClient}><VacanciesTab {...props} /></QueryClientProvider>)
+  const utils = render(
+    <QueryClientProvider client={queryClient}>
+      <NavigationProvider goTo={goTo}><VacanciesTab {...props} /></NavigationProvider>
+    </QueryClientProvider>,
+  )
+  return { ...utils, goTo }
 }
 // /vacancy-statuses resolves the REAL lookup (id + name + is_closed, per the id/name
 // bug the component's own docblock documents). The ids are deliberately OPAQUE UUIDs
@@ -198,5 +210,30 @@ describe('VacanciesTab · tenant-configured default status filter (TENANT-DEFAUL
     const user = userEvent.setup()
     await user.click(screen.getByTitle('Ook niet-gepubliceerd'))
     await waitFor(() => expect(screen.getByText('Concept vacature')).toBeInTheDocument())
+  })
+})
+
+describe('VacanciesTab · K7c applications deep link + K7b edit pencil', () => {
+  it('the applications count is a ghost button that deep-links to that vacancy\'s applicants tab', async () => {
+    const { default: userEvent } = await import('@testing-library/user-event')
+    const { goTo } = renderTab({ customerId: 'cust-1', customerName: 'Acme' })
+    await waitFor(() => expect(screen.getByText('Openstaande vacature')).toBeInTheDocument())
+
+    const user = userEvent.setup()
+    await user.click(screen.getByLabelText('Sollicitaties openen'))
+
+    // Asserts the REQUEST-equivalent intent: page + record id + target tab.
+    expect(goTo).toHaveBeenCalledWith('vacancies', { open: 'v-open', tab: 'applicants' })
+  })
+
+  it('a row pencil opens that vacancy\'s own drawer for editing', async () => {
+    const { default: userEvent } = await import('@testing-library/user-event')
+    const { goTo } = renderTab({ customerId: 'cust-1', customerName: 'Acme' })
+    await waitFor(() => expect(screen.getByText('Openstaande vacature')).toBeInTheDocument())
+
+    const user = userEvent.setup()
+    await user.click(screen.getAllByLabelText('Vacature bewerken')[0])
+
+    expect(goTo).toHaveBeenCalledWith('vacancies', { open: 'v-open', tab: undefined })
   })
 })

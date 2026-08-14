@@ -29,6 +29,12 @@ interface UseCandidateFiltersArgs {
 export function useCandidateFilters({ t, staleMonths, view, mapCenter, mapRadius, setMapCenter, setMapRadius }: UseCandidateFiltersArgs) {
   // Archived (soft-deleted) view toggle — opts the list into ?include_archived=1.
   const [showArchived, setShowArchived] = usePageMemory('cand.archived', false)
+  // V-appdetail-1/2: "afspraak ontbreekt" — a stage that requires an appointment
+  // (requires_appointment, §3B) with none planned. No server list-filter param exists
+  // yet for candidates (only /applications supports it), so this stays a client-side
+  // refine over the already-loaded page, mirrored on the CandidatesPage `filtered`
+  // memo — same pattern as the stale/never-contacted attention tiles below.
+  const [missingAppointmentFilter, setMissingAppointmentFilter] = usePageMemory('cand.missingAppointment', false)
   // Prullenbak (ERASE-1 pending_erase) view — same server include, filtered by lifecycle.
   const [showTrash, setShowTrash] = usePageMemory('cand.trash', false)
   // Server-side filter dimensions (the API supports these). Owner holds owner_ids.
@@ -68,6 +74,7 @@ export function useCandidateFilters({ t, staleMonths, view, mapCenter, mapRadius
 
   // Anything narrowing the default view → the shared clear-button shows; one click resets.
   const anyFilterActive = Boolean(globalSearch.trim() || attentionFilter || dateRange || showArchived || showTrash || geoFilter
+    || missingAppointmentFilter
     || selectedStatus.length || selectedPhase.length || selectedFunnel.length || selectedType.length || selectedOwner.length
     || selectedGeslacht.length || selectedProvince.length || selectedTitle.length || selectedLocation.length
     || selectedPool.length || selectedCity.length || selectedSource.length)
@@ -76,6 +83,7 @@ export function useCandidateFilters({ t, staleMonths, view, mapCenter, mapRadius
   const clearAllFilters = () => {
     setSearchEpoch(e => e + 1)
     setGlobalSearch(''); setAttentionFilter(null); setDateRange(null); setShowArchived(false); setShowTrash(false)
+    setMissingAppointmentFilter(false)
     setSelectedStatus([]); setSelectedPhase([]); setSelectedFunnel([]); setSelectedType([]); setSelectedOwner([])
     setSelectedGeslacht([]); setSelectedProvince([]); setSelectedTitle([]); setSelectedLocation([])
     setSelectedPool([]); setSelectedCity([]); setSelectedSource([]); clearGeo()
@@ -131,6 +139,7 @@ export function useCandidateFilters({ t, staleMonths, view, mapCenter, mapRadius
 
   return {
     showArchived, setShowArchived, showTrash, setShowTrash,
+    missingAppointmentFilter, setMissingAppointmentFilter,
     selectedStatus, setSelectedStatus,
     selectedPhase, setSelectedPhase, selectedFunnel, setSelectedFunnel,
     mapStraalActive, setMapStraalActive,

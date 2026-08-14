@@ -122,8 +122,13 @@ export default function LocationAddressTab({
         onPickContact={() => onGoToContacts()}
         contacts={contacts} customerId={customerId} locationId={l.id as Id} onAddContact={onAddContact} />
 
-      {/* Mirrors the Bedrijf tab exactly — description right after the contact block. */}
-      <EditableRichTextField label={t('locations.detail.description')} value={l.description ?? ''} onSave={saveDescription} />
+      {/* Mirrors the Bedrijf tab exactly — description right after the contact block.
+          K3/K4c: same second-screen icon + Koios generate the customer/department
+          description already have — 'location' is a known /ai/koios/generate entity
+          and a standalone GET/PATCH /locations/{id} route backs the pop-out window. */}
+      <EditableRichTextField label={t('locations.detail.description')} value={l.description ?? ''} onSave={saveDescription}
+        popout={l.id != null ? { entity: 'customer', id: l.id as Id, field: 'locationText' } : undefined}
+        assistGenerate={l.id != null ? { entity: 'location', id: String(l.id) } : undefined} />
 
       {/* Koios advice — pure FE heuristics over this location's OWN completeness. */}
       <KoiosAdviceBlock namespace="customers" insights={buildLocationAdviceInsights(l, t)} />

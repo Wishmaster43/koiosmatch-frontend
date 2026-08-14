@@ -29,7 +29,7 @@
 import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useAuth } from '@/context/AuthContext'
-import { Building } from 'lucide-react'
+import { Building, Upload } from 'lucide-react'
 import FloatingPanel from '@/components/ui/FloatingPanel'
 import { FieldRow, TextField } from '@/components/forms/fields'
 import CreatableSelect from '@/components/ui/CreatableSelect'
@@ -38,8 +38,7 @@ import { useAllSettings, getJsonSetting } from '@/lib/settings/useAllSettings'
 import { BTN_H } from '@/config/buttonMetrics'
 import { WIDE_MODAL } from '@/components/ui/modalMetrics'
 import { cardHead, cardBox, row2, row3Even } from '@/components/ui/modalCards'
-import CollapsedCard from '@/components/ui/CollapsedCard'
-import SubEntityImportCard, { subEntityImportTitle } from './SubEntityImportCard'
+import SubEntityImportCard from './SubEntityImportCard'
 import { useImportWizard } from '@/pages/settings/sections/importeren/useImportWizard'
 import type { DepartmentPayload } from './hooks/useCustomerDepartments'
 import type { Department } from '@/types/customer'
@@ -76,6 +75,9 @@ export default function AddDepartmentModal({ onClose, onCreate, onImported, loca
   const canRunImport = hasPermission('customers.create')
   // The wizard state lives HERE (container), not in the card — mirrors AddCustomerModal.
   const importWizard = useImportWizard('departments')
+  // K1b (2026-08-14): the import affordance sits in the header (Upload button),
+  // never buried in a collapsed section — mirrors AddCustomerModal exactly.
+  const [importOpen, setImportOpen] = useState(false)
   const isEdit = Boolean(initial)
   const [form, setForm] = useState<DepartmentPayload>({
     name: initial?.name ?? '',
@@ -153,7 +155,7 @@ export default function AddDepartmentModal({ onClose, onCreate, onImported, loca
     <FloatingPanel open onClose={onClose}
       ariaLabel={isEdit ? t('subModal.editDepartment') : t('subModal.addDepartment')}
       persistKey="customer-add-department" scrollBody={false}
-      width="min(calc(100vw - 48px), 1060px)" maxWidth={`${WIDE_MODAL.maxWidth}px`}
+      width={`min(calc(100vw - 48px), ${WIDE_MODAL.maxWidth}px)`} maxWidth={`${WIDE_MODAL.maxWidth}px`}
       header={
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
           <div style={{ width: 32, height: 32, borderRadius: 8, background: 'var(--color-violet-bg)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -163,9 +165,31 @@ export default function AddDepartmentModal({ onClose, onCreate, onImported, loca
             <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--text)' }}>{isEdit ? t('subModal.editDepartment') : t('subModal.addDepartment')}</div>
             {customerName && <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 1 }}>{customerName}</div>}
           </div>
+          {/* K1b (2026-08-14): the import affordance lives top-right in the header, a
+              real button, never buried in a collapsed section — mirrors AddCustomerModal. */}
+          {!isEdit && (
+            <button type="button" onClick={() => setImportOpen(v => !v)} aria-expanded={importOpen}
+              style={{ display: 'flex', alignItems: 'center', gap: 6, height: BTN_H, padding: '0 12px', marginLeft: 'auto',
+                flexShrink: 0, borderRadius: 8, cursor: 'pointer', fontSize: 12.5, fontWeight: 600,
+                color: 'var(--color-primary-text)',
+                border: `1px solid color-mix(in srgb, var(--color-primary) ${importWizard.file ? 50 : 32}%, transparent)`,
+                background: `color-mix(in srgb, var(--color-primary) ${importWizard.file ? 16 : 8}%, transparent)` }}>
+              <Upload size={13} />
+              {t('subModal.import.title', { entity: t('settings:import.entities.departments.label') })}
+            </button>
+          )}
         </div>
       }>
         <div style={{ flex: 1, overflowY: 'auto', padding: '18px 22px', display: 'flex', flexDirection: 'column', gap: 16 }}>
+          {/* K1b (2026-08-14): the import flow opens from the header button and renders
+              as the first card while open — summoned deliberately, mirrors AddCustomerModal. */}
+          {importOpen && !isEdit && (
+            <div style={{ ...cardBox, padding: 16 }}>
+              <div style={cardHead}>{t('subModal.import.title', { entity: t('settings:import.entities.departments.label') })}</div>
+              <SubEntityImportCard entity="departments" wizard={importWizard} customerName={customerName}
+                canView={canViewImportTemplate} canImport={canRunImport} />
+            </div>
+          )}
           {/* Algemeen — name, locatie (searchable, hidden when locked), status.
               Location+status pair in one row when both show; status alone stays
               constrained to ~a third of the width (row3Even) rather than
@@ -253,18 +277,6 @@ export default function AddDepartmentModal({ onClose, onCreate, onImported, loca
                 placeholder={t('common:add')} ariaLabel={t('departments.detail.description')} />
             </div>
           </div>
-
-          {/* SUBENTITY-IMPORT-1 (moved to the bottom + collapsed, Danny 03-08 A+D
-              decision): a secondary/optional bulk-create path must never force a
-              scroll past it before the required manual fields are even visible.
-              No column split here — this form is too short to justify one (unlike
-              AddLocationModal's own two-column pass). */}
-          {!isEdit && (
-            <CollapsedCard title={subEntityImportTitle(t, 'departments')} filled={!!importWizard.file}>
-              <SubEntityImportCard entity="departments" wizard={importWizard} customerName={customerName}
-                canView={canViewImportTemplate} canImport={canRunImport} />
-            </CollapsedCard>
-          )}
         </div>
 
         {/* Server-side rejection (non-field 422 / other failure) — shown in place, modal stays open. */}

@@ -65,9 +65,6 @@ const API_TO_FORM: Record<string, string> = {
   linkedin_slug: 'linkedin',
 }
 
-// Lifecycle states that make sense when CREATING a candidate (not matched/inactive/etc.).
-const CREATE_STATUSES = ['lead', 'candidate']
-
 interface AppUser { id: Id; name?: string; firstname?: string; lastname?: string; [k: string]: unknown }
 
 // Exported so the addmodal/ card components share this exact shape (type-only import).
@@ -112,8 +109,11 @@ export default function AddCandidateModal({ onClose, onCreated }: AddCandidateMo
   const { restore, restoring } = useRestoreDuplicate()
 
   // On create you pick the PHASE (Lead/Kandidaat); deployability defaults to available.
-  const entryStatuses = phases.filter(s => CREATE_STATUSES.includes(s.value))
-  const pickStatuses  = entryStatuses.length ? entryStatuses : phases
+  // On create you pick the PHASE; deployability defaults to available. The full
+  // tenant-configured phase list is offered (21-hygiene, 2026-08-14) — a hardcoded
+  // ['lead','candidate'] filter used to silently drop a renamed or newly added
+  // phase from the create picker.
+  const pickStatuses = phases
   // Default entry phase is flag-driven (§3B: is_default), not the hardcoded 'lead' key.
   const defaultStatus = () => pickStatuses.find(s => (s as { is_default?: boolean }).is_default)?.value ?? pickStatuses[0]?.value ?? ''
 
@@ -339,7 +339,7 @@ export default function AddCandidateModal({ onClose, onCreated }: AddCandidateMo
     // edge-to-edge via negative margins; hideClose avoids a second X.
     <FloatingPanel open onClose={onClose} ariaLabel={t('modal.candidateData')}
       persistKey="add-candidate" scrollBody={false} hideClose
-      width="min(calc(100vw - 48px), 1060px)" maxWidth={`${WIDE_MODAL.maxWidth}px`}
+      width={`min(calc(100vw - 48px), ${WIDE_MODAL.maxWidth}px)`} maxWidth={`${WIDE_MODAL.maxWidth}px`}
       header={
         <div style={{ flex: '1 1 100%', margin: '-12px -16px -13px' }}>
           <ModalHeader status={status} pickStatuses={pickStatuses} selectedStatus={selectedStatus} statusLabel={statusLabel}

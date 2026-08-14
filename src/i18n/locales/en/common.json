@@ -136,6 +136,11 @@
     "reports_intakes": "Intakes",
     "reports_outreach": "Outreach",
     "reports_sources": "Sources",
+    "reports_contacts": "Contacts",
+    "reports_locations": "Locations",
+    "reports_departments": "Departments",
+    "reports_ai": "AI",
+    "reports_workflows": "Workflows",
     "shiftmanager": "Shiftmanager",
     "shiftmanager_candidates": "Candidates-SM",
     "shiftmanager_customers": "Customers-SM",
@@ -404,7 +409,9 @@
   "popupBlocked": "Your browser blocked the pop-out window. Please allow pop-ups for this site.",
   "popout": {
     "unknownEntity": "This pop-out window could not be recognized.",
-    "saveAndClose": "Save and close"
+    "saveAndClose": "Save and close",
+    "windowTitle": "{{name}} — notes",
+    "loadError": "Failed to load."
   },
   "notes": {
     "editedBy": "edited by {{name}}",

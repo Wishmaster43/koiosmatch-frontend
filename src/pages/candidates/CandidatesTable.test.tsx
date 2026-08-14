@@ -199,3 +199,19 @@ it('renders the status lookup icon in the row when the lookup carries one', () =
   // LookupIcon renders a lucide svg for the curated 'briefcase' key.
   expect(container.querySelector('svg.lucide-briefcase, svg[class*="briefcase"]')).toBeTruthy()
 })
+
+// V-appdetail-1/2: the missing_appointment flag (mapCandidate.ts) surfaces as an
+// accessible-label attention icon next to the name, only when set.
+describe('CandidatesTable · missing-appointment attention icon (V-appdetail-1/2)', () => {
+  it('shows the icon when the flag is set', () => {
+    const row = { ...baseCandidate, id: 2, missingAppointment: true } as Candidate
+    render(<CandidatesTable rows={[row]} />)
+    expect(screen.getByRole('img', { name: 'Afspraak ontbreekt' })).toBeInTheDocument()
+  })
+
+  it('renders no icon at all when the flag is absent', () => {
+    const row = { ...baseCandidate, id: 3, missingAppointment: false } as Candidate
+    render(<CandidatesTable rows={[row]} />)
+    expect(screen.queryByRole('img', { name: 'Afspraak ontbreekt' })).toBeNull()
+  })
+})

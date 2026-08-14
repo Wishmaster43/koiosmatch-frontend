@@ -362,7 +362,7 @@ export function useCandidateBulkActions({
   // bulkCoupleBackoffice (SYNC-BULK-1) share the same fire-and-forget shape (no
   // optimistic patch, no `updated`-list reconcile); both now live in their own
   // hook and are re-exported below unchanged.
-  const { bulkGeocode, bulkCoupleBackoffice } = useCandidateAsyncBulk({ selectedIds, setSelectedIds, notify, t })
+  const { bulkGeocode, bulkCoupleBackoffice } = useCandidateAsyncBulk({ selectedIds, setSelectedIds, notify, t, candidates })
 
   return {
     toggleRow, toggleAll, bulkAddToPool, bulkRemoveFromPool,

@@ -255,5 +255,99 @@
       "owner": "Propriétaire",
       "branch": "Agence"
     }
+  },
+  "contacts": {
+    "total": "Total contacts",
+    "window": "Contacts du {{from}} au {{to}}",
+    "series": "Contacts dans le temps",
+    "loading": "Chargement…",
+    "error": "Le rapport n'a pas pu être chargé.",
+    "empty": "Aucune donnée sur cette période.",
+    "axes": {
+      "customer": "Par client",
+      "location": "Par site",
+      "department": "Par service",
+      "function": "Par fonction",
+      "status": "Par statut"
+    },
+    "summary": {
+      "primary": "Contact principal",
+      "withRecentContact": "Contacté récemment",
+      "neverContacted": "Jamais contacté"
+    }
+  },
+  "locations": {
+    "total": "Total sites",
+    "window": "Sites du {{from}} au {{to}}",
+    "series": "Sites dans le temps",
+    "loading": "Chargement…",
+    "error": "Le rapport n'a pas pu être chargé.",
+    "empty": "Aucune donnée sur cette période.",
+    "axes": {
+      "customer": "Par client",
+      "city": "Par ville",
+      "province": "Par province",
+      "status": "Par statut"
+    },
+    "summary": {
+      "withCustomer": "Avec client",
+      "withoutCustomer": "Sans client"
+    }
+  },
+  "departments": {
+    "total": "Total services",
+    "window": "Services du {{from}} au {{to}}",
+    "series": "Services dans le temps",
+    "loading": "Chargement…",
+    "error": "Le rapport n'a pas pu être chargé.",
+    "empty": "Aucune donnée sur cette période.",
+    "axes": {
+      "customer": "Par client",
+      "location": "Par site",
+      "status": "Par statut"
+    },
+    "summary": {
+      "withLocation": "Avec site",
+      "withoutLocation": "Sans site"
+    }
+  },
+  "ai": {
+    "total": "Total activité IA",
+    "window": "Utilisation de l'IA du {{from}} au {{to}}",
+    "series": "Utilisation dans le temps",
+    "loading": "Chargement…",
+    "error": "Le rapport n'a pas pu être chargé.",
+    "empty": "Aucune donnée sur cette période.",
+    "axes": {
+      "activity": "Par activité",
+      "model": "Par modèle",
+      "user": "Par utilisateur"
+    },
+    "summary": {
+      "tokens": "Jetons",
+      "amount": "Montant des ventes"
+    }
+  },
+  "workflows": {
+    "total": "Total exécutions",
+    "window": "Exécutions du {{from}} au {{to}}",
+    "series": "Exécutions dans le temps",
+    "loading": "Chargement…",
+    "error": "Le rapport n'a pas pu être chargé.",
+    "empty": "Aucune donnée sur cette période.",
+    "axes": {
+      "workflow": "Par workflow",
+      "trigger": "Par déclencheur",
+      "status": "Par statut"
+    },
+    "summary": {
+      "runs": "Exécutions",
+      "completed": "Terminées",
+      "failed": "Échouées",
+      "cancelled": "Annulées",
+      "running": "En cours",
+      "successRate": "Taux de réussite",
+      "avgDuration": "Durée moyenne"
+    }
   }
 }

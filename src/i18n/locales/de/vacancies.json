@@ -161,7 +161,8 @@
       "statistics": "Statistiken",
       "extra": "Extra",
       "changelog": "Änderungen",
-      "matches": "Matches"
+      "matches": "Matches",
+      "tasks": "Aufgaben"
     },
     "archivedBanner": {
       "since": "Archiviert am {{date}}",
@@ -485,5 +486,13 @@
   },
   "matchesTab": {
     "loadError": "Matches konnten nicht geladen werden."
+  },
+  "tasks": {
+    "newTask": "Neue Aufgabe",
+    "empty": "Noch keine Aufgaben für diese Stelle",
+    "loading": "Aufgaben werden geladen…",
+    "error": "Aufgaben konnten nicht geladen werden",
+    "openTask": "Aufgabe öffnen",
+    "searchPlaceholder": "Aufgabe suchen…"
   }
 }

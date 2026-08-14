@@ -29,7 +29,8 @@
     "city": "Ort",
     "industry": "Branche",
     "createdAt": "Erstellt am",
-    "koios": "Koios AI"
+    "koios": "Koios AI",
+    "matches": "Matches"
   },
   "filters": {
     "search": "Suchen",
@@ -445,14 +446,16 @@
     "col": {
       "title": "Titel",
       "status": "Status",
-      "applications": "Bewerbungen"
+      "applications": "Bewerbungen",
+      "applicationsOpen": "Bewerbungen öffnen"
     },
     "filter": {
       "status": "Status"
     },
     "add": "Neue Stelle",
     "searchPlaceholder": "Stelle suchen…",
-    "showUnpublished": "Auch unveröffentlicht"
+    "showUnpublished": "Auch unveröffentlicht",
+    "editVacancy": "Stelle bearbeiten"
   },
   "opportunities": {
     "title": "Chancen",

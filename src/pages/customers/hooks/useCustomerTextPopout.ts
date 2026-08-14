@@ -22,10 +22,12 @@ import type { Id } from '@/types/common'
 
 export interface CustomerLite { id: string; name: string; initials: string; description: string }
 export interface DepartmentLite { id: string; customerId: string; name: string; description: string }
+export interface LocationLite { id: string; name: string; description: string }
 
-// The subset of the raw customer/department resource these popouts actually read.
+// The subset of the raw customer/department/location resource these popouts actually read.
 interface RawCustomerLite { id?: Id; name?: string; description?: string | null }
 interface RawDepartmentLite { id?: Id; name?: string; description?: string | null }
+interface RawLocationLite { id?: Id; name?: string; description?: string | null }
 
 // Light identity fetch for the popped-out customer bedrijfstekst window.
 export function useCustomerTextLite(id: string | undefined) {
@@ -73,6 +75,40 @@ export function useDepartmentTextLite(customerId: string | undefined, department
 
   useEffect(() => { load() }, [load])
   return { department, loading, error, reload: load }
+}
+
+// K3/K4c: light identity fetch for the popped-out location omschrijving window.
+// Unlike departments, a standalone `GET /locations/{id}` route exists (no
+// customer prefix needed — LocationController::show), so this is a direct
+// single-record fetch, mirroring useCustomerTextLite rather than the
+// list-and-find department pattern above.
+export function useLocationTextLite(locationId: string | undefined) {
+  const [location, setLocation] = useState<LocationLite | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(false)
+
+  const load = useCallback(() => {
+    if (!locationId) { setLoading(false); return }
+    setLoading(true); setError(false)
+    api.get(`/locations/${locationId}`)
+      .then(r => {
+        const raw = unwrap<RawLocationLite>(r)
+        setLocation({ id: String(raw.id ?? locationId), name: raw.name ?? '?', description: raw.description ?? '' })
+      })
+      .catch(() => setError(true))
+      .finally(() => setLoading(false))
+  }, [locationId])
+
+  useEffect(() => { load() }, [load])
+  return { location, loading, error, reload: load }
+}
+
+// Standalone PATCH /locations/{id} — same field LocationAddressTab's
+// saveDescription writes through useCustomerLocations.update.
+export function patchLocationText(locationId: Id, html: string, t: TFunction, revert: () => void): Promise<boolean> {
+  return api.patch(`/locations/${locationId}`, { description: html })
+    .then(() => true)
+    .catch(err => { revert(); notifyError(extractApiError(err, t('common:actionFailed'))); return false })
 }
 
 // Standalone PATCH /customers/{id} — same field the drawer's own OverviewTab

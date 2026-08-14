@@ -17,6 +17,7 @@ import PopoutShell from './PopoutShell'
 import CandidateNotesPopout from './CandidateNotesPopout'
 import CustomerNotesPopout from './CustomerNotesPopout'
 import VacancyNotesPopout from './VacancyNotesPopout'
+import ApplicationNotesPopout from './ApplicationNotesPopout'
 import type { PopoutEntity } from '@/lib/secondScreen'
 
 // One entry per PopoutEntity (secondScreen.ts) — keep the two in sync.
@@ -24,6 +25,7 @@ const ENTITY_PAGES: Record<PopoutEntity, ComponentType<{ id: string | undefined 
   candidate: CandidateNotesPopout,
   customer: CustomerNotesPopout,
   vacancy: VacancyNotesPopout,
+  application: ApplicationNotesPopout,
 }
 
 // Type guard: narrows the raw `:entity` URL param to a known PopoutEntity.

@@ -57,7 +57,7 @@ export default function NoteFields({ fields, noteTypes, channels, labels, editor
               style={{ padding: '4px 10px', fontSize: 11, borderRadius: 99, cursor: 'pointer',
                 border: `1px solid ${type === nt.value ? 'color-mix(in srgb, var(--color-primary) 45%, transparent)' : 'var(--border)'}`,
                 background: type === nt.value ? 'color-mix(in srgb, var(--color-primary) 14%, transparent)' : 'var(--surface)',
-                color: type === nt.value ? 'var(--color-primary)' : 'var(--text)', fontWeight: type === nt.value ? 600 : 400 }}>
+                color: type === nt.value ? 'var(--color-primary-text)' : 'var(--text)', fontWeight: type === nt.value ? 600 : 400 }}>
               {nt.label}
             </button>
           ))}

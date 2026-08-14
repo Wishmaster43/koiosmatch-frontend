@@ -73,7 +73,7 @@ export default function AddVacancyModal({
       // FloatingPanel shell (its own persistKey — it is its own window).
       <FloatingPanel open onClose={onClose} title={f.t('modal.attachments.resultsTitle')}
         ariaLabel={f.t('modal.attachments.resultsTitle')} persistKey="add-vacancy-results"
-        scrollBody={false} width="min(calc(100vw - 48px), 1060px)" maxWidth={`${WIDE_MODAL.maxWidth}px`}>
+        scrollBody={false} width={`min(calc(100vw - 48px), ${WIDE_MODAL.maxWidth}px)`} maxWidth={`${WIDE_MODAL.maxWidth}px`}>
           <PostCreateResultsPanel files={attachments.files} noteText={attachments.noteText}
             noteStatus={attachments.noteStatus} noteError={attachments.noteError} running={attachments.running}
             onRetryFile={attachments.retryFile} onRetryNote={attachments.retryNote} onClose={onClose} />
@@ -140,7 +140,7 @@ export default function AddVacancyModal({
               <RequirementsCard
                 seniority={f.form.seniority} onSeniorityChange={v => f.set('seniority', v)} seniorityLevels={f.seniorityLevels}
                 education={f.form.education} onEducationChange={v => f.set('education', v)} educationLevels={f.educationLevels}
-                skills={f.skills} newSkill={f.newSkill} onNewSkillChange={f.setNewSkill} onAddSkill={f.addSkill} onRemoveSkill={f.removeSkill}
+                skills={f.skills} onAddSkill={f.addSkill} onEditSkill={f.editSkill} onRemoveSkill={f.removeSkill}
               />
               <ConditionsCard
                 salaryMin={f.form.salaryMin} salaryMax={f.form.salaryMax} salaryPeriod={f.form.salaryPeriod}

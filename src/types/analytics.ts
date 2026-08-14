@@ -400,3 +400,63 @@ export interface SourcesReportData {
   to: string
   sources: SourceRow[]
 }
+
+// ── Thin reports (RAPPORTEN-SUITE-2) ─────────────────────────────────────────
+// Hand-written from the backend contract entry (the generated spec carries request
+// shapes + 401 only, no 2xx schema — §10). All five follow the shared portie recipe:
+// period echo + from/to + total + timeseries, axes of {value,label,count} that each
+// sum to `total`, and (except AI) a drill/advice pair per bar.
+
+// One axis bar, shared by the five thin reports.
+export interface ThinSegment { value: string; label: string; count: number; color?: string | null }
+
+// GET /reports/contacts — summary counts primary contacts and contact recency.
+export interface ContactsReportData {
+  period: string; from: string; to: string; total: number
+  summary: { total: number; primary: number; with_recent_contact: number; never_contacted: number }
+  timeseries: { bucket: 'day' | 'week'; series: CandidateTimeseriesPoint[] }
+  by_customer: ThinSegment[]; by_location: ThinSegment[]; by_department: ThinSegment[]
+  by_function: ThinSegment[]; by_status: ThinSegment[]
+}
+
+// GET /reports/locations — `summary` splits locations with and without departments.
+export interface LocationsReportData {
+  period: string; from: string; to: string; total: number
+  summary?: { with_departments: number; without_departments: number }
+  timeseries: { bucket: 'day' | 'week'; series: CandidateTimeseriesPoint[] }
+  by_customer: ThinSegment[]; by_city: ThinSegment[]; by_province: ThinSegment[]; by_status: ThinSegment[]
+}
+
+// GET /reports/departments — `summary` splits departments with and without contacts.
+export interface DepartmentsReportData {
+  period: string; from: string; to: string; total: number
+  summary?: { with_contacts: number; without_contacts: number }
+  timeseries: { bucket: 'day' | 'week'; series: CandidateTimeseriesPoint[] }
+  by_customer: ThinSegment[]; by_location: ThinSegment[]; by_status: ThinSegment[]
+}
+
+// One AI usage bar: `value` is the RAW slug/model id (stable key), `label` the Dutch
+// wording where the backend knows it and the raw value otherwise — never an empty bar.
+// `amount` is a SALES figure only: the envelope carries no cost or margin, and the FE
+// must never render or derive one (privacy line, RAPPORTEN-SUITE-2).
+export interface AiActivitySegment { value: string; label: string; count: number
+  color?: string | null; amount?: number | null; tokens?: number | null }
+
+// GET /reports/ai — NO drill endpoint exists, so these bars stay non-clickable.
+export interface AiReportData {
+  period: string; from: string; to: string; total: number
+  summary: { total: number; tokens: number; amount: number | null }
+  timeseries: { bucket: 'day' | 'week'; series: CandidateTimeseriesPoint[] }
+  by_activity: AiActivitySegment[]; by_model: AiActivitySegment[]; by_user: AiActivitySegment[]
+}
+
+// GET /reports/workflows — run outcomes; `avg_duration_seconds` is null while nothing ran.
+export interface WorkflowsReportData {
+  period: string; from: string; to: string; total: number
+  summary: {
+    runs: number; completed: number; failed: number; cancelled: number; running: number
+    success_rate: number | null; avg_duration_seconds: number | null
+  }
+  timeseries: { bucket: 'day' | 'week'; series: CandidateTimeseriesPoint[] }
+  by_workflow: ThinSegment[]; by_trigger: ThinSegment[]; by_status: ThinSegment[]
+}

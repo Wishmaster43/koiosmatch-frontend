@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next'
 import { useDateFormat } from '@/lib/datetime'
 import { CheckCircle2 } from 'lucide-react'
 import Avatar from '@/components/ui/Avatar'
+import EntityLink from '@/components/ui/EntityLink'
 import KoiosAiMark from '@/components/ui/KoiosAiMark'
 import type { Application } from '@/types/application'
 import type { Id } from '@/types/common'
@@ -31,7 +32,13 @@ function BoardCard({ app, onDragStart, onClick, selected }: {
       {/* Header: avatar + name + new-dot */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
         <Avatar initials={app.candidateInitials} size={28} />
-        <span style={{ fontWeight: 600, fontSize: 13, color: 'var(--text)', flex: 1 }}>{app.candidateName}</span>
+        {/* S-board-2: the board card is the last surface still rendering these as
+            plain text — every other application surface links them (see
+            CustomerApplicationsList's own candidate cell). hideIcon: the compact
+            card has no room for the "open in new tab" trailing icon. */}
+        <span style={{ flex: 1, minWidth: 0, fontWeight: 600, fontSize: 13 }}>
+          <EntityLink page="candidates" id={app.candidateId} tone="neutral" hideIcon>{app.candidateName}</EntityLink>
+        </span>
         {/* PLACED-1: subtle placed badge — colour never the only signal, the icon
             shape + aria/title text carry the meaning on their own. */}
         {app.hasMatch && (
@@ -47,10 +54,10 @@ function BoardCard({ app, onDragStart, onClick, selected }: {
         <div style={{ marginBottom: 6, fontSize: 12, fontWeight: 600, color: scoreColor(app.score) }}>{app.score}%</div>
       )}
 
-      {/* Vacancy (2-line clamp) */}
-      <div style={{ fontSize: 11, color: 'var(--text-muted)', lineHeight: 1.4, marginBottom: 6,
+      {/* Vacancy (2-line clamp) — S-board-2: linked, same reasoning as the candidate name above. */}
+      <div style={{ fontSize: 11, lineHeight: 1.4, marginBottom: 6,
         display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
-        {app.vacancyTitle}
+        <EntityLink page="vacancies" id={app.vacancyId} tone="neutral" hideIcon>{app.vacancyTitle}</EntityLink>
       </div>
 
       {/* AI task — the mark alone is icon-only; the surrounding "AI task" label already

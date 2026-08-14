@@ -166,13 +166,13 @@ vi.mock('@/lib/api', async () => {
 const noop = () => {}
 
 describe('MatchModal · layout (card-stack canon, Danny 13-08)', () => {
-  it('opens WIDE by default (1060/92vw) — a 640px default truncated every customer name (Danny 14-08)', async () => {
+  it('opens WIDE by default (de gedeelde WIDE_MODAL-breedte/92vw) — a 640px default truncated every customer name (Danny 14-08)', async () => {
     render(<MatchModal candidateId="cand-1" onClose={noop} onCreated={noop} />)
     // Let the candidate-branch lookup effect settle before asserting (avoids an
     // act() warning from its microtask resolving after the test body returns).
     const dialogs = await screen.findAllByRole('dialog')
     // POPUP-SLEEP-1: the shared FloatingPanel frame owns the footprint.
-    expect(dialogs.some(d => d.style.maxWidth === '92vw' && d.style.width === '1060px')).toBe(true)
+    expect(dialogs.some(d => d.style.maxWidth === '92vw' && d.style.width === '1320px')).toBe(true)
   })
 })
 

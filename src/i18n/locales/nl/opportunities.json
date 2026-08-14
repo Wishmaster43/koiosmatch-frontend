@@ -154,7 +154,8 @@
       "owner": "Eigenaar",
       "location": "Locatie",
       "department": "Afdeling",
-      "contact": "Contactpersoon"
+      "contact": "Contactpersoon",
+      "branch": "Vestiging"
     }
   },
   "view": {

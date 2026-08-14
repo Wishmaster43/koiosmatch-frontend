@@ -52,7 +52,13 @@ class FakeChannel {
 // transform, not identity) — proves the Tijdlijn section routes `time` through
 // the house formatter instead of rendering the raw ISO field (Danny 05-08).
 vi.mock('@/lib/datetime', () => ({
-  useDateFormat: () => ({ formatDate: (v: string) => `d(${v})`, formatDateTime: (v?: string | null) => (v ? `dt(${v})` : '—') }),
+  useDateFormat: () => ({
+    formatDate: (v: string) => `d(${v})`,
+    formatDateTime: (v?: string | null) => (v ? `dt(${v})` : '—'),
+    // NOTES-TIMELINE-CONVERGE-1: the shared EventTimeline shows formatTime on the
+    // row itself and formatDateTime only in the hover title.
+    formatTime: (v?: string | null) => (v ? `t(${v})` : ''),
+  }),
 }))
 // Auth mock (RECHTEN-DETAIL-1 rights gate below) — module-level, mirrors the
 // GeocodeButton/SmSyncButton convention so vi.mock's hoist never races the
@@ -496,21 +502,49 @@ describe('NotesTab · per-note pop-out (NOTITIE-POPOUT-EDIT-1)', () => {
 describe('NotesTab · timeline', () => {
   const timelineItem = (over: Record<string, unknown> = {}) => ({ time: '2026-08-04T17:30:00+00:00', text: 'Fase gewijzigd', ...over })
 
-  it('routes the event time through formatDateTime — never the raw ISO field', () => {
+  it('routes the event time through the house formatter — never the raw ISO field', () => {
     render(<NotesTab timeline={[timelineItem()]} showNotes={false} showConversations={false} labels={labels} />)
-    expect(screen.getByText('dt(2026-08-04T17:30:00+00:00)')).toBeInTheDocument()
+    // NOTES-TIMELINE-CONVERGE-1: EventTimeline shows formatTime on the row and
+    // keeps the full formatDateTime as the row's hover title.
+    expect(screen.getByText('t(2026-08-04T17:30:00+00:00)')).toBeInTheDocument()
+    expect(screen.getByTitle('dt(2026-08-04T17:30:00+00:00)')).toBeInTheDocument()
     expect(screen.queryByText('2026-08-04T17:30:00+00:00')).toBeNull()
   })
 
   it('falls back to created_at when the event carries no `time`', () => {
     render(<NotesTab timeline={[timelineItem({ time: undefined, created_at: '2026-08-01' })]} showNotes={false} showConversations={false} labels={labels} />)
-    expect(screen.getByText('dt(2026-08-01)')).toBeInTheDocument()
+    expect(screen.getByText('t(2026-08-01)')).toBeInTheDocument()
   })
 
   it('draws no dangling connector after a single event', () => {
     render(<NotesTab timeline={[timelineItem()]} showNotes={false} showConversations={false} labels={labels} />)
     expect(screen.getByTestId('timeline-dot')).toBeInTheDocument()
     expect(screen.queryByTestId('timeline-connector')).toBeNull()
+  })
+
+  it('renders a system event through the shared EventTimeline and its marker still opens the changelog', async () => {
+    const user = userEvent.setup()
+    const openChangelog = vi.fn()
+    window.addEventListener('km:open-changelog', openChangelog)
+    render(<NotesTab
+      systemNotes={[{ type: 'status_change', created_at: '2026-08-04T09:00:00+00:00', text: '<p>Status changed</p>' }]}
+      showNotes={false} showConversations={false} labels={{ ...labels, openChangelog: 'Open changelog' }} />)
+    expect(screen.getByText('Status changed')).toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: 'Open changelog' }))
+    expect(openChangelog).toHaveBeenCalledTimes(1)
+    window.removeEventListener('km:open-changelog', openChangelog)
+  })
+
+  it('merges system events and timeline items into one chronological list', () => {
+    render(<NotesTab
+      systemNotes={[{ type: 'status_change', created_at: '2026-08-05T09:00:00+00:00', text: 'Newer system event' }]}
+      timeline={[timelineItem({ text: 'Older timeline item', time: '2026-08-01T09:00:00+00:00' })]}
+      showNotes={false} showConversations={false} labels={labels} />)
+    const rows = screen.getAllByTestId('timeline-dot')
+    expect(rows).toHaveLength(2)
+    // The system event (05-08) renders before the older timeline item (01-08).
+    const order = screen.getByText('Newer system event').compareDocumentPosition(screen.getByText('Older timeline item'))
+    expect(order & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
   })
 
   it('connects every event except the last', () => {

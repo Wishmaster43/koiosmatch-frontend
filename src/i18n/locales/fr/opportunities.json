@@ -129,7 +129,8 @@
       "endDate": "Date de fin",
       "location": "Lieu",
       "department": "Département",
-      "contact": "Contact"
+      "contact": "Contact",
+      "branch": "Agence"
     }
   },
   "view": {

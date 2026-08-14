@@ -88,6 +88,24 @@ describe('applications NotesTab (shared reuse)', () => {
     // The real request still goes to the application notes route (§13: assert the REQUEST).
     expect(mockPost).toHaveBeenCalledWith('/applications/1/notes', expect.objectContaining({ type: expect.any(String) }))
   })
+
+  // A-popout-1: the composer's second-screen icon opens the SAME
+  // /popout/notes/{entity}/{id} route every other entity's NotesTab uses — assert
+  // the actual window.open call (route + entity + id + named window), not just
+  // that a handler fired (§13).
+  const composerPopOut = () =>
+    screen.getByPlaceholderText('notes.placeholder').parentElement!
+      .querySelector('button[aria-label="openSecondScreen"]') as HTMLButtonElement | null
+
+  it('the composer pop-out opens /popout/notes/application/{id} in a per-record named window', async () => {
+    const user = userEvent.setup()
+    const openSpy = vi.spyOn(window, 'open').mockReturnValue({} as Window)
+    render(<NotesTab application={app({ id: 7 })} />)
+    await user.click(screen.getByRole('button', { name: 'notes.new' }))
+    await user.click(composerPopOut()!)
+    expect(openSpy).toHaveBeenCalledWith('/popout/notes/application/7', 'koios-notes-application-7', expect.any(String))
+    openSpy.mockRestore()
+  })
 })
 
 // NOTE-AUTHOR-SHAPE-2 (verified live 2026-08-07, CMBE 5961c673): a fetched/seeded

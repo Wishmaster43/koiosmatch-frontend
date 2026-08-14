@@ -255,5 +255,99 @@
       "owner": "Eigentümer",
       "branch": "Niederlassung"
     }
+  },
+  "contacts": {
+    "total": "Kontakte gesamt",
+    "window": "Kontakte {{from}} bis {{to}}",
+    "series": "Kontakte im Zeitverlauf",
+    "loading": "Wird geladen…",
+    "error": "Bericht konnte nicht geladen werden.",
+    "empty": "Noch keine Daten in diesem Zeitraum.",
+    "axes": {
+      "customer": "Nach Kunde",
+      "location": "Nach Standort",
+      "department": "Nach Abteilung",
+      "function": "Nach Funktion",
+      "status": "Nach Status"
+    },
+    "summary": {
+      "primary": "Hauptkontakt",
+      "withRecentContact": "Kürzlich kontaktiert",
+      "neverContacted": "Nie kontaktiert"
+    }
+  },
+  "locations": {
+    "total": "Standorte gesamt",
+    "window": "Standorte {{from}} bis {{to}}",
+    "series": "Standorte im Zeitverlauf",
+    "loading": "Wird geladen…",
+    "error": "Bericht konnte nicht geladen werden.",
+    "empty": "Noch keine Daten in diesem Zeitraum.",
+    "axes": {
+      "customer": "Nach Kunde",
+      "city": "Nach Ort",
+      "province": "Nach Provinz",
+      "status": "Nach Status"
+    },
+    "summary": {
+      "withCustomer": "Mit Kunde",
+      "withoutCustomer": "Ohne Kunde"
+    }
+  },
+  "departments": {
+    "total": "Abteilungen gesamt",
+    "window": "Abteilungen {{from}} bis {{to}}",
+    "series": "Abteilungen im Zeitverlauf",
+    "loading": "Wird geladen…",
+    "error": "Bericht konnte nicht geladen werden.",
+    "empty": "Noch keine Daten in diesem Zeitraum.",
+    "axes": {
+      "customer": "Nach Kunde",
+      "location": "Nach Standort",
+      "status": "Nach Status"
+    },
+    "summary": {
+      "withLocation": "Mit Standort",
+      "withoutLocation": "Ohne Standort"
+    }
+  },
+  "ai": {
+    "total": "KI-Aktivität gesamt",
+    "window": "KI-Nutzung {{from}} bis {{to}}",
+    "series": "Nutzung im Zeitverlauf",
+    "loading": "Wird geladen…",
+    "error": "Bericht konnte nicht geladen werden.",
+    "empty": "Noch keine Daten in diesem Zeitraum.",
+    "axes": {
+      "activity": "Nach Aktivität",
+      "model": "Nach Modell",
+      "user": "Nach Benutzer"
+    },
+    "summary": {
+      "tokens": "Tokens",
+      "amount": "Verkaufsbetrag"
+    }
+  },
+  "workflows": {
+    "total": "Workflow-Läufe gesamt",
+    "window": "Läufe {{from}} bis {{to}}",
+    "series": "Läufe im Zeitverlauf",
+    "loading": "Wird geladen…",
+    "error": "Bericht konnte nicht geladen werden.",
+    "empty": "Noch keine Daten in diesem Zeitraum.",
+    "axes": {
+      "workflow": "Nach Workflow",
+      "trigger": "Nach Auslöser",
+      "status": "Nach Status"
+    },
+    "summary": {
+      "runs": "Läufe",
+      "completed": "Abgeschlossen",
+      "failed": "Fehlgeschlagen",
+      "cancelled": "Abgebrochen",
+      "running": "Läuft",
+      "successRate": "Erfolgsquote",
+      "avgDuration": "Ø Dauer"
+    }
   }
 }

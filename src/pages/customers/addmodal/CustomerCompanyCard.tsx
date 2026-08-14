@@ -10,7 +10,7 @@ import { useTranslation } from 'react-i18next'
 import type { CustomerForm } from '../AddCustomerModal'
 import { FieldRow, TextField } from '@/components/forms/fields'
 import CreatableSelect from '@/components/ui/CreatableSelect'
-import { cardHead, cardBox, row2 } from '@/components/ui/modalCards'
+import { cardHead, cardBox } from '@/components/ui/modalCards'
 
 interface CustomerCompanyCardProps {
   form: CustomerForm
@@ -36,21 +36,23 @@ export default function CustomerCompanyCard({ form, set, errors, industries }: C
         {/* DEBITEURNUMMER-1 (Danny 02-08): the debtor number is no longer collected
             here — it is the customer's own accounting number, decided later, and
             stays editable everywhere else (drawer/table/search). Two fields remain. */}
-        <div style={row2}>
-          {/* Branche (industry/sector) — searchable tenant lookup, distinct from the
-              "Vestiging" (establishment) picker below. */}
-          <FieldRow label={t('modal.fields.industry')}>
-            {/* CLEAR-SWEEP (Danny 13-08): industry is genuinely optional (the create
-                body sends it unconditionally, empty string included — see
-                useCustomerRecord.handleCreate) — so clearable. */}
-            <CreatableSelect value={form.industry || null} onChange={v => set('industry', v)} allowCreate={false}
-              clearable clearLabel={t('modal.fields.industry')}
-              placeholder={t('modal.fields.selectIndustry')} options={industries} />
-          </FieldRow>
-          <FieldRow label={t('overview.employeeCount')}>
-            <TextField type="number" value={form.employeeCount} onChange={v => set('employeeCount', v)} />
-          </FieldRow>
-        </div>
+        {/* KLANT-LAYOUT-4 (Danny 14-08: "branche en werknemers ziet er gek uit nadat
+            je er 1 gekozen hebt"): pairing two label-left fields on one grid row left
+            the second input a stub, and a picked industry made the imbalance obvious.
+            Each field owns its row now, like Naam above. */}
+        {/* Branche (industry/sector) — searchable tenant lookup, distinct from the
+            "Vestiging" (establishment) picker below. */}
+        <FieldRow label={t('modal.fields.industry')}>
+          {/* CLEAR-SWEEP (Danny 13-08): industry is genuinely optional (the create
+              body sends it unconditionally, empty string included — see
+              useCustomerRecord.handleCreate) — so clearable. */}
+          <CreatableSelect value={form.industry || null} onChange={v => set('industry', v)} allowCreate={false}
+            clearable clearLabel={t('modal.fields.industry')}
+            placeholder={t('modal.fields.selectIndustry')} options={industries} />
+        </FieldRow>
+        <FieldRow label={t('overview.employeeCount')}>
+          <TextField type="number" value={form.employeeCount} onChange={v => set('employeeCount', v)} />
+        </FieldRow>
       </div>
     </div>
   )

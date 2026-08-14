@@ -148,15 +148,16 @@ export function ZzpTab({ c, onSave }: { c: Candidate; onSave?: (v: Record<string
   const canSeeFinancial = auth?.hasPermission?.('candidates.financial.view') ?? false
   const fields = [
     { key: 'bedrijfsnaam', label: t('zzp.companyName'), group: t('zzp.groupCompany') },
-    // KVK/BTW render as real hyperlinks in read mode (task 1.1.2/1.1.3) — same
-    // shared renderers the customer OverviewTab uses, edit mode stays a plain input.
-    { key: 'kvk', label: t('zzp.kvk'), group: t('zzp.groupCompany'),
+    // 69-17: KVK/BTW/KOR moved from Bedrijf to Financieel (renamed from Facturatie,
+    // see zzp.groupInvoicing's own translation) — same fields, same hyperlink
+    // renderers/validation, only the card they live in changed.
+    { key: 'kvk', label: t('zzp.kvk'), group: t('zzp.groupInvoicing'),
       renderValue: (v: unknown) => kvkValue(v, t('zzp.openKvk')),
       validate: (v: unknown) => identifiers.notice('coc', v as string, zzpCountry) },
-    { key: 'btw', label: t('zzp.vat'), group: t('zzp.groupCompany'),
+    { key: 'btw', label: t('zzp.vat'), group: t('zzp.groupInvoicing'),
       renderValue: (v: unknown) => vatValue(v, t('zzp.openVies')),
       validate: (v: unknown) => identifiers.notice('vat', v as string, zzpCountry) },
-    { key: 'kor', label: t('zzp.kor'), group: t('zzp.groupCompany'), type: 'checkbox' },
+    { key: 'kor', label: t('zzp.kor'), group: t('zzp.groupInvoicing'), type: 'checkbox' },
     // CREDITOR-AUTO-1: only offered as an editable row while the tenant does NOT
     // run it through the numbering sequence — once it does, it renders as its
     // own read-only row instead (see the JSX below), never as an input here.
@@ -184,8 +185,11 @@ export function ZzpTab({ c, onSave }: { c: Candidate; onSave?: (v: Record<string
   // shared toApi, which used to ride the full 12-key ZZP object along on every
   // block's save) — Facturatie needs its own async validation gate below, which
   // must never run just because Bedrijf's KVK/BTW/KOR were edited.
+  // 69-17: kvk/btw/kor moved out of this card (now saved by handleSaveInvoicing
+  // below, alongside the rest of the Financieel card) — Bedrijf now only owns
+  // the company name.
   const handleSaveCompany = (v: Record<string, unknown>) => onSave?.({
-    company_name: v.bedrijfsnaam, kvk_number: v.kvk, vat_number: v.btw, kor: v.kor,
+    company_name: v.bedrijfsnaam,
   })
 
   // Adres — own component + own save call (see ZzpAddressCard's file header for
@@ -222,8 +226,12 @@ export function ZzpTab({ c, onSave }: { c: Candidate; onSave?: (v: Record<string
       // verbatim), the tenaamstelling trimmed — the readable grouping is a
       // display concern only.
       onSave?.({
+        // 69-17: kvk/btw/kor now live in this same Financieel card — still a plain
+        // patch alongside the rest, the async duplicate-check gate below only ever
+        // keys off business_email, so a kvk/btw-only edit never triggers it.
         creditor_number: v.crediteur, business_email: v.email_zakelijk,
         iban: normalizeIban(v.iban), account_holder_name: String(v.tenaamstelling ?? '').trim(),
+        kvk_number: v.kvk, vat_number: v.btw, kor: v.kor,
       })
       // CREDITOR-AUTO-1: only worth a re-read when it was submitted BLANK — that
       // is the one case the backend fills in behind the optimistic patch above.

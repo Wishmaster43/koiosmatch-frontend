@@ -129,7 +129,8 @@
       "endDate": "Fecha de fin",
       "location": "Ubicación",
       "department": "Departamento",
-      "contact": "Contacto"
+      "contact": "Contacto",
+      "branch": "Sucursal"
     }
   },
   "view": {

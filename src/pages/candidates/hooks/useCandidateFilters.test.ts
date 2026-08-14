@@ -211,6 +211,25 @@ describe('useCandidateFilters — stale6m cutoff uses the LOCAL calendar day, ne
   })
 })
 
+describe('useCandidateFilters — missingAppointment (V-appdetail-1/2)', () => {
+  it('is findable: toggling it flips anyFilterActive and clearAllFilters resets it', () => {
+    const { result } = renderHook(() => useCandidateFilters(baseArgs))
+    expect(result.current.missingAppointmentFilter).toBe(false)
+    act(() => { result.current.setMissingAppointmentFilter(v => !v) })
+    expect(result.current.missingAppointmentFilter).toBe(true)
+    expect(result.current.anyFilterActive).toBe(true)
+    act(() => { result.current.clearAllFilters() })
+    expect(result.current.missingAppointmentFilter).toBe(false)
+    expect(result.current.anyFilterActive).toBe(false)
+  })
+
+  it('is a client-side refine only — no server param, filterParams stays empty', () => {
+    const { result } = renderHook(() => useCandidateFilters(baseArgs))
+    act(() => { result.current.setMissingAppointmentFilter(v => !v) })
+    expect(result.current.filterParams).toEqual({})
+  })
+})
+
 describe('useCandidateFilters — clearAllFilters + anyFilterActive', () => {
   it('anyFilterActive flips true once any picked filter is set', () => {
     const { result } = renderHook(() => useCandidateFilters(baseArgs))

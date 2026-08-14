@@ -154,7 +154,8 @@
       "owner": "Owner",
       "location": "Location",
       "department": "Department",
-      "contact": "Contact"
+      "contact": "Contact",
+      "branch": "Branch"
     }
   },
   "view": {

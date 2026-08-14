@@ -25,7 +25,8 @@
     "koios": "Koios",
     "phase": "Phase",
     "deployability": "Status",
-    "contractForm": "Vertragsform"
+    "contractForm": "Vertragsform",
+    "missingAppointment": "Termin fehlt"
   },
   "bulk": {
     "selected": "{{count}} ausgewählt",
@@ -173,7 +174,8 @@
       "hoursMinPlaceholder": "Min",
       "hoursMaxPlaceholder": "Max",
       "availableFromBefore": "Verfügbar vor"
-    }
+    },
+    "missingAppointment": "Termin fehlt"
   },
   "modal": {
     "title": "Neuer Kandidat",
@@ -809,7 +811,7 @@
     "paymentTerm": "Zahlungsziel",
     "groupCompany": "Unternehmen",
     "groupAddress": "Adresse",
-    "groupInvoicing": "Rechnungsstellung",
+    "groupInvoicing": "Finanzen",
     "groupPayment": "Zahlung",
     "openKvk": "Im Handelsregister öffnen",
     "openVies": "In VIES prüfen (EU)",
@@ -1045,7 +1047,8 @@
       "month": "pro Monat",
       "year": "pro Jahr",
       "week": "pro Woche"
-    }
+    },
+    "noLocationResults": "Dieser Kandidat hat noch keine Koordinaten, daher ist keine Umkreissuche möglich. Adresse aktualisieren oder Kandidat geokodieren."
   },
   "erase": {
     "trashView": "Papierkorb",

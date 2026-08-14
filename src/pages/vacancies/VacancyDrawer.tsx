@@ -25,6 +25,7 @@ import PublishingTab from './drawer/PublishingTab'
 import DocumentsTab from './drawer/DocumentsTab'
 import TimelineTab from './drawer/TimelineTab'
 import NotesTab from './drawer/NotesTab'
+import VacancyTasksTab from './drawer/VacancyTasksTab'
 import StatisticsTab from './drawer/StatisticsTab'
 import MatchesTab from './drawer/MatchesTab'
 import MatchingTab from './drawer/MatchingTab'
@@ -78,6 +79,9 @@ const TABS: { id: string; tKey: string; autoExpand?: boolean; render: (v: Vacanc
   // updated lifecycle moments, newest-first.
   { id: 'timeline',   tKey: 'timeline',   render: v => <TimelineTab vacancy={v} /> },
   { id: 'notes',      tKey: 'notes',      render: v => <NotesTab vacancy={v} /> },
+  // V-tasks-1: mirrors the candidate drawer's own Taken tab, via the shared
+  // EntityTasksTab shell (see VacancyTasksTab's own header for why).
+  { id: 'tasks',      tKey: 'tasks',      render: v => <VacancyTasksTab vacancy={v} /> },
   // Koppelingen (Danny 28-07): PDOK left the title row, so the vacancy gets the same
   // tab as every other entity. Vacancies are NOT in the backoffice sync registry
   // (no HelloFlex/Shiftmanager token), so this tab holds the geocoding card only —

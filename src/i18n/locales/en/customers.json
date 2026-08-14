@@ -29,7 +29,8 @@
     "city": "City",
     "industry": "Industry",
     "createdAt": "Created on",
-    "koios": "Koios AI"
+    "koios": "Koios AI",
+    "matches": "Matches"
   },
   "filters": {
     "search": "Search",
@@ -445,14 +446,16 @@
     "col": {
       "title": "Title",
       "status": "Status",
-      "applications": "Applications"
+      "applications": "Applications",
+      "applicationsOpen": "Open applications"
     },
     "filter": {
       "status": "Status"
     },
     "add": "New vacancy",
     "searchPlaceholder": "Search vacancy…",
-    "showUnpublished": "Include unpublished"
+    "showUnpublished": "Include unpublished",
+    "editVacancy": "Edit vacancy"
   },
   "opportunities": {
     "title": "Opportunities",

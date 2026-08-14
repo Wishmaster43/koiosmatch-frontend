@@ -551,11 +551,32 @@ describe('AddVacancyModal · Functie-eisen — senioriteit/opleiding + skills (p
     render(<AddVacancyModal onClose={noop} users={users} customers={customers} />)
     await user.click(screen.getByRole('button', { name: 'details.seniority' }))
     await user.click(screen.getByRole('button', { name: 'Senior' }))
+    // K6e: RequiredSkillsSection's add/edit/remove list — the "+" trigger opens
+    // an inline AddForm (placeholder = the field label), saved via the diskette icon.
+    await user.click(screen.getByRole('button', { name: /details\.addSkill/ }))
     await user.type(screen.getByPlaceholderText('details.addSkill'), 'BIG-registratie')
-    await user.click(screen.getByTitle('details.addSkill'))
+    await user.click(screen.getByTitle('save'))
     await fillTitleAndSubmit(user)
     expect(mockPost).toHaveBeenCalledWith('/vacancies', expect.objectContaining({
       seniority: 'senior', skills: ['BIG-registratie'],
+    }))
+  })
+
+  it('edits a staged required skill in place (K6e)', async () => {
+    const user = userEvent.setup()
+    render(<AddVacancyModal onClose={noop} users={users} customers={customers} />)
+    await user.click(screen.getByRole('button', { name: /details\.addSkill/ }))
+    await user.type(screen.getByPlaceholderText('details.addSkill'), 'BIG-registratie')
+    await user.click(screen.getByTitle('save'))
+    // The saved row now carries an edit pencil (RequiredSkillsSection/AddableSection).
+    await user.click(screen.getByTitle('edit'))
+    const input = screen.getByPlaceholderText('details.addSkill')
+    await user.clear(input)
+    await user.type(input, 'VCA-certificaat')
+    await user.click(screen.getByTitle('save'))
+    await fillTitleAndSubmit(user)
+    expect(mockPost).toHaveBeenCalledWith('/vacancies', expect.objectContaining({
+      skills: ['VCA-certificaat'],
     }))
   })
 

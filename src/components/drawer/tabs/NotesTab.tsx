@@ -61,7 +61,7 @@
  * today; the customer/vacancy popouts wire add-only, so no button there) and only
  * where this user may edit the note here as well (same gate as the pencil).
  */
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import DrawerAddButton from '@/components/drawer/DrawerAddButton'
@@ -69,9 +69,10 @@ import DrawerFilterMenu from '@/components/drawer/DrawerFilterMenu'
 import type { DrawerFilterConfig } from '@/components/drawer/DrawerFilterMenu'
 import { Edit2, ExternalLink, History, Search, Trash2 } from 'lucide-react'
 import Avatar from '@/components/ui/Avatar'
+import EventTimeline from '@/components/ui/EventTimeline'
+import type { TimelineEvent as TimelineEventInput } from '@/components/ui/EventTimeline'
 import SafeHtml from '@/components/ui/SafeHtml'
 import SectionCard, { sectionBlock } from '@/components/ui/SectionCard'
-import TimelineRail from '@/components/ui/TimelineRail'
 import { useAuth } from '@/context/AuthContext'
 import { useConfirm } from '@/hooks/useConfirm'
 import { useNotesPopout } from '@/hooks/useNotesPopout'
@@ -149,6 +150,9 @@ interface NotesTabProps {
   editorLabels?: Record<string, string>
   authorInitials?: string
   timelineName?: ReactNode
+  // NOTES-TIMELINE-CONVERGE-1: no longer rendered — EventTimeline marks rows with
+  // a kind icon, not an avatar (mirrors vacancies/applications Tijdlijn). Kept in
+  // the prop shape so existing hosts don't need an unrelated edit.
   timelineInitials?: string
   onAddNote?: (payload: NotePayload) => void
   onEditNote?: (i: number, payload: NotePayload) => void
@@ -210,7 +214,7 @@ interface NotesTabProps {
 
 export default function NotesTab({
   notes = [], systemNotes = [], timeline = [], noteTypes = [], chipTypes, channels = [], labels = {}, editorLabels,
-  authorInitials, timelineName, timelineInitials, onAddNote, onEditNote, onDeleteNote,
+  authorInitials, timelineName, onAddNote, onEditNote, onDeleteNote,
   managePermission = 'candidates.notes.manage_all',
   showNotes = true, showTimeline = true, showConversations = true, onEditStatusEvent, renderTimelineContent,
   error, onRetry, composerExtra, popout,
@@ -230,7 +234,7 @@ export default function NotesTab({
   // SHARED tab, so every entity's notes get it at once ('' = all).
   const [typeFilter, setTypeFilter] = useState('')
   const [channelFilter, setChannelFilter] = useState('')
-  const { formatDate, formatDateTime } = useDateFormat()
+  const { formatDate } = useDateFormat()
   // Rights model (RECHTEN-DETAIL-1): current user id + the UI-gate permission check
   // (never security — the BE re-checks). Null-safe: a host with no AuthProvider in
   // its render tree (existing tests, hosts that haven't migrated) still works —
@@ -279,20 +283,6 @@ export default function NotesTab({
     ack()
   }, [incomingNoteId, adding, editingIdx, notes, ack])
 
-  // Load-error state (see NotesTabProps.error) — a calm danger row replaces the
-  // whole tab body, same shape as MatchContractSection's error+retry; no button
-  // at all when the host hasn't wired a retry point (back-compat).
-  if (error) {
-    return (
-      <div style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: 12, color: 'var(--color-danger)', padding: '10px 2px' }}>
-        <span>{labels.loadError}</span>
-        {onRetry && (
-          <button onClick={onRetry} style={{ background: 'none', border: '1px solid var(--border)', borderRadius: 6,
-            padding: '3px 9px', cursor: 'pointer', color: 'var(--text)' }}>{labels.retry}</button>
-        )}
-      </div>
-    )
-  }
   // Note timestamp: real date+time when the note carries one, else the relative "ago".
   const noteWhen = (n: NoteItem) => n.created_at
     ? formatDate(n.created_at as string, { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })
@@ -404,6 +394,61 @@ export default function NotesTab({
             style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: 4, display: 'flex', flexShrink: 0 }}>
             <Edit2 size={13} />
           </button>
+        )}
+      </div>
+    )
+  }
+
+
+  // NOTES-TIMELINE-CONVERGE-1: system events (status/phase changes) + the host's
+  // own timeline items, merged into ONE chronological list for the shared
+  // EventTimeline (see the SectionCard comment below for why this replaced the
+  // old hand-rolled two-block render). Sort is stable, so items that share a
+  // timestamp (or carry none) keep their incoming relative order.
+  const mergedTimelineEvents = useMemo(() => {
+    const sysEvents: TimelineEventInput[] = systemNotes.map((n, i) => {
+      const canEditStatus = Boolean(onEditStatusEvent) && n.type === 'status_change'
+      return {
+        id: `sys-${n.id ?? i}`,
+        time: n.created_at,
+        kind: 'system',
+        text: (
+          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
+            {n.type && <NoteTypeChip value={n.type} types={chipTypes ?? noteTypes} />}
+            <SafeHtml html={n.text ?? n.body ?? ''} />
+          </span>
+        ),
+        meta: noteAuthor(n) || undefined,
+        trailing: canEditStatus
+          ? <button onClick={onEditStatusEvent} title={labels.editStatusEvent} aria-label={labels.editStatusEvent}
+              style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: 4, display: 'flex', flexShrink: 0 }}>
+              <Edit2 size={13} />
+            </button>
+          : null,
+        onMarkerClick: () => window.dispatchEvent(new CustomEvent('km:open-changelog')),
+        markerLabel: typeof labels.openChangelog === 'string' ? labels.openChangelog : undefined,
+      }
+    })
+    const hostEvents: TimelineEventInput[] = timeline.map((ev, i) => ({
+      id: `ev-${i}`,
+      time: ev.time ?? ev.created_at,
+      meta: timelineName,
+      text: renderTimelineContent?.(ev) ?? (ev.text ?? ev.description),
+    }))
+    return [...sysEvents, ...hostEvents]
+      .sort((a, b) => (Date.parse(String(b.time ?? '')) || 0) - (Date.parse(String(a.time ?? '')) || 0))
+  }, [systemNotes, timeline, chipTypes, noteTypes, onEditStatusEvent, labels.editStatusEvent, labels.openChangelog, timelineName, renderTimelineContent])
+
+  // Load-error state (see NotesTabProps.error) — a calm danger row replaces the
+  // whole tab body, same shape as MatchContractSection's error+retry; no button
+  // at all when the host hasn't wired a retry point (back-compat).
+  if (error) {
+    return (
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: 12, color: 'var(--color-danger)', padding: '10px 2px' }}>
+        <span>{labels.loadError}</span>
+        {onRetry && (
+          <button onClick={onRetry} style={{ background: 'none', border: '1px solid var(--border)', borderRadius: 6,
+            padding: '3px 9px', cursor: 'pointer', color: 'var(--text)' }}>{labels.retry}</button>
         )}
       </div>
     )
@@ -528,32 +573,28 @@ export default function NotesTab({
       </div>
       )}
 
-      {/* Timeline */}
+      {/* Timeline — converged onto the shared EventTimeline (NOTES-TIMELINE-
+          CONVERGE-1, 14-08): this hand-rolled TimelineRail block used to be the
+          ONLY fork of the axis+day-grouping look the vacancy/application Tijdlijn
+          tabs already share. System events (status/phase changes) and the host's
+          own timeline items are merged into ONE chronological list (previously
+          two separate blocks: all system events first, then the timeline —
+          a genuine ordering gap this convergence also fixes) and handed to
+          EventTimeline, which owns the day headings, the four states and the axis.
+          Two capabilities didn't exist there yet and were EXTENDED onto the shared
+          component rather than kept as a fork: (1) `onMarkerClick`/`markerLabel`
+          on TimelineEvent, so the "open changelog" affordance can still live on the
+          marker itself (TimelineRail's dot becomes a real button); (2) `trailing`
+          already existed and now carries the per-row status-edit pencil. */}
       {showTimeline && (
       <SectionCard title={labels.timeline}>
-        {/* Status/phase-change events belong to the timeline (Danny 2026-07-13). */}
-        {[...systemNotes]
-          .sort((a, b) => (Date.parse(b.created_at ?? '') || 0) - (Date.parse(a.created_at ?? '') || 0))
-          .map((n, i) => systemRow(n, `sys-${i}`))}
-        {(timeline.length > 0 || systemNotes.length > 0)
-          ? timeline.map((ev, i) => (
-              // paddingBottom (not marginBottom) keeps the spacing INSIDE the row's own
-              // box, so TimelineRail's connector line reaches all the way to the next dot.
-              <div key={i} style={{ display: 'flex', gap: 10, paddingBottom: 12, alignItems: 'flex-start' }}>
-                <TimelineRail isLast={i === timeline.length - 1} />
-                <Avatar initials={timelineInitials} size={28} />
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 4 }}>
-                    <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--text)' }}>{timelineName}</span>
-                    {/* House date+time format — never the raw ISO string (Danny 05-08). */}
-                    <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>{formatDateTime(ev.time ?? ev.created_at)}</span>
-                  </div>
-                  <div style={{ background: 'var(--bg)', border: '1px solid var(--border)', borderRadius: 8, padding: '8px 12px', fontSize: 12, color: 'var(--text)' }}>{renderTimelineContent?.(ev) ?? (ev.text ?? ev.description)}</div>
-                </div>
-              </div>
-            ))
-          : <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{labels.timelineEmpty}</div>
-        }
+        <EventTimeline
+          emptyText={labels.timelineEmpty}
+          kindMeta={kind => kind === 'system' ? { icon: History, color: 'var(--text-muted)' } : undefined}
+
+
+          events={mergedTimelineEvents}
+        />
       </SectionCard>
       )}
 

@@ -255,5 +255,99 @@
       "owner": "Propietario",
       "branch": "Sucursal"
     }
+  },
+  "contacts": {
+    "total": "Total contactos",
+    "window": "Contactos del {{from}} al {{to}}",
+    "series": "Contactos a lo largo del tiempo",
+    "loading": "Cargando…",
+    "error": "No se pudo cargar el informe.",
+    "empty": "Aún no hay datos en este periodo.",
+    "axes": {
+      "customer": "Por cliente",
+      "location": "Por ubicación",
+      "department": "Por departamento",
+      "function": "Por función",
+      "status": "Por estado"
+    },
+    "summary": {
+      "primary": "Contacto principal",
+      "withRecentContact": "Contactado recientemente",
+      "neverContacted": "Nunca contactado"
+    }
+  },
+  "locations": {
+    "total": "Total ubicaciones",
+    "window": "Ubicaciones del {{from}} al {{to}}",
+    "series": "Ubicaciones a lo largo del tiempo",
+    "loading": "Cargando…",
+    "error": "No se pudo cargar el informe.",
+    "empty": "Aún no hay datos en este periodo.",
+    "axes": {
+      "customer": "Por cliente",
+      "city": "Por ciudad",
+      "province": "Por provincia",
+      "status": "Por estado"
+    },
+    "summary": {
+      "withCustomer": "Con cliente",
+      "withoutCustomer": "Sin cliente"
+    }
+  },
+  "departments": {
+    "total": "Total departamentos",
+    "window": "Departamentos del {{from}} al {{to}}",
+    "series": "Departamentos a lo largo del tiempo",
+    "loading": "Cargando…",
+    "error": "No se pudo cargar el informe.",
+    "empty": "Aún no hay datos en este periodo.",
+    "axes": {
+      "customer": "Por cliente",
+      "location": "Por ubicación",
+      "status": "Por estado"
+    },
+    "summary": {
+      "withLocation": "Con ubicación",
+      "withoutLocation": "Sin ubicación"
+    }
+  },
+  "ai": {
+    "total": "Total actividad IA",
+    "window": "Uso de IA del {{from}} al {{to}}",
+    "series": "Uso a lo largo del tiempo",
+    "loading": "Cargando…",
+    "error": "No se pudo cargar el informe.",
+    "empty": "Aún no hay datos en este periodo.",
+    "axes": {
+      "activity": "Por actividad",
+      "model": "Por modelo",
+      "user": "Por usuario"
+    },
+    "summary": {
+      "tokens": "Tokens",
+      "amount": "Importe de ventas"
+    }
+  },
+  "workflows": {
+    "total": "Total ejecuciones",
+    "window": "Ejecuciones del {{from}} al {{to}}",
+    "series": "Ejecuciones a lo largo del tiempo",
+    "loading": "Cargando…",
+    "error": "No se pudo cargar el informe.",
+    "empty": "Aún no hay datos en este periodo.",
+    "axes": {
+      "workflow": "Por workflow",
+      "trigger": "Por disparador",
+      "status": "Por estado"
+    },
+    "summary": {
+      "runs": "Ejecuciones",
+      "completed": "Completadas",
+      "failed": "Fallidas",
+      "cancelled": "Canceladas",
+      "running": "En curso",
+      "successRate": "Tasa de éxito",
+      "avgDuration": "Duración media"
+    }
   }
 }

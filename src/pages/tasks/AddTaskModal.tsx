@@ -356,7 +356,7 @@ export default function AddTaskModal({ onClose, onCreated, onSaved, initial, ext
     // to resize the wide trio stays components/ui/modalMetrics.ts.
     <FloatingPanel open onClose={onClose} title={modalTitle} ariaLabel={modalTitle}
       persistKey="add-task" scrollBody={false}
-      width="min(calc(100vw - 48px), 1060px)" maxWidth={`${WIDE_MODAL.maxWidth}px`}>
+      width={`min(calc(100vw - 48px), ${WIDE_MODAL.maxWidth}px)`} maxWidth={`${WIDE_MODAL.maxWidth}px`}>
 
         {/* Body: titled cards — Taak full-width, then Planning+Toewijzing (left,
             stacked) paired against Koppelingen (right) — mirrors +Match's

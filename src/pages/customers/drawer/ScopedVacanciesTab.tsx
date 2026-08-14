@@ -23,9 +23,11 @@
 import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useQueryClient } from '@tanstack/react-query'
+import { Pencil } from 'lucide-react'
 import StatusPill from '@/components/ui/StatusPill'
 import EntityLink from '@/components/ui/EntityLink'
 import { useNavigation } from '@/context/NavigationContext'
+import { useAuth } from '@/context/AuthContext'
 import { VacancyLookupsProvider } from '@/context/VacancyLookupsContext'
 import AddVacancyModal from '@/pages/vacancies/AddVacancyModal'
 import ScopedListTab from './ScopedListTab'
@@ -35,6 +37,10 @@ import { mapVacancyRow } from '../hooks/useCustomerDrawerData'
 import type { VacancyRow } from '../hooks/useCustomerDrawerData'
 import type { Id } from '@/types/common'
 import type { Column } from '@/components/ui/DataTable'
+
+// K7c: same ghost-button count deep-link style as the customer-level VacanciesTab.
+const applicationsBtn = { display: 'inline-flex', fontFamily: 'JetBrains Mono, monospace', fontSize: 12,
+  color: 'var(--text-muted)', background: 'none', border: 'none', padding: 0, cursor: 'pointer' } as const
 
 // Index signature (mirrors MatchStatus in useMatchStatuses.ts): lets this list feed
 // straight into ScopedListTab's `statuses` prop, typed LookupOption[] — structural
@@ -59,6 +65,9 @@ export default function ScopedVacanciesTab({ scope, id, customerId, customerName
 }) {
   const { t } = useTranslation('customers')
   const { openEntity } = useNavigation()
+  const auth = useAuth()
+  // K7b: same permission the Vacancies page itself gates editing on.
+  const canEditVacancies = auth?.hasPermission?.('vacancies.update') ?? false
   const queryClient = useQueryClient()
   const paramName = scope === 'department' ? 'customer_department_id' : 'customer_location_id'
   const [adding, setAdding] = useState(false)
@@ -88,8 +97,29 @@ export default function ScopedVacanciesTab({ scope, id, customerId, customerName
       render: v => <EntityLink tone="neutral" page="vacancies" id={v.id}>{v.title}</EntityLink> },
     // eslint-disable-next-line no-restricted-syntax -- DATA fallback, not a UI colour choice
     { key: 'status', header: t('vacancies.col.status'), render: v => <StatusPill label={v.status.label} color={v.status.color || '#9CA3AF'} /> },
-    { key: 'applications', header: t('vacancies.col.applications'), align: 'right', cellStyle: { color: 'var(--text-muted)', fontSize: 12 },
-      sortable: true, sortValue: v => v.applications, render: v => v.applications },
+    // K7c/S-custcount-1: ghost-button deep link to this vacancy's own Sollicitaties
+    // (applicants) tab — mirrors the customer-level VacanciesTab's own column.
+    { key: 'applications', header: t('vacancies.col.applications'), align: 'right', sortable: true, sortValue: v => v.applications,
+      render: v => (
+        <button type="button" style={applicationsBtn} aria-label={t('vacancies.col.applicationsOpen')}
+          onClick={e => { e.stopPropagation(); openEntity('vacancies', v.id, 'applicants') }}
+          onMouseEnter={e => { e.currentTarget.style.textDecoration = 'underline' }}
+          onMouseLeave={e => { e.currentTarget.style.textDecoration = 'none' }}>
+          {v.applications}
+        </button>
+      ) },
+    // K7b: row pencil opening the vacancy's own drawer for editing (fields edit
+    // in-place there; no separate edit modal exists, so no fake affordance).
+    ...(canEditVacancies ? [{
+      key: 'actions', header: '', align: 'right' as const,
+      render: (v: VacancyRow) => (
+        <button type="button" onClick={e => { e.stopPropagation(); openEntity('vacancies', v.id) }}
+          title={t('vacancies.editVacancy')} aria-label={t('vacancies.editVacancy')}
+          style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: 22, height: 22, border: 'none', background: 'none', borderRadius: 5, cursor: 'pointer', color: 'var(--text-muted)' }}>
+          <Pencil size={12} />
+        </button>
+      ),
+    }] : []),
   ]
 
   return (

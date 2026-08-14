@@ -25,7 +25,8 @@
     "createdAt": "Created",
     "phase": "Phase",
     "deployability": "Status",
-    "contractForm": "Contract form"
+    "contractForm": "Contract form",
+    "missingAppointment": "Appointment missing"
   },
   "koios": {
     "actions": {
@@ -196,7 +197,8 @@
       "hoursMinPlaceholder": "Min",
       "hoursMaxPlaceholder": "Max",
       "availableFromBefore": "Available before"
-    }
+    },
+    "missingAppointment": "Appointment missing"
   },
   "modal": {
     "title": "New candidate",
@@ -832,7 +834,7 @@
     "paymentTerm": "Payment term",
     "groupCompany": "Company",
     "groupAddress": "Address",
-    "groupInvoicing": "Invoicing",
+    "groupInvoicing": "Financial",
     "groupPayment": "Payment",
     "openKvk": "Open in the CoC register",
     "openVies": "Check in VIES (EU)",
@@ -1045,7 +1047,8 @@
       "month": "per month",
       "year": "per year",
       "week": "per week"
-    }
+    },
+    "noLocationResults": "This candidate has no coordinates yet, so a distance search cannot run. Update the address or geocode the candidate."
   },
   "erase": {
     "trashView": "Trash",

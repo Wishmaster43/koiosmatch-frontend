@@ -161,7 +161,8 @@
       "statistics": "Statistiques",
       "extra": "Extra",
       "changelog": "Modifications",
-      "matches": "Matchs"
+      "matches": "Matchs",
+      "tasks": "Tâches"
     },
     "archivedBanner": {
       "since": "Archivé le {{date}}",
@@ -485,5 +486,13 @@
   },
   "matchesTab": {
     "loadError": "Impossible de charger les matchs."
+  },
+  "tasks": {
+    "newTask": "Nouvelle tâche",
+    "empty": "Aucune tâche pour cette offre pour l'instant",
+    "loading": "Chargement des tâches…",
+    "error": "Impossible de charger les tâches",
+    "openTask": "Ouvrir la tâche",
+    "searchPlaceholder": "Rechercher une tâche…"
   }
 }

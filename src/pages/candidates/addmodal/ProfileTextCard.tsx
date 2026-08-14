@@ -54,7 +54,7 @@ export default function ProfileTextCard({ form, set }: ProfileTextCardProps) {
       <div style={cardBox}>
         <CollapsibleRichText t={t} value={form.summary} onChange={handleChange}
           expanded={expanded} setExpanded={setExpanded} editing={editing} setEditing={setEditing}
-          placeholder={t('common:add')} />
+          placeholder={t('common:add')} assistModes={['improve', 'summarize']} />
         {generated && <KoiosSuggestionBadge />}
       </div>
     </div>

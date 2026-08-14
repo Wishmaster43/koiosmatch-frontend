@@ -240,7 +240,7 @@ export default function AddCustomerModal({ onClose, onCreate, onImported, users 
     // pills) rides along inside the drag handle via the `header` slot.
     <FloatingPanel open onClose={onClose} ariaLabel={t('modal.title')}
       persistKey="customer-add" scrollBody={false}
-      width="min(calc(100vw - 48px), 1060px)" maxWidth={`${WIDE_MODAL.maxWidth}px`}
+      width={`min(calc(100vw - 48px), ${WIDE_MODAL.maxWidth}px)`} maxWidth={`${WIDE_MODAL.maxWidth}px`}
       header={
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, flex: 1, minWidth: 0 }}>
           <div style={{ width: 34, height: 34, borderRadius: 9, background: 'var(--color-primary-bg)',

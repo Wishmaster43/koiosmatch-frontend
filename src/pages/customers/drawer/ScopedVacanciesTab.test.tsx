@@ -22,8 +22,13 @@ import ScopedVacanciesTab from './ScopedVacanciesTab'
 
 const cust = (key: string) => i18n.t(key, { ns: 'customers' })
 
-vi.mock('@/context/NavigationContext', () => ({ useNavigation: () => ({ openEntity: vi.fn(), navigate: vi.fn() }) }))
+// K7c/K7b: a shared spy (vi.hoisted so it exists before the vi.mock factory below
+// runs) so the deep-link tests can assert what openEntity was called with.
+const { openEntitySpy } = vi.hoisted(() => ({ openEntitySpy: vi.fn() }))
+vi.mock('@/context/NavigationContext', () => ({ useNavigation: () => ({ openEntity: openEntitySpy, navigate: vi.fn() }) }))
 vi.mock('@/context/VacancyLookupsContext', () => ({ VacancyLookupsProvider: ({ children }: { children: ReactNode }) => children }))
+// K7b: the row pencil is permission-gated on vacancies.update.
+vi.mock('@/context/AuthContext', () => ({ useAuth: () => ({ hasPermission: (p: string) => p === 'vacancies.update' }) }))
 
 const mockUseScopedEntityList = vi.fn()
 vi.mock('../hooks/useScopedEntityList', () => ({ useScopedEntityList: () => mockUseScopedEntityList() }))
@@ -51,7 +56,7 @@ const VACANCY_STATUSES = [
 const wrapper = ({ children }: { children: ReactNode }) =>
   createElement(QueryClientProvider, { client: new QueryClient({ defaultOptions: { queries: { retry: false } } }) }, children)
 
-afterEach(() => { addVacancyModalProps.mockClear() })
+afterEach(() => { addVacancyModalProps.mockClear(); openEntitySpy.mockClear() })
 
 // Every test gets a sane default: the /vacancy-statuses lookup resolves with both
 // seed statuses unless a specific test overrides it (mirrors VacanciesTab.test.tsx).
@@ -137,5 +142,32 @@ describe('ScopedVacanciesTab · status filter (Danny 05-08 "ik mis de status naa
       expect(screen.getByText('Openstaande vacature')).toBeInTheDocument()
       expect(screen.queryByText('Gesloten vacature')).toBeNull()
     })
+  })
+})
+
+describe('ScopedVacanciesTab · K7c applications deep link + K7b edit pencil', () => {
+  beforeEach(() => {
+    mockUseScopedEntityList.mockReturnValue({
+      rows: [{ id: 'v-open', title: 'Openstaande vacature', status: { value: 'open', label: 'Open' }, applications: 3 }],
+      loading: false, error: false,
+    })
+  })
+
+  it('the applications count is a ghost button that deep-links to the applicants tab', async () => {
+    const user = userEvent.setup()
+    render(<ScopedVacanciesTab scope="location" id="loc-1" customerId="cust-1" />, { wrapper })
+    await screen.findByText('Openstaande vacature')
+
+    await user.click(screen.getByLabelText(cust('vacancies.col.applicationsOpen')))
+    expect(openEntitySpy).toHaveBeenCalledWith('vacancies', 'v-open', 'applicants')
+  })
+
+  it('a row pencil opens that vacancy\'s own drawer for editing', async () => {
+    const user = userEvent.setup()
+    render(<ScopedVacanciesTab scope="location" id="loc-1" customerId="cust-1" />, { wrapper })
+    await screen.findByText('Openstaande vacature')
+
+    await user.click(screen.getByLabelText(cust('vacancies.editVacancy')))
+    expect(openEntitySpy).toHaveBeenCalledWith('vacancies', 'v-open')
   })
 })

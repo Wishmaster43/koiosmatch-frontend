@@ -174,9 +174,33 @@ describe('ZzpTab · KVK/BTW as hyperlinks (1.1.2/1.1.3)', () => {
   it('edit mode still shows KVK/VAT as plain inputs', async () => {
     const user = userEvent.setup()
     render(<ZzpTab c={candidate()} />)
-    await user.click(screen.getAllByTitle('edit')[0]) // Bedrijf
+    // 69-17: KVK/BTW moved from Bedrijf into the Financieel card (was Facturatie).
+    await user.click(screen.getAllByTitle('edit')[2]) // Financieel
     expect(screen.getByDisplayValue('12345678')).toBeInTheDocument()
     expect(screen.getByDisplayValue('NL123456789B01')).toBeInTheDocument()
+  })
+})
+
+// 69-17: KVK/BTW(/KOR) moved from the Bedrijf card into the Financieel card
+// (renamed from Facturatie) — same fields, same edit behaviour, new home.
+describe('ZzpTab · KVK/BTW/KOR live under Financieel (69-17)', () => {
+  it('the Bedrijf card only edits the company name — no KVK/VAT there', async () => {
+    const user = userEvent.setup()
+    render(<ZzpTab c={candidate()} />)
+    await user.click(screen.getAllByTitle('edit')[0]) // Bedrijf
+    expect(screen.queryByDisplayValue('12345678')).toBeNull()
+    expect(screen.queryByDisplayValue('NL123456789B01')).toBeNull()
+  })
+
+  it('saving KVK/BTW/KOR from the Financieel card sends the same API keys as before', async () => {
+    const user = userEvent.setup()
+    const onSave = vi.fn()
+    render(<ZzpTab c={candidate()} onSave={onSave} />)
+    await user.click(screen.getAllByTitle('edit')[2]) // Financieel
+    await user.click(screen.getByTitle('save'))
+    expect(onSave).toHaveBeenCalledWith(expect.objectContaining({
+      kvk_number: '12345678', vat_number: 'NL123456789B01', kor: false,
+    }))
   })
 })
 

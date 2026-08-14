@@ -51,7 +51,7 @@ import { useState, useEffect } from 'react'
 import { useConfirm } from '@/hooks/useConfirm'
 import { useTranslation } from 'react-i18next'
 import { useAuth } from '@/context/AuthContext'
-import { Users } from 'lucide-react'
+import { Users, Upload } from 'lucide-react'
 import FloatingPanel from '@/components/ui/FloatingPanel'
 import { useContactFunctions } from '@/lib/useContactFunctions'
 import { useGenders } from '@/lib/useGenders'
@@ -60,9 +60,8 @@ import { useLiveFieldValidation } from '@/hooks/useLiveFieldValidation'
 import { isValidEmailFormat } from '@/lib/contactFieldValidation'
 import { BTN_H } from '@/config/buttonMetrics'
 import { WIDE_MODAL } from '@/components/ui/modalMetrics'
-import { modalColumns } from '@/components/ui/modalCards'
-import CollapsedCard from '@/components/ui/CollapsedCard'
-import SubEntityImportCard, { subEntityImportTitle } from './SubEntityImportCard'
+import { modalColumns, cardBox, cardHead } from '@/components/ui/modalCards'
+import SubEntityImportCard from './SubEntityImportCard'
 import ContactIdentityCard from './addmodal/ContactIdentityCard'
 import ContactDetailsCard from './addmodal/ContactDetailsCard'
 import ContactLinkCard from './ContactLinkCard'
@@ -131,6 +130,9 @@ export default function AddContactPersonModal({
   const canRunImport = hasPermission('customers.create')
   // The wizard state lives HERE (container), not in the card — mirrors AddCustomerModal.
   const importWizard = useImportWizard('contacts')
+  // K1b (2026-08-14): the import affordance sits in the header (Upload button),
+  // never buried in a collapsed section — mirrors AddCustomerModal exactly.
+  const [importOpen, setImportOpen] = useState(false)
   const isEdit = Boolean(initial)
   // Contact function (job title) is a lookup combobox, split from the candidate
   // function list (FUNCTIONS-SPLIT-1) — never a plain free-text field.
@@ -312,7 +314,7 @@ export default function AddContactPersonModal({
     <FloatingPanel open onClose={onClose}
       ariaLabel={isEdit ? t('subModal.editContact') : t('subModal.addContact')}
       persistKey="customer-add-contact" scrollBody={false}
-      width="min(calc(100vw - 48px), 1060px)" maxWidth={`${WIDE_MODAL.maxWidth}px`}
+      width={`min(calc(100vw - 48px), ${WIDE_MODAL.maxWidth}px)`} maxWidth={`${WIDE_MODAL.maxWidth}px`}
       header={
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
           <div style={{ width: 32, height: 32, borderRadius: 8, background: 'var(--color-primary-bg)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -322,9 +324,31 @@ export default function AddContactPersonModal({
             <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--text)' }}>{isEdit ? t('subModal.editContact') : t('subModal.addContact')}</div>
             {customerName && <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 1 }}>{customerName}</div>}
           </div>
+          {/* K1b (2026-08-14): the import affordance lives top-right in the header, a
+              real button, never buried in a collapsed section — mirrors AddCustomerModal. */}
+          {!isEdit && (
+            <button type="button" onClick={() => setImportOpen(v => !v)} aria-expanded={importOpen}
+              style={{ display: 'flex', alignItems: 'center', gap: 6, height: BTN_H, padding: '0 12px', marginLeft: 'auto',
+                flexShrink: 0, borderRadius: 8, cursor: 'pointer', fontSize: 12.5, fontWeight: 600,
+                color: 'var(--color-primary-text)',
+                border: `1px solid color-mix(in srgb, var(--color-primary) ${importWizard.file ? 50 : 32}%, transparent)`,
+                background: `color-mix(in srgb, var(--color-primary) ${importWizard.file ? 16 : 8}%, transparent)` }}>
+              <Upload size={13} />
+              {t('subModal.import.title', { entity: t('settings:import.entities.contacts.label') })}
+            </button>
+          )}
         </div>
       }>
         <div style={{ flex: 1, overflowY: 'auto', padding: '18px 22px', display: 'flex', flexDirection: 'column', gap: 16 }}>
+          {/* K1b (2026-08-14): the import flow opens from the header button and renders
+              as the first card while open — summoned deliberately, mirrors AddCustomerModal. */}
+          {importOpen && !isEdit && (
+            <div style={{ ...cardBox, padding: 16 }}>
+              <div style={cardHead}>{t('subModal.import.title', { entity: t('settings:import.entities.contacts.label') })}</div>
+              <SubEntityImportCard entity="contacts" wizard={importWizard} customerName={customerName}
+                canView={canViewImportTemplate} canImport={canRunImport} />
+            </div>
+          )}
           {/* HET-RECEPT (Danny 14-08): two responsive columns, same idiom as
               AddCustomerModal/AddLocationModal — LEFT keeps the identity fields
               the recruiter always fills (Persoon/Contact), RIGHT holds the
@@ -378,18 +402,6 @@ export default function AddContactPersonModal({
               />
             </div>
           </div>
-
-          {/* SUBENTITY-IMPORT-1 (moved to the bottom + collapsed, Danny 03-08 A+D
-              decision): a secondary/optional bulk-create path must never force a
-              scroll past it before the required manual fields are even visible.
-              No column split here — this form is too short to justify one (unlike
-              AddLocationModal's own two-column pass). */}
-          {!isEdit && (
-            <CollapsedCard title={subEntityImportTitle(t, 'contacts')} filled={!!importWizard.file}>
-              <SubEntityImportCard entity="contacts" wizard={importWizard} customerName={customerName}
-                canView={canViewImportTemplate} canImport={canRunImport} />
-            </CollapsedCard>
-          )}
         </div>
 
         {/* Server-side rejection (non-field 422 / other failure) — shown in place, modal stays open. */}

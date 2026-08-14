@@ -184,7 +184,13 @@ function VacanciesPageInner({ intent }: { intent?: unknown }) {
   const openMatches = (id: Id) => { setDrawerInitialTab('matches'); selectVacancy({ id } as Parameters<typeof selectVacancy>[0], { forceOpen: true }) }
 
   // Open a vacancy drawer when arriving via a cross-entity link (intent).
-  useOpenFromIntent(intent, (id) => openVacancy({ id } as Parameters<typeof selectVacancy>[0]))
+  // K7c: an intent may carry a `tab` (customer drawer's applications ghost-link) —
+  // land on that tab instead of the default, forcing the drawer open like the
+  // in-page openApplicants/openMatches callbacks above.
+  useOpenFromIntent(intent, (id, tab) => {
+    if (tab) { setDrawerInitialTab(tab); selectVacancy({ id } as Parameters<typeof selectVacancy>[0], { forceOpen: true }) }
+    else openVacancy({ id } as Parameters<typeof selectVacancy>[0])
+  })
 
   // D1(a): seed the closing-soon / stale-status filter from a dashboard tile's
   // semantic attention intent (mirrors ApplicationsPage/CandidatesPage's own intent seam).

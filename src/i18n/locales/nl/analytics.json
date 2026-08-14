@@ -255,5 +255,99 @@
       "owner": "Eigenaar",
       "branch": "Vestiging"
     }
+  },
+  "contacts": {
+    "total": "Totaal contactpersonen",
+    "window": "Contactpersonen {{from}} t/m {{to}}",
+    "series": "Contactpersonen over tijd",
+    "loading": "Contactpersonen laden…",
+    "error": "Kon de contactpersonen niet laden",
+    "empty": "Geen contactpersonen in deze periode",
+    "axes": {
+      "customer": "Per klant",
+      "location": "Per locatie",
+      "department": "Per afdeling",
+      "function": "Per functie",
+      "status": "Per status"
+    },
+    "summary": {
+      "primary": "Primair contact",
+      "withRecentContact": "Recent contact gehad",
+      "neverContacted": "Nooit contact gehad"
+    }
+  },
+  "locations": {
+    "total": "Totaal locaties",
+    "window": "Locaties {{from}} t/m {{to}}",
+    "series": "Locaties over tijd",
+    "loading": "Locaties laden…",
+    "error": "Kon de locaties niet laden",
+    "empty": "Geen locaties in deze periode",
+    "axes": {
+      "customer": "Per klant",
+      "city": "Per plaats",
+      "province": "Per provincie",
+      "status": "Per status"
+    },
+    "summary": {
+      "withCustomer": "Gekoppeld aan klant",
+      "withoutCustomer": "Niet gekoppeld aan klant"
+    }
+  },
+  "departments": {
+    "total": "Totaal afdelingen",
+    "window": "Afdelingen {{from}} t/m {{to}}",
+    "series": "Afdelingen over tijd",
+    "loading": "Afdelingen laden…",
+    "error": "Kon de afdelingen niet laden",
+    "empty": "Geen afdelingen in deze periode",
+    "axes": {
+      "customer": "Per klant",
+      "location": "Per locatie",
+      "status": "Per status"
+    },
+    "summary": {
+      "withLocation": "Gekoppeld aan locatie",
+      "withoutLocation": "Niet gekoppeld aan locatie"
+    }
+  },
+  "ai": {
+    "total": "Totaal AI-activiteit",
+    "window": "AI-activiteit {{from}} t/m {{to}}",
+    "series": "Verbruik over tijd",
+    "loading": "AI-activiteit laden…",
+    "error": "Kon de AI-activiteit niet laden",
+    "empty": "Geen AI-activiteit in deze periode",
+    "axes": {
+      "activity": "Per activiteit",
+      "model": "Per model",
+      "user": "Per gebruiker"
+    },
+    "summary": {
+      "tokens": "Gebruikte tokens",
+      "amount": "Verkoopbedrag"
+    }
+  },
+  "workflows": {
+    "total": "Totaal workflow-runs",
+    "window": "Workflow-runs {{from}} t/m {{to}}",
+    "series": "Uitvoeringen over tijd",
+    "loading": "Workflow-runs laden…",
+    "error": "Kon de workflow-runs niet laden",
+    "empty": "Geen workflow-runs in deze periode",
+    "axes": {
+      "workflow": "Per workflow",
+      "trigger": "Per trigger",
+      "status": "Per status"
+    },
+    "summary": {
+      "runs": "Uitvoeringen",
+      "completed": "Voltooid",
+      "failed": "Mislukt",
+      "cancelled": "Geannuleerd",
+      "running": "Bezig",
+      "successRate": "Slaagpercentage",
+      "avgDuration": "Gem. duur"
+    }
   }
 }

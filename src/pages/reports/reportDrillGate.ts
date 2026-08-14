@@ -23,7 +23,7 @@
  * report's endpoint exists.
  * Tests override via `vi.mock('./reportDrillGate', ...)`.
  */
-export type DrillableReport = 'flow' | 'matches' | 'recruiters' | 'vacancies' | 'intakes' | 'outreach' | 'sources' | 'candidates' | 'applications' | 'customers' | 'opportunities' | 'tasks'
+export type DrillableReport = 'flow' | 'matches' | 'recruiters' | 'vacancies' | 'intakes' | 'outreach' | 'sources' | 'candidates' | 'applications' | 'customers' | 'opportunities' | 'tasks' | 'contacts' | 'locations' | 'departments' | 'ai' | 'workflows'
 
 export const REPORT_DRILL_AVAILABLE: Record<DrillableReport, boolean> = {
   flow: true,
@@ -36,9 +36,17 @@ export const REPORT_DRILL_AVAILABLE: Record<DrillableReport, boolean> = {
   opportunities: true,
   tasks: true,
   outreach: true,
+  // RAPPORTEN-SUITE-2: the thin reports ship with their own drill/advice pair.
+  contacts: true,
+  locations: true,
+  departments: true,
+  workflows: true,
   // Not shipped yet — no /reports/{r}/drill|advice endpoint on the backend.
   intakes: false,
   sources: false,
+  // AI usage rows are consumption lines, not entity records: the backend ships NO
+  // /reports/ai/drill on purpose, so its bars stay non-clickable (§3 no fake affordances).
+  ai: false,
 }
 
 // Gates a drill-down click handler behind the per-report capability flag: while a

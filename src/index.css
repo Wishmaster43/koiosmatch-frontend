@@ -80,7 +80,14 @@
      the accent itself; useTenantTheme replaces it with a readable variant when the
      tenant's brand is too light for the surface — darkened in light mode, lightened
      in dark mode (a darkened yellow would vanish on the dark sidebar/canvas). */
-  --color-primary-text:  var(--color-primary);
+  /* G-FLAG-1: static default was `var(--color-primary)`, which on the light surface
+     only clears 2.89:1 (below the readableAccentText 5.5 target used by
+     useTenantTheme.ts) — an untenanted install (no brand_color saved yet) shipped
+     unreadable accent text before the runtime hook ever ran. This is the same
+     colour readableAccentText('#19A5CA', '#FFFFFF') computes, hardcoded so the
+     default itself is AA-safe without waiting on JS; a tenant brand_color still
+     overrides it live via useTenantTheme.ts. */
+  --color-primary-text:  #117089;
   --sidebar-bg: #FFFFFF;
   --sidebar-text: #111827;
   /* SIDEBAR-CONTRAST-1 (measured 08-08): the resting nav label sat at 2.54:1 on the
@@ -126,6 +133,9 @@
   /* Soft semantic backgrounds — dark tints, so active states + badges read as a
      subtle coloured block in dark mode instead of a bright/white one. The matching
      --color-* foreground tokens stay vivid (defined in :root) and remain readable. */
+  /* G-FLAG-1: on the dark surface the raw brand already clears 5.8:1, so unlike
+     light mode no darken-toward-black adjustment is needed here. */
+  --color-primary-text: var(--color-primary);
   --color-primary-bg:   rgba(25, 165, 202, 0.18);
   --color-secondary-bg: rgba(27, 96, 169, 0.24);
   --color-success-bg:   rgba(22, 163, 74, 0.20);
