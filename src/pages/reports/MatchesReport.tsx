@@ -25,6 +25,9 @@ import ReportTimeseriesChart from './ReportTimeseriesChart'
 import { useDateFormat } from '@/lib/datetime'
 import { formatPercent } from '@/lib/formatters'
 import type { ReportPeriod, CandidateTimeseriesPoint } from '@/types/analytics'
+import { useAllSettings, getJsonSetting } from '@/lib/settings/useAllSettings'
+import { getReportKpiCatalog, getReportKpiDefaultOrder, reportKpiSettingsKey } from './kpiCatalog'
+import { resolveReportKpiOrder } from './resolveReportKpiOrder'
 
 // One match stat tile; with an onClick it becomes a drillable surface (keyboard
 // operable — same affordance pattern as SegmentBars).
@@ -136,37 +139,46 @@ export default function MatchesReport({ period, filters = EMPTY_REPORT_FILTERS }
   // derived stats: terminations total, avg duration (dash until HelloFlex fills
   // it) and the termination rate (a ratio of two real fields).
   const terminationRate = data && data.total > 0 ? (data.terminations.total / data.total) * 100 : null
-  const kpis: KpiSpec[] = [
-    { key: 'total',  label: t('matches.total'),     value: data?.total ?? 0,
+  const kpiByKey: Record<string, KpiSpec> = {
+    total:  { key: 'total',  label: t('matches.total'),     value: data?.total ?? 0,
       active: drill != null && openAxis == null,
       onClick: gateDrillClick('matches', () => openMatches(t('matches.total'), data?.total ?? 0)) },
-    { key: 'funnel', label: t('matches.viaFunnel'), value: data?.by_origin.funnel ?? 0,
+    funnel: { key: 'funnel', label: t('matches.viaFunnel'), value: data?.by_origin.funnel ?? 0,
       active: openParams?.origin === 'funnel',
       onClick: gateDrillClick('matches', () => openMatches(t('matches.viaFunnel'), data?.by_origin.funnel ?? 0, 'funnel')) },
-    { key: 'direct', label: t('matches.direct'),    value: data?.by_origin.direct ?? 0,
+    direct: { key: 'direct', label: t('matches.direct'),    value: data?.by_origin.direct ?? 0,
       active: openParams?.origin === 'direct',
       onClick: gateDrillClick('matches', () => openMatches(t('matches.direct'), data?.by_origin.direct ?? 0, 'direct')) },
-    { key: 'sent',   label: t('matches.placements.sent'),   value: tileValue('sent'),
+    sent:   { key: 'sent',   label: t('matches.placements.sent'),   value: tileValue('sent'),
       active: openParams?.contract_status === 'sent',
       onClick: gateDrillClick('matches', () => openContractStatus(t('matches.placements.sent'), tileValue('sent'), 'sent')) },
-    { key: 'active', label: t('matches.placements.active'), value: tileValue('active'),
+    active: { key: 'active', label: t('matches.placements.active'), value: tileValue('active'),
       active: openParams?.contract_status === 'active',
       onClick: gateDrillClick('matches', () => openContractStatus(t('matches.placements.active'), tileValue('active'), 'active')) },
-    { key: 'ended',  label: t('matches.placements.ended'),  value: tileValue('ended'),
+    ended:  { key: 'ended',  label: t('matches.placements.ended'),  value: tileValue('ended'),
       active: openParams?.contract_status === 'ended',
       onClick: gateDrillClick('matches', () => openContractStatus(t('matches.placements.ended'), tileValue('ended'), 'ended')) },
-    { key: 'terminationsTotal', label: t('matches.terminations.total'), value: data?.terminations.total ?? 0 },
-    { key: 'dur',    label: t('matches.avgDuration'),
+    terminationsTotal: { key: 'terminationsTotal', label: t('matches.terminations.total'), value: data?.terminations.total ?? 0 },
+    dur:    { key: 'dur',    label: t('matches.avgDuration'),
       value: data?.avg_placement_duration_days != null ? t('matches.daysValue', { days: Math.round(data.avg_placement_duration_days) }) : '—' },
-    { key: 'terminationRate', label: t('matches.terminations.rate'),
+    terminationRate: { key: 'terminationRate', label: t('matches.terminations.rate'),
       value: formatPercent(terminationRate) },
-  ]
+  }
+  // Which nine keys render, and in what order, is the tenant's Settings → Reports
+  // choice (falls back to today's order when nothing is stored, or a stored key
+  // has vanished — RAPPORT-KPI-INSTELBAAR).
+  const settingsValues = useAllSettings()
+  const catalogKeys = getReportKpiCatalog('matches').map(c => c.key)
+  const defaultOrder = getReportKpiDefaultOrder('matches')
+  const stored = getJsonSetting<string[] | undefined>(settingsValues, reportKpiSettingsKey('matches'), undefined)
+  const { order: kpiOrder, fellBack } = resolveReportKpiOrder(stored, catalogKeys, defaultOrder)
+  const kpis: KpiSpec[] = kpiOrder.map(key => kpiByKey[key]).filter((k): k is KpiSpec => k != null)
 
   return (
     <div>
       {/* KPI strip — above the tabs (candidate-page order: KPIs first) */}
       {!loading && !error && !isEmpty && data && (
-        <ReportKpiBand kpis={kpis} />
+        <ReportKpiBand kpis={kpis} notice={fellBack ? t('matches.kpiOrderFellBack') : undefined} />
       )}
 
       {/* The report's data window, rendered prominently from the RESPONSE —

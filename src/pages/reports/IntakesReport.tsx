@@ -17,6 +17,9 @@ import type { SegmentBarItem } from './SegmentBars'
 import ReportTimeseriesChart from './ReportTimeseriesChart'
 import { useIntakesReport } from './useIntakesReport'
 import type { ReportPeriod, IntakeBucket } from '@/types/analytics'
+import { useAllSettings, getJsonSetting } from '@/lib/settings/useAllSettings'
+import { getReportKpiCatalog, getReportKpiDefaultOrder, reportKpiSettingsKey } from './kpiCatalog'
+import { resolveReportKpiOrder } from './resolveReportKpiOrder'
 
 // The five breakdown dimensions the endpoint returns; the selector switches between them.
 const GROUPS = ['recruiter', 'location', 'source', 'function', 'region'] as const
@@ -53,23 +56,32 @@ export default function IntakesReport({ period }: { period: ReportPeriod }) {
   const topRecruiter = data ? topOf(data.by_recruiter) : null
   const topSource    = data ? topOf(data.by_source) : null
   const topFunction  = data ? topOf(data.by_function) : null
-  const kpis: KpiSpec[] = [
-    { key: 'total', label: t('intakes.total'), value: total },
-    { key: 'recruitersCount', label: t('intakes.summary.recruitersCount'), value: data?.by_recruiter.length ?? 0 },
-    { key: 'locationsCount', label: t('intakes.summary.locationsCount'), value: data?.by_location.length ?? 0 },
-    { key: 'sourcesCount', label: t('intakes.summary.sourcesCount'), value: data?.by_source.length ?? 0 },
-    { key: 'functionsCount', label: t('intakes.summary.functionsCount'), value: data?.by_function.length ?? 0 },
-    { key: 'regionsCount', label: t('intakes.summary.regionsCount'), value: data?.by_region.length ?? 0 },
-    { key: 'topRecruiter', label: t('intakes.summary.topRecruiter'), value: topRecruiter?.count ?? '—', sub: topRecruiter?.label },
-    { key: 'topSource', label: t('intakes.summary.topSource'), value: topSource?.count ?? '—', sub: topSource?.label },
-    { key: 'topFunction', label: t('intakes.summary.topFunction'), value: topFunction?.count ?? '—', sub: topFunction?.label },
-  ]
+  const kpiByKey: Record<string, KpiSpec> = {
+    total: { key: 'total', label: t('intakes.total'), value: total },
+    recruitersCount: { key: 'recruitersCount', label: t('intakes.summary.recruitersCount'), value: data?.by_recruiter.length ?? 0 },
+    locationsCount: { key: 'locationsCount', label: t('intakes.summary.locationsCount'), value: data?.by_location.length ?? 0 },
+    sourcesCount: { key: 'sourcesCount', label: t('intakes.summary.sourcesCount'), value: data?.by_source.length ?? 0 },
+    functionsCount: { key: 'functionsCount', label: t('intakes.summary.functionsCount'), value: data?.by_function.length ?? 0 },
+    regionsCount: { key: 'regionsCount', label: t('intakes.summary.regionsCount'), value: data?.by_region.length ?? 0 },
+    topRecruiter: { key: 'topRecruiter', label: t('intakes.summary.topRecruiter'), value: topRecruiter?.count ?? '—', sub: topRecruiter?.label },
+    topSource: { key: 'topSource', label: t('intakes.summary.topSource'), value: topSource?.count ?? '—', sub: topSource?.label },
+    topFunction: { key: 'topFunction', label: t('intakes.summary.topFunction'), value: topFunction?.count ?? '—', sub: topFunction?.label },
+  }
+  // Which nine keys render, and in what order, is the tenant's Settings → Reports
+  // choice (falls back to today's order when nothing is stored, or a stored key
+  // has vanished — RAPPORT-KPI-INSTELBAAR).
+  const settingsValues = useAllSettings()
+  const catalogKeys = getReportKpiCatalog('intakes').map(c => c.key)
+  const defaultOrder = getReportKpiDefaultOrder('intakes')
+  const stored = getJsonSetting<string[] | undefined>(settingsValues, reportKpiSettingsKey('intakes'), undefined)
+  const { order: kpiOrder, fellBack } = resolveReportKpiOrder(stored, catalogKeys, defaultOrder)
+  const kpis: KpiSpec[] = kpiOrder.map(key => kpiByKey[key]).filter((k): k is KpiSpec => k != null)
 
   return (
     <div>
       {/* KPI strip — total intakes, above the tabs (candidate-page order) */}
       {hasData && (
-        <ReportKpiBand kpis={kpis} />
+        <ReportKpiBand kpis={kpis} notice={fellBack ? t('intakes.kpiOrderFellBack') : undefined} />
       )}
 
       <div style={{ ...card, overflow: 'hidden' }}>

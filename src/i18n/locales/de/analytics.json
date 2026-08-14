@@ -64,7 +64,8 @@
       "topRecruiter": "Aktivster Recruiter",
       "topSource": "Wichtigste Quelle",
       "topFunction": "Häufigste Funktion"
-    }
+    },
+    "kpiOrderFellBack": "Eine in den Einstellungen konfigurierte KPI-Karte existiert nicht mehr und wurde auf den Standard zurückgesetzt."
   },
   "comingSoon": "{{label}}. Folgt in Kürze",
   "period": {
@@ -96,7 +97,8 @@
     "lastPhase": "Endphase",
     "maxDropPhase": "Größter Abbruch",
     "stagesReached": "Erreichte Phasen",
-    "stagesTotal": "Phasen im Trichter"
+    "stagesTotal": "Phasen im Trichter",
+    "kpiOrderFellBack": "Eine in den Einstellungen konfigurierte KPI-Karte existiert nicht mehr und wurde auf den Standard zurückgesetzt."
   },
   "recruiters": {
     "title": "Recruiter",
@@ -165,7 +167,8 @@
       "title": "Stellen ohne Bewerbungen ({{count}})",
       "subtitle": "Gezählt aus den oben gezeigten Stellen — null Bewerbungen in diesem Zeitraum.",
       "empty": "Jede Stelle in diesem Zeitraum erhielt mindestens eine Bewerbung."
-    }
+    },
+    "kpiOrderFellBack": "Eine in den Einstellungen konfigurierte KPI-Karte existiert nicht mehr und wurde auf den Standard zurückgesetzt."
   },
   "matches": {
     "title": "Matches",
@@ -195,7 +198,8 @@
       "title": "Beendigungsgründe",
       "total": "Beendigungen gesamt",
       "rate": "Beendigungsquote"
-    }
+    },
+    "kpiOrderFellBack": "Eine in den Einstellungen konfigurierte KPI-Karte existiert nicht mehr und wurde auf den Standard zurückgesetzt."
   },
   "outreach": {
     "loading": "Outreach wird geladen…",
@@ -218,7 +222,8 @@
       "noOutcome": "Kein Ergebnis",
       "topCampaign": "Größte Anrufliste",
       "topChannel": "Größter Kanal"
-    }
+    },
+    "kpiOrderFellBack": "Eine in den Einstellungen konfigurierte KPI-Karte existiert nicht mehr und wurde auf den Standard zurückgesetzt."
   },
   "sources": {
     "loading": "Quellen werden geladen…",
@@ -241,7 +246,8 @@
       "applications": "Bewerbungen",
       "matches": "Matches",
       "matchRate": "Match-Quote"
-    }
+    },
+    "kpiOrderFellBack": "Eine in den Einstellungen konfigurierte KPI-Karte existiert nicht mehr und wurde auf den Standard zurückgesetzt."
   },
   "applications": {
     "loading": "Bewerbungen werden geladen…",
@@ -263,7 +269,8 @@
       "matched": "Gematcht",
       "rejected": "Abgelehnt",
       "placed": "Platziert"
-    }
+    },
+    "kpiOrderFellBack": "Eine in den Einstellungen konfigurierte KPI-Karte existiert nicht mehr und wurde auf den Standard zurückgesetzt."
   },
   "opportunities": {
     "loading": "Chancen werden geladen…",
@@ -283,7 +290,8 @@
       "overdue": "Überfällig"
     },
     "forecastCount": "Prognostizierte Deals",
-    "forecastValue": "Prognostizierter Wert"
+    "forecastValue": "Prognostizierter Wert",
+    "kpiOrderFellBack": "Eine in den Einstellungen konfigurierte KPI-Karte existiert nicht mehr und wurde auf den Standard zurückgesetzt."
   },
   "tasks": {
     "loading": "Aufgaben werden geladen…",
@@ -309,7 +317,8 @@
     "unassigned": "Nicht zugewiesen",
     "noTeam": "Keine Abteilung",
     "noBranch": "Keine Niederlassung",
-    "overdueRate": "Überfälligkeitsquote"
+    "overdueRate": "Überfälligkeitsquote",
+    "kpiOrderFellBack": "Eine in den Einstellungen konfigurierte KPI-Karte existiert nicht mehr und wurde auf den Standard zurückgesetzt."
   },
   "customers": {
     "loading": "Kunden werden geladen…",
@@ -324,7 +333,8 @@
       "industry": "Branche",
       "owner": "Eigentümer",
       "branch": "Niederlassung"
-    }
+    },
+    "kpiOrderFellBack": "Eine in den Einstellungen konfigurierte KPI-Karte existiert nicht mehr und wurde auf den Standard zurückgesetzt."
   },
   "contacts": {
     "total": "Kontakte gesamt",
@@ -349,7 +359,8 @@
       "withoutLocation": "Ohne Standort",
       "withoutDepartment": "Ohne Abteilung",
       "withoutCustomer": "Ohne Kunde"
-    }
+    },
+    "kpiOrderFellBack": "Eine in den Einstellungen konfigurierte KPI-Karte existiert nicht mehr und wurde auf den Standard zurückgesetzt."
   },
   "locations": {
     "total": "Standorte gesamt",
@@ -373,7 +384,8 @@
       "topCity": "Größter Ort",
       "withoutProvince": "Ohne Provinz",
       "topProvince": "Größte Provinz"
-    }
+    },
+    "kpiOrderFellBack": "Eine in den Einstellungen konfigurierte KPI-Karte existiert nicht mehr und wurde auf den Standard zurückgesetzt."
   },
   "departments": {
     "total": "Abteilungen gesamt",
@@ -396,7 +408,8 @@
       "topCustomer": "Größter Kunde",
       "topLocation": "Größter Standort",
       "customersCount": "Anzahl Kunden"
-    }
+    },
+    "kpiOrderFellBack": "Eine in den Einstellungen konfigurierte KPI-Karte existiert nicht mehr und wurde auf den Standard zurückgesetzt."
   },
   "ai": {
     "total": "KI-Aktivität gesamt",
@@ -419,7 +432,8 @@
       "modelsUsed": "Genutzte Modelle",
       "activeUsers": "Aktive Benutzer",
       "topActivity": "Meistgenutzte Aktivität"
-    }
+    },
+    "kpiOrderFellBack": "Eine in den Einstellungen konfigurierte KPI-Karte existiert nicht mehr und wurde auf den Standard zurückgesetzt."
   },
   "workflows": {
     "total": "Workflow-Läufe gesamt",
@@ -443,7 +457,8 @@
       "avgDuration": "Ø Dauer",
       "workflowsCount": "Workflows",
       "triggersCount": "Auslöser"
-    }
+    },
+    "kpiOrderFellBack": "Eine in den Einstellungen konfigurierte KPI-Karte existiert nicht mehr und wurde auf den Standard zurückgesetzt."
   },
   "leads": {
     "loading": "Leads werden geladen…",
@@ -461,7 +476,8 @@
       "avgTimeToConvert": "Durchschn. Zeit bis Konversion",
       "staleLeads": "Veraltete Leads",
       "newThisPeriod": "Neu in diesem Zeitraum"
-    }
+    },
+    "kpiOrderFellBack": "Eine in den Einstellungen konfigurierte KPI-Karte existiert nicht mehr und wurde auf den Standard zurückgesetzt."
   },
   "accountmanagers": {
     "loading": "Kundenbetreuer werden geladen…",
@@ -481,6 +497,7 @@
     "cols": {
       "manager": "Kundenbetreuer",
       "customers": "Kunden"
-    }
+    },
+    "kpiOrderFellBack": "Eine in den Einstellungen konfigurierte KPI-Karte existiert nicht mehr und wurde auf den Standard zurückgesetzt."
   }
 }

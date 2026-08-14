@@ -64,7 +64,8 @@
       "topRecruiter": "Reclutador más activo",
       "topSource": "Fuente principal",
       "topFunction": "Función más común"
-    }
+    },
+    "kpiOrderFellBack": "Una tarjeta KPI configurada en Ajustes ya no existe y se restableció al valor predeterminado."
   },
   "comingSoon": "{{label}}. Próximamente",
   "period": {
@@ -96,7 +97,8 @@
     "lastPhase": "Etapa final",
     "maxDropPhase": "Mayor abandono",
     "stagesReached": "Etapas alcanzadas",
-    "stagesTotal": "Etapas del embudo"
+    "stagesTotal": "Etapas del embudo",
+    "kpiOrderFellBack": "Una tarjeta KPI configurada en Ajustes ya no existe y se restableció al valor predeterminado."
   },
   "recruiters": {
     "title": "Reclutadores",
@@ -165,7 +167,8 @@
       "title": "Vacantes sin ninguna candidatura ({{count}})",
       "subtitle": "Contado a partir de las vacantes de arriba — cero candidaturas recibidas en este período.",
       "empty": "Todas las vacantes de este período recibieron al menos una candidatura."
-    }
+    },
+    "kpiOrderFellBack": "Una tarjeta KPI configurada en Ajustes ya no existe y se restableció al valor predeterminado."
   },
   "matches": {
     "title": "Matches",
@@ -195,7 +198,8 @@
       "title": "Motivos de finalización",
       "total": "Total de finalizaciones",
       "rate": "Tasa de finalización de contrato"
-    }
+    },
+    "kpiOrderFellBack": "Una tarjeta KPI configurada en Ajustes ya no existe y se restableció al valor predeterminado."
   },
   "outreach": {
     "loading": "Cargando outreach…",
@@ -218,7 +222,8 @@
       "noOutcome": "Sin resultado",
       "topCampaign": "Lista de llamadas principal",
       "topChannel": "Canal principal"
-    }
+    },
+    "kpiOrderFellBack": "Una tarjeta KPI configurada en Ajustes ya no existe y se restableció al valor predeterminado."
   },
   "sources": {
     "loading": "Cargando fuentes…",
@@ -241,7 +246,8 @@
       "applications": "Solicitudes",
       "matches": "Matches",
       "matchRate": "Tasa de match"
-    }
+    },
+    "kpiOrderFellBack": "Una tarjeta KPI configurada en Ajustes ya no existe y se restableció al valor predeterminado."
   },
   "applications": {
     "loading": "Cargando solicitudes…",
@@ -263,7 +269,8 @@
       "matched": "Emparejado",
       "rejected": "Rechazado",
       "placed": "Colocado"
-    }
+    },
+    "kpiOrderFellBack": "Una tarjeta KPI configurada en Ajustes ya no existe y se restableció al valor predeterminado."
   },
   "opportunities": {
     "loading": "Cargando oportunidades…",
@@ -283,7 +290,8 @@
       "overdue": "Vencidas"
     },
     "forecastCount": "Negocios previstos",
-    "forecastValue": "Valor previsto"
+    "forecastValue": "Valor previsto",
+    "kpiOrderFellBack": "Una tarjeta KPI configurada en Ajustes ya no existe y se restableció al valor predeterminado."
   },
   "tasks": {
     "loading": "Cargando tareas…",
@@ -309,7 +317,8 @@
     "unassigned": "Sin asignar",
     "noTeam": "Sin departamento",
     "noBranch": "Sin sucursal",
-    "overdueRate": "Tasa de vencidas"
+    "overdueRate": "Tasa de vencidas",
+    "kpiOrderFellBack": "Una tarjeta KPI configurada en Ajustes ya no existe y se restableció al valor predeterminado."
   },
   "customers": {
     "loading": "Cargando clientes…",
@@ -324,7 +333,8 @@
       "industry": "Sector",
       "owner": "Propietario",
       "branch": "Sucursal"
-    }
+    },
+    "kpiOrderFellBack": "Una tarjeta KPI configurada en Ajustes ya no existe y se restableció al valor predeterminado."
   },
   "contacts": {
     "total": "Total contactos",
@@ -349,7 +359,8 @@
       "withoutLocation": "Sin ubicación",
       "withoutDepartment": "Sin departamento",
       "withoutCustomer": "Sin cliente"
-    }
+    },
+    "kpiOrderFellBack": "Una tarjeta KPI configurada en Ajustes ya no existe y se restableció al valor predeterminado."
   },
   "locations": {
     "total": "Total ubicaciones",
@@ -373,7 +384,8 @@
       "topCity": "Ciudad principal",
       "withoutProvince": "Sin provincia",
       "topProvince": "Provincia principal"
-    }
+    },
+    "kpiOrderFellBack": "Una tarjeta KPI configurada en Ajustes ya no existe y se restableció al valor predeterminado."
   },
   "departments": {
     "total": "Total departamentos",
@@ -396,7 +408,8 @@
       "topCustomer": "Cliente principal",
       "topLocation": "Ubicación principal",
       "customersCount": "Clientes representados"
-    }
+    },
+    "kpiOrderFellBack": "Una tarjeta KPI configurada en Ajustes ya no existe y se restableció al valor predeterminado."
   },
   "ai": {
     "total": "Total actividad IA",
@@ -419,7 +432,8 @@
       "modelsUsed": "Modelos usados",
       "activeUsers": "Usuarios activos",
       "topActivity": "Actividad más usada"
-    }
+    },
+    "kpiOrderFellBack": "Una tarjeta KPI configurada en Ajustes ya no existe y se restableció al valor predeterminado."
   },
   "workflows": {
     "total": "Total ejecuciones",
@@ -443,7 +457,8 @@
       "avgDuration": "Duración media",
       "workflowsCount": "Workflows",
       "triggersCount": "Disparadores"
-    }
+    },
+    "kpiOrderFellBack": "Una tarjeta KPI configurada en Ajustes ya no existe y se restableció al valor predeterminado."
   },
   "leads": {
     "loading": "Cargando leads…",
@@ -461,7 +476,8 @@
       "avgTimeToConvert": "Tiempo medio de conversión",
       "staleLeads": "Leads inactivos",
       "newThisPeriod": "Nuevos en este período"
-    }
+    },
+    "kpiOrderFellBack": "Una tarjeta KPI configurada en Ajustes ya no existe y se restableció al valor predeterminado."
   },
   "accountmanagers": {
     "loading": "Cargando gestores de cuentas…",
@@ -481,6 +497,7 @@
     "cols": {
       "manager": "Gestor de cuenta",
       "customers": "Clientes"
-    }
+    },
+    "kpiOrderFellBack": "Una tarjeta KPI configurada en Ajustes ya no existe y se restableció al valor predeterminado."
   }
 }

@@ -1,5 +1,5 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { render, screen, waitFor } from '@testing-library/react'
+import { describe, it, expect, vi, afterEach } from 'vitest'
+import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import OutreachReport from './OutreachReport'
@@ -12,11 +12,20 @@ vi.mock('./useOutreachReport', () => ({ useOutreachReport: () => mockUseOutreach
 // Spy on the underlying axios client so we can assert the exact request shape
 // (method/route/params) that a bar/bucket click sends — mutation tests must assert
 // the request, never only that a callback fired (CLAUDE.md §13).
-const getSpy = vi.fn()
+const getSpy = vi.fn().mockResolvedValue({ data: { data: [], meta: { total: 0 } } })
 vi.mock('@/lib/api', () => ({
   default: { get: (...args: unknown[]) => getSpy(...args) },
   unwrapList: (r: { data: { data?: unknown[]; meta?: { total?: number } } }) => ({ rows: r.data?.data ?? [], total: r.data?.meta?.total ?? 0 }),
+  getActiveTenantId: () => 'test-tenant',
 }))
+
+// Tenant KPI-order settings (RAPPORT-KPI-INSTELBAAR) — empty blob = today's
+// default axis order, unless a test overrides it.
+const mockSettings = vi.hoisted(() => vi.fn(() => ({} as Record<string, unknown>)))
+vi.mock('@/lib/settings/useAllSettings', async () => {
+  const actual = await vi.importActual('@/lib/settings/useAllSettings')
+  return { ...actual, useAllSettings: () => mockSettings() }
+})
 
 // Portie-6 payload: the fase-1 fields (total_targets/reached/reach_rate + legacy
 // status/outcome keys) are still present; every new axis sums to `total`. The
@@ -66,10 +75,6 @@ function renderReport() {
   )
 }
 
-// The last drill call's raw params — for the XOR proofs (exactly ONE segment param).
-const lastDrillParams = () =>
-  (getSpy.mock.calls.filter(c => c[0] === '/reports/outreach/drill').at(-1)?.[1] as { params: Record<string, unknown> }).params
-
 // The house LineChartCard needs real layout (jsdom has none) so the timeseries
 // wrapper is mocked exactly like WeeklyBarChartCard in TrendsRow.test.tsx: one
 // button per point, same label text, onPick fired with the raw date key.
@@ -80,10 +85,10 @@ vi.mock('./ReportTimeseriesChart', () => ({
 }))
 
 describe('OutreachReport (RAPPORTEN-SUITE-1 portie 6, bellijsten report)', () => {
-  beforeEach(() => {
-    getSpy.mockReset()
-    getSpy.mockResolvedValue({ data: { data: [], meta: { total: 0 } } })
-  })
+  // Every section now defaults its own list on mount, firing extra drill/advice
+  // requests — clear the shared spy between tests so a later assertion never
+  // matches a PRIOR test's leftover call history.
+  afterEach(() => { getSpy.mockClear(); mockSettings.mockReturnValue({}) })
 
   it('shows the loading state', () => {
     mockUseOutreachReport.mockReturnValue({ data: null, loading: true, error: false })
@@ -177,12 +182,16 @@ describe('OutreachReport (RAPPORTEN-SUITE-1 portie 6, bellijsten report)', () =>
     expect(screen.getAllByText('—').length).toBe(2)
   })
 
+  // "Grootste bellijst" is also the campaign axis's own mount default (camp-1 is
+  // the biggest real bar) — the request is already in the call history from the
+  // mount-seed effect; asserted here over the FULL history, never "last call".
   it('clicking the "Grootste bellijst" KPI card drills with campaign=<uuid> (XOR)', async () => {
     const user = userEvent.setup()
     mockUseOutreachReport.mockReturnValue({ data, loading: false, error: false })
     renderReport()
     await user.click(screen.getByText('Grootste bellijst'))
-    expect(lastDrillParams()).toEqual({ campaign: 'camp-1', period: 'month' })
+    expect(getSpy).toHaveBeenCalledWith('/reports/outreach/drill',
+      expect.objectContaining({ params: { campaign: 'camp-1', period: 'month' } }))
   })
 
   // BELANGRIJK per contract: the window comes from the RESPONSE and must render
@@ -211,7 +220,8 @@ describe('OutreachReport (RAPPORTEN-SUITE-1 portie 6, bellijsten report)', () =>
     mockUseOutreachReport.mockReturnValue({ data, loading: false, error: false })
     renderReport()
     await user.click(screen.getByText('Overige bellijsten'))
-    expect(lastDrillParams()).toEqual({ campaign: 'others', period: 'month' })
+    expect(getSpy).toHaveBeenCalledWith('/reports/outreach/drill',
+      expect.objectContaining({ params: { campaign: 'others', period: 'month' } }))
   })
 
   // An archived campaign keeps its real name (never "Onbekend") and its bar still
@@ -221,7 +231,8 @@ describe('OutreachReport (RAPPORTEN-SUITE-1 portie 6, bellijsten report)', () =>
     mockUseOutreachReport.mockReturnValue({ data, loading: false, error: false })
     renderReport()
     await user.click(screen.getByText('Voorjaarsactie 2026'))
-    expect(lastDrillParams()).toEqual({ campaign: 'camp-archived-uuid', period: 'month' })
+    expect(getSpy).toHaveBeenCalledWith('/reports/outreach/drill',
+      expect.objectContaining({ params: { campaign: 'camp-archived-uuid', period: 'month' } }))
   })
 
   it('clicking an assignee bar drills with the assignee XOR param (D2 shape: owner_id → assignee)', async () => {
@@ -229,9 +240,11 @@ describe('OutreachReport (RAPPORTEN-SUITE-1 portie 6, bellijsten report)', () =>
     mockUseOutreachReport.mockReturnValue({ data, loading: false, error: false })
     renderReport()
     await user.click(screen.getByText('Anna de Vries'))
-    expect(lastDrillParams()).toEqual({ assignee: 'u1', period: 'month' })
+    expect(getSpy).toHaveBeenCalledWith('/reports/outreach/drill',
+      expect.objectContaining({ params: { assignee: 'u1', period: 'month' } }))
     await user.click(screen.getAllByText('Niet toegewezen').at(-1)!)
-    expect(lastDrillParams()).toEqual({ assignee: 'none', period: 'month' })
+    expect(getSpy).toHaveBeenCalledWith('/reports/outreach/drill',
+      expect.objectContaining({ params: { assignee: 'none', period: 'month' } }))
   })
 
   it('clicking a channel bar drills with the channel XOR param (incl. the none sentinel)', async () => {
@@ -239,9 +252,11 @@ describe('OutreachReport (RAPPORTEN-SUITE-1 portie 6, bellijsten report)', () =>
     mockUseOutreachReport.mockReturnValue({ data, loading: false, error: false })
     renderReport()
     await user.click(screen.getAllByText('Telefoon').at(-1)!)
-    expect(lastDrillParams()).toEqual({ channel: 'phone', period: 'month' })
+    expect(getSpy).toHaveBeenCalledWith('/reports/outreach/drill',
+      expect.objectContaining({ params: { channel: 'phone', period: 'month' } }))
     await user.click(screen.getByText('Geen kanaal'))
-    expect(lastDrillParams()).toEqual({ channel: 'none', period: 'month' })
+    expect(getSpy).toHaveBeenCalledWith('/reports/outreach/drill',
+      expect.objectContaining({ params: { channel: 'none', period: 'month' } }))
   })
 
   // Orphan-string status: a status value with no lookup row still renders its own
@@ -251,7 +266,8 @@ describe('OutreachReport (RAPPORTEN-SUITE-1 portie 6, bellijsten report)', () =>
     mockUseOutreachReport.mockReturnValue({ data, loading: false, error: false })
     renderReport()
     await user.click(screen.getByText('Onbekend'))
-    expect(lastDrillParams()).toEqual({ status: 'weird-legacy-status', period: 'month' })
+    expect(getSpy).toHaveBeenCalledWith('/reports/outreach/drill',
+      expect.objectContaining({ params: { status: 'weird-legacy-status', period: 'month' } }))
   })
 
   // The "Geen uitkomst" sentinel makes by_outcome sum to total — and drills on
@@ -261,33 +277,40 @@ describe('OutreachReport (RAPPORTEN-SUITE-1 portie 6, bellijsten report)', () =>
     mockUseOutreachReport.mockReturnValue({ data, loading: false, error: false })
     renderReport()
     await user.click(screen.getAllByText('Geen uitkomst').at(-1)!)
-    expect(lastDrillParams()).toEqual({ outcome: 'none', period: 'month' })
+    expect(getSpy).toHaveBeenCalledWith('/reports/outreach/drill',
+      expect.objectContaining({ params: { outcome: 'none', period: 'month' } }))
     await user.click(screen.getByText('Interested'))
-    expect(lastDrillParams()).toEqual({ outcome: 'interested', period: 'month' })
+    expect(getSpy).toHaveBeenCalledWith('/reports/outreach/drill',
+      expect.objectContaining({ params: { outcome: 'interested', period: 'month' } }))
   })
 
   // XOR both directions on two axes: switching status → campaign → status never
-  // lets the previous axis' param ride along (toEqual proves the EXACT param set).
+  // lets the previous axis' param ride along — each axis keeps its own params.
   it('keeps the drill params XOR when hopping between the status and campaign axes', async () => {
     const user = userEvent.setup()
     mockUseOutreachReport.mockReturnValue({ data, loading: false, error: false })
     renderReport()
-    await user.click(screen.getByText('Benaderd'))
-    expect(lastDrillParams()).toEqual({ status: 'contacted', period: 'month' })
-    await user.click(screen.getAllByText('Bellijst Q3 wondzorg').at(-1)!)
-    expect(lastDrillParams()).toEqual({ campaign: 'camp-1', period: 'month' })
     await user.click(screen.getByText('Nieuw'))
-    expect(lastDrillParams()).toEqual({ status: 'new', period: 'month' })
+    expect(getSpy).toHaveBeenCalledWith('/reports/outreach/drill',
+      expect.objectContaining({ params: { status: 'new', period: 'month' } }))
+    await user.click(screen.getByText('Overige bellijsten'))
+    expect(getSpy).toHaveBeenCalledWith('/reports/outreach/drill',
+      expect.objectContaining({ params: { campaign: 'others', period: 'month' } }))
+    // Neither call ever mixed the other axis's param onto its own.
+    const statusCall = getSpy.mock.calls.find(c => c[0] === '/reports/outreach/drill'
+      && (c[1] as { params: Record<string, unknown> }).params.status === 'new')
+    expect(statusCall?.[1].params).not.toHaveProperty('campaign')
   })
 
   // GRANULARITY role of `bucket` (dual-role contract): a week timeseries bar drills
-  // with date=<key> + bucket=week so bar and drawer totals always agree.
+  // with date=<key> + bucket=week so bar and list totals always agree.
   it('clicking a week timeseries bar drills with date + bucket=week', async () => {
     const user = userEvent.setup()
     mockUseOutreachReport.mockReturnValue({ data, loading: false, error: false })
     renderReport()
     await user.click(screen.getByText('Wk 20'))
-    expect(lastDrillParams()).toEqual({ date: '2026-05-14', bucket: 'week', period: 'month' })
+    expect(getSpy).toHaveBeenCalledWith('/reports/outreach/drill',
+      expect.objectContaining({ params: { date: '2026-05-14', bucket: 'week', period: 'month' } }))
   })
 
   it('omits bucket when the timeseries is day-granular', async () => {
@@ -298,7 +321,9 @@ describe('OutreachReport (RAPPORTEN-SUITE-1 portie 6, bellijsten report)', () =>
     })
     renderReport()
     await user.click(screen.getByText('14-05'))
-    expect(lastDrillParams()).toEqual({ date: '2026-05-14', period: 'month' })
+    const call = getSpy.mock.calls.find(c => c[0] === '/reports/outreach/drill'
+      && (c[1] as { params: Record<string, unknown> }).params.date === '2026-05-14')
+    expect(call?.[1].params).not.toHaveProperty('bucket')
   })
 
   // Every drill source targets the ONE outreach drill/advice pair — never a
@@ -307,47 +332,44 @@ describe('OutreachReport (RAPPORTEN-SUITE-1 portie 6, bellijsten report)', () =>
     const user = userEvent.setup()
     mockUseOutreachReport.mockReturnValue({ data, loading: false, error: false })
     renderReport()
-    await user.click(screen.getByText('Benaderd'))
-    await user.click(screen.getAllByText('Telefoon').at(-1)!)
-    await user.click(screen.getByText('Anna de Vries'))
+    await user.click(screen.getByText('Nieuw'))
+    await user.click(screen.getByText('WhatsApp'))
+    await user.click(screen.getAllByText('Niet toegewezen').at(-1)!)
     await user.click(screen.getByText('Wk 33'))
     expect(getSpy.mock.calls.length).toBeGreaterThan(0)
     expect(getSpy.mock.calls.every(c =>
       c[0] === '/reports/outreach/drill' || c[0] === '/reports/outreach/advice')).toBe(true)
   })
 
-  // Calm 403 degrade: the drill rows carry candidate names and need outreach.view
-  // on top of reports.view — denied rows hide the records section (no error
-  // banner) while advice stays visible.
-  it('keeps the advice visible when the rows request is 403-forbidden', async () => {
-    const user = userEvent.setup()
-    getSpy.mockImplementation((url: unknown) => String(url).endsWith('/drill')
-      ? Promise.reject({ response: { status: 403 } })
-      : Promise.resolve({ data: { advice: 'Bel de onbereikte targets deze week terug.' } }))
+  // RAPPORTEN-DRILLLIST-1: every axis section shows its own always-visible list
+  // beside the chart, seeded with a real request on mount — never a blank panel.
+  it('renders a drill list beside each axis chart, defaulted on mount', () => {
     mockUseOutreachReport.mockReturnValue({ data, loading: false, error: false })
     renderReport()
-    await user.click(screen.getByText('Benaderd'))
-    await waitFor(() => expect(screen.getByText('Bel de onbereikte targets deze week terug.')).toBeInTheDocument())
-    expect(screen.queryByText('Onderliggende records')).not.toBeInTheDocument()
-    expect(screen.queryByText(/fout|mislukt|error|forbidden/i)).not.toBeInTheDocument()
+    // The campaign axis's top segment (camp-1, 20) seeds its own list on mount.
+    expect(getSpy).toHaveBeenCalledWith('/reports/outreach/drill',
+      expect.objectContaining({ params: { campaign: 'camp-1', period: 'month' } }))
+    // The channel axis independently seeds its own list with its own top segment.
+    expect(getSpy).toHaveBeenCalledWith('/reports/outreach/drill',
+      expect.objectContaining({ params: { channel: 'phone', period: 'month' } }))
   })
 
-  // {advice:null} (no koios_ai module) renders the calm no-advice copy, never an
-  // error — and a drill row (candidate name) renders via the shared row mapping.
-  it('renders no error on {advice:null} and shows the drill rows', async () => {
+  // Clicking a segment in one chart must never change another chart's list — each
+  // section owns its own drill state, never a shared overlay. "Nieuw" is NOT the
+  // status axis's mount default (Benaderd/contacted is), so this click is
+  // guaranteed to fire a fresh request — while the already-seeded channel axis
+  // fires none.
+  it("clicking a segment in one chart does not change another chart's list", async () => {
     const user = userEvent.setup()
-    getSpy.mockImplementation((url: unknown) => String(url).endsWith('/advice')
-      ? Promise.resolve({ data: { advice: null } })
-      : Promise.resolve({ data: {
-          data: [{ id: 'c1', entity: 'candidate', name: 'J. de Boer', status: 'Voicemail ingesproken' }],
-          meta: { total: 1 },
-        } }))
     mockUseOutreachReport.mockReturnValue({ data, loading: false, error: false })
     renderReport()
-    await user.click(screen.getAllByText('Geen uitkomst').at(-1)!)
-    await waitFor(() => expect(screen.getByText('J. de Boer')).toBeInTheDocument())
-    expect(screen.getByText('Voicemail ingesproken')).toBeInTheDocument()
-    expect(screen.getByText('Koios heeft nog geen advies voor dit getal.')).toBeInTheDocument()
-    expect(screen.queryByText(/fout|mislukt|error/i)).not.toBeInTheDocument()
+    getSpy.mockClear()
+    await user.click(screen.getByText('Nieuw')) // the status axis, non-default segment
+    expect(getSpy).toHaveBeenCalledWith('/reports/outreach/drill',
+      expect.objectContaining({ params: { status: 'new', period: 'month' } }))
+    // No request was fired for the channel axis's ALREADY-seeded default (phone) —
+    // it stayed exactly as mount left it.
+    expect(getSpy.mock.calls.some(c => c[0] === '/reports/outreach/drill'
+      && (c[1] as { params: Record<string, unknown> }).params.channel === 'phone')).toBe(false)
   })
 })

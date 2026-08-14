@@ -5,7 +5,7 @@
  * segment is picked so the section never reflows.
  */
 import { describe, it, expect, vi } from 'vitest'
-import { render, screen } from '@testing-library/react'
+import { render, screen, fireEvent } from '@testing-library/react'
 import ReportChartWithDrillList from './ReportChartWithDrillList'
 import type { DrillSpec } from './ReportDrillDrawer'
 
@@ -47,5 +47,49 @@ describe('ReportChartWithDrillList', () => {
     mockUseReportDrill.mockReturnValue({ rows: [], rowsTotal: 0, rowsLoading: false, rowsForbidden: true })
     render(<ReportChartWithDrillList chart={<div>chart</div>} drill={drill} />)
     expect(screen.queryByText(/error/i)).not.toBeInTheDocument()
+  })
+
+  it('renders the Koios advice block for a segment that has an advice endpoint', () => {
+    const drill: DrillSpec = {
+      title: 'Applied', value: 60, rowsEndpoint: '/reports/flow/drill', rowsParams: { phase: 'applied' },
+      adviceEndpoint: '/reports/flow/advice', adviceParams: { phase: 'applied' },
+    }
+    mockUseReportDrill.mockReturnValue({
+      rows: [], rowsTotal: 0, rowsLoading: false, rowsForbidden: false,
+      advice: 'Reach out to the applied candidates today.', adviceLoading: false,
+    })
+    render(<ReportChartWithDrillList chart={<div>chart</div>} drill={drill} />)
+    expect(mockUseReportDrill).toHaveBeenCalledWith(drill)
+    // The advice row is collapsed by default (KoiosAdviceBlock); expand it to assert the text.
+    fireEvent.click(screen.getAllByText(/koios/i)[screen.getAllByText(/koios/i).length - 1])
+    expect(screen.getByText('Reach out to the applied candidates today.')).toBeInTheDocument()
+  })
+
+  it('does not render the advice block at all when the drill has no adviceEndpoint', () => {
+    const drill: DrillSpec = { title: 'Applied', value: 60, rowsEndpoint: '/reports/flow/drill', rowsParams: { phase: 'applied' } }
+    mockUseReportDrill.mockReturnValue({
+      rows: [], rowsTotal: 0, rowsLoading: false, rowsForbidden: false,
+      advice: null, adviceLoading: false,
+    })
+    render(<ReportChartWithDrillList chart={<div>chart</div>} drill={drill} />)
+    expect(screen.queryByText(/koios/i)).not.toBeInTheDocument()
+  })
+
+  it('refetches advice for the newly selected segment when the drill spec changes', () => {
+    const drillA: DrillSpec = {
+      title: 'Applied', value: 60, rowsEndpoint: '/reports/flow/drill', rowsParams: { phase: 'applied' },
+      adviceEndpoint: '/reports/flow/advice', adviceParams: { phase: 'applied' },
+    }
+    const drillB: DrillSpec = {
+      title: 'Hired', value: 12, rowsEndpoint: '/reports/flow/drill', rowsParams: { phase: 'hired' },
+      adviceEndpoint: '/reports/flow/advice', adviceParams: { phase: 'hired' },
+    }
+    mockUseReportDrill.mockReturnValue({
+      rows: [], rowsTotal: 0, rowsLoading: false, rowsForbidden: false, advice: null, adviceLoading: false,
+    })
+    const { rerender } = render(<ReportChartWithDrillList chart={<div>chart</div>} drill={drillA} />)
+    expect(mockUseReportDrill).toHaveBeenLastCalledWith(drillA)
+    rerender(<ReportChartWithDrillList chart={<div>chart</div>} drill={drillB} />)
+    expect(mockUseReportDrill).toHaveBeenLastCalledWith(drillB)
   })
 })

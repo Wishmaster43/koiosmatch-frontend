@@ -16,6 +16,9 @@ import DataTable from '@/components/ui/DataTable'
 import type { Column } from '@/components/ui/DataTable'
 import { useSourcesReport } from './useSourcesReport'
 import type { ReportPeriod, SourceRow } from '@/types/analytics'
+import { useAllSettings, getJsonSetting } from '@/lib/settings/useAllSettings'
+import { getReportKpiCatalog, getReportKpiDefaultOrder, reportKpiSettingsKey } from './kpiCatalog'
+import { resolveReportKpiOrder } from './resolveReportKpiOrder'
 
 // Number cell: emphasised when > 0, muted when zero (mirrors the SM entity tables).
 const numCell = (n: number) => (
@@ -45,20 +48,29 @@ export default function SourcesReport({ period }: { period: ReportPeriod }) {
   const topByMatches = [...rows].sort((a, b) => b.matches - a.matches)[0]
   const sourcesNoMatches = rows.filter(r => r.matches === 0).length
 
-  const kpis: KpiSpec[] = [
-    { key: 'sources',      label: t('sources.summary.sources'),      value: rows.length },
-    { key: 'candidates',   label: t('sources.summary.candidates'),   value: totals.candidates },
-    { key: 'applications', label: t('sources.summary.applications'), value: totals.applications },
-    { key: 'matches',      label: t('sources.summary.matches'),      value: totals.matches },
-    { key: 'matchRate',    label: t('sources.summary.matchRate'),    value: formatRatio(overallMatchRate) },
-    { key: 'applicationRate', label: t('sources.summary.applicationRate'), value: formatRatio(applicationRate) },
-    { key: 'topSourceCandidates', label: t('sources.summary.topSourceCandidates'),
+  const kpiByKey: Record<string, KpiSpec> = {
+    sources:      { key: 'sources',      label: t('sources.summary.sources'),      value: rows.length },
+    candidates:   { key: 'candidates',   label: t('sources.summary.candidates'),   value: totals.candidates },
+    applications: { key: 'applications', label: t('sources.summary.applications'), value: totals.applications },
+    matches:      { key: 'matches',      label: t('sources.summary.matches'),      value: totals.matches },
+    matchRate:    { key: 'matchRate',    label: t('sources.summary.matchRate'),    value: formatRatio(overallMatchRate) },
+    applicationRate: { key: 'applicationRate', label: t('sources.summary.applicationRate'), value: formatRatio(applicationRate) },
+    topSourceCandidates: { key: 'topSourceCandidates', label: t('sources.summary.topSourceCandidates'),
       value: topByCandidates ? `${topByCandidates.source} · ${topByCandidates.candidates}` : '—' },
-    { key: 'topSourceMatches', label: t('sources.summary.topSourceMatches'),
+    topSourceMatches: { key: 'topSourceMatches', label: t('sources.summary.topSourceMatches'),
       value: topByMatches && topByMatches.matches > 0 ? `${topByMatches.source} · ${topByMatches.matches}` : '—' },
-    { key: 'sourcesNoMatches', label: t('sources.summary.sourcesNoMatches'), value: sourcesNoMatches,
+    sourcesNoMatches: { key: 'sourcesNoMatches', label: t('sources.summary.sourcesNoMatches'), value: sourcesNoMatches,
       color: sourcesNoMatches > 0 ? 'var(--color-warning)' : undefined },
-  ]
+  }
+  // Which nine keys render, and in what order, is the tenant's Settings → Reports
+  // choice (falls back to today's order when nothing is stored, or a stored key
+  // has vanished — RAPPORT-KPI-INSTELBAAR).
+  const settingsValues = useAllSettings()
+  const catalogKeys = getReportKpiCatalog('sources').map(c => c.key)
+  const defaultOrder = getReportKpiDefaultOrder('sources')
+  const stored = getJsonSetting<string[] | undefined>(settingsValues, reportKpiSettingsKey('sources'), undefined)
+  const { order: kpiOrder, fellBack } = resolveReportKpiOrder(stored, catalogKeys, defaultOrder)
+  const kpis: KpiSpec[] = kpiOrder.map(key => kpiByKey[key]).filter((k): k is KpiSpec => k != null)
 
   const columns: Column<SourceRow>[] = [
     { key: 'source',       header: t('sources.cols.source'),       sortable: true, sortValue: r => r.source ?? '', render: r => r.source },
@@ -76,7 +88,7 @@ export default function SourcesReport({ period }: { period: ReportPeriod }) {
     <div>
       {/* KPI strip — above the tabs (candidate-page order: KPIs first) */}
       {!loading && !error && rows.length > 0 && (
-        <ReportKpiBand kpis={kpis} />
+        <ReportKpiBand kpis={kpis} notice={fellBack ? t('sources.kpiOrderFellBack') : undefined} />
       )}
 
       {/* Table — shared DataTable handles loading/empty; error stays a dedicated banner */}

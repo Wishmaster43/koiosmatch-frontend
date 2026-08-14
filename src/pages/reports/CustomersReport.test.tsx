@@ -1,9 +1,10 @@
-import { describe, it, expect, vi } from 'vitest'
+import { describe, it, expect, vi, afterEach } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import CustomersReport from './CustomersReport'
 import type { CustomersReportData } from '@/types/analytics'
+import i18n from '@/i18n'
 
 // Data layer under test control (loading/error/empty/success — the four UI states).
 const mockUseCustomersReport = vi.fn()
@@ -16,7 +17,16 @@ const getSpy = vi.fn().mockResolvedValue({ data: { data: [], meta: { total: 0 } 
 vi.mock('@/lib/api', () => ({
   default: { get: (...args: unknown[]) => getSpy(...args) },
   unwrapList: (r: { data: { data?: unknown[]; meta?: { total?: number } } }) => ({ rows: r.data?.data ?? [], total: r.data?.meta?.total ?? 0 }),
+  getActiveTenantId: () => 'test-tenant',
 }))
+
+// Tenant KPI-order settings (RAPPORT-KPI-INSTELBAAR) — empty blob = today's
+// default order, unless a test overrides it.
+const mockSettings = vi.hoisted(() => vi.fn(() => ({} as Record<string, unknown>)))
+vi.mock('@/lib/settings/useAllSettings', async () => {
+  const actual = await vi.importActual('@/lib/settings/useAllSettings')
+  return { ...actual, useAllSettings: () => mockSettings() }
+})
 
 const data: CustomersReportData = {
   period: 'month', from: '2026-08-01', to: '2026-08-31', total: 13,
@@ -48,6 +58,11 @@ vi.mock('./ReportTimeseriesChart', () => ({
 }))
 
 describe('CustomersReport (RAPPORTEN-SUITE-1 portie 3, customers inflow report)', () => {
+  // Every section now defaults its own list on mount, firing extra drill/advice
+  // requests — clear the shared spy between tests so a later assertion never
+  // matches a PRIOR test's leftover call history.
+  afterEach(() => { getSpy.mockClear(); mockSettings.mockReturnValue({}) })
+
   it('shows the loading state', () => {
     mockUseCustomersReport.mockReturnValue({ data: null, loading: true, error: false })
     renderReport()
@@ -175,6 +190,30 @@ describe('CustomersReport (RAPPORTEN-SUITE-1 portie 3, customers inflow report)'
     expect(screen.getByText('Eigenaar: Anna de Vries')).toBeInTheDocument()
   })
 
+  // RAPPORT-KPI-INSTELBAAR: which axes drive cards 2-9, and in what priority
+  // order, is the tenant's stored Settings → Reports choice, not the hardcoded
+  // status→phase→industry→owner→branch order.
+  it('reorders the axis-derived KPI cards to the tenant-stored axis priority', () => {
+    mockSettings.mockReturnValue({ report_kpis_customers: JSON.stringify(['branch', 'owner', 'industry', 'phase', 'status']) })
+    mockUseCustomersReport.mockReturnValue({ data, loading: false, error: false })
+    const { container } = renderReport()
+    const text = container.textContent ?? ''
+    // "Vestiging" (branch) now leads the axis priority, so its card text appears
+    // before "Status" — the reverse of the hardcoded default order.
+    expect(text.indexOf('Vestiging:')).toBeGreaterThanOrEqual(0)
+    expect(text.indexOf('Vestiging:')).toBeLessThan(text.indexOf('Status:'))
+  })
+
+  // A vanished stored axis key falls back to the default order silently on the
+  // report (still nine real cards, never a crash) but shows a visible notice.
+  it('falls back a vanished stored axis key to the default and shows a notice', () => {
+    mockSettings.mockReturnValue({ report_kpis_customers: JSON.stringify(['ghost_axis', 'phase', 'industry', 'owner', 'branch']) })
+    mockUseCustomersReport.mockReturnValue({ data, loading: false, error: false })
+    renderReport()
+    expect(screen.getByText('Status: Actief')).toBeInTheDocument() // backfilled from the default order
+    expect(screen.getByText(i18n.t('customers.kpiOrderFellBack', { ns: 'analytics' }))).toBeInTheDocument()
+  })
+
   it('clicking an axis-derived KPI card drills with the same XOR param as its bar', async () => {
     const user = userEvent.setup()
     mockUseCustomersReport.mockReturnValue({ data, loading: false, error: false })
@@ -205,5 +244,35 @@ describe('CustomersReport (RAPPORTEN-SUITE-1 portie 3, customers inflow report)'
       expect.objectContaining({ params: { date: '2026-08-03', period: 'month' } }))
     const call = getSpy.mock.calls.find(c => c[0] === '/reports/customers/drill')
     expect(call?.[1].params).not.toHaveProperty('bucket')
+  })
+
+  // RAPPORTEN-DRILLLIST-1: every axis section shows its own always-visible list
+  // beside the chart, seeded with a real request on mount — never a blank panel.
+  it('renders a drill list beside each axis chart, defaulted on mount', () => {
+    mockUseCustomersReport.mockReturnValue({ data, loading: false, error: false })
+    renderReport()
+    // The status axis's top segment (Actief, 9) seeds its own list on mount.
+    expect(getSpy).toHaveBeenCalledWith('/reports/customers/drill',
+      expect.objectContaining({ params: { status: 'active', period: 'month' } }))
+    // The industry axis independently seeds its own list with its own top segment.
+    expect(getSpy).toHaveBeenCalledWith('/reports/customers/drill',
+      expect.objectContaining({ params: { industry: 'healthcare', period: 'month' } }))
+  })
+
+  // Clicking a segment in ONE chart never changes another chart's list — each
+  // section keeps its own independent drill state.
+  it('clicking a segment in one chart never changes another chart\'s list', async () => {
+    const user = userEvent.setup()
+    mockUseCustomersReport.mockReturnValue({ data, loading: false, error: false })
+    renderReport()
+    getSpy.mockClear()
+    // "Inactief" is not the top status segment (Actief is), so it is guaranteed
+    // to differ from the mount default and fire a fresh request.
+    await user.click(screen.getByText('Inactief'))
+    expect(getSpy).toHaveBeenCalledWith('/reports/customers/drill',
+      expect.objectContaining({ params: { status: 'inactive', period: 'month' } }))
+    // The industry section was never re-fetched by the status click.
+    expect(getSpy).not.toHaveBeenCalledWith('/reports/customers/drill',
+      expect.objectContaining({ params: expect.objectContaining({ industry: expect.anything() }) }))
   })
 })

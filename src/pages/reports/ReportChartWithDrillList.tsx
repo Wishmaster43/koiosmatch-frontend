@@ -16,6 +16,7 @@ import type { DrillSpec } from './ReportDrillDrawer'
 import { rowTitle, rowSub } from './ReportDrillDrawer'
 import { useReportDrill } from './useReportDrill'
 import { formatNumber } from '@/lib/formatters'
+import KoiosAdviceBlock from '@/components/ai/KoiosAdviceBlock'
 
 const LIST_WIDTH = 300
 
@@ -25,8 +26,10 @@ export default function ReportChartWithDrillList({ chart, drill, placeholderLabe
   placeholderLabel?: string       // shown while no segment has been picked yet
 }) {
   const { t } = useTranslation('analytics')
-  // Same data layer as the drawer used: real rows from the report's own rowsEndpoint.
-  const { rows, rowsTotal, rowsLoading, rowsForbidden } = useReportDrill(drill)
+  // Same data layer as the drawer used: real rows AND Koios advice from the report's
+  // own rowsEndpoint/adviceEndpoint — restores the advice block the old drawer
+  // carried (KOIOS-DRILL-HOME-1), now following the selected segment inline.
+  const { rows, rowsTotal, rowsLoading, rowsForbidden, advice, adviceLoading } = useReportDrill(drill)
 
   return (
     <div style={{ display: 'flex', gap: 20, alignItems: 'stretch' }}>
@@ -52,6 +55,18 @@ export default function ReportChartWithDrillList({ chart, drill, placeholderLabe
                 {typeof drill.value === 'number' ? formatNumber(drill.value) : drill.value}
               </span>
             </div>
+
+            {/* Koios AI advice for the selected segment — only when this drill declares
+                an adviceEndpoint; no endpoint means no block at all (honest, no empty
+                shell, no forever-spinner). Loading shows the shared "analysing" state
+                inside KoiosAdviceBlock itself once advice arrives; while the request is
+                in flight there is nothing to show yet, so render nothing until it resolves
+                or comes back empty. */}
+            {drill.adviceEndpoint && !adviceLoading && advice && (
+              <div style={{ marginBottom: 16 }}>
+                <KoiosAdviceBlock namespace="common" insights={[{ type: t('drill.koios'), color: 'var(--color-primary)', text: advice }]} />
+              </div>
+            )}
 
             {/* Hidden calmly on a 403 — the segment's own data permission, not an error */}
             {rowsForbidden && (

@@ -4,6 +4,7 @@ import userEvent from '@testing-library/user-event'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import VacanciesReport from './VacanciesReport'
 import type { VacanciesReportData } from '@/types/analytics'
+import i18n from '@/i18n'
 
 // Data layer under test control (loading/error/empty/success — the four UI states).
 const mockUseVacanciesReport = vi.fn()
@@ -16,7 +17,15 @@ const getSpy = vi.fn().mockResolvedValue({ data: { data: [], meta: { total: 0 } 
 vi.mock('@/lib/api', () => ({
   default: { get: (...args: unknown[]) => getSpy(...args) },
   unwrapList: (r: { data: { data?: unknown[]; meta?: { total?: number } } }) => ({ rows: r.data?.data ?? [], total: r.data?.meta?.total ?? 0 }),
+  getActiveTenantId: () => 'test-tenant',
 }))
+
+// Tenant KPI-order settings, controllable per test (RAPPORT-KPI-INSTELBAAR).
+const mockSettings = vi.hoisted(() => vi.fn(() => ({} as Record<string, unknown>)))
+vi.mock('@/lib/settings/useAllSettings', async () => {
+  const actual = await vi.importActual('@/lib/settings/useAllSettings')
+  return { ...actual, useAllSettings: () => mockSettings() }
+})
 
 const row = {
   key: 'v1', label: 'Verpleegkundige IC', code: 'VAC-1',
@@ -79,7 +88,7 @@ vi.mock('./ReportTimeseriesChart', () => ({
 }))
 
 describe('VacanciesReport (RAPPORTEN-SUITE-1 portie 4, additive on C-34)', () => {
-  beforeEach(() => getSpy.mockClear())
+  beforeEach(() => { getSpy.mockClear(); mockSettings.mockReturnValue({}) })
 
   it('shows the loading state', () => {
     mockUseVacanciesReport.mockReturnValue({ data: null, loading: true, error: false })
@@ -319,6 +328,39 @@ describe('VacanciesReport (RAPPORTEN-SUITE-1 portie 4, additive on C-34)', () =>
 
     await user.click(screen.getByText('Zorg · 12'))
     expect(lastDrillParams()).toEqual({ industry: 'Zorg', period: 'month' })
+  })
+
+  // RAPPORT-KPI-INSTELBAAR: which nine keys render, and in what order, is the
+  // tenant's stored Settings → Reports choice, not the hardcoded default order.
+  it('renders the KPI strip in the tenant-chosen stored order', () => {
+    mockSettings.mockReturnValue({
+      report_kpis_vacancies: JSON.stringify([
+        'topOwner', 'topIndustry', 'customersCount', 'staleOnline', 'ttf', 'fillRate', 'filled', 'open', 'total',
+      ]),
+    })
+    mockUseVacanciesReport.mockReturnValue({ data, loading: false, error: false })
+    const { container } = renderReport()
+    const totalLabel = i18n.t('vacancies.summary.total', { ns: 'analytics' })
+    const topOwnerLabel = i18n.t('vacancies.summary.topOwner', { ns: 'analytics' })
+    const text = container.textContent ?? ''
+    // The stored order puts topOwner FIRST and total LAST — the strip must
+    // render in that exact order, not today's hardcoded sequence.
+    expect(text.indexOf(topOwnerLabel)).toBeGreaterThanOrEqual(0)
+    expect(text.indexOf(topOwnerLabel)).toBeLessThan(text.indexOf(totalLabel))
+  })
+
+  // A vanished stored key falls back silently on the report itself (never a
+  // crash or a blank slot) but surfaces a visible notice via ReportKpiBand.
+  it('falls back a vanished stored key to the default and shows a notice, never crashing', () => {
+    mockSettings.mockReturnValue({
+      report_kpis_vacancies: JSON.stringify([
+        'ghost_key', 'open', 'filled', 'fillRate', 'ttf', 'staleOnline', 'customersCount', 'topIndustry', 'topOwner',
+      ]),
+    })
+    mockUseVacanciesReport.mockReturnValue({ data, loading: false, error: false })
+    renderReport()
+    expect(screen.getByText(i18n.t('vacancies.summary.total', { ns: 'analytics' }))).toBeInTheDocument() // backfilled default
+    expect(screen.getByText(i18n.t('vacancies.kpiOrderFellBack', { ns: 'analytics' }))).toBeInTheDocument()
   })
 
   // Legacy summary-KPI drill (unchanged C-34 behaviour): the Open tile explains the

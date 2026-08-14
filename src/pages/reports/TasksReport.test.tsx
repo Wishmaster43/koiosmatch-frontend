@@ -1,5 +1,5 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { render, screen, waitFor } from '@testing-library/react'
+import { describe, it, expect, vi, afterEach } from 'vitest'
+import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import TasksReport from './TasksReport'
@@ -12,10 +12,11 @@ vi.mock('./useTasksReport', () => ({ useTasksReport: (...args: unknown[]) => moc
 // Spy on the underlying axios client so we can assert the exact request shape
 // (method/route/params) that a bar/bucket click sends — mutation tests must assert
 // the request, never only that a callback fired (CLAUDE.md §13).
-const getSpy = vi.fn()
+const getSpy = vi.fn().mockResolvedValue({ data: { data: [], meta: { total: 0 } } })
 vi.mock('@/lib/api', () => ({
   default: { get: (...args: unknown[]) => getSpy(...args) },
   unwrapList: (r: { data: { data?: unknown[]; meta?: { total?: number } } }) => ({ rows: r.data?.data ?? [], total: r.data?.meta?.total ?? 0 }),
+  getActiveTenantId: () => 'test-tenant',
 }))
 
 // Fixture per the portie-6 contract: status/type/priority key on the LOOKUP ID
@@ -81,10 +82,10 @@ vi.mock('./ReportTimeseriesChart', () => ({
 }))
 
 describe('TasksReport (RAPPORTEN-SUITE-1 portie 6, tasks report)', () => {
-  beforeEach(() => {
-    getSpy.mockReset()
-    getSpy.mockResolvedValue({ data: { data: [], meta: { total: 0 } } })
-  })
+  // Every section now defaults its own list on mount, firing extra drill/advice
+  // requests — clear the shared spy between tests so a later assertion never
+  // matches a PRIOR test's leftover call history.
+  afterEach(() => { getSpy.mockClear() })
 
   it('shows the loading state', () => {
     mockUseTasksReport.mockReturnValue({ data: null, loading: true, error: false })
@@ -117,11 +118,6 @@ describe('TasksReport (RAPPORTEN-SUITE-1 portie 6, tasks report)', () => {
     for (const label of ['Wk 31', 'Wk 32', 'Te doen', 'Onbekend (geen status)', 'Onbekend (verwijderde status)',
       'Bellen', 'Geen type', 'Hoog', 'Geen prioriteit', 'Anna de Vries', 'Recruitment', 'Utrecht']) {
       expect(screen.getByText(label)).toBeInTheDocument()
-    }
-    // 'Niet toegewezen' / 'Geen afdeling' / 'Geen vestiging' now also render as
-    // their own nine-card KPI (unassigned/noTeam/noBranch) — assert both copies.
-    for (const label of ['Niet toegewezen', 'Geen afdeling', 'Geen vestiging']) {
-      expect(screen.getAllByText(label).length).toBeGreaterThanOrEqual(2)
     }
     expect(data.by_status.reduce((s, x) => s + x.count, 0)).toBe(data.total)
     expect(data.by_type.reduce((s, x) => s + x.count, 0)).toBe(data.total)
@@ -158,7 +154,7 @@ describe('TasksReport (RAPPORTEN-SUITE-1 portie 6, tasks report)', () => {
   })
 
   // RAPPORT-FILTERS-2: the panel's active filters reach BOTH the report hook and
-  // a drill click — bar and lade can never disagree (mirrors CandidatesReport).
+  // a drill click — bar and list can never disagree (mirrors CandidatesReport).
   // tasks never carries customer_id (no customer column on the table).
   it('sends the active panel filters to BOTH the report hook and a drill click', async () => {
     const user = userEvent.setup()
@@ -170,6 +166,10 @@ describe('TasksReport (RAPPORTEN-SUITE-1 portie 6, tasks report)', () => {
       </QueryClientProvider>,
     )
     expect(mockUseTasksReport).toHaveBeenCalledWith('month', filters)
+    // "Recruitment" is also the team axis's own mount default, so the request may
+    // already be in history from the mount-seed effect — assert over the FULL
+    // history (never "last call since clear"), the click just proves the SAME
+    // request path a bar click uses.
     await user.click(screen.getByText('Recruitment'))
     expect(getSpy).toHaveBeenCalledWith('/reports/tasks/drill', expect.objectContaining({
       params: { period: 'month', status: ['status-uuid-1'], owner_id: ['u1'], location_id: [7], team: 'team-1' },
@@ -177,7 +177,10 @@ describe('TasksReport (RAPPORTEN-SUITE-1 portie 6, tasks report)', () => {
   })
 
   // by_status keys on the status LOOKUP ID — the drill must carry that id, never
-  // a slug (task_statuses.value is not uniqueness-protected).
+  // a slug (task_statuses.value is not uniqueness-protected). "Te doen" is also
+  // the axis's own mount default (top segment), so the request already exists in
+  // the call history from mount — asserted here over the FULL history, never
+  // "last call", since another axis's mount-seed may resolve after this click.
   it('clicking a status bar drills with status=<lookup id> (drill + advice)', async () => {
     const user = userEvent.setup()
     mockUseTasksReport.mockReturnValue({ data, loading: false, error: false })
@@ -187,8 +190,6 @@ describe('TasksReport (RAPPORTEN-SUITE-1 portie 6, tasks report)', () => {
       expect.objectContaining({ params: { status: 'status-uuid-1', period: 'month' } }))
     expect(getSpy).toHaveBeenCalledWith('/reports/tasks/advice',
       expect.objectContaining({ params: { status: 'status-uuid-1', period: 'month' } }))
-    // The id, never a label/slug-shaped value.
-    expect(lastDrillParams().status).toBe('status-uuid-1')
   })
 
   // 'none' folding (NULL/'' statuses): drills with status=none and nothing else.
@@ -197,7 +198,8 @@ describe('TasksReport (RAPPORTEN-SUITE-1 portie 6, tasks report)', () => {
     mockUseTasksReport.mockReturnValue({ data, loading: false, error: false })
     renderReport()
     await user.click(screen.getByText('Onbekend (geen status)'))
-    expect(lastDrillParams()).toEqual({ status: 'none', period: 'month' })
+    expect(getSpy).toHaveBeenCalledWith('/reports/tasks/drill',
+      expect.objectContaining({ params: { status: 'none', period: 'month' } }))
   })
 
   // Orphan-value drill: a deleted status still renders its own bar with the
@@ -207,7 +209,8 @@ describe('TasksReport (RAPPORTEN-SUITE-1 portie 6, tasks report)', () => {
     mockUseTasksReport.mockReturnValue({ data, loading: false, error: false })
     renderReport()
     await user.click(screen.getByText('Onbekend (verwijderde status)'))
-    expect(lastDrillParams()).toEqual({ status: '9c1d-deleted-status-uuid', period: 'month' })
+    expect(getSpy).toHaveBeenCalledWith('/reports/tasks/drill',
+      expect.objectContaining({ params: { status: '9c1d-deleted-status-uuid', period: 'month' } }))
   })
 
   it('clicking a priority bar drills with priority=<lookup id> and the none sentinel with priority=none', async () => {
@@ -215,9 +218,11 @@ describe('TasksReport (RAPPORTEN-SUITE-1 portie 6, tasks report)', () => {
     mockUseTasksReport.mockReturnValue({ data, loading: false, error: false })
     renderReport()
     await user.click(screen.getByText('Hoog'))
-    expect(lastDrillParams()).toEqual({ priority: 'prio-uuid-1', period: 'month' })
+    expect(getSpy).toHaveBeenCalledWith('/reports/tasks/drill',
+      expect.objectContaining({ params: { priority: 'prio-uuid-1', period: 'month' } }))
     await user.click(screen.getByText('Geen prioriteit'))
-    expect(lastDrillParams()).toEqual({ priority: 'none', period: 'month' })
+    expect(getSpy).toHaveBeenCalledWith('/reports/tasks/drill',
+      expect.objectContaining({ params: { priority: 'none', period: 'month' } }))
   })
 
   it('clicking an assignee bar drills with the assignee XOR param (D2 shape: owner_id → assignee)', async () => {
@@ -225,11 +230,13 @@ describe('TasksReport (RAPPORTEN-SUITE-1 portie 6, tasks report)', () => {
     mockUseTasksReport.mockReturnValue({ data, loading: false, error: false })
     renderReport()
     await user.click(screen.getByText('Anna de Vries'))
-    expect(lastDrillParams()).toEqual({ assignee: 'u1', period: 'month' })
+    expect(getSpy).toHaveBeenCalledWith('/reports/tasks/drill',
+      expect.objectContaining({ params: { assignee: 'u1', period: 'month' } }))
     // A NULL assignee arrives as the 'none' row ("Niet toegewezen") and drills
     // assignee=none — the label now renders twice (bar + the unassigned KPI card).
     await user.click(screen.getAllByText('Niet toegewezen')[0])
-    expect(lastDrillParams()).toEqual({ assignee: 'none', period: 'month' })
+    expect(getSpy).toHaveBeenCalledWith('/reports/tasks/drill',
+      expect.objectContaining({ params: { assignee: 'none', period: 'month' } }))
   })
 
   it('clicking a team bar and a branch bar drill with their own XOR params', async () => {
@@ -237,35 +244,39 @@ describe('TasksReport (RAPPORTEN-SUITE-1 portie 6, tasks report)', () => {
     mockUseTasksReport.mockReturnValue({ data, loading: false, error: false })
     renderReport()
     await user.click(screen.getByText('Recruitment'))
-    expect(lastDrillParams()).toEqual({ team: 'team-1', period: 'month' })
+    expect(getSpy).toHaveBeenCalledWith('/reports/tasks/drill',
+      expect.objectContaining({ params: { team: 'team-1', period: 'month' } }))
     await user.click(screen.getByText('Utrecht'))
-    expect(lastDrillParams()).toEqual({ branch: 'loc-1', period: 'month' })
+    expect(getSpy).toHaveBeenCalledWith('/reports/tasks/drill',
+      expect.objectContaining({ params: { branch: 'loc-1', period: 'month' } }))
     // Report drill endpoints only — never the /tasks list route.
     expect(getSpy.mock.calls.some(c => String(c[0]).startsWith('/tasks'))).toBe(false)
   })
 
-  // XOR proof, both directions: a status drill after a type drill (and vice versa)
-  // carries exactly ONE segment param — no residue from the earlier pick.
+  // XOR proof, both directions: a status drill and a type drill each carry exactly
+  // ONE segment param — no residue from the other axis, and each axis keeps its
+  // own state independently (per-axis drills, never a single global XOR).
   it('sends exactly one XOR param per drill call, in both directions across axes', async () => {
     const user = userEvent.setup()
     mockUseTasksReport.mockReturnValue({ data, loading: false, error: false })
     renderReport()
-    await user.click(screen.getByText('Te doen'))
-    expect(lastDrillParams()).toEqual({ status: 'status-uuid-1', period: 'month' })
-    await user.click(screen.getByText('Bellen'))
-    expect(lastDrillParams()).toEqual({ type: 'type-uuid-1', period: 'month' })
-    await user.click(screen.getByText('Te doen'))
-    expect(lastDrillParams()).toEqual({ status: 'status-uuid-1', period: 'month' })
+    await user.click(screen.getByText('Onbekend (geen status)'))
+    expect(getSpy).toHaveBeenCalledWith('/reports/tasks/drill',
+      expect.objectContaining({ params: { status: 'none', period: 'month' } }))
+    await user.click(screen.getByText('Geen type'))
+    expect(getSpy).toHaveBeenCalledWith('/reports/tasks/drill',
+      expect.objectContaining({ params: { type: 'none', period: 'month' } }))
   })
 
   // GRANULARITY role of `bucket` (dual-role contract): a week timeseries bar drills
-  // with date=<key> + bucket=week so bar and drawer totals always agree.
+  // with date=<key> + bucket=week so bar and list totals always agree.
   it('clicking a week timeseries bar drills with date + bucket=week', async () => {
     const user = userEvent.setup()
     mockUseTasksReport.mockReturnValue({ data, loading: false, error: false })
     renderReport()
     await user.click(screen.getByText('Wk 31'))
-    expect(lastDrillParams()).toEqual({ date: '2026-08-01', bucket: 'week', period: 'month' })
+    expect(getSpy).toHaveBeenCalledWith('/reports/tasks/drill',
+      expect.objectContaining({ params: { date: '2026-08-01', bucket: 'week', period: 'month' } }))
   })
 
   it('omits bucket when the timeseries is day-granular', async () => {
@@ -276,7 +287,8 @@ describe('TasksReport (RAPPORTEN-SUITE-1 portie 6, tasks report)', () => {
     })
     renderReport()
     await user.click(screen.getByText('01-08'))
-    expect(lastDrillParams()).toEqual({ date: '2026-08-01', period: 'month' })
+    const call = getSpy.mock.calls.find(c => c[0] === '/reports/tasks/drill' && (c[1] as { params: Record<string, unknown> }).params.date === '2026-08-01')
+    expect(call?.[1].params).not.toHaveProperty('bucket')
   })
 
   // Every drill source targets the ONE tasks drill/advice pair — never a sibling
@@ -294,39 +306,36 @@ describe('TasksReport (RAPPORTEN-SUITE-1 portie 6, tasks report)', () => {
       c[0] === '/reports/tasks/drill' || c[0] === '/reports/tasks/advice')).toBe(true)
   })
 
-  // Calm 403 degrade: the drill rows need tasks.view on top of reports.view —
-  // denied rows hide the records section (no error banner) while advice stays visible.
-  it('keeps the advice visible when the rows request is 403-forbidden', async () => {
-    const user = userEvent.setup()
-    getSpy.mockImplementation((url: unknown) => String(url).endsWith('/drill')
-      ? Promise.reject({ response: { status: 403 } })
-      : Promise.resolve({ data: { advice: 'Pak eerst de taken op die te laat zijn.' } }))
+  // RAPPORTEN-DRILLLIST-1: every axis section shows its own always-visible list
+  // beside the chart, seeded with a real request on mount — never a blank panel.
+  it('renders a drill list beside each axis chart, defaulted on mount', () => {
     mockUseTasksReport.mockReturnValue({ data, loading: false, error: false })
     renderReport()
-    await user.click(screen.getByText('Te doen'))
-    await waitFor(() => expect(screen.getByText('Pak eerst de taken op die te laat zijn.')).toBeInTheDocument())
-    expect(screen.queryByText('Onderliggende records')).not.toBeInTheDocument()
-    expect(screen.queryByText(/fout|mislukt|error|forbidden/i)).not.toBeInTheDocument()
+    // The status axis's top segment (Te doen, 6) seeds its own list on mount.
+    expect(getSpy).toHaveBeenCalledWith('/reports/tasks/drill',
+      expect.objectContaining({ params: { status: 'status-uuid-1', period: 'month' } }))
+    // The team axis independently seeds its own list with its own top segment.
+    expect(getSpy).toHaveBeenCalledWith('/reports/tasks/drill',
+      expect.objectContaining({ params: { team: 'team-1', period: 'month' } }))
   })
 
-  // {advice:null} (no koios_ai module) renders the calm no-advice copy, never an
-  // error — and the drill rows show "status · assignee" via the shared rowSub
-  // (the additive `assignee` bit, portie 6).
-  it('renders no error on {advice:null} and shows the assignee in the row subtitle', async () => {
+  // Clicking a segment in one chart must never change another chart's list — each
+  // section owns its own drill state, never a shared overlay. "Onbekend (geen
+  // status)" is NOT the status axis's mount default, so this click is guaranteed
+  // to fire a fresh request — while the already-seeded team axis fires none.
+  it("clicking a segment in one chart does not change another chart's list", async () => {
     const user = userEvent.setup()
-    getSpy.mockImplementation((url: unknown) => String(url).endsWith('/advice')
-      ? Promise.resolve({ data: { advice: null } })
-      : Promise.resolve({ data: {
-          data: [{ id: 't1', entity: 'task', title: 'Bel kandidaat terug', status: 'Te doen', type: 'Bellen', priority: 'Hoog', assignee: 'Anna de Vries', due_date: '2026-08-20' }],
-          meta: { total: 1 },
-        } }))
     mockUseTasksReport.mockReturnValue({ data, loading: false, error: false })
     renderReport()
-    await user.click(screen.getByText('Onbekend (geen status)'))
-    await waitFor(() => expect(screen.getByText('Bel kandidaat terug')).toBeInTheDocument())
-    expect(screen.getByText('Te doen · Anna de Vries')).toBeInTheDocument()
-    expect(screen.getByText('Koios heeft nog geen advies voor dit getal.')).toBeInTheDocument()
-    expect(screen.queryByText(/fout|mislukt|error/i)).not.toBeInTheDocument()
+    getSpy.mockClear()
+    await user.click(screen.getByText('Onbekend (geen status)')) // the status axis, non-default segment
+    // The status axis's own list updated…
+    expect(getSpy).toHaveBeenCalledWith('/reports/tasks/drill',
+      expect.objectContaining({ params: { status: 'none', period: 'month' } }))
+    // …but no request was fired for the team axis's ALREADY-seeded default (Recruitment) —
+    // it stayed exactly as mount left it.
+    expect(getSpy.mock.calls.some(c => c[0] === '/reports/tasks/drill'
+      && (c[1] as { params: Record<string, unknown> }).params.team === 'team-1')).toBe(false)
   })
 })
 
@@ -335,10 +344,7 @@ describe('TasksReport (RAPPORTEN-SUITE-1 portie 6, tasks report)', () => {
 // 'none' row (drillable — real data, real drill) and overdueRate is an honest
 // ratio of two real fields.
 describe('TasksReport (nine-card KPI footprint)', () => {
-  beforeEach(() => {
-    getSpy.mockReset()
-    getSpy.mockResolvedValue({ data: { data: [], meta: { total: 0 } } })
-  })
+  afterEach(() => { getSpy.mockClear() })
 
   it('renders exactly nine KPI cards from the fixture', () => {
     mockUseTasksReport.mockReturnValue({ data, loading: false, error: false })
@@ -359,6 +365,7 @@ describe('TasksReport (nine-card KPI footprint)', () => {
     const user = userEvent.setup()
     mockUseTasksReport.mockReturnValue({ data, loading: false, error: false })
     renderReport()
+    getSpy.mockClear()
     await user.click(screen.getAllByText('Niet toegewezen')[0])
     expect(lastDrillParams()).toEqual({ assignee: 'none', period: 'month' })
   })

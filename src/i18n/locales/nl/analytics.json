@@ -64,7 +64,8 @@
       "topRecruiter": "Meest actieve recruiter",
       "topSource": "Grootste bron",
       "topFunction": "Meest voorkomende functie"
-    }
+    },
+    "kpiOrderFellBack": "Een in Instellingen ingestelde KPI-kaart bestaat niet meer en is teruggezet naar de standaard."
   },
   "comingSoon": "{{label}}. Komt eraan",
   "period": {
@@ -96,7 +97,8 @@
     "lastPhase": "Eindfase",
     "maxDropPhase": "Grootste uitval",
     "stagesReached": "Bereikte fasen",
-    "stagesTotal": "Fasen in trechter"
+    "stagesTotal": "Fasen in trechter",
+    "kpiOrderFellBack": "Een in Instellingen ingestelde KPI-kaart bestaat niet meer en is teruggezet naar de standaard."
   },
   "recruiters": {
     "title": "Recruiters",
@@ -165,7 +167,8 @@
       "title": "Vacatures zonder sollicitaties ({{count}})",
       "subtitle": "Geteld uit de vacatures hierboven — nul sollicitaties ontvangen in deze periode.",
       "empty": "Elke vacature in deze periode ontving minstens één sollicitatie."
-    }
+    },
+    "kpiOrderFellBack": "Een in Instellingen ingestelde KPI-kaart bestaat niet meer en is teruggezet naar de standaard."
   },
   "matches": {
     "title": "Matches",
@@ -195,7 +198,8 @@
       "title": "Beëindigingsredenen",
       "total": "Totaal beëindigingen",
       "rate": "Beëindigingspercentage"
-    }
+    },
+    "kpiOrderFellBack": "Een in Instellingen ingestelde KPI-kaart bestaat niet meer en is teruggezet naar de standaard."
   },
   "outreach": {
     "loading": "Outreach laden…",
@@ -218,7 +222,8 @@
       "noOutcome": "Geen uitkomst",
       "topCampaign": "Grootste bellijst",
       "topChannel": "Grootste kanaal"
-    }
+    },
+    "kpiOrderFellBack": "Een in Instellingen ingestelde KPI-kaart bestaat niet meer en is teruggezet naar de standaard."
   },
   "sources": {
     "loading": "Bronnen laden…",
@@ -241,7 +246,8 @@
       "applications": "Sollicitaties",
       "matches": "Matches",
       "matchRate": "Matchpercentage"
-    }
+    },
+    "kpiOrderFellBack": "Een in Instellingen ingestelde KPI-kaart bestaat niet meer en is teruggezet naar de standaard."
   },
   "applications": {
     "loading": "Sollicitaties laden…",
@@ -263,7 +269,8 @@
       "matched": "Gematcht",
       "rejected": "Afgewezen",
       "placed": "Geplaatst"
-    }
+    },
+    "kpiOrderFellBack": "Een in Instellingen ingestelde KPI-kaart bestaat niet meer en is teruggezet naar de standaard."
   },
   "opportunities": {
     "loading": "Kansen laden…",
@@ -283,7 +290,8 @@
       "overdue": "Te laat"
     },
     "forecastCount": "Verwachte deals",
-    "forecastValue": "Verwachte waarde"
+    "forecastValue": "Verwachte waarde",
+    "kpiOrderFellBack": "Een in Instellingen ingestelde KPI-kaart bestaat niet meer en is teruggezet naar de standaard."
   },
   "tasks": {
     "loading": "Taken laden…",
@@ -309,7 +317,8 @@
     "unassigned": "Niet toegewezen",
     "noTeam": "Geen afdeling",
     "noBranch": "Geen vestiging",
-    "overdueRate": "Te-laat-percentage"
+    "overdueRate": "Te-laat-percentage",
+    "kpiOrderFellBack": "Een in Instellingen ingestelde KPI-kaart bestaat niet meer en is teruggezet naar de standaard."
   },
   "customers": {
     "loading": "Klanten laden…",
@@ -324,7 +333,8 @@
       "industry": "Branche",
       "owner": "Eigenaar",
       "branch": "Vestiging"
-    }
+    },
+    "kpiOrderFellBack": "Een in Instellingen ingestelde KPI-kaart bestaat niet meer en is teruggezet naar de standaard."
   },
   "contacts": {
     "total": "Totaal contactpersonen",
@@ -349,7 +359,8 @@
       "withoutLocation": "Zonder locatie",
       "withoutDepartment": "Zonder afdeling",
       "withoutCustomer": "Zonder klant"
-    }
+    },
+    "kpiOrderFellBack": "Een in Instellingen ingestelde KPI-kaart bestaat niet meer en is teruggezet naar de standaard."
   },
   "locations": {
     "total": "Totaal locaties",
@@ -373,7 +384,8 @@
       "topCity": "Grootste plaats",
       "withoutProvince": "Zonder provincie",
       "topProvince": "Grootste provincie"
-    }
+    },
+    "kpiOrderFellBack": "Een in Instellingen ingestelde KPI-kaart bestaat niet meer en is teruggezet naar de standaard."
   },
   "departments": {
     "total": "Totaal afdelingen",
@@ -396,7 +408,8 @@
       "topCustomer": "Grootste klant",
       "topLocation": "Grootste locatie",
       "customersCount": "Aantal klanten"
-    }
+    },
+    "kpiOrderFellBack": "Een in Instellingen ingestelde KPI-kaart bestaat niet meer en is teruggezet naar de standaard."
   },
   "ai": {
     "total": "Totaal AI-activiteit",
@@ -419,7 +432,8 @@
       "modelsUsed": "Gebruikte modellen",
       "activeUsers": "Actieve gebruikers",
       "topActivity": "Meest gebruikte activiteit"
-    }
+    },
+    "kpiOrderFellBack": "Een in Instellingen ingestelde KPI-kaart bestaat niet meer en is teruggezet naar de standaard."
   },
   "workflows": {
     "total": "Totaal workflow-runs",
@@ -443,7 +457,8 @@
       "avgDuration": "Gem. duur",
       "workflowsCount": "Aantal workflows",
       "triggersCount": "Aantal triggers"
-    }
+    },
+    "kpiOrderFellBack": "Een in Instellingen ingestelde KPI-kaart bestaat niet meer en is teruggezet naar de standaard."
   },
   "leads": {
     "loading": "Leads laden…",
@@ -461,7 +476,8 @@
       "avgTimeToConvert": "Gem. tijd tot conversie",
       "staleLeads": "Verouderde leads",
       "newThisPeriod": "Nieuw deze periode"
-    }
+    },
+    "kpiOrderFellBack": "Een in Instellingen ingestelde KPI-kaart bestaat niet meer en is teruggezet naar de standaard."
   },
   "accountmanagers": {
     "loading": "Accountmanagers laden…",
@@ -481,6 +497,7 @@
     "cols": {
       "manager": "Accountmanager",
       "customers": "Klanten"
-    }
+    },
+    "kpiOrderFellBack": "Een in Instellingen ingestelde KPI-kaart bestaat niet meer en is teruggezet naar de standaard."
   }
 }

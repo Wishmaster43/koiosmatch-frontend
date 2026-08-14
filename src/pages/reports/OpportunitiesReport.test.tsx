@@ -16,7 +16,16 @@ const getSpy = vi.fn()
 vi.mock('@/lib/api', () => ({
   default: { get: (...args: unknown[]) => getSpy(...args) },
   unwrapList: (r: { data: { data?: unknown[]; meta?: { total?: number } } }) => ({ rows: r.data?.data ?? [], total: r.data?.meta?.total ?? 0 }),
+  getActiveTenantId: () => 'test-tenant',
 }))
+
+// Tenant KPI-order settings (RAPPORT-KPI-INSTELBAAR) — empty blob = today's
+// default order, unless a test overrides it.
+const mockSettings = vi.hoisted(() => vi.fn(() => ({} as Record<string, unknown>)))
+vi.mock('@/lib/settings/useAllSettings', async () => {
+  const actual = await vi.importActual('@/lib/settings/useAllSettings')
+  return { ...actual, useAllSettings: () => mockSettings() }
+})
 
 const data: OpportunitiesReportData = {
   period: { from: '2026-05-14', to: '2026-08-14' },
@@ -198,8 +207,13 @@ describe('OpportunitiesReport (RAPPORTEN-SUITE-1 portie 5, kansen pipeline repor
     const user = userEvent.setup()
     mockUseOpportunitiesReport.mockReturnValue({ data, loading: false, error: false })
     renderReport()
+    // Anna de Vries (u1) is also the mount-seeded top owner segment, so the
+    // click may hit the react-query cache — assert via toHaveBeenCalledWith
+    // (any matching call, mount-seeded or click-fired), never "the last call".
     await user.click(screen.getByText('Anna de Vries'))
-    expect(lastDrillParams()).toEqual({ owner: 'u1', period: 'month' })
+    expect(getSpy).toHaveBeenCalledWith('/reports/opportunities/drill',
+      expect.objectContaining({ params: { owner: 'u1', period: 'month' } }))
+    // "Niet toegewezen" differs from the mount default, so it always fires fresh.
     await user.click(screen.getByText('Niet toegewezen'))
     expect(lastDrillParams()).toEqual({ owner: 'none', period: 'month' })
   })
@@ -235,7 +249,14 @@ describe('OpportunitiesReport (RAPPORTEN-SUITE-1 portie 5, kansen pipeline repor
     })
     renderReport()
     await user.click(screen.getByText('03-08'))
-    expect(lastDrillParams()).toEqual({ date: '2026-08-03', period: 'month' })
+    // The mount default ALSO seeds the series section with this exact single day
+    // point, so the click may hit the react-query cache — assert via
+    // toHaveBeenCalledWith (any matching call), never "the last call".
+    expect(getSpy).toHaveBeenCalledWith('/reports/opportunities/drill',
+      expect.objectContaining({ params: { date: '2026-08-03', period: 'month' } }))
+    const call = getSpy.mock.calls.find(c => c[0] === '/reports/opportunities/drill' &&
+      (c[1] as { params: Record<string, unknown> }).params.date === '2026-08-03')
+    expect(call?.[1].params).not.toHaveProperty('bucket')
   })
 
   // Every drill source targets the ONE opportunities drill/advice pair — never a
@@ -254,8 +275,11 @@ describe('OpportunitiesReport (RAPPORTEN-SUITE-1 portie 5, kansen pipeline repor
   })
 
   // Calm 403 degrade: the drill rows need opportunities.view on top of reports.view —
-  // denied rows hide the records section (no error banner) while advice stays visible.
-  it('keeps the advice visible when the rows request is 403-forbidden', async () => {
+  // ReportChartWithDrillList hides the rows section calmly (its own "no records"
+  // copy), never an error banner. Koios advice no longer has a display surface on
+  // this page — the shared list replaces the drawer (§ ReportChartWithDrillList),
+  // so this only proves the rows section degrades quietly.
+  it('degrades the rows list calmly (no error banner) when the rows request is 403-forbidden', async () => {
     const user = userEvent.setup()
     getSpy.mockImplementation((url: unknown) => String(url).endsWith('/drill')
       ? Promise.reject({ response: { status: 403 } })
@@ -263,14 +287,13 @@ describe('OpportunitiesReport (RAPPORTEN-SUITE-1 portie 5, kansen pipeline repor
     mockUseOpportunitiesReport.mockReturnValue({ data, loading: false, error: false })
     renderReport()
     await user.click(screen.getByText('Voorstel'))
-    await waitFor(() => expect(screen.getByText('Bel deze klant deze week nog.')).toBeInTheDocument())
-    expect(screen.queryByText('Onderliggende records')).not.toBeInTheDocument()
+    await waitFor(() => expect(screen.getAllByText('Geen onderliggende records.').length).toBeGreaterThan(0))
     expect(screen.queryByText(/fout|mislukt|error|forbidden/i)).not.toBeInTheDocument()
   })
 
-  // {advice:null} (no koios_ai module) renders the calm no-advice copy, never an
-  // error — and the drill rows show "stage · customer" via the shared rowSub.
-  it('renders no error on {advice:null} and shows the customer in the row subtitle', async () => {
+  // A drill row renders its title + "stage · customer" subtitle via the shared
+  // rowSub, exactly like the drawer did — no error on a normal, successful fetch.
+  it('renders no error on a successful drill fetch and shows the customer in the row subtitle', async () => {
     const user = userEvent.setup()
     getSpy.mockImplementation((url: unknown) => String(url).endsWith('/advice')
       ? Promise.resolve({ data: { advice: null } })
@@ -281,10 +304,41 @@ describe('OpportunitiesReport (RAPPORTEN-SUITE-1 portie 5, kansen pipeline repor
     mockUseOpportunitiesReport.mockReturnValue({ data, loading: false, error: false })
     renderReport()
     await user.click(screen.getByText('Geen fase'))
-    await waitFor(() => expect(screen.getByText('Deal Careyn wondzorg')).toBeInTheDocument())
-    expect(screen.getByText('Voorstel · Careyn')).toBeInTheDocument()
-    expect(screen.getByText('Koios heeft nog geen advies voor dit getal.')).toBeInTheDocument()
+    // The generic mock answers every section's drill fetch identically (mount
+    // seeds five sections too), so the row can legitimately appear more than once.
+    await waitFor(() => expect(screen.getAllByText('Deal Careyn wondzorg').length).toBeGreaterThan(0))
+    expect(screen.getAllByText('Voorstel · Careyn').length).toBeGreaterThan(0)
     expect(screen.queryByText(/fout|mislukt|error/i)).not.toBeInTheDocument()
+  })
+
+  // RAPPORTEN-DRILLLIST-1: every axis section shows its own always-visible list
+  // beside the chart, seeded with a real request on mount — never a blank panel.
+  it('renders a drill list beside each axis chart, defaulted on mount', () => {
+    mockUseOpportunitiesReport.mockReturnValue({ data, loading: false, error: false })
+    renderReport()
+    // The stage axis's top segment (Voorstel, 6) seeds its own list on mount.
+    expect(getSpy).toHaveBeenCalledWith('/reports/opportunities/drill',
+      expect.objectContaining({ params: { stage: 'proposal', period: 'month' } }))
+    // The branch axis independently seeds its own list with its own top segment.
+    expect(getSpy).toHaveBeenCalledWith('/reports/opportunities/drill',
+      expect.objectContaining({ params: { branch: 'loc-1', period: 'month' } }))
+  })
+
+  // Clicking a segment in ONE chart never changes another chart's list — each
+  // section keeps its own independent drill state.
+  it('clicking a segment in one chart never changes another chart\'s list', async () => {
+    const user = userEvent.setup()
+    mockUseOpportunitiesReport.mockReturnValue({ data, loading: false, error: false })
+    renderReport()
+    getSpy.mockClear()
+    // "Geen vestiging" is not the top branch segment (Utrecht is), so it is
+    // guaranteed to differ from the mount default and fire a fresh request.
+    await user.click(screen.getByText('Geen vestiging'))
+    expect(getSpy).toHaveBeenCalledWith('/reports/opportunities/drill',
+      expect.objectContaining({ params: { branch: 'none', period: 'month' } }))
+    // The stage section was never re-fetched by the branch click.
+    expect(getSpy).not.toHaveBeenCalledWith('/reports/opportunities/drill',
+      expect.objectContaining({ params: expect.objectContaining({ stage: expect.anything() }) }))
   })
 })
 

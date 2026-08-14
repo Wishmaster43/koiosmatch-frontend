@@ -27,6 +27,9 @@ import { EMPTY_REPORT_FILTERS, buildReportQueryParams } from './reportFilterPara
 import type { ReportFilterState } from './reportFilterParams'
 import { useDateFormat } from '@/lib/datetime'
 import type { ReportPeriod, VacancyReportRow, CandidateTimeseriesPoint } from '@/types/analytics'
+import { useAllSettings, getJsonSetting } from '@/lib/settings/useAllSettings'
+import { getReportKpiCatalog, getReportKpiDefaultOrder, reportKpiSettingsKey } from './kpiCatalog'
+import { resolveReportKpiOrder } from './resolveReportKpiOrder'
 
 // Number cell: emphasised when > 0, muted when zero (mirrors the SM entity tables).
 const numCell = (n: number) => (
@@ -106,19 +109,19 @@ export default function VacanciesReport({ period, filters = EMPTY_REPORT_FILTERS
   // see the backend ask in the handoff notes).
   const zeroApplicantRows = rows.filter(v => v.applications === 0)
 
-  const kpis: KpiSpec[] = [
-    { key: 'total',  label: t('vacancies.summary.total'),  value: s?.total ?? 0,
+  const kpiByKey: Record<string, KpiSpec> = {
+    total: { key: 'total',  label: t('vacancies.summary.total'),  value: s?.total ?? 0,
       active: drill != null && drill.rowsParams?.status == null,
       onClick: gateDrillClick('vacancies', () => openVacancies(t('vacancies.summary.total'), s?.total ?? 0)) },
-    { key: 'open',   label: t('vacancies.summary.open'),   value: s?.open ?? 0,
+    open: { key: 'open',   label: t('vacancies.summary.open'),   value: s?.open ?? 0,
       active: drill?.rowsParams?.status === 'open',
       onClick: gateDrillClick('vacancies', () => openVacancies(t('vacancies.summary.open'), s?.open ?? 0, 'open')) },
-    { key: 'filled', label: t('vacancies.summary.filled'), value: s?.filled ?? 0,
+    filled: { key: 'filled', label: t('vacancies.summary.filled'), value: s?.filled ?? 0,
       active: drill?.rowsParams?.status === 'filled',
       onClick: gateDrillClick('vacancies', () => openVacancies(t('vacancies.summary.filled'), s?.filled ?? 0, 'filled')) },
-    { key: 'fillRate', label: t('vacancies.summary.fillRate'),
+    fillRate: { key: 'fillRate', label: t('vacancies.summary.fillRate'),
       value: s ? formatRatio(s.fill_rate) : '—' },
-    { key: 'ttf', label: t('vacancies.summary.avgTimeToFill'),
+    ttf: { key: 'ttf', label: t('vacancies.summary.avgTimeToFill'),
       value: s?.avg_time_to_fill_days != null ? t('vacancies.daysValue', { days: Math.round(s.avg_time_to_fill_days) }) : '—' },
     // PDF-VACATURES point 31: "vacature staat online maar geen kandidaten na X
     // dagen" — the real, tenant-threshold-driven backend count (VacanciesReport
@@ -127,16 +130,25 @@ export default function VacanciesReport({ period, filters = EMPTY_REPORT_FILTERS
     // drill route exists yet for this signal (the drill endpoint's eight-way XOR
     // does not include `signal` — see the handoff note below), so this card is a
     // plain, non-fabricated stat, not clickable.
-    { key: 'staleOnline', label: t('vacancies.summary.staleOnline'), value: s?.stale_online ?? 0 },
+    staleOnline: { key: 'staleOnline', label: t('vacancies.summary.staleOnline'), value: s?.stale_online ?? 0 },
     // Plain stat — no single XOR value represents "distinct customers", so not clickable.
-    { key: 'customersCount', label: t('vacancies.summary.customersCount'), value: customersCount },
-    { key: 'topIndustry', label: t('vacancies.summary.topIndustry'),
+    customersCount: { key: 'customersCount', label: t('vacancies.summary.customersCount'), value: customersCount },
+    topIndustry: { key: 'topIndustry', label: t('vacancies.summary.topIndustry'),
       value: topIndustry ? `${topIndustry.label} · ${topIndustry.count}` : '—',
       onClick: topIndustry ? gateDrillClick('vacancies', () => openSegment(topIndustry, { industry: topIndustry.value })) : undefined },
-    { key: 'topOwner', label: t('vacancies.summary.topOwner'),
+    topOwner: { key: 'topOwner', label: t('vacancies.summary.topOwner'),
       value: topOwner ? `${topOwner.name} · ${topOwner.count}` : '—',
       onClick: topOwner ? gateDrillClick('vacancies', () => openSegment({ label: topOwner.name, count: topOwner.count }, { owner: topOwner.owner_id })) : undefined },
-  ]
+  }
+  // Which nine keys render, and in what order, is the tenant's Settings → Reports
+  // choice (falls back to today's order when nothing is stored, or a stored key
+  // has vanished — RAPPORT-KPI-INSTELBAAR).
+  const settingsValues = useAllSettings()
+  const catalogKeys = getReportKpiCatalog('vacancies').map(c => c.key)
+  const defaultOrder = getReportKpiDefaultOrder('vacancies')
+  const stored = getJsonSetting<string[] | undefined>(settingsValues, reportKpiSettingsKey('vacancies'), undefined)
+  const { order: kpiOrder, fellBack } = resolveReportKpiOrder(stored, catalogKeys, defaultOrder)
+  const kpis: KpiSpec[] = kpiOrder.map(key => kpiByKey[key]).filter((k): k is KpiSpec => k != null)
 
   // Columns — soft chips for status/filled (§4), numeric cols right-aligned + sortable.
   const columns: Column<VacancyReportRow>[] = [
@@ -176,7 +188,7 @@ export default function VacanciesReport({ period, filters = EMPTY_REPORT_FILTERS
     <div>
       {/* KPI strip — above the tabs (candidate-page order: KPIs first) */}
       {hasData && rows.length > 0 && (
-        <ReportKpiBand kpis={kpis} />
+        <ReportKpiBand kpis={kpis} notice={fellBack ? t('vacancies.kpiOrderFellBack') : undefined} />
       )}
 
       {/* The report's data window, rendered prominently — DD-MM-YYYY (never ISO, §3B). */}

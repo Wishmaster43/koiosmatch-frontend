@@ -64,7 +64,8 @@
       "topRecruiter": "Most active recruiter",
       "topSource": "Top source",
       "topFunction": "Most common function"
-    }
+    },
+    "kpiOrderFellBack": "A KPI card configured in Settings no longer exists and was reset to the default."
   },
   "comingSoon": "{{label}}. Coming soon",
   "period": {
@@ -96,7 +97,8 @@
     "lastPhase": "Final stage",
     "maxDropPhase": "Biggest drop-off",
     "stagesReached": "Stages reached",
-    "stagesTotal": "Stages in funnel"
+    "stagesTotal": "Stages in funnel",
+    "kpiOrderFellBack": "A KPI card configured in Settings no longer exists and was reset to the default."
   },
   "recruiters": {
     "title": "Recruiters",
@@ -165,7 +167,8 @@
       "title": "Vacancies without any applications ({{count}})",
       "subtitle": "Counted from the vacancies shown above — zero applications received in this period.",
       "empty": "Every vacancy in this period received at least one application."
-    }
+    },
+    "kpiOrderFellBack": "A KPI card configured in Settings no longer exists and was reset to the default."
   },
   "matches": {
     "title": "Matches",
@@ -195,7 +198,8 @@
       "title": "Termination reasons",
       "total": "Total terminations",
       "rate": "Termination rate"
-    }
+    },
+    "kpiOrderFellBack": "A KPI card configured in Settings no longer exists and was reset to the default."
   },
   "outreach": {
     "loading": "Loading outreach…",
@@ -218,7 +222,8 @@
       "noOutcome": "No outcome",
       "topCampaign": "Top call list",
       "topChannel": "Top channel"
-    }
+    },
+    "kpiOrderFellBack": "A KPI card configured in Settings no longer exists and was reset to the default."
   },
   "sources": {
     "loading": "Loading sources…",
@@ -241,7 +246,8 @@
       "applications": "Applications",
       "matches": "Matches",
       "matchRate": "Match rate"
-    }
+    },
+    "kpiOrderFellBack": "A KPI card configured in Settings no longer exists and was reset to the default."
   },
   "applications": {
     "loading": "Loading applications…",
@@ -263,7 +269,8 @@
       "matched": "Matched",
       "rejected": "Rejected",
       "placed": "Placed"
-    }
+    },
+    "kpiOrderFellBack": "A KPI card configured in Settings no longer exists and was reset to the default."
   },
   "opportunities": {
     "loading": "Loading opportunities…",
@@ -283,7 +290,8 @@
       "overdue": "Overdue"
     },
     "forecastCount": "Forecasted deals",
-    "forecastValue": "Forecasted value"
+    "forecastValue": "Forecasted value",
+    "kpiOrderFellBack": "A KPI card configured in Settings no longer exists and was reset to the default."
   },
   "tasks": {
     "loading": "Loading tasks…",
@@ -309,7 +317,8 @@
     "unassigned": "Unassigned",
     "noTeam": "No department",
     "noBranch": "No branch",
-    "overdueRate": "Overdue rate"
+    "overdueRate": "Overdue rate",
+    "kpiOrderFellBack": "A KPI card configured in Settings no longer exists and was reset to the default."
   },
   "customers": {
     "loading": "Loading customers…",
@@ -324,7 +333,8 @@
       "industry": "Industry",
       "owner": "Owner",
       "branch": "Branch"
-    }
+    },
+    "kpiOrderFellBack": "A KPI card configured in Settings no longer exists and was reset to the default."
   },
   "contacts": {
     "total": "Total contacts",
@@ -349,7 +359,8 @@
       "withoutLocation": "Without location",
       "withoutDepartment": "Without department",
       "withoutCustomer": "Without customer"
-    }
+    },
+    "kpiOrderFellBack": "A KPI card configured in Settings no longer exists and was reset to the default."
   },
   "locations": {
     "total": "Total locations",
@@ -373,7 +384,8 @@
       "topCity": "Top city",
       "withoutProvince": "Without province",
       "topProvince": "Top province"
-    }
+    },
+    "kpiOrderFellBack": "A KPI card configured in Settings no longer exists and was reset to the default."
   },
   "departments": {
     "total": "Total departments",
@@ -396,7 +408,8 @@
       "topCustomer": "Top customer",
       "topLocation": "Top location",
       "customersCount": "Customers represented"
-    }
+    },
+    "kpiOrderFellBack": "A KPI card configured in Settings no longer exists and was reset to the default."
   },
   "ai": {
     "total": "Total AI activity",
@@ -419,7 +432,8 @@
       "modelsUsed": "Models used",
       "activeUsers": "Active users",
       "topActivity": "Most used activity"
-    }
+    },
+    "kpiOrderFellBack": "A KPI card configured in Settings no longer exists and was reset to the default."
   },
   "workflows": {
     "total": "Total workflow runs",
@@ -443,7 +457,8 @@
       "avgDuration": "Avg duration",
       "workflowsCount": "Workflows",
       "triggersCount": "Triggers"
-    }
+    },
+    "kpiOrderFellBack": "A KPI card configured in Settings no longer exists and was reset to the default."
   },
   "leads": {
     "loading": "Loading leads…",
@@ -461,7 +476,8 @@
       "avgTimeToConvert": "Avg. time to convert",
       "staleLeads": "Stale leads",
       "newThisPeriod": "New this period"
-    }
+    },
+    "kpiOrderFellBack": "A KPI card configured in Settings no longer exists and was reset to the default."
   },
   "accountmanagers": {
     "loading": "Loading account managers…",
@@ -481,6 +497,7 @@
     "cols": {
       "manager": "Account manager",
       "customers": "Customers"
-    }
+    },
+    "kpiOrderFellBack": "A KPI card configured in Settings no longer exists and was reset to the default."
   }
 }

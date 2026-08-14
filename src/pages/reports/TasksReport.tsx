@@ -9,26 +9,31 @@
  * is display-only: the XOR carries no open/done/overdue segment (no fake
  * affordances — a stat without a real drill path never looks clickable).
  */
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import ReportKpiBand from './ReportKpiBand'
 import { reportCardStyle as card, reportSectionHeadStyle as head } from './ReportSectionCard'
 import ReportStateBlock from './ReportStateBlock'
 import type { KpiSpec } from '@/components/insights/InsightsRow'
-import ReportDrillDrawer from './ReportDrillDrawer'
 import type { DrillSpec } from './ReportDrillDrawer'
 import { useTasksReport } from './useTasksReport'
 import { gateDrillClick } from './reportDrillGate'
 import { EMPTY_REPORT_FILTERS, buildReportQueryParams } from './reportFilterParams'
 import type { ReportFilterState } from './reportFilterParams'
 import SegmentBars from './SegmentBars'
+import ReportChartWithDrillList from './ReportChartWithDrillList'
 import ReportTimeseriesChart from './ReportTimeseriesChart'
 import { useDateFormat } from '@/lib/datetime'
 import { formatPercent } from '@/lib/formatters'
 import type { ReportPeriod, CandidateOwnerSegment, CandidateTimeseriesPoint } from '@/types/analytics'
+import { useAllSettings, getJsonSetting } from '@/lib/settings/useAllSettings'
+import { getReportKpiCatalog, getReportKpiDefaultOrder, reportKpiSettingsKey } from './kpiCatalog'
+import { resolveReportKpiOrder } from './resolveReportKpiOrder'
 
 // The plain single-value XOR axes; `assignee` has its own D2 shape below.
 type Axis = 'status' | 'type' | 'priority' | 'team' | 'branch'
+// The assignee axis shares the drill-key record with the five plain axes plus the timeseries.
+type DrillKey = Axis | 'assignee' | 'series'
 
 // Minimal surface the generic bar renderer needs — status rows carry a lookup
 // colour, the other axes do not (SegmentBars falls back to the primary tint).
@@ -46,23 +51,24 @@ export default function TasksReport({ period, filters = EMPTY_REPORT_FILTERS }: 
   // tasks behind it + Koios advice). Exactly one XOR param per open drill —
   // ALWAYS layered on top of the report's own active filters (`baseParams`), never
   // just `period`, so the lade counts the exact same set the bar was drawn from.
-  const [drill, setDrill] = useState<DrillSpec | null>(null)
+  const [drills, setDrills] = useState<Partial<Record<DrillKey, DrillSpec>>>({})
   const windowSub = () => `${formatDate(data?.from)} – ${formatDate(data?.to)}`
   const baseParams = buildReportQueryParams(period, 'tasks', filters)
-  const openSegment = (seg: { label: string; count: number }, xorParam: Record<string, unknown>) => setDrill({
-    title: seg.label, value: seg.count, subtitle: windowSub(),
-    rowsEndpoint: '/reports/tasks/drill', rowsParams: { ...baseParams, ...xorParam },
-    adviceEndpoint: '/reports/tasks/advice', adviceParams: { ...baseParams, ...xorParam },
-  })
-  const openBucket = (pt: CandidateTimeseriesPoint) => setDrill({
+  const openSegment = (key: DrillKey, seg: { label: string; count: number }, xorParam: Record<string, unknown>) =>
+    setDrills(d => ({ ...d, [key]: {
+      title: seg.label, value: seg.count, subtitle: windowSub(),
+      rowsEndpoint: '/reports/tasks/drill', rowsParams: { ...baseParams, ...xorParam },
+      adviceEndpoint: '/reports/tasks/advice', adviceParams: { ...baseParams, ...xorParam },
+    } }))
+  const openBucket = (pt: CandidateTimeseriesPoint) => setDrills(d => ({ ...d, series: {
     title: pt.label, value: pt.value, subtitle: windowSub(),
-    // A week bar's `date` is the point's own key; the drawer then counts the WHOLE
-    // week (bucket=week) so bar and drawer total always agree.
+    // A week bar's `date` is the point's own key; the list then counts the WHOLE
+    // week (bucket=week) so bar and list total always agree.
     rowsEndpoint: '/reports/tasks/drill',
     rowsParams: { ...baseParams, date: pt.date, ...(data?.timeseries.bucket === 'week' ? { bucket: 'week' } : {}) },
     adviceEndpoint: '/reports/tasks/advice',
     adviceParams: { ...baseParams, date: pt.date, ...(data?.timeseries.bucket === 'week' ? { bucket: 'week' } : {}) },
-  })
+  } }))
 
   // Generic axis-bar renderer: 'none' sentinels and orphaned (deleted-lookup)
   // values are all normal array entries — each drills on its RAW value (the
@@ -72,7 +78,7 @@ export default function TasksReport({ period, filters = EMPTY_REPORT_FILTERS }: 
     const max = segs.reduce((m, s) => Math.max(m, s.count), 0)
     const onPick = gateDrillClick('tasks', (value: string) => {
       const seg = segs.find(s => s.value === value)
-      if (seg) openSegment(seg, { [axis]: value })
+      if (seg) openSegment(axis, seg, { [axis]: value })
     })
     return <SegmentBars max={max} onPick={onPick}
       items={segs.map(s => ({ key: s.value, label: s.label, count: s.count, color: s.color ?? null }))} />
@@ -84,7 +90,7 @@ export default function TasksReport({ period, filters = EMPTY_REPORT_FILTERS }: 
     const max = segs.reduce((m, s) => Math.max(m, s.count), 0)
     const onPick = gateDrillClick('tasks', (value: string) => {
       const seg = segs.find(s => s.owner_id === value)
-      if (seg) openSegment({ label: seg.name, count: seg.count }, { assignee: value })
+      if (seg) openSegment('assignee', { label: seg.name, count: seg.count }, { assignee: value })
     })
     return <SegmentBars max={max} onPick={onPick}
       items={segs.map(s => ({ key: s.owner_id, label: s.name, count: s.count, color: null }))} />
@@ -94,6 +100,27 @@ export default function TasksReport({ period, filters = EMPTY_REPORT_FILTERS }: 
     const pt = data?.timeseries.series.find(p => p.date === dateKey)
     if (pt) openBucket(pt)
   })
+
+  // Default each section's list to its own top segment on mount so no panel is
+  // ever blank — mirrors clicking that segment's own bar, never a client-side guess.
+  useEffect(() => {
+    if (!data) return
+    const top = <T,>(segs: T[], count: (s: T) => number) => segs.length ? segs.reduce((a, b) => (count(b) > count(a) ? b : a)) : null
+    const topStatus = top(data.by_status, s => s.count)
+    const topType = top(data.by_type, s => s.count)
+    const topPriority = top(data.by_priority, s => s.count)
+    const topAssignee = top(data.by_assignee, s => s.count)
+    const topTeam = top(data.by_team, s => s.count)
+    const topBranch = top(data.by_branch, s => s.count)
+    if (topStatus) openSegment('status', topStatus, { status: topStatus.value })
+    if (topType) openSegment('type', topType, { type: topType.value })
+    if (topPriority) openSegment('priority', topPriority, { priority: topPriority.value })
+    if (topAssignee) openSegment('assignee', { label: topAssignee.name, count: topAssignee.count }, { assignee: topAssignee.owner_id })
+    if (topTeam) openSegment('team', topTeam, { team: topTeam.value })
+    if (topBranch) openSegment('branch', topBranch, { branch: topBranch.value })
+    if (data.timeseries.series.length) openBucket(data.timeseries.series[data.timeseries.series.length - 1])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [data?.from, data?.to])
 
   // Workload KPI strip from the envelope's flag-driven summary. Display-only:
   // the seven-way XOR carries no open/done/overdue param (no fake affordances) —
@@ -108,31 +135,40 @@ export default function TasksReport({ period, filters = EMPTY_REPORT_FILTERS }: 
   const noTeam = data?.by_team.find(seg => seg.value === 'none')
   const noBranch = data?.by_branch.find(seg => seg.value === 'none')
   const overdueRate = data && total > 0 && s ? (s.overdue / total) * 100 : null
-  const kpis: KpiSpec[] = [
-    { key: 'total',    label: t('tasks.total'),            value: total },
-    { key: 'open',     label: t('tasks.summary.open'),     value: s?.open ?? 0 },
-    { key: 'done',     label: t('tasks.summary.done'),     value: s?.done ?? 0 },
-    { key: 'overdue',  label: t('tasks.summary.overdue'),  value: s?.overdue ?? 0 },
-    { key: 'doneRate', label: t('tasks.summary.doneRate'),
+  const kpiByKey: Record<string, KpiSpec> = {
+    total:    { key: 'total',    label: t('tasks.total'),            value: total },
+    open:     { key: 'open',     label: t('tasks.summary.open'),     value: s?.open ?? 0 },
+    done:     { key: 'done',     label: t('tasks.summary.done'),     value: s?.done ?? 0 },
+    overdue:  { key: 'overdue',  label: t('tasks.summary.overdue'),  value: s?.overdue ?? 0 },
+    doneRate: { key: 'doneRate', label: t('tasks.summary.doneRate'),
       value: formatPercent(s?.done_rate) },
-    { key: 'unassigned', label: t('tasks.unassigned'), value: unassigned?.count ?? 0,
-      active: (drill?.rowsParams as Record<string, unknown> | undefined)?.assignee === 'none',
-      onClick: unassigned ? gateDrillClick('tasks', () => openSegment({ label: unassigned.name, count: unassigned.count }, { assignee: 'none' })) : undefined },
-    { key: 'noTeam', label: t('tasks.noTeam'), value: noTeam?.count ?? 0,
-      active: (drill?.rowsParams as Record<string, unknown> | undefined)?.team === 'none',
-      onClick: noTeam ? gateDrillClick('tasks', () => openSegment(noTeam, { team: 'none' })) : undefined },
-    { key: 'noBranch', label: t('tasks.noBranch'), value: noBranch?.count ?? 0,
-      active: (drill?.rowsParams as Record<string, unknown> | undefined)?.branch === 'none',
-      onClick: noBranch ? gateDrillClick('tasks', () => openSegment(noBranch, { branch: 'none' })) : undefined },
-    { key: 'overdueRate', label: t('tasks.overdueRate'),
+    unassigned: { key: 'unassigned', label: t('tasks.unassigned'), value: unassigned?.count ?? 0,
+      active: (drills.assignee?.rowsParams as Record<string, unknown> | undefined)?.assignee === 'none',
+      onClick: unassigned ? gateDrillClick('tasks', () => openSegment('assignee', { label: unassigned.name, count: unassigned.count }, { assignee: 'none' })) : undefined },
+    noTeam: { key: 'noTeam', label: t('tasks.noTeam'), value: noTeam?.count ?? 0,
+      active: (drills.team?.rowsParams as Record<string, unknown> | undefined)?.team === 'none',
+      onClick: noTeam ? gateDrillClick('tasks', () => openSegment('team', noTeam, { team: 'none' })) : undefined },
+    noBranch: { key: 'noBranch', label: t('tasks.noBranch'), value: noBranch?.count ?? 0,
+      active: (drills.branch?.rowsParams as Record<string, unknown> | undefined)?.branch === 'none',
+      onClick: noBranch ? gateDrillClick('tasks', () => openSegment('branch', noBranch, { branch: 'none' })) : undefined },
+    overdueRate: { key: 'overdueRate', label: t('tasks.overdueRate'),
       value: formatPercent(overdueRate) },
-  ]
+  }
+  // Which nine keys render, and in what order, is the tenant's Settings → Reports
+  // choice (falls back to today's order when nothing is stored, or a stored key
+  // has vanished — RAPPORT-KPI-INSTELBAAR).
+  const settingsValues = useAllSettings()
+  const catalogKeys = getReportKpiCatalog('tasks').map(c => c.key)
+  const defaultOrder = getReportKpiDefaultOrder('tasks')
+  const stored = getJsonSetting<string[] | undefined>(settingsValues, reportKpiSettingsKey('tasks'), undefined)
+  const { order: kpiOrder, fellBack } = resolveReportKpiOrder(stored, catalogKeys, defaultOrder)
+  const kpis: KpiSpec[] = kpiOrder.map(key => kpiByKey[key]).filter((k): k is KpiSpec => k != null)
 
   return (
     <div>
       {/* KPI strip — workload health, above the tabs (candidate-page order) */}
       {hasData && (
-        <ReportKpiBand kpis={kpis} />
+        <ReportKpiBand kpis={kpis} notice={fellBack ? t('tasks.kpiOrderFellBack') : undefined} />
       )}
 
       {/* The report's data window, rendered prominently from the RESPONSE —
@@ -151,49 +187,54 @@ export default function TasksReport({ period, filters = EMPTY_REPORT_FILTERS }: 
         />
         {hasData && data && (
           <div style={{ padding: 20, display: 'flex', flexDirection: 'column', gap: 24 }}>
-            {/* Created over time — week/day timeseries, bucket set server-side. */}
+            {/* Created over time — week/day timeseries, bucket set server-side. Its own
+                always-visible list sits beside it, never a shared overlay. */}
             <section>
               <h3 style={{ ...head, marginBottom: 10 }}>{t('tasks.series')}</h3>
-              <ReportTimeseriesChart series={data.timeseries.series} onPick={onSeriesPick} />
+              <ReportChartWithDrillList drill={drills.series ?? null} placeholderLabel={t('tasks.series')}
+                chart={<ReportTimeseriesChart series={data.timeseries.series} onPick={onSeriesPick} />} />
             </section>
 
             {/* Status axis — ID-keyed (slug is not unique-protected); always sums
                 to total ('none' folding + orphan-uuid rows included). */}
             <section>
               <h3 style={{ ...head, marginBottom: 10 }}>{t('tasks.axes.status')}</h3>
-              {bars('status', data.by_status)}
+              <ReportChartWithDrillList drill={drills.status ?? null} placeholderLabel={t('tasks.axes.status')}
+                chart={bars('status', data.by_status)} />
             </section>
 
             <section>
               <h3 style={{ ...head, marginBottom: 10 }}>{t('tasks.axes.type')}</h3>
-              {bars('type', data.by_type)}
+              <ReportChartWithDrillList drill={drills.type ?? null} placeholderLabel={t('tasks.axes.type')}
+                chart={bars('type', data.by_type)} />
             </section>
 
             <section>
               <h3 style={{ ...head, marginBottom: 10 }}>{t('tasks.axes.priority')}</h3>
-              {bars('priority', data.by_priority)}
+              <ReportChartWithDrillList drill={drills.priority ?? null} placeholderLabel={t('tasks.axes.priority')}
+                chart={bars('priority', data.by_priority)} />
             </section>
 
             <section>
               <h3 style={{ ...head, marginBottom: 10 }}>{t('tasks.axes.assignee')}</h3>
-              {assigneeBars(data.by_assignee)}
+              <ReportChartWithDrillList drill={drills.assignee ?? null} placeholderLabel={t('tasks.axes.assignee')}
+                chart={assigneeBars(data.by_assignee)} />
             </section>
 
             <section>
               <h3 style={{ ...head, marginBottom: 10 }}>{t('tasks.axes.team')}</h3>
-              {bars('team', data.by_team)}
+              <ReportChartWithDrillList drill={drills.team ?? null} placeholderLabel={t('tasks.axes.team')}
+                chart={bars('team', data.by_team)} />
             </section>
 
             <section>
               <h3 style={{ ...head, marginBottom: 10 }}>{t('tasks.axes.branch')}</h3>
-              {bars('branch', data.by_branch)}
+              <ReportChartWithDrillList drill={drills.branch ?? null} placeholderLabel={t('tasks.axes.branch')}
+                chart={bars('branch', data.by_branch)} />
             </section>
           </div>
         )}
       </div>
-
-      {/* Dynamic drill-down: explains the clicked segment/bucket + Koios advice */}
-      <ReportDrillDrawer drill={drill} onClose={() => setDrill(null)} />
     </div>
   )
 }

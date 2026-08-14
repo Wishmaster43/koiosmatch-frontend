@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from 'vitest'
+import { describe, it, expect, vi, afterEach } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
@@ -16,7 +16,16 @@ const getSpy = vi.fn().mockResolvedValue({ data: { data: [], meta: { total: 0 } 
 vi.mock('@/lib/api', () => ({
   default: { get: (...args: unknown[]) => getSpy(...args) },
   unwrapList: (r: { data: { data?: unknown[]; meta?: { total?: number } } }) => ({ rows: r.data?.data ?? [], total: r.data?.meta?.total ?? 0 }),
+  getActiveTenantId: () => 'test-tenant',
 }))
+
+// Tenant KPI-order settings (RAPPORT-KPI-INSTELBAAR) — empty blob = today's
+// default order, unless a test overrides it.
+const mockSettings = vi.hoisted(() => vi.fn(() => ({} as Record<string, unknown>)))
+vi.mock('@/lib/settings/useAllSettings', async () => {
+  const actual = await vi.importActual('@/lib/settings/useAllSettings')
+  return { ...actual, useAllSettings: () => mockSettings() }
+})
 
 const data: ApplicationsReportData = {
   period: 'month', from: '2026-08-01', to: '2026-08-31', total: 20,
@@ -61,6 +70,11 @@ vi.mock('./ReportTimeseriesChart', () => ({
 }))
 
 describe('ApplicationsReport (RAPPORTEN-SUITE-1 portie 2)', () => {
+  // Every section now defaults its own list on mount, firing extra drill/advice
+  // requests — clear the shared spy between tests so a later assertion never
+  // matches a PRIOR test's leftover call history.
+  afterEach(() => { getSpy.mockClear() })
+
   it('shows the loading state', () => {
     mockUseApplicationsReport.mockReturnValue({ data: null, loading: true, error: false })
     renderReport()
@@ -262,5 +276,38 @@ describe('ApplicationsReport (RAPPORTEN-SUITE-1 portie 2)', () => {
       expect.objectContaining({ params: { date: '2026-08-03', period: 'month' } }))
     const call = getSpy.mock.calls.find(c => c[0] === '/reports/applications/drill')
     expect(call?.[1].params).not.toHaveProperty('bucket')
+  })
+
+  // RAPPORTEN-DRILLLIST-1: every axis section shows its own always-visible list
+  // beside the chart, seeded with a real request on mount — never a blank panel.
+  it('renders a drill list beside each axis chart, defaulted on mount', () => {
+    mockUseApplicationsReport.mockReturnValue({ data, loading: false, error: false })
+    renderReport()
+    // The stage axis's top segment (Applied, 10) seeds its own list on mount.
+    expect(getSpy).toHaveBeenCalledWith('/reports/applications/drill',
+      expect.objectContaining({ params: { stage: 'applied', period: 'month' } }))
+    // The customer axis independently seeds its own list with its own top segment.
+    expect(getSpy).toHaveBeenCalledWith('/reports/applications/drill',
+      expect.objectContaining({ params: { customer: 'c1', period: 'month' } }))
+    // The funnel-bucket section seeds its own list with its own top segment.
+    expect(getSpy).toHaveBeenCalledWith('/reports/applications/drill',
+      expect.objectContaining({ params: { bucket: 'active', period: 'month' } }))
+  })
+
+  // Clicking a segment in ONE chart never changes another chart's list — each
+  // section keeps its own independent drill state.
+  it('clicking a segment in one chart never changes another chart\'s list', async () => {
+    const user = userEvent.setup()
+    mockUseApplicationsReport.mockReturnValue({ data, loading: false, error: false })
+    renderReport()
+    getSpy.mockClear()
+    // "Geen klant" is not the top customer segment (Yesway Flex is), so it is
+    // guaranteed to differ from the mount default and fire a fresh request.
+    await user.click(screen.getByText('Geen klant'))
+    expect(getSpy).toHaveBeenCalledWith('/reports/applications/drill',
+      expect.objectContaining({ params: { customer: 'none', period: 'month' } }))
+    // The stage section was never re-fetched by the customer click.
+    expect(getSpy).not.toHaveBeenCalledWith('/reports/applications/drill',
+      expect.objectContaining({ params: expect.objectContaining({ stage: expect.anything() }) }))
   })
 })

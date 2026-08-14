@@ -23,6 +23,9 @@ import { EMPTY_REPORT_FILTERS } from './reportFilterParams'
 import type { ReportFilterState } from './reportFilterParams'
 import { useDateFormat } from '@/lib/datetime'
 import type { ReportPeriod } from '@/types/analytics'
+import { useAllSettings, getJsonSetting } from '@/lib/settings/useAllSettings'
+import { getReportKpiCatalog, getReportKpiDefaultOrder, reportKpiSettingsKey } from './kpiCatalog'
+import { resolveReportKpiOrder } from './resolveReportKpiOrder'
 
 export default function LeadsReport({ period, filters = EMPTY_REPORT_FILTERS }: { period: ReportPeriod; filters?: ReportFilterState }) {
   const { t } = useTranslation('analytics')
@@ -41,21 +44,30 @@ export default function LeadsReport({ period, filters = EMPTY_REPORT_FILTERS }: 
   // population (a leads-scoped source/owner/branch/conversion breakdown) —
   // they render the house dash rather than borrowing the whole-population
   // numbers under a leads label.
-  const kpis: KpiSpec[] = [
-    { key: 'totalLeads', label: t('leads.summary.totalLeads'), value: totalLeads ?? '—' },
-    { key: 'bySource', label: t('leads.summary.bySource'), value: '—' },
-    { key: 'byOwner', label: t('leads.summary.byOwner'), value: '—' },
-    { key: 'byBranch', label: t('leads.summary.byBranch'), value: '—' },
-    { key: 'converted', label: t('leads.summary.converted'), value: '—' },
-    { key: 'conversionRate', label: t('leads.summary.conversionRate'), value: '—' },
-    { key: 'avgTimeToConvert', label: t('leads.summary.avgTimeToConvert'), value: '—' },
-    { key: 'staleLeads', label: t('leads.summary.staleLeads'), value: '—' },
-    { key: 'newThisPeriod', label: t('leads.summary.newThisPeriod'), value: totalLeads != null ? totalLeads : '—' },
-  ]
+  const kpiByKey: Record<string, KpiSpec> = {
+    totalLeads: { key: 'totalLeads', label: t('leads.summary.totalLeads'), value: totalLeads ?? '—' },
+    bySource: { key: 'bySource', label: t('leads.summary.bySource'), value: '—' },
+    byOwner: { key: 'byOwner', label: t('leads.summary.byOwner'), value: '—' },
+    byBranch: { key: 'byBranch', label: t('leads.summary.byBranch'), value: '—' },
+    converted: { key: 'converted', label: t('leads.summary.converted'), value: '—' },
+    conversionRate: { key: 'conversionRate', label: t('leads.summary.conversionRate'), value: '—' },
+    avgTimeToConvert: { key: 'avgTimeToConvert', label: t('leads.summary.avgTimeToConvert'), value: '—' },
+    staleLeads: { key: 'staleLeads', label: t('leads.summary.staleLeads'), value: '—' },
+    newThisPeriod: { key: 'newThisPeriod', label: t('leads.summary.newThisPeriod'), value: totalLeads != null ? totalLeads : '—' },
+  }
+  // Which nine keys render, and in what order, is the tenant's Settings → Reports
+  // choice (falls back to today's order when nothing is stored, or a stored key
+  // has vanished — RAPPORT-KPI-INSTELBAAR).
+  const settingsValues = useAllSettings()
+  const catalogKeys = getReportKpiCatalog('leads').map(c => c.key)
+  const defaultOrder = getReportKpiDefaultOrder('leads')
+  const stored = getJsonSetting<string[] | undefined>(settingsValues, reportKpiSettingsKey('leads'), undefined)
+  const { order: kpiOrder, fellBack } = resolveReportKpiOrder(stored, catalogKeys, defaultOrder)
+  const kpis: KpiSpec[] = kpiOrder.map(key => kpiByKey[key]).filter((k): k is KpiSpec => k != null)
 
   return (
     <div>
-      {hasData && <ReportKpiBand kpis={kpis} />}
+      {hasData && <ReportKpiBand kpis={kpis} notice={fellBack ? t('leads.kpiOrderFellBack') : undefined} />}
 
       {!loading && !error && data && (
         <div style={{ fontSize: 13, fontWeight: 500, color: 'var(--text)', marginBottom: 12 }}>

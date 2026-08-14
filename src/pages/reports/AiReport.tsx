@@ -22,6 +22,9 @@ import ReportTimeseriesChart from './ReportTimeseriesChart'
 import { useDateFormat } from '@/lib/datetime'
 import { formatNumber } from '@/lib/formatters'
 import type { ReportPeriod, AiActivitySegment } from '@/types/analytics'
+import { useAllSettings, getJsonSetting } from '@/lib/settings/useAllSettings'
+import { getReportKpiCatalog, getReportKpiDefaultOrder, reportKpiSettingsKey } from './kpiCatalog'
+import { resolveReportKpiOrder } from './resolveReportKpiOrder'
 
 export default function AiReport({ period }: { period: ReportPeriod }) {
   const { t } = useTranslation('analytics')
@@ -47,26 +50,35 @@ export default function AiReport({ period }: { period: ReportPeriod }) {
   const topOf = (segs: AiActivitySegment[]) =>
     segs.reduce<AiActivitySegment | null>((best, x) => (!best || x.count > best.count ? x : best), null)
   const topActivity = data ? topOf(data.by_activity) : null
-  const kpis: KpiSpec[] = [
-    { key: 'total',  label: t('ai.total'),  value: total },
-    { key: 'tokens', label: t('ai.summary.tokens'), value: s?.tokens != null ? formatNumber(s.tokens) : '—' },
-    { key: 'amount', label: t('ai.summary.amount'), value: s?.amount != null ? formatNumber(s.amount) : '—' },
-    { key: 'avgTokens', label: t('ai.summary.avgTokens'),
+  const kpiByKey: Record<string, KpiSpec> = {
+    total:  { key: 'total',  label: t('ai.total'),  value: total },
+    tokens: { key: 'tokens', label: t('ai.summary.tokens'), value: s?.tokens != null ? formatNumber(s.tokens) : '—' },
+    amount: { key: 'amount', label: t('ai.summary.amount'), value: s?.amount != null ? formatNumber(s.amount) : '—' },
+    avgTokens: { key: 'avgTokens', label: t('ai.summary.avgTokens'),
       value: s?.tokens != null && total > 0 ? formatNumber(Math.round(s.tokens / total)) : '—' },
-    { key: 'avgAmount', label: t('ai.summary.avgAmount'),
+    avgAmount: { key: 'avgAmount', label: t('ai.summary.avgAmount'),
       value: s?.amount != null && total > 0 ? formatNumber(s.amount / total) : '—' },
-    { key: 'activityTypes', label: t('ai.summary.activityTypes'), value: data?.by_activity.length ?? 0 },
-    { key: 'modelsUsed', label: t('ai.summary.modelsUsed'), value: data?.by_model.length ?? 0 },
-    { key: 'activeUsers', label: t('ai.summary.activeUsers'), value: data?.by_user.length ?? 0 },
-    { key: 'topActivity', label: t('ai.summary.topActivity'),
+    activityTypes: { key: 'activityTypes', label: t('ai.summary.activityTypes'), value: data?.by_activity.length ?? 0 },
+    modelsUsed: { key: 'modelsUsed', label: t('ai.summary.modelsUsed'), value: data?.by_model.length ?? 0 },
+    activeUsers: { key: 'activeUsers', label: t('ai.summary.activeUsers'), value: data?.by_user.length ?? 0 },
+    topActivity: { key: 'topActivity', label: t('ai.summary.topActivity'),
       value: topActivity?.count ?? '—', sub: topActivity?.label },
-  ]
+  }
+  // Which nine keys render, and in what order, is the tenant's Settings → Reports
+  // choice (falls back to today's order when nothing is stored, or a stored key
+  // has vanished — RAPPORT-KPI-INSTELBAAR).
+  const settingsValues = useAllSettings()
+  const catalogKeys = getReportKpiCatalog('ai').map(c => c.key)
+  const defaultOrder = getReportKpiDefaultOrder('ai')
+  const stored = getJsonSetting<string[] | undefined>(settingsValues, reportKpiSettingsKey('ai'), undefined)
+  const { order: kpiOrder, fellBack } = resolveReportKpiOrder(stored, catalogKeys, defaultOrder)
+  const kpis: KpiSpec[] = kpiOrder.map(key => kpiByKey[key]).filter((k): k is KpiSpec => k != null)
 
   return (
     <div>
       {/* KPI band — total/tokens/amount only, above the tabs (candidate-page order) */}
       {hasData && (
-        <ReportKpiBand kpis={kpis} />
+        <ReportKpiBand kpis={kpis} notice={fellBack ? t('ai.kpiOrderFellBack') : undefined} />
       )}
 
       {/* The report's data window, rendered prominently from the RESPONSE —

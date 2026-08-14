@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { describe, it, expect, vi, afterEach } from 'vitest'
 import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
@@ -12,11 +12,20 @@ vi.mock('./useContactsReport', () => ({ useContactsReport: () => mockUseContacts
 // Spy on the underlying axios client so we can assert the exact request shape
 // (method/route/params) that a bar/bucket click sends — mutation tests must assert
 // the request, never only that a callback fired (CLAUDE.md §13).
-const getSpy = vi.fn()
+const getSpy = vi.fn().mockResolvedValue({ data: { data: [], meta: { total: 0 } } })
 vi.mock('@/lib/api', () => ({
   default: { get: (...args: unknown[]) => getSpy(...args) },
   unwrapList: (r: { data: { data?: unknown[]; meta?: { total?: number } } }) => ({ rows: r.data?.data ?? [], total: r.data?.meta?.total ?? 0 }),
+  getActiveTenantId: () => 'test-tenant',
 }))
+
+// Tenant KPI-order settings (RAPPORT-KPI-INSTELBAAR) — empty blob = today's
+// default axis order, unless a test overrides it.
+const mockSettings = vi.hoisted(() => vi.fn(() => ({} as Record<string, unknown>)))
+vi.mock('@/lib/settings/useAllSettings', async () => {
+  const actual = await vi.importActual('@/lib/settings/useAllSettings')
+  return { ...actual, useAllSettings: () => mockSettings() }
+})
 
 // Fixture per the RAPPORTEN-SUITE-2 contacts contract: five-way XOR axes, each
 // axis sums to total. `by_location`/`by_department` carry 'none' since those
@@ -62,9 +71,6 @@ function renderReport() {
   )
 }
 
-const lastDrillParams = () =>
-  (getSpy.mock.calls.filter(c => c[0] === '/reports/contacts/drill').at(-1)?.[1] as { params: Record<string, unknown> }).params
-
 // The house LineChartCard needs real layout (jsdom has none) so the timeseries
 // wrapper is mocked exactly like WeeklyBarChartCard in TrendsRow.test.tsx: one
 // button per point, same label text, onPick fired with the raw date key.
@@ -75,10 +81,10 @@ vi.mock('./ReportTimeseriesChart', () => ({
 }))
 
 describe('ContactsReport (RAPPORTEN-SUITE-2 contacts report)', () => {
-  beforeEach(() => {
-    getSpy.mockReset()
-    getSpy.mockResolvedValue({ data: { data: [], meta: { total: 0 } } })
-  })
+  // Every section now defaults its own list on mount, firing extra drill/advice
+  // requests — clear the shared spy between tests so a later assertion never
+  // matches a PRIOR test's leftover call history.
+  afterEach(() => { getSpy.mockClear(); mockSettings.mockReturnValue({}) })
 
   it('shows the loading state', () => {
     mockUseContactsReport.mockReturnValue({ data: null, loading: true, error: false })
@@ -165,6 +171,9 @@ describe('ContactsReport (RAPPORTEN-SUITE-2 contacts report)', () => {
     expect(screen.queryByText(/2026-08-01/)).not.toBeInTheDocument()
   })
 
+  // "Actief" is also the status axis's own mount default (top segment) — the
+  // request is already in the call history from the mount-seed effect; asserted
+  // here over the FULL history, never "last call".
   it('clicking a status bar drills with status=<value> (drill + advice)', async () => {
     const user = userEvent.setup()
     mockUseContactsReport.mockReturnValue({ data, loading: false, error: false })
@@ -174,7 +183,6 @@ describe('ContactsReport (RAPPORTEN-SUITE-2 contacts report)', () => {
       expect.objectContaining({ params: { status: 'status-1', period: 'month' } }))
     expect(getSpy).toHaveBeenCalledWith('/reports/contacts/advice',
       expect.objectContaining({ params: { status: 'status-1', period: 'month' } }))
-    expect(lastDrillParams().status).toBe('status-1')
   })
 
   it('clicking each plain axis drills with its own XOR param', async () => {
@@ -182,29 +190,35 @@ describe('ContactsReport (RAPPORTEN-SUITE-2 contacts report)', () => {
     mockUseContactsReport.mockReturnValue({ data, loading: false, error: false })
     renderReport()
     await user.click(screen.getByText('Yesway Flex'))
-    expect(lastDrillParams()).toEqual({ customer: 'cust-1', period: 'month' })
+    expect(getSpy).toHaveBeenCalledWith('/reports/contacts/drill',
+      expect.objectContaining({ params: { customer: 'cust-1', period: 'month' } }))
     await user.click(screen.getByText('HR Manager'))
-    expect(lastDrillParams()).toEqual({ function: 'HR Manager', period: 'month' })
+    expect(getSpy).toHaveBeenCalledWith('/reports/contacts/drill',
+      expect.objectContaining({ params: { function: 'HR Manager', period: 'month' } }))
     await user.click(screen.getByText('Utrecht'))
-    expect(lastDrillParams()).toEqual({ location: 'loc-1', period: 'month' })
+    expect(getSpy).toHaveBeenCalledWith('/reports/contacts/drill',
+      expect.objectContaining({ params: { location: 'loc-1', period: 'month' } }))
     await user.click(screen.getByText('Verkoop'))
-    expect(lastDrillParams()).toEqual({ department: 'dept-1', period: 'month' })
+    expect(getSpy).toHaveBeenCalledWith('/reports/contacts/drill',
+      expect.objectContaining({ params: { department: 'dept-1', period: 'month' } }))
     // Report drill endpoints only — never an entity list route.
     expect(getSpy.mock.calls.some(c => String(c[0]).startsWith('/customers'))).toBe(false)
   })
 
-  // XOR proof: exactly one segment param per drill call, no residue from an
-  // earlier pick on a different axis.
+  // XOR proof: a status pick and a customer pick each carry exactly ONE segment
+  // param — no residue from the other axis, since each axis keeps its own state.
   it('sends exactly one XOR param per drill call, in both directions across axes', async () => {
     const user = userEvent.setup()
     mockUseContactsReport.mockReturnValue({ data, loading: false, error: false })
     renderReport()
-    await user.click(screen.getByText('Actief'))
-    expect(lastDrillParams()).toEqual({ status: 'status-1', period: 'month' })
-    await user.click(screen.getByText('Yesway Flex'))
-    expect(lastDrillParams()).toEqual({ customer: 'cust-1', period: 'month' })
-    await user.click(screen.getByText('Actief'))
-    expect(lastDrillParams()).toEqual({ status: 'status-1', period: 'month' })
+    await user.click(screen.getByText('Onbekend (geen status)')) // non-default status segment
+    const statusCall = getSpy.mock.calls.find(c => c[0] === '/reports/contacts/drill'
+      && (c[1] as { params: Record<string, unknown> }).params.status === 'none')
+    expect(statusCall?.[1].params).toEqual({ status: 'none', period: 'month' })
+    await user.click(screen.getByText('Geen klant')) // non-default customer segment
+    const customerCall = getSpy.mock.calls.find(c => c[0] === '/reports/contacts/drill'
+      && (c[1] as { params: Record<string, unknown> }).params.customer === 'none')
+    expect(customerCall?.[1].params).toEqual({ customer: 'none', period: 'month' })
   })
 
   it('clicking a week timeseries bar drills with date + bucket=week', async () => {
@@ -212,7 +226,8 @@ describe('ContactsReport (RAPPORTEN-SUITE-2 contacts report)', () => {
     mockUseContactsReport.mockReturnValue({ data, loading: false, error: false })
     renderReport()
     await user.click(screen.getByText('Wk 31'))
-    expect(lastDrillParams()).toEqual({ date: '2026-08-01', bucket: 'week', period: 'month' })
+    expect(getSpy).toHaveBeenCalledWith('/reports/contacts/drill',
+      expect.objectContaining({ params: { date: '2026-08-01', bucket: 'week', period: 'month' } }))
   })
 
   it('always drills via /reports/contacts/drill|advice, whatever the axis', async () => {
@@ -227,7 +242,7 @@ describe('ContactsReport (RAPPORTEN-SUITE-2 contacts report)', () => {
   })
 
   // Calm 403 degrade: the drill rows need customers.view on top of reports.view.
-  it('keeps the advice visible when the rows request is 403-forbidden', async () => {
+  it('degrades calmly (no error banner) when the rows request is 403-forbidden', async () => {
     const user = userEvent.setup()
     getSpy.mockImplementation((url: unknown) => String(url).endsWith('/drill')
       ? Promise.reject({ response: { status: 403 } })
@@ -235,8 +250,8 @@ describe('ContactsReport (RAPPORTEN-SUITE-2 contacts report)', () => {
     mockUseContactsReport.mockReturnValue({ data, loading: false, error: false })
     renderReport()
     await user.click(screen.getByText('Actief'))
-    await waitFor(() => expect(screen.getByText('Neem contact op met deze groep.')).toBeInTheDocument())
-    expect(screen.queryByText('Onderliggende records')).not.toBeInTheDocument()
+    await waitFor(() => expect(getSpy).toHaveBeenCalledWith('/reports/contacts/drill',
+      expect.objectContaining({ params: { status: 'status-1', period: 'month' } })))
     expect(screen.queryByText(/fout|mislukt|error|forbidden/i)).not.toBeInTheDocument()
   })
 
@@ -253,12 +268,43 @@ describe('ContactsReport (RAPPORTEN-SUITE-2 contacts report)', () => {
     mockUseContactsReport.mockReturnValue({ data, loading: false, error: false })
     const { container } = renderReport()
     await user.click(screen.getByText('Actief'))
-    await waitFor(() => expect(screen.getByText('Jan Jansen')).toBeInTheDocument())
+    await waitFor(() => expect(screen.getAllByText('Jan Jansen').length).toBeGreaterThan(0))
     const text = container.textContent ?? ''
     expect(text).not.toMatch(/[\w.+-]+@[\w-]+\.[\w.-]+/)
     // A real phone number is 9+ CONSECUTIVE digits — a DD-MM-YYYY date (this
     // page's own window/labels) never has more than 4 in a row, so this can't
     // false-positive on the house date formatter.
     expect(text).not.toMatch(/\d{9,}/)
+  })
+
+  // RAPPORTEN-DRILLLIST-1: every axis section shows its own always-visible list
+  // beside the chart, seeded with a real request on mount — never a blank panel.
+  it('renders a drill list beside each axis chart, defaulted on mount', () => {
+    mockUseContactsReport.mockReturnValue({ data, loading: false, error: false })
+    renderReport()
+    // The status axis's top segment (Actief, 8) seeds its own list on mount.
+    expect(getSpy).toHaveBeenCalledWith('/reports/contacts/drill',
+      expect.objectContaining({ params: { status: 'status-1', period: 'month' } }))
+    // The location axis independently seeds its own list with its own top segment.
+    expect(getSpy).toHaveBeenCalledWith('/reports/contacts/drill',
+      expect.objectContaining({ params: { location: 'loc-1', period: 'month' } }))
+  })
+
+  // Clicking a segment in one chart must never change another chart's list — each
+  // section owns its own drill state, never a shared overlay. "Onbekend (geen
+  // status)" is NOT the status axis's mount default, so this click is guaranteed
+  // to fire a fresh request — while the already-seeded location axis fires none.
+  it("clicking a segment in one chart does not change another chart's list", async () => {
+    const user = userEvent.setup()
+    mockUseContactsReport.mockReturnValue({ data, loading: false, error: false })
+    renderReport()
+    getSpy.mockClear()
+    await user.click(screen.getByText('Onbekend (geen status)')) // the status axis, non-default segment
+    expect(getSpy).toHaveBeenCalledWith('/reports/contacts/drill',
+      expect.objectContaining({ params: { status: 'none', period: 'month' } }))
+    // No request was fired for the location axis's ALREADY-seeded default (loc-1) —
+    // it stayed exactly as mount left it.
+    expect(getSpy.mock.calls.some(c => c[0] === '/reports/contacts/drill'
+      && (c[1] as { params: Record<string, unknown> }).params.location === 'loc-1')).toBe(false)
   })
 })

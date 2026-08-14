@@ -64,7 +64,8 @@
       "topRecruiter": "Recruteur le plus actif",
       "topSource": "Source principale",
       "topFunction": "Fonction la plus fréquente"
-    }
+    },
+    "kpiOrderFellBack": "Une carte KPI configurée dans les paramètres n'existe plus et a été réinitialisée par défaut."
   },
   "comingSoon": "{{label}}. Bientôt disponible",
   "period": {
@@ -96,7 +97,8 @@
     "lastPhase": "Étape finale",
     "maxDropPhase": "Plus grand abandon",
     "stagesReached": "Étapes atteintes",
-    "stagesTotal": "Étapes de l'entonnoir"
+    "stagesTotal": "Étapes de l'entonnoir",
+    "kpiOrderFellBack": "Une carte KPI configurée dans les paramètres n'existe plus et a été réinitialisée par défaut."
   },
   "recruiters": {
     "title": "Recruteurs",
@@ -165,7 +167,8 @@
       "title": "Postes sans aucune candidature ({{count}})",
       "subtitle": "Compté à partir des postes ci-dessus — zéro candidature reçue sur cette période.",
       "empty": "Chaque poste de cette période a reçu au moins une candidature."
-    }
+    },
+    "kpiOrderFellBack": "Une carte KPI configurée dans les paramètres n'existe plus et a été réinitialisée par défaut."
   },
   "matches": {
     "title": "Matchs",
@@ -195,7 +198,8 @@
       "title": "Motifs d'arrêt",
       "total": "Total des arrêts",
       "rate": "Taux d'arrêt"
-    }
+    },
+    "kpiOrderFellBack": "Une carte KPI configurée dans les paramètres n'existe plus et a été réinitialisée par défaut."
   },
   "outreach": {
     "loading": "Chargement de l’outreach…",
@@ -218,7 +222,8 @@
       "noOutcome": "Aucun résultat",
       "topCampaign": "Plus grande liste d’appels",
       "topChannel": "Canal principal"
-    }
+    },
+    "kpiOrderFellBack": "Une carte KPI configurée dans les paramètres n'existe plus et a été réinitialisée par défaut."
   },
   "sources": {
     "loading": "Chargement des sources…",
@@ -241,7 +246,8 @@
       "applications": "Candidatures",
       "matches": "Matchs",
       "matchRate": "Taux de match"
-    }
+    },
+    "kpiOrderFellBack": "Une carte KPI configurée dans les paramètres n'existe plus et a été réinitialisée par défaut."
   },
   "applications": {
     "loading": "Chargement des candidatures…",
@@ -263,7 +269,8 @@
       "matched": "Mis en correspondance",
       "rejected": "Refusé",
       "placed": "Placé"
-    }
+    },
+    "kpiOrderFellBack": "Une carte KPI configurée dans les paramètres n'existe plus et a été réinitialisée par défaut."
   },
   "opportunities": {
     "loading": "Chargement des opportunités…",
@@ -283,7 +290,8 @@
       "overdue": "En retard"
     },
     "forecastCount": "Affaires prévues",
-    "forecastValue": "Valeur prévue"
+    "forecastValue": "Valeur prévue",
+    "kpiOrderFellBack": "Une carte KPI configurée dans les paramètres n'existe plus et a été réinitialisée par défaut."
   },
   "tasks": {
     "loading": "Chargement des tâches…",
@@ -309,7 +317,8 @@
     "unassigned": "Non assignée",
     "noTeam": "Sans service",
     "noBranch": "Sans agence",
-    "overdueRate": "Taux de retard"
+    "overdueRate": "Taux de retard",
+    "kpiOrderFellBack": "Une carte KPI configurée dans les paramètres n'existe plus et a été réinitialisée par défaut."
   },
   "customers": {
     "loading": "Chargement des clients…",
@@ -324,7 +333,8 @@
       "industry": "Secteur",
       "owner": "Propriétaire",
       "branch": "Agence"
-    }
+    },
+    "kpiOrderFellBack": "Une carte KPI configurée dans les paramètres n'existe plus et a été réinitialisée par défaut."
   },
   "contacts": {
     "total": "Total contacts",
@@ -349,7 +359,8 @@
       "withoutLocation": "Sans site",
       "withoutDepartment": "Sans département",
       "withoutCustomer": "Sans client"
-    }
+    },
+    "kpiOrderFellBack": "Une carte KPI configurée dans les paramètres n'existe plus et a été réinitialisée par défaut."
   },
   "locations": {
     "total": "Total sites",
@@ -373,7 +384,8 @@
       "topCity": "Ville principale",
       "withoutProvince": "Sans province",
       "topProvince": "Province principale"
-    }
+    },
+    "kpiOrderFellBack": "Une carte KPI configurée dans les paramètres n'existe plus et a été réinitialisée par défaut."
   },
   "departments": {
     "total": "Total services",
@@ -396,7 +408,8 @@
       "topCustomer": "Client principal",
       "topLocation": "Site principal",
       "customersCount": "Clients représentés"
-    }
+    },
+    "kpiOrderFellBack": "Une carte KPI configurée dans les paramètres n'existe plus et a été réinitialisée par défaut."
   },
   "ai": {
     "total": "Total activité IA",
@@ -419,7 +432,8 @@
       "modelsUsed": "Modèles utilisés",
       "activeUsers": "Utilisateurs actifs",
       "topActivity": "Activité la plus utilisée"
-    }
+    },
+    "kpiOrderFellBack": "Une carte KPI configurée dans les paramètres n'existe plus et a été réinitialisée par défaut."
   },
   "workflows": {
     "total": "Total exécutions",
@@ -443,7 +457,8 @@
       "avgDuration": "Durée moyenne",
       "workflowsCount": "Workflows",
       "triggersCount": "Déclencheurs"
-    }
+    },
+    "kpiOrderFellBack": "Une carte KPI configurée dans les paramètres n'existe plus et a été réinitialisée par défaut."
   },
   "leads": {
     "loading": "Chargement des leads…",
@@ -461,7 +476,8 @@
       "avgTimeToConvert": "Délai moyen de conversion",
       "staleLeads": "Leads inactifs",
       "newThisPeriod": "Nouveaux sur la période"
-    }
+    },
+    "kpiOrderFellBack": "Une carte KPI configurée dans les paramètres n'existe plus et a été réinitialisée par défaut."
   },
   "accountmanagers": {
     "loading": "Chargement des comptes clients…",
@@ -481,6 +497,7 @@
     "cols": {
       "manager": "Gestionnaire de compte",
       "customers": "Clients"
-    }
+    },
+    "kpiOrderFellBack": "Une carte KPI configurée dans les paramètres n'existe plus et a été réinitialisée par défaut."
   }
 }

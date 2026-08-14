@@ -19,6 +19,9 @@ import type { DrillSpec } from './ReportDrillDrawer'
 import { useFlowReport } from './useFlowReport'
 import { gateDrillClick } from './reportDrillGate'
 import type { ReportPeriod, FlowPhase } from '@/types/analytics'
+import { useAllSettings, getJsonSetting } from '@/lib/settings/useAllSettings'
+import { getReportKpiCatalog, getReportKpiDefaultOrder, reportKpiSettingsKey } from './kpiCatalog'
+import { resolveReportKpiOrder } from './resolveReportKpiOrder'
 
 // One funnel row: label, proportional bar, count and (cohort only) conversion + avg days.
 function PhaseRow({ label, value, max, index, conversion, avgDays }: {
@@ -146,8 +149,8 @@ export default function FlowReport({ period }: { period: ReportPeriod }) {
   // between pages, and it must never grow with the tenant's funnel stage
   // count). Every value here is either a real total/derived-subtraction, or
   // the house dash while cohort data isn't ready yet — never a fabricated 0.
-  const kpis: KpiSpec[] = [
-    { key: 'total', label: t('flow.total'), value: data?.total ?? 0,
+  const kpiByKey: Record<string, KpiSpec> = {
+    total: { key: 'total', label: t('flow.total'), value: data?.total ?? 0,
       active: drill != null && drill.rowsParams?.phase == null && drill.rowsEndpoint === '/reports/flow/drill',
       onClick: gateDrillClick('flow', () => setDrill({
         title: t('flow.total'), value: data?.total ?? 0, subtitle: t(`period.${period}`),
@@ -155,26 +158,35 @@ export default function FlowReport({ period }: { period: ReportPeriod }) {
         rowsEndpoint: '/reports/flow/drill', rowsParams: { period, view: cohortReady ? 'reached' : 'current' },
         adviceEndpoint: '/reports/flow/advice', adviceParams: { period, view: cohortReady ? 'reached' : 'current' },
       })) },
-    { key: 'firstPhase', label: t('flow.firstPhase'),
+    firstPhase: { key: 'firstPhase', label: t('flow.firstPhase'),
       value: firstPhase ? (cohortReady ? firstPhase.reached_count : firstPhase.current_count) : '—', sub: firstPhase?.label,
       onClick: firstPhase ? phaseKpi(firstPhase).onClick : undefined },
-    { key: 'lastPhase', label: t('flow.lastPhase'),
+    lastPhase: { key: 'lastPhase', label: t('flow.lastPhase'),
       value: lastPhase ? (cohortReady ? lastPhase.reached_count : lastPhase.current_count) : '—', sub: lastPhase?.label,
       onClick: lastPhase ? phaseKpi(lastPhase).onClick : undefined },
-    { key: 'conv', label: t('flow.overallConversion'), value: overallConv != null ? formatRatio(overallConv) : '—' },
-    { key: 'dropOff', label: t('flow.dropOff'), value: dropOff ?? '—' },
-    { key: 'avgDaysOverall', label: t('flow.avgDaysOverall'),
+    conv: { key: 'conv', label: t('flow.overallConversion'), value: overallConv != null ? formatRatio(overallConv) : '—' },
+    dropOff: { key: 'dropOff', label: t('flow.dropOff'), value: dropOff ?? '—' },
+    avgDaysOverall: { key: 'avgDaysOverall', label: t('flow.avgDaysOverall'),
       value: avgDaysOverall != null ? t('flow.avgDays', { days: Math.round(avgDaysOverall) }) : '—' },
-    { key: 'maxDropPhase', label: t('flow.maxDropPhase'), value: maxDropPhase?.drop ?? '—', sub: maxDropPhase?.label },
-    { key: 'stagesReached', label: t('flow.stagesReached'), value: stagesReached },
-    { key: 'stagesTotal', label: t('flow.stagesTotal'), value: stagesTotal },
-  ]
+    maxDropPhase: { key: 'maxDropPhase', label: t('flow.maxDropPhase'), value: maxDropPhase?.drop ?? '—', sub: maxDropPhase?.label },
+    stagesReached: { key: 'stagesReached', label: t('flow.stagesReached'), value: stagesReached },
+    stagesTotal: { key: 'stagesTotal', label: t('flow.stagesTotal'), value: stagesTotal },
+  }
+  // Which nine keys render, and in what order, is the tenant's Settings → Reports
+  // choice (falls back to today's order when nothing is stored, or a stored key
+  // has vanished — RAPPORT-KPI-INSTELBAAR).
+  const settingsValues = useAllSettings()
+  const catalogKeys = getReportKpiCatalog('flow').map(c => c.key)
+  const defaultOrder = getReportKpiDefaultOrder('flow')
+  const stored = getJsonSetting<string[] | undefined>(settingsValues, reportKpiSettingsKey('flow'), undefined)
+  const { order: kpiOrder, fellBack } = resolveReportKpiOrder(stored, catalogKeys, defaultOrder)
+  const kpis: KpiSpec[] = kpiOrder.map(key => kpiByKey[key]).filter((k): k is KpiSpec => k != null)
 
   return (
     <div>
       {/* KPI strip — sits above the tabs (candidate-page order: KPIs first) */}
       {!loading && !error && phases.length > 0 && (
-        <ReportKpiBand kpis={kpis} />
+        <ReportKpiBand kpis={kpis} notice={fellBack ? t('flow.kpiOrderFellBack') : undefined} />
       )}
 
       {/* Cohort-filling note (pipeline fallback) */}
