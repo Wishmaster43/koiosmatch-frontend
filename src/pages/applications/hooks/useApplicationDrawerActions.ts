@@ -44,18 +44,23 @@ export function useApplicationDrawerActions({ applications, wideRows, setApplica
   const [selected, setSelected] = useState<ApplicationDetail | null>(null)
   const [expanded, setExpanded] = useState(false)
   const selectedIdRef = useRef<Id | null>(null)
+  // PDF-SOLLICITATIES points 6/7 (14-08): a table cell can jump straight to a
+  // specific drawer tab (Vacature/Interview) instead of always opening on the
+  // default Sollicitatie tab — passed through to ApplicationDrawer's initialTab.
+  const [openTab, setOpenTab] = useState<string | undefined>(undefined)
   // V-appdetail-2: a phase-change onto a requires_appointment funnel stage for an
   // application that has none planned yet — warn, never block (§3B "prompt, don't
   // hard-block"). Holds the move the confirm dialog will actually execute.
   const [pendingMove, setPendingMove] = useState<{ id: Id; phaseKey: string; phaseLabel: string } | null>(null)
 
-  const closeDrawer = () => { selectedIdRef.current = null; setSelected(null); setExpanded(false) }
+  const closeDrawer = () => { selectedIdRef.current = null; setSelected(null); setExpanded(false); setOpenTab(undefined) }
 
   // Open an application: show the light row immediately, then fetch the full detail.
-  const selectApplication = (a: Application) => {
+  // `tab` (points 6/7): open straight on this drawer tab instead of the default.
+  const selectApplication = (a: Application, tab?: string) => {
     if (selected?.id === a.id) { closeDrawer(); return }
     selectedIdRef.current = a.id ?? null
-    setSelected(decorate(a) as ApplicationDetail); setExpanded(false)
+    setSelected(decorate(a) as ApplicationDetail); setExpanded(false); setOpenTab(tab)
     // APP-DELETED-AT-1 (measured live, CMFE 2026-07-17): a row opened straight from
     // the Gearchiveerd quick-view IS soft-deleted server-side — ApplicationController::
     // show() 404s on it (`findOrFail` excludes trashed rows) unless asked to reveal
@@ -336,7 +341,7 @@ export function useApplicationDrawerActions({ applications, wideRows, setApplica
   }
 
   return {
-    selected, setSelected, expanded, setExpanded, closeDrawer, selectApplication,
+    selected, setSelected, expanded, setExpanded, closeDrawer, selectApplication, openTab,
     handleMove, handleOwner, handleLinkVacancy, handleUpdateSource, handleReject,
     handleAdjustScore, handleUpdateCustomFields, handleCandidateUpdated, handleDetach, handleRestore,
     // V-appdetail-2: the pending move + its resolve/cancel, for the page to render

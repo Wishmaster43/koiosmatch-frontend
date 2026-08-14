@@ -411,7 +411,9 @@
     "unknownEntity": "Dieses Pop-out-Fenster konnte nicht erkannt werden.",
     "saveAndClose": "Speichern und schließen",
     "windowTitle": "{{name}} — Notizen",
-    "loadError": "Laden fehlgeschlagen."
+    "loadError": "Laden fehlgeschlagen.",
+    "noteNotFound": "Notiz nicht gefunden. Sie wurde möglicherweise gelöscht oder gehört zu einem anderen Datensatz.",
+    "noteReadOnly": "Diese Notiz gehört einem anderen Benutzer. Sie können sie hier nur lesen."
   },
   "notes": {
     "editedBy": "bearbeitet von {{name}}",

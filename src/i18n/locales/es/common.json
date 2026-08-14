@@ -411,7 +411,9 @@
     "unknownEntity": "No se pudo reconocer esta ventana emergente.",
     "saveAndClose": "Guardar y cerrar",
     "windowTitle": "{{name}} — notas",
-    "loadError": "Error al cargar."
+    "loadError": "Error al cargar.",
+    "noteNotFound": "Nota no encontrada. Puede que se haya eliminado o pertenezca a otro registro.",
+    "noteReadOnly": "Esta nota pertenece a otro usuario. Aquí solo puedes leerla."
   },
   "notes": {
     "editedBy": "editado por {{name}}",

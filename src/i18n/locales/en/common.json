@@ -411,7 +411,9 @@
     "unknownEntity": "This pop-out window could not be recognized.",
     "saveAndClose": "Save and close",
     "windowTitle": "{{name}} — notes",
-    "loadError": "Failed to load."
+    "loadError": "Failed to load.",
+    "noteNotFound": "Note not found. It may have been deleted or belongs to a different record.",
+    "noteReadOnly": "This note belongs to another user. You can only read it here."
   },
   "notes": {
     "editedBy": "edited by {{name}}",

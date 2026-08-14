@@ -17,6 +17,10 @@ export interface RawPickRow {
   id?: Id; name?: string; first_name?: string; last_name?: string
   title?: string; titel?: string; client_name?: string; client?: string
   owner?: { id?: Id; name?: string } | null
+  // SUBLINE-1: candidate rows carry function title + city — folded into the
+  // picker's `label` (SearchSelect only renders a plain string) so five
+  // same-named candidates are told apart without a second column.
+  function_title?: string; city?: string
 }
 
 // Why the picker's server search failed — useSearchOptions classifies the axios

@@ -96,18 +96,19 @@ export const noteDraftTopic = (entity: PopoutEntity, id: string | number) => `ko
  *               set ONLY once NoteEditPopout.tsx itself dispatches by entity.
  *   vacancy   → GET/POST + DELETE /vacancies/{id}/notes/{note} — still no PATCH.
  *   application → PATCH /applications/{id}/notes/{note} now exists (A-popout-1)
- *               and the whole-thread ApplicationNotesPopout wires onEditNote, so
- *               THAT surface really edits. Same NoteEditPopout.tsx gap as
- *               customer above still blocks the PER-NOTE URL window though — it
- *               stays hardcoded to useCandidateLite/useCandidateNotes, so
- *               'application' is deliberately NOT added to this set yet.
+ *               and BOTH the whole-thread ApplicationNotesPopout AND the drawer's
+ *               own NotesTab (applications/drawer/NotesTab.tsx) wire onEditNote —
+ *               so this surface really edits. NoteEditPopout.tsx (14-08) now
+ *               dispatches per entity instead of being hardcoded to
+ *               useCandidateLite/useCandidateNotes, so the PER-NOTE URL window
+ *               works for 'application' too — added to this set.
  * Handing an EXISTING note to a window that can only ADD would persist it as a
  * SECOND note: a duplicate the recruiter cannot tell apart from the original and
  * that no undo removes. So customer/vacancy still render no per-note pop-out-to-
  * new-window button (§3, no fake affordance) — only the inline drawer edit and
  * the whole-thread popout's edit are live for customer today.
  */
-export const NOTE_EDIT_POPOUT_ENTITIES: ReadonlySet<PopoutEntity> = new Set<PopoutEntity>(['candidate'])
+export const NOTE_EDIT_POPOUT_ENTITIES: ReadonlySet<PopoutEntity> = new Set<PopoutEntity>(['candidate', 'application'])
 
 /**
  * NOTITIE-POPOUT-URL-1 (Danny 11-08 "zet het notitie-id in de URL", live 13-08

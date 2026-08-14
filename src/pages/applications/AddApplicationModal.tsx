@@ -30,6 +30,11 @@ import SearchPickField from './addmodal/SearchPickField'
 import { useSearchOptions } from './addmodal/useSearchOptions'
 import CustomFieldInput from './addmodal/CustomFieldInput'
 import type { PickOption, RawPickRow } from './addmodal/types'
+// NEWCAND-1 (register pt.4): reuse the real candidate create flow (incl. its own
+// CV-parse entry points) — never a second, thinner "create candidate" form here.
+import AddCandidateModal from '@/pages/candidates/AddCandidateModal'
+import { UserPlus } from 'lucide-react'
+import type { Candidate } from '@/types/candidate'
 
 type AnyProps = Record<string, unknown>
 const CreatableSelect = CreatableSelectJs as unknown as ComponentType<AnyProps>
@@ -40,10 +45,18 @@ interface AppUser { id: Id; name?: string }
 // an `owner` object (CandidateListResource / VacancyListResource) — captured here
 // so the owner-derivation chain below can read it straight off the picked option,
 // no extra fetch for either the candidate or the non-locked vacancy pick.
-const mapCandidateRow = (c: RawPickRow): PickOption => ({
-  value: c.id ?? '', label: c.name ?? [c.first_name, c.last_name].filter(Boolean).join(' '),
-  ownerId: c.owner?.id, ownerName: c.owner?.name,
-})
+// SUBLINE-1 (register PDF-SOLLICITATIES pt.1, Danny 14-08): "vijf keer Blom" is
+// unpickable by name alone — fold function title + city into the label itself,
+// since the shared SearchSelect row only renders a plain string (no sub-line
+// slot). " · " is a value separator here, never sentence punctuation (§5).
+const mapCandidateRow = (c: RawPickRow): PickOption => {
+  const name = c.name ?? [c.first_name, c.last_name].filter(Boolean).join(' ')
+  const detail = [c.function_title, c.city].filter(Boolean).join(' · ')
+  return {
+    value: c.id ?? '', label: detail ? `${name} · ${detail}` : name,
+    ownerId: c.owner?.id, ownerName: c.owner?.name,
+  }
+}
 const mapVacancyRow = (v: RawPickRow): PickOption => ({
   value: v.id ?? '', label: v.title ?? v.titel ?? '', client: v.client_name ?? v.client,
   ownerId: v.owner?.id, ownerName: v.owner?.name,
@@ -163,6 +176,19 @@ export default function AddApplicationModal({ onClose, onCreated, lockedVacancy 
   const pickCandidate = (opt: PickOption) => { setCandidateId(String(opt.value)); setPickedCandidate(opt) }
   const pickVacancy   = (opt: PickOption) => { setVacancyId(String(opt.value)); setPickedVacancy(opt) }
 
+  // NEWCAND-1: "+ New candidate" opens the real AddCandidateModal on top of this
+  // one; a successful create picks the fresh candidate straight into this form
+  // (same shape SearchPickField expects — no extra fetch needed since the
+  // created record already carries id/name/title/city/ownerId).
+  const [addingCandidate, setAddingCandidate] = useState(false)
+  const onCandidateCreated = (c: Candidate) => {
+    setAddingCandidate(false)
+    pickCandidate(mapCandidateRow({
+      id: c.id, name: c.name, function_title: c.title, city: c.city,
+      owner: c.ownerId != null ? { id: c.ownerId, name: c.owner } : null,
+    }))
+  }
+
   // AXIS-1: same application.create preflight the candidate-drawer variant runs —
   // POST /applications enforces this against the candidate server-side, so surface
   // the same warn/block decision here BEFORE submit, once a candidate is picked.
@@ -255,7 +281,10 @@ export default function AddApplicationModal({ onClose, onCreated, lockedVacancy 
   const [createError, setCreateError] = useState<string | null>(null)
   const [errors,      setErrors]      = useState<Record<string, boolean>>({})
   const create = async () => {
-    if (!candidateId || !vacancyId || saving || appRuleBlocked) return
+    // VACATURE-OPTIONEEL (register pt.2): vacancy_id is `sometimes|nullable` on
+    // StoreApplicationRequest — an "open application" with no vacancy yet is a
+    // real, backend-supported case. Only the candidate is required to submit.
+    if (!candidateId || saving || appRuleBlocked) return
     setSaving(true)
     setCreateError(null)
     setErrors({})
@@ -267,7 +296,7 @@ export default function AddApplicationModal({ onClose, onCreated, lockedVacancy 
       // along once the recruiter actually filled something in (an empty {} is
       // indistinguishable from "not asked" server-side, so it's omitted too).
       const res = await api.post('/applications', {
-        candidate_id: candidateId, vacancy_id: vacancyId, owner_id: ownerId || null,
+        candidate_id: candidateId, vacancy_id: vacancyId || null, owner_id: ownerId || null,
         ...(phaseId ? { application_stage_id: phaseId } : {}),
         ...(source.trim() ? { source: source.trim() } : {}),
         ...(Object.keys(customFieldValues).length ? { custom_fields: customFieldValues } : {}),
@@ -299,8 +328,11 @@ export default function AddApplicationModal({ onClose, onCreated, lockedVacancy 
   )
 
   return (
-    // POPUP-SLEEP-1: migrated onto the shared FloatingPanel — draggable header,
-    // remembered position; keeps the S2 720px two-column footprint.
+    // NEWCAND-1: a fragment now wraps two sibling FloatingPanels (this modal +
+    // the optional layered AddCandidateModal below).
+    <>
+    {/* POPUP-SLEEP-1: migrated onto the shared FloatingPanel — draggable header,
+        remembered position; keeps the S2 720px two-column footprint. */}
     <FloatingPanel open onClose={onClose} title={t('add.title')} ariaLabel={t('add.title')}
       persistKey="add-application" width={720} maxWidth="94vw">
 
@@ -313,10 +345,20 @@ export default function AddApplicationModal({ onClose, onCreated, lockedVacancy 
             <ActionRuleBanner decision={appRuleDecision} />
           )}
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
-            <SearchPickField label={t('add.candidate')} placeholder={t('add.candidatePlaceholder')}
-              value={pickedCandidate} options={candidateSearch.options} onPick={pickCandidate}
-              onSearch={candidateSearch.setQuery} error={errors.candidateId}
-              searchError={candidateSearch.error} onRetry={candidateSearch.retry} />
+            <div>
+              <SearchPickField label={t('add.candidate')} placeholder={t('add.candidatePlaceholder')}
+                value={pickedCandidate} options={candidateSearch.options} onPick={pickCandidate}
+                onSearch={candidateSearch.setQuery} error={errors.candidateId}
+                searchError={candidateSearch.error} onRetry={candidateSearch.retry} />
+              {/* NEWCAND-1: a real button (§3A), never coloured text-as-link — opens the
+                  house AddCandidateModal (with its own CV-parse entry points) on top. */}
+              <button type="button" onClick={() => setAddingCandidate(true)}
+                style={{ display: 'flex', alignItems: 'center', gap: 5, marginTop: 6, padding: '4px 8px',
+                  fontSize: 11, fontWeight: 500, border: '1px solid var(--border)', borderRadius: 6,
+                  background: 'var(--surface)', color: 'var(--text)', cursor: 'pointer' }}>
+                <UserPlus size={12} /> {t('add.newCandidate')}
+              </button>
+            </div>
             {lockedVacancy ? (
               <div>
                 <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 5 }}>{t('add.vacancy')}</div>
@@ -326,7 +368,11 @@ export default function AddApplicationModal({ onClose, onCreated, lockedVacancy 
                 </div>
               </div>
             ) : (
-              <SearchPickField label={t('add.vacancy')} placeholder={t('add.vacancyPlaceholder')}
+              // VACATURE-OPTIONEEL: labelled optional so the field's own placement never
+              // reads as a required step — an open application (no vacancy yet) is real.
+              <SearchPickField
+                label={<><span>{t('add.vacancy')}</span> <span style={{ fontWeight: 400, color: 'var(--text-muted)' }}>{t('add.vacancyOptional')}</span></>}
+                placeholder={t('add.vacancyPlaceholder')}
                 value={pickedVacancy} options={vacancySearch.options} onPick={pickVacancy}
                 onSearch={vacancySearch.setQuery} error={errors.vacancyId}
                 searchError={vacancySearch.error} onRetry={vacancySearch.retry} />
@@ -404,12 +450,18 @@ export default function AddApplicationModal({ onClose, onCreated, lockedVacancy 
         {/* BTN_H (§4/§9): one explicit height for every text/action button, everywhere. */}
         <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, padding: '14px 22px', borderTop: '1px solid var(--border)' }}>
           <button onClick={onClose} style={{ height: BTN_H, padding: '0 16px', fontSize: 13, border: '1px solid var(--border)', borderRadius: 8, background: 'var(--surface)', color: 'var(--text)', cursor: 'pointer' }}>{t('add.cancel')}</button>
-          <button onClick={create} disabled={!candidateId || !vacancyId || saving || appRuleBlocked}
+          <button onClick={create} disabled={!candidateId || saving || appRuleBlocked}
             style={{ height: BTN_H, padding: '0 16px', fontSize: 13, fontWeight: 500, border: 'none', borderRadius: 8,
-              background: 'var(--color-primary)', color: 'var(--color-on-accent)', cursor: 'pointer', opacity: (candidateId && vacancyId && !appRuleBlocked) ? 1 : 0.4 }}>
+              background: 'var(--color-primary)', color: 'var(--color-on-accent)', cursor: 'pointer', opacity: (candidateId && !appRuleBlocked) ? 1 : 0.4 }}>
             {t('add.create')}
           </button>
         </div>
     </FloatingPanel>
+
+    {/* NEWCAND-1: layered on top — its own FloatingPanel, own focus trap. */}
+    {addingCandidate && (
+      <AddCandidateModal onClose={() => setAddingCandidate(false)} onCreated={onCandidateCreated} />
+    )}
+    </>
   )
 }

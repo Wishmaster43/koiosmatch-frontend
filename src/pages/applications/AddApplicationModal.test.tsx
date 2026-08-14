@@ -88,6 +88,20 @@ vi.mock('@/hooks/useApplicationStages', () => ({
 vi.mock('@/lib/useCustomFields', () => ({
   useCustomFields: () => ({ fields: customFieldsState.fields, allFields: customFieldsState.fields, loading: false, invalidate: vi.fn() }),
 }))
+// NEWCAND-1: stub the real create-candidate modal — its own extensive dependency
+// tree (genders/locations/functions/provinces/…) is out of scope here; this test
+// file only asserts the INTEGRATION seam (opening it, and what onCreated does).
+vi.mock('@/pages/candidates/AddCandidateModal', () => ({
+  default: ({ onCreated, onClose }: { onCreated: (c: unknown) => void; onClose: () => void }) => (
+    <div>
+      <button onClick={() => onCreated({ id: 'c9', name: 'Nieuwe Kandidaat', title: 'Verpleegkundige', city: 'Utrecht', ownerId: 'u2', owner: 'Klaas Anders' })}>
+        mock-create-candidate
+      </button>
+      <button onClick={onClose}>mock-close-candidate</button>
+    </div>
+  ),
+}))
+
 vi.mock('@/lib/api', () => ({
   default: {
     // Per-URL option rows so the candidate/vacancy pickers have something to pick;
@@ -154,16 +168,18 @@ describe('AddApplicationModal', () => {
     expect(screen.getByText('Piet Recruiter')).toBeInTheDocument()
     // 4 picker triggers (candidate/vacancy/owner/phase) + 2 VAC-CLEAR-1 clear crosses
     // (owner + phase — CLEAR-SWEEP 13-08: both start out pre-seeded, so their clear
-    // cross is already visible on first render, unlike candidate/vacancy which start empty).
-    expect(document.querySelectorAll('button[type="button"]').length).toBe(6)
+    // cross is already visible on first render, unlike candidate/vacancy which start empty)
+    // + 1 NEWCAND-1 "+ New candidate" button.
+    expect(document.querySelectorAll('button[type="button"]').length).toBe(7)
   })
 
   it('shows the vacancy as a locked, non-editable display when opened from a vacancy', () => {
     render(<AddApplicationModal onClose={vi.fn()} onCreated={vi.fn()} lockedVacancy={{ id: 'v1', title: 'Verpleegkundige', client: 'Yesway' }} />)
     expect(screen.getByText('Verpleegkundige · Yesway')).toBeInTheDocument()
     // Locked vacancy: 3 picker triggers (candidate + owner + phase) + 2 clear crosses
-    // (owner + phase, both pre-seeded — see CLEAR-SWEEP note above).
-    expect(document.querySelectorAll('button[type="button"]').length).toBe(5)
+    // (owner + phase, both pre-seeded — see CLEAR-SWEEP note above)
+    // + 1 NEWCAND-1 "+ New candidate" button.
+    expect(document.querySelectorAll('button[type="button"]').length).toBe(6)
   })
 
   // CLEAR-SWEEP (Danny 13-08, "eenmaal gekozen blijft hij staan"): owner and start
@@ -503,5 +519,52 @@ describe('AddApplicationModal · source (CMBE 5961c673)', () => {
     await waitFor(() => expect(api.post).toHaveBeenCalled())
     const body = vi.mocked(api.post).mock.calls[0][1] as Record<string, unknown>
     expect(body).not.toHaveProperty('source')
+  })
+
+  // Register PDF-SOLLICITATIES-2026-08-14, pt.1: same-name candidates must be
+  // tellable apart in the picker — function title + city fold into the option label.
+  it('shows function title and city in the candidate picker so same-name rows are distinguishable', async () => {
+    rowState.candidates = [
+      { id: 'c1', name: 'Jan Blom', function_title: 'Verpleegkundige', city: 'Utrecht' } as never,
+      { id: 'c2', name: 'Jan Blom', function_title: 'Verzorgende', city: 'Rotterdam' } as never,
+    ]
+    const user = userEvent.setup()
+    render(<AddApplicationModal onClose={vi.fn()} onCreated={vi.fn()} />)
+    await user.click(screen.getByRole('button', { name: /add\.candidatePlaceholder/ }))
+    expect(await screen.findByRole('button', { name: 'Jan Blom · Verpleegkundige · Utrecht' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Jan Blom · Verzorgende · Rotterdam' })).toBeInTheDocument()
+  })
+
+  // pt.2: vacancy is genuinely optional — an application must be creatable (and
+  // POSTed) with a candidate only, and the field must read as optional.
+  it('marks the vacancy field optional and allows creating without picking one', async () => {
+    const onCreated = vi.fn()
+    const user = userEvent.setup()
+    render(<AddApplicationModal onClose={vi.fn()} onCreated={onCreated} />)
+    expect(screen.getByText('add.vacancyOptional')).toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: /add\.candidatePlaceholder/ }))
+    await user.click(await screen.findByRole('button', { name: 'Anna Kandidaat' }))
+    const createBtn = screen.getByRole('button', { name: 'add.create' })
+    expect(createBtn).toBeEnabled()
+    await user.click(createBtn)
+    await waitFor(() => expect(api.post).toHaveBeenCalledWith('/applications', expect.objectContaining({
+      candidate_id: 'c1', vacancy_id: null,
+    })))
+    expect(onCreated).toHaveBeenCalled()
+  })
+
+  // pt.4: a new candidate can be created from this popup, reusing the real
+  // AddCandidateModal — and the freshly created candidate is picked straight in.
+  it('opens the real AddCandidateModal from "+ New candidate" and picks the freshly created candidate', async () => {
+    const user = userEvent.setup()
+    render(<AddApplicationModal onClose={vi.fn()} onCreated={vi.fn()} />)
+    await user.click(screen.getByRole('button', { name: /add\.newCandidate/ }))
+    expect(screen.getByText('mock-create-candidate')).toBeInTheDocument()
+    await user.click(screen.getByText('mock-create-candidate'))
+    // The stubbed AddCandidateModal closes and the candidate picker now shows
+    // the created candidate (name · function · city), submittable straight away.
+    expect(screen.queryByText('mock-create-candidate')).not.toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /Nieuwe Kandidaat · Verpleegkundige · Utrecht/ })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'add.create' })).toBeEnabled()
   })
 })

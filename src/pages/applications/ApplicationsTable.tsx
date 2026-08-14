@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { Clock, CheckCircle2 } from 'lucide-react'
 import DataTable from '@/components/ui/DataTable'
 import type { Column, ControlledSort } from '@/components/ui/DataTable'
+import { stopPropagation } from '@/components/ui/dataTableUtils'
 import Avatar from '@/components/ui/Avatar'
 import EntityNameCell from '@/components/ui/EntityNameCell'
 import StatusPill from '@/components/ui/StatusPill'
@@ -32,7 +33,10 @@ interface ApplicationsTableProps {
   loading?: boolean
   error?: unknown
   selectedId?: Id | null
-  onSelect?: (row: Application) => void
+  // PDF-SOLLICITATIES points 6/7 (14-08): the Vacature/Interview cells jump the
+  // drawer straight to that tab — `tab` is undefined for a plain row click
+  // (opens on the drawer's own default tab).
+  onSelect?: (row: Application, tab?: string) => void
   stickyHeader?: boolean
   // Row selection (checkboxes) — driven by the page for the bulk action bar.
   selectable?: boolean
@@ -94,10 +98,13 @@ export default function ApplicationsTable({ rows, loading, error, selectedId, on
       cellStyle: { color: 'var(--text-muted)', fontSize: 12, fontFamily: 'JetBrains Mono, monospace', fontVariantNumeric: 'tabular-nums' },
       sortable: true, sortValue: r => r.referenceNumber ?? '', render: r => r.referenceNumber || '—',
     },
-    // Vacancy — single-line clamp so long titles don't blow up the row.
+    // Vacancy — single-line clamp so long titles don't blow up the row. PDF
+    // point 6 (14-08): clicking this cell jumps straight to the drawer's own
+    // Vacature tab instead of just opening the row on its default tab.
     { key: 'vacancy', header: t('cols.vacancy'), sortable: true, sortValue: r => r.vacancyTitle,
       render: r => (
-        <span style={{ display: '-webkit-box', WebkitLineClamp: 1, WebkitBoxOrient: 'vertical', overflow: 'hidden', maxWidth: 320, color: 'var(--text)' }}>
+        <span onClick={e => { stopPropagation(e); onSelect?.(r, 'vacancy') }}
+          style={{ display: '-webkit-box', WebkitLineClamp: 1, WebkitBoxOrient: 'vertical', overflow: 'hidden', maxWidth: 320, color: 'var(--text)', cursor: 'pointer' }}>
           {r.vacancyTitle}
         </span>
       ) },
@@ -141,12 +148,15 @@ export default function ApplicationsTable({ rows, loading, error, selectedId, on
         fallbackLabel={r.candidateStatusLabel} fallbackColor={r.candidateStatusColor} plain={!colorStatus} round /> },
     // INTERVIEW-PHASE-1: the live AI-interview session's universal category chip
     // + "step X of Y" within its own flow — em-dash when no session exists.
+    // PDF point 7 (14-08): clicking this cell jumps straight to the drawer's
+    // own Interview tab instead of just opening the row on its default tab.
     { key: 'interview', header: t('cols.interview'), sortable: true, sortValue: r => r.interview?.category ?? '',
       render: r => r.interview ? (
         // ONE row (Danny 08-08: "Bezig 2/12 1 regel geen 2 regels") — chip and
         // progress sit side by side; the compact "2/12" form keeps the column
         // narrow where the drawer can afford the spelled-out "Stap 2 van 12".
-        <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, whiteSpace: 'nowrap' }}>
+        <span onClick={e => { stopPropagation(e); onSelect?.(r, 'interviews') }}
+          style={{ display: 'inline-flex', alignItems: 'center', gap: 6, whiteSpace: 'nowrap', cursor: 'pointer' }}>
           <StatusPill label={t(`interview.category.${r.interview.category}`)} color={interviewCategoryColor(r.interview.category)} />
           {r.interview.total > 0 && (
             <span style={{ fontSize: 11, color: 'var(--text-muted)', fontFamily: 'JetBrains Mono, monospace' }}

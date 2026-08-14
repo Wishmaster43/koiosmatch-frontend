@@ -12,15 +12,16 @@ import type { ApplicationDetail } from '@/types/application'
  * declarative); this file only wires the hook to the shared UI's props/labels.
  *
  * A-popout-1: passes `popout` so the composer can hand a half-typed note over to
- * the second-screen window (mirrors vacancies/customers) — read-side only, since
- * this drawer's own onEditNote is not wired here (useApplicationNotes stays
- * add-only in THIS tab; PATCH support lives in the popout window's own hook).
+ * the second-screen window (mirrors vacancies/customers), AND wires `onEditNote`
+ * — the PATCH route now exists (ApplicationController::updateNote), so a note
+ * can be edited right here in the drawer, not only in the popout window. No
+ * DELETE route yet, so no delete affordance (§3).
  */
 export default function NotesTab({ application: a }: { application: ApplicationDetail }) {
   const { t } = useTranslation('applications')
   // Note categories from the tenant lookup, scoped to 'application' (NOTE-TYPES-2/3).
   const { writableTypes: noteTypes } = useNoteTypes('application')
-  const { notes, addNote } = useApplicationNotes(a.id, a.notes ?? [])
+  const { notes, addNote, editNote } = useApplicationNotes(a.id, a.notes ?? [])
 
   // Fallback avatar for a note with no resolved author (mirrors the candidate
   // drawer's own fallback: CommunicationTab passes the CANDIDATE's owner
@@ -32,6 +33,7 @@ export default function NotesTab({ application: a }: { application: ApplicationD
     <SharedNotesTab
       notes={notes}
       onAddNote={addNote}
+      onEditNote={editNote}
       noteTypes={noteTypes}
       authorInitials={initials}
       showTimeline={false}
@@ -43,6 +45,10 @@ export default function NotesTab({ application: a }: { application: ApplicationD
         type: t('notes.type'),
         save: t('notes.save'),
         cancel: t('notes.cancel'),
+        // applications.json (sister-agent namespace, reuse-only) has no dedicated
+        // `notes.edit` key — mirrors ApplicationNotesPopout.tsx, which already
+        // reuses this same generic key for the identical pencil label.
+        edit: t('common:edit'),
         notesEmpty: t('notes.empty'),
         notePlaceholder: () => t('notes.placeholder'),
         searchPlaceholder: t('notes.searchPlaceholder'),

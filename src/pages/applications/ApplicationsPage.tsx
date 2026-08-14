@@ -123,7 +123,7 @@ export default function ApplicationsPage({ intent }: { intent?: unknown } = {}) 
   // ── Single-record drawer actions (select/move/owner/link/reject/score/detach/…)
   // — §0.3 split (F1, audit R1): mirrors useCandidateDrawerActions.
   const {
-    selected, expanded, setExpanded, closeDrawer, selectApplication,
+    selected, expanded, setExpanded, closeDrawer, selectApplication, openTab,
     handleMove, handleOwner, handleLinkVacancy, handleUpdateSource, handleReject,
     handleAdjustScore, handleUpdateCustomFields, handleCandidateUpdated, handleDetach, handleRestore,
     pendingMove, confirmPendingMove, cancelPendingMove,
@@ -399,6 +399,9 @@ export default function ApplicationsPage({ intent }: { intent?: unknown } = {}) 
         onRestore={handleRestore}
         canManage={canManage}
         onCandidateUpdated={handleCandidateUpdated}
+        // PDF-SOLLICITATIES points 6/7 (14-08): a table cell (Vacature/Interview)
+        // can request opening straight on that tab instead of the default.
+        initialTab={openTab}
       />
 
       {addOpen && <AddApplicationModal onClose={() => setAddOpen(false)} onCreated={handleCreated} />}

@@ -411,7 +411,9 @@
     "unknownEntity": "Dit pop-outvenster kon niet worden herkend.",
     "saveAndClose": "Opslaan en sluiten",
     "windowTitle": "{{name}} — notities",
-    "loadError": "Laden is mislukt."
+    "loadError": "Laden is mislukt.",
+    "noteNotFound": "Notitie niet gevonden. Mogelijk is hij verwijderd of hoort hij bij een ander record.",
+    "noteReadOnly": "Deze notitie is van een andere gebruiker. Je kunt hem hier alleen lezen."
   },
   "notes": {
     "editedBy": "bewerkt door {{name}}",

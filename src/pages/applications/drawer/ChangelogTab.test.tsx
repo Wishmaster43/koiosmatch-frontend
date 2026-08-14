@@ -16,6 +16,9 @@ vi.mock('@/lib/datetime', () => ({ useDateFormat: () => ({ formatDate: (v: strin
 
 const mockUseActivity = vi.fn()
 vi.mock('../hooks/useApplicationActivity', () => ({ useApplicationActivity: (id?: unknown) => mockUseActivity(id) }))
+// owner_id resolution (Danny punt 20/30): stub the tenant-users query so the
+// diff-card render needs no live QueryClient in these tests.
+vi.mock('@/lib/queries', () => ({ useUsers: () => ({ data: [{ id: 'u2', name: 'Owner Two' }] }) }))
 
 const app = { id: 1 } as ApplicationDetail
 const setItems = (items: ApplicationActivityEvent[], over: Partial<{ loading: boolean; error: boolean }> = {}) =>

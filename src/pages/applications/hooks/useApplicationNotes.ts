@@ -1,11 +1,13 @@
 /**
  * useApplicationNotes — internal notes on ONE application
- * (POST /applications/{id}/notes, ApplicationController::storeNote). There is no
- * GET/PATCH/DELETE route for application notes (verified 07-08 in
- * routes/api/tenant/applications-matches.php: only the POST exists) — notes ride
- * along inside the application detail payload, so this hook seeds from that list
- * and is add-only (no edit/delete affordance is offered anywhere upstream — §3,
- * no fake affordance for a persistence path that does not exist).
+ * (POST /applications/{id}/notes, ApplicationController::storeNote). There is
+ * still no GET/DELETE route for application notes, so this hook seeds from the
+ * application detail payload passed in by the drawer, not its own fetch — but
+ * A-popout-1 (verified live in routes/api/tenant/applications-matches.php,
+ * 14-08) added `PATCH /applications/{id}/notes/{note}`
+ * (ApplicationController::updateNote), so `editNote` below is real: an
+ * optimistic in-place update, then the PATCH, reverted on failure. Still no
+ * delete affordance (§3, no route to back it).
  *
  * TIMESTAMP-1 (07-08): mapApplicationDetail's notes carry the date under `time`
  * (matching the rest of ApplicationDetail's sub-lists, e.g. `timeline`), but the
@@ -99,5 +101,27 @@ export function useApplicationNotes(applicationId: Id | undefined, initialNotes:
     })
   }, [applicationId, user, t])
 
-  return { notes, addNote }
+  // Edit — NotesTab passes a list index; optimistic in-place update, then the
+  // real PATCH (A-popout-1), reverted on failure (mirrors useCandidateNotes'
+  // editNote). Returns whether the write landed — NOTITIE-POPOUT-URL-1's
+  // per-note window awaits this before closing itself; the drawer tab ignores
+  // the promise, same as every other host.
+  const editNote = useCallback((index: number, payload: NotePayload): Promise<boolean> => {
+    if (!applicationId) return Promise.resolve(false)
+    const target = notes[index]
+    if (!target) return Promise.resolve(false)
+    const snapshot = notes
+    setNotes(prev => prev.map((n, i) => (i === index
+      ? { ...n, type: payload.type, title: payload.title, text: payload.body, language: payload.language }
+      : n)))
+    return api.patch(`/applications/${applicationId}/notes/${target.id}`, payload)
+      .then(() => true)
+      .catch(err => {
+        setNotes(snapshot)
+        notifyError(extractApiError(err, t('common:actionFailed')))
+        return false
+      })
+  }, [applicationId, notes, t])
+
+  return { notes, addNote, editNote }
 }

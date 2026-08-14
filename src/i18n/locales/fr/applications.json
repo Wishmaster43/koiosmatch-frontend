@@ -25,8 +25,10 @@
     "title": "Nouvelle candidature",
     "candidate": "Candidat",
     "candidatePlaceholder": "Sélectionner un candidat",
+    "newCandidate": "+ Nouveau candidat",
     "vacancy": "Poste",
     "vacancyPlaceholder": "Sélectionner un poste",
+    "vacancyOptional": "Facultatif",
     "phase": "Phase",
     "phasePlaceholder": "Sélectionner une phase",
     "owner": "Recruteur",
@@ -106,7 +108,7 @@
       "application": "Candidature",
       "candidate": "Candidat",
       "vacancy": "Poste",
-      "interviews": "Entretiens",
+      "interviews": "Entretien",
       "appointments": "Rendez-vous",
       "timeline": "Chronologie",
       "notes": "Notes",
@@ -520,7 +522,18 @@
     "loading": "Chargement…",
     "error": "Impossible de charger les modifications.",
     "empty": "Aucune modification pour l’instant.",
-    "system": "Système"
+    "system": "Système",
+    "emptyValue": "Vide",
+    "actions": {
+      "updated": "Mis à jour",
+      "created": "Créé",
+      "deleted": "Archivé",
+      "restored": "Restauré"
+    },
+    "updatedValue": "mis à jour",
+    "fields": {
+      "owner_id": "Propriétaire"
+    }
   },
   "status": {
     "title": "Statut",

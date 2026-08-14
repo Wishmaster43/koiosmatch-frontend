@@ -411,7 +411,9 @@
     "unknownEntity": "Cette fenêtre détachée n'a pas pu être reconnue.",
     "saveAndClose": "Enregistrer et fermer",
     "windowTitle": "{{name}} — notes",
-    "loadError": "Échec du chargement."
+    "loadError": "Échec du chargement.",
+    "noteNotFound": "Note introuvable. Elle a peut-être été supprimée ou appartient à un autre enregistrement.",
+    "noteReadOnly": "Cette note appartient à un autre utilisateur. Vous pouvez uniquement la lire ici."
   },
   "notes": {
     "editedBy": "modifié par {{name}}",

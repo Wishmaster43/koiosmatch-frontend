@@ -60,17 +60,21 @@ export function usePopoutApplicationNotes(applicationId: Id | undefined) {
 
   // A-popout-1: edit an existing note — index into the current `notes` array,
   // optimistic + PATCH + reload (mirrors usePopoutCustomerNotes.editNote).
-  const editNote = useCallback((index: number, payload: NotePayload) => {
-    if (!applicationId) return
+  // Returns whether the write landed (NOTITIE-POPOUT-URL-1 / PopoutSaveFooter's
+  // contract: "save and close" only closes on a landed write) — the whole-thread
+  // window (ApplicationNotesPopout) ignores the promise, same as every other host.
+  const editNote = useCallback((index: number, payload: NotePayload): Promise<boolean> => {
+    if (!applicationId) return Promise.resolve(false)
     const target = notes[index]
-    if (!target?.id) return
+    if (!target?.id) return Promise.resolve(false)
     const snapshot = notes
     setNotes(prev => prev.map((n, i) => (i === index ? { ...n, type: payload.type, text: payload.body, language: payload.language } : n)))
-    api.patch(`/applications/${applicationId}/notes/${target.id}`, payload)
-      .then(() => load())
+    return api.patch(`/applications/${applicationId}/notes/${target.id}`, payload)
+      .then(() => { load(); return true })
       .catch(err => {
         setNotes(snapshot)
         notifyError(extractApiError(err, t('common:actionFailed')))
+        return false
       })
   }, [applicationId, notes, load, t])
 

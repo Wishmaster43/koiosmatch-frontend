@@ -13,7 +13,7 @@ import type { ApplicationDetail } from '@/types/application'
 // (mirrors matches/tasks NotesTab.test.tsx).
 vi.mock('@/lib/api', async () => {
   const actual = await vi.importActual<typeof import('@/lib/api')>('@/lib/api')
-  return { ...actual, default: { get: vi.fn(() => Promise.resolve({ data: [] })), post: vi.fn() } }
+  return { ...actual, default: { get: vi.fn(() => Promise.resolve({ data: [] })), post: vi.fn(), patch: vi.fn() } }
 })
 // Stub useDateFormat so the shared NotesTab doesn't transitively init i18n (t() → keys).
 vi.mock('@/lib/datetime', () => ({ useDateFormat: () => ({ formatDate: (v: string) => v, locale: 'nl-NL' }) }))
@@ -28,6 +28,7 @@ vi.mock('@/context/AuthContext', () => ({ useAuth: () => mockUseAuth() }))
 import api from '@/lib/api'
 import { notifyError } from '@/lib/notify'
 const mockPost = api.post as unknown as ReturnType<typeof vi.fn>
+const mockPatch = api.patch as unknown as ReturnType<typeof vi.fn>
 
 const app = (over: Partial<ApplicationDetail> = {}) => ({
   id: 1, owner: { id: 'u1', name: 'Bente de Jong', initials: 'BD', color: null }, notes: [], ...over,
@@ -106,6 +107,28 @@ describe('applications NotesTab (shared reuse)', () => {
     expect(openSpy).toHaveBeenCalledWith('/popout/notes/application/7', 'koios-notes-application-7', expect.any(String))
     openSpy.mockRestore()
   })
+
+  // A-popout-1 (14-08): PATCH /applications/{id}/notes/{note} now exists
+  // (ApplicationController::updateNote) — this proves the drawer tab's own
+  // pencil really reaches it (§13: assert the REQUEST, not just that a
+  // callback fired). The seeded note's author matches the logged-in user
+  // (u9) so the ownership gate lets the pencil render at all.
+  it('edits an existing note through a real PATCH /applications/{id}/notes/{noteId}', async () => {
+    mockPatch.mockResolvedValue({ data: {} })
+    const user = userEvent.setup()
+    render(<NotesTab application={app({
+      id: 3,
+      notes: [{ id: 'n1', type: 'general', title: '', author: 'Kelly Recruiter', authorId: 'u9', text: '<p>Origineel</p>', time: '2026-08-01T10:00:00Z' }],
+    } as unknown as Partial<ApplicationDetail>)} />)
+
+    await user.click(screen.getByRole('button', { name: 'common:edit' }))
+    await user.click(screen.getByRole('button', { name: 'notes.save' }))
+
+    await waitFor(() => expect(mockPatch).toHaveBeenCalledWith(
+      '/applications/3/notes/n1',
+      expect.objectContaining({ body: expect.stringContaining('Origineel') }),
+    ))
+  })
 })
 
 // NOTE-AUTHOR-SHAPE-2 (verified live 2026-08-07, CMBE 5961c673): a fetched/seeded
@@ -114,11 +137,11 @@ describe('applications NotesTab (shared reuse)', () => {
 // the precondition the shared NotesTab's canManageNote() rights gate needs to engage
 // at all (an absent key stays permissively "not migrated", see that file's RIGHTS
 // comment). Exercised against the REAL shared component directly (not through this
-// page's `NotesTab` wrapper): applications have no PATCH/DELETE note route yet
-// (routes/api/tenant/applications-matches.php: only POST), so the wrapper correctly
-// never wires onEditNote/onDeleteNote (§3 no fake affordance) — these tests prove the
-// DATA is now gate-ready for the day that route ships, using the note shape this
-// lane's fix produces.
+// page's `NotesTab` wrapper) so the gate itself is proven in isolation; the wrapper's
+// own onEditNote wiring (PATCH /applications/{id}/notes/{note}, A-popout-1) is
+// covered by the dedicated "edits an existing note" test above, which exercises the
+// pencil through the real `NotesTab` wrapper end to end (§13, assert the request).
+// No DELETE route exists yet, so onDeleteNote still is not wired anywhere (§3).
 describe('note ownership gating — shared NotesTab, key-present path (NOTE-AUTHOR-SHAPE-2)', () => {
   afterEach(() => { mockUseAuth.mockReturnValue({ user: { id: 'u9', name: 'Kelly Recruiter' } }) })
 

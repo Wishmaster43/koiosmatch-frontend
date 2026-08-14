@@ -25,8 +25,10 @@
     "title": "Neue Bewerbung",
     "candidate": "Kandidat",
     "candidatePlaceholder": "Kandidat auswählen",
+    "newCandidate": "+ Neuer Kandidat",
     "vacancy": "Stelle",
     "vacancyPlaceholder": "Stelle auswählen",
+    "vacancyOptional": "Optional",
     "phase": "Phase",
     "phasePlaceholder": "Phase auswählen",
     "owner": "Recruiter",
@@ -106,7 +108,7 @@
       "application": "Bewerbung",
       "candidate": "Kandidat",
       "vacancy": "Stelle",
-      "interviews": "Interviews",
+      "interviews": "Interview",
       "appointments": "Termine",
       "timeline": "Verlauf",
       "notes": "Notizen",
@@ -520,7 +522,18 @@
     "loading": "Laden…",
     "error": "Änderungen konnten nicht geladen werden.",
     "empty": "Noch keine Änderungen.",
-    "system": "System"
+    "system": "System",
+    "emptyValue": "Leer",
+    "actions": {
+      "updated": "Aktualisiert",
+      "created": "Erstellt",
+      "deleted": "Archiviert",
+      "restored": "Wiederhergestellt"
+    },
+    "updatedValue": "aktualisiert",
+    "fields": {
+      "owner_id": "Eigentümer"
+    }
   },
   "status": {
     "title": "Status",

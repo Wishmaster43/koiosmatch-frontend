@@ -1,6 +1,3 @@
-import { useState } from 'react'
-import { useTranslation } from 'react-i18next'
-import SubTabBar from '@/components/drawer/SubTabBar'
 import StatusSubTab from './applicationTab/StatusSubTab'
 import DetailsSubTab from './applicationTab/DetailsSubTab'
 import CvSubTab from './applicationTab/CvSubTab'
@@ -28,41 +25,25 @@ interface ApplicationTabProps {
 }
 
 /**
- * ApplicationTab — the "Sollicitatie" tab, now a thin CONTAINER
- * (APP-TAB-SPLIT-1, Danny: "Dit eerste tabblad blijft te druk dus wellicht
- * sollicitatie en sub-tabjes?"). Mirrors VAC-DETAILS-SPLIT-1's shape exactly:
- * a SubTabBar strip over four small sub-tab components under applicationTab/,
- * each owning one contiguous slice of the original single-scroll tab — Status
- * (rejection outcome + phase/appointment/interview/score strip + the
- * match-score criteria breakdown, the DEFAULT — DD-FE-9, 08-08 drill-down
- * audit: the sliders now live directly under the score cell, not on Context),
- * Details (the editable Bron/Klant/Vacature card), CV (current CV + parser
- * proposal + sent-proposal history) and Context (competing applicants,
- * motivation letter, interview consent, Koios advisory). This is a pure
- * layout reorganisation: every affordance (edit pencils, links, the rejection
- * correction, the recalculate button) moved verbatim into its sub-tab, same
- * PATCH bodies — no behaviour change.
+ * ApplicationTab — the "Sollicitatie" tab, ONE flat scroll (PDF-SOLLICITATIES
+ * point 9, Danny 14-08: "Alle subtabjes onder Sollicitatie worden één
+ * tabblad" — reverses APP-TAB-SPLIT-1's four-sub-tab strip). Every section that
+ * used to sit behind Status/Details/CV/Context now stacks in ONE column, in the
+ * same relative order: outcome + status strip + match score, the editable
+ * details card (source/client/location/vacancy — this is also where the
+ * customer's establishment, "Vestiging", now reads without an extra click,
+ * PDF point 10), the CV blocks, and finally the context blocks including the
+ * Koios advisory (PDF point 11 — was buried on the last sub-tab, now visible
+ * on first open). No behaviour change per section, only layout: same props,
+ * same PATCH bodies.
  */
 export default function ApplicationTab({ application: a, onAdjustScore, onLinkVacancy, onUpdateSource, onNavigateTab }: ApplicationTabProps) {
-  const { t } = useTranslation(['applications', 'common'])
-
-  // Sub-tab strip — Status (default) / Details / CV / Context, the fixed
-  // grouping agreed for this split (see the file docblock).
-  const SUB_TABS = [
-    { id: 'status', label: t('drawer.subTabs.status') },
-    { id: 'details', label: t('drawer.subTabs.details') },
-    { id: 'cv', label: t('drawer.subTabs.cv') },
-    { id: 'context', label: t('drawer.subTabs.context') },
-  ]
-  const [subTab, setSubTab] = useState('status')
-
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-      <SubTabBar tabs={SUB_TABS} active={subTab} onChange={setSubTab} />
-      {subTab === 'status' && <StatusSubTab application={a} onNavigateTab={onNavigateTab} onAdjustScore={onAdjustScore} />}
-      {subTab === 'details' && <DetailsSubTab application={a} onLinkVacancy={onLinkVacancy} onUpdateSource={onUpdateSource} />}
-      {subTab === 'cv' && <CvSubTab application={a} />}
-      {subTab === 'context' && <ContextSubTab application={a} />}
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+      <StatusSubTab application={a} onNavigateTab={onNavigateTab} onAdjustScore={onAdjustScore} />
+      <DetailsSubTab application={a} onLinkVacancy={onLinkVacancy} onUpdateSource={onUpdateSource} />
+      <CvSubTab application={a} />
+      <ContextSubTab application={a} />
     </div>
   )
 }

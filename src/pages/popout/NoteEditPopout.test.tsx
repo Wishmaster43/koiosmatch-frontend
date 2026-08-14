@@ -41,6 +41,18 @@ const { liteState } = vi.hoisted(() => ({
 }))
 vi.mock('./hooks/useCandidateLite', () => ({ useCandidateLite: () => liteState }))
 
+// A-popout-1 (14-08): the generalised application branch — mirrors the candidate
+// mocks above, one-to-one, so both branches of the dispatcher are exercised the
+// same way.
+const { appNotesState } = vi.hoisted(() => ({
+  appNotesState: { notes: [] as Array<Record<string, unknown>>, editNote: vi.fn() },
+}))
+vi.mock('./hooks/usePopoutApplicationNotes', () => ({ usePopoutApplicationNotes: () => appNotesState }))
+const { appLiteState } = vi.hoisted(() => ({
+  appLiteState: { application: null as { id: string; candidateName: string; vacancyTitle: string; initials: string } | null, loading: false, error: false, reload: vi.fn() },
+}))
+vi.mock('./hooks/useApplicationLite', () => ({ useApplicationLite: () => appLiteState }))
+
 // Mount on the REAL route shape so useParams carries entity/id/noteId like production.
 const renderAt = (path: string) => render(
   <MemoryRouter initialEntries={[path]}>
@@ -108,6 +120,49 @@ describe('NoteEditPopout · NOTITIE-POPOUT-URL-1', () => {
   it('refuses an entity whose window cannot PATCH a note (customer) — error row, never a form', () => {
     renderAt('/popout/notes/customer/x1/n1')
     expect(screen.getByText('popout.loadError')).toBeInTheDocument()
+    expect(screen.queryByLabelText('body')).toBeNull()
+  })
+})
+
+// A-popout-1 (14-08): the generalised application branch — same four states +
+// the same seam (save through editNote at the URL-resolved index), proving the
+// dispatcher's second branch is not just wired but really works end to end.
+describe('NoteEditPopout · application branch (A-popout-1)', () => {
+  const previousTitle = document.title
+  beforeEach(() => {
+    vi.spyOn(window, 'close').mockImplementation(() => {})
+    appLiteState.application = { id: 'a1', candidateName: 'Sanne de Vries', vacancyTitle: 'Verzorgende IG', initials: 'SV' }
+    appLiteState.loading = false
+    appLiteState.error = false
+    appLiteState.reload = vi.fn()
+    appNotesState.notes = [
+      { id: 'n1', type: 'general', text: '<p>Eerste</p>', author_id: 'u1' },
+      { id: 'n2', type: 'general', text: '<p>Tweede</p>', author_id: 'u1' },
+    ]
+    appNotesState.editNote = vi.fn().mockResolvedValue(true)
+  })
+  afterEach(() => { document.title = previousTitle; vi.restoreAllMocks() })
+
+  it("renders the application's candidate name and THAT note's text", () => {
+    renderAt('/popout/notes/application/a1/n2')
+    expect(screen.getByText('Sanne de Vries')).toBeInTheDocument()
+    expect(screen.getByLabelText('body')).toHaveValue('<p>Tweede</p>')
+  })
+
+  it('saves through editNote at the URL-resolved index — the seam (§13)', async () => {
+    const user = userEvent.setup()
+    renderAt('/popout/notes/application/a1/n2')
+    await user.type(screen.getByLabelText('body'), ' extra')
+    await user.click(screen.getByTestId('text-popout-save'))
+    await waitFor(() => expect(appNotesState.editNote).toHaveBeenCalledWith(1, expect.objectContaining({
+      type: 'general', body: '<p>Tweede</p> extra',
+    })))
+  })
+
+  it('shows the honest not-found row for a note id absent from the thread', () => {
+    appNotesState.notes = [{ id: 'n1', type: 'general', text: '<p>Eerste</p>' }]
+    renderAt('/popout/notes/application/a1/ontbreekt')
+    expect(screen.getByText('common:popout.noteNotFound')).toBeInTheDocument()
     expect(screen.queryByLabelText('body')).toBeNull()
   })
 })

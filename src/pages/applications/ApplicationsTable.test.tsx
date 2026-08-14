@@ -160,4 +160,36 @@ describe('ApplicationsTable · interview column', () => {
     render(<ApplicationsTable rows={[noSteps]} />)
     expect(screen.queryByText(/\/0$/)).toBeNull()
   })
+
+  // PDF-SOLLICITATIES point 7 (14-08): clicking the interview cell jumps the
+  // drawer straight to the Interview tab, not just the row's default tab.
+  it('clicking the interview cell calls onSelect with the interviews tab, not a plain row open', async () => {
+    const user = userEvent.setup()
+    const onSelect = vi.fn()
+    render(<ApplicationsTable rows={[rowWithInterview]} onSelect={onSelect} />)
+    await user.click(screen.getByText('2/12').parentElement as HTMLElement)
+    expect(onSelect).toHaveBeenCalledTimes(1)
+    expect(onSelect).toHaveBeenCalledWith(rowWithInterview, 'interviews')
+  })
+})
+
+// PDF-SOLLICITATIES point 6 (14-08): clicking the vacancy in a row jumps the
+// drawer straight to the Vacature tab of that application.
+describe('ApplicationsTable · vacancy cell navigation (point 6)', () => {
+  it('clicking the vacancy cell calls onSelect with the vacancy tab, not a plain row open', async () => {
+    const user = userEvent.setup()
+    const onSelect = vi.fn()
+    render(<ApplicationsTable rows={[baseRow]} onSelect={onSelect} />)
+    await user.click(screen.getByText('Verpleegkundige'))
+    expect(onSelect).toHaveBeenCalledTimes(1)
+    expect(onSelect).toHaveBeenCalledWith(baseRow, 'vacancy')
+  })
+
+  it('a plain row click (outside the vacancy/interview cells) opens on the default tab', async () => {
+    const user = userEvent.setup()
+    const onSelect = vi.fn()
+    render(<ApplicationsTable rows={[baseRow]} onSelect={onSelect} />)
+    await user.click(screen.getByText('Jane Doe'))
+    expect(onSelect).toHaveBeenCalledWith(baseRow)
+  })
 })
