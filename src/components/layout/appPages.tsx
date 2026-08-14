@@ -155,7 +155,9 @@ export function renderPage(activePage: string, { navIntent, goTo, dashView }: { 
     case 'tasks':                  return <TasksPage intent={navIntent} />
     case 'outreach':               return <OutreachPage />
     case 'customers':              return <CustomersPage intent={navIntent} />
-    case 'import-wizard':          return <ImportWizardPage />
+    // PDF-VACATURES-2026-08-14 point 7: forward the nav intent so a caller (the
+    // vacancies toolbar's Excel-upload button) can preselect an entity on arrival.
+    case 'import-wizard':          return <ImportWizardPage intent={navIntent} />
     case 'planning':               return <PlanningPage />
 
     // ── Reports hub (analytical) ──────────────────────────────────────────

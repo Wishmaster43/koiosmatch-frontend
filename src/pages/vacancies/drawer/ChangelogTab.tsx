@@ -6,6 +6,7 @@ import { useDateFormat } from '@/lib/datetime'
 import { useVacancyLookups } from '@/context/VacancyLookupsContext'
 import { escapeCsvCell } from '@/lib/csv'
 import { useVacancyActivity, type VacancyActivityEvent } from '../hooks/useVacancyActivity'
+import { useAiAgents } from '../hooks/useAiAgents'
 import type { VacancyDetail } from '@/types/vacancy'
 import { isUuid } from '@/lib/uuid'
 
@@ -58,6 +59,10 @@ export default function ChangelogTab({ vacancy: v, bare = false }: { vacancy: Va
   // Lookup metas so status/seniority/education diff values render tenant labels,
   // not opaque lookup ids.
   const { statusMeta, seniorityMeta, educationMeta } = useVacancyLookups()
+  // V30: ai_agent_id is a raw uuid the diff bag can't name on its own — resolve it
+  // against the tenant's AI agents so a linked/unlinked agent shows its readable
+  // name ("Intake bot") instead of the old opaque "bijgewerkt" (Danny punt 30).
+  const { agents: aiAgents } = useAiAgents(true)
   const [from, setFrom] = useState('')
   const [until, setUntil] = useState('')
   const [q, setQ] = useState('')
@@ -74,6 +79,14 @@ export default function ChangelogTab({ vacancy: v, bare = false }: { vacancy: Va
     if (field === 'vacancy_status_id')            return statusMeta(String(val)).label
     if (field === 'vacancy_seniority_level_id')    return seniorityMeta(String(val)).label
     if (field === 'vacancy_education_level_id')    return educationMeta(String(val)).label
+    // V30: the linked AI agent by name — falls through to the honest "unknown
+    // agent" text (never the raw id) when the agent was since deleted.
+    if (field === 'ai_agent_id') {
+      const found = aiAgents.find(a => String(a.id) === String(val))
+      // No name resolvable (agent deleted since) → the existing honest fallback,
+      // never the raw uuid.
+      return found?.name || t('changelog.updatedValue')
+    }
     if (Array.isArray(val)) return val.length ? val.map(String).join(', ') : t('changelog.emptyValue')
     if (typeof val === 'object') return JSON.stringify(val)
     const s = String(val)

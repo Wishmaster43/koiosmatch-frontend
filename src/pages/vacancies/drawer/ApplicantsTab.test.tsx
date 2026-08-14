@@ -50,32 +50,31 @@ describe('ApplicantsTab · house toolbar (V14)', () => {
   })
 })
 
-// V-count-1: the per-phase breakdown chips above the list become clickable
-// filters onto the SAME phase filter the toolbar's StatusFilterSelect drives.
-describe('ApplicantsTab · phase chips are clickable filters (V-count-1)', () => {
-  it('clicking a phase chip narrows the list to that phase and marks it active', async () => {
+// PDF-VACATURES-11: the "Per fase" breakdown block above the list is gone —
+// the toolbar's own StatusFilterSelect is now the ONLY phase filter, and it
+// still narrows the list exactly as before.
+describe('ApplicantsTab · the toolbar phase filter narrows the list (PDF-VACATURES-11)', () => {
+  it('has no separate per-phase breakdown row above the list', () => {
+    render(<ApplicantsTab vacancy={vacancy([
+      { id: 'a1', candidate_id: 'c1', candidate_name: 'Jan Jansen', phase: { value: 'applied' } },
+    ])} />)
+    expect(screen.queryByRole('button', { name: /^Applied/ })).toBeNull()
+    expect(screen.queryByRole('button', { name: /^Hired/ })).toBeNull()
+  })
+
+  it('picking a phase in the toolbar filter narrows the list to that phase', async () => {
     render(<ApplicantsTab vacancy={vacancy([
       { id: 'a1', candidate_id: 'c1', candidate_name: 'Jan Jansen', phase: { value: 'applied' } },
       { id: 'a2', candidate_id: 'c2', candidate_name: 'Piet Pietersen', phase: { value: 'hired' } },
     ])} />)
-
-    const appliedChip = screen.getByRole('button', { name: /^Applied/ })
-    const hiredChip = screen.getByRole('button', { name: /^Hired/ })
-    expect(appliedChip).toHaveAttribute('aria-pressed', 'false')
-    expect(hiredChip).toHaveAttribute('aria-pressed', 'false')
     expect(screen.getByText('Jan Jansen')).toBeInTheDocument()
     expect(screen.getByText('Piet Pietersen')).toBeInTheDocument()
 
-    await userEvent.click(appliedChip)
+    await userEvent.click(screen.getByTitle('filters.statusFilter'))
+    await userEvent.click(screen.getByRole('button', { name: 'Applied' }))
 
-    expect(appliedChip).toHaveAttribute('aria-pressed', 'true')
     expect(screen.getByText('Jan Jansen')).toBeInTheDocument()
     expect(screen.queryByText('Piet Pietersen')).toBeNull()
-
-    // Clicking again clears the filter — both applicants show again.
-    await userEvent.click(appliedChip)
-    expect(appliedChip).toHaveAttribute('aria-pressed', 'false')
-    expect(screen.getByText('Piet Pietersen')).toBeInTheDocument()
   })
 })
 
@@ -110,6 +109,29 @@ describe('ApplicantsTab · reuses the candidate drawer ApplicationRow (S-vacapp-
     ])} />)
     expect(screen.getByTitle('work.editApplication')).toBeInTheDocument()
     expect(screen.getByTitle('work.detachApplication')).toBeInTheDocument()
+  })
+
+  // PDF-VACATURES-13: the expanded application detail carries a DrillPager so the
+  // recruiter can step to the next applicant without collapsing back to the list.
+  it('shows a DrillPager in the expanded detail and next steps to the next application', async () => {
+    vi.resetModules()
+    vi.doMock('@/context/AuthContext', () => ({ useAuth: () => ({ hasPermission: () => true }) }))
+    const { default: WithView } = await import('./ApplicantsTab')
+    render(<WithView vacancy={vacancy([
+      { id: 'a1', candidate_id: 'c1', candidate_name: 'Jan Jansen', phase: { value: 'applied' } },
+      { id: 'a2', candidate_id: 'c2', candidate_name: 'Piet Pietersen', phase: { value: 'applied' } },
+    ])} />)
+
+    const [firstToggle] = screen.getAllByTitle('work.showDetails')
+    await userEvent.click(firstToggle)
+    expect(screen.getByLabelText('drillPager.next')).toBeInTheDocument()
+    expect(screen.getByLabelText('drillPager.prev')).toBeDisabled()
+
+    await userEvent.click(screen.getByLabelText('drillPager.next'))
+    // Stepping "next" collapses row 1 (its own toggle is back to "show") and
+    // opens row 2's panel instead — never both at once.
+    expect(screen.getAllByTitle('work.showDetails').length).toBe(1)
+    expect(screen.getByTitle('work.hideDetails')).toBeInTheDocument()
   })
 
   it('paginates at 5 rows per page (mirrors WorkTab)', async () => {

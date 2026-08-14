@@ -1,13 +1,11 @@
 /**
- * DetailsTab · VAC-DETAILS-SPLIT-1 (Danny 24-07) regression guard: the tab now
- * shows a SubTabBar (Algemeen/Locatie/Eisen/Voorwaarden) — the OPPOSITE of the
- * earlier flat-stack redesign (21-07) — because ONE shared editing/form pair
- * meant a single pencil turned all 21 fields into inputs at once. Each
- * sub-tab renders its OWN Details<X>Tab component wired to its OWN hook
- * section (general/location/requirements/conditions), so a pencil opened in
- * one sub-tab can only ever flip that sub-tab. The whole hook is stubbed
- * (DetailsTab wires data + the tab list only), so no context providers are
- * needed to mount it.
+ * DetailsTab · VAC-ALGEMEEN-MERGE-1 (Danny 14-08 punt 9) regression guard: the
+ * Algemeen/Locatie/Eisen/Voorwaarden SubTabBar (VAC-DETAILS-SPLIT-1) is gone —
+ * this ONE tab now stacks all four Details<X>Tab blocks, each still wired to
+ * its OWN hook section (general/location/requirements/conditions), so a
+ * pencil opened in one block can only ever flip that block's own editing
+ * flag. The whole hook is stubbed (DetailsTab wires data + the block list
+ * only), so no context providers are needed to mount it.
  */
 import { describe, it, expect, vi } from 'vitest'
 import { render, screen, renderHook } from '@testing-library/react'
@@ -67,61 +65,36 @@ vi.mock('../hooks/useVacancyDetailsForm', () => ({
 
 const vacancy = { id: 'v1', title: 'Verpleegkundige', aiAgentId: 'a1', aiAgentName: 'Kelly' } as unknown as VacancyDetail
 
-describe('DetailsTab · sub-tab strip (VAC-DETAILS-SPLIT-1)', () => {
-  it('renders a tablist with the four existing group labels, Algemeen active first', () => {
+describe('DetailsTab · merged single tab (VAC-ALGEMEEN-MERGE-1)', () => {
+  it('renders every block\'s fields at once — no sub-tab strip, no gating', () => {
     hookReturn = makeHookReturn()
     render(<DetailsTab vacancy={vacancy} onUpdate={vi.fn()} />)
-    expect(screen.getByRole('tablist')).toBeInTheDocument()
-    expect(screen.getByRole('tab', { name: 'details.groups.general' })).toHaveAttribute('aria-selected', 'true')
-    expect(screen.getByRole('tab', { name: 'details.groups.location' })).toBeInTheDocument()
-    expect(screen.getByRole('tab', { name: 'details.groups.requirements' })).toBeInTheDocument()
-    expect(screen.getByRole('tab', { name: 'details.groups.conditions' })).toBeInTheDocument()
-    // Only Algemeen's own fields render initially — the other three sub-tabs are unmounted.
+    // The old sub-tab bar is gone entirely.
+    expect(screen.queryByRole('tablist')).not.toBeInTheDocument()
+    // Algemeen, Locatie, Eisen and Voorwaarden fields all render together.
     expect(screen.getByText('details.contractType')).toBeInTheDocument()
-    expect(screen.queryByText('details.address')).not.toBeInTheDocument()
-    expect(screen.queryByText('details.experience')).not.toBeInTheDocument()
-    expect(screen.queryByText('details.salary')).not.toBeInTheDocument()
-  })
-
-  it('switching sub-tabs swaps the rendered fields', async () => {
-    hookReturn = makeHookReturn()
-    const user = userEvent.setup()
-    render(<DetailsTab vacancy={vacancy} onUpdate={vi.fn()} />)
-
-    await user.click(screen.getByRole('tab', { name: 'details.groups.location' }))
     expect(screen.getByText('details.address')).toBeInTheDocument()
-    expect(screen.queryByText('details.contractType')).not.toBeInTheDocument()
-
-    await user.click(screen.getByRole('tab', { name: 'details.groups.requirements' }))
     expect(screen.getByText('details.experience')).toBeInTheDocument()
-    expect(screen.getByText('details.skills')).toBeInTheDocument()
-    expect(screen.queryByText('details.address')).not.toBeInTheDocument()
-
-    await user.click(screen.getByRole('tab', { name: 'details.groups.conditions' }))
     expect(screen.getByText('details.salary')).toBeInTheDocument()
-    expect(screen.queryByText('details.experience')).not.toBeInTheDocument()
   })
 
-  it('a pencil open in one sub-tab never flips another (each section has its OWN editing flag)', async () => {
+  it('each block keeps its OWN pencil — opening one never flips another\'s editing flag', async () => {
     // Eisen is mid-edit; Algemeen/Locatie/Voorwaarden are not.
     hookReturn = makeHookReturn({ requirements: { editing: true } })
-    const user = userEvent.setup()
     render(<DetailsTab vacancy={vacancy} onUpdate={vi.fn()} />)
-    // Algemeen (the active tab) still shows its READ-mode pencil, not save/cancel.
-    expect(screen.getByTitle('common:edit')).toBeInTheDocument()
-    expect(screen.queryByTitle('common:save')).not.toBeInTheDocument()
-
-    await user.click(screen.getByRole('tab', { name: 'details.groups.requirements' }))
-    // Eisen's OWN card is mid-edit — save/cancel show, not a pencil.
+    // Eisen's OWN card is mid-edit — save/cancel show for that block.
     expect(screen.getByTitle('common:save')).toBeInTheDocument()
     expect(screen.getByTitle('common:cancel')).toBeInTheDocument()
+    // The other three blocks still show a read-mode pencil each.
+    expect(screen.getAllByTitle('common:edit').length).toBeGreaterThanOrEqual(3)
   })
 
-  it('clicking a sub-tab\'s own pencil calls ONLY that section\'s setEditing', async () => {
+  it('clicking Algemeen\'s own pencil calls ONLY general.setEditing', async () => {
     hookReturn = makeHookReturn()
     const user = userEvent.setup()
     render(<DetailsTab vacancy={vacancy} onUpdate={vi.fn()} />)
-    await user.click(screen.getByTitle('common:edit'))
+    // Algemeen's pencil is the first edit-toggle in document order.
+    await user.click(screen.getAllByTitle('common:edit')[0])
     expect(hookReturn.general.setEditing).toHaveBeenCalledWith(true)
     expect(hookReturn.location.setEditing).not.toHaveBeenCalled()
     expect(hookReturn.requirements.setEditing).not.toHaveBeenCalled()
@@ -171,22 +144,18 @@ describe('DetailsTab · table-identical Koios advice (KOIOS-ADVIES-OVERAL-1)', (
 })
 
 describe('DetailsTab · land→provincie cascade (Danny 22-07, punt 2)', () => {
-  it('read-mode resolves the country to its display name, never the bare ISO code', async () => {
+  it('read-mode resolves the country to its display name, never the bare ISO code', () => {
     hookReturn = makeHookReturn()
-    const user = userEvent.setup()
     const v = { ...vacancy, country: 'NL', province: 'Utrecht' } as VacancyDetail
     render(<DetailsTab vacancy={v} onUpdate={vi.fn()} />)
-    await user.click(screen.getByRole('tab', { name: 'details.groups.location' }))
     expect(screen.getByText('Netherlands')).toBeInTheDocument()
     expect(screen.getByText('Utrecht')).toBeInTheDocument()
   })
 
-  it('shows a dash for an unset country/province, never a raw empty string', async () => {
+  it('shows a dash for an unset country/province, never a raw empty string', () => {
     hookReturn = makeHookReturn()
-    const user = userEvent.setup()
     const v = { ...vacancy, country: '', province: '' } as VacancyDetail
     render(<DetailsTab vacancy={v} onUpdate={vi.fn()} />)
-    await user.click(screen.getByRole('tab', { name: 'details.groups.location' }))
     // Both the Location card's province and country rows fall back to the dash.
     expect(screen.getAllByText('-').length).toBeGreaterThanOrEqual(2)
   })

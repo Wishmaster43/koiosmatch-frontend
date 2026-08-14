@@ -3,6 +3,8 @@
     "title": "Vacancies",
     "subtitle": "Easily manage and publish all your open positions.",
     "add": "New vacancy",
+    "import": "Import Excel",
+    "importTitle": "Import vacancies from Excel or CSV (one or several)",
     "searchPlaceholder": "Search vacancy, note, document…",
     "loading": "Loading vacancies…",
     "empty": "No vacancies yet.",

@@ -20,6 +20,12 @@ vi.mock('@/context/VacancyLookupsContext', () => ({
     educationMeta: () => ({ label: '' }),
   }),
 }))
+// V30: the AI-agent name resolution needs no live query in this test — a
+// mutable source list so the resolution test below can seed a named agent.
+let mockAgents: Array<{ id: string; name: string }> = []
+vi.mock('../hooks/useAiAgents', () => ({
+  useAiAgents: () => ({ agents: mockAgents, options: [], loading: false, error: false }),
+}))
 
 // A `let`, not `const` — the empty-state test below reassigns it, and the mocked
 // hook reads it fresh on every render (module-level mocks can't be re-scoped per
@@ -60,5 +66,20 @@ describe('ChangelogTab · per-field diff cards (CHANGELOG-3 shape)', () => {
     render(<ChangelogTab vacancy={vacancy} bare />)
     // No changes → the empty state, never a blank screen (§3 four UI states).
     expect(screen.getByText(nlVacancies.changelog.empty)).toBeInTheDocument()
+  })
+})
+
+// V30: Danny's exact complaint — "ai agent id — bijgewerkt" told nobody WHICH
+// agent changed. The diff now resolves ai_agent_id against the tenant's agents.
+describe('ChangelogTab · V30 AI-agent name resolution', () => {
+  it('shows the resolved agent name instead of the raw uuid', () => {
+    mockItems = [
+      { id: 'a2', event: 'updated', description: 'updated', causer_name: 'Danny Polak', created_at: '2026-08-14T09:00:00Z',
+        changes: { attributes: { ai_agent_id: 'agent-1' }, old: { ai_agent_id: null } } },
+    ]
+    mockAgents = [{ id: 'agent-1', name: 'Intake bot' }]
+    render(<ChangelogTab vacancy={vacancy} bare />)
+    expect(screen.getByText('Intake bot')).toBeInTheDocument()
+    expect(screen.queryByText('agent-1')).toBeNull()
   })
 })

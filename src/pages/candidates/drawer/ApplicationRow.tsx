@@ -43,6 +43,12 @@ import { Calendar, Clock, User, Building2, Video, Phone, Pencil, Unlink, Externa
 import EntityLink from '@/components/ui/EntityLink'
 import StatusPill from '@/components/ui/StatusPill'
 import ApplicationRowDetails from './ApplicationRowDetails'
+// PDF-VACATURES-13: the shared prev/next stepper — optional, only the vacancy
+// ApplicantsTab passes it (paging through applications without a trip back to
+// the list). WorkTab/MatchesTab/CustomerApplicationsList never pass it, so their
+// rows stay on the original uncontrolled expand (see `expanded`/`onToggleExpanded` below).
+import DrillPager from '@/components/drawer/DrillPager'
+import type { DrillPagerProps } from '@/components/drawer/DrillPager'
 import { useDateFormat } from '@/lib/datetime'
 import { rememberReturnTab } from './constants'
 import { APPLICATION_COL_STATUS, APPLICATION_COL_DATE, APPLICATION_COL_ACTIONS, APPLICATION_COL_TITLE, APPLICATION_COL_CLIENT } from './applicationRowColumns'
@@ -68,7 +74,7 @@ const titleCell: CSSProperties = { fontWeight: 500, ...APPLICATION_COL_TITLE }
 // so it is one stable component type, never re-created on every render.
 const ModalityIcon = ({ m }: { m?: string }) => m === 'remote' ? <Video size={11} /> : m === 'phone' ? <Phone size={11} /> : <Building2 size={11} />
 
-export default function ApplicationRow({ candidateId, row, appointment, canManage, canView = false, onEdit, onDetach, onEditAppointment }: {
+export default function ApplicationRow({ candidateId, row, appointment, canManage, canView = false, onEdit, onDetach, onEditAppointment, expanded: expandedProp, onToggleExpanded, pager }: {
   candidateId: Id
   row: AppRow
   // The appointment linked to THIS application (resolved by the host from its own list).
@@ -84,6 +90,15 @@ export default function ApplicationRow({ candidateId, row, appointment, canManag
   onDetach: (row: AppRow) => void
   // Pencil on the appointment line: prefilled intake modal (host owns the state).
   onEditAppointment: (existing: ExistingAppointment) => void
+  // PDF-VACATURES-13: optional CONTROLLED expand — when the host passes both,
+  // it owns which row is open (needed so DrillPager's next/prev can collapse THIS
+  // row and expand another). Omitted (the default), the row keeps its own
+  // uncontrolled `expanded` state, unchanged for every existing caller.
+  expanded?: boolean
+  onToggleExpanded?: () => void
+  // PDF-VACATURES-13: the prev/next stepper shown inside the expanded panel — only
+  // rendered while expanded, since paging only makes sense once a detail is open.
+  pager?: DrillPagerProps
 }) {
   const { t } = useTranslation(['candidates', 'common'])
   const { formatDate, locale } = useDateFormat()
@@ -100,9 +115,14 @@ export default function ApplicationRow({ candidateId, row, appointment, canManag
   // Disclosure state — collapsed by default, per row, purely presentational
   // (mirrors MatchCard's own `expanded`). Only offered when there IS an
   // application to load and the viewer may read it.
-  const [expanded, setExpanded] = useState(false)
+  const [internalExpanded, setInternalExpanded] = useState(false)
+  // PDF-VACATURES-13: controlled iff the host passed BOTH `expanded` and
+  // `onToggleExpanded` — a host passing only one (a mistake) falls back to the
+  // safe uncontrolled behaviour rather than a half-wired toggle.
+  const isControlled = expandedProp !== undefined && onToggleExpanded !== undefined
+  const expanded = isControlled ? expandedProp : internalExpanded
   const collapsible = canView && applicationId != null
-  const toggle = () => setExpanded(x => !x)
+  const toggle = () => (isControlled ? onToggleExpanded?.() : setInternalExpanded(x => !x))
   // Stable ids so the button owns the panel (aria-controls) and the panel is named
   // by the button (aria-labelledby) — the arrow is never the only signal (§6).
   const rowId = useId()
@@ -223,7 +243,16 @@ export default function ApplicationRow({ candidateId, row, appointment, canManag
       {/* The unfolded panel — mounted only while expanded, so the detail request
           is made on first expand and never for a row nobody opens (§8). */}
       {collapsible && expanded && applicationId != null && (
-        <ApplicationRowDetails applicationId={applicationId} id={panelId} labelledBy={toggleId} />
+        <div>
+          {/* PDF-VACATURES-13: prev/next through the caller's own filtered/sorted
+              rows — only when the host actually supplied one (vacancy ApplicantsTab). */}
+          {pager && (
+            <div style={{ display: 'flex', justifyContent: 'flex-end', padding: '6px 12px', borderTop: '1px solid var(--border)' }}>
+              <DrillPager {...pager} />
+            </div>
+          )}
+          <ApplicationRowDetails applicationId={applicationId} id={panelId} labelledBy={toggleId} />
+        </div>
       )}
     </div>
   )

@@ -3,6 +3,8 @@
     "title": "Stellen",
     "subtitle": "Verwalten und veröffentlichen Sie all Ihre offenen Stellen mühelos.",
     "add": "Neue Stelle",
+    "import": "Excel importieren",
+    "importTitle": "Stellen aus Excel oder CSV importieren (eine oder mehrere)",
     "searchPlaceholder": "Stelle, Notiz, Dokument suchen…",
     "loading": "Stellen werden geladen…",
     "empty": "Noch keine Stellen.",

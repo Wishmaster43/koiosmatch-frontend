@@ -1,6 +1,8 @@
 /**
- * VacancyDrawer — Danny 21-07 regression guard: "Beschrijving" is now its own
- * main tab (right after Details), rendering the extracted DescriptionTab. Every
+ * VacancyDrawer — Danny 21-07 regression guard: the vacancy text is its own
+ * main tab (right after Details), rendering the extracted DescriptionTab.
+ * VAC-TEKST-TAB-1 (Danny 14-08 punt 10): its label is "Vacaturetekst" (was
+ * "Beschrijving") — reuses the existing details.description key. Every
  * other tab body is stubbed (mirrors ApplicationDrawer.test.tsx) so only the
  * header + tab bar + the tab under test actually mount.
  */
@@ -70,17 +72,17 @@ vi.mock('./drawer/DescriptionTab', () => ({ default: () => <div>description-tab-
 
 const vacancy = { id: 'v1', title: 'Verpleegkundige', clientName: 'Acme', tags: [] } as unknown as VacancyDetail
 
-describe('VacancyDrawer · Beschrijving main tab (Danny 21-07)', () => {
-  it('renders a "Beschrijving" tab right after "Details"', () => {
+describe('VacancyDrawer · Vacaturetekst main tab (Danny 21-07, renamed 14-08)', () => {
+  it('renders a "Vacaturetekst" tab right after "Details"', () => {
     render(<VacancyDrawer vacancy={vacancy} onClose={vi.fn()} />)
-    const tabButtons = screen.getAllByRole('tab').filter(b => ['Details', 'Beschrijving'].includes(b.textContent ?? ''))
-    expect(tabButtons.map(b => b.textContent)).toEqual(['Details', 'Beschrijving'])
+    const tabButtons = screen.getAllByRole('tab').filter(b => ['Details', 'Vacaturetekst'].includes(b.textContent ?? ''))
+    expect(tabButtons.map(b => b.textContent)).toEqual(['Details', 'Vacaturetekst'])
   })
 
-  it('shows the DescriptionTab content when the Beschrijving tab is clicked', async () => {
+  it('shows the DescriptionTab content when the Vacaturetekst tab is clicked', async () => {
     const user = userEvent.setup()
     render(<VacancyDrawer vacancy={vacancy} onClose={vi.fn()} />)
-    await user.click(screen.getByRole('tab', { name: 'Beschrijving' }))
+    await user.click(screen.getByRole('tab', { name: 'Vacaturetekst' }))
     expect(screen.getByText('description-tab-content')).toBeInTheDocument()
   })
 })

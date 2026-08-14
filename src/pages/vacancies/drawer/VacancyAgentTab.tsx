@@ -160,13 +160,23 @@ export default function VacancyAgentTab({ vacancy: v, onUpdate }: { vacancy: Vac
             </>
           ) : (
             <>
-              <CreatableSelect
-                value={currentId || null}
-                onChange={pickAgent}
-                allowCreate={false}
-                placeholder={loading ? t('common:loading') : t('aiagent.placeholder')}
-                options={selectOptions}
-              />
+              {/* Danny 14-08: the backfill button moves up NEXT TO the agent picker
+                  (was buried at the tab's bottom) — only meaningful once an agent
+                  is actually linked, so it only renders here once currentId is set. */}
+              <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10, flexWrap: 'wrap' }}>
+                <div style={{ flex: '1 1 220px', minWidth: 200 }}>
+                  <CreatableSelect
+                    value={currentId || null}
+                    onChange={pickAgent}
+                    allowCreate={false}
+                    placeholder={loading ? t('common:loading') : t('aiagent.placeholder')}
+                    options={selectOptions}
+                  />
+                </div>
+                {currentId && (
+                  <BackfillInterviewsAction vacancyId={v.id} applicationsCount={v.applicationsCount} />
+                )}
+              </div>
               {!loading && options.length === 0 && (
                 <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>{t('aiagent.empty')}</span>
               )}
@@ -193,15 +203,6 @@ export default function VacancyAgentTab({ vacancy: v, onUpdate }: { vacancy: Vac
           </div>
         )}
       </div>
-
-      {/* INTERVIEW-BACKFILL-1: only meaningful once an agent is actually linked —
-          picks up applicants this vacancy already had, not just future ones. */}
-      {currentId && (
-        <div>
-          <div style={groupTitle}>{t('aiagent.backfill.title')}</div>
-          <BackfillInterviewsAction vacancyId={v.id} applicationsCount={v.applicationsCount} />
-        </div>
-      )}
     </div>
   )
 }

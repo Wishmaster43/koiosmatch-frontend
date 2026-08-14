@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import { renderHook } from '@testing-library/react'
-import { useDateFormat, calcAge, daysUntilBirthday, toLocalIsoDate, humanizeIsoDates } from './datetime'
+import { useDateFormat, calcAge, daysUntilBirthday, toLocalIsoDate, humanizeIsoDates, daysSince } from './datetime'
 
 // Note: i18n is not initialised in tests → locale falls back to nl-NL (§3B).
 describe('useDateFormat', () => {
@@ -104,6 +104,25 @@ describe('daysUntilBirthday', () => {
   it('returns null for missing/unparseable values', () => {
     expect(daysUntilBirthday(undefined, now)).toBeNull()
     expect(daysUntilBirthday('nope', now)).toBeNull()
+  })
+})
+
+// PDF-VACATURES-2026-08-14 point 4 — a plain day count, never bucketed into weeks/
+// months/years and never carrying a unit letter.
+describe('daysSince', () => {
+  const now = new Date('2026-06-08T12:00:00')
+  it('counts whole days since the given date', () => {
+    expect(daysSince('2026-06-05T12:00:00', now)).toBe(3)
+  })
+  it('is 0 for the same moment', () => {
+    expect(daysSince(now, now)).toBe(0)
+  })
+  it('returns null for a future date', () => {
+    expect(daysSince('2026-06-09T12:00:00', now)).toBeNull()
+  })
+  it('returns null for missing/unparseable values', () => {
+    expect(daysSince(undefined, now)).toBeNull()
+    expect(daysSince('nope', now)).toBeNull()
   })
 })
 

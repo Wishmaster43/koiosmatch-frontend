@@ -8,7 +8,7 @@ import StatusPill from '@/components/ui/StatusPill'
 import SoftChip from '@/components/ui/SoftChip'
 import AiAgentAvatar from '@/components/ui/AiAgentAvatar'
 import { makeKoiosColumn } from '@/components/ui/koiosColumn'
-import { useDateFormat, relativeAge } from '@/lib/datetime'
+import { useDateFormat, daysSince } from '@/lib/datetime'
 import { useVacancyLookups } from '@/context/VacancyLookupsContext'
 import { useAllSettings, getBoolSetting } from '@/lib/settings/useAllSettings'
 import { useVacancyAdvice } from '@/lib/useVacancyAdvice'
@@ -242,15 +242,15 @@ export default function VacanciesTable({ rows, loading, selectedId, onSelect, on
       sortable: true, sortValue: r => r.createdSort ?? r.created, render: r => formatDate(r.created),
     },
     {
-      // V2 (vacatures-tabel-cluster): relative age since creation ("3w") — cheap,
-      // no backend dependency (created_at already ships on the list). Tooltip
-      // carries the exact date so the compact token never loses precision.
+      // V2 (vacatures-tabel-cluster), PDF-VACATURES point 4 (Danny 14-08): plain
+      // day count since creation, no unit letter — cheap, no backend dependency
+      // (created_at already ships on the list). Tooltip carries the exact date.
       key: 'age', header: t('columns.age'), nowrap: true, cellStyle: mutedCell,
       sortable: true, sortValue: r => r.createdSort ?? r.created,
       render: r => {
-        const age = relativeAge(r.created)
-        if (!age) return <span style={{ color: 'var(--text-muted)' }}>—</span>
-        return <span title={formatDate(r.created)}>{t(`age.${age.unit}`, { count: age.value })}</span>
+        const days = daysSince(r.created)
+        if (days == null) return <span style={{ color: 'var(--text-muted)' }}>—</span>
+        return <span title={formatDate(r.created)}>{days}</span>
       },
     },
     // Shared Koios column factory (Danny 05-08 consistency pass) — same header,

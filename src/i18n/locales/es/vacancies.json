@@ -3,6 +3,8 @@
     "title": "Vacantes",
     "subtitle": "Gestiona y publica fácilmente todas tus posiciones abiertas.",
     "add": "Nueva vacante",
+    "import": "Importar Excel",
+    "importTitle": "Importar vacantes desde Excel o CSV (una o varias)",
     "searchPlaceholder": "Buscar vacante, nota, documento…",
     "loading": "Cargando vacantes…",
     "empty": "Aún no hay vacantes.",

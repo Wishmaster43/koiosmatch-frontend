@@ -3,6 +3,8 @@
     "title": "Vacatures",
     "subtitle": "Beheer en publiceer eenvoudig al je openstaande functies.",
     "add": "Nieuwe vacature",
+    "import": "Excel importeren",
+    "importTitle": "Vacatures importeren vanuit Excel of CSV (één of meerdere)",
     "searchPlaceholder": "Zoek vacature, notitie, document…",
     "loading": "Vacatures laden…",
     "empty": "Nog geen vacatures.",

@@ -21,20 +21,29 @@ import { groupTemplates, orderedTemplates } from '@/pages/settings/sections/impo
 import type { ImportTemplateSummary } from './api'
 import EntityImportWizard from './EntityImportWizard'
 
-export default function ImportWizardPage() {
+interface ImportWizardPageProps {
+  // PDF-VACATURES-2026-08-14 point 7: a caller (the vacancies toolbar's Excel-
+  // upload button) can preselect an entity via `{ entity: 'vacancies' }` so the
+  // wizard lands there instead of the first template in display order.
+  intent?: { entity?: string } | null
+}
+
+export default function ImportWizardPage({ intent }: ImportWizardPageProps = {}) {
   const { t } = useTranslation('settings')
   // Auth context can be null pre-boot — an honest fallback, mirrors ImporterenSettings.tsx.
   const hasPermission = useAuth()?.hasPermission ?? (() => false)
   const { templates, phase, reload } = useImportTemplates()
   const [selected, setSelected] = useState<string | null>(null)
 
-  // Land on the first template in display order (the combined file first when the
-  // backend serves one); never overrides a user's own pick.
+  // Land on the requested entity (if its template exists) or the first template in
+  // display order (the combined file first when the backend serves one); never
+  // overrides a user's own pick once one has been made.
   useEffect(() => {
     if (phase === 'ready' && templates.length > 0 && !selected) {
-      setSelected(orderedTemplates(templates)[0]?.entity ?? null)
+      const wanted = intent?.entity && templates.some(tpl => tpl.entity === intent.entity) ? intent.entity : null
+      setSelected(wanted ?? orderedTemplates(templates)[0]?.entity ?? null)
     }
-  }, [phase, templates, selected])
+  }, [phase, templates, selected, intent])
 
   // Locations/departments/contacts are sub-entities of the customer tree and share
   // its rights, exactly like routes/api/tenant/exports.php gates every import route.

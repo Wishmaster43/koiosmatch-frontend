@@ -115,6 +115,25 @@ describe('ImportWizardPage — mapping + editable preview', () => {
     expect(await screen.findByText(t('import.result.title'))).toBeInTheDocument()
   })
 
+  // PDF-VACATURES-2026-08-14 point 7: the vacancies toolbar's Excel-upload button
+  // passes `{ entity: 'vacancies' }` — the wizard must land there, not on the
+  // first template in display order, when multiple templates are available.
+  it('lands on the intent-requested entity instead of the first template', async () => {
+    const user = userEvent.setup()
+    const vacanciesTemplate = { entity: 'vacancies', columns: ['title'], example_rows: 1, url: '/imports/vacancies/template.csv' }
+    ;(api.get as MockFn).mockResolvedValue({ data: { data: [TEMPLATE, vacanciesTemplate] } })
+    render(<ImportWizardPage intent={{ entity: 'vacancies' }} />)
+    const input = await screen.findByLabelText(t('import.selectCsv'))
+    const file = new File(['title\nVerpleegkundige'], 'vacancies.csv', { type: 'text/csv' })
+    await user.upload(input, file)
+    const next = await screen.findByRole('button', { name: t('import.wizard.next', { defaultValue: 'Next' }) })
+    await user.click(next)
+    await screen.findByRole('button', { name: t('import.runPreview') })
+    ;(api.post as MockFn).mockResolvedValueOnce({ data: { data: { entity: 'vacancies', dry_run: true, summary: { rows: 1, create: 1, update: 0, skip: 0, error: 0 }, unknown_columns: [], rows: [] } } })
+    await user.click(screen.getByRole('button', { name: t('import.runPreview') }))
+    await waitFor(() => expect(api.post).toHaveBeenCalledWith('/imports/vacancies/dry-run', expect.any(FormData)))
+  })
+
   it('shows the server error and no Confirm button when the dry-run fails', async () => {
     const user = userEvent.setup()
     await uploadAndReachPreview(user)

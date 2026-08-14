@@ -1,16 +1,22 @@
 import type { CSSProperties } from 'react'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
-import { RefreshCw, X } from 'lucide-react'
+import { RefreshCw, X, ChevronRight } from 'lucide-react'
 import MatchExplorerLayout from '@/components/match/MatchExplorerLayout'
 import ScorePill from '@/components/match/ScorePill'
 import MatchScoreBlock from '@/components/match/MatchScoreBlock'
 import RadiusMapPanel from '@/components/map/RadiusMapPanel'
+import DrillPager from '@/components/drawer/DrillPager'
 import EntityLink from '@/components/ui/EntityLink'
 import KoiosAiMark from '@/components/ui/KoiosAiMark'
 import SearchSelect from '@/components/ui/SearchSelect'
 import GeocodeButton from '@/components/ui/GeocodeButton'
 import StatusPill from '@/components/ui/StatusPill'
+import DrawerAddButton from '@/components/drawer/DrawerAddButton'
+// Reuse the candidate-anchored "+ Solliciteren" flow (mirrors ApplicantsTab's own
+// CandidateAddApplicationModal reuse, §2 sanctioned cross-entity import for this
+// exact shared flow) — never a second apply form.
+import CandidateAddApplicationModal from '@/pages/candidates/drawer/AddApplicationModal'
 import { useCandidateSearch } from '../hooks/useCandidateSearch'
 import { useFunctions } from '@/lib/useFunctions'
 import { useLookups } from '@/context/LookupsContext'
@@ -55,6 +61,20 @@ export default function CandidateSearchTab({ vacancy }: { vacancy: VacancyDetail
 
   const selectedRow = rows.find(r => r.id === selectedId) ?? null
   const selectCandidate = (id: Id) => setSelectedId(id)
+
+  // "Solliciteren" (point 18, mirrors VacancySearchTab): opens the shared
+  // candidate-anchored apply flow for the SELECTED candidate with this vacancy
+  // prefilled. Closed on any selection change so browsing prev/next never
+  // leaves a stale modal pinned to the old row.
+  const [showApply, setShowApply] = useState(false)
+  useEffect(() => { setShowApply(false) }, [selectedId])
+
+  // Browse (point 19, mirrors VacancySearchTab): prev/next through the CURRENT
+  // result list via the shared DrillPager — undefined at the ends disables the
+  // matching button, never a cycle.
+  const selectedIndex = rows.findIndex(r => r.id === selectedId)
+  const goPrev = selectedIndex > 0 ? () => setSelectedId(rows[selectedIndex - 1].id) : undefined
+  const goNext = selectedIndex >= 0 && selectedIndex < rows.length - 1 ? () => setSelectedId(rows[selectedIndex + 1].id) : undefined
 
   const toggleFunction = (name: string) =>
     setFunctions(selectedFunctions.includes(name) ? selectedFunctions.filter(f => f !== name) : [...selectedFunctions, name])
@@ -154,10 +174,23 @@ export default function CandidateSearchTab({ vacancy }: { vacancy: VacancyDetail
           </div>
           <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>{[selectedRow.functionTitle, selectedRow.city].filter(Boolean).join(' · ') || '—'}</div>
         </div>
-        <button onClick={() => setSelectedId(null)} aria-label={t('common:close')}
-          style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: 2, flexShrink: 0, display: 'flex' }}>
-          <X size={14} />
-        </button>
+        {/* Right column (mirrors VacancySearchTab's own layout): pager+close on top,
+            Solliciteren beneath — the title row keeps its full width so long
+            candidate names never truncate against the primary action. */}
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 6, flexShrink: 0 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+            <DrillPager index={selectedIndex + 1} total={rows.length} onPrev={goPrev} onNext={goNext} />
+            <button onClick={() => setSelectedId(null)} aria-label={t('common:close')}
+              style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: 2, display: 'flex' }}>
+              <X size={14} />
+            </button>
+          </div>
+          {/* Solliciteren (point 18): the primary action for this candidate score
+              panel — opens the shared candidate-anchored apply flow with this
+              vacancy prefilled (reuses candidates:vacancySearch.apply's label —
+              same action, one i18n key, no vacancies.json duplicate). */}
+          <DrawerAddButton onClick={() => setShowApply(true)} label={t('candidates:vacancySearch.apply')} />
+        </div>
       </div>
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
         {selectedRow.distanceKm != null && (
@@ -222,16 +255,18 @@ export default function CandidateSearchTab({ vacancy }: { vacancy: VacancyDetail
                 {[r.functionTitle, r.city].filter(Boolean).join(' · ') || '—'}
               </div>
             </div>
-            {(r.score != null || r.distanceKm != null) && (
-              <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0 }}>
-                {r.score != null && <ScorePill score={r.score} />}
-                {r.distanceKm != null && (
-                  <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 11, color: 'var(--text-muted)' }}>
-                    {r.distanceKm.toFixed(1)} km
-                  </span>
-                )}
-              </div>
-            )}
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0 }}>
+              {r.score != null && <ScorePill score={r.score} />}
+              {r.distanceKm != null && (
+                <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 11, color: 'var(--text-muted)' }}>
+                  {r.distanceKm.toFixed(1)} km
+                </span>
+              )}
+              {/* Expand affordance (point 17, mirrors VacancySearchTab): a visible
+                  chevron on EVERY row signals the row opens a preview, on top of
+                  the row's own cursor:pointer + hover background. */}
+              <ChevronRight size={14} strokeWidth={3} aria-hidden="true" style={{ color: 'var(--color-primary-text)' }} />
+            </div>
           </div>
         )
       })}
@@ -253,5 +288,21 @@ export default function CandidateSearchTab({ vacancy }: { vacancy: VacancyDetail
 
   const listPane = <div>{refreshButton}{summaryCard}{listBody}</div>
 
-  return <MatchExplorerLayout filters={filtersRow} map={mapPane} list={listPane} />
+  return (
+    <>
+      <MatchExplorerLayout filters={filtersRow} map={mapPane} list={listPane} />
+      {/* Solliciteren modal — only reachable while a candidate is selected (the
+          button itself lives inside summaryCard, so selectedRow is always set
+          here too). onCreated re-triggers the same hook `retry` the error state
+          already uses — no new refetch contract, just the existing reload path. */}
+      {showApply && selectedRow && (
+        <CandidateAddApplicationModal
+          candidateId={selectedRow.id}
+          initialVacancyId={vacancy.id}
+          onClose={() => setShowApply(false)}
+          onCreated={retry}
+        />
+      )}
+    </>
+  )
 }

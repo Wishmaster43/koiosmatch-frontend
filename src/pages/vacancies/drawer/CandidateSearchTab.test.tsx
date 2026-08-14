@@ -23,6 +23,10 @@ import api from '@/lib/api'
 import { notify, notifyError } from '@/lib/notify'
 import nl from '@/i18n/locales/nl/vacancies.json'
 import nlCommon from '@/i18n/locales/nl/common.json'
+// The Solliciteren button reuses the CANDIDATE namespace's own label
+// (`candidates:vacancySearch.apply`) — read it from there, not from vacancies.json,
+// so the assertion breaks if that shared label is ever renamed.
+import nlCandidates from '@/i18n/locales/nl/candidates.json'
 
 // Keep the real unwrap/unwrapList (importActual) — only the default client is stubbed.
 vi.mock('@/lib/api', async () => {
@@ -74,6 +78,17 @@ vi.mock('@/context/LookupsContext', () => ({
 // mechanism) can be asserted without a real NavigationProvider mounted.
 const openEntityMock = vi.hoisted(() => vi.fn())
 vi.mock('@/context/NavigationContext', () => ({ useNavigation: () => ({ openEntity: openEntityMock }) }))
+
+// Point 18: the shared "+ Solliciteren" flow is reused wholesale (own extensive
+// test suite lives on AddApplicationModal itself) — stubbed here to just prove
+// this tab wires the right candidateId/initialVacancyId into it.
+vi.mock('@/pages/candidates/drawer/AddApplicationModal', () => ({
+  default: ({ candidateId, initialVacancyId, onClose }: { candidateId: string; initialVacancyId: string; onClose: () => void }) => (
+    <div data-testid="apply-modal" data-candidate-id={candidateId} data-vacancy-id={initialVacancyId}>
+      <button onClick={onClose}>close-apply</button>
+    </div>
+  ),
+}))
 
 const vacancyWithLocation = mapVacancyDetail({ id: 'v1', title: 'Verpleegkundige | Utrecht', lat: 52.09, lng: 5.12, category: 'Verzorgende IG' })
 const vacancyNoLocation = mapVacancyDetail({ id: 'v2', title: 'Nog niet geocodeerd' })
@@ -280,5 +295,54 @@ describe('CandidateSearchTab · row selection shows a summary card, not an immed
     await userEvent.click(screen.getByText('Alice'))
 
     expect(openEntityMock).toHaveBeenCalledWith('candidates', 'c1')
+  })
+})
+
+// Point 17: every list row carries a visible expand chevron, on top of the row's
+// own click semantics — mirrors VacancySearchTab (candidate side).
+describe('CandidateSearchTab · row expand chevron (point 17)', () => {
+  it('renders a chevron icon on each result row', async () => {
+    mockGet.mockResolvedValueOnce({ data: { data: rawRows } })
+    const { container } = render(<CandidateSearchTab vacancy={vacancyWithLocation} />)
+    await waitFor(() => expect(screen.getByText('Alice')).toBeInTheDocument())
+    expect(container.querySelectorAll('svg.lucide-chevron-right').length).toBe(rawRows.length)
+  })
+})
+
+// Point 19: browsing the SELECTED candidate via the shared DrillPager, scoped to
+// the current result list only — mirrors VacancySearchTab's own prev/next.
+describe('CandidateSearchTab · browse via DrillPager (point 19)', () => {
+  it('disables prev on the first row, enables next, and next moves the selection', async () => {
+    mockGet.mockResolvedValueOnce({ data: { data: rawRows } })
+    render(<CandidateSearchTab vacancy={vacancyWithLocation} />)
+    await waitFor(() => expect(screen.getByText('Alice')).toBeInTheDocument())
+    await userEvent.click(screen.getByText('Verzorgende IG · Amersfoort'))
+
+    const prevBtn = screen.getByRole('button', { name: nlCommon.drillPager.prev })
+    const nextBtn = screen.getByRole('button', { name: nlCommon.drillPager.next })
+    expect(prevBtn).toBeDisabled()
+    expect(nextBtn).not.toBeDisabled()
+
+    await userEvent.click(nextBtn)
+    // Selection moved to Bob (index 2) — Alice returns to the plain list, Bob's
+    // card is now shown; "next" is now disabled (last row).
+    await waitFor(() => expect(screen.getAllByText('Bob')).toHaveLength(1))
+    expect(screen.getByRole('button', { name: nlCommon.drillPager.next })).toBeDisabled()
+  })
+})
+
+// Point 18: the summary card's "Solliciteren" button opens the shared apply flow
+// with THIS candidate + THIS vacancy prefilled.
+describe('CandidateSearchTab · Solliciteren from the preview (point 18)', () => {
+  it('opens the shared apply modal with candidateId + initialVacancyId wired', async () => {
+    mockGet.mockResolvedValueOnce({ data: { data: rawRows } })
+    render(<CandidateSearchTab vacancy={vacancyWithLocation} />)
+    await waitFor(() => expect(screen.getByText('Alice')).toBeInTheDocument())
+    await userEvent.click(screen.getByText('Verzorgende IG · Amersfoort'))
+
+    await userEvent.click(screen.getByRole('button', { name: nlCandidates.vacancySearch.apply }))
+    const modal = screen.getByTestId('apply-modal')
+    expect(modal).toHaveAttribute('data-candidate-id', 'c1')
+    expect(modal).toHaveAttribute('data-vacancy-id', 'v1')
   })
 })

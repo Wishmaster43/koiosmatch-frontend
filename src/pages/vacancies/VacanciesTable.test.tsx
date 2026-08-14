@@ -305,6 +305,24 @@ describe('VacanciesTable · Age column (V2)', () => {
     const cell = container.querySelectorAll('tbody tr')[0].children[colIndex]
     expect(cell.querySelector('span')?.getAttribute('title')).toBe('2024-01-01')
   })
+
+  // PDF-VACATURES-2026-08-14 point 4 (Danny 14-08): a plain day count, no unit
+  // letter ("3", never "3d") — deterministic via vitest's fake system clock.
+  it('renders a plain day count with no unit letter', () => {
+    vi.useFakeTimers()
+    vi.setSystemTime(new Date('2024-01-15T00:00:00Z'))
+    try {
+      const rows = [{ id: 'v1', title: 'A', created: '2024-01-12T00:00:00Z', createdSort: '2024-01-12T00:00:00Z' }] as unknown as Vacancy[]
+      const { container } = render(<VacanciesTable rows={rows} />)
+      const headerCell = screen.getByText('Leeftijd').closest('th') as HTMLElement
+      const colIndex = Array.from(headerCell.parentElement?.children ?? []).indexOf(headerCell)
+      const cell = container.querySelectorAll('tbody tr')[0].children[colIndex]
+      expect(cell.textContent).toBe('3')
+      expect(cell.textContent).not.toMatch(/d$/)
+    } finally {
+      vi.useRealTimers()
+    }
+  })
 })
 
 // V1 (vacatures-tabel-cluster): status column sort follows the tenant's

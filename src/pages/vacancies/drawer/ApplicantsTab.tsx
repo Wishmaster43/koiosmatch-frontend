@@ -22,6 +22,12 @@ import CandidateAddApplicationModal from '@/pages/candidates/drawer/AddApplicati
 import DetachApplicationModal from '@/pages/candidates/drawer/DetachApplicationModal'
 import { vacancyLabelOf } from '@/pages/candidates/drawer/applicationRowModel'
 import type { AppRow } from '@/pages/candidates/drawer/applicationRowModel'
+// PDF-VACATURES-13: the shared prev/next stepper (customer locations/contacts/
+// departments already use it) — paging through the expanded application detail
+// without a trip back to the list. This tab owns which application is expanded
+// (ApplicationRow supports both an internal-toggle mode and this controlled mode);
+// only its prop TYPE is needed here, DrillPager itself renders inside ApplicationRow.
+import type { DrillPagerProps } from '@/components/drawer/DrillPager'
 import { useVacancyLookups } from '@/context/VacancyLookupsContext'
 import { useAuth } from '@/context/AuthContext'
 import { notifyError, notifySuccess } from '@/lib/notify'
@@ -94,8 +100,11 @@ export default function ApplicantsTab({ vacancy: v }: { vacancy: VacancyDetail }
       .catch(() => {})
   }
 
-  const byPhase = (live.applicationsByPhase ?? {}) as Record<string, number>
   const applications = (live.applications ?? []) as ApplicantRow[]
+  // PDF-VACATURES-13: the host owns which application row is expanded, so the
+  // DrillPager's next/prev can collapse the current row and open another —
+  // ApplicationRow's own internal toggle cannot do that from outside.
+  const [openRowId, setOpenRowId] = useState<Id | null>(null)
 
   // House toolbar: free-text search on the candidate's name, on top of the phase filter.
   const [search, setSearch] = useState('')
@@ -109,6 +118,29 @@ export default function ApplicantsTab({ vacancy: v }: { vacancy: VacancyDetail }
   useEffect(() => { setPage(1) }, [search, phaseFilter])
   const pages = Math.max(1, Math.ceil(filteredApplications.length / PER))
   const slice = filteredApplications.slice((page - 1) * PER, page * PER)
+
+  // PDF-VACATURES-13: page to another application's expanded detail — moves the
+  // TABLE page too when the target sits outside the currently visible slice, so
+  // "next" never opens a row the list itself is not showing.
+  const gotoApplication = (index: number) => {
+    const target = filteredApplications[index]
+    if (!target) return
+    setOpenRowId(target.id ?? null)
+    setPage(Math.floor(index / PER) + 1)
+  }
+  // The pager for the CURRENTLY OPEN row — undefined for every other row, and
+  // undefined entirely once the open row falls out of the active filter/search.
+  const pagerFor = (a: ApplicantRow): DrillPagerProps | undefined => {
+    if (openRowId == null || String(a.id) !== String(openRowId)) return undefined
+    const index = filteredApplications.findIndex(x => String(x.id) === String(openRowId))
+    if (index < 0) return undefined
+    return {
+      index: index + 1,
+      total: filteredApplications.length,
+      onPrev: index > 0 ? () => gotoApplication(index - 1) : undefined,
+      onNext: index < filteredApplications.length - 1 ? () => gotoApplication(index + 1) : undefined,
+    }
+  }
 
   // Punt 7 reuse: DELETE /applications/{id} requires a `reason` body (measured on
   // the candidate side, WorkTab.detachApplication) — non-optimistic, so a 422/403
@@ -147,33 +179,9 @@ export default function ApplicantsTab({ vacancy: v }: { vacancy: VacancyDetail }
 
   return (
     <div>
-      {/* Per-phase breakdown — only phases with a count, in the configured order.
-          V-count-1: each chip is now a clickable toggle onto the SAME phase filter
-          the toolbar's StatusFilterSelect drives (togglePhase/phaseFilter from
-          useStatusFilter above) — mirrors StatisticsTab's active-tint convention
-          (stronger tint + fontWeight 600 when selected, §4 soft-chip rule). */}
-      <div style={{ ...sectionTitle, marginBottom: 8 }}>{t('applicants.byPhase')}</div>
-      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 20 }}>
-        {phases.filter(p => (byPhase[p.value] ?? 0) > 0).length === 0 ? (
-          <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>—</span>
-        ) : phases.filter(p => (byPhase[p.value] ?? 0) > 0).map(p => {
-          const active = phaseFilter.includes(p.value)
-          return (
-            <button key={p.value} type="button" onClick={() => togglePhase(p.value)}
-              aria-pressed={active} title={p.label}
-              style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 12,
-                fontWeight: active ? 600 : 400, cursor: 'pointer',
-                padding: '4px 10px', borderRadius: 8,
-                background: `color-mix(in srgb, ${p.color} ${active ? 16 : 8}%, transparent)`,
-                border: `1px solid color-mix(in srgb, ${p.color} ${active ? 50 : 28}%, transparent)`,
-                color: p.color }}>
-              <span style={{ width: 8, height: 8, borderRadius: '50%', background: p.color }} />
-              {p.label}
-              <strong style={{ color: 'var(--text)' }}>{byPhase[p.value]}</strong>
-            </button>
-          )
-        })}
-      </div>
+      {/* PDF-VACATURES-11: the "Per fase" breakdown block was dropped (Danny) — the
+          phase filter in the toolbar below still narrows by phase, it just no
+          longer duplicates the counts as a separate row of chips above the list. */}
 
       {/* Applications list header + house toolbar: search (grows) → phase filter →
           "+ Sollicitatie" (short — the sub-tab already names the entity, DRAWER-ADD-SHORT-1). */}
@@ -239,6 +247,11 @@ export default function ApplicantsTab({ vacancy: v }: { vacancy: VacancyDetail }
                     onEdit={setEditApplicationId}
                     onDetach={() => setDetachRow(a)}
                     onEditAppointment={() => {}}
+                    // PDF-VACATURES-13: this tab owns which row is open, so the row's
+                    // own DrillPager can step to the next/prev application in place.
+                    expanded={openRowId != null && String(a.id) === String(openRowId)}
+                    onToggleExpanded={() => setOpenRowId(prev => (prev != null && String(prev) === String(a.id) ? null : (a.id ?? null)))}
+                    pager={pagerFor(a)}
                   />
                 )}
               </div>

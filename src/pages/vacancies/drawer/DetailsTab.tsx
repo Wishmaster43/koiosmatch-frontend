@@ -1,6 +1,4 @@
-import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import SubTabBar from '@/components/drawer/SubTabBar'
 import KoiosAdviceBlock from '@/components/ai/KoiosAdviceBlock'
 import { useVacancyAdvice } from '@/lib/useVacancyAdvice'
 import { adviceInsightRows } from '@/lib/koiosAdviceInsight'
@@ -16,15 +14,17 @@ import type { Id } from '@/types/common'
 type UpdateFn = (id: Id | undefined, patch: Record<string, unknown>) => void
 
 /**
- * DetailsTab — thin container: wires useVacancyDetailsForm and declares the
- * Algemeen/Locatie/Eisen/Voorwaarden sub-tabs (VAC-DETAILS-SPLIT-1, Danny
- * 24-07: "een potlood zet 21 velden tegelijk in edit-mode ... ruk om te
- * onderhouden"). Mirrors PreferencesZzpTabs' SubTabBar convention: every
- * card gets its OWN pencil/save/cancel from its own hook section, so editing
- * one sub-tab never submits another's untouched draft. No card/row JSX lives
- * here anymore — that moved into detailsFieldKit + the four Details<X>Tab
- * siblings; this file only owns the sub-tab strip and the shared Koios
- * advisory block (unaffected by which sub-tab is active).
+ * DetailsTab — thin container: wires useVacancyDetailsForm and stacks EVERY
+ * field group as its own card on this ONE tab (VAC-ALGEMEEN-MERGE-1, Danny
+ * 14-08 punt 9: "het Locatie-subtabblad verdwijnt: op het eerste tabblad
+ * Algemeen staat ALLES in eigen blokjes"). The earlier Algemeen/Locatie/Eisen/
+ * Voorwaarden SubTabBar (VAC-DETAILS-SPLIT-1) is gone — each Details<X>Tab
+ * still keeps its OWN pencil/save/cancel from its OWN hook section, so
+ * editing one block never submits another's untouched draft; only the
+ * navigation chrome around them (the sub-tab strip) was removed. No card/row
+ * JSX lives here — that stays in detailsFieldKit + the four Details<X>Tab
+ * siblings; this file only owns the block order and the shared Koios
+ * advisory block (still bottom-of-tab, unaffected by the merge).
  */
 export default function DetailsTab({ vacancy: v, onUpdate }: { vacancy: VacancyDetail; onUpdate?: UpdateFn }) {
   const { t } = useTranslation('vacancies')
@@ -35,36 +35,22 @@ export default function DetailsTab({ vacancy: v, onUpdate }: { vacancy: VacancyD
     contractTypeOptions, caoOptions,
     general, location, requirements, conditions } = useVacancyDetailsForm(v, onUpdate)
 
-  // Sub-tab strip — reuses the four EXISTING group labels (details.groups.*),
-  // no new i18n keys needed.
-  const SUB_TABS = [
-    { id: 'general', label: t('details.groups.general') },
-    { id: 'location', label: t('details.groups.location') },
-    { id: 'requirements', label: t('details.groups.requirements') },
-    { id: 'conditions', label: t('details.groups.conditions') },
-  ]
-  const [subTab, setSubTab] = useState('general')
-
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-      <SubTabBar tabs={SUB_TABS} active={subTab} onChange={setSubTab} />
-      {subTab === 'general' && (
-        <>
-          {/* V11 + Danny 05-08 "Koios moet eronder komen": advisory only on Algemeen,
-              BELOW the fields cards — the same bottom placement as the customer tab. */}
-          <DetailsGeneralTab vacancy={v} general={general} candidateTypes={candidateTypes} typeMeta={typeMeta}
-            industries={industries} fnOptions={fnOptions} formatDate={formatDate} />
-          <KoiosAdviceBlock namespace="vacancies"
-            insights={[...adviceInsightRows(resolveAdvice(v)), ...buildVacancyAdviceInsights(v, t)]} />
-        </>
-      )}
-      {subTab === 'location' && <DetailsLocationTab vacancy={v} location={location} />}
-      {subTab === 'requirements' && (
-        <DetailsRequirementsTab vacancy={v} requirements={requirements} seniorityLevels={seniorityLevels} educationLevels={educationLevels} />
-      )}
-      {subTab === 'conditions' && (
-        <DetailsConditionsTab vacancy={v} conditions={conditions} contractTypeOptions={contractTypeOptions} caoOptions={caoOptions} />
-      )}
+      {/* Klant, locatie(vestiging)/afdeling/contactpersoon-cascade, contractvorm,
+          functie — the "Algemeen" block, first. */}
+      <DetailsGeneralTab vacancy={v} general={general} candidateTypes={candidateTypes} typeMeta={typeMeta}
+        industries={industries} fnOptions={fnOptions} formatDate={formatDate} />
+      {/* Werkadres (straat/postcode/plaats/land/provincie) + de eigen vestiging
+          (location_id) van de vacature — VAC-VESTIGING-1's picker, nu zichtbaar
+          op dit eerste tabblad in plaats van een apart Locatie-subtabblad. */}
+      <DetailsLocationTab vacancy={v} location={location} />
+      <DetailsRequirementsTab vacancy={v} requirements={requirements} seniorityLevels={seniorityLevels} educationLevels={educationLevels} />
+      <DetailsConditionsTab vacancy={v} conditions={conditions} contractTypeOptions={contractTypeOptions} caoOptions={caoOptions} />
+      {/* V11 + Danny 05-08 "Koios moet eronder komen": advisory stays at the
+          bottom of the merged tab, unaffected by the sub-tab removal. */}
+      <KoiosAdviceBlock namespace="vacancies"
+        insights={[...adviceInsightRows(resolveAdvice(v)), ...buildVacancyAdviceInsights(v, t)]} />
     </div>
   )
 }

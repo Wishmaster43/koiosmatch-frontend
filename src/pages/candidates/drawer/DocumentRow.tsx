@@ -1,11 +1,11 @@
 import { useTranslation } from 'react-i18next'
-import { Pencil, Eye, X, RefreshCw, Link2, GraduationCap, Award, Languages, Sparkles, UserCheck } from 'lucide-react'
+import { Pencil, Eye, X, RefreshCw, Link2, Download, GraduationCap, Award, Languages, Sparkles, UserCheck } from 'lucide-react'
 import { resolveDocTypeIcon } from '@/lib/useDocumentTypes'
 import { useDateFormat } from '@/lib/datetime'
 import SoftChip from '@/components/ui/SoftChip'
 import DocumentVersionHistory from './DocumentVersionHistory'
 import DocumentLinkPicker from './DocumentLinkPicker'
-import { splitExt, isPersisted, computeDocExpiry, DOC_GRID_COLUMNS } from './documentHelpers'
+import { splitExt, isPersisted, computeDocExpiry, docUrl, DOC_GRID_COLUMNS } from './documentHelpers'
 import type { DocItem } from './documentHelpers'
 import type { Id } from '@/types/common'
 
@@ -46,6 +46,11 @@ interface DocumentRowProps {
   onRenameCommit: () => void
   onRenameCancel: () => void
   onReplace: () => void
+  // PDF-VACATURES-26: the vacancy documents tab reuses this row but has no
+  // /vacancies/{id}/documents/{id}/replace route yet — omitting the button rather
+  // than wiring it to a dead endpoint (§3 no fake affordance). Defaults true so
+  // every existing caller (candidate) keeps its Replace button unchanged.
+  canReplace?: boolean
   onPreview: () => void
   onDeleteRequest: () => void
   docColor: (type?: string) => string
@@ -82,7 +87,7 @@ interface DocumentRowProps {
 export default function DocumentRow({
   d, selected, downloadable, onToggleSelect, canManage,
   renaming, renameValue, onRenameStart, onRenameChange, onRenameCommit, onRenameCancel,
-  onReplace, onPreview, onDeleteRequest, docColor, docTypeLabel, docTypeIcon,
+  onReplace, canReplace = true, onPreview, onDeleteRequest, docColor, docTypeLabel, docTypeIcon,
   linked, linking, linkValue, canLink, onLinkToggle, onLinkChange, educations, certifications, languages, skills, references,
 }: DocumentRowProps) {
   const { t } = useTranslation('candidates')
@@ -165,11 +170,18 @@ export default function DocumentRow({
               <Link2 size={12} />
             </button>
           )}
-          {canManage && isPersisted(d.id) && (
+          {canManage && canReplace && isPersisted(d.id) && (
             <button aria-label={t('documents.replace')} title={t('documents.replace')} onClick={onReplace}
               style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: '2px 3px', display: 'flex' }}><RefreshCw size={12} /></button>
           )}
           <button aria-label={t('documents.preview')} onClick={onPreview} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: '2px 3px', display: 'flex' }}><Eye size={12} /></button>
+          {/* PDF-VACATURES-26: a real per-row download (read action, no permission
+              gate — mirrors the preview button above), next to the bulk "download
+              selected" action in the toolbar. Renders only once the row actually
+              carries a url; a downloadable=false row (still-uploading optimistic
+              row) shows no dead link. */}
+          {downloadable && <a href={docUrl(d)} download={displayName} aria-label={t('documents.download')} title={t('documents.download')}
+            style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: '2px 3px', display: 'flex' }}><Download size={12} /></a>}
           {canManage && <button aria-label={t('common:remove')} onClick={onDeleteRequest} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: '2px 3px', display: 'flex' }}><X size={12} /></button>}
         </div>
       </div>

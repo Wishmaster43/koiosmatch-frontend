@@ -21,7 +21,12 @@ vi.mock('@/hooks/useEntityDocuments', () => ({
 // A fixed 2-type tenant lookup, entity-scoped 'vacancy' — the real hook's fetch/
 // cache plumbing is irrelevant here, only that DocumentsTab reads it and passes
 // the picked value through to upload().
-vi.mock('@/lib/useDocumentTypes', () => ({
+// Partial mock: only the HOOK is stubbed (deterministic type list). The module's
+// pure helpers — notably resolveDocTypeIcon, which the shared DocumentRow calls on
+// every render — keep their real implementation, so this mock cannot go stale when
+// that module grows another export.
+vi.mock('@/lib/useDocumentTypes', async importOriginal => ({
+  ...(await importOriginal<typeof import('@/lib/useDocumentTypes')>()),
   useDocumentTypes: vi.fn(() => ({
     types: [
       { value: 'Contract', label: 'Contract', color: '#059669' },

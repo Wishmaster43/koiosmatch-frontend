@@ -192,7 +192,13 @@ export default function VacancyDrawer({ vacancy: v, onClose, expanded, onToggleE
       // every entity's tab shows the exact same word.
       tabs={visibleTabs.map(tab => ({
         id: tab.id,
-        label: tab.id === 'koppelingen' ? t('common:backofficeLinks.tabLabel') : t(`drawer.tabs.${tab.tKey}`),
+        // VAC-TEKST-TAB-1 (Danny 14-08 punt 10): the Description tab is renamed
+        // "Vacaturetekst" — reuses the EXISTING details.description key (already
+        // "Vacancy text"/"Vacaturetekst" in all five locales, the popout's own
+        // subtitle) instead of drawer.tabs.description, so no new locale edits.
+        label: tab.id === 'koppelingen' ? t('common:backofficeLinks.tabLabel')
+          : tab.id === 'description' ? t('details.description')
+          : t(`drawer.tabs.${tab.tKey}`),
         // V-stats-1: EntityDrawer hands each tab its own setActiveTab — forward it
         // so Statistics can deep-link into a sibling tab without a route hack.
         autoExpand: tab.autoExpand, render: (setActiveTab?: (id: string) => void) => tab.render(v, onUpdate, setActiveTab),
