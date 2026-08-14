@@ -7,14 +7,14 @@
  * `current_count` pipeline occupancy. Phases come from tenant funnel lookups, so we
  * never hardcode stage names — we key on `key` and render `label`.
  */
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { formatRatio } from '@/lib/formatters'
 import { useTranslation } from 'react-i18next'
 import ReportKpiBand from './ReportKpiBand'
 import ReportStateBlock from './ReportStateBlock'
 import { reportCardStyle } from './ReportSectionCard'
 import type { KpiSpec } from '@/components/insights/InsightsRow'
-import ReportDrillDrawer from './ReportDrillDrawer'
+import ReportChartWithDrillList from './ReportChartWithDrillList'
 import type { DrillSpec } from './ReportDrillDrawer'
 import { useFlowReport } from './useFlowReport'
 import { gateDrillClick } from './reportDrillGate'
@@ -132,6 +132,16 @@ export default function FlowReport({ period }: { period: ReportPeriod }) {
   const firstPhase = phases[0] ?? null
   const lastPhase = phases.length > 0 ? phases[phases.length - 1] : null
 
+  // Default the right-hand list to the first phase so the panel is never blank
+  // on load — mirrors clicking that phase's own bar, never a client-side guess.
+  useEffect(() => {
+    if (drill == null && firstPhase) {
+      const click = phaseKpi(firstPhase).onClick
+      if (click) click()
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [firstPhase?.key])
+
   // Exactly nine cards, always (Danny — the strip's footprint never reflows
   // between pages, and it must never grow with the tenant's funnel stage
   // count). Every value here is either a real total/derived-subtraction, or
@@ -183,38 +193,41 @@ export default function FlowReport({ period }: { period: ReportPeriod }) {
           onRetry={() => refetch()}
         />
         {!loading && !error && phases.length > 0 && (
-          <>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 12, fontSize: 10, fontWeight: 700,
-                          color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em',
-                          borderBottom: '1px solid var(--border)', paddingBottom: 8, marginBottom: 4 }}>
-              <span style={{ width: 140, flexShrink: 0 }}>{t('flow.phase')}</span>
-              <span style={{ flex: 1 }}>{cohortReady ? t('flow.reached') : t('flow.current')}</span>
-              <span style={{ width: 64, flexShrink: 0, textAlign: 'right' }}>{cohortReady ? t('flow.conversion') : ''}</span>
-              <span style={{ width: 120, flexShrink: 0 }} />
-            </div>
-            {phases.map((p, i) => {
-              // Same gate as the KPI cards: no click/cursor/tooltip until the drill endpoint exists.
-              const onPhaseClick = phaseKpi(p).onClick
-              return (
-              <div key={p.key} onClick={onPhaseClick} style={{ cursor: onPhaseClick ? 'pointer' : 'default' }}
-                   title={onPhaseClick ? t('drill.breakdown') : undefined}>
-                <PhaseRow
-                  label={p.label}
-                  value={cohortReady ? p.reached_count : p.current_count}
-                  max={max}
-                  index={i}
-                  conversion={cohortReady && p.conversion_rate != null ? formatRatio(p.conversion_rate) : null}
-                  avgDays={p.avg_days_in_phase != null ? t('flow.avgDays', { days: Math.round(p.avg_days_in_phase) }) : null}
-                />
-              </div>
-              )
-            })}
-          </>
+          <ReportChartWithDrillList
+            drill={drill}
+            placeholderLabel={t('flow.phase')}
+            chart={
+              <>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 12, fontSize: 10, fontWeight: 700,
+                              color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em',
+                              borderBottom: '1px solid var(--border)', paddingBottom: 8, marginBottom: 4 }}>
+                  <span style={{ width: 140, flexShrink: 0 }}>{t('flow.phase')}</span>
+                  <span style={{ flex: 1 }}>{cohortReady ? t('flow.reached') : t('flow.current')}</span>
+                  <span style={{ width: 64, flexShrink: 0, textAlign: 'right' }}>{cohortReady ? t('flow.conversion') : ''}</span>
+                  <span style={{ width: 120, flexShrink: 0 }} />
+                </div>
+                {phases.map((p, i) => {
+                  // Same gate as the KPI cards: no click/cursor/tooltip until the drill endpoint exists.
+                  const onPhaseClick = phaseKpi(p).onClick
+                  return (
+                  <div key={p.key} onClick={onPhaseClick} style={{ cursor: onPhaseClick ? 'pointer' : 'default' }}
+                       title={onPhaseClick ? t('drill.breakdown') : undefined}>
+                    <PhaseRow
+                      label={p.label}
+                      value={cohortReady ? p.reached_count : p.current_count}
+                      max={max}
+                      index={i}
+                      conversion={cohortReady && p.conversion_rate != null ? formatRatio(p.conversion_rate) : null}
+                      avgDays={p.avg_days_in_phase != null ? t('flow.avgDays', { days: Math.round(p.avg_days_in_phase) }) : null}
+                    />
+                  </div>
+                  )
+                })}
+              </>
+            }
+          />
         )}
       </div>
-
-      {/* Dynamic drill-down: explains the clicked number + Koios AI advice */}
-      <ReportDrillDrawer drill={drill} onClose={() => setDrill(null)} />
     </div>
   )
 }

@@ -33,6 +33,14 @@ vi.mock('./hooks/useShiftLookups', () => ({
   useShiftCandidateSearch: (q: string) => mockCandidates(q),
 }))
 
+// PLANNING-ORDER-CREATE-1: the modal now also reads the real order list for its
+// order picker — mocked here so this file stays focused on the modal's own
+// behaviour, same reasoning as the other lookup mocks above.
+const mockOrders = vi.fn()
+vi.mock('./hooks/usePlanningOrders', () => ({
+  usePlanningOrdersList: () => mockOrders(),
+}))
+
 const noop = () => {}
 
 beforeEach(() => {
@@ -40,6 +48,7 @@ beforeEach(() => {
   mockCustomers.mockReturnValue({ customers: [{ id: 'c1', name: 'Rivas Zorggroep' }, { id: 'c2', name: 'Yesway Zorg' }], loading: false, error: false })
   mockDepartments.mockReturnValue({ departments: [], loading: false, error: false })
   mockCandidates.mockReturnValue({ candidates: [], loading: false, error: false })
+  mockOrders.mockReturnValue({ orders: [], loading: false, error: false })
 })
 
 // The trigger's accessible name is now the static field label (native <label
@@ -122,6 +131,25 @@ describe('AddShiftModal · customer picker (real /customers, four states, now se
   })
 })
 
+describe('AddShiftModal · order picker (PLANNING-ORDER-CREATE-1, real /planning/orders, no demo rows)', () => {
+  const orderTrigger = () => screen.getByRole('button', { name: 'order.listTitle' })
+
+  it('empty: shows the no-results placeholder when there are no real orders yet', () => {
+    mockOrders.mockReturnValue({ orders: [], loading: false, error: false })
+    render(<AddShiftModal date={new Date()} onClose={noop} onAdd={noop} />)
+    expect(orderTrigger()).toHaveTextContent('common:noResults')
+  })
+
+  it('success: a freshly created order is immediately selectable', async () => {
+    const user = userEvent.setup()
+    mockOrders.mockReturnValue({ orders: [{ id: 'o1', subject: 'ICU dayshift', status: 'open', shifts_count: 0 }], loading: false, error: false })
+    render(<AddShiftModal date={new Date()} onClose={noop} onAdd={noop} />)
+    await user.click(orderTrigger())
+    await user.click(screen.getByRole('button', { name: 'ICU dayshift' }))
+    expect(orderTrigger()).toHaveTextContent('ICU dayshift')
+  })
+})
+
 describe('AddShiftModal · department picker (customer→department cascade)', () => {
   it('prompts to pick a customer first — no separate Location step in this modal', () => {
     render(<AddShiftModal date={new Date()} onClose={noop} onAdd={noop} />)
@@ -154,6 +182,10 @@ describe('AddShiftModal · candidate search (SUGGESTIES mock removed)', () => {
   })
 
   it('empty: shows the no-results state (never a fabricated favourite/suggestion list)', () => {
+    // The order picker also renders 'common:noResults' by default (no seeded
+    // orders in this file's mocks) — seed one order here so this assertion
+    // stays scoped to the candidate panel, not ambiguous across both pickers.
+    mockOrders.mockReturnValue({ orders: [{ id: 'o1', subject: 'Seeded order' }], loading: false, error: false })
     render(<AddShiftModal date={new Date()} onClose={noop} onAdd={noop} />)
     expect(screen.getByText('common:noResults')).toBeInTheDocument()
   })

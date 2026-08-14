@@ -21,7 +21,9 @@
     "applications": "Solicitudes",
     "customers": "Clientes",
     "opportunities": "Oportunidades",
-    "tasks": "Tareas"
+    "tasks": "Tareas",
+    "leads": "Leads",
+    "accountmanagers": "Gestores de cuentas"
   },
   "candidates": {
     "loading": "Cargando entrada…",
@@ -155,6 +157,11 @@
       "matched": "Emparejadas",
       "filled": "Cubierta",
       "timeToFill": "Tiempo de cobertura"
+    },
+    "noApplicants": {
+      "title": "Vacantes sin ninguna candidatura ({{count}})",
+      "subtitle": "Contado a partir de las vacantes de arriba — cero candidaturas recibidas en este período.",
+      "empty": "Todas las vacantes de este período recibieron al menos una candidatura."
     }
   },
   "matches": {
@@ -433,6 +440,44 @@
       "avgDuration": "Duración media",
       "workflowsCount": "Workflows",
       "triggersCount": "Disparadores"
+    }
+  },
+  "leads": {
+    "loading": "Cargando leads…",
+    "error": "No se pudieron cargar los leads",
+    "empty": "Sin leads en este período",
+    "window": "Leads del {{from}} al {{to}}",
+    "partialNotice": "Este informe muestra el único número que respaldan los datos actuales: el total de leads (candidatos en la fase Lead) en este período. Un desglose por fuente, propietario, sucursal o conversión requiere un endpoint de backend específico para leads que aún no existe. Esas tarjetas muestran un guion hasta entonces.",
+    "summary": {
+      "totalLeads": "Total de leads",
+      "bySource": "Leads por fuente",
+      "byOwner": "Leads por propietario",
+      "byBranch": "Leads por sucursal",
+      "converted": "Convertido a candidato",
+      "conversionRate": "Tasa de conversión",
+      "avgTimeToConvert": "Tiempo medio de conversión",
+      "staleLeads": "Leads inactivos",
+      "newThisPeriod": "Nuevos en este período"
+    }
+  },
+  "accountmanagers": {
+    "loading": "Cargando gestores de cuentas…",
+    "error": "No se pudieron cargar los gestores de cuentas",
+    "empty": "Sin clientes en este período",
+    "summary": {
+      "accountManagers": "Gestores de cuentas",
+      "customersInWindow": "Clientes en el período",
+      "avgPerManager": "Clientes medios por gestor",
+      "topManager": "Mejor gestor",
+      "openOpportunities": "Oportunidades abiertas",
+      "activeMatches": "Matches activos",
+      "revenue": "Ingresos",
+      "renewalsDue": "Renovaciones pendientes",
+      "notContacted": "Sin contactar"
+    },
+    "cols": {
+      "manager": "Gestor de cuenta",
+      "customers": "Clientes"
     }
   }
 }

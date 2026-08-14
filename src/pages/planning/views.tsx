@@ -4,17 +4,20 @@
  * renders cells via the shared ShiftPill. Extracted from PlanningPage.
  */
 import { useTranslation } from 'react-i18next'
+import type { MouseEvent } from 'react'
 import { Clock, MapPin, User } from 'lucide-react'
 import { isSameDay, WEEKDAYS_MON, formatDate } from './helpers'
 import { interactive } from '@/lib/a11y'
 import type { Shift } from '@/types/planning'
 
-interface ViewProps { current: Date; shifts: Shift[]; today: Date; onDayClick: (date: Date) => void }
+// onShiftClick (SHIFT-STAFF-1): opens the real staffing drawer for that one
+// shift — optional so every view keeps working before it's wired everywhere.
+interface ViewProps { current: Date; shifts: Shift[]; today: Date; onDayClick: (date: Date) => void; onShiftClick?: (id: Shift['id']) => void }
 
 // ── Shift pill ────────────────────────────────────────────────────────────────
-function ShiftPill({ shift, small }: { shift: Shift; small?: boolean }) {
+function ShiftPill({ shift, small, onClick }: { shift: Shift; small?: boolean; onClick?: (e: MouseEvent) => void }) {
   return (
-    <div style={{ background: shift.color + '20', borderLeft: `3px solid ${shift.color}`,
+    <div onClick={onClick} style={{ background: shift.color + '20', borderLeft: `3px solid ${shift.color}`,
       borderRadius: 4, padding: small ? '2px 5px' : '3px 7px', marginBottom: 2,
       cursor: 'pointer', overflow: 'hidden' }}>
       <div style={{ fontSize: small ? 10 : 11, fontWeight: 600, color: shift.color, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
@@ -30,7 +33,7 @@ function ShiftPill({ shift, small }: { shift: Shift; small?: boolean }) {
 }
 
 // ── Month view ────────────────────────────────────────────────────────────────
-export function MonthView({ current, shifts, today, onDayClick }: ViewProps) {
+export function MonthView({ current, shifts, today, onDayClick, onShiftClick }: ViewProps) {
   const { t } = useTranslation('planning')
   const year  = current.getFullYear()
   const month = current.getMonth()
@@ -90,7 +93,9 @@ export function MonthView({ current, shifts, today, onDayClick }: ViewProps) {
                   }}>
                     {date.getDate()}
                   </div>
-                  {dayShifts.slice(0, 3).map(s => <ShiftPill key={s.id} shift={s} small />)}
+                  {dayShifts.slice(0, 3).map(s => (
+                    <ShiftPill key={s.id} shift={s} small onClick={onShiftClick ? e => { e.stopPropagation(); onShiftClick(s.id) } : undefined} />
+                  ))}
                   {dayShifts.length > 3 && (
                     <div style={{ fontSize: 10, color: 'var(--text-muted)', paddingLeft: 2 }}>{t('more', { count: dayShifts.length - 3 })}</div>
                   )}
@@ -105,7 +110,7 @@ export function MonthView({ current, shifts, today, onDayClick }: ViewProps) {
 }
 
 // ── Week view ─────────────────────────────────────────────────────────────────
-export function WeekView({ current, shifts, today, onDayClick }: ViewProps) {
+export function WeekView({ current, shifts, today, onDayClick, onShiftClick }: ViewProps) {
   const startOfWeek = new Date(current)
   const dow = (current.getDay() + 6) % 7
   startOfWeek.setDate(current.getDate() - dow)
@@ -136,7 +141,7 @@ export function WeekView({ current, shifts, today, onDayClick }: ViewProps) {
                 onMouseEnter={e => e.currentTarget.style.background = 'var(--hover-bg)'}
                 onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
                 {shifts.filter(s => isSameDay(s.date, d)).map(s => (
-                  <ShiftPill key={s.id} shift={s} />
+                  <ShiftPill key={s.id} shift={s} onClick={onShiftClick ? e => { e.stopPropagation(); onShiftClick(s.id) } : undefined} />
                 ))}
               </div>
             </div>
@@ -148,7 +153,7 @@ export function WeekView({ current, shifts, today, onDayClick }: ViewProps) {
 }
 
 // ── Day view ──────────────────────────────────────────────────────────────────
-export function DayView({ current, shifts, today, onDayClick }: ViewProps) {
+export function DayView({ current, shifts, today, onDayClick, onShiftClick }: ViewProps) {
   const { t } = useTranslation('planning')
   const dayShifts = shifts.filter(s => isSameDay(s.date, current))
   const isToday = isSameDay(current, today)
@@ -178,9 +183,9 @@ export function DayView({ current, shifts, today, onDayClick }: ViewProps) {
         : (
           <>
             {dayShifts.map(s => (
-              <div key={s.id} style={{ display: 'flex', gap: 14, padding: '14px 16px',
+              <div key={s.id} onClick={() => onShiftClick?.(s.id)} style={{ display: 'flex', gap: 14, padding: '14px 16px',
                 border: '1px solid var(--border)', borderLeft: `4px solid ${s.color}`,
-                borderRadius: 10, marginBottom: 10, background: 'var(--surface)' }}>
+                borderRadius: 10, marginBottom: 10, background: 'var(--surface)', cursor: onShiftClick ? 'pointer' : 'default' }}>
                 <div style={{ flex: 1 }}>
                   <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--text)', marginBottom: 6 }}>{s.title}</div>
                   <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap' }}>
@@ -214,7 +219,7 @@ export function DayView({ current, shifts, today, onDayClick }: ViewProps) {
 }
 
 // ── List view ─────────────────────────────────────────────────────────────────
-export function ListView({ shifts, today, onDayClick }: Omit<ViewProps, 'current'>) {
+export function ListView({ shifts, today, onDayClick, onShiftClick }: Omit<ViewProps, 'current'>) {
   const { t } = useTranslation('planning')
   const sorted = [...shifts].sort((a, b) => a.date.getTime() - b.date.getTime())
   const grouped: Record<string, { date: Date; shifts: Shift[] }> = {}
@@ -250,9 +255,9 @@ export function ListView({ shifts, today, onDayClick }: Omit<ViewProps, 'current
               </button>
             </div>
             {ds.map(s => (
-              <div key={s.id} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '10px 14px',
+              <div key={s.id} onClick={() => onShiftClick?.(s.id)} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '10px 14px',
                 border: '1px solid var(--border)', borderLeft: `4px solid ${s.color}`,
-                borderRadius: 8, marginBottom: 6, background: 'var(--surface)' }}>
+                borderRadius: 8, marginBottom: 6, background: 'var(--surface)', cursor: onShiftClick ? 'pointer' : 'default' }}>
                 <div style={{ flex: 1 }}>
                   <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)' }}>{s.title}</div>
                   <div style={{ display: 'flex', gap: 14, marginTop: 3 }}>

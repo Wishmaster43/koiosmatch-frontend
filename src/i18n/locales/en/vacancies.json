@@ -272,6 +272,11 @@
         "send_failed": "sending failed",
         "error": "unexpected error"
       }
+    },
+    "flowSource": {
+      "fromAgent": "Inherited from the linked agent ({{agent}}). No per-contract-form default is available yet.",
+      "agentHasNoFlow": "The linked agent has no interview flow configured.",
+      "noContractType": "This vacancy has no contract form set, so the agent's own flow is used as the fallback."
     }
   },
   "generate": {

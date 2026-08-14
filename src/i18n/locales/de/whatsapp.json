@@ -23,7 +23,12 @@
     "messagesToday": "Nachrichten heute",
     "candidatesContacted": "Kontaktierte Kandidaten",
     "shiftsFilled": "Über WA besetzte Einsätze",
-    "openEscalations": "Offene Eskalationen"
+    "openEscalations": "Offene Eskalationen",
+    "sentToday": "Heute gesendet",
+    "receivedToday": "Heute empfangen",
+    "queuedToday": "In Warteschlange (heute)",
+    "failedToday": "Fehlgeschlagen (heute)",
+    "noReplyEscalations": "Eskaliert, keine Antwort"
   },
   "feed": {
     "title": "Neueste Nachrichten",

@@ -23,6 +23,10 @@ export interface Shift {
   // without pretending it knows something the flat legacy fields don't carry.
   openSpots?: number
   numberPersons?: number
+  // PLANNING-ORDER-CREATE-1: the real planning order this shift hangs off,
+  // picked from usePlanningOrdersList in AddShiftModal — optional because the
+  // legacy in-memory rows this type also describes predate the order model.
+  orderId?: string
 }
 
 // A new shift before it gets an id (what the add-modal emits).

@@ -23,7 +23,12 @@
     "messagesToday": "Messages aujourd'hui",
     "candidatesContacted": "Candidats contactés",
     "shiftsFilled": "Missions pourvues via WA",
-    "openEscalations": "Escalades ouvertes"
+    "openEscalations": "Escalades ouvertes",
+    "sentToday": "Envoyés aujourd'hui",
+    "receivedToday": "Reçus aujourd'hui",
+    "queuedToday": "En attente (aujourd'hui)",
+    "failedToday": "Échecs d'envoi (aujourd'hui)",
+    "noReplyEscalations": "Escaladé, sans réponse"
   },
   "feed": {
     "title": "Derniers messages",

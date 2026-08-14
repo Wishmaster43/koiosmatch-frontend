@@ -327,6 +327,22 @@ describe('VacanciesReport (RAPPORTEN-SUITE-1 portie 4, additive on C-34)', () =>
     expect(lastDrillParams()).toEqual({ status: 'open', period: 'month' })
   })
 
+  // PDF notification signal: vacancies with zero applications get their own honest
+  // section, counted from the report's own complete row set (no fabricated number).
+  it('lists vacancies with zero applications in their own section, and omits it when none exist', async () => {
+    mockUseVacanciesReport.mockReturnValue({ data, loading: false, error: false })
+    renderReport()
+    // Fixture's only row has 4 applications — no zero-applicant section.
+    expect(screen.queryByText('Vacatures zonder sollicitaties (1)')).not.toBeInTheDocument()
+
+    const zeroRow = { ...row, key: 'v2', label: 'Doktersassistent', applications: 0, matched: 0 }
+    mockUseVacanciesReport.mockReturnValue({ data: { ...data, vacancies: [row, zeroRow] }, loading: false, error: false })
+    renderReport()
+    expect(screen.getByText('Vacatures zonder sollicitaties (1)')).toBeInTheDocument()
+    // Appears once in the main table and once in the zero-applicants section.
+    expect(screen.getAllByText('Doktersassistent')).toHaveLength(2)
+  })
+
   // Integration proof (WCAG 2.2 AA audit, §6): the "Vacature" column stays wired with
   // `sortable: true` into the shared DataTable — keyboard-operable, aria-sort reflected.
   it('sorts the Vacature column via a keyboard Enter press and reflects it via aria-sort', async () => {

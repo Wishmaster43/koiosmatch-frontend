@@ -21,7 +21,9 @@
     "applications": "Candidatures",
     "customers": "Clients",
     "opportunities": "Opportunités",
-    "tasks": "Tâches"
+    "tasks": "Tâches",
+    "leads": "Leads",
+    "accountmanagers": "Comptes clients"
   },
   "candidates": {
     "loading": "Chargement du flux entrant…",
@@ -155,6 +157,11 @@
       "matched": "Matchés",
       "filled": "Pourvu",
       "timeToFill": "Délai de pourvoi"
+    },
+    "noApplicants": {
+      "title": "Postes sans aucune candidature ({{count}})",
+      "subtitle": "Compté à partir des postes ci-dessus — zéro candidature reçue sur cette période.",
+      "empty": "Chaque poste de cette période a reçu au moins une candidature."
     }
   },
   "matches": {
@@ -433,6 +440,44 @@
       "avgDuration": "Durée moyenne",
       "workflowsCount": "Workflows",
       "triggersCount": "Déclencheurs"
+    }
+  },
+  "leads": {
+    "loading": "Chargement des leads…",
+    "error": "Impossible de charger les leads",
+    "empty": "Aucun lead sur cette période",
+    "window": "Leads du {{from}} au {{to}}",
+    "partialNotice": "Ce rapport affiche le seul chiffre que les données actuelles permettent : le nombre total de leads (candidats en phase Lead) sur cette période. Une répartition par source, propriétaire, site ou conversion nécessite un endpoint backend dédié aux leads qui n'existe pas encore. Ces cartes affichent un tiret en attendant.",
+    "summary": {
+      "totalLeads": "Total des leads",
+      "bySource": "Leads par source",
+      "byOwner": "Leads par propriétaire",
+      "byBranch": "Leads par site",
+      "converted": "Converti en candidat",
+      "conversionRate": "Taux de conversion",
+      "avgTimeToConvert": "Délai moyen de conversion",
+      "staleLeads": "Leads inactifs",
+      "newThisPeriod": "Nouveaux sur la période"
+    }
+  },
+  "accountmanagers": {
+    "loading": "Chargement des comptes clients…",
+    "error": "Impossible de charger les comptes clients",
+    "empty": "Aucun client sur cette période",
+    "summary": {
+      "accountManagers": "Comptes clients",
+      "customersInWindow": "Clients sur la période",
+      "avgPerManager": "Clients moyens par gestionnaire",
+      "topManager": "Meilleur gestionnaire",
+      "openOpportunities": "Opportunités ouvertes",
+      "activeMatches": "Matches actifs",
+      "revenue": "Chiffre d'affaires",
+      "renewalsDue": "Renouvellements à faire",
+      "notContacted": "Non contacté"
+    },
+    "cols": {
+      "manager": "Gestionnaire de compte",
+      "customers": "Clients"
     }
   }
 }

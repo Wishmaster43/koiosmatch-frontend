@@ -13,7 +13,7 @@ import { formatRatio } from '@/lib/formatters'
 import { useTranslation } from 'react-i18next'
 import ReportKpiBand from './ReportKpiBand'
 import ReportStateBlock from './ReportStateBlock'
-import { reportCardStyle as card } from './ReportSectionCard'
+import { reportCardStyle as card, reportSectionHeadStyle } from './ReportSectionCard'
 import type { KpiSpec } from '@/components/insights/InsightsRow'
 import DataTable from '@/components/ui/DataTable'
 import type { Column } from '@/components/ui/DataTable'
@@ -96,6 +96,15 @@ export default function VacanciesReport({ period, filters = EMPTY_REPORT_FILTERS
   // Distinct real customers among this window's vacancies (from the rows themselves,
   // not the top-10-capped axis, so it is never truncated by the 'others' bucket).
   const customersCount = new Set(rows.map(v => v.customer?.id).filter(Boolean)).size
+
+  // PDF signal "vacancies without any applications": `rows` is the report's own
+  // complete (non-paginated, non-top-N) per-vacancy list for this window/filter
+  // set — so counting `applications === 0` here is an honest, exact aggregate, not
+  // a derived guess. This is a DIFFERENT, narrower question than the PDF's "online
+  // X days with no candidates" signal (that one needs a per-vacancy days-open field
+  // and a configurable threshold the backend does not expose yet — not built here,
+  // see the backend ask in the handoff notes).
+  const zeroApplicantRows = rows.filter(v => v.applications === 0)
 
   const kpis: KpiSpec[] = [
     { key: 'total',  label: t('vacancies.summary.total'),  value: s?.total ?? 0,
@@ -201,6 +210,30 @@ export default function VacanciesReport({ period, filters = EMPTY_REPORT_FILTERS
               emptyText={t('vacancies.empty')}
             />
           </div>
+
+          {/* PDF notification signal: vacancies with zero applications this window.
+              Real rows, not a fabricated count — see zeroApplicantRows above. Only
+              rendered when it has something to show (an all-zero-row empty state
+              here would just duplicate the table's own empty text above it). */}
+          {zeroApplicantRows.length > 0 && (
+            <div style={{ ...card, overflow: 'hidden', marginTop: 16 }}>
+              <div style={{ padding: '16px 20px 0' }}>
+                <h3 style={reportSectionHeadStyle}>
+                  {t('vacancies.noApplicants.title', { count: zeroApplicantRows.length })}
+                </h3>
+                <p style={{ fontSize: 12, color: 'var(--text-muted)', margin: '4px 0 12px' }}>
+                  {t('vacancies.noApplicants.subtitle')}
+                </p>
+              </div>
+              <DataTable
+                columns={columns.filter(c => c.key !== 'applications' && c.key !== 'matched' && c.key !== 'filled')}
+                rows={zeroApplicantRows}
+                getRowId={v => v.key}
+                onRowClick={gateDrillClick('vacancies', openVacancyRow)}
+                emptyText={t('vacancies.noApplicants.empty')}
+              />
+            </div>
+          )}
         </>
       )}
 

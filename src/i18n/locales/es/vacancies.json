@@ -272,6 +272,11 @@
         "send_failed": "envío fallido",
         "error": "error inesperado"
       }
+    },
+    "flowSource": {
+      "fromAgent": "Heredado del agente vinculado ({{agent}}). Aún no hay un valor predeterminado por tipo de contrato.",
+      "agentHasNoFlow": "El agente vinculado no tiene una entrevista configurada.",
+      "noContractType": "Esta vacante no tiene un tipo de contrato establecido, por lo que se usa el flujo propio del agente como respaldo."
     }
   },
   "generate": {

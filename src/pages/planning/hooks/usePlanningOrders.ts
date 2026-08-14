@@ -7,6 +7,9 @@
  * covers, and the 2xx response shape for this one wasn't in it):
  *   GET    /planning/orders            -> paginated PlanningOrderResource[]
  *   POST   /planning/orders            -> 201 + PlanningOrderResource
+ *   PATCH  /planning/orders/{order}    -> 200 + PlanningOrderResource
+ *   DELETE /planning/orders/{order}    -> 204, or 409 while it still has non-cancelled
+ *          shifts (PlanningOrderController::destroy aborts with a real reason string)
  * An Order is the root of the order -> shift -> schedule model: POST /planning/shifts
  * REQUIRES planning_order_id, so a shift/candidate assignment can never exist before
  * an order does. This hook is the create-order step that was missing entirely.
@@ -74,6 +77,29 @@ export function useCreatePlanningOrder() {
   const queryClient = useQueryClient()
   return useMutation({
     mutationFn: async (body: PlanningOrderInput) => unwrap<PlanningOrderRow>(await api.post('/planning/orders', body)),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ORDERS_KEY }),
+  })
+}
+
+/** PATCH /planning/orders/{order} — edits the order, then invalidates the shared list. */
+export function useUpdatePlanningOrder() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async ({ id, body }: { id: Id; body: PlanningOrderInput }) =>
+      unwrap<PlanningOrderRow>(await api.patch(`/planning/orders/${id}`, body)),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ORDERS_KEY }),
+  })
+}
+
+/**
+ * DELETE /planning/orders/{order} — the server 409s (with a real reason) while the
+ * order still has non-cancelled shifts hanging off it; the caller surfaces that
+ * reason via extractApiError rather than a generic failure (§3, honest errors).
+ */
+export function useDeletePlanningOrder() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async (id: Id) => { await api.delete(`/planning/orders/${id}`) },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ORDERS_KEY }),
   })
 }

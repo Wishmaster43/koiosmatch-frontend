@@ -37,7 +37,12 @@
     "messagesToday": "Berichten vandaag",
     "candidatesContacted": "Kandidaten benaderd",
     "shiftsFilled": "Diensten gevuld via WA",
-    "openEscalations": "Open escalaties"
+    "openEscalations": "Open escalaties",
+    "sentToday": "Verzonden vandaag",
+    "receivedToday": "Ontvangen vandaag",
+    "queuedToday": "In wachtrij (vandaag)",
+    "failedToday": "Mislukt verzonden (vandaag)",
+    "noReplyEscalations": "Geëscaleerd, geen reactie"
   },
   "feed": {
     "title": "Laatste berichten",

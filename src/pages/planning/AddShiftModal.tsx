@@ -35,10 +35,19 @@
  * `/planning/assignments`) but its create bodies and success responses aren't in
  * the generated OpenAPI spec, and this modal's flat order/shift/candidate form
  * doesn't map onto that order→shift→schedule model without new product
- * decisions (e.g. no order-creation step exists here). Per §3 (no fake
- * affordances), the Save button below is disabled with an honest, translated
- * notice instead of inventing that integration — `handleSave` itself is kept
- * so it reactivates for free the moment a real save path lands.
+ * decisions. Per §3 (no fake affordances), the Save button below stays disabled
+ * with an honest, translated notice instead of inventing that integration —
+ * `handleSave` itself is kept so it reactivates for free the moment a real save
+ * path lands.
+ *
+ * PLANNING-ORDER-CREATE-1 (2026-08-14): the ONE previously missing piece — an
+ * order to hang a shift on — is now real (OrdersPanel + AddOrderModal, POST
+ * /planning/orders). This modal's "sectionOrder" card now includes a real,
+ * searchable order picker sourced from usePlanningOrdersList (no demo data),
+ * so a freshly created order is immediately selectable here. The picker is
+ * local UI state, same as every other field in this form, until POST
+ * /planning/shifts itself gets wired (still gated by the notice above — the
+ * shift body/response shape work is separate from the order-creation gap).
  */
 import { useState } from 'react'
 import type { CSSProperties } from 'react'
@@ -48,6 +57,7 @@ import { formatDate } from './helpers'
 import { useFunctions } from '@/lib/useFunctions'
 import CreatableSelect from '@/components/ui/CreatableSelect'
 import { useShiftCustomers, useShiftDepartments, useShiftCandidateSearch } from './hooks/useShiftLookups'
+import { usePlanningOrdersList } from './hooks/usePlanningOrders'
 import type { ShiftCandidateOption } from './hooks/useShiftLookups'
 import { Field, Avatar, CandidateRow, colorFor, getInitials } from './AddShiftModalFields'
 import { BTN_H } from '@/config/buttonMetrics'
@@ -69,6 +79,7 @@ export default function AddShiftModal({ date, onClose, onAdd }: { date: Date; on
   const [start,       setStart]       = useState('07:00')
   const [end,         setEnd]         = useState('15:00')
   const [jobType,     setJobType]     = useState('')
+  const [orderId,     setOrderId]     = useState('')
   const [customerId,  setCustomerId]  = useState('')
   const [departmentId,setDepartmentId]= useState('')
   const [address,     setAddress]     = useState('')
@@ -88,6 +99,9 @@ export default function AddShiftModal({ date, onClose, onAdd }: { date: Date; on
   const { customers, loading: customersLoading, error: customersError } = useShiftCustomers()
   const { departments, loading: departmentsLoading, error: departmentsError } = useShiftDepartments(customerId)
   const { functions } = useFunctions()
+  // PLANNING-ORDER-CREATE-1: the real order list, so a just-created order is
+  // immediately pickable here — no demo/hardcoded options.
+  const { orders, loading: ordersLoading, error: ordersError } = usePlanningOrdersList()
   const { candidates, loading: candidatesLoading, error: candidatesError } = useShiftCandidateSearch(searchQuery)
 
   const customerName = customers.find(c => String(c.id) === customerId)?.name ?? ''
@@ -97,7 +111,10 @@ export default function AddShiftModal({ date, onClose, onAdd }: { date: Date; on
   const handleCustomerChange = (id: string) => { setCustomerId(id); setDepartmentId('') }
 
   const handleSave = () => {
-    onAdd({ title, location: customerName, candidate: candidate?.name || '', start, end, color, date })
+    // orderId travels with the payload from day one, even while onAdd itself is
+    // still the local in-memory sink — so wiring the real POST later is a body
+    // change, not a hunt for where the picked order went.
+    onAdd({ title, location: customerName, candidate: candidate?.name || '', start, end, color, date, orderId })
     onClose()
   }
 
@@ -155,6 +172,12 @@ export default function AddShiftModal({ date, onClose, onAdd }: { date: Date; on
               <div>
                 <div style={cardHead}>{t('sectionOrder')}</div>
                 <div style={cardBox}>
+                  <Field label={t('order.listTitle')}>
+                    <CreatableSelect value={orderId || null} onChange={setOrderId} allowCreate={false}
+                      clearable clearLabel={t('order.noOrder')}
+                      placeholder={ordersLoading ? t('common:loading') : ordersError ? t('common:errorGeneric') : orders.length === 0 ? t('common:noResults') : t('common:select')}
+                      options={orders.map(o => ({ value: String(o.id), label: o.subject || o.function || o.reference || o.client || t('order.listTitle') }))} />
+                  </Field>
                   <Field label={t('fCustomer')}>
                     <CreatableSelect value={customerId || null} onChange={handleCustomerChange} allowCreate={false}
                       placeholder={customersLoading ? t('common:loading')

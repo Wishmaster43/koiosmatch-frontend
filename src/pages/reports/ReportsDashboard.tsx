@@ -61,9 +61,11 @@ export default function ReportsDashboard({ period }: { period: ReportPeriod }) {
   const kpis: KpiSpec[] = rows.map(r => ({
     key: r.key,
     label: r.label,
-    // Loading/error render as an honest placeholder — never a fabricated 0
-    // while the underlying request is still in flight or failed.
-    value: r.loading ? '…' : r.error ? '—' : (r.total ?? 0),
+    // Loading/error render as an honest placeholder, and a genuinely missing
+    // total (hook resolved but the field was absent) renders the same house
+    // dash — never a fabricated 0 standing in for a number the server didn't
+    // send (CLAUDE.md: "never a padded zero").
+    value: r.loading ? '…' : (r.error || r.total == null) ? '—' : r.total,
     onClick: () => navigate(`reports.${r.page}`),
   }))
 

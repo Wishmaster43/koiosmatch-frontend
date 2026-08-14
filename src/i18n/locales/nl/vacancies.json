@@ -272,6 +272,11 @@
         "send_failed": "verzenden mislukt",
         "error": "onbekende fout"
       }
+    },
+    "flowSource": {
+      "fromAgent": "Overgenomen van de gekoppelde agent ({{agent}}). Er is nog geen standaard per contractvorm beschikbaar.",
+      "agentHasNoFlow": "De gekoppelde agent heeft geen interview ingesteld.",
+      "noContractType": "Deze vacature heeft geen contractvorm ingesteld, dus de eigen flow van de agent wordt als terugval gebruikt."
     }
   },
   "generate": {

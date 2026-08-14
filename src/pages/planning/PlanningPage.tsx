@@ -6,6 +6,7 @@ import { monthName, formatDate, getViewRange } from './helpers'
 import { usePlanningBoard } from './hooks/usePlanningBoard'
 import { useDateFormat } from '@/lib/datetime'
 import AddShiftModal from './AddShiftModal'
+import ShiftStaffingDrawer from './ShiftStaffingDrawer'
 import { MonthView, WeekView, DayView, ListView } from './views'
 import type { Shift } from '@/types/planning'
 import type { PlanningBoardShift } from './hooks/usePlanningBoard'
@@ -50,6 +51,9 @@ export default function PlanningPage() {
   const [view,       setView]       = useState('month')
   const [current,    setCurrent]    = useState(new Date())
   const [modal,      setModal]      = useState<Date | null>(null) // date to add shift for
+  // SHIFT-STAFF-1: the shift id whose staffing drawer is open (assign/unassign/
+  // cancel/checkout on the real API) — separate from `modal` (still-gated add).
+  const [staffingId, setStaffingId] = useState<Shift['id'] | null>(null)
   const todayDate = useMemo(() => new Date(), [])
 
   // Real shifts for whatever window the active view can show (§9: every
@@ -201,10 +205,10 @@ export default function PlanningPage() {
           </div>
         ) : (
           <>
-            {view === 'month' && <MonthView current={current} shifts={filteredShifts} today={todayDate} onDayClick={handleDayClick} />}
-            {view === 'week'  && <WeekView  current={current} shifts={filteredShifts} today={todayDate} onDayClick={handleDayClick} />}
-            {view === 'day'   && <DayView   current={current} shifts={filteredShifts} today={todayDate} onDayClick={handleDayClick} />}
-            {view === 'list'  && <ListView  shifts={filteredShifts} today={todayDate} onDayClick={handleDayClick} />}
+            {view === 'month' && <MonthView current={current} shifts={filteredShifts} today={todayDate} onDayClick={handleDayClick} onShiftClick={setStaffingId} />}
+            {view === 'week'  && <WeekView  current={current} shifts={filteredShifts} today={todayDate} onDayClick={handleDayClick} onShiftClick={setStaffingId} />}
+            {view === 'day'   && <DayView   current={current} shifts={filteredShifts} today={todayDate} onDayClick={handleDayClick} onShiftClick={setStaffingId} />}
+            {view === 'list'  && <ListView  shifts={filteredShifts} today={todayDate} onDayClick={handleDayClick} onShiftClick={setStaffingId} />}
           </>
         )}
       </div>
@@ -217,6 +221,14 @@ export default function PlanningPage() {
           onAdd={handleAdd}
         />
       )}
+
+      {/* SHIFT-STAFF-1: real staffing drawer for the clicked shift — looked up
+          from the raw board rows (boardShifts), not the flattened calendar
+          `Shift` shape, since staffing needs the full assignee/schedule ids. */}
+      {staffingId != null && (() => {
+        const raw = boardShifts.find(s => s.id === staffingId)
+        return raw ? <ShiftStaffingDrawer shift={raw} onClose={() => setStaffingId(null)} /> : null
+      })()}
     </div>
   )
 }

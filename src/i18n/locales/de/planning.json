@@ -54,6 +54,7 @@
   "order": {
     "modal": {
       "title": "Neuer Auftrag",
+      "editTitle": "Auftrag bearbeiten",
       "subtitle": "Der erste Schritt der Planung: Auftrag, dann Dienst, dann Einsatz.",
       "create": "Auftrag anlegen"
     },
@@ -67,6 +68,7 @@
     "fStatus": "Status",
     "fCostCenter": "Kostenstelle",
     "fDescription": "Beschreibung",
+    "noOrder": "Kein Auftrag",
     "noCustomer": "Kein Kunde",
     "noLocation": "Kein Standort",
     "noDepartment": "Keine Abteilung",
@@ -84,6 +86,32 @@
     "shiftsCount_other": "{{count}} Dienste",
     "empty": "Noch keine Aufträge.",
     "emptyHint": "Unten klicken, um den ersten anzulegen.",
-    "errorList": "Die Auftragsliste konnte nicht geladen werden."
+    "errorList": "Die Auftragsliste konnte nicht geladen werden.",
+    "deleteError": "Der Auftrag konnte nicht gelöscht werden.",
+    "deleteConfirmTitle": "Auftrag löschen",
+    "deleteConfirmBody": "Möchten Sie diesen Auftrag wirklich löschen? Dies kann nicht rückgängig gemacht werden."
+  },
+  "staffing": {
+    "title": "Einsatz besetzen",
+    "assigned": "Eingeplant",
+    "noneAssigned": "Noch niemand eingeplant.",
+    "eligible": "Geeignete Kandidaten",
+    "noneEligible": "Keine geeigneten Kandidaten für diesen Einsatz.",
+    "assign": "Einplanen",
+    "unassign": "Ausplanen",
+    "cancel": "Stornieren",
+    "checkout": "Auschecken",
+    "favourite": "Favorit",
+    "cancelReasonPlaceholder": "Stornierungsgrund",
+    "confirmCancel": "Stornierung bestätigen",
+    "confirmCheckout": "Auschecken bestätigen",
+    "actualStart": "Tatsächlicher Beginn",
+    "actualEnd": "Tatsächliches Ende",
+    "actualBreak": "Pause (Min.)",
+    "checkoutSaved": "Ausgecheckt — {{hours}} Stunden",
+    "assignError": "Dieser Kandidat konnte nicht eingeplant werden.",
+    "unassignError": "Dieser Kandidat konnte nicht ausgeplant werden.",
+    "cancelError": "Diese Einplanung konnte nicht storniert werden.",
+    "checkoutError": "Auschecken konnte nicht gespeichert werden."
   }
 }

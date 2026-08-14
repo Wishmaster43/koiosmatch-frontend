@@ -54,6 +54,7 @@
   "order": {
     "modal": {
       "title": "Nieuwe opdracht",
+      "editTitle": "Opdracht bewerken",
       "subtitle": "De eerste stap van de planning: opdracht, dan dienst, dan inzet.",
       "create": "Opdracht aanmaken"
     },
@@ -67,6 +68,7 @@
     "fStatus": "Status",
     "fCostCenter": "Kostenplaats",
     "fDescription": "Omschrijving",
+    "noOrder": "Geen opdracht",
     "noCustomer": "Geen klant",
     "noLocation": "Geen vestiging",
     "noDepartment": "Geen afdeling",
@@ -84,6 +86,32 @@
     "shiftsCount_other": "{{count}} diensten",
     "empty": "Nog geen opdrachten.",
     "emptyHint": "Klik hieronder om de eerste aan te maken.",
-    "errorList": "De opdrachtenlijst kon niet worden geladen."
+    "errorList": "De opdrachtenlijst kon niet worden geladen.",
+    "deleteError": "De opdracht kon niet worden verwijderd.",
+    "deleteConfirmTitle": "Opdracht verwijderen",
+    "deleteConfirmBody": "Weet je zeker dat je deze opdracht wilt verwijderen? Dit kan niet ongedaan worden gemaakt."
+  },
+  "staffing": {
+    "title": "Dienst bemensen",
+    "assigned": "Ingepland",
+    "noneAssigned": "Nog niemand ingepland.",
+    "eligible": "Geschikte kandidaten",
+    "noneEligible": "Geen geschikte kandidaten voor deze dienst.",
+    "assign": "Inplannen",
+    "unassign": "Uitplannen",
+    "cancel": "Annuleren",
+    "checkout": "Uitchecken",
+    "favourite": "Favoriet",
+    "cancelReasonPlaceholder": "Reden van annulering",
+    "confirmCancel": "Annulering bevestigen",
+    "confirmCheckout": "Uitchecken bevestigen",
+    "actualStart": "Werkelijke starttijd",
+    "actualEnd": "Werkelijke eindtijd",
+    "actualBreak": "Pauze (min)",
+    "checkoutSaved": "Uitgecheckt — {{hours}} uur",
+    "assignError": "Kon deze kandidaat niet inplannen.",
+    "unassignError": "Kon deze kandidaat niet uitplannen.",
+    "cancelError": "Kon deze inplanning niet annuleren.",
+    "checkoutError": "Kon het uitchecken niet opslaan."
   }
 }

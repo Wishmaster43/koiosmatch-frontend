@@ -54,6 +54,7 @@
   "order": {
     "modal": {
       "title": "Nuevo pedido",
+      "editTitle": "Editar pedido",
       "subtitle": "El primer paso de la planificación: pedido, luego turno, luego asignación.",
       "create": "Crear pedido"
     },
@@ -67,6 +68,7 @@
     "fStatus": "Estado",
     "fCostCenter": "Centro de coste",
     "fDescription": "Descripción",
+    "noOrder": "Sin pedido",
     "noCustomer": "Sin cliente",
     "noLocation": "Sin ubicación",
     "noDepartment": "Sin departamento",
@@ -84,6 +86,32 @@
     "shiftsCount_other": "{{count}} turnos",
     "empty": "Todavía no hay pedidos.",
     "emptyHint": "Haz clic abajo para crear el primero.",
-    "errorList": "No se pudo cargar la lista de pedidos."
+    "errorList": "No se pudo cargar la lista de pedidos.",
+    "deleteError": "No se pudo eliminar el pedido.",
+    "deleteConfirmTitle": "Eliminar pedido",
+    "deleteConfirmBody": "¿Seguro que quieres eliminar este pedido? Esta acción no se puede deshacer."
+  },
+  "staffing": {
+    "title": "Cubrir turno",
+    "assigned": "Asignados",
+    "noneAssigned": "Nadie asignado todavía.",
+    "eligible": "Candidatos elegibles",
+    "noneEligible": "No hay candidatos elegibles para este turno.",
+    "assign": "Asignar",
+    "unassign": "Desasignar",
+    "cancel": "Cancelar",
+    "checkout": "Registrar salida",
+    "favourite": "Favorito",
+    "cancelReasonPlaceholder": "Motivo de cancelación",
+    "confirmCancel": "Confirmar cancelación",
+    "confirmCheckout": "Confirmar salida",
+    "actualStart": "Inicio real",
+    "actualEnd": "Fin real",
+    "actualBreak": "Descanso (min)",
+    "checkoutSaved": "Salida registrada — {{hours}} horas",
+    "assignError": "No se pudo asignar a este candidato.",
+    "unassignError": "No se pudo desasignar a este candidato.",
+    "cancelError": "No se pudo cancelar esta asignación.",
+    "checkoutError": "No se pudo guardar el registro de salida."
   }
 }

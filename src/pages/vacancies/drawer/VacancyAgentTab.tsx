@@ -188,14 +188,32 @@ export default function VacancyAgentTab({ vacancy: v, onUpdate }: { vacancy: Vac
         </div>
       </div>
 
-      {/* Interview flow the linked agent carries — read-only, shared component. */}
+      {/* Interview flow the linked agent carries — read-only, shared component.
+          PDF-VACATURES point 21 (14-08): the eventual model is contract-form
+          default → vacancy override → agent fallback, but only the agent
+          fallback is real today (no vacancy-level flow field in the UI, no
+          contract-form-to-flow mapping on the backend yet — see notes). This
+          note states the CURRENT resolution honestly so a recruiter is never
+          guessing which interview will run. */}
       <div>
         <div style={groupTitle}>{t('aiagent.flowTitle')}</div>
         {currentId ? (
           loading ? (
             <div style={{ ...blockStyle, padding: '10px 12px', fontSize: 12, color: 'var(--text-muted)' }}>{t('common:loading')}</div>
           ) : (
-            <InterviewFlowSection flow={linkedAgent?.interview_flow ?? null} />
+            <>
+              <InterviewFlowSection flow={linkedAgent?.interview_flow ?? null} />
+              <p style={{ margin: '6px 0 0', fontSize: 11, color: 'var(--text-muted)' }}>
+                {linkedAgent?.interview_flow
+                  ? t('aiagent.flowSource.fromAgent', { agent: linkedAgent?.name ?? v.aiAgentName ?? '' })
+                  : t('aiagent.flowSource.agentHasNoFlow')}
+              </p>
+              {v.contractTypes.length === 0 && (
+                <p style={{ margin: '2px 0 0', fontSize: 11, color: 'var(--text-muted)' }}>
+                  {t('aiagent.flowSource.noContractType')}
+                </p>
+              )}
+            </>
           )
         ) : (
           <div style={{ ...blockStyle, padding: '10px 12px', fontSize: 12, color: 'var(--text-muted)' }}>

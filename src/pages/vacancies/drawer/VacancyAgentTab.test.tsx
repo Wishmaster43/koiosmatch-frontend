@@ -120,6 +120,12 @@ describe('VacancyAgentTab · picker → PATCH ai_agent_id + read-only interview 
 
     // Once linked, the agent's own interview flow renders read-only.
     await waitFor(() => expect(screen.getByText('Zorgintake (9 stappen)')).toBeInTheDocument())
+
+    // PDF-VACATURES point 21 (14-08): the flow source is stated honestly (agent
+    // fallback only — no contract-form default exists yet), and since this
+    // vacancy carries no contract form, the fallback note shows too.
+    expect(screen.getByText('Overgenomen van de gekoppelde agent (Kelly). Er is nog geen standaard per contractvorm beschikbaar.')).toBeInTheDocument()
+    expect(screen.getByText("Deze vacature heeft geen contractvorm ingesteld, dus de eigen flow van de agent wordt als terugval gebruikt.")).toBeInTheDocument()
   })
 
   it('unlinking (clearing to none) sends ai_agent_id: null and the flow hint returns', async () => {

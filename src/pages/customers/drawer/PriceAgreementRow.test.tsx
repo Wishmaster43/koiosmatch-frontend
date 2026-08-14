@@ -3,7 +3,7 @@
  * row between the rate and the validity window (validity trails as a muted
  * suffix) instead of stacking them on two separate lines.
  */
-import { describe, it, expect, vi } from 'vitest'
+import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import PriceAgreementRow from './PriceAgreementRow'
 import type { PriceAgreement } from '../hooks/usePriceAgreements'
@@ -13,6 +13,14 @@ import type { PriceAgreement } from '../hooks/usePriceAgreements'
 // raw t() keys instead of translated Dutch.
 vi.mock('@/lib/datetime', () => ({ useDateFormat: () => ({ formatDate: (v: string) => v }) }))
 vi.mock('@/lib/useCao', () => ({ useCao: () => ({ colorOf: () => '#6B7280', types: [] }) }))
+
+// MATCH-FIN-GATE-1: purchase rate + margin are gated on matches.financial.view
+// (mirrors BankAccountCard's FINANCIAL-GATE-1 pattern). Every existing test in
+// this file renders as a viewer who HAS the permission; the gate itself has its
+// own describe block below.
+const mockHasPermission = vi.fn()
+vi.mock('@/context/AuthContext', () => ({ useAuth: () => ({ hasPermission: mockHasPermission }) }))
+beforeEach(() => { mockHasPermission.mockImplementation(() => true) })
 
 const agreement: PriceAgreement = {
   id: 'pa-1', functionTitle: null, cao: null, scale: null, step: null,
@@ -28,5 +36,28 @@ describe('PriceAgreementRow · K11c compact read view', () => {
     // span — both share the SAME row ancestor (the K11c merge), one level up
     // from the rate's own wrapping span.
     expect(rateEl.parentElement?.parentElement).toBe(validityEl.parentElement)
+  })
+})
+
+// MATCH-FIN-GATE-1 (Danny 14-08, "de marge op een plaatsing, autorisatie").
+describe('PriceAgreementRow · financial permission gate', () => {
+  it('shows purchase rate + margin, and the sale rate, with the permission', () => {
+    render(<PriceAgreementRow agreement={agreement} onSave={vi.fn()} onDelete={vi.fn()} />)
+    expect(screen.getByText('€ 20.00')).toBeInTheDocument()
+    expect(screen.getByText('€ 28.00')).toBeInTheDocument()
+    expect(screen.getByText(/priceAgreements\.margin.*8\.00/)).toBeInTheDocument()
+  })
+
+  it('hides purchase rate + margin without the permission, but keeps the sale rate', () => {
+    mockHasPermission.mockImplementation(() => false)
+    render(<PriceAgreementRow agreement={agreement} onSave={vi.fn()} onDelete={vi.fn()} />)
+    expect(screen.queryByText('€ 20.00')).toBeNull()
+    expect(screen.queryByText(/priceAgreements\.margin/)).toBeNull()
+    expect(screen.getByText('€ 28.00')).toBeInTheDocument()
+  })
+
+  it('asks for exactly matches.financial.view, not a neighbouring permission', () => {
+    render(<PriceAgreementRow agreement={agreement} onSave={vi.fn()} onDelete={vi.fn()} />)
+    expect(mockHasPermission).toHaveBeenCalledWith('matches.financial.view')
   })
 })

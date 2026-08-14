@@ -8,10 +8,16 @@
  */
 export const REPORT_IDS = [
   'candidates',
+  // REPORTS-LEADS-1 (2026-08-14): leads-only slice of the candidate inflow,
+  // placed right after candidates to mirror the order Danny asked for.
+  'leads',
   'applications',
   'customers',
   'flow',
   'recruiters',
+  // REPORTS-ACCTMGR-1 (2026-08-14): per-account-manager customer ownership,
+  // placed right after recruiters to mirror the order Danny asked for.
+  'accountmanagers',
   'vacancies',
   'opportunities',
   'tasks',

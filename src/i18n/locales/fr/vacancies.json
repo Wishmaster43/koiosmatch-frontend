@@ -272,6 +272,11 @@
         "send_failed": "échec de l'envoi",
         "error": "erreur inattendue"
       }
+    },
+    "flowSource": {
+      "fromAgent": "Hérité de l'agent lié ({{agent}}). Aucune valeur par défaut par type de contrat n'est encore disponible.",
+      "agentHasNoFlow": "L'agent lié n'a pas d'entretien configuré.",
+      "noContractType": "Cette offre n'a pas de type de contrat défini, le flux propre de l'agent est donc utilisé comme solution de repli."
     }
   },
   "generate": {

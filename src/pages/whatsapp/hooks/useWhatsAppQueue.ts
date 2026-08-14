@@ -17,6 +17,12 @@ const POLL_MS = 5000
 export const isBatchActive = (b: WaQueueBatch): boolean =>
   !b.finished_at && String(b.status ?? '').toLowerCase() !== 'finished'
 
+// Sum one numeric field (queued/sent/skipped/failed) across today's batches — the
+// WhatsApp page's KPI band uses this for "Queued today" / "Failed sends today"
+// (WA-KPI9-1), a real aggregate of the same rows QueueTab renders, never invented.
+export const sumBatches = (batches: WaQueueBatch[], field: 'queued' | 'sent' | 'skipped' | 'failed'): number =>
+  batches.reduce((sum, b) => sum + (b[field] ?? 0), 0)
+
 export function useWhatsAppQueue() {
   const [batches,      setBatches]      = useState<WaQueueBatch[]>([])
   const [loading,      setLoading]      = useState(true)

@@ -21,7 +21,9 @@
     "applications": "Sollicitaties",
     "customers": "Klanten",
     "opportunities": "Kansen",
-    "tasks": "Taken"
+    "tasks": "Taken",
+    "leads": "Leads",
+    "accountmanagers": "Accountmanagers"
   },
   "candidates": {
     "loading": "Instroom laden…",
@@ -155,6 +157,11 @@
       "matched": "Matched",
       "filled": "Vervuld",
       "timeToFill": "Doorlooptijd"
+    },
+    "noApplicants": {
+      "title": "Vacatures zonder sollicitaties ({{count}})",
+      "subtitle": "Geteld uit de vacatures hierboven — nul sollicitaties ontvangen in deze periode.",
+      "empty": "Elke vacature in deze periode ontving minstens één sollicitatie."
     }
   },
   "matches": {
@@ -433,6 +440,44 @@
       "avgDuration": "Gem. duur",
       "workflowsCount": "Aantal workflows",
       "triggersCount": "Aantal triggers"
+    }
+  },
+  "leads": {
+    "loading": "Leads laden…",
+    "error": "Kon de leads niet laden",
+    "empty": "Geen leads in deze periode",
+    "window": "Leads {{from}} tot {{to}}",
+    "partialNotice": "Dit rapport toont het enige getal dat de huidige data ondersteunt: totaal aantal leads (kandidaten in de fase Lead) in deze periode. Een uitsplitsing per bron, eigenaar, vestiging of conversie vraagt een lead-specifiek backend-endpoint dat nog niet bestaat. Die kaarten tonen een streepje totdat dat er is.",
+    "summary": {
+      "totalLeads": "Totaal leads",
+      "bySource": "Leads per bron",
+      "byOwner": "Leads per eigenaar",
+      "byBranch": "Leads per vestiging",
+      "converted": "Omgezet naar kandidaat",
+      "conversionRate": "Conversieratio",
+      "avgTimeToConvert": "Gem. tijd tot conversie",
+      "staleLeads": "Verouderde leads",
+      "newThisPeriod": "Nieuw deze periode"
+    }
+  },
+  "accountmanagers": {
+    "loading": "Accountmanagers laden…",
+    "error": "Kon de accountmanagers niet laden",
+    "empty": "Geen klanten in deze periode",
+    "summary": {
+      "accountManagers": "Accountmanagers",
+      "customersInWindow": "Klanten in periode",
+      "avgPerManager": "Gem. klanten per manager",
+      "topManager": "Top manager",
+      "openOpportunities": "Open kansen",
+      "activeMatches": "Actieve matches",
+      "revenue": "Omzet",
+      "renewalsDue": "Verlengingen te doen",
+      "notContacted": "Niet benaderd"
+    },
+    "cols": {
+      "manager": "Accountmanager",
+      "customers": "Klanten"
     }
   }
 }

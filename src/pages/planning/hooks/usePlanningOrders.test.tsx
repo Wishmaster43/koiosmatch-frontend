@@ -7,11 +7,11 @@ import { describe, it, expect, vi, afterEach } from 'vitest'
 import { renderHook, waitFor, act } from '@testing-library/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import type { ReactNode } from 'react'
-import { usePlanningOrdersList, useCreatePlanningOrder } from './usePlanningOrders'
+import { usePlanningOrdersList, useCreatePlanningOrder, useUpdatePlanningOrder, useDeletePlanningOrder } from './usePlanningOrders'
 import api from '@/lib/api'
 
 vi.mock('@/lib/api', () => ({
-  default: { get: vi.fn(), post: vi.fn() },
+  default: { get: vi.fn(), post: vi.fn(), patch: vi.fn(), delete: vi.fn() },
   unwrap: (res: { data?: unknown }) => {
     const body = (res as { data?: unknown })?.data ?? res
     return (body && typeof body === 'object' && !Array.isArray(body) && 'data' in (body as object))
@@ -27,6 +27,8 @@ vi.mock('@/lib/api', () => ({
 
 const mockedGet = vi.mocked(api.get)
 const mockedPost = vi.mocked(api.post)
+const mockedPatch = vi.mocked(api.patch)
+const mockedDelete = vi.mocked(api.delete)
 afterEach(() => vi.clearAllMocks())
 
 function wrapper({ children }: { children: ReactNode }) {
@@ -51,5 +53,32 @@ describe('useCreatePlanningOrder', () => {
     const body = { customer_id: 'c1', customer_location_id: null, function: 'Verzorgende IG', status: 'open' }
     await act(async () => { await result.current.mutateAsync(body) })
     expect(mockedPost).toHaveBeenCalledWith('/planning/orders', body)
+  })
+})
+
+describe('useUpdatePlanningOrder', () => {
+  it('PATCHes the exact order body to /planning/orders/{id}', async () => {
+    mockedPatch.mockResolvedValue({ data: { data: { id: 'o3', status: 'filled' } } })
+    const { result } = renderHook(() => useUpdatePlanningOrder(), { wrapper })
+    const body = { status: 'filled' }
+    await act(async () => { await result.current.mutateAsync({ id: 'o3', body }) })
+    expect(mockedPatch).toHaveBeenCalledWith('/planning/orders/o3', body)
+  })
+})
+
+describe('useDeletePlanningOrder', () => {
+  it('DELETEs /planning/orders/{id}', async () => {
+    mockedDelete.mockResolvedValue({ data: null })
+    const { result } = renderHook(() => useDeletePlanningOrder(), { wrapper })
+    await act(async () => { await result.current.mutateAsync('o4') })
+    expect(mockedDelete).toHaveBeenCalledWith('/planning/orders/o4')
+  })
+
+  it('surfaces the 409 "cancel shifts first" reason to the caller', async () => {
+    mockedDelete.mockRejectedValue({ response: { status: 409, data: { message: 'Cannot delete an order with active shifts. Cancel its shifts first.' } } })
+    const { result } = renderHook(() => useDeletePlanningOrder(), { wrapper })
+    await expect(result.current.mutateAsync('o5')).rejects.toMatchObject({
+      response: { data: { message: 'Cannot delete an order with active shifts. Cancel its shifts first.' } },
+    })
   })
 })

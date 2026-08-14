@@ -57,6 +57,7 @@
  * preflight so it's visible before the recruiter fills in the rest.
  */
 import { RateDeviationWarning } from './RateProposalNotice'
+import { useAuth } from '@/context/AuthContext'
 import { useDateFormat } from '@/lib/datetime'
 import { useTextPopoutHost } from '@/hooks/useTextPopoutHost'
 import { ActionRuleBanner } from '@/components/actionrules'
@@ -109,6 +110,10 @@ export default function MatchModal({
   const title = t(editing ? 'placement.editTitle' : 'placement.title')
   // DD-MM-YYYY everywhere (§3B) — used only for the overlap banner's period text.
   const { formatDate } = useDateFormat()
+  // MATCH-FIN-GATE-1 (Danny 14-08): gates the deviation banner below — see FinancialSection
+  // for the field-level gate on the same permission.
+  const auth = useAuth()
+  const canSeeFinancial = !!auth?.hasPermission?.('matches.financial.view')
 
   // MATCH-REMARKS-POPOUT (batch 5, P34): the SAME second-screen recipe
   // ProfileTab's profile text uses (useTextPopoutHost), keyed by the candidate
@@ -249,8 +254,10 @@ export default function MatchModal({
         )}
 
         {/* Deviation guard (Danny's "weet je het zeker?"): the entered rates differ from a
-            FOUND agreement proposal — calm inline confirm, one extra click, no hard block. */}
-        {form.deviatesFromProposal && form.confirmDeviation && (
+            FOUND agreement proposal — calm inline confirm, one extra click, no hard block.
+            MATCH-FIN-GATE-1: the banner prints the purchase rate, so it is gated the same
+            as FinancialSection's purchase field/margin — never shown without the permission. */}
+        {canSeeFinancial && form.deviatesFromProposal && form.confirmDeviation && (
           <RateDeviationWarning proposal={form.proposal} purchase={form.purchase} sell={form.sell} onCancel={() => form.setConfirmDeviation(false)} />
         )}
 

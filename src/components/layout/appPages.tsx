@@ -68,10 +68,12 @@ export const PAGE_TITLES: Record<string, string> = {
   // Reports hub (analytical) — one key per report sub-page (RAPPORTEN-OMBOUW-1)
   reports:                      'Reports',
   'reports.candidates':         'Reports — Candidates',
+  'reports.leads':              'Reports — Leads',
   'reports.applications':       'Reports — Applications',
   'reports.customers':          'Reports — Customers',
   'reports.flow':               'Reports — Flow',
   'reports.recruiters':         'Reports — Recruiters',
+  'reports.accountmanagers':    'Reports — Account managers',
   'reports.vacancies':          'Reports — Vacancies',
   'reports.opportunities':      'Reports — Opportunities',
   'reports.tasks':              'Reports — Tasks',
@@ -166,10 +168,12 @@ export function renderPage(activePage: string, { navIntent, goTo, dashView }: { 
     // reportId prop and ReportsPage renders the dashboard branch.
     case 'reports':                return <ReportsPage />
     case 'reports.candidates':     return <ReportsPage reportId="candidates" />
+    case 'reports.leads':          return <ReportsPage reportId="leads" />
     case 'reports.applications':   return <ReportsPage reportId="applications" />
     case 'reports.customers':      return <ReportsPage reportId="customers" />
     case 'reports.flow':           return <ReportsPage reportId="flow" />
     case 'reports.recruiters':     return <ReportsPage reportId="recruiters" />
+    case 'reports.accountmanagers': return <ReportsPage reportId="accountmanagers" />
     case 'reports.vacancies':      return <ReportsPage reportId="vacancies" />
     case 'reports.opportunities':  return <ReportsPage reportId="opportunities" />
     case 'reports.tasks':          return <ReportsPage reportId="tasks" />

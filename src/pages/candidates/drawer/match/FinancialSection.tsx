@@ -13,6 +13,7 @@
 import { X } from 'lucide-react'
 import type { TFunction } from 'i18next'
 import DrawerAddButton from '@/components/drawer/DrawerAddButton'
+import { useAuth } from '@/context/AuthContext'
 import { RateProposalHint } from '../RateProposalNotice'
 import type { RateProposal } from '@/pages/candidates/hooks/useRateProposal'
 import { FormField as F } from './FormField'
@@ -33,6 +34,14 @@ export default function FinancialSection({
   costCenter: string; setCostCenter: (v: string) => void; setCostCenterDirty: (v: boolean) => void
   billingEmails: string[]; setBillingEmails: (fn: (p: string[]) => string[]) => void; setBillingDirty: (v: boolean) => void
 }) {
+  // MATCH-FIN-GATE-1 (Danny 14-08): the match create/edit form is the third
+  // surface carrying purchase rate + margin — gated on `matches.financial.view`,
+  // same as MatchContractSection/PriceAgreementForm. Sell rate stays visible;
+  // the field is left untouched (never wiped) so an unpermitted user editing an
+  // existing match resubmits whatever value was already there.
+  const auth = useAuth()
+  const canSeeFinancial = !!auth?.hasPermission?.('matches.financial.view')
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column' }}>
       <div style={pairRow}>
@@ -43,25 +52,30 @@ export default function FinancialSection({
           {(labelId: string) => <input value={step} onChange={e => setStep(e.target.value)} style={input} aria-labelledby={labelId} />}
         </F>
       </div>
-      <div style={pairRow}>
-        <F label={t('placement.purchaseRate')} error={errors.purchase}>
-          {(labelId: string) => <input type="number" step="0.01" value={purchase} onChange={e => setPurchase(e.target.value)} style={input} placeholder="22,18" aria-labelledby={labelId} />}
-        </F>
+      <div style={canSeeFinancial ? pairRow : undefined}>
+        {canSeeFinancial && (
+          <F label={t('placement.purchaseRate')} error={errors.purchase}>
+            {(labelId: string) => <input type="number" step="0.01" value={purchase} onChange={e => setPurchase(e.target.value)} style={input} placeholder="22,18" aria-labelledby={labelId} />}
+          </F>
+        )}
         <F label={t('placement.sellRate')} error={errors.sell}>
           {(labelId: string) => <input type="number" step="0.01" value={sell} onChange={e => setSell(e.target.value)} style={input} placeholder="62,10" aria-labelledby={labelId} />}
         </F>
       </div>
       {/* Margin — derived, never entered; its own full-width row (compact box, not
-          a full input footprint) right below the rates it derives from. */}
-      <F label={t('placement.margin')}>
-        <div style={{ ...input, width: 110, display: 'flex', alignItems: 'center', fontSize: 13,
-          background: 'var(--surface-2, var(--bg))',
-          color: hasRates ? (margin >= 0 ? 'var(--color-success)' : 'var(--color-danger)') : 'var(--text-muted)' }}>
-          <span style={{ fontWeight: 700, fontFamily: 'JetBrains Mono, monospace' }}>{hasRates ? margin.toFixed(2) : '—'}</span>
-        </div>
-      </F>
+          a full input footprint) right below the rates it derives from. Hidden
+          entirely without the permission (MATCH-FIN-GATE-1). */}
+      {canSeeFinancial && (
+        <F label={t('placement.margin')}>
+          <div style={{ ...input, width: 110, display: 'flex', alignItems: 'center', fontSize: 13,
+            background: 'var(--surface-2, var(--bg))',
+            color: hasRates ? (margin >= 0 ? 'var(--color-success)' : 'var(--color-danger)') : 'var(--text-muted)' }}>
+            <span style={{ fontWeight: 700, fontFamily: 'JetBrains Mono, monospace' }}>{hasRates ? margin.toFixed(2) : '—'}</span>
+          </div>
+        </F>
+      )}
       {/* Rate proposal hint — only fills EMPTY fields above (never overwrites input). */}
-      <RateProposalHint proposal={proposal} />
+      {canSeeFinancial && <RateProposalHint proposal={proposal} />}
       {/* Cost centre — proposed from the customer/location cascade above; typing
           here freezes it (job 21/22 — never overwritten again after that). */}
       <F label={t('placement.costCenter')} error={errors.costCenter}>

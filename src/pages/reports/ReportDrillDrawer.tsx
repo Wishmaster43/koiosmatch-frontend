@@ -24,10 +24,12 @@ export interface DrillSpec {
   adviceParams?: Record<string, unknown>          // query params for adviceEndpoint
 }
 
-// One underlying record — shape varies per report, read defensively.
-type DrillRow = Record<string, unknown>
-const rowTitle = (r: DrillRow) => String(r.name ?? r.label ?? r.title ?? r.full_name ?? r.id ?? '—')
-const rowSub   = (r: DrillRow) => {
+// One underlying record — shape varies per report, read defensively. Exported so
+// ReportChartWithDrillList (the inline right-hand list) renders rows identically
+// instead of re-typing this field-guessing logic a second time.
+export type DrillRow = Record<string, unknown>
+export const rowTitle = (r: DrillRow) => String(r.name ?? r.label ?? r.title ?? r.full_name ?? r.id ?? '—')
+export const rowSub   = (r: DrillRow) => {
   // `customer` = the opportunities drill's customer-name field (portie 5);
   // `assignee` = the tasks drill's assignee-name field (portie 6).
   const bits = [r.status, r.status_label, r.stage, r.funnel_label, r.client, r.function_title, r.city, r.customer, r.owner, r.assignee]

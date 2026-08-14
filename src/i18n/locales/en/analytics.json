@@ -21,7 +21,9 @@
     "applications": "Applications",
     "customers": "Customers",
     "opportunities": "Opportunities",
-    "tasks": "Tasks"
+    "tasks": "Tasks",
+    "leads": "Leads",
+    "accountmanagers": "Account managers"
   },
   "candidates": {
     "loading": "Loading inflow…",
@@ -155,6 +157,11 @@
       "matched": "Matched",
       "filled": "Filled",
       "timeToFill": "Time to fill"
+    },
+    "noApplicants": {
+      "title": "Vacancies without any applications ({{count}})",
+      "subtitle": "Counted from the vacancies shown above — zero applications received in this period.",
+      "empty": "Every vacancy in this period received at least one application."
     }
   },
   "matches": {
@@ -433,6 +440,44 @@
       "avgDuration": "Avg duration",
       "workflowsCount": "Workflows",
       "triggersCount": "Triggers"
+    }
+  },
+  "leads": {
+    "loading": "Loading leads…",
+    "error": "Could not load the leads",
+    "empty": "No leads in this period",
+    "window": "Leads {{from}} through {{to}}",
+    "partialNotice": "This report shows the one number the current data supports: total leads (candidates in the Lead phase) in this window. A breakdown by source, owner, branch or conversion needs a lead-scoped backend endpoint that does not exist yet. Those cards show a dash until it does.",
+    "summary": {
+      "totalLeads": "Total leads",
+      "bySource": "Leads by source",
+      "byOwner": "Leads by owner",
+      "byBranch": "Leads by branch",
+      "converted": "Converted to candidate",
+      "conversionRate": "Conversion rate",
+      "avgTimeToConvert": "Avg. time to convert",
+      "staleLeads": "Stale leads",
+      "newThisPeriod": "New this period"
+    }
+  },
+  "accountmanagers": {
+    "loading": "Loading account managers…",
+    "error": "Could not load the account managers",
+    "empty": "No customers in this period",
+    "summary": {
+      "accountManagers": "Account managers",
+      "customersInWindow": "Customers in window",
+      "avgPerManager": "Avg. customers per manager",
+      "topManager": "Top manager",
+      "openOpportunities": "Open opportunities",
+      "activeMatches": "Active matches",
+      "revenue": "Revenue",
+      "renewalsDue": "Renewals due",
+      "notContacted": "Not contacted"
+    },
+    "cols": {
+      "manager": "Account manager",
+      "customers": "Customers"
     }
   }
 }

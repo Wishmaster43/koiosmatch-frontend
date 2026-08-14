@@ -41,10 +41,12 @@ import { isFilterableReport, CUSTOMER_FILTERABLE_REPORT_IDS } from './reportFilt
 import type { ReportFilterState } from './reportFilterParams'
 import type { ReportFilterGroup } from '@/types/reports'
 import CandidatesReport from './CandidatesReport'
+import LeadsReport from './LeadsReport'
 import ApplicationsReport from './ApplicationsReport'
 import CustomersReport from './CustomersReport'
 import FlowReport from './FlowReport'
 import RecruitersReport from './RecruitersReport'
+import AccountManagersReport from './AccountManagersReport'
 import VacanciesReport from './VacanciesReport'
 import OpportunitiesReport from './OpportunitiesReport'
 import TasksReport from './TasksReport'
@@ -72,10 +74,12 @@ type ReportComponent = ComponentType<{ period: ReportPeriod; filters?: ReportFil
 // vice versa — is a wiring bug the exhaustive Record type surfaces at compile time.
 const REPORTS: Record<ReportId, ReportComponent> = {
   candidates:    CandidatesReport,
+  leads:         LeadsReport,
   applications:  ApplicationsReport,
   customers:     CustomersReport,
   flow:          FlowReport,
   recruiters:    RecruitersReport,
+  accountmanagers: AccountManagersReport,
   vacancies:     VacanciesReport,
   opportunities: OpportunitiesReport,
   tasks:         TasksReport,

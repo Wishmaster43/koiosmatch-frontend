@@ -23,6 +23,7 @@ import { sectionTitle } from '@/components/ui/SectionCard'
 import { notifySuccess, notifyError } from '@/lib/notify'
 import { useContractTypes } from '@/lib/useContractTypes'
 import { useCao } from '@/lib/useCao'
+import { useAuth } from '@/context/AuthContext'
 import ContractFormChip from '../ContractFormChip'
 import { useMatchContract } from '../hooks/useMatchContract'
 import type { MatchContract } from '../hooks/useMatchContract'
@@ -49,6 +50,15 @@ export default function MatchContractSection({ matchId, onUpdate }: Props) {
   const { types: caoTypes } = useCao()
   const { data, loading, error, unavailable, revertTick, retry, save } = useMatchContract(matchId, onUpdate)
 
+  // MATCH-FIN-GATE-1 (Danny 14-08: "de marge op een plaatsing, autorisatie"):
+  // what the agency PAYS (purchase_rate) and the derived margin are gated behind
+  // the existing `matches.financial.view` permission — mirrors BankAccountCard's
+  // FINANCIAL-GATE-1 precedent (hidden, not disabled, §7 is UX-only anyway). The
+  // sell rate (what the customer pays) stays visible to every recruiter — it is
+  // ordinary commercial data, not the agency's cost/margin.
+  const auth = useAuth()
+  const canSeeFinancial = !!auth?.hasPermission?.('matches.financial.view')
+
   // Editable schema — two titled cards (Contract / Financieel) in one table.
   const fields: FieldRow[] = [
     { key: 'function_title', label: t('drawer.contract.functionTitle'), group: t('drawer.contract.groupContract') },
@@ -63,7 +73,11 @@ export default function MatchContractSection({ matchId, onUpdate }: Props) {
     { key: 'scale', label: t('drawer.contract.scale'), group: t('drawer.contract.groupFinancial') },
     { key: 'step', label: t('drawer.contract.step'), group: t('drawer.contract.groupFinancial') },
     { key: 'surcharge', label: t('drawer.contract.surcharge'), inputType: 'number', mono: true, group: t('drawer.contract.groupFinancial') },
-    { key: 'purchase_rate', label: t('drawer.contract.purchaseRate'), inputType: 'number', mono: true, group: t('drawer.contract.groupFinancial') },
+    // MATCH-FIN-GATE-1: purchase rate omitted from the schema entirely without
+    // the permission — hidden, never a disabled row still printing the number.
+    ...(canSeeFinancial
+      ? [{ key: 'purchase_rate', label: t('drawer.contract.purchaseRate'), inputType: 'number', mono: true, group: t('drawer.contract.groupFinancial') } as FieldRow]
+      : []),
     { key: 'sell_rate', label: t('drawer.contract.sellRate'), inputType: 'number', mono: true, group: t('drawer.contract.groupFinancial') },
     { key: 'cost_center', label: t('drawer.contract.costCenter'), group: t('drawer.contract.groupFinancial') },
     { key: 'billing_emails_text', label: t('drawer.contract.billingEmails'), type: 'textarea', group: t('drawer.contract.groupFinancial') },
@@ -99,7 +113,11 @@ export default function MatchContractSection({ matchId, onUpdate }: Props) {
       scale:          (v.scale as string) || null,
       step:           (v.step as string) || null,
       surcharge:      numOrNull(v.surcharge),
-      purchase_rate:  numOrNull(v.purchase_rate),
+      // MATCH-FIN-GATE-1: the field is omitted from the schema without the
+      // permission, so `v.purchase_rate` is always undefined there — leave the
+      // key OUT of the patch entirely (the backend rule is `sometimes`, i.e.
+      // "unset means unchanged") rather than send `null` and silently wipe it.
+      ...(canSeeFinancial ? { purchase_rate: numOrNull(v.purchase_rate) } : {}),
       sell_rate:      numOrNull(v.sell_rate),
       cost_center:    (v.cost_center as string) || null,
       billing_emails: parseEmails(String(v.billing_emails_text ?? '')),
@@ -176,13 +194,17 @@ export default function MatchContractSection({ matchId, onUpdate }: Props) {
       {/* Canon (05-08): clean cards — no row dividers, 11px labels (candidate = leading);
           label width now the EditableFieldTable default (fieldRowCanon). */}
       <EditableFieldTable key={`${matchId}-${revertTick}`} fields={fields} value={values} onSave={handleSave} />
-      {/* Derived margin — read-only, sits right under the rate fields. */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 12, padding: '7px 11px', borderRadius: 8, marginTop: 8,
-        background: 'var(--surface)', border: '1px solid var(--border)',
-        color: margin != null ? (margin >= 0 ? 'var(--color-success)' : 'var(--color-danger)') : 'var(--text-muted)' }}>
-        <span style={{ color: 'var(--text-muted)' }}>{t('drawer.contract.margin')}</span>
-        <span style={{ fontWeight: 700, fontFamily: 'JetBrains Mono, monospace' }}>{margin != null ? margin.toFixed(2) : '—'}</span>
-      </div>
+      {/* Derived margin — read-only, sits right under the rate fields. MATCH-FIN-GATE-1:
+          hidden without the permission, same as the purchase rate row above — the
+          margin is reconstructible from purchase+sell, so both must go together. */}
+      {canSeeFinancial && (
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 12, padding: '7px 11px', borderRadius: 8, marginTop: 8,
+          background: 'var(--surface)', border: '1px solid var(--border)',
+          color: margin != null ? (margin >= 0 ? 'var(--color-success)' : 'var(--color-danger)') : 'var(--text-muted)' }}>
+          <span style={{ color: 'var(--text-muted)' }}>{t('drawer.contract.margin')}</span>
+          <span style={{ fontWeight: 700, fontFamily: 'JetBrains Mono, monospace' }}>{margin != null ? margin.toFixed(2) : '—'}</span>
+        </div>
+      )}
     </div>
   )
 }

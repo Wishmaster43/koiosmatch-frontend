@@ -37,7 +37,12 @@
     "messagesToday": "Messages today",
     "candidatesContacted": "Candidates contacted",
     "shiftsFilled": "Shifts filled via WA",
-    "openEscalations": "Open escalations"
+    "openEscalations": "Open escalations",
+    "sentToday": "Sent today",
+    "receivedToday": "Received today",
+    "queuedToday": "Queued sends (today)",
+    "failedToday": "Failed sends (today)",
+    "noReplyEscalations": "Escalated, no reply"
   },
   "feed": {
     "title": "Latest messages",

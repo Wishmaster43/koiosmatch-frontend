@@ -13,6 +13,7 @@ import SelectMenu from '@/components/ui/SelectMenu'
 import RichTextEditor from '@/components/ui/RichTextEditor'
 import { useFunctions } from '@/lib/useFunctions'
 import { useCao } from '@/lib/useCao'
+import { useAuth } from '@/context/AuthContext'
 import type { PriceAgreement, PriceAgreementPayload } from '../hooks/usePriceAgreements'
 
 // The form's own string-based draft — every field is a controlled input value;
@@ -61,7 +62,13 @@ export const draftToPayload = (d: PriceAgreementDraft): PriceAgreementPayload =>
   remarks: d.remarks.trim() || null,
 })
 
-export const isDraftValid = (d: PriceAgreementDraft): boolean => d.purchaseRate.trim() !== '' && d.validFrom.trim() !== ''
+// MATCH-FIN-GATE-1: purchase rate is required on the backend for CREATE, but a
+// user without `matches.financial.view` never sees the field at all — so the
+// requirement is skipped for them (they simply cannot set it either way; the
+// backend re-checks on write). `requirePurchaseRate` defaults true so every
+// other caller/test keeps today's behaviour.
+export const isDraftValid = (d: PriceAgreementDraft, requirePurchaseRate = true): boolean =>
+  (!requirePurchaseRate || d.purchaseRate.trim() !== '') && d.validFrom.trim() !== ''
 
 const lbl: CSSProperties = { fontSize: 12, color: 'var(--text-muted)', marginBottom: 5 }
 const input: CSSProperties = { width: '100%', height: 34, padding: '0 10px', fontSize: 13, border: '1px solid var(--border)', borderRadius: 8, outline: 'none', boxSizing: 'border-box', background: 'var(--surface)', color: 'var(--text)' }
@@ -85,6 +92,12 @@ export default function PriceAgreementForm({ draft, onChange, onSave, onCancel, 
   const { t } = useTranslation('customers')
   const { functions } = useFunctions()
   const { types: caoTypes } = useCao()
+  // MATCH-FIN-GATE-1 (Danny 14-08): the purchase rate — what the agency pays,
+  // and the source of the margin — is gated on `matches.financial.view`
+  // (the closest existing permission; see MatchContractSection for the same
+  // gate). The sale rate below stays visible to every recruiter.
+  const auth = useAuth()
+  const canSeeFinancial = !!auth?.hasPermission?.('matches.financial.view')
   // K11d (13-08): the remarks editor can expand to a bigger window, same affordance
   // as every other rich-text block — Generate/pop-out are deliberately skipped here
   // per KD9, only the expand toggle ships.
@@ -112,10 +125,15 @@ export default function PriceAgreementForm({ draft, onChange, onSave, onCancel, 
           <input value={draft.step} onChange={e => onChange({ step: e.target.value })} style={input} placeholder={t('priceAgreements.any')} />
         </Field>
       </div>
-      <div style={row2}>
-        <Field label={t('priceAgreements.purchaseRate')}>
-          <input type="number" step="0.01" min={0} value={draft.purchaseRate} onChange={e => onChange({ purchaseRate: e.target.value })} style={{ ...input, fontFamily: 'JetBrains Mono, monospace' }} placeholder="22.18" />
-        </Field>
+      {/* MATCH-FIN-GATE-1: purchase rate omitted entirely without the permission —
+          hidden, not disabled. Sale rate keeps its own full-width row so the layout
+          never leaves a visible empty half where the purchase field used to be. */}
+      <div style={canSeeFinancial ? row2 : undefined}>
+        {canSeeFinancial && (
+          <Field label={t('priceAgreements.purchaseRate')}>
+            <input type="number" step="0.01" min={0} value={draft.purchaseRate} onChange={e => onChange({ purchaseRate: e.target.value })} style={{ ...input, fontFamily: 'JetBrains Mono, monospace' }} placeholder="22.18" />
+          </Field>
+        )}
         <Field label={t('priceAgreements.saleRate')}>
           <input type="number" step="0.01" min={0} value={draft.saleRate} onChange={e => onChange({ saleRate: e.target.value })} style={{ ...input, fontFamily: 'JetBrains Mono, monospace' }} placeholder="31.10" />
         </Field>
@@ -139,8 +157,8 @@ export default function PriceAgreementForm({ draft, onChange, onSave, onCancel, 
         <button onClick={onCancel} style={{ height: 30, padding: '0 12px', fontSize: 12, border: '1px solid var(--border)', borderRadius: 7, background: 'var(--surface)', cursor: 'pointer', color: 'var(--text)' }}>
           {t('drawer.cancel')}
         </button>
-        <button onClick={onSave} disabled={saving || !isDraftValid(draft)}
-          style={{ height: 30, padding: '0 14px', fontSize: 12, fontWeight: 600, border: 'none', borderRadius: 7, background: 'var(--color-primary)', color: 'var(--color-on-accent)', cursor: 'pointer', opacity: isDraftValid(draft) ? 1 : 0.4 }}>
+        <button onClick={onSave} disabled={saving || !isDraftValid(draft, canSeeFinancial)}
+          style={{ height: 30, padding: '0 14px', fontSize: 12, fontWeight: 600, border: 'none', borderRadius: 7, background: 'var(--color-primary)', color: 'var(--color-on-accent)', cursor: 'pointer', opacity: isDraftValid(draft, canSeeFinancial) ? 1 : 0.4 }}>
           {saveLabel}
         </button>
       </div>

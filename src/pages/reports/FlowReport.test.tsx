@@ -218,4 +218,26 @@ describe('FlowReport', () => {
     expect(getSpy.mock.calls.every(c =>
       c[0] === '/reports/flow/drill' || c[0] === '/reports/flow/advice')).toBe(true)
   })
+
+  // ReportChartWithDrillList adoption: the inline right-hand list panel is never
+  // blank on load — it defaults to the first phase, exactly as if that phase's
+  // own bar had been clicked, and no client-side guess sneaks in.
+  it('the right-hand list defaults to the first phase on load, real rowsEndpoint request', async () => {
+    mockUseFlowReport.mockReturnValue({ data: cohortData, loading: false, error: false })
+    renderReport()
+    await screen.findByText('drill.records', { exact: false }).catch(() => {})
+    expect(lastDrillParams()).toEqual({ phase: 'applied', period: 'month', view: 'reached' })
+  })
+
+  // Clicking a later phase replaces the list content by re-requesting with the
+  // new phase key — never merging/guessing client-side.
+  it('clicking a different phase re-requests the list for that phase only', async () => {
+    const user = userEvent.setup()
+    mockUseFlowReport.mockReturnValue({ data: cohortData, loading: false, error: false })
+    renderReport()
+    // Default load selects "applied" first.
+    expect(lastDrillParams()).toEqual({ phase: 'applied', period: 'month', view: 'reached' })
+    await user.click(screen.getAllByText('Aangenomen')[0])
+    expect(lastDrillParams()).toEqual({ phase: 'hired', period: 'month', view: 'reached' })
+  })
 })

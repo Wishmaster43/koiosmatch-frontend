@@ -12,15 +12,34 @@
  */
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Plus, ClipboardList } from 'lucide-react'
-import { usePlanningOrdersList } from './hooks/usePlanningOrders'
+import { Plus, ClipboardList, Pencil, Trash2 } from 'lucide-react'
+import { usePlanningOrdersList, useDeletePlanningOrder } from './hooks/usePlanningOrders'
+import type { PlanningOrderRow } from './hooks/usePlanningOrders'
 import AddOrderModal from './AddOrderModal'
+import { extractApiError } from '@/lib/extractApiError'
 import { BTN_H } from '@/config/buttonMetrics'
 
 export default function OrdersPanel() {
   const { t } = useTranslation('planning')
   const { orders, loading, error } = usePlanningOrdersList()
   const [addOpen, setAddOpen] = useState(false)
+  const [editing, setEditing] = useState<PlanningOrderRow | null>(null)
+  const [pendingDelete, setPendingDelete] = useState<PlanningOrderRow | null>(null)
+  const [deleteError, setDeleteError] = useState<string | null>(null)
+  const deleteOrder = useDeletePlanningOrder()
+
+  // Cancel-shifts-first is a real, honest 409 reason from the backend (never a
+  // generic failure) — surfaced via the shared extractApiError (§3/§13).
+  const handleDeleteConfirm = async () => {
+    if (!pendingDelete) return
+    try {
+      await deleteOrder.mutateAsync(pendingDelete.id)
+      setPendingDelete(null)
+      setDeleteError(null)
+    } catch (err) {
+      setDeleteError(extractApiError(err, t('order.deleteError')))
+    }
+  }
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%', overflow: 'hidden' }}>
@@ -70,6 +89,16 @@ export default function OrdersPanel() {
                 <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>
                   {t('order.shiftsCount', { count: o.shifts_count ?? 0 })}
                 </span>
+                <button onClick={() => setEditing(o)} aria-label={t('common:edit')} title={t('common:edit')}
+                  style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 26, height: 26,
+                    border: '1px solid var(--border)', borderRadius: 7, background: 'none', color: 'var(--text-muted)', cursor: 'pointer' }}>
+                  <Pencil size={13} />
+                </button>
+                <button onClick={() => { setPendingDelete(o); setDeleteError(null) }} aria-label={t('common:delete')} title={t('common:delete')}
+                  style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 26, height: 26,
+                    border: '1px solid var(--border)', borderRadius: 7, background: 'none', color: 'var(--color-danger)', cursor: 'pointer' }}>
+                  <Trash2 size={13} />
+                </button>
               </div>
             ))}
           </div>
@@ -77,6 +106,37 @@ export default function OrdersPanel() {
       </div>
 
       {addOpen && <AddOrderModal onClose={() => setAddOpen(false)} />}
+      {editing && <AddOrderModal order={editing} onClose={() => setEditing(null)} />}
+
+      {pendingDelete && (
+        <div role="dialog" aria-modal="true" aria-label={t('order.deleteConfirmTitle')}
+          style={{ position: 'fixed', inset: 0, background: 'color-mix(in srgb, #000 40%, transparent)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }}>
+          <div style={{ width: 360, background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 20 }}>
+            <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--text)', marginBottom: 8 }}>{t('order.deleteConfirmTitle')}</div>
+            <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 12 }}>{t('order.deleteConfirmBody')}</div>
+            {deleteError && (
+              <div role="alert" style={{ padding: '8px 10px', fontSize: 12, borderRadius: 8, marginBottom: 12,
+                color: 'var(--color-danger)', background: 'var(--color-danger-bg)',
+                border: '1px solid color-mix(in srgb, var(--color-danger) 40%, transparent)' }}>
+                {deleteError}
+              </div>
+            )}
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8 }}>
+              <button onClick={() => { setPendingDelete(null); setDeleteError(null) }}
+                style={{ height: BTN_H, padding: '0 14px', fontSize: 12, borderRadius: 8, border: '1px solid var(--border)', background: 'none', color: 'var(--text)', cursor: 'pointer' }}>
+                {t('common:cancel')}
+              </button>
+              <button onClick={handleDeleteConfirm} disabled={deleteOrder.isPending}
+                style={{ height: BTN_H, padding: '0 14px', fontSize: 12, fontWeight: 600, borderRadius: 8, border: 'none',
+                  background: 'var(--color-danger)', color: 'var(--color-on-accent)',
+                  cursor: deleteOrder.isPending ? 'not-allowed' : 'pointer', opacity: deleteOrder.isPending ? 0.6 : 1 }}>
+                {deleteOrder.isPending ? t('common:saving') : t('common:delete')}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

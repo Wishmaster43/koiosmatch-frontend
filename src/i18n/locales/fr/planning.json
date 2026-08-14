@@ -54,6 +54,7 @@
   "order": {
     "modal": {
       "title": "Nouvelle commande",
+      "editTitle": "Modifier la commande",
       "subtitle": "La première étape de la planification : commande, puis mission, puis affectation.",
       "create": "Créer la commande"
     },
@@ -67,6 +68,7 @@
     "fStatus": "Statut",
     "fCostCenter": "Centre de coûts",
     "fDescription": "Description",
+    "noOrder": "Aucune commande",
     "noCustomer": "Aucun client",
     "noLocation": "Aucun site",
     "noDepartment": "Aucun service",
@@ -84,6 +86,32 @@
     "shiftsCount_other": "{{count}} missions",
     "empty": "Aucune commande pour l'instant.",
     "emptyHint": "Cliquez ci-dessous pour créer la première.",
-    "errorList": "Impossible de charger la liste des commandes."
+    "errorList": "Impossible de charger la liste des commandes.",
+    "deleteError": "Impossible de supprimer la commande.",
+    "deleteConfirmTitle": "Supprimer la commande",
+    "deleteConfirmBody": "Voulez-vous vraiment supprimer cette commande ? Cette action est irréversible."
+  },
+  "staffing": {
+    "title": "Affecter la mission",
+    "assigned": "Affectés",
+    "noneAssigned": "Personne n'est encore affecté.",
+    "eligible": "Candidats éligibles",
+    "noneEligible": "Aucun candidat éligible pour cette mission.",
+    "assign": "Affecter",
+    "unassign": "Désaffecter",
+    "cancel": "Annuler",
+    "checkout": "Pointer la sortie",
+    "favourite": "Favori",
+    "cancelReasonPlaceholder": "Motif d'annulation",
+    "confirmCancel": "Confirmer l'annulation",
+    "confirmCheckout": "Confirmer la sortie",
+    "actualStart": "Début réel",
+    "actualEnd": "Fin réelle",
+    "actualBreak": "Pause (min)",
+    "checkoutSaved": "Sortie pointée — {{hours}} heures",
+    "assignError": "Impossible d'affecter ce candidat.",
+    "unassignError": "Impossible de désaffecter ce candidat.",
+    "cancelError": "Impossible d'annuler cette affectation.",
+    "checkoutError": "Impossible d'enregistrer la sortie."
   }
 }

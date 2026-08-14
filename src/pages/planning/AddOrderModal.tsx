@@ -33,8 +33,9 @@ import { useCustomerCascade } from '@/hooks/useCustomerCascade'
 import { useShiftCustomers } from './hooks/useShiftLookups'
 import { useFunctions } from '@/lib/useFunctions'
 import { useUsers } from '@/lib/queries'
-import { useCreatePlanningOrder } from './hooks/usePlanningOrders'
-import type { PlanningOrderInput } from './hooks/usePlanningOrders'
+import { useCreatePlanningOrder, useUpdatePlanningOrder } from './hooks/usePlanningOrders'
+import type { PlanningOrderInput, PlanningOrderRow } from './hooks/usePlanningOrders'
+import { extractApiError } from '@/lib/extractApiError'
 
 // The three status values PlanningOrder::STATUSES accepts — a fixed backend enum
 // (not yet a tenant lookup), so the values stay literal but every LABEL still runs
@@ -53,9 +54,27 @@ const EMPTY_FORM: OrderForm = {
   costCenter: '', status: 'open', notes: '',
 }
 
-export default function AddOrderModal({ onClose, onCreated }: { onClose: () => void; onCreated?: () => void }) {
+// Edit mode seeds the form from the existing row (all ids stringified — the form
+// state is string-keyed throughout, same convention as the create path).
+function formFromOrder(order: PlanningOrderRow): OrderForm {
+  return {
+    customerId: order.customer_id != null ? String(order.customer_id) : '',
+    locationId: order.customer_location_id != null ? String(order.customer_location_id) : '',
+    departmentId: order.customer_department_id != null ? String(order.customer_department_id) : '',
+    ownerId: order.owner_id != null ? String(order.owner_id) : '',
+    functionName: order.function ?? '',
+    reference: order.reference ?? '',
+    subject: order.subject ?? '',
+    description: order.description ?? '',
+    costCenter: order.cost_center ?? '',
+    status: order.status,
+    notes: order.notes ?? '',
+  }
+}
+
+export default function AddOrderModal({ onClose, onCreated, order }: { onClose: () => void; onCreated?: () => void; order?: PlanningOrderRow }) {
   const { t } = useTranslation(['planning', 'common'])
-  const [form, setForm] = useState<OrderForm>(EMPTY_FORM)
+  const [form, setForm] = useState<OrderForm>(() => order ? formFromOrder(order) : EMPTY_FORM)
   const [error, setError] = useState<string | null>(null)
 
   const { customers, loading: customersLoading, error: customersError } = useShiftCustomers()
@@ -63,6 +82,9 @@ export default function AddOrderModal({ onClose, onCreated }: { onClose: () => v
   const { functions } = useFunctions()
   const { data: users } = useUsers()
   const create = useCreatePlanningOrder()
+  const update = useUpdatePlanningOrder()
+  const isEditing = Boolean(order)
+  const saving = create.isPending || update.isPending
 
   const set = (k: keyof OrderForm, v: string) => { setForm(f => ({ ...f, [k]: v })); setError(null) }
   // A new customer invalidates the previously picked location/department (they
@@ -88,12 +110,15 @@ export default function AddOrderModal({ onClose, onCreated }: { onClose: () => v
       notes: form.notes || null,
     }
     try {
-      await create.mutateAsync(body)
+      if (isEditing && order) {
+        await update.mutateAsync({ id: order.id, body })
+      } else {
+        await create.mutateAsync(body)
+      }
       onCreated?.()
       onClose()
     } catch (err) {
-      const e = err as { response?: { data?: { message?: string } } }
-      setError(e?.response?.data?.message ?? t('common:errorGeneric'))
+      setError(extractApiError(err, t('common:errorGeneric')))
     }
   }
 
@@ -113,7 +138,9 @@ export default function AddOrderModal({ onClose, onCreated }: { onClose: () => v
             <ClipboardList size={16} color="var(--color-primary)" />
           </div>
           <div>
-            <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--text)' }}>{t('order.modal.title')}</div>
+            <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--text)' }}>
+              {isEditing ? t('order.modal.editTitle') : t('order.modal.title')}
+            </div>
             <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>{t('order.modal.subtitle')}</div>
           </div>
         </div>
@@ -201,12 +228,12 @@ export default function AddOrderModal({ onClose, onCreated }: { onClose: () => v
           style={{ height: BTN_H, padding: '0 16px', fontSize: 13, borderRadius: 8, border: '1px solid var(--border)', background: 'none', color: 'var(--text)', cursor: 'pointer' }}>
           {t('common:cancel')}
         </button>
-        <button onClick={handleSubmit} disabled={create.isPending}
+        <button onClick={handleSubmit} disabled={saving}
           style={{ height: BTN_H, padding: '0 20px', fontSize: 13, fontWeight: 600, borderRadius: 8, border: 'none',
-            background: create.isPending ? 'var(--border)' : 'var(--color-primary)',
-            color: create.isPending ? 'var(--text-muted)' : 'var(--color-on-accent)',
-            cursor: create.isPending ? 'not-allowed' : 'pointer' }}>
-          {create.isPending ? t('common:saving') : t('order.modal.create')}
+            background: saving ? 'var(--border)' : 'var(--color-primary)',
+            color: saving ? 'var(--text-muted)' : 'var(--color-on-accent)',
+            cursor: saving ? 'not-allowed' : 'pointer' }}>
+          {saving ? t('common:saving') : isEditing ? t('common:save') : t('order.modal.create')}
         </button>
       </div>
     </FloatingPanel>

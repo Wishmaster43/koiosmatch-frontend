@@ -21,7 +21,9 @@
     "applications": "Bewerbungen",
     "customers": "Kunden",
     "opportunities": "Chancen",
-    "tasks": "Aufgaben"
+    "tasks": "Aufgaben",
+    "leads": "Leads",
+    "accountmanagers": "Kundenbetreuer"
   },
   "candidates": {
     "loading": "Zulauf wird geladen…",
@@ -155,6 +157,11 @@
       "matched": "Matched",
       "filled": "Besetzt",
       "timeToFill": "Besetzungsdauer"
+    },
+    "noApplicants": {
+      "title": "Stellen ohne Bewerbungen ({{count}})",
+      "subtitle": "Gezählt aus den oben gezeigten Stellen — null Bewerbungen in diesem Zeitraum.",
+      "empty": "Jede Stelle in diesem Zeitraum erhielt mindestens eine Bewerbung."
     }
   },
   "matches": {
@@ -433,6 +440,44 @@
       "avgDuration": "Ø Dauer",
       "workflowsCount": "Workflows",
       "triggersCount": "Auslöser"
+    }
+  },
+  "leads": {
+    "loading": "Leads werden geladen…",
+    "error": "Leads konnten nicht geladen werden",
+    "empty": "Keine Leads in diesem Zeitraum",
+    "window": "Leads {{from}} bis {{to}}",
+    "partialNotice": "Dieser Bericht zeigt die einzige Zahl, die die aktuellen Daten hergeben: Gesamtzahl der Leads (Kandidaten in der Phase Lead) in diesem Zeitraum. Eine Aufschlüsselung nach Quelle, Eigentümer, Standort oder Konversion erfordert einen lead-spezifischen Backend-Endpunkt, der noch nicht existiert. Diese Karten zeigen einen Strich, bis es ihn gibt.",
+    "summary": {
+      "totalLeads": "Leads gesamt",
+      "bySource": "Leads nach Quelle",
+      "byOwner": "Leads nach Eigentümer",
+      "byBranch": "Leads nach Standort",
+      "converted": "In Kandidat umgewandelt",
+      "conversionRate": "Konversionsrate",
+      "avgTimeToConvert": "Durchschn. Zeit bis Konversion",
+      "staleLeads": "Veraltete Leads",
+      "newThisPeriod": "Neu in diesem Zeitraum"
+    }
+  },
+  "accountmanagers": {
+    "loading": "Kundenbetreuer werden geladen…",
+    "error": "Kundenbetreuer konnten nicht geladen werden",
+    "empty": "Keine Kunden in diesem Zeitraum",
+    "summary": {
+      "accountManagers": "Kundenbetreuer",
+      "customersInWindow": "Kunden im Zeitraum",
+      "avgPerManager": "Durchschn. Kunden pro Betreuer",
+      "topManager": "Top-Betreuer",
+      "openOpportunities": "Offene Chancen",
+      "activeMatches": "Aktive Matches",
+      "revenue": "Umsatz",
+      "renewalsDue": "Fällige Verlängerungen",
+      "notContacted": "Nicht kontaktiert"
+    },
+    "cols": {
+      "manager": "Kundenbetreuer",
+      "customers": "Kunden"
     }
   }
 }

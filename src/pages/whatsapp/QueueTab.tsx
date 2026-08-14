@@ -1,14 +1,19 @@
 /**
  * QueueTab — the "Wachtrij" tab on the WhatsApp page: today's WABA batches
  * (GET /whatsapp-queue, R3a). Active batches (not yet finished) sit on top with
- * a live progress bar; finished batches sit below, muted. Polling lives in
- * useWhatsAppQueue and stops the moment no batch is still active anymore.
+ * a live progress bar; finished batches sit below, muted.
+ *
+ * WA-KPI9-1: the useWhatsAppQueue() hook (data + 5s polling) now lives in
+ * WhatsAppPage instead of here — the KPI band above the tabs needs these same
+ * batches (queued/failed today) regardless of which tab is active, so a second,
+ * tab-local instance of the hook would double the polling and the request count.
+ * This component stays presentational; it only renders what the page hands it.
  */
 import { useTranslation } from 'react-i18next'
 import { Loader2 } from 'lucide-react'
 import SoftChip from '@/components/ui/SoftChip'
 import { useDateFormat } from '@/lib/datetime'
-import { useWhatsAppQueue, isBatchActive } from './hooks/useWhatsAppQueue'
+import { isBatchActive } from './hooks/useWhatsAppQueue'
 import type { WaQueueBatch } from '@/types/whatsapp'
 
 // One outcome count (sent/skipped/failed), coloured by meaning — never decoration.
@@ -81,9 +86,17 @@ function BatchRow({ batch, active }: { batch: WaQueueBatch; active: boolean }) {
   )
 }
 
-export default function QueueTab() {
+// Batches + their loading/error/notAvailable state, lifted to WhatsAppPage so the
+// KPI band and this tab share the one polled fetch (see the file header above).
+interface QueueTabProps {
+  batches: WaQueueBatch[]
+  loading: boolean
+  error: boolean
+  notAvailable: boolean
+}
+
+export default function QueueTab({ batches, loading, error, notAvailable }: QueueTabProps) {
   const { t } = useTranslation('whatsapp')
-  const { batches, loading, error, notAvailable } = useWhatsAppQueue()
 
   // Loading state.
   if (loading) {

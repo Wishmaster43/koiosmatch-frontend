@@ -272,6 +272,11 @@
         "send_failed": "Versand fehlgeschlagen",
         "error": "unerwarteter Fehler"
       }
+    },
+    "flowSource": {
+      "fromAgent": "Übernommen vom verknüpften Agenten ({{agent}}). Es gibt noch keinen Standard pro Vertragsform.",
+      "agentHasNoFlow": "Für den verknüpften Agenten ist kein Interview eingerichtet.",
+      "noContractType": "Für diese Vakanz ist keine Vertragsform festgelegt, daher wird der eigene Flow des Agenten als Fallback verwendet."
     }
   },
   "generate": {

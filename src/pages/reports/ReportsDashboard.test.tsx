@@ -80,6 +80,16 @@ describe('ReportsDashboard (RAPPORTEN-DASHBOARD-1)', () => {
     expect(screen.getByText('—')).toBeInTheDocument()
   })
 
+  it('a resolved hook with no total renders the house dash, never a padded zero', () => {
+    setSuccess()
+    mockOpportunities.mockReturnValue({ data: { total: null }, loading: false, error: false })
+    renderDashboard()
+    expect(screen.queryByText(String(FIXTURES.opportunities))).not.toBeInTheDocument()
+    // '0' must never stand in for a total the server didn't send.
+    expect(screen.queryByText('0')).not.toBeInTheDocument()
+    expect(screen.getAllByText('—').length).toBeGreaterThan(0)
+  })
+
   it('clicking the candidates card navigates to the candidates sub-report', async () => {
     setSuccess()
     renderDashboard()
