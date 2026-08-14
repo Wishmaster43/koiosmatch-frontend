@@ -1,4 +1,42 @@
 {
+  "trash": {
+    "view": "Trash",
+    "markAction": "Delete permanently",
+    "unmarkAction": "Move back to archive",
+    "pendingSince": "In trash since {{date}}",
+    "eraseAround": "will be permanently deleted around {{date}}",
+    "eraseAutomatic": "will be permanently deleted automatically after the retention period",
+    "modal": {
+      "title": "Delete permanently",
+      "intro": "{{entity}} moves to the trash and will be permanently deleted automatically after your organisation's retention period.",
+      "blockedTitle": "Still in use",
+      "blockedIntro": "This record cannot be permanently deleted right now. Resolve the linked items below first.",
+      "transferLabel": "Transfer ownership to",
+      "transferPlaceholder": "Choose a user",
+      "confirm": "Delete permanently",
+      "cancel": "Cancel"
+    },
+    "blockers": {
+      "vacancies": "Vacancies",
+      "matches": "Matches",
+      "open_opportunities": "Open opportunities",
+      "open_tasks": "Open tasks",
+      "planned_appointments": "Planned appointments",
+      "backoffice_link": "Back-office link",
+      "applications": "Applications",
+      "contract": "Contract",
+      "contract_status": "Contract status",
+      "open_period": "Open period",
+      "placed_basis": "Basis of a placement",
+      "lifecycle_history": "Lifecycle history",
+      "replaced_by": "Replaced by",
+      "open_runs": "Open runs",
+      "uninvoiced_credits": "Uninvoiced credits",
+      "conversion": "Conversion"
+    },
+    "marked": "Moved to the trash.",
+    "unmarked": "Moved back to the archive."
+  },
   "actionFailed": "Action failed. Please try again.",
   "save": "Save",
   "saving": "Saving…",

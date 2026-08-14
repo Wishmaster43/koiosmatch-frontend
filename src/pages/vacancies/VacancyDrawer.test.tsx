@@ -5,12 +5,31 @@
  * header + tab bar + the tab under test actually mount.
  */
 import { describe, it, expect, vi, afterEach } from 'vitest'
-import { render, screen } from '@testing-library/react'
+import { render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-// Real i18n (nl) side-effect init so the tab labels resolve genuine Dutch text.
-import '@/i18n'
+// Real i18n (nl) init so the tab labels resolve genuine Dutch text.
+import i18n from '@/i18n'
+import api from '@/lib/api'
 import VacancyDrawer from './VacancyDrawer'
 import type { VacancyDetail } from '@/types/vacancy'
+
+// TRASH-OVERAL-2: api + the grace-window read serve the shared TrashLifecycleSection
+// (deletion-preview GET, mark/unmark POSTs) rendered via the `trash` prop.
+vi.mock('@/lib/api', () => ({
+  default: {
+    get: vi.fn(() => Promise.resolve({ data: {} })),
+    post: vi.fn(() => Promise.resolve({ data: { data: { lifecycle: 'pending_erase' } } })),
+  },
+  // useAllSettings' importActual below reaches this too (tenant-keyed caches).
+  getActiveTenantId: () => null,
+  unwrap: (res: { data?: unknown }) => {
+    const body = res?.data
+    return body && typeof body === 'object' && 'data' in body ? (body as { data: unknown }).data : body
+  },
+}))
+vi.mock('@/pages/settings/lib/settingsApi', () => ({
+  loadSettings: () => Promise.resolve({ deletion_grace_days: '30' }),
+}))
 
 // Lookups/custom-fields arrive via mocked hooks — no provider needed. Two known
 // statuses so the Kandidaten zoeken gate test below can allow one and exclude the other.
@@ -126,5 +145,63 @@ describe('VacancyDrawer · initialTab deep-link (VACANCY-MATCH-COUNT-1, Danny 23
     expect(screen.queryByText('candidate-search-tab-content')).not.toBeInTheDocument()
     const detailsBtn = screen.getByRole('tab', { name: 'Details' })
     expect(detailsBtn).toHaveStyle({ fontWeight: 600 })
+  })
+})
+
+// TRASH-OVERAL-2: the drawer's trash surface — REQUEST-asserting (§13): the exact
+// mark POST with and without transfer_to_owner_id, the unmark POST, and the
+// permission-hidden mark action (vacancies.delete / vacancies.update via the page).
+describe('VacancyDrawer · trash lifecycle (TRASH-OVERAL-2)', () => {
+  const tc = (key: string, opts?: Record<string, unknown>) => i18n.t(key, { ns: 'common', ...opts })
+  const PREVIEW = { blocking: [], transferable: null, can_mark: true, lifecycle: 'archived' }
+  const trashWiring = (over: Partial<Record<string, unknown>> = {}) => ({
+    canMark: true, canUnmark: true,
+    users: [{ value: 'u-1', label: 'Anna de Vries' }],
+    onMarked: vi.fn(), onUnmarked: vi.fn(), ...over,
+  })
+
+  it('mark flow: preview GET + confirm POSTs /vacancies/{id}/mark-deletion with an EMPTY body', async () => {
+    vi.mocked(api.get).mockResolvedValue({ data: { data: PREVIEW } })
+    const wiring = trashWiring()
+    const user = userEvent.setup()
+    render(<VacancyDrawer vacancy={vacancy} onClose={vi.fn()} trash={wiring} />)
+
+    await user.click(screen.getByRole('button', { name: tc('trash.markAction') as string }))
+    await waitFor(() => expect(api.get).toHaveBeenCalledWith('/vacancies/v1/deletion-preview'))
+    await user.click(within(screen.getByRole('dialog')).getByRole('button', { name: tc('trash.modal.confirm') as string }))
+
+    await waitFor(() => expect(api.post).toHaveBeenCalledWith('/vacancies/v1/mark-deletion', {}, { quietStatuses: [409] }))
+    expect(wiring.onMarked).toHaveBeenCalledWith('v1')
+  })
+
+  it('mark flow with a picked transfer owner sends {transfer_to_owner_id}', async () => {
+    vi.mocked(api.get).mockResolvedValue({ data: { data: { ...PREVIEW, transferable: { attribute: 'owner_id', current_owner_id: null } } } })
+    const user = userEvent.setup()
+    render(<VacancyDrawer vacancy={vacancy} onClose={vi.fn()} trash={trashWiring()} />)
+
+    await user.click(screen.getByRole('button', { name: tc('trash.markAction') as string }))
+    await user.click(await screen.findByText(tc('trash.modal.transferPlaceholder') as string))
+    await user.click(screen.getByText('Anna de Vries'))
+    await user.click(within(screen.getByRole('dialog')).getByRole('button', { name: tc('trash.modal.confirm') as string }))
+
+    await waitFor(() => expect(api.post).toHaveBeenCalledWith('/vacancies/v1/mark-deletion',
+      { transfer_to_owner_id: 'u-1' }, { quietStatuses: [409] }))
+  })
+
+  it('hides the mark action without vacancies.delete (no fake affordances)', () => {
+    render(<VacancyDrawer vacancy={vacancy} onClose={vi.fn()} trash={trashWiring({ canMark: false })} />)
+    expect(screen.queryByRole('button', { name: tc('trash.markAction') as string })).toBeNull()
+  })
+
+  it('unmark on a pending_erase record POSTs /vacancies/{id}/unmark-deletion', async () => {
+    const wiring = trashWiring()
+    const pending = { ...vacancy, archived: true, lifecycle: 'pending_erase', pendingEraseAt: '2026-08-01T10:00:00Z' } as VacancyDetail
+    const user = userEvent.setup()
+    render(<VacancyDrawer vacancy={pending} onClose={vi.fn()} trash={wiring} />)
+
+    await user.click(screen.getByRole('button', { name: tc('trash.unmarkAction') as string }))
+
+    await waitFor(() => expect(api.post).toHaveBeenCalledWith('/vacancies/v1/unmark-deletion'))
+    expect(wiring.onUnmarked).toHaveBeenCalledWith('v1')
   })
 })

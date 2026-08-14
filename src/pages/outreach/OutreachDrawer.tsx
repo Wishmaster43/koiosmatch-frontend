@@ -46,6 +46,9 @@ import TargetsTab from './drawer/TargetsTab'
 import ChangelogTab from './drawer/ChangelogTab'
 import CampaignStatsTab from './drawer/CampaignStatsTab'
 import ArchivedBanner from '@/components/drawer/ArchivedBanner'
+import PendingEraseBanner from '@/components/drawer/PendingEraseBanner'
+import { buildTrashNote } from '@/hooks/useTrashFlow'
+import { Trash2 } from 'lucide-react'
 import type { Id } from '@/types/common'
 import type { TargetFilter } from './drawer/targetFilter'
 
@@ -58,7 +61,7 @@ const STATUS_COLOR: Record<string, string> = {
 interface UserLike { id?: Id; name?: string; firstname?: string; lastname?: string; email?: string }
 const userName = (u: UserLike): string => u.name || [u.firstname, u.lastname].filter(Boolean).join(' ') || u.email || '—'
 
-export default function OutreachDrawer({ id, createdAt, archived = false, archivedAt = null, fallbackName, fallbackStatus, onRestore, onClose, expanded = false, onToggleExpand }: {
+export default function OutreachDrawer({ id, createdAt, archived = false, archivedAt = null, fallbackName, fallbackStatus, onRestore, inTrash = false, pendingEraseAt = null, graceDays = null, onMarkDeletion, onUnmark, onClose, expanded = false, onToggleExpand }: {
   id: string | null
   createdAt?: string
   // Enkelstuks-sweep: soft-deleted row (flag from the page). W2 delivered (measured:
@@ -72,6 +75,13 @@ export default function OutreachDrawer({ id, createdAt, archived = false, archiv
   fallbackStatus?: string
   // Per-id restore — the page passes this only with outreach.update.
   onRestore?: (id: string) => void
+  // TRASH-OVERAL-2: trash state (lifecycle pending_erase) + its erase-note inputs.
+  inTrash?: boolean
+  pendingEraseAt?: string | null
+  graceDays?: number | null
+  // Mark for erasure (outreach.delete — HIDDEN without) / unmark (outreach.update).
+  onMarkDeletion?: (id: string) => void
+  onUnmark?: (id: string) => void
   onClose: () => void
   expanded?: boolean
   onToggleExpand?: () => void
@@ -159,7 +169,18 @@ export default function OutreachDrawer({ id, createdAt, archived = false, archiv
           // other seven entities. Its content mounts (and only then fetches) on open.
           // Stays available while archived: activityLog resolves withTrashed, so an
           // archived bellijst keeps its history readable (ARCH-READ-1).
-          titleActions={<ChangelogPopover><ChangelogTab campaignId={id} /></ChangelogPopover>}
+          titleActions={<>
+            <ChangelogPopover><ChangelogTab campaignId={id} /></ChangelogPopover>
+            {/* TRASH-OVERAL-2: archived → trash (outreach.delete-gated at the page;
+                the shared preview modal confirms). Hidden once already in the trash. */}
+            {onMarkDeletion && archived && !inTrash && (
+              <button onClick={() => onMarkDeletion(id)}
+                title={t('common:trash.markAction')} aria-label={t('common:trash.markAction')}
+                style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 4, display: 'flex', color: 'var(--color-danger)' }}>
+                <Trash2 size={14} />
+              </button>
+            )}
+          </>}
           renderTitle={() => (
             <>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
@@ -195,10 +216,19 @@ export default function OutreachDrawer({ id, createdAt, archived = false, archiv
               ArchivedBanner (§3A — extend, never duplicate). W2 delivered (measured:
               OutreachCampaignResource now carries deleted_at) → dated banner; falls
               back to the flag-only line when archivedAt is absent. */}
-          {archived && (
+          {archived && !inTrash && (
             <ArchivedBanner id={id} onRestore={onRestore ? () => onRestore(id) : undefined}
               message={archivedAt ? t('drawer.archivedBanner.since', { date: formatDate(archivedAt) }) : t('drawer.archivedBanner.flag')}
               restoreLabel={t('drawer.archivedBanner.restore')} />
+          )}
+          {/* TRASH-OVERAL-2: trash state — since-when + projected erase moment
+              (DD-MM-YYYY via the house formatter) + the unmark ("back to archive")
+              action, outreach.update-gated at the page. */}
+          {inTrash && (
+            <PendingEraseBanner id={id}
+              message={buildTrashNote(t, formatDate, pendingEraseAt, graceDays)}
+              onUnmark={onUnmark ? () => onUnmark(id) : undefined}
+              unmarkLabel={t('common:trash.unmarkAction')} />
           )}
         </EntityHeader>
       }

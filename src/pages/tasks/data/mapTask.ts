@@ -78,6 +78,10 @@ export function mapTask(t: ApiTask = {}): Task {
     // ?archived=1 fetch still stamps `archived: true` defensively (belt-and-braces).
     archived: Boolean(t.archived),
     archivedAt: t.deleted_at ?? null,
+    // TRASH-OVERAL-2 lifecycle (mirrors mapCandidate): server value first, else
+    // derived from the stamps — a missing field stays 'active'/null (old fixtures).
+    lifecycle: t.lifecycle ?? (t.pending_erase_at ? 'pending_erase' : (t.deleted_at || t.archived) ? 'archived' : 'active'),
+    pendingEraseAt: t.pending_erase_at ?? null,
   }
 }
 

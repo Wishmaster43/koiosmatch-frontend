@@ -8,12 +8,14 @@
  * (The live seed has no archived tasks, so this wiring is verified here.)
  */
 import { describe, it, expect, vi } from 'vitest'
-import { render, screen, fireEvent } from '@testing-library/react'
+import { render, screen, fireEvent, waitFor, within } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 // Real i18n (nl) instance so t() resolves genuine Dutch text — kept as a binding
 // (not just the side-effect import) so the NT-TASK-1 block below can read the
 // SAME resolved string the component renders, whether or not the reported nl
 // copy for the new 'notes' tab key has landed in tasks.json yet.
 import i18n from '@/i18n'
+import api from '@/lib/api'
 import TaskDrawer from './TaskDrawer'
 import type { TaskDetail } from '@/types/task'
 
@@ -37,7 +39,23 @@ vi.mock('@/lib/useLocations', () => ({ useLocations: () => [] }))
 // react-query — mocked for the same no-QueryClientProvider reason as the two above.
 vi.mock('@/lib/useTeams', () => ({ useTeams: () => ({ teams: [], loading: false, error: false, retry: vi.fn() }) }))
 vi.mock('@/lib/useCustomFields', () => ({ useCustomFields: () => ({ fields: [] }) }))
-vi.mock('@/lib/api', () => ({ default: { get: vi.fn(() => new Promise(() => {})) }, unwrap: (r: unknown) => r, unwrapList: () => ({ rows: [] }) }))
+// TRASH-OVERAL-2: post + a real body-unwrap serve the shared TrashLifecycleSection
+// (deletion-preview GET, mark/unmark POSTs); the never-resolving get default keeps
+// the untested tab fetches quiet exactly as before.
+vi.mock('@/lib/api', () => ({
+  default: {
+    get: vi.fn(() => new Promise(() => {})),
+    post: vi.fn(() => Promise.resolve({ data: { data: { lifecycle: 'pending_erase' } } })),
+  },
+  unwrap: (res: { data?: unknown }) => {
+    const body = (res as { data?: unknown })?.data
+    return body && typeof body === 'object' && 'data' in body ? (body as { data: unknown }).data : body
+  },
+  unwrapList: () => ({ rows: [] }),
+}))
+vi.mock('@/pages/settings/lib/settingsApi', () => ({
+  loadSettings: () => Promise.resolve({ deletion_grace_days: '30' }),
+}))
 
 // A minimal drawer-ready task; `archived` (+ optional `archivedAt`) flips per test.
 const task = (archived: boolean, archivedAt: string | null = null): TaskDetail => ({
@@ -203,5 +221,71 @@ describe('TaskDrawer · title pencil (T1)', () => {
     rerender(<TaskDrawer task={{ ...task(false), id: 't2', title: 'Andere taak' }} onClose={noop} onUpdate={noop} onAddLink={noop} onRemoveLink={noop} />)
     expect(screen.queryByDisplayValue('Bel kandidaat')).toBeNull()
     expect(screen.getByText('Andere taak')).toBeInTheDocument()
+  })
+})
+
+// TRASH-OVERAL-2: the drawer's trash surface — REQUEST-asserting (§13): the exact
+// mark POST with and without transfer_to_owner_id, the unmark POST, and the
+// permission-hidden mark action (tasks.delete / tasks.update via the page).
+describe('TaskDrawer · trash lifecycle (TRASH-OVERAL-2)', () => {
+  const tc = (key: string, opts?: Record<string, unknown>) => i18n.t(key, { ns: 'common', ...opts })
+  const PREVIEW = { blocking: [], transferable: null, can_mark: true, lifecycle: 'archived' }
+  const trashWiring = (over: Partial<Record<string, unknown>> = {}) => ({
+    canMark: true, canUnmark: true,
+    users: [{ value: 'u-1', label: 'Anna de Vries' }],
+    onMarked: vi.fn(), onUnmarked: vi.fn(), ...over,
+  })
+  // Route ONLY the preview GET to a resolved response; every other get keeps the
+  // never-resolving default this file uses to quiet untested tab fetches.
+  const routePreview = (preview: Record<string, unknown>) =>
+    vi.mocked(api.get).mockImplementation(((url: string) => url.includes('deletion-preview')
+      ? Promise.resolve({ data: { data: preview } })
+      : new Promise(() => {})) as never)
+  const mountTrash = (t: TaskDetail, wiring = trashWiring()) => {
+    render(<TaskDrawer task={t} onClose={noop} onUpdate={noop} onAddLink={noop} onRemoveLink={noop} trash={wiring} />)
+    return wiring
+  }
+
+  it('mark flow: preview GET + confirm POSTs /tasks/{id}/mark-deletion with an EMPTY body', async () => {
+    routePreview(PREVIEW)
+    const user = userEvent.setup()
+    const wiring = mountTrash(task(false))
+
+    await user.click(screen.getByRole('button', { name: tc('trash.markAction') as string }))
+    await waitFor(() => expect(api.get).toHaveBeenCalledWith('/tasks/t1/deletion-preview'))
+    await user.click(within(screen.getByRole('dialog')).getByRole('button', { name: tc('trash.modal.confirm') as string }))
+
+    await waitFor(() => expect(api.post).toHaveBeenCalledWith('/tasks/t1/mark-deletion', {}, { quietStatuses: [409] }))
+    expect(wiring.onMarked).toHaveBeenCalledWith('t1')
+  })
+
+  it('mark flow with a picked transfer owner sends {transfer_to_owner_id}', async () => {
+    routePreview({ ...PREVIEW, transferable: { attribute: 'owner_id', current_owner_id: null } })
+    const user = userEvent.setup()
+    mountTrash(task(false))
+
+    await user.click(screen.getByRole('button', { name: tc('trash.markAction') as string }))
+    await user.click(await screen.findByText(tc('trash.modal.transferPlaceholder') as string))
+    await user.click(screen.getByText('Anna de Vries'))
+    await user.click(within(screen.getByRole('dialog')).getByRole('button', { name: tc('trash.modal.confirm') as string }))
+
+    await waitFor(() => expect(api.post).toHaveBeenCalledWith('/tasks/t1/mark-deletion',
+      { transfer_to_owner_id: 'u-1' }, { quietStatuses: [409] }))
+  })
+
+  it('hides the mark action without tasks.delete (no fake affordances)', () => {
+    mountTrash(task(false), trashWiring({ canMark: false }) as ReturnType<typeof trashWiring>)
+    expect(screen.queryByRole('button', { name: tc('trash.markAction') as string })).toBeNull()
+  })
+
+  it('unmark on a pending_erase record POSTs /tasks/{id}/unmark-deletion', async () => {
+    const pending = { ...task(true, '2026-08-01T10:00:00Z'), lifecycle: 'pending_erase', pendingEraseAt: '2026-08-02T10:00:00Z' }
+    const user = userEvent.setup()
+    const wiring = mountTrash(pending)
+
+    await user.click(screen.getByRole('button', { name: tc('trash.unmarkAction') as string }))
+
+    await waitFor(() => expect(api.post).toHaveBeenCalledWith('/tasks/t1/unmark-deletion'))
+    expect(wiring.onUnmarked).toHaveBeenCalledWith('t1')
   })
 })

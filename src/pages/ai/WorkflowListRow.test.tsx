@@ -98,3 +98,49 @@ describe('WorkflowListRow · archived (TRASH-OVERAL-1b)', () => {
     expect(onEdit).not.toHaveBeenCalled()
   })
 })
+
+// TRASH-OVERAL-2: a TRASHED row (lifecycle pending_erase) swaps restore/archive
+// for the erase note + the unmark action; an ARCHIVED row gains the gated
+// mark-deletion action. Absent props = hidden buttons (§7 no fake affordances).
+describe('WorkflowListRow · trash lifecycle (TRASH-OVERAL-2)', () => {
+  const trashedWorkflow: Workflow = {
+    ...baseWorkflow, archived: true, lifecycle: 'pending_erase', pending_erase_at: '2026-08-10T12:00:00Z',
+  }
+  const archivedWorkflow: Workflow = { ...baseWorkflow, archived: true, lifecycle: 'archived' }
+
+  it('an archived row shows the mark-deletion action and fires it without opening the editor', () => {
+    const onEdit = vi.fn()
+    const onMarkDeletion = vi.fn()
+    render(<WorkflowListRow workflow={archivedWorkflow} onRun={vi.fn()} onEdit={onEdit} onToggleStatus={vi.fn()}
+      canManageFolders onRestore={vi.fn()} onMarkDeletion={onMarkDeletion} />)
+    // Real i18n (nl): common:trash.markAction.
+    fireEvent.click(screen.getByLabelText('Definitief verwijderen'))
+    expect(onMarkDeletion).toHaveBeenCalledTimes(1)
+    expect(onEdit).not.toHaveBeenCalled()
+  })
+
+  it('hides the mark-deletion action when the prop is absent (no workflows.delete)', () => {
+    render(<WorkflowListRow workflow={archivedWorkflow} onRun={vi.fn()} onEdit={vi.fn()} onToggleStatus={vi.fn()}
+      canManageFolders onRestore={vi.fn()} />)
+    expect(screen.queryByLabelText('Definitief verwijderen')).not.toBeInTheDocument()
+  })
+
+  it('a trashed row shows the erase note (DD-MM-YYYY) + unmark, and hides restore/mark', () => {
+    const onUnmark = vi.fn()
+    render(<WorkflowListRow workflow={trashedWorkflow} onRun={vi.fn()} onEdit={vi.fn()} onToggleStatus={vi.fn()}
+      canManageFolders onRestore={vi.fn()} onMarkDeletion={vi.fn()} onUnmark={onUnmark} graceDays={30} />)
+    // House date format, never ISO (DATUM-1): pending since 10-08, erased around +30d.
+    expect(screen.getByText(/10-08-2026/)).toBeInTheDocument()
+    expect(screen.getByText(/09-09-2026/)).toBeInTheDocument()
+    expect(screen.queryByLabelText('Workflow herstellen')).not.toBeInTheDocument()
+    expect(screen.queryByLabelText('Definitief verwijderen')).not.toBeInTheDocument()
+    fireEvent.click(screen.getByLabelText('Terugzetten naar archief'))
+    expect(onUnmark).toHaveBeenCalledTimes(1)
+  })
+
+  it('hides the unmark action on a trashed row when the prop is absent (no settings.update)', () => {
+    render(<WorkflowListRow workflow={trashedWorkflow} onRun={vi.fn()} onEdit={vi.fn()} onToggleStatus={vi.fn()}
+      canManageFolders={false} />)
+    expect(screen.queryByLabelText('Terugzetten naar archief')).not.toBeInTheDocument()
+  })
+})

@@ -374,3 +374,29 @@ describe('useCustomerRecord · editNote/deleteNote (K15NOTES)', () => {
     expect(r.result.current.record.detail?.notes ?? []).toHaveLength(1)
   })
 })
+
+// TRASH-OVERAL-2: restore-to-active stays the separate per-id /restore route —
+// REQUEST-asserting (§13), plus the local lifecycle reconcile across the slices.
+describe('useCustomerRecord · restoreCustomer (TRASH-OVERAL-2)', () => {
+  it('POSTs /customers/{id}/restore and clears archived + lifecycle on the list row', async () => {
+    vi.mocked(api.post).mockResolvedValue({})
+    const r = harness([customer({ id: 1, archived: true, archivedAt: '2026-08-01T10:00:00Z', lifecycle: 'archived', pendingEraseAt: null })])
+
+    act(() => { r.result.current.record.restoreCustomer(1) })
+
+    await waitFor(() => expect(api.post).toHaveBeenCalledWith('/customers/1/restore'))
+    await waitFor(() => expect(r.result.current.customers[0].archived).toBe(false))
+    expect(r.result.current.customers[0].lifecycle).toBe('active')
+    expect(r.result.current.customers[0].archivedAt).toBeNull()
+  })
+
+  it('keeps the archived state and reports failure when the POST is refused', async () => {
+    vi.mocked(api.post).mockRejectedValue({ response: { status: 403 } })
+    const r = harness([customer({ id: 1, archived: true, lifecycle: 'archived' })])
+
+    act(() => { r.result.current.record.restoreCustomer(1) })
+
+    await waitFor(() => expect(notifyError).toHaveBeenCalled())
+    expect(r.result.current.customers[0].archived).toBe(true)
+  })
+})

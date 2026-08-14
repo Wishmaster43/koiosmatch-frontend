@@ -51,6 +51,10 @@ export function mapOpportunity(o: ApiOpportunity): Opportunity {
     expectedCloseAt: o.expected_close_at ?? null,
     archived:   Boolean(o.archived ?? o.deleted_at),
     archivedAt: o.deleted_at ?? null,
+    // TRASH-OVERAL-2 lifecycle (mirrors mapCandidate): server value first, else
+    // derived from the stamps — a missing field stays 'active'/null (old fixtures).
+    lifecycle: o.lifecycle ?? (o.pending_erase_at ? 'pending_erase' : (o.deleted_at || o.archived) ? 'archived' : 'active'),
+    pendingEraseAt: o.pending_erase_at ?? null,
     // Zorg-detachering fields (C-42) — tolerated absent until the backend lands.
     hours:            num(o.hours),
     hoursPeriod:      o.hours_period ?? 'week',

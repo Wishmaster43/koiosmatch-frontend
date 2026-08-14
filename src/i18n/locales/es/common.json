@@ -1,4 +1,42 @@
 {
+  "trash": {
+    "view": "Papelera",
+    "markAction": "Eliminar definitivamente",
+    "unmarkAction": "Devolver al archivo",
+    "pendingSince": "En la papelera desde {{date}}",
+    "eraseAround": "se eliminará definitivamente alrededor del {{date}}",
+    "eraseAutomatic": "se eliminará definitivamente de forma automática tras el plazo de conservación",
+    "modal": {
+      "title": "Eliminar definitivamente",
+      "intro": "{{entity}} se mueve a la papelera y se eliminará definitivamente de forma automática tras el plazo de conservación de tu organización.",
+      "blockedTitle": "Todavía en uso",
+      "blockedIntro": "Este registro no se puede eliminar definitivamente en este momento. Resuelve primero los elementos vinculados siguientes.",
+      "transferLabel": "Transferir la propiedad a",
+      "transferPlaceholder": "Elige un usuario",
+      "confirm": "Eliminar definitivamente",
+      "cancel": "Cancelar"
+    },
+    "blockers": {
+      "vacancies": "Vacantes",
+      "matches": "Coincidencias",
+      "open_opportunities": "Oportunidades abiertas",
+      "open_tasks": "Tareas abiertas",
+      "planned_appointments": "Citas planificadas",
+      "backoffice_link": "Vínculo con el back-office",
+      "applications": "Postulaciones",
+      "contract": "Contrato",
+      "contract_status": "Estado del contrato",
+      "open_period": "Período abierto",
+      "placed_basis": "Base de una colocación",
+      "lifecycle_history": "Historial del ciclo de vida",
+      "replaced_by": "Reemplazado por",
+      "open_runs": "Ejecuciones abiertas",
+      "uninvoiced_credits": "Créditos no facturados",
+      "conversion": "Conversión"
+    },
+    "marked": "Movido a la papelera.",
+    "unmarked": "Devuelto al archivo."
+  },
   "actionFailed": "La acción falló. Inténtalo de nuevo.",
   "save": "Guardar",
   "saving": "Guardando…",

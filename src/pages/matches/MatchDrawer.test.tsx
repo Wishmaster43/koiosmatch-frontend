@@ -357,3 +357,48 @@ describe('MatchDrawer · renew action (G04/MATCH-RENEWAL-1)', () => {
     expect(btn).toHaveAttribute('title', disabledReason)
   })
 })
+
+// TRASH-OVERAL-2: the two-step trash lifecycle in the drawer — an ARCHIVED match
+// offers "Definitief verwijderen" (matches.delete-gated at the page: prop absent =
+// button HIDDEN), a TRASHED match swaps the archived banner for the pending-erase
+// banner with the DD-MM-YYYY note + the unmark action (matches.update-gated).
+describe('MatchDrawer · trash lifecycle (TRASH-OVERAL-2)', () => {
+  const markLabel = i18n.t('trash.markAction', { ns: 'common' })
+  const unmarkLabel = i18n.t('trash.unmarkAction', { ns: 'common' })
+
+  it('shows the mark-deletion action on an archived match and hands back the id', async () => {
+    const user = userEvent.setup()
+    const onMarkDeletion = vi.fn()
+    render(<MatchDrawer match={{ ...match, archived: true }} onClose={vi.fn()} onMarkDeletion={onMarkDeletion} />)
+    await user.click(screen.getByRole('button', { name: markLabel }))
+    expect(onMarkDeletion).toHaveBeenCalledWith('m1')
+  })
+
+  it('hides the mark-deletion action without the permission (prop absent) and on a live match', () => {
+    const { rerender } = render(<MatchDrawer match={{ ...match, archived: true }} onClose={vi.fn()} />)
+    expect(screen.queryByRole('button', { name: markLabel })).not.toBeInTheDocument()
+    rerender(<MatchDrawer match={match} onClose={vi.fn()} onMarkDeletion={vi.fn()} />)
+    expect(screen.queryByRole('button', { name: markLabel })).not.toBeInTheDocument()
+  })
+
+  it('a trashed match shows the pending-erase note (DD-MM-YYYY) and the unmark action', async () => {
+    const user = userEvent.setup()
+    const onUnmark = vi.fn()
+    render(<MatchDrawer
+      match={{ ...match, archived: true, lifecycle: 'pending_erase', pendingEraseAt: '2026-08-10T12:00:00Z' }}
+      onClose={vi.fn()} onUnmark={onUnmark} onMarkDeletion={vi.fn()} graceDays={30} />)
+    // House date format, never ISO/slash-locale (DATUM-1).
+    expect(screen.getByText(new RegExp(i18n.t('trash.pendingSince', { ns: 'common', date: '10-08-2026' })))).toBeInTheDocument()
+    // In the trash the mark action is gone; unmark takes over.
+    expect(screen.queryByRole('button', { name: markLabel })).not.toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: unmarkLabel }))
+    expect(onUnmark).toHaveBeenCalledWith('m1')
+  })
+
+  it('hides the unmark action without the permission (prop absent)', () => {
+    render(<MatchDrawer
+      match={{ ...match, archived: true, lifecycle: 'pending_erase', pendingEraseAt: '2026-08-10T12:00:00Z' }}
+      onClose={vi.fn()} />)
+    expect(screen.queryByRole('button', { name: unmarkLabel })).not.toBeInTheDocument()
+  })
+})

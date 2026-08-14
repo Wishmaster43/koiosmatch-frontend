@@ -22,6 +22,9 @@ export interface Campaign {
   // carries both fields on the list row and the detail).
   archived?: boolean
   deleted_at?: string | null
+  // TRASH-OVERAL-2: two-step trash lifecycle + the pending-erase stamp (list resource).
+  lifecycle?: 'active' | 'archived' | 'pending_erase' | string
+  pending_erase_at?: string | null
   // Tenant custom-field values (§3B "Eigen velden").
   custom_fields?: Record<string, unknown>
   [key: string]: unknown

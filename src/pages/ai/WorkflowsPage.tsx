@@ -13,18 +13,39 @@
  */
 import { useState } from 'react'
 import WorkflowCanvasEditor from '@/components/layout/WorkflowCanvasEditor'
+import { useAuth } from '@/context/AuthContext'
+import { useTrashFlow } from '@/hooks/useTrashFlow'
+import DeletionPreviewModal from '@/components/ui/DeletionPreviewModal'
 import { useWorkflowsData } from './hooks/useWorkflowsData'
 import { useWorkflowsFilters } from './hooks/useWorkflowsFilters'
 import WorkflowFolderSidebar from './WorkflowFolderSidebar'
 import WorkflowsListPanel from './WorkflowsListPanel'
+import type { Workflow } from '@/types/workflow'
 
 export default function WorkflowsPage() {
   // Archived (soft-deleted) view — off by default; drives both the data fetch
   // (include_archived param) and the visible-list filter, so it lives here.
   const [showArchived, setShowArchived] = useState(false)
+  // TRASH-OVERAL-2: the Prullenbak view (lifecycle pending_erase) — exclusive with
+  // the archived view; both ride the same include_archived fetch.
+  const [showTrash, setShowTrash] = useState(false)
 
-  const data = useWorkflowsData(showArchived)
-  const { viewMode, setViewMode, visibleWorkflows } = useWorkflowsFilters(data.workflows, showArchived, data.selectedFolder)
+  const data = useWorkflowsData(showArchived || showTrash)
+  const { viewMode, setViewMode, visibleWorkflows } = useWorkflowsFilters(data.workflows, showArchived, data.selectedFolder, showTrash)
+
+  // TRASH-OVERAL-2: mark is workflows.delete-gated (HIDDEN without — §7 no fake
+  // affordances); unmark reuses settings.update, the same gate the archive/restore
+  // actions carry here (canManageFolders). A mark/unmark refetches the list.
+  const canMarkDeletion = useAuth()?.hasPermission('workflows.delete') ?? false
+  const trash = useTrashFlow({
+    entityPath: 'workflows',
+    onMarked: () => data.retryLoad(),
+    onUnmarked: () => data.retryLoad(),
+  })
+  const openMarkDeletion = (wf: Workflow) => {
+    if (wf.id == null) return
+    trash.openFor(String(wf.id), wf.name ?? String(wf.id))
+  }
 
   return (
     <div style={{ display: 'flex', height: '100%' }}>
@@ -52,7 +73,10 @@ export default function WorkflowsPage() {
         viewMode={viewMode}
         setViewMode={setViewMode}
         showArchived={showArchived}
-        setShowArchived={setShowArchived}
+        // The two lifecycle views are exclusive (TRASH-OVERAL-2, mirrors candidates).
+        onToggleArchived={() => { setShowArchived(v => !v); setShowTrash(false) }}
+        showTrash={showTrash}
+        onToggleTrash={() => { setShowTrash(v => !v); setShowArchived(false) }}
         selectedFolder={data.selectedFolder}
         dragWf={data.dragWf}
         openEditor={data.openEditor}
@@ -61,6 +85,9 @@ export default function WorkflowsPage() {
         canManageFolders={data.canManageFolders}
         handleArchive={data.handleArchive}
         handleRestore={data.handleRestore}
+        onMarkDeletion={canMarkDeletion ? openMarkDeletion : undefined}
+        onUnmark={data.canManageFolders ? (wf) => { if (wf.id != null) trash.unmark(String(wf.id)) } : undefined}
+        graceDays={trash.graceDays}
       />
 
       {data.editingWorkflow && (
@@ -72,6 +99,15 @@ export default function WorkflowsPage() {
         />
       )}
       {data.dialog}
+      {/* TRASH-OVERAL-2: the ONE shared "Definitief verwijderen" preview dialog.
+          Workflows carry no transferable owner (preview.transferable stays null),
+          so the modal renders without the transfer picker by itself. */}
+      {trash.target && (
+        <DeletionPreviewModal open onClose={trash.close} entityLabel={trash.target.label}
+          preview={trash.preview} loading={trash.loading} error={trash.error}
+          users={[]} onConfirm={trash.confirmMark} busy={trash.busy} blocked={trash.blocked}
+          graceDays={trash.graceDays} />
+      )}
     </div>
   )
 }

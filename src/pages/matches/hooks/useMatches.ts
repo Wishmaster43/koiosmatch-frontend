@@ -86,6 +86,11 @@ export function mapMatch(m: RawMatch): MatchRow {
     // MATCH-ARCHIVED-LIST-1: real list-level archive state (MatchListResource).
     archived:   Boolean(m.archived ?? m.deleted_at),
     archivedAt: m.deleted_at ?? null,
+    // TRASH-OVERAL-2: trash lifecycle + pending-erase stamp — tolerant fallback
+    // derives 'archived'/'active' from deleted_at for payloads/fixtures that
+    // predate the lifecycle field (never leaves it undefined on a mapped row).
+    lifecycle:  (m.lifecycle as MatchRow['lifecycle']) ?? (m.deleted_at ? 'archived' : 'active'),
+    pendingEraseAt: m.pending_erase_at ?? null,
     // MATCH-CARD-INFO-1 (Danny points 4/5): contract window + function/branch —
     // MatchListResource.php:35,43-46 already ships all four on every list row.
     functionTitle: m.function_title ?? null,

@@ -58,6 +58,10 @@ export interface Task {
   // derived client-side from which fetch (active vs ?archived=1) produced the row.
   archived?: boolean
   archivedAt?: string | null
+  // TRASH-OVERAL-2 lifecycle: 'active' | 'archived' | 'pending_erase' (trash) —
+  // drives the Gearchiveerd/Prullenbak view split, mirrors Candidate.lifecycle.
+  lifecycle?: string
+  pendingEraseAt?: string | null
 }
 
 /** The enriched task model rendered by the drawer tabs. */
@@ -112,6 +116,10 @@ export interface ApiTask {
   // by the backend today — see the Task interface comment above).
   archived?: boolean
   deleted_at?: string | null
+  // TRASH-OVERAL-2: the two-step trash lifecycle fields the list resource now
+  // carries ('active'|'archived'|'pending_erase' + ISO stamp).
+  lifecycle?: string
+  pending_erase_at?: string | null
   tags?: string[]
   links?: Array<{ type?: string; linkable_type?: string; id?: Id; linkable_id?: Id; label?: string; name?: string }>
   comment_count?: number

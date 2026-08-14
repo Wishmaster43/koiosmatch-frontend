@@ -132,3 +132,20 @@ describe('mapOpportunity', () => {
     expect(row.initials).toBe('?')
   })
 })
+
+// TRASH-OVERAL-2: tolerant lifecycle mapping — server value first, stamps as the
+// derivation fallback, and a bare/old payload stays 'active'/null.
+describe('mapOpportunity · lifecycle (TRASH-OVERAL-2)', () => {
+  it('reads the server lifecycle + pending_erase_at straight through', () => {
+    const row = mapOpportunity({ id: 'o1', lifecycle: 'pending_erase', pending_erase_at: '2026-08-10T10:00:00Z', deleted_at: '2026-08-01T10:00:00Z' })
+    expect(row.lifecycle).toBe('pending_erase')
+    expect(row.pendingEraseAt).toBe('2026-08-10T10:00:00Z')
+    expect(row.archived).toBe(true)
+  })
+
+  it('derives archived from the stamps when the lifecycle field is absent, and stays active on a bare payload', () => {
+    expect(mapOpportunity({ id: 'o1', deleted_at: '2026-08-01T10:00:00Z' }).lifecycle).toBe('archived')
+    expect(mapOpportunity({ id: 'o1' }).lifecycle).toBe('active')
+    expect(mapOpportunity({ id: 'o1' }).pendingEraseAt).toBeNull()
+  })
+})

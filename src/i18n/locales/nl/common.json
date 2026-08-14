@@ -1,4 +1,42 @@
 {
+  "trash": {
+    "view": "Prullenbak",
+    "markAction": "Definitief verwijderen",
+    "unmarkAction": "Terugzetten naar archief",
+    "pendingSince": "In prullenbak sinds {{date}}",
+    "eraseAround": "wordt rond {{date}} definitief verwijderd",
+    "eraseAutomatic": "wordt na de bewaartermijn automatisch definitief verwijderd",
+    "modal": {
+      "title": "Definitief verwijderen",
+      "intro": "{{entity}} gaat naar de prullenbak en wordt na de bewaartermijn van je organisatie automatisch definitief verwijderd.",
+      "blockedTitle": "Nog in gebruik",
+      "blockedIntro": "Dit record kan nu niet definitief verwijderd worden. Handel eerst de onderstaande koppelingen af.",
+      "transferLabel": "Eigendom overdragen aan",
+      "transferPlaceholder": "Kies een gebruiker",
+      "confirm": "Definitief verwijderen",
+      "cancel": "Annuleren"
+    },
+    "blockers": {
+      "vacancies": "Vacatures",
+      "matches": "Matches",
+      "open_opportunities": "Open kansen",
+      "open_tasks": "Open taken",
+      "planned_appointments": "Geplande afspraken",
+      "backoffice_link": "Backoffice-koppeling",
+      "applications": "Sollicitaties",
+      "contract": "Contract",
+      "contract_status": "Contractstatus",
+      "open_period": "Open periode",
+      "placed_basis": "Basis van een plaatsing",
+      "lifecycle_history": "Levensloopgeschiedenis",
+      "replaced_by": "Vervangen door",
+      "open_runs": "Open uitvoeringen",
+      "uninvoiced_credits": "Ongefactureerde credits",
+      "conversion": "Conversie"
+    },
+    "marked": "In de Prullenbak gezet.",
+    "unmarked": "Teruggezet naar archief."
+  },
   "actionFailed": "Actie mislukt. Probeer het opnieuw.",
   "save": "Opslaan",
   "saving": "Opslaan…",

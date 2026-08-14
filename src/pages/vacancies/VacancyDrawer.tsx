@@ -10,6 +10,8 @@ import { channelIcon } from './data/channelIcons'
 import ChangelogPopover from '@/components/drawer/ChangelogPopover'
 import ChangelogTab from './drawer/ChangelogTab'
 import ArchivedBanner from '@/components/drawer/ArchivedBanner'
+import TrashLifecycleSection from '@/components/drawer/TrashLifecycleSection'
+import type { TrashSectionConfig } from '@/components/drawer/TrashLifecycleSection'
 import { useVacancyLookups } from '@/context/VacancyLookupsContext'
 import { useAllSettings, getJsonSetting } from '@/lib/settings/useAllSettings'
 import { isCandidateTabVisible } from './lib/candidateTabVisibility'
@@ -99,6 +101,8 @@ interface VacancyDrawerProps {
   onUpdate?: UpdateFn
   // VAC-RESTORE-1: page passes this only with vacancies.update permission.
   onRestore?: (id: Id | undefined) => void
+  // TRASH-OVERAL-2: the shared trash-section wiring (mark/unmark, see TrashLifecycleSection).
+  trash?: TrashSectionConfig
   users?: DrawerUser[]
   // VACANCY-MATCH-COUNT-1 (Danny 23-07): deep-link from the table's Leads count —
   // open straight on this tab id (mirrors CustomerDrawer's initialTab). Falls back
@@ -114,7 +118,7 @@ const hdrPrimary: CSSProperties = { ...hdrBtn, background: 'var(--color-primary)
  * VacancyDrawer — thin container: wires data (lookups + onUpdate) and declares the
  * header config + tab list. No heavy JSX, no business logic (mirror CandidateDrawer).
  */
-export default function VacancyDrawer({ vacancy: v, onClose, expanded, onToggleExpand, onUpdate, onRestore, users = [], initialTab }: VacancyDrawerProps) {
+export default function VacancyDrawer({ vacancy: v, onClose, expanded, onToggleExpand, onUpdate, onRestore, trash, users = [], initialTab }: VacancyDrawerProps) {
   const { t } = useTranslation('vacancies')
   const { statuses } = useVacancyLookups()
   const { formatDate, formatDateTime } = useDateFormat()
@@ -245,10 +249,17 @@ export default function VacancyDrawer({ vacancy: v, onClose, expanded, onToggleE
               the drawer previously had no equivalent. Now the ONE shared
               components/drawer/ArchivedBanner (§3A — extend, never duplicate); the
               since-when/flag i18n keys are unchanged (drawer.archivedBanner.*, vacancies ns). */}
-          {v.archived && (
+          {/* TRASH-OVERAL-2: hidden once the record sits in the trash — the trash
+              banner (TrashLifecycleSection) takes over with unmark instead. */}
+          {v.archived && v.lifecycle !== 'pending_erase' && (
             <ArchivedBanner id={v.id} onRestore={onRestore}
               message={v.archivedAt ? t('drawer.archivedBanner.since', { date: formatDate(v.archivedAt) }) : t('drawer.archivedBanner.flag')}
               restoreLabel={t('drawer.archivedBanner.restore')} />
+          )}
+          {/* TRASH-OVERAL-2: the shared mark/unmark surface (permission-gated in `trash`). */}
+          {trash && (
+            <TrashLifecycleSection entityPath="vacancies" id={v.id} entityLabel={v.title}
+              lifecycle={v.lifecycle} pendingEraseAt={v.pendingEraseAt} {...trash} />
           )}
           {/* V2: published indicator — per-channel icons for the channels this vacancy
               is ACTUALLY published on (icon + label, colour never the only signal);

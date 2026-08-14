@@ -12,6 +12,7 @@ import { AlertCircle, ArchiveRestore, CheckCircle, Loader2, MoreHorizontal, Play
 import { MODULE_META } from '@/modules/index'
 import { interactive } from '@/lib/a11y'
 import { useDateFormat } from '@/lib/datetime'
+import { buildTrashNote } from '@/hooks/useTrashFlow'
 import type { Workflow } from '@/types/workflow'
 
 // One workflow card's props — mirrors WorkflowListRow's archive/restore lifecycle
@@ -23,6 +24,12 @@ interface WorkflowCardProps {
   canManageFolders?: boolean
   onArchive?: () => void
   onRestore?: () => void | Promise<void>
+  // TRASH-OVERAL-2: mark for erasure (workflows.delete) on an archived card;
+  // unmark (settings.update) on a trashed card. Absent prop = hidden (§7).
+  onMarkDeletion?: () => void
+  onUnmark?: () => void | Promise<void>
+  // Tenant grace window — feeds the trashed card's erase note (DD-MM-YYYY).
+  graceDays?: number | null
 }
 
 // Status badge colours; label = t('status.<key>').
@@ -51,14 +58,16 @@ function StepPill({ type }: { type?: string }) {
   )
 }
 
-export default function WorkflowCard({ workflow, onRun, onEdit, canManageFolders, onArchive, onRestore }: WorkflowCardProps) {
+export default function WorkflowCard({ workflow, onRun, onEdit, canManageFolders, onArchive, onRestore, onMarkDeletion, onUnmark, graceDays = null }: WorkflowCardProps) {
   const { t } = useTranslation('workflows')
-  const { formatDateTime } = useDateFormat()
+  const { formatDate, formatDateTime } = useDateFormat()
   const [running, setRunning] = useState(false)
   const [restoring, setRestoring] = useState(false)
   const [hover, setHover] = useState(false)
   const status = STATUS_STYLES[workflow.status ?? ''] || STATUS_STYLES.draft
   const archived = Boolean(workflow.archived)
+  // TRASH-OVERAL-2: trashed cards swap restore/mark for the erase note + unmark.
+  const inTrash = workflow.lifecycle === 'pending_erase'
 
   // Run is a distinct action — stop propagation so it doesn't also open the editor.
   const handleRun = async (e: MouseEvent) => {
@@ -139,16 +148,49 @@ export default function WorkflowCard({ workflow, onRun, onEdit, canManageFolders
 
         <div className="flex items-center gap-2">
           {archived ? (
-            /* Restore — settings.update-gated (mirrors WorkflowListRow) */
-            canManageFolders && onRestore && (
-              <button onClick={handleRestoreClick} disabled={restoring}
-                aria-label={t('list.restoreWorkflow')} title={t('list.restoreWorkflow')}
-                className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium"
-                style={{ background: 'var(--color-success-bg)', color: 'var(--color-success)', border: '1px solid var(--color-success)', cursor: restoring ? 'not-allowed' : 'pointer' }}
-              >
-                {restoring ? <Loader2 size={12} className="animate-spin" /> : <ArchiveRestore size={12} />}
-                {t('list.restore')}
-              </button>
+            inTrash ? (
+              /* TRASH-OVERAL-2: erase note + unmark (settings.update-gated at the page). */
+              <>
+                <span className="text-xs truncate" style={{ color: 'var(--color-danger)', maxWidth: 220 }}>
+                  {buildTrashNote(t, formatDate, workflow.pending_erase_at, graceDays)}
+                </span>
+                {onUnmark && (
+                  <button onClick={e => { e.stopPropagation(); onUnmark() }}
+                    aria-label={t('common:trash.unmarkAction')} title={t('common:trash.unmarkAction')}
+                    className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium"
+                    style={{ background: 'color-mix(in srgb, var(--color-archive) 10%, transparent)', color: 'var(--color-archive)',
+                      border: '1px solid color-mix(in srgb, var(--color-archive) 40%, transparent)', cursor: 'pointer' }}
+                  >
+                    <ArchiveRestore size={12} />
+                    {t('common:trash.unmarkAction')}
+                  </button>
+                )}
+              </>
+            ) : (
+              <>
+                {/* Restore — settings.update-gated (mirrors WorkflowListRow) */}
+                {canManageFolders && onRestore && (
+                  <button onClick={handleRestoreClick} disabled={restoring}
+                    aria-label={t('list.restoreWorkflow')} title={t('list.restoreWorkflow')}
+                    className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium"
+                    style={{ background: 'var(--color-success-bg)', color: 'var(--color-success)', border: '1px solid var(--color-success)', cursor: restoring ? 'not-allowed' : 'pointer' }}
+                  >
+                    {restoring ? <Loader2 size={12} className="animate-spin" /> : <ArchiveRestore size={12} />}
+                    {t('list.restore')}
+                  </button>
+                )}
+                {/* TRASH-OVERAL-2: archived → trash (workflows.delete-gated at the page). */}
+                {onMarkDeletion && (
+                  <button onClick={e => { e.stopPropagation(); onMarkDeletion() }}
+                    aria-label={t('common:trash.markAction')} title={t('common:trash.markAction')}
+                    className="flex items-center justify-center rounded-lg"
+                    style={{ width: 28, height: 28, background: 'color-mix(in srgb, var(--color-danger) 10%, transparent)',
+                      border: '1px solid color-mix(in srgb, var(--color-danger) 40%, transparent)', cursor: 'pointer', color: 'var(--color-danger)' }}
+                  >
+                    <Trash2 size={13} />
+                  </button>
+                )}
+              </>
             )
           ) : (
             <>

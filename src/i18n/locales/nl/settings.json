@@ -534,6 +534,10 @@
       "label": "Bewaartermijn toestemming",
       "description": "Aantal maanden dat een gegeven bewaartoestemming geldig blijft voordat opnieuw bevestiging nodig is. 0 = toestemming verloopt nooit."
     },
+    "graceDays": {
+      "label": "Prullenbaktermijn",
+      "description": "Aantal dagen dat een record in de prullenbak blijft voordat het automatisch definitief wordt verwijderd."
+    },
     "unit": "maanden"
   },
   "statusList": {

@@ -12,6 +12,9 @@ import { useTranslation } from 'react-i18next'
 import { Trash2, GitMerge } from 'lucide-react'
 import EntityDrawer from '@/components/drawer/EntityDrawer'
 import EntityHeader from '@/components/drawer/EntityHeader'
+import ArchivedBanner from '@/components/drawer/ArchivedBanner'
+import TrashLifecycleSection from '@/components/drawer/TrashLifecycleSection'
+import type { TrashSectionConfig } from '@/components/drawer/TrashLifecycleSection'
 import ReferenceNumberChip from '@/components/ui/ReferenceNumberChip'
 import CustomerHeaderActions from './drawer/CustomerHeaderActions'
 import MergeCustomerModal from './MergeCustomerModal'
@@ -105,11 +108,16 @@ interface CustomerDrawerProps {
   // Deep-link: open on this tab (table count-cell → locations/departments/contacts/
   // vacancies), mirrors the candidate drawer's initialTab.
   initialTab?: string
+  // TRASH-OVERAL-2: restore-to-active (page passes this only with customers.update)
+  // + the shared trash-section wiring (mark/unmark, see TrashLifecycleSection).
+  onRestore?: (id: Id | undefined) => void
+  trash?: TrashSectionConfig
 }
 
 export default function CustomerDrawer({
   customer: c, onClose, expanded, onToggleExpand, onUpdate, onAddNote, onEditNote, onDeleteNote,
   users = [], statuses = [], locationStatuses = [], departmentStatuses = [], contactStatuses = [], initialTab,
+  onRestore, trash,
 }: CustomerDrawerProps) {
   const { t } = useTranslation('customers')
   const auth = useAuth()
@@ -125,7 +133,7 @@ export default function CustomerDrawer({
   // requires (customers.update — a merge is update-class, reversible: the absorbed
   // record is soft-deleted, never hard) — the backend re-checks regardless (§7).
   const canMerge = hasPermission('customers.update')
-  const { formatDateTime } = useDateFormat()
+  const { formatDate, formatDateTime } = useDateFormat()
   // The Extra tab only shows when the tenant has defined customer custom fields (§3A(f)).
   const { fields: customFieldDefs } = useCustomFields('customer')
   // KLANT-FASE-1: the lifecycle-phase lookup behind the header badge (session-cached).
@@ -442,7 +450,22 @@ export default function CustomerDrawer({
                   onRemove: tag => { const next = currentTags.filter(x => x !== tag); setTags(next); onUpdate?.(c.id, { tags: next }) },
                   addLabel: t('drawer.addTag') }}
           tagsLabel={t('drawer.tags')}
-        />
+        >
+          {/* TRASH-OVERAL-2: archived state + restore via the ONE shared ArchivedBanner
+              (§3A — the customer record itself never had a restore button; the
+              sub-entity banners reuse the same generic locations.archivedBanner keys).
+              Hidden once the record sits in the trash — the trash banner takes over. */}
+          {c.archived && c.lifecycle !== 'pending_erase' && (
+            <ArchivedBanner id={c.id} onRestore={onRestore}
+              message={c.archivedAt ? t('locations.archivedBanner.since', { date: formatDate(c.archivedAt) }) : t('locations.archivedBanner.flag')}
+              restoreLabel={t('locations.archivedBanner.restore')} />
+          )}
+          {/* TRASH-OVERAL-2: the shared mark/unmark surface (permission-gated in `trash`). */}
+          {trash && (
+            <TrashLifecycleSection entityPath="customers" id={c.id} entityLabel={c.name}
+              lifecycle={c.lifecycle} pendingEraseAt={c.pendingEraseAt} {...trash} />
+          )}
+        </EntityHeader>
       )}
     />
     {/* DELETE-ICON-1: the shared confirm dialog, mounted once per drawer. */}

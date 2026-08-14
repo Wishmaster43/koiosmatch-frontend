@@ -1,4 +1,42 @@
 {
+  "trash": {
+    "view": "Corbeille",
+    "markAction": "Supprimer définitivement",
+    "unmarkAction": "Remettre dans les archives",
+    "pendingSince": "Dans la corbeille depuis {{date}}",
+    "eraseAround": "sera supprimé définitivement vers le {{date}}",
+    "eraseAutomatic": "sera supprimé définitivement de façon automatique après le délai de conservation",
+    "modal": {
+      "title": "Supprimer définitivement",
+      "intro": "{{entity}} est déplacé vers la corbeille et sera supprimé définitivement de façon automatique après le délai de conservation de votre organisation.",
+      "blockedTitle": "Encore utilisé",
+      "blockedIntro": "Cet enregistrement ne peut pas être supprimé définitivement pour le moment. Réglez d'abord les éléments liés ci-dessous.",
+      "transferLabel": "Transférer la propriété à",
+      "transferPlaceholder": "Choisir un utilisateur",
+      "confirm": "Supprimer définitivement",
+      "cancel": "Annuler"
+    },
+    "blockers": {
+      "vacancies": "Postes",
+      "matches": "Matchs",
+      "open_opportunities": "Opportunités ouvertes",
+      "open_tasks": "Tâches ouvertes",
+      "planned_appointments": "Rendez-vous planifiés",
+      "backoffice_link": "Lien back-office",
+      "applications": "Candidatures",
+      "contract": "Contrat",
+      "contract_status": "Statut du contrat",
+      "open_period": "Période ouverte",
+      "placed_basis": "Base d'un placement",
+      "lifecycle_history": "Historique du cycle de vie",
+      "replaced_by": "Remplacé par",
+      "open_runs": "Exécutions ouvertes",
+      "uninvoiced_credits": "Crédits non facturés",
+      "conversion": "Conversion"
+    },
+    "marked": "Placé dans la corbeille.",
+    "unmarked": "Remis aux archives."
+  },
   "actionFailed": "Échec de l'action. Veuillez réessayer.",
   "save": "Enregistrer",
   "saving": "Enregistrement…",

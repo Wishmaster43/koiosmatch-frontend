@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo, useRef } from 'react'
 import type { Dispatch, SetStateAction } from 'react'
 import { useTranslation } from 'react-i18next'
-import { LayoutList, Kanban, Archive } from 'lucide-react'
+import { LayoutList, Kanban, Archive, Trash2 } from 'lucide-react'
 import { useAuth } from '@/context/AuthContext'
 import { useRightPanel } from '@/context/RightPanelContext'
 import { useAllSettings, getBoolSetting } from '@/lib/settings/useAllSettings'
@@ -40,7 +40,7 @@ const tog = (set: Dispatch<SetStateAction<string[]>>) => (v: string) =>
 // OpportunitiesPage — thin container: the data layer (load + mutations) lives in
 // useOpportunitiesData; the page only derives the filtered/paged view and renders.
 export default function OpportunitiesPage({ intent }: { intent?: unknown } = {}) {
-  const { t } = useTranslation('opportunities')
+  const { t } = useTranslation(['opportunities', 'common'])
   // Scroll container for row virtualization (F-11): DataTable virtualizes against it.
   const tableScrollRef = useRef<HTMLDivElement>(null)
   const auth = useAuth()
@@ -49,8 +49,13 @@ export default function OpportunitiesPage({ intent }: { intent?: unknown } = {})
   const { registerFilters, unregisterFilters } = useRightPanel()
   // Tenant setting: show the deal magnitude in hours instead of euro (Settings → Kansen).
   const valueInHours = getBoolSetting(useAllSettings(), 'opportunity_value_in_hours', false)
-  // ARCHIVE-1: reveal soft-deleted opportunities alongside the active set.
+  // ARCHIVE-1: the archived quick-view (TRASH-OVERAL-2: now an ISOLATED
+  // lifecycle==='archived' view — mirrors candidates; include_archived returns
+  // only soft-deleted rows since TRASH-OVERAL-1b, so "alongside" is history).
   const [showArchived, setShowArchived] = usePageMemory('opps.archived', false)
+  // TRASH-OVERAL-2: Prullenbak view (lifecycle pending_erase) — same include_archived
+  // request, split client-side; mutually exclusive with the archived view.
+  const [showTrash, setShowTrash] = usePageMemory('opps.trash', false)
   // VESTIGING-2: explicit branch filter (inherited from the customer) — a
   // narrowing only; the server excludes deals with no branch, see the empty-state
   // notice below. Values limited to the user's own branch scope (`[]` = unrestricted,
@@ -71,7 +76,7 @@ export default function OpportunitiesPage({ intent }: { intent?: unknown } = {})
     selected, drawerExpanded, setDrawerExpanded,
     selectedIds, toggleRow, toggleAll, clearSelection,
     selectOpportunity, closeDrawer, handleCreated, handleMove, updateOpportunity, reload,
-  } = useOpportunitiesData(showArchived, selectedBranch, refQuery)
+  } = useOpportunitiesData(showArchived || showTrash, selectedBranch, refQuery)
 
   // ARCHIVE-1: per-id archive/restore (routes pre-date this sweep; see the hook's
   // own comment). Gated on the SAME permission each route requires server-side —
@@ -101,11 +106,11 @@ export default function OpportunitiesPage({ intent }: { intent?: unknown } = {})
   const [expiringOnly, setExpiringOnly] = useState(false)
   const [dayStart] = useState(() => new Date(new Date().setHours(0, 0, 0, 0)).getTime())
   // Shared clear-all (page memory keeps filters sticky).
-  const anyFilterActive = Boolean(query.trim() || stage.length || owner.length || client.length || selectedBranch.length || expiringOnly || showArchived)
+  const anyFilterActive = Boolean(query.trim() || stage.length || owner.length || client.length || selectedBranch.length || expiringOnly || showArchived || showTrash)
   const [searchEpoch, setSearchEpoch] = useState(0)
   const clearAllFilters = () => {
     setSearchEpoch(e => e + 1); setQuery(''); setStage([]); setOwner([]); setClient([]); setSelectedBranch([])
-    setExpiringOnly(false); setShowArchived(false); setPage(1)
+    setExpiringOnly(false); setShowArchived(false); setShowTrash(false); setPage(1)
   }
 
   // Seed filters from a navigation intent (dashboard chart/KPI click). The stage key
@@ -122,7 +127,7 @@ export default function OpportunitiesPage({ intent }: { intent?: unknown } = {})
 
   // Reset to the first page + drop the selection whenever a filter changes.
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  useEffect(() => { setPage(1); clearSelection() }, [stage, owner, client, selectedBranch, query, showArchived])
+  useEffect(() => { setPage(1); clearSelection() }, [stage, owner, client, selectedBranch, query, showArchived, showTrash])
 
   // Right-panel filters (stage · owner · client) — options derived from the loaded rows.
   const optionsFrom = (key: 'stage' | 'owner' | 'client') => {
@@ -144,12 +149,13 @@ export default function OpportunitiesPage({ intent }: { intent?: unknown } = {})
   }, [filterGroups, registerFilters, unregisterFilters])
 
   // Visible rows = the stage/owner/client selection applied client-side.
-  // ARCHIVE-1: archived rows are hidden by default; the showArchived toggle reveals
-  // them ALONGSIDE the active set (mirrors vacancies — the table chip tells them
-  // apart), rather than isolating a dedicated archived-only view.
+  // Three lifecycle views (TRASH-OVERAL-2, mirrors candidates): trash = pending_erase,
+  // archived = archived only (so pending rows never double-show), default = active.
   const filteredAll = useMemo(() => {
     return rows.filter(r => {
-      if (!showArchived && r.archived) return false
+      if (showTrash) { if (r.lifecycle !== 'pending_erase') return false }
+      else if (showArchived) { if (r.lifecycle !== 'archived') return false }
+      else if (r.archived) return false
       if (stage.length  && !stage.includes(r.stage))   return false
       if (owner.length  && !owner.includes(r.owner))   return false
       if (client.length && !client.includes(r.client)) return false
@@ -163,7 +169,7 @@ export default function OpportunitiesPage({ intent }: { intent?: unknown } = {})
       }
       return true
     })
-  }, [rows, stage, owner, client, query, refQuery, expiringOnly, dayStart, showArchived])
+  }, [rows, stage, owner, client, query, refQuery, expiringOnly, dayStart, showArchived, showTrash])
 
   const totalRows = filteredAll.length
   const lastPage  = Math.max(1, Math.ceil(totalRows / pageSize))
@@ -215,10 +221,11 @@ export default function OpportunitiesPage({ intent }: { intent?: unknown } = {})
               </div>
             )}
             <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 8 }}>
-              {/* Archived (soft-deleted) — shared quick-view toggle (§4); reveals rows
-                  alongside the active set (OpportunitiesTable renders the "Gearchiveerd" chip). */}
-              <QuickViewToggle active={showArchived} onToggle={() => setShowArchived(v => !v)}
+              {/* Archived ⇄ trash are mutually exclusive views (mirrors candidates). */}
+              <QuickViewToggle active={showArchived} onToggle={() => { setShowArchived(v => !v); setShowTrash(false) }}
                 label={t('view.archived')} color="var(--color-archive)" icon={Archive} />
+              <QuickViewToggle active={showTrash} onToggle={() => { setShowTrash(v => !v); setShowArchived(false) }}
+                label={t('common:trash.view')} color="var(--color-trash)" icon={Trash2} />
               {/* Table/board switcher — shared soft-tint component (§4), never a solid
                   fill (last hand-rolled instance across the entity pages, audit sweep). */}
               <ViewModeToggle value={view} onChange={setView} options={[
@@ -272,6 +279,16 @@ export default function OpportunitiesPage({ intent }: { intent?: unknown } = {})
           // the two routes require DIFFERENT permissions, so gate them separately).
           onArchive={hasPermission('opportunities.delete') ? archiveOpportunity : undefined}
           onRestore={hasPermission('opportunities.update') ? restoreOpportunity : undefined}
+          // TRASH-OVERAL-2: shared trash section (mark = opportunities.delete, unmark =
+          // opportunities.update; backend re-checks, §7). The patches are pure LOCAL
+          // merges — updateOpportunity maps none of these keys, so no stray PATCH.
+          trash={{
+            canMark: hasPermission('opportunities.delete'),
+            canUnmark: hasPermission('opportunities.update'),
+            users: users.map(u => ({ value: String(u.id), label: u.name })),
+            onMarked: id => updateOpportunity(id, { archived: true, lifecycle: 'pending_erase', pendingEraseAt: new Date().toISOString() }),
+            onUnmarked: id => updateOpportunity(id, { lifecycle: 'archived', pendingEraseAt: null }),
+          }}
         />
         {archiveConfirmDialog}
       </div>

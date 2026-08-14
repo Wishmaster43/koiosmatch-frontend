@@ -512,6 +512,10 @@
       "label": "Validité du consentement",
       "description": "Nombre de mois pendant lesquels un consentement de conservation accordé reste valable avant de devoir être reconfirmé. 0 = le consentement n'expire jamais."
     },
+    "graceDays": {
+      "label": "Délai de la corbeille",
+      "description": "Nombre de jours pendant lesquels un enregistrement reste dans la corbeille avant d'être supprimé définitivement de façon automatique."
+    },
     "unit": "mois"
   },
   "statusList": {

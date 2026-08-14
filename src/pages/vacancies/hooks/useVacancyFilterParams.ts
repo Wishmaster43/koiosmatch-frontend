@@ -22,6 +22,9 @@ export interface VacancyFilterState {
   selectedCategory: string[]
   selectedBranch: string[]
   showArchived: boolean
+  // TRASH-OVERAL-2: the Prullenbak view — same include_archived request as the
+  // archived view; the page splits the result client-side on lifecycle.
+  showTrash: boolean
   showWithoutAgent: boolean
   selectedAgentId: string | null
   // VAC-HAS-APPLICATIONS-1: the "Sollicitaties" KPI card's server-wide quick view.
@@ -41,7 +44,7 @@ export interface VacancyFilterState {
 
 export function useVacancyFilterParams({
   globalSearch, statusBucket, selectedOwner, selectedClient, selectedCategory, selectedBranch,
-  showArchived, showWithoutAgent, selectedAgentId, hasApplications, publishedBucket,
+  showArchived, showTrash, showWithoutAgent, selectedAgentId, hasApplications, publishedBucket,
   view, mapCenter, mapRadius, mapStraalActive, attention, geoFilter,
 }: VacancyFilterState): Record<string, unknown> {
   return useMemo(() => {
@@ -63,7 +66,9 @@ export function useVacancyFilterParams({
     // VESTIGING-2: server-side ?branch_id[]= — a narrowing only, gated behind the
     // tenant's own branch_authz_enabled axis on the backend (off = no effect).
     if (selectedBranch.length)  p.branch_id = selectedBranch
-    if (showArchived)           p.include_archived = 1
+    // TRASH-OVERAL-1b: include_archived=1 returns ONLY soft-deleted rows (archived
+    // + pending_erase); the page's lifecycle filter splits them per view.
+    if (showArchived || showTrash) p.include_archived = 1
     // VAC-AGENT-1: quick view onto the vacancies that are online but have no agent linked.
     if (showWithoutAgent)       p.without_agent = 1
     // VAC-KPI-REDESIGN 22-07: the AI-agent donut's real-agent segment click.
@@ -84,6 +89,6 @@ export function useVacancyFilterParams({
     else if (attention === 'staleStatus')  p.stale_status = 1
     return p
   }, [globalSearch, statusBucket, selectedOwner, selectedClient, selectedCategory, selectedBranch,
-    showArchived, showWithoutAgent, selectedAgentId, hasApplications, publishedBucket,
+    showArchived, showTrash, showWithoutAgent, selectedAgentId, hasApplications, publishedBucket,
     view, mapCenter, mapRadius, mapStraalActive, attention, geoFilter])
 }

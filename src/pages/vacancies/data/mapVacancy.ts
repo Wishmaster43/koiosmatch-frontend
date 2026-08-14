@@ -95,6 +95,10 @@ export function mapVacancy(v: ApiVacancy = {}): Vacancy {
     // surfaces these rows; mirror candidates so the row renders the soft chip.
     archived: Boolean(v.archived ?? (v.deleted_at != null)),
     archivedAt: v.deleted_at ?? null,
+    // TRASH-OVERAL-2 lifecycle (mirrors mapCandidate): server value first, else
+    // derived from the stamps — a missing field stays 'active'/null (old fixtures).
+    lifecycle: v.lifecycle ?? (v.pending_erase_at ? 'pending_erase' : (v.deleted_at || v.archived) ? 'archived' : 'active'),
+    pendingEraseAt: v.pending_erase_at ?? null,
     // VAC-AGENT-1: linked AI agent (Option A: linking IS the interview toggle for
     // this vacancy) + the flow id it carries — present on both list and detail.
     aiAgentId: aiAgent?.id ?? v.ai_agent_id ?? null,

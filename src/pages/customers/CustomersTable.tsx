@@ -124,7 +124,10 @@ export default function CustomersTable({
       sortValue: c => (c.phase && c.phase === entryPhaseValue) || !c.status ? '' : (statusMeta(String(c.status)).label ?? String(c.status)),
       // Customer.status is typed string|number for legacy/API reasons (mirrors the
       // debtor/reference-number style scalars); the chip only deals in slugs.
-      render: c => <CustomerStatusChip status={c.status != null ? String(c.status) : null} phase={c.phase} plain={!colorStatus} round />,
+      // TRASH-OVERAL-2: a pending_erase row reads as "Prullenbak" (same chip on every entity table).
+      render: c => c.lifecycle === 'pending_erase'
+        ? <SoftChip label={t('common:trash.view')} color="var(--color-trash)" round />
+        : <CustomerStatusChip status={c.status != null ? String(c.status) : null} phase={c.phase} plain={!colorStatus} round />,
     },
     { key: 'city',        header: t('cols.city'),        nowrap: true, cellStyle: mutedCell, sortable: true, sortValue: c => c.city, render: c => c.city || '—' },
     // Counts deep-link to the matching drawer tab (Danny 2026-07-14) — zero still

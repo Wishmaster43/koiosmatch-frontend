@@ -41,7 +41,7 @@ const NEUTRAL_AVATAR = '#9CA3AF'
 
 // OpportunitiesTable — declares columns only; the shared DataTable owns sorting + states.
 export default function OpportunitiesTable({ rows, loading, error, onRowClick, selectedId, valueInHours = false, stages = [], selectable, selectedIds, onToggleRow, onToggleAll, stickyHeader = false, scrollParentRef }: OpportunitiesTableProps) {
-  const { t } = useTranslation('opportunities')
+  const { t } = useTranslation(['opportunities', 'common'])
   const { formatDate } = useDateFormat()
   // Tenant display settings (Settings → Kansen → Tabelweergave). Coloured chips ON
   // by default, mirrors candidates/applications/customers.
@@ -91,7 +91,8 @@ export default function OpportunitiesTable({ rows, loading, error, onRowClick, s
       render: r => {
         // ARCHIVE-1: archive state wins over the stage pill (mirrors VacanciesTable/
         // MatchesTable) — a soft-deleted row shown via include_archived=1 reads as
-        // "Archived", not its stale stage.
+        // "Archived", not its stale stage. TRASH-OVERAL-2: pending_erase → "Prullenbak".
+        if (r.lifecycle === 'pending_erase') return <SoftChip label={t('common:trash.view')} color="var(--color-trash)" round />
         if (r.archived) return <SoftChip label={t('view.archived')} color="var(--text-muted)" round />
         if (!r.stage) return <span style={{ color: 'var(--text-muted)' }}>—</span>
         return colorStage ? <StatusPill label={r.stage} color={r.stageColor} /> : <span style={{ color: 'var(--text)', fontSize: 12 }}>{r.stage}</span>

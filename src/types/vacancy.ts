@@ -82,6 +82,10 @@ export interface Vacancy {
   // the table can render the same soft "Gearchiveerd" chip when include_archived=1.
   archived: boolean
   archivedAt: string | null
+  // TRASH-OVERAL-2 lifecycle: 'active' | 'archived' | 'pending_erase' (trash) —
+  // drives the Gearchiveerd/Prullenbak view split, mirrors Candidate.lifecycle.
+  lifecycle: string
+  pendingEraseAt: string | null
   // VAC-AGENT-1: the AI agent linked to this vacancy (Option A — linking an agent
   // IS the interview on/off switch; it carries its own interview flow, so only the
   // flow's id rides along too, never a duplicate flow picker on the vacancy itself).
@@ -252,6 +256,10 @@ export interface ApiVacancy {
   // Archive state (soft-delete) — VacancyListResource always sends both.
   archived?: boolean
   deleted_at?: string | null
+  // TRASH-OVERAL-2: the two-step trash lifecycle fields the list resource now
+  // carries ('active'|'archived'|'pending_erase' + ISO stamp).
+  lifecycle?: string
+  pending_erase_at?: string | null
   // detail
   employment_type?: unknown
   employment_type_label?: string

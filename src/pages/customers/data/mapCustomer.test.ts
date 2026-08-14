@@ -69,3 +69,26 @@ describe('mapCustomerNoteRow (NOTES-LOC-DEPT-1)', () => {
     expect(c.notes[0]).toMatchObject({ locationId: 'loc-1', locationName: 'Hoofdlocatie' })
   })
 })
+
+// TRASH-OVERAL-2: tolerant lifecycle mapping — server value first, stamps as the
+// derivation fallback, and a bare/old payload stays 'active'/null (old fixtures work).
+describe('mapCustomer · lifecycle (TRASH-OVERAL-2)', () => {
+  it('reads the server lifecycle + pending_erase_at straight through', () => {
+    const c = mapCustomer({ id: 1, name: 'X', lifecycle: 'pending_erase', pending_erase_at: '2026-08-10T10:00:00Z', deleted_at: '2026-08-01T10:00:00Z' } as ApiCustomer)
+    expect(c.lifecycle).toBe('pending_erase')
+    expect(c.pendingEraseAt).toBe('2026-08-10T10:00:00Z')
+    expect(c.archived).toBe(true)
+  })
+
+  it('derives archived from deleted_at when the lifecycle field is absent', () => {
+    const c = mapCustomer({ id: 1, name: 'X', deleted_at: '2026-08-01T10:00:00Z' } as ApiCustomer)
+    expect(c.lifecycle).toBe('archived')
+    expect(c.archivedAt).toBe('2026-08-01T10:00:00Z')
+  })
+
+  it('a payload without any of the fields stays active/null', () => {
+    const c = mapCustomer({ id: 1, name: 'X' } as ApiCustomer)
+    expect(c.lifecycle).toBe('active')
+    expect(c.pendingEraseAt).toBeNull()
+  })
+})

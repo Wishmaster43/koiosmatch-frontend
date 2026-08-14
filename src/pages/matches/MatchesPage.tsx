@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo, useRef } from 'react'
 import type { Dispatch, SetStateAction } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Plus, LayoutList, Kanban, Archive } from 'lucide-react'
+import { Plus, LayoutList, Kanban, Archive, Trash2 } from 'lucide-react'
 import ViewModeToggle from '@/components/ui/ViewModeToggle'
 import { useAuth } from '@/context/AuthContext'
 import { useRightPanel } from '@/context/RightPanelContext'
@@ -36,6 +36,8 @@ import type { MatchDateRange } from './data/matchFilterGroups'
 import { useMatchesBulkActions } from './hooks/useMatchesBulkActions'
 import { useMatchArchive } from './hooks/useMatchArchive'
 import { useMatchMutations } from './hooks/useMatchMutations'
+import { useTrashFlow } from '@/hooks/useTrashFlow'
+import DeletionPreviewModal from '@/components/ui/DeletionPreviewModal'
 import { BTN_H } from '@/config/buttonMetrics'
 import type { MatchRow } from '@/types/match'
 import type { Id } from '@/types/common'
@@ -53,8 +55,11 @@ export default function MatchesPage({ intent }: { intent?: unknown } = {}) {
   const refQuery = isReferenceQuery(trimmedQuery) ? trimmedQuery : null
   // MATCH-ARCHIVED-LIST-1: reveal soft-deleted matches alongside the active set.
   const [showArchived, setShowArchived] = usePageMemory('matches.archived', false)
+  // TRASH-OVERAL-2: the Prullenbak view (lifecycle pending_erase) — exclusive with
+  // the archived view, mirrors the candidates page's three lifecycle views.
+  const [showTrash, setShowTrash] = usePageMemory('matches.trash', false)
   // Data (fetch + mapping) lives in the hook (§3); the page only derives + renders.
-  const { rows, loading, error, updateMatch, reload } = useMatches(refQuery, showArchived)
+  const { rows, loading, error, updateMatch, reload } = useMatches(refQuery, showArchived || showTrash)
   const { registerFilters, unregisterFilters } = useRightPanel()
   // Match statuses drive the board columns + donut (R-1b lookup; the funnel is
   // an APPLICATION axis — the match resource no longer carries a stage).
@@ -161,7 +166,7 @@ export default function MatchesPage({ intent }: { intent?: unknown } = {}) {
   // Reset to the first page and clear the selection whenever a filter changes
   // (kept out of the memo — setting state during render can loop).
   useEffect(() => { setPage(1); setSelectedIds(new Set()) },
-    [stageFilter, ownerFilter, clientFilter, branchFilter, kpiScored, kpiUnscored, dateRange, query, showArchived])
+    [stageFilter, ownerFilter, clientFilter, branchFilter, kpiScored, kpiUnscored, dateRange, query, showArchived, showTrash])
 
   // Filter the visible rows by donut selection. A reference-number query already
   // narrowed `rows` server-side (exact `?ref=` lookup) — skip the free-text
@@ -169,6 +174,11 @@ export default function MatchesPage({ intent }: { intent?: unknown } = {}) {
   const filteredAll = useMemo(() => {
     const q = refQuery ? '' : query.trim().toLowerCase()
     return rows.filter(r => {
+      // Three lifecycle views (TRASH-OVERAL-2, mirrors candidates): trash =
+      // pending_erase only, archived = archived only, default = active only.
+      if (showTrash) { if (r.lifecycle !== 'pending_erase') return false }
+      else if (showArchived) { if (r.lifecycle !== 'archived') return false }
+      else if (r.archived) return false
       if (stageFilter.length && !stageFilter.includes(r.status)) return false
       if (kpiScored && typeof r.score !== 'number') return false
       if (kpiUnscored && typeof r.score === 'number') return false
@@ -180,7 +190,7 @@ export default function MatchesPage({ intent }: { intent?: unknown } = {}) {
       if (q && ![r.candidate, r.vacancy, r.client].some(v => String(v ?? '').toLowerCase().includes(q))) return false
       return true
     })
-  }, [rows, stageFilter, ownerFilter, clientFilter, branchFilter, kpiScored, kpiUnscored, dateRange, query, refQuery])
+  }, [rows, stageFilter, ownerFilter, clientFilter, branchFilter, kpiScored, kpiUnscored, dateRange, query, refQuery, showArchived, showTrash])
 
   // Board rows never include archived matches: dragging one to a new status would
   // PATCH /matches/{id}, which 404s once soft-deleted (MatchController::update has
@@ -213,11 +223,11 @@ export default function MatchesPage({ intent }: { intent?: unknown } = {}) {
 
   // Shared clear-all (page memory keeps filters sticky).
   const anyFilterActive = Boolean(query.trim() || kpiScored || kpiUnscored || stageFilter.length || ownerFilter.length
-    || clientFilter.length || branchFilter.length || dateRange || showArchived)
+    || clientFilter.length || branchFilter.length || dateRange || showArchived || showTrash)
   const [searchEpoch, setSearchEpoch] = useState(0)
   const clearAllFilters = () => {
     setSearchEpoch(e => e + 1); setQuery(''); setKpiScored(false); setKpiUnscored(false)
-    setStageFilter([]); setOwnerFilter([]); setClientFilter([]); setBranchFilter([]); setDateRange(null); setShowArchived(false)
+    setStageFilter([]); setOwnerFilter([]); setClientFilter([]); setBranchFilter([]); setDateRange(null); setShowArchived(false); setShowTrash(false)
   }
 
   // KPI clicks drive the existing stage filter (chip + clear come for free);
@@ -285,6 +295,23 @@ export default function MatchesPage({ intent }: { intent?: unknown } = {}) {
   // matches.update, the same permission the DELETE/restore routes themselves require.
   const { archiveMatch, restoreMatch, dialog: archiveConfirmDialog } = useMatchArchive({ onPatch: patchRow, onReload: reload })
   const canArchive = hasPermission('matches.update')
+
+  // TRASH-OVERAL-2: mark/unmark wiring + the shared preview-modal state. Mark is
+  // gated matches.delete (button HIDDEN without it — §7 no fake affordances);
+  // unmark reuses the matches.update gate the archive/restore routes carry.
+  const trash = useTrashFlow({
+    entityPath: 'matches',
+    onMarked: () => { setSelected(null); reload() },
+    onUnmarked: () => { setSelected(null); reload() },
+  })
+  const canMarkDeletion = hasPermission('matches.delete')
+  // Human label for the modal intro — candidate + vacancy (— is a data separator here).
+  const openMarkDeletion = (id: MatchRow['id']) => {
+    if (id == null) return
+    const row = rows.find(r => String(r.id) === String(id)) ?? selected
+    const label = [row?.candidate, row?.vacancy].filter(v => v && v !== '—').join(' — ') || String(id)
+    trash.openFor(String(id), label)
+  }
 
   // View toggle: table ⇄ board (planboard). Board columns = the tenant match
   // statuses (R-1b lookup + seed fallback) so there are always columns to drag.
@@ -354,10 +381,13 @@ export default function MatchesPage({ intent }: { intent?: unknown } = {}) {
 
         {/* Right — archived toggle + icon-only view toggle (mirror vacancies/opportunities). */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          {/* Archived (soft-deleted) — shared quick-view toggle (§4); reveals rows
-              alongside the active set (MatchesTable renders the "Gearchiveerd" chip). */}
-          <QuickViewToggle active={showArchived} onToggle={() => setShowArchived(v => !v)}
+          {/* Archived (soft-deleted) — shared quick-view toggle (§4); exclusive with
+              the trash view below (TRASH-OVERAL-2, mirrors candidates). */}
+          <QuickViewToggle active={showArchived} onToggle={() => { setShowArchived(v => !v); setShowTrash(false) }}
             label={t('view.archived')} color="var(--color-archive)" icon={Archive} />
+          {/* Prullenbak (pending erase) — same shared toggle, candidates' trash colour. */}
+          <QuickViewToggle active={showTrash} onToggle={() => { setShowTrash(v => !v); setShowArchived(false) }}
+            label={t('common:trash.view')} color="var(--color-trash)" icon={Trash2} />
           {/* View toggle — shared soft-tint component (§4), never a solid fill. */}
           <ViewModeToggle value={view} onChange={setView} options={[
             { id: 'table', icon: LayoutList, label: t('view.matches') },
@@ -412,6 +442,11 @@ export default function MatchesPage({ intent }: { intent?: unknown } = {}) {
         // matches.update on both routes).
         onArchive={canArchive ? archiveMatch : undefined}
         onRestore={canArchive ? restoreMatch : undefined}
+        // TRASH-OVERAL-2: mark (matches.delete) opens the shared preview modal;
+        // unmark (matches.update) puts a trashed match back to plain archived.
+        onMarkDeletion={canMarkDeletion ? openMarkDeletion : undefined}
+        onUnmark={canArchive ? (id) => { if (id != null) trash.unmark(id) } : undefined}
+        graceDays={trash.graceDays}
         // EXTRACT-1: same matches.update gate as canApprove/canArchive above.
         canLinkBackoffice={hasPermission('matches.update')}
         // MATCH-TERMINATE-1: same gate — the backend re-checks on POST /terminate.
@@ -423,6 +458,15 @@ export default function MatchesPage({ intent }: { intent?: unknown } = {}) {
           cost center) with a candidate picker; refetch so server-derived fields land. */}
       {addOpen && <MatchModal onClose={() => setAddOpen(false)} onCreated={reload} />}
       {archiveConfirmDialog}
+      {/* TRASH-OVERAL-2: the ONE shared "Definitief verwijderen" preview dialog.
+          Matches carry no transferable owner (preview.transferable stays null),
+          so the modal renders without the transfer picker by itself. */}
+      {trash.target && (
+        <DeletionPreviewModal open onClose={trash.close} entityLabel={trash.target.label}
+          preview={trash.preview} loading={trash.loading} error={trash.error}
+          users={[]} onConfirm={trash.confirmMark} busy={trash.busy} blocked={trash.blocked}
+          graceDays={trash.graceDays} />
+      )}
     </div>
   )
 }

@@ -7,7 +7,7 @@
  */
 import { useState, useEffect, useMemo, type Dispatch, type SetStateAction } from 'react'
 import { useTranslation } from 'react-i18next'
-import { LayoutList, Kanban, Archive, Plus } from 'lucide-react'
+import { LayoutList, Kanban, Archive, Plus, Trash2 } from 'lucide-react'
 import { notifyError, notifySuccess } from '@/lib/notify'
 import { useAuth } from '@/context/AuthContext'
 import { useRightPanel } from '@/context/RightPanelContext'
@@ -30,6 +30,8 @@ import OutreachBulkBar from './OutreachBulkBar'
 import OutreachCreate from './OutreachCreate'
 import OutreachDrawer from './OutreachDrawer'
 import PaginationBar from '@/components/ui/PaginationBar'
+import DeletionPreviewModal from '@/components/ui/DeletionPreviewModal'
+import { useTrashFlow } from '@/hooks/useTrashFlow'
 import { BTN_H } from '@/config/buttonMetrics'
 
 // Fixed status enum (not a tenant lookup) → board columns, donut + colours (hex for the chart).
@@ -65,9 +67,14 @@ const tog = (set: Dispatch<SetStateAction<string[]>>) => (v: string) =>
 export default function OutreachPage() {
   const { t } = useTranslation('outreach')
   const auth = useAuth()
-  const canArchive = (auth as unknown as { hasPermission?: (p: string) => boolean })?.hasPermission?.('outreach.delete') ?? false
-  // Restore is update-class (BE gates the /restore route on outreach.update).
-  const canRestore = (auth as unknown as { hasPermission?: (p: string) => boolean })?.hasPermission?.('outreach.update') ?? false
+  const hasPermission = (auth as unknown as { hasPermission?: (p: string) => boolean })?.hasPermission
+  // TRASH-OVERAL-2 contract change: DELETE /outreach-campaigns/{id} (= archive) is
+  // update-class now — planners without outreach.delete keep the archive action.
+  const canArchive = hasPermission?.('outreach.update') ?? false
+  // Restore/unmark are update-class too (BE gates both routes on outreach.update).
+  const canRestore = hasPermission?.('outreach.update') ?? false
+  // Mark-for-erasure stays delete-class (tenant-admin-seeded) — HIDDEN without it (§7).
+  const canMarkDeletion = hasPermission?.('outreach.delete') ?? false
   const { campaigns, loading, error, reload, add, patch, drop } = useOutreachCampaigns()
   const { registerFilters, unregisterFilters } = useRightPanel()
 
@@ -83,6 +90,9 @@ export default function OutreachPage() {
   const [openId, setOpenId] = useState<string | null>(null)
   const [drawerExpanded, setDrawerExpanded] = useState(false)
   const [showArchived, setShowArchived] = useState(false)
+  // TRASH-OVERAL-2: the Prullenbak view (lifecycle pending_erase) — exclusive with
+  // the archived view; both read the same soft-deleted fetch below.
+  const [showTrash, setShowTrash] = useState(false)
   const [creating, setCreating] = useState(false)
   // KPI/donut click-to-filter (status) + checkbox selection.
   const [selectedStatus, setSelectedStatus] = useState<string[]>([])
@@ -108,21 +118,25 @@ export default function OutreachPage() {
   const [archivedRaw, setArchivedRaw] = useState<Campaign[]>([])
   const [archLoading, setArchLoading] = useState(false)
   const [archError, setArchError] = useState(false)
+  // Bumped after a mark/unmark so the soft-deleted list refetches (TRASH-OVERAL-2).
+  const [archTick, setArchTick] = useState(0)
   useEffect(() => {
-    if (!showArchived) return
+    if (!showArchived && !showTrash) return
     setArchLoading(true); setArchError(false)
     listCampaigns({ archived: 1 })
       .then((res) => setArchivedRaw((res.rows as Campaign[]) ?? []))
       .catch(() => setArchError(true))
       .finally(() => setArchLoading(false))
-  }, [showArchived])
+  }, [showArchived, showTrash, archTick])
 
-  // Archived-only rows, exactly as the server returned them (each already carries
-  // `archived: true` / `deleted_at` from OutreachCampaignResource).
+  // Soft-deleted rows, exactly as the server returned them (each already carries
+  // `archived`/`deleted_at`/`lifecycle` from OutreachCampaignResource). Tolerant
+  // lifecycle read for payloads that predate the field (TRASH-OVERAL-2).
   const archived = archivedRaw
+  const lifecycleOf = (c?: Campaign) => c?.lifecycle ?? (c?.deleted_at || c?.archived ? 'archived' : 'active')
 
   // Clear the selection whenever the filter/view/archived toggle changes.
-  useEffect(() => { setSelectedIds(new Set()) }, [selectedStatus, selectedChannel, selectedOwner, selectedTargetGroup, kpiTargets, view, showArchived])
+  useEffect(() => { setSelectedIds(new Set()) }, [selectedStatus, selectedChannel, selectedOwner, selectedTargetGroup, kpiTargets, view, showArchived, showTrash])
 
   // Board columns + donut items, labelled via i18n.
   const columns = useMemo(() => STATUSES.map((s) => ({ key: s.key, label: t(`status.${s.key}`), color: s.color })), [t])
@@ -158,8 +172,13 @@ export default function OutreachPage() {
     return () => unregisterFilters('outreach-page')
   }, [filterGroups, registerFilters, unregisterFilters])
 
-  // Base rows = active list, or the archived list when the archived toggle is on.
-  const baseRows = showArchived ? archived : campaigns
+  // Base rows per lifecycle view (TRASH-OVERAL-2, mirrors candidates): trash =
+  // pending_erase only, archived = archived only, default = the active list.
+  const baseRows = showTrash
+    ? archived.filter((c) => lifecycleOf(c) === 'pending_erase')
+    : showArchived
+      ? archived.filter((c) => lifecycleOf(c) === 'archived')
+      : campaigns
   // Status filter (from the donut/KPI) narrows both the table and the board.
   const filtered = useMemo(() => {
     let byStatus = selectedStatus.length ? baseRows.filter((c) => selectedStatus.includes(statusKey(c))) : baseRows
@@ -178,19 +197,19 @@ export default function OutreachPage() {
   const lastPage   = Math.max(1, Math.ceil(totalRows / pageSize))
   const paged      = useMemo(() => filtered.slice((page - 1) * pageSize, page * pageSize), [filtered, page, pageSize])
   // Reset to the first page whenever the filtered set's shape changes.
-  useEffect(() => { setPage(1) }, [selectedStatus, selectedChannel, selectedOwner, selectedTargetGroup, kpiTargets, query, showArchived]) // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => { setPage(1) }, [selectedStatus, selectedChannel, selectedOwner, selectedTargetGroup, kpiTargets, query, showArchived, showTrash]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // OUTREACH-WISKNOP: same clear-all-filters parity as the other list pages
   // (ClearFiltersButton reports its active state to RightPanelContext, so the
   // topbar filter dot also lights up here) — every filter dimension this page
   // owns, mirrored from useApplicationFilters' anyFilterActive/clearAllFilters.
   const anyFilterActive = Boolean(query.trim() || selectedStatus.length || selectedChannel.length
-    || selectedOwner.length || selectedTargetGroup.length || kpiTargets || showArchived)
+    || selectedOwner.length || selectedTargetGroup.length || kpiTargets || showArchived || showTrash)
   // Remount the (self-stateful) search input on clear so the visible text resets too.
   const [searchEpoch, setSearchEpoch] = useState(0)
   const clearAllFilters = () => {
     setSearchEpoch(e => e + 1); setQuery(''); setSelectedStatus([]); setSelectedChannel([])
-    setSelectedOwner([]); setSelectedTargetGroup([]); setKpiTargets(false); setShowArchived(false)
+    setSelectedOwner([]); setSelectedTargetGroup([]); setKpiTargets(false); setShowArchived(false); setShowTrash(false)
   }
 
   // Donut/KPI click = set exactly one status value (or clear when clicked again).
@@ -259,6 +278,14 @@ export default function OutreachPage() {
   // The open drawer's row — may live in the active OR the archived list.
   const openRow = openId ? [...campaigns, ...archived].find(c => String(c.id) === String(openId)) : undefined
 
+  // TRASH-OVERAL-2: mark (outreach.delete) / unmark (outreach.update) wiring + the
+  // shared preview-modal state; a mark/unmark refetches the soft-deleted list.
+  const trash = useTrashFlow({
+    entityPath: 'outreach-campaigns',
+    onMarked: () => { setOpenId(null); setArchTick(v => v + 1) },
+    onUnmarked: () => { setOpenId(null); setArchTick(v => v + 1) },
+  })
+
   return (
     <>
       {/* + Bellijst is a MODAL over the list (Danny 27-07: "geen popup???") —
@@ -281,9 +308,13 @@ export default function OutreachPage() {
             <ClearFiltersButton active={anyFilterActive} onClear={clearAllFilters} />
 
             <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 8 }}>
-              {/* Archived (soft-deleted) — shared quick-view toggle (§4). */}
-              <QuickViewToggle active={showArchived} onToggle={() => setShowArchived((v) => !v)}
+              {/* Archived (soft-deleted) — shared quick-view toggle (§4); exclusive
+                  with the trash view below (TRASH-OVERAL-2, mirrors candidates). */}
+              <QuickViewToggle active={showArchived} onToggle={() => { setShowArchived((v) => !v); setShowTrash(false) }}
                 label={t('view.archived')} color="var(--color-archive)" icon={Archive} />
+              {/* Prullenbak (pending erase) — same shared toggle, candidates' trash colour. */}
+              <QuickViewToggle active={showTrash} onToggle={() => { setShowTrash((v) => !v); setShowArchived(false) }}
+                label={t('common:trash.view')} color="var(--color-trash)" icon={Trash2} />
               {/* Table / board view toggle — shared ViewModeToggle (§4, audit r5: this was
                   the last hand-rolled solid-fill switcher after MatchesPage/TasksPage/
                   ApplicationsPage moved to the shared component). */}
@@ -295,7 +326,7 @@ export default function OutreachPage() {
           </div>
 
           {/* Bulk action bar — active table view only, when ≥1 row is selected */}
-          {view === 'table' && !showArchived && selectedIds.size > 0 && (
+          {view === 'table' && !showArchived && !showTrash && selectedIds.size > 0 && (
             <div style={{ padding: '8px 24px', flexShrink: 0 }}>
               <OutreachBulkBar count={selectedIds.size} onClear={() => setSelectedIds(new Set())}
                 onSetStatus={bulkSetStatus} onArchive={bulkArchive} canArchive={canArchive}
@@ -311,11 +342,11 @@ export default function OutreachPage() {
             <div style={{ flex: 1, overflowY: 'auto', padding: '0 24px 16px' }}>
               <OutreachList
                 campaigns={paged}
-                loading={showArchived ? archLoading : loading}
-                error={showArchived ? archError : error}
-                onReload={showArchived ? () => setShowArchived(true) : reload}
-                emptyText={showArchived ? t('archivedEmpty') : undefined}
-                selectable={!showArchived}
+                loading={showArchived || showTrash ? archLoading : loading}
+                error={showArchived || showTrash ? archError : error}
+                onReload={showArchived || showTrash ? () => setArchTick(v => v + 1) : reload}
+                emptyText={showArchived || showTrash ? t('archivedEmpty') : undefined}
+                selectable={!showArchived && !showTrash}
                 selectedIds={selectedIds}
                 onToggleRow={toggleRow}
                 onToggleAll={toggleAll}
@@ -336,8 +367,21 @@ export default function OutreachPage() {
           archived={Boolean(openRow?.archived)} archivedAt={openRow?.deleted_at ?? null}
           fallbackName={openRow?.name} fallbackStatus={openRow?.status}
           onRestore={canRestore ? restoreOne : undefined}
+          // TRASH-OVERAL-2: trash state + mark (outreach.delete) / unmark (outreach.update).
+          inTrash={lifecycleOf(openRow) === 'pending_erase'}
+          pendingEraseAt={openRow?.pending_erase_at ?? null}
+          graceDays={trash.graceDays}
+          onMarkDeletion={canMarkDeletion ? (cid) => trash.openFor(cid, openRow?.name ?? String(cid)) : undefined}
+          onUnmark={canRestore ? (cid) => trash.unmark(cid) : undefined}
           expanded={drawerExpanded} onToggleExpand={() => setDrawerExpanded(e => !e)} />
       </div>
+      {/* TRASH-OVERAL-2: the ONE shared "Definitief verwijderen" preview dialog. */}
+      {trash.target && (
+        <DeletionPreviewModal open onClose={trash.close} entityLabel={trash.target.label}
+          preview={trash.preview} loading={trash.loading} error={trash.error}
+          users={[]} onConfirm={trash.confirmMark} busy={trash.busy} blocked={trash.blocked}
+          graceDays={trash.graceDays} />
+      )}
     </>
   )
 }

@@ -18,7 +18,8 @@ export type ViewMode = 'grid' | 'list'
 const readStoredViewMode = (): ViewMode => (localStorage.getItem(VIEW_MODE_KEY) === 'grid' ? 'grid' : 'list')
 
 // View mode + right-panel filters + the resulting visible workflow list.
-export function useWorkflowsFilters(workflows: Workflow[], showArchived: boolean, selectedFolder: FolderId) {
+// `showTrash` (TRASH-OVERAL-2) narrows to lifecycle pending_erase; exclusive with showArchived.
+export function useWorkflowsFilters(workflows: Workflow[], showArchived: boolean, selectedFolder: FolderId, showTrash: boolean = false) {
   const { t } = useTranslation(['workflows', 'common'])
   // List is the Make.com-style default; the choice persists across reloads (localStorage, non-PII).
   const [viewMode, setViewModeState] = useState<ViewMode>(readStoredViewMode)
@@ -54,8 +55,10 @@ export function useWorkflowsFilters(workflows: Workflow[], showArchived: boolean
   }, [filterGroups, registerFilters, unregisterFilters])
 
   const visibleWorkflows = workflows.filter(wf => {
-    // Archived (soft-deleted) hidden by default; the archived view shows only those.
-    if (showArchived ? !wf.archived : wf.archived) return false
+    // Three lifecycle views (TRASH-OVERAL-2, mirrors candidates): trash =
+    // pending_erase only, archived = archived only, default = active only.
+    const lc = wf.lifecycle ?? (wf.archived ? 'archived' : 'active')
+    if (showTrash ? lc !== 'pending_erase' : showArchived ? lc !== 'archived' : wf.archived) return false
     // Folder filter (left list)
     if (selectedFolder === 'unassigned' && wf.folder_id) return false
     if (selectedFolder && selectedFolder !== 'unassigned' && wf.folder_id !== selectedFolder) return false

@@ -4,6 +4,7 @@
  * map from and the flat row the table renders.
  */
 import type { Id } from './common'
+import type { DeletionLifecycle } from './deletion'
 import type { ApiBackofficeLink, BackofficeLink } from '@/lib/backofficeLink'
 
 // MATCH-SOORT-1: the contract-form axis on a match — a candidate_types/
@@ -73,6 +74,9 @@ export interface RawMatch {
   // see MatchListResource.php).
   archived?: boolean
   deleted_at?: string | null
+  // TRASH-OVERAL-2: two-step trash lifecycle + the pending-erase stamp (list resource).
+  lifecycle?: string
+  pending_erase_at?: string | null
   // Approval workflow (MATCH-APPROVAL-1) — list carries the status; the rejection
   // reason is detail-only (fetched lazily, see useMatchApproval).
   approval_status?: string
@@ -132,6 +136,10 @@ export interface MatchRow {
   // list-level state, not just a delete/restore this session performed.
   archived?: boolean
   archivedAt?: string | null
+  // TRASH-OVERAL-2: trash lifecycle — 'pending_erase' rows live in the Prullenbak
+  // view; the mapper derives a tolerant fallback for payloads that predate the field.
+  lifecycle?: DeletionLifecycle
+  pendingEraseAt?: string | null
   // MATCH-CARD-INFO-1 (Danny points 4/5): contract window + function/branch, shown
   // as extra rows on the read-only match card (customer/candidate/scoped views).
   functionTitle?: string | null

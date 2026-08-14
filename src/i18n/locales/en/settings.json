@@ -534,6 +534,10 @@
       "label": "Consent validity",
       "description": "Months a granted retention consent stays valid before it must be re-confirmed. 0 = consent never expires."
     },
+    "graceDays": {
+      "label": "Trash period",
+      "description": "Number of days a record stays in the trash before it is automatically deleted permanently."
+    },
     "unit": "months"
   },
   "statusList": {

@@ -27,11 +27,12 @@ beforeEach(() => {
 })
 
 describe('RetentionSettings — load', () => {
-  it('GETs /settings and renders the tenant defaults (24 / 60 / 24 months)', async () => {
+  it('GETs /settings and renders the tenant defaults (24 / 60 / 24 months + 30 grace days)', async () => {
     render(<RetentionSettings />)
     await waitFor(() => expect(api.get).toHaveBeenCalledWith('/settings'))
     expect(await screen.findAllByDisplayValue('24')).toHaveLength(2) // never-placed + consent-months share the 24 default
     expect(screen.getByDisplayValue('60')).toBeInTheDocument()
+    expect(screen.getByDisplayValue('30')).toBeInTheDocument() // deletion_grace_days (TRASH-OVERAL-2)
   })
 
   it('coerces stored string values to numbers', async () => {
@@ -50,7 +51,7 @@ describe('RetentionSettings — load', () => {
 })
 
 describe('RetentionSettings — save', () => {
-  it('POSTs all three retention keys to /settings on save', async () => {
+  it('POSTs all four retention keys to /settings on save', async () => {
     const user = userEvent.setup()
     render(<RetentionSettings />)
     const neverPlaced = (await screen.findAllByDisplayValue('24'))[0]
@@ -61,6 +62,7 @@ describe('RetentionSettings — save', () => {
 
     await waitFor(() => expect(api.post).toHaveBeenCalledWith('/settings', {
       retention_months_never_placed: '36', retention_months_ever_placed: '60', retention_consent_months: '24',
+      deletion_grace_days: '30',
     }))
   })
 
@@ -76,6 +78,23 @@ describe('RetentionSettings — save', () => {
 
     await waitFor(() => expect(api.post).toHaveBeenCalledWith('/settings', {
       retention_months_never_placed: '24', retention_months_ever_placed: '60', retention_consent_months: '0',
+      deletion_grace_days: '30',
+    }))
+  })
+
+  // TRASH-OVERAL-2: the trash grace window saves its own key (mirrors the sibling rows).
+  it('saves deletion_grace_days when the grace-days row changes', async () => {
+    const user = userEvent.setup()
+    render(<RetentionSettings />)
+    const graceField = await screen.findByDisplayValue('30')
+
+    await user.clear(graceField)
+    await user.type(graceField, '45')
+    await user.click(screen.getByRole('button', { name: t('common.save') }))
+
+    await waitFor(() => expect(api.post).toHaveBeenCalledWith('/settings', {
+      retention_months_never_placed: '24', retention_months_ever_placed: '60', retention_consent_months: '24',
+      deletion_grace_days: '45',
     }))
   })
 })

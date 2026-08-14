@@ -26,8 +26,13 @@ const CAMPAIGNS_WITH_POOL: Campaign[] = [{ id: 'c1', name: 'Bellijst A', channel
 // look the button name up for real, mirrors OpportunitiesPage.test.tsx's `cm` helper.
 const newButtonLabel = i18n.t('new', { ns: 'outreach' })
 
-// Auth/permissions — archive/restore both allowed so the toolbar renders in full.
-vi.mock('@/context/AuthContext', () => ({ useAuth: () => ({ hasPermission: () => true }) }))
+// Auth/permissions — mutable per test: 'all' grants everything (the default the
+// pre-existing tests ran under); an array narrows to exactly those permissions
+// so the TRASH-OVERAL-2 archive-gate tests below can prove both directions.
+let grantedPerms: string[] | 'all' = 'all'
+vi.mock('@/context/AuthContext', () => ({
+  useAuth: () => ({ hasPermission: (p: string) => grantedPerms === 'all' || grantedPerms.includes(p) }),
+}))
 // The campaign list hook is network-backed — mocked directly (page wiring only).
 // `currentCampaigns` is mutable so individual tests can swap in a row shape
 // (e.g. one carrying `pool_name`) without a second module-scope mock.
@@ -51,19 +56,29 @@ vi.mock('./data/outreachApi', () => ({
   // Used by the real OutreachCreate modal rendered inside this page.
   createCampaign: vi.fn(() => Promise.resolve({ id: 'c2', name: 'New' })),
 }))
-// OutreachCreate's own /pools fetch for the source-pool picker.
-vi.mock('@/lib/api', () => ({ default: { get: vi.fn(() => Promise.resolve({ data: [] })) } }))
+// OutreachCreate's own /pools fetch for the source-pool picker; unwrap/post/
+// getActiveTenantId ride along for useTrashFlow's useDeletionLifecycle chain.
+vi.mock('@/lib/api', () => ({
+  default: { get: vi.fn(() => Promise.resolve({ data: [] })), post: vi.fn(() => Promise.resolve({ data: {} })) },
+  getActiveTenantId: () => null,
+  unwrap: (res: { data?: unknown }) => res?.data,
+}))
 // Presentational/heavy children are out of scope for this wiring test.
 vi.mock('@/components/insights/InsightsRow', () => ({ default: () => null }))
 vi.mock('@/components/ui/HeaderSearch', () => ({ default: () => null }))
 vi.mock('@/components/ui/QuickViewToggle', () => ({ default: () => null }))
 vi.mock('@/components/ui/ViewModeToggle', () => ({ default: () => null }))
-vi.mock('./OutreachList', () => ({ default: () => <div data-testid="outreach-list-stub" /> }))
+// The list stub captures its props so tests can drive a row selection (the bulk
+// bar only renders once ≥1 row is selected); the bulk-bar stub captures its props
+// so the archive-gate tests can read `canArchive` straight off the seam.
+let listProps: { onToggleRow?: (id: string) => void } | null = null
+vi.mock('./OutreachList', () => ({ default: (props: { onToggleRow?: (id: string) => void }) => { listProps = props; return <div data-testid="outreach-list-stub" /> } }))
 vi.mock('./OutreachBoard', () => ({ default: () => null }))
-vi.mock('./OutreachBulkBar', () => ({ default: () => null }))
+let bulkBarProps: { canArchive?: boolean } | null = null
+vi.mock('./OutreachBulkBar', () => ({ default: (props: { canArchive?: boolean }) => { bulkBarProps = props; return <div data-testid="outreach-bulkbar-stub" /> } }))
 vi.mock('./OutreachDrawer', () => ({ default: () => null }))
 
-beforeEach(() => { currentCampaigns = CAMPAIGNS; registerFilters.mockClear() })
+beforeEach(() => { currentCampaigns = CAMPAIGNS; registerFilters.mockClear(); grantedPerms = 'all'; listProps = null; bulkBarProps = null })
 
 describe('OutreachPage · target-group filter reads the real pool_name field', () => {
   it('derives the target-group option straight from pool_name, not a guessed shape', () => {
@@ -135,5 +150,26 @@ describe('OutreachPage · clear-filters parity (OUTREACH-WISKNOP)', () => {
       .find(g => g.key === 'archived')!
     expect(lastArchivedGroup.selected).toEqual([])
     expect(screen.queryByRole('button', { name: clearLabel })).not.toBeInTheDocument()
+  })
+})
+
+// TRASH-OVERAL-2 contract change: DELETE /outreach-campaigns/{id} (= archive) is
+// gated on outreach.update now — planners who lost outreach.delete keep archiving,
+// while a viewer without outreach.update loses the action (both directions).
+describe('OutreachPage · bulk archive gates on outreach.update (TRASH-OVERAL-2)', () => {
+  it('a planner with outreach.update (and WITHOUT outreach.delete) keeps the archive action', () => {
+    grantedPerms = ['outreach.update']
+    render(<OutreachPage />)
+    act(() => listProps?.onToggleRow?.('c1'))
+    expect(screen.getByTestId('outreach-bulkbar-stub')).toBeInTheDocument()
+    expect(bulkBarProps?.canArchive).toBe(true)
+  })
+
+  it('a viewer without outreach.update loses it — even holding outreach.delete', () => {
+    grantedPerms = ['outreach.delete']
+    render(<OutreachPage />)
+    act(() => listProps?.onToggleRow?.('c1'))
+    expect(screen.getByTestId('outreach-bulkbar-stub')).toBeInTheDocument()
+    expect(bulkBarProps?.canArchive).toBe(false)
   })
 })

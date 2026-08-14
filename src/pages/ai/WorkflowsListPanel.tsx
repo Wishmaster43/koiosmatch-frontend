@@ -7,7 +7,7 @@
  */
 import type { MutableRefObject } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Plus, Loader2, LayoutGrid, List, Archive } from 'lucide-react'
+import { Plus, Loader2, LayoutGrid, List, Archive, Trash2 } from 'lucide-react'
 import WorkflowCard from './WorkflowCard'
 import WorkflowListRow from './WorkflowListRow'
 import QuickViewToggle from '@/components/ui/QuickViewToggle'
@@ -25,7 +25,10 @@ interface WorkflowsListPanelProps {
   viewMode: ViewMode
   setViewMode: (mode: ViewMode) => void
   showArchived: boolean
-  setShowArchived: (fn: (v: boolean) => boolean) => void
+  // Exclusive lifecycle toggles (TRASH-OVERAL-2) — the page owns the exclusivity.
+  onToggleArchived: () => void
+  showTrash: boolean
+  onToggleTrash: () => void
   selectedFolder: FolderId
   dragWf: MutableRefObject<string | number | null>
   openEditor: (wf: Workflow, runId?: string | number | null) => void
@@ -34,12 +37,18 @@ interface WorkflowsListPanelProps {
   canManageFolders: boolean
   handleArchive: (wf: Workflow) => void
   handleRestore: (wf: Workflow) => void | Promise<void>
+  // TRASH-OVERAL-2: mark (workflows.delete) / unmark (settings.update) — absent =
+  // no permission, so the row/card buttons don't render (§7 no fake affordances).
+  onMarkDeletion?: (wf: Workflow) => void
+  onUnmark?: (wf: Workflow) => void | Promise<void>
+  // Tenant grace window — feeds the rows' pending-erase note (DD-MM-YYYY).
+  graceDays?: number | null
 }
 
 export default function WorkflowsListPanel({
   loading, error, retryLoad, visibleWorkflows, folders, viewMode, setViewMode,
-  showArchived, setShowArchived, selectedFolder, dragWf, openEditor, handleRun, handleToggleStatus,
-  canManageFolders, handleArchive, handleRestore,
+  showArchived, onToggleArchived, showTrash, onToggleTrash, selectedFolder, dragWf, openEditor, handleRun, handleToggleStatus,
+  canManageFolders, handleArchive, handleRestore, onMarkDeletion, onUnmark, graceDays = null,
 }: WorkflowsListPanelProps) {
   const { t } = useTranslation(['workflows', 'common'])
   return (
@@ -57,9 +66,13 @@ export default function WorkflowsListPanel({
           {/* Visible count */}
           <span style={{ fontSize: 13, color: 'var(--text-muted)' }}>{t('page.countWorkflows', { n: visibleWorkflows.length })}</span>
 
-          {/* Archived (soft-deleted) view — shared quick-view toggle (§4), never hand-rolled. */}
-          <QuickViewToggle active={showArchived} onToggle={() => setShowArchived(v => !v)}
+          {/* Archived (soft-deleted) view — shared quick-view toggle (§4), never
+              hand-rolled; exclusive with the trash view (TRASH-OVERAL-2). */}
+          <QuickViewToggle active={showArchived} onToggle={onToggleArchived}
             label={t('page.archived')} title={t('page.archivedView')} icon={Archive} />
+          {/* Prullenbak (pending erase) — same shared toggle, candidates' trash colour. */}
+          <QuickViewToggle active={showTrash} onToggle={onToggleTrash}
+            label={t('common:trash.view')} color="var(--color-trash)" icon={Trash2} />
 
           {/* View mode toggle — icon-pair, persisted (list is the Make.com-style default) */}
           <div style={{ display: 'flex', border: '1px solid var(--border)', borderRadius: 8, overflow: 'hidden' }}>
@@ -95,6 +108,9 @@ export default function WorkflowsListPanel({
                 canManageFolders={canManageFolders}
                 onArchive={() => handleArchive(wf)}
                 onRestore={() => handleRestore(wf)}
+                onMarkDeletion={onMarkDeletion ? () => onMarkDeletion(wf) : undefined}
+                onUnmark={onUnmark ? () => onUnmark(wf) : undefined}
+                graceDays={graceDays}
               />
             </div>
           ))}
@@ -119,6 +135,9 @@ export default function WorkflowsListPanel({
                 canManageFolders={canManageFolders}
                 onArchive={() => handleArchive(wf)}
                 onRestore={() => handleRestore(wf)}
+                onMarkDeletion={onMarkDeletion ? () => onMarkDeletion(wf) : undefined}
+                onUnmark={onUnmark ? () => onUnmark(wf) : undefined}
+                graceDays={graceDays}
               />
             </div>
           ))}

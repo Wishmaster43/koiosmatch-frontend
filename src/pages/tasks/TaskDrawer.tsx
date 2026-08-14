@@ -19,6 +19,8 @@ import NotesTab from './drawer/NotesTab'
 import ChangelogPopover from '@/components/drawer/ChangelogPopover'
 import ActivityTab from './drawer/ActivityTab'
 import ArchivedBanner from '@/components/drawer/ArchivedBanner'
+import TrashLifecycleSection from '@/components/drawer/TrashLifecycleSection'
+import type { TrashSectionConfig } from '@/components/drawer/TrashLifecycleSection'
 import { initialsOf } from '@/lib/initials'
 import { BTN_H } from '@/config/buttonMetrics'
 import type { TaskDetail } from '@/types/task'
@@ -51,6 +53,8 @@ interface TaskDrawerProps {
   onRemoveLink: (id: Id | undefined, link: { type: string; id: Id | null }) => void
   // Enkelstuks-sweep: per-id restore — the page passes this only with tasks.update.
   onRestore?: (id: Id | undefined) => void
+  // TRASH-OVERAL-2: the shared trash-section wiring (mark/unmark, see TrashLifecycleSection).
+  trash?: TrashSectionConfig
 }
 
 /**
@@ -59,7 +63,7 @@ interface TaskDrawerProps {
  * (status / priority / assignee) + a one-click "mark done" quick action, so the most
  * common changes need no edit-mode; the full field edit still lives in DetailsTab.
  */
-export default function TaskDrawer({ task, onClose, expanded, onToggleExpand, onUpdate, onAddLink, onRemoveLink, onRestore }: TaskDrawerProps) {
+export default function TaskDrawer({ task, onClose, expanded, onToggleExpand, onUpdate, onAddLink, onRemoveLink, onRestore, trash }: TaskDrawerProps) {
   const { t } = useTranslation('tasks')
   const { formatDate, formatDateTime } = useDateFormat()
   const { statuses, priorities, doneStatusValues } = useTaskLookups()
@@ -207,10 +211,17 @@ export default function TaskDrawer({ task, onClose, expanded, onToggleExpand, on
               ArchivedBanner (§3A — extend, never duplicate). W2 delivered (measured:
               TaskListResource now carries deleted_at) → shows "Archived on {date}";
               falls back to the flag-only line only if a row somehow has none. */}
-          {task.archived && (
+          {/* TRASH-OVERAL-2: hidden once the record sits in the trash — the trash
+              banner (TrashLifecycleSection) takes over with unmark instead. */}
+          {task.archived && task.lifecycle !== 'pending_erase' && (
             <ArchivedBanner id={task.id} onRestore={onRestore}
               message={task.archivedAt ? t('drawer.archivedBanner.since', { date: formatDate(task.archivedAt) }) : t('drawer.archivedBanner.flag')}
               restoreLabel={t('drawer.archivedBanner.restore')} />
+          )}
+          {/* TRASH-OVERAL-2: the shared mark/unmark surface (permission-gated in `trash`). */}
+          {trash && (
+            <TrashLifecycleSection entityPath="tasks" id={task.id} entityLabel={task.title}
+              lifecycle={task.lifecycle} pendingEraseAt={task.pendingEraseAt} {...trash} />
           )}
         </EntityHeader>
       )}

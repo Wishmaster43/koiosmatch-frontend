@@ -13,6 +13,7 @@ import { useTranslation } from 'react-i18next'
 import { AlertCircle, ArchiveRestore, CheckCircle, Clock, HelpCircle, Loader2, MoreHorizontal, MousePointerClick, Play, Trash2, Webhook, Zap, Bell } from 'lucide-react'
 import { interactive } from '@/lib/a11y'
 import { useDateFormat } from '@/lib/datetime'
+import { buildTrashNote } from '@/hooks/useTrashFlow'
 import { MODULE_META } from '@/modules/index'
 import type { Workflow, WorkflowStep } from '@/types/workflow'
 
@@ -28,6 +29,12 @@ interface WorkflowListRowProps {
   canManageFolders?: boolean
   onArchive?: () => void
   onRestore?: () => void | Promise<void>
+  // TRASH-OVERAL-2: mark for erasure (workflows.delete) shows on an archived row;
+  // unmark (settings.update) shows on a trashed row. Absent prop = hidden (§7).
+  onMarkDeletion?: () => void
+  onUnmark?: () => void | Promise<void>
+  // Tenant grace window — feeds the trashed row's erase note (DD-MM-YYYY).
+  graceDays?: number | null
 }
 
 const BUBBLE_SIZE = 24
@@ -90,14 +97,16 @@ function triggerMeta(triggerType?: string): { Icon: LucideIcon; key: string } {
   return { Icon: MousePointerClick, key: 'list.triggerManual' }
 }
 
-export default function WorkflowListRow({ workflow, folderName, onRun, onEdit, onToggleStatus, canManageFolders, onArchive, onRestore }: WorkflowListRowProps) {
+export default function WorkflowListRow({ workflow, folderName, onRun, onEdit, onToggleStatus, canManageFolders, onArchive, onRestore, onMarkDeletion, onUnmark, graceDays = null }: WorkflowListRowProps) {
   const { t } = useTranslation('workflows')
-  const { formatDateTime } = useDateFormat()
+  const { formatDate, formatDateTime } = useDateFormat()
   const [running, setRunning] = useState(false)
   const [restoring, setRestoring] = useState(false)
   const [hover, setHover] = useState(false)
   const active = workflow.status === 'active'
   const archived = Boolean(workflow.archived)
+  // TRASH-OVERAL-2: trashed rows swap restore/mark for the erase note + unmark.
+  const inTrash = workflow.lifecycle === 'pending_erase'
   const trig = triggerMeta(workflow.trigger_type)
 
   // Restore is a distinct async action — keep the row responsive while it lands.
@@ -148,6 +157,14 @@ export default function WorkflowListRow({ workflow, folderName, onRun, onEdit, o
 
       {archived ? (
         <>
+          {/* TRASH-OVERAL-2: the trashed row says when it entered the trash and when
+              it erases for good (DD-MM-YYYY via the house formatter). */}
+          {inTrash && (
+            <span className="text-xs flex-shrink-0 truncate" style={{ color: 'var(--color-danger)', maxWidth: 320 }}>
+              {buildTrashNote(t, formatDate, workflow.pending_erase_at, graceDays)}
+            </span>
+          )}
+
           {/* Archived soft chip (§4 soft-chip convention) — read-only, no run/toggle for a deleted workflow */}
           <span className="flex-shrink-0 rounded-full px-2 py-1" style={{
             fontSize: 11, fontWeight: 600, color: 'var(--color-danger)',
@@ -157,8 +174,9 @@ export default function WorkflowListRow({ workflow, folderName, onRun, onEdit, o
             {t('list.archivedBadge')}
           </span>
 
-          {/* Restore — settings.update-gated (mirrors deleteFolder's guard) */}
-          {canManageFolders && onRestore && (
+          {/* Restore — settings.update-gated (mirrors deleteFolder's guard); the
+              trashed row unmarks first (below) instead of restoring straight to active. */}
+          {!inTrash && canManageFolders && onRestore && (
             <button onClick={handleRestoreClick} disabled={restoring}
               aria-label={t('list.restoreWorkflow')} title={t('list.restoreWorkflow')}
               className="flex items-center gap-1 rounded-lg px-2.5 py-1 text-xs font-medium flex-shrink-0"
@@ -166,6 +184,32 @@ export default function WorkflowListRow({ workflow, folderName, onRun, onEdit, o
             >
               {restoring ? <Loader2 size={11} className="animate-spin" /> : <ArchiveRestore size={11} />}
               {t('list.restore')}
+            </button>
+          )}
+
+          {/* TRASH-OVERAL-2: archived → trash (workflows.delete-gated at the page;
+              the shared preview modal confirms). */}
+          {!inTrash && onMarkDeletion && (
+            <button onClick={e => { e.stopPropagation(); onMarkDeletion() }}
+              aria-label={t('common:trash.markAction')} title={t('common:trash.markAction')}
+              className="flex items-center justify-center rounded-lg flex-shrink-0"
+              style={{ width: 26, height: 26, background: 'color-mix(in srgb, var(--color-danger) 10%, transparent)',
+                border: '1px solid color-mix(in srgb, var(--color-danger) 40%, transparent)', cursor: 'pointer', color: 'var(--color-danger)' }}
+            >
+              <Trash2 size={13} />
+            </button>
+          )}
+
+          {/* TRASH-OVERAL-2: trash → back to plain archived (settings.update-gated). */}
+          {inTrash && onUnmark && (
+            <button onClick={e => { e.stopPropagation(); onUnmark() }}
+              aria-label={t('common:trash.unmarkAction')} title={t('common:trash.unmarkAction')}
+              className="flex items-center gap-1 rounded-lg px-2.5 py-1 text-xs font-medium flex-shrink-0"
+              style={{ background: 'color-mix(in srgb, var(--color-archive) 10%, transparent)', color: 'var(--color-archive)',
+                border: '1px solid color-mix(in srgb, var(--color-archive) 40%, transparent)', cursor: 'pointer' }}
+            >
+              <ArchiveRestore size={11} />
+              {t('common:trash.unmarkAction')}
             </button>
           )}
         </>

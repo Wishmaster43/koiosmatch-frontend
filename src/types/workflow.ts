@@ -29,6 +29,10 @@ export interface Workflow {
   trigger_type?: string       // 'scheduled' | 'webhook' | 'manual' — drives the list-row trigger icon
   status?: string
   archived?: boolean          // soft-deleted; hidden unless the Archived view is on
+  // TRASH-OVERAL-2: trash lifecycle + pending-erase stamp (normalizeWorkflow derives
+  // a tolerant fallback for payloads that predate the fields).
+  lifecycle?: 'active' | 'archived' | 'pending_erase'
+  pending_erase_at?: string | null
   folder_id?: string | number | null
   steps: WorkflowStep[]
   last_run?: WorkflowLastRun | null

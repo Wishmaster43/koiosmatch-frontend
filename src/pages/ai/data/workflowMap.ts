@@ -41,7 +41,13 @@ export function normalizeWorkflow(wf: RawWorkflow): Workflow {
     ? { time: wf.latest_run.created_at, ok: wf.latest_run.status === 'success' }
     : null)
 
-  return { ...wf, trigger, status, steps, last_run: lastRun }
+  // TRASH-OVERAL-2: archived flag + trash lifecycle, tolerant of older payloads
+  // (deleted_at implies archived; a missing lifecycle derives from that flag).
+  const archived = Boolean(wf.archived ?? wf.deleted_at)
+  const lifecycle = (wf.lifecycle as Workflow['lifecycle']) ?? (archived ? 'archived' : 'active')
+
+  return { ...wf, trigger, status, steps, last_run: lastRun, archived, lifecycle,
+    pending_erase_at: (wf.pending_erase_at as string | null | undefined) ?? null }
 }
 
 // Vertaal frontend trigger string → trigger_type + trigger_config

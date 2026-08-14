@@ -5,6 +5,8 @@ import { Edit2, Save, X, Trash2 } from 'lucide-react'
 import EntityDrawer from '@/components/drawer/EntityDrawer'
 import EntityHeader from '@/components/drawer/EntityHeader'
 import ArchivedBanner from '@/components/drawer/ArchivedBanner'
+import TrashLifecycleSection from '@/components/drawer/TrashLifecycleSection'
+import type { TrashSectionConfig } from '@/components/drawer/TrashLifecycleSection'
 import TitleBadge from '@/components/drawer/TitleBadge'
 import ReferenceNumberChip from '@/components/ui/ReferenceNumberChip'
 import CustomFieldsTab from '@/components/drawer/CustomFieldsTab'
@@ -37,6 +39,8 @@ interface OpportunityDrawerProps {
   // permission, so the trash icon/restore button simply don't render.
   onArchive?: (id: Id | undefined) => void
   onRestore?: (id: Id | undefined) => void
+  // TRASH-OVERAL-2: the shared trash-section wiring (mark/unmark, see TrashLifecycleSection).
+  trash?: TrashSectionConfig
 }
 
 const hdrBtn: CSSProperties = { display: 'flex', alignItems: 'center', justifyContent: 'center', width: 28, height: 28, borderRadius: 7, cursor: 'pointer', flexShrink: 0 }
@@ -52,7 +56,7 @@ const hdrPrimary: CSSProperties = { ...hdrBtn, background: 'var(--color-primary)
  */
 export default function OpportunityDrawer({
   opportunity: o, onClose, expanded, onToggleExpand, onUpdate, stages = [], users = [], customers = [],
-  onArchive, onRestore,
+  onArchive, onRestore, trash,
 }: OpportunityDrawerProps) {
   const { t } = useTranslation('opportunities')
   const { formatDate, formatDateTime } = useDateFormat()
@@ -182,10 +186,17 @@ export default function OpportunityDrawer({
               server-backed (mapOpportunity reads archived/deleted_at, see the type
               comment on Opportunity.archived) OR set locally the moment this session's
               own archive/restore call completes, whichever lands first. */}
-          {o.archived && (
+          {/* TRASH-OVERAL-2: hidden once the record sits in the trash — the trash
+              banner (TrashLifecycleSection) takes over with unmark instead. */}
+          {o.archived && o.lifecycle !== 'pending_erase' && (
             <ArchivedBanner id={o.id}
               message={o.archivedAt ? t('drawer.archivedBanner.since', { date: formatDate(o.archivedAt) }) : t('drawer.archivedBanner.flag')}
               onRestore={onRestore} restoreLabel={t('drawer.archivedBanner.restore')} />
+          )}
+          {/* TRASH-OVERAL-2: the shared mark/unmark surface (permission-gated in `trash`). */}
+          {trash && (
+            <TrashLifecycleSection entityPath="opportunities" id={o.id} entityLabel={o.title}
+              lifecycle={o.lifecycle} pendingEraseAt={o.pendingEraseAt} {...trash} />
           )}
         </EntityHeader>
       )}

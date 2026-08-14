@@ -257,6 +257,11 @@ export interface Customer {
   billingEmail: string
   tags: unknown[]
   archived: boolean
+  archivedAt: string | null
+  // TRASH-OVERAL-2 lifecycle: 'active' | 'archived' | 'pending_erase' (trash) —
+  // drives the Gearchiveerd/Prullenbak view split, mirrors Candidate.lifecycle.
+  lifecycle: string
+  pendingEraseAt: string | null
   locations: Location[]
   departments: Department[]
   contacts: Contact[]
@@ -409,5 +414,10 @@ export interface ApiCustomer {
   custom_fields?: Record<string, unknown>
   // EXTRACT-1: the shared raw shape (src/lib/backofficeLink).
   backoffice_links?: ApiBackofficeLink[]
+  // TRASH-OVERAL-2: soft-delete stamp + the two-step trash lifecycle fields the
+  // list resource now carries ('active'|'archived'|'pending_erase' + ISO stamp).
+  deleted_at?: string | null
+  lifecycle?: string
+  pending_erase_at?: string | null
   [k: string]: unknown
 }

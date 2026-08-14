@@ -512,6 +512,10 @@
       "label": "Validez del consentimiento",
       "description": "Meses durante los que un consentimiento de conservación concedido sigue siendo válido antes de tener que reconfirmarse. 0 = el consentimiento nunca caduca."
     },
+    "graceDays": {
+      "label": "Plazo de la papelera",
+      "description": "Número de días que un registro permanece en la papelera antes de eliminarse definitivamente de forma automática."
+    },
     "unit": "meses"
   },
   "statusList": {

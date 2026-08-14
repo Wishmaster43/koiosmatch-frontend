@@ -279,6 +279,12 @@ export function mapCustomer(c: ApiCustomer = {}): Customer {
     // Archived = soft-deleted (deleted_at). Off by default in the list; the
     // "Gearchiveerd" view opts in via ?include_archived=1.
     archived: !!(c.deleted_at ?? c.archived),
+    archivedAt: c.deleted_at ?? null,
+    // TRASH-OVERAL-2 lifecycle (mirrors mapCandidate): server value first, else
+    // derived from the stamps — a missing field stays 'active'/null so old
+    // fixtures/payloads keep working.
+    lifecycle: c.lifecycle ?? (c.pending_erase_at ? 'pending_erase' : (c.deleted_at || c.archived) ? 'archived' : 'active'),
+    pendingEraseAt: c.pending_erase_at ?? null,
     locations,
     departments,
     contacts,

@@ -19,8 +19,22 @@ import type { Customer } from '@/types/customer'
 
 // DELETE-ICON-1: api.delete is the trash icon's real persistence path (§3 — no
 // fake affordance); api.get is only here so any accidental stray call resolves.
+// TRASH-OVERAL-2: post + unwrap serve the shared TrashLifecycleSection
+// (deletion-preview GET, mark/unmark POSTs) rendered via the `trash` prop.
 vi.mock('@/lib/api', () => ({
-  default: { get: vi.fn(() => Promise.resolve({ data: {} })), delete: vi.fn(() => Promise.resolve({})) },
+  default: {
+    get: vi.fn(() => Promise.resolve({ data: {} })),
+    delete: vi.fn(() => Promise.resolve({})),
+    post: vi.fn(() => Promise.resolve({ data: { data: { lifecycle: 'pending_erase' } } })),
+  },
+  unwrap: (res: { data?: unknown }) => {
+    const body = res?.data
+    return body && typeof body === 'object' && 'data' in body ? (body as { data: unknown }).data : body
+  },
+}))
+// The tenant grace window read by useDeletionLifecycle's session cache.
+vi.mock('@/pages/settings/lib/settingsApi', () => ({
+  loadSettings: () => Promise.resolve({ deletion_grace_days: '30' }),
 }))
 // MatchesTab fires its own GET (proven in its own test file) — stubbed here so
 // this file stays about the drawer shell (header icons + tab wiring), not the
@@ -304,5 +318,73 @@ describe('CustomerDrawer · Matches tab (MATCHES-TAB-1)', () => {
 
     await user.click(screen.getByRole('tab', { name: ct('drawer.tabs.matches') }))
     expect(screen.getByText('matches stub')).toBeInTheDocument()
+  })
+})
+
+// TRASH-OVERAL-2: the drawer's trash surface — REQUEST-asserting (§13): the mark
+// flow's exact POST with and without transfer_to_owner_id, the unmark POST, the
+// permission-hidden mark action, and the NEW restore banner (customers.update).
+describe('CustomerDrawer · trash lifecycle (TRASH-OVERAL-2)', () => {
+  const tc = (key: string, opts?: Record<string, unknown>) => i18n.t(key, { ns: 'common', ...opts })
+  const PREVIEW = { blocking: [], transferable: null, can_mark: true, lifecycle: 'archived' }
+  const trashWiring = (over: Partial<Record<string, unknown>> = {}) => ({
+    canMark: true, canUnmark: true,
+    users: [{ value: 'u-1', label: 'Anna de Vries' }],
+    onMarked: vi.fn(), onUnmarked: vi.fn(), ...over,
+  })
+
+  it('mark flow: preview GET + confirm POSTs /customers/{id}/mark-deletion with an EMPTY body', async () => {
+    vi.mocked(api.get).mockResolvedValue({ data: { data: PREVIEW } })
+    const wiring = trashWiring()
+    const user = userEvent.setup()
+    render(<CustomerDrawer customer={customer} onClose={() => {}} statuses={statuses} trash={wiring} />)
+
+    await user.click(screen.getByRole('button', { name: tc('trash.markAction') as string }))
+    await waitFor(() => expect(api.get).toHaveBeenCalledWith('/customers/1/deletion-preview'))
+    await user.click(within(screen.getByRole('dialog')).getByRole('button', { name: tc('trash.modal.confirm') as string }))
+
+    await waitFor(() => expect(api.post).toHaveBeenCalledWith('/customers/1/mark-deletion', {}, { quietStatuses: [409] }))
+    expect(wiring.onMarked).toHaveBeenCalledWith(1)
+  })
+
+  it('mark flow with a picked transfer owner sends {transfer_to_owner_id}', async () => {
+    vi.mocked(api.get).mockResolvedValue({ data: { data: { ...PREVIEW, transferable: { attribute: 'owner_id', current_owner_id: null } } } })
+    const user = userEvent.setup()
+    render(<CustomerDrawer customer={customer} onClose={() => {}} statuses={statuses} trash={trashWiring()} />)
+
+    await user.click(screen.getByRole('button', { name: tc('trash.markAction') as string }))
+    await user.click(await screen.findByText(tc('trash.modal.transferPlaceholder') as string))
+    await user.click(screen.getByText('Anna de Vries'))
+    await user.click(within(screen.getByRole('dialog')).getByRole('button', { name: tc('trash.modal.confirm') as string }))
+
+    await waitFor(() => expect(api.post).toHaveBeenCalledWith('/customers/1/mark-deletion',
+      { transfer_to_owner_id: 'u-1' }, { quietStatuses: [409] }))
+  })
+
+  it('hides the mark action without customers.delete (no fake affordances)', () => {
+    render(<CustomerDrawer customer={customer} onClose={() => {}} statuses={statuses} trash={trashWiring({ canMark: false })} />)
+    expect(screen.queryByRole('button', { name: tc('trash.markAction') as string })).toBeNull()
+  })
+
+  it('unmark on a pending_erase record POSTs /customers/{id}/unmark-deletion', async () => {
+    const wiring = trashWiring()
+    const pending = { ...customer, archived: true, lifecycle: 'pending_erase', pendingEraseAt: '2026-08-01T10:00:00Z' } as Customer
+    const user = userEvent.setup()
+    render(<CustomerDrawer customer={pending} onClose={() => {}} statuses={statuses} trash={wiring} />)
+
+    await user.click(screen.getByRole('button', { name: tc('trash.unmarkAction') as string }))
+
+    await waitFor(() => expect(api.post).toHaveBeenCalledWith('/customers/1/unmark-deletion'))
+    expect(wiring.onUnmarked).toHaveBeenCalledWith(1)
+  })
+
+  it('archived record shows the NEW restore banner button and calls onRestore (customers.update)', async () => {
+    const onRestore = vi.fn()
+    const archived = { ...customer, archived: true, archivedAt: '2026-08-01T10:00:00Z', lifecycle: 'archived' } as Customer
+    const user = userEvent.setup()
+    render(<CustomerDrawer customer={archived} onClose={() => {}} statuses={statuses} onRestore={onRestore} />)
+
+    await user.click(screen.getByRole('button', { name: ct('locations.archivedBanner.restore') }))
+    expect(onRestore).toHaveBeenCalledWith(1)
   })
 })

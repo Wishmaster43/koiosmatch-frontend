@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo, useRef } from 'react'
 import type { Dispatch, SetStateAction } from 'react'
 import { useTranslation } from 'react-i18next'
-import { LayoutList, Kanban, Archive, Plus } from 'lucide-react'
+import { LayoutList, Kanban, Archive, Plus, Trash2 } from 'lucide-react'
 import ViewModeToggle from '@/components/ui/ViewModeToggle'
 import { useUsers } from '@/lib/queries'
 import { useRightPanel } from '@/context/RightPanelContext'
@@ -53,8 +53,10 @@ function TasksPageInner({ intent }: { intent?: unknown }) {
   const auth = useAuth()
   // Bulk archive (soft-delete, reversible → update-class gating; the backend re-checks).
   const canArchive = (auth as unknown as { hasPermission?: (p: string) => boolean })?.hasPermission?.('tasks.update') ?? false
+  // TRASH-OVERAL-2: mark-for-erasure is delete-class — its own permission (§7).
+  const canMarkDeletion = (auth as unknown as { hasPermission?: (p: string) => boolean })?.hasPermission?.('tasks.delete') ?? false
   const { data: users = [] } = useUsers() as { data?: UserLike[] }
-  const { t } = useTranslation('tasks')
+  const { t } = useTranslation(['tasks', 'common'])
   // Scroll container for row virtualization (F-11): DataTable virtualizes against it.
   const tableScrollRef = useRef<HTMLDivElement>(null)
   const { registerFilters, unregisterFilters } = useRightPanel()
@@ -72,7 +74,7 @@ function TasksPageInner({ intent }: { intent?: unknown }) {
   const [selectedIds, setSelectedIds] = useState<Set<Id>>(() => new Set())
   // ALL filter state + the row predicate live in one hook (§0.3 size split).
   const {
-    showArchived, setShowArchived, query, setQuery, refQuery,
+    showArchived, setShowArchived, showTrash, setShowTrash, query, setQuery, refQuery,
     selectedStatus, setSelectedStatus, selectedPriority, setSelectedPriority,
     selectedType, setSelectedType, selectedAssignee, setSelectedAssignee,
     selectedTeam, setSelectedTeam, selectedLinkType, setSelectedLinkType,
@@ -98,8 +100,10 @@ function TasksPageInner({ intent }: { intent?: unknown }) {
   // Data layer: load + decorate tasks/archived tasks (§0.3 split → hook).
   // NUMMER-1: `refQuery` (T-00042) turns the header search into an exact server-side
   // `?ref=` lookup; anything else stays the client-side free-text filter.
+  // TRASH-OVERAL-2: the trash view rides the SAME ?archived=1 fetch as the
+  // archived view — the lifecycle filter below splits the soft-deleted set.
   const { setTasks, archivedTasks, setArchivedTasks, loading, error, all, decorate } = useTasksData({
-    showArchived, refQuery, statuses, priorities, types, statusMeta, priorityMeta, typeMeta, doneStatusValues,
+    showArchived: showArchived || showTrash, refQuery, statuses, priorities, types, statusMeta, priorityMeta, typeMeta, doneStatusValues,
   })
 
   // Donut/filter/KPI derivations from the decorated list (§0.3 split → hook).
@@ -124,10 +128,16 @@ function TasksPageInner({ intent }: { intent?: unknown }) {
   }, [filterGroups, registerFilters, unregisterFilters])
 
   // Reset to the first page + clear the selection whenever a filter/KPI tile changes.
-  useEffect(() => { setPage(1); setSelectedIds(new Set()) }, [selectedStatus, selectedPriority, selectedType, selectedAssignee, selectedTeam, selectedLinkType, dueRange, kpiFilter, showArchived, query])
+  useEffect(() => { setPage(1); setSelectedIds(new Set()) }, [selectedStatus, selectedPriority, selectedType, selectedAssignee, selectedTeam, selectedLinkType, dueRange, kpiFilter, showArchived, showTrash, query])
 
-  // The visible rows: the hook predicate (panel filters + search + KPI tile).
-  const filteredAll = useMemo(() => all.filter(matchesFilters), [all, matchesFilters])
+  // The visible rows: the hook predicate (panel filters + search + KPI tile) +
+  // the lifecycle view split (TRASH-OVERAL-2, mirrors candidates): trash =
+  // pending_erase, archived = archived only (so pending rows never double-show).
+  const filteredAll = useMemo(() => all.filter(matchesFilters).filter(x =>
+    showTrash ? x.lifecycle === 'pending_erase'
+    : showArchived ? x.lifecycle === 'archived'
+    : true,
+  ), [all, matchesFilters, showArchived, showTrash])
 
   const totalRows = filteredAll.length
   const lastPage  = Math.max(1, Math.ceil(totalRows / pageSize))
@@ -149,6 +159,22 @@ function TasksPageInner({ intent }: { intent?: unknown }) {
 
   // A new task created in the modal — prepend it to the list.
   const handleCreated = (raw: unknown) => { setTasks(prev => [mapTask(raw as ApiTask), ...prev]); setAddOpen(false) }
+
+  // TRASH-OVERAL-2: local reconcile after mark/unmark (no refetch). A row marked
+  // from the ACTIVE view simply leaves that list (it is soft-deleted now — the
+  // archived/trash fetch pulls it fresh when one of those views opens); one marked
+  // from the archived view keeps its slot with the new lifecycle stamps.
+  const onTaskMarked = (id: Id) => {
+    const stamp = { archived: true, lifecycle: 'pending_erase', pendingEraseAt: new Date().toISOString() }
+    setTasks(prev => prev.filter(x => x.id !== id))
+    setArchivedTasks(prev => prev.map(x => x.id === id ? { ...x, ...stamp } : x))
+    setSelected(prev => (prev && prev.id === id ? { ...prev, ...stamp } : prev))
+  }
+  const onTaskUnmarked = (id: Id) => {
+    const stamp = { lifecycle: 'archived', pendingEraseAt: null }
+    setArchivedTasks(prev => prev.map(x => x.id === id ? { ...x, ...stamp } : x))
+    setSelected(prev => (prev && prev.id === id ? { ...prev, ...stamp } : prev))
+  }
 
   // Bulk selection + mutations (§0.3 split → hook).
   const { clearSelection, toggleRow, toggleAll, bulkSetStatus, bulkSetPriority, bulkSetAssignee, bulkArchive } =
@@ -181,9 +207,11 @@ function TasksPageInner({ intent }: { intent?: unknown }) {
           <HeaderSearch key={searchEpoch} onSearch={setQuery} placeholder={t('page.searchPlaceholder')} width={280} />
             <ClearFiltersButton active={anyFilterActive} onClear={clearAllFilters} />
           <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 8 }}>
-            {/* Archived (soft-deleted) — shared quick-view toggle (§4). */}
-            <QuickViewToggle active={showArchived} onToggle={() => setShowArchived(v => !v)}
+            {/* Archived ⇄ trash are mutually exclusive views (mirrors candidates). */}
+            <QuickViewToggle active={showArchived} onToggle={() => { setShowArchived(v => !v); setShowTrash(false) }}
               label={t('view.archived')} color="var(--color-archive)" icon={Archive} />
+            <QuickViewToggle active={showTrash} onToggle={() => { setShowTrash(v => !v); setShowArchived(false) }}
+              label={t('common:trash.view')} color="var(--color-trash)" icon={Trash2} />
             {/* Table/board switcher — shared soft-tint component (§4), never a solid fill. */}
             <ViewModeToggle value={view} onChange={setView} options={[
               { id: 'table', icon: LayoutList, label: t('view.table') },
@@ -243,6 +271,15 @@ function TasksPageInner({ intent }: { intent?: unknown }) {
         onRemoveLink={handleRemoveLink}
         // Restore is update-class (reversible, BE gates tasks.update) — same signal as archive.
         onRestore={canArchive ? restoreTask : undefined}
+        // TRASH-OVERAL-2: shared trash section (mark = tasks.delete, unmark =
+        // tasks.update; backend re-checks, §7) — reconciled locally above.
+        trash={{
+          canMark: canMarkDeletion,
+          canUnmark: canArchive,
+          users: users.map(u => ({ value: String(u.id), label: u.name })),
+          onMarked: onTaskMarked,
+          onUnmarked: onTaskUnmarked,
+        }}
       />
 
       {/* Add-activity modal */}

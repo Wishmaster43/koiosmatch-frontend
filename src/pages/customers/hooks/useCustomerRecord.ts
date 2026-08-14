@@ -12,7 +12,7 @@ import { useState, useRef } from 'react'
 import type { Dispatch, SetStateAction } from 'react'
 import type { TFunction } from 'i18next'
 import api, { unwrap } from '@/lib/api'
-import { notifyError } from '@/lib/notify'
+import { notifyError, notifySuccess } from '@/lib/notify'
 import { extractApiError } from '@/lib/extractApiError'
 import { mergePatch } from '@/lib/mergePatch'
 import { mapCustomer } from '../data/mapCustomer'
@@ -182,6 +182,22 @@ export function useCustomerRecord({ setCustomers, setTotal, users, t }: Args) {
     }
   }
 
+  // TRASH-OVERAL-2: bring an archived customer back to active via the per-id route
+  // (POST /customers/{id}/restore — customers.update; mirrors restoreVacancy).
+  // Reconciles all three local copies so the banner/chip clear without a refetch.
+  const restoreCustomer = (id: Id | undefined) => {
+    if (id == null) return
+    api.post(`/customers/${id}/restore`)
+      .then(() => {
+        notifySuccess(t('changelog.actions.restored'))
+        const clear = { archived: false, archivedAt: null, lifecycle: 'active', pendingEraseAt: null }
+        setCustomers(prev => prev.map(c => c.id === id ? ({ ...c, ...clear } as Customer) : c))
+        setSelected(prev => (prev && prev.id === id ? ({ ...prev, ...clear } as Customer) : prev))
+        setDetail(prev   => (prev && prev.id === id ? ({ ...prev, ...clear } as Customer) : prev))
+      })
+      .catch(() => notifyError(t('locations.detail.restoreFailed')))
+  }
+
   // Create a customer: optimistic prepend, then POST + reconcile. Rethrows on
   // failure (after reverting the optimistic row) instead of swallowing it — the
   // modal awaits this and maps 422 field errors (C-18) rather than closing
@@ -278,6 +294,6 @@ export function useCustomerRecord({ setCustomers, setTotal, users, t }: Args) {
 
   return {
     selected, detail, drawerExpanded, setDrawerExpanded, drawerTab,
-    closeDrawer, selectCustomer, updateCustomer, handleCreate, addNote, editNote, deleteNote,
+    closeDrawer, selectCustomer, updateCustomer, restoreCustomer, handleCreate, addNote, editNote, deleteNote,
   }
 }

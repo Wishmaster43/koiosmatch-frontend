@@ -8,7 +8,6 @@
 import { useState, useEffect, useMemo, useRef, lazy, Suspense } from 'react'
 import type { Dispatch, SetStateAction } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Archive, Map as MapIcon } from 'lucide-react'
 import { useRightPanel } from '@/context/RightPanelContext'
 import { useAuth } from '@/context/AuthContext'
 import { useUsers } from '@/lib/queries'
@@ -18,12 +17,10 @@ import ActionMessageBanner from '@/components/ui/ActionMessageBanner'
 import { VacancyLookupsProvider, useVacancyLookups } from '@/context/VacancyLookupsContext'
 import InsightsRow from '@/components/insights/InsightsRow'
 import PaginationBar from '@/components/ui/PaginationBar'
-import HeaderSearch from '@/components/ui/HeaderSearch'
-import ClearFiltersButton from '@/components/ui/ClearFiltersButton'
-import QuickViewToggle from '@/components/ui/QuickViewToggle'
 import ViewSwitch from '@/components/ui/ViewSwitch'
 import VacanciesTable from './VacanciesTable'
 import VacanciesBulkBar from './VacanciesBulkBar'
+import VacanciesToolbar from './VacanciesToolbar'
 import VacancyDrawer from './VacancyDrawer'
 import AddVacancyModal from './AddVacancyModal'
 import { toggleOneValue } from './data/vacanciesShared'
@@ -42,7 +39,6 @@ import { useAiAgents } from './hooks/useAiAgents'
 import { useVacancyRecord } from './hooks/useVacancyRecord'
 import { useVacancyInsights } from './hooks/useVacancyInsights'
 import { useOpenFromIntent } from '@/context/NavigationContext'
-import { BTN_H } from '@/config/buttonMetrics'
 import { useVacancyBulkActions } from './hooks/useVacancyBulkActions'
 import type { VacancyDetail } from '@/types/vacancy'
 import type { Id } from '@/types/common'
@@ -97,6 +93,9 @@ function VacanciesPageInner({ intent }: { intent?: unknown }) {
   const [selectedBranch, setSelectedBranch] = usePageMemory<string[]>('vac.branch', [])
   const [globalSearch,   setGlobalSearch]   = usePageMemory('vac.search', '')
   const [showArchived,   setShowArchived]   = usePageMemory('vac.archived', false)
+  // TRASH-OVERAL-2: Prullenbak view (lifecycle pending_erase) — same include_archived
+  // request, split client-side; mutually exclusive with the archived view (mirrors candidates).
+  const [showTrash,      setShowTrash]      = usePageMemory('vac.trash', false)
   // VAC-AGENT-1: "online without an AI agent" quick view (?without_agent=1).
   const [showWithoutAgent, setShowWithoutAgent] = usePageMemory('vac.withoutAgent', false)
   // VAC-KPI-REDESIGN 22-07: the AI-agent donut's "real agent" segment click (?agent_id=).
@@ -132,7 +131,7 @@ function VacanciesPageInner({ intent }: { intent?: unknown }) {
   // shape lives in its own hook so it stays unit-testable (§3 size discipline).
   const filterParams = useVacancyFilterParams({
     globalSearch, statusBucket, selectedOwner, selectedClient, selectedCategory, selectedBranch,
-    showArchived, showWithoutAgent, selectedAgentId, hasApplications, publishedBucket,
+    showArchived, showTrash, showWithoutAgent, selectedAgentId, hasApplications, publishedBucket,
     view, mapCenter, mapRadius, mapStraalActive, attention,
     geoFilter: geoFilter ? { lat: geoFilter.lat, lng: geoFilter.lng, km: geoFilter.km } : null,
   })
@@ -155,6 +154,16 @@ function VacanciesPageInner({ intent }: { intent?: unknown }) {
   const { vacancies, setVacancies, loading, error, total, setTotal, lastPage, stats, customers } =
     useVacanciesData({ filterParams, page, pageSize, t, sort })
   const customerList = customers as { id: Id; name: string }[]
+
+  // Three lifecycle views (TRASH-OVERAL-2, mirrors candidates): trash = pending_erase,
+  // archived = archived only (so pending rows never double-show), default = not
+  // soft-deleted (belt-and-braces — the server already omits them without the flag).
+  const visibleRows = useMemo(() =>
+    vacancies.filter(v =>
+      showTrash ? v.lifecycle === 'pending_erase'
+      : showArchived ? v.lifecycle === 'archived'
+      : !v.archived),
+  [vacancies, showArchived, showTrash])
 
   // ── Drawer/record data layer (§3): selection + detail fetch + optimistic edits ──
   const { selected, detail, drawerExpanded, setDrawerExpanded, closeDrawer, selectVacancy, handleCreated, updateVacancy, restoreVacancy } =
@@ -276,11 +285,11 @@ function VacanciesPageInner({ intent }: { intent?: unknown }) {
     applicationsTotal, hasApplications, setHasApplications,
   })
   // Shared clear-all (page memory keeps filters sticky).
-  const anyFilterActive = Boolean(globalSearch.trim() || showArchived || showWithoutAgent || Boolean(selectedAgentId) || statusBucket !== 'all'
+  const anyFilterActive = Boolean(globalSearch.trim() || showArchived || showTrash || showWithoutAgent || Boolean(selectedAgentId) || statusBucket !== 'all'
     || selectedOwner.length || selectedClient.length || selectedCategory.length || selectedBranch.length || publishedBucket !== 'all' || hasApplications || attention || geoFilter)
   const [searchEpoch, setSearchEpoch] = useState(0)
   const clearAllFilters = () => {
-    setSearchEpoch(e => e + 1); setGlobalSearch(''); setShowArchived(false); setShowWithoutAgent(false); setSelectedAgentId(null); setStatusBucket('all')
+    setSearchEpoch(e => e + 1); setGlobalSearch(''); setShowArchived(false); setShowTrash(false); setShowWithoutAgent(false); setSelectedAgentId(null); setStatusBucket('all')
     setSelectedOwner([]); setSelectedClient([]); setSelectedCategory([]); setSelectedBranch([]); setPublishedBucket('all'); setHasApplications(false); setAttention(null)
     clearGeo(); setPage(1)
   }
@@ -302,52 +311,29 @@ function VacanciesPageInner({ intent }: { intent?: unknown }) {
             // linked yet — a resulting empty list must say so, not read as "nothing here".
             notice={selectedBranch.length > 0 && total === 0 ? t('common:filters.branchExcludesUnassigned') : undefined} />
 
-          {/* Add/bulk on the left (like Candidates/Applications); status tabs pushed right */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap',
-            padding: '0 24px 12px', minHeight: 36, flexShrink: 0 }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-              {selectedIds.size > 0 ? (
-                <VacanciesBulkBar count={selectedIds.size} onClear={() => setSelectedIds(new Set())}
-                  onSetOwner={bulkSetOwner} onSetStatus={bulkSetStatus} onSetClient={bulkSetClient}
-                  onPublish={() => bulkPublish(true)} onUnpublish={() => bulkPublish(false)}
-                  onSetAiAgent={bulkSetAiAgent}
-                  onRemoveTag={bulkRemoveTag} onAddNote={bulkAddNote} onArchive={bulkArchive}
-                  canArchive={hasPermission('vacancies.delete')}
-                  users={users} statuses={statuses} customers={customerList} aiAgents={aiAgents} selectedTags={selectedTags}
-                  selectedVacancies={vacancies.filter((v): v is typeof v & { id: Id } => v.id != null && selectedIds.has(v.id)).map(v => ({ id: v.id, title: v.title }))}
-                  onOpenCandidateSearch={openCandidateSearch} />
-              ) : (
-                <>
-                  {/* BTN_H (§4/§9): one explicit height for every text/action button, everywhere. */}
-                  <button onClick={() => setAddOpen(true)} style={{ display: 'flex', alignItems: 'center', height: BTN_H, padding: '0 14px', fontSize: 13, fontWeight: 600,
-                    background: 'var(--color-primary)', color: 'var(--color-on-accent)', border: 'none', borderRadius: 8, cursor: 'pointer' }}>
-                    + {t('page.add')}
-                  </button>
-                  {/* Shared header search (T10) — debounced, drives the same server-side ?search=. */}
-                  <HeaderSearch key={searchEpoch} onSearch={setGlobalSearch} defaultValue={globalSearch}
-                    placeholder={t('page.searchPlaceholder')} width={300} />
-                  <ClearFiltersButton active={anyFilterActive} onClear={clearAllFilters} />
-                </>
-              )}
-            </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', marginLeft: 'auto' }}>
-              {/* Archived (soft-deleted) — shared quick-view toggle (§4). */}
-              <QuickViewToggle active={showArchived} onToggle={() => setShowArchived(v => !v)}
-                label={t('page.archivedView')} color="var(--color-archive)" icon={Archive} />
-              {/* STRAAL-1: table ⇄ map (radius search) — always shown, mirroring the
-                  candidate blueprint (the API ships lat/lng + distance_km now). */}
-              <QuickViewToggle active={view === 'map'} onToggle={() => setView(x => (x === 'map' ? 'table' : 'map'))}
-                label={t('common:map.view')} color="var(--color-map)" icon={MapIcon} />
-              {/* No "Zonder AI-agent" toggle here (Danny 27-07): the KPI row already
-                  carries that view as a click-to-filter card, and the agent donut's
-                  "Geen agent" segment drives the same toggleWithoutAgent — a third
-                  control for one filter is duplication, not convenience. */}
-              {/* No status bucket tabs here (Danny 14-08, PDF-punt "rode rij weg"):
-                  status filtering lives in the right filter panel now — a second
-                  toolbar control for the same statusBucket was duplication. The
-                  state itself stays: the panel, KPI cards and deep-links drive it. */}
-            </div>
-          </div>
+          {/* Toolbar (§0.3 split → VacanciesToolbar, mirrors CandidatesToolbar):
+              bulk bar (composed here — its data wiring stays in this container)
+              or add/search/clear + the archived/trash/map quick-view toggles. */}
+          <VacanciesToolbar
+            selectedCount={selectedIds.size}
+            bulkBar={
+              <VacanciesBulkBar count={selectedIds.size} onClear={() => setSelectedIds(new Set())}
+                onSetOwner={bulkSetOwner} onSetStatus={bulkSetStatus} onSetClient={bulkSetClient}
+                onPublish={() => bulkPublish(true)} onUnpublish={() => bulkPublish(false)}
+                onSetAiAgent={bulkSetAiAgent}
+                onRemoveTag={bulkRemoveTag} onAddNote={bulkAddNote} onArchive={bulkArchive}
+                canArchive={hasPermission('vacancies.delete')}
+                users={users} statuses={statuses} customers={customerList} aiAgents={aiAgents} selectedTags={selectedTags}
+                selectedVacancies={vacancies.filter((v): v is typeof v & { id: Id } => v.id != null && selectedIds.has(v.id)).map(v => ({ id: v.id, title: v.title }))}
+                onOpenCandidateSearch={openCandidateSearch} />
+            }
+            onAddOpen={() => setAddOpen(true)}
+            searchEpoch={searchEpoch} globalSearch={globalSearch} onSearch={setGlobalSearch}
+            anyFilterActive={anyFilterActive} onClearFilters={clearAllFilters}
+            showArchived={showArchived} onToggleArchived={() => { setShowArchived(v => !v); setShowTrash(false) }}
+            showTrash={showTrash} onToggleTrash={() => { setShowTrash(v => !v); setShowArchived(false) }}
+            mapActive={view === 'map'} onToggleView={() => setView(x => (x === 'map' ? 'table' : 'map'))}
+          />
 
           {/* Transient feedback for bulk mutations — audit R1 item 5: this was a
               copy-pasted role=status banner (mirrored in Candidates/Customers); now
@@ -369,7 +355,7 @@ function VacanciesPageInner({ intent }: { intent?: unknown }) {
                       <ErrorBanner style={{ marginBottom: 12 }}>{error}</ErrorBanner>
                     )}
                     <VacanciesTable
-                      rows={vacancies}
+                      rows={visibleRows}
                       loading={loading}
                       selectedId={selected?.id}
                       onSelect={openVacancy}
@@ -398,7 +384,7 @@ function VacanciesPageInner({ intent }: { intent?: unknown }) {
                 <div style={{ flex: 1, minHeight: 0, display: 'flex', gap: 14, padding: '0 24px 16px' }}>
                   <div style={{ flex: '1.1 1 0', minWidth: 400, display: 'flex', flexDirection: 'column' }}>
                     <Suspense fallback={<div style={{ padding: 24, fontSize: 12, color: 'var(--text-muted)' }}>{t('common:map.loading')}</div>}>
-                      <VacanciesMapView rows={vacancies} padded={false} center={mapCenter} radiusKm={mapStraalActive ? mapRadius : 0}
+                      <VacanciesMapView rows={visibleRows} padded={false} center={mapCenter} radiusKm={mapStraalActive ? mapRadius : 0}
                         onCenterChange={(lat, lng) => { setMapCenter({ lat, lng }); setMapStraalActive(true) }}
                         onRadiusChange={(km: number) => { setMapRadius(km); setMapStraalActive(true) }}
                         onClearRadius={mapStraalActive ? () => setMapStraalActive(false) : undefined}
@@ -411,7 +397,7 @@ function VacanciesPageInner({ intent }: { intent?: unknown }) {
                       {error && (
                         <ErrorBanner style={{ marginBottom: 12 }}>{error}</ErrorBanner>
                       )}
-                      <VacanciesTable rows={vacancies} loading={loading} selectedId={selected?.id} onSelect={openVacancy}
+                      <VacanciesTable rows={visibleRows} loading={loading} selectedId={selected?.id} onSelect={openVacancy}
                         onOpenCandidateSearch={openCandidateSearch} onOpenApplicants={openApplicants} onOpenMatches={openMatches} />
                     </div>
                     <PaginationBar page={page} totalPages={lastPage} totalRows={total} pageSize={pageSize}
@@ -432,6 +418,16 @@ function VacanciesPageInner({ intent }: { intent?: unknown }) {
           onToggleExpand={() => setDrawerExpanded(v => !v)}
           onUpdate={updateVacancy}
           onRestore={hasPermission('vacancies.update') ? restoreVacancy : undefined}
+          // TRASH-OVERAL-2: shared trash section (mark = vacancies.delete, unmark =
+          // vacancies.update; backend re-checks, §7). The patches are pure LOCAL
+          // merges — buildVacancyPatch maps none of these keys, so no stray PATCH.
+          trash={{
+            canMark: hasPermission('vacancies.delete'),
+            canUnmark: hasPermission('vacancies.update'),
+            users: users.map(u => ({ value: String(u.id), label: u.name })),
+            onMarked: id => updateVacancy(id, { archived: true, lifecycle: 'pending_erase', pendingEraseAt: new Date().toISOString() }),
+            onUnmarked: id => updateVacancy(id, { lifecycle: 'archived', pendingEraseAt: null }),
+          }}
           users={users}
           initialTab={drawerInitialTab}
         />

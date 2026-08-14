@@ -124,6 +124,8 @@ export default function MatchesTable({
         // MATCH-ARCHIVED-LIST-1: archive state wins over the status pill (mirrors
         // VacanciesTable/CandidatesTable) — a soft-deleted row shown via
         // include_archived=1 reads as "Archived", not its stale status.
+        // TRASH-OVERAL-2: a trashed row reads as pending erase (danger), mirrors candidates.
+        if (r.lifecycle === 'pending_erase') return <SoftChip label={t('common:trash.view')} color="var(--color-trash)" round />
         if (r.archived) return <SoftChip label={t('view.archived')} color="var(--text-muted)" round />
         const m = statusMeta(r.status)
         const label = m?.label ?? r.stage

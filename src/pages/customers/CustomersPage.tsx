@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo, useRef, lazy, Suspense } from 'react'
 import type { Dispatch, SetStateAction } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Archive, Map as MapIcon } from 'lucide-react'
+import { Archive, Map as MapIcon, Trash2 } from 'lucide-react'
 import { useRightPanel } from '@/context/RightPanelContext'
 import { useAuth } from '@/context/AuthContext'
 import { useOpenFromIntent } from '@/context/NavigationContext'
@@ -17,11 +17,11 @@ import { useUsers } from '@/lib/queries'
 import { useCustomerLookups } from '@/lib/useCustomerLookups'
 import { useCustomerPhases } from '@/lib/useCustomerPhases'
 import { useBranchOptions } from '@/lib/useBranchOptions'
-import { pickCustomerStatusSegment, buildCustomerStatusOptions } from './data/customerInsights'
+import { buildCustomerStatusOptions } from './data/customerInsights'
+import { buildCustomerInsightsConfig } from './data/customerInsightsConfig'
 import { buildCustomerFilterGroups } from './data/customerFilterGroups'
 import type { CustomerDateRange } from './data/customerFilterGroups'
 import InsightsRow from '@/components/insights/InsightsRow'
-import type { DonutSpec, KpiSpec } from '@/components/insights/InsightsRow'
 import PaginationBar from '@/components/ui/PaginationBar'
 import HeaderSearch from '@/components/ui/HeaderSearch'
 import ClearFiltersButton from '@/components/ui/ClearFiltersButton'
@@ -42,13 +42,6 @@ const CustomersMapView = lazy(() => import('./CustomersMapView'))
 
 interface AppUser { id: Id; name: string; avatar_color?: string }
 interface Opt { value: Id; label: string; count: number }
-
-// Recharts hands the clicked segment both at top level and under `.payload`.
-const pickKey = (d: unknown): string | undefined => {
-  const o = d as { key?: string; name?: string; payload?: { key?: string } } | null | undefined
-  return o?.key ?? o?.payload?.key ?? o?.name
-}
-const toggleOneValue = (set: Dispatch<SetStateAction<string[]>>, value: string) => set(p => (p.length === 1 && p[0] === value) ? [] : [value])
 
 // KPI-card filter predicates (pure row checks) — rows with ≥1 of the counted thing,
 // or, for "zonder contactpersoon", exactly 0 (Danny: every card must DO something).
@@ -89,6 +82,9 @@ export default function CustomersPage({ intent }: { intent?: unknown } = {}) {
   const [addOpen,   setAddOpen]   = useState(false)
   // Archived (soft-deleted) view toggle — opts the list into ?include_archived=1.
   const [showArchived, setShowArchived] = usePageMemory('cust.archived', false)
+  // TRASH-OVERAL-2: Prullenbak view (lifecycle pending_erase) — same include_archived
+  // request, split client-side; mutually exclusive with the archived view (mirrors candidates).
+  const [showTrash, setShowTrash] = usePageMemory('cust.trash', false)
   // STRAAL-1: map view + radius-search state (server-side ?lat=&lng=&radius=).
   const [view,      setView]      = usePageMemory<'table' | 'map'>('cust.viewMode', 'table')
   const [mapCenter, setMapCenter] = usePageMemory('cust.mapCenter', { lat: 52.09, lng: 5.12 })
@@ -136,14 +132,16 @@ export default function CustomersPage({ intent }: { intent?: unknown } = {}) {
     // VESTIGING-2: server-side ?branch_id[]= — a narrowing only, gated behind the
     // tenant's own branch_authz_enabled axis on the backend (off = no effect).
     if (selectedBranch.length)  p.branch_id = selectedBranch
-    if (showArchived)            p.include_archived = 1
+    // TRASH-OVERAL-1b: include_archived=1 returns ONLY soft-deleted rows (archived
+    // + pending_erase); the lifecycle filter below splits them per view.
+    if (showArchived || showTrash) p.include_archived = 1
     if (dateRange)               p[dateRange.param] = [dateRange.from, dateRange.to]
     // Map view narrows the list server-side to the chosen circle (STRAAL-1);
     // in table view the sidebar's straal-blok drives the same params.
     if (view === 'map') { p.lat = mapCenter.lat; p.lng = mapCenter.lng; p.radius = mapRadius }
     else if (geoFilter) { p.lat = geoFilter.lat; p.lng = geoFilter.lng; p.radius = geoFilter.km }
     return p
-  }, [globalSearch, selectedStatus, selectedPhase, selectedOwner, selectedCity, selectedProvince, selectedIndustry, selectedBranch, showArchived, dateRange, view, mapCenter, mapRadius, geoFilter])
+  }, [globalSearch, selectedStatus, selectedPhase, selectedOwner, selectedCity, selectedProvince, selectedIndustry, selectedBranch, showArchived, showTrash, dateRange, view, mapCenter, mapRadius, geoFilter])
   const filterKey = JSON.stringify(filterParams)
 
   useEffect(() => { setPage(1) }, [filterKey])
@@ -158,7 +156,7 @@ export default function CustomersPage({ intent }: { intent?: unknown } = {}) {
     useCustomersData({ filterParams, page, pageSize, t })
   const {
     selected, detail, drawerExpanded, setDrawerExpanded, drawerTab,
-    closeDrawer, selectCustomer, updateCustomer, handleCreate, addNote, editNote, deleteNote,
+    closeDrawer, selectCustomer, updateCustomer, restoreCustomer, handleCreate, addNote, editNote, deleteNote,
   } = useCustomerRecord({ setCustomers, setTotal, users, t })
   const { toggleRow, toggleAll, bulkSetOwner, bulkSetStatus, bulkAddTag, bulkRemoveTag, bulkAddNote, bulkArchive, bulkGeocode, bulkCoupleBackoffice, selectedTags, dialog: bulkConfirmDialog } =
     useCustomerBulkActions({ customers, setCustomers, setTotal, selectedIds, setSelectedIds, notify, statusMeta, t })
@@ -203,7 +201,6 @@ export default function CustomersPage({ intent }: { intent?: unknown } = {}) {
   const phaseOptions = useMemo<Opt[]>(() => customerPhases.map(p => ({ value: p.value, label: p.label, count: 0, color: p.color })), [customerPhases])
 
   const tog = (set: Dispatch<SetStateAction<string[]>>) => (v: string) => set(p => p.includes(v) ? p.filter(x => x !== v) : [...p, v])
-  const pickOne = (set: Dispatch<SetStateAction<string[]>>) => (v: string | undefined) => { if (v != null) toggleOneValue(set, v) }
 
   // Straal-blok apply: PDOK-geocode; found → filter + map sync, not found → hint.
   const applyGeo = async (q: string, km: number) => {
@@ -244,54 +241,33 @@ export default function CustomersPage({ intent }: { intent?: unknown } = {}) {
   const [kpiFilter, setKpiFilter] = usePageMemory<string | null>('cust.kpi', null)
   const toggleKpi = (k: string) => setKpiFilter(p => (p === k ? null : k))
   // Shared clear-all (page memory keeps filters sticky).
-  const anyFilterActive = Boolean(globalSearch.trim() || showArchived || kpiFilter || geoFilter || dateRange
+  const anyFilterActive = Boolean(globalSearch.trim() || showArchived || showTrash || kpiFilter || geoFilter || dateRange
     || selectedStatus.length || selectedPhase.length || selectedOwner.length || selectedCity.length || selectedProvince.length || selectedIndustry.length || selectedBranch.length)
   const [searchEpoch, setSearchEpoch] = useState(0)
   const clearAllFilters = () => {
-    setSearchEpoch(e => e + 1); setGlobalSearch(''); setShowArchived(false); setKpiFilter(null)
+    setSearchEpoch(e => e + 1); setGlobalSearch(''); setShowArchived(false); setShowTrash(false); setKpiFilter(null)
     setSelectedStatus([]); setSelectedPhase([]); setSelectedOwner([]); setSelectedCity([]); setSelectedProvince([]); setSelectedIndustry([]); setSelectedBranch([])
     setGeoFilter(null); setGeoHint(null); setDateRange(null); setPage(1)
   }
 
-  // One visible-rows list for BOTH the table and the map pane (STRAAL-1 split view):
-  // archived quick-view + the client-side KPI refine narrow whatever the server returned.
+  // One visible-rows list for BOTH the table and the map pane (STRAAL-1 split view).
+  // Three lifecycle views (TRASH-OVERAL-2, mirrors candidates): trash = pending_erase,
+  // archived = archived only (so pending rows never double-show), default = active.
   const visibleRows = useMemo(() =>
-    customers.filter(c => (showArchived ? c.archived : !c.archived)).filter(c => !kpiFilter || KPI_PRED[kpiFilter]?.(c)),
-  [customers, showArchived, kpiFilter])
+    customers.filter(c =>
+      showTrash ? c.lifecycle === 'pending_erase'
+      : showArchived ? c.lifecycle === 'archived'
+      : !c.archived,
+    ).filter(c => !kpiFilter || KPI_PRED[kpiFilter]?.(c)),
+  [customers, showArchived, showTrash, kpiFilter])
 
-  const totalLocations   = stats?.locations   ?? customers.reduce((s, c) => s + c.locationsCount, 0)
-  const totalDepartments = stats?.departments ?? customers.reduce((s, c) => s + c.departmentsCount, 0)
-  const totalContacts    = stats?.contacts    ?? customers.reduce((s, c) => s + c.contactsCount, 0)
-  const totalOpenVac     = stats?.open_vacancies ?? customers.reduce((s, c) => s + c.openVacanciesCount, 0)
-  const totalActive      = stats?.active_matches ?? customers.reduce((s, c) => s + c.activeMatchesCount, 0)
-  const noContactCount   = stats?.without_contact ?? customers.filter(c => c.contactsCount === 0).length
-
-  const insightDonuts: DonutSpec[] = [
-    // Danny 02-08: the '__none' segment is the entry-phase (Prospect) bucket — its
-    // click filters the PHASE axis, never the status axis (mirrors the candidate
-    // Lead-segment click, PHASE-FILTER-1).
-    { key: 'status', title: t('insights.statusTitle'), data: statusData,
-      onPick: d => {
-        const { axis, value } = pickCustomerStatusSegment(pickKey(d), entryPhaseValue)
-        if (axis === 'phase') pickOne(setSelectedPhase)(value)
-        else pickOne(setSelectedStatus)(value)
-      },
-      active: selectedStatus.length > 0 || selectedPhase.length > 0,
-      onClear: () => { setSelectedStatus([]); setSelectedPhase([]) } },
-    { key: 'am', title: t('insights.amTitle'), data: ownerData, onPick: d => pickOne(setSelectedOwner)(pickKey(d)),
-      active: selectedOwner.length > 0, onClear: () => setSelectedOwner([]) },
-  ]
-  const kpiCard = (key: string, label: string, value: number, sub: string, color: string): KpiSpec =>
-    ({ key, label, value, sub, color, onClick: () => toggleKpi(key), active: kpiFilter === key })
-  const insightKpis: KpiSpec[] = [
-    kpiCard('locations',   t('insights.locations'),     totalLocations,   t('insights.locationsSub'),     'var(--color-secondary)'),
-    kpiCard('departments', t('insights.departments'),   totalDepartments, t('insights.departmentsSub'),   'var(--color-violet)'),
-    // Use the readable primary-text token, not the raw primary, so a light brand colour (e.g. AENF yellow) stays legible
-    kpiCard('contacts',    t('insights.contacts'),      totalContacts,    t('insights.contactsSub'),      'var(--color-primary-text)'),
-    kpiCard('openVac',     t('insights.openVacancies'), totalOpenVac,     t('insights.openVacanciesSub'), 'var(--color-warning)'),
-    kpiCard('active',      t('insights.activeMatches'), totalActive,      t('insights.activeMatchesSub'), 'var(--color-success)'),
-    kpiCard('noContact',   t('insights.noContact'),     noContactCount,   t('insights.noContactSub'),     'var(--color-danger)'),
-  ]
+  // KPI strip config (2 donuts + 6 cards) — pure builder (§0.3 split, mirrors
+  // buildVacancyInsightsConfig; extracted once this page crossed ~400 lines).
+  const { donuts: insightDonuts, kpis: insightKpis } = buildCustomerInsightsConfig({
+    t, stats, customers, statusData, ownerData, entryPhaseValue,
+    selectedStatus, setSelectedStatus, selectedPhase, setSelectedPhase, selectedOwner, setSelectedOwner,
+    kpiFilter, toggleKpi,
+  })
 
   return (
     <>
@@ -336,8 +312,11 @@ export default function CustomersPage({ intent }: { intent?: unknown } = {}) {
                 {/* Archived + map quick-views on the right — shared toggles (§4), map last
                     to mirror the candidate blueprint's toggle order (§3A). */}
                 <div style={{ marginLeft: 'auto', display: 'flex', gap: 8 }}>
-                  <QuickViewToggle active={showArchived} onToggle={() => setShowArchived(v => !v)}
+                  {/* Archived ⇄ trash are mutually exclusive views (mirrors candidates). */}
+                  <QuickViewToggle active={showArchived} onToggle={() => { setShowArchived(v => !v); setShowTrash(false) }}
                     label={t('page.archivedView')} color="var(--color-archive)" icon={Archive} />
+                  <QuickViewToggle active={showTrash} onToggle={() => { setShowTrash(v => !v); setShowArchived(false) }}
+                    label={t('common:trash.view')} color="var(--color-trash)" icon={Trash2} />
                   <QuickViewToggle active={view === 'map'} onToggle={() => setView(v => (v === 'map' ? 'table' : 'map'))}
                     label={t('common:map.view')} color="var(--color-map)" icon={MapIcon} />
                 </div>
@@ -406,6 +385,18 @@ export default function CustomersPage({ intent }: { intent?: unknown } = {}) {
           expanded={drawerExpanded}
           onToggleExpand={() => setDrawerExpanded(v => !v)}
           onUpdate={updateCustomer}
+          // TRASH-OVERAL-2: restore-to-active (customers.update) + the shared trash
+          // section (mark = customers.delete, unmark = customers.update; backend
+          // re-checks, §7). The onMarked/onUnmarked patches are pure LOCAL merges —
+          // none of these keys are in useCustomerRecord's FIELD_MAP, so no stray PATCH.
+          onRestore={hasPermission('customers.update') ? restoreCustomer : undefined}
+          trash={{
+            canMark: hasPermission('customers.delete'),
+            canUnmark: hasPermission('customers.update'),
+            users: users.map(u => ({ value: String(u.id), label: u.name })),
+            onMarked: id => updateCustomer(id, { archived: true, lifecycle: 'pending_erase', pendingEraseAt: new Date().toISOString() }),
+            onUnmarked: id => updateCustomer(id, { lifecycle: 'archived', pendingEraseAt: null }),
+          }}
           onAddNote={addNote}
           onEditNote={editNote}
           onDeleteNote={deleteNote}

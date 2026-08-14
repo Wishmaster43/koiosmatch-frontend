@@ -57,7 +57,7 @@ interface VacanciesTableProps {
  * Mirrors CandidatesTable / ApplicationsTable.
  */
 export default function VacanciesTable({ rows, loading, selectedId, onSelect, onOpenCandidateSearch, onOpenApplicants, onOpenMatches, selectable, selectedIds, onToggleRow, onToggleAll, stickyHeader = false, scrollParentRef, sort, onSortChange }: VacanciesTableProps) {
-  const { t } = useTranslation('vacancies')
+  const { t } = useTranslation(['vacancies', 'common'])
   const { formatDate } = useDateFormat()
   const { statuses = [], statusMeta } = useVacancyLookups()
   // V1 (vacatures-tabel-cluster): status sort follows the TENANT's configured
@@ -131,7 +131,9 @@ export default function VacanciesTable({ rows, loading, selectedId, onSelect, on
       },
       render: r => {
         // Archive state wins over the status pill (mirrors CandidatesTable): a soft-
-        // deleted row shown via include_archived=1 reads as "Archived", not its stale status.
+        // deleted row shown via include_archived=1 reads as "Archived", not its stale
+        // status. TRASH-OVERAL-2: a pending_erase row reads as "Prullenbak" instead.
+        if (r.lifecycle === 'pending_erase') return <SoftChip label={t('common:trash.view')} color="var(--color-trash)" round />
         if (r.archived) return <SoftChip label={t('page.archivedView')} color="var(--text-muted)" round />
         // Prefer the resolved label/colour from the row; fall back to the lookup.
         const m = r.statusLabel ? { label: r.statusLabel, color: r.statusColor } : statusMeta(r.statusValue != null ? String(r.statusValue) : null)

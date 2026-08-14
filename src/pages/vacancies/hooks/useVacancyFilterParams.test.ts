@@ -8,7 +8,7 @@ import type { VacancyFilterState } from './useVacancyFilterParams'
 const base = (over: Partial<VacancyFilterState> = {}): VacancyFilterState => ({
   globalSearch: '', statusBucket: 'all',
   selectedOwner: [], selectedClient: [], selectedCategory: [], selectedBranch: [],
-  showArchived: false, showWithoutAgent: false, selectedAgentId: null,
+  showArchived: false, showTrash: false, showWithoutAgent: false, selectedAgentId: null,
   hasApplications: false, publishedBucket: 'all',
   view: 'table', mapCenter: { lat: 52, lng: 5 }, mapRadius: 30, mapStraalActive: false,
   attention: null,
@@ -79,5 +79,17 @@ describe('useVacancyFilterParams · D1(a) dashboard attention intent', () => {
 
   it('sends stale_status=1 for the staleStatus intent', () => {
     expect(params({ attention: 'staleStatus' })).toMatchObject({ stale_status: 1 })
+  })
+})
+
+// TRASH-OVERAL-2: the Prullenbak view rides the SAME include_archived request as
+// the archived view (the page splits the result client-side on lifecycle).
+describe('useVacancyFilterParams · trash view (TRASH-OVERAL-2)', () => {
+  it('sends include_archived=1 for the trash view', () => {
+    expect(params({ showTrash: true }).include_archived).toBe(1)
+  })
+
+  it('omits include_archived while both soft-delete views are off', () => {
+    expect(params()).not.toHaveProperty('include_archived')
   })
 })

@@ -47,6 +47,9 @@ const inDueRange = (due: string | null | undefined, range: DueRangeFilter | null
 
 export function useTaskFilters() {
   const [showArchived,     setShowArchived]     = usePageMemory('tasks.archived', false)
+  // TRASH-OVERAL-2: Prullenbak view (lifecycle pending_erase) — rides the same
+  // ?archived=1 fetch, split client-side; mutually exclusive with the archived view.
+  const [showTrash,        setShowTrash]        = usePageMemory('tasks.trash', false)
   const [query,            setQuery]            = usePageMemory('tasks.search', '')
   const [selectedStatus,   setSelectedStatus]   = usePageMemory<string[]>('tasks.status', [])
   const [selectedPriority, setSelectedPriority] = usePageMemory<string[]>('tasks.priority', [])
@@ -68,13 +71,13 @@ export function useTaskFilters() {
   const refQuery = isReferenceQuery(query.trim()) ? query.trim() : null
 
   // Anything narrowing the default view → the shared clear-button shows.
-  const anyFilterActive = Boolean(query.trim() || showArchived || kpiFilter
+  const anyFilterActive = Boolean(query.trim() || showArchived || showTrash || kpiFilter
     || selectedStatus.length || selectedPriority.length || selectedType.length || selectedAssignee.length
     || selectedTeam.length || selectedLinkType.length || dueRange)
   // Remount the (self-stateful) search input on clear so the visible text resets too.
   const [searchEpoch, setSearchEpoch] = useState(0)
   const clearAllFilters = () => {
-    setSearchEpoch(e => e + 1); setQuery(''); setShowArchived(false); setKpiFilter(null)
+    setSearchEpoch(e => e + 1); setQuery(''); setShowArchived(false); setShowTrash(false); setKpiFilter(null)
     setSelectedStatus([]); setSelectedPriority([]); setSelectedType([]); setSelectedAssignee([])
     setSelectedTeam([]); setSelectedLinkType([]); setDueRange(null)
   }
@@ -104,7 +107,7 @@ export function useTaskFilters() {
   }, [selectedStatus, selectedPriority, selectedType, selectedAssignee, selectedTeam, selectedLinkType, dueRange, kpiFilter, query, refQuery])
 
   return {
-    showArchived, setShowArchived, query, setQuery, refQuery,
+    showArchived, setShowArchived, showTrash, setShowTrash, query, setQuery, refQuery,
     selectedStatus, setSelectedStatus, selectedPriority, setSelectedPriority,
     selectedType, setSelectedType, selectedAssignee, setSelectedAssignee,
     selectedTeam, setSelectedTeam, selectedLinkType, setSelectedLinkType,

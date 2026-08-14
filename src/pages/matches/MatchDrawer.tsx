@@ -36,6 +36,8 @@ import EntityDrawer from '@/components/drawer/EntityDrawer'
 import type { EntityTab } from '@/components/drawer/EntityDrawer'
 import EntityHeader from '@/components/drawer/EntityHeader'
 import ArchivedBanner from '@/components/drawer/ArchivedBanner'
+import PendingEraseBanner from '@/components/drawer/PendingEraseBanner'
+import { buildTrashNote } from '@/hooks/useTrashFlow'
 import ReferenceNumberChip from '@/components/ui/ReferenceNumberChip'
 import CustomFieldsTab from '@/components/drawer/CustomFieldsTab'
 import BackofficeLinksTab from '@/components/drawer/BackofficeLinksTab'
@@ -89,6 +91,12 @@ interface MatchDrawerProps {
   // matches.update). Absent = no permission, so the trash icon/restore button don't render.
   onArchive?: (id: MatchRow['id']) => void
   onRestore?: (id: MatchRow['id']) => void
+  // TRASH-OVERAL-2: mark for erasure (matches.delete — HIDDEN without it) opens the
+  // shared preview modal at the page; unmark (matches.update) leaves the trash again.
+  onMarkDeletion?: (id: MatchRow['id']) => void
+  onUnmark?: (id: MatchRow['id']) => void
+  // Tenant grace window (useTrashFlow.graceDays) — feeds the trash banner's erase note.
+  graceDays?: number | null
   // EXTRACT-1: the caller's own matches.update permission check for the
   // Koppelingen tab's "Koppelen" buttons (§7 — UI gate, backend re-checks).
   canLinkBackoffice?: boolean
@@ -102,7 +110,7 @@ interface MatchDrawerProps {
 
 export default function MatchDrawer({
   match, allRows = [], onClose, expanded = false, onToggleExpand, onSetStatus, onSetOwner, canApprove = false, onApprovalChange, onUpdate, onUpdateCustomFields,
-  onArchive, onRestore, canLinkBackoffice = false, canTerminate: canTerminatePermission = false, canRenew: canRenewPermission = false,
+  onArchive, onRestore, onMarkDeletion, onUnmark, graceDays = null, canLinkBackoffice = false, canTerminate: canTerminatePermission = false, canRenew: canRenewPermission = false,
 }: MatchDrawerProps) {
   const { t } = useTranslation('matches')
   const { formatDate, formatDateTime } = useDateFormat()
@@ -141,6 +149,9 @@ export default function MatchDrawer({
   // picker already loads, rather than a second fetch.
   const matchIsClosed = Boolean(matchStatusMeta(match.status)?.is_closed)
   const canTerminate = canTerminatePermission && !match.archived && !matchIsClosed
+  // TRASH-OVERAL-2: parked in the trash awaiting automatic erasure — the danger
+  // banner + unmark take over from the archived banner/restore below.
+  const inTrash = match.lifecycle === 'pending_erase'
 
   // G04/MATCH-RENEWAL-1: unlike terminate, the renew button stays VISIBLE whenever
   // the permission is there — but DISABLED with an honest reason once the match is
@@ -238,6 +249,15 @@ export default function MatchDrawer({
                 <Trash2 size={14} />
               </button>
             )}
+            {/* TRASH-OVERAL-2: archived → trash (matches.delete-gated at the page; the
+                shared preview modal confirms). Hidden once already in the trash. */}
+            {onMarkDeletion && match.archived && !inTrash && (
+              <button onClick={() => onMarkDeletion(match.id)}
+                title={t('common:trash.markAction')} aria-label={t('common:trash.markAction')}
+                style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 4, display: 'flex', color: 'var(--color-danger)' }}>
+                <Trash2 size={14} />
+              </button>
+            )}
           </>}
           renderTitle={() => (
             <>
@@ -319,10 +339,19 @@ export default function MatchDrawer({
               server-backed (mapMatch reads archived/deleted_at, see the type comment on
               MatchRow.archived) OR set locally the moment this session's own archive/
               restore call completes, whichever lands first. */}
-          {match.archived && (
+          {match.archived && !inTrash && (
             <ArchivedBanner id={match.id}
               message={match.archivedAt ? t('drawer.archivedBanner.since', { date: formatDate(match.archivedAt) }) : t('drawer.archivedBanner.flag')}
               onRestore={onRestore} restoreLabel={t('drawer.archivedBanner.restore')} />
+          )}
+          {/* TRASH-OVERAL-2: trash state — since-when + projected erase moment
+              (DD-MM-YYYY via the house formatter) + the unmark ("back to archive")
+              action, matches.update-gated at the page. */}
+          {inTrash && (
+            <PendingEraseBanner id={match.id}
+              message={buildTrashNote(t, formatDate, match.pendingEraseAt, graceDays)}
+              onUnmark={onUnmark ? () => onUnmark(match.id) : undefined}
+              unmarkLabel={t('common:trash.unmarkAction')} />
           )}
         </EntityHeader>
       }

@@ -34,6 +34,10 @@ export interface Opportunity {
   // true list-level state whenever ?include_archived=1 reveals a soft-deleted row.
   archived: boolean
   archivedAt: string | null
+  // TRASH-OVERAL-2 lifecycle: 'active' | 'archived' | 'pending_erase' (trash) —
+  // drives the Gearchiveerd/Prullenbak view split, mirrors Candidate.lifecycle.
+  lifecycle: string
+  pendingEraseAt: string | null
   // Deal magnitude in hours (staffing) alongside the € value.
   hours: number | null
   hoursPeriod: string
@@ -100,6 +104,10 @@ export interface ApiOpportunity {
   close_date?: string
   archived?: boolean
   deleted_at?: string | null
+  // TRASH-OVERAL-2: the two-step trash lifecycle fields the list resource now
+  // carries ('active'|'archived'|'pending_erase' + ISO stamp).
+  lifecycle?: string
+  pending_erase_at?: string | null
   hours?: number | string | null
   hours_period?: string
   start_date?: string | null

@@ -1,4 +1,42 @@
 {
+  "trash": {
+    "view": "Papierkorb",
+    "markAction": "Endgültig löschen",
+    "unmarkAction": "Zurück ins Archiv",
+    "pendingSince": "Im Papierkorb seit {{date}}",
+    "eraseAround": "wird um den {{date}} endgültig gelöscht",
+    "eraseAutomatic": "wird nach Ablauf der Aufbewahrungsfrist automatisch endgültig gelöscht",
+    "modal": {
+      "title": "Endgültig löschen",
+      "intro": "{{entity}} wird in den Papierkorb verschoben und nach Ablauf der Aufbewahrungsfrist Ihrer Organisation automatisch endgültig gelöscht.",
+      "blockedTitle": "Noch in Verwendung",
+      "blockedIntro": "Dieser Datensatz kann derzeit nicht endgültig gelöscht werden. Bearbeiten Sie zuerst die unten aufgeführten Verknüpfungen.",
+      "transferLabel": "Eigentum übertragen an",
+      "transferPlaceholder": "Benutzer wählen",
+      "confirm": "Endgültig löschen",
+      "cancel": "Abbrechen"
+    },
+    "blockers": {
+      "vacancies": "Stellen",
+      "matches": "Matches",
+      "open_opportunities": "Offene Chancen",
+      "open_tasks": "Offene Aufgaben",
+      "planned_appointments": "Geplante Termine",
+      "backoffice_link": "Backoffice-Verknüpfung",
+      "applications": "Bewerbungen",
+      "contract": "Vertrag",
+      "contract_status": "Vertragsstatus",
+      "open_period": "Offener Zeitraum",
+      "placed_basis": "Grundlage einer Vermittlung",
+      "lifecycle_history": "Lebenszyklus-Verlauf",
+      "replaced_by": "Ersetzt durch",
+      "open_runs": "Offene Ausführungen",
+      "uninvoiced_credits": "Nicht abgerechnete Credits",
+      "conversion": "Umwandlung"
+    },
+    "marked": "In den Papierkorb verschoben.",
+    "unmarked": "Zurück ins Archiv verschoben."
+  },
   "actionFailed": "Aktion fehlgeschlagen – bitte erneut versuchen.",
   "save": "Speichern",
   "saving": "Speichern…",

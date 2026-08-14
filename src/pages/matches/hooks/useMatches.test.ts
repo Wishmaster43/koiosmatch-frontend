@@ -182,3 +182,29 @@ describe('useMatches · per_page cap (MATCHES_MAX_PER_PAGE, seam-harness 2026-08
     expect(matchCall?.[1]?.params).not.toMatchObject({ per_page: 900 })
   })
 })
+
+// TRASH-OVERAL-2: the trash lifecycle rides on every mapped row — straight from
+// the resource when present, tolerantly derived from deleted_at when absent.
+describe('useMatches · trash lifecycle mapping (TRASH-OVERAL-2)', () => {
+  it('maps lifecycle + pending_erase_at onto the row', async () => {
+    mockedGet.mockResolvedValue({
+      data: {
+        data: [{ id: 'm5', archived: true, deleted_at: '2026-08-01T00:00:00Z', lifecycle: 'pending_erase', pending_erase_at: '2026-08-10T12:00:00Z' }],
+        meta: { last_page: 1 },
+      },
+    })
+    const { result } = renderHook(() => useMatches(null, true))
+    await waitFor(() => expect(result.current.loading).toBe(false))
+    expect(result.current.rows[0]).toMatchObject({ lifecycle: 'pending_erase', pendingEraseAt: '2026-08-10T12:00:00Z' })
+  })
+
+  it('derives archived/active when the resource predates the lifecycle field', async () => {
+    mockedGet.mockResolvedValue({
+      data: { data: [{ id: 'm6', deleted_at: '2026-08-01T00:00:00Z' }, { id: 'm7' }], meta: { last_page: 1 } },
+    })
+    const { result } = renderHook(() => useMatches(null, true))
+    await waitFor(() => expect(result.current.loading).toBe(false))
+    expect(result.current.rows[0]).toMatchObject({ lifecycle: 'archived', pendingEraseAt: null })
+    expect(result.current.rows[1]).toMatchObject({ lifecycle: 'active' })
+  })
+})

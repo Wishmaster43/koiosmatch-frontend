@@ -97,7 +97,10 @@ export default function TasksTable({
       render: r => chip(r.typeLabel, r.typeColor, colorType) },
     // Status — round soft chip (the board column).
     { key: 'status', header: t('cols.status'), sortable: true, sortValue: r => r.statusLabel,
-      render: r => chip(r.statusLabel, r.statusColor, colorStatus, false, true) },
+      // TRASH-OVERAL-2: a pending_erase row reads as "Prullenbak" (same chip on every entity table).
+      render: r => r.lifecycle === 'pending_erase'
+        ? <SoftChip label={t('common:trash.view')} color="var(--color-trash)" round />
+        : chip(r.statusLabel, r.statusColor, colorStatus, false, true) },
     // Priority — soft chip with a leading dot.
     { key: 'priority', header: t('cols.priority'), sortable: true, sortValue: r => r.priorityLabel,
       render: r => chip(r.priorityLabel, r.priorityColor, colorPriority, true) },

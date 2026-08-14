@@ -26,6 +26,9 @@ export default function RetentionSettings() {
     retention_months_never_placed: 24,
     retention_months_ever_placed: 60,
     retention_consent_months: 24,
+    // TRASH-OVERAL-2: days a pending-erase record stays in the trash before the
+    // automatic hard erase (drives the "wordt rond {date}" wording app-wide).
+    deletion_grace_days: 30,
   })
 
   return (
@@ -47,6 +50,13 @@ export default function RetentionSettings() {
           <NumberField value={form.values.retention_consent_months}
             onChange={v => form.set('retention_consent_months', v)}
             min={0} max={120} unit={t('retention.unit')} />
+        </SettingRow>
+        {/* Trash grace window in DAYS (unit borrowed from escalation.daysUnit — §11:
+            never a fresh label for something already named elsewhere). */}
+        <SettingRow label={t('retention.graceDays.label')} description={t('retention.graceDays.description')}>
+          <NumberField value={form.values.deletion_grace_days}
+            onChange={v => form.set('deletion_grace_days', v)}
+            min={7} max={365} unit={t('escalation.daysUnit')} />
         </SettingRow>
       </SettingCardList>
     </SettingsScaffold>
