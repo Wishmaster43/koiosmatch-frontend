@@ -7,7 +7,7 @@ import type { MatchesReportData } from '@/types/analytics'
 
 // Data layer under test control (loading/error/empty/success — the four UI states).
 const mockUseMatchesReport = vi.fn()
-vi.mock('./useMatchesReport', () => ({ useMatchesReport: () => mockUseMatchesReport() }))
+vi.mock('./useMatchesReport', () => ({ useMatchesReport: (...args: unknown[]) => mockUseMatchesReport(...args) }))
 
 // Spy on the underlying axios client so we can assert the exact request shape
 // (method/route/params) that a bar click sends — mutation tests must assert the
@@ -107,6 +107,25 @@ describe('MatchesReport (MATCH-SOORT-1, by_contract_form axis)', () => {
     expect(screen.getByText('Onbekend (verwijderde contractvorm)')).toBeInTheDocument()
     const total = data.by_contract_form.reduce((sum, s) => sum + s.count, 0)
     expect(total).toBe(data.total)
+  })
+
+  // RAPPORT-FILTERS-2: the panel's active filters reach BOTH the report hook and
+  // a drill click — bar and lade can never disagree (mirrors CandidatesReport).
+  // matches never carries customer_id (the singular key is already overloaded).
+  it('sends the active panel filters to BOTH the report hook and a drill click', async () => {
+    const user = userEvent.setup()
+    mockUseMatchesReport.mockReturnValue({ data, loading: false, error: false })
+    const filters = { status: ['open'], ownerId: ['u1'], locationId: [7], customerId: [] }
+    render(
+      <QueryClientProvider client={new QueryClient()}>
+        <MatchesReport period="month" filters={filters} />
+      </QueryClientProvider>,
+    )
+    expect(mockUseMatchesReport).toHaveBeenCalledWith('month', filters)
+    await user.click(screen.getByText('Detachering'))
+    expect(getSpy).toHaveBeenCalledWith('/reports/matches/drill', expect.objectContaining({
+      params: { period: 'month', status: ['open'], owner_id: ['u1'], location_id: [7], contract_form: 'secondment' },
+    }))
   })
 
   // 'none'-sentinel drill: the bucket for matches without a contract form drills

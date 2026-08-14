@@ -18,6 +18,8 @@ import ReportDrillDrawer from './ReportDrillDrawer'
 import type { DrillSpec } from './ReportDrillDrawer'
 import { useTasksReport } from './useTasksReport'
 import { gateDrillClick } from './reportDrillGate'
+import { EMPTY_REPORT_FILTERS, buildReportQueryParams } from './reportFilterParams'
+import type { ReportFilterState } from './reportFilterParams'
 import SegmentBars from './SegmentBars'
 import ReportTimeseriesChart from './ReportTimeseriesChart'
 import { useDateFormat } from '@/lib/datetime'
@@ -36,31 +38,34 @@ type Axis = 'status' | 'type' | 'priority' | 'team' | 'branch'
 // colour, the other axes do not (SegmentBars falls back to the primary tint).
 type AxisSeg = { value: string; label: string; count: number; color?: string | null }
 
-export default function TasksReport({ period, tabsSlot }: { period: ReportPeriod; tabsSlot?: ReactNode }) {
+export default function TasksReport({ period, tabsSlot, filters = EMPTY_REPORT_FILTERS }: { period: ReportPeriod; tabsSlot?: ReactNode; filters?: ReportFilterState }) {
   const { t } = useTranslation('analytics')
   const { formatDate } = useDateFormat()
-  const { data, loading, error } = useTasksReport(period)
+  const { data, loading, error } = useTasksReport(period, filters)
 
   const total   = data?.total ?? 0
   const hasData = !loading && !error && total > 0
 
   // Drill-down: any axis-segment bar or timeseries bucket explains itself (the
-  // tasks behind it + Koios advice). Exactly one XOR param per open drill.
+  // tasks behind it + Koios advice). Exactly one XOR param per open drill —
+  // ALWAYS layered on top of the report's own active filters (`baseParams`), never
+  // just `period`, so the lade counts the exact same set the bar was drawn from.
   const [drill, setDrill] = useState<DrillSpec | null>(null)
   const windowSub = () => `${formatDate(data?.from)} – ${formatDate(data?.to)}`
+  const baseParams = buildReportQueryParams(period, 'tasks', filters)
   const openSegment = (seg: { label: string; count: number }, xorParam: Record<string, unknown>) => setDrill({
     title: seg.label, value: seg.count, subtitle: windowSub(),
-    rowsEndpoint: '/reports/tasks/drill', rowsParams: { ...xorParam, period },
-    adviceEndpoint: '/reports/tasks/advice', adviceParams: { ...xorParam, period },
+    rowsEndpoint: '/reports/tasks/drill', rowsParams: { ...baseParams, ...xorParam },
+    adviceEndpoint: '/reports/tasks/advice', adviceParams: { ...baseParams, ...xorParam },
   })
   const openBucket = (pt: CandidateTimeseriesPoint) => setDrill({
     title: pt.label, value: pt.value, subtitle: windowSub(),
     // A week bar's `date` is the point's own key; the drawer then counts the WHOLE
     // week (bucket=week) so bar and drawer total always agree.
     rowsEndpoint: '/reports/tasks/drill',
-    rowsParams: { date: pt.date, ...(data?.timeseries.bucket === 'week' ? { bucket: 'week' } : {}), period },
+    rowsParams: { ...baseParams, date: pt.date, ...(data?.timeseries.bucket === 'week' ? { bucket: 'week' } : {}) },
     adviceEndpoint: '/reports/tasks/advice',
-    adviceParams: { date: pt.date, ...(data?.timeseries.bucket === 'week' ? { bucket: 'week' } : {}), period },
+    adviceParams: { ...baseParams, date: pt.date, ...(data?.timeseries.bucket === 'week' ? { bucket: 'week' } : {}) },
   })
 
   // Generic axis-bar renderer: 'none' sentinels and orphaned (deleted-lookup)

@@ -7,7 +7,7 @@
  * has no further single-record breakdown to explain.
  */
 import type { ReactNode } from 'react'
-import { formatPercent, formatRatio } from '@/lib/formatters'
+import { formatRatio } from '@/lib/formatters'
 import { useTranslation } from 'react-i18next'
 import ReportKpiBand from './ReportKpiBand'
 import type { KpiSpec } from '@/components/insights/InsightsRow'
@@ -35,9 +35,9 @@ export default function SourcesReport({ period, tabsSlot }: { period: ReportPeri
   }
   // Overall match rate = totalMatches / totalCandidates (mirrors the per-row
   // match_rate the endpoint computes); '—' rather than a fabricated 0% at zero.
-  const overallMatchRate = totals.candidates > 0 ? Math.round((totals.matches / totals.candidates) * 100) : null
+  const overallMatchRate = totals.candidates > 0 ? totals.matches / totals.candidates : null
   // Applications per candidate = totalApplications / totalCandidates — a second real ratio.
-  const applicationRate = totals.candidates > 0 ? Math.round((totals.applications / totals.candidates) * 100) : null
+  const applicationRate = totals.candidates > 0 ? totals.applications / totals.candidates : null
   // "Biggest" sources by each real metric — plain stats, no drill endpoint exists
   // (see file doc comment) so none of the nine cards is clickable.
   const topByCandidates = [...rows].sort((a, b) => b.candidates - a.candidates)[0]
@@ -49,8 +49,8 @@ export default function SourcesReport({ period, tabsSlot }: { period: ReportPeri
     { key: 'candidates',   label: t('sources.summary.candidates'),   value: totals.candidates },
     { key: 'applications', label: t('sources.summary.applications'), value: totals.applications },
     { key: 'matches',      label: t('sources.summary.matches'),      value: totals.matches },
-    { key: 'matchRate',    label: t('sources.summary.matchRate'),    value: formatPercent(overallMatchRate) },
-    { key: 'applicationRate', label: t('sources.summary.applicationRate'), value: formatPercent(applicationRate) },
+    { key: 'matchRate',    label: t('sources.summary.matchRate'),    value: formatRatio(overallMatchRate) },
+    { key: 'applicationRate', label: t('sources.summary.applicationRate'), value: formatRatio(applicationRate) },
     { key: 'topSourceCandidates', label: t('sources.summary.topSourceCandidates'),
       value: topByCandidates ? `${topByCandidates.source} · ${topByCandidates.candidates}` : '—' },
     { key: 'topSourceMatches', label: t('sources.summary.topSourceMatches'),

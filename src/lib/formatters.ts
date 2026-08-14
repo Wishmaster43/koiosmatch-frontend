@@ -39,6 +39,18 @@ export function formatNumber(value: NumberInput, locale: string = 'nl-NL'): stri
  *   formatRatio(0.05882)  → "5,9%"   — the value is a fraction of one
  * At most one decimal, and a whole number stays whole ("50%", never "50,0%").
  * Null/undefined/non-finite render the house dash, never a fabricated 0%.
+ *
+ * NEVER APPLY EITHER OF THESE TO A `*_rate` FIELD BY NAME (RATE-EENHEID-1, backend
+ * contract). Three of the API's `_rate` fields are MONEY, not ratios:
+ *   purchase_rate · sale_rate · sell_rate  = euro per hour, decimal(10,2).
+ * A € 45,00 hourly rate run through here renders as "45%" (or "4500%" on the ratio
+ * helper) on a screen showing real money. Those three go through formatCurrency.
+ * The backend contract lists the unit of every rate field; check it, do not guess:
+ *   percentage 0-100 : win_rate · success_rate · done_rate
+ *   fraction 0-1     : conversion_rate · reach_rate · fill_rate · match_rate
+ *   money            : purchase_rate · sale_rate · sell_rate
+ * Any ratio field may be null when its denominator is 0 — that means "nothing
+ * measured yet" and must stay a dash, which is exactly what these return.
  */
 export function formatPercent(value: NumberInput, locale: string = 'nl-NL'): string {
   const n = toFiniteNumber(value)

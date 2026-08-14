@@ -27,7 +27,10 @@ import { useLookups } from '@/context/LookupsContext'
 import { useCustomerLookups } from '@/lib/useCustomerLookups'
 import { useUsers } from '@/lib/queries'
 import { useLocations } from '@/lib/useLocations'
-import { isFilterableReport } from './reportFilterParams'
+import { useMatchStatuses } from '@/lib/useMatchStatuses'
+import { useCustomerOptions } from '@/pages/vacancies/hooks/useCustomerOptions'
+import { useVacancyStatusIdOptions, useTaskStatusIdOptions } from './reportStatusLookups'
+import { isFilterableReport, CUSTOMER_FILTERABLE_REPORT_IDS } from './reportFilterParams'
 import type { ReportFilterState } from './reportFilterParams'
 import type { ReportFilterGroup } from '@/types/reports'
 import CandidatesReport from './CandidatesReport'
@@ -102,30 +105,52 @@ export default function ReportsPage({ reportId }: { reportId?: string }) {
   const Report = REPORTS[active]
   const filterable = isFilterableReport(active)
 
-  // RAPPORT-FILTERS-1: status/owner/branch, wired only for `candidates`/`customers`
-  // (the two reports the shared backend resolver understands so far). Kept here,
-  // not per-report, so the panel and both hooks read the exact same state — a
-  // report's own hook and its drilldown build their request params from this one
-  // object via `buildReportQueryParams`, so bar and lade can never disagree.
+  // RAPPORT-FILTERS-1/2: status/owner/branch(+customer), wired for every report on
+  // FILTERABLE_REPORT_IDS. Kept here, not per-report, so the panel and both hooks
+  // read the exact same state — a report's own hook and its drilldown build their
+  // request params from this one object via `buildReportQueryParams`, so bar and
+  // lade can never disagree.
   const [status, setStatus] = useState<Array<string | number>>([])
   const [ownerId, setOwnerId] = useState<Array<string | number>>([])
   const [locationId, setLocationId] = useState<Array<string | number>>([])
-  const filters: ReportFilterState = useMemo(() => ({ status, ownerId, locationId }), [status, ownerId, locationId])
+  const [customerId, setCustomerId] = useState<Array<string | number>>([])
+  const filters: ReportFilterState = useMemo(() => ({ status, ownerId, locationId, customerId }), [status, ownerId, locationId, customerId])
+  const acceptsCustomer = (CUSTOMER_FILTERABLE_REPORT_IDS as readonly string[]).includes(active)
 
-  // Reset the three dimensions when navigating to a report that doesn't read them
-  // (or off one that does) — a stale selection must never linger invisibly.
+  // Reset every dimension when navigating to a report that doesn't read them (or
+  // off one that does) — a stale selection must never linger invisibly.
   useEffect(() => {
-    if (!filterable) { setStatus([]); setOwnerId([]); setLocationId([]) }
+    if (!filterable) { setStatus([]); setOwnerId([]); setLocationId([]); setCustomerId([]) }
   }, [filterable])
 
-  // Lookup sources for the filter options — candidates and customers each keep
-  // their OWN status vocabulary (deployability vs. customer lifecycle), while
-  // owner (users) and branch (locations) are shared tenant lookups.
+  // Lookup sources for the filter options — each entity keeps its OWN status
+  // vocabulary (deployability/vacancy lifecycle/funnel bucket/match state/task
+  // board), while owner (users) and branch (locations) are shared tenant lookups.
+  // Vacancy/task statuses are validated by the backend against their raw lookup
+  // ID, never the slug (see reportStatusLookups.ts) — a dedicated fetch, not the
+  // page-scoped VacancyLookupsContext/TaskLookupsContext (unmounted here).
   const { statuses: candidateStatuses } = useLookups()
   const { statuses: customerStatuses } = useCustomerLookups()
   const { data: users = [] } = useUsers() as { data?: Array<{ id?: string | number; name?: string }> }
   const locations = useLocations()
-  const statusOptions = active === 'customers' ? customerStatuses : candidateStatuses
+  const vacancyStatusOptions = useVacancyStatusIdOptions()
+  const taskStatusOptions = useTaskStatusIdOptions()
+  const { statuses: matchStatusesRaw } = useMatchStatuses()
+  const matchStatusOptions = useMemo(() => matchStatusesRaw.map(s => ({ value: s.value, label: s.label })), [matchStatusesRaw])
+  // The applications panel filter narrows on the FLAG-derived funnel bucket
+  // (active/matched/rejected/placed, ApplicationsReport::BUCKET_VALUES) — a fixed,
+  // non-tenant vocabulary, so its options are i18n labels, never a lookup fetch.
+  const applicationBucketOptions = useMemo(
+    () => (['active', 'matched', 'rejected', 'placed'] as const).map(k => ({ value: k, label: t(`applications.buckets.${k}`) })),
+    [t],
+  )
+  const customerOptions = useCustomerOptions(filterable && acceptsCustomer)
+  const statusOptions = active === 'customers' ? customerStatuses
+    : active === 'vacancies' ? vacancyStatusOptions
+    : active === 'applications' ? applicationBucketOptions
+    : active === 'matches' ? matchStatusOptions
+    : active === 'tasks' ? taskStatusOptions
+    : candidateStatuses
   const ownerOptions = useMemo(() => users.map(u => ({ value: u.id ?? '', label: u.name || '—' })).filter(o => o.value !== ''), [users])
   const branchOptions = useMemo(() => locations.map(l => ({ value: l.value, label: l.label })), [locations])
 
@@ -176,27 +201,52 @@ export default function ReportsPage({ reportId }: { reportId?: string }) {
       ],
     }]
     if (filterable) {
+      // Each report's own axis vocabulary for the status/owner labels — candidates/
+      // customers keep their existing `<ns>.axes.*` pair; applications/tasks have
+      // their own analytics.json axis labels; vacancies/matches have no dedicated
+      // axis label yet so they borrow the generic `customers.axes.*` pair — the
+      // same fallback VacancyReportAxes already uses for its own bars.
       const axisNs = active === 'customers' ? 'customers' : 'candidates'
+      const statusLabel = active === 'customers' || active === 'candidates' ? t(`${axisNs}.axes.status`)
+        : active === 'applications' ? t('applications.axes.bucket')
+        : active === 'tasks' ? t('tasks.axes.status')
+        : t('customers.axes.status')
+      const ownerLabel = active === 'customers' || active === 'candidates' ? t(`${axisNs}.axes.owner`)
+        : active === 'applications' ? t('applications.axes.owner')
+        : active === 'tasks' ? t('tasks.axes.assignee')
+        : t('customers.axes.owner')
+      const branchLabel = active === 'tasks' ? t('tasks.axes.branch') : t('common:filters.branch')
       groups.push(
         {
-          key: 'status', type: 'search-select', label: t(`${axisNs}.axes.status`),
+          key: 'status', type: 'search-select', label: statusLabel,
           selected: status, onToggle: (v: string | number) => setStatus(s => s.includes(v) ? s.filter(x => x !== v) : [...s, v]),
           options: statusOptions,
         },
         {
-          key: 'owner', type: 'search-select', label: t(`${axisNs}.axes.owner`),
+          key: 'owner', type: 'search-select', label: ownerLabel,
           selected: ownerId, onToggle: (v: string | number) => setOwnerId(s => s.includes(v) ? s.filter(x => x !== v) : [...s, v]),
           options: ownerOptions,
         },
         {
-          key: 'branch', type: 'search-select', label: t('common:filters.branch'),
+          key: 'branch', type: 'search-select', label: branchLabel,
           selected: locationId, onToggle: (v: string | number) => setLocationId(s => s.includes(v) ? s.filter(x => x !== v) : [...s, v]),
           options: branchOptions,
         },
       )
+      // customer_id[] only exists on the two reports whose table actually carries
+      // a customer/client FK (vacancies' client_id, applications' inherited via
+      // the vacancy) — see reportFilterParams.ts's CUSTOMER_FILTERABLE_REPORT_IDS.
+      if (acceptsCustomer) {
+        groups.push({
+          key: 'customer', type: 'search-select', label: t('applications.axes.customer'),
+          selected: customerId, onToggle: (v: string | number) => setCustomerId(s => s.includes(v) ? s.filter(x => x !== v) : [...s, v]),
+          options: customerOptions,
+        })
+      }
     }
     return groups
-  }, [t, period, filterable, active, status, ownerId, locationId, statusOptions, ownerOptions, branchOptions])
+  }, [t, period, filterable, active, status, ownerId, locationId, customerId, acceptsCustomer,
+    statusOptions, ownerOptions, branchOptions, customerOptions])
 
   useEffect(() => {
     registerFilters('reports-page', panelGroups)

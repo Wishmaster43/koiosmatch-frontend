@@ -48,7 +48,7 @@ describe('SourcesReport (GET /reports/sources)', () => {
     render(<SourcesReport period="month" />)
     expect(screen.getByText('Bronnen')).toBeInTheDocument()
     expect(screen.getByText('Sollicitaties per kandidaat')).toBeInTheDocument()
-    expect(screen.getByText('67%')).toBeInTheDocument() // applications/candidates = 8/12
+    expect(screen.getByText('66,7%')).toBeInTheDocument() // applications/candidates = 8/12, one house decimal
     expect(screen.getByText('Grootste bron (kandidaten)')).toBeInTheDocument()
     expect(screen.getByText('linkedin · 12')).toBeInTheDocument()
     expect(screen.getByText('Grootste bron (matches)')).toBeInTheDocument()

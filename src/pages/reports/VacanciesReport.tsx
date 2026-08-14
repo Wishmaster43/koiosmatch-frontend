@@ -22,6 +22,8 @@ import type { DrillSpec } from './ReportDrillDrawer'
 import VacancyReportAxes from './VacancyReportAxes'
 import { useVacanciesReport } from './useVacanciesReport'
 import { gateDrillClick } from './reportDrillGate'
+import { EMPTY_REPORT_FILTERS, buildReportQueryParams } from './reportFilterParams'
+import type { ReportFilterState } from './reportFilterParams'
 import { useDateFormat } from '@/lib/datetime'
 import type { ReportPeriod, VacancyReportRow, CandidateTimeseriesPoint } from '@/types/analytics'
 
@@ -33,17 +35,20 @@ const numCell = (n: number) => (
   <span style={{ fontWeight: n > 0 ? 600 : 400, color: n > 0 ? 'var(--text)' : 'var(--text-muted)' }}>{n}</span>
 )
 
-export default function VacanciesReport({ period, tabsSlot }: { period: ReportPeriod; tabsSlot?: ReactNode }) {
+export default function VacanciesReport({ period, tabsSlot, filters = EMPTY_REPORT_FILTERS }: { period: ReportPeriod; tabsSlot?: ReactNode; filters?: ReportFilterState }) {
   const { t } = useTranslation('analytics')
   const { formatDate } = useDateFormat()
-  const { data, loading, error } = useVacanciesReport(period)
+  const { data, loading, error } = useVacanciesReport(period, filters)
   const rows    = data?.vacancies ?? []
   const s       = data?.summary
   const hasData = !loading && !error && (data?.total ?? 0) > 0
 
-  // One drawer for every drill source: KPI tiles, table rows, axis bars, buckets.
+  // One drawer for every drill source: KPI tiles, table rows, axis bars, buckets —
+  // ALWAYS layered on top of the report's own active panel filters (`baseParams`),
+  // never just `period`, so the lade counts the exact same set the bar was drawn from.
   const [drill, setDrill] = useState<DrillSpec | null>(null)
   const windowSub = () => `${formatDate(data?.from)} – ${formatDate(data?.to)}`
+  const baseParams = buildReportQueryParams(period, 'vacancies', filters)
 
   // Summary-KPI drill (unchanged C-34 behaviour): explains the open/filled split.
   const openVacancies = (title: string, value: number | string, status?: string) => setDrill({
@@ -52,8 +57,8 @@ export default function VacanciesReport({ period, tabsSlot }: { period: ReportPe
       { label: t('vacancies.summary.open'),   value: s?.open ?? 0 },
       { label: t('vacancies.summary.filled'), value: s?.filled ?? 0 },
     ],
-    rowsEndpoint: '/reports/vacancies/drill', rowsParams: { status, period },
-    adviceEndpoint: '/reports/vacancies/advice', adviceParams: { status, period },
+    rowsEndpoint: '/reports/vacancies/drill', rowsParams: { ...baseParams, status },
+    adviceEndpoint: '/reports/vacancies/advice', adviceParams: { ...baseParams, status },
   })
   // Legacy per-vacancy drill (row click): the APPLICATION rows behind one vacancy.
   const openVacancyRow = (v: VacancyReportRow) => setDrill({
@@ -62,23 +67,23 @@ export default function VacanciesReport({ period, tabsSlot }: { period: ReportPe
       { label: t('vacancies.cols.applications'), value: v.applications },
       { label: t('vacancies.cols.matched'),      value: v.matched },
     ],
-    rowsEndpoint: '/reports/vacancies/drill', rowsParams: { vacancy: v.key, period },
-    adviceEndpoint: '/reports/vacancies/advice', adviceParams: { vacancy: v.key, period },
+    rowsEndpoint: '/reports/vacancies/drill', rowsParams: { ...baseParams, vacancy: v.key },
+    adviceEndpoint: '/reports/vacancies/advice', adviceParams: { ...baseParams, vacancy: v.key },
   })
   // Portie-4 segment drill: exactly one XOR param per open drill (vacancy rows behind it).
   const openSegment = (seg: { label: string; count: number }, xorParam: Record<string, unknown>) => setDrill({
     title: seg.label, value: seg.count, subtitle: windowSub(),
-    rowsEndpoint: '/reports/vacancies/drill', rowsParams: { ...xorParam, period },
-    adviceEndpoint: '/reports/vacancies/advice', adviceParams: { ...xorParam, period },
+    rowsEndpoint: '/reports/vacancies/drill', rowsParams: { ...baseParams, ...xorParam },
+    adviceEndpoint: '/reports/vacancies/advice', adviceParams: { ...baseParams, ...xorParam },
   })
   const openBucket = (pt: CandidateTimeseriesPoint) => setDrill({
     title: pt.label, value: pt.value, subtitle: windowSub(),
     // A week bar's `date` is the point's own key; the drawer then counts the WHOLE
     // week (bucket=week) so bar and drawer total always agree.
     rowsEndpoint: '/reports/vacancies/drill',
-    rowsParams: { date: pt.date, ...(data?.timeseries.bucket === 'week' ? { bucket: 'week' } : {}), period },
+    rowsParams: { ...baseParams, date: pt.date, ...(data?.timeseries.bucket === 'week' ? { bucket: 'week' } : {}) },
     adviceEndpoint: '/reports/vacancies/advice',
-    adviceParams: { date: pt.date, ...(data?.timeseries.bucket === 'week' ? { bucket: 'week' } : {}), period },
+    adviceParams: { ...baseParams, date: pt.date, ...(data?.timeseries.bucket === 'week' ? { bucket: 'week' } : {}) },
   })
 
   // Real, non-fabricated segments to source the four extra KPI slots: the axes

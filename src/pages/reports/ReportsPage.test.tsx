@@ -30,6 +30,18 @@ vi.mock('@/context/LookupsContext', () => ({ useLookups: () => candidateLookups 
 vi.mock('@/lib/useCustomerLookups', () => ({ useCustomerLookups: () => customerLookupsValue }))
 vi.mock('@/lib/queries', () => ({ useUsers: () => usersQueryResult }))
 vi.mock('@/lib/useLocations', () => ({ useLocations: () => branchRows }))
+// RAPPORT-FILTERS-2 lookup sources (vacancies/applications/matches/tasks) — same
+// stable-reference contract as the candidate/customer stubs above.
+const vacancyStatusOptions = [{ value: 'vs1', label: 'Open' }]
+const taskStatusOptions = [{ value: 'ts1', label: 'To do' }]
+const matchStatusesValue = { statuses: [{ value: 'open', label: 'Active' }] }
+const customerOptionsValue: Array<{ value: string; label: string }> = []
+vi.mock('./reportStatusLookups', () => ({
+  useVacancyStatusIdOptions: () => vacancyStatusOptions,
+  useTaskStatusIdOptions: () => taskStatusOptions,
+}))
+vi.mock('@/lib/useMatchStatuses', () => ({ useMatchStatuses: () => matchStatusesValue }))
+vi.mock('@/pages/vacancies/hooks/useCustomerOptions', () => ({ useCustomerOptions: () => customerOptionsValue }))
 
 // Every report component collapses to the same stub: it only needs to prove
 // which `period`/`filters` it was handed, never its own body (each has its own tests).
@@ -38,16 +50,32 @@ vi.mock('./CandidatesReport', () => ({
     <div data-testid="report-period" data-filters={JSON.stringify(filters ?? null)}>{period}</div>
   ),
 }))
-vi.mock('./ApplicationsReport', () => ({ default: () => null }))
+vi.mock('./ApplicationsReport', () => ({
+  default: ({ period, filters }: { period: string; filters?: unknown }) => (
+    <div data-testid="report-period" data-filters={JSON.stringify(filters ?? null)}>{period}</div>
+  ),
+}))
 vi.mock('./CustomersReport', () => ({ default: () => null }))
 // A non-filterable report (flow) proves the hard requirement: the OTHER twelve
 // reports keep getting a period-only panel — no field the server would drop.
 vi.mock('./FlowReport', () => ({ default: ({ period }: { period: string }) => <div data-testid="flow-period">{period}</div> }))
 vi.mock('./RecruitersReport', () => ({ default: () => null }))
-vi.mock('./VacanciesReport', () => ({ default: () => null }))
+vi.mock('./VacanciesReport', () => ({
+  default: ({ period, filters }: { period: string; filters?: unknown }) => (
+    <div data-testid="report-period" data-filters={JSON.stringify(filters ?? null)}>{period}</div>
+  ),
+}))
 vi.mock('./OpportunitiesReport', () => ({ default: () => null }))
-vi.mock('./TasksReport', () => ({ default: () => null }))
-vi.mock('./MatchesReport', () => ({ default: () => null }))
+vi.mock('./TasksReport', () => ({
+  default: ({ period, filters }: { period: string; filters?: unknown }) => (
+    <div data-testid="report-period" data-filters={JSON.stringify(filters ?? null)}>{period}</div>
+  ),
+}))
+vi.mock('./MatchesReport', () => ({
+  default: ({ period, filters }: { period: string; filters?: unknown }) => (
+    <div data-testid="report-period" data-filters={JSON.stringify(filters ?? null)}>{period}</div>
+  ),
+}))
 vi.mock('./IntakesReport', () => ({ default: () => null }))
 vi.mock('./OutreachReport', () => ({ default: () => null }))
 vi.mock('./SourcesReport', () => ({ default: () => null }))
@@ -140,7 +168,61 @@ describe('ReportsPage — right filter panel', () => {
     act(() => { ownerGroup?.onToggle?.('u1') })
 
     const filters = JSON.parse(screen.getByTestId('report-period').dataset.filters ?? 'null')
-    expect(filters).toEqual({ status: [], ownerId: ['u1'], locationId: [] })
+    expect(filters).toEqual({ status: [], ownerId: ['u1'], locationId: [], customerId: [] })
+  })
+
+  // RAPPORT-FILTERS-2: vacancies/applications also get the customer_id[] group
+  // (client_id-backed), matches/tasks stop at status/owner/branch (no customer FK).
+  it('registers period + status/owner/branch/customer for vacancies and applications, but only status/owner/branch for matches/tasks', () => {
+    let latest: RadioGroup[] = []
+    const { unmount } = render(
+      <RightPanelProvider>
+        <Capture onGroups={g => { latest = g }} />
+        <ReportsPage reportId="vacancies" />
+      </RightPanelProvider>,
+    )
+    expect(latest.map(g => g.key)).toEqual(['period', 'status', 'owner', 'branch', 'customer'])
+    unmount()
+
+    render(
+      <RightPanelProvider>
+        <Capture onGroups={g => { latest = g }} />
+        <ReportsPage reportId="applications" />
+      </RightPanelProvider>,
+    )
+    expect(latest.map(g => g.key)).toEqual(['period', 'status', 'owner', 'branch', 'customer'])
+  })
+
+  it('registers period + status/owner/branch for matches — never a customer group (the singular key is already overloaded)', () => {
+    let latest: RadioGroup[] = []
+    render(
+      <RightPanelProvider>
+        <Capture onGroups={g => { latest = g }} />
+        <ReportsPage reportId="matches" />
+      </RightPanelProvider>,
+    )
+    expect(latest.map(g => g.key)).toEqual(['period', 'status', 'owner', 'branch'])
+  })
+
+  it('registers period + status/owner/branch for tasks — never a customer group (no customer column on tasks)', () => {
+    let latest: RadioGroup[] = []
+    render(
+      <RightPanelProvider>
+        <Capture onGroups={g => { latest = g }} />
+        <ReportsPage reportId="tasks" />
+      </RightPanelProvider>,
+    )
+    expect(latest.map(g => g.key)).toEqual(['period', 'status', 'owner', 'branch'])
+  })
+
+  it('sends the active vacancies panel filters to the report AS its filters prop (bar and lade share one state)', () => {
+    render(
+      <RightPanelProvider>
+        <ReportsPage reportId="vacancies" />
+      </RightPanelProvider>,
+    )
+    const filters = JSON.parse(screen.getByTestId('report-period').dataset.filters ?? 'null')
+    expect(filters).toEqual({ status: [], ownerId: [], locationId: [], customerId: [] })
   })
 
   it('a non-filterable report never receives a filters prop, even with stale selections', () => {

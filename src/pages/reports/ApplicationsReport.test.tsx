@@ -7,7 +7,7 @@ import type { ApplicationsReportData } from '@/types/analytics'
 
 // Data layer under test control (loading/error/empty/success — the four UI states).
 const mockUseApplicationsReport = vi.fn()
-vi.mock('./useApplicationsReport', () => ({ useApplicationsReport: () => mockUseApplicationsReport() }))
+vi.mock('./useApplicationsReport', () => ({ useApplicationsReport: (...args: unknown[]) => mockUseApplicationsReport(...args) }))
 
 // Spy on the underlying axios client so we can assert the exact request shape
 // (method/route/body) that a bar/bucket click sends — mutation tests must assert
@@ -105,6 +105,24 @@ describe('ApplicationsReport (RAPPORTEN-SUITE-1 portie 2)', () => {
     renderReport()
     expect(screen.getByText('Sollicitaties 01-08-2026 t/m 31-08-2026')).toBeInTheDocument()
     expect(screen.queryByText(/2026-08-01/)).not.toBeInTheDocument()
+  })
+
+  // RAPPORT-FILTERS-2: the panel's active filters reach BOTH the report hook and
+  // a drill click — bar and lade can never disagree (mirrors CandidatesReport).
+  it('sends the active panel filters to BOTH the report hook and a drill click', async () => {
+    const user = userEvent.setup()
+    mockUseApplicationsReport.mockReturnValue({ data, loading: false, error: false })
+    const filters = { status: ['active'], ownerId: ['u1'], locationId: [7], customerId: ['c1'] }
+    render(
+      <QueryClientProvider client={new QueryClient()}>
+        <ApplicationsReport period="month" filters={filters} />
+      </QueryClientProvider>,
+    )
+    expect(mockUseApplicationsReport).toHaveBeenCalledWith('month', filters)
+    await user.click(screen.getByText('Applied'))
+    expect(getSpy).toHaveBeenCalledWith('/reports/applications/drill', expect.objectContaining({
+      params: { period: 'month', status: ['active'], owner_id: ['u1'], location_id: [7], customer_id: ['c1'], stage: 'applied' },
+    }))
   })
 
   it('clicking a stage bar drills with the stage XOR param, never mixed with other axes', async () => {

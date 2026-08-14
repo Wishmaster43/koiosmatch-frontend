@@ -17,6 +17,8 @@ import { useApplicationsReport } from './useApplicationsReport'
 import { gateDrillClick } from './reportDrillGate'
 import { buildAxisKpis } from './buildAxisKpis'
 import type { AxisKpiConfig } from './buildAxisKpis'
+import { EMPTY_REPORT_FILTERS, buildReportQueryParams } from './reportFilterParams'
+import type { ReportFilterState } from './reportFilterParams'
 import SegmentBars from './SegmentBars'
 import ReportTimeseriesChart from './ReportTimeseriesChart'
 import { useDateFormat } from '@/lib/datetime'
@@ -44,21 +46,24 @@ const BUCKET_COLOR: Record<keyof ApplicationBucketCounts, string> = {
   rejected: 'var(--color-danger)', placed: 'var(--color-success)',
 }
 
-export default function ApplicationsReport({ period, tabsSlot }: { period: ReportPeriod; tabsSlot?: ReactNode }) {
+export default function ApplicationsReport({ period, tabsSlot, filters = EMPTY_REPORT_FILTERS }: { period: ReportPeriod; tabsSlot?: ReactNode; filters?: ReportFilterState }) {
   const { t } = useTranslation('analytics')
   const { formatDate } = useDateFormat()
-  const { data, loading, error } = useApplicationsReport(period)
+  const { data, loading, error } = useApplicationsReport(period, filters)
 
   const total   = data?.total ?? 0
   const hasData = !loading && !error && total > 0
 
   // Drill-down: any axis-segment bar or timeseries bucket explains itself (breakdown +
-  // the applications behind it + Koios advice). Exactly one XOR param per open drill.
+  // the applications behind it + Koios advice). Exactly one XOR param per open drill —
+  // ALWAYS layered on top of the report's own active filters (`baseParams`), never
+  // just `period`, so the lade counts the exact same set the bar was drawn from.
   const [drill, setDrill] = useState<DrillSpec | null>(null)
+  const baseParams = buildReportQueryParams(period, 'applications', filters)
   const openSegment = (seg: { label: string; count: number }, xorParam: Record<string, unknown>) => setDrill({
     title: seg.label, value: seg.count, subtitle: `${formatDate(data?.from)} – ${formatDate(data?.to)}`,
-    rowsEndpoint: '/reports/applications/drill', rowsParams: { ...xorParam, period },
-    adviceEndpoint: '/reports/applications/advice', adviceParams: { ...xorParam, period },
+    rowsEndpoint: '/reports/applications/drill', rowsParams: { ...baseParams, ...xorParam },
+    adviceEndpoint: '/reports/applications/advice', adviceParams: { ...baseParams, ...xorParam },
   })
   const openBucket = (pt: CandidateTimeseriesPoint) => setDrill({
     title: pt.label, value: pt.value, subtitle: `${formatDate(data?.from)} – ${formatDate(data?.to)}`,
@@ -68,9 +73,9 @@ export default function ApplicationsReport({ period, tabsSlot }: { period: Repor
     // instead a FUNNEL segment value (active|matched|rejected|placed) sent WITHOUT
     // `date`. The two value sets never overlap, so the two roles never collide.
     rowsEndpoint: '/reports/applications/drill',
-    rowsParams: { date: pt.date, ...(data?.timeseries.bucket === 'week' ? { bucket: 'week' } : {}), period },
+    rowsParams: { ...baseParams, date: pt.date, ...(data?.timeseries.bucket === 'week' ? { bucket: 'week' } : {}) },
     adviceEndpoint: '/reports/applications/advice',
-    adviceParams: { date: pt.date, ...(data?.timeseries.bucket === 'week' ? { bucket: 'week' } : {}), period },
+    adviceParams: { ...baseParams, date: pt.date, ...(data?.timeseries.bucket === 'week' ? { bucket: 'week' } : {}) },
   })
 
   const bars = (axis: Axis, segs: (CandidateSegment | ApplicationTopSegment)[]) => {

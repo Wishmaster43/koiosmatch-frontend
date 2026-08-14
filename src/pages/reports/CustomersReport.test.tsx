@@ -109,7 +109,7 @@ describe('CustomersReport (RAPPORTEN-SUITE-1 portie 3, customers inflow report)'
   it('sends the active panel filters to BOTH the report hook and a drill click (RAPPORT-FILTERS-1 — bar and lade never disagree)', async () => {
     const user = userEvent.setup()
     mockUseCustomersReport.mockReturnValue({ data, loading: false, error: false })
-    const filters = { status: ['active'], ownerId: ['u1'], locationId: [7] }
+    const filters = { status: ['active'], ownerId: ['u1'], locationId: [7], customerId: [] }
     render(
       <QueryClientProvider client={new QueryClient()}>
         <CustomersReport period="month" filters={filters} />

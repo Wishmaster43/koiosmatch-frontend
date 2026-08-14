@@ -7,7 +7,7 @@ import type { TasksReportData } from '@/types/analytics'
 
 // Data layer under test control (loading/error/empty/success — the four UI states).
 const mockUseTasksReport = vi.fn()
-vi.mock('./useTasksReport', () => ({ useTasksReport: () => mockUseTasksReport() }))
+vi.mock('./useTasksReport', () => ({ useTasksReport: (...args: unknown[]) => mockUseTasksReport(...args) }))
 
 // Spy on the underlying axios client so we can assert the exact request shape
 // (method/route/params) that a bar/bucket click sends — mutation tests must assert
@@ -155,6 +155,25 @@ describe('TasksReport (RAPPORTEN-SUITE-1 portie 6, tasks report)', () => {
     renderReport()
     expect(screen.getByText('Taken 01-08-2026 t/m 31-08-2026')).toBeInTheDocument()
     expect(screen.queryByText(/2026-08-01/)).not.toBeInTheDocument()
+  })
+
+  // RAPPORT-FILTERS-2: the panel's active filters reach BOTH the report hook and
+  // a drill click — bar and lade can never disagree (mirrors CandidatesReport).
+  // tasks never carries customer_id (no customer column on the table).
+  it('sends the active panel filters to BOTH the report hook and a drill click', async () => {
+    const user = userEvent.setup()
+    mockUseTasksReport.mockReturnValue({ data, loading: false, error: false })
+    const filters = { status: ['status-uuid-1'], ownerId: ['u1'], locationId: [7], customerId: [] }
+    render(
+      <QueryClientProvider client={new QueryClient()}>
+        <TasksReport period="month" filters={filters} />
+      </QueryClientProvider>,
+    )
+    expect(mockUseTasksReport).toHaveBeenCalledWith('month', filters)
+    await user.click(screen.getByText('Recruitment'))
+    expect(getSpy).toHaveBeenCalledWith('/reports/tasks/drill', expect.objectContaining({
+      params: { period: 'month', status: ['status-uuid-1'], owner_id: ['u1'], location_id: [7], team: 'team-1' },
+    }))
   })
 
   // by_status keys on the status LOOKUP ID — the drill must carry that id, never

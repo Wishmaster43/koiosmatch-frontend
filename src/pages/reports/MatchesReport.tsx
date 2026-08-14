@@ -17,6 +17,8 @@ import ReportDrillDrawer from './ReportDrillDrawer'
 import type { DrillSpec } from './ReportDrillDrawer'
 import { useMatchesReport } from './useMatchesReport'
 import { gateDrillClick } from './reportDrillGate'
+import { EMPTY_REPORT_FILTERS, buildReportQueryParams } from './reportFilterParams'
+import type { ReportFilterState } from './reportFilterParams'
 import SegmentBars from './SegmentBars'
 import ReportTimeseriesChart from './ReportTimeseriesChart'
 import { useDateFormat } from '@/lib/datetime'
@@ -43,25 +45,28 @@ function StatTile({ label, value, accent, onClick }: { label: string; value: num
 // The under_contract tile keys — each drills contract_status=<key> (portie 7 XOR).
 const CONTRACT_STATUS_TILES = ['sent', 'active', 'ended', 'none'] as const
 
-export default function MatchesReport({ period, tabsSlot }: { period: ReportPeriod; tabsSlot?: ReactNode }) {
+export default function MatchesReport({ period, tabsSlot, filters = EMPTY_REPORT_FILTERS }: { period: ReportPeriod; tabsSlot?: ReactNode; filters?: ReportFilterState }) {
   const { t } = useTranslation('analytics')
   const { formatDate } = useDateFormat()
-  const { data, loading, error } = useMatchesReport(period)
+  const { data, loading, error } = useMatchesReport(period, filters)
   const isEmpty = !loading && !error && (!data || data.total === 0)
 
   // Drill-down: clicking a KPI/segment/tile/bucket explains it (breakdown + the
-  // matches behind it + Koios advice). Exactly one XOR param per open drill.
+  // matches behind it + Koios advice). Exactly one XOR param per open drill —
+  // ALWAYS layered on top of the report's own active filters (`baseParams`), never
+  // just `period`, so the lade counts the exact same set the bar was drawn from.
   const [drill, setDrill] = useState<DrillSpec | null>(null)
   // The report window from the RESPONSE, DD-MM-YYYY (§3B DATUM-1) — drawer subtitle.
   const windowSub = () => `${formatDate(data?.from)} – ${formatDate(data?.to)}`
+  const baseParams = buildReportQueryParams(period, 'matches', filters)
   const openMatches = (title: string, value: number, origin?: 'funnel' | 'direct') => setDrill({
     title, value, subtitle: windowSub(),
     breakdown: [
       { label: t('matches.viaFunnel'), value: data?.by_origin.funnel ?? 0 },
       { label: t('matches.direct'),    value: data?.by_origin.direct ?? 0 },
     ],
-    rowsEndpoint: '/reports/matches/drill', rowsParams: { origin, period },
-    adviceEndpoint: '/reports/matches/advice', adviceParams: { origin, period },
+    rowsEndpoint: '/reports/matches/drill', rowsParams: { ...baseParams, origin },
+    adviceEndpoint: '/reports/matches/advice', adviceParams: { ...baseParams, origin },
   })
 
   // Soort-as (MATCH-SOORT-1): by_contract_form bars — `contract_form` is one leg
@@ -69,8 +74,8 @@ export default function MatchesReport({ period, tabsSlot }: { period: ReportPeri
   // backend closed in portie 7 — labels read "Contractvorm: …" server-side).
   const openContractForm = (label: string, value: number, slug: string) => setDrill({
     title: label, value, subtitle: windowSub(),
-    rowsEndpoint: '/reports/matches/drill', rowsParams: { contract_form: slug, period },
-    adviceEndpoint: '/reports/matches/advice', adviceParams: { contract_form: slug, period },
+    rowsEndpoint: '/reports/matches/drill', rowsParams: { ...baseParams, contract_form: slug },
+    adviceEndpoint: '/reports/matches/advice', adviceParams: { ...baseParams, contract_form: slug },
   })
   const contractFormSegs = data?.by_contract_form ?? []
   const contractFormMax = contractFormSegs.reduce((m, s) => Math.max(m, s.count), 0)
@@ -82,8 +87,8 @@ export default function MatchesReport({ period, tabsSlot }: { period: ReportPeri
   // Under-contract tile drill: `contract_status` is the third XOR leg (portie 7).
   const openContractStatus = (label: string, value: number, key: (typeof CONTRACT_STATUS_TILES)[number]) => setDrill({
     title: label, value, subtitle: windowSub(),
-    rowsEndpoint: '/reports/matches/drill', rowsParams: { contract_status: key, period },
-    adviceEndpoint: '/reports/matches/advice', adviceParams: { contract_status: key, period },
+    rowsEndpoint: '/reports/matches/drill', rowsParams: { ...baseParams, contract_status: key },
+    adviceEndpoint: '/reports/matches/advice', adviceParams: { ...baseParams, contract_status: key },
   })
   // 'none' now arrives explicitly in the envelope (7925ce15); the old derivation
   // stays as fallback for a cached pre-update response, never fabricated.
@@ -96,9 +101,9 @@ export default function MatchesReport({ period, tabsSlot }: { period: ReportPeri
   const openBucket = (pt: CandidateTimeseriesPoint) => setDrill({
     title: pt.label, value: pt.value, subtitle: windowSub(),
     rowsEndpoint: '/reports/matches/drill',
-    rowsParams: { date: pt.date, ...(data?.timeseries.bucket === 'week' ? { bucket: 'week' } : {}), period },
+    rowsParams: { ...baseParams, date: pt.date, ...(data?.timeseries.bucket === 'week' ? { bucket: 'week' } : {}) },
     adviceEndpoint: '/reports/matches/advice',
-    adviceParams: { date: pt.date, ...(data?.timeseries.bucket === 'week' ? { bucket: 'week' } : {}), period },
+    adviceParams: { ...baseParams, date: pt.date, ...(data?.timeseries.bucket === 'week' ? { bucket: 'week' } : {}) },
   })
   const onSeriesPick = gateDrillClick('matches', (dateKey: string) => {
     const pt = data?.timeseries.series.find(p => p.date === dateKey)
@@ -114,8 +119,8 @@ export default function MatchesReport({ period, tabsSlot }: { period: ReportPeri
     const seg = terminationSegs.find(s => s.value === value)
     setDrill({
       title: seg?.label ?? value, value: seg?.count ?? 0, subtitle: windowSub(),
-      rowsEndpoint: '/reports/matches/drill', rowsParams: { stop_reason: value, period },
-      adviceEndpoint: '/reports/matches/advice', adviceParams: { stop_reason: value, period },
+      rowsEndpoint: '/reports/matches/drill', rowsParams: { ...baseParams, stop_reason: value },
+      adviceEndpoint: '/reports/matches/advice', adviceParams: { ...baseParams, stop_reason: value },
     })
   })
 
