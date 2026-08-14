@@ -223,6 +223,13 @@ export default function ApplicantsTab({ vacancy: v }: { vacancy: VacancyDetail }
                 {/* Reused record row: EntityLink to the application, pencil-edit,
                     reason-gated unlink, lazy expand panel — the exact candidate-
                     drawer component, never a second implementation (S-vacapp-1). */}
+                {/* FAKE-AFFORDANCE-1 (audit): no vacancy-level appointments endpoint exists yet
+                    (WorkTab's edit-intake pencil reads /candidates/{id}/appointments, one candidate
+                    at a time — there is no batched per-vacancy equivalent this tab could call for
+                    every applicant row). Without an `appointment` prop ApplicationRow never renders
+                    the pencil at all, so no dead button reaches the DOM; `onEditAppointment` is a
+                    required prop on the shared row and stays a documented no-op until a batched
+                    endpoint lands (reported in skipped, not silently left as a fake affordance). */}
                 {a.candidateId != null && (
                   <ApplicationRow
                     candidateId={a.candidateId as Id}

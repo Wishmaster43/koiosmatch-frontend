@@ -19,7 +19,7 @@ vi.mock('@/lib/mocks', () => ({ isAbortError: () => false }))
 // The shared NotesTab pulls in @/lib/datetime, which imports the REAL i18n runtime
 // as a side effect — mocked here (mirrors OpportunitiesTab.test.tsx) so t() keeps
 // echoing raw keys instead of silently switching every assertion to live NL copy.
-vi.mock('@/lib/datetime', () => ({ useDateFormat: () => ({ formatDate: (v: string) => v, formatDateTime: (v: string) => v, locale: 'nl-NL' }) }))
+vi.mock('@/lib/datetime', () => ({ useDateFormat: () => ({ formatDate: (v: string) => v, formatDateTime: (v: string) => v, formatTime: (v: string) => v, locale: 'nl-NL' }) }))
 // TaskLookupsProvider is rendered directly by CustomerNotesTab (not behind a
 // hook boundary) — a passthrough here avoids the real provider's own /task-*
 // fetches while useTaskLookups still returns stable seed-shaped values.

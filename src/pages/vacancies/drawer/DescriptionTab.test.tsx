@@ -16,16 +16,15 @@ import type { VacancyDetail } from '@/types/vacancy'
 // on a description field, via the shared default — no per-field override) can
 // be asserted without mounting the real assist bar.
 vi.mock('@/components/ui/RichTextEditor', () => ({
-  default: ({ value, onChange, assistModes }: { value: string; onChange: (v: string) => void; assistModes?: string[] }) => (
+  default: ({ value, onChange, assistModes, assistGenerate }: { value: string; onChange: (v: string) => void; assistModes?: string[]; assistGenerate?: { entity: string; id: string } }) => (
     <textarea aria-label="rich-text-editor" value={value} onChange={e => onChange(e.target.value)}
-      data-assist-modes={assistModes ? assistModes.join(',') : undefined} />
+      data-assist-modes={assistModes ? assistModes.join(',') : undefined}
+      data-assist-generate={assistGenerate ? `${assistGenerate.entity}:${assistGenerate.id}` : undefined} />
   ),
 }))
 vi.mock('@/components/ui/SafeHtml', () => ({
   default: ({ html }: { html: string }) => <div data-testid="safe-html">{html}</div>,
 }))
-// Not under test here — makes its own resolve/generate API calls, irrelevant to this tab's toggle/save.
-vi.mock('./VacancyGenerateFlow', () => ({ default: () => null }))
 
 const vacancy = { id: 'v1', title: 'Verpleegkundige', description: '<p>Huidige tekst</p>' } as unknown as VacancyDetail
 
@@ -57,6 +56,12 @@ describe('DescriptionTab · edit + save', () => {
     // The mock only sets the attribute when a value is passed — its absence
     // proves NO explicit override reaches RichTextEditor (undefined `assistModes`).
     expect(screen.getByLabelText('rich-text-editor')).not.toHaveAttribute('data-assist-modes')
+  })
+
+  it('VACGEN-1: wires the shared assist bar\'s generate affordance to entity=vacancy, id=v.id — the ONE Koios-generate UX every rich-text field uses, no bespoke flow', () => {
+    render(<DescriptionTab vacancy={vacancy} onUpdate={vi.fn()} />)
+    fireEvent.click(screen.getByTitle('common:edit'))
+    expect(screen.getByLabelText('rich-text-editor')).toHaveAttribute('data-assist-generate', 'vacancy:v1')
   })
 
   it('save persists the edited description via onUpdate(id, { description })', () => {

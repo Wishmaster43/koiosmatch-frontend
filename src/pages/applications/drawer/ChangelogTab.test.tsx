@@ -12,7 +12,7 @@ import ChangelogTab from './ChangelogTab'
 import type { ApplicationActivityEvent } from '../hooks/useApplicationActivity'
 import type { ApplicationDetail } from '@/types/application'
 
-vi.mock('@/lib/datetime', () => ({ useDateFormat: () => ({ formatDate: (v: string) => v, formatDateTime: (v: string) => v, locale: 'nl-NL' }) }))
+vi.mock('@/lib/datetime', () => ({ useDateFormat: () => ({ formatDate: (v: string) => v, formatDateTime: (v: string) => v, formatTime: (v: string) => v, locale: 'nl-NL' }) }))
 
 const mockUseActivity = vi.fn()
 vi.mock('../hooks/useApplicationActivity', () => ({ useApplicationActivity: (id?: unknown) => mockUseActivity(id) }))

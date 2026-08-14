@@ -17,6 +17,7 @@ import type { DrillSpec } from './ReportDrillDrawer'
 import { useLocationsReport } from './useLocationsReport'
 import { gateDrillClick } from './reportDrillGate'
 import SegmentBars from './SegmentBars'
+import ReportTimeseriesChart from './ReportTimeseriesChart'
 import { useDateFormat } from '@/lib/datetime'
 import type { ReportPeriod, CandidateSegment, ApplicationTopSegment, CandidateTimeseriesPoint } from '@/types/analytics'
 
@@ -76,7 +77,6 @@ export default function LocationsReport({ period, tabsSlot }: { period: ReportPe
       items={segs.map(s => ({ key: s.value, label: s.label, count: s.count, color: null }))} />
   }
 
-  const seriesMax = (data?.timeseries.series ?? []).reduce((m, p) => Math.max(m, p.value), 0)
   const onSeriesPick = gateDrillClick('locations', (dateKey: string) => {
     const pt = data?.timeseries.series.find(p => p.date === dateKey)
     if (pt) openBucket(pt)
@@ -121,8 +121,7 @@ export default function LocationsReport({ period, tabsSlot }: { period: ReportPe
             {/* Created over time — week/day timeseries, bucket set server-side. */}
             <section>
               <h3 style={{ ...head, marginBottom: 10 }}>{t('locations.series')}</h3>
-              <SegmentBars max={seriesMax} onPick={onSeriesPick}
-                items={data.timeseries.series.map(p => ({ key: p.date, label: p.label, count: p.value, color: null }))} />
+              <ReportTimeseriesChart series={data.timeseries.series} onPick={onSeriesPick} />
             </section>
 
             <section>

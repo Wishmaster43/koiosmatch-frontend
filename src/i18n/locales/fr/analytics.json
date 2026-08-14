@@ -60,6 +60,9 @@
     "week": "Semaine",
     "month": "Mois"
   },
+  "dashboard": {
+    "vacancies": "Total des offres"
+  },
   "flow": {
     "title": "Flux de candidatures",
     "subtitle": "Entonnoir par étape",

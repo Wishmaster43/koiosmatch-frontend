@@ -17,6 +17,7 @@ import InsightsRow from '@/components/insights/InsightsRow'
 import type { KpiSpec } from '@/components/insights/InsightsRow'
 import { useAiReport } from './useAiReport'
 import SegmentBars from './SegmentBars'
+import ReportTimeseriesChart from './ReportTimeseriesChart'
 import { useDateFormat } from '@/lib/datetime'
 import { formatNumber } from '@/lib/formatters'
 import type { ReportPeriod, AiActivitySegment } from '@/types/analytics'
@@ -81,8 +82,7 @@ export default function AiReport({ period, tabsSlot }: { period: ReportPeriod; t
                 Display-only, like every axis on this report. */}
             <section>
               <h3 style={{ ...head, marginBottom: 10 }}>{t('ai.series')}</h3>
-              <SegmentBars max={data.timeseries.series.reduce((m, p) => Math.max(m, p.value), 0)}
-                items={data.timeseries.series.map(p => ({ key: p.date, label: p.label, count: p.value, color: null }))} />
+              <ReportTimeseriesChart series={data.timeseries.series} />
             </section>
 
             <section>

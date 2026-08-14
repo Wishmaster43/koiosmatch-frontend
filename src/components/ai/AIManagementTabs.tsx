@@ -301,8 +301,10 @@ export function KnowledgeTab() {
         <input value={name} onChange={e => setName(e.target.value)} style={inputStyle} placeholder={t('ai.knowledge.namePlaceholder')} />
       </Field>
       <Field label={t('ai.field.content')}>
+        {/* FAKE-AFFORDANCE (14-08): no /ai/knowledge/{id}/versions endpoint exists, so
+            versions/onRestore are omitted entirely rather than faked with an empty
+            list + a no-op handler (mirrors ToolsTab's honest-gate reasoning above). */}
         <TextEditor value={body} onChange={setBody} onSave={save} saving={saving} saved={saved}
-          versions={[]} onRestore={() => {}}
           placeholder={t('ai.knowledge.bodyPlaceholder')} />
       </Field>
     </SideList>

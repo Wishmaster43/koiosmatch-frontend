@@ -1,18 +1,23 @@
 /**
- * TargetsTab — the call list itself: one row per target (candidate) with a status
- * soft-chip, quick check-off actions and — once handled — the call OUTCOME (Danny
- * 2026-07-04): outcome chips from the /outreach-outcomes lookup + follow-ups
- * (new task pre-linked to the candidate · create a match on a vacancy). The name
- * clicks through to the candidate drawer. Row selection + AssignTargetsBar (G29)
+ * TargetsTab — the call list itself: one COMPACT row per target (candidate) with
+ * a status soft-chip, quick check-off actions and — once handled — the call
+ * OUTCOME (Danny 2026-07-04): outcome chips from the /outreach-outcomes lookup +
+ * follow-ups (new task pre-linked to the candidate · create a match on a
+ * vacancy), tucked behind a per-row expand toggle so large lists stay scannable
+ * (BELLIJST-SCALE-1, Danny 2026-08-14: "hoe moet een eindgebruiker de
+ * onderliggende 400 kandidaten per persoon selecteren?"). A name/status/outcome/
+ * assignee search+filter bar narrows the already-loaded set client-side — no
+ * backend change, works on whatever the campaign returned. The name clicks
+ * through to the candidate drawer. Row selection + AssignTargetsBar (G29)
  * divide the pick round-robin over chosen recruiters; each row also carries its
  * own note (G30) and, once assigned, its recruiter. `filter` (G31 — set by the
  * Stats tab's donut clicks) narrows the visible rows to one status/outcome/
- * assignee value. Presentational; data + mutations come from useOutreachDetail
- * via the drawer.
+ * assignee value, combined with the local search/filter bar. Presentational;
+ * data + mutations come from useOutreachDetail via the drawer.
  */
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Phone, X, RotateCcw, ListChecks, Handshake, FilterX } from 'lucide-react'
+import { Phone, X, RotateCcw, ListChecks, Handshake, FilterX, ChevronDown, ChevronRight, Search } from 'lucide-react'
 import Avatar from '@/components/ui/Avatar'
 import CandidateStatusChip from '@/components/ui/CandidateStatusChip'
 // G34: the house searchable dropdown replaces the native vacancy <select>.
@@ -67,6 +72,27 @@ export default function TargetsTab({ targets, loading, error, onSetStatus, onSet
   const [selected, setSelected] = useState<Set<string>>(new Set())
   // Vacancy options only load while the match prompt is open.
   const vacancyOptions = useVacancyOptions(!!matchFor)
+  // BELLIJST-SCALE-1 — rows expanded to show outcome/note; collapsed by default
+  // so a 400-row list stays a scannable list, not 400 open cards.
+  const [expanded, setExpanded] = useState<Set<string>>(new Set())
+  const toggleExpanded = (id: string) => setExpanded(s => {
+    const next = new Set(s)
+    if (next.has(id)) next.delete(id); else next.add(id)
+    return next
+  })
+  // BELLIJST-SCALE-1 — client-side search + filter bar on the already-loaded set
+  // (no backend pagination yet); combined with the Stats-tab `filter` above.
+  const [search, setSearch] = useState('')
+  const [statusPick, setStatusPick] = useState<string | null>(null)
+  const [outcomePick, setOutcomePick] = useState<string | null>(null)
+  const [assigneePick, setAssigneePick] = useState<string | null>(null)
+  // Assignee options derived from the loaded targets themselves (+ an
+  // "unassigned" sentinel) — no extra endpoint needed for a client-side filter.
+  const assigneeOptions = useMemo(() => {
+    const seen = new Map<string, string>()
+    targets.forEach(tg => { if (tg.assignee?.id && tg.assignee.name) seen.set(String(tg.assignee.id), tg.assignee.name) })
+    return [{ value: '', label: t('workflows:unassigned') }, ...[...seen.entries()].map(([value, label]) => ({ value, label }))]
+  }, [targets, t])
 
   const candidateName = (tg: OutreachTarget) =>
     tg.candidate?.name ?? [tg.candidate?.first_name, tg.candidate?.last_name].filter(Boolean).join(' ') ?? '—'
@@ -91,7 +117,17 @@ export default function TargetsTab({ targets, loading, error, onSetStatus, onSet
     if (filter.axis === 'outcome')  return (tg.outcome ?? '') === filter.value
     return String(tg.assignee?.id ?? '') === filter.value
   }
-  const visibleTargets = targets.filter(matchesFilter)
+  // BELLIJST-SCALE-1 — the local search/filter bar narrows the same set the
+  // Stats-tab `filter` narrows; both apply together (AND), search on name only.
+  const matchesLocalFilters = (tg: OutreachTarget): boolean => {
+    if (search.trim() && !candidateName(tg).toLowerCase().includes(search.trim().toLowerCase())) return false
+    if (statusPick && (tg.status ?? initial?.value ?? 'todo') !== statusPick) return false
+    if (outcomePick && (tg.outcome ?? '') !== outcomePick) return false
+    if (assigneePick !== null && String(tg.assignee?.id ?? '') !== assigneePick) return false
+    return true
+  }
+  const visibleTargets = targets.filter(tg => matchesFilter(tg) && matchesLocalFilters(tg))
+  const hasLocalFilters = !!search.trim() || !!statusPick || !!outcomePick || assigneePick !== null
   const filterLabel = filter?.axis ? t(`drawer.stats.axis.${filter.axis}`) : ''
 
   // G29 — selection toggles, scoped to the currently visible (filtered) rows.
@@ -120,6 +156,43 @@ export default function TargetsTab({ targets, loading, error, onSetStatus, onSet
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+      {/* BELLIJST-SCALE-1 — search on name + client-side status/outcome/assignee
+          filters over the already-loaded targets; makes a large call list usable
+          without a backend change (Danny 2026-08-14). */}
+      <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 6 }}>
+        <div style={{ position: 'relative', flex: '1 1 160px', minWidth: 140 }}>
+          <Search size={13} style={{ position: 'absolute', left: 8, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
+          <input value={search} onChange={e => setSearch(e.target.value)} placeholder={t('common:search')}
+            aria-label={t('common:search')}
+            style={{ width: '100%', padding: '5px 8px 5px 26px', fontSize: 12, borderRadius: 7,
+              border: '1px solid var(--border)', background: 'var(--bg)', color: 'var(--text)' }} />
+        </div>
+        <div style={{ width: 150 }}>
+          <CreatableSelect value={statusPick} onChange={setStatusPick} allowCreate={false} clearable
+            placeholder={t('drawer.stats.byStatus')}
+            options={statuses.map(o => ({ value: o.value, label: o.label }))}
+            style={{ padding: '5px 8px', fontSize: 12 }} />
+        </div>
+        <div style={{ width: 150 }}>
+          <CreatableSelect value={outcomePick} onChange={setOutcomePick} allowCreate={false} clearable
+            placeholder={t('drawer.stats.byOutcome')}
+            options={outcomes.map(o => ({ value: o.value, label: o.label }))}
+            style={{ padding: '5px 8px', fontSize: 12 }} />
+        </div>
+        <div style={{ width: 170 }}>
+          <CreatableSelect value={assigneePick} onChange={setAssigneePick} allowCreate={false} clearable
+            placeholder={t('drawer.stats.byAssignee')}
+            options={assigneeOptions}
+            style={{ padding: '5px 8px', fontSize: 12 }} />
+        </div>
+        {hasLocalFilters && (
+          <button onClick={() => { setSearch(''); setStatusPick(null); setOutcomePick(null); setAssigneePick(null) }}
+            style={{ fontSize: 11, color: 'var(--text-muted)', background: 'none', border: 'none', cursor: 'pointer', padding: '4px 6px' }}>
+            {t('common:filters.clearAll')}
+          </button>
+        )}
+      </div>
+
       {/* G31 — active Stats-tab filter chip: visible on this tab too, since the
           filter narrows THIS list while the click that set it lives elsewhere. */}
       {filter && (
@@ -147,6 +220,13 @@ export default function TargetsTab({ targets, loading, error, onSetStatus, onSet
             <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>{t('common:selectAll')}</span>
           </div>
         )
+      )}
+      {/* Visible-row count — how many of the (search/filter-narrowed) targets are
+          on screen; AssignTargetsBar carries the separate "N geselecteerd" count. */}
+      {visibleTargets.length > 0 && (
+        <span style={{ fontSize: 11, color: 'var(--text-muted)', padding: '0 4px' }}>
+          {t('common:resultsCount', { count: visibleTargets.length })}
+        </span>
       )}
 
       {visibleTargets.length === 0 ? (
@@ -179,13 +259,13 @@ export default function TargetsTab({ targets, loading, error, onSetStatus, onSet
                     <CandidateStatusChip status={tg.candidate?.status} phase={tg.candidate?.phase} />
                   </span>
                 </div>
-                {tg.contacted_at && (
-                  <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>{formatDate(tg.contacted_at)}</div>
-                )}
-                {/* G29 — the recruiter this row was round-robin assigned to. */}
-                {tg.assignee?.name && (
-                  <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>
-                    {t('drawer.assign.assignedTo', { name: tg.assignee.name })}
+                {/* BELLIJST-SCALE-1 — contacted date + assignee on one muted line,
+                    so the row stays a single compact line, not a small card. */}
+                {(tg.contacted_at || tg.assignee?.name) && (
+                  <div style={{ fontSize: 11, color: 'var(--text-muted)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                    {tg.contacted_at && formatDate(tg.contacted_at)}
+                    {tg.contacted_at && tg.assignee?.name && ' · '}
+                    {tg.assignee?.name && t('drawer.assign.assignedTo', { name: tg.assignee.name })}
                   </div>
                 )}
               </div>
@@ -210,10 +290,20 @@ export default function TargetsTab({ targets, loading, error, onSetStatus, onSet
                   </>
                 )}
               </div>
+              {/* BELLIJST-SCALE-1 — expand toggle: outcome chips + note stay tucked
+                  away so a long list reads as one line per candidate by default. */}
+              {(handled || onSetNote) && (
+                <button onClick={() => toggleExpanded(tg.id)} title={t('common:clickForDetails')}
+                  aria-label={t('common:clickForDetails')} aria-expanded={expanded.has(tg.id)}
+                  style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 22, height: 22,
+                    flexShrink: 0, background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)' }}>
+                  {expanded.has(tg.id) ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
+                </button>
+              )}
             </div>
 
             {/* Outcome chips — record HOW the call ended (lookup-driven; click again to clear). */}
-            {handled && (
+            {handled && expanded.has(tg.id) && (
               <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap', paddingLeft: 36 }}>
                 <span style={{ fontSize: 10, color: 'var(--text-muted)' }}>{t('drawer.outcomeLabel')}</span>
                 {outcomes.map(o => {
@@ -232,8 +322,8 @@ export default function TargetsTab({ targets, loading, error, onSetStatus, onSet
             )}
 
             {/* G30 — per-target note; hidden when the caller doesn't wire persistence
-                (no fake affordance — §3). */}
-            {onSetNote && (
+                (no fake affordance — §3), and tucked behind the same expand toggle. */}
+            {onSetNote && expanded.has(tg.id) && (
               <div style={{ paddingLeft: 36 }}>
                 <TargetNoteField note={tg.note} onSave={(note) => onSetNote(tg.id, note)} />
               </div>

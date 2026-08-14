@@ -54,8 +54,10 @@ describe('StatisticsTab · V25 real data (derived from the detail applications a
 
     // Not the old bug: the tab is NOT empty even though applications_by_phase was never attached.
     expect(screen.queryByText(nlVacancies.statistics.empty)).toBeNull()
-    // Leads → applications: 2 applications / 4 leads = 50%.
-    expect(screen.getByText('50%')).toBeInTheDocument()
+    // Leads → applications: 2 applications / 4 leads = 50%. Since the applied →
+    // hired pair landed (1 of 2 = 50% too), BOTH conversion tiles read 50% here —
+    // assert the count rather than uniqueness.
+    expect(screen.getAllByText('50%')).toHaveLength(2)
     // Per-phase legend rows (only phases with a real count show).
     expect(screen.getByText('Gesolliciteerd')).toBeInTheDocument()
     expect(screen.getByText('Aangenomen')).toBeInTheDocument()
@@ -96,6 +98,41 @@ describe('StatisticsTab · V25 real data (derived from the detail applications a
     // Published channels: 1 of the 2 configured (the KPI's "sub" caption is unique text).
     expect(screen.getByText('van de 2 geconfigureerd')).toBeInTheDocument()
     vi.useRealTimers()
+  })
+
+  // APPLIED-VS-HIRED-1: the raw counting pair reuses the existing appliedToHired
+  // label and only renders when both sides of the pair are real.
+  it('shows the honest applied → hired pair when both sides are real', () => {
+    const v = mapVacancyDetail({
+      id: 'v1', title: 'Test', candidate_match_count: 2, created_at: '2026-06-01T00:00:00Z',
+      /* eslint-disable no-restricted-syntax -- test fixture hex, not UI styling */
+      applications: [
+        { id: 'a1', candidate: { id: 'c1', name: 'Rosa Tijssen' }, phase: { value: 'applied', label: 'Gesolliciteerd', color: '#94A3B8' } },
+        { id: 'a2', candidate: { id: 'c2', name: 'Kelly van Vliet' }, phase: { value: 'hired', label: 'Aangenomen', color: '#79B58E' } },
+      ],
+      /* eslint-enable no-restricted-syntax */
+    })
+    render(<StatisticsTab vacancy={v} />)
+    // The label already appears once as the conversion-rate KPI's sub caption —
+    // the new overview row reuses the SAME key, so it appears a second time.
+    expect(screen.getAllByText(nlVacancies.statistics.appliedToHired)).toHaveLength(2)
+    expect(screen.getByText('2 → 1')).toBeInTheDocument()
+  })
+
+  it('hides the applied → hired pair when the hired side is not known (empty byPhase)', () => {
+    const v = mapVacancyDetail({
+      id: 'v1', title: 'Test', candidate_match_count: 2, created_at: '2026-06-01T00:00:00Z',
+      applications_by_phase: {},
+      applications: [],
+    })
+    render(<StatisticsTab vacancy={v} />)
+    // "empty" tab guard fires when there is no data at all — force a non-empty
+    // path by keeping candidate_match_count known but no applications: the tab
+    // still renders (leads known). The label still appears once as the
+    // conversion-rate KPI's own sub caption, but the extra overview row must
+    // stay hidden — so no "N → M" pair text and only the ONE occurrence.
+    expect(screen.getAllByText(nlVacancies.statistics.appliedToHired)).toHaveLength(1)
+    expect(screen.queryByText(/^\d+ → \d+$/)).toBeNull()
   })
 
   it('a phase legend row navigates to Sollicitaties pre-filtered on this vacancy + stage', async () => {

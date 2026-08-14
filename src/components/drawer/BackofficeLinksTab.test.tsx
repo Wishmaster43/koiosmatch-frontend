@@ -14,11 +14,15 @@ import type { BackofficeLink } from '@/lib/backofficeLink'
 
 const mockUseApps = vi.fn()
 const mockPost = vi.fn()
+const mockGet = vi.fn()
 const mockNotifySuccess = vi.fn()
 const mockNotifyError = vi.fn()
 
 vi.mock('@/context/AppsContext', () => ({ useApps: () => mockUseApps() }))
-vi.mock('@/lib/api', () => ({ default: { post: (...args: unknown[]) => mockPost(...args) } }))
+vi.mock('@/lib/api', () => ({
+  default: { post: (...args: unknown[]) => mockPost(...args), get: (...args: unknown[]) => mockGet(...args) },
+  unwrap: (res: { data: unknown }) => res.data,
+}))
 vi.mock('@/lib/notify', () => ({ notifySuccess: (...a: unknown[]) => mockNotifySuccess(...a), notifyError: (...a: unknown[]) => mockNotifyError(...a) }))
 vi.mock('@/lib/datetime', () => ({ useDateFormat: () => ({ formatDate: (v: string) => v, formatDateTime: (v: string) => `fmt(${v})` }) }))
 
@@ -29,6 +33,7 @@ const link = (overrides: Partial<BackofficeLink> = {}): BackofficeLink => ({
 beforeEach(() => {
   vi.clearAllMocks()
   mockUseApps.mockReturnValue({ isAppEnabled: () => false })
+  mockGet.mockResolvedValue({ data: { backoffice_links: [] } })
 })
 
 describe('BackofficeLinksTab · app-flag gating', () => {
@@ -137,6 +142,53 @@ describe('BackofficeLinksTab · Shiftmanager "Nu synchroniseren" (entity-prefixe
     expect(screen.getByText(/428/)).toBeInTheDocument()
     expect(screen.queryByRole('button', { name: /backofficeLinks.shiftmanager.syncNow/ })).toBeNull()
     expect(mockPost).not.toHaveBeenCalled()
+  })
+})
+
+describe('BackofficeLinksTab · self-refresh after a mutation (KOPPELINGEN-REFRESH-1, Danny 14-08)', () => {
+  beforeEach(() => { mockUseApps.mockReturnValue({ isAppEnabled: () => true }) })
+
+  it('refetches /customers/{id} after a successful "Koppelen" click, and shows the fresh linked state without a reload', async () => {
+    mockPost.mockResolvedValue({ data: { link: { status: 'pending' } } })
+    mockGet.mockResolvedValue({
+      data: { backoffice_links: [{ system: 'helloflex', status: 'linked', external_id: '777' }] },
+    })
+    const user = userEvent.setup()
+    render(<BackofficeLinksTab entity="customers" id="42" helloflexLink={null} shiftmanagerLink={null} canLink />)
+    const [helloflexBtn] = screen.getAllByRole('button', { name: /backofficeLinks.common.linkButton/ })
+    await user.click(helloflexBtn)
+    expect(mockPost).toHaveBeenCalledWith('/sync/customers/42', { system: 'helloflex' })
+    // The tab issues a second request on its own — no page reload needed.
+    await waitFor(() => expect(mockGet).toHaveBeenCalledWith('/customers/42'))
+    await waitFor(() => expect(screen.getByText(/777/)).toBeInTheDocument())
+  })
+
+  it('refetches /matches/{id} after a successful "Koppelen" click for a different entity', async () => {
+    mockPost.mockResolvedValue({ data: { link: { status: 'pending' } } })
+    mockGet.mockResolvedValue({
+      data: { backoffice_links: [{ system: 'shiftmanager', status: 'linked', external_id: '999' }] },
+    })
+    const user = userEvent.setup()
+    render(<BackofficeLinksTab entity="matches" id="7" helloflexLink={null} shiftmanagerLink={null} canLink />)
+    const [, shiftmanagerBtn] = screen.getAllByRole('button', { name: /backofficeLinks.common.linkButton/ })
+    await user.click(shiftmanagerBtn)
+    expect(mockPost).toHaveBeenCalledWith('/sync/matches/7', { system: 'shiftmanager' })
+    await waitFor(() => expect(mockGet).toHaveBeenCalledWith('/matches/7'))
+    await waitFor(() => expect(screen.getByText(/999/)).toBeInTheDocument())
+  })
+
+  it('also refetches after the Shiftmanager "Nu synchroniseren" action resolves', async () => {
+    mockUseApps.mockReturnValue({ isAppEnabled: (a: string) => a === 'shiftmanager' })
+    mockPost.mockResolvedValue({ data: {} })
+    mockGet.mockResolvedValue({
+      data: { backoffice_links: [{ system: 'shiftmanager', status: 'linked', external_id: '428', last_synced_at: '2026-08-14T10:00:00Z' }] },
+    })
+    const link = { status: 'linked', externalId: '428', lastError: null, lastSyncedAt: null, linkedAt: null, linkedBy: null }
+    const user = userEvent.setup()
+    render(<BackofficeLinksTab entity="candidates" id="1" helloflexLink={null} shiftmanagerLink={link} canLink />)
+    await user.click(screen.getByRole('button', { name: /backofficeLinks.shiftmanager.syncNow/ }))
+    expect(mockPost).toHaveBeenCalledWith('/sm_candidates/sync/428')
+    await waitFor(() => expect(mockGet).toHaveBeenCalledWith('/candidates/1'))
   })
 })
 

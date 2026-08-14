@@ -7,11 +7,13 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { renderHook, act, waitFor } from '@testing-library/react'
 import api from '@/lib/api'
+import { notifyError } from '@/lib/notify'
 import { useDuplicateProbe } from './useDuplicateProbe'
 
 vi.mock('@/lib/api', () => ({
   default: { post: vi.fn().mockResolvedValue({ data: { exists: true, match: { id: 'c1', name: 'Noud Blom' } } }) },
 }))
+vi.mock('@/lib/notify', () => ({ notifyError: vi.fn(), notifySuccess: vi.fn() }))
 
 describe('useDuplicateProbe · the POST seam', () => {
   beforeEach(() => { vi.useFakeTimers() })
@@ -49,5 +51,17 @@ describe('useDuplicateProbe · the POST seam', () => {
     renderHook(() => useDuplicateProbe('', '', ''))
     await act(async () => { vi.runAllTimers() })
     expect(api.post).not.toHaveBeenCalled()
+  })
+
+  it('a 429 (throttled) probe stays silent — no verdict, no error toast', async () => {
+    vi.mocked(api.post).mockRejectedValueOnce({ response: { status: 429 } })
+    const { result } = renderHook(({ email }) => useDuplicateProbe(email, '', ''), {
+      initialProps: { email: 'danny@yesway.nl' },
+    })
+    await act(async () => { vi.runOnlyPendingTimers() })
+    vi.useRealTimers()
+    await waitFor(() => expect(api.post).toHaveBeenCalled())
+    expect(result.current.probeMatch).toBeNull()
+    expect(notifyError).not.toHaveBeenCalled()
   })
 })

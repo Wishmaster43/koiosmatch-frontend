@@ -1,19 +1,33 @@
 /**
- * TargetNoteField — per-target free-text note (G30). The field + max:2000
- * validation already exist on the backend as a PLAIN string
- * (UpdateOutreachTargetRequest: 'note' => 'sometimes|nullable|string|max:2000',
- * no HTML column) — so this is a plain textarea with the house field footprint
- * (mirrors DetachReasonModal's reason field), never the shared RichTextEditor
- * (§3A only mandates that for HTML-backed prose fields; this one is not).
- * In-place edit: pencil → textarea + save/cancel (§3A convention, mirrors
- * EditableRichTextField's Edit2/Save/X icon set), shown above the block, never
- * floating over the row.
+ * TargetNoteField — per-target free-text note (G30), now the SAME rich note as
+ * the candidate drawer (Danny 14-08: "als je een notitie toevoegt dan moet deze
+ * notitie wel hetzelfde zijn als nu een notitie, dus samenvatten verbeteren
+ * actiepunten"). Reuses the shared building blocks a candidate note is built
+ * from — `RichTextEditor` (assist off) + `RichTextAssistBar` (mic only, mirrors
+ * `NoteFields`' own composition) + `NoteAssistSection` (Verbeteren / Samenvatten
+ * / Actiepunten) — never a second hand-rolled assist block (§11). A bare
+ * type/channel picker is NOT added here: the outreach target's note has no
+ * backing type/channel column on the backend (`UpdateOutreachTargetRequest`
+ * only validates `note`), so those two fields of the candidate note shape would
+ * be a fake affordance (§3) — they simply have no lookup or column to persist
+ * against on this entity.
+ *
+ * STORAGE FORM CHANGE: the backend field stays the same plain `note` string
+ * (max:2000) at the same route/body shape (`updateTarget(id, { note })`), but
+ * its VALUE is now HTML (Tiptap output) instead of plain text — the trade the
+ * candidate note itself already makes. Read mode renders it through the shared
+ * `SafeHtml` sanitizer, mirroring every other rich-text-backed field (§3A).
+ *
+ * In-place edit: pencil → editor + save/cancel (§3A convention), shown above
+ * the block, never floating over the row.
  */
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Edit2, Save, X } from 'lucide-react'
-
-const NOTE_MAX = 2000
+import RichTextEditor from '@/components/ui/RichTextEditor'
+import RichTextAssistBar from '@/components/ui/RichTextAssistBar'
+import NoteAssistSection from '@/components/drawer/tabs/notes/NoteAssistSection'
+import SafeHtml from '@/components/ui/SafeHtml'
 
 export default function TargetNoteField({ note, onSave }: {
   note?: string | null
@@ -45,7 +59,7 @@ export default function TargetNoteField({ note, onSave }: {
     return (
       <div style={{ display: 'flex', alignItems: 'flex-start', gap: 6 }}>
         {note
-          ? <span style={{ fontSize: 11, color: 'var(--text-muted)', flex: 1, minWidth: 0, whiteSpace: 'pre-wrap' }}>{note}</span>
+          ? <SafeHtml html={note} style={{ fontSize: 11, color: 'var(--text-muted)', flex: 1, minWidth: 0 }} />
           : <span style={{ fontSize: 11, fontStyle: 'italic', color: 'var(--text-muted)', flex: 1 }}>{t('outreach:drawer.note.empty')}</span>}
         <button onClick={start} title={t('common:edit')} aria-label={t('common:edit')}
           style={{ ...iconBtn, background: 'none', color: 'var(--text-muted)', border: '1px solid var(--border)' }}>
@@ -56,11 +70,15 @@ export default function TargetNoteField({ note, onSave }: {
   }
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-      <textarea autoFocus value={draft} maxLength={NOTE_MAX} disabled={saving} onChange={e => setDraft(e.target.value)} rows={2}
-        placeholder={t('outreach:drawer.note.placeholder')}
-        style={{ width: '100%', boxSizing: 'border-box', padding: '6px 8px', fontSize: 11, borderRadius: 6,
-          border: '1px solid var(--border)', background: 'var(--input-bg)', color: 'var(--text)', resize: 'vertical', outline: 'none' }} />
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+      {/* Same rich-text + mic composition NoteFields uses (assist off on the
+          editor itself — its own Koios buttons live in NoteAssistSection below). */}
+      <RichTextEditor value={draft} onChange={setDraft} assist={false}
+        toolbarExtra={<RichTextAssistBar value={draft} onChange={setDraft} modes={[]} />}
+        minHeight={80} />
+      {/* Koios AI assist — Verbeteren / Samenvatten / Actiepunten, byte-for-byte
+          the candidate note's own block (§11 one source, no second copy). */}
+      <NoteAssistSection body={draft} onApply={setDraft} />
       <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
         {failed && <span style={{ fontSize: 10, color: 'var(--color-danger)', flex: 1 }}>{t('outreach:drawer.note.saveFailed')}</span>}
         <div style={{ display: 'flex', gap: 4, marginLeft: 'auto' }}>

@@ -61,6 +61,8 @@ vi.mock('@/lib/api', async () => {
   return {
     ...actual,
     default: {
+      // The Koios Wizard/Auto switch reads the user's own mode on mount.
+      get: vi.fn(() => Promise.resolve({ data: { data: {} } })),
       post: vi.fn(() => Promise.resolve({ data: { data: { id: 'opp-1' } } })),
       patch: vi.fn(() => Promise.resolve({ data: { data: { id: 'opp-9' } } })),
     },

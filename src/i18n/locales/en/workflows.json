@@ -1076,5 +1076,6 @@
     "daysBeforeSuffix_other": "days in advance",
     "fieldAvailableAgain": "Candidate available-again date",
     "fieldMatchEnd": "Match end date"
-  }
+  },
+  "unassigned": "Unassigned"
 }

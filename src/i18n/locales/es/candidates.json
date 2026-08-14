@@ -701,7 +701,9 @@
     "noAvailability": "Aún no hay excepciones registradas.",
     "availabilityHint": "Por defecto, el candidato está disponible. Registra aquí las excepciones (p. ej. vacaciones o enfermedad).",
     "availDuplicate": "Esta parte del día ya está definida para esta fecha.",
-    "notPersistedYet": "Aún no se guarda. El módulo de planificación llegará pronto."
+    "notPersistedYet": "Aún no se guarda. El módulo de planificación llegará pronto.",
+    "moduleNotAvailableTitle": "Planificación aún no disponible",
+    "moduleNotAvailableBody": "El módulo de planificación todavía no existe. Esta pestaña mostrará pronto los horarios y la disponibilidad."
   },
   "statuses": {
     "actief": "Activo",

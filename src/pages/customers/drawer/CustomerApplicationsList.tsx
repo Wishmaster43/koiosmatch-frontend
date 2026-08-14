@@ -44,6 +44,17 @@
  * gated on the same `applications.update`/`applications.view` permissions the
  * candidate side gates on. The candidate cell's own `EntityLink` to the
  * application record was already in place — unchanged.
+ *
+ * DATATABLE-EXPAND-1 evaluation (2026-08-14): NOT migrated to DataTable's new
+ * shared `renderExpanded` — deliberate, not an oversight. This chevron opens
+ * `ApplicationRowDetails` in a small ANCHORED FLOATING PANEL next to the
+ * button (see `FloatingPanel`/`persistKey="customer-application-row"`), sized
+ * and positioned independently of the table's row flow. `renderExpanded`
+ * instead opens a full-width <tr> panel BELOW the row, pushing every row
+ * under it down — a real layout/behaviour change from the current popover,
+ * so migrating here would violate the brief's "without behaviour loss". Left
+ * as-is; a future screen that wants the full-width inline-panel look is the
+ * right place to adopt `renderExpanded`.
  */
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'

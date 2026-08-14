@@ -3,7 +3,6 @@ import { useTranslation } from 'react-i18next'
 import { Edit2, Save, X, Trash2, ExternalLink } from 'lucide-react'
 import RichTextEditorJs from '@/components/ui/RichTextEditor'
 import SafeHtmlJs from '@/components/ui/SafeHtml'
-import VacancyGenerateFlow from './VacancyGenerateFlow'
 import { useVacancyDescription } from '../hooks/useVacancyDescription'
 import type { VacancyDetail } from '@/types/vacancy'
 import type { Id } from '@/types/common'
@@ -34,7 +33,7 @@ export default function DescriptionTab({ vacancy: v, onUpdate }: { vacancy: Vaca
   const { t } = useTranslation('vacancies')
   const {
     descEditing, setDescEditing, descExpanded, setDescExpanded, description, setDescription, saveDesc, cancelDesc,
-    descKey, applyGeneratedConcept, openDescriptionPopout,
+    openDescriptionPopout,
   } = useVacancyDescription(v, onUpdate)
 
   // Edit-toggle control block (pencil ↔ save/cancel), same pattern as DetailsTab's
@@ -63,12 +62,14 @@ export default function DescriptionTab({ vacancy: v, onUpdate }: { vacancy: Vaca
           {controls}
         </div>
       </div>
-      {/* VACGEN-1 fase 1b: "Genereer met Koios" — resolves the tenant's generation
-          profile, generates a CONCEPT, and only feeds it into this draft on an
-          explicit "Toepassen" (never a silent overwrite of the saved text). */}
-      <VacancyGenerateFlow vacancy={v} onApply={applyGeneratedConcept} />
       {descEditing
-        ? <RichTextEditor key={descKey} value={description} onChange={setDescription} expanded={descExpanded} onToggleExpand={() => setDescExpanded(x => !x)} />
+        ? <RichTextEditor value={description} onChange={setDescription} expanded={descExpanded} onToggleExpand={() => setDescExpanded(x => !x)}
+            // VACGEN-1/KOIOS-GENERATE-1: "Genereer met Koios" now rides the SAME
+            // shared RichTextAssistBar affordance every other rich-text field uses
+            // (mirrors ProfileTab/OverviewTab) instead of the bespoke
+            // VacancyGenerateFlow chip — one generate UX everywhere, editor-gated
+            // like the others (Genereren only while editing).
+            assistGenerate={v.id ? { entity: 'vacancy', id: String(v.id) } : undefined} />
         : (v.description
             // Full height — the block grows with the text; the drawer body scrolls
             // when it overflows (Danny 23-07: no inner 220px scrollbox on a full tab).

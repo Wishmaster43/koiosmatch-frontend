@@ -187,6 +187,8 @@
       "name": "Name",
       "status": "Status",
       "changeStatus": "Status ändern",
+      "logoUpload": "Logo hochladen",
+      "logoUploadFailed": "Logo-Upload fehlgeschlagen",
       "headquarter": "Hauptsitz",
       "street": "Straße",
       "houseNumber": "Nr.",

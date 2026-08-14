@@ -1076,5 +1076,6 @@
     "daysBeforeSuffix_other": "jours à l'avance",
     "fieldAvailableAgain": "Date de disponibilité du candidat",
     "fieldMatchEnd": "Date de fin du match"
-  }
+  },
+  "unassigned": "Non attribué"
 }

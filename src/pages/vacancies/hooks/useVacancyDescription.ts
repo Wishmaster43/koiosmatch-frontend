@@ -24,18 +24,9 @@ export function useVacancyDescription(v: VacancyDetail, onUpdate?: UpdateFn) {
   // because the popped-out window can save this field while the drawer's own
   // copy of the vacancy is still the pre-save one.
   const [savedDescription, setSavedDescription] = useState(v.description ?? '')
-  // VACGEN-1 fase 1b: bumped whenever a generated concept is applied, forcing
-  // RichTextEditor to remount with the new draft — Tiptap's useEditor only reads
-  // `content` at mount time, so a plain setDescription() while already editing
-  // would not otherwise reach the visible editor.
-  const [descKey, setDescKey] = useState(0)
 
   const saveDesc = () => { onUpdate?.(v.id, { description }); setSavedDescription(description); setDescEditing(false) }
   const cancelDesc = () => { setDescription(savedDescription); setDescEditing(false) }
-  // Seed a Koios-generated concept into the draft (opens edit mode if needed) —
-  // never writes through onUpdate directly, so the existing Save button stays
-  // the ONLY path that persists it (no silent overwrite of the saved text).
-  const applyGeneratedConcept = (concept: string) => { setDescription(concept); setDescEditing(true); setDescKey(k => k + 1) }
 
   // V-desc-1 (TEKST-POPOUT-1): the description gets the profile text's own
   // second-screen affordance — one icon in the block's title row, the SAME
@@ -72,6 +63,6 @@ export function useVacancyDescription(v: VacancyDetail, onUpdate?: UpdateFn) {
 
   return {
     descEditing, setDescEditing, descExpanded, setDescExpanded, description, setDescription: changeDescription, saveDesc, cancelDesc,
-    descKey, applyGeneratedConcept, openDescriptionPopout,
+    openDescriptionPopout,
   }
 }

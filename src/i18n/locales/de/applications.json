@@ -55,7 +55,8 @@
     "client": "Kunde",
     "status": "Kandidatenstatus",
     "interview": "Interview",
-    "created": "Erstellt"
+    "created": "Erstellt",
+    "referenceNumber": "Referenznr."
   },
   "kpi": {
     "totalActive": "Aktiv gesamt",
@@ -483,7 +484,16 @@
     "detach": "Entkoppeln",
     "detachReasonPlaceholder": "Warum werden diese Bewerbungen entkoppelt?",
     "detachConfirm": "Entkoppeln",
-    "done": "{{count}} aktualisiert"
+    "done": "{{count}} aktualisiert",
+    "partialResult": "{{updated}} von {{total}} aktualisiert, {{skipped}} übersprungen",
+    "partialResultReasoned": "{{updated}} von {{total}} aktualisiert, {{skipped}} übersprungen ({{breakdown}})",
+    "mutateError": "Aktion fehlgeschlagen. Bitte erneut versuchen.",
+    "skipReasons": {
+      "not_found": "nicht gefunden",
+      "permission_denied": "keine Berechtigung",
+      "already_on_phase": "bereits in dieser Phase",
+      "already_detached": "bereits getrennt"
+    }
   },
   "page": {
     "searchPlaceholder": "Bewerbungen suchen",

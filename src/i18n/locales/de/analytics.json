@@ -60,6 +60,9 @@
     "week": "Woche",
     "month": "Monat"
   },
+  "dashboard": {
+    "vacancies": "Offene Stellen insgesamt"
+  },
   "flow": {
     "title": "Bewerbungs-Flow",
     "subtitle": "Trichter je Phase",

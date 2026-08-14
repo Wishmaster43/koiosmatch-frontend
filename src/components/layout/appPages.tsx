@@ -159,7 +159,10 @@ export function renderPage(activePage: string, { navIntent, goTo, dashView }: { 
     case 'planning':               return <PlanningPage />
 
     // ── Reports hub (analytical) ──────────────────────────────────────────
-    case 'reports':
+    // Bare #reports is now its own KPI overview dashboard (RAPPORTEN-DASHBOARD-1,
+    // Danny 14-08) — it no longer forwards to the first sub-report, so it gets NO
+    // reportId prop and ReportsPage renders the dashboard branch.
+    case 'reports':                return <ReportsPage />
     case 'reports.candidates':     return <ReportsPage reportId="candidates" />
     case 'reports.applications':   return <ReportsPage reportId="applications" />
     case 'reports.customers':      return <ReportsPage reportId="customers" />
@@ -172,6 +175,11 @@ export function renderPage(activePage: string, { navIntent, goTo, dashView }: { 
     case 'reports.intakes':        return <ReportsPage reportId="intakes" />
     case 'reports.outreach':       return <ReportsPage reportId="outreach" />
     case 'reports.sources':        return <ReportsPage reportId="sources" />
+    case 'reports.contacts':       return <ReportsPage reportId="contacts" />
+    case 'reports.locations':      return <ReportsPage reportId="locations" />
+    case 'reports.departments':    return <ReportsPage reportId="departments" />
+    case 'reports.ai':             return <ReportsPage reportId="ai" />
+    case 'reports.workflows':      return <ReportsPage reportId="workflows" />
 
     // ── Shiftmanager module ───────────────────────────────────────────────
     case 'shiftmanager':

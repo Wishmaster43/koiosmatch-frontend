@@ -33,7 +33,7 @@ export default function TaskCard({ t, form, errors, set, types }: {
             <CreatableSelect value={form.type || null} onChange={(v: string) => set('type', v)} allowCreate={false}
               placeholder={t('modal.typePlaceholder')} menuWidth={PICKER_MENU_W}
               style={errors.type ? { ...pickerStyle, borderColor: 'var(--color-danger)' } : pickerStyle}
-              options={types.map(x => ({ value: x.value, label: x.label }))} />
+              options={types.map(x => ({ value: x.value, label: x.label, icon: x.icon ? <span>{x.icon}</span> : undefined }))} />
           </FieldRow>
           <FieldRow label={t('modal.titleLabel')} required>
             <TextField value={form.title} onChange={v => set('title', v)} placeholder={t('modal.titlePlaceholder')} error={errors.title} />

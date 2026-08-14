@@ -12,7 +12,7 @@ import EditableFieldTable from './EditableFieldTable'
 import type { FieldRow } from './EditableFieldTable'
 
 // Same stub the sibling test uses — keeps t() on raw keys and i18n uninitialised.
-vi.mock('@/lib/datetime', () => ({ useDateFormat: () => ({ formatDate: (v: string) => v, formatDateTime: (v: string) => v, locale: 'nl-NL' }) }))
+vi.mock('@/lib/datetime', () => ({ useDateFormat: () => ({ formatDate: (v: string) => v, formatDateTime: (v: string) => v, formatTime: (v: string) => v, locale: 'nl-NL' }) }))
 
 // A row that reports whatever severity the test asked for, for any non-empty value.
 const cocRow = (severity: 'error' | 'warning'): FieldRow => ({

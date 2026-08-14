@@ -254,3 +254,51 @@ describe('DataTable · unknown sort values', () => {
     expect(titles()).toEqual(['B', 'C', 'A'])
   })
 })
+
+// DATATABLE-EXPAND-1: opt-in expandable rows — a chevron column that opens a
+// detail panel <tr> underneath the row.
+describe('DataTable — expandable rows (DATATABLE-EXPAND-1)', () => {
+  it('renders no chevron column and no extra markup when renderExpanded is omitted (byte-identical for existing callers)', () => {
+    render(<DataTable columns={columns} rows={rows} />)
+    expect(screen.queryAllByRole('button', { name: /details/i })).toHaveLength(0)
+    // Two data rows only — no hidden panel rows in the DOM at all.
+    expect(document.querySelectorAll('tbody tr')).toHaveLength(2)
+  })
+
+  it('opens and closes the panel on chevron click, toggling aria-expanded', async () => {
+    const user = userEvent.setup()
+    render(
+      <DataTable columns={columns} rows={rows}
+        renderExpanded={row => <div>Details for {row.name}</div>}
+        expandLabel="Show details" />
+    )
+    const toggles = screen.getAllByRole('button', { name: 'Show details' })
+    expect(toggles).toHaveLength(2)
+    expect(toggles[0]).toHaveAttribute('aria-expanded', 'false')
+    expect(screen.queryByText('Details for Bob')).not.toBeInTheDocument()
+
+    await user.click(toggles[0])
+    expect(toggles[0]).toHaveAttribute('aria-expanded', 'true')
+    expect(screen.getByText('Details for Bob')).toBeInTheDocument()
+    // The second row's panel stays closed independently.
+    expect(screen.queryByText('Details for Ann')).not.toBeInTheDocument()
+
+    await user.click(toggles[0])
+    expect(toggles[0]).toHaveAttribute('aria-expanded', 'false')
+    expect(screen.queryByText('Details for Bob')).not.toBeInTheDocument()
+  })
+
+  it('is keyboard operable — Enter on the focused chevron button toggles the panel', async () => {
+    const user = userEvent.setup()
+    render(
+      <DataTable columns={columns} rows={rows}
+        renderExpanded={row => <div>Details for {row.name}</div>}
+        expandLabel="Show details" />
+    )
+    const toggle = screen.getAllByRole('button', { name: 'Show details' })[0]
+    toggle.focus()
+    expect(toggle).toHaveFocus()
+    await user.keyboard('{Enter}')
+    expect(screen.getByText('Details for Bob')).toBeInTheDocument()
+  })
+})

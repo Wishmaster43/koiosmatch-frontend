@@ -41,7 +41,7 @@ export default function PlanningCard({ t, form, set, priorities, statuses }: {
             <CreatableSelect value={form.priority || null} onChange={(v: string) => set('priority', v)} allowCreate={false}
               clearable clearLabel={t('modal.priority')}
               style={pickerStyle} menuWidth={PICKER_MENU_W}
-              options={priorities.map(x => ({ value: x.value, label: x.label }))} />
+              options={priorities.map(x => ({ value: x.value, label: x.label, icon: x.icon ? <span>{x.icon}</span> : undefined }))} />
           </FieldRow>
           <FieldRow label={t('modal.status')}>
             <CreatableSelect value={form.status || null} onChange={(v: string) => set('status', v)} allowCreate={false}
@@ -50,7 +50,7 @@ export default function PlanningCard({ t, form, set, priorities, statuses }: {
                  'cleared' while the server kept the old status (control round
                  13-08, fake affordance §3). The drawer's DetailsTab agrees. */
               style={pickerStyle} menuWidth={PICKER_MENU_W}
-              options={statuses.map(x => ({ value: x.value, label: x.label }))} />
+              options={statuses.map(x => ({ value: x.value, label: x.label, icon: x.icon ? <span>{x.icon}</span> : undefined }))} />
           </FieldRow>
         </div>
       </div>

@@ -85,6 +85,15 @@ export default function ApplicationsTable({ rows, loading, error, selectedId, on
           <span style={{ fontWeight: 500, color: 'var(--text)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', display: 'block', maxWidth: 150 }} title={r.candidateName}>{r.candidateName}</span>
         </span>
       ) },
+    {
+      // Human-readable reference number (S-00042) — an identifier, so it sits right
+      // after the identity column, exactly where candidates/customers/vacancies/
+      // matches/tasks put theirs. Plain mono text, not the click-to-copy chip: a
+      // button nested inside this row's own click-to-open would double-fire.
+      key: 'referenceNumber', header: t('cols.referenceNumber'), nowrap: true,
+      cellStyle: { color: 'var(--text-muted)', fontSize: 12, fontFamily: 'JetBrains Mono, monospace', fontVariantNumeric: 'tabular-nums' },
+      sortable: true, sortValue: r => r.referenceNumber ?? '', render: r => r.referenceNumber || '—',
+    },
     // Vacancy — single-line clamp so long titles don't blow up the row.
     { key: 'vacancy', header: t('cols.vacancy'), sortable: true, sortValue: r => r.vacancyTitle,
       render: r => (

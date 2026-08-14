@@ -31,6 +31,8 @@ import { useDateFormat } from '@/lib/datetime'
 // title-row badge (§3A(c)) + its own inline picker, extracted into a shared
 // component (§0.3 split, 2026-08-03 — see that file's own docblock).
 import SubEntityStatusTitleRow from './SubEntityStatusTitleRow'
+// K4BLOGO: the location's own real (non-fake) logo upload — see its own docblock.
+import LocationLogoAvatar from './LocationLogoAvatar'
 // §0.3 split (this task): the pager/changelog/merge/archive/delete cluster, shared
 // with DepartmentDetail — see that component's own docblock.
 import SubEntityTitleActions from './SubEntityTitleActions'
@@ -231,12 +233,16 @@ export default function LocationDetail({
       {/* One way back per level: the shared trail replaces SubEntityTab's own button. */}
       <DrillBreadcrumb trail={[{ label: backLabel ?? '', onClick: close }]} current={l.name} />
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
-        {/* JOB-STATUS-1: name + reference chip + status badge/picker, extracted
-            into a shared component (§0.3 split, 2026-08-03 — also adopted by
-            DepartmentDetail, which carried a near-verbatim copy of this block). */}
-        <SubEntityStatusTitleRow id={l.id as Id} name={l.name} referenceNumber={l.referenceNumber}
-          statusId={l.statusId} statusLabel={l.statusLabel} statusColor={l.statusColor}
-          statusOptions={statusOptions} onSave={onSave} />
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, minWidth: 0 }}>
+          {/* K4BLOGO: real upload — the backend persists + serves it via a signed URL. */}
+          <LocationLogoAvatar customerId={customerId} locationId={l.id as Id} logoUrl={l.logoUrl} name={l.name} canUpdate={canUpdate} />
+          {/* JOB-STATUS-1: name + reference chip + status badge/picker, extracted
+              into a shared component (§0.3 split, 2026-08-03 — also adopted by
+              DepartmentDetail, which carried a near-verbatim copy of this block). */}
+          <SubEntityStatusTitleRow id={l.id as Id} name={l.name} referenceNumber={l.referenceNumber}
+            statusId={l.statusId} statusLabel={l.statusLabel} statusColor={l.statusColor}
+            statusOptions={statusOptions} onSave={onSave} />
+        </div>
         {/* §0.3 split: the pager/changelog/merge/archive/delete cluster is the shared
             SubEntityTitleActions (mirrors DepartmentDetail verbatim). Merge/archive are
             hidden without customers.update; merge also needs a second location to merge

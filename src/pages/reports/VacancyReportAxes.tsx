@@ -8,6 +8,7 @@
 import type { CSSProperties } from 'react'
 import { useTranslation } from 'react-i18next'
 import SegmentBars from './SegmentBars'
+import ReportTimeseriesChart from './ReportTimeseriesChart'
 import { gateDrillClick } from './reportDrillGate'
 import type {
   VacanciesReportData, CandidateSegment, CandidateOwnerSegment,
@@ -51,7 +52,6 @@ export default function VacancyReportAxes({ data, onSegment, onBucket }: {
       items={segs.map(x => ({ key: x.owner_id, label: x.name, count: x.count, color: null }))} />
   }
 
-  const seriesMax = data.timeseries.series.reduce((m, p) => Math.max(m, p.value), 0)
   const onSeriesPick = gateDrillClick('vacancies', (dateKey: string) => {
     const pt = data.timeseries.series.find(p => p.date === dateKey)
     if (pt) onBucket(pt)
@@ -62,8 +62,7 @@ export default function VacancyReportAxes({ data, onSegment, onBucket }: {
       {/* Created over time — week/day timeseries, bucket set server-side. */}
       <section>
         <h3 style={{ ...head, marginBottom: 10 }}>{t('vacancies.series')}</h3>
-        <SegmentBars max={seriesMax} onPick={onSeriesPick}
-          items={data.timeseries.series.map(p => ({ key: p.date, label: p.label, count: p.value, color: null }))} />
+        <ReportTimeseriesChart series={data.timeseries.series} onPick={onSeriesPick} />
       </section>
 
       <section>

@@ -1076,5 +1076,6 @@
     "daysBeforeSuffix_other": "Tage im Voraus",
     "fieldAvailableAgain": "Wieder-verfügbar-Datum Kandidat",
     "fieldMatchEnd": "Enddatum Match"
-  }
+  },
+  "unassigned": "Nicht zugewiesen"
 }

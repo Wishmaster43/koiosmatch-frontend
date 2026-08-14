@@ -12,15 +12,16 @@
  * Card bodies live in backofficeLinkCards.tsx (§3 size discipline); this file only
  * wires the app gate + the two mutations (link / sync-now).
  */
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import type { ReactNode } from 'react'
 import { useApps } from '@/context/AppsContext'
-import api from '@/lib/api'
+import api, { unwrap } from '@/lib/api'
 import { notifySuccess, notifyError } from '@/lib/notify'
 import { extractApiError, apiErrorKey } from '@/lib/extractApiError'
 import { useTranslation } from 'react-i18next'
 import { HelloflexCard, ShiftmanagerCard } from './backofficeLinkCards'
-import type { BackofficeLink } from '@/lib/backofficeLink'
+import { backofficeLinkOf } from '@/lib/backofficeLink'
+import type { ApiBackofficeLink, BackofficeLink } from '@/lib/backofficeLink'
 import type { Id } from '@/types/common'
 import type { operations } from '@/types/api-generated'
 
@@ -57,6 +58,47 @@ export default function BackofficeLinksTab({ entity, id, helloflexLink, shiftman
   const showHelloflex = isAppEnabled('hf')
   const showShiftmanager = isAppEnabled('shiftmanager')
 
+  // KOPPELINGEN-REFRESH-1 (Danny 14-08: "hard refresh nodig ... tabje ververste
+  // zichzelf maar werkt nu niet meer"): self-contained refetch, so this tab always
+  // updates after its own mutations regardless of whether the parent drawer wires an
+  // onUpdate callback — the caller changed six times across entities and drifted.
+  // Mirrors the alive-guard pattern from the candidate PDOK poll (IntegrationsTab):
+  // a mount ref re-armed in the effect SETUP (StrictMode double-mount safe), so a
+  // stray response after unmount never sets state.
+  const [linksOverride, setLinksOverride] = useState<{ helloflex: BackofficeLink | null; shiftmanager: BackofficeLink | null } | null>(null)
+  const mountedRef = useRef(true)
+  useEffect(() => {
+    mountedRef.current = true
+    return () => { mountedRef.current = false }
+  }, [])
+  // A drawer switching to a different record (new `id`) must drop the stale
+  // override — otherwise the previous record's refetched links would leak in.
+  useEffect(() => { setLinksOverride(null) }, [entity, id])
+  const refetchLinks = async () => {
+    try {
+      const res = await api.get(`/${entity}/${id}`)
+      if (!mountedRef.current || !res) return
+      const fresh = unwrap<{ backoffice_links?: ApiBackofficeLink[] | null }>(res)
+      // Only a response that actually carries the relation counts as a real
+      // refetch — a response shaped for something else (or a stub without the
+      // field) must never wipe the just-fired optimistic "pending" overlay.
+      if (!fresh || typeof fresh !== 'object' || !Array.isArray(fresh.backoffice_links)) return
+      setLinksOverride({
+        helloflex: backofficeLinkOf(fresh?.backoffice_links, 'helloflex'),
+        shiftmanager: backofficeLinkOf(fresh?.backoffice_links, 'shiftmanager'),
+      })
+      // The refetched record is now the source of truth — drop the optimistic
+      // "pending" overlay so a fast worker's real status (linked/failed) shows.
+      setQueuedStatus({})
+    } catch {
+      // Silent — the optimistic status overlay already reflects the just-fired
+      // action; a failed refetch just keeps showing the last-known link state.
+    }
+  }
+  // Effective links: a completed refetch wins, else whatever the caller passed in.
+  const effectiveHelloflexLink = linksOverride ? linksOverride.helloflex : helloflexLink
+  const effectiveShiftmanagerLink = linksOverride ? linksOverride.shiftmanager : shiftmanagerLink
+
   // Start-linking: the ONE generic POST both systems share, entity-agnostic via
   // the `entity` URL token. Optimistic: a spinner while in flight, then the 202's
   // `pending` snapshot overlays the card locally until the record is refetched
@@ -72,6 +114,10 @@ export default function BackofficeLinksTab({ entity, id, helloflexLink, shiftman
       const { data } = await api.post(`/sync/${entity}/${id}`, body)
       setQueuedStatus(s => ({ ...s, [system]: data?.link?.status ?? 'pending' }))
       notifySuccess(t('backofficeLinks.common.linkStarted'))
+      // KOPPELINGEN-REFRESH-1: pull the real record right after the sync call
+      // resolves, so the card shows the actual linked/failed result without a
+      // hard reload — the async worker often lands the result within this window.
+      await refetchLinks()
     } catch (err) {
       // HF-CONTRACTMAP-1: an unmapped contract form is an honest, actionable notice
       // (points at Settings → HelloFlex), never the raw 409 server message.
@@ -91,7 +137,7 @@ export default function BackofficeLinksTab({ entity, id, helloflexLink, shiftman
   // simply is not offered until the route lands. Add the entity here the day it does.
   const SM_SYNC_ROUTES = ['candidates']
   const canSyncNow = SM_SYNC_ROUTES.includes(entity)
-  const smExternalId = shiftmanagerLink?.status === 'linked' ? shiftmanagerLink.externalId ?? null : null
+  const smExternalId = effectiveShiftmanagerLink?.status === 'linked' ? effectiveShiftmanagerLink.externalId ?? null : null
   const [syncing, setSyncing] = useState(false)
   const onSyncNow = async () => {
     if (!smExternalId || syncing || !canSyncNow) return
@@ -99,6 +145,8 @@ export default function BackofficeLinksTab({ entity, id, helloflexLink, shiftman
     try {
       await api.post(`/sm_${entity}/sync/${smExternalId}`)
       notifySuccess(t('backofficeLinks.shiftmanager.syncSuccess'))
+      // KOPPELINGEN-REFRESH-1: same self-refetch after a manual resync.
+      await refetchLinks()
     } catch (err) {
       notifyError(extractApiError(err, t('backofficeLinks.shiftmanager.syncFailed')))
     } finally {
@@ -108,18 +156,18 @@ export default function BackofficeLinksTab({ entity, id, helloflexLink, shiftman
 
   // Effective status per system: the just-clicked optimistic overlay wins, else
   // the mapped link's real status, else "never attempted" (null).
-  const hfStatus = queuedStatus.helloflex ?? helloflexLink?.status ?? null
-  const smStatus = queuedStatus.shiftmanager ?? shiftmanagerLink?.status ?? null
+  const hfStatus = queuedStatus.helloflex ?? effectiveHelloflexLink?.status ?? null
+  const smStatus = queuedStatus.shiftmanager ?? effectiveShiftmanagerLink?.status ?? null
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
       {children}
       {showHelloflex && (
-        <HelloflexCard status={hfStatus} link={helloflexLink} canLink={canLink}
+        <HelloflexCard status={hfStatus} link={effectiveHelloflexLink} canLink={canLink}
           busy={!!linking.helloflex} onLink={() => onLink('helloflex')} />
       )}
       {showShiftmanager && (
-        <ShiftmanagerCard status={smStatus} link={shiftmanagerLink} canLink={canLink}
+        <ShiftmanagerCard status={smStatus} link={effectiveShiftmanagerLink} canLink={canLink}
           busy={!!linking.shiftmanager} syncing={syncing} canSyncNow={canSyncNow}
           onLink={() => onLink('shiftmanager')} onSyncNow={onSyncNow} />
       )}

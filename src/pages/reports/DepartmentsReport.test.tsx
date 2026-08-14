@@ -51,6 +51,15 @@ function renderReport() {
 const lastDrillParams = () =>
   (getSpy.mock.calls.filter(c => c[0] === '/reports/departments/drill').at(-1)?.[1] as { params: Record<string, unknown> }).params
 
+// The house LineChartCard needs real layout (jsdom has none) so the timeseries
+// wrapper is mocked exactly like WeeklyBarChartCard in TrendsRow.test.tsx: one
+// button per point, same label text, onPick fired with the raw date key.
+vi.mock('./ReportTimeseriesChart', () => ({
+  default: ({ series, onPick }: { series: { date: string; label: string; value: number }[]; onPick?: (date: string) => void }) => (
+    <>{series.map(p => <button key={p.date} onClick={() => onPick?.(p.date)}>{p.label}</button>)}</>
+  ),
+}))
+
 describe('DepartmentsReport (RAPPORTEN-SUITE-2 departments report)', () => {
   beforeEach(() => {
     getSpy.mockReset()

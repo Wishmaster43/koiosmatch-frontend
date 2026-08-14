@@ -14,7 +14,7 @@ import type { FieldRow } from './EditableFieldTable'
 // EditableFieldTable pulls in useDateFormat for its 'date' field type, which
 // transitively imports the real @/i18n setup and initialises it for real (Dutch
 // resources) — stub it so t() stays on raw keys, like every other test in this repo.
-vi.mock('@/lib/datetime', () => ({ useDateFormat: () => ({ formatDate: (v: string) => v, formatDateTime: (v: string) => v, locale: 'nl-NL' }) }))
+vi.mock('@/lib/datetime', () => ({ useDateFormat: () => ({ formatDate: (v: string) => v, formatDateTime: (v: string) => v, formatTime: (v: string) => v, locale: 'nl-NL' }) }))
 
 // The address composite — a fixed shape shared by every 'address' row in the app.
 const addressFields: FieldRow[] = [

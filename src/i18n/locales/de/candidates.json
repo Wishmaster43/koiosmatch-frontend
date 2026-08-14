@@ -701,7 +701,9 @@
     "noAvailability": "Noch keine Ausnahmen erfasst.",
     "availabilityHint": "Standardmäßig ist der Kandidat verfügbar. Erfassen Sie hier Ausnahmen (z. B. Urlaub oder Krankheit).",
     "availDuplicate": "Diese Tageszeit ist für dieses Datum bereits festgelegt.",
-    "notPersistedYet": "Wird noch nicht gespeichert. Das Planungsmodul folgt."
+    "notPersistedYet": "Wird noch nicht gespeichert. Das Planungsmodul folgt.",
+    "moduleNotAvailableTitle": "Planung noch nicht verfügbar",
+    "moduleNotAvailableBody": "Das Planungsmodul existiert noch nicht. Dieser Tab zeigt bald Dienstpläne und Verfügbarkeit."
   },
   "statuses": {
     "actief": "Aktiv",

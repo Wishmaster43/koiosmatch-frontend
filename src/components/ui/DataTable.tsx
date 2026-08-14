@@ -4,7 +4,7 @@ import { ChevronUp, ChevronDown, ChevronsUpDown } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { useVirtualizer } from '@tanstack/react-virtual'
 import { TableRow } from './DataTableRow'
-import { field, compare, checkboxCol, SKELETON_ROWS, skeletonBarWidth, shiftRangeIds } from './dataTableUtils'
+import { field, compare, checkboxCol, expandCol, SKELETON_ROWS, skeletonBarWidth, shiftRangeIds } from './dataTableUtils'
 
 // Re-exported so existing `import { shiftRangeIds } from '.../DataTable'` call sites
 // (incl. the test file) keep working unchanged after the 2026-07-21 utils split.
@@ -35,6 +35,17 @@ export { shiftRangeIds }
  * e.g. to also drive a real server-side `sort_by`/`sort_dir` request, see
  * pages/applications' ApplicationsTable/ApplicationsPage for the reference
  * adoption. Omitting both keeps every other consumer byte-identical.
+ *
+ * Expandable rows (DATATABLE-EXPAND-1, additive): pass `renderExpanded(row)` to
+ * get a chevron column + a detail panel <tr> under the row. Purely opt-in — a
+ * caller that never passes it renders exactly as before (no extra column, no
+ * extra markup). Expand state is private to DataTable (one row open per id at a
+ * time is NOT enforced — multiple rows can be expanded simultaneously, mirroring
+ * how the checkbox column allows multiple selections). Not currently combined
+ * with `scrollParentRef` virtualization by any caller; the virtualized branch
+ * still renders the expanded panel row in normal flow, so it works, but the
+ * virtualizer's own height estimate won't account for the panel's extra height
+ * until the row is measured.
  */
 export type RowId = string | number
 
@@ -97,6 +108,13 @@ interface DataTableProps<Row> {
   // to before this change — every other consumer is untouched.
   sort?: ControlledSort | null
   onSortChange?: (sort: ControlledSort) => void
+  // DATATABLE-EXPAND-1 — additive, backward-compatible expandable-row escape hatch.
+  // When provided, each row gets a chevron button; clicking it toggles a detail
+  // panel <tr> rendered by this function underneath the row.
+  renderExpanded?: (row: Row) => ReactNode
+  // Accessible name for the chevron button (e.g. t('showDetails')). Required
+  // whenever `renderExpanded` is passed — falls back to a generic label if omitted.
+  expandLabel?: string
 }
 
 export default function DataTable<Row>({
@@ -121,8 +139,25 @@ export default function DataTable<Row>({
   estimatedRowHeight = 44,
   sort: sortProp,
   onSortChange,
+  renderExpanded,
+  expandLabel,
 }: DataTableProps<Row>) {
   const { t } = useTranslation('common')
+  // DATATABLE-EXPAND-1: which row ids currently have their panel open. Private
+  // state — the caller only supplies the render function, not the open/closed
+  // bookkeeping (mirrors how selection state stays with the caller but sort
+  // state can stay internal too — this one is simpler, so it always does).
+  const [expandedIds, setExpandedIds] = useState<Set<RowId>>(new Set())
+  const expandable = !!renderExpanded
+  // setExpandedIds (from useState) is referentially stable across renders, so this
+  // callback never busts TableRow's memo regardless of how often DataTable re-renders.
+  const stableToggleExpand = useCallback((id: RowId) => {
+    setExpandedIds(prev => {
+      const next = new Set(prev)
+      if (next.has(id)) next.delete(id); else next.add(id)
+      return next
+    })
+  }, [])
   // DATATABLE-SORT-1: presence of `onSortChange` decides the mode. Uncontrolled
   // keeps its OWN private state (byte-identical to before this change);
   // controlled derives `sort` straight from the caller's prop every render, so
@@ -240,7 +275,7 @@ export default function DataTable<Row>({
     return { position: 'sticky', left, zIndex: 1, background: bg }
   }
 
-  const totalCols = columns.length + (selectable ? 1 : 0)
+  const totalCols = columns.length + (selectable ? 1 : 0) + (expandable ? 1 : 0)
 
   // Virtualized body: two spacer rows keep the scrollbar height correct while only
   // the visible window of real <tr>s renders (sticky header/columns keep working).
@@ -263,6 +298,7 @@ export default function DataTable<Row>({
                 style={{ cursor: 'pointer', accentColor: 'var(--color-primary)' }} aria-label={t('selectAll')} />
             </th>
           )}
+          {expandable && <th style={{ ...expandCol, ...stickyTh }} aria-hidden="true" />}
           {columns.map((col, i) => {
             const active = sort?.key === col.key
             const baseStyle: CSSProperties = { padding: '8px 10px', textAlign: col.align ?? 'left', fontSize: 11,
@@ -311,6 +347,7 @@ export default function DataTable<Row>({
           Array.from({ length: SKELETON_ROWS }).map((_, ri) => (
             <tr key={`skeleton-${ri}`} style={{ borderBottom: '1px solid var(--border)' }}>
               {selectable && <td style={checkboxCol} />}
+              {expandable && <td style={expandCol} />}
               {columns.map((col, ci) => (
                 <td key={col.key} style={{ padding: '10px 10px', ...(col.width ? { minWidth: col.width, width: col.width } : {}) }}>
                   <div className="animate-pulse" style={{ height: 12, borderRadius: 4, background: 'var(--hover-bg)', width: skeletonBarWidth(ri + ci) }} />
@@ -331,7 +368,9 @@ export default function DataTable<Row>({
                   selectable={selectable} stickyOffsets={stickyOffsets}
                   onRowClick={onRowClick ? stableRowClick : undefined} onToggleRow={stableToggleRow}
                   virtualIndex={vi.index} measureElement={rowVirtualizer.measureElement}
-                  selectRowLabel={selectRowLabel} />
+                  selectRowLabel={selectRowLabel} renderExpanded={renderExpanded}
+                  isExpanded={expandedIds.has(id)} onToggleExpand={stableToggleExpand}
+                  expandLabel={expandLabel} totalCols={totalCols} />
               )
             })}
             {paddingBottom > 0 && <tr style={{ height: paddingBottom }}><td colSpan={totalCols} style={{ padding: 0, border: 'none' }} /></tr>}
@@ -345,7 +384,9 @@ export default function DataTable<Row>({
                 isChecked={!!(selectable && selectedIds?.has(id))}
                 selectable={selectable} stickyOffsets={stickyOffsets}
                 onRowClick={onRowClick ? stableRowClick : undefined} onToggleRow={stableToggleRow}
-                selectRowLabel={selectRowLabel} />
+                selectRowLabel={selectRowLabel} renderExpanded={renderExpanded}
+                isExpanded={expandedIds.has(id)} onToggleExpand={stableToggleExpand}
+                expandLabel={expandLabel} totalCols={totalCols} />
             )
           })
         )}

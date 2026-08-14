@@ -55,7 +55,8 @@
     "client": "Client",
     "status": "Candidate status",
     "interview": "Interview",
-    "created": "Created"
+    "created": "Created",
+    "referenceNumber": "Reference no."
   },
   "kpi": {
     "totalActive": "Total active",
@@ -384,7 +385,16 @@
     "detach": "Detach",
     "detachReasonPlaceholder": "Why are these applications being detached?",
     "detachConfirm": "Detach",
-    "done": "{{count}} updated"
+    "done": "{{count}} updated",
+    "partialResult": "{{updated}} of {{total}} updated, {{skipped}} skipped",
+    "partialResultReasoned": "{{updated}} of {{total}} updated, {{skipped}} skipped ({{breakdown}})",
+    "mutateError": "Action failed. Please try again.",
+    "skipReasons": {
+      "not_found": "not found",
+      "permission_denied": "no permission",
+      "already_on_phase": "already on this phase",
+      "already_detached": "already detached"
+    }
   },
   "rejection": {
     "title": "Rejection",

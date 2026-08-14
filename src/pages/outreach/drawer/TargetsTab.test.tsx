@@ -130,8 +130,18 @@ describe('TargetsTab · selection + assign (G29)', () => {
   })
 })
 
-// G30 — the note field + max:2000 validation already exist on the backend as a
-// PLAIN string; this is a plain textarea, never the RichTextEditor.
+// G30 — the note field + max:2000 validation still exist on the backend as a
+// plain `note` string at the same route/body shape; since NOTE-RICH-PARITY-1
+// (Danny 14-08) the field itself is the SAME rich note the candidate drawer
+// uses (RichTextEditor + NoteAssistSection), so its value is HTML — this
+// suite stubs those two exactly like NoteFields.test.tsx (not in scope here).
+vi.mock('@/components/ui/RichTextEditor', () => ({
+  default: ({ value, onChange }: { value?: string; onChange: (v: string) => void }) => (
+    <textarea aria-label="body" value={value ?? ''} onChange={e => onChange(e.target.value)} />
+  ),
+}))
+vi.mock('@/components/drawer/tabs/notes/NoteAssistSection', () => ({ default: () => <div data-testid="assist-stub" /> }))
+
 describe('TargetsTab · per-target note (G30)', () => {
   it('renders nothing extra when no note handler is wired (no fake affordance)', () => {
     render(<TargetsTab targets={[target]} loading={false} error={false} onSetStatus={vi.fn()} onSetOutcome={vi.fn()} />)
@@ -143,18 +153,27 @@ describe('TargetsTab · per-target note (G30)', () => {
     const onSetNote = vi.fn().mockResolvedValue(undefined)
     render(<TargetsTab targets={[target]} loading={false} error={false} onSetStatus={vi.fn()} onSetOutcome={vi.fn()} onSetNote={onSetNote} />)
 
+    // BELLIJST-SCALE-1: the note lives behind the row's expand toggle now.
+    await user.click(screen.getByLabelText('Klik voor details'))
     expect(screen.getByText(nlOutreach.drawer.note.empty)).toBeInTheDocument()
     await user.click(screen.getByRole('button', { name: 'Bewerken' }))
-    await user.type(screen.getByPlaceholderText(nlOutreach.drawer.note.placeholder), 'Bel na 17u terug')
+    // The Koios assist block (Verbeteren/Samenvatten/Actiepunten) is stubbed
+    // above — this suite proves the SAVE seam, NoteAssistSection.test.tsx
+    // already proves the assist modes themselves.
+    expect(screen.getByTestId('assist-stub')).toBeInTheDocument()
+    await user.type(screen.getByLabelText('body'), 'Bel na 17u terug')
     await user.click(screen.getByRole('button', { name: 'Opslaan' }))
 
-    // THE SEAM: exact target id + trimmed note text.
+    // THE SEAM: exact target id + trimmed note text (still the same PATCH body key).
     expect(onSetNote).toHaveBeenCalledWith('t1', 'Bel na 17u terug')
   })
 
-  it('displays an existing note read-only until the pencil is clicked', () => {
+  it('displays an existing note read-only until the pencil is clicked', async () => {
+    const user = userEvent.setup()
     render(<TargetsTab targets={[{ ...target, note: 'Al twee keer gemist' }]} loading={false} error={false}
       onSetStatus={vi.fn()} onSetOutcome={vi.fn()} onSetNote={vi.fn()} />)
+    // BELLIJST-SCALE-1: expand the row first — the note is tucked behind it.
+    await user.click(screen.getByLabelText('Klik voor details'))
     expect(screen.getByText('Al twee keer gemist')).toBeInTheDocument()
   })
 })
@@ -220,5 +239,44 @@ describe('TargetsTab · vacancy match picker is the house CreatableSelect, not a
     await user.click(await screen.findByRole('button', { name: /Verzorgende IG/ }))
 
     expect(screen.getByRole('button', { name: nlOutreach.drawer.matchConfirm })).toBeEnabled()
+  })
+})
+
+// BELLIJST-SCALE-1: search + client-side filters + select-all-on-visible, the
+// fix for "hoe moet een eindgebruiker de onderliggende 400 kandidaten
+// selecteren?" (Danny 14-08). All work on the already-loaded `targets` prop —
+// no extra network call, so these are pure render/interaction assertions.
+describe('TargetsTab · search + client-side filters (BELLIJST-SCALE-1)', () => {
+  it('search narrows the list to matching names only', async () => {
+    const user = userEvent.setup()
+    render(<TargetsTab targets={[target, contactedTarget]} loading={false} error={false} onSetStatus={vi.fn()} onSetOutcome={vi.fn()} />)
+    expect(screen.getByText('Jan Jansen')).toBeInTheDocument()
+    expect(screen.getByText('Fatima Baz')).toBeInTheDocument()
+
+    await user.type(screen.getByLabelText('Zoeken…'), 'fatima')
+    expect(screen.queryByText('Jan Jansen')).toBeNull()
+    expect(screen.getByText('Fatima Baz')).toBeInTheDocument()
+  })
+
+  it('the header checkbox selects exactly the VISIBLE (search-narrowed) rows', async () => {
+    const user = userEvent.setup()
+    const onAssignTargets = vi.fn()
+    render(<TargetsTab targets={[target, contactedTarget]} loading={false} error={false} onSetStatus={vi.fn()} onSetOutcome={vi.fn()}
+      recruiters={[{ value: 'r1', label: 'Nora Recruiter' }]} onAssignTargets={onAssignTargets} />)
+
+    await user.type(screen.getByLabelText('Zoeken…'), 'jan')
+    // Only Jan Jansen's row is visible now — one row checkbox + the select-all checkbox.
+    expect(screen.getAllByRole('checkbox')).toHaveLength(2)
+    await user.click(screen.getByRole('checkbox', { name: 'Selecteer alles' }))
+    // The select-all bar swaps for the assign bar — confirms exactly 1 target got selected
+    // (the row hidden by the search never enters the selection).
+    expect(screen.getByText(nlOutreach.drawer.assign.selected.replace('{{count}}', '1'))).toBeInTheDocument()
+  })
+
+  it('shows the empty-filter state when the search matches nobody', async () => {
+    const user = userEvent.setup()
+    render(<TargetsTab targets={[target]} loading={false} error={false} onSetStatus={vi.fn()} onSetOutcome={vi.fn()} />)
+    await user.type(screen.getByLabelText('Zoeken…'), 'nobody-matches-this')
+    expect(screen.getByText(nlOutreach.drawer.stats.noMatches)).toBeInTheDocument()
   })
 })

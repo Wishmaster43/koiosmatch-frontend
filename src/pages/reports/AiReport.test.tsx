@@ -52,6 +52,15 @@ function renderReport() {
   )
 }
 
+// The house LineChartCard needs real layout (jsdom has none) so the timeseries
+// wrapper is mocked exactly like WeeklyBarChartCard in TrendsRow.test.tsx: one
+// button per point, same label text, onPick fired with the raw date key.
+vi.mock('./ReportTimeseriesChart', () => ({
+  default: ({ series, onPick }: { series: { date: string; label: string; value: number }[]; onPick?: (date: string) => void }) => (
+    <>{series.map(p => <button key={p.date} onClick={() => onPick?.(p.date)}>{p.label}</button>)}</>
+  ),
+}))
+
 describe('AiReport (RAPPORTEN-SUITE-2 ai report — no drill endpoint)', () => {
   beforeEach(() => { getSpy.mockReset() })
 

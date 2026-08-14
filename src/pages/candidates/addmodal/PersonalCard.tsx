@@ -21,11 +21,15 @@ export default function PersonalCard({ form, errors, set, isReq, genderOptions }
     <div style={{ gridColumn: '1 / -1' }}>
       <div style={cardHead}>{t('modal.fields.cardPersonal')}</div>
       <div style={cardBox}>
-        <div style={row('2fr 1fr 2fr')}>
-          <CvField name="firstName" label={t('modal.fields.firstName')} required={isReq('firstName')}>
-            <TextField value={form.firstName} onChange={v => set('firstName', v)} placeholder={t('modal.fields.firstName')} error={errors.firstName} />
-            {errors.firstName && <div style={{ fontSize: 11, color: 'var(--color-danger)', marginTop: 3 }}>{t('common:required')}</div>}
-          </CvField>
+        {/* KLANT-LAYOUT-4 canon (mirrors CustomerAddressCard/CustomerCompanyCard,
+            14-08): first name owns its own full row, the short "tussenvoegsel"
+            pairs with last name below it, exactly like street-own-row /
+            houseNumber+suffix-paired. No field added or removed. */}
+        <CvField name="firstName" label={t('modal.fields.firstName')} required={isReq('firstName')}>
+          <TextField value={form.firstName} onChange={v => set('firstName', v)} placeholder={t('modal.fields.firstName')} error={errors.firstName} />
+          {errors.firstName && <div style={{ fontSize: 11, color: 'var(--color-danger)', marginTop: 3 }}>{t('common:required')}</div>}
+        </CvField>
+        <div style={row('1fr 2fr')}>
           <Field label={t('modal.fields.middleName')}>
             <TextField value={form.middleName} onChange={v => set('middleName', v)} placeholder="van" />
           </Field>

@@ -60,6 +60,9 @@
     "week": "Week",
     "month": "Month"
   },
+  "dashboard": {
+    "vacancies": "Total vacancies"
+  },
   "flow": {
     "title": "Application flow",
     "subtitle": "Funnel per stage",

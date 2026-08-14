@@ -111,6 +111,9 @@ export interface Location {
   // EXTRACT-1: the backoffice links (Koppelingen sub-tab).
   helloflexLink: BackofficeLink | null
   shiftmanagerLink: BackofficeLink | null
+  // K4BLOGO: this location's own logo — a fresh short-lived signed URL, never
+  // stored client-side beyond the current read (mirrors the tenant logo model).
+  logoUrl: string | null
   name: string
   street: string
   houseNumber: string
@@ -346,6 +349,8 @@ export interface ApiLocation {
   cost_center?: string; billing_email?: string
   // LOCATIE-OMSCHRIJVING-1 (Danny 02-08): free company text, same shape as customers.description.
   description?: string
+  // K4BLOGO: signed download URL, freshly minted on every read — never a stored path.
+  logo_url?: string | null
   branch_ids?: Id[]; branches?: { id?: Id; name?: string }[]
   branch_inherited?: boolean; effective_branches?: { id?: Id; name?: string }[]
   departments?: ApiDepartment[]; contacts?: ApiContact[]

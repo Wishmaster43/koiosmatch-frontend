@@ -1,60 +1,26 @@
 /**
- * PlanningTab — audit R1 regression: this tab's fields (roles/pools/shift-type/
- * driving-licences/info) have no backend save path at all (no PATCH/PUT writes
- * `candidate_planning_settings`, only a read-side resource exists) — a recruiter
- * editing them used to silently lose the change on close. This now gates the
- * whole tab read-only (every control disabled) with one calm notice, instead of
- * inventing an endpoint. Covers: the notice renders, and every interactive
- * control is disabled.
+ * PlanningTab — fake-affordance sweep (14-08): the previous version rendered a
+ * whole screen of roles/pools/shift-type/driving-licence pickers, all permanently
+ * disabled because no PATCH/PUT endpoint writes `candidate_planning_settings`
+ * (audit R1, 2026-07-17). A screen full of dead greyed-out controls is a worse
+ * signal than a plain notice, so this now renders ONE calm empty state instead.
+ * Covers: the notice renders, and none of the old dead controls exist in the DOM.
  */
-import { describe, it, expect, vi } from 'vitest'
+import { describe, it, expect } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import PlanningTab from './PlanningTab'
-import type { Candidate } from '@/types/candidate'
 
-vi.mock('@/lib/useFunctions', () => ({ useFunctions: () => ({ functions: ['Verzorgende IG', 'Verpleegkundige'] }) }))
-vi.mock('@/lib/usePools', () => ({ usePools: () => ({ pools: ['Pool Noord', 'Pool Zuid'] }) }))
-// LOOKUP-ICON-1: useDriverLicenses now returns full {value,label,icon} objects.
-vi.mock('@/lib/useDriverLicenses', () => ({ useDriverLicenses: () => ({ licenses: [{ value: 'B', label: 'B' }, { value: 'BE', label: 'BE' }] }) }))
 
-const candidate = (planningSettings?: Record<string, unknown>): Candidate =>
-  ({ id: 'cand-1', planningSettings } as unknown as Candidate)
-
-describe('PlanningTab · not-yet-persisted gate (CMFE audit R1)', () => {
-  it('shows the calm notice explaining nothing here saves yet', () => {
-    render(<PlanningTab c={candidate()} />)
-    expect(screen.getByText('planning.notPersistedYet')).toBeInTheDocument()
+describe('PlanningTab · module-not-available notice', () => {
+  it('shows the calm notice that the planning module is not available yet', () => {
+    render(<PlanningTab />)
+    expect(screen.getByText('planning.moduleNotAvailableTitle')).toBeInTheDocument()
+    expect(screen.getByText('planning.moduleNotAvailableBody')).toBeInTheDocument()
   })
 
-  it('disables every role/pool/shift-type chip', () => {
-    render(<PlanningTab c={candidate({ roles: ['Verzorgende IG'], pools: ['Pool Noord'] })} />)
-    expect(screen.getByRole('button', { name: 'Verzorgende IG' })).toBeDisabled()
-    expect(screen.getByRole('button', { name: 'Verpleegkundige' })).toBeDisabled()
-    expect(screen.getByRole('button', { name: 'Pool Noord' })).toBeDisabled()
-    expect(screen.getByRole('button', { name: 'Pool Zuid' })).toBeDisabled()
-    expect(screen.getByRole('button', { name: 'planning.eveningShift' })).toBeDisabled()
-    expect(screen.getByRole('button', { name: 'planning.dayShift' })).toBeDisabled()
-    expect(screen.getByRole('button', { name: 'planning.nightShift' })).toBeDisabled()
-  })
-
-  it('disables the roles/pools "all/none" shortcut buttons', () => {
-    render(<PlanningTab c={candidate()} />)
-    // One "common:all" shortcut for roles, one for pools — both must be disabled.
-    const shortcuts = screen.getAllByRole('button', { name: 'common:all' })
-    expect(shortcuts).toHaveLength(2)
-    shortcuts.forEach(btn => expect(btn).toBeDisabled())
-  })
-
-  it('disables the planning-info text input', () => {
-    render(<PlanningTab c={candidate({ info: 'Alleen dagdienst' })} />)
-    const input = screen.getByLabelText('planning.planningInfo') as HTMLInputElement
-    expect(input).toBeDisabled()
-    expect(input.value).toBe('Alleen dagdienst')
-  })
-
-  it('disables the "add driving licence" trigger and any already-selected licence chip', () => {
-    render(<PlanningTab c={candidate({ drivingLicences: ['B'] })} />)
-    expect(screen.getByRole('button', { name: /planning.addLicense/ })).toBeDisabled()
-    expect(screen.getByRole('button', { name: 'common:close' })).toBeDisabled()
+  it('renders no dead roles/pools/shift-type/licence controls', () => {
+    render(<PlanningTab />)
+    expect(screen.queryByRole('button')).not.toBeInTheDocument()
+    expect(screen.queryByRole('textbox')).not.toBeInTheDocument()
   })
 })

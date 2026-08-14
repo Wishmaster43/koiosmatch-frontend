@@ -1076,5 +1076,6 @@
     "daysBeforeSuffix_other": "dagen van tevoren",
     "fieldAvailableAgain": "Weer-beschikbaar-datum kandidaat",
     "fieldMatchEnd": "Einddatum match"
-  }
+  },
+  "unassigned": "Niet toegewezen"
 }

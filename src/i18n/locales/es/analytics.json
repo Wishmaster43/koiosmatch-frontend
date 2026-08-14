@@ -60,6 +60,9 @@
     "week": "Semana",
     "month": "Mes"
   },
+  "dashboard": {
+    "vacancies": "Total de vacantes"
+  },
   "flow": {
     "title": "Flujo de candidaturas",
     "subtitle": "Embudo por fase",

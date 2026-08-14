@@ -73,6 +73,9 @@ function normalize(raw: unknown, fallback: TaskLookupItem[]): TaskLookupItem[] {
       label: String(it.label ?? it.name ?? it.value ?? it.key),
       // eslint-disable-next-line no-restricted-syntax -- DATA fallback, not a UI colour choice
       color: (it.color as string) ?? '#6B7280',
+      // icon travels with the lookup (BE task-types R-2) — dropping it here was the
+      // dead seam that kept the lookup's icon out of every picker (control round).
+      icon: typeof it.icon === 'string' && it.icon ? it.icon : undefined,
       is_done: truthy(it.is_done),
       is_default: truthy(it.is_default),
     }))

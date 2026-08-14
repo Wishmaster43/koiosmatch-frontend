@@ -8,7 +8,7 @@ import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import VacancyNotesPopout from './VacancyNotesPopout'
 
-vi.mock('@/lib/datetime', () => ({ useDateFormat: () => ({ formatDate: (v: string) => v, formatDateTime: (v: string) => v, locale: 'nl-NL' }) }))
+vi.mock('@/lib/datetime', () => ({ useDateFormat: () => ({ formatDate: (v: string) => v, formatDateTime: (v: string) => v, formatTime: (v: string) => v, locale: 'nl-NL' }) }))
 vi.mock('@/lib/useNoteTypes', () => ({ useNoteTypes: () => ({ types: [], writableTypes: [] }), SYSTEM_NOTE_TYPES: new Set() }))
 vi.mock('@/context/AuthContext', () => ({ useAuth: () => ({ user: { name: 'Koios' }, hasPermission: () => false }) }))
 vi.mock('./hooks/usePopoutVacancyNotes', () => ({ usePopoutVacancyNotes: () => ({ notes: [], addNote: vi.fn() }) }))

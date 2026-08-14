@@ -14,7 +14,7 @@ import userEvent from '@testing-library/user-event'
 import NoticePeriodHint from './NoticePeriodHint'
 import { deriveAvailableFrom } from './noticePeriod'
 
-vi.mock('@/lib/datetime', () => ({ useDateFormat: () => ({ formatDate: (v: string) => v, formatDateTime: (v: string) => v, locale: 'nl-NL' }) }))
+vi.mock('@/lib/datetime', () => ({ useDateFormat: () => ({ formatDate: (v: string) => v, formatDateTime: (v: string) => v, formatTime: (v: string) => v, locale: 'nl-NL' }) }))
 
 const NOW = new Date(2026, 7, 9, 12, 0, 0) // 09-08-2026, local noon
 

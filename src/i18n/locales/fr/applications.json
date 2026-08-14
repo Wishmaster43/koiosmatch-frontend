@@ -55,7 +55,8 @@
     "client": "Client",
     "status": "Statut du candidat",
     "interview": "Entretien",
-    "created": "Créé le"
+    "created": "Créé le",
+    "referenceNumber": "N° de référence"
   },
   "kpi": {
     "totalActive": "Total actives",
@@ -483,7 +484,16 @@
     "detach": "Dissocier",
     "detachReasonPlaceholder": "Pourquoi ces candidatures sont-elles dissociées ?",
     "detachConfirm": "Dissocier",
-    "done": "{{count}} mis(es) à jour"
+    "done": "{{count}} mis(es) à jour",
+    "partialResult": "{{updated}} sur {{total}} mis à jour, {{skipped}} ignorés",
+    "partialResultReasoned": "{{updated}} sur {{total}} mis à jour, {{skipped}} ignorés ({{breakdown}})",
+    "mutateError": "L'action a échoué. Veuillez réessayer.",
+    "skipReasons": {
+      "not_found": "introuvable",
+      "permission_denied": "aucune autorisation",
+      "already_on_phase": "déjà à cette phase",
+      "already_detached": "déjà détaché"
+    }
   },
   "page": {
     "searchPlaceholder": "Rechercher des candidatures",

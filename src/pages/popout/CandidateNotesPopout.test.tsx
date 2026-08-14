@@ -14,7 +14,7 @@ import { noteDraftTopic } from '@/lib/secondScreen'
 // bootstrap (`src/i18n`) for LOCALE_BY_LANG — mocked here so this test, like
 // CommunicationTab.test.tsx, stays on react-i18next's key-fallback behaviour
 // (no real translation resources loaded) instead of rendering real Dutch copy.
-vi.mock('@/lib/datetime', () => ({ useDateFormat: () => ({ formatDate: (v: string) => v, formatDateTime: (v: string) => v, locale: 'nl-NL' }) }))
+vi.mock('@/lib/datetime', () => ({ useDateFormat: () => ({ formatDate: (v: string) => v, formatDateTime: (v: string) => v, formatTime: (v: string) => v, locale: 'nl-NL' }) }))
 vi.mock('@/lib/useNoteTypes', () => ({ useNoteTypes: () => ({ types: [], writableTypes: [] }), SYSTEM_NOTE_TYPES: new Set(['status_change']) }))
 vi.mock('@/lib/useLastContactTypes', () => ({ useLastContactTypes: () => ({ types: [] }) }))
 vi.mock('@/context/AuthContext', () => ({ useAuth: () => ({ hasPermission: () => false }) }))

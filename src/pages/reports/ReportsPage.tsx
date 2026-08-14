@@ -5,10 +5,25 @@
  * active report from the route key handed down by appPages (#reports.<id>) and
  * renders it full-page. The shared period control still travels through the
  * existing `tabsSlot` seam so every report keeps its props and layout unchanged.
+ *
+ * Right-hand filter panel (Danny 14-08: "elke pagina wordt een dashboardpagina
+ * met filtermenu rechts"). Every report registers ONE group into the shared
+ * `RightPanelContext` — the same panel DashboardLayout already renders for every
+ * other page (§0 consistency) — with ONLY the period, the one filter the
+ * `/reports/*` endpoints actually read today. No other dimension is registered:
+ * the server ignores anything but `period`/`from`/`to`/`bucket`, so a group that
+ * LOOKED like a real filter here would silently do nothing (an honesty finding).
+ * `buildReportQueryParams` (./reportFilterParams, own unit test) is the single
+ * seam that turns panel state into request params — enabling a real server-side
+ * filter later is one line there, not a new param sprinkled across 17 report
+ * hooks. Each report's own `use<X>Report` hook still builds its own `api.get`
+ * call unchanged; this page only owns the panel and the period it feeds.
  */
-import { useId, useState } from 'react'
+import { useEffect, useId, useMemo, useState } from 'react'
 import type { ComponentType, ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
+import { useRightPanel } from '@/context/RightPanelContext'
+import type { ReportFilterGroup } from '@/types/reports'
 import CandidatesReport from './CandidatesReport'
 import ApplicationsReport from './ApplicationsReport'
 import CustomersReport from './CustomersReport'
@@ -21,7 +36,13 @@ import MatchesReport from './MatchesReport'
 import IntakesReport from './IntakesReport'
 import OutreachReport from './OutreachReport'
 import SourcesReport from './SourcesReport'
+import ContactsReport from './ContactsReport'
+import LocationsReport from './LocationsReport'
+import DepartmentsReport from './DepartmentsReport'
+import AiReport from './AiReport'
+import WorkflowsReport from './WorkflowsReport'
 import CreatableSelect from '@/components/ui/CreatableSelect'
+import ReportsDashboard from './ReportsDashboard'
 import { REPORT_IDS } from './reportIds'
 import type { ReportId } from './reportIds'
 import type { ReportPeriod } from '@/types/analytics'
@@ -45,6 +66,11 @@ const REPORTS: Record<ReportId, ReportComponent> = {
   intakes:       IntakesReport,
   outreach:      OutreachReport,
   sources:       SourcesReport,
+  contacts: ContactsReport,
+  locations: LocationsReport,
+  departments: DepartmentsReport,
+  ai: AiReport,
+  workflows: WorkflowsReport,
 }
 
 export default function ReportsPage({ reportId }: { reportId?: string }) {
@@ -53,12 +79,18 @@ export default function ReportsPage({ reportId }: { reportId?: string }) {
   // Names the period picker for the button-based CreatableSelect below (a <button>
   // isn't labelable by htmlFor — see the component's own doc comment).
   const periodLabelId = useId()
+  const { registerFilters, unregisterFilters } = useRightPanel()
 
-  // Resolve the active report; an unknown or absent id (bare #reports) falls
-  // back to the FIRST report so a stale deep-link still lands somewhere real.
-  const active: ReportId = (REPORT_IDS as readonly string[]).includes(reportId ?? '')
-    ? (reportId as ReportId)
-    : REPORT_IDS[0]
+  // A bare #reports (no reportId) is now its own KPI overview dashboard
+  // (RAPPORTEN-DASHBOARD-1) — it no longer forwards to the first sub-report.
+  // Only an UNKNOWN id (a genuinely stale deep-link) still falls back to the
+  // first report; the root itself renders the dashboard branch below.
+  const isRoot = reportId == null
+  const active: ReportId = isRoot
+    ? REPORT_IDS[0]
+    : (REPORT_IDS as readonly string[]).includes(reportId)
+      ? (reportId as ReportId)
+      : REPORT_IDS[0]
   const Report = REPORTS[active]
 
   // Shared period control, top-right. Passed through `tabsSlot` so each report
@@ -85,9 +117,38 @@ export default function ReportsPage({ reportId }: { reportId?: string }) {
     </div>
   )
 
+  // Right-hand filter panel (DashboardLayout renders whatever is registered
+  // here). ONE group, the period — the only dimension `/reports/*` reads
+  // today (see the file-top comment). `noChip` keeps the always-on period
+  // value out of the removable-chip row (there is nothing honest to "remove"
+  // to — every report always has a period). `buildReportQueryParams` shows,
+  // in one place, exactly which of this group's state reaches the server.
+  const panelGroups: ReportFilterGroup[] = useMemo(() => [{
+    key: 'period',
+    label: t('period.label'),
+    type: 'radio',
+    noChip: true,
+    selected: [period],
+    onToggle: (v: string | number) => setPeriod(String(v) as ReportPeriod),
+    options: [
+      { value: 'day', label: t('period.day') },
+      { value: 'week', label: t('period.week') },
+      { value: 'month', label: t('period.month') },
+    ],
+  }], [t, period])
+
+  useEffect(() => {
+    registerFilters('reports-page', panelGroups)
+    return () => unregisterFilters('reports-page')
+  }, [panelGroups, registerFilters, unregisterFilters])
+
   return (
     <div className="p-6">
-      <Report period={period} tabsSlot={periodBar} />
+      {/* Bare root → the KPI overview dashboard; a real sub-route id → its report,
+          unchanged (RAPPORTEN-DASHBOARD-1). Both still get the shared period bar. */}
+      {isRoot
+        ? <ReportsDashboard period={period} tabsSlot={periodBar} />
+        : <Report period={period} tabsSlot={periodBar} />}
     </div>
   )
 }

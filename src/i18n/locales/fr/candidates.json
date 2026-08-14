@@ -701,7 +701,9 @@
     "noAvailability": "Aucune exception enregistrée pour l'instant.",
     "availabilityHint": "Par défaut, le candidat est disponible. Enregistrez ici les exceptions (p. ex. congés ou maladie).",
     "availDuplicate": "Cette partie de journée est déjà définie pour cette date.",
-    "notPersistedYet": "Pas encore enregistré. Le module de planification arrive."
+    "notPersistedYet": "Pas encore enregistré. Le module de planification arrive.",
+    "moduleNotAvailableTitle": "Planification pas encore disponible",
+    "moduleNotAvailableBody": "Le module de planification n'existe pas encore. Cet onglet affichera bientôt les plannings et les disponibilités."
   },
   "statuses": {
     "actief": "Actif",

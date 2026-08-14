@@ -88,7 +88,7 @@ export function CopyableValue({ value, copyLabel, copiedMessage }: { value: stri
   )
 }
 
-export function VersionList({ versions, onRestore }: { versions?: Version[]; onRestore: (v: Version) => void }) {
+export function VersionList({ versions, onRestore }: { versions?: Version[]; onRestore?: (v: Version) => void }) {
   const { t } = useTranslation('workflows')
   const { formatDateTime } = useDateFormat()
   const [open, setOpen] = useState(false)
@@ -109,7 +109,7 @@ export function VersionList({ versions, onRestore }: { versions?: Version[]; onR
               <span style={{ color: 'var(--text-muted)' }}>
                 v{v.version ?? i + 1} — {v.created_at ? formatDateTime(v.created_at) : ''}
               </span>
-              <button onClick={() => onRestore(v)}
+              <button onClick={() => onRestore?.(v)}
                 style={{ fontSize: 11, color: 'var(--color-primary-text)', background: 'none', border: 'none', cursor: 'pointer', padding: '1px 5px' }}>
                 {t('ai.restore')}
               </button>
@@ -123,7 +123,9 @@ export function VersionList({ versions, onRestore }: { versions?: Version[]; onR
 
 export function TextEditor({ value, onChange, onSave, saving, saved, versions, onRestore, placeholder, height = 220 }: {
   value?: string; onChange: (v: string) => void; onSave?: () => void; saving?: boolean; saved?: boolean
-  versions?: Version[]; onRestore: (v: Version) => void; placeholder?: string; height?: number
+  // FAKE-AFFORDANCE (14-08): optional — a caller with no versions endpoint (e.g.
+  // KnowledgeTab) omits both rather than pass a no-op restore handler.
+  versions?: Version[]; onRestore?: (v: Version) => void; placeholder?: string; height?: number
 }) {
   return (
     <div>

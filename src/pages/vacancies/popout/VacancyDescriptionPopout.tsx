@@ -44,11 +44,9 @@ export default function VacancyDescriptionPopout({ id }: { id: string | undefine
       loadingLabel={t('common:loading')} errorLabel={t('popout.loadError')} retryLabel={t('common:error.retry')}
       name={vacancy?.title ?? ''} initials={vacancy?.initials ?? ''} subtitle={t('details.description')}
     >
-      {/* VACGEN-1 mirrors the drawer's own generate path: entity 'vacancy' is
-          already known to /ai/koios/generate — same review→Toepassen flow, though
-          this popout rides RichTextEditor's own generic assistGenerate (the richer
-          VacancyGenerateFlow with its profile-transparency chip stays the drawer's
-          own affordance — see TextPopoutEditor's docblock). */}
+      {/* VACGEN-1: same generate path as the drawer's own DescriptionTab — both
+          now ride RichTextEditor's shared generic assistGenerate, entity
+          'vacancy' — one Koios-generate UX everywhere, no bespoke chip. */}
       <TextPopoutEditor value={text ?? ''} onChange={change} onSave={save} dirty={dirty}
         generate={id ? { entity: 'vacancy', id } : undefined} />
     </PopoutShell>

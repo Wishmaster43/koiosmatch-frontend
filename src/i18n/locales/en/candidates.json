@@ -724,7 +724,9 @@
     "noAvailability": "No exceptions recorded yet.",
     "availabilityHint": "By default the candidate is available. Record exceptions here (e.g. holiday or illness).",
     "availDuplicate": "This day-part is already set for this date.",
-    "notPersistedYet": "Not saved yet. The planning module is coming."
+    "notPersistedYet": "Not saved yet. The planning module is coming.",
+    "moduleNotAvailableTitle": "Planning not available yet",
+    "moduleNotAvailableBody": "The planning module does not exist yet. This tab will show scheduling and availability once it ships."
   },
   "statuses": {
     "actief": "Active",

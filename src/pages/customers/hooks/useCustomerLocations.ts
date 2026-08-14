@@ -187,6 +187,21 @@ export async function restoreLocation(customerId: Id, id: Id): Promise<Location>
 }
 
 /**
+ * uploadLocationLogo — K4BLOGO: POST …/locations/{id}/logo (multipart), replacing
+ * whatever logo existed. The BE returns only `{ logo_url }` (a fresh signed URL,
+ * never the whole location), so the caller merges it into its own row rather than
+ * expecting a full record back. Standalone (mirrors archiveLocation/restoreLocation
+ * above) — fired from the drill-down's own title row, several hops from the hook
+ * instance CustomerDrawer owns.
+ */
+export async function uploadLocationLogo(customerId: Id, id: Id, file: File): Promise<string> {
+  const body = new FormData()
+  body.append('logo', file)
+  const res = await api.post(`/customers/${customerId}/locations/${id}/logo`, body)
+  return unwrap<{ logo_url?: string }>(res).logo_url ?? ''
+}
+
+/**
  * useArchivedCustomerLocations — the ARCHIVED-ONLY sub-list behind the panel's
  * "Gearchiveerd" quick-view. A separate, independent fetch (never merged into the
  * live `useCustomerLocations` state above) so every OTHER consumer of the live

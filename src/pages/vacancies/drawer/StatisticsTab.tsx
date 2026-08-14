@@ -44,7 +44,10 @@ export default function StatisticsTab({ vacancy: v, onNavigateTab }: { vacancy: 
   const { formatDate, formatDateTime } = useDateFormat()
 
   const byPhase = (v.applicationsByPhase ?? {}) as Record<string, number>
-  const applied = byPhase.applied ?? v.applicationsCount ?? 0
+  // "Gesolliciteerd → aangenomen" reads EVERYONE who applied against those hired —
+  // not only the people still sitting in the 'applied' phase (they moved on, they
+  // did not disappear). The phase bucket is the fallback when no total is known.
+  const applied = v.applicationsCount ?? byPhase.applied ?? 0
   const hired = byPhase.hired ?? 0
   const totalApps = v.applicationsCount ?? 0
   // VACANCY-LEADS-COUNT-1: leadsCount is null until the backend computes a real
@@ -73,6 +76,15 @@ export default function StatisticsTab({ vacancy: v, onNavigateTab }: { vacancy: 
     .filter(d => d.value > 0)
   const jumpToPhase = (stage: string) => navigate('applications', { stage, vacancy: String(v.id) })
 
+  // APPLIED-VS-HIRED-1: the raw counting pair behind the conversionRate % above.
+  // Reuses the SAME t() key the % tile already labels its sub with ('Applied →
+  // hired', all 5 locales) so no new translation is added — only render it when
+  // both sides are real (the applied/hired vars above never fabricate a number,
+  // but an empty byPhase means neither side is actually known yet).
+  const hasApplied = Object.prototype.hasOwnProperty.call(byPhase, 'applied') || totalApps > 0
+  const hasHired = Object.prototype.hasOwnProperty.call(byPhase, 'hired')
+  const appliedHiredPair = hasApplied && hasHired ? `${applied} → ${hired}` : null
+
   return (
     <div>
       <StatsTab
@@ -94,6 +106,8 @@ export default function StatisticsTab({ vacancy: v, onNavigateTab }: { vacancy: 
         overview={{
           title: t('statistics.overviewTitle'),
           rows: [
+            // APPLIED-VS-HIRED-1: the honest raw pair, only when both sides are known.
+            ...(appliedHiredPair ? [[t('statistics.appliedToHired'), appliedHiredPair] as [string, string]] : []),
             [t('statistics.createdOn'), v.created ? formatDate(v.created) : '—'],
             [t('statistics.lastActivity'), lastActivity ? formatDateTime(lastActivity) : '—'],
             // V-stats-1: Leads deep-links to Kandidaten zoeken — real, keyboard-

@@ -60,6 +60,9 @@
     "week": "Week",
     "month": "Maand"
   },
+  "dashboard": {
+    "vacancies": "Totaal vacatures"
+  },
   "flow": {
     "title": "Sollicitatie-flow",
     "subtitle": "Trechter per fase",

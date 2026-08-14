@@ -18,6 +18,7 @@ import type { DrillSpec } from './ReportDrillDrawer'
 import { useMatchesReport } from './useMatchesReport'
 import { gateDrillClick } from './reportDrillGate'
 import SegmentBars from './SegmentBars'
+import ReportTimeseriesChart from './ReportTimeseriesChart'
 import { useDateFormat } from '@/lib/datetime'
 import type { ReportPeriod, CandidateTimeseriesPoint } from '@/types/analytics'
 
@@ -98,7 +99,6 @@ export default function MatchesReport({ period, tabsSlot }: { period: ReportPeri
     adviceEndpoint: '/reports/matches/advice',
     adviceParams: { date: pt.date, ...(data?.timeseries.bucket === 'week' ? { bucket: 'week' } : {}), period },
   })
-  const seriesMax = (data?.timeseries.series ?? []).reduce((m, p) => Math.max(m, p.value), 0)
   const onSeriesPick = gateDrillClick('matches', (dateKey: string) => {
     const pt = data?.timeseries.series.find(p => p.date === dateKey)
     if (pt) openBucket(pt)
@@ -181,8 +181,7 @@ export default function MatchesReport({ period, tabsSlot }: { period: ReportPeri
               every bar drills on its own date key (portie 7). */}
           <div style={{ background: 'var(--surface)', borderRadius: 12, border: '1px solid var(--border)', padding: 20, marginBottom: 16 }}>
             <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)', marginBottom: 12 }}>{t('matches.series')}</div>
-            <SegmentBars max={seriesMax} onPick={onSeriesPick}
-              items={data.timeseries.series.map(p => ({ key: p.date, label: p.label, count: p.value, color: null }))} />
+            <ReportTimeseriesChart series={data.timeseries.series} onPick={onSeriesPick} />
           </div>
 
           {/* Soort-as (MATCH-SOORT-1): by_contract_form bars, sums to total incl. the

@@ -55,7 +55,8 @@
     "client": "Cliente",
     "status": "Estado del candidato",
     "interview": "Entrevista",
-    "created": "Creado"
+    "created": "Creado",
+    "referenceNumber": "N.º de referencia"
   },
   "kpi": {
     "totalActive": "Total activas",
@@ -483,7 +484,16 @@
     "detach": "Desvincular",
     "detachReasonPlaceholder": "¿Por qué se están desvinculando estas candidaturas?",
     "detachConfirm": "Desvincular",
-    "done": "{{count}} actualizado(s)"
+    "done": "{{count}} actualizado(s)",
+    "partialResult": "{{updated}} de {{total}} actualizados, {{skipped}} omitidos",
+    "partialResultReasoned": "{{updated}} de {{total}} actualizados, {{skipped}} omitidos ({{breakdown}})",
+    "mutateError": "La acción falló. Vuelve a intentarlo.",
+    "skipReasons": {
+      "not_found": "no encontrado",
+      "permission_denied": "sin permiso",
+      "already_on_phase": "ya en esta fase",
+      "already_detached": "ya desvinculado"
+    }
   },
   "page": {
     "searchPlaceholder": "Buscar candidaturas",

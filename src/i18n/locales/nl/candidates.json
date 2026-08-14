@@ -724,7 +724,9 @@
     "noAvailability": "Nog geen uitzonderingen vastgelegd.",
     "availabilityHint": "Standaard is de kandidaat beschikbaar. Leg hier uitzonderingen vast (bv. vakantie of ziekte).",
     "availDuplicate": "Dit dagdeel is al vastgelegd voor deze datum.",
-    "notPersistedYet": "Wordt nog niet opgeslagen. De planningmodule volgt."
+    "notPersistedYet": "Wordt nog niet opgeslagen. De planningmodule volgt.",
+    "moduleNotAvailableTitle": "Planning nog niet beschikbaar",
+    "moduleNotAvailableBody": "De planningmodule bestaat nog niet. Deze tab toont hier binnenkort roosters en beschikbaarheid."
   },
   "statuses": {
     "actief": "Actief",

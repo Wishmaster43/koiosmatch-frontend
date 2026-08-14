@@ -126,8 +126,9 @@ export default function DetailsTab({ task, onUpdate }: { task: TaskDetail; onUpd
   const saveDesc = () => { onUpdate({ description: descDraft }); setDescEditing(false) }
   const cancelDesc = () => setDescEditing(false)
 
-  // Label only — `icon` holds a lucide NAME, never prefix it as text (2026-07-08).
-  const opts = (list: TaskLookupItem[]) => list.map(i => ({ value: i.value, label: i.label }))
+  // `icon` holds a tenant emoji/string (BE task-types R-2) — pass it through so
+  // CreatableSelect's own icon slot renders it, never prefix it into the label text.
+  const opts = (list: TaskLookupItem[]) => list.map(i => ({ value: i.value, label: i.label, icon: i.icon ? <span>{i.icon}</span> : undefined }))
   const assigneeOpts = [{ value: '', label: t('bureau') }, ...users.map(u => ({ value: String(u.id), label: userName(u) }))]
   // TEAM-1: internal-department options; "no department" is the picker's clear (X).
   const teamOpts = teams.map(x => ({ value: String(x.value), label: x.label }))

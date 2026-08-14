@@ -55,7 +55,8 @@
     "client": "Klant",
     "status": "Status van de sollicitant",
     "interview": "Interview",
-    "created": "Aangemaakt"
+    "created": "Aangemaakt",
+    "referenceNumber": "Referentienr."
   },
   "kpi": {
     "totalActive": "Totaal actief",
@@ -384,7 +385,16 @@
     "detach": "Ontkoppelen",
     "detachReasonPlaceholder": "Waarom worden deze sollicitaties ontkoppeld?",
     "detachConfirm": "Ontkoppelen",
-    "done": "{{count}} bijgewerkt"
+    "done": "{{count}} bijgewerkt",
+    "partialResult": "{{updated}} van {{total}} bijgewerkt, {{skipped}} overgeslagen",
+    "partialResultReasoned": "{{updated}} van {{total}} bijgewerkt, {{skipped}} overgeslagen ({{breakdown}})",
+    "mutateError": "Actie mislukt. Probeer het opnieuw.",
+    "skipReasons": {
+      "not_found": "niet gevonden",
+      "permission_denied": "geen rechten",
+      "already_on_phase": "al in deze fase",
+      "already_detached": "al ontkoppeld"
+    }
   },
   "rejection": {
     "title": "Afwijzing",

@@ -37,6 +37,9 @@ export function compare(a: unknown, b: unknown): number {
 
 // Shared static styles (module scope — no closures, so no reason to recreate per render).
 export const checkboxCol: CSSProperties = { width: 36, padding: '8px 10px', textAlign: 'center' }
+// Expand-chevron column (DATATABLE-EXPAND-1) — same footprint as the checkbox column
+// so the two can sit side by side without a bespoke width.
+export const expandCol: CSSProperties = { width: 32, padding: '8px 6px', textAlign: 'center' }
 export const stopPropagation = (e: { stopPropagation: () => void }) => e.stopPropagation()
 
 // Selected/checked row tint (audit item 1, 2026-07-16): a STICKY column (e.g. the

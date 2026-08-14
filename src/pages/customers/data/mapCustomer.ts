@@ -150,6 +150,8 @@ export function mapLocation(l: ApiLocation = {}): Location {
     // EXTRACT-1: the backoffice links (Koppelingen sub-tab).
     helloflexLink: backofficeLinkOf(l.backoffice_links, 'helloflex'),
     shiftmanagerLink: backofficeLinkOf(l.backoffice_links, 'shiftmanager'),
+    // K4BLOGO: the signed logo URL, straight through — a fresh one on every read.
+    logoUrl: l.logo_url ?? null,
     name: l.name ?? '—',
     street: l.street ?? '',
     houseNumber: l.house_number ?? '',

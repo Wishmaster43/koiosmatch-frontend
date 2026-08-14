@@ -19,6 +19,13 @@ export const REPORT_IDS = [
   'intakes',
   'outreach',
   'sources',
+  // RAPPORTEN-SUITE-2 (contacts/locations/departments read customers.view; ai and
+  // workflows additionally sit behind their own module — see access.ts).
+  'contacts',
+  'locations',
+  'departments',
+  'ai',
+  'workflows',
 ] as const
 
 export type ReportId = (typeof REPORT_IDS)[number]

@@ -11,7 +11,7 @@ import userEvent from '@testing-library/user-event'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import NoteEditPopout from './NoteEditPopout'
 
-vi.mock('@/lib/datetime', () => ({ useDateFormat: () => ({ formatDate: (v: string) => v, formatDateTime: (v: string) => v, locale: 'nl-NL' }) }))
+vi.mock('@/lib/datetime', () => ({ useDateFormat: () => ({ formatDate: (v: string) => v, formatDateTime: (v: string) => v, formatTime: (v: string) => v, locale: 'nl-NL' }) }))
 vi.mock('@/lib/useNoteTypes', () => ({
   useNoteTypes: () => ({ types: [{ value: 'general', label: 'Algemeen' }], writableTypes: [{ value: 'general', label: 'Algemeen' }] }),
   SYSTEM_NOTE_TYPES: new Set(['status_change']),

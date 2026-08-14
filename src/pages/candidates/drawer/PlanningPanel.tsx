@@ -68,7 +68,7 @@ export default function PlanningPanel({ c }: { c: Candidate }) {
 
       {planningSubTab === 'roles' && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-          <PlanningTab c={c} />
+          <PlanningTab />
         </div>
       )}
 
