@@ -49,6 +49,41 @@ compliant alternative.
    codebase is a secure, maintainable codebase.
 10. **Build to scale** — assume ~50 tenants, many users each. "Stands like a
     house you can put 10 more floors on."
+11. **Business automation is a WORKFLOW, not a coded job (Danny 2026-08-14:
+    "we willen niet werken met coded jobs, alles is workflow tokens" —
+    immediately narrowed by him to "oké niet alles", so the line below is the
+    working boundary until he sharpens it).** If a TENANT should be able to see
+    it, change it, switch it off, or want it to run differently than the tenant
+    next door, it is a workflow built from workflow tokens (`src/modules/`) —
+    never a hardcoded scheduled command with the rule baked in. That covers
+    re-applying a changed match-weight template, chasing a vacancy that has been
+    online too long without candidates, escalating an application that sits in
+    one phase too long, rejection follow-up, and every "after X days, do Y" rule.
+    **PLUMBING stays code**: work that must always run, is not a tenant choice,
+    and has no business rule to configure — keeping a derived count fresh,
+    geocoding an address, deduplicating an audit log, generating the platform's
+    own invoices. **MASS UPDATES stay code too (Danny, same day: "massa updates
+    weer niet, dus misschien de match score update ook niet").** A workflow fires
+    per record; running one across thousands of rows is the wrong tool and would
+    bury the queue. So recalculating every match score, re-applying a template to
+    every linked vacancy, or any other sweep over a whole table is a coded job —
+    even when the RULE that triggers it is a workflow. Split them: the workflow
+    decides *that* it must happen and on which scope, the coded sweep does the
+    work. Test: *would two tenants want this to behave differently, or would
+    Danny ever switch it off?* Yes → workflow. *Does it touch one record at a
+    time, on an event?* Workflow. *Does it sweep a whole table?* Code.
+    A new automation that ships as a coded job without that question being
+    answered is a finding. Mirrored in backend-CLAUDE.md; both repos apply one rule.
+    **What runs through the workflow consumes KOIOS TOKENS (Danny, same day:
+    "niet alles is tokens, maar wat via de workflow gaat — wat we liefst met de
+    meeste willen — dat zijn wel Koios Tokens").** So the workflow-versus-code
+    choice is a COMMERCIAL choice as well as a product one: a workflow run is
+    billable consumption, plumbing and mass sweeps are not. Never call the unit
+    anything else in code or copy — it is a Koios Token. And never quietly move
+    a high-frequency, per-record automation into a workflow "because it is
+    cleaner": that is a bill the tenant did not ask for. When the volume is high
+    and there is nothing for a tenant to configure, that is exactly the case the
+    plumbing rule above exists for.
 
 ---
 
@@ -512,6 +547,36 @@ never label it "Matched"; "matched" is the *application* bucket, a different axi
   state (status/phase); this one governs *whether* something is on. In the shared
   `SegmentedControl` that is the **`activeFill`** prop (with `activeOnly`, since one shared
   colour means "this is the active one" — tinting the rest then states something untrue).
+- **IMPORT lives in the CREATE MODAL's header, never in the list toolbar (Danny
+  2026-08-14, twice, with screenshots of the customers and the vacancies page: "Excel
+  importeren moet in de pop-up + nieuwe vacature, niet hier boven de tabel").** The
+  affordance is a button top-right in the modal header, next to the close control; while
+  open, the import flow renders as the FIRST card in the modal body, so it is summoned
+  deliberately and is never in the way of the form the user actually came for. Its tint
+  deepens once a file is picked, so a paused import stays visible. Reason it is not on
+  the toolbar: importing IS creating, so it belongs where creating happens, and a second
+  entry point above the table makes the row above a list grow one button per feature.
+  `AddCustomerModal` is the reference implementation; reuse its shared upload card and
+  wizard rather than forking a second import client (§11), and gate it on the SELECTED
+  entity's own create permission, never on customers regardless of entity.
+- **EVERY filter lives in the RIGHT-HAND FILTER PANEL. The toolbar above a table holds
+  no filter controls at all (Danny 2026-08-14, screenshot of the matches page: "rode
+  filters moeten naar rechts filter menu").** The row above a list carries exactly the
+  "+ Add" button, the shared `HeaderSearch`, and the clear-filters button. Never an
+  inline "Kies fase…"/"Kies eigenaar…" picker, never a status/bucket tab bar, and never
+  a "Meer filters" button next to them: if a dimension is filterable it registers as a
+  group into `RightPanelContext` like every other dimension, so there is ONE place a
+  user looks for filtering on ANY page. A second filtering surface is how the same page
+  ends up teaching two habits. Same rule for the reports (their period and dimensions
+  register into that panel too). Bulk actions replacing the toolbar while rows are
+  selected stays as it is: that is a mode, not a filter.
+  **Watch for the DUPLICATE case, which is what Danny's matches screenshot actually
+  showed:** the panel already carried Status, Score, Eigenaar, Klant, Datumbereik and
+  Gearchiveerd while the toolbar repeated Fase and Eigenaar next to a "Meer filters"
+  button. So the fix there is deletion, not a move, and the two copies had already
+  started to disagree about which dimensions exist. When you find a toolbar control
+  whose dimension is already registered in the panel, delete the toolbar one and
+  verify the panel's version sends the same server params.
 - **Blueprint-conformance checklist — a new/updated entity page mirrors the candidate page
   1:1 (§3A). Verify before shipping:** (1) quick-view toggles via `QuickViewToggle`; (2) the
   shared `HeaderSearch` present; (3) `<Entity>InsightsRow` with the same donut/KPI footprint;

@@ -46,6 +46,22 @@ describe('useOutreachDetail · setTargetNote (G30)', () => {
   })
 })
 
+// BELLIJST-NOTE-POPOUT-1: applyTargetNote adopts a note the note field's
+// second-screen window ALREADY persisted on its own PATCH — local state only.
+describe('useOutreachDetail · applyTargetNote (BELLIJST-NOTE-POPOUT-1)', () => {
+  it('updates the target locally without issuing a second PATCH', async () => {
+    vi.mocked(api.get).mockResolvedValue({ data: { data: campaign } })
+    const { result } = renderHook(() => useOutreachDetail('c1'))
+    await waitFor(() => expect(result.current.detail?.targets?.[0].note).toBe(null))
+
+    act(() => { result.current.applyTargetNote('t1', '<p>Bel na 17u terug</p>') })
+
+    expect(result.current.detail?.targets?.[0].note).toBe('<p>Bel na 17u terug</p>')
+    // THE SEAM: no network call — the popout window already sent its own PATCH.
+    expect(api.patch).not.toHaveBeenCalled()
+  })
+})
+
 describe('useOutreachDetail · assignTargets (BELLIJST-ASSIGN-2)', () => {
   it('POSTs an ids-selection + assignee_id to /outreach-campaigns/{id}/targets/assign and replaces detail from the response', async () => {
     vi.mocked(api.get).mockResolvedValue({ data: { data: campaign } })

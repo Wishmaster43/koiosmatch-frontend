@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import {
-  isStale, isNoFollowup, isNeverContacted,
+  isStale, noFollowupUncomputable, isNeverContacted,
   toggleOneValue, metaOf, optsFrom, initialsOf, buildCandidatePatch,
 } from './candidatesShared'
 
@@ -17,20 +17,15 @@ describe('attention predicates', () => {
     expect(isStale({ lastContactAt: daysAgo(200) })).toBe(true)
   })
 
-  it('isNoFollowup: only a lead (Phase axis) without any contact', () => {
-    expect(isNoFollowup({ phase: 'lead', lastContactAt: null })).toBe(true)
-    expect(isNoFollowup({ phase: 'lead', lastContactAt: daysAgo(1) })).toBe(false)
-    expect(isNoFollowup({ phase: 'candidate', lastContactAt: null })).toBe(false)
-  })
-  it('isNoFollowup: bug regression — must read `phase`, never `status` (Deployability axis)', () => {
-    // Real candidates never have status === 'lead' ('lead' is a Phase value, not a
-    // Deployability one) — the old code compared status to 'lead' and so ALWAYS
-    // returned false in production, even though a naive test with status:'lead'
-    // fixtures made it look like it worked. Prove the fallback now actually fires
-    // off `phase`, and that a matching `status` alone is not enough.
-    expect(isNoFollowup({ status: 'lead', lastContactAt: null })).toBe(false)
-    expect(isNoFollowup({ status: 'lead', phase: 'candidate', lastContactAt: null })).toBe(false)
-    expect(isNoFollowup({ status: 'available', phase: 'lead', lastContactAt: null })).toBe(true)
+  // GEENOPVOLGING14: the server defines "geen opvolging" as no planned appointment
+  // AND no open task AND no contact within N workdays. A list row carries neither
+  // appointments nor tasks, so the page cannot compute it. It used to try, with an
+  // older and much narrower rule (a lead who was never contacted), which is why the
+  // tile and the list it filtered counted different people: Danny saw the card say
+  // "nieuw, geen contact" above rows that all had a contact date. Returning null
+  // makes the card render a dash instead of a number meaning something else.
+  it('noFollowup has no page-local fallback and never guesses a count', () => {
+    expect(noFollowupUncomputable()).toBeNull()
   })
 
   it('isNeverContacted: true only when no contact moment', () => {

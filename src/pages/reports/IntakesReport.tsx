@@ -7,7 +7,6 @@
  * endpoint is gated `candidates.view` server-side.
  */
 import { useState } from 'react'
-import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import ReportKpiBand from './ReportKpiBand'
 import { reportCardStyle as card, reportSectionHeadStyle as head } from './ReportSectionCard'
@@ -36,7 +35,7 @@ const toSegments = (items: IntakeBucket[]): SegmentBarItem[] =>
 const toTimeseries = (items: IntakeBucket[]) =>
   items.map((it, i) => ({ date: it.key ?? String(i), label: it.label, value: it.count }))
 
-export default function IntakesReport({ period, tabsSlot }: { period: ReportPeriod; tabsSlot?: ReactNode }) {
+export default function IntakesReport({ period }: { period: ReportPeriod }) {
   const { t } = useTranslation('analytics')
   const { data, loading, error, refetch } = useIntakesReport(period)
   const [group, setGroup] = useState<Group>('recruiter')
@@ -72,9 +71,6 @@ export default function IntakesReport({ period, tabsSlot }: { period: ReportPeri
       {hasData && (
         <ReportKpiBand kpis={kpis} />
       )}
-
-      {/* Tab bar + period control (from the hub) */}
-      {tabsSlot}
 
       <div style={{ ...card, overflow: 'hidden' }}>
         <ReportStateBlock

@@ -23,3 +23,32 @@ export function isSameDay(a: Date, b: Date) {
 export function formatDate(d: Date, locale: string = 'nl-NL') {
   return `${d.getDate()} ${monthName(d.getMonth(), locale)} ${d.getFullYear()}`
 }
+
+// Local 'YYYY-MM-DD' for a Date — never toISOString (rolls back a day west of
+// UTC, see lib/datetime.ts's own comment on the same trap).
+export function toIsoDate(d: Date) {
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+}
+
+// The from/to window GET /planning/board needs to cover everything the active
+// view can show, in local calendar days. Month is padded a week either side so
+// the leading/trailing days MonthView's grid borrows from neighbouring months
+// are covered too (a few extra days of overfetch, never a missing real shift);
+// list has no date nav of its own, so it reuses month's window.
+export function getViewRange(view: string, current: Date): { from: string; to: string } {
+  if (view === 'week') {
+    const dow = (current.getDay() + 6) % 7
+    const start = new Date(current); start.setDate(current.getDate() - dow)
+    const end = new Date(start); end.setDate(start.getDate() + 6)
+    return { from: toIsoDate(start), to: toIsoDate(end) }
+  }
+  if (view === 'day') {
+    return { from: toIsoDate(current), to: toIsoDate(current) }
+  }
+  // month + list
+  const start = new Date(current.getFullYear(), current.getMonth(), 1)
+  start.setDate(start.getDate() - 7)
+  const end = new Date(current.getFullYear(), current.getMonth() + 1, 0)
+  end.setDate(end.getDate() + 7)
+  return { from: toIsoDate(start), to: toIsoDate(end) }
+}

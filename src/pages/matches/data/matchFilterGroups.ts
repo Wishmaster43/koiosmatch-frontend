@@ -2,9 +2,10 @@
  * buildMatchFilterGroups — the right-panel filter config for the matches page
  * (stage/owner/client/branch/scored/date-range/archived). Pure function
  * (§0.3 size split): state + options come in, group config goes out — mirrors
- * buildTaskFilterGroups/buildCandidateFilterGroups. The MatchFilterBar toolbar
- * row (stage/owner + "more filters") stays untouched; this feeds the SEPARATE
- * right-hand panel underneath it.
+ * buildTaskFilterGroups/buildCandidateFilterGroups. RIGHTPANEL-FILTERS-1
+ * (2026-08-14): this is now the ONLY place stage/owner/client are filterable —
+ * the toolbar's old MatchFilterBar (stage/owner triggers + a "more filters"
+ * popover for client) was an exact duplicate and has been deleted.
  */
 import type { Dispatch, SetStateAction } from 'react'
 import type { TFunction } from 'i18next'

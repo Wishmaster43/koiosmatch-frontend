@@ -6,6 +6,13 @@
  * Tiptap itself is out of scope here); NoteAssistSection is real, so this
  * suite is the one place proving Verbeteren/Samenvatten/Actiepunten actually
  * render on this field.
+ *
+ * The second-screen pop-out (BELLIJST-NOTE-POPOUT-1) has its own test files —
+ * TargetNoteField.popout.test.tsx (opens the real window.open route) and
+ * TargetNoteField.popoutSync.test.tsx (the popout's save reaches this row) —
+ * mirroring ProfileTabPopout.test.tsx's own-file convention: a different mock
+ * set (window.open / useTextPopoutHost) that these plain render tests must not
+ * inherit.
  */
 import { describe, it, expect, vi } from 'vitest'
 import { render, screen } from '@testing-library/react'
@@ -22,7 +29,7 @@ vi.mock('@/components/ui/RichTextEditor', () => ({
 describe('TargetNoteField · rich-note parity with the candidate note (NOTE-RICH-PARITY-1)', () => {
   it('shows the Koios assist modes (Verbeteren/Samenvatten/Actiepunten) once editing', async () => {
     const user = userEvent.setup()
-    render(<TargetNoteField note={null} onSave={vi.fn().mockResolvedValue(undefined)} />)
+    render(<TargetNoteField note={null} onSave={vi.fn().mockResolvedValue(undefined)} targetId="t1" campaignId="camp-1" />)
 
     await user.click(screen.getByRole('button', { name: 'Bewerken' }))
 
@@ -34,7 +41,7 @@ describe('TargetNoteField · rich-note parity with the candidate note (NOTE-RICH
   it('saves through the exact same (trimmed note string) shape the caller already expects', async () => {
     const user = userEvent.setup()
     const onSave = vi.fn().mockResolvedValue(undefined)
-    render(<TargetNoteField note={null} onSave={onSave} />)
+    render(<TargetNoteField note={null} onSave={onSave} targetId="t1" campaignId="camp-1" />)
 
     await user.click(screen.getByRole('button', { name: 'Bewerken' }))
     await user.type(screen.getByLabelText('body'), 'Bel na 17u terug')
@@ -46,7 +53,7 @@ describe('TargetNoteField · rich-note parity with the candidate note (NOTE-RICH
   })
 
   it('renders an existing note read-only (sanitized HTML) until the pencil is clicked', () => {
-    render(<TargetNoteField note="Al twee keer gemist" onSave={vi.fn()} />)
+    render(<TargetNoteField note="Al twee keer gemist" onSave={vi.fn()} targetId="t1" campaignId="camp-1" />)
     expect(screen.getByText('Al twee keer gemist')).toBeInTheDocument()
     expect(screen.queryByLabelText('body')).toBeNull()
   })

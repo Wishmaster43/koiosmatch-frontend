@@ -4,6 +4,10 @@
  * the backend stamps contacted_at). Also patches the campaign's own owner (PATCH
  * /outreach-campaigns/{id} — UpdateOutreachCampaignRequest accepts owner_id, measured
  * in app/Http/Requests/Outreach). Four states for the drawer; reverts on failure.
+ *
+ * BELLIJST-NOTE-POPOUT-1: `applyTargetNote` is the ONE exception to "every setter
+ * here calls the API" — it adopts a note already persisted by the target note's
+ * second-screen window (its own standalone PATCH), local state only.
  */
 import { useState, useEffect, useCallback } from 'react'
 import { getCampaign, updateCampaign, updateTarget, assignTargets as assignTargetsApi } from '../data/outreachApi'
@@ -100,6 +104,15 @@ export function useOutreachDetail(id: string | null) {
     return res?.meta ?? { updated: [], skipped: [] }
   }, [id])
 
+  // BELLIJST-NOTE-POPOUT-1: adopt a note the POP-OUT WINDOW already persisted on
+  // its own standalone PATCH (OutreachTargetNotePopout) — local state only, no
+  // second PATCH here (that would double-write). Without this, collapsing then
+  // re-expanding a target row (TargetsTab unmounts TargetNoteField on collapse)
+  // would read this hook's now-stale `detail.targets`, not the popout's save.
+  const applyTargetNote = useCallback((targetId: string, note: string) => {
+    setDetail(d => (d ? { ...d, targets: (d.targets ?? []).map(t => t.id === targetId ? { ...t, note } : t) } : d))
+  }, [])
+
   // Change the campaign's owner — optimistic, revert on failure (mirrors setTargetStatus).
   const setOwner = useCallback(async (campaignId: string, owner: { id: string; name: string } | null) => {
     let prev: CampaignDetail['owner'] | undefined
@@ -124,5 +137,5 @@ export function useOutreachDetail(id: string | null) {
     catch { setDetail(d => (d ? { ...d, custom_fields: prev } : d)) }
   }, [detail])
 
-  return { detail, loading, error, setTargetStatus, setTargetOutcome, setTargetNote, assignTargets, setOwner, setCustomFields }
+  return { detail, loading, error, setTargetStatus, setTargetOutcome, setTargetNote, applyTargetNote, assignTargets, setOwner, setCustomFields }
 }

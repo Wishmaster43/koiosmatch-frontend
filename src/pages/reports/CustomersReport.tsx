@@ -9,7 +9,6 @@
  * `source` column, so it is never invented here.
  */
 import { useState } from 'react'
-import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import ReportKpiBand from './ReportKpiBand'
 import { reportCardStyle as card, reportSectionHeadStyle as head } from './ReportSectionCard'
@@ -32,7 +31,7 @@ import type { ReportPeriod, CandidateSegment, CandidateOwnerSegment, CandidateTi
 // Deliberately no 'source' — see the header comment.
 type Axis = 'status' | 'phase' | 'industry' | 'branch'
 
-export default function CustomersReport({ period, tabsSlot, filters = EMPTY_REPORT_FILTERS }: { period: ReportPeriod; tabsSlot?: ReactNode; filters?: ReportFilterState }) {
+export default function CustomersReport({ period, filters = EMPTY_REPORT_FILTERS }: { period: ReportPeriod; filters?: ReportFilterState }) {
   const { t } = useTranslation('analytics')
   const { formatDate } = useDateFormat()
   const { data, loading, error, refetch } = useCustomersReport(period, filters)
@@ -128,9 +127,6 @@ export default function CustomersReport({ period, tabsSlot, filters = EMPTY_REPO
       {hasData && (
         <ReportKpiBand kpis={kpis} />
       )}
-
-      {/* Tab bar + period control (from the hub) */}
-      {tabsSlot}
 
       {/* The report's data window, rendered prominently — DD-MM-YYYY (never ISO, §3B). */}
       {!loading && !error && data && (

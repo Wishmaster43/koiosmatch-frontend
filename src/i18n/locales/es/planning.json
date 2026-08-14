@@ -1,6 +1,7 @@
 {
   "addShift": "Añadir turno",
-  "previewNotice": "Solo vista previa. Los turnos mostrados aquí son datos de demostración, nada de lo que añadas se guarda todavía en tu planificación real.",
+  "previewNotice": "Los turnos mostrados aquí son tu planificación real. Añadir un turno nuevo en este calendario todavía no se guarda.",
+  "loadErrorShifts": "No se pudieron cargar los turnos.",
   "previewSaveTitle": "Aún no conectado. Este turno no se guardará.",
   "sectionOrder": "Pedido",
   "sectionLocation": "Ubicación",
@@ -43,10 +44,46 @@
     "month": "Mes",
     "week": "Semana",
     "day": "Día",
-    "list": "Lista"
+    "list": "Lista",
+    "orders": "Pedidos"
   },
   "filters": {
     "shift": "Turno",
     "location": "Ubicación"
+  },
+  "order": {
+    "modal": {
+      "title": "Nuevo pedido",
+      "subtitle": "El primer paso de la planificación: pedido, luego turno, luego asignación.",
+      "create": "Crear pedido"
+    },
+    "sectionCustomer": "Cliente",
+    "sectionOrder": "Pedido",
+    "fLocation": "Ubicación",
+    "fOwner": "Responsable",
+    "fFunction": "Función",
+    "fReference": "Referencia",
+    "fSubject": "Asunto",
+    "fStatus": "Estado",
+    "fCostCenter": "Centro de coste",
+    "fDescription": "Descripción",
+    "noCustomer": "Sin cliente",
+    "noLocation": "Sin ubicación",
+    "noDepartment": "Sin departamento",
+    "noOwner": "Sin responsable",
+    "noFunction": "Sin función",
+    "pickLocationFirst": "Elige primero una ubicación",
+    "status": {
+      "open": "Abierto",
+      "filled": "Cubierto",
+      "cancelled": "Cancelado"
+    },
+    "addOrder": "Añadir pedido",
+    "listTitle": "Pedidos",
+    "shiftsCount": "{{count}} turno",
+    "shiftsCount_other": "{{count}} turnos",
+    "empty": "Todavía no hay pedidos.",
+    "emptyHint": "Haz clic abajo para crear el primero.",
+    "errorList": "No se pudo cargar la lista de pedidos."
   }
 }

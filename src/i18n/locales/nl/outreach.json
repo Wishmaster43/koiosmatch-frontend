@@ -134,7 +134,9 @@
     "note": {
       "empty": "Nog geen notitie.",
       "placeholder": "Notitie toevoegen…",
-      "saveFailed": "Opslaan van de notitie is mislukt."
+      "saveFailed": "Opslaan van de notitie is mislukt.",
+      "title": "Notitie",
+      "windowTitle": "Notitie — {{name}}"
     },
     "assign": {
       "button": "Toewijzen",

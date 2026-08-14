@@ -14,6 +14,11 @@
  * Stats tab's donut clicks) narrows the visible rows to one status/outcome/
  * assignee value, combined with the local search/filter bar. Presentational;
  * data + mutations come from useOutreachDetail via the drawer.
+ *
+ * BELLIJST-NOTE-POPOUT-1: the per-target note (TargetNoteField) carries a
+ * second-screen pop-out; `campaignId` + `onApplyTargetNote` exist only to wire
+ * that window's talk-back channel to the campaign-level state (see
+ * TargetNoteField's own docblock).
  */
 import { useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -41,7 +46,7 @@ import type { TargetFilter } from './targetFilter'
 interface RecruiterOption { value: string; label: string }
 
 export default function TargetsTab({ targets, loading, error, onSetStatus, onSetOutcome,
-  onSetNote, recruiters = [], onAssignTargets, filter = null, onClearFilter }: {
+  onSetNote, campaignId = '', onApplyTargetNote, recruiters = [], onAssignTargets, filter = null, onClearFilter }: {
   targets: OutreachTarget[]
   loading: boolean
   error: boolean
@@ -49,6 +54,14 @@ export default function TargetsTab({ targets, loading, error, onSetStatus, onSet
   onSetOutcome: (id: string, outcome: string | null) => void
   // G30 — per-target note; omitted in older callers keeps the field read-only.
   onSetNote?: (id: string, note: string) => Promise<void>
+  // BELLIJST-NOTE-POPOUT-1: the campaign this tab belongs to — the note field's
+  // second-screen window addresses one target through a <campaignId>:<targetId>
+  // composite id (no standalone GET /outreach-targets/{id} exists).
+  campaignId?: string
+  // Adopts a note the note field's pop-out window already persisted on its own
+  // PATCH, into the campaign-level state (useOutreachDetail.applyTargetNote) —
+  // local state only, so a collapsed-then-re-expanded row never reads stale text.
+  onApplyTargetNote?: (id: string, note: string) => void
   // G29 — recruiters selectable in the assign picker + the mutation itself;
   // omitted (or empty) hides the whole assign affordance (no fake control).
   recruiters?: RecruiterOption[]
@@ -361,7 +374,9 @@ export default function TargetsTab({ targets, loading, error, onSetStatus, onSet
                 (no fake affordance — §3), and tucked behind the same expand toggle. */}
             {onSetNote && expanded.has(tg.id) && (
               <div style={{ paddingLeft: 36 }}>
-                <TargetNoteField note={tg.note} onSave={(note) => onSetNote(tg.id, note)} />
+                <TargetNoteField note={tg.note} onSave={(note) => onSetNote(tg.id, note)}
+                  targetId={tg.id} campaignId={campaignId}
+                  onNoteSavedElsewhere={onApplyTargetNote ? (note) => onApplyTargetNote(tg.id, note) : undefined} />
               </div>
             )}
 

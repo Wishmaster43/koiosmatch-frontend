@@ -3,8 +3,6 @@
     "title": "Stellen",
     "subtitle": "Verwalten und veröffentlichen Sie all Ihre offenen Stellen mühelos.",
     "add": "Neue Stelle",
-    "import": "Excel importieren",
-    "importTitle": "Stellen aus Excel oder CSV importieren (eine oder mehrere)",
     "searchPlaceholder": "Stelle, Notiz, Dokument suchen…",
     "loading": "Stellen werden geladen…",
     "empty": "Noch keine Stellen.",
@@ -366,6 +364,10 @@
   },
   "modal": {
     "title": "Neue Stelle",
+    "import": {
+      "title": "Stelle aus Datei",
+      "intro": "Der Import einer Datei legt diese Stellen sofort an. Das Formular unten wird dabei nicht ausgefüllt; prüfen Sie die Vorschau, bevor Sie bestätigen."
+    },
     "fields": {
       "title": "Titel",
       "client": "Kunde",

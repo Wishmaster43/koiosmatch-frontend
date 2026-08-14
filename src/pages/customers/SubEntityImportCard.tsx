@@ -3,7 +3,7 @@
  * location/department/contact create modals (Danny 02-08: "+ Nieuwe afdeling, +
  * nieuwe locatie, + nieuwe contactpersoon ... moeten ook een CSV-upload hebben").
  * Reuses the Settings import wizard's dry-run/confirm/result machinery wholesale —
- * the exact same client + PreviewStep/ResultStep components CustomerImportCard
+ * the exact same client + PreviewStep/ResultStep components the shared EntityImportCard
  * uses for the combined customer_tree file, never a second import client or a
  * second result renderer (CLAUDE.md §11).
  *
@@ -13,7 +13,7 @@
  * `UploadStep` — a full-page dashed dropzone (160px min-height) right for a
  * standalone Settings screen, wrong stacked above a create form the user came here
  * to fill in. This now hand-rolls the SAME compact one-line affordance
- * CustomerImportCard already had to build for the identical complaint (intro line +
+ * the shared EntityImportCard already had to build for the identical complaint (intro line +
  * one button row: select/download/accepted-types), so every "create from file"
  * card in the customers area — combined tree, location, department, contact —
  * shares one footprint. Fixed HERE (this file is the ONE shared card behind all
@@ -94,7 +94,7 @@ function rowParentName(row: ImportRowResult): string | null {
 // dry run and the real run stay the actual authority on what resolves).
 const normalize = (v: string) => v.trim().toLowerCase()
 
-// Ghost button — one style, several labels; mirrors CustomerImportCard's own local constant.
+// Ghost button — one style, several labels; mirrors the shared EntityImportCard's own local constant.
 const ghostBtn = {
   height: BTN_H, padding: '0 12px', fontSize: 12, borderRadius: 8, cursor: 'pointer',
   border: '1px solid var(--border)', background: 'none', color: 'var(--text)',

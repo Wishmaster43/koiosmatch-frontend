@@ -8,7 +8,6 @@
  * report ("counts don't match the list") instead of the deliberate report/list split.
  */
 import { useState } from 'react'
-import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import ReportKpiBand from './ReportKpiBand'
 import { reportCardStyle as card, reportSectionHeadStyle as head } from './ReportSectionCard'
@@ -30,7 +29,7 @@ import type { ReportPeriod, CandidateSegment, CandidateOwnerSegment, CandidateTi
 // The five drillable axes; `param` is the XOR query key the drill/advice endpoints expect.
 type Axis = 'status' | 'phase' | 'source' | 'owner' | 'branch'
 
-export default function CandidatesReport({ period, tabsSlot, filters = EMPTY_REPORT_FILTERS }: { period: ReportPeriod; tabsSlot?: ReactNode; filters?: ReportFilterState }) {
+export default function CandidatesReport({ period, filters = EMPTY_REPORT_FILTERS }: { period: ReportPeriod; filters?: ReportFilterState }) {
   const { t } = useTranslation('analytics')
   const { formatDate } = useDateFormat()
   const { data, loading, error, refetch } = useCandidatesReport(period, filters)
@@ -122,9 +121,6 @@ export default function CandidatesReport({ period, tabsSlot, filters = EMPTY_REP
       {hasData && (
         <ReportKpiBand kpis={kpis} />
       )}
-
-      {/* Tab bar + period control (from the hub) */}
-      {tabsSlot}
 
       {/* The report's data window, rendered prominently — DD-MM-YYYY (never ISO, §3B).
           A window that is invisible in the UI reads as a "report ≠ list" support ticket. */}

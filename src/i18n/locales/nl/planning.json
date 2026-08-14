@@ -4,7 +4,8 @@
     "location": "Locatie"
   },
   "addShift": "Dienst toevoegen",
-  "previewNotice": "Alleen voorbeeld. De diensten hier zijn demodata en niets wat je toevoegt wordt al opgeslagen in je live planning.",
+  "previewNotice": "De diensten hier zijn je echte planning. Een nieuwe dienst toevoegen in deze kalender wordt nog niet opgeslagen.",
+  "loadErrorShifts": "Diensten konden niet worden geladen.",
   "previewSaveTitle": "Nog niet gekoppeld. Deze dienst wordt niet opgeslagen.",
   "sectionOrder": "Order",
   "sectionLocation": "Locatie",
@@ -47,6 +48,42 @@
     "month": "Maand",
     "week": "Week",
     "day": "Dag",
-    "list": "Lijst"
+    "list": "Lijst",
+    "orders": "Opdrachten"
+  },
+  "order": {
+    "modal": {
+      "title": "Nieuwe opdracht",
+      "subtitle": "De eerste stap van de planning: opdracht, dan dienst, dan inzet.",
+      "create": "Opdracht aanmaken"
+    },
+    "sectionCustomer": "Klant",
+    "sectionOrder": "Opdracht",
+    "fLocation": "Vestiging",
+    "fOwner": "Eigenaar",
+    "fFunction": "Functie",
+    "fReference": "Referentie",
+    "fSubject": "Onderwerp",
+    "fStatus": "Status",
+    "fCostCenter": "Kostenplaats",
+    "fDescription": "Omschrijving",
+    "noCustomer": "Geen klant",
+    "noLocation": "Geen vestiging",
+    "noDepartment": "Geen afdeling",
+    "noOwner": "Geen eigenaar",
+    "noFunction": "Geen functie",
+    "pickLocationFirst": "Kies eerst een vestiging",
+    "status": {
+      "open": "Open",
+      "filled": "Ingevuld",
+      "cancelled": "Geannuleerd"
+    },
+    "addOrder": "Opdracht toevoegen",
+    "listTitle": "Opdrachten",
+    "shiftsCount": "{{count}} dienst",
+    "shiftsCount_other": "{{count}} diensten",
+    "empty": "Nog geen opdrachten.",
+    "emptyHint": "Klik hieronder om de eerste aan te maken.",
+    "errorList": "De opdrachtenlijst kon niet worden geladen."
   }
 }

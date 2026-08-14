@@ -5,9 +5,10 @@
  * report already uses, each number pulled from an EXISTING report endpoint via
  * its own use*Report hook (no new endpoint, no invented totals) and each card
  * clicks through to the sub-report the number came from. The shared period
- * control (passed in via `tabsSlot`, wired by ReportsPage) governs all nine.
+ * lives ONLY in the right-hand filter panel now (RIGHTPANEL-FILTERS-1,
+ * 2026-08-14) — `period` still drives every hook below it, ReportsPage just no
+ * longer threads a duplicate inline picker down through a `tabsSlot` prop.
  */
-import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import ReportKpiBand from './ReportKpiBand'
 import type { KpiSpec } from '@/components/insights/InsightsRow'
@@ -28,7 +29,7 @@ import type { ReportPeriod } from '@/types/analytics'
 // KPI card needs — total/loading/error, plus the sub-report it drills into.
 type Row = { key: string; label: string; page: ReportId; loading: boolean; error: boolean; total: number | null }
 
-export default function ReportsDashboard({ period, tabsSlot }: { period: ReportPeriod; tabsSlot?: ReactNode }) {
+export default function ReportsDashboard({ period }: { period: ReportPeriod }) {
   const { t } = useTranslation('analytics')
   const { navigate } = useNavigation()
 
@@ -68,7 +69,6 @@ export default function ReportsDashboard({ period, tabsSlot }: { period: ReportP
 
   return (
     <div>
-      {tabsSlot}
       <ReportKpiBand kpis={kpis} />
     </div>
   )

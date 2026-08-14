@@ -4,9 +4,15 @@
  * Publicatie card) into a header pill row, mirroring how AddCandidateModal
  * shows its phase pills top-right. Pure presentational: the selected status
  * value in, `onSelectStatus`/`onClose` callbacks out.
+ *
+ * EXCEL-VACATURES-1 (Danny 14-08, screenshot: "Excel importeren moet in de
+ * pop-up + nieuwe vacature niet hier boven de tabel!!"): adds the same top-right
+ * import toggle AddCustomerModal already carries (KLANT-LAYOUT-3) — rendered only
+ * when `canImport` (vacancies.create, the same right the wizard's confirm step
+ * needs), same soft-tint that deepens once a file is picked.
  */
 import { useTranslation } from 'react-i18next'
-import { X } from 'lucide-react'
+import { X, Upload } from 'lucide-react'
 import { BTN_H } from '@/config/buttonMetrics'
 
 interface StatusOpt { value: string; label: string; color?: string }
@@ -16,9 +22,15 @@ interface Props {
   statusOptions: StatusOpt[]
   onSelectStatus: (value: string) => void
   onClose: () => void
+  /** Whether the import toggle renders at all — gated on the vacancy create right. */
+  canImport: boolean
+  importOpen: boolean
+  onToggleImport: () => void
+  /** Deepens the tint once a file is picked, so a paused import stays visible. */
+  hasFile: boolean
 }
 
-export default function ModalHeader({ status, statusOptions, onSelectStatus, onClose }: Props) {
+export default function ModalHeader({ status, statusOptions, onSelectStatus, onClose, canImport, importOpen, onToggleImport, hasFile }: Props) {
   const { t } = useTranslation(['vacancies', 'common'])
   return (
     <div style={{ padding: '18px 22px 14px', borderBottom: '1px solid var(--border)', flexShrink: 0,
@@ -45,6 +57,20 @@ export default function ModalHeader({ status, statusOptions, onSelectStatus, onC
           )
         })}
       </div>
+      {/* EXCEL-VACATURES-1: mirrors AddCustomerModal's header import button 1:1 —
+          same placement, soft-tint and accessible-name pattern. Never rendered
+          without the create right (§3: no fake affordance). */}
+      {canImport && (
+        <button type="button" onClick={onToggleImport} aria-expanded={importOpen}
+          style={{ display: 'flex', alignItems: 'center', gap: 6, height: BTN_H, padding: '0 12px',
+            flexShrink: 0, borderRadius: 8, cursor: 'pointer', fontSize: 12.5, fontWeight: 600,
+            color: 'var(--color-primary-text)',
+            border: `1px solid color-mix(in srgb, var(--color-primary) ${hasFile ? 50 : 32}%, transparent)`,
+            background: `color-mix(in srgb, var(--color-primary) ${hasFile ? 16 : 8}%, transparent)` }}>
+          <Upload size={13} />
+          {t('modal.import.title')}
+        </button>
+      )}
       <button onClick={onClose} aria-label={t('common:close')}
         style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', display: 'flex', padding: 4 }}>
         <X size={18} />

@@ -134,7 +134,9 @@
     "note": {
       "empty": "Aún no hay ninguna nota.",
       "placeholder": "Añadir una nota…",
-      "saveFailed": "No se pudo guardar la nota."
+      "saveFailed": "No se pudo guardar la nota.",
+      "title": "Nota",
+      "windowTitle": "Nota — {{name}}"
     },
     "assign": {
       "button": "Asignar",

@@ -10,12 +10,24 @@
  * Publicatie cards and (permission-gated) a Documenten+notitie card whose
  * uploads/note run AFTER create via the separate usePostCreateAttachments hook
  * — nothing pending keeps the exact pre-SLICE-2 immediate-close behaviour.
+ *
+ * EXCEL-VACATURES-1 (Danny 14-08, screenshot: "Excel importeren moet in de
+ * pop-up + nieuwe vacature niet hier boven de tabel!!"): the Excel/CSV bulk
+ * upload moved off the list toolbar into THIS modal — mirrors AddCustomerModal's
+ * KLANT-LAYOUT-3 shape verbatim: a header toggle (ModalHeader), the import flow
+ * as the FIRST card in the body while open, wired to the same shared
+ * useEntityImportCard/EntityImportCard the customer modal uses, pointed at the
+ * 'vacancies' importer (never a second upload implementation, §11).
  */
+import { useState } from 'react'
 import { WIDE_MODAL } from '@/components/ui/modalMetrics'
 import FloatingPanel from '@/components/ui/FloatingPanel'
 import { BTN_H } from '@/config/buttonMetrics'
-import { modalColumns } from '@/components/ui/modalCards'
+import { modalColumns, cardBox, cardHead } from '@/components/ui/modalCards'
 import CollapsedCard from '@/components/ui/CollapsedCard'
+import { useAuth } from '@/context/AuthContext'
+import EntityImportCard from '@/components/import/EntityImportCard'
+import { useEntityImportCard } from '@/components/import/useEntityImportCard'
 import { useAddVacancyForm } from './addmodal/useAddVacancyForm'
 import { usePostCreateAttachments } from './addmodal/usePostCreateAttachments'
 import ModalHeader from './addmodal/ModalHeader'
@@ -37,12 +49,21 @@ import type { Id } from '@/types/common'
 interface ModalUser { id: Id; name: string }
 interface ModalCustomer { id: Id; name: string }
 
+// The backend importer key for a whole-vacancy file — verified against
+// koiosmatch-api's ImportRegistry::IMPORTERS ('vacancies' => VacancyImporter::class)
+// and importTemplateShape.ts's importPermissionsFor (vacancies.view/vacancies.create),
+// never guessed from the entity's display name.
+const VACANCY_IMPORT_ENTITY = 'vacancies'
+
 export default function AddVacancyModal({
-  onClose, onCreated, users = [], customers = [], lockCustomerId, lockCustomerName,
+  onClose, onCreated, onImported, users = [], customers = [], lockCustomerId, lockCustomerName,
   initialCustomerLocationId, initialCustomerDepartmentId, initialCustomerLocationName, initialCustomerDepartmentName,
   initialIndustry,
 }: {
-  onClose: () => void; onCreated?: (v: Vacancy) => void; users?: ModalUser[]; customers?: ModalCustomer[]
+  onClose: () => void; onCreated?: (v: Vacancy) => void
+  /** EXCEL-VACATURES-1: called once a real file import lands at least one record — the parent refreshes its list. */
+  onImported?: () => void
+  users?: ModalUser[]; customers?: ModalCustomer[]
   // Opened from a customer drawer: the client is already known, so it is
   // pre-filled and shown read-only instead of asking the recruiter to pick the
   // customer they are already looking at (mirrors AddDepartmentModal's lockLocationId).
@@ -64,6 +85,13 @@ export default function AddVacancyModal({
     initialCustomerLocationId, initialCustomerDepartmentId, initialCustomerLocationName, initialCustomerDepartmentName,
     initialIndustry, attachments,
   })
+  // EXCEL-VACATURES-1: the import affordance opens from the header button
+  // (closed on open, mirrors AddCustomerModal's importOpen/KLANT-LAYOUT-3).
+  const [importOpen, setImportOpen] = useState(false)
+  const authCtx = useAuth() as unknown as { hasPermission?: (perm: string) => boolean }
+  const hasPermission = authCtx.hasPermission ?? (() => false)
+  const { wizard: importWizard, canView: canViewImportTemplate, canImport: canRunImport } =
+    useEntityImportCard({ entity: VACANCY_IMPORT_ENTITY, hasPermission, onImported, onClose })
 
   // Punten 21+22: the vacancy already exists once this is true — show the
   // per-item post-create outcome instead of the form, Close is the recruiter's call.
@@ -81,6 +109,11 @@ export default function AddVacancyModal({
     )
   }
 
+  // EXCEL-VACATURES-1: blocked while an import is past its upload step (preview
+  // or result) — never let the manual form fire a SECOND create while the import
+  // is mid-decision or has just written its own records (mirrors AddCustomerModal).
+  const canSubmit = f.canSubmit && importWizard.step === 'upload'
+
   return (
     // POPUP-SLEEP-1: migrated onto the shared FloatingPanel shell — draggable
     // header, SE-resize, remembered position; same WIDE_MODAL footprint. The
@@ -97,7 +130,9 @@ export default function AddVacancyModal({
       header={
         <div style={{ flex: 1, margin: '-12px -16px -13px' }}>
           <ModalHeader status={f.form.status} statusOptions={f.statusOptions}
-            onSelectStatus={v => f.set('status', v)} onClose={onClose} />
+            onSelectStatus={v => f.set('status', v)} onClose={onClose}
+            canImport={canRunImport} importOpen={importOpen} onToggleImport={() => setImportOpen(v => !v)}
+            hasFile={!!importWizard.file} />
         </div>
       }>
 
@@ -110,6 +145,18 @@ export default function AddVacancyModal({
             cards (Matchprofiel/AI-agent/Publicatie/Documenten+notitie) collapse
             full-width below — never a required field inside a CollapsedCard. */}
         <div style={{ flex: 1, overflowY: 'auto', padding: '20px 22px', display: 'flex', flexDirection: 'column', gap: 16 }}>
+          {/* EXCEL-VACATURES-1 (Danny 14-08): the import flow opens from the header
+              toggle and renders as the FIRST card only while open — a rare, optional
+              path stays out of the way until deliberately summoned (KLANT-LAYOUT-3
+              mirror). One row = one vacancy here, never a linked multi-record tree,
+              so wholeTree stays false (the EntityImportCard/PreviewStep default). */}
+          {importOpen && (
+            <div style={{ ...cardBox, padding: 16 }}>
+              <div style={cardHead}>{f.t('modal.import.title')}</div>
+              <EntityImportCard wizard={importWizard} canView={canViewImportTemplate} canImport={canRunImport}
+                entity={VACANCY_IMPORT_ENTITY} intro={f.t('modal.import.intro')} />
+            </div>
+          )}
           <div style={modalColumns('repeat(auto-fit, minmax(340px, 1fr))')}>
             {/* LEFT — required core: what/who/where/whom this vacancy is for. */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
@@ -201,11 +248,11 @@ export default function AddVacancyModal({
               border: '1px solid var(--border)', background: 'none', color: 'var(--text)', cursor: 'pointer' }}>
             {f.t('modal.cancel')}
           </button>
-          <button onClick={f.handleSubmit} disabled={!f.canSubmit || f.saving}
+          <button onClick={f.handleSubmit} disabled={!canSubmit || f.saving}
             style={{ height: BTN_H, padding: '0 20px', fontSize: 13, fontWeight: 600, borderRadius: 8, border: 'none',
-              background: (f.canSubmit && !f.saving) ? 'var(--color-primary)' : 'var(--border)',
-              color: (f.canSubmit && !f.saving) ? 'var(--color-on-accent)' : 'var(--text-muted)',
-              cursor: (f.canSubmit && !f.saving) ? 'pointer' : 'not-allowed' }}>
+              background: (canSubmit && !f.saving) ? 'var(--color-primary)' : 'var(--border)',
+              color: (canSubmit && !f.saving) ? 'var(--color-on-accent)' : 'var(--text-muted)',
+              cursor: (canSubmit && !f.saving) ? 'pointer' : 'not-allowed' }}>
             {f.saving ? f.t('modal.creating') : f.t('modal.create')}
           </button>
         </div>

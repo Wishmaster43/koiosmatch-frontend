@@ -6,7 +6,6 @@
  * /reports/sources/drill endpoint doesn't exist (reportDrillGate) and a source row
  * has no further single-record breakdown to explain.
  */
-import type { ReactNode } from 'react'
 import { formatRatio } from '@/lib/formatters'
 import { useTranslation } from 'react-i18next'
 import ReportKpiBand from './ReportKpiBand'
@@ -23,7 +22,7 @@ const numCell = (n: number) => (
   <span style={{ fontWeight: n > 0 ? 600 : 400, color: n > 0 ? 'var(--text)' : 'var(--text-muted)' }}>{n}</span>
 )
 
-export default function SourcesReport({ period, tabsSlot }: { period: ReportPeriod; tabsSlot?: ReactNode }) {
+export default function SourcesReport({ period }: { period: ReportPeriod }) {
   const { t } = useTranslation('analytics')
   // `period` is accepted for call-signature parity with the other reports but this
   // endpoint has no bucket — see the hook's own doc comment.
@@ -79,9 +78,6 @@ export default function SourcesReport({ period, tabsSlot }: { period: ReportPeri
       {!loading && !error && rows.length > 0 && (
         <ReportKpiBand kpis={kpis} />
       )}
-
-      {/* Tab bar + period control (from the hub) */}
-      {tabsSlot}
 
       {/* Table — shared DataTable handles loading/empty; error stays a dedicated banner */}
       <ReportSectionCard>

@@ -9,7 +9,6 @@
  */
 import { useState } from 'react'
 import { formatRatio } from '@/lib/formatters'
-import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import ReportKpiBand from './ReportKpiBand'
 import { reportCardStyle as card, reportSectionHeadStyle as head } from './ReportSectionCard'
@@ -29,7 +28,7 @@ import type { ReportPeriod, CandidateSegment, ApplicationTopSegment, CandidateTi
 type ColorAxis = 'status'
 type PlainAxis = 'customer' | 'function' | 'location' | 'department'
 
-export default function ContactsReport({ period, tabsSlot }: { period: ReportPeriod; tabsSlot?: ReactNode }) {
+export default function ContactsReport({ period }: { period: ReportPeriod }) {
   const { t } = useTranslation('analytics')
   const { formatDate } = useDateFormat()
   const { data, loading, error, refetch } = useContactsReport(period)
@@ -116,9 +115,6 @@ export default function ContactsReport({ period, tabsSlot }: { period: ReportPer
       {hasData && (
         <ReportKpiBand kpis={kpis} />
       )}
-
-      {/* Tab bar + period control (from the hub) */}
-      {tabsSlot}
 
       {/* The report's data window, rendered prominently from the RESPONSE —
           DD-MM-YYYY (never ISO, §3B DATUM-1). */}

@@ -91,7 +91,7 @@ export default function OutreachDrawer({ id, createdAt, archived = false, archiv
   const { t } = useTranslation('outreach')
   const { formatDate, formatDateTime } = useDateFormat()
   // Always fetch: an archived campaign's detail now loads too (withTrashed show()).
-  const { detail, loading, error, setTargetStatus, setTargetOutcome, setTargetNote, assignTargets, setOwner, setCustomFields } = useOutreachDetail(id)
+  const { detail, loading, error, setTargetStatus, setTargetOutcome, setTargetNote, applyTargetNote, assignTargets, setOwner, setCustomFields } = useOutreachDetail(id)
   const { data: users = [] } = useUsers() as { data?: UserLike[] }
   // The Extra tab only shows when the tenant has defined outreach-campaign custom fields (§3A(f)).
   const { fields: customFieldDefs } = useCustomFields('outreach_campaign')
@@ -156,6 +156,7 @@ export default function OutreachDrawer({ id, createdAt, archived = false, archiv
         {campaignRow && <CampaignKoiosBlock campaign={campaignRow} />}
         <TargetsTab targets={detail?.targets ?? []} loading={loading} error={error}
           onSetStatus={setTargetStatus} onSetOutcome={setTargetOutcome} onSetNote={setTargetNote}
+          campaignId={id} onApplyTargetNote={applyTargetNote}
           recruiters={recruiterOptions} onAssignTargets={assignTargets}
           filter={targetFilter} onClearFilter={onClearFilter} />
       </div>

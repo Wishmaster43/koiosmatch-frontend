@@ -1,6 +1,7 @@
 {
   "addShift": "Ajouter une mission",
-  "previewNotice": "Aperçu uniquement. Les missions affichées ici sont des données de démonstration, rien de ce qui est ajouté n'est encore enregistré dans votre planning réel.",
+  "previewNotice": "Les missions affichées ici sont votre planning réel. Ajouter une nouvelle mission dans ce calendrier n'est pas encore enregistré.",
+  "loadErrorShifts": "Impossible de charger les missions.",
   "previewSaveTitle": "Pas encore connecté. Cette mission ne sera pas enregistrée.",
   "sectionOrder": "Commande",
   "sectionLocation": "Site",
@@ -43,10 +44,46 @@
     "month": "Mois",
     "week": "Semaine",
     "day": "Jour",
-    "list": "Liste"
+    "list": "Liste",
+    "orders": "Commandes"
   },
   "filters": {
     "shift": "Service",
     "location": "Site"
+  },
+  "order": {
+    "modal": {
+      "title": "Nouvelle commande",
+      "subtitle": "La première étape de la planification : commande, puis mission, puis affectation.",
+      "create": "Créer la commande"
+    },
+    "sectionCustomer": "Client",
+    "sectionOrder": "Commande",
+    "fLocation": "Site",
+    "fOwner": "Responsable",
+    "fFunction": "Fonction",
+    "fReference": "Référence",
+    "fSubject": "Objet",
+    "fStatus": "Statut",
+    "fCostCenter": "Centre de coûts",
+    "fDescription": "Description",
+    "noCustomer": "Aucun client",
+    "noLocation": "Aucun site",
+    "noDepartment": "Aucun service",
+    "noOwner": "Aucun responsable",
+    "noFunction": "Aucune fonction",
+    "pickLocationFirst": "Choisissez d'abord un site",
+    "status": {
+      "open": "Ouverte",
+      "filled": "Pourvue",
+      "cancelled": "Annulée"
+    },
+    "addOrder": "Ajouter une commande",
+    "listTitle": "Commandes",
+    "shiftsCount": "{{count}} mission",
+    "shiftsCount_other": "{{count}} missions",
+    "empty": "Aucune commande pour l'instant.",
+    "emptyHint": "Cliquez ci-dessous pour créer la première.",
+    "errorList": "Impossible de charger la liste des commandes."
   }
 }

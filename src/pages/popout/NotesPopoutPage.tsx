@@ -20,8 +20,11 @@ import VacancyNotesPopout from './VacancyNotesPopout'
 import ApplicationNotesPopout from './ApplicationNotesPopout'
 import type { PopoutEntity } from '@/lib/secondScreen'
 
-// One entry per PopoutEntity (secondScreen.ts) — keep the two in sync.
-const ENTITY_PAGES: Record<PopoutEntity, ComponentType<{ id: string | undefined }>> = {
+// One entry per PopoutEntity that has a notes THREAD (secondScreen.ts) — Partial
+// on purpose: `outreachTarget` (BELLIJST-NOTE-POPOUT-1) has a single `note`
+// column, not a thread, so it only ever appears in TextPopoutPage's map, never
+// here (see PopoutEntity's own doc comment for the asymmetry).
+const ENTITY_PAGES: Partial<Record<PopoutEntity, ComponentType<{ id: string | undefined }>>> = {
   candidate: CandidateNotesPopout,
   customer: CustomerNotesPopout,
   vacancy: VacancyNotesPopout,
@@ -50,5 +53,19 @@ export default function NotesPopoutPage() {
   }
 
   const EntityPage = ENTITY_PAGES[entity]
+  // Defensive, not merely type-satisfying: a PopoutEntity with no notes-thread
+  // page (only `outreachTarget` today) hits the same honest error state above
+  // would have, never a runtime crash on an undefined component (§3).
+  if (!EntityPage) {
+    return (
+      <PopoutShell
+        loading={false} error onRetry={() => window.location.reload()}
+        loadingLabel="" errorLabel={t('popout.unknownEntity')} retryLabel={t('error.retry')}
+        name="" initials="" subtitle=""
+      >
+        {null}
+      </PopoutShell>
+    )
+  }
   return <EntityPage id={id} />
 }

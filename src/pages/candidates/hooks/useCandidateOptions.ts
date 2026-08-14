@@ -6,7 +6,7 @@
  */
 import { useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { metaOf, optsFrom, isStale, isNeverContacted, isNoFollowup } from '../data/candidatesShared'
+import { metaOf, optsFrom, isStale, isNeverContacted, noFollowupUncomputable } from '../data/candidatesShared'
 import { NL_PROVINCES } from '../drawer/constants'
 import type { Candidate, CandidateStats } from '@/types/candidate'
 import type { Id, LookupOption } from '@/types/common'
@@ -94,9 +94,12 @@ export function useCandidateOptions({ stats, candidates, locations, statuses, fu
   // the active filters); fall back to counting the loaded page.
   const staleCount          = stats?.attention?.stale_6m        ?? candidates.filter(isStale).length
   const neverContactedCount = stats?.attention?.never_contacted ?? candidates.filter(isNeverContacted).length
-  // "No follow-up planned": server-wide total (C-13, honours the active filters),
-  // with a page-local fallback while the stats endpoint is unavailable.
-  const noFollowupCount = stats?.attention?.no_followup_planned ?? candidates.filter(isNoFollowup).length
+  // "No follow-up planned": server-wide total (C-13, honours the active filters).
+  // Deliberately has NO page-local fallback — see noFollowupUncomputable: the rule
+  // needs appointments and open tasks, which a list row does not carry, so a
+  // fallback here would count a different set of people than the list it filters.
+  // null renders as a dash instead of a number that quietly means something else.
+  const noFollowupCount = stats?.attention?.no_followup_planned ?? noFollowupUncomputable()
   // Intake stages are flag-driven (§3B: requires_appointment), never a hardcoded value key.
   const intakeStages = useMemo(() => new Set(funnelTypes.filter(f => (f as { requires_appointment?: boolean }).requires_appointment).map(f => f.value)), [funnelTypes])
   // "Intake planned" = the server-wide appointment-based total from /candidates/stats (honours the

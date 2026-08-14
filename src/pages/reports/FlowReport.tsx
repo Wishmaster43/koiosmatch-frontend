@@ -9,7 +9,6 @@
  */
 import { useMemo, useState } from 'react'
 import { formatRatio } from '@/lib/formatters'
-import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import ReportKpiBand from './ReportKpiBand'
 import ReportStateBlock from './ReportStateBlock'
@@ -50,7 +49,7 @@ function PhaseRow({ label, value, max, index, conversion, avgDays }: {
   )
 }
 
-export default function FlowReport({ period, tabsSlot }: { period: ReportPeriod; tabsSlot?: ReactNode }) {
+export default function FlowReport({ period }: { period: ReportPeriod }) {
   const { t } = useTranslation('analytics')
   const { data, loading, error, refetch } = useFlowReport(period)
 
@@ -167,9 +166,6 @@ export default function FlowReport({ period, tabsSlot }: { period: ReportPeriod;
       {!loading && !error && phases.length > 0 && (
         <ReportKpiBand kpis={kpis} />
       )}
-
-      {/* Tab bar + period control (from the hub) */}
-      {tabsSlot}
 
       {/* Cohort-filling note (pipeline fallback) */}
       {!loading && !error && phases.length > 0 && !cohortReady && (

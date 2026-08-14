@@ -4,7 +4,8 @@
     "location": "Location"
   },
   "addShift": "Add shift",
-  "previewNotice": "Preview only. Shifts shown here are demo data and nothing added is saved to your live schedule yet.",
+  "previewNotice": "Shifts shown here are your real schedule. Adding a new shift in this calendar is not saved yet.",
+  "loadErrorShifts": "Could not load shifts.",
   "previewSaveTitle": "Not connected yet. This shift will not be saved.",
   "sectionOrder": "Order",
   "sectionLocation": "Location",
@@ -47,6 +48,42 @@
     "month": "Month",
     "week": "Week",
     "day": "Day",
-    "list": "List"
+    "list": "List",
+    "orders": "Orders"
+  },
+  "order": {
+    "modal": {
+      "title": "New order",
+      "subtitle": "The first step of the schedule: order, then shift, then assignment.",
+      "create": "Create order"
+    },
+    "sectionCustomer": "Customer",
+    "sectionOrder": "Order",
+    "fLocation": "Location",
+    "fOwner": "Owner",
+    "fFunction": "Function",
+    "fReference": "Reference",
+    "fSubject": "Subject",
+    "fStatus": "Status",
+    "fCostCenter": "Cost center",
+    "fDescription": "Description",
+    "noCustomer": "No customer",
+    "noLocation": "No location",
+    "noDepartment": "No department",
+    "noOwner": "No owner",
+    "noFunction": "No function",
+    "pickLocationFirst": "Pick a location first",
+    "status": {
+      "open": "Open",
+      "filled": "Filled",
+      "cancelled": "Cancelled"
+    },
+    "addOrder": "Add order",
+    "listTitle": "Orders",
+    "shiftsCount": "{{count}} shift",
+    "shiftsCount_other": "{{count}} shifts",
+    "empty": "No orders yet.",
+    "emptyHint": "Click below to create the first one.",
+    "errorList": "Could not load the order list."
   }
 }

@@ -1,51 +1,62 @@
 import { useState, useMemo, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useRightPanel } from '@/context/RightPanelContext'
-import { ChevronLeft, ChevronRight, Plus, Info } from 'lucide-react'
-import { monthName, formatDate } from './helpers'
+import { ChevronLeft, ChevronRight, Plus, Info, AlertCircle } from 'lucide-react'
+import { monthName, formatDate, getViewRange } from './helpers'
+import { usePlanningBoard } from './hooks/usePlanningBoard'
+import { useDateFormat } from '@/lib/datetime'
 import AddShiftModal from './AddShiftModal'
 import { MonthView, WeekView, DayView, ListView } from './views'
-import type { Shift, ShiftInput } from '@/types/planning'
+import type { Shift } from '@/types/planning'
+import type { PlanningBoardShift } from './hooks/usePlanningBoard'
 
-// ── Dummy shifts (PLANNING-PERSIST-1, CMFE audit 2026-07-28) ──────────────────
-// This calendar's shifts are entirely LOCAL, in-memory demo rows — never fetched
-// from a server, and `handleAdd` below only appends to that local array: reload
-// the page and every "saved" shift is gone. A real backend Planning API already
-// exists (GET/POST/PATCH/DELETE `/planning/orders`, `/planning/shifts`,
-// `/planning/schedules`, `/planning/assignments` — see src/types/api-generated.ts)
-// but this screen calls none of it. Wiring the backend's order→shift→schedule
-// model onto this flat `Shift` shape is a real feature build — the generated spec
-// only documents the GET filter params, not a create body or any 2xx response
-// shape, and an order/customer/department creation flow doesn't exist in this UI
-// yet — so it is NOT attempted here (§0: never invent an endpoint contract).
-// Per §3 (no fake affordances), the actual persistence action — AddShiftModal's
-// Save — is gated with an honest, disabled notice instead (see its own header
-// comment); this page adds a matching banner so the read side is equally honest
-// about being preview data, not a tenant's live schedule.
-const today = new Date()
-const y = today.getFullYear(), m = today.getMonth()
-
-const INITIAL_SHIFTS: Shift[] = [
-  { id: 1, date: new Date(y, m, today.getDate()),     title: 'Nachtdienst', location: 'Rivas Zorggroep',   candidate: 'Ismail Eddahchouri', start: '22:00', end: '06:00', color: 'var(--color-primary-text)' },
-  { id: 2, date: new Date(y, m, today.getDate()),     title: 'Dagdienst',   location: 'Yesway Zorg',       candidate: 'Elif Akagündüz',     start: '07:00', end: '15:00', color: 'var(--color-success)' },
-  { id: 3, date: new Date(y, m, today.getDate() + 1), title: 'Avonddienst', location: 'WoonzorgGroep',     candidate: 'Rubina Milan',        start: '15:00', end: '23:00', color: 'var(--color-warning)' },
-  { id: 4, date: new Date(y, m, today.getDate() + 2), title: 'Dagdienst',   location: 'Rivas Zorggroep',   candidate: 'Merel Van Muijlwijk', start: '07:00', end: '15:00', color: 'var(--color-success)' },
-  { id: 5, date: new Date(y, m, today.getDate() + 4), title: 'Nachtdienst', location: 'Yesway Zorg',       candidate: 'Figen Ooijevaar',     start: '22:00', end: '06:00', color: 'var(--color-primary-text)' },
-  { id: 6, date: new Date(y, m, today.getDate() - 1), title: 'Dagdienst',   location: 'WoonzorgGroep',     candidate: 'Petra Kuiters',       start: '07:00', end: '15:00', color: 'var(--color-success)' },
-]
-
-
+// ── Real shifts (PLANNING-PERSIST-1 follow-up — read side) ────────────────────
+// This calendar used to render six hardcoded, always-the-same demo rows,
+// entirely disconnected from any tenant's actual schedule. It now fetches the
+// tenant's real shifts via GET /planning/board (PlanningBoardController /
+// PlanningBoardBuilder — verified against the live routes/controller today) and
+// maps that resource's own fields onto the flat `Shift` shape the four calendar
+// views already render. Nothing here is invented: title/location/candidate/
+// times all come straight off the board resource; a shift with nobody on it
+// renders with an empty candidate line (open_spots > 0), never a fabricated name.
+//
+// The CREATE side stays a separate, still-gated concern: AddShiftModal's Save
+// button is disabled (no order-creation flow exists in this UI yet — see its own
+// header) — this page's banner below now only speaks to THAT, not to what's shown.
+function mapBoardShift(s: PlanningBoardShift, formatTime: (v: string | null | undefined) => string): Shift {
+  const candidateNames = s.assigned.map(a => a.candidate).filter((n): n is string => !!n).join(', ')
+  return {
+    id: s.id,
+    date: s.startTime ? new Date(s.startTime) : new Date(),
+    title: s.function || s.shiftType || '',
+    location: s.location || s.customer || '',
+    candidate: candidateNames,
+    start: formatTime(s.startTime),
+    end: formatTime(s.endTime),
+    // Open (still needs people) vs filled — the one real signal the board
+    // resource gives us; never a per-shift-type palette we'd have to invent.
+    color: s.openShift ? 'var(--color-warning)' : 'var(--color-success)',
+    openSpots: s.openSpots,
+    numberPersons: s.numberPersons,
+  }
+}
 
 // ── Main planning page ────────────────────────────────────────────────────────
 const VIEW_IDS = ['month', 'week', 'day', 'list']
 
 export default function PlanningPage() {
   const { t } = useTranslation('planning')
+  const { formatTime } = useDateFormat()
   const [view,       setView]       = useState('month')
   const [current,    setCurrent]    = useState(new Date())
-  const [shifts,     setShifts]     = useState<Shift[]>(INITIAL_SHIFTS)
   const [modal,      setModal]      = useState<Date | null>(null) // date to add shift for
   const todayDate = useMemo(() => new Date(), [])
+
+  // Real shifts for whatever window the active view can show (§9: every
+  // entity-keyed load is refetched on view/date change via the query key).
+  const { from, to } = useMemo(() => getViewRange(view, current), [view, current])
+  const { shifts: boardShifts, loading: shiftsLoading, error: shiftsError } = usePlanningBoard(from, to)
+  const shifts = useMemo(() => boardShifts.map(s => mapBoardShift(s, formatTime)), [boardShifts, formatTime])
 
   // Right-panel filters (shift type + location). Registering them makes the shared
   // topbar filter button appear and feeds the ReportFilterSidebar — same as the
@@ -99,9 +110,15 @@ export default function PlanningPage() {
 
   const handleDayClick = (date: Date) => setModal(date)
 
-  const handleAdd = (data: ShiftInput) => {
-    setShifts(prev => [...prev, { ...data, id: Date.now() }])
-  }
+  // AddShiftModal's Save is disabled (its own header explains why: no
+  // order-creation flow exists yet), so this never actually fires from a real
+  // click — kept only so the prop stays wired and reactivates for free the
+  // moment a real create path lands, per its own PLANNING-PERSIST-1 comment.
+  // It deliberately does NOT touch `shifts` anymore: that list is server data
+  // now (usePlanningBoard), not local state a demo row could be appended to.
+  // Takes no parameter on purpose: an unused named argument only exists to be
+  // linted away later, and a no-arg function still satisfies the prop's type.
+  const handleAdd = () => {}
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%', overflow: 'hidden' }}>
@@ -156,20 +173,40 @@ export default function PlanningPage() {
         </button>
       </div>
 
-      {/* Not-yet-persisted gate (PLANNING-PERSIST-1, §3) — the shifts below are
-          preview/demo data, not this tenant's live schedule; see the file header. */}
+      {/* Not-yet-persisted gate (PLANNING-PERSIST-1, §3) — only the ADD side is
+          still fake (AddShiftModal's Save stays disabled); the shifts below are
+          this tenant's real schedule now (usePlanningBoard). */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '6px 20px',
         background: 'color-mix(in srgb, var(--text-muted) 8%, transparent)', flexShrink: 0 }}>
         <Info size={12} style={{ color: 'var(--text-muted)', flexShrink: 0 }} aria-hidden="true" />
         <span style={{ fontSize: 11, fontStyle: 'italic', color: 'var(--text-muted)' }}>{t('previewNotice')}</span>
       </div>
 
+      {/* Load-error state (§3: four honest states) — the board fetch failed;
+          never silently show a stale/empty calendar without saying why. */}
+      {shiftsError && (
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '8px 20px',
+          background: 'color-mix(in srgb, var(--color-danger) 8%, transparent)', flexShrink: 0 }}>
+          <AlertCircle size={12} style={{ color: 'var(--color-danger)', flexShrink: 0 }} aria-hidden="true" />
+          <span style={{ fontSize: 12, color: 'var(--color-danger)' }}>{t('loadErrorShifts')}</span>
+        </div>
+      )}
+
       {/* ── Calendar body ── */}
       <div style={{ flex: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
-        {view === 'month' && <MonthView current={current} shifts={filteredShifts} today={todayDate} onDayClick={handleDayClick} />}
-        {view === 'week'  && <WeekView  current={current} shifts={filteredShifts} today={todayDate} onDayClick={handleDayClick} />}
-        {view === 'day'   && <DayView   current={current} shifts={filteredShifts} today={todayDate} onDayClick={handleDayClick} />}
-        {view === 'list'  && <ListView  shifts={filteredShifts} today={todayDate} onDayClick={handleDayClick} />}
+        {shiftsLoading ? (
+          <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center',
+            fontSize: 13, color: 'var(--text-muted)' }}>
+            {t('common:loading')}
+          </div>
+        ) : (
+          <>
+            {view === 'month' && <MonthView current={current} shifts={filteredShifts} today={todayDate} onDayClick={handleDayClick} />}
+            {view === 'week'  && <WeekView  current={current} shifts={filteredShifts} today={todayDate} onDayClick={handleDayClick} />}
+            {view === 'day'   && <DayView   current={current} shifts={filteredShifts} today={todayDate} onDayClick={handleDayClick} />}
+            {view === 'list'  && <ListView  shifts={filteredShifts} today={todayDate} onDayClick={handleDayClick} />}
+          </>
+        )}
       </div>
 
       {/* ── Modal ── */}

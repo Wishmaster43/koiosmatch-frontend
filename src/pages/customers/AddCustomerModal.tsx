@@ -17,9 +17,18 @@ import CustomerAddressCard from './addmodal/CustomerAddressCard'
 import CustomerBusinessCards from './addmodal/CustomerBusinessCards'
 import CustomerCompanyTextCard from './addmodal/CustomerCompanyTextCard'
 import CustomerBranchesCard from './addmodal/CustomerBranchesCard'
-import CustomerImportCard from './addmodal/CustomerImportCard'
-import { useCustomerImport } from './addmodal/useCustomerImport'
+// EXCEL-VACATURES-1 (2026-08-14): the compact "create from file" card and its
+// wizard/permission wiring generalised out of this page into a shared component —
+// vacancies now reuses the exact same two, never a second copy (CLAUDE.md §11).
+import EntityImportCard from '@/components/import/EntityImportCard'
+import { useEntityImportCard } from '@/components/import/useEntityImportCard'
 import type { Id, LookupOption } from '@/types/common'
+
+// The ONE backend importer that builds a whole customer tree (customer + locations +
+// departments + contacts) from one flat file — verified against koiosmatch-api's
+// ImportRegistry::IMPORTERS ('customer_tree' => CustomerTreeImporter::class), never
+// guessed from the entity's display name.
+const CUSTOMER_TREE_ENTITY = 'customer_tree'
 
 // Exported so addmodal/AddressCard shares this exact shape (type-only import,
 // mirrors AddCandidateModal's exported FormState).
@@ -137,11 +146,12 @@ export default function AddCustomerModal({ onClose, onCreate, onImported, users 
   const meIsAssignable = me?.id != null && users.some(u => String(u.id) === String(me.id))
   // CUSTOMER-IMPORT-1: falls back to "no permission" rather than crashing when the
   // context is mid-boot (mirrors ImporterenSettings' own hasPermission fallback).
-  // The wizard/permission/auto-close wiring itself lives in useCustomerImport (kept
-  // out of this container to stay under the ~400-line split trigger, CLAUDE.md §3).
+  // The wizard/permission/auto-close wiring itself lives in the shared
+  // useEntityImportCard (kept out of this container to stay under the ~400-line
+  // split trigger, CLAUDE.md §3).
   const hasPermission = authCtx.hasPermission ?? (() => false)
   const { wizard: importWizard, canView: canViewImportTemplate, canImport: canRunImport } =
-    useCustomerImport({ hasPermission, onImported, onClose })
+    useEntityImportCard({ entity: CUSTOMER_TREE_ENTITY, hasPermission, onImported, onClose })
   // DEBITEURNUMMER-1 (Danny 02-08): status is HIDDEN in this form (the phase pills
   // replace it — a new customer starts on the tenant's default status), so the
   // default must come from the lookup's own is_default FLAG, exactly like the
@@ -307,7 +317,8 @@ export default function AddCustomerModal({ onClose, onCreate, onImported, users 
           {importOpen && (
             <div style={{ ...cardBox, padding: 16 }}>
               <div style={cardHead}>{t('modal.import.title')}</div>
-              <CustomerImportCard wizard={importWizard} canView={canViewImportTemplate} canImport={canRunImport} />
+              <EntityImportCard wizard={importWizard} canView={canViewImportTemplate} canImport={canRunImport}
+                entity={CUSTOMER_TREE_ENTITY} intro={t('modal.import.intro')} wholeTree />
             </div>
           )}
           <div style={modalColumns('repeat(auto-fit, minmax(340px, 1fr))')}>

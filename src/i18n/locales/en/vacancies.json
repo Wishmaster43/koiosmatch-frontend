@@ -3,8 +3,6 @@
     "title": "Vacancies",
     "subtitle": "Easily manage and publish all your open positions.",
     "add": "New vacancy",
-    "import": "Import Excel",
-    "importTitle": "Import vacancies from Excel or CSV (one or several)",
     "searchPlaceholder": "Search vacancy, note, document…",
     "loading": "Loading vacancies…",
     "empty": "No vacancies yet.",
@@ -366,6 +364,10 @@
   },
   "modal": {
     "title": "New vacancy",
+    "import": {
+      "title": "Vacancy from file",
+      "intro": "Importing a file creates these vacancies directly. It does not fill in the form below; check the preview before confirming."
+    },
     "fields": {
       "title": "Title",
       "client": "Client",

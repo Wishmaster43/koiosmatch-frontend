@@ -10,7 +10,6 @@
  */
 import { useState } from 'react'
 import { formatRatio } from '@/lib/formatters'
-import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import ReportKpiBand from './ReportKpiBand'
 import ReportStateBlock from './ReportStateBlock'
@@ -34,7 +33,7 @@ const numCell = (n: number) => (
   <span style={{ fontWeight: n > 0 ? 600 : 400, color: n > 0 ? 'var(--text)' : 'var(--text-muted)' }}>{n}</span>
 )
 
-export default function VacanciesReport({ period, tabsSlot, filters = EMPTY_REPORT_FILTERS }: { period: ReportPeriod; tabsSlot?: ReactNode; filters?: ReportFilterState }) {
+export default function VacanciesReport({ period, filters = EMPTY_REPORT_FILTERS }: { period: ReportPeriod; filters?: ReportFilterState }) {
   const { t } = useTranslation('analytics')
   const { formatDate } = useDateFormat()
   const { data, loading, error, refetch } = useVacanciesReport(period, filters)
@@ -165,9 +164,6 @@ export default function VacanciesReport({ period, tabsSlot, filters = EMPTY_REPO
       {hasData && rows.length > 0 && (
         <ReportKpiBand kpis={kpis} />
       )}
-
-      {/* Tab bar + period control (from the hub) */}
-      {tabsSlot}
 
       {/* The report's data window, rendered prominently — DD-MM-YYYY (never ISO, §3B). */}
       {!loading && !error && data?.from && data?.to && (

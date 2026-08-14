@@ -10,7 +10,6 @@
  * design round) — nothing hidden is interactive, so no fake affordances.
  */
 import { useState } from 'react'
-import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import ReportKpiBand from './ReportKpiBand'
 import { reportCardStyle as card, reportSectionHeadStyle as head } from './ReportSectionCard'
@@ -33,7 +32,7 @@ type Axis = 'stage' | 'customer' | 'branch'
 // colour, customer/branch rows do not (SegmentBars falls back to the primary tint).
 type AxisSeg = { value: string; label: string; count: number; color?: string | null }
 
-export default function OpportunitiesReport({ period, tabsSlot }: { period: ReportPeriod; tabsSlot?: ReactNode }) {
+export default function OpportunitiesReport({ period }: { period: ReportPeriod }) {
   const { t } = useTranslation('analytics')
   const { formatDate } = useDateFormat()
   const { formatCurrency } = useNumberFormat()
@@ -120,9 +119,6 @@ export default function OpportunitiesReport({ period, tabsSlot }: { period: Repo
       {hasData && (
         <ReportKpiBand kpis={kpis} />
       )}
-
-      {/* Tab bar + period control (from the hub) */}
-      {tabsSlot}
 
       {/* The report's data window, rendered prominently — DD-MM-YYYY (never ISO, §3B). */}
       {!loading && !error && data && (

@@ -3,7 +3,7 @@
  *
  * No CSV parsing library exists in this repo (verified: no papaparse/csv-parse/xlsx
  * in package.json) and every existing import flow (the settings "importeren" wizard,
- * CustomerImportCard) uploads the raw File straight to the backend, which parses it
+ * the shared EntityImportCard) uploads the raw File straight to the backend, which parses it
  * server-side (koiosmatch-api app/Services/Import/CsvFile.php). This wizard needs the
  * parsed rows CLIENT-side for column mapping + an editable preview, so this is a
  * small, dependency-free parser — not a new dependency, per the task's instruction to

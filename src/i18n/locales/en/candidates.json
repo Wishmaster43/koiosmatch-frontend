@@ -158,7 +158,7 @@
     "stale6m": "Not contacted > 6 mo",
     "stale6mSub": "no contact for a while",
     "noFollowup": "No follow-up",
-    "noFollowupSub": "new, no contact",
+    "noFollowupSub": "no appointment, no task, no recent contact",
     "conversations": "Active conversations",
     "neverContacted": "Never contacted",
     "neverContactedSub": "no contact moment yet",

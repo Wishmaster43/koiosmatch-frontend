@@ -50,6 +50,7 @@ interface UseVacanciesDataResult {
   lastPage: number
   stats: VacancyStats | null
   customers: VacancyCustomer[]
+  refresh: () => void
 }
 interface ListResult { vacancies: Vacancy[]; total: number; lastPage: number }
 
@@ -132,5 +133,13 @@ export function useVacanciesData({ filterParams, page, pageSize, t, sort }: UseV
     })
   }, [queryClient, filterParams, page, pageSize, sort])
 
-  return { vacancies, setVacancies, loading, error, total, setTotal, lastPage, stats, customers }
+  // EXCEL-VACATURES-1: a side-channel write (the create-modal's file import) has no
+  // single record to prepend optimistically like handleCreated does — it can create
+  // any number of vacancies in one run — so the honest refresh is a real refetch of
+  // both the list and the stats query (mirrors useCustomersData's own refresh).
+  const refresh = useCallback(() => {
+    queryClient.invalidateQueries({ queryKey: ['vacancies'] })
+  }, [queryClient])
+
+  return { vacancies, setVacancies, loading, error, total, setTotal, lastPage, stats, customers, refresh }
 }

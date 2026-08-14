@@ -8,7 +8,6 @@
  * Table: shared DataTable (§4 blueprint-conformance — no bespoke table chrome).
  */
 import { useState } from 'react'
-import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import ReportKpiBand from './ReportKpiBand'
 import ReportStateBlock from './ReportStateBlock'
@@ -30,7 +29,7 @@ const numCell = (n: number) => (
   <span style={{ fontWeight: n > 0 ? 600 : 400, color: n > 0 ? 'var(--text)' : 'var(--text-muted)' }}>{n}</span>
 )
 
-export default function RecruitersReport({ period, tabsSlot }: { period: ReportPeriod; tabsSlot?: ReactNode }) {
+export default function RecruitersReport({ period }: { period: ReportPeriod }) {
   const { t } = useTranslation('analytics')
   const { data, loading, error, refetch } = useRecruitersReport(period)
   const rows   = data?.recruiters ?? []
@@ -112,9 +111,6 @@ export default function RecruitersReport({ period, tabsSlot }: { period: ReportP
       {!loading && !error && rows.length > 0 && (
         <ReportKpiBand kpis={kpis} />
       )}
-
-      {/* Tab bar + period control (from the hub) */}
-      {tabsSlot}
 
       <ReportSectionCard>
         {error && !loading ? (

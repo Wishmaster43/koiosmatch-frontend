@@ -14,9 +14,19 @@
  * AddCandidateModal.test.tsx); i18next is uninitialised so t() returns raw keys.
  */
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { render, screen, within } from '@testing-library/react'
+import { render, screen, within, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import AddVacancyModal from './AddVacancyModal'
+// EXCEL-VACATURES-1: only the NETWORK calls are mocked — useImportWizard,
+// EntityImportCard, PreviewStep and ResultStep all run for REAL, so the import
+// tests below prove the actual wizard wiring (dry-run-before-real-run, close +
+// refresh on success), not a stub of it (mirrors AddCustomerModal.test.tsx).
+import { dryRunImport, runImport, type ImportRunResult } from '@/pages/settings/sections/importeren/importApi'
+
+vi.mock('@/pages/settings/sections/importeren/importApi', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@/pages/settings/sections/importeren/importApi')>()
+  return { ...actual, dryRunImport: vi.fn(), runImport: vi.fn(), downloadImportTemplate: vi.fn() }
+})
 
 // useAddVacancyForm reuses composeAddress from useVacancyDetailsForm.ts, which
 // (for the DRAWER's own date formatting) imports lib/datetime -> src/i18n's real
@@ -187,6 +197,8 @@ beforeEach(() => {
   cascadeState.byCustomer = {}
   mockPost.mockReset()
   mockPost.mockResolvedValue({ data: { data: { id: 'v-new', title: 'Verpleegkundige' } } })
+  vi.mocked(dryRunImport).mockReset()
+  vi.mocked(runImport).mockReset()
 })
 
 // Fill the required title and submit — the shared last step of most tests below.
@@ -833,5 +845,111 @@ describe('AddVacancyModal · post-create attachments sequencing gate (punten 21+
     expect(onClose).not.toHaveBeenCalled()
     // POPUP-SLEEP-1: the panel title bar repeats the results heading — assert presence, not uniqueness.
     expect(screen.getAllByText('modal.attachments.resultsTitle').length).toBeGreaterThan(0)
+  })
+})
+
+// EXCEL-VACATURES-1 (Danny 14-08, screenshot: "Excel importeren moet in de pop-up
+// + nieuwe vacature niet hier boven de tabel!!"): the toolbar's Excel/CSV import
+// button moved into THIS modal's header — mirrors AddCustomerModal's own
+// import-card tests (KLANT-LAYOUT-3) 1:1, now pointed at the 'vacancies' template.
+describe('AddVacancyModal · Excel/CSV import in the header (EXCEL-VACATURES-1)', () => {
+  const csvFile = new File(['functietitel\nVerpleegkundige'], 'vacatures.csv', { type: 'text/csv' })
+  // A dry run that would land one row — enough to unlock the real-import confirm.
+  const cleanResult: ImportRunResult = {
+    entity: 'vacancies', dry_run: true,
+    summary: { rows: 1, create: 1, update: 0, skip: 0, error: 0 },
+    unknown_columns: [],
+    rows: [{ row: 1, action: 'create', reference: 'Verpleegkundige', id: null, messages: [] }],
+  }
+
+  it('never renders the header import toggle without vacancies.create — no fake affordance', () => {
+    // authState.hasPermission defaults to "grants nothing" in beforeEach above.
+    render(<AddVacancyModal onClose={noop} users={users} customers={customers} />)
+    expect(screen.queryByRole('button', { name: 'modal.import.title' })).not.toBeInTheDocument()
+  })
+
+  it('renders the header import toggle once vacancies.create is granted, collapsed by default', () => {
+    authState.hasPermission = p => p === 'vacancies.create'
+    render(<AddVacancyModal onClose={noop} users={users} customers={customers} />)
+    expect(screen.getByRole('button', { name: 'modal.import.title' })).toHaveAttribute('aria-expanded', 'false')
+    // No upload control until the toggle is opened.
+    expect(screen.queryByLabelText('import.selectCsv')).not.toBeInTheDocument()
+  })
+
+  it('opening the toggle reveals the import card as the first card in the body', async () => {
+    authState.hasPermission = p => p === 'vacancies.create'
+    const user = userEvent.setup()
+    render(<AddVacancyModal onClose={noop} users={users} customers={customers} />)
+    await user.click(screen.getByRole('button', { name: 'modal.import.title' }))
+    expect(screen.getByRole('button', { name: 'modal.import.title' })).toHaveAttribute('aria-expanded', 'true')
+    expect(screen.getByText('modal.import.intro')).toBeInTheDocument()
+    expect(screen.getByLabelText('import.selectCsv')).toBeInTheDocument()
+  })
+
+  it('the upload input advertises .csv, .txt AND .xlsx (backend: ImportUploadRequest mimes:csv,txt,xlsx)', async () => {
+    authState.hasPermission = p => p === 'vacancies.create'
+    const user = userEvent.setup()
+    render(<AddVacancyModal onClose={noop} users={users} customers={customers} />)
+    await user.click(screen.getByRole('button', { name: 'modal.import.title' }))
+    const input = screen.getByLabelText('import.selectCsv') as HTMLInputElement
+    expect(input.accept).toBe('.csv,.txt,.xlsx')
+  })
+
+  it('a dry run fires the REAL request against the vacancy template, never the real import', async () => {
+    authState.hasPermission = p => p === 'vacancies.create'
+    vi.mocked(dryRunImport).mockResolvedValue(cleanResult)
+    const user = userEvent.setup()
+    render(<AddVacancyModal onClose={noop} users={users} customers={customers} />)
+    await user.click(screen.getByRole('button', { name: 'modal.import.title' }))
+
+    // Before any file is picked, no confirm/real-import control exists at all.
+    expect(screen.queryByRole('button', { name: 'import.preview.confirm' })).not.toBeInTheDocument()
+
+    await user.upload(screen.getByLabelText('import.selectCsv'), csvFile)
+    await user.click(screen.getByRole('button', { name: 'import.runPreview' }))
+
+    expect(dryRunImport).toHaveBeenCalledTimes(1)
+    expect(dryRunImport).toHaveBeenCalledWith('vacancies', expect.any(File))
+    expect(runImport).not.toHaveBeenCalled()
+    // ONLY once the dry run has resolved does the real-import control appear.
+    expect(await screen.findByRole('button', { name: 'import.preview.confirm' })).toBeInTheDocument()
+  })
+
+  it('closes the modal and refreshes the list once a real import lands something', async () => {
+    authState.hasPermission = p => p === 'vacancies.create'
+    vi.mocked(dryRunImport).mockResolvedValue(cleanResult)
+    vi.mocked(runImport).mockResolvedValue({
+      ...cleanResult, dry_run: false, rows: [{ ...cleanResult.rows[0], id: 'v1' }],
+    })
+    const onClose = vi.fn()
+    const onImported = vi.fn()
+    const user = userEvent.setup()
+    render(<AddVacancyModal onClose={onClose} onImported={onImported} users={users} customers={customers} />)
+    await user.click(screen.getByRole('button', { name: 'modal.import.title' }))
+
+    await user.upload(screen.getByLabelText('import.selectCsv'), csvFile)
+    await user.click(screen.getByRole('button', { name: 'import.runPreview' }))
+    await user.click(await screen.findByRole('button', { name: 'import.preview.confirm' }))
+
+    // The auto-close effect fires once the run RESULT lands something — never
+    // leaving the untouched manual form open behind a vacancy that now exists.
+    await waitFor(() => expect(onClose).toHaveBeenCalledTimes(1))
+    expect(onImported).toHaveBeenCalledTimes(1)
+    expect(runImport).toHaveBeenCalledWith('vacancies', expect.any(File))
+  })
+
+  it('blocks the manual Create button while the import is past its upload step — never two creation paths armed at once', async () => {
+    authState.hasPermission = p => p === 'vacancies.create'
+    vi.mocked(dryRunImport).mockResolvedValue(cleanResult)
+    const user = userEvent.setup()
+    render(<AddVacancyModal onClose={noop} users={users} customers={customers} />)
+    await user.click(screen.getByRole('button', { name: 'modal.import.title' }))
+    await user.upload(screen.getByLabelText('import.selectCsv'), csvFile)
+    await user.click(screen.getByRole('button', { name: 'import.runPreview' }))
+    await screen.findByRole('button', { name: 'import.preview.confirm' })
+
+    await user.type(screen.getByPlaceholderText('modal.titlePlaceholder'), 'Verpleegkundige')
+    expect(screen.getByRole('button', { name: 'modal.create' })).toBeDisabled()
+    expect(mockPost).not.toHaveBeenCalledWith('/vacancies', expect.anything())
   })
 })

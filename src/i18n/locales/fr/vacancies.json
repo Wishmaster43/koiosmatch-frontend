@@ -3,8 +3,6 @@
     "title": "Postes",
     "subtitle": "Gérez et publiez facilement tous vos postes ouverts.",
     "add": "Nouveau poste",
-    "import": "Importer Excel",
-    "importTitle": "Importer des postes depuis Excel ou CSV (un ou plusieurs)",
     "searchPlaceholder": "Rechercher un poste, une note, un document…",
     "loading": "Chargement des postes…",
     "empty": "Aucun poste pour le moment.",
@@ -366,6 +364,10 @@
   },
   "modal": {
     "title": "Nouveau poste",
+    "import": {
+      "title": "Poste depuis un fichier",
+      "intro": "L'import d'un fichier crée ces postes immédiatement. Il ne remplit pas le formulaire ci-dessous ; vérifiez l'aperçu avant de confirmer."
+    },
     "fields": {
       "title": "Titre",
       "client": "Client",

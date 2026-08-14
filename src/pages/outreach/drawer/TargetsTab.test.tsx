@@ -7,7 +7,7 @@
  * never only that a callback fired.
  */
 import { describe, it, expect, vi } from 'vitest'
-import { render, screen } from '@testing-library/react'
+import { act, render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 // Real i18n (nl) side-effect init so t() resolves genuine Dutch copy.
 import '@/i18n'
@@ -144,6 +144,16 @@ vi.mock('@/components/ui/RichTextEditor', () => ({
   ),
 }))
 vi.mock('@/components/drawer/tabs/notes/NoteAssistSection', () => ({ default: () => <div data-testid="assist-stub" /> }))
+// BELLIJST-NOTE-POPOUT-1: capture the onSaved callback TargetNoteField wires to
+// useTextPopoutHost, so the "popout saved" test below can simulate the message
+// the real BroadcastChannel would deliver (jsdom has no cross-window messaging).
+const popoutHostCalls: Array<{ onSaved: (html: string) => void }> = []
+vi.mock('@/hooks/useTextPopoutHost', () => ({
+  useTextPopoutHost: (opts: { onSaved: (html: string) => void }) => {
+    popoutHostCalls.push(opts)
+    return { open: vi.fn(), publishDraft: vi.fn(), active: false }
+  },
+}))
 
 describe('TargetsTab · per-target note (G30)', () => {
   it('renders nothing extra when no note handler is wired (no fake affordance)', () => {
@@ -178,6 +188,30 @@ describe('TargetsTab · per-target note (G30)', () => {
     // BELLIJST-SCALE-1: expand the row first — the note is tucked behind it.
     await user.click(screen.getByLabelText('Klik voor details'))
     expect(screen.getByText('Al twee keer gemist')).toBeInTheDocument()
+  })
+
+  // BELLIJST-NOTE-POPOUT-1: the note field's second-screen window persists on
+  // its OWN PATCH (OutreachTargetNotePopout), so the row must adopt that value
+  // through the established talk-back channel — never keep showing stale text.
+  it('the row adopts a note the popout window saved, and pushes it to the campaign-level state', async () => {
+    const user = userEvent.setup()
+    const onApplyTargetNote = vi.fn()
+    popoutHostCalls.length = 0
+    render(<TargetsTab targets={[{ ...target, note: 'Oude tekst' }]} loading={false} error={false}
+      onSetStatus={vi.fn()} onSetOutcome={vi.fn()} onSetNote={vi.fn()}
+      campaignId="camp-1" onApplyTargetNote={onApplyTargetNote} />)
+    await user.click(screen.getByLabelText('Klik voor details'))
+    expect(screen.getByText('Oude tekst')).toBeInTheDocument()
+
+    // Simulate the popout window's `saved` BroadcastChannel message arriving.
+    act(() => { popoutHostCalls[0]?.onSaved('<p>Bel na 17u terug</p>') })
+
+    // THE SEAM: the row's own read view updates immediately, AND the campaign-
+    // level state (useOutreachDetail.applyTargetNote) receives the exact same
+    // note — a collapsed-then-re-expanded row never reads a stale prop.
+    expect(screen.getByText('Bel na 17u terug')).toBeInTheDocument()
+    expect(screen.queryByText('Oude tekst')).toBeNull()
+    expect(onApplyTargetNote).toHaveBeenCalledWith('t1', '<p>Bel na 17u terug</p>')
   })
 })
 

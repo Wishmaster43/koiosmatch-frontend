@@ -135,7 +135,7 @@
     "stale6m": "Sans contact > 6 mois",
     "stale6mSub": "longtemps sans contact",
     "noFollowup": "Sans suivi",
-    "noFollowupSub": "nouveau, sans contact",
+    "noFollowupSub": "pas de rendez-vous, pas de tâche, pas de contact récent",
     "conversations": "Conversations actives",
     "neverContacted": "Jamais contacté",
     "neverContactedSub": "aucun contact pour l'instant",

@@ -9,7 +9,6 @@
  * fills match start/end — we show a note rather than a fabricated number.
  */
 import { useState } from 'react'
-import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import ReportKpiBand from './ReportKpiBand'
 import ReportStateBlock from './ReportStateBlock'
@@ -47,7 +46,7 @@ function StatTile({ label, value, accent, onClick }: { label: string; value: num
 // The under_contract tile keys — each drills contract_status=<key> (portie 7 XOR).
 const CONTRACT_STATUS_TILES = ['sent', 'active', 'ended', 'none'] as const
 
-export default function MatchesReport({ period, tabsSlot, filters = EMPTY_REPORT_FILTERS }: { period: ReportPeriod; tabsSlot?: ReactNode; filters?: ReportFilterState }) {
+export default function MatchesReport({ period, filters = EMPTY_REPORT_FILTERS }: { period: ReportPeriod; filters?: ReportFilterState }) {
   const { t } = useTranslation('analytics')
   const { formatDate } = useDateFormat()
   const { data, loading, error, refetch } = useMatchesReport(period, filters)
@@ -169,9 +168,6 @@ export default function MatchesReport({ period, tabsSlot, filters = EMPTY_REPORT
       {!loading && !error && !isEmpty && data && (
         <ReportKpiBand kpis={kpis} />
       )}
-
-      {/* Tab bar + period control (from the hub) */}
-      {tabsSlot}
 
       {/* The report's data window, rendered prominently from the RESPONSE —
           DD-MM-YYYY (never ISO, §3B DATUM-1). */}

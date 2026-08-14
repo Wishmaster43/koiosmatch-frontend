@@ -27,7 +27,6 @@ import ViewSwitch from '@/components/ui/ViewSwitch'
 import HeaderSearch from '@/components/ui/HeaderSearch'
 import ClearFiltersButton from '@/components/ui/ClearFiltersButton'
 import QuickViewToggle from '@/components/ui/QuickViewToggle'
-import MatchFilterBar from './MatchFilterBar'
 import { useOpenFromIntent } from '@/context/NavigationContext'
 import { useDrawerUrl } from '@/hooks/useDrawerUrl'
 import { useMatches, mapMatch, MATCHES_MAX_PER_PAGE } from './hooks/useMatches'
@@ -135,12 +134,6 @@ export default function MatchesPage({ intent }: { intent?: unknown } = {}) {
   // Multi-select toggle for the right-panel filter groups (add/remove a value).
   const tog = (set: Dispatch<SetStateAction<string[]>>) => (v: string | number) =>
     set(p => p.includes(String(v)) ? p.filter(x => x !== String(v)) : [...p, String(v)])
-
-  // B12: the same aggregates power the toolbar's primary/secondary filter options
-  // (value/label pairs) as their donut counterparts — one source per filter dimension.
-  const stageOptions = useMemo(() => stageData.map(d => ({ value: d.key, label: d.name })), [stageData])
-  const ownerOptions = useMemo(() => ownerData.map(d => ({ value: d.key, label: d.name })), [ownerData])
-  const clientOptions = useMemo(() => clientData.map(d => ({ value: d.key, label: d.name })), [clientData])
 
   // Right-panel filters: stage/owner/client/branch/score-state/date-range/archived
   // — pure builder (§0.3 split). The same stageFilter/ownerFilter drive the donuts,
@@ -369,14 +362,14 @@ export default function MatchesPage({ intent }: { intent?: unknown } = {}) {
           )}
           {/* Shared search — mirror the other list pages (§3A). */}
           <HeaderSearch key={searchEpoch} onSearch={setQuery} placeholder={t('page.searchPlaceholder')} width={260} />
-          {/* B12: primary filters (stage/owner) + a "More filters" popover for client —
-              same recipe as the candidate Match-zoeker (VacancySearchFilters). */}
-          <MatchFilterBar
-            stageOptions={stageOptions} stage={stageFilter} onStageChange={setStageFilter}
-            ownerOptions={ownerOptions} owner={ownerFilter} onOwnerChange={setOwnerFilter}
-            clientOptions={clientOptions} client={clientFilter} onClientChange={setClientFilter}
-          />
-            <ClearFiltersButton active={anyFilterActive} onClear={clearAllFilters} />
+          {/* RIGHTPANEL-FILTERS-1 (Danny 2026-08-14, "rode filters moeten naar rechts
+              filter menu"): stage/owner/client/branch/score/date-range/archived all
+              live in the right-hand filter panel now (buildMatchFilterGroups above) —
+              the toolbar's own MatchFilterBar (stage/owner triggers + a "More filters"
+              popover for client) was an exact duplicate of that panel and is deleted,
+              not moved: both copies drove the SAME stageFilter/ownerFilter/clientFilter
+              state, so nothing here changes which rows a user sees. */}
+          <ClearFiltersButton active={anyFilterActive} onClear={clearAllFilters} />
         </div>
 
         {/* Right — archived toggle + icon-only view toggle (mirror vacancies/opportunities). */}

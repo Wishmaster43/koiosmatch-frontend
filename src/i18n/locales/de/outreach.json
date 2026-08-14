@@ -134,7 +134,9 @@
     "note": {
       "empty": "Noch keine Notiz.",
       "placeholder": "Notiz hinzufügen…",
-      "saveFailed": "Die Notiz konnte nicht gespeichert werden."
+      "saveFailed": "Die Notiz konnte nicht gespeichert werden.",
+      "title": "Notiz",
+      "windowTitle": "Notiz — {{name}}"
     },
     "assign": {
       "button": "Zuweisen",

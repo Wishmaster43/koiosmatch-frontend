@@ -17,7 +17,18 @@ export const isStale = (c: Candidate, months = 6): boolean => {
 // Bug fix (Wave E3): this compared `status` (the Deployability axis: available/placed/
 // unavailable/sick/leave) against 'lead', which is a Phase-axis value (§3B) — status
 // never equals 'lead', so the fallback always returned false. Compare against `phase`.
-export const isNoFollowup = (c: Candidate): boolean => c.phase === 'lead' && !c.lastContactAt
+// GEENOPVOLGING14 (Danny 13-08) defines "geen opvolging" server-side as: NO planned
+// appointment AND NO open task AND no contact within the last N workdays (tenant
+// setting, default 5). This page-local predicate could only ever see the third
+// clause, and it used to read `phase === 'lead' && !lastContactAt` — an OLDER, much
+// narrower rule. So the tile and the list it filters counted different people, which
+// is exactly what Danny caught on 14-08: the tile said "nieuw, geen contact" while
+// every row underneath had a contact date. There is no honest way to compute the
+// first two clauses from a list row (it carries neither appointments nor tasks), so
+// this returns null instead of a wrong number, and the tile shows a dash while the
+// stats endpoint is unavailable (§ STATS-HONEST-1: never present a fallback number
+// as if it were the real one).
+export const noFollowupUncomputable = (): null => null
 // Never contacted: no recorded contact moment at all (page-local fallback predicate).
 export const isNeverContacted = (c: Candidate): boolean => !c.lastContactAt
 

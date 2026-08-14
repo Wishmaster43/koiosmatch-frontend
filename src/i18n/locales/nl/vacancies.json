@@ -3,8 +3,6 @@
     "title": "Vacatures",
     "subtitle": "Beheer en publiceer eenvoudig al je openstaande functies.",
     "add": "Nieuwe vacature",
-    "import": "Excel importeren",
-    "importTitle": "Vacatures importeren vanuit Excel of CSV (één of meerdere)",
     "searchPlaceholder": "Zoek vacature, notitie, document…",
     "loading": "Vacatures laden…",
     "empty": "Nog geen vacatures.",
@@ -366,6 +364,10 @@
   },
   "modal": {
     "title": "Nieuwe vacature",
+    "import": {
+      "title": "Vacature uit bestand",
+      "intro": "Een bestand importeren maakt deze vacatures meteen aan. Het vult het formulier hieronder niet in; controleer eerst de voorbeeldweergave voordat je bevestigt."
+    },
     "fields": {
       "title": "Titel",
       "client": "Klant",

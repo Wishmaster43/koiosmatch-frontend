@@ -151,7 +151,7 @@ function VacanciesPageInner({ intent }: { intent?: unknown }) {
   useEffect(() => () => { if (msgTimer.current) clearTimeout(msgTimer.current) }, [])
 
   // ── Data layer ──
-  const { vacancies, setVacancies, loading, error, total, setTotal, lastPage, stats, customers } =
+  const { vacancies, setVacancies, loading, error, total, setTotal, lastPage, stats, customers, refresh } =
     useVacanciesData({ filterParams, page, pageSize, t, sort })
   const customerList = customers as { id: Id; name: string }[]
 
@@ -304,7 +304,14 @@ function VacanciesPageInner({ intent }: { intent?: unknown }) {
 
   return (
     <>
-      {addOpen && <AddVacancyModal onClose={() => setAddOpen(false)} onCreated={v => { setAddOpen(false); handleCreated(v) }} users={users} customers={customerList} />}
+      {addOpen && (
+        <AddVacancyModal onClose={() => setAddOpen(false)} onCreated={v => { setAddOpen(false); handleCreated(v) }}
+          // EXCEL-VACATURES-1: a real file import refetches the list/stats (refresh)
+          // instead of prepending the way handleCreated does — a real import can
+          // land any number of vacancies in one run (mirrors AddCustomerModal).
+          onImported={refresh}
+          users={users} customers={customerList} />
+      )}
       <div style={{ display: 'flex', height: '100%', overflow: 'hidden' }}>
         <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
 
@@ -334,14 +341,6 @@ function VacanciesPageInner({ intent }: { intent?: unknown }) {
                 onOpenCandidateSearch={openCandidateSearch} />
             }
             onAddOpen={() => setAddOpen(true)}
-            // PDF-VACATURES-2026-08-14 point 7: the Excel/CSV upload button next to
-            // "+ Nieuwe vacature" jumps to the real full-screen import wizard
-            // (#import-wizard already accepts vacancies — routes/api/tenant/
-            // exports.php's `vacancies/dry-run` + `vacancies` import routes, and
-            // ImportUploadRequest accepts csv/txt/xlsx), preselected on vacancies —
-            // never a second, home-grown upload flow (§11 no duplicate implementation).
-            onImportOpen={() => navigate('import-wizard', { entity: 'vacancies' })}
-            canImport={hasPermission('vacancies.create')}
             searchEpoch={searchEpoch} globalSearch={globalSearch} onSearch={setGlobalSearch}
             anyFilterActive={anyFilterActive} onClearFilters={clearAllFilters}
             showArchived={showArchived} onToggleArchived={() => { setShowArchived(v => !v); setShowTrash(false) }}

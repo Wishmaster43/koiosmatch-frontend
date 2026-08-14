@@ -134,7 +134,9 @@
     "note": {
       "empty": "No note yet.",
       "placeholder": "Add a note…",
-      "saveFailed": "Saving the note failed."
+      "saveFailed": "Saving the note failed.",
+      "title": "Note",
+      "windowTitle": "Note — {{name}}"
     },
     "assign": {
       "button": "Assign",

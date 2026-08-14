@@ -7,7 +7,6 @@
  * window reads as "counts don't match the list" instead of the deliberate split.
  */
 import { useState } from 'react'
-import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import ReportKpiBand from './ReportKpiBand'
 import { reportCardStyle as card, reportSectionHeadStyle as head } from './ReportSectionCard'
@@ -43,7 +42,7 @@ const BUCKET_COLOR: Record<keyof ApplicationBucketCounts, string> = {
   rejected: 'var(--color-danger)', placed: 'var(--color-success)',
 }
 
-export default function ApplicationsReport({ period, tabsSlot, filters = EMPTY_REPORT_FILTERS }: { period: ReportPeriod; tabsSlot?: ReactNode; filters?: ReportFilterState }) {
+export default function ApplicationsReport({ period, filters = EMPTY_REPORT_FILTERS }: { period: ReportPeriod; filters?: ReportFilterState }) {
   const { t } = useTranslation('analytics')
   const { formatDate } = useDateFormat()
   const { data, loading, error, refetch } = useApplicationsReport(period, filters)
@@ -153,9 +152,6 @@ export default function ApplicationsReport({ period, tabsSlot, filters = EMPTY_R
       {hasData && (
         <ReportKpiBand kpis={kpis} />
       )}
-
-      {/* Tab bar + period control (from the hub) */}
-      {tabsSlot}
 
       {/* The report's data window, rendered prominently — DD-MM-YYYY (never ISO, §3B). */}
       {!loading && !error && data && (

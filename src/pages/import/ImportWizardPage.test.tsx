@@ -146,7 +146,7 @@ describe('ImportWizardPage — mapping + editable preview', () => {
   })
 
   // The .xlsx entry point lives on the raw-upload screens (settings importeren,
-  // CustomerImportCard, SubEntityImportCard) — THIS screen parses the file
+  // the shared EntityImportCard, SubEntityImportCard) — THIS screen parses the file
   // client-side for column mapping (no xlsx parser in the repo), so it stays
   // .csv/.txt only on purpose.
   it('the upload input stays .csv/.txt only — this screen parses client-side, it never got .xlsx', async () => {

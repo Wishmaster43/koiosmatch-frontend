@@ -158,7 +158,7 @@
     "stale6m": "Niet benaderd > 6 mnd",
     "stale6mSub": "lang geen contact",
     "noFollowup": "Geen opvolging",
-    "noFollowupSub": "nieuw, geen contact",
+    "noFollowupSub": "geen afspraak, geen taak, geen recent contact",
     "conversations": "Actieve gesprekken",
     "neverContacted": "Nooit benaderd",
     "neverContactedSub": "nog geen contactmoment",

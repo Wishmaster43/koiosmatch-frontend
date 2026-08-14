@@ -8,7 +8,7 @@
  */
 import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Archive, Map as MapIcon, Trash2, FileSpreadsheet } from 'lucide-react'
+import { Archive, Map as MapIcon, Trash2 } from 'lucide-react'
 import HeaderSearch from '@/components/ui/HeaderSearch'
 import ClearFiltersButton from '@/components/ui/ClearFiltersButton'
 import QuickViewToggle from '@/components/ui/QuickViewToggle'
@@ -19,10 +19,6 @@ interface VacanciesToolbarProps {
   /** The composed VacanciesBulkBar (page keeps its data wiring). */
   bulkBar: ReactNode
   onAddOpen: () => void
-  // PDF-VACATURES-2026-08-14 point 7: opens the real full-screen import wizard
-  // preselected on vacancies; the button itself only renders when `canImport`.
-  onImportOpen: () => void
-  canImport: boolean
   searchEpoch: number
   globalSearch: string
   onSearch: (v: string) => void
@@ -37,7 +33,7 @@ interface VacanciesToolbarProps {
 }
 
 export default function VacanciesToolbar({
-  selectedCount, bulkBar, onAddOpen, onImportOpen, canImport, searchEpoch, globalSearch, onSearch,
+  selectedCount, bulkBar, onAddOpen, searchEpoch, globalSearch, onSearch,
   anyFilterActive, onClearFilters, showArchived, onToggleArchived,
   showTrash, onToggleTrash, mapActive, onToggleView,
 }: VacanciesToolbarProps) {
@@ -54,17 +50,10 @@ export default function VacanciesToolbar({
               background: 'var(--color-primary)', color: 'var(--color-on-accent)', border: 'none', borderRadius: 8, cursor: 'pointer' }}>
               + {t('page.add')}
             </button>
-            {/* PDF-VACATURES-2026-08-14 point 7: Excel/CSV bulk-upload, one or many
-                vacancies — jumps to the real import wizard (§11: reuse, no second
-                upload implementation); permission-gated on vacancies.create, the
-                same right the wizard's own confirm step needs. */}
-            {canImport && (
-              <button type="button" onClick={onImportOpen} title={t('page.importTitle')}
-                style={{ display: 'flex', alignItems: 'center', gap: 6, height: BTN_H, padding: '0 14px', fontSize: 13, fontWeight: 600,
-                  background: 'none', color: 'var(--text)', border: '1px solid var(--border)', borderRadius: 8, cursor: 'pointer' }}>
-                <FileSpreadsheet size={14} /> {t('page.import')}
-              </button>
-            )}
+            {/* EXCEL-VACATURES-1 (Danny 14-08, screenshot: "Excel importeren moet in de
+                pop-up + nieuwe vacature niet hier boven de tabel!!"): the Excel/CSV
+                import button moved off this toolbar into AddVacancyModal's header —
+                mirrors KLANT-LAYOUT-3's identical move on the customer modal. */}
             {/* Shared header search (T10) — debounced, drives the same server-side ?search=. */}
             <HeaderSearch key={searchEpoch} onSearch={onSearch} defaultValue={globalSearch}
               placeholder={t('page.searchPlaceholder')} width={300} />

@@ -35,7 +35,9 @@ interface Args {
   attentionFilter: string | null
   toggleAttention: (key: string) => void
   staleMonths: number
-  counts: { stale: number; neverContacted: number; noFollowup: number; intake: number; activeConv: number; tasks: number }
+  // noFollowup is null when the stats endpoint is unavailable: that rule cannot be
+  // computed from list rows, so the card shows a dash rather than a wrong number.
+  counts: { stale: number; neverContacted: number; noFollowup: number | null; intake: number; activeConv: number; tasks: number }
 }
 
 export function buildCandidateInsights({
@@ -61,7 +63,7 @@ export function buildCandidateInsights({
       onClick: () => toggleAttention('stale6m'),    active: attentionFilter === 'stale6m' },
     { key: 'neverContacted', label: t('analytics.neverContacted'), value: counts.neverContacted, sub: t('analytics.neverContactedSub'), color: 'var(--color-info)',
       onClick: () => toggleAttention('neverContacted'), active: attentionFilter === 'neverContacted' },
-    { key: 'noFollowup', label: t('analytics.noFollowup'), value: counts.noFollowup, sub: t('analytics.noFollowupSub'), color: 'var(--color-danger)',
+    { key: 'noFollowup', label: t('analytics.noFollowup'), value: counts.noFollowup ?? '—', sub: t('analytics.noFollowupSub'), color: 'var(--color-danger)',
       onClick: () => toggleAttention('noFollowup'), active: attentionFilter === 'noFollowup' },
     // Click filters on the SAME definition as the stat (planned intake appointments) via
     // the intake_planned param (INTAKE-1) — the old funnel-stage set never matched the count.

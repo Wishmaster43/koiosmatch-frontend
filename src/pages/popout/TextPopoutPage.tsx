@@ -26,6 +26,9 @@ import CustomerLocationTextPopout from '@/pages/customers/popout/CustomerLocatio
 // V-desc-1: the vacancy description popout lives under pages/vacancies/popout
 // (this task's own folder scope), not here — this dispatcher only imports it.
 import VacancyDescriptionPopout from '@/pages/vacancies/popout/VacancyDescriptionPopout'
+// BELLIJST-NOTE-POPOUT-1: the outreach (call-list) target note popout lives
+// under pages/outreach/popout (this task's own folder scope), not here.
+import OutreachTargetNotePopout from '@/pages/outreach/popout/OutreachTargetNotePopout'
 
 // One entry per supported `<entity>:<field>` pair — keep in sync with
 // PopoutTextField / openTextPopout in lib/secondScreen.ts.
@@ -36,6 +39,7 @@ const TEXT_POPOUT_PAGES: Record<string, ComponentType<{ id: string | undefined }
   'customer:departmentText': CustomerDepartmentTextPopout,
   'customer:locationText': CustomerLocationTextPopout,
   'vacancy:description': VacancyDescriptionPopout,
+  'outreachTarget:targetNote': OutreachTargetNotePopout,
 }
 
 export default function TextPopoutPage() {

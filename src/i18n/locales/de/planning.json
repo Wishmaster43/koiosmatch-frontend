@@ -1,6 +1,7 @@
 {
   "addShift": "Einsatz hinzufügen",
-  "previewNotice": "Nur Vorschau. Die hier gezeigten Einsätze sind Demodaten, nichts Hinzugefügtes wird bereits in Ihrem Live-Dienstplan gespeichert.",
+  "previewNotice": "Die hier gezeigten Einsätze sind Ihr echter Dienstplan. Ein neuer Einsatz in diesem Kalender wird noch nicht gespeichert.",
+  "loadErrorShifts": "Einsätze konnten nicht geladen werden.",
   "previewSaveTitle": "Noch nicht verbunden. Dieser Einsatz wird nicht gespeichert.",
   "sectionOrder": "Auftrag",
   "sectionLocation": "Standort",
@@ -43,10 +44,46 @@
     "month": "Monat",
     "week": "Woche",
     "day": "Tag",
-    "list": "Liste"
+    "list": "Liste",
+    "orders": "Aufträge"
   },
   "filters": {
     "shift": "Dienst",
     "location": "Standort"
+  },
+  "order": {
+    "modal": {
+      "title": "Neuer Auftrag",
+      "subtitle": "Der erste Schritt der Planung: Auftrag, dann Dienst, dann Einsatz.",
+      "create": "Auftrag anlegen"
+    },
+    "sectionCustomer": "Kunde",
+    "sectionOrder": "Auftrag",
+    "fLocation": "Standort",
+    "fOwner": "Verantwortlicher",
+    "fFunction": "Funktion",
+    "fReference": "Referenz",
+    "fSubject": "Betreff",
+    "fStatus": "Status",
+    "fCostCenter": "Kostenstelle",
+    "fDescription": "Beschreibung",
+    "noCustomer": "Kein Kunde",
+    "noLocation": "Kein Standort",
+    "noDepartment": "Keine Abteilung",
+    "noOwner": "Kein Verantwortlicher",
+    "noFunction": "Keine Funktion",
+    "pickLocationFirst": "Zuerst einen Standort wählen",
+    "status": {
+      "open": "Offen",
+      "filled": "Besetzt",
+      "cancelled": "Storniert"
+    },
+    "addOrder": "Auftrag hinzufügen",
+    "listTitle": "Aufträge",
+    "shiftsCount": "{{count}} Dienst",
+    "shiftsCount_other": "{{count}} Dienste",
+    "empty": "Noch keine Aufträge.",
+    "emptyHint": "Unten klicken, um den ersten anzulegen.",
+    "errorList": "Die Auftragsliste konnte nicht geladen werden."
   }
 }

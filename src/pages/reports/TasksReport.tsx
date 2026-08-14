@@ -10,7 +10,6 @@
  * affordances — a stat without a real drill path never looks clickable).
  */
 import { useState } from 'react'
-import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import ReportKpiBand from './ReportKpiBand'
 import { reportCardStyle as card, reportSectionHeadStyle as head } from './ReportSectionCard'
@@ -35,7 +34,7 @@ type Axis = 'status' | 'type' | 'priority' | 'team' | 'branch'
 // colour, the other axes do not (SegmentBars falls back to the primary tint).
 type AxisSeg = { value: string; label: string; count: number; color?: string | null }
 
-export default function TasksReport({ period, tabsSlot, filters = EMPTY_REPORT_FILTERS }: { period: ReportPeriod; tabsSlot?: ReactNode; filters?: ReportFilterState }) {
+export default function TasksReport({ period, filters = EMPTY_REPORT_FILTERS }: { period: ReportPeriod; filters?: ReportFilterState }) {
   const { t } = useTranslation('analytics')
   const { formatDate } = useDateFormat()
   const { data, loading, error, refetch } = useTasksReport(period, filters)
@@ -135,9 +134,6 @@ export default function TasksReport({ period, tabsSlot, filters = EMPTY_REPORT_F
       {hasData && (
         <ReportKpiBand kpis={kpis} />
       )}
-
-      {/* Tab bar + period control (from the hub) */}
-      {tabsSlot}
 
       {/* The report's data window, rendered prominently from the RESPONSE —
           DD-MM-YYYY (never ISO, §3B DATUM-1). */}

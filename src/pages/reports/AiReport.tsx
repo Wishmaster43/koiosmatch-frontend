@@ -11,7 +11,6 @@
  * drill target this report doesn't have — inventing a new standalone-advice
  * shape for one screen would be a one-off, so it is deliberately skipped here.
  */
-import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import ReportKpiBand from './ReportKpiBand'
 import { reportCardStyle as card, reportSectionHeadStyle as head } from './ReportSectionCard'
@@ -24,7 +23,7 @@ import { useDateFormat } from '@/lib/datetime'
 import { formatNumber } from '@/lib/formatters'
 import type { ReportPeriod, AiActivitySegment } from '@/types/analytics'
 
-export default function AiReport({ period, tabsSlot }: { period: ReportPeriod; tabsSlot?: ReactNode }) {
+export default function AiReport({ period }: { period: ReportPeriod }) {
   const { t } = useTranslation('analytics')
   const { formatDate } = useDateFormat()
   const { data, loading, error, refetch } = useAiReport(period)
@@ -69,9 +68,6 @@ export default function AiReport({ period, tabsSlot }: { period: ReportPeriod; t
       {hasData && (
         <ReportKpiBand kpis={kpis} />
       )}
-
-      {/* Tab bar + period control (from the hub) */}
-      {tabsSlot}
 
       {/* The report's data window, rendered prominently from the RESPONSE —
           DD-MM-YYYY (never ISO, §3B DATUM-1). */}

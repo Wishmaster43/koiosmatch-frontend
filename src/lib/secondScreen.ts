@@ -24,7 +24,12 @@
 // The entities whose notes tab can pop out to a second screen. Mirrors the
 // dynamic `:entity` route segment in App.tsx and the entity dispatch in
 // pages/popout/NotesPopoutPage.tsx — keep the set in sync.
-export type PopoutEntity = 'candidate' | 'customer' | 'vacancy' | 'application'
+// `outreachTarget` (BELLIJST-NOTE-POPOUT-1) is the odd one out on purpose: it
+// has no notes THREAD (a target has one plain `note` column, not a list), so it
+// only ever appears in TEXT_POPOUT_PAGES below, never in NotesPopoutPage's
+// dispatch — the same asymmetry `application` already has in the other
+// direction (a notes thread, no text-field entry).
+export type PopoutEntity = 'candidate' | 'customer' | 'vacancy' | 'application' | 'outreachTarget'
 
 /**
  * Feature string for every second-screen window this app opens, sized to the
@@ -150,7 +155,14 @@ export function openNoteEditPopout(entity: PopoutEntity, id: string | number, no
 // treatment as `departmentText` — a standalone `GET/PATCH /locations/{id}`
 // route exists (unlike departments, no customer prefix needed), so this field's
 // `id` is the location's OWN id, not a composite.
-export type PopoutTextField = 'summary' | 'matchRemarks' | 'companyText' | 'departmentText' | 'description' | 'locationText'
+// `targetNote` (BELLIJST-NOTE-POPOUT-1, Danny 14-08: "dit moet zeker een pop-out
+// kunnen worden op een popup"): a call-list (outreach) TARGET's own note — the
+// SAME single-column PATCH shape as the fields above (never a notes thread), so
+// it belongs on this list, not NOTE_EDIT_POPOUT_ENTITIES. Rides under entity
+// 'outreachTarget'; no standalone `GET /outreach-targets/{id}` exists (measured
+// — routes/api/tenant/tasks-outreach.php only wires PATCH), so this field's `id`
+// is the COMPOSITE `outreachTargetPopoutId()` below, mirroring `departmentText`.
+export type PopoutTextField = 'summary' | 'matchRemarks' | 'companyText' | 'departmentText' | 'description' | 'locationText' | 'targetNote'
 
 // K5a: encodes/decodes the composite id `departmentText` travels under —
 // `<customerId>:<departmentId>` — so ONE string still fits the existing
@@ -163,6 +175,19 @@ export const parseDepartmentPopoutId = (id: string | undefined): { customerId: s
   if (!id) return null
   const [customerId, departmentId] = id.split(':')
   return customerId && departmentId ? { customerId, departmentId } : null
+}
+
+// BELLIJST-NOTE-POPOUT-1: the same composite-id trick as `departmentPopoutId`
+// above, for the same reason — no standalone `GET /outreach-targets/{id}`
+// exists, so the popped-out window loads the CAMPAIGN detail (which already
+// eager-loads `targets.candidate`, including each target's `note`) and picks
+// its own row out of `targets[]`.
+export const outreachTargetPopoutId = (campaignId: string | number, targetId: string | number): string =>
+  `${campaignId}:${targetId}`
+export const parseOutreachTargetPopoutId = (id: string | undefined): { campaignId: string; targetId: string } | null => {
+  if (!id) return null
+  const [campaignId, targetId] = id.split(':')
+  return campaignId && targetId ? { campaignId, targetId } : null
 }
 
 // Identity of ONE popped-out field: the OS window name AND the BroadcastChannel

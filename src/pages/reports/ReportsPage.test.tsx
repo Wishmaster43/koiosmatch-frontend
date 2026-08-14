@@ -237,6 +237,22 @@ describe('ReportsPage — right filter panel', () => {
     expect(screen.getByTestId('flow-period')).toBeInTheDocument()
   })
 
+  // RIGHTPANEL-FILTERS-1 (Danny 2026-08-14, "rode filters moeten naar rechts
+  // filter menu"): ReportsPage used to render its own inline period `CreatableSelect`
+  // (a <button> trigger, passed down via `tabsSlot`) ABOVE every report — an exact
+  // duplicate of the `period` radio group already registered into the right panel
+  // (asserted above). That control is now gone; ReportsPage's own JSX renders no
+  // interactive control of its own at all, so a stray reintroduction would show up
+  // here as a non-zero button count.
+  it('renders no inline period picker of its own — period is chosen ONLY via the right panel now', () => {
+    const { container } = render(
+      <RightPanelProvider>
+        <ReportsPage reportId="flow" />
+      </RightPanelProvider>,
+    )
+    expect(container.querySelectorAll('button')).toHaveLength(0)
+  })
+
   it('the period group only ever carries the period param on an unfilterable report', () => {
     let latest: RadioGroup[] = []
     render(

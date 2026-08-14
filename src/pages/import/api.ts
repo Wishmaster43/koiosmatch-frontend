@@ -4,9 +4,10 @@
  * same HTTP calls: GET /imports/templates, GET /imports/{entity}/template.csv,
  * POST /imports/{entity}/dry-run and POST /imports/{entity} already live in
  * settings/sections/importeren/importApi.ts, used unchanged by both the settings
- * import screen AND CustomerImportCard's useCustomerImport. The one thing this
- * wizard adds on top is buildImportFile: turning the MAPPED + user-edited rows back
- * into a File the existing dry-run/run endpoints accept.
+ * import screen AND the shared EntityImportCard's useEntityImportCard (customers +
+ * vacancies create-modal imports). The one thing this wizard adds on top is
+ * buildImportFile: turning the MAPPED + user-edited rows back into a File the
+ * existing dry-run/run endpoints accept.
  */
 import { buildCsvText } from './lib/csv'
 
