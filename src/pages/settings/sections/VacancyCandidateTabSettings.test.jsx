@@ -65,15 +65,19 @@ describe('VacancyCandidateTabSettings — leads criteria', () => {
     blobRef.current = { vacancy_candidate_tab: JSON.stringify(STORED) }
     const user = userEvent.setup()
     render(<VacancyCandidateTabSettings />)
+    // SETTINGS-SUBTABS-1: this control now lives under its own sub-tab.
+    await user.click(screen.getByRole('tab', { name: t('candidateTab.leadsCriteria.excludeAlreadyAppliedLabel') }))
     await user.click(screen.getByRole('switch', { name: t('candidateTab.leadsCriteria.includeExpiringPlacementsLabel') }))
     expect(postMock).toHaveBeenCalledWith('/settings', {
       vacancy_candidate_tab: JSON.stringify({ ...STORED, include_expiring_placements: false }),
     })
   })
 
-  it('the expiring-within-days input clamps an out-of-range value before persisting', () => {
+  it('the expiring-within-days input clamps an out-of-range value before persisting', async () => {
     blobRef.current = { vacancy_candidate_tab: JSON.stringify(STORED) }
+    const user = userEvent.setup()
     render(<VacancyCandidateTabSettings />)
+    await user.click(screen.getByRole('tab', { name: t('candidateTab.leadsCriteria.excludeAlreadyAppliedLabel') }))
     const daysInput = screen.getByLabelText(t('candidateTab.leadsCriteria.expiringWithinDaysLabel'))
     // A single change event (not user.type — this input is fully controlled by
     // the stored blob, which this mock never reflects back, so per-keystroke
@@ -88,6 +92,7 @@ describe('VacancyCandidateTabSettings — leads criteria', () => {
     blobRef.current = { vacancy_candidate_tab: JSON.stringify(STORED) }
     const user = userEvent.setup()
     render(<VacancyCandidateTabSettings />)
+    await user.click(screen.getByRole('tab', { name: t('candidateTab.leadsCriteria.title') }))
     expect(screen.getByLabelText(t('candidateTab.defaultRadiusLabel'))).not.toBeDisabled()
     await user.click(screen.getByRole('switch', { name: t('candidateTab.leadsCriteria.applyRadiusLabel') }))
     expect(postMock).toHaveBeenCalledWith('/settings', {
@@ -95,15 +100,19 @@ describe('VacancyCandidateTabSettings — leads criteria', () => {
     })
   })
 
-  it('apply_radius: false renders the radius input with a real disabled attribute', () => {
+  it('apply_radius: false renders the radius input with a real disabled attribute', async () => {
     blobRef.current = { vacancy_candidate_tab: JSON.stringify({ ...STORED, apply_radius: false }) }
+    const user = userEvent.setup()
     render(<VacancyCandidateTabSettings />)
+    await user.click(screen.getByRole('tab', { name: t('candidateTab.leadsCriteria.title') }))
     expect(screen.getByLabelText(t('candidateTab.defaultRadiusLabel'))).toBeDisabled()
   })
 
-  it('renders the honest caveat note on the function_match "category" option', () => {
+  it('renders the honest caveat note on the function_match "category" option', async () => {
     blobRef.current = { vacancy_candidate_tab: JSON.stringify(STORED) }
+    const user = userEvent.setup()
     render(<VacancyCandidateTabSettings />)
+    await user.click(screen.getByRole('tab', { name: t('candidateTab.leadsCriteria.title') }))
     expect(screen.getByText(t('candidateTab.leadsCriteria.functionMatchCategoryNote'))).toBeInTheDocument()
   })
 })

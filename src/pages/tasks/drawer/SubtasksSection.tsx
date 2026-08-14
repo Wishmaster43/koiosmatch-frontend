@@ -3,14 +3,21 @@
  * now ride the contract as `parent` (the main task) + `subtask_progress` on every
  * task. The tasks list HIDES subtasks by default, so this section fetches them
  * explicitly with `?parent_id=<id>` — the one documented way to see them. Renders
- * two independent things, either or both: (a) this task's OWN subtasks, when
- * `task.subtaskProgress.total > 0`; (b) a reference row to the MAIN task, when
- * this task itself is a subtask (`task.parent` set). Renders nothing when neither
- * applies (no fake affordance, §3).
+ * up to three things: (a) an "add subtask" affordance (always, DrawerAddButton —
+ * §3A house pattern, never coloured text), (b) this task's OWN subtasks, when
+ * `task.subtaskProgress.total > 0`, and (c) a reference row to the MAIN task,
+ * when this task itself is a subtask (`task.parent` set).
  *
- * No "add subtask" button here (deliberately): POST /tasks does accept a
- * `parent_id`, but there is no dedicated create-with-parent flow in the UI yet
- * (AddTaskModal has no parent picker) — building that is out of this task's scope.
+ * SUBTASK-CREATE-1 (14-08, this delivery): the add button opens AddTaskModal
+ * with `parentId={task.id}` — POST /tasks does accept `parent_id` (confirmed in
+ * the generated spec) and the modal now sends it whenever it is set, with NO
+ * main-task picker added to the general form (brief rule 4: programmatic only).
+ * The full create form is reused as-is (rule 2: "hergebruik waar dat kan" — every
+ * required field, e.g. type, still applies; nothing here invents a default the
+ * user doesn't see). After a successful create: the subtask list refetches, and
+ * `onSubtaskCreated` bumps this task's own `subtaskProgress.total` — a LOCAL-only
+ * count update (no PATCH — subtask_progress is a derived, read-only tally, never
+ * a task field the API would accept a write for).
  */
 import { useEffect, useState, useCallback, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -18,6 +25,8 @@ import { ListChecks, ArrowUpRight } from 'lucide-react'
 import api, { unwrapList } from '@/lib/api'
 import SoftChip from '@/components/ui/SoftChip'
 import { sectionTitle } from '@/components/ui/SectionCard'
+import DrawerAddButton from '@/components/drawer/DrawerAddButton'
+import AddTaskModal from '../AddTaskModal'
 import { useNavigation } from '@/context/NavigationContext'
 import type { TaskDetail } from '@/types/task'
 import type { Id } from '@/types/common'
@@ -34,12 +43,18 @@ const rowBtnStyle = {
   background: 'var(--bg)', cursor: 'pointer',
 }
 
-export default function SubtasksSection({ task }: { task: TaskDetail }) {
+export default function SubtasksSection({ task, onSubtaskCreated }: {
+  task: TaskDetail
+  // Local-only tally bump on the HOST task's own `subtaskProgress` (see file
+  // header) — optional so tests/callers that never create a subtask stay unchanged.
+  onSubtaskCreated?: () => void
+}) {
   const { t } = useTranslation('tasks')
   const { openEntity } = useNavigation()
   const [rows, setRows] = useState<SubtaskRow[]>([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(false)
+  const [addOpen, setAddOpen] = useState(false)
   // Freshness guard (§9, mirrors RelatedTasks): a monotonic request id so a slow
   // response for a previously-opened task can never overwrite the current one.
   const requestIdRef = useRef(0)
@@ -57,11 +72,29 @@ export default function SubtasksSection({ task }: { task: TaskDetail }) {
   }, [hasSubtasks, task.id])
   useEffect(() => { fetchSubtasks() }, [fetchSubtasks])
 
-  // Neither a parent task to link to nor own subtasks to list — render nothing.
-  if (!hasSubtasks && !task.parent) return null
+  // SUBTASK-CREATE-1: a fresh subtask was created — refetch this task's own list
+  // (picks it up even on the very first subtask, since `hasSubtasks` flipping
+  // true on its own re-triggers the effect above, but a SECOND add on an
+  // already-nonzero total would not) and bump the host's local tally.
+  const handleCreated = () => {
+    setAddOpen(false)
+    fetchSubtasks()
+    onSubtaskCreated?.()
+  }
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+      {/* SUBTASK-CREATE-1: the one "+ add" affordance, house pattern (§3A —
+          DrawerAddButton, never coloured text). Always available, even before this
+          task has any subtasks yet — that is precisely how the first one gets made. */}
+      <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+        <DrawerAddButton onClick={() => setAddOpen(true)} label={t('details.subtasks.add')} />
+      </div>
+
+      {addOpen && (
+        <AddTaskModal parentId={task.id} onClose={() => setAddOpen(false)} onCreated={handleCreated} />
+      )}
+
       {/* This task's own main task — a plain reference row, read-only. */}
       {task.parent && (
         <button onClick={() => openEntity('tasks', task.parent!.id)} style={rowBtnStyle}>

@@ -55,6 +55,9 @@ interface TaskDrawerProps {
   onRestore?: (id: Id | undefined) => void
   // TRASH-OVERAL-2: the shared trash-section wiring (mark/unmark, see TrashLifecycleSection).
   trash?: TrashSectionConfig
+  // SUBTASK-CREATE-1: local-only `subtaskProgress` tally bump after a subtask is
+  // created in DetailsTab's SubtasksSection — see TaskDrawer's own render below.
+  onSubtaskCreated?: (id: Id | undefined) => void
 }
 
 /**
@@ -63,7 +66,7 @@ interface TaskDrawerProps {
  * (status / priority / assignee) + a one-click "mark done" quick action, so the most
  * common changes need no edit-mode; the full field edit still lives in DetailsTab.
  */
-export default function TaskDrawer({ task, onClose, expanded, onToggleExpand, onUpdate, onAddLink, onRemoveLink, onRestore, trash }: TaskDrawerProps) {
+export default function TaskDrawer({ task, onClose, expanded, onToggleExpand, onUpdate, onAddLink, onRemoveLink, onRestore, trash, onSubtaskCreated }: TaskDrawerProps) {
   const { t } = useTranslation('tasks')
   const { formatDate, formatDateTime } = useDateFormat()
   const { statuses, priorities, doneStatusValues } = useTaskLookups()
@@ -86,7 +89,7 @@ export default function TaskDrawer({ task, onClose, expanded, onToggleExpand, on
   // Map a tab id to its content component.
   const renderTab = (id: string): ReactNode => {
     switch (id) {
-      case 'details':  return <DetailsTab task={task} onUpdate={patch => onUpdate(task.id, patch)} />
+      case 'details':  return <DetailsTab task={task} onUpdate={patch => onUpdate(task.id, patch)} onSubtaskCreated={() => onSubtaskCreated?.(task.id)} />
       case 'links':    return <LinksTab task={task} onAddLink={link => onAddLink(task.id, link)} onRemoveLink={link => onRemoveLink(task.id, link)} />
       // T5: its own tab now (generalised beyond candidate-only) — was a section
       // pinned under Details.

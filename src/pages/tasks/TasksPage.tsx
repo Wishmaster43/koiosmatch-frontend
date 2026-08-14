@@ -146,7 +146,7 @@ function TasksPageInner({ intent }: { intent?: unknown }) {
   // Drawer open/close + single-record mutations (§0.3 split → hook).
   const {
     selected, setSelected, expanded, setExpanded,
-    closeDrawer, selectTask, handleUpdate, handleMove, handleAddLink, handleRemoveLink, restoreTask,
+    closeDrawer, selectTask, handleUpdate, handleMove, handleAddLink, handleRemoveLink, restoreTask, bumpSubtaskTotal,
   } = useTaskDrawerActions({ setTasks, archivedTasks, setArchivedTasks, decorate, t })
 
   // Open a task drawer when arriving via a cross-entity link ({ open: id }, candidate → task).
@@ -269,6 +269,7 @@ function TasksPageInner({ intent }: { intent?: unknown }) {
         onUpdate={handleUpdate}
         onAddLink={handleAddLink}
         onRemoveLink={handleRemoveLink}
+        onSubtaskCreated={bumpSubtaskTotal}
         // Restore is update-class (reversible, BE gates tasks.update) — same signal as archive.
         onRestore={canArchive ? restoreTask : undefined}
         // TRASH-OVERAL-2: shared trash section (mark = tasks.delete, unmark =

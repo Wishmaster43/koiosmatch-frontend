@@ -118,12 +118,18 @@ function VacancyCandidateTabSettingsInner() {
     persist({ expiring_within_days: n })
   }
 
-  // Three sub-tabs — one per checkbox block, reusing the shared underline SubTabBar.
+  // SETTINGS-SUBTABS-1 (Danny 14-08): the WHOLE screen is sub-tabbed now, not just
+  // the top chip-select block — the leads-criteria section used to render as one
+  // long always-visible list below a divider. Six sub-tabs, one per concern,
+  // reusing the shared underline SubTabBar (mirrors every other settings screen).
   const [activeTab, setActiveTab] = useState('vacancy_statuses')
   const tabs = [
     { id: 'vacancy_statuses', label: t('candidateTab.vacancyStatusesTitle') },
     { id: 'candidate_statuses', label: t('candidateTab.candidateStatusesTitle') },
     { id: 'contract_forms', label: t('candidateTab.contractFormsTitle') },
+    { id: 'countable_statuses', label: t('candidateTab.leadsCriteria.countableStatusesTitle') },
+    { id: 'radius_function', label: t('candidateTab.leadsCriteria.title') },
+    { id: 'exclusions', label: t('candidateTab.leadsCriteria.excludeAlreadyAppliedLabel') },
   ]
 
   return (
@@ -133,102 +139,113 @@ function VacancyCandidateTabSettingsInner() {
 
       <SubTabBar tabs={tabs} active={activeTab} onChange={setActiveTab} />
       <div style={{ marginTop: 14 }}>
-        {activeTab === 'vacancy_statuses' && <LookupChipSelect items={vacancyStatuses} selected={cfg.vacancy_statuses} onToggle={toggleIn('vacancy_statuses')} ariaLabel={t('candidateTab.vacancyStatusesTitle')} />}
-        {activeTab === 'candidate_statuses' && <LookupChipSelect items={candidateStatuses} selected={cfg.candidate_statuses} onToggle={toggleIn('candidate_statuses')} ariaLabel={t('candidateTab.candidateStatusesTitle')} />}
-        {activeTab === 'contract_forms' && <LookupChipSelect items={candidateTypes} selected={cfg.contract_forms} onToggle={toggleIn('contract_forms')} ariaLabel={t('candidateTab.contractFormsTitle')} />}
-      </div>
+        {activeTab === 'vacancy_statuses' && (
+          <LookupChipSelect items={vacancyStatuses} selected={cfg.vacancy_statuses} onToggle={toggleIn('vacancy_statuses')} ariaLabel={t('candidateTab.vacancyStatusesTitle')} />
+        )}
+        {activeTab === 'candidate_statuses' && (
+          <LookupChipSelect items={candidateStatuses} selected={cfg.candidate_statuses} onToggle={toggleIn('candidate_statuses')} ariaLabel={t('candidateTab.candidateStatusesTitle')} />
+        )}
+        {activeTab === 'contract_forms' && (
+          <LookupChipSelect items={candidateTypes} selected={cfg.contract_forms} onToggle={toggleIn('contract_forms')} ariaLabel={t('candidateTab.contractFormsTitle')} />
+        )}
 
-      {/* LEADS-CRITERIA-1: every control below is read by the SAME backend
-          MatchCriteriaResolver that computes the vacancy leads counter AND this
-          tab's own candidate search — a change here changes both immediately. */}
-      <div style={{ marginTop: 28, paddingTop: 20, borderTop: '1px solid var(--border)' }}>
-        <h3 style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)' }}>{t('candidateTab.leadsCriteria.title')}</h3>
-        <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2, marginBottom: 16 }}>{t('candidateTab.leadsCriteria.subtitle')}</p>
-
-        {/* (a) countable_vacancy_statuses — which vacancy statuses count toward the
-            leads counter; reuses the same vacancy-status list + checkbox affordance
-            as the sub-tab above. Empty selection = every status counts. */}
-        <div style={{ marginBottom: 18 }}>
-          <LookupChipSelect items={vacancyStatuses} selected={cfg.countable_vacancy_statuses} onToggle={toggleIn('countable_vacancy_statuses')}
-            label={t('candidateTab.leadsCriteria.countableStatusesTitle')} hint={t('candidateTab.leadsCriteria.countableStatusesHint')} />
-        </div>
-
-        {/* (b)+(c) apply_radius gates default_radius_km (RADIUS-SETTING-1's input,
-            moved here since it only matters for the leads counter's distance
-            filter): OFF means distance is ignored entirely, so the radius input
-            renders disabled (never hidden) to keep that relationship visible. */}
-        <div style={{ marginBottom: 18 }}>
-          <label style={{ fontSize: 12, fontWeight: 600, color: 'var(--text)', display: 'block', marginBottom: 6 }}>
-            {t('candidateTab.leadsCriteria.radiusTitle')}
-          </label>
-          <CheckboxRow checked={cfg.apply_radius} onChange={toggleBool('apply_radius')}
-            label={t('candidateTab.leadsCriteria.applyRadiusLabel')} hint={t('candidateTab.leadsCriteria.applyRadiusHint')} />
-          <div style={{ marginTop: 10, marginLeft: 26 }}>
-            <label htmlFor="vacancy-candidate-tab-radius" style={{ fontSize: 12, fontWeight: 500, color: 'var(--text)', display: 'block', marginBottom: 2 }}>
-              {t('candidateTab.defaultRadiusLabel')}
-            </label>
-            <p style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 6 }}>{t('candidateTab.defaultRadiusHint')}</p>
-            <input id="vacancy-candidate-tab-radius" type="number" min={1} max={500} value={cfg.default_radius_km}
-              disabled={!cfg.apply_radius}
-              onChange={e => setRadius(e.target.value)}
-              style={{ width: 100, padding: '6px 8px', borderRadius: 6, border: '1px solid var(--border)',
-                background: cfg.apply_radius ? 'var(--surface)' : 'var(--bg)', color: 'var(--text)', fontSize: 12,
-                opacity: cfg.apply_radius ? 1 : 0.55, cursor: cfg.apply_radius ? 'text' : 'not-allowed' }} />
+        {/* LEADS-CRITERIA-1: every control below is read by the SAME backend
+            MatchCriteriaResolver that computes the vacancy leads counter AND this
+            tab's own candidate search — a change here changes both immediately. */}
+        {activeTab === 'countable_statuses' && (
+          <div>
+            <p style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 12 }}>{t('candidateTab.leadsCriteria.subtitle')}</p>
+            {/* countable_vacancy_statuses — which vacancy statuses count toward the
+                leads counter; reuses the same vacancy-status list + checkbox affordance
+                as the vacancy-statuses sub-tab. Empty selection = every status counts. */}
+            <LookupChipSelect items={vacancyStatuses} selected={cfg.countable_vacancy_statuses} onToggle={toggleIn('countable_vacancy_statuses')}
+              label={t('candidateTab.leadsCriteria.countableStatusesTitle')} hint={t('candidateTab.leadsCriteria.countableStatusesHint')} />
           </div>
-        </div>
+        )}
 
-        {/* (d) function_match — how strictly the candidate's function must match
-            the vacancy's; 'category' carries an honest muted note since it behaves
-            exactly like 'exact' today (no vacancy category column yet). */}
-        <div style={{ marginBottom: 18 }}>
-          <label style={{ fontSize: 12, fontWeight: 600, color: 'var(--text)', display: 'block', marginBottom: 2 }}>
-            {t('candidateTab.leadsCriteria.functionMatchTitle')}
-          </label>
-          <p style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 6 }}>{t('candidateTab.leadsCriteria.functionMatchHint')}</p>
-          <SegmentedControl
-            ariaLabel={t('candidateTab.leadsCriteria.functionMatchTitle')}
-            value={cfg.function_match}
-            onChange={value => persist({ function_match: value })}
-            options={FUNCTION_MATCH_OPTIONS.map(opt => ({
-              value: opt.value,
-              label: t(`candidateTab.leadsCriteria.${opt.labelKey}`),
-              description: t(`candidateTab.leadsCriteria.${opt.descKey}`),
-            }))}
-          />
-          {/* Honest backend caveat, always shown — 'category' must never present
-              itself as doing more than 'exact' does today (no vacancy category column yet). */}
-          <span style={{ display: 'block', fontSize: 11, fontStyle: 'italic', color: 'var(--text-muted)', marginTop: 6 }}>
-            {t('candidateTab.leadsCriteria.functionMatchCategoryNote')}
-          </span>
-        </div>
+        {activeTab === 'radius_function' && (
+          <div>
+            {/* apply_radius gates default_radius_km (RADIUS-SETTING-1's input): OFF
+                means distance is ignored entirely, so the radius input renders
+                disabled (never hidden) to keep that relationship visible. */}
+            <div style={{ marginBottom: 18 }}>
+              <label style={{ fontSize: 12, fontWeight: 600, color: 'var(--text)', display: 'block', marginBottom: 6 }}>
+                {t('candidateTab.leadsCriteria.radiusTitle')}
+              </label>
+              <CheckboxRow checked={cfg.apply_radius} onChange={toggleBool('apply_radius')}
+                label={t('candidateTab.leadsCriteria.applyRadiusLabel')} hint={t('candidateTab.leadsCriteria.applyRadiusHint')} />
+              <div style={{ marginTop: 10, marginLeft: 26 }}>
+                <label htmlFor="vacancy-candidate-tab-radius" style={{ fontSize: 12, fontWeight: 500, color: 'var(--text)', display: 'block', marginBottom: 2 }}>
+                  {t('candidateTab.defaultRadiusLabel')}
+                </label>
+                <p style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 6 }}>{t('candidateTab.defaultRadiusHint')}</p>
+                <input id="vacancy-candidate-tab-radius" type="number" min={1} max={500} value={cfg.default_radius_km}
+                  disabled={!cfg.apply_radius}
+                  onChange={e => setRadius(e.target.value)}
+                  style={{ width: 100, padding: '6px 8px', borderRadius: 6, border: '1px solid var(--border)',
+                    background: cfg.apply_radius ? 'var(--surface)' : 'var(--bg)', color: 'var(--text)', fontSize: 12,
+                    opacity: cfg.apply_radius ? 1 : 0.55, cursor: cfg.apply_radius ? 'text' : 'not-allowed' }} />
+              </div>
+            </div>
 
-        {/* (e) exclude_already_applied — a candidate with a live application on THIS
-            vacancy no longer counts as a lead (already in the funnel, not a prospect). */}
-        <div style={{ marginBottom: 18 }}>
-          <CheckboxRow checked={cfg.exclude_already_applied} onChange={toggleBool('exclude_already_applied')}
-            label={t('candidateTab.leadsCriteria.excludeAlreadyAppliedLabel')} hint={t('candidateTab.leadsCriteria.excludeAlreadyAppliedHint')} />
-        </div>
-
-        {/* (f) include_expiring_placements — a candidate placed right now still
-            counts as a lead while their match ends within
-            expiring_within_days (Danny: "kandidaten die nu geplaatst zijn maar
-            wiens match afloopt"). */}
-        <div>
-          <CheckboxRow checked={cfg.include_expiring_placements} onChange={toggleBool('include_expiring_placements')}
-            label={t('candidateTab.leadsCriteria.includeExpiringPlacementsLabel')} hint={t('candidateTab.leadsCriteria.includeExpiringPlacementsHint')} />
-          <div style={{ marginTop: 10, marginLeft: 26 }}>
-            <label htmlFor="vacancy-candidate-tab-expiring-days" style={{ fontSize: 12, fontWeight: 500, color: 'var(--text)', display: 'block', marginBottom: 2 }}>
-              {t('candidateTab.leadsCriteria.expiringWithinDaysLabel')}
-            </label>
-            <p style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 6 }}>{t('candidateTab.leadsCriteria.expiringWithinDaysHint')}</p>
-            <input id="vacancy-candidate-tab-expiring-days" type="number" min={1} max={365} value={cfg.expiring_within_days}
-              disabled={!cfg.include_expiring_placements}
-              onChange={e => setExpiringDays(e.target.value)}
-              style={{ width: 100, padding: '6px 8px', borderRadius: 6, border: '1px solid var(--border)',
-                background: cfg.include_expiring_placements ? 'var(--surface)' : 'var(--bg)', color: 'var(--text)', fontSize: 12,
-                opacity: cfg.include_expiring_placements ? 1 : 0.55, cursor: cfg.include_expiring_placements ? 'text' : 'not-allowed' }} />
+            {/* function_match — how strictly the candidate's function must match
+                the vacancy's; 'category' carries an honest muted note since it behaves
+                exactly like 'exact' today (no vacancy category column yet). */}
+            <div>
+              <label style={{ fontSize: 12, fontWeight: 600, color: 'var(--text)', display: 'block', marginBottom: 2 }}>
+                {t('candidateTab.leadsCriteria.functionMatchTitle')}
+              </label>
+              <p style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 6 }}>{t('candidateTab.leadsCriteria.functionMatchHint')}</p>
+              <SegmentedControl
+                ariaLabel={t('candidateTab.leadsCriteria.functionMatchTitle')}
+                value={cfg.function_match}
+                onChange={value => persist({ function_match: value })}
+                options={FUNCTION_MATCH_OPTIONS.map(opt => ({
+                  value: opt.value,
+                  label: t(`candidateTab.leadsCriteria.${opt.labelKey}`),
+                  description: t(`candidateTab.leadsCriteria.${opt.descKey}`),
+                }))}
+              />
+              {/* Honest backend caveat, always shown — 'category' must never present
+                  itself as doing more than 'exact' does today (no vacancy category column yet). */}
+              <span style={{ display: 'block', fontSize: 11, fontStyle: 'italic', color: 'var(--text-muted)', marginTop: 6 }}>
+                {t('candidateTab.leadsCriteria.functionMatchCategoryNote')}
+              </span>
+            </div>
           </div>
-        </div>
+        )}
+
+        {activeTab === 'exclusions' && (
+          <div>
+            {/* exclude_already_applied — a candidate with a live application on THIS
+                vacancy no longer counts as a lead (already in the funnel, not a prospect). */}
+            <div style={{ marginBottom: 18 }}>
+              <CheckboxRow checked={cfg.exclude_already_applied} onChange={toggleBool('exclude_already_applied')}
+                label={t('candidateTab.leadsCriteria.excludeAlreadyAppliedLabel')} hint={t('candidateTab.leadsCriteria.excludeAlreadyAppliedHint')} />
+            </div>
+
+            {/* include_expiring_placements — a candidate placed right now still
+                counts as a lead while their match ends within
+                expiring_within_days (Danny: "kandidaten die nu geplaatst zijn maar
+                wiens match afloopt"). */}
+            <div>
+              <CheckboxRow checked={cfg.include_expiring_placements} onChange={toggleBool('include_expiring_placements')}
+                label={t('candidateTab.leadsCriteria.includeExpiringPlacementsLabel')} hint={t('candidateTab.leadsCriteria.includeExpiringPlacementsHint')} />
+              <div style={{ marginTop: 10, marginLeft: 26 }}>
+                <label htmlFor="vacancy-candidate-tab-expiring-days" style={{ fontSize: 12, fontWeight: 500, color: 'var(--text)', display: 'block', marginBottom: 2 }}>
+                  {t('candidateTab.leadsCriteria.expiringWithinDaysLabel')}
+                </label>
+                <p style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 6 }}>{t('candidateTab.leadsCriteria.expiringWithinDaysHint')}</p>
+                <input id="vacancy-candidate-tab-expiring-days" type="number" min={1} max={365} value={cfg.expiring_within_days}
+                  disabled={!cfg.include_expiring_placements}
+                  onChange={e => setExpiringDays(e.target.value)}
+                  style={{ width: 100, padding: '6px 8px', borderRadius: 6, border: '1px solid var(--border)',
+                    background: cfg.include_expiring_placements ? 'var(--surface)' : 'var(--bg)', color: 'var(--text)', fontSize: 12,
+                    opacity: cfg.include_expiring_placements ? 1 : 0.55, cursor: cfg.include_expiring_placements ? 'text' : 'not-allowed' }} />
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   )

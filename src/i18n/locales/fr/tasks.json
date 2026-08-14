@@ -80,7 +80,8 @@
       "error": "Les sous-tâches n’ont pas pu être chargées.",
       "empty": "Pas encore de sous-tâches.",
       "parentLabel": "Tâche principale",
-      "progressLabel": "{{done}}/{{total}} sous-tâches terminées"
+      "progressLabel": "{{done}}/{{total}} sous-tâches terminées",
+      "add": "Ajouter une sous-tâche"
     }
   },
   "comments": {
@@ -158,7 +159,8 @@
     "teamPlaceholder": "Choisir un service",
     "teamHint": "Où la tâche attend, par exemple le Backoffice. Le service reste en place dès qu'un collègue prend la tâche en charge.",
     "teamEmpty": "Aucun service interne n'a encore été configuré.",
-    "teamLoadError": "Impossible de charger les services internes."
+    "teamLoadError": "Impossible de charger les services internes.",
+    "addSubtaskTitle": "Nouvelle sous-tâche"
   },
   "bulk": {
     "selected": "{{count}} sélectionné(e)s",

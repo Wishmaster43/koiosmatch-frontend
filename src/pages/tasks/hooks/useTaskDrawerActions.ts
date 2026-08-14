@@ -186,8 +186,17 @@ export function useTaskDrawerActions({ setTasks, archivedTasks, setArchivedTasks
       .catch(() => notifyError(t('drawer.archivedBanner.restoreFailed')))
   }
 
+  // SUBTASK-CREATE-1: local-ONLY tally bump after a subtask is created — no PATCH
+  // (`subtask_progress` is a derived, read-only count, never a writable task
+  // field), just increment the total the same list/detail rows already carry.
+  const bumpSubtaskTotal = (id: Id | undefined) => {
+    const bump = (p?: { done: number; total: number } | null) => ({ done: p?.done ?? 0, total: (p?.total ?? 0) + 1 })
+    setTasks(prev => prev.map(x => x.id === id ? { ...x, subtaskProgress: bump((x as unknown as { subtaskProgress?: { done: number; total: number } | null }).subtaskProgress) } as Task : x))
+    setSelected(prev => (prev && prev.id === id ? { ...prev, subtaskProgress: bump(prev.subtaskProgress) } : prev))
+  }
+
   return {
     selected, setSelected, expanded, setExpanded,
-    closeDrawer, selectTask, handleUpdate, handleMove, handleAddLink, handleRemoveLink, restoreTask,
+    closeDrawer, selectTask, handleUpdate, handleMove, handleAddLink, handleRemoveLink, restoreTask, bumpSubtaskTotal,
   }
 }

@@ -1,5 +1,6 @@
 import { describe, it, expect, vi } from 'vitest'
 import { render, screen, waitFor } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import SubtasksSection from './SubtasksSection'
 import type { TaskDetail } from '@/types/task'
 
@@ -13,6 +14,19 @@ vi.mock('@/lib/api', async () => {
 const openEntity = vi.fn()
 vi.mock('@/context/NavigationContext', () => ({ useNavigation: () => ({ openEntity }) }))
 
+// SUBTASK-CREATE-1: AddTaskModal itself is covered by its own test file — here it
+// is stubbed to a single button that fires onCreated with the parentId it was
+// given, so this file proves the WIRING (parentId passed in, onCreated handled),
+// not AddTaskModal's own form behaviour.
+vi.mock('../AddTaskModal', () => ({
+  default: ({ parentId, onCreated, onClose }: { parentId?: string; onCreated?: (raw: unknown) => void; onClose: () => void }) => (
+    <div data-testid="add-task-modal" data-parent-id={parentId}>
+      <button onClick={() => onCreated?.({ id: 'new-sub' })}>fake-create</button>
+      <button onClick={onClose}>fake-close</button>
+    </div>
+  ),
+}))
+
 import api from '@/lib/api'
 const mockGet = api.get as unknown as ReturnType<typeof vi.fn>
 
@@ -21,10 +35,10 @@ const task = (over: Partial<TaskDetail> = {}) => ({
 } as unknown as TaskDetail)
 
 describe('SubtasksSection (task drawer, SUBTASK-1)', () => {
-  it('renders nothing and fetches nothing when the task has no subtasks and is not a subtask itself', () => {
+  it('always shows the add-subtask affordance, even with no subtasks and no parent', () => {
     mockGet.mockClear()
-    const { container } = render(<SubtasksSection task={task()} />)
-    expect(container).toBeEmptyDOMElement()
+    render(<SubtasksSection task={task()} />)
+    expect(screen.getByText('details.subtasks.add')).toBeInTheDocument()
     expect(mockGet).not.toHaveBeenCalled()
   })
 
@@ -67,5 +81,34 @@ describe('SubtasksSection (task drawer, SUBTASK-1)', () => {
     const row = await screen.findByText('Bel terug')
     row.closest('button')?.click()
     expect(openEntity).toHaveBeenCalledWith('tasks', 's1')
+  })
+
+  describe('SUBTASK-CREATE-1: add-subtask flow', () => {
+    it('opens AddTaskModal with parentId set to the current task, no main-task picker', async () => {
+      const user = userEvent.setup()
+      render(<SubtasksSection task={task()} />)
+      await user.click(screen.getByText('details.subtasks.add'))
+      const modal = screen.getByTestId('add-task-modal')
+      expect(modal).toHaveAttribute('data-parent-id', 't1')
+    })
+
+    it('after a successful create: closes the modal, refetches the subtask list, and bumps the local tally', async () => {
+      mockGet.mockClear()
+      mockGet.mockResolvedValue({ data: [{ id: 's1', title: 'Bel terug' }] })
+      const onSubtaskCreated = vi.fn()
+      const user = userEvent.setup()
+      render(<SubtasksSection task={task({ subtaskProgress: { done: 0, total: 1 } })} onSubtaskCreated={onSubtaskCreated} />)
+      await screen.findByText('Bel terug')
+      mockGet.mockClear()
+
+      await user.click(screen.getByText('details.subtasks.add'))
+      await user.click(screen.getByText('fake-create'))
+
+      expect(screen.queryByTestId('add-task-modal')).not.toBeInTheDocument()
+      expect(onSubtaskCreated).toHaveBeenCalledTimes(1)
+      // Same total (1) → hasSubtasks stays true, so the effect's own deps don't
+      // change; the refetch must be an explicit call, not a lucky rerender.
+      await waitFor(() => expect(mockGet).toHaveBeenCalledWith('/tasks', { params: { parent_id: 't1' } }))
+    })
   })
 })

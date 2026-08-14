@@ -94,7 +94,8 @@
       "error": "Subtaken konden niet geladen worden.",
       "empty": "Nog geen subtaken.",
       "parentLabel": "Hoofdtaak",
-      "progressLabel": "{{done}}/{{total}} subtaken afgerond"
+      "progressLabel": "{{done}}/{{total}} subtaken afgerond",
+      "add": "Subtaak toevoegen"
     }
   },
   "comments": {
@@ -172,7 +173,8 @@
     "teamPlaceholder": "Kies een afdeling",
     "teamHint": "Waar de taak wacht, bijvoorbeeld Backoffice. De afdeling blijft staan zodra een collega de taak oppakt.",
     "teamEmpty": "Er zijn nog geen interne afdelingen ingesteld.",
-    "teamLoadError": "Interne afdelingen konden niet worden geladen."
+    "teamLoadError": "Interne afdelingen konden niet worden geladen.",
+    "addSubtaskTitle": "Nieuwe subtaak"
   },
   "page": {
     "searchPlaceholder": "Zoek taak, omschrijving, reactie…"

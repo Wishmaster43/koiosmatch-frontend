@@ -979,6 +979,10 @@
         "title": "Candidates",
         "desc": "Notifications about new and updated candidates."
       },
+      "klanten": {
+        "title": "Customers",
+        "desc": "Notifications about customer stagnation and lifecycle events."
+      },
       "matches": {
         "title": "Matches",
         "desc": "Notifications about new matches and status changes."

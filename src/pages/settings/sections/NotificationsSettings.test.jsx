@@ -27,7 +27,7 @@ beforeEach(() => {
   api.post.mockResolvedValue({ data: {} })
 })
 
-describe.each(['sollicitaties', 'kandidaten', 'matches', 'taken'])(
+describe.each(['sollicitaties', 'kandidaten', 'klanten', 'matches', 'taken'])(
   'NotificationsSettings — context=%s',
   context => {
     it('renders BOTH channel switches, in-app defaulting ON and e-mail defaulting OFF (O-27)', async () => {
@@ -74,6 +74,13 @@ describe.each(['sollicitaties', 'kandidaten', 'matches', 'taken'])(
       render(<NotificationsSettings context={context} />)
       await screen.findByRole('switch', { name: t('notifications.inApp.label') })
       expect(screen.queryByText(t('notifications.inApp.notYetActive'))).not.toBeInTheDocument()
+    })
+
+    it('shows a real translated title, never the raw context id (missing locale key regression)', async () => {
+      render(<NotificationsSettings context={context} />)
+      const heading = await screen.findByRole('heading', { name: t(`notifications.context.${context}.title`, context) })
+      expect(heading).toHaveTextContent(t(`notifications.context.${context}.title`))
+      expect(heading.textContent).not.toBe(context)
     })
   },
 )

@@ -118,7 +118,7 @@ type LinkPair = { type: string; id: string }
  * renders it as read-only text instead of a picker the recruiter could
  * accidentally repoint to a different customer.
  */
-export default function AddTaskModal({ onClose, onCreated, onSaved, initial, extraLinks, editId, lockCustomerId, lockCustomerName }: {
+export default function AddTaskModal({ onClose, onCreated, onSaved, initial, extraLinks, editId, lockCustomerId, lockCustomerName, parentId }: {
   onClose: () => void
   onCreated?: (raw: unknown) => void
   // Fired after a successful edit-mode save (PATCH), mirrors `onCreated`.
@@ -129,6 +129,11 @@ export default function AddTaskModal({ onClose, onCreated, onSaved, initial, ext
   editId?: Id
   // Opened from a customer drawer: the customer link is fixed and shown read-only.
   lockCustomerId?: string; lockCustomerName?: string
+  // SUBTASK-1: opened from the "+ subtask" affordance in SubtasksSection — the
+  // CREATED task is filed as a subtask of this task. Programmatic only (§0.4 rule 4
+  // of the brief: no main-task picker in the general form) — never surfaced as a
+  // field the user can pick/clear here.
+  parentId?: Id
 }) {
   const { t } = useTranslation('tasks')
   const { types, statuses, priorities, defaultPriority } = useTaskLookups()
@@ -305,6 +310,10 @@ export default function AddTaskModal({ onClose, onCreated, onSaved, initial, ext
         // TEAM-1: the internal department — always sent, null when none is picked.
         assignee_team_id: form.teamId || null,
         description: form.description || null, links: buildLinks(),
+        // SUBTASK-1: only present when this modal was opened as "+ subtask" — the
+        // key is omitted (never sent as null) for a normal create, so the exact
+        // request body existing callers assert never gains a stray key.
+        ...(parentId != null ? { parent_id: parentId } : {}),
       }
       const r = await api.post('/tasks', body)
       onCreated?.(unwrap(r))
@@ -347,7 +356,9 @@ export default function AddTaskModal({ onClose, onCreated, onSaved, initial, ext
   // TASKTYPE-ID-1: also blocked while the slug→uuid maps are still loading — see
   // the file header comment (a fast click must never race an empty map).
   const canSubmit = !!(form.title.trim() && form.type) && !saving && !loadingTask && !loadingLookupIds
-  const modalTitle = isEdit ? t('modal.editTitle') : t('modal.title')
+  // SUBTASK-1: an honest title for the "+ subtask" flow — never silently reuses
+  // the generic "Nieuwe taak" wording, which would read like a full standalone create.
+  const modalTitle = isEdit ? t('modal.editTitle') : parentId != null ? t('modal.addSubtaskTitle') : t('modal.title')
 
   return (
     // POPUP-SLEEP-1: migrated onto the shared FloatingPanel — draggable header,

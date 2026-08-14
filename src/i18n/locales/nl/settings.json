@@ -979,6 +979,10 @@
         "title": "Kandidaten",
         "desc": "Meldingen over nieuwe en bijgewerkte kandidaten."
       },
+      "klanten": {
+        "title": "Klanten",
+        "desc": "Meldingen over klantstagnatie en levenscyclusgebeurtenissen."
+      },
       "matches": {
         "title": "Matches",
         "desc": "Meldingen over nieuwe matches en statuswijzigingen."

@@ -80,7 +80,8 @@
       "error": "Unteraufgaben konnten nicht geladen werden.",
       "empty": "Noch keine Unteraufgaben.",
       "parentLabel": "Hauptaufgabe",
-      "progressLabel": "{{done}}/{{total}} Unteraufgaben erledigt"
+      "progressLabel": "{{done}}/{{total}} Unteraufgaben erledigt",
+      "add": "Unteraufgabe hinzufügen"
     }
   },
   "comments": {
@@ -158,7 +159,8 @@
     "teamPlaceholder": "Abteilung wählen",
     "teamHint": "Wo die Aufgabe wartet, zum Beispiel Backoffice. Die Abteilung bleibt bestehen, sobald ein Kollege die Aufgabe übernimmt.",
     "teamEmpty": "Es sind noch keine internen Abteilungen eingerichtet.",
-    "teamLoadError": "Interne Abteilungen konnten nicht geladen werden."
+    "teamLoadError": "Interne Abteilungen konnten nicht geladen werden.",
+    "addSubtaskTitle": "Neue Unteraufgabe"
   },
   "bulk": {
     "selected": "{{count}} ausgewählt",

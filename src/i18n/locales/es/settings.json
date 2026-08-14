@@ -743,6 +743,10 @@
         "title": "Candidatos",
         "desc": "Notificaciones sobre candidatos nuevos y actualizados."
       },
+      "klanten": {
+        "title": "Clientes",
+        "desc": "Notificaciones sobre estancamiento de clientes y eventos del ciclo de vida."
+      },
       "matches": {
         "title": "Coincidencias",
         "desc": "Notificaciones sobre nuevas coincidencias y cambios de estado."

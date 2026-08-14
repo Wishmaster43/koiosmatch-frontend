@@ -108,6 +108,19 @@ describe('MyNotificationsSettings', () => {
     }))
   })
 
+  it('NOTIF-PARITY-1: a no-emitter context (vacatures/facturering) shows a muted marker instead of a working in-app override, and never PUTs', async () => {
+    vi.mocked(api.get).mockResolvedValue({ data: { contexts: { vacatures: null, facturering: null } } })
+    render(<MyNotificationsSettings />)
+    await screen.findByText(t('notifications.context.vacatures.title'))
+
+    // No SegmentedControl (radiogroup) for either no-emitter context — both columns
+    // render the same honest "not active yet" marker (§3 no fake affordance).
+    expect(screen.queryAllByRole('radiogroup')).toHaveLength(0)
+    expect(screen.getAllByText(t('notifications.inApp.notYetActive'))).toHaveLength(2)
+    expect(screen.getAllByText(t('notifications.my.emailNotAvailable'))).toHaveLength(2)
+    expect(api.put).not.toHaveBeenCalled()
+  })
+
   it('rolls back the row and toasts on a failed PUT', async () => {
     vi.mocked(api.get).mockResolvedValue({ data: { contexts: { sollicitaties: null } } })
     vi.mocked(api.put).mockRejectedValue(new Error('network'))

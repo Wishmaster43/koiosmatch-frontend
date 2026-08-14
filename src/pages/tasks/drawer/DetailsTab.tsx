@@ -74,7 +74,12 @@ function EditControls({ onSave, onCancel, saveLabel, cancelLabel }: { onSave: ()
  * Not to be confused with the CUSTOMER department on the Koppelingen tab
  * ("Klantafdeling"); this one is the tenant's own Backoffice/Planning/… .
  */
-export default function DetailsTab({ task, onUpdate }: { task: TaskDetail; onUpdate: (patch: Record<string, unknown>) => void }) {
+export default function DetailsTab({ task, onUpdate, onSubtaskCreated }: {
+  task: TaskDetail
+  onUpdate: (patch: Record<string, unknown>) => void
+  // SUBTASK-CREATE-1: local-only tally bump, threaded through to SubtasksSection.
+  onSubtaskCreated?: () => void
+}) {
   const { t } = useTranslation('tasks')
   // KOIOS-ADVIES-OVERAL-1: the SAME resolver the tasks table's Koios column
   // uses — the advisory block below prepends its advice so the two never disagree.
@@ -220,7 +225,7 @@ export default function DetailsTab({ task, onUpdate }: { task: TaskDetail; onUpd
 
       {/* SUBTASK-1: own subtasks (fetched with ?parent_id=) and/or a reference to the
           main task when this task itself is a subtask — renders nothing otherwise. */}
-      <SubtasksSection task={task} />
+      <SubtasksSection task={task} onSubtaskCreated={onSubtaskCreated} />
 
       <div>
         {/* Description — free-text rich block, own pencil (§3A: every prose field gets

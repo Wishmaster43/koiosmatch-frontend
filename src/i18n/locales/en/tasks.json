@@ -94,7 +94,8 @@
       "error": "Subtasks could not be loaded.",
       "empty": "No subtasks yet.",
       "parentLabel": "Main task",
-      "progressLabel": "{{done}}/{{total}} subtasks done"
+      "progressLabel": "{{done}}/{{total}} subtasks done",
+      "add": "Add subtask"
     }
   },
   "comments": {
@@ -172,7 +173,8 @@
     "teamPlaceholder": "Choose a department",
     "teamHint": "Where the task is waiting, for example Backoffice. The department stays put once a colleague picks the task up.",
     "teamEmpty": "No internal departments have been set up yet.",
-    "teamLoadError": "Internal departments could not be loaded."
+    "teamLoadError": "Internal departments could not be loaded.",
+    "addSubtaskTitle": "New subtask"
   },
   "page": {
     "searchPlaceholder": "Search task, description, comment…"

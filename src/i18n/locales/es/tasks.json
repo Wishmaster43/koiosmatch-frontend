@@ -80,7 +80,8 @@
       "error": "No se pudieron cargar las subtareas.",
       "empty": "Aún no hay subtareas.",
       "parentLabel": "Tarea principal",
-      "progressLabel": "{{done}}/{{total}} subtareas completadas"
+      "progressLabel": "{{done}}/{{total}} subtareas completadas",
+      "add": "Añadir subtarea"
     }
   },
   "comments": {
@@ -158,7 +159,8 @@
     "teamPlaceholder": "Elige un departamento",
     "teamHint": "Dónde espera la tarea, por ejemplo Backoffice. El departamento se mantiene en cuanto un compañero asume la tarea.",
     "teamEmpty": "Aún no se ha configurado ningún departamento interno.",
-    "teamLoadError": "No se han podido cargar los departamentos internos."
+    "teamLoadError": "No se han podido cargar los departamentos internos.",
+    "addSubtaskTitle": "Nueva subtarea"
   },
   "bulk": {
     "selected": "{{count}} seleccionado(s)",

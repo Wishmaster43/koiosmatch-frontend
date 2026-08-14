@@ -28,6 +28,12 @@
  * calm muted marker instead of a SegmentedControl (§3 no fake affordance) — the
  * caller always follows the tenant-wide e-mail switch for now.
  *
+ * NOTIF-PARITY-1: a context with no working backend emitter (see
+ * `../lib/notificationContexts`, shared with NotificationsSettings.jsx) renders the
+ * same muted "not active yet" marker in the in-app column too — a per-user override
+ * on a context nothing ever calls Notifier::send() for would be exactly as fake as
+ * the tenant-wide toggle would be.
+ *
  * Each row saves OPTIMISTICALLY on change (its own partial PUT), with
  * rollback + toast on failure — mirrors useMyKoiosMode, the sibling
  * per-user "my-*" preference screen on the same controller family — so
@@ -44,6 +50,7 @@ import SoftChip from '@/components/ui/SoftChip'
 import Toggle from '@/components/ui/Toggle'
 import { isSupported as isPushSupported, permissionState, isSubscribed, subscribe, unsubscribe } from '@/lib/pushSubscription'
 import { SettingCardList, SettingRow, SkeletonRows } from '../components/SettingsKit'
+import { hasNoEmitterYet } from '../lib/notificationContexts'
 
 // The API's tri-state per context: null = inherit the tenant default, true/false
 // = an explicit personal override. A distinct type from plain boolean so a caller
@@ -184,6 +191,10 @@ export default function MyNotificationsSettings() {
         <SettingCardList>
           {known.map(context => {
             const title = t(`notifications.context.${context}.title`, context)
+            // NOTIF-PARITY-1: a per-user override is exactly as fake as the tenant-wide
+            // toggle when the context has no working backend emitter yet — never render a
+            // working SegmentedControl that changes nothing (§3 no fake affordance).
+            const noEmitterYet = hasNoEmitterYet(context)
             return (
               <SettingRow key={context} label={title} description={t(`notifications.context.${context}.desc`, '')}>
                 {/* Two columns, side by side: a real working in-app override next to
@@ -192,10 +203,15 @@ export default function MyNotificationsSettings() {
                 <div style={{ display: 'flex', alignItems: 'flex-end', gap: 16 }}>
                   <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
                     <span style={captionStyle}>{t('notifications.inApp.label')}</span>
-                    <SegmentedControl size="compact" ariaLabel={title}
-                      value={toUi(contexts[context])}
-                      onChange={next => setContext(context, fromUi(next))}
-                      options={options} />
+                    {noEmitterYet ? (
+                      <SoftChip label={t('notifications.inApp.notYetActive')} color="var(--text-muted)"
+                        title={t('notifications.inApp.notYetActiveReason')} />
+                    ) : (
+                      <SegmentedControl size="compact" ariaLabel={title}
+                        value={toUi(contexts[context])}
+                        onChange={next => setContext(context, fromUi(next))}
+                        options={options} />
+                    )}
                   </div>
                   <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
                     <span style={captionStyle}>{t('notifications.email.label')}</span>

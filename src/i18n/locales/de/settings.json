@@ -743,6 +743,10 @@
         "title": "Kandidaten",
         "desc": "Benachrichtigungen über neue und aktualisierte Kandidaten."
       },
+      "klanten": {
+        "title": "Kunden",
+        "desc": "Benachrichtigungen über Kundenstagnation und Lebenszyklus-Ereignisse."
+      },
       "matches": {
         "title": "Matches",
         "desc": "Benachrichtigungen über neue Matches und Statusänderungen."
