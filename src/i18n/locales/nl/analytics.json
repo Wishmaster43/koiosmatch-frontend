@@ -98,6 +98,8 @@
     "loading": "Vacatures laden…",
     "error": "Kon de vacatures niet laden",
     "empty": "Geen vacatures in deze periode",
+    "series": "Vacatures over tijd",
+    "window": "Vacatures {{from}} t/m {{to}}",
     "daysValue": "{{days}} dagen",
     "filledYes": "Vervuld",
     "filledNo": "Open",

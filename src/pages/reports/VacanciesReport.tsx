@@ -1,14 +1,15 @@
 /**
- * VacanciesReport — per-vacancy demand + fill metrics (GET /reports/vacancies).
- *
- * A summary tile row (total · open · filled · fill-rate · avg time-to-fill) over a
- * table of vacancies (status · applications · matched · filled · time-to-fill).
- * fill-rate/time-to-fill are server-derived; `time_to_fill_days` is null while
- * open. applications_by_phase shares the funnel key-map. Data lives in the hook.
- * Table: shared DataTable (§4 blueprint-conformance — no bespoke table chrome).
+ * VacanciesReport — vacancies report (GET /reports/vacancies, RAPPORTEN-SUITE-1
+ * "portie 4"). ADDITIVE on the old C-34 screen: the summary tile row (total ·
+ * open · filled · fill-rate · avg time-to-fill) and the per-vacancy table keep
+ * working unchanged, now joined by the portie-pattern blocks — timeseries + six
+ * segment axes through the shared SegmentBars (mirrors CustomersReport /
+ * ApplicationsReport). Drill XOR params follow the eight-way vacancies contract:
+ * status|customer|function|industry|owner|branch|date|vacancy. Data lives in the
+ * hook; the table uses the shared DataTable (§4 blueprint-conformance).
  */
 import { useState } from 'react'
-import type { ReactNode } from 'react'
+import type { CSSProperties, ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import InsightsRow from '@/components/insights/InsightsRow'
 import type { KpiSpec } from '@/components/insights/InsightsRow'
@@ -17,9 +18,14 @@ import type { Column } from '@/components/ui/DataTable'
 import SoftChip from '@/components/ui/SoftChip'
 import ReportDrillDrawer from './ReportDrillDrawer'
 import type { DrillSpec } from './ReportDrillDrawer'
+import VacancyReportAxes from './VacancyReportAxes'
 import { useVacanciesReport } from './useVacanciesReport'
 import { gateDrillClick } from './reportDrillGate'
-import type { ReportPeriod, VacancyReportRow } from '@/types/analytics'
+import { useDateFormat } from '@/lib/datetime'
+import type { ReportPeriod, VacancyReportRow, CandidateTimeseriesPoint } from '@/types/analytics'
+
+const card:  CSSProperties = { background: 'var(--surface)', borderRadius: 12, border: '1px solid var(--border)' }
+const state: CSSProperties = { textAlign: 'center', padding: 40, fontSize: 13 }
 
 // Number cell: emphasised when > 0, muted when zero (mirrors the SM entity tables).
 const numCell = (n: number) => (
@@ -28,13 +34,17 @@ const numCell = (n: number) => (
 
 export default function VacanciesReport({ period, tabsSlot }: { period: ReportPeriod; tabsSlot?: ReactNode }) {
   const { t } = useTranslation('analytics')
+  const { formatDate } = useDateFormat()
   const { data, loading, error } = useVacanciesReport(period)
-  const rows = data?.vacancies ?? []
-  const s    = data?.summary
+  const rows    = data?.vacancies ?? []
+  const s       = data?.summary
+  const hasData = !loading && !error && (data?.total ?? 0) > 0
 
-  // Drill-down: clicking a vacancies KPI explains it (open/filled split + the
-  // vacancies behind it + Koios advice). Status filter goes to the drill endpoint.
+  // One drawer for every drill source: KPI tiles, table rows, axis bars, buckets.
   const [drill, setDrill] = useState<DrillSpec | null>(null)
+  const windowSub = () => `${formatDate(data?.from)} – ${formatDate(data?.to)}`
+
+  // Summary-KPI drill (unchanged C-34 behaviour): explains the open/filled split.
   const openVacancies = (title: string, value: number | string, status?: string) => setDrill({
     title, value, subtitle: t(`period.${period}`),
     breakdown: [
@@ -44,6 +54,7 @@ export default function VacanciesReport({ period, tabsSlot }: { period: ReportPe
     rowsEndpoint: '/reports/vacancies/drill', rowsParams: { status, period },
     adviceEndpoint: '/reports/vacancies/advice', adviceParams: { status, period },
   })
+  // Legacy per-vacancy drill (row click): the APPLICATION rows behind one vacancy.
   const openVacancyRow = (v: VacancyReportRow) => setDrill({
     title: v.label, value: v.applications, subtitle: v.customer?.name ?? t(`period.${period}`),
     breakdown: [
@@ -53,11 +64,25 @@ export default function VacanciesReport({ period, tabsSlot }: { period: ReportPe
     rowsEndpoint: '/reports/vacancies/drill', rowsParams: { vacancy: v.key, period },
     adviceEndpoint: '/reports/vacancies/advice', adviceParams: { vacancy: v.key, period },
   })
+  // Portie-4 segment drill: exactly one XOR param per open drill (vacancy rows behind it).
+  const openSegment = (seg: { label: string; count: number }, xorParam: Record<string, unknown>) => setDrill({
+    title: seg.label, value: seg.count, subtitle: windowSub(),
+    rowsEndpoint: '/reports/vacancies/drill', rowsParams: { ...xorParam, period },
+    adviceEndpoint: '/reports/vacancies/advice', adviceParams: { ...xorParam, period },
+  })
+  const openBucket = (pt: CandidateTimeseriesPoint) => setDrill({
+    title: pt.label, value: pt.value, subtitle: windowSub(),
+    // A week bar's `date` is the point's own key; the drawer then counts the WHOLE
+    // week (bucket=week) so bar and drawer total always agree.
+    rowsEndpoint: '/reports/vacancies/drill',
+    rowsParams: { date: pt.date, ...(data?.timeseries.bucket === 'week' ? { bucket: 'week' } : {}), period },
+    adviceEndpoint: '/reports/vacancies/advice',
+    adviceParams: { date: pt.date, ...(data?.timeseries.bucket === 'week' ? { bucket: 'week' } : {}), period },
+  })
 
   const kpis: KpiSpec[] = [
     { key: 'total',  label: t('vacancies.summary.total'),  value: s?.total ?? 0,
       active: drill != null && drill.rowsParams?.status == null,
-      // Drill endpoints don't exist yet (reportDrillGate) — no click affordance until they do.
       onClick: gateDrillClick('vacancies', () => openVacancies(t('vacancies.summary.total'), s?.total ?? 0)) },
     { key: 'open',   label: t('vacancies.summary.open'),   value: s?.open ?? 0,
       active: drill?.rowsParams?.status === 'open',
@@ -108,8 +133,8 @@ export default function VacanciesReport({ period, tabsSlot }: { period: ReportPe
   return (
     <div>
       {/* KPI strip — above the tabs (candidate-page order: KPIs first) */}
-      {!loading && !error && rows.length > 0 && (
-        <div style={{ background: 'var(--surface)', borderRadius: 12, border: '1px solid var(--border)', marginBottom: 16 }}>
+      {hasData && rows.length > 0 && (
+        <div style={{ ...card, marginBottom: 16 }}>
           <InsightsRow kpis={kpis} padding="14px 20px" />
         </div>
       )}
@@ -117,22 +142,40 @@ export default function VacanciesReport({ period, tabsSlot }: { period: ReportPe
       {/* Tab bar + period control (from the hub) */}
       {tabsSlot}
 
-      {/* Table — shared DataTable handles loading/empty; error stays a dedicated banner */}
-      <div style={{ background: 'var(--surface)', borderRadius: 12, border: '1px solid var(--border)', overflow: 'hidden' }}>
-        {error && !loading ? (
-          <div style={{ textAlign: 'center', padding: 40, fontSize: 13, color: 'var(--color-danger)' }}>{t('vacancies.error')}</div>
-        ) : (
-          <DataTable
-            columns={columns}
-            rows={rows}
-            getRowId={v => v.key}
-            onRowClick={gateDrillClick('vacancies', openVacancyRow)}
-            loading={loading}
-            loadingText={t('vacancies.loading')}
-            emptyText={t('vacancies.empty')}
-          />
-        )}
-      </div>
+      {/* The report's data window, rendered prominently — DD-MM-YYYY (never ISO, §3B). */}
+      {!loading && !error && data?.from && data?.to && (
+        <div style={{ fontSize: 13, fontWeight: 500, color: 'var(--text)', marginBottom: 12 }}>
+          {t('vacancies.window', { from: formatDate(data.from), to: formatDate(data.to) })}
+        </div>
+      )}
+
+      {/* Four UI states, handled once for both cards below (§3) */}
+      {loading && <div style={card}><div style={{ ...state, color: 'var(--text-muted)' }}>{t('vacancies.loading')}</div></div>}
+      {error && !loading && <div style={card}><div style={{ ...state, color: 'var(--color-danger)' }}>{t('vacancies.error')}</div></div>}
+      {!loading && !error && (data?.total ?? 0) === 0 && (
+        <div style={card}><div style={{ ...state, color: 'var(--text-muted)' }}>{t('vacancies.empty')}</div></div>
+      )}
+
+      {hasData && data && (
+        <>
+          {/* Timeseries + the six segment axes (portie pattern) */}
+          <div style={{ ...card, overflow: 'hidden', marginBottom: 16 }}>
+            <VacancyReportAxes data={data} onSegment={openSegment} onBucket={openBucket} />
+          </div>
+
+          {/* Per-vacancy table (unchanged C-34 behaviour) — row click drills into
+              that vacancy's own applications. */}
+          <div style={{ ...card, overflow: 'hidden' }}>
+            <DataTable
+              columns={columns}
+              rows={rows}
+              getRowId={v => v.key}
+              onRowClick={gateDrillClick('vacancies', openVacancyRow)}
+              emptyText={t('vacancies.empty')}
+            />
+          </div>
+        </>
+      )}
 
       {/* Dynamic drill-down: explains the clicked number + Koios AI advice */}
       <ReportDrillDrawer drill={drill} onClose={() => setDrill(null)} />

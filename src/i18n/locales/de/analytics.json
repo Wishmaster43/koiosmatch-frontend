@@ -98,6 +98,8 @@
     "loading": "Stellen werden geladen…",
     "error": "Stellen konnten nicht geladen werden",
     "empty": "Keine Stellen in diesem Zeitraum",
+    "series": "Stellen im Zeitverlauf",
+    "window": "Stellen {{from}} bis {{to}}",
     "daysValue": "{{days}} Tage",
     "filledYes": "Besetzt",
     "filledNo": "Offen",

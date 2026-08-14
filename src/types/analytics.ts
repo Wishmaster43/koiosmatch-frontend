@@ -75,12 +75,30 @@ export interface VacancyReportSummary {
   avg_time_to_fill_days: number | null
 }
 
+// Portie-4 additions are ADDITIVE (RAPPORTEN-SUITE-1): the C-34 envelope above
+// (period/from/to/summary/vacancies) is unchanged; the new fields below are
+// hand-written from the backend Service (the generated spec carries request
+// shapes + 401 only, no 2xx schema — §10). Every by_* axis sums to `total`.
 export interface VacanciesReportData {
   period: string
   from?: string
   to?: string
   summary: VacancyReportSummary
   vacancies: VacancyReportRow[]
+  total: number
+  // ?bucket=day|week overrides granularity; the default 3-month window buckets weekly.
+  timeseries: { bucket: 'day' | 'week'; series: CandidateTimeseriesPoint[] }
+  // Zero-filled over the vacancy_statuses lookup (with color); orphan-uuid bars + 'none'.
+  by_status: CandidateSegment[]
+  // Top-10 + 'others' + 'none'; an archived customer keeps its real name.
+  by_customer: ApplicationTopSegment[]
+  // Top-10 + 'others' + 'none'; the raw function string is value AND label.
+  by_function: ApplicationTopSegment[]
+  // Zero-filled over the industries lookup on NAME strings; orphan names as own bars + 'none'.
+  by_industry: CandidateSegment[]
+  by_owner: CandidateOwnerSegment[]
+  // VESTIGING-2: grouped via the CUSTOMER's mirrored branch, not any vacancy field.
+  by_branch: CandidateSegment[]
 }
 
 // ── Matches report (GET /reports/matches) ────────────────────────────────────

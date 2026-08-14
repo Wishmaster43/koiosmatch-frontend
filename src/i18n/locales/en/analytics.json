@@ -98,6 +98,8 @@
     "loading": "Loading vacancies…",
     "error": "Could not load the vacancies",
     "empty": "No vacancies in this period",
+    "series": "Vacancies over time",
+    "window": "Vacancies {{from}} through {{to}}",
     "daysValue": "{{days}} days",
     "filledYes": "Filled",
     "filledNo": "Open",

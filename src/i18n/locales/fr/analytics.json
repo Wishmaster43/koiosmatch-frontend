@@ -98,6 +98,8 @@
     "loading": "Chargement des postes…",
     "error": "Impossible de charger les postes",
     "empty": "Aucun poste sur cette période",
+    "series": "Postes dans le temps",
+    "window": "Postes du {{from}} au {{to}}",
     "daysValue": "{{days}} jours",
     "filledYes": "Pourvu",
     "filledNo": "Ouvert",

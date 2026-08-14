@@ -98,6 +98,8 @@
     "loading": "Cargando vacantes…",
     "error": "No se pudieron cargar las vacantes",
     "empty": "No hay vacantes en este período",
+    "series": "Vacantes en el tiempo",
+    "window": "Vacantes {{from}} a {{to}}",
     "daysValue": "{{days}} días",
     "filledYes": "Cubierta",
     "filledNo": "Abierta",
