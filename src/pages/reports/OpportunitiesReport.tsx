@@ -12,7 +12,7 @@
 import { useState } from 'react'
 import type { CSSProperties, ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
-import InsightsRow from '@/components/insights/InsightsRow'
+import ReportKpiBand from './ReportKpiBand'
 import type { KpiSpec } from '@/components/insights/InsightsRow'
 import ReportDrillDrawer from './ReportDrillDrawer'
 import type { DrillSpec } from './ReportDrillDrawer'
@@ -21,7 +21,7 @@ import { gateDrillClick } from './reportDrillGate'
 import SegmentBars from './SegmentBars'
 import ReportTimeseriesChart from './ReportTimeseriesChart'
 import { useDateFormat } from '@/lib/datetime'
-import { formatNumber } from '@/lib/formatters'
+import { formatNumber, useNumberFormat } from '@/lib/formatters'
 import type { ReportPeriod, CandidateOwnerSegment, CandidateTimeseriesPoint } from '@/types/analytics'
 
 const card:  CSSProperties = { background: 'var(--surface)', borderRadius: 12, border: '1px solid var(--border)' }
@@ -39,6 +39,7 @@ type AxisSeg = { value: string; label: string; count: number; color?: string | n
 export default function OpportunitiesReport({ period, tabsSlot }: { period: ReportPeriod; tabsSlot?: ReactNode }) {
   const { t } = useTranslation('analytics')
   const { formatDate } = useDateFormat()
+  const { formatCurrency } = useNumberFormat()
   const { data, loading, error } = useOpportunitiesReport(period)
 
   const total   = data?.total ?? 0
@@ -95,7 +96,14 @@ export default function OpportunitiesReport({ period, tabsSlot }: { period: Repo
   // Pipeline-health KPI strip from the envelope's totals. Not drillable: the
   // five-way XOR carries no open/won/lost segment (no fake affordances). win_rate
   // is null until a deal is decided — placeholder, never a fabricated 0%.
+  // Nine-card footprint (Danny — same as the dashboard). The pipeline five stay
+  // as-is; the stale-deal counters and the forecast totals are real sums over
+  // fields the endpoint already returns (`stale` and `forecast[]`) — neither is
+  // a drillable XOR axis today, so both render as plain, honest, non-clickable
+  // stats rather than a dead button (no fake affordances).
   const s = data?.totals
+  const forecastCount = data?.forecast.reduce((sum, row) => sum + row.count, 0) ?? 0
+  const forecastValue = data?.forecast.reduce((sum, row) => sum + row.value_sum, 0) ?? 0
   const kpis: KpiSpec[] = [
     { key: 'total',   label: t('opportunities.total'),           value: total },
     { key: 'open',    label: t('opportunities.summary.open'),    value: s?.open ?? 0 },
@@ -103,15 +111,17 @@ export default function OpportunitiesReport({ period, tabsSlot }: { period: Repo
     { key: 'lost',    label: t('opportunities.summary.lost'),    value: s?.lost ?? 0 },
     { key: 'winRate', label: t('opportunities.summary.winRate'),
       value: s?.win_rate != null ? `${formatNumber(s.win_rate)}%` : '—' },
+    { key: 'untouched', label: t('opportunities.stale.untouched'), value: data?.stale.untouched ?? 0 },
+    { key: 'overdue',   label: t('opportunities.stale.overdue'),   value: data?.stale.overdue ?? 0 },
+    { key: 'forecastCount', label: t('opportunities.forecastCount'), value: forecastCount },
+    { key: 'forecastValue', label: t('opportunities.forecastValue'), value: formatCurrency(forecastValue, 'EUR', 0) },
   ]
 
   return (
     <div>
       {/* KPI strip — pipeline health, above the tabs (candidate-page order) */}
       {hasData && (
-        <div style={{ ...card, marginBottom: 16 }}>
-          <InsightsRow kpis={kpis} padding="14px 20px" />
-        </div>
+        <ReportKpiBand kpis={kpis} />
       )}
 
       {/* Tab bar + period control (from the hub) */}

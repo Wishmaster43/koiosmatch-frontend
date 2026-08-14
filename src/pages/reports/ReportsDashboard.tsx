@@ -9,7 +9,7 @@
  */
 import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
-import InsightsRow from '@/components/insights/InsightsRow'
+import ReportKpiBand from './ReportKpiBand'
 import type { KpiSpec } from '@/components/insights/InsightsRow'
 import { useNavigation } from '@/context/NavigationContext'
 import { useCandidatesReport } from './useCandidatesReport'
@@ -23,8 +23,6 @@ import { useIntakesReport } from './useIntakesReport'
 import { useFlowReport } from './useFlowReport'
 import type { ReportId } from './reportIds'
 import type { ReportPeriod } from '@/types/analytics'
-
-const card = { background: 'var(--surface)', borderRadius: 12, border: '1px solid var(--border)' } as const
 
 // One row's shape after normalising its hook's four states down to what the
 // KPI card needs — total/loading/error, plus the sub-report it drills into.
@@ -71,9 +69,7 @@ export default function ReportsDashboard({ period, tabsSlot }: { period: ReportP
   return (
     <div>
       {tabsSlot}
-      <div style={{ ...card, marginTop: 12 }}>
-        <InsightsRow kpis={kpis} padding="14px 20px" />
-      </div>
+      <ReportKpiBand kpis={kpis} />
     </div>
   )
 }

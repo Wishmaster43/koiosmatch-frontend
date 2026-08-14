@@ -90,6 +90,11 @@ describe('FlowReport', () => {
     }
     // Overall conversion = last reached / first reached = 6/20 = 30%.
     expect(screen.getByText('30%')).toBeInTheDocument()
+    // Drop-off (cohort only) = first reached - last reached = 20 - 6 = 14; the
+    // average days-in-phase card averages the non-null avg_days_in_phase values.
+    expect(screen.getByText('Uitval (aantal)')).toBeInTheDocument()
+    expect(screen.getByText('14')).toBeInTheDocument()
+    expect(screen.getByText('Gem. dagen per fase')).toBeInTheDocument()
   })
 
   // Cohort-filling: no reached data yet, so the pipeline fallback renders (current_count)

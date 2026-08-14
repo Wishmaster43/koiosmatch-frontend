@@ -9,7 +9,7 @@
 import { useState } from 'react'
 import type { CSSProperties, ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
-import InsightsRow from '@/components/insights/InsightsRow'
+import ReportKpiBand from './ReportKpiBand'
 import type { KpiSpec } from '@/components/insights/InsightsRow'
 import { useIntakesReport } from './useIntakesReport'
 import type { ReportPeriod, IntakeBucket } from '@/types/analytics'
@@ -58,15 +58,31 @@ export default function IntakesReport({ period, tabsSlot }: { period: ReportPeri
   const breakdown = data?.[GROUP_KEY[group]] ?? []
   const hasData   = !loading && !error && total > 0
 
-  const kpis: KpiSpec[] = [{ key: 'total', label: t('intakes.total'), value: total }]
+  // Nine honest cards: total + distinct-category counts off every breakdown axis
+  // + the top segment per dimension (label/count straight from the response). No
+  // drill endpoint exists for intakes yet, so every card here stays a plain stat.
+  const topOf = (items: IntakeBucket[]) =>
+    items.reduce<IntakeBucket | null>((best, x) => (!best || x.count > best.count ? x : best), null)
+  const topRecruiter = data ? topOf(data.by_recruiter) : null
+  const topSource    = data ? topOf(data.by_source) : null
+  const topFunction  = data ? topOf(data.by_function) : null
+  const kpis: KpiSpec[] = [
+    { key: 'total', label: t('intakes.total'), value: total },
+    { key: 'recruitersCount', label: t('intakes.summary.recruitersCount'), value: data?.by_recruiter.length ?? 0 },
+    { key: 'locationsCount', label: t('intakes.summary.locationsCount'), value: data?.by_location.length ?? 0 },
+    { key: 'sourcesCount', label: t('intakes.summary.sourcesCount'), value: data?.by_source.length ?? 0 },
+    { key: 'functionsCount', label: t('intakes.summary.functionsCount'), value: data?.by_function.length ?? 0 },
+    { key: 'regionsCount', label: t('intakes.summary.regionsCount'), value: data?.by_region.length ?? 0 },
+    { key: 'topRecruiter', label: t('intakes.summary.topRecruiter'), value: topRecruiter?.count ?? '—', sub: topRecruiter?.label },
+    { key: 'topSource', label: t('intakes.summary.topSource'), value: topSource?.count ?? '—', sub: topSource?.label },
+    { key: 'topFunction', label: t('intakes.summary.topFunction'), value: topFunction?.count ?? '—', sub: topFunction?.label },
+  ]
 
   return (
     <div>
       {/* KPI strip — total intakes, above the tabs (candidate-page order) */}
       {hasData && (
-        <div style={{ ...card, marginBottom: 16 }}>
-          <InsightsRow kpis={kpis} padding="14px 20px" />
-        </div>
+        <ReportKpiBand kpis={kpis} />
       )}
 
       {/* Tab bar + period control (from the hub) */}

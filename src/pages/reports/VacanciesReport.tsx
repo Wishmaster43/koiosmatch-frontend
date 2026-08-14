@@ -11,7 +11,7 @@
 import { useState } from 'react'
 import type { CSSProperties, ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
-import InsightsRow from '@/components/insights/InsightsRow'
+import ReportKpiBand from './ReportKpiBand'
 import type { KpiSpec } from '@/components/insights/InsightsRow'
 import DataTable from '@/components/ui/DataTable'
 import type { Column } from '@/components/ui/DataTable'
@@ -80,6 +80,19 @@ export default function VacanciesReport({ period, tabsSlot }: { period: ReportPe
     adviceParams: { date: pt.date, ...(data?.timeseries.bucket === 'week' ? { bucket: 'week' } : {}), period },
   })
 
+  // Real, non-fabricated segments to source the four extra KPI slots: the axes
+  // already sum to `total` (see VacancyReportAxes) — 'none'/'others' sentinels are
+  // excluded here because "the biggest real value" should name an actual customer/
+  // industry/owner, not a bucket. The top-of-axis pick reuses openSegment (same
+  // gateDrillClick + XOR-param pattern the axis bars use).
+  const realSeg = <T extends { value: string; count: number }>(segs: T[]) =>
+    segs.filter(x => x.value !== 'none' && x.value !== 'others').sort((a, b) => b.count - a.count)[0]
+  const topIndustry = realSeg(data?.by_industry ?? [])
+  const topOwner = (data?.by_owner ?? []).filter(o => o.owner_id !== 'none').sort((a, b) => b.count - a.count)[0]
+  // Distinct real customers among this window's vacancies (from the rows themselves,
+  // not the top-10-capped axis, so it is never truncated by the 'others' bucket).
+  const customersCount = new Set(rows.map(v => v.customer?.id).filter(Boolean)).size
+
   const kpis: KpiSpec[] = [
     { key: 'total',  label: t('vacancies.summary.total'),  value: s?.total ?? 0,
       active: drill != null && drill.rowsParams?.status == null,
@@ -94,6 +107,17 @@ export default function VacanciesReport({ period, tabsSlot }: { period: ReportPe
       value: s ? `${Math.round(s.fill_rate * 100)}%` : '—' },
     { key: 'ttf', label: t('vacancies.summary.avgTimeToFill'),
       value: s?.avg_time_to_fill_days != null ? t('vacancies.daysValue', { days: Math.round(s.avg_time_to_fill_days) }) : '—' },
+    // openRate = open/total — a ratio of two fields the endpoint already returns.
+    { key: 'openRate', label: t('vacancies.summary.openRate'),
+      value: s && s.total > 0 ? `${Math.round((s.open / s.total) * 100)}%` : '—' },
+    // Plain stat — no single XOR value represents "distinct customers", so not clickable.
+    { key: 'customersCount', label: t('vacancies.summary.customersCount'), value: customersCount },
+    { key: 'topIndustry', label: t('vacancies.summary.topIndustry'),
+      value: topIndustry ? `${topIndustry.label} · ${topIndustry.count}` : '—',
+      onClick: topIndustry ? gateDrillClick('vacancies', () => openSegment(topIndustry, { industry: topIndustry.value })) : undefined },
+    { key: 'topOwner', label: t('vacancies.summary.topOwner'),
+      value: topOwner ? `${topOwner.name} · ${topOwner.count}` : '—',
+      onClick: topOwner ? gateDrillClick('vacancies', () => openSegment({ label: topOwner.name, count: topOwner.count }, { owner: topOwner.owner_id })) : undefined },
   ]
 
   // Columns — soft chips for status/filled (§4), numeric cols right-aligned + sortable.
@@ -134,9 +158,7 @@ export default function VacanciesReport({ period, tabsSlot }: { period: ReportPe
     <div>
       {/* KPI strip — above the tabs (candidate-page order: KPIs first) */}
       {hasData && rows.length > 0 && (
-        <div style={{ ...card, marginBottom: 16 }}>
-          <InsightsRow kpis={kpis} padding="14px 20px" />
-        </div>
+        <ReportKpiBand kpis={kpis} />
       )}
 
       {/* Tab bar + period control (from the hub) */}

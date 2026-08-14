@@ -12,7 +12,7 @@
 import { useState } from 'react'
 import type { CSSProperties, ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
-import InsightsRow from '@/components/insights/InsightsRow'
+import ReportKpiBand from './ReportKpiBand'
 import type { KpiSpec } from '@/components/insights/InsightsRow'
 import ReportDrillDrawer from './ReportDrillDrawer'
 import type { DrillSpec } from './ReportDrillDrawer'
@@ -98,7 +98,15 @@ export default function TasksReport({ period, tabsSlot }: { period: ReportPeriod
   // the seven-way XOR carries no open/done/overdue param (no fake affordances) —
   // without onClick the card renders as a plain stat, never a dead button.
   // done_rate is null while nothing is countable — placeholder, never a fabricated 0%.
+  // Nine-card footprint (Danny — same as the dashboard). The workload five stay
+  // as-is; unassigned/no-team/no-branch are the existing 'none' row of a
+  // drillable axis (real data, real drill — no fabrication), and overdueRate is
+  // an honest ratio of two real fields (never a fabricated 0%).
   const s = data?.summary
+  const unassigned = data?.by_assignee.find(seg => seg.owner_id === 'none')
+  const noTeam = data?.by_team.find(seg => seg.value === 'none')
+  const noBranch = data?.by_branch.find(seg => seg.value === 'none')
+  const overdueRate = data && total > 0 && s ? (s.overdue / total) * 100 : null
   const kpis: KpiSpec[] = [
     { key: 'total',    label: t('tasks.total'),            value: total },
     { key: 'open',     label: t('tasks.summary.open'),     value: s?.open ?? 0 },
@@ -106,15 +114,24 @@ export default function TasksReport({ period, tabsSlot }: { period: ReportPeriod
     { key: 'overdue',  label: t('tasks.summary.overdue'),  value: s?.overdue ?? 0 },
     { key: 'doneRate', label: t('tasks.summary.doneRate'),
       value: s?.done_rate != null ? `${formatNumber(s.done_rate)}%` : '—' },
+    { key: 'unassigned', label: t('tasks.unassigned'), value: unassigned?.count ?? 0,
+      active: (drill?.rowsParams as Record<string, unknown> | undefined)?.assignee === 'none',
+      onClick: unassigned ? gateDrillClick('tasks', () => openSegment({ label: unassigned.name, count: unassigned.count }, { assignee: 'none' })) : undefined },
+    { key: 'noTeam', label: t('tasks.noTeam'), value: noTeam?.count ?? 0,
+      active: (drill?.rowsParams as Record<string, unknown> | undefined)?.team === 'none',
+      onClick: noTeam ? gateDrillClick('tasks', () => openSegment(noTeam, { team: 'none' })) : undefined },
+    { key: 'noBranch', label: t('tasks.noBranch'), value: noBranch?.count ?? 0,
+      active: (drill?.rowsParams as Record<string, unknown> | undefined)?.branch === 'none',
+      onClick: noBranch ? gateDrillClick('tasks', () => openSegment(noBranch, { branch: 'none' })) : undefined },
+    { key: 'overdueRate', label: t('tasks.overdueRate'),
+      value: overdueRate != null ? `${formatNumber(overdueRate)}%` : '—' },
   ]
 
   return (
     <div>
       {/* KPI strip — workload health, above the tabs (candidate-page order) */}
       {hasData && (
-        <div style={{ ...card, marginBottom: 16 }}>
-          <InsightsRow kpis={kpis} padding="14px 20px" />
-        </div>
+        <ReportKpiBand kpis={kpis} />
       )}
 
       {/* Tab bar + period control (from the hub) */}

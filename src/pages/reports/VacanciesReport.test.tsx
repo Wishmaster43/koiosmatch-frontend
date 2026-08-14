@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { render, screen } from '@testing-library/react'
+import { render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import VacanciesReport from './VacanciesReport'
@@ -263,6 +263,30 @@ describe('VacanciesReport (RAPPORTEN-SUITE-1 portie 4, additive on C-34)', () =>
     expect(lastDrillParams()).toEqual({ vacancy: 'v1', period: 'month' })
     expect(getSpy).toHaveBeenCalledWith('/reports/vacancies/advice',
       expect.objectContaining({ params: { vacancy: 'v1', period: 'month' } }))
+  })
+
+  // Exactly nine KPI cards (§ report-KPI-9 sweep): the five legacy summary tiles
+  // plus four new ones derived from fields the endpoint already returns — an
+  // open-rate ratio, a distinct-customers count, and the top industry/owner
+  // segments (both still drill via the same XOR-param pattern as the axis bars).
+  it('renders exactly nine KPI cards, with topIndustry/topOwner drilling their XOR param', async () => {
+    const user = userEvent.setup()
+    mockUseVacanciesReport.mockReturnValue({ data, loading: false, error: false })
+    renderReport()
+    expect(screen.getByText('Open-percentage')).toBeInTheDocument()
+    expect(screen.getByText('67%')).toBeInTheDocument() // 8/12
+    // One distinct customer in the fixture row — assert via the KPI card
+    // (a bare '1' text match is ambiguous against other numeric cells on the page).
+    const customersLabel = screen.getByText('Aantal klanten')
+    const customersCard = customersLabel.parentElement as HTMLElement
+    expect(within(customersCard).getByText('1')).toBeInTheDocument()
+    expect(screen.getByText('Grootste branche')).toBeInTheDocument()
+    expect(screen.getByText('Zorg · 12')).toBeInTheDocument()
+    expect(screen.getByText('Grootste eigenaar')).toBeInTheDocument()
+    expect(screen.getByText('Anna de Vries · 9')).toBeInTheDocument()
+
+    await user.click(screen.getByText('Zorg · 12'))
+    expect(lastDrillParams()).toEqual({ industry: 'Zorg', period: 'month' })
   })
 
   // Legacy summary-KPI drill (unchanged C-34 behaviour): the Open tile explains the

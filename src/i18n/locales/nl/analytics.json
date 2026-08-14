@@ -51,6 +51,16 @@
       "source": "Bron",
       "function": "Functie",
       "region": "Regio"
+    },
+    "summary": {
+      "recruitersCount": "Aantal recruiters",
+      "locationsCount": "Aantal locaties",
+      "sourcesCount": "Aantal bronnen",
+      "functionsCount": "Aantal functies",
+      "regionsCount": "Aantal regio’s",
+      "topRecruiter": "Meest actieve recruiter",
+      "topSource": "Grootste bron",
+      "topFunction": "Meest voorkomende functie"
     }
   },
   "comingSoon": "{{label}}. Komt eraan",
@@ -76,7 +86,9 @@
     "conversion": "Conversie",
     "reached": "Bereikt",
     "current": "Nu in fase",
-    "avgDays": "gem. {{days}} dagen"
+    "avgDays": "gem. {{days}} dagen",
+    "dropOff": "Uitval (aantal)",
+    "avgDaysOverall": "Gem. dagen per fase"
   },
   "recruiters": {
     "title": "Recruiters",
@@ -84,6 +96,17 @@
     "loading": "Recruiters laden…",
     "error": "Kon de recruiters niet laden",
     "empty": "Geen recruiters in deze periode",
+    "summary": {
+      "recruiters": "Recruiters",
+      "candidates": "Kandidaten",
+      "applications": "Sollicitaties",
+      "matches": "Matches",
+      "notContacted": "Niet gecontacteerd",
+      "intakesPlanned": "Intakes gepland",
+      "intakesDone": "Intakes gedaan",
+      "tasksOpen": "Taken open",
+      "tasksOverdue": "Taken te laat"
+    },
     "cols": {
       "recruiter": "Recruiter",
       "candidates": "Kandidaten",
@@ -113,7 +136,11 @@
       "open": "Open",
       "filled": "Vervuld",
       "fillRate": "Vervullingsgraad",
-      "avgTimeToFill": "Gem. doorlooptijd"
+      "avgTimeToFill": "Gem. doorlooptijd",
+      "openRate": "Open-percentage",
+      "customersCount": "Aantal klanten",
+      "topIndustry": "Grootste branche",
+      "topOwner": "Grootste eigenaar"
     },
     "cols": {
       "vacancy": "Vacature",
@@ -150,7 +177,9 @@
       "none": "Geen contract"
     },
     "terminations": {
-      "title": "Beëindigingsredenen"
+      "title": "Beëindigingsredenen",
+      "total": "Totaal beëindigingen",
+      "rate": "Beëindigingspercentage"
     }
   },
   "outreach": {
@@ -166,6 +195,14 @@
       "campaign": "Bellijst",
       "channel": "Kanaal",
       "outcome": "Uitkomst"
+    },
+    "summary": {
+      "notReached": "Niet bereikt",
+      "assigned": "Toegewezen",
+      "unassigned": "Niet toegewezen",
+      "noOutcome": "Geen uitkomst",
+      "topCampaign": "Grootste bellijst",
+      "topChannel": "Grootste kanaal"
     }
   },
   "sources": {
@@ -176,7 +213,12 @@
       "sources": "Bronnen",
       "candidates": "Kandidaten",
       "applications": "Sollicitaties",
-      "matches": "Matches"
+      "matches": "Matches",
+      "matchRate": "Matchpercentage",
+      "applicationRate": "Sollicitaties per kandidaat",
+      "topSourceCandidates": "Grootste bron (kandidaten)",
+      "topSourceMatches": "Grootste bron (matches)",
+      "sourcesNoMatches": "Bronnen zonder matches"
     },
     "cols": {
       "source": "Bron",
@@ -220,7 +262,13 @@
       "won": "Gewonnen",
       "lost": "Verloren",
       "winRate": "Winratio"
-    }
+    },
+    "stale": {
+      "untouched": "Onaangeraakt",
+      "overdue": "Te laat"
+    },
+    "forecastCount": "Verwachte deals",
+    "forecastValue": "Verwachte waarde"
   },
   "tasks": {
     "loading": "Taken laden…",
@@ -242,7 +290,11 @@
       "assignee": "Toegewezen aan",
       "team": "Afdeling",
       "branch": "Vestiging"
-    }
+    },
+    "unassigned": "Niet toegewezen",
+    "noTeam": "Geen afdeling",
+    "noBranch": "Geen vestiging",
+    "overdueRate": "Te-laat-percentage"
   },
   "customers": {
     "loading": "Klanten laden…",
@@ -276,7 +328,12 @@
     "summary": {
       "primary": "Primair contact",
       "withRecentContact": "Recent contact gehad",
-      "neverContacted": "Nooit contact gehad"
+      "neverContacted": "Nooit contact gehad",
+      "contactedRate": "Percentage recent benaderd",
+      "withoutFunction": "Zonder functie",
+      "withoutLocation": "Zonder locatie",
+      "withoutDepartment": "Zonder afdeling",
+      "withoutCustomer": "Zonder klant"
     }
   },
   "locations": {
@@ -294,7 +351,13 @@
     },
     "summary": {
       "withCustomer": "Gekoppeld aan klant",
-      "withoutCustomer": "Niet gekoppeld aan klant"
+      "withoutCustomer": "Niet gekoppeld aan klant",
+      "withDepartments": "Met afdelingen",
+      "withoutDepartments": "Zonder afdelingen",
+      "withoutCity": "Zonder plaats",
+      "topCity": "Grootste plaats",
+      "withoutProvince": "Zonder provincie",
+      "topProvince": "Grootste provincie"
     }
   },
   "departments": {
@@ -311,7 +374,13 @@
     },
     "summary": {
       "withLocation": "Gekoppeld aan locatie",
-      "withoutLocation": "Niet gekoppeld aan locatie"
+      "withoutLocation": "Niet gekoppeld aan locatie",
+      "withContacts": "Met contacten",
+      "withoutContacts": "Zonder contacten",
+      "withoutCustomer": "Zonder klant",
+      "topCustomer": "Grootste klant",
+      "topLocation": "Grootste locatie",
+      "customersCount": "Aantal klanten"
     }
   },
   "ai": {
@@ -328,7 +397,13 @@
     },
     "summary": {
       "tokens": "Gebruikte tokens",
-      "amount": "Verkoopbedrag"
+      "amount": "Verkoopbedrag",
+      "avgTokens": "Gem. tokens per run",
+      "avgAmount": "Gem. verkoopbedrag per run",
+      "activityTypes": "Soorten activiteit",
+      "modelsUsed": "Gebruikte modellen",
+      "activeUsers": "Actieve gebruikers",
+      "topActivity": "Meest gebruikte activiteit"
     }
   },
   "workflows": {
@@ -350,7 +425,9 @@
       "cancelled": "Geannuleerd",
       "running": "Bezig",
       "successRate": "Slaagpercentage",
-      "avgDuration": "Gem. duur"
+      "avgDuration": "Gem. duur",
+      "workflowsCount": "Aantal workflows",
+      "triggersCount": "Aantal triggers"
     }
   }
 }

@@ -10,7 +10,7 @@
 import { useMemo, useState } from 'react'
 import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
-import InsightsRow from '@/components/insights/InsightsRow'
+import ReportKpiBand from './ReportKpiBand'
 import type { KpiSpec } from '@/components/insights/InsightsRow'
 import ReportDrillDrawer from './ReportDrillDrawer'
 import type { DrillSpec } from './ReportDrillDrawer'
@@ -91,6 +91,22 @@ export default function FlowReport({ period, tabsSlot }: { period: ReportPeriod;
     }
   }
 
+  // Overall drop-off = applications lost between the first and last reached stage
+  // (cohort only — the pipeline-now counts aren't a cohort, so no honest drop-off
+  // exists while it fills). Average days-in-phase is the mean of the phases that
+  // carry a real value — both are plain stats, not a single segment, so neither drills.
+  const dropOff = useMemo(() => {
+    if (!cohortReady || phases.length < 2) return null
+    const first = phases[0].reached_count
+    const last  = phases[phases.length - 1].reached_count
+    return first - last
+  }, [cohortReady, phases])
+  const avgDaysOverall = useMemo(() => {
+    const withDays = phases.filter(p => p.avg_days_in_phase != null)
+    if (withDays.length === 0) return null
+    return withDays.reduce((s, p) => s + (p.avg_days_in_phase ?? 0), 0) / withDays.length
+  }, [phases])
+
   const kpis: KpiSpec[] = [
     { key: 'total', label: t('flow.total'), value: data?.total ?? 0,
       active: drill != null && drill.rowsParams?.phase == null && drill.rowsEndpoint === '/reports/flow/drill',
@@ -103,6 +119,12 @@ export default function FlowReport({ period, tabsSlot }: { period: ReportPeriod;
     ...(overallConv != null
       ? [{ key: 'conv', label: t('flow.overallConversion'), value: `${Math.round(overallConv * 100)}%` } as KpiSpec]
       : []),
+    ...(dropOff != null
+      ? [{ key: 'dropOff', label: t('flow.dropOff'), value: dropOff } as KpiSpec]
+      : []),
+    ...(avgDaysOverall != null
+      ? [{ key: 'avgDaysOverall', label: t('flow.avgDaysOverall'), value: t('flow.avgDays', { days: Math.round(avgDaysOverall) }) } as KpiSpec]
+      : []),
     ...phases.map(phaseKpi),
   ]
 
@@ -110,9 +132,7 @@ export default function FlowReport({ period, tabsSlot }: { period: ReportPeriod;
     <div>
       {/* KPI strip — sits above the tabs (candidate-page order: KPIs first) */}
       {!loading && !error && phases.length > 0 && (
-        <div style={{ background: 'var(--surface)', borderRadius: 12, border: '1px solid var(--border)', marginBottom: 16 }}>
-          <InsightsRow kpis={kpis} padding="14px 20px" />
-        </div>
+        <ReportKpiBand kpis={kpis} />
       )}
 
       {/* Tab bar + period control (from the hub) */}

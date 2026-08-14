@@ -113,10 +113,12 @@ describe('OutreachReport (RAPPORTEN-SUITE-1 portie 6, bellijsten report)', () =>
   it('renders every axis with every segment, each axis summing to the report total', () => {
     mockUseOutreachReport.mockReturnValue({ data, loading: false, error: false })
     renderReport()
+    // getAllByText: a few axis labels (Niet toegewezen/Telefoon/Geen uitkomst) now
+    // also double as a KPI-card label or sub — presence is what this test proves.
     for (const label of ['Wk 20', 'Wk 33', 'Bellijst Q3 wondzorg', 'Voorjaarsactie 2026', 'Overige bellijsten',
       'Anna de Vries', 'Niet toegewezen', 'Telefoon', 'WhatsApp', 'Geen kanaal',
       'Benaderd', 'Nieuw', 'Onbekend', 'Interested', 'Geen interesse', 'Geen uitkomst']) {
-      expect(screen.getByText(label)).toBeInTheDocument()
+      expect(screen.getAllByText(label).length).toBeGreaterThan(0)
     }
     expect(data.by_status.reduce((s, x) => s + x.count, 0)).toBe(data.total)
     expect(data.by_outcome.reduce((s, x) => s + x.count, 0)).toBe(data.total)
@@ -137,6 +139,35 @@ describe('OutreachReport (RAPPORTEN-SUITE-1 portie 6, bellijsten report)', () =>
     expect(screen.getByText('63%')).toBeInTheDocument()
   })
 
+  // Nine-card footprint (Danny's "negen KPI rows"): the fase-1 three plus two
+  // derived complements (not-reached/assigned) and four real axis-derived cards
+  // (unassigned, no-outcome, top campaign, top channel) — never a fabricated ninth.
+  it('renders exactly nine KPI cards, each a real number from the fixture', () => {
+    mockUseOutreachReport.mockReturnValue({ data, loading: false, error: false })
+    renderReport()
+    const cardLabels = ['Totaal targets', 'Bereikt', 'Bereikpercentage', 'Niet bereikt', 'Toegewezen',
+      'Niet toegewezen', 'Geen uitkomst', 'Grootste bellijst', 'Grootste kanaal']
+    expect(cardLabels).toHaveLength(9)
+    // getAllByText: 'Niet toegewezen'/'Geen uitkomst' double as an axis-bar label
+    // below, so at least one instance (not exactly one) is what proves the card.
+    for (const label of cardLabels) expect(screen.getAllByText(label).length).toBeGreaterThan(0)
+    // Values collide with axis-bar counts (15/30 each appear twice) — presence,
+    // not uniqueness, is what these two derived cards need to prove.
+    expect(screen.getAllByText(String(data.total_targets - data.reached)).length).toBeGreaterThan(0) // notReached
+    expect(screen.getAllByText(String(data.total_targets - 10)).length).toBeGreaterThan(0) // assigned
+    // topCampaign sub shows the campaign name (the biggest real one, 'others'
+    // excluded) — it also appears as its own bar below, so at least one instance.
+    expect(screen.getAllByText('Bellijst Q3 wondzorg').length).toBeGreaterThan(0)
+  })
+
+  it('clicking the "Grootste bellijst" KPI card drills with campaign=<uuid> (XOR)', async () => {
+    const user = userEvent.setup()
+    mockUseOutreachReport.mockReturnValue({ data, loading: false, error: false })
+    renderReport()
+    await user.click(screen.getByText('Grootste bellijst'))
+    expect(lastDrillParams()).toEqual({ campaign: 'camp-1', period: 'month' })
+  })
+
   // BELANGRIJK per contract: the window comes from the RESPONSE and must render
   // prominently as DD-MM-YYYY — never ISO (CLAUDE.md §3B DATUM-1).
   it('renders the data window prominently as DD-MM-YYYY', () => {
@@ -150,7 +181,7 @@ describe('OutreachReport (RAPPORTEN-SUITE-1 portie 6, bellijsten report)', () =>
     const user = userEvent.setup()
     mockUseOutreachReport.mockReturnValue({ data, loading: false, error: false })
     renderReport()
-    await user.click(screen.getByText('Bellijst Q3 wondzorg'))
+    await user.click(screen.getAllByText('Bellijst Q3 wondzorg').at(-1)!)
     expect(getSpy).toHaveBeenCalledWith('/reports/outreach/drill',
       expect.objectContaining({ params: { campaign: 'camp-1', period: 'month' } }))
     expect(getSpy).toHaveBeenCalledWith('/reports/outreach/advice',
@@ -182,7 +213,7 @@ describe('OutreachReport (RAPPORTEN-SUITE-1 portie 6, bellijsten report)', () =>
     renderReport()
     await user.click(screen.getByText('Anna de Vries'))
     expect(lastDrillParams()).toEqual({ assignee: 'u1', period: 'month' })
-    await user.click(screen.getByText('Niet toegewezen'))
+    await user.click(screen.getAllByText('Niet toegewezen').at(-1)!)
     expect(lastDrillParams()).toEqual({ assignee: 'none', period: 'month' })
   })
 
@@ -190,7 +221,7 @@ describe('OutreachReport (RAPPORTEN-SUITE-1 portie 6, bellijsten report)', () =>
     const user = userEvent.setup()
     mockUseOutreachReport.mockReturnValue({ data, loading: false, error: false })
     renderReport()
-    await user.click(screen.getByText('Telefoon'))
+    await user.click(screen.getAllByText('Telefoon').at(-1)!)
     expect(lastDrillParams()).toEqual({ channel: 'phone', period: 'month' })
     await user.click(screen.getByText('Geen kanaal'))
     expect(lastDrillParams()).toEqual({ channel: 'none', period: 'month' })
@@ -212,7 +243,7 @@ describe('OutreachReport (RAPPORTEN-SUITE-1 portie 6, bellijsten report)', () =>
     const user = userEvent.setup()
     mockUseOutreachReport.mockReturnValue({ data, loading: false, error: false })
     renderReport()
-    await user.click(screen.getByText('Geen uitkomst'))
+    await user.click(screen.getAllByText('Geen uitkomst').at(-1)!)
     expect(lastDrillParams()).toEqual({ outcome: 'none', period: 'month' })
     await user.click(screen.getByText('Interested'))
     expect(lastDrillParams()).toEqual({ outcome: 'interested', period: 'month' })
@@ -226,7 +257,7 @@ describe('OutreachReport (RAPPORTEN-SUITE-1 portie 6, bellijsten report)', () =>
     renderReport()
     await user.click(screen.getByText('Benaderd'))
     expect(lastDrillParams()).toEqual({ status: 'contacted', period: 'month' })
-    await user.click(screen.getByText('Bellijst Q3 wondzorg'))
+    await user.click(screen.getAllByText('Bellijst Q3 wondzorg').at(-1)!)
     expect(lastDrillParams()).toEqual({ campaign: 'camp-1', period: 'month' })
     await user.click(screen.getByText('Nieuw'))
     expect(lastDrillParams()).toEqual({ status: 'new', period: 'month' })
@@ -260,7 +291,7 @@ describe('OutreachReport (RAPPORTEN-SUITE-1 portie 6, bellijsten report)', () =>
     mockUseOutreachReport.mockReturnValue({ data, loading: false, error: false })
     renderReport()
     await user.click(screen.getByText('Benaderd'))
-    await user.click(screen.getByText('Telefoon'))
+    await user.click(screen.getAllByText('Telefoon').at(-1)!)
     await user.click(screen.getByText('Anna de Vries'))
     await user.click(screen.getByText('Wk 33'))
     expect(getSpy.mock.calls.length).toBeGreaterThan(0)
@@ -296,7 +327,7 @@ describe('OutreachReport (RAPPORTEN-SUITE-1 portie 6, bellijsten report)', () =>
         } }))
     mockUseOutreachReport.mockReturnValue({ data, loading: false, error: false })
     renderReport()
-    await user.click(screen.getByText('Geen uitkomst'))
+    await user.click(screen.getAllByText('Geen uitkomst').at(-1)!)
     await waitFor(() => expect(screen.getByText('J. de Boer')).toBeInTheDocument())
     expect(screen.getByText('Voicemail ingesproken')).toBeInTheDocument()
     expect(screen.getByText('Koios heeft nog geen advies voor dit getal.')).toBeInTheDocument()

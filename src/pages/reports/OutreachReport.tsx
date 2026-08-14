@@ -14,7 +14,7 @@
 import { useState } from 'react'
 import type { CSSProperties, ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
-import InsightsRow from '@/components/insights/InsightsRow'
+import ReportKpiBand from './ReportKpiBand'
 import type { KpiSpec } from '@/components/insights/InsightsRow'
 import ReportDrillDrawer from './ReportDrillDrawer'
 import type { DrillSpec } from './ReportDrillDrawer'
@@ -98,20 +98,42 @@ export default function OutreachReport({ period, tabsSlot }: { period: ReportPer
   // Fase-1 KPI strip, unchanged (regression): reach_rate is null while nothing
   // was reached — placeholder, never a fabricated 0%. Display-only: the six-way
   // XOR carries no reached/rate segment (no fake affordances).
+  const targets = data?.total_targets ?? 0
+  const reached = data?.reached ?? 0
+  const unassignedSeg   = data?.by_assignee.find(s => s.owner_id === 'none')
+  const unassignedCount = unassignedSeg?.count ?? 0
+  const noOutcomeSeg    = data?.by_outcome.find(s => s.value === 'none')
+  // Top-1 real bar per axis (excl. the structural 'others'/'none' sentinels) —
+  // never a hardcoded outcome/campaign/channel value, just the biggest real one.
+  const topCampaign = data?.by_campaign.filter(s => s.value !== 'others').reduce<{ value: string; label: string; count: number } | null>(
+    (top, s) => (!top || s.count > top.count) ? s : top, null)
+  const topChannel = data?.by_channel.filter(s => s.value !== 'none').reduce<{ value: string; label: string; count: number } | null>(
+    (top, s) => (!top || s.count > top.count) ? s : top, null)
   const kpis: KpiSpec[] = [
-    { key: 'total',   label: t('outreach.total'),   value: data?.total_targets ?? 0 },
-    { key: 'reached', label: t('outreach.reached'), value: data?.reached ?? 0 },
+    { key: 'total',   label: t('outreach.total'),   value: targets },
+    { key: 'reached', label: t('outreach.reached'), value: reached },
     { key: 'rate',    label: t('outreach.reachRate'),
       value: data?.reach_rate != null ? `${Math.round(data.reach_rate * 100)}%` : '—' },
+    // Derived complements — real subtraction over fields the endpoint returns,
+    // never a fabricated number. Not clickable: no single-value axis backs a
+    // "not reached"/"assigned" drill.
+    { key: 'notReached', label: t('outreach.summary.notReached'), value: targets - reached },
+    { key: 'assigned',   label: t('outreach.summary.assigned'),   value: targets - unassignedCount },
+    { key: 'unassigned', label: t('outreach.summary.unassigned'), value: unassignedCount,
+      onClick: unassignedSeg ? gateDrillClick('outreach', () => openSegment({ label: unassignedSeg.name, count: unassignedSeg.count }, { assignee: 'none' })) : undefined },
+    { key: 'noOutcome', label: t('outreach.summary.noOutcome'), value: noOutcomeSeg?.count ?? 0,
+      onClick: noOutcomeSeg ? gateDrillClick('outreach', () => openSegment(noOutcomeSeg, { outcome: 'none' })) : undefined },
+    ...(topCampaign ? [{ key: 'topCampaign', label: t('outreach.summary.topCampaign'), value: topCampaign.count, sub: topCampaign.label,
+      onClick: gateDrillClick('outreach', () => openSegment(topCampaign, { campaign: topCampaign.value })) } as KpiSpec] : []),
+    ...(topChannel ? [{ key: 'topChannel', label: t('outreach.summary.topChannel'), value: topChannel.count, sub: topChannel.label,
+      onClick: gateDrillClick('outreach', () => openSegment(topChannel, { channel: topChannel.value })) } as KpiSpec] : []),
   ]
 
   return (
     <div>
       {/* KPI strip — above the tabs (candidate-page order: KPIs first) */}
       {hasData && (
-        <div style={{ ...card, marginBottom: 16 }}>
-          <InsightsRow kpis={kpis} padding="14px 20px" />
-        </div>
+        <ReportKpiBand kpis={kpis} />
       )}
 
       {/* Tab bar + period control (from the hub) */}

@@ -51,6 +51,16 @@
       "source": "Source",
       "function": "Fonction",
       "region": "Région"
+    },
+    "summary": {
+      "recruitersCount": "Recruteurs",
+      "locationsCount": "Lieux",
+      "sourcesCount": "Sources",
+      "functionsCount": "Fonctions",
+      "regionsCount": "Régions",
+      "topRecruiter": "Recruteur le plus actif",
+      "topSource": "Source principale",
+      "topFunction": "Fonction la plus fréquente"
     }
   },
   "comingSoon": "{{label}}. Bientôt disponible",
@@ -76,7 +86,9 @@
     "conversion": "Conversion",
     "reached": "Atteint",
     "current": "Actuellement à l'étape",
-    "avgDays": "moy. {{days}} jours"
+    "avgDays": "moy. {{days}} jours",
+    "dropOff": "Abandons (nombre)",
+    "avgDaysOverall": "Jours moy. par étape"
   },
   "recruiters": {
     "title": "Recruteurs",
@@ -84,6 +96,17 @@
     "loading": "Chargement des recruteurs…",
     "error": "Impossible de charger les recruteurs",
     "empty": "Aucun recruteur sur cette période",
+    "summary": {
+      "recruiters": "Recruteurs",
+      "candidates": "Candidats",
+      "applications": "Candidatures",
+      "matches": "Matchs",
+      "notContacted": "Non contactés",
+      "intakesPlanned": "Entretiens prévus",
+      "intakesDone": "Entretiens réalisés",
+      "tasksOpen": "Tâches ouvertes",
+      "tasksOverdue": "Tâches en retard"
+    },
     "cols": {
       "recruiter": "Recruteur",
       "candidates": "Candidats",
@@ -113,7 +136,11 @@
       "open": "Ouverts",
       "filled": "Pourvus",
       "fillRate": "Taux de pourvoi",
-      "avgTimeToFill": "Délai moyen de pourvoi"
+      "avgTimeToFill": "Délai moyen de pourvoi",
+      "openRate": "Taux ouvert",
+      "customersCount": "Clients",
+      "topIndustry": "Secteur principal",
+      "topOwner": "Propriétaire principal"
     },
     "cols": {
       "vacancy": "Poste",
@@ -150,7 +177,9 @@
       "none": "Sans contrat"
     },
     "terminations": {
-      "title": "Motifs d'arrêt"
+      "title": "Motifs d'arrêt",
+      "total": "Total des arrêts",
+      "rate": "Taux d'arrêt"
     }
   },
   "outreach": {
@@ -166,6 +195,14 @@
       "campaign": "Liste d’appels",
       "channel": "Canal",
       "outcome": "Résultat"
+    },
+    "summary": {
+      "notReached": "Non contactés",
+      "assigned": "Assignés",
+      "unassigned": "Non assignés",
+      "noOutcome": "Aucun résultat",
+      "topCampaign": "Plus grande liste d’appels",
+      "topChannel": "Canal principal"
     }
   },
   "sources": {
@@ -176,7 +213,12 @@
       "sources": "Sources",
       "candidates": "Candidats",
       "applications": "Candidatures",
-      "matches": "Matchs"
+      "matches": "Matchs",
+      "matchRate": "Taux de correspondance",
+      "applicationRate": "Candidatures par candidat",
+      "topSourceCandidates": "Meilleure source (candidats)",
+      "topSourceMatches": "Meilleure source (matchs)",
+      "sourcesNoMatches": "Sources sans match"
     },
     "cols": {
       "source": "Source",
@@ -220,7 +262,13 @@
       "won": "Gagnées",
       "lost": "Perdues",
       "winRate": "Taux de gain"
-    }
+    },
+    "stale": {
+      "untouched": "Sans activité",
+      "overdue": "En retard"
+    },
+    "forecastCount": "Affaires prévues",
+    "forecastValue": "Valeur prévue"
   },
   "tasks": {
     "loading": "Chargement des tâches…",
@@ -242,7 +290,11 @@
       "assignee": "Assignée à",
       "team": "Service",
       "branch": "Agence"
-    }
+    },
+    "unassigned": "Non assignée",
+    "noTeam": "Sans service",
+    "noBranch": "Sans agence",
+    "overdueRate": "Taux de retard"
   },
   "customers": {
     "loading": "Chargement des clients…",
@@ -276,7 +328,12 @@
     "summary": {
       "primary": "Contact principal",
       "withRecentContact": "Contacté récemment",
-      "neverContacted": "Jamais contacté"
+      "neverContacted": "Jamais contacté",
+      "contactedRate": "Taux de contact récent",
+      "withoutFunction": "Sans fonction",
+      "withoutLocation": "Sans site",
+      "withoutDepartment": "Sans département",
+      "withoutCustomer": "Sans client"
     }
   },
   "locations": {
@@ -294,7 +351,13 @@
     },
     "summary": {
       "withCustomer": "Avec client",
-      "withoutCustomer": "Sans client"
+      "withoutCustomer": "Sans client",
+      "withDepartments": "Avec départements",
+      "withoutDepartments": "Sans département",
+      "withoutCity": "Sans ville",
+      "topCity": "Ville principale",
+      "withoutProvince": "Sans province",
+      "topProvince": "Province principale"
     }
   },
   "departments": {
@@ -311,7 +374,13 @@
     },
     "summary": {
       "withLocation": "Avec site",
-      "withoutLocation": "Sans site"
+      "withoutLocation": "Sans site",
+      "withContacts": "Avec contacts",
+      "withoutContacts": "Sans contact",
+      "withoutCustomer": "Sans client",
+      "topCustomer": "Client principal",
+      "topLocation": "Site principal",
+      "customersCount": "Clients représentés"
     }
   },
   "ai": {
@@ -328,7 +397,13 @@
     },
     "summary": {
       "tokens": "Jetons",
-      "amount": "Montant des ventes"
+      "amount": "Montant des ventes",
+      "avgTokens": "Jetons moy. par exécution",
+      "avgAmount": "Montant moy. des ventes par exécution",
+      "activityTypes": "Types d'activité",
+      "modelsUsed": "Modèles utilisés",
+      "activeUsers": "Utilisateurs actifs",
+      "topActivity": "Activité la plus utilisée"
     }
   },
   "workflows": {
@@ -350,7 +425,9 @@
       "cancelled": "Annulées",
       "running": "En cours",
       "successRate": "Taux de réussite",
-      "avgDuration": "Durée moyenne"
+      "avgDuration": "Durée moyenne",
+      "workflowsCount": "Workflows",
+      "triggersCount": "Déclencheurs"
     }
   }
 }

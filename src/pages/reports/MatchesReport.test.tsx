@@ -213,13 +213,16 @@ describe('MatchesReport (RAPPORTEN-SUITE-1 portie 7, closing enrichment)', () =>
     const user = userEvent.setup()
     mockUseMatchesReport.mockReturnValue({ data, loading: false, error: false })
     renderReport()
-    await user.click(screen.getByText('Verzonden'))
+    // 'Verzonden'/'Actief'/'Beëindigd' now render twice (KPI card + StatTile
+    // below) — either fires the identical contract_status drill, so click the
+    // first (the KPI card).
+    await user.click(screen.getAllByText('Verzonden')[0])
     expect(lastDrillParams()).toEqual({ contract_status: 'sent', period: 'month' })
     expect(getSpy).toHaveBeenCalledWith('/reports/matches/advice',
       expect.objectContaining({ params: { contract_status: 'sent', period: 'month' } }))
-    await user.click(screen.getByText('Actief'))
+    await user.click(screen.getAllByText('Actief')[0])
     expect(lastDrillParams()).toEqual({ contract_status: 'active', period: 'month' })
-    await user.click(screen.getByText('Beëindigd'))
+    await user.click(screen.getAllByText('Beëindigd')[0])
     expect(lastDrillParams()).toEqual({ contract_status: 'ended', period: 'month' })
   })
 
@@ -267,7 +270,7 @@ describe('MatchesReport (RAPPORTEN-SUITE-1 portie 7, closing enrichment)', () =>
     expect(lastDrillParams()).toEqual({ origin: 'funnel', period: 'month' })
     await user.click(screen.getByText('Uitzend'))
     expect(lastDrillParams()).toEqual({ contract_form: 'temp_agency', period: 'month' })
-    await user.click(screen.getByText('Verzonden'))
+    await user.click(screen.getAllByText('Verzonden')[0])
     expect(lastDrillParams()).toEqual({ contract_status: 'sent', period: 'month' })
     await user.click(screen.getByText('Wk 32'))
     expect(lastDrillParams()).toEqual({ date: '2026-08-03', bucket: 'week', period: 'month' })
@@ -295,10 +298,47 @@ describe('MatchesReport (RAPPORTEN-SUITE-1 portie 7, closing enrichment)', () =>
     renderReport()
     await user.click(screen.getByText('Via sollicitatie'))
     await user.click(screen.getByText('Detachering'))
-    await user.click(screen.getByText('Actief'))
+    await user.click(screen.getAllByText('Actief')[0])
     await user.click(screen.getByText('Wk 32'))
     expect(getSpy.mock.calls.length).toBeGreaterThan(0)
     expect(getSpy.mock.calls.every(c =>
       c[0] === '/reports/matches/drill' || c[0] === '/reports/matches/advice')).toBe(true)
+  })
+})
+
+// Nine-card KPI footprint (Danny — same as the dashboard, all reports). Every
+// card is derived from a field the endpoint already returns; sent/active/ended
+// mirror the under_contract tiles below and share their drill; the termination
+// total/rate and avg duration render as honest, non-fabricated stats.
+describe('MatchesReport (nine-card KPI footprint)', () => {
+  beforeEach(() => {
+    getSpy.mockReset()
+    getSpy.mockResolvedValue({ data: { data: [], meta: { total: 0 } } })
+  })
+
+  it('renders exactly nine KPI cards from the fixture', () => {
+    mockUseMatchesReport.mockReturnValue({ data, loading: false, error: false })
+    renderReport()
+    for (const label of ['Totaal matches', 'Via sollicitatie', 'Direct', 'Verzonden', 'Actief', 'Beëindigd',
+      'Totaal beëindigingen', 'Gem. matchduur', 'Beëindigingspercentage']) {
+      expect(screen.getAllByText(label).length).toBeGreaterThanOrEqual(1)
+    }
+    // Termination rate: 3 / 16 * 100 = 18,75% → the house number formatter.
+    expect(screen.getByText('18,75%')).toBeInTheDocument()
+  })
+
+  it('clicking the "sent" KPI card sends contract_status=sent, same as the tile below', async () => {
+    const user = userEvent.setup()
+    mockUseMatchesReport.mockReturnValue({ data, loading: false, error: false })
+    renderReport()
+    await user.click(screen.getAllByText('Verzonden')[0])
+    expect(lastDrillParams()).toEqual({ contract_status: 'sent', period: 'month' })
+  })
+
+  it('the avg-duration KPI shows a dash, never a fabricated zero, while HelloFlex has not filled it', () => {
+    mockUseMatchesReport.mockReturnValue({ data, loading: false, error: false })
+    renderReport()
+    expect(data.avg_placement_duration_days).toBeNull()
+    expect(screen.getAllByText('—').length).toBeGreaterThanOrEqual(1)
   })
 })

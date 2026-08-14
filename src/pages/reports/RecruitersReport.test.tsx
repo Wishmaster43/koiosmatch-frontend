@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { render, screen } from '@testing-library/react'
+import { render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import RecruitersReport from './RecruitersReport'
@@ -88,6 +88,31 @@ describe('RecruitersReport', () => {
     // candidates: 20+10=30, matches: 4+1=5, not_contacted: 2+0=2, recruiters: 2 rows.
     expect(screen.getByText('30')).toBeInTheDocument()
     expect(screen.getByText('5')).toBeInTheDocument()
+  })
+
+  // Exactly nine KPI cards: the four legacy team totals plus five new ones, all
+  // plain sums of fields the endpoint already returns per recruiter (no team-level
+  // drill exists, so none is clickable — unchanged from the legacy four).
+  it('renders exactly nine KPI cards summing applications/intakes/tasks across recruiters', () => {
+    mockUseRecruitersReport.mockReturnValue({ data, loading: false, error: false })
+    renderReport()
+    // 'Sollicitaties' renders twice: KPI card label + table column header.
+    expect(screen.getAllByText('Sollicitaties').length).toBe(2)
+    expect(screen.getByText('Intakes gepland')).toBeInTheDocument()
+    expect(screen.getByText('Intakes gedaan')).toBeInTheDocument()
+    expect(screen.getByText('Taken open')).toBeInTheDocument()
+    expect(screen.getByText('Taken te laat')).toBeInTheDocument()
+    // applications: 7+3=10, intakesPlanned: 3+1=4, intakesDone: 2+1=3, tasksOpen: 3+0=3, tasksOverdue: 1+0=1.
+    // Assert each sum scoped to its own KPI card (bare digits collide with table cells).
+    const cardValue = (label: string) => {
+      const l = screen.getAllByText(label)[0]
+      return within(l.parentElement as HTMLElement)
+    }
+    expect(cardValue('Sollicitaties').getByText('10')).toBeInTheDocument()
+    expect(cardValue('Intakes gepland').getByText('4')).toBeInTheDocument()
+    expect(cardValue('Intakes gedaan').getByText('3')).toBeInTheDocument()
+    expect(cardValue('Taken open').getByText('3')).toBeInTheDocument()
+    expect(cardValue('Taken te laat').getByText('1')).toBeInTheDocument()
   })
 
   // Table renders one row per recruiter with the backend's own label, and the

@@ -7,7 +7,7 @@ import type { CandidatesReportData } from '@/types/analytics'
 
 // Data layer under test control (loading/error/empty/success — the four UI states).
 const mockUseCandidatesReport = vi.fn()
-vi.mock('./useCandidatesReport', () => ({ useCandidatesReport: () => mockUseCandidatesReport() }))
+vi.mock('./useCandidatesReport', () => ({ useCandidatesReport: (...args: unknown[]) => mockUseCandidatesReport(...args) }))
 
 // Spy on the underlying axios client so we can assert the exact request shape
 // (method/route/params) that a bar/bucket click sends — mutation tests must assert
@@ -93,6 +93,24 @@ describe('CandidatesReport (RAPPORTEN-SUITE-1 inflow report)', () => {
       expect.objectContaining({ params: { status: 'available', period: 'month' } }))
   })
 
+  it('sends the active panel filters to BOTH the report hook and a drill click (RAPPORT-FILTERS-1 — bar and lade never disagree)', async () => {
+    const user = userEvent.setup()
+    mockUseCandidatesReport.mockReturnValue({ data, loading: false, error: false })
+    const filters = { status: ['available'], ownerId: ['u1'], locationId: [7] }
+    render(
+      <QueryClientProvider client={new QueryClient()}>
+        <CandidatesReport period="month" filters={filters} />
+      </QueryClientProvider>,
+    )
+    // The report's own data hook received the exact same filter object.
+    expect(mockUseCandidatesReport).toHaveBeenCalledWith('month', filters)
+    // A drill click layers its XOR param ON TOP of those same filters, never instead of them.
+    await user.click(screen.getByText('Kandidaat'))
+    expect(getSpy).toHaveBeenCalledWith('/reports/candidates/drill', expect.objectContaining({
+      params: { period: 'month', status: ['available'], owner_id: ['u1'], location_id: [7], phase: 'candidate' },
+    }))
+  })
+
   it('clicking an owner bar drills with the owner XOR param (D2 shape: owner_id → owner)', async () => {
     const user = userEvent.setup()
     mockUseCandidatesReport.mockReturnValue({ data, loading: false, error: false })
@@ -123,6 +141,26 @@ describe('CandidatesReport (RAPPORTEN-SUITE-1 inflow report)', () => {
     await user.click(screen.getByText('Wk 32'))
     expect(getSpy).toHaveBeenCalledWith('/reports/candidates/drill',
       expect.objectContaining({ params: { date: '2026-08-03', bucket: 'week', period: 'month' } }))
+  })
+
+  // Nine-card KPI strip (Danny — same footprint as the dashboard): total + eight
+  // axis-derived cards, all real counts from the fixture's own axes.
+  it('renders nine KPI cards derived from the report axes', () => {
+    mockUseCandidatesReport.mockReturnValue({ data, loading: false, error: false })
+    renderReport()
+    expect(screen.getByText('Totaal ingestroomd')).toBeInTheDocument()
+    expect(screen.getByText('Status: Beschikbaar')).toBeInTheDocument()
+    expect(screen.getByText('Eigenaar: Anna de Vries')).toBeInTheDocument()
+    expect(screen.getByText('Vestiging: Utrecht')).toBeInTheDocument()
+  })
+
+  it('clicking an axis-derived KPI card drills with the same XOR param as its bar', async () => {
+    const user = userEvent.setup()
+    mockUseCandidatesReport.mockReturnValue({ data, loading: false, error: false })
+    renderReport()
+    await user.click(screen.getByText('Status: Beschikbaar'))
+    expect(getSpy).toHaveBeenCalledWith('/reports/candidates/drill',
+      expect.objectContaining({ params: { status: 'available', period: 'month' } }))
   })
 
   it('omits bucket when the timeseries is day-granular', async () => {

@@ -128,6 +128,34 @@ describe('ContactsReport (RAPPORTEN-SUITE-2 contacts report)', () => {
     expect(screen.getByText('Nooit contact gehad')).toBeInTheDocument()
   })
 
+  // Nine-card footprint (Danny's "negen KPI rows"): the four summary cards plus
+  // the derived contacted-rate and the four axis-coverage gaps ('none' bucket
+  // per axis), each a real number off the fixture — never a fabricated ninth.
+  it('renders exactly nine KPI cards, each a real number from the fixture', () => {
+    mockUseContactsReport.mockReturnValue({ data, loading: false, error: false })
+    renderReport()
+    expect(screen.getByText('Percentage recent benaderd')).toBeInTheDocument()
+    expect(screen.getByText('50%')).toBeInTheDocument() // with_recent_contact(5)/total(10)
+    expect(screen.getByText('Zonder functie')).toBeInTheDocument()
+    expect(screen.getByText('Zonder locatie')).toBeInTheDocument()
+    expect(screen.getByText('Zonder afdeling')).toBeInTheDocument()
+    expect(screen.getByText('Zonder klant')).toBeInTheDocument()
+    const cardLabels = ['Totaal contactpersonen', 'Primair contact', 'Recent contact gehad',
+      'Nooit contact gehad', 'Percentage recent benaderd', 'Zonder functie', 'Zonder locatie',
+      'Zonder afdeling', 'Zonder klant']
+    expect(cardLabels).toHaveLength(9)
+    for (const label of cardLabels) expect(screen.getByText(label)).toBeInTheDocument()
+  })
+
+  it('clicking the "Zonder functie" KPI card drills with function=none (XOR)', async () => {
+    const user = userEvent.setup()
+    mockUseContactsReport.mockReturnValue({ data, loading: false, error: false })
+    renderReport()
+    await user.click(screen.getByText('Zonder functie'))
+    expect(getSpy).toHaveBeenCalledWith('/reports/contacts/drill',
+      expect.objectContaining({ params: { function: 'none', period: 'month' } }))
+  })
+
   // BELANGRIJK per contract: the window must be prominent, DD-MM-YYYY from the
   // RESPONSE — never ISO (CLAUDE.md §3B DATUM-1).
   it('renders the data window prominently as DD-MM-YYYY', () => {

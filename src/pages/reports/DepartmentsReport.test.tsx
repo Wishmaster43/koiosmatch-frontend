@@ -91,9 +91,11 @@ describe('DepartmentsReport (RAPPORTEN-SUITE-2 departments report)', () => {
   it('renders every axis with every segment, each axis summing to the report total', () => {
     mockUseDepartmentsReport.mockReturnValue({ data, loading: false, error: false })
     renderReport()
+    // getAllByText: 'Yesway Flex'/'Utrecht' now double as the topCustomer/
+    // topLocation KPI-card sub-labels — presence, not uniqueness, is proven here.
     for (const label of ['Wk 31', 'Wk 32', 'Actief', 'Onbekend (geen status)',
       'Yesway Flex', 'Geen klant', 'Utrecht', 'Geen locatie']) {
-      expect(screen.getByText(label)).toBeInTheDocument()
+      expect(screen.getAllByText(label).length).toBeGreaterThan(0)
     }
     expect(data.by_status.reduce((s, x) => s + x.count, 0)).toBe(data.total)
     expect(data.by_customer.reduce((s, x) => s + x.count, 0)).toBe(data.total)
@@ -114,6 +116,43 @@ describe('DepartmentsReport (RAPPORTEN-SUITE-2 departments report)', () => {
     expect(screen.getAllByText('3').length).toBeGreaterThan(0)
   })
 
+  // Nine-card footprint (Danny's "negen KPI rows"): without the optional
+  // `summary` block, the honest maximum is seven (no withContacts/without
+  // Contacts cards) — never a fabricated 0 for a block that never arrived.
+  it('ships seven honest cards when the optional summary block is absent', () => {
+    mockUseDepartmentsReport.mockReturnValue({ data, loading: false, error: false })
+    renderReport()
+    expect(screen.queryByText('Met contacten')).not.toBeInTheDocument()
+    expect(screen.queryByText('Zonder contacten')).not.toBeInTheDocument()
+    expect(screen.getByText('Zonder klant')).toBeInTheDocument()
+    expect(screen.getByText('Grootste klant')).toBeInTheDocument()
+    expect(screen.getByText('Grootste locatie')).toBeInTheDocument()
+    expect(screen.getByText('Aantal klanten')).toBeInTheDocument()
+    expect(screen.getAllByText('1').length).toBeGreaterThan(0) // customersCount (1 real customer, 'none' excluded)
+  })
+
+  // With the summary block present, the two contact-coverage cards join in for
+  // the full nine — real numbers straight off the fixture's summary.
+  it('adds the contact-coverage cards when the summary block arrives', () => {
+    mockUseDepartmentsReport.mockReturnValue({
+      data: { ...data, summary: { with_contacts: 6, without_contacts: 2 } },
+      loading: false, error: false,
+    })
+    renderReport()
+    expect(screen.getByText('Met contacten')).toBeInTheDocument()
+    expect(screen.getByText('Zonder contacten')).toBeInTheDocument()
+    expect(screen.getAllByText('6').length).toBeGreaterThan(0)
+    expect(screen.getAllByText('2').length).toBeGreaterThan(0)
+  })
+
+  it('clicking the "Grootste klant" KPI card drills with customer=<value> (XOR)', async () => {
+    const user = userEvent.setup()
+    mockUseDepartmentsReport.mockReturnValue({ data, loading: false, error: false })
+    renderReport()
+    await user.click(screen.getByText('Grootste klant'))
+    expect(lastDrillParams()).toEqual({ customer: 'cust-1', period: 'month' })
+  })
+
   it('renders the data window prominently as DD-MM-YYYY', () => {
     mockUseDepartmentsReport.mockReturnValue({ data, loading: false, error: false })
     renderReport()
@@ -127,9 +166,9 @@ describe('DepartmentsReport (RAPPORTEN-SUITE-2 departments report)', () => {
     renderReport()
     await user.click(screen.getByText('Actief'))
     expect(lastDrillParams()).toEqual({ status: 'status-1', period: 'month' })
-    await user.click(screen.getByText('Yesway Flex'))
+    await user.click(screen.getAllByText('Yesway Flex').at(-1)!)
     expect(lastDrillParams()).toEqual({ customer: 'cust-1', period: 'month' })
-    await user.click(screen.getByText('Utrecht'))
+    await user.click(screen.getAllByText('Utrecht').at(-1)!)
     expect(lastDrillParams()).toEqual({ location: 'loc-1', period: 'month' })
     // Report drill endpoints only — never an entity list route.
     expect(getSpy.mock.calls.some(c => String(c[0]).startsWith('/customers'))).toBe(false)
@@ -141,7 +180,7 @@ describe('DepartmentsReport (RAPPORTEN-SUITE-2 departments report)', () => {
     renderReport()
     await user.click(screen.getByText('Actief'))
     expect(lastDrillParams()).toEqual({ status: 'status-1', period: 'month' })
-    await user.click(screen.getByText('Utrecht'))
+    await user.click(screen.getAllByText('Utrecht').at(-1)!)
     expect(lastDrillParams()).toEqual({ location: 'loc-1', period: 'month' })
     await user.click(screen.getByText('Actief'))
     expect(lastDrillParams()).toEqual({ status: 'status-1', period: 'month' })
@@ -160,7 +199,7 @@ describe('DepartmentsReport (RAPPORTEN-SUITE-2 departments report)', () => {
     mockUseDepartmentsReport.mockReturnValue({ data, loading: false, error: false })
     renderReport()
     await user.click(screen.getByText('Actief'))
-    await user.click(screen.getByText('Yesway Flex'))
+    await user.click(screen.getAllByText('Yesway Flex').at(-1)!)
     expect(getSpy.mock.calls.length).toBeGreaterThan(0)
     expect(getSpy.mock.calls.every(c =>
       c[0] === '/reports/departments/drill' || c[0] === '/reports/departments/advice')).toBe(true)

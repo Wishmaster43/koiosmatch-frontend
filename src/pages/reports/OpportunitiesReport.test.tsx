@@ -287,3 +287,43 @@ describe('OpportunitiesReport (RAPPORTEN-SUITE-1 portie 5, kansen pipeline repor
     expect(screen.queryByText(/fout|mislukt|error/i)).not.toBeInTheDocument()
   })
 })
+
+// Nine-card KPI footprint (Danny — same as the dashboard, all reports). The
+// pipeline five stay as-is; stale.untouched/overdue and the forecast sums are
+// real sums over fields the endpoint already returns — non-clickable since the
+// five-way XOR carries no stale/forecast segment (no fake affordances).
+describe('OpportunitiesReport (nine-card KPI footprint)', () => {
+  beforeEach(() => {
+    getSpy.mockReset()
+    getSpy.mockResolvedValue({ data: { data: [], meta: { total: 0 } } })
+  })
+
+  it('renders exactly nine KPI cards from the fixture', () => {
+    mockUseOpportunitiesReport.mockReturnValue({ data, loading: false, error: false })
+    renderReport()
+    expect(screen.getByText('Totaal kansen')).toBeInTheDocument()
+    expect(screen.getByText('Open')).toBeInTheDocument()
+    expect(screen.getByText('Gewonnen')).toBeInTheDocument()
+    expect(screen.getByText('Verloren')).toBeInTheDocument()
+    expect(screen.getByText('Winratio')).toBeInTheDocument()
+    expect(screen.getByText('Onaangeraakt')).toBeInTheDocument()
+    expect(screen.getByText('Verwachte deals')).toBeInTheDocument()
+    expect(screen.getByText('Verwachte waarde')).toBeInTheDocument()
+    // The stale.untouched (1) and stale.overdue (1) counts render as their own tiles.
+    expect(screen.getAllByText('1').length).toBeGreaterThanOrEqual(2)
+    // forecast[].count sums to 2 (a real sum over the returned array, not
+    // fabricated) — 'lost' also renders as 2, so assert via count, not uniqueness.
+    expect(screen.getAllByText('2').length).toBeGreaterThanOrEqual(2)
+    // forecast[].value_sum sums to €8.000 via the house currency formatter.
+    expect(screen.getByText('€ 8.000')).toBeInTheDocument()
+  })
+
+  it('the stale and forecast KPI cards are non-clickable stats, never dead buttons', () => {
+    mockUseOpportunitiesReport.mockReturnValue({ data, loading: false, error: false })
+    renderReport()
+    for (const label of ['Onaangeraakt', 'Verwachte deals', 'Verwachte waarde']) {
+      const card = screen.getByText(label).closest('div[role="button"]')
+      expect(card).toBeNull()
+    }
+  })
+})

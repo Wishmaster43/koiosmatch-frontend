@@ -119,6 +119,42 @@ describe('LocationsReport (RAPPORTEN-SUITE-2 locations report)', () => {
     expect(screen.getAllByText('3').length).toBeGreaterThan(0)
   })
 
+  // Nine-card footprint (Danny's "negen KPI rows"): without the optional
+  // `summary` block, the honest maximum is seven (no withDepartments/without
+  // Departments cards) — never a fabricated 0 for a block that never arrived.
+  it('ships seven honest cards when the optional summary block is absent', () => {
+    mockUseLocationsReport.mockReturnValue({ data, loading: false, error: false })
+    renderReport()
+    expect(screen.queryByText('Met afdelingen')).not.toBeInTheDocument()
+    expect(screen.queryByText('Zonder afdelingen')).not.toBeInTheDocument()
+    expect(screen.getByText('Zonder plaats')).toBeInTheDocument()
+    expect(screen.getByText('Grootste plaats')).toBeInTheDocument()
+    expect(screen.getByText('Zonder provincie')).toBeInTheDocument()
+    expect(screen.getByText('Grootste provincie')).toBeInTheDocument()
+  })
+
+  // With the summary block present, the two department-coverage cards join in
+  // for the full nine — real numbers straight off the fixture's summary.
+  it('adds the department-coverage cards when the summary block arrives', () => {
+    mockUseLocationsReport.mockReturnValue({
+      data: { ...data, summary: { with_departments: 7, without_departments: 2 } },
+      loading: false, error: false,
+    })
+    renderReport()
+    expect(screen.getByText('Met afdelingen')).toBeInTheDocument()
+    expect(screen.getByText('Zonder afdelingen')).toBeInTheDocument()
+    expect(screen.getAllByText('7').length).toBeGreaterThan(0)
+    expect(screen.getAllByText('2').length).toBeGreaterThan(0)
+  })
+
+  it('clicking the "Grootste plaats" KPI card drills with city=<value> (XOR)', async () => {
+    const user = userEvent.setup()
+    mockUseLocationsReport.mockReturnValue({ data, loading: false, error: false })
+    renderReport()
+    await user.click(screen.getByText('Grootste plaats'))
+    expect(lastDrillParams()).toEqual({ city: 'Utrecht', period: 'month' })
+  })
+
   it('renders the data window prominently as DD-MM-YYYY', () => {
     mockUseLocationsReport.mockReturnValue({ data, loading: false, error: false })
     renderReport()
@@ -134,9 +170,9 @@ describe('LocationsReport (RAPPORTEN-SUITE-2 locations report)', () => {
     expect(lastDrillParams()).toEqual({ status: 'status-1', period: 'month' })
     await user.click(screen.getByText('Yesway Flex'))
     expect(lastDrillParams()).toEqual({ customer: 'cust-1', period: 'month' })
-    await user.click(screen.getByText('Utrecht'))
+    await user.click(screen.getAllByText('Utrecht').at(-1)!)
     expect(lastDrillParams()).toEqual({ city: 'Utrecht', period: 'month' })
-    await user.click(screen.getByText('Noord-Holland'))
+    await user.click(screen.getAllByText('Noord-Holland').at(-1)!)
     expect(lastDrillParams()).toEqual({ province: 'Noord-Holland', period: 'month' })
     // Report drill endpoints only — never an entity list route.
     expect(getSpy.mock.calls.some(c => String(c[0]).startsWith('/customers'))).toBe(false)

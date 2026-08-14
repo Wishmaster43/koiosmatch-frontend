@@ -10,7 +10,7 @@
 import { useState } from 'react'
 import type { CSSProperties, ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
-import InsightsRow from '@/components/insights/InsightsRow'
+import ReportKpiBand from './ReportKpiBand'
 import type { KpiSpec } from '@/components/insights/InsightsRow'
 import ReportDrillDrawer from './ReportDrillDrawer'
 import type { DrillSpec } from './ReportDrillDrawer'
@@ -98,15 +98,17 @@ export default function WorkflowsReport({ period, tabsSlot }: { period: ReportPe
       value: s?.success_rate != null ? `${formatNumber(s.success_rate)}%` : '—' },
     { key: 'avgDuration', label: t('workflows.summary.avgDuration'),
       value: s?.avg_duration_seconds != null ? formatDuration(s.avg_duration_seconds * 1000) : '—' },
+    // Distinct-category counts off the axis arrays — a plain stat, not a single
+    // segment value, so there is no XOR param to drill on.
+    { key: 'workflowsCount', label: t('workflows.summary.workflowsCount'), value: data?.by_workflow.length ?? 0 },
+    { key: 'triggersCount', label: t('workflows.summary.triggersCount'), value: data?.by_trigger.length ?? 0 },
   ]
 
   return (
     <div>
       {/* KPI strip — run health, above the tabs (candidate-page order) */}
       {hasData && (
-        <div style={{ ...card, marginBottom: 16 }}>
-          <InsightsRow kpis={kpis} padding="14px 20px" />
-        </div>
+        <ReportKpiBand kpis={kpis} />
       )}
 
       {/* Tab bar + period control (from the hub) */}

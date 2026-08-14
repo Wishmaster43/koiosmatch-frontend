@@ -90,22 +90,37 @@ describe('AiReport (RAPPORTEN-SUITE-2 ai report — no drill endpoint)', () => {
   it('renders every axis with every segment, each axis summing to the report total', () => {
     mockUseAiReport.mockReturnValue({ data, loading: false, error: false })
     renderReport()
-    for (const label of ['Wk 31', 'Wk 32', 'Matchvoorstel', 'Samenvatting',
+    for (const label of ['Wk 31', 'Wk 32', 'Samenvatting',
       'Claude Sonnet', 'Claude Haiku', 'Jan Jansen', 'Onbekend']) {
       expect(screen.getByText(label)).toBeInTheDocument()
     }
+    // 'Matchvoorstel' is also the top-activity KPI card's sub-label (it has the
+    // highest count), so it legitimately renders twice — as a bar AND a KPI sub.
+    expect(screen.getAllByText('Matchvoorstel').length).toBe(2)
     expect(data.by_activity.reduce((s, x) => s + x.count, 0)).toBe(data.total)
     expect(data.by_model.reduce((s, x) => s + x.count, 0)).toBe(data.total)
     expect(data.by_user.reduce((s, x) => s + x.count, 0)).toBe(data.total)
     expect(data.timeseries.series.reduce((s, p) => s + p.value, 0)).toBe(data.total)
   })
 
-  it('renders the KPI band from total/tokens/amount only', () => {
+  it('renders nine honest KPI cards, all derived from summary/axes fields (sales amount only)', () => {
     mockUseAiReport.mockReturnValue({ data, loading: false, error: false })
     renderReport()
     expect(screen.getByText('Totaal AI-activiteit')).toBeInTheDocument()
     expect(screen.getByText('Gebruikte tokens')).toBeInTheDocument()
     expect(screen.getByText('Verkoopbedrag')).toBeInTheDocument()
+    expect(screen.getByText('Gem. tokens per run')).toBeInTheDocument()
+    expect(screen.getByText('Gem. verkoopbedrag per run')).toBeInTheDocument()
+    expect(screen.getByText('Soorten activiteit')).toBeInTheDocument()
+    expect(screen.getByText('Gebruikte modellen')).toBeInTheDocument()
+    expect(screen.getByText('Actieve gebruikers')).toBeInTheDocument()
+    expect(screen.getByText('Meest gebruikte activiteit')).toBeInTheDocument()
+    // Distinct-count cards read straight off the axis array lengths (2 activities,
+    // 2 models, 2 users in the fixture) — never a hardcoded/invented number.
+    expect(screen.getAllByText('2').length).toBeGreaterThanOrEqual(3)
+    // Top-activity card shows the highest-count segment's own label + count
+    // (18 appears both as the KPI value and the axis bar's own count).
+    expect(screen.getAllByText('18').length).toBeGreaterThanOrEqual(1)
   })
 
   it('renders the data window prominently as DD-MM-YYYY', () => {
@@ -121,7 +136,9 @@ describe('AiReport (RAPPORTEN-SUITE-2 ai report — no drill endpoint)', () => {
     mockUseAiReport.mockReturnValue({ data, loading: false, error: false })
     renderReport()
     expect(screen.queryAllByRole('button').filter(b => /Matchvoorstel|Claude Sonnet|Jan Jansen/.test(b.textContent ?? ''))).toHaveLength(0)
-    const row = screen.getByText('Matchvoorstel').closest('div')
+    // Two 'Matchvoorstel' nodes exist (the KPI sub-label + the axis bar) — the
+    // bar is the second one in DOM order (KPI band renders above the axes).
+    const row = screen.getAllByText('Matchvoorstel')[1].closest('div')
     expect(row).not.toHaveAttribute('role', 'button')
     expect(row).not.toHaveAttribute('tabindex')
   })
@@ -132,7 +149,7 @@ describe('AiReport (RAPPORTEN-SUITE-2 ai report — no drill endpoint)', () => {
     const user = userEvent.setup()
     mockUseAiReport.mockReturnValue({ data, loading: false, error: false })
     renderReport()
-    await user.click(screen.getByText('Matchvoorstel'))
+    await user.click(screen.getAllByText('Matchvoorstel')[1])
     await user.click(screen.getByText('Claude Sonnet'))
     await user.click(screen.getByText('Jan Jansen'))
     await user.click(screen.getByText('Wk 31'))

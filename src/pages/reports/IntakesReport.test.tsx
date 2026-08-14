@@ -75,13 +75,35 @@ describe('IntakesReport', () => {
     mockUseIntakesReport.mockReturnValue({ data, loading: false, error: false })
     renderReport()
     expect(screen.getByText('Totaal intakes')).toBeInTheDocument()
-    expect(screen.getByText('9')).toBeInTheDocument()
+    // '9' is also the top-source KPI's value (its only segment has count 9), so
+    // it legitimately renders at least twice — the total plus that KPI card.
+    expect(screen.getAllByText('9').length).toBeGreaterThanOrEqual(2)
     expect(screen.getByText('Wk 31')).toBeInTheDocument()
     expect(screen.getByText('Wk 32')).toBeInTheDocument()
-    expect(screen.getByText('Anna de Vries')).toBeInTheDocument()
+    // 'Anna de Vries' is also the top-recruiter KPI's sub-label (highest count),
+    // so it legitimately renders twice — as a bar AND a KPI sub.
+    expect(screen.getAllByText('Anna de Vries').length).toBe(2)
     expect(screen.getByText('Onbekend')).toBeInTheDocument()
     expect(data.series.reduce((s, b) => s + b.count, 0)).toBe(data.total)
     expect(data.by_recruiter.reduce((s, b) => s + b.count, 0)).toBe(data.total)
+  })
+
+  // As-rendering: the nine KPI cards derive from total + distinct-category
+  // counts + top-segment labels off the axis arrays — never an invented number.
+  it('renders nine honest KPI cards derived from the breakdown axes', () => {
+    mockUseIntakesReport.mockReturnValue({ data, loading: false, error: false })
+    renderReport()
+    expect(screen.getByText('Aantal recruiters')).toBeInTheDocument()
+    expect(screen.getByText('Aantal locaties')).toBeInTheDocument()
+    expect(screen.getByText('Aantal bronnen')).toBeInTheDocument()
+    expect(screen.getByText('Aantal functies')).toBeInTheDocument()
+    expect(screen.getByText('Aantal regio’s')).toBeInTheDocument()
+    expect(screen.getByText('Meest actieve recruiter')).toBeInTheDocument()
+    expect(screen.getByText('Grootste bron')).toBeInTheDocument()
+    expect(screen.getByText('Meest voorkomende functie')).toBeInTheDocument()
+    // by_recruiter has 2 entries in the fixture; the other four dimensions have 1 each.
+    expect(screen.getByText('2')).toBeInTheDocument()
+    expect(screen.getAllByText('1').length).toBe(4)
   })
 
   // Switching the group selector swaps the breakdown dimension shown, without
@@ -93,7 +115,9 @@ describe('IntakesReport', () => {
     expect(screen.queryByText('Utrecht')).not.toBeInTheDocument()
     await user.click(screen.getByText('Locatie'))
     expect(screen.getByText('Utrecht')).toBeInTheDocument()
-    expect(screen.queryByText('Anna de Vries')).not.toBeInTheDocument()
+    // 'Anna de Vries' still shows once — the top-recruiter KPI card's sub-label
+    // persists across breakdown switches; only its bar row disappears.
+    expect(screen.getAllByText('Anna de Vries').length).toBe(1)
     // The series section is unaffected by the breakdown switch.
     expect(screen.getByText('Wk 31')).toBeInTheDocument()
   })
@@ -106,7 +130,7 @@ describe('IntakesReport', () => {
     renderReport()
     await user.click(screen.getByText('Totaal intakes'))
     await user.click(screen.getByText('Wk 31'))
-    await user.click(screen.getByText('Anna de Vries'))
+    await user.click(screen.getAllByText('Anna de Vries')[0])
     expect(getSpy).not.toHaveBeenCalled()
   })
 })

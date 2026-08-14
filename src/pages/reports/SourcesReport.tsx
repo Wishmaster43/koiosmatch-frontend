@@ -8,7 +8,7 @@
  */
 import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
-import InsightsRow from '@/components/insights/InsightsRow'
+import ReportKpiBand from './ReportKpiBand'
 import type { KpiSpec } from '@/components/insights/InsightsRow'
 import DataTable from '@/components/ui/DataTable'
 import type { Column } from '@/components/ui/DataTable'
@@ -32,12 +32,30 @@ export default function SourcesReport({ period, tabsSlot }: { period: ReportPeri
     applications: rows.reduce((acc, r) => acc + r.applications, 0),
     matches:      rows.reduce((acc, r) => acc + r.matches, 0),
   }
+  // Overall match rate = totalMatches / totalCandidates (mirrors the per-row
+  // match_rate the endpoint computes); '—' rather than a fabricated 0% at zero.
+  const overallMatchRate = totals.candidates > 0 ? Math.round((totals.matches / totals.candidates) * 100) : null
+  // Applications per candidate = totalApplications / totalCandidates — a second real ratio.
+  const applicationRate = totals.candidates > 0 ? Math.round((totals.applications / totals.candidates) * 100) : null
+  // "Biggest" sources by each real metric — plain stats, no drill endpoint exists
+  // (see file doc comment) so none of the nine cards is clickable.
+  const topByCandidates = [...rows].sort((a, b) => b.candidates - a.candidates)[0]
+  const topByMatches = [...rows].sort((a, b) => b.matches - a.matches)[0]
+  const sourcesNoMatches = rows.filter(r => r.matches === 0).length
 
   const kpis: KpiSpec[] = [
     { key: 'sources',      label: t('sources.summary.sources'),      value: rows.length },
     { key: 'candidates',   label: t('sources.summary.candidates'),   value: totals.candidates },
     { key: 'applications', label: t('sources.summary.applications'), value: totals.applications },
     { key: 'matches',      label: t('sources.summary.matches'),      value: totals.matches },
+    { key: 'matchRate',    label: t('sources.summary.matchRate'),    value: overallMatchRate != null ? `${overallMatchRate}%` : '—' },
+    { key: 'applicationRate', label: t('sources.summary.applicationRate'), value: applicationRate != null ? `${applicationRate}%` : '—' },
+    { key: 'topSourceCandidates', label: t('sources.summary.topSourceCandidates'),
+      value: topByCandidates ? `${topByCandidates.source} · ${topByCandidates.candidates}` : '—' },
+    { key: 'topSourceMatches', label: t('sources.summary.topSourceMatches'),
+      value: topByMatches && topByMatches.matches > 0 ? `${topByMatches.source} · ${topByMatches.matches}` : '—' },
+    { key: 'sourcesNoMatches', label: t('sources.summary.sourcesNoMatches'), value: sourcesNoMatches,
+      color: sourcesNoMatches > 0 ? 'var(--color-warning)' : undefined },
   ]
 
   const columns: Column<SourceRow>[] = [
@@ -56,9 +74,7 @@ export default function SourcesReport({ period, tabsSlot }: { period: ReportPeri
     <div>
       {/* KPI strip — above the tabs (candidate-page order: KPIs first) */}
       {!loading && !error && rows.length > 0 && (
-        <div style={{ background: 'var(--surface)', borderRadius: 12, border: '1px solid var(--border)', marginBottom: 16 }}>
-          <InsightsRow kpis={kpis} padding="14px 20px" />
-        </div>
+        <ReportKpiBand kpis={kpis} />
       )}
 
       {/* Tab bar + period control (from the hub) */}

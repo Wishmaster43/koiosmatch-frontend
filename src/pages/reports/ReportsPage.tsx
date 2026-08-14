@@ -23,6 +23,12 @@ import { useEffect, useId, useMemo, useState } from 'react'
 import type { ComponentType, ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useRightPanel } from '@/context/RightPanelContext'
+import { useLookups } from '@/context/LookupsContext'
+import { useCustomerLookups } from '@/lib/useCustomerLookups'
+import { useUsers } from '@/lib/queries'
+import { useLocations } from '@/lib/useLocations'
+import { isFilterableReport } from './reportFilterParams'
+import type { ReportFilterState } from './reportFilterParams'
 import type { ReportFilterGroup } from '@/types/reports'
 import CandidatesReport from './CandidatesReport'
 import ApplicationsReport from './ApplicationsReport'
@@ -48,7 +54,9 @@ import type { ReportId } from './reportIds'
 import type { ReportPeriod } from '@/types/analytics'
 
 // Every report takes the same contract: the chosen period + the pass-through slot.
-type ReportComponent = ComponentType<{ period: ReportPeriod; tabsSlot?: ReactNode }>
+// `filters` is optional and only READ by the two reports on FILTERABLE_REPORT_IDS
+// (CandidatesReport/CustomersReport) — every other report ignores the prop.
+type ReportComponent = ComponentType<{ period: ReportPeriod; tabsSlot?: ReactNode; filters?: ReportFilterState }>
 
 // Registry: report id → component. Ids and their order live in reportIds.ts
 // (shared with the sidebar submenu); an id here without a REPORT_IDS entry — or
@@ -92,6 +100,34 @@ export default function ReportsPage({ reportId }: { reportId?: string }) {
       ? (reportId as ReportId)
       : REPORT_IDS[0]
   const Report = REPORTS[active]
+  const filterable = isFilterableReport(active)
+
+  // RAPPORT-FILTERS-1: status/owner/branch, wired only for `candidates`/`customers`
+  // (the two reports the shared backend resolver understands so far). Kept here,
+  // not per-report, so the panel and both hooks read the exact same state — a
+  // report's own hook and its drilldown build their request params from this one
+  // object via `buildReportQueryParams`, so bar and lade can never disagree.
+  const [status, setStatus] = useState<Array<string | number>>([])
+  const [ownerId, setOwnerId] = useState<Array<string | number>>([])
+  const [locationId, setLocationId] = useState<Array<string | number>>([])
+  const filters: ReportFilterState = useMemo(() => ({ status, ownerId, locationId }), [status, ownerId, locationId])
+
+  // Reset the three dimensions when navigating to a report that doesn't read them
+  // (or off one that does) — a stale selection must never linger invisibly.
+  useEffect(() => {
+    if (!filterable) { setStatus([]); setOwnerId([]); setLocationId([]) }
+  }, [filterable])
+
+  // Lookup sources for the filter options — candidates and customers each keep
+  // their OWN status vocabulary (deployability vs. customer lifecycle), while
+  // owner (users) and branch (locations) are shared tenant lookups.
+  const { statuses: candidateStatuses } = useLookups()
+  const { statuses: customerStatuses } = useCustomerLookups()
+  const { data: users = [] } = useUsers() as { data?: Array<{ id?: string | number; name?: string }> }
+  const locations = useLocations()
+  const statusOptions = active === 'customers' ? customerStatuses : candidateStatuses
+  const ownerOptions = useMemo(() => users.map(u => ({ value: u.id ?? '', label: u.name || '—' })).filter(o => o.value !== ''), [users])
+  const branchOptions = useMemo(() => locations.map(l => ({ value: l.value, label: l.label })), [locations])
 
   // Shared period control, top-right. Passed through `tabsSlot` so each report
   // keeps rendering it under its KPI row without any prop change on its side.
@@ -118,24 +154,49 @@ export default function ReportsPage({ reportId }: { reportId?: string }) {
   )
 
   // Right-hand filter panel (DashboardLayout renders whatever is registered
-  // here). ONE group, the period — the only dimension `/reports/*` reads
-  // today (see the file-top comment). `noChip` keeps the always-on period
-  // value out of the removable-chip row (there is nothing honest to "remove"
-  // to — every report always has a period). `buildReportQueryParams` shows,
-  // in one place, exactly which of this group's state reaches the server.
-  const panelGroups: ReportFilterGroup[] = useMemo(() => [{
-    key: 'period',
-    label: t('period.label'),
-    type: 'radio',
-    noChip: true,
-    selected: [period],
-    onToggle: (v: string | number) => setPeriod(String(v) as ReportPeriod),
-    options: [
-      { value: 'day', label: t('period.day') },
-      { value: 'week', label: t('period.week') },
-      { value: 'month', label: t('period.month') },
-    ],
-  }], [t, period])
+  // here). The period group is universal — the only dimension every `/reports/*`
+  // endpoint reads (see the file-top comment). `noChip` keeps the always-on period
+  // value out of the removable-chip row (there is nothing honest to "remove" to —
+  // every report always has a period). `buildReportQueryParams` shows, in one
+  // place, exactly which of this state reaches the server. Status/owner/branch
+  // are appended ONLY on `candidates`/`customers` (§ hard requirement: the other
+  // twelve reports must never show a field the server silently drops).
+  const panelGroups: ReportFilterGroup[] = useMemo(() => {
+    const groups: ReportFilterGroup[] = [{
+      key: 'period',
+      label: t('period.label'),
+      type: 'radio',
+      noChip: true,
+      selected: [period],
+      onToggle: (v: string | number) => setPeriod(String(v) as ReportPeriod),
+      options: [
+        { value: 'day', label: t('period.day') },
+        { value: 'week', label: t('period.week') },
+        { value: 'month', label: t('period.month') },
+      ],
+    }]
+    if (filterable) {
+      const axisNs = active === 'customers' ? 'customers' : 'candidates'
+      groups.push(
+        {
+          key: 'status', type: 'search-select', label: t(`${axisNs}.axes.status`),
+          selected: status, onToggle: (v: string | number) => setStatus(s => s.includes(v) ? s.filter(x => x !== v) : [...s, v]),
+          options: statusOptions,
+        },
+        {
+          key: 'owner', type: 'search-select', label: t(`${axisNs}.axes.owner`),
+          selected: ownerId, onToggle: (v: string | number) => setOwnerId(s => s.includes(v) ? s.filter(x => x !== v) : [...s, v]),
+          options: ownerOptions,
+        },
+        {
+          key: 'branch', type: 'search-select', label: t('common:filters.branch'),
+          selected: locationId, onToggle: (v: string | number) => setLocationId(s => s.includes(v) ? s.filter(x => x !== v) : [...s, v]),
+          options: branchOptions,
+        },
+      )
+    }
+    return groups
+  }, [t, period, filterable, active, status, ownerId, locationId, statusOptions, ownerOptions, branchOptions])
 
   useEffect(() => {
     registerFilters('reports-page', panelGroups)
@@ -148,7 +209,7 @@ export default function ReportsPage({ reportId }: { reportId?: string }) {
           unchanged (RAPPORTEN-DASHBOARD-1). Both still get the shared period bar. */}
       {isRoot
         ? <ReportsDashboard period={period} tabsSlot={periodBar} />
-        : <Report period={period} tabsSlot={periodBar} />}
+        : <Report period={period} tabsSlot={periodBar} filters={filterable ? filters : undefined} />}
     </div>
   )
 }

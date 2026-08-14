@@ -115,9 +115,13 @@ describe('TasksReport (RAPPORTEN-SUITE-1 portie 6, tasks report)', () => {
     mockUseTasksReport.mockReturnValue({ data, loading: false, error: false })
     renderReport()
     for (const label of ['Wk 31', 'Wk 32', 'Te doen', 'Onbekend (geen status)', 'Onbekend (verwijderde status)',
-      'Bellen', 'Geen type', 'Hoog', 'Geen prioriteit', 'Anna de Vries', 'Niet toegewezen',
-      'Recruitment', 'Geen afdeling', 'Utrecht', 'Geen vestiging']) {
+      'Bellen', 'Geen type', 'Hoog', 'Geen prioriteit', 'Anna de Vries', 'Recruitment', 'Utrecht']) {
       expect(screen.getByText(label)).toBeInTheDocument()
+    }
+    // 'Niet toegewezen' / 'Geen afdeling' / 'Geen vestiging' now also render as
+    // their own nine-card KPI (unassigned/noTeam/noBranch) — assert both copies.
+    for (const label of ['Niet toegewezen', 'Geen afdeling', 'Geen vestiging']) {
+      expect(screen.getAllByText(label).length).toBeGreaterThanOrEqual(2)
     }
     expect(data.by_status.reduce((s, x) => s + x.count, 0)).toBe(data.total)
     expect(data.by_type.reduce((s, x) => s + x.count, 0)).toBe(data.total)
@@ -203,8 +207,9 @@ describe('TasksReport (RAPPORTEN-SUITE-1 portie 6, tasks report)', () => {
     renderReport()
     await user.click(screen.getByText('Anna de Vries'))
     expect(lastDrillParams()).toEqual({ assignee: 'u1', period: 'month' })
-    // A NULL assignee arrives as the 'none' row ("Niet toegewezen") and drills assignee=none.
-    await user.click(screen.getByText('Niet toegewezen'))
+    // A NULL assignee arrives as the 'none' row ("Niet toegewezen") and drills
+    // assignee=none — the label now renders twice (bar + the unassigned KPI card).
+    await user.click(screen.getAllByText('Niet toegewezen')[0])
     expect(lastDrillParams()).toEqual({ assignee: 'none', period: 'month' })
   })
 
@@ -303,5 +308,48 @@ describe('TasksReport (RAPPORTEN-SUITE-1 portie 6, tasks report)', () => {
     expect(screen.getByText('Te doen · Anna de Vries')).toBeInTheDocument()
     expect(screen.getByText('Koios heeft nog geen advies voor dit getal.')).toBeInTheDocument()
     expect(screen.queryByText(/fout|mislukt|error/i)).not.toBeInTheDocument()
+  })
+})
+
+// Nine-card KPI footprint (Danny — same as the dashboard, all reports). The
+// workload five stay as-is; unassigned/no-team/no-branch are each axis's real
+// 'none' row (drillable — real data, real drill) and overdueRate is an honest
+// ratio of two real fields.
+describe('TasksReport (nine-card KPI footprint)', () => {
+  beforeEach(() => {
+    getSpy.mockReset()
+    getSpy.mockResolvedValue({ data: { data: [], meta: { total: 0 } } })
+  })
+
+  it('renders exactly nine KPI cards from the fixture', () => {
+    mockUseTasksReport.mockReturnValue({ data, loading: false, error: false })
+    renderReport()
+    expect(screen.getByText('Totaal taken')).toBeInTheDocument()
+    expect(screen.getByText('Afgerond')).toBeInTheDocument()
+    expect(screen.getByText('Afrondingspercentage')).toBeInTheDocument()
+    // Each also renders as an axis bar below, so assert the count, not uniqueness.
+    expect(screen.getAllByText('Niet toegewezen').length).toBeGreaterThanOrEqual(2)
+    expect(screen.getAllByText('Geen afdeling').length).toBeGreaterThanOrEqual(2)
+    expect(screen.getAllByText('Geen vestiging').length).toBeGreaterThanOrEqual(2)
+    expect(screen.getByText('Te-laat-percentage')).toBeInTheDocument()
+    // overdueRate: 2 / 12 * 100 = 16,667% via the house number formatter.
+    expect(screen.getByText('16,667%')).toBeInTheDocument()
+  })
+
+  it('clicking the "unassigned" KPI card drills with assignee=none, same as the bar', async () => {
+    const user = userEvent.setup()
+    mockUseTasksReport.mockReturnValue({ data, loading: false, error: false })
+    renderReport()
+    await user.click(screen.getAllByText('Niet toegewezen')[0])
+    expect(lastDrillParams()).toEqual({ assignee: 'none', period: 'month' })
+  })
+
+  // overdueRate carries no drillable XOR axis — it must render as a plain stat,
+  // never a dead-looking button (no fake affordances).
+  it('the overdueRate KPI card is a non-clickable stat', () => {
+    mockUseTasksReport.mockReturnValue({ data, loading: false, error: false })
+    renderReport()
+    const card = screen.getByText('Te-laat-percentage').closest('div[role="button"]')
+    expect(card).toBeNull()
   })
 })

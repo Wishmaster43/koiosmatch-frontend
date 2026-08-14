@@ -10,7 +10,7 @@
 import { useState } from 'react'
 import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
-import InsightsRow from '@/components/insights/InsightsRow'
+import ReportKpiBand from './ReportKpiBand'
 import type { KpiSpec } from '@/components/insights/InsightsRow'
 import DataTable from '@/components/ui/DataTable'
 import type { Column } from '@/components/ui/DataTable'
@@ -39,8 +39,13 @@ export default function RecruitersReport({ period, tabsSlot }: { period: ReportP
   const totals = {
     recruiters:   rows.length,
     candidates:   sum(r => r.candidates),
+    applications: sum(sumPhases),
     matches:      sum(r => r.matches),
     notContacted: sum(r => r.not_contacted),
+    intakesPlanned: sum(r => r.intakes.planned),
+    intakesDone:    sum(r => r.intakes.done),
+    tasksOpen:      sum(r => r.tasks.open),
+    tasksOverdue:   sum(r => r.tasks.overdue),
   }
 
   // Drill-down: clicking a recruiter row (or a total) explains it — the recruiter's
@@ -58,12 +63,21 @@ export default function RecruitersReport({ period, tabsSlot }: { period: ReportP
     adviceEndpoint: '/reports/recruiters/advice', adviceParams: { recruiter: r.key, period },
   })
 
+  // Team totals — all nine slots are plain sums of fields the endpoint already
+  // returns per recruiter (no per-team drill endpoint exists, so none is clickable;
+  // the row click into a single recruiter stays the drill path, unchanged).
   const kpis: KpiSpec[] = [
-    { key: 'recruiters', label: t('recruiters.title'),          value: totals.recruiters },
-    { key: 'candidates', label: t('recruiters.cols.candidates'), value: totals.candidates },
-    { key: 'matches',    label: t('recruiters.cols.matches'),    value: totals.matches },
-    { key: 'notContacted', label: t('recruiters.cols.notContacted'), value: totals.notContacted,
+    { key: 'recruiters', label: t('recruiters.summary.recruiters'),   value: totals.recruiters },
+    { key: 'candidates', label: t('recruiters.summary.candidates'),   value: totals.candidates },
+    { key: 'applications', label: t('recruiters.summary.applications'), value: totals.applications },
+    { key: 'matches',    label: t('recruiters.summary.matches'),      value: totals.matches },
+    { key: 'notContacted', label: t('recruiters.summary.notContacted'), value: totals.notContacted,
       color: totals.notContacted > 0 ? 'var(--color-warning)' : undefined },
+    { key: 'intakesPlanned', label: t('recruiters.summary.intakesPlanned'), value: totals.intakesPlanned },
+    { key: 'intakesDone',    label: t('recruiters.summary.intakesDone'),    value: totals.intakesDone },
+    { key: 'tasksOpen',      label: t('recruiters.summary.tasksOpen'),      value: totals.tasksOpen },
+    { key: 'tasksOverdue',   label: t('recruiters.summary.tasksOverdue'),   value: totals.tasksOverdue,
+      color: totals.tasksOverdue > 0 ? 'var(--color-warning)' : undefined },
   ]
 
   // Columns — the two "count · count" text cells stay plain text (no chip meaning to carry).
@@ -94,9 +108,7 @@ export default function RecruitersReport({ period, tabsSlot }: { period: ReportP
     <div>
       {/* KPI strip — team totals, above the tabs (candidate-page order) */}
       {!loading && !error && rows.length > 0 && (
-        <div style={{ background: 'var(--surface)', borderRadius: 12, border: '1px solid var(--border)', marginBottom: 16 }}>
-          <InsightsRow kpis={kpis} padding="14px 20px" />
-        </div>
+        <ReportKpiBand kpis={kpis} />
       )}
 
       {/* Tab bar + period control (from the hub) */}

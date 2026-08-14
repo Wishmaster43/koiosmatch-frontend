@@ -9,12 +9,14 @@
 import { useState } from 'react'
 import type { CSSProperties, ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
-import InsightsRow from '@/components/insights/InsightsRow'
+import ReportKpiBand from './ReportKpiBand'
 import type { KpiSpec } from '@/components/insights/InsightsRow'
 import ReportDrillDrawer from './ReportDrillDrawer'
 import type { DrillSpec } from './ReportDrillDrawer'
 import { useApplicationsReport } from './useApplicationsReport'
 import { gateDrillClick } from './reportDrillGate'
+import { buildAxisKpis } from './buildAxisKpis'
+import type { AxisKpiConfig } from './buildAxisKpis'
 import SegmentBars from './SegmentBars'
 import ReportTimeseriesChart from './ReportTimeseriesChart'
 import { useDateFormat } from '@/lib/datetime'
@@ -109,15 +111,45 @@ export default function ApplicationsReport({ period, tabsSlot }: { period: Repor
     if (pt) openBucket(pt)
   })
 
-  const kpis: KpiSpec[] = [{ key: 'total', label: t('applications.total'), value: total }]
+  // Nine-card KPI strip (same footprint as the dashboard): total + the four fixed
+  // funnel-bucket counts (real, flag-driven, already on the response) + the top
+  // segment of four more axes (stage/source/owner/customer) — all real counts,
+  // nothing invented (§0 no fake affordances). `vacancy` stays out of the strip
+  // (top-20+others is a weak "top KPI" pick) but is still fully shown as bars below.
+  const openParams = drill?.rowsParams as Record<string, unknown> | undefined
+  const bucketKpis: KpiSpec[] = BUCKET_KEYS.map(k => ({
+    key: `bucket:${k}`, label: `${t('applications.axes.bucket')}: ${t(`applications.buckets.${k}`)}`, value: data?.by_bucket[k] ?? 0,
+    active: openParams?.bucket === k,
+    onClick: gateDrillClick('applications', () => openSegment({ label: t(`applications.buckets.${k}`), count: data?.by_bucket[k] ?? 0 }, { bucket: k })),
+  }))
+  const axisConfigs: AxisKpiConfig[] = [
+    { axis: 'stage',    axisLabel: t('applications.axes.stage'),    segs: (data?.by_stage ?? []).map(s => ({ key: s.value, label: s.label, count: s.count })) },
+    { axis: 'source',   axisLabel: t('applications.axes.source'),   segs: (data?.by_source ?? []).map(s => ({ key: s.value, label: s.label, count: s.count })) },
+    { axis: 'owner',    axisLabel: t('applications.axes.owner'),    segs: (data?.by_owner ?? []).map(s => ({ key: s.owner_id, label: s.name, count: s.count })) },
+    { axis: 'customer', axisLabel: t('applications.axes.customer'), segs: (data?.by_customer ?? []).map(s => ({ key: s.value, label: s.label, count: s.count })) },
+  ]
+  const onAxisKpiPick = gateDrillClick('applications', (axis: string, key: string) => {
+    const cfg = axisConfigs.find(c => c.axis === axis)
+    const seg = cfg?.segs.find(s => s.key === key)
+    if (seg) openSegment({ label: seg.label, count: seg.count }, { [axis]: key })
+  })
+  const axisKpis = buildAxisKpis(axisConfigs, 4,
+    (axis, key) => onAxisKpiPick?.(axis, key),
+    (axis, key) => openParams?.[axis] === key)
+
+  const kpis: KpiSpec[] = [
+    { key: 'total', label: t('applications.total'), value: total,
+      active: drill != null && (!openParams || Object.keys(openParams).every(k => k === 'period')),
+      onClick: gateDrillClick('applications', () => openSegment({ label: t('applications.total'), count: total }, {})) },
+    ...bucketKpis,
+    ...axisKpis,
+  ]
 
   return (
     <div>
       {/* KPI strip — total inflow, above the tabs (candidate-page order) */}
       {hasData && (
-        <div style={{ ...card, marginBottom: 16 }}>
-          <InsightsRow kpis={kpis} padding="14px 20px" />
-        </div>
+        <ReportKpiBand kpis={kpis} />
       )}
 
       {/* Tab bar + period control (from the hub) */}

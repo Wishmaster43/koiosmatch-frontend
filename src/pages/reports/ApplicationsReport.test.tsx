@@ -202,6 +202,26 @@ describe('ApplicationsReport (RAPPORTEN-SUITE-1 portie 2)', () => {
       expect.objectContaining({ params: { date: '2026-08-03', bucket: 'week', period: 'month' } }))
   })
 
+  // Nine-card KPI strip: total + the four fixed funnel-bucket counts + the top
+  // segment of four more axes, all real counts from the fixture's own axes.
+  it('renders nine KPI cards: total + funnel buckets + top axis segments', () => {
+    mockUseApplicationsReport.mockReturnValue({ data, loading: false, error: false })
+    renderReport()
+    expect(screen.getByText('Totaal sollicitaties')).toBeInTheDocument()
+    expect(screen.getByText('Funnel: Geplaatst')).toBeInTheDocument()
+    expect(screen.getByText('Fase: Applied')).toBeInTheDocument()
+    expect(screen.getByText('Klant: Yesway Flex')).toBeInTheDocument()
+  })
+
+  it('clicking a funnel-bucket KPI card drills with the same bucket XOR param as its bar', async () => {
+    const user = userEvent.setup()
+    mockUseApplicationsReport.mockReturnValue({ data, loading: false, error: false })
+    renderReport()
+    await user.click(screen.getByText('Funnel: Geplaatst'))
+    expect(getSpy).toHaveBeenCalledWith('/reports/applications/drill',
+      expect.objectContaining({ params: { bucket: 'placed', period: 'month' } }))
+  })
+
   it('omits bucket when the timeseries is day-granular', async () => {
     const user = userEvent.setup()
     mockUseApplicationsReport.mockReturnValue({

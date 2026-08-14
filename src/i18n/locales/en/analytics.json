@@ -51,6 +51,16 @@
       "source": "Source",
       "function": "Job function",
       "region": "Region"
+    },
+    "summary": {
+      "recruitersCount": "Recruiters",
+      "locationsCount": "Locations",
+      "sourcesCount": "Sources",
+      "functionsCount": "Job functions",
+      "regionsCount": "Regions",
+      "topRecruiter": "Most active recruiter",
+      "topSource": "Top source",
+      "topFunction": "Most common function"
     }
   },
   "comingSoon": "{{label}}. Coming soon",
@@ -76,7 +86,9 @@
     "conversion": "Conversion",
     "reached": "Reached",
     "current": "Currently in stage",
-    "avgDays": "avg. {{days}} days"
+    "avgDays": "avg. {{days}} days",
+    "dropOff": "Drop-off (count)",
+    "avgDaysOverall": "Avg days per stage"
   },
   "recruiters": {
     "title": "Recruiters",
@@ -84,6 +96,17 @@
     "loading": "Loading recruiters…",
     "error": "Could not load the recruiters",
     "empty": "No recruiters in this period",
+    "summary": {
+      "recruiters": "Recruiters",
+      "candidates": "Candidates",
+      "applications": "Applications",
+      "matches": "Matches",
+      "notContacted": "Not contacted",
+      "intakesPlanned": "Intakes planned",
+      "intakesDone": "Intakes done",
+      "tasksOpen": "Tasks open",
+      "tasksOverdue": "Tasks overdue"
+    },
     "cols": {
       "recruiter": "Recruiter",
       "candidates": "Candidates",
@@ -113,7 +136,11 @@
       "open": "Open",
       "filled": "Filled",
       "fillRate": "Fill rate",
-      "avgTimeToFill": "Avg. time to fill"
+      "avgTimeToFill": "Avg. time to fill",
+      "openRate": "Open rate",
+      "customersCount": "Customers",
+      "topIndustry": "Top industry",
+      "topOwner": "Top owner"
     },
     "cols": {
       "vacancy": "Vacancy",
@@ -150,7 +177,9 @@
       "none": "No contract"
     },
     "terminations": {
-      "title": "Termination reasons"
+      "title": "Termination reasons",
+      "total": "Total terminations",
+      "rate": "Termination rate"
     }
   },
   "outreach": {
@@ -166,6 +195,14 @@
       "campaign": "Call list",
       "channel": "Channel",
       "outcome": "Outcome"
+    },
+    "summary": {
+      "notReached": "Not reached",
+      "assigned": "Assigned",
+      "unassigned": "Unassigned",
+      "noOutcome": "No outcome",
+      "topCampaign": "Top call list",
+      "topChannel": "Top channel"
     }
   },
   "sources": {
@@ -176,7 +213,12 @@
       "sources": "Sources",
       "candidates": "Candidates",
       "applications": "Applications",
-      "matches": "Matches"
+      "matches": "Matches",
+      "matchRate": "Match rate",
+      "applicationRate": "Applications per candidate",
+      "topSourceCandidates": "Top source (candidates)",
+      "topSourceMatches": "Top source (matches)",
+      "sourcesNoMatches": "Sources without matches"
     },
     "cols": {
       "source": "Source",
@@ -220,7 +262,13 @@
       "won": "Won",
       "lost": "Lost",
       "winRate": "Win rate"
-    }
+    },
+    "stale": {
+      "untouched": "Untouched",
+      "overdue": "Overdue"
+    },
+    "forecastCount": "Forecasted deals",
+    "forecastValue": "Forecasted value"
   },
   "tasks": {
     "loading": "Loading tasks…",
@@ -242,7 +290,11 @@
       "assignee": "Assigned to",
       "team": "Department",
       "branch": "Branch"
-    }
+    },
+    "unassigned": "Unassigned",
+    "noTeam": "No department",
+    "noBranch": "No branch",
+    "overdueRate": "Overdue rate"
   },
   "customers": {
     "loading": "Loading customers…",
@@ -276,7 +328,12 @@
     "summary": {
       "primary": "Primary contact",
       "withRecentContact": "Recently contacted",
-      "neverContacted": "Never contacted"
+      "neverContacted": "Never contacted",
+      "contactedRate": "Recently contacted rate",
+      "withoutFunction": "Without function",
+      "withoutLocation": "Without location",
+      "withoutDepartment": "Without department",
+      "withoutCustomer": "Without customer"
     }
   },
   "locations": {
@@ -294,7 +351,13 @@
     },
     "summary": {
       "withCustomer": "With customer",
-      "withoutCustomer": "Without customer"
+      "withoutCustomer": "Without customer",
+      "withDepartments": "With departments",
+      "withoutDepartments": "Without departments",
+      "withoutCity": "Without city",
+      "topCity": "Top city",
+      "withoutProvince": "Without province",
+      "topProvince": "Top province"
     }
   },
   "departments": {
@@ -311,7 +374,13 @@
     },
     "summary": {
       "withLocation": "With location",
-      "withoutLocation": "Without location"
+      "withoutLocation": "Without location",
+      "withContacts": "With contacts",
+      "withoutContacts": "Without contacts",
+      "withoutCustomer": "Without customer",
+      "topCustomer": "Top customer",
+      "topLocation": "Top location",
+      "customersCount": "Customers represented"
     }
   },
   "ai": {
@@ -328,7 +397,13 @@
     },
     "summary": {
       "tokens": "Tokens",
-      "amount": "Sales amount"
+      "amount": "Sales amount",
+      "avgTokens": "Avg tokens per run",
+      "avgAmount": "Avg sales amount per run",
+      "activityTypes": "Activity types",
+      "modelsUsed": "Models used",
+      "activeUsers": "Active users",
+      "topActivity": "Most used activity"
     }
   },
   "workflows": {
@@ -350,7 +425,9 @@
       "cancelled": "Cancelled",
       "running": "Running",
       "successRate": "Success rate",
-      "avgDuration": "Avg duration"
+      "avgDuration": "Avg duration",
+      "workflowsCount": "Workflows",
+      "triggersCount": "Triggers"
     }
   }
 }

@@ -117,6 +117,16 @@ describe('WorkflowsReport (RAPPORTEN-SUITE-2 workflows report)', () => {
     expect(screen.queryByText('90')).not.toBeInTheDocument()
   })
 
+  // The two extra cards read distinct-category counts straight off the
+  // by_workflow/by_trigger axis lengths — plain stats, never drillable.
+  it('renders the workflows/triggers distinct-count cards from the axis arrays', () => {
+    mockUseWorkflowsReport.mockReturnValue({ data, loading: false, error: false })
+    renderReport()
+    expect(screen.getByText('Aantal workflows')).toBeInTheDocument()
+    expect(screen.getByText('Aantal triggers')).toBeInTheDocument()
+    expect(screen.getAllByText('2').length).toBeGreaterThanOrEqual(2)
+  })
+
   it('renders the data window prominently as DD-MM-YYYY', () => {
     mockUseWorkflowsReport.mockReturnValue({ data, loading: false, error: false })
     renderReport()

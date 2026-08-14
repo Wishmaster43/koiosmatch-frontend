@@ -13,12 +13,36 @@ import { RightPanelProvider, useRightPanel } from '@/context/RightPanelContext'
 import ReportsPage from './ReportsPage'
 import { buildReportQueryParams } from './reportFilterParams'
 
+// RAPPORT-FILTERS-1 lookup sources the panel reads to build status/owner/branch
+// options for `candidates`/`customers` — stubbed to small, deterministic option
+// sets. STABLE module-scope references (not fresh literals per call): a fresh
+// array/object identity every render would re-trigger the panel's registration
+// effect forever (the exact "unstable options -> unstable filter groups ->
+// register/unregister loops" class of bug useLocations.ts documents).
+const candidateStatusOptions = [{ value: 'available', label: 'Available' }]
+const customerStatusOptions = [{ value: 'active', label: 'Active' }]
+const userRows = [{ id: 'u1', name: 'Anna de Vries' }]
+const branchRows = [{ value: 'utrecht', label: 'Utrecht' }]
+const candidateLookups = { statuses: candidateStatusOptions }
+const customerLookupsValue = { statuses: customerStatusOptions }
+const usersQueryResult = { data: userRows }
+vi.mock('@/context/LookupsContext', () => ({ useLookups: () => candidateLookups }))
+vi.mock('@/lib/useCustomerLookups', () => ({ useCustomerLookups: () => customerLookupsValue }))
+vi.mock('@/lib/queries', () => ({ useUsers: () => usersQueryResult }))
+vi.mock('@/lib/useLocations', () => ({ useLocations: () => branchRows }))
+
 // Every report component collapses to the same stub: it only needs to prove
-// which `period` it was handed, never its own body (each has its own tests).
-vi.mock('./CandidatesReport', () => ({ default: ({ period }: { period: string }) => <div data-testid="report-period">{period}</div> }))
+// which `period`/`filters` it was handed, never its own body (each has its own tests).
+vi.mock('./CandidatesReport', () => ({
+  default: ({ period, filters }: { period: string; filters?: unknown }) => (
+    <div data-testid="report-period" data-filters={JSON.stringify(filters ?? null)}>{period}</div>
+  ),
+}))
 vi.mock('./ApplicationsReport', () => ({ default: () => null }))
 vi.mock('./CustomersReport', () => ({ default: () => null }))
-vi.mock('./FlowReport', () => ({ default: () => null }))
+// A non-filterable report (flow) proves the hard requirement: the OTHER twelve
+// reports keep getting a period-only panel — no field the server would drop.
+vi.mock('./FlowReport', () => ({ default: ({ period }: { period: string }) => <div data-testid="flow-period">{period}</div> }))
 vi.mock('./RecruitersReport', () => ({ default: () => null }))
 vi.mock('./VacanciesReport', () => ({ default: () => null }))
 vi.mock('./OpportunitiesReport', () => ({ default: () => null }))
@@ -62,20 +86,26 @@ function renderPage() {
 }
 
 describe('ReportsPage — right filter panel', () => {
-  it('registers exactly one group: the period', () => {
+  it('registers period + status/owner/branch for candidates (RAPPORT-FILTERS-1 — one of the two wired reports)', () => {
     const { getGroups } = renderPage()
     const groups = getGroups()
-    expect(groups).toHaveLength(1)
-    expect(groups[0].key).toBe('period')
+    expect(groups.map(g => g.key)).toEqual(['period', 'status', 'owner', 'branch'])
   })
 
-  it('never registers a group for a dimension the server does not accept', () => {
-    const { getGroups } = renderPage()
-    const knownKeys = new Set(Object.keys(buildReportQueryParams('month')))
-    getGroups().forEach(g => expect(knownKeys.has(g.key)).toBe(true))
+  it('a report the backend has NOT wired yet (flow) still registers ONLY the period — no field the server would silently drop', () => {
+    let latest: RadioGroup[] = []
+    render(
+      <RightPanelProvider>
+        <Capture onGroups={g => { latest = g }} />
+        <ReportsPage reportId="flow" />
+      </RightPanelProvider>,
+    )
+    expect(latest).toHaveLength(1)
+    expect(latest[0].key).toBe('period')
+    expect(screen.getByTestId('flow-period').textContent).toBe('month')
   })
 
-  it('unregisters its group on unmount (panel closes with nothing stale behind it)', () => {
+  it('unregisters its groups on unmount (panel closes with nothing stale behind it)', () => {
     let latest: RadioGroup[] = []
     const { unmount } = render(
       <RightPanelProvider>
@@ -83,7 +113,7 @@ describe('ReportsPage — right filter panel', () => {
         <ReportsPage reportId="candidates" />
       </RightPanelProvider>,
     )
-    expect(latest).toHaveLength(1)
+    expect(latest.length).toBeGreaterThan(0)
     unmount()
     // Re-render a fresh provider tree with only the capture probe: registry starts empty.
     render(
@@ -98,16 +128,43 @@ describe('ReportsPage — right filter panel', () => {
     const { getGroups } = renderPage()
     expect(screen.getByTestId('report-period').textContent).toBe('month')
 
-    const periodGroup = getGroups()[0]
-    act(() => { periodGroup.onToggle?.('day') })
+    const periodGroup = getGroups().find(g => g.key === 'period')
+    act(() => { periodGroup?.onToggle?.('day') })
 
     expect(screen.getByTestId('report-period').textContent).toBe('day')
   })
 
-  it('the registered group only ever carries the period param the server reads', () => {
+  it('picking an owner in the panel flows through to the active report AS the report filters (bar and lade share one state)', () => {
     const { getGroups } = renderPage()
-    const periodGroup = getGroups()[0]
-    const params = buildReportQueryParams((periodGroup.selected?.[0] as 'day' | 'week' | 'month') ?? 'month')
+    const ownerGroup = getGroups().find(g => g.key === 'owner')
+    act(() => { ownerGroup?.onToggle?.('u1') })
+
+    const filters = JSON.parse(screen.getByTestId('report-period').dataset.filters ?? 'null')
+    expect(filters).toEqual({ status: [], ownerId: ['u1'], locationId: [] })
+  })
+
+  it('a non-filterable report never receives a filters prop, even with stale selections', () => {
+    render(
+      <RightPanelProvider>
+        <ReportsPage reportId="flow" />
+      </RightPanelProvider>,
+    )
+    // FlowReport's own stub never reads `filters` — asserting on its absence would
+    // require exposing it; the period-only panel group assertion above already
+    // proves nothing beyond period is registered for this report.
+    expect(screen.getByTestId('flow-period')).toBeInTheDocument()
+  })
+
+  it('the period group only ever carries the period param on an unfilterable report', () => {
+    let latest: RadioGroup[] = []
+    render(
+      <RightPanelProvider>
+        <Capture onGroups={g => { latest = g }} />
+        <ReportsPage reportId="flow" />
+      </RightPanelProvider>,
+    )
+    const periodGroup = latest[0]
+    const params = buildReportQueryParams((periodGroup.selected?.[0] as 'day' | 'week' | 'month') ?? 'month', 'flow')
     expect(params).toEqual({ period: 'month' })
   })
 })

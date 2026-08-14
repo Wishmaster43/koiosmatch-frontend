@@ -10,7 +10,7 @@
 import { useState } from 'react'
 import type { CSSProperties, ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
-import InsightsRow from '@/components/insights/InsightsRow'
+import ReportKpiBand from './ReportKpiBand'
 import type { KpiSpec } from '@/components/insights/InsightsRow'
 import ReportDrillDrawer from './ReportDrillDrawer'
 import type { DrillSpec } from './ReportDrillDrawer'
@@ -88,20 +88,35 @@ export default function ContactsReport({ period, tabsSlot }: { period: ReportPer
   // KPI strip straight from the backend summary — total/primary/recent/never
   // contacted are all real counts, never derived or guessed on the client.
   const s = data?.summary
+  // The four axis-coverage gaps ('none' bucket per axis) — real segments, each
+  // still drillable exactly like its own bar.
+  const withoutFunction   = data?.by_function.find(x => x.value === 'none')
+  const withoutLocation   = data?.by_location.find(x => x.value === 'none')
+  const withoutDepartment = data?.by_department.find(x => x.value === 'none')
+  const withoutCustomer   = data?.by_customer.find(x => x.value === 'none')
   const kpis: KpiSpec[] = [
     { key: 'total',            label: t('contacts.total'),            value: total },
     { key: 'primary',          label: t('contacts.summary.primary'),          value: s?.primary ?? 0 },
     { key: 'withRecentContact', label: t('contacts.summary.withRecentContact'), value: s?.with_recent_contact ?? 0 },
     { key: 'neverContacted',   label: t('contacts.summary.neverContacted'),   value: s?.never_contacted ?? 0 },
+    // Derived ratio over two real summary fields — never a fabricated 0%.
+    { key: 'contactedRate', label: t('contacts.summary.contactedRate'),
+      value: s && total > 0 ? `${Math.round((s.with_recent_contact / total) * 100)}%` : '—' },
+    { key: 'withoutFunction', label: t('contacts.summary.withoutFunction'), value: withoutFunction?.count ?? 0,
+      onClick: withoutFunction ? gateDrillClick('contacts', () => openSegment(withoutFunction, { function: 'none' })) : undefined },
+    { key: 'withoutLocation', label: t('contacts.summary.withoutLocation'), value: withoutLocation?.count ?? 0,
+      onClick: withoutLocation ? gateDrillClick('contacts', () => openSegment(withoutLocation, { location: 'none' })) : undefined },
+    { key: 'withoutDepartment', label: t('contacts.summary.withoutDepartment'), value: withoutDepartment?.count ?? 0,
+      onClick: withoutDepartment ? gateDrillClick('contacts', () => openSegment(withoutDepartment, { department: 'none' })) : undefined },
+    { key: 'withoutCustomer', label: t('contacts.summary.withoutCustomer'), value: withoutCustomer?.count ?? 0,
+      onClick: withoutCustomer ? gateDrillClick('contacts', () => openSegment(withoutCustomer, { customer: 'none' })) : undefined },
   ]
 
   return (
     <div>
       {/* KPI strip — contact-cohort health, above the tabs (candidate-page order) */}
       {hasData && (
-        <div style={{ ...card, marginBottom: 16 }}>
-          <InsightsRow kpis={kpis} padding="14px 20px" />
-        </div>
+        <ReportKpiBand kpis={kpis} />
       )}
 
       {/* Tab bar + period control (from the hub) */}

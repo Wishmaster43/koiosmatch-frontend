@@ -32,6 +32,14 @@ const TITLE: CSSProperties = {
   fontSize: 10, fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase',
   letterSpacing: '0.04em', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
 }
+// Nine cards on one row leave roughly 110px per label, which turned real labels
+// into "TOTAAL MA…" / "BEËINDIGIN…". `wrapLabels` lets the title use two lines
+// instead (the same thing the dashboard's own cards do) — opt-in, so the entity
+// list pages with five or six wider cards keep their single-line strip.
+const TITLE_WRAP: CSSProperties = {
+  ...TITLE, whiteSpace: 'normal', display: '-webkit-box', WebkitLineClamp: 2,
+  WebkitBoxOrient: 'vertical', lineHeight: 1.25,
+}
 
 function DonutCard({ title, data, colors, onPick, active, onClear, picked, clearTitle }: Omit<DonutSpec, 'key'> & { clearTitle?: string }) {
   // Total moves to the title line ("STATUS · 99.968") — a 6-digit total never
@@ -72,7 +80,7 @@ function DonutCard({ title, data, colors, onPick, active, onClear, picked, clear
 }
 
 
-function KpiCard({ label, value, sub, color, onClick, active, channels, render }: Omit<KpiSpec, 'key'>) {
+function KpiCard({ label, value, sub, color, onClick, active, channels, render, wrapLabel }: Omit<KpiSpec, 'key'> & { wrapLabel?: boolean }) {
   const clickable = typeof onClick === 'function'
   // Locale-aware grouping (§ FMT-GETAL-1) — never a hardcoded 'nl-NL' toLocaleString.
   const { formatNumber } = useNumberFormat()
@@ -84,7 +92,9 @@ function KpiCard({ label, value, sub, color, onClick, active, channels, render }
         cursor: clickable ? 'pointer' : 'default', transition: 'border-color 0.12s, background 0.12s' }}
       onMouseEnter={clickable ? e => { if (!active) e.currentTarget.style.borderColor = 'var(--color-primary-light)' } : undefined}
       onMouseLeave={clickable ? e => { if (!active) e.currentTarget.style.borderColor = 'var(--border)' } : undefined}>
-      <div style={TITLE}>{label}</div>
+      {/* The full label is always the accessible title too, so a two-line clamp
+          never hides what the number counts. */}
+      <div style={wrapLabel ? TITLE_WRAP : TITLE} title={typeof label === 'string' ? label : undefined}>{label}</div>
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', minWidth: 0 }}>
         {/* Custom card body (e.g. a mini stacked bar) overrides the value/channels. */}
         {render ?? <>
@@ -111,8 +121,11 @@ function KpiCard({ label, value, sub, color, onClick, active, channels, render }
   )
 }
 
-export default function InsightsRow({ donuts = [], kpis = [], padding = '16px 24px 12px', clearTitle, notice }: {
+export default function InsightsRow({ donuts = [], kpis = [], padding = '16px 24px 12px', clearTitle, notice, wrapLabels = false }: {
   donuts?: DonutSpec[]; kpis?: KpiSpec[]; padding?: string; clearTitle?: string
+  // Two-line card titles instead of one ellipsised line — see TITLE_WRAP. Used by
+  // the reports' nine-card band (ReportKpiBand), where labels no longer fit.
+  wrapLabels?: boolean
   // Data-honesty notice (STATS-OOM-1): shown when the server-wide stats failed and
   // the cards silently fall back to page-scope counts — never present fallback
   // numbers as true totals without saying so.
@@ -129,7 +142,7 @@ export default function InsightsRow({ donuts = [], kpis = [], padding = '16px 24
     )}
     <div style={{ padding, display: 'flex', gap: 10, flexShrink: 0, flexWrap: 'nowrap', overflowX: 'auto' }}>
       {donuts.map(({ key, ...d }) => <DonutCard key={key} {...d} clearTitle={clearTitle} />)}
-      {kpis.map(({ key, ...k }) => <KpiCard key={key} {...k} />)}
+      {kpis.map(({ key, ...k }) => <KpiCard key={key} {...k} wrapLabel={wrapLabels} />)}
     </div>
     </>
   )

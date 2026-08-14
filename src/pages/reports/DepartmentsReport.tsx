@@ -10,7 +10,7 @@
 import { useState } from 'react'
 import type { CSSProperties, ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
-import InsightsRow from '@/components/insights/InsightsRow'
+import ReportKpiBand from './ReportKpiBand'
 import type { KpiSpec } from '@/components/insights/InsightsRow'
 import ReportDrillDrawer from './ReportDrillDrawer'
 import type { DrillSpec } from './ReportDrillDrawer'
@@ -86,19 +86,41 @@ export default function DepartmentsReport({ period, tabsSlot }: { period: Report
   // axis's own 'none' bucket (real numbers, never invented ones).
   const withoutLocation = data?.by_location.find(s => s.value === 'none')?.count ?? 0
   const withLocation    = total - withoutLocation
+  // The optional contact-coverage summary — only rendered when the endpoint
+  // actually sends it (never fabricated when the block is absent).
+  const summary = data?.summary
+  const withoutCustomer = data?.by_customer.find(s => s.value === 'none')
+  // Top real (non-'none') bar per axis — the biggest actual customer/location,
+  // never a hardcoded value.
+  const topCustomer = data?.by_customer.filter(s => s.value !== 'none').reduce<{ value: string; label: string; count: number } | null>(
+    (top, s) => (!top || s.count > top.count) ? s : top, null)
+  const topLocation = data?.by_location.filter(s => s.value !== 'none').reduce<{ value: string; label: string; count: number } | null>(
+    (top, s) => (!top || s.count > top.count) ? s : top, null)
+  // Distinct customers actually represented in this window's data — a real
+  // count off the axis array, never a fabricated total.
+  const customersCount = data?.by_customer.filter(s => s.value !== 'none' && s.value !== 'others').length ?? 0
   const kpis: KpiSpec[] = [
     { key: 'total',           label: t('departments.total'),            value: total },
     { key: 'withLocation',    label: t('departments.summary.withLocation'),    value: withLocation },
     { key: 'withoutLocation', label: t('departments.summary.withoutLocation'), value: withoutLocation },
+    ...(summary ? [
+      { key: 'withContacts',    label: t('departments.summary.withContacts'),    value: summary.with_contacts } as KpiSpec,
+      { key: 'withoutContacts', label: t('departments.summary.withoutContacts'), value: summary.without_contacts } as KpiSpec,
+    ] : []),
+    { key: 'withoutCustomer', label: t('departments.summary.withoutCustomer'), value: withoutCustomer?.count ?? 0,
+      onClick: withoutCustomer ? gateDrillClick('departments', () => openSegment(withoutCustomer, { customer: 'none' })) : undefined },
+    ...(topCustomer ? [{ key: 'topCustomer', label: t('departments.summary.topCustomer'), value: topCustomer.count, sub: topCustomer.label,
+      onClick: gateDrillClick('departments', () => openSegment(topCustomer, { customer: topCustomer.value })) } as KpiSpec] : []),
+    ...(topLocation ? [{ key: 'topLocation', label: t('departments.summary.topLocation'), value: topLocation.count, sub: topLocation.label,
+      onClick: gateDrillClick('departments', () => openSegment(topLocation, { location: topLocation.value })) } as KpiSpec] : []),
+    { key: 'customersCount', label: t('departments.summary.customersCount'), value: customersCount },
   ]
 
   return (
     <div>
       {/* KPI strip — above the tabs (candidate-page order) */}
       {hasData && (
-        <div style={{ ...card, marginBottom: 16 }}>
-          <InsightsRow kpis={kpis} padding="14px 20px" />
-        </div>
+        <ReportKpiBand kpis={kpis} />
       )}
 
       {/* Tab bar + period control (from the hub) */}

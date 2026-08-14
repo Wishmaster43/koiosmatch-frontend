@@ -11,7 +11,7 @@
 import { useState } from 'react'
 import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
-import InsightsRow from '@/components/insights/InsightsRow'
+import ReportKpiBand from './ReportKpiBand'
 import type { KpiSpec } from '@/components/insights/InsightsRow'
 import ReportDrillDrawer from './ReportDrillDrawer'
 import type { DrillSpec } from './ReportDrillDrawer'
@@ -20,6 +20,7 @@ import { gateDrillClick } from './reportDrillGate'
 import SegmentBars from './SegmentBars'
 import ReportTimeseriesChart from './ReportTimeseriesChart'
 import { useDateFormat } from '@/lib/datetime'
+import { formatNumber } from '@/lib/formatters'
 import type { ReportPeriod, CandidateTimeseriesPoint } from '@/types/analytics'
 
 // One match stat tile; with an onClick it becomes a drillable surface (keyboard
@@ -122,6 +123,13 @@ export default function MatchesReport({ period, tabsSlot }: { period: ReportPeri
   const openParams = drill?.rowsParams as Record<string, unknown> | undefined
   const openAxis = openParams ? ['origin', 'contract_form', 'contract_status', 'date', 'stop_reason'].find(k => openParams[k] != null) : undefined
 
+  // Nine-card footprint (Danny — same as the dashboard). The first three mirror
+  // the origin axis; sent/active/ended mirror the under_contract tiles below (a
+  // real segment total, not a fabricated metric) and drill the same
+  // contract_status=<key> XOR leg; the last three are honest, non-fabricated
+  // derived stats: terminations total, avg duration (dash until HelloFlex fills
+  // it) and the termination rate (a ratio of two real fields).
+  const terminationRate = data && data.total > 0 ? (data.terminations.total / data.total) * 100 : null
   const kpis: KpiSpec[] = [
     { key: 'total',  label: t('matches.total'),     value: data?.total ?? 0,
       active: drill != null && openAxis == null,
@@ -132,17 +140,27 @@ export default function MatchesReport({ period, tabsSlot }: { period: ReportPeri
     { key: 'direct', label: t('matches.direct'),    value: data?.by_origin.direct ?? 0,
       active: openParams?.origin === 'direct',
       onClick: gateDrillClick('matches', () => openMatches(t('matches.direct'), data?.by_origin.direct ?? 0, 'direct')) },
+    { key: 'sent',   label: t('matches.placements.sent'),   value: tileValue('sent'),
+      active: openParams?.contract_status === 'sent',
+      onClick: gateDrillClick('matches', () => openContractStatus(t('matches.placements.sent'), tileValue('sent'), 'sent')) },
+    { key: 'active', label: t('matches.placements.active'), value: tileValue('active'),
+      active: openParams?.contract_status === 'active',
+      onClick: gateDrillClick('matches', () => openContractStatus(t('matches.placements.active'), tileValue('active'), 'active')) },
+    { key: 'ended',  label: t('matches.placements.ended'),  value: tileValue('ended'),
+      active: openParams?.contract_status === 'ended',
+      onClick: gateDrillClick('matches', () => openContractStatus(t('matches.placements.ended'), tileValue('ended'), 'ended')) },
+    { key: 'terminationsTotal', label: t('matches.terminations.total'), value: data?.terminations.total ?? 0 },
     { key: 'dur',    label: t('matches.avgDuration'),
       value: data?.avg_placement_duration_days != null ? t('matches.daysValue', { days: Math.round(data.avg_placement_duration_days) }) : '—' },
+    { key: 'terminationRate', label: t('matches.terminations.rate'),
+      value: terminationRate != null ? `${formatNumber(terminationRate)}%` : '—' },
   ]
 
   return (
     <div>
       {/* KPI strip — above the tabs (candidate-page order: KPIs first) */}
       {!loading && !error && !isEmpty && data && (
-        <div style={{ background: 'var(--surface)', borderRadius: 12, border: '1px solid var(--border)', marginBottom: 16 }}>
-          <InsightsRow kpis={kpis} padding="14px 20px" />
-        </div>
+        <ReportKpiBand kpis={kpis} />
       )}
 
       {/* Tab bar + period control (from the hub) */}

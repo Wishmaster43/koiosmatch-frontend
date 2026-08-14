@@ -13,7 +13,7 @@
  */
 import type { CSSProperties, ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
-import InsightsRow from '@/components/insights/InsightsRow'
+import ReportKpiBand from './ReportKpiBand'
 import type { KpiSpec } from '@/components/insights/InsightsRow'
 import { useAiReport } from './useAiReport'
 import SegmentBars from './SegmentBars'
@@ -43,22 +43,34 @@ export default function AiReport({ period, tabsSlot }: { period: ReportPeriod; t
       items={segs.map(s => ({ key: s.value, label: s.label, count: s.count, color: null }))} />
   }
 
-  // KPI band: total activity + tokens + sales amount only. No cost/margin key
-  // exists in the envelope and none is derived here.
+  // KPI band: nine honest cards, all derived from the summary/axes the envelope
+  // already returns. No cost/margin key exists here and none is derived — sales
+  // amount only, by contract. Averages are ratios of two real fields; the
+  // distinct-count and top-segment cards read straight off the axis arrays.
   const s = data?.summary
+  const topOf = (segs: AiActivitySegment[]) =>
+    segs.reduce<AiActivitySegment | null>((best, x) => (!best || x.count > best.count ? x : best), null)
+  const topActivity = data ? topOf(data.by_activity) : null
   const kpis: KpiSpec[] = [
     { key: 'total',  label: t('ai.total'),  value: total },
     { key: 'tokens', label: t('ai.summary.tokens'), value: s?.tokens != null ? formatNumber(s.tokens) : '—' },
     { key: 'amount', label: t('ai.summary.amount'), value: s?.amount != null ? formatNumber(s.amount) : '—' },
+    { key: 'avgTokens', label: t('ai.summary.avgTokens'),
+      value: s?.tokens != null && total > 0 ? formatNumber(Math.round(s.tokens / total)) : '—' },
+    { key: 'avgAmount', label: t('ai.summary.avgAmount'),
+      value: s?.amount != null && total > 0 ? formatNumber(s.amount / total) : '—' },
+    { key: 'activityTypes', label: t('ai.summary.activityTypes'), value: data?.by_activity.length ?? 0 },
+    { key: 'modelsUsed', label: t('ai.summary.modelsUsed'), value: data?.by_model.length ?? 0 },
+    { key: 'activeUsers', label: t('ai.summary.activeUsers'), value: data?.by_user.length ?? 0 },
+    { key: 'topActivity', label: t('ai.summary.topActivity'),
+      value: topActivity?.count ?? '—', sub: topActivity?.label },
   ]
 
   return (
     <div>
       {/* KPI band — total/tokens/amount only, above the tabs (candidate-page order) */}
       {hasData && (
-        <div style={{ ...card, marginBottom: 16 }}>
-          <InsightsRow kpis={kpis} padding="14px 20px" />
-        </div>
+        <ReportKpiBand kpis={kpis} />
       )}
 
       {/* Tab bar + period control (from the hub) */}

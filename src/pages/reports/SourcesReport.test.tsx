@@ -35,7 +35,27 @@ describe('SourcesReport (GET /reports/sources)', () => {
     mockUseSourcesReport.mockReturnValue({ data, loading: false, error: false })
     render(<SourcesReport period="month" />)
     expect(screen.getByText('linkedin')).toBeInTheDocument()
-    expect(screen.getByText('25%')).toBeInTheDocument()
+    // The row's own match_rate (25%) AND the KPI strip's overall match rate (also
+    // 25% with a single source) both render — two real, independent computations.
+    expect(screen.getAllByText('25%').length).toBeGreaterThanOrEqual(2)
+  })
+
+  // Exactly nine KPI cards, all derived from fields the endpoint already returns
+  // (sources/candidates/applications/matches/rates/top-source/no-match count) —
+  // no drill (the /reports/sources/drill endpoint doesn't exist), so no XOR param.
+  it('renders exactly nine KPI cards derived from the fixture, none clickable', () => {
+    mockUseSourcesReport.mockReturnValue({ data, loading: false, error: false })
+    render(<SourcesReport period="month" />)
+    expect(screen.getByText('Bronnen')).toBeInTheDocument()
+    expect(screen.getByText('Sollicitaties per kandidaat')).toBeInTheDocument()
+    expect(screen.getByText('67%')).toBeInTheDocument() // applications/candidates = 8/12
+    expect(screen.getByText('Grootste bron (kandidaten)')).toBeInTheDocument()
+    expect(screen.getByText('linkedin · 12')).toBeInTheDocument()
+    expect(screen.getByText('Grootste bron (matches)')).toBeInTheDocument()
+    expect(screen.getByText('linkedin · 3')).toBeInTheDocument()
+    expect(screen.getByText('Bronnen zonder matches')).toBeInTheDocument()
+    // Single source with matches > 0 → zero sources-without-matches.
+    expect(screen.getAllByText('0').length).toBeGreaterThanOrEqual(1)
   })
 
   // Integration proof (WCAG 2.2 AA audit, §6): the "Bron" column is wired with

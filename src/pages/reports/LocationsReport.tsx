@@ -10,7 +10,7 @@
 import { useState } from 'react'
 import type { CSSProperties, ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
-import InsightsRow from '@/components/insights/InsightsRow'
+import ReportKpiBand from './ReportKpiBand'
 import type { KpiSpec } from '@/components/insights/InsightsRow'
 import ReportDrillDrawer from './ReportDrillDrawer'
 import type { DrillSpec } from './ReportDrillDrawer'
@@ -86,19 +86,40 @@ export default function LocationsReport({ period, tabsSlot }: { period: ReportPe
   // axis's own 'none' bucket (real numbers, never invented ones).
   const withoutCustomer = data?.by_customer.find(s => s.value === 'none')?.count ?? 0
   const withCustomer    = total - withoutCustomer
+  // The optional department-coverage summary — only rendered when the endpoint
+  // actually sends it (never fabricated when the block is absent).
+  const summary = data?.summary
+  const withoutCity     = data?.by_city.find(s => s.value === 'none')
+  const withoutProvince = data?.by_province.find(s => s.value === 'none')
+  // Top real (non-'none') bar per axis — the biggest actual city/province, never
+  // a hardcoded value.
+  const topCity = data?.by_city.filter(s => s.value !== 'none').reduce<{ value: string; label: string; count: number } | null>(
+    (top, s) => (!top || s.count > top.count) ? s : top, null)
+  const topProvince = data?.by_province.filter(s => s.value !== 'none').reduce<{ value: string; label: string; count: number } | null>(
+    (top, s) => (!top || s.count > top.count) ? s : top, null)
   const kpis: KpiSpec[] = [
     { key: 'total',            label: t('locations.total'),            value: total },
     { key: 'withCustomer',     label: t('locations.summary.withCustomer'),    value: withCustomer },
     { key: 'withoutCustomer',  label: t('locations.summary.withoutCustomer'), value: withoutCustomer },
+    ...(summary ? [
+      { key: 'withDepartments',    label: t('locations.summary.withDepartments'),    value: summary.with_departments } as KpiSpec,
+      { key: 'withoutDepartments', label: t('locations.summary.withoutDepartments'), value: summary.without_departments } as KpiSpec,
+    ] : []),
+    { key: 'withoutCity', label: t('locations.summary.withoutCity'), value: withoutCity?.count ?? 0,
+      onClick: withoutCity ? gateDrillClick('locations', () => openSegment(withoutCity, { city: 'none' })) : undefined },
+    ...(topCity ? [{ key: 'topCity', label: t('locations.summary.topCity'), value: topCity.count, sub: topCity.label,
+      onClick: gateDrillClick('locations', () => openSegment(topCity, { city: topCity.value })) } as KpiSpec] : []),
+    { key: 'withoutProvince', label: t('locations.summary.withoutProvince'), value: withoutProvince?.count ?? 0,
+      onClick: withoutProvince ? gateDrillClick('locations', () => openSegment(withoutProvince, { province: 'none' })) : undefined },
+    ...(topProvince ? [{ key: 'topProvince', label: t('locations.summary.topProvince'), value: topProvince.count, sub: topProvince.label,
+      onClick: gateDrillClick('locations', () => openSegment(topProvince, { province: topProvince.value })) } as KpiSpec] : []),
   ]
 
   return (
     <div>
       {/* KPI strip — above the tabs (candidate-page order) */}
       {hasData && (
-        <div style={{ ...card, marginBottom: 16 }}>
-          <InsightsRow kpis={kpis} padding="14px 20px" />
-        </div>
+        <ReportKpiBand kpis={kpis} />
       )}
 
       {/* Tab bar + period control (from the hub) */}
