@@ -56,7 +56,8 @@ const NAV_ITEMS = [
   {
     id: 'reports', label: 'Rapporten', icon: PieChart,
     children: [
-      { id: 'reports.candidates', label: 'Instroom' },
+      { id: 'reports.candidates',   label: 'Instroom' },
+      { id: 'reports.applications', label: 'Sollicitaties' },
       { id: 'reports.flow',       label: 'Flow' },
       { id: 'reports.recruiters', label: 'Recruiters' },
       { id: 'reports.vacancies',  label: 'Vacatures' },

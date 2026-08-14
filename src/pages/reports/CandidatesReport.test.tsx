@@ -24,7 +24,7 @@ const data: CandidatesReportData = {
   by_status:  [{ value: 'available', label: 'Beschikbaar', color: '#16a34a', count: 8 }, { value: 'placed', label: 'Geplaatst', color: '#2563eb', count: 4 }],
   by_phase:   [{ value: 'lead', label: 'Lead', color: null, count: 3 }, { value: 'candidate', label: 'Kandidaat', color: null, count: 9 }],
   by_source:  [{ value: 'referral', label: 'Referral', color: null, count: 6 }],
-  by_owner:   [{ owner_id: 'u1', name: 'Anna de Vries', count: 12 }],
+  by_owner:   [{ owner_id: 'u1', name: 'Anna de Vries', count: 8 }, { owner_id: 'none', name: 'Niet toegewezen', count: 4 }],
   by_branch:  [{ value: 'utrecht', label: 'Utrecht', color: null, count: 12 }],
 }
 
@@ -91,6 +91,18 @@ describe('CandidatesReport (RAPPORTEN-SUITE-1 inflow report)', () => {
     await user.click(screen.getByText('Anna de Vries'))
     expect(getSpy).toHaveBeenCalledWith('/reports/candidates/drill',
       expect.objectContaining({ params: { owner: 'u1', period: 'month' } }))
+  })
+
+  // RETRO-CHECK (RAPPORTEN-SUITE-1 "portie 2" contract note): owner='none' (unassigned)
+  // now also applies to /reports/candidates/drill — the sentinel row is a real,
+  // clickable bar here too, not just on the applications report.
+  it('clicking the "Niet toegewezen" owner row drills with owner=none', async () => {
+    const user = userEvent.setup()
+    mockUseCandidatesReport.mockReturnValue({ data, loading: false, error: false })
+    renderReport()
+    await user.click(screen.getByText('Niet toegewezen'))
+    expect(getSpy).toHaveBeenCalledWith('/reports/candidates/drill',
+      expect.objectContaining({ params: { owner: 'none', period: 'month' } }))
   })
 
   // A week bucket click drills with date=<the bucket's machine key> + bucket=week, so

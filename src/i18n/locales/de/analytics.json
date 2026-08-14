@@ -17,7 +17,8 @@
     "intakes": "Intakes",
     "outreach": "Outreach",
     "sources": "Quellen",
-    "candidates": "Zulauf"
+    "candidates": "Zulauf",
+    "applications": "Bewerbungen"
   },
   "candidates": {
     "loading": "Zulauf wird geladen…",
@@ -163,6 +164,28 @@
       "applications": "Bewerbungen",
       "matches": "Matches",
       "matchRate": "Match-Quote"
+    }
+  },
+  "applications": {
+    "loading": "Bewerbungen werden geladen…",
+    "error": "Bewerbungen konnten nicht geladen werden",
+    "empty": "Keine Bewerbungen in diesem Zeitraum",
+    "total": "Bewerbungen gesamt",
+    "series": "Bewerbungen im Zeitverlauf",
+    "window": "Bewerbungen {{from}} bis {{to}}",
+    "axes": {
+      "bucket": "Funnel",
+      "stage": "Phase",
+      "source": "Quelle",
+      "owner": "Eigentümer",
+      "customer": "Kunde",
+      "vacancy": "Stelle"
+    },
+    "buckets": {
+      "active": "Aktiv",
+      "matched": "Gematcht",
+      "rejected": "Abgelehnt",
+      "placed": "Platziert"
     }
   }
 }

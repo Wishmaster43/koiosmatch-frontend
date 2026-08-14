@@ -17,7 +17,8 @@
     "intakes": "Intakes",
     "outreach": "Outreach",
     "sources": "Fuentes",
-    "candidates": "Entrada"
+    "candidates": "Entrada",
+    "applications": "Solicitudes"
   },
   "candidates": {
     "loading": "Cargando entrada…",
@@ -163,6 +164,28 @@
       "applications": "Solicitudes",
       "matches": "Matches",
       "matchRate": "Tasa de match"
+    }
+  },
+  "applications": {
+    "loading": "Cargando solicitudes…",
+    "error": "No se pudieron cargar las solicitudes",
+    "empty": "Sin solicitudes en este período",
+    "total": "Total de solicitudes",
+    "series": "Solicitudes a lo largo del tiempo",
+    "window": "Solicitudes {{from}} a {{to}}",
+    "axes": {
+      "bucket": "Funnel",
+      "stage": "Fase",
+      "source": "Fuente",
+      "owner": "Propietario",
+      "customer": "Cliente",
+      "vacancy": "Vacante"
+    },
+    "buckets": {
+      "active": "Activo",
+      "matched": "Emparejado",
+      "rejected": "Rechazado",
+      "placed": "Colocado"
     }
   }
 }

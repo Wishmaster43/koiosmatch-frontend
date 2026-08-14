@@ -17,7 +17,8 @@
     "intakes": "Intakes",
     "outreach": "Outreach",
     "sources": "Sources",
-    "candidates": "Inflow"
+    "candidates": "Inflow",
+    "applications": "Applications"
   },
   "candidates": {
     "loading": "Loading inflow…",
@@ -163,6 +164,28 @@
       "applications": "Applications",
       "matches": "Matches",
       "matchRate": "Match rate"
+    }
+  },
+  "applications": {
+    "loading": "Loading applications…",
+    "error": "Could not load the applications",
+    "empty": "No applications in this period",
+    "total": "Total applications",
+    "series": "Applications over time",
+    "window": "Applications {{from}} through {{to}}",
+    "axes": {
+      "bucket": "Funnel",
+      "stage": "Stage",
+      "source": "Source",
+      "owner": "Owner",
+      "customer": "Customer",
+      "vacancy": "Vacancy"
+    },
+    "buckets": {
+      "active": "Active",
+      "matched": "Matched",
+      "rejected": "Rejected",
+      "placed": "Placed"
     }
   }
 }

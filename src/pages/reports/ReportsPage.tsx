@@ -7,6 +7,7 @@
 import { useId, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import CandidatesReport from './CandidatesReport'
+import ApplicationsReport from './ApplicationsReport'
 import FlowReport from './FlowReport'
 import RecruitersReport from './RecruitersReport'
 import VacanciesReport from './VacanciesReport'
@@ -28,7 +29,8 @@ export default function ReportsPage({ initialTab = 'candidates' }: { initialTab?
   // Sub-tabs are config: { id, label }. Add a tab here when its report lands.
   // Candidates/leads INFLOW sits first — Danny's morning first-look (RAPPORTEN-SUITE-1).
   const tabs = [
-    { id: 'candidates', label: t('tabs.candidates') },
+    { id: 'candidates',  label: t('tabs.candidates') },
+    { id: 'applications', label: t('tabs.applications') },
     { id: 'flow',       label: t('tabs.flow') },
     { id: 'recruiters', label: t('tabs.recruiters') },
     { id: 'vacancies',  label: t('tabs.vacancies') },
@@ -83,7 +85,8 @@ export default function ReportsPage({ initialTab = 'candidates' }: { initialTab?
 
   return (
     <div className="p-6">
-      {tab === 'candidates' && <CandidatesReport period={period} tabsSlot={tabsBar} />}
+      {tab === 'candidates'  && <CandidatesReport  period={period} tabsSlot={tabsBar} />}
+      {tab === 'applications' && <ApplicationsReport period={period} tabsSlot={tabsBar} />}
       {tab === 'flow'       && <FlowReport       period={period} tabsSlot={tabsBar} />}
       {tab === 'recruiters' && <RecruitersReport period={period} tabsSlot={tabsBar} />}
       {tab === 'vacancies'  && <VacanciesReport  period={period} tabsSlot={tabsBar} />}

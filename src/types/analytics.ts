@@ -171,6 +171,32 @@ export interface CandidatesReportData {
   by_branch: CandidateSegment[]
 }
 
+// ── Applications report (GET /reports/applications, RAPPORTEN-SUITE-1 "portie 2") ─
+// Hand-written from the backend Service (no 2xx schema in the generated spec yet,
+// §10) — mirrors the CONTRACT-CHANGELOG "portie 2" entry exactly.
+
+// The funnel bucket tally — flag-driven, `placed` is EXACTLY the donut definition
+// (cross-checked server-side against /applications/stats).
+export interface ApplicationBucketCounts { active: number; matched: number; rejected: number; placed: number }
+
+// A top-20 + 'others'-remainder segment (customer/vacancy axes). `value` doubles
+// as the drill/advice XOR param — 'none' and 'others' are both real, clickable rows.
+export interface ApplicationTopSegment { value: string; label: string; count: number }
+
+export interface ApplicationsReportData {
+  period: string
+  from: string
+  to: string
+  total: number
+  timeseries: { bucket: 'day' | 'week'; series: CandidateTimeseriesPoint[] }
+  by_bucket: ApplicationBucketCounts
+  by_stage: CandidateSegment[]
+  by_source: CandidateSegment[]
+  by_owner: CandidateOwnerSegment[]
+  by_customer: ApplicationTopSegment[]
+  by_vacancy: ApplicationTopSegment[]
+}
+
 // ── Sources report (GET /reports/sources, REPORTS-2 fase 2) ──────────────────
 // Hand-written from the backend Service (no 2xx schema in the generated spec yet,
 // §10) — mirrors App\Services\Report\SourcesReport::run() exactly.

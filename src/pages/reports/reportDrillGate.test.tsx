@@ -14,6 +14,7 @@ describe('reportDrillGate', () => {
     expect(REPORT_DRILL_AVAILABLE.recruiters).toBe(true)
     expect(REPORT_DRILL_AVAILABLE.vacancies).toBe(true)
     expect(REPORT_DRILL_AVAILABLE.candidates).toBe(true)
+    expect(REPORT_DRILL_AVAILABLE.applications).toBe(true)
   })
 
   it('stays off for the reports without a drill endpoint yet', () => {

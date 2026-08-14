@@ -17,7 +17,8 @@
     "intakes": "Intakes",
     "outreach": "Outreach",
     "sources": "Bronnen",
-    "candidates": "Instroom"
+    "candidates": "Instroom",
+    "applications": "Sollicitaties"
   },
   "candidates": {
     "loading": "Instroom laden…",
@@ -163,6 +164,28 @@
       "applications": "Sollicitaties",
       "matches": "Matches",
       "matchRate": "Matchpercentage"
+    }
+  },
+  "applications": {
+    "loading": "Sollicitaties laden…",
+    "error": "Kon de sollicitaties niet laden",
+    "empty": "Geen sollicitaties in deze periode",
+    "total": "Totaal sollicitaties",
+    "series": "Sollicitaties over tijd",
+    "window": "Sollicitaties {{from}} t/m {{to}}",
+    "axes": {
+      "bucket": "Funnel",
+      "stage": "Fase",
+      "source": "Bron",
+      "owner": "Eigenaar",
+      "customer": "Klant",
+      "vacancy": "Vacature"
+    },
+    "buckets": {
+      "active": "Actief",
+      "matched": "Gematcht",
+      "rejected": "Afgewezen",
+      "placed": "Geplaatst"
     }
   }
 }
