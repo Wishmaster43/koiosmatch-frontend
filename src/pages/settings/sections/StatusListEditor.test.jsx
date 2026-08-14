@@ -373,6 +373,20 @@ describe('StatusListEditor — save failures notify the user', () => {
     await waitFor(() => expect(notifyError).toHaveBeenCalledWith(st('statusList.saveFailed')))
   })
 
+  it('surfaces the server validation reason on a 422 (portie-5 unique-slug guard) instead of the generic toast', async () => {
+    api.get.mockResolvedValue({ data: [] })
+    api.post.mockRejectedValue({ response: { status: 422, data: { errors: { value: ['De slug is al in gebruik.'] } } } })
+    const { notifyError } = await import('@/lib/notify')
+    const user = userEvent.setup()
+    render(<StatusListEditor title="Fasen" subtitle="" endpoint="/opportunity-stages" addLabel="Fase toevoegen" />)
+
+    await user.click(screen.getByRole('button', { name: 'Fase toevoegen' }))
+    await user.type(screen.getByPlaceholderText(st('statusList.namePlaceholder')), 'Intake')
+    await user.click(screen.getByRole('button', { name: st('statusList.addBtn') }))
+
+    await waitFor(() => expect(notifyError).toHaveBeenCalledWith('De slug is al in gebruik.'))
+  })
+
   // Reorder-save-on-drop failure is covered by the dedicated
   // "StatusListEditor — reorder persists on drop" describe block below (the Save
   // button that used to trigger this no longer exists, per the 04-08 decision).

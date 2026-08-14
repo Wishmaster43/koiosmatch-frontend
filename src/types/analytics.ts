@@ -238,6 +238,71 @@ export interface CustomersReportData {
   by_branch: CandidateSegment[]
 }
 
+// ── Opportunities report (GET /reports/opportunities, RAPPORTEN-SUITE-1 "portie 5") ─
+// Hand-written from the backend Service (no 2xx schema in the generated spec yet,
+// §10) — mirrors App\Services\Report\OpportunitiesReport::run() exactly. The
+// KANSEN-REPORT-1 envelope (period/totals/forecast/stale) kept its field shapes;
+// portie 5 added total/timeseries/by_branch and normalised by_stage/by_customer
+// with ADDITIVE value/label keys next to the legacy ones.
+
+// One pipeline-stage segment. `value` mirrors the legacy `key` (SegmentBars
+// normalisation) and is the drill/advice XOR param — 'none' and a raw orphan uuid
+// (deleted stage, no FK on opportunity_stage_id) are both real, drillable rows.
+// `value_sum` is money (euro), deliberately separate from `count`.
+export interface OpportunityStageSegment {
+  key: string
+  value: string
+  label: string
+  color: string | null
+  count: number
+  value_sum: number
+}
+
+// One customer segment (top-20 + 'others' + 'none'). `value`/`label` mirror the
+// legacy customer_id/name pair — `customer_id` is NOT always a uuid anymore
+// ('none'/'others' are sentinels); a hard-deleted customer keeps its raw uuid
+// with an "Onbekend" label and must stay drillable.
+export interface OpportunityCustomerSegment {
+  customer_id: string
+  value: string
+  name: string
+  label: string
+  count: number
+  value_sum: number
+}
+
+// Pipeline-health tallies. `win_rate` counts DECIDED deals only and is null while
+// nothing is decided (render a placeholder, never a fabricated 0%).
+export interface OpportunityTotals {
+  total: number
+  open: number
+  won: number
+  lost: number
+  win_rate: number | null
+  open_value: number
+  open_hours: number
+  won_value: number
+}
+
+// Open deals per expected-close month — the report's only forward-looking slice.
+export interface OpportunityForecastRow { month: string; count: number; value_sum: number }
+
+export interface OpportunitiesReportData {
+  // Unlike the sibling reports, the window lives NESTED under `period` here.
+  period: { from: string; to: string }
+  total: number
+  timeseries: { bucket: 'day' | 'week'; series: CandidateTimeseriesPoint[] }
+  totals: OpportunityTotals
+  by_stage: OpportunityStageSegment[]
+  by_owner: CandidateOwnerSegment[]
+  by_customer: OpportunityCustomerSegment[]
+  // Same {value,label,count} field shape as ApplicationTopSegment — here zero-filled
+  // over the tenant locations + 'none' (direct FK column, so no orphan path).
+  by_branch: ApplicationTopSegment[]
+  forecast: OpportunityForecastRow[]
+  stale: { untouched_days: number; untouched: number; overdue: number }
+}
+
 // ── Sources report (GET /reports/sources, REPORTS-2 fase 2) ──────────────────
 // Hand-written from the backend Service (no 2xx schema in the generated spec yet,
 // §10) — mirrors App\Services\Report\SourcesReport::run() exactly.

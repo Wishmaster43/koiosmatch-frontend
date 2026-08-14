@@ -19,7 +19,8 @@
     "sources": "Fuentes",
     "candidates": "Entrada",
     "applications": "Solicitudes",
-    "customers": "Clientes"
+    "customers": "Clientes",
+    "opportunities": "Oportunidades"
   },
   "candidates": {
     "loading": "Cargando entrada…",
@@ -192,6 +193,20 @@
       "matched": "Emparejado",
       "rejected": "Rechazado",
       "placed": "Colocado"
+    }
+  },
+  "opportunities": {
+    "loading": "Cargando oportunidades…",
+    "error": "No se pudieron cargar las oportunidades",
+    "empty": "Sin oportunidades en este período",
+    "total": "Total de oportunidades",
+    "series": "Oportunidades en el tiempo",
+    "window": "Oportunidades del {{from}} al {{to}}",
+    "summary": {
+      "open": "Abiertas",
+      "won": "Ganadas",
+      "lost": "Perdidas",
+      "winRate": "Tasa de éxito"
     }
   },
   "customers": {

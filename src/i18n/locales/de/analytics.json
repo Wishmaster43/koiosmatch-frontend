@@ -19,7 +19,8 @@
     "sources": "Quellen",
     "candidates": "Zulauf",
     "applications": "Bewerbungen",
-    "customers": "Kunden"
+    "customers": "Kunden",
+    "opportunities": "Chancen"
   },
   "candidates": {
     "loading": "Zulauf wird geladen…",
@@ -192,6 +193,20 @@
       "matched": "Gematcht",
       "rejected": "Abgelehnt",
       "placed": "Platziert"
+    }
+  },
+  "opportunities": {
+    "loading": "Chancen werden geladen…",
+    "error": "Chancen konnten nicht geladen werden",
+    "empty": "Keine Chancen in diesem Zeitraum",
+    "total": "Chancen gesamt",
+    "series": "Chancen im Zeitverlauf",
+    "window": "Chancen {{from}} bis {{to}}",
+    "summary": {
+      "open": "Offen",
+      "won": "Gewonnen",
+      "lost": "Verloren",
+      "winRate": "Gewinnquote"
     }
   },
   "customers": {

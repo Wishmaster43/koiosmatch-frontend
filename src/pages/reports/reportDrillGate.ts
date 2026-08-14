@@ -10,11 +10,13 @@
  * source|owner|customer|vacancy|date — bucket carries a dual role, see
  * ApplicationsReport). "Portie 3" (2026-08-14) added the same pair for
  * **customers** (five-way XOR: status|phase|industry|owner|branch|date — no
- * by_source, customers have no source column). Every report reads its own key
- * here; there is nothing left to flip per screen once a report's endpoint exists.
+ * by_source, customers have no source column). "Portie 5" (2026-08-14) added the
+ * same pair for **opportunities** (five-way XOR: stage|customer|owner|branch|date).
+ * Every report reads its own key here; there is nothing left to flip per screen
+ * once a report's endpoint exists.
  * Tests override via `vi.mock('./reportDrillGate', ...)`.
  */
-export type DrillableReport = 'flow' | 'matches' | 'recruiters' | 'vacancies' | 'intakes' | 'outreach' | 'sources' | 'candidates' | 'applications' | 'customers'
+export type DrillableReport = 'flow' | 'matches' | 'recruiters' | 'vacancies' | 'intakes' | 'outreach' | 'sources' | 'candidates' | 'applications' | 'customers' | 'opportunities'
 
 export const REPORT_DRILL_AVAILABLE: Record<DrillableReport, boolean> = {
   flow: true,
@@ -24,6 +26,7 @@ export const REPORT_DRILL_AVAILABLE: Record<DrillableReport, boolean> = {
   candidates: true,
   applications: true,
   customers: true,
+  opportunities: true,
   // Not shipped yet — no /reports/{r}/drill|advice endpoint on the backend.
   intakes: false,
   outreach: false,

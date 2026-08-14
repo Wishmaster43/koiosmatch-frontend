@@ -19,7 +19,8 @@
     "sources": "Sources",
     "candidates": "Flux entrant",
     "applications": "Candidatures",
-    "customers": "Clients"
+    "customers": "Clients",
+    "opportunities": "Opportunités"
   },
   "candidates": {
     "loading": "Chargement du flux entrant…",
@@ -192,6 +193,20 @@
       "matched": "Mis en correspondance",
       "rejected": "Refusé",
       "placed": "Placé"
+    }
+  },
+  "opportunities": {
+    "loading": "Chargement des opportunités…",
+    "error": "Impossible de charger les opportunités",
+    "empty": "Aucune opportunité sur cette période",
+    "total": "Total des opportunités",
+    "series": "Opportunités dans le temps",
+    "window": "Opportunités du {{from}} au {{to}}",
+    "summary": {
+      "open": "Ouvertes",
+      "won": "Gagnées",
+      "lost": "Perdues",
+      "winRate": "Taux de gain"
     }
   },
   "customers": {

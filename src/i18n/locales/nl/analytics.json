@@ -19,7 +19,8 @@
     "sources": "Bronnen",
     "candidates": "Instroom",
     "applications": "Sollicitaties",
-    "customers": "Klanten"
+    "customers": "Klanten",
+    "opportunities": "Kansen"
   },
   "candidates": {
     "loading": "Instroom laden…",
@@ -192,6 +193,20 @@
       "matched": "Gematcht",
       "rejected": "Afgewezen",
       "placed": "Geplaatst"
+    }
+  },
+  "opportunities": {
+    "loading": "Kansen laden…",
+    "error": "Kon de kansen niet laden",
+    "empty": "Geen kansen in deze periode",
+    "total": "Totaal kansen",
+    "series": "Kansen over tijd",
+    "window": "Kansen {{from}} t/m {{to}}",
+    "summary": {
+      "open": "Open",
+      "won": "Gewonnen",
+      "lost": "Verloren",
+      "winRate": "Winratio"
     }
   },
   "customers": {

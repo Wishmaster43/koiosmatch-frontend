@@ -19,7 +19,8 @@
     "sources": "Sources",
     "candidates": "Inflow",
     "applications": "Applications",
-    "customers": "Customers"
+    "customers": "Customers",
+    "opportunities": "Opportunities"
   },
   "candidates": {
     "loading": "Loading inflow…",
@@ -192,6 +193,20 @@
       "matched": "Matched",
       "rejected": "Rejected",
       "placed": "Placed"
+    }
+  },
+  "opportunities": {
+    "loading": "Loading opportunities…",
+    "error": "Could not load the opportunities",
+    "empty": "No opportunities in this period",
+    "total": "Total opportunities",
+    "series": "Opportunities over time",
+    "window": "Opportunities {{from}} through {{to}}",
+    "summary": {
+      "open": "Open",
+      "won": "Won",
+      "lost": "Lost",
+      "winRate": "Win rate"
     }
   },
   "customers": {

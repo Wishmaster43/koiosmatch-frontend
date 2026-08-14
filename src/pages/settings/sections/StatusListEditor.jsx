@@ -10,6 +10,7 @@ import { GENERIC_LOOKUP_ICON_NAMES, resolveGenericLookupIcon } from './lookupIco
 import SearchSelect from '@/components/ui/SearchSelect'
 import { AlertTriangle, Plus, X, Trash2, RefreshCw, Pencil } from 'lucide-react'
 import api, { unwrap, unwrapList } from '@/lib/api'
+import { extractApiError } from '@/lib/extractApiError'
 import { notifyError } from '@/lib/notify'
 import { useConfirm } from '@/hooks/useConfirm'
 import { DragList, ColorSwatch, ColorBadge, DefaultToggle } from '../components/SettingsControls'
@@ -152,7 +153,12 @@ export default function StatusListEditor({ title, subtitle, endpoint, addLabel, 
         setItems(p => [...p, unwrap(res)])
       }
       setShowModal(false); setDraft(emptyDraft()); setEditing(null)
-    } catch { notifyError(t('statusList.saveFailed')) } finally { setSaving(false) }
+    } catch (e) {
+      // Surface the server's validation reason when there is one (e.g. portie-5
+      // unique-slug 422 "al in gebruik" on opportunity stages) instead of the
+      // generic failure toast; extractApiError falls back to the i18n'd message.
+      notifyError(extractApiError(e, t('statusList.saveFailed')))
+    } finally { setSaving(false) }
   }
 
   const remove = (item) => {
