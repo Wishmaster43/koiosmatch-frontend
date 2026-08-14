@@ -84,6 +84,7 @@
     "phases": "Fases",
     "candidate_status": "Estado del candidato",
     "vacancy": "Vacante",
+    "application_sources": "Fuentes",
     "rejection": "Motivos de rechazo",
     "application_proposal": "Propuestas",
     "cv_template": "Plantilla de CV",
@@ -2195,6 +2196,14 @@
     "freeEntryHint": "Activado: se puede escribir una función propia (combobox). Desactivado: solo elegir de la lista (desplegable estricto).",
     "confirmFreeEntry": "¿Estás seguro? La entrada libre permite escribir funciones fuera de la lista. Puede reducir la calidad de los datos."
   },
+  "applicationSourcesSettings": {
+    "title": "Fuentes",
+    "subtitle": "Gestiona la lista de fuentes de captación (p. ej. Indeed, LinkedIn, Recomendación) utilizada en el campo de fuente de las solicitudes y la admisión de candidatos, y si los reclutadores pueden introducir valores libres.",
+    "add": "Añadir fuente",
+    "freeEntry": "Permitir entrada libre",
+    "freeEntryHint": "Activado: los reclutadores pueden escribir su propia fuente (combobox). Desactivado: solo elegir de la lista.",
+    "confirmFreeEntry": "¿Seguro? La entrada libre permite fuentes fuera de la lista, lo que puede fragmentar el informe de fuentes."
+  },
   "customerDisplay": {
     "title": "Vista de tabla",
     "subtitle": "Por columna: etiquetas con color o texto simple. Los gráficos KPI siempre mantienen sus colores.",
@@ -3111,12 +3120,12 @@
       "matches": "Matches",
       "intakes": "Intakes",
       "outreach": "Listas de llamadas",
-      "sources": "Fuentes",
       "contacts": "Contactos",
       "locations": "Ubicaciones",
       "departments": "Departamentos",
       "ai": "Koios AI",
-      "workflows": "Workflows"
+      "workflows": "Workflows",
+      "prospects": "Prospectos"
     }
   }
 }

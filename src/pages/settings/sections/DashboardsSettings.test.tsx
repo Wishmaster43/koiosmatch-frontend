@@ -68,6 +68,20 @@ describe('DashboardsSettings — loading state (§3)', () => {
   })
 })
 
+// DASHBOARD-KIEZER-1 chain audit: 'chart.recruiter' (recruitment_manager's own
+// per-recruiter breakdown chart) was missing from BLOCK_LABEL_KEY, so its row
+// rendered the raw id "chart.recruiter" instead of a translated label — the exact
+// class of bug KPI_LABEL_KEY.openVacancies hit before (see this file's header).
+describe('DashboardsSettings — every block row carries a real translated label', () => {
+  it('shows the translated "Candidates by recruiter" label for chart.recruiter, never the raw id', async () => {
+    render(<DashboardsSettings />)
+    await userEvent.click(screen.getByRole('tab', { name: st('dashboards.tabs.blocks') }))
+
+    expect(screen.getByText(dt('chart.byRecruiter'))).toBeInTheDocument()
+    expect(screen.queryByText('chart.recruiter', { exact: true })).not.toBeInTheDocument()
+  })
+})
+
 describe('DashboardsSettings — toggle save path (§13, request body)', () => {
   // 'occupancy' is unique to the 'planning' dashboard type (templates.ts KPI_ROWS),
   // so its row renders exactly one live toggle button — a deterministic target that

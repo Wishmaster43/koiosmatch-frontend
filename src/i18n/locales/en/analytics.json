@@ -10,20 +10,19 @@
     "truncated": "Showing {{shown}} of {{total}}"
   },
   "tabs": {
-    "flow": "Flow",
-    "recruiters": "Recruiters",
-    "vacancies": "Vacancies",
-    "matches": "Matches",
-    "intakes": "Intakes",
-    "outreach": "Outreach",
-    "sources": "Sources",
     "candidates": "Inflow",
     "applications": "Applications",
     "customers": "Customers",
+    "customerstructure": "Customer structure",
+    "flow": "Flow",
+    "people": "People",
+    "vacancies": "Vacancies",
     "opportunities": "Opportunities",
     "tasks": "Tasks",
-    "leads": "Leads",
-    "accountmanagers": "Account managers"
+    "matches": "Matches",
+    "intakes": "Intakes",
+    "outreach": "Outreach",
+    "usage": "Usage"
   },
   "candidates": {
     "loading": "Loading inflow…",
@@ -39,7 +38,12 @@
       "owner": "Owner",
       "branch": "Branch"
     },
-    "kpiOrderFellBack": "A KPI card configured in Settings no longer exists and was reset to the default."
+    "kpiOrderFellBack": "A KPI card configured in Settings no longer exists and was reset to the default.",
+    "viewSwitch": {
+      "ariaLabel": "Population",
+      "candidates": "Candidates",
+      "leads": "Leads"
+    }
   },
   "intakes": {
     "loading": "Loading intakes…",
@@ -334,7 +338,12 @@
       "owner": "Owner",
       "branch": "Branch"
     },
-    "kpiOrderFellBack": "A KPI card configured in Settings no longer exists and was reset to the default."
+    "kpiOrderFellBack": "A KPI card configured in Settings no longer exists and was reset to the default.",
+    "viewSwitch": {
+      "ariaLabel": "Population",
+      "customers": "Customers",
+      "prospects": "Prospects"
+    }
   },
   "contacts": {
     "total": "Total contacts",
@@ -464,19 +473,9 @@
     "loading": "Loading leads…",
     "error": "Could not load the leads",
     "empty": "No leads in this period",
+    "total": "Total leads",
+    "series": "Leads over time",
     "window": "Leads {{from}} through {{to}}",
-    "partialNotice": "This report shows the one number the current data supports: total leads (candidates in the Lead phase) in this window. A breakdown by source, owner, branch or conversion needs a lead-scoped backend endpoint that does not exist yet. Those cards show a dash until it does.",
-    "summary": {
-      "totalLeads": "Total leads",
-      "bySource": "Leads by source",
-      "byOwner": "Leads by owner",
-      "byBranch": "Leads by branch",
-      "converted": "Converted to candidate",
-      "conversionRate": "Conversion rate",
-      "avgTimeToConvert": "Avg. time to convert",
-      "staleLeads": "Stale leads",
-      "newThisPeriod": "New this period"
-    },
     "kpiOrderFellBack": "A KPI card configured in Settings no longer exists and was reset to the default."
   },
   "accountmanagers": {
@@ -499,5 +498,36 @@
       "customers": "Customers"
     },
     "kpiOrderFellBack": "A KPI card configured in Settings no longer exists and was reset to the default."
+  },
+  "prospects": {
+    "loading": "Loading prospects…",
+    "error": "Could not load the prospects",
+    "empty": "No prospects in this period",
+    "total": "Total prospects",
+    "series": "Prospects over time",
+    "window": "Prospects {{from}} through {{to}}",
+    "kpiOrderFellBack": "A KPI card configured in Settings no longer exists and was reset to the default."
+  },
+  "customerstructure": {
+    "viewSwitch": {
+      "ariaLabel": "Customer structure",
+      "contacts": "Contacts",
+      "locations": "Locations",
+      "departments": "Departments"
+    }
+  },
+  "people": {
+    "viewSwitch": {
+      "ariaLabel": "Team",
+      "recruiters": "Recruiters",
+      "accountmanagers": "Account managers"
+    }
+  },
+  "usage": {
+    "viewSwitch": {
+      "ariaLabel": "Usage type",
+      "ai": "Koios AI",
+      "workflows": "Workflows"
+    }
   }
 }

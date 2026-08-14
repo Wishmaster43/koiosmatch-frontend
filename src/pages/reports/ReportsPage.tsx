@@ -25,6 +25,16 @@
  * the same `period` state), the same "two doors, one room" pattern the matches
  * page toolbar had. The panel is now the ONLY place `period` is picked; every
  * report component had its now-unused `tabsSlot` prop removed to match.
+ *
+ * RAPPORTEN-CONSOLIDATIE-1 (2026-08-14, Danny's sidebar screenshot: "nog steeds
+ * een veel te lange lijst"): nineteen sub-pages became thirteen — five pairs/
+ * groups merged into one page each with a top-right switch (mirrors the
+ * Shiftmanager dashboard's "In uren / In diensten" toggle). `initialView` below
+ * seeds a merged page's switch position for a LEGACY route (e.g. the old
+ * `reports.leads` deep link still resolves here, now as `reportId="candidates"
+ * initialView="leads"` — appPages.tsx does that mapping via
+ * `LEGACY_REPORT_ROUTE_ALIASES`, reportIds.ts); the canonical route
+ * (`reports.candidates`) omits it and gets that page's own default position.
  */
 import { useEffect, useMemo, useState } from 'react'
 import type { ComponentType } from 'react'
@@ -41,60 +51,54 @@ import { isFilterableReport, CUSTOMER_FILTERABLE_REPORT_IDS } from './reportFilt
 import type { ReportFilterState } from './reportFilterParams'
 import type { ReportFilterGroup } from '@/types/reports'
 import CandidatesReport from './CandidatesReport'
-import LeadsReport from './LeadsReport'
 import ApplicationsReport from './ApplicationsReport'
 import CustomersReport from './CustomersReport'
+import CustomerStructureReport from './CustomerStructureReport'
 import FlowReport from './FlowReport'
-import RecruitersReport from './RecruitersReport'
-import AccountManagersReport from './AccountManagersReport'
+import PeopleReport from './PeopleReport'
 import VacanciesReport from './VacanciesReport'
 import OpportunitiesReport from './OpportunitiesReport'
 import TasksReport from './TasksReport'
 import MatchesReport from './MatchesReport'
 import IntakesReport from './IntakesReport'
 import OutreachReport from './OutreachReport'
-import SourcesReport from './SourcesReport'
-import ContactsReport from './ContactsReport'
-import LocationsReport from './LocationsReport'
-import DepartmentsReport from './DepartmentsReport'
-import AiReport from './AiReport'
-import WorkflowsReport from './WorkflowsReport'
+import UsageReport from './UsageReport'
 import ReportsDashboard from './ReportsDashboard'
 import { REPORT_IDS } from './reportIds'
 import type { ReportId } from './reportIds'
 import type { ReportPeriod } from '@/types/analytics'
 
-// Every report takes the same contract: the chosen period + the optional filters.
-// `filters` is optional and only READ by the two reports on FILTERABLE_REPORT_IDS
-// (CandidatesReport/CustomersReport) — every other report ignores the prop.
-type ReportComponent = ComponentType<{ period: ReportPeriod; filters?: ReportFilterState }>
+// Every report takes the same contract: the chosen period + the optional filters +
+// the optional initial switch position. `filters` is optional and only READ by the
+// two reports on FILTERABLE_REPORT_IDS (CandidatesReport/CustomersReport) — every
+// other report ignores the prop. `initialView` (RAPPORTEN-CONSOLIDATIE-1) seeds a
+// merged page's switch position — read by the five merged pages
+// (candidates/customers/customerstructure/people/usage), ignored by the rest.
+type ReportComponent = ComponentType<{ period: ReportPeriod; filters?: ReportFilterState; initialView?: string }>
 
 // Registry: report id → component. Ids and their order live in reportIds.ts
 // (shared with the sidebar submenu); an id here without a REPORT_IDS entry — or
 // vice versa — is a wiring bug the exhaustive Record type surfaces at compile time.
+// Five entries now render a merged page with its own top-right switch
+// (RAPPORTEN-CONSOLIDATIE-1) — see each component's own doc comment for which
+// retired sidebar entries folded in and why.
 const REPORTS: Record<ReportId, ReportComponent> = {
   candidates:    CandidatesReport,
-  leads:         LeadsReport,
   applications:  ApplicationsReport,
   customers:     CustomersReport,
+  customerstructure: CustomerStructureReport,
   flow:          FlowReport,
-  recruiters:    RecruitersReport,
-  accountmanagers: AccountManagersReport,
+  people:        PeopleReport,
   vacancies:     VacanciesReport,
   opportunities: OpportunitiesReport,
   tasks:         TasksReport,
   matches:       MatchesReport,
   intakes:       IntakesReport,
   outreach:      OutreachReport,
-  sources:       SourcesReport,
-  contacts: ContactsReport,
-  locations: LocationsReport,
-  departments: DepartmentsReport,
-  ai: AiReport,
-  workflows: WorkflowsReport,
+  usage:         UsageReport,
 }
 
-export default function ReportsPage({ reportId }: { reportId?: string }) {
+export default function ReportsPage({ reportId, initialView }: { reportId?: string; initialView?: string }) {
   const { t } = useTranslation('analytics')
   const [period, setPeriod] = useState<ReportPeriod>('month')
   const { registerFilters, unregisterFilters } = useRightPanel()
@@ -243,7 +247,7 @@ export default function ReportsPage({ reportId }: { reportId?: string }) {
           panel above (registerFilters), never from an inline toolbar control. */}
       {isRoot
         ? <ReportsDashboard period={period} />
-        : <Report period={period} filters={filterable ? filters : undefined} />}
+        : <Report period={period} filters={filterable ? filters : undefined} initialView={initialView} />}
     </div>
   )
 }

@@ -7,15 +7,27 @@
  * 'prospect' status string — PROSPECT-DEDUP-1 retired that) — never assume a status
  * value means "lead". There is deliberately no by_source axis: customers carry no
  * `source` column, so it is never invented here.
+ *
+ * RAPPORTEN-CONSOLIDATIE-1 (2026-08-14): this page carries a Klanten/Prospects switch
+ * (ReportSwitchBar, mirrors the Shiftmanager dashboard's "In uren / In diensten"
+ * toggle) — new capability, not a merged-away route (there was never a standalone
+ * Prospects page). Prospects adds a real SERVER-side `phase` filter on top of the
+ * panel filters (never a client-side slice), resolved off the `isCustomer` FLAG
+ * (`useCustomerPhases`) — never a hardcoded 'prospect' slug, per this file's own
+ * PROSPECT-DEDUP-1 rule above. The default Klanten position is BYTE-IDENTICAL to the
+ * pre-existing standalone customers report (no filter added).
  */
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import ReportKpiBand from './ReportKpiBand'
+import ReportSwitchBar from './ReportSwitchBar'
 import { reportCardStyle as card, reportSectionHeadStyle as head } from './ReportSectionCard'
 import ReportStateBlock from './ReportStateBlock'
 import type { KpiSpec } from '@/components/insights/InsightsRow'
 import type { DrillSpec } from './ReportDrillDrawer'
 import { useCustomersReport } from './useCustomersReport'
+import { useReportSwitch } from './useReportSwitch'
+import { useCustomerPhases } from '@/lib/useCustomerPhases'
 import { gateDrillClick } from './reportDrillGate'
 import { buildAxisKpis } from './buildAxisKpis'
 import type { AxisKpiConfig } from './buildAxisKpis'
@@ -28,6 +40,7 @@ import { useDateFormat } from '@/lib/datetime'
 import type { ReportPeriod, CandidateSegment, CandidateOwnerSegment, CandidateTimeseriesPoint } from '@/types/analytics'
 import { useAllSettings, getJsonSetting } from '@/lib/settings/useAllSettings'
 import { getReportKpiCatalog, getReportKpiDefaultOrder, reportKpiSettingsKey } from './kpiCatalog'
+import type { ReportKpiScopeId } from './kpiCatalog'
 import { resolveReportKpiOrder } from './resolveReportKpiOrder'
 
 // The four plain axes; `param` is the XOR query key the drill/advice endpoints expect.
@@ -38,10 +51,30 @@ type Axis = 'status' | 'phase' | 'industry' | 'branch'
 // (ReportChartWithDrillList) — one key per section, never a single global `drill`.
 type DrillKey = Axis | 'owner' | 'series'
 
-export default function CustomersReport({ period, filters = EMPTY_REPORT_FILTERS }: { period: ReportPeriod; filters?: ReportFilterState }) {
+// The two switch positions — also the KPI-catalog/settings-scope id and the
+// i18n namespace-prefix for the population-facing strings. Kept as plain
+// `string` on the wire (see CandidatesReport's identical note) so this
+// component satisfies ReportsPage's one shared `ReportComponent` contract.
+const VIEWS = ['customers', 'prospects'] as const
+
+export default function CustomersReport({ period, filters = EMPTY_REPORT_FILTERS, initialView = 'customers' }: {
+  period: ReportPeriod
+  filters?: ReportFilterState
+  initialView?: string
+}) {
   const { t } = useTranslation('analytics')
   const { formatDate } = useDateFormat()
-  const { data, loading, error, refetch } = useCustomersReport(period, filters)
+  const { phases } = useCustomerPhases()
+  const [view, setView] = useReportSwitch(VIEWS, initialView)
+  const isProspects = view === 'prospects'
+
+  // Flag-driven, never a hardcoded 'prospect' slug (§3B / PROSPECT-DEDUP-1) —
+  // the phase NOT flagged is_customer is the entry/prospect phase.
+  const prospectPhaseValue = phases.find(p => p.isDefault && !p.isCustomer)?.value
+    ?? phases.find(p => !p.isCustomer)?.value ?? null
+  const phaseFilter = isProspects ? prospectPhaseValue : null
+
+  const { data, loading, error, refetch } = useCustomersReport(period, filters, phaseFilter)
 
   const total   = data?.total ?? 0
   const hasData = !loading && !error && total > 0
@@ -51,9 +84,9 @@ export default function CustomersReport({ period, filters = EMPTY_REPORT_FILTERS
   // one key per section, never a single global `drill`. Exactly one XOR param per
   // open drill — ALWAYS layered on top of the report's own active filters
   // (`baseParams`), never just `period`, so the list counts the exact same set the
-  // bar was drawn from.
+  // bar was drawn from. `baseParams` also carries the switch's own `phase` filter.
   const [drills, setDrills] = useState<Partial<Record<DrillKey, DrillSpec>>>({})
-  const baseParams = buildReportQueryParams(period, 'customers', filters)
+  const baseParams = { ...buildReportQueryParams(period, 'customers', filters), ...(phaseFilter ? { phase: phaseFilter } : {}) }
   const openSegment = (key: DrillKey, seg: { label: string; count: number }, xorParam: Record<string, unknown>) =>
     setDrills(d => ({ ...d, [key]: {
       title: seg.label, value: seg.count, subtitle: `${formatDate(data?.from)} – ${formatDate(data?.to)}`,
@@ -120,7 +153,8 @@ export default function CustomersReport({ period, filters = EMPTY_REPORT_FILTERS
   // Nine-card KPI strip (same footprint as the dashboard): "total" plus eight
   // axis-derived cards, all real counts from the five axes already on the
   // response (§0 no fake affordances — nothing here is invented or hardcoded;
-  // deliberately no by_source axis here, see the header comment).
+  // deliberately no by_source axis here, see the header comment). Klanten and
+  // Prospects keep independently configurable catalogs/orders (`kpiScope`).
   const allAxisConfigs: Record<Axis | 'owner', AxisKpiConfig> = {
     status:   { axis: 'status',   axisLabel: t('customers.axes.status'),   segs: (data?.by_status ?? []).map(s => ({ key: s.value, label: s.label, count: s.count })) },
     phase:    { axis: 'phase',    axisLabel: t('customers.axes.phase'),    segs: (data?.by_phase ?? []).map(s => ({ key: s.value, label: s.label, count: s.count })) },
@@ -128,12 +162,13 @@ export default function CustomersReport({ period, filters = EMPTY_REPORT_FILTERS
     owner:    { axis: 'owner',    axisLabel: t('customers.axes.owner'),    segs: (data?.by_owner ?? []).map(s => ({ key: s.owner_id, label: s.name, count: s.count })) },
     branch:   { axis: 'branch',   axisLabel: t('customers.axes.branch'),   segs: (data?.by_branch ?? []).map(s => ({ key: s.value, label: s.label, count: s.count })) },
   }
-  // WHICH axes participate, and in what priority order, is the tenant's
-  // Settings → Reports choice ("total" stays pinned — RAPPORT-KPI-INSTELBAAR).
+  // `view` is constrained to VIEWS at runtime (useReportSwitch); both members
+  // are valid KPI-catalog scope ids (kpiCatalog.ts), so the cast is safe.
+  const kpiScope = view as ReportKpiScopeId
   const settingsValues = useAllSettings()
-  const catalogKeys = getReportKpiCatalog('customers').map(c => c.key)
-  const defaultAxisOrder = getReportKpiDefaultOrder('customers')
-  const storedAxisOrder = getJsonSetting<string[] | undefined>(settingsValues, reportKpiSettingsKey('customers'), undefined)
+  const catalogKeys = getReportKpiCatalog(kpiScope).map(c => c.key)
+  const defaultAxisOrder = getReportKpiDefaultOrder(kpiScope)
+  const storedAxisOrder = getJsonSetting<string[] | undefined>(settingsValues, reportKpiSettingsKey(kpiScope), undefined)
   const { order: axisOrder, fellBack } = resolveReportKpiOrder(storedAxisOrder, catalogKeys, defaultAxisOrder)
   const axisConfigs: AxisKpiConfig[] = axisOrder.map(axis => allAxisConfigs[axis as Axis | 'owner']).filter(Boolean)
   // A KPI card for an axis segment fills THAT axis's own list, exactly like
@@ -149,30 +184,40 @@ export default function CustomersReport({ period, filters = EMPTY_REPORT_FILTERS
 
   // "Total" seeds every axis's list back to its own top segment (mirrors the
   // mount default) — there is no single "total" drill anymore, each section
-  // keeps its own state.
+  // keeps its own state. Card 1's label/window/loading/empty/error text is
+  // scoped to the active position — Klanten keeps today's exact wording (a
+  // byte-identical default, zero regression), Prospects gets its own.
   const kpis: KpiSpec[] = [
-    { key: 'total', label: t('customers.total'), value: total },
+    { key: 'total', label: t(isProspects ? 'prospects.total' : 'customers.total'), value: total },
     ...axisKpis,
   ]
 
   return (
     <div>
+      <ReportSwitchBar ariaLabel={t('customers.viewSwitch.ariaLabel')} value={view} onChange={setView}
+        options={[
+          { value: 'customers', label: t('customers.viewSwitch.customers') },
+          { value: 'prospects', label: t('customers.viewSwitch.prospects') },
+        ]} />
+
       {/* KPI strip — total inflow, above the tabs (candidate-page order) */}
       {hasData && (
-        <ReportKpiBand kpis={kpis} notice={fellBack ? t('customers.kpiOrderFellBack') : undefined} />
+        <ReportKpiBand kpis={kpis} notice={fellBack ? t(isProspects ? 'prospects.kpiOrderFellBack' : 'customers.kpiOrderFellBack') : undefined} />
       )}
 
       {/* The report's data window, rendered prominently — DD-MM-YYYY (never ISO, §3B). */}
       {!loading && !error && data && (
         <div style={{ fontSize: 13, fontWeight: 500, color: 'var(--text)', marginBottom: 12 }}>
-          {t('customers.window', { from: formatDate(data.from), to: formatDate(data.to) })}
+          {t(isProspects ? 'prospects.window' : 'customers.window', { from: formatDate(data.from), to: formatDate(data.to) })}
         </div>
       )}
 
       <div style={{ ...card, overflow: 'hidden' }}>
         <ReportStateBlock
           loading={loading} error={error} empty={!loading && !error && total === 0}
-          loadingLabel={t('customers.loading')} errorLabel={t('customers.error')} emptyLabel={t('customers.empty')}
+          loadingLabel={t(isProspects ? 'prospects.loading' : 'customers.loading')}
+          errorLabel={t(isProspects ? 'prospects.error' : 'customers.error')}
+          emptyLabel={t(isProspects ? 'prospects.empty' : 'customers.empty')}
           onRetry={() => refetch()}
         />
         {hasData && data && (
@@ -180,8 +225,8 @@ export default function CustomersReport({ period, filters = EMPTY_REPORT_FILTERS
             {/* Inflow over time — week/day timeseries, bucket set server-side. Its own
                 always-visible list sits beside it, never a shared overlay. */}
             <section>
-              <h3 style={{ ...head, marginBottom: 10 }}>{t('customers.series')}</h3>
-              <ReportChartWithDrillList drill={drills.series ?? null} placeholderLabel={t('customers.series')}
+              <h3 style={{ ...head, marginBottom: 10 }}>{t(isProspects ? 'prospects.series' : 'customers.series')}</h3>
+              <ReportChartWithDrillList drill={drills.series ?? null} placeholderLabel={t(isProspects ? 'prospects.series' : 'customers.series')}
                 chart={<ReportTimeseriesChart series={data.timeseries.series} onPick={onSeriesPick} />} />
             </section>
 

@@ -84,6 +84,7 @@
     "phases": "Phasen",
     "candidate_status": "Kandidatenstatus",
     "vacancy": "Stelle",
+    "application_sources": "Quellen",
     "rejection": "Ablehnungsgründe",
     "application_proposal": "Vorschläge",
     "cv_template": "Lebenslauf-Vorlage",
@@ -2195,6 +2196,14 @@
     "freeEntryHint": "An: eine eigene Funktion kann eingetippt werden (Combobox). Aus: nur aus der Liste wählen (strikte Auswahl).",
     "confirmFreeEntry": "Sind Sie sicher? Freie Eingabe erlaubt Kontaktfunktionen außerhalb der Liste. Das kann die Datenqualität senken."
   },
+  "applicationSourcesSettings": {
+    "title": "Quellen",
+    "subtitle": "Verwalten Sie die Liste der Akquisequellen (z. B. Indeed, LinkedIn, Empfehlung), die im Quellenfeld von Bewerbungen und der Kandidaten-Intake verwendet wird, und ob Recruiter freie Werte eingeben dürfen.",
+    "add": "Quelle hinzufügen",
+    "freeEntry": "Freie Eingabe erlauben",
+    "freeEntryHint": "An: Recruiter können eine eigene Quelle eingeben (Combobox). Aus: nur aus der Liste wählen (strikte Auswahl).",
+    "confirmFreeEntry": "Sind Sie sicher? Freie Eingabe erlaubt Quellen außerhalb der Liste. Das kann den Quellenbericht fragmentieren."
+  },
   "customerDisplay": {
     "title": "Tabellenanzeige",
     "subtitle": "Pro Spalte: farbige Labels oder einfacher Text. Die KPI-Diagramme behalten immer ihre Farben.",
@@ -3111,12 +3120,12 @@
       "matches": "Matches",
       "intakes": "Intakes",
       "outreach": "Anruflisten",
-      "sources": "Quellen",
       "contacts": "Kontakte",
       "locations": "Standorte",
       "departments": "Abteilungen",
       "ai": "Koios AI",
-      "workflows": "Workflows"
+      "workflows": "Workflows",
+      "prospects": "Interessenten"
     }
   }
 }

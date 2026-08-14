@@ -18,7 +18,7 @@
 import {
   AppWindow, BarChart2, Bell, BookOpen, Briefcase, Building2, CalendarCheck, CalendarDays, Car,
   ClipboardList, Clock, CreditCard, Download, EyeOff, Factory, FileText, Flag, GraduationCap, Hash, History, Key, LayoutGrid,
-  ListChecks, Mail, MapPin, MessageCircle, MessageSquare, Languages, Megaphone, Package, Palette, Percent, Phone, Scale, Shield, SlidersHorizontal, Sparkles, Star,
+  ListChecks, Mail, MapPin, MessageCircle, MessageSquare, Languages, Megaphone, Package, Palette, Percent, Phone, Radio, Scale, Shield, SlidersHorizontal, Sparkles, Star,
   Boxes, Globe, Store, Tags, Target, Upload, UserCheck, Users, Webhook, XCircle,
   ShieldOff, AlertTriangle, ListTree, CheckCircle,
 } from 'lucide-react'
@@ -50,6 +50,7 @@ import IndustrySettings from './sections/IndustrySettings'
 import ProvincesSettings from './sections/ProvincesSettings'
 import FunctionsSettings from './sections/FunctionsSettings'
 import ContactFunctionsSettings from './sections/ContactFunctionsSettings'
+import ApplicationSourcesSettings from './sections/ApplicationSourcesSettings'
 import { VacancyStatusSettings, VacancyPhaseSettings, VacancySenioritySettings, VacancyEducationSettings, VacancyChannelSettings, VacancyApplicationDefaultsSettings } from './sections/VacancySettings'
 import VacancyDefaultStatusSettings from './sections/VacancyDefaultStatusSettings'
 import VacancyMatchingSettings from './sections/VacancyMatchingSettings'
@@ -237,6 +238,12 @@ export const NAV_GROUPS = [
     key: 'applications', icon: ClipboardList,
     items: [
       { id: 'funnel_stages', icon: Target, component: FunnelStagesSettings },
+      // Acquisition-source lookup (S-SOURCE-1 GRADUATION, 2026-08-14) — backed by
+      // /candidate-sources (the backend's shared CandidateSource lookup, also fed
+      // into the candidate intake source field once that surface gets its own
+      // picker); lives here because the application create/edit surfaces
+      // (AddApplicationModal, ApplicationDetailsCard) are its only FE consumers today.
+      { id: 'application_sources', icon: Radio, component: ApplicationSourcesSettings },
       { id: 'rejection', icon: XCircle, component: RejectionSettings },
       { id: 'application_proposal', icon: Mail, component: ProposalSettings },
       { id: 'application_display', icon: Palette, schema: applicationDisplay },

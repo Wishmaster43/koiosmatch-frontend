@@ -91,9 +91,9 @@ export default function ApplicationDetailsCard({ application: a, onLinkVacancy, 
   const [vacancyId, setVacancyId] = useState('')
   const [source, setSource] = useState('')
   const vacancyOptions = useVacancyLinkOptions(editing)
-  // S-SOURCE-1: source is now a searchable/creatable picker (see useApplicationSources'
-  // doc comment for why it isn't a full tenant-CRUD lookup yet) instead of free text —
-  // reuses the real distinct values already on applications, never a hardcoded list.
+  // S-SOURCE-1, GRADUATED 2026-08-14: source is a searchable/creatable picker backed
+  // by the real /candidate-sources tenant lookup (see useApplicationSources' doc
+  // comment for the full backend contract) instead of free text — never a hardcoded list.
   const { sources, allowFreeEntry } = useApplicationSources()
   // VAC-CASCADE-MIRROR-1: the linked vacancy's full detail (customer location/
   // department/contact) — null while loading or when no vacancy is linked; the

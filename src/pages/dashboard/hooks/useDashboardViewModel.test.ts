@@ -108,3 +108,33 @@ describe('useDashboardViewModel · KD11 (DASHP36) widget-feed rows', () => {
     expect(result.current.expiringMatchesRows[0].secondary).toBeUndefined()
   })
 })
+
+// DASHBOARD-KIEZER-1 chain audit: the manager dashboard must actually render its
+// declared blocks/KPIs (the reachability check does not stop at "the role can be
+// set" — the dashboard itself has to come up with real content).
+describe('useDashboardViewModel · recruitment_manager renders its own blocks', () => {
+  it('shows every block its template declares, including the extra per-recruiter chart', () => {
+    const { result } = renderHook(() => useDashboardViewModel(baseArgs({ activeType: 'recruitment_manager' as const })))
+    // Every block the recruitment_manager template lists (DASHBOARD_TEMPLATES).
+    for (const id of ['block.touchpoints', 'block.attention', 'chart.status', 'chart.recruiter', 'chart.funnel', 'chart.funnelConversion', 'chart.weekly', 'list.candidates', 'list.applications', 'list.conversations', 'list.runs']) {
+      expect(result.current.vis(id), `${id} should be visible for recruitment_manager`).toBe(true)
+    }
+    // A block only 'recruitment' has too (never gated off for the manager view).
+    expect(result.current.vis('block.touchpoints')).toBe(true)
+  })
+
+  it('renders the full KPI row, tenant-wide data included (chart.recruiter/by_owner) — not just the plain recruitment set', () => {
+    const { result } = renderHook(() => useDashboardViewModel(baseArgs({
+      activeType: 'recruitment_manager' as const,
+      stats: { by_owner: [{ id: 'u1', name: 'Anna', count: 4 }, { id: 'u2', name: 'Bram', count: 6 }] },
+    })))
+    // The per-recruiter breakdown chart's data — genuinely team-wide (every
+    // recruiter's count), not filtered to one owner (verified against the real
+    // backend, see templates.ts BLOCK_LABEL_KEY/KPI_ROWS comments).
+    expect(result.current.recruiterData).toEqual([
+      { name: 'Anna', value: 4, filterValue: 'u1' },
+      { name: 'Bram', value: 6, filterValue: 'u2' },
+    ])
+    expect(result.current.kpis.length).toBeGreaterThan(0)
+  })
+})

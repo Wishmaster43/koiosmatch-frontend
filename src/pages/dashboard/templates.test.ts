@@ -6,7 +6,7 @@
  */
 import { describe, it, expect } from 'vitest'
 import { buildDashboardKpis } from './dashboardKpis'
-import { KPI_ROWS, DASHBOARD_TEMPLATES, switcherTypes } from './templates'
+import { KPI_ROWS, DASHBOARD_TEMPLATES, BLOCK_LABEL_KEY, switcherTypes, resolveDashboardType } from './templates'
 
 describe('dashboard KPI row guard', () => {
   // Minimal stub args — only the shape matters, not the values, for id resolution.
@@ -37,6 +37,36 @@ describe('dashboard KPI row guard', () => {
   it('recruitment_manager is registered in KPI_ROWS and DASHBOARD_TEMPLATES', () => {
     expect(KPI_ROWS.recruitment_manager.length).toBeGreaterThan(0)
     expect(DASHBOARD_TEMPLATES.recruitment_manager).toContain('chart.recruiter')
+  })
+
+  // Regression guard: a block id present in some template but absent from
+  // BLOCK_LABEL_KEY renders its raw id as the label in Settings → Dashboards
+  // (the exact bug openVacancies hit for KPI_LABEL_KEY before, and 'chart.recruiter'
+  // — added with recruitment_manager, DASHBOARD-KIEZER-1 — hit again for blocks).
+  it('every block id referenced by any template has a BLOCK_LABEL_KEY entry', () => {
+    const allBlockIds = new Set(Object.values(DASHBOARD_TEMPLATES).flat().filter(id => id !== '*'))
+    const missing = [...allBlockIds].filter(id => !BLOCK_LABEL_KEY[id])
+    expect(missing, `template block ids with no translated label: ${missing.join(', ')}`).toEqual([])
+  })
+})
+
+describe('resolveDashboardType (richest-wins precedence)', () => {
+  // AuthContext.dashboardType() delegates here (chain audit, DASHBOARD-KIEZER-1
+  // follow-up) — /auth/me never sorts roles by precedence, so this must not
+  // depend on array order.
+  it('picks recruitment_manager over recruitment regardless of role order', () => {
+    expect(resolveDashboardType(['recruitment', 'recruitment_manager'])).toBe('recruitment_manager')
+    expect(resolveDashboardType(['recruitment_manager', 'recruitment'])).toBe('recruitment_manager')
+  })
+
+  it('management/admin still outrank every other dashboard type', () => {
+    expect(resolveDashboardType(['recruitment_manager', 'management'])).toBe('management')
+    expect(resolveDashboardType(['management', 'admin'])).toBe('admin')
+  })
+
+  it('falls back to readonly when no known type is present', () => {
+    expect(resolveDashboardType([])).toBe('readonly')
+    expect(resolveDashboardType(['some_unknown_type'])).toBe('readonly')
   })
 })
 

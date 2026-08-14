@@ -131,21 +131,22 @@ function PickField({ label, style, value, ...rest }: { label: ReactNode; style?:
  * and must never lose the earlier pick's label or owner-chain data.
  *
  * `source` (CMBE 5961c673, superseding the earlier W30 note below; S-SOURCE-1 08-14
- * supersedes the plain-input note further below): StoreApplicationRequest accepts an
- * optional `source` (sometimes|nullable|string|max:64) — the controller defaults to
- * 'manual' server-side only when the field is omitted, mirroring `application_stage_id`'s
- * own omit-to-default contract. It is now a searchable/creatable PICKER
- * (useApplicationSources, `@/lib/useApplicationSources`) instead of a bare `<input>`:
- * free text let "Indeed"/"indeed"/"Indeed.nl" fragment into three different sources on
- * the Sources report, and §3A already answers this trade-off (tenant lookup, mirror the
- * function field). There is still no tenant-CRUD `/application-sources` endpoint
- * (documented backend ask in the hook's doc comment) — the picker's options are the
- * REAL distinct values already on `/applications/stats.by_source`, the same aggregation
- * `ApplicationsPage → applicationInsights.buildSourceDataFromStats` already used for the
- * source FILTER, and free entry stays allowed so a genuinely new source is never blocked.
- * Mirrors ApplicationDetailsCard's own edit control byte-for-byte. Omitted (not sent)
- * when empty, exactly like `application_stage_id` above — the server's own 'manual'
- * fallback decides then.
+ * supersedes the plain-input note further below, GRADUATED 2026-08-14): StoreApplicationRequest
+ * accepts an optional `source` (sometimes|nullable|string|max:64) — the controller
+ * defaults to 'manual' server-side only when the field is omitted, mirroring
+ * `application_stage_id`'s own omit-to-default contract. It is a searchable/creatable
+ * PICKER (useApplicationSources, `@/lib/useApplicationSources`) instead of a bare
+ * `<input>`: free text let "Indeed"/"indeed"/"Indeed.nl" fragment into three different
+ * sources on the Sources report, and §3A already answers this trade-off (tenant lookup,
+ * mirror the function field). The picker's options now come from the REAL tenant-CRUD
+ * `/candidate-sources` lookup (CandidateSourceController, on the shared
+ * FreeEntryLookupController base — CRUD, reorder, in-use 409, strict-tightening
+ * mismatch guard, exactly like /functions), backfilled with every distinct source
+ * value that existed before it shipped so nothing already recorded went missing.
+ * Free entry defaults to OFF (strict) server-side, same as Functions — a tenant turns
+ * it on in Settings → Applications → Sources. Mirrors ApplicationDetailsCard's own
+ * edit control byte-for-byte. Omitted (not sent) when empty, exactly like
+ * `application_stage_id` above — the server's own 'manual' fallback decides then.
  */
 export default function AddApplicationModal({ onClose, onCreated, lockedVacancy }: {
   onClose: () => void
@@ -263,9 +264,10 @@ export default function AddApplicationModal({ onClose, onCreated, lockedVacancy 
     setPhaseId(defaultStageId)
   }, [defaultStageId, stageOptions, phaseId])
 
-  // Acquisition source (CMBE 5961c673) — S-SOURCE-1: now a searchable/creatable
-  // picker, mirroring ApplicationDetailsCard's own edit control (see
-  // useApplicationSources' doc comment for why it isn't a full tenant-CRUD lookup yet).
+  // Acquisition source (CMBE 5961c673) — S-SOURCE-1, graduated 2026-08-14: a
+  // searchable/creatable picker backed by the real /candidate-sources tenant
+  // lookup, mirroring ApplicationDetailsCard's own edit control (see
+  // useApplicationSources' doc comment for the full backend contract).
   const [source, setSource] = useState('')
   const sourceFieldId = useId()
   const { sources: sourceOptions, allowFreeEntry: sourceAllowFreeEntry } = useApplicationSources()

@@ -3,11 +3,11 @@
  * settings screen (RAPPORT-KPI-INSTELBAAR). Two families exist, mirrored from how
  * each report already builds its strip (never a second hand-maintained list):
  *
- * - `family: 'axis'` (candidates, applications, customers) — cards 2-9 are derived
- *   live per-tenant by `buildAxisKpis` from the report's own axis segments (the
- *   SPECIFIC top segment is data-dependent, so it can't be a stable catalogue
- *   entry). What IS stable and pickable is the axis itself — its id and order.
- *   Card 1 ("total") stays pinned; it is not part of the catalogue.
+ * - `family: 'axis'` (candidates, leads, applications, customers, prospects) — cards
+ *   2-9 are derived live per-tenant by `buildAxisKpis` from the report's own axis
+ *   segments (the SPECIFIC top segment is data-dependent, so it can't be a stable
+ *   catalogue entry). What IS stable and pickable is the axis itself — its id and
+ *   order. Card 1 ("total") stays pinned; it is not part of the catalogue.
  * - `family: 'fixed'` — every other report's nine cards are a literal, hand-written
  *   array today. The catalogue entry IS that literal card (key + i18n label ref),
  *   copied here without touching the report's own compute logic. All catalogue
@@ -15,6 +15,26 @@
  *   cards to swap in yet (only reordering is meaningfully different from today);
  *   `hasSpareCards` says so explicitly so the settings screen can be honest about
  *   it instead of showing a picker that can only ever pick what's already there.
+ *
+ * SCOPE IDS vs. ROUTE IDS (RAPPORTEN-CONSOLIDATIE-1, 2026-08-14): a KPI catalogue
+ * entry is keyed by `ReportKpiScopeId`, a SUPERSET of the route-level `ReportId`.
+ * Merging nineteen sidebar entries into thirteen pages (§ reportIds.ts) retired
+ * several ids as their own ROUTE, but every one of them keeps its OWN independent
+ * catalogue + settings key here — a switch position is a full population/entity,
+ * not a lesser view, so a tenant's per-position KPI order must never collide with
+ * its sibling position's. Concretely: 'leads' and 'prospects' are NEW/kept axis
+ * scopes (Instroom's Leads switch, Klanten's new Prospects switch) even though
+ * neither is a route id any more; 'recruiters'/'accountmanagers' (now switch
+ * positions on the 'people' route) and 'contacts'/'locations'/'departments' (now
+ * switch positions on the 'customerstructure' route) and 'ai'/'workflows' (now
+ * switch positions on the 'usage' route) keep their catalogues byte-identical to
+ * before the merge — nothing lost, nothing duplicated. The ONE id that does NOT
+ * survive as a scope is 'sources': it never had a switch position of its own (its
+ * whole page folded into Instroom's pre-existing Source axis card, see
+ * reportIds.ts), so `report_kpis_sources` is now orphaned/inert — no screen reads
+ * or writes it any more (a tenant who had customised it loses nothing visible,
+ * since the Sources page itself is gone; the stray settings key is harmless dead
+ * data, left in place rather than migrated since there is nowhere left to move it).
  *
  * i18n: every `labelKey` below already exists in the `analytics` namespace (lifted
  * verbatim from the report that owns it) — no new translation work for the
@@ -29,14 +49,40 @@ export interface KpiCatalogEntry {
 
 export type ReportKpiFamily = 'axis' | 'fixed'
 
+// The full set of independently-configurable KPI scopes — every route id PLUS the
+// switch positions that used to be their own route (see the file-top comment).
+// 'leads'/'prospects' are population filters on the candidates/customers table;
+// the rest are switch positions on the customerstructure/people/usage routes.
+export type ReportKpiScopeId = ReportId
+  | 'leads' | 'prospects'
+  | 'recruiters' | 'accountmanagers'
+  | 'contacts' | 'locations' | 'departments'
+  | 'ai' | 'workflows'
+
+// Every configurable scope, in the order the settings screen lists them —
+// mirrors the pre-consolidation REPORT_IDS order with 'leads'/'prospects' next
+// to their host axis and the three merged pages' positions grouped together.
+// 'sources' is deliberately absent (see the file-top comment).
+export const REPORT_KPI_SCOPE_IDS: ReportKpiScopeId[] = [
+  'candidates', 'leads',
+  'applications',
+  'customers', 'prospects',
+  'contacts', 'locations', 'departments',
+  'flow',
+  'recruiters', 'accountmanagers',
+  'vacancies', 'opportunities', 'tasks', 'matches', 'intakes', 'outreach',
+  'ai', 'workflows',
+]
+
 // Reports with no configurable KPI strip at all (e.g. no ReportKpiBand, or a
 // strip that isn't nine independent cards) are simply absent from these maps;
 // the settings screen skips them.
-export const REPORT_KPI_FAMILY: Partial<Record<ReportId, ReportKpiFamily>> = {
+export const REPORT_KPI_FAMILY: Partial<Record<ReportKpiScopeId, ReportKpiFamily>> = {
   candidates: 'axis',
+  leads: 'axis',
   applications: 'axis',
   customers: 'axis',
-  leads: 'fixed',
+  prospects: 'axis',
   flow: 'fixed',
   recruiters: 'fixed',
   accountmanagers: 'fixed',
@@ -46,7 +92,6 @@ export const REPORT_KPI_FAMILY: Partial<Record<ReportId, ReportKpiFamily>> = {
   matches: 'fixed',
   intakes: 'fixed',
   outreach: 'fixed',
-  sources: 'fixed',
   contacts: 'fixed',
   locations: 'fixed',
   departments: 'fixed',
@@ -57,8 +102,19 @@ export const REPORT_KPI_FAMILY: Partial<Record<ReportId, ReportKpiFamily>> = {
 // Axis-family catalogues: the report's own fixed axis list (today's hardcoded
 // AxisKpiConfig ids), in the report's current default priority order. Card 1
 // ("total") is pinned and not part of this list — see REPORT_KPI_PINNED_FIRST.
-export const REPORT_KPI_AXIS_CATALOG: Partial<Record<ReportId, KpiCatalogEntry[]>> = {
+// 'leads' mirrors 'candidates' exactly and 'prospects' mirrors 'customers'
+// exactly — same axes, same labels, same underlying report component; only the
+// STORED ORDER (its own settings key) and the live data (server-side `phase`
+// filter) differ per position.
+export const REPORT_KPI_AXIS_CATALOG: Partial<Record<ReportKpiScopeId, KpiCatalogEntry[]>> = {
   candidates: [
+    { key: 'status', labelKey: 'candidates.axes.status' },
+    { key: 'phase', labelKey: 'candidates.axes.phase' },
+    { key: 'source', labelKey: 'candidates.axes.source' },
+    { key: 'owner', labelKey: 'candidates.axes.owner' },
+    { key: 'branch', labelKey: 'candidates.axes.branch' },
+  ],
+  leads: [
     { key: 'status', labelKey: 'candidates.axes.status' },
     { key: 'phase', labelKey: 'candidates.axes.phase' },
     { key: 'source', labelKey: 'candidates.axes.source' },
@@ -78,24 +134,20 @@ export const REPORT_KPI_AXIS_CATALOG: Partial<Record<ReportId, KpiCatalogEntry[]
     { key: 'owner', labelKey: 'customers.axes.owner' },
     { key: 'branch', labelKey: 'customers.axes.branch' },
   ],
+  prospects: [
+    { key: 'status', labelKey: 'customers.axes.status' },
+    { key: 'phase', labelKey: 'customers.axes.phase' },
+    { key: 'industry', labelKey: 'customers.axes.industry' },
+    { key: 'owner', labelKey: 'customers.axes.owner' },
+    { key: 'branch', labelKey: 'customers.axes.branch' },
+  ],
 }
 
 // Fixed-family catalogues — one entry per today's literal `kpis: KpiSpec[]` card,
 // in the report's current order. This IS today's default order (see
 // REPORT_KPI_DEFAULT_ORDER below): no spare cards exist yet (step 6 of the
 // design's build order grows these per report, later, one at a time).
-export const REPORT_KPI_FIXED_CATALOG: Partial<Record<ReportId, KpiCatalogEntry[]>> = {
-  leads: [
-    { key: 'totalLeads', labelKey: 'leads.summary.totalLeads' },
-    { key: 'bySource', labelKey: 'leads.summary.bySource' },
-    { key: 'byOwner', labelKey: 'leads.summary.byOwner' },
-    { key: 'byBranch', labelKey: 'leads.summary.byBranch' },
-    { key: 'converted', labelKey: 'leads.summary.converted' },
-    { key: 'conversionRate', labelKey: 'leads.summary.conversionRate' },
-    { key: 'avgTimeToConvert', labelKey: 'leads.summary.avgTimeToConvert' },
-    { key: 'staleLeads', labelKey: 'leads.summary.staleLeads' },
-    { key: 'newThisPeriod', labelKey: 'leads.summary.newThisPeriod' },
-  ],
+export const REPORT_KPI_FIXED_CATALOG: Partial<Record<ReportKpiScopeId, KpiCatalogEntry[]>> = {
   flow: [
     { key: 'total', labelKey: 'flow.total' },
     { key: 'firstPhase', labelKey: 'flow.firstPhase' },
@@ -195,17 +247,6 @@ export const REPORT_KPI_FIXED_CATALOG: Partial<Record<ReportId, KpiCatalogEntry[
     { key: 'topCampaign', labelKey: 'outreach.summary.topCampaign' },
     { key: 'topChannel', labelKey: 'outreach.summary.topChannel' },
   ],
-  sources: [
-    { key: 'sources', labelKey: 'sources.summary.sources' },
-    { key: 'candidates', labelKey: 'sources.summary.candidates' },
-    { key: 'applications', labelKey: 'sources.summary.applications' },
-    { key: 'matches', labelKey: 'sources.summary.matches' },
-    { key: 'matchRate', labelKey: 'sources.summary.matchRate' },
-    { key: 'applicationRate', labelKey: 'sources.summary.applicationRate' },
-    { key: 'topSourceCandidates', labelKey: 'sources.summary.topSourceCandidates' },
-    { key: 'topSourceMatches', labelKey: 'sources.summary.topSourceMatches' },
-    { key: 'sourcesNoMatches', labelKey: 'sources.summary.sourcesNoMatches' },
-  ],
   contacts: [
     { key: 'total', labelKey: 'contacts.total' },
     { key: 'primary', labelKey: 'contacts.summary.primary' },
@@ -264,37 +305,42 @@ export const REPORT_KPI_FIXED_CATALOG: Partial<Record<ReportId, KpiCatalogEntry[
 }
 
 // Card 1 pinned = not offered in the catalogue/editor for that report. True for
-// the three axis-family reports (their "total" is a special inline card, not part
+// the five axis-family scopes (their "total" is a special inline card, not part
 // of any axis) — proposal from the design doc, technically the simpler path.
-export const REPORT_KPI_PINNED_FIRST: Partial<Record<ReportId, string>> = {
+export const REPORT_KPI_PINNED_FIRST: Partial<Record<ReportKpiScopeId, string>> = {
   candidates: 'total',
+  leads: 'total',
   applications: 'total',
   customers: 'total',
+  prospects: 'total',
 }
 
-// The report's catalogue, regardless of family — what the editor's picker offers.
-export function getReportKpiCatalog(reportId: ReportId): KpiCatalogEntry[] {
-  const family = REPORT_KPI_FAMILY[reportId]
-  if (family === 'axis') return REPORT_KPI_AXIS_CATALOG[reportId] ?? []
-  if (family === 'fixed') return REPORT_KPI_FIXED_CATALOG[reportId] ?? []
+// The scope's catalogue, regardless of family — what the editor's picker offers.
+export function getReportKpiCatalog(scopeId: ReportKpiScopeId): KpiCatalogEntry[] {
+  const family = REPORT_KPI_FAMILY[scopeId]
+  if (family === 'axis') return REPORT_KPI_AXIS_CATALOG[scopeId] ?? []
+  if (family === 'fixed') return REPORT_KPI_FIXED_CATALOG[scopeId] ?? []
   return []
 }
 
 // Today's default order — identical to what the report renders when nothing is
-// stored. For 'fixed' reports this equals the catalogue itself 1:1 (see module
+// stored. For 'fixed' scopes this equals the catalogue itself 1:1 (see module
 // doc comment): no spare cards exist yet, only reordering is meaningfully new.
-export function getReportKpiDefaultOrder(reportId: ReportId): string[] {
-  return getReportKpiCatalog(reportId).map(e => e.key)
+export function getReportKpiDefaultOrder(scopeId: ReportKpiScopeId): string[] {
+  return getReportKpiCatalog(scopeId).map(e => e.key)
 }
 
-// True once a report's catalogue holds more entries than its default order needs
+// True once a scope's catalogue holds more entries than its default order needs
 // (i.e. real spare cards to swap in) — used by the settings screen to decide
 // between a real "swap" picker and an honest "reorder only, no alternatives yet" notice.
-export function reportHasSpareKpiCards(reportId: ReportId): boolean {
-  return getReportKpiCatalog(reportId).length > getReportKpiDefaultOrder(reportId).length
+export function reportHasSpareKpiCards(scopeId: ReportKpiScopeId): boolean {
+  return getReportKpiCatalog(scopeId).length > getReportKpiDefaultOrder(scopeId).length
 }
 
-// The tenant-facing settings key for a report's stored KPI order.
-export function reportKpiSettingsKey(reportId: ReportId): string {
-  return `report_kpis_${reportId}`
+// The tenant-facing settings key for a scope's stored KPI order. Stable across
+// the RAPPORTEN-CONSOLIDATIE-1 route merge (see file-top comment) — a scope id
+// never changes even when its ROUTE does, so an existing tenant customisation
+// under e.g. `report_kpis_recruiters` keeps resolving unchanged.
+export function reportKpiSettingsKey(scopeId: ReportKpiScopeId): string {
+  return `report_kpis_${scopeId}`
 }

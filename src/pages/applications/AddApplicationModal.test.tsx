@@ -20,12 +20,12 @@
  * tenant's active application custom-field defs, StoreApplicationRequest DOES accept
  * this field) — covered by the "custom fields (Extra section)" block.
  *
- * CMBE 5961c673 (superseding the earlier W30 note): StoreApplicationRequest NOW
- * accepts an optional `source` (verified against the backend request class), so a
- * free-text field was added (no tenant-CRUD lookup exists for this axis anywhere in
- * the app — mirrors the drawer's own Bron `<input>`) — covered by the "source" block
- * below. `application_stage_id`'s pre-existing omit-when-empty tests (untouched) also
- * double as regression coverage that `source` stays absent from those same bodies.
+ * CMBE 5961c673 (superseding the earlier W30 note), S-SOURCE-1 GRADUATED 2026-08-14:
+ * StoreApplicationRequest accepts an optional `source`, rendered as a searchable/
+ * creatable picker backed by the real tenant-CRUD `/candidate-sources` lookup —
+ * covered by the "source" block below. `application_stage_id`'s pre-existing
+ * omit-when-empty tests (untouched) also double as regression coverage that `source`
+ * stays absent from those same bodies.
  */
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, waitFor } from '@testing-library/react'
@@ -113,6 +113,13 @@ vi.mock('@/lib/api', () => ({
       if (url === '/candidates') return Promise.resolve({ data: { data: rowState.candidates } })
       if (url === '/vacancies') return Promise.resolve({ data: { data: rowState.vacancies } })
       if (url.startsWith('/vacancies/')) return Promise.resolve({ data: { data: { owner: rowState.lockedVacancyOwner } } })
+      // S-SOURCE-1 GRADUATED 2026-08-14: useApplicationSources reads the real
+      // /candidate-sources lookup. free_entry: true here simulates a tenant that
+      // opted into creatable sources, so the "POSTs a newly typed source" test
+      // below keeps exercising the create-a-new-value path regardless of the
+      // hook's own strict-by-default fallback (covered on its own in
+      // useApplicationSources.test.ts).
+      if (url === '/candidate-sources') return Promise.resolve({ data: { data: [], allow_free_entry: true } })
       return Promise.resolve({ data: { data: [] } })
     }),
     post: vi.fn(() => Promise.resolve({ data: { data: { id: 'a1' } } })),
@@ -120,7 +127,6 @@ vi.mock('@/lib/api', () => ({
   unwrap: (r: { data?: { data?: unknown } }) => r?.data?.data,
   unwrapList: (res: { data?: { data?: unknown[] } }) =>
     ({ rows: res?.data?.data ?? [], total: 0, page: 1, lastPage: 1, perPage: 0 }),
-  // S-SOURCE-1: useApplicationSources reads /applications/stats through useCachedLookup.
   getActiveTenantId: () => 'tenant-1',
 }))
 

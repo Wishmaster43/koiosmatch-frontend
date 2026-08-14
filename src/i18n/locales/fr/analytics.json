@@ -10,20 +10,19 @@
     "truncated": "Affiche {{shown}} sur {{total}}"
   },
   "tabs": {
-    "flow": "Flux",
-    "recruiters": "Recruteurs",
-    "vacancies": "Postes",
-    "matches": "Matchs",
-    "intakes": "Intakes",
-    "outreach": "Outreach",
-    "sources": "Sources",
     "candidates": "Flux entrant",
     "applications": "Candidatures",
     "customers": "Clients",
+    "customerstructure": "Structure client",
+    "flow": "Flux",
+    "people": "Équipe",
+    "vacancies": "Postes",
     "opportunities": "Opportunités",
     "tasks": "Tâches",
-    "leads": "Leads",
-    "accountmanagers": "Comptes clients"
+    "matches": "Matchs",
+    "intakes": "Intakes",
+    "outreach": "Outreach",
+    "usage": "Utilisation"
   },
   "candidates": {
     "loading": "Chargement du flux entrant…",
@@ -39,7 +38,12 @@
       "owner": "Propriétaire",
       "branch": "Antenne"
     },
-    "kpiOrderFellBack": "Une carte KPI configurée dans les paramètres n'existe plus et a été réinitialisée par défaut."
+    "kpiOrderFellBack": "Une carte KPI configurée dans les paramètres n'existe plus et a été réinitialisée par défaut.",
+    "viewSwitch": {
+      "ariaLabel": "Population",
+      "candidates": "Candidats",
+      "leads": "Leads"
+    }
   },
   "intakes": {
     "loading": "Chargement des intakes…",
@@ -334,7 +338,12 @@
       "owner": "Propriétaire",
       "branch": "Agence"
     },
-    "kpiOrderFellBack": "Une carte KPI configurée dans les paramètres n'existe plus et a été réinitialisée par défaut."
+    "kpiOrderFellBack": "Une carte KPI configurée dans les paramètres n'existe plus et a été réinitialisée par défaut.",
+    "viewSwitch": {
+      "ariaLabel": "Population",
+      "customers": "Clients",
+      "prospects": "Prospects"
+    }
   },
   "contacts": {
     "total": "Total contacts",
@@ -464,19 +473,9 @@
     "loading": "Chargement des leads…",
     "error": "Impossible de charger les leads",
     "empty": "Aucun lead sur cette période",
+    "total": "Total des leads",
+    "series": "Leads dans le temps",
     "window": "Leads du {{from}} au {{to}}",
-    "partialNotice": "Ce rapport affiche le seul chiffre que les données actuelles permettent : le nombre total de leads (candidats en phase Lead) sur cette période. Une répartition par source, propriétaire, site ou conversion nécessite un endpoint backend dédié aux leads qui n'existe pas encore. Ces cartes affichent un tiret en attendant.",
-    "summary": {
-      "totalLeads": "Total des leads",
-      "bySource": "Leads par source",
-      "byOwner": "Leads par propriétaire",
-      "byBranch": "Leads par site",
-      "converted": "Converti en candidat",
-      "conversionRate": "Taux de conversion",
-      "avgTimeToConvert": "Délai moyen de conversion",
-      "staleLeads": "Leads inactifs",
-      "newThisPeriod": "Nouveaux sur la période"
-    },
     "kpiOrderFellBack": "Une carte KPI configurée dans les paramètres n'existe plus et a été réinitialisée par défaut."
   },
   "accountmanagers": {
@@ -499,5 +498,36 @@
       "customers": "Clients"
     },
     "kpiOrderFellBack": "Une carte KPI configurée dans les paramètres n'existe plus et a été réinitialisée par défaut."
+  },
+  "prospects": {
+    "loading": "Chargement des prospects…",
+    "error": "Impossible de charger les prospects",
+    "empty": "Aucun prospect sur cette période",
+    "total": "Total des prospects",
+    "series": "Prospects dans le temps",
+    "window": "Prospects du {{from}} au {{to}}",
+    "kpiOrderFellBack": "Une carte KPI configurée dans les paramètres n'existe plus et a été réinitialisée par défaut."
+  },
+  "customerstructure": {
+    "viewSwitch": {
+      "ariaLabel": "Structure client",
+      "contacts": "Contacts",
+      "locations": "Sites",
+      "departments": "Services"
+    }
+  },
+  "people": {
+    "viewSwitch": {
+      "ariaLabel": "Équipe",
+      "recruiters": "Recruteurs",
+      "accountmanagers": "Chargés de compte"
+    }
+  },
+  "usage": {
+    "viewSwitch": {
+      "ariaLabel": "Type d'utilisation",
+      "ai": "Koios AI",
+      "workflows": "Workflows"
+    }
   }
 }

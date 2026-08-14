@@ -10,20 +10,19 @@
     "truncated": "Toont {{shown}} van {{total}}"
   },
   "tabs": {
-    "flow": "Flow",
-    "recruiters": "Recruiters",
-    "vacancies": "Vacatures",
-    "matches": "Matches",
-    "intakes": "Intakes",
-    "outreach": "Outreach",
-    "sources": "Bronnen",
     "candidates": "Instroom",
     "applications": "Sollicitaties",
     "customers": "Klanten",
+    "customerstructure": "Klantstructuur",
+    "flow": "Flow",
+    "people": "Mensen",
+    "vacancies": "Vacatures",
     "opportunities": "Kansen",
     "tasks": "Taken",
-    "leads": "Leads",
-    "accountmanagers": "Accountmanagers"
+    "matches": "Matches",
+    "intakes": "Intakes",
+    "outreach": "Outreach",
+    "usage": "Verbruik"
   },
   "candidates": {
     "loading": "Instroom laden…",
@@ -39,7 +38,12 @@
       "owner": "Eigenaar",
       "branch": "Vestiging"
     },
-    "kpiOrderFellBack": "Een in Instellingen ingestelde KPI-kaart bestaat niet meer en is teruggezet naar de standaard."
+    "kpiOrderFellBack": "Een in Instellingen ingestelde KPI-kaart bestaat niet meer en is teruggezet naar de standaard.",
+    "viewSwitch": {
+      "ariaLabel": "Populatie",
+      "candidates": "Kandidaten",
+      "leads": "Leads"
+    }
   },
   "intakes": {
     "loading": "Intakes laden…",
@@ -334,7 +338,12 @@
       "owner": "Eigenaar",
       "branch": "Vestiging"
     },
-    "kpiOrderFellBack": "Een in Instellingen ingestelde KPI-kaart bestaat niet meer en is teruggezet naar de standaard."
+    "kpiOrderFellBack": "Een in Instellingen ingestelde KPI-kaart bestaat niet meer en is teruggezet naar de standaard.",
+    "viewSwitch": {
+      "ariaLabel": "Populatie",
+      "customers": "Klanten",
+      "prospects": "Prospects"
+    }
   },
   "contacts": {
     "total": "Totaal contactpersonen",
@@ -464,19 +473,9 @@
     "loading": "Leads laden…",
     "error": "Kon de leads niet laden",
     "empty": "Geen leads in deze periode",
+    "total": "Totaal leads",
+    "series": "Leads over tijd",
     "window": "Leads {{from}} tot {{to}}",
-    "partialNotice": "Dit rapport toont het enige getal dat de huidige data ondersteunt: totaal aantal leads (kandidaten in de fase Lead) in deze periode. Een uitsplitsing per bron, eigenaar, vestiging of conversie vraagt een lead-specifiek backend-endpoint dat nog niet bestaat. Die kaarten tonen een streepje totdat dat er is.",
-    "summary": {
-      "totalLeads": "Totaal leads",
-      "bySource": "Leads per bron",
-      "byOwner": "Leads per eigenaar",
-      "byBranch": "Leads per vestiging",
-      "converted": "Omgezet naar kandidaat",
-      "conversionRate": "Conversieratio",
-      "avgTimeToConvert": "Gem. tijd tot conversie",
-      "staleLeads": "Verouderde leads",
-      "newThisPeriod": "Nieuw deze periode"
-    },
     "kpiOrderFellBack": "Een in Instellingen ingestelde KPI-kaart bestaat niet meer en is teruggezet naar de standaard."
   },
   "accountmanagers": {
@@ -499,5 +498,36 @@
       "customers": "Klanten"
     },
     "kpiOrderFellBack": "Een in Instellingen ingestelde KPI-kaart bestaat niet meer en is teruggezet naar de standaard."
+  },
+  "prospects": {
+    "loading": "Prospects laden…",
+    "error": "Kon de prospects niet laden",
+    "empty": "Geen prospects in deze periode",
+    "total": "Totaal prospects",
+    "series": "Prospects over tijd",
+    "window": "Prospects {{from}} t/m {{to}}",
+    "kpiOrderFellBack": "Een in Instellingen ingestelde KPI-kaart bestaat niet meer en is teruggezet naar de standaard."
+  },
+  "customerstructure": {
+    "viewSwitch": {
+      "ariaLabel": "Klantstructuur",
+      "contacts": "Contactpersonen",
+      "locations": "Locaties",
+      "departments": "Afdelingen"
+    }
+  },
+  "people": {
+    "viewSwitch": {
+      "ariaLabel": "Team",
+      "recruiters": "Recruiters",
+      "accountmanagers": "Accountmanagers"
+    }
+  },
+  "usage": {
+    "viewSwitch": {
+      "ariaLabel": "Verbruikstype",
+      "ai": "Koios AI",
+      "workflows": "Workflows"
+    }
   }
 }

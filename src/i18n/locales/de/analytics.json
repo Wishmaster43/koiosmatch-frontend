@@ -10,20 +10,19 @@
     "truncated": "Zeigt {{shown}} von {{total}}"
   },
   "tabs": {
-    "flow": "Flow",
-    "recruiters": "Recruiter",
-    "vacancies": "Stellen",
-    "matches": "Matches",
-    "intakes": "Intakes",
-    "outreach": "Outreach",
-    "sources": "Quellen",
     "candidates": "Zulauf",
     "applications": "Bewerbungen",
     "customers": "Kunden",
+    "customerstructure": "Kundenstruktur",
+    "flow": "Flow",
+    "people": "Team",
+    "vacancies": "Stellen",
     "opportunities": "Chancen",
     "tasks": "Aufgaben",
-    "leads": "Leads",
-    "accountmanagers": "Kundenbetreuer"
+    "matches": "Matches",
+    "intakes": "Intakes",
+    "outreach": "Outreach",
+    "usage": "Nutzung"
   },
   "candidates": {
     "loading": "Zulauf wird geladen…",
@@ -39,7 +38,12 @@
       "owner": "Eigentümer",
       "branch": "Niederlassung"
     },
-    "kpiOrderFellBack": "Eine in den Einstellungen konfigurierte KPI-Karte existiert nicht mehr und wurde auf den Standard zurückgesetzt."
+    "kpiOrderFellBack": "Eine in den Einstellungen konfigurierte KPI-Karte existiert nicht mehr und wurde auf den Standard zurückgesetzt.",
+    "viewSwitch": {
+      "ariaLabel": "Zielgruppe",
+      "candidates": "Kandidaten",
+      "leads": "Leads"
+    }
   },
   "intakes": {
     "loading": "Intakes werden geladen…",
@@ -334,7 +338,12 @@
       "owner": "Eigentümer",
       "branch": "Niederlassung"
     },
-    "kpiOrderFellBack": "Eine in den Einstellungen konfigurierte KPI-Karte existiert nicht mehr und wurde auf den Standard zurückgesetzt."
+    "kpiOrderFellBack": "Eine in den Einstellungen konfigurierte KPI-Karte existiert nicht mehr und wurde auf den Standard zurückgesetzt.",
+    "viewSwitch": {
+      "ariaLabel": "Zielgruppe",
+      "customers": "Kunden",
+      "prospects": "Interessenten"
+    }
   },
   "contacts": {
     "total": "Kontakte gesamt",
@@ -464,19 +473,9 @@
     "loading": "Leads werden geladen…",
     "error": "Leads konnten nicht geladen werden",
     "empty": "Keine Leads in diesem Zeitraum",
+    "total": "Leads gesamt",
+    "series": "Leads im Zeitverlauf",
     "window": "Leads {{from}} bis {{to}}",
-    "partialNotice": "Dieser Bericht zeigt die einzige Zahl, die die aktuellen Daten hergeben: Gesamtzahl der Leads (Kandidaten in der Phase Lead) in diesem Zeitraum. Eine Aufschlüsselung nach Quelle, Eigentümer, Standort oder Konversion erfordert einen lead-spezifischen Backend-Endpunkt, der noch nicht existiert. Diese Karten zeigen einen Strich, bis es ihn gibt.",
-    "summary": {
-      "totalLeads": "Leads gesamt",
-      "bySource": "Leads nach Quelle",
-      "byOwner": "Leads nach Eigentümer",
-      "byBranch": "Leads nach Standort",
-      "converted": "In Kandidat umgewandelt",
-      "conversionRate": "Konversionsrate",
-      "avgTimeToConvert": "Durchschn. Zeit bis Konversion",
-      "staleLeads": "Veraltete Leads",
-      "newThisPeriod": "Neu in diesem Zeitraum"
-    },
     "kpiOrderFellBack": "Eine in den Einstellungen konfigurierte KPI-Karte existiert nicht mehr und wurde auf den Standard zurückgesetzt."
   },
   "accountmanagers": {
@@ -499,5 +498,36 @@
       "customers": "Kunden"
     },
     "kpiOrderFellBack": "Eine in den Einstellungen konfigurierte KPI-Karte existiert nicht mehr und wurde auf den Standard zurückgesetzt."
+  },
+  "prospects": {
+    "loading": "Interessenten werden geladen…",
+    "error": "Interessenten konnten nicht geladen werden",
+    "empty": "Keine Interessenten in diesem Zeitraum",
+    "total": "Interessenten gesamt",
+    "series": "Interessenten im Zeitverlauf",
+    "window": "Interessenten {{from}} bis {{to}}",
+    "kpiOrderFellBack": "Eine in den Einstellungen konfigurierte KPI-Karte existiert nicht mehr und wurde auf den Standard zurückgesetzt."
+  },
+  "customerstructure": {
+    "viewSwitch": {
+      "ariaLabel": "Kundenstruktur",
+      "contacts": "Kontakte",
+      "locations": "Standorte",
+      "departments": "Abteilungen"
+    }
+  },
+  "people": {
+    "viewSwitch": {
+      "ariaLabel": "Team",
+      "recruiters": "Recruiter",
+      "accountmanagers": "Kundenbetreuer"
+    }
+  },
+  "usage": {
+    "viewSwitch": {
+      "ariaLabel": "Nutzungsart",
+      "ai": "Koios AI",
+      "workflows": "Workflows"
+    }
   }
 }

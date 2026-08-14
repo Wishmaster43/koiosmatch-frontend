@@ -26,6 +26,9 @@ import { PermissionMatrix } from './RolesPermissionMatrix'
 import type { PermissionGroups } from './RolesPermissionMatrix'
 
 const st = (key: string, opts?: Record<string, unknown>) => i18n.t(key, { ns: 'settings', ...opts })
+// Dashboard namespace — the "start dashboard" picker's option labels mirror the
+// live switcher's own translator (RoleDetail.tsx `td`).
+const dt = (key: string, opts?: Record<string, unknown>) => i18n.t(key, { ns: 'dashboard', ...opts })
 // Mirrors the component's own fallback computation exactly (RolesPermissionMatrix.tsx)
 // so the assertion stays correct whether or not roles.matrixAllowed has been seeded yet.
 const chipText = (active: number, total: number) =>
@@ -233,6 +236,43 @@ describe('RolesSettings — end-to-end toggle through the matrix', () => {
       '/roles/r1/permissions', { permissions: ['candidates.view', 'candidates.create'] }))
     // Retired group (SYNC-RETIRE-1): the BE still returns sync until removal — never rendered.
     expect(screen.queryByTitle('sync.refresh')).not.toBeInTheDocument()
+  })
+})
+
+// DASHBOARD-KIEZER-1 chain audit: the manager dashboard type is only reachable if
+// a role can actually be set to it. The backend now accepts 'recruitment_manager'
+// (DASHP-RM-1, RoleController::DASHBOARD_TYPES + RoleUpdateTest); this proves the
+// FE's own "start dashboard" picker — the shared searchable SearchSelect, not a
+// native <select> — offers it and PUTs the real request when picked (§13: the
+// request, not just that a callback fired).
+describe('RolesSettings — start-dashboard picker offers the manager type', () => {
+  it('lists "Recruitment manager" as an option and PUTs dashboard_type: recruitment_manager on pick', async () => {
+    mockAuth.mockReturnValue({ user: { is_super_admin: false }, accessiblePages: [] })
+    // eslint-disable-next-line no-restricted-syntax -- DATA: a fixture role's tenant-picked colour, not a style rule.
+    const role: Role = { id: 'r1', name: 'recruitermanager', color: '#3B8FD4', icon: 'shield', users_count: 0, dashboard_type: null, permissions: [] }
+    vi.mocked(api.get).mockImplementation((url: string) => {
+      if (url === '/roles') return Promise.resolve({ data: [role] })
+      if (url === '/permissions') return Promise.resolve({ data: {} })
+      if (url === '/roles/icons') return Promise.reject(new Error('404'))
+      if (url === '/roles/r1/branches') return Promise.resolve({ data: [] })
+      return Promise.reject(new Error(`unexpected GET ${url}`))
+    })
+    vi.mocked(api.put).mockResolvedValue({ data: { ...role, dashboard_type: 'recruitment_manager' } })
+    const user = userEvent.setup()
+    render(<RolesSettings />)
+
+    await user.click(await screen.findByRole('button', { name: st('roles.edit') }))
+    const select = await screen.findByLabelText(st('roles.startDashboard'))
+
+    // SearchSelect: open the dropdown — its own option list, never a native <select>.
+    await user.click(select)
+    const option = await screen.findByRole('button', { name: dt('types.recruitment_manager') })
+    await user.click(option)
+
+    await waitFor(() => expect(api.put).toHaveBeenCalledWith(
+      // eslint-disable-next-line no-restricted-syntax -- DATA: the fixture role's tenant-picked colour, not a style rule.
+      '/roles/r1', { color: '#3B8FD4', icon: 'shield', dashboard_type: 'recruitment_manager' }))
+    await waitFor(() => expect(select).toHaveTextContent(dt('types.recruitment_manager')))
   })
 })
 

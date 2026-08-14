@@ -6,15 +6,34 @@
  * is rendered PROMINENTLY (from/to from the envelope) — this report is windowed on
  * created_at while the candidates LIST is not, so an invisible window reads as a bug
  * report ("counts don't match the list") instead of the deliberate report/list split.
+ *
+ * RAPPORTEN-CONSOLIDATIE-1 (2026-08-14): this page is now "Instroom" and carries a
+ * Kandidaten/Leads switch (ReportSwitchBar, mirrors the Shiftmanager dashboard's
+ * "In uren / In diensten" toggle) — the sidebar's old standalone 'leads' page merged
+ * in here. Leads is REALLY the same `/reports/candidates` call with one extra
+ * SERVER-side `phase` filter layered on top of the panel filters (never a client-side
+ * slice of the unfiltered payload, unlike the retired standalone LeadsReport) — so
+ * its nine KPI cards, its axis bars and its drill lists are all real, all narrowed to
+ * the same population. The lead-like phase is resolved off the FLAG the backend
+ * itself uses to identify it (`is_default && !is_applicant`, mirrors
+ * CandidatesReport.php's own valueDistribution()) — never a hardcoded 'lead' slug, a
+ * tenant may rename it. The default Kandidaten position is BYTE-IDENTICAL to the old
+ * standalone candidates report (no filter added) so every existing deep link/behaviour
+ * keeps working unchanged. 'sources' also retired into this page (RAPPORTEN-CONSOLIDATIE-1)
+ * — not as a switch position, but because the Source axis section below already IS
+ * what the standalone Sources page existed to show for candidate inflow.
  */
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import ReportKpiBand from './ReportKpiBand'
+import ReportSwitchBar from './ReportSwitchBar'
 import { reportCardStyle as card, reportSectionHeadStyle as head } from './ReportSectionCard'
 import ReportStateBlock from './ReportStateBlock'
 import type { KpiSpec } from '@/components/insights/InsightsRow'
 import type { DrillSpec } from './ReportDrillDrawer'
 import { useCandidatesReport } from './useCandidatesReport'
+import { useReportSwitch } from './useReportSwitch'
+import { useLookups } from '@/context/LookupsContext'
 import { gateDrillClick } from './reportDrillGate'
 import { buildAxisKpis } from './buildAxisKpis'
 import type { AxisKpiConfig } from './buildAxisKpis'
@@ -27,15 +46,40 @@ import { useDateFormat } from '@/lib/datetime'
 import type { ReportPeriod, CandidateSegment, CandidateOwnerSegment, CandidateTimeseriesPoint } from '@/types/analytics'
 import { useAllSettings, getJsonSetting } from '@/lib/settings/useAllSettings'
 import { getReportKpiCatalog, getReportKpiDefaultOrder, reportKpiSettingsKey } from './kpiCatalog'
+import type { ReportKpiScopeId } from './kpiCatalog'
 import { resolveReportKpiOrder } from './resolveReportKpiOrder'
 
 // The five drillable axes; `param` is the XOR query key the drill/advice endpoints expect.
 type Axis = 'status' | 'phase' | 'source' | 'owner' | 'branch'
 
-export default function CandidatesReport({ period, filters = EMPTY_REPORT_FILTERS }: { period: ReportPeriod; filters?: ReportFilterState }) {
+// The two switch positions — also the KPI-catalog/settings-scope id and the
+// i18n namespace-prefix for the population-facing strings (total/series/window/
+// loading/error/empty). Axis labels stay on the shared `candidates.axes.*` keys
+// regardless of position — the axis MEANING never changes, only the population.
+// Kept as plain `string` on the wire (not a narrower literal union) so this
+// component satisfies ReportsPage's one shared `ReportComponent` contract
+// (initialView?: string) — useReportSwitch constrains the runtime value to one
+// of `positions` regardless of the declared type.
+const VIEWS = ['candidates', 'leads'] as const
+
+export default function CandidatesReport({ period, filters = EMPTY_REPORT_FILTERS, initialView = 'candidates' }: {
+  period: ReportPeriod
+  filters?: ReportFilterState
+  initialView?: string
+}) {
   const { t } = useTranslation('analytics')
   const { formatDate } = useDateFormat()
-  const { data, loading, error, refetch } = useCandidatesReport(period, filters)
+  const { phases } = useLookups()
+  const [view, setView] = useReportSwitch(VIEWS, initialView)
+  const isLeads = view === 'leads'
+
+  // Flag-driven, never a hardcoded slug (§3B) — mirrors the backend's own
+  // "which phase counts as a lead" resolution exactly.
+  const leadPhaseValue = phases.find(p => p.is_default && !p.is_applicant)?.value
+    ?? phases.find(p => !p.is_applicant)?.value ?? null
+  const phaseFilter = isLeads ? leadPhaseValue : null
+
+  const { data, loading, error, refetch } = useCandidatesReport(period, filters, phaseFilter)
 
   const total   = data?.total ?? 0
   const hasData = !loading && !error && total > 0
@@ -45,10 +89,11 @@ export default function CandidatesReport({ period, filters = EMPTY_REPORT_FILTER
   // one key per section, never a single global `drill`. Exactly one XOR param per
   // open drill — ALWAYS layered on top of the report's own active filters
   // (`baseParams`), never just `period`, so the list counts the exact same set the
-  // bar was drawn from.
+  // bar was drawn from. `baseParams` also carries the switch's own `phase` filter,
+  // so a Leads-position drill list always describes the exact same rows its bars do.
   type DrillKey = Axis | 'series'
   const [drills, setDrills] = useState<Partial<Record<DrillKey, DrillSpec>>>({})
-  const baseParams = buildReportQueryParams(period, 'candidates', filters)
+  const baseParams = { ...buildReportQueryParams(period, 'candidates', filters), ...(phaseFilter ? { phase: phaseFilter } : {}) }
   const openSegment = (key: DrillKey, seg: { label: string; count: number }, xorParam: Record<string, unknown>) =>
     setDrills(d => ({ ...d, [key]: {
       title: seg.label, value: seg.count, subtitle: `${formatDate(data?.from)} – ${formatDate(data?.to)}`,
@@ -112,8 +157,10 @@ export default function CandidatesReport({ period, filters = EMPTY_REPORT_FILTER
   // Nine-card KPI strip (Danny — same footprint as the dashboard): "total" plus
   // eight axis-derived cards, all real counts from the five axes already on the
   // response (§0 no fake affordances — nothing here is invented or hardcoded).
-  // WHICH axes participate, and in what priority order, is the tenant's
-  // Settings → Reports choice ("total" itself stays pinned — RAPPORT-KPI-INSTELBAAR).
+  // WHICH axes participate, and in what priority order, is the tenant's Settings →
+  // Reports choice PER SWITCH POSITION ("total" itself stays pinned —
+  // RAPPORT-KPI-INSTELBAAR) — Kandidaten and Leads keep independently configurable
+  // catalogs/orders (`kpiScope`), never one shared setting the two positions fight over.
   const allAxisConfigs: Record<Axis, AxisKpiConfig> = {
     status: { axis: 'status', axisLabel: t('candidates.axes.status'), segs: (data?.by_status ?? []).map(s => ({ key: s.value, label: s.label, count: s.count })) },
     phase:  { axis: 'phase',  axisLabel: t('candidates.axes.phase'),  segs: (data?.by_phase ?? []).map(s => ({ key: s.value, label: s.label, count: s.count })) },
@@ -121,10 +168,13 @@ export default function CandidatesReport({ period, filters = EMPTY_REPORT_FILTER
     owner:  { axis: 'owner',  axisLabel: t('candidates.axes.owner'),  segs: (data?.by_owner ?? []).map(s => ({ key: s.owner_id, label: s.name, count: s.count })) },
     branch: { axis: 'branch', axisLabel: t('candidates.axes.branch'), segs: (data?.by_branch ?? []).map(s => ({ key: s.value, label: s.label, count: s.count })) },
   }
+  // `view` is constrained to VIEWS at runtime (useReportSwitch); both members
+  // are valid KPI-catalog scope ids (kpiCatalog.ts), so the cast is safe.
+  const kpiScope = view as ReportKpiScopeId
   const settingsValues = useAllSettings()
-  const catalogKeys = getReportKpiCatalog('candidates').map(c => c.key)
-  const defaultAxisOrder = getReportKpiDefaultOrder('candidates')
-  const storedAxisOrder = getJsonSetting<string[] | undefined>(settingsValues, reportKpiSettingsKey('candidates'), undefined)
+  const catalogKeys = getReportKpiCatalog(kpiScope).map(c => c.key)
+  const defaultAxisOrder = getReportKpiDefaultOrder(kpiScope)
+  const storedAxisOrder = getJsonSetting<string[] | undefined>(settingsValues, reportKpiSettingsKey(kpiScope), undefined)
   const { order: axisOrder, fellBack } = resolveReportKpiOrder(storedAxisOrder, catalogKeys, defaultAxisOrder)
   const axisConfigs: AxisKpiConfig[] = axisOrder.map(axis => allAxisConfigs[axis as Axis]).filter(Boolean)
   // A KPI card for an axis segment fills THAT axis's own list, exactly like
@@ -140,31 +190,42 @@ export default function CandidatesReport({ period, filters = EMPTY_REPORT_FILTER
 
   // "Total" seeds every axis's list back to its own top segment (mirrors the
   // mount default) — there is no single "total" drill anymore, each section
-  // keeps its own state.
+  // keeps its own state. Card 1's label/window/loading/empty/error text is
+  // scoped to the active position — the Kandidaten position keeps today's exact
+  // "Total inflow" wording (a byte-identical default, zero regression), Leads
+  // gets its own "Total leads" wording.
   const kpis: KpiSpec[] = [
-    { key: 'total', label: t('candidates.total'), value: total },
+    { key: 'total', label: t(isLeads ? 'leads.total' : 'candidates.total'), value: total },
     ...axisKpis,
   ]
 
   return (
     <div>
+      <ReportSwitchBar ariaLabel={t('candidates.viewSwitch.ariaLabel')} value={view} onChange={setView}
+        options={[
+          { value: 'candidates', label: t('candidates.viewSwitch.candidates') },
+          { value: 'leads', label: t('candidates.viewSwitch.leads') },
+        ]} />
+
       {/* KPI strip — total inflow, above the tabs (candidate-page order) */}
       {hasData && (
-        <ReportKpiBand kpis={kpis} notice={fellBack ? t('candidates.kpiOrderFellBack') : undefined} />
+        <ReportKpiBand kpis={kpis} notice={fellBack ? t(isLeads ? 'leads.kpiOrderFellBack' : 'candidates.kpiOrderFellBack') : undefined} />
       )}
 
       {/* The report's data window, rendered prominently — DD-MM-YYYY (never ISO, §3B).
           A window that is invisible in the UI reads as a "report ≠ list" support ticket. */}
       {!loading && !error && data && (
         <div style={{ fontSize: 13, fontWeight: 500, color: 'var(--text)', marginBottom: 12 }}>
-          {t('candidates.window', { from: formatDate(data.from), to: formatDate(data.to) })}
+          {t(isLeads ? 'leads.window' : 'candidates.window', { from: formatDate(data.from), to: formatDate(data.to) })}
         </div>
       )}
 
       <div style={{ ...card, overflow: 'hidden' }}>
         <ReportStateBlock
           loading={loading} error={error} empty={!loading && !error && total === 0}
-          loadingLabel={t('candidates.loading')} errorLabel={t('candidates.error')} emptyLabel={t('candidates.empty')}
+          loadingLabel={t(isLeads ? 'leads.loading' : 'candidates.loading')}
+          errorLabel={t(isLeads ? 'leads.error' : 'candidates.error')}
+          emptyLabel={t(isLeads ? 'leads.empty' : 'candidates.empty')}
           onRetry={() => refetch()}
         />
         {hasData && data && (
@@ -172,8 +233,8 @@ export default function CandidatesReport({ period, filters = EMPTY_REPORT_FILTER
             {/* Inflow over time — week/day timeseries, bucket set server-side. Its own
                 always-visible list sits beside it, never a shared overlay. */}
             <section>
-              <h3 style={{ ...head, marginBottom: 10 }}>{t('candidates.series')}</h3>
-              <ReportChartWithDrillList drill={drills.series ?? null} placeholderLabel={t('candidates.series')}
+              <h3 style={{ ...head, marginBottom: 10 }}>{t(isLeads ? 'leads.series' : 'candidates.series')}</h3>
+              <ReportChartWithDrillList drill={drills.series ?? null} placeholderLabel={t(isLeads ? 'leads.series' : 'candidates.series')}
                 chart={<ReportTimeseriesChart series={data.timeseries.series} onPick={onSeriesPick} />} />
             </section>
 

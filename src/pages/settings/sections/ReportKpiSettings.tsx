@@ -19,23 +19,26 @@ import SubTabBar from '@/components/drawer/SubTabBar'
 import SectionCard from '@/components/ui/SectionCard'
 import { DragList } from '../components/SettingsControls'
 import CreatableSelect from '@/components/ui/CreatableSelect'
-import { REPORT_IDS } from '@/pages/reports/reportIds'
-import type { ReportId } from '@/pages/reports/reportIds'
 import {
-  REPORT_KPI_FAMILY, REPORT_KPI_PINNED_FIRST,
+  REPORT_KPI_SCOPE_IDS, REPORT_KPI_FAMILY, REPORT_KPI_PINNED_FIRST,
   getReportKpiCatalog, getReportKpiDefaultOrder, reportHasSpareKpiCards, reportKpiSettingsKey,
 } from '@/pages/reports/kpiCatalog'
+import type { ReportKpiScopeId } from '@/pages/reports/kpiCatalog'
 import { resolveReportKpiOrder } from '@/pages/reports/resolveReportKpiOrder'
 
-// Only reports with a known catalogue (axis or fixed) get a block — a report
-// without a ReportKpiBand strip has nothing to configure here.
-const CONFIGURABLE_REPORT_IDS: ReportId[] = REPORT_IDS.filter(id => REPORT_KPI_FAMILY[id] != null)
+// Only scopes with a known catalogue (axis or fixed) get a block — a scope
+// without a ReportKpiBand strip has nothing to configure here. Scopes are the
+// consolidation-proof identity (RAPPORTEN-CONSOLIDATIE-1): every switch
+// position on a merged page (Leads, Prospects, Recruiters/Accountmanagers,
+// Contacts/Locations/Departments, AI/Workflows) keeps its own tab here even
+// though several no longer have their own top-level route — see kpiCatalog.ts.
+const CONFIGURABLE_SCOPE_IDS: ReportKpiScopeId[] = REPORT_KPI_SCOPE_IDS.filter(id => REPORT_KPI_FAMILY[id] != null)
 
 export default function ReportKpiSettings() {
   const { t } = useTranslation('settings')
   const values = useAllSettings()
   const loaded = useSettingsLoaded()
-  const [active, setActive] = useState<ReportId>(CONFIGURABLE_REPORT_IDS[0])
+  const [active, setActive] = useState<ReportKpiScopeId>(CONFIGURABLE_SCOPE_IDS[0])
 
   if (!loaded) {
     return <div style={{ padding: 16, color: 'var(--text-muted)', fontSize: 13 }}>{t('reportKpis.loading')}</div>
@@ -45,9 +48,9 @@ export default function ReportKpiSettings() {
     <div>
       <p style={{ fontSize: 13, color: 'var(--text-muted)', marginBottom: 12 }}>{t('reportKpis.intro')}</p>
       <SubTabBar
-        tabs={CONFIGURABLE_REPORT_IDS.map(id => ({ id, label: t(`reportKpis.reportNames.${id}`) }))}
+        tabs={CONFIGURABLE_SCOPE_IDS.map(id => ({ id, label: t(`reportKpis.reportNames.${id}`) }))}
         active={active}
-        onChange={id => setActive(id as ReportId)}
+        onChange={id => setActive(id as ReportKpiScopeId)}
       />
       <div style={{ marginTop: 12 }}>
         <ReportKpiBlock key={active} reportId={active} values={values} />
@@ -56,9 +59,9 @@ export default function ReportKpiSettings() {
   )
 }
 
-// One report's nine-slot editor. Keyed by reportId in the parent so switching
-// tabs never leaks local drag/save state between reports.
-function ReportKpiBlock({ reportId, values }: { reportId: ReportId; values: Record<string, unknown> }) {
+// One scope's nine-slot editor. Keyed by scope id in the parent so switching
+// tabs never leaks local drag/save state between scopes.
+function ReportKpiBlock({ reportId, values }: { reportId: ReportKpiScopeId; values: Record<string, unknown> }) {
   const { t } = useTranslation('settings')
   const family = REPORT_KPI_FAMILY[reportId]
   const catalog = getReportKpiCatalog(reportId)

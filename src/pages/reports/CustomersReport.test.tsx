@@ -10,6 +10,18 @@ import i18n from '@/i18n'
 const mockUseCustomersReport = vi.fn()
 vi.mock('./useCustomersReport', () => ({ useCustomersReport: (...args: unknown[]) => mockUseCustomersReport(...args) }))
 
+// RAPPORTEN-CONSOLIDATIE-1: the Klanten/Prospects switch resolves its `phase`
+// filter off the customer-phase lookup's `isCustomer` flag (never a hardcoded
+// slug) — mirrors this file's own `by_phase` fixture ('lead'/'customer').
+vi.mock('@/lib/useCustomerPhases', () => ({
+  useCustomerPhases: () => ({
+    phases: [
+      { value: 'lead', label: 'Lead', isCustomer: false, isDefault: true },
+      { value: 'customer', label: 'Klant', isCustomer: true, isDefault: false },
+    ],
+  }),
+}))
+
 // Spy on the underlying axios client so we can assert the exact request shape
 // (method/route/params) that a bar/bucket click sends — mutation tests must assert
 // the request, never only that a callback fired (CLAUDE.md §13).
@@ -130,8 +142,9 @@ describe('CustomersReport (RAPPORTEN-SUITE-1 portie 3, customers inflow report)'
         <CustomersReport period="month" filters={filters} />
       </QueryClientProvider>,
     )
-    // The report's own data hook received the exact same filter object.
-    expect(mockUseCustomersReport).toHaveBeenCalledWith('month', filters)
+    // The report's own data hook received the exact same filter object — plus
+    // the switch's own `phase` filter, `null` on the default Klanten position.
+    expect(mockUseCustomersReport).toHaveBeenCalledWith('month', filters, null)
     // A drill click layers its XOR param ON TOP of those same filters, never instead of them.
     await user.click(screen.getByText('Klant'))
     expect(getSpy).toHaveBeenCalledWith('/reports/customers/drill', expect.objectContaining({

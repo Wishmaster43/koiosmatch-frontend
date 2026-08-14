@@ -2,62 +2,73 @@
  * useApplicationSources — the searchable/creatable option list for the
  * application "source" field (acquisition channel: Indeed, LinkedIn, referral, …).
  *
- * BACKEND GAP (documented, not faked — see AddApplicationModal's doc comment and
- * the exact ask below): unlike Contractvorm/funnel/phase/functions, there is NO
- * tenant-CRUD lookup endpoint for sources yet (no `/application-sources` route,
- * no `allow_free_entry` flag, no Settings screen). `source` is a genuinely free
- * `sometimes|nullable|string|max:64` column server-side. Building a Settings CRUD
- * screen against a route that does not exist would be a fake affordance (buttons
- * that 404 on save) — so this hook does NOT mirror useFunctions' `/functions` GET.
+ * S-SOURCE-1 GRADUATION (2026-08-14): the backend has delivered the tenant-CRUD
+ * lookup this hook's doc comment used to ask for — `GET /candidate-sources`
+ * (CandidateSourceController, on the shared FreeEntryLookupController base that
+ * also backs /functions and /contact-functions: CRUD + reorder + in-use 409 +
+ * a free-entry toggle). It is named "candidate-sources" and, per the backend's
+ * own doc comment, feeds BOTH the candidate intake source field AND this
+ * application source picker — one shared vocabulary, two consumers. An idempotent
+ * backfill folded every DISTINCT free-text `candidates.source` / `applications.source`
+ * value that existed before this lookup shipped into it, so nothing already on a
+ * record went "unknown".
  *
- * Instead it reuses the ALREADY-REAL vocabulary: `GET /applications/stats` (W27)
- * returns a server-wide `by_source` distribution — the exact same data source the
- * applications page's own source FILTER already aggregates via
- * `applicationInsights.buildSourceDataFromStats`. This hook fetches that endpoint
- * (via the shared useCachedLookup so every mounted picker shares one request) and
- * turns the distinct source names into option strings.
+ * IMPORTANT: `candidates.source` / `applications.source` themselves are UNCHANGED —
+ * still plain strings matched by NAME, never a foreign key (CandidateSource is a
+ * validated SUGGESTION set, not a hard relation; the "none" sentinel and every
+ * report shape built on the raw string keep working). This hook mirrors that: it
+ * returns option NAMES, not ids, exactly like useFunctions/useContactFunctions.
  *
- * `allowFreeEntry` is `true` by default (unlike Functions' strict-by-default):
- * with no tenant lookup to seed itself from, a strict-only picker would let no
- * one add a source until data already existed. It stays a picker (not a bare
- * input) so existing values are reused instead of refragmenting ("Indeed" vs
- * "indeed" vs "Indeed.nl"), which is the whole point of this change — see the
- * Sources report fragmentation problem in the task doc.
+ * `allowFreeEntry` is read straight off THIS SAME response's `allow_free_entry`
+ * flag — deliberately NOT shadowed through a second tenant-settings-blob key the
+ * way useFunctions/useContactFunctions do (`getBoolSetting(settings,
+ * '..._allow_free_entry', ...)`). That shadow key is a DIFFERENT Setting row than
+ * the one the backend actually enforces: both `ValidCandidateSource` (the request
+ * rule gating POST/PATCH `source`) and `FreeEntryLookupController::allowFreeEntry()`
+ * read the DOTTED `candidate_sources.allow_free_entry` key, written only by
+ * `PUT /candidate-sources/free-entry` — the generic `POST /settings` blob
+ * (underscored keys) never reaches it. Wiring a second, disconnected key here
+ * would reproduce that exact gap (a toggle that reads as "on" in this app while
+ * the server still 422s a newly typed value with "The selected bron is not in
+ * the configured list") — see ApplicationSourcesSettings.jsx, which persists
+ * through the real dedicated route so this single response stays authoritative.
  *
- * BACKEND ASK (for when this graduates to a real lookup, mirroring /functions):
- *   - `GET /application-sources` → `{ data: [{ id, name, order, active }], allow_free_entry }`
- *   - `POST/PATCH/DELETE /application-sources/{id}` (CRUD, in-use 409 like every
- *     other candidate/application lookup) + colour + reorder.
- *   - tenant setting `application_sources_allow_free_entry` (mirrors
- *     `functions_allow_free_entry`).
- *   - a one-time backfill: fold every DISTINCT existing `applications.source` value
- *     into the seeded lookup rows so nothing already on a record goes "unknown".
- * Until that ships, this hook (and the pickers built on it) is the honest interim.
+ * Fetch/cache/dedupe via the shared useCachedLookup (one GET per session, shared
+ * across every mounted picker). `invalidate` is exposed so the settings screen can
+ * force a refetch right after changing the free-entry flag. A value recorded
+ * before this lookup existed (or typed off-list while free entry was on) still
+ * renders on its record even once free entry is off again — the picker
+ * (CreatableSelect) always falls back to showing the raw stored value when it
+ * isn't one of the listed options, so nothing is ever silently dropped.
  */
-import { useCachedLookup } from './useCachedLookup'
-import { unwrap } from './api'
 import type { AxiosResponse } from 'axios'
+import { useCachedLookup } from './useCachedLookup'
+import { lookupNames } from './lookupUtils'
 
-// Small starter seed shown before any real /applications/stats data has loaded
+// Small starter seed shown before any real /candidate-sources data has loaded
 // (data values, not UI copy — same treatment as DEFAULT_FUNCTIONS).
 export const DEFAULT_APPLICATION_SOURCES = [
   'Indeed', 'LinkedIn', 'Referral', 'Career site', 'Job board', 'Direct approach',
 ]
 
-// Pull the distinct, non-empty source names out of the stats response's
-// `by_source` distribution (same shape applicationInsights.buildSourceDataFromStats reads).
-const mapSources = (res: AxiosResponse): string[] => {
-  const stats = unwrap<{ by_source?: Array<{ source?: string | null }> }>(res)
-  const bySource = stats?.by_source
-  const names = Array.isArray(bySource)
-    ? Array.from(new Set(bySource.map(s => s.source).filter((s): s is string => Boolean(s))))
-    : []
-  return names.length ? names : DEFAULT_APPLICATION_SOURCES
+// Both pieces of state (names + the API's free-entry flag) come from the same
+// response, so they're cached together as one value. The backend's own default
+// (before any tenant has toggled it) is strict — mirror that as the pending seed.
+interface SourcesLookupData { sources: string[]; apiFreeEntry: boolean }
+const FALLBACK: SourcesLookupData = { sources: DEFAULT_APPLICATION_SOURCES, apiFreeEntry: false }
+
+// Names keep the seed when empty; apiFreeEntry keeps the strict default when the
+// response doesn't carry a boolean flag (e.g. a genuinely empty/failed response).
+const mapSources = (res: AxiosResponse): SourcesLookupData => {
+  const names = lookupNames(res)
+  const free = (res?.data as { allow_free_entry?: unknown })?.allow_free_entry
+  return {
+    sources: names.length ? names : DEFAULT_APPLICATION_SOURCES,
+    apiFreeEntry: typeof free === 'boolean' ? free : false,
+  }
 }
 
 export function useApplicationSources() {
-  const { data } = useCachedLookup('/applications/stats', mapSources, DEFAULT_APPLICATION_SOURCES)
-  // No tenant toggle exists yet (see doc comment) — free entry stays on so the
-  // picker never blocks recording a source that hasn't been seen before.
-  return { sources: data, allowFreeEntry: true }
+  const { data, invalidate } = useCachedLookup('/candidate-sources', mapSources, FALLBACK)
+  return { sources: data.sources, allowFreeEntry: data.apiFreeEntry, invalidate }
 }

@@ -87,6 +87,7 @@
     "candidate_status": "Kandidaatstatus",
     "vacancy": "Vacature",
     "assessment_criteria": "Beoordelingscriteria",
+    "application_sources": "Bronnen",
     "rejection": "Afwijsredenen",
     "application_proposal": "Voorstellen",
     "cv_template": "CV-sjabloon",
@@ -2195,6 +2196,14 @@
     "freeEntryHint": "Aan: een eigen functie typen kan (combobox). Uit: alleen kiezen uit de lijst (strikte dropdown).",
     "confirmFreeEntry": "Weet je het zeker? Vrije invoer laat gebruikers contactfuncties typen die niet in de lijst staan. Dit kan de datakwaliteit verlagen."
   },
+  "applicationSourcesSettings": {
+    "title": "Bronnen",
+    "subtitle": "Beheer de lijst met wervingsbronnen (bijv. Indeed, LinkedIn, Referral) die wordt gebruikt bij het bronveld van sollicitaties en kandidaatintake, en of recruiters vrije waarden mogen invoeren.",
+    "add": "Bron toevoegen",
+    "freeEntry": "Vrije invoer toestaan",
+    "freeEntryHint": "Aan: recruiters kunnen een eigen bron typen (combobox). Uit: alleen kiezen uit de lijst (strikte dropdown).",
+    "confirmFreeEntry": "Weet je het zeker? Vrije invoer laat recruiters bronnen typen die niet in de lijst staan. Dit kan het bronnenrapport laten fragmenteren."
+  },
   "opportunityDisplay": {
     "title": "Tabelweergave",
     "subtitle": "Per kolom: gekleurde labels of platte tekst. De KPI-grafieken houden altijd hun kleuren.",
@@ -3111,12 +3120,12 @@
       "matches": "Matches",
       "intakes": "Intakes",
       "outreach": "Belllijsten",
-      "sources": "Bronnen",
       "contacts": "Contacten",
       "locations": "Locaties",
       "departments": "Afdelingen",
       "ai": "Koios AI",
-      "workflows": "Workflows"
+      "workflows": "Workflows",
+      "prospects": "Prospects"
     }
   }
 }

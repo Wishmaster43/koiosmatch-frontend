@@ -7,6 +7,7 @@
 import { lazy } from 'react'
 import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
+import { LEGACY_REPORT_ROUTE_ALIASES } from '@/pages/reports/reportIds'
 
 const Dashboard              = lazy(() => import('@/pages/dashboard/Dashboard'))
 const ReportsPage            = lazy(() => import('@/pages/reports/ReportsPage'))
@@ -65,22 +66,36 @@ export const PAGE_TITLES: Record<string, string> = {
   customers:                    'Customers',
   'import-wizard':              'Import wizard',
 
-  // Reports hub (analytical) — one key per report sub-page (RAPPORTEN-OMBOUW-1)
+  // Reports hub (analytical) — one key per report sub-page (RAPPORTEN-OMBOUW-1,
+  // consolidated RAPPORTEN-CONSOLIDATIE-1 2026-08-14). The thirteen CANONICAL
+  // routes come first; the legacy ids below them are RETIRED routes kept
+  // resolvable forever (house rule: a rename must never break a deep link) —
+  // renderPage() maps each to the merged page + its right switch position via
+  // reportIds.ts's LEGACY_REPORT_ROUTE_ALIASES.
   reports:                      'Reports',
-  'reports.candidates':         'Reports — Candidates',
-  'reports.leads':              'Reports — Leads',
+  'reports.candidates':         'Reports — Inflow',
   'reports.applications':       'Reports — Applications',
   'reports.customers':          'Reports — Customers',
+  'reports.customerstructure':  'Reports — Customer structure',
   'reports.flow':               'Reports — Flow',
-  'reports.recruiters':         'Reports — Recruiters',
-  'reports.accountmanagers':    'Reports — Account managers',
+  'reports.people':             'Reports — People',
   'reports.vacancies':          'Reports — Vacancies',
   'reports.opportunities':      'Reports — Opportunities',
   'reports.tasks':              'Reports — Tasks',
   'reports.matches':            'Reports — Matches',
   'reports.intakes':            'Reports — Intakes',
   'reports.outreach':           'Reports — Outreach',
+  'reports.usage':              'Reports — Usage',
+  // Legacy (retired as their own route — RAPPORTEN-CONSOLIDATIE-1)
+  'reports.leads':              'Reports — Leads',
   'reports.sources':            'Reports — Sources',
+  'reports.recruiters':         'Reports — Recruiters',
+  'reports.accountmanagers':    'Reports — Account managers',
+  'reports.contacts':           'Reports — Contacts',
+  'reports.locations':          'Reports — Locations',
+  'reports.departments':        'Reports — Departments',
+  'reports.ai':                 'Reports — AI usage',
+  'reports.workflows':          'Reports — Workflow runs',
   'customers.locations':        'Customers — Locations',
   'customers.departments':      'Customers — Departments',
   'customers.contacts':         'Customers — Contacts',
@@ -167,25 +182,38 @@ export function renderPage(activePage: string, { navIntent, goTo, dashView }: { 
     // Danny 14-08) — it no longer forwards to the first sub-report, so it gets NO
     // reportId prop and ReportsPage renders the dashboard branch.
     case 'reports':                return <ReportsPage />
+    // Thirteen CANONICAL routes (RAPPORTEN-CONSOLIDATIE-1) — each lands on that
+    // page's own default switch position (no initialView needed).
     case 'reports.candidates':     return <ReportsPage reportId="candidates" />
-    case 'reports.leads':          return <ReportsPage reportId="leads" />
     case 'reports.applications':   return <ReportsPage reportId="applications" />
     case 'reports.customers':      return <ReportsPage reportId="customers" />
+    case 'reports.customerstructure': return <ReportsPage reportId="customerstructure" />
     case 'reports.flow':           return <ReportsPage reportId="flow" />
-    case 'reports.recruiters':     return <ReportsPage reportId="recruiters" />
-    case 'reports.accountmanagers': return <ReportsPage reportId="accountmanagers" />
+    case 'reports.people':         return <ReportsPage reportId="people" />
     case 'reports.vacancies':      return <ReportsPage reportId="vacancies" />
     case 'reports.opportunities':  return <ReportsPage reportId="opportunities" />
     case 'reports.tasks':          return <ReportsPage reportId="tasks" />
     case 'reports.matches':        return <ReportsPage reportId="matches" />
     case 'reports.intakes':        return <ReportsPage reportId="intakes" />
     case 'reports.outreach':       return <ReportsPage reportId="outreach" />
-    case 'reports.sources':        return <ReportsPage reportId="sources" />
-    case 'reports.contacts':       return <ReportsPage reportId="contacts" />
-    case 'reports.locations':      return <ReportsPage reportId="locations" />
-    case 'reports.departments':    return <ReportsPage reportId="departments" />
-    case 'reports.ai':             return <ReportsPage reportId="ai" />
-    case 'reports.workflows':      return <ReportsPage reportId="workflows" />
+    case 'reports.usage':          return <ReportsPage reportId="usage" />
+    // Legacy routes — nine sidebar entries retired into the pages above
+    // (RAPPORTEN-CONSOLIDATIE-1); every one keeps resolving, landing on the
+    // merged page with the right switch position via the SAME map reportIds.ts
+    // documents (LEGACY_REPORT_ROUTE_ALIASES) — never a second, hand-copied list.
+    case 'reports.leads':
+    case 'reports.sources':
+    case 'reports.recruiters':
+    case 'reports.accountmanagers':
+    case 'reports.contacts':
+    case 'reports.locations':
+    case 'reports.departments':
+    case 'reports.ai':
+    case 'reports.workflows': {
+      const legacyId = activePage.slice('reports.'.length)
+      const alias = LEGACY_REPORT_ROUTE_ALIASES[legacyId]
+      return <ReportsPage reportId={alias.reportId} initialView={alias.view} />
+    }
 
     // ── Shiftmanager module ───────────────────────────────────────────────
     case 'shiftmanager':

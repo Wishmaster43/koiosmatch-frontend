@@ -84,6 +84,7 @@
     "phases": "Phases",
     "candidate_status": "Statut candidat",
     "vacancy": "Offre",
+    "application_sources": "Sources",
     "rejection": "Motifs de refus",
     "application_proposal": "Propositions",
     "cv_template": "Modèle de CV",
@@ -2195,6 +2196,14 @@
     "freeEntryHint": "Activé : une fonction personnalisée peut être saisie (combobox). Désactivé : choix dans la liste uniquement (liste stricte).",
     "confirmFreeEntry": "Es-tu sûr ? La saisie libre permet de saisir des fonctions hors liste. Cela peut réduire la qualité des données."
   },
+  "applicationSourcesSettings": {
+    "title": "Sources",
+    "subtitle": "Gérez la liste des sources d'acquisition (ex. Indeed, LinkedIn, Recommandation) utilisée dans le champ source des candidatures et de l'accueil des candidats, et si les recruteurs peuvent saisir des valeurs libres.",
+    "add": "Ajouter une source",
+    "freeEntry": "Autoriser la saisie libre",
+    "freeEntryHint": "Activé : les recruteurs peuvent saisir leur propre source (combobox). Désactivé : choisir uniquement dans la liste.",
+    "confirmFreeEntry": "Êtes-vous sûr ? La saisie libre autorise des sources hors liste. Cela peut fragmenter le rapport des sources."
+  },
   "customerDisplay": {
     "title": "Affichage du tableau",
     "subtitle": "Par colonne : libellés colorés ou texte simple. Les graphiques KPI gardent toujours leurs couleurs.",
@@ -3111,12 +3120,12 @@
       "matches": "Matches",
       "intakes": "Intakes",
       "outreach": "Listes d'appels",
-      "sources": "Sources",
       "contacts": "Contacts",
       "locations": "Sites",
       "departments": "Départements",
       "ai": "Koios AI",
-      "workflows": "Workflows"
+      "workflows": "Workflows",
+      "prospects": "Prospects"
     }
   }
 }

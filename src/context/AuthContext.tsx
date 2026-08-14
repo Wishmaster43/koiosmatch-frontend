@@ -4,6 +4,7 @@ import api, { primeCsrf, unwrapList } from '../lib/api'
 import { hasModule as tenantHasModule } from '../lib/modules'
 import { queryClient } from '../lib/queryClient'
 import { unsubscribe as unsubscribePush } from '../lib/pushSubscription'
+import { resolveDashboardType } from '../pages/dashboard/templates'
 import type { Tenant, User } from '../types/api'
 
 /**
@@ -367,15 +368,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const hasModule = useCallback((key: string) =>
     tenantHasModule(key, activeTenant ?? user?.tenant), [activeTenant, user])
 
-  // Start-dashboard type from the first role that carries one (C-35). The shape is
-  // live (roles are objects), but the seeded dashboard_type values read null until a
-  // dev:reset — so we default to 'readonly' (least privilege). Still tolerant of the
-  // legacy string[] shape defensively (untrusted client, §7).
+  // Start-dashboard type for a (possibly multi-role) user (C-35). The shape is live
+  // (roles are objects), but the seeded dashboard_type values read null until a
+  // dev:reset. DASHBOARD-KIEZER-1 chain audit: this used to return the FIRST role
+  // that carried a dashboard_type — but /auth/me (AuthPayloadService) never sorts
+  // roles by precedence, so a user holding BOTH 'recruitment' and 'recruitment_manager'
+  // could land on the poorer own-scoped view purely by DB row order. Resolving through
+  // the SAME richest-wins TYPE_PRECEDENCE the switcher/templates use (resolveDashboardType)
+  // makes this deterministic and consistent with the rest of the dashboard-type chain.
+  // Falls back to 'readonly' (least privilege) when no role carries one. Still tolerant
+  // of the legacy string[] shape defensively (untrusted client, §7).
   const dashboardType = useCallback((): string => {
-    for (const r of user?.roles ?? []) {
-      if (typeof r === 'object' && r.dashboard_type) return r.dashboard_type
-    }
-    return 'readonly'
+    const types = (user?.roles ?? [])
+      .map(r => (typeof r === 'object' ? r.dashboard_type : undefined))
+      .filter((t): t is string => !!t)
+    return resolveDashboardType(types)
   }, [user])
 
   const hasPermission = useCallback((permName: string) => {

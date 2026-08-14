@@ -35,8 +35,9 @@ vi.mock('@/lib/api', () => ({
   default: { get: vi.fn(() => Promise.resolve({ data: [] })) },
   unwrapList: (res: { data?: { data?: unknown[] } }) =>
     ({ rows: res?.data?.data ?? [], total: 0, page: 1, lastPage: 1, perPage: 0 }),
-  // S-SOURCE-1: useApplicationSources reads /applications/stats through this same
-  // shared unwrap — mirrors the real helper's "unwrap the .data envelope" shape.
+  // S-SOURCE-1 GRADUATED 2026-08-14: useApplicationSources reads the real
+  // /candidate-sources lookup through this same shared unwrap — mirrors the real
+  // helper's "unwrap the .data envelope" shape.
   unwrap: (res: { data?: { data?: unknown } }) => res?.data?.data ?? res?.data,
   getActiveTenantId: () => 'tenant-1',
 }))

@@ -87,6 +87,7 @@
     "candidate_status": "Candidate status",
     "vacancy": "Vacancy",
     "assessment_criteria": "Assessment criteria",
+    "application_sources": "Sources",
     "rejection": "Rejection reasons",
     "application_proposal": "Proposals",
     "cv_template": "CV template",
@@ -2195,6 +2196,14 @@
     "freeEntryHint": "On: a custom function can be typed (combobox). Off: pick from the list only (strict dropdown).",
     "confirmFreeEntry": "Are you sure? Free entry lets users type contact functions that are not in the list. This can lower data quality."
   },
+  "applicationSourcesSettings": {
+    "title": "Sources",
+    "subtitle": "Manage the list of acquisition sources (e.g. Indeed, LinkedIn, Referral) used on the application and candidate intake source field, and whether recruiters can enter free values.",
+    "add": "Add source",
+    "freeEntry": "Allow free entry",
+    "freeEntryHint": "On: recruiters can type their own source (combobox). Off: pick from the list only (strict dropdown).",
+    "confirmFreeEntry": "Are you sure? Free entry lets recruiters type sources that aren’t in the list. This can fragment the Sources report."
+  },
   "opportunityDisplay": {
     "title": "Table display",
     "subtitle": "Per column: coloured labels or plain text. The KPI charts always keep their colours.",
@@ -3111,12 +3120,12 @@
       "matches": "Matches",
       "intakes": "Intakes",
       "outreach": "Call lists",
-      "sources": "Sources",
       "contacts": "Contacts",
       "locations": "Locations",
       "departments": "Departments",
       "ai": "Koios AI",
-      "workflows": "Workflows"
+      "workflows": "Workflows",
+      "prospects": "Prospects"
     }
   }
 }

@@ -41,9 +41,12 @@ export const KPI_ROWS: Record<DashboardType, string[]> = {
   management:  ['candidates', 'opps', 'pipeline', 'expiringOpps', 'placements', 'intakes', 'openVacancies', 'tasksOverdue', 'activeConv'],
   recruitment: ['candidates', 'never', 'stale', 'tasksOverdue', 'failedWf', 'uncalledCallist', 'intakes', 'tooLongInStage', 'missingApptApps', 'closingSoon', 'staleStatusVac'],
   // DASHBOARD-KIEZER-1 — team-wide manager view: same KPI vocabulary as `recruitment`
-  // (the backend widens the underlying query team-wide instead of owner-scoped; the
-  // FE feeds carry no owner-scope param today, so this row stays server-identical to
-  // `recruitment` until a scoped endpoint lands — tracked as a BE follow-up, see skipped).
+  // (same ids/labels), but genuinely TEAM-WIDE data — VERIFIED against the real backend
+  // (DASHP-RM-1, RoleController::DASHBOARD_TYPES + DashboardController::hasRecruiterDashboard):
+  // the controller's owner-scope check is an exact match on 'recruitment', so
+  // 'recruitment_manager' falls through to the tenant-wide branch by construction, exactly
+  // like management/sales_manager — no BE follow-up or dedicated endpoint needed. Backend
+  // test: DashboardP36Test::test_recruitment_manager_type_is_tenant_wide_not_narrowed_to_own.
   recruitment_manager: ['candidates', 'never', 'stale', 'tasksOverdue', 'failedWf', 'uncalledCallist', 'intakes', 'tooLongInStage', 'missingApptApps', 'closingSoon', 'staleStatusVac'],
   backoffice:  ['tasks', 'placements', 'missingDocs', 'expiringContracts', 'couplingErrors', 'incompleteRuns'],
   sales:       ['opps', 'pipeline', 'expiringOpps', 'fillRate', 'placements', 'activeConv'],
@@ -97,6 +100,10 @@ export const KPI_LABEL_KEY: Record<string, string> = {
 }
 export const BLOCK_LABEL_KEY: Record<string, string> = {
   'chart.status': 'chart.byStatus', 'chart.funnel': 'chart.funnel', 'chart.funnelConversion': 'chart.funnelConversion',
+  // Was missing — recruitment_manager (DASHBOARD-KIEZER-1) is the only template that
+  // carries 'chart.recruiter', and its raw id leaked as the row label in the Settings →
+  // Dashboards "Charts & lists" matrix (the exact class of bug openVacancies hit before).
+  'chart.recruiter': 'chart.byRecruiter',
   'chart.weekly': 'chart.intakeWeekly', 'chart.oppStage': 'chart.byStage',
   'list.candidates': 'block.recentCandidates', 'list.applications': 'block.recentApplications',
   'list.conversations': 'block.recentConversations', 'list.runs': 'block.recentRuns', 'list.leads': 'block.leadsPipeline',
