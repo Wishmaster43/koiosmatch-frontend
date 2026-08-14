@@ -8,6 +8,15 @@ import type { Id } from '@/types/common'
 
 export interface CustomerOption { value: Id; label: string }
 
+// Stable empty-array fallback. A fresh `[]` per render gives the caller a new
+// identity every time, and a consumer that feeds these options into a memo behind
+// an effect (the reports right panel does exactly that) then re-registers on every
+// render: register → context state → re-render → register, until React gives up
+// with "Maximum update depth exceeded". The smoke suite caught this on the real
+// Reports page while every unit test stayed green, because the tests mock this
+// hook with a stable reference. One shared constant, no loop.
+const EMPTY_CUSTOMER_OPTIONS: CustomerOption[] = []
+
 export function useCustomerOptions(enabled: boolean): CustomerOption[] {
   const { data } = useQuery({
     queryKey: ['customers', 'options'],
@@ -19,5 +28,5 @@ export function useCustomerOptions(enabled: boolean): CustomerOption[] {
       return rows.map(c => ({ value: c.id ?? '', label: c.name ?? '' })) as CustomerOption[]
     },
   })
-  return data ?? []
+  return data ?? EMPTY_CUSTOMER_OPTIONS
 }
