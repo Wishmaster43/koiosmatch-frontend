@@ -10,6 +10,7 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Trash2, Undo2 } from 'lucide-react'
 import DeletionPreviewModal from '@/components/ui/DeletionPreviewModal'
+import PendingEraseBanner from '@/components/drawer/PendingEraseBanner'
 import { useDeletionLifecycle, eraseAroundDate } from '@/hooks/useDeletionLifecycle'
 import api from '@/lib/api'
 import { notifyError, notifySuccess } from '@/lib/notify'
@@ -95,19 +96,11 @@ export default function TrashLifecycleSection({
   if (lifecycle === 'pending_erase') {
     const eraseAt = eraseAroundDate(pendingEraseAt, graceDays)
     const eraseLine = eraseAt ? t('trash.eraseAround', { date: formatDate(eraseAt) }) : t('trash.eraseAutomatic')
+    const message = pendingEraseAt ? `${t('trash.pendingSince', { date: formatDate(pendingEraseAt) })} · ${eraseLine}` : eraseLine
     return (
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 8, padding: '7px 10px', borderRadius: 8, fontSize: 12,
-        color: 'var(--color-danger)', background: 'color-mix(in srgb, var(--color-danger) 8%, transparent)',
-        border: '1px solid color-mix(in srgb, var(--color-danger) 28%, transparent)' }}>
-        <span style={{ flex: 1, minWidth: 0 }}>
-          {pendingEraseAt ? `${t('trash.pendingSince', { date: formatDate(pendingEraseAt) })} · ${eraseLine}` : eraseLine}
-        </span>
-        {canUnmark && (
-          <button type="button" onClick={doUnmark} disabled={unmarkBusy} style={{ ...actionBtn('var(--color-archive)'), opacity: unmarkBusy ? 0.6 : 1 }}>
-            <Undo2 size={12} aria-hidden="true" /> {t('trash.unmarkAction')}
-          </button>
-        )}
-      </div>
+      <PendingEraseBanner id={id} message={message}
+        onUnmark={canUnmark ? doUnmark : undefined} unmarkLabel={t('trash.unmarkAction')}
+        unmarkBusy={unmarkBusy} unmarkVariant="button" unmarkIcon={Undo2} unmarkColor="var(--color-archive)" />
     )
   }
 
