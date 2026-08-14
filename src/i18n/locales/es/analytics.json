@@ -18,7 +18,8 @@
     "outreach": "Outreach",
     "sources": "Fuentes",
     "candidates": "Entrada",
-    "applications": "Solicitudes"
+    "applications": "Solicitudes",
+    "customers": "Clientes"
   },
   "candidates": {
     "loading": "Cargando entrada…",
@@ -186,6 +187,21 @@
       "matched": "Emparejado",
       "rejected": "Rechazado",
       "placed": "Colocado"
+    }
+  },
+  "customers": {
+    "loading": "Cargando clientes…",
+    "error": "No se pudieron cargar los clientes",
+    "empty": "Sin clientes en este período",
+    "total": "Entrada total",
+    "series": "Entrada en el tiempo",
+    "window": "Entrada {{from}} a {{to}}",
+    "axes": {
+      "status": "Estado",
+      "phase": "Fase",
+      "industry": "Sector",
+      "owner": "Propietario",
+      "branch": "Sucursal"
     }
   }
 }

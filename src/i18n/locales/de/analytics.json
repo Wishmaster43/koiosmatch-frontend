@@ -18,7 +18,8 @@
     "outreach": "Outreach",
     "sources": "Quellen",
     "candidates": "Zulauf",
-    "applications": "Bewerbungen"
+    "applications": "Bewerbungen",
+    "customers": "Kunden"
   },
   "candidates": {
     "loading": "Zulauf wird geladen…",
@@ -186,6 +187,21 @@
       "matched": "Gematcht",
       "rejected": "Abgelehnt",
       "placed": "Platziert"
+    }
+  },
+  "customers": {
+    "loading": "Kunden werden geladen…",
+    "error": "Kunden konnten nicht geladen werden",
+    "empty": "Keine Kunden in diesem Zeitraum",
+    "total": "Gesamtzugang",
+    "series": "Zugang im Zeitverlauf",
+    "window": "Zugang {{from}} bis {{to}}",
+    "axes": {
+      "status": "Status",
+      "phase": "Phase",
+      "industry": "Branche",
+      "owner": "Eigentümer",
+      "branch": "Niederlassung"
     }
   }
 }

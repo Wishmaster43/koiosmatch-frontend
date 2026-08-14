@@ -18,7 +18,8 @@
     "outreach": "Outreach",
     "sources": "Bronnen",
     "candidates": "Instroom",
-    "applications": "Sollicitaties"
+    "applications": "Sollicitaties",
+    "customers": "Klanten"
   },
   "candidates": {
     "loading": "Instroom laden…",
@@ -186,6 +187,21 @@
       "matched": "Gematcht",
       "rejected": "Afgewezen",
       "placed": "Geplaatst"
+    }
+  },
+  "customers": {
+    "loading": "Klanten laden…",
+    "error": "Kon de klanten niet laden",
+    "empty": "Geen klanten in deze periode",
+    "total": "Totaal instroom",
+    "series": "Instroom over tijd",
+    "window": "Instroom {{from}} t/m {{to}}",
+    "axes": {
+      "status": "Status",
+      "phase": "Fase",
+      "industry": "Branche",
+      "owner": "Eigenaar",
+      "branch": "Vestiging"
     }
   }
 }

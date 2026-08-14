@@ -28,7 +28,7 @@ export interface DrillSpec {
 type DrillRow = Record<string, unknown>
 const rowTitle = (r: DrillRow) => String(r.name ?? r.label ?? r.title ?? r.full_name ?? r.id ?? '—')
 const rowSub   = (r: DrillRow) => {
-  const bits = [r.status, r.stage, r.funnel_label, r.client, r.function_title, r.owner]
+  const bits = [r.status, r.status_label, r.stage, r.funnel_label, r.client, r.function_title, r.city, r.owner]
     .filter((v): v is string => typeof v === 'string' && v.length > 0)
   return bits.slice(0, 2).join(' · ')
 }

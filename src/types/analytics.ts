@@ -197,6 +197,24 @@ export interface ApplicationsReportData {
   by_vacancy: ApplicationTopSegment[]
 }
 
+// ── Customers report (GET /reports/customers, RAPPORTEN-SUITE-1 "portie 3") ──
+// Hand-written from the backend Service (no 2xx schema in the generated spec yet,
+// §10) — mirrors the CONTRACT-CHANGELOG "portie 3" entry exactly. No by_source axis:
+// customers have no `source` column (never invent one). by_industry segments carry
+// no `color` (the Industry lookup has none) so `color` is always null there.
+export interface CustomersReportData {
+  period: string
+  from: string
+  to: string
+  total: number
+  timeseries: { bucket: 'day' | 'week'; series: CandidateTimeseriesPoint[] }
+  by_status: CandidateSegment[]
+  by_phase: CandidateSegment[]
+  by_industry: CandidateSegment[]
+  by_owner: CandidateOwnerSegment[]
+  by_branch: CandidateSegment[]
+}
+
 // ── Sources report (GET /reports/sources, REPORTS-2 fase 2) ──────────────────
 // Hand-written from the backend Service (no 2xx schema in the generated spec yet,
 // §10) — mirrors App\Services\Report\SourcesReport::run() exactly.

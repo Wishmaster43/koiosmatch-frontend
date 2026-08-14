@@ -18,7 +18,8 @@
     "outreach": "Outreach",
     "sources": "Sources",
     "candidates": "Inflow",
-    "applications": "Applications"
+    "applications": "Applications",
+    "customers": "Customers"
   },
   "candidates": {
     "loading": "Loading inflow…",
@@ -186,6 +187,21 @@
       "matched": "Matched",
       "rejected": "Rejected",
       "placed": "Placed"
+    }
+  },
+  "customers": {
+    "loading": "Loading customers…",
+    "error": "Could not load the customers",
+    "empty": "No customers in this period",
+    "total": "Total inflow",
+    "series": "Inflow over time",
+    "window": "Inflow {{from}} through {{to}}",
+    "axes": {
+      "status": "Status",
+      "phase": "Phase",
+      "industry": "Industry",
+      "owner": "Owner",
+      "branch": "Branch"
     }
   }
 }

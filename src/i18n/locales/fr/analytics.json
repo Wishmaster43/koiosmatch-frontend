@@ -18,7 +18,8 @@
     "outreach": "Outreach",
     "sources": "Sources",
     "candidates": "Flux entrant",
-    "applications": "Candidatures"
+    "applications": "Candidatures",
+    "customers": "Clients"
   },
   "candidates": {
     "loading": "Chargement du flux entrant…",
@@ -186,6 +187,21 @@
       "matched": "Mis en correspondance",
       "rejected": "Refusé",
       "placed": "Placé"
+    }
+  },
+  "customers": {
+    "loading": "Chargement des clients…",
+    "error": "Impossible de charger les clients",
+    "empty": "Aucun client sur cette période",
+    "total": "Total des entrées",
+    "series": "Entrées dans le temps",
+    "window": "Entrées du {{from}} au {{to}}",
+    "axes": {
+      "status": "Statut",
+      "phase": "Phase",
+      "industry": "Secteur",
+      "owner": "Propriétaire",
+      "branch": "Agence"
     }
   }
 }
