@@ -160,7 +160,12 @@
     "settings": "Instellingen",
     "modulesGroup": "Modules",
     "switchTenant": "Wissel van tenant",
-    "workflows": "Workflows"
+    "workflows": "Workflows",
+    "reports_candidates": "Instroom",
+    "reports_applications": "Sollicitaties",
+    "reports_customers": "Klanten",
+    "reports_opportunities": "Kansen",
+    "reports_tasks": "Taken"
   },
   "koios": {
     "online": "Online",

@@ -65,13 +65,16 @@ export const PAGE_TITLES: Record<string, string> = {
   customers:                    'Customers',
   'import-wizard':              'Import wizard',
 
-  // Reports hub (analytical)
+  // Reports hub (analytical) — one key per report sub-page (RAPPORTEN-OMBOUW-1)
   reports:                      'Reports',
   'reports.candidates':         'Reports — Candidates',
   'reports.applications':       'Reports — Applications',
+  'reports.customers':          'Reports — Customers',
   'reports.flow':               'Reports — Flow',
   'reports.recruiters':         'Reports — Recruiters',
   'reports.vacancies':          'Reports — Vacancies',
+  'reports.opportunities':      'Reports — Opportunities',
+  'reports.tasks':              'Reports — Tasks',
   'reports.matches':            'Reports — Matches',
   'reports.intakes':            'Reports — Intakes',
   'reports.outreach':           'Reports — Outreach',
@@ -157,15 +160,18 @@ export function renderPage(activePage: string, { navIntent, goTo, dashView }: { 
 
     // ── Reports hub (analytical) ──────────────────────────────────────────
     case 'reports':
-    case 'reports.candidates':     return <ReportsPage initialTab="candidates" />
-    case 'reports.applications':   return <ReportsPage initialTab="applications" />
-    case 'reports.flow':           return <ReportsPage initialTab="flow" />
-    case 'reports.recruiters':     return <ReportsPage initialTab="recruiters" />
-    case 'reports.vacancies':      return <ReportsPage initialTab="vacancies" />
-    case 'reports.matches':        return <ReportsPage initialTab="matches" />
-    case 'reports.intakes':        return <ReportsPage initialTab="intakes" />
-    case 'reports.outreach':       return <ReportsPage initialTab="outreach" />
-    case 'reports.sources':        return <ReportsPage initialTab="sources" />
+    case 'reports.candidates':     return <ReportsPage reportId="candidates" />
+    case 'reports.applications':   return <ReportsPage reportId="applications" />
+    case 'reports.customers':      return <ReportsPage reportId="customers" />
+    case 'reports.flow':           return <ReportsPage reportId="flow" />
+    case 'reports.recruiters':     return <ReportsPage reportId="recruiters" />
+    case 'reports.vacancies':      return <ReportsPage reportId="vacancies" />
+    case 'reports.opportunities':  return <ReportsPage reportId="opportunities" />
+    case 'reports.tasks':          return <ReportsPage reportId="tasks" />
+    case 'reports.matches':        return <ReportsPage reportId="matches" />
+    case 'reports.intakes':        return <ReportsPage reportId="intakes" />
+    case 'reports.outreach':       return <ReportsPage reportId="outreach" />
+    case 'reports.sources':        return <ReportsPage reportId="sources" />
 
     // ── Shiftmanager module ───────────────────────────────────────────────
     case 'shiftmanager':

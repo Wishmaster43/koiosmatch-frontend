@@ -1,10 +1,13 @@
 /**
- * ReportsPage — the analytical reports hub (B-28). A thin shell that owns the
- * sub-tab bar (Flow · Recruiters · later Vacancies) and the shared period control,
- * and renders the active report. Each report owns its own data layer; this only
- * switches tabs and propagates the chosen period.
+ * ReportsPage — thin router for the analytical reports (B-28, RAPPORTEN-OMBOUW-1).
+ * The old inner tab bar is GONE (Danny 13-08: every report is its own sub-page,
+ * reached from the sidebar's Rapporten submenu). This shell only resolves the
+ * active report from the route key handed down by appPages (#reports.<id>) and
+ * renders it full-page. The shared period control still travels through the
+ * existing `tabsSlot` seam so every report keeps its props and layout unchanged.
  */
 import { useId, useState } from 'react'
+import type { ComponentType, ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import CandidatesReport from './CandidatesReport'
 import ApplicationsReport from './ApplicationsReport'
@@ -19,90 +22,72 @@ import IntakesReport from './IntakesReport'
 import OutreachReport from './OutreachReport'
 import SourcesReport from './SourcesReport'
 import CreatableSelect from '@/components/ui/CreatableSelect'
+import { REPORT_IDS } from './reportIds'
+import type { ReportId } from './reportIds'
 import type { ReportPeriod } from '@/types/analytics'
 
-export default function ReportsPage({ initialTab = 'candidates' }: { initialTab?: string }) {
+// Every report takes the same contract: the chosen period + the pass-through slot.
+type ReportComponent = ComponentType<{ period: ReportPeriod; tabsSlot?: ReactNode }>
+
+// Registry: report id → component. Ids and their order live in reportIds.ts
+// (shared with the sidebar submenu); an id here without a REPORT_IDS entry — or
+// vice versa — is a wiring bug the exhaustive Record type surfaces at compile time.
+const REPORTS: Record<ReportId, ReportComponent> = {
+  candidates:    CandidatesReport,
+  applications:  ApplicationsReport,
+  customers:     CustomersReport,
+  flow:          FlowReport,
+  recruiters:    RecruitersReport,
+  vacancies:     VacanciesReport,
+  opportunities: OpportunitiesReport,
+  tasks:         TasksReport,
+  matches:       MatchesReport,
+  intakes:       IntakesReport,
+  outreach:      OutreachReport,
+  sources:       SourcesReport,
+}
+
+export default function ReportsPage({ reportId }: { reportId?: string }) {
   const { t } = useTranslation('analytics')
-  const [tab,    setTab]    = useState(initialTab)
   const [period, setPeriod] = useState<ReportPeriod>('month')
   // Names the period picker for the button-based CreatableSelect below (a <button>
   // isn't labelable by htmlFor — see the component's own doc comment).
   const periodLabelId = useId()
 
-  // Sub-tabs are config: { id, label }. Add a tab here when its report lands.
-  // Candidates/leads INFLOW sits first — Danny's morning first-look (RAPPORTEN-SUITE-1).
-  const tabs = [
-    { id: 'candidates',  label: t('tabs.candidates') },
-    { id: 'applications', label: t('tabs.applications') },
-    { id: 'customers',  label: t('tabs.customers') },
-    { id: 'flow',       label: t('tabs.flow') },
-    { id: 'recruiters', label: t('tabs.recruiters') },
-    { id: 'vacancies',  label: t('tabs.vacancies') },
-    { id: 'opportunities', label: t('tabs.opportunities') },
-    { id: 'tasks',      label: t('tabs.tasks') },
-    { id: 'matches',    label: t('tabs.matches') },
-    { id: 'intakes',    label: t('tabs.intakes') },
-    { id: 'outreach',   label: t('tabs.outreach') },
-    { id: 'sources',    label: t('tabs.sources') },
-  ]
+  // Resolve the active report; an unknown or absent id (bare #reports) falls
+  // back to the FIRST report so a stale deep-link still lands somewhere real.
+  const active: ReportId = (REPORT_IDS as readonly string[]).includes(reportId ?? '')
+    ? (reportId as ReportId)
+    : REPORT_IDS[0]
+  const Report = REPORTS[active]
 
-  // Tab bar + shared period control on one row. Passed to each report as `tabsSlot`
-  // so the report renders its KPI row ABOVE the tabs — same order as the candidate
-  // page (KPIs first, then navigation), consistent across every report.
-  const tabsBar = (
-    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                  gap: 12, borderBottom: '1px solid var(--border)', marginBottom: 20 }}>
-      <div style={{ display: 'flex', gap: 4 }}>
-        {tabs.map(tb => (
-          <button key={tb.id} type="button" onClick={() => setTab(tb.id)}
-            style={{
-              padding: '8px 14px', fontSize: 13, fontWeight: tab === tb.id ? 600 : 400,
-              // Text-colour accent uses the AA-contrast text token, not the raw brand primary.
-              color: tab === tb.id ? 'var(--color-primary-text)' : 'var(--text-muted)',
-              background: 'none', border: 'none', cursor: 'pointer',
-              borderBottom: tab === tb.id ? '2px solid var(--color-primary)' : '2px solid transparent',
-              marginBottom: -1,
-            }}>
-            {tb.label}
-          </button>
-        ))}
-      </div>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12,
-                    color: 'var(--text-muted)', flexShrink: 0, paddingBottom: 6 }}>
-        <span id={periodLabelId}>{t('period.label')}</span>
-        {/* Searchable combobox replaces the bare native <select> (Danny 08-08, §4) —
-            allowCreate=false since the period is a fixed, non-creatable vocabulary. */}
-        <CreatableSelect
-          aria-labelledby={periodLabelId}
-          value={period}
-          onChange={v => setPeriod(v as ReportPeriod)}
-          allowCreate={false}
-          menuWidth={140}
-          options={[
-            { value: 'day', label: t('period.day') },
-            { value: 'week', label: t('period.week') },
-            { value: 'month', label: t('period.month') },
-          ]}
-          style={{ height: 30, padding: '0 8px', fontSize: 13 }}
-        />
-      </div>
+  // Shared period control, top-right. Passed through `tabsSlot` so each report
+  // keeps rendering it under its KPI row without any prop change on its side.
+  const periodBar = (
+    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end',
+                  gap: 6, fontSize: 12, color: 'var(--text-muted)', marginBottom: 16 }}>
+      <span id={periodLabelId}>{t('period.label')}</span>
+      {/* Searchable combobox replaces the bare native <select> (Danny 08-08, §4) —
+          allowCreate=false since the period is a fixed, non-creatable vocabulary. */}
+      <CreatableSelect
+        aria-labelledby={periodLabelId}
+        value={period}
+        onChange={v => setPeriod(v as ReportPeriod)}
+        allowCreate={false}
+        menuWidth={140}
+        options={[
+          { value: 'day', label: t('period.day') },
+          { value: 'week', label: t('period.week') },
+          { value: 'month', label: t('period.month') },
+        ]}
+        style={{ height: 30, padding: '0 8px', fontSize: 13 }}
+      />
     </div>
   )
 
   return (
     <div className="p-6">
-      {tab === 'candidates'  && <CandidatesReport  period={period} tabsSlot={tabsBar} />}
-      {tab === 'applications' && <ApplicationsReport period={period} tabsSlot={tabsBar} />}
-      {tab === 'customers'  && <CustomersReport  period={period} tabsSlot={tabsBar} />}
-      {tab === 'flow'       && <FlowReport       period={period} tabsSlot={tabsBar} />}
-      {tab === 'recruiters' && <RecruitersReport period={period} tabsSlot={tabsBar} />}
-      {tab === 'vacancies'  && <VacanciesReport  period={period} tabsSlot={tabsBar} />}
-      {tab === 'opportunities' && <OpportunitiesReport period={period} tabsSlot={tabsBar} />}
-      {tab === 'tasks'      && <TasksReport      period={period} tabsSlot={tabsBar} />}
-      {tab === 'matches'    && <MatchesReport    period={period} tabsSlot={tabsBar} />}
-      {tab === 'intakes'    && <IntakesReport    period={period} tabsSlot={tabsBar} />}
-      {tab === 'outreach'   && <OutreachReport   period={period} tabsSlot={tabsBar} />}
-      {tab === 'sources'    && <SourcesReport    period={period} tabsSlot={tabsBar} />}
+      <Report period={period} tabsSlot={periodBar} />
     </div>
   )
 }

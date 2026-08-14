@@ -9,6 +9,7 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useAuth } from '@/context/AuthContext'
 import { canAccessPage } from '@/lib/access'
+import { REPORT_IDS } from '@/pages/reports/reportIds'
 import TenantSwitcher from './TenantSwitcher'
 import {
   LayoutDashboard, Users, Building2,
@@ -55,17 +56,9 @@ const NAV_ITEMS = [
   // ReportsPage tabs; labels resolve via common.nav.* (navLabel).
   {
     id: 'reports', label: 'Rapporten', icon: PieChart,
-    children: [
-      { id: 'reports.candidates',   label: 'Instroom' },
-      { id: 'reports.applications', label: 'Sollicitaties' },
-      { id: 'reports.flow',       label: 'Flow' },
-      { id: 'reports.recruiters', label: 'Recruiters' },
-      { id: 'reports.vacancies',  label: 'Vacatures' },
-      { id: 'reports.matches',    label: 'Matches' },
-      { id: 'reports.intakes',    label: 'Intakes' },
-      { id: 'reports.outreach',   label: 'Outreach' },
-      { id: 'reports.sources',    label: 'Sources' },
-    ],
+    // One child per report sub-page, in REPORT_IDS order (reports/reportIds.ts is
+    // the single source for that order; labels resolve via navLabel → common.nav.*).
+    children: REPORT_IDS.map(id => ({ id: `reports.${id}` })),
   },
 ]
 

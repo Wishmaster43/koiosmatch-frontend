@@ -160,7 +160,12 @@
     "settings": "Settings",
     "modulesGroup": "Modules",
     "switchTenant": "Switch tenant",
-    "workflows": "Workflows"
+    "workflows": "Workflows",
+    "reports_candidates": "Intake flow",
+    "reports_applications": "Applications",
+    "reports_customers": "Customers",
+    "reports_opportunities": "Opportunities",
+    "reports_tasks": "Tasks"
   },
   "koios": {
     "online": "Online",

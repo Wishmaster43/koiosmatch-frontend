@@ -160,7 +160,12 @@
     "matches": "Matches",
     "opportunities": "Chancen",
     "tasks": "Aufgaben",
-    "outreach": "Anruflisten"
+    "outreach": "Anruflisten",
+    "reports_candidates": "Zulauf",
+    "reports_applications": "Bewerbungen",
+    "reports_customers": "Kunden",
+    "reports_opportunities": "Chancen",
+    "reports_tasks": "Aufgaben"
   },
   "koios": {
     "online": "Online",
