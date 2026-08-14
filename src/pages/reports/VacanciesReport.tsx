@@ -120,9 +120,14 @@ export default function VacanciesReport({ period, filters = EMPTY_REPORT_FILTERS
       value: s ? formatRatio(s.fill_rate) : '—' },
     { key: 'ttf', label: t('vacancies.summary.avgTimeToFill'),
       value: s?.avg_time_to_fill_days != null ? t('vacancies.daysValue', { days: Math.round(s.avg_time_to_fill_days) }) : '—' },
-    // openRate = open/total — a ratio of two fields the endpoint already returns.
-    { key: 'openRate', label: t('vacancies.summary.openRate'),
-      value: s && s.total > 0 ? formatRatio(s.open / s.total) : '—' },
+    // PDF-VACATURES point 31: "vacature staat online maar geen kandidaten na X
+    // dagen" — the real, tenant-threshold-driven backend count (VacanciesReport
+    // ::applySignal SIGNAL_STALE_ONLINE), the same predicate the row-level
+    // vacancyAdvice.ts rule and the list's stale_online filter already use. No
+    // drill route exists yet for this signal (the drill endpoint's eight-way XOR
+    // does not include `signal` — see the handoff note below), so this card is a
+    // plain, non-fabricated stat, not clickable.
+    { key: 'staleOnline', label: t('vacancies.summary.staleOnline'), value: s?.stale_online ?? 0 },
     // Plain stat — no single XOR value represents "distinct customers", so not clickable.
     { key: 'customersCount', label: t('vacancies.summary.customersCount'), value: customersCount },
     { key: 'topIndustry', label: t('vacancies.summary.topIndustry'),

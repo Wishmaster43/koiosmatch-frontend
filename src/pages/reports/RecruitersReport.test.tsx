@@ -4,10 +4,18 @@ import userEvent from '@testing-library/user-event'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import RecruitersReport from './RecruitersReport'
 import type { RecruitersReportData } from '@/types/analytics'
+import i18n from '@/i18n'
 
 // Data layer under test control (loading/error/empty/success — the four UI states).
 const mockUseRecruitersReport = vi.fn()
 vi.mock('./useRecruitersReport', () => ({ useRecruitersReport: () => mockUseRecruitersReport() }))
+
+// Tenant KPI-order settings, controllable per test (RAPPORT-KPI-INSTELBAAR).
+const mockSettings = vi.hoisted(() => vi.fn(() => ({} as Record<string, unknown>)))
+vi.mock('@/lib/settings/useAllSettings', async () => {
+  const actual = await vi.importActual('@/lib/settings/useAllSettings')
+  return { ...actual, useAllSettings: () => mockSettings() }
+})
 
 // Spy on the underlying axios client so we can assert the exact request shape
 // (method/route/params) that a row click sends — mutation tests must assert the
@@ -55,6 +63,7 @@ describe('RecruitersReport', () => {
   beforeEach(() => {
     getSpy.mockReset()
     getSpy.mockResolvedValue({ data: { data: [], meta: { total: 0 } } })
+    mockSettings.mockReturnValue({})
   })
 
   it('shows the loading state', () => {
@@ -158,5 +167,41 @@ describe('RecruitersReport', () => {
     expect(getSpy.mock.calls.length).toBeGreaterThan(0)
     expect(getSpy.mock.calls.every(c =>
       c[0] === '/reports/recruiters/drill' || c[0] === '/reports/recruiters/advice')).toBe(true)
+  })
+
+  // RAPPORT-KPI-INSTELBAAR: the strip renders the tenant's stored nine-card
+  // order, in that exact order, instead of today's hardcoded sequence.
+  it('renders the KPI strip in the tenant-chosen stored order', () => {
+    mockSettings.mockReturnValue({
+      report_kpis_recruiters: JSON.stringify([
+        'tasksOverdue', 'tasksOpen', 'intakesDone', 'intakesPlanned',
+        'notContacted', 'matches', 'applications', 'candidates', 'recruiters',
+      ]),
+    })
+    mockUseRecruitersReport.mockReturnValue({ data, loading: false, error: false })
+    const { container } = renderReport()
+    const overdueLabel = i18n.t('recruiters.summary.tasksOverdue', { ns: 'analytics' })
+    const recruitersLabel = i18n.t('recruiters.summary.recruiters', { ns: 'analytics' })
+    const text = container.textContent ?? ''
+    // The stored order puts tasksOverdue FIRST and recruiters LAST — the strip
+    // must render in that exact order, not today's hardcoded sequence.
+    expect(text.indexOf(overdueLabel)).toBeGreaterThanOrEqual(0)
+    expect(text.indexOf(overdueLabel)).toBeLessThan(text.indexOf(recruitersLabel))
+  })
+
+  // A vanished stored key falls back silently on the report itself (never a
+  // crash or a blank slot) but surfaces a visible notice via ReportKpiBand.
+  it('falls back a vanished stored key to the default and shows a notice, never crashing', () => {
+    mockSettings.mockReturnValue({
+      report_kpis_recruiters: JSON.stringify([
+        'ghost_key', 'candidates', 'applications', 'matches', 'notContacted',
+        'intakesPlanned', 'intakesDone', 'tasksOpen', 'tasksOverdue',
+      ]),
+    })
+    mockUseRecruitersReport.mockReturnValue({ data, loading: false, error: false })
+    renderReport()
+    // Still renders nine real cards — 'recruiters' (the backfilled default) shows up.
+    expect(screen.getAllByText('Recruiters').length).toBeGreaterThan(0)
+    expect(screen.getByText(i18n.t('recruiters.kpiOrderFellBack', { ns: 'analytics' }))).toBeInTheDocument()
   })
 })

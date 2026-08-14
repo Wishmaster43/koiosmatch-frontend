@@ -62,7 +62,8 @@
     "import_export": "Import & Export",
     "document_types": "Dokumenttypen",
     "appointments": "Termine",
-    "workflows": "Workflows"
+    "workflows": "Workflows",
+    "reports": "Berichte"
   },
   "nav": {
     "candidate_display": "Tabellenansicht",
@@ -237,7 +238,8 @@
     "notif_my": "Meine Benachrichtigungen",
     "customer_identifier_validation": "Nummernprüfung",
     "automations": "Automatisierungen",
-    "hf_contract_map": "HelloFlex-Vertragszuordnung"
+    "hf_contract_map": "HelloFlex-Vertragszuordnung",
+    "report_kpis": "Berichtskarten"
   },
   "kpis": {
     "title": "KPI-Einstellungen",
@@ -3085,5 +3087,36 @@
     "labelPlaceholder": "Erkennbarer Name",
     "empty": "Es sind noch keine Vertragsformen eingerichtet.",
     "saveError": "Speichern der Vertragszuordnung fehlgeschlagen."
+  },
+  "reportKpis": {
+    "intro": "Wählen Sie, welche neun KPI-Karten jeder Bericht anzeigt und in welcher Reihenfolge. Ein Kartenplatz kann nur gegen eine andere Karte aus der Liste dieses Berichts getauscht werden, die Anzahl bleibt immer neun.",
+    "loading": "Einstellungen werden geladen…",
+    "slotsTitle": "Neun KPI-Karten",
+    "saving": "Speichern…",
+    "pinnedFirstNotice": "Die erste Karte ({{label}}) ist fest und nicht Teil der Auswahl.",
+    "noSpareCards": "Für diesen Bericht gibt es noch keine alternativen Karten. Sie können die neun neu anordnen, aber noch nicht durch etwas Neues ersetzen.",
+    "noSpareAxes": "Alle verfügbaren Kategorien für diesen Bericht werden bereits angezeigt. Sie können sie neu anordnen, es gibt jedoch keine weiteren hinzuzufügen.",
+    "fellBackNotice": "Eine zuvor gewählte Karte existiert nicht mehr und wurde auf den Standard zurückgesetzt. Der Bericht selbst zeigt weiterhin immer neun Karten.",
+    "reportNames": {
+      "candidates": "Kandidaten",
+      "leads": "Leads",
+      "applications": "Bewerbungen",
+      "customers": "Kunden",
+      "flow": "Flow",
+      "recruiters": "Recruiter",
+      "accountmanagers": "Kundenbetreuer",
+      "vacancies": "Vakanzen",
+      "opportunities": "Chancen",
+      "tasks": "Aufgaben",
+      "matches": "Matches",
+      "intakes": "Intakes",
+      "outreach": "Anruflisten",
+      "sources": "Quellen",
+      "contacts": "Kontakte",
+      "locations": "Standorte",
+      "departments": "Abteilungen",
+      "ai": "Koios AI",
+      "workflows": "Workflows"
+    }
   }
 }

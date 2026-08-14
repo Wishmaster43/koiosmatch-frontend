@@ -38,7 +38,8 @@
       "source": "Quelle",
       "owner": "Eigentümer",
       "branch": "Niederlassung"
-    }
+    },
+    "kpiOrderFellBack": "Eine in den Einstellungen konfigurierte KPI-Karte existiert nicht mehr und wurde auf den Standard zurückgesetzt."
   },
   "intakes": {
     "loading": "Intakes werden geladen…",
@@ -125,7 +126,8 @@
     },
     "intakesValue": "{{planned}} geplant · {{done}} erledigt",
     "tasksValue": "{{open}} offen · {{overdue}} überfällig",
-    "notContactedHint": "> {{months}} Mon."
+    "notContactedHint": "> {{months}} Mon.",
+    "kpiOrderFellBack": "Eine in den Einstellungen konfigurierte KPI-Karte existiert nicht mehr und wurde auf den Standard zurückgesetzt."
   },
   "vacancies": {
     "title": "Stellen",
@@ -147,7 +149,8 @@
       "openRate": "Offen-Quote",
       "customersCount": "Kunden",
       "topIndustry": "Top-Branche",
-      "topOwner": "Top-Eigentümer"
+      "topOwner": "Top-Eigentümer",
+      "staleOnline": "Online, keine Kandidaten"
     },
     "cols": {
       "vacancy": "Stelle",

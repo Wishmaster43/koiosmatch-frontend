@@ -62,7 +62,8 @@
     "import_export": "Import & Export",
     "document_types": "Types de document",
     "appointments": "Rendez-vous",
-    "workflows": "Workflows"
+    "workflows": "Workflows",
+    "reports": "Rapports"
   },
   "nav": {
     "candidate_display": "Affichage du tableau",
@@ -237,7 +238,8 @@
     "notif_my": "Mes notifications",
     "customer_identifier_validation": "Validation des numéros",
     "automations": "Automatisations",
-    "hf_contract_map": "Correspondance des contrats HelloFlex"
+    "hf_contract_map": "Correspondance des contrats HelloFlex",
+    "report_kpis": "Cartes de rapport"
   },
   "kpis": {
     "title": "Paramètres KPI",
@@ -3085,5 +3087,36 @@
     "labelPlaceholder": "Nom reconnaissable",
     "empty": "Aucune forme de contrat n'est encore configurée.",
     "saveError": "L'enregistrement de la correspondance a échoué."
+  },
+  "reportKpis": {
+    "intro": "Choisissez les neuf cartes KPI affichées par chaque rapport, et dans quel ordre. Un emplacement de carte ne peut être remplacé que par une autre carte de la liste de ce rapport, le nombre reste toujours neuf.",
+    "loading": "Chargement des paramètres…",
+    "slotsTitle": "Neuf cartes KPI",
+    "saving": "Enregistrement…",
+    "pinnedFirstNotice": "La première carte ({{label}}) est fixe et ne fait pas partie du sélecteur.",
+    "noSpareCards": "Il n'existe pas encore de cartes alternatives pour ce rapport. Vous pouvez réordonner les neuf, mais pas encore en remplacer une par une nouvelle.",
+    "noSpareAxes": "Toutes les catégories disponibles pour ce rapport sont déjà affichées. Vous pouvez les réordonner, mais il n'y en a pas d'autres à ajouter.",
+    "fellBackNotice": "Une carte précédemment choisie n'existe plus et a été réinitialisée par défaut. Le rapport lui-même continue toujours d'afficher neuf cartes.",
+    "reportNames": {
+      "candidates": "Candidats",
+      "leads": "Leads",
+      "applications": "Candidatures",
+      "customers": "Clients",
+      "flow": "Flux",
+      "recruiters": "Recruteurs",
+      "accountmanagers": "Chargés de compte",
+      "vacancies": "Postes vacants",
+      "opportunities": "Opportunités",
+      "tasks": "Tâches",
+      "matches": "Matches",
+      "intakes": "Intakes",
+      "outreach": "Listes d'appels",
+      "sources": "Sources",
+      "contacts": "Contacts",
+      "locations": "Sites",
+      "departments": "Départements",
+      "ai": "Koios AI",
+      "workflows": "Workflows"
+    }
   }
 }

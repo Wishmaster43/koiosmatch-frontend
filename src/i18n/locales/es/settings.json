@@ -62,7 +62,8 @@
     "import_export": "Importar y exportar",
     "document_types": "Tipos de documento",
     "appointments": "Citas",
-    "workflows": "Workflows"
+    "workflows": "Workflows",
+    "reports": "Informes"
   },
   "nav": {
     "candidate_display": "Visualización de la tabla",
@@ -237,7 +238,8 @@
     "notif_my": "Mis notificaciones",
     "customer_identifier_validation": "Validación de números",
     "automations": "Automatizaciones",
-    "hf_contract_map": "Correspondencia de contratos de HelloFlex"
+    "hf_contract_map": "Correspondencia de contratos de HelloFlex",
+    "report_kpis": "Tarjetas de informe"
   },
   "kpis": {
     "title": "Configuración de KPI",
@@ -3085,5 +3087,36 @@
     "labelPlaceholder": "Nombre reconocible",
     "empty": "Todavía no hay formas de contrato configuradas.",
     "saveError": "No se pudo guardar la correspondencia de contratos."
+  },
+  "reportKpis": {
+    "intro": "Elige qué nueve tarjetas KPI muestra cada informe y en qué orden. Una posición de tarjeta solo puede sustituirse por otra tarjeta de la lista de ese informe, el número siempre sigue siendo nueve.",
+    "loading": "Cargando ajustes…",
+    "slotsTitle": "Nueve tarjetas KPI",
+    "saving": "Guardando…",
+    "pinnedFirstNotice": "La primera tarjeta ({{label}}) es fija y no forma parte del selector.",
+    "noSpareCards": "Aún no existen tarjetas alternativas para este informe. Puedes reordenar las nueve, pero todavía no sustituir una por algo nuevo.",
+    "noSpareAxes": "Ya se muestran todas las categorías disponibles para este informe. Puedes reordenarlas, pero no hay otras que añadir.",
+    "fellBackNotice": "Una tarjeta elegida anteriormente ya no existe y se restableció al valor predeterminado. El propio informe siempre sigue mostrando nueve tarjetas.",
+    "reportNames": {
+      "candidates": "Candidatos",
+      "leads": "Leads",
+      "applications": "Solicitudes",
+      "customers": "Clientes",
+      "flow": "Flujo",
+      "recruiters": "Reclutadores",
+      "accountmanagers": "Gestores de cuenta",
+      "vacancies": "Vacantes",
+      "opportunities": "Oportunidades",
+      "tasks": "Tareas",
+      "matches": "Matches",
+      "intakes": "Intakes",
+      "outreach": "Listas de llamadas",
+      "sources": "Fuentes",
+      "contacts": "Contactos",
+      "locations": "Ubicaciones",
+      "departments": "Departamentos",
+      "ai": "Koios AI",
+      "workflows": "Workflows"
+    }
   }
 }

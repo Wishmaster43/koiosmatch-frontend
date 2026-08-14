@@ -38,7 +38,8 @@
       "source": "Fuente",
       "owner": "Propietario",
       "branch": "Sucursal"
-    }
+    },
+    "kpiOrderFellBack": "Una tarjeta KPI configurada en Ajustes ya no existe y se restableció al valor predeterminado."
   },
   "intakes": {
     "loading": "Cargando intakes…",
@@ -125,7 +126,8 @@
     },
     "intakesValue": "{{planned}} previstas · {{done}} realizadas",
     "tasksValue": "{{open}} abiertas · {{overdue}} atrasadas",
-    "notContactedHint": "> {{months}} meses"
+    "notContactedHint": "> {{months}} meses",
+    "kpiOrderFellBack": "Una tarjeta KPI configurada en Ajustes ya no existe y se restableció al valor predeterminado."
   },
   "vacancies": {
     "title": "Vacantes",
@@ -147,7 +149,8 @@
       "openRate": "Tasa abierta",
       "customersCount": "Clientes",
       "topIndustry": "Sector principal",
-      "topOwner": "Propietario principal"
+      "topOwner": "Propietario principal",
+      "staleOnline": "En línea, sin candidatos"
     },
     "cols": {
       "vacancy": "Vacante",

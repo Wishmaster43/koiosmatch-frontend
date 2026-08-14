@@ -38,7 +38,8 @@
       "source": "Bron",
       "owner": "Eigenaar",
       "branch": "Vestiging"
-    }
+    },
+    "kpiOrderFellBack": "Een in Instellingen ingestelde KPI-kaart bestaat niet meer en is teruggezet naar de standaard."
   },
   "intakes": {
     "loading": "Intakes laden…",
@@ -125,7 +126,8 @@
     },
     "intakesValue": "{{planned}} gepland · {{done}} gedaan",
     "tasksValue": "{{open}} open · {{overdue}} te laat",
-    "notContactedHint": "> {{months}} mnd"
+    "notContactedHint": "> {{months}} mnd",
+    "kpiOrderFellBack": "Een in Instellingen ingestelde KPI-kaart bestaat niet meer en is teruggezet naar de standaard."
   },
   "vacancies": {
     "title": "Vacatures",
@@ -147,7 +149,8 @@
       "openRate": "Open-percentage",
       "customersCount": "Aantal klanten",
       "topIndustry": "Grootste branche",
-      "topOwner": "Grootste eigenaar"
+      "topOwner": "Grootste eigenaar",
+      "staleOnline": "Online, geen kandidaten"
     },
     "cols": {
       "vacancy": "Vacature",

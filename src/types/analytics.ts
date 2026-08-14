@@ -73,6 +73,17 @@ export interface VacancyReportSummary {
   filled: number
   fill_rate: number
   avg_time_to_fill_days: number | null
+  // SIGNALEN-VAC-1 (backend VacanciesReport::applySignal): the PDF-VACATURES point
+  // 31 notification signal — published, zero applications, older than the tenant's
+  // configurable stale-days setting (KoiosAdviceSettings). Real server-side count,
+  // same predicate the drawer/list `?stale_online=1` filter and the row-level
+  // vacancyAdvice.ts rule already use — never re-derived on the frontend.
+  stale_online: number
+  // Never published, older than the same shared threshold, not closed — the
+  // "stuck in concept" companion signal (same backend predicate family).
+  long_concept: number
+  // An actively advertised, still-open vacancy with zero matches.
+  no_matches: number
 }
 
 // Portie-4 additions are ADDITIVE (RAPPORTEN-SUITE-1): the C-34 envelope above

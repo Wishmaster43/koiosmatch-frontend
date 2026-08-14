@@ -102,6 +102,7 @@ import NotificationsSettings from './sections/NotificationsSettings'
 import EscalationSettings from './sections/EscalationSettings'
 // Planning settings — gated on the 'plan' module (requiresPage: 'planning'); hidden until it is on.
 import { ShiftTypesSettings, AvailabilitySettings, AutoMatchSettings, PlanningBoardSettings } from './sections/PlanningSettings'
+import ReportKpiSettings from './sections/ReportKpiSettings'
 import TenantInvoicesSettings from './sections/TenantInvoicesSettings'
 import GebruikSettings from './sections/GebruikSettings'
 import InvoiceCompanySettings from './sections/InvoiceCompanySettings'
@@ -555,6 +556,18 @@ export const NAV_GROUPS = [
       { id: 'availability', icon: CalendarCheck, component: AvailabilitySettings, requiresPage: 'planning' },
       { id: 'automatch', icon: Sparkles, component: AutoMatchSettings, requiresPage: 'planning' },
       { id: 'planning_board', icon: LayoutGrid, component: PlanningBoardSettings, requiresPage: 'planning' },
+    ],
+  },
+  {
+    // Reports settings — gated on the 'reports' module (requiresPage: 'reports'),
+    // hidden entirely (menu included) until it is on; mirrors the 'planning'
+    // group above exactly (RAPPORT-KPI-INSTELBAAR). Deliberately its own group
+    // key/nav id ('report_kpis'), never the existing 'kpis' group — that one is
+    // the unrelated dashboard KPI-TARGET editor (numeric goals), not this
+    // report-card catalogue.
+    key: 'reports', icon: BarChart2,
+    items: [
+      { id: 'report_kpis', icon: ListChecks, component: ReportKpiSettings, requiresPage: 'reports' },
     ],
   },
   {

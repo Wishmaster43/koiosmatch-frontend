@@ -20,6 +20,9 @@ import type { DrillSpec } from './ReportDrillDrawer'
 import { useRecruitersReport } from './useRecruitersReport'
 import { gateDrillClick } from './reportDrillGate'
 import type { ReportPeriod, RecruiterRow } from '@/types/analytics'
+import { useAllSettings, getJsonSetting } from '@/lib/settings/useAllSettings'
+import { getReportKpiCatalog, getReportKpiDefaultOrder, reportKpiSettingsKey } from './kpiCatalog'
+import { resolveReportKpiOrder } from './resolveReportKpiOrder'
 
 // Total applications = sum of the per-stage counts.
 const sumPhases = (r: RecruiterRow) => r.applications_by_phase.reduce((acc, p) => acc + p.count, 0)
@@ -64,22 +67,31 @@ export default function RecruitersReport({ period }: { period: ReportPeriod }) {
     adviceEndpoint: '/reports/recruiters/advice', adviceParams: { recruiter: r.key, period },
   })
 
-  // Team totals — all nine slots are plain sums of fields the endpoint already
+  // Team totals — all nine cards are plain sums of fields the endpoint already
   // returns per recruiter (no per-team drill endpoint exists, so none is clickable;
-  // the row click into a single recruiter stays the drill path, unchanged).
-  const kpis: KpiSpec[] = [
-    { key: 'recruiters', label: t('recruiters.summary.recruiters'),   value: totals.recruiters },
-    { key: 'candidates', label: t('recruiters.summary.candidates'),   value: totals.candidates },
-    { key: 'applications', label: t('recruiters.summary.applications'), value: totals.applications },
-    { key: 'matches',    label: t('recruiters.summary.matches'),      value: totals.matches },
-    { key: 'notContacted', label: t('recruiters.summary.notContacted'), value: totals.notContacted,
+  // the row click into a single recruiter stays the drill path, unchanged). The
+  // KEYED map below is unchanged; which nine keys render, and in what order, now
+  // comes from the tenant's Settings → Reports choice (falls back to today's
+  // order when nothing is stored, or a stored key has vanished — RAPPORT-KPI-INSTELBAAR).
+  const kpiByKey: Record<string, KpiSpec> = {
+    recruiters: { key: 'recruiters', label: t('recruiters.summary.recruiters'),   value: totals.recruiters },
+    candidates: { key: 'candidates', label: t('recruiters.summary.candidates'),   value: totals.candidates },
+    applications: { key: 'applications', label: t('recruiters.summary.applications'), value: totals.applications },
+    matches:    { key: 'matches',    label: t('recruiters.summary.matches'),      value: totals.matches },
+    notContacted: { key: 'notContacted', label: t('recruiters.summary.notContacted'), value: totals.notContacted,
       color: totals.notContacted > 0 ? 'var(--color-warning)' : undefined },
-    { key: 'intakesPlanned', label: t('recruiters.summary.intakesPlanned'), value: totals.intakesPlanned },
-    { key: 'intakesDone',    label: t('recruiters.summary.intakesDone'),    value: totals.intakesDone },
-    { key: 'tasksOpen',      label: t('recruiters.summary.tasksOpen'),      value: totals.tasksOpen },
-    { key: 'tasksOverdue',   label: t('recruiters.summary.tasksOverdue'),   value: totals.tasksOverdue,
+    intakesPlanned: { key: 'intakesPlanned', label: t('recruiters.summary.intakesPlanned'), value: totals.intakesPlanned },
+    intakesDone:    { key: 'intakesDone',    label: t('recruiters.summary.intakesDone'),    value: totals.intakesDone },
+    tasksOpen:      { key: 'tasksOpen',      label: t('recruiters.summary.tasksOpen'),      value: totals.tasksOpen },
+    tasksOverdue:   { key: 'tasksOverdue',   label: t('recruiters.summary.tasksOverdue'),   value: totals.tasksOverdue,
       color: totals.tasksOverdue > 0 ? 'var(--color-warning)' : undefined },
-  ]
+  }
+  const settingsValues = useAllSettings()
+  const catalogKeys = getReportKpiCatalog('recruiters').map(c => c.key)
+  const defaultOrder = getReportKpiDefaultOrder('recruiters')
+  const stored = getJsonSetting<string[] | undefined>(settingsValues, reportKpiSettingsKey('recruiters'), undefined)
+  const { order: kpiOrder, fellBack } = resolveReportKpiOrder(stored, catalogKeys, defaultOrder)
+  const kpis: KpiSpec[] = kpiOrder.map(key => kpiByKey[key]).filter((k): k is KpiSpec => k != null)
 
   // Columns — the two "count · count" text cells stay plain text (no chip meaning to carry).
   const columns: Column<RecruiterRow>[] = [
@@ -109,7 +121,7 @@ export default function RecruitersReport({ period }: { period: ReportPeriod }) {
     <div>
       {/* KPI strip — team totals, above the tabs (candidate-page order) */}
       {!loading && !error && rows.length > 0 && (
-        <ReportKpiBand kpis={kpis} />
+        <ReportKpiBand kpis={kpis} notice={fellBack ? t('recruiters.kpiOrderFellBack') : undefined} />
       )}
 
       <ReportSectionCard>

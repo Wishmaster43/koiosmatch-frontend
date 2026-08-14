@@ -38,7 +38,8 @@
       "source": "Source",
       "owner": "Propriétaire",
       "branch": "Antenne"
-    }
+    },
+    "kpiOrderFellBack": "Une carte KPI configurée dans les paramètres n'existe plus et a été réinitialisée par défaut."
   },
   "intakes": {
     "loading": "Chargement des intakes…",
@@ -125,7 +126,8 @@
     },
     "intakesValue": "{{planned}} prévus · {{done}} réalisés",
     "tasksValue": "{{open}} ouvertes · {{overdue}} en retard",
-    "notContactedHint": "> {{months}} mois"
+    "notContactedHint": "> {{months}} mois",
+    "kpiOrderFellBack": "Une carte KPI configurée dans les paramètres n'existe plus et a été réinitialisée par défaut."
   },
   "vacancies": {
     "title": "Postes",
@@ -147,7 +149,8 @@
       "openRate": "Taux ouvert",
       "customersCount": "Clients",
       "topIndustry": "Secteur principal",
-      "topOwner": "Propriétaire principal"
+      "topOwner": "Propriétaire principal",
+      "staleOnline": "En ligne, aucun candidat"
     },
     "cols": {
       "vacancy": "Poste",

@@ -26,7 +26,7 @@ const row = {
 }
 const data: VacanciesReportData = {
   period: 'month', from: '2026-05-14', to: '2026-08-14',
-  summary: { total: 12, open: 8, filled: 4, fill_rate: 0.33, avg_time_to_fill_days: 11.4 },
+  summary: { total: 12, open: 8, filled: 4, fill_rate: 0.33, avg_time_to_fill_days: 11.4, stale_online: 2, long_concept: 1, no_matches: 3 },
   vacancies: [row],
   total: 12,
   timeseries: { bucket: 'week', series: [
@@ -293,15 +293,20 @@ describe('VacanciesReport (RAPPORTEN-SUITE-1 portie 4, additive on C-34)', () =>
   })
 
   // Exactly nine KPI cards (§ report-KPI-9 sweep): the five legacy summary tiles
-  // plus four new ones derived from fields the endpoint already returns — an
-  // open-rate ratio, a distinct-customers count, and the top industry/owner
-  // segments (both still drill via the same XOR-param pattern as the axis bars).
+  // plus four new ones derived from fields the endpoint already returns — the
+  // PDF-VACATURES point 31 "online without candidates" signal, a distinct-
+  // customers count, and the top industry/owner segments (both still drill via
+  // the same XOR-param pattern as the axis bars).
   it('renders exactly nine KPI cards, with topIndustry/topOwner drilling their XOR param', async () => {
     const user = userEvent.setup()
     mockUseVacanciesReport.mockReturnValue({ data, loading: false, error: false })
     renderReport()
-    expect(screen.getByText('Open-percentage')).toBeInTheDocument()
-    expect(screen.getByText('66,7%')).toBeInTheDocument() // 8/12, FMT-PROCENT-1 keeps the decimal
+    // PDF-VACATURES-31: the card's number is the REAL backend summary.stale_online
+    // field (2 in the fixture), never a re-derived front-end guess, and the label
+    // names exactly what it counts (published, no candidates, past the threshold).
+    const staleLabel = screen.getByText('Online, geen kandidaten')
+    const staleCard = staleLabel.parentElement as HTMLElement
+    expect(within(staleCard).getByText('2')).toBeInTheDocument()
     // One distinct customer in the fixture row — assert via the KPI card
     // (a bare '1' text match is ambiguous against other numeric cells on the page).
     const customersLabel = screen.getByText('Aantal klanten')

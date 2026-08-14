@@ -62,7 +62,8 @@
     "import_export": "Import & Export",
     "document_types": "Documenttypes",
     "appointments": "Afspraken",
-    "workflows": "Workflows"
+    "workflows": "Workflows",
+    "reports": "Rapporten"
   },
   "nav": {
     "candidate_display": "Tabelweergave",
@@ -237,7 +238,8 @@
     "notif_my": "Mijn meldingen",
     "customer_identifier_validation": "Nummervalidatie",
     "automations": "Automatiseringen",
-    "hf_contract_map": "HelloFlex contractmap"
+    "hf_contract_map": "HelloFlex contractmap",
+    "report_kpis": "Rapportkaarten"
   },
   "kpis": {
     "title": "KPI-instellingen",
@@ -3085,5 +3087,36 @@
     "labelPlaceholder": "Herkenbare naam",
     "empty": "Er zijn nog geen contractvormen ingericht.",
     "saveError": "Opslaan van de contractmap is mislukt."
+  },
+  "reportKpis": {
+    "intro": "Kies welke negen KPI-kaarten elk rapport toont, en in welke volgorde. Een kaartplek kan alleen vervangen worden door een andere kaart uit de lijst van dat rapport, het aantal blijft altijd negen.",
+    "loading": "Instellingen laden…",
+    "slotsTitle": "Negen KPI-kaarten",
+    "saving": "Opslaan…",
+    "pinnedFirstNotice": "De eerste kaart ({{label}}) staat vast en zit niet in de kiezer.",
+    "noSpareCards": "Er bestaan nog geen alternatieve kaarten voor dit rapport. Je kunt de negen wel verslepen, maar nog niet vervangen door iets nieuws.",
+    "noSpareAxes": "Alle beschikbare categorieën voor dit rapport worden al getoond. Je kunt ze verslepen, maar er zijn er geen andere om toe te voegen.",
+    "fellBackNotice": "Een eerder gekozen kaart bestaat niet meer en is teruggezet naar de standaard. Het rapport zelf blijft altijd negen kaarten tonen.",
+    "reportNames": {
+      "candidates": "Kandidaten",
+      "leads": "Leads",
+      "applications": "Sollicitaties",
+      "customers": "Klanten",
+      "flow": "Flow",
+      "recruiters": "Recruiters",
+      "accountmanagers": "Accountmanagers",
+      "vacancies": "Vacatures",
+      "opportunities": "Kansen",
+      "tasks": "Taken",
+      "matches": "Matches",
+      "intakes": "Intakes",
+      "outreach": "Belllijsten",
+      "sources": "Bronnen",
+      "contacts": "Contacten",
+      "locations": "Locaties",
+      "departments": "Afdelingen",
+      "ai": "Koios AI",
+      "workflows": "Workflows"
+    }
   }
 }

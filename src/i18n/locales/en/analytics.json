@@ -38,7 +38,8 @@
       "source": "Source",
       "owner": "Owner",
       "branch": "Branch"
-    }
+    },
+    "kpiOrderFellBack": "A KPI card configured in Settings no longer exists and was reset to the default."
   },
   "intakes": {
     "loading": "Loading intakes…",
@@ -125,7 +126,8 @@
     },
     "intakesValue": "{{planned}} planned · {{done}} done",
     "tasksValue": "{{open}} open · {{overdue}} overdue",
-    "notContactedHint": "> {{months}} mo"
+    "notContactedHint": "> {{months}} mo",
+    "kpiOrderFellBack": "A KPI card configured in Settings no longer exists and was reset to the default."
   },
   "vacancies": {
     "title": "Vacancies",
@@ -147,7 +149,8 @@
       "openRate": "Open rate",
       "customersCount": "Customers",
       "topIndustry": "Top industry",
-      "topOwner": "Top owner"
+      "topOwner": "Top owner",
+      "staleOnline": "Online, no candidates"
     },
     "cols": {
       "vacancy": "Vacancy",
