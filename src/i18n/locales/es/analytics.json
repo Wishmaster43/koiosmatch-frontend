@@ -88,7 +88,12 @@
     "current": "Actualmente en fase",
     "avgDays": "med. {{days}} días",
     "dropOff": "Abandonos (número)",
-    "avgDaysOverall": "Días medios por fase"
+    "avgDaysOverall": "Días medios por fase",
+    "firstPhase": "Etapa de entrada",
+    "lastPhase": "Etapa final",
+    "maxDropPhase": "Mayor abandono",
+    "stagesReached": "Etapas alcanzadas",
+    "stagesTotal": "Etapas del embudo"
   },
   "recruiters": {
     "title": "Reclutadores",

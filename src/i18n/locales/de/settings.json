@@ -850,7 +850,21 @@
       },
       "daily": {
         "title": "Tägliche Nutzung",
-        "notice": "Eine Tagesübersicht pro Kategorie (Gesamt · KI · Leads · Telefonate · WhatsApp) ist noch nicht verfügbar. Das Backend liefert derzeit nur Summen pro Zeitraum, keine Tageswerte."
+        "subtitle": "Workflow- und KI-Nutzung pro Tag (Verkaufspreis), für diesen Zeitraum.",
+        "notice": "Eine Tagesübersicht pro Kategorie (Gesamt · KI · Leads · Telefonate · WhatsApp) ist noch nicht verfügbar. Das Backend liefert derzeit nur Summen pro Zeitraum, keine Tageswerte.",
+        "periodLabel": "Zeitraum",
+        "categoryLabel": "Kategorie",
+        "categoryTotal": "Gesamt",
+        "categoryWorkflow": "Workflow",
+        "categoryAi": "KI",
+        "colDate": "Datum",
+        "colWorkflowCredits": "Workflow-Credits",
+        "colWorkflowAmount": "Workflow-Betrag",
+        "colAiTokens": "KI-Token",
+        "colAiAmount": "KI-Betrag",
+        "colTotalAmount": "Gesamtbetrag",
+        "loadError": "Tägliche Nutzung konnte nicht geladen werden.",
+        "empty": "Noch keine Nutzung in diesem Zeitraum."
       },
       "koios": {
         "title": "Koios-KI-Abrechnung",

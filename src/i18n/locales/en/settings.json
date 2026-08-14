@@ -1086,7 +1086,21 @@
       },
       "daily": {
         "title": "Daily usage",
-        "notice": "A daily breakdown per category (Total · AI · Leads · Phone calls · WhatsApp) is not available yet. The backend currently only returns period totals, no per-day figures."
+        "subtitle": "Sale-price workflow and AI usage per day, for this period.",
+        "notice": "A daily breakdown per category (Total · AI · Leads · Phone calls · WhatsApp) is not available yet. The backend currently only returns period totals, no per-day figures.",
+        "periodLabel": "Period",
+        "categoryLabel": "Category",
+        "categoryTotal": "Total",
+        "categoryWorkflow": "Workflow",
+        "categoryAi": "AI",
+        "colDate": "Date",
+        "colWorkflowCredits": "Workflow credits",
+        "colWorkflowAmount": "Workflow amount",
+        "colAiTokens": "AI tokens",
+        "colAiAmount": "AI amount",
+        "colTotalAmount": "Total amount",
+        "loadError": "Failed to load daily usage.",
+        "empty": "No usage yet in this period."
       },
       "koios": {
         "title": "Koios AI billing",

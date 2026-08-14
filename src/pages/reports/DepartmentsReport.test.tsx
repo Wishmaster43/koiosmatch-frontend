@@ -116,24 +116,27 @@ describe('DepartmentsReport (RAPPORTEN-SUITE-2 departments report)', () => {
     expect(screen.getAllByText('3').length).toBeGreaterThan(0)
   })
 
-  // Nine-card footprint (Danny's "negen KPI rows"): without the optional
-  // `summary` block, the honest maximum is seven (no withContacts/without
-  // Contacts cards) — never a fabricated 0 for a block that never arrived.
-  it('ships seven honest cards when the optional summary block is absent', () => {
+  // Nine-card footprint (Danny's "negen KPI rows", ALWAYS — never 5-9): the
+  // `withContacts`/`withoutContacts` slots are PERMANENT — without the optional
+  // `summary` block they still render, with the house dash, never a fabricated
+  // 0 and never a missing card.
+  it('ships all nine cards, dash-filled, when the optional summary block is absent', () => {
     mockUseDepartmentsReport.mockReturnValue({ data, loading: false, error: false })
     renderReport()
-    expect(screen.queryByText('Met contacten')).not.toBeInTheDocument()
-    expect(screen.queryByText('Zonder contacten')).not.toBeInTheDocument()
+    expect(screen.getByText('Met contacten')).toBeInTheDocument()
+    expect(screen.getByText('Zonder contacten')).toBeInTheDocument()
     expect(screen.getByText('Zonder klant')).toBeInTheDocument()
     expect(screen.getByText('Grootste klant')).toBeInTheDocument()
     expect(screen.getByText('Grootste locatie')).toBeInTheDocument()
     expect(screen.getByText('Aantal klanten')).toBeInTheDocument()
     expect(screen.getAllByText('1').length).toBeGreaterThan(0) // customersCount (1 real customer, 'none' excluded)
+    // Both permanent-but-unshipped slots show the house dash, not a zero.
+    expect(screen.getAllByText('—').length).toBe(2)
   })
 
-  // With the summary block present, the two contact-coverage cards join in for
-  // the full nine — real numbers straight off the fixture's summary.
-  it('adds the contact-coverage cards when the summary block arrives', () => {
+  // With the summary block present, the two contact-coverage cards fill with
+  // real numbers straight off the fixture's summary — same nine cards, no dash.
+  it('fills the contact-coverage cards with real numbers when the summary block arrives', () => {
     mockUseDepartmentsReport.mockReturnValue({
       data: { ...data, summary: { with_contacts: 6, without_contacts: 2 } },
       loading: false, error: false,
@@ -143,6 +146,7 @@ describe('DepartmentsReport (RAPPORTEN-SUITE-2 departments report)', () => {
     expect(screen.getByText('Zonder contacten')).toBeInTheDocument()
     expect(screen.getAllByText('6').length).toBeGreaterThan(0)
     expect(screen.getAllByText('2').length).toBeGreaterThan(0)
+    expect(screen.queryByText('—')).not.toBeInTheDocument()
   })
 
   it('clicking the "Grootste klant" KPI card drills with customer=<value> (XOR)', async () => {

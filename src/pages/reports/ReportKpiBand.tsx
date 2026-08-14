@@ -25,6 +25,19 @@ export default function ReportKpiBand({ kpis, donuts, clearTitle, notice }: {
   clearTitle?: string
   notice?: string
 }) {
+  // Dev-time guard for the nine-card promise (Danny, twice): every report's
+  // strip must be exactly nine cards in every data state — a card whose value
+  // is unknown renders the house dash, it never disappears or multiplies. This
+  // is the ONE shared place that can catch a regression; the actual "always
+  // nine, honest dash" content still lives per-report (§0 no fake affordances
+  // — this component can't invent a report's own dash-worthy fields).
+  if (import.meta.env.DEV) {
+    const count = (kpis?.length ?? 0) + (donuts?.length ?? 0)
+    if (count !== 9) {
+      // eslint-disable-next-line no-console
+      console.error(`ReportKpiBand: expected exactly 9 cards, got ${count}. The KPI strip must never reflow between report pages.`)
+    }
+  }
   return (
     <div style={{ marginBottom: 16 }}>
       {/* `wrapLabels`: nine cards on one row leave ~110px per label, so the shared

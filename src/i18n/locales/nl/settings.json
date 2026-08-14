@@ -1086,7 +1086,21 @@
       },
       "daily": {
         "title": "Dagelijks verbruik",
-        "notice": "Een daggrafiek per categorie (Totaal · AI · Leads · Telefoongesprekken · WhatsApp) is nog niet beschikbaar. De backend levert nu alleen totalen per periode, geen cijfers per dag."
+        "subtitle": "Workflow- en AI-verbruik per dag (verkoopprijs), voor deze periode.",
+        "notice": "Een daggrafiek per categorie (Totaal · AI · Leads · Telefoongesprekken · WhatsApp) is nog niet beschikbaar. De backend levert nu alleen totalen per periode, geen cijfers per dag.",
+        "periodLabel": "Periode",
+        "categoryLabel": "Categorie",
+        "categoryTotal": "Totaal",
+        "categoryWorkflow": "Workflow",
+        "categoryAi": "AI",
+        "colDate": "Datum",
+        "colWorkflowCredits": "Workflow-credits",
+        "colWorkflowAmount": "Workflow-bedrag",
+        "colAiTokens": "AI-tokens",
+        "colAiAmount": "AI-bedrag",
+        "colTotalAmount": "Totaalbedrag",
+        "loadError": "Laden van dagelijks verbruik mislukt.",
+        "empty": "Nog geen verbruik in deze periode."
       },
       "koios": {
         "title": "Koios AI-facturatie",

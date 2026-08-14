@@ -88,7 +88,12 @@
     "current": "Aktuell in Phase",
     "avgDays": "Ø {{days}} Tage",
     "dropOff": "Abbrüche (Anzahl)",
-    "avgDaysOverall": "Ø Tage je Phase"
+    "avgDaysOverall": "Ø Tage je Phase",
+    "firstPhase": "Einstiegsphase",
+    "lastPhase": "Endphase",
+    "maxDropPhase": "Größter Abbruch",
+    "stagesReached": "Erreichte Phasen",
+    "stagesTotal": "Phasen im Trichter"
   },
   "recruiters": {
     "title": "Recruiter",

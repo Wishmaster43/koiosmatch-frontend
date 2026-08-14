@@ -88,7 +88,12 @@
     "current": "Actuellement à l'étape",
     "avgDays": "moy. {{days}} jours",
     "dropOff": "Abandons (nombre)",
-    "avgDaysOverall": "Jours moy. par étape"
+    "avgDaysOverall": "Jours moy. par étape",
+    "firstPhase": "Étape d'entrée",
+    "lastPhase": "Étape finale",
+    "maxDropPhase": "Plus grand abandon",
+    "stagesReached": "Étapes atteintes",
+    "stagesTotal": "Étapes de l'entonnoir"
   },
   "recruiters": {
     "title": "Recruteurs",

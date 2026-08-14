@@ -94,22 +94,28 @@ export default function LocationsReport({ period, tabsSlot }: { period: ReportPe
     (top, s) => (!top || s.count > top.count) ? s : top, null)
   const topProvince = data?.by_province.filter(s => s.value !== 'none').reduce<{ value: string; label: string; count: number } | null>(
     (top, s) => (!top || s.count > top.count) ? s : top, null)
+  // Exactly nine cards, always (Danny — the strip's footprint never reflows
+  // between pages). `topCity`/`topProvince` and the department-coverage
+  // summary are PERMANENT slots: while their underlying value is absent, the
+  // card still renders (house dash, never a fabricated 0 or a missing slot)
+  // and reclaims its normal number the moment the data exists.
   const kpis: KpiSpec[] = [
     { key: 'total',            label: t('locations.total'),            value: total },
     { key: 'withCustomer',     label: t('locations.summary.withCustomer'),    value: withCustomer },
     { key: 'withoutCustomer',  label: t('locations.summary.withoutCustomer'), value: withoutCustomer },
-    ...(summary ? [
-      { key: 'withDepartments',    label: t('locations.summary.withDepartments'),    value: summary.with_departments } as KpiSpec,
-      { key: 'withoutDepartments', label: t('locations.summary.withoutDepartments'), value: summary.without_departments } as KpiSpec,
-    ] : []),
     { key: 'withoutCity', label: t('locations.summary.withoutCity'), value: withoutCity?.count ?? 0,
       onClick: withoutCity ? gateDrillClick('locations', () => openSegment(withoutCity, { city: 'none' })) : undefined },
-    ...(topCity ? [{ key: 'topCity', label: t('locations.summary.topCity'), value: topCity.count, sub: topCity.label,
-      onClick: gateDrillClick('locations', () => openSegment(topCity, { city: topCity.value })) } as KpiSpec] : []),
+    { key: 'topCity', label: t('locations.summary.topCity'), value: topCity?.count ?? '—', sub: topCity?.label,
+      onClick: topCity ? gateDrillClick('locations', () => openSegment(topCity, { city: topCity.value })) : undefined },
     { key: 'withoutProvince', label: t('locations.summary.withoutProvince'), value: withoutProvince?.count ?? 0,
       onClick: withoutProvince ? gateDrillClick('locations', () => openSegment(withoutProvince, { province: 'none' })) : undefined },
-    ...(topProvince ? [{ key: 'topProvince', label: t('locations.summary.topProvince'), value: topProvince.count, sub: topProvince.label,
-      onClick: gateDrillClick('locations', () => openSegment(topProvince, { province: topProvince.value })) } as KpiSpec] : []),
+    { key: 'topProvince', label: t('locations.summary.topProvince'), value: topProvince?.count ?? '—', sub: topProvince?.label,
+      onClick: topProvince ? gateDrillClick('locations', () => openSegment(topProvince, { province: topProvince.value })) : undefined },
+    // Department-coverage summary — the backend hasn't shipped this block yet;
+    // these two slots hold their place with a dash so the strip's shape does
+    // not change the day it lands.
+    { key: 'withDepartments',    label: t('locations.summary.withDepartments'),    value: summary?.with_departments ?? '—' },
+    { key: 'withoutDepartments', label: t('locations.summary.withoutDepartments'), value: summary?.without_departments ?? '—' },
   ]
 
   return (

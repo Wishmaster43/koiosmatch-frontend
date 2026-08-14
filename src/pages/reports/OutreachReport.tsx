@@ -121,10 +121,13 @@ export default function OutreachReport({ period, tabsSlot }: { period: ReportPer
       onClick: unassignedSeg ? gateDrillClick('outreach', () => openSegment({ label: unassignedSeg.name, count: unassignedSeg.count }, { assignee: 'none' })) : undefined },
     { key: 'noOutcome', label: t('outreach.summary.noOutcome'), value: noOutcomeSeg?.count ?? 0,
       onClick: noOutcomeSeg ? gateDrillClick('outreach', () => openSegment(noOutcomeSeg, { outcome: 'none' })) : undefined },
-    ...(topCampaign ? [{ key: 'topCampaign', label: t('outreach.summary.topCampaign'), value: topCampaign.count, sub: topCampaign.label,
-      onClick: gateDrillClick('outreach', () => openSegment(topCampaign, { campaign: topCampaign.value })) } as KpiSpec] : []),
-    ...(topChannel ? [{ key: 'topChannel', label: t('outreach.summary.topChannel'), value: topChannel.count, sub: topChannel.label,
-      onClick: gateDrillClick('outreach', () => openSegment(topChannel, { channel: topChannel.value })) } as KpiSpec] : []),
+    // Permanent slots (Danny — nine cards, always): while there is no real top
+    // campaign/channel yet, the card still renders with the house dash instead
+    // of shrinking the strip.
+    { key: 'topCampaign', label: t('outreach.summary.topCampaign'), value: topCampaign?.count ?? '—', sub: topCampaign?.label,
+      onClick: topCampaign ? gateDrillClick('outreach', () => openSegment(topCampaign, { campaign: topCampaign.value })) : undefined },
+    { key: 'topChannel', label: t('outreach.summary.topChannel'), value: topChannel?.count ?? '—', sub: topChannel?.label,
+      onClick: topChannel ? gateDrillClick('outreach', () => openSegment(topChannel, { channel: topChannel.value })) : undefined },
   ]
 
   return (

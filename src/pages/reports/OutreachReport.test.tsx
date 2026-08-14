@@ -160,6 +160,23 @@ describe('OutreachReport (RAPPORTEN-SUITE-1 portie 6, bellijsten report)', () =>
     expect(screen.getAllByText('Bellijst Q3 wondzorg').length).toBeGreaterThan(0)
   })
 
+  // Nine-card footprint holds even without a real top campaign/channel (only
+  // 'others'/'none' sentinel rows) — the two slots are PERMANENT and render the
+  // house dash instead of shrinking the strip to seven (Danny — always nine).
+  it('dash-fills topCampaign/topChannel when only sentinel rows exist', () => {
+    mockUseOutreachReport.mockReturnValue({
+      data: { ...data,
+        by_campaign: [{ value: 'others', label: 'Overige bellijsten', count: 40 }],
+        by_channel: [{ value: 'none', label: 'Geen kanaal', count: 40 }],
+      },
+      loading: false, error: false,
+    })
+    renderReport()
+    expect(screen.getByText('Grootste bellijst')).toBeInTheDocument()
+    expect(screen.getByText('Grootste kanaal')).toBeInTheDocument()
+    expect(screen.getAllByText('—').length).toBe(2)
+  })
+
   it('clicking the "Grootste bellijst" KPI card drills with campaign=<uuid> (XOR)', async () => {
     const user = userEvent.setup()
     mockUseOutreachReport.mockReturnValue({ data, loading: false, error: false })

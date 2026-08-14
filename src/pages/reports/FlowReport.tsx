@@ -110,6 +110,33 @@ export default function FlowReport({ period, tabsSlot }: { period: ReportPeriod;
     return withDays.reduce((s, p) => s + (p.avg_days_in_phase ?? 0), 0) / withDays.length
   }, [phases])
 
+  // The stage a real drop happens FROM the most (cohort only, ≥2 phases) — a
+  // fixed, always-computable summary card instead of one card per tenant
+  // funnel stage (that was the unbounded strip: 5, 8, 10+ cards depending on
+  // how many stages a tenant configured). The per-stage detail still lives in
+  // the funnel rows below; this card is one honest headline number.
+  const maxDropPhase = useMemo(() => {
+    if (!cohortReady || phases.length < 2) return null
+    let best: { label: string; drop: number } | null = null
+    for (let i = 0; i < phases.length - 1; i++) {
+      const drop = phases[i].reached_count - phases[i + 1].reached_count
+      if (!best || drop > best.drop) best = { label: phases[i].label, drop }
+    }
+    return best && best.drop > 0 ? best : null
+  }, [cohortReady, phases])
+
+  // Real, always-available counts that don't depend on which/how many stages
+  // the tenant configured: how many stages actually saw activity vs. the
+  // total stage count.
+  const stagesReached = phases.filter(p => (cohortReady ? p.reached_count : p.current_count) > 0).length
+  const stagesTotal = phases.length
+  const firstPhase = phases[0] ?? null
+  const lastPhase = phases.length > 0 ? phases[phases.length - 1] : null
+
+  // Exactly nine cards, always (Danny — the strip's footprint never reflows
+  // between pages, and it must never grow with the tenant's funnel stage
+  // count). Every value here is either a real total/derived-subtraction, or
+  // the house dash while cohort data isn't ready yet — never a fabricated 0.
   const kpis: KpiSpec[] = [
     { key: 'total', label: t('flow.total'), value: data?.total ?? 0,
       active: drill != null && drill.rowsParams?.phase == null && drill.rowsEndpoint === '/reports/flow/drill',
@@ -119,16 +146,19 @@ export default function FlowReport({ period, tabsSlot }: { period: ReportPeriod;
         rowsEndpoint: '/reports/flow/drill', rowsParams: { period, view: cohortReady ? 'reached' : 'current' },
         adviceEndpoint: '/reports/flow/advice', adviceParams: { period, view: cohortReady ? 'reached' : 'current' },
       })) },
-    ...(overallConv != null
-      ? [{ key: 'conv', label: t('flow.overallConversion'), value: formatRatio(overallConv) } as KpiSpec]
-      : []),
-    ...(dropOff != null
-      ? [{ key: 'dropOff', label: t('flow.dropOff'), value: dropOff } as KpiSpec]
-      : []),
-    ...(avgDaysOverall != null
-      ? [{ key: 'avgDaysOverall', label: t('flow.avgDaysOverall'), value: t('flow.avgDays', { days: Math.round(avgDaysOverall) }) } as KpiSpec]
-      : []),
-    ...phases.map(phaseKpi),
+    { key: 'firstPhase', label: t('flow.firstPhase'),
+      value: firstPhase ? (cohortReady ? firstPhase.reached_count : firstPhase.current_count) : '—', sub: firstPhase?.label,
+      onClick: firstPhase ? phaseKpi(firstPhase).onClick : undefined },
+    { key: 'lastPhase', label: t('flow.lastPhase'),
+      value: lastPhase ? (cohortReady ? lastPhase.reached_count : lastPhase.current_count) : '—', sub: lastPhase?.label,
+      onClick: lastPhase ? phaseKpi(lastPhase).onClick : undefined },
+    { key: 'conv', label: t('flow.overallConversion'), value: overallConv != null ? formatRatio(overallConv) : '—' },
+    { key: 'dropOff', label: t('flow.dropOff'), value: dropOff ?? '—' },
+    { key: 'avgDaysOverall', label: t('flow.avgDaysOverall'),
+      value: avgDaysOverall != null ? t('flow.avgDays', { days: Math.round(avgDaysOverall) }) : '—' },
+    { key: 'maxDropPhase', label: t('flow.maxDropPhase'), value: maxDropPhase?.drop ?? '—', sub: maxDropPhase?.label },
+    { key: 'stagesReached', label: t('flow.stagesReached'), value: stagesReached },
+    { key: 'stagesTotal', label: t('flow.stagesTotal'), value: stagesTotal },
   ]
 
   return (

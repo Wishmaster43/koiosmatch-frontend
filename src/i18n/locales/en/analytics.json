@@ -88,7 +88,12 @@
     "current": "Currently in stage",
     "avgDays": "avg. {{days}} days",
     "dropOff": "Drop-off (count)",
-    "avgDaysOverall": "Avg days per stage"
+    "avgDaysOverall": "Avg days per stage",
+    "firstPhase": "Entry stage",
+    "lastPhase": "Final stage",
+    "maxDropPhase": "Biggest drop-off",
+    "stagesReached": "Stages reached",
+    "stagesTotal": "Stages in funnel"
   },
   "recruiters": {
     "title": "Recruiters",

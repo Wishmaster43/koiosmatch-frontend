@@ -34,6 +34,7 @@ import QuickViewToggle from '@/components/ui/QuickViewToggle'
 import { BTN_H } from '@/config/buttonMetrics'
 import { card, cardTitle, sub, th, td, numCell, notice, Tile } from './usageCardStyles'
 import CreditsUsageCard from './CreditsUsageCard'
+import UsageDailySection from './UsageDailySection'
 
 // EXCEL-1 — stream the usage xlsx (per day / per workflow / per user tabs, sale
 // prices only, §9) to disk via a temporary object URL, never a bare <a href>.
@@ -373,8 +374,10 @@ export default function GebruikSettings() {
         )}
       </div>
 
-      {/* Blocked: no per-day×category aggregate exists in the backend yet. */}
-      <ComingSoonNotice title={t('billing.usage.daily.title')} text={t('billing.usage.daily.notice')} />
+      {/* Daily usage — chart + table + right-panel filters (USAGE-DAILY-1). Real
+          per-day series (workflow credits, AI amount); Leads/Phone-calls/WhatsApp
+          have no per-day backend data yet, see UsageDailySection's header comment. */}
+      <UsageDailySection />
     </div>
   )
 }

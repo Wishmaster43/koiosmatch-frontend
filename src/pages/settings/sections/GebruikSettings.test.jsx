@@ -4,9 +4,10 @@
  * seam, never only that a callback fired. Covers the AI usage period toggle
  * (post-CREDITS-1 amount keys), the WhatsApp usage fetch, the K0 Koios AI billing
  * block (month param + clickable per_module breakdown, claude.cost/margin gone),
- * and the two honest "not built yet" notices for the plan/credits and daily-
- * breakdown pieces that have no backend behind them. The new Credits headline
- * block is its own component/test file (CreditsUsageCard.test.jsx, §3 size split).
+ * and the honest "not built yet" notice for the plan/credits piece that has no
+ * backend behind it. The Credits headline block is its own component/test file
+ * (CreditsUsageCard.test.jsx, §3 size split); the daily-usage chart+table+filters
+ * piece is UsageDailySection, own component/test file (UsageDailySection.test.tsx).
  */
 import { describe, it, expect, afterEach, vi } from 'vitest'
 import { render, screen, waitFor, fireEvent } from '@testing-library/react'
@@ -168,12 +169,11 @@ describe('GebruikSettings — Koios AI billing (K0, post-CREDITS-1)', () => {
 })
 
 describe('GebruikSettings — blocked pieces render an honest notice, never fake numbers', () => {
-  it('shows the plan/credits and daily-breakdown notices instead of fabricated data', async () => {
+  it('shows the plan/credits notice instead of fabricated data (the daily-usage piece is now real, see UsageDailySection.test.tsx)', async () => {
     mockApi()
     render(<GebruikSettings />)
 
     expect(await screen.findByText(t('billing.usage.plan.notice'))).toBeInTheDocument()
-    expect(screen.getByText(t('billing.usage.daily.notice'))).toBeInTheDocument()
   })
 })
 

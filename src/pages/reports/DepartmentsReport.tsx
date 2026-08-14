@@ -96,21 +96,27 @@ export default function DepartmentsReport({ period, tabsSlot }: { period: Report
   // Distinct customers actually represented in this window's data — a real
   // count off the axis array, never a fabricated total.
   const customersCount = data?.by_customer.filter(s => s.value !== 'none' && s.value !== 'others').length ?? 0
+  // Exactly nine cards, always (Danny — the strip's footprint never reflows
+  // between pages). `topCustomer`/`topLocation` and the contact-coverage
+  // summary are PERMANENT slots: while their underlying value is absent, the
+  // card still renders (house dash, never a fabricated 0 or a missing slot)
+  // and reclaims its normal number the moment the data exists.
   const kpis: KpiSpec[] = [
     { key: 'total',           label: t('departments.total'),            value: total },
     { key: 'withLocation',    label: t('departments.summary.withLocation'),    value: withLocation },
     { key: 'withoutLocation', label: t('departments.summary.withoutLocation'), value: withoutLocation },
-    ...(summary ? [
-      { key: 'withContacts',    label: t('departments.summary.withContacts'),    value: summary.with_contacts } as KpiSpec,
-      { key: 'withoutContacts', label: t('departments.summary.withoutContacts'), value: summary.without_contacts } as KpiSpec,
-    ] : []),
     { key: 'withoutCustomer', label: t('departments.summary.withoutCustomer'), value: withoutCustomer?.count ?? 0,
       onClick: withoutCustomer ? gateDrillClick('departments', () => openSegment(withoutCustomer, { customer: 'none' })) : undefined },
-    ...(topCustomer ? [{ key: 'topCustomer', label: t('departments.summary.topCustomer'), value: topCustomer.count, sub: topCustomer.label,
-      onClick: gateDrillClick('departments', () => openSegment(topCustomer, { customer: topCustomer.value })) } as KpiSpec] : []),
-    ...(topLocation ? [{ key: 'topLocation', label: t('departments.summary.topLocation'), value: topLocation.count, sub: topLocation.label,
-      onClick: gateDrillClick('departments', () => openSegment(topLocation, { location: topLocation.value })) } as KpiSpec] : []),
+    { key: 'topCustomer', label: t('departments.summary.topCustomer'), value: topCustomer?.count ?? '—', sub: topCustomer?.label,
+      onClick: topCustomer ? gateDrillClick('departments', () => openSegment(topCustomer, { customer: topCustomer.value })) : undefined },
+    { key: 'topLocation', label: t('departments.summary.topLocation'), value: topLocation?.count ?? '—', sub: topLocation?.label,
+      onClick: topLocation ? gateDrillClick('departments', () => openSegment(topLocation, { location: topLocation.value })) : undefined },
     { key: 'customersCount', label: t('departments.summary.customersCount'), value: customersCount },
+    // Contact-coverage summary — the backend hasn't shipped this block yet;
+    // these two slots hold their place with a dash so the strip's shape does
+    // not change the day it lands.
+    { key: 'withContacts',    label: t('departments.summary.withContacts'),    value: summary?.with_contacts ?? '—' },
+    { key: 'withoutContacts', label: t('departments.summary.withoutContacts'), value: summary?.without_contacts ?? '—' },
   ]
 
   return (

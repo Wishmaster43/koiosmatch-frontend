@@ -87,33 +87,83 @@ describe('FlowReport', () => {
     expect(screen.getByText('Geen sollicitaties in deze periode')).toBeInTheDocument()
   })
 
-  // As-rendering: every phase renders its own KPI card + funnel row (label appears
-  // twice — once in the KPI strip, once in the funnel), reached_count as the value.
-  it('renders every phase as a KPI card and a funnel row, plus the total and overall conversion', () => {
+  // Nine-card footprint (Danny — never one card per tenant funnel stage, that
+  // was the unbounded strip). Only the first and last phase get their own
+  // summary card (sub-label); the middle phase's detail lives ONLY in the
+  // funnel row below, exactly where the per-stage breakdown belongs.
+  it('renders exactly nine fixed KPI cards, never one per funnel stage', () => {
     mockUseFlowReport.mockReturnValue({ data: cohortData, loading: false, error: false })
     renderReport()
     expect(screen.getByText('Totaal sollicitaties')).toBeInTheDocument()
     expect(screen.getByText('Totale conversie')).toBeInTheDocument()
-    for (const label of ['Sollicitant', 'Uitgenodigd', 'Aangenomen']) {
-      expect(screen.getAllByText(label).length).toBe(2)
-    }
+    expect(screen.getByText('Instapfase')).toBeInTheDocument()
+    expect(screen.getByText('Eindfase')).toBeInTheDocument()
+    expect(screen.getByText('Grootste uitval')).toBeInTheDocument()
+    expect(screen.getByText('Bereikte fasen')).toBeInTheDocument()
+    expect(screen.getByText('Fasen in trechter')).toBeInTheDocument()
+    // Entry/final stage cards carry the real stage label as their sub-text,
+    // plus the funnel row below. 'Sollicitant' is also the biggest-drop-off
+    // stage (applied→invited = 8, the largest step), so its sub-text shows a
+    // third time on the maxDropPhase card.
+    expect(screen.getAllByText('Sollicitant').length).toBe(3)
+    expect(screen.getAllByText('Aangenomen').length).toBe(2)
+    // The middle phase has NO KPI card of its own — only the funnel row.
+    expect(screen.getAllByText('Uitgenodigd').length).toBe(1)
     // Overall conversion = last reached / first reached = 6/20 = 30%.
     expect(screen.getByText('30%')).toBeInTheDocument()
     // Drop-off (cohort only) = first reached - last reached = 20 - 6 = 14; the
     // average days-in-phase card averages the non-null avg_days_in_phase values.
     expect(screen.getByText('Uitval (aantal)')).toBeInTheDocument()
-    expect(screen.getByText('14')).toBeInTheDocument()
+    expect(screen.getAllByText('14').length).toBeGreaterThan(0)
     expect(screen.getByText('Gem. dagen per fase')).toBeInTheDocument()
+    // Biggest drop-off: applied(20) → invited(12) = 8, bigger than invited(12) → hired(6) = 6.
+    expect(screen.getAllByText('8').length).toBeGreaterThan(0)
+    // 3 phases configured, all 3 reached (cohort ready, every reached_count > 0).
+    expect(screen.getAllByText('3').length).toBeGreaterThan(0)
+  })
+
+  // Nine-card footprint holds for a tenant with a different funnel length too —
+  // this is the regression that mattered: an unbounded strip grew with the
+  // tenant's own stage count, this fixed one does not.
+  it('still ships exactly nine cards for a five-stage tenant funnel', () => {
+    const fiveStage: FlowReportData = {
+      period: 'month', from: '2026-08-01', to: '2026-08-31', total: 30,
+      phases: [
+        { key: 'a', label: 'A', current_count: 1, reached_count: 30, conversion_rate: null, avg_days_in_phase: 1 },
+        { key: 'b', label: 'B', current_count: 1, reached_count: 22, conversion_rate: 0.73, avg_days_in_phase: 2 },
+        { key: 'c', label: 'C', current_count: 1, reached_count: 15, conversion_rate: 0.68, avg_days_in_phase: 3 },
+        { key: 'd', label: 'D', current_count: 1, reached_count: 9, conversion_rate: 0.6, avg_days_in_phase: 4 },
+        { key: 'e', label: 'E', current_count: 1, reached_count: 4, conversion_rate: 0.44, avg_days_in_phase: 5 },
+      ],
+    }
+    mockUseFlowReport.mockReturnValue({ data: fiveStage, loading: false, error: false })
+    renderReport()
+    // Still exactly the same nine fixed labels, never a card for stage B/C/D.
+    for (const label of ['Instapfase', 'Eindfase', 'Grootste uitval', 'Bereikte fasen', 'Fasen in trechter']) {
+      expect(screen.getByText(label)).toBeInTheDocument()
+    }
+    // C and D only appear once each (funnel row), never as their own KPI card.
+    for (const label of ['C', 'D']) expect(screen.getAllByText(label).length).toBe(1)
+    // A is both the entry stage AND the biggest-drop-off stage (a→b = 8, the
+    // largest step), so its sub-text renders on two cards plus the funnel row.
+    expect(screen.getAllByText('A').length).toBe(3)
+    // B only appears once (funnel row) — no KPI card of its own.
+    expect(screen.getAllByText('B').length).toBe(1)
+    expect(screen.getAllByText('E').length).toBe(2)
   })
 
   // Cohort-filling: no reached data yet, so the pipeline fallback renders (current_count)
-  // and the calm cohort-filling note shows.
+  // and the calm cohort-filling note shows; the derived-summary cards fall back to
+  // the house dash instead of disappearing (still nine cards).
   it('falls back to the pipeline occupancy and shows the cohort note while the cohort fills', () => {
     mockUseFlowReport.mockReturnValue({ data: pipelineData, loading: false, error: false })
     renderReport()
     expect(screen.getByText('Cohort vult zich nog. Pipeline-bezetting getoond tot er genoeg historie is.')).toBeInTheDocument()
-    // No overall conversion KPI while the cohort isn't ready.
-    expect(screen.queryByText('Totale conversie')).not.toBeInTheDocument()
+    // No overall conversion number while the cohort isn't ready — the card stays,
+    // dash-filled, never a fabricated percentage.
+    expect(screen.getByText('Totale conversie')).toBeInTheDocument()
+    expect(screen.getByText('Grootste uitval')).toBeInTheDocument()
+    expect(screen.getAllByText('—').length).toBeGreaterThan(0)
   })
 
   // Clicking the total KPI drills with view=reached and no phase param.
@@ -126,13 +176,14 @@ describe('FlowReport', () => {
     expect(lastAdviceParams()).toEqual({ period: 'month', view: 'reached' })
   })
 
-  // Clicking a phase KPI drills with phase=<key> + view=reached (XOR — the total
-  // never carries a phase param, a phase click always does).
-  it('clicking a phase KPI drills with phase=<key> and view=reached', async () => {
+  // Clicking a phase drills with phase=<key> + view=reached (XOR — the total
+  // never carries a phase param, a phase click always does). The middle phase
+  // has no KPI card of its own (nine-card cap) — this proves its funnel ROW
+  // is still independently clickable.
+  it('clicking a phase (via its funnel row) drills with phase=<key> and view=reached', async () => {
     const user = userEvent.setup()
     mockUseFlowReport.mockReturnValue({ data: cohortData, loading: false, error: false })
     renderReport()
-    // First occurrence of the label = the KPI card (rendered before the funnel rows).
     await user.click(screen.getAllByText('Uitgenodigd')[0])
     expect(lastDrillParams()).toEqual({ phase: 'invited', period: 'month', view: 'reached' })
     expect(lastAdviceParams()).toEqual({ phase: 'invited', period: 'month', view: 'reached' })

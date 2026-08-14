@@ -850,7 +850,21 @@
       },
       "daily": {
         "title": "Uso diario",
-        "notice": "Un gráfico diario por categoría (Total · IA · Leads · Llamadas telefónicas · WhatsApp) aún no está disponible. El backend solo devuelve totales por periodo, sin cifras por día."
+        "subtitle": "Uso de workflow e IA por día (precio de venta), para este periodo.",
+        "notice": "Un gráfico diario por categoría (Total · IA · Leads · Llamadas telefónicas · WhatsApp) aún no está disponible. El backend solo devuelve totales por periodo, sin cifras por día.",
+        "periodLabel": "Periodo",
+        "categoryLabel": "Categoría",
+        "categoryTotal": "Total",
+        "categoryWorkflow": "Workflow",
+        "categoryAi": "IA",
+        "colDate": "Fecha",
+        "colWorkflowCredits": "Créditos de workflow",
+        "colWorkflowAmount": "Importe de workflow",
+        "colAiTokens": "Tokens de IA",
+        "colAiAmount": "Importe de IA",
+        "colTotalAmount": "Importe total",
+        "loadError": "No se pudo cargar el uso diario.",
+        "empty": "Aún no hay uso en este periodo."
       },
       "koios": {
         "title": "Facturación de Koios IA",
