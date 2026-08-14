@@ -1172,6 +1172,7 @@
     "overlapWarningHours": "La période saisie chevauche un match actif chez {{label}} : ensemble {{hours}} heures par semaine sur la période de chevauchement ({{period}}).",
     "contractForm": "Forme de contrat",
     "pickContractForm": "Choisir…",
+    "pickBranch": "Choisir agence",
     "contractLines": {
       "title": "Lignes de contrat",
       "add": "ajouter une ligne",

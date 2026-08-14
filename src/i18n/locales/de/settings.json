@@ -1743,6 +1743,8 @@
     "phaseApplicant": "Ist die Bewerber-Phase",
     "phaseApplicantHint": "Neue Leads wechseln bei ihrer ersten Bewerbung automatisch in diese Phase (Lead → Kandidat).",
     "phaseApplicantBadge": "Bewerber-Phase",
+    "customerNotApplicable": "Kunde nicht zutreffend",
+    "customerNotApplicableHint": "Ein Match mit dieser Vertragsform hat keinen Kunden, keinen Standort, keine Abteilung und keinen Ansprechpartner; eine Niederlassung ist dann Pflicht.",
     "iconField": "Symbol"
   },
   "planning": {

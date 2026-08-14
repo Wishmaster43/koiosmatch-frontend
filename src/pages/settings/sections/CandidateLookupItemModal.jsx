@@ -20,7 +20,7 @@ const slugify = (s) => s.toLowerCase().trim().replace(/[^a-z0-9]+/g, '_').replac
 // `locked` (system list) flag that disables the label field in edit mode.
 export default function CandidateLookupItemModal({
   modal, setModal, onClose, onSave, busy, locked,
-  isStatusBlock, isFunnelBlock, isPhaseBlock, supportsIcon,
+  isStatusBlock, isFunnelBlock, isPhaseBlock, isContractFormBlock, supportsIcon,
 }) {
   const { t } = useTranslation('settings')
 
@@ -82,6 +82,19 @@ export default function CandidateLookupItemModal({
             <IconPickerControl icons={GENERIC_LOOKUP_ICON_NAMES} resolve={resolveGenericLookupIcon} value={modal.icon}
               color={modal.color ?? '#6B7280'} label={modal.label || t('lookups.iconField')}
               onPick={icon => setModal(m => ({ ...m, icon }))} />
+          </div>
+        )}
+
+        {/* Customer-not-applicable toggle — contract forms only (MATCH-KLANTLOOS-1):
+            a match resolved to this Contractvorm has no customer/location/department/
+            contact — the server rejects those fields and requires a branch instead. */}
+        {isContractFormBlock && (
+          <div style={{ marginBottom: 14 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <Toggle checked={modal.customer_not_applicable} onChange={v => setModal(m => ({ ...m, customer_not_applicable: v }))} />
+              <span style={{ fontSize: 13, color: 'var(--text)' }}>{t('lookups.customerNotApplicable')}</span>
+            </div>
+            <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 4 }}>{t('lookups.customerNotApplicableHint')}</div>
           </div>
         )}
 

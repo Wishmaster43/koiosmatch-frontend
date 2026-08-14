@@ -162,6 +162,7 @@ export default function MatchModal({
                 t={t} errors={form.errors} editing={editing}
                 candidateTypes={form.candidateTypes} contractForm={form.contractForm} setContractForm={form.setContractForm}
                 hasContractLines={form.hasContractLines} contractLines={form.contractLines} setContractLines={form.setContractLines}
+                customerNotApplicable={form.customerNotApplicable}
                 fixedCandidateId={form.fixedCandidateId} pickedCandidateId={form.pickedCandidateId} setPickedCandidateId={form.setPickedCandidateId}
                 candidateOptions={form.candidateOptions}
                 customerId={form.customerId} setCustomerId={form.setCustomerId} customerOptions={form.customerOptions}
@@ -255,13 +256,21 @@ export default function MatchModal({
       </div>
 
       {/* Pinned footer — buttons stay visible whatever the content height (mirrors PlanIntakeModal). */}
-      <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, padding: '14px 22px', borderTop: '1px solid var(--border)', flexShrink: 0 }}>
-          <button onClick={onClose} style={{ height: 34, padding: '0 16px', fontSize: 13, border: '1px solid var(--border)', borderRadius: 8, background: 'var(--surface)', cursor: 'pointer', color: 'var(--text)' }}>{t('common:cancel')}</button>
-          <button onClick={form.handleSubmitClick} disabled={form.saving || !form.customerId || !form.func}
-            style={{ height: 34, padding: '0 16px', fontSize: 13, fontWeight: 600, border: 'none', borderRadius: 8, background: 'var(--color-primary)', color: 'var(--color-on-accent)', cursor: (form.customerId && form.func) ? 'pointer' : 'default', opacity: (form.customerId && form.func) ? 1 : 0.4 }}>
-            {form.saving ? t('common:saving') : (form.deviatesFromProposal && form.confirmDeviation ? t('placement.rateProposal.deviationConfirm') : t(editing ? 'common:save' : 'placement.create'))}
-          </button>
-        </div>
+      {/* MATCH-KLANTLOOS-1: the relational requirement flips with the picked
+          Contractvorm — a klant-loos form needs branch instead of customer. */}
+      {(() => {
+        const requiredOk = form.customerNotApplicable ? Boolean(form.branchId) : Boolean(form.customerId)
+        const canSubmit = requiredOk && Boolean(form.func)
+        return (
+          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, padding: '14px 22px', borderTop: '1px solid var(--border)', flexShrink: 0 }}>
+            <button onClick={onClose} style={{ height: 34, padding: '0 16px', fontSize: 13, border: '1px solid var(--border)', borderRadius: 8, background: 'var(--surface)', cursor: 'pointer', color: 'var(--text)' }}>{t('common:cancel')}</button>
+            <button onClick={form.handleSubmitClick} disabled={form.saving || !canSubmit}
+              style={{ height: 34, padding: '0 16px', fontSize: 13, fontWeight: 600, border: 'none', borderRadius: 8, background: 'var(--color-primary)', color: 'var(--color-on-accent)', cursor: canSubmit ? 'pointer' : 'default', opacity: canSubmit ? 1 : 0.4 }}>
+              {form.saving ? t('common:saving') : (form.deviatesFromProposal && form.confirmDeviation ? t('placement.rateProposal.deviationConfirm') : t(editing ? 'common:save' : 'placement.create'))}
+            </button>
+          </div>
+        )
+      })()}
     </FloatingPanel>
   )
 }

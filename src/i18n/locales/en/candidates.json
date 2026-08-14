@@ -1172,6 +1172,7 @@
     "overlapWarningHours": "The entered period overlaps with an active match at {{label}}: together {{hours}} hours per week in the overlapping period ({{period}}).",
     "contractForm": "Contract form",
     "pickContractForm": "Pick…",
+    "pickBranch": "Pick branch",
     "contractLines": {
       "title": "Contract lines",
       "add": "add line",

@@ -1172,6 +1172,7 @@
     "overlapWarningHours": "De opgegeven periode overlapt met een actieve match bij {{label}}: samen {{hours}} uur per week in de overlappende periode ({{period}}).",
     "contractForm": "Contractvorm",
     "pickContractForm": "Kies…",
+    "pickBranch": "Kies vestiging",
     "contractLines": {
       "title": "Contractregels",
       "add": "regel toevoegen",

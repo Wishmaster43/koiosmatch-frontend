@@ -630,6 +630,8 @@
     "phaseApplicant": "Is the applicant phase",
     "phaseApplicantHint": "New leads automatically move to this phase on their first application (Lead → Candidate).",
     "phaseApplicantBadge": "Applicant phase",
+    "customerNotApplicable": "Customer not applicable",
+    "customerNotApplicableHint": "A match with this contract form has no customer, location, department or contact person; a branch is then required.",
     "iconField": "Icon"
   },
   "vacancy": {

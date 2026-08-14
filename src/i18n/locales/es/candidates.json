@@ -1172,6 +1172,7 @@
     "overlapWarningHours": "El período indicado se solapa con un Match activo en {{label}}: juntos {{hours}} horas por semana en el período solapado ({{period}}).",
     "contractForm": "Forma de contrato",
     "pickContractForm": "Elegir…",
+    "pickBranch": "Elige sucursal",
     "contractLines": {
       "title": "Líneas de contrato",
       "add": "añadir línea",

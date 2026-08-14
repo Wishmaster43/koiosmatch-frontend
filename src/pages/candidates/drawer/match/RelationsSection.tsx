@@ -49,7 +49,7 @@ const contactOpt = (arr: CascadeOption[]) => arr.map(c => ({ value: String(c.id)
 
 export default function RelationsSection({
   t, errors, editing,
-  candidateTypes, contractForm, setContractForm, hasContractLines, contractLines, setContractLines,
+  candidateTypes, contractForm, setContractForm, hasContractLines, contractLines, setContractLines, customerNotApplicable,
   fixedCandidateId, pickedCandidateId, setPickedCandidateId, candidateOptions,
   customerId, setCustomerId, customerOptions,
   locationId, setLocationId, locations,
@@ -74,6 +74,9 @@ export default function RelationsSection({
   candidateTypes: LookupItem[]
   contractForm: string; setContractForm: (v: string) => void
   hasContractLines: boolean
+  // MATCH-KLANTLOOS-1: the picked Contractvorm's own flag — hides klant/locatie/
+  // afdeling/contactpersoon entirely and makes Vestiging required instead.
+  customerNotApplicable: boolean
   contractLines: MatchContractLine[]; setContractLines: (v: MatchContractLine[]) => void
   fixedCandidateId?: Id; pickedCandidateId: string; setPickedCandidateId: (v: string) => void
   candidateOptions: Array<{ id?: Id; name?: string }>
@@ -129,91 +132,99 @@ export default function RelationsSection({
           )}
         </F>
       )}
-      <div style={pairRow}>
-        {/* Klant/locatie — typeable searchable pickers (job 17/18), never free-text
-            create (allowCreate={false}: a customer/location is a real relational id). */}
-        <F label={t('placement.customer')} error={errors.customerId}>
-          {(labelId: string) => (
-            <CreatableSelect value={customerId || null} onChange={setCustomerId} allowCreate={false}
-              placeholder={t('placement.pickCustomer')} menuWidth={pickerMenuWidth}
-              aria-labelledby={labelId}
-              options={customerOptions.map(c => ({ value: String(c.value), label: c.label }))} />
-          )}
-        </F>
-        <F label={t('placement.location')} error={errors.locationId}>
-          {(labelId: string) => (
-            <CreatableSelect value={locationId || null} onChange={v => { setLocationId(v); setDepartmentId('') }}
-              allowCreate={false} menuWidth={pickerMenuWidth}
-              placeholder={customerId ? t('placement.pickLocation') : t('placement.pickCustomerFirst')}
-              aria-labelledby={labelId}
-              options={opt(locations)} />
-          )}
-        </F>
-      </div>
-      <div style={pairRow}>
-        {/* Afdeling/contactpersoon — same searchable pattern. allowCreate={false}
-            was missing here (live-check finding, kandidaten-ronde-2 punt C.2.1):
-            a department is a real relational id like customer/location/contact,
-            never a free-text create — the file header already claimed this. */}
-        <F label={t('placement.department')} error={errors.departmentId}>
-          {(labelId: string) => (
-            <CreatableSelect value={departmentId || null} onChange={setDepartmentId} allowCreate={false}
-              placeholder={t('placement.optional')} menuWidth={pickerMenuWidth} options={opt(departments)}
-              aria-labelledby={labelId} />
-          )}
-        </F>
-        <div style={labelLeftRow}>
-          <div style={{ ...rowLabel, display: 'flex', flexDirection: 'column', gap: 4 }}>
-            <span id={contactLabelId}>{t('placement.contact')}</span>
-            {/* House soft-tint chip (Danny 24-07 screenshot feedback) — the shared
-                DrawerAddButton, not a bare text link. Wraps under the label in the
-                narrower label-left column. */}
-            {customerId && !creatingContact && (
-              <DrawerAddButton onClick={() => setCreatingContact(true)} label={t('placement.newContact')} />
-            )}
-          </div>
-          <div style={rowField}>
-          {creatingContact ? (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 6, border: '1px solid var(--border)', borderRadius: 8, padding: 8, background: 'var(--bg)' }}>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 6 }}>
-                <input value={nc.first_name} onChange={e => setNc(p => ({ ...p, first_name: e.target.value }))} placeholder={t('placement.firstName')} style={{ ...input, height: 30 }} />
-                <input value={nc.last_name} onChange={e => setNc(p => ({ ...p, last_name: e.target.value }))} placeholder={t('placement.lastName')} style={{ ...input, height: 30 }} />
-              </div>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 6 }}>
-                <input value={nc.email} onChange={e => setNc(p => ({ ...p, email: e.target.value }))} placeholder={t('placement.email')} style={{ ...input, height: 30 }} />
-                {/* Functie — searchable/creatable per the tenant's contact-function
-                    lookup (Danny 24-07 addendum), mirrors AddContactPersonModal. */}
-                <CreatableSelect value={nc.function || null} onChange={v => setNc(p => ({ ...p, function: v }))}
-                  allowCreate={contactFunctionsAllowFreeEntry} placeholder={t('placement.contactFunction')}
-                  options={contactFunctions.map(f => ({ value: f, label: f }))} />
-              </div>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 6 }}>
-                <input type="tel" value={nc.phone} onChange={e => setNc(p => ({ ...p, phone: e.target.value }))} placeholder={t('placement.phone')} style={{ ...input, height: 30 }} />
-                <input type="tel" value={nc.mobile} onChange={e => setNc(p => ({ ...p, mobile: e.target.value }))} placeholder={t('placement.mobile')} style={{ ...input, height: 30 }} />
-              </div>
-              {/* Duplicate-contact preflight (Danny 24-07): blocks the save, names the
-                  existing match — the backend enforces no uniqueness on these fields. */}
-              {duplicateContact && (
-                <div role="alert" style={{ fontSize: 11.5, color: 'var(--color-warning)',
-                  background: 'color-mix(in srgb, var(--color-warning) 10%, transparent)',
-                  border: '1px solid color-mix(in srgb, var(--color-warning) 30%, transparent)', borderRadius: 6, padding: '6px 8px' }}>
-                  {t('placement.duplicateContact', { name: duplicateContact.name ?? '—' })}
-                </div>
+      {/* MATCH-KLANTLOOS-1: a klant-loos Contractvorm hides the whole customer
+          cascade — klant/locatie/afdeling/contactpersoon simply do not apply,
+          and the submit body never carries any of the four (§3 no fake affordances:
+          a picker that can never persist for this form must not render at all). */}
+      {!customerNotApplicable && (
+        <>
+          <div style={pairRow}>
+            {/* Klant/locatie — typeable searchable pickers (job 17/18), never free-text
+                create (allowCreate={false}: a customer/location is a real relational id). */}
+            <F label={t('placement.customer')} error={errors.customerId}>
+              {(labelId: string) => (
+                <CreatableSelect value={customerId || null} onChange={setCustomerId} allowCreate={false}
+                  placeholder={t('placement.pickCustomer')} menuWidth={pickerMenuWidth}
+                  aria-labelledby={labelId}
+                  options={customerOptions.map(c => ({ value: String(c.value), label: c.label }))} />
               )}
-              <div style={{ display: 'flex', gap: 6, justifyContent: 'flex-end' }}>
-                <button onClick={() => { setCreatingContact(false); setDuplicateContact(null); setNc({ first_name: '', last_name: '', email: '', phone: '', mobile: '', function: '' }) }} style={{ height: 28, padding: '0 10px', fontSize: 12, border: '1px solid var(--border)', borderRadius: 6, background: 'var(--surface)', cursor: 'pointer', color: 'var(--text)' }}>{t('common:cancel')}</button>
-                <button onClick={saveContact} disabled={!nc.first_name.trim() || !nc.last_name.trim()} style={{ height: 28, padding: '0 12px', fontSize: 12, fontWeight: 600, border: 'none', borderRadius: 6, background: 'var(--color-primary)', color: 'var(--color-on-accent)', cursor: 'pointer', opacity: (nc.first_name.trim() && nc.last_name.trim()) ? 1 : 0.4 }}>{t('common:save')}</button>
+            </F>
+            <F label={t('placement.location')} error={errors.locationId}>
+              {(labelId: string) => (
+                <CreatableSelect value={locationId || null} onChange={v => { setLocationId(v); setDepartmentId('') }}
+                  allowCreate={false} menuWidth={pickerMenuWidth}
+                  placeholder={customerId ? t('placement.pickLocation') : t('placement.pickCustomerFirst')}
+                  aria-labelledby={labelId}
+                  options={opt(locations)} />
+              )}
+            </F>
+          </div>
+          <div style={pairRow}>
+            {/* Afdeling/contactpersoon — same searchable pattern. allowCreate={false}
+                was missing here (live-check finding, kandidaten-ronde-2 punt C.2.1):
+                a department is a real relational id like customer/location/contact,
+                never a free-text create — the file header already claimed this. */}
+            <F label={t('placement.department')} error={errors.departmentId}>
+              {(labelId: string) => (
+                <CreatableSelect value={departmentId || null} onChange={setDepartmentId} allowCreate={false}
+                  placeholder={t('placement.optional')} menuWidth={pickerMenuWidth} options={opt(departments)}
+                  aria-labelledby={labelId} />
+              )}
+            </F>
+            <div style={labelLeftRow}>
+              <div style={{ ...rowLabel, display: 'flex', flexDirection: 'column', gap: 4 }}>
+                <span id={contactLabelId}>{t('placement.contact')}</span>
+                {/* House soft-tint chip (Danny 24-07 screenshot feedback) — the shared
+                    DrawerAddButton, not a bare text link. Wraps under the label in the
+                    narrower label-left column. */}
+                {customerId && !creatingContact && (
+                  <DrawerAddButton onClick={() => setCreatingContact(true)} label={t('placement.newContact')} />
+                )}
+              </div>
+              <div style={rowField}>
+              {creatingContact ? (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 6, border: '1px solid var(--border)', borderRadius: 8, padding: 8, background: 'var(--bg)' }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 6 }}>
+                    <input value={nc.first_name} onChange={e => setNc(p => ({ ...p, first_name: e.target.value }))} placeholder={t('placement.firstName')} style={{ ...input, height: 30 }} />
+                    <input value={nc.last_name} onChange={e => setNc(p => ({ ...p, last_name: e.target.value }))} placeholder={t('placement.lastName')} style={{ ...input, height: 30 }} />
+                  </div>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 6 }}>
+                    <input value={nc.email} onChange={e => setNc(p => ({ ...p, email: e.target.value }))} placeholder={t('placement.email')} style={{ ...input, height: 30 }} />
+                    {/* Functie — searchable/creatable per the tenant's contact-function
+                        lookup (Danny 24-07 addendum), mirrors AddContactPersonModal. */}
+                    <CreatableSelect value={nc.function || null} onChange={v => setNc(p => ({ ...p, function: v }))}
+                      allowCreate={contactFunctionsAllowFreeEntry} placeholder={t('placement.contactFunction')}
+                      options={contactFunctions.map(f => ({ value: f, label: f }))} />
+                  </div>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 6 }}>
+                    <input type="tel" value={nc.phone} onChange={e => setNc(p => ({ ...p, phone: e.target.value }))} placeholder={t('placement.phone')} style={{ ...input, height: 30 }} />
+                    <input type="tel" value={nc.mobile} onChange={e => setNc(p => ({ ...p, mobile: e.target.value }))} placeholder={t('placement.mobile')} style={{ ...input, height: 30 }} />
+                  </div>
+                  {/* Duplicate-contact preflight (Danny 24-07): blocks the save, names the
+                      existing match — the backend enforces no uniqueness on these fields. */}
+                  {duplicateContact && (
+                    <div role="alert" style={{ fontSize: 11.5, color: 'var(--color-warning)',
+                      background: 'color-mix(in srgb, var(--color-warning) 10%, transparent)',
+                      border: '1px solid color-mix(in srgb, var(--color-warning) 30%, transparent)', borderRadius: 6, padding: '6px 8px' }}>
+                      {t('placement.duplicateContact', { name: duplicateContact.name ?? '—' })}
+                    </div>
+                  )}
+                  <div style={{ display: 'flex', gap: 6, justifyContent: 'flex-end' }}>
+                    <button onClick={() => { setCreatingContact(false); setDuplicateContact(null); setNc({ first_name: '', last_name: '', email: '', phone: '', mobile: '', function: '' }) }} style={{ height: 28, padding: '0 10px', fontSize: 12, border: '1px solid var(--border)', borderRadius: 6, background: 'var(--surface)', cursor: 'pointer', color: 'var(--text)' }}>{t('common:cancel')}</button>
+                    <button onClick={saveContact} disabled={!nc.first_name.trim() || !nc.last_name.trim()} style={{ height: 28, padding: '0 12px', fontSize: 12, fontWeight: 600, border: 'none', borderRadius: 6, background: 'var(--color-primary)', color: 'var(--color-on-accent)', cursor: 'pointer', opacity: (nc.first_name.trim() && nc.last_name.trim()) ? 1 : 0.4 }}>{t('common:save')}</button>
+                  </div>
+                </div>
+              ) : (
+                <CreatableSelect value={contactId || null} onChange={setContactId} allowCreate={false} menuWidth={pickerMenuWidth}
+                  placeholder={customerId ? t('placement.pickContact') : t('placement.pickCustomerFirst')} options={contactOpt(contacts)}
+                  aria-labelledby={contactLabelId} />
+              )}
+              {errors.contactId && <div style={errMsg}>{t('common:required')}</div>}
               </div>
             </div>
-          ) : (
-            <CreatableSelect value={contactId || null} onChange={setContactId} allowCreate={false} menuWidth={pickerMenuWidth}
-              placeholder={customerId ? t('placement.pickContact') : t('placement.pickCustomerFirst')} options={contactOpt(contacts)}
-              aria-labelledby={contactLabelId} />
-          )}
-          {errors.contactId && <div style={errMsg}>{t('common:required')}</div>}
           </div>
-        </div>
-      </div>
+        </>
+      )}
       {/* Functie — searchable (tenant lookup, can run to dozens of job titles);
           Recruiter is now searchable too (Danny 24-07 addendum, same treatment as
           Contractsoort/Vestiging/CAO) — stays optional exactly like before: no
@@ -241,11 +252,14 @@ export default function RelationsSection({
       </div>
       {/* Vestiging (7.4) — proposes from the customer's own branch, then the
           recruiter's, then the tenant default (useBranchDefault); editing it by
-          hand freezes the proposal (setBranchDirty), same pattern as cost centre. */}
+          hand freezes the proposal (setBranchDirty), same pattern as cost centre.
+          MATCH-KLANTLOOS-1: REQUIRED (no clear affordance) on a klant-loos
+          Contractvorm — the server rejects the match without a branch_id then. */}
       <F label={t('placement.branch')} error={errors.branchId}>
         {(labelId: string) => (
           <CreatableSelect value={branchId || null} onChange={v => { setBranchDirty(true); setBranchId(v) }}
-            allowCreate={false} menuWidth={pickerMenuWidth} placeholder={t('placement.optional')}
+            allowCreate={false} menuWidth={pickerMenuWidth}
+            placeholder={customerNotApplicable ? t('placement.pickBranch') : t('placement.optional')}
             aria-labelledby={labelId}
             options={branchLocations.map(l => ({ value: String(l.value), label: l.label }))} />
         )}

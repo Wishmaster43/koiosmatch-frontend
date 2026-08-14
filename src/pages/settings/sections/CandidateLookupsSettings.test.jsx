@@ -334,3 +334,26 @@ describe('CandidateLookupsSettings — colour + reorder revert on failure', () =
     expect(revertedRows[0]).toHaveTextContent('ZZP')
   })
 })
+
+// MATCH-KLANTLOOS-1: the Contractvorm editor's own customer_not_applicable flag —
+// mirrors the is_blacklist/is_proposal flag tests above, same shared modal pattern.
+describe('CandidateLookupsSettings — customer_not_applicable flag (MATCH-KLANTLOOS-1)', () => {
+  it('saves customer_not_applicable:true on a contract form via the edit modal', async () => {
+    api.get.mockResolvedValue({ data: {
+      // eslint-disable-next-line no-restricted-syntax -- DATA: fixture contract-form colour, not a style rule.
+      candidate_types: [{ id: 'c1', value: 'zzp', label: 'ZZP', color: '#3B8FD4', customer_not_applicable: false }],
+    } })
+    api.put.mockResolvedValue({ data: {} })
+    const user = userEvent.setup()
+    render(<ContractFormsSettings />)
+
+    await screen.findByText('ZZP')
+    await user.click(screen.getByTitle(st('lookups.edit')))
+    // customer_not_applicable is the only toggle in the contract-form modal.
+    await user.click(screen.getByRole('switch'))
+    await user.click(screen.getByText(st('common.save')))
+
+    await waitFor(() => expect(api.put).toHaveBeenCalledWith(
+      '/settings/candidate-lookups/candidate-types/c1', expect.objectContaining({ customer_not_applicable: true })))
+  })
+})

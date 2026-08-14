@@ -125,6 +125,10 @@ export function useMatchForm({
   const [contractForm, setContractFormRaw] = useState('')
   const setContractForm = (v: string) => setContractFormRaw(v)
   const hasContractLines = Boolean(candidateTypes.find(ct => ct.value === contractForm)?.has_contract_lines)
+  // MATCH-KLANTLOOS-1: a Contractvorm flagged `customer_not_applicable` means this
+  // match has no customer — Relaties hides klant/locatie/afdeling/contactpersoon and
+  // requires a branch instead (the server rejects the four fields + requires branch_id).
+  const customerNotApplicable = Boolean(candidateTypes.find(ct => ct.value === contractForm)?.customer_not_applicable)
   const [contractLines, setContractLinesRaw] = useState<MatchContractLine[]>([])
   // Switching AWAY from a flagged Contractvorm clears the local draft — the
   // section disappears (§1 of the changelog: the backend cleans up orphaned
@@ -172,6 +176,17 @@ export function useMatchForm({
   const [locationId, setLocationIdRaw] = useState(initialCustomerLocationId != null ? String(initialCustomerLocationId) : '')
   const [departmentId, setDepartmentIdRaw] = useState(initialCustomerDepartmentId != null ? String(initialCustomerDepartmentId) : '')
   const [contactId, setContactIdRaw] = useState('')
+  // MATCH-KLANTLOOS-1: switching TO a `customer_not_applicable` Contractvorm clears
+  // a previously staged customer/location/department/contact — those fields hide and
+  // the submit body must never carry a stale relational id the server would reject.
+  useEffect(() => {
+    if (!customerNotApplicable) return
+    if (customerId) setCustomerIdRaw('')
+    if (locationId) setLocationIdRaw('')
+    if (departmentId) setDepartmentIdRaw('')
+    if (contactId) setContactIdRaw('')
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- only react to the flag flipping, never to the recruiter's own cascade edits
+  }, [customerNotApplicable])
   // EDIT-MATCH-1: guards the reset below during the one-shot prefill (see the
   // prefill effect further down) — picking a NEW customer still clears location/
   // department/contact, but loading an existing match's own combination must not
@@ -331,7 +346,7 @@ export function useMatchForm({
   const { saving, errors, submitErr, handleSubmitClick } = useMatchSubmit({
     editing, editMatchId, candidateId, t, onClose, onCreated,
     customerId, locationId, departmentId, contactId, branchId,
-    contractForm, contractLines, hasContractLines,
+    contractForm, contractLines, hasContractLines, customerNotApplicable,
     func, contractType, startDate, endDate, hours, cao, scale, step,
     purchase, sell, costCenter, billingEmails, remarks, ownerId, vacancyId,
     branchMismatch, mismatchChoice, detail,
@@ -393,7 +408,7 @@ export function useMatchForm({
     branchMismatch, candBranch, mismatchChoice, setMismatchChoice,
     contractType, setContractType, startDate, setStartDate, endDate, setEndDate, setEndDateDirty, hours, setHours, cao, setCao,
     // MATCH-SOORT-1: Contractvorm + its conditional CONTRACTREGELS editor.
-    candidateTypes, contractForm, setContractForm, hasContractLines, contractLines, setContractLines,
+    candidateTypes, contractForm, setContractForm, hasContractLines, contractLines, setContractLines, customerNotApplicable,
     scale, setScale, step, setStep, purchase, setPurchase, sell, setSell,
     costCenter, setCostCenter, setCostCenterDirty, billingEmails, setBillingEmails, setBillingDirty,
     remarks, setRemarks, remarksExpanded, setRemarksExpanded, remarksEditing, setRemarksEditing,

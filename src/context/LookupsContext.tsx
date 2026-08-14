@@ -42,6 +42,10 @@ export interface LookupItem {
   // MATCH-SOORT-1: a Contractvorm (candidateTypes) row flagged with this shows the
   // match popup's CONTRACTREGELS section — flag-driven, never a hardcoded slug.
   has_contract_lines?: boolean
+  // MATCH-KLANTLOOS-1: a Contractvorm row flagged with this drives a klant-loos
+  // match (no customer/location/department/contact; branch_id required instead) —
+  // read from the same candidateTypes lookup, never a hardcoded slug.
+  customer_not_applicable?: boolean
   // PROPOSE-STAGE-FLAG-1 (verified live 2026-07-27): the funnel row that represents
   // "proposed to the customer" now carries is_proposal, so the proposal stage
   // resolves by flag rather than the literal 'proposal' slug — a tenant may rename it.

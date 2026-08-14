@@ -1743,6 +1743,8 @@
     "phaseApplicant": "Es la fase de solicitante",
     "phaseApplicantHint": "Los nuevos leads pasan automáticamente a esta fase en su primera solicitud (Lead → Candidato).",
     "phaseApplicantBadge": "Fase de solicitante",
+    "customerNotApplicable": "Cliente no aplicable",
+    "customerNotApplicableHint": "Un Match con esta forma de contrato no tiene cliente, ubicación, departamento ni persona de contacto; una sucursal es entonces obligatoria.",
     "iconField": "Icono"
   },
   "planning": {

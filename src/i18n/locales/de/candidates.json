@@ -1172,6 +1172,7 @@
     "overlapWarningHours": "Der eingegebene Zeitraum überschneidet sich mit einem aktiven Match bei {{label}}: zusammen {{hours}} Stunden pro Woche im überschneidenden Zeitraum ({{period}}).",
     "contractForm": "Vertragsform",
     "pickContractForm": "Wählen…",
+    "pickBranch": "Niederlassung wählen",
     "contractLines": {
       "title": "Vertragszeilen",
       "add": "Zeile hinzufügen",

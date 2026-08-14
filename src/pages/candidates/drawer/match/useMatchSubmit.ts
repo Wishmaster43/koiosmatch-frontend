@@ -47,7 +47,7 @@ interface MatchEditDetail {
 export function useMatchSubmit({
   editing, editMatchId, candidateId, t, onClose, onCreated,
   customerId, locationId, departmentId, contactId, branchId,
-  contractForm, contractLines, hasContractLines,
+  contractForm, contractLines, hasContractLines, customerNotApplicable,
   func, contractType, startDate, endDate, hours, cao, scale, step,
   purchase, sell, costCenter, billingEmails, remarks, ownerId, vacancyId,
   branchMismatch, mismatchChoice, detail,
@@ -67,6 +67,10 @@ export function useMatchSubmit({
   // gates whether the draft is actually sent (the section may hold a stale
   // draft from a form the recruiter typed into before switching the form away).
   contractForm: string; contractLines: MatchContractLine[]; hasContractLines: boolean
+  // MATCH-KLANTLOOS-1: the picked Contractvorm's own flag — hides the customer
+  // cascade, requires branch_id, and drops customer/location/department/contact
+  // from the submit body entirely (the server 422s any of the four otherwise).
+  customerNotApplicable: boolean
   func: string; contractType: string; startDate: string; endDate: string; hours: string; cao: string
   scale: string; step: string; purchase: string; sell: string; costCenter: string
   billingEmails: string[]; remarks: string; ownerId: string; vacancyId: string
@@ -169,14 +173,24 @@ export function useMatchSubmit({
   // body below deliberately omits both, RelationsSection renders vacancy read-only
   // while editing so the UI never implies an edit that silently drops (§3).
   const submit = async () => {
-    if (!candidateId || !customerId || !func) return
+    // MATCH-KLANTLOOS-1: a klant-loos Contractvorm needs no customer, but DOES
+    // require a branch — the two guards are mutually exclusive, mirroring the
+    // server's own StoreMatchRequest rules (customer required unless the flag is
+    // set; branch_id required when it is).
+    if (!candidateId || !func) return
+    if (customerNotApplicable) { if (!branchId) { setErrors({ branchId: true }); return } }
+    else if (!customerId) return
     setSaving(true)
     setErrors({}); setSubmitErr(null)
     const match = {
-      customer_id: customerId,
-      customer_location_id: locationId || null,
-      customer_department_id: departmentId || null,
-      contact_id: contactId || null,
+      // The server LOUDLY rejects these four fields on a klant-loos match (422) —
+      // never send them at all rather than rely on the server to ignore them.
+      ...(customerNotApplicable ? {} : {
+        customer_id: customerId,
+        customer_location_id: locationId || null,
+        customer_department_id: departmentId || null,
+        contact_id: contactId || null,
+      }),
       branch_id: branchId || null,
       function_title: func,
       contract_type: contractType || null,

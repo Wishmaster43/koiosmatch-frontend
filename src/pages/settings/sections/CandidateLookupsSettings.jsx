@@ -61,14 +61,14 @@ export function LookupBlock({ slug, title, subtitle, items, setItems, locked = f
   const supportsIcon = isStatusBlock || isContractFormBlock
 
   // eslint-disable-next-line no-restricted-syntax -- DATA: default swatch colour pre-filled for a newly created lookup row, not UI chrome
-  const openAdd  = ()   => setModal({ mode: 'add',  value: '', label: '', color: '#3B8FD4', icon: null, requires_appointment: false, requires_reason: false, requires_match: false, expects_return_date: false, is_match: false, is_rejected: false, is_proposal: false, is_blacklist: false, is_applicant: false })
+  const openAdd  = ()   => setModal({ mode: 'add',  value: '', label: '', color: '#3B8FD4', icon: null, requires_appointment: false, requires_reason: false, requires_match: false, expects_return_date: false, is_match: false, is_rejected: false, is_proposal: false, is_blacklist: false, is_applicant: false, customer_not_applicable: false })
   // eslint-disable-next-line no-restricted-syntax -- DATA: fallback swatch colour for a lookup row without one stored yet, not UI chrome
   const openEdit = (it) => setModal({ mode: 'edit', id: it.id, value: it.value, label: it.label, color: it.color ?? '#6B7280', icon: it.icon ?? null,
     requires_appointment: it.requires_appointment === true, requires_reason: it.requires_reason === true,
     requires_match: it.requires_match === true, expects_return_date: it.expects_return_date === true,
     is_match: it.is_match === true, is_rejected: it.is_rejected === true,
     is_proposal: it.is_proposal === true, is_blacklist: it.is_blacklist === true,
-    is_applicant: it.is_applicant === true })
+    is_applicant: it.is_applicant === true, customer_not_applicable: it.customer_not_applicable === true })
 
   const save = async () => {
     if (!modal.label.trim()) return
@@ -79,6 +79,9 @@ export function LookupBlock({ slug, title, subtitle, items, setItems, locked = f
       ...(isStatusBlock ? { requires_reason: modal.requires_reason, requires_match: modal.requires_match, expects_return_date: modal.expects_return_date, is_blacklist: modal.is_blacklist } : {}),
       ...(isFunnelBlock ? { requires_appointment: modal.requires_appointment, is_match: modal.is_match, is_rejected: modal.is_rejected, is_proposal: modal.is_proposal } : {}),
       ...(isPhaseBlock  ? { is_applicant: modal.is_applicant } : {}),
+      // MATCH-KLANTLOOS-1: contract forms only — a match resolved to this form
+      // rejects customer/location/department/contact server-side and requires branch_id.
+      ...(isContractFormBlock ? { customer_not_applicable: modal.customer_not_applicable } : {}),
     }
     try {
       if (modal.mode === 'add') {
@@ -257,7 +260,7 @@ export function LookupBlock({ slug, title, subtitle, items, setItems, locked = f
       {modal && (
         <CandidateLookupItemModal
           modal={modal} setModal={setModal} onClose={() => setModal(null)} onSave={save} busy={busy} locked={locked}
-          isStatusBlock={isStatusBlock} isFunnelBlock={isFunnelBlock} isPhaseBlock={isPhaseBlock} supportsIcon={supportsIcon}
+          isStatusBlock={isStatusBlock} isFunnelBlock={isFunnelBlock} isPhaseBlock={isPhaseBlock} isContractFormBlock={isContractFormBlock} supportsIcon={supportsIcon}
         />
       )}
       {dialog}
