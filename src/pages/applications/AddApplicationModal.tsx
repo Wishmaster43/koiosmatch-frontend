@@ -16,6 +16,7 @@ import { useApplicationStages } from '@/hooks/useApplicationStages'
 // drawer/) — reuse the SAME shared hook/banner, never a second implementation.
 import { useActionRulePreflight, ActionRuleBanner } from '@/components/actionrules'
 import { useCustomFields } from '@/lib/useCustomFields'
+import { useApplicationSources } from '@/lib/useApplicationSources'
 import { mapApplication } from './data/mapApplication'
 import { BTN_H } from '@/config/buttonMetrics'
 import CreatableSelectJs from '@/components/ui/CreatableSelect'
@@ -129,20 +130,22 @@ function PickField({ label, style, value, ...rest }: { label: ReactNode; style?:
  * search results, since a later search edit legitimately replaces those results
  * and must never lose the earlier pick's label or owner-chain data.
  *
- * `source` (CMBE 5961c673, superseding the earlier W30 note below): StoreApplicationRequest
- * NOW accepts an optional `source` (sometimes|nullable|string|max:64) — the controller
- * defaults to 'manual' server-side only when the field is omitted, mirroring
- * `application_stage_id`'s own omit-to-default contract. A free-text field (not a
- * picker) is deliberate: unlike Contractvorm/funnel/phase, "source" has no tenant-CRUD
- * lookup behind it anywhere in the app — the applications page's own source FILTER
- * (ApplicationsPage → applicationInsights.buildSourceDataFromStats) builds its option
- * list by aggregating the DISTINCT values already on `/applications/stats`, and the
- * drawer's own edit control (ApplicationDetailsCard) is the exact same plain `<input>`
- * this field mirrors byte-for-byte. Fetching `/applications/stats` just for create-time
- * suggestions would be a heavier round-trip than this lightweight modal warrants for a
- * field that is genuinely open text server-side; the free-text input is the honest,
- * consistent choice, not a fake affordance. Omitted (not sent) when empty, exactly like
- * `application_stage_id` above — the server's own 'manual' fallback decides then.
+ * `source` (CMBE 5961c673, superseding the earlier W30 note below; S-SOURCE-1 08-14
+ * supersedes the plain-input note further below): StoreApplicationRequest accepts an
+ * optional `source` (sometimes|nullable|string|max:64) — the controller defaults to
+ * 'manual' server-side only when the field is omitted, mirroring `application_stage_id`'s
+ * own omit-to-default contract. It is now a searchable/creatable PICKER
+ * (useApplicationSources, `@/lib/useApplicationSources`) instead of a bare `<input>`:
+ * free text let "Indeed"/"indeed"/"Indeed.nl" fragment into three different sources on
+ * the Sources report, and §3A already answers this trade-off (tenant lookup, mirror the
+ * function field). There is still no tenant-CRUD `/application-sources` endpoint
+ * (documented backend ask in the hook's doc comment) — the picker's options are the
+ * REAL distinct values already on `/applications/stats.by_source`, the same aggregation
+ * `ApplicationsPage → applicationInsights.buildSourceDataFromStats` already used for the
+ * source FILTER, and free entry stays allowed so a genuinely new source is never blocked.
+ * Mirrors ApplicationDetailsCard's own edit control byte-for-byte. Omitted (not sent)
+ * when empty, exactly like `application_stage_id` above — the server's own 'manual'
+ * fallback decides then.
  */
 export default function AddApplicationModal({ onClose, onCreated, lockedVacancy }: {
   onClose: () => void
@@ -260,10 +263,12 @@ export default function AddApplicationModal({ onClose, onCreated, lockedVacancy 
     setPhaseId(defaultStageId)
   }, [defaultStageId, stageOptions, phaseId])
 
-  // Acquisition source (CMBE 5961c673) — free text, mirrors ApplicationDetailsCard's
-  // own edit control byte-for-byte (see the file doc comment for why no picker exists).
+  // Acquisition source (CMBE 5961c673) — S-SOURCE-1: now a searchable/creatable
+  // picker, mirroring ApplicationDetailsCard's own edit control (see
+  // useApplicationSources' doc comment for why it isn't a full tenant-CRUD lookup yet).
   const [source, setSource] = useState('')
   const sourceFieldId = useId()
+  const { sources: sourceOptions, allowFreeEntry: sourceAllowFreeEntry } = useApplicationSources()
 
   // W30: the tenant's active custom-field defs for applications — StoreApplicationRequest
   // also accepts `custom_fields` (ValidCustomFields('application')). The section only
@@ -395,15 +400,17 @@ export default function AddApplicationModal({ onClose, onCreated, lockedVacancy 
             </div>
           ) : ownerField}
 
-          {/* Acquisition source — free text (see the file doc comment for why: no
-              tenant lookup exists behind this field anywhere in the app). Mirrors
-              ApplicationDetailsCard's own Bron input byte-for-byte; maxLength mirrors
-              the backend's own `max:64` rule (client-side hint only, §7 — the server
-              re-validates). Own full-width row, same style as the pickers above. */}
+          {/* Acquisition source — S-SOURCE-1: a searchable/creatable picker over the
+              real distinct source values already on applications (see useApplicationSources'
+              doc comment for why no tenant-CRUD lookup exists behind it yet). Mirrors
+              ApplicationDetailsCard's own Bron picker byte-for-byte. Own full-width row,
+              same style as the pickers above. Clearable: source is optional. */}
           <div>
-            <label htmlFor={sourceFieldId} style={{ display: 'block', fontSize: 12, color: 'var(--text-muted)', marginBottom: 5 }}>{t('drawer.source')}</label>
-            <input id={sourceFieldId} value={source} onChange={e => setSource(e.target.value)} maxLength={64}
-              placeholder={t('drawer.source')}
+            <label id={`${sourceFieldId}-label`} htmlFor={sourceFieldId} style={{ display: 'block', fontSize: 12, color: 'var(--text-muted)', marginBottom: 5 }}>{t('drawer.source')}</label>
+            <CreatableSelectJs id={sourceFieldId} aria-labelledby={`${sourceFieldId}-label`}
+              value={source} options={sourceOptions} onChange={setSource}
+              allowCreate={sourceAllowFreeEntry} placeholder={t('drawer.source')}
+              clearable clearLabel={t('drawer.source')}
               style={{ width: '100%', padding: '6px 10px', fontSize: 12, borderRadius: 6, border: '1px solid var(--border)', background: 'var(--input-bg)', color: 'var(--text)', boxSizing: 'border-box' }} />
           </div>
 

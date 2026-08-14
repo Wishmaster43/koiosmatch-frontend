@@ -41,6 +41,9 @@ vi.mock('@/lib/api', () => ({
   default: { get: vi.fn(() => Promise.resolve({ data: [] })) },
   unwrapList: (res: { data?: { data?: unknown[] } }) =>
     ({ rows: res?.data?.data ?? [], total: 0, page: 1, lastPage: 1, perPage: 0 }),
+  // S-SOURCE-1: ApplicationDetailsCard now reads useApplicationSources (useCachedLookup).
+  unwrap: (res: { data?: { data?: unknown } }) => res?.data?.data ?? res?.data,
+  getActiveTenantId: () => 'tenant-1',
 }))
 import api from '@/lib/api'
 const mockGet = api.get as unknown as ReturnType<typeof vi.fn>
@@ -194,14 +197,15 @@ describe('ApplicationTab', () => {
       expect(screen.getByLabelText('common:edit')).toBeInTheDocument()
     })
 
-    it('edits Bron in place and calls onUpdateSource with the new value on save', async () => {
+    it('edits Bron in place (searchable/creatable picker, S-SOURCE-1) and calls onUpdateSource with the new value on save', async () => {
       const onUpdateSource = vi.fn()
       const user = userEvent.setup()
       renderTab(<ApplicationTab application={app({ id: 5 })} onUpdateSource={onUpdateSource} />)
       await user.click(screen.getByLabelText('common:edit'))
-      const sourceInput = screen.getByDisplayValue('Facebook')
-      await user.clear(sourceInput)
-      await user.type(sourceInput, 'LinkedIn')
+      // Bron is now a picker (not a bare input) — open it and type a new value.
+      await user.click(screen.getByRole('button', { name: 'Facebook' }))
+      await user.type(screen.getByPlaceholderText('drawer.source'), 'LinkedIn')
+      await user.click(screen.getByRole('button', { name: 'LinkedIn' }))
       await user.click(screen.getByLabelText('common:save'))
       expect(onUpdateSource).toHaveBeenCalledWith(5, 'LinkedIn')
     })
@@ -220,9 +224,9 @@ describe('ApplicationTab', () => {
       const user = userEvent.setup()
       renderTab(<ApplicationTab application={app()} onUpdateSource={onUpdateSource} />)
       await user.click(screen.getByLabelText('common:edit'))
-      const sourceInput = screen.getByDisplayValue('Facebook')
-      await user.clear(sourceInput)
-      await user.type(sourceInput, 'LinkedIn')
+      await user.click(screen.getByRole('button', { name: 'Facebook' }))
+      await user.type(screen.getByPlaceholderText('drawer.source'), 'LinkedIn')
+      await user.click(screen.getByRole('button', { name: 'LinkedIn' }))
       await user.click(screen.getByLabelText('common:cancel'))
       expect(onUpdateSource).not.toHaveBeenCalled()
       expect(screen.getByText('Facebook')).toBeInTheDocument()

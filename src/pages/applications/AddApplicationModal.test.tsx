@@ -120,6 +120,8 @@ vi.mock('@/lib/api', () => ({
   unwrap: (r: { data?: { data?: unknown } }) => r?.data?.data,
   unwrapList: (res: { data?: { data?: unknown[] } }) =>
     ({ rows: res?.data?.data ?? [], total: 0, page: 1, lastPage: 1, perPage: 0 }),
+  // S-SOURCE-1: useApplicationSources reads /applications/stats through useCachedLookup.
+  getActiveTenantId: () => 'tenant-1',
 }))
 
 // Restore the default (real, uuid-id) stage lookup + owner-less rows before every test.
@@ -166,20 +168,21 @@ describe('AddApplicationModal', () => {
     // CreatableSelect) — the owner one already shows the pre-selected logged-in
     // user's name (APP-OWNER-1 default).
     expect(screen.getByText('Piet Recruiter')).toBeInTheDocument()
-    // 4 picker triggers (candidate/vacancy/owner/phase) + 2 VAC-CLEAR-1 clear crosses
-    // (owner + phase — CLEAR-SWEEP 13-08: both start out pre-seeded, so their clear
-    // cross is already visible on first render, unlike candidate/vacancy which start empty)
+    // 5 picker triggers (candidate/vacancy/owner/phase/source — S-SOURCE-1 added the
+    // source CreatableSelect trigger) + 2 VAC-CLEAR-1 clear crosses (owner + phase —
+    // CLEAR-SWEEP 13-08: both start out pre-seeded, so their clear cross is already
+    // visible on first render, unlike candidate/vacancy/source which start empty)
     // + 1 NEWCAND-1 "+ New candidate" button.
-    expect(document.querySelectorAll('button[type="button"]').length).toBe(7)
+    expect(document.querySelectorAll('button[type="button"]').length).toBe(8)
   })
 
   it('shows the vacancy as a locked, non-editable display when opened from a vacancy', () => {
     render(<AddApplicationModal onClose={vi.fn()} onCreated={vi.fn()} lockedVacancy={{ id: 'v1', title: 'Verpleegkundige', client: 'Yesway' }} />)
     expect(screen.getByText('Verpleegkundige · Yesway')).toBeInTheDocument()
-    // Locked vacancy: 3 picker triggers (candidate + owner + phase) + 2 clear crosses
-    // (owner + phase, both pre-seeded — see CLEAR-SWEEP note above)
+    // Locked vacancy: 4 picker triggers (candidate + owner + phase + source) + 2 clear
+    // crosses (owner + phase, both pre-seeded — see CLEAR-SWEEP note above)
     // + 1 NEWCAND-1 "+ New candidate" button.
-    expect(document.querySelectorAll('button[type="button"]').length).toBe(6)
+    expect(document.querySelectorAll('button[type="button"]').length).toBe(7)
   })
 
   // CLEAR-SWEEP (Danny 13-08, "eenmaal gekozen blijft hij staan"): owner and start
@@ -480,18 +483,41 @@ describe('AddApplicationModal · AXIS-1 action-rule preflight', () => {
   })
 })
 
-describe('AddApplicationModal · source (CMBE 5961c673)', () => {
-  it('renders a free-text source field (no picker — no tenant lookup backs this axis)', () => {
+describe('AddApplicationModal · source (S-SOURCE-1, supersedes CMBE 5961c673)', () => {
+  // S-SOURCE-1: the free-text `<input>` became a searchable/creatable CreatableSelect
+  // (see useApplicationSources' doc comment for why the backend has no tenant-CRUD
+  // lookup behind it yet) — never a bare native <select>, and never a plain <input>.
+  // The trigger's own accessible-name span mirrors the field label's text while
+  // unset (placeholder === label copy), so every lookup below scopes to the
+  // BUTTON role explicitly rather than a bare getByText (ambiguous: label + span).
+  it('renders source as a searchable, clearable picker (never a bare <input> or <select>)', async () => {
     render(<AddApplicationModal onClose={vi.fn()} onCreated={vi.fn()} />)
-    const sourceInput = screen.getByLabelText('drawer.source')
-    expect(sourceInput.tagName).toBe('INPUT')
-    expect(sourceInput).toHaveAttribute('maxlength', '64')
+    expect(document.querySelector('select')).toBeNull()
+    expect(document.querySelector('input[maxlength]')).toBeNull()
+    const trigger = screen.getAllByRole('button', { name: 'drawer.source' })[0]
+    await userEvent.setup().click(trigger)
+    expect(screen.getByPlaceholderText('drawer.source')).toBeInTheDocument()
   })
 
-  it('POSTs the typed source, trimmed', async () => {
+  it('POSTs a source picked from the searchable list', async () => {
     const user = userEvent.setup()
     render(<AddApplicationModal onClose={vi.fn()} onCreated={vi.fn()} />)
-    await user.type(screen.getByLabelText('drawer.source'), '  Website  ')
+    await user.click(screen.getAllByRole('button', { name: 'drawer.source' })[0])
+    await user.click(screen.getByRole('button', { name: 'Indeed' }))
+    await pickCandidateAndVacancy(user)
+    await user.click(screen.getByRole('button', { name: 'add.create' }))
+
+    await waitFor(() => expect(api.post).toHaveBeenCalledWith('/applications', expect.objectContaining({
+      source: 'Indeed',
+    })))
+  })
+
+  it('POSTs a newly typed source (free entry — no tenant lookup blocks an unseen value), trimmed', async () => {
+    const user = userEvent.setup()
+    render(<AddApplicationModal onClose={vi.fn()} onCreated={vi.fn()} />)
+    await user.click(screen.getAllByRole('button', { name: 'drawer.source' })[0])
+    await user.type(screen.getByPlaceholderText('drawer.source'), '  Website  ')
+    await user.click(screen.getByRole('button', { name: /Website/ }))
     await pickCandidateAndVacancy(user)
     await user.click(screen.getByRole('button', { name: 'add.create' }))
 
@@ -500,9 +526,19 @@ describe('AddApplicationModal · source (CMBE 5961c673)', () => {
     })))
   })
 
-  it('omits source from the POST body when left empty (mirrors application_stage_id)', async () => {
+  it('picks then clears the source picker back to unset (optional field, VAC-CLEAR-1)', async () => {
     const user = userEvent.setup()
     render(<AddApplicationModal onClose={vi.fn()} onCreated={vi.fn()} />)
+    await user.click(screen.getAllByRole('button', { name: 'drawer.source' })[0])
+    await user.click(screen.getByRole('button', { name: 'Indeed' }))
+    // The trigger's accessible name is label-driven (aria-labelledby self-reference),
+    // so it stays "drawer.source" after picking — assert the pick via its VISIBLE
+    // text instead (mirrors the existing owner-picker test's screen.getByText use),
+    // then scope the clear button to that same trigger.
+    const sourceValueText = screen.getByText('Indeed')
+    const sourceClear = sourceValueText.closest('div')!.querySelector('button[title="clearField"]') as HTMLButtonElement
+    expect(sourceClear).toBeTruthy()
+    await user.click(sourceClear)
     await pickCandidateAndVacancy(user)
     await user.click(screen.getByRole('button', { name: 'add.create' }))
     await waitFor(() => expect(api.post).toHaveBeenCalled())
@@ -510,10 +546,9 @@ describe('AddApplicationModal · source (CMBE 5961c673)', () => {
     expect(body).not.toHaveProperty('source')
   })
 
-  it('omits a whitespace-only source from the POST body', async () => {
+  it('omits source from the POST body when left empty (mirrors application_stage_id)', async () => {
     const user = userEvent.setup()
     render(<AddApplicationModal onClose={vi.fn()} onCreated={vi.fn()} />)
-    await user.type(screen.getByLabelText('drawer.source'), '   ')
     await pickCandidateAndVacancy(user)
     await user.click(screen.getByRole('button', { name: 'add.create' }))
     await waitFor(() => expect(api.post).toHaveBeenCalled())

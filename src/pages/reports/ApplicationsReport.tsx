@@ -7,9 +7,11 @@
  * window reads as "counts don't match the list" instead of the deliberate split.
  */
 import { useState } from 'react'
-import type { CSSProperties, ReactNode } from 'react'
+import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import ReportKpiBand from './ReportKpiBand'
+import { reportCardStyle as card, reportSectionHeadStyle as head } from './ReportSectionCard'
+import ReportStateBlock from './ReportStateBlock'
 import type { KpiSpec } from '@/components/insights/InsightsRow'
 import ReportDrillDrawer from './ReportDrillDrawer'
 import type { DrillSpec } from './ReportDrillDrawer'
@@ -26,11 +28,6 @@ import type {
   ReportPeriod, CandidateSegment, CandidateOwnerSegment, CandidateTimeseriesPoint,
   ApplicationTopSegment, ApplicationBucketCounts,
 } from '@/types/analytics'
-
-const card:  CSSProperties = { background: 'var(--surface)', borderRadius: 12, border: '1px solid var(--border)' }
-const state: CSSProperties = { textAlign: 'center', padding: 40, fontSize: 13 }
-const head:  CSSProperties = { fontSize: 12, fontWeight: 600, textTransform: 'uppercase',
-  letterSpacing: '0.04em', color: 'var(--text-muted)', margin: 0 }
 
 // The plain axes (single-value XOR param, same shape as CandidatesReport). The
 // funnel-bucket axis is handled separately below — its param name ('bucket')
@@ -49,7 +46,7 @@ const BUCKET_COLOR: Record<keyof ApplicationBucketCounts, string> = {
 export default function ApplicationsReport({ period, tabsSlot, filters = EMPTY_REPORT_FILTERS }: { period: ReportPeriod; tabsSlot?: ReactNode; filters?: ReportFilterState }) {
   const { t } = useTranslation('analytics')
   const { formatDate } = useDateFormat()
-  const { data, loading, error } = useApplicationsReport(period, filters)
+  const { data, loading, error, refetch } = useApplicationsReport(period, filters)
 
   const total   = data?.total ?? 0
   const hasData = !loading && !error && total > 0
@@ -168,9 +165,11 @@ export default function ApplicationsReport({ period, tabsSlot, filters = EMPTY_R
       )}
 
       <div style={{ ...card, overflow: 'hidden' }}>
-        {loading && <div style={{ ...state, color: 'var(--text-muted)' }}>{t('applications.loading')}</div>}
-        {error && !loading && <div style={{ ...state, color: 'var(--color-danger)' }}>{t('applications.error')}</div>}
-        {!loading && !error && total === 0 && <div style={{ ...state, color: 'var(--text-muted)' }}>{t('applications.empty')}</div>}
+        <ReportStateBlock
+          loading={loading} error={error} empty={!loading && !error && total === 0}
+          loadingLabel={t('applications.loading')} errorLabel={t('applications.error')} emptyLabel={t('applications.empty')}
+          onRetry={() => refetch()}
+        />
         {hasData && data && (
           <div style={{ padding: 20, display: 'flex', flexDirection: 'column', gap: 24 }}>
             {/* Inflow over time — week/day timeseries, bucket set server-side. */}

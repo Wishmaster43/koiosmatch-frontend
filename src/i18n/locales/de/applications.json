@@ -58,7 +58,8 @@
     "status": "Kandidatenstatus",
     "interview": "Interview",
     "created": "Erstellt",
-    "referenceNumber": "Referenznr."
+    "referenceNumber": "Referenznr.",
+    "daysInPhase": "Tage in Phase"
   },
   "kpi": {
     "totalActive": "Aktiv gesamt",

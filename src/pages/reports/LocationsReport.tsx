@@ -8,9 +8,11 @@
  * fabricated number).
  */
 import { useState } from 'react'
-import type { CSSProperties, ReactNode } from 'react'
+import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import ReportKpiBand from './ReportKpiBand'
+import { reportCardStyle as card, reportSectionHeadStyle as head } from './ReportSectionCard'
+import ReportStateBlock from './ReportStateBlock'
 import type { KpiSpec } from '@/components/insights/InsightsRow'
 import ReportDrillDrawer from './ReportDrillDrawer'
 import type { DrillSpec } from './ReportDrillDrawer'
@@ -21,18 +23,13 @@ import ReportTimeseriesChart from './ReportTimeseriesChart'
 import { useDateFormat } from '@/lib/datetime'
 import type { ReportPeriod, CandidateSegment, ApplicationTopSegment, CandidateTimeseriesPoint } from '@/types/analytics'
 
-const card:  CSSProperties = { background: 'var(--surface)', borderRadius: 12, border: '1px solid var(--border)' }
-const state: CSSProperties = { textAlign: 'center', padding: 40, fontSize: 13 }
-const head:  CSSProperties = { fontSize: 12, fontWeight: 600, textTransform: 'uppercase',
-  letterSpacing: '0.04em', color: 'var(--text-muted)', margin: 0 }
-
 type ColorAxis = 'status'
 type PlainAxis = 'customer' | 'city' | 'province'
 
 export default function LocationsReport({ period, tabsSlot }: { period: ReportPeriod; tabsSlot?: ReactNode }) {
   const { t } = useTranslation('analytics')
   const { formatDate } = useDateFormat()
-  const { data, loading, error } = useLocationsReport(period)
+  const { data, loading, error, refetch } = useLocationsReport(period)
 
   const total   = data?.total ?? 0
   const hasData = !loading && !error && total > 0
@@ -134,9 +131,11 @@ export default function LocationsReport({ period, tabsSlot }: { period: ReportPe
       )}
 
       <div style={{ ...card, overflow: 'hidden' }}>
-        {loading && <div style={{ ...state, color: 'var(--text-muted)' }}>{t('locations.loading')}</div>}
-        {error && !loading && <div style={{ ...state, color: 'var(--color-danger)' }}>{t('locations.error')}</div>}
-        {!loading && !error && total === 0 && <div style={{ ...state, color: 'var(--text-muted)' }}>{t('locations.empty')}</div>}
+        <ReportStateBlock
+          loading={loading} error={error} empty={!loading && !error && total === 0}
+          loadingLabel={t('locations.loading')} errorLabel={t('locations.error')} emptyLabel={t('locations.empty')}
+          onRetry={() => refetch()}
+        />
         {hasData && data && (
           <div style={{ padding: 20, display: 'flex', flexDirection: 'column', gap: 24 }}>
             {/* Created over time — week/day timeseries, bucket set server-side. */}

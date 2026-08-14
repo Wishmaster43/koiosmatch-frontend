@@ -9,9 +9,11 @@
  * `source` column, so it is never invented here.
  */
 import { useState } from 'react'
-import type { CSSProperties, ReactNode } from 'react'
+import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import ReportKpiBand from './ReportKpiBand'
+import { reportCardStyle as card, reportSectionHeadStyle as head } from './ReportSectionCard'
+import ReportStateBlock from './ReportStateBlock'
 import type { KpiSpec } from '@/components/insights/InsightsRow'
 import ReportDrillDrawer from './ReportDrillDrawer'
 import type { DrillSpec } from './ReportDrillDrawer'
@@ -26,11 +28,6 @@ import ReportTimeseriesChart from './ReportTimeseriesChart'
 import { useDateFormat } from '@/lib/datetime'
 import type { ReportPeriod, CandidateSegment, CandidateOwnerSegment, CandidateTimeseriesPoint } from '@/types/analytics'
 
-const card:  CSSProperties = { background: 'var(--surface)', borderRadius: 12, border: '1px solid var(--border)' }
-const state: CSSProperties = { textAlign: 'center', padding: 40, fontSize: 13 }
-const head:  CSSProperties = { fontSize: 12, fontWeight: 600, textTransform: 'uppercase',
-  letterSpacing: '0.04em', color: 'var(--text-muted)', margin: 0 }
-
 // The four plain axes; `param` is the XOR query key the drill/advice endpoints expect.
 // Deliberately no 'source' — see the header comment.
 type Axis = 'status' | 'phase' | 'industry' | 'branch'
@@ -38,7 +35,7 @@ type Axis = 'status' | 'phase' | 'industry' | 'branch'
 export default function CustomersReport({ period, tabsSlot, filters = EMPTY_REPORT_FILTERS }: { period: ReportPeriod; tabsSlot?: ReactNode; filters?: ReportFilterState }) {
   const { t } = useTranslation('analytics')
   const { formatDate } = useDateFormat()
-  const { data, loading, error } = useCustomersReport(period, filters)
+  const { data, loading, error, refetch } = useCustomersReport(period, filters)
 
   const total   = data?.total ?? 0
   const hasData = !loading && !error && total > 0
@@ -143,9 +140,11 @@ export default function CustomersReport({ period, tabsSlot, filters = EMPTY_REPO
       )}
 
       <div style={{ ...card, overflow: 'hidden' }}>
-        {loading && <div style={{ ...state, color: 'var(--text-muted)' }}>{t('customers.loading')}</div>}
-        {error && !loading && <div style={{ ...state, color: 'var(--color-danger)' }}>{t('customers.error')}</div>}
-        {!loading && !error && total === 0 && <div style={{ ...state, color: 'var(--text-muted)' }}>{t('customers.empty')}</div>}
+        <ReportStateBlock
+          loading={loading} error={error} empty={!loading && !error && total === 0}
+          loadingLabel={t('customers.loading')} errorLabel={t('customers.error')} emptyLabel={t('customers.empty')}
+          onRetry={() => refetch()}
+        />
         {hasData && data && (
           <div style={{ padding: 20, display: 'flex', flexDirection: 'column', gap: 24 }}>
             {/* Inflow over time — week/day timeseries, bucket set server-side. */}

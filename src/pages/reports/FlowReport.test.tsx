@@ -72,6 +72,15 @@ describe('FlowReport', () => {
     expect(screen.getByText('Kon de flow niet laden')).toBeInTheDocument()
   })
 
+  // The shared ReportStateBlock retry button must call the hook's own refetch.
+  it('retries via the hook refetch when the retry button is clicked', async () => {
+    const refetch = vi.fn()
+    mockUseFlowReport.mockReturnValue({ data: null, loading: false, error: true, refetch })
+    renderReport()
+    await userEvent.click(screen.getByRole('button', { name: 'Probeer opnieuw' }))
+    expect(refetch).toHaveBeenCalledTimes(1)
+  })
+
   it('shows the empty state when there are no phases', () => {
     mockUseFlowReport.mockReturnValue({ data: { ...cohortData, phases: [] }, loading: false, error: false })
     renderReport()

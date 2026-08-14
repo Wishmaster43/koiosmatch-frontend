@@ -89,6 +89,15 @@ describe('MatchesReport (MATCH-SOORT-1, by_contract_form axis)', () => {
     expect(screen.getByText('Kon de matches niet laden')).toBeInTheDocument()
   })
 
+  // The shared ReportStateBlock retry button must call the hook's own refetch.
+  it('retries via the hook refetch when the retry button is clicked', async () => {
+    const refetch = vi.fn()
+    mockUseMatchesReport.mockReturnValue({ data: null, loading: false, error: true, refetch })
+    renderReport()
+    await userEvent.click(screen.getByRole('button', { name: 'Probeer opnieuw' }))
+    expect(refetch).toHaveBeenCalledTimes(1)
+  })
+
   it('shows the empty state when there are no matches', () => {
     mockUseMatchesReport.mockReturnValue({ data: { ...data, total: 0 }, loading: false, error: false })
     renderReport()
@@ -201,6 +210,21 @@ describe('MatchesReport (RAPPORTEN-SUITE-1 portie 7, closing enrichment)', () =>
     expect(screen.getByText('Wk 31')).toBeInTheDocument()
     expect(screen.getByText('Wk 32')).toBeInTheDocument()
     expect(data.timeseries.series.reduce((s, p) => s + p.value, 0)).toBe(data.total)
+  })
+
+  // Structural regression: the four sections (series, contract form, tiles,
+  // terminations) share ONE outer ReportSectionCard, not four hand-typed card divs —
+  // the exact drift the report-suite audit flagged for this page.
+  it('renders every section inside one shared section-card, not four separate cards', () => {
+    mockUseMatchesReport.mockReturnValue({ data, loading: false, error: false })
+    const { container } = renderReport()
+    const seriesHeading = screen.getByText('Matches over tijd')
+    const terminationsHeading = screen.getByText('Beëindigingsredenen')
+    // Both section headings share the same nearest ancestor with the card border —
+    // i.e. one outer card, not one card per section.
+    const cardOf = (el: HTMLElement) => el.closest('[style*="border-radius: 12px"]')
+    expect(cardOf(seriesHeading)).toBe(cardOf(terminationsHeading))
+    expect(container.querySelectorAll('[style*="border-radius: 12px"]').length).toBe(1)
   })
 
   // WEEK-FLOOR contract: a week bar drills date=<its own Monday key> + bucket=week —

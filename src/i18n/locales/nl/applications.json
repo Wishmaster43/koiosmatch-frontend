@@ -58,7 +58,8 @@
     "status": "Status van de sollicitant",
     "interview": "Interview",
     "created": "Aangemaakt",
-    "referenceNumber": "Referentienr."
+    "referenceNumber": "Referentienr.",
+    "daysInPhase": "Dagen in fase"
   },
   "kpi": {
     "totalActive": "Totaal actief",

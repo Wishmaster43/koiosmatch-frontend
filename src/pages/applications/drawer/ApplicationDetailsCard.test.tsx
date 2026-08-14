@@ -35,6 +35,10 @@ vi.mock('@/lib/api', () => ({
   default: { get: vi.fn(() => Promise.resolve({ data: [] })) },
   unwrapList: (res: { data?: { data?: unknown[] } }) =>
     ({ rows: res?.data?.data ?? [], total: 0, page: 1, lastPage: 1, perPage: 0 }),
+  // S-SOURCE-1: useApplicationSources reads /applications/stats through this same
+  // shared unwrap — mirrors the real helper's "unwrap the .data envelope" shape.
+  unwrap: (res: { data?: { data?: unknown } }) => res?.data?.data ?? res?.data,
+  getActiveTenantId: () => 'tenant-1',
 }))
 import api from '@/lib/api'
 const mockGet = api.get as unknown as ReturnType<typeof vi.fn>
@@ -97,8 +101,10 @@ describe('ApplicationDetailsCard', () => {
     expect(screen.getAllByText('—')).toHaveLength(3)
   })
 
-  it('opens the pencil into edit mode and calls both callbacks on save', async () => {
-    mockGet.mockResolvedValue({ data: { data: [{ id: 'v2', title: 'Chirurg', client_name: 'Acme' }] } })
+  it('opens the pencil into edit mode, picks a source from the searchable picker, and calls both callbacks on save (S-SOURCE-1)', async () => {
+    mockGet.mockImplementation((url: string) => url === '/vacancies'
+      ? Promise.resolve({ data: { data: [{ id: 'v2', title: 'Chirurg', client_name: 'Acme' }] } })
+      : Promise.resolve({ data: [] }))
     const onLinkVacancy = vi.fn()
     const onUpdateSource = vi.fn()
     const user = userEvent.setup()
@@ -106,13 +112,29 @@ describe('ApplicationDetailsCard', () => {
 
     await user.click(screen.getByLabelText('common:edit'))
     await waitFor(() => expect(mockGet).toHaveBeenCalledWith('/vacancies', { params: { per_page: 100 } }))
-    const sourceInput = screen.getByDisplayValue('Facebook')
-    await user.clear(sourceInput)
-    await user.type(sourceInput, 'LinkedIn')
+
+    // Source is now a searchable picker (not a bare input) — its trigger shows the
+    // application's current (possibly non-conforming) value, "Facebook", even though
+    // that value is not one of the seeded picker options — never silently dropped.
+    const sourceTrigger = screen.getByRole('button', { name: 'Facebook' })
+    await user.click(sourceTrigger)
+    const search = screen.getByPlaceholderText('drawer.source')
+    await user.type(search, 'LinkedIn')
+    await user.click(screen.getByRole('button', { name: 'LinkedIn' }))
     await user.click(screen.getByLabelText('common:save'))
 
     expect(onLinkVacancy).toHaveBeenCalledWith(1, null, { title: undefined, client: undefined })
     expect(onUpdateSource).toHaveBeenCalledWith(1, 'LinkedIn')
+  })
+
+  it('clears the source picker back to empty (optional field, VAC-CLEAR-1)', async () => {
+    const onUpdateSource = vi.fn()
+    const user = userEvent.setup()
+    render(<ApplicationDetailsCard application={app()} onUpdateSource={onUpdateSource} />)
+    await user.click(screen.getByLabelText('common:edit'))
+    await user.click(screen.getByTitle('clearField'))
+    await user.click(screen.getByLabelText('common:save'))
+    expect(onUpdateSource).toHaveBeenCalledWith(1, '')
   })
 
   it('cancels the edit without calling either callback', async () => {

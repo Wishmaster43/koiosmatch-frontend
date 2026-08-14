@@ -5,9 +5,11 @@ import { Edit2, Save, X } from 'lucide-react'
 import EntityLink from '@/components/ui/EntityLink'
 import SectionCard from '@/components/ui/SectionCard'
 import SoftChip from '@/components/ui/SoftChip'
+import CreatableSelect from '@/components/ui/CreatableSelect'
 import { CANON_LABEL_STYLE } from '@/components/drawer/fieldRowCanon'
 import { fieldInputStyle } from '@/components/forms/fieldMetrics'
 import { useDateFormat } from '@/lib/datetime'
+import { useApplicationSources } from '@/lib/useApplicationSources'
 import VacancyLinkField from './VacancyLinkField'
 import { useVacancyLinkOptions } from '../hooks/useVacancyLinkOptions'
 import { useApplicationVacancy } from '../hooks/useApplicationVacancy'
@@ -89,6 +91,10 @@ export default function ApplicationDetailsCard({ application: a, onLinkVacancy, 
   const [vacancyId, setVacancyId] = useState('')
   const [source, setSource] = useState('')
   const vacancyOptions = useVacancyLinkOptions(editing)
+  // S-SOURCE-1: source is now a searchable/creatable picker (see useApplicationSources'
+  // doc comment for why it isn't a full tenant-CRUD lookup yet) instead of free text —
+  // reuses the real distinct values already on applications, never a hardcoded list.
+  const { sources, allowFreeEntry } = useApplicationSources()
   // VAC-CASCADE-MIRROR-1: the linked vacancy's full detail (customer location/
   // department/contact) — null while loading or when no vacancy is linked; the
   // three rows below fall back to a dash rather than fabricate a value.
@@ -126,7 +132,9 @@ export default function ApplicationDetailsCard({ application: a, onLinkVacancy, 
       {/* S7: Bron is editable in-place, sharing the Details block's pencil. */}
       <Row label={t('drawer.source')}>
         {editing ? (
-          <input value={source} onChange={e => setSource(e.target.value)} style={inputStyle} placeholder={t('drawer.source')} />
+          <CreatableSelect value={source} options={sources} onChange={setSource}
+            allowCreate={allowFreeEntry} placeholder={t('drawer.source')} style={inputStyle}
+            clearable clearLabel={t('drawer.source')} />
         ) : (
           a.source || '—'
         )}

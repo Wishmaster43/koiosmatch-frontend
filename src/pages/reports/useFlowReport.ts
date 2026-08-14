@@ -8,9 +8,9 @@ import api from '@/lib/api'
 import type { FlowReportData, ReportPeriod } from '@/types/analytics'
 
 export function useFlowReport(period: ReportPeriod) {
-  const { data, isLoading, isError } = useQuery({
+  const { data, isLoading, isError, refetch } = useQuery({
     queryKey: ['reports', 'flow', period],
     queryFn: async ({ signal }) => ((await api.get('/reports/flow', { params: { period }, signal })).data ?? null) as FlowReportData | null,
   })
-  return { data: data ?? null, loading: isLoading, error: isError }
+  return { data: data ?? null, loading: isLoading, error: isError, refetch }
 }

@@ -13,9 +13,11 @@
  */
 import { useState } from 'react'
 import { formatRatio } from '@/lib/formatters'
-import type { CSSProperties, ReactNode } from 'react'
+import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import ReportKpiBand from './ReportKpiBand'
+import { reportCardStyle as card, reportSectionHeadStyle as head } from './ReportSectionCard'
+import ReportStateBlock from './ReportStateBlock'
 import type { KpiSpec } from '@/components/insights/InsightsRow'
 import ReportDrillDrawer from './ReportDrillDrawer'
 import type { DrillSpec } from './ReportDrillDrawer'
@@ -25,11 +27,6 @@ import SegmentBars from './SegmentBars'
 import ReportTimeseriesChart from './ReportTimeseriesChart'
 import { useDateFormat } from '@/lib/datetime'
 import type { ReportPeriod, CandidateOwnerSegment, CandidateTimeseriesPoint } from '@/types/analytics'
-
-const card:  CSSProperties = { background: 'var(--surface)', borderRadius: 12, border: '1px solid var(--border)' }
-const state: CSSProperties = { textAlign: 'center', padding: 40, fontSize: 13 }
-const head:  CSSProperties = { fontSize: 12, fontWeight: 600, textTransform: 'uppercase',
-  letterSpacing: '0.04em', color: 'var(--text-muted)', margin: 0 }
 
 // The plain single-value XOR axes; `assignee` has its own D2 shape below.
 type Axis = 'campaign' | 'channel' | 'status' | 'outcome'
@@ -41,7 +38,7 @@ type AxisSeg = { value: string; label: string; count: number }
 export default function OutreachReport({ period, tabsSlot }: { period: ReportPeriod; tabsSlot?: ReactNode }) {
   const { t } = useTranslation('analytics')
   const { formatDate } = useDateFormat()
-  const { data, loading, error } = useOutreachReport(period)
+  const { data, loading, error, refetch } = useOutreachReport(period)
 
   const total   = data?.total ?? data?.total_targets ?? 0
   const hasData = !loading && !error && total > 0
@@ -149,9 +146,11 @@ export default function OutreachReport({ period, tabsSlot }: { period: ReportPer
       )}
 
       <div style={{ ...card, overflow: 'hidden' }}>
-        {loading && <div style={{ ...state, color: 'var(--text-muted)' }}>{t('outreach.loading')}</div>}
-        {error && !loading && <div style={{ ...state, color: 'var(--color-danger)' }}>{t('outreach.error')}</div>}
-        {!loading && !error && total === 0 && <div style={{ ...state, color: 'var(--text-muted)' }}>{t('outreach.empty')}</div>}
+        <ReportStateBlock
+          loading={loading} error={error} empty={!loading && !error && total === 0}
+          loadingLabel={t('outreach.loading')} errorLabel={t('outreach.error')} emptyLabel={t('outreach.empty')}
+          onRetry={() => refetch()}
+        />
         {hasData && data && (
           <div style={{ padding: 20, display: 'flex', flexDirection: 'column', gap: 24 }}>
             {/* Targets over time — week/day timeseries, bucket set server-side. */}

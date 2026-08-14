@@ -12,9 +12,9 @@ import type { SourcesReportData, ReportPeriod } from '@/types/analytics'
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars -- kept for call-signature parity with the other report hooks (see doc comment above)
 export function useSourcesReport(_period: ReportPeriod) {
-  const { data, isLoading, isError } = useQuery({
+  const { data, isLoading, isError, refetch } = useQuery({
     queryKey: ['reports', 'sources'],
     queryFn: async ({ signal }) => ((await api.get('/reports/sources', { signal })).data ?? null) as SourcesReportData | null,
   })
-  return { data: data ?? null, loading: isLoading, error: isError }
+  return { data: data ?? null, loading: isLoading, error: isError, refetch }
 }

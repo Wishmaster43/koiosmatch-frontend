@@ -8,9 +8,9 @@ import api from '@/lib/api'
 import type { RecruitersReportData, ReportPeriod } from '@/types/analytics'
 
 export function useRecruitersReport(period: ReportPeriod) {
-  const { data, isLoading, isError } = useQuery({
+  const { data, isLoading, isError, refetch } = useQuery({
     queryKey: ['reports', 'recruiters', period],
     queryFn: async ({ signal }) => ((await api.get('/reports/recruiters', { params: { period }, signal })).data ?? null) as RecruitersReportData | null,
   })
-  return { data: data ?? null, loading: isLoading, error: isError }
+  return { data: data ?? null, loading: isLoading, error: isError, refetch }
 }

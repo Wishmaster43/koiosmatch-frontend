@@ -20,6 +20,7 @@ import CandidateAddApplicationModal from '@/pages/candidates/drawer/AddApplicati
 import { useCandidateSearch } from '../hooks/useCandidateSearch'
 import { useFunctions } from '@/lib/useFunctions'
 import { useLookups } from '@/context/LookupsContext'
+import { useDateFormat } from '@/lib/datetime'
 import { notify, notifyError } from '@/lib/notify'
 import { toCoord } from '@/lib/coords'
 import type { VacancyDetail } from '@/types/vacancy'
@@ -39,6 +40,7 @@ const rowStyle: CSSProperties = { display: 'flex', alignItems: 'center', justify
  */
 export default function CandidateSearchTab({ vacancy }: { vacancy: VacancyDetail }) {
   const { t } = useTranslation('vacancies')
+  const { formatDate } = useDateFormat()
   const { functions: functionOptions } = useFunctions()
   const { statuses: statusOptions, candidateTypes } = useLookups()
   const {
@@ -286,7 +288,26 @@ export default function CandidateSearchTab({ vacancy }: { vacancy: VacancyDetail
     </button>
   )
 
-  const listPane = <div>{refreshButton}{summaryCard}{listBody}</div>
+  // VACANCY-LEADS-COUNT-1 (points 3+5): the persisted teller's own honesty
+  // status (Vacancy.matchCountState, the SAME row VacanciesTable's Leads
+  // column reads) — a small caveat line so a recruiter sees this LIVE list
+  // may still be a few minutes ahead of/behind the row's cached count, instead
+  // of wondering why the two disagree. Same precedence as the table cell:
+  // stale > geo-missing > partial > plain "updated on". Nothing shown when the
+  // count has never been computed (no row yet) or carries no caveat at all.
+  const countState = vacancy.matchCountState
+  const caveat = countState
+    ? (countState.isStale ? t('columns.leadsStale', { date: formatDate(countState.computedAt) })
+      : countState.geoMissing ? t('columns.leadsGeoMissing')
+      : countState.partial ? t('columns.leadsPartial')
+      : countState.computedAt ? t('columns.leadsComputedAt', { date: formatDate(countState.computedAt) })
+      : null)
+    : null
+  const caveatLine = caveat && (
+    <div style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 10 }}>{caveat}</div>
+  )
+
+  const listPane = <div>{caveatLine}{refreshButton}{summaryCard}{listBody}</div>
 
   return (
     <>

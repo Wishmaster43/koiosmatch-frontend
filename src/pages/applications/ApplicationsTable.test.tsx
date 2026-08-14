@@ -3,8 +3,8 @@
  * hand-rolled mark+text cell with no dash/sort support; now the shared
  * makeKoiosColumn factory wraps the SAME `task` field the row already carries.
  */
-import { describe, it, expect, vi } from 'vitest'
-import { render, screen, within } from '@testing-library/react'
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
+import { render, screen, within, fireEvent } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import ApplicationsTable from './ApplicationsTable'
 import type { Application } from '@/types/application'
@@ -170,6 +170,66 @@ describe('ApplicationsTable · interview column', () => {
     await user.click(screen.getByText('2/12').parentElement as HTMLElement)
     expect(onSelect).toHaveBeenCalledTimes(1)
     expect(onSelect).toHaveBeenCalledWith(rowWithInterview, 'interviews')
+  })
+})
+
+// PDF-SOLLICITATIES point 8 (14-08): plain day count in the CURRENT phase —
+// sourced from the REAL currentStageEnteredAt field (ApplicationListResource's
+// application_stage_transitions-backed timestamp), never derived from `created`
+// (that would be application age, a different number).
+describe('ApplicationsTable · days-in-phase column (PDF-SOLLICITATIES point 8)', () => {
+  beforeEach(() => {
+    // Fixed "now" so the day-count math is deterministic.
+    vi.useFakeTimers()
+    vi.setSystemTime(new Date('2026-08-14T12:00:00Z'))
+  })
+  afterEach(() => { vi.useRealTimers() })
+
+  it('renders the real day count from currentStageEnteredAt, not from created_at', () => {
+    const row = {
+      ...baseRow, id: 40,
+      created: '2026-01-01T00:00:00Z', // application age — a different number
+      currentStageEnteredAt: '2026-08-10T12:00:00Z', // 4 days in the current phase
+    } as unknown as Application
+    render(<ApplicationsTable rows={[row]} />)
+    expect(screen.getByText('4')).toBeInTheDocument()
+    // Never the age-in-days derived from created_at (would be ~225).
+    expect(screen.queryByText('225')).toBeNull()
+  })
+
+  it('renders a dash, never a fabricated zero, when currentStageEnteredAt is missing', () => {
+    const row = { ...baseRow, id: 41, currentStageEnteredAt: null } as unknown as Application
+    render(<ApplicationsTable rows={[row]} />)
+    const headerCell = screen.getByText('Dagen in fase').closest('th') as HTMLElement
+    const col = Array.from(headerCell.parentElement?.children ?? []).indexOf(headerCell)
+    const cell = document.querySelectorAll('tbody tr')[0].children[col]
+    expect(cell.textContent).toBe('—')
+    expect(cell.textContent).not.toBe('0')
+  })
+
+  it('colours the count with the warning tint when tooLongInStage is flagged (server threshold)', () => {
+    const flagged = { ...baseRow, id: 42, currentStageEnteredAt: '2026-08-01T00:00:00Z', tooLongInStage: true } as unknown as Application
+    render(<ApplicationsTable rows={[flagged]} />)
+    const count = screen.getByText('13')
+    expect(count).toHaveStyle({ color: 'var(--color-warning)' })
+  })
+
+  it('sorts by days in the current phase (who is stuck longest)', () => {
+    const short = { ...baseRow, id: 43, currentStageEnteredAt: '2026-08-13T00:00:00Z' } as unknown as Application // 1 day
+    const long = { ...baseRow, id: 44, currentStageEnteredAt: '2026-08-01T00:00:00Z' } as unknown as Application // 13 days
+    render(<ApplicationsTable rows={[short, long]} />)
+
+    const headerCell = screen.getByText('Dagen in fase').closest('th') as HTMLElement
+    const col = Array.from(headerCell.parentElement?.children ?? []).indexOf(headerCell)
+    fireEvent.click(within(headerCell).getByRole('button'))
+    let rows = document.querySelectorAll('tbody tr')
+    let values = Array.from(rows).map(r => r.children[col].textContent)
+    expect(values).toEqual(['1', '13'])
+
+    fireEvent.click(within(headerCell).getByRole('button'))
+    rows = document.querySelectorAll('tbody tr')
+    values = Array.from(rows).map(r => r.children[col].textContent)
+    expect(values).toEqual(['13', '1'])
   })
 })
 

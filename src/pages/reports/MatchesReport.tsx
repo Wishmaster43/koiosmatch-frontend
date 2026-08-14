@@ -12,6 +12,8 @@ import { useState } from 'react'
 import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import ReportKpiBand from './ReportKpiBand'
+import ReportStateBlock from './ReportStateBlock'
+import { ReportSectionCard, ReportSectionCardBody, ReportSection } from './ReportSectionCard'
 import type { KpiSpec } from '@/components/insights/InsightsRow'
 import ReportDrillDrawer from './ReportDrillDrawer'
 import type { DrillSpec } from './ReportDrillDrawer'
@@ -48,7 +50,7 @@ const CONTRACT_STATUS_TILES = ['sent', 'active', 'ended', 'none'] as const
 export default function MatchesReport({ period, tabsSlot, filters = EMPTY_REPORT_FILTERS }: { period: ReportPeriod; tabsSlot?: ReactNode; filters?: ReportFilterState }) {
   const { t } = useTranslation('analytics')
   const { formatDate } = useDateFormat()
-  const { data, loading, error } = useMatchesReport(period, filters)
+  const { data, loading, error, refetch } = useMatchesReport(period, filters)
   const isEmpty = !loading && !error && (!data || data.total === 0)
 
   // Drill-down: clicking a KPI/segment/tile/bucket explains it (breakdown + the
@@ -179,66 +181,55 @@ export default function MatchesReport({ period, tabsSlot, filters = EMPTY_REPORT
         </div>
       )}
 
-      {loading && (
-        <div style={{ textAlign: 'center', padding: 40, fontSize: 13, color: 'var(--text-muted)',
-                      background: 'var(--surface)', borderRadius: 12, border: '1px solid var(--border)' }}>
-          {t('matches.loading')}
-        </div>
-      )}
-      {error && !loading && (
-        <div style={{ textAlign: 'center', padding: 40, fontSize: 13, color: 'var(--color-danger)',
-                      background: 'var(--surface)', borderRadius: 12, border: '1px solid var(--border)' }}>
-          {t('matches.error')}
-        </div>
-      )}
-      {isEmpty && (
-        <div style={{ textAlign: 'center', padding: 40, fontSize: 13, color: 'var(--text-muted)',
-                      background: 'var(--surface)', borderRadius: 12, border: '1px solid var(--border)' }}>
-          {t('matches.empty')}
-        </div>
-      )}
+      {/* One outer section-card holding the state block and, on success, the
+          gap:24 stack of sections — same shape as every other report page. */}
+      <ReportSectionCard>
+        {(loading || error || isEmpty) && (
+          <ReportStateBlock
+            loading={loading} error={error} empty={isEmpty}
+            loadingLabel={t('matches.loading')} errorLabel={t('matches.error')} emptyLabel={t('matches.empty')}
+            onRetry={() => refetch()}
+          />
+        )}
 
-      {!loading && !error && !isEmpty && data && (
-        <>
-          {/* Matches over time — week/day timeseries, bucket set server-side;
-              every bar drills on its own date key (portie 7). */}
-          <div style={{ background: 'var(--surface)', borderRadius: 12, border: '1px solid var(--border)', padding: 20, marginBottom: 16 }}>
-            <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)', marginBottom: 12 }}>{t('matches.series')}</div>
-            <ReportTimeseriesChart series={data.timeseries.series} onPick={onSeriesPick} />
-          </div>
+        {!loading && !error && !isEmpty && data && (
+          <ReportSectionCardBody>
+            {/* Matches over time — week/day timeseries, bucket set server-side;
+                every bar drills on its own date key (portie 7). */}
+            <ReportSection title={t('matches.series')}>
+              <ReportTimeseriesChart series={data.timeseries.series} onPick={onSeriesPick} />
+            </ReportSection>
 
-          {/* Soort-as (MATCH-SOORT-1): by_contract_form bars, sums to total incl. the
-              'none' sentinel and any orphaned slug — SegmentBars needs no special-casing. */}
-          <div style={{ background: 'var(--surface)', borderRadius: 12, border: '1px solid var(--border)', padding: 20, marginBottom: 16 }}>
-            <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)', marginBottom: 12 }}>{t('matches.axes.contractForm')}</div>
-            <SegmentBars max={contractFormMax} onPick={onContractFormPick}
-              items={contractFormSegs.map(s => ({ key: s.value, label: s.label, count: s.count, color: s.color }))} />
-          </div>
+            {/* Soort-as (MATCH-SOORT-1): by_contract_form bars, sums to total incl. the
+                'none' sentinel and any orphaned slug — SegmentBars needs no special-casing. */}
+            <ReportSection title={t('matches.axes.contractForm')}>
+              <SegmentBars max={contractFormMax} onPick={onContractFormPick}
+                items={contractFormSegs.map(s => ({ key: s.value, label: s.label, count: s.count, color: s.color }))} />
+            </ReportSection>
 
-          {/* Contract-status tiles (under_contract, MATCH-VOCABULAIRE-1): the four
-              tiles sum to the report total and each drills contract_status=<key>. */}
-          <div style={{ background: 'var(--surface)', borderRadius: 12, border: '1px solid var(--border)', padding: 20, marginBottom: 16 }}>
-            <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)', marginBottom: 12 }}>{t('matches.placements.title')}</div>
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12 }}>
-              {CONTRACT_STATUS_TILES.map(key => (
-                <StatTile key={key} label={t(`matches.placements.${key}`)} value={tileValue(key)} accent={key === 'active'}
-                  onClick={gateDrillClick('matches', () => openContractStatus(t(`matches.placements.${key}`), tileValue(key), key))} />
-              ))}
-            </div>
-            {data.avg_placement_duration_days == null && (
-              <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 14 }}>{t('matches.durationNote')}</p>
-            )}
-          </div>
+            {/* Contract-status tiles (under_contract, MATCH-VOCABULAIRE-1): the four
+                tiles sum to the report total and each drills contract_status=<key>. */}
+            <ReportSection title={t('matches.placements.title')}>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12 }}>
+                {CONTRACT_STATUS_TILES.map(key => (
+                  <StatTile key={key} label={t(`matches.placements.${key}`)} value={tileValue(key)} accent={key === 'active'}
+                    onClick={gateDrillClick('matches', () => openContractStatus(t(`matches.placements.${key}`), tileValue(key), key))} />
+                ))}
+              </div>
+              {data.avg_placement_duration_days == null && (
+                <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 14 }}>{t('matches.durationNote')}</p>
+              )}
+            </ReportSection>
 
-          {/* Terminations by stop reason — zero-filled over every active reason;
-              each bar drills stop_reason=<value> (fifth XOR leg, 7925ce15). */}
-          <div style={{ background: 'var(--surface)', borderRadius: 12, border: '1px solid var(--border)', padding: 20 }}>
-            <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)', marginBottom: 12 }}>{t('matches.terminations.title')}</div>
-            <SegmentBars max={terminationsMax} onPick={openReason}
-              items={terminationSegs.map(s => ({ key: s.value, label: s.label, count: s.count, color: s.color }))} />
-          </div>
-        </>
-      )}
+            {/* Terminations by stop reason — zero-filled over every active reason;
+                each bar drills stop_reason=<value> (fifth XOR leg, 7925ce15). */}
+            <ReportSection title={t('matches.terminations.title')}>
+              <SegmentBars max={terminationsMax} onPick={openReason}
+                items={terminationSegs.map(s => ({ key: s.value, label: s.label, count: s.count, color: s.color }))} />
+            </ReportSection>
+          </ReportSectionCardBody>
+        )}
+      </ReportSectionCard>
 
       {/* Dynamic drill-down: explains the clicked number + Koios AI advice */}
       <ReportDrillDrawer drill={drill} onClose={() => setDrill(null)} />

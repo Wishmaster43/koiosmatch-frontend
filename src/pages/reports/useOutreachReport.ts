@@ -11,9 +11,9 @@ import api from '@/lib/api'
 import type { OutreachReportData, ReportPeriod } from '@/types/analytics'
 
 export function useOutreachReport(period: ReportPeriod) {
-  const { data, isLoading, isError } = useQuery({
+  const { data, isLoading, isError, refetch } = useQuery({
     queryKey: ['reports', 'outreach', period],
     queryFn: async ({ signal }) => ((await api.get('/reports/outreach', { params: { period }, signal })).data ?? null) as OutreachReportData | null,
   })
-  return { data: data ?? null, loading: isLoading, error: isError }
+  return { data: data ?? null, loading: isLoading, error: isError, refetch }
 }

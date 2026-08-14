@@ -25,6 +25,15 @@ describe('SourcesReport (GET /reports/sources)', () => {
     expect(screen.getByText('Kon de bronnen niet laden')).toBeInTheDocument()
   })
 
+  // The shared ReportStateBlock retry button must call the hook's own refetch.
+  it('retries via the hook refetch when the retry button is clicked', async () => {
+    const refetch = vi.fn()
+    mockUseSourcesReport.mockReturnValue({ data: null, loading: false, error: true, refetch })
+    render(<SourcesReport period="month" />)
+    await userEvent.click(screen.getByRole('button', { name: 'Probeer opnieuw' }))
+    expect(refetch).toHaveBeenCalledTimes(1)
+  })
+
   it('shows the empty state when there are no sources', () => {
     mockUseSourcesReport.mockReturnValue({ data: { from: data.from, to: data.to, sources: [] }, loading: false, error: false })
     render(<SourcesReport period="month" />)

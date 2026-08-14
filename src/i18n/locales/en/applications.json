@@ -58,7 +58,8 @@
     "status": "Candidate status",
     "interview": "Interview",
     "created": "Created",
-    "referenceNumber": "Reference no."
+    "referenceNumber": "Reference no.",
+    "daysInPhase": "Days in phase"
   },
   "kpi": {
     "totalActive": "Total active",

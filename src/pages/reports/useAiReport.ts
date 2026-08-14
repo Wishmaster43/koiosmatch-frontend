@@ -11,9 +11,9 @@ import api from '@/lib/api'
 import type { AiReportData, ReportPeriod } from '@/types/analytics'
 
 export function useAiReport(period: ReportPeriod) {
-  const { data, isLoading, isError } = useQuery({
+  const { data, isLoading, isError, refetch } = useQuery({
     queryKey: ['reports', 'ai', period],
     queryFn: async ({ signal }) => ((await api.get('/reports/ai', { params: { period }, signal })).data ?? null) as AiReportData | null,
   })
-  return { data: data ?? null, loading: isLoading, error: isError }
+  return { data: data ?? null, loading: isLoading, error: isError, refetch }
 }

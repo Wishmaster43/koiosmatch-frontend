@@ -5,6 +5,15 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import IntakesReport from './IntakesReport'
 import type { IntakesReportData } from '@/types/analytics'
 
+// The house LineChartCard needs real layout (jsdom has none) so the timeseries
+// section is asserted via a lightweight stand-in — proves the shared wrapper is
+// used and receives the mapped points, without depending on Recharts' DOM output.
+vi.mock('./ReportTimeseriesChart', () => ({
+  default: ({ series }: { series: { date: string; label: string; value: number }[] }) => (
+    <>{series.map(p => <span key={p.date}>{p.label}</span>)}</>
+  ),
+}))
+
 // Data layer under test control (loading/error/empty/success — the four UI states).
 const mockUseIntakesReport = vi.fn()
 vi.mock('./useIntakesReport', () => ({ useIntakesReport: () => mockUseIntakesReport() }))
@@ -58,6 +67,15 @@ describe('IntakesReport', () => {
     mockUseIntakesReport.mockReturnValue({ data: null, loading: false, error: true })
     renderReport()
     expect(screen.getByText('Kon de intakes niet laden')).toBeInTheDocument()
+  })
+
+  // The shared ReportStateBlock retry button must call the hook's own refetch.
+  it('retries via the hook refetch when the retry button is clicked', async () => {
+    const refetch = vi.fn()
+    mockUseIntakesReport.mockReturnValue({ data: null, loading: false, error: true, refetch })
+    renderReport()
+    await userEvent.click(screen.getByRole('button', { name: 'Probeer opnieuw' }))
+    expect(refetch).toHaveBeenCalledTimes(1)
   })
 
   it('shows the empty state when there are no intakes', () => {
@@ -120,6 +138,18 @@ describe('IntakesReport', () => {
     expect(screen.getAllByText('Anna de Vries').length).toBe(1)
     // The series section is unaffected by the breakdown switch.
     expect(screen.getByText('Wk 31')).toBeInTheDocument()
+  })
+
+  // Regression for the audit finding (2b): the breakdown must render through the
+  // shared SegmentBars component, not a page-local fork — asserted via a spy on
+  // the actual module import rather than any styling value.
+  it('renders the breakdown through the shared SegmentBars component', async () => {
+    mockUseIntakesReport.mockReturnValue({ data, loading: false, error: false })
+    const segmentBars = await import('./SegmentBars')
+    const spy = vi.spyOn(segmentBars, 'default')
+    renderReport()
+    expect(spy).toHaveBeenCalled()
+    spy.mockRestore()
   })
 
   // No drill endpoint exists for intakes (reportDrillGate: intakes=false) — nothing

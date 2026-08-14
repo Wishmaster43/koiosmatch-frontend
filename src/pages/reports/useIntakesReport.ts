@@ -9,9 +9,9 @@ import type { IntakesReportData, ReportPeriod } from '@/types/analytics'
 
 export function useIntakesReport(period: ReportPeriod) {
   // The intakes endpoint groups by `bucket` (day/week/month) = the shared period control.
-  const { data, isLoading, isError } = useQuery({
+  const { data, isLoading, isError, refetch } = useQuery({
     queryKey: ['reports', 'intakes', period],
     queryFn: async ({ signal }) => ((await api.get('/reports/intakes', { params: { bucket: period }, signal })).data ?? null) as IntakesReportData | null,
   })
-  return { data: data ?? null, loading: isLoading, error: isError }
+  return { data: data ?? null, loading: isLoading, error: isError, refetch }
 }

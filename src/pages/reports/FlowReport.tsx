@@ -12,6 +12,8 @@ import { formatRatio } from '@/lib/formatters'
 import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import ReportKpiBand from './ReportKpiBand'
+import ReportStateBlock from './ReportStateBlock'
+import { reportCardStyle } from './ReportSectionCard'
 import type { KpiSpec } from '@/components/insights/InsightsRow'
 import ReportDrillDrawer from './ReportDrillDrawer'
 import type { DrillSpec } from './ReportDrillDrawer'
@@ -50,7 +52,7 @@ function PhaseRow({ label, value, max, index, conversion, avgDays }: {
 
 export default function FlowReport({ period, tabsSlot }: { period: ReportPeriod; tabsSlot?: ReactNode }) {
   const { t } = useTranslation('analytics')
-  const { data, loading, error } = useFlowReport(period)
+  const { data, loading, error, refetch } = useFlowReport(period)
 
   // Cohort is "ready" once any stage has been reached; else show pipeline-now.
   const cohortReady = useMemo(() => !!data?.phases.some(p => p.reached_count > 0), [data])
@@ -148,16 +150,12 @@ export default function FlowReport({ period, tabsSlot }: { period: ReportPeriod;
       )}
 
       {/* Funnel card — handles the four UI states */}
-      <div style={{ background: 'var(--surface)', borderRadius: 12, border: '1px solid var(--border)', padding: 20 }}>
-        {loading && (
-          <div style={{ textAlign: 'center', padding: 40, fontSize: 13, color: 'var(--text-muted)' }}>{t('flow.loading')}</div>
-        )}
-        {error && !loading && (
-          <div style={{ textAlign: 'center', padding: 40, fontSize: 13, color: 'var(--color-danger)' }}>{t('flow.error')}</div>
-        )}
-        {!loading && !error && phases.length === 0 && (
-          <div style={{ textAlign: 'center', padding: 40, fontSize: 13, color: 'var(--text-muted)' }}>{t('flow.empty')}</div>
-        )}
+      <div style={{ ...reportCardStyle, padding: 20 }}>
+        <ReportStateBlock
+          loading={loading} error={error} empty={!loading && !error && phases.length === 0}
+          loadingLabel={t('flow.loading')} errorLabel={t('flow.error')} emptyLabel={t('flow.empty')}
+          onRetry={() => refetch()}
+        />
         {!loading && !error && phases.length > 0 && (
           <>
             <div style={{ display: 'flex', alignItems: 'center', gap: 12, fontSize: 10, fontWeight: 700,

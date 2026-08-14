@@ -8,9 +8,11 @@
  * report ("counts don't match the list") instead of the deliberate report/list split.
  */
 import { useState } from 'react'
-import type { CSSProperties, ReactNode } from 'react'
+import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import ReportKpiBand from './ReportKpiBand'
+import { reportCardStyle as card, reportSectionHeadStyle as head } from './ReportSectionCard'
+import ReportStateBlock from './ReportStateBlock'
 import type { KpiSpec } from '@/components/insights/InsightsRow'
 import ReportDrillDrawer from './ReportDrillDrawer'
 import type { DrillSpec } from './ReportDrillDrawer'
@@ -25,18 +27,13 @@ import ReportTimeseriesChart from './ReportTimeseriesChart'
 import { useDateFormat } from '@/lib/datetime'
 import type { ReportPeriod, CandidateSegment, CandidateOwnerSegment, CandidateTimeseriesPoint } from '@/types/analytics'
 
-const card:  CSSProperties = { background: 'var(--surface)', borderRadius: 12, border: '1px solid var(--border)' }
-const state: CSSProperties = { textAlign: 'center', padding: 40, fontSize: 13 }
-const head:  CSSProperties = { fontSize: 12, fontWeight: 600, textTransform: 'uppercase',
-  letterSpacing: '0.04em', color: 'var(--text-muted)', margin: 0 }
-
 // The five drillable axes; `param` is the XOR query key the drill/advice endpoints expect.
 type Axis = 'status' | 'phase' | 'source' | 'owner' | 'branch'
 
 export default function CandidatesReport({ period, tabsSlot, filters = EMPTY_REPORT_FILTERS }: { period: ReportPeriod; tabsSlot?: ReactNode; filters?: ReportFilterState }) {
   const { t } = useTranslation('analytics')
   const { formatDate } = useDateFormat()
-  const { data, loading, error } = useCandidatesReport(period, filters)
+  const { data, loading, error, refetch } = useCandidatesReport(period, filters)
 
   const total   = data?.total ?? 0
   const hasData = !loading && !error && total > 0
@@ -138,9 +135,11 @@ export default function CandidatesReport({ period, tabsSlot, filters = EMPTY_REP
       )}
 
       <div style={{ ...card, overflow: 'hidden' }}>
-        {loading && <div style={{ ...state, color: 'var(--text-muted)' }}>{t('candidates.loading')}</div>}
-        {error && !loading && <div style={{ ...state, color: 'var(--color-danger)' }}>{t('candidates.error')}</div>}
-        {!loading && !error && total === 0 && <div style={{ ...state, color: 'var(--text-muted)' }}>{t('candidates.empty')}</div>}
+        <ReportStateBlock
+          loading={loading} error={error} empty={!loading && !error && total === 0}
+          loadingLabel={t('candidates.loading')} errorLabel={t('candidates.error')} emptyLabel={t('candidates.empty')}
+          onRetry={() => refetch()}
+        />
         {hasData && data && (
           <div style={{ padding: 20, display: 'flex', flexDirection: 'column', gap: 24 }}>
             {/* Inflow over time — week/day timeseries, bucket set server-side. */}

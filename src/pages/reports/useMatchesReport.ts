@@ -16,9 +16,9 @@ import type { MatchesReportData, ReportPeriod } from '@/types/analytics'
 
 export function useMatchesReport(period: ReportPeriod, filters: ReportFilterState = EMPTY_REPORT_FILTERS) {
   const params = buildReportQueryParams(period, 'matches', filters)
-  const { data, isLoading, isError } = useQuery({
+  const { data, isLoading, isError, refetch } = useQuery({
     queryKey: ['reports', 'matches', params],
     queryFn: async ({ signal }) => ((await api.get('/reports/matches', { params, signal })).data ?? null) as MatchesReportData | null,
   })
-  return { data: data ?? null, loading: isLoading, error: isError }
+  return { data: data ?? null, loading: isLoading, error: isError, refetch }
 }

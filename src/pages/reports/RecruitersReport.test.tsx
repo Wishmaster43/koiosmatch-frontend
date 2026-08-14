@@ -69,6 +69,16 @@ describe('RecruitersReport', () => {
     expect(screen.getByText('Kon de recruiters niet laden')).toBeInTheDocument()
   })
 
+  // The shared ReportStateBlock retry button must call the hook's own refetch
+  // (Family C — DataTable-only reports get the same affordance as the rest).
+  it('retries via the hook refetch when the retry button is clicked', async () => {
+    const refetch = vi.fn()
+    mockUseRecruitersReport.mockReturnValue({ data: null, loading: false, error: true, refetch })
+    renderReport()
+    await userEvent.click(screen.getByRole('button', { name: 'Probeer opnieuw' }))
+    expect(refetch).toHaveBeenCalledTimes(1)
+  })
+
   it('shows the empty state when there are no recruiters', () => {
     mockUseRecruitersReport.mockReturnValue({ data: { ...data, recruiters: [] }, loading: false, error: false })
     renderReport()

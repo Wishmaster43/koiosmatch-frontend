@@ -73,6 +73,16 @@ describe('ApplicationsReport (RAPPORTEN-SUITE-1 portie 2)', () => {
     expect(screen.getByText('Kon de sollicitaties niet laden')).toBeInTheDocument()
   })
 
+  // The shared ReportStateBlock retry button must call the hook's own refetch,
+  // never a page-local reload — same affordance on every report (§13).
+  it('retries via the hook refetch when the retry button is clicked', async () => {
+    const refetch = vi.fn()
+    mockUseApplicationsReport.mockReturnValue({ data: null, loading: false, error: true, refetch })
+    renderReport()
+    await userEvent.click(screen.getByRole('button', { name: 'Probeer opnieuw' }))
+    expect(refetch).toHaveBeenCalledTimes(1)
+  })
+
   it('shows the empty state when there are no applications', () => {
     mockUseApplicationsReport.mockReturnValue({
       data: { ...data, total: 0, by_stage: [], by_source: [], by_owner: [], by_customer: [], by_vacancy: [],

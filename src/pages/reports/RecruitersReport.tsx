@@ -11,6 +11,8 @@ import { useState } from 'react'
 import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import ReportKpiBand from './ReportKpiBand'
+import ReportStateBlock from './ReportStateBlock'
+import { ReportSectionCard } from './ReportSectionCard'
 import type { KpiSpec } from '@/components/insights/InsightsRow'
 import DataTable from '@/components/ui/DataTable'
 import type { Column } from '@/components/ui/DataTable'
@@ -30,7 +32,7 @@ const numCell = (n: number) => (
 
 export default function RecruitersReport({ period, tabsSlot }: { period: ReportPeriod; tabsSlot?: ReactNode }) {
   const { t } = useTranslation('analytics')
-  const { data, loading, error } = useRecruitersReport(period)
+  const { data, loading, error, refetch } = useRecruitersReport(period)
   const rows   = data?.recruiters ?? []
   const months = data?.compliance_months ?? 6
 
@@ -114,9 +116,13 @@ export default function RecruitersReport({ period, tabsSlot }: { period: ReportP
       {/* Tab bar + period control (from the hub) */}
       {tabsSlot}
 
-      <div style={{ background: 'var(--surface)', borderRadius: 12, border: '1px solid var(--border)', overflow: 'hidden' }}>
+      <ReportSectionCard>
         {error && !loading ? (
-          <div style={{ textAlign: 'center', padding: 40, fontSize: 13, color: 'var(--color-danger)' }}>{t('recruiters.error')}</div>
+          <ReportStateBlock
+            loading={false} error empty={false}
+            loadingLabel={t('recruiters.loading')} errorLabel={t('recruiters.error')} emptyLabel={t('recruiters.empty')}
+            onRetry={() => refetch()}
+          />
         ) : (
           <DataTable
             columns={columns}
@@ -128,7 +134,7 @@ export default function RecruitersReport({ period, tabsSlot }: { period: ReportP
             emptyText={t('recruiters.empty')}
           />
         )}
-      </div>
+      </ReportSectionCard>
 
       {/* Dynamic drill-down: explains the clicked recruiter + Koios AI advice */}
       <ReportDrillDrawer drill={drill} onClose={() => setDrill(null)} />

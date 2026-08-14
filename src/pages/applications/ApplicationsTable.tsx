@@ -13,7 +13,7 @@ import type { Application } from '@/types/application'
 import type { Id } from '@/types/common'
 import { useAllSettings, getBoolSetting } from '@/lib/settings/useAllSettings'
 import { useApplicationAdvice } from '@/lib/useApplicationAdvice'
-import { useDateFormat } from '@/lib/datetime'
+import { useDateFormat, daysSince } from '@/lib/datetime'
 import { interviewCategoryColor } from './data/applicationsShared'
 import { APPLICATION_SORT_KEYS } from './hooks/useApplicationsData'
 
@@ -166,6 +166,25 @@ export default function ApplicationsTable({ rows, loading, error, selectedId, on
           )}
         </span>
       ) : <span style={{ color: 'var(--text-muted)' }}>—</span> },
+    // PDF-SOLLICITATIES point 8 (14-08): plain day count in the CURRENT phase —
+    // the header carries the unit, the cell is bare digits (mirrors the vacancies
+    // "age" column). Real field: ApplicationListResource::currentStageEnteredAt
+    // (the application_stage_transitions row for the current stage; created_at
+    // fallback ONLY happens server-side inside too_long_in_stage, never here — a
+    // missing transition renders a dash, never a fabricated zero). No serverKey:
+    // the backend has no sort_by for this yet (ApplicationQuery::SORTS), so the
+    // column sorts client-side on the loaded page, same pattern as client/status.
+    // Colour reuses the backend's own too_long_in_stage flag (the exact
+    // application_stage_stale_days-threshold predicate) rather than duplicating
+    // the threshold on the frontend.
+    { key: 'daysInPhase', header: t('cols.daysInPhase'), align: 'right', sortable: true,
+      sortValue: r => daysSince(r.currentStageEnteredAt) ?? null,
+      cellStyle: { fontFamily: 'JetBrains Mono, monospace', fontVariantNumeric: 'tabular-nums' },
+      render: r => {
+        const days = daysSince(r.currentStageEnteredAt)
+        if (days == null) return <span style={{ color: 'var(--text-muted)' }}>—</span>
+        return <span style={{ color: r.tooLongInStage ? 'var(--color-warning)' : 'var(--text)' }}>{days}</span>
+      } },
     // Created date — the table defaults to newest first. DATATABLE-SORT-1:
     // serverKey maps to ApplicationQuery's created_at sort.
     { key: 'created', header: t('cols.created'), nowrap: true, sortable: true, sortValue: r => r.created ?? '',

@@ -10,9 +10,11 @@
  */
 import { useState } from 'react'
 import { formatRatio } from '@/lib/formatters'
-import type { CSSProperties, ReactNode } from 'react'
+import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import ReportKpiBand from './ReportKpiBand'
+import ReportStateBlock from './ReportStateBlock'
+import { reportCardStyle as card } from './ReportSectionCard'
 import type { KpiSpec } from '@/components/insights/InsightsRow'
 import DataTable from '@/components/ui/DataTable'
 import type { Column } from '@/components/ui/DataTable'
@@ -27,9 +29,6 @@ import type { ReportFilterState } from './reportFilterParams'
 import { useDateFormat } from '@/lib/datetime'
 import type { ReportPeriod, VacancyReportRow, CandidateTimeseriesPoint } from '@/types/analytics'
 
-const card:  CSSProperties = { background: 'var(--surface)', borderRadius: 12, border: '1px solid var(--border)' }
-const state: CSSProperties = { textAlign: 'center', padding: 40, fontSize: 13 }
-
 // Number cell: emphasised when > 0, muted when zero (mirrors the SM entity tables).
 const numCell = (n: number) => (
   <span style={{ fontWeight: n > 0 ? 600 : 400, color: n > 0 ? 'var(--text)' : 'var(--text-muted)' }}>{n}</span>
@@ -38,7 +37,7 @@ const numCell = (n: number) => (
 export default function VacanciesReport({ period, tabsSlot, filters = EMPTY_REPORT_FILTERS }: { period: ReportPeriod; tabsSlot?: ReactNode; filters?: ReportFilterState }) {
   const { t } = useTranslation('analytics')
   const { formatDate } = useDateFormat()
-  const { data, loading, error } = useVacanciesReport(period, filters)
+  const { data, loading, error, refetch } = useVacanciesReport(period, filters)
   const rows    = data?.vacancies ?? []
   const s       = data?.summary
   const hasData = !loading && !error && (data?.total ?? 0) > 0
@@ -177,11 +176,15 @@ export default function VacanciesReport({ period, tabsSlot, filters = EMPTY_REPO
         </div>
       )}
 
-      {/* Four UI states, handled once for both cards below (§3) */}
-      {loading && <div style={card}><div style={{ ...state, color: 'var(--text-muted)' }}>{t('vacancies.loading')}</div></div>}
-      {error && !loading && <div style={card}><div style={{ ...state, color: 'var(--color-danger)' }}>{t('vacancies.error')}</div></div>}
-      {!loading && !error && (data?.total ?? 0) === 0 && (
-        <div style={card}><div style={{ ...state, color: 'var(--text-muted)' }}>{t('vacancies.empty')}</div></div>
+      {/* Four UI states, handled once via the shared block (§3) */}
+      {(loading || error || (data?.total ?? 0) === 0) && (
+        <div style={card}>
+          <ReportStateBlock
+            loading={loading} error={error} empty={!loading && !error && (data?.total ?? 0) === 0}
+            loadingLabel={t('vacancies.loading')} errorLabel={t('vacancies.error')} emptyLabel={t('vacancies.empty')}
+            onRetry={() => refetch()}
+          />
+        </div>
       )}
 
       {hasData && data && (

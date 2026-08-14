@@ -10,6 +10,8 @@ import type { ReactNode } from 'react'
 import { formatRatio } from '@/lib/formatters'
 import { useTranslation } from 'react-i18next'
 import ReportKpiBand from './ReportKpiBand'
+import ReportStateBlock from './ReportStateBlock'
+import { ReportSectionCard } from './ReportSectionCard'
 import type { KpiSpec } from '@/components/insights/InsightsRow'
 import DataTable from '@/components/ui/DataTable'
 import type { Column } from '@/components/ui/DataTable'
@@ -25,7 +27,7 @@ export default function SourcesReport({ period, tabsSlot }: { period: ReportPeri
   const { t } = useTranslation('analytics')
   // `period` is accepted for call-signature parity with the other reports but this
   // endpoint has no bucket — see the hook's own doc comment.
-  const { data, loading, error } = useSourcesReport(period)
+  const { data, loading, error, refetch } = useSourcesReport(period)
   const rows = data?.sources ?? []
 
   const totals = {
@@ -82,9 +84,13 @@ export default function SourcesReport({ period, tabsSlot }: { period: ReportPeri
       {tabsSlot}
 
       {/* Table — shared DataTable handles loading/empty; error stays a dedicated banner */}
-      <div style={{ background: 'var(--surface)', borderRadius: 12, border: '1px solid var(--border)', overflow: 'hidden' }}>
+      <ReportSectionCard>
         {error && !loading ? (
-          <div style={{ textAlign: 'center', padding: 40, fontSize: 13, color: 'var(--color-danger)' }}>{t('sources.error')}</div>
+          <ReportStateBlock
+            loading={false} error empty={false}
+            loadingLabel={t('sources.loading')} errorLabel={t('sources.error')} emptyLabel={t('sources.empty')}
+            onRetry={() => refetch()}
+          />
         ) : (
           <DataTable
             columns={columns}
@@ -95,7 +101,7 @@ export default function SourcesReport({ period, tabsSlot }: { period: ReportPeri
             emptyText={t('sources.empty')}
           />
         )}
-      </div>
+      </ReportSectionCard>
     </div>
   )
 }

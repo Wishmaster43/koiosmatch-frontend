@@ -331,6 +331,31 @@ describe('CandidateSearchTab · browse via DrillPager (point 19)', () => {
   })
 })
 
+// Points 3+5: the counter's own honesty status (matchCountState) surfaces as a
+// caveat line above the list, so the LIVE list and the row's cached count can
+// never silently disagree without the recruiter being told why.
+describe('CandidateSearchTab · lead-count honesty caveat (points 3+5)', () => {
+  it('shows the stale caveat when matchCountState.isStale is true', async () => {
+    mockGet.mockResolvedValueOnce({ data: { data: rawRows } })
+    const staleVacancy = mapVacancyDetail({
+      id: 'v3', title: 'Verpleegkundige | Utrecht', lat: 52.09, lng: 5.12, category: 'Verzorgende IG',
+      match_count_state: { computed_at: '2026-08-10T09:00:00Z', is_stale: true, geo_missing: false, partial: false },
+    })
+    render(<CandidateSearchTab vacancy={staleVacancy} />)
+    await waitFor(() => expect(screen.getByText('Alice')).toBeInTheDocument())
+
+    expect(screen.getByText(nl.columns.leadsStale.replace('{{date}}', '10-08-2026'))).toBeInTheDocument()
+  })
+
+  it('shows nothing when matchCountState is absent (never computed)', async () => {
+    mockGet.mockResolvedValueOnce({ data: { data: rawRows } })
+    render(<CandidateSearchTab vacancy={vacancyWithLocation} />)
+    await waitFor(() => expect(screen.getByText('Alice')).toBeInTheDocument())
+
+    expect(screen.queryByText(/Wordt opnieuw berekend|Zonder coördinaten|Gedeeltelijk geteld|Bijgewerkt op/)).toBeNull()
+  })
+})
+
 // Point 18: the summary card's "Solliciteren" button opens the shared apply flow
 // with THIS candidate + THIS vacancy prefilled.
 describe('CandidateSearchTab · Solliciteren from the preview (point 18)', () => {

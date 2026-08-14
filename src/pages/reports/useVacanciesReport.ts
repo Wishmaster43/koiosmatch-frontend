@@ -16,9 +16,9 @@ import type { VacanciesReportData, ReportPeriod } from '@/types/analytics'
 
 export function useVacanciesReport(period: ReportPeriod, filters: ReportFilterState = EMPTY_REPORT_FILTERS, bucket?: 'day' | 'week') {
   const params = { ...buildReportQueryParams(period, 'vacancies', filters), ...(bucket ? { bucket } : {}) }
-  const { data, isLoading, isError } = useQuery({
+  const { data, isLoading, isError, refetch } = useQuery({
     queryKey: ['reports', 'vacancies', params],
     queryFn: async ({ signal }) => ((await api.get('/reports/vacancies', { params, signal })).data ?? null) as VacanciesReportData | null,
   })
-  return { data: data ?? null, loading: isLoading, error: isError }
+  return { data: data ?? null, loading: isLoading, error: isError, refetch }
 }

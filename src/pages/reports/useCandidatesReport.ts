@@ -14,9 +14,9 @@ import type { CandidatesReportData, ReportPeriod } from '@/types/analytics'
 
 export function useCandidatesReport(period: ReportPeriod, filters: ReportFilterState = EMPTY_REPORT_FILTERS) {
   const params = buildReportQueryParams(period, 'candidates', filters)
-  const { data, isLoading, isError } = useQuery({
+  const { data, isLoading, isError, refetch } = useQuery({
     queryKey: ['reports', 'candidates', params],
     queryFn: async ({ signal }) => ((await api.get('/reports/candidates', { params, signal })).data ?? null) as CandidatesReportData | null,
   })
-  return { data: data ?? null, loading: isLoading, error: isError }
+  return { data: data ?? null, loading: isLoading, error: isError, refetch }
 }

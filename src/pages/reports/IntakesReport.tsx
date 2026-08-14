@@ -7,10 +7,15 @@
  * endpoint is gated `candidates.view` server-side.
  */
 import { useState } from 'react'
-import type { CSSProperties, ReactNode } from 'react'
+import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import ReportKpiBand from './ReportKpiBand'
+import { reportCardStyle as card, reportSectionHeadStyle as head } from './ReportSectionCard'
+import ReportStateBlock from './ReportStateBlock'
 import type { KpiSpec } from '@/components/insights/InsightsRow'
+import SegmentBars from './SegmentBars'
+import type { SegmentBarItem } from './SegmentBars'
+import ReportTimeseriesChart from './ReportTimeseriesChart'
 import { useIntakesReport } from './useIntakesReport'
 import type { ReportPeriod, IntakeBucket } from '@/types/analytics'
 
@@ -22,35 +27,18 @@ const GROUP_KEY: Record<Group, 'by_recruiter' | 'by_location' | 'by_source' | 'b
   function: 'by_function', region: 'by_region',
 }
 
-const card:  CSSProperties = { background: 'var(--surface)', borderRadius: 12, border: '1px solid var(--border)' }
-const state: CSSProperties = { textAlign: 'center', padding: 40, fontSize: 13 }
-const head:  CSSProperties = { fontSize: 12, fontWeight: 600, textTransform: 'uppercase',
-  letterSpacing: '0.04em', color: 'var(--text-muted)', margin: 0 }
+// Maps an IntakeBucket (no colour axis here) onto the shared SegmentBars shape.
+const toSegments = (items: IntakeBucket[]): SegmentBarItem[] =>
+  items.map((it, i) => ({ key: it.key ?? String(i), label: it.label, count: it.count, color: null }))
 
-// One horizontal bar row: label, a proportional bar, and the count.
-function Bars({ items }: { items: IntakeBucket[] }) {
-  const max = items.reduce((m, i) => Math.max(m, i.count), 0) || 1
-  return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 6, padding: '4px 2px' }}>
-      {items.map((it, i) => (
-        <div key={it.key ?? i} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-          <span style={{ flex: '0 0 34%', fontSize: 12, color: 'var(--text)', overflow: 'hidden',
-                         textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{it.label}</span>
-          <span style={{ flex: 1, height: 8, background: 'var(--hover-bg)', borderRadius: 999, overflow: 'hidden' }}>
-            <span style={{ display: 'block', height: '100%', width: `${(it.count / max) * 100}%`,
-                           background: 'var(--color-primary)', borderRadius: 999 }} />
-          </span>
-          <span style={{ flex: '0 0 40px', textAlign: 'right', fontSize: 12, fontWeight: 600,
-                         fontVariantNumeric: 'tabular-nums', color: 'var(--text)' }}>{it.count}</span>
-        </div>
-      ))}
-    </div>
-  )
-}
+// Maps the intake date series onto the shared timeseries chart's point shape.
+// No drill exists yet (reportDrillGate.intakes=false), so no onPick is wired.
+const toTimeseries = (items: IntakeBucket[]) =>
+  items.map((it, i) => ({ date: it.key ?? String(i), label: it.label, value: it.count }))
 
 export default function IntakesReport({ period, tabsSlot }: { period: ReportPeriod; tabsSlot?: ReactNode }) {
   const { t } = useTranslation('analytics')
-  const { data, loading, error } = useIntakesReport(period)
+  const { data, loading, error, refetch } = useIntakesReport(period)
   const [group, setGroup] = useState<Group>('recruiter')
 
   const total     = data?.total ?? 0
@@ -89,15 +77,17 @@ export default function IntakesReport({ period, tabsSlot }: { period: ReportPeri
       {tabsSlot}
 
       <div style={{ ...card, overflow: 'hidden' }}>
-        {loading && <div style={{ ...state, color: 'var(--text-muted)' }}>{t('intakes.loading')}</div>}
-        {error && !loading && <div style={{ ...state, color: 'var(--color-danger)' }}>{t('intakes.error')}</div>}
-        {!loading && !error && total === 0 && <div style={{ ...state, color: 'var(--text-muted)' }}>{t('intakes.empty')}</div>}
+        <ReportStateBlock
+          loading={loading} error={error} empty={!loading && !error && total === 0}
+          loadingLabel={t('intakes.loading')} errorLabel={t('intakes.error')} emptyLabel={t('intakes.empty')}
+          onRetry={() => refetch()}
+        />
         {hasData && (
           <div style={{ padding: 20, display: 'flex', flexDirection: 'column', gap: 24 }}>
             {/* Intakes over time */}
             <section>
               <h3 style={{ ...head, marginBottom: 10 }}>{t('intakes.series')}</h3>
-              <Bars items={series} />
+              <ReportTimeseriesChart series={toTimeseries(series)} />
             </section>
 
             {/* Switchable breakdown per dimension */}
@@ -124,7 +114,8 @@ export default function IntakesReport({ period, tabsSlot }: { period: ReportPeri
                   })}
                 </div>
               </div>
-              <Bars items={breakdown} />
+              <SegmentBars items={toSegments(breakdown)}
+                max={breakdown.reduce((m, i) => Math.max(m, i.count), 0)} />
             </section>
           </div>
         )}

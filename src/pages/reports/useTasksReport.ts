@@ -16,9 +16,9 @@ import type { TasksReportData, ReportPeriod } from '@/types/analytics'
 
 export function useTasksReport(period: ReportPeriod, filters: ReportFilterState = EMPTY_REPORT_FILTERS) {
   const params = buildReportQueryParams(period, 'tasks', filters)
-  const { data, isLoading, isError } = useQuery({
+  const { data, isLoading, isError, refetch } = useQuery({
     queryKey: ['reports', 'tasks', params],
     queryFn: async ({ signal }) => ((await api.get('/reports/tasks', { params, signal })).data ?? null) as TasksReportData | null,
   })
-  return { data: data ?? null, loading: isLoading, error: isError }
+  return { data: data ?? null, loading: isLoading, error: isError, refetch }
 }

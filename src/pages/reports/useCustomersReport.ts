@@ -14,9 +14,9 @@ import type { CustomersReportData, ReportPeriod } from '@/types/analytics'
 
 export function useCustomersReport(period: ReportPeriod, filters: ReportFilterState = EMPTY_REPORT_FILTERS) {
   const params = buildReportQueryParams(period, 'customers', filters)
-  const { data, isLoading, isError } = useQuery({
+  const { data, isLoading, isError, refetch } = useQuery({
     queryKey: ['reports', 'customers', params],
     queryFn: async ({ signal }) => ((await api.get('/reports/customers', { params, signal })).data ?? null) as CustomersReportData | null,
   })
-  return { data: data ?? null, loading: isLoading, error: isError }
+  return { data: data ?? null, loading: isLoading, error: isError, refetch }
 }
