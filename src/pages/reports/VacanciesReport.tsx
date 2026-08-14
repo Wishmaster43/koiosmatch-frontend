@@ -9,6 +9,7 @@
  * hook; the table uses the shared DataTable (§4 blueprint-conformance).
  */
 import { useState } from 'react'
+import { formatRatio } from '@/lib/formatters'
 import type { CSSProperties, ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import ReportKpiBand from './ReportKpiBand'
@@ -104,12 +105,12 @@ export default function VacanciesReport({ period, tabsSlot }: { period: ReportPe
       active: drill?.rowsParams?.status === 'filled',
       onClick: gateDrillClick('vacancies', () => openVacancies(t('vacancies.summary.filled'), s?.filled ?? 0, 'filled')) },
     { key: 'fillRate', label: t('vacancies.summary.fillRate'),
-      value: s ? `${Math.round(s.fill_rate * 100)}%` : '—' },
+      value: s ? formatRatio(s.fill_rate) : '—' },
     { key: 'ttf', label: t('vacancies.summary.avgTimeToFill'),
       value: s?.avg_time_to_fill_days != null ? t('vacancies.daysValue', { days: Math.round(s.avg_time_to_fill_days) }) : '—' },
     // openRate = open/total — a ratio of two fields the endpoint already returns.
     { key: 'openRate', label: t('vacancies.summary.openRate'),
-      value: s && s.total > 0 ? `${Math.round((s.open / s.total) * 100)}%` : '—' },
+      value: s && s.total > 0 ? formatRatio(s.open / s.total) : '—' },
     // Plain stat — no single XOR value represents "distinct customers", so not clickable.
     { key: 'customersCount', label: t('vacancies.summary.customersCount'), value: customersCount },
     { key: 'topIndustry', label: t('vacancies.summary.topIndustry'),

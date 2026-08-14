@@ -20,7 +20,7 @@ import { gateDrillClick } from './reportDrillGate'
 import SegmentBars from './SegmentBars'
 import ReportTimeseriesChart from './ReportTimeseriesChart'
 import { useDateFormat } from '@/lib/datetime'
-import { formatNumber } from '@/lib/formatters'
+import { formatPercent } from '@/lib/formatters'
 import type { ReportPeriod, CandidateTimeseriesPoint } from '@/types/analytics'
 
 // One match stat tile; with an onClick it becomes a drillable surface (keyboard
@@ -153,7 +153,7 @@ export default function MatchesReport({ period, tabsSlot }: { period: ReportPeri
     { key: 'dur',    label: t('matches.avgDuration'),
       value: data?.avg_placement_duration_days != null ? t('matches.daysValue', { days: Math.round(data.avg_placement_duration_days) }) : '—' },
     { key: 'terminationRate', label: t('matches.terminations.rate'),
-      value: terminationRate != null ? `${formatNumber(terminationRate)}%` : '—' },
+      value: formatPercent(terminationRate) },
   ]
 
   return (

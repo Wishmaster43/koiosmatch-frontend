@@ -7,6 +7,7 @@
  * has no further single-record breakdown to explain.
  */
 import type { ReactNode } from 'react'
+import { formatPercent, formatRatio } from '@/lib/formatters'
 import { useTranslation } from 'react-i18next'
 import ReportKpiBand from './ReportKpiBand'
 import type { KpiSpec } from '@/components/insights/InsightsRow'
@@ -48,8 +49,8 @@ export default function SourcesReport({ period, tabsSlot }: { period: ReportPeri
     { key: 'candidates',   label: t('sources.summary.candidates'),   value: totals.candidates },
     { key: 'applications', label: t('sources.summary.applications'), value: totals.applications },
     { key: 'matches',      label: t('sources.summary.matches'),      value: totals.matches },
-    { key: 'matchRate',    label: t('sources.summary.matchRate'),    value: overallMatchRate != null ? `${overallMatchRate}%` : '—' },
-    { key: 'applicationRate', label: t('sources.summary.applicationRate'), value: applicationRate != null ? `${applicationRate}%` : '—' },
+    { key: 'matchRate',    label: t('sources.summary.matchRate'),    value: formatPercent(overallMatchRate) },
+    { key: 'applicationRate', label: t('sources.summary.applicationRate'), value: formatPercent(applicationRate) },
     { key: 'topSourceCandidates', label: t('sources.summary.topSourceCandidates'),
       value: topByCandidates ? `${topByCandidates.source} · ${topByCandidates.candidates}` : '—' },
     { key: 'topSourceMatches', label: t('sources.summary.topSourceMatches'),
@@ -66,7 +67,7 @@ export default function SourcesReport({ period, tabsSlot }: { period: ReportPeri
     {
       key: 'match_rate', header: t('sources.cols.matchRate'), align: 'right', sortable: true,
       sortValue: r => r.match_rate ?? -1,
-      render: r => r.match_rate != null ? `${Math.round(r.match_rate * 100)}%` : '—',
+      render: r => formatRatio(r.match_rate),
     },
   ]
 

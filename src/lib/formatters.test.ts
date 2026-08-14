@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import { renderHook } from '@testing-library/react'
-import { formatNumber, formatNumberCompact, formatCurrency, useNumberFormat } from './formatters'
+import { formatNumber, formatNumberCompact, formatCurrency, formatPercent, formatRatio, useNumberFormat } from './formatters'
 
 describe('formatNumber', () => {
   it('groups thousands with the nl-NL separator by default', () => {
@@ -34,6 +34,33 @@ describe('formatNumberCompact', () => {
 
   it('respects a custom threshold', () => {
     expect(formatNumberCompact(1234, 'nl-NL', 1000).toLowerCase()).toContain('k')
+  })
+})
+
+// FMT-PROCENT-1 — the bug that made this helper exist: a matches KPI printed
+// "5,882%" because the value went through the plain number formatter.
+describe('formatPercent / formatRatio', () => {
+  it('caps a percentage at one decimal instead of printing three', () => {
+    expect(formatPercent((2 / 34) * 100)).toBe('5,9%')
+  })
+
+  it('keeps a whole percentage whole', () => {
+    expect(formatPercent(50)).toBe('50%')
+  })
+
+  it('turns a fraction of one into the same one-decimal percentage', () => {
+    expect(formatRatio(2 / 34)).toBe('5,9%')
+    expect(formatRatio(0.5)).toBe('50%')
+  })
+
+  it('renders the house dash for a missing value, never a fabricated 0%', () => {
+    expect(formatPercent(null)).toBe('—')
+    expect(formatPercent(undefined)).toBe('—')
+    expect(formatRatio(null)).toBe('—')
+  })
+
+  it('follows the locale separator', () => {
+    expect(formatPercent(5.882, 'en-GB')).toBe('5.9%')
   })
 })
 

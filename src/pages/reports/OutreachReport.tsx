@@ -12,6 +12,7 @@
  * candidate names (outreach.view), so a 403 keeps the calm degrade in the drawer.
  */
 import { useState } from 'react'
+import { formatRatio } from '@/lib/formatters'
 import type { CSSProperties, ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import ReportKpiBand from './ReportKpiBand'
@@ -113,7 +114,7 @@ export default function OutreachReport({ period, tabsSlot }: { period: ReportPer
     { key: 'total',   label: t('outreach.total'),   value: targets },
     { key: 'reached', label: t('outreach.reached'), value: reached },
     { key: 'rate',    label: t('outreach.reachRate'),
-      value: data?.reach_rate != null ? `${Math.round(data.reach_rate * 100)}%` : '—' },
+      value: formatRatio(data?.reach_rate) },
     // Derived complements — real subtraction over fields the endpoint returns,
     // never a fabricated number. Not clickable: no single-value axis backs a
     // "not reached"/"assigned" drill.

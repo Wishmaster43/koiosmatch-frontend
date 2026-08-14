@@ -21,7 +21,7 @@ import { gateDrillClick } from './reportDrillGate'
 import SegmentBars from './SegmentBars'
 import ReportTimeseriesChart from './ReportTimeseriesChart'
 import { useDateFormat } from '@/lib/datetime'
-import { formatNumber } from '@/lib/formatters'
+import { formatPercent } from '@/lib/formatters'
 import type { ReportPeriod, CandidateOwnerSegment, CandidateTimeseriesPoint } from '@/types/analytics'
 
 const card:  CSSProperties = { background: 'var(--surface)', borderRadius: 12, border: '1px solid var(--border)' }
@@ -113,7 +113,7 @@ export default function TasksReport({ period, tabsSlot }: { period: ReportPeriod
     { key: 'done',     label: t('tasks.summary.done'),     value: s?.done ?? 0 },
     { key: 'overdue',  label: t('tasks.summary.overdue'),  value: s?.overdue ?? 0 },
     { key: 'doneRate', label: t('tasks.summary.doneRate'),
-      value: s?.done_rate != null ? `${formatNumber(s.done_rate)}%` : '—' },
+      value: formatPercent(s?.done_rate) },
     { key: 'unassigned', label: t('tasks.unassigned'), value: unassigned?.count ?? 0,
       active: (drill?.rowsParams as Record<string, unknown> | undefined)?.assignee === 'none',
       onClick: unassigned ? gateDrillClick('tasks', () => openSegment({ label: unassigned.name, count: unassigned.count }, { assignee: 'none' })) : undefined },
@@ -124,7 +124,7 @@ export default function TasksReport({ period, tabsSlot }: { period: ReportPeriod
       active: (drill?.rowsParams as Record<string, unknown> | undefined)?.branch === 'none',
       onClick: noBranch ? gateDrillClick('tasks', () => openSegment(noBranch, { branch: 'none' })) : undefined },
     { key: 'overdueRate', label: t('tasks.overdueRate'),
-      value: overdueRate != null ? `${formatNumber(overdueRate)}%` : '—' },
+      value: formatPercent(overdueRate) },
   ]
 
   return (

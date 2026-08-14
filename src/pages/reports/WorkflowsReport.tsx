@@ -19,7 +19,7 @@ import { gateDrillClick } from './reportDrillGate'
 import SegmentBars from './SegmentBars'
 import ReportTimeseriesChart from './ReportTimeseriesChart'
 import { useDateFormat } from '@/lib/datetime'
-import { formatNumber } from '@/lib/formatters'
+import { formatPercent } from '@/lib/formatters'
 import { formatDuration } from '@/components/reports/runFormat'
 import type { ReportPeriod, CandidateSegment, ApplicationTopSegment, CandidateTimeseriesPoint } from '@/types/analytics'
 
@@ -95,7 +95,7 @@ export default function WorkflowsReport({ period, tabsSlot }: { period: ReportPe
     { key: 'cancelled',  label: t('workflows.summary.cancelled'),  value: s?.cancelled ?? 0 },
     { key: 'running',    label: t('workflows.summary.running'),    value: s?.running ?? 0 },
     { key: 'successRate', label: t('workflows.summary.successRate'),
-      value: s?.success_rate != null ? `${formatNumber(s.success_rate)}%` : '—' },
+      value: formatPercent(s?.success_rate) },
     { key: 'avgDuration', label: t('workflows.summary.avgDuration'),
       value: s?.avg_duration_seconds != null ? formatDuration(s.avg_duration_seconds * 1000) : '—' },
     // Distinct-category counts off the axis arrays — a plain stat, not a single

@@ -8,6 +8,7 @@
  * never hardcode stage names — we key on `key` and render `label`.
  */
 import { useMemo, useState } from 'react'
+import { formatRatio } from '@/lib/formatters'
 import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import ReportKpiBand from './ReportKpiBand'
@@ -68,7 +69,7 @@ export default function FlowReport({ period, tabsSlot }: { period: ReportPeriod;
 
   // Drill-down: which KPI is being explained (null = closed).
   const [drill, setDrill] = useState<DrillSpec | null>(null)
-  const pct = (v: number | null) => (v != null ? `${Math.round(v * 100)}%` : undefined)
+  const pct = (v: number | null) => (v != null ? formatRatio(v) : undefined)
 
   // One clickable KPI block per funnel phase; clicking explains the number
   // (breakdown + the applications behind it + Koios advice).
@@ -117,7 +118,7 @@ export default function FlowReport({ period, tabsSlot }: { period: ReportPeriod;
         adviceEndpoint: '/reports/flow/advice', adviceParams: { period, view: cohortReady ? 'reached' : 'current' },
       })) },
     ...(overallConv != null
-      ? [{ key: 'conv', label: t('flow.overallConversion'), value: `${Math.round(overallConv * 100)}%` } as KpiSpec]
+      ? [{ key: 'conv', label: t('flow.overallConversion'), value: formatRatio(overallConv) } as KpiSpec]
       : []),
     ...(dropOff != null
       ? [{ key: 'dropOff', label: t('flow.dropOff'), value: dropOff } as KpiSpec]
@@ -178,7 +179,7 @@ export default function FlowReport({ period, tabsSlot }: { period: ReportPeriod;
                   value={cohortReady ? p.reached_count : p.current_count}
                   max={max}
                   index={i}
-                  conversion={cohortReady && p.conversion_rate != null ? `${Math.round(p.conversion_rate * 100)}%` : null}
+                  conversion={cohortReady && p.conversion_rate != null ? formatRatio(p.conversion_rate) : null}
                   avgDays={p.avg_days_in_phase != null ? t('flow.avgDays', { days: Math.round(p.avg_days_in_phase) }) : null}
                 />
               </div>

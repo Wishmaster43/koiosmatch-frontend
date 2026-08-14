@@ -26,6 +26,31 @@ export function formatNumber(value: NumberInput, locale: string = 'nl-NL'): stri
   return n === null ? '—' : new Intl.NumberFormat(locale).format(n)
 }
 
+/**
+ * Percentages, the ONE house way (FMT-PROCENT-1, Danny 14-08: a matches KPI read
+ * "5,882%" where it meant 5,9%).
+ *
+ * The reports had grown five different treatments of the same thing: plain
+ * `formatNumber(x) + '%'` (which lets Intl print three decimals),
+ * `Math.round(x * 100)` (whole numbers, but bypassing the locale entirely) and a
+ * bare template literal. Two helpers replace all of them, named after the UNIT
+ * they take so a call site cannot silently be off by a factor of a hundred:
+ *   formatPercent(5.882)  → "5,9%"   — the value is already a percentage
+ *   formatRatio(0.05882)  → "5,9%"   — the value is a fraction of one
+ * At most one decimal, and a whole number stays whole ("50%", never "50,0%").
+ * Null/undefined/non-finite render the house dash, never a fabricated 0%.
+ */
+export function formatPercent(value: NumberInput, locale: string = 'nl-NL'): string {
+  const n = toFiniteNumber(value)
+  if (n === null) return '—'
+  return `${new Intl.NumberFormat(locale, { maximumFractionDigits: 1 }).format(n)}%`
+}
+
+export function formatRatio(value: NumberInput, locale: string = 'nl-NL'): string {
+  const n = toFiniteNumber(value)
+  return n === null ? '—' : formatPercent(n * 100, locale)
+}
+
 // Compact form for tight spaces (donut centers, mini KPI tiles) — e.g. 99968 → "100K".
 // Below `threshold` (default 10 000 = 5 digits) it falls back to the full grouped
 // number so values that still fit stay exact rather than needlessly abbreviated.
@@ -62,6 +87,8 @@ export function useNumberFormat() {
     locale,
     formatNumber: (value: NumberInput) => formatNumber(value, locale),
     formatNumberCompact: (value: NumberInput, threshold?: number) => formatNumberCompact(value, locale, threshold),
+    formatPercent: (value: NumberInput) => formatPercent(value, locale),
+    formatRatio: (value: NumberInput) => formatRatio(value, locale),
     formatCurrency: (value: NumberInput, currency?: string, maximumFractionDigits?: number, minimumFractionDigits?: number) =>
       formatCurrency(value, currency, locale, maximumFractionDigits, minimumFractionDigits),
   }

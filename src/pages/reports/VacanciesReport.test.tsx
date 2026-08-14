@@ -274,7 +274,7 @@ describe('VacanciesReport (RAPPORTEN-SUITE-1 portie 4, additive on C-34)', () =>
     mockUseVacanciesReport.mockReturnValue({ data, loading: false, error: false })
     renderReport()
     expect(screen.getByText('Open-percentage')).toBeInTheDocument()
-    expect(screen.getByText('67%')).toBeInTheDocument() // 8/12
+    expect(screen.getByText('66,7%')).toBeInTheDocument() // 8/12, FMT-PROCENT-1 keeps the decimal
     // One distinct customer in the fixture row — assert via the KPI card
     // (a bare '1' text match is ambiguous against other numeric cells on the page).
     const customersLabel = screen.getByText('Aantal klanten')

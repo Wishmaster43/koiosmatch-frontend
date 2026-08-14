@@ -21,7 +21,7 @@ import { gateDrillClick } from './reportDrillGate'
 import SegmentBars from './SegmentBars'
 import ReportTimeseriesChart from './ReportTimeseriesChart'
 import { useDateFormat } from '@/lib/datetime'
-import { formatNumber, useNumberFormat } from '@/lib/formatters'
+import { useNumberFormat, formatPercent } from '@/lib/formatters'
 import type { ReportPeriod, CandidateOwnerSegment, CandidateTimeseriesPoint } from '@/types/analytics'
 
 const card:  CSSProperties = { background: 'var(--surface)', borderRadius: 12, border: '1px solid var(--border)' }
@@ -110,7 +110,7 @@ export default function OpportunitiesReport({ period, tabsSlot }: { period: Repo
     { key: 'won',     label: t('opportunities.summary.won'),     value: s?.won ?? 0 },
     { key: 'lost',    label: t('opportunities.summary.lost'),    value: s?.lost ?? 0 },
     { key: 'winRate', label: t('opportunities.summary.winRate'),
-      value: s?.win_rate != null ? `${formatNumber(s.win_rate)}%` : '—' },
+      value: formatPercent(s?.win_rate) },
     { key: 'untouched', label: t('opportunities.stale.untouched'), value: data?.stale.untouched ?? 0 },
     { key: 'overdue',   label: t('opportunities.stale.overdue'),   value: data?.stale.overdue ?? 0 },
     { key: 'forecastCount', label: t('opportunities.forecastCount'), value: forecastCount },

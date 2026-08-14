@@ -8,6 +8,7 @@
  * consent-percentage axis (never add one here).
  */
 import { useState } from 'react'
+import { formatRatio } from '@/lib/formatters'
 import type { CSSProperties, ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import ReportKpiBand from './ReportKpiBand'
@@ -101,7 +102,7 @@ export default function ContactsReport({ period, tabsSlot }: { period: ReportPer
     { key: 'neverContacted',   label: t('contacts.summary.neverContacted'),   value: s?.never_contacted ?? 0 },
     // Derived ratio over two real summary fields — never a fabricated 0%.
     { key: 'contactedRate', label: t('contacts.summary.contactedRate'),
-      value: s && total > 0 ? `${Math.round((s.with_recent_contact / total) * 100)}%` : '—' },
+      value: s && total > 0 ? formatRatio(s.with_recent_contact / total) : '—' },
     { key: 'withoutFunction', label: t('contacts.summary.withoutFunction'), value: withoutFunction?.count ?? 0,
       onClick: withoutFunction ? gateDrillClick('contacts', () => openSegment(withoutFunction, { function: 'none' })) : undefined },
     { key: 'withoutLocation', label: t('contacts.summary.withoutLocation'), value: withoutLocation?.count ?? 0,

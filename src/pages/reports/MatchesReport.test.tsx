@@ -324,7 +324,7 @@ describe('MatchesReport (nine-card KPI footprint)', () => {
       expect(screen.getAllByText(label).length).toBeGreaterThanOrEqual(1)
     }
     // Termination rate: 3 / 16 * 100 = 18,75% → the house number formatter.
-    expect(screen.getByText('18,75%')).toBeInTheDocument()
+    expect(screen.getByText('18,8%')).toBeInTheDocument()  // FMT-PROCENT-1: at most one decimal
   })
 
   it('clicking the "sent" KPI card sends contract_status=sent, same as the tile below', async () => {

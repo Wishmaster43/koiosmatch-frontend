@@ -333,7 +333,7 @@ describe('TasksReport (nine-card KPI footprint)', () => {
     expect(screen.getAllByText('Geen vestiging').length).toBeGreaterThanOrEqual(2)
     expect(screen.getByText('Te-laat-percentage')).toBeInTheDocument()
     // overdueRate: 2 / 12 * 100 = 16,667% via the house number formatter.
-    expect(screen.getByText('16,667%')).toBeInTheDocument()
+    expect(screen.getByText('16,7%')).toBeInTheDocument()  // FMT-PROCENT-1: at most one decimal
   })
 
   it('clicking the "unassigned" KPI card drills with assignee=none, same as the bar', async () => {
