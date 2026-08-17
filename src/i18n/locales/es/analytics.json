@@ -616,7 +616,33 @@
     "viewSwitch": {
       "ariaLabel": "Tipo de uso",
       "ai": "Koios AI",
-      "workflows": "Workflows"
+      "workflows": "Workflows",
+      "total": "Total"
+    },
+    "window": "Consumo del {{from}} al {{to}}",
+    "loading": "Cargando consumo…",
+    "error": "No se ha podido cargar el consumo",
+    "empty": "Sin consumo en este periodo",
+    "series": "Consumo a lo largo del tiempo",
+    "axes": {
+      "module": "Por módulo"
+    },
+    "moduleNote": "Solo ejecuciones de workflow. El consumo de IA no lleva módulo, por eso aquí no aparecen filas de IA.",
+    "kpiOrderFellBack": "Una tarjeta KPI configurada en Ajustes ya no existe y se ha restablecido.",
+    "summary": {
+      "total": "Consumo total",
+      "workflowCredits": "Koios Tokens",
+      "aiCredits": "Llamadas de IA",
+      "aiAmount": "Importe de IA",
+      "modules": "Módulos con consumo",
+      "topModule": "Módulo más activo",
+      "busiestDay": "Día más activo",
+      "activeDays": "Días con consumo",
+      "avgPerDay": "Media por día activo",
+      "aiShare": "Cuota de IA",
+      "workflowShare": "Cuota de workflows",
+      "topModuleShare": "Cuota del módulo más activo",
+      "amountPerDay": "Importe de IA por día activo"
     }
   },
   "compare": {

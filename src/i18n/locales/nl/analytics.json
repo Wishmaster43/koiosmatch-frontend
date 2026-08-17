@@ -616,7 +616,33 @@
     "viewSwitch": {
       "ariaLabel": "Verbruikstype",
       "ai": "Koios AI",
-      "workflows": "Workflows"
+      "workflows": "Workflows",
+      "total": "Totaal"
+    },
+    "window": "Verbruik {{from}} t/m {{to}}",
+    "loading": "Verbruik laden…",
+    "error": "Kon het verbruik niet laden",
+    "empty": "Geen verbruik in deze periode",
+    "series": "Verbruik over tijd",
+    "axes": {
+      "module": "Per module"
+    },
+    "moduleNote": "Alleen workflow-uitvoeringen. AI-verbruik draagt geen module, dus daar staan geen AI-regels in.",
+    "kpiOrderFellBack": "Een in Instellingen ingestelde KPI-kaart bestaat niet meer en is teruggezet naar de standaard.",
+    "summary": {
+      "total": "Totaal verbruik",
+      "workflowCredits": "Koios Tokens",
+      "aiCredits": "AI-calls",
+      "aiAmount": "AI-bedrag",
+      "modules": "Modules met verbruik",
+      "topModule": "Drukste module",
+      "busiestDay": "Drukste dag",
+      "activeDays": "Dagen met verbruik",
+      "avgPerDay": "Gemiddeld per actieve dag",
+      "aiShare": "Aandeel AI",
+      "workflowShare": "Aandeel workflows",
+      "topModuleShare": "Aandeel drukste module",
+      "amountPerDay": "AI-bedrag per actieve dag"
     }
   },
   "compare": {

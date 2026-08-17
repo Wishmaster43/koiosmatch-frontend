@@ -616,7 +616,33 @@
     "viewSwitch": {
       "ariaLabel": "Usage type",
       "ai": "Koios AI",
-      "workflows": "Workflows"
+      "workflows": "Workflows",
+      "total": "Total"
+    },
+    "window": "Usage {{from}} to {{to}}",
+    "loading": "Loading usage…",
+    "error": "Could not load usage",
+    "empty": "No usage in this period",
+    "series": "Usage over time",
+    "axes": {
+      "module": "Per module"
+    },
+    "moduleNote": "Workflow executions only. AI usage carries no module, so no AI rows appear here.",
+    "kpiOrderFellBack": "A KPI card configured in Settings no longer exists and was reset to the default.",
+    "summary": {
+      "total": "Total usage",
+      "workflowCredits": "Koios Tokens",
+      "aiCredits": "AI calls",
+      "aiAmount": "AI amount",
+      "modules": "Modules with usage",
+      "topModule": "Busiest module",
+      "busiestDay": "Busiest day",
+      "activeDays": "Days with usage",
+      "avgPerDay": "Average per active day",
+      "aiShare": "AI share",
+      "workflowShare": "Workflow share",
+      "topModuleShare": "Busiest module share",
+      "amountPerDay": "AI amount per active day"
     }
   },
   "compare": {

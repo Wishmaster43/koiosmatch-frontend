@@ -616,7 +616,33 @@
     "viewSwitch": {
       "ariaLabel": "Nutzungsart",
       "ai": "Koios AI",
-      "workflows": "Workflows"
+      "workflows": "Workflows",
+      "total": "Gesamt"
+    },
+    "window": "Verbrauch {{from}} bis {{to}}",
+    "loading": "Verbrauch wird geladen…",
+    "error": "Verbrauch konnte nicht geladen werden",
+    "empty": "Kein Verbrauch in diesem Zeitraum",
+    "series": "Verbrauch im Zeitverlauf",
+    "axes": {
+      "module": "Pro Modul"
+    },
+    "moduleNote": "Nur Workflow-Ausführungen. KI-Verbrauch trägt kein Modul, daher stehen hier keine KI-Zeilen.",
+    "kpiOrderFellBack": "Eine in den Einstellungen konfigurierte KPI-Karte existiert nicht mehr und wurde zurückgesetzt.",
+    "summary": {
+      "total": "Gesamtverbrauch",
+      "workflowCredits": "Koios Tokens",
+      "aiCredits": "KI-Aufrufe",
+      "aiAmount": "KI-Betrag",
+      "modules": "Module mit Verbrauch",
+      "topModule": "Aktivstes Modul",
+      "busiestDay": "Aktivster Tag",
+      "activeDays": "Tage mit Verbrauch",
+      "avgPerDay": "Durchschnitt pro aktivem Tag",
+      "aiShare": "Anteil KI",
+      "workflowShare": "Anteil Workflows",
+      "topModuleShare": "Anteil aktivstes Modul",
+      "amountPerDay": "KI-Betrag pro aktivem Tag"
     }
   },
   "compare": {
