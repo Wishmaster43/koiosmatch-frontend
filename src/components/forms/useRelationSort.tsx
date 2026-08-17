@@ -89,10 +89,30 @@ export function useRelationSort<T>(items: T[], opts: UseRelationSortOptions<T>):
   const { storageKey, startDateOf, startDateLabel, endDateOf, endDateLabel, functionOf, functionLabel } = opts
 
   // ONE shared preference object across every sub-tab; this hook instance only
-  // ever reads/writes its own `storageKey` slice. Default `{}` — nobody's view
-  // changes until a user actually picks a sort (untouched sub-tabs stay null).
+  // ever reads/writes its own `storageKey` slice.
   const [allSorts, setAllSorts] = useUserPreference<SortPreferenceMap>(PREFERENCE_KEY, {})
-  const state = allSorts[storageKey] ?? null
+
+  // ACHTERGROND-DATUM-STANDAARD-1 (Danny 17-08: "standaard op datum dus laatste
+  // werkervaring boven"). A list that carries dates opens newest-first, the way a
+  // CV reads, without anyone having to pick it. This needs no stored order at all,
+  // which is exactly Danny's point: it is computed from dates the record already
+  // has. A column in the database is only needed for the OTHER case, someone
+  // deliberately overriding that order by hand.
+  //
+  // Start date is the axis, not end date: a job still running has no end date, and
+  // sorting on a missing value would push the current job to the bottom, which is
+  // the opposite of what "most recent on top" means.
+  //
+  // On a dated list the default is not "no sort" but a REAL sort, so cycling an
+  // axis off returns to newest-first rather than to the raw order the server
+  // happened to send. That raw order is insertion order, which a user cannot
+  // explain and never asked for, so offering it as a third state would only be
+  // confusing. On a list without dates there is no default, and cycling off still
+  // means the received order.
+  // (When a stored manual order lands, IT becomes the meaningful third state and
+  // takes this fallback's place. That is the single follow-up entry.)
+  const fallback: SortState | null = startDateOf ? { field: 'startDate', dir: 'desc' } : null
+  const state = allSorts[storageKey] ?? fallback
 
   const fields = useMemo(() => {
     const list: { field: SortField; label: string }[] = []

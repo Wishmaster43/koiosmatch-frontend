@@ -84,11 +84,20 @@ describe('ExperienceTab sort menu', () => {
     expect(screen.getByRole('menuitem', { name: 'Functietitel' })).toBeInTheDocument()
   })
 
-  it('start date (newest first on first pick) reorders the rows', async () => {
+  // ACHTERGROND-DATUM-STANDAARD-1 (Danny 17-08: "standaard op datum dus laatste
+  // werkervaring boven"). The list opens newest-first with nobody picking anything,
+  // computed from the start dates the records already carry. No stored order and no
+  // database column is involved; that is only needed for a manual override.
+  it('opens newest-first on start date without any pick', () => {
+    render(<ExperienceTab items={items} onAdd={() => {}} onEdit={() => {}} onRemove={() => {}} />)
+    expect(names()).toEqual(['Arts', 'Verpleegkundige', 'Coördinator'])
+  })
+
+  it('picking the start-date axis again flips to oldest-first', async () => {
     const user = userEvent.setup()
     render(<ExperienceTab items={items} onAdd={() => {}} onEdit={() => {}} onRemove={() => {}} />)
     await pick(user, 'Begindatum')
-    expect(names()).toEqual(['Arts', 'Verpleegkundige', 'Coördinator'])
+    expect(names()).toEqual(['Coördinator', 'Verpleegkundige', 'Arts'])
   })
 
   it('end date (newest first on first pick) reorders the rows — a DIFFERENT order than start date', async () => {
@@ -105,13 +114,16 @@ describe('ExperienceTab sort menu', () => {
     expect(names()).toEqual(['Arts', 'Coördinator', 'Verpleegkundige'])
   })
 
-  it('a third pick of the same axis clears the sort back to the received (default) order', async () => {
+  // Cycling the axis off no longer lands on the raw order the server happened to
+  // send. That order is insertion order: a user cannot explain it and never asked
+  // for it, so offering it as a state would only confuse. Off returns to the
+  // newest-first default instead.
+  it('cycling the axis off returns to the newest-first default, not the raw received order', async () => {
     const user = userEvent.setup()
     render(<ExperienceTab items={items} onAdd={() => {}} onEdit={() => {}} onRemove={() => {}} />)
-    await pick(user, 'Begindatum') // desc
     await pick(user, 'Begindatum') // asc
-    await pick(user, 'Begindatum') // off
-    expect(names()).toEqual(['Verpleegkundige', 'Arts', 'Coördinator'])
+    await pick(user, 'Begindatum') // off -> back to the default
+    expect(names()).toEqual(['Arts', 'Verpleegkundige', 'Coördinator'])
   })
 
   it('is keyboard-operable: Enter opens the menu on the focused trigger, Enter on the auto-focused first option picks it', async () => {
@@ -124,7 +136,9 @@ describe('ExperienceTab sort menu', () => {
     // ActionMenu auto-focuses the first menu item on open (its own effect) — no
     // mouse ever touches this flow.
     await user.keyboard('{Enter}')
-    expect(names()).toEqual(['Arts', 'Verpleegkundige', 'Coördinator']) // start date, the first item, desc
+    // Start date is the first item and the list already opened on it descending,
+    // so picking it flips to ascending.
+    expect(names()).toEqual(['Coördinator', 'Verpleegkundige', 'Arts'])
   })
 })
 
@@ -149,7 +163,8 @@ describe('EducationTab sort menu', () => {
   it('start date and end date sort independently', async () => {
     const user = userEvent.setup()
     render(<EducationTab items={items} onAdd={() => {}} onEdit={() => {}} onRemove={() => {}} />)
-    await pick(user, 'Begindatum')
+    // Already newest-start-first on open (ACHTERGROND-DATUM-STANDAARD-1), so no
+    // pick is needed to see that axis; picking the OTHER axis proves independence.
     expect(names()).toEqual(['B-opleiding', 'A-opleiding']) // newer start first
     await pick(user, 'Einddatum')
     expect(names()).toEqual(['A-opleiding', 'B-opleiding']) // newer end first
@@ -175,7 +190,8 @@ describe('CertificationsTab sort menu', () => {
   it('Issued and Expires sort independently', async () => {
     const user = userEvent.setup()
     render(<CertificationsTab items={items} onAdd={() => {}} onEdit={() => {}} onRemove={() => {}} />)
-    await pick(user, 'Uitgegeven')
+    // Newest issue date is already on top when the tab opens; picking the expiry
+    // axis proves the two read different columns.
     expect(names()).toEqual(['VCA', 'BHV']) // newer issue date first
     await pick(user, 'Verloopt')
     expect(names()).toEqual(['BHV', 'VCA']) // newer expiry first
