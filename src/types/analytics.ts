@@ -50,6 +50,34 @@ export interface RecruitersReportData {
   recruiters: RecruiterRow[]
 }
 
+// ── Account managers report (GET /reports/accountmanagers) ───────────────────
+// Mirror-image of RecruitersReport on the customer side (Customer.owner_id).
+// `customers` is the manager's own book SNAPSHOT (no created_at window); the
+// other five fields are windowed/snapshot per the backend service's own docs.
+export interface AccountManagerRow {
+  key: string
+  label: string
+  customers: number
+  open_vacancies: number
+  filled_positions: number
+  opportunities: number
+  contract_ending: number
+  not_contacted: number
+}
+
+// GET /reports/accountmanagers response. `compliance_days`/`contract_ending_days`
+// are the ACTUAL thresholds applied (either the `months`/`contract_ending_days`
+// request override, or the tenant's own setting) — echoed back so the UI can show
+// what was measured, never a client-guessed number.
+export interface AccountManagersReportData {
+  period: string
+  from?: string
+  to?: string
+  compliance_days: number
+  contract_ending_days: number
+  account_managers: AccountManagerRow[]
+}
+
 // ── Vacancies report (GET /reports/vacancies) ────────────────────────────────
 
 // One vacancy row. `applications_by_phase[].key` shares the funnel key-map.

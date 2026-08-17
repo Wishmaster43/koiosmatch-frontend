@@ -482,21 +482,33 @@
   "accountmanagers": {
     "loading": "Chargement des comptes clients…",
     "error": "Impossible de charger les comptes clients",
-    "empty": "Aucun client sur cette période",
+    "empty": "Aucun compte client sur cette période",
     "summary": {
       "accountManagers": "Comptes clients",
       "customersInWindow": "Clients sur la période",
       "avgPerManager": "Clients moyens par gestionnaire",
       "topManager": "Meilleur gestionnaire",
-      "openOpportunities": "Opportunités ouvertes",
-      "activeMatches": "Matches actifs",
-      "revenue": "Chiffre d'affaires",
+      "openVacancies": "Postes ouverts",
+      "filledPositions": "Postes pourvus",
+      "opportunities": "Opportunités",
       "renewalsDue": "Renouvellements à faire",
       "notContacted": "Non contacté"
     },
     "cols": {
       "manager": "Gestionnaire de compte",
-      "customers": "Clients"
+      "customers": "Clients",
+      "openVacancies": "Postes ouverts",
+      "filledPositions": "Postes pourvus",
+      "opportunities": "Opportunités",
+      "contractEnding": "Fin de contrat",
+      "notContacted": "Non contacté"
+    },
+    "notContactedHint": "> {{days}} j",
+    "contractEndingHint": "≤ {{days}} j",
+    "compareThresholds": "Les deux périodes utilisent les mêmes seuils : non contacté après {{notContactedDays}} jours, fin de contrat dans les {{contractEndingDays}} jours.",
+    "overrides": {
+      "notContactedMonths": "Non contacté après (mois)",
+      "contractEndingDays": "Fin de contrat dans (jours)"
     },
     "kpiOrderFellBack": "Une carte KPI configurée dans les paramètres n'existe plus et a été réinitialisée par défaut."
   },

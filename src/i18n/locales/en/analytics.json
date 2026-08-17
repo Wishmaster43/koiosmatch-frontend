@@ -482,21 +482,33 @@
   "accountmanagers": {
     "loading": "Loading account managers…",
     "error": "Could not load the account managers",
-    "empty": "No customers in this period",
+    "empty": "No account managers in this period",
     "summary": {
       "accountManagers": "Account managers",
       "customersInWindow": "Customers in window",
       "avgPerManager": "Avg. customers per manager",
       "topManager": "Top manager",
-      "openOpportunities": "Open opportunities",
-      "activeMatches": "Active matches",
-      "revenue": "Revenue",
+      "openVacancies": "Open vacancies",
+      "filledPositions": "Filled positions",
+      "opportunities": "Opportunities",
       "renewalsDue": "Renewals due",
       "notContacted": "Not contacted"
     },
     "cols": {
       "manager": "Account manager",
-      "customers": "Customers"
+      "customers": "Customers",
+      "openVacancies": "Open vacancies",
+      "filledPositions": "Filled positions",
+      "opportunities": "Opportunities",
+      "contractEnding": "Contract ending",
+      "notContacted": "Not contacted"
+    },
+    "notContactedHint": "> {{days}} d",
+    "contractEndingHint": "≤ {{days}} d",
+    "compareThresholds": "Both windows compare against the same thresholds: not contacted after {{notContactedDays}} days, contract ending within {{contractEndingDays}} days.",
+    "overrides": {
+      "notContactedMonths": "Not contacted after (months)",
+      "contractEndingDays": "Contract ending within (days)"
     },
     "kpiOrderFellBack": "A KPI card configured in Settings no longer exists and was reset to the default."
   },

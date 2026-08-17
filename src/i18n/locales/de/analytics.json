@@ -482,21 +482,33 @@
   "accountmanagers": {
     "loading": "Kundenbetreuer werden geladen…",
     "error": "Kundenbetreuer konnten nicht geladen werden",
-    "empty": "Keine Kunden in diesem Zeitraum",
+    "empty": "Keine Kundenbetreuer in diesem Zeitraum",
     "summary": {
       "accountManagers": "Kundenbetreuer",
       "customersInWindow": "Kunden im Zeitraum",
       "avgPerManager": "Durchschn. Kunden pro Betreuer",
       "topManager": "Top-Betreuer",
-      "openOpportunities": "Offene Chancen",
-      "activeMatches": "Aktive Matches",
-      "revenue": "Umsatz",
+      "openVacancies": "Offene Stellen",
+      "filledPositions": "Besetzte Stellen",
+      "opportunities": "Chancen",
       "renewalsDue": "Fällige Verlängerungen",
       "notContacted": "Nicht kontaktiert"
     },
     "cols": {
       "manager": "Kundenbetreuer",
-      "customers": "Kunden"
+      "customers": "Kunden",
+      "openVacancies": "Offene Stellen",
+      "filledPositions": "Besetzte Stellen",
+      "opportunities": "Chancen",
+      "contractEnding": "Vertrag endet",
+      "notContacted": "Nicht kontaktiert"
+    },
+    "notContactedHint": "> {{days}} Tg.",
+    "contractEndingHint": "≤ {{days}} Tg.",
+    "compareThresholds": "Beide Zeiträume verwenden dieselben Schwellenwerte: nicht kontaktiert nach {{notContactedDays}} Tagen, Vertrag endet innerhalb von {{contractEndingDays}} Tagen.",
+    "overrides": {
+      "notContactedMonths": "Nicht kontaktiert nach (Monate)",
+      "contractEndingDays": "Vertrag endet innerhalb (Tage)"
     },
     "kpiOrderFellBack": "Eine in den Einstellungen konfigurierte KPI-Karte existiert nicht mehr und wurde auf den Standard zurückgesetzt."
   },

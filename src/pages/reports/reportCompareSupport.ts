@@ -3,10 +3,9 @@
  * frontend report id (+ optional switch-position `view`, RAPPORTEN-CONSOLIDATIE-1)
  * to the backend's `/reports/{slug}/compare` slug, or `null` when that position is
  * not wired yet. VERIFIED against the backend registry (ReportCompareController::
- * REGISTRY, koiosmatch-api, read 2026-08-15) — never assumed from a report existing
+ * REGISTRY, koiosmatch-api, read 2026-08-17) — never assumed from a report existing
  * on the plain `/reports/*` list, since the compare endpoint is a DELIBERATE
- * subset (only reports with a time axis compare; accountmanagers is explicitly
- * still open on the backend's own follow-up).
+ * subset (only reports with a time axis compare).
  *
  * A report/view absent here (or mapped to `null`) gets NO compare control — the
  * house rule is "the control simply is not there", never a disabled picker.
@@ -17,16 +16,15 @@ import type { ReportId } from './reportIds'
 export const COMPARE_SUPPORTED_SLUGS = [
   'flow', 'recruiters', 'vacancies', 'matches', 'outreach', 'sources',
   'candidates', 'leads', 'applications', 'customers', 'opportunities',
-  'tasks', 'contacts', 'locations', 'departments', 'ai', 'workflows',
+  'tasks', 'contacts', 'locations', 'departments', 'accountmanagers', 'ai', 'workflows',
 ] as const
 
 export type CompareSlug = (typeof COMPARE_SUPPORTED_SLUGS)[number]
 
 // Per report id (+ switch position), the backend slug to call — or null/absent
 // when that position has no compare wiring. Positions not listed at all (e.g.
-// 'intakes', which has no matching report-service registry entry; 'people' view
-// 'accountmanagers', which the backend explicitly deferred) fall through to
-// `getCompareSlug`'s default `null`.
+// 'intakes', which has no matching report-service registry entry) fall through
+// to `getCompareSlug`'s default `null`.
 const COMPARE_SLUG_BY_REPORT_VIEW: Partial<Record<ReportId, Partial<Record<string, CompareSlug>> | CompareSlug>> = {
   candidates: { candidates: 'candidates', leads: 'candidates' },
   applications: 'applications',
@@ -34,8 +32,8 @@ const COMPARE_SLUG_BY_REPORT_VIEW: Partial<Record<ReportId, Partial<Record<strin
   // customerstructure switch positions map 1:1 onto three distinct backend slugs.
   customerstructure: { contacts: 'contacts', locations: 'locations', departments: 'departments' },
   flow: 'flow',
-  // people switch: recruiters is wired, accountmanagers deliberately is not (yet).
-  people: { recruiters: 'recruiters' },
+  // people switch: both positions wired (K-67 closed the accountmanagers gap).
+  people: { recruiters: 'recruiters', accountmanagers: 'accountmanagers' },
   vacancies: 'vacancies',
   opportunities: 'opportunities',
   tasks: 'tasks',

@@ -170,14 +170,18 @@ export const REPORT_KPI_FIXED_CATALOG: Partial<Record<ReportKpiScopeId, KpiCatal
     { key: 'tasksOpen', labelKey: 'recruiters.summary.tasksOpen' },
     { key: 'tasksOverdue', labelKey: 'recruiters.summary.tasksOverdue' },
   ],
+  // REPORTS-ACCTMGR-1 follow-up: all nine now real (GET /reports/accountmanagers),
+  // replacing the three placeholder dashes the customers-report-reuse stand-in
+  // never could back (openOpportunities/activeMatches/revenue) with the report's
+  // own real fields — never a permanent hardcoded dash once the data exists (§0).
   accountmanagers: [
     { key: 'accountManagers', labelKey: 'accountmanagers.summary.accountManagers' },
     { key: 'customers', labelKey: 'accountmanagers.summary.customersInWindow' },
     { key: 'avgPerManager', labelKey: 'accountmanagers.summary.avgPerManager' },
     { key: 'topManager', labelKey: 'accountmanagers.summary.topManager' },
-    { key: 'openOpportunities', labelKey: 'accountmanagers.summary.openOpportunities' },
-    { key: 'activeMatches', labelKey: 'accountmanagers.summary.activeMatches' },
-    { key: 'revenue', labelKey: 'accountmanagers.summary.revenue' },
+    { key: 'openVacancies', labelKey: 'accountmanagers.summary.openVacancies' },
+    { key: 'filledPositions', labelKey: 'accountmanagers.summary.filledPositions' },
+    { key: 'opportunities', labelKey: 'accountmanagers.summary.opportunities' },
     { key: 'renewalsDue', labelKey: 'accountmanagers.summary.renewalsDue' },
     { key: 'notContacted', labelKey: 'accountmanagers.summary.notContacted' },
   ],

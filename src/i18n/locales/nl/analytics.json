@@ -482,21 +482,33 @@
   "accountmanagers": {
     "loading": "Accountmanagers laden…",
     "error": "Kon de accountmanagers niet laden",
-    "empty": "Geen klanten in deze periode",
+    "empty": "Geen accountmanagers in deze periode",
     "summary": {
       "accountManagers": "Accountmanagers",
       "customersInWindow": "Klanten in periode",
       "avgPerManager": "Gem. klanten per manager",
       "topManager": "Top manager",
-      "openOpportunities": "Open kansen",
-      "activeMatches": "Actieve matches",
-      "revenue": "Omzet",
+      "openVacancies": "Open vacatures",
+      "filledPositions": "Vervulde plaatsingen",
+      "opportunities": "Kansen",
       "renewalsDue": "Verlengingen te doen",
       "notContacted": "Niet benaderd"
     },
     "cols": {
       "manager": "Accountmanager",
-      "customers": "Klanten"
+      "customers": "Klanten",
+      "openVacancies": "Open vacatures",
+      "filledPositions": "Vervulde plaatsingen",
+      "opportunities": "Kansen",
+      "contractEnding": "Contract eindigt",
+      "notContacted": "Niet benaderd"
+    },
+    "notContactedHint": "> {{days}} d",
+    "contractEndingHint": "≤ {{days}} d",
+    "compareThresholds": "Beide periodes vergelijken met dezelfde drempels: niet benaderd na {{notContactedDays}} dagen, contract eindigt binnen {{contractEndingDays}} dagen.",
+    "overrides": {
+      "notContactedMonths": "Niet benaderd na (maanden)",
+      "contractEndingDays": "Contract eindigt binnen (dagen)"
     },
     "kpiOrderFellBack": "Een in Instellingen ingestelde KPI-kaart bestaat niet meer en is teruggezet naar de standaard."
   },
