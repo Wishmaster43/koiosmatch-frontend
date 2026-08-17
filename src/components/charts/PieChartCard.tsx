@@ -32,8 +32,15 @@ function ChartTooltip({ active, payload, total, showPercent, unit, formatNumber 
   )
 }
 
-export default function PieChartCard({ title, data = [], colors = DEFAULT_COLORS, showPercent = false, size = 200, onItemClick, unit }: {
+export default function PieChartCard({ title, data = [], colors = DEFAULT_COLORS, showPercent = false, size = 200, onItemClick, unit, hideLegend = false }: {
   title?: ReactNode; data?: ChartDatum[]; colors?: string[]; showPercent?: boolean; size?: number; onItemClick?: (d: unknown) => void; unit?: string
+  // Drop the per-slice legend (LEGEND-DUP-1): additive and off by default, so
+  // every existing caller renders byte-identically. Meant for the one case where
+  // the legend would be a second copy of something already on screen — a donut
+  // standing NEXT TO a table that already lists every row with the same value.
+  // There the legend only eats the width the table needs, and the slice values
+  // stay reachable through the tooltip.
+  hideLegend?: boolean
 }) {
   const { t } = useTranslation('common')
   // Locale-aware grouping (§ FMT-GETAL-1) — never a hardcoded 'nl-NL' toLocaleString.
@@ -83,6 +90,7 @@ export default function PieChartCard({ title, data = [], colors = DEFAULT_COLORS
         </ErrorBoundary>
 
         {/* Legend */}
+        {!hideLegend && (
         <div className="flex flex-col flex-1 min-w-0 gap-2">
           {data.map((entry, i) => {
             const pct = total ? ((entry.value / total) * 100).toFixed(1) : '0'
@@ -112,7 +120,17 @@ export default function PieChartCard({ title, data = [], colors = DEFAULT_COLORS
             </span>
           </div>
         </div>
+        )}
       </div>
+
+      {/* Without the legend the total would disappear with it, so it keeps its
+          own line under the ring — a chart that shows shares and never states
+          what they are shares OF is half a chart. */}
+      {hideLegend && (
+        <div className="mt-3 text-xs text-gray-400">
+          {t('total')}: <strong className="text-gray-700">{formatNumber(total)}</strong>
+        </div>
+      )}
     </div>
   )
 }

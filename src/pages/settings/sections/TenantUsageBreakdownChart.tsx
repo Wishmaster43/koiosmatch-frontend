@@ -64,5 +64,9 @@ export default function TenantUsageBreakdownChart({ axis, rows }: {
     })
   }
 
-  return <PieChartCard title={title} data={data} size={170} unit="€" />
+  // No legend: it would repeat the table standing right next to it, row for row
+  // and value for value, and that repetition is what pushed the table's own
+  // Inkoop/Verkoop columns off screen on a laptop. The ring shows the SHAPE, the
+  // table carries the numbers, the tooltip covers "which slice is that".
+  return <PieChartCard title={title} data={data} size={170} unit="€" hideLegend />
 }

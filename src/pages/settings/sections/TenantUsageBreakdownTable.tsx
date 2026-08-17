@@ -123,10 +123,17 @@ export default function TenantUsageBreakdownTable({ tenantId, month }: Props) {
       {phase === 'loading' && <p style={{ fontSize: 13, color: 'var(--text-muted)', padding: 8 }}>{t('common.loadingShort', { defaultValue: 'Laden…' })}</p>}
       {phase === 'error' && <p style={{ fontSize: 13, color: 'var(--text-muted)', padding: 8 }}>{t('usage.breakdown.loadError')}</p>}
       {phase === 'ready' && (
-        // Table left, its own picture right (Danny 17-08). Wraps on a narrow
-        // viewport rather than squeezing six numeric columns into half a column.
+        // Table left, its own picture right (Danny 17-08).
+        // The flex bases are deliberately SMALL. The first attempt used 520/340,
+        // which needs ~880px of content width — and the settings pane only has
+        // that from a ~1440px window up, so on a normal laptop the chart wrapped
+        // back underneath the table, which is exactly what Danny reported. At
+        // 300/300 the pair stays side by side down to ~620px of pane; the table
+        // simply gets narrower and scrolls inside its own frame, which it already
+        // does. Wrapping is kept for genuinely small screens, where two columns
+        // of this density are worse than one.
         <div style={{ display: 'flex', gap: 20, alignItems: 'flex-start', flexWrap: 'wrap' }}>
-          <div style={{ flex: '1 1 520px', minWidth: 0 }}>
+          <div style={{ flex: '1 1 300px', minWidth: 0 }}>
             <TableScrollFrame label={t('usage.breakdown.title')} footer={rows.length ? footer : null}>
               <DataTable
                 columns={columns}
@@ -140,7 +147,7 @@ export default function TenantUsageBreakdownTable({ tenantId, month }: Props) {
             </TableScrollFrame>
           </div>
           {rows.length > 0 && (
-            <div style={{ flex: '1 1 340px', minWidth: 300, background: 'var(--surface)',
+            <div style={{ flex: '0 0 280px', background: 'var(--surface)',
               border: '1px solid var(--border)', borderRadius: 10, padding: 16 }}>
               <TenantUsageBreakdownChart axis={axis} rows={rows} />
             </div>
