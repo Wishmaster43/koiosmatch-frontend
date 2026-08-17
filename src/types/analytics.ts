@@ -515,3 +515,25 @@ export interface WorkflowsReportData {
   timeseries: { bucket: 'day' | 'week'; series: CandidateTimeseriesPoint[] }
   by_workflow: ThinSegment[]; by_trigger: ThinSegment[]; by_status: ThinSegment[]
 }
+
+// GET /reports/usage — the two consumption sources merged into one picture, because
+// the bureau gets ONE bill (App\Services\Report\UsageReport). Pure aggregation over
+// the AI and workflow reports, never a second count of the same thing.
+//
+// `ai_credits` is AiReport's own CALL count — the codebase has no separate AI-credit
+// ledger, and a call count is the honest symmetric proxy for "1 credit = 1 module
+// execution". Because a twenty-turn conversation and a one-line prompt are both "one
+// call" and are not the same bill, `ai_amount` travels alongside it: AiReport's SALE
+// figure, echoed and never recomputed, so the margin stays invisible (§9).
+//
+// `by_module` is WORKFLOW-ONLY by nature, not by omission — AI usage carries no
+// module_type, so there is nothing to bucket it into. The UI says so out loud rather
+// than leaving the reader to wonder which rows went missing. The day series IS merged
+// and carries both halves.
+export interface UsageOverviewDay { day: string; workflow_credits: number; ai_credits: number }
+export interface UsageOverviewReportData {
+  period: string; from: string; to: string
+  totals: { workflow_credits: number; ai_credits: number; total: number; ai_amount: number }
+  by_module: ThinSegment[]
+  timeseries: UsageOverviewDay[]
+}

@@ -35,7 +35,7 @@
  * so there is no longer any caller passing 'sources' here; removed rather than
  * left as dead vocabulary.
  */
-export type DrillableReport = 'flow' | 'matches' | 'recruiters' | 'vacancies' | 'intakes' | 'outreach' | 'candidates' | 'applications' | 'customers' | 'opportunities' | 'tasks' | 'contacts' | 'locations' | 'departments' | 'ai' | 'workflows'
+export type DrillableReport = 'flow' | 'matches' | 'recruiters' | 'vacancies' | 'intakes' | 'outreach' | 'candidates' | 'applications' | 'customers' | 'opportunities' | 'tasks' | 'contacts' | 'locations' | 'departments' | 'ai' | 'workflows' | 'usage'
 
 export const REPORT_DRILL_AVAILABLE: Record<DrillableReport, boolean> = {
   flow: true,
@@ -60,6 +60,14 @@ export const REPORT_DRILL_AVAILABLE: Record<DrillableReport, boolean> = {
   // AI usage rows are consumption lines, not entity records: the backend ships NO
   // /reports/ai/drill on purpose, so its bars stay non-clickable (§3 no fake affordances).
   ai: false,
+  // The merged Verbruik overview needs its OWN pair. It may NOT borrow the
+  // workflows drill: its day bars carry workflow + AI credits together, so a
+  // workflows-backed list would structurally miss the AI half and disagree with
+  // the bar above it — a mismatch built in at birth. CMBE is building
+  // /reports/usage/drill (XOR module|date) + /advice; this flips to true only
+  // once the route is verified live to ACCEPT and ANSWER those params, never on
+  // a "landed" report alone (the intakes lesson above).
+  usage: false,
 }
 
 // Gates a drill-down click handler behind the per-report capability flag: while a

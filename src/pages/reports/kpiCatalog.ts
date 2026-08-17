@@ -101,7 +101,7 @@ export const REPORT_KPI_SCOPE_IDS: ReportKpiScopeId[] = [
   'flow',
   'recruiters', 'accountmanagers',
   'vacancies', 'opportunities', 'tasks', 'matches', 'intakes', 'outreach',
-  'ai', 'workflows',
+  'usage', 'ai', 'workflows',
 ]
 
 // Reports with no configurable KPI strip at all (e.g. no ReportKpiBand, or a
@@ -125,6 +125,7 @@ export const REPORT_KPI_FAMILY: Partial<Record<ReportKpiScopeId, ReportKpiFamily
   contacts: 'fixed',
   locations: 'fixed',
   departments: 'fixed',
+  usage: 'fixed',
   ai: 'fixed',
   workflows: 'fixed',
 }
@@ -445,6 +446,26 @@ export const REPORT_KPI_FIXED_CATALOG: Partial<Record<ReportKpiScopeId, KpiCatal
     { key: 'locationCoverageRate', labelKey: 'departments.summary.locationCoverageRate' },
     { key: 'contactCoverageRate', labelKey: 'departments.summary.contactCoverageRate' },
     { key: 'othersCustomer', labelKey: 'departments.summary.othersCustomer' },
+  ],
+  // The merged Verbruik overview. Every entry is read off (or derived from) the
+  // single GET /reports/usage envelope — no card here needs a number the reader
+  // cannot also see on the page itself.
+  usage: [
+    { key: 'total', labelKey: 'usage.summary.total' },
+    { key: 'workflowCredits', labelKey: 'usage.summary.workflowCredits' },
+    { key: 'aiCredits', labelKey: 'usage.summary.aiCredits' },
+    { key: 'aiAmount', labelKey: 'usage.summary.aiAmount' },
+    { key: 'modules', labelKey: 'usage.summary.modules' },
+    { key: 'topModule', labelKey: 'usage.summary.topModule' },
+    { key: 'busiestDay', labelKey: 'usage.summary.busiestDay' },
+    { key: 'activeDays', labelKey: 'usage.summary.activeDays' },
+    { key: 'avgPerDay', labelKey: 'usage.summary.avgPerDay' },
+    // Spares (REPORTS-KPI-SPARES-1) — three shares over figures already on the
+    // page plus the amount per consuming day; all ratios of two visible numbers.
+    { key: 'aiShare', labelKey: 'usage.summary.aiShare' },
+    { key: 'workflowShare', labelKey: 'usage.summary.workflowShare' },
+    { key: 'topModuleShare', labelKey: 'usage.summary.topModuleShare' },
+    { key: 'amountPerDay', labelKey: 'usage.summary.amountPerDay' },
   ],
   ai: [
     { key: 'total', labelKey: 'ai.total' },
