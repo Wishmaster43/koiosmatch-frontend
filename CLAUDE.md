@@ -434,8 +434,26 @@ change-log (`effective_from` + `reason`), tied to the audit trail (§3B / C-16).
    becomes a **Match → placement**.
 2. **Direct match:** create a Match without the funnel → placement.
 Both end in a placement; automation sets deployability status → **Placed** (the `requires_match` status —
-never label it "Matched"; "matched" is the *application* bucket, a different axis). (A Match auto-adds a
-**work experience** entry at the top via a workflow; experience/education/certs sort newest-first.)
+never label it "Matched"; "matched" is the *application* bucket, a different axis).
+
+**Corrected 2026-08-17, because this paragraph described something the code never did.**
+It used to claim a Match auto-adds a work experience *at the top* and that experience,
+education and certifications *sort newest-first*. Measured against the code: there was NO
+sort at all, on either side, and new rows appended to the END. A rule that does not match
+the code is worse than no rule, because the next reader builds on it. What is true now:
+- A Match really does auto-create a **work experience**, and so do three other paths (the
+  career-site application, the CV parser, and the placement itself). The ordering invariant
+  therefore lives in the MODEL, not in one controller, or three of the four would land wrong.
+- An automatically created row takes the next free position, so it appears **at the BOTTOM**.
+  Deliberate (Danny 17-08): a manual order is a human's considered arrangement, and a row
+  that silently jumps to the top rearranges what that person just put down.
+- Experience, education and certifications open **newest-first on START date** (not end date:
+  a job still running has no end date, and sorting on a missing value would push the current
+  job to the bottom). This is COMPUTED from the dates on the records; it needs no stored
+  order and no column. A `sort_order` column exists only for a manual override, which is a
+  property of the record and shared by every viewer, never a per-user preference.
+- The chosen SORT (which axis, which direction) is a per-user view preference and lives in
+  the user's own `ui_preferences`, not on the record.
 
 ### Appointment-gated stages & intake reporting
 
