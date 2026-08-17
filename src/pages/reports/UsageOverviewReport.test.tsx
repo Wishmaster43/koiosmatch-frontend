@@ -9,7 +9,7 @@
  *     spy, not on a callback.
  */
 import { describe, it, expect, vi, afterEach } from 'vitest'
-import { render, screen } from '@testing-library/react'
+import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import UsageOverviewReport from './UsageOverviewReport'
@@ -131,18 +131,34 @@ describe('UsageOverviewReport (merged Verbruik overview)', () => {
     expect(data.by_module.reduce((s, x) => s + x.count, 0)).toBe(data.totals.workflow_credits)
   })
 
-  it('fires no drill request while the endpoint does not exist, and leaves the bars unclickable', async () => {
+  it('seeds each list from its own top segment, through the report OWN drill route', async () => {
     mockUseUsageOverviewReport.mockReturnValue({ data, loading: false, error: false })
     renderReport()
-    // No seeded drill/advice call on mount …
-    expect(getSpy).not.toHaveBeenCalled()
-    // … and the day bar carries no click target to press.
-    expect(screen.getByText('02-08-2026 (35)')).toBeDisabled()
-    // The module bar renders its label twice (bar + the topModule card's sub),
-    // so click every match: none of them may reach the network.
-    for (const el of screen.getAllByText('WhatsApp sturen')) await userEvent.click(el)
-    expect(getSpy).not.toHaveBeenCalled()
-    // And no module bar is exposed as a pressable control at all.
-    expect(screen.queryByRole('button', { name: /WhatsApp sturen/ })).not.toBeInTheDocument()
+    // Both lists seed on mount: the busiest module and the last day in the window.
+    await waitFor(() => expect(getSpy).toHaveBeenCalledWith('/reports/usage/drill',
+      expect.objectContaining({ params: expect.objectContaining({ module: 'send_whatsapp', period: 'month' }) })))
+    expect(getSpy).toHaveBeenCalledWith('/reports/usage/drill',
+      expect.objectContaining({ params: expect.objectContaining({ date: '2026-08-03', period: 'month' }) }))
+    // It must be the report's OWN route: borrowing /reports/workflows/drill would
+    // hand back a list missing the AI half of every merged day bar.
+    const routes = getSpy.mock.calls.map(c => c[0])
+    expect(routes.every((r: string) => String(r).startsWith('/reports/usage/'))).toBe(true)
+  })
+
+  it('a day bar drills on that day alone, never mixed with the module axis (XOR)', async () => {
+    mockUseUsageOverviewReport.mockReturnValue({ data, loading: false, error: false })
+    renderReport()
+    await waitFor(() => expect(getSpy).toHaveBeenCalled())
+    getSpy.mockClear()
+    await userEvent.click(screen.getByText('02-08-2026 (35)'))
+    await waitFor(() => expect(getSpy).toHaveBeenCalled())
+    const params = getSpy.mock.calls
+      .filter(c => c[0] === '/reports/usage/drill')
+      .map(c => (c[1] as { params: Record<string, unknown> }).params)
+    expect(params.length).toBeGreaterThan(0)
+    for (const p of params) {
+      expect(p.date).toBe('2026-08-02')
+      expect(p.module).toBeUndefined() // XOR: never both axes in one request
+    }
   })
 })
