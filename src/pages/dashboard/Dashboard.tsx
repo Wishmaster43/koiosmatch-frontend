@@ -147,11 +147,27 @@ export default function Dashboard({ onNavigate, viewType }: { onNavigate?: (page
 
           <TrendsRow vis={vis} trendData={trendData} trendSeries={trendSeries} funnelData={funnelData} onNavigate={onNavigate} />
 
-          {/* Recruitment-feeds — kandidaat-touchpoints (Vandaag) + kandidaten om af te werken. */}
-          {(vis('block.touchpoints') || vis('block.attention')) && (
+          {/* ONE grid for every work-feed tile (DASH-FEEDS-PACK-1, Danny 17-08:
+              "Stilstaande leads naast Werk af").
+              These used to be TWO grids with a hardcoded '1fr 1fr' and other
+              sections between them. Each tile self-hides when its data is empty
+              (all of them `return null`), so whenever a neighbour hid itself its
+              half of the row stayed blank — which is what Danny saw: "Werk af"
+              alone in one row and "Stilstaande leads" alone two sections lower,
+              with dead space beside both. In one grid the cells simply pack.
+              ORDER: the two work-lists lead, because both answer "what must I
+              pick up now?" — so they land side by side in row one no matter how
+              many of the tiles below them have data. "Vandaag" (today's contact
+              moments) is a different question and follows them. */}
+          {(vis('block.touchpoints') || vis('block.attention') || vis('block.expiringMatches')
+            || vis('block.staleLeads') || vis('block.staleVacancies') || vis('block.koiosSuggestions')) && (
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 16 }}>
-            {vis('block.touchpoints') && <TouchpointsFeed items={dash?.touchpoints ?? []} onOpen={(id) => onNavigate?.('candidates', { open: id })} />}
             {vis('block.attention') && <AttentionCandidates groups={dash?.attention_candidates} onOpen={(id) => onNavigate?.('candidates', { open: id })} onNavigate={onNavigate} />}
+            {vis('block.staleLeads') && <WidgetListBlock title={t('block.staleLeads')} rows={staleLeadsRows} />}
+            {vis('block.touchpoints') && <TouchpointsFeed items={dash?.touchpoints ?? []} onOpen={(id) => onNavigate?.('candidates', { open: id })} />}
+            {vis('block.expiringMatches') && <WidgetListBlock title={t('block.expiringMatches')} rows={expiringMatchesRows} />}
+            {vis('block.staleVacancies') && <WidgetListBlock title={t('block.staleVacancies')} rows={staleVacanciesRows} />}
+            {vis('block.koiosSuggestions') && <WidgetListBlock title={t('block.koiosSuggestions')} rows={koiosSuggestionsRows} />}
           </div>
           )}
 
@@ -162,17 +178,9 @@ export default function Dashboard({ onNavigate, viewType }: { onNavigate?: (page
           </div>
           )}
 
-          {/* KD11 (DASHP36) — the two sales-dashboard TEMPLATES' widget feeds:
-              equal-footprint WidgetListBlock tiles, config-driven per role via
-              templates.ts (accountmanager/sales_manager). Self-hide when empty. */}
-          {(vis('block.expiringMatches') || vis('block.staleLeads') || vis('block.staleVacancies') || vis('block.koiosSuggestions')) && (
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 16 }}>
-            {vis('block.expiringMatches') && <WidgetListBlock title={t('block.expiringMatches')} rows={expiringMatchesRows} />}
-            {vis('block.staleLeads') && <WidgetListBlock title={t('block.staleLeads')} rows={staleLeadsRows} />}
-            {vis('block.staleVacancies') && <WidgetListBlock title={t('block.staleVacancies')} rows={staleVacanciesRows} />}
-            {vis('block.koiosSuggestions') && <WidgetListBlock title={t('block.koiosSuggestions')} rows={koiosSuggestionsRows} />}
-          </div>
-          )}
+          {/* KD11 (DASHP36) — the four sales-widget feeds moved INTO the packed
+              grid above (DASH-FEEDS-PACK-1); only the full-width tenant-wide
+              breakdown stays on its own row, since it is not a half-width tile. */}
           {vis('block.customersByOwner') && (
           <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: 16, marginBottom: 16 }}>
             <WidgetListBlock title={t('block.customersByOwner')} rows={customersByOwnerRows} />
