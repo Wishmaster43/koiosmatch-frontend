@@ -49,8 +49,11 @@ export function CandidateTitle({ c, editing, hf, setHF, phaseInfo, showPhase }: 
         <input placeholder={t('modal.fields.lastName')} value={hf('lastname')} onChange={e => setHF('lastname', e.target.value)}
           style={{ ...inputBase, fontSize: 13, fontWeight: 600 }} />
       </div>
+      {/* The tussenvoegsel is part of the NAME, so it carries the same weight as
+          the first/last name beside it (Danny 17-08: "Van moet ook dik gedrukt") —
+          it used to render a size smaller and muted, which read as a side note. */}
       <input placeholder={t('modal.fields.middleName')} value={hf('middleName')} onChange={e => setHF('middleName', e.target.value)}
-        style={{ ...inputBase, fontSize: 12, color: 'var(--text-muted)' }} />
+        style={{ ...inputBase, fontSize: 13, fontWeight: 600 }} />
       <CreatableSelect value={hf('title')} options={functions} onChange={v => setHF('title', v)}
         allowCreate={allowFreeEntry} placeholder={t('columns.function')} menuWidth={260} />
     </div>
