@@ -15,7 +15,7 @@
  *     also accepts a FQCN morph type ("App\\Models\\Customer").
  *   - GET without `?kind=` returns both kinds; POST echoes back the created row.
  */
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import api, { unwrap, unwrapList } from '@/lib/api'
 import { isAbortError } from '@/lib/mocks'
@@ -92,8 +92,15 @@ export function useCandidatePlanningPreferences(candidateId?: Id) {
   const [prefs,   setPrefs]   = useState<Preference[]>([])
   const [loading, setLoading] = useState(true)
   const [error,   setError]   = useState(false)
+  // Bumped by reload() to re-run the load effect below (retry after a real failure).
+  const [attempt, setAttempt] = useState(0)
 
-  // Load all preferences once per candidate; 404 = endpoint not built → empty (calm).
+  // Load all preferences once per candidate. HONEST-PLANNING-1: this route carries no
+  // planning_configured split yet (unlike the customer side) — a 404 here is a REAL
+  // failure (candidate not found / out of tenant scope), not "endpoint not built", so it
+  // is no longer swallowed into a silent empty list. Only a genuinely empty answer
+  // (200 with zero rows) renders the empty state; any request failure renders the error
+  // state with retry, so a broken load can never look identical to "no preferences yet".
   useEffect(() => {
     if (!candidateId) { setLoading(false); return }
     const ctrl = new AbortController()
@@ -105,12 +112,15 @@ export function useCandidatePlanningPreferences(candidateId?: Id) {
       })
       .catch(err => {
         if (isAbortError(err)) return
-        if (err?.response?.status && err.response.status !== 404) setError(true)
+        setError(true)
         setPrefs([])
       })
       .finally(() => { if (!ctrl.signal.aborted) setLoading(false) })
     return () => ctrl.abort()
-  }, [candidateId])
+  }, [candidateId, attempt])
+
+  // Re-fires the real request (used by the error state's retry action).
+  const reload = useCallback(() => setAttempt(a => a + 1), [])
 
   // Optimistically add a preference; reconcile with the server row, roll back + toast on failure.
   const add = async (kind: PrefKind, target: { linkable_type: LinkableType; linkable_id: Id; linkable_name: string; reason?: string }) => {
@@ -148,7 +158,7 @@ export function useCandidatePlanningPreferences(candidateId?: Id) {
   return {
     favorites: prefs.filter(p => p.kind === 'favorite'),
     blacklist: prefs.filter(p => p.kind === 'blacklist'),
-    loading, error, add, remove,
+    loading, error, add, remove, reload,
   }
 }
 
@@ -218,8 +228,12 @@ export function useCandidateAvailability(candidateId?: Id) {
   const [entries, setEntries] = useState<Availability[]>([])
   const [loading, setLoading] = useState(true)
   const [error,   setError]   = useState(false)
+  // Bumped by reload() to re-run the load effect below (retry after a real failure).
+  const [attempt, setAttempt] = useState(0)
 
-  // Load once per candidate; 404 = endpoint not built → empty (calm).
+  // Load once per candidate. HONEST-PLANNING-1: no planning_configured split on this route
+  // yet, so a failure (404 included — it now means "candidate not found", the route is
+  // built) renders the honest error state with retry instead of a silent empty list.
   useEffect(() => {
     if (!candidateId) { setLoading(false); return }
     const ctrl = new AbortController()
@@ -231,12 +245,15 @@ export function useCandidateAvailability(candidateId?: Id) {
       })
       .catch(err => {
         if (isAbortError(err)) return
-        if (err?.response?.status && err.response.status !== 404) setError(true)
+        setError(true)
         setEntries([])
       })
       .finally(() => { if (!ctrl.signal.aborted) setLoading(false) })
     return () => ctrl.abort()
-  }, [candidateId])
+  }, [candidateId, attempt])
+
+  // Re-fires the real request (used by the error state's retry action).
+  const reload = useCallback(() => setAttempt(a => a + 1), [])
 
   // Optimistically add an entry; reconcile with the server row, roll back + toast on failure (409 = slot taken).
   const add = async (entry: { date: string; part: DayPart; status: AvailStatus; reason?: string }) => {
@@ -270,5 +287,5 @@ export function useCandidateAvailability(candidateId?: Id) {
     }
   }
 
-  return { entries, loading, error, add, remove }
+  return { entries, loading, error, add, remove, reload }
 }

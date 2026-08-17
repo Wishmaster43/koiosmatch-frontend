@@ -32,13 +32,16 @@ beforeEach(() => {
   invalidateRetentionConsentMonths()
   apiGet.mockReset()
   apiGet.mockResolvedValue({ data: { retention_consent_months: '24' } })
+  notesState.error = false
 })
 // Mutable per-test notes list (vi.hoisted so the mock factory below can read it) —
 // the status-change pencil tests need a system note in the list; every other test
 // keeps the original empty list.
-const { notesState } = vi.hoisted(() => ({ notesState: { notes: [] as unknown[] } }))
+const { notesState } = vi.hoisted(() => ({ notesState: { notes: [] as unknown[], error: false } }))
 vi.mock('@/pages/candidates/hooks/useCandidateNotes', () => ({
-  useCandidateNotes: () => ({ notes: notesState.notes, addNote: vi.fn(), editNote: vi.fn() }),
+  useCandidateNotes: () => ({
+    notes: notesState.notes, error: notesState.error, addNote: vi.fn(), editNote: vi.fn(), reload: vi.fn(),
+  }),
 }))
 vi.mock('./CandidateTasks', () => ({ default: () => <div data-testid="candidate-tasks-stub" /> }))
 
@@ -383,5 +386,22 @@ describe('CommunicationTab · WhatsApp start trigger (WHATSAPP-COMPOSE-1)', () =
     await goToConversations(user)
     await user.click(screen.getByRole('button', { name: 'conversations.start' }))
     expect(screen.getByRole('dialog', { name: 'conversations.startModalTitle' })).toBeInTheDocument()
+  })
+})
+
+// BUG-HUNT-CLASS-B: a failed notes GET must surface a real, retryable notice —
+// never render as a silently empty thread indistinguishable from "no notes".
+describe('CommunicationTab · notes load failure (Class B)', () => {
+  it('shows no error notice when the notes GET succeeded (even if empty)', () => {
+    notesState.error = false
+    render(<CommunicationTab c={candidate()} />)
+    expect(screen.queryByText('communication.notesLoadError')).not.toBeInTheDocument()
+  })
+
+  it('shows the error notice with a retry action when the notes GET failed', () => {
+    notesState.error = true
+    render(<CommunicationTab c={candidate()} />)
+    expect(screen.getByText('communication.notesLoadError')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'common:error.retry' })).toBeInTheDocument()
   })
 })

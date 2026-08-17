@@ -63,6 +63,38 @@ describe('useCandidatePlanningPreferences', () => {
     expect(r.result.current.favorites).toHaveLength(1)          // restored
     expect(notify).toHaveBeenCalledWith('common:actionFailed')
   })
+
+  // HONEST-PLANNING-1: a real request failure (any status, 404 included — the route is
+  // built, so 404 now means "candidate not found") must render the error state, never
+  // the same empty list a genuinely empty answer renders.
+  it('sets error (not a silent empty list) on a failed load, including a 404', async () => {
+    get.mockRejectedValue({ response: { status: 404 } })
+    const r = renderHook(() => useCandidatePlanningPreferences('c1'))
+    await waitFor(() => expect(r.result.current.loading).toBe(false))
+    expect(r.result.current.error).toBe(true)
+    expect(r.result.current.favorites).toHaveLength(0)
+    expect(r.result.current.blacklist).toHaveLength(0)
+  })
+
+  it('renders no error for a genuinely empty answer', async () => {
+    get.mockResolvedValue({ data: [] })
+    const r = renderHook(() => useCandidatePlanningPreferences('c1'))
+    await waitFor(() => expect(r.result.current.loading).toBe(false))
+    expect(r.result.current.error).toBe(false)
+  })
+
+  it('reload() re-fires the real GET request', async () => {
+    get.mockRejectedValue({ response: { status: 500 } })
+    const r = renderHook(() => useCandidatePlanningPreferences('c1'))
+    await waitFor(() => expect(r.result.current.loading).toBe(false))
+    const callsBefore = get.mock.calls.length
+    get.mockResolvedValue({ data: [{ id: 1, kind: 'favorite', linkable_type: 'customer', linkable_id: 1, linkable_name: 'A' }] })
+    act(() => { r.result.current.reload() })
+    await waitFor(() => expect(r.result.current.favorites).toHaveLength(1))
+    expect(get.mock.calls.length).toBeGreaterThan(callsBefore)
+    expect(get).toHaveBeenLastCalledWith('/candidates/c1/planning-preferences', expect.objectContaining({ signal: expect.anything() }))
+    expect(r.result.current.error).toBe(false)
+  })
 })
 
 describe('useCandidateAvailability', () => {
@@ -82,5 +114,25 @@ describe('useCandidateAvailability', () => {
     await act(async () => { await r.result.current.add({ date: '2026-07-01', part: 'day', status: 'unavailable' }) })
     expect(r.result.current.entries).toHaveLength(0)
     expect(notify).toHaveBeenCalledWith('planning.availDuplicate')
+  })
+
+  it('sets error (not a silent empty list) on a failed load, including a 404', async () => {
+    get.mockRejectedValue({ response: { status: 404 } })
+    const r = renderHook(() => useCandidateAvailability('c1'))
+    await waitFor(() => expect(r.result.current.loading).toBe(false))
+    expect(r.result.current.error).toBe(true)
+    expect(r.result.current.entries).toHaveLength(0)
+  })
+
+  it('reload() re-fires the real GET request', async () => {
+    get.mockRejectedValue({ response: { status: 500 } })
+    const r = renderHook(() => useCandidateAvailability('c1'))
+    await waitFor(() => expect(r.result.current.loading).toBe(false))
+    const callsBefore = get.mock.calls.length
+    get.mockResolvedValue({ data: [{ id: 1, date: '2026-07-01', part: 'day', status: 'available' }] })
+    act(() => { r.result.current.reload() })
+    await waitFor(() => expect(r.result.current.entries).toHaveLength(1))
+    expect(get.mock.calls.length).toBeGreaterThan(callsBefore)
+    expect(r.result.current.error).toBe(false)
   })
 })

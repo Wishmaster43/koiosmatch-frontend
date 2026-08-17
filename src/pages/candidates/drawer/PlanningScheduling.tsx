@@ -8,6 +8,7 @@ import type { Dispatch, SetStateAction } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Mail, Clock, MapPin, Heart, X, Check } from 'lucide-react'
 import { sectionBlock, sectionTitle } from './constants'
+import ErrorBanner from '@/components/ui/ErrorBanner'
 import type { Candidate } from '@/types/candidate'
 import type { Id } from '@/types/common'
 import type { OpenShift, RosterShift, ScheduleFavorites } from './planningTypes'
@@ -17,6 +18,9 @@ interface PlanningSchedulingProps {
   c: Candidate
   baseShifts: RosterShift[]
   openShifts: OpenShift[]
+  loading?: boolean
+  error?: boolean
+  onReload?: () => void
   scheduleSelected: RosterShift | null
   setScheduleSelected: Dispatch<SetStateAction<RosterShift | null>>
   scheduleFavorites: ScheduleFavorites
@@ -28,7 +32,7 @@ interface PlanningSchedulingProps {
 }
 
 export default function PlanningScheduling({
-  c, baseShifts, openShifts, scheduleSelected, setScheduleSelected, scheduleFavorites, setScheduleFavorites,
+  c, baseShifts, openShifts, loading, error, onReload, scheduleSelected, setScheduleSelected, scheduleFavorites, setScheduleFavorites,
   scheduledIds, setScheduledIds, unscheduledIdx, setUnscheduledIdx,
 }: PlanningSchedulingProps) {
   const { t } = useTranslation('candidates')
@@ -58,10 +62,14 @@ export default function PlanningScheduling({
             <Mail size={11} /> {t('planning.mail')}
           </a>
         </div>
-        {allShifts.length === 0 && (
+        {/* Loading / error (with retry) / empty / list — a failed roster load must
+            never render as an honest "no scheduled shifts" empty state. */}
+        {loading && <div style={{ textAlign: 'center', padding: '20px 0', color: 'var(--text-muted)', fontSize: 12 }}>{t('common:loading')}</div>}
+        {!loading && error && <ErrorBanner onRetry={onReload}>{t('planning.rosterLoadError')}</ErrorBanner>}
+        {!loading && !error && allShifts.length === 0 && (
           <div style={{ textAlign: 'center', padding: '20px 0', color: 'var(--text-muted)', fontSize: 12 }}>{t('planning.noScheduled')}</div>
         )}
-        {allShifts.map((d, i) => {
+        {!loading && !error && allShifts.map((d, i) => {
           const isSel = scheduleSelected === d
           return (
             <div key={i} onClick={() => setScheduleSelected(isSel ? null : d)}

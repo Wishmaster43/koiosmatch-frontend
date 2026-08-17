@@ -10,6 +10,7 @@ import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Heart, X, Ban, Plus } from 'lucide-react'
 import { sectionBlock, sectionTitle } from './constants'
+import ErrorBanner from '@/components/ui/ErrorBanner'
 import type { Id } from '@/types/common'
 import type { LinkableType, Preference, PrefKind, PrefTargetGroup } from '../hooks/useCandidatePlanning'
 
@@ -20,9 +21,11 @@ interface PlanningFavoritesProps {
   onAdd: (kind: PrefKind, target: { linkable_type: LinkableType; linkable_id: Id; linkable_name: string; reason?: string }) => void
   onRemove: (prefId: Id) => void
   loading?: boolean
+  error?: boolean
+  onReload?: () => void
 }
 
-export default function PlanningFavorites({ favorites, blacklist, targets, onAdd, onRemove, loading }: PlanningFavoritesProps) {
+export default function PlanningFavorites({ favorites, blacklist, targets, onAdd, onRemove, loading, error, onReload }: PlanningFavoritesProps) {
   const { t } = useTranslation('candidates')
   // Which card is in add-mode ('favorite' | 'blacklist' | null) + its inputs.
   const [addMode, setAddMode] = useState<PrefKind | null>(null)
@@ -81,12 +84,15 @@ export default function PlanningFavorites({ favorites, blacklist, targets, onAdd
               )}
             </div>
 
-            {/* Four states: loading / empty / list (success) */}
+            {/* Four states: loading / error (with retry) / empty / list (success). A
+                failed load renders the shared error banner, never the empty copy — an
+                empty roster and a broken request must look different. */}
             {loading && <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>{t('common:loading')}</div>}
-            {!loading && data.length === 0 && !isAdding && (
+            {!loading && error && <ErrorBanner onRetry={onReload}>{t('planning.prefsLoadError')}</ErrorBanner>}
+            {!loading && !error && data.length === 0 && !isAdding && (
               <div style={{ fontSize: 11, color: 'var(--text-muted)', fontStyle: 'italic' }}>{emptyText}</div>
             )}
-            {data.map(p => (
+            {!error && data.map(p => (
               <div key={String(p.id)} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '6px 0', borderBottom: '1px solid var(--border)' }}>
                 <span style={{ fontSize: 9, padding: '1px 6px', borderRadius: 3, background: 'var(--bg)', color: 'var(--text-muted)',
                   border: '1px solid var(--border)', fontWeight: 600, flexShrink: 0 }}>

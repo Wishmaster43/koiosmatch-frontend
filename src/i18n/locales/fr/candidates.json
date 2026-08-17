@@ -569,6 +569,7 @@
     "channel": "Canal de contact",
     "channelNone": "Note interne",
     "notePlaceholder": "Note {{type}}",
+    "notesLoadError": "Impossible de charger les notes.",
     "noteTypes": {
       "general": "Générale",
       "intake": "Entretien",
@@ -707,6 +708,10 @@
     "noAvailability": "Aucune exception enregistrée pour l'instant.",
     "availabilityHint": "Par défaut, le candidat est disponible. Enregistrez ici les exceptions (p. ex. congés ou maladie).",
     "availDuplicate": "Cette partie de journée est déjà définie pour cette date.",
+    "rosterLoadError": "Le planning n'a pas pu être chargé.",
+    "openShiftsLoadError": "Les créneaux ouverts n'ont pas pu être chargés.",
+    "prefsLoadError": "Les préférences n'ont pas pu être chargées.",
+    "availabilityLoadError": "La disponibilité n'a pas pu être chargée.",
     "notPersistedYet": "Pas encore enregistré. Le module de planification arrive.",
     "moduleNotAvailableTitle": "Planification pas encore disponible",
     "moduleNotAvailableBody": "Le module de planification n'existe pas encore. Cet onglet affichera bientôt les plannings et les disponibilités."

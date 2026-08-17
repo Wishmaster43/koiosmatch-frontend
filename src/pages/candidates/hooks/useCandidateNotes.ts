@@ -59,15 +59,20 @@ export function useCandidateNotes(candidateId: string | number | undefined, opts
   // needs to tell "still loading" apart from "note really absent" (both render an
   // empty `notes` here). Additive; existing hosts simply ignore it.
   const [loaded, setLoaded] = useState(false)
+  // BUG-HUNT-CLASS-B: a failed GET must not read the same as "no notes yet" — this
+  // is health-adjacent data, not a cosmetic list. Callers that care surface it;
+  // callers that don't (mirroring the pre-existing default) keep behaving as before.
+  const [error, setError] = useState(false)
 
   // One loader — the effect uses it, and every successful write RE-FETCHES the thread so
   // the server truth (author, updated_by/updated_at, stamped last-contact) shows at once.
   const load = useCallback(() => {
-    if (!candidateId) { setNotes([]); return }
+    if (!candidateId) { setNotes([]); setError(false); return }
+    setError(false)
     api.get(`/candidates/${candidateId}/notes`)
       .then(res => setNotes(unwrapList<CandidateNote>(res).rows))
-      // GET degrades to an empty thread; the dev interceptor already surfaces write errors.
-      .catch(() => setNotes([]))
+      // A real GET failure clears the thread AND flags it — never silently "no notes".
+      .catch(() => { setNotes([]); setError(true) })
       .finally(() => setLoaded(true))
   }, [candidateId])
 
@@ -115,5 +120,5 @@ export function useCandidateNotes(candidateId: string | number | undefined, opts
       .catch(() => { setNotes(snapshot); notifyError(t('common:actionFailed')) })
   }, [candidateId, notes, t])
 
-  return { notes, loaded, addNote, editNote, deleteNote }
+  return { notes, loaded, error, addNote, editNote, deleteNote, reload: load }
 }

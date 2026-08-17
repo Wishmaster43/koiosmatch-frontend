@@ -5,19 +5,22 @@
  * people and must not share one lookup.
  *
  * Fed by the API (GET /contact-functions) with a healthcare-org default as fallback
- * while the API is empty/unavailable — the backend endpoint is requested and may
- * not be deployed everywhere yet; useCachedLookup's silent catch already keeps the
- * seed until it lands (mirrors useFunctions.ts exactly). The generated OpenAPI spec
- * for this route documents only the request shape/401 today (no 2xx schema yet, §10
- * of CLAUDE.md), so the response is still hand-mapped here.
+ * while the API is empty/unavailable.
  *
- * `allowFreeEntry` stays creatable (true) until a tenant setting exists for this
- * list — no Settings toggle ships yet — but the API's own `allow_free_entry` flag
- * wins the moment the backend starts sending one, so nothing needs to change here.
+ * FUNC-FREEENTRY-FIX (2026-08-17): `allowFreeEntry` is read straight off THIS SAME
+ * response's `allow_free_entry` flag — never a second tenant-settings-blob key. It
+ * used to be shadowed through `getBoolSetting(settings, 'contact_functions_allow_free_entry',
+ * ...)`, an UNDERSCORED key written by the generic `POST /settings` blob. That is a
+ * DIFFERENT Setting row than the one the backend actually enforces: both
+ * `FreeEntryLookupController::allowFreeEntry()` (this GET) and
+ * `CustomerContactController`'s write-time gate on `customer_contacts.function` read
+ * the DOTTED `contact_functions.allow_free_entry` key, written only by
+ * `PUT /contact-functions/free-entry`. Wiring the underscored key here reproduced
+ * the exact gap found on the sources lookup — see ContactFunctionsSettings.jsx,
+ * which now persists through the real dedicated route (mirrors useApplicationSources.ts).
  */
 import type { AxiosResponse } from 'axios'
 import { useCachedLookup } from './useCachedLookup'
-import { useAllSettings, getBoolSetting } from './settings/useAllSettings'
 import { lookupNames } from './lookupUtils'
 
 export const DEFAULT_CONTACT_FUNCTIONS = [
@@ -25,30 +28,24 @@ export const DEFAULT_CONTACT_FUNCTIONS = [
 ]
 
 // Both pieces of state (names + the API's free-entry flag) come from the same
-// response, so they're cached together as one value (mirrors useFunctions.ts).
-interface ContactFunctionsLookupData { contactFunctions: string[]; apiFreeEntry: boolean | null }
-const FALLBACK: ContactFunctionsLookupData = { contactFunctions: DEFAULT_CONTACT_FUNCTIONS, apiFreeEntry: null }
+// response, so they're cached together as one value (mirrors useFunctions.ts). The
+// backend's OWN default for this lookup is FREE (ContactFunctionController::
+// defaultFreeEntry() returns true) — mirror that as the pending seed, never strict.
+interface ContactFunctionsLookupData { contactFunctions: string[]; apiFreeEntry: boolean }
+const FALLBACK: ContactFunctionsLookupData = { contactFunctions: DEFAULT_CONTACT_FUNCTIONS, apiFreeEntry: true }
 
-// Always returns a usable object (never null): names keep the seed when empty,
-// apiFreeEntry keeps null when absent — same independent fallbacks as useFunctions.ts.
+// Names keep the seed when empty; apiFreeEntry keeps the backend's own default when
+// the response doesn't carry a boolean flag (e.g. a genuinely empty/failed response).
 const mapContactFunctions = (res: AxiosResponse): ContactFunctionsLookupData => {
   const names = lookupNames(res)
   const free = (res?.data as { allow_free_entry?: unknown })?.allow_free_entry
   return {
     contactFunctions: names.length ? names : DEFAULT_CONTACT_FUNCTIONS,
-    apiFreeEntry: typeof free === 'boolean' ? free : null,
+    apiFreeEntry: typeof free === 'boolean' ? free : true,
   }
 }
 
 export function useContactFunctions() {
-  const { data } = useCachedLookup('/contact-functions', mapContactFunctions, FALLBACK)
-  const settings = useAllSettings()
-
-  // Same chain as useFunctions: the tenant Settings toggle wins, else the API's own
-  // flag, else STRICT. Danny 28-07: "toggle moet uit zoals kandidaten — uit is dropdown,
-  // aan is vrije invoer". This list defaulted to creatable while the candidate list
-  // defaulted to strict, so the same control behaved differently on two screens.
-  const allowFreeEntry = getBoolSetting(settings, 'contact_functions_allow_free_entry', data.apiFreeEntry ?? false)
-
-  return { contactFunctions: data.contactFunctions, allowFreeEntry }
+  const { data, invalidate } = useCachedLookup('/contact-functions', mapContactFunctions, FALLBACK)
+  return { contactFunctions: data.contactFunctions, allowFreeEntry: data.apiFreeEntry, invalidate }
 }

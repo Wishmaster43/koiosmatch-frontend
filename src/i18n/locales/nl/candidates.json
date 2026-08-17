@@ -592,6 +592,7 @@
     "channel": "Contactkanaal",
     "channelNone": "Interne notitie",
     "notePlaceholder": "{{type}} notitie",
+    "notesLoadError": "Notities konden niet worden geladen.",
     "noteTypes": {
       "general": "Algemeen",
       "intake": "Intake",
@@ -730,6 +731,10 @@
     "noAvailability": "Nog geen uitzonderingen vastgelegd.",
     "availabilityHint": "Standaard is de kandidaat beschikbaar. Leg hier uitzonderingen vast (bv. vakantie of ziekte).",
     "availDuplicate": "Dit dagdeel is al vastgelegd voor deze datum.",
+    "rosterLoadError": "Het rooster kon niet worden geladen.",
+    "openShiftsLoadError": "De open diensten konden niet worden geladen.",
+    "prefsLoadError": "De voorkeuren konden niet worden geladen.",
+    "availabilityLoadError": "De beschikbaarheid kon niet worden geladen.",
     "notPersistedYet": "Wordt nog niet opgeslagen. De planningmodule volgt.",
     "moduleNotAvailableTitle": "Planning nog niet beschikbaar",
     "moduleNotAvailableBody": "De planningmodule bestaat nog niet. Deze tab toont hier binnenkort roosters en beschikbaarheid."

@@ -8,6 +8,7 @@ import { useState, useId } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Plus, X, Check, Ban } from 'lucide-react'
 import { sectionBlock, sectionTitle, softPill } from './constants'
+import ErrorBanner from '@/components/ui/ErrorBanner'
 import { useCandidateAvailability } from '../hooks/useCandidatePlanning'
 import type { AvailStatus, DayPart } from '../hooks/useCandidatePlanning'
 import type { Id } from '@/types/common'
@@ -24,7 +25,7 @@ function dmy(iso: string): string {
 
 export default function AvailabilityEditor({ candidateId }: { candidateId?: Id }) {
   const { t } = useTranslation('candidates')
-  const { entries, loading, add, remove } = useCandidateAvailability(candidateId)
+  const { entries, loading, error, add, remove, reload } = useCandidateAvailability(candidateId)
   // The day-part picker has no visible label of its own (inline in the add row) —
   // a sr-only span + aria-labelledby names it for screen readers (CreatableSelect's
   // trigger is a <button>, which ignores an associated <label for>, see its own doc).
@@ -89,12 +90,15 @@ export default function AvailabilityEditor({ candidateId }: { candidateId?: Id }
         </div>
       )}
 
-      {/* Four states: loading / empty / list */}
+      {/* Four states: loading / error (with retry) / empty / list. A failed load must
+          never look like an honest empty roster (§0: never fabricate, never hide a
+          failure), so it renders the shared error banner instead of the empty copy. */}
       {loading && <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{t('common:loading')}</div>}
-      {!loading && sorted.length === 0 && !adding && (
+      {!loading && error && <ErrorBanner onRetry={reload}>{t('planning.availabilityLoadError')}</ErrorBanner>}
+      {!loading && !error && sorted.length === 0 && !adding && (
         <div style={{ fontSize: 12, color: 'var(--text-muted)', fontStyle: 'italic' }}>{t('planning.noAvailability')}</div>
       )}
-      {sorted.map(e => {
+      {!error && sorted.map(e => {
         const unavailable = e.status === 'unavailable'
         return (
           <div key={String(e.id)} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 0', borderBottom: '1px solid var(--border)' }}>

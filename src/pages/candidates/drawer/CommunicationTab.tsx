@@ -58,7 +58,7 @@ export default function CommunicationTab({ c, onSave, onEditStatusEvent, initial
   // Contact channels (last_contact_types) — picking one on a note stamps last_contact_at/_type/_by.
   const { types: channels } = useLastContactTypes()
   // Notes persist via the API (G-1) — add/edit/delete hit /candidates/{id}/notes.
-  const { notes, addNote, editNote, deleteNote } = useCandidateNotes(c.id, { onContactStamped: () => onRefresh?.(c.id) })
+  const { notes, error: notesError, addNote, editNote, deleteNote, reload: reloadNotes } = useCandidateNotes(c.id, { onContactStamped: () => onRefresh?.(c.id) })
 
   // SYSTEM notes (status/phase changes, BE-written) are EVENTS, not notes (Danny
   // 2026-07-13): they render in the Tijdlijn, never in the Notities thread. Keep the
@@ -282,6 +282,15 @@ export default function CommunicationTab({ c, onSave, onEditStatusEvent, initial
       {/* Tasks linked to this candidate — click-through to the Taken page + "+ Taak". */}
       {subTab === 'tasks' && <CandidateTasks candidateId={c.id} />}
 
+      {/* A failed notes GET must never read as "no notes" — real error, real retry (Class B fix). */}
+      {subTab === 'notes' && notesError && (
+        <p style={{ fontSize: 12, color: 'var(--color-danger)', marginBottom: 8 }}>
+          {t('communication.notesLoadError')}{' '}
+          <button type="button" onClick={reloadNotes} style={{ color: 'var(--color-primary)', textDecoration: 'underline', background: 'none', border: 'none', padding: 0, cursor: 'pointer' }}>
+            {t('common:error.retry')}
+          </button>
+        </p>
+      )}
       {/* Notes / timeline / conversations — one NotesTab section per sub-tab. */}
       {subTab === 'notes'         && <NotesTab {...notesProps} showTimeline={false} showConversations={false} />}
       {subTab === 'timeline'      && <NotesTab {...notesProps} showNotes={false} showConversations={false} />}

@@ -5,9 +5,22 @@
  * The backend rows are sparse (ISO times + customer/function/location/status); this maps them
  * to the RosterShift/OpenShift shapes the panels render — formatting the times and defaulting
  * the fields the backend doesn't provide yet (distance/level/pool → 0/''). Read-only.
+ *
+ * HONEST-PLANNING-1: neither route carries a planning_configured split yet (unlike the
+ * customer side, which now answers 200/meta.planning_configured:false for "no coupling").
+ * So a candidate here cannot yet distinguish "not configured" from "actually broken" — the
+ * only distinction available today is success vs. request failure, and this hook makes THAT
+ * one honest: a failed request sets its own `error`, a genuinely empty 200 sets an empty
+ * array. The two sources are loaded independently (own AbortController, own error, own
+ * reload) so one endpoint failing never blanks the other's data.
+ * BACKEND ASK: give `/candidates/{id}/agenda` and `/candidates/{id}/open-shifts` the same
+ * meta.planning_configured / reason split CustomerPlanningController got (PLANNING-CONFIG-1),
+ * so an unconfigured agency renders its own calm "not configured" copy instead of reusing
+ * the empty-state text a genuinely empty roster would show.
  */
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import api from '@/lib/api'
+import { isAbortError } from '@/lib/mocks'
 import { useLocale } from '@/lib/datetime'
 import type { Id } from '@/types/common'
 import type { OpenShift, RosterShift } from '../drawer/planningTypes'
@@ -37,38 +50,78 @@ const unwrapRows = (r: { data?: unknown }): unknown[] => {
   return (Array.isArray(body.data) ? body.data : Array.isArray(r?.data) ? (r.data as unknown[]) : []) as unknown[]
 }
 
-export function useCandidateSchedule(candidateId?: Id) {
-  const [roster,     setRoster]     = useState<RosterShift[]>([])
-  const [openShifts, setOpenShifts] = useState<OpenShift[]>([])
-  const [loading,    setLoading]    = useState(true)
-  // App-wide active locale (§5) — fed into the date/time formatters below instead
-  // of a hardcoded 'nl-NL'.
-  const locale = useLocale()
+// The candidate's scheduled shifts (agenda) — its own load/error/reload, independent
+// of the open-shifts source below.
+function useCandidateAgenda(candidateId: Id | undefined, locale: string) {
+  const [roster,  setRoster]  = useState<RosterShift[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error,   setError]   = useState(false)
+  const [attempt, setAttempt] = useState(0)
 
-  // Load the real agenda + open shifts once per candidate; each soft-fails to empty.
   useEffect(() => {
     if (!candidateId) { setLoading(false); return }
     const ctrl = new AbortController()
-    setLoading(true)
-    Promise.all([
-      api.get(`/candidates/${candidateId}/agenda`, { signal: ctrl.signal })
-        .then(r => (unwrapRows(r) as RawAgenda[]).map<RosterShift>(s => ({
-          date: fmtDate(s.start_time, locale), time: fmtTime(s.start_time, s.end_time, locale),
-          client: s.customer ?? '—', function: s.function, location: s.location ?? '',
-          color: colorFor(s.customer ?? ''), workedBefore: 0, favorite: false,
-        }))).catch(() => [] as RosterShift[]),
-      api.get(`/candidates/${candidateId}/open-shifts`, { signal: ctrl.signal })
-        .then(r => (unwrapRows(r) as RawOpen[]).map<OpenShift>(s => ({
-          id: s.id as Id, date: fmtDate(s.start_time, locale), time: fmtTime(s.start_time, s.end_time, locale),
-          client: s.customer ?? '—', function: s.function ?? '', location: s.location ?? '',
-          color: colorFor(s.customer ?? ''), distance: 0, level: 0,
-          shiftType: s.shift_type ?? '', openSpots: s.number_persons ?? 1, pool: '',
-        }))).catch(() => [] as OpenShift[]),
-    ])
-      .then(([r, o]) => { if (!ctrl.signal.aborted) { setRoster(r); setOpenShifts(o) } })
+    setLoading(true); setError(false)
+    api.get(`/candidates/${candidateId}/agenda`, { signal: ctrl.signal })
+      .then(r => setRoster((unwrapRows(r) as RawAgenda[]).map<RosterShift>(s => ({
+        date: fmtDate(s.start_time, locale), time: fmtTime(s.start_time, s.end_time, locale),
+        client: s.customer ?? '—', function: s.function, location: s.location ?? '',
+        color: colorFor(s.customer ?? ''), workedBefore: 0, favorite: false,
+      }))))
+      .catch(err => {
+        if (isAbortError(err)) return
+        setError(true)
+        setRoster([])
+      })
       .finally(() => { if (!ctrl.signal.aborted) setLoading(false) })
     return () => ctrl.abort()
-  }, [candidateId, locale])
+  }, [candidateId, locale, attempt])
 
-  return { roster, openShifts, loading }
+  return { roster, loading, error, reload: useCallback(() => setAttempt(a => a + 1), []) }
+}
+
+// The open shifts this candidate could still be scheduled for — its own load/error/reload.
+function useCandidateOpenShifts(candidateId: Id | undefined, locale: string) {
+  const [openShifts, setOpenShifts] = useState<OpenShift[]>([])
+  const [loading,    setLoading]    = useState(true)
+  const [error,      setError]      = useState(false)
+  const [attempt,    setAttempt]    = useState(0)
+
+  useEffect(() => {
+    if (!candidateId) { setLoading(false); return }
+    const ctrl = new AbortController()
+    setLoading(true); setError(false)
+    api.get(`/candidates/${candidateId}/open-shifts`, { signal: ctrl.signal })
+      .then(r => setOpenShifts((unwrapRows(r) as RawOpen[]).map<OpenShift>(s => ({
+        id: s.id as Id, date: fmtDate(s.start_time, locale), time: fmtTime(s.start_time, s.end_time, locale),
+        client: s.customer ?? '—', function: s.function ?? '', location: s.location ?? '',
+        color: colorFor(s.customer ?? ''), distance: 0, level: 0,
+        shiftType: s.shift_type ?? '', openSpots: s.number_persons ?? 1, pool: '',
+      }))))
+      .catch(err => {
+        if (isAbortError(err)) return
+        setError(true)
+        setOpenShifts([])
+      })
+      .finally(() => { if (!ctrl.signal.aborted) setLoading(false) })
+    return () => ctrl.abort()
+  }, [candidateId, locale, attempt])
+
+  return { openShifts, loading, error, reload: useCallback(() => setAttempt(a => a + 1), []) }
+}
+
+export function useCandidateSchedule(candidateId?: Id) {
+  // App-wide active locale (§5) — fed into the date/time formatters below instead
+  // of a hardcoded 'nl-NL'.
+  const locale = useLocale()
+  // Two independent sources — a failure on one must never blank the other (§9).
+  const agenda = useCandidateAgenda(candidateId, locale)
+  const open   = useCandidateOpenShifts(candidateId, locale)
+
+  return {
+    roster: agenda.roster, rosterLoading: agenda.loading, rosterError: agenda.error, reloadRoster: agenda.reload,
+    openShifts: open.openShifts, openShiftsLoading: open.loading, openShiftsError: open.error, reloadOpenShifts: open.reload,
+    // Combined convenience flag for callers that only need one "still loading" signal.
+    loading: agenda.loading || open.loading,
+  }
 }

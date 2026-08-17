@@ -3,9 +3,20 @@
  *
  * Fed by the API (GET /functions) with a healthcare default as fallback while the
  * API is empty/unavailable. Managed in Settings → Functies. Items are plain name
- * strings (the candidate/vacancy stores the name). `allowFreeEntry` = creatable
- * combobox (true) vs strict dropdown (false): the tenant toggle (setting
- * `functions_allow_free_entry`) wins, else the API flag, else **false** (strict default).
+ * strings (the candidate/vacancy stores the name).
+ *
+ * FUNC-FREEENTRY-FIX (2026-08-17): `allowFreeEntry` is read straight off THIS SAME
+ * response's `allow_free_entry` flag — never a second tenant-settings-blob key.
+ * It used to be shadowed through `getBoolSetting(settings, 'functions_allow_free_entry',
+ * ...)`, an UNDERSCORED key written by the generic `POST /settings` blob. That is a
+ * DIFFERENT Setting row than the one the backend actually enforces: both
+ * `FreeEntryLookupController::allowFreeEntry()` (this GET) and any write-time gate
+ * on `candidates.function_title` read the DOTTED `functions.allow_free_entry` key,
+ * written only by `PUT /functions/free-entry`. Wiring the underscored key here
+ * reproduced the exact gap found on the sources lookup: the toggle read as "on" in
+ * this app while the server enforced strict — see FunctionsSettings.jsx, which now
+ * persists through the real dedicated route so this single response stays
+ * authoritative (mirrors useApplicationSources.ts).
  *
  * Fetch/cache/dedupe lives in useCachedLookup (audit item 8) — one GET per
  * session, shared across every mounted consumer.
@@ -13,7 +24,6 @@
 import type { AxiosResponse } from 'axios'
 import { useCachedLookup } from './useCachedLookup'
 import { lookupNames } from './lookupUtils'
-import { useAllSettings, getBoolSetting } from './settings/useAllSettings'
 
 export const DEFAULT_FUNCTIONS = [
   'Helpende', 'Helpende Plus', 'Verzorgende', 'Verzorgende IG', "EVV'er",
@@ -21,28 +31,23 @@ export const DEFAULT_FUNCTIONS = [
 ]
 
 // Both pieces of state (names + the API's free-entry flag) come from the same
-// response, so they're cached together as one value.
-interface FunctionsLookupData { functions: string[]; apiFreeEntry: boolean | null }
-const FALLBACK: FunctionsLookupData = { functions: DEFAULT_FUNCTIONS, apiFreeEntry: null }
+// response, so they're cached together as one value. The backend's own default
+// (before any tenant has toggled it) is strict — mirror that as the pending seed.
+interface FunctionsLookupData { functions: string[]; apiFreeEntry: boolean }
+const FALLBACK: FunctionsLookupData = { functions: DEFAULT_FUNCTIONS, apiFreeEntry: false }
 
-// Always returns a usable object (never null): names keep the seed when empty,
-// apiFreeEntry keeps null when absent — same independent fallbacks as before.
+// Names keep the seed when empty; apiFreeEntry keeps the strict default when the
+// response doesn't carry a boolean flag (e.g. a genuinely empty/failed response).
 const mapFunctions = (res: AxiosResponse): FunctionsLookupData => {
   const names = lookupNames(res)
   const free = (res?.data as { allow_free_entry?: unknown })?.allow_free_entry
   return {
     functions: names.length ? names : DEFAULT_FUNCTIONS,
-    apiFreeEntry: typeof free === 'boolean' ? free : null,
+    apiFreeEntry: typeof free === 'boolean' ? free : false,
   }
 }
 
 export function useFunctions() {
-  const settings = useAllSettings()
-  const { data } = useCachedLookup('/functions', mapFunctions, FALLBACK)
-
-  // The Settings → Functies toggle is the source of truth; fall back to the API flag, then
-  // false — strict by default (clean vocab for matching/AI; the backend default is OFF too).
-  const allowFreeEntry = getBoolSetting(settings, 'functions_allow_free_entry', data.apiFreeEntry ?? false)
-
-  return { functions: data.functions, allowFreeEntry }
+  const { data, invalidate } = useCachedLookup('/functions', mapFunctions, FALLBACK)
+  return { functions: data.functions, allowFreeEntry: data.apiFreeEntry, invalidate }
 }

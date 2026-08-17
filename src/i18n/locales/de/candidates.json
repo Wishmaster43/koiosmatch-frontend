@@ -569,6 +569,7 @@
     "channel": "Kontaktkanal",
     "channelNone": "Interne Notiz",
     "notePlaceholder": "{{type}}-Notiz",
+    "notesLoadError": "Notizen konnten nicht geladen werden.",
     "noteTypes": {
       "general": "Allgemein",
       "intake": "Aufnahme",
@@ -707,6 +708,10 @@
     "noAvailability": "Noch keine Ausnahmen erfasst.",
     "availabilityHint": "Standardmäßig ist der Kandidat verfügbar. Erfassen Sie hier Ausnahmen (z. B. Urlaub oder Krankheit).",
     "availDuplicate": "Diese Tageszeit ist für dieses Datum bereits festgelegt.",
+    "rosterLoadError": "Der Dienstplan konnte nicht geladen werden.",
+    "openShiftsLoadError": "Die offenen Dienste konnten nicht geladen werden.",
+    "prefsLoadError": "Die Präferenzen konnten nicht geladen werden.",
+    "availabilityLoadError": "Die Verfügbarkeit konnte nicht geladen werden.",
     "notPersistedYet": "Wird noch nicht gespeichert. Das Planungsmodul folgt.",
     "moduleNotAvailableTitle": "Planung noch nicht verfügbar",
     "moduleNotAvailableBody": "Das Planungsmodul existiert noch nicht. Dieser Tab zeigt bald Dienstpläne und Verfügbarkeit."

@@ -2,15 +2,24 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import StatusListEditor from './StatusListEditor'
 import { SettingCard, SettingRow, Toggle } from '../components/SettingsKit'
-import { useAllSettings, getBoolSetting, saveSettingsKeys } from '@/lib/settings/useAllSettings'
+import api from '@/lib/api'
+import { extractApiError } from '@/lib/extractApiError'
+import { notifyError } from '@/lib/notify'
+import { useFunctions } from '@/lib/useFunctions'
 import { useConfirm } from '@/hooks/useConfirm'
 
 /**
  * FunctionsSettings — the CANDIDATE job-function list (/functions, e.g. "Verzorgende
- * IG") plus the field-mode toggle (creatable combobox ↔ strict dropdown), stored as
- * the tenant setting `functions_allow_free_entry`. Turning free-entry ON (strict →
- * free) asks for confirmation; turning it OFF (free → strict) lets the backend fold
- * every used function into the list so nothing is lost.
+ * IG") plus the field-mode toggle (creatable combobox ↔ strict dropdown).
+ *
+ * FUNC-FREEENTRY-FIX (2026-08-17): persists through the REAL dedicated
+ * `PUT /functions/free-entry` route — never the generic `/settings` blob. That blob
+ * used to write an UNDERSCORED key (`functions_allow_free_entry`) that neither the
+ * backend's write-time gate on `candidates.function_title` nor
+ * `FreeEntryLookupController::allowFreeEntry()` (this list's own GET) ever reads —
+ * both read the DOTTED `functions.allow_free_entry` Setting row, moved only by this
+ * dedicated route. See useFunctions.ts's own doc comment for the full trail; mirrors
+ * ApplicationSourcesSettings.jsx exactly.
  *
  * Distinct from the contact-person job-title list (ContactFunctionsSettings, `/contact-
  * functions`, FUNCTIONS-SPLIT-1, Danny 2026-07-20/22) — the title/subtitle/nav label
@@ -18,25 +27,33 @@ import { useConfirm } from '@/hooks/useConfirm'
  */
 export default function FunctionsSettings() {
   const { t } = useTranslation('settings')
-  const settings = useAllSettings()
-  // Strict by default (Danny 2026-07-16, job 26): checked really does mean "allowed"
-  // here (Toggle checked={freeEntry}, label "Vrije invoer toestaan") — the bug was the
-  // FALLBACK shown before any tenant explicitly saves this setting. It defaulted to
-  // `true` (shows checked/allowed) while useFunctions() — and the backend's own
-  // GET /functions.allow_free_entry — both default to `false` (strict), so a
-  // never-configured tenant saw a checked toggle that lied about the actually
-  // enforced (strict) behaviour. Mirror useFunctions.ts's default here; never touches
-  // an already-persisted tenant value (getBoolSetting only falls back when unset).
-  const freeEntry = getBoolSetting(settings, 'functions_allow_free_entry', false)
+  const { allowFreeEntry, invalidate } = useFunctions()
+  // Optimistic local override so the switch reflects the just-saved value
+  // immediately (useCachedLookup's invalidate() only affects the NEXT mount) —
+  // null means "follow the API's own current value". Reverted on a failed PUT.
+  const [override, setOverride] = useState(null)
+  const freeEntry = override ?? allowFreeEntry
   const [busy, setBusy] = useState(false)
   const { confirm, dialog } = useConfirm()
 
-  // Persist the mode; confirm before loosening to free-text (data-quality choice).
+  // Persist the mode via the REAL dedicated route (see the doc comment above for
+  // why the generic settings blob is not enough here); confirm before loosening
+  // to free-text (data-quality choice). A tightening 409 (off-list values still in
+  // use) surfaces the server's own worklist message instead of silently no-oping.
   const onToggle = (next) => {
     if (busy) return
     const persist = async () => {
       setBusy(true)
-      try { await saveSettingsKeys({ functions_allow_free_entry: next }) } finally { setBusy(false) }
+      setOverride(next)
+      try {
+        await api.put('/functions/free-entry', { allow_free_entry: next })
+        invalidate()
+      } catch (e) {
+        setOverride(null)
+        notifyError(extractApiError(e, t('statusList.saveFailed')))
+      } finally {
+        setBusy(false)
+      }
     }
     if (next) confirm(t('functionsSettings.confirmFreeEntry'), persist)
     else persist()

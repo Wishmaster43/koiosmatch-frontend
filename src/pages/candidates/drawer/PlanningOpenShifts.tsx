@@ -9,6 +9,7 @@ import type { Dispatch, SetStateAction } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Heart, Ban } from 'lucide-react'
 import { sectionBlock, softPill } from './constants'
+import ErrorBanner from '@/components/ui/ErrorBanner'
 import { useFunctions } from '@/lib/useFunctions'
 // ALWAYS-SEARCHABLE-1 (Danny 08-08): the house searchable combobox replaces the
 // native <select> that used to render the distance/level filter pickers below.
@@ -18,6 +19,9 @@ import type { FavLists, OpenFilters, OpenShift } from './planningTypes'
 
 interface PlanningOpenShiftsProps {
   openShifts: OpenShift[]
+  loading?: boolean
+  error?: boolean
+  onReload?: () => void
   openFilters: OpenFilters
   setOpenFilters: Dispatch<SetStateAction<OpenFilters>>
   scheduledIds: Set<Id>
@@ -26,7 +30,7 @@ interface PlanningOpenShiftsProps {
   blacklist: FavLists
 }
 
-export default function PlanningOpenShifts({ openShifts, openFilters, setOpenFilters, scheduledIds, setScheduledIds, favorites, blacklist }: PlanningOpenShiftsProps) {
+export default function PlanningOpenShifts({ openShifts, loading, error, onReload, openFilters, setOpenFilters, scheduledIds, setScheduledIds, favorites, blacklist }: PlanningOpenShiftsProps) {
   const { t } = useTranslation('candidates')
   // Function/level options from the tenant lookup (no hardcoded care-level list).
   const { functions: FUNCTION_LEVELS } = useFunctions() as { functions: string[] }
@@ -95,7 +99,13 @@ export default function PlanningOpenShifts({ openShifts, openFilters, setOpenFil
 
       {/* Results */}
       <div style={sectionBlock}>
-        {filtered.length === 0 ? (
+        {/* Loading / error (with retry) / empty / list — a failed open-shifts load must
+            never render as an honest "no open shifts" empty state. */}
+        {loading ? (
+          <div style={{ textAlign: 'center', padding: '24px 0', color: 'var(--text-muted)', fontSize: 12 }}>{t('common:loading')}</div>
+        ) : error ? (
+          <ErrorBanner onRetry={onReload}>{t('planning.openShiftsLoadError')}</ErrorBanner>
+        ) : filtered.length === 0 ? (
           <div style={{ textAlign: 'center', padding: '24px 0', color: 'var(--text-muted)', fontSize: 12 }}>
             {t('planning.noOpenShifts')}
           </div>

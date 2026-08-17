@@ -569,6 +569,7 @@
     "channel": "Canal de contacto",
     "channelNone": "Nota interna",
     "notePlaceholder": "Nota {{type}}",
+    "notesLoadError": "No se pudieron cargar las notas.",
     "noteTypes": {
       "general": "General",
       "intake": "Entrevista",
@@ -707,6 +708,10 @@
     "noAvailability": "Aún no hay excepciones registradas.",
     "availabilityHint": "Por defecto, el candidato está disponible. Registra aquí las excepciones (p. ej. vacaciones o enfermedad).",
     "availDuplicate": "Esta parte del día ya está definida para esta fecha.",
+    "rosterLoadError": "No se pudo cargar el horario.",
+    "openShiftsLoadError": "No se pudieron cargar los turnos abiertos.",
+    "prefsLoadError": "No se pudieron cargar las preferencias.",
+    "availabilityLoadError": "No se pudo cargar la disponibilidad.",
     "notPersistedYet": "Aún no se guarda. El módulo de planificación llegará pronto.",
     "moduleNotAvailableTitle": "Planificación aún no disponible",
     "moduleNotAvailableBody": "El módulo de planificación todavía no existe. Esta pestaña mostrará pronto los horarios y la disponibilidad."

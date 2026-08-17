@@ -14,7 +14,7 @@ vi.mock('../hooks/useCandidatePlanning', () => ({ useCandidateAvailability: vi.f
 
 describe('AvailabilityEditor · day-part picker is the house CreatableSelect, not a native <select>', () => {
   it('renders no native <select> in the add row', async () => {
-    vi.mocked(useCandidateAvailability).mockReturnValue({ entries: [], loading: false, error: false, add: vi.fn(), remove: vi.fn() })
+    vi.mocked(useCandidateAvailability).mockReturnValue({ entries: [], loading: false, error: false, add: vi.fn(), remove: vi.fn(), reload: vi.fn() })
     const user = userEvent.setup()
     const { container } = render(<AvailabilityEditor candidateId="cand-1" />)
     await user.click(screen.getByRole('button', { name: 'planning.addAvailability' }))
@@ -23,7 +23,7 @@ describe('AvailabilityEditor · day-part picker is the house CreatableSelect, no
 
   it('picking a day part and submitting calls add() with the SAME payload shape as before', async () => {
     const add = vi.fn()
-    vi.mocked(useCandidateAvailability).mockReturnValue({ entries: [], loading: false, error: false, add, remove: vi.fn() })
+    vi.mocked(useCandidateAvailability).mockReturnValue({ entries: [], loading: false, error: false, add, remove: vi.fn(), reload: vi.fn() })
     const user = userEvent.setup()
     render(<AvailabilityEditor candidateId="cand-1" />)
     await user.click(screen.getByRole('button', { name: 'planning.addAvailability' }))

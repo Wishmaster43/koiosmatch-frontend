@@ -29,7 +29,12 @@ export default function PlanningPanel({ c }: { c: Candidate }) {
   const prefs = useCandidatePlanningPreferences(c.id)
   const { groups: prefTargets } = usePlanningPreferenceTargets()
   // Real agenda + open shifts (G-7 — replaces the dummy roster/open-shift datasets).
-  const { roster, openShifts } = useCandidateSchedule(c.id)
+  // Each source carries its own loading/error/reload so one failing request never
+  // blanks the other (HONEST-PLANNING-1, §9).
+  const {
+    roster, rosterLoading, rosterError, reloadRoster,
+    openShifts, openShiftsLoading, openShiftsError, reloadOpenShifts,
+  } = useCandidateSchedule(c.id)
   const favoriteNames  = namesByType(prefs.favorites)
   const blacklistNames = namesByType(prefs.blacklist)
 
@@ -53,6 +58,7 @@ export default function PlanningPanel({ c }: { c: Candidate }) {
 
       {planningSubTab === 'scheduling' && (
         <PlanningScheduling c={c} baseShifts={roster} openShifts={openShifts}
+          loading={rosterLoading} error={rosterError} onReload={reloadRoster}
           scheduleSelected={scheduleSelected} setScheduleSelected={setScheduleSelected}
           scheduleFavorites={scheduleFavorites} setScheduleFavorites={setScheduleFavorites}
           scheduledIds={scheduledIds} setScheduledIds={setScheduledIds}
@@ -61,6 +67,7 @@ export default function PlanningPanel({ c }: { c: Candidate }) {
 
       {planningSubTab === 'openShifts' && (
         <PlanningOpenShifts openShifts={openShifts}
+          loading={openShiftsLoading} error={openShiftsError} onReload={reloadOpenShifts}
           openFilters={openFilters} setOpenFilters={setOpenFilters}
           scheduledIds={scheduledIds} setScheduledIds={setScheduledIds}
           favorites={favoriteNames} blacklist={blacklistNames} />
@@ -75,7 +82,7 @@ export default function PlanningPanel({ c }: { c: Candidate }) {
       {planningSubTab === 'favorites' && (
         <PlanningFavorites
           favorites={prefs.favorites} blacklist={prefs.blacklist}
-          targets={prefTargets} loading={prefs.loading}
+          targets={prefTargets} loading={prefs.loading} error={prefs.error} onReload={prefs.reload}
           onAdd={prefs.add} onRemove={prefs.remove} />
       )}
     </div>

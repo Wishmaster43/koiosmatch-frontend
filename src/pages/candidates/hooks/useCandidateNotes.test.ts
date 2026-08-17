@@ -22,7 +22,7 @@ vi.mock('@/lib/useNoteTypes', () => ({ useNoteTypes: () => ({ types: [], writabl
 vi.mock('@/lib/useLastContactTypes', () => ({ useLastContactTypes: () => ({ types: [] }) }))
 vi.mock('@/lib/datetime', () => ({ useDateFormat: () => ({ formatDate: (v: string) => v }) }))
 
-beforeEach(() => { vi.mocked(api.post).mockClear() })
+beforeEach(() => { vi.mocked(api.post).mockClear(); vi.mocked(api.get).mockClear() })
 
 describe('useCandidateNotes · onContactStamped (LAST-CONTACT-REFRESH-1)', () => {
   it('fires onContactStamped AFTER a successful save of a note WITH a channel', async () => {
@@ -110,5 +110,37 @@ describe('useCandidateNotes · deleteNote', () => {
     expect(result.current.notes).toHaveLength(0)
     // … then the rejected DELETE puts it back.
     await waitFor(() => expect(result.current.notes).toHaveLength(1))
+  })
+})
+
+// BUG-HUNT-CLASS-B: a failed GET must be distinguishable from "no notes yet" —
+// health-adjacent data, never a silent empty thread.
+describe('useCandidateNotes · GET failure vs. genuine empty (Class B)', () => {
+  it('flags error=true and does not claim loaded=false forever when the GET rejects', async () => {
+    vi.mocked(api.get).mockRejectedValueOnce(new Error('network'))
+    const { result } = renderHook(() => useCandidateNotes('c1'))
+    await waitFor(() => expect(result.current.loaded).toBe(true))
+    expect(result.current.error).toBe(true)
+    expect(result.current.notes).toEqual([])
+  })
+
+  it('leaves error=false on a genuinely empty (but successful) GET', async () => {
+    vi.mocked(api.get).mockResolvedValueOnce({ data: { data: [] } })
+    const { result } = renderHook(() => useCandidateNotes('c1'))
+    await waitFor(() => expect(result.current.loaded).toBe(true))
+    expect(result.current.error).toBe(false)
+    expect(result.current.notes).toEqual([])
+  })
+
+  it('reload() re-fires the GET and clears a previous error on success', async () => {
+    vi.mocked(api.get)
+      .mockRejectedValueOnce(new Error('network'))
+      .mockResolvedValueOnce({ data: { data: [{ id: 'n1', body: 'Back' }] } })
+    const { result } = renderHook(() => useCandidateNotes('c1'))
+    await waitFor(() => expect(result.current.error).toBe(true))
+    act(() => { result.current.reload() })
+    await waitFor(() => expect(result.current.error).toBe(false))
+    expect(result.current.notes).toHaveLength(1)
+    expect(api.get).toHaveBeenCalledTimes(2)
   })
 })
