@@ -2585,7 +2585,10 @@
       "footer_one": "{{count}} Zeile",
       "footer_other": "{{count}} Zeilen",
       "footerWithTotals_one": "{{count}} Zeile · {{requests}} Anfragen · {{tokens}} Tokens",
-      "footerWithTotals_other": "{{count}} Zeilen · {{requests}} Anfragen · {{tokens}} Tokens"
+      "footerWithTotals_other": "{{count}} Zeilen · {{requests}} Anfragen · {{tokens}} Tokens",
+      "chartTitle": "Einkauf pro {{axis}}",
+      "chartOther_one": "Sonstige ({{count}})",
+      "chartOther_other": "Sonstige ({{count}})"
     },
     "nothingUsed": "Für diesen Monat wurde keine Nutzung erfasst. Deshalb stehen die Tabellen unten auf null."
   },

@@ -25,6 +25,7 @@ import { useTranslation } from 'react-i18next'
 import api, { unwrap } from '@/lib/api'
 import DataTable from '@/components/ui/DataTable'
 import TableScrollFrame from '@/components/ui/TableScrollFrame'
+import TenantUsageBreakdownChart from './TenantUsageBreakdownChart'
 import SegmentedControl from '@/components/ui/SegmentedControl'
 import { useNumberFormat } from '@/lib/formatters'
 import { useDateFormat } from '@/lib/datetime'
@@ -122,17 +123,29 @@ export default function TenantUsageBreakdownTable({ tenantId, month }: Props) {
       {phase === 'loading' && <p style={{ fontSize: 13, color: 'var(--text-muted)', padding: 8 }}>{t('common.loadingShort', { defaultValue: 'Laden…' })}</p>}
       {phase === 'error' && <p style={{ fontSize: 13, color: 'var(--text-muted)', padding: 8 }}>{t('usage.breakdown.loadError')}</p>}
       {phase === 'ready' && (
-        <TableScrollFrame label={t('usage.breakdown.title')} footer={rows.length ? footer : null}>
-          <DataTable
-            columns={columns}
-            rows={rows}
-            getRowId={(r: AdminUsageDetailsRow) => r.key}
-            stickyHeader
-            // Biggest consumer first — the reason a super-admin opens this at all.
-            defaultSort={{ key: 'purchase', dir: 'desc' }}
-            emptyText={t('usage.breakdown.empty')}
-          />
-        </TableScrollFrame>
+        // Table left, its own picture right (Danny 17-08). Wraps on a narrow
+        // viewport rather than squeezing six numeric columns into half a column.
+        <div style={{ display: 'flex', gap: 20, alignItems: 'flex-start', flexWrap: 'wrap' }}>
+          <div style={{ flex: '1 1 520px', minWidth: 0 }}>
+            <TableScrollFrame label={t('usage.breakdown.title')} footer={rows.length ? footer : null}>
+              <DataTable
+                columns={columns}
+                rows={rows}
+                getRowId={(r: AdminUsageDetailsRow) => r.key}
+                stickyHeader
+                // Biggest consumer first — the reason a super-admin opens this at all.
+                defaultSort={{ key: 'purchase', dir: 'desc' }}
+                emptyText={t('usage.breakdown.empty')}
+              />
+            </TableScrollFrame>
+          </div>
+          {rows.length > 0 && (
+            <div style={{ flex: '1 1 340px', minWidth: 300, background: 'var(--surface)',
+              border: '1px solid var(--border)', borderRadius: 10, padding: 16 }}>
+              <TenantUsageBreakdownChart axis={axis} rows={rows} />
+            </div>
+          )}
+        </div>
       )}
     </div>
   )

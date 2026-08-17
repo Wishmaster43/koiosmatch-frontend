@@ -2585,7 +2585,10 @@
       "footer_one": "{{count}} row",
       "footer_other": "{{count}} rows",
       "footerWithTotals_one": "{{count}} row · {{requests}} requests · {{tokens}} tokens",
-      "footerWithTotals_other": "{{count}} rows · {{requests}} requests · {{tokens}} tokens"
+      "footerWithTotals_other": "{{count}} rows · {{requests}} requests · {{tokens}} tokens",
+      "chartTitle": "Purchase per {{axis}}",
+      "chartOther_one": "Other ({{count}})",
+      "chartOther_other": "Other ({{count}})"
     },
     "nothingUsed": "No usage recorded for this month, which is why the tables below are all zero."
   },

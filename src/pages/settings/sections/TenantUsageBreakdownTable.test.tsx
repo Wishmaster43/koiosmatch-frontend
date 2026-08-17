@@ -23,6 +23,16 @@ vi.mock('@/lib/api', async () => {
   return { ...actual, default: { get: vi.fn(), post: vi.fn(), put: vi.fn(), delete: vi.fn() } }
 })
 
+// The chart beside the table is stubbed down to the props it receives: it renders
+// the same group labels in its own legend, which would otherwise make every
+// getByText below ambiguous, and it has its own test file for its own behaviour.
+// The stub still proves the composition — which axis and how many rows it is fed.
+vi.mock('./TenantUsageBreakdownChart', () => ({
+  default: ({ axis, rows }: { axis: string; rows: unknown[] }) => (
+    <div data-testid="breakdown-chart" data-axis={axis} data-rows={rows.length} />
+  ),
+}))
+
 const t = (key: string, opts?: object) => i18n.t(key, { ns: 'settings', ...opts })
 
 const activityGroups = {
@@ -132,6 +142,23 @@ describe('TenantUsageBreakdownTable', () => {
       '/admin/tenants/t1/usage/details',
       expect.objectContaining({ params: { month: '2026-08', group_by: 'user' } }),
     ))
+  })
+
+  it('puts a chart beside the table, fed the SAME rows and axis (never a second query)', async () => {
+    vi.mocked(api.get).mockResolvedValue({ data: activityGroups })
+    render(<TenantUsageBreakdownTable tenantId="t1" month="2026-08" />)
+    const chart = await screen.findByTestId('breakdown-chart')
+    expect(chart).toHaveAttribute('data-axis', 'activity')
+    expect(chart).toHaveAttribute('data-rows', '2')
+    // One request feeds both views, so the picture can never disagree with the list.
+    expect(api.get).toHaveBeenCalledTimes(1)
+  })
+
+  it('renders no chart when there is nothing to chart', async () => {
+    vi.mocked(api.get).mockResolvedValue({ data: { group_by: 'activity', month: '2026-08', groups: [], totals: { tokens: 0, requests: 0, cost: 0 } } })
+    render(<TenantUsageBreakdownTable tenantId="t1" month="2026-08" />)
+    expect(await screen.findByText(t('usage.breakdown.empty'))).toBeInTheDocument()
+    expect(screen.queryByTestId('breakdown-chart')).not.toBeInTheDocument()
   })
 
   it('shows an honest error state when the request fails', async () => {

@@ -2585,7 +2585,10 @@
       "footer_one": "{{count}} fila",
       "footer_other": "{{count}} filas",
       "footerWithTotals_one": "{{count}} fila · {{requests}} solicitudes · {{tokens}} tokens",
-      "footerWithTotals_other": "{{count}} filas · {{requests}} solicitudes · {{tokens}} tokens"
+      "footerWithTotals_other": "{{count}} filas · {{requests}} solicitudes · {{tokens}} tokens",
+      "chartTitle": "Compra por {{axis}}",
+      "chartOther_one": "Otro ({{count}})",
+      "chartOther_other": "Otros ({{count}})"
     },
     "nothingUsed": "No se ha registrado consumo en este mes. Por eso las tablas de abajo están a cero."
   },

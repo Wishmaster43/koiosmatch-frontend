@@ -2585,7 +2585,10 @@
       "footer_one": "{{count}} regel",
       "footer_other": "{{count}} regels",
       "footerWithTotals_one": "{{count}} regel · {{requests}} verzoeken · {{tokens}} tokens",
-      "footerWithTotals_other": "{{count}} regels · {{requests}} verzoeken · {{tokens}} tokens"
+      "footerWithTotals_other": "{{count}} regels · {{requests}} verzoeken · {{tokens}} tokens",
+      "chartTitle": "Inkoop per {{axis}}",
+      "chartOther_one": "Overig ({{count}})",
+      "chartOther_other": "Overig ({{count}})"
     },
     "nothingUsed": "Geen verbruik geregistreerd in deze maand. Daarom staan de tabellen hieronder op nul."
   },
