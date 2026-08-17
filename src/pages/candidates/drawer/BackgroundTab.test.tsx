@@ -18,7 +18,7 @@ import type { Candidate } from '@/types/candidate'
 // unrelated to anything under test here.
 vi.mock('@/lib/api', () => ({
   getActiveTenantId: () => 'demo',
-  default: { get: vi.fn(() => Promise.resolve({ data: { data: [] } })), post: vi.fn(), patch: vi.fn(), delete: vi.fn() },
+  default: { get: vi.fn(() => Promise.resolve({ data: { data: [] } })), post: vi.fn(), patch: vi.fn(), delete: vi.fn(), put: vi.fn() },
   unwrap: (r: unknown) => r,
   unwrapList: (r: { data?: { data?: unknown[] } }) => ({ rows: r?.data?.data ?? [] }),
 }))
@@ -208,6 +208,95 @@ describe('BackgroundTab · ops() optimistic-revert (onAdd/onEdit/onRemove)', () 
     // restore would still leave it untouched here, but a bulk-loop scenario
     // (mirrors useEntityDocuments.remove) is exactly what surgical re-insert guards.
     expect(screen.getByText('Word')).toBeInTheDocument()
+    expect(notifyError).toHaveBeenCalled()
+  })
+})
+
+/**
+ * DRAG-SORT-1 — the real manual-reorder REQUEST (§13: assert method/route/body,
+ * never only that a callback fired). SectionTabsSort.test.tsx already covers the
+ * display/gesture contract (handles gated to own-order mode, onReorder receiving
+ * the reordered items, the CHOSEN AXIS vs. the ORDER never sharing a body) — this
+ * file owns the real `PUT /candidates/{id}/{relation}/reorder` BackgroundTab
+ * fires, its optimistic-then-revert behaviour, and the keyboard path, mirroring
+ * the onAdd/onEdit/onRemove block above. Skills is the simplest sub-tab (no
+ * ProseField description) — used here for the same reason that block uses it:
+ * unambiguous DOM queries.
+ */
+describe('BackgroundTab · manual reorder (DRAG-SORT-1)', () => {
+  const skillsCandidate = () => ({
+    ...candidate(),
+    skills: [
+      { id: 's1', name: 'Excel', level: '' },
+      { id: 's2', name: 'Word', level: '' },
+      { id: 's3', name: 'PowerPoint', level: '' },
+    ],
+  } as unknown as Candidate)
+
+  const namesInOrder = () => screen.getAllByText(/Excel|Word|PowerPoint/).map(el => el.textContent)
+
+  const openOwnOrder = async (user: ReturnType<typeof userEvent.setup>) => {
+    await user.click(screen.getByRole('tab', { name: 'Vaardigheden' }))
+    await user.click(screen.getByRole('button', { name: 'Sorteren' }))
+    await user.click(screen.getByRole('menuitem', { name: 'Eigen volgorde' }))
+  }
+
+  beforeEach(() => {
+    vi.mocked(api.put).mockReset()
+    vi.mocked(notifyError).mockClear()
+  })
+
+  it('a drag PUTs the real reorder route with the ids in the new order', async () => {
+    vi.mocked(api.put).mockResolvedValue({ data: { ok: true } })
+    const user = userEvent.setup()
+    const { container } = render(<BackgroundTab c={skillsCandidate()} />)
+    await openOwnOrder(user)
+
+    const rows = container.querySelectorAll('[draggable="true"]')
+    expect(rows).toHaveLength(3)
+    // Drag row 0 (Excel) onto row 1 (Word) — Excel moves after Word.
+    fireEvent.dragStart(rows[0])
+    fireEvent.dragOver(rows[1])
+    fireEvent.drop(rows[1])
+
+    await waitFor(() => expect(api.put).toHaveBeenCalledWith(
+      '/candidates/1/skills/reorder', { ids: ['s2', 's1', 's3'] }, { quietStatuses: [422] },
+    ))
+  })
+
+  it('the keyboard path (a focused move-down button, real Enter keypress) ALSO PUTs the real route — no mouse involved', async () => {
+    vi.mocked(api.put).mockResolvedValue({ data: { ok: true } })
+    const user = userEvent.setup()
+    render(<BackgroundTab c={skillsCandidate()} />)
+    await openOwnOrder(user)
+
+    const moveDown = screen.getAllByRole('button', { name: 'Omlaag verplaatsen' })[0]
+    moveDown.focus()
+    await user.keyboard('{Enter}')
+
+    await waitFor(() => expect(api.put).toHaveBeenCalledWith(
+      '/candidates/1/skills/reorder', { ids: ['s2', 's1', 's3'] }, { quietStatuses: [422] },
+    ))
+  })
+
+  it('a refused save (the backend\'s 422 IDOR guard, or any other rejection) reverts the visual order and notifies — never a silent, half-applied drag', async () => {
+    vi.mocked(api.put).mockRejectedValue({ response: { status: 422, data: { message: 'One or more ids do not belong to this candidate.' } } })
+    const user = userEvent.setup()
+    const { container } = render(<BackgroundTab c={skillsCandidate()} />)
+    await openOwnOrder(user)
+    expect(namesInOrder()).toEqual(['Excel', 'Word', 'PowerPoint'])
+
+    const rows = container.querySelectorAll('[draggable="true"]')
+    fireEvent.dragStart(rows[0])
+    fireEvent.dragOver(rows[1])
+    fireEvent.drop(rows[1])
+
+    // Optimistic: the drag applies immediately, before the server answers.
+    expect(namesInOrder()).toEqual(['Word', 'Excel', 'PowerPoint'])
+    // The refused PUT reverts it back to the pre-drag order and notifies — the
+    // same optimistic-then-revert shape as onAdd/onEdit/onRemove above; the
+    // backend's own IDOR check means this candidate's rows were never touched.
+    await waitFor(() => expect(namesInOrder()).toEqual(['Excel', 'Word', 'PowerPoint']))
     expect(notifyError).toHaveBeenCalled()
   })
 })

@@ -72,6 +72,10 @@ interface ReferencesTabProps {
   // REF-ERVARING-1: the candidate's OWN work experiences — the only valid link
   // targets (the backend scopes the FK to this candidate, 422 otherwise).
   experiences?: LinkableExperience[]
+  // DRAG-SORT-1: fires with the FULL item list in its new order once a manual
+  // reorder (drag or keyboard move-up/down) completes — mirrors SectionTabs.tsx's
+  // RelTabProps. BackgroundTab owns the real optimistic PUT .../reorder + revert.
+  onReorder?: (items: RelItem[]) => void
 }
 
 // A row is persisted once it carries a real backend id (a non-empty UUID string,
@@ -131,7 +135,7 @@ function ReferenceLetterLink({ doc, onPreview, onJump }: { doc: RelItem; onPrevi
   )
 }
 
-export default function ReferencesTab({ items = [], onAdd, onEdit, onRemove, onVerify, documents = [], onJumpToDocuments, experiences = [] }: ReferencesTabProps) {
+export default function ReferencesTab({ items = [], onAdd, onEdit, onRemove, onVerify, documents = [], onJumpToDocuments, experiences = [], onReorder }: ReferencesTabProps) {
   const { t } = useTranslation('candidates')
   const { formatDate } = useDateFormat()
   // REFERENTIE-VELDEN-1: the relation lookup, searchable + pick-only (CLAUDE.md
@@ -192,11 +196,13 @@ export default function ReferencesTab({ items = [], onAdd, onEdit, onRemove, onV
   // start/end date are omitted — but it DOES carry the referent's own
   // `function` (their role, e.g. "Teamleider", distinct from `relation_id` —
   // their relation TO the candidate), a real field on every row, so that is
-  // the one axis offered here (Requirement 2).
-  const { order, control } = useRelationSort(items, {
+  // one axis offered here (Requirement 2). DRAG-SORT-1: candidate_references
+  // carries sort_order + PUT .../reorder, so 'own' is offered too.
+  const { order, control, isOwnOrder } = useRelationSort(items, {
     storageKey: 'references',
     functionOf: (raw: RelItem) => raw.function as string | undefined,
     functionLabel: t('addFields.referenceFunction', { defaultValue: 'Functie' }),
+    ownOrder: true,
   })
   return (
     <>
@@ -206,6 +212,7 @@ export default function ReferencesTab({ items = [], onAdd, onEdit, onRemove, onV
     {items.length > 0 && experienceOptions.length === 0 && <NoExperiencesNotice />}
     <AddableSection title={null} emptyText={t('sections.referencesEmpty', { defaultValue: 'Nog geen referenties.' })}
       renderAddButton={renderAddButton} order={order} headerExtra={control}
+      dragEnabled={isOwnOrder} onReorder={onReorder}
       items={items} fields={fields} onAdd={onAdd} onEdit={onEdit} onRemove={onRemove}
       renderItem={(raw: RelItem, i: number, arr: RelItem[]) => {
         const r = raw as {

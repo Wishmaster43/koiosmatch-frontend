@@ -6,25 +6,26 @@
  * hook renders that ONE menu (the shared ActionMenu, icon-only) and every
  * sub-tab reuses it — never a per-tab fork or a hand-rolled dropdown.
  *
- * SORT VOCABULARY — exactly three axes, and only the ones a sub-tab can really
- * serve: 'startDate' | 'endDate' | 'function'. A caller passes an accessor
- * (+ an optional label override) for whichever of the three exist on its own
- * rows; omitting an accessor omits that menu entry entirely — never an option
- * that would sort a field that is always empty there. Each SectionTabs.tsx /
- * ReferencesTab.tsx call site documents WHICH axes it offers and why, right
- * next to the accessors (its own "notes").
+ * SORT VOCABULARY — 'startDate' | 'endDate' | 'function' | 'own'. A caller
+ * passes an accessor (+ an optional label override) for whichever of the first
+ * three exist on its own rows; omitting an accessor omits that menu entry
+ * entirely — never an option that would sort a field that is always empty
+ * there. Each SectionTabs.tsx / ReferencesTab.tsx call site documents WHICH
+ * axes it offers and why, right next to the accessors (its own "notes").
  *
- * OWN ORDER — deliberately not a fourth axis here. candidate_work_experiences/
- * _educations/_certifications/_skills/candidate_references have no `sort_order`
- * column and no `POST .../reorder` route today (verified against
- * routes/api/tenant/candidates.php and the five create-table migrations,
- * 2026-08-17) — the backend is adding both, but only after a `migrate:fresh`
- * Danny runs himself. Shipping a drag handle before that lands would be a fake
- * affordance (§3): it would 500, not sort. FOLLOW-UP (the one step once the
- * column + route exist): add ONE more entry to a call site's `fields`-shaping —
- * an `'own'` axis whose order comes from the row's own `sort_order`, not a
- * client comparator — the menu, the persistence key and the toggle plumbing
- * below already generalise to it; nothing else changes.
+ * OWN ORDER (DRAG-SORT-1, shipped 2026-08-17) — the fourth axis is structural,
+ * not an accessor: pass `ownOrder: true` once the relation's backend carries a
+ * `sort_order` column + `PUT .../reorder` route (all five candidate sub-lists do
+ * — verified against routes/api/tenant/candidates.php). Unlike the other three
+ * axes this one needs NO client comparator: the backend already orders its GET
+ * by `sort_order` (Candidate::orderedSubEntities), so the array a caller's
+ * `items` already arrived in IS the current manual order — 'own' just means
+ * "render the received order, don't re-sort it" (see `order` below: identity,
+ * no getter). The actual DRAG that changes that order lives one layer up
+ * (AddableSection's `dragEnabled`/`onReorder`, wired from BackgroundTab's real
+ * `PUT /candidates/{id}/{relation}/reorder`) — this hook only decides WHETHER
+ * that mode is active (`isOwnOrder`) and remembers the CHOICE, never the order
+ * itself (see PERSISTENCE below).
  *
  * PERSISTENCE — every sub-tab's sort is saved through the user's own
  * `ui_preferences` blob (PUT /auth/me — confirmed against
@@ -32,21 +33,27 @@
  * sub-tabs share ONE clearly-named top-level key, `candidate_background_sort`,
  * internally keyed by `storageKey` (one slice per sub-tab) — see
  * useUserPreference (src/hooks) for the read-once / fail-quiet contract.
+ * Only the CHOSEN AXIS is a per-user preference here (including picking
+ * 'own'); the manual ORDER itself is a property of the record — same for every
+ * viewer — and is persisted separately, through the candidate's own reorder
+ * route, never through this blob.
  *
  * PINNED/AUTOMATED ROWS — candidate_work_experiences carries a nullable
  * `match_id`: a row a workflow auto-created from a Hired match. It gets no
  * special treatment here — it still carries a real `start_date`, so a date
- * sort places it honestly instead of hiding or silently pinning it.
+ * sort places it honestly instead of hiding or silently pinning it. An
+ * auto-created row's OWN position (HasManualOrder: next free slot, i.e. the
+ * bottom) is a backend invariant, not something this hook computes.
  */
 import { useCallback, useMemo } from 'react'
 import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
-import { ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react'
+import { ArrowUpDown, ArrowUp, ArrowDown, GripVertical } from 'lucide-react'
 import ActionMenu from '@/components/ui/ActionMenu'
 import type { MenuNode } from '@/components/ui/ActionMenu'
 import { useUserPreference } from '@/hooks/useUserPreference'
 
-type SortField = 'startDate' | 'endDate' | 'function'
+type SortField = 'startDate' | 'endDate' | 'function' | 'own'
 type SortDir = 'asc' | 'desc'
 interface SortState { field: SortField; dir: SortDir }
 
@@ -67,6 +74,12 @@ interface UseRelationSortOptions<T> {
   endDateLabel?: string
   functionOf?: (item: T) => string | null | undefined
   functionLabel?: string
+  // Structural, not an accessor (file header, OWN ORDER): true once the
+  // relation's backend carries `sort_order` + a `PUT .../reorder` route. Omit
+  // for any future caller that doesn't have that yet — same "never offer an
+  // option with nothing real behind it" rule the other three axes already follow.
+  ownOrder?: boolean
+  ownOrderLabel?: string
 }
 
 interface UseRelationSortResult {
@@ -75,18 +88,23 @@ interface UseRelationSortResult {
   // index is preserved so edit/remove never target the wrong row (§3).
   order: number[]
   control: ReactNode
+  // True while 'own' is the active axis — the ONLY moment drag handles/keyboard
+  // reorder should render (build brief #2): sorting by date and then dragging
+  // would be meaningless, since the very next render re-sorts it away.
+  isOwnOrder: boolean
 }
 
 // Missing values always sink to the bottom regardless of direction, instead of
 // being placed by comparing against undefined/empty string.
 const isMissing = (v: unknown): boolean => v === undefined || v === null || v === ''
 // Date-ish axes default to newest-first (a CV-like "most recent on top"); the
-// alphabetic 'function' axis defaults A→Z.
+// alphabetic 'function' axis defaults A→Z. 'own' has no direction (never called
+// for it — see toggle() below).
 const defaultDir = (field: SortField): SortDir => (field === 'function' ? 'asc' : 'desc')
 
 export function useRelationSort<T>(items: T[], opts: UseRelationSortOptions<T>): UseRelationSortResult {
   const { t } = useTranslation('candidates')
-  const { storageKey, startDateOf, startDateLabel, endDateOf, endDateLabel, functionOf, functionLabel } = opts
+  const { storageKey, startDateOf, startDateLabel, endDateOf, endDateLabel, functionOf, functionLabel, ownOrder, ownOrderLabel } = opts
 
   // ONE shared preference object across every sub-tab; this hook instance only
   // ever reads/writes its own `storageKey` slice.
@@ -119,12 +137,19 @@ export function useRelationSort<T>(items: T[], opts: UseRelationSortOptions<T>):
     if (startDateOf) list.push({ field: 'startDate', label: startDateLabel ?? t('addFields.startDate') })
     if (endDateOf)   list.push({ field: 'endDate',   label: endDateLabel   ?? t('addFields.endDate') })
     if (functionOf)  list.push({ field: 'function',  label: functionLabel  ?? t('addFields.functionTitle') })
+    // Own order always sits last (Danny's own phrasing: "…and my own order").
+    if (ownOrder)    list.push({ field: 'own',       label: ownOrderLabel  ?? t('addFields.ownOrder') })
     return list
-  }, [startDateOf, startDateLabel, endDateOf, endDateLabel, functionOf, functionLabel, t])
+  }, [startDateOf, startDateLabel, endDateOf, endDateLabel, functionOf, functionLabel, ownOrder, ownOrderLabel, t])
+
+  const isOwnOrder = state?.field === 'own'
 
   const order = useMemo(() => {
     const idx = items.map((_, i) => i)
-    if (!state) return idx
+    // 'own' has no client comparator (file header, OWN ORDER) — the received
+    // array order already IS the manual order (the backend orders its GET by
+    // sort_order), so this is deliberately the identity mapping, never a sort.
+    if (!state || state.field === 'own') return idx
     const getter = state.field === 'startDate' ? startDateOf : state.field === 'endDate' ? endDateOf : functionOf
     idx.sort((ia, ib) => {
       const av = getter?.(items[ia]), bv = getter?.(items[ib])
@@ -142,22 +167,27 @@ export function useRelationSort<T>(items: T[], opts: UseRelationSortOptions<T>):
 
   // Click cycle per axis: off → default dir → opposite dir → off (back to the
   // received order). Picking a DIFFERENT axis always restarts at its default.
+  // 'own' has no direction to cycle through — a second click on it just turns
+  // it back off, mirroring the two-state toggle a checkbox would give it.
   const toggle = useCallback((field: SortField) => {
     const next: SortState | null =
-      !state || state.field !== field ? { field, dir: defaultDir(field) }
+      !state || state.field !== field ? { field, dir: field === 'own' ? 'asc' : defaultDir(field) }
+      : field === 'own' ? null
       : state.dir === defaultDir(field) ? { field, dir: state.dir === 'asc' ? 'desc' : 'asc' }
       : null
     setAllSorts({ ...allSorts, [storageKey]: next })
   }, [allSorts, setAllSorts, storageKey, state])
 
-  if (fields.length === 0) return { order, control: null }
+  if (fields.length === 0) return { order, control: null, isOwnOrder: false }
 
   // One leaf action per offered axis — ArrowUpDown when idle, an explicit
-  // Up/Down once it is the active axis (never colour as the only signal, §6:
-  // the label text plus the icon shape both carry the state).
+  // Up/Down once it is the active date/function axis, GripVertical for 'own'
+  // (never colour as the only signal, §6: the label text plus the icon shape
+  // both carry the state).
   const menuItems: MenuNode[] = fields.map(({ field, label }) => {
     const dir = state?.field === field ? state.dir : null
-    return { key: field, label, icon: dir ? (dir === 'asc' ? ArrowUp : ArrowDown) : ArrowUpDown, onSelect: () => toggle(field) }
+    const icon = field === 'own' ? GripVertical : dir ? (dir === 'asc' ? ArrowUp : ArrowDown) : ArrowUpDown
+    return { key: field, label, icon, onSelect: () => toggle(field) }
   })
 
   const control = (
@@ -165,5 +195,5 @@ export function useRelationSort<T>(items: T[], opts: UseRelationSortOptions<T>):
       items={menuItems} align="right" menuWidth={200} highlighted={!!state} />
   )
 
-  return { order, control }
+  return { order, control, isOwnOrder }
 }

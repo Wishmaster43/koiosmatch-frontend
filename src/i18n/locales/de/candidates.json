@@ -480,7 +480,8 @@
     "mobile": "Mobil",
     "referenceLetter": "Referenzschreiben",
     "linkedDocumentFor": "Verknüpftes Dokument für {{name}}",
-    "workExperience": "Berufserfahrung"
+    "workExperience": "Berufserfahrung",
+    "ownOrder": "Eigene Reihenfolge"
   },
   "work": {
     "client": "Kunde",

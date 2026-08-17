@@ -7,17 +7,21 @@
  * - ONE menu (the shared ActionMenu), keyboard-reachable with a real accessible
  *   name — never a hand-rolled dropdown or a pair of buttons;
  * - each OFFERED option really reorders the rendered rows;
- * - an option is absent where the sub-tab has nothing real to sort by (Skills:
- *   no control at all; Education/Certifications: no function; References: no
- *   dates but a real `function` field);
- * - "own order" is never offered anywhere (no backend sort_order/reorder route
- *   exists yet for any of these five relations);
- * - the choice persists through the REAL /auth/me `ui_preferences` route — read
- *   once from the already-loaded user, written with the real merged body, and
- *   never lost locally when that write fails.
+ * - a date/function option is absent where the sub-tab has nothing real to sort
+ *   by (Skills: no start/end/function; Education/Certifications: no function;
+ *   References: no dates but a real `function` field);
+ * - "own order" (DRAG-SORT-1) is offered on ALL FIVE relations — the backend
+ *   ships sort_order + PUT .../reorder on every one of them — and drag/keyboard
+ *   reorder handles render ONLY while it is the active axis;
+ * - the CHOSEN AXIS persists through the REAL /auth/me `ui_preferences` route
+ *   (read once from the already-loaded user, written with the real merged
+ *   body, never lost locally when that write fails) — but the manual ORDER
+ *   itself never rides along in that same body (it is the record's own data,
+ *   not a per-user preference; BackgroundTab.test.tsx owns the real
+ *   PUT .../reorder request assertion).
  */
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { render, screen, waitFor } from '@testing-library/react'
+import { render, screen, waitFor, fireEvent } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { ExperienceTab, EducationTab, CertificationsTab, SkillsTab } from './SectionTabs'
 import ReferencesTab from './ReferencesTab'
@@ -27,7 +31,10 @@ import ReferencesTab from './ReferencesTab'
 // first time `api.put`/`useAuth()` are actually invoked from inside a mock.
 const { getMock, putMock, authState } = vi.hoisted(() => ({
   getMock: vi.fn(() => Promise.resolve({ data: { data: [] } })),
-  putMock: vi.fn(() => Promise.resolve({ data: {} })),
+  // Explicit call signature (mirrors ReportKpiSettings.test.tsx's saveSettingsKeys
+  // mock) — the own-order persistence-separation test below reads `call[1]` (the
+  // request body) off `putMock.mock.calls`, which needs a real parameter tuple.
+  putMock: vi.fn<(url: string, body: Record<string, unknown>) => Promise<{ data: object }>>(() => Promise.resolve({ data: {} })),
   authState: { user: null as { ui_preferences?: Record<string, unknown> } | null, refreshUser: vi.fn() },
 }))
 
@@ -71,7 +78,7 @@ describe('ExperienceTab sort menu', () => {
   ]
   const names = () => screen.getAllByText(/Verpleegkundige|Arts|Coördinator/).map(el => el.textContent)
 
-  it('offers exactly start date, end date and function — all three are real columns here', async () => {
+  it('offers start date, end date, function AND own order — all four are real here', async () => {
     const user = userEvent.setup()
     render(<ExperienceTab items={items} onAdd={() => {}} onEdit={() => {}} onRemove={() => {}} />)
     await user.click(screen.getByRole('button', { name: 'Sorteren' }))
@@ -80,8 +87,10 @@ describe('ExperienceTab sort menu', () => {
     expect(screen.getByRole('menuitem', { name: 'Einddatum' })).toBeInTheDocument()
     // FIELD TRAP (build brief point 3): the menu label is "Functietitel" — the FE
     // title field, which TO_API maps to the backend's `position` column (the job
-    // title). It is never a stand-in for the future ordering column.
+    // title). It is never a stand-in for the manual `sort_order` ordering column.
     expect(screen.getByRole('menuitem', { name: 'Functietitel' })).toBeInTheDocument()
+    // DRAG-SORT-1: candidate_work_experiences carries sort_order + PUT .../reorder.
+    expect(screen.getByRole('menuitem', { name: 'Eigen volgorde' })).toBeInTheDocument()
   })
 
   // ACHTERGROND-DATUM-STANDAARD-1 (Danny 17-08: "standaard op datum dus laatste
@@ -142,6 +151,118 @@ describe('ExperienceTab sort menu', () => {
   })
 })
 
+/**
+ * DRAG-SORT-1 — own order: display, drag handles gated to that ONE mode, the
+ * real reorder gesture bubbling up as `onReorder`, and keyboard operability.
+ * BackgroundTab.test.tsx separately asserts the REAL PUT .../reorder request +
+ * revert-on-failure — this layer only proves the presentation/gesture contract
+ * (§13: a mutation test asserts the request; a display test asserts the DOM).
+ */
+describe('ExperienceTab own order (DRAG-SORT-1)', () => {
+  const items = [
+    { id: 'a', title: 'Verpleegkundige', company: 'Zorg B.V.', start: '2020-01-01' },
+    { id: 'b', title: 'Arts',            company: 'Kliniek',   start: '2022-06-15' },
+    { id: 'c', title: 'Coördinator',     company: 'Huis',      start: '2018-03-10' },
+  ]
+  const names = () => screen.getAllByText(/Verpleegkundige|Arts|Coördinator/).map(el => el.textContent)
+
+  it('renders no drag handles while a date/function axis is active (the default)', () => {
+    const { container } = render(<ExperienceTab items={items} onAdd={() => {}} onEdit={() => {}} onRemove={() => {}} onReorder={() => {}} />)
+    expect(container.querySelectorAll('[draggable="true"]')).toHaveLength(0)
+    expect(screen.queryByRole('button', { name: 'Omhoog verplaatsen' })).toBeNull()
+  })
+
+  it('picking "own order" shows the RECEIVED order (not the date-sorted one) and renders a handle per row', async () => {
+    const user = userEvent.setup()
+    const { container } = render(<ExperienceTab items={items} onAdd={() => {}} onEdit={() => {}} onRemove={() => {}} onReorder={() => {}} />)
+    await pick(user, 'Eigen volgorde')
+    // Identity order — items as given, NOT newest-start-first (that would be Arts first).
+    expect(names()).toEqual(['Verpleegkundige', 'Arts', 'Coördinator'])
+    expect(container.querySelectorAll('[draggable="true"]')).toHaveLength(3)
+    expect(screen.getAllByRole('button', { name: 'Omhoog verplaatsen' })).toHaveLength(3)
+    expect(screen.getAllByRole('button', { name: 'Omlaag verplaatsen' })).toHaveLength(3)
+  })
+
+  it('switching back to a date axis hides the handles again — sorting by date and then dragging would be meaningless (the next render re-sorts it away)', async () => {
+    const user = userEvent.setup()
+    const { container } = render(<ExperienceTab items={items} onAdd={() => {}} onEdit={() => {}} onRemove={() => {}} onReorder={() => {}} />)
+    await pick(user, 'Eigen volgorde')
+    expect(container.querySelectorAll('[draggable="true"]')).toHaveLength(3)
+    await pick(user, 'Begindatum')
+    expect(container.querySelectorAll('[draggable="true"]')).toHaveLength(0)
+  })
+
+  it('a drag reports the FULL item list in its new order to onReorder', async () => {
+    const user = userEvent.setup()
+    const onReorder = vi.fn()
+    const { container } = render(<ExperienceTab items={items} onAdd={() => {}} onEdit={() => {}} onRemove={() => {}} onReorder={onReorder} />)
+    await pick(user, 'Eigen volgorde')
+    const rows = container.querySelectorAll('[draggable="true"]')
+    expect(rows).toHaveLength(3)
+
+    // Drag row 0 (Verpleegkundige) onto row 1 (Arts) — Verpleegkundige moves after Arts.
+    fireEvent.dragStart(rows[0])
+    fireEvent.dragOver(rows[1])
+    fireEvent.drop(rows[1])
+
+    expect(onReorder).toHaveBeenCalledTimes(1)
+    const next = onReorder.mock.calls[0][0] as { id: string }[]
+    expect(next.map(x => x.id)).toEqual(['b', 'a', 'c'])
+  })
+
+  it('the keyboard path (focused move-down button, real Enter keypress) reorders and calls onReorder — no mouse involved', async () => {
+    const user = userEvent.setup()
+    const onReorder = vi.fn()
+    render(<ExperienceTab items={items} onAdd={() => {}} onEdit={() => {}} onRemove={() => {}} onReorder={onReorder} />)
+    await pick(user, 'Eigen volgorde')
+
+    const moveDown = screen.getAllByRole('button', { name: 'Omlaag verplaatsen' })[0]
+    moveDown.focus()
+    await user.keyboard('{Enter}')
+
+    expect(onReorder).toHaveBeenCalledTimes(1)
+    const next = onReorder.mock.calls[0][0] as { id: string }[]
+    expect(next.map(x => x.id)).toEqual(['b', 'a', 'c'])
+  })
+
+  it('the move-up button on the FIRST row and move-down on the LAST row are disabled — no dead reorder past either end', async () => {
+    const user = userEvent.setup()
+    render(<ExperienceTab items={items} onAdd={() => {}} onEdit={() => {}} onRemove={() => {}} onReorder={() => {}} />)
+    await pick(user, 'Eigen volgorde')
+    expect(screen.getAllByRole('button', { name: 'Omhoog verplaatsen' })[0]).toBeDisabled()
+    expect(screen.getAllByRole('button', { name: 'Omlaag verplaatsen' }).at(-1)).toBeDisabled()
+  })
+
+  it('picking "own order" persists ONLY the chosen axis to ui_preferences — the manual order/ids never ride along in that same body', async () => {
+    authState.user = { ui_preferences: {} }
+    const user = userEvent.setup()
+    const onReorder = vi.fn()
+    const { container } = render(<ExperienceTab items={items} onAdd={() => {}} onEdit={() => {}} onRemove={() => {}} onReorder={onReorder} />)
+    await pick(user, 'Eigen volgorde')
+    await waitFor(() => expect(putMock).toHaveBeenCalledWith('/auth/me', {
+      ui_preferences: { candidate_background_sort: { experience: { field: 'own', dir: 'asc' } } },
+    }))
+    const callsAfterPick = putMock.mock.calls.length
+
+    // Now drag — the ORDER itself is record data (BackgroundTab persists it
+    // through the candidate's own reorder route), never this preference blob.
+    const rows = container.querySelectorAll('[draggable="true"]')
+    fireEvent.dragStart(rows[0])
+    fireEvent.dragOver(rows[1])
+    fireEvent.drop(rows[1])
+    expect(onReorder).toHaveBeenCalled()
+
+    // No additional /auth/me write happened — the drag never touched this route,
+    // and every earlier call already only ever carried {field, dir}, never an
+    // items/ids array.
+    expect(putMock.mock.calls.length).toBe(callsAfterPick)
+    for (const call of putMock.mock.calls) {
+      const body = call[1] as { ui_preferences: { candidate_background_sort: Record<string, unknown> } }
+      expect(body.ui_preferences.candidate_background_sort.experience).toEqual({ field: 'own', dir: 'asc' })
+    }
+  })
+})
+
 describe('EducationTab sort menu', () => {
   // Start EARLY/end LATE vs. start LATE/end EARLY — proves the two axes are
   // independent, not both reading the same underlying date.
@@ -151,12 +272,13 @@ describe('EducationTab sort menu', () => {
   ]
   const names = () => screen.getAllByText(/A-opleiding|B-opleiding/).map(el => el.textContent)
 
-  it('offers start date and end date but NOT function — candidate_educations has no job-title field', async () => {
+  it('offers start date, end date and own order, but NOT function — candidate_educations has no job-title field', async () => {
     const user = userEvent.setup()
     render(<EducationTab items={items} onAdd={() => {}} onEdit={() => {}} onRemove={() => {}} />)
     await user.click(screen.getByRole('button', { name: 'Sorteren' }))
     expect(screen.getByRole('menuitem', { name: 'Begindatum' })).toBeInTheDocument()
     expect(screen.getByRole('menuitem', { name: 'Einddatum' })).toBeInTheDocument()
+    expect(screen.getByRole('menuitem', { name: 'Eigen volgorde' })).toBeInTheDocument()
     expect(screen.queryByRole('menuitem', { name: 'Functietitel' })).not.toBeInTheDocument()
   })
 
@@ -178,12 +300,13 @@ describe('CertificationsTab sort menu', () => {
   ]
   const names = () => screen.getAllByText(/BHV|VCA/).map(el => el.textContent)
 
-  it('labels the two real date columns with THIS tab\'s own wording (Issued/Expires), not a generic Start/End', async () => {
+  it('labels the two real date columns with THIS tab\'s own wording (Issued/Expires), not a generic Start/End, and offers own order too', async () => {
     const user = userEvent.setup()
     render(<CertificationsTab items={items} onAdd={() => {}} onEdit={() => {}} onRemove={() => {}} />)
     await user.click(screen.getByRole('button', { name: 'Sorteren' }))
     expect(screen.getByRole('menuitem', { name: 'Uitgegeven' })).toBeInTheDocument()
     expect(screen.getByRole('menuitem', { name: 'Verloopt' })).toBeInTheDocument()
+    expect(screen.getByRole('menuitem', { name: 'Eigen volgorde' })).toBeInTheDocument()
     expect(screen.queryByRole('menuitem', { name: 'Functietitel' })).not.toBeInTheDocument()
   })
 
@@ -198,15 +321,29 @@ describe('CertificationsTab sort menu', () => {
   })
 })
 
+/**
+ * DRAG-SORT-1: candidate_skills has NO date column and NO function/title field
+ * (Requirement 2 of the original brief still holds — never offer an option
+ * with nothing real to sort by), but it DOES now carry sort_order +
+ * PUT .../reorder — so "own order" is the ONE axis this tab offers, and the
+ * sort control that used to render nothing now renders exactly that.
+ */
 describe('SkillsTab sort menu', () => {
-  it('renders no sort control at all — candidate_skills has no date column and no function field', () => {
-    render(<SkillsTab items={[{ id: '1', name: 'Triage', level: 'Expert' }]} onAdd={() => {}} onEdit={() => {}} onRemove={() => {}} />)
-    expect(screen.queryByRole('button', { name: 'Sorteren' })).not.toBeInTheDocument()
+  it('offers ONLY own order — no date column and no function field exist here', async () => {
+    const user = userEvent.setup()
+    render(<SkillsTab items={[{ id: '1', name: 'Triage', level: 'Expert' }, { id: '2', name: 'BHV', level: '' }]} onAdd={() => {}} onEdit={() => {}} onRemove={() => {}} />)
+    await user.click(screen.getByRole('button', { name: 'Sorteren' }))
+    expect(screen.getByRole('menuitem', { name: 'Eigen volgorde' })).toBeInTheDocument()
+    expect(screen.queryByRole('menuitem', { name: 'Begindatum' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('menuitem', { name: 'Functietitel' })).not.toBeInTheDocument()
   })
 
-  it('never offers "own order" — no reorder route exists for candidate_skills', () => {
-    render(<SkillsTab items={[{ id: '1', name: 'Triage' }]} onAdd={() => {}} onEdit={() => {}} onRemove={() => {}} />)
-    expect(screen.queryByRole('button', { name: /drag|sleep|eigen volgorde/i })).not.toBeInTheDocument()
+  it('renders drag handles only once own order is picked', async () => {
+    const user = userEvent.setup()
+    const { container } = render(<SkillsTab items={[{ id: '1', name: 'Triage' }, { id: '2', name: 'BHV' }]} onAdd={() => {}} onEdit={() => {}} onRemove={() => {}} onReorder={() => {}} />)
+    expect(container.querySelectorAll('[draggable="true"]')).toHaveLength(0)
+    await pick(user, 'Eigen volgorde')
+    expect(container.querySelectorAll('[draggable="true"]')).toHaveLength(2)
   })
 })
 
@@ -217,11 +354,12 @@ describe('ReferencesTab sort menu', () => {
   ]
   const names = () => screen.getAllByText(/Jan Jansen|Piet Pietersen/).map(el => el.textContent)
 
-  it('offers ONLY function — candidate_references has no date column, but DOES carry the referent\'s own role', async () => {
+  it('offers function and own order — candidate_references has no date column, but DOES carry the referent\'s own role plus sort_order', async () => {
     const user = userEvent.setup()
     render(<ReferencesTab items={items} onAdd={() => {}} onEdit={() => {}} onRemove={() => {}} onVerify={() => {}} />)
     await user.click(screen.getByRole('button', { name: 'Sorteren' }))
     expect(screen.getByRole('menuitem', { name: 'Functie' })).toBeInTheDocument()
+    expect(screen.getByRole('menuitem', { name: 'Eigen volgorde' })).toBeInTheDocument()
     expect(screen.queryByRole('menuitem', { name: 'Begindatum' })).not.toBeInTheDocument()
     expect(screen.queryByRole('menuitem', { name: 'Einddatum' })).not.toBeInTheDocument()
   })

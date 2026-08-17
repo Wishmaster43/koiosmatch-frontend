@@ -503,7 +503,8 @@
     "mobile": "Mobile",
     "referenceLetter": "Reference letter",
     "linkedDocumentFor": "Linked document for {{name}}",
-    "workExperience": "Work experience"
+    "workExperience": "Work experience",
+    "ownOrder": "Custom order"
   },
   "work": {
     "client": "Client",

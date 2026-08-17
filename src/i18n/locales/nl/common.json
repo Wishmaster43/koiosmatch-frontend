@@ -446,5 +446,9 @@
   "popoutHandoffFailed": "Het tweede scherm heeft de notitie niet overgenomen. Je tekst staat hier nog.",
   "discardChangesConfirm": "Je hebt tekst die nog niet is opgeslagen. Sluiten zonder opslaan?",
   "koiosSuggested": "Voorstel van Koios AI op basis van de kandidaatgeschiedenis",
-  "koiosSuggestedOwnerAgent": "Voorstel van Koios AI op basis van de eigenaar van de vacature"
+  "koiosSuggestedOwnerAgent": "Voorstel van Koios AI op basis van de eigenaar van de vacature",
+  "dragList": {
+    "moveUp": "Omhoog verplaatsen",
+    "moveDown": "Omlaag verplaatsen"
+  }
 }

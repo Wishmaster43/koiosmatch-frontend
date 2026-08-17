@@ -446,5 +446,9 @@
   "popoutHandoffFailed": "Le second écran n'a pas repris la note. Votre texte est toujours ici.",
   "discardChangesConfirm": "Vous avez du texte non enregistré. Fermer sans enregistrer ?",
   "koiosSuggested": "Proposé par Koios AI selon l'historique du candidat",
-  "koiosSuggestedOwnerAgent": "Proposé par Koios AI selon le propriétaire de l'offre"
+  "koiosSuggestedOwnerAgent": "Proposé par Koios AI selon le propriétaire de l'offre",
+  "dragList": {
+    "moveUp": "Déplacer vers le haut",
+    "moveDown": "Déplacer vers le bas"
+  }
 }

@@ -480,7 +480,8 @@
     "mobile": "Móvil",
     "referenceLetter": "Carta de referencia",
     "linkedDocumentFor": "Documento vinculado para {{name}}",
-    "workExperience": "Experiencia laboral"
+    "workExperience": "Experiencia laboral",
+    "ownOrder": "Orden personalizado"
   },
   "work": {
     "client": "Cliente",

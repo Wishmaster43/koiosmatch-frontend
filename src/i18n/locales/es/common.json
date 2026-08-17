@@ -446,5 +446,9 @@
   "popoutHandoffFailed": "La segunda pantalla no ha recogido la nota. Tu texto sigue aquí.",
   "discardChangesConfirm": "Tienes texto sin guardar. ¿Cerrar sin guardar?",
   "koiosSuggested": "Propuesto por Koios AI según el historial del candidato",
-  "koiosSuggestedOwnerAgent": "Propuesto por Koios AI según el propietario de la vacante"
+  "koiosSuggestedOwnerAgent": "Propuesto por Koios AI según el propietario de la vacante",
+  "dragList": {
+    "moveUp": "Mover hacia arriba",
+    "moveDown": "Mover hacia abajo"
+  }
 }

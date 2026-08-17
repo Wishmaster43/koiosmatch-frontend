@@ -51,6 +51,11 @@ interface RelTabProps {
   // Certifications only — Experience/Skills ignore both, harmlessly unused).
   documents?: RelItem[]
   onJumpToDocuments?: () => void
+  // DRAG-SORT-1: fires with the FULL item list in its new order once a manual
+  // reorder (drag or keyboard move-up/down) completes — only reachable while the
+  // sort menu's "own order" axis is active (useRelationSort's `isOwnOrder`).
+  // BackgroundTab owns the real optimistic PUT .../reorder + revert.
+  onReorder?: (items: RelItem[]) => void
 }
 type AnyProps = Record<string, unknown>
 const AddableSection = AddableSectionJs as unknown as ComponentType<AnyProps>
@@ -141,7 +146,7 @@ function ProseField({ value }: { value?: string }) {
   )
 }
 
-export function ExperienceTab({ items = [], onAdd, onEdit, onRemove, documents = [], onJumpToDocuments }: RelTabProps) {
+export function ExperienceTab({ items = [], onAdd, onEdit, onRemove, documents = [], onJumpToDocuments, onReorder }: RelTabProps) {
   const { t } = useTranslation('candidates')
   const { formatDate } = useDateFormat()
   // DOC-ERV-1: preview overlay for a row's linked proof document — the shared
@@ -173,21 +178,23 @@ export function ExperienceTab({ items = [], onAdd, onEdit, onRemove, documents =
   // has real start_date + end_date columns, plus the job title — stored on the
   // BACKEND in a column literally named `position` (confirmed against the
   // migration, 2026-08-17). That `position` is a plain string field (the job
-  // title), NOT an ordering column — a FUTURE "own order" axis will use a
-  // DIFFERENT `sort_order` column once the backend adds it (see useRelationSort's
-  // FOLLOW-UP note); the two must never be confused. The FE local key for the
+  // title), NOT the `sort_order` ordering column the 'own' axis below reads
+  // (DRAG-SORT-1) — the two must never be confused. The FE local key for the
   // job title is `title`/`function_title` (TO_API maps it to `function_title`
-  // above) — sort-by-function reads THAT. All three axes are real here, so all
-  // three are offered.
-  const { order, control } = useRelationSort(items, {
+  // above) — sort-by-function reads THAT. All three date/function axes are real
+  // here, plus 'own' (the backend carries sort_order + PUT .../reorder for
+  // candidate_work_experiences), so all four are offered.
+  const { order, control, isOwnOrder } = useRelationSort(items, {
     storageKey: 'experience',
     startDateOf: (raw: RelItem) => (raw.start ?? raw.start_date) as string | undefined,
     endDateOf:   (raw: RelItem) => (raw.end ?? raw.end_date) as string | undefined,
     functionOf:  (raw: RelItem) => (raw.title ?? raw.function_title) as string | undefined,
+    ownOrder: true,
   })
   return (
     <>
       <AddableSection title={null} emptyText={t('sections.experienceEmpty')} renderAddButton={renderAddButton} order={order} headerExtra={control}
+        dragEnabled={isOwnOrder} onReorder={onReorder}
         items={items} fields={fields} onAdd={onAdd} onEdit={onEdit} onRemove={onRemove}
         renderItem={(raw: RelItem, i: number, arr: RelItem[]) => {
           const e = raw as { id?: Id; title?: string; function_title?: string; company?: string; employer?: string; location?: string; start?: string; start_date?: string; end?: string; end_date?: string; current?: boolean; period?: string; desc?: string }
@@ -218,7 +225,7 @@ export function ExperienceTab({ items = [], onAdd, onEdit, onRemove, documents =
   )
 }
 
-export function EducationTab({ items = [], onAdd, onEdit, onRemove, documents = [], onJumpToDocuments }: RelTabProps) {
+export function EducationTab({ items = [], onAdd, onEdit, onRemove, documents = [], onJumpToDocuments, onReorder }: RelTabProps) {
   const { t } = useTranslation('candidates')
   const { formatDate } = useDateFormat()
   const fmt = (d?: string) => (d ? formatDate(d) : '')
@@ -261,14 +268,18 @@ export function EducationTab({ items = [], onAdd, onEdit, onRemove, documents = 
   // mirroring resolveEducationStartDate's own read-line fallback) — offer both.
   // No job-title/function field exists on this table, so 'function' is omitted
   // entirely (Requirement 2: never offer an option with nothing to sort by).
-  const { order, control } = useRelationSort(items, {
+  // DRAG-SORT-1: candidate_educations carries sort_order + PUT .../reorder, so
+  // 'own' is offered too.
+  const { order, control, isOwnOrder } = useRelationSort(items, {
     storageKey: 'education',
     startDateOf: (raw: RelItem) => resolveEducationStartDate(raw as { start?: unknown; start_date?: unknown; issued?: unknown; issue_date?: unknown }),
     endDateOf:   (raw: RelItem) => (raw.end ?? raw.end_date) as string | undefined,
+    ownOrder: true,
   })
   return (
     <>
     <AddableSection title={null} emptyText={t('sections.educationEmpty')} renderAddButton={renderAddButton} order={order} headerExtra={control}
+      dragEnabled={isOwnOrder} onReorder={onReorder}
       items={items} fields={fields} onAdd={onAdd} onEdit={onEdit} onRemove={onRemove}
       // Mirror the read line's own fallback (resolveEducationStartDate) into the edit
       // form's initial values — otherwise a legacy in-progress row that shows e.g.
@@ -333,7 +344,7 @@ export function EducationTab({ items = [], onAdd, onEdit, onRemove, documents = 
   )
 }
 
-export function CertificationsTab({ items = [], onAdd, onEdit, onRemove, documents = [], onJumpToDocuments }: RelTabProps) {
+export function CertificationsTab({ items = [], onAdd, onEdit, onRemove, documents = [], onJumpToDocuments, onReorder }: RelTabProps) {
   const { t } = useTranslation('candidates')
   const { formatDate } = useDateFormat()
   const fmt = (d?: string) => (d ? formatDate(d) : '')
@@ -365,17 +376,21 @@ export function CertificationsTab({ items = [], onAdd, onEdit, onRemove, documen
   // "opens/closes the validity window" role — offered under the same
   // startDate/endDate axis, labelled with THIS tab's own field names
   // (Issued/Expires, t('certified.*')) so nothing is mislabeled. No function
-  // field exists here, so it is omitted (Requirement 2).
-  const { order, control } = useRelationSort(items, {
+  // field exists here, so it is omitted (Requirement 2). DRAG-SORT-1:
+  // candidate_certifications carries sort_order + PUT .../reorder, so 'own' is
+  // offered too.
+  const { order, control, isOwnOrder } = useRelationSort(items, {
     storageKey: 'certifications',
     startDateOf: (raw: RelItem) => (raw.issued ?? raw.issue_date) as string | undefined,
     startDateLabel: t('certified.issued'),
     endDateOf: (raw: RelItem) => (raw.expires ?? raw.expiry_date ?? raw.expiration_date) as string | undefined,
     endDateLabel: t('certified.expires'),
+    ownOrder: true,
   })
   return (
     <>
     <AddableSection title={null} emptyText={t('sections.certificationsEmpty')} renderAddButton={renderAddButton} order={order} headerExtra={control}
+      dragEnabled={isOwnOrder} onReorder={onReorder}
       items={items} fields={fields} onAdd={onAdd} onEdit={onEdit} onRemove={onRemove}
       editInitial={(it: RelItem) => ({ ...it, noExpiry: !(it as { expires?: unknown }).expires })}
       renderItem={(raw: RelItem, i: number, arr: RelItem[]) => {
@@ -405,7 +420,7 @@ export function CertificationsTab({ items = [], onAdd, onEdit, onRemove, documen
   )
 }
 
-export function SkillsTab({ items = [], onAdd, onEdit, onRemove, documents = [], onJumpToDocuments }: RelTabProps) {
+export function SkillsTab({ items = [], onAdd, onEdit, onRemove, documents = [], onJumpToDocuments, onReorder }: RelTabProps) {
   const { t } = useTranslation('candidates')
   // Level is a tenant lookup dropdown (SKILL-LVL-1), mirroring the languages editor.
   // LOOKUP-ICON-1: useSkillLevels now returns full {value,label,icon,color}
@@ -430,14 +445,16 @@ export function SkillsTab({ items = [], onAdd, onEdit, onRemove, documents = [],
     ...(documents.length > 0 ? [{ key: 'document_id', label: t('addFields.linkedDocument'), options: documentOptions }] : []),
   ]
   // Sub-tab sort notes: candidate_skills has no date column and no function/
-  // title field — nothing in the start date / end date / function set applies,
-  // so no accessor is passed at all and no sort control renders (Requirement 2:
-  // never offer an option with nothing to sort by).
-  const { order, control } = useRelationSort(items, { storageKey: 'skills' })
+  // title field — nothing in the start date / end date / function set applies
+  // (Requirement 2: never offer an option with nothing to sort by). DRAG-SORT-1:
+  // it DOES carry sort_order + PUT .../reorder, so 'own' is the ONE axis this
+  // tab offers — its menu is new because of this, not a regression.
+  const { order, control, isOwnOrder } = useRelationSort(items, { storageKey: 'skills', ownOrder: true })
   // Skills render as a vertical list (one per row) so edit/remove read clearly.
   return (
     <>
     <AddableSection title={null} emptyText={t('sections.skillsEmpty')} renderAddButton={renderAddButton} order={order} headerExtra={control}
+      dragEnabled={isOwnOrder} onReorder={onReorder}
       items={items} fields={fields} onAdd={onAdd} onEdit={onEdit} onRemove={onRemove}
       renderItem={(raw: RelItem, i: number, arr: RelItem[]) => {
         const v = raw as { id?: Id; name?: string; skill?: string; level?: string }

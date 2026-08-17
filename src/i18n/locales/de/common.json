@@ -446,5 +446,9 @@
   "popoutHandoffFailed": "Der zweite Bildschirm hat die Notiz nicht übernommen. Dein Text ist noch hier.",
   "discardChangesConfirm": "Du hast noch nicht gespeicherten Text. Ohne Speichern schließen?",
   "koiosSuggested": "Vorschlag von Koios AI auf Basis der Kandidatenhistorie",
-  "koiosSuggestedOwnerAgent": "Vorschlag von Koios AI auf Basis des Inhabers der Stelle"
+  "koiosSuggestedOwnerAgent": "Vorschlag von Koios AI auf Basis des Inhabers der Stelle",
+  "dragList": {
+    "moveUp": "Nach oben verschieben",
+    "moveDown": "Nach unten verschieben"
+  }
 }

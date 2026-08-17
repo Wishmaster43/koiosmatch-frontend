@@ -503,7 +503,8 @@
     "mobile": "Mobiel",
     "referenceLetter": "Referentiebrief",
     "linkedDocumentFor": "Gekoppeld document voor {{name}}",
-    "workExperience": "Werkervaring"
+    "workExperience": "Werkervaring",
+    "ownOrder": "Eigen volgorde"
   },
   "work": {
     "client": "Klant",

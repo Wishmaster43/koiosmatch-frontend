@@ -480,7 +480,8 @@
     "mobile": "Mobile",
     "referenceLetter": "Lettre de référence",
     "linkedDocumentFor": "Document lié pour {{name}}",
-    "workExperience": "Expérience professionnelle"
+    "workExperience": "Expérience professionnelle",
+    "ownOrder": "Ordre personnalisé"
   },
   "work": {
     "client": "Client",

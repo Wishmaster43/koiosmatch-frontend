@@ -3,7 +3,8 @@
  * a colour picker (swatch + popup), a colour badge, and a drag-to-reorder list.
  */
 import { useState, useEffect, useRef } from 'react'
-import { GripVertical, Check } from 'lucide-react'
+import { GripVertical, Check, ChevronUp, ChevronDown } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { COLOR_PRESETS } from '@/lib/colorPresets'
 import Toggle from '@/components/ui/Toggle'
 
@@ -95,7 +96,21 @@ export function DefaultToggle({ active, onClick, busy, activeLabel, inactiveLabe
 // sortable=false renders the same rows without drag affordances — for lookup
 // families whose backend has no /reorder route (SimpleLookupController): a drag
 // would PUT a nonexistent endpoint and 404-toast on every drop.
-export function DragList({ items, onReorder, renderItem, sortable = true }) {
+//
+// bare=true drops this list's OWN row padding/border (a caller whose renderItem
+// already renders its own full-width divider/spacing — e.g. the candidate
+// Background sub-tabs, DRAG-SORT-1 — would otherwise get it twice). The
+// drag-feedback opacity/highlight stays either way; only the chrome differs.
+//
+// KEYBOARD-REORDER-1: mouse-only drag-and-drop is not keyboard operable (§6) —
+// this had no alternative at all before DRAG-SORT-1 needed one. A move-up/
+// move-down pair per row is the smallest real path: each is a normal focusable
+// `<button>` with an accessible name, so Tab + Enter/Space reorders exactly like
+// a drag would, calling the same `onReorder(next)` the mouse path uses — one
+// reorder contract, two ways to drive it. This fixes every existing DragList
+// caller's keyboard gap too (e.g. ReportKpiSettings), not just the new one.
+export function DragList({ items, onReorder, renderItem, sortable = true, bare = false }) {
+  const { t } = useTranslation('common')
   const [dragIdx, setDragIdx] = useState(null)
   const [overIdx, setOverIdx] = useState(null)
 
@@ -108,26 +123,58 @@ export function DragList({ items, onReorder, renderItem, sortable = true }) {
     setDragIdx(null); setOverIdx(null)
   }
 
+  // Swap item `from` with the row directly above/below it and persist — the
+  // keyboard equivalent of a one-step drag (out-of-range moves are no-ops, also
+  // guarded by the buttons' own `disabled` at the list's ends).
+  const moveTo = (from, to) => {
+    if (to < 0 || to >= items.length || from === to) return
+    const next = [...items]
+    const [moved] = next.splice(from, 1)
+    next.splice(to, 0, moved)
+    onReorder(next)
+  }
+
+  const moveBtnStyle = (disabled) => ({
+    display: 'flex', alignItems: 'center', justifyContent: 'center', width: 14, height: 12,
+    background: 'none', border: 'none', padding: 0, color: disabled ? 'var(--border)' : 'var(--text-muted)',
+    cursor: disabled ? 'default' : 'pointer',
+  })
+
   return (
     <div>
-      {items.map((item, i) => (
-        <div key={item.id ?? i}
-          draggable={sortable}
-          onDragStart={sortable ? () => setDragIdx(i) : undefined}
-          onDragOver={sortable ? e => { e.preventDefault(); setOverIdx(i) } : undefined}
-          onDrop={sortable ? handleDrop : undefined}
-          onDragEnd={sortable ? () => { setDragIdx(null); setOverIdx(null) } : undefined}
-          style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 0',
-                   // eslint-disable-next-line no-restricted-syntax -- no exact/close index.css token match for this row divider/drag-over tint; kept literal to avoid changing the rendered tone
-                   borderBottom: '1px solid #F3F4F6', opacity: dragIdx === i ? 0.4 : 1,
-                   // eslint-disable-next-line no-restricted-syntax -- no exact/close index.css token match for this drag-over highlight tint; kept literal to avoid changing the rendered tone
-                   background: overIdx === i && dragIdx !== i ? '#F0F9FF' : 'transparent',
-                   borderRadius: 6, transition: 'background 0.1s' }}>
-          {/* eslint-disable-next-line no-restricted-syntax -- no exact/close index.css token match for this grip-icon grey; kept literal to avoid changing the rendered tone */}
-          {sortable && <GripVertical size={14} style={{ color: '#D1D5DB', cursor: 'grab', flexShrink: 0 }} />}
-          {renderItem(item, i)}
-        </div>
-      ))}
+      {items.map((item, i) => {
+        const isFirst = i === 0, isLast = i === items.length - 1
+        return (
+          <div key={item.id ?? i}
+            draggable={sortable}
+            onDragStart={sortable ? () => setDragIdx(i) : undefined}
+            onDragOver={sortable ? e => { e.preventDefault(); setOverIdx(i) } : undefined}
+            onDrop={sortable ? handleDrop : undefined}
+            onDragEnd={sortable ? () => { setDragIdx(null); setOverIdx(null) } : undefined}
+            style={{ display: 'flex', alignItems: 'center', gap: 10, padding: bare ? 0 : '10px 0',
+                     // eslint-disable-next-line no-restricted-syntax -- no exact/close index.css token match for this row divider/drag-over tint; kept literal to avoid changing the rendered tone
+                     borderBottom: bare ? 'none' : '1px solid #F3F4F6', opacity: dragIdx === i ? 0.4 : 1,
+                     // eslint-disable-next-line no-restricted-syntax -- no exact/close index.css token match for this drag-over highlight tint; kept literal to avoid changing the rendered tone
+                     background: overIdx === i && dragIdx !== i ? '#F0F9FF' : 'transparent',
+                     borderRadius: 6, transition: 'background 0.1s' }}>
+            {sortable && (
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', flexShrink: 0 }}>
+                <button type="button" onClick={() => moveTo(i, i - 1)} disabled={isFirst}
+                  aria-label={t('dragList.moveUp')} title={t('dragList.moveUp')} style={moveBtnStyle(isFirst)}>
+                  <ChevronUp size={11} />
+                </button>
+                {/* eslint-disable-next-line no-restricted-syntax -- no exact/close index.css token match for this grip-icon grey; kept literal to avoid changing the rendered tone */}
+                <GripVertical size={14} style={{ color: '#D1D5DB', cursor: 'grab' }} aria-hidden="true" />
+                <button type="button" onClick={() => moveTo(i, i + 1)} disabled={isLast}
+                  aria-label={t('dragList.moveDown')} title={t('dragList.moveDown')} style={moveBtnStyle(isLast)}>
+                  <ChevronDown size={11} />
+                </button>
+              </div>
+            )}
+            {renderItem(item, i)}
+          </div>
+        )
+      })}
     </div>
   )
 }

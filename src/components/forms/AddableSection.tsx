@@ -8,6 +8,12 @@
  * diskette/✕) and the trash button per item.
  *
  * layout="tags" wraps items in a flex-wrap row (chips); "list" stacks them.
+ *
+ * DRAG-SORT-1: `dragEnabled` + `onReorder` render the list through the shared
+ * settings `DragList` (grip + keyboard move-up/down, KEYBOARD-REORDER-1) instead
+ * of the plain map — reusing it rather than forking a second drag implementation
+ * per the house rule. Both are optional/undefined by default, so every existing
+ * caller (matches, vacancy required-skills, …) is byte-for-byte unaffected.
  */
 import { useState } from 'react'
 import type { ComponentType, CSSProperties, ReactNode } from 'react'
@@ -16,6 +22,7 @@ import { Edit2, Trash2 } from 'lucide-react'
 import SectionCardJs from '../ui/SectionCard'
 import AddFormJs from './AddForm'
 import { AddButton as AddButtonJs } from './fields'
+import { DragList } from '@/pages/settings/components/SettingsControls'
 
 type AnyProps = Record<string, unknown>
 // Still-untyped JS helpers — accept any props at the boundary.
@@ -53,10 +60,20 @@ interface AddableSectionProps {
   order?: number[]
   // Optional control shown beside the "+" button — e.g. the shared sort header.
   headerExtra?: ReactNode
+  // DRAG-SORT-1: render rows through the shared DragList (grip + keyboard
+  // move-up/down) instead of the plain map. Only meaningful together with
+  // `onReorder` — omit/false renders exactly as before.
+  dragEnabled?: boolean
+  // Called with the FULL item list in its new order once a drag or a keyboard
+  // move completes. The caller (BackgroundTab) owns the actual persistence
+  // (optimistic PUT .../reorder + revert) — this component only reports the
+  // gesture, mirroring how onAdd/onEdit/onRemove already work.
+  onReorder?: (nextItems: RelItem[]) => void
 }
 
 export default function AddableSection({
   title, items = [], fields, onAdd, onEdit, onRemove, emptyText, renderItem, layout = 'list', addLabel, editInitial, renderAddButton, order, headerExtra,
+  dragEnabled = false, onReorder,
 }: AddableSectionProps) {
   const { t } = useTranslation('common')
   const [adding,     setAdding]     = useState(false)
@@ -112,9 +129,30 @@ export default function AddableSection({
       {items.length === 0 && !adding && (
         <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{emptyText ?? t('empty')}</div>
       )}
-      {isTags
-        ? <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, alignItems: 'center' }}>{displayIdx.map(i => renderRow(items[i], i, items))}</div>
-        : displayIdx.map(i => renderRow(items[i], i, items))}
+      {isTags ? (
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, alignItems: 'center' }}>{displayIdx.map(i => renderRow(items[i], i, items))}</div>
+      ) : dragEnabled && onReorder ? (
+        // DRAG-SORT-1: `bare` — this row already renders its own padding/border
+        // (each Tab's renderItem), so DragList contributes only the grip + the
+        // keyboard move-up/down pair, never a second divider.
+        <DragList
+          items={displayIdx.map(i => items[i])}
+          bare
+          // Reordering mid add/edit would move a row out from under an open form —
+          // pause the affordance for that one beat rather than let it fire.
+          sortable={editingIdx === null && !adding}
+          onReorder={(next: RelItem[]) => onReorder(next)}
+          // flex:1/minWidth:0 — DragList's row is a flex container (grip column +
+          // this content); without stretching, the row wrapper's `position:
+          // absolute, right:0` edit/remove controls (in `controls()` above) would
+          // land at the CONTENT's edge, not the actual row's right edge.
+          renderItem={(item: RelItem, displayPos: number) => (
+            <div style={{ flex: 1, minWidth: 0 }}>{renderRow(item, displayIdx[displayPos], items)}</div>
+          )}
+        />
+      ) : (
+        displayIdx.map(i => renderRow(items[i], i, items))
+      )}
     </SectionCard>
   )
 }

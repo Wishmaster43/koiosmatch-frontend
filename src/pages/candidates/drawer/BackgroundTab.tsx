@@ -19,6 +19,8 @@ type RelTabProps = {
   // all resolve+show a linked proof document via these two props (read-only display
   // for Experience — there is no "Koppelen aan" edit-form picker on that tab).
   documents?: RelItem[]; onJumpToDocuments?: () => void
+  // DRAG-SORT-1: the manual-reorder gesture (drag or keyboard move) — see ops() below.
+  onReorder?: (items: RelItem[]) => void
 }
 
 // SectionTabs is still untyped JS — declare the relation-list props used here.
@@ -190,6 +192,27 @@ export default function BackgroundTab({ c, onEditSave, onJump }: { c: Candidate;
       if (!isPersisted(id)) return
       api.delete(`/candidates/${c.id}/${rel}/${id}`).catch(err => {
         if (row) set(p => { const next = [...p]; next.splice(Math.min(i, next.length), 0, row); return next })
+        notifyError(extractApiError(err, t('actionFailed')))
+      })
+    },
+    // DRAG-SORT-1: a manual reorder (drag or keyboard move) on the sub-tab's
+    // shared sort control (useRelationSort's 'own' axis). Optimistic — the new
+    // order renders immediately — then persisted through the real generic
+    // reorder route (CandidateSubEntityController::reorder, IDOR-safe: an id
+    // that doesn't belong to this candidate 422s and moves nothing server-side).
+    // A rejected PUT reverts to the PREVIOUS full order and notifies, same
+    // shape as onAdd/onEdit/onRemove above — never a silent, half-applied drag.
+    onReorder: (nextItems: RelItem[]) => {
+      const previous = list
+      set(nextItems)
+      const ids = nextItems.map(it => it.id)
+      // A row still mid-POST (negative temp id) has no real id to send yet — it
+      // settles at the bottom on its own once that POST resolves (HasManualOrder,
+      // backend). Skip the request rather than PUT a doomed non-uuid id; the
+      // optimistic local order still renders correctly in the meantime.
+      if (!ids.every(isPersisted)) return
+      api.put(`/candidates/${c.id}/${rel}/reorder`, { ids }, REQUEST_CONFIG).catch(err => {
+        set(previous)
         notifyError(extractApiError(err, t('actionFailed')))
       })
     },
