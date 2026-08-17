@@ -134,6 +134,32 @@ describe('IntakesReport', () => {
     expect(screen.getAllByText('1').length).toBe(4)
   })
 
+  // REPORTS-KPI-SPARES-1: the settings-picked spare cards render real values off
+  // the by_recruiter/by_location/by_region axes already in the fixture, and the
+  // strip stays exactly nine.
+  it('renders spare KPI cards with real values when picked in settings, strip stays nine', () => {
+    mockSettings.mockReturnValue({
+      report_kpis_intakes: [
+        'total', 'unassignedRecruiter', 'topLocation', 'topRegion', 'avgPerRecruiter',
+        'topRecruiter', 'topSource', 'topFunction', 'sourcesCount',
+      ],
+    })
+    mockUseIntakesReport.mockReturnValue({ data, loading: false, error: false })
+    renderReport()
+    // unassignedRecruiter = the by_recruiter row with key null ("Onbekend", 3).
+    expect(screen.getByText('Niet toegewezen recruiter')).toBeInTheDocument()
+    expect(screen.getAllByText('3').length).toBeGreaterThan(0)
+    // topLocation/topRegion — single-segment fixtures, so their own count (9) shows.
+    expect(screen.getByText('Grootste locatie')).toBeInTheDocument()
+    expect(screen.getByText('Grootste regio')).toBeInTheDocument()
+    expect(screen.getAllByText('Utrecht').length).toBeGreaterThan(0)
+    expect(screen.getAllByText('Midden-NL').length).toBeGreaterThan(0)
+    // avgPerRecruiter = total (9) / distinct recruiters (2) = 4,5.
+    expect(screen.getByText('Gem. intakes per recruiter')).toBeInTheDocument()
+    expect(screen.getAllByText('4,5').length).toBeGreaterThan(0)
+    mockSettings.mockReturnValue({})
+  })
+
   // Switching the group selector swaps the breakdown dimension shown, without
   // touching the series section above it.
   it('switches the breakdown when a different group button is clicked', async () => {

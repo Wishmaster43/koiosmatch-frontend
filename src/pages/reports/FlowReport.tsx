@@ -135,6 +135,42 @@ export default function FlowReport({ period }: { period: ReportPeriod }) {
   const firstPhase = phases[0] ?? null
   const lastPhase = phases.length > 0 ? phases[phases.length - 1] : null
 
+  // REPORTS-KPI-SPARE-3 spares — all four honest derivations over the report's
+  // own `phases[]` array (GET /reports/flow), same "fixed headline number, never
+  // one card per tenant stage" pattern as maxDropPhase above.
+
+  // The stage with the WEAKEST conversion (cohort only) — a different bottleneck
+  // signal than maxDropPhase: that one is the biggest ABSOLUTE drop, this is the
+  // worst RATE, so a stage with few applications but a terrible pass-through can
+  // surface here even when its raw drop count is small.
+  const worstConversionPhase = useMemo(() => {
+    if (!cohortReady) return null
+    const withConv = phases.filter(p => p.conversion_rate != null)
+    if (withConv.length === 0) return null
+    return withConv.reduce((a, b) => ((b.conversion_rate as number) < (a.conversion_rate as number) ? b : a))
+  }, [cohortReady, phases])
+
+  // The stage applications sit in longest on average — a "where does it stall"
+  // signal, distinct from maxDropPhase's "where does it leak".
+  const slowestPhase = useMemo(() => {
+    const withDays = phases.filter(p => p.avg_days_in_phase != null)
+    if (withDays.length === 0) return null
+    return withDays.reduce((a, b) => ((b.avg_days_in_phase ?? 0) > (a.avg_days_in_phase ?? 0) ? b : a))
+  }, [phases])
+
+  // Drop-off as a RATE (dropOff / first reached) rather than a raw count — the
+  // same two real numbers dropOff already derives from, just comparable across
+  // periods of different volume.
+  const dropOffRate = useMemo(() => {
+    if (!cohortReady || phases.length < 2 || dropOff == null) return null
+    const first = phases[0].reached_count
+    return first > 0 ? dropOff / first : null
+  }, [cohortReady, phases, dropOff])
+
+  // The honest complement of stagesReached/stagesTotal — how many configured
+  // stages saw NO activity at all this window (a setup/data-quality signal).
+  const stagesEmpty = stagesTotal - stagesReached
+
   // Default the right-hand list to the first phase so the panel is never blank
   // on load — mirrors clicking that phase's own bar, never a client-side guess.
   useEffect(() => {
@@ -171,6 +207,15 @@ export default function FlowReport({ period }: { period: ReportPeriod }) {
     maxDropPhase: { key: 'maxDropPhase', label: t('flow.maxDropPhase'), value: maxDropPhase?.drop ?? '—', sub: maxDropPhase?.label },
     stagesReached: { key: 'stagesReached', label: t('flow.stagesReached'), value: stagesReached },
     stagesTotal: { key: 'stagesTotal', label: t('flow.stagesTotal'), value: stagesTotal },
+    // Spares (REPORTS-KPI-SPARE-3) — see the four derivations above.
+    worstConversionPhase: { key: 'worstConversionPhase', label: t('flow.worstConversionPhase'),
+      value: worstConversionPhase ? pct(worstConversionPhase.conversion_rate) ?? '—' : '—', sub: worstConversionPhase?.label,
+      onClick: worstConversionPhase ? phaseKpi(worstConversionPhase).onClick : undefined },
+    slowestPhase: { key: 'slowestPhase', label: t('flow.slowestPhase'),
+      value: slowestPhase?.avg_days_in_phase != null ? t('flow.avgDays', { days: Math.round(slowestPhase.avg_days_in_phase) }) : '—',
+      sub: slowestPhase?.label, onClick: slowestPhase ? phaseKpi(slowestPhase).onClick : undefined },
+    dropOffRate: { key: 'dropOffRate', label: t('flow.dropOffRate'), value: dropOffRate != null ? formatRatio(dropOffRate) : '—' },
+    stagesEmpty: { key: 'stagesEmpty', label: t('flow.stagesEmpty'), value: stagesEmpty },
   }
   // Which nine keys render, and in what order, is the tenant's Settings → Reports
   // choice (falls back to today's order when nothing is stored, or a stored key

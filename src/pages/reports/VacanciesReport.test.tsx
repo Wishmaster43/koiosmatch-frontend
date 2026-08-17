@@ -330,6 +330,55 @@ describe('VacanciesReport (RAPPORTEN-SUITE-1 portie 4, additive on C-34)', () =>
     expect(lastDrillParams()).toEqual({ industry: 'Zorg', period: 'month' })
   })
 
+  // REPORTS-KPI-SPARE-1: the catalogue now offers four spares beyond the nine
+  // defaults (longConcept/noMatches/topFunction/topBranch), so the settings
+  // screen has something to swap in — a tenant can pick one into the strip.
+  it('offers the four new spare cards to the settings catalogue', async () => {
+    const { getReportKpiCatalog, getReportKpiDefaultOrder, reportHasSpareKpiCards } = await import('./kpiCatalog')
+    const catalogKeys = getReportKpiCatalog('vacancies').map(c => c.key)
+    expect(catalogKeys).toEqual(expect.arrayContaining(['longConcept', 'noMatches', 'topFunction', 'topBranch']))
+    expect(catalogKeys.length).toBe(getReportKpiDefaultOrder('vacancies').length + 4)
+    expect(reportHasSpareKpiCards('vacancies')).toBe(true)
+  })
+
+  // A tenant swaps a spare into the strip: the strip is STILL exactly nine cards,
+  // and each spare renders its real fixture value (never a fabricated number).
+  it('renders a swapped-in spare card with its real value, strip still exactly nine', () => {
+    mockSettings.mockReturnValue({
+      report_kpis_vacancies: JSON.stringify([
+        'longConcept', 'noMatches', 'topFunction', 'topBranch', 'open', 'filled', 'fillRate', 'ttf', 'total',
+      ]),
+    })
+    mockUseVacanciesReport.mockReturnValue({ data, loading: false, error: false })
+    renderReport()
+    const longConceptLabel = screen.getByText(i18n.t('vacancies.summary.longConcept', { ns: 'analytics' }))
+    expect(within(longConceptLabel.parentElement as HTMLElement).getByText('1')).toBeInTheDocument()
+    const noMatchesLabel = screen.getByText(i18n.t('vacancies.summary.noMatches', { ns: 'analytics' }))
+    expect(within(noMatchesLabel.parentElement as HTMLElement).getByText('3')).toBeInTheDocument()
+    expect(screen.getByText('Verzorgende IG · 9')).toBeInTheDocument() // topFunction
+    expect(screen.getByText('Utrecht · 12')).toBeInTheDocument() // topBranch
+    // No KPI-band notice — every stored key is real, still nine cards.
+    expect(screen.queryByText(i18n.t('vacancies.kpiOrderFellBack', { ns: 'analytics' }))).not.toBeInTheDocument()
+  })
+
+  // longConcept/noMatches drill the shared `signal=<name>` XOR leg the backend's
+  // SIGNALEN-VAC-1 narrowing already exposes for stale_online — never a bespoke,
+  // unsupported param.
+  it('longConcept/noMatches KPI cards drill signal=<name>', async () => {
+    const user = userEvent.setup()
+    mockSettings.mockReturnValue({
+      report_kpis_vacancies: JSON.stringify([
+        'longConcept', 'noMatches', 'open', 'filled', 'fillRate', 'ttf', 'staleOnline', 'customersCount', 'total',
+      ]),
+    })
+    mockUseVacanciesReport.mockReturnValue({ data, loading: false, error: false })
+    renderReport()
+    await user.click(screen.getByText(i18n.t('vacancies.summary.longConcept', { ns: 'analytics' })))
+    expect(lastDrillParams()).toEqual({ signal: 'long_concept', period: 'month' })
+    await user.click(screen.getByText(i18n.t('vacancies.summary.noMatches', { ns: 'analytics' })))
+    expect(lastDrillParams()).toEqual({ signal: 'no_matches', period: 'month' })
+  })
+
   // RAPPORT-KPI-INSTELBAAR: which nine keys render, and in what order, is the
   // tenant's stored Settings → Reports choice, not the hardcoded default order.
   it('renders the KPI strip in the tenant-chosen stored order', () => {

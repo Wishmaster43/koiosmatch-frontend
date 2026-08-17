@@ -96,6 +96,11 @@ export default function VacanciesReport({ period, filters = EMPTY_REPORT_FILTERS
     segs.filter(x => x.value !== 'none' && x.value !== 'others').sort((a, b) => b.count - a.count)[0]
   const topIndustry = realSeg(data?.by_industry ?? [])
   const topOwner = (data?.by_owner ?? []).filter(o => o.owner_id !== 'none').sort((a, b) => b.count - a.count)[0]
+  // Spare-card sources (REPORTS-KPI-SPARE-1): topFunction/topBranch mirror
+  // topIndustry (same "biggest real segment" rule, same by_* axes the report
+  // already renders below).
+  const topFunction = realSeg(data?.by_function ?? [])
+  const topBranch = realSeg(data?.by_branch ?? [])
   // Distinct real customers among this window's vacancies (from the rows themselves,
   // not the top-10-capped axis, so it is never truncated by the 'others' bucket).
   const customersCount = new Set(rows.map(v => v.customer?.id).filter(Boolean)).size
@@ -147,6 +152,23 @@ export default function VacanciesReport({ period, filters = EMPTY_REPORT_FILTERS
     topOwner: { key: 'topOwner', label: t('vacancies.summary.topOwner'),
       value: topOwner ? `${topOwner.name} · ${topOwner.count}` : '—',
       onClick: topOwner ? gateDrillClick('vacancies', () => openSegment({ label: topOwner.name, count: topOwner.count }, { owner: topOwner.owner_id })) : undefined },
+    // Spares (REPORTS-KPI-SPARE-1): real summary fields the report already
+    // fetches but never surfaced as a card (SIGNALEN-VAC-1 family) + the two
+    // remaining top-segment picks (function/branch axes, same rule as above).
+    // Both drill via the generic `?signal=<name>` XOR leg (VacanciesReport::
+    // applyDrillFilters, shared with stale_online/zero_applications — the
+    // backend's own SIGNALEN-VAC-1 attention-signal narrowing), never a
+    // bespoke/unsupported param.
+    longConcept: { key: 'longConcept', label: t('vacancies.summary.longConcept'), value: s?.long_concept ?? 0,
+      onClick: gateDrillClick('vacancies', () => openSegment({ label: t('vacancies.summary.longConcept'), count: s?.long_concept ?? 0 }, { signal: 'long_concept' })) },
+    noMatches: { key: 'noMatches', label: t('vacancies.summary.noMatches'), value: s?.no_matches ?? 0,
+      onClick: gateDrillClick('vacancies', () => openSegment({ label: t('vacancies.summary.noMatches'), count: s?.no_matches ?? 0 }, { signal: 'no_matches' })) },
+    topFunction: { key: 'topFunction', label: t('vacancies.summary.topFunction'),
+      value: topFunction ? `${topFunction.label} · ${topFunction.count}` : '—',
+      onClick: topFunction ? gateDrillClick('vacancies', () => openSegment(topFunction, { function: topFunction.value })) : undefined },
+    topBranch: { key: 'topBranch', label: t('vacancies.summary.topBranch'),
+      value: topBranch ? `${topBranch.label} · ${topBranch.count}` : '—',
+      onClick: topBranch ? gateDrillClick('vacancies', () => openSegment(topBranch, { branch: topBranch.value })) : undefined },
   }
   // Which nine keys render, and in what order, is the tenant's Settings → Reports
   // choice (falls back to today's order when nothing is stored, or a stored key

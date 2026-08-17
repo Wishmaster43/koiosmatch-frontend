@@ -20,7 +20,7 @@
  */
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { formatNumber } from '@/lib/formatters'
+import { formatNumber, formatRatio } from '@/lib/formatters'
 import ReportKpiBand from './ReportKpiBand'
 import ReportStateBlock from './ReportStateBlock'
 import { ReportSectionCard } from './ReportSectionCard'
@@ -159,6 +159,17 @@ export default function AccountManagersReport({ period }: { period: ReportPeriod
       color: totalNotContacted > 0 ? 'var(--color-warning)' : undefined,
       sub: compareMetrics ? <ReportCompareMetric metric={compareMetrics.not_contacted} polarity="down-good" /> : undefined,
     },
+    // Spares (REPORTS-KPI-SPARE-2): two more "per manager" averages (mirrors
+    // avgPerManager) and two rates over counts already summed above — all real
+    // fields the endpoint already returns, no new backend field needed.
+    avgOpportunitiesPerManager: { key: 'avgOpportunitiesPerManager', label: t('accountmanagers.summary.avgOpportunitiesPerManager'),
+      value: managerCount > 0 ? formatNumber(Math.round((totalOpportunities / managerCount) * 10) / 10) : '—' },
+    avgVacanciesPerManager: { key: 'avgVacanciesPerManager', label: t('accountmanagers.summary.avgVacanciesPerManager'),
+      value: managerCount > 0 ? formatNumber(Math.round((totalOpenVacancies / managerCount) * 10) / 10) : '—' },
+    notContactedRate: { key: 'notContactedRate', label: t('accountmanagers.summary.notContactedRate'),
+      value: totalCustomers > 0 ? formatRatio(totalNotContacted / totalCustomers) : '—' },
+    renewalsDueRate: { key: 'renewalsDueRate', label: t('accountmanagers.summary.renewalsDueRate'),
+      value: totalCustomers > 0 ? formatRatio(totalContractEnding / totalCustomers) : '—' },
   }
   // Which nine keys render, and in what order, is the tenant's Settings → Reports
   // choice (falls back to today's order when nothing is stored, or a stored key
@@ -190,9 +201,22 @@ export default function AccountManagersReport({ period }: { period: ReportPeriod
 
   return (
     <div>
-      {/* Threshold overrides — ONE value, applied to BOTH the plain fetch and the
-          single compare call above (never a per-window override, K-67). Blank =
-          use the tenant's own setting, never a client-guessed default. */}
+      {/* DELIBERATE EXCEPTION (REPORTS-THRESHOLD-OVERRIDE-1) — this is the ONLY report
+          in the app with a threshold-override control. Why here: an account manager
+          reads a dip in "not contacted" / "renewals due" and needs to tell apart "the
+          PERIOD did this" from "the PERSON did this" — the override exists to answer
+          that one question, nothing else. It is a VIEW-ONLY override: it never writes
+          the tenant's customer_no_contact_days / customer_contract_ending_days
+          Setting, only reshapes what this screen fetches (see accountManagersOverrideParams);
+          leaving both fields blank always falls back to the tenant's own configured
+          value, never a client-guessed default. ONE state object feeds BOTH comparison
+          windows at once (the plain fetch above and the single compare call below) so
+          the two halves can never end up measuring a different threshold.
+          Do NOT copy this control onto another report "for consistency" — that is a
+          decision, not a paste. Every other report just reads and displays whatever
+          threshold the backend already applied server-side; adding an escape hatch
+          elsewhere needs its own written reason (see this component's notes for which
+          reports currently do that without one). */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 16, flexWrap: 'wrap', marginBottom: 10 }}>
         <label style={overrideLabelStyle}>
           {t('accountmanagers.overrides.notContactedMonths')}

@@ -2185,7 +2185,11 @@
     "add": "Functie toevoegen",
     "freeEntry": "Vrije invoer toestaan",
     "freeEntryHint": "Aan: recruiters kunnen een eigen functie typen (combobox). Uit: alleen kiezen uit de lijst (strikte dropdown).",
-    "confirmFreeEntry": "Weet je het zeker? Vrije invoer laat recruiters functies typen die niet in de lijst staan. Dit kan de datakwaliteit verlagen."
+    "confirmFreeEntry": "Weet je het zeker? Vrije invoer laat recruiters functies typen die niet in de lijst staan. Dit kan de datakwaliteit verlagen.",
+    "confirmStrictMismatchTitle": "Sommige waarden staan niet in de lijst",
+    "confirmStrictMismatch": "{{count}} functiewaarde bij bestaande kandidaten staat niet in de lijst en zou onbereikbaar worden in een strikte dropdown: {{values}}. Voeg hem eerst toe aan de lijst, of annuleer en ruim hem handmatig op.",
+    "confirmStrictMismatch_other": "{{count}} functiewaarden bij bestaande kandidaten staan niet in de lijst en zouden onbereikbaar worden in een strikte dropdown: {{values}}. Voeg ze eerst toe aan de lijst, of annuleer en ruim ze handmatig op.",
+    "gatherMissing": "Toevoegen aan de lijst"
   },
   "contactFunctionsSettings": {
     "title": "Contactfuncties",

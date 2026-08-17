@@ -131,6 +131,32 @@ describe('AiReport (RAPPORTEN-SUITE-2 ai report — no drill endpoint)', () => {
     expect(screen.getAllByText('18').length).toBeGreaterThanOrEqual(1)
   })
 
+  // REPORTS-KPI-SPARES-1: the settings-picked spare cards render real values off
+  // by_model/by_user/total already in the fixture, and the strip stays nine.
+  it('renders spare KPI cards with real values when picked in settings, strip stays nine', () => {
+    mockSettings.mockReturnValue({
+      report_kpis_ai: [
+        'total', 'topModel', 'topUser', 'avgPerUser', 'avgPerActivityType',
+        'tokens', 'amount', 'activityTypes', 'modelsUsed',
+      ],
+    })
+    mockUseAiReport.mockReturnValue({ data, loading: false, error: false })
+    renderReport()
+    // topModel = the biggest by_model segment (claude-sonnet, 20).
+    expect(screen.getByText('Meest gebruikte model')).toBeInTheDocument()
+    expect(screen.getAllByText('Claude Sonnet').length).toBeGreaterThan(0)
+    expect(screen.getAllByText('20').length).toBeGreaterThan(0)
+    // topUser = the biggest by_user segment (user-1/Jan Jansen, 22).
+    expect(screen.getByText('Meest actieve gebruiker')).toBeInTheDocument()
+    expect(screen.getAllByText('Jan Jansen').length).toBeGreaterThan(0)
+    expect(screen.getAllByText('22').length).toBeGreaterThan(0)
+    // avgPerUser = total (30) / distinct users (2) = 15; avgPerActivityType = 30/2 = 15.
+    expect(screen.getByText('Gem. activiteit per gebruiker')).toBeInTheDocument()
+    expect(screen.getByText('Gem. activiteit per soort')).toBeInTheDocument()
+    expect(screen.getAllByText('15').length).toBeGreaterThanOrEqual(2)
+    mockSettings.mockReturnValue({})
+  })
+
   it('renders the data window prominently as DD-MM-YYYY', () => {
     mockUseAiReport.mockReturnValue({ data, loading: false, error: false })
     renderReport()

@@ -9,6 +9,7 @@
  */
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { formatRatio, formatNumber } from '@/lib/formatters'
 import ReportKpiBand from './ReportKpiBand'
 import ReportStateBlock from './ReportStateBlock'
 import { ReportSectionCard } from './ReportSectionCard'
@@ -51,6 +52,13 @@ export default function RecruitersReport({ period }: { period: ReportPeriod }) {
     tasksOpen:      sum(r => r.tasks.open),
     tasksOverdue:   sum(r => r.tasks.overdue),
   }
+  // Spares (REPORTS-KPI-SPARE-2): honest derivations over the report's own
+  // per-recruiter rows — average book size, the recruiter with the biggest
+  // book (mirrors accountmanagers.topManager) and two rates over counts
+  // already summed above. No new backend field.
+  const topRecruiter = [...rows].sort((a, b) => b.candidates - a.candidates)[0]
+  const avgCandidatesPerRecruiter = rows.length > 0 ? Math.round((totals.candidates / rows.length) * 10) / 10 : null
+  const intakeDenominator = totals.intakesPlanned + totals.intakesDone
 
   // Drill-down: clicking a recruiter row (or a total) explains it — the recruiter's
   // candidates + Koios advice.
@@ -85,6 +93,13 @@ export default function RecruitersReport({ period }: { period: ReportPeriod }) {
     tasksOpen:      { key: 'tasksOpen',      label: t('recruiters.summary.tasksOpen'),      value: totals.tasksOpen },
     tasksOverdue:   { key: 'tasksOverdue',   label: t('recruiters.summary.tasksOverdue'),   value: totals.tasksOverdue,
       color: totals.tasksOverdue > 0 ? 'var(--color-warning)' : undefined },
+    avgCandidatesPerRecruiter: { key: 'avgCandidatesPerRecruiter', label: t('recruiters.summary.avgCandidatesPerRecruiter'),
+      value: avgCandidatesPerRecruiter !== null ? formatNumber(avgCandidatesPerRecruiter) : '—' },
+    topRecruiter: { key: 'topRecruiter', label: t('recruiters.summary.topRecruiter'), value: topRecruiter?.candidates ?? '—', sub: topRecruiter?.label },
+    intakeCompletionRate: { key: 'intakeCompletionRate', label: t('recruiters.summary.intakeCompletionRate'),
+      value: intakeDenominator > 0 ? formatRatio(totals.intakesDone / intakeDenominator) : '—' },
+    taskOverdueRate: { key: 'taskOverdueRate', label: t('recruiters.summary.taskOverdueRate'),
+      value: totals.tasksOpen > 0 ? formatRatio(totals.tasksOverdue / totals.tasksOpen) : '—' },
   }
   const settingsValues = useAllSettings()
   const catalogKeys = getReportKpiCatalog('recruiters').map(c => c.key)

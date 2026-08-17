@@ -127,6 +127,14 @@ export default function OpportunitiesReport({ period }: { period: ReportPeriod }
   const s = data?.totals
   const forecastCount = data?.forecast.reduce((sum, row) => sum + row.count, 0) ?? 0
   const forecastValue = data?.forecast.reduce((sum, row) => sum + row.value_sum, 0) ?? 0
+  // Spare-card sources (REPORTS-KPI-SPARE-1): the top real segment of by_stage /
+  // by_customer (excluding 'none'/'others' sentinels, same rule VacanciesReport
+  // uses for topIndustry/topOwner) — clicking reuses the page's own openSegment,
+  // exactly like the bars() drill and the default-on-mount effect above.
+  const topReal = <T extends { value: string; count: number; label: string }>(segs: T[]) =>
+    segs.filter(x => x.value !== 'none' && x.value !== 'others').sort((a, b) => b.count - a.count)[0]
+  const topStage = topReal(data?.by_stage ?? [])
+  const topCustomer = topReal(data?.by_customer ?? [])
   const kpiByKey: Record<string, KpiSpec> = {
     total:   { key: 'total',   label: t('opportunities.total'),           value: total },
     open:    { key: 'open',    label: t('opportunities.summary.open'),    value: s?.open ?? 0 },
@@ -138,6 +146,16 @@ export default function OpportunitiesReport({ period }: { period: ReportPeriod }
     overdue:   { key: 'overdue',   label: t('opportunities.stale.overdue'),   value: data?.stale.overdue ?? 0 },
     forecastCount: { key: 'forecastCount', label: t('opportunities.forecastCount'), value: forecastCount },
     forecastValue: { key: 'forecastValue', label: t('opportunities.forecastValue'), value: formatCurrency(forecastValue, 'EUR', 0) },
+    // Spares: real money fields already in `totals` (money via formatCurrency,
+    // never a raw number) + the two top-segment picks above.
+    openValue: { key: 'openValue', label: t('opportunities.summary.openValue'), value: formatCurrency(s?.open_value ?? 0, 'EUR', 0) },
+    wonValue:  { key: 'wonValue',  label: t('opportunities.summary.wonValue'),  value: formatCurrency(s?.won_value ?? 0, 'EUR', 0) },
+    topStage: { key: 'topStage', label: t('opportunities.summary.topStage'),
+      value: topStage ? `${topStage.label} · ${topStage.count}` : '—',
+      onClick: topStage ? gateDrillClick('opportunities', () => openSegment('stage', topStage, { stage: topStage.value })) : undefined },
+    topCustomer: { key: 'topCustomer', label: t('opportunities.summary.topCustomer'),
+      value: topCustomer ? `${topCustomer.label} · ${topCustomer.count}` : '—',
+      onClick: topCustomer ? gateDrillClick('opportunities', () => openSegment('customer', topCustomer, { customer: topCustomer.value })) : undefined },
   }
   // Which nine keys render, and in what order, is the tenant's Settings → Reports
   // choice (falls back to today's order when nothing is stored, or a stored key

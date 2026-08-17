@@ -88,3 +88,47 @@ describe('FunctionsSettings — free-entry toggle (real dedicated route)', () =>
     expect(notifyError).toHaveBeenCalledWith('Niet alle bestaande waarden staan in de lijst.')
   })
 })
+
+describe('FunctionsSettings — strict preflight (FUNC-STRICT-PREFLIGHT-1)', () => {
+  it('tightening with off-list values runs the preflight and shows them before any PUT', async () => {
+    const api = await renderWithFunctions([], true)
+    api.get.mockImplementation(url => {
+      if (url === '/functions') return Promise.resolve({ data: { data: [], allow_free_entry: true } })
+      if (url === '/functions/mismatches') {
+        return Promise.resolve({ data: [{ entity: 'candidate', id: 'c1', name: 'Jan', function: 'Verpleger', count: 2 }] })
+      }
+      return Promise.resolve({ data: {} })
+    })
+    const user = userEvent.setup()
+    const toggle = await screen.findByRole('switch')
+    await user.click(toggle)
+
+    // The preflight ran (route + no PUT yet) and the mismatch value surfaced in the dialog.
+    await waitFor(() => expect(api.get).toHaveBeenCalledWith('/functions/mismatches'))
+    expect(await screen.findByText(/Verpleger/)).toBeInTheDocument()
+    expect(api.put).not.toHaveBeenCalled()
+
+    // Confirming gathers the missing values first, THEN tightens.
+    api.post.mockResolvedValue({ data: { added: ['Verpleger'], count: 1 } })
+    api.put.mockResolvedValue({ data: { allow_free_entry: false } })
+    await user.click(await screen.findByRole('button', { name: i18n.t('settings:functionsSettings.gatherMissing') }))
+
+    await waitFor(() => expect(api.post).toHaveBeenCalledWith('/functions/gather-missing'))
+    await waitFor(() => expect(api.put).toHaveBeenCalledWith('/functions/free-entry', { allow_free_entry: false }))
+  })
+
+  it('tightening with no off-list values skips the confirmation entirely', async () => {
+    const api = await renderWithFunctions([], true)
+    api.get.mockImplementation(url => {
+      if (url === '/functions') return Promise.resolve({ data: { data: [], allow_free_entry: true } })
+      if (url === '/functions/mismatches') return Promise.resolve({ data: [] })
+      return Promise.resolve({ data: {} })
+    })
+    api.put.mockResolvedValue({ data: { allow_free_entry: false } })
+    const user = userEvent.setup()
+    const toggle = await screen.findByRole('switch')
+    await user.click(toggle)
+
+    await waitFor(() => expect(api.put).toHaveBeenCalledWith('/functions/free-entry', { allow_free_entry: false }))
+  })
+})

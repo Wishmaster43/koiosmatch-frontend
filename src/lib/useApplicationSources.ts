@@ -52,19 +52,30 @@ export const DEFAULT_APPLICATION_SOURCES = [
 ]
 
 // Both pieces of state (names + the API's free-entry flag) come from the same
-// response, so they're cached together as one value. The backend's own default
-// (before any tenant has toggled it) is strict — mirror that as the pending seed.
+// response, so they're cached together as one value.
+//
+// FREE-ENTRY-FALLBACK-1: the pending/unknown value is PERMISSIVE, not strict, and
+// that direction is deliberate. Strict-while-unknown means "no value is valid",
+// which locks a recruiter out of a required field for a reason they cannot see:
+// before the lookup has loaded, when the request fails, or on a fresh tenant whose
+// list is still empty. The backend hit exactly this on 15-08 — its own rule
+// inherited a strict default against an empty table, so "strict" meant "every
+// source is invalid" and four write paths answered 422 where free text had always
+// been accepted. It now defaults to permissive too, so this mirrors the real
+// contract rather than guessing the safer-sounding option. Being briefly too
+// permissive costs a value the server can still reject; being briefly too strict
+// costs the user the ability to work at all.
 interface SourcesLookupData { sources: string[]; apiFreeEntry: boolean }
-const FALLBACK: SourcesLookupData = { sources: DEFAULT_APPLICATION_SOURCES, apiFreeEntry: false }
+const FALLBACK: SourcesLookupData = { sources: DEFAULT_APPLICATION_SOURCES, apiFreeEntry: true }
 
-// Names keep the seed when empty; apiFreeEntry keeps the strict default when the
-// response doesn't carry a boolean flag (e.g. a genuinely empty/failed response).
+// Names keep the seed when empty; apiFreeEntry stays permissive when the response
+// carries no boolean flag (a genuinely empty or failed response), per the reasoning above.
 const mapSources = (res: AxiosResponse): SourcesLookupData => {
   const names = lookupNames(res)
   const free = (res?.data as { allow_free_entry?: unknown })?.allow_free_entry
   return {
     sources: names.length ? names : DEFAULT_APPLICATION_SOURCES,
-    apiFreeEntry: typeof free === 'boolean' ? free : false,
+    apiFreeEntry: typeof free === 'boolean' ? free : true,
   }
 }
 

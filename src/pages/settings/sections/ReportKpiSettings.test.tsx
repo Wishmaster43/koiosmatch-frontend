@@ -3,18 +3,19 @@
  * the REQUEST (route key + full nine-key body), not just that a callback fired
  * (§13). Also covers the vanished-key fallback notice.
  *
- * Note: today every 'fixed'-family report's catalogue equals its default order
- * 1:1 (design doc — no spare cards exist yet), so a slot's picker legitimately
- * offers no OTHER card to swap in; the meaningfully testable mutation right now
- * is REORDER (drag), which this test drives directly on the shared DragList's
- * plain draggable rows (no dataTransfer payload needed — see SettingsControls.jsx).
+ * REPORTS-KPI-SPARE-2: `recruiters` grew real spare cards (kpiCatalog.ts), so the
+ * "no spares yet" honesty case now uses `prospects` — the one remaining scope
+ * whose catalogue still equals its default order 1:1 (its 'axis'-family sibling
+ * `customers` grew signal spares, but those are deliberately NOT mirrored onto
+ * Prospects — see kpiCatalog.ts's own note on why). Reorder + fallback-notice
+ * coverage stays on `recruiters` unchanged.
  */
 import { describe, it, expect, vi, afterEach } from 'vitest'
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import i18n from '@/i18n'
 import ReportKpiSettings from './ReportKpiSettings'
-import { getReportKpiDefaultOrder, reportKpiSettingsKey } from '@/pages/reports/kpiCatalog'
+import { getReportKpiCatalog, getReportKpiDefaultOrder, reportKpiSettingsKey } from '@/pages/reports/kpiCatalog'
 
 const t = (key: string) => i18n.t(key, { ns: 'analytics' })
 const st = (key: string) => i18n.t(key, { ns: 'settings' })
@@ -23,6 +24,12 @@ const st = (key: string) => i18n.t(key, { ns: 'settings' })
 async function openRecruitersTab() {
   const user = userEvent.setup()
   await user.click(screen.getByRole('tab', { name: st('reportKpis.reportNames.recruiters') }))
+}
+
+// Prospects is the "still no spares" control case (see file-top note).
+async function openProspectsTab() {
+  const user = userEvent.setup()
+  await user.click(screen.getByRole('tab', { name: st('reportKpis.reportNames.prospects') }))
 }
 
 const mockSettings = vi.hoisted(() => vi.fn(() => ({} as Record<string, unknown>)))
@@ -55,10 +62,26 @@ describe('ReportKpiSettings', () => {
     expect(defaultOrder[0]).toBe('recruiters')
   })
 
-  it('says there are no spare cards yet for a fixed-family report (honest, not decorative)', async () => {
+  it('says there are no spare axes yet for an axis-family report with none (honest, not decorative)', async () => {
+    render(<ReportKpiSettings />)
+    await openProspectsTab()
+    expect(screen.getByText(st('reportKpis.noSpareAxes'))).toBeTruthy()
+  })
+
+  it('offers real spare cards for recruiters now that the catalogue grew beyond its nine defaults (REPORTS-KPI-SPARE-2)', async () => {
     render(<ReportKpiSettings />)
     await openRecruitersTab()
-    expect(screen.getByText(st('reportKpis.noSpareCards'))).toBeTruthy()
+    expect(screen.queryByText(st('reportKpis.noSpareCards'))).toBeNull()
+    const catalog = getReportKpiCatalog('recruiters')
+    const defaultOrder = getReportKpiDefaultOrder('recruiters')
+    expect(catalog.length).toBeGreaterThan(defaultOrder.length)
+    // The four new spare keys are real catalogue entries with real i18n labels
+    // (not raw keys falling back to themselves).
+    for (const key of ['avgCandidatesPerRecruiter', 'topRecruiter', 'intakeCompletionRate', 'taskOverdueRate']) {
+      const entry = catalog.find(c => c.key === key)
+      expect(entry).toBeDefined()
+      expect(i18n.t(entry!.labelKey, { ns: 'analytics' })).not.toBe(entry!.labelKey)
+    }
   })
 
   it('reordering PUTs the exact settings key with the same nine keys in the new order', async () => {

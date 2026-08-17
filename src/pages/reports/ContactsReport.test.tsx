@@ -153,6 +153,38 @@ describe('ContactsReport (RAPPORTEN-SUITE-2 contacts report)', () => {
     for (const label of cardLabels) expect(screen.getByText(label)).toBeInTheDocument()
   })
 
+  // REPORTS-KPI-SPARE-2: the four "top real segment" spares read the biggest
+  // NON-'none' bar of their own axis — real fixture values, never fabricated.
+  it('renders the top-segment spares (topCustomer/topFunction/topLocation/topDepartment) when swapped in', () => {
+    mockSettings.mockReturnValue({
+      report_kpis_contacts: JSON.stringify(['topCustomer', 'topFunction', 'topLocation', 'topDepartment',
+        'primary', 'withRecentContact', 'neverContacted', 'contactedRate', 'withoutFunction']),
+    })
+    mockUseContactsReport.mockReturnValue({ data, loading: false, error: false })
+    renderReport()
+    expect(screen.getByText('Grootste klant')).toBeInTheDocument()
+    expect(screen.getAllByText('Yesway Flex').length).toBeGreaterThan(0)
+    expect(screen.getByText('Grootste functie')).toBeInTheDocument()
+    expect(screen.getAllByText('HR Manager').length).toBeGreaterThan(0)
+    expect(screen.getByText('Grootste locatie')).toBeInTheDocument()
+    expect(screen.getAllByText('Utrecht').length).toBeGreaterThan(0)
+    expect(screen.getByText('Grootste afdeling')).toBeInTheDocument()
+    expect(screen.getAllByText('Verkoop').length).toBeGreaterThan(0)
+  })
+
+  it('clicking the "Grootste klant" spare drills with customer=<top value> (XOR)', async () => {
+    const user = userEvent.setup()
+    mockSettings.mockReturnValue({
+      report_kpis_contacts: JSON.stringify(['topCustomer', 'topFunction', 'topLocation', 'topDepartment',
+        'primary', 'withRecentContact', 'neverContacted', 'contactedRate', 'withoutFunction']),
+    })
+    mockUseContactsReport.mockReturnValue({ data, loading: false, error: false })
+    renderReport()
+    await user.click(screen.getByText('Grootste klant'))
+    expect(getSpy).toHaveBeenCalledWith('/reports/contacts/drill',
+      expect.objectContaining({ params: { customer: 'cust-1', period: 'month' } }))
+  })
+
   it('clicking the "Zonder functie" KPI card drills with function=none (XOR)', async () => {
     const user = userEvent.setup()
     mockUseContactsReport.mockReturnValue({ data, loading: false, error: false })

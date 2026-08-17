@@ -36,7 +36,11 @@
       "phase": "Fase",
       "source": "Bron",
       "owner": "Eigenaar",
-      "branch": "Vestiging"
+      "branch": "Vestiging",
+      "ownerNone": "Zonder eigenaar",
+      "branchNone": "Zonder vestiging",
+      "sourceNone": "Zonder bron",
+      "phaseLead": "Nog lead"
     },
     "kpiOrderFellBack": "Een in Instellingen ingestelde KPI-kaart bestaat niet meer en is teruggezet naar de standaard.",
     "viewSwitch": {
@@ -67,7 +71,11 @@
       "regionsCount": "Aantal regio’s",
       "topRecruiter": "Meest actieve recruiter",
       "topSource": "Grootste bron",
-      "topFunction": "Meest voorkomende functie"
+      "topFunction": "Meest voorkomende functie",
+      "unassignedRecruiter": "Niet toegewezen recruiter",
+      "topLocation": "Grootste locatie",
+      "topRegion": "Grootste regio",
+      "avgPerRecruiter": "Gem. intakes per recruiter"
     },
     "kpiOrderFellBack": "Een in Instellingen ingestelde KPI-kaart bestaat niet meer en is teruggezet naar de standaard."
   },
@@ -102,7 +110,11 @@
     "maxDropPhase": "Grootste uitval",
     "stagesReached": "Bereikte fasen",
     "stagesTotal": "Fasen in trechter",
-    "kpiOrderFellBack": "Een in Instellingen ingestelde KPI-kaart bestaat niet meer en is teruggezet naar de standaard."
+    "kpiOrderFellBack": "Een in Instellingen ingestelde KPI-kaart bestaat niet meer en is teruggezet naar de standaard.",
+    "worstConversionPhase": "Zwakste conversie",
+    "slowestPhase": "Traagste fase",
+    "dropOffRate": "Uitval (percentage)",
+    "stagesEmpty": "Fasen zonder activiteit"
   },
   "recruiters": {
     "title": "Recruiters",
@@ -119,7 +131,11 @@
       "intakesPlanned": "Intakes gepland",
       "intakesDone": "Intakes gedaan",
       "tasksOpen": "Taken open",
-      "tasksOverdue": "Taken te laat"
+      "tasksOverdue": "Taken te laat",
+      "avgCandidatesPerRecruiter": "Gem. kandidaten per recruiter",
+      "topRecruiter": "Top recruiter",
+      "intakeCompletionRate": "Percentage intakes gedaan",
+      "taskOverdueRate": "Percentage taken te laat"
     },
     "cols": {
       "recruiter": "Recruiter",
@@ -156,7 +172,11 @@
       "customersCount": "Aantal klanten",
       "topIndustry": "Grootste branche",
       "topOwner": "Grootste eigenaar",
-      "staleOnline": "Online, geen kandidaten"
+      "staleOnline": "Online, geen kandidaten",
+      "longConcept": "Lang in concept",
+      "noMatches": "Geen matches",
+      "topFunction": "Grootste functie",
+      "topBranch": "Grootste vestiging"
     },
     "cols": {
       "vacancy": "Vacature",
@@ -201,7 +221,13 @@
     "terminations": {
       "title": "Beëindigingsredenen",
       "total": "Totaal beëindigingen",
-      "rate": "Beëindigingspercentage"
+      "rate": "Beëindigingspercentage",
+      "topReason": "Grootste reden"
+    },
+    "summary": {
+      "noContract": "Zonder contract",
+      "topContractForm": "Grootste contractvorm",
+      "funnelRate": "Percentage via sollicitatie"
     },
     "kpiOrderFellBack": "Een in Instellingen ingestelde KPI-kaart bestaat niet meer en is teruggezet naar de standaard."
   },
@@ -225,7 +251,12 @@
       "unassigned": "Niet toegewezen",
       "noOutcome": "Geen uitkomst",
       "topCampaign": "Grootste bellijst",
-      "topChannel": "Grootste kanaal"
+      "topChannel": "Grootste kanaal",
+      "topStatus": "Grootste status",
+      "topOutcome": "Grootste uitkomst",
+      "campaignsCount": "Aantal bellijsten",
+      "channelsUsed": "Gebruikte kanalen",
+      "assigneesCount": "Aantal toegewezen recruiters"
     },
     "kpiOrderFellBack": "Een in Instellingen ingestelde KPI-kaart bestaat niet meer en is teruggezet naar de standaard."
   },
@@ -267,7 +298,9 @@
       "owner": "Eigenaar",
       "customer": "Klant",
       "vacancy": "Vacature",
-      "stageDuration": "Te lang in fase"
+      "stageDuration": "Te lang in fase",
+      "customerNone": "Zonder klant",
+      "stageNone": "Zonder fase"
     },
     "buckets": {
       "active": "Actief",
@@ -288,7 +321,11 @@
       "open": "Open",
       "won": "Gewonnen",
       "lost": "Verloren",
-      "winRate": "Winratio"
+      "winRate": "Winratio",
+      "openValue": "Openstaande waarde",
+      "wonValue": "Gewonnen waarde",
+      "topStage": "Grootste fase",
+      "topCustomer": "Grootste klant"
     },
     "stale": {
       "untouched": "Onaangeraakt",
@@ -309,7 +346,11 @@
       "open": "Open",
       "done": "Afgerond",
       "overdue": "Te laat",
-      "doneRate": "Afrondingspercentage"
+      "doneRate": "Afrondingspercentage",
+      "topStatus": "Grootste status",
+      "topType": "Grootste type",
+      "topPriority": "Grootste prioriteit",
+      "topAssignee": "Grootste toegewezene"
     },
     "axes": {
       "status": "Status",
@@ -344,6 +385,17 @@
       "ariaLabel": "Populatie",
       "customers": "Klanten",
       "prospects": "Prospects"
+    },
+    "kpis": {
+      "contractEnding": "Overeenkomst loopt binnenkort af",
+      "noContact": "Lang geen contact",
+      "taskOverdue": "Taken over tijd",
+      "priceAgreementEnding": "Prijsafspraken die verlopen",
+      "vacancyStale": "Vacature online zonder sollicitanten",
+      "departmentsWithoutPlacement": "Afdelingen zonder plaatsing",
+      "customersWithoutVacancies": "Klanten zonder vacatures",
+      "customersWithoutApplications": "Klanten zonder sollicitaties",
+      "matchesStoppedEarly": "Matches voortijdig gestopt"
     }
   },
   "contacts": {
@@ -368,7 +420,11 @@
       "withoutFunction": "Zonder functie",
       "withoutLocation": "Zonder locatie",
       "withoutDepartment": "Zonder afdeling",
-      "withoutCustomer": "Zonder klant"
+      "withoutCustomer": "Zonder klant",
+      "topCustomer": "Grootste klant",
+      "topFunction": "Grootste functie",
+      "topLocation": "Grootste locatie",
+      "topDepartment": "Grootste afdeling"
     },
     "kpiOrderFellBack": "Een in Instellingen ingestelde KPI-kaart bestaat niet meer en is teruggezet naar de standaard."
   },
@@ -393,7 +449,11 @@
       "withoutCity": "Zonder plaats",
       "topCity": "Grootste plaats",
       "withoutProvince": "Zonder provincie",
-      "topProvince": "Grootste provincie"
+      "topProvince": "Grootste provincie",
+      "withContacts": "Met directe contacten",
+      "withoutContacts": "Zonder directe contacten",
+      "departmentCoverageRate": "Dekking afdelingen",
+      "contactCoverageRate": "Dekking contacten"
     },
     "kpiOrderFellBack": "Een in Instellingen ingestelde KPI-kaart bestaat niet meer en is teruggezet naar de standaard."
   },
@@ -417,7 +477,11 @@
       "withoutCustomer": "Zonder klant",
       "topCustomer": "Grootste klant",
       "topLocation": "Grootste locatie",
-      "customersCount": "Aantal klanten"
+      "customersCount": "Aantal klanten",
+      "withCustomer": "Gekoppeld aan klant",
+      "locationCoverageRate": "Dekking locatie",
+      "contactCoverageRate": "Dekking contacten",
+      "othersCustomer": "Overige klanten"
     },
     "kpiOrderFellBack": "Een in Instellingen ingestelde KPI-kaart bestaat niet meer en is teruggezet naar de standaard."
   },
@@ -441,7 +505,11 @@
       "activityTypes": "Soorten activiteit",
       "modelsUsed": "Gebruikte modellen",
       "activeUsers": "Actieve gebruikers",
-      "topActivity": "Meest gebruikte activiteit"
+      "topActivity": "Meest gebruikte activiteit",
+      "topModel": "Meest gebruikte model",
+      "topUser": "Meest actieve gebruiker",
+      "avgPerUser": "Gem. activiteit per gebruiker",
+      "avgPerActivityType": "Gem. activiteit per soort"
     },
     "kpiOrderFellBack": "Een in Instellingen ingestelde KPI-kaart bestaat niet meer en is teruggezet naar de standaard."
   },
@@ -466,7 +534,11 @@
       "successRate": "Slaagpercentage",
       "avgDuration": "Gem. duur",
       "workflowsCount": "Aantal workflows",
-      "triggersCount": "Aantal triggers"
+      "triggersCount": "Aantal triggers",
+      "topWorkflow": "Meest actieve workflow",
+      "topTrigger": "Meest actieve trigger",
+      "failureRate": "Mislukpercentage",
+      "avgRunsPerWorkflow": "Gem. uitvoeringen per workflow"
     },
     "kpiOrderFellBack": "Een in Instellingen ingestelde KPI-kaart bestaat niet meer en is teruggezet naar de standaard."
   },
@@ -492,7 +564,11 @@
       "filledPositions": "Vervulde plaatsingen",
       "opportunities": "Kansen",
       "renewalsDue": "Verlengingen te doen",
-      "notContacted": "Niet benaderd"
+      "notContacted": "Niet benaderd",
+      "avgOpportunitiesPerManager": "Gem. kansen per manager",
+      "avgVacanciesPerManager": "Gem. open vacatures per manager",
+      "notContactedRate": "Percentage niet benaderd",
+      "renewalsDueRate": "Percentage verlengingen te doen"
     },
     "cols": {
       "manager": "Accountmanager",

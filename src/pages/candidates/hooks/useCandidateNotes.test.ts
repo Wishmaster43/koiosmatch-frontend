@@ -139,8 +139,12 @@ describe('useCandidateNotes · GET failure vs. genuine empty (Class B)', () => {
     const { result } = renderHook(() => useCandidateNotes('c1'))
     await waitFor(() => expect(result.current.error).toBe(true))
     act(() => { result.current.reload() })
-    await waitFor(() => expect(result.current.error).toBe(false))
-    expect(result.current.notes).toHaveLength(1)
+    // Wait on the NOTES, not on the error flag. Both settle in the same commit, but
+    // under a loaded suite `error` can be observed false one render before `notes`
+    // carries the reloaded row, which made this assertion flake without anything
+    // being wrong. Waiting on the value the test is actually about removes the race.
+    await waitFor(() => expect(result.current.notes).toHaveLength(1))
+    expect(result.current.error).toBe(false)
     expect(api.get).toHaveBeenCalledTimes(2)
   })
 })

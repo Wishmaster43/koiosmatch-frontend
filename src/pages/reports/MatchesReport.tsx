@@ -139,6 +139,14 @@ export default function MatchesReport({ period, filters = EMPTY_REPORT_FILTERS }
   // derived stats: terminations total, avg duration (dash until HelloFlex fills
   // it) and the termination rate (a ratio of two real fields).
   const terminationRate = data && data.total > 0 ? (data.terminations.total / data.total) * 100 : null
+  // Spare-card sources (REPORTS-KPI-SPARE-1): the top real contract-form/reason
+  // segment (excluding the 'none' sentinel — that already has its own card
+  // below), an honest ratio of two real counts (funnel share of total), and the
+  // fourth under_contract tile ('none' = tileValue('none'), already computed
+  // above as `noContract`, just never offered as its own card until now).
+  const topContractForm = contractFormSegs.filter(s => s.value !== 'none').sort((a, b) => b.count - a.count)[0]
+  const topTerminationReason = terminationSegs.slice().sort((a, b) => b.count - a.count)[0]
+  const funnelRate = data && data.total > 0 ? (data.by_origin.funnel / data.total) * 100 : null
   const kpiByKey: Record<string, KpiSpec> = {
     total:  { key: 'total',  label: t('matches.total'),     value: data?.total ?? 0,
       active: drill != null && openAxis == null,
@@ -163,6 +171,22 @@ export default function MatchesReport({ period, filters = EMPTY_REPORT_FILTERS }
       value: data?.avg_placement_duration_days != null ? t('matches.daysValue', { days: Math.round(data.avg_placement_duration_days) }) : '—' },
     terminationRate: { key: 'terminationRate', label: t('matches.terminations.rate'),
       value: formatPercent(terminationRate) },
+    // Spares (REPORTS-KPI-SPARE-1): see the derivations above.
+    noContract: { key: 'noContract', label: t('matches.summary.noContract'), value: noContract,
+      active: openParams?.contract_status === 'none',
+      onClick: gateDrillClick('matches', () => openContractStatus(t('matches.summary.noContract'), noContract, 'none')) },
+    topContractForm: { key: 'topContractForm', label: t('matches.summary.topContractForm'),
+      value: topContractForm ? `${topContractForm.label} · ${topContractForm.count}` : '—',
+      onClick: topContractForm ? gateDrillClick('matches', () => openContractForm(topContractForm.label, topContractForm.count, topContractForm.value)) : undefined },
+    topTerminationReason: { key: 'topTerminationReason', label: t('matches.terminations.topReason'),
+      value: topTerminationReason ? `${topTerminationReason.label} · ${topTerminationReason.count}` : '—',
+      onClick: topTerminationReason ? gateDrillClick('matches', () => setDrill({
+        title: topTerminationReason.label, value: topTerminationReason.count, subtitle: windowSub(),
+        rowsEndpoint: '/reports/matches/drill', rowsParams: { ...baseParams, stop_reason: topTerminationReason.value },
+        adviceEndpoint: '/reports/matches/advice', adviceParams: { ...baseParams, stop_reason: topTerminationReason.value },
+      })) : undefined },
+    funnelRate: { key: 'funnelRate', label: t('matches.summary.funnelRate'),
+      value: formatPercent(funnelRate) },
   }
   // Which nine keys render, and in what order, is the tenant's Settings → Reports
   // choice (falls back to today's order when nothing is stored, or a stored key

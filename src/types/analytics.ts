@@ -325,6 +325,13 @@ export interface CustomersReportData {
   by_industry: CandidateSegment[]
   by_owner: CandidateOwnerSegment[]
   by_branch: CandidateSegment[]
+  // KD10 punt 21 (REPORTS-KPI-SPARE-2): nine STANDING signal counts over the whole
+  // live customer base (contract ending, no contact, …) — CustomersReport::signalKpis(),
+  // never windowed on created_at like the axes above. Previously typed nowhere on the
+  // frontend even though the backend always sent it; now the source for the customers
+  // scope's KPI-catalog spares (kpiCatalog.ts). Optional: the compare endpoint's diffed
+  // envelope does not carry this array.
+  kpis?: { key: string; label: string; count: number }[]
 }
 
 // ── Opportunities report (GET /reports/opportunities, RAPPORTEN-SUITE-1 "portie 5") ─
@@ -465,10 +472,12 @@ export interface ContactsReportData {
   by_function: ThinSegment[]; by_status: ThinSegment[]
 }
 
-// GET /reports/locations — `summary` splits locations with and without departments.
+// GET /reports/locations — `summary` splits locations with/without departments AND
+// (REPORTS-KPI-SPARE-2) with/without direct contacts (LocationsReport::summary(),
+// already sent by the backend — previously typed as only the first pair).
 export interface LocationsReportData {
   period: string; from: string; to: string; total: number
-  summary?: { with_departments: number; without_departments: number }
+  summary?: { with_departments: number; without_departments: number; with_contacts: number; without_contacts: number }
   timeseries: { bucket: 'day' | 'week'; series: CandidateTimeseriesPoint[] }
   by_customer: ThinSegment[]; by_city: ThinSegment[]; by_province: ThinSegment[]; by_status: ThinSegment[]
 }

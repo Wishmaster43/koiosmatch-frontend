@@ -116,6 +116,16 @@ export default function ContactsReport({ period }: { period: ReportPeriod }) {
   const withoutLocation   = data?.by_location.find(x => x.value === 'none')
   const withoutDepartment = data?.by_department.find(x => x.value === 'none')
   const withoutCustomer   = data?.by_customer.find(x => x.value === 'none')
+  // Spares (REPORTS-KPI-SPARE-2): the biggest real ('none'/'others'-excluded)
+  // segment of each existing axis — mirrors LocationsReport/DepartmentsReport's
+  // own topCity/topCustomer pattern, real counts already in these same arrays.
+  const top = (segs: ApplicationTopSegment[] | undefined) => (segs ?? [])
+    .filter(s => s.value !== 'none' && s.value !== 'others')
+    .reduce<ApplicationTopSegment | null>((best, s) => (!best || s.count > best.count ? s : best), null)
+  const topCustomer   = top(data?.by_customer)
+  const topFunction   = top(data?.by_function)
+  const topLocation   = top(data?.by_location)
+  const topDepartment = top(data?.by_department)
   const kpiByKey: Record<string, KpiSpec> = {
     total:            { key: 'total',            label: t('contacts.total'),            value: total },
     primary:          { key: 'primary',          label: t('contacts.summary.primary'),          value: s?.primary ?? 0 },
@@ -132,6 +142,14 @@ export default function ContactsReport({ period }: { period: ReportPeriod }) {
       onClick: withoutDepartment ? gateDrillClick('contacts', () => openSegment('department', withoutDepartment, { department: 'none' })) : undefined },
     withoutCustomer: { key: 'withoutCustomer', label: t('contacts.summary.withoutCustomer'), value: withoutCustomer?.count ?? 0,
       onClick: withoutCustomer ? gateDrillClick('contacts', () => openSegment('customer', withoutCustomer, { customer: 'none' })) : undefined },
+    topCustomer: { key: 'topCustomer', label: t('contacts.summary.topCustomer'), value: topCustomer?.count ?? '—', sub: topCustomer?.label,
+      onClick: topCustomer ? gateDrillClick('contacts', () => openSegment('customer', topCustomer, { customer: topCustomer.value })) : undefined },
+    topFunction: { key: 'topFunction', label: t('contacts.summary.topFunction'), value: topFunction?.count ?? '—', sub: topFunction?.label,
+      onClick: topFunction ? gateDrillClick('contacts', () => openSegment('function', topFunction, { function: topFunction.value })) : undefined },
+    topLocation: { key: 'topLocation', label: t('contacts.summary.topLocation'), value: topLocation?.count ?? '—', sub: topLocation?.label,
+      onClick: topLocation ? gateDrillClick('contacts', () => openSegment('location', topLocation, { location: topLocation.value })) : undefined },
+    topDepartment: { key: 'topDepartment', label: t('contacts.summary.topDepartment'), value: topDepartment?.count ?? '—', sub: topDepartment?.label,
+      onClick: topDepartment ? gateDrillClick('contacts', () => openSegment('department', topDepartment, { department: topDepartment.value })) : undefined },
   }
   // Which nine keys render, and in what order, is the tenant's Settings → Reports
   // choice (falls back to today's order when nothing is stored, or a stored key

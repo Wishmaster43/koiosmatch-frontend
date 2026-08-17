@@ -36,7 +36,11 @@
       "phase": "Phase",
       "source": "Source",
       "owner": "Owner",
-      "branch": "Branch"
+      "branch": "Branch",
+      "ownerNone": "Without owner",
+      "branchNone": "Without branch",
+      "sourceNone": "Without source",
+      "phaseLead": "Still a lead"
     },
     "kpiOrderFellBack": "A KPI card configured in Settings no longer exists and was reset to the default.",
     "viewSwitch": {
@@ -67,7 +71,11 @@
       "regionsCount": "Regions",
       "topRecruiter": "Most active recruiter",
       "topSource": "Top source",
-      "topFunction": "Most common function"
+      "topFunction": "Most common function",
+      "unassignedRecruiter": "Unassigned recruiter",
+      "topLocation": "Top location",
+      "topRegion": "Top region",
+      "avgPerRecruiter": "Avg intakes per recruiter"
     },
     "kpiOrderFellBack": "A KPI card configured in Settings no longer exists and was reset to the default."
   },
@@ -102,7 +110,11 @@
     "maxDropPhase": "Biggest drop-off",
     "stagesReached": "Stages reached",
     "stagesTotal": "Stages in funnel",
-    "kpiOrderFellBack": "A KPI card configured in Settings no longer exists and was reset to the default."
+    "kpiOrderFellBack": "A KPI card configured in Settings no longer exists and was reset to the default.",
+    "worstConversionPhase": "Weakest conversion",
+    "slowestPhase": "Slowest stage",
+    "dropOffRate": "Drop-off (rate)",
+    "stagesEmpty": "Stages with no activity"
   },
   "recruiters": {
     "title": "Recruiters",
@@ -119,7 +131,11 @@
       "intakesPlanned": "Intakes planned",
       "intakesDone": "Intakes done",
       "tasksOpen": "Tasks open",
-      "tasksOverdue": "Tasks overdue"
+      "tasksOverdue": "Tasks overdue",
+      "avgCandidatesPerRecruiter": "Avg. candidates per recruiter",
+      "topRecruiter": "Top recruiter",
+      "intakeCompletionRate": "Intake completion rate",
+      "taskOverdueRate": "Task overdue rate"
     },
     "cols": {
       "recruiter": "Recruiter",
@@ -156,7 +172,11 @@
       "customersCount": "Customers",
       "topIndustry": "Top industry",
       "topOwner": "Top owner",
-      "staleOnline": "Online, no candidates"
+      "staleOnline": "Online, no candidates",
+      "longConcept": "Long in concept",
+      "noMatches": "No matches",
+      "topFunction": "Top function",
+      "topBranch": "Top branch"
     },
     "cols": {
       "vacancy": "Vacancy",
@@ -201,7 +221,13 @@
     "terminations": {
       "title": "Termination reasons",
       "total": "Total terminations",
-      "rate": "Termination rate"
+      "rate": "Termination rate",
+      "topReason": "Top reason"
+    },
+    "summary": {
+      "noContract": "No contract",
+      "topContractForm": "Top contract form",
+      "funnelRate": "Share via application"
     },
     "kpiOrderFellBack": "A KPI card configured in Settings no longer exists and was reset to the default."
   },
@@ -225,7 +251,12 @@
       "unassigned": "Unassigned",
       "noOutcome": "No outcome",
       "topCampaign": "Top call list",
-      "topChannel": "Top channel"
+      "topChannel": "Top channel",
+      "topStatus": "Top status",
+      "topOutcome": "Top outcome",
+      "campaignsCount": "Call lists",
+      "channelsUsed": "Channels used",
+      "assigneesCount": "Assigned recruiters"
     },
     "kpiOrderFellBack": "A KPI card configured in Settings no longer exists and was reset to the default."
   },
@@ -267,7 +298,9 @@
       "owner": "Owner",
       "customer": "Customer",
       "vacancy": "Vacancy",
-      "stageDuration": "Too long in stage"
+      "stageDuration": "Too long in stage",
+      "customerNone": "Without customer",
+      "stageNone": "Without stage"
     },
     "buckets": {
       "active": "Active",
@@ -288,7 +321,11 @@
       "open": "Open",
       "won": "Won",
       "lost": "Lost",
-      "winRate": "Win rate"
+      "winRate": "Win rate",
+      "openValue": "Open value",
+      "wonValue": "Won value",
+      "topStage": "Top stage",
+      "topCustomer": "Top customer"
     },
     "stale": {
       "untouched": "Untouched",
@@ -309,7 +346,11 @@
       "open": "Open",
       "done": "Done",
       "overdue": "Overdue",
-      "doneRate": "Done rate"
+      "doneRate": "Done rate",
+      "topStatus": "Top status",
+      "topType": "Top type",
+      "topPriority": "Top priority",
+      "topAssignee": "Top assignee"
     },
     "axes": {
       "status": "Status",
@@ -344,6 +385,17 @@
       "ariaLabel": "Population",
       "customers": "Customers",
       "prospects": "Prospects"
+    },
+    "kpis": {
+      "contractEnding": "Contract ending soon",
+      "noContact": "No contact for a while",
+      "taskOverdue": "Tasks overdue",
+      "priceAgreementEnding": "Price agreements ending",
+      "vacancyStale": "Vacancy online without applicants",
+      "departmentsWithoutPlacement": "Departments without a placement",
+      "customersWithoutVacancies": "Customers without vacancies",
+      "customersWithoutApplications": "Customers without applications",
+      "matchesStoppedEarly": "Matches stopped early"
     }
   },
   "contacts": {
@@ -368,7 +420,11 @@
       "withoutFunction": "Without function",
       "withoutLocation": "Without location",
       "withoutDepartment": "Without department",
-      "withoutCustomer": "Without customer"
+      "withoutCustomer": "Without customer",
+      "topCustomer": "Top customer",
+      "topFunction": "Top function",
+      "topLocation": "Top location",
+      "topDepartment": "Top department"
     },
     "kpiOrderFellBack": "A KPI card configured in Settings no longer exists and was reset to the default."
   },
@@ -393,7 +449,11 @@
       "withoutCity": "Without city",
       "topCity": "Top city",
       "withoutProvince": "Without province",
-      "topProvince": "Top province"
+      "topProvince": "Top province",
+      "withContacts": "With direct contacts",
+      "withoutContacts": "Without direct contacts",
+      "departmentCoverageRate": "Department coverage rate",
+      "contactCoverageRate": "Contact coverage rate"
     },
     "kpiOrderFellBack": "A KPI card configured in Settings no longer exists and was reset to the default."
   },
@@ -417,7 +477,11 @@
       "withoutCustomer": "Without customer",
       "topCustomer": "Top customer",
       "topLocation": "Top location",
-      "customersCount": "Customers represented"
+      "customersCount": "Customers represented",
+      "withCustomer": "With customer",
+      "locationCoverageRate": "Location coverage rate",
+      "contactCoverageRate": "Contact coverage rate",
+      "othersCustomer": "Other customers"
     },
     "kpiOrderFellBack": "A KPI card configured in Settings no longer exists and was reset to the default."
   },
@@ -441,7 +505,11 @@
       "activityTypes": "Activity types",
       "modelsUsed": "Models used",
       "activeUsers": "Active users",
-      "topActivity": "Most used activity"
+      "topActivity": "Most used activity",
+      "topModel": "Most used model",
+      "topUser": "Most active user",
+      "avgPerUser": "Avg activity per user",
+      "avgPerActivityType": "Avg activity per type"
     },
     "kpiOrderFellBack": "A KPI card configured in Settings no longer exists and was reset to the default."
   },
@@ -466,7 +534,11 @@
       "successRate": "Success rate",
       "avgDuration": "Avg duration",
       "workflowsCount": "Workflows",
-      "triggersCount": "Triggers"
+      "triggersCount": "Triggers",
+      "topWorkflow": "Most active workflow",
+      "topTrigger": "Most active trigger",
+      "failureRate": "Failure rate",
+      "avgRunsPerWorkflow": "Avg runs per workflow"
     },
     "kpiOrderFellBack": "A KPI card configured in Settings no longer exists and was reset to the default."
   },
@@ -492,7 +564,11 @@
       "filledPositions": "Filled positions",
       "opportunities": "Opportunities",
       "renewalsDue": "Renewals due",
-      "notContacted": "Not contacted"
+      "notContacted": "Not contacted",
+      "avgOpportunitiesPerManager": "Avg. opportunities per manager",
+      "avgVacanciesPerManager": "Avg. open vacancies per manager",
+      "notContactedRate": "Not-contacted rate",
+      "renewalsDueRate": "Renewals-due rate"
     },
     "cols": {
       "manager": "Account manager",

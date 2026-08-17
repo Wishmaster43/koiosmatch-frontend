@@ -4,6 +4,7 @@ import userEvent from '@testing-library/user-event'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import ApplicationsReport from './ApplicationsReport'
 import type { ApplicationsReportData } from '@/types/analytics'
+import { getReportKpiCatalog } from './kpiCatalog'
 
 // Data layer under test control (loading/error/empty/success — the four UI states).
 const mockUseApplicationsReport = vi.fn()
@@ -327,5 +328,42 @@ describe('ApplicationsReport (RAPPORTEN-SUITE-1 portie 2)', () => {
     // The stage section was never re-fetched by the customer click.
     expect(getSpy).not.toHaveBeenCalledWith('/reports/applications/drill',
       expect.objectContaining({ params: expect.objectContaining({ stage: expect.anything() }) }))
+  })
+
+  // REPORTS-KPI-SPARE-3: the settings catalogue offers real spares beyond the
+  // four default axes — otherwise the picker has nothing new to swap in.
+  it('offers vacancy/stage_duration/customer_none/stage_none spares in the applications catalogue', () => {
+    const keys = getReportKpiCatalog('applications').map(c => c.key)
+    expect(keys).toEqual(expect.arrayContaining(['vacancy', 'stage_duration', 'customer_none', 'stage_none']))
+  })
+
+  it('swapping in the vacancy spare renders a real top-vacancy KPI card, still nine cards total', () => {
+    mockSettings.mockReturnValue({ report_kpis_applications: JSON.stringify(['vacancy', 'source', 'owner', 'customer']) })
+    mockUseApplicationsReport.mockReturnValue({ data, loading: false, error: false })
+    renderReport()
+    // The fixture's real top vacancy row (count 9) — no fabricated number.
+    expect(screen.getByText('Vacature: Verpleegkundige (gearchiveerd)')).toBeInTheDocument()
+    const cards = screen.getAllByText(/^(Totaal sollicitaties|Funnel:|Fase:|Bron:|Eigenaar:|Klant:|Vacature:|Te lang in fase:)/)
+    expect(cards.length).toBe(9)
+  })
+
+  it('swapping in customer_none/stage_none renders their real none-bucket counts', () => {
+    mockSettings.mockReturnValue({ report_kpis_applications: JSON.stringify(['customer_none', 'stage_none', 'source', 'owner']) })
+    mockUseApplicationsReport.mockReturnValue({ data, loading: false, error: false })
+    renderReport()
+    expect(screen.getByText('Klant: Geen klant')).toBeInTheDocument()
+    expect(screen.getByText('Fase: Geen fase')).toBeInTheDocument()
+  })
+
+  // Clicking the stage_duration spare card drills through the SAME real
+  // `stage_duration` XOR param as its own bar — never the plain `stage` param.
+  it('clicking the stage_duration spare KPI card drills with stage_duration, never stage', async () => {
+    const user = userEvent.setup()
+    mockSettings.mockReturnValue({ report_kpis_applications: JSON.stringify(['stage_duration', 'source', 'owner', 'customer']) })
+    mockUseApplicationsReport.mockReturnValue({ data, loading: false, error: false })
+    renderReport()
+    await user.click(screen.getByText('Te lang in fase: Applied (duration)'))
+    expect(getSpy).toHaveBeenCalledWith('/reports/applications/drill',
+      expect.objectContaining({ params: { stage_duration: 'applied', period: 'month' } }))
   })
 })

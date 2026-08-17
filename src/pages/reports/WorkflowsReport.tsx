@@ -23,7 +23,7 @@ import SegmentBars from './SegmentBars'
 import ReportChartWithDrillList from './ReportChartWithDrillList'
 import ReportTimeseriesChart from './ReportTimeseriesChart'
 import { useDateFormat } from '@/lib/datetime'
-import { formatPercent } from '@/lib/formatters'
+import { formatPercent, formatRatio, formatNumber } from '@/lib/formatters'
 import { formatDuration } from '@/components/reports/runFormat'
 import type { ReportPeriod, CandidateSegment, ApplicationTopSegment, CandidateTimeseriesPoint } from '@/types/analytics'
 import { useAllSettings, getJsonSetting } from '@/lib/settings/useAllSettings'
@@ -108,6 +108,14 @@ export default function WorkflowsReport({ period }: { period: ReportPeriod }) {
   // percentage; avg_duration_seconds is whole seconds but the shared
   // formatDuration expects milliseconds — hence the *1000 conversion.
   const s = data?.summary
+  // Spares (REPORTS-KPI-SPARES-1): the top real segment of two axes not yet
+  // offered (by_workflow/by_trigger, same pattern as workflowsCount/triggersCount
+  // above), and two honest rates over real counts already in the summary.
+  const top = <T extends { count: number; label: string }>(segs: T[]) =>
+    segs.reduce<T | null>((best, x) => (!best || x.count > best.count ? x : best), null)
+  const topWorkflow = data ? top(data.by_workflow) : null
+  const topTrigger  = data ? top(data.by_trigger) : null
+  const workflowsCount = data?.by_workflow.length ?? 0
   const kpiByKey: Record<string, KpiSpec> = {
     runs:       { key: 'runs',       label: t('workflows.summary.runs'),       value: s?.runs ?? total },
     completed:  { key: 'completed',  label: t('workflows.summary.completed'),  value: s?.completed ?? 0 },
@@ -122,6 +130,14 @@ export default function WorkflowsReport({ period }: { period: ReportPeriod }) {
     // segment value, so there is no XOR param to drill on.
     workflowsCount: { key: 'workflowsCount', label: t('workflows.summary.workflowsCount'), value: data?.by_workflow.length ?? 0 },
     triggersCount: { key: 'triggersCount', label: t('workflows.summary.triggersCount'), value: data?.by_trigger.length ?? 0 },
+    topWorkflow: { key: 'topWorkflow', label: t('workflows.summary.topWorkflow'),
+      value: topWorkflow?.count ?? '—', sub: topWorkflow?.label },
+    topTrigger: { key: 'topTrigger', label: t('workflows.summary.topTrigger'),
+      value: topTrigger?.count ?? '—', sub: topTrigger?.label },
+    failureRate: { key: 'failureRate', label: t('workflows.summary.failureRate'),
+      value: s && s.runs > 0 ? formatRatio(s.failed / s.runs) : '—' },
+    avgRunsPerWorkflow: { key: 'avgRunsPerWorkflow', label: t('workflows.summary.avgRunsPerWorkflow'),
+      value: s && workflowsCount > 0 ? formatNumber(Math.round(s.runs / workflowsCount)) : '—' },
   }
   // Which nine keys render, and in what order, is the tenant's Settings → Reports
   // choice (falls back to today's order when nothing is stored, or a stored key

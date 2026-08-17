@@ -9,6 +9,14 @@ import type { TasksReportData } from '@/types/analytics'
 const mockUseTasksReport = vi.fn()
 vi.mock('./useTasksReport', () => ({ useTasksReport: (...args: unknown[]) => mockUseTasksReport(...args) }))
 
+// Tenant KPI-order settings (RAPPORT-KPI-INSTELBAAR) — empty blob = today's
+// default order, unless a test overrides it.
+const mockSettings = vi.hoisted(() => vi.fn(() => ({} as Record<string, unknown>)))
+vi.mock('@/lib/settings/useAllSettings', async () => {
+  const actual = await vi.importActual('@/lib/settings/useAllSettings')
+  return { ...actual, useAllSettings: () => mockSettings() }
+})
+
 // Spy on the underlying axios client so we can assert the exact request shape
 // (method/route/params) that a bar/bucket click sends — mutation tests must assert
 // the request, never only that a callback fired (CLAUDE.md §13).
@@ -377,5 +385,44 @@ describe('TasksReport (nine-card KPI footprint)', () => {
     renderReport()
     const card = screen.getByText('Te-laat-percentage').closest('div[role="button"]')
     expect(card).toBeNull()
+  })
+})
+
+// REPORTS-KPI-SPARE-1: four real spares grow the catalogue so the settings
+// screen has something to swap in.
+describe('TasksReport (spare KPI cards)', () => {
+  afterEach(() => { getSpy.mockClear(); mockSettings.mockReturnValue({}) })
+
+  it('offers the four new spare cards to the settings catalogue', async () => {
+    const { getReportKpiCatalog, getReportKpiDefaultOrder, reportHasSpareKpiCards } = await import('./kpiCatalog')
+    const catalogKeys = getReportKpiCatalog('tasks').map(c => c.key)
+    expect(catalogKeys).toEqual(expect.arrayContaining(['topStatus', 'topType', 'topPriority', 'topAssignee']))
+    expect(catalogKeys.length).toBe(getReportKpiDefaultOrder('tasks').length + 4)
+    expect(reportHasSpareKpiCards('tasks')).toBe(true)
+  })
+
+  it('renders swapped-in spare cards with their real fixture values, strip still exactly nine', async () => {
+    const user = userEvent.setup()
+    mockSettings.mockReturnValue({
+      report_kpis_tasks: JSON.stringify([
+        'topStatus', 'topType', 'topPriority', 'topAssignee',
+        'total', 'open', 'done', 'overdue', 'doneRate',
+      ]),
+    })
+    mockUseTasksReport.mockReturnValue({ data, loading: false, error: false })
+    renderReport()
+    // Each: the largest real (non-'none') segment of its axis.
+    expect(screen.getByText('Te doen · 6')).toBeInTheDocument()
+    expect(screen.getByText('Bellen · 8')).toBeInTheDocument()
+    expect(screen.getByText('Hoog · 9')).toBeInTheDocument()
+    expect(screen.getByText('Anna de Vries · 9')).toBeInTheDocument()
+
+    // Clicking a spare card drills the same real XOR param its axis bar uses.
+    // (The status axis already defaults to this exact top segment on mount, and
+    // React Query dedupes the identical rowsParams — so assert the request was
+    // sent with the real value rather than relying on a fresh network call.)
+    await user.click(screen.getByText('Te doen · 6'))
+    expect(getSpy).toHaveBeenCalledWith('/reports/tasks/drill',
+      expect.objectContaining({ params: { status: 'status-uuid-1', period: 'month' } }))
   })
 })

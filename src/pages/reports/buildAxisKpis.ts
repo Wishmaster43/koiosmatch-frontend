@@ -9,6 +9,12 @@
  * nothing is invented, no zero is shown to mean "unknown" (CLAUDE.md §0 no fake
  * affordances). Shared by the three reports so this derivation lives in ONE
  * place, not copy-pasted three times (§11 — a helper lands with adoption).
+ *
+ * REPORTS-KPI-SPARE-2: a config MAY carry exactly one segment with an empty
+ * `label` — a single-segment "signal" pseudo-axis (CustomersReport's `kpis[]`
+ * spares, see kpiCatalog.ts) whose axisLabel already fully names the card, so
+ * appending "": " + ''" would print a bare trailing colon. Only that case skips
+ * the segment label; every real multi-segment axis still reads "Axis: Segment".
  */
 import type { KpiSpec } from '@/components/insights/InsightsRow'
 
@@ -37,7 +43,7 @@ export function buildAxisKpis(
       addedThisRound = true
       picks.push({
         key: `${c.axis}:${seg.key}`,
-        label: `${c.axisLabel}: ${seg.label}`,
+        label: seg.label ? `${c.axisLabel}: ${seg.label}` : c.axisLabel,
         value: seg.count,
         active: isActive(c.axis, seg.key),
         onClick: () => onPick(c.axis, seg.key),

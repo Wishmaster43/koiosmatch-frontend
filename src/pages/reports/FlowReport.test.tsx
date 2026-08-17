@@ -4,6 +4,7 @@ import userEvent from '@testing-library/user-event'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import FlowReport from './FlowReport'
 import type { FlowReportData } from '@/types/analytics'
+import { getReportKpiCatalog } from './kpiCatalog'
 
 // Data layer under test control (loading/error/empty/success — the four UI states).
 const mockUseFlowReport = vi.fn()
@@ -66,6 +67,7 @@ describe('FlowReport', () => {
   beforeEach(() => {
     getSpy.mockReset()
     getSpy.mockResolvedValue({ data: { data: [], meta: { total: 0 } } })
+    mockSettings.mockReturnValue({})
   })
 
   it('shows the loading state', () => {
@@ -246,6 +248,56 @@ describe('FlowReport', () => {
     // Default load selects "applied" first.
     expect(lastDrillParams()).toEqual({ phase: 'applied', period: 'month', view: 'reached' })
     await user.click(screen.getAllByText('Aangenomen')[0])
+    expect(lastDrillParams()).toEqual({ phase: 'hired', period: 'month', view: 'reached' })
+  })
+
+  // REPORTS-KPI-SPARE-3: the settings catalogue offers real spares beyond the
+  // nine default cards — otherwise the picker has nothing new to swap in.
+  it('offers worstConversionPhase/slowestPhase/dropOffRate/stagesEmpty spares in the flow catalogue', () => {
+    const keys = getReportKpiCatalog('flow').map(c => c.key)
+    expect(keys).toEqual(expect.arrayContaining(['worstConversionPhase', 'slowestPhase', 'dropOffRate', 'stagesEmpty']))
+  })
+
+  // Swapping in a spare renders a real, fixture-derived value — never a
+  // fabricated number — and the strip still ships exactly nine cards.
+  it('swapping in the four spares renders their real derived values, still nine cards', () => {
+    mockSettings.mockReturnValue({
+      report_kpis_flow: JSON.stringify([
+        'total', 'worstConversionPhase', 'slowestPhase', 'dropOffRate', 'stagesEmpty',
+        'firstPhase', 'lastPhase', 'stagesReached', 'stagesTotal',
+      ]),
+    })
+    mockUseFlowReport.mockReturnValue({ data: cohortData, loading: false, error: false })
+    renderReport()
+    expect(screen.getByText('Zwakste conversie')).toBeInTheDocument()
+    // Hired has the lowest real conversion_rate (0.5, vs invited's 0.6) — also
+    // shown a second time in the funnel row's own conversion column below.
+    expect(screen.getAllByText('50%').length).toBeGreaterThan(0)
+    expect(screen.getByText('Traagste fase')).toBeInTheDocument()
+    // Hired also has the highest real avg_days_in_phase (5) — also shown a
+    // second time in the funnel row's own avg-days column below.
+    expect(screen.getAllByText('gem. 5 dagen').length).toBeGreaterThan(0)
+    expect(screen.getByText('Uitval (percentage)')).toBeInTheDocument()
+    // dropOff (14) / first reached (20) = 70%.
+    expect(screen.getByText('70%')).toBeInTheDocument()
+    expect(screen.getByText('Fasen zonder activiteit')).toBeInTheDocument()
+    // All 3 configured phases were reached this window, so 0 stages sit empty.
+    expect(screen.getByText('0')).toBeInTheDocument()
+  })
+
+  // Clicking the worstConversionPhase spare drills through the SAME real phase
+  // as clicking its own funnel row — never a synthetic param.
+  it('clicking the worstConversionPhase spare card drills with the real phase key', async () => {
+    const user = userEvent.setup()
+    mockSettings.mockReturnValue({
+      report_kpis_flow: JSON.stringify([
+        'total', 'worstConversionPhase', 'slowestPhase', 'dropOffRate', 'stagesEmpty',
+        'firstPhase', 'lastPhase', 'stagesReached', 'stagesTotal',
+      ]),
+    })
+    mockUseFlowReport.mockReturnValue({ data: cohortData, loading: false, error: false })
+    renderReport()
+    await user.click(screen.getByText('Zwakste conversie'))
     expect(lastDrillParams()).toEqual({ phase: 'hired', period: 'month', view: 'reached' })
   })
 })

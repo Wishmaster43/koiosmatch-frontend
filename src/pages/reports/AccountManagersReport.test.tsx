@@ -144,6 +144,20 @@ describe('AccountManagersReport — real data (GET /reports/accountmanagers)', (
     expect(screen.queryByText('—')).not.toBeInTheDocument()
   })
 
+  // REPORTS-KPI-SPARE-2: two more "per manager" averages and two rates over
+  // sums already shown — all real derivations, no new backend field.
+  it('renders the four spare cards with real derived values when swapped in', () => {
+    mockSettings.mockReturnValue({
+      report_kpis_accountmanagers: JSON.stringify(['avgOpportunitiesPerManager', 'avgVacanciesPerManager', 'notContactedRate', 'renewalsDueRate',
+        'accountManagers', 'customers', 'avgPerManager', 'topManager', 'openVacancies']),
+    })
+    renderReport()
+    expect(cardValue('Gem. kansen per manager').getByText('0,5')).toBeInTheDocument() // opportunities(1)/managers(2)
+    expect(cardValue('Gem. open vacatures per manager').getByText('1,5')).toBeInTheDocument() // openVacancies(3)/managers(2)
+    expect(cardValue('Percentage niet benaderd').getByText('10%')).toBeInTheDocument() // notContacted(1)/customers(10)
+    expect(cardValue('Percentage verlengingen te doen').getByText('20%')).toBeInTheDocument() // contractEnding(2)/customers(10)
+  })
+
   it('shows the not-contacted/contract-ending thresholds actually applied, read from the plain report', () => {
     renderReport()
     expect(screen.getByText(/> 90 d/)).toBeInTheDocument()

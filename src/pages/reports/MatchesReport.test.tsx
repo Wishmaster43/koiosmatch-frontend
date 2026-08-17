@@ -393,3 +393,46 @@ describe('MatchesReport (nine-card KPI footprint)', () => {
     expect(screen.getAllByText('—').length).toBeGreaterThanOrEqual(1)
   })
 })
+
+// REPORTS-KPI-SPARE-1: four real spares grow the catalogue so the settings
+// screen has something to swap in.
+describe('MatchesReport (spare KPI cards)', () => {
+  beforeEach(() => {
+    getSpy.mockReset()
+    getSpy.mockResolvedValue({ data: { data: [], meta: { total: 0 } } })
+  })
+
+  it('offers the four new spare cards to the settings catalogue', async () => {
+    const { getReportKpiCatalog, getReportKpiDefaultOrder, reportHasSpareKpiCards } = await import('./kpiCatalog')
+    const catalogKeys = getReportKpiCatalog('matches').map(c => c.key)
+    expect(catalogKeys).toEqual(expect.arrayContaining(['noContract', 'topContractForm', 'topTerminationReason', 'funnelRate']))
+    expect(catalogKeys.length).toBe(getReportKpiDefaultOrder('matches').length + 4)
+    expect(reportHasSpareKpiCards('matches')).toBe(true)
+  })
+
+  it('renders swapped-in spare cards with their real fixture values, strip still exactly nine', async () => {
+    const user = userEvent.setup()
+    mockSettings.mockReturnValue({
+      report_kpis_matches: JSON.stringify([
+        'noContract', 'topContractForm', 'topTerminationReason', 'funnelRate',
+        'total', 'funnel', 'direct', 'sent', 'active',
+      ]),
+    })
+    mockUseMatchesReport.mockReturnValue({ data, loading: false, error: false })
+    renderReport()
+    // noContract reuses the same 'none' tile count (3) already covered above.
+    expect(screen.getAllByText('Geen contract').length).toBeGreaterThanOrEqual(1)
+    // topContractForm: the largest real (non-'none') segment — Detachering · 9.
+    expect(screen.getByText('Detachering · 9')).toBeInTheDocument()
+    // topTerminationReason: the largest reason segment — Klant stopt · 2.
+    expect(screen.getByText('Klant stopt · 2')).toBeInTheDocument()
+    // funnelRate: 10 / 16 * 100 = 62,5%.
+    expect(screen.getByText('62,5%')).toBeInTheDocument()
+
+    // Clicking the swapped-in cards sends the real, already-supported XOR params.
+    await user.click(screen.getByText('Detachering · 9'))
+    expect(lastDrillParams()).toEqual({ contract_form: 'secondment', period: 'month' })
+    await user.click(screen.getByText('Klant stopt · 2'))
+    expect(lastDrillParams()).toEqual({ stop_reason: 'client_stop', period: 'month' })
+  })
+})

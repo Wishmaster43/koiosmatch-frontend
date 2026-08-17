@@ -41,7 +41,7 @@ type Axis = 'stage' | 'source' | 'customer' | 'vacancy'
 // 'stageDuration' is its OWN key (not folded into 'stage') — same stage-key
 // vocabulary, a DIFFERENT XOR param (`stage_duration`, not `stage`) and a
 // different predicate (longest-hanging rows, not "currently in this stage").
-type DrillKey = Axis | 'owner' | 'bucket' | 'series' | 'stageDuration'
+type DrillKey = Axis | 'owner' | 'bucket' | 'series' | 'stage_duration'
 
 // Fixed funnel-bucket vocabulary: flag-driven on the backend, not a tenant lookup,
 // so labels come from i18n and colour from the semantic tokens (§4) — never a
@@ -128,7 +128,7 @@ export default function ApplicationsReport({ period, filters = EMPTY_REPORT_FILT
     const max = segs.reduce((m, s) => Math.max(m, s.count), 0)
     const onPick = gateDrillClick('applications', (value: string) => {
       const seg = segs.find(s => s.value === value)
-      if (seg) openSegment('stageDuration', seg, { stage_duration: value })
+      if (seg) openSegment('stage_duration', seg, { stage_duration: value })
     })
     return <SegmentBars max={max} onPick={onPick}
       items={segs.map(s => ({ key: s.value, label: s.label, count: s.count, color: null }))} />
@@ -156,7 +156,7 @@ export default function ApplicationsReport({ period, filters = EMPTY_REPORT_FILT
     if (topCustomer) openSegment('customer', topCustomer, { customer: topCustomer.value })
     if (topVacancy) openSegment('vacancy', topVacancy, { vacancy: topVacancy.value })
     const topStageDuration = top(data.by_stage_duration, s => s.count)
-    if (topStageDuration) openSegment('stageDuration', topStageDuration, { stage_duration: topStageDuration.value })
+    if (topStageDuration) openSegment('stage_duration', topStageDuration, { stage_duration: topStageDuration.value })
     if (topBucketKey) openSegment('bucket', { label: t(`applications.buckets.${topBucketKey}`), count: data.by_bucket[topBucketKey] }, { bucket: topBucketKey })
     if (data.timeseries.series.length) openBucket(data.timeseries.series[data.timeseries.series.length - 1])
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -165,8 +165,11 @@ export default function ApplicationsReport({ period, filters = EMPTY_REPORT_FILT
   // Nine-card KPI strip (same footprint as the dashboard): total + the four fixed
   // funnel-bucket counts (real, flag-driven, already on the response) + the top
   // segment of four more axes (stage/source/owner/customer) — all real counts,
-  // nothing invented (§0 no fake affordances). `vacancy` stays out of the strip
-  // (top-20+others is a weak "top KPI" pick) but is still fully shown as bars below.
+  // nothing invented (§0 no fake affordances). `vacancy`/`stage_duration` and two
+  // 'none'-bucket pseudo-axes stay out of the DEFAULT four (top-20+others is a
+  // weak default "top KPI" pick) but are real spare catalogue entries a tenant
+  // can swap in (REPORTS-KPI-SPARE-3, kpiCatalog.ts) — `vacancy` is still fully
+  // shown as bars below regardless of the strip's own choice.
   const bucketKpis: KpiSpec[] = BUCKET_KEYS.map(k => ({
     key: `bucket:${k}`, label: `${t('applications.axes.bucket')}: ${t(`applications.buckets.${k}`)}`, value: data?.by_bucket[k] ?? 0,
     active: (drills.bucket?.rowsParams as Record<string, unknown> | undefined)?.bucket === k,
@@ -177,6 +180,15 @@ export default function ApplicationsReport({ period, filters = EMPTY_REPORT_FILT
     source:   { axis: 'source',   axisLabel: t('applications.axes.source'),   segs: (data?.by_source ?? []).map(s => ({ key: s.value, label: s.label, count: s.count })) },
     owner:    { axis: 'owner',    axisLabel: t('applications.axes.owner'),    segs: (data?.by_owner ?? []).map(s => ({ key: s.owner_id, label: s.name, count: s.count })) },
     customer: { axis: 'customer', axisLabel: t('applications.axes.customer'), segs: (data?.by_customer ?? []).map(s => ({ key: s.value, label: s.label, count: s.count })) },
+    // REPORTS-KPI-SPARE-3: two real full axes the strip already computes (the
+    // component's `bars('vacancy', ...)`/`stageDurationBars` sections below) but
+    // never offered as swap-in KPI cards, plus two single-segment pseudo-axes
+    // filtering their parent axis's own real 'none' sentinel row (already
+    // returned by /reports/applications — never invented).
+    vacancy:        { axis: 'vacancy', axisLabel: t('applications.axes.vacancy'), segs: (data?.by_vacancy ?? []).map(s => ({ key: s.value, label: s.label, count: s.count })) },
+    stage_duration: { axis: 'stage_duration', axisLabel: t('applications.axes.stageDuration'), segs: (data?.by_stage_duration ?? []).map(s => ({ key: s.value, label: s.label, count: s.count })) },
+    customer_none:  { axis: 'customer', axisLabel: t('applications.axes.customer'), segs: (data?.by_customer ?? []).filter(s => s.value === 'none').map(s => ({ key: s.value, label: s.label, count: s.count })) },
+    stage_none:     { axis: 'stage',    axisLabel: t('applications.axes.stage'),    segs: (data?.by_stage ?? []).filter(s => s.value === 'none').map(s => ({ key: s.value, label: s.label, count: s.count })) },
   }
   // WHICH axes participate, and in what priority order, is the tenant's
   // Settings → Reports choice (bucket cards stay fixed — not in the axis
@@ -248,7 +260,7 @@ export default function ApplicationsReport({ period, filters = EMPTY_REPORT_FILT
 
             <section>
               <h3 style={{ ...head, marginBottom: 10 }}>{t('applications.axes.stageDuration')}</h3>
-              <ReportChartWithDrillList drill={drills.stageDuration ?? null} placeholderLabel={t('applications.axes.stageDuration')}
+              <ReportChartWithDrillList drill={drills.stage_duration ?? null} placeholderLabel={t('applications.axes.stageDuration')}
                 chart={stageDurationBars(data.by_stage_duration)} />
             </section>
 

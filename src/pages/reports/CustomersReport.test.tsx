@@ -288,6 +288,53 @@ describe('CustomersReport (RAPPORTEN-SUITE-1 portie 3, customers inflow report)'
     expect(getSpy).not.toHaveBeenCalledWith('/reports/customers/drill',
       expect.objectContaining({ params: expect.objectContaining({ industry: expect.anything() }) }))
   })
+
+  // REPORTS-KPI-SPARE-2: a tenant swapping a slot to one of the nine standing
+  // `kpis[]` signal spares sees the endpoint's REAL count, not a fabricated
+  // number — the strip never invents this value.
+  it('renders a real "kpis[]" signal spare when the tenant swaps it into a slot', () => {
+    mockSettings.mockReturnValue({
+      report_kpis_customers: JSON.stringify(['signal:contract_ending', 'status', 'phase', 'industry', 'owner', 'branch']),
+    })
+    mockUseCustomersReport.mockReturnValue({
+      data: {
+        ...data,
+        kpis: [
+          { key: 'contract_ending', label: 'Overeenkomst loopt af', count: 7 },
+          { key: 'no_contact', label: 'Lang geen contact', count: 2 },
+        ],
+      },
+      loading: false, error: false,
+    })
+    renderReport()
+    expect(screen.getByText(i18n.t('customers.kpis.contractEnding', { ns: 'analytics' }))).toBeInTheDocument()
+    expect(screen.getByText('7')).toBeInTheDocument()
+    // The unpicked signal (no_contact) never leaks in — only the swapped-in one renders.
+    expect(screen.queryByText(i18n.t('customers.kpis.noContact', { ns: 'analytics' }))).not.toBeInTheDocument()
+  })
+
+  // The catalog knowingly excludes these signal spares from Prospects (they
+  // describe an existing client relationship a lead can't have) — swapping one
+  // into a Prospects slot must not silently render there.
+  it('never offers a customers-only signal spare on the Prospects position', () => {
+    mockSettings.mockReturnValue({
+      report_kpis_prospects: JSON.stringify(['signal:contract_ending', 'phase', 'industry', 'owner', 'branch']),
+    })
+    mockUseCustomersReport.mockReturnValue({
+      data: { ...data, kpis: [{ key: 'contract_ending', label: 'Overeenkomst loopt af', count: 7 }] },
+      loading: false, error: false,
+    })
+    render(
+      <QueryClientProvider client={new QueryClient()}>
+        <CustomersReport period="month" initialView="prospects" />
+      </QueryClientProvider>,
+    )
+    // 'signal:contract_ending' is not in the prospects catalogue, so
+    // resolveReportKpiOrder drops it and backfills from the default order —
+    // Status (the real default) renders in its place, never the signal card.
+    expect(screen.queryByText(i18n.t('customers.kpis.contractEnding', { ns: 'analytics' }))).not.toBeInTheDocument()
+    expect(screen.getByText('Status: Actief')).toBeInTheDocument()
+  })
 })
 
 // RAPPORTEN-CONSOLIDATIE-1: the Klanten/Prospects switch — a real server-side

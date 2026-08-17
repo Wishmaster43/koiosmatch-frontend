@@ -2185,7 +2185,11 @@
     "add": "Add function",
     "freeEntry": "Allow free entry",
     "freeEntryHint": "On: recruiters can type their own function (combobox). Off: pick from the list only (strict dropdown).",
-    "confirmFreeEntry": "Are you sure? Free entry lets recruiters type functions that aren’t in the list. This can lower data quality."
+    "confirmFreeEntry": "Are you sure? Free entry lets recruiters type functions that aren’t in the list. This can lower data quality.",
+    "confirmStrictMismatchTitle": "Some values are not in the list",
+    "confirmStrictMismatch": "{{count}} function value used on existing candidates is not in the list and would become unreachable in a strict dropdown: {{values}}. Add it to the list first, or cancel and clean it up manually.",
+    "confirmStrictMismatch_other": "{{count}} function values used on existing candidates are not in the list and would become unreachable in a strict dropdown: {{values}}. Add them to the list first, or cancel and clean them up manually.",
+    "gatherMissing": "Add them to the list"
   },
   "contactFunctionsSettings": {
     "title": "Contact functions",

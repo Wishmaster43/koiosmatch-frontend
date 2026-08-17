@@ -38,12 +38,25 @@ describe('useApplicationSources', () => {
     expect(mockedGet).not.toHaveBeenCalledWith('/applications/stats', expect.anything())
   })
 
-  it('returns the seed and the strict default while the request is pending', () => {
+  // FREE-ENTRY-FALLBACK-1: pending means PERMISSIVE, never strict. Strict-while-unknown
+  // reads as "no value is valid" and locks the user out of a required field for a reason
+  // they cannot see. The backend hit exactly this on 15-08 with an empty lookup table and
+  // answered 422 on four write paths; both sides now default permissive.
+  it('returns the seed and stays permissive while the request is pending', () => {
     mockedTenantId.mockReturnValue(nextTenant())
     mockedGet.mockReturnValue(new Promise(() => {}))
     const { result } = renderHook(() => useApplicationSources())
     expect(result.current.sources).toEqual(DEFAULT_APPLICATION_SOURCES)
-    expect(result.current.allowFreeEntry).toBe(false)
+    expect(result.current.allowFreeEntry).toBe(true)
+  })
+
+  // The mirror case: a failed request must not silently turn the picker strict either.
+  it('stays permissive when the request fails outright', async () => {
+    mockedTenantId.mockReturnValue(nextTenant())
+    mockedGet.mockRejectedValue(new Error('network'))
+    const { result } = renderHook(() => useApplicationSources())
+    await waitFor(() => expect(result.current.sources).toEqual(DEFAULT_APPLICATION_SOURCES))
+    expect(result.current.allowFreeEntry).toBe(true)
   })
 
   it('maps the distinct lookup row names once the response resolves', async () => {

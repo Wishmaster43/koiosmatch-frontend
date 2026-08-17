@@ -19,6 +19,14 @@ vi.mock('@/lib/api', () => ({
   getActiveTenantId: () => 'test-tenant',
 }))
 
+// Tenant KPI-order settings (RAPPORT-KPI-INSTELBAAR) — empty blob = today's
+// default order, unless a test overrides it.
+const mockSettings = vi.hoisted(() => vi.fn(() => ({} as Record<string, unknown>)))
+vi.mock('@/lib/settings/useAllSettings', async () => {
+  const actual = await vi.importActual('@/lib/settings/useAllSettings')
+  return { ...actual, useAllSettings: () => mockSettings() }
+})
+
 // Fixture per the RAPPORTEN-SUITE-2 workflows contract: three-way XOR axes,
 // each axis sums to total.
 const data: WorkflowsReportData = {
@@ -67,7 +75,7 @@ describe('WorkflowsReport (RAPPORTEN-SUITE-2 workflows report)', () => {
   // Every section now defaults its own list on mount, firing extra drill/advice
   // requests — clear the shared spy between tests so a later assertion never
   // matches a PRIOR test's leftover call history.
-  afterEach(() => { getSpy.mockClear() })
+  afterEach(() => { getSpy.mockClear(); mockSettings.mockReturnValue({}) })
 
   it('shows the loading state', () => {
     mockUseWorkflowsReport.mockReturnValue({ data: null, loading: true, error: false })
@@ -123,6 +131,33 @@ describe('WorkflowsReport (RAPPORTEN-SUITE-2 workflows report)', () => {
     expect(screen.getByText('Aantal workflows')).toBeInTheDocument()
     expect(screen.getByText('Aantal triggers')).toBeInTheDocument()
     expect(screen.getAllByText('2').length).toBeGreaterThanOrEqual(2)
+  })
+
+  // REPORTS-KPI-SPARES-1: the settings-picked spare cards render real values off
+  // by_workflow/by_trigger/summary already in the fixture, and the strip stays nine.
+  it('renders spare KPI cards with real values when picked in settings, strip stays nine', () => {
+    mockSettings.mockReturnValue({
+      report_kpis_workflows: [
+        'runs', 'topWorkflow', 'topTrigger', 'failureRate', 'avgRunsPerWorkflow',
+        'completed', 'failed', 'cancelled', 'running',
+      ],
+    })
+    mockUseWorkflowsReport.mockReturnValue({ data, loading: false, error: false })
+    renderReport()
+    // topWorkflow = the biggest by_workflow segment (wf-1/Intake-uitnodiging, 12).
+    expect(screen.getByText('Meest actieve workflow')).toBeInTheDocument()
+    expect(screen.getAllByText('Intake-uitnodiging').length).toBeGreaterThan(0)
+    expect(screen.getAllByText('12').length).toBeGreaterThan(0)
+    // topTrigger = the biggest by_trigger segment (schedule/Schema, 11).
+    expect(screen.getByText('Meest actieve trigger')).toBeInTheDocument()
+    expect(screen.getAllByText('Schema').length).toBeGreaterThan(0)
+    expect(screen.getAllByText('11').length).toBeGreaterThan(0)
+    // failureRate = failed (3) / runs (20) = 15%.
+    expect(screen.getByText('Mislukpercentage')).toBeInTheDocument()
+    expect(screen.getByText('15%')).toBeInTheDocument()
+    // avgRunsPerWorkflow = runs (20) / distinct workflows (2) = 10.
+    expect(screen.getByText('Gem. uitvoeringen per workflow')).toBeInTheDocument()
+    expect(screen.getAllByText('10').length).toBeGreaterThan(0)
   })
 
   it('renders the data window prominently as DD-MM-YYYY', () => {

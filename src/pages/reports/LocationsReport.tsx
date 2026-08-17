@@ -11,6 +11,7 @@
  */
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { formatRatio } from '@/lib/formatters'
 import ReportKpiBand from './ReportKpiBand'
 import { reportCardStyle as card, reportSectionHeadStyle as head } from './ReportSectionCard'
 import ReportStateBlock from './ReportStateBlock'
@@ -140,6 +141,17 @@ export default function LocationsReport({ period }: { period: ReportPeriod }) {
     // not change the day it lands.
     withDepartments:    { key: 'withDepartments',    label: t('locations.summary.withDepartments'),    value: summary?.with_departments ?? '—' },
     withoutDepartments: { key: 'withoutDepartments', label: t('locations.summary.withoutDepartments'), value: summary?.without_departments ?? '—' },
+    // Spares (REPORTS-KPI-SPARE-2): `summary.with_contacts`/`without_contacts`
+    // are real fields the endpoint already returns (LocationsReport::summary())
+    // but the strip never surfaced — plus two honest coverage ratios over counts
+    // already in the strip. All four hold a dash while `summary` is absent,
+    // exactly like withDepartments/withoutDepartments above.
+    withContacts:    { key: 'withContacts',    label: t('locations.summary.withContacts'),    value: summary?.with_contacts ?? '—' },
+    withoutContacts: { key: 'withoutContacts', label: t('locations.summary.withoutContacts'), value: summary?.without_contacts ?? '—' },
+    departmentCoverageRate: { key: 'departmentCoverageRate', label: t('locations.summary.departmentCoverageRate'),
+      value: summary && total > 0 ? formatRatio(summary.with_departments / total) : '—' },
+    contactCoverageRate: { key: 'contactCoverageRate', label: t('locations.summary.contactCoverageRate'),
+      value: summary && total > 0 ? formatRatio(summary.with_contacts / total) : '—' },
   }
   // Which nine keys render, and in what order, is the tenant's Settings → Reports
   // choice (falls back to today's order when nothing is stored, or a stored key

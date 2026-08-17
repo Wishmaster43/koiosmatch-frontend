@@ -381,3 +381,48 @@ describe('OpportunitiesReport (nine-card KPI footprint)', () => {
     }
   })
 })
+
+// REPORTS-KPI-SPARE-1: four real spares grow the catalogue so the settings
+// screen has something to swap in.
+describe('OpportunitiesReport (spare KPI cards)', () => {
+  beforeEach(() => {
+    getSpy.mockReset()
+    getSpy.mockResolvedValue({ data: { data: [], meta: { total: 0 } } })
+  })
+
+  it('offers the four new spare cards to the settings catalogue', async () => {
+    const { getReportKpiCatalog, getReportKpiDefaultOrder, reportHasSpareKpiCards } = await import('./kpiCatalog')
+    const catalogKeys = getReportKpiCatalog('opportunities').map(c => c.key)
+    expect(catalogKeys).toEqual(expect.arrayContaining(['openValue', 'wonValue', 'topStage', 'topCustomer']))
+    expect(catalogKeys.length).toBe(getReportKpiDefaultOrder('opportunities').length + 4)
+    expect(reportHasSpareKpiCards('opportunities')).toBe(true)
+  })
+
+  it('renders swapped-in spare cards with their real fixture values, strip still exactly nine', async () => {
+    const user = userEvent.setup()
+    mockSettings.mockReturnValue({
+      report_kpis_opportunities: JSON.stringify([
+        'openValue', 'wonValue', 'topStage', 'topCustomer',
+        'total', 'open', 'won', 'lost', 'winRate',
+      ]),
+    })
+    mockUseOpportunitiesReport.mockReturnValue({ data, loading: false, error: false })
+    renderReport()
+    // totals.open_value/won_value, real money fields, via the house formatter.
+    expect(screen.getByText('€ 25.000')).toBeInTheDocument()
+    expect(screen.getByText('€ 18.000')).toBeInTheDocument()
+    // topStage: the largest real (non-'none') stage segment — Voorstel · 6.
+    expect(screen.getByText('Voorstel · 6')).toBeInTheDocument()
+    // topCustomer: the largest real (non-'none'/'others') customer — Careyn · 5.
+    expect(screen.getByText('Careyn · 5')).toBeInTheDocument()
+
+    // Clicking reuses the page's own stage/customer axis drill (already covered
+    // elsewhere for the bars — the KPI card sends the identical XOR param).
+    await user.click(screen.getByText('Voorstel · 6'))
+    await waitFor(() => expect(getSpy).toHaveBeenCalledWith('/reports/opportunities/drill',
+      expect.objectContaining({ params: expect.objectContaining({ stage: 'proposal' }) })))
+    await user.click(screen.getByText('Careyn · 5'))
+    await waitFor(() => expect(getSpy).toHaveBeenCalledWith('/reports/opportunities/drill',
+      expect.objectContaining({ params: expect.objectContaining({ customer: 'cust-1' }) })))
+  })
+})

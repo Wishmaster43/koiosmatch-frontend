@@ -2185,7 +2185,11 @@
     "add": "Funktion hinzufügen",
     "freeEntry": "Freie Eingabe erlauben",
     "freeEntryHint": "An: Recruiter können eine eigene Funktion eingeben (Combobox). Aus: nur aus der Liste wählen (strikte Auswahl).",
-    "confirmFreeEntry": "Sind Sie sicher? Freie Eingabe erlaubt Funktionen außerhalb der Liste. Das kann die Datenqualität senken."
+    "confirmFreeEntry": "Sind Sie sicher? Freie Eingabe erlaubt Funktionen außerhalb der Liste. Das kann die Datenqualität senken.",
+    "confirmStrictMismatchTitle": "Einige Werte stehen nicht in der Liste",
+    "confirmStrictMismatch": "{{count}} Funktionswert bei bestehenden Kandidaten steht nicht in der Liste und wäre in einer strikten Auswahl nicht mehr erreichbar: {{values}}. Fügen Sie ihn zuerst zur Liste hinzu oder brechen Sie ab und bereinigen Sie ihn manuell.",
+    "confirmStrictMismatch_other": "{{count}} Funktionswerte bei bestehenden Kandidaten stehen nicht in der Liste und wären in einer strikten Auswahl nicht mehr erreichbar: {{values}}. Fügen Sie sie zuerst zur Liste hinzu oder brechen Sie ab und bereinigen Sie sie manuell.",
+    "gatherMissing": "Zur Liste hinzufügen"
   },
   "contactFunctionsSettings": {
     "title": "Kontaktfunktionen",

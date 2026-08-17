@@ -134,6 +134,25 @@ describe('RecruitersReport', () => {
     expect(cardValue('Taken te laat').getByText('1')).toBeInTheDocument()
   })
 
+  // REPORTS-KPI-SPARE-2: honest derivations over the same per-recruiter rows —
+  // average book size, the biggest book, and two rates over sums already shown.
+  it('renders the four spare cards with real derived values when swapped in', () => {
+    mockSettings.mockReturnValue({
+      report_kpis_recruiters: JSON.stringify(['avgCandidatesPerRecruiter', 'topRecruiter', 'intakeCompletionRate', 'taskOverdueRate',
+        'recruiters', 'candidates', 'applications', 'matches', 'notContacted']),
+    })
+    mockUseRecruitersReport.mockReturnValue({ data, loading: false, error: false })
+    renderReport()
+    expect(screen.getByText('Gem. kandidaten per recruiter')).toBeInTheDocument()
+    expect(screen.getByText('15')).toBeInTheDocument() // candidates(30)/recruiters(2)
+    expect(screen.getByText('Top recruiter')).toBeInTheDocument()
+    expect(screen.getAllByText('Anna de Vries').length).toBeGreaterThan(0) // 20 candidates, the biggest book
+    expect(screen.getByText('Percentage intakes gedaan')).toBeInTheDocument()
+    expect(screen.getByText('42,9%')).toBeInTheDocument() // intakesDone(3)/(planned4+done3)
+    expect(screen.getByText('Percentage taken te laat')).toBeInTheDocument()
+    expect(screen.getByText('33,3%')).toBeInTheDocument() // tasksOverdue(1)/tasksOpen(3)
+  })
+
   // Table renders one row per recruiter with the backend's own label, and the
   // applications column sums the per-phase counts (5+2=7 for Anna).
   it('renders one table row per recruiter with the summed applications column', () => {

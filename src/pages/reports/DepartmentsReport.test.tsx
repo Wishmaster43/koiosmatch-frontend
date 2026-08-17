@@ -18,6 +18,14 @@ vi.mock('@/lib/api', () => ({
   getActiveTenantId: () => 'test-tenant',
 }))
 
+// Tenant KPI-order settings (RAPPORT-KPI-INSTELBAAR) — empty blob = today's
+// default order, unless a test overrides it (REPORTS-KPI-SPARE-2 tests below).
+const mockSettings = vi.hoisted(() => vi.fn(() => ({} as Record<string, unknown>)))
+vi.mock('@/lib/settings/useAllSettings', async () => {
+  const actual = await vi.importActual('@/lib/settings/useAllSettings')
+  return { ...actual, useAllSettings: () => mockSettings() }
+})
+
 // Fixture per the RAPPORTEN-SUITE-2 departments contract: three-way XOR axes,
 // each axis sums to total.
 const data: DepartmentsReportData = {
@@ -65,7 +73,7 @@ describe('DepartmentsReport (RAPPORTEN-SUITE-2 departments report)', () => {
   // Every section now defaults its own list on mount, firing extra drill/advice
   // requests — clear the shared spy between tests so a later assertion never
   // matches a PRIOR test's leftover call history.
-  afterEach(() => { getSpy.mockClear() })
+  afterEach(() => { getSpy.mockClear(); mockSettings.mockReturnValue({}) })
 
   it('shows the loading state', () => {
     mockUseDepartmentsReport.mockReturnValue({ data: null, loading: true, error: false })
@@ -145,6 +153,58 @@ describe('DepartmentsReport (RAPPORTEN-SUITE-2 departments report)', () => {
     expect(screen.getByText('Zonder contacten')).toBeInTheDocument()
     expect(screen.getAllByText('6').length).toBeGreaterThan(0)
     expect(screen.getAllByText('2').length).toBeGreaterThan(0)
+  })
+
+  // REPORTS-KPI-SPARE-2: `withCustomer` is the honest complement of the
+  // existing `withoutCustomer` card; the two rates are honest ratios over
+  // counts already in the strip; `othersCustomer` is the by_customer axis's
+  // own real 'others' rollup bucket.
+  it('renders withCustomer/othersCustomer and the two coverage rates when swapped in', () => {
+    mockSettings.mockReturnValue({
+      report_kpis_departments: JSON.stringify(['withCustomer', 'locationCoverageRate', 'contactCoverageRate', 'othersCustomer',
+        'withLocation', 'withoutLocation', 'withoutCustomer', 'topCustomer', 'topLocation']),
+    })
+    mockUseDepartmentsReport.mockReturnValue({
+      data: {
+        ...data,
+        by_customer: [
+          { value: 'cust-1', label: 'Yesway Flex', count: 5 },
+          { value: 'others', label: 'Overig', count: 2 },
+          { value: 'none', label: 'Geen klant', count: 1 },
+        ],
+        summary: { with_contacts: 6, without_contacts: 2 },
+      },
+      loading: false, error: false,
+    })
+    renderReport()
+    expect(screen.getByText('Gekoppeld aan klant')).toBeInTheDocument()
+    expect(screen.getAllByText('7').length).toBeGreaterThan(0) // total(8) - withoutCustomer(1)
+    expect(screen.getByText('Dekking locatie')).toBeInTheDocument()
+    expect(screen.getByText('62,5%')).toBeInTheDocument() // withLocation(5)/total(8)
+    expect(screen.getByText('Dekking contacten')).toBeInTheDocument()
+    expect(screen.getByText('75%')).toBeInTheDocument() // with_contacts(6)/total(8)
+    expect(screen.getByText('Overige klanten')).toBeInTheDocument()
+    expect(screen.getAllByText('2').length).toBeGreaterThan(0)
+  })
+
+  it('clicking "Overige klanten" drills the customer list with customer=others (XOR)', async () => {
+    const user = userEvent.setup()
+    mockSettings.mockReturnValue({
+      report_kpis_departments: JSON.stringify(['withCustomer', 'locationCoverageRate', 'contactCoverageRate', 'othersCustomer',
+        'withLocation', 'withoutLocation', 'withoutCustomer', 'topCustomer', 'topLocation']),
+    })
+    mockUseDepartmentsReport.mockReturnValue({
+      data: { ...data, by_customer: [
+        { value: 'cust-1', label: 'Yesway Flex', count: 5 },
+        { value: 'others', label: 'Overig', count: 2 },
+        { value: 'none', label: 'Geen klant', count: 1 },
+      ] },
+      loading: false, error: false,
+    })
+    renderReport()
+    await user.click(screen.getByText('Overige klanten'))
+    expect(getSpy).toHaveBeenCalledWith('/reports/departments/drill',
+      expect.objectContaining({ params: { customer: 'others', period: 'month' } }))
   })
 
   it('clicking the "Grootste klant" KPI card drills the customer list with customer=<value> (XOR)', async () => {

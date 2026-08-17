@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import CandidatesReport from './CandidatesReport'
 import type { CandidatesReportData } from '@/types/analytics'
 import i18n from '@/i18n'
+import { getReportKpiCatalog } from './kpiCatalog'
 
 // Data layer under test control (loading/error/empty/success — the four UI states).
 const mockUseCandidatesReport = vi.fn()
@@ -44,7 +45,14 @@ const data: CandidatesReportData = {
   by_phase:   [{ value: 'lead', label: 'Lead', color: null, count: 3 }, { value: 'candidate', label: 'Kandidaat', color: null, count: 9 }],
   by_source:  [{ value: 'referral', label: 'Referral', color: null, count: 6 }],
   by_owner:   [{ owner_id: 'u1', name: 'Anna de Vries', count: 8 }, { owner_id: 'none', name: 'Niet toegewezen', count: 4 }],
-  by_branch:  [{ value: 'utrecht', label: 'Utrecht', color: null, count: 12 }],
+  by_branch:  [{ value: 'utrecht', label: 'Utrecht', color: null, count: 12 }, { value: 'none', label: 'Geen vestiging', color: null, count: 2 }],
+}
+// A 'none' source row too (mirrors the real endpoint's sentinel, REPORTS-KPI-SPARE-3
+// fixture) — kept in its own object so the vast majority of tests (which never pick
+// the source_none spare) keep the byte-identical `data` fixture above.
+const dataWithSourceNone: CandidatesReportData = {
+  ...data,
+  by_source: [...data.by_source, { value: 'none', label: 'Eigen invoer', color: null, count: 3 }],
 }
 
 function renderReport() {
@@ -238,6 +246,55 @@ describe('CandidatesReport (RAPPORTEN-SUITE-1 inflow report)', () => {
     const call = getSpy.mock.calls.find(c => c[0] === '/reports/candidates/drill')
     expect(call?.[1].params).not.toHaveProperty('bucket')
   })
+
+  // REPORTS-KPI-SPARE-3: the settings catalogue offers real spare cards beyond
+  // the five default axes — otherwise the picker has nothing new to swap in.
+  it('offers the owner_none/branch_none/source_none/phase_lead spares in the candidates catalogue', () => {
+    const keys = getReportKpiCatalog('candidates').map(c => c.key)
+    expect(keys).toEqual(expect.arrayContaining(['owner_none', 'branch_none', 'source_none', 'phase_lead']))
+    // Still exactly nine cards by default (five axes, unchanged) — a never-configured
+    // tenant sees the byte-identical strip it always did.
+    expect(screen.queryByText('Zonder eigenaar')).not.toBeInTheDocument()
+  })
+
+  it('swapping in the owner_none spare renders a real "unassigned owner" card, still nine cards total', () => {
+    mockSettings.mockReturnValue({ report_kpis_candidates: JSON.stringify(['owner_none', 'phase', 'source', 'status', 'branch']) })
+    mockUseCandidatesReport.mockReturnValue({ data, loading: false, error: false })
+    renderReport()
+    // The fixture's real owner='none' row (count 4) — no fabricated number.
+    expect(screen.getByText('Eigenaar: Niet toegewezen')).toBeInTheDocument()
+    const cards = screen.getAllByText(/^(Totaal ingestroomd|Status:|Fase:|Bron:|Eigenaar:|Vestiging:)/)
+    expect(cards.length).toBe(9)
+  })
+
+  it('swapping in branch_none/source_none renders their real none-bucket counts', () => {
+    mockSettings.mockReturnValue({ report_kpis_candidates: JSON.stringify(['branch_none', 'source_none', 'status', 'owner', 'phase']) })
+    mockUseCandidatesReport.mockReturnValue({ data: dataWithSourceNone, loading: false, error: false })
+    renderReport()
+    expect(screen.getByText('Vestiging: Geen vestiging')).toBeInTheDocument()
+    expect(screen.getByText('Bron: Eigen invoer')).toBeInTheDocument()
+  })
+
+  // phase_lead reuses the SAME flag-derived lead-phase value as the Kandidaten/
+  // Leads switch (never a hardcoded slug) — the fixture's `lead` phase row.
+  it('swapping in phase_lead renders the real lead-phase count on the Kandidaten position', () => {
+    mockSettings.mockReturnValue({ report_kpis_candidates: JSON.stringify(['phase_lead', 'status', 'source', 'owner', 'branch']) })
+    mockUseCandidatesReport.mockReturnValue({ data, loading: false, error: false })
+    renderReport()
+    expect(screen.getByText('Fase: Lead')).toBeInTheDocument()
+  })
+
+  // Clicking a spare card drills through the SAME real axis/param as its bar —
+  // never a synthetic 'owner_none' param the backend wouldn't understand.
+  it('clicking the owner_none spare card drills with the real owner=none XOR param', async () => {
+    const user = userEvent.setup()
+    mockSettings.mockReturnValue({ report_kpis_candidates: JSON.stringify(['owner_none', 'phase', 'source', 'status', 'branch']) })
+    mockUseCandidatesReport.mockReturnValue({ data, loading: false, error: false })
+    renderReport()
+    await user.click(screen.getByText('Eigenaar: Niet toegewezen'))
+    expect(getSpy).toHaveBeenCalledWith('/reports/candidates/drill',
+      expect.objectContaining({ params: { owner: 'none', period: 'month' } }))
+  })
 })
 
 // RAPPORTEN-CONSOLIDATIE-1: the Kandidaten/Leads switch — a real server-side
@@ -292,6 +349,27 @@ describe('CandidatesReport — Kandidaten/Leads switch (RAPPORTEN-CONSOLIDATIE-1
     renderReport()
     await user.click(screen.getByRole('radio', { name: 'Leads' }))
     expect(window.location.hash).toBe('#reports.candidates?view=leads')
+  })
+
+  // The Leads position keeps its OWN, independently-configurable spare catalogue
+  // (owner_none/branch_none/source_none) — but deliberately withOUT phase_lead
+  // (every row here already IS the lead phase, so that card would always ≈ total).
+  it('offers owner_none/branch_none/source_none but not phase_lead on the Leads catalogue', () => {
+    const keys = getReportKpiCatalog('leads').map(c => c.key)
+    expect(keys).toEqual(expect.arrayContaining(['owner_none', 'branch_none', 'source_none']))
+    expect(keys).not.toContain('phase_lead')
+  })
+
+  it('swapping in the owner_none spare on Leads renders the real count too, nine cards total', () => {
+    mockSettings.mockReturnValue({ report_kpis_leads: JSON.stringify(['owner_none', 'phase', 'source', 'status', 'branch']) })
+    mockUseCandidatesReport.mockReturnValue({ data, loading: false, error: false })
+    render(
+      <QueryClientProvider client={new QueryClient()}>
+        <CandidatesReport period="month" initialView="leads" />
+      </QueryClientProvider>,
+    )
+    expect(screen.getByText('Eigenaar: Niet toegewezen')).toBeInTheDocument()
+    expect(screen.getByText('Totaal leads')).toBeInTheDocument()
   })
 
   it('a legacy reports.leads deep link (initialView="leads") opens directly on the Leads position', () => {

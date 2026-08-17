@@ -18,6 +18,14 @@ vi.mock('@/lib/api', () => ({
   getActiveTenantId: () => 'test-tenant',
 }))
 
+// Tenant KPI-order settings (RAPPORT-KPI-INSTELBAAR) — empty blob = today's
+// default order, unless a test overrides it (REPORTS-KPI-SPARE-2 tests below).
+const mockSettings = vi.hoisted(() => vi.fn(() => ({} as Record<string, unknown>)))
+vi.mock('@/lib/settings/useAllSettings', async () => {
+  const actual = await vi.importActual('@/lib/settings/useAllSettings')
+  return { ...actual, useAllSettings: () => mockSettings() }
+})
+
 // Fixture per the RAPPORTEN-SUITE-2 locations contract: four-way XOR axes, each
 // axis sums to total (all top-20 + 'others' + 'none').
 const data: LocationsReportData = {
@@ -69,7 +77,7 @@ describe('LocationsReport (RAPPORTEN-SUITE-2 locations report)', () => {
   // Every section now defaults its own list on mount, firing extra drill/advice
   // requests — clear the shared spy between tests so a later assertion never
   // matches a PRIOR test's leftover call history.
-  afterEach(() => { getSpy.mockClear() })
+  afterEach(() => { getSpy.mockClear(); mockSettings.mockReturnValue({}) })
 
   it('shows the loading state', () => {
     mockUseLocationsReport.mockReturnValue({ data: null, loading: true, error: false })
@@ -147,6 +155,42 @@ describe('LocationsReport (RAPPORTEN-SUITE-2 locations report)', () => {
     expect(screen.getByText('Zonder afdelingen')).toBeInTheDocument()
     expect(screen.getAllByText('7').length).toBeGreaterThan(0)
     expect(screen.getAllByText('2').length).toBeGreaterThan(0)
+  })
+
+  // REPORTS-KPI-SPARE-2: `summary.with_contacts`/`without_contacts` are real
+  // fields the endpoint already returns but the strip never surfaced — plus two
+  // honest coverage ratios over counts already in the strip.
+  it('renders the contact-coverage spares and coverage rates when swapped in', () => {
+    mockSettings.mockReturnValue({
+      report_kpis_locations: JSON.stringify(['withContacts', 'withoutContacts', 'departmentCoverageRate', 'contactCoverageRate',
+        'withCustomer', 'withoutCustomer', 'withoutCity', 'topCity', 'withoutProvince']),
+    })
+    mockUseLocationsReport.mockReturnValue({
+      data: { ...data, summary: { with_departments: 6, without_departments: 3, with_contacts: 4, without_contacts: 5 } },
+      loading: false, error: false,
+    })
+    renderReport()
+    expect(screen.getByText('Met directe contacten')).toBeInTheDocument()
+    expect(screen.getByText('Zonder directe contacten')).toBeInTheDocument()
+    expect(screen.getAllByText('4').length).toBeGreaterThan(0)
+    expect(screen.getAllByText('5').length).toBeGreaterThan(0)
+    expect(screen.getByText('Dekking afdelingen')).toBeInTheDocument()
+    expect(screen.getByText('66,7%')).toBeInTheDocument() // with_departments(6)/total(9)
+    expect(screen.getByText('Dekking contacten')).toBeInTheDocument()
+    expect(screen.getByText('44,4%')).toBeInTheDocument() // with_contacts(4)/total(9)
+  })
+
+  // While `summary` is absent, the four new spares hold the house dash — never
+  // a fabricated number and never a missing slot.
+  it('dash-fills the contact-coverage spares when the summary block is absent', () => {
+    mockSettings.mockReturnValue({
+      report_kpis_locations: JSON.stringify(['withContacts', 'withoutContacts', 'departmentCoverageRate', 'contactCoverageRate',
+        'withCustomer', 'withoutCustomer', 'withoutCity', 'topCity', 'withoutProvince']),
+    })
+    mockUseLocationsReport.mockReturnValue({ data, loading: false, error: false })
+    renderReport()
+    expect(screen.getByText('Met directe contacten')).toBeInTheDocument()
+    expect(screen.getAllByText('—').length).toBeGreaterThan(0)
   })
 
   it('clicking the "Grootste plaats" KPI card drills the city list with city=<value> (XOR)', async () => {

@@ -180,12 +180,24 @@ export default function CandidatesReport({ period, filters = EMPTY_REPORT_FILTER
   // Reports choice PER SWITCH POSITION ("total" itself stays pinned —
   // RAPPORT-KPI-INSTELBAAR) — Kandidaten and Leads keep independently configurable
   // catalogs/orders (`kpiScope`), never one shared setting the two positions fight over.
-  const allAxisConfigs: Record<Axis, AxisKpiConfig> = {
+  // REPORTS-KPI-SPARE-3 pseudo-axes: single-segment configs sharing the SAME
+  // real `axis` field (status/phase/source/owner/branch) as their full-axis
+  // sibling above — so clicking either card resolves to the exact same drill
+  // section/XOR param (onAxisKpiPick below matches by `c.axis`, not by catalog
+  // key). Each filters its parent axis's own real 'none' sentinel row (already
+  // returned by /reports/candidates — never invented). `phase_lead` filters to
+  // the SAME flag-derived lead-phase value the Kandidaten/Leads switch itself
+  // resolves (`leadPhaseValue` above), so it never hardcodes a slug.
+  const allAxisConfigs: Record<string, AxisKpiConfig> = {
     status: { axis: 'status', axisLabel: t('candidates.axes.status'), segs: (data?.by_status ?? []).map(s => ({ key: s.value, label: s.label, count: s.count })) },
     phase:  { axis: 'phase',  axisLabel: t('candidates.axes.phase'),  segs: (data?.by_phase ?? []).map(s => ({ key: s.value, label: s.label, count: s.count })) },
     source: { axis: 'source', axisLabel: t('candidates.axes.source'), segs: (data?.by_source ?? []).map(s => ({ key: s.value, label: s.label, count: s.count })) },
     owner:  { axis: 'owner',  axisLabel: t('candidates.axes.owner'),  segs: (data?.by_owner ?? []).map(s => ({ key: s.owner_id, label: s.name, count: s.count })) },
     branch: { axis: 'branch', axisLabel: t('candidates.axes.branch'), segs: (data?.by_branch ?? []).map(s => ({ key: s.value, label: s.label, count: s.count })) },
+    owner_none:  { axis: 'owner',  axisLabel: t('candidates.axes.owner'),  segs: (data?.by_owner ?? []).filter(s => s.owner_id === 'none').map(s => ({ key: s.owner_id, label: s.name, count: s.count })) },
+    branch_none: { axis: 'branch', axisLabel: t('candidates.axes.branch'), segs: (data?.by_branch ?? []).filter(s => s.value === 'none').map(s => ({ key: s.value, label: s.label, count: s.count })) },
+    source_none: { axis: 'source', axisLabel: t('candidates.axes.source'), segs: (data?.by_source ?? []).filter(s => s.value === 'none').map(s => ({ key: s.value, label: s.label, count: s.count })) },
+    phase_lead:  { axis: 'phase',  axisLabel: t('candidates.axes.phase'),  segs: leadPhaseValue ? (data?.by_phase ?? []).filter(s => s.value === leadPhaseValue).map(s => ({ key: s.value, label: s.label, count: s.count })) : [] },
   }
   // `view` is constrained to VIEWS at runtime (useReportSwitch); both members
   // are valid KPI-catalog scope ids (kpiCatalog.ts), so the cast is safe.
@@ -195,7 +207,7 @@ export default function CandidatesReport({ period, filters = EMPTY_REPORT_FILTER
   const defaultAxisOrder = getReportKpiDefaultOrder(kpiScope)
   const storedAxisOrder = getJsonSetting<string[] | undefined>(settingsValues, reportKpiSettingsKey(kpiScope), undefined)
   const { order: axisOrder, fellBack } = resolveReportKpiOrder(storedAxisOrder, catalogKeys, defaultAxisOrder)
-  const axisConfigs: AxisKpiConfig[] = axisOrder.map(axis => allAxisConfigs[axis as Axis]).filter(Boolean)
+  const axisConfigs: AxisKpiConfig[] = axisOrder.map(axis => allAxisConfigs[axis]).filter(Boolean)
   // A KPI card for an axis segment fills THAT axis's own list, exactly like
   // clicking the bar itself — never a shared overlay.
   const onAxisKpiPick = gateDrillClick('candidates', (axis: string, key: string) => {

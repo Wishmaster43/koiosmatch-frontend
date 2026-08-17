@@ -21,6 +21,17 @@ import { useConfirm } from '@/hooks/useConfirm'
  * dedicated route. See useFunctions.ts's own doc comment for the full trail; mirrors
  * ApplicationSourcesSettings.jsx exactly.
  *
+ * FUNC-STRICT-PREFLIGHT-1 (2026-08-17): tightening (free → strict) runs a preflight —
+ * `GET /functions/mismatches` (FreeEntryLookupController::computeMismatches, already
+ * routed) — BEFORE the PUT, so the tenant sees WHICH existing candidate function
+ * values are not on the list, not just a bare "something failed" after a blind 409.
+ * Confirming offers `POST /functions/gather-missing` to add the off-list values first,
+ * so the tightening PUT that follows actually passes. §3B: "Switching to strict
+ * requires a preflight listing non-conforming values to fix first — never silently
+ * drop data." The PUT's own 409 mismatch guard stays as the backend's last word
+ * (e.g. a value added between preflight and confirm) — this only makes the common
+ * case visible up front instead of discovered by trial and error.
+ *
  * Distinct from the contact-person job-title list (ContactFunctionsSettings, `/contact-
  * functions`, FUNCTIONS-SPLIT-1, Danny 2026-07-20/22) — the title/subtitle/nav label
  * here spell out "candidate" so the two vocabularies are never confused (Danny 22-07).
@@ -39,7 +50,8 @@ export default function FunctionsSettings() {
   // Persist the mode via the REAL dedicated route (see the doc comment above for
   // why the generic settings blob is not enough here); confirm before loosening
   // to free-text (data-quality choice). A tightening 409 (off-list values still in
-  // use) surfaces the server's own worklist message instead of silently no-oping.
+  // use) surfaces the server's own worklist message instead of silently no-oping —
+  // this is the LAST-RESORT guard; the preflight below is what a tenant actually sees.
   const onToggle = (next) => {
     if (busy) return
     const persist = async () => {
@@ -55,8 +67,37 @@ export default function FunctionsSettings() {
         setBusy(false)
       }
     }
-    if (next) confirm(t('functionsSettings.confirmFreeEntry'), persist)
-    else persist()
+    if (next) {
+      confirm(t('functionsSettings.confirmFreeEntry'), persist)
+      return
+    }
+    // FUNC-STRICT-PREFLIGHT-1: tightening — check what would fall off the list
+    // BEFORE attempting the PUT, so the tenant sees the actual off-list values,
+    // never just a generic "not allowed" after the fact.
+    setBusy(true)
+    api.get('/functions/mismatches')
+      .then(({ data }) => {
+        setBusy(false)
+        const mismatches = Array.isArray(data) ? data : []
+        if (mismatches.length === 0) { persist(); return }
+        const values = mismatches.map(m => `${m.function ?? m.name} (${m.count})`).join(', ')
+        confirm(
+          t('functionsSettings.confirmStrictMismatch', { count: mismatches.length, values }),
+          () => {
+            // Add every off-list value to the list first, so the tightening PUT
+            // that follows passes with no remaining mismatch (idempotent on the
+            // backend). Never fabricated locally — these are the server's own rows.
+            setBusy(true)
+            api.post('/functions/gather-missing')
+              .then(() => persist())
+              .catch(e => { setBusy(false); notifyError(extractApiError(e, t('statusList.saveFailed'))) })
+          },
+          { title: t('functionsSettings.confirmStrictMismatchTitle'), confirmLabel: t('functionsSettings.gatherMissing') }
+        )
+      })
+      // The preflight itself failing (network/permission) must never silently block
+      // toggling — fall through to the PUT, whose own 409 guard still applies.
+      .catch(() => { setBusy(false); persist() })
   }
 
   return (

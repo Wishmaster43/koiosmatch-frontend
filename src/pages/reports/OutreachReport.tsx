@@ -131,6 +131,17 @@ export default function OutreachReport({ period }: { period: ReportPeriod }) {
     (top, s) => (!top || s.count > top.count) ? s : top, null)
   const topChannel = data?.by_channel.filter(s => s.value !== 'none').reduce<{ value: string; label: string; count: number } | null>(
     (top, s) => (!top || s.count > top.count) ? s : top, null)
+  // Spares (REPORTS-KPI-SPARES-1): the top real segment of two axes not yet
+  // offered (by_status/by_outcome, excluding the 'none' sentinel already used by
+  // noOutcome above), and three distinct-category counts off axes already in the
+  // response (campaigns/channels/assignees actually used, i.e. count > 0).
+  const topStatus = data?.by_status.reduce<{ value: string; label: string; count: number } | null>(
+    (top, s) => (!top || s.count > top.count) ? s : top, null)
+  const topOutcome = data?.by_outcome.filter(s => s.value !== 'none').reduce<{ value: string; label: string; count: number } | null>(
+    (top, s) => (!top || s.count > top.count) ? s : top, null)
+  const campaignsCount  = data?.by_campaign.filter(s => s.value !== 'others' && s.count > 0).length ?? 0
+  const channelsUsedCount = data?.by_channel.filter(s => s.value !== 'none' && s.count > 0).length ?? 0
+  const assigneesCount  = data?.by_assignee.filter(s => s.owner_id !== 'none' && s.count > 0).length ?? 0
   const kpiByKey: Record<string, KpiSpec> = {
     total:   { key: 'total',   label: t('outreach.total'),   value: targets },
     reached: { key: 'reached', label: t('outreach.reached'), value: reached },
@@ -152,6 +163,13 @@ export default function OutreachReport({ period }: { period: ReportPeriod }) {
       onClick: topCampaign ? gateDrillClick('outreach', () => openSegment('campaign', topCampaign, { campaign: topCampaign.value })) : undefined },
     topChannel: { key: 'topChannel', label: t('outreach.summary.topChannel'), value: topChannel?.count ?? '—', sub: topChannel?.label,
       onClick: topChannel ? gateDrillClick('outreach', () => openSegment('channel', topChannel, { channel: topChannel.value })) : undefined },
+    topStatus: { key: 'topStatus', label: t('outreach.summary.topStatus'), value: topStatus?.count ?? '—', sub: topStatus?.label,
+      onClick: topStatus ? gateDrillClick('outreach', () => openSegment('status', topStatus, { status: topStatus.value })) : undefined },
+    topOutcome: { key: 'topOutcome', label: t('outreach.summary.topOutcome'), value: topOutcome?.count ?? '—', sub: topOutcome?.label,
+      onClick: topOutcome ? gateDrillClick('outreach', () => openSegment('outcome', topOutcome, { outcome: topOutcome.value })) : undefined },
+    campaignsCount: { key: 'campaignsCount', label: t('outreach.summary.campaignsCount'), value: campaignsCount },
+    channelsUsed: { key: 'channelsUsed', label: t('outreach.summary.channelsUsed'), value: channelsUsedCount },
+    assigneesCount: { key: 'assigneesCount', label: t('outreach.summary.assigneesCount'), value: assigneesCount },
   }
   // Which nine keys render, and in what order, is the tenant's Settings → Reports
   // choice (falls back to today's order when nothing is stored, or a stored key

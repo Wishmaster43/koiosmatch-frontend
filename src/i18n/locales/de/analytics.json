@@ -36,7 +36,11 @@
       "phase": "Phase",
       "source": "Quelle",
       "owner": "Eigentümer",
-      "branch": "Niederlassung"
+      "branch": "Niederlassung",
+      "ownerNone": "Ohne Eigentümer",
+      "branchNone": "Ohne Niederlassung",
+      "sourceNone": "Ohne Quelle",
+      "phaseLead": "Noch Lead"
     },
     "kpiOrderFellBack": "Eine in den Einstellungen konfigurierte KPI-Karte existiert nicht mehr und wurde auf den Standard zurückgesetzt.",
     "viewSwitch": {
@@ -67,7 +71,11 @@
       "regionsCount": "Regionen",
       "topRecruiter": "Aktivster Recruiter",
       "topSource": "Wichtigste Quelle",
-      "topFunction": "Häufigste Funktion"
+      "topFunction": "Häufigste Funktion",
+      "unassignedRecruiter": "Nicht zugewiesener Recruiter",
+      "topLocation": "Groesste Standort",
+      "topRegion": "Groesste Region",
+      "avgPerRecruiter": "Durchschn. Intakes pro Recruiter"
     },
     "kpiOrderFellBack": "Eine in den Einstellungen konfigurierte KPI-Karte existiert nicht mehr und wurde auf den Standard zurückgesetzt."
   },
@@ -102,7 +110,11 @@
     "maxDropPhase": "Größter Abbruch",
     "stagesReached": "Erreichte Phasen",
     "stagesTotal": "Phasen im Trichter",
-    "kpiOrderFellBack": "Eine in den Einstellungen konfigurierte KPI-Karte existiert nicht mehr und wurde auf den Standard zurückgesetzt."
+    "kpiOrderFellBack": "Eine in den Einstellungen konfigurierte KPI-Karte existiert nicht mehr und wurde auf den Standard zurückgesetzt.",
+    "worstConversionPhase": "Schwächste Konversion",
+    "slowestPhase": "Langsamste Phase",
+    "dropOffRate": "Abbruch (Anteil)",
+    "stagesEmpty": "Phasen ohne Aktivität"
   },
   "recruiters": {
     "title": "Recruiter",
@@ -119,7 +131,11 @@
       "intakesPlanned": "Intakes geplant",
       "intakesDone": "Intakes erledigt",
       "tasksOpen": "Aufgaben offen",
-      "tasksOverdue": "Aufgaben überfällig"
+      "tasksOverdue": "Aufgaben überfällig",
+      "avgCandidatesPerRecruiter": "Durchschn. Kandidaten je Recruiter",
+      "topRecruiter": "Top-Recruiter",
+      "intakeCompletionRate": "Anteil erledigter Intakes",
+      "taskOverdueRate": "Anteil überfälliger Aufgaben"
     },
     "cols": {
       "recruiter": "Recruiter",
@@ -156,7 +172,11 @@
       "customersCount": "Kunden",
       "topIndustry": "Top-Branche",
       "topOwner": "Top-Eigentümer",
-      "staleOnline": "Online, keine Kandidaten"
+      "staleOnline": "Online, keine Kandidaten",
+      "longConcept": "Lange im Konzept",
+      "noMatches": "Keine Matches",
+      "topFunction": "Top-Funktion",
+      "topBranch": "Top-Niederlassung"
     },
     "cols": {
       "vacancy": "Stelle",
@@ -201,7 +221,13 @@
     "terminations": {
       "title": "Beendigungsgründe",
       "total": "Beendigungen gesamt",
-      "rate": "Beendigungsquote"
+      "rate": "Beendigungsquote",
+      "topReason": "Top-Grund"
+    },
+    "summary": {
+      "noContract": "Ohne Vertrag",
+      "topContractForm": "Top-Vertragsform",
+      "funnelRate": "Anteil über Bewerbung"
     },
     "kpiOrderFellBack": "Eine in den Einstellungen konfigurierte KPI-Karte existiert nicht mehr und wurde auf den Standard zurückgesetzt."
   },
@@ -225,7 +251,12 @@
       "unassigned": "Nicht zugewiesen",
       "noOutcome": "Kein Ergebnis",
       "topCampaign": "Größte Anrufliste",
-      "topChannel": "Größter Kanal"
+      "topChannel": "Größter Kanal",
+      "topStatus": "Groesster Status",
+      "topOutcome": "Groesstes Ergebnis",
+      "campaignsCount": "Anzahl Anruflisten",
+      "channelsUsed": "Genutzte Kanaele",
+      "assigneesCount": "Zugewiesene Recruiter"
     },
     "kpiOrderFellBack": "Eine in den Einstellungen konfigurierte KPI-Karte existiert nicht mehr und wurde auf den Standard zurückgesetzt."
   },
@@ -267,7 +298,9 @@
       "owner": "Eigentümer",
       "customer": "Kunde",
       "vacancy": "Stelle",
-      "stageDuration": "Zu lange in Phase"
+      "stageDuration": "Zu lange in Phase",
+      "customerNone": "Ohne Kunde",
+      "stageNone": "Ohne Phase"
     },
     "buckets": {
       "active": "Aktiv",
@@ -288,7 +321,11 @@
       "open": "Offen",
       "won": "Gewonnen",
       "lost": "Verloren",
-      "winRate": "Gewinnquote"
+      "winRate": "Gewinnquote",
+      "openValue": "Offener Wert",
+      "wonValue": "Gewonnener Wert",
+      "topStage": "Top-Phase",
+      "topCustomer": "Top-Kunde"
     },
     "stale": {
       "untouched": "Unberührt",
@@ -309,7 +346,11 @@
       "open": "Offen",
       "done": "Abgeschlossen",
       "overdue": "Überfällig",
-      "doneRate": "Erledigungsquote"
+      "doneRate": "Erledigungsquote",
+      "topStatus": "Top-Status",
+      "topType": "Top-Typ",
+      "topPriority": "Top-Priorität",
+      "topAssignee": "Top-Zuständiger"
     },
     "axes": {
       "status": "Status",
@@ -344,6 +385,17 @@
       "ariaLabel": "Zielgruppe",
       "customers": "Kunden",
       "prospects": "Interessenten"
+    },
+    "kpis": {
+      "contractEnding": "Vertrag läuft bald ab",
+      "noContact": "Lange kein Kontakt",
+      "taskOverdue": "Aufgaben überfällig",
+      "priceAgreementEnding": "Preisvereinbarungen laufen ab",
+      "vacancyStale": "Stelle online ohne Bewerber",
+      "departmentsWithoutPlacement": "Abteilungen ohne Vermittlung",
+      "customersWithoutVacancies": "Kunden ohne Stellen",
+      "customersWithoutApplications": "Kunden ohne Bewerbungen",
+      "matchesStoppedEarly": "Vorzeitig beendete Matches"
     }
   },
   "contacts": {
@@ -368,7 +420,11 @@
       "withoutFunction": "Ohne Funktion",
       "withoutLocation": "Ohne Standort",
       "withoutDepartment": "Ohne Abteilung",
-      "withoutCustomer": "Ohne Kunde"
+      "withoutCustomer": "Ohne Kunde",
+      "topCustomer": "Größter Kunde",
+      "topFunction": "Größte Funktion",
+      "topLocation": "Größter Standort",
+      "topDepartment": "Größte Abteilung"
     },
     "kpiOrderFellBack": "Eine in den Einstellungen konfigurierte KPI-Karte existiert nicht mehr und wurde auf den Standard zurückgesetzt."
   },
@@ -393,7 +449,11 @@
       "withoutCity": "Ohne Ort",
       "topCity": "Größter Ort",
       "withoutProvince": "Ohne Provinz",
-      "topProvince": "Größte Provinz"
+      "topProvince": "Größte Provinz",
+      "withContacts": "Mit direkten Kontakten",
+      "withoutContacts": "Ohne direkte Kontakte",
+      "departmentCoverageRate": "Abdeckung Abteilungen",
+      "contactCoverageRate": "Abdeckung Kontakte"
     },
     "kpiOrderFellBack": "Eine in den Einstellungen konfigurierte KPI-Karte existiert nicht mehr und wurde auf den Standard zurückgesetzt."
   },
@@ -417,7 +477,11 @@
       "withoutCustomer": "Ohne Kunde",
       "topCustomer": "Größter Kunde",
       "topLocation": "Größter Standort",
-      "customersCount": "Anzahl Kunden"
+      "customersCount": "Anzahl Kunden",
+      "withCustomer": "Mit Kunde",
+      "locationCoverageRate": "Abdeckung Standort",
+      "contactCoverageRate": "Abdeckung Kontakte",
+      "othersCustomer": "Weitere Kunden"
     },
     "kpiOrderFellBack": "Eine in den Einstellungen konfigurierte KPI-Karte existiert nicht mehr und wurde auf den Standard zurückgesetzt."
   },
@@ -441,7 +505,11 @@
       "activityTypes": "Aktivitätsarten",
       "modelsUsed": "Genutzte Modelle",
       "activeUsers": "Aktive Benutzer",
-      "topActivity": "Meistgenutzte Aktivität"
+      "topActivity": "Meistgenutzte Aktivität",
+      "topModel": "Meistgenutztes Modell",
+      "topUser": "Aktivster Nutzer",
+      "avgPerUser": "Durchschn. Aktivitaet pro Nutzer",
+      "avgPerActivityType": "Durchschn. Aktivitaet pro Typ"
     },
     "kpiOrderFellBack": "Eine in den Einstellungen konfigurierte KPI-Karte existiert nicht mehr und wurde auf den Standard zurückgesetzt."
   },
@@ -466,7 +534,11 @@
       "successRate": "Erfolgsquote",
       "avgDuration": "Ø Dauer",
       "workflowsCount": "Workflows",
-      "triggersCount": "Auslöser"
+      "triggersCount": "Auslöser",
+      "topWorkflow": "Aktivster Workflow",
+      "topTrigger": "Aktivster Trigger",
+      "failureRate": "Fehlerquote",
+      "avgRunsPerWorkflow": "Durchschn. Ausfuehrungen pro Workflow"
     },
     "kpiOrderFellBack": "Eine in den Einstellungen konfigurierte KPI-Karte existiert nicht mehr und wurde auf den Standard zurückgesetzt."
   },
@@ -492,7 +564,11 @@
       "filledPositions": "Besetzte Stellen",
       "opportunities": "Chancen",
       "renewalsDue": "Fällige Verlängerungen",
-      "notContacted": "Nicht kontaktiert"
+      "notContacted": "Nicht kontaktiert",
+      "avgOpportunitiesPerManager": "Durchschn. Chancen je Betreuer",
+      "avgVacanciesPerManager": "Durchschn. offene Stellen je Betreuer",
+      "notContactedRate": "Anteil nicht kontaktiert",
+      "renewalsDueRate": "Anteil fällige Verlängerungen"
     },
     "cols": {
       "manager": "Kundenbetreuer",

@@ -2185,7 +2185,11 @@
     "add": "Ajouter une fonction",
     "freeEntry": "Autoriser la saisie libre",
     "freeEntryHint": "Activé : les recruteurs peuvent saisir leur propre fonction (combobox). Désactivé : choisir uniquement dans la liste.",
-    "confirmFreeEntry": "Êtes-vous sûr ? La saisie libre autorise des fonctions hors liste. Cela peut réduire la qualité des données."
+    "confirmFreeEntry": "Êtes-vous sûr ? La saisie libre autorise des fonctions hors liste. Cela peut réduire la qualité des données.",
+    "confirmStrictMismatchTitle": "Certaines valeurs ne figurent pas dans la liste",
+    "confirmStrictMismatch": "{{count}} valeur de fonction utilisée par des candidats existants ne figure pas dans la liste et deviendrait inaccessible avec une liste stricte : {{values}}. Ajoutez-la d'abord à la liste, ou annulez et corrigez-la manuellement.",
+    "confirmStrictMismatch_other": "{{count}} valeurs de fonction utilisées par des candidats existants ne figurent pas dans la liste et deviendraient inaccessibles avec une liste stricte : {{values}}. Ajoutez-les d'abord à la liste, ou annulez et corrigez-les manuellement.",
+    "gatherMissing": "Ajouter à la liste"
   },
   "contactFunctionsSettings": {
     "title": "Fonctions des contacts",

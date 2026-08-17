@@ -39,7 +39,7 @@ import ReportTimeseriesChart from './ReportTimeseriesChart'
 import { useDateFormat } from '@/lib/datetime'
 import type { ReportPeriod, CandidateSegment, CandidateOwnerSegment, CandidateTimeseriesPoint } from '@/types/analytics'
 import { useAllSettings, getJsonSetting } from '@/lib/settings/useAllSettings'
-import { getReportKpiCatalog, getReportKpiDefaultOrder, reportKpiSettingsKey } from './kpiCatalog'
+import { getReportKpiCatalog, getReportKpiDefaultOrder, reportKpiSettingsKey, CUSTOMERS_SIGNAL_LABEL_KEYS } from './kpiCatalog'
 import type { ReportKpiScopeId } from './kpiCatalog'
 import { resolveReportKpiOrder } from './resolveReportKpiOrder'
 
@@ -162,6 +162,18 @@ export default function CustomersReport({ period, filters = EMPTY_REPORT_FILTERS
     owner:    { axis: 'owner',    axisLabel: t('customers.axes.owner'),    segs: (data?.by_owner ?? []).map(s => ({ key: s.owner_id, label: s.name, count: s.count })) },
     branch:   { axis: 'branch',   axisLabel: t('customers.axes.branch'),   segs: (data?.by_branch ?? []).map(s => ({ key: s.value, label: s.label, count: s.count })) },
   }
+  // REPORTS-KPI-SPARE-2: the customers-only "signal" pseudo-axes (see kpiCatalog.ts) —
+  // each of the report's own STANDING kpis[] counts, wrapped as a single-segment axis
+  // config so buildAxisKpis can round-robin it in as one honest card. Never offered on
+  // Prospects (kpiCatalog.ts REPORT_KPI_AXIS_CATALOG.prospects has no `signal:*` keys),
+  // so `signalAxisConfigs` is simply unused/empty there — no runtime branch needed.
+  const signalAxisConfigs: Record<string, AxisKpiConfig> = Object.fromEntries(
+    (data?.kpis ?? []).map(k => [`signal:${k.key}`, {
+      axis: `signal:${k.key}`,
+      axisLabel: t(`customers.kpis.${CUSTOMERS_SIGNAL_LABEL_KEYS[k.key] ?? k.key}`),
+      segs: [{ key: 'count', label: '', count: k.count }],
+    }]),
+  )
   // `view` is constrained to VIEWS at runtime (useReportSwitch); both members
   // are valid KPI-catalog scope ids (kpiCatalog.ts), so the cast is safe.
   const kpiScope = view as ReportKpiScopeId
@@ -170,10 +182,16 @@ export default function CustomersReport({ period, filters = EMPTY_REPORT_FILTERS
   const defaultAxisOrder = getReportKpiDefaultOrder(kpiScope)
   const storedAxisOrder = getJsonSetting<string[] | undefined>(settingsValues, reportKpiSettingsKey(kpiScope), undefined)
   const { order: axisOrder, fellBack } = resolveReportKpiOrder(storedAxisOrder, catalogKeys, defaultAxisOrder)
-  const axisConfigs: AxisKpiConfig[] = axisOrder.map(axis => allAxisConfigs[axis as Axis | 'owner']).filter(Boolean)
+  const axisConfigs: AxisKpiConfig[] = axisOrder
+    .map(axis => allAxisConfigs[axis as Axis | 'owner'] ?? signalAxisConfigs[axis])
+    .filter(Boolean)
   // A KPI card for an axis segment fills THAT axis's own list, exactly like
-  // clicking the bar itself — never a shared overlay.
+  // clicking the bar itself — never a shared overlay. A "signal" pseudo-axis has
+  // no matching drill section (it is a standing count, not a chart on this page),
+  // so its card renders informational-only — same as every non-clickable KPI
+  // card elsewhere (e.g. departments.customersCount) — never a fake affordance.
   const onAxisKpiPick = gateDrillClick('customers', (axis: string, key: string) => {
+    if (axis.startsWith('signal:')) return
     const cfg = axisConfigs.find(c => c.axis === axis)
     const seg = cfg?.segs.find(s => s.key === key)
     if (seg) openSegment(axis as DrillKey, { label: seg.label, count: seg.count }, { [axis]: key })

@@ -341,6 +341,34 @@ describe('OutreachReport (RAPPORTEN-SUITE-1 portie 6, bellijsten report)', () =>
       c[0] === '/reports/outreach/drill' || c[0] === '/reports/outreach/advice')).toBe(true)
   })
 
+  // REPORTS-KPI-SPARES-1: the settings-picked spare cards render real values off
+  // fields already in the fixture, and the strip stays exactly nine.
+  it('renders spare KPI cards with real values when picked in settings, strip stays nine', () => {
+    mockSettings.mockReturnValue({
+      report_kpis_outreach: [
+        'topStatus', 'topOutcome', 'campaignsCount', 'channelsUsed', 'assigneesCount',
+        'assigned', 'reached', 'rate', 'total',
+      ],
+    })
+    mockUseOutreachReport.mockReturnValue({ data, loading: false, error: false })
+    renderReport()
+    // topStatus = the biggest by_status segment ('contacted'/'Benaderd', 25).
+    expect(screen.getByText('Grootste status')).toBeInTheDocument()
+    expect(screen.getAllByText('Benaderd').length).toBeGreaterThan(0)
+    // topOutcome excludes the 'none' sentinel, so the biggest real outcome wins
+    // ('not_interested'/'Geen interesse', 15).
+    expect(screen.getByText('Grootste uitkomst')).toBeInTheDocument()
+    expect(screen.getAllByText('Geen interesse').length).toBeGreaterThan(0)
+    // campaignsCount = real campaigns excl. 'others' (camp-1, camp-archived-uuid) = 2.
+    expect(screen.getByText('Aantal bellijsten')).toBeInTheDocument()
+    // channelsUsed = real channels excl. 'none' (phone, whatsapp) = 2.
+    expect(screen.getByText('Gebruikte kanalen')).toBeInTheDocument()
+    // assigneesCount = real assignees excl. 'none' (u1) = 1.
+    expect(screen.getByText('Aantal toegewezen recruiters')).toBeInTheDocument()
+    expect(screen.getAllByText('2').length).toBeGreaterThan(0)
+    expect(screen.getAllByText('1').length).toBeGreaterThan(0)
+  })
+
   // RAPPORTEN-DRILLLIST-1: every axis section shows its own always-visible list
   // beside the chart, seeded with a real request on mount — never a blank panel.
   it('renders a drill list beside each axis chart, defaulted on mount', () => {

@@ -15,6 +15,7 @@
  */
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { formatNumber } from '@/lib/formatters'
 import ReportKpiBand from './ReportKpiBand'
 import { reportCardStyle as card, reportSectionHeadStyle as head } from './ReportSectionCard'
 import ReportStateBlock from './ReportStateBlock'
@@ -91,6 +92,16 @@ export default function IntakesReport({ period }: { period: ReportPeriod }) {
   const topRecruiter = data ? topOf(data.by_recruiter) : null
   const topSource    = data ? topOf(data.by_source) : null
   const topFunction  = data ? topOf(data.by_function) : null
+  // Spares (REPORTS-KPI-SPARES-1): the top real segment of two axes not yet
+  // offered (by_location/by_region, same "biggest real value" pattern as
+  // topRecruiter/topSource above), the unassigned-recruiter bucket the
+  // by_recruiter axis already carries (key null, "Niet toegewezen"), and an
+  // honest rate over two real counts (total / distinct recruiters) — never a
+  // fabricated number.
+  const topLocation = data ? topOf(data.by_location) : null
+  const topRegion   = data ? topOf(data.by_region) : null
+  const unassignedRecruiter = data?.by_recruiter.find(b => b.key === null) ?? null
+  const recruitersCount = data?.by_recruiter.length ?? 0
   const kpiByKey: Record<string, KpiSpec> = {
     total: { key: 'total', label: t('intakes.total'), value: total, active: totalDrill != null,
       onClick: gateDrillClick('intakes', openTotal) },
@@ -102,6 +113,11 @@ export default function IntakesReport({ period }: { period: ReportPeriod }) {
     topRecruiter: { key: 'topRecruiter', label: t('intakes.summary.topRecruiter'), value: topRecruiter?.count ?? '—', sub: topRecruiter?.label },
     topSource: { key: 'topSource', label: t('intakes.summary.topSource'), value: topSource?.count ?? '—', sub: topSource?.label },
     topFunction: { key: 'topFunction', label: t('intakes.summary.topFunction'), value: topFunction?.count ?? '—', sub: topFunction?.label },
+    unassignedRecruiter: { key: 'unassignedRecruiter', label: t('intakes.summary.unassignedRecruiter'), value: unassignedRecruiter?.count ?? 0 },
+    topLocation: { key: 'topLocation', label: t('intakes.summary.topLocation'), value: topLocation?.count ?? '—', sub: topLocation?.label },
+    topRegion: { key: 'topRegion', label: t('intakes.summary.topRegion'), value: topRegion?.count ?? '—', sub: topRegion?.label },
+    avgPerRecruiter: { key: 'avgPerRecruiter', label: t('intakes.summary.avgPerRecruiter'),
+      value: recruitersCount > 0 ? formatNumber(total / recruitersCount) : '—' },
   }
   // Which nine keys render, and in what order, is the tenant's Settings → Reports
   // choice (falls back to today's order when nothing is stored, or a stored key

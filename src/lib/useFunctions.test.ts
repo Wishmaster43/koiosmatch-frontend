@@ -32,12 +32,12 @@ describe('useFunctions', () => {
     await waitFor(() => expect(mockedGet).toHaveBeenCalledWith('/functions', undefined))
   })
 
-  it('keeps the seed fallback (and the strict default) while the request is pending', async () => {
+  it('keeps the seed fallback and stays permissive while the request is pending', async () => {
     const { mockedGet, useFunctions, DEFAULT_FUNCTIONS } = await freshHook()
     mockedGet.mockReturnValue(new Promise(() => {})) // never resolves in this test
     const { result } = renderHook(() => useFunctions())
     expect(result.current.functions).toEqual(DEFAULT_FUNCTIONS)
-    expect(result.current.allowFreeEntry).toBe(false)
+    expect(result.current.allowFreeEntry).toBe(true)
   })
 
   it('maps the API rows and honours a true allow_free_entry from the response', async () => {

@@ -34,16 +34,24 @@ export const DEFAULT_FUNCTIONS = [
 // response, so they're cached together as one value. The backend's own default
 // (before any tenant has toggled it) is strict — mirror that as the pending seed.
 interface FunctionsLookupData { functions: string[]; apiFreeEntry: boolean }
-const FALLBACK: FunctionsLookupData = { functions: DEFAULT_FUNCTIONS, apiFreeEntry: false }
+// FREE-ENTRY-FALLBACK-1: the pending/unknown value is PERMISSIVE, matching the
+// contact-functions lookup and the sources lookup. Strict-while-unknown means "no
+// value is valid", which locks a recruiter out of a field for a reason they cannot
+// see: before the response lands, when it fails, or on a tenant whose list is still
+// empty. The backend proved this the hard way on 15-08, when its sources rule
+// inherited a strict default against an empty table and answered 422 on four write
+// paths. Being briefly too permissive costs a value the server can still reject;
+// being briefly too strict costs the user the ability to work at all.
+const FALLBACK: FunctionsLookupData = { functions: DEFAULT_FUNCTIONS, apiFreeEntry: true }
 
-// Names keep the seed when empty; apiFreeEntry keeps the strict default when the
+// Names keep the seed when empty; apiFreeEntry stays permissive when the
 // response doesn't carry a boolean flag (e.g. a genuinely empty/failed response).
 const mapFunctions = (res: AxiosResponse): FunctionsLookupData => {
   const names = lookupNames(res)
   const free = (res?.data as { allow_free_entry?: unknown })?.allow_free_entry
   return {
     functions: names.length ? names : DEFAULT_FUNCTIONS,
-    apiFreeEntry: typeof free === 'boolean' ? free : false,
+    apiFreeEntry: typeof free === 'boolean' ? free : true,
   }
 }
 

@@ -2185,7 +2185,11 @@
     "add": "Añadir función",
     "freeEntry": "Permitir entrada libre",
     "freeEntryHint": "Activado: los reclutadores pueden escribir su propia función (combobox). Desactivado: solo elegir de la lista.",
-    "confirmFreeEntry": "¿Seguro? La entrada libre permite funciones fuera de la lista, lo que puede reducir la calidad de los datos."
+    "confirmFreeEntry": "¿Seguro? La entrada libre permite funciones fuera de la lista, lo que puede reducir la calidad de los datos.",
+    "confirmStrictMismatchTitle": "Algunos valores no están en la lista",
+    "confirmStrictMismatch": "{{count}} valor de función usado en candidatos existentes no está en la lista y quedaría inaccesible en una lista estricta: {{values}}. Añádelo primero a la lista, o cancela y corrígelo manualmente.",
+    "confirmStrictMismatch_other": "{{count}} valores de función usados en candidatos existentes no están en la lista y quedarían inaccesibles en una lista estricta: {{values}}. Añádelos primero a la lista, o cancela y corrígelos manualmente.",
+    "gatherMissing": "Añadir a la lista"
   },
   "contactFunctionsSettings": {
     "title": "Funciones de contacto",

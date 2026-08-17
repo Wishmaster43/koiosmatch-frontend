@@ -135,6 +135,16 @@ export default function TasksReport({ period, filters = EMPTY_REPORT_FILTERS }: 
   const noTeam = data?.by_team.find(seg => seg.value === 'none')
   const noBranch = data?.by_branch.find(seg => seg.value === 'none')
   const overdueRate = data && total > 0 && s ? (s.overdue / total) * 100 : null
+  // Spare-card sources (REPORTS-KPI-SPARE-1): the top real segment of each axis
+  // already rendered below, excluding the 'none' bucket (that is its own card
+  // already — unassigned/noTeam/noBranch) — same "biggest real value" rule as
+  // vacancies' topIndustry/topOwner. Clicking reuses the page's own openSegment.
+  const topRealSeg = <T extends { value: string; count: number; label: string }>(segs: T[]) =>
+    segs.filter(x => x.value !== 'none').sort((a, b) => b.count - a.count)[0]
+  const topStatus = topRealSeg(data?.by_status ?? [])
+  const topType = topRealSeg(data?.by_type ?? [])
+  const topPriority = topRealSeg(data?.by_priority ?? [])
+  const topAssignee = (data?.by_assignee ?? []).filter(a => a.owner_id !== 'none').sort((a, b) => b.count - a.count)[0]
   const kpiByKey: Record<string, KpiSpec> = {
     total:    { key: 'total',    label: t('tasks.total'),            value: total },
     open:     { key: 'open',     label: t('tasks.summary.open'),     value: s?.open ?? 0 },
@@ -153,6 +163,19 @@ export default function TasksReport({ period, filters = EMPTY_REPORT_FILTERS }: 
       onClick: noBranch ? gateDrillClick('tasks', () => openSegment('branch', noBranch, { branch: 'none' })) : undefined },
     overdueRate: { key: 'overdueRate', label: t('tasks.overdueRate'),
       value: formatPercent(overdueRate) },
+    // Spares (REPORTS-KPI-SPARE-1): see topRealSeg above.
+    topStatus: { key: 'topStatus', label: t('tasks.summary.topStatus'),
+      value: topStatus ? `${topStatus.label} · ${topStatus.count}` : '—',
+      onClick: topStatus ? gateDrillClick('tasks', () => openSegment('status', topStatus, { status: topStatus.value })) : undefined },
+    topType: { key: 'topType', label: t('tasks.summary.topType'),
+      value: topType ? `${topType.label} · ${topType.count}` : '—',
+      onClick: topType ? gateDrillClick('tasks', () => openSegment('type', topType, { type: topType.value })) : undefined },
+    topPriority: { key: 'topPriority', label: t('tasks.summary.topPriority'),
+      value: topPriority ? `${topPriority.label} · ${topPriority.count}` : '—',
+      onClick: topPriority ? gateDrillClick('tasks', () => openSegment('priority', topPriority, { priority: topPriority.value })) : undefined },
+    topAssignee: { key: 'topAssignee', label: t('tasks.summary.topAssignee'),
+      value: topAssignee ? `${topAssignee.name} · ${topAssignee.count}` : '—',
+      onClick: topAssignee ? gateDrillClick('tasks', () => openSegment('assignee', { label: topAssignee.name, count: topAssignee.count }, { assignee: topAssignee.owner_id })) : undefined },
   }
   // Which nine keys render, and in what order, is the tenant's Settings → Reports
   // choice (falls back to today's order when nothing is stored, or a stored key

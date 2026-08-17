@@ -11,6 +11,7 @@
  */
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { formatRatio } from '@/lib/formatters'
 import ReportKpiBand from './ReportKpiBand'
 import { reportCardStyle as card, reportSectionHeadStyle as head } from './ReportSectionCard'
 import ReportStateBlock from './ReportStateBlock'
@@ -118,6 +119,12 @@ export default function DepartmentsReport({ period }: { period: ReportPeriod }) 
   // Distinct customers actually represented in this window's data — a real
   // count off the axis array, never a fabricated total.
   const customersCount = data?.by_customer.filter(s => s.value !== 'none' && s.value !== 'others').length ?? 0
+  // Spares (REPORTS-KPI-SPARE-2): `withCustomer` is the honest complement of the
+  // existing `withoutCustomer` card; `othersCustomer` is the by_customer axis's
+  // own real 'others' rollup bucket (top-20 + rest, BuildsTopNDistribution);
+  // the two rates are honest ratios over counts already in the strip.
+  const withCustomer = total - (withoutCustomer?.count ?? 0)
+  const othersCustomer = data?.by_customer.find(s => s.value === 'others')
   // Exactly nine cards, always (Danny — the strip's footprint never reflows
   // between pages). `topCustomer`/`topLocation` and the contact-coverage
   // summary are PERMANENT slots: while their underlying value is absent, the
@@ -139,6 +146,13 @@ export default function DepartmentsReport({ period }: { period: ReportPeriod }) 
     // not change the day it lands.
     withContacts:    { key: 'withContacts',    label: t('departments.summary.withContacts'),    value: summary?.with_contacts ?? '—' },
     withoutContacts: { key: 'withoutContacts', label: t('departments.summary.withoutContacts'), value: summary?.without_contacts ?? '—' },
+    withCustomer: { key: 'withCustomer', label: t('departments.summary.withCustomer'), value: withCustomer },
+    othersCustomer: { key: 'othersCustomer', label: t('departments.summary.othersCustomer'), value: othersCustomer?.count ?? 0,
+      onClick: othersCustomer ? gateDrillClick('departments', () => openSegment('customer', othersCustomer, { customer: 'others' })) : undefined },
+    locationCoverageRate: { key: 'locationCoverageRate', label: t('departments.summary.locationCoverageRate'),
+      value: total > 0 ? formatRatio(withLocation / total) : '—' },
+    contactCoverageRate: { key: 'contactCoverageRate', label: t('departments.summary.contactCoverageRate'),
+      value: summary && total > 0 ? formatRatio(summary.with_contacts / total) : '—' },
   }
   // Which nine keys render, and in what order, is the tenant's Settings → Reports
   // choice (falls back to today's order when nothing is stored, or a stored key

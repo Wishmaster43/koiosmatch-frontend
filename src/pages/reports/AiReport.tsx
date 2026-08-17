@@ -50,6 +50,13 @@ export default function AiReport({ period }: { period: ReportPeriod }) {
   const topOf = (segs: AiActivitySegment[]) =>
     segs.reduce<AiActivitySegment | null>((best, x) => (!best || x.count > best.count ? x : best), null)
   const topActivity = data ? topOf(data.by_activity) : null
+  // Spares (REPORTS-KPI-SPARES-1): the top real segment of two axes not yet
+  // offered (by_model/by_user, same pattern as topActivity above) and two honest
+  // rates over real counts (total spread over distinct users / activity types).
+  const topModel = data ? topOf(data.by_model) : null
+  const topUser  = data ? topOf(data.by_user) : null
+  const activeUsersCount    = data?.by_user.length ?? 0
+  const activityTypesCount  = data?.by_activity.length ?? 0
   const kpiByKey: Record<string, KpiSpec> = {
     total:  { key: 'total',  label: t('ai.total'),  value: total },
     tokens: { key: 'tokens', label: t('ai.summary.tokens'), value: s?.tokens != null ? formatNumber(s.tokens) : '—' },
@@ -63,6 +70,14 @@ export default function AiReport({ period }: { period: ReportPeriod }) {
     activeUsers: { key: 'activeUsers', label: t('ai.summary.activeUsers'), value: data?.by_user.length ?? 0 },
     topActivity: { key: 'topActivity', label: t('ai.summary.topActivity'),
       value: topActivity?.count ?? '—', sub: topActivity?.label },
+    topModel: { key: 'topModel', label: t('ai.summary.topModel'),
+      value: topModel?.count ?? '—', sub: topModel?.label },
+    topUser: { key: 'topUser', label: t('ai.summary.topUser'),
+      value: topUser?.count ?? '—', sub: topUser?.label },
+    avgPerUser: { key: 'avgPerUser', label: t('ai.summary.avgPerUser'),
+      value: activeUsersCount > 0 ? formatNumber(Math.round(total / activeUsersCount)) : '—' },
+    avgPerActivityType: { key: 'avgPerActivityType', label: t('ai.summary.avgPerActivityType'),
+      value: activityTypesCount > 0 ? formatNumber(Math.round(total / activityTypesCount)) : '—' },
   }
   // Which nine keys render, and in what order, is the tenant's Settings → Reports
   // choice (falls back to today's order when nothing is stored, or a stored key
