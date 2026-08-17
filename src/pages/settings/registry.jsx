@@ -61,6 +61,7 @@ import IdentifierValidationSettings from './sections/customers/IdentifierValidat
 import { CustomerConversionSettings } from './sections/CustomerConversionSettings'
 import MatchTemplatesSettings from './sections/MatchTemplatesSettings'
 import MatchRatesSettings from './sections/MatchRatesSettings'
+import MatchContractLineRateSideSettings from './sections/MatchContractLineRateSideSettings'
 import { TaskStatusSettings, TaskTypeSettings, TaskPrioritySettings } from './sections/TaskSettings'
 import { MatchStatusSettings, ContractTypesSettings, MatchStopReasonSettings } from './sections/MatchSettings'
 import { AppointmentTypeSettings } from './sections/AppointmentTypeSettings'
@@ -372,6 +373,9 @@ export const NAV_GROUPS = [
       // Purchase→sale conversion factor (Danny 22-07) — moved here from Vacancies →
       // Matching: it's a match rate concept, not a per-vacancy one.
       { id: 'match_rates', icon: Percent, component: MatchRatesSettings },
+      // TARIEF-ZIJDE-1 (Danny 15-08): which side of the money the CONTRACTREGELS
+      // rate line means — sale (open) or purchase (gated behind matches.financial.view).
+      { id: 'match_contract_line_rate_side', icon: EyeOff, component: MatchContractLineRateSideSettings },
       { id: 'match_display', icon: Palette, schema: matchDisplay },
     ],
   },

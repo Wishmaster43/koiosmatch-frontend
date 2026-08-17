@@ -78,9 +78,21 @@ interface ActionMenuProps {
   menuWidth?: number
   align?: 'left' | 'right'
   disabled?: boolean
+  // Icon-only trigger — no visible label/chevron (e.g. a compact per-list sort
+  // menu next to a small "+ Add" button). `ariaLabel` supplies the accessible
+  // name WCAG requires on an icon-only control (§6) — pass it whenever `label`
+  // is omitted; falls back to `label` when both are given.
+  iconOnly?: boolean
+  ariaLabel?: string
+  // Soft-tints the trigger even while CLOSED — e.g. "a sort/filter is currently
+  // applied" (§4 soft-tint convention). Optional; the plain look is unaffected.
+  highlighted?: boolean
 }
 
-export default function ActionMenu({ label, icon: Icon, items = [], menuWidth = 280, align = 'left', disabled = false }: ActionMenuProps) {
+export default function ActionMenu({
+  label, icon: Icon, items = [], menuWidth = 280, align = 'left', disabled = false,
+  iconOnly = false, ariaLabel, highlighted = false,
+}: ActionMenuProps) {
   const { t } = useTranslation('common')
   const [open, setOpen] = useState(false)
   // Drill-in stack: each entry is the node we descended into (last = current level).
@@ -156,19 +168,31 @@ export default function ActionMenu({ label, icon: Icon, items = [], menuWidth = 
   return (
     <div ref={ref} style={{ position: 'relative' }} onKeyDown={onKeyDown}>
       {/* Trigger — BTN_H (§4/§9): one explicit height for every text/action button, everywhere
-          (this single component drives every bulk bar + settings row-action menu). */}
+          (this single component drives every bulk bar + settings row-action menu).
+          Icon-only mode drops the label/chevron and shrinks to a compact square — the
+          accessible name still comes through (aria-label + title), never silently lost. */}
       <button type="button" disabled={disabled} aria-haspopup="menu" aria-expanded={open}
+        aria-label={iconOnly ? (ariaLabel ?? label) : undefined}
+        title={iconOnly ? (ariaLabel ?? label) : undefined}
         onClick={() => (open ? close() : setOpen(true))}
-        style={{ display: 'flex', alignItems: 'center', gap: 6, height: BTN_H, padding: '0 12px', fontSize: 12, fontWeight: 500,
+        style={iconOnly ? {
+          display: 'flex', alignItems: 'center', justifyContent: 'center', width: 26, height: 26, borderRadius: 6,
+          border: `1px solid ${open || highlighted ? 'var(--color-primary)' : 'var(--border)'}`,
+          background: highlighted && !open ? 'color-mix(in srgb, var(--color-primary) 10%, transparent)' : 'var(--surface)',
+          color: open || highlighted ? 'var(--color-primary)' : 'var(--text-muted)',
+          cursor: disabled ? 'not-allowed' : 'pointer', opacity: disabled ? 0.5 : 1, flexShrink: 0,
+        } : {
+          display: 'flex', alignItems: 'center', gap: 6, height: BTN_H, padding: '0 12px', fontSize: 12, fontWeight: 500,
           border: `1px solid ${open ? 'var(--color-primary)' : 'var(--border)'}`, borderRadius: 7,
-          background: 'var(--surface)', color: 'var(--text)', cursor: disabled ? 'not-allowed' : 'pointer', opacity: disabled ? 0.5 : 1 }}>
-        {Icon && <Icon size={13} />}
-        <span>{label}</span>
-        <ChevronDown size={13} />
+          background: 'var(--surface)', color: 'var(--text)', cursor: disabled ? 'not-allowed' : 'pointer', opacity: disabled ? 0.5 : 1,
+        }}>
+        {Icon && <Icon size={iconOnly ? 14 : 13} />}
+        {!iconOnly && <span>{label}</span>}
+        {!iconOnly && <ChevronDown size={13} />}
       </button>
 
       {open && (
-        <div role="menu" aria-label={label}
+        <div role="menu" aria-label={label ?? ariaLabel}
           style={{ position: 'absolute', top: '100%', zIndex: 200, marginTop: 4, minWidth: menuWidth, maxWidth: 'min(420px, 90vw)',
             background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 10,
             boxShadow: '0 4px 20px rgba(0,0,0,0.12)', overflow: 'hidden',

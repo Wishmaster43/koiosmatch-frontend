@@ -93,7 +93,8 @@
     "staleLeads": "Stillstehende Leads",
     "staleVacancies": "Stillstehende Stellen",
     "koiosSuggestions": "Koios-Vorschläge",
-    "customersByOwner": "Kunden nach Kundenbetreuer"
+    "customersByOwner": "Kunden nach Kundenbetreuer",
+    "seeAll": "Alle {{count}} anzeigen"
   },
   "action": {
     "allCandidates": "Alle Kandidaten",

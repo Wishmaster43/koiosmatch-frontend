@@ -13,6 +13,10 @@ import DrawerAddButton from './DrawerAddButton'
 import { documentLinkOptions } from './documentLinkRules'
 // G34: the house searchable dropdown replaces the native <select> per language/level.
 import CreatableSelect from '@/components/ui/CreatableSelect'
+// KAND-ACHTERGROND-VERPLICHT-1: the ONE required-field marker (red asterisk) and
+// the ONE inline validation message — same convention AddForm/AddCandidateModal use.
+import { Label } from '@/components/forms/fields'
+import FieldNotice from '@/components/ui/FieldNotice'
 import type { Candidate } from '@/types/candidate'
 import type { Id } from '@/types/common'
 
@@ -87,6 +91,11 @@ export default function LanguagesSection({ c, onEditSave }: { c: Candidate; onEd
   const [rows,    setRows]    = useState<LangRow[]>(initial)
   // The preview overlay for a row's linked document — the shared house modal, never a fork.
   const [previewDoc, setPreviewDoc] = useState<LinkedDocument | null>(null)
+  // KAND-ACHTERGROND-VERPLICHT-1: rows (by index) a blocked Save flagged for having
+  // content but no language — `language` is required on create
+  // (CandidateLanguageController::rules, measured 2026-08-17). Cleared per-row the
+  // moment its language is picked, mirrors AddForm's own `invalid` state.
+  const [invalidRows, setInvalidRows] = useState<Record<number, boolean>>({})
 
   // DOC-1-EIGENAAR-1: the picker options for ONE row — every document no other entry
   // has claimed, plus this row's own pick so it stays visible and switchable. The
@@ -98,10 +107,14 @@ export default function LanguagesSection({ c, onEditSave }: { c: Candidate; onEd
     { id: row.id, document_id: row.documentId || null },
   )
 
-  const setRow    = (i: number, k: keyof LangRow, v: string) => setRows(r => r.map((row, idx) => idx === i ? { ...row, [k]: v } : row))
+  const setRow    = (i: number, k: keyof LangRow, v: string) => {
+    setRows(r => r.map((row, idx) => idx === i ? { ...row, [k]: v } : row))
+    // A row just given a language is no longer incomplete — clear its marker.
+    if (k === 'language' && v) setInvalidRows(p => (p[i] ? { ...p, [i]: false } : p))
+  }
   const addRow    = ()        => setRows(r => [...r, { language: '', spoken: '', written: '', documentId: '' }])
   const removeRow = (i: number) => setRows(r => r.filter((_, idx) => idx !== i))
-  const cancel = () => { setRows(initial()); setEditing(false) }
+  const cancel = () => { setRows(initial()); setInvalidRows({}); setEditing(false) }
   // Save in two paths, because the backend has two. Language + levels keep riding the
   // existing candidate-level bulk payload (unchanged shape). The document link does
   // NOT: MEASURED live 08-08 — PATCH /candidates/{id} answers 200 but silently drops
@@ -109,8 +122,21 @@ export default function LanguagesSection({ c, onEditSave }: { c: Candidate; onEd
   // persists it (and the reverse language_id then shows on the document). That is the
   // exact per-item relation route the Documenten tab's link picker already uses.
   const save = () => {
+    // KAND-ACHTERGROND-VERPLICHT-1: a row with content but no language used to be
+    // silently dropped by the `kept` filter below — no error, no explanation, the
+    // typed spoken/written level or picked document just vanished. Block Save
+    // instead and point at the row, mirroring every other sub-tab's required check.
+    // A row with NOTHING filled at all stays a harmless no-op discard (unchanged).
+    const incomplete = rows
+      .map((r, i) => ({ r, i }))
+      .filter(({ r }) => !r.language.trim() && (r.spoken || r.written || r.documentId))
+    if (incomplete.length) {
+      setInvalidRows(Object.fromEntries(incomplete.map(({ i }) => [i, true])))
+      return
+    }
     const kept = rows.filter(r => r.language)
     onEditSave?.({ languages: kept.map(r => ({ ...(r.id != null ? { id: r.id } : {}), language: r.language, spoken: r.spoken, written: r.written })) })
+    setInvalidRows({})
     setEditing(false)
     kept.forEach(r => {
       if (r.id == null || r.documentId === (docLinks[String(r.id)] ?? '')) return
@@ -173,12 +199,24 @@ export default function LanguagesSection({ c, onEditSave }: { c: Candidate; onEd
         )}
         {editing ? (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+            {/* KAND-ACHTERGROND-VERPLICHT-1: column captions above the row list (once,
+                not per row — this is a repeating-row form, not a single-record one) so
+                the required "Taal" column carries the shared Label's red asterisk. The
+                trailing spacer matches the trash button's own 26px + gap so the three
+                captions line up with their picker below. */}
+            <div style={{ display: 'flex', alignItems: 'flex-end', gap: 6 }}>
+              <div style={{ flex: 1, minWidth: 0 }}><Label required>{t('addFields.language')}</Label></div>
+              <div style={{ flex: 1, minWidth: 0 }}><Label>{t('addFields.spokenLevel')}</Label></div>
+              <div style={{ flex: 1, minWidth: 0 }}><Label>{t('addFields.writtenLevel')}</Label></div>
+              <div style={{ width: 26, flexShrink: 0 }} aria-hidden="true" />
+            </div>
             {rows.map((row, i) => (
               <div key={i} style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <CreatableSelect value={row.language || null} onChange={v => setRow(i, 'language', v)} allowCreate={false} clearable
-                      placeholder={t('addFields.language')} options={langOpts} style={pickerStyle} />
+                      placeholder={t('addFields.language')} options={langOpts}
+                      style={invalidRows[i] ? { ...pickerStyle, borderColor: 'var(--color-danger)' } : pickerStyle} />
                   </div>
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <CreatableSelect value={row.spoken || null} onChange={v => setRow(i, 'spoken', v)} allowCreate={false} clearable
@@ -196,6 +234,12 @@ export default function LanguagesSection({ c, onEditSave }: { c: Candidate; onEd
                     <Trash2 size={12} />
                   </button>
                 </div>
+                {/* KAND-ACHTERGROND-VERPLICHT-1: points at the row a blocked Save
+                    flagged — content typed, but no language picked. */}
+                {/* Explicit `common:` prefix — this file's default `t` resolves the
+                    'candidates' namespace, and the shared field-required copy lives
+                    in 'common' (extractApiError's own ERROR_CODE_KEYS convention). */}
+                {invalidRows[i] && <FieldNotice text={t('common:errors.fieldRequired', { field: t('addFields.language') })} />}
                 {/* TAAL-DOC-LINK-1: the proof-document picker on its own line, so the
                     trash column above stays one clean column (TRASH-ALIGN-1). Only for a
                     PERSISTED row and only when the candidate actually HAS documents — a

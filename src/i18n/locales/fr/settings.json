@@ -157,6 +157,7 @@
     "match_statuses": "Statuts",
     "contract_types": "Types de contrat",
     "match_rates": "Facteur de conversion",
+    "match_contract_line_rate_side": "Côté du tarif",
     "outreach_statuses": "Statuts",
     "task_types": "Types d'activité",
     "task_priorities": "Priorités",
@@ -1902,6 +1903,15 @@
     "placeholder": "Ex. 1,35",
     "saveFailed": "Échec de l’enregistrement. La valeur a été rétablie.",
     "loadError": "Impossible de charger le facteur de conversion."
+  },
+  "matchContractLineRateSide": {
+    "title": "Visibilité de la ligne tarifaire",
+    "subtitle": "Choisissez quel côté de l'argent la ligne tarifaire par fonction d'un match affiche : ce que le client paie, ou ce que vous payez au candidat.",
+    "saleLabel": "Ce que le client paie (vente)",
+    "saleDescription": "Toute personne pouvant voir ce match voit ce montant.",
+    "purchaseLabel": "Ce que nous payons au candidat (achat)",
+    "purchaseDescription": "Seules les personnes disposant du droit financier voient ce montant.",
+    "saveFailed": "Impossible d'enregistrer le paramètre de la ligne tarifaire. Veuillez réessayer."
   },
   "outreach": {
     "statusTitle": "Statuts",

@@ -93,7 +93,8 @@
     "staleLeads": "Leads stagnants",
     "staleVacancies": "Offres stagnantes",
     "koiosSuggestions": "Suggestions Koios",
-    "customersByOwner": "Clients par responsable"
+    "customersByOwner": "Clients par responsable",
+    "seeAll": "Voir les {{count}}"
   },
   "action": {
     "allCandidates": "Tous les candidats",

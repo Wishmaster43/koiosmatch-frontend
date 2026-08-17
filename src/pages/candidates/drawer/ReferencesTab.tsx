@@ -31,6 +31,7 @@ import SafeHtml from '@/components/ui/SafeHtml'
 import SoftChip from '@/components/ui/SoftChip'
 import DocPreviewModal from '@/components/drawer/DocPreviewModal'
 import DrawerAddButton from './DrawerAddButton'
+import { useRelationSort } from '@/components/forms/useRelationSort'
 // REF-ERVARING-1: the reference ↔ work-experience link (contract measured live
 // 09-08 — see referenceExperienceLink's header). Rules/labels live in the helper
 // module, the two read-only views in LinkedExperience.
@@ -158,7 +159,10 @@ export default function ReferencesTab({ items = [], onAdd, onEdit, onRemove, onV
   // the free-text block close the form.
   const fields = [
     { key: 'first_name',  label: t('addFields.referenceFirstName', { defaultValue: 'Voornaam' }), half: true },
-    { key: 'last_name',   label: t('addFields.referenceLastName', { defaultValue: 'Achternaam' }), half: true },
+    // KAND-ACHTERGROND-VERPLICHT-1: `last_name` is required on create
+    // (CandidateReferenceController::rules, measured 2026-08-17 — REFERENTIE-VELDEN-1's
+    // own header already notes it "mirrors the old `name` requiredness").
+    { key: 'last_name',   label: t('addFields.referenceLastName', { defaultValue: 'Achternaam' }), half: true, required: true },
     { key: 'middle_name', label: t('addFields.referenceMiddleName', { defaultValue: 'Tussenvoegsel' }), half: true },
     { key: 'function',    label: t('addFields.referenceFunction', { defaultValue: 'Functie' }), half: true },
     // Relation TO the candidate (manager/collega/klant/…) — a SEPARATE tenant
@@ -184,6 +188,16 @@ export default function ReferencesTab({ items = [], onAdd, onEdit, onRemove, onV
     // this one is too ("Referentietekst", key referenceText).
     { key: 'note',        label: t('addFields.referenceText', { defaultValue: 'Referentietekst' }), richtext: true },
   ]
+  // Sub-tab sort notes: candidate_references has no date column at all, so
+  // start/end date are omitted — but it DOES carry the referent's own
+  // `function` (their role, e.g. "Teamleider", distinct from `relation_id` —
+  // their relation TO the candidate), a real field on every row, so that is
+  // the one axis offered here (Requirement 2).
+  const { order, control } = useRelationSort(items, {
+    storageKey: 'references',
+    functionOf: (raw: RelItem) => raw.function as string | undefined,
+    functionLabel: t('addFields.referenceFunction', { defaultValue: 'Functie' }),
+  })
   return (
     <>
     {/* REF-ERVARING-1: a candidate without a single work experience gets a calm
@@ -191,7 +205,8 @@ export default function ReferencesTab({ items = [], onAdd, onEdit, onRemove, onV
         recruiter would look for the link, i.e. once there is at least one reference. */}
     {items.length > 0 && experienceOptions.length === 0 && <NoExperiencesNotice />}
     <AddableSection title={null} emptyText={t('sections.referencesEmpty', { defaultValue: 'Nog geen referenties.' })}
-      renderAddButton={renderAddButton} items={items} fields={fields} onAdd={onAdd} onEdit={onEdit} onRemove={onRemove}
+      renderAddButton={renderAddButton} order={order} headerExtra={control}
+      items={items} fields={fields} onAdd={onAdd} onEdit={onEdit} onRemove={onRemove}
       renderItem={(raw: RelItem, i: number, arr: RelItem[]) => {
         const r = raw as {
           id?: Id; first_name?: string; middle_name?: string; last_name?: string; function?: string

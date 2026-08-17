@@ -153,6 +153,7 @@
     "match_statuses": "Statussen",
     "contract_types": "Contractsoorten",
     "match_rates": "Omrekenfactor",
+    "match_contract_line_rate_side": "Tariefzijde",
     "outreach_statuses": "Statussen",
     "task_types": "Activiteit-types",
     "task_priorities": "Prioriteiten",
@@ -690,6 +691,15 @@
     "placeholder": "Bijv. 1,35",
     "saveFailed": "Opslaan mislukt. De waarde is teruggezet.",
     "loadError": "Kon de omrekenfactor niet laden."
+  },
+  "matchContractLineRateSide": {
+    "title": "Zichtbaarheid tariefregel",
+    "subtitle": "Bepaal welke kant van het geld de tariefregel per functie op een match toont: wat de klant betaalt, of wat je de kandidaat betaalt.",
+    "saleLabel": "Wat de klant betaalt (verkoop)",
+    "saleDescription": "Iedereen die deze match mag zien, ziet dit bedrag.",
+    "purchaseLabel": "Wat we de kandidaat betalen (inkoop)",
+    "purchaseDescription": "Alleen mensen met het financiële recht zien dit bedrag.",
+    "saveFailed": "De instelling voor de tariefregel kon niet worden opgeslagen. Probeer het opnieuw."
   },
   "outreach": {
     "statusTitle": "Statussen",

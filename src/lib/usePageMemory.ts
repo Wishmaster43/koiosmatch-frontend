@@ -19,3 +19,11 @@ export function usePageMemory<T>(key: string, initial: T | (() => T)): [T, Dispa
   useEffect(() => { store.set(key, value) }, [key, value])
   return [value, setValue]
 }
+
+// TEST-ONLY: the store is module-level by design (it survives page nav), which
+// means it also survives across `it()` blocks within one test file. Tests that
+// exercise a hook built on usePageMemory (e.g. useRelationSort) call this in
+// beforeEach so one test's sort choice never leaks into the next.
+export function __resetPageMemoryForTests(): void {
+  store.clear()
+}

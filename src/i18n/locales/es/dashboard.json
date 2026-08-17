@@ -93,7 +93,8 @@
     "staleLeads": "Leads estancados",
     "staleVacancies": "Vacantes estancadas",
     "koiosSuggestions": "Sugerencias de Koios",
-    "customersByOwner": "Clientes por gestor"
+    "customersByOwner": "Clientes por gestor",
+    "seeAll": "Ver los {{count}}"
   },
   "action": {
     "allCandidates": "Todos los candidatos",

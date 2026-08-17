@@ -116,6 +116,9 @@ describe('EducationTab · education level (KAND-NIVEAU-1)', () => {
     const onAdd = vi.fn()
     render(<EducationTab items={[]} onAdd={onAdd} />)
     await user.click(screen.getByRole('button', { name: /Toevoegen/ }))
+    // KAND-ACHTERGROND-VERPLICHT-1: `title` (Diploma) is required — fill it first,
+    // otherwise Save is now correctly blocked client-side and onAdd never fires.
+    await user.type(screen.getByPlaceholderText('Diploma *'), 'Verpleegkunde')
     // ALWAYS-SEARCHABLE-1: the level_id picker is now the house CreatableSelect — an
     // empty picker's trigger is named by its own label ("Niveau"). Open it and wait
     // for the lookup GET to resolve and its portalled options to render.

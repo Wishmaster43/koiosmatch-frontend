@@ -7,10 +7,36 @@
  */
 interface ServerErrorBody { message?: string; code?: string; errors?: Record<string, string[]> }
 
-export function extractApiError(err: unknown, fallback: string): string {
+// KAND-ACHTERGROND-VERPLICHT-1 (2026-08-17): Laravel's OWN default "required"
+// validation copy (vendor lang/en/validation.php: 'The :attribute field is
+// required.'). The API has `APP_LOCALE=nl` but ships no lang/nl/validation.php
+// (verified in koiosmatch-api/lang — only vacancies/guard/customers/contacts are
+// translated), so this template always falls through to the English default and
+// reaches the client raw, naming the raw column ("employer") instead of the
+// label the user sees — the exact toast Danny screenshotted. Every message a
+// controller crafts by hand (DocumentOwnershipGuard, guard.*, the domain 409s
+// throughout app/Http/Controllers) is authored Dutch/English prose and never
+// matches this literal template, so the fingerprint safely tells the two apart
+// without touching any of those already-working, already-readable messages.
+const RAW_REQUIRED_RE = /^The .+ field is required\.$/
+
+/**
+ * @param fieldLabels Optional map of backend field key → an ALREADY-TRANSLATED
+ * message (built by the caller via `t()`, since this helper has no i18n access
+ * and runs outside render too). Only consulted when the raw validation message
+ * is Laravel's own untranslated "required" template — a crafted domain message
+ * always wins as before. Unknown/absent field → the caller's generic `fallback`,
+ * never the raw server sentence.
+ */
+export function extractApiError(err: unknown, fallback: string, fieldLabels?: Record<string, string>): string {
   const body = (err as { response?: { data?: ServerErrorBody } })?.response?.data
-  const firstValidation = body?.errors ? Object.values(body.errors)[0]?.[0] : undefined
-  return firstValidation ?? body?.message ?? fallback
+  const entries = body?.errors ? Object.entries(body.errors) : []
+  const [field, messages] = entries[0] ?? []
+  const raw = messages?.[0]
+  if (raw && RAW_REQUIRED_RE.test(raw)) {
+    return (field && fieldLabels?.[field]) ? fieldLabels[field] : fallback
+  }
+  return raw ?? body?.message ?? fallback
 }
 
 /**

@@ -18,6 +18,8 @@ import { useState, useEffect } from 'react'
 import type { MutableRefObject } from 'react'
 import type { TFunction } from 'i18next'
 import api, { unwrap } from '@/lib/api'
+import { useAuth } from '@/context/AuthContext'
+import { useAllSettings, getStringSetting } from '@/lib/settings/useAllSettings'
 import { notifyError, notifySuccess } from '@/lib/notify'
 import { extractApiError } from '@/lib/extractApiError'
 import { API_TO_FORM } from './helpers'
@@ -114,6 +116,17 @@ export function useMatchSubmit({
   // EDIT-MATCH-1: fetch the full record once — the candidate's embedded `matches`
   // row (MATCH-EMBED-1) carries none of the match/contract/financial fields.
   const [editDetail, setEditDetail] = useState<MatchEditDetail | null>(null)
+  // MATCH-LINE-REDACTED-1 — see the prefill and the submit body below. The rate on
+  // a contract line is only confidential when the tenant put its lines on the
+  // PURCHASE side; on the sale side it is ordinary commercial data every recruiter
+  // needs. Reading the tenant's own choice keeps this precise: without it we would
+  // block line editing for every user without the financial right, including on
+  // tenants where nothing is hidden at all.
+  const auth = useAuth()
+  const settingValues = useAllSettings()
+  const linesAreConfidential = getStringSetting(settingValues, 'match_contract_line_rate_side', 'purchase') === 'purchase'
+  const canSeeFinancial = !!auth?.hasPermission?.('matches.financial.view')
+  const [redactedLines, setRedactedLines] = useState(false)
   useEffect(() => {
     if (!editMatchId) return
     let alive = true
@@ -158,10 +171,26 @@ export function useMatchSubmit({
     // (dropping the server id — this hook always resends the array as a fresh
     // full replacing set, never a partial patch keyed on the old ids).
     setContractFormRaw(editDetail.contract_form?.value ?? '')
+    // MATCH-LINE-REDACTED-1: a line whose rate the viewer may not see arrives with
+    // `rate: null` (the tenant put its contract lines on the purchase side and this
+    // user lacks matches.financial.view). That is INDISTINGUISHABLE here from a line
+    // whose rate was genuinely never filled in, and both prefill as an empty input.
+    // Since every save resends contract_lines as a FULL REPLACING set, saving any
+    // unrelated field would have written those nulls back and destroyed the real
+    // amounts with no way back. `redactedLines` records that this record carried a
+    // hidden amount, and submit() then leaves contract_lines out of the PATCH
+    // entirely rather than echoing a value this user was never shown.
     setContractLinesRaw(
       editDetail.contract_lines?.length
         ? editDetail.contract_lines.map(l => ({ functionTitle: l.function_title ?? '', rate: l.rate != null ? String(l.rate) : '' }))
         : [],
+    )
+    // Redacted only when the tenant hides this side, the viewer lacks the right,
+    // AND at least one line really came back without its amount. A line that is
+    // genuinely blank on a sale-side tenant is not a redaction.
+    setRedactedLines(
+      linesAreConfidential && !canSeeFinancial
+      && Boolean(editDetail.contract_lines?.some(l => l.rate == null)),
     )
     // Every setter above is a stable useState/sibling-hook setter — only react to a NEW record.
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -211,11 +240,18 @@ export function useMatchSubmit({
       // form at all) always sends `[]` — never the stale local draft — so the
       // backend's own orphan cleanup is never fighting a client-sent value.
       contract_form: contractForm || null,
-      contract_lines: hasContractLines
-        ? contractLines
-            .filter(l => l.functionTitle.trim())
-            .map((l, i) => ({ function_title: l.functionTitle, rate: l.rate !== '' ? Number(l.rate) : null, sort_order: i }))
-        : [],
+      // MATCH-LINE-REDACTED-1: omit the key entirely when this record's rates were
+      // hidden from this viewer, so the server keeps what it already has. Sending
+      // the array at all would replace the set, and every hidden amount would come
+      // back as null. Not sending it is the only safe answer: a user who may not
+      // see the money must not be able to rewrite it, not even accidentally.
+      ...(redactedLines ? {} : {
+        contract_lines: hasContractLines
+          ? contractLines
+              .filter(l => l.functionTitle.trim())
+              .map((l, i) => ({ function_title: l.functionTitle, rate: l.rate !== '' ? Number(l.rate) : null, sort_order: i }))
+          : [],
+      }),
     }
     const body: Record<string, unknown> = editing
       ? match // PATCH — no candidate_id/vacancy_id (identity stays fixed).

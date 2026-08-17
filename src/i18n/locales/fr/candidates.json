@@ -755,7 +755,8 @@
     "poolKoios": "Suggéré par Koios",
     "branchEmpty": "Aucune agence rattachée.",
     "references": "Références",
-    "referencesEmpty": "Aucune référence pour le moment."
+    "referencesEmpty": "Aucune référence pour le moment.",
+    "sortLabel": "Trier"
   },
   "preferences": {
     "title": "Préférences",

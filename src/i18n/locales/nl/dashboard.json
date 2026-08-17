@@ -93,7 +93,8 @@
     "staleLeads": "Stilstaande leads",
     "staleVacancies": "Stilstaande vacatures",
     "koiosSuggestions": "Koios-suggesties",
-    "customersByOwner": "Klanten per accountmanager"
+    "customersByOwner": "Klanten per accountmanager",
+    "seeAll": "Bekijk alle {{count}}"
   },
   "action": {
     "allCandidates": "Alle kandidaten",

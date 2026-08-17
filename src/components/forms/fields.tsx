@@ -85,7 +85,10 @@ export function TextField({ id, value, onChange, placeholder, type = 'text', err
   return (
     <input id={id} type={type} value={value ?? ''} placeholder={placeholder} aria-label={placeholder}
       onChange={e => onChange(e.target.value)}
-      style={{ ...inputStyle, ...(error ? { borderColor: 'var(--color-danger)' } : {}), ...style }} />
+      // The error state replaces the whole `border` shorthand rather than only its
+      // colour: React warns when a longhand is removed while the shorthand is still
+      // set, and the two can then fight over which wins on re-render.
+      style={{ ...inputStyle, ...(error ? { border: '1px solid var(--color-danger)' } : {}), ...style }} />
   )
 }
 

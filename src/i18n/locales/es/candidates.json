@@ -755,7 +755,8 @@
     "poolKoios": "Sugerido por Koios",
     "branchEmpty": "Aún no hay sede vinculada.",
     "references": "Referencias",
-    "referencesEmpty": "Aún no hay referencias."
+    "referencesEmpty": "Aún no hay referencias.",
+    "sortLabel": "Ordenar"
   },
   "preferences": {
     "title": "Preferencias",

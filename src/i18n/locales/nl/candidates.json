@@ -778,7 +778,8 @@
     "conversationsEmpty": "Nog geen conversaties.",
     "branchEmpty": "Nog geen vestiging gekoppeld.",
     "references": "Referenties",
-    "referencesEmpty": "Nog geen referenties."
+    "referencesEmpty": "Nog geen referenties.",
+    "sortLabel": "Sorteren"
   },
   "preferences": {
     "title": "Voorkeuren",

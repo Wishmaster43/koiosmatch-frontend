@@ -94,6 +94,53 @@ describe('LanguagesSection · pickers are the house CreatableSelect, not a nativ
   })
 })
 
+/**
+ * KAND-ACHTERGROND-VERPLICHT-1 (2026-08-17): `language` is required on create
+ * (CandidateLanguageController::rules) — the old `kept = rows.filter(r =>
+ * r.language)` silently dropped a row with content but no language, with no
+ * marker and no explanation. The Taal column now carries the required asterisk,
+ * and Save blocks (no onEditSave call at all) until the language is picked.
+ */
+describe('LanguagesSection · language is required (KAND-ACHTERGROND-VERPLICHT-1)', () => {
+  it('marks the Taal column required, blocks Save on a row with content but no language, then saves once it is picked', async () => {
+    const user = userEvent.setup()
+    const onEditSave = vi.fn()
+    render(<LanguagesSection c={{ id: 'c1', languages: [] } as unknown as Candidate} onEditSave={onEditSave} />)
+    await user.click(screen.getByRole('button', { name: 'addFields.language' }))
+
+    // 1) NO REQUIRED MARKER — the Taal column caption carries the asterisk.
+    const captionLabel = screen.getAllByText('addFields.language').find(el => el.tagName === 'LABEL')
+    expect(captionLabel).toBeDefined()
+    expect(captionLabel!.textContent).toContain('*')
+
+    // Fill the spoken level only — a row with content but no language.
+    await user.click(screen.getByRole('button', { name: 'addFields.spokenLevel' }))
+    await user.click(await screen.findByRole('button', { name: 'Vloeiend' }))
+
+    // 2) SAVE IS ALLOWED WITH IT EMPTY — must now be blocked: no onEditSave call,
+    // the row's content is never silently discarded.
+    await user.click(screen.getByTitle('common:save'))
+    expect(onEditSave).not.toHaveBeenCalled()
+    expect(screen.getByRole('alert')).toBeInTheDocument()
+
+    // Picking the language clears the block and the real payload goes out.
+    const langTriggers = screen.getAllByRole('button', { name: 'addFields.language' })
+    await user.click(langTriggers[langTriggers.length - 1])
+    await user.click(await screen.findByRole('button', { name: 'Nederlands' }))
+    await user.click(screen.getByTitle('common:save'))
+    expect(onEditSave).toHaveBeenCalledWith({ languages: [{ language: 'Nederlands', spoken: 'Vloeiend', written: '' }] })
+  })
+
+  it('still discards a row with NOTHING filled at all as a harmless no-op (unchanged)', async () => {
+    const user = userEvent.setup()
+    const onEditSave = vi.fn()
+    render(<LanguagesSection c={{ id: 'c1', languages: [] } as unknown as Candidate} onEditSave={onEditSave} />)
+    await user.click(screen.getByRole('button', { name: 'addFields.language' }))
+    await user.click(screen.getByTitle('common:save'))
+    expect(onEditSave).toHaveBeenCalledWith({ languages: [] })
+  })
+})
+
 describe('LanguagesSection · TAAL-DOC-LINK-1 document link', () => {
   it('picking a document PATCHes the per-item language relation with document_id (never the candidate payload)', async () => {
     const user = userEvent.setup()

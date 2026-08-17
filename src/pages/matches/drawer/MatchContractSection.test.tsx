@@ -66,3 +66,41 @@ describe('MatchContractSection · financial permission gate', () => {
     expect(mockHasPermission).toHaveBeenCalledWith('matches.financial.view')
   })
 })
+
+/**
+ * TARIEF-ZIJDE-1 (Danny 15-08) — the CONTRACTREGELS read-list. The backend
+ * already blanks a gated line's `rate` to null (MatchDetailResource::
+ * visibleContractLines); this section must render that null as the house dash,
+ * never a fabricated 0.00 or a row that silently disappears. The line's function
+ * title + order are NEVER part of the secret and must always render, regardless
+ * of the matches.financial.view permission (that gate only governs the separate
+ * purchase_rate/sell_rate/margin fields tested above).
+ */
+describe('MatchContractSection · CONTRACTREGELS rate lines (TARIEF-ZIJDE-1)', () => {
+  /* eslint-disable-next-line no-restricted-syntax -- seed DATA mirroring LookupsContext's own flex_services seed colour, not a UI colour choice */
+  const contractForm = { value: 'flex_services', label: 'Flex-diensten', color: '#79B58E' }
+  const contractLines = [
+    { id: 'l1', functionTitle: 'Verpleegkundige', rate: null, sortOrder: 0 },
+    { id: 'l2', functionTitle: 'Helpende', rate: 24.5, sortOrder: 1 },
+  ]
+
+  it('shows the house dash for a gated (null) rate, and the real amount for one that is not', () => {
+    // function_title cleared so the Contract card's own field (same base value,
+    // 'Verpleegkundige') doesn't collide with the CONTRACTREGELS row text below.
+    setup({ function_title: null, contractForm, contractLines })
+    const rows = screen.getAllByText(/Verpleegkundige|Helpende/)
+    expect(rows).toHaveLength(2) // both function titles render — the line itself is never hidden
+    expect(screen.getByText('—')).toBeInTheDocument() // the gated line's blanked rate
+    expect(screen.getByText('24.50')).toBeInTheDocument() // the ungated line's real amount
+    expect(screen.queryByText('0.00')).toBeNull() // never a fabricated zero
+  })
+
+  it('renders the function title and order the same way with or without matches.financial.view', () => {
+    mockHasPermission.mockImplementation(() => false)
+    setup({ function_title: null, contractForm, contractLines })
+    const titles = screen.getAllByText(/Verpleegkundige|Helpende/).map(el => el.textContent)
+    expect(titles).toEqual(['Verpleegkundige', 'Helpende']) // array order === sort order, unaffected by the permission
+    expect(screen.getByText('—')).toBeInTheDocument()
+    expect(screen.getByText('24.50')).toBeInTheDocument()
+  })
+})

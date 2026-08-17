@@ -63,6 +63,10 @@ export interface RecentLead { name?: string; contact_name?: string; status_value
 // Recruitment candidate-focus feeds (owner-scoped by the backend; B-27).
 export interface Touchpoint { candidate_id?: string | number; name?: string; type?: string; date?: string; [k: string]: unknown }
 export interface AttentionCandidate { id?: string | number; name?: string; status_value?: string; last_contact_at?: string; [k: string]: unknown }
+// An attention group carries its own total (server-side count) alongside the
+// capped, longest-waiting-first row sample — total/rows come from one query so
+// they never disagree; a "see all" link only makes sense when total > rows.length.
+export interface AttentionGroup { total: number; rows: AttentionCandidate[] }
 export interface AiRun { name?: string; ran_at?: string; ok?: boolean; processed?: number; error?: string; [k: string]: unknown }
 export interface Conversation { name?: string; last_message?: string; at?: string; [k: string]: unknown }
 export interface TimeseriesPoint { name: string; value?: number; [k: string]: unknown }
@@ -76,7 +80,7 @@ export interface DashData {
   recent?: { candidates?: RecentCandidate[]; applications?: RecentApplication[]; leads?: RecentLead[] }
   // Recruitment feeds (owner-scoped): today's touchpoints + candidates to work.
   touchpoints?: Touchpoint[]
-  attention_candidates?: { stale6m?: AttentionCandidate[]; never_contacted?: AttentionCandidate[]; no_followup?: AttentionCandidate[] }
+  attention_candidates?: { stale6m?: AttentionGroup; never_contacted?: AttentionGroup; no_followup?: AttentionGroup }
   ai_runs?: AiRun[]
   conversations?: Conversation[]
   filters?: { locations?: Array<{ id: string | number; name: string }>; statuses?: Array<{ value: string; label: string }> }

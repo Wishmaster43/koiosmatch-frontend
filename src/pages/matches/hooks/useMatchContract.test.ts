@@ -90,6 +90,31 @@ describe('useMatchContract', () => {
     expect(result.current.matchTextPresent).toBe(false)
   })
 
+  // TARIEF-ZIJDE-1 (Danny 15-08): a gated CONTRACTREGELS line arrives with
+  // `rate: null` from MatchDetailResource::visibleContractLines — `pick()` must
+  // preserve that null (never coerce it to 0/NaN) while still mapping the
+  // function title and sort order, which are never gated.
+  it('preserves a gated rate line as null, and always maps function title + order', async () => {
+    mockedGet.mockResolvedValue({
+      data: {
+        data: {
+          ...detailRow,
+          contract_lines: [
+            { id: 'l1', function_title: 'Verpleegkundige', rate: null, sort_order: 0 },
+            { id: 'l2', function_title: 'Helpende', rate: '24.50', sort_order: 1 },
+          ],
+        },
+      },
+    })
+    const { result } = renderHook(() => useMatchContract('m1'))
+    await waitFor(() => expect(result.current.loading).toBe(false))
+
+    expect(result.current.data.contractLines).toEqual([
+      { id: 'l1', functionTitle: 'Verpleegkundige', rate: null, sortOrder: 0 },
+      { id: 'l2', functionTitle: 'Helpende', rate: 24.5, sortOrder: 1 },
+    ])
+  })
+
   it('reverts to the last confirmed values and rethrows on a failed save', async () => {
     mockedGet.mockResolvedValue({ data: { data: detailRow } })
     const { result } = renderHook(() => useMatchContract('m1'))

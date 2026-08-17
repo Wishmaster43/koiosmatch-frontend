@@ -45,10 +45,18 @@ interface AddableSectionProps {
   // future caller (AddableSection is candidates-only today, but this stays
   // additive/non-breaking rather than forking the component).
   renderAddButton?: (onClick: () => void) => ReactNode
+  // Optional caller-computed render order: ORIGINAL indices into `items`, one
+  // per row, in display order (e.g. from useRelationSort). Rows still render
+  // through their REAL index for onEdit/onRemove — sorting is display-only and
+  // never changes which row a save/delete request targets. Omit to render
+  // `items` as received (today's default, unchanged).
+  order?: number[]
+  // Optional control shown beside the "+" button — e.g. the shared sort header.
+  headerExtra?: ReactNode
 }
 
 export default function AddableSection({
-  title, items = [], fields, onAdd, onEdit, onRemove, emptyText, renderItem, layout = 'list', addLabel, editInitial, renderAddButton,
+  title, items = [], fields, onAdd, onEdit, onRemove, emptyText, renderItem, layout = 'list', addLabel, editInitial, renderAddButton, order, headerExtra,
 }: AddableSectionProps) {
   const { t } = useTranslation('common')
   const [adding,     setAdding]     = useState(false)
@@ -83,15 +91,19 @@ export default function AddableSection({
       </div>
     ) : renderItem(item, i, arr)
 
+  // Display order: caller-supplied (sorted) index list, or received order.
+  const displayIdx = order ?? items.map((_, i) => i)
+
   return (
     <SectionCard
       title={title}
       action={!adding && (
-        // marginLeft: auto pushes the single flex child fully right even when
-        // `title` is null (SectionCard's row would otherwise sit it at flex-start).
-        renderAddButton
-          ? <div style={{ marginLeft: 'auto' }}>{renderAddButton(() => setAdding(true))}</div>
-          : <AddButton onClick={() => setAdding(true)} label={addLabel} />
+        // marginLeft: auto pushes the row fully right even when `title` is null
+        // (SectionCard's row would otherwise sit it at flex-start).
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginLeft: 'auto' }}>
+          {headerExtra}
+          {renderAddButton ? renderAddButton(() => setAdding(true)) : <AddButton onClick={() => setAdding(true)} label={addLabel} />}
+        </div>
       )}
     >
       {adding && (
@@ -101,8 +113,8 @@ export default function AddableSection({
         <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{emptyText ?? t('empty')}</div>
       )}
       {isTags
-        ? <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, alignItems: 'center' }}>{items.map(renderRow)}</div>
-        : items.map(renderRow)}
+        ? <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, alignItems: 'center' }}>{displayIdx.map(i => renderRow(items[i], i, items))}</div>
+        : displayIdx.map(i => renderRow(items[i], i, items))}
     </SectionCard>
   )
 }

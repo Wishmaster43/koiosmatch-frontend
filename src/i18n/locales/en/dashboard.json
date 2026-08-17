@@ -93,7 +93,8 @@
     "staleLeads": "Stale leads",
     "staleVacancies": "Stale vacancies",
     "koiosSuggestions": "Koios suggestions",
-    "customersByOwner": "Customers by owner"
+    "customersByOwner": "Customers by owner",
+    "seeAll": "See all {{count}}"
   },
   "action": {
     "allCandidates": "All candidates",

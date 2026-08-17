@@ -16,6 +16,7 @@ import type { ComponentType } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Eye, Download, ArrowRight } from 'lucide-react'
 import AddableSectionJs from '@/components/forms/AddableSection'
+import { useRelationSort } from '@/components/forms/useRelationSort'
 import SafeHtml from '@/components/ui/SafeHtml'
 import SoftChip from '@/components/ui/SoftChip'
 import DrawerAddButton from './DrawerAddButton'
@@ -155,7 +156,11 @@ export function ExperienceTab({ items = [], onAdd, onEdit, onRemove, documents =
   // per entry, Danny 05-08) — the row reads it back via ProseField (view-only).
   const fields = [
     { key: 'title',    label: t('addFields.functionTitle'), half: true },
-    { key: 'company',  label: t('addFields.company'),        half: true },
+    // KAND-ACHTERGROND-VERPLICHT-1: `company` is the FE name for the backend's
+    // `employer` column, required on create (CandidateExperienceController::rules) —
+    // measured 2026-08-17, this is the exact field behind Danny's "employer field
+    // is required" toast.
+    { key: 'company',  label: t('addFields.company'),        half: true, required: true },
     { key: 'location', label: t('addFields.location') },
     { key: 'start',    label: t('addFields.startDate'), half: true, date: true },
     // End date stays editable WITH 'current' checked (Danny 24-07: a known
@@ -164,9 +169,25 @@ export function ExperienceTab({ items = [], onAdd, onEdit, onRemove, documents =
     { key: 'current',  label: t('addFields.currentJob'), checkbox: true },
     { key: 'desc',     label: t('addFields.description'), richtext: true },
   ]
+  // Sub-tab sort notes (build brief Requirement 2/3): candidate_work_experiences
+  // has real start_date + end_date columns, plus the job title — stored on the
+  // BACKEND in a column literally named `position` (confirmed against the
+  // migration, 2026-08-17). That `position` is a plain string field (the job
+  // title), NOT an ordering column — a FUTURE "own order" axis will use a
+  // DIFFERENT `sort_order` column once the backend adds it (see useRelationSort's
+  // FOLLOW-UP note); the two must never be confused. The FE local key for the
+  // job title is `title`/`function_title` (TO_API maps it to `function_title`
+  // above) — sort-by-function reads THAT. All three axes are real here, so all
+  // three are offered.
+  const { order, control } = useRelationSort(items, {
+    storageKey: 'experience',
+    startDateOf: (raw: RelItem) => (raw.start ?? raw.start_date) as string | undefined,
+    endDateOf:   (raw: RelItem) => (raw.end ?? raw.end_date) as string | undefined,
+    functionOf:  (raw: RelItem) => (raw.title ?? raw.function_title) as string | undefined,
+  })
   return (
     <>
-      <AddableSection title={null} emptyText={t('sections.experienceEmpty')} renderAddButton={renderAddButton}
+      <AddableSection title={null} emptyText={t('sections.experienceEmpty')} renderAddButton={renderAddButton} order={order} headerExtra={control}
         items={items} fields={fields} onAdd={onAdd} onEdit={onEdit} onRemove={onRemove}
         renderItem={(raw: RelItem, i: number, arr: RelItem[]) => {
           const e = raw as { id?: Id; title?: string; function_title?: string; company?: string; employer?: string; location?: string; start?: string; start_date?: string; end?: string; end_date?: string; current?: boolean; period?: string; desc?: string }
@@ -213,7 +234,9 @@ export function EducationTab({ items = [], onAdd, onEdit, onRemove, documents = 
   const levelOptions = levels.map(l => ({ value: l.id, label: l.label }))
   // Compact layout: diploma+school and start+end each pair; description (richtext) goes last.
   const fields = [
-    { key: 'title',     label: t('addFields.diploma'),     half: true },
+    // KAND-ACHTERGROND-VERPLICHT-1: `title` is required on create
+    // (CandidateEducationController::rules, measured 2026-08-17).
+    { key: 'title',     label: t('addFields.diploma'),     half: true, required: true },
     { key: 'school',    label: t('addFields.institution'), half: true },
     // KAND-NIVEAU-1: a pick-only dropdown (own row, full width) — AddForm's `options`
     // field now renders the house CreatableSelect (ALWAYS-SEARCHABLE-1, Danny 08-08,
@@ -233,9 +256,19 @@ export function EducationTab({ items = [], onAdd, onEdit, onRemove, documents = 
     // Experience/Certifications — one pencil per entry (Danny 05-08).
     { key: 'desc',      label: t('addFields.description'), richtext: true },
   ]
+  // Sub-tab sort notes: candidate_educations has real start_date + end_date
+  // columns (start falls back to the diploma/issue date for an in-progress row,
+  // mirroring resolveEducationStartDate's own read-line fallback) — offer both.
+  // No job-title/function field exists on this table, so 'function' is omitted
+  // entirely (Requirement 2: never offer an option with nothing to sort by).
+  const { order, control } = useRelationSort(items, {
+    storageKey: 'education',
+    startDateOf: (raw: RelItem) => resolveEducationStartDate(raw as { start?: unknown; start_date?: unknown; issued?: unknown; issue_date?: unknown }),
+    endDateOf:   (raw: RelItem) => (raw.end ?? raw.end_date) as string | undefined,
+  })
   return (
     <>
-    <AddableSection title={null} emptyText={t('sections.educationEmpty')} renderAddButton={renderAddButton}
+    <AddableSection title={null} emptyText={t('sections.educationEmpty')} renderAddButton={renderAddButton} order={order} headerExtra={control}
       items={items} fields={fields} onAdd={onAdd} onEdit={onEdit} onRemove={onRemove}
       // Mirror the read line's own fallback (resolveEducationStartDate) into the edit
       // form's initial values — otherwise a legacy in-progress row that shows e.g.
@@ -314,7 +347,9 @@ export function CertificationsTab({ items = [], onAdd, onEdit, onRemove, documen
   // The description renders as a `richtext` field in this same form (one
   // pencil per entry, Danny 05-08) — see ProseField (view-only) below.
   const fields = [
-    { key: 'name',    label: t('addFields.certName'),     half: true },
+    // KAND-ACHTERGROND-VERPLICHT-1: `name` is required on create
+    // (CandidateCertificationController::rules, measured 2026-08-17).
+    { key: 'name',    label: t('addFields.certName'),     half: true, required: true },
     { key: 'org',     label: t('addFields.organisation'), half: true },
     { key: 'issued',  label: t('addFields.issueDate'), separator: true, date: true },
     { key: 'expires', label: t('addFields.expiryDate'), date: true, disabledWhen: 'noExpiry' },
@@ -325,9 +360,22 @@ export function CertificationsTab({ items = [], onAdd, onEdit, onRemove, documen
     ...(documents.length > 0 ? [{ key: 'document_id', label: t('addFields.linkedDocument'), options: documentOptions }] : []),
     { key: 'desc',    label: t('addFields.description'), richtext: true },
   ]
+  // Sub-tab sort notes: candidate_certifications has no columns literally named
+  // start_date/end_date, but issue_date/expiration_date serve the exact same
+  // "opens/closes the validity window" role — offered under the same
+  // startDate/endDate axis, labelled with THIS tab's own field names
+  // (Issued/Expires, t('certified.*')) so nothing is mislabeled. No function
+  // field exists here, so it is omitted (Requirement 2).
+  const { order, control } = useRelationSort(items, {
+    storageKey: 'certifications',
+    startDateOf: (raw: RelItem) => (raw.issued ?? raw.issue_date) as string | undefined,
+    startDateLabel: t('certified.issued'),
+    endDateOf: (raw: RelItem) => (raw.expires ?? raw.expiry_date ?? raw.expiration_date) as string | undefined,
+    endDateLabel: t('certified.expires'),
+  })
   return (
     <>
-    <AddableSection title={null} emptyText={t('sections.certificationsEmpty')} renderAddButton={renderAddButton}
+    <AddableSection title={null} emptyText={t('sections.certificationsEmpty')} renderAddButton={renderAddButton} order={order} headerExtra={control}
       items={items} fields={fields} onAdd={onAdd} onEdit={onEdit} onRemove={onRemove}
       editInitial={(it: RelItem) => ({ ...it, noExpiry: !(it as { expires?: unknown }).expires })}
       renderItem={(raw: RelItem, i: number, arr: RelItem[]) => {
@@ -372,16 +420,24 @@ export function SkillsTab({ items = [], onAdd, onEdit, onRemove, documents = [],
   // has claimed, plus this row's own pick (DOC-1-EIGENAAR-1).
   const documentOptions = linkedDocumentOptions(documents, items)
   const fields = [
-    { key: 'name',  label: t('addFields.skill') },
+    // KAND-ACHTERGROND-VERPLICHT-1: `name` is required on create
+    // (CandidateSkillController::rules, measured 2026-08-17) — `level` is a tenant
+    // lookup validated `sometimes`/`nullable` (MatchRules::fromLookup), never required.
+    { key: 'name',  label: t('addFields.skill'), required: true },
     { key: 'level', label: t('addFields.skillLevel'), options: levelNames },
     // DOC-LANG-SKILL-LINK-1: optionally link an already-uploaded proof document to this
     // entry (only offered once the candidate HAS documents — §3, no fake affordance).
     ...(documents.length > 0 ? [{ key: 'document_id', label: t('addFields.linkedDocument'), options: documentOptions }] : []),
   ]
+  // Sub-tab sort notes: candidate_skills has no date column and no function/
+  // title field — nothing in the start date / end date / function set applies,
+  // so no accessor is passed at all and no sort control renders (Requirement 2:
+  // never offer an option with nothing to sort by).
+  const { order, control } = useRelationSort(items, { storageKey: 'skills' })
   // Skills render as a vertical list (one per row) so edit/remove read clearly.
   return (
     <>
-    <AddableSection title={null} emptyText={t('sections.skillsEmpty')} renderAddButton={renderAddButton}
+    <AddableSection title={null} emptyText={t('sections.skillsEmpty')} renderAddButton={renderAddButton} order={order} headerExtra={control}
       items={items} fields={fields} onAdd={onAdd} onEdit={onEdit} onRemove={onRemove}
       renderItem={(raw: RelItem, i: number, arr: RelItem[]) => {
         const v = raw as { id?: Id; name?: string; skill?: string; level?: string }

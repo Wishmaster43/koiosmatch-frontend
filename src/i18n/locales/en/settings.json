@@ -153,6 +153,7 @@
     "match_statuses": "Statuses",
     "contract_types": "Contract types",
     "match_rates": "Conversion factor",
+    "match_contract_line_rate_side": "Rate side",
     "outreach_statuses": "Statuses",
     "task_types": "Activity types",
     "task_priorities": "Priorities",
@@ -690,6 +691,15 @@
     "placeholder": "E.g. 1.35",
     "saveFailed": "Saving failed. The value was reverted.",
     "loadError": "Could not load the conversion factor."
+  },
+  "matchContractLineRateSide": {
+    "title": "Rate line visibility",
+    "subtitle": "Choose which side of the money a match's per-function rate line shows: what the customer pays, or what you pay the candidate.",
+    "saleLabel": "What the customer pays (sale)",
+    "saleDescription": "Everyone who can see this match can see this amount.",
+    "purchaseLabel": "What we pay the candidate (purchase)",
+    "purchaseDescription": "Only people with the financial permission can see this amount.",
+    "saveFailed": "Could not save the rate line setting. Please try again."
   },
   "outreach": {
     "statusTitle": "Statuses",

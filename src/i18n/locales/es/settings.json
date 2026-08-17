@@ -157,6 +157,7 @@
     "match_statuses": "Estados",
     "contract_types": "Tipos de contrato",
     "match_rates": "Factor de conversión",
+    "match_contract_line_rate_side": "Lado de la tarifa",
     "outreach_statuses": "Estados",
     "task_types": "Tipos de actividad",
     "task_priorities": "Prioridades",
@@ -1902,6 +1903,15 @@
     "placeholder": "P. ej. 1,35",
     "saveFailed": "Error al guardar. Se restableció el valor.",
     "loadError": "No se pudo cargar el factor de conversión."
+  },
+  "matchContractLineRateSide": {
+    "title": "Visibilidad de la línea de tarifa",
+    "subtitle": "Elige qué lado del dinero muestra la línea de tarifa por función de un match: lo que paga el cliente o lo que le pagas al candidato.",
+    "saleLabel": "Lo que paga el cliente (venta)",
+    "saleDescription": "Todos los que pueden ver este match pueden ver este importe.",
+    "purchaseLabel": "Lo que le pagamos al candidato (compra)",
+    "purchaseDescription": "Solo las personas con el permiso financiero ven este importe.",
+    "saveFailed": "No se pudo guardar el ajuste de la línea de tarifa. Inténtalo de nuevo."
   },
   "outreach": {
     "statusTitle": "Estados",

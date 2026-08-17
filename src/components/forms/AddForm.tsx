@@ -14,7 +14,8 @@ import RichTextEditor from '@/components/ui/RichTextEditor'
 // ALWAYS-SEARCHABLE-1 (Danny 08-08): the house searchable combobox replaces the
 // native <select> that used to render every `options` field below.
 import CreatableSelect from '@/components/ui/CreatableSelect'
-import { TextField, TextArea, DateField } from './fields'
+import { TextField, TextArea, DateField, Label } from './fields'
+import FieldNotice from '@/components/ui/FieldNotice'
 
 /** One dropdown's option list — a bare string or a {value,label} pair. */
 export type FieldOptions = Array<string | { value: string; label?: ReactNode }>
@@ -44,6 +45,12 @@ export interface FieldDef {
   // hideWhen removes the field entirely, disabledWhen greys it out (read-only).
   hideWhen?: string
   disabledWhen?: string
+  // KAND-ACHTERGROND-VERPLICHT-1 (2026-08-17, Danny: "staat geen sterrentje bij" /
+  // "waarom kan ik opslaan zonder in te vullen?"): this field is required on the
+  // backend (CandidateExperienceController::employer etc.) — render the shared
+  // Label's asterisk and block Save while it is empty, instead of letting an
+  // incomplete row reach the API and bounce back as a raw 422.
+  required?: boolean
 }
 
 export type FormValues = Record<string, unknown>
@@ -59,9 +66,13 @@ function RichTextFieldBlock({ value, onChange }: { value: string | undefined; on
   )
 }
 
-function FieldInput({ f, value, onChange, values, disabled }: {
+function FieldInput({ f, value, onChange, values, disabled, invalid }: {
   f: FieldDef; value: unknown; onChange: (v: string | boolean) => void; values: FormValues; disabled?: boolean
+  // KAND-ACHTERGROND-VERPLICHT-1: true once a blocked Save flagged this required
+  // field as empty — drives the red border + the FieldNotice message below it.
+  invalid?: boolean
 }) {
+  const { t } = useTranslation('common')
   // A field's label can switch based on another field (altLabelWhen) — e.g. an
   // education end date becomes "Verwachte einddatum" when "Nog in opleiding" is on.
   const label = (f.altLabelWhen && values?.[f.altLabelWhen]) ? f.altLabel : f.label
@@ -70,6 +81,28 @@ function FieldInput({ f, value, onChange, values, disabled }: {
   const wrap = (node: ReactNode) => disabled
     ? <div style={{ opacity: 0.45, pointerEvents: 'none' }}>{node}</div>
     : node
+  // KAND-ACHTERGROND-VERPLICHT-1: a required field is marked with the house
+  // asterisk, but INSIDE its placeholder rather than as a caption above it.
+  //
+  // The first version put a Label above the required field only. In this compact
+  // add row the other fields carry a placeholder and no caption, so that one field
+  // became taller than its neighbours and the whole row went out of line (Danny
+  // 17-08, looking straight at the employer field: "BEDRIJF ziet er niet uit zo").
+  // A marker that breaks the layout of the form it is explaining is not an
+  // improvement. In the placeholder it is visible, it costs no height, and every
+  // field in the row keeps the same box.
+  //
+  // The inline notice below only appears AFTER Save flagged the field, so it can
+  // shift the row exactly once, at the moment the user needs to be told why.
+  const requiredChrome = (body: ReactNode) => (
+    <div>
+      {body}
+      {invalid && <FieldNotice text={t('errors.fieldRequired', { field: labelText })} />}
+    </div>
+  )
+  // The placeholder every control below renders, with the asterisk appended when
+  // the field is required, so the marker lives in one place instead of per control.
+  const placeholder = f.required && labelText ? `${labelText} *` : labelText
   if (f.checkbox) return (
     <label style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 12, color: 'var(--text)', cursor: 'pointer' }}>
       <input type="checkbox" checked={!!value} onChange={e => onChange(e.target.checked)} style={{ cursor: 'pointer' }} />
@@ -83,13 +116,12 @@ function FieldInput({ f, value, onChange, values, disabled }: {
   // toggle as the profile text (ProfileTab.tsx) — a small local-state wrapper
   // owns `expanded` and hands it to RichTextEditor's own expanded/onToggleExpand
   // API; `resizable` stays so the drag handle still works inside the small row form.
+  // Reuses the shared Label (KAND-ACHTERGROND-VERPLICHT-1) instead of a private
+  // caption div — same look as before (required stays false for every existing
+  // richtext caller here), one fewer hand-rolled copy of the same style.
   if (f.richtext) return wrap(
     <div>
-      {labelText && (
-        <div style={{ fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em', color: 'var(--text-muted)', marginBottom: 5 }}>
-          {labelText}
-        </div>
-      )}
+      {labelText && <Label required={f.required}>{labelText}</Label>}
       {/* resizable (Danny 08-08: "kan referentie txt niet groter maken?") — the
           shared editor already ships a drag-to-grow handle (MEMORY-RESIZE-1); this
           form never opted in, so a longer note had no room. minHeight raised from
@@ -97,8 +129,8 @@ function FieldInput({ f, value, onChange, values, disabled }: {
       <RichTextFieldBlock value={value as string | undefined} onChange={onChange} />
     </div>
   )
-  if (f.textarea) return wrap(<TextArea placeholder={labelText} value={value as string | undefined} onChange={onChange} rows={2} />)
-  if (f.date)     return wrap(<DateField placeholder={labelText} value={value as string | undefined} onChange={onChange} />)
+  if (f.textarea) return wrap(requiredChrome(<TextArea placeholder={placeholder} value={value as string | undefined} onChange={onChange} rows={2} />))
+  if (f.date)     return wrap(requiredChrome(<DateField placeholder={placeholder} value={value as string | undefined} onChange={onChange} />))
   // ALWAYS-SEARCHABLE-1 (Danny 08-08, CLAUDE.md §4): every dropdown is a searchable
   // combobox — the house CreatableSelect (allowCreate={false}, pick-only) replaces
   // the native <select> that used to render every `options` field (education level,
@@ -106,18 +138,18 @@ function FieldInput({ f, value, onChange, values, disabled }: {
   // caller or request shape changes; `clearable` mirrors the old select's own blank
   // "unset" option. The placeholder carries the accessible name, the same convention
   // every sibling picker in this drawer already uses (LanguagesSection, ZzpAddressCard, …).
-  if (f.options)  return (
+  if (f.options)  return requiredChrome(
     // Every real caller's option label is a plain string (tenant lookup labels /
     // document names) — FieldDef.options keeps the wider ReactNode type for label
     // flexibility elsewhere, so narrow it here to what CreatableSelect expects.
     // A resolver form is called with the CURRENT values, so a list may depend on the
     // row being edited (DOC-1-EIGENAAR-1) — see FieldDef.options.
     <CreatableSelect value={(value as string) ?? ''} onChange={onChange} allowCreate={false} clearable
-      placeholder={labelText}
+      placeholder={placeholder}
       options={(typeof f.options === 'function' ? f.options(values) : f.options) as Array<string | { value: string; label: string }>}
-      style={{ width: '100%', fontSize: 12 }} />
+      style={{ width: '100%', fontSize: 12 }} />,
   )
-  return wrap(<TextField placeholder={labelText} value={value as string | undefined} onChange={onChange} type={f.type} />)
+  return wrap(requiredChrome(<TextField placeholder={placeholder} value={value as string | undefined} onChange={onChange} type={f.type} error={invalid} />))
 }
 
 // `initial` (optional) prefills the fields → same form for adding and editing.
@@ -126,7 +158,14 @@ export default function AddForm({ fields, onSave, onCancel, initial }: {
 }) {
   const { t } = useTranslation('common')
   const [values, setValues] = useState<FormValues>(() => ({ ...Object.fromEntries(fields.map(f => [f.key, ''])), ...(initial ?? {}) }))
-  const set = (k: string, v: string | boolean) => setValues(p => ({ ...p, [k]: v }))
+  // KAND-ACHTERGROND-VERPLICHT-1: which required fields a blocked Save flagged
+  // empty — cleared per-field the moment the user edits it (mirrors
+  // AddCandidateModal's own `errors` state, the established convention).
+  const [invalid, setInvalid] = useState<Record<string, boolean>>({})
+  const set = (k: string, v: string | boolean) => {
+    setValues(p => ({ ...p, [k]: v }))
+    setInvalid(p => (p[k] ? { ...p, [k]: false } : p))
+  }
   const iconBtn: CSSProperties = { width: 28, height: 28, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 7, cursor: 'pointer' }
 
   // Fields whose hideWhen condition is active drop out entirely (pairing runs on what's left).
@@ -149,15 +188,30 @@ export default function AddForm({ fields, onSave, onCancel, initial }: {
         <div key={f.key} style={f.separator
           ? { display: 'grid', gridTemplateColumns: '1fr auto 1fr', gap: 8, alignItems: 'center' }
           : { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
-          <FieldInput f={f}    value={values[f.key]}    onChange={v => set(f.key, v)} values={values} disabled={dis(f)} />
+          <FieldInput f={f}    value={values[f.key]}    onChange={v => set(f.key, v)} values={values} disabled={dis(f)} invalid={invalid[f.key]} />
           {f.separator && <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>{t('to')}</span>}
-          {next && <FieldInput f={next} value={values[next.key]} onChange={v => set(next.key, v)} values={values} disabled={dis(next)} />}
+          {next && <FieldInput f={next} value={values[next.key]} onChange={v => set(next.key, v)} values={values} disabled={dis(next)} invalid={invalid[next.key]} />}
         </div>
       )
       i++
     } else {
-      rows.push(<FieldInput key={f.key} f={f} value={values[f.key]} onChange={v => set(f.key, v)} values={values} disabled={dis(f)} />)
+      rows.push(<FieldInput key={f.key} f={f} value={values[f.key]} onChange={v => set(f.key, v)} values={values} disabled={dis(f)} invalid={invalid[f.key]} />)
     }
+  }
+
+  // KAND-ACHTERGROND-VERPLICHT-1: block Save while any `required` field is empty
+  // — mirrors AddCandidateModal's handleSubmit gate (the established convention):
+  // flag every empty required field at once, never call onSave, never fire the
+  // request. Points at the field via the asterisk + red border + FieldNotice
+  // FieldInput already renders once `invalid` is set, so the user finds out
+  // BEFORE the request goes out, not from a raw 422 toast afterwards.
+  const handleSave = () => {
+    const missing = fields.filter(f => f.required && !String(values[f.key] ?? '').trim())
+    if (missing.length) {
+      setInvalid(p => ({ ...p, ...Object.fromEntries(missing.map(f => [f.key, true])) }))
+      return
+    }
+    onSave(values)
   }
 
   return (
@@ -170,7 +224,7 @@ export default function AddForm({ fields, onSave, onCancel, initial }: {
             onChange={v => set(footerCheckbox.key, v)} values={values} disabled={dis(footerCheckbox)} />
         )}
         <div style={{ display: 'flex', gap: 6 }}>
-          <button onClick={() => onSave(values)} title={t('save')}
+          <button onClick={handleSave} title={t('save')}
             // Accent-filled save button — follow the tenant's on-accent contrast
             // token instead of a hardcoded white (2026-08-08).
             style={{ ...iconBtn, background: 'var(--color-primary)', color: 'var(--color-on-accent)', border: 'none' }}>

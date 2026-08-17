@@ -133,7 +133,7 @@ describe('ReferencesTab · add/edit/remove wiring (generic AddableSection contra
     await user.click(screen.getByRole('button', { name: 'Toevoegen' }))
 
     await user.type(screen.getByPlaceholderText('Voornaam'), 'Jan')
-    await user.type(screen.getByPlaceholderText('Achternaam'), 'Jansen')
+    await user.type(screen.getByPlaceholderText('Achternaam *'), 'Jansen')
     await user.type(screen.getByPlaceholderText('Tussenvoegsel'), 'van der')
     await user.type(screen.getByPlaceholderText('Functie'), 'Teamleider')
     await user.type(screen.getByPlaceholderText('Werkgever'), 'Zorggroep X')
@@ -300,7 +300,7 @@ describe('ReferencesTab · work-experience link (REF-ERVARING-1)', () => {
     expect(container.querySelectorAll('select')).toHaveLength(0)
     await user.click(screen.getByRole('button', { name: PICKER }))
     await user.click(await screen.findByRole('button', { name: 'Woonzorg Centrum · Verzorgende · 06-08-2024 – heden' }))
-    await user.type(screen.getByPlaceholderText('Achternaam'), 'Jansen')
+    await user.type(screen.getByPlaceholderText('Achternaam *'), 'Jansen')
     await user.click(screen.getByTitle('Opslaan'))
     expect(onAdd).toHaveBeenCalledWith(expect.objectContaining({ work_experience_id: 'exp-2' }))
   })

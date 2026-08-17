@@ -119,6 +119,30 @@ export default function BackgroundTab({ c, onEditSave, onJump }: { c: Candidate;
     references:     v => v,
   }
 
+  // KAND-ACHTERGROND-VERPLICHT-1 (2026-08-17): the ONE required field per relation,
+  // mirrored 1:1 from each backend sub-entity controller's `rules()` (measured
+  // against the live source — employer/title/name/name/last_name are the only
+  // `required` rules on these five routes). Each AddForm already blocks an empty
+  // save client-side (SectionTabs.tsx/ReferencesTab.tsx `required: true`), so a
+  // 422 naming this exact field is a defence-in-depth backstop (a stale form, a
+  // second tab) — extractApiError's fieldLabels map below turns even THAT residual
+  // case into our own translated copy instead of Laravel's raw English sentence.
+  const REQUIRED_FIELD: Record<string, { apiField: string; labelKey: string }> = {
+    experiences:    { apiField: 'employer',   labelKey: 'candidates:addFields.company' },
+    educations:     { apiField: 'title',      labelKey: 'candidates:addFields.diploma' },
+    certifications: { apiField: 'name',       labelKey: 'candidates:addFields.certName' },
+    skills:         { apiField: 'name',       labelKey: 'candidates:addFields.skill' },
+    references:     { apiField: 'last_name',  labelKey: 'candidates:addFields.referenceLastName' },
+  }
+  // The fieldLabels map extractApiError consults ONLY when the raw server message
+  // is Laravel's own untranslated "required" template — never overrides a crafted
+  // domain message (DOC-1-EIGENAAR-1's "Dit document is al aan een ander onderdeel
+  // gekoppeld." keeps surfacing exactly as before).
+  const requiredFieldLabels = (rel: string): Record<string, string> | undefined => {
+    const req = REQUIRED_FIELD[rel]
+    return req ? { [req.apiField]: t('errors.fieldRequired', { field: t(req.labelKey) }) } : undefined
+  }
+
   // add / edit-at-index / remove-at-index for a relation, with optimistic persistence.
   // Not-yet-persisted rows get a negative temp id (never collides with server ids).
   // Bug-class fix (optimistic-revert audit): all three used to fail soft — a
@@ -140,7 +164,7 @@ export default function BackgroundTab({ c, onEditSave, onJump }: { c: Candidate;
       set(p => [...p, { ...v, id }])
       api.post(`/candidates/${c.id}/${rel}`, TO_API[rel](v), REQUEST_CONFIG)
         .then(r => { const it = unwrap<RelItem>(r); if (it?.id) set(p => p.map(x => x.id === id ? { ...v, ...it } : x)) })
-        .catch(err => { set(p => p.filter(x => x.id !== id)); notifyError(extractApiError(err, t('actionFailed'))) })
+        .catch(err => { set(p => p.filter(x => x.id !== id)); notifyError(extractApiError(err, t('actionFailed'), requiredFieldLabels(rel))) })
     },
     onEdit: (i: number, raw: RelItem) => {
       // Merge over the stored row FIRST: SectionTabs now has two independent editors
@@ -155,7 +179,7 @@ export default function BackgroundTab({ c, onEditSave, onJump }: { c: Candidate;
       if (isPersisted(id)) {
         api.patch(`/candidates/${c.id}/${rel}/${id}`, TO_API[rel](v), REQUEST_CONFIG).catch(err => {
           if (before) set(p => p.map(x => x.id === id ? before : x))
-          notifyError(extractApiError(err, t('actionFailed')))
+          notifyError(extractApiError(err, t('actionFailed'), requiredFieldLabels(rel)))
         })
       }
     },

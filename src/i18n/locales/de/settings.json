@@ -157,6 +157,7 @@
     "match_statuses": "Status",
     "contract_types": "Vertragsarten",
     "match_rates": "Umrechnungsfaktor",
+    "match_contract_line_rate_side": "Tarifseite",
     "outreach_statuses": "Status",
     "task_types": "Aktivitätstypen",
     "task_priorities": "Prioritäten",
@@ -1902,6 +1903,15 @@
     "placeholder": "Z. B. 1,35",
     "saveFailed": "Speichern fehlgeschlagen. Der Wert wurde zurückgesetzt.",
     "loadError": "Der Umrechnungsfaktor konnte nicht geladen werden."
+  },
+  "matchContractLineRateSide": {
+    "title": "Sichtbarkeit der Tarifzeile",
+    "subtitle": "Legen Sie fest, welche Seite des Geldes die Tarifzeile pro Funktion bei einem Match zeigt: was der Kunde zahlt oder was Sie dem Kandidaten zahlen.",
+    "saleLabel": "Was der Kunde zahlt (Verkauf)",
+    "saleDescription": "Jeder, der dieses Match sehen darf, sieht diesen Betrag.",
+    "purchaseLabel": "Was wir dem Kandidaten zahlen (Einkauf)",
+    "purchaseDescription": "Nur Personen mit der Finanzberechtigung sehen diesen Betrag.",
+    "saveFailed": "Die Einstellung für die Tarifzeile konnte nicht gespeichert werden. Bitte versuchen Sie es erneut."
   },
   "outreach": {
     "statusTitle": "Status",

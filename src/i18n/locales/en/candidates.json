@@ -778,7 +778,8 @@
     "conversationsEmpty": "No conversations yet.",
     "branchEmpty": "No branch linked yet.",
     "references": "References",
-    "referencesEmpty": "No references yet."
+    "referencesEmpty": "No references yet.",
+    "sortLabel": "Sort"
   },
   "preferences": {
     "title": "Preferences",

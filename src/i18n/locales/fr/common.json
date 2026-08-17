@@ -423,7 +423,8 @@
   "errors": {
     "koiosCreditExhausted": "Le crédit Koios de cette organisation est épuisé ou pas encore activé. Rechargez le solde ou contactez votre administrateur.",
     "koiosUnavailable": "Koios est momentanément indisponible. Réessayez dans un instant.",
-    "helloflexContractTypeUnmapped": "Aucun type de contrat HelloFlex n'est lié à cette forme de contrat. Configurez-le dans Paramètres → HelloFlex."
+    "helloflexContractTypeUnmapped": "Aucun type de contrat HelloFlex n'est lié à cette forme de contrat. Configurez-le dans Paramètres → HelloFlex.",
+    "fieldRequired": "{{field}} est obligatoire."
   },
   "timeline": {
     "today": "Aujourd'hui",

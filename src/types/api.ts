@@ -47,6 +47,11 @@ export interface User {
   mfa_setup_required?: boolean
   tenant?: Tenant
   accessible_pages?: string[]
+  // C-33: free-form per-user UI state (layout/filters/sort/theme), self-owned via
+  // PUT /auth/me. Always present as an object on the real payload (AuthPayloadService
+  // ::formatUser casts a null column to `{}`) — never a bare array despite the loose
+  // backend validation (`sometimes|nullable|array`). See src/hooks/useUserPreference.
+  ui_preferences?: Record<string, unknown> | null
 }
 
 /** A user row in the tenant user-management page (User + its settable icon colour). */

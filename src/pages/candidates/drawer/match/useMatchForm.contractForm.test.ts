@@ -34,6 +34,10 @@ vi.mock('@/lib/notify', () => ({ notifyError: vi.fn(), notifySuccess: vi.fn() })
 
 const mockCustomer = { id: 'cust-1', name: 'Zorggroep A', branch_id: null, locations: [], contacts: [] }
 
+// Mutable so a test can hand the hook a DIFFERENT edit payload (see the
+// redacted-rate cases at the bottom) without a second api mock.
+const editDetailRef = vi.hoisted(() => ({ current: null as unknown }))
+
 const EDIT_DETAIL = {
   customer_id: 'cust-1', function_title: 'Verpleegkundige',
   contract_form: { value: 'temp_agency', label: 'Uitzend', color: '#6E8FD6' },
@@ -45,7 +49,7 @@ vi.mock('@/lib/api', async () => {
   const get = vi.fn((url: string) => {
     if (url.startsWith('/customers/')) return Promise.resolve({ data: { data: mockCustomer } })
     if (url.startsWith('/candidates/')) return Promise.resolve({ data: { data: { branch_id: null, location: null } } })
-    if (url.startsWith('/matches/')) return Promise.resolve({ data: { data: EDIT_DETAIL } })
+    if (url.startsWith('/matches/')) return Promise.resolve({ data: { data: editDetailRef.current } })
     return Promise.resolve({ data: { data: [] } })
   })
   return {
@@ -64,7 +68,8 @@ import api from '@/lib/api'
 const apiPost = api.post as unknown as ReturnType<typeof vi.fn>
 const apiPatch = api.patch as unknown as ReturnType<typeof vi.fn>
 
-function harness(editMatchId?: string) {
+function harness(editMatchId?: string, detail?: unknown) {
+  editDetailRef.current = detail ?? EDIT_DETAIL
   const onClose = vi.fn()
   const onCreated = vi.fn()
   const { result } = renderHook(() => useMatchForm({ candidateId: 'cand-1', editMatchId, onClose, onCreated }))
@@ -139,5 +144,46 @@ describe('useMatchForm · Contractvorm/CONTRACTREGELS payload (MATCH-SOORT-1)', 
     expect(url).toBe('/matches/match-1')
     expect(body.contract_form).toBe('temp_agency')
     expect(body.contract_lines).toEqual([{ function_title: 'Verpleegkundige', rate: 22.5, sort_order: 0 }])
+  })
+
+  // MATCH-LINE-REDACTED-1 — the data-loss case. When the tenant puts contract lines
+  // on the PURCHASE side, a viewer without matches.financial.view receives each line
+  // with `rate: null`. That prefills as an empty input and is indistinguishable from
+  // a rate nobody ever filled in. Because every save resends contract_lines as a FULL
+  // REPLACING set, saving any unrelated field would have written those nulls back and
+  // destroyed the real amounts, recoverable only from the audit log. The fix is to
+  // leave the key out of the PATCH entirely, so the server keeps what it has.
+  it('omits contract_lines entirely when the viewer was shown redacted rates, so saving cannot wipe them', async () => {
+    const { result } = harness('match-1', {
+      ...EDIT_DETAIL,
+      contract_lines: [{ id: 'line-1', function_title: 'Verpleegkundige', rate: null, sort_order: 0 }],
+    })
+    await waitFor(() => expect(result.current.contractForm).toBe('temp_agency'))
+
+    await act(async () => { result.current.handleSubmitClick() })
+    await waitFor(() => expect(apiPatch).toHaveBeenCalled())
+
+    const [, body] = apiPatch.mock.calls[0]
+    expect('contract_lines' in body).toBe(false)
+    // Everything else still saves normally: the guard protects one field, it does
+    // not turn the whole form read-only.
+    expect(body.contract_form).toBe('temp_agency')
+  })
+
+  // The mirror case: a genuinely empty rate on a record whose amounts were NOT
+  // hidden must still save, or the guard would quietly block ordinary editing.
+  it('still sends contract_lines when a rate is simply blank rather than redacted', async () => {
+    const { result } = harness('match-1', {
+      ...EDIT_DETAIL,
+      contract_lines: [{ id: 'line-1', function_title: 'Verpleegkundige', rate: 22.5, sort_order: 0 }],
+    })
+    await waitFor(() => expect(result.current.contractForm).toBe('temp_agency'))
+    act(() => { result.current.setContractLines([{ functionTitle: 'Verpleegkundige', rate: '' }]) })
+
+    await act(async () => { result.current.handleSubmitClick() })
+    await waitFor(() => expect(apiPatch).toHaveBeenCalled())
+
+    const [, body] = apiPatch.mock.calls[0]
+    expect(body.contract_lines).toEqual([{ function_title: 'Verpleegkundige', rate: null, sort_order: 0 }])
   })
 })
