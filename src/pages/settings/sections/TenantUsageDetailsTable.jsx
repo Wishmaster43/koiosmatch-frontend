@@ -9,6 +9,7 @@
  */
 import { useTranslation } from 'react-i18next'
 import DataTable from '@/components/ui/DataTable'
+import TableScrollFrame from '@/components/ui/TableScrollFrame'
 import { useNumberFormat } from '@/lib/formatters'
 import { th, td, numCell } from './usageCardStyles'
 
@@ -130,14 +131,25 @@ export default function TenantUsageDetailsTable({ history }) {
     return <p style={{ fontSize: 13, color: 'var(--text-muted)', padding: 8 }}>{t('usage.details.empty')}</p>
   }
 
+  // Bounded height (Danny 17-08: "hoe lang wordt dit dan wel niet") — the history
+  // is a rolling window that grows with the tenant, and an expanded row adds a
+  // whole panel on top of that. Nothing is dropped: the footer states the real
+  // number of months, and every one of them stays in the scroll area.
   return (
-    <DataTable
-      columns={columns}
-      rows={rows}
-      getRowId={(r) => r.month}
-      renderExpanded={renderExpanded}
-      expandLabel={t('usage.details.expandLabel')}
-      emptyText={t('usage.details.empty')}
-    />
+    <TableScrollFrame
+      label={t('usage.details.title')}
+      maxHeight={380}
+      footer={t('usage.details.footer', { count: rows.length })}
+    >
+      <DataTable
+        columns={columns}
+        rows={rows}
+        getRowId={(r) => r.month}
+        stickyHeader
+        renderExpanded={renderExpanded}
+        expandLabel={t('usage.details.expandLabel')}
+        emptyText={t('usage.details.empty')}
+      />
+    </TableScrollFrame>
   )
 }

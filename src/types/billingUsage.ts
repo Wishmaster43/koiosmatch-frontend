@@ -125,11 +125,27 @@ export interface AdminUsageDetailsRow {
   requests?: number
   input_tokens?: number
   output_tokens?: number
-  // Sale-side cost, computed with the same formula as the /usage block (never drifts).
+  // PURCHASE side: what the model calls in this group actually cost us
+  // (sum of AiUsageLog.cost, 6 decimals). Measured against the live endpoint
+  // 17-08 — this used to be annotated as the sale side, which it is not.
   cost?: number
+  // The same amount split into purchase / sale / margin with the tenant's
+  // configured Claude margin (AdminUsageController@saleForCost — the same
+  // formula the /usage block uses, so the two can never drift). Super-admin
+  // surface only: purchase and margin never leave this screen (MARGEGEHEIM).
+  sale?: { purchase?: number; sale?: number; margin?: number }
 }
+// Month aggregate the server sends alongside the groups, so a bounded/scrolled
+// view still foots to the same total as the block above it.
+export interface AdminUsageDetailsTotals { tokens?: number; requests?: number; cost?: number }
 export interface AdminUsageDetailsResponse {
   group_by: AdminUsageDetailsAxis
   month: string
-  rows: AdminUsageDetailsRow[]
+  // NOTE THE KEY. The server calls this `groups` (AdminUsageController@details);
+  // it was read here as `rows`, a name that appears nowhere in the response — so
+  // the breakdown table rendered its empty state on every axis for every tenant,
+  // while its unit test (which mocked `rows`) stayed green. Exactly the §13 trap:
+  // a test that doesn't touch the seam proves nothing about the seam.
+  groups: AdminUsageDetailsRow[]
+  totals?: AdminUsageDetailsTotals
 }

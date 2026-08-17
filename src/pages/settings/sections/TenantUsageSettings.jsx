@@ -60,9 +60,18 @@ export default function TenantUsageSettings() {
   }, [activeTenant?.id, month])
 
   const connectors = Array.isArray(usage?.connectors) ? usage.connectors : []
+  // Honest read of an all-zero month: the tables below are correct but look
+  // broken (a wall of zeros), so say out loud that nothing was consumed rather
+  // than leaving the reader to work out whether the screen failed.
+  const nothingUsed = phase === 'ready'
+    && !usage?.ai?.tokens && !usage?.ai?.requests
+    && !connectors.some(c => Number(c?.usage) > 0)
 
   return (
-    <div style={{ maxWidth: 640 }}>
+    // Deliberately wider than the 640px settings-form width: this section is a
+    // DATA screen (three tables of five to six numeric columns), and at 640 the
+    // columns crushed together with half the page left empty (Danny 17-08).
+    <div style={{ maxWidth: 1080 }}>
       {/* Tenant + month selector — super-admin switches the tenant; the month picker is the history */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, marginBottom: 18, flexWrap: 'wrap' }}>
         <p style={{ fontSize: 12, color: 'var(--text-muted)', margin: 0 }}>
@@ -94,6 +103,13 @@ export default function TenantUsageSettings() {
 
       {phase === 'ready' && (
         <>
+          {nothingUsed && (
+            <p style={{ fontSize: 12, color: 'var(--text-muted)', margin: '0 0 14px', padding: '9px 12px',
+              background: 'var(--bg)', border: '1px solid var(--border)', borderRadius: 8 }}>
+              {t('usage.nothingUsed')}
+            </p>
+          )}
+
           {/* Metric tiles */}
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10, marginBottom: 22 }}>
             <Tile label={t('usage.col.aiTokens')}   value={num(usage?.ai?.tokens)} />

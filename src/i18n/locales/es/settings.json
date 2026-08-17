@@ -2556,7 +2556,9 @@
       "margin": "Margen",
       "workflowPerModule": "Ejecuciones de workflow por módulo",
       "colModule": "Módulo",
-      "colRuns": "Ejecuciones"
+      "colRuns": "Ejecuciones",
+      "footer_one": "{{count}} mes",
+      "footer_other": "{{count}} meses"
     },
     "breakdown": {
       "title": "Desglose de uso",
@@ -2575,11 +2577,17 @@
         "requests": "Solicitudes",
         "inputTokens": "Tokens de entrada",
         "outputTokens": "Tokens de salida",
-        "cost": "Coste"
+        "purchase": "Compra",
+        "sale": "Venta"
       },
       "loadError": "No se pudo cargar el desglose de uso.",
-      "empty": "Sin uso en este período."
-    }
+      "empty": "Sin uso en este período.",
+      "footer_one": "{{count}} fila",
+      "footer_other": "{{count}} filas",
+      "footerWithTotals_one": "{{count}} fila · {{requests}} solicitudes · {{tokens}} tokens",
+      "footerWithTotals_other": "{{count}} filas · {{requests}} solicitudes · {{tokens}} tokens"
+    },
+    "nothingUsed": "No se ha registrado consumo en este mes. Por eso las tablas de abajo están a cero."
   },
   "jobs": {
     "title": "Gestión de tareas",

@@ -2556,7 +2556,9 @@
       "margin": "Marge",
       "workflowPerModule": "Workflow-Ausführungen pro Modul",
       "colModule": "Modul",
-      "colRuns": "Ausführungen"
+      "colRuns": "Ausführungen",
+      "footer_one": "{{count}} Monat",
+      "footer_other": "{{count}} Monate"
     },
     "breakdown": {
       "title": "Nutzungsaufschlüsselung",
@@ -2575,11 +2577,17 @@
         "requests": "Anfragen",
         "inputTokens": "Eingabe-Tokens",
         "outputTokens": "Ausgabe-Tokens",
-        "cost": "Kosten"
+        "purchase": "Einkauf",
+        "sale": "Verkauf"
       },
       "loadError": "Aufschlüsselung konnte nicht geladen werden.",
-      "empty": "Keine Nutzung in diesem Zeitraum."
-    }
+      "empty": "Keine Nutzung in diesem Zeitraum.",
+      "footer_one": "{{count}} Zeile",
+      "footer_other": "{{count}} Zeilen",
+      "footerWithTotals_one": "{{count}} Zeile · {{requests}} Anfragen · {{tokens}} Tokens",
+      "footerWithTotals_other": "{{count}} Zeilen · {{requests}} Anfragen · {{tokens}} Tokens"
+    },
+    "nothingUsed": "Für diesen Monat wurde keine Nutzung erfasst. Deshalb stehen die Tabellen unten auf null."
   },
   "jobs": {
     "title": "Aufgabenverwaltung",

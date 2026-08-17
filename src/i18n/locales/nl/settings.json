@@ -2556,7 +2556,9 @@
       "margin": "Marge",
       "workflowPerModule": "Workflow-runs per module",
       "colModule": "Module",
-      "colRuns": "Runs"
+      "colRuns": "Runs",
+      "footer_one": "{{count}} maand",
+      "footer_other": "{{count}} maanden"
     },
     "breakdown": {
       "title": "Verbruik uitgesplitst",
@@ -2575,11 +2577,17 @@
         "requests": "Verzoeken",
         "inputTokens": "Input tokens",
         "outputTokens": "Output tokens",
-        "cost": "Kosten"
+        "purchase": "Inkoop",
+        "sale": "Verkoop"
       },
       "loadError": "Uitsplitsing laden mislukt.",
-      "empty": "Geen verbruik in deze periode."
-    }
+      "empty": "Geen verbruik in deze periode.",
+      "footer_one": "{{count}} regel",
+      "footer_other": "{{count}} regels",
+      "footerWithTotals_one": "{{count}} regel · {{requests}} verzoeken · {{tokens}} tokens",
+      "footerWithTotals_other": "{{count}} regels · {{requests}} verzoeken · {{tokens}} tokens"
+    },
+    "nothingUsed": "Geen verbruik geregistreerd in deze maand. Daarom staan de tabellen hieronder op nul."
   },
   "jobs": {
     "title": "Taakbeheer",

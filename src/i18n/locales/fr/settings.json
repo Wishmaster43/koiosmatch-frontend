@@ -2556,7 +2556,9 @@
       "margin": "Marge",
       "workflowPerModule": "Exécutions de workflow par module",
       "colModule": "Module",
-      "colRuns": "Exécutions"
+      "colRuns": "Exécutions",
+      "footer_one": "{{count}} mois",
+      "footer_other": "{{count}} mois"
     },
     "breakdown": {
       "title": "Répartition de l'utilisation",
@@ -2575,11 +2577,17 @@
         "requests": "Requêtes",
         "inputTokens": "Jetons d'entrée",
         "outputTokens": "Jetons de sortie",
-        "cost": "Coût"
+        "purchase": "Achat",
+        "sale": "Vente"
       },
       "loadError": "Échec du chargement de la répartition.",
-      "empty": "Aucune utilisation sur cette période."
-    }
+      "empty": "Aucune utilisation sur cette période.",
+      "footer_one": "{{count}} ligne",
+      "footer_other": "{{count}} lignes",
+      "footerWithTotals_one": "{{count}} ligne · {{requests}} requêtes · {{tokens}} tokens",
+      "footerWithTotals_other": "{{count}} lignes · {{requests}} requêtes · {{tokens}} tokens"
+    },
+    "nothingUsed": "Aucune consommation enregistrée pour ce mois. C'est pourquoi les tableaux ci-dessous sont à zéro."
   },
   "jobs": {
     "title": "Gestion des tâches",

@@ -2556,7 +2556,9 @@
       "margin": "Margin",
       "workflowPerModule": "Workflow runs per module",
       "colModule": "Module",
-      "colRuns": "Runs"
+      "colRuns": "Runs",
+      "footer_one": "{{count}} month",
+      "footer_other": "{{count}} months"
     },
     "breakdown": {
       "title": "Usage breakdown",
@@ -2575,11 +2577,17 @@
         "requests": "Requests",
         "inputTokens": "Input tokens",
         "outputTokens": "Output tokens",
-        "cost": "Cost"
+        "purchase": "Purchase",
+        "sale": "Sale"
       },
       "loadError": "Failed to load the usage breakdown.",
-      "empty": "No usage in this period."
-    }
+      "empty": "No usage in this period.",
+      "footer_one": "{{count}} row",
+      "footer_other": "{{count}} rows",
+      "footerWithTotals_one": "{{count}} row · {{requests}} requests · {{tokens}} tokens",
+      "footerWithTotals_other": "{{count}} rows · {{requests}} requests · {{tokens}} tokens"
+    },
+    "nothingUsed": "No usage recorded for this month, which is why the tables below are all zero."
   },
   "jobs": {
     "title": "Task manager",
