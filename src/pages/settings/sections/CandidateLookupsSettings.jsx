@@ -29,10 +29,10 @@ import api, { unwrap } from '@/lib/api'
 import { notifyError } from '@/lib/notify'
 import { useConfirm } from '@/hooks/useConfirm'
 import { DragList, ColorSwatch, ColorBadge, DefaultToggle } from '../components/SettingsControls'
-import { BTN_H } from '@/config/buttonMetrics'
 import IconPickerControl from './IconPickerControl'
 import { GENERIC_LOOKUP_ICON_NAMES, resolveGenericLookupIcon } from './lookupIcons'
 import CandidateLookupItemModal from './CandidateLookupItemModal'
+import Button from '@/components/ui/Button'
 
 const BASE = '/settings/candidate-lookups'
 
@@ -164,12 +164,9 @@ export function LookupBlock({ slug, title, subtitle, items, setItems, locked = f
           <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>{subtitle}</p>
         </div>
         {/* BTN_H (§4/§9): one explicit height for every text/action button, everywhere. */}
-        {!locked && <button onClick={openAdd}
-          style={{ display: 'flex', alignItems: 'center', gap: 6, height: BTN_H, padding: '0 12px',
-                   fontSize: 13, fontWeight: 500, borderRadius: 8, border: '1px solid var(--border)',
-                   background: 'var(--surface)', cursor: 'pointer', color: 'var(--text)' }}>
+        {!locked && <Button variant="secondary" onClick={openAdd}>
           <Plus size={13} /> {t('lookups.add')}
-        </button>}
+        </Button>}
       </div>
 
       <DragList

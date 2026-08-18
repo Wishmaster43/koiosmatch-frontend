@@ -22,6 +22,7 @@ import SafeHtml from '@/components/ui/SafeHtml'
 import SearchSelect from '@/components/ui/SearchSelect'
 import { useConfirm } from '@/hooks/useConfirm'
 import { fieldInputStyle } from '@/components/forms/fieldMetrics'
+import Button from '@/components/ui/Button'
 
 const ENDPOINT = '/vacancy-content-blocks'
 const KINDS = ['intro', 'cta', 'legal']
@@ -190,10 +191,9 @@ export default function VacancyContentBlocksSettings() {
                       style={{ padding: '6px 14px', fontSize: 12, borderRadius: 6, border: '1px solid var(--border)', background: 'var(--surface)', color: 'var(--text-muted)', cursor: 'pointer' }}>
                       {t('common.cancel')}
                     </button>
-                    <button onClick={() => handleSave(block)} disabled={saving === block.id || !form.name?.trim()}
-                      style={{ padding: '6px 14px', fontSize: 12, fontWeight: 600, borderRadius: 6, border: 'none', background: 'var(--color-primary)', color: 'var(--color-on-accent)', cursor: 'pointer' }}>
+                    <Button variant="primary" size="sm" onClick={() => handleSave(block)} disabled={saving === block.id || !form.name?.trim()}>
                       {saving === block.id ? t('common.saving') : t('common.save')}
-                    </button>
+                    </Button>
                   </div>
                 </div>
               </div>
@@ -241,10 +241,9 @@ export default function VacancyContentBlocksSettings() {
                 style={{ padding: '6px 14px', fontSize: 12, borderRadius: 6, border: '1px solid var(--border)', background: 'var(--surface)', color: 'var(--text-muted)', cursor: 'pointer' }}>
                 {t('common.cancel')}
               </button>
-              <button onClick={handleCreate} disabled={!newForm.name.trim() || saving === 'new'}
-                style={{ padding: '6px 14px', fontSize: 12, fontWeight: 600, borderRadius: 6, border: 'none', background: 'var(--color-primary)', color: 'var(--color-on-accent)', cursor: 'pointer' }}>
+              <Button variant="primary" size="sm" onClick={handleCreate} disabled={!newForm.name.trim() || saving === 'new'}>
                 {saving === 'new' ? t('common.saving') : t('vacancyContentBlocksSettings.add')}
-              </button>
+              </Button>
             </div>
           </div>
         </div>

@@ -20,6 +20,7 @@ import { notifyError } from '@/lib/notify'
 import { useConfirm } from '@/hooks/useConfirm'
 import { DefaultToggle } from '../components/SettingsControls'
 import VacancyGenerationProfileEditor from './VacancyGenerationProfileEditor'
+import Button from '@/components/ui/Button'
 
 const ENDPOINT = '/vacancy-generation-profiles'
 const BLOCKS_ENDPOINT = '/vacancy-content-blocks'
@@ -205,10 +206,9 @@ export default function VacancyGenerationProfilesList() {
                       style={{ padding: '6px 14px', fontSize: 12, borderRadius: 6, border: '1px solid var(--border)', background: 'var(--surface)', color: 'var(--text-muted)', cursor: 'pointer' }}>
                       {t('common.cancel')}
                     </button>
-                    <button onClick={() => handleSave(profile)} disabled={saving === profile.id || !form.name?.trim()}
-                      style={{ padding: '6px 14px', fontSize: 12, fontWeight: 600, borderRadius: 6, border: 'none', background: 'var(--color-primary)', color: 'var(--color-on-accent)', cursor: 'pointer' }}>
+                    <Button variant="primary" size="sm" onClick={() => handleSave(profile)} disabled={saving === profile.id || !form.name?.trim()}>
                       {saving === profile.id ? t('common.saving') : t('common.save')}
-                    </button>
+                    </Button>
                   </div>
                 </div>
               </div>
@@ -225,10 +225,9 @@ export default function VacancyGenerationProfilesList() {
               style={{ padding: '6px 14px', fontSize: 12, borderRadius: 6, border: '1px solid var(--border)', background: 'var(--surface)', color: 'var(--text-muted)', cursor: 'pointer' }}>
               {t('common.cancel')}
             </button>
-            <button onClick={handleCreate} disabled={!newForm.name.trim() || saving === 'new'}
-              style={{ padding: '6px 14px', fontSize: 12, fontWeight: 600, borderRadius: 6, border: 'none', background: 'var(--color-primary)', color: 'var(--color-on-accent)', cursor: 'pointer' }}>
+            <Button variant="primary" size="sm" onClick={handleCreate} disabled={!newForm.name.trim() || saving === 'new'}>
               {saving === 'new' ? t('common.saving') : t('vacancyGenerationSettings.add')}
-            </button>
+            </Button>
           </div>
         </div>
       ) : (

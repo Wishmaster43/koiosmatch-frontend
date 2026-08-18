@@ -179,7 +179,9 @@ describe('AddApplicationModal', () => {
     // CLEAR-SWEEP 13-08: both start out pre-seeded, so their clear cross is already
     // visible on first render, unlike candidate/vacancy/source which start empty)
     // + 1 NEWCAND-1 "+ New candidate" button.
-    expect(document.querySelectorAll('button[type="button"]').length).toBe(8)
+    // +1 sinds HUISSTIJL-1: de voetregel-annuleerknop is nu een house Button en
+    // draagt daarmee expliciet type="button" (nooit meer impliciet submit).
+    expect(document.querySelectorAll('button[type="button"]').length).toBe(9)
   })
 
   it('shows the vacancy as a locked, non-editable display when opened from a vacancy', () => {
@@ -188,7 +190,7 @@ describe('AddApplicationModal', () => {
     // Locked vacancy: 4 picker triggers (candidate + owner + phase + source) + 2 clear
     // crosses (owner + phase, both pre-seeded — see CLEAR-SWEEP note above)
     // + 1 NEWCAND-1 "+ New candidate" button.
-    expect(document.querySelectorAll('button[type="button"]').length).toBe(7)
+    expect(document.querySelectorAll('button[type="button"]').length).toBe(8)
   })
 
   // CLEAR-SWEEP (Danny 13-08, "eenmaal gekozen blijft hij staan"): owner and start

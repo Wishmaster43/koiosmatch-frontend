@@ -36,6 +36,7 @@ import type { PickOption, RawPickRow } from './addmodal/types'
 import AddCandidateModal from '@/pages/candidates/AddCandidateModal'
 import { UserPlus } from 'lucide-react'
 import type { Candidate } from '@/types/candidate'
+import Button from '@/components/ui/Button'
 
 type AnyProps = Record<string, unknown>
 const CreatableSelect = CreatableSelectJs as unknown as ComponentType<AnyProps>
@@ -458,7 +459,7 @@ export default function AddApplicationModal({ onClose, onCreated, lockedVacancy 
 
         {/* BTN_H (§4/§9): one explicit height for every text/action button, everywhere. */}
         <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, padding: '14px 22px', borderTop: '1px solid var(--border)' }}>
-          <button onClick={onClose} style={{ height: BTN_H, padding: '0 16px', fontSize: 13, border: '1px solid var(--border)', borderRadius: 8, background: 'var(--surface)', color: 'var(--text)', cursor: 'pointer' }}>{t('add.cancel')}</button>
+          <Button variant="secondary" onClick={onClose}>{t('add.cancel')}</Button>
           <button onClick={create} disabled={!candidateId || saving || appRuleBlocked}
             style={{ height: BTN_H, padding: '0 16px', fontSize: 13, fontWeight: 500, border: 'none', borderRadius: 8,
               background: 'var(--color-primary)', color: 'var(--color-on-accent)', cursor: 'pointer', opacity: (candidateId && !appRuleBlocked) ? 1 : 0.4 }}>

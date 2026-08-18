@@ -25,6 +25,7 @@ import { cardHead, cardBox, row2, cardPair } from '@/components/ui/modalCards'
 import CreatableSelect from '@/components/ui/CreatableSelect'
 import { BTN_H } from '@/config/buttonMetrics'
 import { fieldInputStyle } from '@/components/forms/fieldMetrics'
+import Button from '@/components/ui/Button'
 
 // Fixed backend enum (not a tenant lookup) — labels via i18n, values stay literal.
 const CHANNELS = ['call', 'email', 'whatsapp'] as const
@@ -142,10 +143,9 @@ export default function OutreachCreate({ onClose, onCreated }: Props) {
 
         {/* Footer — Annuleren + primary create, BTN_H everywhere (§4/§9). */}
         <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, marginTop: 20 }}>
-          <button onClick={onClose}
-            style={{ height: BTN_H, padding: '0 16px', fontSize: 13, fontWeight: 500, border: '1px solid var(--border)', borderRadius: 8, background: 'var(--surface)', color: 'var(--text)', cursor: 'pointer' }}>
+          <Button variant="secondary" onClick={onClose}>
             {t('common:cancel', { defaultValue: 'Cancel' })}
-          </button>
+          </Button>
           <button onClick={submit} disabled={saving || !canSubmit}
             style={{ height: BTN_H, padding: '0 20px', fontSize: 13, fontWeight: 600, border: 'none', borderRadius: 8, background: 'var(--color-primary)', color: 'var(--color-on-accent)', cursor: canSubmit ? 'pointer' : 'not-allowed', opacity: canSubmit ? 1 : 0.5 }}>
             {saving ? t('create.saving') : t('create.submit')}

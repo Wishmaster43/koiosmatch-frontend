@@ -18,7 +18,7 @@ import { DragList } from '../components/SettingsControls'
 import SearchSelect from '@/components/ui/SearchSelect'
 import { useConfirm } from '@/hooks/useConfirm'
 import { getCountryOptions } from '@/lib/countries'
-import { BTN_H } from '@/config/buttonMetrics'
+import Button from '@/components/ui/Button'
 
 export default function ProvincesSettings() {
   const { t, i18n } = useTranslation('settings')
@@ -118,13 +118,9 @@ export default function ProvincesSettings() {
                      color: saved ? 'var(--color-on-success)' : 'var(--color-on-accent)' }}>
             {saved ? <><Check size={13}/> {t('common.saved')}</> : <><Save size={13}/> {t('common.save')}</>}
           </button>
-          <button onClick={openCreate}
-            style={{ display: 'flex', alignItems: 'center', gap: 6, height: 34, padding: '0 14px',
-                     fontSize: 13, fontWeight: 500, borderRadius: 8, border: '1px solid var(--border)',
-                     whiteSpace: 'nowrap', flexShrink: 0,
-                     background: 'var(--surface)', cursor: 'pointer', color: 'var(--text)' }}>
+          <Button variant="secondary" onClick={openCreate}>
             <Plus size={13} /> {t('provinces.add')}
-          </button>
+          </Button>
         </div>
       </div>
 
@@ -143,12 +139,9 @@ export default function ProvincesSettings() {
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, color: 'var(--color-danger)', fontSize: 13 }}>
             <AlertTriangle size={14} /> {t('provinces.loadError')}
           </div>
-          <button onClick={retry}
-            style={{ display: 'inline-flex', alignItems: 'center', gap: 6, height: BTN_H, padding: '0 14px',
-                     fontSize: 13, border: '1px solid var(--border)', borderRadius: 8,
-                     background: 'var(--surface)', cursor: 'pointer', color: 'var(--text)' }}>
+          <Button variant="secondary" onClick={retry}>
             <RefreshCw size={13} /> {t('provinces.retry')}
-          </button>
+          </Button>
         </div>
       ) : items.length === 0 ? (
         <p style={{ fontSize: 13, color: 'var(--text-muted)' }}>{t('provinces.empty')}</p>
@@ -194,7 +187,7 @@ export default function ProvincesSettings() {
                 style={{ width: '100%', height: 36, padding: '0 10px', fontSize: 13, border: '1px solid var(--border)', borderRadius: 8, outline: 'none', boxSizing: 'border-box' }} />
             </div>
             <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, marginTop: 20 }}>
-              <button onClick={() => setShowModal(false)} style={{ height: 34, padding: '0 16px', fontSize: 13, border: '1px solid var(--border)', borderRadius: 8, background: 'var(--surface)', cursor: 'pointer' }}>{t('common.cancel')}</button>
+              <Button variant="secondary" onClick={() => setShowModal(false)}>{t('common.cancel')}</Button>
               <button onClick={submit} disabled={saving || !name.trim()}
                 style={{ height: 34, padding: '0 16px', fontSize: 13, fontWeight: 500, border: 'none', borderRadius: 8, background: 'var(--color-primary)', color: 'var(--color-on-accent)', cursor: 'pointer', opacity: name.trim() ? 1 : 0.4 }}>
                 {saving ? t('common.saving') : (editing ? t('common.save') : t('statusList.addBtn'))}

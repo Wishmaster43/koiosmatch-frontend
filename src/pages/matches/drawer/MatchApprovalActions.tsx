@@ -9,6 +9,7 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Check, X } from 'lucide-react'
 import { BTN_H } from '@/config/buttonMetrics'
+import Button from '@/components/ui/Button'
 
 // BTN_H (§4/§9): one explicit height for every text/action button, everywhere.
 const actionBtn = (color: string): React.CSSProperties => ({
@@ -69,10 +70,9 @@ export default function MatchApprovalActions({
               background: 'var(--surface)', color: 'var(--text)', outline: 'none', resize: 'vertical', boxSizing: 'border-box', fontFamily: 'inherit' }} />
           {/* BTN_H (§4/§9): one explicit height for every text/action button, everywhere. */}
           <div style={{ display: 'flex', gap: 6, justifyContent: 'flex-end' }}>
-            <button onClick={() => { onCancelReject(); setReasonText('') }}
-              style={{ height: BTN_H, padding: '0 10px', fontSize: 11, border: '1px solid var(--border)', borderRadius: 6, background: 'var(--surface)', cursor: 'pointer', color: 'var(--text)' }}>
+            <Button variant="secondary" size="sm" onClick={() => { onCancelReject(); setReasonText('') }}>
               {t('common:cancel')}
-            </button>
+            </Button>
             <button onClick={() => onReject(reasonText)} disabled={!reasonText.trim() || busy}
               style={{ height: BTN_H, padding: '0 12px', fontSize: 11, fontWeight: 600, border: 'none', borderRadius: 6,
                 background: 'var(--color-danger)', color: '#fff', cursor: (reasonText.trim() && !busy) ? 'pointer' : 'default', opacity: (reasonText.trim() && !busy) ? 1 : 0.4 }}>

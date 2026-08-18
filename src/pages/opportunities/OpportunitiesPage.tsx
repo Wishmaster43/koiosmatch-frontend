@@ -23,8 +23,8 @@ import { useDrawerUrl } from '@/hooks/useDrawerUrl'
 import { usePageMemory } from '@/lib/usePageMemory'
 import { useListPageSize } from '@/hooks/useListPageSize'
 import { isReferenceQuery } from '@/lib/referenceNumber'
-import { BTN_H } from '@/config/buttonMetrics'
 import { buildOpportunityFilterGroups } from './data/opportunityFilterGroups'
+import Button from '@/components/ui/Button'
 
 // Single-select donut pick: clicking the active segment clears it.
 const pickOne = (set: Dispatch<SetStateAction<string[]>>) => (d: unknown) => {
@@ -203,11 +203,9 @@ export default function OpportunitiesPage({ intent }: { intent?: unknown } = {})
           <div style={{ display: 'flex', alignItems: 'center', gap: 10,
             padding: '0 24px 12px', minHeight: 36, flexShrink: 0 }}>
             {/* BTN_H (§4/§9): one explicit height for every text/action button, everywhere. */}
-            <button onClick={() => setAddOpen(true)}
-              style={{ display: 'flex', alignItems: 'center', gap: 6, height: BTN_H, padding: '0 14px', fontSize: 13, fontWeight: 600,
-                borderRadius: 8, border: 'none', cursor: 'pointer', background: 'var(--color-primary)', color: 'var(--color-on-accent)' }}>
+            <Button variant="primary" onClick={() => setAddOpen(true)}>
               + {t('page.add')}
-            </button>
+            </Button>
             <HeaderSearch key={searchEpoch} onSearch={setQuery} placeholder={t('page.searchPlaceholder')} width={280} />
             <ClearFiltersButton active={anyFilterActive} onClear={clearAllFilters} />
             {/* Selection strip — count + clear (bulk actions land with C-41). */}

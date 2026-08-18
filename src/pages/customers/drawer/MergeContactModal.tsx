@@ -36,6 +36,7 @@ import { CONTACTS_CHANGED_EVENT } from '../hooks/useCustomerContacts'
 import { contactOptionLabel } from '@/lib/contactLabel'
 import type { Contact } from '@/types/customer'
 import type { Id } from '@/types/common'
+import Button from '@/components/ui/Button'
 
 // Only the fields the two picker cards show — never the whole contact record
 // (§8). `role` (mapCustomer.ts's normalised function/job-title field) is
@@ -181,16 +182,14 @@ export default function MergeContactModal({ customerId, current, others, onClose
 
         <div style={{ display: 'flex', justifyContent: 'space-between', gap: 8 }}>
           {other
-            ? <button type="button" onClick={() => { setOther(null); setSurvivorId(current.id as Id) }}
-                style={{ height: BTN_H, padding: '0 12px', fontSize: 12, border: '1px solid var(--border)', borderRadius: 8, background: 'var(--surface)', color: 'var(--text)', cursor: 'pointer' }}>
+            ? <Button variant="secondary" size="sm" onClick={() => { setOther(null); setSurvivorId(current.id as Id) }}>
                 {t('contacts.merge.back')}
-              </button>
+              </Button>
             : <span />}
           <div style={{ display: 'flex', gap: 8 }}>
-            <button type="button" onClick={onClose}
-              style={{ height: BTN_H, padding: '0 12px', fontSize: 12, border: '1px solid var(--border)', borderRadius: 8, background: 'var(--surface)', color: 'var(--text)', cursor: 'pointer' }}>
+            <Button variant="secondary" size="sm" onClick={onClose}>
               {t('contacts.merge.cancel')}
-            </button>
+            </Button>
             <button type="button" onClick={confirmMerge} disabled={!other || merging}
               style={{ display: 'flex', alignItems: 'center', gap: 6, height: BTN_H, padding: '0 14px', fontSize: 12, fontWeight: 600, border: 'none', borderRadius: 8,
                 background: 'var(--color-danger)', color: '#fff', cursor: !other || merging ? 'not-allowed' : 'pointer', opacity: !other || merging ? 0.5 : 1 }}>

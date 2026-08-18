@@ -32,6 +32,7 @@ import { Z } from '@/lib/zIndexScale'
 import { BTN_H } from '@/config/buttonMetrics'
 import { fieldInputStyle } from '@/components/forms/fieldMetrics'
 import type { Id } from '@/types/common'
+import Button from '@/components/ui/Button'
 
 // Modal body is 460 wide with 20px padding — the dropdown spans that inner width so
 // a full "name · number · e-mail" row is readable without truncating (punt 20).
@@ -214,16 +215,14 @@ export default function MergeCandidateModal({ current, onClose, onMerged, initia
 
         <div style={{ display: 'flex', justifyContent: 'space-between', gap: 8 }}>
           {other
-            ? <button type="button" onClick={() => { setOther(null); setSurvivorId(current.id) }}
-                style={{ height: BTN_H, padding: '0 12px', fontSize: 12, border: '1px solid var(--border)', borderRadius: 8, background: 'var(--surface)', color: 'var(--text)', cursor: 'pointer' }}>
+            ? <Button variant="secondary" size="sm" onClick={() => { setOther(null); setSurvivorId(current.id) }}>
                 {t('merge.back')}
-              </button>
+              </Button>
             : <span />}
           <div style={{ display: 'flex', gap: 8 }}>
-            <button type="button" onClick={onClose}
-              style={{ height: BTN_H, padding: '0 12px', fontSize: 12, border: '1px solid var(--border)', borderRadius: 8, background: 'var(--surface)', color: 'var(--text)', cursor: 'pointer' }}>
+            <Button variant="secondary" size="sm" onClick={onClose}>
               {t('merge.cancel')}
-            </button>
+            </Button>
             <button type="button" onClick={confirm} disabled={!other || merging}
               style={{ display: 'flex', alignItems: 'center', gap: 6, height: BTN_H, padding: '0 14px', fontSize: 12, fontWeight: 600, border: 'none', borderRadius: 8,
                 background: 'var(--color-danger)', color: 'var(--color-on-danger)', cursor: !other || merging ? 'not-allowed' : 'pointer', opacity: !other || merging ? 0.5 : 1 }}>

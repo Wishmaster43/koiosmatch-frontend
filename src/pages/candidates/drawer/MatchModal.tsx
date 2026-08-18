@@ -74,6 +74,7 @@ import { WIDE_MODAL } from '@/components/ui/modalMetrics'
 import FloatingPanel from '@/components/ui/FloatingPanel'
 import { cardHead, cardBox } from '@/components/ui/modalCards'
 import type { Id } from '@/types/common'
+import Button from '@/components/ui/Button'
 
 export default function MatchModal({
   candidateId: fixedCandidateId, editMatchId, onClose, onCreated,
@@ -271,7 +272,7 @@ export default function MatchModal({
         const canSubmit = requiredOk && Boolean(form.func)
         return (
           <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, padding: '14px 22px', borderTop: '1px solid var(--border)', flexShrink: 0 }}>
-            <button onClick={onClose} style={{ height: 34, padding: '0 16px', fontSize: 13, border: '1px solid var(--border)', borderRadius: 8, background: 'var(--surface)', cursor: 'pointer', color: 'var(--text)' }}>{t('common:cancel')}</button>
+            <Button variant="secondary" onClick={onClose}>{t('common:cancel')}</Button>
             <button onClick={form.handleSubmitClick} disabled={form.saving || !canSubmit}
               style={{ height: 34, padding: '0 16px', fontSize: 13, fontWeight: 600, border: 'none', borderRadius: 8, background: 'var(--color-primary)', color: 'var(--color-on-accent)', cursor: canSubmit ? 'pointer' : 'default', opacity: canSubmit ? 1 : 0.4 }}>
               {form.saving ? t('common:saving') : (form.deviatesFromProposal && form.confirmDeviation ? t('placement.rateProposal.deviationConfirm') : t(editing ? 'common:save' : 'placement.create'))}

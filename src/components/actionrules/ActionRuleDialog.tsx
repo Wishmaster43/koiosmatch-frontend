@@ -10,6 +10,7 @@ import { useTranslation } from 'react-i18next'
 import ActionRuleBanner from './ActionRuleBanner'
 import FloatingPanel from '@/components/ui/FloatingPanel'
 import type { ActionRuleDecision } from './actionRuleTypes'
+import Button from '@/components/ui/Button'
 
 export interface ActionRuleDialogProps {
   open: boolean
@@ -32,17 +33,13 @@ export default function ActionRuleDialog({ open, decision, onConfirm, onCancel }
       <ActionRuleBanner decision={decision} />
 
       <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, marginTop: 16 }}>
-        <button onClick={onCancel}
-          style={{ padding: '6px 12px', fontSize: 12, fontWeight: 500, borderRadius: 7,
-            border: '1px solid var(--border)', background: 'none', color: 'var(--text)', cursor: 'pointer' }}>
+        <Button variant="secondary" size="sm" onClick={onCancel}>
           {t('actionRules.cancel')}
-        </button>
+        </Button>
         {canConfirm && (
-          <button onClick={onConfirm}
-            style={{ padding: '6px 12px', fontSize: 12, fontWeight: 600, borderRadius: 7, border: 'none',
-              background: 'var(--color-primary)', color: 'var(--color-on-accent)', cursor: 'pointer' }}>
+          <Button variant="primary" size="sm" onClick={onConfirm}>
             {t('actionRules.ok')}
-          </button>
+          </Button>
         )}
       </div>
     </FloatingPanel>

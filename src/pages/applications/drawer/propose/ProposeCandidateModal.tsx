@@ -11,6 +11,7 @@ import { fieldInputStyle } from '@/components/forms/fieldMetrics'
 import { contactOptionLabel } from '@/lib/contactLabel'
 import { useProposeForm } from './useProposeForm'
 import type { ApplicationDetail } from '@/types/application'
+import Button from '@/components/ui/Button'
 
 const sectionTitle = { fontSize: 12, fontWeight: 600, color: 'var(--text)', marginBottom: 6 } as const
 const muted = { fontSize: 11, color: 'var(--text-muted)' } as const
@@ -213,10 +214,9 @@ export default function ProposeCandidateModal({ application: a, onClose }: Props
         )}
 
         <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, marginTop: 14 }}>
-          <button onClick={onClose} style={{ height: BTN_H, padding: '0 16px', fontSize: 13, border: '1px solid var(--border)',
-            borderRadius: 8, background: 'var(--surface)', cursor: 'pointer', color: 'var(--text)' }}>
+          <Button variant="secondary" onClick={onClose}>
             {t('common:cancel')}
-          </button>
+          </Button>
           {/* BUTTON-SOFT-TINT-1 (Danny 05-08): was a white/transparent outline
               button — now the house soft-tint recipe (§4, mirrors DrawerAddButton/
               QuickViewToggle). */}

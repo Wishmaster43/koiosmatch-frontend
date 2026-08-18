@@ -11,6 +11,7 @@ import { AlertTriangle } from 'lucide-react'
 import api from '@/lib/api'
 import FloatingPanel from '@/components/ui/FloatingPanel'
 import type { Id } from '@/types/common'
+import Button from '@/components/ui/Button'
 
 interface PreviewCounts { applications?: number; matches?: number; appointments?: number; notes?: number; documents?: number; tasks?: number; timeline_events?: number; conversations?: number }
 
@@ -77,7 +78,7 @@ export default function DeletionPreviewModal({ candidateId, candidateName, onClo
         <p style={{ fontSize: 11.5, color: 'var(--color-danger)', marginBottom: 16 }}>{t('erase.irreversible')}</p>
 
         <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8 }}>
-          <button onClick={onClose} style={{ height: 34, padding: '0 16px', fontSize: 13, border: '1px solid var(--border)', borderRadius: 8, background: 'var(--surface)', cursor: 'pointer', color: 'var(--text)' }}>{t('common:cancel')}</button>
+          <Button variant="secondary" onClick={onClose}>{t('common:cancel')}</Button>
           <button onClick={confirm} disabled={deleting}
             style={{ height: 34, padding: '0 16px', fontSize: 13, fontWeight: 600, border: 'none', borderRadius: 8, background: 'var(--color-danger)', color: '#fff', cursor: 'pointer', opacity: deleting ? 0.6 : 1 }}>
             {deleting ? t('common:saving') : t('erase.confirmButton')}

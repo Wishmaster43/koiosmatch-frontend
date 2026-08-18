@@ -24,6 +24,7 @@ import { BTN_H } from '@/config/buttonMetrics'
 import { card, th as thBase, td as tdBase, numCell as numCellBase, notice } from './usageCardStyles'
 import type { CSSProperties } from 'react'
 import type { operations } from '@/types/api-generated'
+import Button from '@/components/ui/Button'
 const th = thBase as CSSProperties
 const td = tdBase as CSSProperties
 const numCell = numCellBase as CSSProperties
@@ -168,11 +169,9 @@ export default function AdminInvoicesSettings() {
             onToggle={(v: string) => setMonth(v)}
             closeOnToggle
             renderTrigger={(toggle: () => void) => (
-              <button type="button" onClick={toggle}
-                style={{ height: BTN_H, padding: '0 12px', fontSize: 13, border: '1px solid var(--border)',
-                         borderRadius: 8, background: 'var(--surface)', color: 'var(--text)', cursor: 'pointer' }}>
+              <Button variant="secondary" onClick={toggle}>
                 {selectedMonthLabel}
-              </button>
+              </Button>
             )}
           />
           <button type="button" onClick={handleGenerate} disabled={generating}

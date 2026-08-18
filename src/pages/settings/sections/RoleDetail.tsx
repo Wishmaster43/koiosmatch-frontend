@@ -19,6 +19,7 @@ import SearchSelect from '@/components/ui/SearchSelect'
 import { DASHBOARD_TYPES } from '@/pages/dashboard/templates'
 import { BTN_H } from '@/config/buttonMetrics'
 import type { Role, PermissionsByGroup, UpdateRoleBody, UpdatePermissionsBody } from './rolesTypes'
+import Button from '@/components/ui/Button'
 
 interface IconPickerProps {
   value: string
@@ -32,11 +33,10 @@ function IconPicker({ value, color, options, onPick }: IconPickerProps) {
   const [open, setOpen] = useState(false)
   return (
     <div style={{ position: 'relative' }}>
-      <button onClick={() => setOpen(o => !o)}
-        style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 34, height: 34,
-          borderRadius: 8, border: '1px solid var(--border)', background: 'var(--surface)', cursor: 'pointer' }}>
+      <Button variant="secondary" onClick={() => setOpen(o => !o)}
+        style={{ width: 34 }}>
         {roleIconEl(value, { size: 17, color })}
-      </button>
+      </Button>
       {open && (
         <>
           <div className="fixed inset-0 z-40" onClick={() => setOpen(false)} />

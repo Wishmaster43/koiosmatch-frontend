@@ -46,6 +46,7 @@ import { ActionRuleBanner } from '@/components/actionrules'
 import { usePlanIntakeForm } from './planIntake/usePlanIntakeForm'
 import type { PlanIntakeFormOptions } from './planIntake/usePlanIntakeForm'
 import { input, fieldFootprint, errMsg, labelLeftRow, rowLabel, rowField } from './planIntake/styles'
+import Button from '@/components/ui/Button'
 
 // Re-exported from their new homes so every caller/test keeps importing them from
 // this module (WorkTab + AppointmentsTab take the type, the unit test the helper).
@@ -171,7 +172,7 @@ export default function PlanIntakeModal(props: PlanIntakeFormOptions) {
 
       {/* Pinned footer — buttons stay visible whatever the content height (Danny 13-08). */}
       <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, padding: '14px 22px', borderTop: '1px solid var(--border)', flexShrink: 0 }}>
-          <button onClick={onClose} style={{ height: 34, padding: '0 16px', fontSize: 13, border: '1px solid var(--border)', borderRadius: 8, background: 'var(--surface)', cursor: 'pointer', color: 'var(--text)' }}>{t('common:cancel')}</button>
+          <Button variant="secondary" onClick={onClose}>{t('common:cancel')}</Button>
           {/* Disabled when `when` OR `type` is missing (no hardcoded type fallback —
               a tenant with zero configured appointment types has nothing valid to
               submit, mirrors the existing `when`-empty gate). */}

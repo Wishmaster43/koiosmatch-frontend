@@ -17,6 +17,7 @@ import type { ScheduleConfig } from '@/types/workflow'
 import ChangelogPopover from '@/components/drawer/ChangelogPopover'
 import EntityChangelog from '@/components/drawer/EntityChangelog'
 import type { Id } from '@/types/common'
+import Button from '@/components/ui/Button'
 
 // Top-level editor view: the node diagram, or this workflow's run history.
 export type EditorView = 'diagram' | 'history'
@@ -215,15 +216,10 @@ export default function WorkflowEditorHeader({
       </button>
 
       {/* Opslaan & sluiten — terug naar overzicht (live-run guard eerst) */}
-      <button onClick={onSaveClose}
-        style={{
-          display: 'flex', alignItems: 'center', gap: 6, padding: '6px 14px', borderRadius: 8, fontSize: 12, fontWeight: 500,
-          background: 'var(--color-primary)', color: 'var(--color-on-accent)',
-          border: 'none', cursor: 'pointer',
-        }}>
+      <Button variant="primary" size="sm" onClick={onSaveClose}>
         <Save size={13} />
         {t('editor.saveClose')}
-      </button>
+      </Button>
 
       <button onClick={onClose} aria-label={t('common:close')}
         style={{ width: 30, height: 30, borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'none', border: '1px solid var(--border)', cursor: 'pointer', color: 'var(--text-muted)' }}

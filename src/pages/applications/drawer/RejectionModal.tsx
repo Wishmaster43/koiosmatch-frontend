@@ -9,6 +9,7 @@ import RichTextEditor from '@/components/ui/RichTextEditor'
 import SafeHtml from '@/components/ui/SafeHtml'
 import type { ApplicationDetail } from '@/types/application'
 import type { Id } from '@/types/common'
+import Button from '@/components/ui/Button'
 
 interface RejectionReason { id?: Id; name?: string; label?: string }
 // Moved from RejectionBlock (now deleted) — the shape the confirm submits.
@@ -167,10 +168,9 @@ export default function RejectionModal({ application: a, onCancel, onConfirm, su
         </div>
 
         <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, marginTop: 16 }}>
-          <button onClick={onCancel} style={{ height: 34, padding: '0 16px', fontSize: 13, border: '1px solid var(--border)',
-            borderRadius: 8, background: 'var(--surface)', cursor: 'pointer', color: 'var(--text)' }}>
+          <Button variant="secondary" onClick={onCancel}>
             {t('common:cancel')}
-          </button>
+          </Button>
           {/* Correction is a plain SAVE (primary), never the danger-red "Reject"
               button — no candidate-facing message goes out on this path. */}
           <button onClick={submit} disabled={!reasonId || submitting}

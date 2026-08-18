@@ -8,6 +8,7 @@ import { useCallback, useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { ArrowLeft, Copy, Loader2, ShieldCheck } from 'lucide-react'
 import { QRCodeSVG } from 'qrcode.react'
+import Button from '@/components/ui/Button'
 
 // Loose server payload shapes — AuthContext types these calls as Promise<unknown>.
 type SetupResponse   = { otpauth_url?: string; secret?: string }
@@ -93,17 +94,13 @@ export default function MfaSetupWizard({ setupMfa, confirmMfa, onConfirmed, onFi
             {error}
           </div>
           <div style={{ display: 'flex', gap: 10 }}>
-            <button onClick={() => void startSetup()}
-              style={{ height: 34, padding: '0 16px', fontSize: 13, fontWeight: 500, borderRadius: 8,
-                       cursor: 'pointer', border: 'none', background: 'var(--color-primary)', color: 'var(--color-on-accent)' }}>
+            <Button variant="primary" onClick={() => void startSetup()}>
               {t('security.retry')}
-            </button>
+            </Button>
             {onCancel && (
-              <button onClick={onCancel}
-                style={{ height: 34, padding: '0 16px', fontSize: 13, fontWeight: 500, borderRadius: 8, cursor: 'pointer',
-                         border: '1px solid var(--border)', background: 'var(--surface)', color: 'var(--text)' }}>
+              <Button variant="secondary" onClick={onCancel}>
                 {t('security.back')}
-              </button>
+              </Button>
             )}
           </div>
         </>
@@ -138,12 +135,9 @@ export default function MfaSetupWizard({ setupMfa, confirmMfa, onConfirmed, onFi
         ))}
       </div>
       <div style={{ display: 'flex', gap: 10 }}>
-        <button onClick={copyRecovery}
-          style={{ display: 'flex', alignItems: 'center', gap: 6, height: 34, padding: '0 14px',
-                   fontSize: 13, fontWeight: 500, borderRadius: 8, cursor: 'pointer',
-                   border: '1px solid var(--border)', background: 'var(--surface)', color: 'var(--text)' }}>
+        <Button variant="secondary" onClick={copyRecovery}>
           <Copy size={13} /> {copied ? t('security.copied') : t('security.copy')}
-        </button>
+        </Button>
         <button onClick={() => void finish()} disabled={busy}
           style={{ height: 34, padding: '0 20px', fontSize: 13, fontWeight: 500, borderRadius: 8,
                    cursor: busy ? 'not-allowed' : 'pointer', border: 'none', background: 'var(--color-primary)', color: 'var(--color-on-accent)' }}>

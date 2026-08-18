@@ -28,6 +28,7 @@ import { useLookups } from '@/context/LookupsContext'
 import CandidateCustomRequiredFields from './candidates/CandidateCustomRequiredFields'
 import RequiredFieldsGroup, { type PhaseColumn } from './candidates/RequiredFieldsGroup'
 import { CANDIDATE_FIELD_GROUPS, normalizeRequiredFieldKeys } from './candidates/requiredFieldsCatalog'
+import Button from '@/components/ui/Button'
 
 const KEY = 'candidate_required_fields'
 
@@ -73,20 +74,12 @@ export default function CandidateRequiredFieldsSettings() {
 
       {/* Expand/collapse all built-in groups at once — v1 scope only, CandidateCustomRequiredFields keeps its own open state. */}
       <div style={{ display: 'flex', gap: 8, marginBottom: 12 }}>
-        <button type="button" onClick={() => setOpenIds(CANDIDATE_FIELD_GROUPS.map(g => g.id))}
-          style={{
-            fontSize: 12, fontWeight: 500, padding: '6px 12px', borderRadius: 6,
-            border: '1px solid var(--border)', background: 'var(--surface)', color: 'var(--text)', cursor: 'pointer',
-          }}>
+        <Button variant="secondary" size="sm" onClick={() => setOpenIds(CANDIDATE_FIELD_GROUPS.map(g => g.id))}>
           {t('requiredFields.expandAll')}
-        </button>
-        <button type="button" onClick={() => setOpenIds([])}
-          style={{
-            fontSize: 12, fontWeight: 500, padding: '6px 12px', borderRadius: 6,
-            border: '1px solid var(--border)', background: 'var(--surface)', color: 'var(--text)', cursor: 'pointer',
-          }}>
+        </Button>
+        <Button variant="secondary" size="sm" onClick={() => setOpenIds([])}>
           {t('requiredFields.collapseAll')}
-        </button>
+        </Button>
       </div>
 
       {/* Built-in fields — one collapsible block per card of the candidate screens. */}

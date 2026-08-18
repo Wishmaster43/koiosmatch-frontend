@@ -38,6 +38,7 @@ import {
 import { buildApplicationFilterGroups } from './data/applicationFilterGroups'
 import type { Application } from '@/types/application'
 import type { Id } from '@/types/common'
+import Button from '@/components/ui/Button'
 
 // Right-panel multi-toggle for a filter dimension.
 const tog = (set: Dispatch<SetStateAction<string[]>>) => (v: string) => set(p => p.includes(v) ? p.filter(x => x !== v) : [...p, v])
@@ -296,11 +297,9 @@ export default function ApplicationsPage({ intent }: { intent?: unknown } = {}) 
           padding: '0 24px 12px', minHeight: 36, flexShrink: 0 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
             {/* BTN_H (§4/§9): one explicit height for every text/action button, everywhere. */}
-            <button onClick={() => setAddOpen(true)} style={{ display: 'flex', alignItems: 'center', gap: 5,
-              height: BTN_H, padding: '0 14px', fontSize: 13, fontWeight: 600, background: 'var(--color-primary)', color: 'var(--color-on-accent)',
-              border: 'none', borderRadius: 8, cursor: 'pointer' }}>
+            <Button variant="primary" onClick={() => setAddOpen(true)}>
               <Plus size={14} /> {t('add.button')}
-            </button>
+            </Button>
             {/* Shared header search (T10) — debounced, client-side text filter. */}
             <HeaderSearch key={searchEpoch} onSearch={setQuery} placeholder={t('page.searchPlaceholder')} width={300} />
             <ClearFiltersButton active={anyFilterActive} onClear={clearAllFilters} />

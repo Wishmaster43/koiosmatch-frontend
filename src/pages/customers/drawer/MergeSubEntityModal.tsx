@@ -29,6 +29,7 @@ import { fieldInputStyle } from '@/components/forms/fieldMetrics'
 import { LOCATIONS_CHANGED_EVENT } from '../hooks/useCustomerLocations'
 import { DEPARTMENTS_CHANGED_EVENT } from '../hooks/useCustomerDepartments'
 import type { Id } from '@/types/common'
+import Button from '@/components/ui/Button'
 
 export type MergeSubEntityScope = 'location' | 'department'
 
@@ -162,16 +163,14 @@ export default function MergeSubEntityModal({ scope, customerId, current, others
 
         <div style={{ display: 'flex', justifyContent: 'space-between', gap: 8 }}>
           {other
-            ? <button type="button" onClick={() => { setOther(null); setSurvivorId(current.id) }}
-                style={{ height: BTN_H, padding: '0 12px', fontSize: 12, border: '1px solid var(--border)', borderRadius: 8, background: 'var(--surface)', color: 'var(--text)', cursor: 'pointer' }}>
+            ? <Button variant="secondary" size="sm" onClick={() => { setOther(null); setSurvivorId(current.id) }}>
                 {t(`${ns}.merge.back`)}
-              </button>
+              </Button>
             : <span />}
           <div style={{ display: 'flex', gap: 8 }}>
-            <button type="button" onClick={onClose}
-              style={{ height: BTN_H, padding: '0 12px', fontSize: 12, border: '1px solid var(--border)', borderRadius: 8, background: 'var(--surface)', color: 'var(--text)', cursor: 'pointer' }}>
+            <Button variant="secondary" size="sm" onClick={onClose}>
               {t(`${ns}.merge.cancel`)}
-            </button>
+            </Button>
             <button type="button" onClick={confirmMerge} disabled={!other || merging}
               style={{ display: 'flex', alignItems: 'center', gap: 6, height: BTN_H, padding: '0 14px', fontSize: 12, fontWeight: 600, border: 'none', borderRadius: 8,
                 background: 'var(--color-danger)', color: '#fff', cursor: !other || merging ? 'not-allowed' : 'pointer', opacity: !other || merging ? 0.5 : 1 }}>

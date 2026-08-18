@@ -45,6 +45,7 @@ import PostCreateResultsPanel from './addmodal/PostCreateResultsPanel'
 import RecruiterCard from './addmodal/RecruiterCard'
 import type { Vacancy } from '@/types/vacancy'
 import type { Id } from '@/types/common'
+import Button from '@/components/ui/Button'
 
 interface ModalUser { id: Id; name: string }
 interface ModalCustomer { id: Id; name: string }
@@ -243,11 +244,9 @@ export default function AddVacancyModal({
         {/* Footer — BTN_H (§4/§9): one explicit height for every text/action button, everywhere. */}
         <div style={{ padding: '14px 22px', borderTop: '1px solid var(--border)', flexShrink: 0,
           display: 'flex', justifyContent: 'flex-end', gap: 8 }}>
-          <button onClick={onClose}
-            style={{ height: BTN_H, padding: '0 16px', fontSize: 13, borderRadius: 8,
-              border: '1px solid var(--border)', background: 'none', color: 'var(--text)', cursor: 'pointer' }}>
+          <Button variant="secondary" onClick={onClose}>
             {f.t('modal.cancel')}
-          </button>
+          </Button>
           <button onClick={f.handleSubmit} disabled={!canSubmit || f.saving}
             style={{ height: BTN_H, padding: '0 20px', fontSize: 13, fontWeight: 600, borderRadius: 8, border: 'none',
               background: (canSubmit && !f.saving) ? 'var(--color-primary)' : 'var(--border)',

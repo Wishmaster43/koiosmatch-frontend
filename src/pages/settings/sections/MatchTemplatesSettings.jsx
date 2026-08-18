@@ -10,6 +10,7 @@ import { useConfirm } from '@/hooks/useConfirm'
 import { useContractTypes } from '@/lib/useContractTypes'
 import { useFunctions } from '@/lib/useFunctions'
 import { fieldInputStyle } from '@/components/forms/fieldMetrics'
+import Button from '@/components/ui/Button'
 
 // The six scoring dimensions (mirrors the backend App\Enums\MatchDimension, single
 // source of truth there, and the vacancy Matching tab's picker). Duplicated here on
@@ -297,10 +298,9 @@ export default function MatchTemplatesSettings() {
                       style={{ padding: '6px 14px', fontSize: 12, borderRadius: 6, border: '1px solid var(--border)', background: 'var(--surface)', color: 'var(--text-muted)', cursor: 'pointer' }}>
                       {t('common.cancel')}
                     </button>
-                    <button onClick={() => handleSave(tpl)} disabled={saving === tpl.id || !form.name?.trim()}
-                      style={{ padding: '6px 14px', fontSize: 12, fontWeight: 600, borderRadius: 6, border: 'none', background: 'var(--color-primary)', color: 'var(--color-on-accent)', cursor: 'pointer' }}>
+                    <Button variant="primary" size="sm" onClick={() => handleSave(tpl)} disabled={saving === tpl.id || !form.name?.trim()}>
                       {saving === tpl.id ? t('common.saving') : t('common.save')}
-                    </button>
+                    </Button>
                   </div>
                 </div>
               </div>
@@ -330,10 +330,9 @@ export default function MatchTemplatesSettings() {
                 style={{ padding: '6px 14px', fontSize: 12, borderRadius: 6, border: '1px solid var(--border)', background: 'var(--surface)', color: 'var(--text-muted)', cursor: 'pointer' }}>
                 {t('common.cancel')}
               </button>
-              <button onClick={handleCreate} disabled={!newForm.name.trim() || saving === 'new'}
-                style={{ padding: '6px 14px', fontSize: 12, fontWeight: 600, borderRadius: 6, border: 'none', background: 'var(--color-primary)', color: 'var(--color-on-accent)', cursor: 'pointer' }}>
+              <Button variant="primary" size="sm" onClick={handleCreate} disabled={!newForm.name.trim() || saving === 'new'}>
                 {saving === 'new' ? t('common.saving') : t('matchTemplatesSettings.add')}
-              </button>
+              </Button>
             </div>
           </div>
         </div>

@@ -5,6 +5,7 @@ import DocumentLinkPicker from './DocumentLinkPicker'
 // G34: the house searchable dropdown replaces the native per-file type <select>.
 import SelectMenu from '@/components/ui/SelectMenu'
 import type { Id, LookupOption } from '@/types/common'
+import Button from '@/components/ui/Button'
 
 // A queued-but-not-yet-uploaded file, each with its own document type (BUGFIX
 // 23-07: a multi-file pick used to collapse to a single pending slot, so picking
@@ -108,8 +109,7 @@ export default function PendingUploadQueue({
           style={{ padding: '7px 14px', fontSize: 12, fontWeight: 600, borderRadius: 7, background: 'var(--text)', color: 'var(--bg)', border: 'none', cursor: 'pointer' }}>
           {pending.length > 1 ? t('documents.addAll', { count: pending.length }) : t('common:add')}
         </button>
-        <button onClick={onCancel}
-          style={{ padding: '7px 14px', fontSize: 12, borderRadius: 7, background: 'none', color: 'var(--text)', border: '1px solid var(--border)', cursor: 'pointer' }}>{t('common:cancel')}</button>
+        <Button variant="secondary" size="sm" onClick={onCancel}>{t('common:cancel')}</Button>
       </div>
     </div>
   )

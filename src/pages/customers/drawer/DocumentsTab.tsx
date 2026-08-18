@@ -52,6 +52,7 @@ import type { DrawerFilterConfig } from '@/components/drawer/DrawerFilterMenu'
 // text+Plus button below; same click target (opens the hidden file input).
 import DrawerAddButton from '@/components/drawer/DrawerAddButton'
 import type { Id } from '@/types/common'
+import Button from '@/components/ui/Button'
 
 // A queued-but-not-yet-uploaded file, each with its own document type (BUGFIX
 // 23-07: a multi-file pick used to collapse to a single pending slot, so picking
@@ -318,8 +319,7 @@ export default function DocumentsTab({ customerId, locations = [], departments =
                 style={{ padding: '7px 14px', fontSize: 12, fontWeight: 600, borderRadius: 7, background: 'var(--text)', color: 'var(--bg)', border: 'none', cursor: 'pointer' }}>
                 {pending.length > 1 ? t('documents.addAll', { count: pending.length }) : t('documents.add')}
               </button>
-              <button onClick={cancelPending}
-                style={{ padding: '7px 14px', fontSize: 12, borderRadius: 7, background: 'none', color: 'var(--text)', border: '1px solid var(--border)', cursor: 'pointer' }}>{t('drawer.cancel')}</button>
+              <Button variant="secondary" size="sm" onClick={cancelPending}>{t('drawer.cancel')}</Button>
             </div>
           </div>
         )}

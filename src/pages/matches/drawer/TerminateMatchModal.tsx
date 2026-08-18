@@ -10,6 +10,7 @@ import { useMatchStopReasons } from '../hooks/useMatchStopReasons'
 import { useMatchTerminate } from '../hooks/useMatchTerminate'
 import { fieldInputStyle, fieldTextareaStyle } from '@/components/forms/fieldMetrics'
 import type { MatchRow } from '@/types/match'
+import Button from '@/components/ui/Button'
 
 // Canon field style (G33/fieldMetrics) — was its own padding-8/radius-8 copy;
 // fieldBox covers the single-line date input + the disabled-lookup notice,
@@ -138,10 +139,9 @@ export default function TerminateMatchModal({ match, onClose, onUpdate }: Props)
         </div>
 
         <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, marginTop: 16 }}>
-          <button onClick={onClose} style={{ height: 34, padding: '0 16px', fontSize: 13, border: '1px solid var(--border)',
-            borderRadius: 8, background: 'var(--surface)', cursor: 'pointer', color: 'var(--text)' }}>
+          <Button variant="secondary" onClick={onClose}>
             {t('common:cancel')}
-          </button>
+          </Button>
           <button onClick={submit} disabled={!canSubmit}
             style={{ height: 34, padding: '0 16px', fontSize: 13, fontWeight: 600, border: 'none', borderRadius: 8,
               background: 'var(--color-danger)', color: '#fff', cursor: canSubmit ? 'pointer' : 'not-allowed',

@@ -24,6 +24,7 @@ import { FilterFieldPicker } from './FilterFieldPicker'
 import { OperatorSelect } from './OperatorSelect'
 import { MODULE_META } from '@/modules/index'
 import type { FilterCondition, FilterConditionGroup, EdgeFilters, FlowNode, FlowEdge } from '@/types/workflow'
+import Button from '@/components/ui/Button'
 
 // A short syntax reminder for the newer date/time operators — undefined (no
 // hint row rendered) for the plain equality/text operators.
@@ -173,10 +174,9 @@ export function EdgeFilterPanel({ filters, label, sourceNodeId, nodes = [], edge
 
       <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
         <button onClick={onClose} style={{ padding: '8px 16px', fontSize: 13, border: '1px solid var(--border)', borderRadius: 8, background: 'var(--surface)', cursor: 'pointer', color: 'var(--text-muted)' }}>{t('common:cancel')}</button>
-        <button onClick={handleSave}
-          style={{ padding: '8px 16px', fontSize: 13, border: 'none', borderRadius: 8, background: 'var(--color-primary)', color: 'var(--color-on-accent)', cursor: 'pointer', fontWeight: 600 }}>
+        <Button variant="primary" onClick={handleSave}>
           {t('common:save')}
-        </button>
+        </Button>
       </div>
     </FloatingPanel>
   )

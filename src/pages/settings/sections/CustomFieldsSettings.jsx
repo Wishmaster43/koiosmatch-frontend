@@ -18,6 +18,7 @@ import { notifyError } from '@/lib/notify'
 import SearchSelect from '@/components/ui/SearchSelect'
 import { DragList } from '../components/SettingsControls'
 import { fieldInputStyle } from '@/components/forms/fieldMetrics'
+import Button from '@/components/ui/Button'
 
 // Field types the backend supports.
 const FIELD_TYPES = ['text', 'textarea', 'number', 'date', 'boolean', 'select']
@@ -288,10 +289,9 @@ export default function CustomFieldsSettings({ entityType }) {
                         style={{ padding: '6px 14px', fontSize: 12, borderRadius: 6, border: '1px solid var(--border)', background: 'var(--surface)', color: 'var(--text-muted)', cursor: 'pointer' }}>
                         {t('common.cancel')}
                       </button>
-                      <button onClick={() => handleSave(field)} disabled={saving === field.id}
-                        style={{ padding: '6px 14px', fontSize: 12, fontWeight: 600, borderRadius: 6, border: 'none', background: 'var(--color-primary)', color: 'var(--color-on-accent)', cursor: 'pointer' }}>
+                      <Button variant="primary" size="sm" onClick={() => handleSave(field)} disabled={saving === field.id}>
                         {saving === field.id ? t('common.saving') : t('common.save')}
-                      </button>
+                      </Button>
                     </div>
                   </div>
                 </div>
@@ -345,10 +345,9 @@ export default function CustomFieldsSettings({ entityType }) {
                 style={{ padding: '6px 14px', fontSize: 12, borderRadius: 6, border: '1px solid var(--border)', background: 'var(--surface)', color: 'var(--text-muted)', cursor: 'pointer' }}>
                 {t('common.cancel')}
               </button>
-              <button onClick={handleCreate} disabled={!newForm.label.trim() || saving === 'new'}
-                style={{ padding: '6px 14px', fontSize: 12, fontWeight: 600, borderRadius: 6, border: 'none', background: 'var(--color-primary)', color: 'var(--color-on-accent)', cursor: 'pointer' }}>
+              <Button variant="primary" size="sm" onClick={handleCreate} disabled={!newForm.label.trim() || saving === 'new'}>
                 {saving === 'new' ? t('common.saving') : t('customFieldsSettings.add')}
-              </button>
+              </Button>
             </div>
           </div>
         </div>

@@ -35,6 +35,7 @@ import type { Id } from '@/types/common'
 import type { LookupItem } from '@/context/LookupsContext'
 import type { MatchContractLine } from '@/types/match'
 import { contactOptionLabel } from '@/lib/contactLabel'
+import Button from '@/components/ui/Button'
 
 interface UserLike { id?: Id; name?: string }
 interface NewContact { first_name: string; last_name: string; email: string; phone: string; mobile: string; function: string }
@@ -210,7 +211,7 @@ export default function RelationsSection({
                     </div>
                   )}
                   <div style={{ display: 'flex', gap: 6, justifyContent: 'flex-end' }}>
-                    <button onClick={() => { setCreatingContact(false); setDuplicateContact(null); setNc({ first_name: '', last_name: '', email: '', phone: '', mobile: '', function: '' }) }} style={{ height: 28, padding: '0 10px', fontSize: 12, border: '1px solid var(--border)', borderRadius: 6, background: 'var(--surface)', cursor: 'pointer', color: 'var(--text)' }}>{t('common:cancel')}</button>
+                    <Button variant="secondary" size="sm" onClick={() => { setCreatingContact(false); setDuplicateContact(null); setNc({ first_name: '', last_name: '', email: '', phone: '', mobile: '', function: '' }) }}>{t('common:cancel')}</Button>
                     <button onClick={saveContact} disabled={!nc.first_name.trim() || !nc.last_name.trim()} style={{ height: 28, padding: '0 12px', fontSize: 12, fontWeight: 600, border: 'none', borderRadius: 6, background: 'var(--color-primary)', color: 'var(--color-on-accent)', cursor: 'pointer', opacity: (nc.first_name.trim() && nc.last_name.trim()) ? 1 : 0.4 }}>{t('common:save')}</button>
                   </div>
                 </div>

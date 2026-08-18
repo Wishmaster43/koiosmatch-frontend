@@ -23,6 +23,7 @@ import FloatingPanel from '@/components/ui/FloatingPanel'
 import { modalColumns } from '@/components/ui/modalCards'
 import type { ApiOpportunity, Opportunity } from '@/types/opportunity'
 import type { Id } from '@/types/common'
+import Button from '@/components/ui/Button'
 
 // 422 field-error keys are snake_case; map them back to this form's field names.
 const API_TO_FORM: Record<string, string> = {
@@ -321,11 +322,9 @@ export default function AddOpportunityModal({ onClose, onCreated, users = [], cu
         {/* Footer — BTN_H (§4/§9): one explicit height for every text/action button, everywhere. */}
         <div style={{ padding: '14px 22px', borderTop: '1px solid var(--border)', flexShrink: 0,
           display: 'flex', justifyContent: 'flex-end', gap: 8 }}>
-          <button onClick={onClose}
-            style={{ height: BTN_H, padding: '0 16px', fontSize: 13, borderRadius: 8,
-              border: '1px solid var(--border)', background: 'none', color: 'var(--text)', cursor: 'pointer' }}>
+          <Button variant="secondary" onClick={onClose}>
             {t('modal.cancel')}
-          </button>
+          </Button>
           <button onClick={handleSubmit} disabled={!canSubmit || saving}
             style={{ height: BTN_H, padding: '0 20px', fontSize: 13, fontWeight: 600, borderRadius: 8, border: 'none',
               background: (canSubmit && !saving) ? 'var(--color-primary)' : 'var(--border)',

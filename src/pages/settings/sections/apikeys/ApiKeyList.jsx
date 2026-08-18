@@ -9,7 +9,7 @@ import DataTable from '@/components/ui/DataTable'
 import StatusBadge from '@/components/ui/StatusBadge'
 import { useDateFormat } from '@/lib/datetime'
 import { shortGuid } from './constants'
-import { BTN_H } from '@/config/buttonMetrics'
+import Button from '@/components/ui/Button'
 
 export default function ApiKeyList({ keys, loading, error, onReload, onOpen, onNew }) {
   const { t } = useTranslation('settings')
@@ -51,20 +51,18 @@ export default function ApiKeyList({ keys, loading, error, onReload, onOpen, onN
           </p>
         </div>
         {/* BTN_H (§4/§9): one explicit height for every text/action button, everywhere. */}
-        <button onClick={onNew}
-          style={{ display: 'flex', alignItems: 'center', gap: 6, height: BTN_H, padding: '0 14px', fontSize: 13, fontWeight: 500, border: 'none', borderRadius: 8, background: 'var(--color-primary)', color: 'var(--color-on-accent)', cursor: 'pointer' }}>
+        <Button variant="primary" onClick={onNew}>
           <Plus size={14} /> {t('apiKeys.new')}
-        </button>
+        </Button>
       </div>
 
       {/* Error state with a retry, else the table (which handles loading/empty) */}
       {error ? (
         <div style={{ padding: '32px 0', textAlign: 'center' }}>
           <p style={{ fontSize: 13, color: 'var(--text-muted)', marginBottom: 12 }}>{t('apiKeys.loadError')}</p>
-          <button onClick={onReload}
-            style={{ display: 'inline-flex', alignItems: 'center', gap: 6, height: BTN_H, padding: '0 14px', fontSize: 13, border: '1px solid var(--border)', borderRadius: 8, background: 'var(--surface)', cursor: 'pointer', color: 'var(--text)' }}>
+          <Button variant="secondary" onClick={onReload}>
             <RefreshCw size={13} /> {t('apiKeys.retry')}
-          </button>
+          </Button>
         </div>
       ) : (
         <DataTable

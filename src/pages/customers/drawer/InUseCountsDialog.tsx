@@ -15,6 +15,7 @@ import { useTranslation } from 'react-i18next'
 import { Archive, Loader2 } from 'lucide-react'
 import FloatingPanel from '@/components/ui/FloatingPanel'
 import { Z } from '@/lib/zIndexScale'
+import Button from '@/components/ui/Button'
 
 // Relation keys the backend's usageCounts() may send (location: 7 keys incl.
 // `departments`; department: same minus `departments` plus `tasks` — both
@@ -82,11 +83,9 @@ export default function InUseCountsDialog({ open, counts, onClose, onArchive, ar
               {t('inUse.archive')}
             </button>
           ) : <span />}
-          <button onClick={onClose}
-            style={{ height: 32, padding: '0 16px', borderRadius: 8, border: '1px solid var(--border)',
-              background: 'none', color: 'var(--text)', cursor: 'pointer', fontSize: 13 }}>
+          <Button variant="secondary" onClick={onClose}>
             {t('inUse.close')}
-          </button>
+          </Button>
         </div>
     </FloatingPanel>
   )

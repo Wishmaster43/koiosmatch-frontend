@@ -9,6 +9,7 @@ import { useTranslation } from 'react-i18next'
 import { Check, Copy, Plus, Trash2, Edit2, Save, X } from 'lucide-react'
 import api, { unwrap, unwrapList } from '@/lib/api'
 import { useConfirm } from '@/hooks/useConfirm'
+import Button from '@/components/ui/Button'
 
 // Inbound webhook URLs hang off the API root's /webhook path, not under /api.
 const API_URL = import.meta.env.VITE_API_URL ?? 'http://koiosmatch-api.test/api'
@@ -125,10 +126,10 @@ export default function IncomingWebhooks() {
                   )}
                   {editId === wh.id ? (
                     <>
-                      <button onClick={() => saveEdit(wh.id)} title={t('common.save')}
-                        style={{ width: 28, height: 28, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--color-primary)', border: 'none', borderRadius: 6, cursor: 'pointer', color: 'var(--color-on-accent)' }}>
+                      <Button variant="primary" size="sm" onClick={() => saveEdit(wh.id)} title={t('common.save')}
+                        style={{ width: 28 }}>
                         <Save size={12} />
-                      </button>
+                      </Button>
                       <button onClick={() => setEditId(null)} title={t('common.cancel')}
                         style={{ width: 28, height: 28, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--hover-bg)', border: '1px solid var(--border)', borderRadius: 6, cursor: 'pointer', color: 'var(--text-muted)' }}>
                         <X size={12} />

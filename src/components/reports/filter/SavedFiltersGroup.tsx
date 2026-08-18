@@ -8,6 +8,7 @@ import { useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Save, Trash2, Star } from 'lucide-react'
 import type { ReportFilterGroup } from '@/types/reports'
+import Button from '@/components/ui/Button'
 
 // One saved set — state is opaque to this component.
 interface SavedSet { id: string; name: string; state: unknown; isDefault?: boolean }
@@ -45,11 +46,9 @@ export default function SavedFiltersGroup({ group }: { group: ReportFilterGroup 
           onKeyDown={e => { if (e.key === 'Enter') save() }}
           placeholder={t('savedFilters.namePlaceholder')} aria-label={t('savedFilters.namePlaceholder')}
           style={input} />
-        <button type="button" onClick={save} title={t('savedFilters.save')}
-          style={{ display: 'flex', alignItems: 'center', gap: 5, height: 30, padding: '0 10px', fontSize: 12, fontWeight: 500,
-            border: 'none', borderRadius: 6, cursor: 'pointer', background: 'var(--color-primary)', color: 'var(--color-on-accent)' }}>
+        <Button variant="primary" size="sm" onClick={save} title={t('savedFilters.save')}>
           <Save size={13} /> {t('savedFilters.save')}
-        </button>
+        </Button>
       </div>
 
       {/* Saved sets: star = default (auto-applied on load), click name to load, trash to delete */}

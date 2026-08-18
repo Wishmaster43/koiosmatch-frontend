@@ -36,6 +36,7 @@ import { useUsers } from '@/lib/queries'
 import { useCreatePlanningOrder, useUpdatePlanningOrder } from './hooks/usePlanningOrders'
 import type { PlanningOrderInput, PlanningOrderRow } from './hooks/usePlanningOrders'
 import { extractApiError } from '@/lib/extractApiError'
+import Button from '@/components/ui/Button'
 
 // The three status values PlanningOrder::STATUSES accepts — a fixed backend enum
 // (not yet a tenant lookup), so the values stay literal but every LABEL still runs
@@ -224,10 +225,9 @@ export default function AddOrderModal({ onClose, onCreated, order }: { onClose: 
 
       <div style={{ padding: '14px 24px', borderTop: '1px solid var(--border)', flexShrink: 0,
         display: 'flex', justifyContent: 'flex-end', gap: 8 }}>
-        <button onClick={onClose}
-          style={{ height: BTN_H, padding: '0 16px', fontSize: 13, borderRadius: 8, border: '1px solid var(--border)', background: 'none', color: 'var(--text)', cursor: 'pointer' }}>
+        <Button variant="secondary" onClick={onClose}>
           {t('common:cancel')}
-        </button>
+        </Button>
         <button onClick={handleSubmit} disabled={saving}
           style={{ height: BTN_H, padding: '0 20px', fontSize: 13, fontWeight: 600, borderRadius: 8, border: 'none',
             background: saving ? 'var(--border)' : 'var(--color-primary)',

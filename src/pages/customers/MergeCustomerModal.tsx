@@ -35,6 +35,7 @@ import { Z } from '@/lib/zIndexScale'
 import { BTN_H } from '@/config/buttonMetrics'
 import { fieldInputStyle } from '@/components/forms/fieldMetrics'
 import type { Id } from '@/types/common'
+import Button from '@/components/ui/Button'
 
 // Only the fields the picker/summary show (§8 data minimization) — never the whole
 // customer record. `city` (not `email`, unlike the candidate/contact pickers) is what
@@ -172,16 +173,14 @@ export default function MergeCustomerModal({ current, onClose, onMerged }: {
 
         <div style={{ display: 'flex', justifyContent: 'space-between', gap: 8 }}>
           {duplicate
-            ? <button type="button" onClick={() => setDuplicate(null)}
-                style={{ height: BTN_H, padding: '0 12px', fontSize: 12, border: '1px solid var(--border)', borderRadius: 8, background: 'var(--surface)', color: 'var(--text)', cursor: 'pointer' }}>
+            ? <Button variant="secondary" size="sm" onClick={() => setDuplicate(null)}>
                 {t('merge.back')}
-              </button>
+              </Button>
             : <span />}
           <div style={{ display: 'flex', gap: 8 }}>
-            <button type="button" onClick={onClose}
-              style={{ height: BTN_H, padding: '0 12px', fontSize: 12, border: '1px solid var(--border)', borderRadius: 8, background: 'var(--surface)', color: 'var(--text)', cursor: 'pointer' }}>
+            <Button variant="secondary" size="sm" onClick={onClose}>
               {t('merge.cancel')}
-            </button>
+            </Button>
             <button type="button" onClick={confirmMerge} disabled={!duplicate || merging}
               style={{ display: 'flex', alignItems: 'center', gap: 6, height: BTN_H, padding: '0 14px', fontSize: 12, fontWeight: 600, border: 'none', borderRadius: 8,
                 background: 'var(--color-danger)', color: '#fff', cursor: !duplicate || merging ? 'not-allowed' : 'pointer', opacity: !duplicate || merging ? 0.5 : 1 }}>

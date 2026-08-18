@@ -8,6 +8,7 @@ import { useConfirm } from '@/hooks/useConfirm'
 import { DEFAULT_LOCATION_COLOR, DEFAULT_LOCATION_ICON } from '@/lib/locationIcons'
 import LocationsTable from './locations/LocationsTable'
 import LocationFormModal from './locations/LocationFormModal'
+import Button from '@/components/ui/Button'
 
 // STRAAL-1: Leaflet only loads when the map view opens (§9 — lazy heavy deps).
 const LocationsMapView = lazy(() => import('./LocationsMapView'))
@@ -173,12 +174,9 @@ export default function LocationsSettings() {
           {/* Map quick-view via the ONE shared toggle (§4 — never hand-rolled). */}
           <QuickViewToggle active={view === 'map'} onToggle={() => setView(v => (v === 'map' ? 'table' : 'map'))}
             label={t('common:map.view')} color="var(--color-primary)" icon={MapIcon} />
-          <button onClick={openCreate}
-            style={{ display: 'flex', alignItems: 'center', gap: 6, height: 34, padding: '0 14px',
-                     fontSize: 13, fontWeight: 500, borderRadius: 8, border: '1px solid var(--border)',
-                     background: 'var(--surface)', cursor: 'pointer', color: 'var(--text)' }}>
+          <Button variant="secondary" onClick={openCreate}>
             <Plus size={13} /> {t('locations.create')}
-          </button>
+          </Button>
         </div>
       </div>
 

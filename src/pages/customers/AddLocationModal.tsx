@@ -56,6 +56,7 @@ import type { LocationPayload } from './hooks/useCustomerLocations'
 import type { ContactPayload } from './hooks/useCustomerContacts'
 import type { Location, Contact } from '@/types/customer'
 import type { LookupOption, Id } from '@/types/common'
+import Button from '@/components/ui/Button'
 
 // 422 field-error keys are snake_case; map them back to this form's field names.
 // No billing_email entry (Danny 2026-07-22): that field has no input here anymore
@@ -384,7 +385,7 @@ export default function AddLocationModal({
 
         {/* BTN_H (§4/§9): one explicit height for every text/action button, everywhere. */}
         <div style={{ padding: '12px 22px', borderTop: '1px solid var(--border)', display: 'flex', justifyContent: 'flex-end', gap: 8, flexShrink: 0 }}>
-          <button onClick={onClose} style={{ height: BTN_H, padding: '0 16px', fontSize: 13, borderRadius: 8, border: '1px solid var(--border)', background: 'none', color: 'var(--text)', cursor: 'pointer' }}>{t('subModal.cancel')}</button>
+          <Button variant="secondary" onClick={onClose}>{t('subModal.cancel')}</Button>
           {/* KVK/BTW-PER-LAND-1: a blocking identifier mismatch gates the button too,
               so the disabled state and submit() agree on one condition. */}
           <button onClick={submit} disabled={!form.name.trim() || hasFormatError || hasIdentifierError} style={{ height: BTN_H, padding: '0 20px', fontSize: 13, fontWeight: 600, borderRadius: 8, border: 'none', background: (form.name.trim() && !hasFormatError && !hasIdentifierError) ? 'var(--color-primary)' : 'var(--border)', color: (form.name.trim() && !hasFormatError && !hasIdentifierError) ? 'var(--color-on-accent)' : 'var(--text-muted)', cursor: (form.name.trim() && !hasFormatError && !hasIdentifierError) ? 'pointer' : 'not-allowed' }}>

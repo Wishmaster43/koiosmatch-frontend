@@ -8,7 +8,7 @@ import { useEffect, useState, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import { RefreshCw } from 'lucide-react'
 import { fetchJobMetrics } from './jobsApi'
-import { BTN_H } from '@/config/buttonMetrics'
+import Button from '@/components/ui/Button'
 
 const TH = { padding: '9px 12px', textAlign: 'left', fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', borderBottom: '1px solid var(--border)', whiteSpace: 'nowrap' }
 const TD = { padding: '9px 12px', fontSize: 12.5, color: 'var(--text)', borderBottom: '1px solid var(--hover-bg)' }
@@ -65,11 +65,10 @@ export default function MetricsTab() {
   return (
     <div>
       <div style={{ display: 'flex', alignItems: 'center', marginBottom: 14 }}>
-        <button type="button" onClick={load}
-          style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 6, height: BTN_H, padding: '0 10px', fontSize: 12,
-            border: '1px solid var(--border)', borderRadius: 8, background: 'var(--surface)', color: 'var(--text)', cursor: 'pointer' }}>
+        <Button variant="secondary" size="sm" onClick={load}
+          style={{ marginLeft: 'auto' }}>
           <RefreshCw size={12} className={phase === 'loading' ? 'animate-spin' : undefined} /> {t('jobs.refresh')}
-        </button>
+        </Button>
       </div>
 
       {phase === 'error' && <p style={{ fontSize: 13, color: 'var(--text-muted)', padding: 8 }}>{t('jobs.loadError')}</p>}

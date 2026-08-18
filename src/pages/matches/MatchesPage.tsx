@@ -37,9 +37,9 @@ import { useMatchArchive } from './hooks/useMatchArchive'
 import { useMatchMutations } from './hooks/useMatchMutations'
 import { useTrashFlow } from '@/hooks/useTrashFlow'
 import DeletionPreviewModal from '@/components/ui/DeletionPreviewModal'
-import { BTN_H } from '@/config/buttonMetrics'
 import type { MatchRow } from '@/types/match'
 import type { Id } from '@/types/common'
+import Button from '@/components/ui/Button'
 
 // MatchesPage — loads matches, shows an insights strip and paginates the table.
 export default function MatchesPage({ intent }: { intent?: unknown } = {}) {
@@ -352,13 +352,10 @@ export default function MatchesPage({ intent }: { intent?: unknown } = {}) {
           ) : (
             // Create a direct match (candidate + vacancy) from the Matches page.
             // BTN_H (§4/§9): one explicit height for every text/action button, everywhere.
-            <button
-              onClick={() => setAddOpen(true)}
-              style={{ display: 'flex', alignItems: 'center', gap: 6, height: BTN_H, padding: '0 14px', fontSize: 13,
-                fontWeight: 600, borderRadius: 8, border: 'none', cursor: 'pointer',
-                background: 'var(--color-primary)', color: 'var(--color-on-accent)' }}>
+            <Button variant="primary"
+              onClick={() => setAddOpen(true)}>
               <Plus size={15} aria-hidden="true" /> {t('add.button')}
-            </button>
+            </Button>
           )}
           {/* Shared search — mirror the other list pages (§3A). */}
           <HeaderSearch key={searchEpoch} onSearch={setQuery} placeholder={t('page.searchPlaceholder')} width={260} />

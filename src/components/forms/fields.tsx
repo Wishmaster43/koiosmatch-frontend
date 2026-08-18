@@ -14,6 +14,7 @@ import { fieldInputStyle } from './fieldMetrics'
 import { CANON_LABEL_STYLE } from '@/components/drawer/fieldRowCanon'
 import { toLocalIsoDate } from '@/lib/localDate'
 import CreatableSelect from '@/components/ui/CreatableSelect'
+import Button from '@/components/ui/Button'
 
 export interface SelectOption { value: string; label?: ReactNode }
 
@@ -185,11 +186,9 @@ export function SaveCancel({ onSave, onCancel, saveLabel, cancelLabel }: {
           background: 'var(--text)', color: 'var(--surface)', border: 'none', cursor: 'pointer' }}>
         {saveLabel ?? t('save')}
       </button>
-      <button onClick={onCancel}
-        style={{ padding: '8px 16px', fontSize: 12, borderRadius: 8,
-          background: 'none', color: 'var(--text)', border: '1px solid var(--border)', cursor: 'pointer' }}>
+      <Button variant="secondary" size="sm" onClick={onCancel}>
         {cancelLabel ?? t('cancel')}
-      </button>
+      </Button>
     </div>
   )
 }

@@ -10,8 +10,8 @@ import { MessageCircle, RefreshCw, Search } from 'lucide-react'
 import api, { unwrap } from '@/lib/api'
 import { useAuth } from '@/context/AuthContext'
 import { useDateFormat } from '@/lib/datetime'
-import { BTN_H } from '@/config/buttonMetrics'
 import AddWhatsAppConnectionForm from './whatsapp/AddWhatsAppConnectionForm'
+import Button from '@/components/ui/Button'
 
 // Phone-number quality ratings → colour. Label = t('whatsapp.quality<KEY>').
 const QUALITY_META = {
@@ -228,13 +228,10 @@ export default function WhatsAppSettings() {
                   token against Meta (and thereby activate an inactive connection).
                   Same button footprint as the two sync buttons on the other tabs. */}
               {connId && canProvision && (
-                <button onClick={checkStatus} disabled={syncing === 'status'}
-                  style={{ display: 'flex', alignItems: 'center', gap: 6, height: BTN_H, padding: '0 12px', flexShrink: 0,
-                           fontSize: 12, fontWeight: 500, borderRadius: 8, cursor: 'pointer',
-                           border: '1px solid var(--border)', background: 'var(--surface)', color: 'var(--text)' }}>
+                <Button variant="secondary" size="sm" onClick={checkStatus} disabled={syncing === 'status'}>
                   <RefreshCw size={11} style={{ animation: syncing === 'status' ? 'spin 1s linear infinite' : 'none' }} />
                   {t('whatsapp.checkStatus')}
-                </button>
+                </Button>
               )}
             </div>
         ) : (
@@ -252,13 +249,10 @@ export default function WhatsAppSettings() {
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', marginBottom: 12 }}>
           {connId && canProvision && (
             // BTN_H (§4/§9): one explicit height for every text/action button, everywhere.
-            <button onClick={syncNumbers} disabled={syncing === 'numbers'}
-              style={{ display: 'flex', alignItems: 'center', gap: 6, height: BTN_H, padding: '0 12px',
-                       fontSize: 12, fontWeight: 500, borderRadius: 8, cursor: 'pointer',
-                       border: '1px solid var(--border)', background: 'var(--surface)', color: 'var(--text)' }}>
+            <Button variant="secondary" size="sm" onClick={syncNumbers} disabled={syncing === 'numbers'}>
               <RefreshCw size={11} style={{ animation: syncing === 'numbers' ? 'spin 1s linear infinite' : 'none' }} />
               {t('whatsapp.sync')}
-            </button>
+            </Button>
           )}
         </div>
         {phones.length === 0 ? (
@@ -316,13 +310,10 @@ export default function WhatsAppSettings() {
           <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
             {connId && (
               // BTN_H (§4/§9): one explicit height for every text/action button, everywhere.
-              <button onClick={syncTemplates} disabled={syncing === 'templates'}
-                style={{ display: 'flex', alignItems: 'center', gap: 6, height: BTN_H, padding: '0 12px',
-                         fontSize: 12, fontWeight: 500, borderRadius: 8, cursor: 'pointer',
-                         border: '1px solid var(--border)', background: 'var(--surface)', color: 'var(--text)' }}>
+              <Button variant="secondary" size="sm" onClick={syncTemplates} disabled={syncing === 'templates'}>
                 <RefreshCw size={11} style={{ animation: syncing === 'templates' ? 'spin 1s linear infinite' : 'none' }} />
                 {t('whatsapp.sync')}
-              </button>
+              </Button>
             )}
             {templates.length > 0 && (
               <div style={{ position: 'relative' }}>

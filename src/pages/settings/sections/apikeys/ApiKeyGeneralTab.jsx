@@ -13,6 +13,7 @@ import { KEY_TYPES, isValidIpOrCidr } from './constants'
 import SearchSelect from '@/components/ui/SearchSelect'
 import { BTN_H } from '@/config/buttonMetrics'
 import { fieldInputStyle } from '@/components/forms/fieldMetrics'
+import Button from '@/components/ui/Button'
 
 export default function ApiKeyGeneralTab({ apiKey, onSave }) {
   const { t } = useTranslation('settings')
@@ -74,13 +75,12 @@ export default function ApiKeyGeneralTab({ apiKey, onSave }) {
       <div className="flex items-center justify-end" style={{ marginBottom: 14, gap: 8 }}>
         {editing ? (
           <>
-            <button onClick={cancel} style={{ display: 'flex', alignItems: 'center', gap: 5, height: BTN_H, padding: '0 12px', fontSize: 13, border: '1px solid var(--border)', borderRadius: 8, background: 'var(--surface)', cursor: 'pointer', color: 'var(--text)' }}>
+            <Button variant="secondary" onClick={cancel}>
               <X size={13} /> {t('common.cancel')}
-            </button>
-            <button onClick={save} disabled={saving}
-              style={{ display: 'flex', alignItems: 'center', gap: 6, height: BTN_H, padding: '0 14px', fontSize: 13, fontWeight: 500, border: 'none', borderRadius: 8, background: 'var(--color-primary)', color: 'var(--color-on-accent)', cursor: 'pointer' }}>
+            </Button>
+            <Button variant="primary" onClick={save} disabled={saving}>
               {saving ? <RefreshCw size={13} className="animate-spin" /> : <Save size={13} />} {t('common.save')}
-            </button>
+            </Button>
           </>
         ) : (
           <button onClick={() => setEditing(true)}

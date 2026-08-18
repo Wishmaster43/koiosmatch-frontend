@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next'
 import { ChevronDown, ChevronUp, Pencil, Save, X } from 'lucide-react'
 import Slider from '@/components/ui/Slider'
 import AiGeneratedLabel from '@/components/ui/AiGeneratedLabel'
+import Button from '@/components/ui/Button'
 
 export interface Criterion { key?: string; label?: string; hard?: boolean; score: number; weight?: number; note?: string }
 
@@ -161,7 +162,7 @@ export default function MatchScoreBlock({ score, criteria = [], summary, onSave,
             {(showOverall || editing) && <span style={{ fontSize: 12, fontWeight: 700, color: scoreColor(overall) }}>{overall}%</span>}
             {onSave && (editing ? (
               <>
-                <button onClick={save} title={t('matchScore.save')} style={{ display: 'flex', width: 26, height: 26, alignItems: 'center', justifyContent: 'center', borderRadius: 6, background: 'var(--color-primary)', color: 'var(--color-on-accent)', border: 'none', cursor: 'pointer' }}><Save size={13} /></button>
+                <Button variant="primary" size="sm" onClick={save} title={t('matchScore.save')} style={{ width: 26 }}><Save size={13} /></Button>
                 <button onClick={cancel} title={t('matchScore.cancel')} style={{ display: 'flex', width: 26, height: 26, alignItems: 'center', justifyContent: 'center', borderRadius: 6, background: 'var(--bg)', color: 'var(--text-muted)', border: '1px solid var(--border)', cursor: 'pointer' }}><X size={13} /></button>
               </>
             ) : (

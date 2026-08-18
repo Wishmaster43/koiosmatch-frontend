@@ -5,6 +5,7 @@
  */
 import { useTranslation } from 'react-i18next'
 import { Check, Save, RotateCcw } from 'lucide-react'
+import Button from '@/components/ui/Button'
 
 interface ActionRuleSaveBarProps {
   dirtyCount: number
@@ -28,12 +29,9 @@ export default function ActionRuleSaveBar({ dirtyCount, saving, saved, onSave, o
       )}
 
       <div style={{ marginLeft: 'auto', display: 'flex', gap: 8 }}>
-        <button type="button" onClick={onResetAll}
-          style={{ display: 'flex', alignItems: 'center', gap: 6, height: 34, padding: '0 14px', fontSize: 13,
-                   fontWeight: 500, borderRadius: 8, border: '1px solid var(--border)', background: 'var(--surface)',
-                   color: 'var(--text)', cursor: 'pointer', whiteSpace: 'nowrap' }}>
+        <Button variant="secondary" onClick={onResetAll}>
           <RotateCcw size={13} /> {t('actionRules.saveBar.resetAll')}
-        </button>
+        </Button>
         <button type="button" onClick={onSave} disabled={!dirty || saving}
           style={{ display: 'flex', alignItems: 'center', gap: 6, height: 34, padding: '0 14px', fontSize: 13,
                    fontWeight: 500, borderRadius: 8, border: 'none', cursor: dirty && !saving ? 'pointer' : 'default',

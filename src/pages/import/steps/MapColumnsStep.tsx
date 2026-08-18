@@ -11,6 +11,7 @@ import { AlertTriangle } from 'lucide-react'
 import CreatableSelect from '@/components/ui/CreatableSelect'
 import { fieldLabel } from '../lib/fieldLabels'
 import { SKIP, missingRequiredColumns, unmappedSourceColumns, type ColumnMapping } from '../lib/mapping'
+import Button from '@/components/ui/Button'
 
 const SELECT_STYLE: CSSProperties = {
   height: 32, fontSize: 13, minWidth: 220,
@@ -113,11 +114,9 @@ export default function MapColumnsStep({ entity, headers, targetColumns, mapping
       )}
 
       <div style={{ display: 'flex', gap: 8, marginTop: 20 }}>
-        <button type="button" onClick={onBack}
-          style={{ height: 34, padding: '0 16px', fontSize: 13, border: '1px solid var(--border)', borderRadius: 8,
-                   background: 'var(--surface)', color: 'var(--text)', cursor: 'pointer' }}>
+        <Button variant="secondary" onClick={onBack}>
           {t('back', { ns: 'common' })}
-        </button>
+        </Button>
         <button type="button" onClick={onNext} disabled={missingRequired.length > 0 || headers.length === 0}
           style={{ height: 34, padding: '0 16px', fontSize: 13, fontWeight: 500, border: 'none', borderRadius: 8,
                    background: 'var(--color-primary)', color: 'var(--color-on-accent)',

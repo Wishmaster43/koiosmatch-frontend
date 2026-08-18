@@ -15,6 +15,7 @@ import { useDateFormat } from '@/lib/datetime'
 import { useAllSettings, getBoolSetting } from '@/lib/settings/useAllSettings'
 import { useCampaignAdvice } from '@/lib/useCampaignAdvice'
 import type { Campaign } from './hooks/useOutreachCampaigns'
+import Button from '@/components/ui/Button'
 
 // Icon + colour per outreach channel (soft-chip convention) — fixed channel enum,
 // not a tenant lookup, so these are DATA (mirrors a categorical palette, not styling).
@@ -108,10 +109,9 @@ export default function OutreachList({ campaigns, loading, error, onReload, onOp
     return (
       <div style={{ padding: '32px 0', textAlign: 'center' }}>
         <p style={{ fontSize: 13, color: 'var(--text-muted)', marginBottom: 12 }}>{t('loadError')}</p>
-        <button onClick={onReload}
-          style={{ display: 'inline-flex', alignItems: 'center', gap: 6, height: 32, padding: '0 14px', fontSize: 13, border: '1px solid var(--border)', borderRadius: 8, background: 'var(--surface)', cursor: 'pointer', color: 'var(--text)' }}>
+        <Button variant="secondary" onClick={onReload}>
           <RefreshCw size={13} /> {t('retry')}
-        </button>
+        </Button>
       </div>
     )
   }

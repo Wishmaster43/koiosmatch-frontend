@@ -15,6 +15,7 @@ import { notifyError } from '@/lib/notify'
 import { useConfirm } from '@/hooks/useConfirm'
 import { DragList, ColorSwatch, ColorBadge, DefaultToggle } from '../components/SettingsControls'
 import { Toggle } from '../components/SettingsKit'
+import Button from '@/components/ui/Button'
 
 // eslint-disable-next-line no-restricted-syntax -- DATA: fallback swatch colour for a lookup row without one stored yet, not UI chrome
 const FALLBACK_SWATCH = '#6B7280'
@@ -286,13 +287,9 @@ export default function StatusListEditor({ title, subtitle, endpoint, addLabel, 
         </div>
         <div style={{ display: 'flex', gap: 8, flexShrink: 0 }}>
           {allowAdd && (
-            <button onClick={openCreate}
-              style={{ display: 'flex', alignItems: 'center', gap: 6, height: 34, padding: '0 14px',
-                       fontSize: 13, fontWeight: 500, borderRadius: 8, border: '1px solid var(--border)',
-                       whiteSpace: 'nowrap', flexShrink: 0,
-                       background: 'var(--surface)', cursor: 'pointer', color: 'var(--text)' }}>
+            <Button variant="secondary" onClick={openCreate}>
               <Plus size={13} /> {addLabel}
-            </button>
+            </Button>
           )}
         </div>
       </div>
@@ -448,7 +445,7 @@ export default function StatusListEditor({ title, subtitle, endpoint, addLabel, 
               </div>
             ))}
             <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, marginTop: 20 }}>
-              <button onClick={() => setShowModal(false)} style={{ height: 34, padding: '0 16px', fontSize: 13, border: '1px solid var(--border)', borderRadius: 8, background: 'var(--surface)', cursor: 'pointer' }}>{t('common.cancel')}</button>
+              <Button variant="secondary" onClick={() => setShowModal(false)}>{t('common.cancel')}</Button>
               <button onClick={submit} disabled={saving || !draft.name.trim()}
                 style={{ height: 34, padding: '0 16px', fontSize: 13, fontWeight: 500, border: 'none', borderRadius: 8, background: 'var(--color-primary)', color: 'var(--color-on-accent)', cursor: 'pointer', opacity: draft.name.trim() ? 1 : 0.4 }}>
                 {saving ? t('common.saving') : (editing ? t('common.save') : t('statusList.addBtn'))}

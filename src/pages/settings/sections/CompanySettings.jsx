@@ -13,6 +13,7 @@ import { cardHead } from '@/components/ui/modalCards'
 // locales the profile picker offers — never a diverging local list.
 import { LANGUAGES as APP_LANGUAGES } from '@/pages/auth/profileParts'
 import { BTN_H } from '@/config/buttonMetrics'
+import Button from '@/components/ui/Button'
 
 // Option lists (data — kept as-is; only labels are translated). Industries and
 // countries are now backend-sourced (Settings → Personalisation → Industries;
@@ -203,10 +204,9 @@ export default function CompanySettings() {
                   {/* Real upload (BANNER-UPLOAD-1). No local "remove": clearing only the
                       preview would reappear on reload — a delete needs its own endpoint. */}
                   <input ref={bannerRef} type="file" accept="image/png,image/jpeg,image/webp,image/svg+xml" style={{ display: 'none' }} onChange={handleBannerFile} />
-                  <button onClick={() => bannerRef.current?.click()}
-                    style={{ height: BTN_H, padding: '0 12px', fontSize: 12, border: '1px solid var(--border)', borderRadius: 7, background: 'var(--surface)', cursor: 'pointer', color: 'var(--text)' }}>
+                  <Button variant="secondary" size="sm" onClick={() => bannerRef.current?.click()}>
                     {t('common.upload')}
-                  </button>
+                  </Button>
                 </div>
               </div>
             </Row>

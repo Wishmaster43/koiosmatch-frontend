@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Unlink } from 'lucide-react'
 import FloatingPanel from '@/components/ui/FloatingPanel'
+import Button from '@/components/ui/Button'
 
 const REASON_MAX = 1000
 
@@ -44,10 +45,9 @@ export default function DetachReasonModal({ onCancel, onConfirm, submitting }: P
             border: '1px solid var(--border)', background: 'var(--input-bg)', color: 'var(--text)', resize: 'vertical', outline: 'none' }} />
 
         <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, marginTop: 14 }}>
-          <button onClick={onCancel} style={{ height: 34, padding: '0 16px', fontSize: 13, border: '1px solid var(--border)',
-            borderRadius: 8, background: 'var(--surface)', cursor: 'pointer', color: 'var(--text)' }}>
+          <Button variant="secondary" onClick={onCancel}>
             {t('common:cancel')}
-          </button>
+          </Button>
           <button onClick={() => trimmed && onConfirm(trimmed)} disabled={!trimmed || submitting}
             style={{ height: 34, padding: '0 16px', fontSize: 13, fontWeight: 600, border: 'none', borderRadius: 8,
               background: 'var(--color-danger)', color: '#fff', cursor: (!trimmed || submitting) ? 'not-allowed' : 'pointer',

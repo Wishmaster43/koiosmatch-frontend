@@ -14,6 +14,7 @@ import SoftChip from '@/components/ui/SoftChip'
 import FloatingPanel from '@/components/ui/FloatingPanel'
 import { resolveApplication, resolveMatch } from '../data/archiveGuard'
 import type { BlockingApplication, BlockingMatch } from '../data/archiveGuard'
+import Button from '@/components/ui/Button'
 
 const sectionHeader: React.CSSProperties = {
   display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6, gap: 8,
@@ -137,9 +138,9 @@ export default function ArchiveGuardModal({ mode, candidateName, aggregate, appl
         )}
 
         <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, marginTop: 6 }}>
-          <button onClick={onClose} style={{ height: 34, padding: '0 16px', fontSize: 13, border: '1px solid var(--border)', borderRadius: 8, background: 'var(--surface)', cursor: 'pointer', color: 'var(--text)' }}>
+          <Button variant="secondary" onClick={onClose}>
             {t('common:cancel')}
-          </button>
+          </Button>
           <button onClick={resolveAll} disabled={resolving || !hasBlockers}
             style={{ height: 34, padding: '0 16px', fontSize: 13, fontWeight: 600, border: 'none', borderRadius: 8, background: 'var(--color-danger)', color: '#fff', cursor: 'pointer', opacity: (resolving || !hasBlockers) ? 0.6 : 1 }}>
             {resolving ? t('archiveGuard.resolving') : t(mode === 'trash' ? 'archiveGuard.resolveButtonTrash' : 'archiveGuard.resolveButtonArchive')}

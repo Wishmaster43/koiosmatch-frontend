@@ -14,6 +14,7 @@ import StatusPill from '@/components/ui/StatusPill'
 import { formatDuration } from '@/components/reports/runFormat'
 import { BTN_H } from '@/config/buttonMetrics'
 import SearchSelect from '@/components/ui/SearchSelect'
+import Button from '@/components/ui/Button'
 
 const STATUS_COLOR = {
   completed: 'var(--color-success)', failed: 'var(--color-danger)',
@@ -75,11 +76,10 @@ export default function RecentJobsTab() {
           <input value={jobSearch} onChange={e => setJobSearch(e.target.value)} placeholder={t('jobs.recent.jobSearch')}
             style={{ border: 'none', outline: 'none', background: 'transparent', fontSize: 12, color: 'var(--text)', width: 160 }} />
         </div>
-        <button type="button" onClick={load}
-          style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 6, height: BTN_H, padding: '0 10px', fontSize: 12,
-            border: '1px solid var(--border)', borderRadius: 8, background: 'var(--surface)', color: 'var(--text)', cursor: 'pointer' }}>
+        <Button variant="secondary" size="sm" onClick={load}
+          style={{ marginLeft: 'auto' }}>
           <RefreshCw size={12} className={phase === 'loading' ? 'animate-spin' : undefined} /> {t('jobs.refresh')}
-        </button>
+        </Button>
         <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>{t('jobs.recent.window')}</span>
       </div>
 

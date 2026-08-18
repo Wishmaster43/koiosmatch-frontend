@@ -23,6 +23,7 @@ import CustomerBranchesCard from './addmodal/CustomerBranchesCard'
 import EntityImportCard from '@/components/import/EntityImportCard'
 import { useEntityImportCard } from '@/components/import/useEntityImportCard'
 import type { Id, LookupOption } from '@/types/common'
+import Button from '@/components/ui/Button'
 
 // The ONE backend importer that builds a whole customer tree (customer + locations +
 // departments + contacts) from one flat file — verified against koiosmatch-api's
@@ -355,10 +356,9 @@ export default function AddCustomerModal({ onClose, onCreate, onImported, users 
         {/* Footer — BTN_H (§4/§9): one explicit height for every text/action button, everywhere. */}
         <div style={{ padding: '14px 24px', borderTop: '1px solid var(--border)', flexShrink: 0,
           display: 'flex', justifyContent: 'flex-end', gap: 8 }}>
-          <button onClick={onClose}
-            style={{ height: BTN_H, padding: '0 16px', fontSize: 13, borderRadius: 8, border: '1px solid var(--border)', background: 'none', color: 'var(--text)', cursor: 'pointer' }}>
+          <Button variant="secondary" onClick={onClose}>
             {t('modal.cancel')}
-          </button>
+          </Button>
           <button onClick={handleSubmit} disabled={!canSubmit}
             style={{ height: BTN_H, padding: '0 20px', fontSize: 13, fontWeight: 600, borderRadius: 8, border: 'none',
               background: canSubmit ? 'var(--color-primary)' : 'var(--border)', color: canSubmit ? 'var(--color-on-accent)' : 'var(--text-muted)',

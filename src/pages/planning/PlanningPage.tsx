@@ -10,6 +10,7 @@ import ShiftStaffingDrawer from './ShiftStaffingDrawer'
 import { MonthView, WeekView, DayView, ListView } from './views'
 import type { Shift } from '@/types/planning'
 import type { PlanningBoardShift } from './hooks/usePlanningBoard'
+import Button from '@/components/ui/Button'
 
 // ── Real shifts (PLANNING-PERSIST-1 follow-up — read side) ────────────────────
 // This calendar used to render six hardcoded, always-the-same demo rows,
@@ -132,11 +133,9 @@ export default function PlanningPage() {
         borderBottom: '1px solid var(--border)', flexShrink: 0 }}>
 
         {/* Today */}
-        <button onClick={goToday}
-          style={{ padding: '6px 14px', fontSize: 12, fontWeight: 500, border: '1px solid var(--border)',
-            borderRadius: 8, background: 'var(--surface)', color: 'var(--text)', cursor: 'pointer' }}>
+        <Button variant="secondary" size="sm" onClick={goToday}>
           {t('today')}
-        </button>
+        </Button>
 
         {/* Prev / Next */}
         <button onClick={() => navigate(-1)}
@@ -169,12 +168,9 @@ export default function PlanningPage() {
         </div>
 
         {/* Add button */}
-        <button onClick={() => setModal(new Date())}
-          style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '7px 14px', fontSize: 12,
-            fontWeight: 600, background: 'var(--color-primary)', color: 'var(--color-on-accent)',
-            border: 'none', borderRadius: 8, cursor: 'pointer' }}>
+        <Button variant="primary" size="sm" onClick={() => setModal(new Date())}>
           <Plus size={14} /> {t('addShift')}
-        </button>
+        </Button>
       </div>
 
       {/* Not-yet-persisted gate (PLANNING-PERSIST-1, §3) — only the ADD side is

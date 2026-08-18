@@ -9,6 +9,7 @@ import { useTranslation } from 'react-i18next'
 import { Search } from 'lucide-react'
 import { EVENT_GROUPS, ALL_EVENTS, actionOf } from './webhookEvents'
 import { PermissionToggle } from '@/pages/settings/components/SettingsControls'
+import Button from '@/components/ui/Button'
 
 export default function EventCatalog({ value = [], onChange }) {
   const { t } = useTranslation('settings')
@@ -56,10 +57,9 @@ export default function EventCatalog({ value = [], onChange }) {
           <input value={query} onChange={(e) => setQuery(e.target.value)} placeholder={t('webhooks.events.search')}
             style={{ width: '100%', height: 34, padding: '0 10px 0 32px', fontSize: 13, color: 'var(--text)', border: '1px solid var(--border)', borderRadius: 8, outline: 'none', background: 'var(--surface)' }} />
         </div>
-        <button onClick={() => onChange(allSelected ? [] : [...ALL_EVENTS])}
-          style={{ height: 34, padding: '0 12px', fontSize: 12, fontWeight: 500, border: '1px solid var(--border)', borderRadius: 8, background: 'var(--surface)', cursor: 'pointer', color: 'var(--text)', whiteSpace: 'nowrap' }}>
+        <Button variant="secondary" size="sm" onClick={() => onChange(allSelected ? [] : [...ALL_EVENTS])}>
           {allSelected ? t('webhooks.events.clear') : t('webhooks.events.selectAll')}
-        </button>
+        </Button>
       </div>
       <p style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 12 }}>
         {t('webhooks.events.selectedCount', { count: selected.size })}

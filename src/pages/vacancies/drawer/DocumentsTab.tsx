@@ -24,6 +24,7 @@ import { downloadFilesSequentially } from '@/lib/downloadFiles'
 import DocumentRow from '@/pages/candidates/drawer/DocumentRow'
 import { docKey, docUrl, splitExt, DOC_GRID_COLUMNS } from '@/pages/candidates/drawer/documentHelpers'
 import type { DocItem } from '@/pages/candidates/drawer/documentHelpers'
+import Button from '@/components/ui/Button'
 
 // A picked-but-not-yet-uploaded file, staged so its type can be chosen first.
 interface PendingDoc { file: File; objectUrl: string; name: string; size: string; type: string }
@@ -240,10 +241,9 @@ export default function DocumentsTab({ vacancy: v }: { vacancy: VacancyDetail })
               style={{ padding: '6px 12px', fontSize: 12, fontWeight: 600, borderRadius: 6, background: 'var(--text)', color: 'var(--bg)', border: 'none', cursor: 'pointer' }}>
               {t('common:add')}
             </button>
-            <button onClick={cancelUpload}
-              style={{ padding: '6px 12px', fontSize: 12, borderRadius: 6, background: 'none', color: 'var(--text)', border: '1px solid var(--border)', cursor: 'pointer' }}>
+            <Button variant="secondary" size="sm" onClick={cancelUpload}>
               {t('common:cancel')}
-            </button>
+            </Button>
           </div>
         </div>
       )}

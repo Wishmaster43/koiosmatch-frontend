@@ -5,6 +5,7 @@
  */
 import { useTranslation } from 'react-i18next'
 import { BTN_H } from '@/config/buttonMetrics'
+import Button from '@/components/ui/Button'
 
 interface ModalFooterProps {
   onClose: () => void
@@ -23,11 +24,9 @@ export default function ModalFooter({ onClose, onSubmit, canSubmit, saving, hasT
   return (
     <div style={{ padding: '14px 24px', borderTop: '1px solid var(--border)', flexShrink: 0,
       display: 'flex', justifyContent: 'flex-end', gap: 8, background: 'var(--bg)' }}>
-      <button onClick={onClose}
-        style={{ height: BTN_H, padding: '0 16px', fontSize: 13, borderRadius: 8,
-          border: '1px solid var(--border)', background: 'none', color: 'var(--text)', cursor: 'pointer' }}>
+      <Button variant="secondary" onClick={onClose}>
         {t('common:cancel')}
-      </button>
+      </Button>
       <button onClick={onSubmit} disabled={!canSubmit || saving}
         style={{ height: BTN_H, padding: '0 20px', fontSize: 13, fontWeight: 600, borderRadius: 8, border: 'none',
           background: enabled ? 'var(--color-primary)' : 'var(--border)',

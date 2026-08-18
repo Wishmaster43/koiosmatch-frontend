@@ -11,6 +11,7 @@ import { ShieldCheck, ArrowLeft, Lock } from 'lucide-react'
 import { useAuth } from '@/context/AuthContext'
 import MfaSetupWizard from '@/components/auth/MfaSetupWizard'
 import { BTN_H } from '@/config/buttonMetrics'
+import Button from '@/components/ui/Button'
 
 export default function SecuritySettings() {
   const { t } = useTranslation('settings')
@@ -110,12 +111,9 @@ export default function SecuritySettings() {
               {t('security.disable')}
             </button>
           ) : (
-            <button onClick={() => { setStep('wizard'); setError('') }}
-              style={{ height: BTN_H, padding: '0 14px', fontSize: 12, fontWeight: 500, borderRadius: 8,
-                       cursor: 'pointer', border: 'none',
-                       background: 'var(--color-primary)', color: 'var(--color-on-accent)', flexShrink: 0 }}>
+            <Button variant="primary" size="sm" onClick={() => { setStep('wizard'); setError('') }}>
               {t('security.enable')}
-            </button>
+            </Button>
           )
         }
       </div>

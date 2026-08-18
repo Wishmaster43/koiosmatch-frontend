@@ -18,6 +18,7 @@ import type { PlanningOrderRow } from './hooks/usePlanningOrders'
 import AddOrderModal from './AddOrderModal'
 import { extractApiError } from '@/lib/extractApiError'
 import { BTN_H } from '@/config/buttonMetrics'
+import Button from '@/components/ui/Button'
 
 export default function OrdersPanel() {
   const { t } = useTranslation('planning')
@@ -45,12 +46,9 @@ export default function OrdersPanel() {
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%', overflow: 'hidden' }}>
       <div style={{ display: 'flex', alignItems: 'center', padding: '14px 20px', borderBottom: '1px solid var(--border)', flexShrink: 0 }}>
         <span style={{ fontSize: 15, fontWeight: 700, color: 'var(--text)', flex: 1 }}>{t('order.listTitle')}</span>
-        <button onClick={() => setAddOpen(true)}
-          style={{ display: 'flex', alignItems: 'center', gap: 6, height: BTN_H, padding: '0 14px', fontSize: 12,
-            fontWeight: 600, background: 'var(--color-primary)', color: 'var(--color-on-accent)',
-            border: 'none', borderRadius: 8, cursor: 'pointer' }}>
+        <Button variant="primary" size="sm" onClick={() => setAddOpen(true)}>
           <Plus size={14} /> {t('order.addOrder')}
-        </button>
+        </Button>
       </div>
 
       <div style={{ flex: 1, overflowY: 'auto', padding: 16 }}>
@@ -123,10 +121,9 @@ export default function OrdersPanel() {
               </div>
             )}
             <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8 }}>
-              <button onClick={() => { setPendingDelete(null); setDeleteError(null) }}
-                style={{ height: BTN_H, padding: '0 14px', fontSize: 12, borderRadius: 8, border: '1px solid var(--border)', background: 'none', color: 'var(--text)', cursor: 'pointer' }}>
+              <Button variant="secondary" size="sm" onClick={() => { setPendingDelete(null); setDeleteError(null) }}>
                 {t('common:cancel')}
-              </button>
+              </Button>
               <button onClick={handleDeleteConfirm} disabled={deleteOrder.isPending}
                 style={{ height: BTN_H, padding: '0 14px', fontSize: 12, fontWeight: 600, borderRadius: 8, border: 'none',
                   background: 'var(--color-danger)', color: 'var(--color-on-accent)',

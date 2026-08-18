@@ -14,6 +14,7 @@ import { AlertTriangle, CheckCircle2 } from 'lucide-react'
 import ImportResultPanel from './ImportResultPanel'
 import { countRemarkRows } from './importRowAttention'
 import type { ImportRunResult } from './importApi'
+import Button from '@/components/ui/Button'
 
 interface ResultStepProps {
   result: ImportRunResult
@@ -51,11 +52,10 @@ export default function ResultStep({ result, onReset, wholeTree = false }: Resul
       <ImportResultPanel result={result} wholeTree={wholeTree}
         showAllRows={showAllRows} onToggleShowAll={() => setShowAllRows((v) => !v)} />
 
-      <button type="button" onClick={onReset}
-        style={{ marginTop: 20, height: 34, padding: '0 16px', fontSize: 13, border: '1px solid var(--border)',
-                 borderRadius: 8, background: 'var(--surface)', color: 'var(--text)', cursor: 'pointer' }}>
+      <Button variant="secondary" onClick={onReset}
+        style={{ marginTop: 20 }}>
         {t('import.result.newImport')}
-      </button>
+      </Button>
     </div>
   )
 }

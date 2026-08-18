@@ -14,6 +14,7 @@ import QuickViewToggle from '@/components/ui/QuickViewToggle'
 import type { Workflow } from '@/types/workflow'
 import type { WorkflowFolder, FolderId } from './hooks/useWorkflowsData'
 import type { ViewMode } from './hooks/useWorkflowsFilters'
+import Button from '@/components/ui/Button'
 
 // Props: everything needed to render the toolbar + the visible workflow list.
 interface WorkflowsListPanelProps {
@@ -55,12 +56,11 @@ export default function WorkflowsListPanel({
     <div style={{ flex: 1, padding: 24, overflowY: 'auto' }}>
       {/* Toolbar — add on the LEFT, count + archived + view toggle on the RIGHT (mirror Kansen). */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 20 }}>
-        <button
+        <Button variant="primary"
           onClick={() => openEditor({ name: t('page.newWorkflow'), trigger: 'Dagelijks 08:00', status: 'draft', last_run: null, steps: [], folder_id: selectedFolder === 'unassigned' ? null : (selectedFolder ?? null) })}
-          style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '8px 16px', fontSize: 13, fontWeight: 600, color: 'var(--color-on-accent)', background: 'var(--color-primary)', border: 'none', borderRadius: 8, cursor: 'pointer' }}
         >
           <Plus size={14} /> {t('page.newWorkflow')}
-        </button>
+        </Button>
 
         <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 10 }}>
           {/* Visible count */}

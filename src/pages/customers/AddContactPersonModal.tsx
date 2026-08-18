@@ -69,6 +69,7 @@ import { useImportWizard } from '@/pages/settings/sections/importeren/useImportW
 import type { ContactPayload } from './hooks/useCustomerContacts'
 import type { Contact, Department } from '@/types/customer'
 import type { Id, LookupOption } from '@/types/common'
+import Button from '@/components/ui/Button'
 
 interface OptionRow { id: Id; name: string }
 
@@ -415,7 +416,7 @@ export default function AddContactPersonModal({
 
         {/* BTN_H (§4/§9): one explicit height for every text/action button, everywhere. */}
         <div style={{ padding: '12px 22px', borderTop: '1px solid var(--border)', display: 'flex', justifyContent: 'flex-end', gap: 8, flexShrink: 0 }}>
-          <button onClick={onClose} style={{ height: BTN_H, padding: '0 16px', fontSize: 13, borderRadius: 8, border: '1px solid var(--border)', background: 'none', color: 'var(--text)', cursor: 'pointer' }}>{t('subModal.cancel')}</button>
+          <Button variant="secondary" onClick={onClose}>{t('subModal.cancel')}</Button>
           <button onClick={submit} disabled={!canSubmit} style={{ height: BTN_H, padding: '0 20px', fontSize: 13, fontWeight: 600, borderRadius: 8, border: 'none', background: canSubmit ? 'var(--color-primary)' : 'var(--border)', color: canSubmit ? 'var(--color-on-accent)' : 'var(--text-muted)', cursor: canSubmit ? 'pointer' : 'not-allowed' }}>
             {isEdit ? t('subModal.save') : t('subModal.create')}
           </button>

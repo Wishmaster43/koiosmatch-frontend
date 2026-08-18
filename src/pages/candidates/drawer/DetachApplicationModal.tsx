@@ -29,6 +29,7 @@ import { Unlink } from 'lucide-react'
 import FloatingPanel from '@/components/ui/FloatingPanel'
 import { Z } from '@/lib/zIndexScale'
 import { BTN_H } from '@/config/buttonMetrics'
+import Button from '@/components/ui/Button'
 
 // Mirrors the backend limit (ApplicationController::destroy — string|max:1000).
 const REASON_MAX = 1000
@@ -71,11 +72,9 @@ export default function DetachApplicationModal({ label, onCancel, onConfirm, sub
             border: '1px solid var(--border)', background: 'var(--input-bg)', color: 'var(--text)', resize: 'vertical', outline: 'none' }} />
 
         <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, marginTop: 14 }}>
-          <button type="button" onClick={onCancel}
-            style={{ height: BTN_H, padding: '0 16px', fontSize: 13, border: '1px solid var(--border)', borderRadius: 8,
-              background: 'var(--surface)', color: 'var(--text)', cursor: 'pointer' }}>
+          <Button variant="secondary" onClick={onCancel}>
             {t('common:cancel')}
-          </button>
+          </Button>
           <button type="button" onClick={() => trimmed && onConfirm(trimmed)} disabled={disabled}
             style={{ height: BTN_H, padding: '0 16px', fontSize: 13, fontWeight: 600, border: 'none', borderRadius: 8,
               background: 'var(--color-danger)', color: 'var(--color-on-danger)',

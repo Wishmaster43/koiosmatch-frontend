@@ -26,7 +26,7 @@ import type { UserRow } from './userRow'
 import { useUsersData } from './hooks/useUsersData'
 import { useUserDeletion } from './hooks/useUserDeletion'
 import { roleName } from './usersParts'
-import { BTN_H } from '@/config/buttonMetrics'
+import Button from '@/components/ui/Button'
 
 export default function UsersPage() {
   const { t } = useTranslation('users')
@@ -108,12 +108,9 @@ export default function UsersPage() {
           <HeaderSearch onSearch={setQuery} placeholder={t('searchPlaceholder')} ariaLabel={t('searchPlaceholder')} width={220} />
           {/* Hidden without the right, never a dead button (§7 — backend re-checks). */}
           {canCreate && (
-            <button onClick={() => setShowCreate(true)}
-              style={{ display: 'flex', alignItems: 'center', gap: 6, height: BTN_H, padding: '0 14px',
-                       fontSize: 13, fontWeight: 600, borderRadius: 8, border: 'none',
-                       background: 'var(--color-primary)', color: 'var(--color-on-accent)', cursor: 'pointer' }}>
+            <Button variant="primary" onClick={() => setShowCreate(true)}>
               <Plus size={14} aria-hidden="true" /> {t('newUser')}
-            </button>
+            </Button>
           )}
         </div>
       </div>

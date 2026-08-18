@@ -32,6 +32,7 @@ import { useProvinces } from '@/hooks/useProvinces'
 import FieldNotice from '@/components/ui/FieldNotice'
 import { useIdentifierValidation } from '@/hooks/useIdentifierValidation'
 import IconPickerControl from '../IconPickerControl'
+import Button from '@/components/ui/Button'
 
 // House field footprint (Danny 27-07 point D): 11px uppercase muted label above
 // each input, fontSize 13 / borderRadius 8 — mirrors match/styles.ts'
@@ -174,7 +175,7 @@ export default function LocationFormModal({ editingId, form, setForm, saving, on
         </div>
 
         <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, marginTop: 20 }}>
-          <button onClick={onClose} style={{ height: BTN_H, padding: '0 16px', fontSize: 13, border: '1px solid var(--border)', borderRadius: 8, background: 'var(--surface)', cursor: 'pointer', color: 'var(--text)' }}>{t('common.cancel')}</button>
+          <Button variant="secondary" onClick={onClose}>{t('common.cancel')}</Button>
           {/* KVK/BTW-PER-LAND-1: only a BLOCKING mismatch gates Save — a warning still saves. */}
           <button onClick={onSubmit} disabled={saving || !form.name.trim() || identifierBlocked}
             style={{ height: BTN_H, padding: '0 16px', fontSize: 13, fontWeight: 500, border: 'none', borderRadius: 8, background: 'var(--color-primary)', color: 'var(--color-on-accent)', cursor: 'pointer', opacity: (form.name.trim() && !identifierBlocked) ? 1 : 0.4 }}>

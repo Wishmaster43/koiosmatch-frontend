@@ -12,7 +12,7 @@ import { Archive, Map as MapIcon, Trash2 } from 'lucide-react'
 import HeaderSearch from '@/components/ui/HeaderSearch'
 import ClearFiltersButton from '@/components/ui/ClearFiltersButton'
 import QuickViewToggle from '@/components/ui/QuickViewToggle'
-import { BTN_H } from '@/config/buttonMetrics'
+import Button from '@/components/ui/Button'
 
 interface VacanciesToolbarProps {
   selectedCount: number
@@ -46,10 +46,9 @@ export default function VacanciesToolbar({
         {selectedCount > 0 ? bulkBar : (
           <>
             {/* BTN_H (§4/§9): one explicit height for every text/action button, everywhere. */}
-            <button onClick={onAddOpen} style={{ display: 'flex', alignItems: 'center', height: BTN_H, padding: '0 14px', fontSize: 13, fontWeight: 600,
-              background: 'var(--color-primary)', color: 'var(--color-on-accent)', border: 'none', borderRadius: 8, cursor: 'pointer' }}>
+            <Button variant="primary" onClick={onAddOpen}>
               + {t('page.add')}
-            </button>
+            </Button>
             {/* EXCEL-VACATURES-1 (Danny 14-08, screenshot: "Excel importeren moet in de
                 pop-up + nieuwe vacature niet hier boven de tabel!!"): the Excel/CSV
                 import button moved off this toolbar into AddVacancyModal's header —

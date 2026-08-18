@@ -24,6 +24,7 @@ import { userName, API_TO_FORM } from './addmodal/formHelpers'
 import type { UserLike } from './addmodal/formHelpers'
 import type { Id } from '@/types/common'
 import type { ApiTask } from '@/types/task'
+import Button from '@/components/ui/Button'
 
 // Exported so the addmodal/ card components share this exact shape (type-only import).
 export interface TaskForm {
@@ -411,11 +412,9 @@ export default function AddTaskModal({ onClose, onCreated, onSaved, initial, ext
         {/* Footer — BTN_H (§4/§9): one explicit height for every text/action button, everywhere. */}
         <div style={{ padding: '14px 24px', borderTop: '1px solid var(--border)', flexShrink: 0,
           display: 'flex', justifyContent: 'flex-end', gap: 8, background: 'var(--bg)' }}>
-          <button onClick={onClose}
-            style={{ height: BTN_H, padding: '0 16px', fontSize: 13, borderRadius: 8, border: '1px solid var(--border)',
-              background: 'none', color: 'var(--text)', cursor: 'pointer' }}>
+          <Button variant="secondary" onClick={onClose}>
             {t('modal.cancel')}
-          </button>
+          </Button>
           <button onClick={isEdit ? handleUpdate : handleSubmit} disabled={!canSubmit}
             style={{ height: BTN_H, padding: '0 20px', fontSize: 13, fontWeight: 600, borderRadius: 8, border: 'none',
               background: canSubmit ? 'var(--color-primary)' : 'var(--border)', color: canSubmit ? 'var(--color-on-accent)' : 'var(--text-muted)',

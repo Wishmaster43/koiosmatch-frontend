@@ -18,6 +18,7 @@ import { rememberReturnTab } from './constants'
 import type { ApplicationDetail } from '@/types/application'
 import type { VacancyDetail } from '@/types/vacancy'
 import type { Id } from '@/types/common'
+import Button from '@/components/ui/Button'
 
 type LoadState = 'loading' | 'error' | 'empty' | 'ok'
 
@@ -127,11 +128,9 @@ export default function VacancyTab({ application: a, onLinkVacancy }: VacancyTab
               style={{ ...iconBtn, background: 'var(--bg)', color: 'var(--text-muted)', border: '1px solid var(--border)' }}><X size={13} /></button>
           </div>
         ) : (
-          <button onClick={() => { setVacancyId(''); setLinking(true) }}
-            style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '6px 14px', fontSize: 12, fontWeight: 500,
-              borderRadius: 8, border: '1px solid var(--border)', background: 'none', color: 'var(--text)', cursor: 'pointer' }}>
+          <Button variant="secondary" size="sm" onClick={() => { setVacancyId(''); setLinking(true) }}>
             <Link2 size={13} /> {t('vacancyDetail.linkButton')}
-          </button>
+          </Button>
         ))}
       </div>
     )

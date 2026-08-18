@@ -38,6 +38,7 @@ import FloatingPanel from '@/components/ui/FloatingPanel'
 import { templateTexts, type WaTemplateOption } from '@/components/layout/workflow/whatsappTemplate'
 import type { Id } from '@/types/common'
 import type { AiAgent } from '@/types/ai'
+import Button from '@/components/ui/Button'
 
 // GET /whatsapp-phone-numbers option shape — the tenant's active WhatsApp senders.
 interface PhoneNumberOption { value: string; label: string }
@@ -199,7 +200,7 @@ export default function StartConversationModal({ candidateId, onClose, onStarted
         )}
 
         <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8 }}>
-          <button onClick={onClose} style={{ height: 34, padding: '0 16px', fontSize: 13, border: '1px solid var(--border)', borderRadius: 8, background: 'var(--surface)', cursor: 'pointer', color: 'var(--text)' }}>{t('common:cancel')}</button>
+          <Button variant="secondary" onClick={onClose}>{t('common:cancel')}</Button>
           <button onClick={submit} disabled={!canSend}
             style={{ height: 34, padding: '0 16px', fontSize: 13, fontWeight: 500, border: 'none', borderRadius: 8, background: 'var(--color-primary)', color: 'var(--color-on-accent)', cursor: canSend ? 'pointer' : 'default', opacity: canSend ? 1 : 0.4 }}>
             {sending ? t('common:saving') : t('conversations.start')}

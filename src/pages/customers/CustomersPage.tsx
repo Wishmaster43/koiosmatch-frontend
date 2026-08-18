@@ -32,10 +32,10 @@ import CustomerDrawer from './CustomerDrawer'
 import AddCustomerModal from './AddCustomerModal'
 import { useCustomersData, CUSTOMERS_MAX_PER_PAGE } from './hooks/useCustomersData'
 import { useCustomerRecord } from './hooks/useCustomerRecord'
-import { BTN_H } from '@/config/buttonMetrics'
 import { useCustomerBulkActions } from './hooks/useCustomerBulkActions'
 import type { Id } from '@/types/common'
 import type { Customer } from '@/types/customer'
+import Button from '@/components/ui/Button'
 
 // STRAAL-1: Leaflet only loads when the map view opens (§9 — lazy heavy deps).
 const CustomersMapView = lazy(() => import('./CustomersMapView'))
@@ -301,10 +301,9 @@ export default function CustomersPage({ intent }: { intent?: unknown } = {}) {
               <>
                 {/* Add on the left (like Applications/Candidates) — BTN_H (§4/§9): one
                     explicit height for every text/action button, everywhere. */}
-                <button onClick={() => setAddOpen(true)} style={{ display: 'flex', alignItems: 'center', height: BTN_H, padding: '0 14px', fontSize: 13, fontWeight: 600,
-                  background: 'var(--color-primary)', color: 'var(--color-on-accent)', border: 'none', borderRadius: 8, cursor: 'pointer' }}>
+                <Button variant="primary" onClick={() => setAddOpen(true)}>
                   + {t('page.add')}
-                </button>
+                </Button>
                 {/* Shared header search (T10) — debounced, drives the same server-side ?search=. */}
                 <HeaderSearch key={searchEpoch} onSearch={setGlobalSearch} defaultValue={globalSearch}
                   placeholder={t('page.searchPlaceholder')} width={300} />

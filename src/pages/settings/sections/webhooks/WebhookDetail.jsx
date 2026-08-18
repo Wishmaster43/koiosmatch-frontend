@@ -15,6 +15,7 @@ import { getSubscription, updateSubscription, deleteSubscription, regenerateSecr
 import EventCatalog from './EventCatalog'
 import { BTN_H } from '@/config/buttonMetrics'
 import { fieldInputStyle } from '@/components/forms/fieldMetrics'
+import Button from '@/components/ui/Button'
 
 export default function WebhookDetail({ subId, listRow, onBack, onPatch, onDelete }) {
   const { t } = useTranslation('settings')
@@ -127,8 +128,8 @@ export default function WebhookDetail({ subId, listRow, onBack, onPatch, onDelet
           <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)' }}>{t('webhooks.outgoing.detailsTitle')}</span>
           {editing ? (
             <div style={{ display: 'flex', gap: 8 }}>
-              <button onClick={() => { setForm(sub); setEditing(false) }} style={{ display: 'flex', alignItems: 'center', gap: 5, height: BTN_H, padding: '0 12px', fontSize: 13, border: '1px solid var(--border)', borderRadius: 8, background: 'var(--surface)', cursor: 'pointer', color: 'var(--text)' }}><X size={13} /> {t('common.cancel')}</button>
-              <button onClick={saveDetails} style={{ display: 'flex', alignItems: 'center', gap: 6, height: BTN_H, padding: '0 14px', fontSize: 13, fontWeight: 500, border: 'none', borderRadius: 8, background: 'var(--color-primary)', color: 'var(--color-on-accent)', cursor: 'pointer' }}><Save size={13} /> {t('common.save')}</button>
+              <Button variant="secondary" onClick={() => { setForm(sub); setEditing(false) }}><X size={13} /> {t('common.cancel')}</Button>
+              <Button variant="primary" onClick={saveDetails}><Save size={13} /> {t('common.save')}</Button>
             </div>
           ) : (
             <button onClick={() => setEditing(true)} style={{ display: 'flex', alignItems: 'center', gap: 6, height: BTN_H, padding: '0 12px', fontSize: 13, fontWeight: 500, border: '1px solid var(--color-primary)', borderRadius: 8, background: 'var(--color-primary-bg)', color: 'var(--color-primary-text)', cursor: 'pointer' }}><Pencil size={13} /> {t('webhooks.outgoing.edit')}</button>

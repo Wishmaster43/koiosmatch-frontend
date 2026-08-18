@@ -16,6 +16,7 @@ import SearchSelect from '@/components/ui/SearchSelect'
 import CalloutBox from '@/components/ui/CalloutBox'
 import { BTN_H } from '@/config/buttonMetrics'
 import { fieldInputStyle } from '@/components/forms/fieldMetrics'
+import Button from '@/components/ui/Button'
 
 export default function ApiKeyCreate({ onBack, onCreated }) {
   const { t } = useTranslation('settings')
@@ -155,10 +156,9 @@ export default function ApiKeyCreate({ onBack, onCreated }) {
                 style={{ height: BTN_H, padding: '0 20px', fontSize: 13, fontWeight: 500, border: 'none', borderRadius: 8, background: 'var(--color-primary)', color: 'var(--color-on-accent)', cursor: form.friendly_name.trim() ? 'pointer' : 'not-allowed', opacity: form.friendly_name.trim() ? 1 : 0.5 }}>
                 {saving ? t('apiKeys.creating') : t('apiKeys.create')}
               </button>
-              <button onClick={onBack}
-                style={{ height: BTN_H, padding: '0 16px', fontSize: 13, fontWeight: 500, border: '1px solid var(--border)', borderRadius: 8, background: 'var(--surface)', color: 'var(--text)', cursor: 'pointer' }}>
+              <Button variant="secondary" onClick={onBack}>
                 {t('common.cancel')}
-              </button>
+              </Button>
             </div>
           </div>
         )}

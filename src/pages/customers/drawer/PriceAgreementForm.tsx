@@ -15,6 +15,7 @@ import { useFunctions } from '@/lib/useFunctions'
 import { useCao } from '@/lib/useCao'
 import { useAuth } from '@/context/AuthContext'
 import type { PriceAgreement, PriceAgreementPayload } from '../hooks/usePriceAgreements'
+import Button from '@/components/ui/Button'
 
 // The form's own string-based draft — every field is a controlled input value;
 // numbers/dates convert to the payload shape only on submit (draftToPayload).
@@ -154,9 +155,9 @@ export default function PriceAgreementForm({ draft, onChange, onSave, onCancel, 
           expanded={remarksExpanded} onToggleExpand={() => setRemarksExpanded(v => !v)} />
       </Field>
       <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, marginTop: 2 }}>
-        <button onClick={onCancel} style={{ height: 30, padding: '0 12px', fontSize: 12, border: '1px solid var(--border)', borderRadius: 7, background: 'var(--surface)', cursor: 'pointer', color: 'var(--text)' }}>
+        <Button variant="secondary" size="sm" onClick={onCancel}>
           {t('drawer.cancel')}
-        </button>
+        </Button>
         <button onClick={onSave} disabled={saving || !isDraftValid(draft, canSeeFinancial)}
           style={{ height: 30, padding: '0 14px', fontSize: 12, fontWeight: 600, border: 'none', borderRadius: 7, background: 'var(--color-primary)', color: 'var(--color-on-accent)', cursor: 'pointer', opacity: isDraftValid(draft, canSeeFinancial) ? 1 : 0.4 }}>
           {saveLabel}

@@ -68,6 +68,7 @@ import { useAuth } from '@/context/AuthContext'
 import { useUsers } from '@/lib/queries'
 import { CANON_LABEL_STYLE } from '@/components/drawer/fieldRowCanon'
 import type { Id } from '@/types/common'
+import Button from '@/components/ui/Button'
 
 // Label-left canon (P32, batch 5): label column fixed at CANON_LABEL_WIDTH, control fills the rest.
 const fieldRow: React.CSSProperties = { display: 'flex', alignItems: 'center', gap: 10 }
@@ -375,7 +376,7 @@ export default function AddApplicationModal({ candidateId, candidateOwnerId, can
 
       {/* Pinned footer — buttons stay visible whatever the content height (Danny 13-08). */}
       <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, padding: '14px 22px', borderTop: '1px solid var(--border)', flexShrink: 0 }}>
-          <button onClick={onClose} style={{ height: 34, padding: '0 16px', fontSize: 13, border: '1px solid var(--border)', borderRadius: 8, background: 'var(--surface)', cursor: 'pointer', color: 'var(--text)' }}>{t('common:cancel')}</button>
+          <Button variant="secondary" onClick={onClose}>{t('common:cancel')}</Button>
           <button onClick={submit} disabled={saving || appRuleBlocked}
             style={{ height: 34, padding: '0 16px', fontSize: 13, fontWeight: 500, border: 'none', borderRadius: 8, background: 'var(--color-primary)', color: 'var(--color-on-accent)', cursor: !appRuleBlocked ? 'pointer' : 'default', opacity: !appRuleBlocked ? 1 : 0.4 }}>
             {saving ? t('common:saving') : t(editing ? 'common:save' : 'work.createApplication')}

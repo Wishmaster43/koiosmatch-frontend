@@ -15,6 +15,7 @@ import FloatingPanel from '@/components/ui/FloatingPanel'
 import KoiosAiMark from '@/components/ui/KoiosAiMark'
 import { useWorkflowTemplates, KOIOS_AI_CATEGORY } from './hooks/useWorkflowTemplates'
 import type { WorkflowTemplate } from './hooks/useWorkflowTemplates'
+import Button from '@/components/ui/Button'
 
 interface WorkflowTemplateLibraryProps {
   open: boolean
@@ -58,11 +59,10 @@ function TemplateCard({ template, useLabel, onUse }: { template: WorkflowTemplat
       {/* CONTRAST-YELLOW-1 (08-08 audit): the fill IS the tenant accent, so the label
           must use the computed on-accent token — a hardcoded white reads as 1.31:1
           against a yellow brand instead of the intended readable contrast. */}
-      <button type="button" onClick={onUse} aria-label={`${useLabel} — ${template.name}`}
-        style={{ alignSelf: 'flex-start', padding: '6px 12px', fontSize: 12, fontWeight: 600, color: 'var(--color-on-accent)',
-                 background: 'var(--color-primary)', border: 'none', borderRadius: 6, cursor: 'pointer' }}>
+      <Button variant="primary" size="sm" onClick={onUse} aria-label={`${useLabel} — ${template.name}`}
+        style={{ alignSelf: 'flex-start' }}>
         {useLabel}
-      </button>
+      </Button>
     </div>
   )
 }
