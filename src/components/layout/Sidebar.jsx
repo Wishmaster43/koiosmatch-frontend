@@ -293,7 +293,9 @@ export default function Sidebar({ expanded, activePage, setActivePage, koiosOpen
             // Solid accent gradient needs the tenant's readable-on-accent token; the
             // soft-tint (non-open) state is a light surface, so it uses the accent as TEXT
             // instead (mirrors the "Koios" label below) — never a hardcoded white/#fff.
-            color: koiosOpen ? 'var(--color-on-accent)' : 'var(--color-primary)',
+            // ACCENT-INK-1: closed, this label sits on the white sidebar, so it needs the
+            // contrast-safe twin of the accent, not the accent itself (AENF measured 1.17:1).
+            color: koiosOpen ? 'var(--color-on-accent)' : 'var(--color-primary-text)',
           }}
         >
           <div className="flex items-center justify-center rounded-full flex-shrink-0"
@@ -304,7 +306,7 @@ export default function Sidebar({ expanded, activePage, setActivePage, koiosOpen
           </div>
           {expanded && (
             <span style={{ fontSize: 13, fontWeight: 600, flex: 1, textAlign: 'left',
-              color: koiosOpen ? 'var(--color-on-accent)' : 'var(--color-primary)' }}>
+              color: koiosOpen ? 'var(--color-on-accent)' : 'var(--color-primary-text)' }}>
               Koios
             </span>
           )}

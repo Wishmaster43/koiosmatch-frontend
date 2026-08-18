@@ -64,9 +64,17 @@
   --module-periwinkle:   #6E8FD6; /* Tasks */
 
   /* Text/icon colour for content painted on a FILLED accent surface (primary/danger
-     buttons, filled badges, …) — same white in light and dark mode since a saturated
-     fill stays lit either way, so one definition covers both themes (§4 audit). */
-  --color-on-accent:     #FFFFFF;
+     buttons, filled badges, …). One definition covers both themes: a saturated fill
+     stays equally lit either way.
+     ON-ACCENT-DEFAULT-1 (measured 18-08): this was #FFFFFF, which on the DEFAULT
+     accent #19A5CA is 2.89:1 — under the AA floor, and under the code's own
+     ON_ACCENT_EXPLICIT_FLOOR of 3.0 in useTenantTheme.ts. So every primary-filled
+     button in an unbranded tenant shipped sub-AA, while readableOn() would have
+     picked #1F2937 (5.09:1) for that exact fill had a tenant set it as a brand. The
+     CSS default now agrees with the rule the runtime already applies. A tenant whose
+     own brand IS light enough for white still gets white: applyBrandTokens overrides
+     this per tenant via clampedOnAccent. */
+  --color-on-accent:     #1F2937;
   /* Text on the FIXED danger fill. Never takes the tenant accent, so it never
      follows the brand either — white measures 4.83:1 on --color-danger, so it
      stays white in both themes (WCAG audit 2026-08). */
@@ -103,7 +111,12 @@
   --surface:   #FFFFFF;
   --border:    #E5E7EB;
   --text:      #111827;
-  --text-muted:#6B7280;
+  /* CONTRAST-MUTED-1 (measured 18-08): #6B7280 scores 4.83:1 on --surface but only
+     4.44:1 on --bg, so every muted label on a page background sat just under the
+     4.5 AA floor (§6) — in every tenant, not only a branded one. #68707E measures
+     4.58 on --bg and 4.99 on --surface. --sidebar-muted below keeps #6B7280: it
+     lives on the WHITE sidebar, where it already clears the floor. */
+  --text-muted:#68707E;
   --input-bg:  #FFFFFF;
   --hover-bg:  #F9FAFB;
   --topbar-bg: #FFFFFF;

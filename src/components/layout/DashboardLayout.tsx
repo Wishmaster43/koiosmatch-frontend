@@ -172,7 +172,11 @@ export default function DashboardLayout() {
               'pageTitles' namespace; keySeparator is off since some keys carry a
               literal dot ('reports.flow'). The map value is the English fallback
               if a translation is ever missing. */}
-          <span style={{ color: 'var(--border)', fontSize: 16 }}>›</span>
+          {/* Purely a visual divider between two labels, so it is marked decorative
+              rather than darkened: it carries no meaning, a screen reader should skip
+              it, and WCAG 1.4.3 exempts decorative text from the contrast floor. Left
+              pale on purpose — it must not compete with the labels it separates. */}
+          <span aria-hidden="true" style={{ color: 'var(--border)', fontSize: 16 }}>›</span>
           <span className="font-medium truncate" style={{ fontSize: 13, color: 'var(--text-muted)' }}>
             {t(activePage, { ns: 'pageTitles', keySeparator: false, defaultValue: PAGE_TITLES[activePage] || activePage })}
           </span>
@@ -219,7 +223,9 @@ export default function DashboardLayout() {
                   style={{
                     width: 30, height: 30, borderRadius: '50%', flexShrink: 0,
                     background: activePage === 'profile' ? 'var(--color-primary)' : 'var(--color-primary-bg)',
-                    color: activePage === 'profile' ? 'var(--color-on-accent)' : 'var(--color-primary)',
+                    // ACCENT-INK-1: resting, the initials sit on --color-primary-bg (a 12% tint
+                    // of the brand), so they need the contrast-safe twin (AENF measured 1.14:1).
+                    color: activePage === 'profile' ? 'var(--color-on-accent)' : 'var(--color-primary-text)',
                     border: `1.5px solid ${activePage === 'profile' ? 'var(--color-primary)' : 'transparent'}`,
                     fontSize: 11, fontWeight: 700, cursor: 'pointer',
                     display: 'flex', alignItems: 'center', justifyContent: 'center',

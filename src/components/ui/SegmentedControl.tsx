@@ -52,6 +52,16 @@ export interface SegmentedControlProps {
 export default function SegmentedControl({ options, value, onChange, color = 'var(--color-primary)', ariaLabel, size = 'default', activeOnly = false, activeFill }: SegmentedControlProps) {
   const refs = useRef<Array<HTMLButtonElement | null>>([])
   const compact = size === 'compact'
+  // ACCENT-INK-1 (measured 18-08 on tenant AENF, brand #fef200): the tint colour and
+  // the TEXT colour are not the same thing. Painting the label in `color` on a 6-14%
+  // tint of that same `color` only reads when the accent is dark enough; on a light
+  // brand these pills measured 1.05-1.07:1. --color-primary-text is the derived,
+  // contrast-safe twin the theme already computes, so the tint keeps the real brand
+  // hue while the label stays readable.
+  // KNOWN GAP, deliberately not papered over: a caller passing a light HEX (a status
+  // lookup colour a tenant picked) still hits the same wall. That needs the same twin
+  // derived per colour, which belongs in the shared house-style layer, not here.
+  const ink = color.includes('--color-primary') ? 'var(--color-primary-text)' : color
 
   // Arrow/Home/End roving focus, mirroring native radiogroup keyboard behaviour —
   // moving focus also selects, exactly like radio inputs.
@@ -82,7 +92,7 @@ export default function SegmentedControl({ options, value, onChange, color = 'va
             style={compact ? {
               padding: '3px 9px', fontSize: 10.5, fontWeight: active ? 600 : 500, borderRadius: 999,
               cursor: 'pointer', whiteSpace: 'nowrap', flexShrink: 0,
-              color: activeOnly && !active ? 'var(--text-muted)' : color,
+              color: activeOnly && !active ? 'var(--text-muted)' : ink,
               background: activeOnly && !active ? 'var(--surface)'
                 : active && activeFill ? activeFill
                 : `color-mix(in srgb, ${color} ${active ? 14 : 6}%, transparent)`,
@@ -92,7 +102,7 @@ export default function SegmentedControl({ options, value, onChange, color = 'va
             } : {
               display: 'flex', alignItems: 'flex-start', gap: 10, textAlign: 'left',
               padding: '10px 14px', borderRadius: 10, cursor: 'pointer', width: '100%',
-              color: activeOnly && !active ? 'var(--text)' : color,
+              color: activeOnly && !active ? 'var(--text)' : ink,
               fontWeight: active ? 600 : 500,
               background: activeOnly && !active ? 'var(--surface)'
                 : active && activeFill ? activeFill
