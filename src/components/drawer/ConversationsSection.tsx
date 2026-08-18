@@ -38,6 +38,7 @@ import ConversationMessage, { type MessageRow } from './ConversationMessage'
 import TemplateComposer from './TemplateComposer'
 import { sessionWindow, windowLeftParts } from './sessionWindow'
 import type { Id } from '@/types/common'
+import Button from '@/components/ui/Button'
 
 // How often the "time left in the window" line re-reads the clock. One minute is
 // the display resolution, so anything faster would only burn renders.
@@ -314,13 +315,11 @@ export default function ConversationsSection({ threadsUrl, threadsParams, header
                         onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(row.id) } }}
                         placeholder={t('conversations.composerPlaceholder')} aria-label={t('conversations.composerPlaceholder')}
                         style={{ flex: 1, minWidth: 0, padding: '6px 10px', borderRadius: 8, border: '1px solid var(--border)', background: 'var(--surface)', fontSize: 12, color: 'var(--text)' }} />
-                      <button onClick={() => sendMessage(row.id)} disabled={!composerText.trim() || sendingMsg}
+                      <Button variant="primary" onClick={() => sendMessage(row.id)} disabled={!composerText.trim() || sendingMsg}
                         aria-label={t('common:send')} title={t('common:send')}
-                        style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 30, borderRadius: 8, border: 'none',
-                          background: 'var(--color-primary)', color: 'var(--color-on-accent)', flexShrink: 0,
-                          cursor: composerText.trim() ? 'pointer' : 'default', opacity: composerText.trim() ? 1 : 0.5 }}>
+                        style={{ width: 30 }}>
                         <Send size={13} />
-                      </button>
+                      </Button>
                     </div>
                     {/* WA-SEND-TRANSPORT-1: the 409/502 inline explanation — role="alert" so
                         assistive tech announces it, icon + text so colour is never the only cue. */}

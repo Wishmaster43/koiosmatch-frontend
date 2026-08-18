@@ -1,7 +1,7 @@
 import { useTranslation } from 'react-i18next'
 import { Check, X, Loader2 } from 'lucide-react'
-import { BTN_H } from '@/config/buttonMetrics'
 import type { PendingFile, AttachmentStatus } from './usePostCreateAttachments'
+import Button from '@/components/ui/Button'
 
 interface Props {
   files: PendingFile[]
@@ -70,11 +70,9 @@ export default function PostCreateResultsPanel({ files, noteText, noteStatus, no
         )}
       </div>
       <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 8 }}>
-        <button type="button" onClick={onClose} disabled={running}
-          style={{ height: BTN_H, padding: '0 16px', fontSize: 13, fontWeight: 600, borderRadius: 8, border: 'none',
-            background: 'var(--color-primary)', color: 'var(--color-on-accent)', cursor: running ? 'not-allowed' : 'pointer', opacity: running ? 0.6 : 1 }}>
+        <Button variant="primary" onClick={onClose} disabled={running}>
           {t('common:close')}
-        </button>
+        </Button>
       </div>
     </div>
   )

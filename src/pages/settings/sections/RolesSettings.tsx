@@ -13,6 +13,7 @@ import { roleIconEl, ROLE_ICON_NAMES } from '@/lib/roleIcons'
 import { useConfirm } from '@/hooks/useConfirm'
 import { BTN_H } from '@/config/buttonMetrics'
 import type { Role, PermissionsByGroup, CreateRoleBody } from './rolesTypes'
+import Button from '@/components/ui/Button'
 
 export default function RolesSettings() {
   const { t } = useTranslation('settings')
@@ -92,12 +93,9 @@ export default function RolesSettings() {
             placeholder={t('roles.newPlaceholder')} onKeyDown={e => e.key === 'Enter' && createRole()}
             style={{ height: 34, padding: '0 10px', fontSize: 13, border: '1px solid var(--border)',
                      borderRadius: 8, outline: 'none', color: 'var(--text)', width: 150 }} />
-          <button onClick={createRole} disabled={creating || !newRoleName.trim()}
-            style={{ display: 'flex', alignItems: 'center', gap: 6, height: BTN_H, padding: '0 12px',
-                     fontSize: 13, fontWeight: 500, borderRadius: 8, cursor: 'pointer', border: 'none',
-                     background: 'var(--color-primary)', color: 'var(--color-on-accent)', opacity: newRoleName.trim() ? 1 : 0.4 }}>
+          <Button variant="primary" onClick={createRole} disabled={creating || !newRoleName.trim()}>
             <Plus size={13} /> {t('roles.create')}
-          </button>
+          </Button>
         </div>
       </div>
 

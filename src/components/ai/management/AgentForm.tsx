@@ -20,6 +20,7 @@ import type { AiAgent, AiItem, ChatMessage } from '@/types/ai'
 // Reuse the WhatsApp-templates option shape from the workflow module's template
 // picker (GET /whatsapp-templates) instead of re-declaring it (§11 — one truth).
 import type { WaTemplateOption } from '@/components/layout/workflow/whatsappTemplate'
+import Button from '@/components/ui/Button'
 
 // Mirrors shared.tsx's `Field` label style — used directly (not via `Field`) for the
 // two CreatableSelect pickers below, which need their own aria-labelledby wiring.
@@ -113,12 +114,10 @@ function ChatTest({ agent, onClose }: { agent: AiAgent; onClose?: () => void }) 
           onKeyDown={e => e.key === 'Enter' && !e.shiftKey && send()}
           placeholder={t('ai.chat.placeholder')} aria-label={t('ai.chat.placeholder')}
           style={{ ...inputStyle, flex: 1 }} />
-        <button onClick={send} disabled={!input.trim() || loading} aria-label={t('common:send')}
-          style={{ width: 32, height: 32, borderRadius: 7, border: 'none', background: 'var(--color-primary)', color: 'var(--color-on-accent)',
-            cursor: input.trim() ? 'pointer' : 'default', opacity: input.trim() ? 1 : 0.4,
-            display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+        <Button variant="primary" onClick={send} disabled={!input.trim() || loading} aria-label={t('common:send')}
+          style={{ width: 32 }}>
           <Send size={13} />
-        </button>
+        </Button>
       </div>
     </div>
   )

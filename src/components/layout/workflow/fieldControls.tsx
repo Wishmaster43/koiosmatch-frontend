@@ -16,6 +16,7 @@ import { unwrap, unwrapList } from '@/lib/api'
 // Danny 08-08 (§4): the house searchable combobox replaces every bare native
 // <select> below (webhook / lookup / response-structure-type pickers).
 import CreatableSelect from '@/components/ui/CreatableSelect'
+import Button from '@/components/ui/Button'
 
 // Shared change handler: writes one field's value into the node config.
 export type OnChange = (key: string, value: unknown) => void
@@ -138,10 +139,9 @@ export function WebhookSelectField({ value, onChange, fieldKey }: { value?: unkn
           <input autoFocus value={newName} onChange={e => setNewName(e.target.value)}
             placeholder={t('fields.webhookNamePlaceholder')} aria-label={t('fields.webhookNamePlaceholder')} onKeyDown={e => e.key === 'Enter' && create()}
             style={{ flex: 1, padding: '6px 9px', fontSize: 12, border: '1px solid var(--border)', borderRadius: 8, outline: 'none' }} />
-          <button type="button" onClick={create} disabled={!newName.trim() || creating}
-            style={{ padding: '6px 12px', fontSize: 12, fontWeight: 600, background: 'var(--color-primary)', color: 'var(--color-on-accent)', border: 'none', borderRadius: 8, cursor: newName.trim() ? 'pointer' : 'not-allowed', opacity: newName.trim() ? 1 : 0.5, display: 'flex', alignItems: 'center', gap: 4 }}>
+          <Button variant="primary" size="sm" onClick={create} disabled={!newName.trim() || creating}>
             {creating ? <Loader2 size={11} className="animate-spin" /> : <Plus size={11} />} {t('fields.create')}
-          </button>
+          </Button>
           <button type="button" onClick={() => { setShowNew(false); setNewName('') }}
             style={{ padding: '6px 8px', background: 'none', border: '1px solid var(--border)', borderRadius: 8, cursor: 'pointer', color: 'var(--text-muted)', display: 'flex' }}>
             <X size={12} />

@@ -188,10 +188,9 @@ export default function ProvincesSettings() {
             </div>
             <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, marginTop: 20 }}>
               <Button variant="secondary" onClick={() => setShowModal(false)}>{t('common.cancel')}</Button>
-              <button onClick={submit} disabled={saving || !name.trim()}
-                style={{ height: 34, padding: '0 16px', fontSize: 13, fontWeight: 500, border: 'none', borderRadius: 8, background: 'var(--color-primary)', color: 'var(--color-on-accent)', cursor: 'pointer', opacity: name.trim() ? 1 : 0.4 }}>
+              <Button variant="primary" onClick={submit} disabled={saving || !name.trim()}>
                 {saving ? t('common.saving') : (editing ? t('common.save') : t('statusList.addBtn'))}
-              </button>
+              </Button>
             </div>
           </div>
         </>

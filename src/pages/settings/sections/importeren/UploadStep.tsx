@@ -9,6 +9,7 @@ import { useTranslation } from 'react-i18next'
 import { CloudUpload, Download, Loader2 } from 'lucide-react'
 import { downloadImportTemplate } from './importApi'
 import { notifyError } from '@/lib/notify'
+import Button from '@/components/ui/Button'
 
 // Only these extensions are ever accepted by the backend (ImportUploadRequest:
 // mimes:csv,txt,xlsx) — .xlsx is read by its own reader (ZIP magic + Excel's own
@@ -81,14 +82,11 @@ export default function UploadStep({
           <div style={{ fontSize: 13, fontWeight: 500, color: 'var(--text)' }}>{t('import.downloadTemplate')}</div>
           <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>{t('import.downloadTemplateHint')}</div>
         </div>
-        <button type="button" onClick={handleDownloadTemplate} disabled={!canView || downloadPending}
-          title={canView ? undefined : t('import.noViewPermission')}
-          style={{ display: 'flex', alignItems: 'center', gap: 6, height: 32, padding: '0 14px', fontSize: 13,
-                   border: '1px solid var(--border)', borderRadius: 8, background: 'var(--surface)', color: 'var(--text)',
-                   cursor: !canView || downloadPending ? 'not-allowed' : 'pointer', opacity: !canView ? 0.5 : 1, flexShrink: 0 }}>
+        <Button variant="secondary" onClick={handleDownloadTemplate} disabled={!canView || downloadPending}
+          title={canView ? undefined : t('import.noViewPermission')}>
           {downloadPending ? <Loader2 size={14} className="animate-spin" aria-hidden="true" /> : <Download size={14} />}
           {t('import.downloadTemplate')}
-        </button>
+        </Button>
       </div>
 
       {!canImport && (
@@ -107,12 +105,10 @@ export default function UploadStep({
                  background: drag ? 'var(--color-primary-bg)' : 'var(--hover-bg)', transition: 'all 0.15s' }}>
         <CloudUpload size={28} style={{ color: 'var(--text-muted)' }} aria-hidden="true" />
         <span style={{ fontSize: 13, color: 'var(--text-muted)' }}>{t('import.dropHere')}</span>
-        <button type="button" onClick={(event) => { event.stopPropagation(); if (canImport) fileRef.current?.click() }}
-          disabled={!canImport}
-          style={{ height: 32, padding: '0 16px', fontSize: 13, fontWeight: 500, border: 'none', borderRadius: 8,
-                   background: 'var(--color-primary)', color: 'var(--color-on-accent)', cursor: canImport ? 'pointer' : 'not-allowed' }}>
+        <Button variant="primary" onClick={(event) => { event.stopPropagation(); if (canImport) fileRef.current?.click() }}
+          disabled={!canImport}>
           {t('import.selectCsv')}
-        </button>
+        </Button>
         <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>{t('import.acceptedTypes')}</span>
         <input ref={fileRef} type="file" accept=".csv,.txt,.xlsx" aria-label={t('import.selectCsv')}
           style={{ display: 'none' }} onChange={handleFileInput} disabled={!canImport} />
@@ -141,14 +137,10 @@ export default function UploadStep({
       )}
 
       <div style={{ marginTop: 20 }}>
-        <button type="button" onClick={onRunPreview} disabled={!file || !canImport || checking}
-          style={{ display: 'flex', alignItems: 'center', gap: 6, height: 34, padding: '0 16px', fontSize: 13,
-                   fontWeight: 500, border: 'none', borderRadius: 8, background: 'var(--color-primary)', color: 'var(--color-on-accent)',
-                   cursor: !file || !canImport || checking ? 'not-allowed' : 'pointer',
-                   opacity: !file || !canImport ? 0.5 : 1 }}>
+        <Button variant="primary" onClick={onRunPreview} disabled={!file || !canImport || checking}>
           {checking && <Loader2 size={14} className="animate-spin" aria-hidden="true" />}
           {checking ? t('import.runningPreview') : t('import.runPreview')}
-        </button>
+        </Button>
       </div>
     </div>
   )

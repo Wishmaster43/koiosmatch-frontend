@@ -73,11 +73,9 @@ export default function MatchApprovalActions({
             <Button variant="secondary" size="sm" onClick={() => { onCancelReject(); setReasonText('') }}>
               {t('common:cancel')}
             </Button>
-            <button onClick={() => onReject(reasonText)} disabled={!reasonText.trim() || busy}
-              style={{ height: BTN_H, padding: '0 12px', fontSize: 11, fontWeight: 600, border: 'none', borderRadius: 6,
-                background: 'var(--color-danger)', color: '#fff', cursor: (reasonText.trim() && !busy) ? 'pointer' : 'default', opacity: (reasonText.trim() && !busy) ? 1 : 0.4 }}>
+            <Button variant="danger" size="sm" onClick={() => onReject(reasonText)} disabled={!reasonText.trim() || busy}>
               {t('approval.confirmReject')}
-            </button>
+            </Button>
           </div>
         </div>
       )}

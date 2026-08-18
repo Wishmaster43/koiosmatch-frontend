@@ -79,10 +79,9 @@ export default function DeletionPreviewModal({ candidateId, candidateName, onClo
 
         <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8 }}>
           <Button variant="secondary" onClick={onClose}>{t('common:cancel')}</Button>
-          <button onClick={confirm} disabled={deleting}
-            style={{ height: 34, padding: '0 16px', fontSize: 13, fontWeight: 600, border: 'none', borderRadius: 8, background: 'var(--color-danger)', color: '#fff', cursor: 'pointer', opacity: deleting ? 0.6 : 1 }}>
+          <Button variant="danger" onClick={confirm} disabled={deleting}>
             {deleting ? t('common:saving') : t('erase.confirmButton')}
-          </button>
+          </Button>
         </div>
     </FloatingPanel>
   )

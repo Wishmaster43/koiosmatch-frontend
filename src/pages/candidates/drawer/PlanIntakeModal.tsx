@@ -176,10 +176,9 @@ export default function PlanIntakeModal(props: PlanIntakeFormOptions) {
           {/* Disabled when `when` OR `type` is missing (no hardcoded type fallback —
               a tenant with zero configured appointment types has nothing valid to
               submit, mirrors the existing `when`-empty gate). */}
-          <button onClick={form.submit} disabled={form.saving || !form.when || !form.type || form.apptRuleBlocked}
-            style={{ height: 34, padding: '0 16px', fontSize: 13, fontWeight: 500, border: 'none', borderRadius: 8, background: 'var(--color-primary)', color: 'var(--color-on-accent)', cursor: (form.when && form.type && !form.apptRuleBlocked) ? 'pointer' : 'default', opacity: (form.when && form.type && !form.apptRuleBlocked) ? 1 : 0.4 }}>
+          <Button variant="primary" onClick={form.submit} disabled={form.saving || !form.when || !form.type || form.apptRuleBlocked}>
             {form.saving ? t('common:saving') : form.submitLabel}
-          </button>
+          </Button>
         </div>
     </FloatingPanel>
   )

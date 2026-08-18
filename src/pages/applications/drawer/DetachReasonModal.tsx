@@ -48,12 +48,9 @@ export default function DetachReasonModal({ onCancel, onConfirm, submitting }: P
           <Button variant="secondary" onClick={onCancel}>
             {t('common:cancel')}
           </Button>
-          <button onClick={() => trimmed && onConfirm(trimmed)} disabled={!trimmed || submitting}
-            style={{ height: 34, padding: '0 16px', fontSize: 13, fontWeight: 600, border: 'none', borderRadius: 8,
-              background: 'var(--color-danger)', color: '#fff', cursor: (!trimmed || submitting) ? 'not-allowed' : 'pointer',
-              opacity: (!trimmed || submitting) ? 0.6 : 1 }}>
+          <Button variant="danger" onClick={() => trimmed && onConfirm(trimmed)} disabled={!trimmed || submitting}>
             {t('detach.confirm')}
-          </button>
+          </Button>
         </div>
     </FloatingPanel>
   )

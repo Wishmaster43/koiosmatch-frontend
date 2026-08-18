@@ -20,7 +20,6 @@ import { notifyError, notifySuccess } from '@/lib/notify'
 import { extractApiError } from '@/lib/extractApiError'
 import StatusPill from '@/components/ui/StatusPill'
 import SearchSelect from '@/components/ui/SearchSelect'
-import { BTN_H } from '@/config/buttonMetrics'
 import { card, th as thBase, td as tdBase, numCell as numCellBase, notice } from './usageCardStyles'
 import type { CSSProperties } from 'react'
 import type { operations } from '@/types/api-generated'
@@ -174,23 +173,15 @@ export default function AdminInvoicesSettings() {
               </Button>
             )}
           />
-          <button type="button" onClick={handleGenerate} disabled={generating}
-            style={{ display: 'flex', alignItems: 'center', gap: 6, height: BTN_H, padding: '0 14px',
-                     fontSize: 13, fontWeight: 500, borderRadius: 8, border: 'none',
-                     background: 'var(--color-primary)', color: 'var(--color-on-accent)',
-                     cursor: generating ? 'not-allowed' : 'pointer', opacity: generating ? 0.6 : 1 }}>
+          <Button variant="primary" onClick={handleGenerate} disabled={generating}>
             {generating ? <Loader2 size={13} className="animate-spin" aria-hidden="true" /> : <RefreshCw size={13} aria-hidden="true" />}
             {t('adminInvoices.generate')}
-          </button>
-          <button type="button" onClick={handleExport} disabled={exporting || invoices.length === 0}
-            title={t('adminInvoices.exportXlsx')}
-            style={{ display: 'flex', alignItems: 'center', gap: 6, height: BTN_H, padding: '0 14px',
-                     fontSize: 13, fontWeight: 500, borderRadius: 8, border: '1px solid var(--border)',
-                     background: 'var(--surface)', color: 'var(--text)',
-                     cursor: exporting || invoices.length === 0 ? 'not-allowed' : 'pointer', opacity: exporting || invoices.length === 0 ? 0.6 : 1 }}>
+          </Button>
+          <Button variant="secondary" onClick={handleExport} disabled={exporting || invoices.length === 0}
+            title={t('adminInvoices.exportXlsx')}>
             {exporting ? <Loader2 size={13} className="animate-spin" aria-hidden="true" /> : <FileSpreadsheet size={13} aria-hidden="true" />}
             {t('adminInvoices.exportXlsx')}
-          </button>
+          </Button>
         </div>
       </div>
 
@@ -230,25 +221,17 @@ export default function AdminInvoicesSettings() {
                     <td style={{ ...td, textAlign: 'right' as const }}>
                       <div style={{ display: 'inline-flex', gap: 8 }}>
                         {(inv.status === 'draft' || isResend) && (
-                          <button type="button" onClick={() => handleFinalize(inv)} disabled={finalizing}
-                            style={{ display: 'inline-flex', alignItems: 'center', gap: 6, height: 30, padding: '0 12px',
-                                     fontSize: 12, fontWeight: 500, border: '1px solid var(--border)', borderRadius: 7,
-                                     background: 'var(--surface)', color: 'var(--text)',
-                                     cursor: finalizing ? 'not-allowed' : 'pointer', opacity: finalizing ? 0.6 : 1 }}>
+                          <Button variant="secondary" size="sm" onClick={() => handleFinalize(inv)} disabled={finalizing}>
                             {finalizing ? <Loader2 size={13} className="animate-spin" aria-hidden="true" /> : <Send size={13} aria-hidden="true" />}
                             {t(isResend ? 'adminInvoices.resend' : 'adminInvoices.finalize')}
-                          </button>
+                          </Button>
                         )}
                         {inv.status === 'final' && (
-                          <button type="button" onClick={() => handleDownload(inv)} disabled={downloading}
-                            aria-label={t('adminInvoices.download')}
-                            style={{ display: 'inline-flex', alignItems: 'center', gap: 6, height: 30, padding: '0 12px',
-                                     fontSize: 12, fontWeight: 500, border: '1px solid var(--border)', borderRadius: 7,
-                                     background: 'var(--surface)', color: 'var(--text)',
-                                     cursor: downloading ? 'not-allowed' : 'pointer', opacity: downloading ? 0.6 : 1 }}>
+                          <Button variant="secondary" size="sm" onClick={() => handleDownload(inv)} disabled={downloading}
+                            aria-label={t('adminInvoices.download')}>
                             {downloading ? <Loader2 size={13} className="animate-spin" aria-hidden="true" /> : <Download size={13} aria-hidden="true" />}
                             {t('adminInvoices.download')}
-                          </button>
+                          </Button>
                         )}
                       </div>
                     </td>

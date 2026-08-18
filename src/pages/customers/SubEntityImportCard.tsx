@@ -49,6 +49,7 @@ import ResultStep from '@/pages/settings/sections/importeren/ResultStep'
 import { downloadImportTemplate } from '@/pages/settings/sections/importeren/importApi'
 import type { useImportWizard } from '@/pages/settings/sections/importeren/useImportWizard'
 import type { ImportRowResult } from '@/pages/settings/sections/importeren/importApi'
+import Button from '@/components/ui/Button'
 
 // The three per-entity importers this card can drive — verified against the
 // backend's ImportRegistry::IMPORTERS keys, never guessed from a display label.
@@ -242,14 +243,11 @@ export default function SubEntityImportCard({ entity, customerName, wizard, canV
                   padding: 0, cursor: checking ? 'not-allowed' : 'pointer' }}>
                 {t('import.replaceFile', { ns: 'settings' })}
               </button>
-              <button type="button" onClick={wizard.runPreview} disabled={!canImport || checking}
-                style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 6, height: BTN_H, padding: '0 14px',
-                  fontSize: 12, fontWeight: 600, border: 'none', borderRadius: 8,
-                  background: 'var(--color-primary)', color: 'var(--color-on-accent)',
-                  cursor: !canImport || checking ? 'not-allowed' : 'pointer', opacity: !canImport ? 0.5 : 1 }}>
+              <Button variant="primary" size="sm" onClick={wizard.runPreview} disabled={!canImport || checking}
+                style={{ marginLeft: 'auto' }}>
                 {checking && <Loader2 size={13} style={{ animation: 'spin 1s linear infinite' }} />}
                 {checking ? t('import.runningPreview', { ns: 'settings' }) : t('import.runPreview', { ns: 'settings' })}
-              </button>
+              </Button>
             </div>
             {preview.status === 'error' && (
               <div role="alert" style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 11, color: 'var(--color-danger)' }}>

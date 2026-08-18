@@ -23,6 +23,7 @@ import LookupIcon from '@/components/ui/LookupIcon'
 import { Z } from '@/lib/zIndexScale'
 import { BTN_H } from '@/config/buttonMetrics'
 import type { VacancyOption } from '../hooks/useVacancyOptions'
+import Button from '@/components/ui/Button'
 
 // Mirrors the backend's `status_reason` column limit (CandidateProfileRequest: string|max:255).
 const STATUS_REASON_MAX = 255
@@ -90,8 +91,7 @@ function MatchPickModal({
         {/* BTN_H (§4/§9): one explicit height for every text/action button, everywhere. */}
         <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8 }}>
           <button onClick={onCloseMatch} style={{ height: BTN_H, padding: '0 14px', fontSize: 12, borderRadius: 7, background: 'var(--bg)', color: 'var(--text)', border: '1px solid var(--border)', cursor: 'pointer' }}>{t('common:cancel')}</button>
-          <button disabled={(!matchChoice && !newMatchVacancyId) || creatingMatch} onClick={onConfirmMatch}
-            style={{ height: BTN_H, padding: '0 14px', fontSize: 12, fontWeight: 600, borderRadius: 7, background: 'var(--color-primary)', color: 'var(--color-on-accent)', border: 'none', cursor: 'pointer', opacity: ((matchChoice || newMatchVacancyId) && !creatingMatch) ? 1 : 0.5 }}>{t('drawer.placedConfirm')}</button>
+          <Button variant="primary" size="sm" disabled={(!matchChoice && !newMatchVacancyId) || creatingMatch} onClick={onConfirmMatch}>{t('drawer.placedConfirm')}</Button>
         </div>
     </FloatingPanel>
   )
@@ -143,8 +143,7 @@ function StatusReasonModal({
         {/* BTN_H (§4/§9): one explicit height for every text/action button, everywhere. */}
         <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8 }}>
           <button onClick={close} style={{ height: BTN_H, padding: '0 14px', fontSize: 12, borderRadius: 7, background: 'var(--bg)', color: 'var(--text)', border: '1px solid var(--border)', cursor: 'pointer' }}>{t('common:cancel')}</button>
-          <button onClick={onConfirmStatus} disabled={statusModal.needReason && !statusModal.reason.trim()}
-            style={{ height: BTN_H, padding: '0 14px', fontSize: 12, fontWeight: 600, borderRadius: 7, background: 'var(--color-primary)', color: 'var(--color-on-accent)', border: 'none', cursor: 'pointer', opacity: (statusModal.needReason && !statusModal.reason.trim()) ? 0.5 : 1 }}>{t('common:save')}</button>
+          <Button variant="primary" size="sm" onClick={onConfirmStatus} disabled={statusModal.needReason && !statusModal.reason.trim()}>{t('common:save')}</Button>
         </div>
     </FloatingPanel>
   )

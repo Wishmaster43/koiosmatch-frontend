@@ -24,6 +24,7 @@ import { useAssignableRoles } from '@/pages/users/hooks/useAssignableRoles'
 import { notifyError, notifySuccess } from '@/lib/notify'
 import type { TargetSelection, AssigneeAxes } from '../data/outreachApi'
 import type { AssignResult } from '../hooks/useOutreachDetail'
+import Button from '@/components/ui/Button'
 
 interface RecruiterOption { value: string; label: string }
 type Axis = 'person' | 'team' | 'role'
@@ -125,12 +126,10 @@ export default function AssignTargetsBar({ selection, count, recruiters, onAssig
         </>
       )}
 
-      <button onClick={handleSubmit} disabled={saving || !canSubmit}
-        style={{ alignSelf: 'flex-end', padding: '6px 14px', fontSize: 11, fontWeight: 600, borderRadius: 7, border: 'none',
-          cursor: (saving || !canSubmit) ? 'not-allowed' : 'pointer', opacity: (saving || !canSubmit) ? 0.5 : 1,
-          background: 'var(--color-primary)', color: 'var(--color-on-accent)' }}>
+      <Button variant="primary" size="sm" onClick={handleSubmit} disabled={saving || !canSubmit}
+        style={{ alignSelf: 'flex-end' }}>
         {t('drawer.assign.confirm')}
-      </button>
+      </Button>
     </div>
   )
 }

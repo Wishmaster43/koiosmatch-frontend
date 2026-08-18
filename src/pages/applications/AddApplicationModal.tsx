@@ -18,7 +18,6 @@ import { useActionRulePreflight, ActionRuleBanner } from '@/components/actionrul
 import { useCustomFields } from '@/lib/useCustomFields'
 import { useApplicationSources } from '@/lib/useApplicationSources'
 import { mapApplication } from './data/mapApplication'
-import { BTN_H } from '@/config/buttonMetrics'
 import CreatableSelectJs from '@/components/ui/CreatableSelect'
 import RichTextEditor from '@/components/ui/RichTextEditor'
 import FloatingPanel from '@/components/ui/FloatingPanel'
@@ -460,11 +459,9 @@ export default function AddApplicationModal({ onClose, onCreated, lockedVacancy 
         {/* BTN_H (§4/§9): one explicit height for every text/action button, everywhere. */}
         <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, padding: '14px 22px', borderTop: '1px solid var(--border)' }}>
           <Button variant="secondary" onClick={onClose}>{t('add.cancel')}</Button>
-          <button onClick={create} disabled={!candidateId || saving || appRuleBlocked}
-            style={{ height: BTN_H, padding: '0 16px', fontSize: 13, fontWeight: 500, border: 'none', borderRadius: 8,
-              background: 'var(--color-primary)', color: 'var(--color-on-accent)', cursor: 'pointer', opacity: (candidateId && !appRuleBlocked) ? 1 : 0.4 }}>
+          <Button variant="primary" onClick={create} disabled={!candidateId || saving || appRuleBlocked}>
             {t('add.create')}
-          </button>
+          </Button>
         </div>
     </FloatingPanel>
 

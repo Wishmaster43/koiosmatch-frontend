@@ -14,6 +14,7 @@ import type { Column, RowId } from '@/components/ui/DataTable'
 import { escapeCsvCell } from '@/lib/csv'
 import { toLocalIsoDate } from '@/lib/localDate'
 import CalloutBox from '@/components/ui/CalloutBox'
+import Button from '@/components/ui/Button'
 
 export interface LogExportCol<Row> { header: string; value: (row: Row) => string }
 
@@ -69,12 +70,9 @@ export default function LogView<Row>({
         <p style={{ fontSize: 12, color: 'var(--text-muted)' }}>
           {loading ? t('audit.loading') : t('audit.countSummary', { shown: rows.length, total: totalCount ?? rows.length })}
         </p>
-        <button onClick={exportCsv} disabled={rows.length === 0}
-          style={{ display: 'flex', alignItems: 'center', gap: 6, height: 34, padding: '0 12px', fontSize: 12,
-            fontWeight: 500, border: '1px solid var(--border)', borderRadius: 8, background: 'var(--surface)',
-            color: 'var(--text)', cursor: rows.length ? 'pointer' : 'not-allowed', opacity: rows.length ? 1 : 0.5, whiteSpace: 'nowrap' }}>
+        <Button variant="secondary" size="sm" onClick={exportCsv} disabled={rows.length === 0}>
           <Download size={13} /> {t('audit.export')}
-        </button>
+        </Button>
       </div>
 
       {error && (

@@ -9,6 +9,7 @@ import { useState, useRef, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Send, Trash2, Plus, X, Loader2, Bot, User, Zap } from 'lucide-react'
 import api, { unwrap } from '@/lib/api'
+import Button from '@/components/ui/Button'
 
 interface Message {
   role: 'user' | 'assistant'
@@ -197,13 +198,13 @@ export default function AgentTestPanel({ config }: {
           rows={2}
           style={{ flex: 1, padding: '7px 10px', fontSize: 12, border: '1px solid var(--border)', borderRadius: 8, outline: 'none', resize: 'none', background: 'var(--surface)', color: 'var(--text)', lineHeight: 1.5, fontFamily: 'inherit' }}
         />
-        <button onClick={sendMessage} disabled={!input.trim() || loading} aria-label={t('agentTest.send')}
-          style={{ width: 36, height: 36, borderRadius: 8, background: input.trim() && !loading ? 'var(--color-primary)' : 'var(--border)', border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: input.trim() && !loading ? 'pointer' : 'not-allowed', alignSelf: 'flex-end', flexShrink: 0 }}>
+        <Button variant="primary" onClick={sendMessage} disabled={!input.trim() || loading} aria-label={t('agentTest.send')}
+          style={{ width: 36, alignSelf: 'flex-end' }}>
           {/* Active fill is the tenant accent (on-accent token); disabled fill is neutral
               border, so the icon falls back to text-muted instead of a raw white that
               fails at 1.31:1 on a yellow brand. */}
           <Send size={14} color={input.trim() && !loading ? 'var(--color-on-accent)' : 'var(--text-muted)'} />
-        </button>
+        </Button>
       </div>
     </div>
   )

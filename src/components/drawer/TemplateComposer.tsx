@@ -20,6 +20,7 @@ import { AlertTriangle, Clock, Send } from 'lucide-react'
 import CreatableSelect from '@/components/ui/CreatableSelect'
 import { useWhatsAppTemplateSend } from './useWhatsAppTemplateSend'
 import type { Id } from '@/types/common'
+import Button from '@/components/ui/Button'
 
 // Shared field footprint for both pickers — one look, never two drifting inputs.
 const fieldLabel: React.CSSProperties = { fontSize: 11, color: 'var(--text-muted)', marginBottom: 4 }
@@ -116,13 +117,10 @@ export default function TemplateComposer({ candidateId, windowKnown, onSent }: {
 
           {/* Send — disabled whenever the send could not actually go through. */}
           <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 8 }}>
-            <button onClick={submit} disabled={!canSend}
-              style={{ display: 'flex', alignItems: 'center', gap: 6, height: 30, padding: '0 12px', fontSize: 12, fontWeight: 500,
-                border: 'none', borderRadius: 8, background: 'var(--color-primary)', color: 'var(--color-on-accent)',
-                cursor: canSend ? 'pointer' : 'default', opacity: canSend ? 1 : 0.45 }}>
+            <Button variant="primary" size="sm" onClick={submit} disabled={!canSend}>
               <Send size={12} />
               {sending ? t('common:saving') : t('conversations.sendTemplate')}
-            </button>
+            </Button>
           </div>
 
           {/* The server's own reason (409) or our honest gateway notice (502), inline. */}

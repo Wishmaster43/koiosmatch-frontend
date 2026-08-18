@@ -33,6 +33,7 @@ import PieChartCard from '@/components/charts/PieChartCard'
 import BarChartCard from '@/components/charts/BarChartCard'
 import { MessageFeed, EscalationList, ActivityChart } from './components'
 import QueueTab from './QueueTab'
+import Button from '@/components/ui/Button'
 
 // The one house placeholder for "the server did not return this" — never a padded zero.
 const DASH = '—'
@@ -212,13 +213,10 @@ export default function WhatsAppPage({ intent }: { intent?: unknown } = {}) {
           )
         })}
         </div>
-        <button onClick={handleRefresh} disabled={refreshing}
-          style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '7px 14px', marginBottom: 6,
-                   fontSize: 12, fontWeight: 500, borderRadius: 8, flexShrink: 0, border: 'none',
-                   background: 'var(--color-primary)', color: 'var(--color-on-accent)',
-                   cursor: refreshing ? 'not-allowed' : 'pointer', opacity: refreshing ? 0.6 : 1 }}>
+        <Button variant="primary" size="sm" onClick={handleRefresh} disabled={refreshing}
+          style={{ marginBottom: 6 }}>
           <RefreshCw size={12} className={refreshing ? 'animate-spin' : undefined} /> {t('refresh')}
-        </button>
+        </Button>
       </div>
 
       {/* Overzicht — activiteit + verdelingen (KPI's staan bovenaan; verhuist later naar Rapportage) */}

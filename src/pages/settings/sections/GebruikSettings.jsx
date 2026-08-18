@@ -31,10 +31,10 @@ import { useNumberFormat } from '@/lib/formatters'
 import { notifyError } from '@/lib/notify'
 import { extractApiError } from '@/lib/extractApiError'
 import QuickViewToggle from '@/components/ui/QuickViewToggle'
-import { BTN_H } from '@/config/buttonMetrics'
 import { card, cardTitle, sub, th, td, numCell, notice, Tile } from './usageCardStyles'
 import CreditsUsageCard from './CreditsUsageCard'
 import UsageDailySection from './UsageDailySection'
+import Button from '@/components/ui/Button'
 
 // EXCEL-1 — stream the usage xlsx (per day / per workflow / per user tabs, sale
 // prices only, §9) to disk via a temporary object URL, never a bare <a href>.
@@ -158,15 +158,11 @@ export default function GebruikSettings() {
           <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>{t('billing.usage.desc')}</p>
         </div>
         {/* EXCEL-1 — xlsx export of the current period's usage. */}
-        <button type="button" onClick={handleExport} disabled={exporting}
-          title={t('billing.usage.exportXlsx')}
-          style={{ display: 'flex', alignItems: 'center', gap: 6, height: BTN_H, padding: '0 14px', flexShrink: 0,
-                   fontSize: 13, fontWeight: 500, borderRadius: 8, border: '1px solid var(--border)',
-                   background: 'var(--surface)', color: 'var(--text)',
-                   cursor: exporting ? 'not-allowed' : 'pointer', opacity: exporting ? 0.6 : 1 }}>
+        <Button variant="secondary" onClick={handleExport} disabled={exporting}
+          title={t('billing.usage.exportXlsx')}>
           {exporting ? <Loader2 size={13} className="animate-spin" aria-hidden="true" /> : <FileSpreadsheet size={13} aria-hidden="true" />}
           {t('billing.usage.exportXlsx')}
-        </button>
+        </Button>
       </div>
 
       {/* Blocked: no plan/credit model exists in the backend yet. */}

@@ -21,6 +21,7 @@ import { Mail, RefreshCw, Eye, EyeOff } from 'lucide-react'
 import { useEmailConnection } from './useEmailConnection'
 import type { SmtpForm } from './useEmailConnection'
 import { fieldInputStyle } from '@/components/forms/fieldMetrics'
+import Button from '@/components/ui/Button'
 
 const PROVIDERS = [
   { id: 'office', label: 'Office 365' },
@@ -71,12 +72,9 @@ export default function ProfileEmailConnect() {
             </div>
             {info.email && <div style={{ fontSize: 12, color: 'var(--text-muted)', fontFamily: 'monospace', marginTop: 2 }}>{info.email}</div>}
           </div>
-          <button onClick={disconnect} disabled={busy}
-            style={{ height: 32, padding: '0 14px', fontSize: 13, fontWeight: 500, borderRadius: 8,
-                     border: '1px solid var(--border)', background: 'var(--surface)', color: 'var(--text)',
-                     cursor: busy ? 'default' : 'pointer', flexShrink: 0 }}>
+          <Button variant="secondary" onClick={disconnect} disabled={busy}>
             {t('profile.email.disconnect')}
-          </button>
+          </Button>
         </div>
       )}
 

@@ -204,10 +204,9 @@ export default function CandidateLookupItemModal({
 
         <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, marginTop: 20 }}>
           <Button variant="secondary" onClick={onClose}>{t('common.cancel')}</Button>
-          <button onClick={onSave} disabled={busy || !modal.label.trim()}
-            style={{ height: 34, padding: '0 16px', fontSize: 13, fontWeight: 500, border: 'none', borderRadius: 8, background: 'var(--color-primary)', color: 'var(--color-on-accent)', cursor: 'pointer', opacity: modal.label.trim() ? 1 : 0.4 }}>
+          <Button variant="primary" onClick={onSave} disabled={busy || !modal.label.trim()}>
             {busy ? t('common.saving') : t('common.save')}
-          </button>
+          </Button>
         </div>
       </div>
     </>

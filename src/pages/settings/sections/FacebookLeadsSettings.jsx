@@ -16,6 +16,7 @@ import { useAuth } from '@/context/AuthContext'
 import { notifyError } from '@/lib/notify'
 import { loadSettings, saveSettings } from '../lib/settingsApi'
 import { fieldInputStyle } from '@/components/forms/fieldMetrics'
+import Button from '@/components/ui/Button'
 
 // The exact placeholder the backend masks a stored secret with (SettingController::MASK) —
 // matching it lets the FE tell "already set" apart from "empty" without ever seeing the value.
@@ -144,13 +145,11 @@ export default function FacebookLeadsSettings() {
         </div>
       </div>
 
-      <button onClick={save} disabled={saving}
-        style={{ display: 'flex', alignItems: 'center', gap: 6, height: 34, padding: '0 16px', fontSize: 13, fontWeight: 500,
-          border: 'none', borderRadius: 8, background: 'var(--color-primary)', color: 'var(--color-on-accent)',
-          cursor: saving ? 'not-allowed' : 'pointer', opacity: saving ? 0.7 : 1, marginBottom: 24 }}>
+      <Button variant="primary" onClick={save} disabled={saving}
+        style={{ marginBottom: 24 }}>
         <Save size={14} />
         {saving ? t('common.saving') : saved ? t('common.saved') : t('common.save')}
-      </button>
+      </Button>
 
       {/* Read-only webhook URL to paste into the Facebook app dashboard. */}
       <div>

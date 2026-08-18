@@ -11,6 +11,7 @@ import { setLocationPrimaryContact, splitContactName } from '../hooks/useCustome
 import type { ContactPayload } from '../hooks/useCustomerContacts'
 import type { Contact } from '@/types/customer'
 import type { Id } from '@/types/common'
+import Button from '@/components/ui/Button'
 
 interface Props {
   /** The site's coupled primary contact (customer_contact_customer_location.is_primary) — the truth. */
@@ -57,16 +58,10 @@ const PickButton = ({ label, onClick }: { label: string; onClick: () => void }) 
 // because it performs the write directly, mirroring ContactsPanel's own "make
 // primary" star action (Star icon, Loader2 while the PUT is in flight).
 const LinkMatchButton = ({ label, onClick, busy }: { label: string; onClick: () => void; busy: boolean }) => (
-  <button type="button" onClick={onClick} disabled={busy}
-    style={{
-      display: 'flex', alignItems: 'center', gap: 6, height: 26, padding: '0 10px',
-      fontSize: 12, fontWeight: 600, borderRadius: 7, border: 'none',
-      background: 'var(--color-primary)', color: 'var(--color-on-accent)',
-      cursor: busy ? 'not-allowed' : 'pointer', opacity: busy ? 0.7 : 1,
-    }}>
+  <Button variant="primary" size="sm" onClick={onClick} disabled={busy}>
     {busy ? <Loader2 size={12} className="animate-spin" /> : <Star size={12} />}
     {label}
-  </button>
+  </Button>
 )
 
 /**

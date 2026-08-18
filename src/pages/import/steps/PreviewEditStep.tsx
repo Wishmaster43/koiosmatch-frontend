@@ -15,6 +15,7 @@ import PreviewStep from '@/pages/settings/sections/importeren/PreviewStep'
 import { fieldLabel } from '../lib/fieldLabels'
 import type { ColumnMapping } from '../lib/mapping'
 import type { ImportRunResult } from '../api'
+import Button from '@/components/ui/Button'
 
 type AsyncStatus = 'idle' | 'loading' | 'error' | 'success'
 
@@ -106,14 +107,10 @@ export default function PreviewEditStep({
       )}
 
       <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginTop: 16 }}>
-        <button type="button" onClick={onValidate} disabled={validating || editableRows.length === 0}
-          style={{ display: 'flex', alignItems: 'center', gap: 6, height: 34, padding: '0 16px', fontSize: 13,
-                   fontWeight: 500, border: 'none', borderRadius: 8, background: 'var(--color-primary)', color: 'var(--color-on-accent)',
-                   cursor: validating || editableRows.length === 0 ? 'not-allowed' : 'pointer',
-                   opacity: editableRows.length === 0 ? 0.5 : 1 }}>
+        <Button variant="primary" onClick={onValidate} disabled={validating || editableRows.length === 0}>
           {validating && <Loader2 size={14} className="animate-spin" aria-hidden="true" />}
           {validating ? t('import.runningPreview', { ns: 'settings' }) : t('import.runPreview', { ns: 'settings' })}
-        </button>
+        </Button>
         {dirty && (
           <span style={{ fontSize: 12, color: 'var(--text-muted)', fontStyle: 'italic' }}>
             {t('import.wizard.preview.validateHint', { ns: 'settings' })}

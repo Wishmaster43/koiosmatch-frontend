@@ -212,7 +212,7 @@ export default function RelationsSection({
                   )}
                   <div style={{ display: 'flex', gap: 6, justifyContent: 'flex-end' }}>
                     <Button variant="secondary" size="sm" onClick={() => { setCreatingContact(false); setDuplicateContact(null); setNc({ first_name: '', last_name: '', email: '', phone: '', mobile: '', function: '' }) }}>{t('common:cancel')}</Button>
-                    <button onClick={saveContact} disabled={!nc.first_name.trim() || !nc.last_name.trim()} style={{ height: 28, padding: '0 12px', fontSize: 12, fontWeight: 600, border: 'none', borderRadius: 6, background: 'var(--color-primary)', color: 'var(--color-on-accent)', cursor: 'pointer', opacity: (nc.first_name.trim() && nc.last_name.trim()) ? 1 : 0.4 }}>{t('common:save')}</button>
+                    <Button variant="primary" size="sm" onClick={saveContact} disabled={!nc.first_name.trim() || !nc.last_name.trim()}>{t('common:save')}</Button>
                   </div>
                 </div>
               ) : (

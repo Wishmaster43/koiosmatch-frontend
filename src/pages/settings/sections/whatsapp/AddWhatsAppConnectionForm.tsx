@@ -14,7 +14,7 @@ import { Plus } from 'lucide-react'
 import api, { unwrap } from '@/lib/api'
 import { extractApiError } from '@/lib/extractApiError'
 import { Field, TextField, SelectField } from '@/components/forms/fields'
-import { BTN_H } from '@/config/buttonMetrics'
+import Button from '@/components/ui/Button'
 
 // Provider options are brand names (data, not prose) — no i18n by design.
 const PROVIDERS = [
@@ -100,14 +100,10 @@ export default function AddWhatsAppConnectionForm({ onCreated }: { onCreated: ()
       )}
 
       <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 14 }}>
-        <button onClick={submit} disabled={saving}
-          style={{ display: 'flex', alignItems: 'center', gap: 6, height: BTN_H, padding: '0 14px',
-                   fontSize: 12, fontWeight: 500, borderRadius: 8, cursor: saving ? 'default' : 'pointer',
-                   border: 'none', background: 'var(--color-primary)', color: 'var(--color-on-accent)',
-                   opacity: saving ? 0.6 : 1 }}>
+        <Button variant="primary" size="sm" onClick={submit} disabled={saving}>
           <Plus size={12} />
           {saving ? t('whatsapp.addConnectionSaving') : t('whatsapp.addConnectionSubmit')}
-        </button>
+        </Button>
       </div>
     </div>
   )

@@ -163,10 +163,9 @@ export default function ApiKeyGeneralTab({ apiKey, onSave }) {
           <div style={{ display: 'flex', gap: 8, maxWidth: 320 }}>
             <input value={ipDraft} onChange={(e) => setIpDraft(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && addIp()}
               placeholder={t('apiKeys.ipPlaceholder')} style={{ ...inputStyle, fontFamily: "'JetBrains Mono', monospace" }} />
-            <button onClick={addIp} disabled={!isValidIpOrCidr(ipDraft)}
-              style={{ display: 'flex', alignItems: 'center', gap: 5, height: 32, padding: '0 12px', fontSize: 13, border: '1px solid var(--border)', borderRadius: 8, background: 'var(--surface)', cursor: isValidIpOrCidr(ipDraft) ? 'pointer' : 'not-allowed', opacity: isValidIpOrCidr(ipDraft) ? 1 : 0.5, color: 'var(--text)' }}>
+            <Button variant="secondary" onClick={addIp} disabled={!isValidIpOrCidr(ipDraft)}>
               <Plus size={13} /> {t('common:add')}
-            </button>
+            </Button>
           </div>
         )}
       </div>

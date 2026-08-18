@@ -14,6 +14,7 @@ import { useAuditFilters } from './useAuditFilters'
 import { exportAuditCsv } from './auditCsvExport'
 import PaginationBar from '@/components/ui/PaginationBar'
 import CalloutBox from '@/components/ui/CalloutBox'
+import Button from '@/components/ui/Button'
 
 const PAGE_SIZE = 25
 
@@ -80,13 +81,9 @@ export default function AuditLog() {
         <p style={{ fontSize: 12, color: 'var(--text-muted)' }}>
           {loading ? t('audit.loading') : t('audit.countSummary', { shown: filteredAll.length, total: logs.length })}
         </p>
-        <button onClick={() => exportAuditCsv(filteredAll, t)} disabled={filteredAll.length === 0}
-          style={{ display: 'flex', alignItems: 'center', gap: 6, height: 34, padding: '0 12px', fontSize: 12,
-                   fontWeight: 500, border: '1px solid var(--border)', borderRadius: 8, background: 'var(--surface)',
-                   color: 'var(--text)', cursor: filteredAll.length ? 'pointer' : 'not-allowed',
-                   opacity: filteredAll.length ? 1 : 0.5, whiteSpace: 'nowrap' }}>
+        <Button variant="secondary" size="sm" onClick={() => exportAuditCsv(filteredAll, t)} disabled={filteredAll.length === 0}>
           <Download size={13} /> {t('audit.export')}
-        </button>
+        </Button>
       </div>
 
       {error && (

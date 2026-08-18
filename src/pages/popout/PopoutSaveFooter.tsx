@@ -16,6 +16,7 @@ import { useEffect, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useConfirm } from '@/hooks/useConfirm'
 import { Save, X } from 'lucide-react'
+import Button from '@/components/ui/Button'
 
 interface PopoutSaveFooterProps {
   // Unsaved-changes marker — drives the state text AND every guard here.
@@ -78,12 +79,9 @@ export default function PopoutSaveFooter({ dirty, onSave }: PopoutSaveFooterProp
             background: 'var(--surface)', color: 'var(--text-muted)' }}>
           <X size={13} /> {t('close')}
         </button>
-        <button type="button" onClick={saveAndClose} disabled={!dirty} data-testid="text-popout-save"
-          style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '6px 12px', fontSize: 12, fontWeight: 600,
-            borderRadius: 8, border: 'none', cursor: dirty ? 'pointer' : 'default', opacity: dirty ? 1 : 0.5,
-            background: 'var(--color-primary)', color: 'var(--color-on-accent)' }}>
+        <Button variant="primary" size="sm" onClick={saveAndClose} disabled={!dirty} data-testid="text-popout-save">
           <Save size={13} /> {t('popout.saveAndClose')}
-        </button>
+        </Button>
       </div>
     </div>
   )

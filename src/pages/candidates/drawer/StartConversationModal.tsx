@@ -201,10 +201,9 @@ export default function StartConversationModal({ candidateId, onClose, onStarted
 
         <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8 }}>
           <Button variant="secondary" onClick={onClose}>{t('common:cancel')}</Button>
-          <button onClick={submit} disabled={!canSend}
-            style={{ height: 34, padding: '0 16px', fontSize: 13, fontWeight: 500, border: 'none', borderRadius: 8, background: 'var(--color-primary)', color: 'var(--color-on-accent)', cursor: canSend ? 'pointer' : 'default', opacity: canSend ? 1 : 0.4 }}>
+          <Button variant="primary" onClick={submit} disabled={!canSend}>
             {sending ? t('common:saving') : t('conversations.start')}
-          </button>
+          </Button>
         </div>
     </FloatingPanel>
   )

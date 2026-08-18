@@ -28,7 +28,6 @@ import { useTranslation } from 'react-i18next'
 import { Unlink } from 'lucide-react'
 import FloatingPanel from '@/components/ui/FloatingPanel'
 import { Z } from '@/lib/zIndexScale'
-import { BTN_H } from '@/config/buttonMetrics'
 import Button from '@/components/ui/Button'
 
 // Mirrors the backend limit (ApplicationController::destroy — string|max:1000).
@@ -75,12 +74,9 @@ export default function DetachApplicationModal({ label, onCancel, onConfirm, sub
           <Button variant="secondary" onClick={onCancel}>
             {t('common:cancel')}
           </Button>
-          <button type="button" onClick={() => trimmed && onConfirm(trimmed)} disabled={disabled}
-            style={{ height: BTN_H, padding: '0 16px', fontSize: 13, fontWeight: 600, border: 'none', borderRadius: 8,
-              background: 'var(--color-danger)', color: 'var(--color-on-danger)',
-              cursor: disabled ? 'not-allowed' : 'pointer', opacity: disabled ? 0.6 : 1 }}>
+          <Button variant="danger" onClick={() => trimmed && onConfirm(trimmed)} disabled={disabled}>
             {submitting ? t('common:saving') : t('work.detachConfirm')}
-          </button>
+          </Button>
         </div>
     </FloatingPanel>
   )

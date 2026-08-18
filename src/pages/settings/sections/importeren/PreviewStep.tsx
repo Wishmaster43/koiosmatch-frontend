@@ -9,6 +9,7 @@ import { useTranslation } from 'react-i18next'
 import { AlertTriangle, Loader2 } from 'lucide-react'
 import ImportResultPanel from './ImportResultPanel'
 import type { ImportRunResult } from './importApi'
+import Button from '@/components/ui/Button'
 
 interface PreviewStepProps {
   result: ImportRunResult
@@ -56,19 +57,14 @@ export default function PreviewStep({ result, runStatus, runError, canImport, on
       )}
 
       <div style={{ display: 'flex', gap: 8, marginTop: 20 }}>
-        <button type="button" onClick={onBack} disabled={confirming}
-          style={{ height: 34, padding: '0 16px', fontSize: 13, border: '1px solid var(--border)', borderRadius: 8,
-                   background: 'var(--surface)', color: 'var(--text)', cursor: confirming ? 'not-allowed' : 'pointer' }}>
+        <Button variant="secondary" onClick={onBack} disabled={confirming}>
           {t('import.preview.back')}
-        </button>
-        <button type="button" onClick={onConfirm} disabled={confirmDisabled}
-          title={canImport ? undefined : t('import.noImportPermission')}
-          style={{ display: 'flex', alignItems: 'center', gap: 6, height: 34, padding: '0 16px', fontSize: 13,
-                   fontWeight: 500, border: 'none', borderRadius: 8, background: 'var(--color-primary)', color: 'var(--color-on-accent)',
-                   cursor: confirmDisabled ? 'not-allowed' : 'pointer', opacity: !canImport || nothingToImport ? 0.5 : 1 }}>
+        </Button>
+        <Button variant="primary" onClick={onConfirm} disabled={confirmDisabled}
+          title={canImport ? undefined : t('import.noImportPermission')}>
           {confirming && <Loader2 size={14} className="animate-spin" aria-hidden="true" />}
           {confirming ? t('import.preview.running') : t('import.preview.confirm')}
-        </button>
+        </Button>
       </div>
     </div>
   )

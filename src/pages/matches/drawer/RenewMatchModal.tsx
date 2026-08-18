@@ -123,12 +123,9 @@ export default function RenewMatchModal({ match, onClose, onUpdate }: Props) {
           <Button variant="secondary" onClick={onClose}>
             {t('common:cancel')}
           </Button>
-          <button onClick={submit} disabled={!canSubmit}
-            style={{ height: 34, padding: '0 16px', fontSize: 13, fontWeight: 600, border: 'none', borderRadius: 8,
-              background: 'var(--color-primary)', color: 'var(--color-on-accent)', cursor: canSubmit ? 'pointer' : 'not-allowed',
-              opacity: canSubmit ? 1 : 0.6 }}>
+          <Button variant="primary" onClick={submit} disabled={!canSubmit}>
             {t('drawer.renew.confirm')}
-          </button>
+          </Button>
         </div>
     </FloatingPanel>
   )

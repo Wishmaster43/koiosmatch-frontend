@@ -225,13 +225,9 @@ export default function ProposeCandidateModal({ application: a, onClose }: Props
             background: 'color-mix(in srgb, var(--color-primary) 10%, transparent)', color: 'var(--color-primary-text)', cursor: 'pointer' }}>
             {form.copied ? t('propose.copied') : t('propose.copyMessage')}
           </button>
-          <button onClick={handleSubmit} disabled={!!form.disabledReason || form.submitting}
-            style={{ height: BTN_H, padding: '0 16px', fontSize: 13, fontWeight: 600, border: 'none', borderRadius: 8,
-              background: 'var(--color-primary)', color: 'var(--color-on-accent)',
-              cursor: (form.disabledReason || form.submitting) ? 'not-allowed' : 'pointer',
-              opacity: (form.disabledReason || form.submitting) ? 0.6 : 1 }}>
+          <Button variant="primary" onClick={handleSubmit} disabled={!!form.disabledReason || form.submitting}>
             {t('propose.submit')}
-          </button>
+          </Button>
         </div>
     </FloatingPanel>
   )

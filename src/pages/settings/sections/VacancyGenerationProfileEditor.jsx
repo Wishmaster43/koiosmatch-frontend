@@ -30,6 +30,7 @@ import { useContractTypes } from '@/lib/useContractTypes'
 import { useFunctions } from '@/lib/useFunctions'
 import { useIndustries } from '@/lib/useIndustries'
 import { useLanguageLookups } from '@/lib/useLanguageLookups'
+import Button from '@/components/ui/Button'
 
 // Tone-of-voice and length are fixed prompt-engine parameters (like the custom-field
 // TYPE select), not tenant business data — a small hardcoded enum is appropriate here,
@@ -207,10 +208,9 @@ export default function VacancyGenerationProfileEditor({ draft, onChange, conten
           <div style={{ display: 'flex', gap: 8, maxWidth: 320 }}>
             <input value={wordDraft} onChange={e => setWordDraft(e.target.value)} onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); addWord() } }}
               placeholder={t('vacancyGenerationSettings.forbiddenPlaceholder')} style={inputStyle} />
-            <button onClick={addWord} disabled={!wordDraft.trim()}
-              style={{ display: 'flex', alignItems: 'center', gap: 5, height: 32, padding: '0 12px', fontSize: 13, border: '1px solid var(--border)', borderRadius: 8, background: 'var(--surface)', cursor: wordDraft.trim() ? 'pointer' : 'not-allowed', opacity: wordDraft.trim() ? 1 : 0.5, color: 'var(--text)' }}>
+            <Button variant="secondary" onClick={addWord} disabled={!wordDraft.trim()}>
               <Plus size={13} />
-            </button>
+            </Button>
           </div>
         </div>
 

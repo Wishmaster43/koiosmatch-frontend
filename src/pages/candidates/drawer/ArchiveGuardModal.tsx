@@ -141,10 +141,9 @@ export default function ArchiveGuardModal({ mode, candidateName, aggregate, appl
           <Button variant="secondary" onClick={onClose}>
             {t('common:cancel')}
           </Button>
-          <button onClick={resolveAll} disabled={resolving || !hasBlockers}
-            style={{ height: 34, padding: '0 16px', fontSize: 13, fontWeight: 600, border: 'none', borderRadius: 8, background: 'var(--color-danger)', color: '#fff', cursor: 'pointer', opacity: (resolving || !hasBlockers) ? 0.6 : 1 }}>
+          <Button variant="danger" onClick={resolveAll} disabled={resolving || !hasBlockers}>
             {resolving ? t('archiveGuard.resolving') : t(mode === 'trash' ? 'archiveGuard.resolveButtonTrash' : 'archiveGuard.resolveButtonArchive')}
-          </button>
+          </Button>
         </div>
     </FloatingPanel>
   )

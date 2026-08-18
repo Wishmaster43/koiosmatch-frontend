@@ -22,7 +22,6 @@ import { useTranslation } from 'react-i18next'
 import { X } from 'lucide-react'
 import { WIDE_MODAL } from '@/components/ui/modalMetrics'
 import { cardHead, cardBox } from '@/components/ui/modalCards'
-import { BTN_H } from '@/config/buttonMetrics'
 import { LOCATION_ICON_NAMES, resolveLocationIcon, DEFAULT_LOCATION_COLOR } from '@/lib/locationIcons'
 import { useFocusTrap } from '@/hooks/useFocusTrap'
 import { ColorSwatch } from '../../components/SettingsControls'
@@ -177,10 +176,9 @@ export default function LocationFormModal({ editingId, form, setForm, saving, on
         <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, marginTop: 20 }}>
           <Button variant="secondary" onClick={onClose}>{t('common.cancel')}</Button>
           {/* KVK/BTW-PER-LAND-1: only a BLOCKING mismatch gates Save — a warning still saves. */}
-          <button onClick={onSubmit} disabled={saving || !form.name.trim() || identifierBlocked}
-            style={{ height: BTN_H, padding: '0 16px', fontSize: 13, fontWeight: 500, border: 'none', borderRadius: 8, background: 'var(--color-primary)', color: 'var(--color-on-accent)', cursor: 'pointer', opacity: (form.name.trim() && !identifierBlocked) ? 1 : 0.4 }}>
+          <Button variant="primary" onClick={onSubmit} disabled={saving || !form.name.trim() || identifierBlocked}>
             {saving ? t('common.saving') : (editingId ? t('common.save') : t('locations.createBtn'))}
-          </button>
+          </Button>
         </div>
       </div>
     </>

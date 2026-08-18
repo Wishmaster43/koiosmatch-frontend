@@ -19,6 +19,7 @@ import {
 import api from '@/lib/api'
 import { useAuth } from '@/context/AuthContext'
 import { notifyError } from '@/lib/notify'
+import Button from '@/components/ui/Button'
 
 // Entity → icon + its export route + the view-permission that gates it (mirrors
 // routes/api/tenant/exports.php exactly). "Leads" = candidates in a Lead phase,
@@ -144,20 +145,13 @@ export default function ExportSettings() {
                 <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>{t(`export.entities.${entity.id}.desc`)}</div>
               </div>
             </div>
-            <button
+            <Button variant="primary"
               onClick={() => handleExport(entity)}
               disabled={!allowed || pending}
-              title={allowed ? t('export.button') : t('export.noPermission')}
-              style={{
-                display: 'flex', alignItems: 'center', gap: 6, height: 34, padding: '0 16px', fontSize: 13,
-                fontWeight: 500, border: 'none', borderRadius: 8, whiteSpace: 'nowrap', flexShrink: 0,
-                background: 'var(--color-primary)', color: 'var(--color-on-accent)',
-                cursor: allowed && !pending ? 'pointer' : 'not-allowed',
-                opacity: !allowed || pending ? 0.5 : 1,
-              }}>
+              title={allowed ? t('export.button') : t('export.noPermission')}>
               {pending ? <Loader2 size={14} className="animate-spin" aria-hidden="true" /> : <Upload size={14} />}
               {t('export.button')}
-            </button>
+            </Button>
           </div>
         </div>
       </div>

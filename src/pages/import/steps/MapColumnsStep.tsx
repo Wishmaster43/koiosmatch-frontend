@@ -117,13 +117,9 @@ export default function MapColumnsStep({ entity, headers, targetColumns, mapping
         <Button variant="secondary" onClick={onBack}>
           {t('back', { ns: 'common' })}
         </Button>
-        <button type="button" onClick={onNext} disabled={missingRequired.length > 0 || headers.length === 0}
-          style={{ height: 34, padding: '0 16px', fontSize: 13, fontWeight: 500, border: 'none', borderRadius: 8,
-                   background: 'var(--color-primary)', color: 'var(--color-on-accent)',
-                   cursor: missingRequired.length > 0 || headers.length === 0 ? 'not-allowed' : 'pointer',
-                   opacity: missingRequired.length > 0 || headers.length === 0 ? 0.5 : 1 }}>
+        <Button variant="primary" onClick={onNext} disabled={missingRequired.length > 0 || headers.length === 0}>
           {t('import.wizard.next', { ns: 'settings', defaultValue: 'Next' })}
-        </button>
+        </Button>
       </div>
     </div>
   )

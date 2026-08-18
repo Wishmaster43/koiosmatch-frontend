@@ -21,6 +21,7 @@ import StatusPill from '@/components/ui/StatusPill'
 import { card, th as thBase, td as tdBase, numCell as numCellBase, notice } from './usageCardStyles'
 import type { CSSProperties } from 'react'
 import type { operations } from '@/types/api-generated'
+import Button from '@/components/ui/Button'
 const th = thBase as CSSProperties
 const td = tdBase as CSSProperties
 const numCell = numCellBase as CSSProperties
@@ -136,15 +137,11 @@ export default function TenantInvoicesSettings() {
                     </td>
                     <td style={td}>{formatDate(inv.finalized_at ?? inv.sent_at)}</td>
                     <td style={{ ...td, textAlign: 'right' as const }}>
-                      <button type="button" onClick={() => handleDownload(inv)} disabled={downloading}
-                        aria-label={t('billing.invoices.download')}
-                        style={{ display: 'inline-flex', alignItems: 'center', gap: 6, height: 30, padding: '0 12px',
-                                 fontSize: 12, fontWeight: 500, border: '1px solid var(--border)', borderRadius: 7,
-                                 background: 'var(--surface)', color: 'var(--text)',
-                                 cursor: downloading ? 'not-allowed' : 'pointer', opacity: downloading ? 0.6 : 1 }}>
+                      <Button variant="secondary" size="sm" onClick={() => handleDownload(inv)} disabled={downloading}
+                        aria-label={t('billing.invoices.download')}>
                         {downloading ? <Loader2 size={13} className="animate-spin" aria-hidden="true" /> : <Download size={13} aria-hidden="true" />}
                         {t('billing.invoices.download')}
-                      </button>
+                      </Button>
                     </td>
                   </tr>
                 )

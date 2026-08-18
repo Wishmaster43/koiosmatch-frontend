@@ -377,10 +377,9 @@ export default function AddApplicationModal({ candidateId, candidateOwnerId, can
       {/* Pinned footer — buttons stay visible whatever the content height (Danny 13-08). */}
       <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, padding: '14px 22px', borderTop: '1px solid var(--border)', flexShrink: 0 }}>
           <Button variant="secondary" onClick={onClose}>{t('common:cancel')}</Button>
-          <button onClick={submit} disabled={saving || appRuleBlocked}
-            style={{ height: 34, padding: '0 16px', fontSize: 13, fontWeight: 500, border: 'none', borderRadius: 8, background: 'var(--color-primary)', color: 'var(--color-on-accent)', cursor: !appRuleBlocked ? 'pointer' : 'default', opacity: !appRuleBlocked ? 1 : 0.4 }}>
+          <Button variant="primary" onClick={submit} disabled={saving || appRuleBlocked}>
             {saving ? t('common:saving') : t(editing ? 'common:save' : 'work.createApplication')}
-          </button>
+          </Button>
         </div>
     </FloatingPanel>
   )

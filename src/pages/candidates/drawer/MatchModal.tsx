@@ -273,10 +273,9 @@ export default function MatchModal({
         return (
           <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, padding: '14px 22px', borderTop: '1px solid var(--border)', flexShrink: 0 }}>
             <Button variant="secondary" onClick={onClose}>{t('common:cancel')}</Button>
-            <button onClick={form.handleSubmitClick} disabled={form.saving || !canSubmit}
-              style={{ height: 34, padding: '0 16px', fontSize: 13, fontWeight: 600, border: 'none', borderRadius: 8, background: 'var(--color-primary)', color: 'var(--color-on-accent)', cursor: canSubmit ? 'pointer' : 'default', opacity: canSubmit ? 1 : 0.4 }}>
+            <Button variant="primary" onClick={form.handleSubmitClick} disabled={form.saving || !canSubmit}>
               {form.saving ? t('common:saving') : (form.deviatesFromProposal && form.confirmDeviation ? t('placement.rateProposal.deviationConfirm') : t(editing ? 'common:save' : 'placement.create'))}
-            </button>
+            </Button>
           </div>
         )
       })()}

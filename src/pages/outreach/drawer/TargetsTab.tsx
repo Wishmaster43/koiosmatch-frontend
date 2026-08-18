@@ -42,6 +42,7 @@ import TargetNoteField from './TargetNoteField'
 import type { OutreachTarget, AssignResult } from '../hooks/useOutreachDetail'
 import type { TargetSelection, AssigneeAxes } from '../data/outreachApi'
 import type { TargetFilter } from './targetFilter'
+import Button from '@/components/ui/Button'
 
 interface RecruiterOption { value: string; label: string }
 
@@ -389,11 +390,9 @@ export default function TargetsTab({ targets, loading, error, onSetStatus, onSet
                     options={vacancyOptions.map(v => ({ value: String(v.value), label: v.label + (v.client ? ` — ${v.client}` : '') }))}
                     style={{ padding: '6px 8px', fontSize: 12 }} />
                 </div>
-                <button onClick={confirmMatch} disabled={!matchVacancyId || matchSaving}
-                  style={{ padding: '6px 12px', fontSize: 11, fontWeight: 600, borderRadius: 7, border: 'none', cursor: (!matchVacancyId || matchSaving) ? 'not-allowed' : 'pointer',
-                    background: 'var(--color-primary)', color: 'var(--color-on-accent)', opacity: (!matchVacancyId || matchSaving) ? 0.5 : 1 }}>
+                <Button variant="primary" size="sm" onClick={confirmMatch} disabled={!matchVacancyId || matchSaving}>
                   {t('drawer.matchConfirm')}
-                </button>
+                </Button>
                 <button onClick={() => setMatchFor(null)} title={t('common:cancel')} aria-label={t('common:cancel')}
                   style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', display: 'flex', padding: 2 }}>
                   <X size={14} />

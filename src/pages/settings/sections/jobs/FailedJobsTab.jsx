@@ -12,6 +12,7 @@ import { formatDT } from '@/components/reports/runFormat'
 import { useConfirm } from '@/hooks/useConfirm'
 import { useFailedJobs } from './useFailedJobs'
 import { BTN_H } from '@/config/buttonMetrics'
+import Button from '@/components/ui/Button'
 
 export default function FailedJobsTab() {
   const { t } = useTranslation('settings')
@@ -67,12 +68,9 @@ export default function FailedJobsTab() {
           style={{ height: 32, padding: '0 10px', fontSize: 12, border: '1px solid var(--border)', borderRadius: 8, background: 'var(--surface)', color: 'var(--text)', width: 160 }} />
         {/* BTN_H (§4/§9): one explicit height for every text/action button, everywhere. */}
         <div style={{ display: 'flex', gap: 8, marginLeft: 'auto' }}>
-          <button type="button" disabled={bulkBusy || result.total === 0} onClick={confirmRetryAll}
-            style={{ display: 'flex', alignItems: 'center', gap: 6, height: BTN_H, padding: '0 12px', fontSize: 12, fontWeight: 500,
-              border: '1px solid var(--border)', borderRadius: 8, background: 'var(--surface)', color: 'var(--text)',
-              cursor: bulkBusy || result.total === 0 ? 'not-allowed' : 'pointer', opacity: bulkBusy || result.total === 0 ? 0.5 : 1 }}>
+          <Button variant="secondary" size="sm" disabled={bulkBusy || result.total === 0} onClick={confirmRetryAll}>
             <RefreshCw size={12} /> {t('jobs.retryAll')}
-          </button>
+          </Button>
           <button type="button" disabled={bulkBusy || result.total === 0} onClick={confirmFlush}
             style={{ display: 'flex', alignItems: 'center', gap: 6, height: BTN_H, padding: '0 12px', fontSize: 12, fontWeight: 500,
               border: '1px solid color-mix(in srgb, var(--color-danger) 40%, transparent)', borderRadius: 8,

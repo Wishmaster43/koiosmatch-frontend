@@ -32,7 +32,6 @@ import api, { unwrapList } from '@/lib/api'
 import { notifyError, notifySuccess } from '@/lib/notify'
 import FloatingPanel from '@/components/ui/FloatingPanel'
 import { Z } from '@/lib/zIndexScale'
-import { BTN_H } from '@/config/buttonMetrics'
 import { fieldInputStyle } from '@/components/forms/fieldMetrics'
 import type { Id } from '@/types/common'
 import Button from '@/components/ui/Button'
@@ -181,11 +180,9 @@ export default function MergeCustomerModal({ current, onClose, onMerged }: {
             <Button variant="secondary" size="sm" onClick={onClose}>
               {t('merge.cancel')}
             </Button>
-            <button type="button" onClick={confirmMerge} disabled={!duplicate || merging}
-              style={{ display: 'flex', alignItems: 'center', gap: 6, height: BTN_H, padding: '0 14px', fontSize: 12, fontWeight: 600, border: 'none', borderRadius: 8,
-                background: 'var(--color-danger)', color: '#fff', cursor: !duplicate || merging ? 'not-allowed' : 'pointer', opacity: !duplicate || merging ? 0.5 : 1 }}>
+            <Button variant="danger" size="sm" onClick={confirmMerge} disabled={!duplicate || merging}>
               {merging ? <Loader2 size={13} className="animate-spin" /> : <GitMerge size={13} />} {t('merge.confirm')}
-            </button>
+            </Button>
           </div>
         </div>
     </FloatingPanel>
