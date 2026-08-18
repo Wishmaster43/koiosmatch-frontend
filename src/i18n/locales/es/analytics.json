@@ -10,7 +10,7 @@
     "truncated": "Mostrando {{shown}} de {{total}}"
   },
   "tabs": {
-    "candidates": "Entrada",
+    "candidates": "Candidatos",
     "applications": "Solicitudes",
     "customers": "Clientes",
     "customerstructure": "Estructura de cliente",
@@ -25,12 +25,12 @@
     "usage": "Uso"
   },
   "candidates": {
-    "loading": "Cargando entrada…",
-    "error": "No se pudo cargar la entrada",
-    "empty": "Sin entrada en este período",
+    "loading": "Cargando candidatos…",
+    "error": "No se han podido cargar los candidatos",
+    "empty": "Sin candidatos en este periodo",
     "total": "Entrada total",
-    "series": "Entrada a lo largo del tiempo",
-    "window": "Entrada {{from}} a {{to}}",
+    "series": "Candidatos a lo largo del tiempo",
+    "window": "Candidatos del {{from}} al {{to}}",
     "axes": {
       "status": "Estado",
       "phase": "Fase",

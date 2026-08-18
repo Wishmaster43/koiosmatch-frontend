@@ -10,7 +10,7 @@
     "truncated": "Zeigt {{shown}} von {{total}}"
   },
   "tabs": {
-    "candidates": "Zulauf",
+    "candidates": "Kandidaten",
     "applications": "Bewerbungen",
     "customers": "Kunden",
     "customerstructure": "Kundenstruktur",
@@ -25,12 +25,12 @@
     "usage": "Nutzung"
   },
   "candidates": {
-    "loading": "Zulauf wird geladen…",
-    "error": "Zulauf konnte nicht geladen werden",
-    "empty": "Kein Zulauf in diesem Zeitraum",
+    "loading": "Kandidaten werden geladen…",
+    "error": "Kandidaten konnten nicht geladen werden",
+    "empty": "Keine Kandidaten in diesem Zeitraum",
     "total": "Zulauf gesamt",
-    "series": "Zulauf im Zeitverlauf",
-    "window": "Zulauf {{from}} bis {{to}}",
+    "series": "Kandidaten im Zeitverlauf",
+    "window": "Kandidaten {{from}} bis {{to}}",
     "axes": {
       "status": "Status",
       "phase": "Phase",

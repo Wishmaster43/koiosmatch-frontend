@@ -7,6 +7,7 @@
  * all come from tenant lookups via their `useX()` hooks / LookupsContext.
  */
 import type { CSSProperties } from 'react'
+import { tintBg, tintBorder } from '@/lib/tint'
 import { sectionTitle as uiSectionTitle } from '@/components/ui/SectionCard'
 import type { Id } from '@/types/common'
 
@@ -27,8 +28,9 @@ export const sectionTitle: CSSProperties = { ...uiSectionTitle, display: 'block'
 export const softPill = (active: boolean, color: string = 'var(--color-primary)'): CSSProperties => ({
   color: active ? color : 'var(--text-muted)',
   fontWeight: active ? 600 : 400,
-  background: active ? `color-mix(in srgb, ${color} 14%, transparent)` : 'transparent',
-  border: `1px solid ${active ? `color-mix(in srgb, ${color} 45%, transparent)` : 'var(--border)'}`,
+  // HUISSTIJL-1: one shared tint formula — was a private 14/45 pair.
+  background: active ? tintBg(color, true) : 'transparent',
+  border: active ? tintBorder(color, true) : '1px solid var(--border)',
 })
 
 // Return-tab memory (NAV-BACK-1 tab-remember): candidate→Match cross-navigation

@@ -1,6 +1,6 @@
 import { useState, useMemo, useRef, useCallback } from 'react'
 import type { CSSProperties, ReactNode, RefObject } from 'react'
-import { ChevronUp, ChevronDown, ChevronsUpDown } from 'lucide-react'
+import SortCaret from './SortCaret'
 import { useTranslation } from 'react-i18next'
 import { useVirtualizer } from '@tanstack/react-virtual'
 import { TableRow } from './DataTableRow'
@@ -333,9 +333,8 @@ export default function DataTable<Row>({
                     padding: thPadding, cursor: 'pointer', userSelect: 'none', alignItems: 'center', gap: 3,
                     justifyContent: justify, font: 'inherit', color: 'inherit' }}>
                   {col.header}
-                  {active
-                    ? (sort.dir === 'asc' ? <ChevronUp size={12} aria-hidden="true" /> : <ChevronDown size={12} aria-hidden="true" />)
-                    : <ChevronsUpDown size={12} aria-hidden="true" style={{ opacity: 0.35 }} />}
+                  {/* One shared caret recipe (HUISSTIJL-1): active is coloured, everywhere. */}
+                  <SortCaret active={!!active} dir={sort?.dir} />
                 </button>
               </th>
             )

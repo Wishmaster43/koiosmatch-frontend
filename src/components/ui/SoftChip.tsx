@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react'
+import { tintBg, tintBorder } from '@/lib/tint'
 
 /**
  * SoftChip — THE §3A/§4 soft-chip: a tinted label with a matching border, never a
@@ -25,8 +26,8 @@ export default function SoftChip({ label, color, dot = false, title, round = fal
   return (
     <span title={title} style={{ display: 'inline-flex', alignItems: 'center', gap: 5,
       fontSize: size, fontWeight: 500, padding: '2px 8px', borderRadius: round ? 99 : 6,
-      background: `color-mix(in srgb, ${c} 10%, transparent)`, color: c,
-      border: `1px solid color-mix(in srgb, ${c} 33%, transparent)`, whiteSpace: 'nowrap' }}>
+      background: tintBg(c), color: c,
+      border: tintBorder(c), whiteSpace: 'nowrap' }}>
       {dot && <span style={{ width: 6, height: 6, borderRadius: '50%', background: c, flexShrink: 0 }} />}
       {label}
     </span>

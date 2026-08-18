@@ -16,6 +16,7 @@
  */
 import { Check } from 'lucide-react'
 import SelectAllRow from './SelectAllRow'
+import { tintBg, tintBorder } from '@/lib/tint'
 import { useBatchToggle } from '@/hooks/useBatchToggle'
 
 export interface ChipOption { value: string; label: string; color?: string }
@@ -61,8 +62,8 @@ export default function ChipMultiSelect({ options, values, selected, onToggle, c
               // all, so the chosen state is unmistakable (and never colour-only, §6).
               fontWeight: isActive ? 600 : 400,
               color: isActive ? tint : 'var(--text-muted)',
-              background: isActive ? `color-mix(in srgb, ${tint} 16%, transparent)` : 'var(--bg)',
-              border: isActive ? `1px solid color-mix(in srgb, ${tint} 50%, transparent)` : '1px solid var(--border)',
+              background: isActive ? tintBg(tint, true) : 'var(--bg)',
+              border: isActive ? tintBorder(tint, true) : '1px solid var(--border)',
             }}>
             {isActive && <Check size={11} strokeWidth={3} aria-hidden="true" />}
             {o.label}

@@ -5,7 +5,8 @@
  */
 import { useTranslation } from 'react-i18next'
 import type { CSSProperties, ReactNode } from 'react'
-import { ChevronUp, ChevronDown, ChevronsUpDown } from 'lucide-react'
+
+import SortCaret from '@/components/ui/SortCaret'
 
 export const NOW = new Date()
 export const PAD = (n: number) => String(n).padStart(2, '0')
@@ -33,10 +34,8 @@ export function StatusBadge({ status }: { status?: string }) {
 }
 
 export function SortIcon({ active, dir }: { active: boolean; dir: 'asc' | 'desc' }) {
-  if (!active) return <ChevronsUpDown size={12} style={{ color: 'var(--border)' }} />
-  return dir === 'asc'
-    ? <ChevronUp size={12} style={{ color: 'var(--color-primary-text)' }} />
-    : <ChevronDown size={12} style={{ color: 'var(--color-primary-text)' }} />
+  // Delegates to the ONE shared caret recipe (HUISSTIJL-1).
+  return <SortCaret active={active} dir={dir} />
 }
 
 export const TH: CSSProperties = { padding: '8px 12px', textAlign: 'left', fontSize: 11, fontWeight: 600,

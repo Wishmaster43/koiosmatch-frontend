@@ -540,6 +540,23 @@ the code is worse than no rule, because the next reader builds on it. What is tr
   duplicate.
 - Tailwind discipline: extract repeated class strings into a component or a
   shared constant; don't copy-paste 15-class strings across files.
+- **DE KNOP IS `components/ui/Button` — een nieuwe inline knopstijl is een finding
+  (HUISSTIJL-1, Danny 2026-08-18: "geen 427 objecten voor hetzelfde maar één
+  herbruikbaar element, per tenant instelbaar").** Gemeten vóór het traject: 1138
+  handgestylede `<button>`-tags in 427 bestanden, 565 verschillende handtekeningen,
+  géén gedeelde Button. Regels: (1) elke actie-/formulier-/modalknop rendert via
+  `Button` (varianten primary · secondary · ghost · soft · danger · dangerSoft;
+  maten md/sm; `iconOnly`); layout (breedte/marge/flex) mag via `style`, identiteit
+  (kleur/rand/typografie) NOOIT. (2) De modal-voetregel is `components/ui/ModalFooter`.
+  (3) Het sorticoon is `components/ui/SortCaret` — actief is gekleurd
+  (`--color-primary-text`), overal. (4) De §4-tint komt uit `lib/tint`
+  (`tintBg`/`tintBorder`, huispaar 10/33 · actief 16/50) — een ad-hoc
+  color-mix-percentage of `kleur+'1A'`-hex-concat is een finding (concat breekt stil
+  op `var(--…)`-tenanttokens). (5) Per-tenant instelbaarheid loopt ALLEEN via de
+  tokens (Instellingen → Bedrijf → Branding, opgeslagen in de backend-DB) — een
+  component dat een kleur hardcodeert, onttrekt zich aan de tenant-branding en is
+  daarmee per definitie fout. Bij het aanraken van een bestand: migreer de
+  handgerolde knoppen die je tegenkomt, ook als ze niet in je opdracht stonden.
 - **Soft-chip / toggle-button convention (one look on every entity).** Coloured chips,
   status pills and quick-view toggles (Blacklist / Archived / status / phase / …) are
   **always tinted in their own semantic colour, never a solid fill.** Background =

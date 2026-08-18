@@ -1,4 +1,5 @@
 import type { ComponentType, ReactNode } from 'react'
+import { tintBg, tintBorder } from '@/lib/tint'
 import { useTranslation } from 'react-i18next'
 import { Plus } from 'lucide-react'
 
@@ -53,8 +54,8 @@ export default function DrawerAddButton({ onClick, label, icon: Icon = Plus, dis
         cursor: disabled ? 'not-allowed' : 'pointer',
         // Text-colour accent uses the AA-contrast text token, not the raw brand primary.
         color: disabled ? 'var(--text-muted)' : 'var(--color-primary-text)',
-        background: disabled ? 'var(--bg)' : 'color-mix(in srgb, var(--color-primary) 10%, transparent)',
-        border: `1px solid ${disabled ? 'var(--border)' : 'color-mix(in srgb, var(--color-primary) 30%, transparent)'}`,
+        background: disabled ? 'var(--bg)' : tintBg('var(--color-primary)'),
+        border: disabled ? '1px solid var(--border)' : tintBorder('var(--color-primary)'),
         opacity: disabled ? 0.7 : 1,
       }}>
       <Icon size={12} /> {iconOnly ? null : visibleText}

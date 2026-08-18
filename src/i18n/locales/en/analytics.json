@@ -10,7 +10,7 @@
     "truncated": "Showing {{shown}} of {{total}}"
   },
   "tabs": {
-    "candidates": "Inflow",
+    "candidates": "Candidates",
     "applications": "Applications",
     "customers": "Customers",
     "customerstructure": "Customer structure",
@@ -25,12 +25,12 @@
     "usage": "Usage"
   },
   "candidates": {
-    "loading": "Loading inflow…",
-    "error": "Could not load the inflow",
-    "empty": "No inflow in this period",
+    "loading": "Loading candidates…",
+    "error": "Could not load candidates",
+    "empty": "No candidates in this period",
     "total": "Total inflow",
-    "series": "Inflow over time",
-    "window": "Inflow {{from}} through {{to}}",
+    "series": "Candidates over time",
+    "window": "Candidates {{from}} to {{to}}",
     "axes": {
       "status": "Status",
       "phase": "Phase",

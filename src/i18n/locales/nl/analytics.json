@@ -10,7 +10,7 @@
     "truncated": "Toont {{shown}} van {{total}}"
   },
   "tabs": {
-    "candidates": "Instroom",
+    "candidates": "Kandidaten",
     "applications": "Sollicitaties",
     "customers": "Klanten",
     "customerstructure": "Klantstructuur",
@@ -25,12 +25,12 @@
     "usage": "Verbruik"
   },
   "candidates": {
-    "loading": "Instroom laden…",
-    "error": "Kon de instroom niet laden",
-    "empty": "Geen instroom in deze periode",
+    "loading": "Kandidaten laden…",
+    "error": "Kon de kandidaten niet laden",
+    "empty": "Geen kandidaten in deze periode",
     "total": "Totaal ingestroomd",
-    "series": "Instroom over tijd",
-    "window": "Instroom {{from}} t/m {{to}}",
+    "series": "Kandidaten over tijd",
+    "window": "Kandidaten {{from}} t/m {{to}}",
     "axes": {
       "status": "Status",
       "phase": "Fase",

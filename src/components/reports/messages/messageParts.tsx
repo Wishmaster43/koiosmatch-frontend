@@ -3,8 +3,8 @@
  * meta + badge components, and the sortable-column icon. Used by both MessagesTable
  * and MessageDrawer. Labels resolve via t('messages.channel.*' / '.status.*').
  */
-import { MessageCircle, Mail, Phone, CheckCheck, Clock, XCircle, AlertTriangle,
-         ChevronUp, ChevronDown, ChevronsUpDown } from 'lucide-react'
+import { MessageCircle, Mail, Phone, CheckCheck, Clock, XCircle, AlertTriangle } from 'lucide-react'
+import SortCaret from '@/components/ui/SortCaret'
 import type { LucideIcon } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 
@@ -69,8 +69,6 @@ export function StatusBadge({ status }: { status?: string }) {
 }
 
 export function SortIcon({ active, dir }: { active: boolean; dir: 'asc' | 'desc' }) {
-  if (!active) return <ChevronsUpDown size={12} style={{ color: 'var(--border)' }} />
-  return dir === 'asc'
-    ? <ChevronUp size={12} style={{ color: 'var(--color-primary-text)' }} />
-    : <ChevronDown size={12} style={{ color: 'var(--color-primary-text)' }} />
+  // Delegates to the ONE shared caret recipe (HUISSTIJL-1).
+  return <SortCaret active={active} dir={dir} />
 }

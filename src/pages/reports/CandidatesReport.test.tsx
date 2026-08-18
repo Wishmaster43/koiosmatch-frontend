@@ -82,19 +82,19 @@ describe('CandidatesReport (RAPPORTEN-SUITE-1 inflow report)', () => {
   it('shows the loading state', () => {
     mockUseCandidatesReport.mockReturnValue({ data: null, loading: true, error: false })
     renderReport()
-    expect(screen.getByText('Instroom laden…')).toBeInTheDocument()
+    expect(screen.getByText('Kandidaten laden…')).toBeInTheDocument()
   })
 
   it('shows the error state', () => {
     mockUseCandidatesReport.mockReturnValue({ data: null, loading: false, error: true })
     renderReport()
-    expect(screen.getByText('Kon de instroom niet laden')).toBeInTheDocument()
+    expect(screen.getByText('Kon de kandidaten niet laden')).toBeInTheDocument()
   })
 
   it('shows the empty state when there is no inflow', () => {
     mockUseCandidatesReport.mockReturnValue({ data: { ...data, total: 0, by_status: [], by_phase: [], by_source: [], by_owner: [], by_branch: [], timeseries: { bucket: 'week', series: [] } }, loading: false, error: false })
     renderReport()
-    expect(screen.getByText('Geen instroom in deze periode')).toBeInTheDocument()
+    expect(screen.getByText('Geen kandidaten in deze periode')).toBeInTheDocument()
   })
 
   it('renders the axis bars on success', () => {
@@ -110,7 +110,7 @@ describe('CandidatesReport (RAPPORTEN-SUITE-1 inflow report)', () => {
   it('renders the data window prominently as DD-MM-YYYY', () => {
     mockUseCandidatesReport.mockReturnValue({ data, loading: false, error: false })
     renderReport()
-    expect(screen.getByText('Instroom 01-08-2026 t/m 31-08-2026')).toBeInTheDocument()
+    expect(screen.getByText('Kandidaten 01-08-2026 t/m 31-08-2026')).toBeInTheDocument()
     expect(screen.queryByText(/2026-08-01/)).not.toBeInTheDocument()
   })
 

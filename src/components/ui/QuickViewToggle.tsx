@@ -11,6 +11,7 @@
  * The label is a prop so each page passes its own i18n string (no strings live here).
  */
 import type { ComponentType } from 'react'
+import { tintBg, tintBorder } from '@/lib/tint'
 
 interface QuickViewToggleProps {
   active: boolean
@@ -54,8 +55,9 @@ export default function QuickViewToggle({ active, onToggle, label, color = 'var(
           : compact ? { height: 26, padding: '0 10px' } : { padding: '6px 12px' }),
         fontSize: compact ? 11.5 : 12,
         fontWeight: active ? 600 : 500, borderRadius: compact ? 6 : 8, cursor: 'pointer', color: textColor,
-        background: `color-mix(in srgb, ${color} ${active ? 16 : 8}%, transparent)`,
-        border: `1px solid color-mix(in srgb, ${color} ${active ? 50 : 28}%, transparent)`,
+        // HUISSTIJL-1: one shared tint formula (lib/tint) — was a private 8/28 pair.
+        background: tintBg(color, active),
+        border: tintBorder(color, active),
       }}>
       {Icon && <Icon size={13} />}
       {!squished && label}

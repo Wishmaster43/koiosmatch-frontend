@@ -10,7 +10,7 @@
     "truncated": "Affiche {{shown}} sur {{total}}"
   },
   "tabs": {
-    "candidates": "Flux entrant",
+    "candidates": "Candidats",
     "applications": "Candidatures",
     "customers": "Clients",
     "customerstructure": "Structure client",
@@ -25,12 +25,12 @@
     "usage": "Utilisation"
   },
   "candidates": {
-    "loading": "Chargement du flux entrant…",
-    "error": "Impossible de charger le flux entrant",
-    "empty": "Aucun flux entrant sur cette période",
+    "loading": "Chargement des candidats…",
+    "error": "Impossible de charger les candidats",
+    "empty": "Aucun candidat sur cette période",
     "total": "Flux entrant total",
-    "series": "Flux entrant dans le temps",
-    "window": "Flux entrant du {{from}} au {{to}}",
+    "series": "Candidats dans le temps",
+    "window": "Candidats du {{from}} au {{to}}",
     "axes": {
       "status": "Statut",
       "phase": "Phase",

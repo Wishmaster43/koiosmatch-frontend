@@ -6,7 +6,8 @@
 import { useState, useEffect, useMemo } from 'react'
 import type { CSSProperties } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Search, ChevronUp, ChevronDown, ChevronsUpDown } from 'lucide-react'
+import { Search } from 'lucide-react'
+import SortCaret from '@/components/ui/SortCaret'
 import { useRightPanel }      from '@/context/RightPanelContext'
 import LocationDrawer         from './LocationDrawer'
 import PaginationBar          from '../ui/PaginationBar'
@@ -17,10 +18,8 @@ import type { ReportLocation, SortState } from '@/types/reports'
 
 
 function SortIcon({ active, dir }: { active: boolean; dir: 'asc' | 'desc' }) {
-  if (!active) return <ChevronsUpDown size={12} style={{ color: 'var(--border)' }} />
-  return dir === 'asc'
-    ? <ChevronUp size={12} style={{ color: 'var(--color-primary-text)' }} />
-    : <ChevronDown size={12} style={{ color: 'var(--color-primary-text)' }} />
+  // Delegates to the ONE shared caret recipe (HUISSTIJL-1).
+  return <SortCaret active={active} dir={dir} />
 }
 
 const TH: CSSProperties = { padding: '8px 12px', textAlign: 'left', fontSize: 11, fontWeight: 600,

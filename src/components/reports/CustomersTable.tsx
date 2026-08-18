@@ -6,7 +6,8 @@
 import { useState, useEffect, useMemo } from 'react'
 import type { CSSProperties, Dispatch, SetStateAction } from 'react'
 import { useTranslation } from 'react-i18next'
-import { ChevronUp, ChevronDown, ChevronsUpDown, RefreshCw, Search } from 'lucide-react'
+import { RefreshCw, Search } from 'lucide-react'
+import SortCaret from '@/components/ui/SortCaret'
 import { useRightPanel }      from '@/context/RightPanelContext'
 import CustomerDetailDrawer   from './CustomerDetailDrawer'
 import PaginationBar          from '../ui/PaginationBar'
@@ -16,10 +17,8 @@ import StatusBadge from '../ui/StatusBadge'  // shared active/inactive status pi
 import type { ReportCustomer, SortState } from '@/types/reports'
 
 function SortIcon({ active, dir }: { active: boolean; dir: 'asc' | 'desc' }) {
-  if (!active) return <ChevronsUpDown size={12} style={{ color: 'var(--border)' }} />
-  return dir === 'asc'
-    ? <ChevronUp size={12} style={{ color: 'var(--color-primary-text)' }} />
-    : <ChevronDown size={12} style={{ color: 'var(--color-primary-text)' }} />
+  // Delegates to the ONE shared caret recipe (HUISSTIJL-1).
+  return <SortCaret active={active} dir={dir} />
 }
 
 const TH: CSSProperties = { padding: '8px 12px', textAlign: 'left', fontSize: 11, fontWeight: 600,
