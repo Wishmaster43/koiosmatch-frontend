@@ -7,6 +7,7 @@
  */
 import { useId, cloneElement, isValidElement } from 'react'
 import type { ReactNode, ReactElement } from 'react'
+import SharedAvatar from '@/components/ui/Avatar'
 import { interactive } from '@/lib/a11y'
 import type { ShiftCandidateOption } from './hooks/useShiftLookups'
 
@@ -38,15 +39,10 @@ export function getInitials(name: string) {
   return (chars || '?').toUpperCase()
 }
 
+// Delegates to the ONE shared Avatar (HUISSTIJL-1) — the local copy hardcoded
+// white initials, which the shared component already solves for accent fills.
 export function Avatar({ initials, size = 26 }: { initials: string; size?: number }) {
-  const color = colorFor(initials)
-  return (
-    <div style={{ width: size, height: size, borderRadius: '50%', background: color, flexShrink: 0,
-      display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff',
-      fontSize: size * 0.36, fontWeight: 700 }}>
-      {initials}
-    </div>
-  )
+  return <SharedAvatar initials={initials} size={size} color={colorFor(initials)} />
 }
 
 // One candidate row in the right-hand search results list.

@@ -271,6 +271,8 @@ export default function InterviewsTab({ application: a }: { application: Applica
               waDigits() hover colour) rather than the brand's literal hex green. */}
           <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
             <span style={{ width: 40, height: 40, borderRadius: '50%', background: 'var(--color-success)', flexShrink: 0,
+              // Icon (non-text) on the FIXED success fill: WCAG 1.4.11 bar is 3:1 and
+              // white measures 3.3:1 there — audited; text on this fill would use on-success.
               display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff' }}>
               <MessageCircle size={20} />
             </span>

@@ -79,7 +79,7 @@ export default function ViewConfigEditor({ module }: { module: string }) {
         <button onClick={save} disabled={saving} aria-label={t('common.save')}
           style={{ display: 'flex', alignItems: 'center', gap: 6, height: 34, padding: '0 14px',
             fontSize: 13, fontWeight: 500, borderRadius: 8, border: 'none', cursor: saving ? 'wait' : 'pointer',
-            background: saved ? 'var(--color-success)' : 'var(--color-primary)', color: 'white' }}>
+            background: saved ? 'var(--color-success)' : 'var(--color-primary)', color: saved ? 'var(--color-on-success)' : 'var(--color-on-accent)' }}>
           {saved ? <><Check size={13} /> {t('common.saved')}</> : saving ? <><RefreshCw size={13} className="animate-spin" /> {t('common.saving')}</> : <><Save size={13} /> {t('common.save')}</>}
         </button>
       </div>

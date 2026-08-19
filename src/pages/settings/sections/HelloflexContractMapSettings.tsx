@@ -127,7 +127,7 @@ export default function HelloflexContractMapSettings() {
 
       <button type="button" onClick={save} disabled={saving || !dirty}
         style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '8px 14px', fontSize: 13, fontWeight: 500,
-          borderRadius: 8, border: '1px solid var(--color-primary)', background: 'var(--color-primary)', color: '#fff',
+          borderRadius: 8, border: '1px solid var(--color-primary)', background: 'var(--color-primary)', color: 'var(--color-on-accent)',
           cursor: saving || !dirty ? 'default' : 'pointer', opacity: saving || !dirty ? 0.6 : 1 }}>
         {saved ? <Check size={14} /> : <Save size={14} />}
         {saved ? t('common.saved') : t('common.save')}

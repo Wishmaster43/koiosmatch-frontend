@@ -42,7 +42,7 @@ function BootLoader() {
       <div className="flex flex-col items-center gap-3">
         <div className="flex items-center justify-center rounded-xl animate-pulse"
           style={{ width: 40, height: 40, background: 'var(--color-primary)' }}>
-          <span style={{ color: 'white', fontSize: 18 }}>⚡</span>
+          <span style={{ color: 'var(--color-on-accent)', fontSize: 18 }}>⚡</span>
         </div>
         <p className="text-sm text-[var(--text-muted)]">{t('loading')}</p>
       </div>

@@ -7,6 +7,7 @@
 import type { ReactNode } from 'react'
 import { interactive } from '@/lib/a11y'
 import type { LucideIcon } from 'lucide-react'
+import SharedAvatar from '@/components/ui/Avatar'
 
 export function KpiCard({ label, value, sub, color, bg, Icon, onClick }: {
   label?: ReactNode; value?: ReactNode; sub?: ReactNode; color?: string; bg?: string; Icon: LucideIcon; onClick?: () => void
@@ -50,17 +51,10 @@ export function Block({ title, action, onAction, children }: { title?: ReactNode
   )
 }
 
+// Delegates to the ONE shared Avatar (HUISSTIJL-1): same colour-cycling idea,
+// but the shared palette + on-accent rule live in one place now.
 export function Avatar({ initials, size = 28 }: { initials: string; size?: number }) {
-  // eslint-disable-next-line no-restricted-syntax -- DATA: avatar colour-cycling palette, not UI element styling
-  const colors = ['var(--color-primary)','var(--color-secondary)','var(--color-success)','var(--color-warning)','var(--color-danger)','#8B5CF6','#EC4899']
-  const color  = colors[initials.charCodeAt(0) % colors.length]
-  return (
-    <div style={{ width: size, height: size, borderRadius: '50%', background: color, flexShrink: 0,
-      display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff',
-      fontSize: size * 0.36, fontWeight: 700 }}>
-      {initials}
-    </div>
-  )
+  return <SharedAvatar initials={initials} size={size} />
 }
 
 export function StatusBadge({ label, color }: { label?: ReactNode; color: string }) {

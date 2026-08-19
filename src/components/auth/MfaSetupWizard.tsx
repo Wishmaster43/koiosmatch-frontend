@@ -198,7 +198,7 @@ export default function MfaSetupWizard({ setupMfa, confirmMfa, onConfirmed, onFi
         <button type="submit" disabled={busy || code.length < 6}
           style={{ height: 36, padding: '0 20px', fontSize: 13, fontWeight: 500, borderRadius: 8,
                    border: 'none', cursor: (busy || code.length < 6) ? 'not-allowed' : 'pointer',
-                   background: (busy || code.length < 6) ? 'var(--border)' : 'var(--color-primary)', color: 'white' }}>
+                   background: (busy || code.length < 6) ? 'var(--border)' : 'var(--color-primary)', color: 'var(--color-on-accent)' }}>
           {busy ? t('security.working') : t('security.confirmEnable')}
         </button>
       </form>
