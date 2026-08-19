@@ -17,11 +17,12 @@
 import { useState } from 'react'
 import type { ChangeEvent, CSSProperties } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Mail, RefreshCw, Eye, EyeOff } from 'lucide-react'
+import { Mail, Eye, EyeOff } from 'lucide-react'
 import { useEmailConnection } from './useEmailConnection'
 import type { SmtpForm } from './useEmailConnection'
 import { fieldInputStyle } from '@/components/forms/fieldMetrics'
 import Button from '@/components/ui/Button'
+import Spinner from '@/components/ui/Spinner'
 
 const PROVIDERS = [
   { id: 'office', label: 'Office 365' },
@@ -97,7 +98,7 @@ export default function ProfileEmailConnect() {
 
           {(choice === 'office' || choice === 'gmail') && (
             <Button variant="primary" onClick={() => connectOauth(choice)} disabled={busy}>
-              {busy ? <RefreshCw size={14} className="animate-spin" /> : <Mail size={14} />}
+              {busy ? <Spinner size={14} /> : <Mail size={14} />}
               {t('profile.email.connectWith', { provider: PROVIDERS.find(p => p.id === choice)?.label ?? choice })}
             </Button>
           )}
@@ -150,7 +151,7 @@ export default function ProfileEmailConnect() {
                 </div>
               </div>
               <Button variant="primary" onClick={() => saveSmtp(smtp)} disabled={busy || !smtp.host.trim()} style={{ alignSelf: 'flex-start' }}>
-                {busy ? <RefreshCw size={14} className="animate-spin" /> : <Mail size={14} />}
+                {busy ? <Spinner size={14} /> : <Mail size={14} />}
                 {t('profile.email.saveConnect')}
               </Button>
             </div>

@@ -40,8 +40,9 @@ import { useMemo, useRef, useState } from 'react'
 import type { ChangeEvent, DragEvent } from 'react'
 import { useTranslation } from 'react-i18next'
 import type { TFunction } from 'i18next'
-import { AlertTriangle, FileUp, FileText, Loader2 } from 'lucide-react'
+import { AlertTriangle, FileUp, FileText } from 'lucide-react'
 import { cardBox } from '@/components/ui/modalCards'
+import Spinner from '@/components/ui/Spinner'
 import { BTN_H } from '@/config/buttonMetrics'
 import { useConfirm } from '@/hooks/useConfirm'
 import PreviewStep from '@/pages/settings/sections/importeren/PreviewStep'
@@ -245,7 +246,7 @@ export default function SubEntityImportCard({ entity, customerName, wizard, canV
               </button>
               <Button variant="primary" size="sm" onClick={wizard.runPreview} disabled={!canImport || checking}
                 style={{ marginLeft: 'auto' }}>
-                {checking && <Loader2 size={13} style={{ animation: 'spin 1s linear infinite' }} />}
+                {checking && <Spinner size={13} />}
                 {checking ? t('import.runningPreview', { ns: 'settings' }) : t('import.runPreview', { ns: 'settings' })}
               </Button>
             </div>

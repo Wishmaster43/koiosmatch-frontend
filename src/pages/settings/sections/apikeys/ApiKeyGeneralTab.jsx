@@ -6,8 +6,9 @@
  */
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Pencil, Plus, RefreshCw, Save, X } from 'lucide-react'
+import { Pencil, Plus, Save, X } from 'lucide-react'
 import DetailTable from '@/components/ui/DetailTable'
+import Spinner from '@/components/ui/Spinner'
 import { useDateFormat } from '@/lib/datetime'
 import { KEY_TYPES, isValidIpOrCidr } from './constants'
 import SearchSelect from '@/components/ui/SearchSelect'
@@ -79,7 +80,7 @@ export default function ApiKeyGeneralTab({ apiKey, onSave }) {
               <X size={13} /> {t('common.cancel')}
             </Button>
             <Button variant="primary" onClick={save} disabled={saving}>
-              {saving ? <RefreshCw size={13} className="animate-spin" /> : <Save size={13} />} {t('common.save')}
+              {saving ? <Spinner size={13} /> : <Save size={13} />} {t('common.save')}
             </Button>
           </>
         ) : (

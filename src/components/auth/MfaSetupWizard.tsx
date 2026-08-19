@@ -6,9 +6,10 @@
  */
 import { useCallback, useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { ArrowLeft, Copy, Loader2, ShieldCheck } from 'lucide-react'
+import { ArrowLeft, Copy, ShieldCheck } from 'lucide-react'
 import { QRCodeSVG } from 'qrcode.react'
 import Button from '@/components/ui/Button'
+import Spinner from '@/components/ui/Spinner'
 
 // Loose server payload shapes — AuthContext types these calls as Promise<unknown>.
 type SetupResponse   = { otpauth_url?: string; secret?: string }
@@ -106,7 +107,7 @@ export default function MfaSetupWizard({ setupMfa, confirmMfa, onConfirmed, onFi
         </>
       ) : (
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, color: 'var(--text-muted)' }}>
-          <Loader2 size={15} className="animate-spin" /> {t('security.working')}
+          <Spinner size={15} /> {t('security.working')}
         </div>
       )}
     </div>

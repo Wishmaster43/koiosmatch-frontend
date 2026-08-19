@@ -5,10 +5,11 @@
  */
 import { useState, useEffect, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Layers, MapPin, Building2, Hash, RefreshCw } from 'lucide-react'
+import { Layers, MapPin, Building2, Hash } from 'lucide-react'
 import ShiftsChartsBlock from '@/components/shiftmanager/ShiftsChartsBlock'
 import { useRightPanel } from '@/context/RightPanelContext'
 import KpiBlock from '@/components/ui/KpiBlock'  // shared KPI card
+import Spinner from '@/components/ui/Spinner'
 import { useSmCustomerTree } from '@/hooks/useSmCustomerTree'
 
 export default function DepartmentsReport() {
@@ -69,7 +70,7 @@ export default function DepartmentsReport() {
             </span>
           </>
         )}
-        {loading && <RefreshCw size={14} className="animate-spin" style={{ color: 'var(--border)' }} />}
+        {loading && <span style={{ color: 'var(--border)' }}><Spinner size={14} /></span>}
       </div>
 
       {/* KPI blocks */}

@@ -10,10 +10,11 @@
  */
 import { useRef, useState, type ChangeEvent, type DragEvent } from 'react'
 import { useTranslation } from 'react-i18next'
-import { CloudUpload, Download, Loader2 } from 'lucide-react'
+import { CloudUpload, Download } from 'lucide-react'
 import { downloadImportTemplate } from '../api'
 import { notifyError } from '@/lib/notify'
 import Button from '@/components/ui/Button'
+import Spinner from '@/components/ui/Spinner'
 
 // The backend also accepts .xlsx (ImportUploadRequest: mimes:csv,txt,xlsx), but THIS
 // screen parses the file client-side for column mapping (lib/csv.ts, text-only — no
@@ -93,7 +94,7 @@ export default function UploadStep({ entity, canView, canImport, onFileReady }: 
         </div>
         <Button variant="secondary" onClick={handleDownloadTemplate} disabled={!canView || downloadPending}
           title={canView ? undefined : t('import.noViewPermission')}>
-          {downloadPending ? <Loader2 size={14} className="animate-spin" aria-hidden="true" /> : <Download size={14} />}
+          {downloadPending ? <Spinner size={14} /> : <Download size={14} />}
           {t('import.downloadTemplate')}
         </Button>
       </div>
@@ -112,7 +113,7 @@ export default function UploadStep({ entity, canView, canImport, onFileReady }: 
                  gap: 12, cursor: canImport ? 'pointer' : 'not-allowed', opacity: canImport ? 1 : 0.5,
                  background: drag ? 'var(--color-primary-bg)' : 'var(--hover-bg)', transition: 'all 0.15s' }}>
         {parsing
-          ? <Loader2 size={28} className="animate-spin" style={{ color: 'var(--color-primary-text)' }} aria-hidden="true" />
+          ? <span style={{ color: 'var(--color-primary-text)' }}><Spinner size={28} /></span>
           : <CloudUpload size={28} style={{ color: 'var(--text-muted)' }} aria-hidden="true" />}
         <span style={{ fontSize: 13, color: 'var(--text-muted)' }}>{t('import.dropHere')}</span>
         <Button variant="primary" onClick={(event) => { event.stopPropagation(); if (canImport && !parsing) fileRef.current?.click() }}

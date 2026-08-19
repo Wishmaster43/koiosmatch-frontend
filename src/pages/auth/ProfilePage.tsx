@@ -6,9 +6,10 @@
  */
 import { useState } from 'react'
 import { useTranslation }      from 'react-i18next'
-import { User, Mail, Sun, Loader2, Camera, Shield } from 'lucide-react'
+import { User, Mail, Sun, Camera, Shield } from 'lucide-react'
 import { useTheme }           from '@/context/ThemeContext'
 import Avatar                 from '@/components/ui/Avatar'
+import Spinner                from '@/components/ui/Spinner'
 import ProfileEmailConnect    from './ProfileEmailConnect'
 import SecuritySettings        from '../settings/sections/SecuritySettings'
 import { Section, ProfileTabs } from './profileParts'
@@ -50,7 +51,7 @@ export default function ProfilePage() {
               onMouseEnter={e => { if (!avatarBusy) e.currentTarget.style.opacity = '1' }}
               onMouseLeave={e => { if (!avatarBusy) e.currentTarget.style.opacity = '0' }}>
               {avatarBusy
-                ? <Loader2 size={18} color="white" style={{ animation: 'spin 1s linear infinite' }} />
+                ? <span style={{ color: 'white' }}><Spinner size={18} /></span>
                 : <Camera size={18} color="white" />}
             </div>
           </button>

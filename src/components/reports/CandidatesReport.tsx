@@ -5,8 +5,8 @@
  */
 import { useState, useEffect, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
-import { RefreshCw } from 'lucide-react'
 import ErrorBanner from '@/components/ui/ErrorBanner'
+import Spinner from '@/components/ui/Spinner'
 import { useKpiSettings } from '@/lib/useKpiSettings'
 import { useReportCandidates } from './useReportCandidates'
 import type { ReportCandidate } from '@/types/reports'
@@ -243,7 +243,7 @@ export default function CandidatesReport() {
       {/* Grid layout for the cards */}
       {loading ? (
         <div className="flex flex-col items-center justify-center h-64 gap-3 bg-[var(--surface)] border border-[var(--border)] shadow-sm rounded-xl">
-          <RefreshCw size={20} className="text-[var(--text-muted)] animate-spin" />
+          <span className="text-[var(--text-muted)]"><Spinner size={20} /></span>
           <p className="text-sm text-[var(--text-muted)]">{t('candidates.loading')}</p>
         </div>
       ) : (

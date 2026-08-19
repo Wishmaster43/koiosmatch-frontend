@@ -6,8 +6,8 @@
  */
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Loader2 } from 'lucide-react'
 import { useAuth } from '@/context/AuthContext'
+import Spinner from '@/components/ui/Spinner'
 import { SettingRow, Toggle } from '../components/SettingsKit'
 import { loadSettings, saveSettings } from '../lib/settingsApi'
 
@@ -50,7 +50,7 @@ export default function MfaEnforcementSetting() {
       </h3>
       <SettingRow label={t('security.enforceTitle')} description={t('security.enforceDesc')}>
         {loading || saving
-          ? <Loader2 size={15} className="animate-spin" style={{ color: 'var(--text-muted)' }} aria-hidden="true" />
+          ? <span style={{ color: 'var(--text-muted)' }}><Spinner size={15} /></span>
           : null}
         <Toggle checked={enforced} onChange={toggle} />
       </SettingRow>

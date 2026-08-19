@@ -27,10 +27,11 @@ import { useEffect, useRef, useState } from 'react'
 import type { CSSProperties } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useQueryClient } from '@tanstack/react-query'
-import { Search, GitMerge, Loader2 } from 'lucide-react'
+import { Search, GitMerge } from 'lucide-react'
 import api, { unwrapList } from '@/lib/api'
 import { notifyError, notifySuccess } from '@/lib/notify'
 import FloatingPanel from '@/components/ui/FloatingPanel'
+import Spinner from '@/components/ui/Spinner'
 import { Z } from '@/lib/zIndexScale'
 import { fieldInputStyle } from '@/components/forms/fieldMetrics'
 import type { Id } from '@/types/common'
@@ -181,7 +182,7 @@ export default function MergeCustomerModal({ current, onClose, onMerged }: {
               {t('merge.cancel')}
             </Button>
             <Button variant="danger" size="sm" onClick={confirmMerge} disabled={!duplicate || merging}>
-              {merging ? <Loader2 size={13} className="animate-spin" /> : <GitMerge size={13} />} {t('merge.confirm')}
+              {merging ? <Spinner size={13} /> : <GitMerge size={13} />} {t('merge.confirm')}
             </Button>
           </div>
         </div>

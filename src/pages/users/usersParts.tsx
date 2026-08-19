@@ -7,12 +7,13 @@ import { useState, useRef, useEffect } from 'react'
 import type { CSSProperties } from 'react'
 import { createPortal } from 'react-dom'
 import { useTranslation } from 'react-i18next'
-import { ShieldCheck, Shield, User, Loader2, ChevronDown } from 'lucide-react'
+import { ShieldCheck, Shield, User, ChevronDown } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import api, { unwrap } from '@/lib/api'
 import { notifyError } from '@/lib/notify'
 import { COLOR_PRESETS } from '@/lib/colorPresets'
 import RoleChip from '@/components/ui/RoleChip'
+import Spinner from '@/components/ui/Spinner'
 import type { ManagedUser } from '@/types/api'
 import { tintBg, tintBorder } from '@/lib/tint'
 
@@ -123,7 +124,7 @@ export function RoleSelector({ user: u, availableRoles, onChanged }: {
         onMouseEnter={e => (e.currentTarget.style.color = 'var(--color-primary)')}
         onMouseLeave={e => !open && (e.currentTarget.style.color = 'var(--text-muted)')}>
         {saving
-          ? <Loader2 size={11} style={{ animation: 'spin 1s linear infinite' }} />
+          ? <Spinner size={11} />
           : <ChevronDown size={11} />}
       </button>
 

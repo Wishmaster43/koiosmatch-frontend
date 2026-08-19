@@ -25,12 +25,13 @@
  */
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Clock, ChevronDown, ChevronRight, FileSpreadsheet, Loader2 } from 'lucide-react'
+import { Clock, ChevronDown, ChevronRight, FileSpreadsheet } from 'lucide-react'
 import api, { unwrap } from '@/lib/api'
 import { useNumberFormat } from '@/lib/formatters'
 import { notifyError } from '@/lib/notify'
 import { extractApiError } from '@/lib/extractApiError'
 import QuickViewToggle from '@/components/ui/QuickViewToggle'
+import Spinner from '@/components/ui/Spinner'
 import { card, cardTitle, sub, th, td, numCell, notice, Tile } from './usageCardStyles'
 import CreditsUsageCard from './CreditsUsageCard'
 import UsageDailySection from './UsageDailySection'
@@ -160,7 +161,7 @@ export default function GebruikSettings() {
         {/* EXCEL-1 — xlsx export of the current period's usage. */}
         <Button variant="secondary" onClick={handleExport} disabled={exporting}
           title={t('billing.usage.exportXlsx')}>
-          {exporting ? <Loader2 size={13} className="animate-spin" aria-hidden="true" /> : <FileSpreadsheet size={13} aria-hidden="true" />}
+          {exporting ? <Spinner size={13} /> : <FileSpreadsheet size={13} aria-hidden="true" />}
           {t('billing.usage.exportXlsx')}
         </Button>
       </div>

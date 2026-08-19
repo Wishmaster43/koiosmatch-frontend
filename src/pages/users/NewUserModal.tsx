@@ -8,9 +8,9 @@
 import { useState, useEffect, useId } from 'react'
 import type { ChangeEvent, CSSProperties, FormEvent } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Loader2 } from 'lucide-react'
 import api, { unwrap } from '@/lib/api'
 import FloatingPanel from '@/components/ui/FloatingPanel'
+import Spinner from '@/components/ui/Spinner'
 // G34: the house searchable dropdown replaces the native role <select>.
 import CreatableSelect from '@/components/ui/CreatableSelect'
 import Button from '@/components/ui/Button'
@@ -209,7 +209,7 @@ export default function NewUserModal({ onClose, onCreated }: {
               {t('common:cancel')}
             </Button>
             <Button type="submit" variant="primary" disabled={saving || !form.role || hasFormatError}>
-              {saving ? <><Loader2 size={13} style={{ animation: 'spin 1s linear infinite' }} /> {t('creating')}</> : t('create')}
+              {saving ? <><Spinner size={13} /> {t('creating')}</> : t('create')}
             </Button>
           </div>
         </form>

@@ -14,10 +14,11 @@
  */
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { RefreshCw, AlertTriangle, Search } from 'lucide-react'
+import { AlertTriangle, Search } from 'lucide-react'
 // House "+ action" trigger (Danny 27-07: "+ Prijsafspraak toevoegen moet ook
 // knopje zijn!!! zoals in kandidaat drill down") — replaces the bare text button below.
 import DrawerAddButton from '@/components/drawer/DrawerAddButton'
+import Spinner from '@/components/ui/Spinner'
 // TOOLBAR-4 (Danny, live 04-08: "ook zoek venster en status!!") — the same shared
 // filter trigger every other sub-entity list uses (see its own docblock).
 import StatusFilterSelect, { useStatusFilter, STATUS_FILTER_ALL } from '@/components/drawer/StatusFilterSelect'
@@ -223,7 +224,7 @@ export default function PriceAgreementsTab({ customerId, c, onSave }: { customer
       {/* Loading state. */}
       {loading && (
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: 16, fontSize: 12, color: 'var(--text-muted)' }}>
-          <RefreshCw size={13} className="animate-spin" /> {t('priceAgreements.loading')}
+          <Spinner size={13} /> {t('priceAgreements.loading')}
         </div>
       )}
 

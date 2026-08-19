@@ -6,7 +6,7 @@
 import { useState } from 'react'
 import type { MouseEvent } from 'react'
 import { useTranslation } from 'react-i18next'
-import { AlertCircle, ArchiveRestore, CheckCircle, Loader2, MoreHorizontal, Play, Trash2, Zap } from 'lucide-react'
+import { AlertCircle, ArchiveRestore, CheckCircle, MoreHorizontal, Play, Trash2, Zap } from 'lucide-react'
 // Shared module registry — every module type (label/Icon/colours), so no step chip
 // silently disappears (AW-6). The local 6-type map is gone.
 import { MODULE_META } from '@/modules/index'
@@ -14,6 +14,7 @@ import { interactive } from '@/lib/a11y'
 import { useDateFormat } from '@/lib/datetime'
 import { buildTrashNote } from '@/hooks/useTrashFlow'
 import type { Workflow } from '@/types/workflow'
+import Spinner from '@/components/ui/Spinner'
 
 // One workflow card's props — mirrors WorkflowListRow's archive/restore lifecycle
 // (TRASH-OVERAL-1b, same gates/handlers, no fork).
@@ -175,7 +176,7 @@ export default function WorkflowCard({ workflow, onRun, onEdit, canManageFolders
                     className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium"
                     style={{ background: 'var(--color-success-bg)', color: 'var(--color-success)', border: '1px solid var(--color-success)', cursor: restoring ? 'not-allowed' : 'pointer' }}
                   >
-                    {restoring ? <Loader2 size={12} className="animate-spin" /> : <ArchiveRestore size={12} />}
+                    {restoring ? <Spinner size={12} /> : <ArchiveRestore size={12} />}
                     {t('list.restore')}
                   </button>
                 )}
@@ -206,7 +207,7 @@ export default function WorkflowCard({ workflow, onRun, onEdit, canManageFolders
                   cursor: running ? 'not-allowed' : 'pointer',
                 }}
               >
-                {running ? <Loader2 size={12} className="animate-spin" /> : <Play size={12} />}
+                {running ? <Spinner size={12} /> : <Play size={12} />}
                 {running ? t('page.running') : t('page.run')}
               </button>
 

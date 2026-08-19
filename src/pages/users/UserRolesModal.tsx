@@ -15,9 +15,10 @@
  */
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Loader2, Plus, X } from 'lucide-react'
+import { Plus, X } from 'lucide-react'
 import api, { unwrap } from '@/lib/api'
 import FloatingPanel from '@/components/ui/FloatingPanel'
+import Spinner from '@/components/ui/Spinner'
 import SearchSelect from '@/components/ui/SearchSelect'
 import { extractApiError } from '@/lib/extractApiError'
 import Button from '@/components/ui/Button'
@@ -113,7 +114,7 @@ export default function UserRolesModal({ user, roles, onSaved, onClose }: {
         {/* Disabled on an empty set: the route rejects `roles: []` (min:1), so an
             enabled button there would be a promise the API cannot keep. */}
         <Button variant="primary" onClick={save} disabled={saving || selected.length === 0}>
-          {saving && <Loader2 size={13} style={{ animation: 'spin 1s linear infinite' }} aria-hidden="true" />}
+          {saving && <Spinner size={13} />}
           {t('common:save')}
         </Button>
       </div>

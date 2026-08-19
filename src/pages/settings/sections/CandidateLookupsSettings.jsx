@@ -24,7 +24,8 @@
  */
 import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Trash2, RefreshCw, Pencil } from 'lucide-react'
+import { Trash2, Pencil } from 'lucide-react'
+import Spinner from '@/components/ui/Spinner'
 import api, { unwrap } from '@/lib/api'
 import { notifyError } from '@/lib/notify'
 import { useConfirm } from '@/hooks/useConfirm'
@@ -242,7 +243,7 @@ export function LookupBlock({ slug, title, subtitle, items, setItems, locked = f
               style={{ width: 28, height: 28, display: 'flex', alignItems: 'center', justifyContent: 'center',
                        background: 'var(--color-danger-bg)', border: 'none', borderRadius: 6, color: 'var(--color-danger)',
                        cursor: inUse(item) ? 'not-allowed' : 'pointer', opacity: inUse(item) ? 0.4 : 1 }}>
-              {deleting === item.id ? <RefreshCw size={11} className="animate-spin" /> : <Trash2 size={11} />}
+              {deleting === item.id ? <Spinner size={11} /> : <Trash2 size={11} />}
             </button>}
           </>
         )}

@@ -6,7 +6,7 @@
  */
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { ArrowLeft, RefreshCw } from 'lucide-react'
+import { ArrowLeft } from 'lucide-react'
 import api from '@/lib/api'
 import { notifyError } from '@/lib/notify'
 import { ColorSwatch } from '../components/SettingsControls'
@@ -15,6 +15,7 @@ import type { PermissionGroups } from './RolesPermissionMatrix'
 import { RoleBranchTemplate } from './RoleBranchTemplate'
 import { roleIconEl } from '@/lib/roleIcons'
 import RoleChip from '@/components/ui/RoleChip'
+import Spinner from '@/components/ui/Spinner'
 import SearchSelect from '@/components/ui/SearchSelect'
 import { DASHBOARD_TYPES } from '@/pages/dashboard/templates'
 import { BTN_H } from '@/config/buttonMetrics'
@@ -157,7 +158,7 @@ export function RoleDetail({ role, permissions, iconOptions, onBack, onUpdate }:
             {localRole.name}
           </h2>
         )}
-        {saving && <RefreshCw size={13} className="animate-spin" style={{ color: 'var(--text-muted)' }} />}
+        {saving && <span style={{ color: 'var(--text-muted)' }}><Spinner size={13} /></span>}
       </div>
 
       {/* Appearance — colour + icon picker */}

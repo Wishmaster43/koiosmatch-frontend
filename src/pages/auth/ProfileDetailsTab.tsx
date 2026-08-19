@@ -5,8 +5,9 @@
  */
 import type { ChangeEvent, ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
-import { User, Mail, Phone, Check, Loader2, Shield, MapPin } from 'lucide-react'
+import { User, Mail, Phone, Check, Shield, MapPin } from 'lucide-react'
 import { Section, Field, Pill, ROLE_META, inputStyle } from './profileParts'
+import Spinner from '@/components/ui/Spinner'
 
 interface ProfileForm { firstname: string; lastname: string; email: string; phone: string }
 interface ProfileUser { roles?: Array<string | { name?: string }>; locations?: unknown[]; location?: unknown }
@@ -75,7 +76,7 @@ export default function ProfileDetailsTab({ form, onField, onSave, saving, saved
             display: 'flex', alignItems: 'center', gap: 6, transition: 'background 0.2s',
           }}>
           {saving
-            ? <><Loader2 size={13} style={{ animation: 'spin 1s linear infinite' }} /> {t('profile.saving')}</>
+            ? <><Spinner size={13} /> {t('profile.saving')}</>
             : saved
               ? <><Check size={13} /> {t('profile.saved')}</>
               : t('profile.saveChanges')}

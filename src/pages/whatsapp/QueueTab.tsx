@@ -10,8 +10,8 @@
  * This component stays presentational; it only renders what the page hands it.
  */
 import { useTranslation } from 'react-i18next'
-import { Loader2 } from 'lucide-react'
 import SoftChip from '@/components/ui/SoftChip'
+import Spinner from '@/components/ui/Spinner'
 import { useDateFormat } from '@/lib/datetime'
 import { isBatchActive } from './hooks/useWhatsAppQueue'
 import type { WaQueueBatch } from '@/types/whatsapp'
@@ -103,7 +103,7 @@ export default function QueueTab({ batches, loading, error, notAvailable }: Queu
     return (
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
                     padding: 40, color: 'var(--text-muted)', fontSize: 13 }}>
-        <Loader2 size={14} className="animate-spin" /> {t('queue.loading')}
+        <Spinner size={14} /> {t('queue.loading')}
       </div>
     )
   }

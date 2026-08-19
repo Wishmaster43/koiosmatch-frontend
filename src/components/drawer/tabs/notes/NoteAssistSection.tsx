@@ -32,8 +32,9 @@
  * actually shown once a real translation resolves.
  */
 import { useTranslation } from 'react-i18next'
-import { Wand2, AlignLeft, ListChecks, Loader2, Check, X } from 'lucide-react'
+import { Wand2, AlignLeft, ListChecks, Check, X } from 'lucide-react'
 import KoiosAiMark from '@/components/ui/KoiosAiMark'
+import Spinner from '@/components/ui/Spinner'
 import CalloutBox from '@/components/ui/CalloutBox'
 import Button from '@/components/ui/Button'
 import { useNoteAssist } from './useNoteAssist'
@@ -102,7 +103,7 @@ export default function NoteAssistSection({ body, onApply, language, noteId }: N
         {MODES.map(({ mode: m, icon: Icon }) => (
           <Button key={m} variant="soft" size="sm" onClick={() => run(m, body)} disabled={loading || !hasText}
             title={hasText ? undefined : t('notesAssist.needsText', { defaultValue: 'Schrijf eerst tekst in de notitie' })}>
-            {loading && mode === m ? <Loader2 size={12} className="animate-spin" /> : <Icon size={12} />}
+            {loading && mode === m ? <Spinner size={12} /> : <Icon size={12} />}
             {t(`notesAssist.${m}`, { defaultValue: MODE_LABEL_NL[m] })}
           </Button>
         ))}

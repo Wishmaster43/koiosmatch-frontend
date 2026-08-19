@@ -6,10 +6,11 @@
  */
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { GripVertical, ArrowUp, ArrowDown, Check, Save, RefreshCw } from 'lucide-react'
+import { GripVertical, ArrowUp, ArrowDown, Check, Save } from 'lucide-react'
 import { MODULES } from '@/lib/settings/moduleRegistry'
 import { useAllSettings, getJsonSetting, saveSettingsKeys } from '@/lib/settings/useAllSettings'
 import { viewConfigKey } from '@/lib/settings/useModuleView'
+import Spinner from '@/components/ui/Spinner'
 
 interface Row { id: string; enabled: boolean }
 interface SavedRow { id: string; enabled?: boolean }
@@ -80,7 +81,7 @@ export default function ViewConfigEditor({ module }: { module: string }) {
           style={{ display: 'flex', alignItems: 'center', gap: 6, height: 34, padding: '0 14px',
             fontSize: 13, fontWeight: 500, borderRadius: 8, border: 'none', cursor: saving ? 'wait' : 'pointer',
             background: saved ? 'var(--color-success)' : 'var(--color-primary)', color: saved ? 'var(--color-on-success)' : 'var(--color-on-accent)' }}>
-          {saved ? <><Check size={13} /> {t('common.saved')}</> : saving ? <><RefreshCw size={13} className="animate-spin" /> {t('common.saving')}</> : <><Save size={13} /> {t('common.save')}</>}
+          {saved ? <><Check size={13} /> {t('common.saved')}</> : saving ? <><Spinner size={13} /> {t('common.saving')}</> : <><Save size={13} /> {t('common.save')}</>}
         </button>
       </div>
 

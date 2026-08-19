@@ -9,8 +9,8 @@
  */
 import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Loader2 } from 'lucide-react'
 import FloatingPanel from '@/components/ui/FloatingPanel'
+import Spinner from '@/components/ui/Spinner'
 import KoiosAiMark from '@/components/ui/KoiosAiMark'
 import SegmentedControl from '@/components/ui/SegmentedControl'
 import { useWorkflowTemplates, KOIOS_AI_CATEGORY } from './hooks/useWorkflowTemplates'
@@ -103,7 +103,7 @@ export default function WorkflowTemplateLibrary({ open, onClose, onUseTemplate }
 
           {loading && (
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, color: 'var(--text-muted)', fontSize: 13 }}>
-              <Loader2 size={14} className="animate-spin" /> {t('templateLibrary.loading')}
+              <Spinner size={14} /> {t('templateLibrary.loading')}
             </div>
           )}
           {!loading && error && <p style={{ fontSize: 13, color: 'var(--color-danger)' }}>{t('templateLibrary.error')}</p>}

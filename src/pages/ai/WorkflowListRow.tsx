@@ -10,12 +10,13 @@ import { useState } from 'react'
 import type { MouseEvent } from 'react'
 import type { LucideIcon } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
-import { AlertCircle, ArchiveRestore, CheckCircle, Clock, HelpCircle, Loader2, MoreHorizontal, MousePointerClick, Play, Trash2, Webhook, Zap, Bell } from 'lucide-react'
+import { AlertCircle, ArchiveRestore, CheckCircle, Clock, HelpCircle, MoreHorizontal, MousePointerClick, Play, Trash2, Webhook, Zap, Bell } from 'lucide-react'
 import { interactive } from '@/lib/a11y'
 import { useDateFormat } from '@/lib/datetime'
 import { buildTrashNote } from '@/hooks/useTrashFlow'
 import { MODULE_META } from '@/modules/index'
 import Toggle from '@/components/ui/Toggle'
+import Spinner from '@/components/ui/Spinner'
 import type { Workflow, WorkflowStep } from '@/types/workflow'
 
 // One workflow row's props — mirrors WorkflowCard's shared shape, plus the
@@ -183,7 +184,7 @@ export default function WorkflowListRow({ workflow, folderName, onRun, onEdit, o
               className="flex items-center gap-1 rounded-lg px-2.5 py-1 text-xs font-medium flex-shrink-0"
               style={{ background: 'var(--color-success-bg)', color: 'var(--color-success)', border: '1px solid var(--color-success)', cursor: restoring ? 'not-allowed' : 'pointer' }}
             >
-              {restoring ? <Loader2 size={11} className="animate-spin" /> : <ArchiveRestore size={11} />}
+              {restoring ? <Spinner size={11} /> : <ArchiveRestore size={11} />}
               {t('list.restore')}
             </button>
           )}
@@ -221,7 +222,7 @@ export default function WorkflowListRow({ workflow, folderName, onRun, onEdit, o
             className="flex items-center gap-1 rounded-lg px-2.5 py-1 text-xs font-medium flex-shrink-0"
             style={{ background: running ? 'var(--border)' : 'var(--color-primary-bg)', color: running ? 'var(--text-muted)' : 'var(--color-primary)', border: 'none', cursor: running ? 'not-allowed' : 'pointer' }}
           >
-            {running ? <Loader2 size={11} className="animate-spin" /> : <Play size={11} />}
+            {running ? <Spinner size={11} /> : <Play size={11} />}
             {running ? t('page.running') : t('page.run')}
           </button>
 

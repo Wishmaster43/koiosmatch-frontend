@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Check, RefreshCw, Save } from 'lucide-react'
+import { Check, Save } from 'lucide-react'
 import api from '@/lib/api'
 import { notifyError } from '@/lib/notify'
 import { loadSettings, saveSettings } from '../lib/settingsApi'
@@ -8,6 +8,7 @@ import { useIndustries } from '@/lib/useIndustries'
 import { useCountriesLookup } from '@/lib/useCountriesLookup'
 import { useProvinces } from '@/hooks/useProvinces'
 import SearchSelect from '@/components/ui/SearchSelect'
+import Spinner from '@/components/ui/Spinner'
 import { cardHead } from '@/components/ui/modalCards'
 // One language source for the whole app (Danny 14/7): the same five shipped
 // locales the profile picker offers — never a diverging local list.
@@ -184,7 +185,7 @@ export default function CompanySettings() {
                    background: saved ? 'var(--color-success)' : 'var(--color-primary)',
                    // Success fill needs its own on-* token — white only reaches ~3.3:1 there (WCAG audit 2026-08).
                    color: saved ? 'var(--color-on-success)' : 'var(--color-on-accent)' }}>
-          {saved ? <><Check size={13}/> {t('common.saved')}</> : saving ? <><RefreshCw size={13} className="animate-spin"/> {t('common.saving')}</> : <><Save size={13}/> {t('common.save')}</>}
+          {saved ? <><Check size={13}/> {t('common.saved')}</> : saving ? <><Spinner size={13} /> {t('common.saving')}</> : <><Save size={13}/> {t('common.save')}</>}
         </button>
       </div>
 

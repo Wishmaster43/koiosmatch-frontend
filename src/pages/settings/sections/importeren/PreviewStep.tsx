@@ -6,10 +6,11 @@
  */
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { AlertTriangle, Loader2 } from 'lucide-react'
+import { AlertTriangle } from 'lucide-react'
 import ImportResultPanel from './ImportResultPanel'
 import type { ImportRunResult } from './importApi'
 import Button from '@/components/ui/Button'
+import Spinner from '@/components/ui/Spinner'
 
 interface PreviewStepProps {
   result: ImportRunResult
@@ -62,7 +63,7 @@ export default function PreviewStep({ result, runStatus, runError, canImport, on
         </Button>
         <Button variant="primary" onClick={onConfirm} disabled={confirmDisabled}
           title={canImport ? undefined : t('import.noImportPermission')}>
-          {confirming && <Loader2 size={14} className="animate-spin" aria-hidden="true" />}
+          {confirming && <Spinner size={14} />}
           {confirming ? t('import.preview.running') : t('import.preview.confirm')}
         </Button>
       </div>

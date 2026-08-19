@@ -6,8 +6,9 @@
 import { useState, useEffect, useMemo } from 'react'
 import type { CSSProperties, Dispatch, SetStateAction } from 'react'
 import { useTranslation } from 'react-i18next'
-import { RefreshCw, Search } from 'lucide-react'
+import { Search } from 'lucide-react'
 import SortCaret from '@/components/ui/SortCaret'
+import Spinner from '@/components/ui/Spinner'
 import { useRightPanel }      from '@/context/RightPanelContext'
 import CustomerDetailDrawer   from './CustomerDetailDrawer'
 import PaginationBar          from '../ui/PaginationBar'
@@ -155,7 +156,7 @@ export default function CustomersTable() {
         <div className="flex-1 min-w-0 overflow-auto">
           {loading ? (
             <div className="flex flex-col items-center justify-center gap-3" style={{ height: 240 }}>
-              <RefreshCw size={18} className="animate-spin" style={{ color: 'var(--border)' }} />
+              <span style={{ color: 'var(--border)' }}><Spinner size={18} /></span>
               <p style={{ fontSize: 13, color: 'var(--text-muted)' }}>{t('customers.loading')}</p>
             </div>
           ) : sorted.length === 0 ? (

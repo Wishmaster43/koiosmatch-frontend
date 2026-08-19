@@ -12,13 +12,14 @@
  */
 import { useEffect, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Download, FileSpreadsheet, Loader2, RefreshCw, Send } from 'lucide-react'
+import { Download, FileSpreadsheet, RefreshCw, Send } from 'lucide-react'
 import api, { unwrap } from '@/lib/api'
 import { useNumberFormat } from '@/lib/formatters'
 import { useLocale } from '@/lib/datetime'
 import { notifyError, notifySuccess } from '@/lib/notify'
 import { extractApiError } from '@/lib/extractApiError'
 import StatusPill from '@/components/ui/StatusPill'
+import Spinner from '@/components/ui/Spinner'
 import SearchSelect from '@/components/ui/SearchSelect'
 import { card, th as thBase, td as tdBase, numCell as numCellBase, notice } from './usageCardStyles'
 import type { CSSProperties } from 'react'
@@ -174,12 +175,12 @@ export default function AdminInvoicesSettings() {
             )}
           />
           <Button variant="primary" onClick={handleGenerate} disabled={generating}>
-            {generating ? <Loader2 size={13} className="animate-spin" aria-hidden="true" /> : <RefreshCw size={13} aria-hidden="true" />}
+            {generating ? <Spinner size={13} /> : <RefreshCw size={13} aria-hidden="true" />}
             {t('adminInvoices.generate')}
           </Button>
           <Button variant="secondary" onClick={handleExport} disabled={exporting || invoices.length === 0}
             title={t('adminInvoices.exportXlsx')}>
-            {exporting ? <Loader2 size={13} className="animate-spin" aria-hidden="true" /> : <FileSpreadsheet size={13} aria-hidden="true" />}
+            {exporting ? <Spinner size={13} /> : <FileSpreadsheet size={13} aria-hidden="true" />}
             {t('adminInvoices.exportXlsx')}
           </Button>
         </div>
@@ -222,14 +223,14 @@ export default function AdminInvoicesSettings() {
                       <div style={{ display: 'inline-flex', gap: 8 }}>
                         {(inv.status === 'draft' || isResend) && (
                           <Button variant="secondary" size="sm" onClick={() => handleFinalize(inv)} disabled={finalizing}>
-                            {finalizing ? <Loader2 size={13} className="animate-spin" aria-hidden="true" /> : <Send size={13} aria-hidden="true" />}
+                            {finalizing ? <Spinner size={13} /> : <Send size={13} aria-hidden="true" />}
                             {t(isResend ? 'adminInvoices.resend' : 'adminInvoices.finalize')}
                           </Button>
                         )}
                         {inv.status === 'final' && (
                           <Button variant="secondary" size="sm" onClick={() => handleDownload(inv)} disabled={downloading}
                             aria-label={t('adminInvoices.download')}>
-                            {downloading ? <Loader2 size={13} className="animate-spin" aria-hidden="true" /> : <Download size={13} aria-hidden="true" />}
+                            {downloading ? <Spinner size={13} /> : <Download size={13} aria-hidden="true" />}
                             {t('adminInvoices.download')}
                           </Button>
                         )}

@@ -12,10 +12,11 @@
  */
 import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Save, RefreshCw, Check, Mail, AlertTriangle, Eye, EyeOff } from 'lucide-react'
+import { Save, Check, Mail, AlertTriangle, Eye, EyeOff } from 'lucide-react'
 import api from '@/lib/api'
 import { loadSettings, saveSettings } from '../lib/settingsApi'
 import RichTextEditor from '@/components/ui/RichTextEditor'
+import Spinner from '@/components/ui/Spinner'
 import CalloutBox from '@/components/ui/CalloutBox'
 import { fieldInputStyle } from '@/components/forms/fieldMetrics'
 
@@ -112,7 +113,7 @@ export default function EmailSettings({ context = 'klanten' }) {
             style={{ display: 'flex', alignItems: 'center', gap: 6, height: 34, padding: '0 12px', whiteSpace: 'nowrap',
                      fontSize: 13, fontWeight: 500, borderRadius: 8, cursor: testing ? 'wait' : 'pointer',
                      border: '1px solid var(--border)', background: 'var(--hover-bg)', color: 'var(--text)', opacity: testing ? 0.6 : 1 }}>
-            {testing ? <RefreshCw size={13} className="animate-spin" /> : <Mail size={13} />}
+            {testing ? <Spinner size={13} /> : <Mail size={13} />}
             {t('email.testConnection')}
           </button>
           <button onClick={save} disabled={saving}
@@ -123,7 +124,7 @@ export default function EmailSettings({ context = 'klanten' }) {
                      // Success fill needs its own on-* token — white only reaches ~3.3:1 there (WCAG audit 2026-08).
                      color: saved ? 'var(--color-on-success)' : 'var(--color-on-accent)', transition: 'background 0.2s' }}>
             {saved   ? <><Check size={13} /> {t('common.saved')}</>                         :
-             saving  ? <><RefreshCw size={13} className="animate-spin" /> {t('common.saving')}</> :
+             saving  ? <><Spinner size={13} /> {t('common.saving')}</> :
                        <><Save size={13} /> {t('common.save')}</>}
           </button>
         </div>

@@ -8,11 +8,12 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useQuery } from '@tanstack/react-query'
-import { Loader2, CheckCircle, AlertCircle, Clock } from 'lucide-react'
+import { CheckCircle, AlertCircle, Clock } from 'lucide-react'
 import api, { unwrap } from '@/lib/api'
 import { useDateFormat } from '@/lib/datetime'
 import { useNumberFormat } from '@/lib/formatters'
 import KoiosAiMark from '@/components/ui/KoiosAiMark'
+import Spinner from '@/components/ui/Spinner'
 import SoftChip from '@/components/ui/SoftChip'
 import SegmentedControl from '@/components/ui/SegmentedControl'
 import ErrorBanner from '@/components/ui/ErrorBanner'
@@ -96,7 +97,7 @@ export default function KoiosForYouCard() {
       {/* Loading — the report for the active period is in flight. */}
       {isLoading && (
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, padding: '24px 0', color: 'var(--text-muted)' }}>
-          <Loader2 size={16} className="animate-spin" />
+          <Spinner size={16} />
           <span style={{ fontSize: 12 }}>{t('common:loading')}</span>
         </div>
       )}

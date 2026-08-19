@@ -5,10 +5,11 @@
  */
 import { useState, useEffect, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
-import { MapPin, Layers, Building2, AlertCircle, RefreshCw } from 'lucide-react'
+import { MapPin, Layers, Building2, AlertCircle } from 'lucide-react'
 import ShiftsChartsBlock from '@/components/shiftmanager/ShiftsChartsBlock'
 import { useRightPanel } from '@/context/RightPanelContext'
 import KpiBlock         from '@/components/ui/KpiBlock'
+import Spinner from '@/components/ui/Spinner'
 import EntityListDrawer from '@/components/ui/EntityListDrawer'
 import { useSmCustomerTree } from '@/hooks/useSmCustomerTree'
 import type { SmDrillItem } from '@/types/shiftmanager'
@@ -109,7 +110,7 @@ export default function LocationsReport() {
             </div>
           </>
         )}
-        {loading && <RefreshCw size={14} className="animate-spin" style={{ color: 'var(--border)' }} />}
+        {loading && <span style={{ color: 'var(--border)' }}><Spinner size={14} /></span>}
       </div>
 
       {/* KPI blocks */}

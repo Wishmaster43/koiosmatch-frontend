@@ -7,8 +7,9 @@
  */
 import { useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { RefreshCw, TrendingDown, TrendingUp, UserX, CalendarClock } from 'lucide-react'
+import { TrendingDown, TrendingUp, UserX, CalendarClock } from 'lucide-react'
 import KpiCard from '@/components/ui/KpiCard'
+import Spinner from '@/components/ui/Spinner'
 import ErrorBanner from '@/components/ui/ErrorBanner'
 import BarChartCard from '@/components/charts/BarChartCard'
 import DrillTabs from '@/components/ui/DrillTabs'
@@ -64,7 +65,7 @@ export default function ShiftAnalysisPage() {
       {loading ? (
         <div className="flex flex-col items-center justify-center gap-3 bg-[var(--surface)] rounded-xl"
           style={{ border: '1px solid var(--border)', minHeight: 220 }}>
-          <RefreshCw size={20} className="animate-spin" style={{ color: 'var(--text-muted)' }} />
+          <span style={{ color: 'var(--text-muted)' }}><Spinner size={20} /></span>
           <p className="text-sm text-[var(--text-muted)]">{t('shiftAnalysis.loading')}</p>
         </div>
       ) : error ? (

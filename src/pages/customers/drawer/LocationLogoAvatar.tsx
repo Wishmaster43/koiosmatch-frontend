@@ -14,8 +14,9 @@
  */
 import { useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Camera, Loader2 } from 'lucide-react'
+import { Camera } from 'lucide-react'
 import Avatar from '@/components/ui/Avatar'
+import Spinner from '@/components/ui/Spinner'
 import { notifyError } from '@/lib/notify'
 import { uploadLocationLogo, LOCATIONS_CHANGED_EVENT } from '../hooks/useCustomerLocations'
 import type { Id } from '@/types/common'
@@ -64,7 +65,8 @@ export default function LocationLogoAvatar({ customerId, locationId, logoUrl, na
           display: 'flex', alignItems: 'center', justifyContent: 'center', opacity: uploading ? 1 : 0, transition: 'opacity 0.15s' }}
           onMouseEnter={e => { if (!uploading) e.currentTarget.style.opacity = '1' }}
           onMouseLeave={e => { if (!uploading) e.currentTarget.style.opacity = '0' }}>
-          {uploading ? <Loader2 size={13} color="white" className="animate-spin" /> : <Camera size={13} color="white" />}
+          {/* Spinner has no color prop — wrap so it inherits the overlay's white via currentColor. */}
+          {uploading ? <span style={{ color: 'white' }}><Spinner size={13} /></span> : <Camera size={13} color="white" />}
         </div>
       </button>
       <input ref={fileRef} type="file" accept="image/png,image/jpeg,image/webp,image/svg+xml" aria-label={t('locations.detail.logoUpload')}

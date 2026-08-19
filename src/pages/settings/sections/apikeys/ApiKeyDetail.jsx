@@ -10,6 +10,7 @@ import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { ArrowLeft, Check, Copy, Key, MoreHorizontal, Power, RefreshCw, Trash2 } from 'lucide-react'
 import StatusBadge from '@/components/ui/StatusBadge'
+import Spinner from '@/components/ui/Spinner'
 import ActionMenu from '@/components/ui/ActionMenu'
 import CalloutBox from '@/components/ui/CalloutBox'
 import { useConfirm } from '@/hooks/useConfirm'
@@ -124,7 +125,7 @@ export default function ApiKeyDetail({ keyId, listRow, onBack, onPatch, onDelete
             </button>
           )
         })}
-        {loading && <RefreshCw size={13} className="animate-spin" style={{ color: 'var(--text-muted)', alignSelf: 'center', marginLeft: 8 }} />}
+        {loading && <span style={{ color: 'var(--text-muted)', alignSelf: 'center', marginLeft: 8 }}><Spinner size={13} /></span>}
       </div>
 
       {/* Active tab */}

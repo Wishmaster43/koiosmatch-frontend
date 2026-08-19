@@ -10,12 +10,12 @@
  * dry-run of what is about to be sent, never a stale one.
  */
 import { useTranslation } from 'react-i18next'
-import { Loader2 } from 'lucide-react'
 import PreviewStep from '@/pages/settings/sections/importeren/PreviewStep'
 import { fieldLabel } from '../lib/fieldLabels'
 import type { ColumnMapping } from '../lib/mapping'
 import type { ImportRunResult } from '../api'
 import Button from '@/components/ui/Button'
+import Spinner from '@/components/ui/Spinner'
 
 type AsyncStatus = 'idle' | 'loading' | 'error' | 'success'
 
@@ -108,7 +108,7 @@ export default function PreviewEditStep({
 
       <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginTop: 16 }}>
         <Button variant="primary" onClick={onValidate} disabled={validating || editableRows.length === 0}>
-          {validating && <Loader2 size={14} className="animate-spin" aria-hidden="true" />}
+          {validating && <Spinner size={14} />}
           {validating ? t('import.runningPreview', { ns: 'settings' }) : t('import.runPreview', { ns: 'settings' })}
         </Button>
         {dirty && (

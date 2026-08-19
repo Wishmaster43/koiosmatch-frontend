@@ -9,8 +9,9 @@
  * so the container is left with loading, CRUD and the table↔map switch.
  */
 import { useTranslation } from 'react-i18next'
-import { Pencil, Trash2, RefreshCw } from 'lucide-react'
+import { Pencil, Trash2 } from 'lucide-react'
 import GeocodeButton from '@/components/ui/GeocodeButton'
+import Spinner from '@/components/ui/Spinner'
 import LocationBadge from './LocationBadge'
 
 const TH = { padding: '8px 14px', fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', textAlign: 'left', background: 'var(--hover-bg)', borderBottom: '1px solid var(--border)' }
@@ -85,7 +86,7 @@ export default function LocationsTable({ isLocked, rows, page, totalPages, onPag
                                background: locked ? 'var(--hover-bg)' : 'var(--color-danger-bg)', border: 'none', borderRadius: 6,
                                cursor: (deletingId === loc.id || locked) ? 'not-allowed' : 'pointer',
                                color: locked ? 'var(--text-muted)' : 'var(--color-danger)', opacity: locked ? 0.5 : 1 }}>
-                      {deletingId === loc.id ? <RefreshCw size={12} className="animate-spin" /> : <Trash2 size={12} />}
+                      {deletingId === loc.id ? <Spinner size={12} /> : <Trash2 size={12} />}
                     </button>
                   </div>
                 </td>

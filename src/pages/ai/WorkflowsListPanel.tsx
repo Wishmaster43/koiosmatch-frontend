@@ -7,10 +7,11 @@
  */
 import type { MutableRefObject } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Plus, Loader2, LayoutGrid, List, Archive, Trash2 } from 'lucide-react'
+import { Plus, LayoutGrid, List, Archive, Trash2 } from 'lucide-react'
 import WorkflowCard from './WorkflowCard'
 import WorkflowListRow from './WorkflowListRow'
 import QuickViewToggle from '@/components/ui/QuickViewToggle'
+import Spinner from '@/components/ui/Spinner'
 import type { Workflow } from '@/types/workflow'
 import type { WorkflowFolder, FolderId } from './hooks/useWorkflowsData'
 import type { ViewMode } from './hooks/useWorkflowsFilters'
@@ -88,7 +89,7 @@ export default function WorkflowsListPanel({
 
       {loading ? (
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, color: 'var(--text-muted)', fontSize: 13 }}>
-          <Loader2 size={14} className="animate-spin" /> {t('page.loading')}
+          <Spinner size={14} /> {t('page.loading')}
         </div>
       ) : error ? (
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, color: 'var(--color-danger)', fontSize: 13, padding: '24px 0' }}>

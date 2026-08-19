@@ -12,11 +12,12 @@
  */
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { AlertTriangle, Check, RefreshCw, Save } from 'lucide-react'
+import { AlertTriangle, Check, Save } from 'lucide-react'
 import api, { unwrap } from '@/lib/api'
 import { notifyError } from '@/lib/notify'
 import { extractApiError } from '@/lib/extractApiError'
 import Toggle from '@/components/ui/Toggle'
+import Spinner from '@/components/ui/Spinner'
 import { BTN_H } from '@/config/buttonMetrics'
 import { card, notice } from './usageCardStyles'
 
@@ -120,7 +121,7 @@ export default function InvoiceCompanySettings() {
                    cursor: phase === 'ready' ? 'pointer' : 'not-allowed',
                    background: justSaved ? 'var(--color-success)' : 'var(--color-primary)',
                    color: justSaved ? 'var(--color-on-success)' : 'var(--color-on-accent)' }}>
-          {justSaved ? <><Check size={13} /> {t('common.saved')}</> : saving ? <><RefreshCw size={13} className="animate-spin" /> {t('common.saving')}</> : <><Save size={13} /> {t('common.save')}</>}
+          {justSaved ? <><Check size={13} /> {t('common.saved')}</> : saving ? <><Spinner size={13} /> {t('common.saving')}</> : <><Save size={13} /> {t('common.save')}</>}
         </button>
       </div>
 

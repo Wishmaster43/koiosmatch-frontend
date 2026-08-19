@@ -6,12 +6,12 @@
  */
 import { useState, useEffect, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
-import { RefreshCw } from 'lucide-react'
 import ShiftsChartsBlock from '@/components/shiftmanager/ShiftsChartsBlock'
 import { useSmCustomerTree } from '@/hooks/useSmCustomerTree'
 import { useRightPanel } from '@/context/RightPanelContext'
 import ModuleView       from '@/components/settings/ModuleView'
 import EntityListDrawer  from '@/components/ui/EntityListDrawer'
+import Spinner from '@/components/ui/Spinner'
 import type { SmDrillItem } from '@/types/shiftmanager'
 
 export default function CustomersReport() {
@@ -135,7 +135,7 @@ export default function CustomersReport() {
             </div>
           </>
         )}
-        {loading && <RefreshCw size={14} className="animate-spin" style={{ color: 'var(--border)' }} />}
+        {loading && <span style={{ color: 'var(--border)' }}><Spinner size={14} /></span>}
       </div>
 
       {/* KPI blocks — layout configurable in Settings → Views → Klanten */}

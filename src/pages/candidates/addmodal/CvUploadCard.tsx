@@ -11,9 +11,10 @@
  * banner cards read as clutter, not an invitation).
  */
 import { useTranslation } from 'react-i18next'
-import { Loader2, CheckCircle2, AlertTriangle, RotateCcw } from 'lucide-react'
+import { CheckCircle2, AlertTriangle, RotateCcw } from 'lucide-react'
 import { BTN_H } from '@/config/buttonMetrics'
 import AiGeneratedLabel from '@/components/ui/AiGeneratedLabel'
+import Spinner from '@/components/ui/Spinner'
 import type { CvPhase } from './useCvParse'
 import type { CvPrefillResult } from './cvPrefill'
 import { cardHead, cardBox } from './fields'
@@ -50,7 +51,7 @@ export default function CvUploadCard({ phase, errorKey, fileName, summary, onRes
         {/* Busy: uploading or waiting on the queued parse — with a real cancel. */}
         {busy && (
           <div role="status" aria-live="polite" style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
-            <Loader2 size={15} color="var(--color-primary)" style={{ animation: 'spin 1s linear infinite' }} />
+            <span style={{ color: 'var(--color-primary)' }}><Spinner size={15} /></span>
             <div style={{ minWidth: 0 }}>
               <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--text)' }}>
                 {phase === 'uploading' ? t('modal.cv.uploading') : t('modal.cv.reading')}

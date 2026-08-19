@@ -11,9 +11,10 @@ import { useState, useRef, useEffect } from 'react'
 import type { FormEvent, ChangeEvent, ReactNode } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { Eye, EyeOff, Loader2, ShieldCheck, ArrowLeft } from 'lucide-react'
+import { Eye, EyeOff, ShieldCheck, ArrowLeft } from 'lucide-react'
 import { useAuth } from '@/context/AuthContext'
 import ErrorBanner from '@/components/ui/ErrorBanner'
+import Spinner from '@/components/ui/Spinner'
 
 // Read a server-provided error message off an axios-style error, if present.
 const messageOf = (e: unknown) => (e as { response?: { data?: { message?: string } } })?.response?.data?.message
@@ -193,7 +194,7 @@ function CredentialForm({ onMfaRequired }: { onMfaRequired: (token: string) => v
           style={{ padding: '11px', background: loading || throttled ? 'var(--text-muted)' : 'var(--color-primary)',
                    color: loading || throttled ? '#fff' : 'var(--color-on-accent)',
                    border: 'none', cursor: loading || throttled ? 'not-allowed' : 'pointer' }}>
-          {loading && <Loader2 size={15} className="animate-spin" />}
+          {loading && <Spinner size={15} />}
           {loading ? t('login.busy') : t('login.signIn')}
         </button>
       </form>
@@ -279,7 +280,7 @@ function MfaForm({ mfaToken, onBack }: { mfaToken: string; onBack: () => void })
                    background: (loading || code.length < 6) ? 'var(--text-muted)' : 'var(--color-primary)',
                    color: (loading || code.length < 6) ? '#fff' : 'var(--color-on-accent)',
                    border: 'none', cursor: (loading || code.length < 6) ? 'not-allowed' : 'pointer' }}>
-          {loading && <Loader2 size={15} className="animate-spin" />}
+          {loading && <Spinner size={15} />}
           {loading ? t('mfa.verifying') : t('mfa.verify')}
         </button>
 

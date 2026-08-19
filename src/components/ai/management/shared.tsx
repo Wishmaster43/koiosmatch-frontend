@@ -6,8 +6,9 @@
 import { useState, useId, cloneElement, isValidElement } from 'react'
 import type { CSSProperties, ReactNode, ReactElement } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Check, ChevronDown, Clock, Copy, Plus, RefreshCw, Save, Trash2 } from 'lucide-react'
+import { Check, ChevronDown, Clock, Copy, Plus, Save, Trash2 } from 'lucide-react'
 import { interactive } from '@/lib/a11y'
+import Spinner from '@/components/ui/Spinner'
 import { useDateFormat } from '@/lib/datetime'
 import { notifySuccess } from '@/lib/notify'
 import { fieldInputStyle, fieldTextareaStyle } from '@/components/forms/fieldMetrics'
@@ -56,7 +57,7 @@ export function SaveBar({ saving, saved, onSave }: { saving?: boolean; saved?: b
           borderRadius: 8, border: 'none', background: 'var(--color-primary)', color: 'var(--color-on-accent)',
           cursor: saving ? 'default' : 'pointer', opacity: saving ? 0.6 : 1 }}>
         {saving
-          ? <RefreshCw size={11} style={{ animation: 'spin 1s linear infinite' }} />
+          ? <Spinner size={11} />
           : <Save size={11} />}
         {t('common:save')}
       </button>

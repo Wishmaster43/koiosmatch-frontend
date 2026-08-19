@@ -1,7 +1,8 @@
 import { useTranslation } from 'react-i18next'
-import { Check, X, Loader2 } from 'lucide-react'
+import { Check, X } from 'lucide-react'
 import type { PendingFile, AttachmentStatus } from './usePostCreateAttachments'
 import Button from '@/components/ui/Button'
+import Spinner from '@/components/ui/Spinner'
 
 interface Props {
   files: PendingFile[]
@@ -18,7 +19,7 @@ interface Props {
 function StatusIcon({ status }: { status: AttachmentStatus }) {
   if (status === 'done') return <Check size={14} style={{ color: 'var(--color-success)' }} aria-hidden="true" />
   if (status === 'error') return <X size={14} style={{ color: 'var(--color-danger)' }} aria-hidden="true" />
-  if (status === 'uploading') return <Loader2 size={14} className="animate-spin" style={{ color: 'var(--text-muted)' }} aria-hidden="true" />
+  if (status === 'uploading') return <span style={{ color: 'var(--text-muted)' }}><Spinner size={14} /></span>
   return null
 }
 

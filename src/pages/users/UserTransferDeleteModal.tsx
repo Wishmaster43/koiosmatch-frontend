@@ -11,8 +11,9 @@
  */
 import { useId, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { AlertTriangle, Loader2 } from 'lucide-react'
+import { AlertTriangle } from 'lucide-react'
 import FloatingPanel from '@/components/ui/FloatingPanel'
+import Spinner from '@/components/ui/Spinner'
 import CreatableSelect from '@/components/ui/CreatableSelect'
 import { fieldInputStyle } from '@/components/forms/fieldMetrics'
 import Button from '@/components/ui/Button'
@@ -95,7 +96,7 @@ export default function UserTransferDeleteModal({ user, owned, successors, busy,
           {t('common:cancel')}
         </Button>
         <Button variant="danger" disabled={busy || !successorId} onClick={() => successorId && onConfirm(successorId)}>
-          {busy && <Loader2 size={13} style={{ animation: 'spin 1s linear infinite' }} aria-hidden="true" />}
+          {busy && <Spinner size={13} />}
           {t('delete.confirm')}
         </Button>
       </div>

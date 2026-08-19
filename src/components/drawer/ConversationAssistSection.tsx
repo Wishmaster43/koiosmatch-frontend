@@ -12,8 +12,9 @@
  * is mirrored here rather than shared/forked.
  */
 import { useTranslation } from 'react-i18next'
-import { AlignLeft, ListChecks, Loader2, Check, X } from 'lucide-react'
+import { AlignLeft, ListChecks, Check, X } from 'lucide-react'
 import KoiosAiMark from '@/components/ui/KoiosAiMark'
+import Spinner from '@/components/ui/Spinner'
 import CalloutBox from '@/components/ui/CalloutBox'
 import Button from '@/components/ui/Button'
 import { useConversationAssist } from './useConversationAssist'
@@ -66,7 +67,7 @@ export default function ConversationAssistSection({ conversationId, hasMessages,
         {MODES.map(({ mode: m, icon: Icon }) => (
           <Button key={m} variant="soft" size="sm" onClick={() => run(m, conversationId)} disabled={loading || !hasMessages}
             title={hasMessages ? undefined : t('conversations.assist.needsMessages', { defaultValue: 'Dit gesprek heeft nog geen berichten' })}>
-            {loading && mode === m ? <Loader2 size={12} className="animate-spin" /> : <Icon size={12} />}
+            {loading && mode === m ? <Spinner size={12} /> : <Icon size={12} />}
             {t(`conversations.assist.${m}`, { defaultValue: MODE_LABEL_NL[m] })}
           </Button>
         ))}

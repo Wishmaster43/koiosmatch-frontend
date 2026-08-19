@@ -12,7 +12,7 @@
  * error — same convention as TouchpointsFeed/AttentionCandidates), otherwise renders.
  */
 import { useTranslation } from 'react-i18next'
-import { Loader2 } from 'lucide-react'
+import Spinner from '@/components/ui/Spinner'
 import { interactive } from '@/lib/a11y'
 import { Block } from '../DashboardPrimitives'
 
@@ -36,7 +36,7 @@ export default function WidgetListBlock({ title, action, onAction, rows, loading
     return (
       <Block title={title}>
         <div style={{ display: 'flex', justifyContent: 'center', padding: '20px 16px', color: 'var(--text-muted)' }}>
-          <Loader2 size={16} className="animate-spin" />
+          <Spinner size={16} />
         </div>
       </Block>
     )

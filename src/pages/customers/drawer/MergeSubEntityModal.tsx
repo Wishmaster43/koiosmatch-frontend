@@ -19,10 +19,11 @@
 import { useState } from 'react'
 import type { CSSProperties } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Search, GitMerge, Loader2 } from 'lucide-react'
+import { Search, GitMerge } from 'lucide-react'
 import api from '@/lib/api'
 import { notifyError, notifySuccess } from '@/lib/notify'
 import FloatingPanel from '@/components/ui/FloatingPanel'
+import Spinner from '@/components/ui/Spinner'
 import SegmentedControl from '@/components/ui/SegmentedControl'
 import { Z } from '@/lib/zIndexScale'
 import { fieldInputStyle } from '@/components/forms/fieldMetrics'
@@ -168,7 +169,7 @@ export default function MergeSubEntityModal({ scope, customerId, current, others
               {t(`${ns}.merge.cancel`)}
             </Button>
             <Button variant="danger" size="sm" onClick={confirmMerge} disabled={!other || merging}>
-              {merging ? <Loader2 size={13} className="animate-spin" /> : <GitMerge size={13} />} {t(`${ns}.merge.confirm`)}
+              {merging ? <Spinner size={13} /> : <GitMerge size={13} />} {t(`${ns}.merge.confirm`)}
             </Button>
           </div>
         </div>

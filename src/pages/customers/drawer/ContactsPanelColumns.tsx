@@ -9,8 +9,9 @@
  */
 import { type ComponentType, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Users, Star, Loader2, Unlink } from 'lucide-react'
+import { Users, Star, Unlink } from 'lucide-react'
 import type { Column } from '@/components/ui/DataTable'
+import Spinner from '@/components/ui/Spinner'
 import SoftChipJs from '@/components/ui/SoftChip'
 import LookupIcon from '@/components/ui/LookupIcon'
 import { emailValue, phoneValue } from '@/components/drawer/contactLinks'
@@ -169,7 +170,7 @@ export function useContactsPanelColumns({ scope, scopeId, locationScope, locatio
             title={setPrimaryLabel} aria-label={setPrimaryLabel}
             style={{ ...iconBtn, cursor: busy || blocked || promoting != null ? 'not-allowed' : 'pointer',
               opacity: blocked ? 0.4 : 1 }}>
-            {busy ? <Loader2 size={12} className="animate-spin" /> : <Star size={12} />}
+            {busy ? <Spinner size={12} /> : <Star size={12} />}
           </button>
         )
       },

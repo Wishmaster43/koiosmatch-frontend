@@ -21,9 +21,10 @@
  */
 import { useContext, useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { AlertTriangle, Check, RefreshCw, Save } from 'lucide-react'
+import { AlertTriangle, Check, Save } from 'lucide-react'
 import { SettingsDirtyContext } from '../lib/settingsDirty'
 import ToggleUi from '@/components/ui/Toggle'
+import Spinner from '@/components/ui/Spinner'
 import SearchSelect from '@/components/ui/SearchSelect'
 // PRE-EXISTING BUG FIX (found while verifying this task, unrelated to SUB-TABS-1/
 // TENANT-DEFAULT-1 itself): ColorField's palette-swatch rebuild (Danny 02-08) called
@@ -73,7 +74,7 @@ export function SettingsScaffold({ title, subtitle, form, maxWidth, actions, chi
                 transition: 'background 0.2s, opacity 0.2s',
               }}>
               {saved  ? <><Check size={13} /> {t('common.saved')}</>                                :
-               saving ? <><RefreshCw size={13} className="animate-spin" /> {t('common.saving')}</> :
+               saving ? <><Spinner size={13} /> {t('common.saving')}</> :
                         <><Save size={13} /> {t('common.save')}</>}
             </button>
           )}

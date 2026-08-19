@@ -1,7 +1,8 @@
 import { useState, useEffect, useRef } from 'react'
 import { contrastRatio, applyBrandTokens, clampedOnAccent } from '@/hooks/useTenantTheme'
 import { useTranslation } from 'react-i18next'
-import { Check, RefreshCw, Save, Upload, X } from 'lucide-react'
+import { Check, Save, Upload, X } from 'lucide-react'
+import Spinner from '@/components/ui/Spinner'
 import api from '@/lib/api'
 import { useAuth } from '@/context/AuthContext'
 import { loadSettings, saveSettings } from '../lib/settingsApi'
@@ -122,7 +123,7 @@ export default function BrandSettings() {
                    // Success fill needs its own on-* token — white only reaches ~3.3:1 there (WCAG audit 2026-08).
                    color: saved ? 'var(--color-on-success)' : 'var(--color-on-accent)', transition: 'background 0.2s' }}>
           {saved   ? <><Check size={13} /> {t('common.saved')}</>                         :
-           saving  ? <><RefreshCw size={13} className="animate-spin" /> {t('common.saving')}</> :
+           saving  ? <><Spinner size={13} /> {t('common.saving')}</> :
                      <><Save size={13} /> {t('common.save')}</>}
         </button>
       </div>

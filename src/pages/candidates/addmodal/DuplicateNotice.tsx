@@ -14,8 +14,9 @@
  * real records exist: the drawer / bulk MergeCandidateModal.
  */
 import { useTranslation } from 'react-i18next'
-import { AlertTriangle, ExternalLink, RotateCcw, Loader2 } from 'lucide-react'
+import { AlertTriangle, ExternalLink, RotateCcw } from 'lucide-react'
 import SoftChip from '@/components/ui/SoftChip'
+import Spinner from '@/components/ui/Spinner'
 import { BTN_H } from '@/config/buttonMetrics'
 import type { DuplicateMatch } from './useDuplicateProbe'
 
@@ -81,7 +82,7 @@ export default function DuplicateNotice({ match, variant, canRestore, restoring,
         {archived && canRestore && (
           <button type="button" onClick={onRestore} disabled={restoring}
             style={{ ...actionBtn(), cursor: restoring ? 'not-allowed' : 'pointer', opacity: restoring ? 0.6 : 1 }}>
-            {restoring ? <Loader2 size={13} className="animate-spin" aria-hidden="true" /> : <RotateCcw size={13} aria-hidden="true" />}
+            {restoring ? <Spinner size={13} /> : <RotateCcw size={13} aria-hidden="true" />}
             {restoring ? t('duplicate.restoring') : t('duplicate.restoreAndOpen')}
           </button>
         )}

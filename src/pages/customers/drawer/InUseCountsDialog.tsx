@@ -12,8 +12,9 @@
  * that has not wired archiving yet).
  */
 import { useTranslation } from 'react-i18next'
-import { Archive, Loader2 } from 'lucide-react'
+import { Archive } from 'lucide-react'
 import FloatingPanel from '@/components/ui/FloatingPanel'
+import Spinner from '@/components/ui/Spinner'
 import { Z } from '@/lib/zIndexScale'
 import Button from '@/components/ui/Button'
 
@@ -79,7 +80,7 @@ export default function InUseCountsDialog({ open, counts, onClose, onArchive, ar
                 border: '1px solid color-mix(in srgb, var(--color-archive) 40%, transparent)',
                 background: 'color-mix(in srgb, var(--color-archive) 10%, transparent)', color: 'var(--color-archive)',
                 cursor: archiving ? 'not-allowed' : 'pointer', fontSize: 13, opacity: archiving ? 0.6 : 1 }}>
-              {archiving ? <Loader2 size={13} className="animate-spin" /> : <Archive size={13} />}
+              {archiving ? <Spinner size={13} /> : <Archive size={13} />}
               {t('inUse.archive')}
             </button>
           ) : <span />}

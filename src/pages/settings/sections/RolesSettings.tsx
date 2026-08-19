@@ -6,7 +6,7 @@
  */
 import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Plus, RefreshCw, Trash2 } from 'lucide-react'
+import { Plus, Trash2 } from 'lucide-react'
 import api, { unwrap } from '@/lib/api'
 import { RoleDetail } from './RoleDetail'
 import { roleIconEl, ROLE_ICON_NAMES } from '@/lib/roleIcons'
@@ -14,6 +14,7 @@ import { useConfirm } from '@/hooks/useConfirm'
 import { BTN_H } from '@/config/buttonMetrics'
 import type { Role, PermissionsByGroup, CreateRoleBody } from './rolesTypes'
 import Button from '@/components/ui/Button'
+import Spinner from '@/components/ui/Spinner'
 import { tintBg, tintBorder } from '@/lib/tint'
 
 export default function RolesSettings() {
@@ -139,7 +140,7 @@ export default function RolesSettings() {
                     border: 'none', borderRadius: 8, cursor: canDelete ? 'pointer' : 'not-allowed',
                     background: canDelete ? 'var(--color-danger-bg)' : 'var(--hover-bg)',
                     color: canDelete ? 'var(--color-danger)' : 'var(--border)' }}>
-                  {deleting === role.id ? <RefreshCw size={12} className="animate-spin" /> : <Trash2 size={12} />}
+                  {deleting === role.id ? <Spinner size={12} /> : <Trash2 size={12} />}
                 </button>
               </div>
             </div>

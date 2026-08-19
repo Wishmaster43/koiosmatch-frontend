@@ -16,6 +16,7 @@ import api, { unwrap, unwrapList } from '@/lib/api'
 import { notifyError } from '@/lib/notify'
 import { DragList } from '../components/SettingsControls'
 import SearchSelect from '@/components/ui/SearchSelect'
+import Spinner from '@/components/ui/Spinner'
 import { useConfirm } from '@/hooks/useConfirm'
 import { getCountryOptions } from '@/lib/countries'
 import Button from '@/components/ui/Button'
@@ -167,7 +168,7 @@ export default function ProvincesSettings() {
                 style={{ width: 28, height: 28, display: 'flex', alignItems: 'center', justifyContent: 'center',
                          background: 'var(--color-danger-bg)', border: 'none', borderRadius: 6, color: 'var(--color-danger)',
                          cursor: item.in_use ? 'not-allowed' : 'pointer', opacity: item.in_use ? 0.4 : 1 }}>
-                {deleting === item.id ? <RefreshCw size={11} className="animate-spin" /> : <Trash2 size={11} />}
+                {deleting === item.id ? <Spinner size={11} /> : <Trash2 size={11} />}
               </button>
             </>
           )}

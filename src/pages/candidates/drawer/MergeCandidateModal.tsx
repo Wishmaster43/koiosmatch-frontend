@@ -23,10 +23,11 @@
 import { useCallback, useEffect, useId, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useQueryClient } from '@tanstack/react-query'
-import { ChevronDown, GitMerge, Loader2 } from 'lucide-react'
+import { ChevronDown, GitMerge } from 'lucide-react'
 import api, { unwrapList } from '@/lib/api'
 import { notifyError, notifySuccess } from '@/lib/notify'
 import FloatingPanel from '@/components/ui/FloatingPanel'
+import Spinner from '@/components/ui/Spinner'
 import SearchSelect from '@/components/ui/SearchSelect'
 import SegmentedControl from '@/components/ui/SegmentedControl'
 import { Z } from '@/lib/zIndexScale'
@@ -217,7 +218,7 @@ export default function MergeCandidateModal({ current, onClose, onMerged, initia
               {t('merge.cancel')}
             </Button>
             <Button variant="danger" size="sm" onClick={confirm} disabled={!other || merging}>
-              {merging ? <Loader2 size={13} className="animate-spin" /> : <GitMerge size={13} />} {t('merge.confirm')}
+              {merging ? <Spinner size={13} /> : <GitMerge size={13} />} {t('merge.confirm')}
             </Button>
           </div>
         </div>

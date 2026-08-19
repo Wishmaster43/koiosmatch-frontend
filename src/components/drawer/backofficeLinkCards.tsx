@@ -10,6 +10,7 @@ import type { CSSProperties, ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { RefreshCw, Link2 } from 'lucide-react'
 import SectionCard from '@/components/ui/SectionCard'
+import Spinner from '@/components/ui/Spinner'
 import SoftChip from '@/components/ui/SoftChip'
 import { useDateFormat } from '@/lib/datetime'
 import helloflexIcon from '@/assets/integrations/helloflex.png'
@@ -48,7 +49,7 @@ function LinkButton({ onClick, busy, retry, disabled }: { onClick: () => void; b
   const isDisabled = busy || !!disabled
   return (
     <button type="button" onClick={onClick} disabled={isDisabled} style={actionBtn(isDisabled)}>
-      {busy ? <RefreshCw size={11} className="animate-spin" /> : <Link2 size={11} />}
+      {busy ? <Spinner size={11} /> : <Link2 size={11} />}
       {busy ? t('backofficeLinks.common.linking') : t(retry ? 'backofficeLinks.common.retry' : 'backofficeLinks.common.linkButton')}
     </button>
   )

@@ -1,8 +1,9 @@
 import { useState } from 'react'
 import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Star, Loader2 } from 'lucide-react'
+import { Star } from 'lucide-react'
 import SectionCard from '@/components/ui/SectionCard'
+import Spinner from '@/components/ui/Spinner'
 import ContactNameLink from './ContactNameLink'
 import { emailValue, phoneValue, linkedinValue, LinkedinMark } from '@/components/drawer/contactLinks'
 import { CANON_LABEL_STYLE } from '@/components/drawer/fieldRowCanon'
@@ -56,10 +57,10 @@ const PickButton = ({ label, onClick }: { label: string; onClick: () => void }) 
 // ONE-CLICK-COUPLE-1: the one-click alternative to PickButton, offered only when a
 // strict single email match was found — a solid primary button (not a plain link)
 // because it performs the write directly, mirroring ContactsPanel's own "make
-// primary" star action (Star icon, Loader2 while the PUT is in flight).
+// primary" star action (Star icon, Spinner while the PUT is in flight).
 const LinkMatchButton = ({ label, onClick, busy }: { label: string; onClick: () => void; busy: boolean }) => (
   <Button variant="primary" size="sm" onClick={onClick} disabled={busy}>
-    {busy ? <Loader2 size={12} className="animate-spin" /> : <Star size={12} />}
+    {busy ? <Spinner size={12} /> : <Star size={12} />}
     {label}
   </Button>
 )

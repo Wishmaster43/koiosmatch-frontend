@@ -6,10 +6,11 @@
  */
 import { useRef, useState, type ChangeEvent, type DragEvent } from 'react'
 import { useTranslation } from 'react-i18next'
-import { CloudUpload, Download, Loader2 } from 'lucide-react'
+import { CloudUpload, Download } from 'lucide-react'
 import { downloadImportTemplate } from './importApi'
 import { notifyError } from '@/lib/notify'
 import Button from '@/components/ui/Button'
+import Spinner from '@/components/ui/Spinner'
 
 // Only these extensions are ever accepted by the backend (ImportUploadRequest:
 // mimes:csv,txt,xlsx) — .xlsx is read by its own reader (ZIP magic + Excel's own
@@ -84,7 +85,7 @@ export default function UploadStep({
         </div>
         <Button variant="secondary" onClick={handleDownloadTemplate} disabled={!canView || downloadPending}
           title={canView ? undefined : t('import.noViewPermission')}>
-          {downloadPending ? <Loader2 size={14} className="animate-spin" aria-hidden="true" /> : <Download size={14} />}
+          {downloadPending ? <Spinner size={14} /> : <Download size={14} />}
           {t('import.downloadTemplate')}
         </Button>
       </div>
@@ -138,7 +139,7 @@ export default function UploadStep({
 
       <div style={{ marginTop: 20 }}>
         <Button variant="primary" onClick={onRunPreview} disabled={!file || !canImport || checking}>
-          {checking && <Loader2 size={14} className="animate-spin" aria-hidden="true" />}
+          {checking && <Spinner size={14} />}
           {checking ? t('import.runningPreview') : t('import.runPreview')}
         </Button>
       </div>

@@ -8,6 +8,7 @@ import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { ArrowLeft, Check, Copy, MoreHorizontal, Pencil, Power, RefreshCw, Save, Trash2, Webhook, X } from 'lucide-react'
 import StatusBadge from '@/components/ui/StatusBadge'
+import Spinner from '@/components/ui/Spinner'
 import ActionMenu from '@/components/ui/ActionMenu'
 import CalloutBox from '@/components/ui/CalloutBox'
 import { useConfirm } from '@/hooks/useConfirm'
@@ -97,7 +98,7 @@ export default function WebhookDetail({ subId, listRow, onBack, onPatch, onDelet
           </div>
           <h2 style={{ fontSize: 17, fontWeight: 700, color: 'var(--text)', margin: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{sub.name}</h2>
           <StatusBadge status={sub.status ?? 'active'} map={statusMap} />
-          {loading && <RefreshCw size={13} className="animate-spin" style={{ color: 'var(--text-muted)' }} />}
+          {loading && <span style={{ color: 'var(--text-muted)' }}><Spinner size={13} /></span>}
         </div>
         <ActionMenu label={t('webhooks.outgoing.action')} icon={MoreHorizontal} align="right" menuWidth={220}
           items={[
@@ -160,7 +161,7 @@ export default function WebhookDetail({ subId, listRow, onBack, onPatch, onDelet
           {/* Success fill needs its own on-* token — white only reaches ~3.3:1 there (WCAG audit 2026-08). */}
           <button onClick={saveEvents} disabled={!eventsDirty || savingEv}
             style={{ display: 'flex', alignItems: 'center', gap: 6, height: BTN_H, padding: '0 14px', fontSize: 13, fontWeight: 500, border: 'none', borderRadius: 8, cursor: eventsDirty && !savingEv ? 'pointer' : 'default', opacity: eventsDirty || savedEv ? 1 : 0.55, background: savedEv ? 'var(--color-success)' : 'var(--color-primary)', color: savedEv ? 'var(--color-on-success)' : 'var(--color-on-accent)' }}>
-            {savedEv ? <><Check size={13} /> {t('common.saved')}</> : savingEv ? <><RefreshCw size={13} className="animate-spin" /> {t('common.saving')}</> : <><Save size={13} /> {t('common.save')}</>}
+            {savedEv ? <><Check size={13} /> {t('common.saved')}</> : savingEv ? <><Spinner size={13} /> {t('common.saving')}</> : <><Save size={13} /> {t('common.save')}</>}
           </button>
         </div>
         <EventCatalog value={events} onChange={setEvents} />

@@ -29,8 +29,9 @@
 import { useRef, useState } from 'react'
 import type { ChangeEvent, DragEvent } from 'react'
 import { useTranslation } from 'react-i18next'
-import { FileUp, FileText, Loader2, AlertTriangle } from 'lucide-react'
+import { FileUp, FileText, AlertTriangle } from 'lucide-react'
 import { cardBox } from '@/components/ui/modalCards'
+import Spinner from '@/components/ui/Spinner'
 import { BTN_H } from '@/config/buttonMetrics'
 // CUSTOMER-IMPORT-1 (Danny 02-08): the PREVIEW/RESULT panels and the download-
 // template call are reused straight from Settings' working import wizard — cross-
@@ -171,7 +172,7 @@ export default function EntityImportCard({ wizard, canView, canImport, entity, i
             </button>
             <Button variant="primary" size="sm" onClick={wizard.runPreview} disabled={!canImport || checking}
               style={{ marginLeft: 'auto' }}>
-              {checking && <Loader2 size={13} style={{ animation: 'spin 1s linear infinite' }} />}
+              {checking && <Spinner size={13} />}
               {checking ? t('import.runningPreview') : t('import.runPreview')}
             </Button>
           </div>

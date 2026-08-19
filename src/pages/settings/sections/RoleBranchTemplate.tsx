@@ -6,10 +6,10 @@
  */
 import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
-import { RefreshCw } from 'lucide-react'
 import api, { unwrapList } from '@/lib/api'
 import { notifyError } from '@/lib/notify'
 import ChipMultiSelect from '@/components/ui/ChipMultiSelect'
+import Spinner from '@/components/ui/Spinner'
 import { useLocations } from '@/lib/useLocations'
 import type { Role, UpdateBranchesBody } from './rolesTypes'
 
@@ -52,7 +52,7 @@ export function RoleBranchTemplate({ roleId }: { roleId: Role['id'] }) {
                   border: '1px solid var(--border)', borderRadius: 10 }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
         <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-muted)' }}>{t('roles.branchesTemplate')}</span>
-        {saving && <RefreshCw size={12} className="animate-spin" style={{ color: 'var(--text-muted)' }} />}
+        {saving && <span style={{ color: 'var(--text-muted)' }}><Spinner size={12} /></span>}
       </div>
       <p style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 10 }}>{t('roles.branchesTemplateHint')}</p>
       {loading ? (

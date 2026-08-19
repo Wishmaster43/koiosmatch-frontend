@@ -8,7 +8,8 @@ import { useTranslation } from 'react-i18next'
 import IconPickerControl from './IconPickerControl'
 import { GENERIC_LOOKUP_ICON_NAMES, resolveGenericLookupIcon } from './lookupIcons'
 import SearchSelect from '@/components/ui/SearchSelect'
-import { AlertTriangle, X, Trash2, RefreshCw, Pencil } from 'lucide-react'
+import Spinner from '@/components/ui/Spinner'
+import { AlertTriangle, X, Trash2, Pencil } from 'lucide-react'
 import api, { unwrap, unwrapList } from '@/lib/api'
 import { extractApiError } from '@/lib/extractApiError'
 import { notifyError } from '@/lib/notify'
@@ -373,7 +374,7 @@ export default function StatusListEditor({ title, subtitle, endpoint, addLabel, 
                 style={{ width: 28, height: 28, display: 'flex', alignItems: 'center', justifyContent: 'center',
                          background: 'var(--color-danger-bg)', border: 'none', borderRadius: 6, color: 'var(--color-danger)',
                          cursor: inUse(item) ? 'not-allowed' : 'pointer', opacity: inUse(item) ? 0.4 : 1 }}>
-                {deleting === item.id ? <RefreshCw size={11} className="animate-spin" /> : <Trash2 size={11} />}
+                {deleting === item.id ? <Spinner size={11} /> : <Trash2 size={11} />}
               </button>
             </>
           )}

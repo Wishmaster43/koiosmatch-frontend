@@ -11,13 +11,14 @@
  */
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Download, FileText, Loader2 } from 'lucide-react'
+import { Download, FileText } from 'lucide-react'
 import api, { unwrap } from '@/lib/api'
 import { useDateFormat } from '@/lib/datetime'
 import { useNumberFormat } from '@/lib/formatters'
 import { notifyError } from '@/lib/notify'
 import { extractApiError } from '@/lib/extractApiError'
 import StatusPill from '@/components/ui/StatusPill'
+import Spinner from '@/components/ui/Spinner'
 import { card, th as thBase, td as tdBase, numCell as numCellBase, notice } from './usageCardStyles'
 import type { CSSProperties } from 'react'
 import type { operations } from '@/types/api-generated'
@@ -102,7 +103,7 @@ export default function TenantInvoicesSettings() {
 
       <div style={card}>
         {phase === 'loading' && (
-          <p style={notice}><Loader2 size={13} className="animate-spin" style={{ display: 'inline', marginRight: 6 }} aria-hidden="true" />{t('common.loadingShort')}</p>
+          <p style={notice}><span style={{ display: 'inline-flex' /* deliberate: inline-flex aligns the SVG baseline inside running text (was inline) */, marginRight: 6 }}><Spinner size={13} /></span>{t('common.loadingShort')}</p>
         )}
         {phase === 'error' && <p style={notice}>{t('billing.invoices.loadError')}</p>}
         {phase === 'empty' && (
@@ -139,7 +140,7 @@ export default function TenantInvoicesSettings() {
                     <td style={{ ...td, textAlign: 'right' as const }}>
                       <Button variant="secondary" size="sm" onClick={() => handleDownload(inv)} disabled={downloading}
                         aria-label={t('billing.invoices.download')}>
-                        {downloading ? <Loader2 size={13} className="animate-spin" aria-hidden="true" /> : <Download size={13} aria-hidden="true" />}
+                        {downloading ? <Spinner size={13} /> : <Download size={13} aria-hidden="true" />}
                         {t('billing.invoices.download')}
                       </Button>
                     </td>

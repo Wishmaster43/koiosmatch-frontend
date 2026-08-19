@@ -1,9 +1,9 @@
 import { useTranslation } from 'react-i18next'
-import { Loader2 } from 'lucide-react'
 import { useAuth } from '@/context/AuthContext'
 import { useCandidateCount } from '@/lib/queries'
 import { useLookups } from '@/context/LookupsContext'
 import ErrorBanner from '@/components/ui/ErrorBanner'
+import Spinner from '@/components/ui/Spinner'
 import { useDashboardData } from './hooks/useDashboardData'
 import { useDashboardFilterState } from './hooks/useDashboardFilterState'
 import { useDashboardFilterPanel } from './hooks/useDashboardFilterPanel'
@@ -103,7 +103,7 @@ export default function Dashboard({ onNavigate, viewType }: { onNavigate?: (page
       {loading && (
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
           gap: 8, padding: '96px 0', color: 'var(--text-muted)' }}>
-          <Loader2 size={22} className="animate-spin" />
+          <Spinner size={22} />
           <span style={{ fontSize: 13 }}>{t('page.loading')}</span>
         </div>
       )}

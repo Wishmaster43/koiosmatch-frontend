@@ -9,7 +9,7 @@
  */
 import { useState, useEffect, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Check, RefreshCw, Save, Package, Rocket, Crown, BarChart2, CalendarDays } from 'lucide-react'
+import { Check, Save, Package, Rocket, Crown, BarChart2, CalendarDays } from 'lucide-react'
 // Real brand logos for the reporting add-ons (local assets, §7 CSP).
 import shiftmanagerLogo from '@/assets/integrations/shiftmanager.png'
 import helloflexLogo from '@/assets/integrations/helloflex.png'
@@ -17,6 +17,7 @@ import api from '@/lib/api'
 import { useAuth } from '@/context/AuthContext'
 import { BTN_H } from '@/config/buttonMetrics'
 import SegmentedControl from '@/components/ui/SegmentedControl'
+import Spinner from '@/components/ui/Spinner'
 import Toggle from '@/components/ui/Toggle'
 import PlatformPricingCard from './PlatformPricingCard'
 
@@ -216,7 +217,7 @@ export default function ModulesSettings() {
                    cursor: (saving || !hasChange) ? 'not-allowed' : 'pointer',
                    transition: 'background 0.2s', opacity: saving ? 0.7 : 1 }}>
           {savedOk ? <><Check size={13} /> {t('modules.savedActive')}</>
-          : saving  ? <><RefreshCw size={13} className="animate-spin" /> {t('common.saving')}</>
+          : saving  ? <><Spinner size={13} /> {t('common.saving')}</>
           :           <><Save size={13} /> {t('modules.activate')}</>}
         </button>
       </div>

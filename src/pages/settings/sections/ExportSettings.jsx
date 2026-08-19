@@ -13,13 +13,14 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import {
-  Upload, Users, ClipboardList, Briefcase, Target, Building2, Loader2,
+  Upload, Users, ClipboardList, Briefcase, Target, Building2,
   MapPin, Building, Handshake, ListChecks, PhoneCall,
 } from 'lucide-react'
 import api from '@/lib/api'
 import { useAuth } from '@/context/AuthContext'
 import { notifyError } from '@/lib/notify'
 import Button from '@/components/ui/Button'
+import Spinner from '@/components/ui/Spinner'
 
 // Entity → icon + its export route + the view-permission that gates it (mirrors
 // routes/api/tenant/exports.php exactly). "Leads" = candidates in a Lead phase,
@@ -149,7 +150,7 @@ export default function ExportSettings() {
               onClick={() => handleExport(entity)}
               disabled={!allowed || pending}
               title={allowed ? t('export.button') : t('export.noPermission')}>
-              {pending ? <Loader2 size={14} className="animate-spin" aria-hidden="true" /> : <Upload size={14} />}
+              {pending ? <Spinner size={14} /> : <Upload size={14} />}
               {t('export.button')}
             </Button>
           </div>

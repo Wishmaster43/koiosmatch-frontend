@@ -7,9 +7,10 @@
  * itself now lives in the header popover, not a full-width banner card.
  */
 import { useTranslation } from 'react-i18next'
-import { Loader2, CheckCircle2, AlertTriangle, RotateCcw } from 'lucide-react'
+import { CheckCircle2, AlertTriangle, RotateCcw } from 'lucide-react'
 import { BTN_H } from '@/config/buttonMetrics'
 import AiGeneratedLabel from '@/components/ui/AiGeneratedLabel'
+import Spinner from '@/components/ui/Spinner'
 import type { CvPhase } from './useCvParse'
 import type { CvPrefillResult } from './cvPrefill'
 import { cardHead, cardBox } from './fields'
@@ -41,7 +42,7 @@ export default function PasteCvCard({ phase, errorKey, summary, onReset }: Paste
 
         {busy && (
           <div role="status" style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 12, color: 'var(--text-muted)' }}>
-            <Loader2 size={14} className="animate-spin" />
+            <Spinner size={14} />
             {phase === 'uploading' ? t('modal.cv.uploading') : t('modal.cv.reading')}
             <button type="button" onClick={onReset} style={{ ...ghostBtn, marginLeft: 'auto' }}>{t('common:cancel')}</button>
           </div>

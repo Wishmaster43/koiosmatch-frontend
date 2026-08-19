@@ -10,8 +10,9 @@
  */
 import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Loader2, AlertTriangle, Inbox } from 'lucide-react'
+import { AlertTriangle, Inbox } from 'lucide-react'
 import Button from '@/components/ui/Button'
+import Spinner from '@/components/ui/Spinner'
 
 // One centred layout shared by all three non-success states; only icon/color/message differ.
 function StateRow({ icon, color, message, action }: { icon: ReactNode; color: string; message: string; action?: ReactNode }) {
@@ -36,7 +37,7 @@ export default function ReportStateBlock({ loading, error, empty, loadingLabel, 
 }) {
   const { t } = useTranslation('common')
   if (loading) {
-    return <StateRow icon={<Loader2 size={20} className="animate-spin" />} color="var(--text-muted)" message={loadingLabel} />
+    return <StateRow icon={<Spinner size={20} />} color="var(--text-muted)" message={loadingLabel} />
   }
   if (error) {
     return (

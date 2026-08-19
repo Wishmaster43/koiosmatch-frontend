@@ -9,9 +9,9 @@
 import { useState } from 'react'
 import type { ChangeEvent, CSSProperties, FormEvent } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Loader2, RefreshCw } from 'lucide-react'
 import api, { unwrap } from '@/lib/api'
 import FloatingPanel from '@/components/ui/FloatingPanel'
+import Spinner from '@/components/ui/Spinner'
 import { fieldInputStyle } from '@/components/forms/fieldMetrics'
 import { useLocations } from '@/lib/useLocations'
 import ChipMultiSelect from '@/components/ui/ChipMultiSelect'
@@ -142,7 +142,7 @@ export default function EditUserModal({ user, onClose, onSaved }: {
           <div style={{ marginBottom: 20, padding: '12px 14px', background: 'var(--hover-bg)', borderRadius: 10 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
               <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--text)' }}>{t('branches.title')}</span>
-              {branchesSaving && <RefreshCw size={12} className="animate-spin" style={{ color: 'var(--text-muted)' }} />}
+              {branchesSaving && <span style={{ color: 'var(--text-muted)' }}><Spinner size={12} /></span>}
             </div>
             <p style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 10 }}>{t('branches.hint')}</p>
             {branchesLoading ? (
@@ -185,7 +185,7 @@ export default function EditUserModal({ user, onClose, onSaved }: {
               {t('common:cancel')}
             </Button>
             <Button type="submit" variant="primary" disabled={saving || hasFormatError}>
-              {saving ? <><Loader2 size={13} style={{ animation: 'spin 1s linear infinite' }} /> {t('saving')}</> : t('common:save')}
+              {saving ? <><Spinner size={13} /> {t('saving')}</> : t('common:save')}
             </Button>
           </div>
         </form>

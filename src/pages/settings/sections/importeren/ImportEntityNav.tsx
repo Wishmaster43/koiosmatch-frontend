@@ -9,10 +9,10 @@
  * between; with a single group the list stays a plain list.
  */
 import { useTranslation } from 'react-i18next'
-import { Loader2 } from 'lucide-react'
 import { groupTemplates } from './importTemplateShape'
 import { iconForTemplate } from './importEntityIcon'
 import type { ImportTemplateSummary } from './importApi'
+import Spinner from '@/components/ui/Spinner'
 
 interface ImportEntityNavProps {
   templates: ImportTemplateSummary[]
@@ -58,7 +58,7 @@ export default function ImportEntityNav({ templates, phase, selected, onSelect, 
     <div style={{ width: 200, flexShrink: 0, borderRight: '1px solid var(--border)', paddingRight: 16, marginRight: 32 }}>
       {phase === 'loading' && (
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 12, color: 'var(--text-muted)', padding: '8px 10px' }}>
-          <Loader2 size={13} className="animate-spin" aria-hidden="true" /> {t('import.loadingTemplates')}
+          <Spinner size={13} /> {t('import.loadingTemplates')}
         </div>
       )}
       {phase === 'error' && (

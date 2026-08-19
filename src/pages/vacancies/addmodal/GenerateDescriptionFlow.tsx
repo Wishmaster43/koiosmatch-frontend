@@ -1,7 +1,8 @@
 import { useTranslation } from 'react-i18next'
 import type { CSSProperties } from 'react'
-import { Loader2, Sparkles, X, Check } from 'lucide-react'
+import { Sparkles, X, Check } from 'lucide-react'
 import KoiosAiMark from '@/components/ui/KoiosAiMark'
+import Spinner from '@/components/ui/Spinner'
 import AiGeneratedLabel from '@/components/ui/AiGeneratedLabel'
 import CalloutBox from '@/components/ui/CalloutBox'
 import Button from '@/components/ui/Button'
@@ -72,7 +73,7 @@ export default function GenerateDescriptionFlow({ fields, onApply }: GenerateDes
 
       {status === 'loading' && (
         <div aria-live="polite" style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 12, color: 'var(--text-muted)' }}>
-          <Loader2 size={14} className="animate-spin" /> {t('generate.generating')}
+          <Spinner size={14} /> {t('generate.generating')}
         </div>
       )}
 
