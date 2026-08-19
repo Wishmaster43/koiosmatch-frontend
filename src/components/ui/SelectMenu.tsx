@@ -14,7 +14,7 @@ import { useTranslation } from 'react-i18next'
 import type { ReactNode } from 'react'
 import { ChevronDown, Check } from 'lucide-react'
 import Avatar from './Avatar'
-import { useDropdownPlacement, DROPDOWN_PORTAL_Z_INDEX, DROPDOWN_PORTAL_ATTR } from '@/lib/useDropdownPlacement'
+import { useDropdownPlacement, DROPDOWN_PORTAL_ATTR } from '@/lib/useDropdownPlacement'
 
 interface SelectOption {
   value: string
@@ -140,7 +140,8 @@ export default function SelectMenu({ id, 'aria-labelledby': ariaLabelledBy, valu
       </button>
       {open && createPortal(
         <div id={listId} ref={menuRef} {...{ [DROPDOWN_PORTAL_ATTR]: '' }}
-          style={{ position: 'fixed', zIndex: DROPDOWN_PORTAL_Z_INDEX, minWidth: menuWidth,
+          // HUISSTIJL-1: portalled dropdown menu — z-popover ladder tier, shadow-float role.
+          style={{ position: 'fixed', zIndex: 'var(--z-popover)', minWidth: menuWidth,
           // Hidden until the first measurement lands — never painted at (0,0).
           visibility: rect ? 'visible' : 'hidden',
           left: rect ? rect.left : 0,
@@ -148,7 +149,7 @@ export default function SelectMenu({ id, 'aria-labelledby': ariaLabelledBy, valu
             ? (openUp ? { bottom: window.innerHeight - rect.top + 4 } : { top: rect.bottom + 4 })
             : {}),
           background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 8,
-          boxShadow: '0 4px 16px rgba(0,0,0,0.1)', overflow: 'hidden', maxHeight: menuMaxHeight, overflowY: 'auto' }}>
+          boxShadow: 'var(--shadow-float)', overflow: 'hidden', maxHeight: menuMaxHeight, overflowY: 'auto' }}>
           {/* Filter box — autofocused so typing narrows immediately, Escape-safe
               (the outside-click/Escape handling above owns closing). */}
           <div style={{ padding: 6, borderBottom: '1px solid var(--border)', position: 'sticky', top: 0, background: 'var(--surface)' }}>

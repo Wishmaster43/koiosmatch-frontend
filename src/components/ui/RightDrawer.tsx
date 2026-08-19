@@ -17,12 +17,15 @@ export default function RightDrawer({ title, subtitle, onClose, width = 480, chi
   return (
     <>
       {/* Backdrop */}
-      <div className="fixed inset-0 z-40" style={{ background: 'rgba(0,0,0,0.25)' }} onClick={onClose} />
+      {/* Backdrop + panel both live on the drawer rung; the panel renders after
+          the backdrop, so DOM order stacks it on top within the rung. */}
+      <div className="fixed inset-0" style={{ background: 'rgba(0,0,0,0.25)', zIndex: 'var(--z-drawer)' }} onClick={onClose} />
 
       {/* Panel */}
       <div ref={panelRef} role="dialog" aria-modal="true" aria-label={typeof title === 'string' ? title : undefined} tabIndex={-1}
-        className="fixed top-0 bottom-0 right-0 z-50 flex flex-col"
-        style={{ width, maxWidth: '92vw', background: 'var(--surface)', boxShadow: '-4px 0 30px rgba(0,0,0,0.12)' }}>
+        className="fixed top-0 bottom-0 right-0 flex flex-col"
+        // HUISSTIJL-1: aria-modal dialog panel — shadow-modal role.
+        style={{ zIndex: 'var(--z-drawer)',  width, maxWidth: '92vw', background: 'var(--surface)', boxShadow: 'var(--shadow-drawer)' }}>
         <div className="flex items-start justify-between flex-shrink-0" style={{ padding: '16px 20px', borderBottom: '1px solid var(--border)' }}>
           <div style={{ minWidth: 0 }}>
             <div style={{ fontSize: 15, fontWeight: 600, color: 'var(--text)' }}>{title}</div>

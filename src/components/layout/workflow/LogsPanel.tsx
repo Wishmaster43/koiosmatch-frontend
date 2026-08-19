@@ -148,7 +148,7 @@ export default function LogsPanel({ workflowId, liveRun, onClose, onOpenHistory 
                   </div>
                   {steps.length > 0 && (
                     <ChevronDown size={12} color="var(--border)"
-                      style={{ flexShrink: 0, transform: isOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.15s' }} />
+                      style={{ flexShrink: 0, transform: isOpen ? 'rotate(180deg)' : 'none', transition: 'transform var(--motion-fast)' }} />
                   )}
                 </button>
                 {/* LOGS-DRILL-1: full run detail lives on the Geschiedenis tab. */}

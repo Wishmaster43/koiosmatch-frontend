@@ -33,9 +33,10 @@ export default function Toggle({ checked, onChange, ariaLabel, disabled, describ
       style={{ width: 32, height: 18, borderRadius: 999, border: 'none',
                cursor: disabled ? 'not-allowed' : 'pointer', opacity: disabled ? 0.6 : 1,
                background: checked ? (tone === 'success' ? 'var(--color-success)' : 'var(--color-primary)') : 'var(--border)', position: 'relative',
-               transition: 'background 0.15s', flexShrink: 0 }}>
+               transition: 'background var(--motion-fast)', flexShrink: 0 }}>
+      {/* HUISSTIJL-1: tiny thumb shadow, none of card/float/modal — kept as-is */}
       <div style={{ position: 'absolute', top: 2, left: checked ? 16 : 2, width: 14, height: 14,
-                    borderRadius: '50%', background: 'var(--surface)', transition: 'left 0.15s',
+                    borderRadius: '50%', background: 'var(--surface)', transition: 'left var(--motion-fast)',
                     boxShadow: '0 1px 3px rgba(0,0,0,0.2)' }} />
     </button>
   )

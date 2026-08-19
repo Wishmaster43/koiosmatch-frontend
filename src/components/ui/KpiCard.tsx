@@ -47,10 +47,11 @@ export default function KpiCard({ label, value, delta, icon: Icon, iconBg, iconC
       style={{
         border: '1px solid var(--border)',
         cursor: onClick ? 'pointer' : 'default',
-        transition: 'box-shadow 0.15s',
+        transition: 'box-shadow var(--motion-fast)',
       }}
       {...interactive(onClick)}
-      onMouseEnter={e => onClick && (e.currentTarget.style.boxShadow = '0 2px 12px rgba(0,0,0,0.06)')}
+      // HUISSTIJL-1: resting-card role — hover lift uses the same card shadow tier.
+      onMouseEnter={e => onClick && (e.currentTarget.style.boxShadow = 'var(--shadow-float)')}
       onMouseLeave={e => onClick && (e.currentTarget.style.boxShadow = 'none')}
     >
       <div className="flex items-start justify-between">

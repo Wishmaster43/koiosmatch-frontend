@@ -77,6 +77,7 @@ function KoiosMessage({ msg, isNew, t, locale }: { msg: KoiosChatMessage; isNew?
           background: isKoios ? 'var(--surface)' : GRADIENT,
           color:      isKoios ? (notice ? 'var(--text-muted)' : 'var(--text)') : 'var(--color-on-accent)',
           border:     isKoios ? '1px solid var(--border)' : 'none',
+          // HUISSTIJL-1: colored glow tied to the gradient bubble background, none of card/float/modal — kept.
           boxShadow:  isKoios ? 'none' : '0 2px 10px rgba(99,102,241,0.35)',
         }}>
           {text}
@@ -340,8 +341,9 @@ export default function KoiosPanel({ open, onClose, onNavigate }: { open?: boole
           border: `1.5px solid ${focused ? 'var(--color-primary)' : 'var(--border)'}`,
           borderRadius: 20,
           padding: '10px 10px 8px 14px',
-          boxShadow: focused ? '0 0 0 3px rgba(99,102,241,0.1)' : '0 1px 3px rgba(0,0,0,0.05)',
-          transition: 'border-color 0.15s, box-shadow 0.15s',
+          // HUISSTIJL-1: focused state is an inset focus ring (kept as-is); resting state is a card-level shadow.
+          boxShadow: focused ? '0 0 0 3px rgba(99,102,241,0.1)' : 'var(--shadow-card)',
+          transition: 'border-color var(--motion-fast), box-shadow var(--motion-fast)',
         }}>
           <textarea
             ref={textareaRef}
@@ -411,7 +413,7 @@ export default function KoiosPanel({ open, onClose, onNavigate }: { open?: boole
                 // unlike the raw 'white' this replaced (unreadable at 1.09:1 in dark mode).
                 color: input.trim() && !loading ? 'var(--bg)' : 'var(--text-muted)',
                 cursor: input.trim() && !loading ? 'pointer' : 'default',
-                transition: 'background 0.15s, transform 0.1s',
+                transition: 'background var(--motion-fast), transform 0.1s',
               }}
               onMouseEnter={e => { if (input.trim() && !loading) e.currentTarget.style.transform = 'scale(1.08)' }}
               onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}>

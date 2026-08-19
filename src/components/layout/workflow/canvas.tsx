@@ -99,7 +99,9 @@ function ModuleNode({ id, data, selected }: { id: string; data: FlowNodeData; se
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}
     >
-      {/* Drop indicator ring */}
+      {/* Drop indicator ring. HUISSTIJL-1: zIndex 10/5/3/4 in this node order its OWN
+          decorative siblings (drop ring, start badge, progress arc, count badge)
+          within one node — internal layering, exempt from the z-ladder. */}
       {dropOver && (
         <div style={{ position: 'absolute', inset: -6, borderRadius: '50%', border: '2.5px dashed var(--color-primary)', pointerEvents: 'none', zIndex: 10 }} />
       )}
@@ -177,10 +179,12 @@ function ModuleNode({ id, data, selected }: { id: string; data: FlowNodeData; se
           border: failed ? '3px solid var(--color-danger)' : done ? '3px solid var(--color-success)'
             : data.isRunning ? `3px solid ${meta.color}` : selected ? `3px solid ${meta.color}` : `2px solid ${meta.color}40`,
           display: 'flex', alignItems: 'center', justifyContent: 'center',
+          // HUISSTIJL-1: failed/done/running/selected are semantic STATUS rings (none of
+          // card/float/modal), kept as-is; only the true resting state maps to shadow-card.
           boxShadow: failed ? '0 0 0 4px var(--color-danger-bg)' : done ? '0 0 0 4px var(--color-success-bg)'
             : data.isRunning
             ? `0 0 0 6px ${meta.color}30, 0 0 20px ${meta.color}50`
-            : selected ? `0 0 0 4px ${meta.color}20` : '0 2px 8px rgba(0,0,0,0.08)',
+            : selected ? `0 0 0 4px ${meta.color}20` : 'var(--shadow-card)',
           transition: 'border 0.2s, box-shadow 0.2s',
           cursor: 'pointer', flexShrink: 0,
           animation: data.isRunning ? 'nodePulse 1s ease-in-out infinite' : 'none',
@@ -198,6 +202,7 @@ function ModuleNode({ id, data, selected }: { id: string; data: FlowNodeData; se
             border: `1.5px solid ${meta.color}`,
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             cursor: 'pointer', color: meta.color,
+            // HUISSTIJL-1: tiny circular icon-button shadow, none of card/float/modal — kept.
             boxShadow: '0 1px 4px rgba(0,0,0,0.15)',
           }}
         >
@@ -244,14 +249,15 @@ export function OutputPanel({ output, onClose }: { output?: unknown; onClose: ()
   const panelRef = useFocusTrap<HTMLDivElement>(onClose)
 
   return (
+    // HUISSTIJL-1: modal dialog — z-overlay ladder tier, shadow-modal role.
     <div style={{
-      position: 'fixed', inset: 0, zIndex: 200, display: 'flex', alignItems: 'center', justifyContent: 'center',
+      position: 'fixed', inset: 0, zIndex: 'var(--z-overlay)', display: 'flex', alignItems: 'center', justifyContent: 'center',
       background: 'rgba(0,0,0,0.4)',
     }} onClick={onClose}>
       <div ref={panelRef} role="dialog" aria-modal="true" aria-label={t('canvas.outputTitle')} tabIndex={-1} style={{
         background: 'var(--surface)', borderRadius: 14, width: 680, maxHeight: '80vh',
         display: 'flex', flexDirection: 'column', overflow: 'hidden',
-        boxShadow: '0 20px 60px rgba(0,0,0,0.3)',
+        boxShadow: 'var(--shadow-modal)',
       }} onClick={e => e.stopPropagation()}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 20px', borderBottom: '1px solid var(--border)' }}>
           <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--text)' }}>{t('canvas.outputTitle')} — {Array.isArray(output) ? t('canvas.records', { n: output.length }) : t('canvas.response')}</div>
@@ -307,6 +313,8 @@ function AddableEdge({ id, sourceX, sourceY, targetX, targetY, selected, data }:
               {t('canvas.filterCount', { count: filterCount })}
             </div>
           )}
+          {/* HUISSTIJL-1: these three tiny edge-action buttons (add/filter/delete) carry a
+              small circular icon-button shadow, none of card/float/modal — kept as-is. */}
           <button onClick={() => onAdd && onAdd(id)} title={t('editor.addModule')} aria-label={t('editor.addModule')}
             style={{ width: 22, height: 22, borderRadius: '50%', background: 'var(--surface)', border: '1.5px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: 'var(--text-muted)', boxShadow: '0 1px 4px rgba(0,0,0,0.1)' }}
             onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--color-primary)'; e.currentTarget.style.color = 'var(--color-primary)' }}

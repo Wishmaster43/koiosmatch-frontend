@@ -29,7 +29,7 @@ import type { CSSProperties, ReactNode } from 'react'
 import { createPortal } from 'react-dom'
 import { useTranslation } from 'react-i18next'
 import { ChevronDown, Check, Plus, X } from 'lucide-react'
-import { useDropdownPlacement, DROPDOWN_SEARCH_ROW_HEIGHT, DROPDOWN_PORTAL_Z_INDEX, DROPDOWN_PORTAL_ATTR } from '@/lib/useDropdownPlacement'
+import { useDropdownPlacement, DROPDOWN_SEARCH_ROW_HEIGHT, DROPDOWN_PORTAL_ATTR } from '@/lib/useDropdownPlacement'
 
 // Footprint of the opt-in clear button: a 24px WCAG 2.2 (2.5.8) target, parked
 // left of the chevron. The label span reserves exactly this much extra room so a
@@ -205,7 +205,8 @@ export default function CreatableSelect({
       )}
       {open && createPortal(
         <div ref={menuRef} {...{ [DROPDOWN_PORTAL_ATTR]: '' }} style={{
-          position: 'fixed', zIndex: DROPDOWN_PORTAL_Z_INDEX, minWidth: menuWidth, maxHeight: menuMaxHeight,
+          // HUISSTIJL-1: portalled dropdown menu — z-popover ladder tier, shadow-float role.
+          position: 'fixed', zIndex: 'var(--z-popover)', minWidth: menuWidth, maxHeight: menuMaxHeight,
           // Hidden until the first measurement lands (see useDropdownPlacement's
           // doc comment) — never painted at an unpositioned (0,0) spot.
           visibility: rect ? 'visible' : 'hidden',
@@ -214,7 +215,7 @@ export default function CreatableSelect({
             ? (openUp ? { bottom: window.innerHeight - rect.top + 4 } : { top: rect.bottom + 4 })
             : {}),
           background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 8,
-          boxShadow: '0 4px 16px rgba(0,0,0,0.1)', overflow: 'hidden' }}>
+          boxShadow: 'var(--shadow-float)', overflow: 'hidden' }}>
           {/* Search / type-to-create */}
           <div style={{ padding: 6, borderBottom: '1px solid var(--border)' }}>
             <input ref={inputRef} value={query} onChange={e => setQuery(e.target.value)}

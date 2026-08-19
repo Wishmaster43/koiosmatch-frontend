@@ -34,14 +34,15 @@ export default function Toaster() {
   if (toasts.length === 0) return null
 
   return (
-    <div style={{ position: 'fixed', bottom: 20, right: 20, zIndex: 9999, display: 'flex', flexDirection: 'column', gap: 8, maxWidth: 360 }}>
+    // HUISSTIJL-1: notifications sit at the top of the z-ladder, always above drawers/modals/popovers.
+    <div style={{ position: 'fixed', bottom: 20, right: 20, zIndex: 'var(--z-toast)', display: 'flex', flexDirection: 'column', gap: 8, maxWidth: 360 }}>
       {toasts.map(toast => {
         const Icon = ICON[toast.type]
         return (
           <div key={toast.id} role={toast.type === 'error' ? 'alert' : 'status'}
             style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 12px', borderRadius: 10,
               background: 'var(--surface)', border: `1px solid ${COLOR[toast.type]}`,
-              boxShadow: '0 6px 24px rgba(0,0,0,0.12)', color: 'var(--text)' }}>
+              boxShadow: 'var(--shadow-float)', color: 'var(--text)' }}>
             <Icon size={16} color={COLOR[toast.type]} style={{ flexShrink: 0 }} />
             <span style={{ flex: 1, fontSize: 13 }}>{toast.message}</span>
             <button onClick={() => remove(toast.id)} aria-label={t('close', { defaultValue: 'Close' })}

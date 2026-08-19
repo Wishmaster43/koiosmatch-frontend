@@ -48,9 +48,10 @@ export default function KoiosModelPicker({ models, value, onChange, t }: {
       </button>
 
       {open && (
+        // HUISSTIJL-1: dropdown menu — z-popover ladder tier, shadow-float role.
         <div style={{ position: 'absolute', bottom: '100%', left: 0, marginBottom: 6, minWidth: 170,
                       background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 10,
-                      boxShadow: '0 4px 20px rgba(0,0,0,0.12)', overflow: 'hidden', zIndex: 50 }}>
+                      boxShadow: 'var(--shadow-float)', overflow: 'hidden', zIndex: 'var(--z-popover)' }}>
           {models.map((m) => (
             <button key={m} onClick={() => { onChange(m); setOpen(false) }}
               style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 8, textAlign: 'left',

@@ -305,7 +305,9 @@ export default function DataTable<Row>({
               fontWeight: 600, color: 'var(--text-muted)', whiteSpace: 'nowrap',
               ...(col.width ? { minWidth: col.width, width: col.width } : {}),
               ...stickyTh, ...stickyColStyle(i),
-              // sticky header + sticky col: bump zIndex so corner cell stays above both axes
+              // sticky header + sticky col: bump zIndex so corner cell stays above both axes.
+              // HUISSTIJL-1: 1/2/3 here order STICKY SIBLINGS within this one table, not
+              // app-wide stacking context — internal layering, exempt from the z-ladder.
               ...(stickyHeader && col.sticky ? { zIndex: 3 } : {}) }
             if (!col.sortable) {
               return <th key={col.key} style={baseStyle}>{col.header}</th>

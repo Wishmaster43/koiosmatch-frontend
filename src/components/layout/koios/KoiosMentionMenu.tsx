@@ -101,10 +101,11 @@ export default function KoiosMentionMenu({
   if (!scoped && !defaultSearchActive && categories.length === 0) return null
 
   return (
+    // HUISSTIJL-1: dropdown menu — z-popover ladder tier, shadow-float role.
     <div ref={menuRef} data-testid="koios-mention-menu"
       style={{ position: 'absolute', bottom: '100%', left: 12, right: 12, marginBottom: 6,
         background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12,
-        boxShadow: '0 4px 20px rgba(0,0,0,0.12)', overflow: 'hidden', zIndex: 50,
+        boxShadow: 'var(--shadow-float)', overflow: 'hidden', zIndex: 'var(--z-popover)',
         maxHeight: 320, overflowY: 'auto' }}>
 
       {/* Scoped: live search inside the one chosen category. */}

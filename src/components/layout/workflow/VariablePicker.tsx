@@ -140,13 +140,15 @@ function PickerPopover({ variables, onInsert, onClose }: {
 
   return (
     <>
-      {/* Click-away backdrop */}
-      <div style={{ position: 'fixed', inset: 0, zIndex: 20 }} onClick={onClose} />
+      {/* Click-away backdrop — HUISSTIJL-1: same z-popover tier as the panel below it;
+          the panel paints on top because it comes later in DOM order at equal z-index. */}
+      <div style={{ position: 'fixed', inset: 0, zIndex: 'var(--z-popover)' }} onClick={onClose} />
 
+      {/* HUISSTIJL-1: anchored dropdown panel — z-popover ladder tier, shadow-float role. */}
       <div ref={trapRef} role="dialog" aria-modal="true" aria-label={t('vars.title')} tabIndex={-1}
         style={{ position: 'absolute', top: '100%', right: 0, marginTop: 4, minWidth: 340, maxWidth: '90vw', maxHeight: 340,
-                 display: 'flex', flexDirection: 'column', background: 'var(--surface)', zIndex: 21,
-                 border: '1px solid var(--border)', borderRadius: 10, boxShadow: '0 8px 24px rgba(0,0,0,0.14)', overflow: 'hidden', outline: 'none' }}>
+                 display: 'flex', flexDirection: 'column', background: 'var(--surface)', zIndex: 'var(--z-popover)',
+                 border: '1px solid var(--border)', borderRadius: 10, boxShadow: 'var(--shadow-float)', overflow: 'hidden', outline: 'none' }}>
 
         {/* Search */}
         <div style={{ position: 'relative', padding: 8, borderBottom: '1px solid var(--border)', flexShrink: 0 }}>

@@ -111,6 +111,9 @@ export default function AssistActionsResultsPanel({ items, source, onApplyAsText
           <X size={13} /> {t('notesAssist.execute.done', { defaultValue: 'Klaar' })}
         </button>
       </div>
+      {/* HUISSTIJL-1: RunDetailDrawer (src/components/reports, out of scope) types
+          `zIndex?: number` — Z.confirm can't become a CSS var string without touching
+          that file; kept as-is. */}
       {viewingRun && <RunDetailDrawer run={viewingRun} onClose={() => setViewingRun(null)} zIndex={Z.confirm} />}
     </div>
   )

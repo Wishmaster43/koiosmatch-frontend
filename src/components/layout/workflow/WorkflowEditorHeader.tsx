@@ -108,7 +108,8 @@ export default function WorkflowEditorHeader({
               fontSize: 12, fontWeight: 500, border: 'none', cursor: 'pointer',
               background: view === v.id ? 'var(--surface)' : 'transparent',
               color:      view === v.id ? 'var(--text)'    : 'var(--text-muted)',
-              boxShadow:  view === v.id ? '0 1px 2px rgba(0,0,0,0.08)' : 'none',
+              // HUISSTIJL-1: active-tab lift — resting-card role.
+              boxShadow:  view === v.id ? 'var(--shadow-card)' : 'none',
             }}>
             <v.Icon size={13} />
             {v.label}

@@ -84,6 +84,9 @@ function Panel({ onClose, ariaLabel, title, header, children, width, maxWidth, p
     : { position: 'relative', width }
 
   return (
+    // HUISSTIJL-1: `z` is a dynamic bring-to-front counter for stacking MULTIPLE open
+    // floating panels among each other (internal ordering, not a static role) — kept
+    // as-is; its base band lives in lib/zIndexScale.ts, out of scope for this batch.
     <div style={{ position: 'fixed', inset: 0, zIndex: z, display: 'flex',
       alignItems: 'center', justifyContent: 'center',
       // Modeless: no scrim and clicks fall through to the page behind it.
@@ -105,8 +108,10 @@ function Panel({ onClose, ariaLabel, title, header, children, width, maxWidth, p
           borderRadius: 14, border: '1px solid var(--border)', pointerEvents: 'auto',
           // The window lifts while it is being dragged; that lift never animates
           // during the drag itself, and never at all under prefers-reduced-motion (§6).
-          boxShadow: dragging ? '0 28px 70px rgba(0,0,0,0.32)' : '0 20px 60px rgba(0,0,0,0.22)',
-          transition: dragging || reducedMotion ? 'none' : 'box-shadow 150ms ease',
+          // HUISSTIJL-1: dragging state is a deliberate deeper lift (drag-ghost-style),
+          // not a static role — kept; the resting shadow is the dialog's shadow-modal tier.
+          boxShadow: dragging ? '0 28px 70px rgba(0,0,0,0.32)' : 'var(--shadow-modal)',
+          transition: dragging || reducedMotion ? 'none' : 'box-shadow var(--motion-fast)',
           overflow: 'hidden' }}>
         {/* Drag handle: the whole header row (never the body — selecting text there
             must keep working). Double-click = reset to center. */}

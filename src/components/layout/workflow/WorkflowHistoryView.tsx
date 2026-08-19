@@ -185,6 +185,9 @@ export default function WorkflowHistoryView({ workflowId, initialRun }: {
         </div>
       </div>
 
+      {/* HUISSTIJL-1: RunDetailDrawer (src/components/reports, out of scope) types
+          `zIndex?: number` — the literal 60 can't become a CSS var string without
+          touching that file; kept as-is. */}
       {drill && <RunDetailDrawer run={drill} onClose={() => setDrill(null)} zIndex={60} />}
     </div>
   )

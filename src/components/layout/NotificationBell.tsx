@@ -116,10 +116,11 @@ export default function NotificationBell() {
       </button>
 
       {open && (
+        // HUISSTIJL-1: dropdown panel — z-popover ladder tier, shadow-float role.
         <div role="menu" style={{
-          position: 'absolute', right: 0, top: 38, width: 360, maxHeight: 420, overflowY: 'auto', zIndex: 50,
+          position: 'absolute', right: 0, top: 38, width: 360, maxHeight: 420, overflowY: 'auto', zIndex: 'var(--z-popover)',
           background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12,
-          boxShadow: '0 8px 28px rgba(0,0,0,0.16)',
+          boxShadow: 'var(--shadow-float)',
         }}>
           <div style={{ padding: '12px 16px', borderBottom: '1px solid var(--border)', fontSize: 13, fontWeight: 600, color: 'var(--text)' }}>
             {t('notifications.title')}

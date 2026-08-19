@@ -24,7 +24,7 @@ import type { ReactNode } from 'react'
 import { createPortal } from 'react-dom'
 import { Plus, Check } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
-import { useDropdownPlacement, DROPDOWN_SEARCH_ROW_HEIGHT, DROPDOWN_PORTAL_Z_INDEX, DROPDOWN_PORTAL_ATTR } from '@/lib/useDropdownPlacement'
+import { useDropdownPlacement, DROPDOWN_SEARCH_ROW_HEIGHT, DROPDOWN_PORTAL_ATTR } from '@/lib/useDropdownPlacement'
 import SelectAllRow, { SELECT_ALL_ROW_HEIGHT } from './SelectAllRow'
 import { useBatchToggle } from '@/hooks/useBatchToggle'
 
@@ -168,7 +168,8 @@ export default function SearchSelect({
         // minWidth + viewport cap: the menu grows with long option labels instead of
         // truncating. Flips upward + clamps to the available space (see doc comment).
         <div ref={menuRef} {...{ [DROPDOWN_PORTAL_ATTR]: '' }} style={{
-          position: 'fixed', zIndex: DROPDOWN_PORTAL_Z_INDEX, minWidth: width, maxWidth: 'min(420px, 90vw)', maxHeight: menuMaxHeight,
+          // HUISSTIJL-1: portalled dropdown menu — z-popover ladder tier, shadow-float role.
+          position: 'fixed', zIndex: 'var(--z-popover)', minWidth: width, maxWidth: 'min(420px, 90vw)', maxHeight: menuMaxHeight,
           // Hidden until the first measurement lands — never painted at an
           // unpositioned (0,0) spot (see useDropdownPlacement's doc comment).
           visibility: rect ? 'visible' : 'hidden',
@@ -182,7 +183,7 @@ export default function SearchSelect({
               }
             : { left: 0 }),
           background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 10,
-          boxShadow: '0 4px 20px rgba(0,0,0,0.12)', overflow: 'hidden' }}>
+          boxShadow: 'var(--shadow-float)', overflow: 'hidden' }}>
           {searchable && (
             <div style={{ padding: '8px 10px', borderBottom: '1px solid var(--border)' }}>
               {/* Escape closes the innermost open thing — this menu — instead of doing

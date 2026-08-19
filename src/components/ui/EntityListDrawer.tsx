@@ -36,11 +36,13 @@ export default function EntityListDrawer({ title, items, onClose }: EntityListDr
 
   return (
     <>
-      <div className="fixed inset-0 z-40" style={{ background: 'rgba(0,0,0,0.25)' }} onClick={onClose} />
+      {/* Backdrop + panel share the drawer rung; DOM order stacks the panel on top. */}
+      <div className="fixed inset-0" style={{ background: 'rgba(0,0,0,0.25)', zIndex: 'var(--z-drawer)' }} onClick={onClose} />
 
       <div ref={panelRef} role="dialog" aria-modal="true" aria-label={typeof title === 'string' ? title : undefined} tabIndex={-1}
-           className="fixed top-0 bottom-0 right-0 z-50 flex flex-col bg-white"
-           style={{ width: 480, boxShadow: '-4px 0 30px rgba(0,0,0,0.12)' }}>
+           className="fixed top-0 bottom-0 right-0 flex flex-col bg-white"
+           // HUISSTIJL-1: aria-modal dialog panel — shadow-modal role.
+           style={{ zIndex: 'var(--z-drawer)',  width: 480, boxShadow: 'var(--shadow-drawer)' }}>
 
         {/* Header */}
         <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between',

@@ -259,7 +259,7 @@ export default function KoiosVoiceButton({ onText, t, lang, tone = 'muted' }: Ko
           border: 'none', cursor: 'pointer', padding: '4px 5px', borderRadius: 7,
           color: listening ? 'var(--color-danger)' : idleColor,
           fontWeight: listening ? 600 : 400,
-          display: 'flex', transition: 'background 0.15s, color 0.15s',
+          display: 'flex', transition: 'background var(--motion-fast), color var(--motion-fast)',
         }}
         onMouseEnter={e => { if (!listening) { e.currentTarget.style.background = 'var(--hover-bg)'; e.currentTarget.style.color = 'var(--color-primary)' } }}
         onMouseLeave={e => { if (!listening) { e.currentTarget.style.background = 'none'; e.currentTarget.style.color = idleColor } }}

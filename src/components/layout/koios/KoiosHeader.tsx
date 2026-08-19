@@ -40,7 +40,7 @@ export default function KoiosHeader({ connected, expanded, onNewChat, onToggleEx
       <button onClick={onNewChat} title={t('koios.newChat')}
         style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '4px 9px', fontSize: 10,
           fontWeight: 600, background: 'rgba(99,102,241,0.12)', color: 'var(--color-primary-text)',
-          border: 'none', borderRadius: 6, cursor: 'pointer', transition: 'background 0.15s' }}
+          border: 'none', borderRadius: 6, cursor: 'pointer', transition: 'background var(--motion-fast)' }}
         onMouseEnter={e => e.currentTarget.style.background = 'rgba(99,102,241,0.22)'}
         onMouseLeave={e => e.currentTarget.style.background = 'rgba(99,102,241,0.12)'}>
         <Plus size={10} /> {t('koios.newChatShort')}

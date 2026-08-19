@@ -61,10 +61,11 @@ export function EventCombobox({ value, onChange, label }: {
 
       {/* Dropdown: every catalogued event, filtered as you type. */}
       {open && (
+        // HUISSTIJL-1: dropdown listbox — z-popover ladder tier, shadow-float role.
         <div role="listbox" aria-label={label}
-          style={{ position: 'absolute', zIndex: 30, top: '100%', left: 0, right: 0, marginTop: 4,
+          style={{ position: 'absolute', zIndex: 'var(--z-popover)', top: '100%', left: 0, right: 0, marginTop: 4,
                    maxHeight: 260, overflowY: 'auto', borderRadius: 8, border: '1px solid var(--border)',
-                   background: 'var(--surface)', boxShadow: '0 8px 24px rgba(0,0,0,0.12)' }}>
+                   background: 'var(--surface)', boxShadow: 'var(--shadow-float)' }}>
           {filtered.length === 0 ? (
             <div style={{ padding: '9px 12px', fontSize: 12, color: 'var(--text-muted)' }}>
               {t('fields.multiselectNoResults', { defaultValue: 'Geen resultaten.' })}

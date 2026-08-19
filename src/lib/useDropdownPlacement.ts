@@ -33,12 +33,10 @@ const MIN_MENU_HEIGHT = 120
 // list once the outer popover height is clamped.
 export const DROPDOWN_SEARCH_ROW_HEIGHT = 44
 
-// z-index audit (2026-07-20): the highest in-app modal/drawer layer today is
-// AddShiftModal at 1000; the Toaster sits at 9999 and must ALWAYS stay above
-// everything, including an open dropdown. A portalled dropdown must out-rank
-// whichever modal/drawer it was opened from, so this sits one tier above every
-// existing modal — comfortably below the Toaster.
-export const DROPDOWN_PORTAL_Z_INDEX = 1100
+// Stacking: portalled dropdowns sit on var(--z-popover) — above the whole
+// dialog band (201-298 + --z-overlay), below --z-confirm and --z-toast. The
+// invariant "a dropdown out-ranks whatever it was opened from" now lives in
+// the index.css ladder, not in a local constant (Opus E2 review).
 
 // PORTAL-MARKER-1 (13-08): every portalled dropdown menu carries this attribute
 // on its root, so any host with its own outside-click-close (DrawerFilterMenu,

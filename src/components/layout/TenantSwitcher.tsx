@@ -151,7 +151,7 @@ export default function TenantSwitcher({ expanded }: { expanded?: boolean }) {
 
       {open && canSwitch && (
         <div className="absolute left-0 right-0 z-50 mt-1 overflow-hidden bg-[var(--surface)] top-full rounded-xl"
-          style={{ border: '1px solid var(--border)', boxShadow: '0 4px 20px rgba(0,0,0,0.1)' }}>
+          style={{ border: '1px solid var(--border)', boxShadow: 'var(--shadow-float)' }}>
           <div className="p-2 border-b border-gray-100">
             <div className="relative">
               <Search size={13} style={{ position: 'absolute', left: 8, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />

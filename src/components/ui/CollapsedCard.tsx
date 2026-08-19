@@ -48,7 +48,7 @@ export default function CollapsedCard({ title, filled, defaultOpen = false, chil
         style={{ ...cardHead, display: 'flex', alignItems: 'center', gap: 6, width: '100%',
           background: 'none', border: 'none', padding: 0, cursor: 'pointer', textAlign: 'left' }}>
         <ChevronRight size={12} aria-hidden="true"
-          style={{ flexShrink: 0, transition: 'transform 0.15s', transform: open ? 'rotate(90deg)' : 'none' }} />
+          style={{ flexShrink: 0, transition: 'transform var(--motion-fast)', transform: open ? 'rotate(90deg)' : 'none' }} />
         {/* Presence dot — solid, not a soft-tint chip (§4 governs chips/pills that
             carry TEXT; this is a bare status dot, same idiom as the phase pills'
             own solid colour dot). Muted/empty when nothing was entered yet. */}

@@ -66,6 +66,9 @@ export default function DeletionPreviewModal({
     : t('trash.eraseAutomatic')
 
   return (
+    // HUISSTIJL-1: Z.confirm comes from lib/zIndexScale.ts (out of scope for this batch)
+    // and FloatingPanel's `zIndex` prop is typed `number` — a CSS var string cannot
+    // substitute here without touching that out-of-scope contract; kept as-is.
     <FloatingPanel open={open} onClose={onClose} title={t('trash.modal.title')}
       ariaLabel={t('trash.modal.title')} persistKey="deletion-preview" zIndex={Z.confirm}
       width={440} maxWidth="min(560px, 90vw)"

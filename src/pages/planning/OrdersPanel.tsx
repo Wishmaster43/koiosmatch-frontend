@@ -104,7 +104,7 @@ export default function OrdersPanel() {
       {pendingDelete && (
         <div role="dialog" aria-modal="true" aria-label={t('order.deleteConfirmTitle')}
           style={{ position: 'fixed', inset: 0, background: 'color-mix(in srgb, #000 40%, transparent)',
-            display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }}>
+            display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 'var(--z-confirm)' }}>
           <div style={{ width: 360, background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 20 }}>
             <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--text)', marginBottom: 8 }}>{t('order.deleteConfirmTitle')}</div>
             <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 12 }}>{t('order.deleteConfirmBody')}</div>

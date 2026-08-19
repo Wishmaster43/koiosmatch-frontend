@@ -192,10 +192,11 @@ export default function ActionMenu({
       </button>
 
       {open && (
+        // HUISSTIJL-1: dropdown menu — z-popover ladder tier, shadow-float role.
         <div role="menu" aria-label={label ?? ariaLabel}
-          style={{ position: 'absolute', top: '100%', zIndex: 200, marginTop: 4, minWidth: menuWidth, maxWidth: 'min(420px, 90vw)',
+          style={{ position: 'absolute', top: '100%', zIndex: 'var(--z-popover)', marginTop: 4, minWidth: menuWidth, maxWidth: 'min(420px, 90vw)',
             background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 10,
-            boxShadow: '0 4px 20px rgba(0,0,0,0.12)', overflow: 'hidden',
+            boxShadow: 'var(--shadow-float)', overflow: 'hidden',
             ...(align === 'right' ? { right: 0 } : { left: 0 }) }}>
 
           {/* Back header when drilled into a sub-level */}

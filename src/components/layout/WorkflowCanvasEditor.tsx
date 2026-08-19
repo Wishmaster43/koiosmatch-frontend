@@ -79,7 +79,8 @@ function EditorInner({ workflow, onClose, onSave, initialRunId }: {
     <EdgeDeleteContext.Provider value={handleEdgeDelete}>
     <EdgeFilterContext.Provider value={handleEdgeFilter}>
     <NodeRunContext.Provider value={handleNodeRun}>
-      <div style={{ position: 'fixed', inset: 0, zIndex: 50, display: 'flex', flexDirection: 'column', background: 'var(--bg)' }}>
+      {/* HUISSTIJL-1: full-screen editor takeover — modal/dialog role. */}
+      <div style={{ position: 'fixed', inset: 0, zIndex: 'var(--z-overlay)', display: 'flex', flexDirection: 'column', background: 'var(--bg)' }}>
 
         {/* ── Header ── */}
         <WorkflowEditorHeader
@@ -143,7 +144,10 @@ function EditorInner({ workflow, onClose, onSave, initialRunId }: {
                 padding: '9px 16px', borderRadius: 999,
                 background: 'var(--color-primary)', color: 'var(--color-on-accent)',
                 border: 'none', cursor: 'pointer', fontSize: 13, fontWeight: 500,
-                boxShadow: '0 4px 14px rgba(0,0,0,0.2)',
+                boxShadow: 'var(--shadow-float)',
+                // HUISSTIJL-1: orders this FAB above the ReactFlow canvas' own siblings
+                // (controls/minimap) INSIDE the relatively-positioned canvas container —
+                // internal layering, exempt from the z-ladder.
                 zIndex: 10,
               }}>
               <Plus size={15} />

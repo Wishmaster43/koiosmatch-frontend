@@ -93,10 +93,13 @@ export default function MultiSelectField({ field, value, onChange }: {
 
       {/* Dropdown: filtered options (or the free-entry hint). */}
       {open && (
-        <div style={{ position: 'absolute', zIndex: 30, top: '100%', left: 0, right: 0, marginTop: 4,
+        // HUISSTIJL-1: dropdown menu — z-popover ladder tier, shadow-float role.
+        <div style={{ position: 'absolute', zIndex: 'var(--z-popover)', top: '100%', left: 0, right: 0, marginTop: 4,
                       maxHeight: 220, overflowY: 'auto', borderRadius: 8, border: '1px solid var(--border)',
-                      background: 'var(--surface)', boxShadow: '0 8px 24px rgba(0,0,0,0.12)' }}>
-          {/* Select-all pinned above the list (free entry has no list to select). */}
+                      background: 'var(--surface)', boxShadow: 'var(--shadow-float)' }}>
+          {/* Select-all pinned above the list (free entry has no list to select).
+              HUISSTIJL-1: zIndex:1 orders this sticky row above its own sibling list
+              items WITHIN this dropdown — internal layering, exempt from the z-ladder. */}
           {!freeEntry && filtered.length > 0 && (
             <div style={{ position: 'sticky', top: 0, zIndex: 1, background: 'var(--surface)', padding: '6px 8px 0' }}>
               <SelectAllRow dense visibleValues={filtered.map(o => o.value)} selectedValues={selected} onApply={applyAll} />

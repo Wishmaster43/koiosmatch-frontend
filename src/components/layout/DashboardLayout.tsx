@@ -229,7 +229,7 @@ export default function DashboardLayout() {
                     border: `1.5px solid ${activePage === 'profile' ? 'var(--color-primary)' : 'transparent'}`,
                     fontSize: 11, fontWeight: 700, cursor: 'pointer',
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    transition: 'all 0.15s',
+                    transition: 'all var(--motion-fast)',
                   }}
                 >
                   {initials}
