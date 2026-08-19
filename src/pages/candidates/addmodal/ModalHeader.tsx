@@ -14,6 +14,7 @@ import { X } from 'lucide-react'
 import { BTN_H } from '@/config/buttonMetrics'
 import type { LookupOption } from '@/types/common'
 import CvEntryIcons from './CvEntryIcons'
+import { tintBg } from '@/lib/tint'
 
 interface ModalHeaderProps {
   status: string
@@ -61,7 +62,7 @@ export default function ModalHeader({ status, pickStatuses, selectedStatus, stat
               style={{ display: 'flex', alignItems: 'center', gap: 8, height: BTN_H, padding: '0 14px',
                 borderRadius: 999, cursor: 'pointer', transition: 'all 0.15s',
                 border: `1.5px solid ${active ? s.color : 'var(--border)'}`,
-                background: active ? s.color + '14' : 'var(--surface)' }}>
+                background: active ? tintBg(s.color ?? 'var(--color-primary)', true) : 'var(--surface)' }}>
               <div style={{ width: 8, height: 8, borderRadius: '50%', background: s.color, flexShrink: 0 }} />
               <span style={{ fontSize: 13, fontWeight: active ? 600 : 500, color: active ? s.color : 'var(--text)' }}>{s.label}</span>
             </button>

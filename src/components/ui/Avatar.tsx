@@ -1,3 +1,4 @@
+import { tint } from '@/lib/tint'
 /**
  * Avatar — round photo or coloured initials bubble.
  *
@@ -42,9 +43,10 @@ export default function Avatar({ initials, size = 28, photo, color, soft = false
   // saturated solid fill); used in detail headers where the avatar is large. The
   // tint must work for hex (+alpha suffix) AND CSS-var colours (via color-mix), so a
   // no-photo avatar ALWAYS shows a coloured placeholder — never a blank/grey bubble.
-  const isHex      = typeof bg === 'string' && bg.startsWith('#')
-  const softBg     = isHex ? bg + '1A' : `color-mix(in srgb, ${bg} 12%, transparent)`
-  const softBorder = isHex ? bg + '55' : `color-mix(in srgb, ${bg} 40%, transparent)`
+  // One tint recipe for hex AND var() tokens (lib/tint) — the old isHex fork was
+  // the pre-color-mix workaround this helper replaced everywhere else.
+  const softBg     = tint(bg, 12)
+  const softBorder = tint(bg, 40)
   // The solid (non-soft) bubble's initials sit directly on `bg`; when that resolves
   // to the tenant accent token, follow --color-on-accent instead of a hardcoded
   // white (2026-08-08 — a yellow tenant brand made it unreadable). Every other

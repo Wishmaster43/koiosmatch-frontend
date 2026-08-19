@@ -24,6 +24,7 @@ import EntityImportCard from '@/components/import/EntityImportCard'
 import { useEntityImportCard } from '@/components/import/useEntityImportCard'
 import type { Id, LookupOption } from '@/types/common'
 import Button from '@/components/ui/Button'
+import { tintBg } from '@/lib/tint'
 
 // The ONE backend importer that builds a whole customer tree (customer + locations +
 // departments + contacts) from one flat file — verified against koiosmatch-api's
@@ -277,7 +278,7 @@ export default function AddCustomerModal({ onClose, onCreate, onImported, users 
                   style={{ display: 'flex', alignItems: 'center', gap: 8, height: BTN_H, padding: '0 14px',
                     borderRadius: 999, cursor: 'pointer', transition: 'all 0.15s',
                     border: `1.5px solid ${active ? (ph.color ?? 'var(--color-primary)') : 'var(--border)'}`,
-                    background: active ? (ph.color ?? 'var(--color-primary)') + '14' : 'var(--surface)' }}>
+                    background: active ? tintBg(ph.color ?? 'var(--color-primary)', true) : 'var(--surface)' }}>
                   <div style={{ width: 8, height: 8, borderRadius: '50%', background: ph.color ?? 'var(--color-primary)', flexShrink: 0 }} />
                   <span style={{ fontSize: 13, fontWeight: active ? 600 : 500,
                     // Text-colour accent uses the AA-contrast text token, not the raw brand primary.
