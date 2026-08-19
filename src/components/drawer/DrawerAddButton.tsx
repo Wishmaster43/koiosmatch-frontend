@@ -46,7 +46,7 @@ export default function DrawerAddButton({ onClick, label, icon: Icon = Plus, dis
   // Visible text: the short house word when requested, else the caller's own label.
   const visibleText = short ? t('new') : (label ?? t('add'))
   return (
-    <button onClick={onClick} disabled={disabled} title={title ?? name} aria-label={name}
+    <button type="button" onClick={onClick} disabled={disabled} title={title ?? name} aria-label={name}
       style={{
         display: 'inline-flex', alignItems: 'center', gap: 5, height: 26, padding: iconOnly ? '0 7px' : '0 10px',
         whiteSpace: 'nowrap', flexShrink: 0, fontSize: 11.5, fontWeight: 500, borderRadius: 6,

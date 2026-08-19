@@ -241,8 +241,9 @@ export default function KoiosVoiceButton({ onText, t, lang, tone = 'muted' }: Ko
 
   const title = denied ? t('voice.denied', { ns: 'koios' })
     : listening ? t('voice.stop', { ns: 'koios' }) : t('voice.start', { ns: 'koios' })
-  // Idle colour per tone; hover always previews the accent.
-  const idleColor = tone === 'primary' ? 'var(--color-primary)' : 'var(--sidebar-muted)'
+  // HUISSTIJL-1: idle colour per tone now reads the on-accent-safe text token
+  // (never the raw brand primary, which can fail contrast on a light tenant fill).
+  const idleColor = tone === 'primary' ? 'var(--color-primary-text)' : 'var(--sidebar-muted)'
 
   return (
     <>
@@ -254,14 +255,16 @@ export default function KoiosVoiceButton({ onText, t, lang, tone = 'muted' }: Ko
         aria-pressed={listening}
         className={listening ? 'km-koios-voice-pulse' : undefined}
         style={{
-          // §4 soft-tint: active state = a stronger color-mix tint + bold, never a solid fill.
+          // Recording is a DANGER state, never the accent trio — the mic stays a
+          // soft danger tint while listening (§4: danger colours keep their own
+          // language, excluded from the button trio).
           background: listening ? 'color-mix(in srgb, var(--color-danger) 14%, transparent)' : 'none',
           border: 'none', cursor: 'pointer', padding: '4px 5px', borderRadius: 7,
           color: listening ? 'var(--color-danger)' : idleColor,
           fontWeight: listening ? 600 : 400,
           display: 'flex', transition: 'background var(--motion-fast), color var(--motion-fast)',
         }}
-        onMouseEnter={e => { if (!listening) { e.currentTarget.style.background = 'var(--hover-bg)'; e.currentTarget.style.color = 'var(--color-primary)' } }}
+        onMouseEnter={e => { if (!listening) { e.currentTarget.style.background = 'var(--hover-bg)'; e.currentTarget.style.color = 'var(--color-primary-text)' } }}
         onMouseLeave={e => { if (!listening) { e.currentTarget.style.background = 'none'; e.currentTarget.style.color = idleColor } }}
       >
         {listening ? <MicOff size={14} /> : <Mic size={14} />}

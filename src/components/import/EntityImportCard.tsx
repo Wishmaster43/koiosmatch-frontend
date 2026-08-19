@@ -127,11 +127,13 @@ export default function EntityImportCard({ wizard, canView, canImport, entity, i
         <>
           <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{intro}</div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
+            {/* HUISSTIJL-1: the primary create action of this step reads the house
+                trio, solid — same as every other accent action button. */}
             <button type="button" onClick={() => inputRef.current?.click()} disabled={!canImport}
               title={canImport ? undefined : t('import.noImportPermission')}
-              style={{ ...ghostBtn, borderColor: 'color-mix(in srgb, var(--color-primary) 45%, transparent)',
-                background: 'color-mix(in srgb, var(--color-primary) 8%, transparent)',
-                color: 'var(--color-primary-text)', fontWeight: 600, opacity: canImport ? 1 : 0.5,
+              style={{ ...ghostBtn, borderColor: 'var(--button-border)',
+                background: 'var(--button-fill)',
+                color: 'var(--button-ink)', fontWeight: 600, opacity: canImport ? 1 : 0.5,
                 cursor: canImport ? 'pointer' : 'not-allowed' }}>
               <FileUp size={14} /> {t('import.selectCsv')}
             </button>

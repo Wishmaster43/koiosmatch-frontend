@@ -574,7 +574,10 @@ the code is worse than no rule, because the next reader builds on it. What is tr
   geselecteerde pillen/chips, telbadges eromheen geïnverteerd) leest het
   KNOP-DRIETAL `--button-fill` / `--button-ink` / `--button-border` — nu de
   volle tenantkleur; "alle knoppen lichter" is één tokenwissel in index.css
-  (nooit een nieuwe veegronde). Tint blijft de taal van status-/datachips.
+  (nooit een nieuwe veegronde). Tint blijft de taal van status-/datachips,
+  van GESELECTEERDE LIJSTRIJEN (menu-opties, zoekresultaten) en van de ACTIEVE
+  NAVIGATIE (zijbalk, rustende tabs): dat zijn plaatsmarkeringen, geen acties —
+  een menu vol volle vullingen schreeuwt (besluit bij Opus-review F, punt 8).
   (2) Destructief (verwijderen/beëindigen), gearchiveerd en datakleuren doen
   NIET mee — Danny's expliciete uitzondering. (3) DE MAAT (Danny 19-08, slotwet: "drill downs moeten ALLEMAAL zelfde
   zijn — zelfde geldt voor de instellingen; boven elke tabel groot mag"):

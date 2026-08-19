@@ -1,9 +1,9 @@
 import { Sparkle } from 'lucide-react'
 
 /**
- * AiAgentAvatar — a soft, primary-tinted round bubble carrying the lucide Sparkle
- * mark, next to the linked AI agent's name. Mirrors Avatar's soft variant (same
- * round shape + color-mix tint math, §4) but marks "this is a Koios AI agent"
+ * AiAgentAvatar — a round bubble in the house button trio carrying the lucide
+ * Sparkle mark, next to the linked AI agent's name. Mirrors Avatar's soft variant
+ * (same round shape, §4) but marks "this is a Koios AI agent"
  * instead of a person's initials — so the vacancy table's AI-agent column reads as
  * an agent, not a plain name (Danny 22-07). One accent, not per-item: every agent
  * IS Koios AI, so the tint is always the fixed `--color-primary` token (documented
@@ -21,8 +21,9 @@ export default function AiAgentAvatar({ name, size = 22 }: { name?: string; size
       <span aria-hidden="true"
         style={{ width: size, height: size, borderRadius: '50%', flexShrink: 0, boxSizing: 'border-box',
           display: 'flex', alignItems: 'center', justifyContent: 'center',
-          background: 'color-mix(in srgb, var(--color-primary) 14%, transparent)',
-          border: '1px solid color-mix(in srgb, var(--color-primary) 40%, transparent)',
+          // HUISSTIJL-1: the accent-tinted avatar bubble reads the house trio, solid.
+          background: 'var(--color-primary-bg)',
+          border: '1px solid var(--button-border)',
           color: 'var(--color-primary-text)' }}>
         <Sparkle size={Math.round(size * 0.55)} aria-hidden="true" />
       </span>

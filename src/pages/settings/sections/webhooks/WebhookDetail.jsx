@@ -134,7 +134,8 @@ export default function WebhookDetail({ subId, listRow, onBack, onPatch, onDelet
               <Button variant="primary" onClick={saveDetails}><Save size={13} /> {t('common.save')}</Button>
             </div>
           ) : (
-            <button onClick={() => setEditing(true)} style={{ display: 'flex', alignItems: 'center', gap: 6, height: BTN_H, padding: '0 12px', fontSize: 13, fontWeight: 500, border: '1px solid var(--color-primary)', borderRadius: 8, background: 'var(--color-primary-bg)', color: 'var(--color-primary-text)', cursor: 'pointer' }}><Pencil size={13} /> {t('webhooks.outgoing.edit')}</button>
+            // HUISSTIJL-1: the house Button (variant="soft") — solid tenant trio.
+            <Button variant="soft" onClick={() => setEditing(true)}><Pencil size={13} /> {t('webhooks.outgoing.edit')}</Button>
           )}
         </div>
         {editing ? (

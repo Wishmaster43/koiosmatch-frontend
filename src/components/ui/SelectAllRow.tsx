@@ -72,9 +72,11 @@ export default function SelectAllRow<T extends string | number>({
         style={{
           display: 'flex', alignItems: 'center', gap: 6, width: '100%', height: 26,
           padding: '0 8px', borderRadius: 6, cursor: 'pointer', fontSize: 11.5, fontWeight: 600,
-          color: 'var(--color-primary-text)',
-          background: 'color-mix(in srgb, var(--color-primary) 10%, transparent)',
-          border: '1px solid color-mix(in srgb, var(--color-primary) 30%, transparent)',
+          // HUISSTIJL-1: a real ACTION (select/clear the visible scope) reads the
+          // house trio, solid, same as every other accent action button.
+          color: 'var(--button-ink)',
+          background: 'var(--button-fill)',
+          border: '1px solid var(--button-border)',
         }}>
         {allSelected ? <Eraser size={12} aria-hidden="true" /> : <CheckCheck size={12} aria-hidden="true" />}
         <span style={{ flex: 1, textAlign: 'left' }}>

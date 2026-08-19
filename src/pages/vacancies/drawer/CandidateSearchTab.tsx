@@ -8,8 +8,10 @@ import MatchScoreBlock from '@/components/match/MatchScoreBlock'
 import RadiusMapPanel from '@/components/map/RadiusMapPanel'
 import DrillPager from '@/components/drawer/DrillPager'
 import EntityLink from '@/components/ui/EntityLink'
+import Button from '@/components/ui/Button'
 import KoiosAiMark from '@/components/ui/KoiosAiMark'
 import SearchSelect from '@/components/ui/SearchSelect'
+import FilterTriggerPill from '@/components/ui/FilterTriggerPill'
 import GeocodeButton from '@/components/ui/GeocodeButton'
 import StatusPill from '@/components/ui/StatusPill'
 import DrawerAddButton from '@/components/drawer/DrawerAddButton'
@@ -126,19 +128,40 @@ export default function CandidateSearchTab({ vacancy }: { vacancy: VacancyDetail
       <div style={{ minWidth: 180 }}>
         <Caption style={{ display: 'block', marginBottom: 4 }}>{t('candidateSearch.functions')}</Caption>
         <SearchSelect
-          triggerLabel={<>{t('candidateSearch.functions')}{selectedFunctions.length > 0 && ` (${selectedFunctions.length})`}</>}
+          triggerLabel={`${t('candidateSearch.functions')}${selectedFunctions.length > 0 ? ` (${selectedFunctions.length})` : ''}`}
+          renderTrigger={toggle => (
+            <button type="button" onClick={toggle} aria-haspopup="listbox"
+              aria-label={`${t('candidateSearch.functions')}${selectedFunctions.length > 0 ? ` (${selectedFunctions.length})` : ''}`}
+              style={{ background: 'none', border: 'none', padding: 0 }}>
+              <FilterTriggerPill label={t('candidateSearch.functions')} count={selectedFunctions.length} />
+            </button>
+          )}
           options={functionOptions} selected={selectedFunctions} onToggle={toggleFunction} width={240} />
       </div>
       <div style={{ minWidth: 180 }}>
         <Caption style={{ display: 'block', marginBottom: 4 }}>{t('candidateSearch.statuses')}</Caption>
         <SearchSelect
-          triggerLabel={<>{t('candidateSearch.statuses')}{selectedStatuses.length > 0 && ` (${selectedStatuses.length})`}</>}
+          triggerLabel={`${t('candidateSearch.statuses')}${selectedStatuses.length > 0 ? ` (${selectedStatuses.length})` : ''}`}
+          renderTrigger={toggle => (
+            <button type="button" onClick={toggle} aria-haspopup="listbox"
+              aria-label={`${t('candidateSearch.statuses')}${selectedStatuses.length > 0 ? ` (${selectedStatuses.length})` : ''}`}
+              style={{ background: 'none', border: 'none', padding: 0 }}>
+              <FilterTriggerPill label={t('candidateSearch.statuses')} count={selectedStatuses.length} />
+            </button>
+          )}
           options={statusOptions.map(s => ({ value: s.value, label: s.label }))} selected={selectedStatuses} onToggle={toggleStatus} width={240} />
       </div>
       <div style={{ minWidth: 180 }}>
         <Caption style={{ display: 'block', marginBottom: 4 }}>{t('candidateSearch.contractForms')}</Caption>
         <SearchSelect
-          triggerLabel={<>{t('candidateSearch.contractForms')}{selectedContractForms.length > 0 && ` (${selectedContractForms.length})`}</>}
+          triggerLabel={`${t('candidateSearch.contractForms')}${selectedContractForms.length > 0 ? ` (${selectedContractForms.length})` : ''}`}
+          renderTrigger={toggle => (
+            <button type="button" onClick={toggle} aria-haspopup="listbox"
+              aria-label={`${t('candidateSearch.contractForms')}${selectedContractForms.length > 0 ? ` (${selectedContractForms.length})` : ''}`}
+              style={{ background: 'none', border: 'none', padding: 0 }}>
+              <FilterTriggerPill label={t('candidateSearch.contractForms')} count={selectedContractForms.length} />
+            </button>
+          )}
           options={candidateTypes.map(c => ({ value: c.value, label: c.label }))} selected={selectedContractForms} onToggle={toggleContractForm} width={240} />
       </div>
     </div>
@@ -276,17 +299,14 @@ export default function CandidateSearchTab({ vacancy }: { vacancy: VacancyDetail
     </div>
   )
 
-  // Calm secondary button (soft primary tint, §4 — never a solid fill) above the
-  // list: queues a batched Koios advice refresh (fase 3) for this vacancy's best matches.
+  // HUISSTIJL-1: the house Button (variant="soft") — solid tenant trio, same as
+  // every other accent action button. Queues a batched Koios advice refresh
+  // (fase 3) for this vacancy's best matches.
   const refreshButton = (
-    <button type="button" onClick={handleRefreshAdvice} disabled={refreshing}
-      style={{ display: 'inline-flex', alignItems: 'center', gap: 6, marginBottom: 10,
-        fontSize: 12, fontWeight: 600, color: 'var(--color-primary-text)', background: 'var(--color-primary-bg)',
-        border: '1px solid color-mix(in srgb, var(--color-primary) 30%, transparent)', borderRadius: 8,
-        padding: '6px 12px', cursor: refreshing ? 'default' : 'pointer', opacity: refreshing ? 0.6 : 1 }}>
+    <Button variant="soft" onClick={handleRefreshAdvice} disabled={refreshing} style={{ marginBottom: 10 }}>
       <RefreshCw size={13} className={refreshing ? 'animate-spin' : ''} />
       {t('candidateSearch.refreshAdvice')}
-    </button>
+    </Button>
   )
 
   // VACANCY-LEADS-COUNT-1 (points 3+5): the persisted teller's own honesty

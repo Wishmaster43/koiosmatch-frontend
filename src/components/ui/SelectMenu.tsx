@@ -124,11 +124,14 @@ export default function SelectMenu({ id, 'aria-labelledby': ariaLabelledBy, valu
     <div ref={ref} style={{ position: 'relative' }}>
       {/* Same disclosure semantics as CreatableSelect — one picker convention, so a
           screen reader describes both identically (§6). */}
+      {/* HUISSTIJL-1: ONE trigger recipe shared with CreatableSelect (was var(--bg)/r7
+          here vs var(--surface)/r6 there) — background var(--surface), border
+          1px solid var(--border), radius 6, padding '6px 10px'. */}
       <button ref={triggerRef} onClick={() => setOpen(o => !o)}
         id={triggerId} aria-labelledby={labelledBy}
         aria-expanded={open} aria-haspopup="listbox" aria-controls={open ? listId : undefined}
-        style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '5px 10px', width: '100%',
-          border: '1px solid var(--border)', borderRadius: 7, background: 'var(--bg)', cursor: 'pointer' , ...style }}>
+        style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '6px 10px', width: '100%',
+          border: '1px solid var(--border)', borderRadius: 6, background: 'var(--surface)', cursor: 'pointer' , ...style }}>
         {leading}
         {current?.initials && <Avatar initials={current.initials} size={18} />}
         {current?.icon && !current.initials && <span style={{ display: 'flex', flexShrink: 0 }}>{current.icon}</span>}

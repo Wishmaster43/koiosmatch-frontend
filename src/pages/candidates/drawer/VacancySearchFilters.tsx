@@ -8,6 +8,7 @@ import { useDateFormat } from '@/lib/datetime'
 // HUISSTIJL-1: the shared muted-caption atom (identity-only swap).
 import { Caption } from '@/components/ui/typography'
 import type { HoursRange } from '../hooks/vacancySearchFilters'
+import FilterTriggerPill from '@/components/ui/FilterTriggerPill'
 
 // FILTER-VLAK-1 (Danny 13-08, rustplan step 4): the ONE soft-tint recipe every
 // trigger/chip/action in this bar shares — pulled out of the three near-duplicate
@@ -17,22 +18,6 @@ const softTint = (activeOrOpen: boolean) => ({
   background: `color-mix(in srgb, var(--color-primary) ${activeOrOpen ? 16 : 10}%, transparent)`,
   border: `1px solid color-mix(in srgb, var(--color-primary) ${activeOrOpen ? 45 : 30}%, transparent)`,
 })
-// Primary-field trigger — same footprint/idiom as DrawerFilterMenu's own "More
-// filters" button (height 26, fontSize 11.5, radius 6, badge-on-active) so the
-// three fixed filters and the popover trigger read as ONE family of controls.
-// PRIMAIR-VLAK-1 (Danny 19-08): accent triggers paint the button trio; the
-// count badge inverts so it stays visible on the solid fill.
-const filterTrigger = (active: boolean): CSSProperties => ({
-  display: 'inline-flex', alignItems: 'center', gap: 5, height: 26, padding: '0 10px',
-  whiteSpace: 'nowrap', fontSize: 11.5, fontWeight: active ? 600 : 500, borderRadius: 6,
-  cursor: 'pointer', color: 'var(--button-ink)',
-  background: 'var(--button-fill)', border: '1px solid var(--button-border)',
-})
-const filterTriggerBadge: CSSProperties = {
-  display: 'inline-flex', alignItems: 'center', justifyContent: 'center', minWidth: 15, height: 15,
-  padding: '0 4px', borderRadius: 999, background: 'var(--button-ink)', color: 'var(--color-primary-text)',
-  fontSize: 10, fontWeight: 700, lineHeight: 1,
-}
 // Removable soft-chip (§4 convention) for an ACTIVE secondary filter parked in
 // the DrawerFilterMenu popover — CALM-1 (P8-more-filters, batch 8): a filter
 // that narrows the search must never be hidden-but-active, so it also surfaces
@@ -72,13 +57,9 @@ function SecondaryFilterChip({ label, ariaLabel, onRemove }: { label: string; ar
 // ("Vacaturestatus · 2"), mirroring the DrawerFilterMenu "More filters" idiom —
 // FILTER-VLAK-1 step 1: this replaces the separate label-beside-control layout,
 // halving the number of elements on the row.
+// Delegates to the ONE shared pill (Opus F: the two search twins had diverged).
 function PrimaryFilterTrigger({ label, count }: { label: string; count: number }) {
-  return (
-    <span style={filterTrigger(count > 0)}>
-      {label}
-      {count > 0 && <span aria-hidden="true" style={filterTriggerBadge}>{count}</span>}
-    </span>
-  )
+  return <FilterTriggerPill label={label} count={count} />
 }
 
 interface VacancySearchFiltersProps {

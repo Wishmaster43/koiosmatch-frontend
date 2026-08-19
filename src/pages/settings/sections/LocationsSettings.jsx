@@ -174,7 +174,7 @@ export default function LocationsSettings() {
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
           {/* Map quick-view via the ONE shared toggle (§4 — never hand-rolled). */}
           <QuickViewToggle size="compact" active={view === 'map'} onToggle={() => setView(v => (v === 'map' ? 'table' : 'map'))}
-            label={t('common:map.view')} color="var(--color-primary)" icon={MapIcon} />
+            label={t('common:map.view')} icon={MapIcon} />
           {/* HUISSTIJL-1: the ONE "+ add" affordance, app-wide (§3A). */}
           <DrawerAddButton onClick={openCreate} label={t('locations.create')} />
         </div>

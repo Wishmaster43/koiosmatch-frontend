@@ -22,11 +22,12 @@
 import { useState, useRef, useEffect } from 'react'
 import type { ReactNode } from 'react'
 import { createPortal } from 'react-dom'
-import { Plus, Check } from 'lucide-react'
+import { Check, ChevronDown } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { useDropdownPlacement, DROPDOWN_SEARCH_ROW_HEIGHT, DROPDOWN_PORTAL_ATTR } from '@/lib/useDropdownPlacement'
 import SelectAllRow, { SELECT_ALL_ROW_HEIGHT } from './SelectAllRow'
 import { useBatchToggle } from '@/hooks/useBatchToggle'
+import DrawerAddButton from '@/components/drawer/DrawerAddButton'
 
 interface SearchSelectOption {
   value: string
@@ -157,12 +158,23 @@ export default function SearchSelect({
           ? <div style={{ opacity: 0.5, cursor: 'default', pointerEvents: 'none' }}>{renderTrigger(toggle)}</div>
           : renderTrigger(toggle))
         : (
-          <button onClick={toggle} disabled={disabled}
-            style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '6px 10px', fontSize: 11, fontWeight: 500,
-              border: '1px dashed var(--border)', borderRadius: 7, background: 'none', color: 'var(--text-muted)',
-              cursor: disabled ? 'default' : 'pointer', opacity: disabled ? 0.5 : 1 }}>
-            <Plus size={11} /> {triggerLabel}
-          </button>
+          // Two roles, two looks (Opus F review — the first attempt applied one
+          // look to both): closeOnToggle marks the SINGLE-PICK FIELD role, which
+          // wears calm form chrome (value + chevron, no plus); everything else is
+          // a genuine ADD affordance and renders the REAL DrawerAddButton
+          // (PRIMAIR-VLAK-1 + §3A), never a hand-copy of it.
+          closeOnToggle ? (
+            <button type="button" onClick={toggle} disabled={disabled}
+              style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '6px 10px',
+                border: '1px solid var(--border)', borderRadius: 6, background: 'var(--surface)',
+                cursor: disabled ? 'default' : 'pointer', opacity: disabled ? 0.6 : 1 }}>
+              <span style={{ fontSize: 12, flex: 1, textAlign: 'left', whiteSpace: 'nowrap',
+                overflow: 'hidden', textOverflow: 'ellipsis', color: 'var(--text)' }}>{triggerLabel}</span>
+              <ChevronDown size={12} aria-hidden="true" style={{ color: 'var(--text-muted)', flexShrink: 0 }} />
+            </button>
+          ) : (
+            <DrawerAddButton label={triggerLabel ?? ''} onClick={toggle} disabled={disabled} />
+          )
         )}
       {open && createPortal(
         // minWidth + viewport cap: the menu grows with long option labels instead of

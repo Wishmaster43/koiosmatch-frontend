@@ -38,12 +38,20 @@ interface QuickViewToggleProps {
 export default function QuickViewToggle({ active, onToggle, label, color = 'var(--color-primary)', icon: Icon, title, size = 'default', iconOnly = false }: QuickViewToggleProps) {
   const compact = size === 'compact'
   const squished = iconOnly && Boolean(Icon)
+  // PRIMAIR-VLAK-1: a toggle with NO distinct semantic colour (still the default
+  // tenant accent — "show unpublished", map view, …) is a plain ACTION/SELECTED
+  // surface, so it reads the house trio instead of the §4 soft-tint formula: calm
+  // surface+border while off, the solid tenant fill while on. A toggle with its
+  // OWN colour (Archief/Prullenbak/Blacklist/kaart/status) keeps the soft-tint
+  // language untouched below — that colour IS the information it carries,
+  // excluded from the trio by THE LAW's own danger/archive/status/data carve-out.
+  const isPlainAccent = color === 'var(--color-primary)'
   // Text/icon colour must stay readable: the primary token has a dedicated
-  // readable-text variant; any other colour is darkened toward --text via
-  // color-mix so light per-toggle colours never render as low-contrast text.
-  // Backgrounds/borders below keep the RAW colour — only text contrast changes.
-  const textColor = color === 'var(--color-primary)'
-    ? 'var(--color-primary-text)'
+  // readable-text variant (or the trio's own ink while ON); any other colour is
+  // darkened toward --text via color-mix so light per-toggle colours never
+  // render as low-contrast text.
+  const textColor = isPlainAccent
+    ? (active ? 'var(--button-ink)' : 'var(--color-primary-text)')
     : `color-mix(in srgb, ${color} 60%, var(--text))`
   return (
     <button type="button" onClick={onToggle} title={title ?? label} aria-pressed={active}
@@ -55,9 +63,10 @@ export default function QuickViewToggle({ active, onToggle, label, color = 'var(
           : compact ? { height: 26, padding: '0 10px' } : { padding: '6px 12px' }),
         fontSize: compact ? 11.5 : 12,
         fontWeight: active ? 600 : 500, borderRadius: compact ? 6 : 8, cursor: 'pointer', color: textColor,
-        // HUISSTIJL-1: one shared tint formula (lib/tint) — was a private 8/28 pair.
-        background: tintBg(color, active),
-        border: tintBorder(color, active),
+        // HUISSTIJL-1: one shared tint formula (lib/tint) for a COLOURED toggle —
+        // was a private 8/28 pair. The plain-accent case bypasses it for the trio.
+        background: isPlainAccent ? (active ? 'var(--button-fill)' : 'var(--surface)') : tintBg(color, active),
+        border: isPlainAccent ? `1px solid ${active ? 'var(--button-border)' : 'var(--border)'}` : tintBorder(color, active),
       }}>
       {Icon && <Icon size={13} />}
       {!squished && label}

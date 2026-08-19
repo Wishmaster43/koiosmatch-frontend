@@ -33,9 +33,20 @@ describe('QuickViewToggle', () => {
     expect(btn.style.border).toContain('color-mix(in srgb, rgb(255, 221, 0)')
   })
 
-  it('uses the readable primary-text token for the default primary colour', () => {
-    render(<QuickViewToggle active onToggle={() => {}} label="Default" />)
-    const btn = screen.getByRole('button', { name: 'Default' })
+  // HUISSTIJL-1 (PRIMAIR-VLAK-1): the plain-accent case (no explicit `color`) now
+  // reads the house trio — solid fill while ON, calm surface+border while OFF —
+  // instead of the §4 soft-tint formula every other coloured toggle still uses.
+  it('reads the house trio for the default primary colour: calm off, solid trio on', () => {
+    const { rerender } = render(<QuickViewToggle active={false} onToggle={() => {}} label="Default" />)
+    let btn = screen.getByRole('button', { name: 'Default' })
     expect(btn.style.color).toBe('var(--color-primary-text)')
+    expect(btn.style.background).toBe('var(--surface)')
+    expect(btn.style.border).toBe('1px solid var(--border)')
+
+    rerender(<QuickViewToggle active onToggle={() => {}} label="Default" />)
+    btn = screen.getByRole('button', { name: 'Default' })
+    expect(btn.style.color).toBe('var(--button-ink)')
+    expect(btn.style.background).toBe('var(--button-fill)')
+    expect(btn.style.border).toBe('1px solid var(--button-border)')
   })
 })

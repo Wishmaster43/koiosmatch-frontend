@@ -12,7 +12,6 @@ import Spinner from '@/components/ui/Spinner'
 import { useDateFormat } from '@/lib/datetime'
 import { KEY_TYPES, isValidIpOrCidr } from './constants'
 import SearchSelect from '@/components/ui/SearchSelect'
-import { BTN_H } from '@/config/buttonMetrics'
 import { fieldInputStyle } from '@/components/forms/fieldMetrics'
 import Button from '@/components/ui/Button'
 import { Mono } from '@/components/ui/typography'
@@ -73,7 +72,7 @@ export default function ApiKeyGeneralTab({ apiKey, onSave }) {
 
   return (
     <div style={{ maxWidth: 680 }}>
-      {/* Toolbar: Edit / Save+Cancel — BTN_H (§4/§9): one explicit height for every text/action button, everywhere. */}
+      {/* Toolbar: Edit / Save+Cancel — the house Button owns height/radius everywhere. */}
       <div className="flex items-center justify-end" style={{ marginBottom: 14, gap: 8 }}>
         {editing ? (
           <>
@@ -85,10 +84,10 @@ export default function ApiKeyGeneralTab({ apiKey, onSave }) {
             </Button>
           </>
         ) : (
-          <button onClick={() => setEditing(true)}
-            style={{ display: 'flex', alignItems: 'center', gap: 6, height: BTN_H, padding: '0 14px', fontSize: 13, fontWeight: 500, border: '1px solid var(--color-primary)', borderRadius: 8, background: 'var(--color-primary-bg)', color: 'var(--color-primary-text)', cursor: 'pointer' }}>
+          // HUISSTIJL-1: the house Button (variant="soft") — solid tenant trio.
+          <Button variant="soft" onClick={() => setEditing(true)}>
             <Pencil size={13} /> {t('apiKeys.edit')}
-          </button>
+          </Button>
         )}
       </div>
 

@@ -331,9 +331,10 @@ export default function AddContactPersonModal({
             <button type="button" onClick={() => setImportOpen(v => !v)} aria-expanded={importOpen}
               style={{ display: 'flex', alignItems: 'center', gap: 6, height: BTN_H, padding: '0 12px', marginLeft: 'auto',
                 flexShrink: 0, borderRadius: 8, cursor: 'pointer', fontSize: 12.5, fontWeight: 600,
-                color: 'var(--color-primary-text)',
-                border: `1px solid color-mix(in srgb, var(--color-primary) ${importWizard.file ? 50 : 32}%, transparent)`,
-                background: `color-mix(in srgb, var(--color-primary) ${importWizard.file ? 16 : 8}%, transparent)` }}>
+                color: 'var(--button-ink)',
+                // Trio + §4-IMPORT ring: a picked file (paused import) stays visible as the ink ring.
+                border: importWizard.file ? '1px solid var(--button-ink)' : '1px solid var(--button-border)',
+                background: 'var(--button-fill)' }}>
               <Upload size={13} />
               {t('subModal.import.title', { entity: t('settings:import.entities.contacts.label') })}
             </button>

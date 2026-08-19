@@ -78,11 +78,11 @@
  * renders it — the one case that already needs the real wizard.
  */
 import { lazy, Suspense } from 'react'
-import type { CSSProperties } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Wand2, AlignLeft, ListChecks, Sparkles, Loader2, Check, X } from 'lucide-react'
 import KoiosAiMark from './KoiosAiMark'
 import CalloutBox from './CalloutBox'
+import Button from './Button'
 import KoiosVoiceButton from '@/components/layout/koios/KoiosVoiceButton'
 import { useRichTextAssist } from './richtext/useRichTextAssist'
 import { appendDictatedText, applyRichTextAssist, hasPlainText } from './richtext/richTextAssistApply'
@@ -120,18 +120,6 @@ const MODES: { mode: RichTextAssistMode; icon: typeof Wand2 }[] = [
   { mode: 'actions', icon: ListChecks },
 ]
 
-// §4 soft-tint: the accent-tinted action pill, never a solid fill.
-const actionBtn = (active: boolean, disabled: boolean): CSSProperties => ({
-  display: 'inline-flex', alignItems: 'center', gap: 5, fontSize: 11, fontWeight: active ? 600 : 500,
-  padding: '5px 9px', borderRadius: 7, cursor: disabled ? 'default' : 'pointer',
-  background: 'var(--color-primary-bg)', color: 'var(--color-primary-text)',
-  border: '1px solid color-mix(in srgb, var(--color-primary) 30%, transparent)',
-  opacity: disabled && !active ? 0.5 : 1,
-})
-const primaryBtn: CSSProperties = { display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 12, fontWeight: 600,
-  padding: '5px 11px', borderRadius: 7, cursor: 'pointer', background: 'var(--color-primary)', color: 'var(--color-on-accent)', border: 'none' }
-const ghostBtn: CSSProperties = { display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 12, fontWeight: 500,
-  padding: '5px 11px', borderRadius: 7, cursor: 'pointer', background: 'none', color: 'var(--text-muted)', border: '1px solid var(--border)' }
 
 export default function RichTextAssistBar({ value, onChange, language, modes = ['improve', 'summarize'], generate }: RichTextAssistBarProps) {
   const { t } = useTranslation('common')
@@ -179,24 +167,24 @@ export default function RichTextAssistBar({ value, onChange, language, modes = [
             </span>
           </div>
           <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 6 }}>
+            {/* HUISSTIJL-1: the house Button (variant="soft") — solid tenant trio,
+                same as every other accent action button app-wide. */}
             {MODES.filter(m => modes.includes(m.mode)).map(({ mode: m, icon: Icon }) => (
-              <button key={m} type="button" onClick={() => run(m, value)} disabled={loading || !hasText}
+              <Button key={m} variant="soft" onClick={() => run(m, value)} disabled={loading || !hasText}
                 data-testid={`rte-assist-${m}`}
-                title={hasText ? undefined : t('notesAssist.needsText')}
-                style={actionBtn(loading && mode === m, loading || !hasText)}>
+                title={hasText ? undefined : t('notesAssist.needsText')}>
                 {loading && mode === m ? <Loader2 size={12} className="animate-spin" /> : <Icon size={12} />}
                 {t(`notesAssist.${m}`)}
-              </button>
+              </Button>
             ))}
             {/* KOIOS-GENERATE-1: unlike the modes above, this never needs existing
                 text — it writes FROM the entity's own data, so only `loading` gates it. */}
             {generate && (
-              <button type="button" onClick={() => runGenerate(generate.entity, generate.id)} disabled={loading}
-                data-testid="rte-assist-generate"
-                style={actionBtn(loading && mode === 'generate', loading)}>
+              <Button variant="soft" onClick={() => runGenerate(generate.entity, generate.id)} disabled={loading}
+                data-testid="rte-assist-generate">
                 {loading && mode === 'generate' ? <Loader2 size={12} className="animate-spin" /> : <Sparkles size={12} />}
                 {t('notesAssist.generate')}
-              </button>
+              </Button>
             )}
           </div>
 
@@ -240,13 +228,13 @@ export default function RichTextAssistBar({ value, onChange, language, modes = [
               <div style={{ display: 'flex', gap: 8 }}>
                 {/* No apply target when actions came back empty — nothing to overnemen. */}
                 {result.kind === 'text' && (
-                  <button type="button" onClick={handleApply} style={primaryBtn} data-testid="rte-assist-apply">
+                  <Button variant="primary" onClick={handleApply} data-testid="rte-assist-apply">
                     <Check size={13} /> {t('notesAssist.apply')}
-                  </button>
+                  </Button>
                 )}
-                <button type="button" onClick={discard} style={ghostBtn} data-testid="rte-assist-discard">
+                <Button variant="secondary" onClick={discard} data-testid="rte-assist-discard">
                   <X size={13} /> {t('notesAssist.discard')}
-                </button>
+                </Button>
               </div>
             </div>
           )}
