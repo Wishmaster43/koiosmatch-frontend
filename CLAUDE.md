@@ -843,6 +843,12 @@ the code is worse than no rule, because the next reader builds on it. What is tr
 - Naming: `PascalCase` components, `camelCase` functions/vars, `useX` hooks,
   `UPPER_SNAKE` constants. Names describe intent, not implementation.
 - No dead code, no commented-out blocks, no `console.log` in committed code.
+- **JSX-COMMENTPOSITIE (les na vier identieke breuken op één dag, 19/20-08):**
+  een `{/* … */}`-comment mag UITSLUITEND tussen JSX-kinderen staan — nooit in
+  attribuutpositie, nooit direct binnen een `{cond && (…)}`/ternary-expressie.
+  De comment hoort op de regel BOVEN de expressie. Elke geautomatiseerde edit
+  die een comment toevoegt draait direct daarna `tsc --noEmit` vóór welke
+  vervolgstap dan ook; een patch-script assert eerst dat zijn doelregel bestaat.
 - **Een nieuwe gedeelde helper landt met adoptie op de bestaande kopieerplekken** —
   een helper naast drie verse kopieen van het patroon dat hij vervangt
   (extractApiError, 2026-07-17) is een finding, geen vooruitgang.

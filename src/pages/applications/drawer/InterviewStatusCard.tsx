@@ -12,7 +12,6 @@ import { useAuth } from '@/context/AuthContext'
 import api, { unwrap } from '@/lib/api'
 import { notifySuccess, notifyError } from '@/lib/notify'
 import { extractApiError } from '@/lib/extractApiError'
-import { BTN_H } from '@/config/buttonMetrics'
 import { interviewCategoryColor } from '../data/applicationsShared'
 import { mapInterview } from '../data/mapApplication'
 import type { ApiApplication, ApplicationInterview } from '@/types/application'
@@ -91,17 +90,20 @@ const MetaDot = () => <span aria-hidden="true" style={{ color: 'var(--text-muted
 // outline button — now the house soft-tint recipe (§4, mirrors DrawerAddButton/
 // QuickViewToggle). The inactive/disabled state stays a neutral, unfilled ghost
 // (§3 honest gate — it carries no colour meaning while disabled).
-const actionBtnStyle = (active: boolean, danger: boolean): CSSProperties => {
-  const token = danger ? 'var(--color-danger)' : 'var(--color-primary)'
-  return {
-    display: 'inline-flex', alignItems: 'center', gap: 5,
-    fontSize: 12, fontWeight: 500, height: BTN_H, padding: '0 12px', borderRadius: 8,
-    border: active ? `1px solid color-mix(in srgb, ${token} 30%, transparent)` : '1px solid var(--border)',
-    background: active ? `color-mix(in srgb, ${token} 10%, transparent)` : 'none',
-    color: active ? token : 'var(--text-muted)',
-    cursor: active ? 'pointer' : 'not-allowed', opacity: active ? 1 : 0.6,
-  }
-}
+// PRIMAIR-VLAK-1 + maatwet (Danny 19/20-08): accent action = the solid trio at
+// the sm drill-down height; danger keeps its red tint (his reconfirmed rule).
+const actionBtnStyle = (active: boolean, danger: boolean): CSSProperties => ({
+  display: 'inline-flex', alignItems: 'center', gap: 5,
+  fontSize: 12, fontWeight: danger ? 500 : 600, height: 28, padding: '0 10px', borderRadius: 6,
+  border: !active ? '1px solid var(--border)'
+    : danger ? '1px solid color-mix(in srgb, var(--color-danger) 33%, transparent)'
+    : '1px solid var(--button-border)',
+  background: !active ? 'none'
+    : danger ? 'color-mix(in srgb, var(--color-danger) 10%, transparent)'
+    : 'var(--button-fill)',
+  color: !active ? 'var(--text-muted)' : danger ? 'var(--color-danger)' : 'var(--button-ink)',
+  cursor: active ? 'pointer' : 'not-allowed', opacity: active ? 1 : 0.6,
+})
 
 /**
  * InterviewStatusCard — the compact "who's talking to whom, right now" summary

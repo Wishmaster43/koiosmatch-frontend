@@ -12,6 +12,7 @@ import LookupIcon from '@/components/ui/LookupIcon'
 import { FieldRow, EditControls, GroupCard, GroupHeader, inputStyle } from './profileFieldShared'
 import { useProfileRequiredKeys } from './useProfileRequiredKeys'
 import type { Candidate } from '@/types/candidate'
+import SoftChip from '@/components/ui/SoftChip'
 
 type AnyProps = Record<string, unknown>
 // CreatableSelect is still untyped JS — accept any props at the boundary.
@@ -114,12 +115,10 @@ export default function ProfilePersonalTab({ c, onSave, autoEditSignal }: {
         <span style={{ display: 'inline-flex', alignItems: 'center', flexWrap: 'wrap', gap: 8, fontSize: 12, color: 'var(--text)' }}>
           {formatDate(v)}
           {age != null && <span style={{ color: 'var(--text-muted)' }}>· {t('profile.age', { count: age })}</span>}
+          {/* Informational signal → the ONE SoftChip (Danny 20-08 asked; ruling:
+              information stays tinted, actions wear the trio). */}
           {bday && (
-            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 11, fontWeight: 500,
-              padding: '2px 8px', borderRadius: 99, background: 'var(--color-primary-bg)',
-              color: 'var(--color-primary-text)', border: '1px solid var(--color-primary)' }}>
-              <Cake size={11} /> {bday}
-            </span>
+            <SoftChip round label={<span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}><Cake size={11} /> {bday}</span>} />
           )}
         </span>
       )

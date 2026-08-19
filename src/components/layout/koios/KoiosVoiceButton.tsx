@@ -217,7 +217,9 @@ interface KoiosVoiceButtonProps {
   tone?: 'muted' | 'primary'
 }
 
-export default function KoiosVoiceButton({ onText, t, lang, tone = 'muted' }: KoiosVoiceButtonProps) {
+// `tone` intentionally dropped from the destructure: the mic is a trio chip in
+// every host now (Danny 20-08); the prop stays in the interface for API compat.
+export default function KoiosVoiceButton({ onText, t, lang }: KoiosVoiceButtonProps) {
   const { supported, insecureContext, listening, denied, toggle } = useSpeechDictation({ onText, lang })
 
   // Rules of hooks: every hook runs inside useSpeechDictation unconditionally;
@@ -243,7 +245,7 @@ export default function KoiosVoiceButton({ onText, t, lang, tone = 'muted' }: Ko
     : listening ? t('voice.stop', { ns: 'koios' }) : t('voice.start', { ns: 'koios' })
   // HUISSTIJL-1: idle colour per tone now reads the on-accent-safe text token
   // (never the raw brand primary, which can fail contrast on a light tenant fill).
-  const idleColor = tone === 'primary' ? 'var(--color-primary-text)' : 'var(--sidebar-muted)'
+  const idleColor = 'var(--button-ink)'
 
   return (
     <>
@@ -255,17 +257,17 @@ export default function KoiosVoiceButton({ onText, t, lang, tone = 'muted' }: Ko
         aria-pressed={listening}
         className={listening ? 'km-koios-voice-pulse' : undefined}
         style={{
-          // Recording is a DANGER state, never the accent trio — the mic stays a
-          // soft danger tint while listening (§4: danger colours keep their own
-          // language, excluded from the button trio).
-          background: listening ? 'color-mix(in srgb, var(--color-danger) 14%, transparent)' : 'none',
-          border: 'none', cursor: 'pointer', padding: '4px 5px', borderRadius: 7,
+          // Danny 20-08 ("hij valt niet op — een knopje van de mic maken"): the mic
+          // is a real trio chip at rest so it reads as a control; recording stays
+          // a DANGER tint (his reconfirmed rule: destructive/warning keeps red).
+          background: listening ? 'color-mix(in srgb, var(--color-danger) 14%, transparent)' : 'var(--button-fill)',
+          border: listening ? '1px solid color-mix(in srgb, var(--color-danger) 40%, transparent)' : '1px solid var(--button-border)',
+          cursor: 'pointer', width: 28, height: 28, display: 'inline-flex',
+          alignItems: 'center', justifyContent: 'center', borderRadius: 6,
           color: listening ? 'var(--color-danger)' : idleColor,
           fontWeight: listening ? 600 : 400,
-          display: 'flex', transition: 'background var(--motion-fast), color var(--motion-fast)',
+          transition: 'background var(--motion-fast), color var(--motion-fast)',
         }}
-        onMouseEnter={e => { if (!listening) { e.currentTarget.style.background = 'var(--hover-bg)'; e.currentTarget.style.color = 'var(--color-primary-text)' } }}
-        onMouseLeave={e => { if (!listening) { e.currentTarget.style.background = 'none'; e.currentTarget.style.color = idleColor } }}
       >
         {listening ? <MicOff size={14} /> : <Mic size={14} />}
       </button>

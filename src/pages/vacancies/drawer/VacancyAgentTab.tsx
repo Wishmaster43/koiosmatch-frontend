@@ -101,7 +101,7 @@ function BackfillInterviewsAction({ vacancyId, applicationsCount }: { vacancyId:
     <>
       <button type="button" onClick={() => setConfirmOpen(true)} disabled={busy || unavailable}
         style={{ alignSelf: 'flex-start', height: BTN_H, padding: '0 14px', fontSize: 12, fontWeight: 600, borderRadius: 8,
-          border: '1px solid var(--color-primary)', background: 'none', color: 'var(--color-primary-text)',
+          border: '1px solid var(--button-border)', background: 'var(--button-fill)', color: 'var(--button-ink)',
           cursor: busy || unavailable ? 'not-allowed' : 'pointer', opacity: busy || unavailable ? 0.6 : 1 }}>
         {t('aiagent.backfill.button')}
       </button>

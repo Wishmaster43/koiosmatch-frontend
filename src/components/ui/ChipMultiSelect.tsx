@@ -60,7 +60,7 @@ export default function ChipMultiSelect({ options, values, selected, onToggle, c
               // Chosen: §4 soft tint + weight + check. Unchosen: neutral — no tint at
               // all, so the chosen state is unmistakable (and never colour-only, §6).
               fontWeight: isActive ? 600 : 400,
-              color: isActive ? tint : 'var(--text-muted)',
+              color: isActive ? (tint === 'var(--color-primary)' ? 'var(--button-ink)' : 'var(--color-on-accent)') : 'var(--text-muted)',
               // PRIMAIR-VLAK-1 (Danny 19-08, op de geselecteerde dag-pil: "HUISSTIJL!!"):
               // selected = solid — the button trio for the accent, the chip's own
               // data colour (with on-accent ink) otherwise. Unselected stays calm.
