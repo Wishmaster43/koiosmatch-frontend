@@ -106,6 +106,28 @@
   --sidebar-active: #F3F4F6;
   --sidebar-border: #F0F0F0;
 
+  /* ── HUISSTIJL-1 scales (Danny 19-08: spacing/schaduw/z-index als tokens) ──
+     SPACING: the 4px grid, named. Inline styles use these via var() or the
+     lib/uiScale.ts constants; a bare pixel number outside the scale is drift. */
+  --space-1: 4px;  --space-2: 8px;  --space-3: 12px; --space-4: 16px;
+  --space-5: 20px; --space-6: 24px; --space-8: 32px;
+  /* ELEVATION: three levels are enough — resting card, floating panel/menu,
+     modal. Measured 19-08: 35 distinct boxShadow values were in use; these are
+     the three the top-40 call-sites already converged on. */
+  --shadow-card:  0 1px 3px rgba(0, 0, 0, 0.08);
+  --shadow-float: 0 4px 16px rgba(0, 0, 0, 0.08);
+  --shadow-modal: 0 8px 32px rgba(0, 0, 0, 0.18);
+  /* Z-INDEX: a five-step ladder replaces the measured 2..9999 free-for-all.
+     Nothing ever needs a number between or above these. */
+  --z-sticky: 10;    /* sticky table headers, toolbars       */
+  --z-drawer: 100;   /* entity drawers, right filter panel   */
+  --z-overlay: 200;  /* modal backdrops + dialogs            */
+  --z-popover: 300;  /* dropdown portals, floating panels    */
+  --z-toast: 400;    /* notifications, always on top         */
+  /* MOTION: one duration + easing pair; scattered 0.1s/0.15s/0.2s snippets
+     converge here so the app animates at ONE tempo. */
+  --motion-fast: 0.15s ease;
+
   /* Semantische tokens — light mode */
   --bg:        #F5F5F7;
   --surface:   #FFFFFF;

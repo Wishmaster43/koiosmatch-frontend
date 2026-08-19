@@ -555,8 +555,16 @@ the code is worse than no rule, because the next reader builds on it. What is tr
   · Overlays/feedback → `ModalFooter`, `ConfirmDialog`, `FloatingPanel`,
     `Toaster`, `ErrorBanner`, `CalloutBox`, `EntityDrawer`-familie
   · Schakelaars/weergave → `QuickViewToggle`, `ViewModeToggle`, `SegmentedControl`
+  · Typografie → `components/ui/typography`: `PageTitle` (15/600) ·
+    `SectionTitle` (13/600) · `BodyText` (13/400) · `Caption` (11 muted) ·
+    `GroupLabel` (11/600 uppercase) · `Mono` (JetBrains). Een losse
+    fontSize/fontWeight voor een kop/alinea/bijschrift is een finding.
+  · Laden → `Spinner` (nooit een losse Loader2+animate-spin meer).
   · Tokens → kleuren/tinten via `--color-*` + `lib/tint` (huispaar 10/33,
-    actief 16/50); maten via `BTN_H`; spacing op het 4px-grid.
+    actief 16/50); maten via `BTN_H`; SPACING via `--space-1..8` (4px-grid);
+    SCHADUW via `--shadow-card/float/modal` (drie niveaus, nooit een eigen
+    boxShadow); STAPELING via `--z-sticky/drawer/overlay/popover/toast`
+    (nooit een los getal); BEWEGING via `--motion-fast`.
   Per-tenant instelbaarheid loopt uitsluitend via de tokens die Instellingen →
   Bedrijf → Branding in de backend-DB bewaart — een component dat een kleur
   hardcodeert onttrekt zich daaraan en is fout. Popupformaten mogen verschillen;
