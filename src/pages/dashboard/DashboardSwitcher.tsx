@@ -9,6 +9,7 @@ import { LayoutDashboard, ChevronDown } from 'lucide-react'
 import type { DashboardType } from './templates'
 // PORTAL-MARKER-1: a click inside an open portalled picker menu is never "outside".
 import { isInsideDropdownPortal } from '@/lib/useDropdownPlacement'
+import Button from '@/components/ui/Button'
 
 export default function DashboardSwitcher({ value, options, onChange }: {
   value: DashboardType
@@ -31,17 +32,17 @@ export default function DashboardSwitcher({ value, options, onChange }: {
 
   return (
     <div ref={ref} style={{ position: 'relative' }}>
-      <button onClick={() => setOpen(o => !o)} aria-label={t('switcher.label')} title={t('switcher.label')}
-        style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '6px 10px', fontSize: 12, fontWeight: 500,
-          borderRadius: 8, border: '1px solid var(--border)', background: 'var(--surface)', color: 'var(--text)', cursor: 'pointer' }}>
+      <Button variant="secondary" size="sm" onClick={() => setOpen(o => !o)} aria-label={t('switcher.label')} title={t('switcher.label')}>
         <LayoutDashboard size={14} style={{ color: 'var(--text-muted)', flexShrink: 0 }} />
         {t(`types.${value}`)}
         <ChevronDown size={13} style={{ color: 'var(--text-muted)', transform: open ? 'rotate(180deg)' : 'none', transition: 'transform 0.15s' }} />
-      </button>
+      </Button>
       {open && (
         <div style={{ position: 'absolute', top: 'calc(100% + 4px)', right: 0, zIndex: 50, minWidth: 190,
           background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 10,
           boxShadow: '0 8px 24px rgba(0,0,0,0.12)', overflow: 'hidden', padding: 4 }}>
+          {/* Dropdown menu options (active-dot indicator) — a list/menu item, not an
+              action button, so this stays a bare <button>. */}
           {options.map(opt => {
             const active = opt === value
             return (

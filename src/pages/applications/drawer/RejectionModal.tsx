@@ -15,7 +15,6 @@ interface RejectionReason { id?: Id; name?: string; label?: string }
 // Moved from RejectionBlock (now deleted) — the shape the confirm submits.
 export interface RejectPayload { reason_id: string; note: string; reason_label: string }
 
-const iconBtn = { width: 26, height: 26, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 6, cursor: 'pointer' } as const
 // The collapsed read-only note card (mirrors ProfileTab's profile-text block).
 const noteBlock = { borderRadius: 8, border: '1px solid var(--border)', background: 'var(--bg)', padding: '8px 10px' } as const
 
@@ -144,16 +143,13 @@ export default function RejectionModal({ application: a, onCancel, onConfirm, su
               <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>{t('rejection.note')}</span>
               {noteEditing ? (
                 <div style={{ display: 'flex', gap: 4 }}>
-                  <button onClick={saveNote} title={t('common:save')} aria-label={t('common:save')}
-                    style={{ ...iconBtn, background: 'var(--color-primary)', color: 'var(--color-on-accent)', border: 'none' }}><Save size={13} /></button>
-                  <button onClick={cancelNoteEdit} title={t('common:cancel')} aria-label={t('common:cancel')}
-                    style={{ ...iconBtn, background: 'var(--bg)', color: 'var(--text-muted)', border: '1px solid var(--border)' }}><X size={13} /></button>
+                  <Button variant="primary" iconOnly size="sm" onClick={saveNote} title={t('common:save')} aria-label={t('common:save')}><Save size={13} /></Button>
+                  <Button variant="secondary" iconOnly size="sm" onClick={cancelNoteEdit} title={t('common:cancel')} aria-label={t('common:cancel')}><X size={13} /></Button>
                 </div>
               ) : (
                 // A distinct label (not the generic common:edit) — two icon-only
                 // buttons both announced as "Edit" is a real a11y ambiguity.
-                <button onClick={startNoteEdit} title={t('rejection.editNote')} aria-label={t('rejection.editNote')}
-                  style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: 4, display: 'flex' }}><Edit2 size={13} /></button>
+                <Button variant="ghost" iconOnly size="sm" onClick={startNoteEdit} title={t('rejection.editNote')} aria-label={t('rejection.editNote')}><Edit2 size={13} /></Button>
               )}
             </div>
             {noteEditing ? (
@@ -173,15 +169,9 @@ export default function RejectionModal({ application: a, onCancel, onConfirm, su
           </Button>
           {/* Correction is a plain SAVE (primary), never the danger-red "Reject"
               button — no candidate-facing message goes out on this path. */}
-          <button onClick={submit} disabled={!reasonId || submitting}
-            style={{ height: 34, padding: '0 16px', fontSize: 13, fontWeight: 600, border: 'none', borderRadius: 8,
-              background: isCorrection ? 'var(--color-primary)' : 'var(--color-danger)',
-              /* Text colour on a danger/primary fill uses the on-* contrast token, never raw white */
-              color: isCorrection ? 'var(--color-on-accent)' : 'var(--color-on-danger)',
-              cursor: (!reasonId || submitting) ? 'not-allowed' : 'pointer',
-              opacity: (!reasonId || submitting) ? 0.6 : 1 }}>
+          <Button variant={isCorrection ? 'primary' : 'danger'} onClick={submit} disabled={!reasonId || submitting}>
             {isCorrection ? t('rejection.saveCorrection') : t('rejection.confirm')}
-          </button>
+          </Button>
         </div>
     </FloatingPanel>
   )

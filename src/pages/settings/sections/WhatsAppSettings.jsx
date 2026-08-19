@@ -151,7 +151,8 @@ export default function WhatsAppSettings() {
   return (
     <div style={{ maxWidth: 800 }}>
 
-      {/* ── Sub-tab bar ── */}
+      {/* ── Sub-tab bar — HUISSTIJL-1: left hand-styled, this is a tab selector
+          (bottom-border active indicator), not a chrome action button. ── */}
       <div style={{ display: 'flex', gap: 4, borderBottom: '1px solid var(--border)', marginBottom: 20 }}>
         {TABS.map(tb => {
           const active = tab === tb.id

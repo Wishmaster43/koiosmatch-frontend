@@ -23,6 +23,7 @@ import { useLookups } from '@/context/LookupsContext'
 import { loadSettings, saveSettings } from '../lib/settingsApi'
 import { notifyError } from '@/lib/notify'
 import { fieldInputStyle } from '@/components/forms/fieldMetrics'
+import Button from '@/components/ui/Button'
 
 const SETTINGS_KEY = 'helloflex_contract_type_map'
 
@@ -125,13 +126,10 @@ export default function HelloflexContractMapSettings() {
         </div>
       )}
 
-      <button type="button" onClick={save} disabled={saving || !dirty}
-        style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '8px 14px', fontSize: 13, fontWeight: 500,
-          borderRadius: 8, border: '1px solid var(--color-primary)', background: 'var(--color-primary)', color: 'var(--color-on-accent)',
-          cursor: saving || !dirty ? 'default' : 'pointer', opacity: saving || !dirty ? 0.6 : 1 }}>
+      <Button variant="primary" onClick={save} disabled={saving || !dirty}>
         {saved ? <Check size={14} /> : <Save size={14} />}
         {saved ? t('common.saved') : t('common.save')}
-      </button>
+      </Button>
     </div>
   )
 }

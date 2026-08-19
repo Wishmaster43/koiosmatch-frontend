@@ -28,13 +28,13 @@
  * toggle per self-contained block, same as its separate summary-text editor).
  */
 import { useState } from 'react'
-import type { CSSProperties } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Trash2, Edit2, Save, X, GitMerge, Archive } from 'lucide-react'
 import EditableFieldTable from '@/components/forms/EditableFieldTable'
 import type { FieldRow } from '@/components/forms/EditableFieldTable'
 import CreatableSelect from '@/components/ui/CreatableSelect'
 import ReferenceNumberChip from '@/components/ui/ReferenceNumberChip'
+import Button from '@/components/ui/Button'
 import TitleBadge from '@/components/drawer/TitleBadge'
 import DrillPager, { type DrillPagerProps } from '@/components/drawer/DrillPager'
 import ContactLinkSection from './ContactLinkSection'
@@ -213,7 +213,6 @@ export default function ContactDetail({ contact, locations, departments, statuse
   const [statusDraft, setStatusDraft] = useState('')
   const startEditStatus = () => { setStatusDraft(contact.statusId != null ? String(contact.statusId) : ''); setEditingStatus(true) }
   const saveStatus = () => { onSave(contact.id as Id, { statusId: statusDraft || null }); setEditingStatus(false) }
-  const iconBtn: CSSProperties = { width: 26, height: 26, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 6, cursor: 'pointer' }
 
   const remove = () => confirm(t('contacts.deleteConfirm'), () => { onDelete(contact.id as Id); close() }, { danger: true })
 
@@ -265,16 +264,13 @@ export default function ContactDetail({ contact, locations, departments, statuse
                   placeholder={t('locations.detail.status')}
                   options={statuses.map(s => ({ value: String(s.id ?? s.value), label: s.label }))} />
               </div>
-              <button onClick={saveStatus} title={t('common:save')} aria-label={t('common:save')}
-                style={{ ...iconBtn, background: 'var(--color-primary)', color: 'var(--color-on-accent)', border: 'none' }}><Save size={13} /></button>
-              <button onClick={() => setEditingStatus(false)} title={t('common:cancel')} aria-label={t('common:cancel')}
-                style={{ ...iconBtn, background: 'var(--bg)', color: 'var(--text-muted)', border: '1px solid var(--border)' }}><X size={13} /></button>
+              <Button variant="primary" iconOnly size="sm" onClick={saveStatus} title={t('common:save')} aria-label={t('common:save')}><Save size={13} /></Button>
+              <Button variant="secondary" iconOnly size="sm" onClick={() => setEditingStatus(false)} title={t('common:cancel')} aria-label={t('common:cancel')}><X size={13} /></Button>
             </div>
           ) : (
             <>
               <TitleBadge label={contact.statusLabel} color={contact.statusColor} />
-              <button onClick={startEditStatus} title={t('locations.detail.changeStatus')} aria-label={t('locations.detail.changeStatus')}
-                style={{ ...iconBtn, background: 'none', color: 'var(--text-muted)', border: '1px solid var(--border)' }}><Edit2 size={13} /></button>
+              <Button variant="secondary" iconOnly size="sm" onClick={startEditStatus} title={t('locations.detail.changeStatus')} aria-label={t('locations.detail.changeStatus')}><Edit2 size={13} /></Button>
             </>
           )}
         </div>
@@ -292,26 +288,24 @@ export default function ContactDetail({ contact, locations, departments, statuse
               without customers.update and when this customer has no second contact to
               merge with: a button that can only ever fail is a fake affordance. */}
           {canMerge && contact.customerId != null && existing.length > 1 && (
-            <button onClick={() => setMerging(true)} title={t('contacts.merge.title')} aria-label={t('contacts.merge.title')}
-              style={{ width: 28, height: 28, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 7, cursor: 'pointer', border: '1px solid var(--border)', background: 'var(--bg)', color: 'var(--text-muted)' }}>
+            <Button variant="secondary" iconOnly size="sm" onClick={() => setMerging(true)} title={t('contacts.merge.title')} aria-label={t('contacts.merge.title')}>
               <GitMerge size={13} />
-            </button>
+            </Button>
           )}
-          {/* ARCHIVE-SUBENTITY-1: the reversible escape — same customers.update gate
-              `canMerge` already computes (Archive is update-class too, §5). */}
+          {/* Archive: house secondary chrome; only the ICON colour is the archive token,
+              which rides in as a style override (Button merges caller style last —
+              Opus batch B R4: the chrome was the house secondary all along). Gated on
+              `canMerge` (Archive is update-class too, §5). */}
           {canMerge && !contact.archived && (
-            <button onClick={doArchive} disabled={archiving}
+            <Button variant="secondary" iconOnly size="sm" onClick={doArchive} disabled={archiving}
               title={t('contacts.detail.archiveContact')} aria-label={t('contacts.detail.archiveContact')}
-              style={{ width: 28, height: 28, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 7,
-                cursor: archiving ? 'not-allowed' : 'pointer', border: '1px solid var(--border)', background: 'var(--bg)',
-                color: 'var(--color-archive)', opacity: archiving ? 0.6 : 1 }}>
+              style={{ color: 'var(--color-archive)' }}>
               <Archive size={13} />
-            </button>
+            </Button>
           )}
-          <button onClick={remove} title={t('common:delete')} aria-label={t('common:delete')}
-            style={{ width: 28, height: 28, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 7, cursor: 'pointer', border: '1px solid var(--border)', background: 'var(--bg)', color: 'var(--color-danger)' }}>
+          <Button variant="dangerSoft" iconOnly size="sm" onClick={remove} title={t('common:delete')} aria-label={t('common:delete')}>
             <Trash2 size={13} />
-          </button>
+          </Button>
         </div>
       </div>
 

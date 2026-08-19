@@ -8,6 +8,7 @@ import CreatableSelect from '@/components/ui/CreatableSelect'
 import SelectMenu from '@/components/ui/SelectMenu'
 import EntityLink from '@/components/ui/EntityLink'
 import { sectionTitle } from '@/components/ui/SectionCard'
+import Button from '@/components/ui/Button'
 import { useCustomerCascade} from '../hooks/useCustomerCascade'
 import type { Opportunity } from '@/types/opportunity'
 import type { Id } from '@/types/common'
@@ -41,8 +42,6 @@ function F({ label, children }: { label: ReactNode; children: ReactNode }) {
     </div>
   )
 }
-
-const iconBtn: React.CSSProperties = { width: 26, height: 26, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 6, cursor: 'pointer' }
 
 /**
  * CustomerRelationTab (renamed from KlantTab/CustomerTab — canon Dutch-identifier
@@ -147,12 +146,11 @@ export default function CustomerRelationTab({ opportunity: o, customers = [], on
         {/* In-place edit toggle: pencil → diskette + ✕, same spot (§0.3 pattern). */}
         {onUpdate && (editing ? (
           <div style={{ display: 'flex', gap: 4 }}>
-            <button onClick={save} title={t('common:save')} style={{ ...iconBtn, background: 'var(--color-primary)', color: 'var(--color-on-accent)', border: 'none' }}><Save size={13} /></button>
-            <button onClick={cancel} title={t('common:cancel')} style={{ ...iconBtn, background: 'var(--bg)', color: 'var(--text-muted)', border: '1px solid var(--border)' }}><X size={13} /></button>
+            <Button variant="primary" iconOnly size="sm" onClick={save} title={t('common:save')}><Save size={13} /></Button>
+            <Button variant="secondary" iconOnly size="sm" onClick={cancel} title={t('common:cancel')}><X size={13} /></Button>
           </div>
         ) : (
-          <button onClick={startEdit} title={t('common:edit')}
-            style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: 4, display: 'flex' }}><Edit2 size={13} /></button>
+          <Button variant="ghost" iconOnly size="sm" onClick={startEdit} title={t('common:edit')}><Edit2 size={13} /></Button>
         ))}
       </div>
 

@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { Edit2, Save, X, Trash2, ExternalLink } from 'lucide-react'
 import RichTextEditorJs from '@/components/ui/RichTextEditor'
 import SafeHtmlJs from '@/components/ui/SafeHtml'
+import Button from '@/components/ui/Button'
 import { useVacancyDescription } from '../hooks/useVacancyDescription'
 import type { VacancyDetail } from '@/types/vacancy'
 import type { Id } from '@/types/common'
@@ -13,7 +14,6 @@ const SafeHtml = SafeHtmlJs as unknown as ComponentType<AnyProps>
 
 type UpdateFn = (id: Id | undefined, patch: Record<string, unknown>) => void
 
-const iconBtn: CSSProperties = { width: 26, height: 26, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 6, cursor: 'pointer' }
 const blockStyle: CSSProperties = { borderRadius: 10, overflow: 'hidden', border: '1px solid var(--border)', background: 'var(--surface)' }
 const groupTitle: CSSProperties = { fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em', color: 'var(--text-muted)' }
 
@@ -40,12 +40,12 @@ export default function DescriptionTab({ vacancy: v, onUpdate }: { vacancy: Vaca
   // Algemeen card — an independent editing state, own title row placement.
   const controls = descEditing ? (
     <div style={{ display: 'flex', gap: 4 }}>
-      <button onClick={() => setDescription('')} title={t('common:remove')} style={{ ...iconBtn, background: 'none', color: 'var(--color-danger)', border: '1px solid var(--border)' }}><Trash2 size={13} /></button>
-      <button onClick={saveDesc} title={t('common:save')} style={{ ...iconBtn, background: 'var(--color-primary)', color: 'var(--color-on-accent)', border: 'none' }}><Save size={13} /></button>
-      <button onClick={cancelDesc} title={t('common:cancel')} style={{ ...iconBtn, background: 'var(--bg)', color: 'var(--text-muted)', border: '1px solid var(--border)' }}><X size={13} /></button>
+      <Button variant="dangerSoft" iconOnly size="sm" onClick={() => setDescription('')} title={t('common:remove')}><Trash2 size={13} /></Button>
+      <Button variant="primary" iconOnly size="sm" onClick={saveDesc} title={t('common:save')}><Save size={13} /></Button>
+      <Button variant="secondary" iconOnly size="sm" onClick={cancelDesc} title={t('common:cancel')}><X size={13} /></Button>
     </div>
   ) : (
-    <button onClick={() => setDescEditing(true)} title={t('common:edit')} style={{ ...iconBtn, background: 'none', color: 'var(--text-muted)', border: '1px solid var(--border)' }}><Edit2 size={13} /></button>
+    <Button variant="secondary" iconOnly size="sm" onClick={() => setDescEditing(true)} title={t('common:edit')}><Edit2 size={13} /></Button>
   )
 
   return (
@@ -55,10 +55,9 @@ export default function DescriptionTab({ vacancy: v, onUpdate }: { vacancy: Vaca
         <div style={{ display: 'flex', gap: 4, alignItems: 'center' }}>
           {/* V-desc-1: second screen — same icon + footprint the candidate
               profile-text pop-out uses, in this block's own title row. */}
-          <button onClick={openDescriptionPopout} title={t('common:openSecondScreen')} aria-label={t('common:openSecondScreen')}
-            style={{ ...iconBtn, background: 'none', color: 'var(--text-muted)', border: '1px solid var(--border)' }}>
+          <Button variant="secondary" iconOnly size="sm" onClick={openDescriptionPopout} title={t('common:openSecondScreen')} aria-label={t('common:openSecondScreen')}>
             <ExternalLink size={13} />
-          </button>
+          </Button>
           {controls}
         </div>
       </div>

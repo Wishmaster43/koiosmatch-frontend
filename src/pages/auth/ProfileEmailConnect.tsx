@@ -80,7 +80,8 @@ export default function ProfileEmailConnect() {
 
       {status === 'disconnected' && (
         <>
-          {/* Provider choice */}
+          {/* Provider choice — a segmented selector (active/inactive state), not an
+              action button, so it stays a bare <button> rather than a Button variant. */}
           <div style={{ display: 'flex', gap: 10, marginBottom: 16 }}>
             {PROVIDERS.map(p => (
               <button key={p.id} onClick={() => setChoice(p.id)}
@@ -95,13 +96,10 @@ export default function ProfileEmailConnect() {
           </div>
 
           {(choice === 'office' || choice === 'gmail') && (
-            <button onClick={() => connectOauth(choice)} disabled={busy}
-              style={{ display: 'flex', alignItems: 'center', gap: 8, height: 38, padding: '0 18px',
-                       fontSize: 13, fontWeight: 600, borderRadius: 8, border: 'none', color: 'var(--color-on-accent)',
-                       background: 'var(--color-primary)', cursor: busy ? 'default' : 'pointer' }}>
+            <Button variant="primary" onClick={() => connectOauth(choice)} disabled={busy}>
               {busy ? <RefreshCw size={14} className="animate-spin" /> : <Mail size={14} />}
               {t('profile.email.connectWith', { provider: PROVIDERS.find(p => p.id === choice)?.label ?? choice })}
-            </button>
+            </Button>
           )}
 
           {choice === 'smtp' && (
@@ -120,13 +118,12 @@ export default function ProfileEmailConnect() {
                     <input type={showPass ? 'text' : 'password'} value={smtp.pass} onChange={setF('pass')}
                       aria-label={t('profile.email.pass')}
                       style={{ ...inputStyle, paddingRight: 36 }} />
-                    <button onClick={() => setShowPass(s => !s)}
+                    <Button variant="ghost" iconOnly size="sm" onClick={() => setShowPass(s => !s)}
                       title={showPass ? t('profile.email.hidePassword') : t('profile.email.showPassword')}
                       aria-label={showPass ? t('profile.email.hidePassword') : t('profile.email.showPassword')}
-                      style={{ position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)',
-                               background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)' }}>
+                      style={{ position: 'absolute', right: 4, top: '50%', transform: 'translateY(-50%)' }}>
                       {showPass ? <EyeOff size={14} /> : <Eye size={14} />}
-                    </button>
+                    </Button>
                   </div></div>
               </div>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
@@ -137,6 +134,8 @@ export default function ProfileEmailConnect() {
               </div>
               <div>
                 <label style={labelStyle}>{t('profile.email.security')}</label>
+                {/* Security choice — a segmented selector (active/inactive state), same
+                    reasoning as the provider choice above: not an action button. */}
                 <div style={{ display: 'flex', gap: 8 }}>
                   {['tls', 'ssl', 'none'].map(s => (
                     <button key={s} onClick={() => setSmtp(v => ({ ...v, secure: s }))}
@@ -150,14 +149,10 @@ export default function ProfileEmailConnect() {
                   ))}
                 </div>
               </div>
-              <button onClick={() => saveSmtp(smtp)} disabled={busy || !smtp.host.trim()}
-                style={{ alignSelf: 'flex-start', display: 'flex', alignItems: 'center', gap: 8, height: 38, padding: '0 18px',
-                         fontSize: 13, fontWeight: 600, borderRadius: 8, border: 'none', color: 'var(--color-on-accent)',
-                         background: 'var(--color-primary)', cursor: busy ? 'default' : 'pointer',
-                         opacity: smtp.host.trim() ? 1 : 0.5 }}>
+              <Button variant="primary" onClick={() => saveSmtp(smtp)} disabled={busy || !smtp.host.trim()} style={{ alignSelf: 'flex-start' }}>
                 {busy ? <RefreshCw size={14} className="animate-spin" /> : <Mail size={14} />}
                 {t('profile.email.saveConnect')}
-              </button>
+              </Button>
             </div>
           )}
         </>

@@ -12,10 +12,10 @@ import { useTranslation } from 'react-i18next'
 import { Loader2, RefreshCw } from 'lucide-react'
 import api, { unwrap } from '@/lib/api'
 import FloatingPanel from '@/components/ui/FloatingPanel'
-import { BTN_H } from '@/config/buttonMetrics'
 import { fieldInputStyle } from '@/components/forms/fieldMetrics'
 import { useLocations } from '@/lib/useLocations'
 import ChipMultiSelect from '@/components/ui/ChipMultiSelect'
+import Button from '@/components/ui/Button'
 import { useLiveFieldValidation } from '@/hooks/useLiveFieldValidation'
 import { isValidEmailFormat } from '@/lib/contactFieldValidation'
 import { useUserBranches } from './hooks/useUserBranches'
@@ -180,19 +180,13 @@ export default function EditUserModal({ user, onClose, onSaved }: {
 
           {error && <p style={{ fontSize: 12, color: 'var(--color-danger)', marginBottom: 12 }}>{error}</p>}
 
-          {/* Actions — BTN_H (§4/§9): one explicit height for every text/action button, everywhere. */}
           <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
-            <button type="button" onClick={onClose}
-              style={{ height: BTN_H, padding: '0 16px', fontSize: 13, borderRadius: 8, border: '1px solid var(--border)',
-                       background: 'var(--surface)', color: 'var(--text-muted)', cursor: 'pointer' }}>
+            <Button variant="secondary" onClick={onClose}>
               {t('common:cancel')}
-            </button>
-            <button type="submit" disabled={saving || hasFormatError}
-              style={{ height: BTN_H, padding: '0 18px', fontSize: 13, fontWeight: 600, borderRadius: 8, border: 'none',
-                       background: 'var(--color-primary)', color: 'var(--color-on-accent)', cursor: (saving || hasFormatError) ? 'default' : 'pointer',
-                       display: 'flex', alignItems: 'center', gap: 6, opacity: hasFormatError ? 0.6 : 1 }}>
+            </Button>
+            <Button type="submit" variant="primary" disabled={saving || hasFormatError}>
               {saving ? <><Loader2 size={13} style={{ animation: 'spin 1s linear infinite' }} /> {t('saving')}</> : t('common:save')}
-            </button>
+            </Button>
           </div>
         </form>
     </FloatingPanel>

@@ -17,7 +17,6 @@ import { usePlanningOrdersList, useDeletePlanningOrder } from './hooks/usePlanni
 import type { PlanningOrderRow } from './hooks/usePlanningOrders'
 import AddOrderModal from './AddOrderModal'
 import { extractApiError } from '@/lib/extractApiError'
-import { BTN_H } from '@/config/buttonMetrics'
 import Button from '@/components/ui/Button'
 
 export default function OrdersPanel() {
@@ -87,16 +86,12 @@ export default function OrdersPanel() {
                 <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>
                   {t('order.shiftsCount', { count: o.shifts_count ?? 0 })}
                 </span>
-                <button onClick={() => setEditing(o)} aria-label={t('common:edit')} title={t('common:edit')}
-                  style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 26, height: 26,
-                    border: '1px solid var(--border)', borderRadius: 7, background: 'none', color: 'var(--text-muted)', cursor: 'pointer' }}>
+                <Button variant="secondary" iconOnly size="sm" onClick={() => setEditing(o)} aria-label={t('common:edit')} title={t('common:edit')}>
                   <Pencil size={13} />
-                </button>
-                <button onClick={() => { setPendingDelete(o); setDeleteError(null) }} aria-label={t('common:delete')} title={t('common:delete')}
-                  style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 26, height: 26,
-                    border: '1px solid var(--border)', borderRadius: 7, background: 'none', color: 'var(--color-danger)', cursor: 'pointer' }}>
+                </Button>
+                <Button variant="dangerSoft" iconOnly size="sm" onClick={() => { setPendingDelete(o); setDeleteError(null) }} aria-label={t('common:delete')} title={t('common:delete')}>
                   <Trash2 size={13} />
-                </button>
+                </Button>
               </div>
             ))}
           </div>
@@ -121,15 +116,13 @@ export default function OrdersPanel() {
               </div>
             )}
             <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8 }}>
-              <Button variant="secondary" size="sm" onClick={() => { setPendingDelete(null); setDeleteError(null) }}>
+              {/* Dialog footer = md, matching every other confirm footer (Opus batch B R2). */}
+              <Button variant="secondary" onClick={() => { setPendingDelete(null); setDeleteError(null) }}>
                 {t('common:cancel')}
               </Button>
-              <button onClick={handleDeleteConfirm} disabled={deleteOrder.isPending}
-                style={{ height: BTN_H, padding: '0 14px', fontSize: 12, fontWeight: 600, borderRadius: 8, border: 'none',
-                  background: 'var(--color-danger)', color: 'var(--color-on-accent)',
-                  cursor: deleteOrder.isPending ? 'not-allowed' : 'pointer', opacity: deleteOrder.isPending ? 0.6 : 1 }}>
+              <Button variant="danger" onClick={handleDeleteConfirm} disabled={deleteOrder.isPending}>
                 {deleteOrder.isPending ? t('common:saving') : t('common:delete')}
-              </button>
+              </Button>
             </div>
           </div>
         </div>

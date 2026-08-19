@@ -10,6 +10,7 @@ import { CANON_LABEL_STYLE } from '@/components/drawer/fieldRowCanon'
 import { fieldInputStyle } from '@/components/forms/fieldMetrics'
 import { useDateFormat } from '@/lib/datetime'
 import { useApplicationSources } from '@/lib/useApplicationSources'
+import Button from '@/components/ui/Button'
 import VacancyLinkField from './VacancyLinkField'
 import { useVacancyLinkOptions } from '../hooks/useVacancyLinkOptions'
 import { useApplicationVacancy } from '../hooks/useApplicationVacancy'
@@ -37,7 +38,6 @@ function Row({ label, children }: { label: ReactNode; children: ReactNode }) {
   )
 }
 
-const iconBtn = { width: 26, height: 26, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 6, cursor: 'pointer' } as const
 // S7: the Bron input shares the Details block's edit mode (same pencil/save/✕).
 // Canon field style (G33/fieldMetrics) — was its own padding-7/font-12/radius-6 copy.
 const inputStyle = fieldInputStyle
@@ -117,14 +117,11 @@ export default function ApplicationDetailsCard({ application: a, onLinkVacancy, 
   // Edit-mode toggle: pencil → diskette + ✕, shown as the card's action row (§3A pattern).
   const action = (onLinkVacancy || onUpdateSource) && (editing ? (
     <div style={{ display: 'flex', gap: 4 }}>
-      <button onClick={saveEdit} title={t('common:save')} aria-label={t('common:save')}
-        style={{ ...iconBtn, background: 'var(--color-primary)', color: 'var(--color-on-accent)', border: 'none' }}><Save size={13} /></button>
-      <button onClick={cancelEdit} title={t('common:cancel')} aria-label={t('common:cancel')}
-        style={{ ...iconBtn, background: 'var(--bg)', color: 'var(--text-muted)', border: '1px solid var(--border)' }}><X size={13} /></button>
+      <Button variant="primary" iconOnly size="sm" onClick={saveEdit} title={t('common:save')} aria-label={t('common:save')}><Save size={13} /></Button>
+      <Button variant="secondary" iconOnly size="sm" onClick={cancelEdit} title={t('common:cancel')} aria-label={t('common:cancel')}><X size={13} /></Button>
     </div>
   ) : (
-    <button onClick={startEdit} title={t('common:edit')} aria-label={t('common:edit')}
-      style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: 4, display: 'flex' }}><Edit2 size={13} /></button>
+    <Button variant="ghost" iconOnly size="sm" onClick={startEdit} title={t('common:edit')} aria-label={t('common:edit')}><Edit2 size={13} /></Button>
   ))
 
   return (

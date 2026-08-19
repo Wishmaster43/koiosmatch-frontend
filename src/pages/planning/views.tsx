@@ -8,6 +8,7 @@ import type { MouseEvent } from 'react'
 import { Clock, MapPin, User } from 'lucide-react'
 import { isSameDay, WEEKDAYS_MON, formatDate } from './helpers'
 import { interactive } from '@/lib/a11y'
+import Button from '@/components/ui/Button'
 import type { Shift } from '@/types/planning'
 
 // onShiftClick (SHIFT-STAFF-1): opens the real staffing drawer for that one
@@ -173,11 +174,9 @@ export function DayView({ current, shifts, today, onDayClick, onShiftClick }: Vi
             <div style={{ fontSize: 32, marginBottom: 12 }}>📅</div>
             <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--text)', marginBottom: 6 }}>{t('noShiftsPlanned')}</div>
             <div style={{ fontSize: 13, color: 'var(--text-muted)', marginBottom: 20 }}>{t('addHint')}</div>
-            <button onClick={() => onDayClick(current)}
-              style={{ padding: '9px 18px', fontSize: 13, fontWeight: 600, background: 'var(--color-primary)',
-                color: 'var(--color-on-accent)', border: 'none', borderRadius: 8, cursor: 'pointer' }}>
+            <Button variant="primary" onClick={() => onDayClick(current)}>
               + {t('addShift')}
-            </button>
+            </Button>
           </div>
         )
         : (
@@ -206,6 +205,8 @@ export function DayView({ current, shifts, today, onDayClick, onShiftClick }: Vi
                 </div>
               </div>
             ))}
+            {/* HUISSTIJL-1: left hand-styled — the dashed border is a distinct
+                "add row" placeholder chrome with no Button variant equivalent. */}
             <button onClick={() => onDayClick(current)}
               style={{ width: '100%', padding: '9px', fontSize: 13, border: '1px dashed var(--border)',
                 borderRadius: 8, background: 'none', color: 'var(--text-muted)', cursor: 'pointer', marginTop: 4 }}>
@@ -247,12 +248,9 @@ export function ListView({ shifts, today, onDayClick, onShiftClick }: Omit<ViewP
                 color: isToday ? 'var(--color-primary-text)' : 'var(--text)' }}>
                 {isToday ? `${t('today')} — ` : ''}{formatDate(date)}
               </span>
-              <button onClick={() => onDayClick(date)}
-                style={{ marginLeft: 'auto', fontSize: 11, padding: '3px 10px',
-                  border: '1px solid var(--border)', borderRadius: 6, background: 'none',
-                  color: 'var(--text-muted)', cursor: 'pointer' }}>
+              <Button variant="secondary" size="sm" onClick={() => onDayClick(date)} style={{ marginLeft: 'auto' }}>
                 + {t('add')}
-              </button>
+              </Button>
             </div>
             {ds.map(s => (
               <div key={s.id} onClick={() => onShiftClick?.(s.id)} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '10px 14px',

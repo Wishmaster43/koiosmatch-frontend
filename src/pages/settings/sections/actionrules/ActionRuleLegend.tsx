@@ -34,6 +34,8 @@ export default function ActionRuleLegend() {
           {t('actionRules.legend.override')}
         </span>
 
+        {/* HUISSTIJL-1: left hand-styled — an accent-coloured disclosure toggle
+            (expand/collapse text link), not a chrome action button. */}
         <button type="button" onClick={() => setExpanded((v) => !v)}
           style={{ marginLeft: 'auto', display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 12,
                    fontWeight: 500, color: 'var(--color-primary-text)', background: 'none', border: 'none', cursor: 'pointer' }}>

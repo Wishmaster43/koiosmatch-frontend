@@ -1,5 +1,4 @@
 import { useState } from 'react'
-import type { CSSProperties } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Edit2, Save, X, Trash2 } from 'lucide-react'
 import EntityDrawer from '@/components/drawer/EntityDrawer'
@@ -10,6 +9,7 @@ import type { TrashSectionConfig } from '@/components/drawer/TrashLifecycleSecti
 import TitleBadge from '@/components/drawer/TitleBadge'
 import ReferenceNumberChip from '@/components/ui/ReferenceNumberChip'
 import CustomFieldsTab from '@/components/drawer/CustomFieldsTab'
+import Button from '@/components/ui/Button'
 import { useDateFormat } from '@/lib/datetime'
 import { useCustomFields } from '@/lib/useCustomFields'
 import DetailsTab from './drawer/DetailsTab'
@@ -42,10 +42,6 @@ interface OpportunityDrawerProps {
   // TRASH-OVERAL-2: the shared trash-section wiring (mark/unmark, see TrashLifecycleSection).
   trash?: TrashSectionConfig
 }
-
-const hdrBtn: CSSProperties = { display: 'flex', alignItems: 'center', justifyContent: 'center', width: 28, height: 28, borderRadius: 7, cursor: 'pointer', flexShrink: 0 }
-const hdrGhost: CSSProperties = { ...hdrBtn, background: 'var(--bg)', color: 'var(--text-muted)', border: '1px solid var(--border)' }
-const hdrPrimary: CSSProperties = { ...hdrBtn, background: 'var(--color-primary)', color: 'var(--color-on-accent)', border: 'none' }
 
 /**
  * OpportunityDrawer — thin container mirroring the candidate drawer: a calm header
@@ -123,11 +119,11 @@ export default function OpportunityDrawer({
   // phase). ARCHIVED: no title edit on a soft-deleted deal — restore first.
   const actions = o.archived ? null : editing ? (
     <>
-      <button onClick={saveEdit} title={t('common:save')} style={hdrPrimary}><Save size={14} /></button>
-      <button onClick={() => setEditing(false)} title={t('common:cancel')} style={hdrGhost}><X size={14} /></button>
+      <Button variant="primary" iconOnly size="sm" onClick={saveEdit} title={t('common:save')}><Save size={14} /></Button>
+      <Button variant="secondary" iconOnly size="sm" onClick={() => setEditing(false)} title={t('common:cancel')}><X size={14} /></Button>
     </>
   ) : (
-    <button onClick={startEdit} title={t('common:edit')} style={hdrGhost}><Edit2 size={13} /></button>
+    <Button variant="secondary" iconOnly size="sm" onClick={startEdit} title={t('common:edit')}><Edit2 size={13} /></Button>
   )
 
   return (
@@ -159,11 +155,10 @@ export default function OpportunityDrawer({
             {/* ARCHIVE-1: per-id soft-delete (mirrors candidates' trash icon in the
                 title row) — hidden once already archived; the banner below takes over. */}
             {onArchive && !o.archived && (
-              <button onClick={() => onArchive(o.id)}
-                title={t('drawer.archive')} aria-label={t('drawer.archive')}
-                style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 4, display: 'flex', color: 'var(--color-danger)', opacity: 0.7 }}>
+              <Button variant="dangerSoft" iconOnly size="sm" onClick={() => onArchive(o.id)}
+                title={t('drawer.archive')} aria-label={t('drawer.archive')}>
                 <Trash2 size={14} />
-              </button>
+              </Button>
             )}
           </>}
           actions={actions}

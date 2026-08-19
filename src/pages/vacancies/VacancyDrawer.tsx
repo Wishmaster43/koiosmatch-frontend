@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import type { CSSProperties, ReactNode } from 'react'
+import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Globe, Edit2, Save, X } from 'lucide-react'
 import EntityDrawer from '@/components/drawer/EntityDrawer'
@@ -34,6 +34,7 @@ import MatchingTab from './drawer/MatchingTab'
 import CandidateSearchTab from './drawer/CandidateSearchTab'
 import CustomFieldsTab from '@/components/drawer/CustomFieldsTab'
 import { useVacancyCustomFields } from '@/lib/useVacancyCustomFields'
+import Button from '@/components/ui/Button'
 import type { VacancyDetail } from '@/types/vacancy'
 import type { Id } from '@/types/common'
 
@@ -120,10 +121,6 @@ interface VacancyDrawerProps {
   // to the default tab below if the requested tab is gated away for this vacancy.
   initialTab?: string
 }
-
-const hdrBtn: CSSProperties = { display: 'flex', alignItems: 'center', justifyContent: 'center', width: 28, height: 28, borderRadius: 7, cursor: 'pointer', flexShrink: 0 }
-const hdrGhost: CSSProperties = { ...hdrBtn, background: 'var(--bg)', color: 'var(--text-muted)', border: '1px solid var(--border)' }
-const hdrPrimary: CSSProperties = { ...hdrBtn, background: 'var(--color-primary)', color: 'var(--color-on-accent)', border: 'none' }
 
 /**
  * VacancyDrawer — thin container: wires data (lookups + onUpdate) and declares the
@@ -243,11 +240,11 @@ export default function VacancyDrawer({ vacancy: v, onClose, expanded, onToggleE
           // V7: title pencil → save/cancel, same spot as the changelog icon's row.
           actions={editingTitle ? (
             <>
-              <button onClick={saveTitleEdit} title={t('common:save')} style={hdrPrimary}><Save size={14} /></button>
-              <button onClick={() => setEditingTitle(false)} title={t('common:cancel')} style={hdrGhost}><X size={14} /></button>
+              <Button variant="primary" iconOnly size="sm" onClick={saveTitleEdit} title={t('common:save')}><Save size={14} /></Button>
+              <Button variant="secondary" iconOnly size="sm" onClick={() => setEditingTitle(false)} title={t('common:cancel')}><X size={14} /></Button>
             </>
           ) : (
-            <button onClick={startTitleEdit} title={t('common:edit')} style={hdrGhost}><Edit2 size={13} /></button>
+            <Button variant="secondary" iconOnly size="sm" onClick={startTitleEdit} title={t('common:edit')}><Edit2 size={13} /></Button>
           )}
           // Standard picker widths (§3A blueprint: Status ~160 + Eigenaar ~190).
           meta={[
@@ -286,6 +283,9 @@ export default function VacancyDrawer({ vacancy: v, onClose, expanded, onToggleE
               channel to jump straight to the Publiceren tab. */}
           {publishedChannels.length > 0 ? (
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 12 }}>
+              {/* HUISSTIJL-1: left hand-styled — the §4 "aan/gelukt" success TOKEN
+                  PAIR (--color-success-bg fill + full --color-success border) is a
+                  deliberate exception to the soft-tint recipe, never a Button variant. */}
               {publishedChannels.map(c => {
                 const Icon = channelIcon(c.icon, c.key)
                 return (
@@ -301,12 +301,10 @@ export default function VacancyDrawer({ vacancy: v, onClose, expanded, onToggleE
               })}
             </div>
           ) : (
-            <button type="button" onClick={() => setActiveTab('publishing')}
-              style={{ fontSize: 11, marginBottom: 12, display: 'inline-flex', alignItems: 'center', gap: 6,
-                background: 'none', border: 'none', cursor: 'pointer', padding: 0, color: 'var(--text-muted)' }}>
+            <Button variant="ghost" size="sm" onClick={() => setActiveTab('publishing')} style={{ marginBottom: 12 }}>
               <Globe size={13} />
               {t('drawer.notPublished')}
-            </button>
+            </Button>
           )}
         </EntityHeader>
         </>

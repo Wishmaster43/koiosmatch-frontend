@@ -16,12 +16,12 @@
  * a component meant to be identical everywhere.
  */
 import { useState } from 'react'
-import type { CSSProperties } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Edit2, Save, X } from 'lucide-react'
 import CreatableSelect from '@/components/ui/CreatableSelect'
 import TitleBadge from '@/components/drawer/TitleBadge'
 import ReferenceNumberChip from '@/components/ui/ReferenceNumberChip'
+import Button from '@/components/ui/Button'
 import type { Id } from '@/types/common'
 
 export interface SubEntityStatusTitleRowProps {
@@ -39,10 +39,6 @@ export interface SubEntityStatusTitleRowProps {
   /** Fires the same PATCH the field tables use, scoped to statusId only. */
   onSave: (id: Id, payload: { statusId: Id | null }) => void
 }
-
-// Mirrors the 26px icon-button treatment every title-row control already used
-// (the former inline `iconBtn` constant in both LocationDetail/DepartmentDetail).
-const iconBtn: CSSProperties = { width: 26, height: 26, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 6, cursor: 'pointer' }
 
 export default function SubEntityStatusTitleRow({
   id, name, referenceNumber, statusId, statusLabel, statusColor, statusOptions, onSave,
@@ -70,21 +66,18 @@ export default function SubEntityStatusTitleRow({
             <CreatableSelect value={statusDraft} onChange={setStatusDraft} options={statusOptions}
               placeholder={t('locations.detail.status')} allowCreate={false} menuWidth={180} />
           </div>
-          <button onClick={saveStatus} title={t('common:save')} aria-label={t('common:save')}
-            // BRAND-TEXT-COLOR-1: readable text on the accent background is the
-            // dedicated --color-on-accent token (derived from brand luminance),
-            // not a hardcoded white — mirrors the shared EditableFieldTable Save button.
-            style={{ ...iconBtn, background: 'var(--color-primary)', color: 'var(--color-on-accent)', border: 'none' }}><Save size={13} /></button>
-          <button onClick={cancelStatus} title={t('common:cancel')} aria-label={t('common:cancel')}
-            style={{ ...iconBtn, background: 'var(--bg)', color: 'var(--text-muted)', border: '1px solid var(--border)' }}><X size={13} /></button>
+          {/* BRAND-TEXT-COLOR-1: readable text on the accent background is the
+              dedicated --color-on-accent token (derived from brand luminance),
+              not a hardcoded white — Button's primary variant carries this. */}
+          <Button variant="primary" iconOnly size="sm" onClick={saveStatus} title={t('common:save')} aria-label={t('common:save')}><Save size={13} /></Button>
+          <Button variant="secondary" iconOnly size="sm" onClick={cancelStatus} title={t('common:cancel')} aria-label={t('common:cancel')}><X size={13} /></Button>
         </div>
       ) : (
         <>
           {/* Status = colour-coded read-only badge next to the title (§3A(c)), not
               buried as a row in the field table — the pencil reopens the picker above. */}
           <TitleBadge label={statusLabel} color={statusColor} />
-          <button onClick={startEditStatus} title={t('locations.detail.changeStatus')} aria-label={t('locations.detail.changeStatus')}
-            style={{ ...iconBtn, background: 'none', color: 'var(--text-muted)', border: '1px solid var(--border)' }}><Edit2 size={13} /></button>
+          <Button variant="secondary" iconOnly size="sm" onClick={startEditStatus} title={t('locations.detail.changeStatus')} aria-label={t('locations.detail.changeStatus')}><Edit2 size={13} /></Button>
         </>
       )}
     </div>

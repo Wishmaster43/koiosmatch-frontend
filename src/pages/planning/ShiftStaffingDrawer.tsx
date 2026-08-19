@@ -16,7 +16,7 @@ import { Star, UserMinus, Ban, LogOut, AlertCircle, Check } from 'lucide-react'
 import FloatingPanel from '@/components/ui/FloatingPanel'
 import CreatableSelect from '@/components/ui/CreatableSelect'
 import { cardHead, cardBox } from '@/components/ui/modalCards'
-import { BTN_H } from '@/config/buttonMetrics'
+import Button from '@/components/ui/Button'
 import { useDateFormat } from '@/lib/datetime'
 import { extractApiError } from '@/lib/extractApiError'
 import { useShiftEligibleCandidates, usePlanningCancellationReasons, useShiftStaffingMutations } from './hooks/useShiftStaffing'
@@ -123,13 +123,10 @@ export default function ShiftStaffingDrawer({ shift, onClose }: Props) {
                 )}
                 {a.status !== 'cancelled' && a.status !== 'no_show' && a.status !== 'completed' && (
                   <>
-                    <button onClick={() => startCheckout(a.scheduleId)} title={t('staffing.checkout')}
-                      style={{ ...iconBtn }}><LogOut size={13} /></button>
-                    <button onClick={() => startCancel(a.scheduleId)} title={t('staffing.cancel')}
-                      style={{ ...iconBtn }}><Ban size={13} /></button>
-                    <button onClick={() => handleUnassign(a.scheduleId)} title={t('staffing.unassign')}
-                      disabled={unassign.isPending}
-                      style={{ ...iconBtn }}><UserMinus size={13} /></button>
+                    <Button variant="secondary" iconOnly size="sm" onClick={() => startCheckout(a.scheduleId)} title={t('staffing.checkout')}><LogOut size={13} /></Button>
+                    <Button variant="secondary" iconOnly size="sm" onClick={() => startCancel(a.scheduleId)} title={t('staffing.cancel')}><Ban size={13} /></Button>
+                    <Button variant="secondary" iconOnly size="sm" onClick={() => handleUnassign(a.scheduleId)} title={t('staffing.unassign')}
+                      disabled={unassign.isPending}><UserMinus size={13} /></Button>
                   </>
                 )}
               </div>
@@ -142,11 +139,10 @@ export default function ShiftStaffingDrawer({ shift, onClose }: Props) {
                       placeholder={reasonsLoading ? t('common:loading') : t('staffing.cancelReasonPlaceholder')}
                       options={reasons} />
                   </div>
-                  <button onClick={() => submitCancel(a.scheduleId)} disabled={!cancelReason || cancel.isPending}
-                    style={{ ...primaryBtn, opacity: (!cancelReason || cancel.isPending) ? 0.6 : 1 }}>
+                  <Button variant="primary" onClick={() => submitCancel(a.scheduleId)} disabled={!cancelReason || cancel.isPending}>
                     <Check size={13} /> {t('staffing.confirmCancel')}
-                  </button>
-                  <button onClick={() => setCancelling(null)} style={ghostBtn}>{t('common:cancel')}</button>
+                  </Button>
+                  <Button variant="secondary" onClick={() => setCancelling(null)}>{t('common:cancel')}</Button>
                 </div>
               )}
 
@@ -169,11 +165,10 @@ export default function ShiftStaffingDrawer({ shift, onClose }: Props) {
                     <input type="number" min={0} style={{ ...INPUT, marginTop: 3 }}
                       value={actualBreak} onChange={e => setActualBreak(e.target.value)} />
                   </label>
-                  <button onClick={() => submitCheckout(a.scheduleId)} disabled={!actualStart || !actualEnd || checkout.isPending}
-                    style={{ ...primaryBtn, opacity: (!actualStart || !actualEnd || checkout.isPending) ? 0.6 : 1 }}>
+                  <Button variant="primary" onClick={() => submitCheckout(a.scheduleId)} disabled={!actualStart || !actualEnd || checkout.isPending}>
                     <Check size={13} /> {t('staffing.confirmCheckout')}
-                  </button>
-                  <button onClick={() => setCheckingOut(null)} style={ghostBtn}>{t('common:cancel')}</button>
+                  </Button>
+                  <Button variant="secondary" onClick={() => setCheckingOut(null)}>{t('common:cancel')}</Button>
                 </div>
               )}
 
@@ -204,9 +199,9 @@ export default function ShiftStaffingDrawer({ shift, onClose }: Props) {
                 <div style={{ fontSize: 13, color: 'var(--text)' }}>{c.firstName} {c.lastName}</div>
                 {c.reason && <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>{c.reason}</div>}
               </div>
-              <button onClick={() => handleAssign(c.id)} disabled={assign.isPending} style={primaryBtn}>
+              <Button variant="primary" onClick={() => handleAssign(c.id)} disabled={assign.isPending}>
                 {t('staffing.assign')}
-              </button>
+              </Button>
             </div>
           ))}
         </div>
@@ -214,10 +209,3 @@ export default function ShiftStaffingDrawer({ shift, onClose }: Props) {
     </FloatingPanel>
   )
 }
-
-const iconBtn = { display: 'flex', width: 26, height: 26, alignItems: 'center', justifyContent: 'center',
-  border: '1px solid var(--border)', borderRadius: 6, background: 'var(--surface)', color: 'var(--text-muted)', cursor: 'pointer' } as const
-const primaryBtn = { display: 'flex', alignItems: 'center', gap: 4, height: BTN_H, padding: '0 12px', fontSize: 12, fontWeight: 600,
-  border: 'none', borderRadius: 8, background: 'var(--color-primary)', color: 'var(--color-on-accent)', cursor: 'pointer' } as const
-const ghostBtn = { height: BTN_H, padding: '0 12px', fontSize: 12, border: '1px solid var(--border)', borderRadius: 8,
-  background: 'var(--surface)', color: 'var(--text)', cursor: 'pointer' } as const

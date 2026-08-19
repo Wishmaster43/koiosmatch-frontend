@@ -26,20 +26,6 @@ function Cell({ label, children }: { label: ReactNode; children: ReactNode }) {
 
 const mutedItalic: CSSProperties = { color: 'var(--text-muted)', fontStyle: 'italic' }
 const mutedLine: CSSProperties = { fontSize: 11, color: 'var(--text-muted)', marginTop: 2 }
-// Ghost icon-only trigger (mirrors GeocodeButton's 'ghost' variant, §3A reuse —
-// the one subtle refresh-style affordance shape, never a bespoke button per page).
-const recalcBtn = (busy: boolean): CSSProperties => ({
-  background: 'none', border: 'none', padding: 2, display: 'flex',
-  color: 'var(--text-muted)', opacity: busy ? 0.5 : 0.8, cursor: busy ? 'not-allowed' : 'pointer',
-})
-
-// MATCHSCORE-EDIT-1: the manual-override save/cancel pair — same shape as
-// EditableFieldTable's own icon buttons (§3A in-place edit convention), scaled
-// down (20px vs 26px) to fit this compact status-strip cell.
-const scoreIconBtn = (disabled: boolean): CSSProperties => ({
-  width: 20, height: 20, display: 'flex', alignItems: 'center', justifyContent: 'center',
-  borderRadius: 6, cursor: disabled ? 'not-allowed' : 'pointer', opacity: disabled ? 0.6 : 1,
-})
 // House field footprint for a short numeric input (mirrors RadiusMapPanel's km field).
 const scoreInput: CSSProperties = {
   width: 46, padding: '3px 6px', fontSize: 12, borderRadius: 6,
@@ -84,6 +70,8 @@ interface ApplicationStatusStripProps {
 
 // A clickable, EntityLink-styled piece of text that switches the drawer's own
 // active tab (no separate page to deep-link to, see the prop comment above).
+// HUISSTIJL-1: left as a bare <button> — this is a text link (padding 0, font
+// inherit, underline-on-hover), not a chrome button, so no Button variant fits.
 function TabLink({ onClick, children }: { onClick: () => void; children: ReactNode }) {
   return (
     <button type="button" onClick={onClick}
@@ -256,14 +244,23 @@ export default function ApplicationStatusStrip({ application: a, onNavigateTab }
               <input type="number" min={0} max={100} step={1} value={draftScore} disabled={savingScore}
                 onChange={e => setDraftScore(e.target.value)} aria-label={t('status.matchScore')}
                 autoFocus style={scoreInput} />
+              {/* HUISSTIJL-1 deferred (Opus review, batch B R1): this strip cell is a
+                  20px inline footprint — scaled down to sit beside the ~23px score
+                  input; Button's 28px floor overpowers the row. Stays hand-styled
+                  until the inline/ghost icon family gets its own house atom. */}
               <button type="button" onClick={saveScore} disabled={!draftScoreValid || savingScore}
                 title={t('matchScore.save')} aria-label={t('matchScore.save')}
-                style={{ ...scoreIconBtn(!draftScoreValid || savingScore), border: 'none', background: 'var(--color-primary)', color: 'var(--color-on-accent)' }}>
+                style={{ width: 20, height: 20, display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+                  borderRadius: 5, border: 'none', cursor: 'pointer',
+                  background: (!draftScoreValid || savingScore) ? 'var(--border)' : 'var(--color-primary)',
+                  color: 'var(--color-on-accent)' }}>
                 <Save size={11} />
               </button>
               <button type="button" onClick={cancelEditScore} disabled={savingScore}
                 title={t('matchScore.cancel')} aria-label={t('matchScore.cancel')}
-                style={{ ...scoreIconBtn(savingScore), border: '1px solid var(--border)', background: 'var(--bg)', color: 'var(--text-muted)' }}>
+                style={{ width: 20, height: 20, display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+                  borderRadius: 5, border: '1px solid var(--border)', cursor: 'pointer',
+                  background: 'var(--surface)', color: 'var(--text)' }}>
                 <X size={11} />
               </button>
             </div>
@@ -273,17 +270,18 @@ export default function ApplicationStatusStrip({ application: a, onNavigateTab }
                 {score != null
                   ? <span style={{ fontWeight: 600, color: scoreColor(score) }}>{score}%</span>
                   : <span style={mutedItalic}>{t('status.notScored')}</span>}
+                {/* HUISSTIJL-1 deferred (batch B R1): the one subtle refresh-style
+                    affordance next to a 13px value — an inline glyph, not a 28px box. */}
                 {canManage && (
-                  <button type="button" onClick={startEditScore}
-                    title={t('status.editScore')} aria-label={t('status.editScore')}
-                    style={recalcBtn(false)}>
+                  <button type="button" onClick={startEditScore} title={t('status.editScore')} aria-label={t('status.editScore')}
+                    style={{ padding: 2, background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', display: 'inline-flex' }}>
                     <Pencil size={12} />
                   </button>
                 )}
                 {canManage && (
                   <button type="button" onClick={recalculateScore} disabled={recalculating}
                     title={t('status.recalculateScore')} aria-label={t('status.recalculateScore')}
-                    style={recalcBtn(recalculating)}>
+                    style={{ padding: 2, background: 'none', border: 'none', cursor: recalculating ? 'default' : 'pointer', color: 'var(--text-muted)', display: 'inline-flex' }}>
                     <RefreshCw size={12} className={recalculating ? 'animate-spin' : ''} />
                   </button>
                 )}

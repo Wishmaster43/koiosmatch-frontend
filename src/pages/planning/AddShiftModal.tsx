@@ -60,10 +60,10 @@ import { useShiftCustomers, useShiftDepartments, useShiftCandidateSearch } from 
 import { usePlanningOrdersList } from './hooks/usePlanningOrders'
 import type { ShiftCandidateOption } from './hooks/useShiftLookups'
 import { Field, Avatar, CandidateRow, colorFor, getInitials } from './AddShiftModalFields'
-import { BTN_H } from '@/config/buttonMetrics'
 import { WIDE_MODAL } from '@/components/ui/modalMetrics'
 import FloatingPanel from '@/components/ui/FloatingPanel'
 import { cardHead, cardBox } from '@/components/ui/modalCards'
+import Button from '@/components/ui/Button'
 import type { ShiftInput } from '@/types/planning'
 
 // ── Field helpers — house footprint (padding '8px 11px', fontSize 13,
@@ -134,16 +134,12 @@ export default function AddShiftModal({ date, onClose, onAdd }: { date: Date; on
             <span style={{ fontSize: 12, color: 'var(--text-muted)', marginLeft: 10 }}>{formatDate(date)}</span>
           </div>
           <div style={{ marginLeft: 'auto', display: 'flex', gap: 8 }}>
-            {/* BTN_H (§4/§9): one explicit height for every text/action button, everywhere.
-                PLANNING-PERSIST-1 (§3) — disabled + an honest title until a real save
+            {/* PLANNING-PERSIST-1 (§3) — disabled + an honest title until a real save
                 path exists (see the file header); onClick stays wired so it reactivates
                 for free the moment that path lands. */}
-            <button onClick={handleSave} disabled title={t('previewSaveTitle')}
-              style={{ display: 'flex', alignItems: 'center', gap: 6, height: BTN_H, padding: '0 16px', fontSize: 12,
-                fontWeight: 600, background: 'var(--color-primary)', color: 'var(--color-on-accent)', opacity: 0.5,
-                border: 'none', borderRadius: 8, cursor: 'not-allowed' }}>
+            <Button variant="primary" onClick={handleSave} disabled title={t('previewSaveTitle')}>
               <Save size={13} /> {t('common:save')}
-            </button>
+            </Button>
           </div>
         </div>
       }>
@@ -217,7 +213,9 @@ export default function AddShiftModal({ date, onClose, onAdd }: { date: Date; on
                 <div style={cardBox}>
                   <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
                     {/* Icon-only swatch buttons need a real aria-label (§6) — the CSS
-                        value itself isn't meaningful to a screen reader, so number them. */}
+                        value itself isn't meaningful to a screen reader, so number them.
+                        HUISSTIJL-1: left hand-styled — each swatch's fill IS the picked
+                        colour value (data), not a Button identity. */}
                     {COLORS.map((c, i) => (
                       <button key={c} type="button" onClick={() => setColor(c)} aria-label={`${t('sectionColor')} ${i + 1}`}
                         style={{ width: 20, height: 20, borderRadius: '50%', background: c, border: 'none',
@@ -285,10 +283,9 @@ export default function AddShiftModal({ date, onClose, onAdd }: { date: Date; on
                         <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)' }}>{candidate.name}</div>
                         {candidate.functionTitle && <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>{candidate.functionTitle}</div>}
                       </div>
-                      <button onClick={() => setCandidate(null)} aria-label={t('common:cancel')}
-                        style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)' }}>
+                      <Button variant="ghost" iconOnly size="sm" onClick={() => setCandidate(null)} aria-label={t('common:cancel')}>
                         <X size={14} />
-                      </button>
+                      </Button>
                     </div>
                   ) : (
                     <div style={{ padding: '20px', textAlign: 'center', border: '1px dashed var(--border)',

@@ -4,6 +4,7 @@ import { Loader2, Sparkles, X, Check } from 'lucide-react'
 import KoiosAiMark from '@/components/ui/KoiosAiMark'
 import AiGeneratedLabel from '@/components/ui/AiGeneratedLabel'
 import CalloutBox from '@/components/ui/CalloutBox'
+import Button from '@/components/ui/Button'
 import { useGenerateDescription } from './useGenerateDescription'
 import type { GenerateFormFields } from './useGenerateDescription'
 
@@ -14,10 +15,7 @@ interface GenerateDescriptionFlowProps {
   onApply: (concept: string) => void
 }
 
-const primaryBtn: CSSProperties = { display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 12, fontWeight: 600,
-  padding: '6px 12px', borderRadius: 7, cursor: 'pointer', background: 'var(--color-primary)', color: 'var(--color-on-accent)', border: 'none' }
-const ghostBtn: CSSProperties = { display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 12, fontWeight: 500,
-  padding: '6px 12px', borderRadius: 7, cursor: 'pointer', background: 'none', color: 'var(--text-muted)', border: '1px solid var(--border)' }
+// HUISSTIJL-1: a genuine text link (underlined, no chrome) — not a Button variant.
 const linkBtn: CSSProperties = { background: 'none', border: 'none', cursor: 'pointer', padding: 0, fontSize: 11, fontWeight: 600, color: 'var(--color-primary-text)', textDecoration: 'underline' }
 
 /**
@@ -36,15 +34,12 @@ export default function GenerateDescriptionFlow({ fields, onApply }: GenerateDes
   // Idle — just the entry button; disabled (with an honest reason) until a title exists.
   if (!open) {
     return (
-      <button type="button" onClick={openFlow} disabled={!canGenerate}
+      <Button variant="soft" size="sm" onClick={openFlow} disabled={!canGenerate}
         aria-label={t('generate.button')} title={canGenerate ? undefined : t('generate.needsTitleFirst')}
-        style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 12, fontWeight: 500, padding: '5px 10px',
-          borderRadius: 7, cursor: canGenerate ? 'pointer' : 'not-allowed', opacity: canGenerate ? 1 : 0.55,
-          background: 'var(--color-primary-bg)', color: 'var(--color-primary-text)',
-          border: '1px solid color-mix(in srgb, var(--color-primary) 35%, transparent)', marginBottom: 8 }}>
+        style={{ marginBottom: 8 }}>
         <KoiosAiMark size={16} tone="soft" title={t('generate.button')} />
         {t('generate.button')}
-      </button>
+      </Button>
     )
   }
 
@@ -59,10 +54,9 @@ export default function GenerateDescriptionFlow({ fields, onApply }: GenerateDes
           {!resolving && profile && t('generate.profileChip', { name: profile.name, specificity: profile.specificity })}
           {!resolving && resolveFailed && t('common:error.title')}
         </div>
-        <button type="button" onClick={closeFlow} aria-label={t('common:close')}
-          style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', display: 'flex' }}>
+        <Button variant="ghost" iconOnly size="sm" onClick={closeFlow} aria-label={t('common:close')}>
           <X size={14} />
-        </button>
+        </Button>
       </div>
 
       {/* No generation profile configured for this tenant at all — honest notice, no dead button. */}
@@ -71,9 +65,9 @@ export default function GenerateDescriptionFlow({ fields, onApply }: GenerateDes
       )}
 
       {status === 'idle' && !noProfileConfigured && (
-        <button type="button" onClick={generate} disabled={resolving || resolveFailed} style={{ ...primaryBtn, opacity: (resolving || resolveFailed) ? 0.6 : 1, alignSelf: 'flex-start' }}>
+        <Button variant="primary" size="sm" onClick={generate} disabled={resolving || resolveFailed} style={{ alignSelf: 'flex-start' }}>
           <Sparkles size={13} /> {t('generate.cta')}
-        </button>
+        </Button>
       )}
 
       {status === 'loading' && (
@@ -127,10 +121,10 @@ export default function GenerateDescriptionFlow({ fields, onApply }: GenerateDes
             {concept}
           </div>
           <div style={{ display: 'flex', gap: 8 }}>
-            <button type="button" onClick={() => { onApply(concept); closeFlow() }} style={primaryBtn}>
+            <Button variant="primary" size="sm" onClick={() => { onApply(concept); closeFlow() }}>
               <Check size={13} /> {t('generate.apply')}
-            </button>
-            <button type="button" onClick={discard} style={ghostBtn}>{t('generate.discard')}</button>
+            </Button>
+            <Button variant="secondary" size="sm" onClick={discard}>{t('generate.discard')}</Button>
           </div>
         </>
       )}

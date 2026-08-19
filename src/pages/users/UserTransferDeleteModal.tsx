@@ -14,8 +14,8 @@ import { useTranslation } from 'react-i18next'
 import { AlertTriangle, Loader2 } from 'lucide-react'
 import FloatingPanel from '@/components/ui/FloatingPanel'
 import CreatableSelect from '@/components/ui/CreatableSelect'
-import { BTN_H } from '@/config/buttonMetrics'
 import { fieldInputStyle } from '@/components/forms/fieldMetrics'
+import Button from '@/components/ui/Button'
 import { userDisplayName } from './userRow'
 import type { ManagedUser } from '@/types/api'
 import type { OwnedSummary } from './hooks/useUserDeletion'
@@ -91,19 +91,13 @@ export default function UserTransferDeleteModal({ user, owned, successors, busy,
       {/* Actions — confirming is the ONLY delete path from here, and it always
           carries a successor, so ownership can never be dropped. */}
       <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
-        <button type="button" onClick={onClose}
-          style={{ height: BTN_H, padding: '0 16px', fontSize: 13, borderRadius: 8, border: '1px solid var(--border)',
-                   background: 'var(--surface)', color: 'var(--text-muted)', cursor: 'pointer' }}>
+        <Button variant="secondary" onClick={onClose}>
           {t('common:cancel')}
-        </button>
-        <button type="button" disabled={busy || !successorId} onClick={() => successorId && onConfirm(successorId)}
-          style={{ height: BTN_H, padding: '0 18px', fontSize: 13, fontWeight: 600, borderRadius: 8, border: 'none',
-                   display: 'flex', alignItems: 'center', gap: 6,
-                   background: 'var(--color-danger)', color: 'var(--color-on-danger)',
-                   cursor: (busy || !successorId) ? 'default' : 'pointer', opacity: successorId ? 1 : 0.5 }}>
+        </Button>
+        <Button variant="danger" disabled={busy || !successorId} onClick={() => successorId && onConfirm(successorId)}>
           {busy && <Loader2 size={13} style={{ animation: 'spin 1s linear infinite' }} aria-hidden="true" />}
           {t('delete.confirm')}
-        </button>
+        </Button>
       </div>
     </FloatingPanel>
   )

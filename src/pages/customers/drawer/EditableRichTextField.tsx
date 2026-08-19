@@ -15,6 +15,7 @@ import { useTranslation } from 'react-i18next'
 import { Edit2, Save, X, Trash2, ExternalLink } from 'lucide-react'
 import RichTextEditor from '@/components/ui/RichTextEditor'
 import SafeHtml from '@/components/ui/SafeHtml'
+import Button from '@/components/ui/Button'
 import { useTextPopoutHost } from '@/hooks/useTextPopoutHost'
 import type { PopoutEntity, PopoutTextField } from '@/lib/secondScreen'
 import type { GenerateEntity } from '@/components/ui/richtext/richTextAssistApi'
@@ -78,7 +79,6 @@ export default function EditableRichTextField({ label, value, onSave, popout, as
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [value])
 
-  const iconBtn: CSSProperties = { width: 26, height: 26, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 6, cursor: 'pointer' }
   const blockStyle: CSSProperties = { borderRadius: 10, overflow: 'hidden', border: '1px solid var(--border)', background: 'var(--surface)' }
 
   return (
@@ -88,26 +88,24 @@ export default function EditableRichTextField({ label, value, onSave, popout, as
         <div style={{ display: 'flex', gap: 4, alignItems: 'center' }}>
           {/* Clear the text (edit mode only) — same spot as the candidate profile text. */}
           {editing && (
-            <button onClick={() => changeDraft('')} title={t('clear')} aria-label={t('clear')}
-              style={{ ...iconBtn, background: 'none', color: 'var(--color-danger)', border: '1px solid var(--border)' }}>
+            <Button variant="dangerSoft" iconOnly size="sm" onClick={() => changeDraft('')} title={t('clear')} aria-label={t('clear')}>
               <Trash2 size={13} />
-            </button>
+            </Button>
           )}
           {/* TEKST-POPOUT-1: second screen — same icon + footprint the candidate
               profile text uses, only rendered when the caller opted in. */}
           {popout && (
-            <button onClick={openPopout} title={t('openSecondScreen')} aria-label={t('openSecondScreen')}
-              style={{ ...iconBtn, background: 'none', color: 'var(--text-muted)', border: '1px solid var(--border)' }}>
+            <Button variant="secondary" iconOnly size="sm" onClick={openPopout} title={t('openSecondScreen')} aria-label={t('openSecondScreen')}>
               <ExternalLink size={13} />
-            </button>
+            </Button>
           )}
           {editing ? (
             <div style={{ display: 'flex', gap: 4 }}>
-              <button onClick={save} title={t('save')} aria-label={t('save')} style={{ ...iconBtn, background: 'var(--color-primary)', color: 'var(--color-on-accent)', border: 'none' }}><Save size={13} /></button>
-              <button onClick={cancel} title={t('cancel')} aria-label={t('cancel')} style={{ ...iconBtn, background: 'var(--bg)', color: 'var(--text-muted)', border: '1px solid var(--border)' }}><X size={13} /></button>
+              <Button variant="primary" iconOnly size="sm" onClick={save} title={t('save')} aria-label={t('save')}><Save size={13} /></Button>
+              <Button variant="secondary" iconOnly size="sm" onClick={cancel} title={t('cancel')} aria-label={t('cancel')}><X size={13} /></Button>
             </div>
           ) : (
-            <button onClick={start} title={t('edit')} aria-label={t('edit')} style={{ ...iconBtn, background: 'none', color: 'var(--text-muted)', border: '1px solid var(--border)' }}><Edit2 size={13} /></button>
+            <Button variant="secondary" iconOnly size="sm" onClick={start} title={t('edit')} aria-label={t('edit')}><Edit2 size={13} /></Button>
           )}
         </div>
       </div>

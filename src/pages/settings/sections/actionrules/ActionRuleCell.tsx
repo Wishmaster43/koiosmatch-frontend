@@ -35,6 +35,9 @@ export default function ActionRuleCell({
   const effectLabel = t(`actionRules.effect.${effect}`)
   const cellLabel = t('actionRules.cellAria', { action: actionLabel, condition: conditionLabel, effect: effectLabel })
 
+  // HUISSTIJL-1: every button below stays hand-styled — the colour is a per-cell
+  // computed effect/state tint (§4 soft-chip convention), not a Button identity,
+  // and the info trigger is an 18px circular toggle with no variant equivalent.
   // Locked: read-only, disabled button so it stays in the a11y tree with an explanatory title.
   if (locked) {
     return (

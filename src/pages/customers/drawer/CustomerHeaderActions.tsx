@@ -7,10 +7,8 @@
  */
 import { useTranslation } from 'react-i18next'
 import { Edit2, Save, UserCheck, X } from 'lucide-react'
-import { BTN_H } from '@/config/buttonMetrics'
+import Button from '@/components/ui/Button'
 import type { CustomerPhaseOption } from '@/lib/useCustomerPhases'
-
-const iconBtn = { display: 'flex', alignItems: 'center', justifyContent: 'center', width: 28, height: 28, borderRadius: 7, cursor: 'pointer', flexShrink: 0 } as const
 
 interface Props {
   isEntryPhase: boolean
@@ -32,28 +30,24 @@ export default function CustomerHeaderActions({ isEntryPhase, targetPhase, onCon
           button (§3A(c)) — one click, no confirmation modal. No isCustomer option
           configured on the tenant's lookup → render no button at all. */}
       {isEntryPhase && targetPhase && (
-        <button onClick={onConvert}
-          style={{ display: 'flex', alignItems: 'center', gap: 4, height: BTN_H, padding: '0 10px', fontSize: 11, fontWeight: 600, borderRadius: 7, cursor: 'pointer', border: '1px solid var(--color-primary)', background: 'var(--color-primary)', color: 'var(--color-on-accent)' }}>
+        <Button variant="primary" onClick={onConvert}>
           <UserCheck size={11} />{t('drawer.convertTo', { phase: targetPhase.label })}
-        </button>
+        </Button>
       )}
       {/* Edit-pencil that toggles to save/cancel (same pattern as the candidate header). */}
       {headerEditing ? (
         <>
-          <button onClick={onSaveEdit} title={t('drawer.save')}
-            style={{ ...iconBtn, background: 'var(--color-primary)', color: 'var(--color-on-accent)', border: 'none' }}>
+          <Button variant="primary" iconOnly size="sm" onClick={onSaveEdit} title={t('drawer.save')}>
             <Save size={14} />
-          </button>
-          <button onClick={onCancelEdit} title={t('drawer.cancel')}
-            style={{ ...iconBtn, background: 'var(--bg)', color: 'var(--text-muted)', border: '1px solid var(--border)' }}>
+          </Button>
+          <Button variant="secondary" iconOnly size="sm" onClick={onCancelEdit} title={t('drawer.cancel')}>
             <X size={14} />
-          </button>
+          </Button>
         </>
       ) : (
-        <button onClick={onStartEdit} title={t('drawer.edit')}
-          style={{ ...iconBtn, background: 'var(--bg)', color: 'var(--text-muted)', border: '1px solid var(--border)' }}>
+        <Button variant="secondary" iconOnly size="sm" onClick={onStartEdit} title={t('drawer.edit')}>
           <Edit2 size={13} />
-        </button>
+        </Button>
       )}
     </>
   )

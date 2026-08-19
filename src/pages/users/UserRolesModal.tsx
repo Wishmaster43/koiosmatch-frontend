@@ -20,7 +20,7 @@ import api, { unwrap } from '@/lib/api'
 import FloatingPanel from '@/components/ui/FloatingPanel'
 import SearchSelect from '@/components/ui/SearchSelect'
 import { extractApiError } from '@/lib/extractApiError'
-import { BTN_H } from '@/config/buttonMetrics'
+import Button from '@/components/ui/Button'
 import type { ManagedUser } from '@/types/api'
 import { RoleBadge, roleLabel, roleName } from './usersParts'
 import type { AvailableRole } from './usersParts'
@@ -80,6 +80,8 @@ export default function UserRolesModal({ user, roles, onSaved, onClose }: {
         {chosen.map(r => (
           <span key={r.id} style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
             <RoleBadge role={r.name} />
+            {/* HUISSTIJL-1: left hand-styled — an 18px chip-remove glyph sized to sit
+                inside the role-chip row; Button's smallest footprint (28px) would break it. */}
             <button type="button" onClick={() => toggle(String(r.id))}
               aria-label={t('rolesModal.remove', { role: roleLabel(t, r.name) })}
               style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 18, height: 18,
@@ -96,36 +98,24 @@ export default function UserRolesModal({ user, roles, onSaved, onClose }: {
         <SearchSelect options={roles.map(r => ({ value: String(r.id), label: roleLabel(t, r.name) }))}
           selected={selected} onToggle={toggle}
           renderTrigger={open => (
-            <button type="button" onClick={open}
-              style={{ display: 'flex', alignItems: 'center', gap: 6, height: BTN_H, padding: '0 12px',
-                       fontSize: 13, fontWeight: 500, borderRadius: 8, cursor: 'pointer',
-                       border: '1px solid color-mix(in srgb, var(--color-primary) 40%, transparent)',
-                       background: 'color-mix(in srgb, var(--color-primary) 10%, transparent)',
-                       color: 'var(--color-primary-text)' }}>
+            <Button variant="soft" onClick={open}>
               <Plus size={13} aria-hidden="true" /> {t('rolesModal.add')}
-            </button>
+            </Button>
           )} />
       </div>
 
       {error && <p style={{ fontSize: 12, color: 'var(--color-danger)', marginBottom: 12 }}>{error}</p>}
 
       <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
-        <button type="button" onClick={onClose}
-          style={{ height: BTN_H, padding: '0 16px', fontSize: 13, borderRadius: 8, border: '1px solid var(--border)',
-                   background: 'var(--surface)', color: 'var(--text-muted)', cursor: 'pointer' }}>
+        <Button variant="secondary" onClick={onClose}>
           {t('common:cancel')}
-        </button>
+        </Button>
         {/* Disabled on an empty set: the route rejects `roles: []` (min:1), so an
             enabled button there would be a promise the API cannot keep. */}
-        <button type="button" onClick={save} disabled={saving || selected.length === 0}
-          style={{ height: BTN_H, padding: '0 18px', fontSize: 13, fontWeight: 600, borderRadius: 8, border: 'none',
-                   display: 'flex', alignItems: 'center', gap: 6,
-                   background: 'var(--color-primary)', color: 'var(--color-on-accent)',
-                   cursor: (saving || selected.length === 0) ? 'default' : 'pointer',
-                   opacity: selected.length === 0 ? 0.5 : 1 }}>
+        <Button variant="primary" onClick={save} disabled={saving || selected.length === 0}>
           {saving && <Loader2 size={13} style={{ animation: 'spin 1s linear infinite' }} aria-hidden="true" />}
           {t('common:save')}
-        </button>
+        </Button>
       </div>
     </FloatingPanel>
   )

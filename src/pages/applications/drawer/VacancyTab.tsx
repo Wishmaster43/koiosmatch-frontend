@@ -22,8 +22,6 @@ import Button from '@/components/ui/Button'
 
 type LoadState = 'loading' | 'error' | 'empty' | 'ok'
 
-const iconBtn = { width: 26, height: 26, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 6, cursor: 'pointer', flexShrink: 0 } as const
-
 interface VacancyTabProps {
   application: ApplicationDetail
   // Re-link (or unlink, null) the vacancy — the SAME handler as ApplicationTab's
@@ -122,10 +120,8 @@ export default function VacancyTab({ application: a, onLinkVacancy }: VacancyTab
             <div style={{ flex: 1 }}>
               <VacancyLinkField value={vacancyId} options={vacancyOptions} onChange={setVacancyId} />
             </div>
-            <button onClick={saveLink} disabled={!vacancyId} title={t('common:save')} aria-label={t('common:save')}
-              style={{ ...iconBtn, background: 'var(--color-primary)', color: 'var(--color-on-accent)', border: 'none', opacity: vacancyId ? 1 : 0.5 }}><Save size={13} /></button>
-            <button onClick={() => setLinking(false)} title={t('common:cancel')} aria-label={t('common:cancel')}
-              style={{ ...iconBtn, background: 'var(--bg)', color: 'var(--text-muted)', border: '1px solid var(--border)' }}><X size={13} /></button>
+            <Button variant="primary" iconOnly size="sm" onClick={saveLink} disabled={!vacancyId} title={t('common:save')} aria-label={t('common:save')}><Save size={13} /></Button>
+            <Button variant="secondary" iconOnly size="sm" onClick={() => setLinking(false)} title={t('common:cancel')} aria-label={t('common:cancel')}><X size={13} /></Button>
           </div>
         ) : (
           <Button variant="secondary" size="sm" onClick={() => { setVacancyId(''); setLinking(true) }}>

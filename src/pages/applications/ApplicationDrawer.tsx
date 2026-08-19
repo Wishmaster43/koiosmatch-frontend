@@ -24,16 +24,11 @@ import RejectionModal from './drawer/RejectionModal'
 import ProposeCandidateModal from './drawer/propose/ProposeCandidateModal'
 import { peekReturnTab, clearReturnTab } from './drawer/constants'
 import { useApplicationCandidateEdit } from './hooks/useApplicationCandidateEdit'
-import { BTN_H } from '@/config/buttonMetrics'
+import Button from '@/components/ui/Button'
 import type { ApplicationDetail } from '@/types/application'
 import type { RejectPayload } from './drawer/RejectionModal'
 import type { Criterion } from '@/components/match/MatchScoreBlock'
 import type { Id } from '@/types/common'
-
-// Icon-button metrics for the header's edit/save/cancel toggles — same 28x28
-// footprint as CandidateHeaderBits' iconBtn (§4 consistency), kept local since
-// that constant isn't exported from the (out-of-scope) candidate file.
-const iconBtn = { display: 'flex', alignItems: 'center', justifyContent: 'center', width: 28, height: 28, borderRadius: 7, cursor: 'pointer', flexShrink: 0 } as const
 
 // The tab order (matches the screenshots). 'extra' (§3A(f)) is appended below
 // only when the tenant has ≥1 active application custom field.
@@ -172,49 +167,35 @@ export default function ApplicationDrawer({ application: a, onClose, expanded, o
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>{t('drawer.createdAt', { date: formatDateTime(a.created) })}</span>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            {/* Detached → restore (primary); active → detach (danger, gated).
-                BTN_H (§4/§9): one explicit height for every text/action button, everywhere. */}
+            {/* Detached → restore (primary soft); active → detach (danger, gated).
+                HUISSTIJL-1: house Button carries the height/radius/typography. Restore
+                keeps its FULL token pair (primary-bg fill + full primary border) — the
+                archived-state twin of the §4 success pair; soft's 10/33 tint halves it
+                in dark mode (Opus batch B R3), so the pair rides in via style. */}
             {a.archived ? (
-              <button onClick={() => onRestore?.(a.id)} style={{ display: 'flex', alignItems: 'center', gap: 5,
-                fontSize: 12, fontWeight: 500, height: BTN_H, padding: '0 12px', borderRadius: 8,
-                border: '1px solid var(--color-primary)', background: 'var(--color-primary-bg)',
-                color: 'var(--color-primary-text)', cursor: 'pointer' }}>
+              <Button variant="soft" style={{ background: 'var(--color-primary-bg)', border: '1px solid var(--color-primary)' }} onClick={() => onRestore?.(a.id)}>
                 <ArchiveRestore size={12} /> {t('restore.button')}
-              </button>
+              </Button>
             ) : canManage ? (
               <>
               {/* Afwijzen (Danny 25-07): the reject FORM moved out of the tab into
                   this footer button + confirm modal — hidden once already rejected
-                  or matched (a match can no longer be rejected). BUTTON-SOFT-TINT-1
-                  (Danny 05-08): was a white/transparent outline button — the house
-                  recipe (§4, mirrors DrawerAddButton/QuickViewToggle) is a
-                  color-mix soft tint, never a plain outline. */}
+                  or matched (a match can no longer be rejected). */}
               {a.bucket !== 'rejected' && a.bucket !== 'matched' && (
-                <button onClick={() => setRejectModalOpen(true)}
-                  style={{ display: 'flex', alignItems: 'center', gap: 5,
-                    fontSize: 12, fontWeight: 500, height: BTN_H, padding: '0 12px', borderRadius: 8,
-                    border: '1px solid color-mix(in srgb, var(--color-danger) 30%, transparent)',
-                    background: 'color-mix(in srgb, var(--color-danger) 10%, transparent)',
-                    color: 'var(--color-danger)', cursor: 'pointer' }}>
+                <Button variant="dangerSoft" onClick={() => setRejectModalOpen(true)}>
                   <XCircle size={12} /> {t('rejection.action')}
-                </button>
+                </Button>
               )}
-              {/* No vacancy linked = nothing to detach — grey + disabled (Danny 13/7).
-                  S15: opens the reason-required confirm modal instead of detaching
-                  straight away (the BE 422s a bare DELETE now). BUTTON-SOFT-TINT-1:
-                  the enabled state gets the same soft tint as Afwijzen above; the
-                  disabled state stays a neutral, unfilled ghost (§3 honest gate —
-                  it is not a colour-carrying action while disabled). */}
-              <button onClick={() => a.vacancyId != null && setDetachModalOpen(true)} disabled={a.vacancyId == null}
-                title={a.vacancyId == null ? t('detach.nothingLinked') : undefined}
-                style={{ display: 'flex', alignItems: 'center', gap: 5,
-                  fontSize: 12, fontWeight: 500, height: BTN_H, padding: '0 12px', borderRadius: 8,
-                  border: a.vacancyId == null ? '1px solid var(--border)' : '1px solid color-mix(in srgb, var(--color-danger) 30%, transparent)',
-                  background: a.vacancyId == null ? 'none' : 'color-mix(in srgb, var(--color-danger) 10%, transparent)',
-                  color: a.vacancyId == null ? 'var(--text-muted)' : 'var(--color-danger)',
-                  cursor: a.vacancyId == null ? 'not-allowed' : 'pointer', opacity: a.vacancyId == null ? 0.6 : 1 }}>
+              {/* No vacancy linked = nothing to detach — the `disabled` prop keeps
+                  the honest §3 gate. S15: opens the reason-required confirm modal
+                  instead of detaching straight away (the BE 422s a bare DELETE now). */}
+              {/* Disabled renders the uniform house recipe (grey fill). Supersedes the
+                  earlier bespoke unfilled ghost documented here as a §3 honest gate —
+                  ONE disabled look app-wide outweighs the local nuance (batch B R5). */}
+              <Button variant="dangerSoft" onClick={() => a.vacancyId != null && setDetachModalOpen(true)} disabled={a.vacancyId == null}
+                title={a.vacancyId == null ? t('detach.nothingLinked') : undefined}>
                 <Unlink size={12} /> {t('detach.button')}
-              </button>
+              </Button>
               </>
             ) : null}
           </div>
@@ -246,44 +227,33 @@ export default function ApplicationDrawer({ application: a, onClose, expanded, o
             <>
               {/* "Voorstellen aan klant" — prepares the house-style CV + a drafted
                   message and records it (no send capability yet, see the modal's
-                  own honest line). BUTTON-SOFT-TINT-1 (Danny 05-08): was a white/
-                  transparent outline button ("een andere stijl als onze standaard")
-                  — now the house soft-tint recipe (§4, mirrors DrawerAddButton/
-                  QuickViewToggle), still calm next to the filled Save pencil toggle. */}
+                  own honest line). */}
               {canPropose && (
-                <button type="button" onClick={() => setProposeModalOpen(true)}
-                  title={t('propose.trigger')} aria-label={t('propose.trigger')}
-                  style={{ display: 'flex', alignItems: 'center', gap: 5, height: BTN_H, padding: '0 10px',
-                    fontSize: 11, fontWeight: 600, borderRadius: 7, cursor: 'pointer',
-                    border: '1px solid color-mix(in srgb, var(--color-primary) 30%, transparent)',
-                    background: 'color-mix(in srgb, var(--color-primary) 10%, transparent)', color: 'var(--color-primary-text)' }}>
+                <Button variant="soft" onClick={() => setProposeModalOpen(true)}
+                  title={t('propose.trigger')} aria-label={t('propose.trigger')}>
                   <Send size={12} /> {t('propose.trigger')}
-                </button>
+                </Button>
               )}
               {candidateEdit.editing ? (
                 <>
-                  {/* Save (diskette) + cancel (✕) — same 28x28 icon-button pair as the
+                  {/* Save (diskette) + cancel (✕) — same icon-button pair as the
                       candidate drawer's CandidateHeaderActions edit toggle (§4). */}
-                  <button type="button" onClick={() => candidateEdit.saveEdit()} disabled={candidateEdit.saving}
-                    title={t('common:save')} aria-label={t('common:save')}
-                    style={{ ...iconBtn, background: 'var(--color-primary)', color: 'var(--color-on-accent)', border: 'none',
-                      opacity: candidateEdit.saving ? 0.7 : 1, cursor: candidateEdit.saving ? 'not-allowed' : 'pointer' }}>
+                  <Button variant="primary" iconOnly size="sm" onClick={() => candidateEdit.saveEdit()} disabled={candidateEdit.saving}
+                    title={t('common:save')} aria-label={t('common:save')}>
                     <Save size={14} />
-                  </button>
-                  <button type="button" onClick={candidateEdit.cancelEdit}
-                    title={t('common:cancel')} aria-label={t('common:cancel')}
-                    style={{ ...iconBtn, background: 'var(--bg)', color: 'var(--text-muted)', border: '1px solid var(--border)' }}>
+                  </Button>
+                  <Button variant="secondary" iconOnly size="sm" onClick={candidateEdit.cancelEdit}
+                    title={t('common:cancel')} aria-label={t('common:cancel')}>
                     <X size={14} />
-                  </button>
+                  </Button>
                 </>
               ) : (
                 // Idle → pencil. Gated on canManage AND a real candidateId (§3: no
                 // fake affordance when there is no honest edit target).
-                <button type="button" onClick={candidateEdit.startEdit}
-                  title={t('drawer.editCandidate')} aria-label={t('drawer.editCandidate')}
-                  style={{ ...iconBtn, background: 'var(--bg)', color: 'var(--text-muted)', border: '1px solid var(--border)' }}>
+                <Button variant="secondary" iconOnly size="sm" onClick={candidateEdit.startEdit}
+                  title={t('drawer.editCandidate')} aria-label={t('drawer.editCandidate')}>
                   <Edit2 size={13} />
-                </button>
+                </Button>
               )}
             </>
           ) : undefined}

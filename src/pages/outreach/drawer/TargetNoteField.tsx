@@ -40,6 +40,7 @@ import RichTextEditor from '@/components/ui/RichTextEditor'
 import RichTextAssistBar from '@/components/ui/RichTextAssistBar'
 import NoteAssistSection from '@/components/drawer/tabs/notes/NoteAssistSection'
 import SafeHtml from '@/components/ui/SafeHtml'
+import Button from '@/components/ui/Button'
 import { useTextPopoutHost } from '@/hooks/useTextPopoutHost'
 import { outreachTargetPopoutId } from '@/lib/secondScreen'
 
@@ -120,27 +121,21 @@ export default function TargetNoteField({ note, onSave, targetId, campaignId, on
     finally { setSaving(false) }
   }
 
-  const iconBtn = { width: 22, height: 22, display: 'flex', alignItems: 'center', justifyContent: 'center',
-    borderRadius: 6, cursor: saving ? 'not-allowed' : 'pointer', flexShrink: 0 } as const
-
   // Pencil (read mode) or save/cancel (edit mode) — the second-screen icon sits
   // next to it in BOTH states, exactly like the candidate profile text block.
   const editControls = editing ? (
     <div style={{ display: 'flex', gap: 4 }}>
-      <button onClick={cancel} disabled={saving} title={t('common:cancel')} aria-label={t('common:cancel')}
-        style={{ ...iconBtn, background: 'none', border: '1px solid var(--border)', color: 'var(--text-muted)' }}>
+      <Button variant="secondary" iconOnly size="sm" onClick={cancel} disabled={saving} title={t('common:cancel')} aria-label={t('common:cancel')}>
         <X size={12} />
-      </button>
-      <button onClick={save} disabled={saving} title={t('common:save')} aria-label={t('common:save')}
-        style={{ ...iconBtn, background: 'var(--color-primary)', border: 'none', color: 'var(--color-on-accent)', opacity: saving ? 0.6 : 1 }}>
+      </Button>
+      <Button variant="primary" iconOnly size="sm" onClick={save} disabled={saving} title={t('common:save')} aria-label={t('common:save')}>
         <Save size={12} />
-      </button>
+      </Button>
     </div>
   ) : (
-    <button onClick={start} title={t('common:edit')} aria-label={t('common:edit')}
-      style={{ ...iconBtn, background: 'none', color: 'var(--text-muted)', border: '1px solid var(--border)' }}>
+    <Button variant="secondary" iconOnly size="sm" onClick={start} title={t('common:edit')} aria-label={t('common:edit')}>
       <Edit2 size={11} />
-    </button>
+    </Button>
   )
 
   return (
@@ -153,10 +148,9 @@ export default function TargetNoteField({ note, onSave, targetId, campaignId, on
         <div style={{ display: 'flex', gap: 4, alignItems: 'center', flexShrink: 0 }}>
           {/* Second screen — same icon + footprint the candidate profile text
               uses for its own pop-out (§11: one mechanism). */}
-          <button onClick={openPopout} title={t('common:openSecondScreen')} aria-label={t('common:openSecondScreen')}
-            style={{ ...iconBtn, background: 'none', color: 'var(--text-muted)', border: '1px solid var(--border)' }}>
+          <Button variant="secondary" iconOnly size="sm" onClick={openPopout} title={t('common:openSecondScreen')} aria-label={t('common:openSecondScreen')}>
             <ExternalLink size={11} />
-          </button>
+          </Button>
           {editControls}
         </div>
       </div>

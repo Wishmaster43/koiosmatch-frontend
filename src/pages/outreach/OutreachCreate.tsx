@@ -23,7 +23,6 @@ import { useFocusTrap } from '@/hooks/useFocusTrap'
 import { WIDE_MODAL } from '@/components/ui/modalMetrics'
 import { cardHead, cardBox, row2, cardPair } from '@/components/ui/modalCards'
 import CreatableSelect from '@/components/ui/CreatableSelect'
-import { BTN_H } from '@/config/buttonMetrics'
 import { fieldInputStyle } from '@/components/forms/fieldMetrics'
 import Button from '@/components/ui/Button'
 
@@ -96,10 +95,9 @@ export default function OutreachCreate({ onClose, onCreated }: Props) {
         {/* Title row + close X (mirrors every other wide-form modal's header). */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
           <span style={{ fontSize: 16, fontWeight: 700, color: 'var(--text)' }}>{title}</span>
-          <button onClick={onClose} aria-label={t('common:close', { defaultValue: 'Close' })}
-            style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', display: 'flex' }}>
+          <Button variant="ghost" iconOnly size="sm" onClick={onClose} aria-label={t('common:close', { defaultValue: 'Close' })}>
             <X size={16} />
-          </button>
+          </Button>
         </div>
 
         {/* Two titled cards side by side: Algemeen (naam + kanaal) and Bron
@@ -146,10 +144,9 @@ export default function OutreachCreate({ onClose, onCreated }: Props) {
           <Button variant="secondary" onClick={onClose}>
             {t('common:cancel', { defaultValue: 'Cancel' })}
           </Button>
-          <button onClick={submit} disabled={saving || !canSubmit}
-            style={{ height: BTN_H, padding: '0 20px', fontSize: 13, fontWeight: 600, border: 'none', borderRadius: 8, background: 'var(--color-primary)', color: 'var(--color-on-accent)', cursor: canSubmit ? 'pointer' : 'not-allowed', opacity: canSubmit ? 1 : 0.5 }}>
+          <Button variant="primary" onClick={submit} disabled={saving || !canSubmit}>
             {saving ? t('create.saving') : t('create.submit')}
-          </button>
+          </Button>
         </div>
       </div>
     </>

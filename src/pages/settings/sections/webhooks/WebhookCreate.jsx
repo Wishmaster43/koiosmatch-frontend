@@ -61,11 +61,9 @@ export default function WebhookCreate({ onBack, onCreated }) {
     <div>
       {/* Header: back + icon + title (mirrors WebhookDetail) */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 22 }}>
-        {/* BTN_H (§4/§9): one explicit height for every text/action button, everywhere. */}
-        <button onClick={onBack} aria-label={t('common.back')}
-          style={{ display: 'flex', alignItems: 'center', gap: 6, height: BTN_H, padding: '0 12px', fontSize: 13, border: '1px solid var(--border)', borderRadius: 8, background: 'var(--hover-bg)', color: 'var(--text)', cursor: 'pointer' }}>
+        <Button variant="secondary" onClick={onBack} aria-label={t('common.back')}>
           <ArrowLeft size={13} /> {t('common.back')}
-        </button>
+        </Button>
         <div style={{ width: 34, height: 34, borderRadius: 9, background: 'var(--color-primary-bg)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
           <Webhook size={16} style={{ color: 'var(--color-primary-text)' }} />
         </div>
@@ -81,6 +79,8 @@ export default function WebhookCreate({ onBack, onCreated }) {
               <CalloutBox variant="success" title={t('webhooks.outgoing.secretOnce')}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                   <code style={{ flex: 1, fontSize: 12, fontFamily: "'JetBrains Mono', monospace", background: 'var(--surface)', border: '1px solid color-mix(in srgb, var(--color-success) 35%, transparent)', borderRadius: 6, padding: '9px 11px', color: 'var(--text)', overflowX: 'auto', whiteSpace: 'nowrap' }}>{result.secret}</code>
+                  {/* HUISSTIJL-1: left hand-styled — a success-tinted action has no
+                      Button variant (only primary/secondary/ghost/soft/danger/dangerSoft exist). */}
                   <button onClick={copySecret} aria-label={t('webhooks.outgoing.copySecret')}
                     style={{ height: BTN_H, padding: '0 12px', display: 'flex', alignItems: 'center', gap: 5, fontSize: 12, border: '1px solid color-mix(in srgb, var(--color-success) 35%, transparent)', borderRadius: 6, background: 'var(--surface)', cursor: 'pointer', color: 'var(--color-success)', whiteSpace: 'nowrap' }}>
                     {copied ? <Check size={12} /> : <Copy size={12} />} {copied ? t('common.copied') : t('webhooks.outgoing.copySecret')}
@@ -89,10 +89,9 @@ export default function WebhookCreate({ onBack, onCreated }) {
                 <p style={{ fontSize: 11, color: 'var(--color-success)', marginTop: 8, marginBottom: 0 }}>{t('webhooks.outgoing.signingHint')}</p>
               </CalloutBox>
             </div>
-            <button onClick={onBack}
-              style={{ height: BTN_H, padding: '0 20px', fontSize: 13, fontWeight: 500, border: 'none', borderRadius: 8, background: 'var(--color-primary)', color: 'var(--color-on-accent)', cursor: 'pointer' }}>
+            <Button variant="primary" onClick={onBack}>
               {t('webhooks.outgoing.done')}
-            </button>
+            </Button>
           </div>
         ) : (
           // Phase 1 — the create form + event filter.
@@ -114,12 +113,10 @@ export default function WebhookCreate({ onBack, onCreated }) {
 
             {error && <div style={{ fontSize: 12, color: 'var(--color-danger)' }}>{t('webhooks.outgoing.createError')}</div>}
 
-            {/* BTN_H (§4/§9): one explicit height for every text/action button, everywhere. */}
             <div style={{ display: 'flex', gap: 10 }}>
-              <button onClick={submit} disabled={saving || !canSubmit}
-                style={{ height: BTN_H, padding: '0 20px', fontSize: 13, fontWeight: 500, border: 'none', borderRadius: 8, background: 'var(--color-primary)', color: 'var(--color-on-accent)', cursor: canSubmit ? 'pointer' : 'not-allowed', opacity: canSubmit ? 1 : 0.5 }}>
+              <Button variant="primary" onClick={submit} disabled={saving || !canSubmit}>
                 {saving ? t('webhooks.outgoing.creating') : t('webhooks.outgoing.create')}
-              </button>
+              </Button>
               <Button variant="secondary" onClick={onBack}>
                 {t('common.cancel')}
               </Button>

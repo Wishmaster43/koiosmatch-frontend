@@ -45,6 +45,7 @@ import { useTranslation } from 'react-i18next'
 import { Edit2, Save, X } from 'lucide-react'
 import RichTextEditorJs from '@/components/ui/RichTextEditor'
 import SafeHtmlJs from '@/components/ui/SafeHtml'
+import Button from '@/components/ui/Button'
 import { notifySuccess, notifyError } from '@/lib/notify'
 import type { MatchContract } from '../hooks/useMatchContract'
 
@@ -87,7 +88,6 @@ export default function MatchTextBlock({ value, present, loading, save }: Props)
     }
   }
 
-  const iconBtn = { width: 26, height: 26, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 6, cursor: 'pointer' } as const
   const blockStyle = { borderRadius: 10, overflow: 'hidden', border: '1px solid var(--border)', background: 'var(--surface)' } as const
 
   // OFFERED-IFF-READ: the backend column doesn't exist yet — stay hidden
@@ -100,20 +100,17 @@ export default function MatchTextBlock({ value, present, loading, save }: Props)
         <span style={{ fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em', color: 'var(--text-muted)' }}>{t('drawer.matchText.title')}</span>
         {editing ? (
           <div style={{ display: 'flex', gap: 4 }}>
-            <button onClick={saveEdit} title={t('common:save')} aria-label={t('common:save')}
-              style={{ ...iconBtn, background: 'var(--color-primary)', color: 'var(--color-on-accent)', border: 'none' }}>
+            <Button variant="primary" iconOnly size="sm" onClick={saveEdit} title={t('common:save')} aria-label={t('common:save')}>
               <Save size={13} />
-            </button>
-            <button onClick={cancelEdit} title={t('common:cancel')} aria-label={t('common:cancel')}
-              style={{ ...iconBtn, background: 'var(--bg)', color: 'var(--text-muted)', border: '1px solid var(--border)' }}>
+            </Button>
+            <Button variant="secondary" iconOnly size="sm" onClick={cancelEdit} title={t('common:cancel')} aria-label={t('common:cancel')}>
               <X size={13} />
-            </button>
+            </Button>
           </div>
         ) : (
-          <button onClick={startEdit} title={t('common:edit')} aria-label={t('common:edit')}
-            style={{ ...iconBtn, background: 'none', color: 'var(--text-muted)', border: '1px solid var(--border)' }}>
+          <Button variant="secondary" iconOnly size="sm" onClick={startEdit} title={t('common:edit')} aria-label={t('common:edit')}>
             <Edit2 size={13} />
-          </button>
+          </Button>
         )}
       </div>
       {loading ? (

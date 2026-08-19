@@ -21,9 +21,10 @@ import { useDateFormat } from '@/lib/datetime'
 import { initialsOf } from '@/lib/initials'
 import { isTaskOverdue, dueDateTime } from '../data/mapTask'
 import SubtasksSection from './SubtasksSection'
+import Button from '@/components/ui/Button'
 import type { TaskDetail } from '@/types/task'
 import type { Id } from '@/types/common'
-import type { CSSProperties, ReactNode } from 'react'
+import type { ReactNode } from 'react'
 import { CANON_LABEL_STYLE } from '@/components/drawer/fieldRowCanon'
 
 interface UserLike { id?: Id; name?: string; firstname?: string; lastname?: string; email?: string; avatar_color?: string | null }
@@ -42,16 +43,12 @@ function Row({ label, children }: { label: ReactNode; children: ReactNode }) {
   )
 }
 
-const iconBtnBase: CSSProperties = { width: 26, height: 26, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 6, cursor: 'pointer' }
-
 // Shared save/cancel icon pair — used by both independently-editable sections below.
 function EditControls({ onSave, onCancel, saveLabel, cancelLabel }: { onSave: () => void; onCancel: () => void; saveLabel: string; cancelLabel: string }) {
   return (
     <div style={{ display: 'flex', gap: 4 }}>
-      <button onClick={onSave} title={saveLabel} aria-label={saveLabel}
-        style={{ ...iconBtnBase, background: 'var(--color-primary)', color: 'var(--color-on-accent)', border: 'none' }}><Save size={13} /></button>
-      <button onClick={onCancel} title={cancelLabel} aria-label={cancelLabel}
-        style={{ ...iconBtnBase, background: 'var(--bg)', color: 'var(--text-muted)', border: '1px solid var(--border)' }}><X size={13} /></button>
+      <Button variant="primary" iconOnly size="sm" onClick={onSave} title={saveLabel} aria-label={saveLabel}><Save size={13} /></Button>
+      <Button variant="secondary" iconOnly size="sm" onClick={onCancel} title={cancelLabel} aria-label={cancelLabel}><X size={13} /></Button>
     </div>
   )
 }
@@ -160,10 +157,9 @@ export default function DetailsTab({ task, onUpdate, onSubtaskCreated }: {
             // No edit on an ARCHIVED task. W2 delivered (measured: TaskController::update
             // is now withTrashed, so the PATCH no longer 404s) — the gating stays anyway:
             // restore first is a deliberate product choice (mirrors the header gating).
-            <button onClick={startEdit} title={t('details.title')} aria-label={t('details.title')}
-              style={{ ...iconBtnBase, background: 'none', color: 'var(--text-muted)', border: '1px solid var(--border)' }}>
+            <Button variant="secondary" iconOnly size="sm" onClick={startEdit} title={t('details.title')} aria-label={t('details.title')}>
               <Edit2 size={13} />
-            </button>
+            </Button>
           )}
         </div>
 
@@ -235,10 +231,9 @@ export default function DetailsTab({ task, onUpdate, onSubtaskCreated }: {
           {descEditing ? (
             <EditControls onSave={saveDesc} onCancel={cancelDesc} saveLabel={t('comments.send')} cancelLabel={t('modal.cancel')} />
           ) : !task.archived && (
-            <button onClick={startDescEdit} title={t('details.description')} aria-label={t('details.description')}
-              style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: 4, display: 'flex' }}>
+            <Button variant="ghost" iconOnly size="sm" onClick={startDescEdit} title={t('details.description')} aria-label={t('details.description')}>
               <Edit2 size={13} />
-            </button>
+            </Button>
           )}
         </div>
         {descEditing ? (

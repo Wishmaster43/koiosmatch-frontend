@@ -1,4 +1,4 @@
-import type { CSSProperties, ReactNode } from 'react'
+import type { ReactNode } from 'react'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { CheckCircle2, Edit2, Save, X } from 'lucide-react'
@@ -22,7 +22,7 @@ import ArchivedBanner from '@/components/drawer/ArchivedBanner'
 import TrashLifecycleSection from '@/components/drawer/TrashLifecycleSection'
 import type { TrashSectionConfig } from '@/components/drawer/TrashLifecycleSection'
 import { initialsOf } from '@/lib/initials'
-import { BTN_H } from '@/config/buttonMetrics'
+import Button from '@/components/ui/Button'
 import type { TaskDetail } from '@/types/task'
 import type { Id } from '@/types/common'
 
@@ -38,10 +38,6 @@ const userName = (u: UserLike): string => u.name || [u.firstname, u.lastname].fi
 // own tab now — was a section pinned under Details, generalised beyond candidate-only.
 // 'extra' (§3A(f)) is appended below only when the tenant has ≥1 active custom field.
 const TAB_IDS = ['details', 'links', 'related', 'notes']
-
-const hdrBtn: CSSProperties = { display: 'flex', alignItems: 'center', justifyContent: 'center', width: 28, height: 28, borderRadius: 7, cursor: 'pointer', flexShrink: 0 }
-const hdrGhost: CSSProperties = { ...hdrBtn, background: 'var(--bg)', color: 'var(--text-muted)', border: '1px solid var(--border)' }
-const hdrPrimary: CSSProperties = { ...hdrBtn, background: 'var(--color-primary)', color: 'var(--color-on-accent)', border: 'none' }
 
 interface TaskDrawerProps {
   task: TaskDetail | null
@@ -135,10 +131,14 @@ export default function TaskDrawer({ task, onClose, expanded, onToggleExpand, on
   const doneValue = doneStatusValues[0]
   const markDone = doneValue != null && !task.statusIsDone && !task.archived
     ? (
-      // BTN_H (§4/§9): one explicit height for every text/action button, everywhere.
+      // HUISSTIJL-1: left hand-styled — the success token PAIR (--color-success
+      // fill + --color-on-success text) is deliberate (§4 "aan/gelukt" green),
+      // not a Button variant (Button has no success variant).
       <button onClick={() => onUpdate(task.id, { statusKey: doneValue })}
-        style={{ display: 'flex', alignItems: 'center', gap: 5, height: BTN_H, padding: '0 10px', fontSize: 11, fontWeight: 600,
-          borderRadius: 7, cursor: 'pointer', border: '1px solid var(--color-success)', background: 'var(--color-success)', color: 'var(--color-on-success)' }}>
+        // 28px/r6: matches its sm icon-button neighbours in this actions row (Opus batch B R6);
+        // the success token pair itself stays — §4 names this exact surface.
+        style={{ display: 'flex', alignItems: 'center', gap: 5, height: 28, padding: '0 10px', fontSize: 11, fontWeight: 600,
+          borderRadius: 6, cursor: 'pointer', border: '1px solid var(--color-success)', background: 'var(--color-success)', color: 'var(--color-on-success)' }}>
         <CheckCircle2 size={12} /> {t('drawer.markDone')}
       </button>
     ) : null
@@ -191,12 +191,12 @@ export default function TaskDrawer({ task, onClose, expanded, onToggleExpand, on
           // choice per the meta-picker comment below, not a technical necessity).
           actions={editingTitle ? (
             <>
-              <button onClick={saveTitleEdit} title={t('common:save')} style={hdrPrimary}><Save size={14} /></button>
-              <button onClick={() => setEditingTitle(false)} title={t('common:cancel')} style={hdrGhost}><X size={14} /></button>
+              <Button variant="primary" iconOnly size="sm" onClick={saveTitleEdit} title={t('common:save')}><Save size={14} /></Button>
+              <Button variant="secondary" iconOnly size="sm" onClick={() => setEditingTitle(false)} title={t('common:cancel')}><X size={14} /></Button>
             </>
           ) : (
             <>
-              {!task.archived && <button onClick={startTitleEdit} title={t('common:edit')} style={hdrGhost}><Edit2 size={13} /></button>}
+              {!task.archived && <Button variant="secondary" iconOnly size="sm" onClick={startTitleEdit} title={t('common:edit')}><Edit2 size={13} /></Button>}
               {markDone}
             </>
           )}
