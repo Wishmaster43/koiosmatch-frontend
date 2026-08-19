@@ -6,7 +6,7 @@
  * to `./fieldControls`. Extracted from WorkflowCanvasEditor.
  */
 import { useId } from 'react'
-import { Plus, X } from 'lucide-react'
+import { X } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import type { WorkflowField, EdgeFilters, WorkflowVarGroup } from '@/types/workflow'
 import {
@@ -20,6 +20,7 @@ import MultiSelectField from './MultiSelectField'
 // Danny 08-08 (§4): the house searchable combobox replaces the bare native
 // <select> for the generic 'select' field type below.
 import CreatableSelect from '@/components/ui/CreatableSelect'
+import DrawerAddButton from '@/components/drawer/DrawerAddButton'
 
 export function FieldInput({ field, value, onChange, variables, config }: {
   field: WorkflowField; value?: unknown; onChange: OnChange; variables?: WorkflowVarGroup[]
@@ -122,10 +123,8 @@ export function FieldInput({ field, value, onChange, variables, config }: {
             </button>
           </div>
         ))}
-        <button type="button" onClick={add}
-          style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 11, color: 'var(--color-primary-text)', background: 'none', border: '1px dashed var(--color-primary)', borderRadius: 6, padding: '4px 8px', cursor: 'pointer' }}>
-          <Plus size={10} /> {t('fields.add')}
-        </button>
+        {/* HUISSTIJL-1: the ONE "+ add" affordance, app-wide (§3A). */}
+        <DrawerAddButton onClick={add} label={t('fields.add')} />
       </div>
     )
   }

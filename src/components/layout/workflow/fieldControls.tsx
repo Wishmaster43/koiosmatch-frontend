@@ -17,6 +17,7 @@ import { unwrap, unwrapList } from '@/lib/api'
 // <select> below (webhook / lookup / response-structure-type pickers).
 import CreatableSelect from '@/components/ui/CreatableSelect'
 import Button from '@/components/ui/Button'
+import DrawerAddButton from '@/components/drawer/DrawerAddButton'
 
 // Shared change handler: writes one field's value into the node config.
 export type OnChange = (key: string, value: unknown) => void
@@ -148,10 +149,8 @@ export function WebhookSelectField({ value, onChange, fieldKey }: { value?: unkn
           </button>
         </div>
       ) : (
-        <button type="button" onClick={() => setShowNew(true)}
-          style={{ alignSelf: 'flex-start', display: 'flex', alignItems: 'center', gap: 4, fontSize: 11, color: 'var(--color-primary-text)', background: 'none', border: '1px dashed var(--color-primary)', borderRadius: 6, padding: '5px 9px', cursor: 'pointer' }}>
-          <Plus size={11} /> {t('fields.webhookCreate')}
-        </button>
+        // HUISSTIJL-1: the ONE "+ add" affordance, app-wide (§3A).
+        <DrawerAddButton onClick={() => setShowNew(true)} label={t('fields.webhookCreate')} />
       )}
 
       {/* Receiving URL — what you give to the external system */}
@@ -280,10 +279,8 @@ export function FiltersField({ field, value, onChange }: { field: WorkflowField;
           </div>
         )
       })}
-      <button type="button" onClick={add}
-        style={{ alignSelf: 'flex-start', display: 'flex', alignItems: 'center', gap: 4, fontSize: 11, color: 'var(--color-primary-text)', background: 'none', border: '1px dashed var(--color-primary)', borderRadius: 6, padding: '5px 9px', cursor: 'pointer' }}>
-        <Plus size={10} /> {t('fields.addCondition')}
-      </button>
+      // HUISSTIJL-1: the ONE "+ add" affordance, app-wide (§3A).
+      <DrawerAddButton onClick={add} label={t('fields.addCondition')} />
     </div>
   )
 }
@@ -332,12 +329,10 @@ export function ResponseStructureField({ value, onChange, fieldKey }: { value?: 
           </button>
         </div>
       ))}
-      <button type="button" onClick={add}
-        style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 11, color: 'var(--color-primary-text)',
-          background: 'none', border: '1px dashed var(--color-primary)', borderRadius: 6,
-          padding: '5px 9px', cursor: 'pointer', marginTop: 2 }}>
-        <Plus size={10} /> {t('fields.addItem')}
-      </button>
+      // HUISSTIJL-1: the ONE "+ add" affordance, app-wide (§3A).
+      <div style={{ marginTop: 2 }}>
+        <DrawerAddButton onClick={add} label={t('fields.addItem')} />
+      </div>
     </div>
   )
 }

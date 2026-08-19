@@ -7,6 +7,7 @@ import { GripVertical, Check, ChevronUp, ChevronDown } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { COLOR_PRESETS } from '@/lib/colorPresets'
 import Toggle from '@/components/ui/Toggle'
+import SoftChip from '@/components/ui/SoftChip'
 
 function ColorPickerPopup({ color, onChange, onClose }) {
   const [hex, setHex] = useState(color)
@@ -56,14 +57,12 @@ export function PermissionToggle({ checked, onChange, 'aria-label': ariaLabel, .
   return <Toggle checked={checked} onChange={() => onChange()} ariaLabel={ariaLabel} {...rest} />
 }
 
+// ColorBadge — a lookup row's own label+colour chip (statuses/funnel/candidate
+// types/pools/…). HUISSTIJL-1: this used to hand-roll its own hex-concat tint;
+// it now delegates to SoftChip — the ONE chip component (§4) — so every one of
+// its many call sites gets the house tintBg/tintBorder formula for free.
 export function ColorBadge({ label, color }) {
-  const bg = color + '22'
-  return (
-    <span style={{ display: 'inline-block', padding: '3px 10px', borderRadius: 999, fontSize: 12, fontWeight: 600,
-                   background: bg, color: color, border: `1px solid ${color}44` }}>
-      {label}
-    </span>
-  )
+  return <SoftChip label={label} color={color} round />
 }
 
 // Per-row "Standaard" (is_default) singleton toggle — soft-chip convention (§4):

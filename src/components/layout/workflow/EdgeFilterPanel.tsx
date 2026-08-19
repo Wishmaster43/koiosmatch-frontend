@@ -25,6 +25,7 @@ import { OperatorSelect } from './OperatorSelect'
 import { MODULE_META } from '@/modules/index'
 import type { FilterCondition, FilterConditionGroup, EdgeFilters, FlowNode, FlowEdge } from '@/types/workflow'
 import Button from '@/components/ui/Button'
+import DrawerAddButton from '@/components/drawer/DrawerAddButton'
 
 // A short syntax reminder for the newer date/time operators — undefined (no
 // hint row rendered) for the plain equality/text operators.
@@ -152,25 +153,18 @@ export function EdgeFilterPanel({ filters, label, sourceNodeId, nodes = [], edge
                   </div>
                 )
               })}
-              <button onClick={() => addCond(gi)} style={{
-                display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, color: 'var(--color-primary-text)',
-                background: 'none', border: '1px dashed var(--color-primary)', borderRadius: 8,
-                padding: '6px 12px', cursor: 'pointer', justifyContent: 'center',
-              }}>
-                <Plus size={12} /> {t('fields.addCondition')}
-              </button>
+              {/* HUISSTIJL-1: the ONE "+ add" affordance, app-wide (§3A). */}
+              <DrawerAddButton onClick={() => addCond(gi)} label={t('fields.addCondition')} />
             </div>
           </div>
         ))}
       </div>
 
-      <button onClick={addGroup} style={{
-        display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, fontWeight: 600, color: 'var(--color-primary-text)',
-        background: 'var(--color-primary-bg)', border: 'none', borderRadius: 8,
-        padding: '8px 12px', cursor: 'pointer', marginBottom: 20, width: '100%', justifyContent: 'center',
-      }}>
+      {/* Full-width trigger: Button variant="soft" (§4 tint), not DrawerAddButton — this
+          spans the whole panel, unlike the row-level "+ add condition" affordance above. */}
+      <Button variant="soft" size="sm" onClick={addGroup} style={{ width: '100%', marginBottom: 20 }}>
         <Plus size={12} /> {t('canvas.addGroup')}
-      </button>
+      </Button>
 
       <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
         <button onClick={onClose} style={{ padding: '8px 16px', fontSize: 13, border: '1px solid var(--border)', borderRadius: 8, background: 'var(--surface)', cursor: 'pointer', color: 'var(--text-muted)' }}>{t('common:cancel')}</button>

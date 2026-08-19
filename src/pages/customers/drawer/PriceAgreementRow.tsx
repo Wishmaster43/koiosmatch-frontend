@@ -15,6 +15,7 @@ import { useDateFormat } from '@/lib/datetime'
 import { sectionBlock } from '@/components/ui/SectionCard'
 import SafeHtml from '@/components/ui/SafeHtml'
 import { useConfirm } from '@/hooks/useConfirm'
+import SoftChip from '@/components/ui/SoftChip'
 import PriceAgreementForm, { draftFromAgreement, draftToPayload } from './PriceAgreementForm'
 import type { PriceAgreementDraft } from './PriceAgreementForm'
 import type { PriceAgreement, PriceAgreementPayload } from '../hooks/usePriceAgreements'
@@ -74,10 +75,9 @@ export default function PriceAgreementRow({ agreement, onSave, onDelete }: {
       <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 8 }}>
         <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 10 }}>
           <Criterion label={t('priceAgreements.function')} value={agreement.functionTitle} any={t('priceAgreements.any')} />
+          {/* SoftChip — the ONE chip component (§4, HUISSTIJL-1). */}
           {agreement.cao
-            ? <span style={{ padding: '2px 9px', borderRadius: 999, fontSize: 11, fontWeight: 500, background: caoColor + '1A', color: caoColor, border: `1px solid ${caoColor}55` }}>
-                {t('priceAgreements.cao')}: {agreement.cao}
-              </span>
+            ? <SoftChip color={caoColor} round label={`${t('priceAgreements.cao')}: ${agreement.cao}`} />
             : <Criterion label={t('priceAgreements.cao')} value={null} any={t('priceAgreements.any')} />}
           <Criterion label={t('priceAgreements.scale')} value={agreement.scale} any={t('priceAgreements.any')} />
           <Criterion label={t('priceAgreements.step')} value={agreement.step} any={t('priceAgreements.any')} />

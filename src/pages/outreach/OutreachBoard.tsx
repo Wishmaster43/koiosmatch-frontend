@@ -8,6 +8,7 @@ import { useTranslation } from 'react-i18next'
 import { Phone, Mail, MessageCircle, Users } from 'lucide-react'
 import type { Campaign } from './hooks/useOutreachCampaigns'
 import { useDragAutoScroll } from '@/lib/useDragAutoScroll'
+import SoftChip from '@/components/ui/SoftChip'
 
 // Icon + colour per outreach channel (soft-chip convention) — fixed channel enum,
 // not a tenant lookup, so these are DATA (mirrors a categorical palette, not styling).
@@ -74,10 +75,12 @@ export default function OutreachBoard({ rows, columns, onMove, onOpen }: Props) 
                     cursor: onOpen ? 'pointer' : 'grab', userSelect: 'none', border: '1px solid var(--border)' }}>
                   <div style={{ fontWeight: 600, fontSize: 13, color: 'var(--text)', marginBottom: 8, lineHeight: 1.3 }}>{c.name ?? '—'}</div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 8, justifyContent: 'space-between' }}>
-                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, fontSize: 11, fontWeight: 500,
-                      padding: '2px 8px', borderRadius: 99, background: m.color + '1A', color: m.color, border: `1px solid ${m.color}55` }}>
-                      <Icon size={12} /> {t(`channel.${c.channel}`, { defaultValue: c.channel ?? '—' })}
-                    </span>
+                    {/* SoftChip — the ONE chip component (§4, HUISSTIJL-1). */}
+                    <SoftChip color={m.color} round label={
+                      <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5 }}>
+                        <Icon size={12} /> {t(`channel.${c.channel}`, { defaultValue: c.channel ?? '—' })}
+                      </span>
+                    } />
                     {targets != null && (
                       <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 11, color: 'var(--text-muted)' }}>
                         <Users size={12} /> {targets}

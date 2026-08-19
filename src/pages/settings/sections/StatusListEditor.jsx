@@ -8,7 +8,7 @@ import { useTranslation } from 'react-i18next'
 import IconPickerControl from './IconPickerControl'
 import { GENERIC_LOOKUP_ICON_NAMES, resolveGenericLookupIcon } from './lookupIcons'
 import SearchSelect from '@/components/ui/SearchSelect'
-import { AlertTriangle, Plus, X, Trash2, RefreshCw, Pencil } from 'lucide-react'
+import { AlertTriangle, X, Trash2, RefreshCw, Pencil } from 'lucide-react'
 import api, { unwrap, unwrapList } from '@/lib/api'
 import { extractApiError } from '@/lib/extractApiError'
 import { notifyError } from '@/lib/notify'
@@ -16,6 +16,7 @@ import { useConfirm } from '@/hooks/useConfirm'
 import { DragList, ColorSwatch, ColorBadge, DefaultToggle } from '../components/SettingsControls'
 import { Toggle } from '../components/SettingsKit'
 import Button from '@/components/ui/Button'
+import DrawerAddButton from '@/components/drawer/DrawerAddButton'
 
 // eslint-disable-next-line no-restricted-syntax -- DATA: fallback swatch colour for a lookup row without one stored yet, not UI chrome
 const FALLBACK_SWATCH = '#6B7280'
@@ -286,11 +287,8 @@ export default function StatusListEditor({ title, subtitle, endpoint, addLabel, 
           <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>{subtitle}</p>
         </div>
         <div style={{ display: 'flex', gap: 8, flexShrink: 0 }}>
-          {allowAdd && (
-            <Button variant="secondary" onClick={openCreate}>
-              <Plus size={13} /> {addLabel}
-            </Button>
-          )}
+          {/* HUISSTIJL-1: the ONE "+ add" affordance, app-wide (§3A). */}
+          {allowAdd && <DrawerAddButton onClick={openCreate} label={addLabel} />}
         </div>
       </div>
 

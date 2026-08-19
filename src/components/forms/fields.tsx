@@ -15,6 +15,7 @@ import { CANON_LABEL_STYLE } from '@/components/drawer/fieldRowCanon'
 import { toLocalIsoDate } from '@/lib/localDate'
 import CreatableSelect from '@/components/ui/CreatableSelect'
 import Button from '@/components/ui/Button'
+import DrawerAddButton from '@/components/drawer/DrawerAddButton'
 
 export interface SelectOption { value: string; label?: ReactNode }
 
@@ -150,25 +151,17 @@ export function CheckboxField({ id, checked, onChange, disabled }: {
   )
 }
 
-/** "+ label" ghost button used at the top of every addable section. */
 /**
  * AddButton — every "+ X toevoegen" affordance in a form/section. Danny 08-08:
  * "MOET EEN KNOP ZIJN" — it used to render as bare orange text with a plus,
- * which does not read as clickable and drifted per screen. Now it is a real
- * bordered button in the §4 soft-tint recipe, matching DrawerAddButton so the
- * add action looks identical in a drawer tab and in a form section.
+ * which does not read as clickable and drifted per screen. HUISSTIJL-1 (18-08):
+ * this had its own hand-rolled 8%/32% tint recipe instead of the house 10%/33%
+ * pair, so it now delegates straight to DrawerAddButton — the ONE "+ add"
+ * component app-wide — while keeping its own name/signature so AddableSection's
+ * one call-site is untouched.
  */
 export function AddButton({ onClick, label }: { onClick: () => void; label?: ReactNode }) {
-  const { t } = useTranslation('common')
-  return (
-    <button type="button" onClick={onClick}
-      style={{ display: 'inline-flex', alignItems: 'center', gap: 5, fontSize: 12, fontWeight: 500,
-        padding: '5px 11px', borderRadius: 8, cursor: 'pointer', color: 'var(--color-primary-text)',
-        background: 'color-mix(in srgb, var(--color-primary) 8%, transparent)',
-        border: '1px solid color-mix(in srgb, var(--color-primary) 32%, transparent)' }}>
-      <span style={{ fontSize: 13, lineHeight: 1 }}>+</span> {label ?? t('add')}
-    </button>
-  )
+  return <DrawerAddButton onClick={onClick} label={label} />
 }
 
 export function SaveCancel({ onSave, onCancel, saveLabel, cancelLabel }: {

@@ -23,6 +23,8 @@ import RichTextEditor from '@/components/ui/RichTextEditor'
 import SafeHtml from '@/components/ui/SafeHtml'
 import FieldNotice from '@/components/ui/FieldNotice'
 import { CANON_LABEL_WIDTH } from '@/components/drawer/fieldRowCanon'
+import SoftChip from '@/components/ui/SoftChip'
+import { tintBg, tintBorder } from '@/lib/tint'
 
 export interface FieldRow {
   key: string
@@ -262,7 +264,10 @@ export default function EditableFieldTable({
             return (
               <button key={o.value} type="button" onClick={() => setF(f.key, active ? '' : o.value)}
                 style={{ padding: '3px 10px', borderRadius: 999, fontSize: 12, cursor: 'pointer', fontWeight: active ? 600 : 400, transition: 'all 0.12s',
-                  ...(active ? { background: col + '1A', color: col, border: `1px solid ${col}55` } : { background: 'var(--surface)', color: 'var(--text-muted)', border: '1px solid var(--border)' }) }}>
+                  // Interactive toggle chip — stays a real <button> (SoftChip has no
+                  // onClick), but the tint now uses the house tintBg/tintBorder formula
+                  // instead of hex-concat (§4, HUISSTIJL-1).
+                  ...(active ? { background: tintBg(col, true), color: col, border: tintBorder(col, true) } : { background: 'var(--surface)', color: 'var(--text-muted)', border: '1px solid var(--border)' }) }}>
                 {o.label}
               </button>
             )
@@ -297,12 +302,10 @@ export default function EditableFieldTable({
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 5 }}>
           {arr.map(x => {
             const o = (f.chipOptions ?? []).find(op => op.value === x)
-            const col = o?.color
-            // Per-value colour when set (e.g. contract forms), else the primary accent.
-            const s = col
-              ? { background: col + '1A', color: col, border: `1px solid ${col}55` }
-              : { background: 'var(--color-primary-bg)', color: 'var(--color-primary-text)', border: '1px solid var(--color-primary)' }
-            return <span key={x} style={{ padding: '2px 9px', borderRadius: 999, fontSize: 11, fontWeight: 500, ...s }}>{o?.label ?? x}</span>
+            // SoftChip — the ONE chip component (§4, HUISSTIJL-1). Per-value colour when
+            // set (e.g. contract forms), else the primary accent (never SoftChip's own
+            // neutral-grey fallback, which would drop the "Candidate-type chip" look).
+            return <SoftChip key={x} label={o?.label ?? x} color={o?.color ?? 'var(--color-primary)'} round />
           })}
         </div>
       )
@@ -320,8 +323,8 @@ export default function EditableFieldTable({
       const cur = v as string | undefined
       if (!cur) return <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>-</span>
       const o = (f.chipOptions ?? []).find(op => op.value === cur)
-      const col = o?.color ?? 'var(--color-primary)'
-      return <span style={{ padding: '2px 9px', borderRadius: 999, fontSize: 11, fontWeight: 500, background: col + '1A', color: col, border: `1px solid ${col}55` }}>{o?.label ?? cur}</span>
+      // SoftChip — the ONE chip component (§4, HUISSTIJL-1).
+      return <SoftChip label={o?.label ?? cur} color={o?.color ?? 'var(--color-primary)'} round />
     }
     // Address composite reads as ONE composed line (only reached in read mode —
     // editing expands this row into its addressFields instead, see renderRows).

@@ -1,12 +1,13 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Link2, X, Plus } from 'lucide-react'
+import { Link2, X } from 'lucide-react'
 import EntityLink from '@/components/ui/EntityLink'
 import AddLinkRow from '../links/AddLinkRow'
 import type { NewLink } from '../links/AddLinkRow'
 import { TASK_LINK_PAGE } from '../links/taskLinkTypes'
 import type { TaskDetail } from '@/types/task'
 import type { Id } from '@/types/common'
+import DrawerAddButton from '@/components/drawer/DrawerAddButton'
 
 /**
  * LinksTab — the polymorphic entities a task is linked to. Lists the current links
@@ -31,12 +32,10 @@ export default function LinksTab({ task, onAddLink, onRemoveLink }: {
       {adding ? (
         <AddLinkRow existing={links} onAdd={onAddLink} onClose={() => setAdding(false)} />
       ) : (
-        <button onClick={() => setAdding(true)}
-          style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '6px 10px', fontSize: 12, fontWeight: 500,
-            border: '1px dashed var(--border)', borderRadius: 8, background: 'none', color: 'var(--text-muted)',
-            cursor: 'pointer', marginBottom: 12 }}>
-          <Plus size={13} /> {t('links.add')}
-        </button>
+        // HUISSTIJL-1: the ONE "+ add" affordance, app-wide (§3A).
+        <div style={{ marginBottom: 12 }}>
+          <DrawerAddButton onClick={() => setAdding(true)} label={t('links.add')} />
+        </div>
       )}
 
       {/* Existing links */}

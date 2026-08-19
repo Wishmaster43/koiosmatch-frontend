@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, lazy, Suspense } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Plus, Map as MapIcon, AlertTriangle } from 'lucide-react'
+import { Map as MapIcon, AlertTriangle } from 'lucide-react'
 import api, { unwrap, unwrapList } from '@/lib/api'
 import { notifyError, notifySuccess } from '@/lib/notify'
 import QuickViewToggle from '@/components/ui/QuickViewToggle'
@@ -8,7 +8,7 @@ import { useConfirm } from '@/hooks/useConfirm'
 import { DEFAULT_LOCATION_COLOR, DEFAULT_LOCATION_ICON } from '@/lib/locationIcons'
 import LocationsTable from './locations/LocationsTable'
 import LocationFormModal from './locations/LocationFormModal'
-import Button from '@/components/ui/Button'
+import DrawerAddButton from '@/components/drawer/DrawerAddButton'
 
 // STRAAL-1: Leaflet only loads when the map view opens (§9 — lazy heavy deps).
 const LocationsMapView = lazy(() => import('./LocationsMapView'))
@@ -172,11 +172,10 @@ export default function LocationsSettings() {
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
           {/* Map quick-view via the ONE shared toggle (§4 — never hand-rolled). */}
-          <QuickViewToggle active={view === 'map'} onToggle={() => setView(v => (v === 'map' ? 'table' : 'map'))}
+          <QuickViewToggle size="compact" active={view === 'map'} onToggle={() => setView(v => (v === 'map' ? 'table' : 'map'))}
             label={t('common:map.view')} color="var(--color-primary)" icon={MapIcon} />
-          <Button variant="secondary" onClick={openCreate}>
-            <Plus size={13} /> {t('locations.create')}
-          </Button>
+          {/* HUISSTIJL-1: the ONE "+ add" affordance, app-wide (§3A). */}
+          <DrawerAddButton onClick={openCreate} label={t('locations.create')} />
         </div>
       </div>
 

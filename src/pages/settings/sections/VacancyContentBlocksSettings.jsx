@@ -248,11 +248,11 @@ export default function VacancyContentBlocksSettings() {
           </div>
         </div>
       ) : (
-        <button onClick={() => setAdding(true)}
-          style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '8px 14px', fontSize: 13, borderRadius: 8,
-                   border: '1px dashed var(--border)', background: 'transparent', color: 'var(--text-muted)', cursor: 'pointer', width: '100%', justifyContent: 'center' }}>
+        // Full-width trigger: Button variant="soft" (§4 tint), not DrawerAddButton — this
+        // spans the whole card, unlike the row-level "+ add" affordance.
+        <Button variant="soft" size="sm" onClick={() => setAdding(true)} style={{ width: '100%' }}>
           <Plus size={14} /> {t('vacancyContentBlocksSettings.add')}
-        </button>
+        </Button>
       )}
       {dialog}
     </div>

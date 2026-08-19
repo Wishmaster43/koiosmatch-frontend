@@ -20,6 +20,7 @@ import { DASHBOARD_TYPES } from '@/pages/dashboard/templates'
 import { BTN_H } from '@/config/buttonMetrics'
 import type { Role, PermissionsByGroup, UpdateRoleBody, UpdatePermissionsBody } from './rolesTypes'
 import Button from '@/components/ui/Button'
+import { tintBg } from '@/lib/tint'
 
 interface IconPickerProps {
   value: string
@@ -50,7 +51,8 @@ function IconPicker({ value, color, options, onPick }: IconPickerProps) {
                 <button key={name} onClick={() => { onPick(name); setOpen(false) }} title={name}
                   style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 32, height: 32,
                     borderRadius: 7, cursor: 'pointer', border: `1px solid ${active ? color || 'var(--color-primary)' : 'transparent'}`,
-                    background: active ? (color || 'var(--color-primary)') + '1A' : 'var(--hover-bg)' }}>
+                    // Non-chip tinted surface: the house tintBg formula, not hex-concat (§4, HUISSTIJL-1).
+                    background: active ? tintBg(color || 'var(--color-primary)') : 'var(--hover-bg)' }}>
                   {roleIconEl(name, { size: 15, color: active ? color : 'var(--text)' })}
                 </button>
               )

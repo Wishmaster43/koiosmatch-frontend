@@ -14,6 +14,7 @@ import { notifyError } from '@/lib/notify'
 import { COLOR_PRESETS } from '@/lib/colorPresets'
 import RoleChip from '@/components/ui/RoleChip'
 import type { ManagedUser } from '@/types/api'
+import { tintBg, tintBorder } from '@/lib/tint'
 
 // A role reference as it can appear on a user: a bare name or a role object
 // (the backend now carries colour + icon on the object).
@@ -193,13 +194,15 @@ export function EditableAvatar({ user: u, onPick }: { user: ManagedUser; onPick?
     document.addEventListener('keydown', onKey)
     return () => document.removeEventListener('keydown', onKey)
   }, [open])
+  // Non-chip tinted surface (an avatar bubble) — the house tintBg/tintBorder
+  // formula applies here rather than SoftChip (§4, HUISSTIJL-1).
   const bubble: CSSProperties = {
     width: 30, height: 30, borderRadius: '50%', flexShrink: 0, boxSizing: 'border-box',
     display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 700,
-    background: c ? c + '22' : 'var(--color-primary-bg)',
+    background: c ? tintBg(c) : 'var(--color-primary-bg)',
     // Text-colour accent uses the AA-contrast text token, not the raw brand primary.
     color: c || 'var(--color-primary-text)',
-    border: c ? `1px solid ${c}55` : '1px solid transparent',
+    border: c ? tintBorder(c) : '1px solid transparent',
   }
   if (!onPick) return <div style={bubble}>{avatarInitials(u)}</div>
 

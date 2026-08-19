@@ -31,6 +31,7 @@ import { useIndustries } from '@/lib/useIndustries'
 import { useDriverLicenses } from '@/lib/useDriverLicenses'
 import type { DriverLicenseItem } from '@/lib/useDriverLicenses'
 import LookupIcon from '@/components/ui/LookupIcon'
+import SoftChip from '@/components/ui/SoftChip'
 import EmergencyContactCard from './EmergencyContactCard'
 import type { EmergencyContactValues } from './EmergencyContactCard'
 import BankAccountCard from './BankAccountCard'
@@ -157,16 +158,16 @@ export function PreferencesTab({ c, onSave, onTypesChange, onEditStatus }: { c: 
               const opt = candidateTypeOptions.find(o => o.value === x)
               const col = opt?.color
               const icon = candidateTypeIconOf(x)
-              // Per-value colour when set (e.g. contract forms), else the primary accent —
-              // mirrors EditableFieldTable's own default chip-read style (no colour-var concat).
-              const s = col
-                ? { background: col + '1A', color: col, border: `1px solid ${col}55` }
-                : { background: 'var(--color-primary-bg)', color: 'var(--color-primary-text)', border: '1px solid var(--color-primary)' }
+              // SoftChip — the ONE chip component (§4, HUISSTIJL-1). Per-value colour
+              // when set (e.g. contract forms), else the primary accent — mirrors
+              // EditableFieldTable's own default chip-read style.
               return (
-                <span key={x} style={{ display: 'inline-flex', alignItems: 'center', gap: 4, padding: '2px 9px', borderRadius: 999, fontSize: 11, fontWeight: 500, ...s }}>
-                  {icon && <LookupIcon icon={icon} size={11} color={col} />}
-                  {opt?.label ?? x}
-                </span>
+                <SoftChip key={x} color={col ?? 'var(--color-primary)'} round label={
+                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+                    {icon && <LookupIcon icon={icon} size={11} color={col} />}
+                    {opt?.label ?? x}
+                  </span>
+                } />
               )
             })}
           </div>

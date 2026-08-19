@@ -14,6 +14,7 @@ import { useConfirm } from '@/hooks/useConfirm'
 import { BTN_H } from '@/config/buttonMetrics'
 import type { Role, PermissionsByGroup, CreateRoleBody } from './rolesTypes'
 import Button from '@/components/ui/Button'
+import { tintBg, tintBorder } from '@/lib/tint'
 
 export default function RolesSettings() {
   const { t } = useTranslation('settings')
@@ -93,6 +94,8 @@ export default function RolesSettings() {
             placeholder={t('roles.newPlaceholder')} onKeyDown={e => e.key === 'Enter' && createRole()}
             style={{ height: 34, padding: '0 10px', fontSize: 13, border: '1px solid var(--border)',
                      borderRadius: 8, outline: 'none', color: 'var(--text)', width: 150 }} />
+          {/* Paired with the name input above — a soft CTA, not the row-level "+ add"
+              affordance, so it stays a Button (soft, not solid primary) rather than DrawerAddButton. */}
           <Button variant="primary" onClick={createRole} disabled={creating || !newRoleName.trim()}>
             <Plus size={13} /> {t('roles.create')}
           </Button>
@@ -110,7 +113,9 @@ export default function RolesSettings() {
             <div key={role.id}
               style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '14px 18px',
                        background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12 }}>
-              <div style={{ width: 36, height: 36, borderRadius: 10, background: color + '1A', border: `1px solid ${color}33`,
+              {/* Icon swatch — a non-chip tinted surface, so the house tintBg/tintBorder
+                  formula applies here rather than SoftChip (§4, HUISSTIJL-1). */}
+              <div style={{ width: 36, height: 36, borderRadius: 10, background: tintBg(color), border: tintBorder(color),
                              display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                 {roleIconEl(role.icon, { size: 16, color })}
               </div>

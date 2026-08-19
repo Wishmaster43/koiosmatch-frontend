@@ -124,8 +124,10 @@ describe('VacancyChannelSettings', () => {
     render(<VacancyChannelSettings />)
 
     // ColorBadge (withColor) has a distinctive pill shape the plain withColor=false span never had.
+    // HUISSTIJL-1: ColorBadge now delegates to the shared SoftChip, whose round=true
+    // pill radius is 99px (still fully rounded — the exact px only matters as "pill or not").
     const badge = await screen.findByText('Indeed')
-    expect(badge).toHaveStyle({ borderRadius: '999px' })
+    expect(badge).toHaveStyle({ borderRadius: '99px' })
     expect(screen.getByRole('button', { name: `${st('documentTypes.icon')}: Indeed` })).toBeInTheDocument()
   })
 

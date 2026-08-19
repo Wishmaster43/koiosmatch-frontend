@@ -4,6 +4,8 @@ import EntityLink from '@/components/ui/EntityLink'
 import { row, card, controls, dash, dateRange, makeFieldHelpers } from './detailsFieldKit'
 import type { GeneralSection } from '../hooks/useVacancyDetailsForm'
 import type { VacancyDetail } from '@/types/vacancy'
+import SoftChip from '@/components/ui/SoftChip'
+import { tintBg, tintBorder } from '@/lib/tint'
 
 interface Props {
   vacancy: VacancyDetail
@@ -31,22 +33,23 @@ export default function DetailsGeneralTab({ vacancy: v, general, candidateTypes,
     {/* V13: Contractvorm — multi-value soft chips in read mode, toggle buttons in edit mode. */}
     {row(t('details.contractType'),
       types.length === 0 ? dash : (
+        // SoftChip — the ONE chip component (§4, HUISSTIJL-1).
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 5 }}>
-          {types.map(val => { const m = typeMeta(val); return (
-            <span key={val} style={{ fontSize: 11, fontWeight: 500, padding: '2px 9px', borderRadius: 999,
-              background: m.color + '1A', color: m.color, border: `1px solid ${m.color}55` }}>{m.label}</span>
-          ) })}
+          {types.map(val => { const m = typeMeta(val); return <SoftChip key={val} label={m.label} color={m.color} round /> })}
         </div>
       ),
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: 5 }}>
         {candidateTypes.map(ct => {
           const on = types.includes(ct.value)
+          const col = ct.color ?? 'var(--color-primary)'
           return (
+            // Interactive toggle chip — stays a real <button> (SoftChip has no onClick),
+            // but the tint now uses the house tintBg/tintBorder formula (§4, HUISSTIJL-1).
             <button key={ct.value} type="button" onClick={() => toggleType(ct.value)}
               style={{ padding: '3px 10px', borderRadius: 999, fontSize: 12, cursor: 'pointer', fontWeight: on ? 600 : 400,
-                background: on ? (ct.color ?? 'var(--color-primary)') + '1A' : 'var(--surface)',
-                color: on ? (ct.color ?? 'var(--color-primary)') : 'var(--text-muted)',
-                border: `1px solid ${on ? (ct.color ?? 'var(--color-primary)') + '55' : 'var(--border)'}` }}>{ct.label}</button>
+                background: on ? tintBg(col, true) : 'var(--surface)',
+                color: on ? col : 'var(--text-muted)',
+                border: on ? tintBorder(col, true) : '1px solid var(--border)' }}>{ct.label}</button>
           )
         })}
       </div>, editing)}

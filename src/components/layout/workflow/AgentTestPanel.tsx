@@ -7,9 +7,10 @@
  */
 import { useState, useRef, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Send, Trash2, Plus, X, Loader2, Bot, User, Zap } from 'lucide-react'
+import { Send, Trash2, X, Loader2, Bot, User, Zap } from 'lucide-react'
 import api, { unwrap } from '@/lib/api'
 import Button from '@/components/ui/Button'
+import DrawerAddButton from '@/components/drawer/DrawerAddButton'
 
 interface Message {
   role: 'user' | 'assistant'
@@ -97,10 +98,8 @@ export default function AgentTestPanel({ config }: {
           <span style={{ fontSize: 10, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
             {t('agentTest.title')}
           </span>
-          <button onClick={addVariable}
-            style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 11, color: 'var(--color-primary-text)', background: 'none', border: 'none', cursor: 'pointer', padding: '2px 0' }}>
-            <Plus size={11} /> {t('agentTest.add')}
-          </button>
+          {/* HUISSTIJL-1: the ONE "+ add" affordance, app-wide (§3A). */}
+          <DrawerAddButton onClick={addVariable} label={t('agentTest.add')} />
         </div>
         {variables.length === 0 && (
           <p style={{ fontSize: 11, color: 'var(--text-muted)', margin: 0 }}>

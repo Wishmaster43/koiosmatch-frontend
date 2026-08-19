@@ -10,6 +10,7 @@ import { useDateFormat } from '@/lib/datetime'
 import { Cake, CalendarPlus, RotateCcw, Clock } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import type { Touchpoint } from '@/types/dashboard'
+import { tintBg } from '@/lib/tint'
 
 // Backend type slug → icon + i18n key.
 const META: Record<string, { Icon: LucideIcon; key: string; color: string }> = {
@@ -46,7 +47,9 @@ export default function TouchpointsFeed({ items, onOpen }: {
           <div key={i} {...interactive(clickable ? () => onOpen?.(it.candidate_id!) : undefined)}
             style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 16px', cursor: clickable ? 'pointer' : 'default',
               borderBottom: i < items.length - 1 ? '1px solid var(--border)' : 'none' }}>
-            <div style={{ width: 28, height: 28, borderRadius: 8, background: m.color + '1A', flexShrink: 0,
+            {/* Non-chip tinted surface (an icon swatch) — the house tintBg formula,
+                not hex-concat (§4, HUISSTIJL-1). */}
+            <div style={{ width: 28, height: 28, borderRadius: 8, background: tintBg(m.color), flexShrink: 0,
               display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
               <m.Icon size={14} color={m.color} />
             </div>

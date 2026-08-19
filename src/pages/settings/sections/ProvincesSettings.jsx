@@ -11,7 +11,7 @@
  */
 import { useState, useEffect, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
-import { AlertTriangle, Check, Save, Plus, X, Trash2, RefreshCw, Pencil } from 'lucide-react'
+import { AlertTriangle, Check, Save, X, Trash2, RefreshCw, Pencil, Plus } from 'lucide-react'
 import api, { unwrap, unwrapList } from '@/lib/api'
 import { notifyError } from '@/lib/notify'
 import { DragList } from '../components/SettingsControls'
@@ -118,8 +118,11 @@ export default function ProvincesSettings() {
                      color: saved ? 'var(--color-on-success)' : 'var(--color-on-accent)' }}>
             {saved ? <><Check size={13}/> {t('common.saved')}</> : <><Save size={13}/> {t('common.save')}</>}
           </button>
-          <Button variant="secondary" onClick={openCreate}>
-            <Plus size={13} /> {t('provinces.add')}
+          {/* Section-header row at 34px (Opus batch D fix 4): the 26px drawer add
+              affordance sat 8px short beside Save. House Button at row height,
+              soft so it does not compete with the primary Save beside it. */}
+          <Button variant="soft" onClick={openCreate}>
+            <Plus size={14} /> {t('provinces.add')}
           </Button>
         </div>
       </div>

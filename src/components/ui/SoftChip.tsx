@@ -26,7 +26,10 @@ export default function SoftChip({ label, color, dot = false, title, round = fal
   return (
     <span title={title} style={{ display: 'inline-flex', alignItems: 'center', gap: 5,
       fontSize: size, fontWeight: 500, padding: '2px 8px', borderRadius: round ? 99 : 6,
-      background: tintBg(c), color: c,
+      // ACCENT-INK-1 (Opus batch D, measured): raw --color-primary as text on its
+      // own 10% tint is 2.61:1; the derived twin measures 5.17:1. Every other
+      // colour stays itself — data colours are the chip's meaning.
+      background: tintBg(c), color: c === 'var(--color-primary)' ? 'var(--color-primary-text)' : c,
       border: tintBorder(c), whiteSpace: 'nowrap' }}>
       {dot && <span style={{ width: 6, height: 6, borderRadius: '50%', background: c, flexShrink: 0 }} />}
       {label}

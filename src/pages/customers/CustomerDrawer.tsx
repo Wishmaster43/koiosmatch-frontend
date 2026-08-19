@@ -17,6 +17,7 @@ import TrashLifecycleSection from '@/components/drawer/TrashLifecycleSection'
 import type { TrashSectionConfig } from '@/components/drawer/TrashLifecycleSection'
 import ReferenceNumberChip from '@/components/ui/ReferenceNumberChip'
 import DetachedCountBadge from '@/components/ui/DetachedCountBadge'
+import SoftChip from '@/components/ui/SoftChip'
 import CustomerHeaderActions from './drawer/CustomerHeaderActions'
 import MergeCustomerModal from './MergeCustomerModal'
 import PdokCard from '@/components/drawer/PdokCard'
@@ -366,10 +367,9 @@ export default function CustomerDrawer({
         {/* KLANT-FASE-CONVERT-1: Fase = colour-coded read-only badge next to the name
             (mirrors the candidate's CandidateTitle, §3A(c)) — convert lives in the
             header actions below, never a picker. */}
-        {currentPhase && (
-          <span style={{ fontSize: 11, fontWeight: 600, padding: '2px 9px', borderRadius: 999,
-            background: phaseInfo.color + '1A', color: phaseInfo.color, border: `1px solid ${phaseInfo.color}55` }}>{phaseInfo.label}</span>
-        )}
+        {/* SoftChip — the ONE chip component (§4, HUISSTIJL-1): tokens via color-mix,
+            not hex-concat, so a tenant CSS-var colour tints correctly too. */}
+        {currentPhase && <SoftChip label={phaseInfo.label} color={phaseInfo.color} round />}
         {/* NUMMER-1: human-readable reference number, click-to-copy — same spot on every drawer. */}
         <ReferenceNumberChip value={c.referenceNumber} />
         {/* ONTKOPPEL-TELLER-1: whole-history CURRENTLY-detached count across ALL this

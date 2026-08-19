@@ -5,6 +5,7 @@ import { useCandidatePools } from '../hooks/useCandidatePools'
 import { sectionBlock } from './constants'
 import DrawerAddButton from './DrawerAddButton'
 import LookupIcon from '@/components/ui/LookupIcon'
+import SoftChip from '@/components/ui/SoftChip'
 import type { Candidate } from '@/types/candidate'
 // PORTAL-MARKER-1: a click inside an open portalled picker menu is never "outside".
 import { isInsideDropdownPortal } from '@/lib/useDropdownPlacement'
@@ -91,28 +92,24 @@ export default function PoolsSection({ c }: { c: Candidate }) {
           : (
             <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
               {pools.map((p, i) => {
-                // Fallback swatch colour when no tenant colour is set — a design
-                // token (§4), resolved via the same isHex/color-mix split Avatar's
-                // soft variant uses, since real tenant colours (hex) still need the
-                // cheap alpha-suffix concat below, which a bare var() can't take.
+                // Fallback swatch colour when no tenant colour is set — a design token (§4).
                 const color = p.color || 'var(--text-muted)'
-                const isHex = color.startsWith('#')
                 const ai = p.source === 'koios'
                 // LOOKUP-ICON-1: the tenant pool icon rides next to the AI marker/name.
                 const icon = (p as { icon?: string | null }).icon
+                // SoftChip — the ONE chip component (§4, HUISSTIJL-1): tintBg/tintBorder
+                // work for hex AND var() tokens via color-mix, so the old isHex ternary
+                // (a third, redundant recipe) is gone.
                 return (
-                  <span key={p.id ?? p.name ?? i} title={ai ? t('sections.poolKoios') : undefined}
-                    style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 11, fontWeight: 500, padding: '3px 8px',
-                      borderRadius: 99,
-                      border: `1px solid ${isHex ? color + '55' : `color-mix(in srgb, ${color} 40%, transparent)`}`,
-                      background: isHex ? color + '1A' : `color-mix(in srgb, ${color} 12%, transparent)`,
-                      color }}>
-                    {ai && <Sparkles size={10} />}
-                    {icon && <LookupIcon icon={icon} size={11} color={color} />}
-                    {p.name}
-                    <button onClick={() => toggle(p)}
-                      style={{ background: 'none', border: 'none', cursor: 'pointer', color, opacity: 0.7, padding: 0, lineHeight: 1, fontSize: 14 }}>×</button>
-                  </span>
+                  <SoftChip key={p.id ?? p.name ?? i} title={ai ? t('sections.poolKoios') : undefined} color={color} round label={
+                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+                      {ai && <Sparkles size={10} />}
+                      {icon && <LookupIcon icon={icon} size={11} color={color} />}
+                      {p.name}
+                      <button onClick={() => toggle(p)}
+                        style={{ background: 'none', border: 'none', cursor: 'pointer', color, opacity: 0.7, padding: 0, lineHeight: 1, fontSize: 14 }}>×</button>
+                    </span>
+                  } />
                 )
               })}
             </div>

@@ -24,7 +24,7 @@
  */
 import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Plus, Trash2, RefreshCw, Pencil } from 'lucide-react'
+import { Trash2, RefreshCw, Pencil } from 'lucide-react'
 import api, { unwrap } from '@/lib/api'
 import { notifyError } from '@/lib/notify'
 import { useConfirm } from '@/hooks/useConfirm'
@@ -32,7 +32,7 @@ import { DragList, ColorSwatch, ColorBadge, DefaultToggle } from '../components/
 import IconPickerControl from './IconPickerControl'
 import { GENERIC_LOOKUP_ICON_NAMES, resolveGenericLookupIcon } from './lookupIcons'
 import CandidateLookupItemModal from './CandidateLookupItemModal'
-import Button from '@/components/ui/Button'
+import DrawerAddButton from '@/components/drawer/DrawerAddButton'
 
 const BASE = '/settings/candidate-lookups'
 
@@ -163,10 +163,8 @@ export function LookupBlock({ slug, title, subtitle, items, setItems, locked = f
           <h3 style={{ fontSize: 14, fontWeight: 600, color: 'var(--text)' }}>{title}</h3>
           <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>{subtitle}</p>
         </div>
-        {/* BTN_H (§4/§9): one explicit height for every text/action button, everywhere. */}
-        {!locked && <Button variant="secondary" onClick={openAdd}>
-          <Plus size={13} /> {t('lookups.add')}
-        </Button>}
+        {/* HUISSTIJL-1: the ONE "+ add" affordance, app-wide (§3A). */}
+        {!locked && <DrawerAddButton onClick={openAdd} label={t('lookups.add')} />}
       </div>
 
       <DragList
