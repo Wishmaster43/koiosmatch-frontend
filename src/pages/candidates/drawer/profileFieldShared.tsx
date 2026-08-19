@@ -11,16 +11,11 @@ import { useTranslation } from 'react-i18next'
 import { Edit2, Save, X } from 'lucide-react'
 import { CANON_LABEL_STYLE } from '@/components/drawer/fieldRowCanon'
 import { fieldInputStyle } from '@/components/forms/fieldMetrics'
+import Button from '@/components/ui/Button'
 
 // Shared input styling for text/date/combobox controls across all three tabs
 // (G33/fieldMetrics canon — was its own padding-7/font-12/radius-6 copy).
 export const inputStyle: CSSProperties = fieldInputStyle
-
-// Shared square icon-button sizing for the pencil/save/cancel controls.
-export const iconBtn: CSSProperties = {
-  width: 26, height: 26, display: 'flex', alignItems: 'center', justifyContent: 'center',
-  borderRadius: 6, cursor: 'pointer',
-}
 
 const blockStyle: CSSProperties = { borderRadius: 10, overflow: 'hidden', border: '1px solid var(--border)', background: 'var(--surface)' }
 
@@ -70,18 +65,18 @@ export function EditControls({ editing, onSave, onCancel, onStart }: {
 }) {
   const { t } = useTranslation('candidates')
   if (!editing) return (
-    <button onClick={onStart} title={t('common:edit')} style={{ ...iconBtn, background: 'none', color: 'var(--text-muted)', border: '1px solid var(--border)' }}>
+    <Button variant="secondary" size="sm" iconOnly onClick={onStart} title={t('common:edit')}>
       <Edit2 size={13} />
-    </button>
+    </Button>
   )
   return (
     <div style={{ display: 'flex', gap: 4 }}>
-      <button onClick={onSave} title={t('common:save')} style={{ ...iconBtn, background: 'var(--color-primary)', color: 'var(--color-on-accent)', border: 'none' }}>
+      <Button variant="primary" size="sm" iconOnly onClick={onSave} title={t('common:save')}>
         <Save size={13} />
-      </button>
-      <button onClick={onCancel} title={t('common:cancel')} style={{ ...iconBtn, background: 'var(--bg)', color: 'var(--text-muted)', border: '1px solid var(--border)' }}>
+      </Button>
+      <Button variant="secondary" size="sm" iconOnly onClick={onCancel} title={t('common:cancel')}>
         <X size={13} />
-      </button>
+      </Button>
     </div>
   )
 }

@@ -9,6 +9,7 @@ import { useTranslation } from 'react-i18next'
 import { Plus, X, Check, Ban } from 'lucide-react'
 import { sectionBlock, sectionTitle, softPill } from './constants'
 import ErrorBanner from '@/components/ui/ErrorBanner'
+import Button from '@/components/ui/Button'
 import { useCandidateAvailability } from '../hooks/useCandidatePlanning'
 import type { AvailStatus, DayPart } from '../hooks/useCandidatePlanning'
 import type { Id } from '@/types/common'
@@ -53,11 +54,9 @@ export default function AvailabilityEditor({ candidateId }: { candidateId?: Id }
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
         <span style={{ ...sectionTitle, marginBottom: 0, flex: 1 }}>{t('planning.availability')}</span>
         {!adding && (
-          <button onClick={() => setAdding(true)} aria-label={t('planning.addAvailability')}
-            style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '5px 10px', fontSize: 11, fontWeight: 500,
-              border: '1px solid var(--border)', borderRadius: 7, background: 'var(--bg)', color: 'var(--text-muted)', cursor: 'pointer' }}>
+          <Button variant="secondary" size="sm" onClick={() => setAdding(true)} aria-label={t('planning.addAvailability')}>
             <Plus size={12} /> {t('planning.addAvailability')}
-          </button>
+          </Button>
         )}
       </div>
 
@@ -73,20 +72,16 @@ export default function AvailabilityEditor({ candidateId }: { candidateId?: Id }
             <CreatableSelect value={part} onChange={v => setPart(v as DayPart)} allowCreate={false}
               aria-labelledby={dayPartLabelId} options={PARTS.map(p => ({ value: p, label: partLabel(p) }))} style={input} />
           </div>
+          {/* Segmented available/unavailable toggle — the shared softPill convention (§4), not a Button identity. */}
           <div style={{ display: 'flex', gap: 6 }}>
             <button onClick={() => setStatus('available')}   style={pill(status === 'available')}>{t('planning.statusAvailable')}</button>
             <button onClick={() => setStatus('unavailable')} style={pill(status === 'unavailable')}>{t('planning.statusUnavailable')}</button>
           </div>
           <input value={reason} onChange={e => setReason(e.target.value)} placeholder={t('planning.reasonPlaceholder')} style={{ ...input, flex: 1, minWidth: 120 }} />
-          <button onClick={submit} disabled={!date}
-            style={{ padding: '5px 12px', fontSize: 12, fontWeight: 600, borderRadius: 7, border: 'none',
-              background: 'var(--color-primary)', color: 'var(--color-on-accent)', cursor: date ? 'pointer' : 'not-allowed', opacity: date ? 1 : 0.5 }}>
-            {t('common:add')}
-          </button>
-          <button onClick={reset} aria-label={t('common:cancel')}
-            style={{ padding: '5px 7px', border: '1px solid var(--border)', borderRadius: 7, background: 'none', color: 'var(--text-muted)', cursor: 'pointer', display: 'flex' }}>
+          <Button variant="primary" size="sm" onClick={submit} disabled={!date}>{t('common:add')}</Button>
+          <Button variant="secondary" size="sm" iconOnly onClick={reset} aria-label={t('common:cancel')}>
             <X size={12} />
-          </button>
+          </Button>
         </div>
       )}
 

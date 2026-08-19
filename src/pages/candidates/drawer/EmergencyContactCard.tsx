@@ -34,9 +34,10 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Edit2, Save, X } from 'lucide-react'
 import CreatableSelect from '@/components/ui/CreatableSelect'
-import { GroupCard, GroupHeader, FieldRow, inputStyle, iconBtn } from './profileFieldShared'
+import { GroupCard, GroupHeader, FieldRow, inputStyle } from './profileFieldShared'
 import { isValidPhoneFormat } from '../lib/contactFieldValidation'
 import { useEmergencyContactRelations } from '@/lib/useEmergencyContactRelations'
+import Button from '@/components/ui/Button'
 
 export interface EmergencyContactValues {
   firstName: string
@@ -121,11 +122,11 @@ export default function EmergencyContactCard({ value, onSave }: {
       <GroupHeader title={t('preferences.groupEmergencyContact')}>
         {editing ? (
           <div style={{ display: 'flex', gap: 4 }}>
-            <button onClick={save} title={tc('save')} style={{ ...iconBtn, background: 'var(--color-primary)', color: 'var(--color-on-accent)', border: 'none' }}><Save size={13} /></button>
-            <button onClick={cancel} title={tc('cancel')} style={{ ...iconBtn, background: 'var(--bg)', color: 'var(--text-muted)', border: '1px solid var(--border)' }}><X size={13} /></button>
+            <Button variant="primary" size="sm" iconOnly onClick={save} title={tc('save')}><Save size={13} /></Button>
+            <Button variant="secondary" size="sm" iconOnly onClick={cancel} title={tc('cancel')}><X size={13} /></Button>
           </div>
         ) : (
-          <button onClick={start} title={tc('edit')} style={{ ...iconBtn, background: 'none', color: 'var(--text-muted)', border: '1px solid var(--border)' }}><Edit2 size={13} /></button>
+          <Button variant="secondary" size="sm" iconOnly onClick={start} title={tc('edit')}><Edit2 size={13} /></Button>
         )}
       </GroupHeader>
       <GroupCard>

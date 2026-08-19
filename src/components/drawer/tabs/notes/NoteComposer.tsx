@@ -51,10 +51,11 @@
  * (hooks/useNotesPopout) instead of opening an empty sheet. This composer closes
  * only once that window confirms it holds the draft — never on the click itself.
  */
-import type { CSSProperties, ReactNode } from 'react'
+import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { ExternalLink, Save, X } from 'lucide-react'
 import FloatingPanel from '@/components/ui/FloatingPanel'
+import Button from '@/components/ui/Button'
 import NoteFields from './NoteFields'
 import { useNoteFields } from './useNoteFields'
 import type { NoteDraft } from '@/hooks/useNotesPopout'
@@ -85,11 +86,6 @@ interface NoteComposerProps {
   onSave: (payload: NotePayload) => void
   onCancel: () => void
 }
-
-const iconBtn: CSSProperties = { width: 30, height: 30, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 8, cursor: 'pointer' }
-// Pop-out icon — byte-for-byte the profile text's own affordance (ProfileTab):
-// 26x26, bordered, muted, no fill. One affordance, one look (§4).
-const popOutBtn: CSSProperties = { width: 26, height: 26, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 6, background: 'none', color: 'var(--text-muted)', border: '1px solid var(--border)', flexShrink: 0 }
 
 export default function NoteComposer({ open, initialNote, noteTypes, channels, labels, editorLabels, composerExtra, onPopOutDraft, popOutPending, initialDraft, onSave, onCancel }: NoteComposerProps) {
   const { t } = useTranslation('common')
@@ -143,21 +139,18 @@ export default function NoteComposer({ open, initialNote, noteTypes, channels, l
         <NoteFields fields={fields} noteTypes={noteTypes} channels={channels} labels={labels}
           editorLabels={editorLabels} noteId={noteId} editorMinHeight={160}
           titleExtra={canHandOff ? (
-            <button type="button" onClick={popOut} disabled={popOutPending} aria-busy={popOutPending}
-              title={t('openSecondScreen')} aria-label={t('openSecondScreen')}
-              style={{ ...popOutBtn, opacity: popOutPending ? 0.5 : 1, cursor: popOutPending ? 'default' : 'pointer' }}>
+            <Button variant="secondary" size="sm" iconOnly onClick={popOut} disabled={popOutPending} aria-busy={popOutPending}
+              title={t('openSecondScreen')} aria-label={t('openSecondScreen')}>
               <ExternalLink size={13} />
-            </button>
+            </Button>
           ) : undefined} />
       </div>
 
       {/* Pinned footer — OUTSIDE the scroll area (mirrors AddTaskModal's
           scrollBody=false footer), always reachable regardless of scroll position. */}
       <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 6, padding: '10px 16px', borderTop: '1px solid var(--border)', flexShrink: 0 }}>
-        <button onClick={save} title={labels.save}
-          style={{ ...iconBtn, background: 'var(--color-primary)', color: 'var(--color-on-accent)', border: 'none' }}><Save size={15} /></button>
-        <button onClick={onCancel} title={labels.cancel}
-          style={{ ...iconBtn, background: 'var(--bg)', color: 'var(--text-muted)', border: '1px solid var(--border)' }}><X size={15} /></button>
+        <Button variant="primary" size="md" iconOnly onClick={save} title={labels.save}><Save size={15} /></Button>
+        <Button variant="secondary" size="md" iconOnly onClick={onCancel} title={labels.cancel}><X size={15} /></Button>
       </div>
     </FloatingPanel>
   )

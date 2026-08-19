@@ -17,10 +17,10 @@ import CreatableSelect from '@/components/ui/CreatableSelect'
 // no title above it — that read as out of tone next to those sibling cards.
 import SectionCard, { sectionBlock } from '@/components/ui/SectionCard'
 import { fieldInputStyle } from '@/components/forms/fieldMetrics'
+import Button from '@/components/ui/Button'
 
 // Canon field style (G33/fieldMetrics) — was its own padding-6/font-12/radius-6 copy.
 const inputStyle: CSSProperties = fieldInputStyle
-const iconBtn: CSSProperties = { width: 28, height: 28, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 6, cursor: 'pointer' }
 const labelStyle: CSSProperties = { fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: 3 }
 
 // Render one value read-only (boolean → yes/no, date → locale date, else string).
@@ -64,11 +64,11 @@ function RichTextField({ def, value, onSave }: { def: CustomFieldDef; value: unk
         <span style={labelStyle}>{def.label}</span>
         {editing ? (
           <div style={{ display: 'flex', gap: 4 }}>
-            <button onClick={save} title={t('save')} style={{ ...iconBtn, background: 'var(--color-primary)', color: 'var(--color-on-accent)', border: 'none' }}><Save size={12} /></button>
-            <button onClick={cancel} title={t('cancel')} style={{ ...iconBtn, background: 'var(--bg)', color: 'var(--text-muted)', border: '1px solid var(--border)' }}><X size={12} /></button>
+            <Button variant="primary" size="sm" iconOnly onClick={save} title={t('save')}><Save size={12} /></Button>
+            <Button variant="secondary" size="sm" iconOnly onClick={cancel} title={t('cancel')}><X size={12} /></Button>
           </div>
         ) : (
-          <button onClick={start} title={t('edit')} style={{ ...iconBtn, background: 'none', color: 'var(--text-muted)', border: '1px solid var(--border)' }}><Edit2 size={12} /></button>
+          <Button variant="secondary" size="sm" iconOnly onClick={start} title={t('edit')}><Edit2 size={12} /></Button>
         )}
       </div>
       {editing
@@ -136,11 +136,11 @@ export default function CustomFieldsTab({ entityType, values, onSave }: Props) {
           title={t('customFieldsCard.title')}
           action={editing ? (
             <div style={{ display: 'flex', gap: 4 }}>
-              <button onClick={save} title={t('save')} style={{ ...iconBtn, background: 'var(--color-primary)', color: 'var(--color-on-accent)', border: 'none' }}><Save size={13} /></button>
-              <button onClick={cancel} title={t('cancel')} style={{ ...iconBtn, background: 'var(--bg)', color: 'var(--text-muted)', border: '1px solid var(--border)' }}><X size={13} /></button>
+              <Button variant="primary" size="sm" iconOnly onClick={save} title={t('save')}><Save size={13} /></Button>
+              <Button variant="secondary" size="sm" iconOnly onClick={cancel} title={t('cancel')}><X size={13} /></Button>
             </div>
           ) : (
-            <button onClick={startEdit} title={t('edit')} style={{ ...iconBtn, background: 'none', color: 'var(--text-muted)', border: '1px solid var(--border)' }}><Edit2 size={13} /></button>
+            <Button variant="secondary" size="sm" iconOnly onClick={startEdit} title={t('edit')}><Edit2 size={13} /></Button>
           )}
           style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px 20px' }}
         >

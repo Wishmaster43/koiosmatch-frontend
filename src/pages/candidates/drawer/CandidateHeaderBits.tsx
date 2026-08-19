@@ -13,12 +13,13 @@ import type { CvCandidate } from '../CandidateCvTemplate'
 import { useCvSettings } from '@/lib/useCvSettings'
 import { useLocale, useDateFormat } from '@/lib/datetime'
 import { useFunctions } from '@/lib/useFunctions'
-import { BTN_H } from '@/config/buttonMetrics'
 import { fieldInputStyle } from '@/components/forms/fieldMetrics'
 import CreatableSelect from '@/components/ui/CreatableSelect'
 import ReferenceNumberChip from '@/components/ui/ReferenceNumberChip'
 import DetachedCountBadge from '@/components/ui/DetachedCountBadge'
 import LookupIcon from '@/components/ui/LookupIcon'
+import Button from '@/components/ui/Button'
+import SoftChip from '@/components/ui/SoftChip'
 import type { Candidate } from '@/types/candidate'
 import type { Id, LookupOption } from '@/types/common'
 import type { HeaderForm } from '../hooks/useCandidateHeaderEdit'
@@ -26,7 +27,6 @@ import type { HeaderForm } from '../hooks/useCandidateHeaderEdit'
 // Canon field style (G33/fieldMetrics) — was its own padding-6/radius-6 copy;
 // `minWidth: 0` stays local since it only matters inside this header's grid.
 const inputBase = { ...fieldInputStyle, minWidth: 0 }
-const iconBtn = { display: 'flex', alignItems: 'center', justifyContent: 'center', width: 28, height: 28, borderRadius: 7, cursor: 'pointer', flexShrink: 0 } as const
 
 // Title block: name + phase badge, or the name/function edit form. The status
 // reason/return-date line was removed from the header (Danny 13/7: calm header) —
@@ -62,14 +62,17 @@ export function CandidateTitle({ c, editing, hf, setHF, phaseInfo, showPhase }: 
     <>
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
         <div style={{ fontSize: 15, fontWeight: 700, color: 'var(--text)' }}>{c.name}</div>
-        {/* Fase = colour-coded read-only badge (no picker); convert lives in the header actions. */}
+        {/* Fase = colour-coded read-only badge (no picker); convert lives in the header
+            actions. SoftChip — the ONE chip component (§4, HUISSTIJL-1): tokens via
+            color-mix, not hex-concat, so a tenant CSS-var colour tints correctly too. */}
         {showPhase && (
-          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 11, fontWeight: 600, padding: '2px 9px', borderRadius: 999,
-            background: phaseInfo.color + '1A', color: phaseInfo.color, border: `1px solid ${phaseInfo.color}55` }}>
-            {/* HEADER-ICONEN: the phase lookup's own icon, never colour-only (§6). */}
-            {phaseInfo.icon && <LookupIcon icon={phaseInfo.icon} size={11} />}
-            {phaseInfo.label}
-          </span>
+          <SoftChip color={phaseInfo.color} round label={
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+              {/* HEADER-ICONEN: the phase lookup's own icon, never colour-only (§6). */}
+              {phaseInfo.icon && <LookupIcon icon={phaseInfo.icon} size={11} />}
+              {phaseInfo.label}
+            </span>
+          } />
         )}
         {/* NUMMER-1: human-readable reference number, click-to-copy — same spot on every drawer. */}
         <ReferenceNumberChip value={c.referenceNumber} />
@@ -107,35 +110,30 @@ export function CandidateHeaderActions({ c, isEntryPhase, nextPhase, converting,
   return (
     <>
       {/* Entry phase (Lead) → prominent convert (CV is illogical for a lead); else → download CV.
-          BTN_H (§4/§9, KANDIDAAT-100 #50): same explicit height as every other text/action
+          size="md" (§4/§9, KANDIDAAT-100 #50): same explicit height as every other text/action
           button — this was the exact "Converteer naar Kandidaat" vs "+ Kandidaat" mismatch Danny flagged. */}
       {(isEntryPhase && nextPhase) ? (
-        <button onClick={onConvert}
-          style={{ display: 'flex', alignItems: 'center', gap: 4, height: BTN_H, padding: '0 10px', fontSize: 11, fontWeight: 600, borderRadius: 7, cursor: 'pointer', border: '1px solid var(--color-primary)', background: 'var(--color-primary)', color: 'var(--color-on-accent)' }}>
+        <Button variant="primary" size="md" onClick={onConvert}>
           <UserCheck size={11} />{t('drawer.convertTo', { phase: nextPhase.label })}
-        </button>
+        </Button>
       ) : (
-        <button disabled={cvGenerating || converting} onClick={downloadCv}
-          style={{ display: 'flex', alignItems: 'center', gap: 4, height: BTN_H, padding: '0 10px', fontSize: 11, fontWeight: 600, borderRadius: 7, cursor: (cvGenerating || converting) ? 'not-allowed' : 'pointer', border: '1px solid var(--color-primary)', background: 'var(--color-primary)', color: 'var(--color-on-accent)', opacity: (cvGenerating || converting) ? 0.7 : 1 }}>
+        <Button variant="primary" size="md" disabled={cvGenerating || converting} onClick={downloadCv}>
           <Download size={11} />{cvGenerating ? t('drawer.generating') : t('drawer.downloadCv')}
-        </button>
+        </Button>
       )}
       {headerEditing ? (
         <>
-          <button onClick={onSaveEdit} title={t('common:save')}
-            style={{ ...iconBtn, background: 'var(--color-primary)', color: 'var(--color-on-accent)', border: 'none' }}>
+          <Button variant="primary" size="sm" iconOnly onClick={onSaveEdit} title={t('common:save')}>
             <Save size={14} />
-          </button>
-          <button onClick={onCancelEdit} title={t('common:cancel')}
-            style={{ ...iconBtn, background: 'var(--bg)', color: 'var(--text-muted)', border: '1px solid var(--border)' }}>
+          </Button>
+          <Button variant="secondary" size="sm" iconOnly onClick={onCancelEdit} title={t('common:cancel')}>
             <X size={14} />
-          </button>
+          </Button>
         </>
       ) : (
-        <button onClick={onStartEdit} title={t('drawer.edit')}
-          style={{ ...iconBtn, background: 'var(--bg)', color: 'var(--text-muted)', border: '1px solid var(--border)' }}>
+        <Button variant="secondary" size="sm" iconOnly onClick={onStartEdit} title={t('drawer.edit')}>
           <Edit2 size={13} />
-        </button>
+        </Button>
       )}
     </>
   )
@@ -159,7 +157,8 @@ export function ArchivedBanner({ c, canHardDelete, onRestore, onMarkDeletion, on
           ? [c.pendingEraseAt ? t('erase.inTrashSince', { date: formatDate(c.pendingEraseAt) }) : t('erase.inTrash'), c.archivedBy ? t('drawer.byWho', { name: c.archivedBy }) : null].filter(Boolean).join(' · ')
           : [c.archivedAt ? t('drawer.archivedOn', { date: formatDate(c.archivedAt) }) : t('drawer.archivedFlag'), c.archivedBy ? t('drawer.byWho', { name: c.archivedBy }) : null, c.archiveReason].filter(Boolean).join(' · ')}
       </span>
-      {/* Herstellen (both states) */}
+      {/* Herstellen (both states) — HUISSTIJL-1: bare borderless icon (ghost
+          identity), not one of the four migrated Button patterns, left as-is. */}
       {onRestore && (
         <button onClick={() => onRestore(c.id)} title={t('drawer.restore')} aria-label={t('drawer.restore')}
           style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 3, display: 'flex', color: 'var(--color-primary-text)' }}>
@@ -168,7 +167,8 @@ export function ArchivedBanner({ c, canHardDelete, onRestore, onMarkDeletion, on
       )}
       {/* Archived → move to trash (reversible); Trash → permanent delete (admin, preview popup).
           The confirm (or, when live applications/matches hang on the candidate, the
-          ArchiveGuardModal) lives in useCandidateDrawerActions.markDeletionOne. */}
+          ArchiveGuardModal) lives in useCandidateDrawerActions.markDeletionOne.
+          HUISSTIJL-1: same bare borderless ghost identity as Herstellen above — left as-is. */}
       {!inTrash && onMarkDeletion && (
         <button onClick={() => onMarkDeletion(c.id)}
           title={t('erase.markDelete')} aria-label={t('erase.markDelete')}
@@ -177,11 +177,10 @@ export function ArchivedBanner({ c, canHardDelete, onRestore, onMarkDeletion, on
         </button>
       )}
       {inTrash && onHardDelete && canHardDelete && (
-        <button onClick={() => onHardDelete(c.id)}
-          title={t('drawer.hardDelete')} aria-label={t('drawer.hardDelete')}
-          style={{ display: 'inline-flex', alignItems: 'center', gap: 4, background: 'var(--color-danger)', border: 'none', borderRadius: 6, cursor: 'pointer', padding: '3px 8px', color: 'var(--color-on-danger)', fontSize: 11, fontWeight: 600 }}>
+        <Button variant="danger" size="sm" onClick={() => onHardDelete(c.id)}
+          title={t('drawer.hardDelete')} aria-label={t('drawer.hardDelete')}>
           <Trash2 size={12} /> {t('erase.deleteForever')}
-        </button>
+        </Button>
       )}
     </div>
   )

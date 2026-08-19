@@ -31,11 +31,11 @@
  * `defaultValue`s below are a harmless leftover safety net, never the value
  * actually shown once a real translation resolves.
  */
-import type { CSSProperties } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Wand2, AlignLeft, ListChecks, Loader2, Check, X } from 'lucide-react'
 import KoiosAiMark from '@/components/ui/KoiosAiMark'
 import CalloutBox from '@/components/ui/CalloutBox'
+import Button from '@/components/ui/Button'
 import { useNoteAssist } from './useNoteAssist'
 import { applyAssistResult } from './noteAssistApply'
 import AssistActionsResultsPanel from '@/components/ui/richtext/AssistActionsResultsPanel'
@@ -53,18 +53,6 @@ interface NoteAssistSectionProps {
   // `source.note_id`; a new unsaved note omits this (no source sent).
   noteId?: string
 }
-
-const actionBtn = (active: boolean, disabled: boolean): CSSProperties => ({
-  display: 'inline-flex', alignItems: 'center', gap: 5, fontSize: 11, fontWeight: 500,
-  padding: '5px 9px', borderRadius: 7, cursor: disabled ? 'default' : 'pointer',
-  background: 'var(--color-primary-bg)', color: 'var(--color-primary-text)',
-  border: '1px solid color-mix(in srgb, var(--color-primary) 30%, transparent)',
-  opacity: disabled && !active ? 0.5 : 1,
-})
-const primaryBtn: CSSProperties = { display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 12, fontWeight: 600,
-  padding: '5px 11px', borderRadius: 7, cursor: 'pointer', background: 'var(--color-primary)', color: 'var(--color-on-accent)', border: 'none' }
-const ghostBtn: CSSProperties = { display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 12, fontWeight: 500,
-  padding: '5px 11px', borderRadius: 7, cursor: 'pointer', background: 'none', color: 'var(--text-muted)', border: '1px solid var(--border)' }
 
 // Dutch fallback copy (DEFAULT-VALUE-1) — mode button label. The action-item
 // type label (ACTION_TYPE_LABEL_NL) now lives in richTextAssistApi.ts (§11 one
@@ -112,12 +100,11 @@ export default function NoteAssistSection({ body, onApply, language, noteId }: N
       </div>
       <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 6, marginBottom: 4 }}>
         {MODES.map(({ mode: m, icon: Icon }) => (
-          <button key={m} type="button" onClick={() => run(m, body)} disabled={loading || !hasText}
-            title={hasText ? undefined : t('notesAssist.needsText', { defaultValue: 'Schrijf eerst tekst in de notitie' })}
-            style={actionBtn(loading && mode === m, loading || !hasText)}>
+          <Button key={m} variant="soft" size="sm" onClick={() => run(m, body)} disabled={loading || !hasText}
+            title={hasText ? undefined : t('notesAssist.needsText', { defaultValue: 'Schrijf eerst tekst in de notitie' })}>
             {loading && mode === m ? <Loader2 size={12} className="animate-spin" /> : <Icon size={12} />}
             {t(`notesAssist.${m}`, { defaultValue: MODE_LABEL_NL[m] })}
-          </button>
+          </Button>
         ))}
       </div>
       {/* Honest, VISIBLE reason the buttons are disabled — never rely on a
@@ -159,9 +146,9 @@ export default function NoteAssistSection({ body, onApply, language, noteId }: N
           <div style={{ display: 'flex', gap: 8 }}>
             {/* No apply target when actions came back empty — nothing to overnemen. */}
             {result.kind === 'text' && (
-              <button type="button" onClick={handleApply} style={primaryBtn}><Check size={13} /> {t('notesAssist.apply', { defaultValue: 'Overnemen' })}</button>
+              <Button variant="primary" size="sm" onClick={handleApply}><Check size={13} /> {t('notesAssist.apply', { defaultValue: 'Overnemen' })}</Button>
             )}
-            <button type="button" onClick={discard} style={ghostBtn}><X size={13} /> {t('notesAssist.discard', { defaultValue: 'Verwerpen' })}</button>
+            <Button variant="secondary" size="sm" onClick={discard}><X size={13} /> {t('notesAssist.discard', { defaultValue: 'Verwerpen' })}</Button>
           </div>
         </div>
       )}

@@ -11,11 +11,11 @@
  * avoided: that folder is out of this job's owned scope (G27), so the shape
  * is mirrored here rather than shared/forked.
  */
-import type { CSSProperties } from 'react'
 import { useTranslation } from 'react-i18next'
 import { AlignLeft, ListChecks, Loader2, Check, X } from 'lucide-react'
 import KoiosAiMark from '@/components/ui/KoiosAiMark'
 import CalloutBox from '@/components/ui/CalloutBox'
+import Button from '@/components/ui/Button'
 import { useConversationAssist } from './useConversationAssist'
 import { formatAssistResultForDraft } from './conversationAssistApply'
 import { ACTION_TYPE_LABEL_NL } from './conversationAssistApi'
@@ -31,18 +31,6 @@ interface ConversationAssistSectionProps {
   onApply: (draftText: string) => void
   language?: string
 }
-
-const actionBtn = (active: boolean, disabled: boolean): CSSProperties => ({
-  display: 'inline-flex', alignItems: 'center', gap: 5, fontSize: 11, fontWeight: 500,
-  padding: '5px 9px', borderRadius: 7, cursor: disabled ? 'default' : 'pointer',
-  background: 'var(--color-primary-bg)', color: 'var(--color-primary-text)',
-  border: '1px solid color-mix(in srgb, var(--color-primary) 30%, transparent)',
-  opacity: disabled && !active ? 0.5 : 1,
-})
-const primaryBtn: CSSProperties = { display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 12, fontWeight: 600,
-  padding: '5px 11px', borderRadius: 7, cursor: 'pointer', background: 'var(--color-primary)', color: 'var(--color-on-accent)', border: 'none' }
-const ghostBtn: CSSProperties = { display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 12, fontWeight: 500,
-  padding: '5px 11px', borderRadius: 7, cursor: 'pointer', background: 'none', color: 'var(--text-muted)', border: '1px solid var(--border)' }
 
 // Dutch fallback copy (DEFAULT-VALUE-1) — mode button label.
 const MODE_LABEL_NL: Record<ConversationAssistMode, string> = { summarize: 'Samenvatten', actions: 'Actiepunten' }
@@ -76,12 +64,11 @@ export default function ConversationAssistSection({ conversationId, hasMessages,
       </div>
       <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 6, marginBottom: 4 }}>
         {MODES.map(({ mode: m, icon: Icon }) => (
-          <button key={m} type="button" onClick={() => run(m, conversationId)} disabled={loading || !hasMessages}
-            title={hasMessages ? undefined : t('conversations.assist.needsMessages', { defaultValue: 'Dit gesprek heeft nog geen berichten' })}
-            style={actionBtn(loading && mode === m, loading || !hasMessages)}>
+          <Button key={m} variant="soft" size="sm" onClick={() => run(m, conversationId)} disabled={loading || !hasMessages}
+            title={hasMessages ? undefined : t('conversations.assist.needsMessages', { defaultValue: 'Dit gesprek heeft nog geen berichten' })}>
             {loading && mode === m ? <Loader2 size={12} className="animate-spin" /> : <Icon size={12} />}
             {t(`conversations.assist.${m}`, { defaultValue: MODE_LABEL_NL[m] })}
-          </button>
+          </Button>
         ))}
       </div>
       {/* Honest, VISIBLE reason the buttons are disabled — never a hover-only title (§3). */}
@@ -127,9 +114,9 @@ export default function ConversationAssistSection({ conversationId, hasMessages,
           <div style={{ display: 'flex', gap: 8 }}>
             {/* No apply target when actions came back empty — nothing to overnemen. */}
             {(result.kind === 'text' || result.items.length > 0) && (
-              <button type="button" onClick={handleApply} style={primaryBtn}><Check size={13} /> {t('conversations.assist.apply', { defaultValue: 'Overnemen' })}</button>
+              <Button variant="primary" size="sm" onClick={handleApply}><Check size={13} /> {t('conversations.assist.apply', { defaultValue: 'Overnemen' })}</Button>
             )}
-            <button type="button" onClick={discard} style={ghostBtn}><X size={13} /> {t('conversations.assist.discard', { defaultValue: 'Verwerpen' })}</button>
+            <Button variant="secondary" size="sm" onClick={discard}><X size={13} /> {t('conversations.assist.discard', { defaultValue: 'Verwerpen' })}</Button>
           </div>
         </div>
       )}

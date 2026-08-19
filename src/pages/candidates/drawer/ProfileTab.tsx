@@ -10,6 +10,7 @@ import ProfileAddressTab from './ProfileAddressTab'
 import ProfileContactTab from './ProfileContactTab'
 import WorkPermitBlock from './WorkPermitBlock'
 import CandidateOriginCard from './CandidateOriginCard'
+import Button from '@/components/ui/Button'
 import type { Candidate } from '@/types/candidate'
 
 type AnyProps = Record<string, unknown>
@@ -78,17 +79,17 @@ export default function ProfileTab({ c, onEditSave, autoEditSignal, onContactMom
   const blockStyle: CSSProperties = { borderRadius: 10, overflow: 'hidden', border: '1px solid var(--border)', background: 'var(--surface)' }
   const editControls = (isEditing: boolean, onSave: () => void, onCancel: () => void, onStart: () => void) => isEditing ? (
     <div style={{ display: 'flex', gap: 4 }}>
-      <button onClick={onSave} title={t('common:save')} style={{ ...iconBtn, background: 'var(--color-primary)', color: 'var(--color-on-accent)', border: 'none' }}>
+      <Button variant="primary" size="sm" iconOnly onClick={onSave} title={t('common:save')}>
         <Save size={13} />
-      </button>
-      <button onClick={onCancel} title={t('common:cancel')} style={{ ...iconBtn, background: 'var(--bg)', color: 'var(--text-muted)', border: '1px solid var(--border)' }}>
+      </Button>
+      <Button variant="secondary" size="sm" iconOnly onClick={onCancel} title={t('common:cancel')}>
         <X size={13} />
-      </button>
+      </Button>
     </div>
   ) : (
-    <button onClick={onStart} title={t('common:edit')} style={{ ...iconBtn, background: 'none', color: 'var(--text-muted)', border: '1px solid var(--border)' }}>
+    <Button variant="secondary" size="sm" iconOnly onClick={onStart} title={t('common:edit')}>
       <Edit2 size={13} />
-    </button>
+    </Button>
   )
 
   return (
@@ -113,19 +114,21 @@ export default function ProfileTab({ c, onEditSave, autoEditSignal, onContactMom
           <span style={{ fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em', color: 'var(--text-muted)' }}>{t('profile.summary')}</span>
           <div style={{ display: 'flex', gap: 4, alignItems: 'center' }}>
             {/* Clear the profile text (edit mode only) — through the same publish
-                path as typing, so a popped-out window clears with it. */}
+                path as typing, so a popped-out window clears with it.
+                HUISSTIJL-1: neutral border + danger-coloured icon is a hybrid that
+                matches neither `secondary` (needs neutral text) nor `dangerSoft`
+                (needs a danger-tinted bg/border) — left as its own bespoke style. */}
             {summaryEditing && (
               <button onClick={() => changeSummary('')} title={t('profile.clear')} aria-label={t('profile.clear')}
-                style={{ ...iconBtn, background: 'none', color: 'var(--color-danger)', border: '1px solid var(--border)' }}>
+                style={{ ...iconBtn, width: 28, height: 28, background: 'none', color: 'var(--color-danger)', border: '1px solid var(--border)' }}>
                 <Trash2 size={13} />
               </button>
             )}
             {/* Second screen — same icon + footprint the notes popup uses for its
                 own pop-out, in this block's own title row. */}
-            <button onClick={openSummaryPopout} title={t('common:openSecondScreen')} aria-label={t('common:openSecondScreen')}
-              style={{ ...iconBtn, background: 'none', color: 'var(--text-muted)', border: '1px solid var(--border)' }}>
+            <Button variant="secondary" size="sm" iconOnly onClick={openSummaryPopout} title={t('common:openSecondScreen')} aria-label={t('common:openSecondScreen')}>
               <ExternalLink size={13} />
-            </button>
+            </Button>
             {editControls(summaryEditing, saveSummary, cancelSummary, () => setSummaryEditing(true))}
           </div>
         </div>

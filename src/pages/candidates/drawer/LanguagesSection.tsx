@@ -9,6 +9,7 @@ import { downloadFilesSequentially } from '@/lib/downloadFiles'
 import DocPreviewModal from '@/components/drawer/DocPreviewModal'
 import { useLanguageLookups } from '@/lib/useLanguageLookups'
 import DrawerAddButton from './DrawerAddButton'
+import Button from '@/components/ui/Button'
 // DOC-1-EIGENAAR-1: the ONE shared "which document is still free" rule (§11).
 import { documentLinkOptions } from './documentLinkRules'
 // G34: the house searchable dropdown replaces the native <select> per language/level.
@@ -153,7 +154,6 @@ export default function LanguagesSection({ c, onEditSave }: { c: Candidate; onEd
   // Documenten list row) — the in-app stream url first, the signed url as fallback.
   const downloadDoc = (doc: LinkedDocument) => downloadFilesSequentially([{ url: doc.url ?? doc.download_url, name: doc.name ?? doc.file_name ?? '' }])
 
-  const iconBtn: CSSProperties = { width: 26, height: 26, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 6, cursor: 'pointer' }
   // Subtle, borderless icon button for the chip's preview/download actions — the
   // same muted treatment SectionTabs' own document links use.
   const chipIconBtn: CSSProperties = { background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: 0, display: 'flex' }
@@ -194,7 +194,7 @@ export default function LanguagesSection({ c, onEditSave }: { c: Candidate; onEd
         padding: editing ? '10px 12px' : '10px 40px 10px 12px' }}>
         {!editing && (
           <div style={{ position: 'absolute', top: 8, right: 8, display: 'flex', gap: 4 }}>
-            <button onClick={() => { setRows(initial()); setEditing(true) }} title={t('common:edit')} style={{ ...iconBtn, background: 'none', color: 'var(--text-muted)', border: '1px solid var(--border)' }}><Edit2 size={13} /></button>
+            <Button variant="secondary" size="sm" iconOnly onClick={() => { setRows(initial()); setEditing(true) }} title={t('common:edit')}><Edit2 size={13} /></Button>
           </div>
         )}
         {editing ? (
@@ -226,13 +226,12 @@ export default function LanguagesSection({ c, onEditSave }: { c: Candidate; onEd
                     <CreatableSelect value={row.written || null} onChange={v => setRow(i, 'written', v)} allowCreate={false} clearable
                       placeholder={t('addFields.writtenLevel')} options={levels} style={pickerStyle} />
                   </div>
-                  {/* Same 26×26 box as every other icon button in this card (Danny
-                      08-08: "is stuk groter dan de andere 2 knopjes") — one size for
-                      trash, save and ✕; the row centers it vertically. */}
-                  <button onClick={() => removeRow(i)} title={t('common:remove')}
-                    style={{ ...iconBtn, flexShrink: 0, background: 'var(--color-danger-bg)', color: 'var(--color-danger)', border: 'none' }}>
+                  {/* Same 28×28 box (house Button size="sm") as every other icon button
+                      in this card (Danny 08-08: "is stuk groter dan de andere 2 knopjes")
+                      — one size for trash, save and ✕; the row centers it vertically. */}
+                  <Button variant="dangerSoft" size="sm" iconOnly onClick={() => removeRow(i)} title={t('common:remove')} style={{ flexShrink: 0 }}>
                     <Trash2 size={12} />
-                  </button>
+                  </Button>
                 </div>
                 {/* KAND-ACHTERGROND-VERPLICHT-1: points at the row a blocked Save
                     flagged — content typed, but no language picked. */}
@@ -260,8 +259,8 @@ export default function LanguagesSection({ c, onEditSave }: { c: Candidate; onEd
             ))}
             {/* Save/✕ as a real footer line — right-aligned under the rows. */}
             <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 4, marginTop: 2 }}>
-              <button onClick={save} title={t('common:save')} style={{ ...iconBtn, background: 'var(--color-primary)', color: 'var(--color-on-accent)', border: 'none' }}><Save size={13} /></button>
-              <button onClick={cancel} title={t('common:cancel')} style={{ ...iconBtn, background: 'var(--bg)', color: 'var(--text-muted)', border: '1px solid var(--border)' }}><X size={13} /></button>
+              <Button variant="primary" size="sm" iconOnly onClick={save} title={t('common:save')}><Save size={13} /></Button>
+              <Button variant="secondary" size="sm" iconOnly onClick={cancel} title={t('common:cancel')}><X size={13} /></Button>
             </div>
           </div>
         ) : view.length === 0 ? (

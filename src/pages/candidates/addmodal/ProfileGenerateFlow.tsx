@@ -12,6 +12,7 @@ import { Loader2, Sparkles, X, Check } from 'lucide-react'
 import KoiosAiMark from '@/components/ui/KoiosAiMark'
 import AiGeneratedLabel from '@/components/ui/AiGeneratedLabel'
 import CalloutBox from '@/components/ui/CalloutBox'
+import Button from '@/components/ui/Button'
 import { useProfileGenerate } from './useProfileGenerate'
 import type { FormState } from '../AddCandidateModal'
 
@@ -20,10 +21,8 @@ interface ProfileGenerateFlowProps {
   onApply: (concept: string) => void
 }
 
-const primaryBtn: CSSProperties = { display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 12, fontWeight: 600,
-  padding: '6px 12px', borderRadius: 7, cursor: 'pointer', background: 'var(--color-primary)', color: 'var(--color-on-accent)', border: 'none' }
-const ghostBtn: CSSProperties = { display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 12, fontWeight: 500,
-  padding: '6px 12px', borderRadius: 7, cursor: 'pointer', background: 'none', color: 'var(--text-muted)', border: '1px solid var(--border)' }
+// HUISSTIJL-1: bare text-link retry action (no border/fill) — not one of the
+// house Button identities, kept as its own small link style.
 const linkBtn: CSSProperties = { background: 'none', border: 'none', cursor: 'pointer', padding: 0, fontSize: 11, fontWeight: 600, color: 'var(--color-primary-text)', textDecoration: 'underline' }
 
 export default function ProfileGenerateFlow({ form, onApply }: ProfileGenerateFlowProps) {
@@ -33,15 +32,12 @@ export default function ProfileGenerateFlow({ form, onApply }: ProfileGenerateFl
 
   if (!open) {
     return (
-      <button type="button" onClick={openFlow} disabled={!canGenerate}
+      <Button variant="soft" size="sm" onClick={openFlow} disabled={!canGenerate}
         aria-label={t('generate.button')} title={canGenerate ? undefined : t('generate.needsFieldsFirst')}
-        style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 12, fontWeight: 500, padding: '5px 10px',
-          borderRadius: 7, cursor: canGenerate ? 'pointer' : 'not-allowed', opacity: canGenerate ? 1 : 0.55,
-          background: 'var(--color-primary-bg)', color: 'var(--color-primary-text)',
-          border: '1px solid color-mix(in srgb, var(--color-primary) 35%, transparent)', marginBottom: 8 }}>
+        style={{ marginBottom: 8 }}>
         <KoiosAiMark size={16} tone="soft" title={t('generate.button')} />
         {t('generate.button')}
-      </button>
+      </Button>
     )
   }
 
@@ -50,6 +46,8 @@ export default function ProfileGenerateFlow({ form, onApply }: ProfileGenerateFl
       style={{ border: '1px solid var(--border)', borderRadius: 8, padding: '10px 12px', marginBottom: 8,
         background: 'var(--surface)', display: 'flex', flexDirection: 'column', gap: 8 }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}>
+        {/* HUISSTIJL-1: bare borderless close icon (ghost identity) — not one of
+            the four migrated Button patterns, left as its own minimal control. */}
         <button type="button" onClick={closeFlow} aria-label={t('common:close')}
           style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', display: 'flex' }}>
           <X size={14} />
@@ -57,9 +55,9 @@ export default function ProfileGenerateFlow({ form, onApply }: ProfileGenerateFl
       </div>
 
       {status === 'idle' && (
-        <button type="button" onClick={generate} style={{ ...primaryBtn, alignSelf: 'flex-start' }}>
+        <Button variant="primary" size="sm" onClick={generate} style={{ alignSelf: 'flex-start' }}>
           <Sparkles size={13} /> {t('generate.cta')}
-        </button>
+        </Button>
       )}
 
       {status === 'loading' && (
@@ -106,10 +104,10 @@ export default function ProfileGenerateFlow({ form, onApply }: ProfileGenerateFl
             {concept}
           </div>
           <div style={{ display: 'flex', gap: 8 }}>
-            <button type="button" onClick={() => { onApply(concept); closeFlow() }} style={primaryBtn}>
+            <Button variant="primary" size="sm" onClick={() => { onApply(concept); closeFlow() }}>
               <Check size={13} /> {t('generate.apply')}
-            </button>
-            <button type="button" onClick={discard} style={ghostBtn}>{t('generate.discard')}</button>
+            </Button>
+            <Button variant="secondary" size="sm" onClick={discard}>{t('generate.discard')}</Button>
           </div>
         </>
       )}
