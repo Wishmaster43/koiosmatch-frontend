@@ -166,7 +166,8 @@ describe('VacancyDrawer · trash lifecycle (TRASH-OVERAL-2)', () => {
     vi.mocked(api.get).mockResolvedValue({ data: { data: PREVIEW } })
     const wiring = trashWiring()
     const user = userEvent.setup()
-    render(<VacancyDrawer vacancy={vacancy} onClose={vi.fn()} trash={wiring} />)
+    // TRASH-ARCHIEF-EERST-1: hard delete only exists on an ARCHIVED record now.
+    render(<VacancyDrawer vacancy={{ ...vacancy, archived: true, lifecycle: 'archived' }} onClose={vi.fn()} trash={wiring} />)
 
     await user.click(screen.getByRole('button', { name: tc('trash.markAction') as string }))
     await waitFor(() => expect(api.get).toHaveBeenCalledWith('/vacancies/v1/deletion-preview'))
@@ -179,7 +180,7 @@ describe('VacancyDrawer · trash lifecycle (TRASH-OVERAL-2)', () => {
   it('mark flow with a picked transfer owner sends {transfer_to_owner_id}', async () => {
     vi.mocked(api.get).mockResolvedValue({ data: { data: { ...PREVIEW, transferable: { attribute: 'owner_id', current_owner_id: null } } } })
     const user = userEvent.setup()
-    render(<VacancyDrawer vacancy={vacancy} onClose={vi.fn()} trash={trashWiring()} />)
+    render(<VacancyDrawer vacancy={{ ...vacancy, archived: true, lifecycle: 'archived' }} onClose={vi.fn()} trash={trashWiring()} />)
 
     await user.click(screen.getByRole('button', { name: tc('trash.markAction') as string }))
     await user.click(await screen.findByText(tc('trash.modal.transferPlaceholder') as string))

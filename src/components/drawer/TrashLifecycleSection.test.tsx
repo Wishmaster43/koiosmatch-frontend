@@ -103,4 +103,18 @@ describe('TrashLifecycleSection — pending_erase banner', () => {
     renderSection({ lifecycle: 'pending_erase', pendingEraseAt: '2026-08-01T10:00:00Z', canUnmark: false })
     expect(screen.queryByRole('button', { name: t('trash.unmarkAction') as string })).toBeNull()
   })
+
+// TRASH-ARCHIEF-EERST-1 (Danny 19-08, verbatim: "We doen altijd soft delete
+// archiveren en hard delete via gearchiveerde accounts"): an ACTIVE record shows
+// NO hard-delete affordance at all — the destructive path starts from the archive,
+// in all four entities that share this section.
+it('renders no hard-delete action on an active record, even with full permissions', () => {
+  renderSection({ lifecycle: 'active' })
+  expect(screen.queryByRole('button', { name: t('trash.markAction') })).toBeNull()
+})
+
+it('renders the hard-delete action once the record is archived', () => {
+  renderSection({ lifecycle: 'archived' })
+  expect(screen.getByRole('button', { name: t('trash.markAction') })).toBeInTheDocument()
+})
 })

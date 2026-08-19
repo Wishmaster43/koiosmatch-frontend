@@ -249,7 +249,7 @@ describe('TaskDrawer · trash lifecycle (TRASH-OVERAL-2)', () => {
   it('mark flow: preview GET + confirm POSTs /tasks/{id}/mark-deletion with an EMPTY body', async () => {
     routePreview(PREVIEW)
     const user = userEvent.setup()
-    const wiring = mountTrash(task(false))
+    const wiring = mountTrash({ ...task(true), archived: true, lifecycle: 'archived' })
 
     await user.click(screen.getByRole('button', { name: tc('trash.markAction') as string }))
     await waitFor(() => expect(api.get).toHaveBeenCalledWith('/tasks/t1/deletion-preview'))
@@ -262,7 +262,7 @@ describe('TaskDrawer · trash lifecycle (TRASH-OVERAL-2)', () => {
   it('mark flow with a picked transfer owner sends {transfer_to_owner_id}', async () => {
     routePreview({ ...PREVIEW, transferable: { attribute: 'owner_id', current_owner_id: null } })
     const user = userEvent.setup()
-    mountTrash(task(false))
+    mountTrash({ ...task(true), archived: true, lifecycle: 'archived' })
 
     await user.click(screen.getByRole('button', { name: tc('trash.markAction') as string }))
     await user.click(await screen.findByText(tc('trash.modal.transferPlaceholder') as string))
@@ -274,7 +274,7 @@ describe('TaskDrawer · trash lifecycle (TRASH-OVERAL-2)', () => {
   })
 
   it('hides the mark action without tasks.delete (no fake affordances)', () => {
-    mountTrash(task(false), trashWiring({ canMark: false }) as ReturnType<typeof trashWiring>)
+    mountTrash(task(true), trashWiring({ canMark: false }) as ReturnType<typeof trashWiring>)
     expect(screen.queryByRole('button', { name: tc('trash.markAction') as string })).toBeNull()
   })
 

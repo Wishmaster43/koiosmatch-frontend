@@ -337,7 +337,8 @@ describe('CustomerDrawer · trash lifecycle (TRASH-OVERAL-2)', () => {
     vi.mocked(api.get).mockResolvedValue({ data: { data: PREVIEW } })
     const wiring = trashWiring()
     const user = userEvent.setup()
-    render(<CustomerDrawer customer={customer} onClose={() => {}} statuses={statuses} trash={wiring} />)
+    // TRASH-ARCHIEF-EERST-1: hard delete only exists on an ARCHIVED record now.
+    render(<CustomerDrawer customer={{ ...customer, archived: true, lifecycle: 'archived' }} onClose={() => {}} statuses={statuses} trash={wiring} />)
 
     await user.click(screen.getByRole('button', { name: tc('trash.markAction') as string }))
     await waitFor(() => expect(api.get).toHaveBeenCalledWith('/customers/1/deletion-preview'))
@@ -350,7 +351,7 @@ describe('CustomerDrawer · trash lifecycle (TRASH-OVERAL-2)', () => {
   it('mark flow with a picked transfer owner sends {transfer_to_owner_id}', async () => {
     vi.mocked(api.get).mockResolvedValue({ data: { data: { ...PREVIEW, transferable: { attribute: 'owner_id', current_owner_id: null } } } })
     const user = userEvent.setup()
-    render(<CustomerDrawer customer={customer} onClose={() => {}} statuses={statuses} trash={trashWiring()} />)
+    render(<CustomerDrawer customer={{ ...customer, archived: true, lifecycle: 'archived' }} onClose={() => {}} statuses={statuses} trash={trashWiring()} />)
 
     await user.click(screen.getByRole('button', { name: tc('trash.markAction') as string }))
     await user.click(await screen.findByText(tc('trash.modal.transferPlaceholder') as string))

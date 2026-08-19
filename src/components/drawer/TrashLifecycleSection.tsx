@@ -9,6 +9,7 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Trash2, Undo2 } from 'lucide-react'
+import Button from '@/components/ui/Button'
 import DeletionPreviewModal from '@/components/ui/DeletionPreviewModal'
 import PendingEraseBanner from '@/components/drawer/PendingEraseBanner'
 import { useDeletionLifecycle, eraseAroundDate } from '@/hooks/useDeletionLifecycle'
@@ -38,13 +39,6 @@ interface TrashLifecycleSectionProps extends TrashSectionConfig {
   pendingEraseAt?: string | null
 }
 
-// Compact soft-tint action button (§4 — never a solid fill, never bare coloured text).
-const actionBtn = (color: string) => ({
-  display: 'inline-flex', alignItems: 'center', gap: 5, height: 26, padding: '0 10px',
-  fontSize: 11.5, fontWeight: 600, borderRadius: 6, cursor: 'pointer', whiteSpace: 'nowrap',
-  color, background: `color-mix(in srgb, ${color} 8%, transparent)`,
-  border: `1px solid color-mix(in srgb, ${color} 40%, transparent)`,
-} as const)
 
 export default function TrashLifecycleSection({
   entityPath, id, entityLabel, lifecycle, pendingEraseAt = null,
@@ -104,15 +98,19 @@ export default function TrashLifecycleSection({
     )
   }
 
-  // Not in the trash: the mark action, HIDDEN (never disabled) without the
-  // '<entity>.delete' permission — house rule: no fake affordances.
-  if (!canMark) return null
+  // TRASH-ARCHIEF-EERST-1 (Danny 19-08, on this exact button): hard delete exists
+  // ONLY from the ARCHIVE. A live record is soft-deleted (archived) first — so an
+  // active drawer renders no destructive affordance at all, in all four entities
+  // that share this section (the candidate blueprint already worked this way: its
+  // hard delete lives inside the ArchivedBanner). Also still HIDDEN (never
+  // disabled) without the '<entity>.delete' permission — no fake affordances.
+  if (!canMark || lifecycle !== 'archived') return null
   return (
     <>
       <div style={{ marginTop: 8, display: 'flex', justifyContent: 'flex-end' }}>
-        <button type="button" onClick={() => { setBlocked(false); setModalOpen(true) }} style={actionBtn('var(--color-danger)')}>
+        <Button variant="dangerSoft" size="sm" onClick={() => { setBlocked(false); setModalOpen(true) }}>
           <Trash2 size={12} aria-hidden="true" /> {t('trash.markAction')}
-        </button>
+        </Button>
       </div>
       <DeletionPreviewModal open={modalOpen} onClose={() => setModalOpen(false)} entityLabel={entityLabel}
         preview={preview} loading={loading} error={error} users={users}
