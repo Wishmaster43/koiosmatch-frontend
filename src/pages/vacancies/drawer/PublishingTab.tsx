@@ -5,6 +5,7 @@ import SelectMenuJs from '@/components/ui/SelectMenu'
 import SubTabBar from '@/components/drawer/SubTabBar'
 import SelectAllRow from '@/components/ui/SelectAllRow'
 import { sectionTitle } from '@/components/ui/SectionCard'
+import Toggle from '@/components/ui/Toggle'
 import { useVacancyLookups } from '@/context/VacancyLookupsContext'
 import { useAllSettings, getJsonSetting, getBoolSetting } from '@/lib/settings/useAllSettings'
 import { VACANCY_APP_DEFAULTS_KEY, FALLBACK_APP_SETTINGS } from '../data/applicationSettingsDefaults'
@@ -15,18 +16,6 @@ type AnyProps = Record<string, unknown>
 const SelectMenu = SelectMenuJs as unknown as ComponentType<AnyProps>
 
 interface ChannelState { value: string; label: string; published: boolean }
-
-// Small accessible on/off toggle (no shared Switch component in the library yet).
-function Toggle({ on, onChange, label }: { on: boolean; onChange: (next: boolean) => void; label?: string }) {
-  return (
-    <button role="switch" aria-checked={on} aria-label={label} onClick={() => onChange(!on)}
-      style={{ width: 38, height: 22, borderRadius: 99, border: 'none', cursor: 'pointer', flexShrink: 0,
-        background: on ? 'var(--color-primary)' : 'var(--border)', position: 'relative', transition: 'background 0.15s' }}>
-      <span style={{ position: 'absolute', top: 2, left: on ? 18 : 2, width: 18, height: 18, borderRadius: '50%',
-        background: '#fff', transition: 'left 0.15s' }} />
-    </button>
-  )
-}
 
 const APP_FIELDS = ['cv', 'cover_letter', 'photo', 'remarks', 'interview_consent']
 
@@ -187,7 +176,7 @@ export default function PublishingTab({ vacancy: v, onUpdate }: { vacancy: Vacan
                   <span style={{ fontSize: 12, color: 'var(--text)' }}>{c.label}</span>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                     <span style={{ fontSize: 11, color: statusColor }}>{statusLabel}</span>
-                    <Toggle on={c.published} onChange={next => toggleChannel(c.value, next)} label={c.label} />
+                    <Toggle checked={c.published} onChange={next => toggleChannel(c.value, next)} ariaLabel={c.label} />
                   </div>
                 </div>
               )

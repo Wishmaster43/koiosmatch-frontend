@@ -54,7 +54,9 @@ describe('WorkflowTemplateLibrary', () => {
     render(<WorkflowTemplateLibrary open onClose={vi.fn()} onUseTemplate={vi.fn()} />)
     await screen.findByText('Onboarding')
 
-    await userEvent.click(screen.getByRole('button', { name: t('templateLibrary.koiosAiFolder') }))
+    // HUISSTIJL-1: the category picker is now the shared SegmentedControl radiogroup —
+    // its options carry role="radio" (real keyboard semantics), not role="button".
+    await userEvent.click(screen.getByRole('radio', { name: t('templateLibrary.koiosAiFolder') }))
 
     await waitFor(() => expect(api.get).toHaveBeenCalledWith('/workflow-templates', { params: { category: 'koios_ai' } }))
     expect(await screen.findByText('Send WhatsApp')).toBeInTheDocument()

@@ -8,11 +8,11 @@
  * concern (mirrors how WorkflowsPage owns handleSave, not its list panels).
  */
 import { useMemo } from 'react'
-import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Loader2 } from 'lucide-react'
 import FloatingPanel from '@/components/ui/FloatingPanel'
 import KoiosAiMark from '@/components/ui/KoiosAiMark'
+import SegmentedControl from '@/components/ui/SegmentedControl'
 import { useWorkflowTemplates, KOIOS_AI_CATEGORY } from './hooks/useWorkflowTemplates'
 import type { WorkflowTemplate } from './hooks/useWorkflowTemplates'
 import Button from '@/components/ui/Button'
@@ -23,24 +23,9 @@ interface WorkflowTemplateLibraryProps {
   onUseTemplate: (template: WorkflowTemplate) => void
 }
 
-// One row in the category sidebar (built-in "All"/"Koios AI" or a template's own
-// category). The icon is aria-hidden — the visible label already fully names the
-// button, so KoiosAiMark's own "Koios AI" aria-label doesn't get glued onto it.
-function CategoryRow({ active, label, icon, onClick }: { active: boolean; label: string; icon?: ReactNode; onClick: () => void }) {
-  return (
-    <button type="button" onClick={onClick} aria-pressed={active}
-      style={{
-        display: 'flex', alignItems: 'center', gap: 8, width: '100%', textAlign: 'left',
-        padding: '7px 10px', borderRadius: 6, border: 'none', cursor: 'pointer', marginBottom: 2,
-        background: active ? 'var(--color-primary-bg)' : 'transparent',
-        // Text-colour accent uses the AA-contrast text token, not the raw brand primary.
-        color: active ? 'var(--color-primary-text)' : 'var(--text)', fontSize: 13, fontWeight: active ? 600 : 400,
-      }}>
-      {icon && <span aria-hidden="true" style={{ display: 'flex' }}>{icon}</span>}
-      <span style={{ flex: 1, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{label}</span>
-    </button>
-  )
-}
+// The category state is `string | null` ("All templates"); SegmentedControl needs a
+// real string value for every option, so "All" gets its own sentinel value.
+const ALL_CATEGORY = '__all__'
 
 // One template tile — name/description + a "Use template" action the caller wires
 // up. The button's own accessible name includes the template name (not just the
@@ -72,12 +57,26 @@ export default function WorkflowTemplateLibrary({ open, onClose, onUseTemplate }
   const { templates, category, setCategory, loading, error } = useWorkflowTemplates(open)
 
   // Categories other than Koios AI, derived from whatever the last fetch carried —
-  // Koios AI itself is always pinned in the sidebar regardless of what loaded.
+  // Koios AI itself is always pinned in the bar regardless of what loaded.
   const otherCategories = useMemo(() => {
     const set = new Set<string>()
     templates.forEach((tpl) => { if (tpl.category && tpl.category !== KOIOS_AI_CATEGORY) set.add(tpl.category) })
     return [...set].sort()
   }, [templates])
+
+  // HUISSTIJL-1: the hand-rolled aria-pressed CategoryRow list is now the shared
+  // SegmentedControl (compact — a horizontal pill row, mirroring ReportSwitchBar/
+  // KoiosForYouCard's period switches). "All templates" needs a real string value
+  // since the underlying state uses `null` for that case.
+  const categoryOptions = useMemo(() => [
+    { value: ALL_CATEGORY, label: t('templateLibrary.allTemplates') },
+    // The brand mark rides along again now compact SegmentedControl renders
+    // option icons (Opus batch C finding 4: grow the shared component, never
+    // shrink the brand).
+    { value: KOIOS_AI_CATEGORY, label: t('templateLibrary.koiosAiFolder'), icon: KoiosAiMark },
+    ...otherCategories.map(cat => ({ value: cat, label: cat })),
+  ], [otherCategories, t])
+  const handleCategoryChange = (value: string) => setCategory(value === ALL_CATEGORY ? null : value)
 
   return (
     <FloatingPanel open={open} onClose={onClose} ariaLabel={t('templateLibrary.title')}
@@ -88,15 +87,12 @@ export default function WorkflowTemplateLibrary({ open, onClose, onUseTemplate }
           <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>{t('templateLibrary.subtitle')}</div>
         </div>
       }>
-      <div style={{ display: 'flex', flex: 1, minHeight: 0 }}>
-        {/* Category sidebar — "All templates" + the pinned Koios AI folder + whatever else loaded. */}
-        <div style={{ width: 200, flexShrink: 0, borderRight: '1px solid var(--border)', overflowY: 'auto', padding: 8 }}>
-          <CategoryRow active={category === null} label={t('templateLibrary.allTemplates')} onClick={() => setCategory(null)} />
-          <CategoryRow active={category === KOIOS_AI_CATEGORY} onClick={() => setCategory(KOIOS_AI_CATEGORY)}
-            icon={<KoiosAiMark size={18} />} label={t('templateLibrary.koiosAiFolder')} />
-          {otherCategories.map((cat) => (
-            <CategoryRow key={cat} active={category === cat} label={cat} onClick={() => setCategory(cat)} />
-          ))}
+      <div style={{ display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0 }}>
+        {/* Category bar — "All templates" + the pinned Koios AI folder + whatever else
+            loaded. Horizontal-scrolls instead of wrapping if a tenant has many categories. */}
+        <div style={{ borderBottom: '1px solid var(--border)', padding: '10px 16px', overflowX: 'auto' }}>
+          <SegmentedControl options={categoryOptions} value={category ?? ALL_CATEGORY} onChange={handleCategoryChange}
+            size="compact" ariaLabel={t('templateLibrary.title')} />
         </div>
 
         {/* Template grid for the selected category. */}

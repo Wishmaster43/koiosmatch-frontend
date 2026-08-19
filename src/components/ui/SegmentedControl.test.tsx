@@ -82,4 +82,21 @@ describe('SegmentedControl · activeOnly leaves the unselected options neutral',
       color="var(--color-success)" ariaLabel="Pakket" />)
     expect(screen.getByRole('radio', { name: /Core/ }).style.background).toContain('color-mix')
   })
+
+// commitOnFocus=false (Opus batch C finding 1): a selection that triggers an
+// audited server write must not fire on every arrow press. Arrows only move
+// focus; Enter/Space (the button's native click) commits.
+it('with commitOnFocus=false, arrows move focus without selecting; Enter commits', async () => {
+  const onChange = vi.fn()
+  render(<SegmentedControl ariaLabel="model" commitOnFocus={false} value="a" onChange={onChange}
+    options={[{ value: 'a', label: 'A' }, { value: 'b', label: 'B' }, { value: 'c', label: 'C' }]} />)
+  const first = screen.getByRole('radio', { name: 'A' })
+  first.focus()
+  fireEvent.keyDown(first, { key: 'ArrowRight' })
+  fireEvent.keyDown(screen.getByRole('radio', { name: 'B' }), { key: 'ArrowRight' })
+  expect(onChange).not.toHaveBeenCalled() // two arrow presses, zero writes
+  fireEvent.click(screen.getByRole('radio', { name: 'C' })) // Enter/Space = native click
+  expect(onChange).toHaveBeenCalledTimes(1)
+  expect(onChange).toHaveBeenCalledWith('c')
+})
 })

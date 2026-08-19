@@ -7,12 +7,12 @@ import type { CSSProperties } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Brain, ChevronDown, Eye, EyeOff, MessageSquare, Send, Trash2 } from 'lucide-react'
 import api, { unwrap, unwrapList } from '@/lib/api'
-import { interactive } from '@/lib/a11y'
 import { notifyError } from '@/lib/notify'
 import Avatar from '@/components/ui/Avatar'
 import ChipMultiSelect from '@/components/ui/ChipMultiSelect'
 // G34: the house searchable dropdown replaces the native prompt/WA-template <select>s.
 import CreatableSelect from '@/components/ui/CreatableSelect'
+import Toggle from '@/components/ui/Toggle'
 import { initialsOf } from '@/lib/initials'
 import { inputStyle, Field, CopyableValue, SaveBar } from './shared'
 import { InterviewFlowSection } from './InterviewFlowSection'
@@ -295,11 +295,7 @@ export function AgentForm({ agent, prompts, faqs, onSaved, onDelete }: {
               {t('ai.agent.knowledge')}
             </div>
             <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer', marginBottom: 10 }}>
-              <div {...interactive(() => set('use_knowledge', !form.use_knowledge))}
-                role="switch" aria-checked={form.use_knowledge}
-                style={{ width: 34, height: 18, borderRadius: 999, position: 'relative', transition: 'background 0.15s', background: form.use_knowledge ? 'var(--color-primary)' : 'var(--border)', cursor: 'pointer', flexShrink: 0 }}>
-                <div style={{ position: 'absolute', top: 2, left: form.use_knowledge ? 16 : 2, width: 14, height: 14, borderRadius: '50%', background: 'white', transition: 'left 0.15s', boxShadow: '0 1px 3px rgba(0,0,0,0.2)' }} />
-              </div>
+              <Toggle checked={form.use_knowledge} onChange={v => set('use_knowledge', v)} ariaLabel={t('ai.agent.useKnowledge')} />
               <span style={{ fontSize: 12, color: 'var(--text)' }}>{t('ai.agent.useKnowledge')}</span>
             </label>
             <Field label={t('ai.agent.selectFaqs')}>

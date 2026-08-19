@@ -6,27 +6,25 @@
  * whitelist can never be set. Rates live in the pricing card below this one.
  */
 import { useState } from 'react'
-import { Zap, Sparkles, Crown, Check } from 'lucide-react'
+import { Zap, Sparkles, Crown } from 'lucide-react'
 import { updateKoiosModel } from './koiosApi'
 import { tierKeyForModel } from '@/lib/koiosModelTiers'
+import SegmentedControl from '@/components/ui/SegmentedControl'
 
 const card = { border: '1px solid var(--border)', borderRadius: 10, padding: 16, marginBottom: 14, background: 'var(--surface)' }
 const cardTitle = { fontSize: 13, fontWeight: 600, color: 'var(--text)', marginBottom: 4 }
 
-// Icon/colour per tier — presentation only. The id→tier MATCH itself lives in the
-// shared lib/koiosModelTiers (K-37) so this card and the floating Koios panel's
-// model picker never drift into two hand-maintained id→tier maps (CLAUDE.md §11).
-// Colours are design tokens (§4), not ad-hoc hex (audit finding, 05-08) — snel/slim
-// map onto the existing success/info tokens, and max onto --color-violet, which is
-// an exact match for the previous #7C3AED so nothing here shifts visually.
-const TIER_STYLE = {
-  snel: { Icon: Zap, color: 'var(--color-success)' },
-  slim: { Icon: Sparkles, color: 'var(--color-info)' },
-  max:  { Icon: Crown, color: 'var(--color-violet)' },
-}
+// Icon per tier — presentation only. The id→tier MATCH itself lives in the shared
+// lib/koiosModelTiers (K-37) so this card and the floating Koios panel's model
+// picker never drift into two hand-maintained id→tier maps (CLAUDE.md §11).
+// HUISSTIJL-1: the per-tier accent colour (success/info/violet border+icon) is
+// dropped in favour of the shared SegmentedControl's one look — the control takes
+// a single group colour, not one per option, so tier identity now reads through
+// the icon shape + label/description text instead of colour.
+const TIER_ICON = { snel: Zap, slim: Sparkles, max: Crown }
 const tierFor = (id) => {
   const key = tierKeyForModel(id)
-  return key ? { key, ...TIER_STYLE[key] } : { key: null, Icon: Sparkles, color: 'var(--text-muted)' }
+  return { key, Icon: key ? TIER_ICON[key] : Sparkles }
 }
 
 export default function KoiosModelsCard({ models, t, onChanged }) {
@@ -48,34 +46,26 @@ export default function KoiosModelsCard({ models, t, onChanged }) {
     setSaving(false)
   }
 
+  // One radio option per selectable model — label is the tier name (raw model id
+  // when it falls outside the known tiers), description folds in the tier blurb
+  // AND the raw model id (monospace styling isn't part of the shared description
+  // slot, so it rides along in the same line instead of silently disappearing).
+  const modelOptions = selectable.map((m) => {
+    const { key, Icon } = tierFor(m)
+    return {
+      value: m,
+      label: key ? t(`models.tier.${key}`) : m,
+      description: key ? `${t(`models.tierDesc.${key}`)} · ${m}` : undefined,
+      icon: Icon,
+    }
+  })
+
   return (
     <div style={card}>
       <div style={cardTitle}>{t('models.title')}</div>
       <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 12 }}>{t('models.pickHint')}</div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: `repeat(${Math.min(selectable.length || 1, 3)}, 1fr)`, gap: 10 }}>
-        {selectable.map((m) => {
-          const { key, Icon, color } = tierFor(m)
-          const on = m === active
-          return (
-            <button key={m} type="button" onClick={() => pick(m)} disabled={saving} aria-pressed={on}
-              style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: 6,
-                padding: '12px 14px', borderRadius: 10, cursor: on ? 'default' : 'pointer', textAlign: 'left',
-                border: `2px solid ${on ? color : 'var(--border)'}`,
-                background: on ? `color-mix(in srgb, ${color} 8%, transparent)` : 'var(--surface)' }}>
-              <span style={{ display: 'flex', alignItems: 'center', gap: 6, width: '100%' }}>
-                <Icon size={15} color={color} />
-                <span style={{ fontSize: 13, fontWeight: 600, color: on ? color : 'var(--text)' }}>
-                  {key ? t(`models.tier.${key}`) : m}
-                </span>
-                {on && <Check size={14} color={color} style={{ marginLeft: 'auto' }} />}
-              </span>
-              {key && <span style={{ fontSize: 11.5, color: 'var(--text-muted)', lineHeight: 1.4 }}>{t(`models.tierDesc.${key}`)}</span>}
-              <span style={{ fontSize: 10.5, fontFamily: 'monospace', color: 'var(--text-muted)' }}>{m}</span>
-            </button>
-          )
-        })}
-      </div>
+      <SegmentedControl commitOnFocus={false} options={modelOptions} value={active ?? ''} onChange={pick} ariaLabel={t('models.title')} />
 
       {error && <div style={{ fontSize: 12, color: 'var(--color-danger)', marginTop: 10 }}>{error}</div>}
     </div>

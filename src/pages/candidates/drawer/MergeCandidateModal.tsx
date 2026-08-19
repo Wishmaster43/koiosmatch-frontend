@@ -14,11 +14,11 @@
  * the term up to this component, which re-fetches a capped 8 rows — never the whole
  * table, §8) with `closeOnToggle` so one pick closes it: a real searchable dropdown,
  * strict (no create — a candidate is a relational id, not free text).
- * READABILITY: every colour here goes through the tokens, and the accent is used AS
- * TEXT via `--color-primary-text` (never the raw `--color-primary`), which
- * useTenantTheme keeps ≥4.5:1 on the surface for any tenant brand — the old raw
- * accent measured 2.55:1 on the selected card for the default brand and 1.06:1 for
- * a light one, i.e. unreadable exactly where it mattered.
+ * HUISSTIJL-1: step 2's survivor picker is the shared `SegmentedControl` (radiogroup +
+ * roving tabindex) instead of a hand-rolled `aria-pressed` card pair — it also folds in
+ * the READABILITY fix this file used to hand-roll: SegmentedControl already renders its
+ * active-option text via `--color-primary-text` (never the raw `--color-primary`), which
+ * useTenantTheme keeps ≥4.5:1 on the surface for any tenant brand.
  */
 import { useCallback, useEffect, useId, useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -28,6 +28,7 @@ import api, { unwrapList } from '@/lib/api'
 import { notifyError, notifySuccess } from '@/lib/notify'
 import FloatingPanel from '@/components/ui/FloatingPanel'
 import SearchSelect from '@/components/ui/SearchSelect'
+import SegmentedControl from '@/components/ui/SegmentedControl'
 import { Z } from '@/lib/zIndexScale'
 import { fieldInputStyle } from '@/components/forms/fieldMetrics'
 import type { Id } from '@/types/common'
@@ -138,27 +139,13 @@ export default function MergeCandidateModal({ current, onClose, onMerged, initia
     }
   }
 
-  // One selectable "which record remains" card per side. MERGE-PICKER-1: the active
-  // state paints its accent through `--color-primary-text` (the readable variant),
-  // never the raw `--color-primary` — the raw brand as text on its own 12% tint
-  // measured 2.55:1 for the default brand (and worse for a light one), so the
-  // "Dit dossier blijft" line was unreadable at exactly the brands Danny reported.
-  const survivorCard = (c: LiteCandidate, isCurrent: boolean) => {
-    const active = String(survivorId) === String(c.id)
-    return (
-      <button type="button" key={String(c.id)} onClick={() => setSurvivorId(c.id)} aria-pressed={active}
-        style={{ flex: 1, minWidth: 0, textAlign: 'left', padding: '10px 12px', borderRadius: 10, cursor: 'pointer',
-          border: `1px solid ${active ? 'var(--color-primary-text)' : 'var(--border)'}`,
-          background: active ? 'var(--color-primary-bg)' : 'var(--surface)' }}>
-        <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--text)', overflowWrap: 'anywhere' }}>{c.name}</div>
-        <div style={{ fontSize: 11, color: 'var(--text-muted)', fontFamily: "'JetBrains Mono', monospace" }}>{c.code ?? '—'}</div>
-        {c.email && <div style={{ fontSize: 11, color: 'var(--text-muted)', overflowWrap: 'anywhere' }}>{c.email}</div>}
-        <div style={{ fontSize: 10, marginTop: 4, fontWeight: active ? 600 : 400, color: active ? 'var(--color-primary-text)' : 'var(--text-muted)' }}>
-          {active ? t('merge.stays') : (isCurrent ? t('merge.thisRecord') : t('merge.otherRecord'))}
-        </div>
-      </button>
-    )
-  }
+  // One radio option per side — label is the record's name, description is its meta
+  // line (which record it is + number + email), so lookalikes stay tellable apart.
+  const survivorOption = (c: LiteCandidate, isCurrent: boolean) => ({
+    value: String(c.id),
+    label: c.name,
+    description: [isCurrent ? t('merge.thisRecord') : t('merge.otherRecord'), c.code, c.email].filter(Boolean).join(' · '),
+  })
 
   return (
     // POPUP-SLEEP-1: migrated onto the shared FloatingPanel — draggable header,
@@ -202,9 +189,16 @@ export default function MergeCandidateModal({ current, onClose, onMerged, initia
         {/* Step 2 — choose the survivor + danger summary. */}
         {other && (
           <>
-            <div style={{ display: 'flex', gap: 10, marginBottom: 10 }}>
-              {survivorCard(current, true)}
-              {survivorCard(other, false)}
+            <div style={{ marginBottom: 10 }}>
+              {/* Visible caption doubles as the radiogroup's accessible name (matches
+                  the duplicateLabel caption above it in step 1). */}
+              <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', marginBottom: 6 }}>{t('merge.stays')}</div>
+              <SegmentedControl
+                options={[survivorOption(current, true), survivorOption(other, false)]}
+                value={String(survivorId)}
+                onChange={id => setSurvivorId(id)}
+                ariaLabel={t('merge.stays')}
+              />
             </div>
             <div style={{ fontSize: 12, color: 'var(--color-danger)', background: 'var(--color-danger-bg)', border: '1px solid color-mix(in srgb, var(--color-danger) 40%, transparent)', borderRadius: 8, padding: '8px 10px', lineHeight: 1.5, marginBottom: 12 }}>
               {t('merge.warning', { source: String(survivorId) === String(current.id) ? other.name : current.name })}

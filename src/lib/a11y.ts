@@ -13,6 +13,13 @@ export function interactive(onClick?: () => void) {
     tabIndex: 0,
     onClick,
     onKeyDown: (e: KeyboardEvent) => {
+      // Only act on keys pressed ON the element itself. A focusable CHILD (a real
+      // button inside an interactive row) handles its own Enter/Space; before this
+      // guard the row swallowed the child's activation with preventDefault AND
+      // fired its own — Enter on a workflow-row toggle opened the editor and
+      // cancelled the switch (Opus review, batch C finding 3; click paths were
+      // guarded per call-site, the keyboard path never was).
+      if (e.target !== e.currentTarget) return
       if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onClick() }
     },
   }

@@ -29,6 +29,7 @@ import { Search, GitMerge, Loader2 } from 'lucide-react'
 import api from '@/lib/api'
 import { notifyError, notifySuccess } from '@/lib/notify'
 import FloatingPanel from '@/components/ui/FloatingPanel'
+import SegmentedControl from '@/components/ui/SegmentedControl'
 import { Z } from '@/lib/zIndexScale'
 import { fieldInputStyle } from '@/components/forms/fieldMetrics'
 import { CONTACTS_CHANGED_EVENT } from '../hooks/useCustomerContacts'
@@ -103,24 +104,13 @@ export default function MergeContactModal({ customerId, current, others, onClose
   // Canon field style (G33/fieldMetrics) + a left inset for the search icon.
   const inputStyle: CSSProperties = { ...fieldInputStyle, paddingLeft: 30 }
 
-  // One selectable "which record remains" card per side.
-  const survivorCard = (c: LiteContact, isCurrent: boolean) => {
-    const active = String(survivorId) === String(c.id)
-    return (
-      <button type="button" key={String(c.id)} onClick={() => setSurvivorId(c.id)} aria-pressed={active}
-        style={{ flex: 1, textAlign: 'left', padding: '10px 12px', borderRadius: 10, cursor: 'pointer',
-          border: `1px solid ${active ? 'var(--color-primary)' : 'var(--border)'}`,
-          background: active ? 'var(--color-primary-bg)' : 'var(--surface)' }}>
-        <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--text)' }}>{contactOptionLabel(c)}</div>
-        <div style={{ fontSize: 11, color: 'var(--text-muted)', fontFamily: "'JetBrains Mono', monospace" }}>{c.code ?? '—'}</div>
-        {c.email && <div style={{ fontSize: 11, color: 'var(--text-muted)', overflow: 'hidden', textOverflow: 'ellipsis' }}>{c.email}</div>}
-        {/* Text-colour accent uses the AA-contrast text token, not the raw brand primary. */}
-        <div style={{ fontSize: 10, marginTop: 4, fontWeight: active ? 600 : 400, color: active ? 'var(--color-primary-text)' : 'var(--text-muted)' }}>
-          {active ? t('contacts.merge.stays') : (isCurrent ? t('contacts.merge.thisRecord') : t('contacts.merge.otherRecord'))}
-        </div>
-      </button>
-    )
-  }
+  // One radio option per side — label is "Name — Function" (contactOptionLabel),
+  // description is the meta line (which record it is + number + email).
+  const survivorOption = (c: LiteContact, isCurrent: boolean) => ({
+    value: String(c.id),
+    label: contactOptionLabel(c),
+    description: [isCurrent ? t('contacts.merge.thisRecord') : t('contacts.merge.otherRecord'), c.code, c.email].filter(Boolean).join(' · '),
+  })
 
   return (
     // POPUP-SLEEP-1: swapped the bespoke overlay/panel shell for the shared
@@ -166,9 +156,15 @@ export default function MergeContactModal({ customerId, current, others, onClose
         {/* Step 2 — choose the survivor + name who disappears. */}
         {other && (
           <>
-            <div style={{ display: 'flex', gap: 10, marginBottom: 10 }}>
-              {survivorCard(currentLite, true)}
-              {survivorCard(other, false)}
+            <div style={{ marginBottom: 10 }}>
+              {/* Visible caption doubles as the radiogroup's accessible name. */}
+              <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', marginBottom: 6 }}>{t('contacts.merge.stays')}</div>
+              <SegmentedControl
+                options={[survivorOption(currentLite, true), survivorOption(other, false)]}
+                value={String(survivorId)}
+                onChange={id => setSurvivorId(id)}
+                ariaLabel={t('contacts.merge.stays')}
+              />
             </div>
             <div style={{ fontSize: 12, color: 'var(--color-danger)', background: 'var(--color-danger-bg)', border: '1px solid color-mix(in srgb, var(--color-danger) 40%, transparent)', borderRadius: 8, padding: '8px 10px', lineHeight: 1.5, marginBottom: 12 }}>
               {t('contacts.merge.warning', {

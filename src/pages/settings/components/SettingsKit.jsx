@@ -13,7 +13,9 @@
  *   SettingRow        — label/description left, control right
  *   Toggle            — pill switch
  *   NumberField / TextField / TextareaField / SelectField / ColorField
- *   StatusBadge       — inline "active / not connected" pill
+ *   SettingsStatusBadge — inline "active / not connected" pill (settings' own
+ *                         tone API; renamed from StatusBadge, HUISSTIJL-1, to stop
+ *                         colliding with the unrelated shared components/ui/StatusBadge)
  *   SkeletonRows      — loading placeholder
  *   SettingsDirtyContext — lets the shell warn before leaving an unsaved section
  */
@@ -225,21 +227,9 @@ export function ColorField({ value, onChange, invalidLabel, ariaLabel }) {
   )
 }
 
-export function StatusBadge({ label, tone = 'neutral' }) {
-  const tones = {
-    active:   { c: 'var(--color-success)', bg: 'rgba(16,185,129,0.12)' },
-    inactive: { c: 'var(--text-muted)',              bg: 'var(--border)' },
-    warning:  { c: 'var(--color-warning)', bg: 'rgba(245,158,11,0.12)' },
-    neutral:  { c: 'var(--color-primary)', bg: 'var(--color-primary-bg)' },
-  }
-  const s = tones[tone] ?? tones.neutral
-  return (
-    <span style={{ display: 'inline-flex', alignItems: 'center', padding: '3px 10px', borderRadius: 999,
-                   fontSize: 12, fontWeight: 600, background: s.bg, color: s.c }}>
-      {label}
-    </span>
-  )
-}
+// HUISSTIJL-1: renamed from StatusBadge — that name collided with the unrelated
+// shared components/ui/StatusBadge.tsx (a map-keyed status chip). This one is
+// settings' own simpler tone-only API (active/inactive/warning/neutral) and has
 
 export function SkeletonRows({ n = 3 }) {
   return (

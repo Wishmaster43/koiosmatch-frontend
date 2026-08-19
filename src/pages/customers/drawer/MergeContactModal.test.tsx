@@ -71,8 +71,11 @@ describe('MergeContactModal · the request', () => {
     const user = userEvent.setup()
     renderModal()
     await pickDuplicate(user)
-    // Choose the found record as the one that remains.
-    await user.click(screen.getByText('Jan Janssen', { selector: 'div' }))
+    // Choose the found record as the one that remains. HUISSTIJL-1: the survivor
+    // picker is now the shared SegmentedControl, whose option label renders as a
+    // <span> (not the old hand-rolled <div>) — the step-1 list is unmounted by now
+    // so the name is unambiguous without a selector filter.
+    await user.click(screen.getByText('Jan Janssen'))
     await user.click(screen.getByRole('button', { name: ct('contacts.merge.confirm') }))
 
     await waitFor(() => expect(mockPost).toHaveBeenCalledTimes(1))

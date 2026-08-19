@@ -23,6 +23,7 @@ import { Search, GitMerge, Loader2 } from 'lucide-react'
 import api from '@/lib/api'
 import { notifyError, notifySuccess } from '@/lib/notify'
 import FloatingPanel from '@/components/ui/FloatingPanel'
+import SegmentedControl from '@/components/ui/SegmentedControl'
 import { Z } from '@/lib/zIndexScale'
 import { fieldInputStyle } from '@/components/forms/fieldMetrics'
 import { LOCATIONS_CHANGED_EVENT } from '../hooks/useCustomerLocations'
@@ -87,23 +88,13 @@ export default function MergeSubEntityModal({ scope, customerId, current, others
   // Canon field style (G33/fieldMetrics) + a left inset for the search icon.
   const inputStyle: CSSProperties = { ...fieldInputStyle, paddingLeft: 30 }
 
-  // One selectable "which record remains" card per side.
-  const survivorCard = (c: MergeCandidate, isCurrent: boolean) => {
-    const active = String(survivorId) === String(c.id)
-    return (
-      <button type="button" key={String(c.id)} onClick={() => setSurvivorId(c.id)} aria-pressed={active}
-        style={{ flex: 1, textAlign: 'left', padding: '10px 12px', borderRadius: 10, cursor: 'pointer',
-          border: `1px solid ${active ? 'var(--color-primary)' : 'var(--border)'}`,
-          background: active ? 'var(--color-primary-bg)' : 'var(--surface)' }}>
-        <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--text)' }}>{c.name}</div>
-        <div style={{ fontSize: 11, color: 'var(--text-muted)', fontFamily: "'JetBrains Mono', monospace" }}>{c.code ?? '—'}</div>
-        {/* Text-colour accent uses the AA-contrast text token, not the raw brand primary. */}
-        <div style={{ fontSize: 10, marginTop: 4, fontWeight: active ? 600 : 400, color: active ? 'var(--color-primary-text)' : 'var(--text-muted)' }}>
-          {active ? t(`${ns}.merge.stays`) : (isCurrent ? t(`${ns}.merge.thisRecord`) : t(`${ns}.merge.otherRecord`))}
-        </div>
-      </button>
-    )
-  }
+  // One radio option per side — label is the record's name, description is its meta
+  // line (which record it is + its reference number).
+  const survivorOption = (c: MergeCandidate, isCurrent: boolean) => ({
+    value: String(c.id),
+    label: c.name,
+    description: [isCurrent ? t(`${ns}.merge.thisRecord`) : t(`${ns}.merge.otherRecord`), c.code].filter(Boolean).join(' · '),
+  })
 
   return (
     // POPUP-SLEEP-1: swapped the bespoke overlay/panel shell for the shared
@@ -147,9 +138,15 @@ export default function MergeSubEntityModal({ scope, customerId, current, others
         {/* Step 2 — choose the survivor + name who disappears. */}
         {other && (
           <>
-            <div style={{ display: 'flex', gap: 10, marginBottom: 10 }}>
-              {survivorCard(current, true)}
-              {survivorCard(other, false)}
+            <div style={{ marginBottom: 10 }}>
+              {/* Visible caption doubles as the radiogroup's accessible name. */}
+              <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', marginBottom: 6 }}>{t(`${ns}.merge.stays`)}</div>
+              <SegmentedControl
+                options={[survivorOption(current, true), survivorOption(other, false)]}
+                value={String(survivorId)}
+                onChange={id => setSurvivorId(id)}
+                ariaLabel={t(`${ns}.merge.stays`)}
+              />
             </div>
             <div style={{ fontSize: 12, color: 'var(--color-danger)', background: 'var(--color-danger-bg)', border: '1px solid color-mix(in srgb, var(--color-danger) 40%, transparent)', borderRadius: 8, padding: '8px 10px', lineHeight: 1.5, marginBottom: 12 }}>
               {t(`${ns}.merge.warning`, {

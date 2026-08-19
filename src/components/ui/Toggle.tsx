@@ -20,15 +20,19 @@ export interface ToggleProps {
   // straight onto the button's `title` attribute — additive, unused by every
   // other existing consumer.
   title?: string
+  // On-colour. §4 names "an active workflow toggle" as a SUCCESS surface, so that
+  // one consumer passes 'success'; everything else keeps the accent default.
+  // Additive — omitting it renders byte-identical to before.
+  tone?: 'primary' | 'success'
 }
 
-export default function Toggle({ checked, onChange, ariaLabel, disabled, describedBy, title }: ToggleProps) {
+export default function Toggle({ checked, onChange, ariaLabel, disabled, describedBy, title, tone = 'primary' }: ToggleProps) {
   return (
     <button type="button" role="switch" aria-checked={checked} aria-label={ariaLabel} aria-describedby={describedBy}
       title={title} disabled={disabled} onClick={() => onChange(!checked)}
       style={{ width: 32, height: 18, borderRadius: 999, border: 'none',
                cursor: disabled ? 'not-allowed' : 'pointer', opacity: disabled ? 0.6 : 1,
-               background: checked ? 'var(--color-primary)' : 'var(--border)', position: 'relative',
+               background: checked ? (tone === 'success' ? 'var(--color-success)' : 'var(--color-primary)') : 'var(--border)', position: 'relative',
                transition: 'background 0.15s', flexShrink: 0 }}>
       <div style={{ position: 'absolute', top: 2, left: checked ? 16 : 2, width: 14, height: 14,
                     borderRadius: '50%', background: 'var(--surface)', transition: 'left 0.15s',

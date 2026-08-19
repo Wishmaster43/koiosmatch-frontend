@@ -15,6 +15,7 @@ import { interactive } from '@/lib/a11y'
 import { useDateFormat } from '@/lib/datetime'
 import { buildTrashNote } from '@/hooks/useTrashFlow'
 import { MODULE_META } from '@/modules/index'
+import Toggle from '@/components/ui/Toggle'
 import type { Workflow, WorkflowStep } from '@/types/workflow'
 
 // One workflow row's props — mirrors WorkflowCard's shared shape, plus the
@@ -224,17 +225,15 @@ export default function WorkflowListRow({ workflow, folderName, onRun, onEdit, o
             {running ? t('page.running') : t('page.run')}
           </button>
 
-          {/* Active/draft toggle — same semantics as the editor's status switch (active <-> inactive) */}
-          <button type="button" role="switch" aria-checked={active}
-            aria-label={t(active ? 'list.setInactive' : 'list.setActive')}
-            title={t(active ? 'list.setInactive' : 'list.setActive')}
-            onClick={e => { e.stopPropagation(); onToggleStatus() }}
-            style={{ width: 32, height: 18, borderRadius: 999, border: 'none', cursor: 'pointer', flexShrink: 0,
-              background: active ? 'var(--color-success)' : 'var(--border)', position: 'relative', transition: 'background 0.15s' }}
-          >
-            <div style={{ position: 'absolute', top: 2, left: active ? 16 : 2, width: 14, height: 14, borderRadius: '50%',
-              background: 'var(--surface)', transition: 'left 0.15s', boxShadow: '0 1px 3px rgba(0,0,0,0.2)' }} />
-          </button>
+          {/* Active/draft toggle — same semantics as the editor's status switch (active <-> inactive).
+              On-colour unified to primary (HUISSTIJL-1); was success — flag for Danny if workflows must stay green. */}
+          <div onClick={e => e.stopPropagation()} style={{ flexShrink: 0 }}>
+            {/* §4 names the ACTIVE WORKFLOW TOGGLE as a success surface — the shared Toggle
+              carries that via tone, so house law and house component agree. */}
+          <Toggle tone="success" checked={active} onChange={() => onToggleStatus()}
+              ariaLabel={t(active ? 'list.setInactive' : 'list.setActive')}
+              title={t(active ? 'list.setInactive' : 'list.setActive')} />
+          </div>
 
           {/* Archive (soft-delete) — settings.update-gated, opens the confirm with the open-runs notice */}
           {canManageFolders && onArchive && (

@@ -8,7 +8,7 @@
  * color-mix(token 28-50%, transparent); active adds fontWeight 600. No i18n inside —
  * labels/descriptions arrive already translated from the caller.
  */
-import { useRef } from 'react'
+import { useRef, useState } from 'react'
 import type { ComponentType, KeyboardEvent } from 'react'
 
 export interface SegmentedControlOption {
@@ -40,6 +40,13 @@ export interface SegmentedControlProps {
   // active one", because then a faint tint on the others says something untrue. Set
   // this whenever the colour means "on" rather than "which".
   activeOnly?: boolean
+  // Arrow keys SELECT by default (native radio behaviour). Pass false when a
+  // selection is EXPENSIVE (an audited server write, a tenant-wide switch): then
+  // arrows only move focus and Enter/Space commits — the ARIA-sanctioned variant
+  // for costly activation. Found the hard way (Opus review, batch C): the Koios
+  // model picker fired an audited PUT per arrow press, and its saving-guard then
+  // swallowed the user's real target.
+  commitOnFocus?: boolean
   // Exact background for the SELECTED option, when the design calls for a flat
   // semantic token instead of a derived tint (e.g. --color-success-bg). Some house
   // tints are their own colour, not a percentage of the accent — measured on
@@ -49,8 +56,12 @@ export interface SegmentedControlProps {
   activeFill?: string
 }
 
-export default function SegmentedControl({ options, value, onChange, color = 'var(--color-primary)', ariaLabel, size = 'default', activeOnly = false, activeFill }: SegmentedControlProps) {
+export default function SegmentedControl({ options, value, onChange, color = 'var(--color-primary)', ariaLabel, size = 'default', activeOnly = false, activeFill, commitOnFocus = true }: SegmentedControlProps) {
   const refs = useRef<Array<HTMLButtonElement | null>>([])
+  // Roving-focus index for commitOnFocus=false: arrows park here; Enter/Space
+  // (the button's native click) commits. Reset implicitly: tabIndex falls back
+  // to the selected option whenever focus leaves the group.
+  const [focusIdx, setFocusIdx] = useState<number | null>(null)
   const compact = size === 'compact'
   // ACCENT-INK-1 (measured 18-08 on tenant AENF, brand #fef200): the tint colour and
   // the TEXT colour are not the same thing. Painting the label in `color` on a 6-14%
@@ -73,8 +84,8 @@ export default function SegmentedControl({ options, value, onChange, color = 'va
     else if (e.key === 'End') nextIndex = options.length - 1
     if (nextIndex === null) return
     e.preventDefault()
-    const next = options[nextIndex]
-    onChange(next.value)
+    if (commitOnFocus) onChange(options[nextIndex].value)
+    else setFocusIdx(nextIndex)
     refs.current[nextIndex]?.focus()
   }
 
@@ -86,11 +97,13 @@ export default function SegmentedControl({ options, value, onChange, color = 'va
         return (
           <button key={opt.value} type="button" role="radio" aria-checked={active}
             ref={el => { refs.current[i] = el }}
-            tabIndex={active || (!options.some(o => o.value === value) && i === 0) ? 0 : -1}
+            tabIndex={(commitOnFocus ? active : i === (focusIdx ?? options.findIndex(o => o.value === value)))
+              || (!options.some(o => o.value === value) && focusIdx === null && i === 0) ? 0 : -1}
             onClick={() => onChange(opt.value)}
             onKeyDown={e => onKeyDown(e, i)}
             style={compact ? {
               padding: '3px 9px', fontSize: 10.5, fontWeight: active ? 600 : 500, borderRadius: 999,
+              display: 'inline-flex', alignItems: 'center', gap: 4,
               cursor: 'pointer', whiteSpace: 'nowrap', flexShrink: 0,
               color: activeOnly && !active ? 'var(--text-muted)' : ink,
               background: activeOnly && !active ? 'var(--surface)'
@@ -111,7 +124,12 @@ export default function SegmentedControl({ options, value, onChange, color = 'va
                 : active && activeFill ? `1px solid ${color}`
                 : `1px solid color-mix(in srgb, ${color} ${active ? 50 : 28}%, transparent)`,
             }}>
-            {compact ? opt.label : (
+            {compact ? (<>
+              {/* Decorative: the LABEL is the accessible name; an icon with its own
+                  title (KoiosAiMark) must not double into the radio's name. */}
+              {Icon && <span aria-hidden="true" style={{ display: 'inline-flex' }}><Icon size={11} /></span>}
+              {opt.label}
+            </>) : (
               <>
                 {Icon && <Icon size={16} />}
                 <span style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
