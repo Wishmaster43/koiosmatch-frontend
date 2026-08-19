@@ -22,9 +22,9 @@ export default function AiAgentAvatar({ name, size = 22 }: { name?: string; size
         style={{ width: size, height: size, borderRadius: '50%', flexShrink: 0, boxSizing: 'border-box',
           display: 'flex', alignItems: 'center', justifyContent: 'center',
           // HUISSTIJL-1: the accent-tinted avatar bubble reads the house trio, solid.
-          background: 'var(--color-primary-bg)',
+          background: 'var(--button-fill)',
           border: '1px solid var(--button-border)',
-          color: 'var(--color-primary-text)' }}>
+          color: 'var(--button-ink)' }}>
         <Sparkle size={Math.round(size * 0.55)} aria-hidden="true" />
       </span>
       <span style={{ fontSize: 12, color: 'var(--text)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{name}</span>

@@ -15,6 +15,9 @@ interface KoiosAiMarkProps {
   title?: string
 }
 
+// Danny 20-08, on this exact mark: "HUISSTIJL!!" — the Koios BRAND marks wear
+// the solid button trio (overrules the earlier informational-tint ruling; both
+// tones now resolve to the same trio surface, the prop stays for API compat).
 export default function KoiosAiMark({ size = 26, tone = 'soft', title = 'Koios AI' }: KoiosAiMarkProps) {
   const solid = tone === 'solid'
   return (
@@ -24,10 +27,10 @@ export default function KoiosAiMark({ size = 26, tone = 'soft', title = 'Koios A
         // HUISSTIJL-1: 'soft' now reads the same trio every accent action button
         // reads (--button-fill/--button-ink), so the mark tracks the tenant's fill
         // the instant it changes — no separate tint token to keep in sync.
-        background: solid ? 'var(--color-primary)' : 'var(--color-primary-bg)',
+        background: solid ? 'var(--color-primary)' : 'var(--button-fill)',
         // The glyph sits ON the accent fill in 'solid' tone — use the tenant's
         // computed on-accent contrast token, not a hardcoded white (2026-08-08).
-        color: solid ? 'var(--color-on-accent)' : 'var(--color-primary-text)' }}>
+        color: solid ? 'var(--color-on-accent)' : 'var(--button-ink)' }}>
       <BrainCircuit size={Math.round(size * 0.56)} />
     </span>
   )
