@@ -540,6 +540,27 @@ the code is worse than no rule, because the next reader builds on it. What is tr
   duplicate.
 - Tailwind discipline: extract repeated class strings into a component or a
   shared constant; don't copy-paste 15-class strings across files.
+- **HET DESIGNSYSTEEM WOONT IN `components/ui/` + `lib/tint` + `config/buttonMetrics`
+  (HUISSTIJL-1, Danny 2026-08-19: atomen/moleculen/organismen — "niet 100 keer
+  hetzelfde maar een element dat hergebruikt wordt").** Geen nieuwe `layout/`-map:
+  `components/ui` IS de huisstijlmap (100+ gedeelde componenten wonen er al);
+  `components/layout` blijft app-chrome (Sidebar, topbar, Koios-paneel). De
+  taxonomie, met per atoom het bestaande component — nieuw UI-werk COMPONEERT
+  hieruit; ontbreekt een atoom, bouw het EERST hier en gebruik het dan:
+  · Knoppen/acties → `Button` (varianten+maten), `DrawerAddButton`, `ActionMenu`
+  · Formulier → `SelectMenu`/`SearchSelect`/`CreatableSelect` (nooit `<select>`),
+    `Toggle` (nooit een eigen switch), `Slider`, `RichTextEditor`, `forms/fields`
+  · Status/data → `SoftChip`/`StatusPill`/`StatusBadge`, `Avatar`, `KpiCard`,
+    `DataTable` (+`SortCaret`), `TableScrollFrame`, `PaginationBar`
+  · Overlays/feedback → `ModalFooter`, `ConfirmDialog`, `FloatingPanel`,
+    `Toaster`, `ErrorBanner`, `CalloutBox`, `EntityDrawer`-familie
+  · Schakelaars/weergave → `QuickViewToggle`, `ViewModeToggle`, `SegmentedControl`
+  · Tokens → kleuren/tinten via `--color-*` + `lib/tint` (huispaar 10/33,
+    actief 16/50); maten via `BTN_H`; spacing op het 4px-grid.
+  Per-tenant instelbaarheid loopt uitsluitend via de tokens die Instellingen →
+  Bedrijf → Branding in de backend-DB bewaart — een component dat een kleur
+  hardcodeert onttrekt zich daaraan en is fout. Popupformaten mogen verschillen;
+  de STIJL (chrome, knoppen, koppen, velden) komt altijd uit deze set.
 - **DE KNOP IS `components/ui/Button` — een nieuwe inline knopstijl is een finding
   (HUISSTIJL-1, Danny 2026-08-18: "geen 427 objecten voor hetzelfde maar één
   herbruikbaar element, per tenant instelbaar").** Gemeten vóór het traject: 1138
@@ -856,6 +877,16 @@ Be honest. If something is not done, say so — do not pretend.
 - Prefer small reusable components over large ones.
 - Use the candidate's own UUID `id` for internal references, never Shiftmanager's
   `external_id`.
+- **Controleketen (Danny 2026-08-19, "0% foutmarge" — bovenop het modelbeleid hieronder):**
+  FABLE 5 (manager) schrijft de instructie — met gemeten feiten, expliciete
+  bestandenlijst, referentie-implementatie en acceptatiecriteria; LOW-workers
+  (Sonnet/Haiku, effort low) voeren uit; **OPUS 5 (high) controleert elke
+  worker-oplevering** tegen die acceptatiecriteria vóórdat de manager hem ziet;
+  de manager controleert Opus' oordeel én draait zelf de poort (tsc/lint/vitest/
+  rooktest) en commit. Een worker-fout die de keten passeert is per definitie een
+  INSTRUCTIEFOUT van de manager: de les gaat dan in CLAUDE.md of in het
+  prompt-sjabloon, niet alleen in de fix. Danny bepaalt de prioriteiten; de
+  manager kiest nooit zelf een nieuw werkterrein terwijl er een opdracht loopt.
 - **Subagent model policy (Danny 2026-07-22 — supersedes 2026-07-08/15/17; fallback updated 2026-07-24):**
   The MANAGER runs **Fable 5 at reasoning effort high**; when Fable's budget is
   exhausted, **Opus 5 (`claude-opus-5`) at high** takes over as the TEMPORARY
