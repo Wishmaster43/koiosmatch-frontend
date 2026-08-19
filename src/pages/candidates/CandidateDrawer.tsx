@@ -35,7 +35,7 @@ import ChangelogPopover from '@/components/drawer/ChangelogPopover'
 import ChangelogTab from './drawer/ChangelogTab'
 import MergeCandidateModal from './drawer/MergeCandidateModal'
 import CandidateStatusModals from './drawer/CandidateStatusModals'
-import { CandidateTitle, CandidateHeaderActions, ArchivedBanner } from './drawer/CandidateHeaderBits'
+import { PhaseChip, CandidateTitle, CandidateHeaderActions, ArchivedBanner } from './drawer/CandidateHeaderBits'
 import CandidateDrawerFooter from './drawer/CandidateDrawerFooter'
 import { peekReturnTab, clearReturnTab } from './drawer/constants'
 import { parseTabTarget } from './drawer/tabTarget'
@@ -49,7 +49,7 @@ const EntityDrawer = EntityDrawerJs as ComponentType<{
   header?: (arg: { activeTab?: string; setActiveTab: (id: string) => void }) => ReactNode
 }>
 const EntityHeader = EntityHeaderJs as ComponentType<{
-  label?: string; expanded?: boolean; onToggleExpand?: () => void; onClose?: () => void
+  label?: ReactNode; expanded?: boolean; onToggleExpand?: () => void; onClose?: () => void
   avatar?: unknown; onPhotoChange?: (url: string | null) => void; photoLabels?: unknown
   renderTitle?: () => ReactNode; titleActions?: ReactNode; actions?: ReactNode
   meta?: unknown; metaExtra?: ReactNode; tags?: unknown; tagsLabel?: string; children?: ReactNode
@@ -270,14 +270,16 @@ export default function CandidateDrawer({ candidate: c, onClose, expanded, onTog
       tabs={tabs.map(tab => ({ id: tab.id, label: t(`drawer.tabs.${tab.tKey}`), autoExpand: tab.id === 'planning' || tab.id === 'vacancySearch', render: (setTab?: (id: string) => void) => renderTabContent(tab.id, setTab) }))}
       header={({ setActiveTab }) => (
         <EntityHeader
-          label={t('drawer.entityLabel')}
+          // The title label IS the phase chip (Danny 19-08: it doubled with the
+          // badge beside the name; for a Lead the static word was even wrong).
+          // Falls back to the static entity label while no phase is known.
+          label={status.currentPhase ? <PhaseChip phaseInfo={status.phaseInfo} /> : t('drawer.entityLabel')}
           expanded={expanded} onToggleExpand={onToggleExpand} onClose={onClose}
           avatar={{ initials: c.initials, photo: photoUrl ?? c.photo, color: avatarColor, soft: true }}
           onPhotoChange={setPhotoUrl}
           photoLabels={{ upload: t('drawer.photoUpload'), remove: t('drawer.photoRemove') }}
           renderTitle={() => (
-            <CandidateTitle c={c} editing={headerEdit.headerEditing} hf={headerEdit.hf} setHF={headerEdit.setHF}
-              phaseInfo={status.phaseInfo} showPhase={!!status.currentPhase} />
+            <CandidateTitle c={c} editing={headerEdit.headerEditing} hf={headerEdit.hf} setHF={headerEdit.setHF} />
           )}
           titleActions={<>
             {/* Danny 27-07: the shared house ChangelogPopover shell (§3A(d)) — the

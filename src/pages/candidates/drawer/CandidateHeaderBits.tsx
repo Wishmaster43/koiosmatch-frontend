@@ -31,13 +31,24 @@ const inputBase = { ...fieldInputStyle, minWidth: 0 }
 // Title block: name + phase badge, or the name/function edit form. The status
 // reason/return-date line was removed from the header (Danny 13/7: calm header) —
 // that info lives in the status modal (re-pick the status), Voorkeuren and Tijdlijn.
-export function CandidateTitle({ c, editing, hf, setHF, phaseInfo, showPhase }: {
+// The phase chip — SoftChip + the lookup's own icon (§6: never colour-only).
+// Rendered as the DRAWER TITLE label since 19-08 (Danny: "Kandidaat staat dubbel
+// in de drill down"): the static entity label and this chip said the same word
+// twice, and for a Lead the static label was even wrong. One chip, one spot.
+export function PhaseChip({ phaseInfo }: { phaseInfo: { label: string; color: string; icon?: string } }) {
+  return (
+    <SoftChip color={phaseInfo.color} round label={
+      <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+        {phaseInfo.icon && <LookupIcon icon={phaseInfo.icon} size={11} />}
+        {phaseInfo.label}
+      </span>
+    } />
+  )
+}
+
+export function CandidateTitle({ c, editing, hf, setHF }: {
   c: Candidate; editing: boolean
   hf: (k: keyof HeaderForm) => string; setHF: (k: keyof HeaderForm, v: string) => void
-  // HEADER-ICONEN: phaseInfo carries the tenant lookup's own icon slug (LookupItem.icon,
-  // resolved server-side) alongside label/color — optional so a lookup without an icon
-  // (or a caller that hasn't upgraded yet) renders exactly as before.
-  phaseInfo: { label: string; color: string; icon?: string }; showPhase: boolean
 }) {
   const { t } = useTranslation('candidates')
   const { functions, allowFreeEntry } = useFunctions() as { functions: Array<string | { value: string; label: string }>; allowFreeEntry: boolean }
@@ -62,18 +73,6 @@ export function CandidateTitle({ c, editing, hf, setHF, phaseInfo, showPhase }: 
     <>
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
         <div style={{ fontSize: 15, fontWeight: 700, color: 'var(--text)' }}>{c.name}</div>
-        {/* Fase = colour-coded read-only badge (no picker); convert lives in the header
-            actions. SoftChip — the ONE chip component (§4, HUISSTIJL-1): tokens via
-            color-mix, not hex-concat, so a tenant CSS-var colour tints correctly too. */}
-        {showPhase && (
-          <SoftChip color={phaseInfo.color} round label={
-            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
-              {/* HEADER-ICONEN: the phase lookup's own icon, never colour-only (§6). */}
-              {phaseInfo.icon && <LookupIcon icon={phaseInfo.icon} size={11} />}
-              {phaseInfo.label}
-            </span>
-          } />
-        )}
         {/* NUMMER-1: human-readable reference number, click-to-copy — same spot on every drawer. */}
         <ReferenceNumberChip value={c.referenceNumber} />
         {/* ONTKOPPEL-TELLER-1: whole-history CURRENTLY-detached count, warning-only (hidden at 0). */}

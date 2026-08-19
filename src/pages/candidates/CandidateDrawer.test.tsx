@@ -163,4 +163,13 @@ describe('CandidateDrawer · archived banner restore/mark-deletion (RECHTEN-DETA
 
     expect(screen.queryByTitle(ct('drawer.hardDelete'))).toBeNull()
   })
+
+// TITEL-CHIP-1 (Danny 19-08: "Kandidaat staat dubbel in de drill down"): the
+// phase renders ONCE — as the drawer's title label — never also as a badge
+// beside the name. For a Lead this also fixes the title itself: it used to say
+// the static entity word while the chip beside the name said Lead.
+it('renders the phase exactly once, as the title chip, never doubled beside the name', async () => {
+  await renderDrawer({ candidate: candidate() })
+  expect(screen.getAllByText('Candidate')).toHaveLength(1)
+})
 })
