@@ -15,12 +15,10 @@ import FloatingPanel from '@/components/ui/FloatingPanel'
 import { resolveApplication, resolveMatch } from '../data/archiveGuard'
 import type { BlockingApplication, BlockingMatch } from '../data/archiveGuard'
 import Button from '@/components/ui/Button'
+import { BodyText, GroupLabel } from '@/components/ui/typography'
 
 const sectionHeader: React.CSSProperties = {
   display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6, gap: 8,
-}
-const sectionLabel: React.CSSProperties = {
-  fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em', color: 'var(--text-muted)',
 }
 const rowStyle = (last: boolean): React.CSSProperties => ({
   display: 'flex', alignItems: 'center', gap: 8, padding: '8px 12px', fontSize: 12.5, color: 'var(--text)',
@@ -82,16 +80,16 @@ export default function ArchiveGuardModal({ mode, candidateName, aggregate, appl
         </div>
       }>
 
-        <p style={{ fontSize: 13, color: 'var(--text)', marginBottom: 14, lineHeight: 1.5 }}>
+        <BodyText style={{ marginBottom: 14 }}>
           {aggregate
             ? t('archiveGuard.bodyAggregate', { blocked: aggregate.blockedCount, total: aggregate.totalCount })
             : t('archiveGuard.body', { name: candidateName })}
-        </p>
+        </BodyText>
 
         {applications.length > 0 && (
           <div style={{ marginBottom: 14 }}>
             <div style={sectionHeader}>
-              <span style={sectionLabel}>{t('archiveGuard.applicationsTitle')}</span>
+              <GroupLabel as="span" style={{ letterSpacing: '0.04em' }}>{t('archiveGuard.applicationsTitle')}</GroupLabel>
               <span style={{ fontSize: 11.5, color: 'var(--color-danger)', fontWeight: 600 }}>{t('archiveGuard.resolutionReject')}</span>
             </div>
             <div style={{ border: '1px solid var(--border)', borderRadius: 8, overflow: 'hidden' }}>
@@ -111,7 +109,7 @@ export default function ArchiveGuardModal({ mode, candidateName, aggregate, appl
         {matches.length > 0 && (
           <div style={{ marginBottom: 14 }}>
             <div style={sectionHeader}>
-              <span style={sectionLabel}>{t('archiveGuard.matchesTitle')}</span>
+              <GroupLabel as="span" style={{ letterSpacing: '0.04em' }}>{t('archiveGuard.matchesTitle')}</GroupLabel>
               <span style={{ fontSize: 11.5, color: 'var(--color-danger)', fontWeight: 600 }}>{t('archiveGuard.resolutionEndMatch')}</span>
             </div>
             <div style={{ border: '1px solid var(--border)', borderRadius: 8, overflow: 'hidden' }}>

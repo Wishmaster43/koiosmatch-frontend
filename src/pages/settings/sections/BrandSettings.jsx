@@ -7,6 +7,7 @@ import api from '@/lib/api'
 import { useAuth } from '@/context/AuthContext'
 import { loadSettings, saveSettings } from '../lib/settingsApi'
 import { BTN_H } from '@/config/buttonMetrics'
+import { PageTitle, Caption } from '@/components/ui/typography'
 
 // Preset swatches are tenant brand-colour DATA (persisted as brand_color) — literal hex by design, never tokens.
 /* eslint-disable no-restricted-syntax -- DATA: fixed swatch palette offered to tenants in the brand-colour picker */
@@ -112,7 +113,7 @@ export default function BrandSettings() {
     <div>
       <div className="flex items-center justify-between mb-5">
         <div>
-          <h2 style={{ fontSize: 15, fontWeight: 600, color: 'var(--text)' }}>{t('brand.title')}</h2>
+          <PageTitle>{t('brand.title')}</PageTitle>
           <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>{t('brand.subtitle')}</p>
         </div>
         <button onClick={save} disabled={saving}
@@ -134,7 +135,7 @@ export default function BrandSettings() {
 
         <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 10, padding: '16px 18px' }}>
           <div style={{ fontSize: 13, fontWeight: 500, color: 'var(--text)', marginBottom: 4 }}>{t('brand.companyName')}</div>
-          <div style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 10 }}>{t('brand.companyNameHint')}</div>
+          <Caption as="div" style={{ marginBottom: 10 }}>{t('brand.companyNameHint')}</Caption>
           <input
             value={companyName}
             onChange={e => setCompanyName(e.target.value)}
@@ -146,7 +147,7 @@ export default function BrandSettings() {
 
         <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 10, padding: '16px 18px' }}>
           <div style={{ fontSize: 13, fontWeight: 500, color: 'var(--text)', marginBottom: 4 }}>{t('brand.primaryColor')}</div>
-          <div style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 12 }}>{t('brand.primaryColorHint')}</div>
+          <Caption as="div" style={{ marginBottom: 12 }}>{t('brand.primaryColorHint')}</Caption>
           <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
             {BRAND_COLOR_PRESETS.map(c => (
               <button key={c} onClick={() => applyColor(c)}
@@ -177,7 +178,7 @@ export default function BrandSettings() {
           {/* Text ON the accent — automatic by default, overridable. */}
           <div style={{ marginTop: 16, paddingTop: 14, borderTop: '1px solid var(--border)' }}>
             <div style={{ fontSize: 13, fontWeight: 500, color: 'var(--text)', marginBottom: 4 }}>{t('brand.textColor')}</div>
-            <div style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 10 }}>{t('brand.textColorHint')}</div>
+            <Caption as="div" style={{ marginBottom: 10 }}>{t('brand.textColorHint')}</Caption>
             <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
               {[{ v: '', label: t('brand.textColorAuto') }, { v: '#FFFFFF', label: t('brand.textColorLight') }, { v: '#1F2937', label: t('brand.textColorDark') }].map(o => {
                 const active = textColor === o.v
@@ -240,7 +241,7 @@ export default function BrandSettings() {
 
         <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 10, padding: '16px 18px' }}>
           <div style={{ fontSize: 13, fontWeight: 500, color: 'var(--text)', marginBottom: 4 }}>{t('brand.logo')}</div>
-          <div style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 12 }}>{t('brand.logoHint')}</div>
+          <Caption as="div" style={{ marginBottom: 12 }}>{t('brand.logoHint')}</Caption>
           <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
             {logoPreview ? (
               <img src={logoPreview} alt="Logo" style={{ height: 48, maxWidth: 120, objectFit: 'contain',

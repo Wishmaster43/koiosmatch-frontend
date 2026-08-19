@@ -15,6 +15,7 @@ import { cardHead } from '@/components/ui/modalCards'
 import { LANGUAGES as APP_LANGUAGES } from '@/pages/auth/profileParts'
 import { BTN_H } from '@/config/buttonMetrics'
 import Button from '@/components/ui/Button'
+import { PageTitle } from '@/components/ui/typography'
 
 // Option lists (data — kept as-is; only labels are translated). Industries and
 // countries are now backend-sourced (Settings → Personalisation → Industries;
@@ -176,7 +177,7 @@ export default function CompanySettings() {
     <div style={{ maxWidth: 720 }}>
       <div className="flex items-center justify-between mb-5">
         <div>
-          <h2 style={{ fontSize: 15, fontWeight: 600, color: 'var(--text)' }}>{t('company.title')}</h2>
+          <PageTitle>{t('company.title')}</PageTitle>
           <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>{t('company.subtitle')}</p>
         </div>
         <button onClick={save} disabled={saving}

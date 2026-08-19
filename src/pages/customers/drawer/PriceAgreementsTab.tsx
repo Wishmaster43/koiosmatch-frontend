@@ -35,6 +35,7 @@ import SubTabBar from '@/components/drawer/SubTabBar'
 import { getCountryOptions } from '@/lib/countries'
 import { resolveCustomerBillingAddress } from '../hooks/customerBillingAddress'
 import { toLocalIsoDate } from '@/lib/localDate'
+import { Caption } from '@/components/ui/typography'
 import type { Customer } from '@/types/customer'
 import type { Id, LookupOption } from '@/types/common'
 
@@ -122,7 +123,7 @@ export default function PriceAgreementsTab({ customerId, c, onSave }: { customer
         <span style={{ fontSize: 12, color: billing.visitLine ? 'var(--text)' : 'var(--text-muted)' }}>
           {billing.visitLine || t('overview.billingAddress.visitEmpty')}
         </span>
-        <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>{t('overview.billingAddress.usesVisitAddress')}</span>
+        <Caption>{t('overview.billingAddress.usesVisitAddress')}</Caption>
       </div>
     ),
   }

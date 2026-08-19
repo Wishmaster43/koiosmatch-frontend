@@ -36,6 +36,9 @@ import AddCandidateModal from '@/pages/candidates/AddCandidateModal'
 import { UserPlus } from 'lucide-react'
 import type { Candidate } from '@/types/candidate'
 import Button from '@/components/ui/Button'
+// HUISSTIJL-1: the "Extra" custom-fields section title is an exact match for
+// the shared uppercase GroupLabel atom (11/600/uppercase/muted).
+import { GroupLabel } from '@/components/ui/typography'
 
 type AnyProps = Record<string, unknown>
 const CreatableSelect = CreatableSelectJs as unknown as ComponentType<AnyProps>
@@ -420,9 +423,9 @@ export default function AddApplicationModal({ onClose, onCreated, lockedVacancy 
               rendered only once ≥1 active def exists. */}
           {customFieldDefs.length > 0 && (
             <div style={errors.custom_fields ? { border: '1px solid var(--color-danger)', borderRadius: 8, padding: 10 } : undefined}>
-              <div style={{ fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em', color: 'var(--text-muted)', marginBottom: 8 }}>
+              <GroupLabel style={{ letterSpacing: '0.04em', marginBottom: 8 }}>
                 {t('common:customFieldsCard.title')}
-              </div>
+              </GroupLabel>
               {simpleCustomFields.length > 0 && (
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px 16px' }}>
                   {simpleCustomFields.map(def => {

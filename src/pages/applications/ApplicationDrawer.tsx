@@ -25,10 +25,14 @@ import ProposeCandidateModal from './drawer/propose/ProposeCandidateModal'
 import { peekReturnTab, clearReturnTab } from './drawer/constants'
 import { useApplicationCandidateEdit } from './hooks/useApplicationCandidateEdit'
 import Button from '@/components/ui/Button'
+// HUISSTIJL-1: shared typography atom — the footer's created-at line is an
+// exact 11px/muted match for the house Caption scale.
+import { Caption } from '@/components/ui/typography'
 import type { ApplicationDetail } from '@/types/application'
 import type { RejectPayload } from './drawer/RejectionModal'
 import type { Criterion } from '@/components/match/MatchScoreBlock'
 import type { Id } from '@/types/common'
+import EntityLink from '@/components/ui/EntityLink'
 
 // The tab order (matches the screenshots). 'extra' (§3A(f)) is appended below
 // only when the tenant has ≥1 active application custom field.
@@ -165,7 +169,7 @@ export default function ApplicationDrawer({ application: a, onClose, expanded, o
       onToggleExpand={onToggleExpand}
       footer={(
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>{t('drawer.createdAt', { date: formatDateTime(a.created) })}</span>
+          <Caption>{t('drawer.createdAt', { date: formatDateTime(a.created) })}</Caption>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
             {/* Detached → restore (primary soft); active → detach (danger, gated).
                 HUISSTIJL-1: house Button carries the height/radius/typography. Restore
@@ -204,7 +208,11 @@ export default function ApplicationDrawer({ application: a, onClose, expanded, o
       tabs={tabIds.map(id => ({ id, label: t(`drawer.tabs.${id}`), render: (setActiveTab?: (id: string) => void) => renderTab(id, setActiveTab) }))}
       header={() => (
         <EntityHeader
-          label={t('drawer.label')}
+          // TITEL-CHIP-1 (Danny 19-08): the vacancy IS the title, as a deep link with
+          // the new-tab icon; static word only while unlinked.
+          label={a.vacancyId != null
+            ? <EntityLink page="vacancies" id={a.vacancyId}>{a.vacancyTitle || t('drawer.label')}</EntityLink>
+            : t('drawer.label')}
           expanded={expanded} onToggleExpand={onToggleExpand} onClose={onClose}
           avatar={{ initials: a.candidateInitials, soft: true }}
           renderTitle={() => (
@@ -214,7 +222,7 @@ export default function ApplicationDrawer({ application: a, onClose, expanded, o
             // here (pencil in the header actions), mirroring the candidate drawer.
             <ApplicationHeaderTitle
               candidateName={a.candidateName} referenceNumber={a.referenceNumber}
-              candidateFunction={a.candidate?.function ?? ''} vacancyTitle={a.vacancyTitle}
+              candidateFunction={a.candidate?.function ?? ''}
               editing={candidateEdit.editing} loading={candidateEdit.loading}
               form={candidateEdit.form} setField={candidateEdit.setField}
             />

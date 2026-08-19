@@ -43,6 +43,8 @@ import { downloadFilesSequentially } from '@/lib/downloadFiles'
 // DOC-1-EIGENAAR-1: the ONE shared option resolver every claimable section uses (§11)
 // — so all five sections offer exactly the same set of still-free documents.
 import { linkedDocumentOptions } from './documentLinkRules'
+// HUISSTIJL-1: the shared 13/600 title atom (identity-only swap).
+import { SectionTitle } from '@/components/ui/typography'
 import type { Id } from '@/types/common'
 
 type AnyProps = Record<string, unknown>
@@ -242,7 +244,8 @@ export default function ReferencesTab({ items = [], onAdd, onEdit, onRemove, onV
           <div key={r.id ?? i} style={{ display: 'flex', gap: 10, padding: '10px 0', borderBottom: i < arr.length - 1 ? '1px solid var(--border)' : 'none' }}>
             <div style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--color-info)', flexShrink: 0, marginTop: 5 }} />
             <div style={{ flex: 1, minWidth: 0 }}>
-              <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)' }}>{name || '-'}</div>
+              {/* HUISSTIJL-1: identical 13/600/var(--text) render as a div. */}
+              <SectionTitle as="div">{name || '-'}</SectionTitle>
               {secondary && <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{secondary}</div>}
               {contact && <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{contact}</div>}
               <NoteField value={r.note} />

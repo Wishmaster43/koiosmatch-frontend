@@ -19,6 +19,7 @@ import SearchSelect from '@/components/ui/SearchSelect'
 import { DragList } from '../components/SettingsControls'
 import { fieldInputStyle } from '@/components/forms/fieldMetrics'
 import Button from '@/components/ui/Button'
+import { Caption } from '@/components/ui/typography'
 
 // Field types the backend supports.
 const FIELD_TYPES = ['text', 'textarea', 'number', 'date', 'boolean', 'select']
@@ -197,14 +198,14 @@ export default function CustomFieldsSettings({ entityType }) {
                 {/* Label + meta */}
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div style={{ fontWeight: 500, fontSize: 13, color: 'var(--text)' }}>{field.label}</div>
-                  <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>
+                  <Caption as="div">
                     <code style={{ fontFamily: 'JetBrains Mono, monospace' }}>{field.key}</code>
                     {' · '}{t(`customFieldsSettings.types.${field.type}`)}
                     {field.has_data && <span style={{ color: 'var(--color-warning)', marginLeft: 6 }}>· {t('customFieldsSettings.hasData')}</span>}
                     {/* Worklist #44: legible in words, not just icon colour — a tenant
                         must understand WHY a field they configured isn't showing up. */}
                     {!field.visible_in_ui && <span style={{ color: 'var(--color-info)', marginLeft: 6 }}>· {t('customFieldsSettings.apiOnly')}</span>}
-                  </div>
+                  </Caption>
                 </div>
 
                 {/* Active toggle */}

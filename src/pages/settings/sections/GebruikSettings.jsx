@@ -36,6 +36,7 @@ import { card, cardTitle, sub, th, td, numCell, notice, Tile } from './usageCard
 import CreditsUsageCard from './CreditsUsageCard'
 import UsageDailySection from './UsageDailySection'
 import Button from '@/components/ui/Button'
+import { PageTitle, Caption } from '@/components/ui/typography'
 
 // EXCEL-1 — stream the usage xlsx (per day / per workflow / per user tabs, sale
 // prices only, §9) to disk via a temporary object URL, never a bare <a href>.
@@ -155,7 +156,7 @@ export default function GebruikSettings() {
     <div style={{ maxWidth: 680 }}>
       <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12, marginBottom: 20 }}>
         <div>
-          <h2 style={{ fontSize: 15, fontWeight: 600, color: 'var(--text)' }}>{t('billing.usage.title')}</h2>
+          <PageTitle>{t('billing.usage.title')}</PageTitle>
           <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>{t('billing.usage.desc')}</p>
         </div>
         {/* EXCEL-1 — xlsx export of the current period's usage. */}
@@ -239,7 +240,7 @@ export default function GebruikSettings() {
             <div style={sub}>{t('billing.usage.koios.subtitle')}</div>
           </div>
           <label style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-            <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>{t('billing.usage.koios.monthLabel')}</span>
+            <Caption>{t('billing.usage.koios.monthLabel')}</Caption>
             <input type="month" value={month} aria-label={t('billing.usage.koios.monthLabel')}
               onChange={(e) => e.target.value && setMonth(e.target.value)}
               style={{ padding: '5px 8px', fontSize: 12, background: 'var(--input-bg)', color: 'var(--text)',

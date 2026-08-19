@@ -18,6 +18,7 @@ import { useAuth } from '@/context/AuthContext'
 import { canAccessPage } from '@/lib/access'
 import { PermissionToggle } from '../components/SettingsControls'
 import SoftChip from '@/components/ui/SoftChip'
+import { SectionTitle } from '@/components/ui/typography'
 
 // Hand-written — GET /permissions carries no 2xx schema in api-generated.ts yet
 // (§10: only the 401 shape is documented for this route).
@@ -152,7 +153,7 @@ export function PermissionMatrix({ groups, hasPermission, onToggle }: Permission
           <div key={group} style={rowCardStyle}>
             <button type="button" onClick={() => toggleExpanded(group)} aria-expanded={isOpen}
               aria-label={`${groupLabel(group)} — ${chipLabel}`} style={rowHeaderStyle}>
-              <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)', flex: 1, minWidth: 0 }}>{groupLabel(group)}</span>
+              <SectionTitle as="span" style={{ flex: 1, minWidth: 0 }}>{groupLabel(group)}</SectionTitle>
               <SoftChip round color={chipColor} label={chipLabel} />
               {isOpen
                 ? <ChevronUp size={14} aria-hidden="true" style={{ color: 'var(--text-muted)', flexShrink: 0 }} />

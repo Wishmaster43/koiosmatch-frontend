@@ -18,6 +18,7 @@ import { useTranslation } from 'react-i18next'
 import { RotateCcw } from 'lucide-react'
 import Toggle from '@/components/ui/Toggle'
 import { useAllSettings, getBoolSetting } from '@/lib/settings/useAllSettings'
+import { Caption, GroupLabel } from '@/components/ui/typography'
 import type { Customer } from '@/types/customer'
 
 // Customer field → tenant-default settings key. Mirrors settings/schemas/
@@ -39,9 +40,9 @@ export default function VacancySettingsTab({ c, onSave }: Props) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
       <div>
-        <span style={{ fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em', color: 'var(--text-muted)' }}>
+        <GroupLabel as="span" style={{ letterSpacing: '0.04em' }}>
           {t('vacancySettings.title')}
-        </span>
+        </GroupLabel>
         <p style={{ fontSize: 12, color: 'var(--text-muted)', margin: '4px 0 0' }}>{t('vacancySettings.subtitle')}</p>
       </div>
 
@@ -57,11 +58,11 @@ export default function VacancySettingsTab({ c, onSave }: Props) {
               <Toggle checked={current} onChange={v => onSave?.({ [f.key]: v })} ariaLabel={t(`vacancySettings.fields.${f.key}`)} />
               <div style={{ flex: 1, minWidth: 0 }}>
                 <div style={{ fontSize: 12, color: 'var(--text)' }}>{t(`vacancySettings.fields.${f.key}`)}</div>
-                <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 2 }}>
+                <Caption as="div" style={{ marginTop: 2 }}>
                   {t('vacancySettings.tenantDefault', { value: tenantDefault ? t('vacancySettings.on') : t('vacancySettings.off') })}
                   {' · '}
                   {followsDefault ? t('vacancySettings.followsDefault') : t('vacancySettings.deviates')}
-                </div>
+                </Caption>
               </div>
               {!followsDefault && (
                 <button onClick={() => onSave?.({ [f.key]: tenantDefault })} title={t('vacancySettings.resetToDefault')}

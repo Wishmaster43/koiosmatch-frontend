@@ -9,12 +9,13 @@ import { notifySuccess, notifyError } from '@/lib/notify'
 import { extractApiError } from '@/lib/extractApiError'
 import { BTN_H } from '@/config/buttonMetrics'
 import { useAiAgents } from '../hooks/useAiAgents'
+// HUISSTIJL-1: group labels (11/600/uppercase/muted) + hint text (11/muted) are the shared atoms.
+import { GroupLabel, Caption } from '@/components/ui/typography'
 import type { VacancyDetail } from '@/types/vacancy'
 import type { Id } from '@/types/common'
 
 type UpdateFn = (id: Id | undefined, patch: Record<string, unknown>) => void
 
-const groupTitle: CSSProperties = { fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em', color: 'var(--text-muted)', marginBottom: 6 }
 const blockStyle: CSSProperties = { borderRadius: 10, overflow: 'hidden', border: '1px solid var(--border)', background: 'var(--surface)' }
 
 // One skipped applicant per INTERVIEW-BACKFILL-1's confirmed contract.
@@ -151,7 +152,7 @@ export default function VacancyAgentTab({ vacancy: v, onUpdate }: { vacancy: Vac
       {/* Picker card — error state falls back to plain read-only text + notice, so the
           currently-linked agent stays visible even when the fresh list fails to load. */}
       <div>
-        <div style={groupTitle}>{t('aiagent.pickerLabel')}</div>
+        <GroupLabel style={{ letterSpacing: '0.04em', marginBottom: 6 }}>{t('aiagent.pickerLabel')}</GroupLabel>
         <div style={{ ...blockStyle, padding: '10px 12px', display: 'flex', flexDirection: 'column', gap: 8 }}>
           {error ? (
             <>
@@ -178,7 +179,7 @@ export default function VacancyAgentTab({ vacancy: v, onUpdate }: { vacancy: Vac
                 )}
               </div>
               {!loading && options.length === 0 && (
-                <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>{t('aiagent.empty')}</span>
+                <Caption>{t('aiagent.empty')}</Caption>
               )}
             </>
           )}
@@ -196,7 +197,7 @@ export default function VacancyAgentTab({ vacancy: v, onUpdate }: { vacancy: Vac
           note states the CURRENT resolution honestly so a recruiter is never
           guessing which interview will run. */}
       <div>
-        <div style={groupTitle}>{t('aiagent.flowTitle')}</div>
+        <GroupLabel style={{ letterSpacing: '0.04em', marginBottom: 6 }}>{t('aiagent.flowTitle')}</GroupLabel>
         {currentId ? (
           loading ? (
             <div style={{ ...blockStyle, padding: '10px 12px', fontSize: 12, color: 'var(--text-muted)' }}>{t('common:loading')}</div>

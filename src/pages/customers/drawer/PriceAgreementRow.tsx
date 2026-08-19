@@ -16,6 +16,7 @@ import { sectionBlock } from '@/components/ui/SectionCard'
 import SafeHtml from '@/components/ui/SafeHtml'
 import { useConfirm } from '@/hooks/useConfirm'
 import SoftChip from '@/components/ui/SoftChip'
+import { Caption, Mono } from '@/components/ui/typography'
 import PriceAgreementForm, { draftFromAgreement, draftToPayload } from './PriceAgreementForm'
 import type { PriceAgreementDraft } from './PriceAgreementForm'
 import type { PriceAgreement, PriceAgreementPayload } from '../hooks/usePriceAgreements'
@@ -23,14 +24,13 @@ import type { Id } from '@/types/common'
 
 const iconBtn: CSSProperties = { width: 26, height: 26, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 6, cursor: 'pointer', border: 'none', background: 'var(--bg)', color: 'var(--text-muted)', flexShrink: 0 }
 const mutedItalic: CSSProperties = { fontStyle: 'italic', color: 'var(--text-muted)' }
-const criterionLabel: CSSProperties = { fontSize: 11, color: 'var(--text-muted)' }
 
 // A criterion cell: the value, or a muted italic "any" placeholder when the
 // backend wildcard (null) applies.
 function Criterion({ label, value, any }: { label: string; value: string | null; any: string }) {
   return (
     <span style={{ display: 'inline-flex', alignItems: 'baseline', gap: 4, fontSize: 12.5 }}>
-      <span style={criterionLabel}>{label}</span>
+      <Caption>{label}</Caption>
       <span style={value ? { color: 'var(--text)' } : mutedItalic}>{value || any}</span>
     </span>
   )
@@ -95,7 +95,7 @@ export default function PriceAgreementRow({ agreement, onSave, onDelete }: {
         {/* MATCH-FIN-GATE-1: without the permission, only the sale rate prints —
             no purchase rate and no arrow (an arrow to a hidden number still hints
             at "there is a cost here"), so the margin cannot be reconstructed. */}
-        <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8, fontSize: 13, fontFamily: 'JetBrains Mono, monospace' }}>
+        <Mono style={{ display: 'inline-flex', alignItems: 'center', gap: 8, fontSize: 13 }}>
           {canSeeFinancial && (
             <>
               <span style={{ color: 'var(--text)' }}>€ {agreement.purchaseRate != null ? agreement.purchaseRate.toFixed(2) : '—'}</span>
@@ -108,12 +108,12 @@ export default function PriceAgreementRow({ agreement, onSave, onDelete }: {
               ({t('priceAgreements.margin')} € {margin.toFixed(2)})
             </span>
           )}
-        </span>
-        <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>
+        </Mono>
+        <Caption>
           {t('priceAgreements.validFrom')} {formatDate(agreement.validFrom)}
           {' · '}
           {agreement.validUntil ? `${t('priceAgreements.validUntil')} ${formatDate(agreement.validUntil)}` : t('priceAgreements.indefinite')}
-        </span>
+        </Caption>
       </div>
 
       {/* Remarks is rich-text HTML (RichTextEditor in the form above) — sanitised render, never raw. */}

@@ -38,6 +38,7 @@ import ResultStep from './importeren/ResultStep'
 import { groupTemplates, importPermissionsFor, isWholeTreeTemplate, orderedTemplates } from './importeren/importTemplateShape'
 import { iconForTemplate } from './importeren/importEntityIcon'
 import type { ImportTemplateSummary } from './importeren/importApi'
+import { PageTitle } from '@/components/ui/typography'
 
 interface EntityWizardProps {
   entity: string
@@ -136,7 +137,7 @@ export default function ImporterenSettings() {
       {/* Content */}
       <div style={{ flex: 1, minWidth: 0 }}>
         <div style={{ marginBottom: 20 }}>
-          <h2 style={{ fontSize: 15, fontWeight: 600, color: 'var(--text)' }}>{t('import.title')}</h2>
+          <PageTitle>{t('import.title')}</PageTitle>
           <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>{t('import.subtitle')}</p>
         </div>
 

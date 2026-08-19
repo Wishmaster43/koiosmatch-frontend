@@ -18,6 +18,7 @@ import type { TrashSectionConfig } from '@/components/drawer/TrashLifecycleSecti
 import ReferenceNumberChip from '@/components/ui/ReferenceNumberChip'
 import DetachedCountBadge from '@/components/ui/DetachedCountBadge'
 import SoftChip from '@/components/ui/SoftChip'
+import { Caption } from '@/components/ui/typography'
 import CustomerHeaderActions from './drawer/CustomerHeaderActions'
 import MergeCustomerModal from './MergeCustomerModal'
 import PdokCard from '@/components/drawer/PdokCard'
@@ -364,12 +365,6 @@ export default function CustomerDrawer({
     <>
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
         <div style={{ fontSize: 15, fontWeight: 700, color: 'var(--text)' }}>{c.name}</div>
-        {/* KLANT-FASE-CONVERT-1: Fase = colour-coded read-only badge next to the name
-            (mirrors the candidate's CandidateTitle, §3A(c)) — convert lives in the
-            header actions below, never a picker. */}
-        {/* SoftChip — the ONE chip component (§4, HUISSTIJL-1): tokens via color-mix,
-            not hex-concat, so a tenant CSS-var colour tints correctly too. */}
-        {currentPhase && <SoftChip label={phaseInfo.label} color={phaseInfo.color} round />}
         {/* NUMMER-1: human-readable reference number, click-to-copy — same spot on every drawer. */}
         <ReferenceNumberChip value={c.referenceNumber} />
         {/* ONTKOPPEL-TELLER-1: whole-history CURRENTLY-detached count across ALL this
@@ -396,7 +391,7 @@ export default function CustomerDrawer({
       initialTab={initialTab}
       expanded={expanded}
       onToggleExpand={onToggleExpand}
-      footer={<span style={{ fontSize: 11, color: 'var(--text-muted)' }}>{t('drawer.createdAt', { date: c.created ? formatDateTime(c.created) : '—' })}</span>}
+      footer={<Caption>{t('drawer.createdAt', { date: c.created ? formatDateTime(c.created) : '—' })}</Caption>}
       tabs={tabs.map(tab => ({
         // The Koppelingen tab reads the SHARED common:backofficeLinks.tabLabel key
         // (§3A/§11) — never this file's own drawer.tabs.* — so all six adopting
@@ -406,7 +401,9 @@ export default function CustomerDrawer({
       }))}
       header={() => (
         <EntityHeader
-          label={t('drawer.entityLabel')}
+          // TITEL-CHIP-1 (Danny 19-08: "net zoals bij kandidaat"): the phase chip IS
+          // the title; static word only while no phase is known.
+          label={currentPhase ? <SoftChip label={phaseInfo.label} color={phaseInfo.color} round /> : t('drawer.entityLabel')}
           expanded={expanded} onToggleExpand={onToggleExpand} onClose={onClose}
           avatar={{ initials: c.initials, photo: logoUrl ?? c.logo, soft: true }}
           onPhotoChange={setLogoUrl}

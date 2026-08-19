@@ -4,6 +4,8 @@ import { X } from 'lucide-react'
 import DocumentLinkPicker from './DocumentLinkPicker'
 // G34: the house searchable dropdown replaces the native per-file type <select>.
 import SelectMenu from '@/components/ui/SelectMenu'
+// HUISSTIJL-1: the shared muted-caption atom (identity-only swap).
+import { Caption } from '@/components/ui/typography'
 import type { Id, LookupOption } from '@/types/common'
 import Button from '@/components/ui/Button'
 
@@ -60,9 +62,10 @@ export default function PendingUploadQueue({
           ? <>{pending[0].name} <span style={{ fontWeight: 400, color: 'var(--text-muted)' }}>({pending[0].size})</span></>
           : t('documents.pendingCount', { count: pending.length })}
       </div>
-      <div style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 6 }}>
+      {/* HUISSTIJL-1: identical 11/400/var(--text-muted) render as a div. */}
+      <Caption as="div" style={{ marginBottom: 6 }}>
         {pending.length > 1 ? t('documents.applyTypeToAll') : t('documents.docType')}
-      </div>
+      </Caption>
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 10 }}>
         {/* §4 soft-tint (audit r4): active = tinted, never a solid primary fill.
             A chip is "active" only when EVERY queued item already shares that type. */}
@@ -83,7 +86,8 @@ export default function PendingUploadQueue({
         {pending.map((item, idx) => (
           <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
             <span style={{ flex: 1, minWidth: 0, fontSize: 12, color: 'var(--text)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{item.name}</span>
-            <span style={{ fontSize: 11, color: 'var(--text-muted)', flexShrink: 0 }}>{item.size}</span>
+            {/* HUISSTIJL-1: identical 11/400/var(--text-muted) render. */}
+            <Caption style={{ flexShrink: 0 }}>{item.size}</Caption>
             <span id={`${docTypeLabelBaseId}-${idx}`} className="sr-only">{t('documents.docTypeFor', { name: item.name })}</span>
             <div style={{ width: 130, flexShrink: 0 }}>
               <SelectMenu aria-labelledby={`${docTypeLabelBaseId}-${idx}`} value={item.type} onChange={v => onSetType(idx, v)}

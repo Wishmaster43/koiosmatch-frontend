@@ -16,7 +16,6 @@
  */
 import { Check } from 'lucide-react'
 import SelectAllRow from './SelectAllRow'
-import { tintBg, tintBorder } from '@/lib/tint'
 import { useBatchToggle } from '@/hooks/useBatchToggle'
 
 export interface ChipOption { value: string; label: string; color?: string }
@@ -62,8 +61,11 @@ export default function ChipMultiSelect({ options, values, selected, onToggle, c
               // all, so the chosen state is unmistakable (and never colour-only, §6).
               fontWeight: isActive ? 600 : 400,
               color: isActive ? tint : 'var(--text-muted)',
-              background: isActive ? tintBg(tint, true) : 'var(--bg)',
-              border: isActive ? tintBorder(tint, true) : '1px solid var(--border)',
+              // PRIMAIR-VLAK-1 (Danny 19-08, op de geselecteerde dag-pil: "HUISSTIJL!!"):
+              // selected = solid — the button trio for the accent, the chip's own
+              // data colour (with on-accent ink) otherwise. Unselected stays calm.
+              background: isActive ? (tint === 'var(--color-primary)' ? 'var(--button-fill)' : tint) : 'var(--bg)',
+              border: isActive ? '1px solid var(--button-border)' : '1px solid var(--border)',
             }}>
             {isActive && <Check size={11} strokeWidth={3} aria-hidden="true" />}
             {o.label}

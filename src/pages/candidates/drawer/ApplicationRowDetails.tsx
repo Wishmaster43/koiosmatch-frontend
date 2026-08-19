@@ -29,6 +29,7 @@ import api, { unwrap } from '@/lib/api'
 import { extractApiError } from '@/lib/extractApiError'
 import { useDateFormat } from '@/lib/datetime'
 import SoftChip from '@/components/ui/SoftChip'
+import { Mono } from '@/components/ui/typography'
 import type { Id } from '@/types/common'
 
 // The slice of ApplicationDetailResource this panel reads. Hand-written on purpose
@@ -82,7 +83,7 @@ export default function ApplicationRowDetails({ applicationId, labelledBy, id }:
   if (detail?.phase_label) rows.push({ key: 'phase', label: t('work.phase'), value: <SoftChip label={detail.phase_label} color={detail.phase_color} /> })
   if (detail?.owner?.name) rows.push({ key: 'owner', label: t('work.owner'), value: detail.owner.name })
   if (detail?.created_at) rows.push({ key: 'createdAt', label: t('work.createdAt'), value: formatDate(detail.created_at) })
-  if (detail?.reference_number) rows.push({ key: 'reference', label: t('work.reference'), value: <span style={{ fontFamily: 'JetBrains Mono, monospace' }}>{detail.reference_number}</span> })
+  if (detail?.reference_number) rows.push({ key: 'reference', label: t('work.reference'), value: <Mono>{detail.reference_number}</Mono> })
   if (detail?.rejection?.reason_label) rows.push({ key: 'rejection', label: t('work.rejectionReason'), value: <SoftChip label={detail.rejection.reason_label} color="var(--color-danger)" /> })
 
   // Four states, never a blank panel (§3): error → success → empty → loading.

@@ -15,6 +15,7 @@ import SearchSelect from '@/components/ui/SearchSelect'
 import { BTN_H } from '@/config/buttonMetrics'
 import { fieldInputStyle } from '@/components/forms/fieldMetrics'
 import Button from '@/components/ui/Button'
+import { Mono } from '@/components/ui/typography'
 
 export default function ApiKeyGeneralTab({ apiKey, onSave }) {
   const { t } = useTranslation('settings')
@@ -63,7 +64,7 @@ export default function ApiKeyGeneralTab({ apiKey, onSave }) {
     [t('apiKeys.field.organisation'), apiKey.organisation],
     [t('apiKeys.field.description'), apiKey.description],
     [t('apiKeys.field.guid'), <code style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 12 }}>{apiKey.guid ?? '—'}</code>],
-    [t('apiKeys.field.secret'), <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 12, color: 'var(--text-muted)' }}>••••••••••••  <span style={{ fontFamily: 'inherit', fontSize: 11 }}>({t('apiKeys.secretHidden')})</span></span>],
+    [t('apiKeys.field.secret'), <Mono style={{ fontSize: 12, color: 'var(--text-muted)' }}>••••••••••••  <span style={{ fontFamily: 'inherit', fontSize: 11 }}>({t('apiKeys.secretHidden')})</span></Mono>],
     [t('apiKeys.field.created'), formatDate(apiKey.created_at)],
     [t('apiKeys.field.updated'), formatDate(apiKey.updated_at)],
     [t('apiKeys.field.contactName'), apiKey.contact_name],
@@ -150,14 +151,14 @@ export default function ApiKeyGeneralTab({ apiKey, onSave }) {
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: editing ? 10 : 0 }}>
           {ips.length === 0 && <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>{t('apiKeys.noIps')}</span>}
           {ips.map((ip) => (
-            <span key={ip} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontFamily: "'JetBrains Mono', monospace", fontSize: 12, padding: '4px 10px', background: 'var(--hover-bg)', border: '1px solid var(--border)', borderRadius: 7, color: 'var(--text)' }}>
+            <Mono key={ip} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 12, padding: '4px 10px', background: 'var(--hover-bg)', border: '1px solid var(--border)', borderRadius: 7, color: 'var(--text)' }}>
               {ip}
               {editing && (
                 <button onClick={() => removeIp(ip)} aria-label={t('common.remove')} style={{ border: 'none', background: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: 0, display: 'flex' }}>
                   <X size={12} />
                 </button>
               )}
-            </span>
+            </Mono>
           ))}
         </div>
         {editing && (

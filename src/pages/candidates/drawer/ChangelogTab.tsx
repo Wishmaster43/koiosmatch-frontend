@@ -6,6 +6,7 @@ import { useDateFormat } from '@/lib/datetime'
 import { useCandidateActivity, type ActivityEvent } from '../hooks/useCandidateDrawerData'
 import { useLookups } from '@/context/LookupsContext'
 import { escapeCsvCell } from '@/lib/csv'
+import { Caption } from '@/components/ui/typography'
 import type { Candidate } from '@/types/candidate'
 import { isUuid } from '@/lib/uuid'
 
@@ -194,11 +195,11 @@ export default function ChangelogTab({ c, bare = false }: { c: Candidate; bare?:
       {/* One card per change: "when · who · action · Field" + "old → new". */}
       {!loading && !error && cards.map((cd, i) => (
         <div key={i} style={{ border: '1px solid var(--border)', borderRadius: 8, background: 'var(--bg)', padding: '9px 12px', marginBottom: 8 }}>
-          <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>
+          <Caption as="div">
             {cd.when ? formatDate(cd.when, { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit' }) : '—'}
             {' · '}{cd.who}{' · '}{cd.action}
             {cd.field && <> {' · '}<span style={{ fontWeight: 600, color: 'var(--text)' }}>{cd.field}</span></>}
-          </div>
+          </Caption>
           {cd.line && <div style={{ fontSize: 12, color: 'var(--text)', marginTop: 5 }}>{cd.line}</div>}
           {!cd.line && cd.field && (
             <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginTop: 5, fontSize: 12 }}>

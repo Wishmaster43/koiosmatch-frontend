@@ -4,6 +4,7 @@ import SearchSelect from '@/components/ui/SearchSelect'
 import { VacancyLookupsProvider, useVacancyLookups } from '@/context/VacancyLookupsContext'
 import { useAllSettings, saveSettingsKeys, invalidateAllSettingsCache } from '@/lib/settings/useAllSettings'
 import { notifyError } from '@/lib/notify'
+import { SectionTitle } from '@/components/ui/typography'
 
 // The tenant-setting key; VacancyDefaultStatusResolver (backend) applies it on every
 // status-less vacancy create (VACSTATUS-DEFAULT-1) — the FE never has to replicate
@@ -51,7 +52,7 @@ function VacancyDefaultStatusEditor() {
 
   return (
     <div style={{ maxWidth: 560 }}>
-      <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)', marginBottom: 4 }}>{t('vacancyDefaultStatus.title')}</div>
+      <SectionTitle as="div" style={{ marginBottom: 4 }}>{t('vacancyDefaultStatus.title')}</SectionTitle>
       <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 12 }}>{t('vacancyDefaultStatus.subtitle')}</div>
       {/* Searchable single-pick dropdown, like every other lookup filter (Danny 23-07). */}
       <SearchSelect closeOnToggle width={300}

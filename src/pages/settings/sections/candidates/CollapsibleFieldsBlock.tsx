@@ -12,6 +12,7 @@
 import { useId, type ReactNode } from 'react'
 import { ChevronDown, ChevronRight } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
+import { SectionTitle, Caption } from '@/components/ui/typography'
 
 export default function CollapsibleFieldsBlock({ title, requiredCount, total, open, onToggle, children }: {
   /** Already-translated block title. */
@@ -38,13 +39,13 @@ export default function CollapsibleFieldsBlock({ title, requiredCount, total, op
         {open
           ? <ChevronDown size={14} style={{ color: 'var(--text-muted)', flexShrink: 0 }} aria-hidden="true" />
           : <ChevronRight size={14} style={{ color: 'var(--text-muted)', flexShrink: 0 }} aria-hidden="true" />}
-        <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)', flex: 1 }}>{title}</span>
+        <SectionTitle as="span" style={{ flex: 1 }}>{title}</SectionTitle>
         {/* Named vars, not `count` — this string never varies by plural, and `count`
             would force i18next to demand _one/_other variants of the same sentence
             (matches reports:summary "{{shown}} van {{total}}"). */}
-        <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>
+        <Caption>
           {t('requiredFields.groupCount', { required: requiredCount, total })}
-        </span>
+        </Caption>
       </button>
 
       {/* Body stays unmounted while collapsed — nothing to tab through when hidden. */}

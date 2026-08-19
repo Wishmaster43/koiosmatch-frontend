@@ -11,6 +11,9 @@ import { fieldInputStyle } from '@/components/forms/fieldMetrics'
 import { useDateFormat } from '@/lib/datetime'
 import { useApplicationSources } from '@/lib/useApplicationSources'
 import Button from '@/components/ui/Button'
+// HUISSTIJL-1: shared typography atom — both muted secondary lines below are
+// exact 11px/muted matches for the house Caption scale.
+import { Caption } from '@/components/ui/typography'
 import VacancyLinkField from './VacancyLinkField'
 import { useVacancyLinkOptions } from '../hooks/useVacancyLinkOptions'
 import { useApplicationVacancy } from '../hooks/useApplicationVacancy'
@@ -174,9 +177,9 @@ export default function ApplicationDetailsCard({ application: a, onLinkVacancy, 
           <>
             <EntityLink page="customers" id={vac.clientId}>{vac.contactName}</EntityLink>
             {(a.contact?.phone || a.contact?.email) && (
-              <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>
+              <Caption as="div">
                 {[a.contact.phone, a.contact.email].filter(Boolean).join(' · ')}
-              </div>
+              </Caption>
             )}
           </>
         ) : '—'}
@@ -212,12 +215,12 @@ export default function ApplicationDetailsCard({ application: a, onLinkVacancy, 
             <SoftChip label={a.match.statusLabel} color={a.match.statusColor} />
           </div>
           {a.match.matchStart && (
-            <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 3 }}>
+            <Caption as="div" style={{ marginTop: 3 }}>
               {t('drawer.placementPeriod', {
                 start: formatDate(a.match.matchStart),
                 end: a.match.matchEnd ? formatDate(a.match.matchEnd) : t('drawer.placementOngoing'),
               })}
-            </div>
+            </Caption>
           )}
         </Row>
       )}

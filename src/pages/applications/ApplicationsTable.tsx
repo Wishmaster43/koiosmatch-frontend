@@ -9,6 +9,9 @@ import EntityNameCell from '@/components/ui/EntityNameCell'
 import StatusPill from '@/components/ui/StatusPill'
 import CandidateStatusChip from '@/components/ui/CandidateStatusChip'
 import { makeKoiosColumn } from '@/components/ui/koiosColumn'
+// HUISSTIJL-1: the interview step count is JetBrains Mono — exact match for
+// the shared Mono atom (size/colour kept via style since they ride with context).
+import { Mono } from '@/components/ui/typography'
 import type { Application } from '@/types/application'
 import type { Id } from '@/types/common'
 import { useAllSettings, getBoolSetting } from '@/lib/settings/useAllSettings'
@@ -159,10 +162,10 @@ export default function ApplicationsTable({ rows, loading, error, selectedId, on
           style={{ display: 'inline-flex', alignItems: 'center', gap: 6, whiteSpace: 'nowrap', cursor: 'pointer' }}>
           <StatusPill label={t(`interview.category.${r.interview.category}`)} color={interviewCategoryColor(r.interview.category)} />
           {r.interview.total > 0 && (
-            <span style={{ fontSize: 11, color: 'var(--text-muted)', fontFamily: 'JetBrains Mono, monospace' }}
+            <Mono style={{ fontSize: 11, color: 'var(--text-muted)' }}
               title={t('interview.stepOf', { step: r.interview.step ?? '–', total: r.interview.total })}>
               {r.interview.step ?? '–'}/{r.interview.total}
-            </span>
+            </Mono>
           )}
         </span>
       ) : <span style={{ color: 'var(--text-muted)' }}>—</span> },

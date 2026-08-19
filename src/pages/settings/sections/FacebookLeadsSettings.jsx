@@ -17,6 +17,7 @@ import { notifyError } from '@/lib/notify'
 import { loadSettings, saveSettings } from '../lib/settingsApi'
 import { fieldInputStyle } from '@/components/forms/fieldMetrics'
 import Button from '@/components/ui/Button'
+import { PageTitle } from '@/components/ui/typography'
 
 // The exact placeholder the backend masks a stored secret with (SettingController::MASK) —
 // matching it lets the FE tell "already set" apart from "empty" without ever seeing the value.
@@ -118,7 +119,7 @@ export default function FacebookLeadsSettings() {
 
   return (
     <div style={{ maxWidth: 560 }}>
-      <h2 style={{ fontSize: 15, fontWeight: 600, color: 'var(--text)' }}>{t('facebookLeads.title')}</h2>
+      <PageTitle>{t('facebookLeads.title')}</PageTitle>
       <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2, marginBottom: 20 }}>{t('facebookLeads.subtitle')}</p>
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: 14, marginBottom: 20 }}>

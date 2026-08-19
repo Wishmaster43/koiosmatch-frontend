@@ -10,6 +10,7 @@ import { CANDIDATE_SORT_KEYS } from './hooks/useCandidatesData'
 import Avatar, { NEUTRAL_AVATAR } from '@/components/ui/Avatar'
 import BackofficeCouplingIndicator from '@/components/ui/BackofficeCouplingIndicator'
 import { makeKoiosColumn } from '@/components/ui/koiosColumn'
+import { Caption } from '@/components/ui/typography'
 import { useDateFormat } from '@/lib/datetime'
 import { useLookups } from '@/context/LookupsContext'
 import { useApps } from '@/context/AppsContext'
@@ -264,7 +265,7 @@ export default function CandidatesTable({ rows, loading, selectedId, onSelect, o
                   <div style={{ display: 'flex', gap: 4, alignItems: 'center' }}>
                     {shown.map(v => { const m = typeMeta(v); return <SoftChip key={v} label={m.label} color={m.color} /> })}
                     {list.length > shown.length && (
-                      <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>+{list.length - shown.length}</span>
+                      <Caption>+{list.length - shown.length}</Caption>
                     )}
                   </div>
                 )
@@ -286,7 +287,7 @@ export default function CandidatesTable({ rows, loading, selectedId, onSelect, o
                 return (
                   <div style={{ display: 'flex', gap: 4, alignItems: 'center' }}>
                     {shown.map((p, i) => <SoftChip key={p.id ?? p.name ?? i} label={p.name} color={p.color || 'var(--text-muted)'} title={p.name} />)}
-                    {pools.length > shown.length && <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>+{pools.length - shown.length}</span>}
+                    {pools.length > shown.length && <Caption>+{pools.length - shown.length}</Caption>}
                   </div>
                 )
               })()

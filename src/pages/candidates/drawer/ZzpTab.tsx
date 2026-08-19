@@ -53,6 +53,8 @@ import { notifyError } from '@/lib/notify'
 import { useNumberingEntities } from '@/lib/useNumberingEntities'
 import { useIdentifierValidation } from '@/hooks/useIdentifierValidation'
 import { resolveCountryCode } from '@/lib/companyIdentifiers'
+// HUISSTIJL-1: the shared JetBrains Mono atom + the muted-caption atom (identity-only swaps).
+import { Mono, Caption } from '@/components/ui/typography'
 import ZzpAddressCard from './ZzpAddressCard'
 import type { ZzpAddressValues } from './ZzpAddressCard'
 import { useBusinessEmailDuplicateCheck } from '../hooks/useBusinessEmailDuplicateCheck'
@@ -276,12 +278,16 @@ export function ZzpTab({ c, onSave }: { c: Candidate; onSave?: (v: Record<string
         <div style={{ borderRadius: 10, overflow: 'hidden', border: '1px solid var(--border)', background: 'var(--surface)',
           padding: '6px 12px', display: 'flex', flexDirection: 'column', gap: 2 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 12, minHeight: 26 }}>
-            <span style={{ fontSize: 11, color: 'var(--text-muted)', width: WIDE_LABEL_WIDTH, flexShrink: 0 }}>{t('zzp.creditor')}</span>
-            <span style={{ fontSize: 12, color: value.crediteur ? 'var(--text)' : 'var(--text-muted)', fontFamily: 'JetBrains Mono, monospace' }}>
+            {/* HUISSTIJL-1: identical 11/400/var(--text-muted) render. */}
+            <Caption style={{ width: WIDE_LABEL_WIDTH, flexShrink: 0 }}>{t('zzp.creditor')}</Caption>
+            {/* HUISSTIJL-1: identical fontFamily/size/colour render (colour stays
+                the same live ternary — the atom does not fix a colour). */}
+            <Mono style={{ fontSize: 12, color: value.crediteur ? 'var(--text)' : 'var(--text-muted)' }}>
               {(value.crediteur as string) || '-'}
-            </span>
+            </Mono>
           </div>
-          <div style={{ fontSize: 11, fontStyle: 'italic', color: 'var(--text-muted)' }}>{t('zzp.creditorAutoLocked')}</div>
+          {/* HUISSTIJL-1: identical 11/400/var(--text-muted) render as a div. */}
+          <Caption as="div" style={{ fontStyle: 'italic' }}>{t('zzp.creditorAutoLocked')}</Caption>
         </div>
       )}
       <EditableFieldTable key={`invoicing-${invoicingEpoch}`} title={t('zzp.groupInvoicing')} fields={blockFields(t('zzp.groupInvoicing'))} value={value} labelWidth={WIDE_LABEL_WIDTH} onSave={handleSaveInvoicing} />
@@ -290,8 +296,9 @@ export function ZzpTab({ c, onSave }: { c: Candidate; onSave?: (v: Record<string
           tenant today — this branch is dead in practice, kept only so a future
           config change (the entity ever removed) still degrades honestly to an
           editable field + hint instead of a silently-blank row. */}
+      {/* HUISSTIJL-1: identical 11/400/var(--text-muted) render as a div. */}
       {!creditorAutoNumbered && !value.crediteur && (
-        <div style={{ fontSize: 11, fontStyle: 'italic', color: 'var(--text-muted)', padding: '0 12px' }}>{t('zzp.creditorAutoHint')}</div>
+        <Caption as="div" style={{ fontStyle: 'italic', padding: '0 12px' }}>{t('zzp.creditorAutoHint')}</Caption>
       )}
       {dialog}
     </div>

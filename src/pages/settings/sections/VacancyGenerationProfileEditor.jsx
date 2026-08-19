@@ -31,6 +31,7 @@ import { useFunctions } from '@/lib/useFunctions'
 import { useIndustries } from '@/lib/useIndustries'
 import { useLanguageLookups } from '@/lib/useLanguageLookups'
 import Button from '@/components/ui/Button'
+import { SectionTitle } from '@/components/ui/typography'
 
 // Tone-of-voice and length are fixed prompt-engine parameters (like the custom-field
 // TYPE select), not tenant business data — a small hardcoded enum is appropriate here,
@@ -98,7 +99,7 @@ export default function VacancyGenerationProfileEditor({ draft, onChange, conten
       {/* Matcher — which vacancy characteristics this profile applies to. An empty
           field means "matches any value" (the future resolver's default). */}
       <div style={{ borderTop: '1px solid var(--border)', paddingTop: 12 }}>
-        <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)', marginBottom: 2 }}>{t('vacancyGenerationSettings.matcherTitle')}</div>
+        <SectionTitle as="div" style={{ marginBottom: 2 }}>{t('vacancyGenerationSettings.matcherTitle')}</SectionTitle>
         <p style={{ ...hintStyle, marginBottom: 10 }}>{t('vacancyGenerationSettings.matcherHint')}</p>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
           <MatcherField label={t('vacancyGenerationSettings.matcherLocations')}
@@ -122,7 +123,7 @@ export default function VacancyGenerationProfileEditor({ draft, onChange, conten
 
       {/* Content — the template + brand rules the generator (fase 1b) will apply. */}
       <div style={{ borderTop: '1px solid var(--border)', paddingTop: 12, display: 'flex', flexDirection: 'column', gap: 12 }}>
-        <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)' }}>{t('vacancyGenerationSettings.contentTitle')}</div>
+        <SectionTitle as="div">{t('vacancyGenerationSettings.contentTitle')}</SectionTitle>
 
         <div>
           <label style={labelStyle}>{t('vacancyGenerationSettings.templateLabel')}</label>

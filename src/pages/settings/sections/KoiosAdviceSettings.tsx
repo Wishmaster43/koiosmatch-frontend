@@ -28,6 +28,7 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useAllSettings, saveSettingsKeys, invalidateAllSettingsCache, getNumberSetting } from '@/lib/settings/useAllSettings'
 import { notifyError } from '@/lib/notify'
+import { PageTitle, SectionTitle } from '@/components/ui/typography'
 
 // Tenant-setting keys — the generic /settings key/value store. Defaults mirror
 // the fallback numbers vacancyAdvice.ts/matchAdvice.ts's callers already use.
@@ -65,7 +66,7 @@ function VacancyStaleDaysField() {
 
   return (
     <div style={{ marginBottom: 16, paddingBottom: 16, borderBottom: '1px solid var(--border)' }}>
-      <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)', marginBottom: 4 }}>{t('koiosAdvice.vacancyStaleTitle')}</div>
+      <SectionTitle as="div" style={{ marginBottom: 4 }}>{t('koiosAdvice.vacancyStaleTitle')}</SectionTitle>
       <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 8, maxWidth: 460 }}>{t('koiosAdvice.vacancyStaleHint')}</div>
       <label htmlFor="vacancy-advice-stale-days" style={{ fontSize: 11, fontWeight: 500, color: 'var(--text-muted)', display: 'block', marginBottom: 4 }}>
         {t('koiosAdvice.vacancyStaleLabel')}
@@ -104,7 +105,7 @@ function MatchRenewDaysField() {
 
   return (
     <div>
-      <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)', marginBottom: 4 }}>{t('koiosAdvice.matchRenewTitle')}</div>
+      <SectionTitle as="div" style={{ marginBottom: 4 }}>{t('koiosAdvice.matchRenewTitle')}</SectionTitle>
       <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 8, maxWidth: 460 }}>{t('koiosAdvice.matchRenewHint')}</div>
       <label htmlFor="match-advice-renew-days" style={{ fontSize: 11, fontWeight: 500, color: 'var(--text-muted)', display: 'block', marginBottom: 4 }}>
         {t('koiosAdvice.matchRenewLabel')}
@@ -145,7 +146,7 @@ function ApplicationStageStaleDaysField() {
 
   return (
     <div>
-      <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)', marginBottom: 4 }}>{t('koiosAdvice.applicationStaleTitle')}</div>
+      <SectionTitle as="div" style={{ marginBottom: 4 }}>{t('koiosAdvice.applicationStaleTitle')}</SectionTitle>
       <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 8, maxWidth: 460 }}>{t('koiosAdvice.applicationStaleHint')}</div>
       <label htmlFor="application-stage-stale-days" style={{ fontSize: 11, fontWeight: 500, color: 'var(--text-muted)', display: 'block', marginBottom: 4 }}>
         {t('koiosAdvice.applicationStaleLabel')}
@@ -166,7 +167,7 @@ export default function KoiosAdviceSettings() {
   return (
     <div style={{ maxWidth: 640 }}>
       <div style={{ marginBottom: 16 }}>
-        <h2 style={{ fontSize: 15, fontWeight: 600, color: 'var(--text)' }}>{t('koiosAdvice.title')}</h2>
+        <PageTitle>{t('koiosAdvice.title')}</PageTitle>
         <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>{t('koiosAdvice.subtitle')}</p>
       </div>
       <VacancyStaleDaysField />

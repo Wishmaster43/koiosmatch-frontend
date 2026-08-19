@@ -9,6 +9,7 @@ import { DEFAULT_LOCATION_COLOR, DEFAULT_LOCATION_ICON } from '@/lib/locationIco
 import LocationsTable from './locations/LocationsTable'
 import LocationFormModal from './locations/LocationFormModal'
 import DrawerAddButton from '@/components/drawer/DrawerAddButton'
+import { PageTitle } from '@/components/ui/typography'
 
 // STRAAL-1: Leaflet only loads when the map view opens (§9 — lazy heavy deps).
 const LocationsMapView = lazy(() => import('./LocationsMapView'))
@@ -167,7 +168,7 @@ export default function LocationsSettings() {
     <div>
       <div className="flex items-center justify-between mb-5">
         <div>
-          <h2 style={{ fontSize: 15, fontWeight: 600, color: 'var(--text)' }}>{t('locations.title')}</h2>
+          <PageTitle>{t('locations.title')}</PageTitle>
           <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>{t('locations.subtitle')}</p>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>

@@ -10,6 +10,7 @@ import { Check, Copy, Plus, Trash2, Edit2, Save, X } from 'lucide-react'
 import api, { unwrap, unwrapList } from '@/lib/api'
 import { useConfirm } from '@/hooks/useConfirm'
 import Button from '@/components/ui/Button'
+import { PageTitle, SectionTitle } from '@/components/ui/typography'
 
 // Inbound webhook URLs hang off the API root's /webhook path, not under /api.
 const API_URL = import.meta.env.VITE_API_URL ?? 'http://koiosmatch-api.test/api'
@@ -75,12 +76,12 @@ export default function IncomingWebhooks() {
 
   return (
     <div style={{ maxWidth: 700 }}>
-      <h2 style={{ fontSize: 15, fontWeight: 600, color: 'var(--text)', marginBottom: 4 }}>{t('webhooks.incoming.title')}</h2>
+      <PageTitle style={{ marginBottom: 4 }}>{t('webhooks.incoming.title')}</PageTitle>
       <p style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 20 }}>{t('webhooks.incoming.subtitle')}</p>
 
       {/* New webhook */}
       <div style={{ background: 'var(--hover-bg)', border: '1px solid var(--border)', borderRadius: 10, padding: 16, marginBottom: 24 }}>
-        <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)', marginBottom: 12 }}>{t('webhooks.incoming.newWebhook')}</div>
+        <SectionTitle as="div" style={{ marginBottom: 12 }}>{t('webhooks.incoming.newWebhook')}</SectionTitle>
         <div style={{ display: 'flex', gap: 8, marginBottom: 8 }}>
           <input value={name} onChange={(e) => setName(e.target.value)} placeholder={t('webhooks.incoming.namePlaceholder')}
             style={{ flex: 1, padding: '8px 12px', fontSize: 13, border: '1px solid var(--border)', borderRadius: 8, outline: 'none', background: 'var(--surface)', color: 'var(--text)' }}
@@ -113,7 +114,7 @@ export default function IncomingWebhooks() {
                   </div>
                 ) : (
                   <div style={{ minWidth: 0 }}>
-                    <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)' }}>{wh.name}</div>
+                    <SectionTitle as="div">{wh.name}</SectionTitle>
                     {wh.description && <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{wh.description}</div>}
                   </div>
                 )}

@@ -4,6 +4,7 @@ import StatusListEditor from './StatusListEditor'
 import { DOC_TYPE_ICON_NAMES, resolveDocTypeIcon } from '@/lib/useDocumentTypes'
 import { useAllSettings, saveSettingsKeys, invalidateAllSettingsCache, getNumberSetting } from '@/lib/settings/useAllSettings'
 import { notifyError } from '@/lib/notify'
+import { SectionTitle } from '@/components/ui/typography'
 
 // entity → the nav.<id> label already registered for this tab (registry.jsx dt_*
 // items), reused so each entity name is translated once (mirrors NoteTypesSettings'
@@ -54,7 +55,7 @@ function ExpiringAlertDaysField() {
 
   return (
     <div style={{ marginBottom: 16, paddingBottom: 16, borderBottom: '1px solid var(--border)' }}>
-      <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)', marginBottom: 4 }}>{t('documentTypes.expiringAlertDaysTitle')}</div>
+      <SectionTitle as="div" style={{ marginBottom: 4 }}>{t('documentTypes.expiringAlertDaysTitle')}</SectionTitle>
       <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 8, maxWidth: 460 }}>{t('documentTypes.expiringAlertDaysHint')}</div>
       <label htmlFor="document-expiring-alert-days" style={{ fontSize: 11, fontWeight: 500, color: 'var(--text-muted)', display: 'block', marginBottom: 4 }}>
         {t('documentTypes.expiringAlertDaysLabel')}

@@ -10,6 +10,7 @@ import { RefreshCw, Layers, Building2 } from 'lucide-react'
 import StatusPill from '@/components/ui/StatusPill'
 import { formatDuration } from '@/components/reports/runFormat'
 import Button from '@/components/ui/Button'
+import { Mono } from '@/components/ui/typography'
 
 // Heartbeat status → semantic colour (never a plain grey "off" state — §4).
 const STATUS_COLOR = { active: 'var(--color-success)', stalled: 'var(--color-danger)', idle: 'var(--text-muted)' }
@@ -23,18 +24,18 @@ function BucketCard({ t, name, bucket }) {
   return (
     <div style={{ border: '1px solid var(--border)', borderRadius: 10, background: 'var(--surface)', padding: '12px 14px' }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-        <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)', fontFamily: "'JetBrains Mono', monospace" }}>{name}</span>
+        <Mono style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)' }}>{name}</Mono>
         <StatusPill label={t(`jobs.status.${bucket.status}`, bucket.status)} color={STATUS_COLOR[bucket.status] ?? 'var(--text-muted)'} />
       </div>
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6px 12px', fontSize: 12 }}>
         <span style={{ color: 'var(--text-muted)' }}>{t('jobs.pending')}</span>
-        <span style={{ color: 'var(--text)', textAlign: 'right', fontFamily: "'JetBrains Mono', monospace" }}>{bucket.pending}</span>
+        <Mono style={{ color: 'var(--text)', textAlign: 'right' }}>{bucket.pending}</Mono>
         <span style={{ color: 'var(--text-muted)' }}>{t('jobs.reserved')}</span>
-        <span style={{ color: 'var(--text)', textAlign: 'right', fontFamily: "'JetBrains Mono', monospace" }}>{bucket.reserved}</span>
+        <Mono style={{ color: 'var(--text)', textAlign: 'right' }}>{bucket.reserved}</Mono>
         <span style={{ color: 'var(--text-muted)' }}>{t('jobs.oldestPending')}</span>
-        <span style={{ color: 'var(--text)', textAlign: 'right', fontFamily: "'JetBrains Mono', monospace" }}>{formatDuration(ageMs(bucket.oldest_pending_age_seconds))}</span>
+        <Mono style={{ color: 'var(--text)', textAlign: 'right' }}>{formatDuration(ageMs(bucket.oldest_pending_age_seconds))}</Mono>
         <span style={{ color: 'var(--text-muted)' }}>{t('jobs.oldestReserved')}</span>
-        <span style={{ color: 'var(--text)', textAlign: 'right', fontFamily: "'JetBrains Mono', monospace" }}>{formatDuration(ageMs(bucket.oldest_reserved_age_seconds))}</span>
+        <Mono style={{ color: 'var(--text)', textAlign: 'right' }}>{formatDuration(ageMs(bucket.oldest_reserved_age_seconds))}</Mono>
       </div>
     </div>
   )

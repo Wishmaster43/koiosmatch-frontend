@@ -304,16 +304,16 @@ export default function DrawerFilterMenu({ filters, label, title, clearAllLabel 
 
   return (
     <div ref={wrapRef} style={{ position: 'relative', flexShrink: 0 }}>
-      {/* Compact soft-tint trigger (§4) — same footprint as DrawerAddButton (height
-          26, fontSize 11.5, radius 6) so it sits flush next to it in the toolbar. */}
+      {/* PRIMAIR-VLAK-1 (Danny 19-08): solid tenant fill — same footprint as
+          DrawerAddButton (26/11.5/r6) so it sits flush next to it in the toolbar. */}
       <button type="button" onClick={() => setOpen(o => !o)}
         aria-haspopup="dialog" aria-expanded={open} aria-controls={open ? panelId : undefined}
         style={{
           display: 'inline-flex', alignItems: 'center', gap: 5, height: 26, padding: '0 10px',
           whiteSpace: 'nowrap', flexShrink: 0, fontSize: 11.5, fontWeight: activeCount > 0 ? 600 : 500, borderRadius: 6,
-          cursor: 'pointer', color: 'var(--color-primary-text)',
-          background: `color-mix(in srgb, var(--color-primary) ${activeCount > 0 || open ? 16 : 10}%, transparent)`,
-          border: `1px solid color-mix(in srgb, var(--color-primary) ${activeCount > 0 || open ? 45 : 30}%, transparent)`,
+          cursor: 'pointer', color: 'var(--button-ink)',
+          background: 'var(--button-fill)',
+          border: open ? '1px solid var(--button-ink)' : '1px solid var(--button-border)',
         }}>
         <SlidersHorizontal size={12} />
         {label}
@@ -323,7 +323,7 @@ export default function DrawerFilterMenu({ filters, label, title, clearAllLabel 
             actual active values are fully exposed inside the open panel below. */}
         {activeCount > 0 && (
           <span aria-hidden="true" style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', minWidth: 15, height: 15,
-            padding: '0 4px', borderRadius: 999, background: 'var(--color-primary)', color: 'var(--color-on-accent)',
+            padding: '0 4px', borderRadius: 999, background: 'var(--button-ink)', color: 'var(--color-primary-text)',
             fontSize: 10, fontWeight: 700, lineHeight: 1 }}>
             {activeCount}
           </span>

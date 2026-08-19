@@ -9,6 +9,7 @@
 import { useTranslation } from 'react-i18next'
 import { X, RotateCcw, Lock } from 'lucide-react'
 import type { Effect } from './types'
+import { Mono } from '@/components/ui/typography'
 
 interface ActionRuleDetailPanelProps {
   actionLabel: string
@@ -56,9 +57,9 @@ export default function ActionRuleDetailPanel({
       {popupCode ? (
         <>
           <div style={{ marginTop: 10, fontSize: 12.5, color: 'var(--text)' }}>
-            <span style={{ fontFamily: "'JetBrains Mono', monospace", fontWeight: 700, color: 'var(--color-primary-text)' }}>
+            <Mono style={{ fontWeight: 700, color: 'var(--color-primary-text)' }}>
               {popupCode}
-            </span>
+            </Mono>
             {' — '}
             {t(`actionRules.popups.${popupCode}`)}
           </div>

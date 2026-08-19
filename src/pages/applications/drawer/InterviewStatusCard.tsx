@@ -5,6 +5,9 @@ import { Hand, PlayCircle } from 'lucide-react'
 import Avatar from '@/components/ui/Avatar'
 import SoftChip from '@/components/ui/SoftChip'
 import StatusPill from '@/components/ui/StatusPill'
+// HUISSTIJL-1: shared typography atom — the three plain 11px/muted lines
+// below are exact matches for the house Caption scale.
+import { Caption } from '@/components/ui/typography'
 import { useAuth } from '@/context/AuthContext'
 import api, { unwrap } from '@/lib/api'
 import { notifySuccess, notifyError } from '@/lib/notify'
@@ -300,9 +303,9 @@ export default function InterviewStatusCard({ interview, applicationId }: { inte
           </span>
         )}
         {live.total > 0 && (
-          <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>
+          <Caption>
             {t('interview.stepOf', { step: live.step ?? '–', total: live.total })}
-          </span>
+          </Caption>
         )}
       </div>
 
@@ -325,9 +328,9 @@ export default function InterviewStatusCard({ interview, applicationId }: { inte
       </span>
 
       {!hasVisibilityData && (
-        <span style={{ fontSize: 11, color: 'var(--text-muted)', fontStyle: 'italic' }}>
+        <Caption style={{ fontStyle: 'italic' }}>
           {t('interview.status.visibilityPending')}
-        </span>
+        </Caption>
       )}
 
       {/* Stop/takeover + resume — authorization-gated (hidden, not just disabled,
@@ -356,9 +359,9 @@ export default function InterviewStatusCard({ interview, applicationId }: { inte
       {/* The 404 answer, in words: this application has no running interview
           (any more). Informative — the buttons above stay clickable. */}
       {noSession && (
-        <span style={{ fontSize: 11, color: 'var(--text-muted)', fontStyle: 'italic' }}>
+        <Caption style={{ fontStyle: 'italic' }}>
           {t('interview.status.noRunningSession')}
-        </span>
+        </Caption>
       )}
     </div>
   )

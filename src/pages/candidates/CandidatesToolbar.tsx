@@ -102,7 +102,7 @@ export default function CandidatesToolbar({
         <>
           {/* Add on the left (like Applications) — BTN_H (§4/§9, KANDIDAAT-100 #50): one
               explicit height for every text/action button, everywhere. */}
-          <Button variant="primary" onClick={onAddOpen}>
+          <Button variant="primary" size="md" onClick={onAddOpen}>
             + {t('page.add')}
           </Button>
           {/* Shared header search (T10) — debounced, drives the same server-side ?search=. */}

@@ -8,6 +8,7 @@ import { useConfirm } from '@/hooks/useConfirm'
 import { useDateFormat } from '@/lib/datetime'
 import { notifyError, notifySuccess } from '@/lib/notify'
 import { extractApiError } from '@/lib/extractApiError'
+import { Caption } from '@/components/ui/typography'
 import { useProposals } from './useProposals'
 import type { Id } from '@/types/common'
 import type { ApplicationDetail } from '@/types/application'
@@ -92,17 +93,17 @@ export default function ProposalsBlock({ application }: ProposalsBlockProps) {
             <div key={String(p.id)} style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
               <div style={{ flex: '1 1 auto', minWidth: 160 }}>
                 <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--text)' }}>{p.recipient_name || '—'}</div>
-                {p.recipient_email && <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>{p.recipient_email}</div>}
+                {p.recipient_email && <Caption as="div">{p.recipient_email}</Caption>}
               </div>
               <SoftChip label={p.cv_variant === 'full' ? t('propose.variantChipFull') : t('propose.variantChipProposal')} color="var(--color-primary)" />
-              <div style={{ fontSize: 11, color: 'var(--text-muted)', minWidth: 90 }}>
+              <Caption as="div" style={{ minWidth: 90 }}>
                 {p.sent_at ? t('propose.sentOn', { date: formatDate(p.sent_at) }) : '—'}
-              </div>
+              </Caption>
               {/* Open-state line: revoked > opened (+ count) > not opened yet — one of
                   the three always renders now that opened_at reflects a real customer
                   visit (PROPOSE-SHARE-URL-1), regardless of whether THIS viewer holds
                   the link (opened_at/open_count are not permission-gated on the API). */}
-              <div style={{ fontSize: 11, color: 'var(--text-muted)', flex: '1 1 160px' }}>
+              <Caption as="div" style={{ flex: '1 1 160px' }}>
                 {p.revoked_at ? (
                   <span>{t('propose.revoked', { date: formatDate(p.revoked_at) })}</span>
                 ) : p.opened_at ? (
@@ -113,7 +114,7 @@ export default function ProposalsBlock({ application }: ProposalsBlockProps) {
                 ) : (
                   <span>{t('propose.notOpenedYet')}</span>
                 )}
-              </div>
+              </Caption>
               {canShare && (
                 <div style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
                   <button type="button" onClick={() => handleCopyLink(p.id, p.share_url as string)}

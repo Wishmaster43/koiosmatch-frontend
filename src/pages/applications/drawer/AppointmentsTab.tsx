@@ -6,6 +6,7 @@ import { useDateFormat } from '@/lib/datetime'
 import { useAppointmentTypes } from '@/lib/useAppointmentTypes'
 import DrawerAddButton from '@/components/drawer/DrawerAddButton'
 import StatusFilterSelect, { useStatusFilter } from '@/components/drawer/StatusFilterSelect'
+import { SectionTitle } from '@/components/ui/typography'
 import PlanIntakeModal from '@/pages/candidates/drawer/PlanIntakeModal'
 import type { ExistingAppointment } from '@/pages/candidates/drawer/PlanIntakeModal'
 import type { ApplicationDetail } from '@/types/application'
@@ -149,7 +150,7 @@ export default function AppointmentsTab({ application: a }: { application: Appli
         return (
           <div key={ap.id} style={{ border: '1px solid var(--border)', borderRadius: 10, padding: '12px 14px', background: 'var(--surface)' }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8, marginBottom: 6 }}>
-              <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)' }}>{typeLabel}</span>
+              <SectionTitle as="span">{typeLabel}</SectionTitle>
               <span style={{ fontSize: 11, fontWeight: 500, padding: '2px 8px', borderRadius: 99,
                 background: 'var(--color-secondary-bg)', color: 'var(--color-secondary)' }}>{statusLabel}</span>
             </div>

@@ -4,6 +4,8 @@ import { useTranslation } from 'react-i18next'
 import { Save, Check, Info } from 'lucide-react'
 import SliderJs from '@/components/ui/Slider'
 import CreatableSelect from '@/components/ui/CreatableSelect'
+// HUISSTIJL-1: title/group-label/weight-readout are the shared typography atoms.
+import { SectionTitle, GroupLabel, Mono } from '@/components/ui/typography'
 import { useMatchWeightTemplates } from '../hooks/useMatchWeightTemplates'
 import { MATCH_DIMENSIONS as DIMENSIONS, buildMatchWeights as buildWeights } from '../data/matchWeights'
 import type { VacancyDetail } from '@/types/vacancy'
@@ -63,7 +65,7 @@ export default function MatchingTab({ vacancy: v, onUpdate }: { vacancy: Vacancy
     <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
       <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 16 }}>
         <div style={{ minWidth: 0 }}>
-          <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)' }}>{t('matching.title')}</div>
+          <SectionTitle as="div">{t('matching.title')}</SectionTitle>
           <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>{t('matching.subtitle')}</p>
         </div>
         <button onClick={save}
@@ -79,9 +81,9 @@ export default function MatchingTab({ vacancy: v, onUpdate }: { vacancy: Vacancy
           error, empty (no templates configured yet) and the ready select. V18
           (VACATURES-100): searchable CreatableSelect (was a plain <select>). */}
       <div>
-        <div style={{ fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em', color: 'var(--text-muted)', marginBottom: 6 }}>
+        <GroupLabel style={{ letterSpacing: '0.04em', marginBottom: 6 }}>
           {t('matching.profile')}
-        </div>
+        </GroupLabel>
         {templatesLoading ? (
           <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{t('common:loading')}</div>
         ) : templatesError ? (
@@ -110,9 +112,9 @@ export default function MatchingTab({ vacancy: v, onUpdate }: { vacancy: Vacancy
                 No %-of-total: on a 6-way split it can't be both equal for equal sliders AND
                 total 100 (100÷6=16,66…), so it read as "wrong" — the weight is the clean number;
                 relative importance already shows in the slider positions. */}
-            <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 12, fontWeight: 600, color: 'var(--text)' }}>
+            <Mono style={{ fontSize: 12, fontWeight: 600, color: 'var(--text)' }}>
               {weights[d] ?? 3}/5
-            </span>
+            </Mono>
           </div>
           {/* Slider is 0-based (0..4); stored weight is 1..5. */}
           <Slider value={(weights[d] ?? 3) - 1} max={4} step={1} onChange={(i: number) => setW(d, i + 1)}

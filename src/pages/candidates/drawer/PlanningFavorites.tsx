@@ -11,6 +11,8 @@ import { useTranslation } from 'react-i18next'
 import { Heart, X, Ban, Plus } from 'lucide-react'
 import { sectionBlock, sectionTitle } from './constants'
 import ErrorBanner from '@/components/ui/ErrorBanner'
+// HUISSTIJL-1: the shared muted-caption atom (identity-only swap).
+import { Caption } from '@/components/ui/typography'
 import type { Id } from '@/types/common'
 import type { LinkableType, Preference, PrefKind, PrefTargetGroup } from '../hooks/useCandidatePlanning'
 
@@ -87,10 +89,11 @@ export default function PlanningFavorites({ favorites, blacklist, targets, onAdd
             {/* Four states: loading / error (with retry) / empty / list (success). A
                 failed load renders the shared error banner, never the empty copy — an
                 empty roster and a broken request must look different. */}
-            {loading && <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>{t('common:loading')}</div>}
+            {/* HUISSTIJL-1: identical 11/400/var(--text-muted) render as a div. */}
+            {loading && <Caption as="div">{t('common:loading')}</Caption>}
             {!loading && error && <ErrorBanner onRetry={onReload}>{t('planning.prefsLoadError')}</ErrorBanner>}
             {!loading && !error && data.length === 0 && !isAdding && (
-              <div style={{ fontSize: 11, color: 'var(--text-muted)', fontStyle: 'italic' }}>{emptyText}</div>
+              <Caption as="div" style={{ fontStyle: 'italic' }}>{emptyText}</Caption>
             )}
             {!error && data.map(p => (
               <div key={String(p.id)} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '6px 0', borderBottom: '1px solid var(--border)' }}>

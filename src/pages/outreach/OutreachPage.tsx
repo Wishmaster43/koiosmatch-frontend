@@ -300,7 +300,7 @@ export default function OutreachPage() {
           {/* Toolbar — create on the LEFT, archived toggle + view toggle on the RIGHT (mirror Opportunities) */}
           <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '0 24px 12px', minHeight: 36, flexShrink: 0 }}>
             {/* BTN_H (§4/§9): one explicit height for every text/action button, everywhere. */}
-            <Button variant="primary" onClick={() => setCreating(true)}>
+            <Button variant="primary" size="md" onClick={() => setCreating(true)}>
               <Plus size={15} /> {t('new')}
             </Button>
             <HeaderSearch key={searchEpoch} onSearch={setQuery} placeholder={t('page.searchPlaceholder')} width={280} />

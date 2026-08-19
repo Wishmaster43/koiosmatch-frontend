@@ -16,19 +16,26 @@ describe('Button', () => {
     expect(screen.getByRole('button', { name: 'Opslaan' })).toHaveAttribute('type', 'button')
   })
 
-  it('primary paints the accent pair — token only, never a literal colour', () => {
+  it('primary paints the button trio — one token flip restyles every action button (PRIMAIR-VLAK-1)', () => {
     render(<Button variant="primary">Ga</Button>)
     const b = screen.getByRole('button')
-    expect(b.style.background).toBe('var(--color-primary)')
-    expect(b.style.color).toBe('var(--color-on-accent)')
+    expect(b.style.background).toBe('var(--button-fill)')
+    expect(b.style.color).toBe('var(--button-ink)')
   })
 
-  it('secondary is the calm surface + border pair at the shared height', () => {
+  it('secondary is the calm surface + border pair, defaulting to the sm standard height', () => {
+    // Danny 19-08 ("drill downs moeten allemaal zelfde zijn"): the DEFAULT is 28;
+    // md/BTN_H is the explicit page-toolbar exception, asserted separately below.
     render(<Button variant="secondary">Annuleren</Button>)
     const b = screen.getByRole('button')
     expect(b.style.background).toBe('var(--surface)')
     expect(b.style.border).toBe('1px solid var(--border)')
-    expect(b.style.height).toBe(`${BTN_H}px`)
+    expect(b.style.height).toBe('28px')
+  })
+
+  it('size="md" is the explicit toolbar exception at BTN_H', () => {
+    render(<Button variant="primary" size="md">Nieuw</Button>)
+    expect(screen.getByRole('button').style.height).toBe(`${BTN_H}px`)
   })
 
   it('danger uses the fixed danger pair, not the tenant accent', () => {
@@ -62,6 +69,6 @@ describe('Button', () => {
     render(<Button variant="primary" style={{ width: '100%' }}>Ga</Button>)
     const b = screen.getByRole('button')
     expect(b.style.width).toBe('100%')
-    expect(b.style.background).toBe('var(--color-primary)')
+    expect(b.style.background).toBe('var(--button-fill)')
   })
 })

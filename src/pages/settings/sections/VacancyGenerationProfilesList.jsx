@@ -21,6 +21,7 @@ import { useConfirm } from '@/hooks/useConfirm'
 import { DefaultToggle } from '../components/SettingsControls'
 import VacancyGenerationProfileEditor from './VacancyGenerationProfileEditor'
 import Button from '@/components/ui/Button'
+import { Caption } from '@/components/ui/typography'
 
 const ENDPOINT = '/vacancy-generation-profiles'
 const BLOCKS_ENDPOINT = '/vacancy-content-blocks'
@@ -178,7 +179,7 @@ export default function VacancyGenerationProfilesList() {
             <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
               <div style={{ flex: 1, minWidth: 0 }}>
                 <div style={{ fontWeight: 500, fontSize: 13, color: 'var(--text)' }}>{profile.name}</div>
-                <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>{t('vacancyGenerationSettings.priorityLabel')}: {profile.priority ?? 10}</div>
+                <Caption as="div">{t('vacancyGenerationSettings.priorityLabel')}: {profile.priority ?? 10}</Caption>
               </div>
               <DefaultToggle active={!!profile.is_default} busy={settingDefaultId === profile.id}
                 onClick={() => setDefault(profile)} activeLabel={t('common.default')} inactiveLabel={t('common.setDefault')} />

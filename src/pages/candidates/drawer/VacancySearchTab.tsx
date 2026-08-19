@@ -20,6 +20,8 @@ import { useFunctions } from '@/lib/useFunctions'
 import { VacancyLookupsProvider, useVacancyLookups } from '@/context/VacancyLookupsContext'
 import { toCoord } from '@/lib/coords'
 import { formatCurrency } from '@/lib/formatters'
+// HUISSTIJL-1: the shared JetBrains Mono atom + the muted-caption atom (identity-only swaps).
+import { Mono, Caption } from '@/components/ui/typography'
 import type { Candidate } from '@/types/candidate'
 import type { Id } from '@/types/common'
 
@@ -207,7 +209,8 @@ function VacancySearchTabInner({ candidate }: { candidate: Candidate }) {
           <div style={{ fontSize: 13, fontWeight: 600 }}>
             <EntityLink page="vacancies" id={selectedRow.id}>{selectedRow.title}</EntityLink>
           </div>
-          <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>{[selectedRow.customer, selectedRow.city].filter(Boolean).join(' · ') || '—'}</div>
+          {/* HUISSTIJL-1: identical 11/400/var(--text-muted) render as a div. */}
+          <Caption as="div">{[selectedRow.customer, selectedRow.city].filter(Boolean).join(' · ') || '—'}</Caption>
         </div>
         {/* Right column (Danny 13-08 screenshot): pager+close on top, Solliciteren
             BENEATH them — the title row keeps its full width so long vacancy names
@@ -228,35 +231,39 @@ function VacancySearchTabInner({ candidate }: { candidate: Candidate }) {
         </div>
       </div>
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+        {/* HUISSTIJL-1: identical fontFamily/size/colour render. */}
         {selectedRow.distanceKm != null && (
-          <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 11, color: 'var(--text-muted)' }}>{selectedRow.distanceKm.toFixed(1)} km</span>
+          <Mono style={{ fontSize: 11, color: 'var(--text-muted)' }}>{selectedRow.distanceKm.toFixed(1)} km</Mono>
         )}
         <StatusPill label={statusMeta(selectedRow.status).label} color={statusMeta(selectedRow.status).color} />
         {/* Already-fetched search-row fields (hours + contract form) — render on
             the card too, no extra request needed. */}
         {selectedRow.employmentType && <StatusPill label={selectedRow.employmentType} color="var(--text-muted)" />}
+        {/* HUISSTIJL-1: identical fontFamily/size/colour render. */}
         {formatRange(selectedRow.hoursMin, selectedRow.hoursMax, n => String(n)) && (
-          <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 11, color: 'var(--text-muted)' }}>
+          <Mono style={{ fontSize: 11, color: 'var(--text-muted)' }}>
             {t('vacancySearch.cardHours', { range: formatRange(selectedRow.hoursMin, selectedRow.hoursMax, n => String(n)) })}
-          </span>
+          </Mono>
         )}
       </div>
       {/* P8-result-cards: the lazily-fetched detail line (salary/experience) +
           education/seniority soft-chips — summary card ONLY, list rows stay calm. */}
       {detail && (formatRange(detail.salaryMin, detail.salaryMax, n => formatCurrency(n, 'EUR', 'nl-NL', 0)) || formatRange(detail.experienceMin, detail.experienceMax, n => String(n)) || detail.education || detail.seniority) && (
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+          {/* HUISSTIJL-1: identical fontFamily/size/colour render. */}
           {formatRange(detail.salaryMin, detail.salaryMax, n => formatCurrency(n, 'EUR', 'nl-NL', 0)) && (
-            <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 11, color: 'var(--text-muted)' }}>
+            <Mono style={{ fontSize: 11, color: 'var(--text-muted)' }}>
               {t('vacancySearch.cardSalary', {
                 range: formatRange(detail.salaryMin, detail.salaryMax, n => formatCurrency(n, 'EUR', 'nl-NL', 0)),
                 period: detail.salaryPeriod ? t(`vacancySearch.salaryPeriod.${detail.salaryPeriod}`, { defaultValue: detail.salaryPeriod }) : '',
               })}
-            </span>
+            </Mono>
           )}
           {formatRange(detail.experienceMin, detail.experienceMax, n => String(n)) && (
-            <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>
+            // HUISSTIJL-1: identical 11/400/var(--text-muted) render.
+            <Caption>
               {t('vacancySearch.cardExperience', { range: formatRange(detail.experienceMin, detail.experienceMax, n => String(n)) })}
-            </span>
+            </Caption>
           )}
           {/* Seniority uses its lookup colour (§4); education mirrors the same soft-chip look. */}
           {detail.seniority?.label && <StatusPill label={detail.seniority.label} color={detail.seniority.color} />}
@@ -331,19 +338,21 @@ function VacancySearchTabInner({ candidate }: { candidate: Candidate }) {
                   <EntityLink page="vacancies" id={r.id} title={t('vacancySearch.openInApp')}>{r.title}</EntityLink>
                 </span>
               </div>
-              <div style={{ fontSize: 11, color: 'var(--text-muted)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+              {/* HUISSTIJL-1: identical 11/400/var(--text-muted) render as a div. */}
+              <Caption as="div" style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                 {[r.customer, r.city].filter(Boolean).join(' · ') || '—'}
-              </div>
+              </Caption>
               {/* V-search-1: per-row meta chips — hours + employment type, only when
                   the row really carries them (salary is detail-only, stays on the
                   summary card). Mono for the numbers (§4). */}
               {(formatRange(r.hoursMin, r.hoursMax, n => String(n)) || r.employmentType) && (
                 <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 2, minWidth: 0 }}>
+                  {/* HUISSTIJL-1: identical fontFamily/size/colour + chip-frame render. */}
                   {formatRange(r.hoursMin, r.hoursMax, n => String(n)) && (
-                    <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 10.5, color: 'var(--text-muted)',
+                    <Mono style={{ fontSize: 10.5, color: 'var(--text-muted)',
                       border: '1px solid var(--border)', borderRadius: 999, padding: '1px 7px', whiteSpace: 'nowrap' }}>
                       {t('vacancySearch.cardHours', { range: formatRange(r.hoursMin, r.hoursMax, n => String(n)) })}
-                    </span>
+                    </Mono>
                   )}
                   {r.employmentType && (
                     <span style={{ fontSize: 10.5, color: 'var(--text-muted)', border: '1px solid var(--border)',
@@ -356,10 +365,11 @@ function VacancySearchTabInner({ candidate }: { candidate: Candidate }) {
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0 }}>
               {r.score != null && <ScorePill score={r.score} />}
+              {/* HUISSTIJL-1: identical fontFamily/size/colour render. */}
               {r.distanceKm != null && (
-                <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 11, color: 'var(--text-muted)' }}>
+                <Mono style={{ fontSize: 11, color: 'var(--text-muted)' }}>
                   {r.distanceKm.toFixed(1)} km
-                </span>
+                </Mono>
               )}
               {/* Expand affordance (Danny 05-08, point 2: "niet duidelijk dat je een
                   vacature kan openklappen") — a visible chevron on EVERY row, on top

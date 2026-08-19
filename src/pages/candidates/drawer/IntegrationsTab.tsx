@@ -22,6 +22,7 @@ import { toCoord } from '@/lib/coords'
 import { notifySuccess, notifyError } from '@/lib/notify'
 import { extractApiError } from '@/lib/extractApiError'
 import pdokIcon from '@/assets/integrations/pdok.png'
+import { Mono } from '@/components/ui/typography'
 import type { Candidate } from '@/types/candidate'
 
 // PDOK geocode provenance (CAND-PDOK-GEOCODE-META-1): prefers "Bijgewerkt …" once
@@ -162,9 +163,9 @@ export default function IntegrationsTab({ c, onUpdate }: {
           {hasCoords ? (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
               <SoftChip label={t('integrations.pdok.linked')} color="var(--color-success)" />
-              <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 11, color: 'var(--text-muted)' }}>
+              <Mono style={{ fontSize: 11, color: 'var(--text-muted)' }}>
                 {effectiveLat?.toFixed(5)}, {effectiveLng?.toFixed(5)}
-              </span>
+              </Mono>
             </div>
           ) : (
             <SoftChip label={t('integrations.pdok.notGeocoded')} color="var(--text-muted)" />

@@ -25,6 +25,7 @@ import { ArrowRight } from 'lucide-react'
 import api, { unwrapList } from '@/lib/api'
 import { isAbortError } from '@/lib/mocks'
 import { useDateFormat } from '@/lib/datetime'
+import { Caption } from '@/components/ui/typography'
 import type { Id } from '@/types/common'
 
 interface ActivityEntry {
@@ -139,11 +140,11 @@ export default function ChangelogTab({ customerId, endpoint }: { customerId?: Id
     <>
       {cards.map((cd, i) => (
         <div key={i} style={{ border: '1px solid var(--border)', borderRadius: 8, background: 'var(--bg)', padding: '9px 12px', marginBottom: 8 }}>
-          <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>
+          <Caption as="div">
             {cd.when ? formatDate(cd.when, { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '—'}
             {' · '}{cd.who}{' · '}{cd.action}
             {cd.subject && <> {' · '}<span style={{ fontWeight: 600, color: 'var(--text)' }}>{cd.subject}</span></>}
-          </div>
+          </Caption>
           {/* One row per changed field — falls back to the plain description line
               when the backend sent no diff bag for this entry (e.g. a delete). */}
           {cd.rows.length > 0 ? (

@@ -50,6 +50,7 @@ import ResultStep from '@/pages/settings/sections/importeren/ResultStep'
 import { downloadImportTemplate } from '@/pages/settings/sections/importeren/importApi'
 import type { useImportWizard } from '@/pages/settings/sections/importeren/useImportWizard'
 import type { ImportRowResult } from '@/pages/settings/sections/importeren/importApi'
+import { Caption } from '@/components/ui/typography'
 import Button from '@/components/ui/Button'
 
 // The three per-entity importers this card can drive — verified against the
@@ -215,9 +216,9 @@ export default function SubEntityImportCard({ entity, customerName, wizard, canV
                   padding: 0, cursor: canView ? 'pointer' : 'not-allowed', opacity: canView ? 1 : 0.5 }}>
                 {t('import.downloadTemplate', { ns: 'settings' })}
               </button>
-              <span style={{ fontSize: 11, color: 'var(--text-muted)', marginLeft: 'auto' }}>
+              <Caption style={{ marginLeft: 'auto' }}>
                 {t('import.acceptedTypes', { ns: 'settings' })}
-              </span>
+              </Caption>
             </div>
             {typeError && (
               <div role="alert" style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 11, color: 'var(--color-danger)' }}>

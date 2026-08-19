@@ -18,6 +18,7 @@ import { AlertTriangle, ExternalLink, RotateCcw } from 'lucide-react'
 import SoftChip from '@/components/ui/SoftChip'
 import Spinner from '@/components/ui/Spinner'
 import { BTN_H } from '@/config/buttonMetrics'
+import { SectionTitle } from '@/components/ui/typography'
 import type { DuplicateMatch } from './useDuplicateProbe'
 
 interface DuplicateNoticeProps {
@@ -66,7 +67,7 @@ export default function DuplicateNotice({ match, variant, canRestore, restoring,
 
       {/* The duplicate itself: name + state chip, nothing more (§8 data minimisation). */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 8, flexWrap: 'wrap' }}>
-        <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)' }}>{name}</span>
+        <SectionTitle as="span">{name}</SectionTitle>
         <SoftChip color={archived ? 'var(--color-warning)' : 'var(--color-success)'}
           label={archived ? t('duplicate.stateArchived') : t('duplicate.stateActive')} />
       </div>

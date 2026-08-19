@@ -17,6 +17,7 @@ import EventCatalog from './EventCatalog'
 import { BTN_H } from '@/config/buttonMetrics'
 import { fieldInputStyle } from '@/components/forms/fieldMetrics'
 import Button from '@/components/ui/Button'
+import { SectionTitle } from '@/components/ui/typography'
 
 export default function WebhookDetail({ subId, listRow, onBack, onPatch, onDelete }) {
   const { t } = useTranslation('settings')
@@ -126,7 +127,7 @@ export default function WebhookDetail({ subId, listRow, onBack, onPatch, onDelet
       {/* Details card (name + url) */}
       <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 10, padding: 16, margin: '18px 0', maxWidth: 680 }}>
         <div className="flex items-center justify-between" style={{ marginBottom: editing ? 14 : 0 }}>
-          <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)' }}>{t('webhooks.outgoing.detailsTitle')}</span>
+          <SectionTitle as="span">{t('webhooks.outgoing.detailsTitle')}</SectionTitle>
           {editing ? (
             <div style={{ display: 'flex', gap: 8 }}>
               <Button variant="secondary" onClick={() => { setForm(sub); setEditing(false) }}><X size={13} /> {t('common.cancel')}</Button>
@@ -157,7 +158,7 @@ export default function WebhookDetail({ subId, listRow, onBack, onPatch, onDelet
       {/* Event filter card */}
       <div style={{ maxWidth: 680 }}>
         <div className="flex items-center justify-between" style={{ marginBottom: 12 }}>
-          <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)' }}>{t('webhooks.outgoing.field.events')}</span>
+          <SectionTitle as="span">{t('webhooks.outgoing.field.events')}</SectionTitle>
           {/* Success fill needs its own on-* token — white only reaches ~3.3:1 there (WCAG audit 2026-08). */}
           <button onClick={saveEvents} disabled={!eventsDirty || savingEv}
             style={{ display: 'flex', alignItems: 'center', gap: 6, height: BTN_H, padding: '0 14px', fontSize: 13, fontWeight: 500, border: 'none', borderRadius: 8, cursor: eventsDirty && !savingEv ? 'pointer' : 'default', opacity: eventsDirty || savedEv ? 1 : 0.55, background: savedEv ? 'var(--color-success)' : 'var(--color-primary)', color: savedEv ? 'var(--color-on-success)' : 'var(--color-on-accent)' }}>

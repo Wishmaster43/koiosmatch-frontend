@@ -25,6 +25,7 @@ import { card, th as thBase, td as tdBase, numCell as numCellBase, notice } from
 import type { CSSProperties } from 'react'
 import type { operations } from '@/types/api-generated'
 import Button from '@/components/ui/Button'
+import { PageTitle } from '@/components/ui/typography'
 const th = thBase as CSSProperties
 const td = tdBase as CSSProperties
 const numCell = numCellBase as CSSProperties
@@ -158,7 +159,7 @@ export default function AdminInvoicesSettings() {
     <div style={{ maxWidth: 900 }}>
       <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 16, marginBottom: 20 }}>
         <div>
-          <h2 style={{ fontSize: 15, fontWeight: 600, color: 'var(--text)' }}>{t('adminInvoices.title')}</h2>
+          <PageTitle>{t('adminInvoices.title')}</PageTitle>
           <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>{t('adminInvoices.subtitle')}</p>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>

@@ -4,6 +4,7 @@ import { Download, Eye } from 'lucide-react'
 import { useDateFormat } from '@/lib/datetime'
 import DocPreviewModal from '@/components/drawer/DocPreviewModal'
 import { sectionTitle } from '@/components/ui/SectionCard'
+import { Caption } from '@/components/ui/typography'
 import { useCandidateCvDocument } from '../hooks/useCandidateCvDocument'
 import type { Id } from '@/types/common'
 
@@ -58,9 +59,9 @@ export default function CvBlock({ candidateId }: { candidateId: Id | null | unde
                   {cv.name || t('drawer.cv.title')}
                 </div>
                 {uploadedAt && (
-                  <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>
+                  <Caption as="div">
                     {t('drawer.cv.uploadedOn', { date: formatDateTime(uploadedAt) })}
-                  </div>
+                  </Caption>
                 )}
               </div>
               {/* Download — the same plain anchor + `download` attribute the candidate

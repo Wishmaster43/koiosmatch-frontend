@@ -6,6 +6,8 @@ import Spinner from '@/components/ui/Spinner'
 import AiGeneratedLabel from '@/components/ui/AiGeneratedLabel'
 import CalloutBox from '@/components/ui/CalloutBox'
 import Button from '@/components/ui/Button'
+// HUISSTIJL-1: the status chip line (11px/muted) is the shared Caption atom.
+import { Caption } from '@/components/ui/typography'
 import { useGenerateDescription } from './useGenerateDescription'
 import type { GenerateFormFields } from './useGenerateDescription'
 
@@ -50,11 +52,11 @@ export default function GenerateDescriptionFlow({ fields, onApply }: GenerateDes
         background: 'var(--surface)', display: 'flex', flexDirection: 'column', gap: 8 }}>
       {/* Header row: read-only transparency chip + close */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
-        <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>
+        <Caption as="div">
           {resolving && t('generate.resolving')}
           {!resolving && profile && t('generate.profileChip', { name: profile.name, specificity: profile.specificity })}
           {!resolving && resolveFailed && t('common:error.title')}
-        </div>
+        </Caption>
         <Button variant="ghost" iconOnly size="sm" onClick={closeFlow} aria-label={t('common:close')}>
           <X size={14} />
         </Button>

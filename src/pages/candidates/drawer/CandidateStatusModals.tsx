@@ -22,6 +22,7 @@ import CreatableSelect from '@/components/ui/CreatableSelect'
 import LookupIcon from '@/components/ui/LookupIcon'
 import { Z } from '@/lib/zIndexScale'
 import { BTN_H } from '@/config/buttonMetrics'
+import { Caption, GroupLabel } from '@/components/ui/typography'
 import type { VacancyOption } from '../hooks/useVacancyOptions'
 import Button from '@/components/ui/Button'
 
@@ -79,7 +80,7 @@ function MatchPickModal({
         )}
 
         {/* Or create a new match by picking a vacancy (G-2 direct match → POST /matches). */}
-        <div style={{ fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em', color: 'var(--text-muted)', margin: '2px 0 6px' }}>{t('drawer.placedOrNew')}</div>
+        <GroupLabel style={{ letterSpacing: '0.04em', margin: '2px 0 6px' }}>{t('drawer.placedOrNew')}</GroupLabel>
         <div style={{ marginBottom: 16 }}>
           <CreatableSelect value={newMatchVacancyId || null} allowCreate={false} clearable
             onChange={v => { setNewMatchVacancyId(v); if (v) setMatchChoice(null) }}
@@ -137,7 +138,7 @@ function StatusReasonModal({
             <input type="date" value={statusModal.date} onChange={e => setStatusModal(m => m && ({ ...m, date: e.target.value }))}
               style={{ padding: '7px 10px', fontSize: 12, border: '1px solid var(--border)', borderRadius: 7, outline: 'none' }} />
             {/* Return date is honestly optional — empty means "nog onbekend" (Danny 2026-07-06). */}
-            <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 4, fontStyle: 'italic' }}>{t('drawer.returnDateUnknownHint')}</div>
+            <Caption as="div" style={{ marginTop: 4, fontStyle: 'italic' }}>{t('drawer.returnDateUnknownHint')}</Caption>
           </div>
         )}
         {/* BTN_H (§4/§9): one explicit height for every text/action button, everywhere. */}

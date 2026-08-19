@@ -16,6 +16,7 @@ import { Search } from 'lucide-react'
 import FloatingPanel from '@/components/ui/FloatingPanel'
 import { WIDE_MODAL } from '@/components/ui/modalMetrics'
 import SoftChipJs from '@/components/ui/SoftChip'
+import { Caption } from '@/components/ui/typography'
 import type { Contact, Department } from '@/types/customer'
 import type { Id } from '@/types/common'
 
@@ -76,7 +77,7 @@ export default function ContactLinkPicker({ candidates, locations, departments, 
         <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text)' }}>{t('locations.detail.pickContactTitle')}</div>
           {/* Optional caller-supplied warning (e.g. "this repoints, it does not add a second site"). */}
-          {note && <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 2 }}>{note}</div>}
+          {note && <Caption as="div" style={{ marginTop: 2 }}>{note}</Caption>}
         </div>
       )}>
       {/* Search stays fixed above the scrolling list, mirrors SubEntityTab. */}
@@ -100,7 +101,7 @@ export default function ContactLinkPicker({ candidates, locations, departments, 
             <button key={String(c.id)} onClick={() => onPick(c.id as Id)} style={rowBtn}>
               <div style={{ minWidth: 0 }}>
                 <div style={{ color: 'var(--text)' }}>{c.name}</div>
-                <div style={{ color: 'var(--text-muted)', fontSize: 11, marginTop: 2 }}>{[c.role, c.email].filter(Boolean).join(' · ')}</div>
+                <Caption as="div" style={{ marginTop: 2 }}>{[c.role, c.email].filter(Boolean).join(' · ')}</Caption>
               </div>
               <div style={{ flexShrink: 0, maxWidth: '55%', textAlign: 'right' }}>
                 {hasLinks ? (
@@ -112,7 +113,7 @@ export default function ContactLinkPicker({ candidates, locations, departments, 
                     </div>
                   </>
                 ) : (
-                  <div style={{ fontSize: 11, fontStyle: 'italic', color: 'var(--text-muted)' }}>{t('locations.detail.pickContactNoLinks')}</div>
+                  <Caption as="div" style={{ fontStyle: 'italic' }}>{t('locations.detail.pickContactNoLinks')}</Caption>
                 )}
               </div>
             </button>

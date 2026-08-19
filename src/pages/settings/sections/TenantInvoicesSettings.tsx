@@ -23,6 +23,7 @@ import { card, th as thBase, td as tdBase, numCell as numCellBase, notice } from
 import type { CSSProperties } from 'react'
 import type { operations } from '@/types/api-generated'
 import Button from '@/components/ui/Button'
+import { PageTitle } from '@/components/ui/typography'
 const th = thBase as CSSProperties
 const td = tdBase as CSSProperties
 const numCell = numCellBase as CSSProperties
@@ -97,7 +98,7 @@ export default function TenantInvoicesSettings() {
   return (
     <div style={{ maxWidth: 720 }}>
       <div style={{ marginBottom: 20 }}>
-        <h2 style={{ fontSize: 15, fontWeight: 600, color: 'var(--text)' }}>{t('billing.invoices.title')}</h2>
+        <PageTitle>{t('billing.invoices.title')}</PageTitle>
         <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>{t('billing.invoices.desc')}</p>
       </div>
 

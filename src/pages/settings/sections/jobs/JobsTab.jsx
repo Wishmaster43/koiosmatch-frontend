@@ -12,6 +12,7 @@ import StatusPill from '@/components/ui/StatusPill'
 import { formatDT, formatDuration } from '@/components/reports/runFormat'
 import { useJobsList } from './useJobsList'
 import SearchSelect from '@/components/ui/SearchSelect'
+import { Mono } from '@/components/ui/typography'
 
 const STATE_COLOR = { pending: 'var(--text-muted)', reserved: 'var(--color-warning)' }
 
@@ -23,7 +24,7 @@ export default function JobsTab() {
     { key: 'queue', header: t('jobs.col.queue'), nowrap: true },
     { key: 'tenant_id', header: t('jobs.col.tenant'), nowrap: true,
       render: (r) => r.tenant_id === 'central' ? t('jobs.centralTenant') : r.tenant_id },
-    { key: 'job', header: t('jobs.col.job'), render: (r) => <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 12 }}>{r.job}</span> },
+    { key: 'job', header: t('jobs.col.job'), render: (r) => <Mono style={{ fontSize: 12 }}>{r.job}</Mono> },
     { key: 'attempts', header: t('jobs.col.attempts'), align: 'right' },
     { key: 'created_at', header: t('jobs.col.createdAt'), nowrap: true, render: (r) => formatDT(r.created_at) },
     { key: 'state', header: t('jobs.col.status'), nowrap: true,

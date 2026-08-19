@@ -16,6 +16,7 @@ import { Archive } from 'lucide-react'
 import FloatingPanel from '@/components/ui/FloatingPanel'
 import Spinner from '@/components/ui/Spinner'
 import { Z } from '@/lib/zIndexScale'
+import { Mono } from '@/components/ui/typography'
 import Button from '@/components/ui/Button'
 
 // Relation keys the backend's usageCounts() may send (location: 7 keys incl.
@@ -67,7 +68,7 @@ export default function InUseCountsDialog({ open, counts, onClose, onArchive, ar
           {rows.map(([key, n]) => (
             <div key={key} style={{ display: 'flex', justifyContent: 'space-between', gap: 12, fontSize: 13, color: 'var(--text)' }}>
               <span>{relationLabel(key)}</span>
-              <span style={{ fontWeight: 600, fontFamily: 'JetBrains Mono, monospace' }}>{n}</span>
+              <Mono style={{ fontWeight: 600 }}>{n}</Mono>
             </div>
           ))}
         </div>

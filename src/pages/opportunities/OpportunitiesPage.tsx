@@ -203,7 +203,7 @@ export default function OpportunitiesPage({ intent }: { intent?: unknown } = {})
           <div style={{ display: 'flex', alignItems: 'center', gap: 10,
             padding: '0 24px 12px', minHeight: 36, flexShrink: 0 }}>
             {/* BTN_H (§4/§9): one explicit height for every text/action button, everywhere. */}
-            <Button variant="primary" onClick={() => setAddOpen(true)}>
+            <Button variant="primary" size="md" onClick={() => setAddOpen(true)}>
               + {t('page.add')}
             </Button>
             <HeaderSearch key={searchEpoch} onSearch={setQuery} placeholder={t('page.searchPlaceholder')} width={280} />

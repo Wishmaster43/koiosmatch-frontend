@@ -9,6 +9,7 @@ import DataTable from '@/components/ui/DataTable'
 import StatusBadge from '@/components/ui/StatusBadge'
 import { useDateFormat } from '@/lib/datetime'
 import Button from '@/components/ui/Button'
+import { PageTitle } from '@/components/ui/typography'
 
 export default function WebhookList({ subs, loading, error, onReload, onOpen, onNew }) {
   const { t } = useTranslation('settings')
@@ -39,7 +40,7 @@ export default function WebhookList({ subs, loading, error, onReload, onOpen, on
       {/* Header: title + count, create button */}
       <div className="flex items-center justify-between" style={{ marginBottom: 18, gap: 16 }}>
         <div>
-          <h2 style={{ fontSize: 15, fontWeight: 600, color: 'var(--text)' }}>{t('webhooks.outgoing.title')}</h2>
+          <PageTitle>{t('webhooks.outgoing.title')}</PageTitle>
           <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>{t('webhooks.outgoing.subtitle')}</p>
         </div>
         {/* BTN_H (§4/§9): one explicit height for every text/action button, everywhere. */}

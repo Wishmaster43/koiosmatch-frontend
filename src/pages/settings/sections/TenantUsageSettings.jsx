@@ -11,6 +11,7 @@ import { useAuth } from '@/context/AuthContext'
 import SearchSelect from '@/components/ui/SearchSelect'
 import TenantUsageDetailsTable from './TenantUsageDetailsTable'
 import TenantUsageBreakdownTable from './TenantUsageBreakdownTable'
+import { Mono } from '@/components/ui/typography'
 
 const num = (v) => (v == null ? '—' : Number(v).toLocaleString('nl-NL'))
 
@@ -130,7 +131,7 @@ export default function TenantUsageSettings() {
                 <div key={c.key ?? i} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between',
                   padding: '10px 16px', borderTop: i ? '1px solid var(--border)' : 'none' }}>
                   <span style={{ fontSize: 13, color: 'var(--text)' }}>{CONNECTOR_LABELS[c.key] ?? c.key}</span>
-                  <span style={{ fontSize: 13, fontFamily: "'JetBrains Mono', monospace", color: 'var(--text)' }}>{num(c.usage)}</span>
+                  <Mono style={{ fontSize: 13, color: 'var(--text)' }}>{num(c.usage)}</Mono>
                 </div>
               ))}
           </div>

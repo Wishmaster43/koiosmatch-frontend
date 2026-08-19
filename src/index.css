@@ -106,6 +106,19 @@
   --sidebar-active: #F3F4F6;
   --sidebar-border: #F0F0F0;
 
+  /* ── PRIMAIR-VLAK-1 (Danny 19-08): THE action-button surface, as tokens.
+     Every accent action button (Button primary/soft, DrawerAddButton, the
+     ActionMenu/filter triggers, selected pills) reads THIS trio — so "alle
+     knoppen lichter" is one edit here (or, later, a Branding setting):
+       lighter tinted look =
+         --button-fill:   color-mix(in srgb, var(--color-primary) 12%, transparent);
+         --button-ink:    var(--color-primary-text);
+         --button-border: color-mix(in srgb, var(--color-primary) 35%, transparent);
+     Current stand (Danny 19-08): the SOLID tenant fill. */
+  --button-fill:   var(--color-primary);
+  --button-ink:    var(--color-on-accent);
+  --button-border: transparent;
+
   /* ── HUISSTIJL-1 scales (Danny 19-08: spacing/schaduw/z-index als tokens) ──
      SPACING: the 4px grid, named. Inline styles use these via var() or the
      lib/uiScale.ts constants; a bare pixel number outside the scale is drift. */

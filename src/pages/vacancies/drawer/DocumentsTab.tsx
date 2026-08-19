@@ -25,6 +25,8 @@ import DocumentRow from '@/pages/candidates/drawer/DocumentRow'
 import { docKey, docUrl, splitExt, DOC_GRID_COLUMNS } from '@/pages/candidates/drawer/documentHelpers'
 import type { DocItem } from '@/pages/candidates/drawer/documentHelpers'
 import Button from '@/components/ui/Button'
+// HUISSTIJL-1: the doc-type hint line (11px/muted) is the shared Caption atom.
+import { Caption } from '@/components/ui/typography'
 
 // A picked-but-not-yet-uploaded file, staged so its type can be chosen first.
 interface PendingDoc { file: File; objectUrl: string; name: string; size: string; type: string }
@@ -219,7 +221,7 @@ export default function DocumentsTab({ vacancy: v }: { vacancy: VacancyDetail })
           <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--text)', marginBottom: 6 }}>
             {pending.name} <span style={{ fontWeight: 400, color: 'var(--text-muted)' }}>({pending.size})</span>
           </div>
-          <div style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 6 }}>{t('documents.docType')}</div>
+          <Caption as="div" style={{ marginBottom: 6 }}>{t('documents.docType')}</Caption>
           {/* Soft-tint type chips (§4) — mirrors the customer DocumentsTab's picker. */}
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 10 }}>
             {docTypes.map(dt => {

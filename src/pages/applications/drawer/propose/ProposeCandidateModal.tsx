@@ -9,12 +9,12 @@ import RichTextEditor from '@/components/ui/RichTextEditor'
 import { BTN_H } from '@/config/buttonMetrics'
 import { fieldInputStyle } from '@/components/forms/fieldMetrics'
 import { contactOptionLabel } from '@/lib/contactLabel'
+import { Caption } from '@/components/ui/typography'
 import { useProposeForm } from './useProposeForm'
 import type { ApplicationDetail } from '@/types/application'
 import Button from '@/components/ui/Button'
 
 const sectionTitle = { fontSize: 12, fontWeight: 600, color: 'var(--text)', marginBottom: 6 } as const
-const muted = { fontSize: 11, color: 'var(--text-muted)' } as const
 // Canon field style (G33/fieldMetrics) — was its own padding-7/font-13/radius-8 copy.
 const inputBase = fieldInputStyle
 
@@ -113,9 +113,9 @@ export default function ProposeCandidateModal({ application: a, onClose }: Props
           <div>
             <div style={sectionTitle}>{t('propose.recipient')}</div>
             {form.contactsLoading ? (
-              <div style={muted}>{t('propose.loading')}</div>
+              <Caption as="div">{t('propose.loading')}</Caption>
             ) : contactOptions.length === 0 && !form.recipient ? (
-              <div style={muted}>{t('propose.noContacts')}</div>
+              <Caption as="div">{t('propose.noContacts')}</Caption>
             ) : (
               <CreatableSelect allowCreate={false} value={form.recipientContactId || null}
                 onChange={form.setRecipientContactId} options={contactOptions}
@@ -159,9 +159,9 @@ export default function ProposeCandidateModal({ application: a, onClose }: Props
                 {t('propose.variantFull')}
               </label>
             </div>
-            <div style={{ display: 'flex', gap: 5, marginTop: 6, fontSize: 11, color: 'var(--text-muted)' }}>
+            <Caption as="div" style={{ display: 'flex', gap: 5, marginTop: 6 }}>
               <Info size={12} style={{ flexShrink: 0, marginTop: 1 }} /> {t('propose.variantRedacted')}
-            </div>
+            </Caption>
           </div>
 
           {/* 4. Bericht — subject + the shared rich-text body, prefilled from the
@@ -187,10 +187,10 @@ export default function ProposeCandidateModal({ application: a, onClose }: Props
 
         {/* The honest line — Koios prepares the CV + message, it does not send them
             itself. Never a Verzenden button. */}
-        <div style={{ display: 'flex', gap: 6, marginTop: 16, padding: '8px 10px', borderRadius: 8, fontSize: 11, color: 'var(--text-muted)',
+        <Caption as="div" style={{ display: 'flex', gap: 6, marginTop: 16, padding: '8px 10px', borderRadius: 8,
           background: 'color-mix(in srgb, var(--color-primary) 6%, transparent)', border: '1px solid color-mix(in srgb, var(--color-primary) 20%, transparent)' }}>
           <Info size={13} style={{ flexShrink: 0, marginTop: 1 }} /> {t('propose.notSentYet')}
-        </div>
+        </Caption>
 
         {/* V-appdetail-5: on success, hand over the recorded proposal's own share
             link right here — a copy button, never the raw URL in a log/toast (§8). */}
@@ -210,7 +210,7 @@ export default function ProposeCandidateModal({ application: a, onClose }: Props
         )}
 
         {disabledText && (
-          <div style={{ marginTop: 8, fontSize: 11, color: 'var(--text-muted)' }}>{disabledText}</div>
+          <Caption as="div" style={{ marginTop: 8 }}>{disabledText}</Caption>
         )}
 
         <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, marginTop: 14 }}>

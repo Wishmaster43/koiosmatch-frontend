@@ -5,6 +5,8 @@ import { Edit2, Save, X, Trash2, ExternalLink } from 'lucide-react'
 import { useTextPopoutHost } from '@/hooks/useTextPopoutHost'
 import RichTextEditorJs from '@/components/ui/RichTextEditor'
 import SafeHtmlJs from '@/components/ui/SafeHtml'
+// HUISSTIJL-1: the shared uppercase group-label atom (identity-only swap).
+import { GroupLabel } from '@/components/ui/typography'
 import ProfilePersonalTab from './ProfilePersonalTab'
 import ProfileAddressTab from './ProfileAddressTab'
 import ProfileContactTab from './ProfileContactTab'
@@ -111,7 +113,9 @@ export default function ProfileTab({ c, onEditSave, autoEditSignal, onContactMom
       {/* ── Profile text — same rich editor as Notes (formatting + HTML toggle + expand) ── */}
       <div>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
-          <span style={{ fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em', color: 'var(--text-muted)' }}>{t('profile.summary')}</span>
+          {/* HUISSTIJL-1: identical 11/600/uppercase render, letterSpacing kept at
+              this block's own 0.04em (atom default is 0.05em) via the style override. */}
+          <GroupLabel as="span" style={{ letterSpacing: '0.04em' }}>{t('profile.summary')}</GroupLabel>
           <div style={{ display: 'flex', gap: 4, alignItems: 'center' }}>
             {/* Clear the profile text (edit mode only) — through the same publish
                 path as typing, so a popped-out window clears with it.

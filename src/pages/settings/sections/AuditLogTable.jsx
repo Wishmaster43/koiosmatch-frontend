@@ -11,6 +11,7 @@ import { ChevronUp, ChevronDown as ChevronDn, Eye } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { LogBadge, isAccessEvent, entityLabel } from './auditShared'
 import { buildDiffCells } from './auditDiffCells'
+import { Caption } from '@/components/ui/typography'
 
 // Sort chevron indicator for a column header.
 function SortIcon({ col, sortCol, sortDir }) {
@@ -110,7 +111,7 @@ export default function AuditLogTable({ rows, sortCol, sortDir, onSort, onRowCli
                   {entry.subject_type ? (
                     <>
                       <div style={{ fontWeight: 500, color: 'var(--text)' }}>{entityLabel(entry.subject_type, t)}</div>
-                      {entry.subject_label && <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>{entry.subject_label}</div>}
+                      {entry.subject_label && <Caption as="div">{entry.subject_label}</Caption>}
                     </>
                   ) : <span style={{ color: 'var(--text-muted)' }}>—</span>}
                 </td>

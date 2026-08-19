@@ -297,7 +297,7 @@ export default function ApplicationsPage({ intent }: { intent?: unknown } = {}) 
           padding: '0 24px 12px', minHeight: 36, flexShrink: 0 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
             {/* BTN_H (§4/§9): one explicit height for every text/action button, everywhere. */}
-            <Button variant="primary" onClick={() => setAddOpen(true)}>
+            <Button variant="primary" size="md" onClick={() => setAddOpen(true)}>
               <Plus size={14} /> {t('add.button')}
             </Button>
             {/* Shared header search (T10) — debounced, client-side text filter. */}

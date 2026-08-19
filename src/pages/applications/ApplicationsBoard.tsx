@@ -6,6 +6,9 @@ import { CheckCircle2 } from 'lucide-react'
 import Avatar from '@/components/ui/Avatar'
 import EntityLink from '@/components/ui/EntityLink'
 import KoiosAiMark from '@/components/ui/KoiosAiMark'
+// HUISSTIJL-1: shared typography atoms — the column header (13/600) and the
+// card's muted date line (11/muted) are exact matches for the house scale.
+import { SectionTitle, Caption } from '@/components/ui/typography'
 import type { Application } from '@/types/application'
 import type { Id } from '@/types/common'
 import { useDragAutoScroll } from '@/lib/useDragAutoScroll'
@@ -78,7 +81,7 @@ function BoardCard({ app, onDragStart, onClick, selected }: {
       {/* Footer: owner + date (raw ISO from the API → locale format, Danny 2026-07-13) */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <Avatar initials={app.owner?.initials} size={18} color={app.owner?.color} />
-        <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>{formatDate(app.created)}</span>
+        <Caption>{formatDate(app.created)}</Caption>
       </div>
     </div>
   )
@@ -97,7 +100,7 @@ function BoardColumn({ phase, items, onDragStart, onDrop, onDragOver, onSelect, 
     <div style={{ width: 260, flexShrink: 0, display: 'flex', flexDirection: 'column' }}
       onDrop={e => onDrop(e, phase.key)} onDragOver={onDragOver}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
-        <span style={{ fontWeight: 600, fontSize: 13, color: 'var(--text)' }}>{phase.label}</span>
+        <SectionTitle as="span">{phase.label}</SectionTitle>
         {/* F7 (audit R1): color-mix instead of a hex-concat tint (`color + '20'`
             silently breaks once `phase.color` is a `var(--…)` token, not a hex —
             color-mix works for both). */}

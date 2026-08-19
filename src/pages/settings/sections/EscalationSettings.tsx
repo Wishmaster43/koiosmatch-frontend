@@ -26,6 +26,7 @@ import { fieldInputStyle } from '@/components/forms/fieldMetrics'
 import SearchSelect from '@/components/ui/SearchSelect'
 import { useUsers } from '@/lib/queries'
 import { useAssignableRoles } from '@/pages/users/hooks/useAssignableRoles'
+import { Caption } from '@/components/ui/typography'
 
 // The four stilstand signals the backend escalates today (11-escalatie 3b).
 // Copied verbatim from the changelog — never invent a fifth here without a
@@ -54,7 +55,7 @@ function EscalationRow({ signal, days, target, onDays, onTarget, options, error 
     <SettingCard style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
       <div>
         <div style={{ fontSize: 13, fontWeight: 500, color: 'var(--text)' }}>{t(`escalation.signal.${signal}.title`)}</div>
-        <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 2 }}>{t(`escalation.signal.${signal}.desc`)}</div>
+        <Caption as="div" style={{ marginTop: 2 }}>{t(`escalation.signal.${signal}.desc`)}</Caption>
       </div>
       <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 16 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
@@ -74,7 +75,7 @@ function EscalationRow({ signal, days, target, onDays, onTarget, options, error 
             style={{ ...fieldInputStyle, width: 90, textAlign: 'right' }} />
           {/* Unit suffix (Danny 13-08: "er staat niet bij wat het is, alleen een
               getal") — the number is DAYS, and the field must say so itself. */}
-          <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>{t('escalation.daysUnit')}</span>
+          <Caption>{t('escalation.daysUnit')}</Caption>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
           <span style={{ fontSize: 11, fontWeight: 500, color: 'var(--text-muted)' }}>{t('escalation.targetLabel')}</span>

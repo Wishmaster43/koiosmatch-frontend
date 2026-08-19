@@ -7,6 +7,7 @@
 import { useTranslation } from 'react-i18next'
 import { Briefcase, Info } from 'lucide-react'
 import { useExperienceLabel, type LinkableExperience } from './referenceExperienceLink'
+import { Caption } from '@/components/ui/typography'
 
 /** Read-only line for a reference's linked work experience: "werkgever · functie ·
  *  periode". Same muted tone as the reference-letter link right above it — linking
@@ -38,9 +39,9 @@ export function NoExperiencesNotice() {
         borderRadius: 8, background: 'color-mix(in srgb, var(--text-muted) 8%, transparent)',
       }}>
       <Info size={13} style={{ color: 'var(--text-muted)', flexShrink: 0, marginTop: 1 }} aria-hidden="true" />
-      <span style={{ fontSize: 11, fontStyle: 'italic', color: 'var(--text-muted)' }}>
+      <Caption style={{ fontStyle: 'italic' }}>
         {t('references.noExperiencesToLink')}
-      </span>
+      </Caption>
     </div>
   )
 }

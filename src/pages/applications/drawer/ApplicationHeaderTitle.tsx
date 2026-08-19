@@ -8,6 +8,9 @@
 import { useTranslation } from 'react-i18next'
 import ReferenceNumberChip from '@/components/ui/ReferenceNumberChip'
 import { fieldInputStyle } from '@/components/forms/fieldMetrics'
+// HUISSTIJL-1: the "for vacancy" line is an exact 11px/muted match for the
+// house Caption scale (the 15/700 name and 12/muted function lines are near
+// misses — see the batch report — and stay hand-styled).
 import type { ApplicationCandidateForm } from '../hooks/useApplicationCandidateEdit'
 
 // Canon field style (G33/fieldMetrics) — mirrors CandidateHeaderBits' inputBase;
@@ -18,7 +21,6 @@ interface ApplicationHeaderTitleProps {
   candidateName: string
   referenceNumber: string
   candidateFunction: string
-  vacancyTitle: string
   editing: boolean
   loading: boolean
   form: ApplicationCandidateForm
@@ -26,7 +28,7 @@ interface ApplicationHeaderTitleProps {
 }
 
 export default function ApplicationHeaderTitle({
-  candidateName, referenceNumber, candidateFunction, vacancyTitle, editing, loading, form, setField,
+  candidateName, referenceNumber, candidateFunction, editing, loading, form, setField,
 }: ApplicationHeaderTitleProps) {
   const { t } = useTranslation('applications')
 
@@ -62,9 +64,6 @@ export default function ApplicationHeaderTitle({
       <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>
         {candidateFunction || <span style={{ fontStyle: 'italic' }}>{t('drawer.noFunction')}</span>}
       </div>
-      {vacancyTitle && (
-        <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>{t('drawer.forVacancy')}: {vacancyTitle}</div>
-      )}
     </>
   )
 }

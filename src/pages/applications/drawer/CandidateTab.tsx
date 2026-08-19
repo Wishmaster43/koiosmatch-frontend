@@ -15,6 +15,7 @@ import { PreferencesTab, ZzpTab } from '@/pages/candidates/drawer/PreferencesZzp
 import CommunicationTab from '@/pages/candidates/drawer/CommunicationTab'
 import DocumentsSection from '@/pages/candidates/drawer/DocumentsSection'
 import StatisticsTab from '@/pages/candidates/drawer/StatisticsTab'
+import { SectionTitle } from '@/components/ui/typography'
 import { rememberReturnTab } from './constants'
 import type { Candidate } from '@/types/candidate'
 import type { ApplicationDetail } from '@/types/application'
@@ -130,9 +131,9 @@ export default function CandidateTab({ application: a }: { application: Applicat
           candidate's own status lives on their own drawer, one "Open kandidaat" away. */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8, marginBottom: 8 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, minWidth: 0 }}>
-          <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+          <SectionTitle as="span" style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
             {a.candidate?.name ?? a.candidateName}
-          </span>
+          </SectionTitle>
         </div>
         {/* S14/S22: stash the current subtab so browser BACK from the full candidate
             page reopens THIS application's drawer on the Kandidaat tab again.

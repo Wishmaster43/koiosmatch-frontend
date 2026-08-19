@@ -12,6 +12,7 @@ import { useAuth } from '@/context/AuthContext'
 import { useDateFormat } from '@/lib/datetime'
 import AddWhatsAppConnectionForm from './whatsapp/AddWhatsAppConnectionForm'
 import Button from '@/components/ui/Button'
+import { Caption } from '@/components/ui/typography'
 
 // Phone-number quality ratings → colour. Label = t('whatsapp.quality<KEY>').
 const QUALITY_META = {
@@ -214,16 +215,16 @@ export default function WhatsAppSettings() {
                     <span style={{ textTransform: 'capitalize', marginRight: 8 }}>{connection.provider}</span>
                   )}
                   {connection.waba_id && (
-                    <span style={{ fontFamily: 'monospace', fontSize: 11, color: 'var(--text-muted)' }}>
+                    <Caption style={{ fontFamily: 'monospace' }}>
                       WABA: {connection.waba_id}
-                    </span>
+                    </Caption>
                   )}
                 </div>
               </div>
               {connection.last_checked_at && (
-                <div style={{ fontSize: 11, color: 'var(--text-muted)', flexShrink: 0 }}>
+                <Caption as="div" style={{ flexShrink: 0 }}>
                   {t('whatsapp.checked')} {formatDate(connection.last_checked_at)}
-                </div>
+                </Caption>
               )}
               {/* CONN-CHECK-1: the one action this card was missing — re-verify the
                   token against Meta (and thereby activate an inactive connection).
@@ -290,11 +291,11 @@ export default function WhatsAppSettings() {
                     </span>
                   )}
                   {p.code_verification_status && (
-                    <span style={{ fontSize: 11, color: 'var(--text-muted)', background: 'var(--hover-bg)',
+                    <Caption style={{ background: 'var(--hover-bg)',
                                    borderRadius: 999, padding: '2px 10px', flexShrink: 0,
                                    border: '1px solid var(--border)' }}>
                       {p.code_verification_status}
-                    </span>
+                    </Caption>
                   )}
                 </div>
               )
@@ -372,10 +373,10 @@ export default function WhatsAppSettings() {
                           {tpl.name}
                         </div>
                         {bodyText && (
-                          <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 2,
+                          <Caption as="div" style={{ marginTop: 2,
                                          maxWidth: 320, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                             {bodyText}
-                          </div>
+                          </Caption>
                         )}
                       </td>
                       <td style={{ padding: '11px 14px', fontSize: 12, color: 'var(--text-muted)' }}>

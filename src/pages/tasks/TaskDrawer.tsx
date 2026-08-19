@@ -159,7 +159,9 @@ export default function TaskDrawer({ task, onClose, expanded, onToggleExpand, on
       tabs={tabIds.map(id => ({ id, label: t(`drawer.tabs.${id}`), render: () => renderTab(id) }))}
       header={() => (
         <EntityHeader
-          label={t('drawer.label')}
+          // TITEL-CHIP-1 (Danny 19-08): the status badge IS the title — the static
+          // entity word doubled with the badge beside the name.
+          label={<TitleBadge label={task.statusLabel} color={task.statusColor} />}
           expanded={expanded} onToggleExpand={onToggleExpand} onClose={onClose}
           avatar={{ initials: initialsOf(task.title, 'T'), soft: true, color: task.statusColor }}
           renderTitle={() => editingTitle ? (
@@ -176,7 +178,6 @@ export default function TaskDrawer({ task, onClose, expanded, onToggleExpand, on
                 <ReferenceNumberChip value={task.referenceNumber} />
                 {/* Status badge — colour-coded, read-only (mirrors the candidate phase badge,
                     §3A(c)); the status meta picker below still handles the actual change. */}
-                <TitleBadge label={task.statusLabel} color={task.statusColor} />
               </div>
               <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{task.typeLabel || '—'}</div>
             </>

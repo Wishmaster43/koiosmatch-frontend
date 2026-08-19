@@ -24,6 +24,7 @@ import { useCustomFields } from '@/lib/useCustomFields'
 import { PermissionToggle } from '@/pages/settings/components/SettingsControls'
 import CollapsibleFieldsBlock from './CollapsibleFieldsBlock'
 import type { PhaseColumn } from './RequiredFieldsGroup'
+import { Caption } from '@/components/ui/typography'
 
 export default function CandidateCustomRequiredFields({ phases }: { phases: PhaseColumn[] }) {
   const { t } = useTranslation(['settings', 'candidates', 'common'])
@@ -104,9 +105,9 @@ export default function CandidateCustomRequiredFields({ phases }: { phases: Phas
                       {f.label}
                       {/* Honest note instead of toggles that cannot change anything. */}
                       {f.required_always && (
-                        <span style={{ display: 'block', fontSize: 11, color: 'var(--text-muted)', fontStyle: 'italic' }}>
+                        <Caption style={{ display: 'block', fontStyle: 'italic' }}>
                           {t('requiredFields.customAlwaysRequired')}
-                        </span>
+                        </Caption>
                       )}
                     </td>
                     {phases.map(p => (

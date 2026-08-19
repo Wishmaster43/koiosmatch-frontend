@@ -17,6 +17,7 @@ import { useTranslation } from 'react-i18next'
 import { useAllSettings, saveSettingsKeys, invalidateAllSettingsCache } from '@/lib/settings/useAllSettings'
 import { useNumberingEntities } from '@/lib/useNumberingEntities'
 import { notifyError } from '@/lib/notify'
+import { PageTitle, Caption } from '@/components/ui/typography'
 
 const cellInput = {
   height: 32, padding: '0 8px', fontSize: 13, color: 'var(--text)', boxSizing: 'border-box',
@@ -93,10 +94,10 @@ export default function NumberingSettings() {
 
   return (
     <div style={{ maxWidth: 640 }}>
-      <div style={{ fontSize: 15, fontWeight: 600, color: 'var(--text)', marginBottom: 4 }}>{t('numbering.title')}</div>
+      <PageTitle as="div" style={{ marginBottom: 4 }}>{t('numbering.title')}</PageTitle>
       <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 6 }}>{t('numbering.subtitle')}</div>
       {/* Hint: changes only affect NEW numbers — existing reference numbers never change. */}
-      <div style={{ fontSize: 11, color: 'var(--text-muted)', fontStyle: 'italic', marginBottom: 14 }}>{t('numbering.hint')}</div>
+      <Caption as="div" style={{ fontStyle: 'italic', marginBottom: 14 }}>{t('numbering.hint')}</Caption>
       <div style={{ border: '1px solid var(--border)', borderRadius: 10, overflow: 'hidden' }}>
         <table style={{ width: '100%', borderCollapse: 'collapse' }}>
           <thead>
@@ -119,7 +120,7 @@ export default function NumberingSettings() {
           file header) — a real backend outage still lands on the seed above, never
           a blank table. */}
       {entitiesLoading && (
-        <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 8 }}>{t('common.loading')}</div>
+        <Caption as="div" style={{ marginTop: 8 }}>{t('common.loading')}</Caption>
       )}
     </div>
   )

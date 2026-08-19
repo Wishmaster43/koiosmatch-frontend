@@ -109,14 +109,14 @@ export function CandidateHeaderActions({ c, isEntryPhase, nextPhase, converting,
   return (
     <>
       {/* Entry phase (Lead) → prominent convert (CV is illogical for a lead); else → download CV.
-          size="md" (§4/§9, KANDIDAAT-100 #50): same explicit height as every other text/action
-          button — this was the exact "Converteer naar Kandidaat" vs "+ Kandidaat" mismatch Danny flagged. */}
+          size="sm" (Danny 19-08): flush with the pencil/save trio beside it — md
+          towered 6px over its own row. */}
       {(isEntryPhase && nextPhase) ? (
-        <Button variant="primary" size="md" onClick={onConvert}>
+        <Button variant="primary" size="sm" onClick={onConvert}>
           <UserCheck size={11} />{t('drawer.convertTo', { phase: nextPhase.label })}
         </Button>
       ) : (
-        <Button variant="primary" size="md" disabled={cvGenerating || converting} onClick={downloadCv}>
+        <Button variant="primary" size="sm" disabled={cvGenerating || converting} onClick={downloadCv}>
           <Download size={11} />{cvGenerating ? t('drawer.generating') : t('drawer.downloadCv')}
         </Button>
       )}

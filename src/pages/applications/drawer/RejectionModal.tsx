@@ -7,6 +7,7 @@ import KoiosAiMark from '@/components/ui/KoiosAiMark'
 import CreatableSelect from '@/components/ui/CreatableSelect'
 import RichTextEditor from '@/components/ui/RichTextEditor'
 import SafeHtml from '@/components/ui/SafeHtml'
+import { Caption } from '@/components/ui/typography'
 import type { ApplicationDetail } from '@/types/application'
 import type { Id } from '@/types/common'
 import Button from '@/components/ui/Button'
@@ -119,9 +120,9 @@ export default function RejectionModal({ application: a, onCancel, onConfirm, su
               <div style={{ flex: 1, minWidth: 0 }}>
                 <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--color-primary-text)' }}>{t('rejection.aiAdvice')}</div>
                 {a.ai.advice_reason && <div style={{ fontSize: 12, color: 'var(--text)', marginTop: 2 }}>{a.ai.advice_reason}</div>}
-                <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 3 }}>
+                <Caption as="div" style={{ marginTop: 3 }}>
                   {a.ai.auto_reject_eligible ? t('rejection.aiAuto') : t('rejection.aiConfirm')}
-                </div>
+                </Caption>
               </div>
             </div>
           )}
@@ -129,7 +130,7 @@ export default function RejectionModal({ application: a, onCancel, onConfirm, su
           {/* Reason — searchable CreatableSelect (S8), allowCreate off: a rejection
               reason is a tenant lookup, picked never free-typed here. */}
           <div>
-            <div style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 5 }}>{t('rejection.reason')}</div>
+            <Caption as="div" style={{ marginBottom: 5 }}>{t('rejection.reason')}</Caption>
             <CreatableSelect allowCreate={false} value={reasonId || null} onChange={setReasonId}
               placeholder={t('rejection.reasonPlaceholder')}
               options={reasons.map(r => ({ value: String(r.id ?? ''), label: r.name ?? r.label ?? '' }))} />
@@ -140,7 +141,7 @@ export default function RejectionModal({ application: a, onCancel, onConfirm, su
               rich-text editor (S9, house rule), never a bare textarea. */}
           <div>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 5 }}>
-              <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>{t('rejection.note')}</span>
+              <Caption>{t('rejection.note')}</Caption>
               {noteEditing ? (
                 <div style={{ display: 'flex', gap: 4 }}>
                   <Button variant="primary" iconOnly size="sm" onClick={saveNote} title={t('common:save')} aria-label={t('common:save')}><Save size={13} /></Button>

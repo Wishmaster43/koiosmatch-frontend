@@ -16,6 +16,7 @@ import type { Role, PermissionsByGroup, CreateRoleBody } from './rolesTypes'
 import Button from '@/components/ui/Button'
 import Spinner from '@/components/ui/Spinner'
 import { tintBg, tintBorder } from '@/lib/tint'
+import { PageTitle } from '@/components/ui/typography'
 
 export default function RolesSettings() {
   const { t } = useTranslation('settings')
@@ -87,7 +88,7 @@ export default function RolesSettings() {
     <div>
       <div className="flex items-center justify-between mb-5">
         <div>
-          <h2 style={{ fontSize: 15, fontWeight: 600, color: 'var(--text)' }}>{t('roles.title')}</h2>
+          <PageTitle>{t('roles.title')}</PageTitle>
           <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>{t('roles.subtitle')}</p>
         </div>
         <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>

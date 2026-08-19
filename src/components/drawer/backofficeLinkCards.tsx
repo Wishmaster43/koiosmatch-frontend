@@ -21,11 +21,13 @@ import type { BackofficeLink } from '@/lib/backofficeLink'
 const mutedItalic: CSSProperties = { fontSize: 12, fontStyle: 'italic', color: 'var(--text-muted)', margin: 0 }
 const errorLine: CSSProperties = { fontSize: 11, color: 'var(--color-danger)', margin: 0 }
 const monoText: CSSProperties = { fontFamily: 'JetBrains Mono, monospace', fontSize: 12, color: 'var(--text)' }
+// PRIMAIR-VLAK-1 (Danny 19-08 op deze knop: "die ook!!"): action buttons read
+// the button trio — one token flip restyles them with every other accent action.
 const actionBtn = (disabled: boolean): CSSProperties => ({
   display: 'inline-flex', alignItems: 'center', gap: 5, padding: '4px 10px',
-  fontSize: 11, fontWeight: 500, borderRadius: 7, border: '1px solid var(--border)',
-  cursor: disabled ? 'not-allowed' : 'pointer', background: 'var(--surface)',
-  color: 'var(--text)', opacity: disabled ? 0.6 : 1, flexShrink: 0,
+  fontSize: 11, fontWeight: 500, borderRadius: 7, border: '1px solid var(--button-border)',
+  cursor: disabled ? 'not-allowed' : 'pointer', background: 'var(--button-fill)',
+  color: 'var(--button-ink)', opacity: disabled ? 0.6 : 1, flexShrink: 0,
 })
 
 // Small brand icon, fixed at a 16px footprint in every card header (never

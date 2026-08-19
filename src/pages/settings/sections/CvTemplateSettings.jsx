@@ -18,6 +18,7 @@ import { fieldInputStyle } from '@/components/forms/fieldMetrics'
 import { PREVIEW_CANDIDATE } from './cvTemplate/previewCandidate'
 import CvHtmlPreview from './cvTemplate/CvHtmlPreview'
 import CvSectionList from './cvTemplate/CvSectionList'
+import { Caption } from '@/components/ui/typography'
 
 export default function CvTemplateSettings() {
   const { settings, save, reset } = useCvSettings()
@@ -160,7 +161,7 @@ export default function CvTemplateSettings() {
         <div>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
             <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--text)' }}>{t('cvTemplate.preview')}</span>
-            <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>{t('cvTemplate.previewHint')}</span>
+            <Caption>{t('cvTemplate.previewHint')}</Caption>
           </div>
           <CvHtmlPreview settings={settingsWithBrand} t={tCv} />
         </div>

@@ -46,7 +46,7 @@ export default function VacanciesToolbar({
         {selectedCount > 0 ? bulkBar : (
           <>
             {/* BTN_H (§4/§9): one explicit height for every text/action button, everywhere. */}
-            <Button variant="primary" onClick={onAddOpen}>
+            <Button variant="primary" size="md" onClick={onAddOpen}>
               + {t('page.add')}
             </Button>
             {/* EXCEL-VACATURES-1 (Danny 14-08, screenshot: "Excel importeren moet in de

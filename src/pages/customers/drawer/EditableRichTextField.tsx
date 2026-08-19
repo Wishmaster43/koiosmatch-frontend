@@ -17,6 +17,7 @@ import RichTextEditor from '@/components/ui/RichTextEditor'
 import SafeHtml from '@/components/ui/SafeHtml'
 import Button from '@/components/ui/Button'
 import { useTextPopoutHost } from '@/hooks/useTextPopoutHost'
+import { GroupLabel } from '@/components/ui/typography'
 import type { PopoutEntity, PopoutTextField } from '@/lib/secondScreen'
 import type { GenerateEntity } from '@/components/ui/richtext/richTextAssistApi'
 
@@ -84,7 +85,7 @@ export default function EditableRichTextField({ label, value, onSave, popout, as
   return (
     <div>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
-        <span style={{ fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em', color: 'var(--text-muted)' }}>{label}</span>
+        <GroupLabel as="span" style={{ letterSpacing: '0.04em' }}>{label}</GroupLabel>
         <div style={{ display: 'flex', gap: 4, alignItems: 'center' }}>
           {/* Clear the text (edit mode only) — same spot as the candidate profile text. */}
           {editing && (

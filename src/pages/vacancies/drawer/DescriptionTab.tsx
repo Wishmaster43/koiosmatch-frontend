@@ -4,6 +4,8 @@ import { Edit2, Save, X, Trash2, ExternalLink } from 'lucide-react'
 import RichTextEditorJs from '@/components/ui/RichTextEditor'
 import SafeHtmlJs from '@/components/ui/SafeHtml'
 import Button from '@/components/ui/Button'
+// HUISSTIJL-1: the group label (11/600/uppercase/muted) is the shared GroupLabel atom.
+import { GroupLabel } from '@/components/ui/typography'
 import { useVacancyDescription } from '../hooks/useVacancyDescription'
 import type { VacancyDetail } from '@/types/vacancy'
 import type { Id } from '@/types/common'
@@ -15,7 +17,6 @@ const SafeHtml = SafeHtmlJs as unknown as ComponentType<AnyProps>
 type UpdateFn = (id: Id | undefined, patch: Record<string, unknown>) => void
 
 const blockStyle: CSSProperties = { borderRadius: 10, overflow: 'hidden', border: '1px solid var(--border)', background: 'var(--surface)' }
-const groupTitle: CSSProperties = { fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em', color: 'var(--text-muted)' }
 
 /**
  * DescriptionTab — the vacancy description as its OWN drawer main-tab (Danny
@@ -51,7 +52,7 @@ export default function DescriptionTab({ vacancy: v, onUpdate }: { vacancy: Vaca
   return (
     <div>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
-        <span style={groupTitle}>{t('details.description')}</span>
+        <GroupLabel as="span" style={{ letterSpacing: '0.04em' }}>{t('details.description')}</GroupLabel>
         <div style={{ display: 'flex', gap: 4, alignItems: 'center' }}>
           {/* V-desc-1: second screen — same icon + footprint the candidate
               profile-text pop-out uses, in this block's own title row. */}

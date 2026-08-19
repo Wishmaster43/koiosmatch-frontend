@@ -35,6 +35,7 @@ import { Z } from '@/lib/zIndexScale'
 import { fieldInputStyle } from '@/components/forms/fieldMetrics'
 import { CONTACTS_CHANGED_EVENT } from '../hooks/useCustomerContacts'
 import { contactOptionLabel } from '@/lib/contactLabel'
+import { Caption, Mono } from '@/components/ui/typography'
 import type { Contact } from '@/types/customer'
 import type { Id } from '@/types/common'
 import Button from '@/components/ui/Button'
@@ -146,8 +147,8 @@ export default function MergeContactModal({ customerId, current, others, onClose
                 <button key={String(c.id)} type="button" onClick={() => setOther(c)}
                   style={{ textAlign: 'left', padding: '8px 10px', borderRadius: 8, border: '1px solid var(--border)', background: 'var(--surface)', cursor: 'pointer' }}>
                   <span style={{ fontSize: 12, fontWeight: 500, color: 'var(--text)' }}>{contactOptionLabel(c)}</span>
-                  <span style={{ fontSize: 11, color: 'var(--text-muted)', marginLeft: 8, fontFamily: "'JetBrains Mono', monospace" }}>{c.code ?? ''}</span>
-                  {c.email && <span style={{ fontSize: 11, color: 'var(--text-muted)', marginLeft: 8 }}>{c.email}</span>}
+                  <Mono style={{ fontSize: 11, color: 'var(--text-muted)', marginLeft: 8 }}>{c.code ?? ''}</Mono>
+                  {c.email && <Caption style={{ marginLeft: 8 }}>{c.email}</Caption>}
                 </button>
               ))}
             </div>

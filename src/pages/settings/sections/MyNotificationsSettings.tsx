@@ -51,6 +51,7 @@ import Toggle from '@/components/ui/Toggle'
 import { isSupported as isPushSupported, permissionState, isSubscribed, subscribe, unsubscribe } from '@/lib/pushSubscription'
 import { SettingCardList, SettingRow, SkeletonRows } from '../components/SettingsKit'
 import { hasNoEmitterYet } from '../lib/notificationContexts'
+import { PageTitle } from '@/components/ui/typography'
 
 // The API's tri-state per context: null = inherit the tenant default, true/false
 // = an explicit personal override. A distinct type from plain boolean so a caller
@@ -157,7 +158,7 @@ export default function MyNotificationsSettings() {
   return (
     <div style={{ maxWidth: 640 }}>
       <div style={{ marginBottom: 20 }}>
-        <h2 style={{ fontSize: 15, fontWeight: 600, color: 'var(--text)' }}>{t('notifications.my.title')}</h2>
+        <PageTitle>{t('notifications.my.title')}</PageTitle>
         <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>{t('notifications.my.subtitle')}</p>
       </div>
 

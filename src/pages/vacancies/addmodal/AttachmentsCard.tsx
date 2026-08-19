@@ -5,6 +5,8 @@ import { FileText, X } from 'lucide-react'
 import CollapsibleRichText from '@/components/ui/CollapsibleRichText'
 import DrawerAddButton from '@/components/drawer/DrawerAddButton'
 import { cardBox } from '@/components/ui/modalCards'
+// HUISSTIJL-1: the two uppercase 11px group labels are the shared GroupLabel atom.
+import { GroupLabel } from '@/components/ui/typography'
 import type { PendingFile } from './usePostCreateAttachments'
 
 interface Props {
@@ -45,9 +47,9 @@ export default function AttachmentsCard({ files, onAddFile, onRemoveFile, noteTe
       {/* Documents — picked now, uploaded right after Create returns the id. */}
       <div>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
-          <span style={{ fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em', color: 'var(--text-muted)' }}>
+          <GroupLabel as="span" style={{ letterSpacing: '0.04em' }}>
             {t('drawer.tabs.documents')}
-          </span>
+          </GroupLabel>
           {/* S-add-1: the shared DrawerAddButton (short variant, no "documents"
               repeat — the card title already names the entity) replaces the old
               bare coloured text link. */}
@@ -72,9 +74,9 @@ export default function AttachmentsCard({ files, onAddFile, onRemoveFile, noteTe
 
       {/* Note — its own block, never merged with the Vacaturetekst above. */}
       <div>
-        <div style={{ fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em', color: 'var(--text-muted)', marginBottom: 6 }}>
+        <GroupLabel style={{ letterSpacing: '0.04em', marginBottom: 6 }}>
           {t('modal.attachments.noteLabel')}
-        </div>
+        </GroupLabel>
         {/* ACTIONS-SCOPE-DEFAULT-FLIP: this note reads as a conversation (like a
             NotesTab note), not a description — keep all three Koios modes,
             including Actiepunten, explicitly. */}

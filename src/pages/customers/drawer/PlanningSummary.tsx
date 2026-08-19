@@ -10,6 +10,7 @@ import { Users } from 'lucide-react'
 import { useAuth } from '@/context/AuthContext'
 import { useDateFormat } from '@/lib/datetime'
 import { useCustomerPlanning } from '../hooks/useCustomerDrawerData'
+import { Caption } from '@/components/ui/typography'
 import type { Id } from '@/types/common'
 
 const Muted = ({ text }: { text: ReactNode }) => <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{text}</div>
@@ -43,7 +44,7 @@ export default function PlanningSummary({ customerId, params }: { customerId: Id
         </div>
         <div>
           <div style={{ fontSize: 22, fontWeight: 700, color: 'var(--text)', lineHeight: 1 }}>{activeNow}</div>
-          <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 3 }}>{t('planning.activeNow')} · {t('planning.activeNowSub')}</div>
+          <Caption as="div" style={{ marginTop: 3 }}>{t('planning.activeNow')} · {t('planning.activeNowSub')}</Caption>
         </div>
       </div>
 

@@ -25,6 +25,7 @@ import {
 } from '@/pages/reports/kpiCatalog'
 import type { ReportKpiScopeId } from '@/pages/reports/kpiCatalog'
 import { resolveReportKpiOrder } from '@/pages/reports/resolveReportKpiOrder'
+import { Caption } from '@/components/ui/typography'
 
 // Only scopes with a known catalogue (axis or fixed) get a block — a scope
 // without a ReportKpiBand strip has nothing to configure here. Scopes are the
@@ -122,7 +123,7 @@ function ReportKpiBlock({ reportId, values }: { reportId: ReportKpiScopeId; valu
           onReorder={(next: { key: string; index: number }[]) => persist(next.map(it => it.key))}
           renderItem={(item: { key: string; index: number }) => (
             <div style={{ display: 'flex', alignItems: 'center', gap: 12, flex: 1 }}>
-              <span style={{ fontSize: 11, color: 'var(--text-muted)', width: 20, textAlign: 'right' }}>{item.index + 1}</span>
+              <Caption style={{ width: 20, textAlign: 'right' }}>{item.index + 1}</Caption>
               <div style={{ flex: 1 }}>
                 <CreatableSelect
                   value={item.key}

@@ -3,6 +3,8 @@ import { Check, X } from 'lucide-react'
 import type { PendingFile, AttachmentStatus } from './usePostCreateAttachments'
 import Button from '@/components/ui/Button'
 import Spinner from '@/components/ui/Spinner'
+// HUISSTIJL-1: the panel title (13/600/text) is the shared SectionTitle atom.
+import { SectionTitle } from '@/components/ui/typography'
 
 interface Props {
   files: PendingFile[]
@@ -35,7 +37,7 @@ export default function PostCreateResultsPanel({ files, noteText, noteStatus, no
   return (
     <div style={{ flex: 1, overflowY: 'auto', padding: '20px 22px', display: 'flex', flexDirection: 'column', gap: 12 }}>
       <div>
-        <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)' }}>{t('modal.attachments.resultsTitle')}</div>
+        <SectionTitle as="div">{t('modal.attachments.resultsTitle')}</SectionTitle>
         <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 4 }}>{t('modal.attachments.resultsHint')}</p>
       </div>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>

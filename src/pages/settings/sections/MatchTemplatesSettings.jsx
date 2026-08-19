@@ -11,6 +11,7 @@ import { useContractTypes } from '@/lib/useContractTypes'
 import { useFunctions } from '@/lib/useFunctions'
 import { fieldInputStyle } from '@/components/forms/fieldMetrics'
 import Button from '@/components/ui/Button'
+import { Mono } from '@/components/ui/typography'
 
 // The six scoring dimensions (mirrors the backend App\Enums\MatchDimension, single
 // source of truth there, and the vacancy Matching tab's picker). Duplicated here on
@@ -168,9 +169,9 @@ export default function MatchTemplatesSettings() {
             <span style={{ fontSize: 12, color: 'var(--text)' }}>{dimLabel(d)}</span>
             {/* Danny 22-07: concrete 1..5 weight, next to the word labels (no %-of-total —
                 mirrors the vacancy Matching tab: it can't be both equal and sum to 100). */}
-            <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 11, fontWeight: 600, color: 'var(--text)' }}>
+            <Mono style={{ fontSize: 11, fontWeight: 600, color: 'var(--text)' }}>
               {weights?.[d] ?? 3}/5
-            </span>
+            </Mono>
           </div>
           <Slider value={(weights?.[d] ?? 3) - 1} max={4} step={1}
             onChange={i => onChangeDim(d, i + 1)}

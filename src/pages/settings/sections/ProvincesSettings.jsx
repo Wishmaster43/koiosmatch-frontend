@@ -20,6 +20,7 @@ import Spinner from '@/components/ui/Spinner'
 import { useConfirm } from '@/hooks/useConfirm'
 import { getCountryOptions } from '@/lib/countries'
 import Button from '@/components/ui/Button'
+import { PageTitle } from '@/components/ui/typography'
 
 export default function ProvincesSettings() {
   const { t, i18n } = useTranslation('settings')
@@ -106,7 +107,7 @@ export default function ProvincesSettings() {
     <div style={{ maxWidth: 640 }}>
       <div className="flex items-start justify-between" style={{ marginBottom: 20, gap: 16 }}>
         <div style={{ minWidth: 0 }}>
-          <h2 style={{ fontSize: 15, fontWeight: 600, color: 'var(--text)' }}>{t('provinces.title')}</h2>
+          <PageTitle>{t('provinces.title')}</PageTitle>
           <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>{t('provinces.subtitle')}</p>
         </div>
         <div style={{ display: 'flex', gap: 8, flexShrink: 0 }}>

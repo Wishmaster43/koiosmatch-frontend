@@ -106,7 +106,6 @@ export default function OpportunityDrawer({
         {/* NUMMER-3: the copy chip, right after the title and before the phase badge (§3A). */}
         <ReferenceNumberChip value={o.referenceNumber} />
         {/* Phase = colour-coded read-only badge (shows Gewonnen/Verloren at a glance). */}
-        <TitleBadge label={o.stage} color={o.stageColor} />
       </div>
       <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{o.client || '—'}</div>
       {o.expectedCloseAt && (
@@ -142,7 +141,8 @@ export default function OpportunityDrawer({
       tabs={tabs}
       header={() => (
         <EntityHeader
-          label={t('drawer.entityLabel')}
+          // TITEL-CHIP-1 (Danny 19-08): the stage badge IS the title.
+          label={<TitleBadge label={o.stage} color={o.stageColor} />}
           expanded={expanded} onToggleExpand={onToggleExpand} onClose={onClose}
           // eslint-disable-next-line no-restricted-syntax -- DATA fallback, not a UI colour choice (mirrors the shared Avatar.tsx NEUTRAL_AVATAR constant)
           avatar={{ initials: o.initials, soft: true, color: '#9CA3AF' }}

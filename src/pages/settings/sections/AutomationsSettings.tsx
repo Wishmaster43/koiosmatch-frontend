@@ -16,6 +16,7 @@ import Toggle from '@/components/ui/Toggle'
 import MultiSelectField from '@/components/layout/workflow/MultiSelectField'
 import { DateRelativeFields, DATE_RELATIVE_FIELDS, dateRelativeFieldLabel } from '@/components/layout/workflow/DateRelativeFields'
 import { SettingsScaffold, SettingCard, SettingCardList } from '../components/SettingsKit'
+import { Caption } from '@/components/ui/typography'
 
 // One tenant workflow row, only the fields this screen reads/writes.
 interface AutomationRow {
@@ -98,11 +99,11 @@ export default function AutomationsSettings() {
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <div style={{ fontSize: 13, fontWeight: 500, color: 'var(--text)' }}>{row.name}</div>
                     {isDateRelative && (
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 11, color: 'var(--text-muted)', marginTop: 2 }}>
+                      <Caption as="div" style={{ display: 'flex', alignItems: 'center', gap: 4, marginTop: 2 }}>
                         <CalendarClock size={12} />
                         {/* Read-only: the date field the offset is measured against. */}
                         {t('automations.dateFieldReadOnly', { field: dateRelativeFieldLabel(t, dateField) })}
-                      </div>
+                      </Caption>
                     )}
                   </div>
                   <Toggle checked={row.status === 'active'} onChange={() => toggleStatus(row)}

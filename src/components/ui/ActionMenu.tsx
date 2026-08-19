@@ -177,9 +177,13 @@ export default function ActionMenu({
         onClick={() => (open ? close() : setOpen(true))}
         style={iconOnly ? {
           display: 'flex', alignItems: 'center', justifyContent: 'center', width: 26, height: 26, borderRadius: 6,
-          border: `1px solid ${open || highlighted ? 'var(--color-primary)' : 'var(--border)'}`,
-          background: highlighted && !open ? 'color-mix(in srgb, var(--color-primary) 10%, transparent)' : 'var(--surface)',
-          color: open || highlighted ? 'var(--color-primary)' : 'var(--text-muted)',
+          // PRIMAIR-VLAK-1 (Danny 19-08, tweede aanwijzing op de sorteerknopjes):
+          // the icon trigger is an ACTION and paints the solid tenant fill in
+          // every state — idle included; open keeps it, with the ring via border.
+          // highlighted (an active sort/filter) keeps its signal as the ink ring.
+          border: (open || highlighted) ? '1px solid var(--button-ink)' : '1px solid var(--button-border)',
+          background: 'var(--button-fill)',
+          color: 'var(--button-ink)',
           cursor: disabled ? 'not-allowed' : 'pointer', opacity: disabled ? 0.5 : 1, flexShrink: 0,
         } : {
           display: 'flex', alignItems: 'center', gap: 6, height: BTN_H, padding: '0 12px', fontSize: 12, fontWeight: 500,

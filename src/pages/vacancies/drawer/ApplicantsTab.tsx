@@ -22,6 +22,8 @@ import CandidateAddApplicationModal from '@/pages/candidates/drawer/AddApplicati
 import DetachApplicationModal from '@/pages/candidates/drawer/DetachApplicationModal'
 import { vacancyLabelOf } from '@/pages/candidates/drawer/applicationRowModel'
 import type { AppRow } from '@/pages/candidates/drawer/applicationRowModel'
+// HUISSTIJL-1: the source-channel meta text (11px/muted) is the shared Caption atom.
+import { Caption } from '@/components/ui/typography'
 // PDF-VACATURES-13: the shared prev/next stepper (customer locations/contacts/
 // departments already use it) — paging through the expanded application detail
 // without a trip back to the list. This tab owns which application is expanded
@@ -216,7 +218,7 @@ export default function ApplicantsTab({ vacancy: v }: { vacancy: VacancyDetail }
                   <div style={{ flex: 1, minWidth: 0, fontSize: 13, fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                     <EntityLink page="candidates" id={a.candidateId} title={a.candidateName}>{a.candidateName}</EntityLink>
                   </div>
-                  {a.source && <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>{a.source}</div>}
+                  {a.source && <Caption as="div">{a.source}</Caption>}
                   {/* Book an intake for this applicant — matches candidate + vacancy + application. */}
                   {a.candidateId != null && (
                     <button onClick={() => setIntakeFor({ applicationId: a.id ?? null, candidateId: a.candidateId as Id })}

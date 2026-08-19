@@ -25,6 +25,7 @@ import { useAllSettings, saveSettingsKeys, invalidateAllSettingsCache, getNumber
 import { notifyError } from '@/lib/notify'
 // WA-LOG-LEESBAAR-1: row click opens the candidate's whole thread, readable.
 import WaConversationPanel from './whatsapp/WaConversationPanel'
+import { SectionTitle } from '@/components/ui/typography'
 
 // Tenant-setting key — the generic /settings key/value store (no dedicated column).
 export const KOIOS_MEMORY_DAYS_KEY = 'koios_conversation_memory_days'
@@ -56,7 +57,7 @@ function ConversationMemoryField() {
 
   return (
     <div style={{ marginBottom: 16, paddingBottom: 16, borderBottom: '1px solid var(--border)', flexShrink: 0 }}>
-      <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)', marginBottom: 4 }}>{t('waLog.memoryDaysTitle')}</div>
+      <SectionTitle as="div" style={{ marginBottom: 4 }}>{t('waLog.memoryDaysTitle')}</SectionTitle>
       <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 8, maxWidth: 460 }}>{t('waLog.memoryDaysHint')}</div>
       <label htmlFor="koios-conversation-memory-days" style={{ fontSize: 11, fontWeight: 500, color: 'var(--text-muted)', display: 'block', marginBottom: 4 }}>
         {t('waLog.memoryDaysLabel')}

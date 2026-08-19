@@ -13,6 +13,8 @@ import type { Candidate } from '@/types/candidate'
 import type { Id } from '@/types/common'
 import type { OpenShift, RosterShift, ScheduleFavorites } from './planningTypes'
 import { CANON_LABEL_WIDTH } from '@/components/drawer/fieldRowCanon'
+// HUISSTIJL-1: the shared muted-caption atom (identity-only swap).
+import { Caption } from '@/components/ui/typography'
 
 interface PlanningSchedulingProps {
   c: Candidate
@@ -122,7 +124,8 @@ export default function PlanningScheduling({
               <div style={{ width: 3, height: 38, borderRadius: 2, background: d.color, flexShrink: 0 }} />
               <div style={{ flex: 1 }}>
                 <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text)' }}>{d.client}</div>
-                <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>{d.function}</div>
+                {/* HUISSTIJL-1: identical 11/400/var(--text-muted) render as a div. */}
+                <Caption as="div">{d.function}</Caption>
               </div>
               <button onClick={toggleFav} title={fav ? t('planning.removeFavorite') : t('planning.favorite')}
                 style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 3, color: fav ? 'var(--color-danger)' : 'var(--text-muted)', display: 'flex' }}>
@@ -141,7 +144,8 @@ export default function PlanningScheduling({
             ].map(([l, v]) => (
               <div key={l} style={{ display: 'flex', padding: '8px 14px', borderBottom: '1px solid var(--border)', gap: 10 }}>
                 {/* Canon width (fieldRowCanon, 05-08): was width:100, aligned to candidate ProfileTab's 120. */}
-                <span style={{ fontSize: 11, color: 'var(--text-muted)', width: CANON_LABEL_WIDTH, flexShrink: 0 }}>{l}</span>
+                {/* HUISSTIJL-1: identical 11/400/var(--text-muted) render. */}
+                <Caption style={{ width: CANON_LABEL_WIDTH, flexShrink: 0 }}>{l}</Caption>
                 <span style={{ fontSize: 11, color: 'var(--text)', fontWeight: 500 }}>{v}</span>
               </div>
             ))}

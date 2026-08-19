@@ -51,6 +51,7 @@ import type { DrawerFilterConfig } from '@/components/drawer/DrawerFilterMenu'
 // House "+ action" trigger (Danny 27-07 consistency sweep) — replaces the bare
 // text+Plus button below; same click target (opens the hidden file input).
 import DrawerAddButton from '@/components/drawer/DrawerAddButton'
+import { Caption } from '@/components/ui/typography'
 import type { Id } from '@/types/common'
 import Button from '@/components/ui/Button'
 
@@ -262,9 +263,9 @@ export default function DocumentsTab({ customerId, locations = [], departments =
                 ? <>{pending[0].name} <span style={{ fontWeight: 400, color: 'var(--text-muted)' }}>({pending[0].size})</span></>
                 : t('documents.pendingCount', { count: pending.length })}
             </div>
-            <div style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 6 }}>
+            <Caption as="div" style={{ marginBottom: 6 }}>
               {pending.length > 1 ? t('documents.applyTypeToAll') : t('documents.docType')}
-            </div>
+            </Caption>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 10 }}>
               {/* §4 soft-tint (audit r4): active = tinted, never a solid primary fill.
                   A chip is "active" only when EVERY queued item already shares that type. */}
@@ -287,7 +288,7 @@ export default function DocumentsTab({ customerId, locations = [], departments =
                 department to link to (§3 — no dead-end picker). */}
             {showLinkPicker && (
               <div style={{ marginBottom: 10 }}>
-                <div style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 6 }}>{t('documents.linkLevelLabel')}</div>
+                <Caption as="div" style={{ marginBottom: 6 }}>{t('documents.linkLevelLabel')}</Caption>
                 <div style={{ width: 220 }}>
                   <SelectMenu value={uploadLink} onChange={setUploadLink} options={linkOptions}
                     placeholder={t('notes.linkLevelOptions.customer')} />
@@ -299,7 +300,7 @@ export default function DocumentsTab({ customerId, locations = [], departments =
               {pending.map((item, idx) => (
                 <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                   <span style={{ flex: 1, minWidth: 0, fontSize: 12, color: 'var(--text)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{item.name}</span>
-                  <span style={{ fontSize: 11, color: 'var(--text-muted)', flexShrink: 0 }}>{item.size}</span>
+                  <Caption style={{ flexShrink: 0 }}>{item.size}</Caption>
                   <span id={`${docTypeLabelBaseId}-${idx}`} className="sr-only">{t('documents.docTypeFor', { name: item.name })}</span>
                   <div style={{ width: 130, flexShrink: 0 }}>
                     <SelectMenu aria-labelledby={`${docTypeLabelBaseId}-${idx}`} value={item.type} onChange={v => setItemType(idx, v)}
@@ -355,7 +356,7 @@ export default function DocumentsTab({ customerId, locations = [], departments =
                           onKeyDown={e => { if (e.key === 'Enter') doRename(d, renameValue); if (e.key === 'Escape') setRenamingId(null) }}
                           onBlur={() => doRename(d, renameValue)}
                           style={{ flex: 1, fontSize: 12, fontWeight: 500, padding: '3px 7px', borderRadius: 6, border: '1px solid var(--color-primary)', outline: 'none', color: 'var(--text)', boxSizing: 'border-box', minWidth: 0 }} />
-                        <span style={{ fontSize: 11, color: 'var(--text-muted)', flexShrink: 0 }}>{splitExt(String(d.name ?? d.file_name ?? '')).ext}</span>
+                        <Caption style={{ flexShrink: 0 }}>{splitExt(String(d.name ?? d.file_name ?? '')).ext}</Caption>
                       </div>
                     : <span style={{ fontSize: 12, fontWeight: 500, color: 'var(--text)', display: 'block', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{d.name ?? d.file_name}</span>
                   }
@@ -384,7 +385,7 @@ export default function DocumentsTab({ customerId, locations = [], departments =
               </div>
               <span style={{ fontSize: 11, fontWeight: 500, padding: '2px 8px', borderRadius: 99, background: docColor(d.type) + '18', color: docColor(d.type), whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{d.type ? docTypeLabel(d.type) : '—'}</span>
               <div style={{ display: 'flex', alignItems: 'center', gap: 2, justifyContent: 'space-between' }}>
-                <span style={{ fontSize: 11, color: 'var(--text-muted)', whiteSpace: 'nowrap' }}>{d.size ?? ''}</span>
+                <Caption style={{ whiteSpace: 'nowrap' }}>{d.size ?? ''}</Caption>
                 <div style={{ display: 'flex' }}>
                   <button aria-label={t('common:edit')} onClick={() => { setRenamingId(d.id ?? null); setRenameValue(splitExt(String(d.name ?? d.file_name ?? '')).base) }} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: '2px 3px', display: 'flex' }}><Pencil size={12} /></button>
                   <button aria-label={t('documents.preview')} onClick={() => preview(d)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: '2px 3px', display: 'flex' }}><Eye size={12} /></button>

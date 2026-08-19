@@ -7,7 +7,6 @@
  * all come from tenant lookups via their `useX()` hooks / LookupsContext.
  */
 import type { CSSProperties } from 'react'
-import { tintBg, tintBorder } from '@/lib/tint'
 import { sectionTitle as uiSectionTitle } from '@/components/ui/SectionCard'
 import type { Id } from '@/types/common'
 
@@ -26,11 +25,13 @@ export const sectionTitle: CSSProperties = { ...uiSectionTitle, display: 'block'
 // filters) so the same solid-primary+white-text selection pill can't drift back into
 // three separate hand-rolled copies.
 export const softPill = (active: boolean, color: string = 'var(--color-primary)'): CSSProperties => ({
-  color: active ? color : 'var(--text-muted)',
+  color: active ? (color === 'var(--color-primary)' ? 'var(--button-ink)' : 'var(--color-on-accent)') : 'var(--text-muted)',
   fontWeight: active ? 600 : 400,
-  // HUISSTIJL-1: one shared tint formula — was a private 14/45 pair.
-  background: active ? tintBg(color, true) : 'transparent',
-  border: active ? tintBorder(color, true) : '1px solid var(--border)',
+  // PRIMAIR-VLAK-1 (Danny 19-08): a SELECTED pill paints the solid colour with
+  // on-accent ink — tints stay the language of unselected/status surfaces.
+  // Accent selections read the button trio; DATA colours stay themselves.
+  background: active ? (color === 'var(--color-primary)' ? 'var(--button-fill)' : color) : 'transparent',
+  border: active ? '1px solid var(--button-border)' : '1px solid var(--border)',
 })
 
 // Return-tab memory (NAV-BACK-1 tab-remember): candidate→Match cross-navigation

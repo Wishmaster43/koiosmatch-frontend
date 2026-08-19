@@ -5,6 +5,8 @@ import SearchSelect from '@/components/ui/SearchSelect'
 import DrawerFilterMenu from '@/components/drawer/DrawerFilterMenu'
 import type { DrawerFilterConfig } from '@/components/drawer/DrawerFilterMenu'
 import { useDateFormat } from '@/lib/datetime'
+// HUISSTIJL-1: the shared muted-caption atom (identity-only swap).
+import { Caption } from '@/components/ui/typography'
 import type { HoursRange } from '../hooks/vacancySearchFilters'
 
 // FILTER-VLAK-1 (Danny 13-08, rustplan step 4): the ONE soft-tint recipe every
@@ -18,14 +20,17 @@ const softTint = (activeOrOpen: boolean) => ({
 // Primary-field trigger — same footprint/idiom as DrawerFilterMenu's own "More
 // filters" button (height 26, fontSize 11.5, radius 6, badge-on-active) so the
 // three fixed filters and the popover trigger read as ONE family of controls.
+// PRIMAIR-VLAK-1 (Danny 19-08): accent triggers paint the button trio; the
+// count badge inverts so it stays visible on the solid fill.
 const filterTrigger = (active: boolean): CSSProperties => ({
   display: 'inline-flex', alignItems: 'center', gap: 5, height: 26, padding: '0 10px',
   whiteSpace: 'nowrap', fontSize: 11.5, fontWeight: active ? 600 : 500, borderRadius: 6,
-  cursor: 'pointer', color: 'var(--color-primary-text)', ...softTint(active),
+  cursor: 'pointer', color: 'var(--button-ink)',
+  background: 'var(--button-fill)', border: '1px solid var(--button-border)',
 })
 const filterTriggerBadge: CSSProperties = {
   display: 'inline-flex', alignItems: 'center', justifyContent: 'center', minWidth: 15, height: 15,
-  padding: '0 4px', borderRadius: 999, background: 'var(--color-primary)', color: 'var(--color-on-accent)',
+  padding: '0 4px', borderRadius: 999, background: 'var(--button-ink)', color: 'var(--color-primary-text)',
   fontSize: 10, fontWeight: 700, lineHeight: 1,
 }
 // Removable soft-chip (§4 convention) for an ACTIVE secondary filter parked in
@@ -196,9 +201,10 @@ export default function VacancySearchFilters({
               no exact lookup match, so the filter above seeded empty (searches ALL functions)
               — say so instead of leaving a silent gap. */}
           {functionNotInLookup && (
-            <span style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 2, fontStyle: 'italic', display: 'block' }}>
+            // HUISSTIJL-1: identical 11/400/var(--text-muted) render.
+            <Caption style={{ marginTop: 2, fontStyle: 'italic', display: 'block' }}>
               {t('vacancySearch.functionNotInLookup', { title: candidateTitle })}
-            </span>
+            </Caption>
           )}
         </div>
         <SearchSelect

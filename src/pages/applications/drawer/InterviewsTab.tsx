@@ -11,6 +11,7 @@ import { notifySuccess, notifyError } from '@/lib/notify'
 import { extractApiError } from '@/lib/extractApiError'
 import { useDateFormat } from '@/lib/datetime'
 import { BTN_H } from '@/config/buttonMetrics'
+import { Caption } from '@/components/ui/typography'
 import { useAiAgents } from '../hooks/useAiAgents'
 import InterviewStatusCard from './InterviewStatusCard'
 import { mapInterview } from '../data/mapApplication'
@@ -143,7 +144,7 @@ function StartInterviewAction({ applicationId, onStarted }: { applicationId: Id 
       </div>
       {error && <span style={{ fontSize: 11, color: 'var(--color-danger)' }}>{t('interview.start.loadError')}</span>}
       {unavailable && (
-        <span style={{ fontSize: 11, color: 'var(--text-muted)', fontStyle: 'italic' }}>{t('interview.start.unavailable')}</span>
+        <Caption style={{ fontStyle: 'italic' }}>{t('interview.start.unavailable')}</Caption>
       )}
     </div>
   )

@@ -11,6 +11,7 @@ import { getKoiosSettings } from './koiosApi'
 import KoiosStatusCard from './KoiosStatusCard'
 import KoiosModelsCard from './KoiosModelsCard'
 import KoiosPricingCard from './KoiosPricingCard'
+import { PageTitle } from '@/components/ui/typography'
 
 const notice = { fontSize: 13, color: 'var(--text-muted)' }
 
@@ -32,7 +33,7 @@ export default function KoiosSettings() {
   return (
     <div style={{ maxWidth: 640 }}>
       <div className="mb-6">
-        <h2 style={{ fontSize: 15, fontWeight: 600, color: 'var(--text)' }}>{t('title')}</h2>
+        <PageTitle>{t('title')}</PageTitle>
         <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>{t('subtitle')}</p>
       </div>
 

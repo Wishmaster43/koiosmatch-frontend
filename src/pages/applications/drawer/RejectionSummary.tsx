@@ -7,6 +7,7 @@ import { notifyError, notifySuccess } from '@/lib/notify'
 import { extractApiError } from '@/lib/extractApiError'
 import { useDateFormat } from '@/lib/datetime'
 import SafeHtml from '@/components/ui/SafeHtml'
+import { Caption } from '@/components/ui/typography'
 import RejectionModal from './RejectionModal'
 import type { RejectPayload } from './RejectionModal'
 import type { ApplicationDetail } from '@/types/application'
@@ -147,10 +148,10 @@ export default function RejectionSummary({ application: a }: { application: Appl
         {reasonLabel && (
           <div style={{ fontSize: 12, color: 'var(--text)', marginTop: 6 }}>{reasonLabel}</div>
         )}
-        <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 4 }}>{metaParts.join(' · ')}</div>
+        <Caption as="div" style={{ marginTop: 4 }}>{metaParts.join(' · ')}</Caption>
         {note && (
           <div style={{ marginTop: 8 }}>
-            <div style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 4 }}>{t('rejection.note')}</div>
+            <Caption as="div" style={{ marginBottom: 4 }}>{t('rejection.note')}</Caption>
             <SafeHtml html={note} style={{ fontSize: 12, color: 'var(--text)', lineHeight: 1.5 }} />
           </div>
         )}

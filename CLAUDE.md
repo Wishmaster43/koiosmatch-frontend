@@ -569,6 +569,20 @@ the code is worse than no rule, because the next reader builds on it. What is tr
   Bedrijf → Branding in de backend-DB bewaart — een component dat een kleur
   hardcodeert onttrekt zich daaraan en is fout. Popupformaten mogen verschillen;
   de STIJL (chrome, knoppen, koppen, velden) komt altijd uit deze set.
+- **PRIMAIR-VLAK-1 + SM-STANDAARD (Danny 2026-08-19, reeks aanwijzingen op de
+  knoppen zelf).** (1) Elke accent-actie (knoppen, sorteer-/filtertriggers,
+  geselecteerde pillen/chips, telbadges eromheen geïnverteerd) leest het
+  KNOP-DRIETAL `--button-fill` / `--button-ink` / `--button-border` — nu de
+  volle tenantkleur; "alle knoppen lichter" is één tokenwissel in index.css
+  (nooit een nieuwe veegronde). Tint blijft de taal van status-/datachips.
+  (2) Destructief (verwijderen/beëindigen), gearchiveerd en datakleuren doen
+  NIET mee — Danny's expliciete uitzondering. (3) DE MAAT (Danny 19-08, slotwet: "drill downs moeten ALLEMAAL zelfde
+  zijn — zelfde geldt voor de instellingen; boven elke tabel groot mag"):
+  Button's STANDAARD is `sm` (28px · 12px · r6) — élke knop in drawers,
+  instellingen, kaarten en modals erft die maat vanzelf; breedte volgt de
+  tekst. `size="md"` (BTN_H 34) is de expliciete uitzondering, uitsluitend
+  voor de "+ Nieuw"-knop op de paginatoolbar naast het 34px-zoekchrome. Een
+  afwijkende knophoogte in een drilldown of instellingenscherm is een finding.
 - **DE KNOP IS `components/ui/Button` — een nieuwe inline knopstijl is een finding
   (HUISSTIJL-1, Danny 2026-08-18: "geen 427 objecten voor hetzelfde maar één
   herbruikbaar element, per tenant instelbaar").** Gemeten vóór het traject: 1138

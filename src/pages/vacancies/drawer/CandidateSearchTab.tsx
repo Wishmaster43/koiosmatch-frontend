@@ -17,6 +17,8 @@ import DrawerAddButton from '@/components/drawer/DrawerAddButton'
 // CandidateAddApplicationModal reuse, §2 sanctioned cross-entity import for this
 // exact shared flow) — never a second apply form.
 import CandidateAddApplicationModal from '@/pages/candidates/drawer/AddApplicationModal'
+// HUISSTIJL-1: filter labels/meta captions (11/muted) and distance readouts (Mono) are the shared atoms.
+import { Caption, Mono } from '@/components/ui/typography'
 import { useCandidateSearch } from '../hooks/useCandidateSearch'
 import { useFunctions } from '@/lib/useFunctions'
 import { useLookups } from '@/context/LookupsContext'
@@ -26,7 +28,6 @@ import { toCoord } from '@/lib/coords'
 import type { VacancyDetail } from '@/types/vacancy'
 import type { Id } from '@/types/common'
 
-const filterLabel: CSSProperties = { fontSize: 11, color: 'var(--text-muted)', display: 'block', marginBottom: 4 }
 const rowStyle: CSSProperties = { display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8, padding: '8px 10px', borderRadius: 8, cursor: 'pointer' }
 
 /**
@@ -123,19 +124,19 @@ export default function CandidateSearchTab({ vacancy }: { vacancy: VacancyDetail
   const filtersRow = (
     <div style={{ display: 'flex', flexWrap: 'wrap', gap: 16 }}>
       <div style={{ minWidth: 180 }}>
-        <span style={filterLabel}>{t('candidateSearch.functions')}</span>
+        <Caption style={{ display: 'block', marginBottom: 4 }}>{t('candidateSearch.functions')}</Caption>
         <SearchSelect
           triggerLabel={<>{t('candidateSearch.functions')}{selectedFunctions.length > 0 && ` (${selectedFunctions.length})`}</>}
           options={functionOptions} selected={selectedFunctions} onToggle={toggleFunction} width={240} />
       </div>
       <div style={{ minWidth: 180 }}>
-        <span style={filterLabel}>{t('candidateSearch.statuses')}</span>
+        <Caption style={{ display: 'block', marginBottom: 4 }}>{t('candidateSearch.statuses')}</Caption>
         <SearchSelect
           triggerLabel={<>{t('candidateSearch.statuses')}{selectedStatuses.length > 0 && ` (${selectedStatuses.length})`}</>}
           options={statusOptions.map(s => ({ value: s.value, label: s.label }))} selected={selectedStatuses} onToggle={toggleStatus} width={240} />
       </div>
       <div style={{ minWidth: 180 }}>
-        <span style={filterLabel}>{t('candidateSearch.contractForms')}</span>
+        <Caption style={{ display: 'block', marginBottom: 4 }}>{t('candidateSearch.contractForms')}</Caption>
         <SearchSelect
           triggerLabel={<>{t('candidateSearch.contractForms')}{selectedContractForms.length > 0 && ` (${selectedContractForms.length})`}</>}
           options={candidateTypes.map(c => ({ value: c.value, label: c.label }))} selected={selectedContractForms} onToggle={toggleContractForm} width={240} />
@@ -174,7 +175,7 @@ export default function CandidateSearchTab({ vacancy }: { vacancy: VacancyDetail
           <div style={{ fontSize: 13, fontWeight: 600 }}>
             <EntityLink page="candidates" id={selectedRow.id}>{selectedRow.name}</EntityLink>
           </div>
-          <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>{[selectedRow.functionTitle, selectedRow.city].filter(Boolean).join(' · ') || '—'}</div>
+          <Caption as="div">{[selectedRow.functionTitle, selectedRow.city].filter(Boolean).join(' · ') || '—'}</Caption>
         </div>
         {/* Right column (mirrors VacancySearchTab's own layout): pager+close on top,
             Solliciteren beneath — the title row keeps its full width so long
@@ -196,7 +197,7 @@ export default function CandidateSearchTab({ vacancy }: { vacancy: VacancyDetail
       </div>
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
         {selectedRow.distanceKm != null && (
-          <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 11, color: 'var(--text-muted)' }}>{selectedRow.distanceKm.toFixed(1)} km</span>
+          <Mono style={{ fontSize: 11, color: 'var(--text-muted)' }}>{selectedRow.distanceKm.toFixed(1)} km</Mono>
         )}
         <StatusPill label={selectedRow.statusLabel || selectedRow.status} color={selectedRow.statusColor} />
       </div>
@@ -253,16 +254,16 @@ export default function CandidateSearchTab({ vacancy }: { vacancy: VacancyDetail
                   <EntityLink page="candidates" id={r.id}>{r.name}</EntityLink>
                 </span>
               </div>
-              <div style={{ fontSize: 11, color: 'var(--text-muted)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+              <Caption as="div" style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                 {[r.functionTitle, r.city].filter(Boolean).join(' · ') || '—'}
-              </div>
+              </Caption>
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0 }}>
               {r.score != null && <ScorePill score={r.score} />}
               {r.distanceKm != null && (
-                <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 11, color: 'var(--text-muted)' }}>
+                <Mono style={{ fontSize: 11, color: 'var(--text-muted)' }}>
                   {r.distanceKm.toFixed(1)} km
-                </span>
+                </Mono>
               )}
               {/* Expand affordance (point 17, mirrors VacancySearchTab): a visible
                   chevron on EVERY row signals the row opens a preview, on top of
@@ -304,7 +305,7 @@ export default function CandidateSearchTab({ vacancy }: { vacancy: VacancyDetail
       : null)
     : null
   const caveatLine = caveat && (
-    <div style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 10 }}>{caveat}</div>
+    <Caption as="div" style={{ marginBottom: 10 }}>{caveat}</Caption>
   )
 
   const listPane = <div>{caveatLine}{refreshButton}{summaryCard}{listBody}</div>

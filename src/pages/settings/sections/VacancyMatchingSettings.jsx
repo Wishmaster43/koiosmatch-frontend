@@ -5,6 +5,7 @@ import api, { unwrap } from '@/lib/api'
 import { notifyError } from '@/lib/notify'
 import Slider from '@/components/ui/Slider'
 import SegmentedControl from '@/components/ui/SegmentedControl'
+import { PageTitle, SectionTitle, Mono } from '@/components/ui/typography'
 
 /**
  * VacancyMatchingSettings — the GLOBAL matching strictness (how critical the AI
@@ -65,7 +66,7 @@ export default function VacancyMatchingSettings() {
     <div style={{ maxWidth: 560 }}>
       <div className="flex items-start justify-between" style={{ marginBottom: 16, gap: 16 }}>
         <div style={{ minWidth: 0 }}>
-          <h2 style={{ fontSize: 15, fontWeight: 600, color: 'var(--text)' }}>{t('matching.title')}</h2>
+          <PageTitle>{t('matching.title')}</PageTitle>
           <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>{t('matching.subtitle')}</p>
         </div>
         <button onClick={save} disabled={saving}
@@ -80,9 +81,9 @@ export default function VacancyMatchingSettings() {
 
       <div style={{ marginTop: 18 }}>
         <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 4 }}>
-          <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 12, fontWeight: 600, color: 'var(--text)' }}>
+          <Mono style={{ fontSize: 12, fontWeight: 600, color: 'var(--text)' }}>
             {level + 1}/{LEVELS.length} · {levelPct}%
-          </span>
+          </Mono>
         </div>
         <Slider value={level} max={2} step={1} onChange={setLevel}
           labels={[t('matching.lenient'), t('matching.balanced'), t('matching.strict')]} ariaLabel={t('matching.title')} />
@@ -92,7 +93,7 @@ export default function VacancyMatchingSettings() {
 
       {/* Match approval — three-option segmented control (house idiom for option cards). */}
       <div style={{ marginTop: 28, paddingTop: 20, borderTop: '1px solid var(--border)' }}>
-        <h3 style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)' }}>{t('matching.approval.title')}</h3>
+        <SectionTitle>{t('matching.approval.title')}</SectionTitle>
         <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2, marginBottom: 12 }}>{t('matching.approval.subtitle')}</p>
         <SegmentedControl
           ariaLabel={t('matching.approval.title')}

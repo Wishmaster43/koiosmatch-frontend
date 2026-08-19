@@ -18,6 +18,7 @@ import { History, AlertTriangle, ArrowRight } from 'lucide-react'
 import { useDateFormat } from '@/lib/datetime'
 import { useUsers } from '@/lib/queries'
 import { isUuid } from '@/lib/uuid'
+import { Caption } from '@/components/ui/typography'
 import { useApplicationActivity, type ApplicationActivityEvent } from '../hooks/useApplicationActivity'
 import type { ApplicationDetail } from '@/types/application'
 
@@ -128,11 +129,11 @@ export default function ChangelogTab({ application: a }: { application: Applicat
       {/* One card per change: "when · who · action · Field" + "old → new". */}
       {!loading && !error && cards.map((cd, i) => (
         <div key={i} style={{ border: '1px solid var(--border)', borderRadius: 8, background: 'var(--bg)', padding: '9px 12px', marginBottom: 8 }}>
-          <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>
+          <Caption as="div">
             {cd.when ? formatDate(cd.when, { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit' }) : '—'}
             {' · '}<span>{cd.who}</span>{' · '}<span>{cd.action}</span>
             {cd.field && <> {' · '}<span style={{ fontWeight: 600, color: 'var(--text)' }}>{cd.field}</span></>}
-          </div>
+          </Caption>
           {cd.field && (
             <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginTop: 5, fontSize: 12 }}>
               {(cd.oldVal === null || cd.newVal === null) ? (

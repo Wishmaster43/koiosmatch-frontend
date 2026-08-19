@@ -15,6 +15,7 @@
 import { useTranslation } from 'react-i18next'
 import { useDateFormat } from '@/lib/datetime'
 import { useLastContactTypes } from '@/lib/useLastContactTypes'
+import { Caption } from '@/components/ui/typography'
 import type { Candidate } from '@/types/candidate'
 
 /** Footer meta strip — creation stamp (left) + last contact (right). */
@@ -26,7 +27,7 @@ export default function CandidateDrawerFooter({ c }: { c: Candidate }) {
   const { labelOf: lastContactLabel } = useLastContactTypes()
 
   return (
-    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 12, fontSize: 11, color: 'var(--text-muted)' }}>
+    <Caption as="div" style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 12 }}>
       <span>
         {t('drawer.lastContact')}:{' '}
         {(c.lastContactDate || c.lastContactType) ? (
@@ -40,6 +41,6 @@ export default function CandidateDrawerFooter({ c }: { c: Candidate }) {
           <span style={{ fontStyle: 'italic' }}>{t('drawer.notRegistered')}</span>
         )}
       </span>
-    </div>
+    </Caption>
   )
 }

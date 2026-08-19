@@ -28,6 +28,8 @@ import { useEducationLevels } from '@/lib/useEducationLevels'
 import { downloadFilesSequentially } from '@/lib/downloadFiles'
 // DOC-1-EIGENAAR-1: the one shared "which document is still free" rule (measured 08-08).
 import { linkedDocumentOptions } from './documentLinkRules'
+// HUISSTIJL-1: the shared 13/600 title atom + the JetBrains Mono atom (identity-only swaps).
+import { SectionTitle, Mono } from '@/components/ui/typography'
 import type { Id } from '@/types/common'
 
 // One shared render-prop: the "+ Toevoegen" trigger for every Achtergrond
@@ -212,7 +214,8 @@ export function ExperienceTab({ items = [], onAdd, onEdit, onRemove, documents =
             <div key={e.id ?? i} style={{ display: 'flex', gap: 10, padding: '10px 0', borderBottom: i < arr.length - 1 ? '1px solid var(--border)' : 'none' }}>
               <div style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--color-warning)', flexShrink: 0, marginTop: 5 }} />
               <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)' }}>{e.title ?? e.function_title}</div>
+                {/* HUISSTIJL-1: identical 13/600/var(--text) render as a div. */}
+                <SectionTitle as="div">{e.title ?? e.function_title}</SectionTitle>
                 {secondary && <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{secondary}</div>}
                 <ProseField value={e.desc} />
                 {linkedDoc && <DocEntryLinks doc={linkedDoc} onPreview={() => setPreviewDoc(linkedDoc)} onJump={onJumpToDocuments} />}
@@ -319,7 +322,8 @@ export function EducationTab({ items = [], onAdd, onEdit, onRemove, documents = 
             <div style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--color-warning)', flexShrink: 0, marginTop: 5 }} />
             <div style={{ flex: 1 }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)' }}>{o.title ?? o.education}</div>
+                {/* HUISSTIJL-1: identical 13/600/var(--text) render as a div. */}
+                <SectionTitle as="div">{o.title ?? o.education}</SectionTitle>
                 {/* KAND-NIVEAU-1: the picked education level as a soft chip (§4 convention).
                     LOOKUP-ICON-1: the tenant icon rides inside the chip label, next to
                     the text — icon is additive, never the only signal. */}
@@ -405,10 +409,13 @@ export function CertificationsTab({ items = [], onAdd, onEdit, onRemove, documen
           <div key={cert.id ?? i} style={{ display: 'flex', gap: 8, padding: '8px 0', borderBottom: i < arr.length - 1 ? '1px solid var(--border)' : 'none' }}>
             <div style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--color-violet)', flexShrink: 0, marginTop: 4 }} />
             <div style={{ flex: 1, minWidth: 0 }}>
-              <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{cert.name ?? cert.title}</div>
+              {/* HUISSTIJL-1: identical 13/600/var(--text) render as a div; the
+                  truncation props ride through the atom's style prop unchanged. */}
+              <SectionTitle as="div" style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{cert.name ?? cert.title}</SectionTitle>
               {secondary && <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{secondary}</div>}
-              {/* Licence number (C-13b) — a code/ID, so JetBrains Mono per §4. */}
-              {cert.license && <div style={{ fontSize: 11, color: 'var(--text-muted)', fontFamily: 'JetBrains Mono, monospace' }}>{t('addFields.licenseNumber')}: {cert.license}</div>}
+              {/* Licence number (C-13b) — a code/ID, so JetBrains Mono per §4.
+                  HUISSTIJL-1: identical fontFamily/size/colour render as a div. */}
+              {cert.license && <Mono as="div" style={{ fontSize: 11, color: 'var(--text-muted)' }}>{t('addFields.licenseNumber')}: {cert.license}</Mono>}
               <ProseField value={cert.desc} />
               {linkedDoc && <DocEntryLinks doc={linkedDoc} onPreview={() => setPreviewDoc(linkedDoc)} onJump={onJumpToDocuments} />}
             </div>

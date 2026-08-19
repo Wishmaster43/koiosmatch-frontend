@@ -35,6 +35,8 @@ import CandidateSearchTab from './drawer/CandidateSearchTab'
 import CustomFieldsTab from '@/components/drawer/CustomFieldsTab'
 import { useVacancyCustomFields } from '@/lib/useVacancyCustomFields'
 import Button from '@/components/ui/Button'
+// HUISSTIJL-1: the footer's 11px/muted meta line is the shared Caption atom.
+import { Caption } from '@/components/ui/typography'
 import type { VacancyDetail } from '@/types/vacancy'
 import type { Id } from '@/types/common'
 
@@ -187,10 +189,10 @@ export default function VacancyDrawer({ vacancy: v, onClose, expanded, onToggleE
       // Two-sided footer (§3A(8)): created-at left, empty right (consistent spacing
       // with the candidate/other drawers even when there is no right-side content).
       footer={
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, fontSize: 11, color: 'var(--text-muted)' }}>
+        <Caption as="div" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
           <span>{t('drawer.createdAt', { date: formatDateTime(v.created) })}</span>
           <span />
-        </div>
+        </Caption>
       }
       // Koppelingen reads the SHARED common:backofficeLinks.tabLabel key (§3A/§11) so
       // every entity's tab shows the exact same word.
@@ -210,7 +212,36 @@ export default function VacancyDrawer({ vacancy: v, onClose, expanded, onToggleE
       header={({ setActiveTab }) => (
         <>
         <EntityHeader
-          label={t('drawer.entityLabel')}
+          // TITEL-CHIP-1 (Danny 19-08): the title slot shows WHERE this vacancy is
+          // published (the §4 success token pair per live channel) — or the calm
+          // not-published affordance; both jump to the Publiceren tab.
+          label={<span style={{ display: 'inline-flex', flexWrap: 'wrap', gap: 6, alignItems: 'center' }}>
+            {publishedChannels.length > 0 ? (
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+              {/* HUISSTIJL-1: left hand-styled — the §4 "aan/gelukt" success TOKEN
+                  PAIR (--color-success-bg fill + full --color-success border) is a
+                  deliberate exception to the soft-tint recipe, never a Button variant. */}
+              {publishedChannels.map(c => {
+                const Icon = channelIcon(c.icon, c.key)
+                return (
+                  <button key={String(c.value)} type="button" onClick={() => setActiveTab('publishing')}
+                    title={t('drawer.publishedOnChannel', { channel: c.label })}
+                    style={{ display: 'inline-flex', alignItems: 'center', gap: 5, fontSize: 11, fontWeight: 500,
+                      padding: '3px 9px', borderRadius: 999, cursor: 'pointer',
+                      background: 'var(--color-success-bg)',
+                      color: 'var(--color-success)', border: '1px solid var(--color-success)' }}>
+                    <Icon size={12} /> {c.label}
+                  </button>
+                )
+              })}
+            </div>
+          ) : (
+            <Button variant="ghost" size="sm" onClick={() => setActiveTab('publishing')} style={{ marginBottom: 12 }}>
+              <Globe size={13} />
+              {t('drawer.notPublished')}
+            </Button>
+          )}
+          </span>}
           expanded={expanded} onToggleExpand={onToggleExpand} onClose={onClose}
           avatar={{ initials: (v.clientName?.[0] ?? v.title?.[0] ?? '?').toUpperCase(), soft: true }}
           renderTitle={() => editingTitle ? (
@@ -281,32 +312,7 @@ export default function VacancyDrawer({ vacancy: v, onClose, expanded, onToggleE
               is ACTUALLY published on (icon + label, colour never the only signal);
               falls back to the generic globe + "not published" when none are. Click a
               channel to jump straight to the Publiceren tab. */}
-          {publishedChannels.length > 0 ? (
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 12 }}>
-              {/* HUISSTIJL-1: left hand-styled — the §4 "aan/gelukt" success TOKEN
-                  PAIR (--color-success-bg fill + full --color-success border) is a
-                  deliberate exception to the soft-tint recipe, never a Button variant. */}
-              {publishedChannels.map(c => {
-                const Icon = channelIcon(c.icon, c.key)
-                return (
-                  <button key={String(c.value)} type="button" onClick={() => setActiveTab('publishing')}
-                    title={t('drawer.publishedOnChannel', { channel: c.label })}
-                    style={{ display: 'inline-flex', alignItems: 'center', gap: 5, fontSize: 11, fontWeight: 500,
-                      padding: '3px 9px', borderRadius: 999, cursor: 'pointer',
-                      background: 'var(--color-success-bg)',
-                      color: 'var(--color-success)', border: '1px solid var(--color-success)' }}>
-                    <Icon size={12} /> {c.label}
-                  </button>
-                )
-              })}
-            </div>
-          ) : (
-            <Button variant="ghost" size="sm" onClick={() => setActiveTab('publishing')} style={{ marginBottom: 12 }}>
-              <Globe size={13} />
-              {t('drawer.notPublished')}
-            </Button>
-          )}
-        </EntityHeader>
+                  </EntityHeader>
         </>
       )}
     />

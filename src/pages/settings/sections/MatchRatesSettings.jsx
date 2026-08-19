@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { AlertTriangle } from 'lucide-react'
 import api, { unwrap } from '@/lib/api'
 import { notifyError } from '@/lib/notify'
+import { PageTitle } from '@/components/ui/typography'
 
 /**
  * MatchRatesSettings — Settings → Matches → the purchase→sale conversion factor.
@@ -52,7 +53,7 @@ export default function MatchRatesSettings() {
 
   return (
     <div style={{ maxWidth: 560 }}>
-      <h2 style={{ fontSize: 15, fontWeight: 600, color: 'var(--text)' }}>{t('matchRates.title')}</h2>
+      <PageTitle>{t('matchRates.title')}</PageTitle>
       <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>{t('matchRates.subtitle')}</p>
       {loading ? (
         <p style={{ fontSize: 13, color: 'var(--text-muted)', marginTop: 14 }}>{t('common.loadingShort')}</p>

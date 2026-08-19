@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { ShieldCheck, ShieldAlert, HelpCircle } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import Toggle from '@/components/ui/Toggle'
+import { GroupLabel, Caption } from '@/components/ui/typography'
 import { useDateFormat } from '@/lib/datetime'
 import { useAuth } from '@/context/AuthContext'
 import { resolveRetentionConsent } from './retentionConsent'
@@ -69,9 +70,11 @@ export default function RetentionConsentBlock({ optIn, consentAt, expiresAt, onT
 
   return (
     <div style={{ marginTop: 14, paddingTop: 12, borderTop: '1px solid var(--border)' }}>
-      <div style={{ fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em', color: 'var(--text-muted)', marginBottom: 8 }}>
+      {/* HUISSTIJL-1: identical 11/600/uppercase render, letterSpacing kept at
+          this block's own 0.04em (atom default is 0.05em) via the style override. */}
+      <GroupLabel style={{ letterSpacing: '0.04em', marginBottom: 8 }}>
         {t('communication.retentionTitle')}
-      </div>
+      </GroupLabel>
 
       {/* Opt-in toggle — described by the validity line below, so a screen reader
           hears "may be kept … consent lapsed on 12-05-2026" as one statement.
@@ -82,9 +85,10 @@ export default function RetentionConsentBlock({ optIn, consentAt, expiresAt, onT
         <Toggle checked={optIn} onChange={onToggle} ariaLabel={t('communication.consentRetentionOptIn')} describedBy={statusId} />
         <span style={{ fontSize: 13, color: 'var(--text)', flex: 1 }}>{t('communication.consentRetentionOptIn')}</span>
         {optIn && consentAt && (
-          <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>
+          // HUISSTIJL-1: identical 11/400/var(--text-muted) render.
+          <Caption>
             {t('communication.consentGivenAt', { date: formatDate(consentAt) })}
-          </span>
+          </Caption>
         )}
       </div>
 
@@ -100,9 +104,10 @@ export default function RetentionConsentBlock({ optIn, consentAt, expiresAt, onT
 
       {/* The story the backend actually implements: expiry is imperative, the workflow
           only asks for renewal — so consent never silently becomes eternal. */}
-      <div style={{ marginTop: 6, fontSize: 11, color: 'var(--text-muted)', lineHeight: 1.45 }}>
+      {/* HUISSTIJL-1: identical 11/400/var(--text-muted) render as a div. */}
+      <Caption as="div" style={{ marginTop: 6, lineHeight: 1.45 }}>
         {t('communication.retentionConsentExpiryNote')}
-      </div>
+      </Caption>
 
       {canViewRetention && (
         <div style={{ marginTop: 10, padding: '8px 12px', borderRadius: 8, fontSize: 12, fontWeight: 600, color: dossier.tone,

@@ -19,6 +19,7 @@ import RichTextEditor from '@/components/ui/RichTextEditor'
 import Spinner from '@/components/ui/Spinner'
 import CalloutBox from '@/components/ui/CalloutBox'
 import { fieldInputStyle } from '@/components/forms/fieldMetrics'
+import { PageTitle, Caption } from '@/components/ui/typography'
 
 export default function EmailSettings({ context = 'klanten' }) {
   const { t } = useTranslation('settings')
@@ -105,7 +106,7 @@ export default function EmailSettings({ context = 'klanten' }) {
     <div style={{ maxWidth: 940 }}>
       <div className="flex items-center justify-between" style={{ marginBottom: 20, gap: 16 }}>
         <div style={{ minWidth: 0 }}>
-          <h2 style={{ fontSize: 15, fontWeight: 600, color: 'var(--text)' }}>{t(`email.context.${context}.title`)}</h2>
+          <PageTitle>{t(`email.context.${context}.title`)}</PageTitle>
           <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>{t(`email.context.${context}.subtitle`)}</p>
         </div>
         <div style={{ display: 'flex', gap: 8, flexShrink: 0 }}>
@@ -166,7 +167,7 @@ export default function EmailSettings({ context = 'klanten' }) {
                               color: provider === p.id ? 'var(--color-primary-text)' : 'var(--text)', marginBottom: 2 }}>
                   {p.label}
                 </div>
-                <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>{p.desc}</div>
+                <Caption as="div">{p.desc}</Caption>
               </button>
             ))}
           </div>
@@ -262,7 +263,7 @@ export default function EmailSettings({ context = 'klanten' }) {
         {/* Right column — email signature (per context); fills the column height alongside the connection blocks */}
         <div style={{ ...cardStyle, display: 'flex', flexDirection: 'column' }}>
           <div style={{ fontSize: 13, fontWeight: 500, color: 'var(--text)', marginBottom: 2 }}>{t('email.signature')}</div>
-          <div style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 10 }}>{t('email.signatureHint')}</div>
+          <Caption as="div" style={{ marginBottom: 10 }}>{t('email.signatureHint')}</Caption>
           <RichTextEditor value={signature} onChange={setSignature} fill
             expanded={sigExpanded} onToggleExpand={() => setSigExpanded(e => !e)} />
         </div>

@@ -3,6 +3,8 @@ import { useTranslation } from 'react-i18next'
 import Slider from '@/components/ui/Slider'
 import CreatableSelect from '@/components/ui/CreatableSelect'
 import { cardBox } from '@/components/ui/modalCards'
+// HUISSTIJL-1: the weight readout (JetBrains Mono) is the shared Mono atom.
+import { Mono } from '@/components/ui/typography'
 import { useMatchWeightTemplates } from '../hooks/useMatchWeightTemplates'
 import { MATCH_DIMENSIONS, buildMatchWeights } from '../data/matchWeights'
 
@@ -79,9 +81,9 @@ export default function MatchProfileCard({ templateId, onTemplateChange, onWeigh
         <div key={d}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
             <span style={{ fontSize: 12, color: 'var(--text)' }}>{t(`matching.dim.${d}`)}</span>
-            <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 11, fontWeight: 600, color: 'var(--text)' }}>
+            <Mono style={{ fontSize: 11, fontWeight: 600, color: 'var(--text)' }}>
               {weights[d] ?? 3}/5
-            </span>
+            </Mono>
           </div>
           {/* Slider is 0-based (0..4); stored weight is 1..5 (mirrors MatchingTab). */}
           <Slider value={(weights[d] ?? 3) - 1} max={4} step={1} onChange={(i: number) => setWeight(d, i + 1)}

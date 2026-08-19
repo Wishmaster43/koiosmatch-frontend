@@ -15,6 +15,7 @@ import api, { unwrap } from '@/lib/api'
 import { extractApiError } from '@/lib/extractApiError'
 import { Field, TextField, SelectField } from '@/components/forms/fields'
 import Button from '@/components/ui/Button'
+import { SectionTitle } from '@/components/ui/typography'
 
 // Provider options are brand names (data, not prose) — no i18n by design.
 const PROVIDERS = [
@@ -68,7 +69,7 @@ export default function AddWhatsAppConnectionForm({ onCreated }: { onCreated: ()
   return (
     <div style={{ marginTop: 16, padding: '18px 18px', background: 'var(--surface)',
                   border: '1px solid var(--border)', borderRadius: 12 }}>
-      <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)' }}>{t('whatsapp.addConnectionTitle')}</div>
+      <SectionTitle as="div">{t('whatsapp.addConnectionTitle')}</SectionTitle>
       <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2, marginBottom: 14 }}>
         {t('whatsapp.addConnectionDesc')}
       </div>

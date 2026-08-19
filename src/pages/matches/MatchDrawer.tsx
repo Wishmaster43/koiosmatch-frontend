@@ -63,6 +63,8 @@ import { computeMatchOrdinals } from './matchOrdinals'
 import type { OwnerCandidate } from './hooks/useMatchMutations'
 import type { MatchRow } from '@/types/match'
 import type { Id } from '@/types/common'
+import Button from '@/components/ui/Button'
+import EntityLink from '@/components/ui/EntityLink'
 
 interface MatchDrawerProps {
   match: MatchRow | null
@@ -230,7 +232,12 @@ export default function MatchDrawer({
       }
       header={
         <EntityHeader
-          label={t('drawer.label')}
+          // TITEL-CHIP-1 (Danny 19-08): the title slot carries the CUSTOMER as a
+          // deep link (EntityLink brings the new-tab icon); falls back to the
+          // static entity word when the match has no customer.
+          label={match.clientId != null
+            ? <EntityLink page="customers" id={match.clientId}>{match.client || t('drawer.label')}</EntityLink>
+            : t('drawer.label')}
           avatar={{ initials: match.initials, soft: true }}
           expanded={expanded}
           onToggleExpand={onToggleExpand}
@@ -283,29 +290,22 @@ export default function MatchDrawer({
               <MatchApprovalActions status={match.approval_status} reason={reason} canUpdate={canApprove && !match.archived} busy={busy}
                 rejectOpen={rejectOpen} onOpenReject={() => setRejectOpen(true)} onCancelReject={() => setRejectOpen(false)}
                 onApprove={approve} onReject={reject} />
-              {/* G04/MATCH-RENEWAL-1: one calm primary-tint button (§4 soft-tint, never a
-                  solid fill) — stays visible but DISABLED with a title/reason once the
-                  match is already closed or archived (no fake affordance). */}
+              {/* G04/MATCH-RENEWAL-1 — house Button on the sm standard (PRIMAIR-VLAK-1):
+                  accent action = the button trio; stays visible but DISABLED with a
+                  title/reason once closed or archived (no fake affordance). */}
               {canRenew && (
-                <button onClick={() => !renewDisabledReason && setRenewOpen(true)} disabled={Boolean(renewDisabledReason)}
-                  title={renewDisabledReason} aria-label={renewDisabledReason || t('drawer.renew.button')}
-                  style={{ display: 'flex', alignItems: 'center', gap: 4, height: 26, padding: '0 9px', fontSize: 11, fontWeight: 600,
-                    borderRadius: 7, cursor: renewDisabledReason ? 'not-allowed' : 'pointer',
-                    border: '1px solid color-mix(in srgb, var(--color-primary) 40%, transparent)',
-                    background: 'color-mix(in srgb, var(--color-primary) 10%, transparent)', color: 'var(--color-primary-text)',
-                    opacity: renewDisabledReason ? 0.5 : 1 }}>
+                <Button variant="soft" size="sm" onClick={() => !renewDisabledReason && setRenewOpen(true)}
+                  disabled={Boolean(renewDisabledReason)}
+                  title={renewDisabledReason} aria-label={renewDisabledReason || t('drawer.renew.button')}>
                   <RefreshCw size={11} />{t('drawer.renew.button')}
-                </button>
+                </Button>
               )}
-              {/* MATCH-TERMINATE-1: one calm danger-tint button (§4 soft-tint, never a
-                  solid fill) — hidden once the match is already closed or archived. */}
+              {/* MATCH-TERMINATE-1 — destructive stays the danger language (dangerSoft),
+                  Danny's explicit exclusion from the tenant fill; hidden once closed. */}
               {canTerminate && (
-                <button onClick={() => setTerminateOpen(true)}
-                  style={{ display: 'flex', alignItems: 'center', gap: 4, height: 26, padding: '0 9px', fontSize: 11, fontWeight: 600,
-                    borderRadius: 7, cursor: 'pointer', border: '1px solid color-mix(in srgb, var(--color-danger) 40%, transparent)',
-                    background: 'color-mix(in srgb, var(--color-danger) 10%, transparent)', color: 'var(--color-danger)' }}>
+                <Button variant="dangerSoft" size="sm" onClick={() => setTerminateOpen(true)}>
                   <Ban size={11} />{t('drawer.terminate.button')}
-                </button>
+                </Button>
               )}
             </>
           }

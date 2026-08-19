@@ -19,6 +19,7 @@ import { useTranslation } from 'react-i18next'
 import { Lock } from 'lucide-react'
 import { useDateFormat } from '@/lib/datetime'
 import { FieldRow, GroupCard, GroupHeader } from './profileFieldShared'
+import { Caption } from '@/components/ui/typography'
 import type { Candidate } from '@/types/candidate'
 
 // Read-only stamp value: the text plus a small lock, so "you cannot edit this" is
@@ -56,7 +57,7 @@ export default function CandidateOriginCard({ c }: { c: Candidate }) {
           <span style={{ display: 'inline-flex', flexDirection: 'column', gap: 2 }}>
             <Stamp value={c.source} locked={false} />
             {c.sourceDetail && (
-              <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>{c.sourceDetail}</span>
+              <Caption>{c.sourceDetail}</Caption>
             )}
           </span>
         </FieldRow>

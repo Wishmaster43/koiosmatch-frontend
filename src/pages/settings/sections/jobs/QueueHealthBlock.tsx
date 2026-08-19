@@ -10,6 +10,7 @@ import { useTranslation } from 'react-i18next'
 import { AlertTriangle, CheckCircle2 } from 'lucide-react'
 import { useDateFormat } from '@/lib/datetime'
 import type { QueueStatus } from './jobsApi'
+import { SectionTitle } from '@/components/ui/typography'
 
 // 5-minute granularity per the contract — round down to whole minutes, never
 // fabricate sub-minute precision the backend doesn't actually measure.
@@ -49,9 +50,9 @@ export default function QueueHealthBlock({ queueStatus }: { queueStatus?: QueueS
         <div role="alert" style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '10px 14px', marginBottom: 10,
           borderRadius: 8, background: 'var(--color-danger-bg)', border: '1px solid var(--color-danger)' }}>
           <AlertTriangle size={16} style={{ color: 'var(--color-danger)', flexShrink: 0 }} />
-          <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)' }}>
+          <SectionTitle as="span">
             {t('jobs.health.incidentBanner', { since: formatDateTime(watch.open_incident_since) })}
-          </span>
+          </SectionTitle>
         </div>
       )}
 

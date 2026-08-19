@@ -301,7 +301,7 @@ export default function CustomersPage({ intent }: { intent?: unknown } = {}) {
               <>
                 {/* Add on the left (like Applications/Candidates) — BTN_H (§4/§9): one
                     explicit height for every text/action button, everywhere. */}
-                <Button variant="primary" onClick={() => setAddOpen(true)}>
+                <Button variant="primary" size="md" onClick={() => setAddOpen(true)}>
                   + {t('page.add')}
                 </Button>
                 {/* Shared header search (T10) — debounced, drives the same server-side ?search=. */}

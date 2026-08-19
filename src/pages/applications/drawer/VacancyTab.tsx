@@ -11,6 +11,7 @@ import { VacancyLookupsProvider } from '@/context/VacancyLookupsContext'
 import DetailsTab from '@/pages/vacancies/drawer/DetailsTab'
 import DescriptionTab from '@/pages/vacancies/drawer/DescriptionTab'
 import { buildVacancyPatch } from '@/pages/vacancies/data/vacanciesShared'
+import { SectionTitle } from '@/components/ui/typography'
 import { useApplicationVacancy } from '../hooks/useApplicationVacancy'
 import VacancyLinkField from './VacancyLinkField'
 import { useVacancyLinkOptions } from '../hooks/useVacancyLinkOptions'
@@ -143,9 +144,9 @@ export default function VacancyTab({ application: a, onLinkVacancy }: VacancyTab
           tab's [name … Open kandidaat] header so both drill-downs read the same
           (Danny 21-07: "vacature moet zelfde soort worden … naam van de vacature links"). */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 14 }}>
-        <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', minWidth: 0 }}>
+        <SectionTitle as="span" style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', minWidth: 0 }}>
           {a.vacancyTitle}
-        </span>
+        </SectionTitle>
         {/* S14/S22: stash the current subtab so browser BACK from the full vacancy
             page reopens THIS application's drawer on the Vacature tab again.
             Danny 21-07: this is an explicit "Open vacancy" AFFORDANCE (not the

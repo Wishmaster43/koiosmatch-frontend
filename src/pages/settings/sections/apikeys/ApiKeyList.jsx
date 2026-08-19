@@ -10,6 +10,7 @@ import StatusBadge from '@/components/ui/StatusBadge'
 import { useDateFormat } from '@/lib/datetime'
 import { shortGuid } from './constants'
 import Button from '@/components/ui/Button'
+import { PageTitle } from '@/components/ui/typography'
 
 export default function ApiKeyList({ keys, loading, error, onReload, onOpen, onNew }) {
   const { t } = useTranslation('settings')
@@ -45,7 +46,7 @@ export default function ApiKeyList({ keys, loading, error, onReload, onOpen, onN
       {/* Header: title + count on the left, create button on the right */}
       <div className="flex items-center justify-between" style={{ marginBottom: 18, gap: 16 }}>
         <div>
-          <h2 style={{ fontSize: 15, fontWeight: 600, color: 'var(--text)' }}>{t('apiKeys.title')}</h2>
+          <PageTitle>{t('apiKeys.title')}</PageTitle>
           <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>
             {t('apiKeys.count', { count: keys.length })}
           </p>

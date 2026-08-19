@@ -23,6 +23,7 @@ import SearchSelect from '@/components/ui/SearchSelect'
 import { useConfirm } from '@/hooks/useConfirm'
 import { fieldInputStyle } from '@/components/forms/fieldMetrics'
 import Button from '@/components/ui/Button'
+import { Caption } from '@/components/ui/typography'
 
 const ENDPOINT = '/vacancy-content-blocks'
 const KINDS = ['intro', 'cta', 'legal']
@@ -141,7 +142,7 @@ export default function VacancyContentBlocksSettings() {
             <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
               <div style={{ flex: 1, minWidth: 0 }}>
                 <div style={{ fontWeight: 500, fontSize: 13, color: 'var(--text)' }}>{block.name}</div>
-                <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 2 }}>{t(`vacancyContentBlocksSettings.kind.${block.kind}`)}</div>
+                <Caption as="div" style={{ marginTop: 2 }}>{t(`vacancyContentBlocksSettings.kind.${block.kind}`)}</Caption>
               </div>
               <button onClick={() => (isOpen ? setExpanded(null) : openEdit(block))}
                 aria-label={`${isOpen ? t('common.close') : t('common.edit')}: ${block.name}`}

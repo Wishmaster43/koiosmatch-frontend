@@ -7,6 +7,7 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Check, AlertTriangle, Ban, Lock, ChevronDown, ChevronUp } from 'lucide-react'
 import { POPUP_CODES } from './catalogMeta'
+import { Mono } from '@/components/ui/typography'
 
 // Same icon/colour pairing as ActionRuleCell, so the legend visually matches the grid.
 const ITEMS = [
@@ -49,9 +50,9 @@ export default function ActionRuleLegend() {
                       display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: '6px 16px' }}>
           {POPUP_CODES.map((code) => (
             <li key={code} style={{ fontSize: 12, color: 'var(--text-muted)', listStyle: 'none' }}>
-              <span style={{ fontFamily: "'JetBrains Mono', monospace", fontWeight: 700, color: 'var(--text)' }}>
+              <Mono style={{ fontWeight: 700, color: 'var(--text)' }}>
                 {code}
-              </span>
+              </Mono>
               {' — '}
               {t(`actionRules.popups.${code}`)}
             </li>

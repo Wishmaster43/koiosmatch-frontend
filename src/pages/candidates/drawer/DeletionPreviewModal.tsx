@@ -10,6 +10,7 @@ import { useTranslation } from 'react-i18next'
 import { AlertTriangle } from 'lucide-react'
 import api from '@/lib/api'
 import FloatingPanel from '@/components/ui/FloatingPanel'
+import { BodyText } from '@/components/ui/typography'
 import type { Id } from '@/types/common'
 import Button from '@/components/ui/Button'
 
@@ -55,9 +56,9 @@ export default function DeletionPreviewModal({ candidateId, candidateName, onClo
         </div>
       }>
 
-        <p style={{ fontSize: 13, color: 'var(--text)', marginBottom: 12, lineHeight: 1.5 }}>
+        <BodyText style={{ marginBottom: 12 }}>
           {t('erase.confirmBody', { name: candidateName })}
-        </p>
+        </BodyText>
 
         {loading ? (
           <div style={{ fontSize: 12, color: 'var(--text-muted)', padding: '12px 0' }}>{t('common:loading')}</div>

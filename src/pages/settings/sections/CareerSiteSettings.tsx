@@ -16,6 +16,7 @@ import { useTranslation } from 'react-i18next'
 import { useAllSettings, saveSettingsKeys } from '@/lib/settings/useAllSettings'
 import { SettingRow, Toggle } from '../components/SettingsKit'
 import PublicUrlsCard from './careerSite/PublicUrlsCard'
+import { PageTitle } from '@/components/ui/typography'
 
 export default function CareerSiteSettings() {
   const { t } = useTranslation('settings')
@@ -29,7 +30,7 @@ export default function CareerSiteSettings() {
   return (
     <div style={{ maxWidth: 640, display: 'flex', flexDirection: 'column', gap: 20 }}>
       <div>
-        <h2 style={{ fontSize: 15, fontWeight: 600, color: 'var(--text)' }}>{t('careerSite.title')}</h2>
+        <PageTitle>{t('careerSite.title')}</PageTitle>
         <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2, marginBottom: 16 }}>{t('careerSite.subtitle')}</p>
 
         <SettingRow label={t('careerSite.activeLabel')} description={t('careerSite.hint')}>

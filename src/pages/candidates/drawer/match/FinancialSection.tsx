@@ -18,6 +18,8 @@ import { RateProposalHint } from '../RateProposalNotice'
 import type { RateProposal } from '@/pages/candidates/hooks/useRateProposal'
 import { FormField as F } from './FormField'
 import { input, pairRow, rowLabel, rowField, errMsg } from './styles'
+// HUISSTIJL-1: the shared JetBrains Mono atom (identity-only swap).
+import { Mono } from '@/components/ui/typography'
 
 export default function FinancialSection({
   t, errors,
@@ -70,7 +72,8 @@ export default function FinancialSection({
           <div style={{ ...input, width: 110, display: 'flex', alignItems: 'center', fontSize: 13,
             background: 'var(--surface-2, var(--bg))',
             color: hasRates ? (margin >= 0 ? 'var(--color-success)' : 'var(--color-danger)') : 'var(--text-muted)' }}>
-            <span style={{ fontWeight: 700, fontFamily: 'JetBrains Mono, monospace' }}>{hasRates ? margin.toFixed(2) : '—'}</span>
+            {/* HUISSTIJL-1: identical fontFamily/weight render. */}
+            <Mono style={{ fontWeight: 700 }}>{hasRates ? margin.toFixed(2) : '—'}</Mono>
           </div>
         </F>
       )}

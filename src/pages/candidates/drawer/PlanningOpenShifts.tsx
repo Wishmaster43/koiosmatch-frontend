@@ -14,6 +14,8 @@ import { useFunctions } from '@/lib/useFunctions'
 // ALWAYS-SEARCHABLE-1 (Danny 08-08): the house searchable combobox replaces the
 // native <select> that used to render the distance/level filter pickers below.
 import CreatableSelect from '@/components/ui/CreatableSelect'
+// HUISSTIJL-1: the shared muted-caption atom (identity-only swap).
+import { Caption } from '@/components/ui/typography'
 import type { Id } from '@/types/common'
 import type { FavLists, OpenFilters, OpenShift } from './planningTypes'
 
@@ -90,9 +92,10 @@ export default function PlanningOpenShifts({ openShifts, loading, error, onReloa
               style={{ padding: '5px 8px', fontSize: 12 }} />
           </div>
           <div style={{ marginLeft: 'auto' }}>
-            <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>
+            {/* HUISSTIJL-1: identical 11/400/var(--text-muted) render. */}
+            <Caption>
               {filtered.length}/{openShifts.length} {t('planning.shifts')}
-            </span>
+            </Caption>
           </div>
         </div>
       </div>

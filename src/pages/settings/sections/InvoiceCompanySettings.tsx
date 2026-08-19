@@ -20,6 +20,7 @@ import Toggle from '@/components/ui/Toggle'
 import Spinner from '@/components/ui/Spinner'
 import { BTN_H } from '@/config/buttonMetrics'
 import { card, notice } from './usageCardStyles'
+import { PageTitle, SectionTitle } from '@/components/ui/typography'
 
 // The full settings shape (matches PUT /admin/invoice-settings request body 1:1).
 interface InvoiceSettingsForm {
@@ -112,7 +113,7 @@ export default function InvoiceCompanySettings() {
     <div style={{ maxWidth: 720 }}>
       <div className="flex items-center justify-between mb-5">
         <div>
-          <h2 style={{ fontSize: 15, fontWeight: 600, color: 'var(--text)' }}>{t('invoiceSettings.title')}</h2>
+          <PageTitle>{t('invoiceSettings.title')}</PageTitle>
           <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>{t('invoiceSettings.subtitle')}</p>
         </div>
         <button type="button" onClick={handleSave} disabled={saving || phase !== 'ready'}
@@ -136,7 +137,7 @@ export default function InvoiceCompanySettings() {
                       borderRadius: 10, marginBottom: 16 }}>
           <AlertTriangle size={15} style={{ color: 'var(--color-warning, var(--text-muted))', flexShrink: 0, marginTop: 1 }} aria-hidden="true" />
           <div>
-            <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)' }}>{t('invoiceSettings.notReadyTitle')}</div>
+            <SectionTitle as="div">{t('invoiceSettings.notReadyTitle')}</SectionTitle>
             <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>{t('invoiceSettings.notReadyDesc')}</div>
           </div>
         </div>

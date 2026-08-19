@@ -7,6 +7,8 @@ import EntityLink from '@/components/ui/EntityLink'
 import { useAuth } from '@/context/AuthContext'
 import { useDateFormat } from '@/lib/datetime'
 import { useVacancyAppointments, VACANCY_APPOINTMENTS_PER_PAGE } from '../hooks/useVacancyAppointments'
+// HUISSTIJL-1: the meta text (11px/muted) is the shared Caption atom.
+import { Caption } from '@/components/ui/typography'
 import type { VacancyDetail } from '@/types/vacancy'
 
 /**
@@ -60,22 +62,22 @@ export default function AppointmentsTab({ vacancy: v }: { vacancy: VacancyDetail
                       ? <EntityLink page="candidates" id={a.candidateId}>{a.candidateName || '—'}</EntityLink>
                       : (a.candidateName || t('appointmentsTab.noCandidate'))}
                   </span>
-                  {a.locationName && <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>{a.locationName}</span>}
+                  {a.locationName && <Caption>{a.locationName}</Caption>}
                 </div>
                 {a.type && <SoftChip label={a.type} color="var(--color-primary)" />}
                 {a.status && <SoftChip label={a.status} color="var(--color-info)" />}
-                {a.ownerName && <span style={{ fontSize: 11, color: 'var(--text-muted)', flexShrink: 0 }}>{a.ownerName}</span>}
+                {a.ownerName && <Caption style={{ flexShrink: 0 }}>{a.ownerName}</Caption>}
               </div>
             ))}
           </div>
         )}
       </SectionCard>
       {total > VACANCY_APPOINTMENTS_PER_PAGE && (
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 8, fontSize: 11, color: 'var(--text-muted)' }}>
+        <Caption as="div" style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 8 }}>
           <span>{t('appointmentsTab.pageOf', { page, lastPage })}</span>
           <button onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page <= 1} style={{ width: 24, height: 24, display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid var(--border)', borderRadius: 5, background: 'var(--bg)', cursor: page <= 1 ? 'default' : 'pointer', color: page <= 1 ? 'var(--border)' : 'var(--text-muted)' }}>‹</button>
           <button onClick={() => setPage(p => Math.min(lastPage, p + 1))} disabled={page >= lastPage} style={{ width: 24, height: 24, display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid var(--border)', borderRadius: 5, background: 'var(--bg)', cursor: page >= lastPage ? 'default' : 'pointer', color: page >= lastPage ? 'var(--border)' : 'var(--text-muted)' }}>›</button>
-        </div>
+        </Caption>
       )}
     </div>
   )

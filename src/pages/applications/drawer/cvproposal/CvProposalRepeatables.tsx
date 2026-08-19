@@ -1,10 +1,10 @@
 import { useTranslation } from 'react-i18next'
 import SoftChip from '@/components/ui/SoftChip'
+import { Caption } from '@/components/ui/typography'
 import type { CvProposalEducation, CvProposalExperience } from '@/pages/applications/data/mapCvProposal'
 
 const rowStyle = { display: 'flex', alignItems: 'baseline', gap: 8, flexWrap: 'wrap' as const, fontSize: 12 }
 const listTitle = { fontSize: 11, fontWeight: 600 as const, color: 'var(--text)', marginBottom: 4 }
-const metaStyle = { fontSize: 11, color: 'var(--text-muted)' }
 
 interface CvProposalRepeatablesProps {
   experiences: CvProposalExperience[]
@@ -40,9 +40,9 @@ export default function CvProposalRepeatables({ experiences, educations }: CvPro
             {experiences.map((row, index) => (
               <li key={`${row.company}-${index}`} style={rowStyle}>
                 <span style={{ color: 'var(--text)', fontWeight: 500 }}>{row.company}</span>
-                {row.position && <span style={metaStyle}>{row.position}</span>}
-                {row.location && <span style={metaStyle}>{row.location}</span>}
-                {period(row.startDate, row.endDate) && <span style={metaStyle}>{period(row.startDate, row.endDate)}</span>}
+                {row.position && <Caption>{row.position}</Caption>}
+                {row.location && <Caption>{row.location}</Caption>}
+                {period(row.startDate, row.endDate) && <Caption>{period(row.startDate, row.endDate)}</Caption>}
                 <SoftChip label={t('cvProposal.badge')} color="var(--color-primary)" title={t('cvProposal.badgeTitle')} />
               </li>
             ))}
@@ -57,8 +57,8 @@ export default function CvProposalRepeatables({ experiences, educations }: CvPro
             {educations.map((row, index) => (
               <li key={`${row.degree}-${index}`} style={rowStyle}>
                 <span style={{ color: 'var(--text)', fontWeight: 500 }}>{row.degree}</span>
-                {row.school && <span style={metaStyle}>{row.school}</span>}
-                {row.issueDate && <span style={metaStyle}>{row.issueDate}</span>}
+                {row.school && <Caption>{row.school}</Caption>}
+                {row.issueDate && <Caption>{row.issueDate}</Caption>}
                 <SoftChip label={t('cvProposal.badge')} color="var(--color-primary)" title={t('cvProposal.badgeTitle')} />
               </li>
             ))}

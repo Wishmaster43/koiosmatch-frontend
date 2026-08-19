@@ -7,6 +7,7 @@ import DocumentVersionHistory from './DocumentVersionHistory'
 import DocumentLinkPicker from './DocumentLinkPicker'
 import { splitExt, isPersisted, computeDocExpiry, docUrl, DOC_GRID_COLUMNS } from './documentHelpers'
 import type { DocItem } from './documentHelpers'
+import { Caption } from '@/components/ui/typography'
 import type { Id } from '@/types/common'
 
 // DOC-LIST-LINK-1: the five kinds a document can be linked to — mirrors the reverse-FK
@@ -121,7 +122,7 @@ export default function DocumentRow({
                   onBlur={onRenameCommit}
                   style={{ flex: 1, fontSize: 12, fontWeight: 500, padding: '3px 7px', borderRadius: 6, border: '1px solid var(--color-primary)', outline: 'none', color: 'var(--text)', boxSizing: 'border-box', minWidth: 0 }} />
                 {/* Extension shown but not editable. */}
-                <span style={{ fontSize: 11, color: 'var(--text-muted)', flexShrink: 0 }}>{splitExt(displayName).ext}</span>
+                <Caption style={{ flexShrink: 0 }}>{splitExt(displayName).ext}</Caption>
               </div>
             : <span style={{ fontSize: 12, fontWeight: 500, color: 'var(--text)', display: 'block', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{displayName}</span>
           }

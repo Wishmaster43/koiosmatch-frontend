@@ -21,6 +21,7 @@ import { useAuth } from '@/context/AuthContext'
 import { notifyError } from '@/lib/notify'
 import Button from '@/components/ui/Button'
 import Spinner from '@/components/ui/Spinner'
+import { PageTitle } from '@/components/ui/typography'
 
 // Entity → icon + its export route + the view-permission that gates it (mirrors
 // routes/api/tenant/exports.php exactly). "Leads" = candidates in a Lead phase,
@@ -133,7 +134,7 @@ export default function ExportSettings() {
       {/* Content — header + a card whose action sits on the right (mirrors Importeren). */}
       <div style={{ flex: 1 }}>
         <div style={{ marginBottom: 20 }}>
-          <h2 style={{ fontSize: 15, fontWeight: 600, color: 'var(--text)' }}>{t('export.title')}</h2>
+          <PageTitle>{t('export.title')}</PageTitle>
           <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>{t('export.subtitle')}</p>
         </div>
 

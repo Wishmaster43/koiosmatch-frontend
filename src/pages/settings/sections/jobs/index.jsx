@@ -16,6 +16,7 @@ import JobsTab from './JobsTab'
 import RecentJobsTab from './RecentJobsTab'
 import FailedJobsTab from './FailedJobsTab'
 import MetricsTab from './MetricsTab'
+import { PageTitle } from '@/components/ui/typography'
 
 // TAAKBEHEER-HORIZON-1 fase 1: Recent = Horizon's zojuist-verwerkte jobs per tenant.
 // TAAKBEHEER-HORIZON-1 fase 2: Metrics = Horizon's snapshotted throughput/runtime.
@@ -31,7 +32,7 @@ export default function JobQueueSettings() {
       {/* Header */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 4 }}>
         <ListChecks size={18} style={{ color: 'var(--color-primary-text)' }} />
-        <h2 style={{ fontSize: 15, fontWeight: 600, color: 'var(--text)', margin: 0 }}>{t('jobs.title')}</h2>
+        <PageTitle>{t('jobs.title')}</PageTitle>
       </div>
       <p style={{ fontSize: 12, color: 'var(--text-muted)', margin: '2px 0 16px' }}>{t('jobs.subtitle')}</p>
 

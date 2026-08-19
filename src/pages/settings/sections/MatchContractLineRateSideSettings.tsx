@@ -21,6 +21,7 @@ import { useTranslation } from 'react-i18next'
 import SegmentedControl from '@/components/ui/SegmentedControl'
 import { notifyError } from '@/lib/notify'
 import { useAllSettings, getStringSetting, saveSettingsKeys } from '@/lib/settings/useAllSettings'
+import { PageTitle } from '@/components/ui/typography'
 
 const KEY = 'match_contract_line_rate_side'
 const SALE = 'sale'
@@ -69,7 +70,7 @@ export default function MatchContractLineRateSideSettings() {
 
   return (
     <div style={{ maxWidth: 640 }}>
-      <h2 style={{ fontSize: 15, fontWeight: 600, color: 'var(--text)' }}>{t('matchContractLineRateSide.title')}</h2>
+      <PageTitle>{t('matchContractLineRateSide.title')}</PageTitle>
       <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2, marginBottom: 14 }}>{t('matchContractLineRateSide.subtitle')}</p>
       <SegmentedControl ariaLabel={t('matchContractLineRateSide.title')} value={side} onChange={pick} options={options} />
     </div>

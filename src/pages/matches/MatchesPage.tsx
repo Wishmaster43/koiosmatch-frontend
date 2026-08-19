@@ -352,7 +352,7 @@ export default function MatchesPage({ intent }: { intent?: unknown } = {}) {
           ) : (
             // Create a direct match (candidate + vacancy) from the Matches page.
             // BTN_H (§4/§9): one explicit height for every text/action button, everywhere.
-            <Button variant="primary"
+            <Button variant="primary" size="md"
               onClick={() => setAddOpen(true)}>
               <Plus size={15} aria-hidden="true" /> {t('add.button')}
             </Button>

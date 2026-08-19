@@ -12,6 +12,8 @@ import { Edit2, Save, X } from 'lucide-react'
 import { CANON_LABEL_STYLE } from '@/components/drawer/fieldRowCanon'
 import { fieldInputStyle } from '@/components/forms/fieldMetrics'
 import Button from '@/components/ui/Button'
+// HUISSTIJL-1: the shared uppercase group-label atom (identity-only swap).
+import { GroupLabel } from '@/components/ui/typography'
 
 // Shared input styling for text/date/combobox controls across all three tabs
 // (G33/fieldMetrics canon — was its own padding-7/font-12/radius-6 copy).
@@ -32,7 +34,9 @@ export function GroupCard({ children }: { children: ReactNode }) {
 export function GroupHeader({ title, children }: { title: ReactNode; children: ReactNode }) {
   return (
     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
-      <span style={{ fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em', color: 'var(--text-muted)' }}>{title}</span>
+      {/* HUISSTIJL-1: identical 11/600/uppercase render, letterSpacing kept at
+          this block's own 0.04em (atom default is 0.05em) via the style override. */}
+      <GroupLabel as="span" style={{ letterSpacing: '0.04em' }}>{title}</GroupLabel>
       {children}
     </div>
   )

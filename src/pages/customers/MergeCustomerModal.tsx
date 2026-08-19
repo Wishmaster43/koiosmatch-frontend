@@ -34,6 +34,7 @@ import FloatingPanel from '@/components/ui/FloatingPanel'
 import Spinner from '@/components/ui/Spinner'
 import { Z } from '@/lib/zIndexScale'
 import { fieldInputStyle } from '@/components/forms/fieldMetrics'
+import { Caption, Mono } from '@/components/ui/typography'
 import type { Id } from '@/types/common'
 import Button from '@/components/ui/Button'
 
@@ -110,8 +111,8 @@ export default function MergeCustomerModal({ current, onClose, onMerged }: {
       border: `1px solid ${isSurvivor ? 'var(--color-primary)' : 'var(--border)'}`,
       background: isSurvivor ? 'var(--color-primary-bg)' : 'var(--surface)' }}>
       <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--text)' }}>{cust.name}</div>
-      <div style={{ fontSize: 11, color: 'var(--text-muted)', fontFamily: "'JetBrains Mono', monospace" }}>{cust.code ?? '—'}</div>
-      {cust.city && <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>{cust.city}</div>}
+      <Mono as="div" style={{ fontSize: 11, color: 'var(--text-muted)' }}>{cust.code ?? '—'}</Mono>
+      {cust.city && <Caption as="div">{cust.city}</Caption>}
       {/* Text-colour accent uses the AA-contrast text token, not the raw brand primary. */}
       <div style={{ fontSize: 10, marginTop: 4, fontWeight: isSurvivor ? 600 : 400, color: isSurvivor ? 'var(--color-primary-text)' : 'var(--color-danger)' }}>
         {isSurvivor ? t('merge.staysLabel') : t('merge.duplicateLabel')}
@@ -150,8 +151,8 @@ export default function MergeCustomerModal({ current, onClose, onMerged }: {
                 <button key={String(c.id)} type="button" onClick={() => setDuplicate(c)}
                   style={{ textAlign: 'left', padding: '8px 10px', borderRadius: 8, border: '1px solid var(--border)', background: 'var(--surface)', cursor: 'pointer' }}>
                   <span style={{ fontSize: 12, fontWeight: 500, color: 'var(--text)' }}>{c.name}</span>
-                  <span style={{ fontSize: 11, color: 'var(--text-muted)', marginLeft: 8, fontFamily: "'JetBrains Mono', monospace" }}>{c.code ?? ''}</span>
-                  {c.city && <span style={{ fontSize: 11, color: 'var(--text-muted)', marginLeft: 8 }}>{c.city}</span>}
+                  <Mono style={{ fontSize: 11, color: 'var(--text-muted)', marginLeft: 8 }}>{c.code ?? ''}</Mono>
+                  {c.city && <Caption style={{ marginLeft: 8 }}>{c.city}</Caption>}
                 </button>
               ))}
             </div>

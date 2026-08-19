@@ -33,6 +33,7 @@ import SearchSelect from '@/components/ui/SearchSelect'
 // broke this task's own verification run. One-line fix: import the sibling component.
 import { ColorSwatch } from './SettingsControls'
 import { fieldInputStyle } from '@/components/forms/fieldMetrics'
+import { PageTitle, Caption } from '@/components/ui/typography'
 
 const CARD = {
   background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 10,
@@ -57,7 +58,7 @@ export function SettingsScaffold({ title, subtitle, form, maxWidth, actions, chi
     <div style={{ maxWidth }}>
       <div className="flex items-center justify-between" style={{ marginBottom: 20, gap: 16 }}>
         <div style={{ minWidth: 0 }}>
-          <h2 style={{ fontSize: 15, fontWeight: 600, color: 'var(--text)' }}>{title}</h2>
+          <PageTitle>{title}</PageTitle>
           {subtitle && <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>{subtitle}</p>}
         </div>
         <div className="flex items-center" style={{ gap: 8, flexShrink: 0 }}>
@@ -104,7 +105,7 @@ export function SettingRow({ label, description, children }) {
     <SettingCard style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
       <div style={{ flex: 1, minWidth: 0 }}>
         <div style={{ fontSize: 13, fontWeight: 500, color: 'var(--text)' }}>{label}</div>
-        {description && <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 2 }}>{description}</div>}
+        {description && <Caption as="div" style={{ marginTop: 2 }}>{description}</Caption>}
       </div>
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>{children}</div>
     </SettingCard>

@@ -18,6 +18,7 @@ import { DragList, ColorSwatch, ColorBadge, DefaultToggle } from '../components/
 import { Toggle } from '../components/SettingsKit'
 import Button from '@/components/ui/Button'
 import DrawerAddButton from '@/components/drawer/DrawerAddButton'
+import { PageTitle, Caption } from '@/components/ui/typography'
 
 // eslint-disable-next-line no-restricted-syntax -- DATA: fallback swatch colour for a lookup row without one stored yet, not UI chrome
 const FALLBACK_SWATCH = '#6B7280'
@@ -257,7 +258,7 @@ export default function StatusListEditor({ title, subtitle, endpoint, addLabel, 
       <div style={{ maxWidth: 640 }}>
         {compact
           ? <h3 style={{ fontSize: 14, fontWeight: 600, color: 'var(--text)' }}>{title}</h3>
-          : <h2 style={{ fontSize: 15, fontWeight: 600, color: 'var(--text)' }}>{title}</h2>}
+          : <PageTitle>{title}</PageTitle>}
         <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 8 }}>{notFoundNotice}</p>
       </div>
     )
@@ -270,7 +271,7 @@ export default function StatusListEditor({ title, subtitle, endpoint, addLabel, 
       <div style={{ maxWidth: 640 }}>
         {compact
           ? <h3 style={{ fontSize: 14, fontWeight: 600, color: 'var(--text)' }}>{title}</h3>
-          : <h2 style={{ fontSize: 15, fontWeight: 600, color: 'var(--text)' }}>{title}</h2>}
+          : <PageTitle>{title}</PageTitle>}
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 8, color: 'var(--color-danger)', fontSize: 13 }}>
           <AlertTriangle size={14} /> {t('statusList.loadError')}
         </div>
@@ -284,7 +285,7 @@ export default function StatusListEditor({ title, subtitle, endpoint, addLabel, 
         <div style={{ minWidth: 0 }}>
           {compact
             ? <h3 style={{ fontSize: 14, fontWeight: 600, color: 'var(--text)' }}>{title}</h3>
-            : <h2 style={{ fontSize: 15, fontWeight: 600, color: 'var(--text)' }}>{title}</h2>}
+            : <PageTitle>{title}</PageTitle>}
           <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>{subtitle}</p>
         </div>
         <div style={{ display: 'flex', gap: 8, flexShrink: 0 }}>
@@ -345,9 +346,9 @@ export default function StatusListEditor({ title, subtitle, endpoint, addLabel, 
                 </span>
               )}
               {extraField && !extraField.hideRowBadge && item[extraField.key] && (
-                <span style={{ fontSize: 11, color: 'var(--text-muted)', background: 'var(--border)', padding: '2px 8px', borderRadius: 99, whiteSpace: 'nowrap' }}>
+                <Caption style={{ background: 'var(--border)', padding: '2px 8px', borderRadius: 99, whiteSpace: 'nowrap' }}>
                   {extraField.options.find(o => o.value === item[extraField.key])?.label ?? item[extraField.key]}
-                </span>
+                </Caption>
               )}
               {/* One independent pill per singleton (defaultFields) — each has its own
                   tinted marker + tooltip + undo (SECOND SINGLETON, 04-08). */}

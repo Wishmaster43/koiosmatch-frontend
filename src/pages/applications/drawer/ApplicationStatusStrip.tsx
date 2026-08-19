@@ -9,6 +9,9 @@ import { extractApiError } from '@/lib/extractApiError'
 import { useDateFormat } from '@/lib/datetime'
 import SectionCard from '@/components/ui/SectionCard'
 import SoftChip from '@/components/ui/SoftChip'
+// HUISSTIJL-1: shared typography atom — the cell label and every muted
+// secondary line in this strip are exact 11px/muted matches for Caption.
+import { Caption } from '@/components/ui/typography'
 import { humanizeInterviewStatus } from './InterviewStatusCard'
 import type { ApplicationDetail } from '@/types/application'
 
@@ -18,7 +21,7 @@ import type { ApplicationDetail } from '@/types/application'
 function Cell({ label, children }: { label: ReactNode; children: ReactNode }) {
   return (
     <div style={{ minWidth: 0 }}>
-      <div style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 4 }}>{label}</div>
+      <Caption as="div" style={{ marginBottom: 4 }}>{label}</Caption>
       <div style={{ fontSize: 12, color: 'var(--text)', lineHeight: 1.4 }}>{children}</div>
     </div>
   )
@@ -221,13 +224,13 @@ export default function ApplicationStatusStrip({ application: a, onNavigateTab }
           <SoftChip label={a.phaseLabel ?? a.phaseKey ?? '—'} color={a.phaseColor} />
           {phaseEnteredAt != null ? (
             <>
-              <div style={mutedLine}>{t('status.inPhase', { days: daysInPhase ?? 0, phase: a.phaseLabel ?? a.phaseKey ?? '' })}</div>
-              <div style={mutedLine}>{t('status.phaseSince', { date: formatDate(phaseEnteredAt) })}</div>
+              <Caption as="div" style={mutedLine}>{t('status.inPhase', { days: daysInPhase ?? 0, phase: a.phaseLabel ?? a.phaseKey ?? '' })}</Caption>
+              <Caption as="div" style={mutedLine}>{t('status.phaseSince', { date: formatDate(phaseEnteredAt) })}</Caption>
             </>
           ) : daysInProcess !== null ? (
-            <div style={mutedLine}>{`${t('status.inProcess')} · ${t('status.days', { count: daysInProcess })}`}</div>
+            <Caption as="div" style={mutedLine}>{`${t('status.inProcess')} · ${t('status.days', { count: daysInProcess })}`}</Caption>
           ) : (
-            <div style={mutedLine}>{t('status.phaseUnknown')}</div>
+            <Caption as="div" style={mutedLine}>{t('status.phaseUnknown')}</Caption>
           )}
         </Cell>
 
@@ -290,7 +293,7 @@ export default function ApplicationStatusStrip({ application: a, onNavigateTab }
                   badge. Same i18n key + shape as MatchScoreBlock's own manualNote so
                   the two surfaces read identically and never drift apart. */}
               {scoreSource === 'manual' && (
-                <div style={mutedLine}>{t('matchScore.manualNote', { score: aiScoreValue ?? '—' })}</div>
+                <Caption as="div" style={mutedLine}>{t('matchScore.manualNote', { score: aiScoreValue ?? '—' })}</Caption>
               )}
             </>
           )}
@@ -311,7 +314,7 @@ export default function ApplicationStatusStrip({ application: a, onNavigateTab }
                   <>{(nextAppointment.title || nextAppointment.type) ?? '—'} · {formatDateTime(nextAppointment.when)}</>
                 )}
               </div>
-              {nextAppointment.with && <div style={mutedLine}>{nextAppointment.with}</div>}
+              {nextAppointment.with && <Caption as="div" style={mutedLine}>{nextAppointment.with}</Caption>}
             </>
           ) : (
             <span style={mutedItalic}>{t('status.noAppointment')}</span>
@@ -337,7 +340,7 @@ export default function ApplicationStatusStrip({ application: a, onNavigateTab }
                 )}
               </div>
               {a.interview.step != null && a.interview.total > 0 && (
-                <div style={mutedLine}>{t('interview.stepOf', { step: a.interview.step, total: a.interview.total })}</div>
+                <Caption as="div" style={mutedLine}>{t('interview.stepOf', { step: a.interview.step, total: a.interview.total })}</Caption>
               )}
             </>
           ) : (

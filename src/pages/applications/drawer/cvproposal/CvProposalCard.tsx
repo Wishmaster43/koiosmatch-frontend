@@ -7,6 +7,7 @@ import { useConfirm } from '@/hooks/useConfirm'
 import { useDateFormat } from '@/lib/datetime'
 import { BTN_H } from '@/config/buttonMetrics'
 import { buildCvProposalDiff } from '@/pages/applications/data/mapCvProposal'
+import { Caption } from '@/components/ui/typography'
 import CvProposalDiffTable from './CvProposalDiffTable'
 import CvProposalRepeatables from './CvProposalRepeatables'
 import type { CvProposal } from '@/pages/applications/data/mapCvProposal'
@@ -20,7 +21,6 @@ const STATUS_COLOR: Record<CvProposal['status'], string> = {
   rejected: 'var(--text-muted)',
 }
 
-const noticeStyle = { fontSize: 11, color: 'var(--text-muted)' }
 const btnBase = { display: 'inline-flex', alignItems: 'center', gap: 5, height: BTN_H, padding: '0 12px',
   fontSize: 12, fontWeight: 500 as const, borderRadius: 8, cursor: 'pointer' }
 
@@ -95,9 +95,9 @@ export default function CvProposalCard({
         <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--text)' }}>{t('cvProposal.cardTitle')}</span>
         <SoftChip label={t(`cvProposal.status.${proposal.status}`)} color={STATUS_COLOR[proposal.status]} />
         {proposal.createdAt && (
-          <span style={noticeStyle}>{t('cvProposal.readOn', { date: formatDateTime(proposal.createdAt) })}</span>
+          <Caption>{t('cvProposal.readOn', { date: formatDateTime(proposal.createdAt) })}</Caption>
         )}
-        {proposal.model && <span style={noticeStyle}>{t('cvProposal.modelLabel', { model: proposal.model })}</span>}
+        {proposal.model && <Caption>{t('cvProposal.modelLabel', { model: proposal.model })}</Caption>}
       </div>
 
       {isPending ? (
@@ -109,27 +109,27 @@ export default function CvProposalCard({
           </div>
 
           {/* Four states for the current-values fetch that the diff depends on. */}
-          {currentLoading && <div style={noticeStyle}>{t('cvProposal.currentLoading')}</div>}
+          {currentLoading && <Caption as="div">{t('cvProposal.currentLoading')}</Caption>}
           {currentError && (
             <div role="alert" style={{ fontSize: 12, color: 'var(--color-danger)' }}>{t('cvProposal.currentError')}</div>
           )}
-          {!hasContent && <div style={{ ...noticeStyle, fontStyle: 'italic' }}>{t('cvProposal.noFields')}</div>}
+          {!hasContent && <Caption as="div" style={{ fontStyle: 'italic' }}>{t('cvProposal.noFields')}</Caption>}
 
           {diff && diff.rows.length > 0 && <CvProposalDiffTable diff={diff} />}
           <CvProposalRepeatables experiences={proposal.experiences} educations={proposal.educations} />
 
           {/* What accepting does, in one sentence, before the button. */}
           {diff && (
-            <div style={noticeStyle}>
+            <Caption as="div">
               {diff.fillCount === 0 && extraRows === 0 ? t('cvProposal.nothingToFill') : t('cvProposal.fillOnlyNotice')}
-            </div>
+            </Caption>
           )}
-          {extraRows > 0 && <div style={noticeStyle}>{t('cvProposal.appendNotice')}</div>}
+          {extraRows > 0 && <Caption as="div">{t('cvProposal.appendNotice')}</Caption>}
           {/* Key names only — a dropped value is never held, let alone rendered. */}
           {proposal.droppedFieldKeys.length > 0 && (
-            <div style={noticeStyle}>{t('cvProposal.dropped', { count: proposal.droppedFieldKeys.length })}</div>
+            <Caption as="div">{t('cvProposal.dropped', { count: proposal.droppedFieldKeys.length })}</Caption>
           )}
-          <div style={{ ...noticeStyle, fontStyle: 'italic' }}>{t('cvProposal.noFreeText')}</div>
+          <Caption as="div" style={{ fontStyle: 'italic' }}>{t('cvProposal.noFreeText')}</Caption>
 
           {/* The decision. Read-only viewers get an honest line, not a dead button. */}
           {canDecide ? (
@@ -152,24 +152,24 @@ export default function CvProposalCard({
               </button>
             </div>
           ) : (
-            <div style={noticeStyle}>{t('cvProposal.readOnly')}</div>
+            <Caption as="div">{t('cvProposal.readOnly')}</Caption>
           )}
         </>
       ) : (
         <>
           {/* Decided — who and when, then what actually landed (accept only). */}
-          <div style={noticeStyle}>
+          <Caption as="div">
             {proposal.reviewedBy
               ? t('cvProposal.reviewedBy', { name: proposal.reviewedBy, date: proposal.reviewedAt ? formatDateTime(proposal.reviewedAt) : '—' })
               : t('cvProposal.reviewedOn', { date: proposal.reviewedAt ? formatDateTime(proposal.reviewedAt) : '—' })}
-          </div>
+          </Caption>
           {proposal.status === 'accepted' && decidedResult && (
-            <div style={noticeStyle}>
+            <Caption as="div">
               {decidedResult.appliedFields.length === 0
                 ? t('cvProposal.resultNothing')
                 : t('cvProposal.resultApplied', { count: decidedResult.appliedFields.length })}
               {decidedResult.skippedFields.length > 0 && ` · ${t('cvProposal.resultSkipped', { count: decidedResult.skippedFields.length })}`}
-            </div>
+            </Caption>
           )}
         </>
       )}

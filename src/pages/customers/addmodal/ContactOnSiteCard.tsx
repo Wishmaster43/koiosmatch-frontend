@@ -31,6 +31,7 @@ import { FieldRow, TextField } from '@/components/forms/fields'
 import CreatableSelect from '@/components/ui/CreatableSelect'
 import { cardHead, cardBox, row2 } from '@/components/ui/modalCards'
 import { contactOptionLabel } from '@/lib/contactLabel'
+import { Caption } from '@/components/ui/typography'
 import type { Contact } from '@/types/customer'
 import type { Id } from '@/types/common'
 import FieldNotice from '@/components/ui/FieldNotice'
@@ -109,7 +110,7 @@ export default function ContactOnSiteCard({
                 }}
                 placeholder={t('subModal.contactName')} options={contactOptions} menuWidth={280} style={pickerStyle} />
             </FieldRow>
-            <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 3 }}>{t('subModal.contactPersonHint')}</div>
+            <Caption as="div" style={{ marginTop: 3 }}>{t('subModal.contactPersonHint')}</Caption>
           </div>
         )}
         <div style={row2}>

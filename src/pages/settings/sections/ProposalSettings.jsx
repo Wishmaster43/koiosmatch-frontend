@@ -7,6 +7,7 @@ import SegmentedControl from '@/components/ui/SegmentedControl'
 import { Toggle } from '../components/SettingsKit'
 import { notifyError } from '@/lib/notify'
 import { fieldInputStyle } from '@/components/forms/fieldMetrics'
+import { PageTitle, Mono } from '@/components/ui/typography'
 
 // The tenant-setting key: one JSON blob holding the whole proposal configuration
 // (shared contract with the sibling "propose candidate" modal — MODAL agent reads
@@ -81,7 +82,7 @@ export default function ProposalSettings() {
 
   return (
     <div style={{ maxWidth: 720 }}>
-      <h2 style={{ fontSize: 15, fontWeight: 600, color: 'var(--text)' }}>{t('proposal.title')}</h2>
+      <PageTitle>{t('proposal.title')}</PageTitle>
       <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2, marginBottom: 16 }}>{t('proposal.subtitle')}</p>
 
       {/* Honest notice — no fake affordance: Koios never sends this on its own yet. */}
@@ -111,11 +112,11 @@ export default function ProposalSettings() {
           <p style={hintStyle}>{t('proposal.tokensHint')}</p>
           <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
             {TOKENS.map(token => (
-              <span key={token} style={{ fontSize: 11, fontFamily: 'JetBrains Mono, monospace', padding: '3px 8px', borderRadius: 6,
+              <Mono key={token} style={{ fontSize: 11, padding: '3px 8px', borderRadius: 6,
                 color: 'var(--color-primary-text)', background: 'var(--color-primary-bg, color-mix(in srgb, var(--color-primary) 10%, transparent))',
                 border: '1px solid color-mix(in srgb, var(--color-primary) 30%, transparent)' }}>
                 {token}
-              </span>
+              </Mono>
             ))}
           </div>
         </div>

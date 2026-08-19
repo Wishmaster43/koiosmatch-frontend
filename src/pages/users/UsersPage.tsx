@@ -108,7 +108,7 @@ export default function UsersPage() {
           <HeaderSearch onSearch={setQuery} placeholder={t('searchPlaceholder')} ariaLabel={t('searchPlaceholder')} width={220} />
           {/* Hidden without the right, never a dead button (§7 — backend re-checks). */}
           {canCreate && (
-            <Button variant="primary" onClick={() => setShowCreate(true)}>
+            <Button variant="primary" size="md" onClick={() => setShowCreate(true)}>
               <Plus size={14} aria-hidden="true" /> {t('newUser')}
             </Button>
           )}

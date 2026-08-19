@@ -43,6 +43,8 @@ import CreatableSelect from '@/components/ui/CreatableSelect'
 import KoiosSuggestionBadge from '@/components/ui/KoiosSuggestionBadge'
 import FloatingPanel from '@/components/ui/FloatingPanel'
 import { ActionRuleBanner } from '@/components/actionrules'
+// HUISSTIJL-1: the shared JetBrains Mono atom + the muted-caption atom (identity-only swaps).
+import { Mono, Caption } from '@/components/ui/typography'
 import { usePlanIntakeForm } from './planIntake/usePlanIntakeForm'
 import type { PlanIntakeFormOptions } from './planIntake/usePlanIntakeForm'
 import { input, fieldFootprint, errMsg, labelLeftRow, rowLabel, rowField } from './planIntake/styles'
@@ -109,9 +111,11 @@ export default function PlanIntakeModal(props: PlanIntakeFormOptions) {
             broken layout (Danny 24-07), hence the box, now in its own row (P33). */}
         <div style={labelLeftRow}>
           <span style={rowLabel}>{t('work.endTime')}</span>
-          <div style={{ padding: '8px 11px', border: '1px solid var(--border)', background: 'var(--hover-bg)', borderRadius: 8, boxSizing: 'border-box', display: 'flex', alignItems: 'center', whiteSpace: 'nowrap', fontSize: 13, width: 110, color: form.endTime ? 'var(--text)' : 'var(--text-muted)', fontFamily: "'JetBrains Mono', monospace" }}>
+          {/* HUISSTIJL-1: identical fontFamily/box render (colour stays the same
+              live ternary — the atom does not fix a colour). */}
+          <Mono as="div" style={{ padding: '8px 11px', border: '1px solid var(--border)', background: 'var(--hover-bg)', borderRadius: 8, boxSizing: 'border-box', display: 'flex', alignItems: 'center', whiteSpace: 'nowrap', fontSize: 13, width: 110, color: form.endTime ? 'var(--text)' : 'var(--text-muted)' }}>
             {form.endTime ? t('work.endTimeAt', { time: form.endTime }) : '—'}
-          </div>
+          </Mono>
         </div>
 
         {/* Office / remote / phone / a real tenant location. */}
@@ -154,7 +158,8 @@ export default function PlanIntakeModal(props: PlanIntakeFormOptions) {
                 repicking dissolves it — then the value is the recruiter's own. */}
             {props.suggestedVacancyId != null && String(form.vacancyId) === String(props.suggestedVacancyId) && !props.existing
               ? <KoiosSuggestionBadge />
-              : <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 5 }}>{form.vacancyHint}</div>}
+              // HUISSTIJL-1: identical 11/400/var(--text-muted) render as a div.
+              : <Caption as="div" style={{ marginTop: 5 }}>{form.vacancyHint}</Caption>}
             {(errors.vacancyId || errors.applicationId) && <div style={errMsg}>{t('common:required')}</div>}
           </div>
         </div>

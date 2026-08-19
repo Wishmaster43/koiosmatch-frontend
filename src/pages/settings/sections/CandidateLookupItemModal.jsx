@@ -12,6 +12,7 @@ import { Toggle } from '../components/SettingsKit'
 import IconPickerControl from './IconPickerControl'
 import { GENERIC_LOOKUP_ICON_NAMES, resolveGenericLookupIcon } from './lookupIcons'
 import Button from '@/components/ui/Button'
+import { Caption } from '@/components/ui/typography'
 
 // "Niet actief" → "niet_actief" — a stable English-ish slug suggestion (mirrors
 // the parent's slugify; duplicated here to avoid a cross-file import cycle).
@@ -50,7 +51,7 @@ export default function CandidateLookupItemModal({
                      background: (locked && modal.mode === 'edit') ? 'var(--hover-bg)' : 'var(--surface)',
                      color: (locked && modal.mode === 'edit') ? 'var(--text-muted)' : 'var(--text)' }} />
           {locked && modal.mode === 'edit' && (
-            <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 4 }}>{t('lookups.labelLocked')}</div>
+            <Caption as="div" style={{ marginTop: 4 }}>{t('lookups.labelLocked')}</Caption>
           )}
         </div>
 
@@ -63,9 +64,9 @@ export default function CandidateLookupItemModal({
             style={{ width: '100%', height: 36, padding: '0 10px', fontSize: 13, fontFamily: 'monospace',
                      border: '1px solid var(--border)', borderRadius: 8, outline: 'none', boxSizing: 'border-box',
                      background: modal.mode === 'edit' ? 'var(--hover-bg)' : 'var(--surface)', color: modal.mode === 'edit' ? 'var(--text-muted)' : 'var(--text)' }} />
-          <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 4 }}>
+          <Caption as="div" style={{ marginTop: 4 }}>
             {modal.mode === 'edit' ? t('lookups.valueImmutable') : t('lookups.valueHint')}
-          </div>
+          </Caption>
         </div>
 
         <div style={{ marginBottom: 14 }}>
@@ -95,7 +96,7 @@ export default function CandidateLookupItemModal({
               <Toggle checked={modal.customer_not_applicable} onChange={v => setModal(m => ({ ...m, customer_not_applicable: v }))} />
               <span style={{ fontSize: 13, color: 'var(--text)' }}>{t('lookups.customerNotApplicable')}</span>
             </div>
-            <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 4 }}>{t('lookups.customerNotApplicableHint')}</div>
+            <Caption as="div" style={{ marginTop: 4 }}>{t('lookups.customerNotApplicableHint')}</Caption>
           </div>
         )}
 
@@ -110,7 +111,7 @@ export default function CandidateLookupItemModal({
               <Toggle checked={modal.is_applicant} onChange={v => setModal(m => ({ ...m, is_applicant: v }))} />
               <span style={{ fontSize: 13, color: 'var(--text)' }}>{t('lookups.phaseApplicant')}</span>
             </div>
-            <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 4 }}>{t('lookups.phaseApplicantHint')}</div>
+            <Caption as="div" style={{ marginTop: 4 }}>{t('lookups.phaseApplicantHint')}</Caption>
           </div>
         )}
 
@@ -121,7 +122,7 @@ export default function CandidateLookupItemModal({
               <Toggle checked={modal.requires_reason} onChange={v => setModal(m => ({ ...m, requires_reason: v }))} />
               <span style={{ fontSize: 13, color: 'var(--text)' }}>{t('lookups.requiresReason')}</span>
             </div>
-            <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 4 }}>{t('lookups.requiresReasonHint')}</div>
+            <Caption as="div" style={{ marginTop: 4 }}>{t('lookups.requiresReasonHint')}</Caption>
           </div>
         )}
 
@@ -132,7 +133,7 @@ export default function CandidateLookupItemModal({
               <Toggle checked={modal.requires_match} onChange={v => setModal(m => ({ ...m, requires_match: v }))} />
               <span style={{ fontSize: 13, color: 'var(--text)' }}>{t('lookups.requiresMatch')}</span>
             </div>
-            <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 4 }}>{t('lookups.requiresMatchHint')}</div>
+            <Caption as="div" style={{ marginTop: 4 }}>{t('lookups.requiresMatchHint')}</Caption>
           </div>
         )}
 
@@ -143,7 +144,7 @@ export default function CandidateLookupItemModal({
               <Toggle checked={modal.expects_return_date} onChange={v => setModal(m => ({ ...m, expects_return_date: v }))} />
               <span style={{ fontSize: 13, color: 'var(--text)' }}>{t('lookups.expectsReturnDate')}</span>
             </div>
-            <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 4 }}>{t('lookups.expectsReturnDateHint')}</div>
+            <Caption as="div" style={{ marginTop: 4 }}>{t('lookups.expectsReturnDateHint')}</Caption>
           </div>
         )}
 
@@ -154,7 +155,7 @@ export default function CandidateLookupItemModal({
               <Toggle checked={modal.is_blacklist} onChange={v => setModal(m => ({ ...m, is_blacklist: v }))} />
               <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--color-danger)' }}>{t('lookups.isBlacklist')}</span>
             </div>
-            <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 4 }}>{t('lookups.isBlacklistHint')}</div>
+            <Caption as="div" style={{ marginTop: 4 }}>{t('lookups.isBlacklistHint')}</Caption>
           </div>
         )}
 
@@ -165,7 +166,7 @@ export default function CandidateLookupItemModal({
               <Toggle checked={modal.requires_appointment} onChange={v => setModal(m => ({ ...m, requires_appointment: v }))} />
               <span style={{ fontSize: 13, color: 'var(--text)' }}>{t('lookups.requiresAppointment')}</span>
             </div>
-            <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 4 }}>{t('lookups.requiresAppointmentHint')}</div>
+            <Caption as="div" style={{ marginTop: 4 }}>{t('lookups.requiresAppointmentHint')}</Caption>
           </div>
         )}
 
@@ -176,7 +177,7 @@ export default function CandidateLookupItemModal({
               <Toggle checked={modal.is_match} onChange={v => setModal(m => ({ ...m, is_match: v }))} />
               <span style={{ fontSize: 13, color: 'var(--text)' }}>{t('lookups.isMatch')}</span>
             </div>
-            <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 4 }}>{t('lookups.isMatchHint')}</div>
+            <Caption as="div" style={{ marginTop: 4 }}>{t('lookups.isMatchHint')}</Caption>
           </div>
         )}
 
@@ -187,7 +188,7 @@ export default function CandidateLookupItemModal({
               <Toggle checked={modal.is_rejected} onChange={v => setModal(m => ({ ...m, is_rejected: v }))} />
               <span style={{ fontSize: 13, color: 'var(--text)' }}>{t('lookups.isRejected')}</span>
             </div>
-            <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 4 }}>{t('lookups.isRejectedHint')}</div>
+            <Caption as="div" style={{ marginTop: 4 }}>{t('lookups.isRejectedHint')}</Caption>
           </div>
         )}
 
@@ -198,7 +199,7 @@ export default function CandidateLookupItemModal({
               <Toggle checked={modal.is_proposal} onChange={v => setModal(m => ({ ...m, is_proposal: v }))} />
               <span style={{ fontSize: 13, color: 'var(--text)' }}>{t('lookups.isProposal')}</span>
             </div>
-            <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 4 }}>{t('lookups.isProposalHint')}</div>
+            <Caption as="div" style={{ marginTop: 4 }}>{t('lookups.isProposalHint')}</Caption>
           </div>
         )}
 

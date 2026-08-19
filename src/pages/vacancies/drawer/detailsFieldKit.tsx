@@ -5,6 +5,8 @@ import { CANON_LABEL_STYLE } from '@/components/drawer/fieldRowCanon'
 import { fieldInputStyle } from '@/components/forms/fieldMetrics'
 import CreatableSelect from '@/components/ui/CreatableSelect'
 import Button from '@/components/ui/Button'
+// HUISSTIJL-1: the card title (11/600/uppercase/muted) is the shared GroupLabel atom.
+import { GroupLabel } from '@/components/ui/typography'
 
 /**
  * detailsFieldKit — shared row/card/control-button building blocks for the
@@ -42,7 +44,7 @@ export function card(title: ReactNode, children: ReactNode, actions?: ReactNode)
   return (
     <div>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 3 }}>
-        <span style={groupTitleText}>{title}</span>
+        <GroupLabel as="span" style={{ letterSpacing: '0.04em' }}>{title}</GroupLabel>
         {actions}
       </div>
       {/* CANON-BOX (05-08): the card pads once (6/12) and stacks bare rows with gap 2 — 28px pitch. */}

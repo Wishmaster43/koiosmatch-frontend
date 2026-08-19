@@ -51,6 +51,7 @@ import VacancySettingsTab from './VacancySettingsTab'
 import SelectMenu from '@/components/ui/SelectMenu'
 import { useNoteTypes } from '@/lib/useNoteTypes'
 import { contactOptionLabel } from '@/lib/contactLabel'
+import { Caption } from '@/components/ui/typography'
 import type { Id } from '@/types/common'
 import type { Customer, CustomerNote } from '@/types/customer'
 
@@ -287,7 +288,7 @@ export default function CustomerNotesTab({ customerId, customerName, customerIni
           // there is anything below Klant to link to.
           composerExtra={hasLinkChoices ? (
             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <span style={{ fontSize: 11, color: 'var(--text-muted)', flexShrink: 0 }}>{t('notes.linkContactLabel')}</span>
+              <Caption style={{ flexShrink: 0 }}>{t('notes.linkContactLabel')}</Caption>
               <div style={{ width: 240 }}>
                 <SelectMenu value={pendingLink} onChange={setPendingLink}
                   options={linkOptions}

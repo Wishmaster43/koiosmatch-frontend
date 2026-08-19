@@ -9,6 +9,7 @@ import OpenCheckGroup from '@/components/reports/filter/OpenCheckGroup'
 import { resolveGenericLookupIcon } from './lookupIcons'
 import { useAllSettings, saveSettingsKeys, invalidateAllSettingsCache, getNumberSetting, getJsonSetting } from '@/lib/settings/useAllSettings'
 import { notifyError } from '@/lib/notify'
+import { SectionTitle } from '@/components/ui/typography'
 
 // Tenant-setting key — the duplicate-detection field set (v1: email/mobile/phone).
 // Consumed TODAY by the backend DuplicateFinder (dedupeKeys(), default ['email','mobile'])
@@ -59,7 +60,7 @@ function NoContactDaysField() {
 
   return (
     <div style={{ marginBottom: 16, paddingBottom: 16, borderBottom: '1px solid var(--border)' }}>
-      <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)', marginBottom: 4 }}>{t('lastContactTypes.noContactDaysTitle')}</div>
+      <SectionTitle as="div" style={{ marginBottom: 4 }}>{t('lastContactTypes.noContactDaysTitle')}</SectionTitle>
       <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 8, maxWidth: 460 }}>{t('lastContactTypes.noContactDaysHint')}</div>
       <label htmlFor="candidate-no-contact-days" style={{ fontSize: 11, fontWeight: 500, color: 'var(--text-muted)', display: 'block', marginBottom: 4 }}>
         {t('lastContactTypes.noContactDaysLabel')}
@@ -109,7 +110,7 @@ function DedupeKeysField() {
 
   return (
     <div style={{ marginBottom: 16, paddingBottom: 16, borderBottom: '1px solid var(--border)' }}>
-      <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)', marginBottom: 4 }}>{t('lastContactTypes.dedupeKeysTitle')}</div>
+      <SectionTitle as="div" style={{ marginBottom: 4 }}>{t('lastContactTypes.dedupeKeysTitle')}</SectionTitle>
       <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 8, maxWidth: 460 }}>{t('lastContactTypes.dedupeKeysHint')}</div>
       <div style={{ maxWidth: 220 }}>
         <OpenCheckGroup group={{

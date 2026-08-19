@@ -104,6 +104,8 @@ export default function OutreachDrawer({ id, createdAt, archived = false, archiv
 
   const name = detail?.name ?? fallbackName ?? '…'
   const st   = (detail?.status as string) ?? fallbackStatus ?? 'draft'
+  // eslint-disable-next-line no-restricted-syntax -- DATA: STATUS_COLOR's own draft-calm fallback shade
+  const stBadgeColor = STATUS_COLOR[st] ?? '#94A3B8'
   const done = (detail?.targets ?? []).filter(tg => tg.status && tg.status !== 'todo').length
   const total = detail?.targets?.length ?? detail?.targets_count ?? 0
 
@@ -185,7 +187,8 @@ export default function OutreachDrawer({ id, createdAt, archived = false, archiv
       }
       header={
         <EntityHeader
-          label={t('drawer.label')}
+          // TITEL-CHIP-1 (Danny 19-08): the status badge IS the title.
+          label={<TitleBadge label={t(`status.${st}`, { defaultValue: st })} color={stBadgeColor} />}
           avatar={{ initials: initialsOf(name), soft: true }}
           // Changelog icon (§3A(d)) — the ONE shared house popover shell, same as the
           // other seven entities. Its content mounts (and only then fetches) on open.
@@ -209,9 +212,6 @@ export default function OutreachDrawer({ id, createdAt, archived = false, archiv
                 <span style={{ fontSize: 15, fontWeight: 700, color: 'var(--text)' }}>{name}</span>
                 {/* NUMMER-3: the copy chip, right after the title and before the status badge (§3A). */}
                 <ReferenceNumberChip value={detail?.reference_number ?? ''} />
-                {/* Status badge — colour-coded, read-only (was the body StatusPill, §3A(c)). */}
-                {/* eslint-disable-next-line no-restricted-syntax -- DATA: matches STATUS_COLOR's own "draft calm" fallback shade, no token available */}
-                <TitleBadge label={t(`status.${st}`, { defaultValue: st })} color={STATUS_COLOR[st] ?? '#94A3B8'} />
               </div>
               {/* W2 delivered: the detail (incl. targets) now loads for an archived
                   campaign too, so the real progress shows regardless of archive state

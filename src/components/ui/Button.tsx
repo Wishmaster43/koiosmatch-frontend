@@ -35,14 +35,18 @@ export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 const VARIANTS: Record<ButtonVariant, CSSProperties> = {
   // The main action. on-accent is the contrast-safe text the theme derives for
   // whatever fill the tenant picked (clampedOnAccent) — never hardcoded white.
-  primary:    { background: 'var(--color-primary)', color: 'var(--color-on-accent)', border: 'none', fontWeight: 600 },
+  primary:    { background: 'var(--button-fill)', color: 'var(--button-ink)', border: '1px solid var(--button-border)', fontWeight: 600 },
   // The calm sibling: cancel, back, everything that must not compete.
   secondary:  { background: 'var(--surface)', color: 'var(--text)', border: '1px solid var(--border)', fontWeight: 500 },
   // Bare text button for inline/low-emphasis actions.
   ghost:      { background: 'none', color: 'var(--text-muted)', border: 'none', fontWeight: 500 },
-  // §4 soft-tint of the accent — emphasis without a solid fill. Text uses the
-  // readable twin (ACCENT-INK-1): the tint colour and the ink are not the same thing.
-  soft:       { background: tintBg('var(--color-primary)'), color: 'var(--color-primary-text)', border: tintBorder('var(--color-primary)'), fontWeight: 500 },
+  // PRIMAIR-VLAK-1 (Danny 19-08, on the tinted buttons app-wide: "alle knoppen
+  // die licht rood zijn maken we tenantkleur"): the accent-tinted ACTION button
+  // is retired — soft now paints the SOLID tenant fill, same as primary; only
+  // the caller's chosen size differs. The variant name stays so its ~60 call
+  // sites don't churn. Tints remain the language of CHIPS/toggles/filters
+  // (status meaning), never of primary actions.
+  soft:       { background: 'var(--button-fill)', color: 'var(--button-ink)', border: '1px solid var(--button-border)', fontWeight: 600 },
   // Destructive main action. --color-on-danger is fixed white (4.83:1, audited).
   danger:     { background: 'var(--color-danger)', color: 'var(--color-on-danger)', border: 'none', fontWeight: 600 },
   // Destructive but not the primary action of the surface (row deletes, etc.).
@@ -55,7 +59,11 @@ const SIZES: Record<ButtonSize, { height: number; padding: string; fontSize: num
 }
 
 const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button(
-  { variant = 'secondary', size = 'md', iconOnly = false, disabled, style, type = 'button', children, ...rest }, ref,
+  // DEFAULT = sm (Danny 19-08: "drill downs moeten allemaal zelfde zijn — zelfde
+  // geldt voor de instellingen"): ONE height everywhere, width follows the text.
+  // md is the explicit exception for the page toolbar's "+ Nieuw" beside 34px
+  // search chrome ("boven elke tabel groot mag").
+  { variant = 'secondary', size = 'sm', iconOnly = false, disabled, style, type = 'button', children, ...rest }, ref,
 ) {
   const s = SIZES[size]
   return (
