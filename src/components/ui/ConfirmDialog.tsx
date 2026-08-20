@@ -8,7 +8,8 @@
  */
 import { useTranslation } from 'react-i18next'
 import FloatingPanel from '@/components/ui/FloatingPanel'
-import { BTN_H } from '@/config/buttonMetrics'
+import { BodyText } from '@/components/ui/typography'
+import Button from '@/components/ui/Button'
 
 export interface ConfirmDialogProps {
   open: boolean
@@ -21,12 +22,6 @@ export interface ConfirmDialogProps {
   onCancel: () => void
 }
 
-// Shared button box: one fixed height, but the label may never be clipped — it stays
-// on one line and the row wraps around it instead.
-const btnBase = {
-  height: BTN_H, display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
-  fontSize: 13, borderRadius: 8, cursor: 'pointer', whiteSpace: 'nowrap', flexShrink: 0,
-} as const
 
 // POPUP-SLEEP (Danny punt 19, "elke popup sleepbaar"): the hand-rolled overlay is
 // replaced by the shared FloatingPanel, so a confirmation that lands on top of the
@@ -46,25 +41,14 @@ export default function ConfirmDialog({ open, message, title, danger, confirmLab
       width="auto" maxWidth="min(620px, 90vw)" resizable={false} hideClose
       bodyStyle={{ minWidth: 380, padding: 20, display: 'flex', flexDirection: 'column', gap: 14 }}
       header={title ? <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--text)', flex: 1 }}>{title}</div> : <div style={{ flex: 1 }} />}>
-      <div style={{ fontSize: 13, color: 'var(--text)', lineHeight: 1.5 }}>{message}</div>
+      <BodyText as="div">{message}</BodyText>
       {/* Buttons keep their label on ONE line (nowrap) and the row wraps instead —
           so a narrow screen stacks them rather than cutting text off. */}
       <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'flex-end', gap: 8 }}>
-        <button onClick={onCancel}
-          style={{ ...btnBase, padding: '0 16px', border: '1px solid var(--border)',
-            background: 'none', color: 'var(--text)' }}>
-          {cancelLabel ?? t('cancel')}
-        </button>
-        <button onClick={onConfirm}
-          style={{ ...btnBase, padding: '0 18px', fontWeight: 600, border: 'none',
-            // Danger keeps a fixed white-on-red fill (its own --color-on-danger token,
-            // never a raw 'white' literal); the primary fill follows the tenant's
-            // on-accent contrast token (a light brand needs dark text) — a hardcoded
-            // white broke unreadable on a yellow tenant brand (2026-08-08).
-            background: danger ? 'var(--color-danger)' : 'var(--color-primary)',
-            color: danger ? 'var(--color-on-danger)' : 'var(--color-on-accent)' }}>
-          {confirmLabel ?? t('confirm')}
-        </button>
+        {/* House Buttons (r9 boy-scout): the shared confirm dialog hand-drew both
+            actions — identity comes from Button (danger keeps its fixed pair). */}
+        <Button variant="secondary" onClick={onCancel}>{cancelLabel ?? t('cancel')}</Button>
+        <Button variant={danger ? 'danger' : 'primary'} onClick={onConfirm}>{confirmLabel ?? t('confirm')}</Button>
       </div>
     </FloatingPanel>
   )

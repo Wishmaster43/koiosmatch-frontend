@@ -7,6 +7,7 @@ import Slider from '@/components/ui/Slider'
 import AiGeneratedLabel from '@/components/ui/AiGeneratedLabel'
 import Button from '@/components/ui/Button'
 import { tint } from '@/lib/tint'
+import { BodyText, SectionTitle, Caption } from '@/components/ui/typography'
 
 export interface Criterion { key?: string; label?: string; hard?: boolean; score: number; weight?: number; note?: string }
 
@@ -60,7 +61,7 @@ function CriterionCard({ criterion, hardLabel, weightTitle, editing, onScore }: 
     return (
       <div style={{ border: '1px solid var(--border)', borderRadius: 10, padding: '10px 12px', background: 'var(--surface)' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
-          <span style={{ flex: 1, fontSize: 13, fontWeight: 600, color: 'var(--text)' }}>{criterion.label}</span>
+          <SectionTitle as="span" style={{ flex: 1 }}>{criterion.label}</SectionTitle>
           {criterion.hard && (
             // Ink is --color-on-danger-bg — the raw danger colour reads only 3.95:1
             // on its own pastel, AA fail (Opus r3.5).
@@ -68,6 +69,7 @@ function CriterionCard({ criterion, hardLabel, weightTitle, editing, onScore }: 
               background: 'var(--color-danger-bg)', color: 'var(--color-on-danger-bg)' }}>{hardLabel}</span>
           )}
           {criterion.weight != null && <WeightDots weight={criterion.weight} title={weightTitle} />}
+          {/* eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- DATA-coloured score value (scoreColor), not a title */}
           <span style={{ fontSize: 13, fontWeight: 600, color: scoreColor(criterion.score), minWidth: 36, textAlign: 'right' }}>{criterion.score}%</span>
         </div>
         <Slider value={criterion.score} max={100} step={5} onChange={onScore} color={scoreColor(criterion.score)} ariaLabel={criterion.label} />
@@ -83,7 +85,7 @@ function CriterionCard({ criterion, hardLabel, weightTitle, editing, onScore }: 
         <button onClick={() => setOpen(o => !o)}
           // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- see comment above
           style={{ flex: 1, display: 'flex', alignItems: 'center', gap: 6, padding: 0, background: 'none', border: 'none', cursor: 'pointer', textAlign: 'left' }}>
-          <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)' }}>{criterion.label}</span>
+          <SectionTitle as="span">{criterion.label}</SectionTitle>
         </button>
         {criterion.hard && (
           // Ink is --color-on-danger-bg — the raw danger colour reads only 3.95:1
@@ -93,7 +95,8 @@ function CriterionCard({ criterion, hardLabel, weightTitle, editing, onScore }: 
         )}
         {criterion.weight != null && <WeightDots weight={criterion.weight} title={weightTitle} />}
         <ScoreRing value={criterion.score} />
-        <span style={{ fontSize: 13, fontWeight: 600, color: scoreColor(criterion.score), minWidth: 36, textAlign: 'right' }}>{criterion.score}%</span>
+        {/* eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- DATA-coloured score value (scoreColor), not a title */}
+          <span style={{ fontSize: 13, fontWeight: 600, color: scoreColor(criterion.score), minWidth: 36, textAlign: 'right' }}>{criterion.score}%</span>
         {/* eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- see comment above */}
         <button onClick={() => setOpen(o => !o)} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, display: 'flex' }}>
           {open ? <ChevronUp size={14} color="var(--text-muted)" /> : <ChevronDown size={14} color="var(--text-muted)" />}
@@ -161,7 +164,7 @@ export default function MatchScoreBlock({ score, criteria = [], summary, onSave,
           the source themselves. */}
       {!editing && source !== 'manual' && <AiGeneratedLabel />}
 
-      {summary && !editing && <p style={{ fontSize: 13, color: 'var(--text)', lineHeight: 1.55, margin: 0 }}>{summary}</p>}
+      {summary && !editing && <BodyText style={{ lineHeight: 1.55 }}>{summary}</BodyText>}
 
       {/* Overall + edit controls */}
       <div>
@@ -196,7 +199,7 @@ export default function MatchScoreBlock({ score, criteria = [], summary, onSave,
         )}
         {/* Manual-override marker (keeps the AI's own score visible). */}
         {!editing && source === 'manual' && (
-          <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 6 }}>{t('matchScore.manualNote', { score: aiScore ?? '—' })}</div>
+          <Caption as="div" style={{ marginTop: 6 }}>{t('matchScore.manualNote', { score: aiScore ?? '—' })}</Caption>
         )}
       </div>
 

@@ -257,6 +257,25 @@ export default defineConfig([
         message: 'HUISSTIJL: 13/600 is SectionTitle — gebruik <SectionTitle> uit components/ui/typography.',
       },
       {
+        // Herhaal-audit r9 T-GAP-1..4: 13px on --text in one style object IS
+        // BodyText — the conjunction (not fontSize alone: 13 is also ordinary
+        // chrome) mirrors the Caption selector's precedent exactly.
+        selector: "ObjectExpression:has(Property[key.name='fontSize'] > Literal[value=13]):has(Property[key.name='color'] > Literal[value='var(--text)'])",
+        message: 'HUISSTIJL: 13px op --text is BodyText — gebruik <BodyText> uit components/ui/typography.',
+      },
+      {
+        // Herhaal-audit r9 T-GAP-5: the Mono atom was the only one nothing
+        // enforced — the font name lives on exactly one line in typography.tsx.
+        selector: "Property[key.name='fontFamily'] > Literal[value=/JetBrains/]",
+        message: 'HUISSTIJL: JetBrains Mono is het <Mono>-atoom uit components/ui/typography — de fontnaam staat op één plek.',
+      },
+      {
+        // Same rule, template form (the color-mix lesson: Literal regexes never
+        // match TemplateLiterals).
+        selector: "TemplateLiteral > TemplateElement[value.raw=/JetBrains/]",
+        message: 'HUISSTIJL: JetBrains Mono is het <Mono>-atoom uit components/ui/typography — de fontnaam staat op één plek.',
+      },
+      {
         // Herhaal-slotaudit finding 1: BTN_H feeds Button size="md" ONLY (its own
         // docblock says so) — a raw <button> reading it is by definition a copy of
         // Button. Warn bucket: 46 pre-existing hits / 35 files (measured r3.5); the

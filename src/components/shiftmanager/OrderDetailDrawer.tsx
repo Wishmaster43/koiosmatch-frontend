@@ -9,6 +9,16 @@ import { X } from 'lucide-react'
 import { useFocusTrap } from '@/hooks/useFocusTrap'
 import { Section, formatDate, formatTime, formatHours } from './ordersTableParts'
 import type { OrderRow } from '@/types/shiftmanager'
+import { BodyText, Caption } from '@/components/ui/typography'
+
+// Labelled value, dash when empty — module scope (props-only), so React never
+// recreates the component type per render (react-hooks/static-components).
+const Field = ({ label, value }: { label: ReactNode; value?: ReactNode }) => (
+  <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+    <span style={{ fontSize: 10, fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{label}</span>
+    <BodyText as="span">{value || '—'}</BodyText>
+  </div>
+)
 
 export default function OrderDetailDrawer({ row, onClose }: { row: OrderRow | null; onClose: () => void }) {
   const panelRef = useFocusTrap<HTMLDivElement>(onClose)
@@ -19,13 +29,6 @@ export default function OrderDetailDrawer({ row, onClose }: { row: OrderRow | nu
   const customer = loc?.customer ?? row.order?.customer
   const invites  = row.invites ?? []
 
-  // Labelled value, dash when empty.
-  const Field = ({ label, value }: { label: ReactNode; value?: ReactNode }) => (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-      <span style={{ fontSize: 10, fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{label}</span>
-      <span style={{ fontSize: 13, color: 'var(--text)' }}>{value || '—'}</span>
-    </div>
-  )
 
   return (
     <>
@@ -33,17 +36,21 @@ export default function OrderDetailDrawer({ row, onClose }: { row: OrderRow | nu
       <div ref={panelRef} role="dialog" aria-modal="true" aria-label={t('orders.drawer.title')} tabIndex={-1}
         className="fixed right-0 top-0 bottom-0 z-40 overflow-y-auto"
         style={{ width: 400, background: 'var(--surface)', borderLeft: '1px solid var(--border)',
-                 boxShadow: '-4px 0 24px rgba(0,0,0,0.08)' }}>
+                 boxShadow: 'var(--shadow-drawer)' }}>
         <div style={{ padding: '20px 20px 0', display: 'flex', alignItems: 'center', justifyContent: 'space-between',
                       borderBottom: '1px solid var(--border)', paddingBottom: 16, marginBottom: 20 }}>
           <div>
             <h3 style={{ fontSize: 14, fontWeight: 700, color: 'var(--text)' }}>{t('orders.drawer.title')}</h3>
-            <p style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 2 }}>{row.external_id ?? row.id}</p>
+            <Caption as="p" style={{ marginTop: 2 }}>{row.external_id ?? row.id}</Caption>
           </div>
+          {/* Bare close glyph in sm-drawer chrome, not a Button copy. Block form:
+              the style attr sits a line into the tag. */}
+          {/* eslint-disable huisstijlLegacy/no-restricted-syntax */}
           <button onClick={onClose} aria-label={t('common:close')}
             style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: 4 }}>
             <X size={16} />
           </button>
+          {/* eslint-enable huisstijlLegacy/no-restricted-syntax */}
         </div>
 
         <div style={{ padding: '0 20px 24px', display: 'flex', flexDirection: 'column', gap: 16 }}>
@@ -95,9 +102,9 @@ export default function OrderDetailDrawer({ row, onClose }: { row: OrderRow | nu
                       <div style={{ fontSize: 12, fontWeight: 500, color: 'var(--text)' }}>
                         {c ? `${c.first_name ?? ''} ${c.last_name ?? ''}`.trim() : '—'}
                       </div>
-                      <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>
+                      <Caption as="div">
                         {inv.status ?? ''}
-                      </div>
+                      </Caption>
                     </div>
                   </div>
                 )
@@ -107,7 +114,7 @@ export default function OrderDetailDrawer({ row, onClose }: { row: OrderRow | nu
 
           {row.notes && (
             <Section title={t('orders.drawer.notes')}>
-              <p style={{ fontSize: 13, color: 'var(--text)', lineHeight: 1.5 }}>{row.notes}</p>
+              <BodyText>{row.notes}</BodyText>
             </Section>
           )}
         </div>

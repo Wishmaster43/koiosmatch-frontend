@@ -11,6 +11,7 @@
  */
 import type { ReactNode } from 'react'
 import { tint } from '@/lib/tint'
+import { BodyText } from '@/components/ui/typography'
 
 export type CalloutBoxVariant = 'success' | 'warning' | 'info' | 'danger'
 
@@ -58,7 +59,7 @@ export default function CalloutBox({ variant, title, children, onDismiss, dismis
         borderRadius: 10, padding: '12px 14px',
       }}>
       {title && <div style={{ fontSize: 12, fontWeight: 600, color: TOKEN_INK[variant], marginBottom: 8 }}>{title}</div>}
-      <div style={{ fontSize: 13, color: 'var(--text)' }}>{children}</div>
+      <BodyText as="div" style={{ lineHeight: 'normal' }}>{children}</BodyText>
       {onDismiss && (
         // Bare muted TEXT action inside the callout (a dismiss link, not a chrome
         // button) — Button's bordered footprint would outweigh the box itself.

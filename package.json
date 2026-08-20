@@ -39,7 +39,7 @@
     "i18next": "^26.3.1",
     "leaflet": "^1.9.4",
     "lucide-react": "^1.17.0",
-    "pdfjs-dist": "^6.1.200",
+    "pdfjs-dist": "^6.2.108",
     "qrcode.react": "^4.2.0",
     "react": "^19.2.6",
     "react-datepicker": "^9.1.0",
@@ -70,5 +70,8 @@
     "typescript-eslint": "^8.61.1",
     "vite": "^8.0.12",
     "vitest": "^2.1.9"
+  },
+  "overrides": {
+    "pdfjs-dist": "$pdfjs-dist"
   }
 }

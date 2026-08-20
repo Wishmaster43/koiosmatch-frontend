@@ -39,6 +39,7 @@ const make = (defaults: CSSProperties, defaultTag: ElementType) =>
 export const pageTitleStyle: CSSProperties = { fontSize: 15, fontWeight: 600, color: 'var(--text)' }
 // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- the canonical SectionTitle style identity itself, not a hand-styled copy
 export const sectionTitleStyle: CSSProperties = { fontSize: 13, fontWeight: 600, color: 'var(--text)' }
+// eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- the canonical BodyText style identity itself, not a hand-styled copy
 export const bodyTextStyle: CSSProperties = { fontSize: 13, fontWeight: 400, color: 'var(--text)', lineHeight: 1.5 }
 // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- the canonical Caption style identity itself, not a hand-styled copy
 export const captionStyle: CSSProperties = { fontSize: 11, fontWeight: 400, color: 'var(--text-muted)' }
@@ -56,4 +57,5 @@ export const Caption = make(captionStyle, 'span')
 // Uppercase group label (the 11px/600 tracked heading the settings cards use).
 export const GroupLabel = make(groupLabelStyle, 'div')
 // Numbers/IDs/code — JetBrains Mono per §1; size rides with the surrounding text.
+// eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- the canonical Mono font identity itself; the font name lives on exactly this line
 export const Mono = make({ fontFamily: "'JetBrains Mono', monospace" }, 'span')
