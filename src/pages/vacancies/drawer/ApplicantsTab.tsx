@@ -6,7 +6,6 @@ import EntityLink from '@/components/ui/EntityLink'
 import Button from '@/components/ui/Button'
 import DrawerAddButton from '@/components/drawer/DrawerAddButton'
 import StatusFilterSelect, { useStatusFilter } from '@/components/drawer/StatusFilterSelect'
-import { GroupLabel } from '@/components/ui/typography'
 import api, { unwrap } from '@/lib/api'
 import PlanIntakeModal from '@/pages/candidates/drawer/PlanIntakeModal'
 import AddApplicationModal from '@/pages/applications/AddApplicationModal'
@@ -186,9 +185,9 @@ export default function ApplicantsTab({ vacancy: v }: { vacancy: VacancyDetail }
           phase filter in the toolbar below still narrows by phase, it just no
           longer duplicates the counts as a separate row of chips above the list. */}
 
-      {/* Applications list header + house toolbar: search (grows) → phase filter →
-          "+ Sollicitatie" (short — the sub-tab already names the entity, DRAWER-ADD-SHORT-1). */}
-      <GroupLabel style={{ letterSpacing: '0.04em', marginBottom: 8 }}>{t('applicants.title')}</GroupLabel>
+      {/* House toolbar: search (grows) → phase filter → "+ Sollicitatie" (short —
+          the sub-tab already names the entity, DRAWER-ADD-SHORT-1). No heading
+          above it: the tab bar already says "Sollicitaties" (Danny 20-08, dubbel). */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, flex: 1, minWidth: 120, padding: '6px 10px',
           background: 'var(--bg)', border: '1px solid var(--border)', borderRadius: 8 }}>

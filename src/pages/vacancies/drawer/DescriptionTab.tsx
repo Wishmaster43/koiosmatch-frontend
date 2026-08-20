@@ -4,8 +4,6 @@ import { Edit2, Save, X, Trash2, ExternalLink } from 'lucide-react'
 import RichTextEditorJs from '@/components/ui/RichTextEditor'
 import SafeHtmlJs from '@/components/ui/SafeHtml'
 import Button from '@/components/ui/Button'
-// HUISSTIJL-1: the group label (11/600/uppercase/muted) is the shared GroupLabel atom.
-import { GroupLabel } from '@/components/ui/typography'
 import { useVacancyDescription } from '../hooks/useVacancyDescription'
 import type { VacancyDetail } from '@/types/vacancy'
 import type { Id } from '@/types/common'
@@ -51,8 +49,10 @@ export default function DescriptionTab({ vacancy: v, onUpdate }: { vacancy: Vaca
 
   return (
     <div>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
-        <GroupLabel as="span" style={{ letterSpacing: '0.04em' }}>{t('details.description')}</GroupLabel>
+      {/* No heading here: since VAC-TEKST-TAB-1 the tab itself is named
+          "Vacaturetekst", so repeating it was dubbel (Danny 20-08) — the row
+          keeps only the pop-out + edit controls, right-aligned. */}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', marginBottom: 6 }}>
         <div style={{ display: 'flex', gap: 4, alignItems: 'center' }}>
           {/* V-desc-1: second screen — same icon + footprint the candidate
               profile-text pop-out uses, in this block's own title row. */}
