@@ -456,5 +456,13 @@
     "moveDown": "Mover hacia abajo"
   },
   "photoChange": "Cambiar foto",
-  "photoUpload": "Subir"
+  "photoUpload": "Subir",
+  "placeholders": {
+    "middleName": "de",
+    "emailExample": "nombre@cliente.es",
+    "firstName": "Juan",
+    "lastName": "García",
+    "min": "mín",
+    "max": "máx"
+  }
 }

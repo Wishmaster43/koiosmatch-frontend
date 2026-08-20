@@ -31,7 +31,7 @@ export default function PersonalCard({ form, errors, set, isReq, genderOptions }
         </CvField>
         <div style={row('1fr 2fr')}>
           <Field label={t('modal.fields.middleName')}>
-            <TextField value={form.middleName} onChange={v => set('middleName', v)} placeholder="van" />
+            <TextField value={form.middleName} onChange={v => set('middleName', v)} placeholder={t('common:placeholders.middleName')} />
           </Field>
           <CvField name="lastName" label={t('modal.fields.lastName')} required={isReq('lastName')}>
             <TextField value={form.lastName} onChange={v => set('lastName', v)} placeholder={t('modal.fields.lastName')} error={errors.lastName} />

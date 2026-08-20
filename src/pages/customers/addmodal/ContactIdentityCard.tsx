@@ -45,7 +45,7 @@ export default function ContactIdentityCard({
           {/* CONTACT-TUSSENVOEGSEL-1: without this the backend stores "Jan Vries"
               for "Jan de Vries" — and an edit of an existing contact wiped it. */}
           <FieldRow label={t('subModal.middleName')}>
-            <TextField value={middleName} onChange={onMiddleNameChange} placeholder="van" />
+            <TextField value={middleName} onChange={onMiddleNameChange} placeholder={t('common:placeholders.middleName')} />
           </FieldRow>
           <FieldRow label={t('subModal.lastName')} required>
             <TextField value={lastName} onChange={onLastNameChange} error={lastNameError} />

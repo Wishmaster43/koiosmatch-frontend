@@ -12,7 +12,7 @@
 import { useState } from 'react'
 import type { CSSProperties } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Play, FileText, X, Loader2 } from 'lucide-react'
+import { Play, FileText, X } from 'lucide-react'
 import RunDetailDrawer from '@/components/reports/RunDetailDrawer'
 import { Z } from '@/lib/zIndexScale'
 import { fetchWorkflowRun } from './assistActionsExecuteApi'
@@ -22,6 +22,7 @@ import AssistActionItemCard from './AssistActionItemCard'
 import { ACTION_TYPE_LABEL_NL } from './richTextAssistApi'
 import type { RichTextAssistActionItem } from './richTextAssistApi'
 import type { RunRow } from '@/types/reports'
+import Spinner from '../Spinner'
 
 const primaryBtn: CSSProperties = { display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 12, fontWeight: 600,
   padding: '5px 11px', borderRadius: 7, cursor: 'pointer', background: 'var(--color-primary)', color: 'var(--color-on-accent)', border: 'none' }
@@ -83,7 +84,7 @@ export default function AssistActionsResultsPanel({ items, source, onApplyAsText
         )}
         <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
           <button type="button" onClick={() => exec.preview(items)} disabled={exec.status === 'loading'} style={{ ...primaryBtn, opacity: exec.status === 'loading' ? 0.7 : 1 }}>
-            {exec.status === 'loading' ? <Loader2 size={13} className="animate-spin" /> : <Play size={13} />}
+            {exec.status === 'loading' ? <Spinner size={13} /> : <Play size={13} />}
             {t('notesAssist.execute.run', { defaultValue: 'Uitvoeren' })}
           </button>
           <button type="button" onClick={onApplyAsText} style={ghostBtn}>

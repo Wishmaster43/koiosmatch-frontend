@@ -24,3 +24,22 @@ export function interactive(onClick?: () => void) {
     },
   }
 }
+
+/**
+ * interactiveRow — keyboard path for a clickable TABLE ROW (heraudit r3 HIGH:
+ * DataTable rows opened by mouse only). Same Enter/Space + self-target guard as
+ * interactive(), but WITHOUT role="button": a <tr> must keep its native row
+ * semantics or screen readers stop announcing it as a table row. Focus comes
+ * from tabIndex; the browser's focus outline marks the row (§6).
+ */
+export function interactiveRow(onClick?: () => void) {
+  if (!onClick) return {}
+  return {
+    tabIndex: 0,
+    onClick,
+    onKeyDown: (e: KeyboardEvent) => {
+      if (e.target !== e.currentTarget) return
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onClick() }
+    },
+  }
+}

@@ -6,13 +6,14 @@
  */
 import { useEffect, useId, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Loader2 } from 'lucide-react'
+import {  } from 'lucide-react'
 import FloatingPanel from '@/components/ui/FloatingPanel'
 import CreatableSelect from '@/components/ui/CreatableSelect'
 import { useDateFormat } from '@/lib/datetime'
 import { Z } from '@/lib/zIndexScale'
 import { BTN_H } from '@/config/buttonMetrics'
 import type { DeletionPreview } from '@/types/deletion'
+import Spinner from './Spinner'
 
 export interface DeletionPreviewModalProps {
   open: boolean
@@ -76,7 +77,7 @@ export default function DeletionPreviewModal({
       {/* Loading state — the preview GET is in flight. */}
       {loading && (
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, color: 'var(--text-muted)' }}>
-          <Loader2 size={14} className="animate-spin" aria-hidden="true" />
+          <Spinner size={14} />
           {t('loading')}
         </div>
       )}
@@ -136,7 +137,7 @@ export default function DeletionPreviewModal({
           style={{ ...btnBase, padding: '0 18px', fontWeight: 600, border: 'none',
             background: 'var(--color-danger)', color: 'var(--color-on-danger)',
             cursor: confirmDisabled ? 'not-allowed' : 'pointer', opacity: confirmDisabled ? 0.6 : 1 }}>
-          {busy && <Loader2 size={13} className="animate-spin" aria-hidden="true" />}
+          {busy && <Spinner size={13} />}
           {t('trash.modal.confirm')}
         </button>
       </div>

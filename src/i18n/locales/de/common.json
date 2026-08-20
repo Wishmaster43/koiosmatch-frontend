@@ -456,5 +456,13 @@
     "moveDown": "Nach unten verschieben"
   },
   "photoChange": "Foto ändern",
-  "photoUpload": "Hochladen"
+  "photoUpload": "Hochladen",
+  "placeholders": {
+    "middleName": "von",
+    "emailExample": "name@kunde.de",
+    "firstName": "Jan",
+    "lastName": "Janssen",
+    "min": "min",
+    "max": "max"
+  }
 }

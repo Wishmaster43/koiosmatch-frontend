@@ -456,5 +456,13 @@
     "moveDown": "Move down"
   },
   "photoChange": "Change photo",
-  "photoUpload": "Upload"
+  "photoUpload": "Upload",
+  "placeholders": {
+    "middleName": "de/van",
+    "emailExample": "name@client.com",
+    "firstName": "John",
+    "lastName": "Smith",
+    "min": "min",
+    "max": "max"
+  }
 }

@@ -79,7 +79,7 @@
  */
 import { lazy, Suspense } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Wand2, AlignLeft, ListChecks, Sparkles, Loader2, Check, X } from 'lucide-react'
+import { Wand2, AlignLeft, ListChecks, Sparkles, Check, X } from 'lucide-react'
 import KoiosAiMark from './KoiosAiMark'
 import CalloutBox from './CalloutBox'
 import Button from './Button'
@@ -87,6 +87,7 @@ import KoiosVoiceButton from '@/components/layout/koios/KoiosVoiceButton'
 import { useRichTextAssist } from './richtext/useRichTextAssist'
 import { appendDictatedText, applyRichTextAssist, hasPlainText } from './richtext/richTextAssistApply'
 import type { GenerateEntity, RichTextAssistMode } from './richtext/richTextAssistApi'
+import Spinner from './Spinner'
 
 // See the LAZY EXECUTE WIZARD docblock note above for why this is lazy, not a
 // plain static import.
@@ -173,7 +174,7 @@ export default function RichTextAssistBar({ value, onChange, language, modes = [
               <Button key={m} variant="soft" onClick={() => run(m, value)} disabled={loading || !hasText}
                 data-testid={`rte-assist-${m}`}
                 title={hasText ? undefined : t('notesAssist.needsText')}>
-                {loading && mode === m ? <Loader2 size={12} className="animate-spin" /> : <Icon size={12} />}
+                {loading && mode === m ? <Spinner size={12} /> : <Icon size={12} />}
                 {t(`notesAssist.${m}`)}
               </Button>
             ))}
@@ -182,7 +183,7 @@ export default function RichTextAssistBar({ value, onChange, language, modes = [
             {generate && (
               <Button variant="soft" onClick={() => runGenerate(generate.entity, generate.id)} disabled={loading}
                 data-testid="rte-assist-generate">
-                {loading && mode === 'generate' ? <Loader2 size={12} className="animate-spin" /> : <Sparkles size={12} />}
+                {loading && mode === 'generate' ? <Spinner size={12} /> : <Sparkles size={12} />}
                 {t('notesAssist.generate')}
               </Button>
             )}

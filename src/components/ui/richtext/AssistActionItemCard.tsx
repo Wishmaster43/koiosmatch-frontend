@@ -19,11 +19,12 @@
  */
 import type { CSSProperties } from 'react'
 import { useTranslation } from 'react-i18next'
-import { CheckSquare, MessageCircle, Mail, CalendarClock, Bell, Check, Clock, ShieldAlert, HelpCircle, ExternalLink, Loader2 } from 'lucide-react'
+import { CheckSquare, MessageCircle, Mail, CalendarClock, Bell, Check, Clock, ShieldAlert, HelpCircle, ExternalLink } from 'lucide-react'
 import { useDateFormat } from '@/lib/datetime'
 import { ACTION_TYPE_LABEL_NL } from './richTextAssistApi'
 import type { RichTextAssistActionType } from './richTextAssistApi'
 import type { ExecItem } from './useAssistActionsExecute'
+import Spinner from '../Spinner'
 
 // Icon per action-item type — its own small map (distinct concern from
 // channelIcons.ts's contact-channel chip: 'appointment'/'notification' here
@@ -124,7 +125,7 @@ export default function AssistActionItemCard({ item, onConfirm, onViewRun }: Ass
             </span>
           )}
           <button type="button" onClick={onConfirm} disabled={item.confirming} style={{ ...confirmBtn, opacity: item.confirming ? 0.6 : 1 }}>
-            {item.confirming ? <Loader2 size={12} className="animate-spin" /> : <Clock size={12} />}
+            {item.confirming ? <Spinner size={12} /> : <Clock size={12} />}
             {t('notesAssist.execute.confirm', { defaultValue: 'Bevestigen' })}
           </button>
         </span>

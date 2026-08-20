@@ -9,7 +9,7 @@
  * Everything it shows arrives as props and every control reports upward, so the
  * editor keeps all state in `useWorkflowEditor` and this file stays presentational.
  */
-import { X, Save, Play, Loader2, Zap, List, Clock, Workflow as WorkflowIcon, History } from 'lucide-react'
+import { X, Save, Play, Zap, List, Clock, Workflow as WorkflowIcon, History } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { scheduleLabel } from './ScheduleModal'
 import { StopRunButton } from './runControl'
@@ -18,6 +18,7 @@ import ChangelogPopover from '@/components/drawer/ChangelogPopover'
 import EntityChangelog from '@/components/drawer/EntityChangelog'
 import type { Id } from '@/types/common'
 import Button from '@/components/ui/Button'
+import Spinner from '@/components/ui/Spinner'
 
 // Top-level editor view: the node diagram, or this workflow's run history.
 export type EditorView = 'diagram' | 'history'
@@ -199,7 +200,7 @@ export default function WorkflowEditorHeader({
           color:      running ? 'var(--text-muted)' : 'var(--color-primary-text)',
           border: 'none', cursor: running ? 'not-allowed' : 'pointer',
         }}>
-        {running ? <Loader2 size={13} className="animate-spin" /> : <Play size={13} />}
+        {running ? <Spinner size={13} /> : <Play size={13} />}
         {running ? t('editor.running') : t('editor.run')}
       </button>
 

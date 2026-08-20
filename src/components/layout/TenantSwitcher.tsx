@@ -7,7 +7,7 @@ import type { UIEvent } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useAuth } from '@/context/AuthContext'
 import api, { unwrapList } from '@/lib/api'
-import { ChevronDown, Loader2, Search } from 'lucide-react'
+import { ChevronDown, Search } from 'lucide-react'
 import type { Tenant } from '@/types/api'
 // Shared luminance-based contrast helper (BRAND-TEXT-COLOR-1) — reused here because
 // each list row shows a DIFFERENT tenant's own brand colour, never the active
@@ -15,6 +15,7 @@ import type { Tenant } from '@/types/api'
 import { readableOn } from '@/hooks/useTenantTheme'
 // PORTAL-MARKER-1: a click inside an open portalled picker menu is never "outside".
 import { isInsideDropdownPortal } from '@/lib/useDropdownPlacement'
+import Spinner from '@/components/ui/Spinner'
 
 // Only a real 6-digit hex is safe to feed into readableOn's luminance maths.
 const isHexColor = (v: unknown): v is string => typeof v === 'string' && /^#[0-9a-fA-F]{6}$/.test(v)
@@ -201,7 +202,7 @@ export default function TenantSwitcher({ expanded }: { expanded?: boolean }) {
                     {tenantDomain(tn) && <div className="text-xs text-[var(--text-muted)] truncate">{tenantDomain(tn)}</div>}
                   </div>
                   {switching === tn.id
-                    ? <Loader2 size={13} className="flex-shrink-0 animate-spin" style={{ color: 'var(--text-muted)' }} />
+                    ? <span style={{ display: 'flex', color: 'var(--text-muted)' }}><Spinner size={13} label={t('loading')} /></span>
                     // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- actieve-tenant-stip: plaatsmarkering in accentkleur (nav-marker), geen actieoppervlak
                     : isActive && <div className="flex-shrink-0 rounded-full" style={{ width: 6, height: 6, background: 'var(--color-primary)' }} />}
                 </button>
@@ -210,7 +211,7 @@ export default function TenantSwitcher({ expanded }: { expanded?: boolean }) {
 
             {loading && (
               <div className="flex items-center justify-center gap-2 py-3" style={{ fontSize: 12, color: 'var(--text-muted)' }}>
-                <Loader2 size={13} className="animate-spin" /> {t('loading')}
+                <Spinner size={13} /> {t('loading')}
               </div>
             )}
             {!loading && results.length === 0 && (

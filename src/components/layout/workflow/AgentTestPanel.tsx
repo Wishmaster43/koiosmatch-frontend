@@ -7,10 +7,11 @@
  */
 import { useState, useRef, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Send, Trash2, X, Loader2, Bot, User, Zap } from 'lucide-react'
+import { Send, Trash2, X, Bot, User, Zap } from 'lucide-react'
 import api, { unwrap } from '@/lib/api'
 import Button from '@/components/ui/Button'
 import DrawerAddButton from '@/components/drawer/DrawerAddButton'
+import Spinner from '@/components/ui/Spinner'
 
 interface Message {
   role: 'user' | 'assistant'
@@ -165,7 +166,7 @@ export default function AgentTestPanel({ config }: {
         ))}
         {loading && (
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, color: 'var(--text-muted)', fontSize: 12 }}>
-            <Loader2 size={13} className="animate-spin" />
+            <Spinner size={13} />
             {t('agentTest.thinking')}
           </div>
         )}

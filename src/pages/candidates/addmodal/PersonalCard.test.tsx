@@ -47,14 +47,14 @@ describe('PersonalCard layout', () => {
   it('renders first, middle, last name and dob/gender fields', () => {
     setup()
     expect(screen.getByPlaceholderText('modal.fields.firstName')).toBeInTheDocument()
-    expect(screen.getByPlaceholderText('van')).toBeInTheDocument()
+    expect(screen.getByPlaceholderText('placeholders.middleName')).toBeInTheDocument()
     expect(screen.getByPlaceholderText('modal.fields.lastName')).toBeInTheDocument()
   })
 
   it('keeps first name on its own row, separate from middle/last name', () => {
     setup()
     const firstNameRow = screen.getByPlaceholderText('modal.fields.firstName').closest('div[style]')
-    const middleNameRow = screen.getByPlaceholderText('van').closest('div[style]')
+    const middleNameRow = screen.getByPlaceholderText('placeholders.middleName').closest('div[style]')
     // Different row containers (first name is no longer grid-mated with middle/last).
     expect(firstNameRow).not.toBe(middleNameRow)
   })

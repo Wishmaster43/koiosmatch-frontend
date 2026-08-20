@@ -608,10 +608,10 @@ describe('AddVacancyModal · Voorwaarden — salaris + uren (punt 16)', () => {
   it('carries salary min/max/period and hours min/max', async () => {
     const user = userEvent.setup()
     render(<AddVacancyModal onClose={noop} users={users} customers={customers} />)
-    const salaryInputs = screen.getAllByPlaceholderText('min')
+    const salaryInputs = screen.getAllByPlaceholderText('common:placeholders.min')
     await user.type(salaryInputs[0], '2500')
     await user.type(screen.getByPlaceholderText('modal.fields.salaryPeriodPlaceholder'), 'per maand')
-    await user.type(screen.getAllByPlaceholderText('max')[1], '32')
+    await user.type(screen.getAllByPlaceholderText('common:placeholders.max')[1], '32')
     await fillTitleAndSubmit(user)
     expect(mockPost).toHaveBeenCalledWith('/vacancies', expect.objectContaining({
       salary_min: '2500', salary_period: 'per maand', hours_max: '32',

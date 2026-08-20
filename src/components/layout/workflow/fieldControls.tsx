@@ -5,7 +5,7 @@
  * live in `fields.tsx`, which delegates the field types below to these.
  */
 import { useState, useEffect, useId } from 'react'
-import { Loader2, Plus, X, Check, Copy } from 'lucide-react'
+import { Plus, X, Check, Copy } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { VALUELESS_OPERATORS, normalizeOperator } from './constants'
 import { fieldLabel } from './moduleI18n'
@@ -18,6 +18,7 @@ import { unwrap, unwrapList } from '@/lib/api'
 import CreatableSelect from '@/components/ui/CreatableSelect'
 import Button from '@/components/ui/Button'
 import DrawerAddButton from '@/components/drawer/DrawerAddButton'
+import Spinner from '@/components/ui/Spinner'
 
 // Shared change handler: writes one field's value into the node config.
 export type OnChange = (key: string, value: unknown) => void
@@ -141,7 +142,7 @@ export function WebhookSelectField({ value, onChange, fieldKey }: { value?: unkn
             placeholder={t('fields.webhookNamePlaceholder')} aria-label={t('fields.webhookNamePlaceholder')} onKeyDown={e => e.key === 'Enter' && create()}
             style={{ flex: 1, padding: '6px 9px', fontSize: 12, border: '1px solid var(--border)', borderRadius: 8, outline: 'none' }} />
           <Button variant="primary" size="sm" onClick={create} disabled={!newName.trim() || creating}>
-            {creating ? <Loader2 size={11} className="animate-spin" /> : <Plus size={11} />} {t('fields.create')}
+            {creating ? <Spinner size={11} /> : <Plus size={11} />} {t('fields.create')}
           </Button>
           <button type="button" onClick={() => { setShowNew(false); setNewName('') }}
             style={{ padding: '6px 8px', background: 'none', border: '1px solid var(--border)', borderRadius: 8, cursor: 'pointer', color: 'var(--text-muted)', display: 'flex' }}>

@@ -10,7 +10,7 @@ import { useTranslation } from 'react-i18next'
 import { useFocusTrap } from '@/hooks/useFocusTrap'
 import type { MouseEvent, DragEvent } from 'react'
 import { Handle, Position, BaseEdge, EdgeLabelRenderer, getStraightPath } from '@xyflow/react'
-import { CheckCircle, Filter, HelpCircle, Loader2, Play, Plus, X } from 'lucide-react'
+import { CheckCircle, Filter, HelpCircle, Play, Plus, X } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import { MODULE_META } from '@/modules/index'
 import { NODE_W, NODE_H, countEdgeFilterConditions } from './serialization'
@@ -18,6 +18,7 @@ import { EdgeAddContext, EdgeDeleteContext, EdgeFilterContext, NodeRunContext, S
 import OutputTree from './OutputTree'
 import type { FlowNodeData, EdgeFilters } from '@/types/workflow'
 import { tint } from '@/lib/tint'
+import Spinner from '@/components/ui/Spinner'
 
 // ── Custom node ───────────────────────────────────────────────────────────────
 
@@ -214,7 +215,7 @@ function ModuleNode({ id, data, selected }: { id: string; data: FlowNodeData; se
             boxShadow: '0 1px 4px rgba(0,0,0,0.15)',
           }}
         >
-          {busy ? <Loader2 size={10} className="animate-spin" /> : <Play size={10} />}
+          {busy ? <Spinner size={10} /> : <Play size={10} />}
         </button>
         {/* Status badge — live run (success/failed) or a stored test-run output.
             Suppressed while the counter badge occupies the same corner (verify

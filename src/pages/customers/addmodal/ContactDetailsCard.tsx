@@ -6,6 +6,7 @@
  * contacts + the server response), this card only renders the already-computed
  * error flag and message string per field.
  */
+import { useTranslation } from 'react-i18next'
 import { FieldRow, TextField } from '@/components/forms/fields'
 import { cardHead, cardBox, row3Even, row } from '@/components/ui/modalCards'
 import FieldNotice from '@/components/ui/FieldNotice'
@@ -38,6 +39,8 @@ export default function ContactDetailsCard({
   mobile, onMobileChange, mobileError, mobileMessage,
   linkedinLabel, linkedinPlaceholder, linkedin, onLinkedinChange,
 }: ContactDetailsCardProps) {
+  // §5: the example placeholder is copy too — resolves via the shared common keys.
+  const { t } = useTranslation('common')
   return (
     <div>
       <div style={cardHead}>{cardLabel}</div>
@@ -45,7 +48,7 @@ export default function ContactDetailsCard({
         <div style={row3Even}>
           <div onBlur={onEmailBlur}>
             <FieldRow label={emailLabel}>
-              <TextField type="email" value={email} onChange={onEmailChange} placeholder="naam@klant.nl" error={emailError} />
+              <TextField type="email" value={email} onChange={onEmailChange} placeholder={t('placeholders.emailExample')} error={emailError} />
             </FieldRow>
             <FieldError text={emailMessage} />
           </div>

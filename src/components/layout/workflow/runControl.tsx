@@ -6,8 +6,9 @@
  */
 import { useState } from 'react'
 import type { MouseEvent } from 'react'
-import { Loader2, Square } from 'lucide-react'
+import { Square } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
+import Spinner from '@/components/ui/Spinner'
 
 // Run statuses the backend accepts a cancel for (mirror of the BE guard).
 export const CANCELLABLE = new Set(['running', 'waiting'])
@@ -62,7 +63,7 @@ export function StopRunButton({ runId, compact = false, onStopped, onError }: {
         border: '1px solid color-mix(in srgb, var(--color-danger) 35%, transparent)',
         cursor: busy ? 'wait' : 'pointer',
       }}>
-      {busy ? <Loader2 size={compact ? 10 : 13} className="animate-spin" /> : <Square size={compact ? 10 : 13} fill="currentColor" />}
+      {busy ? <Spinner size={compact ? 10 : 13} /> : <Square size={compact ? 10 : 13} fill="currentColor" />}
       {busy ? t('runControl.stopping') : t('runControl.stop')}
     </button>
   )

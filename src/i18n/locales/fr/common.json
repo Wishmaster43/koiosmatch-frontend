@@ -456,5 +456,13 @@
     "moveDown": "Déplacer vers le bas"
   },
   "photoChange": "Modifier la photo",
-  "photoUpload": "Téléverser"
+  "photoUpload": "Téléverser",
+  "placeholders": {
+    "middleName": "de",
+    "emailExample": "nom@client.fr",
+    "firstName": "Jean",
+    "lastName": "Dupont",
+    "min": "min",
+    "max": "max"
+  }
 }

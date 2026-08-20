@@ -115,7 +115,7 @@ export default function ContactOnSiteCard({
         )}
         <div style={row2}>
           <div onBlur={onEmailBlur}>
-            <FieldRow label={t('subModal.email')}><TextField type="email" value={email} onChange={onEmailChange} placeholder="naam@klant.nl" error={emailError} /></FieldRow>
+            <FieldRow label={t('subModal.email')}><TextField type="email" value={email} onChange={onEmailChange} placeholder={t('common:placeholders.emailExample')} error={emailError} /></FieldRow>
             <FieldNotice text={emailMessage} />
           </div>
           <FieldRow label={t('subModal.phone')}><TextField value={phone} onChange={onPhoneChange} /></FieldRow>

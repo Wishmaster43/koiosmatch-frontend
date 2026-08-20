@@ -133,11 +133,11 @@ export default function NewUserModal({ onClose, onCreated }: {
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 12 }}>
             <div>
               <label style={label}>{t('firstName')}</label>
-              <input required value={form.firstname} onChange={set('firstname')} style={input} placeholder="Jan" aria-label={t('firstName')} />
+              <input required value={form.firstname} onChange={set('firstname')} style={input} placeholder={t('common:placeholders.firstName')} aria-label={t('firstName')} />
             </div>
             <div>
               <label style={label}>{t('lastName')}</label>
-              <input value={form.lastname} onChange={set('lastname')} style={input} placeholder="Jansen" aria-label={t('lastName')} />
+              <input value={form.lastname} onChange={set('lastname')} style={input} placeholder={t('common:placeholders.lastName')} aria-label={t('lastName')} />
             </div>
           </div>
           {/* E-mail — VALIDATIE-LIVE-1-rest: blur marks it touched so a live

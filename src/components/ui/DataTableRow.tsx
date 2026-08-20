@@ -3,6 +3,7 @@ import type { CSSProperties, ReactNode } from 'react'
 import { ChevronRight, ChevronDown } from 'lucide-react'
 import type { Column, RowId } from './DataTable'
 import { field, checkboxCol, expandCol, stopPropagation, HIGHLIGHT_BG } from './dataTableUtils'
+import { interactiveRow } from '@/lib/a11y'
 
 /**
  * DataTable's row subcomponent (split out 2026-07-21 from DataTable.tsx, same
@@ -57,7 +58,9 @@ function TableRowInner<Row>({
     <Fragment>
       <tr
         {...(virtualIndex !== undefined ? { 'data-index': virtualIndex, ref: measureElement } : {})}
-        onClick={onRowClick ? () => onRowClick(row) : undefined}
+        // Keyboard path (heraudit r3): Enter/Space opens the row, same guard as
+        // interactive(); role stays the native row role.
+        {...interactiveRow(onRowClick ? () => onRowClick(row) : undefined)}
         style={{ borderBottom: expandable && isExpanded ? 'none' : '1px solid var(--border)', cursor: onRowClick ? 'pointer' : 'default',
           background: highlight ? HIGHLIGHT_BG : 'transparent' }}
         onMouseEnter={e => { if (!highlight) { e.currentTarget.style.background = 'var(--hover-bg)'; e.currentTarget.querySelectorAll('td[data-sticky]').forEach(td => { (td as HTMLElement).style.background = 'var(--hover-bg)' }) } }}

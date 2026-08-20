@@ -84,6 +84,25 @@ describe('DataTable', () => {
     expect(onRowClick).toHaveBeenCalledWith(rows[0])
   })
 
+  // Heraudit r3 HIGH regression: the row is keyboard-operable — Enter/Space fire
+  // onRowClick via interactiveRow (native row role kept, no role="button").
+  it('opens a row with Enter and Space, and only when clickable', async () => {
+    const user = userEvent.setup()
+    const onRowClick = vi.fn()
+    const { unmount } = render(<DataTable columns={columns} rows={rows} onRowClick={onRowClick} />)
+    const row = screen.getByText('Bob').closest('tr')
+    expect(row).toHaveAttribute('tabindex', '0')
+    row.focus()
+    await user.keyboard('{Enter}')
+    expect(onRowClick).toHaveBeenCalledWith(rows[0])
+    await user.keyboard(' ')
+    expect(onRowClick).toHaveBeenCalledTimes(2)
+    unmount()
+    // Without onRowClick the row must stay inert — never focusable.
+    render(<DataTable columns={columns} rows={rows} />)
+    expect(screen.getByText('Bob').closest('tr')).not.toHaveAttribute('tabindex')
+  })
+
   it('shows a header + skeleton-row shell while loading, not a layout-jumping spinner block', () => {
     render(<DataTable columns={columns} rows={[]} loading loadingText="Laden…" />)
     // The header stays put — no chrome collapse during loading.

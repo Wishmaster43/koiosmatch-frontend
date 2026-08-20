@@ -7,7 +7,7 @@
 import { Fragment, useEffect, useRef, useState } from 'react'
 import type { CSSProperties } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Loader2, History, Play, Clock as ClockIcon, ChevronRight, ChevronDown, Users, Clock } from 'lucide-react'
+import { History, Play, Clock as ClockIcon, ChevronRight, ChevronDown, Users, Clock } from 'lucide-react'
 import { useReportList } from '@/components/reports/useReportList'
 import { useDateFormat } from '@/lib/datetime'
 import { formatDuration, StatusBadge } from '@/components/reports/runFormat'
@@ -18,6 +18,7 @@ import Button from '@/components/ui/Button'
 // drawer's own step viewer — no forked step-rendering, no extra fetch.
 import RunStepList from '@/components/reports/RunStepList'
 import type { RunRow } from '@/types/reports'
+import Spinner from '@/components/ui/Spinner'
 
 const TH: CSSProperties = { padding: '10px 16px', textAlign: 'left', fontSize: 11, fontWeight: 600,
   color: 'var(--text-muted)', background: 'var(--hover-bg)', borderBottom: '1px solid var(--border)',
@@ -79,7 +80,7 @@ export default function WorkflowHistoryView({ workflowId, initialRun }: {
           {loading && (
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
                           padding: 48, color: 'var(--text-muted)', fontSize: 13 }}>
-              <Loader2 size={15} className="animate-spin" /> {t('runs.loading')}
+              <Spinner size={15} /> {t('runs.loading')}
             </div>
           )}
 

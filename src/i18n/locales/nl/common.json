@@ -456,5 +456,13 @@
     "moveDown": "Omlaag verplaatsen"
   },
   "photoChange": "Foto wijzigen",
-  "photoUpload": "Uploaden"
+  "photoUpload": "Uploaden",
+  "placeholders": {
+    "middleName": "van",
+    "emailExample": "naam@klant.nl",
+    "firstName": "Jan",
+    "lastName": "Jansen",
+    "min": "min",
+    "max": "max"
+  }
 }

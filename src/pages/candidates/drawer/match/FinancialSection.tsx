@@ -82,6 +82,8 @@ export default function FinancialSection({
       {/* Cost centre — proposed from the customer/location cascade above; typing
           here freezes it (job 21/22 — never overwritten again after that). */}
       <F label={t('placement.costCenter')} error={errors.costCenter}>
+        {/* "KP-…" is the cost-centre FORMAT example (tenant data prefix), not
+            prose — locale-neutral by design (§5 code/ID class). */}
         <input value={costCenter} onChange={e => { setCostCenterDirty(true); setCostCenter(e.target.value) }}
           style={input} placeholder="KP-…" />
       </F>
