@@ -7,6 +7,7 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { MapPin, X } from 'lucide-react'
 import type { ReportFilterGroup } from '@/types/reports'
+import Button from '@/components/ui/Button'
 
 const inputStyle = {
   padding: '6px 8px', fontSize: 12, borderRadius: 6, border: '1px solid var(--border)',
@@ -28,10 +29,15 @@ export default function GeoRadiusGroup({ group }: { group: ReportFilterGroup }) 
                        overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
           {group.applied.label}
         </span>
+        {/* Dense applied-filter row: the 11px clear glyph keeps its flush footprint
+            (Button's 28px square would inflate the row — mirrors the search-box
+            clear-icon precedent). Block form: the style attr spans the tag. */}
+        {/* eslint-disable huisstijlLegacy/no-restricted-syntax */}
         <button onClick={() => group.onClear?.()} aria-label={t('filters.clear')}
           style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--color-primary-text)', padding: 0, display: 'flex' }}>
           <X size={11} />
         </button>
+        {/* eslint-enable huisstijlLegacy/no-restricted-syntax */}
       </div>
     )
   }
@@ -47,13 +53,13 @@ export default function GeoRadiusGroup({ group }: { group: ReportFilterGroup }) 
         <input value={km} onChange={e => setKm(Number(e.target.value) || 0)} type="number" min={1} max={300}
           aria-label={t('filters.radius')} style={{ width: 64, ...inputStyle }} />
         <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>km</span>
-        <button onClick={apply} disabled={!q.trim()}
-          style={{ marginLeft: 'auto', padding: '5px 10px', fontSize: 11, fontWeight: 600, borderRadius: 6,
-                   cursor: q.trim() ? 'pointer' : 'default', border: '1px solid var(--border)',
-                   background: q.trim() ? 'var(--color-primary)' : 'var(--hover-bg)',
-                   color: q.trim() ? 'var(--color-on-accent)' : 'var(--text-muted)' }}>
+        {/* House Button (r4 follow-up): the enabled state hand-painted the raw
+            accent — an accent ACTION reads the trio via Button; disabled is
+            Button's own grey recipe. */}
+        <Button variant="primary" size="sm" onClick={apply} disabled={!q.trim()}
+          style={{ marginLeft: 'auto' }}>
           {t('filters.apply')}
-        </button>
+        </Button>
       </div>
       {group.hint && <div style={{ fontSize: 11, color: 'var(--color-warning)' }}>{group.hint}</div>}
     </div>

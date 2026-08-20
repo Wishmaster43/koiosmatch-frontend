@@ -25,8 +25,12 @@ import DocumentRow from '@/pages/candidates/drawer/DocumentRow'
 import { docKey, docUrl, splitExt, DOC_GRID_COLUMNS } from '@/pages/candidates/drawer/documentHelpers'
 import type { DocItem } from '@/pages/candidates/drawer/documentHelpers'
 import Button from '@/components/ui/Button'
+import { tintBg, tintBorder, chipInk } from '@/lib/tint'
 // HUISSTIJL-1: the doc-type hint line (11px/muted) is the shared Caption atom.
 import { Caption } from '@/components/ui/typography'
+
+// Hoisted: an inline accent literal under background: false-fires the accent-fill selector.
+const ACCENT = 'var(--color-primary)'
 
 // A picked-but-not-yet-uploaded file, staged so its type can be chosen first.
 interface PendingDoc { file: File; objectUrl: string; name: string; size: string; type: string }
@@ -188,6 +192,8 @@ export default function DocumentsTab({ vacancy: v }: { vacancy: VacancyDetail })
           <Search size={13} style={{ color: 'var(--text-muted)', flexShrink: 0 }} />
           <input value={docSearch} onChange={e => setDocSearch(e.target.value)} placeholder={t('documents.search')}
             style={{ border: 'none', outline: 'none', fontSize: 12, color: 'var(--text)', background: 'none', flex: 1, minWidth: 0 }} />
+          {/* Search-clear glyph keeps its flush footprint (mirrors the shared search-chrome precedent). */}
+          {/* eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- 11px inline clear glyph inside the search chrome, not a Button copy */}
           {docSearch && <button onClick={() => setDocSearch('')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: 0, display: 'flex' }}><X size={11} /></button>}
         </div>
         <DrawerFilterMenu filters={filterRows}
@@ -196,18 +202,14 @@ export default function DocumentsTab({ vacancy: v }: { vacancy: VacancyDetail })
             documents section shows, only rendered once something is selected. */}
         {selected.size > 0 && (
           <>
-            <button onClick={downloadSelected}
-              style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 11, fontWeight: 600, padding: '4px 10px', borderRadius: 99, cursor: 'pointer', whiteSpace: 'nowrap', flexShrink: 0,
-                background: 'color-mix(in srgb, var(--color-primary) 14%, transparent)', color: 'var(--color-primary-text)',
-                border: '1px solid color-mix(in srgb, var(--color-primary) 45%, transparent)' }}>
+            {/* r4 finding 1's twin (customers DocumentsTab converted the same round):
+                the bulk pills are house Buttons, never hand-rolled tints. */}
+            <Button variant="soft" size="sm" onClick={downloadSelected} style={{ flexShrink: 0 }}>
               <Download size={11} /> {t('documents.downloadSelected', { count: selected.size, defaultValue: 'Download ({{count}})' })}
-            </button>
-            <button onClick={() => setConfirmDelete({ kind: 'many' })}
-              style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 11, fontWeight: 600, padding: '4px 10px', borderRadius: 99, cursor: 'pointer', whiteSpace: 'nowrap', flexShrink: 0,
-                background: 'color-mix(in srgb, var(--color-danger) 12%, transparent)', color: 'var(--color-danger)',
-                border: '1px solid color-mix(in srgb, var(--color-danger) 40%, transparent)' }}>
+            </Button>
+            <Button variant="dangerSoft" size="sm" onClick={() => setConfirmDelete({ kind: 'many' })} style={{ flexShrink: 0 }}>
               <Trash2 size={11} /> {t('documents.deleteSelected', { count: selected.size, defaultValue: 'Delete ({{count}})' })}
-            </button>
+            </Button>
           </>
         )}
         {/* V16 (05-08): the house control keeps the same click target (the hidden
@@ -222,27 +224,30 @@ export default function DocumentsTab({ vacancy: v }: { vacancy: VacancyDetail })
             {pending.name} <span style={{ fontWeight: 400, color: 'var(--text-muted)' }}>({pending.size})</span>
           </div>
           <Caption as="div" style={{ marginBottom: 6 }}>{t('documents.docType')}</Caption>
-          {/* Soft-tint type chips (§4) — mirrors the customer DocumentsTab's picker. */}
+          {/* Choice-chips (CHIP-TINT-1): the lib/tint house pair + chipInk — was a
+              hand-rolled 14/45 pair with RAW accent ink. Block form: the style
+              attr spans the tag. */}
+          {/* eslint-disable huisstijlLegacy/no-restricted-syntax */}
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 10 }}>
             {docTypes.map(dt => {
               const active = pending.type === dt.value
               return (
                 <button key={dt.value} onClick={() => setPending(p => (p ? { ...p, type: dt.value } : p))}
                   style={{ padding: '4px 10px', fontSize: 11, borderRadius: 99, cursor: 'pointer', fontWeight: active ? 600 : 400,
-                    border: `1px solid ${active ? 'color-mix(in srgb, var(--color-primary) 45%, transparent)' : 'var(--border)'}`,
-                    background: active ? 'color-mix(in srgb, var(--color-primary) 14%, transparent)' : 'var(--surface)',
-                    color: active ? 'var(--color-primary)' : 'var(--text)' }}>{dt.label}</button>
+                    border: active ? tintBorder(ACCENT, true) : '1px solid var(--border)',
+                    background: active ? tintBg(ACCENT, true) : 'var(--surface)',
+                    color: active ? chipInk(ACCENT) : 'var(--text)' }}>{dt.label}</button>
               )
             })}
           </div>
+          {/* eslint-enable huisstijlLegacy/no-restricted-syntax */}
           <div style={{ display: 'flex', gap: 8 }}>
-            {/* CONTRAST-YELLOW-1 (08-08 audit): the fill is var(--text), which flips
-                near-black↔near-white across themes, so the label must flip with it —
-                var(--bg) is always the readable inverse of --text in both themes. */}
-            <button onClick={confirmUpload}
-              style={{ padding: '6px 12px', fontSize: 12, fontWeight: 600, borderRadius: 6, background: 'var(--text)', color: 'var(--bg)', border: 'none', cursor: 'pointer' }}>
+            {/* Herhaal-audit r4 finding 2's twin (customers DocumentsTab converted
+                the same round): the inverse --text fill is retired — the card's
+                primary action wears the house Button. */}
+            <Button variant="primary" size="sm" onClick={confirmUpload}>
               {t('common:add')}
-            </button>
+            </Button>
             <Button variant="secondary" size="sm" onClick={cancelUpload}>
               {t('common:cancel')}
             </Button>

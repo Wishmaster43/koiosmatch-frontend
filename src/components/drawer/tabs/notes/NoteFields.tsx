@@ -21,6 +21,10 @@ import RichTextEditor from '@/components/ui/RichTextEditor'
 import RichTextAssistBar from '@/components/ui/RichTextAssistBar'
 import NoteAssistSection from './NoteAssistSection'
 import { CHANNEL_ICON } from './channelIcons'
+
+// Hoisted OUTSIDE the style objects: the accent-fill lint selector walks
+// background:'s descendants, so an inline literal there false-fires on tint arguments.
+const ACCENT = 'var(--color-primary)'
 import type { NoteFieldsState } from './useNoteFields'
 import type { NoteType, NotesLabels } from '../NotesTab'
 import { tintBg, tintBorder, chipInk } from '@/lib/tint'
@@ -62,11 +66,13 @@ export default function NoteFields({ fields, noteTypes, channels, labels, editor
               style attribute sits lines into the opening tag. */}
           {/* eslint-disable huisstijlLegacy/no-restricted-syntax */}
           {noteTypes.map(nt => (
+            // CHIP-TINT-1 (Danny 20-08): a selected note-type pill is a choice-chip —
+            // active tint + chipInk, never the solid trio ("te krachtig").
             <button key={nt.value} type="button" onClick={() => setType(nt.value)}
               style={{ padding: '4px 10px', fontSize: 11.5, borderRadius: 99, cursor: 'pointer',
-                border: `1px solid ${type === nt.value ? 'var(--button-border)' : 'var(--border)'}`,
-                background: type === nt.value ? 'var(--button-fill)' : 'var(--surface)',
-                color: type === nt.value ? 'var(--button-ink)' : 'var(--text)', fontWeight: type === nt.value ? 600 : 400 }}>
+                border: type === nt.value ? tintBorder(ACCENT, true) : '1px solid var(--border)',
+                background: type === nt.value ? tintBg(ACCENT, true) : 'var(--surface)',
+                color: type === nt.value ? chipInk(ACCENT) : 'var(--text)', fontWeight: type === nt.value ? 600 : 400 }}>
               {nt.label}
             </button>
           ))}

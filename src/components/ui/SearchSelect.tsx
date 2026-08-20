@@ -51,6 +51,13 @@ interface SearchSelectProps {
   menuAlign?: 'left' | 'right'
   // Opt-in: close the menu after a pick — single-select dropdowns (Conversie).
   closeOnToggle?: boolean
+  // Herhaal-audit r4 (findings 5/6/7): an accessible-name override for the DEFAULT
+  // trigger face, for the case where the visible label is only the picked VALUE
+  // (e.g. "Read") while an adjacent element already names what it configures — the
+  // renderTrigger call sites this default face replaces relied on their own
+  // aria-label for exactly that. Optional: omitted keeps the visible text as the
+  // accessible name, unchanged for every existing caller.
+  triggerAriaLabel?: string
   // Lock the whole control inert (e.g. a field-type selector once data exists).
   // The default trigger gets the real native `disabled` attribute (keyboard,
   // click and focus all inert, aria-disabled for free); a caller's own
@@ -69,7 +76,7 @@ interface SearchSelectProps {
 }
 
 export default function SearchSelect({
-  triggerLabel, options = [], selected = [], onToggle, searchable = true, width = 280, onSearch, renderTrigger, menuAlign = 'left', closeOnToggle = false, disabled = false, selectAll,
+  triggerLabel, options = [], selected = [], onToggle, searchable = true, width = 280, onSearch, renderTrigger, menuAlign = 'left', closeOnToggle = false, disabled = false, selectAll, triggerAriaLabel,
 }: SearchSelectProps) {
   const { t } = useTranslation('common')
   const [open, setOpen] = useState(false)
@@ -164,7 +171,13 @@ export default function SearchSelect({
           // a genuine ADD affordance and renders the REAL DrawerAddButton
           // (PRIMAIR-VLAK-1 + §3A), never a hand-copy of it.
           closeOnToggle ? (
-            <button type="button" onClick={toggle} disabled={disabled}
+            // This IS the canonical single-pick FIELD trigger (herhaal-audit r4,
+            // findings 5/6/7) — a dropdown trigger is a form field, not an action
+            // button, so it deliberately does not read components/ui/Button; every
+            // renderTrigger call site this default face replaces should adopt THIS,
+            // never hand-paint its own copy. Block form: style spans several lines.
+            /* eslint-disable huisstijlLegacy/no-restricted-syntax */
+            <button type="button" onClick={toggle} disabled={disabled} aria-label={triggerAriaLabel}
               style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '6px 10px',
                 border: '1px solid var(--border)', borderRadius: 6, background: 'var(--surface)',
                 cursor: disabled ? 'default' : 'pointer', opacity: disabled ? 0.6 : 1 }}>
@@ -172,6 +185,7 @@ export default function SearchSelect({
                 overflow: 'hidden', textOverflow: 'ellipsis', color: 'var(--text)' }}>{triggerLabel}</span>
               <ChevronDown size={12} aria-hidden="true" style={{ color: 'var(--text-muted)', flexShrink: 0 }} />
             </button>
+            /* eslint-enable huisstijlLegacy/no-restricted-syntax */
           ) : (
             <DrawerAddButton label={triggerLabel ?? ''} onClick={toggle} disabled={disabled} />
           )
@@ -219,6 +233,11 @@ export default function SearchSelect({
             {shown.map(o => {
               const isSel = selected.includes(o.value)
               return (
+                // A dropdown OPTION row — a menu item, not a standalone action; the
+                // "selected list row" tint exemption DrawerFilterMenu's own checklist
+                // rows already document applies here too. Block form: style spans
+                // several lines.
+                /* eslint-disable huisstijlLegacy/no-restricted-syntax */
                 <button key={o.value} onClick={() => { onToggle(o.value); if (closeOnToggle) setOpen(false) }}
                   style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%',
                     padding: '9px 12px', fontSize: 12, textAlign: 'left', cursor: 'pointer', border: 'none',
@@ -226,6 +245,7 @@ export default function SearchSelect({
                   {o.label}
                   {isSel && <Check size={13} style={{ color: 'var(--color-primary-text)', flexShrink: 0 }} />}
                 </button>
+                /* eslint-enable huisstijlLegacy/no-restricted-syntax */
               )
             })}
           </div>

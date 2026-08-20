@@ -78,6 +78,13 @@ describe('house token pairs stay readable (defaults, light theme)', () => {
     expect(ratio(token('color-on-danger-bg'), token('color-danger-bg'))).toBeGreaterThanOrEqual(4.5)
   })
 
+  // The INVERTED count badge (CountBadge: bg --button-ink ≙ on-accent, text
+  // --button-fill ≙ primary). Herhaal-audit r4: a hand-painted copy paired the
+  // dark fill with ANOTHER dark token at 2.52:1 — this pins the real pair.
+  it('the inverted count badge pair clears 4.5:1 (defaults)', () => {
+    expect(ratio(token('color-primary'), token('color-on-accent'))).toBeGreaterThanOrEqual(4.5)
+  })
+
   // chipInk (herhaal-slotaudit 20-08): every semantic token's TEXT on its own
   // 10% AND 16% tint, composited over both page grounds, must clear AA. The raw
   // colours measured 2.4-3.0:1 there (SoftChip app-wide); chipInk blends 45%

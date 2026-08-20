@@ -5,25 +5,35 @@
  * badge inverted so it survives on the fill. Extracted from VacancySearchFilters
  * after Opus review F caught the twins diverging (one had this pill, the other
  * accidentally wore the add-affordance and lost its accessible name).
+ *
+ * Every filter trigger carries a filter GLYPH by default (Danny 20-08, pasted
+ * the bare "Status" pill: "je ziet niet dat het een filterknopje is") — a bare
+ * label doesn't read as a filter control. A caller with its own leading icon
+ * passes it via `icon`; it replaces the default, never stacks.
  */
-import { tint } from '@/lib/tint'
+import type { ComponentType } from 'react'
+import { ListFilter } from 'lucide-react'
+import CountBadge from './CountBadge'
 
-export default function FilterTriggerPill({ label, count }: { label: string; count: number }) {
+interface FilterTriggerPillProps {
+  label: string
+  count: number
+  // Leading glyph; defaults to the filter funnel. Pass null to render none
+  // (rare — only when the surrounding chrome already carries the filter signal).
+  icon?: ComponentType<{ size?: number }> | null
+}
+
+export default function FilterTriggerPill({ label, count, icon: Icon = ListFilter }: FilterTriggerPillProps) {
   return (
     <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, height: 26, padding: '0 10px',
       whiteSpace: 'nowrap', fontSize: 11.5, fontWeight: count > 0 ? 600 : 500, borderRadius: 6,
       cursor: 'pointer', color: 'var(--button-ink)',
       background: 'var(--button-fill)', border: '1px solid var(--button-border)' }}>
+      {Icon && <Icon size={12} aria-hidden="true" />}
       {label}
-      {count > 0 && (
-        <span aria-hidden="true" style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
-          minWidth: 15, height: 15, padding: '0 4px', borderRadius: 999,
-          background: 'var(--button-ink)', color: 'var(--color-primary-text)',
-          fontSize: 10, fontWeight: 700, lineHeight: 1 }}>{count}</span>
-      )}
+      {/* Herhaal-audit r4 finding 3: the shared CountBadge atom — was a local
+          copy pairing the badge fill with the WRONG dark ink token (2.52:1). */}
+      {count > 0 && <span aria-hidden="true"><CountBadge count={count} /></span>}
     </span>
   )
 }
-// tint import kept referenced for the calm variant some callers may add later;
-// removing it here would orphan the shared formula this pill's docs point at.
-void tint

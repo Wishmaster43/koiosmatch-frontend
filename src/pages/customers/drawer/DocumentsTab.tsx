@@ -54,6 +54,11 @@ import DrawerAddButton from '@/components/drawer/DrawerAddButton'
 import { Caption } from '@/components/ui/typography'
 import type { Id } from '@/types/common'
 import Button from '@/components/ui/Button'
+// §4 soft-tint atoms (herhaal-audit r4, findings 1/2/10): the §4 formula lives
+// in lib/tint, and a same-type "pick one to apply to all" chip picker fits the
+// shared ChipMultiSelect atom (its "active" set just never grows past one).
+import { tintBg, tintBorder, chipInk } from '@/lib/tint'
+import ChipMultiSelect from '@/components/ui/ChipMultiSelect'
 
 // A queued-but-not-yet-uploaded file, each with its own document type (BUGFIX
 // 23-07: a multi-file pick used to collapse to a single pending slot, so picking
@@ -226,28 +231,28 @@ export default function DocumentsTab({ customerId, locations = [], departments =
             <Search size={13} style={{ color: 'var(--text-muted)', flexShrink: 0 }} />
             <input value={docSearch} onChange={e => setDocSearch(e.target.value)} placeholder={t('documents.search')}
               style={{ border: 'none', outline: 'none', fontSize: 12, color: 'var(--text)', background: 'none', flex: 1, minWidth: 0 }} />
-            {docSearch && <button onClick={() => setDocSearch('')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: 0, display: 'flex' }}><X size={11} /></button>}
+            {/* Inline clear icon inside the 26px search chrome — Button's smallest
+                footprint (sm, 28px) would overflow this compact box; mirrors the
+                identical unconverted clear button in the shared HeaderSearch atom. */}
+            {/* eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- compact search-chrome icon, not a Button-sized action (see comment above) */}
+            {docSearch && <button onClick={() => setDocSearch('')} aria-label={t('common:clear')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: 0, display: 'flex' }}><X size={11} /></button>}
           </div>
           {/* DOC-FILTER-PARITY-1: the type filter lives behind this one compact Filter
               button, mirroring the candidate documents section — self-hides when the
               tenant has no document types for this scope. */}
           <DrawerFilterMenu filters={filterRows}
             label={t('common:filters.button')} title={t('common:filters.title')} clearAllLabel={t('common:filters.clearAll')} />
-          {/* Soft-tint bulk-download + bulk-delete actions (§4) — only shown once something is selected. */}
+          {/* Bulk-download + bulk-delete actions — herhaal-audit r4 finding 1: the
+              §4 soft-tint identity now comes from Button (soft/dangerSoft), never a
+              hand-painted color-mix pill — only shown once something is selected. */}
           {selected.size > 0 && (
             <>
-              <button onClick={downloadSelected}
-                style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 11, fontWeight: 600, padding: '4px 10px', borderRadius: 99, cursor: 'pointer', whiteSpace: 'nowrap', flexShrink: 0,
-                  background: 'color-mix(in srgb, var(--color-primary) 14%, transparent)', color: 'var(--color-primary-text)',
-                  border: '1px solid color-mix(in srgb, var(--color-primary) 45%, transparent)' }}>
+              <Button variant="soft" size="sm" onClick={downloadSelected}>
                 <Download size={11} /> {t('documents.downloadSelected', { count: selected.size })}
-              </button>
-              <button onClick={() => setConfirmDelete({ kind: 'many' })}
-                style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 11, fontWeight: 600, padding: '4px 10px', borderRadius: 99, cursor: 'pointer', whiteSpace: 'nowrap', flexShrink: 0,
-                  background: 'color-mix(in srgb, var(--color-danger) 12%, transparent)', color: 'var(--color-danger)',
-                  border: '1px solid color-mix(in srgb, var(--color-danger) 40%, transparent)' }}>
+              </Button>
+              <Button variant="dangerSoft" size="sm" onClick={() => setConfirmDelete({ kind: 'many' })}>
                 <Trash2 size={11} /> {t('documents.deleteSelected', { count: selected.size })}
-              </button>
+              </Button>
             </>
           )}
           {/* DRAWER-ADD-SHORT-1 (Danny 05-08): short in this drawer sub-tab's toolbar. */}
@@ -266,20 +271,15 @@ export default function DocumentsTab({ customerId, locations = [], departments =
             <Caption as="div" style={{ marginBottom: 6 }}>
               {pending.length > 1 ? t('documents.applyTypeToAll') : t('documents.docType')}
             </Caption>
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 10 }}>
-              {/* §4 soft-tint (audit r4): active = tinted, never a solid primary fill.
-                  A chip is "active" only when EVERY queued item already shares that type. */}
-              {docTypes.map(dt => {
-                const active = pending.length > 0 && pending.every(p => p.type === dt.value)
-                return (
-                  <button key={dt.value} onClick={() => setAllTypes(dt.value)}
-                    style={{ padding: '4px 10px', fontSize: 11, borderRadius: 99, cursor: 'pointer', fontWeight: active ? 600 : 400,
-                      border: `1px solid ${active ? 'color-mix(in srgb, var(--color-primary) 45%, transparent)' : 'var(--border)'}`,
-                      background: active ? 'color-mix(in srgb, var(--color-primary) 14%, transparent)' : 'var(--surface)',
-                      // Text-colour accent uses the AA-contrast text token, not the raw brand primary.
-                      color: active ? 'var(--color-primary-text)' : 'var(--text)' }}>{dt.label}</button>
-                )
-              })}
+            {/* Herhaal-audit r4 finding 10: the shared ChipMultiSelect atom (§4 tint +
+                fontWeight 600 + a check mark — CHIP-CONTRAST-1's second signal) reused
+                as a "pick one to apply to all" picker: its own "active" set never grows
+                past the single type every queued item already shares. selectAll is
+                switched off — "select all types" has no meaning here. */}
+            <div style={{ marginBottom: 10 }}>
+              <ChipMultiSelect options={docTypes} selectAll={false}
+                values={pending.length > 0 && pending.every(p => p.type === pending[0].type) ? [pending[0].type] : []}
+                onToggle={setAllTypes} ariaLabel={t('documents.applyTypeToAll')} />
             </div>
             {/* DOCS-LOC-DEPT-1: the "gekoppeld aan" level picker — applies to the WHOLE
                 queued batch (a batch is normally meant for one place), unlike the
@@ -307,19 +307,27 @@ export default function DocumentsTab({ customerId, locations = [], departments =
                       options={docTypes} menuWidth={160}
                       style={{ fontSize: 11, padding: '4px 8px', border: '1px solid var(--border)', borderRadius: 6, background: 'var(--bg)', color: 'var(--text)' }} />
                   </div>
+                  {/* Dense queue-row icon — mirrors the identical unconverted remove
+                      button in the candidate drawer's twin PendingUploadQueue.tsx
+                      (out of this task's scope); Button's smallest footprint (28px)
+                      would tower over this 12px icon in a tightly packed row. Block
+                      form: the flagged style attribute sits on the tag's 2nd line. */}
+                  {/* eslint-disable huisstijlLegacy/no-restricted-syntax -- see comment above */}
                   <button onClick={() => removePending(idx)} aria-label={t('common:remove')}
                     style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: 2, display: 'flex', flexShrink: 0 }}><X size={12} /></button>
+                  {/* eslint-enable huisstijlLegacy/no-restricted-syntax */}
                 </div>
               ))}
             </div>
             <div style={{ display: 'flex', gap: 8 }}>
-              {/* CONTRAST-YELLOW-1 (08-08 audit): the fill is var(--text), which flips
-                  near-black↔near-white across themes, so the label must flip with it —
-                  var(--bg) is always the readable inverse of --text in both themes. */}
-              <button onClick={uploadAll}
-                style={{ padding: '7px 14px', fontSize: 12, fontWeight: 600, borderRadius: 7, background: 'var(--text)', color: 'var(--bg)', border: 'none', cursor: 'pointer' }}>
+              {/* Herhaal-audit r4 finding 2: this is the card's primary action, so it
+                  reads Button's own primary identity — a hand-painted inverse fill
+                  sitting next to a real Button (cancelPending below) is exactly the
+                  drift the audit closes. Wanting the inverse LOOK back is a Button
+                  variant to add once, in Button.tsx, never a loose fill in a tab. */}
+              <Button variant="primary" size="sm" onClick={uploadAll}>
                 {pending.length > 1 ? t('documents.addAll', { count: pending.length }) : t('documents.add')}
-              </button>
+              </Button>
               <Button variant="secondary" size="sm" onClick={cancelPending}>{t('drawer.cancel')}</Button>
             </div>
           </div>
@@ -366,8 +374,8 @@ export default function DocumentsTab({ customerId, locations = [], departments =
                   {(d.department_name ?? d.location_name) && (
                     <span style={{ display: 'inline-flex', alignItems: 'center', fontSize: 10, fontWeight: 600,
                       padding: '1px 6px', borderRadius: 99, marginTop: 2,
-                      background: 'color-mix(in srgb, var(--color-info) 12%, transparent)', color: 'var(--color-info)',
-                      border: '1px solid color-mix(in srgb, var(--color-info) 40%, transparent)' }}>
+                      background: tintBg('var(--color-info)'), color: chipInk('var(--color-info)'),
+                      border: tintBorder('var(--color-info)') }}>
                       {t('notes.linkedTo', { name: d.department_name ?? d.location_name })}
                     </span>
                   )}
@@ -386,9 +394,17 @@ export default function DocumentsTab({ customerId, locations = [], departments =
               <span style={{ fontSize: 11, fontWeight: 500, padding: '2px 8px', borderRadius: 99, background: docColor(d.type) + '18', color: docColor(d.type), whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{d.type ? docTypeLabel(d.type) : '—'}</span>
               <div style={{ display: 'flex', alignItems: 'center', gap: 2, justifyContent: 'space-between' }}>
                 <Caption style={{ whiteSpace: 'nowrap' }}>{d.size ?? ''}</Caption>
+                {/* Row-action icon trio — mirrors the byte-identical unconverted row
+                    in the candidate drawer's twin DocumentRow.tsx (out of this task's
+                    scope): 3× Button's sm footprint (28px) would overflow this fixed
+                    100px grid column (DOC_GRID_COLUMNS), which today fits size text +
+                    3 dense icons side by side. */}
                 <div style={{ display: 'flex' }}>
+                  {/* eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- see comment above */}
                   <button aria-label={t('common:edit')} onClick={() => { setRenamingId(d.id ?? null); setRenameValue(splitExt(String(d.name ?? d.file_name ?? '')).base) }} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: '2px 3px', display: 'flex' }}><Pencil size={12} /></button>
+                  {/* eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- see comment above */}
                   <button aria-label={t('documents.preview')} onClick={() => preview(d)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: '2px 3px', display: 'flex' }}><Eye size={12} /></button>
+                  {/* eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- see comment above */}
                   <button aria-label={t('common:remove')} onClick={() => setConfirmDelete({ kind: 'one', doc: d, index: i })} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: '2px 3px', display: 'flex' }}><X size={12} /></button>
                 </div>
               </div>

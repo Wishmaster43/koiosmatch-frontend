@@ -12,19 +12,8 @@ import SearchSelectGroup from './SearchSelectGroup'
 import PeriodGroup from './PeriodGroup'
 import OpenCheckGroup from './OpenCheckGroup'
 import GeoRadiusGroup from './GeoRadiusGroup'
-
-// Solid numeric badge — mirrors the panel header's total-count pill so every
-// "how many are active" indicator reads as one visual language.
-function CountBadge({ count, label }: { count: number; label: string }) {
-  return (
-    <span aria-label={label} style={{
-      background: 'var(--color-primary)', color: 'var(--color-on-accent)', borderRadius: 999,
-      padding: '1px 6px', fontSize: 10, fontWeight: 600, flexShrink: 0,
-    }}>
-      {count}
-    </span>
-  )
-}
+import CountBadge from '@/components/ui/CountBadge'
+import { tint } from '@/lib/tint'
 
 export default function FilterGroupBlock({
   group, collapsed, count, onToggle,
@@ -34,14 +23,22 @@ export default function FilterGroupBlock({
 
   return (
     // Subtle primary-tinted background (§4 color-mix, not a loud fill) so the
-    // panel reads as separated cards instead of one long list.
+    // panel reads as separated cards instead of one long list. A deliberately
+    // lighter pair (14/4%) than the standard chip formula (33/10%) — this is a
+    // CARD wrapper, not a chip — so it reads through lib/tint's own `tint()`
+    // helper (arbitrary percentage) rather than the fixed-pair tintBorder/tintBg.
     <div data-testid={`filter-group-${group.key}`} style={{
-      borderRadius: 8, border: '1px solid color-mix(in srgb, var(--color-primary) 14%, transparent)',
+      borderRadius: 8, border: `1px solid ${tint('var(--color-primary)', 14)}`,
       background: 'color-mix(in srgb, var(--color-primary) 4%, var(--surface))', overflow: 'hidden',
     }}>
       {/* Header row: chevron+label toggles the block; count chip always visible
           (even collapsed) so no active filter is ever hidden silently. */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 6, padding: '7px 9px' }}>
+        {/* Accordion disclosure header — flex-grows over variable chevron+label+
+            badge content, so it needs custom padding:0/flex:1 that Button's fixed
+            sm footprint does not model (structural role, mirrors SegmentedControl's
+            own role="radio" exemption). Block form: style spans several lines. */}
+        {/* eslint-disable huisstijlLegacy/no-restricted-syntax */}
         <button type="button" onClick={onToggle} aria-expanded={!collapsed} aria-controls={bodyId}
           style={{ flex: 1, minWidth: 0, display: 'flex', alignItems: 'center', gap: 6,
                    background: 'none', border: 'none', cursor: 'pointer', padding: 0, textAlign: 'left' }}>
@@ -52,14 +49,23 @@ export default function FilterGroupBlock({
                          overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
             {group.label}
           </span>
-          {count > 0 && <CountBadge count={count} label={t('filters.selectedCount', { count })} />}
+          {/* Herhaal-audit r4 findings 8/9: the shared CountBadge atom (the panel
+              header's own active-count badge, ReportFilterSidebar, reads it too —
+              so "how many are active" looks identical everywhere it appears). */}
+          {count > 0 && <span aria-label={t('filters.selectedCount', { count })}><CountBadge count={count} /></span>}
         </button>
+        {/* eslint-enable huisstijlLegacy/no-restricted-syntax */}
         {!collapsed && group.type !== 'period' && count > 0 && (
+          // Dense inline "clear this group" hint (9px) — smaller than Button's
+          // floor (12px/sm) by design, de-emphasised next to the header label.
+          // Block form: the flagged style attribute sits on the tag's 2nd line.
+          /* eslint-disable huisstijlLegacy/no-restricted-syntax */
           <button type="button" onClick={() => group.selected?.forEach(v => group.onToggle?.(v))}
             style={{ fontSize: 9, color: 'var(--text-muted)', background: 'none', border: 'none',
                      cursor: 'pointer', padding: 0, flexShrink: 0 }}>
             {t('filters.clear')}
           </button>
+          /* eslint-enable huisstijlLegacy/no-restricted-syntax */
         )}
       </div>
 
@@ -95,6 +101,10 @@ export default function FilterGroupBlock({
               {(group.options ?? []).map(opt => {
                 const active = (group.selected ?? []).includes(opt.value)
                 return (
+                  // Segmented pill option, not a standalone action — mirrors
+                  // SegmentedControl's own compact-pill exemption; the raised
+                  // "active" shadow is a status-ring class (deliberately excepted).
+                  /* eslint-disable huisstijlLegacy/no-restricted-syntax */
                   <button key={opt.value} onClick={() => group.onToggle?.(opt.value)}
                     style={{
                       flex: 1, padding: '4px 0', borderRadius: 5, fontSize: 11,
@@ -107,6 +117,7 @@ export default function FilterGroupBlock({
                     }}>
                     {opt.label}
                   </button>
+                  /* eslint-enable huisstijlLegacy/no-restricted-syntax */
                 )
               })}
             </div>

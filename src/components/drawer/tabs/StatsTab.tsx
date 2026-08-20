@@ -5,6 +5,7 @@
 import type { ComponentType, ReactNode } from 'react'
 import SectionCard, { sectionTitle } from '@/components/ui/SectionCard'
 import DetailTableJs from '@/components/ui/DetailTable'
+import { Caption } from '@/components/ui/typography'
 
 type AnyProps = Record<string, unknown>
 // DetailTable is still untyped JS — accept any props at the boundary.
@@ -26,7 +27,8 @@ export default function StatsTab({ kpis = [], kpisTitle, overview, activity }: {
           <div key={k.label} onClick={k.onClick} role={k.onClick ? 'button' : undefined} tabIndex={k.onClick ? 0 : undefined}
             onKeyDown={k.onClick ? (e) => { if (e.key === 'Enter' || e.key === ' ') k.onClick?.() } : undefined}
             style={{ border: '1px solid var(--border)', borderRadius: 10, padding: '14px 16px', background: 'var(--surface)', cursor: k.onClick ? 'pointer' : 'default' }}>
-            <div style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 8 }}>{k.label}</div>
+            {/* Herhaal-audit r4 finding 11: the shared Caption atom (11/text-muted). */}
+            <Caption as="div" style={{ marginBottom: 8 }}>{k.label}</Caption>
             <div style={{ fontSize: 26, fontWeight: 700, color: k.color, lineHeight: 1 }}>{k.value}</div>
             <div style={{ fontSize: 10, color: 'var(--text-muted)', marginTop: 4 }}>{k.sub}</div>
           </div>
@@ -47,6 +49,9 @@ export default function StatsTab({ kpis = [], kpisTitle, overview, activity }: {
             ? <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{activity.emptyText}</div>
             : activity.items.map((ev, i) => (
                 <div key={i} style={{ display: 'flex', gap: 8, marginBottom: 8, alignItems: 'flex-start' }}>
+                  {/* Decorative timeline marker dot, not an action surface — the
+                      accent-fill rule targets hand-painted BUTTON identity. */}
+                  {/* eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- see comment above */}
                   <div style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--color-primary)', flexShrink: 0, marginTop: 5 }} />
                   <div style={{ flex: 1 }}>
                     <div style={{ fontSize: 12, color: 'var(--text)' }}>{ev.text}</div>

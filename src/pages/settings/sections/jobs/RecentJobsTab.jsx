@@ -59,17 +59,17 @@ export default function RecentJobsTab() {
     <div>
       {/* Toolbar: tenant filter + job search + refresh. */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 14, flexWrap: 'wrap' }}>
+        {/* Herhaal-audit r4 finding 7: SearchSelect's own default trigger face —
+            was the app's own two-height inconsistency (this used BTN_H/34px while
+            JobsTab's twin status filter used a hand-rolled 32px); both now share
+            the one calm trigger footprint the atom owns. */}
         <SearchSelect
           options={[{ value: '', label: t('jobs.recent.allTenants') }, ...tenants.map(id => ({ value: id, label: id }))]}
           selected={[tenant]}
           onToggle={setTenant}
           closeOnToggle
-          renderTrigger={toggle => (
-            <button type="button" onClick={toggle} aria-label={t('jobs.recent.tenantFilter')}
-              style={{ height: BTN_H, padding: '0 8px', borderRadius: 8, border: '1px solid var(--border)', background: 'var(--surface)', color: 'var(--text)', fontSize: 12, cursor: 'pointer', textAlign: 'left' }}>
-              {tenant || t('jobs.recent.allTenants')}
-            </button>
-          )}
+          triggerLabel={tenant || t('jobs.recent.allTenants')}
+          triggerAriaLabel={t('jobs.recent.tenantFilter')}
         />
         <div style={{ display: 'flex', alignItems: 'center', gap: 6, height: BTN_H, padding: '0 10px', borderRadius: 8, border: '1px solid var(--border)', background: 'var(--surface)' }}>
           <Search size={12} color="var(--text-muted)" />

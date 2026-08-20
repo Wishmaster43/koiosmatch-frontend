@@ -32,6 +32,12 @@ import type { ScheduleForm } from './useScheduleForm'
 // only CreatableSelect's portalled popover truly survives it.
 import CreatableSelect from '@/components/ui/CreatableSelect'
 import Button from '@/components/ui/Button'
+import { tintBg, tintBorder, chipInk } from '@/lib/tint'
+
+// Hoisted OUTSIDE the style objects: the accent-fill lint selector walks
+// background:'s descendants, so an inline literal there reads as a hand-painted
+// accent fill (false positive on tint arguments).
+const ACCENT = 'var(--color-primary)'
 
 // ISO weekdays, Monday-first (1..7) — matches the contract's own numbering.
 const ISO_WEEKDAYS = [1, 2, 3, 4, 5, 6, 7]
@@ -94,13 +100,14 @@ export function ScheduleFields({ form }: { form: ScheduleForm }) {
           <div style={{ display: 'flex', gap: 6 }}>
             {ISO_WEEKDAYS.map(iso => (
               <button key={iso} type="button" onClick={() => toggleWeekday(iso)}
+                // CHIP-TINT-1 (Danny 20-08): a selected weekday circle is a
+                // choice-chip — active tint + chipInk, never the solid trio.
                 // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- weekday circle picker cell, not a Button
                 style={{
                   width: 38, height: 38, borderRadius: '50%', fontSize: 11, fontWeight: 600, cursor: 'pointer',
-                  // PRIMAIR-VLAK-1: selected state wears the button trio, not a raw accent fill.
-                  border: `1.5px solid ${weekdays.includes(iso) ? 'var(--button-border)' : 'var(--border)'}`,
-                  background: weekdays.includes(iso) ? 'var(--button-fill)' : 'var(--surface)',
-                  color: weekdays.includes(iso) ? 'var(--button-ink)' : 'var(--text)',
+                  border: weekdays.includes(iso) ? tintBorder(ACCENT, true) : '1px solid var(--border)',
+                  background: weekdays.includes(iso) ? tintBg(ACCENT, true) : 'var(--surface)',
+                  color: weekdays.includes(iso) ? chipInk(ACCENT) : 'var(--text)',
                 }}>{dayNameIso(locale, iso)}</button>
             ))}
           </div>
@@ -125,12 +132,14 @@ export function ScheduleFields({ form }: { form: ScheduleForm }) {
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 34px)', gap: 6 }}>
               {Array.from({ length: 31 }, (_, i) => i + 1).map(d => (
                 <button key={d} type="button" onClick={() => setMonthday(d)}
-                  // PRIMAIR-VLAK-1: selected state wears the button trio, not a raw accent fill.
+                  // CHIP-TINT-1 (Danny 20-08, supersedes the 19-08 solid order for
+                  // CHIPS): a selected day-cell is a choice-chip — active 16/50
+                  // tint + chipInk, never the solid trio ("te krachtig").
                   // eslint-disable-next-line huisstijl/no-restricted-syntax, huisstijlLegacy/no-restricted-syntax -- a calendar day-grid cell (7-col grid, gridTemplateColumns 'repeat(7, 34px)'), not a text/action Button copy
                   style={{ width: 34, height: 34, borderRadius: 8, fontSize: 12, fontWeight: monthday === d ? 700 : 400, cursor: 'pointer',
-                    border: `1.5px solid ${monthday === d ? 'var(--button-border)' : 'var(--border)'}`,
-                    background: monthday === d ? 'var(--button-fill)' : 'var(--surface)',
-                    color: monthday === d ? 'var(--button-ink)' : 'var(--text)',
+                    border: monthday === d ? tintBorder(ACCENT, true) : '1px solid var(--border)',
+                    background: monthday === d ? tintBg(ACCENT, true) : 'var(--surface)',
+                    color: monthday === d ? chipInk(ACCENT) : 'var(--text)',
                   }}>{d}</button>
               ))}
             </div>

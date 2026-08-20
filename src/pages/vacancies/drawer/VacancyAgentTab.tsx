@@ -7,7 +7,7 @@ import { InterviewFlowSection } from '@/components/ai/management/InterviewFlowSe
 import api, { unwrap } from '@/lib/api'
 import { notifySuccess, notifyError } from '@/lib/notify'
 import { extractApiError } from '@/lib/extractApiError'
-import { BTN_H } from '@/config/buttonMetrics'
+import Button from '@/components/ui/Button'
 import { useAiAgents } from '../hooks/useAiAgents'
 // HUISSTIJL-1: group labels (11/600/uppercase/muted) + hint text (11/muted) are the shared atoms.
 import { GroupLabel, Caption } from '@/components/ui/typography'
@@ -99,12 +99,12 @@ function BackfillInterviewsAction({ vacancyId, applicationsCount }: { vacancyId:
 
   return (
     <>
-      <button type="button" onClick={() => setConfirmOpen(true)} disabled={busy || unavailable}
-        style={{ alignSelf: 'flex-start', height: BTN_H, padding: '0 14px', fontSize: 12, fontWeight: 600, borderRadius: 8,
-          border: '1px solid var(--button-border)', background: 'var(--button-fill)', color: 'var(--button-ink)',
-          cursor: busy || unavailable ? 'not-allowed' : 'pointer', opacity: busy || unavailable ? 0.6 : 1 }}>
+      {/* House Button (Danny 20-08): this hand-drew the trio itself — the identity
+          comes from Button, at the drawer sm standard. */}
+      <Button variant="primary" onClick={() => setConfirmOpen(true)} disabled={busy || unavailable}
+        style={{ alignSelf: 'flex-start' }}>
         {t('aiagent.backfill.button')}
-      </button>
+      </Button>
       {unavailable && <p style={{ margin: 0, fontSize: 11, color: 'var(--text-muted)' }}>{t('aiagent.backfill.unavailable')}</p>}
       <ConfirmDialog open={confirmOpen} onConfirm={onConfirm} onCancel={() => setConfirmOpen(false)}
         message={applicationsCount ? t('aiagent.backfill.confirmWithCount', { count: applicationsCount }) : t('aiagent.backfill.confirm')} />

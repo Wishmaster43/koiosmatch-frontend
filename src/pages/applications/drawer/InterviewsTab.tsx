@@ -10,7 +10,8 @@ import api, { unwrap, unwrapList } from '@/lib/api'
 import { notifySuccess, notifyError } from '@/lib/notify'
 import { extractApiError } from '@/lib/extractApiError'
 import { useDateFormat } from '@/lib/datetime'
-import { BTN_H } from '@/config/buttonMetrics'
+import Button from '@/components/ui/Button'
+import { tintBg, tintBorder } from '@/lib/tint'
 import { Caption } from '@/components/ui/typography'
 import { useAiAgents } from '../hooks/useAiAgents'
 import InterviewStatusCard from './InterviewStatusCard'
@@ -51,10 +52,11 @@ function TranscriptBubble({ msg }: { msg: TranscriptMsg }) {
   const color = isOut ? 'var(--color-primary)' : 'var(--color-success)'
   return (
     <div style={{ display: 'flex', flexDirection: 'column', alignItems: isOut ? 'flex-end' : 'flex-start', gap: 3 }}>
-      {/* Canon (05-08): body text 12px, matching the candidate profile/notes prose convention. */}
+      {/* Canon (05-08): body text 12px, matching the candidate profile/notes prose convention.
+          Bubble fill via the lib/tint house pair (neutral ink — a bubble, not a chip). */}
       <div style={{ maxWidth: '85%', padding: '8px 12px', borderRadius: 10, fontSize: 12, color: 'var(--text)', lineHeight: 1.45,
-        background: `color-mix(in srgb, ${color} 10%, transparent)`,
-        border: `1px solid color-mix(in srgb, ${color} 32%, transparent)` }}>
+        background: tintBg(color),
+        border: tintBorder(color) }}>
         {msg.body || '—'}
       </div>
       {msg.sentAt && <span style={{ fontSize: 10, color: 'var(--text-muted)' }}>{formatDateTime(msg.sentAt)}</span>}
@@ -131,16 +133,12 @@ function StartInterviewAction({ applicationId, onStarted }: { applicationId: Id 
         <CreatableSelect value={agentId || null} onChange={setAgentId} allowCreate={false}
           placeholder={loading ? t('common:loading') : t('interview.start.agentPlaceholder')}
           options={options.map(o => ({ value: String(o.value), label: o.label }))} />
-        {/* BUTTON-SOFT-TINT-1 (Danny 05-08): was a white/transparent outline button
-            ("een andere stijl als onze standaard") — now the house soft-tint recipe
-            (§4, mirrors DrawerAddButton/QuickViewToggle). */}
-        <button type="button" onClick={onStart} disabled={busy || unavailable}
-          style={{ height: BTN_H, padding: '0 14px', fontSize: 12, fontWeight: 600, borderRadius: 8,
-            border: '1px solid color-mix(in srgb, var(--color-primary) 30%, transparent)',
-            background: 'color-mix(in srgb, var(--color-primary) 10%, transparent)', color: 'var(--color-primary-text)',
-            cursor: busy || unavailable ? 'not-allowed' : 'pointer', opacity: busy || unavailable ? 0.6 : 1 }}>
+        {/* House Button (Danny 20-08, pasted this pill: "Deze ook nog") — the 05-08
+            soft-tint predates PRIMAIR-VLAK-1; an accent ACTION wears the solid trio
+            via Button, at the drawer sm standard. */}
+        <Button variant="primary" onClick={onStart} disabled={busy || unavailable}>
           {t('interview.start.label')}
-        </button>
+        </Button>
       </div>
       {error && <span style={{ fontSize: 11, color: 'var(--color-danger)' }}>{t('interview.start.loadError')}</span>}
       {unavailable && (

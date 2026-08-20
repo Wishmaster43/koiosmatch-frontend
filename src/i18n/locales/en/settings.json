@@ -2638,7 +2638,8 @@
     "filters": {
       "queue": "Queue",
       "tenant": "Tenant",
-      "all": "All"
+      "all": "All",
+      "status": "Filter by status"
     },
     "col": {
       "queue": "Queue",

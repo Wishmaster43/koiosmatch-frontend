@@ -17,6 +17,7 @@
 import { Check } from 'lucide-react'
 import SelectAllRow from './SelectAllRow'
 import { useBatchToggle } from '@/hooks/useBatchToggle'
+import { tintBg, tintBorder, chipInk } from '@/lib/tint'
 
 export interface ChipOption { value: string; label: string; color?: string }
 
@@ -52,6 +53,10 @@ export default function ChipMultiSelect({ options, values, selected, onToggle, c
       {options.map(o => {
         const isActive = active.includes(o.value)
         const tint = o.color ?? color
+        // This IS the shared chip-multiselect's own canonical chip render (an
+        // aria-pressed choice-chip, a different species than Button), not a copy.
+        // Block form: the flagged style attribute sits lines into the opening tag.
+        /* eslint-disable huisstijlLegacy/no-restricted-syntax */
         return (
           <button key={o.value} type="button" onClick={() => onToggle(o.value)} aria-pressed={isActive}
             style={{
@@ -60,17 +65,21 @@ export default function ChipMultiSelect({ options, values, selected, onToggle, c
               // Chosen: §4 soft tint + weight + check. Unchosen: neutral — no tint at
               // all, so the chosen state is unmistakable (and never colour-only, §6).
               fontWeight: isActive ? 600 : 400,
-              color: isActive ? (tint === 'var(--color-primary)' ? 'var(--button-ink)' : 'var(--color-on-accent)') : 'var(--text-muted)',
-              // PRIMAIR-VLAK-1 (Danny 19-08, op de geselecteerde dag-pil: "HUISSTIJL!!"):
-              // selected = solid — the button trio for the accent, the chip's own
-              // data colour (with on-accent ink) otherwise. Unselected stays calm.
-              background: isActive ? (tint === 'var(--color-primary)' ? 'var(--button-fill)' : tint) : 'var(--bg)',
-              border: isActive ? '1px solid var(--button-border)' : '1px solid var(--border)',
+              // CHIP-TINT-1 (Danny 20-08, screenshot of the preference chips:
+              // "het oranje is te krachtig — de chips doen we in dat lichte rode,
+              // en dit geldt voor alle chips"): supersedes the 19-08 solid order
+              // FOR CHIPS ONLY — selected choice-chips wear the active 16/50 tint
+              // with chipInk (readable on its own tint since r3); buttons, action
+              // bars and toolbar toggles keep the solid trio.
+              color: isActive ? chipInk(tint) : 'var(--text-muted)',
+              background: isActive ? tintBg(tint, true) : 'var(--bg)',
+              border: isActive ? tintBorder(tint, true) : '1px solid var(--border)',
             }}>
             {isActive && <Check size={11} strokeWidth={3} aria-hidden="true" />}
             {o.label}
           </button>
         )
+        /* eslint-enable huisstijlLegacy/no-restricted-syntax */
       })}
       </div>
     </div>

@@ -40,6 +40,11 @@ export default function ScopeEditor({ value = {}, onChange }) {
             <span style={{ flex: 1, fontSize: 13, color: 'var(--text)', fontWeight: on ? 500 : 400 }}>
               {t(`apiKeys.scopes.${entity}`)}
             </span>
+            {/* Herhaal-audit r4 finding 5: SearchSelect's own default single-pick
+                trigger face (closeOnToggle, no renderTrigger) — never a hand-painted
+                trigger button per call site. triggerAriaLabel keeps the accessible
+                name naming the ENTITY ("Candidates"), since the visible text is only
+                the picked LEVEL ("Read"). */}
             <SearchSelect
               options={ACCESS_LEVELS.map((lvl) => ({ value: lvl, label: t(`apiKeys.level.${lvl}`) }))}
               selected={[level ?? 'read']}
@@ -47,12 +52,8 @@ export default function ScopeEditor({ value = {}, onChange }) {
               closeOnToggle
               searchable={false}
               disabled={!on}
-              renderTrigger={(toggleOpen) => (
-                <button type="button" onClick={toggleOpen} disabled={!on} aria-label={t(`apiKeys.scopes.${entity}`)}
-                  style={{ height: 30, minWidth: 110, padding: '0 8px', fontSize: 12, border: '1px solid var(--border)', borderRadius: 7, background: 'var(--surface)', color: on ? 'var(--text)' : 'var(--text-muted)', cursor: on ? 'pointer' : 'not-allowed', textAlign: 'left' }}>
-                  {t(`apiKeys.level.${level ?? 'read'}`)}
-                </button>
-              )}
+              triggerLabel={t(`apiKeys.level.${level ?? 'read'}`)}
+              triggerAriaLabel={t(`apiKeys.scopes.${entity}`)}
             />
           </div>
         )

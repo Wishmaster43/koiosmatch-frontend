@@ -17,6 +17,9 @@ import CreatableSelect from '@/components/ui/CreatableSelect'
 import Button from '@/components/ui/Button'
 import DrawerAddButton from '@/components/drawer/DrawerAddButton'
 
+/* eslint-disable react-refresh/only-export-components -- the shared form KIT
+   exports field styles/helpers beside its components by design (§ field layout,
+   one sweep source); HMR-nicety only — precedent: usageCardStyles.jsx. */
 export interface SelectOption { value: string; label?: ReactNode }
 
 // Canon field style (G33/fieldMetrics) — this was its own one-off (padding
@@ -170,15 +173,11 @@ export function SaveCancel({ onSave, onCancel, saveLabel, cancelLabel }: {
   const { t } = useTranslation('common')
   return (
     <div style={{ display: 'flex', gap: 8, marginTop: 10 }}>
-      <button onClick={onSave}
-        style={{ padding: '8px 16px', fontSize: 12, fontWeight: 600, borderRadius: 8,
-          // Inverted button: fill = --text, so the label must be its exact theme
-          // opposite (--surface), never a hardcoded white — a fixed white on
-          // --text vanished in dark mode where --text itself turns near-white
-          // (WCAG contrast audit 2026-08-08).
-          background: 'var(--text)', color: 'var(--surface)', border: 'none', cursor: 'pointer' }}>
+      {/* Herhaal-audit r4 finding 2's twin: the inverse --text fill is retired —
+          the primary action of a form footer wears the house Button. */}
+      <Button variant="primary" size="sm" onClick={onSave}>
         {saveLabel ?? t('save')}
-      </button>
+      </Button>
       <Button variant="secondary" size="sm" onClick={onCancel}>
         {cancelLabel ?? t('cancel')}
       </Button>

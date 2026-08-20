@@ -8,6 +8,10 @@ import { RotateCcw } from 'lucide-react'
 import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import type { ReportFilterGroup } from '@/types/reports'
+import { tintBg, tintBorder, chipInk } from '@/lib/tint'
+
+// Hoisted: an inline accent literal under background: false-fires the accent-fill selector.
+const ACCENT = 'var(--color-primary)'
 
 // Locale-aware short month name for index 0–11.
 const monthAbbr = (i: number) => new Date(2000, i, 1).toLocaleString('nl-NL', { month: 'short' })
@@ -58,6 +62,11 @@ export default function PeriodGroup({ group }: { group: ReportFilterGroup }) {
     fontSize: 11, fontWeight: 500, transition: 'all 0.1s',
   }
 
+  // The five raw <button>s below are all STRUCTURAL: a granularity segment, the
+  // year/month/quarter choice-chips (CHIP-TINT-1 tint language) and a text
+  // micro-link — none is an action-Button copy; Button's sm footprint would
+  // inflate this dense filter panel. Block form: style attrs span the tags.
+  /* eslint-disable huisstijlLegacy/no-restricted-syntax */
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
 
@@ -90,9 +99,11 @@ export default function PeriodGroup({ group }: { group: ReportFilterGroup }) {
             const active = selectedYear === y
             return (
               <button key={y} onClick={() => setYear(y)}
+                // CHIP-TINT-1: the ONE house pair + chipInk (the earlier
+                // primary-bg/primary-text recipe measured 4.41:1 dark — Opus r8).
                 style={{ ...btnBase, padding: '3px 9px',
-                         background: active ? 'var(--color-primary)' : 'var(--border)',
-                         color:      active ? 'var(--color-on-accent)' : 'var(--text)',
+                         background: active ? tintBg(ACCENT, true) : 'var(--border)',
+                         color:      active ? chipInk(ACCENT) : 'var(--text)',
                          fontWeight: active ? 600 : 400 }}>
                 {y}
               </button>
@@ -110,10 +121,10 @@ export default function PeriodGroup({ group }: { group: ReportFilterGroup }) {
             return (
               <button key={sub} onClick={() => setSub(sub)}
                 style={{ ...btnBase, padding: '4px 0', textAlign: 'center',
-                         background: active ? 'var(--color-primary-bg)' : 'var(--hover-bg)',
-                         // Text-colour accent uses the AA-contrast text token, not the raw brand primary.
-                         color:      active ? 'var(--color-primary-text)'    : 'var(--text)',
-                         border: `1px solid ${active ? 'var(--color-primary)' : 'var(--border)'}`,
+                         background: active ? tintBg(ACCENT, true) : 'var(--hover-bg)',
+                         // chipInk: the ONE selected-chip ink (Opus r8 unified the file's two recipes).
+                         color:      active ? chipInk(ACCENT) : 'var(--text)',
+                         border: active ? tintBorder(ACCENT, true) : '1px solid var(--border)',
                          fontWeight: active ? 600 : 400 }}>
                 {monthAbbr(i)}
               </button>
@@ -131,10 +142,10 @@ export default function PeriodGroup({ group }: { group: ReportFilterGroup }) {
             return (
               <button key={sub} onClick={() => setSub(sub)}
                 style={{ ...btnBase, padding: '6px 0', textAlign: 'center',
-                         background: active ? 'var(--color-primary-bg)' : 'var(--hover-bg)',
-                         // Text-colour accent uses the AA-contrast text token, not the raw brand primary.
-                         color:      active ? 'var(--color-primary-text)'    : 'var(--text)',
-                         border: `1px solid ${active ? 'var(--color-primary)' : 'var(--border)'}`,
+                         background: active ? tintBg(ACCENT, true) : 'var(--hover-bg)',
+                         // chipInk: the ONE selected-chip ink (Opus r8 unified the file's two recipes).
+                         color:      active ? chipInk(ACCENT) : 'var(--text)',
+                         border: active ? tintBorder(ACCENT, true) : '1px solid var(--border)',
                          fontWeight: active ? 600 : 400, fontSize: 12 }}>
                 {q}
               </button>
@@ -154,4 +165,5 @@ export default function PeriodGroup({ group }: { group: ReportFilterGroup }) {
       )}
     </div>
   )
+  /* eslint-enable huisstijlLegacy/no-restricted-syntax */
 }

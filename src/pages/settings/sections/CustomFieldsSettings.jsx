@@ -19,7 +19,7 @@ import SearchSelect from '@/components/ui/SearchSelect'
 import { DragList } from '../components/SettingsControls'
 import { fieldInputStyle } from '@/components/forms/fieldMetrics'
 import Button from '@/components/ui/Button'
-import { Caption } from '@/components/ui/typography'
+import { Caption, PageTitle } from '@/components/ui/typography'
 
 // Field types the backend supports.
 const FIELD_TYPES = ['text', 'textarea', 'number', 'date', 'boolean', 'select']
@@ -176,7 +176,7 @@ export default function CustomFieldsSettings({ entityType }) {
     <div style={{ maxWidth: 640 }}>
       {/* Header — entity name interpolated from the sub-tab's own nav label. */}
       <div style={{ marginBottom: 20 }}>
-        <h2 style={{ fontSize: 15, fontWeight: 700, color: 'var(--text)' }}>{t('customFieldsSettings.title', { entity: entityLabel })}</h2>
+        <PageTitle>{t('customFieldsSettings.title', { entity: entityLabel })}</PageTitle>
         <p style={{ fontSize: 13, color: 'var(--text-muted)', marginTop: 4 }}>{t('customFieldsSettings.subtitle')}</p>
       </div>
 
@@ -209,25 +209,27 @@ export default function CustomFieldsSettings({ entityType }) {
                 </div>
 
                 {/* Active toggle */}
-                <button onClick={() => toggleActive(field)} title={field.active ? t('customFieldsSettings.deactivate') : t('customFieldsSettings.activate')}
-                  style={{ background: 'none', border: 'none', cursor: 'pointer', color: field.active ? 'var(--color-primary)' : 'var(--text-muted)', padding: 4 }}>
+                <Button variant="ghost" iconOnly onClick={() => toggleActive(field)} title={field.active ? t('customFieldsSettings.deactivate') : t('customFieldsSettings.activate')}
+                  aria-label={field.active ? t('customFieldsSettings.deactivate') : t('customFieldsSettings.activate')}
+                  style={{ color: field.active ? 'var(--color-primary)' : 'var(--text-muted)' }}>
                   {field.active ? <Eye size={14} /> : <EyeOff size={14} />}
-                </button>
+                </Button>
 
                 {/* Visible-in-UI toggle (worklist #44) — independent of active: the field
                     stays reachable via the API/imports either way, this only hides it from
                     the entity's rendered Extra tab. Monitor/MonitorOff so it reads as a
                     distinct control from the Eye/EyeOff active toggle above. */}
-                <button onClick={() => toggleVisibleInUi(field)} title={field.visible_in_ui ? t('customFieldsSettings.hideFromUi') : t('customFieldsSettings.showInUi')}
-                  style={{ background: 'none', border: 'none', cursor: 'pointer', color: field.visible_in_ui ? 'var(--color-primary)' : 'var(--text-muted)', padding: 4 }}>
+                <Button variant="ghost" iconOnly onClick={() => toggleVisibleInUi(field)} title={field.visible_in_ui ? t('customFieldsSettings.hideFromUi') : t('customFieldsSettings.showInUi')}
+                  aria-label={field.visible_in_ui ? t('customFieldsSettings.hideFromUi') : t('customFieldsSettings.showInUi')}
+                  style={{ color: field.visible_in_ui ? 'var(--color-primary)' : 'var(--text-muted)' }}>
                   {field.visible_in_ui ? <Monitor size={14} /> : <MonitorOff size={14} />}
-                </button>
+                </Button>
 
                 {/* Expand / collapse */}
-                <button onClick={() => setExpanded(isOpen ? null : field.id)}
-                  style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: 4 }}>
+                <Button variant="ghost" iconOnly onClick={() => setExpanded(isOpen ? null : field.id)}
+                  aria-label={isOpen ? t('common:collapse') : t('common:expand')}>
                   {isOpen ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
-                </button>
+                </Button>
               </div>
 
               {/* Expanded edit form */}
@@ -251,6 +253,9 @@ export default function CustomFieldsSettings({ entityType }) {
                       (the single source of truth — no per-callsite guard/styling). */}
                   <div>
                     <label style={labelStyle}>{t('customFieldsSettings.type')} {field.has_data && <span style={{ color: 'var(--color-warning)', fontWeight: 400 }}>({t('customFieldsSettings.hasData')})</span>}</label>
+                    {/* Herhaal-audit r4 finding 5/6/7: SearchSelect's own default
+                        single-pick trigger face (closeOnToggle, no renderTrigger) —
+                        never a hand-painted trigger button per call site. */}
                     <SearchSelect
                       options={FIELD_TYPES.map(tp => ({ value: tp, label: t(`customFieldsSettings.types.${tp}`) }))}
                       selected={[currentType]}
@@ -258,11 +263,7 @@ export default function CustomFieldsSettings({ entityType }) {
                       closeOnToggle
                       searchable={false}
                       disabled={field.has_data}
-                      renderTrigger={toggle => (
-                        <button type="button" onClick={toggle} disabled={field.has_data} style={{ ...inputStyle, textAlign: 'left' }}>
-                          {t(`customFieldsSettings.types.${currentType}`)}
-                        </button>
-                      )}
+                      triggerLabel={t(`customFieldsSettings.types.${currentType}`)}
                     />
                   </div>
 
@@ -276,20 +277,16 @@ export default function CustomFieldsSettings({ entityType }) {
                     </div>
                   )}
 
-                  {/* Actions */}
+                  {/* Actions — herhaal-audit r4 finding 4: Button's own dangerSoft/
+                      secondary recipe covers the disabled look; no per-callsite
+                      background/colour ternary needed anymore. */}
                   <div style={{ display: 'flex', gap: 8, justifyContent: 'space-between', marginTop: 4 }}>
-                    <button onClick={() => handleDelete(field)} disabled={field.has_data || saving === field.id}
-                      title={field.has_data ? t('customFieldsSettings.deleteBlocked') : t('customFieldsSettings.delete')}
-                      style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '6px 12px', fontSize: 12,
-                               borderRadius: 6, border: '1px solid color-mix(in srgb, var(--color-danger) 40%, transparent)', background: field.has_data ? 'var(--hover-bg)' : 'var(--color-danger-bg)',
-                               color: field.has_data ? 'var(--text-muted)' : 'var(--color-danger)', cursor: field.has_data ? 'not-allowed' : 'pointer' }}>
+                    <Button variant="dangerSoft" size="sm" onClick={() => handleDelete(field)} disabled={field.has_data || saving === field.id}
+                      title={field.has_data ? t('customFieldsSettings.deleteBlocked') : t('customFieldsSettings.delete')}>
                       <Trash2 size={12} /> {t('customFieldsSettings.delete')}
-                    </button>
+                    </Button>
                     <div style={{ display: 'flex', gap: 8 }}>
-                      <button onClick={() => setExpanded(null)}
-                        style={{ padding: '6px 14px', fontSize: 12, borderRadius: 6, border: '1px solid var(--border)', background: 'var(--surface)', color: 'var(--text-muted)', cursor: 'pointer' }}>
-                        {t('common.cancel')}
-                      </button>
+                      <Button variant="secondary" size="sm" onClick={() => setExpanded(null)}>{t('common.cancel')}</Button>
                       <Button variant="primary" size="sm" onClick={() => handleSave(field)} disabled={saving === field.id}>
                         {saving === field.id ? t('common.saving') : t('common.save')}
                       </Button>
@@ -320,17 +317,14 @@ export default function CustomFieldsSettings({ entityType }) {
             </div>
             <div>
               <label style={labelStyle}>{t('customFieldsSettings.type')}</label>
+              {/* Herhaal-audit r4 finding 5/6/7: SearchSelect's own default trigger face. */}
               <SearchSelect
                 options={FIELD_TYPES.map(tp => ({ value: tp, label: t(`customFieldsSettings.types.${tp}`) }))}
                 selected={[newForm.type]}
                 onToggle={v => setNewForm(p => ({ ...p, type: v }))}
                 closeOnToggle
                 searchable={false}
-                renderTrigger={toggle => (
-                  <button type="button" onClick={toggle} style={{ ...inputStyle, cursor: 'pointer', textAlign: 'left' }}>
-                    {t(`customFieldsSettings.types.${newForm.type}`)}
-                  </button>
-                )}
+                triggerLabel={t(`customFieldsSettings.types.${newForm.type}`)}
               />
             </div>
             {newForm.type === 'select' && (
@@ -342,10 +336,7 @@ export default function CustomFieldsSettings({ entityType }) {
               </div>
             )}
             <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
-              <button onClick={() => setAdding(false)}
-                style={{ padding: '6px 14px', fontSize: 12, borderRadius: 6, border: '1px solid var(--border)', background: 'var(--surface)', color: 'var(--text-muted)', cursor: 'pointer' }}>
-                {t('common.cancel')}
-              </button>
+              <Button variant="secondary" size="sm" onClick={() => setAdding(false)}>{t('common.cancel')}</Button>
               <Button variant="primary" size="sm" onClick={handleCreate} disabled={!newForm.label.trim() || saving === 'new'}>
                 {saving === 'new' ? t('common.saving') : t('customFieldsSettings.add')}
               </Button>

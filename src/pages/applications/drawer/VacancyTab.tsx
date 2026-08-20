@@ -125,7 +125,9 @@ export default function VacancyTab({ application: a, onLinkVacancy }: VacancyTab
             <Button variant="secondary" iconOnly size="sm" onClick={() => setLinking(false)} title={t('common:cancel')} aria-label={t('common:cancel')}><X size={13} /></Button>
           </div>
         ) : (
-          <Button variant="secondary" size="sm" onClick={() => { setVacancyId(''); setLinking(true) }}>
+          // Primary, not secondary (Danny 20-08, pasted this button: "Huisstijl") —
+          // coupling the vacancy is THE action of this empty state.
+          <Button variant="primary" size="sm" onClick={() => { setVacancyId(''); setLinking(true) }}>
             <Link2 size={13} /> {t('vacancyDetail.linkButton')}
           </Button>
         ))}
@@ -153,6 +155,9 @@ export default function VacancyTab({ application: a, onLinkVacancy }: VacancyTab
             name+trailing-icon EntityLink pattern), so it is a real new-tab anchor
             rather than EntityLink's in-app button wrapped around the icon+label. */}
         <span onClickCapture={() => { if (a.id != null) rememberReturnTab(a.id, 'vacancy') }} style={{ flexShrink: 0 }}>
+          {/* A TRUE text link (accent ink, no chrome) — V7 covers button-lookalikes
+              only. Block form: the style attribute sits inside the opening tag. */}
+          {/* eslint-disable huisstijlLegacy/no-restricted-syntax */}
           {a.vacancyId != null ? (
             <a href={buildEntityDeepLink('vacancies', a.vacancyId)} target="_blank" rel="noopener noreferrer"
               title={t('drawer.openVacancy')} aria-label={t('drawer.openVacancy')}
@@ -164,6 +169,7 @@ export default function VacancyTab({ application: a, onLinkVacancy }: VacancyTab
               <ExternalLink size={13} /> {t('drawer.openVacancy')}
             </span>
           )}
+          {/* eslint-enable huisstijlLegacy/no-restricted-syntax */}
         </span>
       </div>
       <VacancyLookupsProvider>

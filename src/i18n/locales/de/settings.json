@@ -2638,7 +2638,8 @@
     "filters": {
       "queue": "Warteschlange",
       "tenant": "Mandant",
-      "all": "Alle"
+      "all": "Alle",
+      "status": "Nach Status filtern"
     },
     "col": {
       "queue": "Warteschlange",

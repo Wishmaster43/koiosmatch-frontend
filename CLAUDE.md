@@ -582,7 +582,26 @@ the code is worse than no rule, because the next reader builds on it. What is tr
   NAVIGATIE (zijbalk, rustende tabs): dat zijn plaatsmarkeringen, geen acties —
   een menu vol volle vullingen schreeuwt (besluit bij Opus-review F, punt 8).
   (2) Destructief (verwijderen/beëindigen), gearchiveerd en datakleuren doen
-  NIET mee — Danny's expliciete uitzondering. (3) DE MAAT (Danny 19-08, slotwet: "drill downs moeten ALLEMAAL zelfde
+  NIET mee — Danny's expliciete uitzondering. (2a) **CHIP-TINT-1 (Danny 20-08,
+  screenshot voorkeuren-chips: "het oranje is te krachtig — de chips doen we in
+  dat lichte rode, en dit geldt voor ALLE chips"; vervangt de 19-08-regel
+  "geselecteerde pillen/chips = drietal"):** geselecteerde KEUZE-CHIPS (dagen,
+  branches, contractvormen, notitietype, dag-/weekdagcellen — alles waar je uit
+  opties kiest) dragen de ACTIEVE tint (16/50) + `chipInk` + 600 + vinkje —
+  nooit het volle vlak. Het drietal blijft voor KNOPPEN, actiebalken
+  ("Alles selecteren"), toolbar-toggles (QuickViewToggle's kale-accentgeval),
+  import-triggers en filtertriggers. Kortweg: kies-je-eruit = tint,
+  doe-je-ermee = vol. (2b) Drie randregels uit de
+  herhaal-audits (20-08): een GEÏNVERTEERD vlak op het drietal draait fill en
+  ink om (bg=`--button-ink`, tekst=`--button-fill` — het gedeelde `CountBadge`;
+  nooit een derde token als inkt, dat mat 2,52:1); `var(--color-primary)` als
+  background-WAARDE is in een component altijd fout — het accentvlak leest
+  `--button-fill`, de rauwe token hoort alleen in index.css en lib/tint; en een
+  dropdown-/select-TRIGGER is een FORMULIERVELD, geen actieknop — hij erft zijn
+  face van SearchSelect/fieldMetrics, nooit een eigen height per call-site
+  (30/32px-drift kwam precies daarvandaan). Een kleurcomment die een vulling
+  verantwoordt is geen reden om Button te omzeilen: de identiteit komt uit
+  Button, het comment hoort bij de variant in Button.tsx. (3) DE MAAT (Danny 19-08, slotwet: "drill downs moeten ALLEMAAL zelfde
   zijn — zelfde geldt voor de instellingen; boven elke tabel groot mag"):
   Button's STANDAARD is `sm` (28px · 12px · r6) — élke knop in drawers,
   instellingen, kaarten en modals erft die maat vanzelf; breedte volgt de

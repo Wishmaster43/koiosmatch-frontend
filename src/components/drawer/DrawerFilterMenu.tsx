@@ -6,6 +6,7 @@ import SelectMenu from '@/components/ui/SelectMenu'
 import SelectAllRow from '@/components/ui/SelectAllRow'
 import Slider from '@/components/ui/Slider'
 import Button from '@/components/ui/Button'
+import CountBadge from '@/components/ui/CountBadge'
 import { parseDate } from '@/components/forms/fields'
 import { toLocalIsoDate } from '@/lib/localDate'
 // PORTAL-MARKER-1: a click inside an open portalled picker menu is never "outside".
@@ -329,13 +330,9 @@ export default function DrawerFilterMenu({ filters, label, title, clearAllLabel 
             stays the stable `label` text (never "Filter 2", which would shift with
             every pick and break a screen reader's sense of "the same button"); the
             actual active values are fully exposed inside the open panel below. */}
-        {activeCount > 0 && (
-          <span aria-hidden="true" style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', minWidth: 15, height: 15,
-            padding: '0 4px', borderRadius: 999, background: 'var(--button-ink)', color: 'var(--color-primary-text)',
-            fontSize: 10, fontWeight: 700, lineHeight: 1 }}>
-            {activeCount}
-          </span>
-        )}
+        {/* Herhaal-audit r4 finding 3: the shared CountBadge atom (see
+            FilterTriggerPill's twin badge — same fix, same inverted trio). */}
+        {activeCount > 0 && <span aria-hidden="true"><CountBadge count={activeCount} /></span>}
       </button>
       {open && (
         <div id={panelId} ref={panelRef} role="dialog" aria-modal="true" aria-label={title} tabIndex={-1}

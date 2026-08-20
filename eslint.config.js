@@ -139,6 +139,21 @@ export default defineConfig([
         message: 'HUISSTIJL: knophoogte komt uit Button (sm=28, md=34 via size="md") — een losse 34px raw <button> is altijd een kopie, gebruik <Button>.',
       },
       {
+        // Herhaal-audit r4 finding 2: the inverse --text fill was a hand-rolled
+        // FOURTH button identity (four copies found; all retired the same round).
+        // Zero-hit at adoption — a returning inverse fill is a build error.
+        selector: "JSXOpeningElement[name.name='button'] Property[key.name=/^background(Color)?$/] > Literal[value='var(--text)']",
+        message: 'HUISSTIJL: een inverse-vulling (--text als knopvlak) is geen losse knop — de primaire actie leest <Button variant="primary">.',
+      },
+      {
+        // Herhaal-audit r4 findings 5-7: a dropdown TRIGGER is a form field, not an
+        // action button — it inherits its face from SearchSelect/fieldMetrics. A
+        // hand-painted height inside a renderTrigger is exactly how 30/32px drift
+        // arose. Zero-hit at adoption (the four offenders adopted the default face).
+        selector: "JSXAttribute[name.name='renderTrigger'] JSXOpeningElement[name.name='button'] Property[key.name='height']",
+        message: 'HUISSTIJL: een dropdown-trigger erft zijn maat van SearchSelect/fieldMetrics — geen eigen height in een renderTrigger.',
+      },
+      {
         // Herhaal-slotaudit 20-08 (SoftChip WCAG-fail, 2.4-3.0:1): text sitting on
         // its own tint never carries the raw colour as ink — that is chipInk's job.
         // Matches an object that tints (tint/tintBg call anywhere in it) while its
@@ -258,6 +273,21 @@ export default defineConfig([
       'huisstijlUiStrict/no-restricted-syntax': ['error', {
         selector: "Property[key.name='fontSize'] > Literal[value=15]",
         message: "HUISSTIJL: 15px is PageTitle — gebruik <PageTitle as='…'> uit components/ui/typography. De huisstijlmap zelf mag geen handgestylede kop bevatten.",
+      }],
+    },
+  },
+  // Herhaal-audit r4 findings 8/9: the reports map hand-painted the raw accent
+  // twice (both count badges). Zero-hit after the CountBadge adoption — this
+  // scoped block keeps it that way at 'error' (the same small-scope pattern as
+  // huisstijlUiStrict above; tree-wide the selector stays warn: 88 legacy hits).
+  {
+    files: ['src/components/reports/**/*.{ts,tsx,js,jsx}'],
+    ignores: ['src/components/reports/**/*.test.{ts,tsx,js,jsx}'],
+    plugins: { huisstijlReportsStrict: huisstijlPlugin },
+    rules: {
+      'huisstijlReportsStrict/no-restricted-syntax': ['error', {
+        selector: "Property[key.name=/^background(Color)?$/] Literal[value='var(--color-primary)']",
+        message: 'HUISSTIJL: het rauwe accent als vulling is verboden in reports/ — het accentvlak leest var(--button-fill) (of CountBadge voor telbadges).',
       }],
     },
   },

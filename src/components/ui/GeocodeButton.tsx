@@ -11,10 +11,10 @@
  * gating is UX only).
  */
 import { useState } from 'react'
-import type { CSSProperties } from 'react'
 import { useTranslation } from 'react-i18next'
 import { RefreshCw } from 'lucide-react'
 import api, { unwrap } from '@/lib/api'
+import Button from '@/components/ui/Button'
 import { notifySuccess, notifyError } from '@/lib/notify'
 import { toCoord } from '@/lib/coords'
 import { useAuth } from '@/context/AuthContext'
@@ -78,22 +78,15 @@ export default function GeocodeButton({ endpoint, permission, disabled = false, 
     }
   }
 
-  // Ghost: transparent icon (drawer title-row). Row: boxed icon-button (settings table row).
-  const ghostStyle: CSSProperties = {
-    background: 'none', border: 'none', cursor: disabled ? 'not-allowed' : 'pointer',
-    padding: 4, display: 'flex', color: 'var(--text-muted)', opacity: disabled ? 0.4 : 0.8,
-  }
-  const rowStyle: CSSProperties = {
-    width: 26, height: 26, display: 'flex', alignItems: 'center', justifyContent: 'center',
-    background: 'var(--hover-bg)', border: 'none', borderRadius: 6,
-    cursor: disabled ? 'not-allowed' : 'pointer', color: 'var(--text-muted)', opacity: disabled ? 0.5 : 1,
-  }
-
+  // House Button (Danny 20-08, pasted the hand-styled 26px row variant: "mooier
+  // ook in huisstijl"): ghost = the drawer title-row icon convention, secondary =
+  // the boxed settings-row convention — both at Button's own sm 28px footprint.
+  // The spinning glyph stays the refresh icon itself (same glyph, loading state).
   return (
-    <button type="button" onClick={handleClick} disabled={disabled || loading}
-      title={t('geocode.refresh')} aria-label={t('geocode.refresh')}
-      style={variant === 'row' ? rowStyle : ghostStyle}>
+    <Button variant={variant === 'row' ? 'secondary' : 'ghost'} iconOnly
+      onClick={handleClick} disabled={disabled || loading}
+      title={t('geocode.refresh')} aria-label={t('geocode.refresh')}>
       <RefreshCw size={variant === 'row' ? 12 : 14} className={loading ? 'animate-spin' : ''} />
-    </button>
+    </Button>
   )
 }

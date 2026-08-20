@@ -2638,7 +2638,8 @@
     "filters": {
       "queue": "Cola",
       "tenant": "Tenant",
-      "all": "Todas"
+      "all": "Todas",
+      "status": "Filtrar por estado"
     },
     "col": {
       "queue": "Cola",

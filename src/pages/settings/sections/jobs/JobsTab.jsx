@@ -13,6 +13,8 @@ import { formatDT, formatDuration } from '@/components/reports/runFormat'
 import { useJobsList } from './useJobsList'
 import SearchSelect from '@/components/ui/SearchSelect'
 import { Mono } from '@/components/ui/typography'
+import Button from '@/components/ui/Button'
+import { tintBorder } from '@/lib/tint'
 
 const STATE_COLOR = { pending: 'var(--text-muted)', reserved: 'var(--color-warning)' }
 
@@ -36,12 +38,7 @@ export default function JobsTab() {
       render: (r) => r.reserved_at ? formatDuration((r.runtime_seconds ?? 0) * 1000) : '—' },
     { key: 'actions', header: t('jobs.col.actions'), align: 'right', nowrap: true,
       render: (r) => r.reserved_at ? null : (
-        <button type="button" onClick={() => cancel(r.id)}
-          style={{ fontSize: 12, fontWeight: 500, padding: '4px 10px', borderRadius: 7, cursor: 'pointer',
-            border: '1px solid color-mix(in srgb, var(--color-danger) 40%, transparent)',
-            background: 'var(--color-danger-bg)', color: 'var(--color-danger)' }}>
-          {t('jobs.cancel')}
-        </button>
+        <Button variant="dangerSoft" size="sm" onClick={() => cancel(r.id)}>{t('jobs.cancel')}</Button>
       ) },
   ]
 
@@ -53,6 +50,9 @@ export default function JobsTab() {
           style={{ height: 32, padding: '0 10px', fontSize: 12, border: '1px solid var(--border)', borderRadius: 8, background: 'var(--surface)', color: 'var(--text)', width: 160 }} />
         <input value={filters.tenant} onChange={(e) => setFilter('tenant', e.target.value)} placeholder={t('jobs.filters.tenant')}
           style={{ height: 32, padding: '0 10px', fontSize: 12, border: '1px solid var(--border)', borderRadius: 8, background: 'var(--surface)', color: 'var(--text)', width: 160 }} />
+        {/* Herhaal-audit r4 finding 7: SearchSelect's own default trigger face —
+            same footprint as RecentJobsTab's tenant filter, so the two compact
+            filter triggers in Taakbeheer no longer disagree on height. */}
         <SearchSelect
           options={[
             { value: '', label: t('jobs.filters.all') },
@@ -63,22 +63,19 @@ export default function JobsTab() {
           onToggle={v => setFilter('status', v)}
           closeOnToggle
           searchable={false}
-          renderTrigger={toggle => (
-            <button type="button" onClick={toggle}
-              style={{ height: 32, padding: '0 10px', fontSize: 12, border: '1px solid var(--border)', borderRadius: 8, background: 'var(--surface)', color: 'var(--text)', cursor: 'pointer', textAlign: 'left' }}>
-              {filters.status === 'pending' ? t('jobs.state.pending') : filters.status === 'reserved' ? t('jobs.state.reserved') : t('jobs.filters.all')}
-            </button>
-          )}
+          triggerLabel={filters.status === 'pending' ? t('jobs.state.pending') : filters.status === 'reserved' ? t('jobs.state.reserved') : t('jobs.filters.all')}
+          triggerAriaLabel={t('jobs.filters.status')}
         />
       </div>
 
       {/* A cancel that lost the race (worker reserved it first) — the 409's own message. */}
       {cancelError && (
         <div style={{ display: 'flex', alignItems: 'flex-start', gap: 8, padding: '10px 12px', marginBottom: 12,
-          borderRadius: 8, background: 'var(--color-warning-bg)', border: '1px solid color-mix(in srgb, var(--color-warning) 40%, transparent)' }}>
+          borderRadius: 8, background: 'var(--color-warning-bg)', border: tintBorder('var(--color-warning)') }}>
           <span style={{ fontSize: 12, color: 'var(--text)', flex: 1 }}>{cancelError.message ?? t('jobs.cancelReservedError')}</span>
-          <button type="button" onClick={() => setCancelError(null)} aria-label={t('common.close')}
-            style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', display: 'flex' }}><X size={13} /></button>
+          <Button variant="ghost" iconOnly onClick={() => setCancelError(null)} aria-label={t('common.close')}>
+            <X size={13} />
+          </Button>
         </div>
       )}
 
@@ -90,18 +87,20 @@ export default function JobsTab() {
         </div>
       )}
 
-      {/* Pagination — server-paginated (max 100/page; we ask for 25). */}
+      {/* Pagination — server-paginated (max 100/page; we ask for 25). A simple
+          prev/next (no page-size picker) doesn't fit the shared PaginationBar's
+          fuller contract without also reworking useJobsList's fixed per_page —
+          out of this task's scope, so this stays its own minimal pair, now via
+          Button (its own disabled recipe replaces the manual opacity/cursor). */}
       {result.lastPage > 1 && (
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 10, marginTop: 10 }}>
-          <button type="button" disabled={page <= 1} onClick={() => setPage((p) => p - 1)}
-            style={{ fontSize: 12, padding: '4px 10px', borderRadius: 7, border: '1px solid var(--border)', background: 'var(--surface)', color: 'var(--text)', cursor: page <= 1 ? 'not-allowed' : 'pointer', opacity: page <= 1 ? 0.5 : 1 }}>
+          <Button variant="secondary" size="sm" disabled={page <= 1} onClick={() => setPage((p) => p - 1)}>
             {t('jobs.pagination.prev')}
-          </button>
+          </Button>
           <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>{t('jobs.pagination.page', { page: result.page, last: result.lastPage })}</span>
-          <button type="button" disabled={page >= result.lastPage} onClick={() => setPage((p) => p + 1)}
-            style={{ fontSize: 12, padding: '4px 10px', borderRadius: 7, border: '1px solid var(--border)', background: 'var(--surface)', color: 'var(--text)', cursor: page >= result.lastPage ? 'not-allowed' : 'pointer', opacity: page >= result.lastPage ? 0.5 : 1 }}>
+          <Button variant="secondary" size="sm" disabled={page >= result.lastPage} onClick={() => setPage((p) => p + 1)}>
             {t('jobs.pagination.next')}
-          </button>
+          </Button>
         </div>
       )}
     </div>

@@ -8,6 +8,10 @@ import SelectMenu from '@/components/ui/SelectMenu'
 import { Caption } from '@/components/ui/typography'
 import type { Id, LookupOption } from '@/types/common'
 import Button from '@/components/ui/Button'
+import { tintBg, tintBorder, chipInk } from '@/lib/tint'
+
+// Hoisted: an inline accent literal under background: false-fires the accent-fill selector.
+const ACCENT = 'var(--color-primary)'
 
 // A queued-but-not-yet-uploaded file, each with its own document type (BUGFIX
 // 23-07: a multi-file pick used to collapse to a single pending slot, so picking
@@ -69,17 +73,20 @@ export default function PendingUploadQueue({
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 10 }}>
         {/* §4 soft-tint (audit r4): active = tinted, never a solid primary fill.
             A chip is "active" only when EVERY queued item already shares that type. */}
+        {/* Choice-chips (CHIP-TINT-1): the lib/tint house pair + chipInk — was a
+            hand-rolled 14/45 pair. Block form: the style attr spans the tag. */}
+        {/* eslint-disable huisstijlLegacy/no-restricted-syntax */}
         {docTypes.map(dt => {
           const active = pending.length > 0 && pending.every(p => p.type === dt.value)
           return (
             <button key={dt.value} onClick={() => onSetAllTypes(dt.value)}
               style={{ padding: '4px 10px', fontSize: 11, borderRadius: 99, cursor: 'pointer', fontWeight: active ? 600 : 400,
-                border: `1px solid ${active ? 'color-mix(in srgb, var(--color-primary) 45%, transparent)' : 'var(--border)'}`,
-                background: active ? 'color-mix(in srgb, var(--color-primary) 14%, transparent)' : 'var(--surface)',
-                // Text-colour accent uses the AA-contrast text token, not the raw brand primary.
-                color: active ? 'var(--color-primary-text)' : 'var(--text)' }}>{dt.label}</button>
+                border: active ? tintBorder(ACCENT, true) : '1px solid var(--border)',
+                background: active ? tintBg(ACCENT, true) : 'var(--surface)',
+                color: active ? chipInk(ACCENT) : 'var(--text)' }}>{dt.label}</button>
           )
         })}
+        {/* eslint-enable huisstijlLegacy/no-restricted-syntax */}
       </div>
       {/* One compact row per queued file — its own type select + link picker + remove. */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: 6, marginBottom: 10 }}>
@@ -100,19 +107,23 @@ export default function PendingUploadQueue({
                 picker itself (DOC-1-EIGENAAR-1). */}
             <DocumentLinkPicker ariaLabel={t('documents.linkToFor', { name: item.name })} value={item.linkTo} onChange={v => onSetLink(idx, v)}
               educations={educations} certifications={certifications} languages={languages} skills={skills} references={references} />
+            {/* 12px inline row-remove glyph in a dense queue row, not a Button copy
+                (mirrors EntityHeader's chip-remove precedent). Block form: the
+                style attr sits a line into the tag. */}
+            {/* eslint-disable huisstijlLegacy/no-restricted-syntax */}
             <button onClick={() => onRemove(idx)} aria-label={t('common:remove')}
               style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: 2, display: 'flex', flexShrink: 0 }}><X size={12} /></button>
+            {/* eslint-enable huisstijlLegacy/no-restricted-syntax */}
           </div>
         ))}
       </div>
       <div style={{ display: 'flex', gap: 8 }}>
-        {/* CONTRAST-YELLOW-1 (08-08 audit): the fill is var(--text), which flips
-            near-black↔near-white across themes, so the label must flip with it —
-            var(--bg) is always the readable inverse of --text in both themes. */}
-        <button onClick={onUploadAll}
-          style={{ padding: '7px 14px', fontSize: 12, fontWeight: 600, borderRadius: 7, background: 'var(--text)', color: 'var(--bg)', border: 'none', cursor: 'pointer' }}>
+        {/* Herhaal-audit r4 finding 2's twin (customers DocumentsTab converted the
+            same round): the inverse --text fill is retired — the card's primary
+            action wears the house Button. */}
+        <Button variant="primary" size="sm" onClick={onUploadAll}>
           {pending.length > 1 ? t('documents.addAll', { count: pending.length }) : t('common:add')}
-        </button>
+        </Button>
         <Button variant="secondary" size="sm" onClick={onCancel}>{t('common:cancel')}</Button>
       </div>
     </div>

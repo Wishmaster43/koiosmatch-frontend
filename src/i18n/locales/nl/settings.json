@@ -2638,7 +2638,8 @@
     "filters": {
       "queue": "Wachtrij",
       "tenant": "Tenant",
-      "all": "Alle"
+      "all": "Alle",
+      "status": "Filter op status"
     },
     "col": {
       "queue": "Wachtrij",

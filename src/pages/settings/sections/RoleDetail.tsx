@@ -18,7 +18,6 @@ import RoleChip from '@/components/ui/RoleChip'
 import Spinner from '@/components/ui/Spinner'
 import SearchSelect from '@/components/ui/SearchSelect'
 import { DASHBOARD_TYPES } from '@/pages/dashboard/templates'
-import { BTN_H } from '@/config/buttonMetrics'
 import type { Role, PermissionsByGroup, UpdateRoleBody, UpdatePermissionsBody } from './rolesTypes'
 import Button from '@/components/ui/Button'
 import { tintBg } from '@/lib/tint'
@@ -33,6 +32,11 @@ interface IconPickerProps {
 // Small popover grid to pick a role icon from the allowed set.
 function IconPicker({ value, color, options, onPick }: IconPickerProps) {
   const [open, setOpen] = useState(false)
+  // Defensive fallback so a caller without a resolved colour never tints with
+  // `undefined` — today's only caller always passes one. Its own binding (not
+  // inline in the style object below) so the HUISSTIJL accent-fill selector
+  // doesn't mistake this tintBg() ARGUMENT for a hand-painted solid fill.
+  const swatchColor = color || 'var(--color-primary)'
   return (
     <div style={{ position: 'relative' }}>
       <Button variant="secondary" onClick={() => setOpen(o => !o)}
@@ -45,17 +49,22 @@ function IconPicker({ value, color, options, onPick }: IconPickerProps) {
           <div className="z-50" style={{ position: 'absolute', top: '110%', left: 0, marginTop: 4,
             display: 'grid', gridTemplateColumns: 'repeat(8, 1fr)', gap: 4, padding: 8, width: 300,
             background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 10,
-            boxShadow: '0 8px 28px rgba(0,0,0,0.16)' }}>
+            boxShadow: 'var(--shadow-float)' }}>
             {options.map(name => {
               const active = name === value
               return (
+                // Icon-grid CELL, not a standalone action — mirrors the accepted
+                // calendar-grid-cell exemption (§4): a 32px swatch tile has no
+                // Button-sized equivalent. Block form: style spans several lines.
+                /* eslint-disable huisstijlLegacy/no-restricted-syntax */
                 <button key={name} onClick={() => { onPick(name); setOpen(false) }} title={name}
                   style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 32, height: 32,
-                    borderRadius: 7, cursor: 'pointer', border: `1px solid ${active ? color || 'var(--color-primary)' : 'transparent'}`,
+                    borderRadius: 7, cursor: 'pointer', border: `1px solid ${active ? swatchColor : 'transparent'}`,
                     // Non-chip tinted surface: the house tintBg formula, not hex-concat (§4, HUISSTIJL-1).
-                    background: active ? tintBg(color || 'var(--color-primary)') : 'var(--hover-bg)' }}>
+                    background: active ? tintBg(swatchColor) : 'var(--hover-bg)' }}>
                   {roleIconEl(name, { size: 15, color: active ? color : 'var(--text)' })}
                 </button>
+                /* eslint-enable huisstijlLegacy/no-restricted-syntax */
               )
             })}
           </div>
@@ -138,13 +147,11 @@ export function RoleDetail({ role, permissions, iconOptions, onBack, onUpdate }:
     <div>
       {/* Back + role name header */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 18 }}>
-        {/* BTN_H (§4/§9): one explicit height for every text/action button, everywhere. */}
-        <button onClick={onBack}
-          style={{ display: 'flex', alignItems: 'center', gap: 6, height: BTN_H, padding: '0 12px',
-                   fontSize: 13, border: '1px solid var(--border)', borderRadius: 8, background: 'var(--hover-bg)',
-                   color: 'var(--text)', cursor: 'pointer' }}>
+        {/* Herhaal-audit r4 finding 6: a raw <button> reading BTN_H is by definition
+            a copy of Button size="md" — read the atom directly instead. */}
+        <Button variant="secondary" size="md" onClick={onBack}>
           <ArrowLeft size={13} /> {t('common.back')}
-        </button>
+        </Button>
         {roleIconEl(iconName, { size: 16, style: { color } })}
         {editName ? (
           <input autoFocus value={draftName}
@@ -175,18 +182,16 @@ export function RoleDetail({ role, permissions, iconOptions, onBack, onUpdate }:
         {/* Start dashboard — couples this role to a dashboard type (same labels as the switcher). */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
           <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>{t('roles.startDashboard')}</span>
+          {/* Herhaal-audit r4 finding 6: SearchSelect's own default trigger face —
+              triggerAriaLabel keeps the accessible name naming what it configures,
+              since the adjacent label span is a separate element. */}
           <SearchSelect
             options={[{ value: '', label: t('roles.startDashboardNone') }, ...DASHBOARD_TYPES.map(dt => ({ value: dt, label: td(`types.${dt}`) }))]}
             selected={[localRole.dashboard_type ?? '']}
             onToggle={v => saveAppearance({ dashboard_type: v || null })}
             closeOnToggle
-            renderTrigger={toggle => (
-              <button type="button" onClick={toggle} aria-label={t('roles.startDashboard')}
-                style={{ height: 30, padding: '0 8px', fontSize: 13, border: '1px solid var(--border)', borderRadius: 7,
-                         background: 'var(--surface)', color: 'var(--text)', cursor: 'pointer', textAlign: 'left' }}>
-                {localRole.dashboard_type ? td(`types.${localRole.dashboard_type}`) : t('roles.startDashboardNone')}
-              </button>
-            )}
+            triggerLabel={localRole.dashboard_type ? td(`types.${localRole.dashboard_type}`) : t('roles.startDashboardNone')}
+            triggerAriaLabel={t('roles.startDashboard')}
           />
         </div>
         <div style={{ marginLeft: 'auto' }}>

@@ -16,6 +16,8 @@ import type { ReportFilterGroup } from '@/types/reports'
 import SavedFiltersGroup from './filter/SavedFiltersGroup'
 import FilterGroupBlock from './filter/FilterGroupBlock'
 import { useFilterGroupCollapse } from './filter/useFilterGroupCollapse'
+import CountBadge from '@/components/ui/CountBadge'
+import Button from '@/components/ui/Button'
 
 // A group's own active-selection count (single-group version of the header sum).
 function groupActiveCount(g: ReportFilterGroup): number {
@@ -63,10 +65,15 @@ export default function ReportFilterSidebar({
       borderRadius: 999, padding: '2px 8px', fontSize: 10.5, fontWeight: 500 }}>
       <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{label}</span>
       {onRemove && (
+        // Inline chip-remove glyph sized to the 10.5px tag chip, not a standalone
+        // Button — mirrors EntityHeader.tsx's own identical exemption. Block form:
+        // the flagged style attribute sits on the tag's 2nd line.
+        /* eslint-disable huisstijlLegacy/no-restricted-syntax */
         <button onClick={onRemove} aria-label={t('filters.clear')}
           style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'inherit', padding: 0, lineHeight: 1, display: 'flex' }}>
           <X size={8} />
         </button>
+        /* eslint-enable huisstijlLegacy/no-restricted-syntax */
       )}
     </span>
   )
@@ -90,46 +97,38 @@ export default function ReportFilterSidebar({
                     padding: '10px 12px', borderBottom: '1px solid var(--border)' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
           <span style={{ fontWeight: 600, fontSize: 12, color: 'var(--text)' }}>{heading}</span>
-          {activeCount > 0 && (
-            <span style={{ background: 'var(--color-primary)', color: 'var(--color-on-accent)',
-                           borderRadius: 999, padding: '1px 6px', fontSize: 10, fontWeight: 600 }}>
-              {activeCount}
-            </span>
-          )}
+          {/* Herhaal-audit r4 findings 8/9: the shared CountBadge atom — both this
+              panel header and FilterGroupBlock's own per-group badge read it now. */}
+          {activeCount > 0 && <CountBadge count={activeCount} />}
         </div>
         <div style={{ display: 'flex', gap: 4 }}>
-          {/* Expand all / collapse all — one click flips every group at once (punt 31c) */}
+          {/* Expand all / collapse all — one click flips every group at once (punt 31c).
+              Herhaal-audit r4: these three header icons now read Button's own ghost
+              iconOnly identity; the imperative hover handlers still work unchanged —
+              they mutate the rendered DOM node directly, regardless of which
+              component drew it. */}
           {collapsibleGroups.length > 0 && (
-            <button
+            <Button variant="ghost" iconOnly
               onClick={() => (collapse.allExpanded ? collapse.collapseAll() : collapse.expandAll())}
               title={collapse.allExpanded ? t('filters.collapseAll') : t('filters.expandAll')}
               aria-label={collapse.allExpanded ? t('filters.collapseAll') : t('filters.expandAll')}
-              style={{ display: 'flex', alignItems: 'center', justifyContent: 'center',
-                       width: 22, height: 22, background: 'none', border: 'none',
-                       cursor: 'pointer', color: 'var(--text-muted)', borderRadius: 4 }}
               onMouseEnter={e => (e.currentTarget.style.background = 'var(--border)')}
               onMouseLeave={e => (e.currentTarget.style.background = 'none')}>
               {collapse.allExpanded ? <ChevronsDownUp size={12} /> : <ChevronsUpDown size={12} />}
-            </button>
+            </Button>
           )}
           {activeCount > 0 && (
-            <button onClick={clearAll} title={t('filters.clearAll')} aria-label={t('filters.clearAll')}
-              style={{ display: 'flex', alignItems: 'center', justifyContent: 'center',
-                       width: 22, height: 22, background: 'none', border: 'none',
-                       cursor: 'pointer', color: 'var(--text-muted)', borderRadius: 4 }}
+            <Button variant="ghost" iconOnly onClick={clearAll} title={t('filters.clearAll')} aria-label={t('filters.clearAll')}
               onMouseEnter={e => (e.currentTarget.style.background = 'var(--border)')}
               onMouseLeave={e => (e.currentTarget.style.background = 'none')}>
               <RotateCcw size={12} />
-            </button>
+            </Button>
           )}
-          <button onClick={onClose} aria-label={t('close')}
-            style={{ display: 'flex', alignItems: 'center', justifyContent: 'center',
-                     width: 22, height: 22, background: 'none', border: 'none',
-                     cursor: 'pointer', color: 'var(--text-muted)', borderRadius: 4 }}
+          <Button variant="ghost" iconOnly onClick={onClose} aria-label={t('close')}
             onMouseEnter={e => (e.currentTarget.style.background = 'var(--border)')}
             onMouseLeave={e => (e.currentTarget.style.background = 'none')}>
             <X size={13} />
-          </button>
+          </Button>
         </div>
       </div>
 
@@ -157,9 +156,12 @@ export default function ReportFilterSidebar({
             <input autoFocus={false} value={g.value ?? ''} onChange={e => g.onChange?.(e.target.value)}
               placeholder={g.placeholder ?? t('filters.searchAll')}
               style={{ flex: 1, border: 'none', outline: 'none', fontSize: 12, color: 'var(--text)', background: 'transparent', padding: 0 }} />
+            {/* Inline clear icon inside compact search chrome — mirrors the
+                identical pattern in HeaderSearch/DocumentsTab (Button's smallest
+                footprint, 28px, would overflow this 6px-padding row). */}
             {g.value && (
-              <button onClick={() => g.onChange?.('')} aria-label={t('filters.clear')}
-                style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: 0, display: 'flex' }}>
+              // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- see comment above
+              <button onClick={() => g.onChange?.('')} aria-label={t('filters.clear')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: 0, display: 'flex' }}>
                 <X size={10} />
               </button>
             )}

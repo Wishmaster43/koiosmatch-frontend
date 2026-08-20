@@ -11,9 +11,13 @@ npm run --silent typecheck || {
   echo "✗ tsc failed — fix the type errors before committing (or, only if you must: git commit --no-verify)"
   exit 1
 }
-echo "▶ pre-commit: lint…"
-npm run --silent lint || {
-  echo "✗ eslint reported errors — fix them before committing"
+echo "▶ pre-commit: lint + huisstijl-plafond…"
+# One `eslint .` json run checks BOTH: errors anywhere (the old lint step) and the
+# shrink-only per-file warning CEILING (herhaal-slotaudit §7.1 — the staged check
+# below only guards files you touch; the ceiling catches new drift in UNTOUCHED
+# legacy files too). Debt paid down? Lower the snapshot: npm run huisstijl:ceiling -- --write
+node scripts/huisstijl-ceiling.mjs || {
+  echo "✗ eslint errors or a HUISSTIJL ceiling breach — see above"
   exit 1
 }
 # HUISSTIJL slotaudit §2.3: a handful of selectors (link-as-button, raw <button>

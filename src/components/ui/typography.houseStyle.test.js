@@ -167,7 +167,6 @@ const CAPTION_ALLOWLIST = {
   'components/drawer/backofficeLinkCards.tsx': 2,
   'components/drawer/tabs/EntityTasksTab.tsx': 1,
   'components/drawer/tabs/NotesTab.tsx': 2,
-  'components/drawer/tabs/StatsTab.tsx': 1,
   'components/drawer/tabs/notes/NoteAssistSection.tsx': 1,
   'components/drawer/tabs/notes/NoteFields.tsx': 2,
   'components/import/EntityImportCard.tsx': 1,
