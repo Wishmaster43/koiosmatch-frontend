@@ -12,7 +12,7 @@ import SoftChip from '@/components/ui/SoftChip'
 // HUISSTIJL-1: shared typography atom — the cell label and every muted
 // secondary line in this strip are exact 11px/muted matches for Caption.
 import { Caption } from '@/components/ui/typography'
-import { humanizeInterviewStatus } from './InterviewStatusCard'
+import { translateInterviewStatus } from '@/lib/interviewStatus'
 import type { ApplicationDetail } from '@/types/application'
 
 // One label-above cell in the strip; every cell renders something calm even
@@ -114,7 +114,7 @@ export default function ApplicationStatusStrip({ application: a, onNavigateTab }
   const interviewStatusLabel = (iv: NonNullable<ApplicationDetail['interview']>) => {
     const raw = iv.currentStatus
     if (!raw) return t(`interview.category.${iv.category}`)
-    return t(`interview.currentStatus.${raw}`, { defaultValue: humanizeInterviewStatus(raw) })
+    return translateInterviewStatus(t, raw)
   }
   // W29: gated on the same permission the POST /applications/{id}/score route
   // requires (applications.update) — self-contained like InterviewStatusCard's

@@ -68,12 +68,18 @@ interface CreatableSelectProps {
   // wissen"), so several clearable pickers on one card don't all announce as a
   // bare "Wissen". Composed via ICU interpolation, never string concatenation (§5).
   clearLabel?: string
+  // HUISSTIJL-1: opt-in trigger override (mirrors SearchSelect's own
+  // `renderTrigger`), for the handful of FILTER-role call sites that must wear
+  // the house trio pill instead of the calm form-field box below. Receives the
+  // open/close toggle; omitted = the existing bordered trigger, so every
+  // FORM-role call site (pick a value to save) renders byte-for-byte unchanged.
+  renderTrigger?: (toggle: () => void) => ReactNode
 }
 
 export default function CreatableSelect({
   id, 'aria-labelledby': ariaLabelledBy,
   value, options = [], onChange, placeholder, allowCreate = true, menuWidth = 220, style,
-  clearable = false, clearLabel,
+  clearable = false, clearLabel, renderTrigger,
 }: CreatableSelectProps) {
   const { t } = useTranslation('common')
   const listId = useId()
@@ -154,37 +160,43 @@ export default function CreatableSelect({
 
   return (
     <div ref={ref} style={{ position: 'relative' }}>
-      {/* Announced as a disclosure, NOT role="combobox": the options are real focusable
-          buttons reached by Tab, so claiming the combobox role would promise the arrow-key
-          + aria-activedescendant model this component does not implement. haspopup/expanded
-          tell a screen reader it opens a list — the part that was missing entirely once a
-          native <select> was replaced by this (measured 27-07). */}
-      <button type="button" ref={triggerRef} onClick={() => setOpen(o => !o)}
-        id={triggerId} aria-labelledby={labelledBy}
-        aria-expanded={open} aria-haspopup="listbox" aria-controls={open ? listId : undefined}
-        style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '6px 10px', width: '100%',
-          boxSizing: 'border-box', border: '1px solid var(--border)', borderRadius: 6,
-          background: 'var(--surface)', cursor: 'pointer', ...style }}>
-        {/* The trigger label follows an explicit style.fontSize (modal-sized fields).
-            `marginRight` (NOT the button's padding) reserves the clear button's slot:
-            padding would push the chevron inward too, and it would also be overridable
-            by a caller's own `style`. Applied only while the X is showing, so a caller
-            that never opts in keeps its exact current layout. */}
-        {/* S-icon-1 (mirrored from SelectMenu): the selected option's own icon, if any. */}
-        {current?.icon && <span style={{ display: 'flex', flexShrink: 0 }}>{current.icon}</span>}
-        <span style={{ fontSize: (style as { fontSize?: number } | undefined)?.fontSize ?? 12, flex: 1, textAlign: 'left', whiteSpace: 'nowrap', overflow: 'hidden',
-          textOverflow: 'ellipsis', color: (current || value) ? 'var(--text)' : 'var(--text-muted)',
-          ...(showClear ? { marginRight: CLEAR_BUTTON_SIZE } : {}) }}>
-          {/* `value || placeholder`, NOT `value ?? placeholder`: an unset field commonly
-              holds an EMPTY STRING (form state seeded with ''), which ?? happily renders —
-              leaving the trigger with no text at all. The placeholder then never showed AND
-              the box collapsed ~8px shorter than the text inputs beside it (measured live
-              28-07 on the contact modal's Functie field: 30px vs 38px, Danny's "het veld is
-              niet even groot als de rest"). Every picker seeded with '' had it. */}
-          {current?.label ?? (value || placeholder) ?? '-'}
-        </span>
-        <ChevronDown size={12} style={{ color: 'var(--text-muted)', flexShrink: 0 }} />
-      </button>
+      {/* HUISSTIJL-1: a caller-supplied trigger (FILTER role) replaces the default
+          button entirely — same toggle, same portal/menu logic below, only the
+          face changes. FORM-role callers never pass this, so they render exactly
+          as before. */}
+      {renderTrigger ? renderTrigger(() => setOpen(o => !o)) : (
+        // Announced as a disclosure, NOT role="combobox": the options are real focusable
+        // buttons reached by Tab, so claiming the combobox role would promise the arrow-key
+        // + aria-activedescendant model this component does not implement. haspopup/expanded
+        // tell a screen reader it opens a list — the part that was missing entirely once a
+        // native <select> was replaced by this (measured 27-07).
+        <button type="button" ref={triggerRef} onClick={() => setOpen(o => !o)}
+          id={triggerId} aria-labelledby={labelledBy}
+          aria-expanded={open} aria-haspopup="listbox" aria-controls={open ? listId : undefined}
+          style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '6px 10px', width: '100%',
+            boxSizing: 'border-box', border: '1px solid var(--border)', borderRadius: 6,
+            background: 'var(--surface)', cursor: 'pointer', ...style }}>
+          {/* The trigger label follows an explicit style.fontSize (modal-sized fields).
+              `marginRight` (NOT the button's padding) reserves the clear button's slot:
+              padding would push the chevron inward too, and it would also be overridable
+              by a caller's own `style`. Applied only while the X is showing, so a caller
+              that never opts in keeps its exact current layout. */}
+          {/* S-icon-1 (mirrored from SelectMenu): the selected option's own icon, if any. */}
+          {current?.icon && <span style={{ display: 'flex', flexShrink: 0 }}>{current.icon}</span>}
+          <span style={{ fontSize: (style as { fontSize?: number } | undefined)?.fontSize ?? 12, flex: 1, textAlign: 'left', whiteSpace: 'nowrap', overflow: 'hidden',
+            textOverflow: 'ellipsis', color: (current || value) ? 'var(--text)' : 'var(--text-muted)',
+            ...(showClear ? { marginRight: CLEAR_BUTTON_SIZE } : {}) }}>
+            {/* `value || placeholder`, NOT `value ?? placeholder`: an unset field commonly
+                holds an EMPTY STRING (form state seeded with ''), which ?? happily renders —
+                leaving the trigger with no text at all. The placeholder then never showed AND
+                the box collapsed ~8px shorter than the text inputs beside it (measured live
+                28-07 on the contact modal's Functie field: 30px vs 38px, Danny's "het veld is
+                niet even groot als de rest"). Every picker seeded with '' had it. */}
+            {current?.label ?? (value || placeholder) ?? '-'}
+          </span>
+          <ChevronDown size={12} style={{ color: 'var(--text-muted)', flexShrink: 0 }} />
+        </button>
+      )}
       {/* Clear — a SIBLING of the trigger, never a child: a <button> inside a
           <button> is invalid HTML and browsers drop the inner one from the tab
           order. Absolutely positioned over the trigger's reserved slot, so it is

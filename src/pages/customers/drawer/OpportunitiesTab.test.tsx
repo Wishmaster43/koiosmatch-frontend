@@ -96,10 +96,10 @@ describe('OpportunitiesTab · stage filter narrows the rows (Danny: "bij Kansen 
     const user = userEvent.setup()
     mockOpportunities(rows)
     render(<OpportunitiesTab customerId="cust-1" customerName="Acme" />)
-    // Nothing picked yet, so the trigger's own text is the "all statuses" label
-    // (StatusFilterSelect.tsx) — i18n is unmocked here, so t() echoes the raw key,
-    // same convention the pre-existing tests above already rely on.
-    await user.click(screen.getByRole('button', { name: 'filters.allStatuses' }))
+    // StatusFilterSelect shows the pill+count convention since HUISSTIJL-1 batch G:
+    // the trigger always reads the static "Status" word, never the picked value.
+    // i18n is unmocked here, so t() echoes the raw key.
+    await user.click(screen.getByRole('button', { name: 'filters.status' }))
     // The dropdown OPTION is a <button>; the table's own stage chip for "Gewonnen"
     // is a <span> (SoftChip) — querying by button role picks the option, never the chip.
     await user.click(await screen.findByRole('button', { name: 'Gewonnen' }))

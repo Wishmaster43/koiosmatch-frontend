@@ -66,6 +66,29 @@ export default defineConfig([
       'no-restricted-syntax': ['warn', {
         selector: 'Literal[value=/#[0-9A-Fa-f]{6}/]',
         message: 'Ad-hoc hex colour — use a design token (var(--color-*)/color-mix), or add an eslint-disable-next-line with a reason if this hex is DATA (seed/palette).',
+      },
+      // ── HUISSTIJL-1 fase 3 (Danny 19/20-08): drift is a BUILD ERROR from here on. ──
+      {
+        // A hand-painted accent/danger action fill outside the design system —
+        // the identity belongs to components/ui/Button (or the --button-* trio).
+        selector: "Property[key.name=/^background(Color)?$/] > Literal[value='var(--color-primary)']",
+        message: 'HUISSTIJL: a solid accent fill is Button/DrawerAddButton territory (or var(--button-fill)) — never hand-painted per element.',
+      },
+      {
+        // The hex-concat tint recipe silently breaks on var() tenant tokens.
+        selector: "BinaryExpression[operator='+'] > Literal[value=/^(1A|14|22|33|55)$/]",
+        message: "HUISSTIJL: hex-concat tint (colour + '1A') breaks on tenant tokens — use tintBg/tintBorder from lib/tint.",
+      },
+      {
+        // Z-index literals outside the ladder: stacking inversions only show with
+        // two surfaces open at once (the toast-behind-datepicker class).
+        selector: "Property[key.name='zIndex'] > Literal[value=/^(?!([1-9]|1[0-9]|2[0-9]|3[0-9]|4[0-9])$)\\d{2,}$/]",
+        message: 'HUISSTIJL: z-index rides the ladder (--z-drawer/overlay/popover/confirm/toast) or lib/zIndexScale — never a loose number ≥50.',
+      },
+      {
+        // Hand-rolled shadows drift into 35 variants; three levels exist.
+        selector: "Property[key.name='boxShadow'] > Literal[value=/rgba?\\(/]",
+        message: 'HUISSTIJL: shadows are --shadow-card/float/modal/drawer — a bespoke boxShadow needs an eslint-disable with its reason (thumb/status-ring class).',
       }],
     },
   },

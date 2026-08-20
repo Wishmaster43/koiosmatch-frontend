@@ -135,8 +135,11 @@ describe('DepartmentsPanel · one surface, scope-trimmed columns', () => {
   it('drops the Locatie column inside a location — it would repeat on every row', () => {
     render(<DepartmentsPanel {...base} openId={null} onOpenChange={vi.fn()} scope="location" scopeId="loc-1" scopeName="Vestiging Noord" departments={[department()]} />)
     expect(screen.queryByText(ct('departments.col.location'))).toBeNull()
-    // Everything else the customer tab shows is still here.
-    expect(screen.getByText(ct('departments.col.status'))).toBeInTheDocument()
+    // Everything else the customer tab shows is still here. Scoped to the
+    // columnheader role: the toolbar's StatusFilterSelect trigger now ALSO
+    // renders the literal word "Status" (HUISSTIJL-1 batch G), so an unscoped
+    // getByText('Status') matches both and throws.
+    expect(screen.getByRole('columnheader', { name: ct('departments.col.status') })).toBeInTheDocument()
     expect(screen.getByText(ct('departments.col.contacts'))).toBeInTheDocument()
   })
 
@@ -158,7 +161,10 @@ describe('DepartmentsPanel · colour on/off flags per column (CHIPKLEUR-INSTELBA
 
     await waitFor(() => {
       expect(screen.getByText('Vestiging Noord')).toHaveStyle({ color: 'var(--color-secondary)' })
-      expect(screen.getByText(ct('departments.col.status'))).toBeInTheDocument()
+      // Scoped to the columnheader role: the toolbar's StatusFilterSelect trigger
+      // now ALSO renders the literal word "Status" (HUISSTIJL-1 batch G), so an
+      // unscoped getByText('Status') matches both and throws.
+      expect(screen.getByRole('columnheader', { name: ct('departments.col.status') })).toBeInTheDocument()
     })
   })
 

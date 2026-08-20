@@ -184,9 +184,11 @@ describe('MatchesTab · toolbar search + status filter', () => {
     const user = userEvent.setup()
     mockUseCustomerMatches.mockReturnValue({ rows, loading: false, error: false, reload: vi.fn() })
     render(<MatchesTab customerId="cust-1" />)
-    // Real i18n is loaded in this file (see the side-effect import above), so the
-    // trigger's own text is the REAL translated "all statuses" copy, not the raw key.
-    await user.click(screen.getByRole('button', { name: i18n.t('filters.allStatuses', { ns: 'customers' }) }))
+    // Real i18n is loaded in this file (see the side-effect import above). The
+    // StatusFilterSelect trigger shows the pill+count convention since
+    // HUISSTIJL-1 batch G — it always reads the static "Status" word, never
+    // the picked value, so this asserts the REAL translated "Status" copy.
+    await user.click(screen.getByRole('button', { name: i18n.t('filters.status', { ns: 'customers' }) }))
     await user.click(await screen.findByRole('button', { name: 'Bevestigd' }))
     expect(screen.getByText('John Roe')).toBeInTheDocument()
     expect(screen.queryByText('Jane Doe')).toBeNull()

@@ -346,7 +346,9 @@ describe('WorkTab · Sollicitaties toolbar (search + stage filter, Danny live re
   it('renders search, stage filter and the two actions on ONE line, in that DOM order', () => {
     render(<WorkTab c={candidate(twoApps)} />)
     const search = screen.getByPlaceholderText('work.searchPlaceholder')
-    const stageFilter = screen.getByRole('button', { name: 'filters.allStatuses' })
+    // StatusFilterSelect shows the pill+count convention since HUISSTIJL-1 batch G:
+    // the trigger always reads the static "Status" word, never the picked value.
+    const stageFilter = screen.getByRole('button', { name: 'filters.status' })
     const applyButton = screen.getByRole('button', { name: 'work.addApplication' })
     const intakeButton = screen.getByRole('button', { name: 'work.planIntake' })
     expect(search.compareDocumentPosition(stageFilter) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
@@ -367,7 +369,9 @@ describe('WorkTab · Sollicitaties toolbar (search + stage filter, Danny live re
   it('the stage filter (derived from the loaded rows) narrows to the picked stage only', async () => {
     const user = userEvent.setup()
     render(<WorkTab c={candidate(twoApps)} />)
-    await user.click(screen.getByRole('button', { name: 'filters.allStatuses' }))
+    // StatusFilterSelect shows the pill+count convention since HUISSTIJL-1 batch G:
+    // the trigger always reads the static "Status" word, never the picked value.
+    await user.click(screen.getByRole('button', { name: 'filters.status' }))
     await user.click(await screen.findByRole('button', { name: 'Ingepland' }))
     expect(screen.getByRole('button', { name: 'Verzorgende' })).toBeInTheDocument()
     expect(screen.queryByRole('button', { name: 'Verpleegkundige' })).toBeNull()
@@ -395,7 +399,9 @@ describe('WorkTab · S-cand-1 stage filter uses stageKey (label fallback)', () =
     ]
     const user = userEvent.setup()
     render(<WorkTab c={candidate(rows)} />)
-    await user.click(screen.getByRole('button', { name: 'filters.allStatuses' }))
+    // StatusFilterSelect shows the pill+count convention since HUISSTIJL-1 batch G:
+    // the trigger always reads the static "Status" word, never the picked value.
+    await user.click(screen.getByRole('button', { name: 'filters.status' }))
     // Only ONE stage option in the menu — not two, despite the differing labels.
     expect(screen.getAllByRole('button', { name: /Gesolliciteerd|Sollicitatie ontvangen/ })).toHaveLength(1)
     await user.click(screen.getByRole('button', { name: /Gesolliciteerd|Sollicitatie ontvangen/ }))
@@ -411,7 +417,9 @@ describe('WorkTab · S-cand-1 stage filter uses stageKey (label fallback)', () =
     ]
     const user = userEvent.setup()
     render(<WorkTab c={candidate(rows)} />)
-    await user.click(screen.getByRole('button', { name: 'filters.allStatuses' }))
+    // StatusFilterSelect shows the pill+count convention since HUISSTIJL-1 batch G:
+    // the trigger always reads the static "Status" word, never the picked value.
+    await user.click(screen.getByRole('button', { name: 'filters.status' }))
     await user.click(await screen.findByRole('button', { name: 'Ingepland' }))
     expect(screen.getByRole('button', { name: 'Verzorgende' })).toBeInTheDocument()
     expect(screen.queryByRole('button', { name: 'Verpleegkundige' })).toBeNull()

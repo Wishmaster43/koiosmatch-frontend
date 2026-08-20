@@ -83,7 +83,9 @@
      white only reaches ~3.3:1 on --color-success (fails 4.5:1) — near-black wins
      here, same value both themes since the fill itself is fixed either theme
      (WCAG audit 2026-08, mirrors --color-on-danger). */
-  --color-on-success:    #1F2937;
+  /* #1F2937 measured 4.45:1 on the success fill — a hair under AA; caught by
+     the new token-contrast CI gate the moment it existed (fase 3). */
+  --color-on-success:    #111827;
   /* Accent used as TEXT (active menu item, active chip label, links). Defaults to
      the accent itself; useTenantTheme replaces it with a readable variant when the
      tenant's brand is too light for the surface — darkened in light mode, lightened

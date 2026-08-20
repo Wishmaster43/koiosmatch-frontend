@@ -86,6 +86,12 @@ export default function NotificationBell() {
 
   return (
     <div ref={ref} style={{ position: 'relative' }}>
+      {/* HUISSTIJL-1 (Opus-F residual triage, judged — LEFT tinted, not trio):
+          a calm topbar utility icon (mirrors ChangelogPopover/VariablePicker's
+          own identical muted-idle -> primary-tint-while-open pattern), not an
+          accent call-to-action like ActionMenu's "+ actions" trigger — solid-
+          filling only the bell would fight its own sibling precedent, and an
+          always-coloured icon in the global topbar reads as decoration (§4). */}
       <button
         onClick={toggle}
         aria-label={t('notifications.title')}

@@ -27,6 +27,8 @@ import Avatar from '@/components/ui/Avatar'
 import CandidateStatusChip from '@/components/ui/CandidateStatusChip'
 // G34: the house searchable dropdown replaces the native vacancy <select>.
 import CreatableSelect from '@/components/ui/CreatableSelect'
+// HUISSTIJL-1: the ONE trio-tinted filter trigger face (§4 tint-vs-trio law).
+import FilterTriggerPill from '@/components/ui/FilterTriggerPill'
 import AddTaskModal from '@/pages/tasks/AddTaskModal'
 import { TaskLookupsProvider } from '@/context/TaskLookupsContext'
 import api from '@/lib/api'
@@ -203,24 +205,42 @@ export default function TargetsTab({ targets, loading, error, onSetStatus, onSet
             style={{ width: '100%', padding: '5px 8px 5px 26px', fontSize: 12, borderRadius: 7,
               border: '1px solid var(--border)', background: 'var(--bg)', color: 'var(--text)' }} />
         </div>
-        <div style={{ width: 150 }}>
-          <CreatableSelect value={statusPick} onChange={setStatusPick} allowCreate={false} clearable
-            placeholder={t('drawer.stats.byStatus')}
-            options={statuses.map(o => ({ value: o.value, label: o.label }))}
-            style={{ padding: '5px 8px', fontSize: 12 }} />
-        </div>
-        <div style={{ width: 150 }}>
-          <CreatableSelect value={outcomePick} onChange={setOutcomePick} allowCreate={false} clearable
-            placeholder={t('drawer.stats.byOutcome')}
-            options={outcomes.map(o => ({ value: o.value, label: o.label }))}
-            style={{ padding: '5px 8px', fontSize: 12 }} />
-        </div>
-        <div style={{ width: 170 }}>
-          <CreatableSelect value={assigneePick} onChange={setAssigneePick} allowCreate={false} clearable
-            placeholder={t('drawer.stats.byAssignee')}
-            options={assigneeOptions}
-            style={{ padding: '5px 8px', fontSize: 12 }} />
-        </div>
+        {/* HUISSTIJL-1: these three narrow the already-loaded list — filter role,
+            never a value to save — so the trigger wears the house trio pill
+            (FilterTriggerPill) instead of the calm form-field box. Individual
+            clearing now goes through the shared "clear all" text button below
+            (mirrors VacancySearchFilters/CandidateSearchTab, which carry no
+            per-field clear either); the inline X only exists on the calm box. */}
+        <CreatableSelect value={statusPick} onChange={setStatusPick} allowCreate={false}
+          placeholder={t('drawer.stats.byStatus')}
+          options={statuses.map(o => ({ value: o.value, label: o.label }))}
+          renderTrigger={toggle => (
+            <button type="button" onClick={toggle} aria-haspopup="listbox" aria-label={t('drawer.stats.byStatus')}
+              style={{ background: 'none', border: 'none', padding: 0 }}>
+              <FilterTriggerPill label={t('drawer.stats.byStatus')} count={statusPick ? 1 : 0} />
+            </button>
+          )} />
+        <CreatableSelect value={outcomePick} onChange={setOutcomePick} allowCreate={false}
+          placeholder={t('drawer.stats.byOutcome')}
+          options={outcomes.map(o => ({ value: o.value, label: o.label }))}
+          renderTrigger={toggle => (
+            <button type="button" onClick={toggle} aria-haspopup="listbox" aria-label={t('drawer.stats.byOutcome')}
+              style={{ background: 'none', border: 'none', padding: 0 }}>
+              <FilterTriggerPill label={t('drawer.stats.byOutcome')} count={outcomePick ? 1 : 0} />
+            </button>
+          )} />
+        <CreatableSelect value={assigneePick} onChange={setAssigneePick} allowCreate={false}
+          placeholder={t('drawer.stats.byAssignee')}
+          options={assigneeOptions}
+          renderTrigger={toggle => (
+            <button type="button" onClick={toggle} aria-haspopup="listbox" aria-label={t('drawer.stats.byAssignee')}
+              style={{ background: 'none', border: 'none', padding: 0 }}>
+              {/* assigneePick === '' is the real "unassigned" pick (matchesLocalFilters
+                  checks `!== null`, not truthiness) — count on that, not on truthiness,
+                  or picking "unassigned" would show an active filter with no badge. */}
+              <FilterTriggerPill label={t('drawer.stats.byAssignee')} count={assigneePick !== null ? 1 : 0} />
+            </button>
+          )} />
         {hasLocalFilters && (
           <button onClick={() => { setSearch(''); setStatusPick(null); setOutcomePick(null); setAssigneePick(null) }}
             style={{ fontSize: 11, color: 'var(--text-muted)', background: 'none', border: 'none', cursor: 'pointer', padding: '4px 6px' }}>

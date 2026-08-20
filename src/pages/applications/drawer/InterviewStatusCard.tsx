@@ -12,6 +12,7 @@ import { useAuth } from '@/context/AuthContext'
 import api, { unwrap } from '@/lib/api'
 import { notifySuccess, notifyError } from '@/lib/notify'
 import { extractApiError } from '@/lib/extractApiError'
+import { humanizeInterviewStatus, translateInterviewStatus } from '@/lib/interviewStatus'
 import { interviewCategoryColor } from '../data/applicationsShared'
 import { mapInterview } from '../data/mapApplication'
 import type { ApiApplication, ApplicationInterview } from '@/types/application'
@@ -64,23 +65,12 @@ const cardStyle: CSSProperties = {
   background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 10,
 }
 
-/**
- * humanizeInterviewStatus — `current_status` (e.g. "ACTIVE_IN_CARE") is one entry
- * off THAT flow's own `statuses[]` list (interview_flows.statuses, verified live
- * against InterviewSessionResource::block for S-00001/Zorgintake: a 12-name,
- * tenant/flow-authored vocabulary), never a fixed global enum — so a static i18n
- * map per value would both violate "nothing hardcoded" (§3B) and miss every future
- * flow-defined name. SCREAMING_SNAKE → "Screaming snake" is the honest fallback so
- * the raw enum never reaches the screen; the render below still tries a real i18n
- * key first for the few markers the ENGINE ITSELF sets verbatim (INTRO_SENT at
- * session-create, COMPLETED/DISQUALIFIED at session-end — InterviewEngine.php),
- * which are the one part of this vocabulary that IS universal. Exported so an
- * unknown value's fallback is directly unit-testable.
- */
-export function humanizeInterviewStatus(raw: string): string {
-  const spaced = raw.replace(/_+/g, ' ').trim().toLowerCase()
-  return spaced.charAt(0).toUpperCase() + spaced.slice(1)
-}
+// Re-exported for compat: existing importers (ApplicationStatusStrip, this
+// file's own tests) still pull humanizeInterviewStatus from here. The real
+// definition + its i18n-first sibling `translateInterviewStatus` now live in
+// `@/lib/interviewStatus`, shared with every other render site (RAW-ENUM-LEAK
+// fix, HUISSTIJL-1 batch G — InterviewFlowSection was rendering the raw value).
+export { humanizeInterviewStatus }
 
 // Decorative separator between the meta line's segments — hidden from assistive
 // tech since every segment around it already carries its own accessible text.
@@ -291,7 +281,7 @@ export default function InterviewStatusCard({ interview, applicationId }: { inte
 
         {/* DD-FE-11 (08-08 drill-down audit, "Stap 2 van 12" read as the ONLY
             signal): the flow's own current-step NAME is now the PRIMARY
-            progress readout — see humanizeInterviewStatus above for why an
+            progress readout — see @/lib/interviewStatus for why an
             unknown flow-authored value is never shown raw. The numeric
             position is kept, but demoted to a small muted suffix right after
             the name (never dropped) — mirrors the equally-ordered interview
@@ -301,7 +291,7 @@ export default function InterviewStatusCard({ interview, applicationId }: { inte
         {(live.currentStatus || live.total > 0) && <MetaDot />}
         {live.currentStatus && (
           <span style={{ fontSize: 12, color: 'var(--text)' }}>
-            {t(`interview.currentStatus.${live.currentStatus}`, { defaultValue: humanizeInterviewStatus(live.currentStatus) })}
+            {translateInterviewStatus(t, live.currentStatus)}
           </span>
         )}
         {live.total > 0 && (

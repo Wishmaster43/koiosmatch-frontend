@@ -12,6 +12,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { RefreshCw } from 'lucide-react'
+import Button from '@/components/ui/Button'
 import SectionCard from '@/components/ui/SectionCard'
 import SoftChip from '@/components/ui/SoftChip'
 import BackofficeLinksTab, { CardTitle } from '@/components/drawer/BackofficeLinksTab'
@@ -170,17 +171,16 @@ export default function IntegrationsTab({ c, onUpdate }: {
           ) : (
             <SoftChip label={t('integrations.pdok.notGeocoded')} color="var(--text-muted)" />
           )}
+          {/* HUISSTIJL-1: the house Button trio (variant="soft", iconOnly) — same
+              title/aria-label/disabled as before, only the chrome moved off a
+              hand-rolled <button>. RefreshCw keeps its spin-while-refreshing
+              className (stateful action icon, never re-tinted by the trio). */}
           {canUpdate && (
-            <button type="button" onClick={onRefreshPdok} disabled={pdokRefreshing}
-              style={{
-                display: 'inline-flex', alignItems: 'center', gap: 5, padding: '4px 10px',
-                fontSize: 11, fontWeight: 500, borderRadius: 7, border: '1px solid var(--border)',
-                cursor: pdokRefreshing ? 'not-allowed' : 'pointer', background: 'var(--surface)',
-                color: 'var(--text)', opacity: pdokRefreshing ? 0.6 : 1, flexShrink: 0,
-              }}>
-              <RefreshCw size={11} className={pdokRefreshing ? 'animate-spin' : ''} />
-              {pdokRefreshing ? t('integrations.pdok.refreshing') : t('integrations.pdok.refresh')}
-            </button>
+            <Button variant="soft" iconOnly onClick={onRefreshPdok} disabled={pdokRefreshing}
+              title={pdokRefreshing ? t('integrations.pdok.refreshing') : t('integrations.pdok.refresh')}
+              aria-label={pdokRefreshing ? t('integrations.pdok.refreshing') : t('integrations.pdok.refresh')}>
+              <RefreshCw size={13} className={pdokRefreshing ? 'animate-spin' : ''} />
+            </Button>
           )}
         </div>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 4, marginTop: 8 }}>

@@ -162,7 +162,9 @@ describe('CandidateTasks · toolbar (search + status filter, ONE line)', () => {
     vi.mocked(api.get).mockResolvedValueOnce({ data: { data: twoTasks } })
     render(<CandidateTasks candidateId="cand-1" />)
     const search = await screen.findByPlaceholderText('drawer.tasksSearchPlaceholder')
-    const statusTrigger = screen.getByRole('button', { name: 'filters.allStatuses' })
+    // StatusFilterSelect shows the pill+count convention since HUISSTIJL-1 batch G:
+    // the trigger always reads the static "Status" word, never the picked value.
+    const statusTrigger = screen.getByRole('button', { name: 'filters.status' })
     const addButton = screen.getByRole('button', { name: /drawer.newTask/ })
     // DOM_POSITION_FOLLOWING: each control sits AFTER the previous one, confirming
     // the left-to-right toolbar order (search → status → add) on one row.
@@ -195,7 +197,9 @@ describe('CandidateTasks · toolbar (search + status filter, ONE line)', () => {
     const user = userEvent.setup()
     render(<CandidateTasks candidateId="cand-1" />)
     await screen.findByText('Bel kandidaat')
-    await user.click(screen.getByRole('button', { name: 'filters.allStatuses' }))
+    // StatusFilterSelect shows the pill+count convention since HUISSTIJL-1 batch G:
+    // the trigger always reads the static "Status" word, never the picked value.
+    await user.click(screen.getByRole('button', { name: 'filters.status' }))
     await user.click(await screen.findByRole('button', { name: 'Afgerond' }))
     expect(screen.getByText('Stuur contract')).toBeInTheDocument()
     expect(screen.queryByText('Bel kandidaat')).toBeNull()

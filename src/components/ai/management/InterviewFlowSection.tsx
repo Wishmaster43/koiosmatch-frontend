@@ -12,6 +12,7 @@ import type { CSSProperties } from 'react'
 import { useTranslation } from 'react-i18next'
 import { ChevronDown } from 'lucide-react'
 import SoftChip from '@/components/ui/SoftChip'
+import { translateInterviewStatus } from '@/lib/interviewStatus'
 import { Badge } from './shared'
 import type { InterviewFlow } from '@/types/ai'
 
@@ -77,12 +78,16 @@ export function InterviewFlowSection({ flow }: { flow?: InterviewFlow | null }) 
         )}
       </div>
 
-      {/* Statuses — soft chips, never solid fills (§4) */}
+      {/* Statuses — soft chips, never solid fills (§4). RAW-ENUM-LEAK fix
+          (HUISSTIJL-1 batch G): these are flow-authored SCREAMING_SNAKE
+          values (e.g. "INTRO_SENT") — run through the shared i18n-first
+          lookup so a known engine marker reads as prose, mirroring
+          InterviewStatusCard/ApplicationStatusStrip instead of a third copy. */}
       {statuses.length > 0 && (
         <div style={{ marginBottom: 10 }}>
           <div style={sectionLabelStyle}>{t('ai.agent.interviewFlow.statusesLabel')}</div>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 5 }}>
-            {statuses.map(s => <SoftChip key={s} label={s} color="var(--color-primary)" />)}
+            {statuses.map(s => <SoftChip key={s} label={translateInterviewStatus(t, s)} color="var(--color-primary)" />)}
           </div>
         </div>
       )}

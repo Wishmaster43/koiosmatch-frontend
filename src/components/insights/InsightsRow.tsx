@@ -60,16 +60,20 @@ function DonutCard({ title, data, colors, onPick, active, onClear, picked, clear
         )}
       </div>
       {/* Active filter: icon-only clear button (Danny 13/7 — no text at filters);
-          the picked value lives in the tooltip, the dimmed segments show the pick. */}
+          the picked value lives in the tooltip, the dimmed segments show the pick.
+          HUISSTIJL-1 (Opus-F residual triage, judged): this button IS the active
+          filter's own ON-state — same category as a selected pill/tab — so it
+          reads the house trio (solid at rest), no more hover-driven colour swap.
+          --button-ink is already the theme's contrast-safe ink for --button-fill
+          (Button.tsx's clampedOnAccent), so the old AENF-yellow readability bug
+          this hover logic guarded against cannot recur — there is no second
+          colour to restore once the button is static. */}
       {active && onClear && (
         <button onClick={onClear} title={picked ? `${picked} — ${clearTitle ?? ''}` : clearTitle}
           aria-label={picked ? `${picked} — ${clearTitle ?? ''}` : clearTitle}
           style={{ position: 'absolute', bottom: 5, right: 6, width: 22, height: 22, borderRadius: 999,
             display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer',
-            background: 'var(--color-primary-bg)', color: 'var(--color-primary-text)', border: 'none', zIndex: 1 }}
-          onMouseEnter={e => { e.currentTarget.style.background = 'var(--color-primary)'; e.currentTarget.style.color = 'var(--color-on-accent)' }}
-          // Restore the readable text token on leave, never the raw primary — keeps contrast on light brand colours (e.g. AENF yellow)
-          onMouseLeave={e => { e.currentTarget.style.background = 'var(--color-primary-bg)'; e.currentTarget.style.color = 'var(--color-primary-text)' }}>
+            background: 'var(--button-fill)', color: 'var(--button-ink)', border: 'none', zIndex: 1 }}>
           <FilterX size={12} />
         </button>
       )}
@@ -87,6 +91,13 @@ function KpiCard({ label, value, sub, color, onClick, active, channels, render, 
   const clickable = typeof onClick === 'function'
   // Locale-aware grouping (§ FMT-GETAL-1) — never a hardcoded 'nl-NL' toLocaleString.
   const { formatNumber } = useNumberFormat()
+  // HUISSTIJL-1 (Opus-F residual triage, judged — LEFT tinted below, not trio):
+  // unlike the donut's own clear button above, this card's big VALUE number
+  // carries its own semantic `color` (danger/warning/info/teal-tasks — a DATA
+  // colour, the law's own carve-out). A solid tenant-primary fill behind that
+  // data-coloured number would clash and read worse, and no other KpiCard in
+  // the app goes solid-on-active — the calm tint + the primary border already
+  // say "selected" without fighting the number's own colour.
   return (
     <div {...interactive(onClick)} title={typeof sub === 'string' ? sub : undefined}
       style={{ ...CARD,

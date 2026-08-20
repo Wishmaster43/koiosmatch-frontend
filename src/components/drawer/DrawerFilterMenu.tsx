@@ -146,12 +146,17 @@ function DrawerMultiFilterRow({ config }: { config: DrawerMultiFilterConfig }) {
           <SelectAllRow dense visibleValues={shown.map(o => o.value)} selectedValues={config.selected}
             onApply={values => applyBatch(values)} />
           {shown.length === 0 && <div style={{ fontSize: 11, color: 'var(--text-muted)', padding: '2px 4px' }}>{config.noResultsLabel}</div>}
+          {/* FILTER-WIDTH-1: the label WRAPS instead of ellipsising — a truncated
+              option ("Verklaring Omtrent het …") is exactly what made filtering
+              impossible. flex-start keeps the box on the first line when it wraps.
+              HUISSTIJL-1 (Opus-F residual triage, judged — LEFT tinted, not trio):
+              a checked row in this checklist is the same "selected list row"
+              category the law already exempts on SelectMenu/SearchSelect/
+              CreatableSelect's own option rows — solid-filling only this sibling
+              would be new drift, not less of it. */}
           {shown.map(o => {
             const checked = config.selected.includes(o.value)
             return (
-              // FILTER-WIDTH-1: the label WRAPS instead of ellipsising — a truncated
-              // option ("Verklaring Omtrent het …") is exactly what made filtering
-              // impossible. flex-start keeps the box on the first line when it wraps.
               <label key={o.value} style={{ display: 'flex', alignItems: 'flex-start', gap: 6, padding: '4px 6px', borderRadius: 5, cursor: 'pointer',
                 background: checked ? 'var(--color-primary-bg)' : 'none' }}>
                 <input type="checkbox" checked={checked} onChange={() => config.onToggle(o.value)}

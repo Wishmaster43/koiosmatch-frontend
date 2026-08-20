@@ -25,20 +25,23 @@ describe('InsightsRow · notice', () => {
   })
 })
 
-// Regression: on mouse-leave the donut clear button must restore the readable
-// --color-primary-text token, never the raw --color-primary (unreadable on a
-// light brand colour such as AENF yellow).
+// HUISSTIJL-1 (Opus-F residual triage, 20-08): the donut clear button now reads
+// the static house trio (solid at rest) instead of a hover-driven tint→solid
+// swap — --button-ink is already the theme's contrast-safe ink for --button-fill
+// (Button.tsx's clampedOnAccent), so there is no second colour to restore on
+// mouse-leave any more; this replaces the old hover-regression test above.
 describe('InsightsRow · donut clear button colour', () => {
-  it('restores the primary-text token, not the raw primary, on mouse leave', () => {
+  it('reads the solid house trio at rest, unaffected by hover', () => {
     render(
       <InsightsRow
         donuts={[{ key: 'status', data: [{ label: 'A', value: 1 }], active: true, onClear: () => {}, picked: 'A' }]}
       />
     )
     const clearBtn = screen.getByRole('button')
+    expect(clearBtn).toHaveStyle({ background: 'var(--button-fill)', color: 'var(--button-ink)' })
     fireEvent.mouseEnter(clearBtn)
-    expect(clearBtn).toHaveStyle({ color: 'var(--color-on-accent)' })
+    expect(clearBtn).toHaveStyle({ background: 'var(--button-fill)', color: 'var(--button-ink)' })
     fireEvent.mouseLeave(clearBtn)
-    expect(clearBtn).toHaveStyle({ color: 'var(--color-primary-text)' })
+    expect(clearBtn).toHaveStyle({ background: 'var(--button-fill)', color: 'var(--button-ink)' })
   })
 })

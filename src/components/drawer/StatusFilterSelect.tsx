@@ -42,8 +42,9 @@
  */
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { ChevronDown } from 'lucide-react'
 import SearchSelect from '@/components/ui/SearchSelect'
+// HUISSTIJL-1: the ONE trio-tinted filter trigger face (§4 tint-vs-trio law).
+import FilterTriggerPill from '@/components/ui/FilterTriggerPill'
 import type { LookupOption } from '@/types/common'
 
 // A row that carries a status — every sub-entity does, under the same two field names.
@@ -186,7 +187,9 @@ export default function StatusFilterSelect({ value, onToggle, statuses, optionKe
 }) {
   const { t } = useTranslation('customers')
   const options = statuses.map(s => ({ value: optionKey(s), label: s.label }))
-  // One selected reads as that status; several read as a count — never a truncated list.
+  // Kept as the SearchSelect's own internal triggerLabel fallback (a11y text the
+  // component may fall back to) — the visible face is the trio pill below, which
+  // reads "Status · N" instead of the previously truncated single-status name.
   const label = value.length === 0
     ? t('filters.allStatuses')
     : value.length === 1
@@ -205,14 +208,13 @@ export default function StatusFilterSelect({ value, onToggle, statuses, optionKe
     <div style={{ minWidth: 96, maxWidth: 180, flexShrink: 0 }}>
       <SearchSelect options={options} selected={value} onToggle={onToggle} menuAlign="right" width={190}
         triggerLabel={label}
+        // HUISSTIJL-1: the trio pill (§4 tint-vs-trio law) replaces the calm
+        // bordered box — same toggle/aria-haspopup, only the face changes, so
+        // every one of this component's ~9 consumers picks it up at once.
         renderTrigger={(toggleOpen: () => void) => (
           <button type="button" onClick={toggleOpen} title={t('filters.statusFilter')} aria-haspopup="listbox"
-            style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '6px 10px', width: '100%',
-              boxSizing: 'border-box', border: '1px solid var(--border)', borderRadius: 6,
-              background: 'var(--surface)', cursor: 'pointer' }}>
-            <span style={{ fontSize: 12, flex: 1, textAlign: 'left', whiteSpace: 'nowrap',
-              overflow: 'hidden', textOverflow: 'ellipsis', color: 'var(--text)' }}>{label}</span>
-            <ChevronDown size={12} style={{ color: 'var(--text-muted)', flexShrink: 0 }} />
+            style={{ background: 'none', border: 'none', padding: 0 }}>
+            <FilterTriggerPill label={t('filters.status')} count={value.length} />
           </button>
         )} />
     </div>

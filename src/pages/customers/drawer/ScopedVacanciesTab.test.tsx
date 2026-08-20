@@ -75,7 +75,9 @@ describe('ScopedVacanciesTab · "+ Vacature" (point 1)', () => {
     // Flush the /vacancy-statuses fetch this component now fires on mount — waits for
     // the status filter itself to mount (only happens once `resolved` flips true), so
     // its state update never lands after the test body (unwrapped act() warning).
-    await screen.findByRole('button', { name: cust('filters.allStatuses') })
+    // StatusFilterSelect shows the pill+count convention since HUISSTIJL-1 batch G:
+    // the trigger always reads the static "Status" word, never the picked value.
+    await screen.findByRole('button', { name: cust('filters.status') })
   })
 
   it('locks the customer and pre-sets the location id/name on click', async () => {
@@ -117,7 +119,9 @@ describe('ScopedVacanciesTab · "+ Vacature" (point 1)', () => {
     // Flush the /vacancy-statuses fetch this component fires on mount first (waits
     // for the status filter to actually mount), so its resolution never lands after
     // this test body (unwrapped act() warning).
-    await screen.findByRole('button', { name: cust('filters.allStatuses') })
+    // StatusFilterSelect shows the pill+count convention since HUISSTIJL-1 batch G:
+    // the trigger always reads the static "Status" word, never the picked value.
+    await screen.findByRole('button', { name: cust('filters.status') })
     await user.click(screen.getByRole('button', { name: cust('vacancies.add') }))
     const { onCreated } = addVacancyModalProps.mock.calls.at(-1)?.[0] as { onCreated: () => void }
     // Wrapped in act(): a plain call (unlike a user-event interaction) is the

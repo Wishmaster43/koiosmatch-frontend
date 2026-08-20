@@ -58,6 +58,12 @@ export interface MenuNode {
 }
 
 // Shared inline styles (CSS-var tokens only, theme-aware).
+// HUISSTIJL-1 (Opus-F residual triage, judged — LEFT tinted, not trio): this is
+// the drill-in panel's persistent "Back to X" ORIENTATION header, always shown
+// while inside a sub-level — not a toggle/selected-among-peers control, so it
+// reads as a calm "you are here" context bar rather than a call-to-action.
+// Ordinary row hover uses the neutral --hover-bg (see hoverOn/hoverOff below);
+// this stays the one deliberately-tinted exception.
 const headerStyle: CSSProperties = {
   display: 'flex', alignItems: 'center', gap: 8, width: '100%', padding: '9px 12px',
   fontSize: 12, color: 'var(--text)', background: 'var(--color-primary-bg)',

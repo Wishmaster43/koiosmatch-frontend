@@ -175,7 +175,9 @@ describe('PriceAgreementsTab · toolbar search + derived active/expired filter (
     render(<PriceAgreementsTab customerId="cust-1" />)
     // No real i18n instance in this file (see the top-of-file comment) — t() returns
     // the raw key, same as every other assertion here ('priceAgreements.add' etc.).
-    await user.click(screen.getByRole('button', { name: 'filters.allStatuses' }))
+    // StatusFilterSelect shows the pill+count convention since HUISSTIJL-1 batch G:
+    // the trigger always reads the static "Status" word, never the picked value.
+    await user.click(screen.getByRole('button', { name: 'filters.status' }))
     await user.click(await screen.findByRole('button', { name: 'priceAgreements.statusExpired' }))
     expect(screen.getByText('Verzorgende')).toBeInTheDocument()
     expect(screen.queryByText('Verpleegkundige')).toBeNull()
@@ -208,7 +210,9 @@ describe('PriceAgreementsTab · toolbar search + derived active/expired filter (
         agreements: [agreementRow({ id: 'pa-1', functionTitle: 'Verpleegkundige', validUntil: '2026-01-14' })],
       })
       render(<PriceAgreementsTab customerId="cust-1" />)
-      await user.click(screen.getByRole('button', { name: 'filters.allStatuses' }))
+      // StatusFilterSelect shows the pill+count convention since HUISSTIJL-1 batch G:
+      // the trigger always reads the static "Status" word, never the picked value.
+      await user.click(screen.getByRole('button', { name: 'filters.status' }))
       await user.click(await screen.findByRole('button', { name: 'priceAgreements.statusExpired' }))
       // Only visible under "expired" if todayIso resolved to 2026-01-15 (local), not
       // 2026-01-14 (the UTC-shifted value the old code would have produced).

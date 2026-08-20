@@ -53,8 +53,10 @@ describe('AgentsTab — AI-AGENTS-2/3 fields', () => {
     expect(screen.getByText('Zorgintake (9 stappen)')).toBeInTheDocument()
     expect(screen.getByText('Actief')).toBeInTheDocument()
     expect(screen.getByText('Hoi {{first_name}}!')).toBeInTheDocument()
-    expect(screen.getByText('INTRO_SENT')).toBeInTheDocument()
-    expect(screen.getByText('COMPLETED')).toBeInTheDocument()
+    // RAW-ENUM-LEAK fix (HUISSTIJL-1 batch G): statuses now go through the
+    // shared i18n-first lookup, so the real nl copy shows, not the raw enum.
+    expect(screen.getByText('Intro verzonden')).toBeInTheDocument()
+    expect(screen.getByText('Afgerond')).toBeInTheDocument()
     expect(screen.getByText('first_name')).toBeInTheDocument()
     expect(screen.getByText('city')).toBeInTheDocument()
 

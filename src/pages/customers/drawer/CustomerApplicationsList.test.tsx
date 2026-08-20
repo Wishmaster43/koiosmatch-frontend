@@ -118,7 +118,9 @@ describe('CustomerApplicationsList', () => {
     render(<CustomerApplicationsList customerId="cust-1" />)
     // Open the shared StatusFilterSelect and pick only "Aangenomen" (hired) —
     // mirrors EntityTasksTab.test.tsx's own open-then-pick interaction.
-    await user.click(screen.getByRole('button', { name: /statussen/i }))
+    // StatusFilterSelect shows the pill+count convention since HUISSTIJL-1 batch G:
+    // the trigger always reads the static "Status" word, never the picked value.
+    await user.click(screen.getByRole('button', { name: /^status$/i }))
     await user.click(await screen.findByRole('button', { name: 'Aangenomen' }))
     expect(screen.getByText('John Smith')).toBeInTheDocument()
     expect(screen.queryByText('Jane Doe')).toBeNull()

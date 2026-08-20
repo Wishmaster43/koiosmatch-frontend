@@ -65,7 +65,9 @@ describe('AppointmentsTab', () => {
     render(<AppointmentsTab application={app()} />)
     await waitFor(() => screen.getByText('appointments.empty'))
     expect(screen.getByLabelText('appointments.searchPlaceholder')).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: 'filters.allStatuses' })).toBeInTheDocument()
+    // StatusFilterSelect shows the pill+count convention since HUISSTIJL-1 batch G:
+    // the trigger always reads the static "Status" word, never the picked value.
+    expect(screen.getByRole('button', { name: 'filters.status' })).toBeInTheDocument()
   })
 
   it('disables the new-appointment button without a candidate link', async () => {

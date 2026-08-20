@@ -155,7 +155,9 @@ describe('MatchesTab · toolbar search + status filter', () => {
   it('the status filter narrows to the picked status only', async () => {
     const user = userEvent.setup()
     render(<MatchesTab c={candidate(matches)} />)
-    await user.click(screen.getByRole('button', { name: i18n.t('filters.allStatuses', { ns: 'customers' }) }))
+    // StatusFilterSelect shows the pill+count convention since HUISSTIJL-1 batch G:
+    // the trigger always reads the static "Status" word, never the picked value.
+    await user.click(screen.getByRole('button', { name: i18n.t('filters.status', { ns: 'customers' }) }))
     await user.click(await screen.findByRole('button', { name: 'Bevestigd' }))
     expect(screen.getByText('Acme')).toBeInTheDocument()
     expect(screen.queryByText('Yesway')).toBeNull()
@@ -176,7 +178,9 @@ describe('MatchesTab · onAdd renders "+ Match" at the end of the ONE-LINE toolb
     const user = userEvent.setup()
     render(<MatchesTab c={candidate([])} onAdd={onAdd} />)
     const search = screen.getByRole('textbox')
-    const statusTrigger = screen.getByRole('button', { name: i18n.t('filters.allStatuses', { ns: 'customers' }) })
+    // StatusFilterSelect shows the pill+count convention since HUISSTIJL-1 batch G:
+    // the trigger always reads the static "Status" word, never the picked value.
+    const statusTrigger = screen.getByRole('button', { name: i18n.t('filters.status', { ns: 'customers' }) })
     const addButton = screen.getByRole('button', { name: ct('work.addMatch') })
     expect(search.compareDocumentPosition(statusTrigger) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
     expect(statusTrigger.compareDocumentPosition(addButton) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
@@ -295,7 +299,10 @@ describe('MatchesTab · every visible column has a header (Danny 09-08 second lo
   it('renders a Status header AND a Match(score) header, reusing WorkTab\'s own status key + MatchesTable\'s own score key', () => {
     render(<MatchesTab c={candidate([row])} />)
     // Reuses the exact key ApplicationRow's own status column header uses.
-    expect(screen.getByText(ct('work.colStatus'))).toBeInTheDocument()
+    // Scoped to the header cell's own testid: the StatusFilterSelect toolbar
+    // trigger now ALSO renders the literal word "Status" (HUISSTIJL-1 batch G),
+    // so an unscoped getByText('Status') matches both and throws.
+    expect(screen.getByTestId('match-col-status-header')).toHaveTextContent(ct('work.colStatus'))
     // Reuses MatchesTable's own score-column label — no new i18n key introduced.
     expect(screen.getByText(mt('cols.score'))).toBeInTheDocument()
   })

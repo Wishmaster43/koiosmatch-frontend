@@ -122,8 +122,11 @@ describe('ContactsPanel · one surface, scope-trimmed columns', () => {
     render(<ContactsPanel {...base} openId={null} onOpenChange={vi.fn()} scope="location" scopeId="loc-1" scopeName="Vestiging Noord" contacts={[contact()]} />)
     expect(screen.queryByText(ct('contacts.col.location'))).toBeNull()
     expect(screen.getByText(ct('contacts.col.department'))).toBeInTheDocument()
-    // Everything else the customer tab shows is still here.
-    expect(screen.getByText(ct('contacts.col.status'))).toBeInTheDocument()
+    // Everything else the customer tab shows is still here. Scoped to the
+    // columnheader role: the toolbar's StatusFilterSelect trigger now ALSO
+    // renders the literal word "Status" (HUISSTIJL-1 batch G), so an unscoped
+    // getByText('Status') matches both and throws.
+    expect(screen.getByRole('columnheader', { name: ct('contacts.col.status') })).toBeInTheDocument()
     expect(screen.getByText(ct('contacts.col.mobile'))).toBeInTheDocument()
     expect(screen.getByText(ct('contacts.col.lastContact'))).toBeInTheDocument()
   })
