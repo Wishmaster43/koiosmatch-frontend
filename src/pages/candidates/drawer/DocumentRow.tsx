@@ -9,6 +9,7 @@ import { splitExt, isPersisted, computeDocExpiry, docUrl, DOC_GRID_COLUMNS } fro
 import type { DocItem } from './documentHelpers'
 import { Caption } from '@/components/ui/typography'
 import type { Id } from '@/types/common'
+import { tintBg, chipInk } from '@/lib/tint'
 
 // DOC-LIST-LINK-1: the five kinds a document can be linked to — mirrors the reverse-FK
 // ids the backend's DocumentResource serialises per row (education_id/certification_id/
@@ -113,6 +114,7 @@ export default function DocumentRow({
         checked={downloadable && selected} disabled={!downloadable} onChange={onToggleSelect}
         style={{ accentColor: 'var(--color-primary)' }} />
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, minWidth: 0 }}>
+        {/* eslint-disable-next-line react-hooks/static-components -- DocIcon RESOLVES an existing icon component from the lookup (same identity each render), never defines one */}
         <div style={{ width: 28, height: 28, borderRadius: 6, flexShrink: 0, background: docColor(d.type), display: 'flex', alignItems: 'center', justifyContent: 'center' }}><DocIcon size={13} color="white" /></div>
         <div style={{ minWidth: 0, flex: 1 }}>
           {renaming
@@ -156,8 +158,13 @@ export default function DocumentRow({
           <DocumentVersionHistory versions={d.versions ?? []} />
         </div>
       </div>
-      <span style={{ fontSize: 11, fontWeight: 500, padding: '2px 8px', borderRadius: 99, background: docColor(d.type) + '18', color: docColor(d.type), whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{d.type ? docTypeLabel(d.type) : '—'}</span>
+      <span style={{ fontSize: 11, fontWeight: 500, padding: '2px 8px', borderRadius: 99, background: tintBg(docColor(d.type)), color: chipInk(docColor(d.type)), whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{d.type ? docTypeLabel(d.type) : '—'}</span>
       <span style={{ fontSize: 11, color: 'var(--text-muted)', whiteSpace: 'nowrap', textAlign: 'right' }}>{d.size ?? ''}</span>
+      {/* Dense row-action glyphs (12px) in a fixed grid column — Button's 28px
+          square would overflow the 100px actions column; mirrors the customers
+          DocumentsTab twin's identical reasoned exception. The download <a> is a
+          true download link, not a button-lookalike. */}
+      {/* eslint-disable huisstijlLegacy/no-restricted-syntax */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 2, justifySelf: 'end' }}>
         <div style={{ display: 'flex' }}>
           {/* Point 4: rename/replace/delete are MANAGE actions — never offered without it. */}
@@ -167,7 +174,7 @@ export default function DocumentRow({
               and the candidate actually has something to link to (no fake affordance). */}
           {canManage && isPersisted(d.id) && canLink && (
             <button aria-label={t('documents.changeLink')} title={t('documents.changeLink')} aria-pressed={linking} onClick={onLinkToggle}
-              style={{ background: linking ? 'color-mix(in srgb, var(--color-info) 14%, transparent)' : 'none', border: 'none', borderRadius: 4, cursor: 'pointer', color: linking ? 'var(--color-info)' : 'var(--text-muted)', padding: '2px 3px', display: 'flex' }}>
+              style={{ background: linking ? tintBg('var(--color-info)', true) : 'none', border: 'none', borderRadius: 4, cursor: 'pointer', color: linking ? chipInk('var(--color-info)') : 'var(--text-muted)', padding: '2px 3px', display: 'flex' }}>
               <Link2 size={12} />
             </button>
           )}
@@ -186,6 +193,7 @@ export default function DocumentRow({
           {canManage && <button aria-label={t('common:remove')} onClick={onDeleteRequest} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: '2px 3px', display: 'flex' }}><X size={12} /></button>}
         </div>
       </div>
+      {/* eslint-enable huisstijlLegacy/no-restricted-syntax */}
     </div>
   )
 }

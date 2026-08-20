@@ -6,6 +6,7 @@ import ScorePill from './ScorePill'
 import type { MatchRow } from '@/types/match'
 import type { Id } from '@/types/common'
 import { useDragAutoScroll } from '@/lib/useDragAutoScroll'
+import { tintBg, chipInk } from '@/lib/tint'
 
 export interface BoardColumn { key: string; label: string; color: string }
 
@@ -61,7 +62,7 @@ function BoardColumnView({ column, items, onDragStart, onDrop, onDragOver, onSel
         <span style={{ width: 8, height: 8, borderRadius: '50%', background: column.color, flexShrink: 0 }} />
         <span style={{ fontWeight: 600, fontSize: 13, color: 'var(--text)' }}>{column.label}</span>
         <span style={{ fontSize: 11, fontWeight: 600, padding: '1px 7px', borderRadius: 99,
-          background: column.color + '20', color: column.color }}>{items.length}</span>
+          background: tintBg(column.color, true), color: chipInk(column.color) }}>{items.length}</span>
       </div>
       <div style={{ flex: 1, minHeight: 80, borderRadius: 10,
         border: items.length === 0 ? '1px dashed var(--border)' : 'none' }}>

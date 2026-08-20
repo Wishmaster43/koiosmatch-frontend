@@ -147,9 +147,9 @@ export function RoleDetail({ role, permissions, iconOptions, onBack, onUpdate }:
     <div>
       {/* Back + role name header */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 18 }}>
-        {/* Herhaal-audit r4 finding 6: a raw <button> reading BTN_H is by definition
-            a copy of Button size="md" — read the atom directly instead. */}
-        <Button variant="secondary" size="md" onClick={onBack}>
+        {/* The previous raw 34px button was drift, and so was carrying its size
+            into the migration (r5 finding 2): settings buttons ride the sm standard. */}
+        <Button variant="secondary" onClick={onBack}>
           <ArrowLeft size={13} /> {t('common.back')}
         </Button>
         {roleIconEl(iconName, { size: 16, style: { color } })}

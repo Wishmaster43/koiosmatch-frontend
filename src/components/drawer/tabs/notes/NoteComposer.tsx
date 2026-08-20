@@ -149,8 +149,10 @@ export default function NoteComposer({ open, initialNote, noteTypes, channels, l
       {/* Pinned footer — OUTSIDE the scroll area (mirrors AddTaskModal's
           scrollBody=false footer), always reachable regardless of scroll position. */}
       <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 6, padding: '10px 16px', borderTop: '1px solid var(--border)', flexShrink: 0 }}>
-        <Button variant="primary" size="md" iconOnly onClick={save} title={labels.save}><Save size={15} /></Button>
-        <Button variant="secondary" size="md" iconOnly onClick={onCancel} title={labels.cancel}><X size={15} /></Button>
+        {/* MAAT (r5 finding 1): drawer buttons ride the sm standard — md is the
+            page-toolbar exception only. */}
+        <Button variant="primary" iconOnly onClick={save} title={labels.save}><Save size={14} /></Button>
+        <Button variant="secondary" iconOnly onClick={onCancel} title={labels.cancel}><X size={14} /></Button>
       </div>
     </FloatingPanel>
   )

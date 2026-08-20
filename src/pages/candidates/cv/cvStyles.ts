@@ -11,6 +11,11 @@
 import { StyleSheet } from '@react-pdf/renderer'
 import { readableOn } from '@/hooks/useTenantTheme'
 
+/* eslint-disable huisstijl/no-restricted-syntax -- react-pdf renders NO CSS
+   color-mix (its own style engine), so lib/tint's formula cannot work here;
+   the colours are guaranteed hex (tenant theme resolved before PDF render),
+   which is the ONE context where hex+alpha concat is safe by construction. */
+
 // Hex + alpha -> rgba(): react-pdf takes literal colour values (no color-mix/CSS
 // vars here, see below), so translucent sidebar text/chip tints are built from
 // the computed on-accent hex rather than a fixed rgba(255,255,255,x) constant.

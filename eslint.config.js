@@ -115,8 +115,12 @@ export default defineConfig([
     rules: {
       'huisstijl/no-restricted-syntax': ['error', {
         // The hex-concat tint recipe silently breaks on var() tenant tokens.
-        selector: "BinaryExpression[operator='+'] > Literal[value=/^(1A|14|22|33|55)$/]",
-        message: "HUISSTIJL: hex-concat tint (colour + '1A') breaks on tenant tokens — use tintBg/tintBorder from lib/tint.",
+        // GENERIC two-hex-suffix form (r5 finding 3): the old five-suffix list
+        // (1A|14|22|33|55) encoded only the house pair and let '20'/'CC'/'18'
+        // through — the exact shape of the gap. cvStyles.ts (react-pdf, no
+        // color-mix support) carries the one reasoned file-level exception.
+        selector: "BinaryExpression[operator='+'] > Literal[value=/^[0-9A-Fa-f]{2}$/]",
+        message: "HUISSTIJL: hex-concat tint (colour + 'XX') breaks on tenant tokens, ongeacht het suffix — use tintBg/tintBorder/chipInk from lib/tint.",
       },
       {
         // Z-index literals outside the ladder: stacking inversions only show with

@@ -44,7 +44,7 @@ npx vitest run src/i18n/localeParity.test.ts || {
 # Caption allowlists) — a file's hand-styled count may never grow, and a file
 # migrated to the shared atom must drop out of (or shrink in) the allowlist.
 echo "▶ pre-commit: typografie-ratchet…"
-npx vitest run src/components/ui/typography.houseStyle.test.js || {
+npx vitest run src/components/ui/typography.houseStyle.test.js src/components/ui/buttonSize.houseStyle.test.js || {
   echo "✗ typography ratchet failed — a file's hand-styled SectionTitle/Caption count grew beyond its frozen allowlist entry. Use <SectionTitle>/<Caption> from components/ui/typography, or lower the allowlist entry if it genuinely shrank."
   exit 1
 }

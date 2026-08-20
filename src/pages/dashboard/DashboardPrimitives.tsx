@@ -8,6 +8,7 @@ import type { ReactNode } from 'react'
 import { interactive } from '@/lib/a11y'
 import type { LucideIcon } from 'lucide-react'
 import SharedAvatar from '@/components/ui/Avatar'
+import { tintBg, chipInk } from '@/lib/tint'
 
 export function KpiCard({ label, value, sub, color, bg, Icon, onClick }: {
   label?: ReactNode; value?: ReactNode; sub?: ReactNode; color?: string; bg?: string; Icon: LucideIcon; onClick?: () => void
@@ -59,5 +60,5 @@ export function Avatar({ initials, size = 28 }: { initials: string; size?: numbe
 
 export function StatusBadge({ label, color }: { label?: ReactNode; color: string }) {
   return <span style={{ fontSize: 10, fontWeight: 500, padding: '2px 7px', borderRadius: 99,
-    background: color + '20', color, whiteSpace: 'nowrap' }}>{label}</span>
+    background: tintBg(color, true), color: chipInk(color), whiteSpace: 'nowrap' }}>{label}</span>
 }

@@ -10,6 +10,7 @@ import { isSameDay, WEEKDAYS_MON, formatDate } from './helpers'
 import { interactive } from '@/lib/a11y'
 import Button from '@/components/ui/Button'
 import type { Shift } from '@/types/planning'
+import { tintBg, chipInk } from '@/lib/tint'
 
 // onShiftClick (SHIFT-STAFF-1): opens the real staffing drawer for that one
 // shift — optional so every view keeps working before it's wired everywhere.
@@ -18,14 +19,14 @@ interface ViewProps { current: Date; shifts: Shift[]; today: Date; onDayClick: (
 // ── Shift pill ────────────────────────────────────────────────────────────────
 function ShiftPill({ shift, small, onClick }: { shift: Shift; small?: boolean; onClick?: (e: MouseEvent) => void }) {
   return (
-    <div onClick={onClick} style={{ background: shift.color + '20', borderLeft: `3px solid ${shift.color}`,
+    <div onClick={onClick} style={{ background: tintBg(shift.color, true), borderLeft: `3px solid ${shift.color}`,
       borderRadius: 4, padding: small ? '2px 5px' : '3px 7px', marginBottom: 2,
       cursor: 'pointer', overflow: 'hidden' }}>
-      <div style={{ fontSize: small ? 10 : 11, fontWeight: 600, color: shift.color, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+      <div style={{ fontSize: small ? 10 : 11, fontWeight: 600, color: chipInk(shift.color), whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
         {shift.start} {shift.title}
       </div>
       {!small && shift.candidate && (
-        <div style={{ fontSize: 10, color: shift.color + 'CC', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+        <div style={{ fontSize: 10, color: chipInk(shift.color), whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
           {shift.candidate}
         </div>
       )}
@@ -89,8 +90,9 @@ export function MonthView({ current, shifts, today, onDayClick, onShiftClick }: 
                   <div style={{
                     width: 24, height: 24, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center',
                     marginBottom: 4, fontSize: 12, fontWeight: isToday ? 700 : 400,
-                    background: isToday ? 'var(--color-primary)' : 'transparent',
-                    color: outside ? 'var(--text-muted)' : isToday ? 'var(--color-on-accent)' : 'var(--text)',
+                    // Today-marker reads the trio (same solid look, tenant-adjustable).
+                    background: isToday ? 'var(--button-fill)' : 'transparent',
+                    color: outside ? 'var(--text-muted)' : isToday ? 'var(--button-ink)' : 'var(--text)',
                   }}>
                     {date.getDate()}
                   </div>
@@ -133,8 +135,8 @@ export function WeekView({ current, shifts, today, onDayClick, onShiftClick }: V
                 <div style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 3 }}>{WEEK_LABELS[i]}</div>
                 <div style={{ width: 30, height: 30, borderRadius: '50%', margin: '0 auto',
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  background: isToday ? 'var(--color-primary)' : 'transparent',
-                  color: isToday ? 'var(--color-on-accent)' : 'var(--text)', fontSize: 14, fontWeight: isToday ? 700 : 400 }}>
+                  background: isToday ? 'var(--button-fill)' : 'transparent',
+                  color: isToday ? 'var(--button-ink)' : 'var(--text)', fontSize: 14, fontWeight: isToday ? 700 : 400 }}>
                   {d.getDate()}
                 </div>
               </div>
@@ -206,12 +208,15 @@ export function DayView({ current, shifts, today, onDayClick, onShiftClick }: Vi
               </div>
             ))}
             {/* HUISSTIJL-1: left hand-styled — the dashed border is a distinct
-                "add row" placeholder chrome with no Button variant equivalent. */}
+                "add row" placeholder chrome with no Button variant equivalent.
+                Block form: the style attr sits a line into the tag. */}
+            {/* eslint-disable huisstijlLegacy/no-restricted-syntax */}
             <button onClick={() => onDayClick(current)}
               style={{ width: '100%', padding: '9px', fontSize: 13, border: '1px dashed var(--border)',
                 borderRadius: 8, background: 'none', color: 'var(--text-muted)', cursor: 'pointer', marginTop: 4 }}>
               + {t('addShift')}
             </button>
+            {/* eslint-enable huisstijlLegacy/no-restricted-syntax */}
           </>
         )
       }
