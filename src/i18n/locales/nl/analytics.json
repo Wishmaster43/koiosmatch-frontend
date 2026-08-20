@@ -189,7 +189,7 @@
     },
     "noApplicants": {
       "title": "Vacatures zonder sollicitaties ({{count}})",
-      "subtitle": "Geteld uit de vacatures hierboven — nul sollicitaties ontvangen in deze periode.",
+      "subtitle": "Geteld uit de vacatures hierboven: nul sollicitaties ontvangen in deze periode.",
       "empty": "Elke vacature in deze periode ontving minstens één sollicitatie."
     },
     "kpiOrderFellBack": "Een in Instellingen ingestelde KPI-kaart bestaat niet meer en is teruggezet naar de standaard."

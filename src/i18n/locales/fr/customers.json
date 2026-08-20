@@ -109,7 +109,8 @@
     "deleteConfirm": "Supprimer {{name}} ? Le client passe dans Archivés et peut être restauré.",
     "deletedNamed": "{{name}} supprimé",
     "deleteFailed": "Échec de la suppression (liens actifs possibles).",
-    "deleteBlocked": "Impossible de supprimer {{name}} : des liens actifs existent encore."
+    "deleteBlocked": "Impossible de supprimer {{name}} : des liens actifs existent encore.",
+    "photoChange": "Modifier la photo"
   },
   "overview": {
     "general": "Général",

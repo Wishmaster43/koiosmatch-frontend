@@ -35,20 +35,27 @@ export function useCustomerTextLite(id: string | undefined) {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(false)
 
-  const load = useCallback(() => {
+  const load = useCallback((signal?: AbortSignal) => {
     if (!id) { setLoading(false); return }
     setLoading(true); setError(false)
-    api.get(`/customers/${id}`)
+    api.get(`/customers/${id}`, { signal })
       .then(r => {
         const raw = unwrap<RawCustomerLite>(r)
         const name = raw.name ?? '?'
         setCustomer({ id: String(raw.id ?? id), name, initials: initialsOf(name), description: raw.description ?? '' })
       })
-      .catch(() => setError(true))
+      .catch((e) => { if (!signal?.aborted && e?.name !== 'CanceledError') setError(true) })
       .finally(() => setLoading(false))
   }, [id])
 
-  useEffect(() => { load() }, [load])
+  // §9 abort-guard (heraudit A11Y-2): a fast popout-id switch must never let the
+  // previous id's stale response win — the effect owns a controller; `reload`
+  // (user-initiated) deliberately runs unsignalled.
+  useEffect(() => {
+    const ctrl = new AbortController()
+    load(ctrl.signal)
+    return () => ctrl.abort()
+  }, [load])
   return { customer, loading, error, reload: load }
 }
 
@@ -60,20 +67,27 @@ export function useDepartmentTextLite(customerId: string | undefined, department
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(false)
 
-  const load = useCallback(() => {
+  const load = useCallback((signal?: AbortSignal) => {
     if (!customerId || !departmentId) { setLoading(false); return }
     setLoading(true); setError(false)
-    api.get(`/customers/${customerId}/departments`)
+    api.get(`/customers/${customerId}/departments`, { signal })
       .then(r => {
         const row = unwrapList<RawDepartmentLite>(r).rows.find(d => String(d.id) === departmentId)
         if (!row) { setError(true); return }
         setDepartment({ id: departmentId, customerId, name: row.name ?? '?', description: row.description ?? '' })
       })
-      .catch(() => setError(true))
+      .catch((e) => { if (!signal?.aborted && e?.name !== 'CanceledError') setError(true) })
       .finally(() => setLoading(false))
   }, [customerId, departmentId])
 
-  useEffect(() => { load() }, [load])
+  // §9 abort-guard (heraudit A11Y-2): a fast popout-id switch must never let the
+  // previous id's stale response win — the effect owns a controller; `reload`
+  // (user-initiated) deliberately runs unsignalled.
+  useEffect(() => {
+    const ctrl = new AbortController()
+    load(ctrl.signal)
+    return () => ctrl.abort()
+  }, [load])
   return { department, loading, error, reload: load }
 }
 
@@ -87,19 +101,26 @@ export function useLocationTextLite(locationId: string | undefined) {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(false)
 
-  const load = useCallback(() => {
+  const load = useCallback((signal?: AbortSignal) => {
     if (!locationId) { setLoading(false); return }
     setLoading(true); setError(false)
-    api.get(`/locations/${locationId}`)
+    api.get(`/locations/${locationId}`, { signal })
       .then(r => {
         const raw = unwrap<RawLocationLite>(r)
         setLocation({ id: String(raw.id ?? locationId), name: raw.name ?? '?', description: raw.description ?? '' })
       })
-      .catch(() => setError(true))
+      .catch((e) => { if (!signal?.aborted && e?.name !== 'CanceledError') setError(true) })
       .finally(() => setLoading(false))
   }, [locationId])
 
-  useEffect(() => { load() }, [load])
+  // §9 abort-guard (heraudit A11Y-2): a fast popout-id switch must never let the
+  // previous id's stale response win — the effect owns a controller; `reload`
+  // (user-initiated) deliberately runs unsignalled.
+  useEffect(() => {
+    const ctrl = new AbortController()
+    load(ctrl.signal)
+    return () => ctrl.abort()
+  }, [load])
   return { location, loading, error, reload: load }
 }
 

@@ -380,7 +380,8 @@
     "noStatus": "Sans statut",
     "changelog": "Journal",
     "tasksSearchPlaceholder": "Rechercher une tâche…",
-    "createdAtBy": "Créé le {{date}} par {{name}}"
+    "createdAtBy": "Créé le {{date}} par {{name}}",
+    "photoChange": "Modifier la photo"
   },
   "stage": {
     "lead": "Piste",

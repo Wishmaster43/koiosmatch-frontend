@@ -41,3 +41,20 @@ export function humanizeIsoDates(text: string | null | undefined): string {
     .replace(ISO_TIMESTAMP_RE, (_, y, m, d, hh, mm) => `${d}-${m}-${y} ${hh}:${mm}`)
     .replace(ISO_DATE_RE, (_, y, m, d) => `${d}-${m}-${y}`)
 }
+
+// Non-hook DD-MM-YYYY[+ HH:mm] formatters (heraudit I18N-2): the ONE string
+// builder for contexts without hook access (table parts, run/message logs).
+// They live HERE, not in datetime.ts, because that module's i18n import has an
+// initialising side effect (raw-key unit tests must stay side-effect-free).
+const DT_DATE = new Intl.DateTimeFormat('nl-NL', { day: '2-digit', month: '2-digit', year: 'numeric' })
+const DT_TIME = new Intl.DateTimeFormat('nl-NL', { hour: '2-digit', minute: '2-digit', hour12: false })
+export function formatDateOnly(dt?: string | number | Date | null): string {
+  if (!dt) return '—'
+  const d = new Date(dt)
+  return isNaN(d.getTime()) ? '—' : DT_DATE.format(d).replace(/\//g, '-')
+}
+export function formatDateTimeStr(dt?: string | number | Date | null): string {
+  if (!dt) return '—'
+  const d = new Date(dt)
+  return isNaN(d.getTime()) ? '—' : `${DT_DATE.format(d).replace(/\//g, '-')} ${DT_TIME.format(d)}`
+}

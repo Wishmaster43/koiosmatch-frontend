@@ -52,8 +52,8 @@ describe('useTasksData · error signalling (re-audit findings)', () => {
   })
 
   it('signals archivedError on a failed archived fetch instead of reading as "no archived tasks"', async () => {
-    mockedGet.mockImplementation((_url: string, config?: { params?: Record<string, unknown> }) => {
-      if (config?.params?.archived) return Promise.reject({ response: { status: 500 } })
+    mockedGet.mockImplementation((_url: string, config?: Parameters<typeof api.get>[1]) => {
+      if ((config?.params as Record<string, unknown> | undefined)?.archived) return Promise.reject({ response: { status: 500 } })
       return Promise.resolve({ data: { data: [] } })
     })
     const { result } = renderHook(() => useTasksData({ showArchived: true, ...lookupProps }))
@@ -65,8 +65,8 @@ describe('useTasksData · error signalling (re-audit findings)', () => {
   })
 
   it('does not report archivedError once the archived list loads successfully', async () => {
-    mockedGet.mockImplementation((_url: string, config?: { params?: Record<string, unknown> }) => {
-      if (config?.params?.archived) return Promise.resolve({ data: { data: [{ id: 'a1', title: 'Old task' }] } })
+    mockedGet.mockImplementation((_url: string, config?: Parameters<typeof api.get>[1]) => {
+      if ((config?.params as Record<string, unknown> | undefined)?.archived) return Promise.resolve({ data: { data: [{ id: 'a1', title: 'Old task' }] } })
       return Promise.resolve({ data: { data: [] } })
     })
     const { result } = renderHook(() => useTasksData({ showArchived: true, ...lookupProps }))

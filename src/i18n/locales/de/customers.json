@@ -109,7 +109,8 @@
     "deleteConfirm": "{{name}} löschen? Der Kunde wandert nach Archiviert und kann wiederhergestellt werden.",
     "deletedNamed": "{{name}} gelöscht",
     "deleteFailed": "Löschen fehlgeschlagen (möglicherweise aktive Verknüpfungen).",
-    "deleteBlocked": "{{name}} kann nicht gelöscht werden: es bestehen noch aktive Verknüpfungen."
+    "deleteBlocked": "{{name}} kann nicht gelöscht werden: es bestehen noch aktive Verknüpfungen.",
+    "photoChange": "Foto ändern"
   },
   "overview": {
     "general": "Allgemein",

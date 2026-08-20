@@ -48,6 +48,22 @@ describe('needsLiveCheck', () => {
   it('is true when the deployability status is placed, regardless of stage', () => {
     expect(needsLiveCheck({ stage: '', status: 'placed' } as Candidate)).toBe(true)
   })
+
+  // F1b root-cause (heraudit 20-08): requires_match is a LOOKUP FLAG, never the
+  // literal 'placed' key — a tenant who renamed/re-slugged Placed skipped the
+  // pre-check entirely and leaned on the 409 round-trip.
+  it('is flag-driven: a renamed Placed status (requires_match) still needs the live check', () => {
+    const RENAMED_STATUSES = [
+    // eslint-disable-next-line no-restricted-syntax -- test fixture DATA: a tenant lookup colour VALUE, not UI styling
+      { value: 'ingezet', label: 'Ingezet', color: '#6E8FD6', requires_match: true },
+    // eslint-disable-next-line no-restricted-syntax -- test fixture DATA: a tenant lookup colour VALUE, not UI styling
+      { value: 'vrij', label: 'Vrij', color: '#22C55E' },
+    ]
+    expect(needsLiveCheck({ stage: '', status: 'ingezet' } as Candidate, undefined, RENAMED_STATUSES)).toBe(true)
+    expect(needsLiveCheck({ stage: '', status: 'vrij' } as Candidate, undefined, RENAMED_STATUSES)).toBe(false)
+    // And the OLD literal no longer matches when the tenant lookup lacks it.
+    expect(needsLiveCheck({ stage: '', status: 'placed' } as Candidate, undefined, RENAMED_STATUSES)).toBe(false)
+  })
   it('is false for null/undefined candidates', () => {
     expect(needsLiveCheck(null)).toBe(false)
     expect(needsLiveCheck(undefined)).toBe(false)

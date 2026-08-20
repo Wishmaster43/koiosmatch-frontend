@@ -403,7 +403,8 @@
     "noStatus": "Geen status",
     "changelog": "Wijzigingslog",
     "tasksSearchPlaceholder": "Zoek taak…",
-    "createdAtBy": "Aangemaakt op {{date}} door {{name}}"
+    "createdAtBy": "Aangemaakt op {{date}} door {{name}}",
+    "photoChange": "Foto wijzigen"
   },
   "stage": {
     "lead": "Lead",

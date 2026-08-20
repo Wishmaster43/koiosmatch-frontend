@@ -21,6 +21,10 @@ type DateInput = string | number | Date | null | undefined
 // Date's own LOCAL getters (getFullYear/getMonth/getDate) instead means the calendar day the
 // user actually picked is the one that round-trips to the API.
 
+// Non-hook formatters (heraudit I18N-2) re-exported from localDate — they live
+// there because this module's i18n import has an initialising side effect.
+export { formatDateOnly, formatDateTimeStr } from './localDate'
+
 export function useLocale(): string {
   const { i18n } = useTranslation()
   // Optional chaining: some tests stub react-i18next with a bare `{ t }` (no

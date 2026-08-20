@@ -109,7 +109,8 @@
     "deleteConfirm": "{{name}} verwijderen? De klant verhuist naar Gearchiveerd en kan teruggehaald worden.",
     "deletedNamed": "{{name}} verwijderd",
     "deleteFailed": "Verwijderen is mislukt (mogelijk actieve koppelingen).",
-    "deleteBlocked": "{{name}} kan niet verwijderd worden: er zijn nog actieve koppelingen."
+    "deleteBlocked": "{{name}} kan niet verwijderd worden: er zijn nog actieve koppelingen.",
+    "photoChange": "Foto wijzigen"
   },
   "overview": {
     "general": "Algemeen",

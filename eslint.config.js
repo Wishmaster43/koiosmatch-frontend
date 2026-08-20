@@ -19,6 +19,10 @@ const projectRules = {
   // component definitions, etc.) — kept visible as warnings, a real refactor for later.
   'react-hooks/static-components': 'warn',
   'react-hooks/immutability': 'warn',
+  // Heraudit MOD-1/MOD-3 (20-08): the §3 split trigger as a warning — counted
+  // by scripts/huisstijl-ceiling.mjs, so an oversized file is frozen shrink-only
+  // debt that pays down per touch; a NEW file can never land above 400.
+  'max-lines': ['warn', { max: 400, skipBlankLines: true, skipComments: true }],
   // Steer new code to the "@/" alias; deep ../../ chains are flagged but the 400+
   // existing ones stay warnings (converted per-touch, CLAUDE.md §11 / CS-8).
   'no-restricted-imports': ['warn', {

@@ -2,7 +2,6 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Search } from 'lucide-react'
 import SectionCard from '@/components/ui/SectionCard'
-import EntityLink from '@/components/ui/EntityLink'
 import DrawerAddButton from '@/components/drawer/DrawerAddButton'
 import StatusFilterSelect, { useStatusFilter } from '@/components/drawer/StatusFilterSelect'
 import { useMatchStatuses } from '@/lib/useMatchStatuses'
@@ -101,7 +100,7 @@ export default function MatchesTab({ customerId }: { customerId?: Id }) {
             helloflexLink={m.helloflexLink} shiftmanagerLink={m.shiftmanagerLink}
             showHelloflex={showHelloflex} showShiftmanager={showShiftmanager}
             otherPartyLabel={t('matches:cols.candidate')}
-            otherPartyValue={<EntityLink page="candidates" id={m.candidateId}>{m.candidate || '—'}</EntityLink>}
+            otherParty={{ page: 'candidates', id: m.candidateId ?? null, label: m.candidate || '' }}
             contractType={m.contractType} contractStatus={m.contractStatus}
             functionTitle={m.functionTitle} branchName={m.branchName} ownerName={m.owner}
             startDate={m.startDate} endDate={m.endDate}

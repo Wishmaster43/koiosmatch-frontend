@@ -32,7 +32,7 @@ afterEach(() => { vi.useRealTimers() })
 
 const base = {
   id: 'm-1', vacancyId: 'vac-1', vacancyTitle: 'Verpleegkundige',
-  otherPartyLabel: 'Kandidaat', otherPartyValue: 'Jane Doe',
+  otherPartyLabel: 'Kandidaat', otherParty: { page: 'candidates', id: 'cand-1', label: 'Jane Doe' },
 }
 
 describe('MatchCard · title (point 2)', () => {

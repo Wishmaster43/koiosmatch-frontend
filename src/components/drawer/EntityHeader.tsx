@@ -15,7 +15,7 @@ import SelectMenuJs from '../ui/SelectMenu'
 import { isInsideDropdownPortal } from '@/lib/useDropdownPlacement'
 import { Z } from '@/lib/zIndexScale'
 import Button from '@/components/ui/Button'
-import { PageTitle } from '@/components/ui/typography'
+import { PageTitle, SectionTitle, Caption } from '@/components/ui/typography'
 
 type AnyProps = Record<string, unknown>
 // Still-untyped JS UI — accept any props at the boundary.
@@ -23,9 +23,12 @@ const Avatar = AvatarJs as unknown as ComponentType<AnyProps>
 const SelectMenu = SelectMenuJs as unknown as ComponentType<AnyProps>
 
 interface AvatarConfig { initials?: string; photo?: string | null; color?: string | null; soft?: boolean }
-interface PhotoLabels { upload?: string; remove?: string }
+interface PhotoLabels { upload?: string; remove?: string; change?: string }
 
 function PhotoAvatar({ avatar, onChange, labels }: { avatar: AvatarConfig; onChange?: (url: string) => void; labels?: PhotoLabels }) {
+  // §5 fallbacks resolve via i18n, never a literal — a caller without labels
+  // still gets translated names (Opus-verificatie heraudit, MINOR A).
+  const { t } = useTranslation('common')
   const [menuOpen, setMenuOpen] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
   const fileRef = useRef<HTMLInputElement>(null)
@@ -62,6 +65,10 @@ function PhotoAvatar({ avatar, onChange, labels }: { avatar: AvatarConfig; onCha
   return (
     <div ref={ref} style={{ position: 'relative', flexShrink: 0 }}>
       <button onClick={() => setMenuOpen(o => !o)}
+        // A11Y-3 (heraudit): the icon-only photo trigger sits on EVERY entity
+        // drawer header — it carries a name and its menu semantics.
+        aria-label={labels?.change ?? t('photoChange')}
+        aria-haspopup="menu" aria-expanded={menuOpen}
         // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- circular avatar photo-picker trigger (wraps the round Avatar itself), not a rectangular Button shape
         style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, display: 'block', position: 'relative', borderRadius: '50%' }}>
         <Avatar initials={avatar.initials} size={44} photo={avatar.photo} color={avatar.color} soft={avatar.soft} />
@@ -75,7 +82,7 @@ function PhotoAvatar({ avatar, onChange, labels }: { avatar: AvatarConfig; onCha
           <Camera size={14} color="white" />
         </div>
       </button>
-      <input ref={fileRef} type="file" accept="image/*" aria-label={labels?.upload ?? 'Upload'} style={{ display: 'none' }}
+      <input ref={fileRef} type="file" accept="image/*" aria-label={labels?.upload ?? t('photoUpload')} style={{ display: 'none' }}
         onChange={e => { const f = e.target.files?.[0]; if (f) { pickFile(f); setMenuOpen(false) } }} />
       {menuOpen && (
         // Themed surface, not a raw 'white' — this menu floats over the app in both
@@ -87,7 +94,7 @@ function PhotoAvatar({ avatar, onChange, labels }: { avatar: AvatarConfig; onCha
             // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- full-width dropdown menu-item row with an imperative hover swap, not a standalone Button
             style={{ display: 'block', width: '100%', padding: '9px 14px', fontSize: 12, textAlign: 'left', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text)' }}
             onMouseEnter={e => (e.currentTarget.style.background = 'var(--hover-bg)')} onMouseLeave={e => (e.currentTarget.style.background = 'none')}>
-            {labels?.upload ?? 'Upload'}
+            {labels?.upload ?? t('photoUpload')}
           </button>
           <button onClick={() => { removePhoto(); setMenuOpen(false) }}
             // Ink is --color-on-danger-bg, not --color-danger: on hover this row sits ON
@@ -97,7 +104,7 @@ function PhotoAvatar({ avatar, onChange, labels }: { avatar: AvatarConfig; onCha
             // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- full-width dropdown menu-item row with an imperative hover swap, not a standalone Button
             style={{ display: 'block', width: '100%', padding: '9px 14px', fontSize: 12, textAlign: 'left', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--color-on-danger-bg)' }}
             onMouseEnter={e => (e.currentTarget.style.background = 'var(--color-danger-bg)')} onMouseLeave={e => (e.currentTarget.style.background = 'none')}>
-            {labels?.remove ?? 'Remove'}
+            {labels?.remove ?? t('remove')}
           </button>
         </div>
       )}
@@ -105,7 +112,7 @@ function PhotoAvatar({ avatar, onChange, labels }: { avatar: AvatarConfig; onCha
   )
 }
 
-function TagRow({ items = [], onAdd, onRemove, addLabel }: { items?: string[]; onAdd: (v: string) => void; onRemove: (tag: string) => void; addLabel?: string }) {
+function TagRow({ items = [], onAdd, onRemove, addLabel }: { items?: string[]; onAdd: (v: string) => void; onRemove: (tag: string) => void; addLabel: string }) {
   const [adding, setAdding] = useState(false)
   const [value, setValue] = useState('')
   // Tag-edit-in-place (Danny punt 51, 16-07): click a tag to rename it — commit
@@ -148,7 +155,7 @@ function TagRow({ items = [], onAdd, onRemove, addLabel }: { items?: string[]; o
           onBlur={commit} placeholder={addLabel} aria-label={addLabel}
           style={{ fontSize: 11, padding: '3px 8px', borderRadius: 99, border: '1px solid var(--color-primary)', color: 'var(--text)', width: 110 }} />
       ) : (
-        <button onClick={() => setAdding(true)}
+        <button onClick={() => setAdding(true)} aria-label={addLabel}
           // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- compact dashed-pill add-tag trigger sized to match the tag chip row (11px), not a toolbar Button
           style={{ fontSize: 11, padding: '3px 8px', borderRadius: 99, border: '1px dashed var(--border)', background: 'none', color: 'var(--text-muted)', cursor: 'pointer' }}>+</button>
       )}
@@ -182,7 +189,7 @@ interface EntityHeaderProps {
   actions?: ReactNode
   meta?: MetaPicker[]
   metaExtra?: ReactNode
-  tags?: { items?: string[]; onAdd: (v: string) => void; onRemove: (tag: string) => void; addLabel?: string }
+  tags?: { items?: string[]; onAdd: (v: string) => void; onRemove: (tag: string) => void; addLabel: string }
   tagsLabel?: ReactNode
   children?: ReactNode
   expanded?: boolean
@@ -199,7 +206,9 @@ export default function EntityHeader({
     <>
       {/* Title row */}
       <div style={{ display: 'flex', alignItems: 'center', marginBottom: 12 }}>
-        <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-muted)', flex: 1 }}>{label}</span>
+        {/* Muted override is the calm-header design (§3A): this is the drawer's
+            entity LABEL, not a content heading — size/weight stay the atom's. */}
+        <SectionTitle as="span" style={{ color: 'var(--text-muted)', flex: 1 }}>{label}</SectionTitle>
         {titleActions}
         <Button variant="ghost" iconOnly onClick={onToggleExpand} aria-label={expanded ? t('collapse') : t('expand')}>
           {expanded ? <Minimize2 size={14} /> : <Maximize2 size={14} />}
@@ -233,7 +242,7 @@ export default function EntityHeader({
             // Compact, fixed-width picker (no flex-grow) so the pickers stay tight
             // and left-aligned instead of stretching across the whole header.
             <div key={m.key} style={{ width: m.width ?? 200, maxWidth: '100%', minWidth: 0, flexShrink: 0 }}>
-              <div style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 4 }}>{m.label}</div>
+              <Caption as="div" style={{ marginBottom: 4 }}>{m.label}</Caption>
               <SelectMenu value={m.value} options={m.options} onChange={m.onChange} placeholder={m.placeholder} menuWidth={m.menuWidth ?? 180} />
             </div>
           ))}

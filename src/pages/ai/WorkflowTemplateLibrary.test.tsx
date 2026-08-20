@@ -28,9 +28,9 @@ const koiosAiTemplates = allTemplates.filter((tpl) => tpl.category === 'koios_ai
 // Mirrors GebruikSettings.test.jsx's mockApi convention: read the caller's params
 // off the call itself rather than assuming a single fixed response.
 function mockApi() {
-  vi.mocked(api.get).mockImplementation((url: string, config?: { params?: { category?: string } }) => {
+  vi.mocked(api.get).mockImplementation((url: string, config?: Parameters<typeof api.get>[1]) => {
     if (url === '/workflow-templates') {
-      const category = config?.params?.category
+      const category = (config?.params as { category?: string } | undefined)?.category
       return Promise.resolve({ data: category === 'koios_ai' ? koiosAiTemplates : allTemplates })
     }
     return Promise.resolve({ data: [] })

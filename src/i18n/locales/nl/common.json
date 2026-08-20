@@ -450,5 +450,7 @@
   "dragList": {
     "moveUp": "Omhoog verplaatsen",
     "moveDown": "Omlaag verplaatsen"
-  }
+  },
+  "photoChange": "Foto wijzigen",
+  "photoUpload": "Uploaden"
 }

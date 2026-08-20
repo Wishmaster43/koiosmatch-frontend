@@ -189,7 +189,7 @@
     },
     "noApplicants": {
       "title": "Stellen ohne Bewerbungen ({{count}})",
-      "subtitle": "Gezählt aus den oben gezeigten Stellen — null Bewerbungen in diesem Zeitraum.",
+      "subtitle": "Gezählt aus den obigen Vakanzen: null Bewerbungen in diesem Zeitraum erhalten.",
       "empty": "Jede Stelle in diesem Zeitraum erhielt mindestens eine Bewerbung."
     },
     "kpiOrderFellBack": "Eine in den Einstellungen konfigurierte KPI-Karte existiert nicht mehr und wurde auf den Standard zurückgesetzt."

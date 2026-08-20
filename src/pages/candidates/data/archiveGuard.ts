@@ -12,7 +12,7 @@
  *     'open' | 'closed' (confirmed via /matches PATCH's documented enum).
  */
 import api, { unwrap } from '@/lib/api'
-import { DEFAULT_FUNNEL_TYPES } from '@/context/LookupsContext'
+import { DEFAULT_FUNNEL_TYPES, DEFAULT_STATUSES } from '@/context/LookupsContext'
 import type { LookupItem } from '@/context/LookupsContext'
 import type { Candidate } from '@/types/candidate'
 import type { Id } from '@/types/common'
@@ -45,11 +45,15 @@ export interface LiveBlockers { applications: BlockingApplication[]; matches: Bl
 // defaults to the seed because the two callers of this pure helper
 // (useCandidateDrawerActions/useCandidateBulkActions) don't thread the live
 // tenant lookup through yet — follow-up, out of this change's file scope.
-export const needsLiveCheck = (c?: Candidate | null, funnelTypes: LookupItem[] = DEFAULT_FUNNEL_TYPES): boolean => {
+export const needsLiveCheck = (c?: Candidate | null, funnelTypes: LookupItem[] = DEFAULT_FUNNEL_TYPES, statuses: LookupItem[] = DEFAULT_STATUSES): boolean => {
   if (!c) return false
   const meta = funnelTypes.find(f => f.value === c.stage)
   const nonTerminalStage = !!c.stage && !(meta?.is_match || meta?.is_rejected)
-  return nonTerminalStage || c.status === 'placed'
+  // FLAG-driven, mirroring the funnel half above (heraudit F1b): the literal
+  // 'placed' key broke for any tenant who renamed/re-slugged that status — the
+  // axes model says requires_match is a LOOKUP FLAG, never a hardcoded key.
+  const statusMeta = statuses.find(s => s.value === c.status)
+  return nonTerminalStage || !!statusMeta?.requires_match
 }
 
 // The nested application ref lacks a funnel slug — resolve the authoritative

@@ -380,7 +380,8 @@
     "noStatus": "Kein Status",
     "changelog": "Änderungsprotokoll",
     "tasksSearchPlaceholder": "Aufgabe suchen…",
-    "createdAtBy": "Erstellt am {{date}} von {{name}}"
+    "createdAtBy": "Erstellt am {{date}} von {{name}}",
+    "photoChange": "Foto ändern"
   },
   "stage": {
     "lead": "Lead",

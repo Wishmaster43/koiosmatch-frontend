@@ -42,7 +42,11 @@ export interface MatchCardProps {
   // The "other side" of the match — Client on the candidate card, Candidate on
   // the customer/scoped card (the one swap between the two variants, §3A).
   otherPartyLabel: ReactNode
-  otherPartyValue: ReactNode
+  // Typed LINKED counterparty (heraudit F1a): a Match always links a real record
+  // on its other side — a bare string cannot compile, so no MatchesTab can drop
+  // the click-through again (the candidate tab shipped exactly that gap).
+  // EntityLink renders plain truncated text when id is null.
+  otherParty: { page: string; id: Id | null; label: string }
   contractType?: string | null
   // MATCH-SOORT-1: the Contractvorm chip — a distinct axis from contractType above.
   contractForm?: MatchContractForm | null
@@ -105,7 +109,7 @@ export default function MatchCard({
   stageLabel, stageColor, score,
   helloflexGuid, helloflexLink, shiftmanagerLink, showHelloflex = false, showShiftmanager = false,
   onEdit,
-  otherPartyLabel, otherPartyValue,
+  otherPartyLabel, otherParty,
   contractType, contractForm, contractStatus, functionTitle, branchName, ownerName, startDate, endDate,
   isClosed = false, archived = false,
   collapsible = false, flatRow = false,
@@ -124,7 +128,7 @@ export default function MatchCard({
   const expiry = computeMatchExpiry(endDate, { closed: isClosed || archived })
 
   const rows: Array<{ key: string; label: ReactNode; value: ReactNode }> = [
-    { key: 'otherParty', label: otherPartyLabel, value: otherPartyValue },
+    { key: 'otherParty', label: otherPartyLabel, value: <EntityLink page={otherParty.page} id={otherParty.id}>{otherParty.label || '—'}</EntityLink> },
     { key: 'functionTitle', label: t('matchesView.functionTitle'), value: functionTitle || '—' },
     { key: 'contractType', label: t('matchesView.contractType'), value: contractType || '—' },
     // MATCH-SOORT-1: the Contractvorm chip — one shared component, never a
@@ -192,6 +196,7 @@ export default function MatchCard({
       {id != null && (
         <a href={buildEntityDeepLink('matches', id)} target="_blank" rel="noopener noreferrer" onClick={onBeforeOpen}
           title={t('matchesView.openMatch')} aria-label={t('matchesView.openMatch')}
+          // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- compact match-card glyph control: deliberate bare 12–14px icon in a dense row; Button iconOnly’s 28px chrome would break the card metrics
           style={{ display: 'flex', color: 'var(--color-primary-text)', padding: 2 }}>
           <ExternalLink size={12} />
         </a>
@@ -199,6 +204,7 @@ export default function MatchCard({
       {/* Point 2 (Danny live P1): edit this match's contract fields — candidate card only. */}
       {onEdit && id != null && (
         <button type="button" onClick={onEdit} title={t('common:edit')} aria-label={t('common:edit')}
+          // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- compact match-card glyph control: deliberate bare 12–14px icon in a dense row; Button iconOnly’s 28px chrome would break the card metrics
           style={{ display: 'flex', border: 'none', background: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: 2 }}>
           <Pencil size={12} />
         </button>
@@ -212,6 +218,7 @@ export default function MatchCard({
       )}
       {isSafeUrl(vacancyUrl) ? (
         <a href={vacancyUrl ?? undefined} target="_blank" rel="noopener noreferrer" title={t('work.openVacancy')}
+          // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- compact match-card glyph control: deliberate bare 12–14px icon in a dense row; Button iconOnly’s 28px chrome would break the card metrics
           style={{ display: 'flex', color: 'var(--text-muted)' }}><ExternalLink size={12} /></a>
       ) : null}
     </>
@@ -232,6 +239,7 @@ export default function MatchCard({
       title={expanded ? t('common:collapse') : t('common:expand')}
       aria-label={expanded ? t('common:collapse') : t('common:expand')}
       aria-expanded={expanded}
+      // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- compact match-card glyph control: deliberate bare 12–14px icon in a dense row; Button iconOnly’s 28px chrome would break the card metrics
       style={{ display: 'flex', border: 'none', background: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: 2, flexShrink: 0 }}>
       {expanded ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
     </button>
@@ -272,7 +280,7 @@ export default function MatchCard({
               style={{ fontSize: 12, color: 'var(--text-muted)', flexShrink: 0,
               ...(flatRow ? MATCH_COL_OTHER_PARTY : { maxWidth: MATCH_COLUMN_WIDTH }),
               overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-              {otherPartyValue}
+              <EntityLink page={otherParty.page} id={otherParty.id}>{otherParty.label || '—'}</EntityLink>
             </span>
             {/* SCORE COLUMN (Danny 09-08 second look, point 3): the score is a DATA
                 value ("82%" or a muted dash), not a click action, so it gets its

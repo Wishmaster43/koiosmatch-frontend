@@ -7,15 +7,11 @@ import { MessageCircle, Mail, Phone, CheckCheck, Clock, XCircle, AlertTriangle }
 import SortCaret from '@/components/ui/SortCaret'
 import type { LucideIcon } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
+import { formatDateTimeStr } from '@/lib/localDate'
 
-const PAD = (n: number) => String(n).padStart(2, '0')
-
+// Short readable date + time via the ONE shared formatter (heraudit I18N-2).
 // eslint-disable-next-line react-refresh/only-export-components -- shared formatter every message table/drawer in this file imports; HMR-nicety warning only
-export function formatDT(dt?: string | number | Date | null) {
-  if (!dt) return '—'
-  const d = new Date(dt)
-  return `${PAD(d.getDate())}-${PAD(d.getMonth()+1)}-${d.getFullYear()} ${PAD(d.getHours())}:${PAD(d.getMinutes())}`
-}
+export const formatDT = formatDateTimeStr
 
 // One badge's visual treatment.
 export interface BadgeMeta { bg: string; color: string; Icon: LucideIcon }

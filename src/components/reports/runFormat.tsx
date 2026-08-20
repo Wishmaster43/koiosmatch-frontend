@@ -6,16 +6,13 @@
 import type { ComponentType } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Ban, CheckCircle, XCircle, RotateCcw, Clock } from 'lucide-react'
+import { formatDateTimeStr } from '@/lib/localDate'
 
-const PAD = (n: number) => String(n).padStart(2, '0')
-
-// Format an ISO datetime into a short readable date + time (or em-dash if empty).
+// Short readable date + time — delegates to the ONE shared formatter (heraudit
+// I18N-2: this file, messageParts and ordersTableParts each hand-built the same
+// string; a locale change now lands in lib/datetime once).
 // eslint-disable-next-line react-refresh/only-export-components -- shared formatter every run table/drawer in this file imports; HMR-nicety warning only
-export function formatDT(dt?: string | number | Date | null) {
-  if (!dt) return '—'
-  const d = new Date(dt)
-  return `${PAD(d.getDate())}-${PAD(d.getMonth() + 1)}-${d.getFullYear()} ${PAD(d.getHours())}:${PAD(d.getMinutes())}`
-}
+export const formatDT = formatDateTimeStr
 
 // Format a millisecond duration as ms / s / m s (or em-dash if empty).
 // eslint-disable-next-line react-refresh/only-export-components -- shared formatter every run table/drawer in this file imports; HMR-nicety warning only

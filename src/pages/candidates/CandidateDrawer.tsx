@@ -277,7 +277,7 @@ export default function CandidateDrawer({ candidate: c, onClose, expanded, onTog
           expanded={expanded} onToggleExpand={onToggleExpand} onClose={onClose}
           avatar={{ initials: c.initials, photo: photoUrl ?? c.photo, color: avatarColor, soft: true }}
           onPhotoChange={setPhotoUrl}
-          photoLabels={{ upload: t('drawer.photoUpload'), remove: t('drawer.photoRemove') }}
+          photoLabels={{ upload: t('drawer.photoUpload'), remove: t('drawer.photoRemove'), change: t('drawer.photoChange') }}
           renderTitle={() => (
             <CandidateTitle c={c} editing={headerEdit.headerEditing} hf={headerEdit.hf} setHF={headerEdit.setHF} />
           )}
@@ -291,6 +291,7 @@ export default function CandidateDrawer({ candidate: c, onClose, expanded, onTog
             {onMerged && !c.archived && (
               <button onClick={() => setShowMerge(true)}
                 title={t('merge.title')} aria-label={t('merge.title')}
+                // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- frozen calm-header glyph control (Danny 08-08): deliberate bare 14px icon; Button iconOnly’s 28px chrome would change the frozen look
                 style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 4, display: 'flex', color: 'var(--text-muted)', opacity: 0.8 }}>
                 <GitMerge size={14} />
               </button>
@@ -302,6 +303,7 @@ export default function CandidateDrawer({ candidate: c, onClose, expanded, onTog
             {onArchive && canArchive && !c.archived && (
               <button onClick={() => onArchive(c.id)}
                 title={t('drawer.archive')} aria-label={t('drawer.archive')}
+                // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- frozen calm-header glyph control (Danny 08-08): deliberate bare 14px icon; Button iconOnly’s 28px chrome would change the frozen look
                 style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 4, display: 'flex', color: 'var(--color-danger)', opacity: 0.7 }}>
                 <Trash2 size={14} />
               </button>

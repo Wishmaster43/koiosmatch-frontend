@@ -189,7 +189,7 @@
     },
     "noApplicants": {
       "title": "Vacancies without any applications ({{count}})",
-      "subtitle": "Counted from the vacancies shown above — zero applications received in this period.",
+      "subtitle": "Counted from the vacancies above: zero applications received in this period.",
       "empty": "Every vacancy in this period received at least one application."
     },
     "kpiOrderFellBack": "A KPI card configured in Settings no longer exists and was reset to the default."

@@ -138,9 +138,9 @@ describe('ConversationsSection', () => {
     // Guards the paramsKey serialization: a new inline object each render must not be
     // ignored just because the params VALUE (candidate_id) actually changed.
     const otherThreads = [{ id: 'conv-9', wa_number: '+31600000000', last_message_at: '2026-07-18T09:00:00Z', is_active: true, escalated: false }]
-    vi.mocked(api.get).mockImplementation((url: string, config?: { params?: { candidate_id?: string } }) => {
-      if (url === '/conversations' && config?.params?.candidate_id === 'cand-1') return Promise.resolve({ data: { data: THREADS } })
-      if (url === '/conversations' && config?.params?.candidate_id === 'cand-9') return Promise.resolve({ data: { data: otherThreads } })
+    vi.mocked(api.get).mockImplementation((url: string, config?: Parameters<typeof api.get>[1]) => {
+      if (url === '/conversations' && (config?.params as { candidate_id?: string } | undefined)?.candidate_id === 'cand-1') return Promise.resolve({ data: { data: THREADS } })
+      if (url === '/conversations' && (config?.params as { candidate_id?: string } | undefined)?.candidate_id === 'cand-9') return Promise.resolve({ data: { data: otherThreads } })
       if (url === '/conversations/conv-1/messages') return Promise.resolve({ data: { data: MESSAGES } })
       if (url === '/conversations/conv-9/messages') return Promise.resolve({ data: { data: [] } })
       return Promise.reject(new Error(`unexpected GET ${url}`))

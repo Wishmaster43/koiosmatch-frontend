@@ -114,6 +114,7 @@ export default function MatchesTab({ c, onEdit, onAdd }: { c: Candidate
           this shared module exists to prevent). Column order: Vacature ·
           Status · Klant · Match(score) · actions (empty header — pure
           click-icons + chevron only, mirrors WorkTab's own actions column). */}
+      {/* eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- table-header BAR: the 11/600 muted typography inherits into its column cells; a text atom cannot be this flex container */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '8px 12px', marginBottom: 8,
         background: 'var(--bg)', border: '1px solid var(--border)', borderRadius: 8,
         fontSize: 11, fontWeight: 600, color: 'var(--text-muted)' }}>
@@ -145,7 +146,8 @@ export default function MatchesTab({ c, onEdit, onAdd }: { c: Candidate
             helloflexGuid={m.helloflex_contract_guid}
             // Point 2 (Danny live P1): reopens MatchModal in EDIT mode.
             onEdit={onEdit && m.id != null ? () => onEdit(m.id as Id) : undefined}
-            otherPartyLabel={t('matchesView.client')} otherPartyValue={m.client || '—'}
+            otherPartyLabel={t('matchesView.client')}
+            otherParty={{ page: 'customers', id: m.customerId ?? null, label: m.client || '' }}
             contractType={m.contractType} contractForm={m.contractForm} contractStatus={m.contractStatus}
             functionTitle={m.functionTitle} startDate={m.startDate} endDate={m.endDate}
             isClosed={statusMeta?.is_closed}

@@ -109,7 +109,8 @@
     "deleteConfirm": "¿Eliminar a {{name}}? El cliente pasa a Archivados y puede restaurarse.",
     "deletedNamed": "{{name}} eliminado",
     "deleteFailed": "Error al eliminar (posibles vínculos activos).",
-    "deleteBlocked": "No se puede eliminar a {{name}}: aún existen vínculos activos."
+    "deleteBlocked": "No se puede eliminar a {{name}}: aún existen vínculos activos.",
+    "photoChange": "Cambiar foto"
   },
   "overview": {
     "general": "General",

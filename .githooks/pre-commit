@@ -44,7 +44,7 @@ npx vitest run src/i18n/localeParity.test.ts || {
 # Caption allowlists) — a file's hand-styled count may never grow, and a file
 # migrated to the shared atom must drop out of (or shrink in) the allowlist.
 echo "▶ pre-commit: typografie-ratchet…"
-npx vitest run src/components/ui/typography.houseStyle.test.js src/components/ui/buttonSize.houseStyle.test.js || {
+npx vitest run src/components/ui/typography.houseStyle.test.js src/components/ui/buttonSize.houseStyle.test.js src/i18n/emdash.houseStyle.test.js || {
   echo "✗ typography ratchet failed — a file's hand-styled SectionTitle/Caption count grew beyond its frozen allowlist entry. Use <SectionTitle>/<Caption> from components/ui/typography, or lower the allowlist entry if it genuinely shrank."
   exit 1
 }
@@ -59,4 +59,11 @@ if [ -f ../koiosmatch-api/docs/openapi.yaml ]; then
     exit 1
   fi
 fi
-echo "✓ gate passed (tsc 0, lint 0 errors, i18n parity, typography ratchet, types fresh)"
+# Dependency-audit gate (heraudit SEC-1/2/3): HIGH/CRITICAL advisories fail the
+# commit unless allowlisted in audit-ci.jsonc WITH a reason + revalidation date.
+echo "▶ pre-commit: dependency-audit…"
+npm run --silent security:audit || {
+  echo "✗ een HIGH/CRITICAL npm-advisory zonder allowlist-reden — upgrade de dependency of registreer hem bewust in audit-ci.jsonc"
+  exit 1
+}
+echo "✓ gate passed (tsc 0, lint 0 errors, i18n parity, typography ratchet, types fresh, deps audited)"

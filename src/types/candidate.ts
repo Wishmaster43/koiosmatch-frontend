@@ -94,6 +94,9 @@ export interface CandidateMatch {
   vacancyTitle: string
   vacancyUrl?: string | null
   client: string
+  // F1a: the customer behind the match — the click-through target (null when
+  // the payload embeds no customer id).
+  customerId?: Id | null
   score: number | null
   // Lifecycle status slug (R-1b /match-statuses) — resolved to label/colour via
   // useMatchStatuses() in the card (mirrors MatchesTable); `stage`/`stageColor`

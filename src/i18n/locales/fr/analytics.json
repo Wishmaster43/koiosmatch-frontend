@@ -189,7 +189,7 @@
     },
     "noApplicants": {
       "title": "Postes sans aucune candidature ({{count}})",
-      "subtitle": "Compté à partir des postes ci-dessus — zéro candidature reçue sur cette période.",
+      "subtitle": "Compté à partir des postes ci-dessus : zéro candidature reçue sur cette période.",
       "empty": "Chaque poste de cette période a reçu au moins une candidature."
     },
     "kpiOrderFellBack": "Une carte KPI configurée dans les paramètres n'existe plus et a été réinitialisée par défaut."

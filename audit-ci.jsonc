@@ -1,0 +1,17 @@
+{
+  // Dependency-audit gate (heraudit SEC-1/2/3, 20-08): `npm run security:audit`
+  // fails on any HIGH/CRITICAL advisory not explicitly allowlisted here. Every
+  // allowlist entry carries its reason and a revalidation date — "we didn't
+  // know" is impossible by construction (the huisstijl-ceiling pattern).
+  "high": true,
+  "allowlist": [
+    // vitest 3 → 4 is a MAJOR test-infra migration (784 test files), planned
+    // separately. All five advisories sit in the DEV-ONLY chain (vitest/vite dev
+    // server/esbuild): never in the production bundle path. Revalidate 2026-09-01.
+    "GHSA-5xrq-8626-4rwp", // vitest (critical, dev-only test runner)
+    "GHSA-4w7w-66w2-5vf9", // vite dev-server path traversal (dev-only)
+    "GHSA-67mh-4wv8-2f99", // esbuild dev-server request forwarding (dev-only)
+    "GHSA-fx2h-pf6j-xcff", // vite server.fs.deny bypass op Windows-paden (dev-only, macOS/CI)
+    "GHSA-v6wh-96g9-6wx3"  // launch-editor NTLM-hash via UNC (dev-only, Windows-vector)
+  ]
+}

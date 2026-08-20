@@ -403,7 +403,8 @@
     "noStatus": "No status",
     "changelog": "Changelog",
     "tasksSearchPlaceholder": "Search task…",
-    "createdAtBy": "Created on {{date}} by {{name}}"
+    "createdAtBy": "Created on {{date}} by {{name}}",
+    "photoChange": "Change photo"
   },
   "stage": {
     "lead": "Lead",

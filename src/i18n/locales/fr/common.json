@@ -450,5 +450,7 @@
   "dragList": {
     "moveUp": "Déplacer vers le haut",
     "moveDown": "Déplacer vers le bas"
-  }
+  },
+  "photoChange": "Modifier la photo",
+  "photoUpload": "Téléverser"
 }

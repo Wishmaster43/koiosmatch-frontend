@@ -275,6 +275,9 @@ export function mapCandidate(c: ApiCandidate): Candidate {
       vacancyTitle:   m.vacancyTitle ?? m.vacancy?.title ?? m.vacancy_title ?? '',
       vacancyUrl:     m.vacancyUrl ?? m.vacancy?.url ?? m.vacancy_url ?? null,
       client:         m.client ?? m.customer?.name ?? m.client_name ?? '',
+      // F1a (heraudit): the embedded customer id — the click-through the other
+      // two MatchesTab directions already had.
+      customerId:     m.customer?.id ?? null,
       score:          m.score ?? m.match_score ?? null,
       // MATCH-EMBED-1: the lifecycle status slug — the card resolves label/colour
       // via useMatchStatuses(); stage/stageColor (backend-resolved label) fall back.

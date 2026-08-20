@@ -189,7 +189,7 @@
     },
     "noApplicants": {
       "title": "Vacantes sin ninguna candidatura ({{count}})",
-      "subtitle": "Contado a partir de las vacantes de arriba — cero candidaturas recibidas en este período.",
+      "subtitle": "Contado a partir de las vacantes anteriores: cero candidaturas recibidas en este periodo.",
       "empty": "Todas las vacantes de este período recibieron al menos una candidatura."
     },
     "kpiOrderFellBack": "Una tarjeta KPI configurada en Ajustes ya no existe y se restableció al valor predeterminado."

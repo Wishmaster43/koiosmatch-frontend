@@ -380,7 +380,8 @@
     "noStatus": "Sin estado",
     "changelog": "Registro de cambios",
     "tasksSearchPlaceholder": "Buscar tarea…",
-    "createdAtBy": "Creado el {{date}} por {{name}}"
+    "createdAtBy": "Creado el {{date}} por {{name}}",
+    "photoChange": "Cambiar foto"
   },
   "stage": {
     "lead": "Lead",

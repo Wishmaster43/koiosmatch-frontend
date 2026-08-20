@@ -450,5 +450,7 @@
   "dragList": {
     "moveUp": "Move up",
     "moveDown": "Move down"
-  }
+  },
+  "photoChange": "Change photo",
+  "photoUpload": "Upload"
 }

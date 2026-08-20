@@ -109,7 +109,8 @@
     "deleteConfirm": "Delete {{name}}? The customer moves to Archived and can be restored.",
     "deletedNamed": "{{name}} deleted",
     "deleteFailed": "Deleting failed (possibly active links).",
-    "deleteBlocked": "Cannot delete {{name}}: active links still exist."
+    "deleteBlocked": "Cannot delete {{name}}: active links still exist.",
+    "photoChange": "Change photo"
   },
   "overview": {
     "general": "General",

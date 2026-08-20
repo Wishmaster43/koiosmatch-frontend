@@ -3,10 +3,12 @@
  * table cell/header styles, the date/number formatters, the section card used in
  * the detail drawer, and the column config. No data fetching here.
  */
+/* eslint-disable react-refresh/only-export-components -- shared parts file: the components and their column/style constants ship together by design; HMR-nicety warning only (house precedent: runFormat.tsx) */
 import { useTranslation } from 'react-i18next'
 import type { CSSProperties, ReactNode } from 'react'
 
 import SortCaret from '@/components/ui/SortCaret'
+import { formatDateOnly } from '@/lib/localDate'
 
 export const NOW = new Date()
 export const PAD = (n: number) => String(n).padStart(2, '0')
@@ -38,13 +40,15 @@ export function SortIcon({ active, dir }: { active: boolean; dir: 'asc' | 'desc'
   return <SortCaret active={active} dir={dir} />
 }
 
+// eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- th cell style OBJECT for the sm_ mirror tables, not running text; the Caption/GroupLabel atoms are text components and cannot style a <th>
 export const TH: CSSProperties = { padding: '8px 12px', textAlign: 'left', fontSize: 11, fontWeight: 600,
                     color: 'var(--text-muted)', background: 'var(--hover-bg)', borderBottom: '1px solid var(--border)',
                     whiteSpace: 'nowrap', userSelect: 'none' }
 export const TD: CSSProperties = { padding: '9px 12px', fontSize: 12, color: 'var(--text)', borderBottom: '1px solid var(--hover-bg)',
                     whiteSpace: 'nowrap' }
 
-export const formatDate   = (dt?: string | number | Date | null) => { if (!dt) return '—'; const d = new Date(dt); return `${PAD(d.getDate())}-${PAD(d.getMonth()+1)}-${d.getFullYear()}` }
+// Date-only via the ONE shared formatter (heraudit I18N-2); time stays local.
+export const formatDate   = formatDateOnly
 export const formatTime   = (dt?: string | number | Date | null) => { if (!dt) return '—'; const d = new Date(dt); return `${PAD(d.getHours())}:${PAD(d.getMinutes())}` }
 export const formatHours  = (h?: number | string | null) => h != null ? Number(h).toFixed(2) : '—'
 export const dash         = (v: unknown): ReactNode => v ? (v as ReactNode) : <span style={{ color: 'var(--border)' }}>—</span>

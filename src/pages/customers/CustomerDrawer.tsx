@@ -18,7 +18,7 @@ import type { TrashSectionConfig } from '@/components/drawer/TrashLifecycleSecti
 import ReferenceNumberChip from '@/components/ui/ReferenceNumberChip'
 import DetachedCountBadge from '@/components/ui/DetachedCountBadge'
 import SoftChip from '@/components/ui/SoftChip'
-import { Caption } from '@/components/ui/typography'
+import { Caption, PageTitle } from '@/components/ui/typography'
 import CustomerHeaderActions from './drawer/CustomerHeaderActions'
 import MergeCustomerModal from './MergeCustomerModal'
 import PdokCard from '@/components/drawer/PdokCard'
@@ -364,7 +364,8 @@ export default function CustomerDrawer({
   ) : (
     <>
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-        <div style={{ fontSize: 15, fontWeight: 700, color: 'var(--text)' }}>{c.name}</div>
+        {/* Mirrors EntityHeader's own canonical title recipe (PageTitle + 700 override). */}
+        <PageTitle as="div" style={{ fontWeight: 700 }}>{c.name}</PageTitle>
         {/* NUMMER-1: human-readable reference number, click-to-copy — same spot on every drawer. */}
         <ReferenceNumberChip value={c.referenceNumber} />
         {/* ONTKOPPEL-TELLER-1: whole-history CURRENTLY-detached count across ALL this
@@ -407,7 +408,7 @@ export default function CustomerDrawer({
           expanded={expanded} onToggleExpand={onToggleExpand} onClose={onClose}
           avatar={{ initials: c.initials, photo: logoUrl ?? c.logo, soft: true }}
           onPhotoChange={setLogoUrl}
-          photoLabels={{ upload: t('drawer.photoUpload'), remove: t('drawer.photoRemove') }}
+          photoLabels={{ upload: t('drawer.photoUpload'), remove: t('drawer.photoRemove'), change: t('drawer.photoChange') }}
           renderTitle={renderTitle}
           titleActions={<>
             {/* Danny 27-07: the shared house ChangelogPopover shell (§3A(d)) — was a
@@ -420,6 +421,7 @@ export default function CustomerDrawer({
             {canMerge && !c.archived && (
               <button onClick={() => setShowMerge(true)}
                 title={t('merge.title')} aria-label={t('merge.title')}
+                // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- frozen calm-header glyph control (Danny 08-08): deliberate bare 14px icon; Button iconOnly’s 28px chrome would change the frozen look
                 style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 4, display: 'flex', color: 'var(--text-muted)', opacity: 0.8 }}>
                 <GitMerge size={14} />
               </button>
@@ -429,6 +431,7 @@ export default function CustomerDrawer({
             {canDelete && !c.archived && (
               <button onClick={requestDelete}
                 title={t('drawer.delete')} aria-label={t('drawer.delete')}
+                // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- frozen calm-header glyph control (Danny 08-08): deliberate bare 14px icon; Button iconOnly’s 28px chrome would change the frozen look
                 style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 4, display: 'flex', color: 'var(--color-danger)', opacity: 0.7 }}>
                 <Trash2 size={14} />
               </button>
