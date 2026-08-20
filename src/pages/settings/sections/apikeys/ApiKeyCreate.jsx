@@ -17,6 +17,8 @@ import CalloutBox from '@/components/ui/CalloutBox'
 import { BTN_H } from '@/config/buttonMetrics'
 import { fieldInputStyle } from '@/components/forms/fieldMetrics'
 import Button from '@/components/ui/Button'
+import { Mono, Caption } from '@/components/ui/typography'
+import { tintBorder } from '@/lib/tint'
 
 export default function ApiKeyCreate({ onBack, onCreated }) {
   const { t } = useTranslation('settings')
@@ -81,11 +83,11 @@ export default function ApiKeyCreate({ onBack, onCreated }) {
             <div style={{ marginBottom: 16 }}>
               <CalloutBox variant="success" title={t('apiKeys.secretOnce')}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                  <code style={{ flex: 1, fontSize: 12, fontFamily: "'JetBrains Mono', monospace", background: 'var(--surface)', border: '1px solid color-mix(in srgb, var(--color-success) 35%, transparent)', borderRadius: 6, padding: '9px 11px', color: 'var(--text)', overflowX: 'auto', whiteSpace: 'nowrap' }}>{result.secret}</code>
-                  {/* HUISSTIJL-1: left hand-styled — a success-tinted action has no
-                      Button variant (only primary/secondary/ghost/soft/danger/dangerSoft exist). */}
+                  <Mono as="code" style={{ flex: 1, fontSize: 12, background: 'var(--surface)', border: tintBorder('var(--color-success)'), borderRadius: 6, padding: '9px 11px', color: 'var(--text)', overflowX: 'auto', whiteSpace: 'nowrap' }}>{result.secret}</Mono>
+                  {/* HUISSTIJL-1 necessity: success-tinted action, no Button variant covers a success-tinted border/text pairing (only primary/secondary/ghost/soft/danger/dangerSoft exist). */}
                   <button onClick={copySecret} aria-label={t('apiKeys.copySecret')}
-                    style={{ height: BTN_H, padding: '0 12px', display: 'flex', alignItems: 'center', gap: 5, fontSize: 12, border: '1px solid color-mix(in srgb, var(--color-success) 35%, transparent)', borderRadius: 6, background: 'var(--surface)', cursor: 'pointer', color: 'var(--color-success)', whiteSpace: 'nowrap' }}>
+                    // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- state-carrying success accent (secret-copy confirmation); Button has no success-tint variant
+                    style={{ height: BTN_H, padding: '0 12px', display: 'flex', alignItems: 'center', gap: 5, fontSize: 12, border: tintBorder('var(--color-success)'), borderRadius: 6, background: 'var(--surface)', cursor: 'pointer', color: 'var(--color-success)', whiteSpace: 'nowrap' }}>
                     {copied ? <Check size={12} /> : <Copy size={12} />} {copied ? t('common.copied') : t('apiKeys.copySecret')}
                   </button>
                 </div>
@@ -114,9 +116,12 @@ export default function ApiKeyCreate({ onBack, onCreated }) {
                   closeOnToggle
                   searchable={false}
                   renderTrigger={toggle => (
-                    // HUISSTIJL-1: left hand-styled — this is a SearchSelect trigger
-                    // styled as a form field (inputStyle), not a Button identity.
-                    <button type="button" id="ak-type" onClick={toggle} style={{ ...inputStyle, cursor: 'pointer', textAlign: 'left' }}>
+                    // HUISSTIJL-1 necessity: this is a SearchSelect trigger styled as a
+                    // form field (inputStyle), not an action — Button's identity is for
+                    // actions, a dropdown trigger inherits SearchSelect/fieldMetrics face.
+                    <button type="button" id="ak-type" onClick={toggle}
+                      // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- form-field trigger face (SearchSelect/fieldMetrics), not an action button; Button identity does not apply to field triggers
+                      style={{ ...inputStyle, cursor: 'pointer', textAlign: 'left' }}>
                       {t(`apiKeys.type.${form.type}`)}
                     </button>
                   )}
@@ -145,7 +150,7 @@ export default function ApiKeyCreate({ onBack, onCreated }) {
             {/* Access grid — full width, no cramped scroll box, for readability */}
             <div style={{ borderTop: '1px solid var(--border)', paddingTop: 16 }}>
               <label style={labelStyle}>{t('apiKeys.tab.access')}</label>
-              <p style={{ fontSize: 11, color: 'var(--text-muted)', margin: '0 0 10px' }}>{t('apiKeys.access.subtitle')}</p>
+              <Caption style={{ display: 'block', margin: '0 0 10px' }}>{t('apiKeys.access.subtitle')}</Caption>
               <ScopeEditor value={scopes} onChange={setScopes} />
             </div>
 

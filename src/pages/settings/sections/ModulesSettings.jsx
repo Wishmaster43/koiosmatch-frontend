@@ -15,10 +15,11 @@ import shiftmanagerLogo from '@/assets/integrations/shiftmanager.png'
 import helloflexLogo from '@/assets/integrations/helloflex.png'
 import api from '@/lib/api'
 import { useAuth } from '@/context/AuthContext'
-import { BTN_H } from '@/config/buttonMetrics'
 import SegmentedControl from '@/components/ui/SegmentedControl'
 import Spinner from '@/components/ui/Spinner'
 import Toggle from '@/components/ui/Toggle'
+import SaveButton from '@/components/ui/SaveButton'
+import { GroupLabel } from '@/components/ui/typography'
 import PlatformPricingCard from './PlatformPricingCard'
 
 // Base tiers (the "size bar"). `desc` lists what each tier adds over the previous one.
@@ -130,10 +131,9 @@ export default function ModulesSettings() {
       <PlatformPricingCard />
 
       {/* Base package (one of three) */}
-      <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase',
-                    letterSpacing: '0.07em', marginBottom: 10 }}>
+      <GroupLabel style={{ marginBottom: 10 }}>
         {t('modules.tierHeading')}
-      </div>
+      </GroupLabel>
       {/* Shared SegmentedControl (audit finding, §4/§11) replaces the hand-rolled radio
           cards + hardcoded white check — same tier semantics/payload (setPkg(tier.id)),
           same success-green tint the "activate" flow already uses for "this is on". */}
@@ -158,10 +158,9 @@ export default function ModulesSettings() {
       </div>
 
       {/* Add-ons (toggle on top of the package) */}
-      <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase',
-                    letterSpacing: '0.07em', marginBottom: 10 }}>
+      <GroupLabel style={{ marginBottom: 10 }}>
         {t('modules.addonsHeading')}
-      </div>
+      </GroupLabel>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 28 }}>
         {ADDONS.map(addon => {
           const on = addons.includes(addon.id)
@@ -205,21 +204,13 @@ export default function ModulesSettings() {
         })}
       </div>
 
-      {/* Save — BTN_H (§4/§9): one explicit height for every text/action button, everywhere. */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 40 }}>
-        <button onClick={save} disabled={saving || !hasChange}
-          style={{ display: 'flex', alignItems: 'center', gap: 6, height: BTN_H, padding: '0 20px',
-                   fontSize: 13, fontWeight: 500, borderRadius: 8, border: 'none',
-                   background: savedOk ? 'var(--color-success)' : hasChange ? 'var(--color-primary)' : 'var(--border)',
-                   // Each fill gets its own readable token: success/accent have dedicated
-                   // on-* tokens, the neutral disabled fill reuses muted-on-border (WCAG audit 2026-08).
-                   color: savedOk ? 'var(--color-on-success)' : hasChange ? 'var(--color-on-accent)' : 'var(--text-muted)',
-                   cursor: (saving || !hasChange) ? 'not-allowed' : 'pointer',
-                   transition: 'background 0.2s', opacity: saving ? 0.7 : 1 }}>
+        <SaveButton onClick={save} disabled={saving || !hasChange} saved={savedOk}
+          style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
           {savedOk ? <><Check size={13} /> {t('modules.savedActive')}</>
           : saving  ? <><Spinner size={13} /> {t('common.saving')}</>
           :           <><Save size={13} /> {t('modules.activate')}</>}
-        </button>
+        </SaveButton>
       </div>
     </div>
   )

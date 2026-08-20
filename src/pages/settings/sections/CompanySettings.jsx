@@ -13,9 +13,10 @@ import { cardHead } from '@/components/ui/modalCards'
 // One language source for the whole app (Danny 14/7): the same five shipped
 // locales the profile picker offers — never a diverging local list.
 import { LANGUAGES as APP_LANGUAGES } from '@/pages/auth/profileParts'
-import { BTN_H } from '@/config/buttonMetrics'
 import Button from '@/components/ui/Button'
+import SaveButton from '@/components/ui/SaveButton'
 import { PageTitle } from '@/components/ui/typography'
+import { fieldSelectStyle, fieldInputStyle } from '@/components/forms/fieldMetrics'
 
 // Option lists (data — kept as-is; only labels are translated). Industries and
 // countries are now backend-sourced (Settings → Personalisation → Industries;
@@ -54,10 +55,8 @@ function Group({ title, children }) {
   )
 }
 
-const baseInput = {
-  height: 36, padding: '0 10px', fontSize: 13, border: '1px solid var(--border)', borderRadius: 8,
-  outline: 'none', color: 'var(--text)', width: '100%', maxWidth: 360, boxSizing: 'border-box',
-}
+// Field faces come from fieldMetrics' canon (§4 2b) — never a local copy.
+const baseInput = fieldInputStyle
 
 function Input({ value, onChange, placeholder, style }) {
   return (
@@ -82,8 +81,11 @@ function Select({ value, onChange, options }) {
       onToggle={onChange}
       closeOnToggle
       renderTrigger={toggle => (
+        // §4 2b: a dropdown TRIGGER is a FORM FIELD — its face comes from
+        // fieldMetrics' select canon, never Button (Opus-controle klus d).
         <button type="button" onClick={toggle}
-          style={{ ...baseInput, background: 'var(--surface)', textAlign: 'left', cursor: 'pointer' }}>
+          // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- form-field trigger face (fieldSelectStyle canon), not an action button
+          style={{ ...fieldSelectStyle, maxWidth: 360, textAlign: 'left' }}>
           {selectedLabel}
         </button>
       )}
@@ -180,14 +182,9 @@ export default function CompanySettings() {
           <PageTitle>{t('company.title')}</PageTitle>
           <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>{t('company.subtitle')}</p>
         </div>
-        <button onClick={save} disabled={saving}
-          style={{ display: 'flex', alignItems: 'center', gap: 6, height: BTN_H, padding: '0 14px',
-                   fontSize: 13, fontWeight: 500, borderRadius: 8, border: 'none', cursor: 'pointer',
-                   background: saved ? 'var(--color-success)' : 'var(--color-primary)',
-                   // Success fill needs its own on-* token — white only reaches ~3.3:1 there (WCAG audit 2026-08).
-                   color: saved ? 'var(--color-on-success)' : 'var(--color-on-accent)' }}>
+        <SaveButton onClick={save} disabled={saving} saved={saved} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
           {saved ? <><Check size={13}/> {t('common.saved')}</> : saving ? <><Spinner size={13} /> {t('common.saving')}</> : <><Save size={13}/> {t('common.save')}</>}
-        </button>
+        </SaveButton>
       </div>
 
       {/* Company name & logo live under Brand — kept in one place to avoid duplicates. */}

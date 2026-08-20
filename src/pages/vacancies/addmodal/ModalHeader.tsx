@@ -12,8 +12,11 @@
  * needs), same soft-tint that deepens once a file is picked.
  */
 import { useTranslation } from 'react-i18next'
-import { X, Upload } from 'lucide-react'
+import { X, Upload, CheckCircle2 } from 'lucide-react'
 import { BTN_H } from '@/config/buttonMetrics'
+import { PageTitle } from '@/components/ui/typography'
+import Button from '@/components/ui/Button'
+import { tintBg , chipInk } from '@/lib/tint'
 
 interface StatusOpt { value: string; label: string; color?: string }
 
@@ -37,45 +40,43 @@ export default function ModalHeader({ status, statusOptions, onSelectStatus, onC
       display: 'flex', alignItems: 'center', gap: 16 }}>
       {/* nowrap: the title must stay on ONE line so the status pills sit fully
           right (Danny 08-08) instead of being pushed against a wrapped title. */}
-      <span style={{ fontSize: 15, fontWeight: 700, color: 'var(--text)', whiteSpace: 'nowrap' }}>{t('modal.title')}</span>
+      <PageTitle as="span" style={{ whiteSpace: 'nowrap' }}>{t('modal.title')}</PageTitle>
       {/* Status pill row — a read-and-pick control, never a form field. A
           genuinely empty lookup renders no pills at all (never a fabricated
-          highlight), matching the honest "nothing picked" state. */}
+          highlight), matching the honest "nothing picked" state. Each pill's
+          fill/ink/border carries the tenant lookup's OWN colour (state+data),
+          which Button's fixed variant palette cannot express per-option. */}
       <div style={{ display: 'flex', gap: 8, marginLeft: 'auto', flexShrink: 0, flexWrap: 'wrap' }}>
         {statusOptions.map(s => {
           const active = status === s.value
           const c = s.color ?? 'var(--color-primary)'
           return (
             <button key={s.value} type="button" onClick={() => onSelectStatus(s.value)} aria-pressed={active} title={s.label}
+              // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- state-carrying lookup-colour pill: fill/border encode the tenant status colour, per option; Button has no per-option colour face
               style={{ display: 'flex', alignItems: 'center', gap: 8, height: BTN_H, padding: '0 14px',
                 borderRadius: 999, cursor: 'pointer', transition: 'all 0.15s',
                 border: `1.5px solid ${active ? c : 'var(--border)'}`,
-                background: active ? `color-mix(in srgb, ${c} 14%, transparent)` : 'var(--surface)' }}>
+                background: active ? tintBg(c, true) : 'var(--surface)' }}>
               <div style={{ width: 8, height: 8, borderRadius: '50%', background: c, flexShrink: 0 }} />
-              <span style={{ fontSize: 13, fontWeight: active ? 600 : 500, color: active ? c : 'var(--text)' }}>{s.label}</span>
+              <span style={{ fontSize: 13, fontWeight: active ? 600 : 500, color: active ? chipInk(c) : 'var(--text)' }}>{s.label}</span>
             </button>
           )
         })}
       </div>
       {/* EXCEL-VACATURES-1: mirrors AddCustomerModal's header import button 1:1 —
-          same placement, soft-tint and accessible-name pattern. Never rendered
-          without the create right (§3: no fake affordance). */}
+          same placement and accessible-name pattern; the paused-import signal is
+          the ICON SWAP (upload → check), the canon — never a border repaint.
+          Never rendered without the create right (§3: no fake affordance). */}
       {canImport && (
-        <button type="button" onClick={onToggleImport} aria-expanded={importOpen}
-          style={{ display: 'flex', alignItems: 'center', gap: 6, height: BTN_H, padding: '0 12px',
-            flexShrink: 0, borderRadius: 8, cursor: 'pointer', fontSize: 12.5, fontWeight: 600,
-            color: 'var(--button-ink)',
-            // Trio + §4-IMPORT ring: a picked file (paused import) stays visible as the ink ring.
-                border: hasFile ? '1px solid var(--button-ink)' : '1px solid var(--button-border)',
-            background: 'var(--button-fill)' }}>
-          <Upload size={13} />
+        <Button type="button" variant="primary" onClick={onToggleImport} aria-expanded={importOpen}
+          style={{ gap: 6, flexShrink: 0 }}>
+          {hasFile ? <CheckCircle2 size={13} /> : <Upload size={13} />}
           {t('modal.import.title')}
-        </button>
+        </Button>
       )}
-      <button onClick={onClose} aria-label={t('common:close')}
-        style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', display: 'flex', padding: 4 }}>
+      <Button onClick={onClose} aria-label={t('common:close')} variant="ghost" iconOnly>
         <X size={18} />
-      </button>
+      </Button>
     </div>
   )
 }

@@ -27,7 +27,7 @@ import type { AnchorHTMLAttributes, ButtonHTMLAttributes, CSSProperties, Ref } f
 import { BTN_H } from '@/config/buttonMetrics'
 import { tintBg, tintBorder, chipInk } from '@/lib/tint'
 
-export type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'soft' | 'danger' | 'dangerSoft'
+export type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'ghostAccent' | 'soft' | 'danger' | 'dangerSoft'
 export type ButtonSize = 'md' | 'sm'
 
 // iconOnly REQUIRES an accessible name at the TYPE level (herhaal-audit r6
@@ -64,6 +64,10 @@ const VARIANTS: Record<ButtonVariant, CSSProperties> = {
   secondary:  { background: 'var(--surface)', color: 'var(--text)', border: '1px solid var(--border)', fontWeight: 500 },
   // Bare text button for inline/low-emphasis actions.
   ghost:      { background: 'none', color: 'var(--text-muted)', border: 'none', fontWeight: 500 },
+  // Ghost with the ACCENT ink (contrast-safe text token): the bulk bars' deselect
+  // action next to accent-inked count labels — declared here once, never via a
+  // per-call-site style colour (§4: identiteit komt uit Button).
+  ghostAccent: { background: 'none', color: 'var(--color-primary-text)', border: 'none', fontWeight: 500 },
   // PRIMAIR-VLAK-1 (Danny 19-08, on the tinted buttons app-wide: "alle knoppen
   // die licht rood zijn maken we tenantkleur"): the accent-tinted ACTION button
   // is retired — soft now paints the SOLID tenant fill, same as primary; only

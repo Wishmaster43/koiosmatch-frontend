@@ -21,7 +21,6 @@ import FloatingPanel from '@/components/ui/FloatingPanel'
 import CreatableSelect from '@/components/ui/CreatableSelect'
 import LookupIcon from '@/components/ui/LookupIcon'
 import { Z } from '@/lib/zIndexScale'
-import { BTN_H } from '@/config/buttonMetrics'
 import { Caption, GroupLabel } from '@/components/ui/typography'
 import type { VacancyOption } from '../hooks/useVacancyOptions'
 import Button from '@/components/ui/Button'
@@ -89,9 +88,8 @@ function MatchPickModal({
             style={{ padding: '8px 11px', fontSize: 13 }} />
         </div>
 
-        {/* BTN_H (§4/§9): one explicit height for every text/action button, everywhere. */}
         <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8 }}>
-          <button onClick={onCloseMatch} style={{ height: BTN_H, padding: '0 14px', fontSize: 12, borderRadius: 7, background: 'var(--bg)', color: 'var(--text)', border: '1px solid var(--border)', cursor: 'pointer' }}>{t('common:cancel')}</button>
+          <Button variant="secondary" onClick={onCloseMatch}>{t('common:cancel')}</Button>
           <Button variant="primary" size="sm" disabled={(!matchChoice && !newMatchVacancyId) || creatingMatch} onClick={onConfirmMatch}>{t('drawer.placedConfirm')}</Button>
         </div>
     </FloatingPanel>
@@ -141,9 +139,8 @@ function StatusReasonModal({
             <Caption as="div" style={{ marginTop: 4, fontStyle: 'italic' }}>{t('drawer.returnDateUnknownHint')}</Caption>
           </div>
         )}
-        {/* BTN_H (§4/§9): one explicit height for every text/action button, everywhere. */}
         <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8 }}>
-          <button onClick={close} style={{ height: BTN_H, padding: '0 14px', fontSize: 12, borderRadius: 7, background: 'var(--bg)', color: 'var(--text)', border: '1px solid var(--border)', cursor: 'pointer' }}>{t('common:cancel')}</button>
+          <Button variant="secondary" onClick={close}>{t('common:cancel')}</Button>
           <Button variant="primary" size="sm" onClick={onConfirmStatus} disabled={statusModal.needReason && !statusModal.reason.trim()}>{t('common:save')}</Button>
         </div>
     </FloatingPanel>

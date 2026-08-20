@@ -28,7 +28,7 @@ import CreatableSelect from '@/components/ui/CreatableSelect'
 import { FieldRow, inputStyle } from '@/components/forms/fields'
 import { cardHead, cardBox, modalColumns } from '@/components/ui/modalCards'
 import { WIDE_MODAL } from '@/components/ui/modalMetrics'
-import { BTN_H } from '@/config/buttonMetrics'
+import { tintBorder } from '@/lib/tint'
 import { useCustomerCascade } from '@/hooks/useCustomerCascade'
 import { useShiftCustomers } from './hooks/useShiftLookups'
 import { useFunctions } from '@/lib/useFunctions'
@@ -218,7 +218,7 @@ export default function AddOrderModal({ onClose, onCreated, order }: { onClose: 
       {error && (
         <div role="alert" style={{ margin: '0 24px 8px', padding: '8px 10px', fontSize: 12, borderRadius: 8,
           color: 'var(--color-danger)', background: 'var(--color-danger-bg)',
-          border: '1px solid color-mix(in srgb, var(--color-danger) 40%, transparent)', flexShrink: 0 }}>
+          border: tintBorder('var(--color-danger)', true), flexShrink: 0 }}>
           {error}
         </div>
       )}
@@ -228,13 +228,9 @@ export default function AddOrderModal({ onClose, onCreated, order }: { onClose: 
         <Button variant="secondary" onClick={onClose}>
           {t('common:cancel')}
         </Button>
-        <button onClick={handleSubmit} disabled={saving}
-          style={{ height: BTN_H, padding: '0 20px', fontSize: 13, fontWeight: 600, borderRadius: 8, border: 'none',
-            background: saving ? 'var(--border)' : 'var(--color-primary)',
-            color: saving ? 'var(--text-muted)' : 'var(--color-on-accent)',
-            cursor: saving ? 'not-allowed' : 'pointer' }}>
+        <Button variant="primary" onClick={handleSubmit} disabled={saving}>
           {saving ? t('common:saving') : isEditing ? t('common:save') : t('order.modal.create')}
-        </button>
+        </Button>
       </div>
     </FloatingPanel>
   )

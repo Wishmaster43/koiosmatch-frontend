@@ -18,6 +18,9 @@ import { getApiKey, updateApiKey, deleteApiKey, regenerateApiKey } from './apiKe
 import ApiKeyGeneralTab from './ApiKeyGeneralTab'
 import ApiKeyAccessTab from './ApiKeyAccessTab'
 import { BTN_H } from '@/config/buttonMetrics'
+import Button from '@/components/ui/Button'
+import { Mono } from '@/components/ui/typography'
+import { tintBorder } from '@/lib/tint'
 
 export default function ApiKeyDetail({ keyId, listRow, onBack, onPatch, onDelete }) {
   const { t } = useTranslation('settings')
@@ -78,11 +81,9 @@ export default function ApiKeyDetail({ keyId, listRow, onBack, onPatch, onDelete
       {/* Header */}
       <div className="flex items-center justify-between" style={{ marginBottom: 8, gap: 12 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 12, minWidth: 0 }}>
-          {/* BTN_H (§4/§9): one explicit height for every text/action button, everywhere. */}
-          <button onClick={onBack} aria-label={t('common.back')}
-            style={{ display: 'flex', alignItems: 'center', gap: 6, height: BTN_H, padding: '0 12px', fontSize: 13, border: '1px solid var(--border)', borderRadius: 8, background: 'var(--hover-bg)', color: 'var(--text)', cursor: 'pointer' }}>
+          <Button variant="secondary" onClick={onBack} aria-label={t('common.back')}>
             <ArrowLeft size={13} /> {t('common.back')}
-          </button>
+          </Button>
           <div style={{ width: 34, height: 34, borderRadius: 9, background: 'var(--color-primary-bg)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
             <Key size={16} style={{ color: 'var(--color-primary-text)' }} />
           </div>
@@ -105,8 +106,11 @@ export default function ApiKeyDetail({ keyId, listRow, onBack, onPatch, onDelete
           <CalloutBox variant="success" title={t('apiKeys.secretOnce')}
             onDismiss={() => setSecret(null)} dismissLabel={t('apiKeys.dismiss')}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <code style={{ flex: 1, fontSize: 12, fontFamily: "'JetBrains Mono', monospace", background: 'var(--surface)', border: '1px solid color-mix(in srgb, var(--color-success) 35%, transparent)', borderRadius: 6, padding: '8px 10px', color: 'var(--text)', overflowX: 'auto', whiteSpace: 'nowrap' }}>{secret}</code>
-              <button onClick={copySecret} style={{ height: BTN_H, padding: '0 10px', display: 'flex', alignItems: 'center', gap: 5, fontSize: 12, border: '1px solid color-mix(in srgb, var(--color-success) 35%, transparent)', borderRadius: 6, background: 'var(--surface)', cursor: 'pointer', color: 'var(--color-success)', whiteSpace: 'nowrap' }}>
+              <Mono as="code" style={{ flex: 1, fontSize: 12, background: 'var(--surface)', border: tintBorder('var(--color-success)'), borderRadius: 6, padding: '8px 10px', color: 'var(--text)', overflowX: 'auto', whiteSpace: 'nowrap' }}>{secret}</Mono>
+              {/* HUISSTIJL-1 necessity: success-tinted action, no Button variant covers a success-tinted border/text pairing (only primary/secondary/ghost/soft/danger/dangerSoft exist). */}
+              <button onClick={copySecret}
+                // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- state-carrying success accent (secret-copy confirmation); Button has no success-tint variant
+                style={{ height: BTN_H, padding: '0 10px', display: 'flex', alignItems: 'center', gap: 5, fontSize: 12, border: tintBorder('var(--color-success)'), borderRadius: 6, background: 'var(--surface)', cursor: 'pointer', color: 'var(--color-success)', whiteSpace: 'nowrap' }}>
                 {copied ? <Check size={12} /> : <Copy size={12} />} {copied ? t('common.copied') : t('apiKeys.copySecret')}
               </button>
             </div>
@@ -120,6 +124,7 @@ export default function ApiKeyDetail({ keyId, listRow, onBack, onPatch, onDelete
           const active = id === tab
           return (
             <button key={id} role="tab" aria-selected={active} onClick={() => setTab(id)}
+              // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- state-carrying tab-strip control: active tab reads a colored underline, not a Button fill; Button has no tab face
               style={{ padding: '9px 14px', border: 'none', background: 'transparent', cursor: 'pointer', fontSize: 13, fontWeight: active ? 600 : 500, color: active ? 'var(--color-primary)' : 'var(--text-muted)', borderBottom: `2px solid ${active ? 'var(--color-primary)' : 'transparent'}`, marginBottom: -1 }}>
               {label}
             </button>

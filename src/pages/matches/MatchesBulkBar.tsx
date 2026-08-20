@@ -2,7 +2,8 @@ import { useTranslation } from 'react-i18next'
 import { ListChecks, Link2, Building2, Layers, X } from 'lucide-react'
 import ActionMenu from '@/components/ui/ActionMenu'
 import type { MenuNode } from '@/components/ui/ActionMenu'
-import { BTN_H } from '@/config/buttonMetrics'
+import Button from '@/components/ui/Button'
+import { SectionTitle } from '@/components/ui/typography'
 import { useAuth } from '@/context/AuthContext'
 import { useApps } from '@/context/AppsContext'
 
@@ -49,7 +50,8 @@ export default function MatchesBulkBar({
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: 10, width: '100%',
       padding: '8px 12px', borderRadius: 8, background: 'var(--color-primary-bg)', border: '1px solid var(--color-primary)' }}>
-      <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--color-primary-text)' }}>{t('bulk.selected', { count })}</span>
+      {/* colour override: this bar sits on a tinted accent background */}
+      <SectionTitle as="span" style={{ color: 'var(--color-primary-text)' }}>{t('bulk.selected', { count })}</SectionTitle>
 
       {items.length > 0
         ? <ActionMenu label={t('bulk.actions')} icon={ListChecks} items={items} />
@@ -57,12 +59,11 @@ export default function MatchesBulkBar({
         // no backoffice system enabled for this tenant.
         : <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>{canCouple ? t('bulk.coupleUnavailable') : t('bulk.noPermission')}</span>}
 
-      {/* BTN_H (§4/§9): one explicit height for every text/action button, everywhere. */}
-      <button onClick={onClear}
-        style={{ display: 'flex', alignItems: 'center', gap: 5, marginLeft: 'auto', height: BTN_H, padding: '0 10px', fontSize: 12,
-          border: 'none', borderRadius: 7, background: 'none', color: 'var(--color-primary-text)', cursor: 'pointer', fontWeight: 500 }}>
+      {/* Deselect: ghost keeps its identity except ink, which stays the accent
+          text colour (this bar sits on a tinted accent background). */}
+      <Button variant="ghostAccent" onClick={onClear} style={{ gap: 5, marginLeft: 'auto' }}>
         <X size={13} /> {t('bulk.deselect')}
-      </button>
+      </Button>
     </div>
   )
 }

@@ -17,7 +17,9 @@ import EventCatalog from './EventCatalog'
 import { BTN_H } from '@/config/buttonMetrics'
 import { fieldInputStyle } from '@/components/forms/fieldMetrics'
 import Button from '@/components/ui/Button'
-import { SectionTitle } from '@/components/ui/typography'
+import SaveButton from '@/components/ui/SaveButton'
+import { SectionTitle, BodyText, Mono } from '@/components/ui/typography'
+import { tintBorder } from '@/lib/tint'
 
 export default function WebhookDetail({ subId, listRow, onBack, onPatch, onDelete }) {
   const { t } = useTranslation('settings')
@@ -89,11 +91,9 @@ export default function WebhookDetail({ subId, listRow, onBack, onPatch, onDelet
       {/* Header */}
       <div className="flex items-center justify-between" style={{ marginBottom: 8, gap: 12 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 12, minWidth: 0 }}>
-          {/* BTN_H (§4/§9): one explicit height for every text/action button, everywhere. */}
-          <button onClick={onBack} aria-label={t('common.back')}
-            style={{ display: 'flex', alignItems: 'center', gap: 6, height: BTN_H, padding: '0 12px', fontSize: 13, border: '1px solid var(--border)', borderRadius: 8, background: 'var(--hover-bg)', color: 'var(--text)', cursor: 'pointer' }}>
+          <Button variant="secondary" onClick={onBack} aria-label={t('common.back')}>
             <ArrowLeft size={13} /> {t('common.back')}
-          </button>
+          </Button>
           <div style={{ width: 34, height: 34, borderRadius: 9, background: 'var(--color-primary-bg)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
             <Webhook size={16} style={{ color: 'var(--color-primary-text)' }} />
           </div>
@@ -115,8 +115,10 @@ export default function WebhookDetail({ subId, listRow, onBack, onPatch, onDelet
           <CalloutBox variant="success" title={t('webhooks.outgoing.secretOnce')}
             onDismiss={() => setSecret(null)} dismissLabel={t('webhooks.outgoing.dismiss')}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <code style={{ flex: 1, fontSize: 12, fontFamily: "'JetBrains Mono', monospace", background: 'var(--surface)', border: '1px solid color-mix(in srgb, var(--color-success) 35%, transparent)', borderRadius: 6, padding: '8px 10px', color: 'var(--text)', overflowX: 'auto', whiteSpace: 'nowrap' }}>{secret}</code>
-              <button onClick={copySecret} style={{ height: BTN_H, padding: '0 10px', display: 'flex', alignItems: 'center', gap: 5, fontSize: 12, border: '1px solid color-mix(in srgb, var(--color-success) 35%, transparent)', borderRadius: 6, background: 'var(--surface)', cursor: 'pointer', color: 'var(--color-success)', whiteSpace: 'nowrap' }}>
+              <Mono as="code" style={{ flex: 1, fontSize: 12, background: 'var(--surface)', border: tintBorder('var(--color-success)'), borderRadius: 6, padding: '8px 10px', color: 'var(--text)', overflowX: 'auto', whiteSpace: 'nowrap' }}>{secret}</Mono>
+              {/* HUISSTIJL-1 necessity: success-tinted action, no Button variant covers a success-tinted border/text pairing (only primary/secondary/ghost/soft/danger/dangerSoft exist). */}
+              {/* eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- state-carrying success accent (secret-copy confirmation); Button has no success-tint variant */}
+              <button onClick={copySecret} style={{ height: BTN_H, padding: '0 10px', display: 'flex', alignItems: 'center', gap: 5, fontSize: 12, border: tintBorder('var(--color-success)'), borderRadius: 6, background: 'var(--surface)', cursor: 'pointer', color: 'var(--color-success)', whiteSpace: 'nowrap' }}>
                 {copied ? <Check size={12} /> : <Copy size={12} />} {copied ? t('common.copied') : t('webhooks.outgoing.copySecret')}
               </button>
             </div>
@@ -146,13 +148,18 @@ export default function WebhookDetail({ subId, listRow, onBack, onPatch, onDelet
             </div>
             <div>
               <label style={labelStyle}>{t('webhooks.outgoing.field.url')}</label>
-              <input value={form.url ?? ''} onChange={(e) => setForm((f) => ({ ...f, url: e.target.value }))} style={{ ...inputStyle, fontFamily: "'JetBrains Mono', monospace" }} />
+              <input
+                value={form.url ?? ''}
+                onChange={(e) => setForm((f) => ({ ...f, url: e.target.value }))}
+                // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- the input element itself must carry the font; the Mono atom renders a separate element and cannot apply to native input text
+                style={{ ...inputStyle, fontFamily: "'JetBrains Mono', monospace" }}
+              />
             </div>
           </div>
         ) : (
-          <div style={{ marginTop: 12, fontSize: 13, color: 'var(--text)' }}>
-            <code style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 12, color: 'var(--text-muted)', wordBreak: 'break-all' }}>{sub.url}</code>
-          </div>
+          <BodyText as="div" style={{ marginTop: 12 }}>
+            <Mono as="code" style={{ fontSize: 12, color: 'var(--text-muted)', wordBreak: 'break-all' }}>{sub.url}</Mono>
+          </BodyText>
         )}
       </div>
 
@@ -160,11 +167,9 @@ export default function WebhookDetail({ subId, listRow, onBack, onPatch, onDelet
       <div style={{ maxWidth: 680 }}>
         <div className="flex items-center justify-between" style={{ marginBottom: 12 }}>
           <SectionTitle as="span">{t('webhooks.outgoing.field.events')}</SectionTitle>
-          {/* Success fill needs its own on-* token — white only reaches ~3.3:1 there (WCAG audit 2026-08). */}
-          <button onClick={saveEvents} disabled={!eventsDirty || savingEv}
-            style={{ display: 'flex', alignItems: 'center', gap: 6, height: BTN_H, padding: '0 14px', fontSize: 13, fontWeight: 500, border: 'none', borderRadius: 8, cursor: eventsDirty && !savingEv ? 'pointer' : 'default', opacity: eventsDirty || savedEv ? 1 : 0.55, background: savedEv ? 'var(--color-success)' : 'var(--color-primary)', color: savedEv ? 'var(--color-on-success)' : 'var(--color-on-accent)' }}>
+          <SaveButton onClick={saveEvents} disabled={!eventsDirty || savingEv} saved={savedEv}>
             {savedEv ? <><Check size={13} /> {t('common.saved')}</> : savingEv ? <><Spinner size={13} /> {t('common.saving')}</> : <><Save size={13} /> {t('common.save')}</>}
-          </button>
+          </SaveButton>
         </div>
         <EventCatalog value={events} onChange={setEvents} />
       </div>

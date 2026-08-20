@@ -17,8 +17,8 @@ import { hasDescriptionText } from './data/descriptionText'
 import OpportunityGeneralCard from './addmodal/OpportunityGeneralCard'
 import OpportunityDealStageCard from './addmodal/OpportunityDealStageCard'
 import OpportunityDescriptionCard from './addmodal/OpportunityDescriptionCard'
-import { BTN_H } from '@/config/buttonMetrics'
 import { WIDE_MODAL } from '@/components/ui/modalMetrics'
+import { tintBorder } from '@/lib/tint'
 import FloatingPanel from '@/components/ui/FloatingPanel'
 import { modalColumns } from '@/components/ui/modalCards'
 import type { ApiOpportunity, Opportunity } from '@/types/opportunity'
@@ -314,26 +314,22 @@ export default function AddOpportunityModal({ onClose, onCreated, users = [], cu
         {createError && (
           <div role="alert" style={{ margin: '0 22px', padding: '8px 10px', fontSize: 12, borderRadius: 8,
             color: 'var(--color-danger)', background: 'var(--color-danger-bg)',
-            border: '1px solid color-mix(in srgb, var(--color-danger) 40%, transparent)', flexShrink: 0 }}>
+            border: tintBorder('var(--color-danger)', true), flexShrink: 0 }}>
             {createError}
           </div>
         )}
 
-        {/* Footer — BTN_H (§4/§9): one explicit height for every text/action button, everywhere. */}
+        {/* Footer — Button owns the height (sm, 28px) for every text/action button, everywhere. */}
         <div style={{ padding: '14px 22px', borderTop: '1px solid var(--border)', flexShrink: 0,
           display: 'flex', justifyContent: 'flex-end', gap: 8 }}>
           <Button variant="secondary" onClick={onClose}>
             {t('modal.cancel')}
           </Button>
-          <button onClick={handleSubmit} disabled={!canSubmit || saving}
-            style={{ height: BTN_H, padding: '0 20px', fontSize: 13, fontWeight: 600, borderRadius: 8, border: 'none',
-              background: (canSubmit && !saving) ? 'var(--color-primary)' : 'var(--border)',
-              color: (canSubmit && !saving) ? 'var(--color-on-accent)' : 'var(--text-muted)',
-              cursor: (canSubmit && !saving) ? 'pointer' : 'not-allowed' }}>
+          <Button variant="primary" onClick={handleSubmit} disabled={!canSubmit || saving}>
             {isEdit
               ? (saving ? t('modal.saving') : t('modal.save'))
               : (saving ? t('modal.creating') : t('modal.create'))}
-          </button>
+          </Button>
         </div>
     </FloatingPanel>
   )

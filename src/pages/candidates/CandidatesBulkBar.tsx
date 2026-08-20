@@ -1,8 +1,10 @@
 import { useTranslation } from 'react-i18next'
 import { ListChecks, Folder, FolderPlus, FolderMinus, UserCog, Milestone, Briefcase, Tag, Tags, StickyNote, Archive, ShieldCheck, UserCheck, Activity, GitMerge, RefreshCw, X, ExternalLink, Link2, Building2, Layers } from 'lucide-react'
 import ActionMenu from '@/components/ui/ActionMenu'
+import { BTN_H_SM } from '@/config/buttonMetrics'
 import type { MenuNode } from '@/components/ui/ActionMenu'
-import { BTN_H } from '@/config/buttonMetrics'
+import Button from '@/components/ui/Button'
+import { SectionTitle } from '@/components/ui/typography'
 import { useAuth } from '@/context/AuthContext'
 import { useApps } from '@/context/AppsContext'
 import { useTenantPools } from './hooks/useCandidatePools'
@@ -179,32 +181,36 @@ export default function CandidatesBulkBar({
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: 10, width: '100%',
       padding: '8px 12px', borderRadius: 8, background: 'var(--color-primary-bg)', border: '1px solid var(--color-primary)' }}>
-      <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--color-primary-text)' }}>
+      {/* colour override: this bar sits on a tinted accent background, so the
+          count reads in the accent ink rather than SectionTitle's default --text */}
+      <SectionTitle as="span" style={{ color: 'var(--color-primary-text)' }}>
         {bulkScope === 'filtered' ? t('bulk.scopeSelected', { count: filteredTotal }) : t('bulk.selected', { count })}
-      </span>
+      </SectionTitle>
 
       {/* BULK-FILTERSET-1: only offered when a filter narrows the list — an empty
           filter set is never sent as "all" (the backend 422s it too, see the hook). */}
       {anyFilterActive && (
+        /* eslint-disable huisstijlLegacy/no-restricted-syntax -- state-carrying scope toggle: filled=bulkScope 'filtered', outline=bulkScope 'selected'; Button has no toggle face */
         <button
           onClick={() => onSetBulkScope(bulkScope === 'filtered' ? 'selected' : 'filtered')}
-          style={{ display: 'flex', alignItems: 'center', height: BTN_H, padding: '0 10px', fontSize: 12, fontWeight: 500,
+          style={{ display: 'flex', alignItems: 'center', height: BTN_H_SM, padding: '0 10px', fontSize: 12, fontWeight: 500,
             border: '1px solid var(--color-primary)', borderRadius: 7, cursor: 'pointer',
             background: bulkScope === 'filtered' ? 'var(--color-primary)' : 'transparent',
             color: bulkScope === 'filtered' ? 'var(--color-on-accent)' : 'var(--color-primary-text)' }}>
           {bulkScope === 'filtered' ? t('bulk.scopeUseSelection') : t('bulk.scopeUseFilters', { count: filteredTotal })}
         </button>
+        /* eslint-enable huisstijlLegacy/no-restricted-syntax */
       )}
 
       {/* Single bulk-mutations menu with drill-in submenus */}
       <ActionMenu label={t('bulk.actions')} icon={ListChecks} items={items} />
 
-      {/* BTN_H (§4/§9): one explicit height for every text/action button, everywhere. */}
-      <button onClick={onClear}
-        style={{ display: 'flex', alignItems: 'center', gap: 5, marginLeft: 'auto', height: BTN_H, padding: '0 10px', fontSize: 12,
-          border: 'none', borderRadius: 7, background: 'none', color: 'var(--color-primary-text)', cursor: 'pointer', fontWeight: 500 }}>
+      {/* Deselect: ghost keeps its identity except ink, which stays the accent
+          text colour (differs from Button's default var(--text-muted) — this bar
+          sits on a tinted accent background, so the muted grey would be lost). */}
+      <Button variant="ghostAccent" onClick={onClear} style={{ gap: 5, marginLeft: 'auto' }}>
         <X size={13} /> {t('bulk.deselect')}
-      </button>
+      </Button>
     </div>
   )
 }

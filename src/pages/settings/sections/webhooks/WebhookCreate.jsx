@@ -13,6 +13,8 @@ import CalloutBox from '@/components/ui/CalloutBox'
 import { BTN_H } from '@/config/buttonMetrics'
 import { fieldInputStyle } from '@/components/forms/fieldMetrics'
 import Button from '@/components/ui/Button'
+import { Mono } from '@/components/ui/typography'
+import { tintBorder } from '@/lib/tint'
 
 export default function WebhookCreate({ onBack, onCreated }) {
   const { t } = useTranslation('settings')
@@ -78,11 +80,11 @@ export default function WebhookCreate({ onBack, onCreated }) {
             <div style={{ marginBottom: 16 }}>
               <CalloutBox variant="success" title={t('webhooks.outgoing.secretOnce')}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                  <code style={{ flex: 1, fontSize: 12, fontFamily: "'JetBrains Mono', monospace", background: 'var(--surface)', border: '1px solid color-mix(in srgb, var(--color-success) 35%, transparent)', borderRadius: 6, padding: '9px 11px', color: 'var(--text)', overflowX: 'auto', whiteSpace: 'nowrap' }}>{result.secret}</code>
-                  {/* HUISSTIJL-1: left hand-styled — a success-tinted action has no
-                      Button variant (only primary/secondary/ghost/soft/danger/dangerSoft exist). */}
+                  <Mono as="code" style={{ flex: 1, fontSize: 12, background: 'var(--surface)', border: tintBorder('var(--color-success)'), borderRadius: 6, padding: '9px 11px', color: 'var(--text)', overflowX: 'auto', whiteSpace: 'nowrap' }}>{result.secret}</Mono>
+                  {/* HUISSTIJL-1 necessity: success-tinted action, no Button variant covers a success-tinted border/text pairing (only primary/secondary/ghost/soft/danger/dangerSoft exist). */}
                   <button onClick={copySecret} aria-label={t('webhooks.outgoing.copySecret')}
-                    style={{ height: BTN_H, padding: '0 12px', display: 'flex', alignItems: 'center', gap: 5, fontSize: 12, border: '1px solid color-mix(in srgb, var(--color-success) 35%, transparent)', borderRadius: 6, background: 'var(--surface)', cursor: 'pointer', color: 'var(--color-success)', whiteSpace: 'nowrap' }}>
+                    // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- state-carrying success accent (secret-copy confirmation); Button has no success-tint variant
+                    style={{ height: BTN_H, padding: '0 12px', display: 'flex', alignItems: 'center', gap: 5, fontSize: 12, border: tintBorder('var(--color-success)'), borderRadius: 6, background: 'var(--surface)', cursor: 'pointer', color: 'var(--color-success)', whiteSpace: 'nowrap' }}>
                     {copied ? <Check size={12} /> : <Copy size={12} />} {copied ? t('common.copied') : t('webhooks.outgoing.copySecret')}
                   </button>
                 </div>
@@ -103,8 +105,14 @@ export default function WebhookCreate({ onBack, onCreated }) {
             </div>
             <div>
               <label style={labelStyle} htmlFor="wh-url">{t('webhooks.outgoing.field.url')}</label>
-              <input id="wh-url" value={url} onChange={(e) => setUrl(e.target.value)}
-                placeholder={t('webhooks.outgoing.urlPlaceholder')} style={{ ...inputStyle, fontFamily: "'JetBrains Mono', monospace" }} />
+              <input
+                id="wh-url"
+                value={url}
+                onChange={(e) => setUrl(e.target.value)}
+                placeholder={t('webhooks.outgoing.urlPlaceholder')}
+                // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- the input element itself must carry the font; the Mono atom renders a separate element and cannot apply to native input text
+                style={{ ...inputStyle, fontFamily: "'JetBrains Mono', monospace" }}
+              />
             </div>
             <div style={{ borderTop: '1px solid var(--border)', paddingTop: 16 }}>
               <label style={labelStyle}>{t('webhooks.outgoing.field.events')}</label>

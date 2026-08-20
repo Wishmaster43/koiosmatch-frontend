@@ -1,7 +1,8 @@
 import { useTranslation } from 'react-i18next'
 import FloatingPanel from '@/components/ui/FloatingPanel'
 import ActionRuleBanner from '@/components/actionrules/ActionRuleBanner'
-import { BTN_H } from '@/config/buttonMetrics'
+import { SectionTitle } from '@/components/ui/typography'
+import Button from '@/components/ui/Button'
 
 /**
  * PhaseChangeAppointmentWarning — V-appdetail-2: the warn-not-block confirm for
@@ -23,18 +24,16 @@ export default function PhaseChangeAppointmentWarning({ phaseLabel, onConfirm, o
 
   return (
     <FloatingPanel open onClose={onCancel} ariaLabel={t('moveWarn.title')} width={420} persistKey="application-move-warn"
-      header={<span style={{ fontSize: 13, fontWeight: 600 }}>{t('moveWarn.title')}</span>}>
+      header={<SectionTitle as="span">{t('moveWarn.title')}</SectionTitle>}>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
         <ActionRuleBanner decision={{ effect: 'warn', message: t('moveWarn.message', { phase: phaseLabel }) }} />
         <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8 }}>
-          <button type="button" onClick={onCancel}
-            style={{ height: BTN_H, padding: '0 14px', borderRadius: 6, border: '1px solid var(--border)', background: 'var(--bg)', color: 'var(--text)', cursor: 'pointer', fontSize: 12 }}>
+          <Button variant="secondary" onClick={onCancel}>
             {t('moveWarn.cancel')}
-          </button>
-          <button type="button" onClick={onConfirm}
-            style={{ height: BTN_H, padding: '0 14px', borderRadius: 6, border: '1px solid color-mix(in srgb, var(--color-warning) 40%, transparent)', background: 'color-mix(in srgb, var(--color-warning) 14%, transparent)', color: 'var(--color-warning)', cursor: 'pointer', fontSize: 12, fontWeight: 600 }}>
+          </Button>
+          <Button variant="primary" onClick={onConfirm}>
             {t('moveWarn.confirm')}
-          </button>
+          </Button>
         </div>
       </div>
     </FloatingPanel>

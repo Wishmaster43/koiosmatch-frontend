@@ -15,3 +15,8 @@
  * adopted — removed per §11 no-dead-code, audit 22-07; re-add WITH adoption.)
  */
 export const BTN_H = 34
+// The sm-standard height (DE MAAT: 28 · 12px · r6) for the few RAW state-carrying
+// faces that Button cannot express but that sit in a Button-sm row (ActionMenu's
+// labeled trigger, a bulk bar's scope toggle). Mirrors components/ui/Button's
+// SIZES.sm so those rows stay uniform — never hardcode 28 at a call site.
+export const BTN_H_SM = 28

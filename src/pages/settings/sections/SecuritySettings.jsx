@@ -10,8 +10,8 @@ import { useTranslation } from 'react-i18next'
 import { ShieldCheck, ArrowLeft, Lock } from 'lucide-react'
 import { useAuth } from '@/context/AuthContext'
 import MfaSetupWizard from '@/components/auth/MfaSetupWizard'
-import { BTN_H } from '@/config/buttonMetrics'
 import Button from '@/components/ui/Button'
+import { tintBorder } from '@/lib/tint'
 
 export default function SecuritySettings() {
   const { t } = useTranslation('settings')
@@ -49,11 +49,13 @@ export default function SecuritySettings() {
   // Disable confirm view
   if (step === 'disabling') return (
     <div style={{ maxWidth: 420 }}>
-      <button onClick={reset} style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13,
-                                        color: 'var(--text-muted)', background: 'none', border: 'none',
-                                        cursor: 'pointer', padding: 0, marginBottom: 20 }}>
+      {/* padding: 0 is layout here, not identity: the ghost back-link must sit
+          flush with the card's left edge (same flush-ghost pattern as drawer
+          back links); every colour/weight still comes from the variant. */}
+      <Button variant="ghost" onClick={reset} style={{ display: 'flex', alignItems: 'center', gap: 6,
+                                        padding: 0, marginBottom: 20 }}>
         <ArrowLeft size={13} /> {t('security.back')}
-      </button>
+      </Button>
       <h3 style={{ fontSize: 14, fontWeight: 700, color: 'var(--text)', marginBottom: 6 }}>{t('security.disableTitle')}</h3>
       <p style={{ fontSize: 13, color: 'var(--text-muted)', marginBottom: 20, lineHeight: 1.6 }}>{t('security.disableDesc')}</p>
       <form onSubmit={handleDisable} style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
@@ -66,20 +68,13 @@ export default function SecuritySettings() {
           onBlur={e  => (e.target.style.borderColor = 'var(--border)')} />
         {error && (
           <div style={{ fontSize: 13, color: 'var(--color-danger)', background: 'var(--color-danger-bg)',
-                         border: '1px solid color-mix(in srgb, var(--color-danger) 45%, transparent)', borderRadius: 8, padding: '8px 12px' }}>
+                         border: tintBorder('var(--color-danger)', true), borderRadius: 8, padding: '8px 12px' }}>
             {error}
           </div>
         )}
-        {/* BTN_H (§4/§9): one explicit height for every text/action button, everywhere. */}
-        <button type="submit" disabled={loading || disableCode.length < 6}
-          style={{ height: BTN_H, padding: '0 20px', fontSize: 13, fontWeight: 500, borderRadius: 8,
-                   border: 'none', cursor: (loading || disableCode.length < 6) ? 'not-allowed' : 'pointer',
-                   background: (loading || disableCode.length < 6) ? 'var(--border)' : 'var(--color-danger)',
-                   // On-danger fill needs its own readable token (white); the neutral
-                   // disabled fill reuses the muted-on-border convention (StatusListEditor).
-                   color: (loading || disableCode.length < 6) ? 'var(--text-muted)' : 'var(--color-on-danger)' }}>
+        <Button type="submit" variant="danger" disabled={loading || disableCode.length < 6}>
           {loading ? t('security.working') : t('security.disableBtn')}
-        </button>
+        </Button>
       </form>
     </div>
   )
@@ -104,12 +99,10 @@ export default function SecuritySettings() {
         </div>
         {mfaEnabled
           ? (
-            // BTN_H (§4/§9): one explicit height for every text/action button, everywhere.
-            <button onClick={() => { setStep('disabling'); setError('') }}
-              style={{ height: BTN_H, padding: '0 14px', fontSize: 12, fontWeight: 500, borderRadius: 8,
-                       cursor: 'pointer', border: '1px solid color-mix(in srgb, var(--color-danger) 45%, transparent)', background: 'var(--color-danger-bg)', color: 'var(--color-danger)', flexShrink: 0 }}>
+            <Button variant="dangerSoft" onClick={() => { setStep('disabling'); setError('') }}
+              style={{ flexShrink: 0 }}>
               {t('security.disable')}
-            </button>
+            </Button>
           ) : (
             <Button variant="primary" size="sm" onClick={() => { setStep('wizard'); setError('') }}>
               {t('security.enable')}

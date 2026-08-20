@@ -11,12 +11,12 @@ import api, { unwrap } from '@/lib/api'
 import { RoleDetail } from './RoleDetail'
 import { roleIconEl, ROLE_ICON_NAMES } from '@/lib/roleIcons'
 import { useConfirm } from '@/hooks/useConfirm'
-import { BTN_H } from '@/config/buttonMetrics'
 import type { Role, PermissionsByGroup, CreateRoleBody } from './rolesTypes'
 import Button from '@/components/ui/Button'
 import Spinner from '@/components/ui/Spinner'
 import { tintBg, tintBorder } from '@/lib/tint'
 import { PageTitle } from '@/components/ui/typography'
+import { fieldInputStyle } from '@/components/forms/fieldMetrics'
 
 export default function RolesSettings() {
   const { t } = useTranslation('settings')
@@ -92,10 +92,12 @@ export default function RolesSettings() {
           <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>{t('roles.subtitle')}</p>
         </div>
         <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+          {/* Data-entry field identity (native <input> sizing) — not running text, so
+              the BodyText atom does not apply here. */}
           <input value={newRoleName} onChange={e => setNewRoleName(e.target.value)}
             placeholder={t('roles.newPlaceholder')} onKeyDown={e => e.key === 'Enter' && createRole()}
-            style={{ height: 34, padding: '0 10px', fontSize: 13, border: '1px solid var(--border)',
-                     borderRadius: 8, outline: 'none', color: 'var(--text)', width: 150 }} />
+            // §4 2b: the field face comes from fieldMetrics' canon; only the width is local.
+            style={{ ...fieldInputStyle, width: 150 }} />
           {/* Paired with the name input above — a soft CTA, not the row-level "+ add"
               affordance, so it stays a Button (soft, not solid primary) rather than DrawerAddButton. */}
           <Button variant="primary" onClick={createRole} disabled={creating || !newRoleName.trim()}>
@@ -128,21 +130,15 @@ export default function RolesSettings() {
                 </div>
               </div>
               <div style={{ display: 'flex', gap: 8, flexShrink: 0 }}>
-                {/* BTN_H (§4/§9): one explicit height for every text/action button, everywhere. */}
-                <button onClick={() => setEditRole(role)}
-                  style={{ display: 'flex', alignItems: 'center', gap: 6, height: BTN_H, padding: '0 14px',
-                           fontSize: 13, fontWeight: 500, borderRadius: 8, cursor: 'pointer',
-                           border: '1px solid var(--color-primary)', background: 'var(--color-primary-bg)', color: 'var(--color-primary-text)' }}>
+                {/* PRIMAIR-VLAK-1: this row action wore the accent tint pre-migration — the accent action wears the trio, not neutral secondary (Opus-controle klus d). */}
+                <Button variant="primary" onClick={() => setEditRole(role)}>
                   {t('roles.edit')}
-                </button>
-                <button onClick={() => canDelete && deleteRole(role)} disabled={!canDelete || deleting === role.id}
-                  title={canDelete ? t('roles.deleteTitle') : t('roles.deleteBlocked', { count: userCount })}
-                  style={{ width: 32, height: 32, display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    border: 'none', borderRadius: 8, cursor: canDelete ? 'pointer' : 'not-allowed',
-                    background: canDelete ? 'var(--color-danger-bg)' : 'var(--hover-bg)',
-                    color: canDelete ? 'var(--color-danger)' : 'var(--border)' }}>
+                </Button>
+                <Button variant="dangerSoft" iconOnly aria-label={canDelete ? t('roles.deleteTitle') : t('roles.deleteBlocked', { count: userCount })}
+                  onClick={() => canDelete && deleteRole(role)} disabled={!canDelete || deleting === role.id}
+                  title={canDelete ? t('roles.deleteTitle') : t('roles.deleteBlocked', { count: userCount })}>
                   {deleting === role.id ? <Spinner size={12} /> : <Trash2 size={12} />}
-                </button>
+                </Button>
               </div>
             </div>
           )

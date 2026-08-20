@@ -6,15 +6,16 @@ import { useActionRulePreflight, ActionRuleBanner, ActionRuleDialog } from '@/co
 import type { ActionRuleDecision } from '@/components/actionrules'
 import CreatableSelect from '@/components/ui/CreatableSelect'
 import RichTextEditor from '@/components/ui/RichTextEditor'
-import { BTN_H } from '@/config/buttonMetrics'
 import { fieldInputStyle } from '@/components/forms/fieldMetrics'
 import { contactOptionLabel } from '@/lib/contactLabel'
-import { Caption } from '@/components/ui/typography'
+import { Caption, PageTitle, sectionTitleStyle } from '@/components/ui/typography'
 import { useProposeForm } from './useProposeForm'
 import type { ApplicationDetail } from '@/types/application'
 import Button from '@/components/ui/Button'
+import CalloutBox from '@/components/ui/CalloutBox'
 
-const sectionTitle = { fontSize: 12, fontWeight: 600, color: 'var(--text)', marginBottom: 6 } as const
+// r6: the identity comes from the typography module; only the layout margin is local.
+const sectionTitle = { ...sectionTitleStyle, fontSize: 12, marginBottom: 6 } as const
 // Canon field style (G33/fieldMetrics) — was its own padding-7/font-13/radius-8 copy.
 const inputBase = fieldInputStyle
 
@@ -103,7 +104,7 @@ export default function ProposeCandidateModal({ application: a, onClose }: Props
         <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>
           <span style={{ display: 'inline-flex', width: 30, height: 30, borderRadius: 8, alignItems: 'center', justifyContent: 'center',
             background: 'var(--color-primary-bg)', color: 'var(--color-primary-text)' }}><Send size={16} /></span>
-          <span style={{ fontSize: 15, fontWeight: 700, color: 'var(--text)' }}>{t('propose.title')}</span>
+          <PageTitle as="span">{t('propose.title')}</PageTitle>
         </span>
       }>
         {decision?.effect === 'warn' && <div style={{ marginBottom: 12 }}><ActionRuleBanner decision={decision} /></div>}
@@ -169,7 +170,7 @@ export default function ProposeCandidateModal({ application: a, onClose }: Props
               {recruiter} tokens filled in by useProposeForm). */}
           <div>
             <div style={sectionTitle}>{t('propose.message')}</div>
-            <label htmlFor="propose-subject" style={{ display: 'block', fontSize: 11, color: 'var(--text-muted)', marginBottom: 4 }}>{t('propose.subject')}</label>
+            <label htmlFor="propose-subject" style={{ display: 'block', marginBottom: 4 }}><Caption as="span">{t('propose.subject')}</Caption></label>
             <input id="propose-subject" value={form.subject} onChange={e => form.setSubject(e.target.value)}
               style={{ ...inputBase, marginBottom: 8 }} />
             <RichTextEditor value={form.body} onChange={form.setBody}
@@ -186,23 +187,25 @@ export default function ProposeCandidateModal({ application: a, onClose }: Props
         </div>
 
         {/* The honest line — Koios prepares the CV + message, it does not send them
-            itself. Never a Verzenden button. */}
-        <Caption as="div" style={{ display: 'flex', gap: 6, marginTop: 16, padding: '8px 10px', borderRadius: 8,
-          background: 'color-mix(in srgb, var(--color-primary) 6%, transparent)', border: '1px solid color-mix(in srgb, var(--color-primary) 20%, transparent)' }}>
-          <Info size={13} style={{ flexShrink: 0, marginTop: 1 }} /> {t('propose.notSentYet')}
-        </Caption>
+            itself. Never a Verzenden button. Shared CalloutBox (§4 feedback atom) —
+            the hand-rolled tint banner here double-prefixed tintBorder into
+            invalid CSS and dodged the lint via a token const (Opus-controle). */}
+        <div style={{ marginTop: 16 }}>
+          <CalloutBox variant="info">{t('propose.notSentYet')}</CalloutBox>
+        </div>
 
         {/* V-appdetail-5: on success, hand over the recorded proposal's own share
             link right here — a copy button, never the raw URL in a log/toast (§8). */}
         {form.shareUrl && (
           <div role="status" style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 10, padding: '8px 10px',
-            borderRadius: 8, fontSize: 11, color: 'var(--color-success)',
+            borderRadius: 8, fontSize: 11, color: 'var(--color-on-success-bg)',
             background: 'var(--color-success-bg)', border: '1px solid var(--color-success)' }}>
             <span style={{ flex: 1 }}>{t('propose.recorded')}</span>
             <button type="button" onClick={form.copyShareLink}
+              // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- state-carrying success-outline copy action: confirms the just-recorded share link, Button has no success variant
               style={{ display: 'inline-flex', alignItems: 'center', gap: 4, height: 26, padding: '0 8px', fontSize: 11,
                 borderRadius: 6, border: '1px solid var(--color-success)', background: 'transparent',
-                color: 'var(--color-success)', cursor: 'pointer' }}>
+                color: 'var(--color-on-success-bg)', cursor: 'pointer' }}>
               {form.shareLinkCopied ? <Check size={11} /> : <Copy size={11} />}
               {form.shareLinkCopied ? t('propose.copied') : t('propose.copyLink')}
             </button>
@@ -217,14 +220,11 @@ export default function ProposeCandidateModal({ application: a, onClose }: Props
           <Button variant="secondary" onClick={onClose}>
             {t('common:cancel')}
           </Button>
-          {/* BUTTON-SOFT-TINT-1 (Danny 05-08): was a white/transparent outline
-              button — now the house soft-tint recipe (§4, mirrors DrawerAddButton/
-              QuickViewToggle). */}
-          <button onClick={form.copyMessage} style={{ height: BTN_H, padding: '0 16px', fontSize: 13, fontWeight: 500,
-            border: '1px solid color-mix(in srgb, var(--color-primary) 30%, transparent)', borderRadius: 8,
-            background: 'color-mix(in srgb, var(--color-primary) 10%, transparent)', color: 'var(--color-primary-text)', cursor: 'pointer' }}>
+          {/* PRIMAIR-VLAK-1 (19-08): the tinted-primary action face is retired — the
+              secondary-action button now carries this copy affordance. */}
+          <Button variant="secondary" onClick={form.copyMessage}>
             {form.copied ? t('propose.copied') : t('propose.copyMessage')}
-          </button>
+          </Button>
           <Button variant="primary" onClick={handleSubmit} disabled={!!form.disabledReason || form.submitting}>
             {t('propose.submit')}
           </Button>

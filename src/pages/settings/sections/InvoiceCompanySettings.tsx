@@ -18,9 +18,10 @@ import { notifyError } from '@/lib/notify'
 import { extractApiError } from '@/lib/extractApiError'
 import Toggle from '@/components/ui/Toggle'
 import Spinner from '@/components/ui/Spinner'
-import { BTN_H } from '@/config/buttonMetrics'
+import SaveButton from '@/components/ui/SaveButton'
 import { card, notice } from './usageCardStyles'
 import { PageTitle, SectionTitle } from '@/components/ui/typography'
+import { fieldInputStyle } from '@/components/forms/fieldMetrics'
 
 // The full settings shape (matches PUT /admin/invoice-settings request body 1:1).
 interface InvoiceSettingsForm {
@@ -49,10 +50,9 @@ const REQUIRED_KEYS: (keyof InvoiceSettingsForm)[] = [
   'invoice_coc_number', 'invoice_vat_number', 'invoice_iban', 'invoice_email',
 ]
 
-const baseInput = {
-  height: 36, padding: '0 10px', fontSize: 13, border: '1px solid var(--border)', borderRadius: 8,
-  outline: 'none', color: 'var(--text)', width: '100%', maxWidth: 360, boxSizing: 'border-box' as const,
-}
+// Field faces come from fieldMetrics' canon (§4 2b) — never a local copy;
+// only the layout max-width stays local.
+const baseInput = { ...fieldInputStyle, maxWidth: 360 }
 
 // One labelled row — mirrors CompanySettings.jsx's Row so the two forms read as one family.
 function Row({ label, children, last = false }: { label: string; children: React.ReactNode; last?: boolean }) {
@@ -116,14 +116,10 @@ export default function InvoiceCompanySettings() {
           <PageTitle>{t('invoiceSettings.title')}</PageTitle>
           <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>{t('invoiceSettings.subtitle')}</p>
         </div>
-        <button type="button" onClick={handleSave} disabled={saving || phase !== 'ready'}
-          style={{ display: 'flex', alignItems: 'center', gap: 6, height: BTN_H, padding: '0 14px',
-                   fontSize: 13, fontWeight: 500, borderRadius: 8, border: 'none',
-                   cursor: phase === 'ready' ? 'pointer' : 'not-allowed',
-                   background: justSaved ? 'var(--color-success)' : 'var(--color-primary)',
-                   color: justSaved ? 'var(--color-on-success)' : 'var(--color-on-accent)' }}>
+        <SaveButton type="button" onClick={handleSave} disabled={saving || phase !== 'ready'} saved={justSaved}
+          style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
           {justSaved ? <><Check size={13} /> {t('common.saved')}</> : saving ? <><Spinner size={13} /> {t('common.saving')}</> : <><Save size={13} /> {t('common.save')}</>}
-        </button>
+        </SaveButton>
       </div>
 
       {phase === 'loading' && <p style={notice}>{t('common.loading')}</p>}

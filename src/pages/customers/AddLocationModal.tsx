@@ -33,7 +33,7 @@
 import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useAuth } from '@/context/AuthContext'
-import { MapPin, Upload } from 'lucide-react'
+import { MapPin, Upload, CheckCircle2 } from 'lucide-react'
 import FloatingPanel from '@/components/ui/FloatingPanel'
 import { useProvinces } from '@/hooks/useProvinces'
 import { notifyError } from '@/lib/notify'
@@ -41,7 +41,6 @@ import { useLiveFieldValidation } from '@/hooks/useLiveFieldValidation'
 import { useIdentifierValidation } from '@/hooks/useIdentifierValidation'
 import { isValidEmailFormat } from '@/lib/contactFieldValidation'
 import { useAllSettings, getJsonSetting } from '@/lib/settings/useAllSettings'
-import { BTN_H } from '@/config/buttonMetrics'
 import { WIDE_MODAL } from '@/components/ui/modalMetrics'
 import { modalColumns, cardBox, cardHead } from '@/components/ui/modalCards'
 import SubEntityImportCard from './SubEntityImportCard'
@@ -57,6 +56,8 @@ import type { ContactPayload } from './hooks/useCustomerContacts'
 import type { Location, Contact } from '@/types/customer'
 import type { LookupOption, Id } from '@/types/common'
 import Button from '@/components/ui/Button'
+import ModalFooter from '@/components/ui/ModalFooter'
+import { tintBorder } from '@/lib/tint'
 
 // 422 field-error keys are snake_case; map them back to this form's field names.
 // No billing_email entry (Danny 2026-07-22): that field has no input here anymore
@@ -304,15 +305,12 @@ export default function AddLocationModal({
               RING once a file is picked — the same active-signal convention the
               sort/filter triggers use on the solid fill. */}
           {!isEdit && (
-            <button type="button" onClick={() => setImportOpen(v => !v)} aria-expanded={importOpen}
-              style={{ display: 'flex', alignItems: 'center', gap: 6, height: BTN_H, padding: '0 12px', marginLeft: 'auto',
-                flexShrink: 0, borderRadius: 8, cursor: 'pointer', fontSize: 12.5, fontWeight: 600,
-                color: 'var(--button-ink)',
-                border: importWizard.file ? '1px solid var(--button-ink)' : '1px solid var(--button-border)',
-                background: 'var(--button-fill)' }}>
-              <Upload size={13} />
+            <Button type="button" variant="primary" onClick={() => setImportOpen(v => !v)} aria-expanded={importOpen}
+              style={{ gap: 6, marginLeft: 'auto' }}>
+              {/* Icon swap = the paused-import signal (AddCustomerModal canon): never a second identity paint on the chrome. */}
+              {importWizard.file ? <CheckCircle2 size={13} /> : <Upload size={13} />}
               {t('subModal.import.title', { entity: t('settings:import.entities.locations.label') })}
-            </button>
+            </Button>
           )}
         </div>
       }>
@@ -382,20 +380,16 @@ export default function AddLocationModal({
         {createError && (
           <div role="alert" style={{ margin: '0 22px 8px', padding: '8px 10px', fontSize: 12, borderRadius: 8,
             color: 'var(--color-danger)', background: 'var(--color-danger-bg)',
-            border: '1px solid color-mix(in srgb, var(--color-danger) 40%, transparent)', flexShrink: 0 }}>
+            border: tintBorder('var(--color-danger)', true), flexShrink: 0 }}>
             {createError}
           </div>
         )}
 
-        {/* BTN_H (§4/§9): one explicit height for every text/action button, everywhere. */}
-        <div style={{ padding: '12px 22px', borderTop: '1px solid var(--border)', display: 'flex', justifyContent: 'flex-end', gap: 8, flexShrink: 0 }}>
-          <Button variant="secondary" onClick={onClose}>{t('subModal.cancel')}</Button>
-          {/* KVK/BTW-PER-LAND-1: a blocking identifier mismatch gates the button too,
-              so the disabled state and submit() agree on one condition. */}
-          <button onClick={submit} disabled={!form.name.trim() || hasFormatError || hasIdentifierError} style={{ height: BTN_H, padding: '0 20px', fontSize: 13, fontWeight: 600, borderRadius: 8, border: 'none', background: (form.name.trim() && !hasFormatError && !hasIdentifierError) ? 'var(--color-primary)' : 'var(--border)', color: (form.name.trim() && !hasFormatError && !hasIdentifierError) ? 'var(--color-on-accent)' : 'var(--text-muted)', cursor: (form.name.trim() && !hasFormatError && !hasIdentifierError) ? 'pointer' : 'not-allowed' }}>
-            {isEdit ? t('subModal.save') : t('subModal.create')}
-          </button>
-        </div>
+        {/* KVK/BTW-PER-LAND-1: a blocking identifier mismatch gates the button too,
+            so the disabled state and submit() agree on one condition. */}
+        <ModalFooter onCancel={onClose} cancelLabel={t('subModal.cancel')}
+          onSubmit={submit} submitLabel={isEdit ? t('subModal.save') : t('subModal.create')}
+          disabled={!form.name.trim() || hasFormatError || hasIdentifierError} />
     </FloatingPanel>
   )
 }

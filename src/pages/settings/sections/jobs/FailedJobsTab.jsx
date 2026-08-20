@@ -11,9 +11,9 @@ import DataTable from '@/components/ui/DataTable'
 import { formatDT } from '@/components/reports/runFormat'
 import { useConfirm } from '@/hooks/useConfirm'
 import { useFailedJobs } from './useFailedJobs'
-import { BTN_H } from '@/config/buttonMetrics'
 import Button from '@/components/ui/Button'
 import { Mono } from '@/components/ui/typography'
+import { tintBorder } from '@/lib/tint'
 
 export default function FailedJobsTab() {
   const { t } = useTranslation('settings')
@@ -45,16 +45,12 @@ export default function FailedJobsTab() {
     { key: 'actions', header: t('jobs.col.actions'), align: 'right', nowrap: true,
       render: (r) => (
         <div style={{ display: 'flex', gap: 6, justifyContent: 'flex-end' }}>
-          <button type="button" disabled={busyId === r.uuid} onClick={() => retry(r.uuid)}
-            style={{ fontSize: 12, fontWeight: 500, padding: '4px 10px', borderRadius: 7, cursor: busyId === r.uuid ? 'wait' : 'pointer',
-              border: '1px solid var(--border)', background: 'var(--surface)', color: 'var(--text)' }}>
+          <Button variant="secondary" disabled={busyId === r.uuid} onClick={() => retry(r.uuid)}>
             {t('jobs.retry')}
-          </button>
-          <button type="button" disabled={busyId === r.uuid} onClick={() => confirm(t('jobs.forgetConfirm'), () => forget(r.uuid), { danger: true })}
-            style={{ fontSize: 12, fontWeight: 500, padding: '4px 10px', borderRadius: 7, cursor: busyId === r.uuid ? 'wait' : 'pointer',
-              border: '1px solid color-mix(in srgb, var(--color-danger) 40%, transparent)', background: 'var(--color-danger-bg)', color: 'var(--color-danger)' }}>
+          </Button>
+          <Button variant="dangerSoft" disabled={busyId === r.uuid} onClick={() => confirm(t('jobs.forgetConfirm'), () => forget(r.uuid), { danger: true })}>
             {t('jobs.forget')}
-          </button>
+          </Button>
         </div>
       ) },
   ]
@@ -67,27 +63,23 @@ export default function FailedJobsTab() {
           style={{ height: 32, padding: '0 10px', fontSize: 12, border: '1px solid var(--border)', borderRadius: 8, background: 'var(--surface)', color: 'var(--text)', width: 160 }} />
         <input value={filters.tenant} onChange={(e) => setFilter('tenant', e.target.value)} placeholder={t('jobs.filters.tenant')}
           style={{ height: 32, padding: '0 10px', fontSize: 12, border: '1px solid var(--border)', borderRadius: 8, background: 'var(--surface)', color: 'var(--text)', width: 160 }} />
-        {/* BTN_H (§4/§9): one explicit height for every text/action button, everywhere. */}
         <div style={{ display: 'flex', gap: 8, marginLeft: 'auto' }}>
-          <Button variant="secondary" size="sm" disabled={bulkBusy || result.total === 0} onClick={confirmRetryAll}>
+          <Button variant="secondary" disabled={bulkBusy || result.total === 0} onClick={confirmRetryAll}>
             <RefreshCw size={12} /> {t('jobs.retryAll')}
           </Button>
-          <button type="button" disabled={bulkBusy || result.total === 0} onClick={confirmFlush}
-            style={{ display: 'flex', alignItems: 'center', gap: 6, height: BTN_H, padding: '0 12px', fontSize: 12, fontWeight: 500,
-              border: '1px solid color-mix(in srgb, var(--color-danger) 40%, transparent)', borderRadius: 8,
-              background: 'var(--color-danger-bg)', color: 'var(--color-danger)',
-              cursor: bulkBusy || result.total === 0 ? 'not-allowed' : 'pointer', opacity: bulkBusy || result.total === 0 ? 0.5 : 1 }}>
+          <Button variant="dangerSoft" disabled={bulkBusy || result.total === 0} onClick={confirmFlush}>
             <Trash2 size={12} /> {t('jobs.flush')}
-          </button>
+          </Button>
         </div>
       </div>
 
       {actionError && (
         <div style={{ display: 'flex', alignItems: 'flex-start', gap: 8, padding: '10px 12px', marginBottom: 12,
-          borderRadius: 8, background: 'var(--color-warning-bg)', border: '1px solid color-mix(in srgb, var(--color-warning) 40%, transparent)' }}>
+          borderRadius: 8, background: 'var(--color-warning-bg)', border: tintBorder('var(--color-warning)') }}>
           <span style={{ fontSize: 12, color: 'var(--text)', flex: 1 }}>{actionError}</span>
-          <button type="button" onClick={() => setActionError(null)} aria-label={t('common.close')}
-            style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', display: 'flex' }}><X size={13} /></button>
+          <Button variant="ghost" iconOnly onClick={() => setActionError(null)} aria-label={t('common.close')}>
+            <X size={13} />
+          </Button>
         </div>
       )}
 
@@ -108,15 +100,13 @@ export default function FailedJobsTab() {
 
       {result.lastPage > 1 && (
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 10, marginTop: 10 }}>
-          <button type="button" disabled={page <= 1} onClick={() => setPage((p) => p - 1)}
-            style={{ fontSize: 12, padding: '4px 10px', borderRadius: 7, border: '1px solid var(--border)', background: 'var(--surface)', color: 'var(--text)', cursor: page <= 1 ? 'not-allowed' : 'pointer', opacity: page <= 1 ? 0.5 : 1 }}>
+          <Button variant="secondary" disabled={page <= 1} onClick={() => setPage((p) => p - 1)}>
             {t('jobs.pagination.prev')}
-          </button>
+          </Button>
           <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>{t('jobs.pagination.page', { page: result.page, last: result.lastPage })}</span>
-          <button type="button" disabled={page >= result.lastPage} onClick={() => setPage((p) => p + 1)}
-            style={{ fontSize: 12, padding: '4px 10px', borderRadius: 7, border: '1px solid var(--border)', background: 'var(--surface)', color: 'var(--text)', cursor: page >= result.lastPage ? 'not-allowed' : 'pointer', opacity: page >= result.lastPage ? 0.5 : 1 }}>
+          <Button variant="secondary" disabled={page >= result.lastPage} onClick={() => setPage((p) => p + 1)}>
             {t('jobs.pagination.next')}
-          </button>
+          </Button>
         </div>
       )}
       {dialog}

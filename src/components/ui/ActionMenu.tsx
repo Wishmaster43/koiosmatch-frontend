@@ -11,8 +11,9 @@ import { useState, useRef, useEffect, useMemo } from 'react'
 import type { CSSProperties, ComponentType, KeyboardEvent as ReactKeyboardEvent, MouseEvent as ReactMouseEvent } from 'react'
 import { ChevronDown, ChevronRight, ArrowLeft, Search, Check } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
-import { BTN_H } from '@/config/buttonMetrics'
+import { BTN_H_SM } from '@/config/buttonMetrics'
 import Button from './Button'
+import { Caption } from './typography'
 import SelectAllRow from './SelectAllRow'
 // PORTAL-MARKER-1: a click inside an open portalled picker menu is never "outside".
 import { isInsideDropdownPortal } from '@/lib/useDropdownPlacement'
@@ -174,7 +175,7 @@ export default function ActionMenu({
 
   return (
     <div ref={ref} style={{ position: 'relative' }} onKeyDown={onKeyDown}>
-      {/* Trigger — BTN_H (§4/§9): one explicit height for every text/action button, everywhere
+      {/* Trigger — BTN_H_SM (DE MAAT): the labeled trigger tracks Button's sm row
           (this single component drives every bulk bar + settings row-action menu).
           Icon-only mode drops the label/chevron and shrinks to a compact square — the
           accessible name still comes through (aria-label + title), never silently lost. */}
@@ -194,7 +195,7 @@ export default function ActionMenu({
           color: 'var(--button-ink)',
           cursor: disabled ? 'not-allowed' : 'pointer', opacity: disabled ? 0.5 : 1, flexShrink: 0,
         } : {
-          display: 'flex', alignItems: 'center', gap: 6, height: BTN_H, padding: '0 12px', fontSize: 12, fontWeight: 500,
+          display: 'flex', alignItems: 'center', gap: 6, height: BTN_H_SM, padding: '0 12px', fontSize: 12, fontWeight: 500,
           border: `1px solid ${open ? 'var(--color-primary)' : 'var(--border)'}`, borderRadius: 7,
           background: 'var(--surface)', color: 'var(--text)', cursor: disabled ? 'not-allowed' : 'pointer', opacity: disabled ? 0.5 : 1,
         }}>
@@ -223,10 +224,10 @@ export default function ActionMenu({
           {/* Optional info line for the current level (job 35) — e.g. clarifying that a
               bulk action applies per the backend's actual scope, not a vacancy the user picks. */}
           {current?.note && (
-            <div style={{ padding: '8px 12px', fontSize: 11, lineHeight: 1.4, color: 'var(--text-muted)',
+            <Caption as="div" style={{ padding: '8px 12px', lineHeight: 1.4,
               background: 'var(--hover-bg)', borderBottom: '1px solid var(--border)' }}>
               {current.note}
-            </div>
+            </Caption>
           )}
 
           {/* Search box for an option/multi-select level (unless explicitly disabled) */}
