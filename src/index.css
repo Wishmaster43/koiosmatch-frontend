@@ -91,6 +91,10 @@
      (WCAG fail, Opus slotaudit review 20-08) and no single ink works on both the
      solid fill and the pastel across themes — dark redefines this one. */
   --color-on-success-bg: #111827;
+  /* Text on the danger-bg PASTEL (error banners/notices). Same class: the danger
+     colour itself reads 3.95:1 on its own pastel (Opus r3.5) — this darker red
+     measures 5.30:1 and still reads as "error red". Dark redefines it. */
+  --color-on-danger-bg:  #B91C1C;
   /* Accent used as TEXT (active menu item, active chip label, links). Defaults to
      the accent itself; useTenantTheme replaces it with a readable variant when the
      tenant's brand is too light for the surface — darkened in light mode, lightened
@@ -210,6 +214,9 @@
   /* On the dark success tint (composites to ≈#1B3734 on the dark surface) the
      light pastel reads ≈12:1; near-black or the vivid green both fail there. */
   --color-on-success-bg: #DCFCE7;
+  /* On the dark danger tint (composites to ≈#461E2C) the vivid danger reads
+     2.92:1 — this lightened red measures 7.44:1. */
+  --color-on-danger-bg:  #FCA5A5;
   --color-warning-bg:   rgba(217, 119, 6, 0.20);
   --color-danger-bg:    rgba(220, 38, 38, 0.22);
   --color-info-bg:      rgba(14, 165, 233, 0.18);

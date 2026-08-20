@@ -10,6 +10,7 @@
 import { useTranslation } from 'react-i18next'
 import { CalendarCheck, Clock, UserX, CalendarX, MessageCircle, CheckSquare } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
+import { tintBg, chipInk } from '@/lib/tint'
 import { useKoiosRadarSignals } from './useKoiosRadarSignals'
 import type { RadarSignalId } from './useKoiosRadarSignals'
 
@@ -60,6 +61,7 @@ export default function KoiosRadar({ onNavigate }: { onNavigate?: (page: string,
               <button key={s.id} type="button"
                 onClick={() => onNavigate?.('candidates', { attention: s.id })}
                 aria-label={`${label}: ${s.count}`}
+                // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- full-width clickable list row with an imperative hover swap (structural, not an action button), pre-existing and out of this ink/tint task's scope
                 style={{
                   display: 'flex', alignItems: 'center', gap: 10, width: '100%',
                   padding: '7px 14px', background: 'none', border: 'none', cursor: 'pointer',
@@ -70,7 +72,9 @@ export default function KoiosRadar({ onNavigate }: { onNavigate?: (page: string,
                 <span style={{
                   display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
                   width: 22, height: 22, borderRadius: 6,
-                  background: `color-mix(in srgb, ${meta.color} 14%, transparent)`, color: meta.color,
+                  // Tint via lib/tint; ink via chipInk — the raw colour on its own tint
+                  // reads 2.4-3.0:1, AA fail (herhaal-slotaudit r3.5).
+                  background: tintBg(meta.color, true), color: chipInk(meta.color),
                 }}>
                   <Icon size={12} />
                 </span>

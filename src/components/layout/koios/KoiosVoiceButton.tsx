@@ -44,6 +44,7 @@ import { useTranslation } from 'react-i18next'
 import { Mic, MicOff } from 'lucide-react'
 import type { TFn } from '@/types/koios'
 import { notifyError } from '@/lib/notify'
+import { tintBg, tintBorder, chipInk } from '@/lib/tint'
 
 // Minimal shape of the (still non-standard, vendor-prefixed) Web Speech API
 // recognizer — lib.dom.d.ts ships the *event*/*result* types already but not
@@ -231,6 +232,10 @@ export default function KoiosVoiceButton({ onText, t, lang }: KoiosVoiceButtonPr
   // button (§3 no fake affordances), with a tooltip explaining WHY.
   if (insecureContext) {
     const insecureTitle = t('voice.insecureContext', { ns: 'koios' })
+    // Deliberately bare chrome: an inert explainer glyph in sidebar chrome, not an
+    // action button — Button's grey disabled recipe would make it LOUDER than the
+    // live mic beside it. Block form: the style attribute spans lines.
+    /* eslint-disable huisstijlLegacy/no-restricted-syntax */
     return (
       <button type="button" disabled title={insecureTitle} aria-label={insecureTitle} style={{
         background: 'none', border: 'none', cursor: 'not-allowed', padding: '4px 5px', borderRadius: 7,
@@ -239,6 +244,7 @@ export default function KoiosVoiceButton({ onText, t, lang }: KoiosVoiceButtonPr
         <Mic size={14} />
       </button>
     )
+    /* eslint-enable huisstijlLegacy/no-restricted-syntax */
   }
 
   const title = denied ? t('voice.denied', { ns: 'koios' })
@@ -247,6 +253,10 @@ export default function KoiosVoiceButton({ onText, t, lang }: KoiosVoiceButtonPr
   // (never the raw brand primary, which can fail contrast on a light tenant fill).
   const idleColor = 'var(--button-ink)'
 
+  // The mic is an aria-pressed TOGGLE with a listening state tint + pulse — a
+  // different species than Button (which models actions, not pressed state).
+  // Block form: the flagged style attribute sits lines into the opening tag.
+  /* eslint-disable huisstijlLegacy/no-restricted-syntax */
   return (
     <>
       <button
@@ -260,11 +270,13 @@ export default function KoiosVoiceButton({ onText, t, lang }: KoiosVoiceButtonPr
           // Danny 20-08 ("hij valt niet op — een knopje van de mic maken"): the mic
           // is a real trio chip at rest so it reads as a control; recording stays
           // a DANGER tint (his reconfirmed rule: destructive/warning keeps red).
-          background: listening ? 'color-mix(in srgb, var(--color-danger) 14%, transparent)' : 'var(--button-fill)',
-          border: listening ? '1px solid color-mix(in srgb, var(--color-danger) 40%, transparent)' : '1px solid var(--button-border)',
+          background: listening ? tintBg('var(--color-danger)', true) : 'var(--button-fill)',
+          border: listening ? tintBorder('var(--color-danger)', true) : '1px solid var(--button-border)',
           cursor: 'pointer', width: 28, height: 28, display: 'inline-flex',
           alignItems: 'center', justifyContent: 'center', borderRadius: 6,
-          color: listening ? 'var(--color-danger)' : idleColor,
+          // chipInk while listening: the raw danger on its own tint read ~2.9:1 dark (Opus r4).
+          // eslint-disable-next-line huisstijl/no-restricted-syntax -- idleColor is the untinted idle state's derived ink; provenance is opaque to the tint-ink selector
+          color: listening ? chipInk('var(--color-danger)') : idleColor,
           fontWeight: listening ? 600 : 400,
           transition: 'background var(--motion-fast), color var(--motion-fast)',
         }}

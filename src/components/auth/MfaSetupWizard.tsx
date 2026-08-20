@@ -10,6 +10,7 @@ import { ArrowLeft, Copy, ShieldCheck } from 'lucide-react'
 import { QRCodeSVG } from 'qrcode.react'
 import Button from '@/components/ui/Button'
 import Spinner from '@/components/ui/Spinner'
+import { tint } from '@/lib/tint'
 
 // Loose server payload shapes — AuthContext types these calls as Promise<unknown>.
 type SetupResponse   = { otpauth_url?: string; secret?: string }
@@ -90,8 +91,10 @@ export default function MfaSetupWizard({ setupMfa, confirmMfa, onConfirmed, onFi
     <div style={{ maxWidth: 420 }}>
       {error ? (
         <>
-          <div role="alert" style={{ fontSize: 13, color: 'var(--color-danger)', background: 'var(--color-danger-bg)',
-                         border: '1px solid color-mix(in srgb, var(--color-danger) 45%, transparent)', borderRadius: 8, padding: '8px 12px', marginBottom: 12 }}>
+          {/* Ink is --color-on-danger-bg — the raw danger colour reads only 3.95:1
+              on its own pastel, AA fail (Opus r3.5). */}
+          <div role="alert" style={{ fontSize: 13, color: 'var(--color-on-danger-bg)', background: 'var(--color-danger-bg)',
+                         border: `1px solid ${tint('var(--color-danger)', 45)}`, borderRadius: 8, padding: '8px 12px', marginBottom: 12 }}>
             {error}
           </div>
           <div style={{ display: 'flex', gap: 10 }}>
@@ -187,8 +190,10 @@ export default function MfaSetupWizard({ setupMfa, confirmMfa, onConfirmed, onFi
             onBlur={e  => (e.target.style.borderColor = 'var(--border)')} />
         </div>
         {error && (
-          <div role="alert" style={{ fontSize: 13, color: 'var(--color-danger)', background: 'var(--color-danger-bg)',
-                         border: '1px solid color-mix(in srgb, var(--color-danger) 45%, transparent)', borderRadius: 8, padding: '8px 12px' }}>
+          // Ink is --color-on-danger-bg — the raw danger colour reads only 3.95:1
+          // on its own pastel, AA fail (Opus r3.5).
+          <div role="alert" style={{ fontSize: 13, color: 'var(--color-on-danger-bg)', background: 'var(--color-danger-bg)',
+                         border: `1px solid ${tint('var(--color-danger)', 45)}`, borderRadius: 8, padding: '8px 12px' }}>
             {error}
           </div>
         )}

@@ -1,10 +1,13 @@
+import { tintBg, tintBorder, chipInk } from '@/lib/tint'
+
 /**
  * TitleBadge — the ONE read-only, colour-coded pill shown beside an entity's
  * drawer title (candidate phase, opportunity stage, application phase, task
  * status, outreach status, …). Extracted so every drawer's title badge stays
  * pixel-identical (§3A) instead of re-copying the inline style a fourth time.
- * Uses color-mix (not hex-concat) so it also works with CSS-var tokens, not
- * just hex lookup colours (mirrors the shared SoftChip convention, §4).
+ * Tint via lib/tint (house pair) so it also works with CSS-var tokens, not
+ * just hex lookup colours; ink via chipInk — the raw colour on its own tint
+ * reads 2.4-3.0:1, AA fail (herhaal-slotaudit r3.5), mirrors SoftChip.
  */
 interface TitleBadgeProps {
   label?: string | null
@@ -19,8 +22,8 @@ export default function TitleBadge({ label, color }: TitleBadgeProps) {
   const c = color || '#9CA3AF'
   return (
     <span style={{ fontSize: 11, fontWeight: 600, padding: '2px 9px', borderRadius: 999,
-      background: `color-mix(in srgb, ${c} 10%, transparent)`, color: c,
-      border: `1px solid color-mix(in srgb, ${c} 33%, transparent)`, whiteSpace: 'nowrap' }}>
+      background: tintBg(c), color: chipInk(c),
+      border: tintBorder(c), whiteSpace: 'nowrap' }}>
       {label}
     </span>
   )

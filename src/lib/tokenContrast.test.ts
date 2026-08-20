@@ -72,6 +72,12 @@ describe('house token pairs stay readable (defaults, light theme)', () => {
     expect(ratio(token('color-on-success-bg'), token('color-success-bg'))).toBeGreaterThanOrEqual(4.5)
   })
 
+  // Same class, danger side (Opus r3.5): the danger colour itself reads 3.95:1
+  // on its own pastel — error banners carry their own ink token.
+  it('on-danger-bg clears 4.5:1 as text on the danger-bg pastel', () => {
+    expect(ratio(token('color-on-danger-bg'), token('color-danger-bg'))).toBeGreaterThanOrEqual(4.5)
+  })
+
   // chipInk (herhaal-slotaudit 20-08): every semantic token's TEXT on its own
   // 10% AND 16% tint, composited over both page grounds, must clear AA. The raw
   // colours measured 2.4-3.0:1 there (SoftChip app-wide); chipInk blends 45%

@@ -60,8 +60,10 @@ function ErrorFallback({ error, onReset, compact }: { error: Error | null; onRes
       display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
       gap: 12, textAlign: 'center', padding: compact ? '24px 16px' : '64px 24px',
       minHeight: compact ? 0 : 240, color: 'var(--text)' }}>
+      {/* Ink is --color-on-danger-bg — the raw danger colour reads only 3.95:1 on
+          its own pastel, AA fail (Opus r3.5). */}
       <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 44, height: 44,
-        borderRadius: 12, background: 'var(--color-danger-bg)', color: 'var(--color-danger)' }}>
+        borderRadius: 12, background: 'var(--color-danger-bg)', color: 'var(--color-on-danger-bg)' }}>
         <AlertTriangle size={22} />
       </span>
       <div>

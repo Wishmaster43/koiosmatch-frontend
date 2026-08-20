@@ -20,6 +20,7 @@ import { describe, it, expect, vi, afterEach } from 'vitest'
 import { render, screen, act } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import NoteComposer from './NoteComposer'
+import { chipInk } from '@/lib/tint'
 
 vi.mock('@/components/ui/RichTextEditor', () => ({
   // Renders `toolbarExtra` like the real editor does — the dictation mic lives in
@@ -275,7 +276,7 @@ describe('NoteComposer · channel picker shows the selection (CHANNEL-PICKER-CON
     const selected = chip('Email')
     expect(selected).toHaveAttribute('aria-pressed', 'true')
     // jsdom normalizes a hex colour to rgb() — toHaveStyle normalizes both sides.
-    expect(selected).toHaveStyle({ color: EMAIL_COLOR })
+    expect(selected).toHaveStyle({ color: chipInk(EMAIL_COLOR) })
     // jsdom rewrites the hex inside color-mix() to rgb() — assert on the parts
     // that carry the meaning: the channel colour, the 16%/50% tint, color-mix.
     expect(selected.style.background).toContain('color-mix(in srgb, rgb(37, 99, 235)')

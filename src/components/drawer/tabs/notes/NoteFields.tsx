@@ -23,6 +23,7 @@ import NoteAssistSection from './NoteAssistSection'
 import { CHANNEL_ICON } from './channelIcons'
 import type { NoteFieldsState } from './useNoteFields'
 import type { NoteType, NotesLabels } from '../NotesTab'
+import { tintBg, tintBorder, chipInk } from '@/lib/tint'
 
 interface NoteFieldsProps {
   // The field state — one `useNoteFields(...)` return, passed whole.
@@ -56,6 +57,10 @@ export default function NoteFields({ fields, noteTypes, channels, labels, editor
               SELECTED state reads the house trio, solid, same as every other
               accent selection. The channel picker below keeps ITS OWN colour per
               channel (a data colour, excluded from the trio — see its comment). */}
+          {/* Note-type pill toggles — structural chip toggles (selected wears the
+              trio per PRIMAIR-VLAK-1), not Button copies. Block form: the flagged
+              style attribute sits lines into the opening tag. */}
+          {/* eslint-disable huisstijlLegacy/no-restricted-syntax */}
           {noteTypes.map(nt => (
             <button key={nt.value} type="button" onClick={() => setType(nt.value)}
               style={{ padding: '4px 10px', fontSize: 11.5, borderRadius: 99, cursor: 'pointer',
@@ -65,6 +70,7 @@ export default function NoteFields({ fields, noteTypes, channels, labels, editor
               {nt.label}
             </button>
           ))}
+          {/* eslint-enable huisstijlLegacy/no-restricted-syntax */}
         </div>
       </div>
 
@@ -81,6 +87,10 @@ export default function NoteFields({ fields, noteTypes, channels, labels, editor
                 every chip (colour is never the only signal) and aria-pressed exposes the
                 selection to screen readers (§6). The note LIST chip keeps its own colour —
                 there the colour answers "which channel was this". */}
+            {/* Channel chip toggles — structural (colour = WHICH channel, §4 tint
+                language via the house pair + chipInk), not Button copies. Block
+                form: the flagged style attribute sits lines into the opening tag. */}
+            {/* eslint-disable huisstijlLegacy/no-restricted-syntax */}
             {channels.map(ch => {
               const active = channel === ch.value
               const col = ch.color ?? 'var(--color-primary)'
@@ -89,13 +99,14 @@ export default function NoteFields({ fields, noteTypes, channels, labels, editor
                 <button key={ch.value} type="button" aria-pressed={active} onClick={() => setChannel(active ? '' : ch.value)}
                   style={{ display: 'inline-flex', alignItems: 'center', gap: 5, padding: '4px 10px', fontSize: 11.5,
                     fontWeight: active ? 600 : 500, borderRadius: 99, cursor: 'pointer',
-                    color: active ? col : 'var(--text-muted)',
-                    background: active ? `color-mix(in srgb, ${col} 16%, transparent)` : 'var(--surface)',
-                    border: active ? `1px solid color-mix(in srgb, ${col} 50%, transparent)` : '1px solid var(--border)' }}>
+                    color: active ? chipInk(col) : 'var(--text-muted)',
+                    background: active ? tintBg(col, true) : 'var(--surface)',
+                    border: active ? tintBorder(col, true) : '1px solid var(--border)' }}>
                   {Icon && <Icon size={12} />} {ch.label}
                 </button>
               )
             })}
+            {/* eslint-enable huisstijlLegacy/no-restricted-syntax */}
           </div>
         </div>
       )}

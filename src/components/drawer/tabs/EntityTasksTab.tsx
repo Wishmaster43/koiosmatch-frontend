@@ -40,6 +40,7 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { ListChecks, AlertTriangle, Search } from 'lucide-react'
+import { tintBg, tintBorder, chipInk } from '@/lib/tint'
 import DrawerAddButton from '@/components/drawer/DrawerAddButton'
 import DrawerFilterMenu from '@/components/drawer/DrawerFilterMenu'
 import type { DrawerFilterConfig } from '@/components/drawer/DrawerFilterMenu'
@@ -200,6 +201,7 @@ function EntityTasksTabBody({ linkType, id, labels, extraLinks = [] }: Props) {
             return (
               <button key={String(task.id ?? i)} type="button" title={labels.openTask}
                 onClick={() => task.id != null && openEntity('tasks', task.id)}
+                // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- full-width clickable list row (structural, not an action button), pre-existing and out of this ink/tint task's scope
                 style={{ display: 'flex', alignItems: 'center', gap: 10, width: '100%', textAlign: 'left', padding: '9px 11px',
                   border: '1px solid var(--border)', borderRadius: 8, background: 'var(--surface)', cursor: 'pointer' }}>
                 <div style={{ flex: 1, minWidth: 0 }}>
@@ -212,9 +214,11 @@ function EntityTasksTabBody({ linkType, id, labels, extraLinks = [] }: Props) {
                 </div>
                 {statusLabel && (
                   colorStatus ? (
+                    // Tint via lib/tint (house pair); ink via chipInk — the raw lookup
+                    // colour on its own tint reads 2.4-3.0:1, AA fail (herhaal-slotaudit r3.5).
                     <span style={{ fontSize: 11, fontWeight: 500, padding: '2px 7px', borderRadius: 5, flexShrink: 0,
-                      background: `color-mix(in srgb, ${statusColor} 12%, transparent)`, color: statusColor,
-                      border: `1px solid color-mix(in srgb, ${statusColor} 40%, transparent)` }}>
+                      background: tintBg(statusColor), color: chipInk(statusColor),
+                      border: tintBorder(statusColor) }}>
                       {statusLabel}
                     </span>
                   ) : (

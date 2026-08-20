@@ -12,6 +12,7 @@
 import { AlertTriangle, Ban } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { humanizeIsoDates } from '@/lib/localDate'
+import { tintBg, tintBorder, chipInk } from '@/lib/tint'
 import type { ActionRuleDecision } from './actionRuleTypes'
 
 export default function ActionRuleBanner({ decision }: { decision: ActionRuleDecision | null | undefined }) {
@@ -20,18 +21,21 @@ export default function ActionRuleBanner({ decision }: { decision: ActionRuleDec
 
   const isBlock = decision.effect === 'block'
   const color = isBlock ? 'var(--color-danger)' : 'var(--color-warning)'
-  const bg = `color-mix(in srgb, ${color} 10%, transparent)`
-  const border = `color-mix(in srgb, ${color} 30%, transparent)`
+  // Tint via lib/tint (house pair); ink via chipInk — the raw colour on its own
+  // tint reads 2.4-3.0:1, AA fail (herhaal-slotaudit r3.5).
+  const bg = tintBg(color)
+  const border = tintBorder(color)
+  const ink = chipInk(color)
   const Icon = isBlock ? Ban : AlertTriangle
   const titleKey = isBlock ? 'actionRules.blockTitle' : 'actionRules.warnTitle'
 
   return (
     <div role="alert" data-testid="action-rule-banner" data-effect={decision.effect}
       style={{ display: 'flex', gap: 8, alignItems: 'flex-start', padding: '8px 10px',
-        borderRadius: 8, background: bg, border: `1px solid ${border}` }}>
-      <Icon size={15} color={color} style={{ flexShrink: 0, marginTop: 1 }} aria-hidden="true" />
+        borderRadius: 8, background: bg, border }}>
+      <Icon size={15} color={ink} style={{ flexShrink: 0, marginTop: 1 }} aria-hidden="true" />
       <div style={{ minWidth: 0 }}>
-        <div style={{ fontSize: 11, fontWeight: 600, color }}>{t(titleKey)}</div>
+        <div style={{ fontSize: 11, fontWeight: 600, color: ink }}>{t(titleKey)}</div>
         {decision.message && (
           <div style={{ fontSize: 12, color: 'var(--text)', marginTop: 2 }}>{humanizeIsoDates(decision.message)}</div>
         )}

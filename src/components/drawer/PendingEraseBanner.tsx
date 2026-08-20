@@ -1,5 +1,6 @@
 import type { ReactNode, ComponentType } from 'react'
 import { ArchiveRestore } from 'lucide-react'
+import { tintBg, tintBorder, chipInk } from '@/lib/tint'
 import type { Id } from '@/types/common'
 
 interface PendingEraseBannerProps {
@@ -29,12 +30,13 @@ interface PendingEraseBannerProps {
 }
 
 // Compact soft-tint action button (§4 — never a solid fill, never bare coloured text),
-// shared by the 'button' unmark variant.
+// shared by the 'button' unmark variant. Tint via lib/tint (house pair); ink via
+// chipInk — the raw colour on its own tint reads 2.4-3.0:1, AA fail (r3.5).
 const actionBtn = (color: string) => ({
   display: 'inline-flex', alignItems: 'center', gap: 5, height: 26, padding: '0 10px',
   fontSize: 11.5, fontWeight: 600, borderRadius: 6, cursor: 'pointer', whiteSpace: 'nowrap',
-  color, background: `color-mix(in srgb, ${color} 8%, transparent)`,
-  border: `1px solid color-mix(in srgb, ${color} 40%, transparent)`,
+  color: chipInk(color), background: tintBg(color),
+  border: tintBorder(color),
 } as const)
 
 /**
@@ -53,17 +55,21 @@ export default function PendingEraseBanner({
   const Icon = unmarkIcon ?? ArchiveRestore
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 8, padding: '7px 10px', borderRadius: 8, fontSize: 12,
-      color: 'var(--color-danger)', background: 'color-mix(in srgb, var(--color-danger) 8%, transparent)',
-      border: '1px solid color-mix(in srgb, var(--color-danger) 28%, transparent)' }}>
+      color: chipInk('var(--color-danger)'), background: tintBg('var(--color-danger)'),
+      border: tintBorder('var(--color-danger)') }}>
       <span style={{ flex: 1, minWidth: 0 }}>{message}</span>
       {onUnmark && unmarkVariant === 'button' && (
+        // Pre-existing bespoke §4 soft-tint pill (own busy-fade opacity), out of this
+        // ink/tint task's scope; not converted to avoid a size/identity regression.
         <button type="button" onClick={() => onUnmark(id)} disabled={unmarkBusy}
+          // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- see comment above
           style={{ ...actionBtn(unmarkColor), opacity: unmarkBusy ? 0.6 : 1 }}>
           <Icon size={12} aria-hidden="true" /> {unmarkLabel}
         </button>
       )}
       {onUnmark && unmarkVariant === 'icon' && (
         <button onClick={() => onUnmark(id)} disabled={unmarkBusy} title={unmarkLabel} aria-label={unmarkLabel}
+          // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- pre-existing bespoke icon-only control with its own busy-fade opacity, out of this ink/tint task's scope
           style={{ background: 'none', border: 'none', cursor: unmarkBusy ? 'default' : 'pointer', padding: 3, display: 'flex',
             color: 'var(--color-danger)', opacity: unmarkBusy ? 0.6 : 1 }}>
           <Icon size={14} />

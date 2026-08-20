@@ -336,8 +336,10 @@ export default function AddCustomerModal({ onClose, onCreate, onImported, users 
 
         {/* Server-side rejection (non-field 422 / other failure) — shown in place, modal stays open. */}
         {createError && (
+          // Ink is --color-on-danger-bg — the raw danger colour reads only 3.95:1 on
+          // its own pastel, AA fail (Opus r3.5).
           <div role="alert" style={{ margin: '0 24px 8px', padding: '8px 10px', fontSize: 12, borderRadius: 8,
-            color: 'var(--color-danger)', background: 'var(--color-danger-bg)',
+            color: 'var(--color-on-danger-bg)', background: 'var(--color-danger-bg)',
             border: tintBorder('var(--color-danger)', true), flexShrink: 0 }}>
             {createError}
           </div>

@@ -154,12 +154,14 @@ export default defineConfig([
         // Same rule, ternary form: `color: on ? col : 'var(--text-muted)'` — only a
         // RAW identifier/member in a BRANCH is the violation; `on ? chipInk(col) : …`
         // is the fix and must pass, so the whole ConditionalExpression is never
-        // flagged as one blob.
-        selector: "ObjectExpression:has(CallExpression[callee.name=/^tint(Bg)?$/]) > Property[key.name='color'] > ConditionalExpression.value > .consequent:matches(Identifier, MemberExpression)",
+        // flagged as one blob. DESCENDANT (not `> ConditionalExpression.value >`):
+        // a NESTED ternary hid SegmentedControl's 3.00:1 activeFill ink from the
+        // direct-child form (Opus r4) — any ternary depth under color: now counts.
+        selector: "ObjectExpression:has(CallExpression[callee.name=/^tint(Bg)?$/]) > Property[key.name='color'] ConditionalExpression > .consequent:matches(Identifier, MemberExpression)",
         message: 'HUISSTIJL: tekst op zijn eigen tint leest chipInk(kleur) uit lib/tint — de bronkleur zelf haalt de 4.5:1 niet (gemeten 2.4-3.0:1).',
       },
       {
-        selector: "ObjectExpression:has(CallExpression[callee.name=/^tint(Bg)?$/]) > Property[key.name='color'] > ConditionalExpression.value > .alternate:matches(Identifier, MemberExpression)",
+        selector: "ObjectExpression:has(CallExpression[callee.name=/^tint(Bg)?$/]) > Property[key.name='color'] ConditionalExpression > .alternate:matches(Identifier, MemberExpression)",
         message: 'HUISSTIJL: tekst op zijn eigen tint leest chipInk(kleur) uit lib/tint — de bronkleur zelf haalt de 4.5:1 niet (gemeten 2.4-3.0:1).',
       }],
     },

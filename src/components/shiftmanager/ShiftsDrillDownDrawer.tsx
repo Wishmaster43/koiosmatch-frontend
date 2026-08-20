@@ -27,7 +27,9 @@ const STATUS_META: Record<string, { bg: string; color: string }> = {
   completed:          { bg: 'var(--color-success-bg)', color: 'var(--color-success)' },
   // eslint-disable-next-line no-restricted-syntax -- DATA: fixed status→colour mapping, mirrors the lookup-colour pattern used elsewhere; no exact token equivalent for this shade
   open:               { bg: 'var(--color-warning-bg)', color: '#C2410C' },
-  verwijderd:         { bg: 'var(--color-danger-bg)', color: 'var(--color-danger)' },
+  // Ink is --color-on-danger-bg — the raw danger colour reads only 3.95:1 on its
+  // own pastel, AA fail (Opus r3.5).
+  verwijderd:         { bg: 'var(--color-danger-bg)', color: 'var(--color-on-danger-bg)' },
   niet_factureerbaar: { bg: 'var(--hover-bg)', color: 'var(--text-muted)' },
 }
 

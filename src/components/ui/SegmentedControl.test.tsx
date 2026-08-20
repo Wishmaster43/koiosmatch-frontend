@@ -75,6 +75,10 @@ describe('SegmentedControl · activeOnly leaves the unselected options neutral',
     expect(chosen.style.background).toBe('var(--color-success-bg)')
     expect(chosen.style.border).toBe('1px solid var(--color-success)')
     expect(chosen.style.background).not.toContain('color-mix')
+    // Ink is the pastel's own on-token — the raw success colour reads 3.00:1 on
+    // this fill (the exact value Opus r2 rejected; caught live again on the
+    // package cards, r4). Nothing asserted this before, so it regressed silently.
+    expect(chosen.style.color).toBe('var(--color-on-success-bg)')
   })
 
   it('still tints every option WITHOUT activeOnly — the §4 default is unchanged', () => {

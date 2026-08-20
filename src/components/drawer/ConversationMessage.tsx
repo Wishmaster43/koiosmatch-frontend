@@ -11,6 +11,7 @@ import { useTranslation } from 'react-i18next'
 import { Check, CheckCheck } from 'lucide-react'
 import SoftChip from '@/components/ui/SoftChip'
 import { avatarColor } from '@/lib/avatarColor'
+import { tintBg, tintBorder } from '@/lib/tint'
 import type { Id } from '@/types/common'
 
 // The recruiter/agent behind an outbound message (e.g. Ravi, Kelly).
@@ -68,9 +69,12 @@ export default function ConversationMessage({ message, formatDateTime }: {
       {out && message.sent_by?.name && (
         <span style={{ fontSize: 10, fontWeight: 600, color, marginBottom: 2 }}>{message.sent_by.name}</span>
       )}
+      {/* Bubble fill is the sender's tint (§4, via lib/tint); the TEXT stays the
+          neutral --text token on purpose — this is a message body, not a chip
+          label, so it reads like ordinary prose regardless of sender colour. */}
       <div style={{ maxWidth: '85%', padding: '6px 10px', borderRadius: 10, fontSize: 12, color: 'var(--text)',
-        background: `color-mix(in srgb, ${color} 10%, transparent)`,
-        border: `1px solid color-mix(in srgb, ${color} 32%, transparent)` }}>
+        background: tintBg(color),
+        border: tintBorder(color) }}>
         {message.message_content ?? '—'}
       </div>
       <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 2 }}>

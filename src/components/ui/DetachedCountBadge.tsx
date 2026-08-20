@@ -1,5 +1,6 @@
 import { useTranslation } from 'react-i18next'
 import { Unlink } from 'lucide-react'
+import { tint } from '@/lib/tint'
 
 interface DetachedCountBadgeProps {
   // Server-computed, whole-history count of applications CURRENTLY detached
@@ -22,7 +23,9 @@ export default function DetachedCountBadge({ count }: DetachedCountBadgeProps) {
     <span title={t('detachedCount.tooltip', { count })}
       style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 11, fontWeight: 600,
         padding: '2px 9px', borderRadius: 999, background: 'var(--color-danger-bg)',
-        color: 'var(--color-danger)', border: '1px solid color-mix(in srgb, var(--color-danger) 40%, transparent)' }}>
+        // Ink is --color-on-danger-bg — the raw danger colour reads only 3.95:1 on its
+        // own pastel, AA fail (Opus r3.5). Border stays the plain danger tint.
+        color: 'var(--color-on-danger-bg)', border: `1px solid ${tint('var(--color-danger)', 40)}` }}>
       <Unlink size={11} />
       {t('detachedCount.label', { count })}
     </span>

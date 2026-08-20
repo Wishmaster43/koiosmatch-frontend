@@ -25,7 +25,9 @@ function StatusBadge({ status }: { status?: string }) {
     nietactief: { bg: 'var(--color-warning-bg)', color: '#C2410C' },
     extern:     { bg: 'var(--color-secondary-bg)', color: '#1D4ED8' },
     intake:     { bg: '#FAF5FF', color: 'var(--color-violet)' },
-    verwijderd: { bg: 'var(--color-danger-bg)', color: 'var(--color-danger)' },
+    // Ink is --color-on-danger-bg — the raw danger colour reads only 3.95:1 on its
+    // own pastel, AA fail (Opus r3.5).
+    verwijderd: { bg: 'var(--color-danger-bg)', color: 'var(--color-on-danger-bg)' },
   }
   /* eslint-enable no-restricted-syntax */
   const key = (status || '').toLowerCase()

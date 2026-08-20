@@ -8,6 +8,7 @@
  * (e.g. 'table' | 'board') instead of widening to a plain string.
  */
 import type { ComponentType } from 'react'
+import { tint, chipInk } from '@/lib/tint'
 
 export interface ViewModeOption<T extends string = string> {
   id: T
@@ -30,10 +31,14 @@ export default function ViewModeToggle<T extends string = string>({ value, onCha
         const active = value === id
         return (
           <button key={id} onClick={() => onChange(id)} title={label} aria-label={label} aria-pressed={active}
+            // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- aria-pressed toggle with its own §4 soft-tint identity (colour-driven per caller), not one of Button's fixed variants
             style={{
-              display: 'flex', padding: 6, borderRadius: 6, cursor: 'pointer', color: active ? color : 'var(--text-muted)',
-              background: `color-mix(in srgb, ${color} ${active ? 16 : 8}%, transparent)`,
-              border: `1px solid color-mix(in srgb, ${color} ${active ? 50 : 28}%, transparent)`,
+              display: 'flex', padding: 6, borderRadius: 6, cursor: 'pointer',
+              // Ink via chipInk when selected — the raw colour on its own tint reads
+              // 2.4-3.0:1, AA fail (herhaal-slotaudit r3.5); unselected stays muted.
+              color: active ? chipInk(color) : 'var(--text-muted)',
+              background: tint(color, active ? 16 : 8),
+              border: `1px solid ${tint(color, active ? 50 : 28)}`,
             }}>
             <Icon size={16} />
           </button>

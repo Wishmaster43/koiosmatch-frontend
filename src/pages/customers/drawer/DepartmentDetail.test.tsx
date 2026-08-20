@@ -22,6 +22,7 @@ import userEvent from '@testing-library/user-event'
 import i18n from '@/i18n'
 import api from '@/lib/api'
 import DepartmentDetail from './DepartmentDetail'
+import { chipInk } from '@/lib/tint'
 import type { Department } from '@/types/customer'
 import type { LookupOption } from '@/types/common'
 
@@ -116,11 +117,13 @@ const department = (over: Partial<Department> = {}): Department => ({
 } as Department)
 
 // Hex values here are DATA — fixture colours for a tenant lookup, not UI styling.
+// Lowercase (jsdom lowercases hex inside a color-mix() string on serialization, so
+// a mixed-case fixture would never match chipInk's own computed output).
 const statuses: LookupOption[] = [
   // eslint-disable-next-line no-restricted-syntax -- DATA fixture, mirrors a tenant lookup colour
-  { value: 'status-active', label: 'Actief', color: '#22C55E', id: 'status-active' },
+  { value: 'status-active', label: 'Actief', color: '#22c55e', id: 'status-active' },
   // eslint-disable-next-line no-restricted-syntax -- DATA fixture, mirrors a tenant lookup colour
-  { value: 'status-inactive', label: 'Inactief', color: '#9CA3AF', id: 'status-inactive' },
+  { value: 'status-inactive', label: 'Inactief', color: '#9ca3af', id: 'status-inactive' },
 ]
 
 // Every required prop the component reads — kept minimal, only onSave is asserted.
@@ -147,7 +150,8 @@ describe('DepartmentDetail · title-row status badge (JOB-STATUS-1)', () => {
 
   it('colours the badge with the lookup\'s own colour, not a fixed brand colour', () => {
     render(<DepartmentDetail department={activeDepartment()} onSave={vi.fn()} {...baseProps} />)
-    expect(screen.getByText('Actief')).toHaveStyle({ color: statuses[0].color })
+    // Ink is chipInk(colour), not the raw lookup colour (AA contrast, r3.5).
+    expect(screen.getByText('Actief')).toHaveStyle({ color: chipInk(statuses[0].color as string) })
   })
 
   it('renders no badge (but still an edit affordance) when the department carries no status yet', () => {

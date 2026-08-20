@@ -16,6 +16,7 @@ import { vi } from 'vitest'
 import NoteFields from './NoteFields'
 import { useNoteFields } from './useNoteFields'
 import type { NoteType, NotesLabels } from '../NotesTab'
+import { chipInk } from '@/lib/tint'
 
 vi.mock('@/components/ui/RichTextEditor', () => ({
   default: ({ value, onChange }: { value?: string; onChange: (v: string) => void }) => (
@@ -66,7 +67,7 @@ describe('NoteFields · channel picker shows the selection (CHANNEL-PICKER-CONTR
     const selected = chip('WhatsApp')
     expect(selected).toHaveAttribute('aria-pressed', 'true')
     // jsdom normalizes a hex colour to rgb() — toHaveStyle normalizes both sides.
-    expect(selected).toHaveStyle({ color: WHATSAPP_COLOR })
+    expect(selected).toHaveStyle({ color: chipInk(WHATSAPP_COLOR) })
     // jsdom rewrites the hex inside color-mix() to rgb() — assert on the parts
     // that carry the meaning: the channel colour, the 16%/50% tint, color-mix.
     expect(selected.style.background).toContain('color-mix(in srgb, rgb(22, 163, 74)')

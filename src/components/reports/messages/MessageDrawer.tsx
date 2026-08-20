@@ -6,6 +6,7 @@
 import { X, MessageCircle, Mail, User, Phone, AlertTriangle } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { useFocusTrap } from '@/hooks/useFocusTrap'
+import { PageTitle } from '@/components/ui/typography'
 import type { MessageRow } from '@/types/reports'
 import { formatDT, CHANNEL_META, ChannelBadge, StatusBadge } from './messageParts'
 
@@ -22,7 +23,7 @@ export default function MessageDrawer({ message, onClose }: { message: MessageRo
 
       <div ref={panelRef} role="dialog" aria-modal="true" aria-label={t('messageDetail', { defaultValue: 'Message' })} tabIndex={-1}
         className="fixed top-0 bottom-0 right-0 z-50 flex flex-col bg-[var(--surface)]"
-        style={{ width: 480, boxShadow: '-4px 0 30px rgba(0,0,0,0.12)' }}>
+        style={{ width: 480, boxShadow: 'var(--shadow-drawer)' }}>
 
         {/* Header */}
         <div style={{ padding: '18px 20px', borderBottom: '1px solid var(--border)', flexShrink: 0 }}>
@@ -30,16 +31,21 @@ export default function MessageDrawer({ message, onClose }: { message: MessageRo
             <div>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
                 <ChannelIcon size={15} color={channelMeta.color} />
-                <span style={{ fontWeight: 700, fontSize: 15, color: 'var(--text)' }}>
+                {/* PageTitle's own 15px scale — weight overridden to 700 to keep the
+                    pre-existing visual weight exactly (default is 600). */}
+                <PageTitle as="span" style={{ fontWeight: 700 }}>
                   {message.subject ?? message.template_name ?? t('messages.drawer.messageFallback', { id: message.id })}
-                </span>
+                </PageTitle>
               </div>
               <div style={{ display: 'flex', gap: 8 }}>
                 <ChannelBadge channel={message.channel} />
                 <StatusBadge status={message.status} />
               </div>
             </div>
+            {/* Close icon button with an imperative hover highlight Button does not
+                provide, pre-existing and out of this ink/tint task's scope. */}
             <button onClick={onClose} aria-label={t('common:close')}
+              // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- see comment above
               style={{ width: 28, height: 28, display: 'flex', alignItems: 'center', justifyContent: 'center',
                        background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)',
                        borderRadius: 6, marginLeft: 10, flexShrink: 0 }}
@@ -109,9 +115,11 @@ export default function MessageDrawer({ message, onClose }: { message: MessageRo
             // eslint-disable-next-line no-restricted-syntax -- DATA: danger-border companion colour, mirrors the same literal used in RunDetailDrawer/EmailSettings/WhatsAppSettings
             <div style={{ marginTop: 16, background: 'var(--color-danger-bg)', border: '1px solid #FCA5A5',
                           borderRadius: 8, padding: '12px 14px' }}>
+              {/* Ink is --color-on-danger-bg — the raw danger colour reads only 3.95:1
+                  on its own pastel, AA fail (Opus r3.5). */}
               <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 6 }}>
-                <AlertTriangle size={13} color="var(--color-danger)" />
-                <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--color-danger)' }}>{t('messages.drawer.error')}</span>
+                <AlertTriangle size={13} color="var(--color-on-danger-bg)" />
+                <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--color-on-danger-bg)' }}>{t('messages.drawer.error')}</span>
               </div>
               <pre style={{ fontSize: 11, color: 'var(--text)', whiteSpace: 'pre-wrap',
                             wordBreak: 'break-all', margin: 0, fontFamily: 'monospace' }}>

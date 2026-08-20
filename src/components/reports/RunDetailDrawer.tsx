@@ -12,6 +12,7 @@ import { Zap, Clock, Users, X, AlertTriangle } from 'lucide-react'
 import { formatDT, formatDuration, StatusBadge } from './runFormat'
 import RunStepList from './RunStepList'
 import { StopRunButton, CANCELLABLE } from '@/components/layout/workflow/runControl'
+import { PageTitle } from '@/components/ui/typography'
 import type { RunRow } from '@/types/reports'
 
 export default function RunDetailDrawer({ run, onClose, zIndex = 50 }: {
@@ -70,7 +71,7 @@ export default function RunDetailDrawer({ run, onClose, zIndex = 50 }: {
 
       <div ref={panelRef} role="dialog" aria-modal="true" aria-label={run.workflow_name as string | undefined} tabIndex={-1}
         className="fixed top-0 bottom-0 right-0 flex flex-col bg-[var(--surface)]"
-        style={{ width: 500, zIndex: zIndex + 1, boxShadow: '-4px 0 30px rgba(0,0,0,0.12)' }}>
+        style={{ width: 500, zIndex: zIndex + 1, boxShadow: 'var(--shadow-drawer)' }}>
 
         {/* Header */}
         <div style={{ padding: '18px 20px', borderBottom: '1px solid var(--border)', flexShrink: 0 }}>
@@ -78,9 +79,11 @@ export default function RunDetailDrawer({ run, onClose, zIndex = 50 }: {
             <div>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
                 <Zap size={15} color="var(--color-primary)" />
-                <span style={{ fontWeight: 700, fontSize: 15, color: 'var(--text)' }}>
+                {/* PageTitle's own 15px scale — weight overridden to 700 to keep the
+                    pre-existing visual weight exactly (default is 600). */}
+                <PageTitle as="span" style={{ fontWeight: 700 }}>
                   {run.workflow_name ?? t('runs.drawer.workflowFallback', { id: run.workflow_id ?? run.id })}
-                </span>
+                </PageTitle>
                 <StatusBadge status={shown.status} />
                 {/* RUN-CONTROL-1: this Make-style inspector stays read-only otherwise —
                     the stop button is the one exception for a still-live run. */}
@@ -95,7 +98,10 @@ export default function RunDetailDrawer({ run, onClose, zIndex = 50 }: {
                 <div style={{ fontSize: 11, color: 'var(--color-danger)', marginTop: 4 }}>{stopError}</div>
               )}
             </div>
+            {/* Close icon button with an imperative hover highlight Button does not
+                provide, pre-existing and out of this ink/tint task's scope. */}
             <button onClick={onClose} aria-label={t('common:close')}
+              // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- see comment above
               style={{ width: 28, height: 28, display: 'flex', alignItems: 'center', justifyContent: 'center',
                        background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)',
                        borderRadius: 6, marginLeft: 10, flexShrink: 0 }}
@@ -149,8 +155,11 @@ export default function RunDetailDrawer({ run, onClose, zIndex = 50 }: {
                                           borderBottom: '1px solid var(--hover-bg)' }}>
                 <span style={{ fontSize: 12, color: 'var(--text-muted)', width: 140, flexShrink: 0 }}>{r.label}</span>
                 {'mono' in r && r.mono ? (
+                  // Inline monospace copy-id affordance styled as plain text,
+                  // pre-existing and out of this ink/tint task's scope.
                   <button type="button" title={t('runs.drawer.copyId')}
                     onClick={() => { void navigator.clipboard?.writeText(String(r.value)) }}
+                    // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- see comment above
                     style={{ fontSize: 11.5, color: 'var(--text)', fontFamily: "'JetBrains Mono', monospace",
                              background: 'none', border: 'none', padding: 0, cursor: 'copy',
                              textAlign: 'left', wordBreak: 'break-all' }}>
@@ -181,9 +190,11 @@ export default function RunDetailDrawer({ run, onClose, zIndex = 50 }: {
             // eslint-disable-next-line no-restricted-syntax -- DATA: danger-border companion colour, mirrors the same literal used in MessageDrawer/EmailSettings/WhatsAppSettings
             <div style={{ background: 'var(--color-danger-bg)', border: '1px solid #FCA5A5', borderRadius: 8,
                           padding: '12px 14px' }}>
+              {/* Ink is --color-on-danger-bg — the raw danger colour reads only 3.95:1
+                  on its own pastel, AA fail (Opus r3.5). */}
               <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 6 }}>
-                <AlertTriangle size={13} color="var(--color-danger)" />
-                <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--color-danger)' }}>{t('runs.drawer.error')}</span>
+                <AlertTriangle size={13} color="var(--color-on-danger-bg)" />
+                <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--color-on-danger-bg)' }}>{t('runs.drawer.error')}</span>
               </div>
               <pre style={{ fontSize: 11, color: 'var(--text)', whiteSpace: 'pre-wrap',
                             wordBreak: 'break-all', margin: 0, fontFamily: 'monospace' }}>

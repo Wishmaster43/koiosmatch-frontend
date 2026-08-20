@@ -6,6 +6,7 @@ import { ChevronDown, ChevronUp, Pencil, Save, X } from 'lucide-react'
 import Slider from '@/components/ui/Slider'
 import AiGeneratedLabel from '@/components/ui/AiGeneratedLabel'
 import Button from '@/components/ui/Button'
+import { tint } from '@/lib/tint'
 
 export interface Criterion { key?: string; label?: string; hard?: boolean; score: number; weight?: number; note?: string }
 
@@ -32,7 +33,7 @@ function ScoreRing({ value, size = 26 }: { value: number; size?: number }) {
           from scoreColor(), never data-hex, so `c + '33'` was the same broken
           hex-concat-on-token defect the board's count badge had (`var(--…)33` is
           not a valid CSS colour) — color-mix works for both hex and tokens. */}
-      <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke={`color-mix(in srgb, ${c} 20%, transparent)`} strokeWidth="3" />
+      <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke={tint(c, 20)} strokeWidth="3" />
       <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke={c} strokeWidth="3" strokeLinecap="round"
         strokeDasharray={`${circ * value / 100} ${circ}`} transform={`rotate(-90 ${size / 2} ${size / 2})`} />
     </svg>
@@ -61,8 +62,10 @@ function CriterionCard({ criterion, hardLabel, weightTitle, editing, onScore }: 
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
           <span style={{ flex: 1, fontSize: 13, fontWeight: 600, color: 'var(--text)' }}>{criterion.label}</span>
           {criterion.hard && (
+            // Ink is --color-on-danger-bg — the raw danger colour reads only 3.95:1
+            // on its own pastel, AA fail (Opus r3.5).
             <span style={{ fontSize: 10, fontWeight: 600, padding: '1px 7px', borderRadius: 99,
-              background: 'var(--color-danger-bg)', color: 'var(--color-danger)' }}>{hardLabel}</span>
+              background: 'var(--color-danger-bg)', color: 'var(--color-on-danger-bg)' }}>{hardLabel}</span>
           )}
           {criterion.weight != null && <WeightDots weight={criterion.weight} title={weightTitle} />}
           <span style={{ fontSize: 13, fontWeight: 600, color: scoreColor(criterion.score), minWidth: 36, textAlign: 'right' }}>{criterion.score}%</span>
@@ -75,17 +78,23 @@ function CriterionCard({ criterion, hardLabel, weightTitle, editing, onScore }: 
   return (
     <div style={{ border: '1px solid var(--border)', borderRadius: 10, overflow: 'hidden' }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 12px', background: 'var(--surface)' }}>
+        {/* Pre-existing bespoke flex-1 row-toggle (structural, not an action button)
+            and chevron affordance below, out of this ink/tint task's scope. */}
         <button onClick={() => setOpen(o => !o)}
+          // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- see comment above
           style={{ flex: 1, display: 'flex', alignItems: 'center', gap: 6, padding: 0, background: 'none', border: 'none', cursor: 'pointer', textAlign: 'left' }}>
           <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)' }}>{criterion.label}</span>
         </button>
         {criterion.hard && (
+          // Ink is --color-on-danger-bg — the raw danger colour reads only 3.95:1
+          // on its own pastel, AA fail (Opus r3.5).
           <span style={{ fontSize: 10, fontWeight: 600, padding: '1px 7px', borderRadius: 99,
-            background: 'var(--color-danger-bg)', color: 'var(--color-danger)' }}>{hardLabel}</span>
+            background: 'var(--color-danger-bg)', color: 'var(--color-on-danger-bg)' }}>{hardLabel}</span>
         )}
         {criterion.weight != null && <WeightDots weight={criterion.weight} title={weightTitle} />}
         <ScoreRing value={criterion.score} />
         <span style={{ fontSize: 13, fontWeight: 600, color: scoreColor(criterion.score), minWidth: 36, textAlign: 'right' }}>{criterion.score}%</span>
+        {/* eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- see comment above */}
         <button onClick={() => setOpen(o => !o)} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, display: 'flex' }}>
           {open ? <ChevronUp size={14} color="var(--text-muted)" /> : <ChevronDown size={14} color="var(--text-muted)" />}
         </button>
@@ -163,9 +172,13 @@ export default function MatchScoreBlock({ score, criteria = [], summary, onSave,
             {onSave && (editing ? (
               <>
                 <Button variant="primary" size="sm" onClick={save} title={t('matchScore.save')} style={{ width: 26 }}><Save size={13} /></Button>
+                {/* Pre-existing bespoke 26x26 cancel/edit controls (bg/ink combo not
+                    covered by a Button variant), out of this ink/tint task's scope. */}
+                {/* eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- see comment above */}
                 <button onClick={cancel} title={t('matchScore.cancel')} style={{ display: 'flex', width: 26, height: 26, alignItems: 'center', justifyContent: 'center', borderRadius: 6, background: 'var(--bg)', color: 'var(--text-muted)', border: '1px solid var(--border)', cursor: 'pointer' }}><X size={13} /></button>
               </>
             ) : (
+              // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- pre-existing bespoke 26x26 edit control (bg/ink combo not covered by a Button variant), out of this ink/tint task's scope
               <button onClick={startEdit} title={t('matchScore.edit')} style={{ display: 'flex', width: 26, height: 26, alignItems: 'center', justifyContent: 'center', borderRadius: 6, background: 'var(--bg)', color: 'var(--text-muted)', border: '1px solid var(--border)', cursor: 'pointer' }}><Pencil size={12} /></button>
             ))}
           </span>

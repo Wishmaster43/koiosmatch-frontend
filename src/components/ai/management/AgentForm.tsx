@@ -68,12 +68,16 @@ function ChatTest({ agent, onClose }: { agent: AiAgent; onClose?: () => void }) 
       <div style={{ padding: '9px 13px', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'center', gap: 8 }}>
         <MessageSquare size={13} color="var(--color-primary)" />
         <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--text)', flex: 1 }}>{t('ai.chat.test')} — {agent.name}</span>
+        {/* Pre-existing bespoke-size (no fixed height, 11px) inline test-panel controls —
+            out of this ink/tint task's scope; not converted to avoid a size regression. */}
         <button onClick={() => setMessages([])}
+          // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- see comment above
           style={{ fontSize: 11, color: 'var(--text-muted)', background: 'none', border: 'none', cursor: 'pointer' }}>
           {t('ai.chat.clear')}
         </button>
         {onClose && (
           <button onClick={onClose} aria-label={t('common:close')}
+            // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- see comment above
             style={{ fontSize: 11, color: 'var(--text-muted)', background: 'none', border: 'none', cursor: 'pointer' }}>
             ✕
           </button>
@@ -90,8 +94,11 @@ function ChatTest({ agent, onClose }: { agent: AiAgent; onClose?: () => void }) 
             <div style={{
               maxWidth: '80%', padding: '7px 11px', fontSize: 12, lineHeight: 1.5,
               borderRadius: m.role === 'user' ? '10px 10px 2px 10px' : '10px 10px 10px 2px',
+              // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- chat-bubble fill (own-message accent), not an action button
               background: m.role === 'user' ? 'var(--color-primary)' : m.error ? 'var(--color-danger-bg)' : 'var(--bg)',
-              color: m.role === 'user' ? 'white' : m.error ? 'var(--color-danger)' : 'var(--text)',
+              // Error ink is --color-on-danger-bg — the raw danger colour reads only
+              // 3.95:1 on its own pastel, AA fail (Opus r3.5).
+              color: m.role === 'user' ? 'white' : m.error ? 'var(--color-on-danger-bg)' : 'var(--text)',
               border: m.role === 'user' ? 'none' : '1px solid var(--border)',
             }}>
               {m.content}
@@ -222,7 +229,10 @@ export function AgentForm({ agent, prompts, faqs, onSaved, onDelete }: {
         </div>
         <div style={{ display: 'flex', gap: 6 }}>
           {!isNew && (
+            // Pre-existing bespoke toggle-state control (own on/off fill), out of this
+            // ink/tint task's scope; not converted to avoid a size/identity regression.
             <button onClick={() => setChatOpen(o => !o)}
+              // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- see comment above
               style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '5px 10px', fontSize: 12, fontWeight: 500,
                 borderRadius: 8, border: '1px solid var(--border)',
                 background: chatOpen ? 'var(--color-primary-bg)' : 'var(--surface)',
@@ -234,6 +244,7 @@ export function AgentForm({ agent, prompts, faqs, onSaved, onDelete }: {
           {!isNew && (
             <button onClick={() => agent && onDelete(agent)}
               aria-label={t('common:delete')} title={t('common:delete')}
+              // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- pre-existing bespoke-size icon button, out of this ink/tint task's scope
               style={{ padding: '5px 8px', borderRadius: 8, border: '1px solid var(--border)', background: 'var(--surface)', color: 'var(--color-danger)', cursor: 'pointer', display: 'flex' }}>
               <Trash2 size={12} />
             </button>
@@ -319,7 +330,10 @@ export function AgentForm({ agent, prompts, faqs, onSaved, onDelete }: {
           {/* Custom API override — rare BYO-endpoint escape hatch; collapsed by
               default (calm by default), no longer gated behind a model picker. */}
           <div style={{ marginBottom: 13 }}>
+            {/* Pre-existing bespoke collapsible-section header control, out of this
+                ink/tint task's scope; not converted to avoid a size/identity regression. */}
             <button type="button" onClick={() => setShowCustomApi(o => !o)}
+              // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- see comment above
               style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 11, fontWeight: 600, color: 'var(--text-muted)',
                 textTransform: 'uppercase', letterSpacing: '0.04em', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}>
               {t('ai.agent.customApiSection')}
@@ -348,8 +362,11 @@ export function AgentForm({ agent, prompts, faqs, onSaved, onDelete }: {
                       onChange={e => set('custom_api_key', e.target.value)}
                       placeholder={hasCustomApiKey ? t('ai.agent.apiKeyKeepPlaceholder') : 'sk-...'}
                       style={{ ...inputStyle, paddingRight: 36 }} />
+                    {/* Pre-existing bespoke show/hide-password affordance absolutely
+                        positioned inside the input, out of this ink/tint task's scope. */}
                     <button type="button" onClick={() => setShowApiKey(s => !s)}
                       aria-label={showApiKey ? t('ai.agent.hideApiKey') : t('ai.agent.showApiKey')}
+                      // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- see comment above
                       style={{ position: 'absolute', right: 8, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)' }}>
                       {showApiKey ? <EyeOff size={14} /> : <Eye size={14} />}
                     </button>

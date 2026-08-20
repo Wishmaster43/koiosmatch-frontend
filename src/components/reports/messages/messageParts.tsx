@@ -10,6 +10,7 @@ import { useTranslation } from 'react-i18next'
 
 const PAD = (n: number) => String(n).padStart(2, '0')
 
+// eslint-disable-next-line react-refresh/only-export-components -- shared formatter every message table/drawer in this file imports; HMR-nicety warning only
 export function formatDT(dt?: string | number | Date | null) {
   if (!dt) return '—'
   const d = new Date(dt)
@@ -21,6 +22,7 @@ export interface BadgeMeta { bg: string; color: string; Icon: LucideIcon }
 
 // Channel → colour + icon. Label = t('messages.channel.<key>').
 /* eslint-disable no-restricted-syntax -- fixed channel→colour mapping (DATA), mirrors the lookup-colour pattern used elsewhere; these shades have no exact token equivalent */
+// eslint-disable-next-line react-refresh/only-export-components -- shared meta map every message table/drawer in this file imports; HMR-nicety warning only
 export const CHANNEL_META: Record<string, BadgeMeta> = {
   whatsapp: { bg: '#ECFDF5', color: '#059669', Icon: MessageCircle },
   email:    { bg: 'var(--color-secondary-bg)', color: 'var(--color-secondary)', Icon: Mail },
@@ -30,11 +32,14 @@ export const CHANNEL_META: Record<string, BadgeMeta> = {
 
 // Status → colour + icon. Label = t('messages.status.<key>').
 /* eslint-disable no-restricted-syntax -- fixed status→colour mapping (DATA), mirrors the lookup-colour pattern used elsewhere; these shades have no exact token equivalent */
+// eslint-disable-next-line react-refresh/only-export-components -- shared meta map every message table/drawer in this file imports; HMR-nicety warning only
 export const STATUS_META: Record<string, BadgeMeta> = {
   sent:       { bg: 'var(--color-success-bg)', color: 'var(--color-success)', Icon: CheckCheck  },
   delivered:  { bg: '#ECFDF5', color: '#059669', Icon: CheckCheck  },
   read:       { bg: 'var(--color-secondary-bg)', color: 'var(--color-secondary)', Icon: CheckCheck  },
-  failed:     { bg: 'var(--color-danger-bg)', color: 'var(--color-danger)', Icon: XCircle     },
+  // Ink is --color-on-danger-bg — the raw danger colour reads only 3.95:1 on its
+  // own pastel, AA fail (Opus r3.5).
+  failed:     { bg: 'var(--color-danger-bg)', color: 'var(--color-on-danger-bg)', Icon: XCircle     },
   pending:    { bg: 'var(--hover-bg)', color: 'var(--text-muted)', Icon: Clock     },
   bounced:    { bg: 'var(--color-warning-bg)', color: '#C2410C', Icon: AlertTriangle },
 }

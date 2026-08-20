@@ -90,8 +90,12 @@ function PhotoAvatar({ avatar, onChange, labels }: { avatar: AvatarConfig; onCha
             {labels?.upload ?? 'Upload'}
           </button>
           <button onClick={() => { removePhoto(); setMenuOpen(false) }}
+            // Ink is --color-on-danger-bg, not --color-danger: on hover this row sits ON
+            // the danger-bg pastel where the raw danger colour reads only 3.95:1 (Opus
+            // r3.5); at rest it is on the neutral surface, where the darker on-danger-bg
+            // twin stays just as readable, so one ink covers both states.
             // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- full-width dropdown menu-item row with an imperative hover swap, not a standalone Button
-            style={{ display: 'block', width: '100%', padding: '9px 14px', fontSize: 12, textAlign: 'left', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--color-danger)' }}
+            style={{ display: 'block', width: '100%', padding: '9px 14px', fontSize: 12, textAlign: 'left', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--color-on-danger-bg)' }}
             onMouseEnter={e => (e.currentTarget.style.background = 'var(--color-danger-bg)')} onMouseLeave={e => (e.currentTarget.style.background = 'none')}>
             {labels?.remove ?? 'Remove'}
           </button>

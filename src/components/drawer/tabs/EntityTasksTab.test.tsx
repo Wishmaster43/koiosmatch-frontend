@@ -21,6 +21,7 @@ import type { ReactNode } from 'react'
 import EntityTasksTab, { type EntityTasksLabels } from './EntityTasksTab'
 import { useEntityTasks } from '@/hooks/useEntityTasks'
 import type { EntityTask } from '@/hooks/useEntityTasks'
+import { chipInk } from '@/lib/tint'
 
 const { openEntityMock } = vi.hoisted(() => ({ openEntityMock: vi.fn() }))
 // Controllable tenant-settings blob (mirrors VacancySettingsTab.test.tsx's blobRef) —
@@ -270,13 +271,16 @@ describe('EntityTasksTab · "+ Nieuwe taak"', () => {
 })
 
 describe('EntityTasksTab · task status colour toggle (customer_task_table_color_status)', () => {
+  // Lowercase (jsdom lowercases hex inside a color-mix() string on serialization,
+  // so a mixed-case fixture would never match chipInk's own computed output).
   // eslint-disable-next-line no-restricted-syntax -- DATA fixture colour, mirrors a tenant lookup colour
-  const STATUS_COLOR = '#22C55E'
+  const STATUS_COLOR = '#22c55e'
 
   it('colours the status chip by default for the customer embedding (today\'s behaviour)', () => {
     mockTasks({ items: [task({ status_label: 'In behandeling', status_color: STATUS_COLOR })] })
     render(<EntityTasksTab linkType="customer" id="cust-1" labels={labels} />)
-    expect(screen.getByText('In behandeling')).toHaveStyle({ color: STATUS_COLOR })
+    // Ink is chipInk(statusColor), not the raw lookup colour (AA contrast, r3.5).
+    expect(screen.getByText('In behandeling')).toHaveStyle({ color: chipInk(STATUS_COLOR) })
   })
 
   it('renders the status chip as plain text once the tenant setting is off (customer embedding)', () => {
@@ -290,7 +294,7 @@ describe('EntityTasksTab · task status colour toggle (customer_task_table_color
     settingsRef.current = { customer_task_table_color_status: 'false' }
     mockTasks({ items: [task({ status_label: 'In behandeling', status_color: STATUS_COLOR })] })
     render(<EntityTasksTab linkType="contact" id="c-1" labels={labels} />)
-    expect(screen.getByText('In behandeling')).toHaveStyle({ color: STATUS_COLOR })
+    expect(screen.getByText('In behandeling')).toHaveStyle({ color: chipInk(STATUS_COLOR) })
   })
 })
 

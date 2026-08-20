@@ -10,6 +10,7 @@ import { Ban, CheckCircle, XCircle, RotateCcw, Clock } from 'lucide-react'
 const PAD = (n: number) => String(n).padStart(2, '0')
 
 // Format an ISO datetime into a short readable date + time (or em-dash if empty).
+// eslint-disable-next-line react-refresh/only-export-components -- shared formatter every run table/drawer in this file imports; HMR-nicety warning only
 export function formatDT(dt?: string | number | Date | null) {
   if (!dt) return '—'
   const d = new Date(dt)
@@ -17,6 +18,7 @@ export function formatDT(dt?: string | number | Date | null) {
 }
 
 // Format a millisecond duration as ms / s / m s (or em-dash if empty).
+// eslint-disable-next-line react-refresh/only-export-components -- shared formatter every run table/drawer in this file imports; HMR-nicety warning only
 export function formatDuration(ms?: number | null) {
   if (ms == null) return '—'
   if (ms < 1000) return `${ms}ms`
@@ -30,9 +32,12 @@ interface StatusMeta { bg: string; color: string; Icon: ComponentType<{ size?: n
 // Run status → colour + icon. Label = t('runs.status.<key>').
 // `cancelled` (RUN-CONTROL-1 stop button) is deliberately NEUTRAL grey — a
 // stopped run is not a failure; red stays reserved for `failed`.
+// eslint-disable-next-line react-refresh/only-export-components -- shared meta map every run table/drawer in this file imports; HMR-nicety warning only
 export const STATUS_META: Record<string, StatusMeta> = {
   success:   { bg: 'var(--color-success-bg)', color: 'var(--color-success)', Icon: CheckCircle },
-  failed:    { bg: 'var(--color-danger-bg)',  color: 'var(--color-danger)',  Icon: XCircle },
+  // Ink is --color-on-danger-bg — the raw danger colour reads only 3.95:1 on its
+  // own pastel, AA fail (Opus r3.5).
+  failed:    { bg: 'var(--color-danger-bg)',  color: 'var(--color-on-danger-bg)',  Icon: XCircle },
   running:   { bg: 'var(--color-warning-bg)', color: 'var(--color-warning)', Icon: RotateCcw },
   pending:   { bg: 'var(--hover-bg)',         color: 'var(--text-muted)',    Icon: Clock },
   waiting:   { bg: 'var(--hover-bg)',         color: 'var(--text-muted)',    Icon: Clock },

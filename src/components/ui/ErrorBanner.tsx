@@ -22,13 +22,18 @@ export default function ErrorBanner({ children, style, onRetry, onDismiss, retry
   return (
     <div role="alert" style={{
       display: 'flex', alignItems: 'center', gap: 8, padding: '10px 12px', borderRadius: 8, fontSize: 13,
-      background: 'var(--color-danger-bg)', color: 'var(--color-danger)', border: '1px solid var(--color-danger)',
+      // Ink is --color-on-danger-bg — the raw danger colour reads only 3.95:1 on its
+      // own pastel, AA fail (Opus r3.5). Border stays the full-strength danger token.
+      background: 'var(--color-danger-bg)', color: 'var(--color-on-danger-bg)', border: '1px solid var(--color-danger)',
       ...style,
     }}>
       <AlertTriangle size={15} style={{ flexShrink: 0 }} />
       <span style={{ flex: 1 }}>{children}</span>
-      {/* Optional retry action — e.g. a failed list load offering "try again". */}
+      {/* Optional retry action — e.g. a failed list load offering "try again". Bespoke
+          inline text+icon control that inherits the banner's own ink (not a fixed-height
+          action button), pre-existing and out of this ink/tint task's scope. */}
       {onRetry && (
+        // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- see comment above
         <button onClick={onRetry} style={{
           display: 'flex', alignItems: 'center', gap: 5, flexShrink: 0, background: 'none', border: 'none',
           cursor: 'pointer', color: 'inherit', fontSize: 12.5, fontWeight: 600, padding: '2px 4px',
@@ -38,6 +43,7 @@ export default function ErrorBanner({ children, style, onRetry, onDismiss, retry
       )}
       {/* Optional dismiss action — closes the banner without retrying. */}
       {onDismiss && (
+        // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- bespoke icon-only control inheriting the banner's own ink, pre-existing and out of this ink/tint task's scope
         <button onClick={onDismiss} aria-label={dismissLabel ?? t('close')} style={{
           display: 'flex', flexShrink: 0, background: 'none', border: 'none', cursor: 'pointer', color: 'inherit', padding: 2,
         }}>

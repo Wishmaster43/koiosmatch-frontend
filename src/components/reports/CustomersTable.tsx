@@ -143,7 +143,10 @@ export default function CustomersTable() {
       </div>
 
       {error && (
-        <div style={{ padding: '10px 14px', marginBottom: 12, fontSize: 13, color: 'var(--color-danger)',
+        <div style={{ padding: '10px 14px', marginBottom: 12, fontSize: 13,
+                      // Ink is --color-on-danger-bg — the raw danger colour reads only
+                      // 3.95:1 on its own pastel, AA fail (Opus r3.5).
+                      color: 'var(--color-on-danger-bg)',
                       // eslint-disable-next-line no-restricted-syntax -- DATA: danger-border companion colour paired with the danger-bg tokens above; no exact token match for this specific soft-border shade
                       background: 'var(--color-danger-bg)', border: '1px solid #FECACA', borderRadius: 8 }}>
           {t('customers.loadError')}
@@ -183,6 +186,7 @@ export default function CustomersTable() {
                             gives Tab reachability + native Enter/Space activation; mirrors the
                             shared DataTable's sortable header exactly. */}
                         <button type="button" onClick={() => setSort_(col.key)} title={tCommon('sort')}
+                          // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- table-header sort control (all:unset reset), mirrors the shared DataTable's own sortable header, pre-existing and out of this ink/tint task's scope
                           style={{ all: 'unset', boxSizing: 'border-box', display: 'inline-flex', width: '100%',
                             padding: thPadding, cursor: 'pointer', userSelect: 'none', alignItems: 'center', gap: 4,
                             font: 'inherit', color: 'inherit' }}>

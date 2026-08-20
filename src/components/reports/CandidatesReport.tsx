@@ -215,8 +215,11 @@ export default function CandidatesReport() {
                 <span style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--color-success)', flexShrink: 0 }} />
                 {filteredGeneral.length} {t('report.activeWord')}
               </span>
+              {/* Ink is --color-on-danger-bg — the raw danger colour reads only 3.95:1
+                  on its own pastel, AA fail (Opus r3.5). The dot stays full-strength
+                  danger — a decorative fill, not text. */}
               <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5,
-                             background: 'var(--color-danger-bg)', color: 'var(--color-danger)', borderRadius: 999,
+                             background: 'var(--color-danger-bg)', color: 'var(--color-on-danger-bg)', borderRadius: 999,
                              padding: '3px 10px', fontSize: 12, fontWeight: 500 }}>
                 <span style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--color-danger)', flexShrink: 0 }} />
                 {filteredDeleted.length} {t('report.deregisteredWord')}
