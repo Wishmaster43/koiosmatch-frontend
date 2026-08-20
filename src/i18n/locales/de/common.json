@@ -171,7 +171,10 @@
     "reports_tasks": "Aufgaben",
     "reports_customerstructure": "Kundenstruktur",
     "reports_people": "Team",
-    "reports_usage": "Nutzung"
+    "reports_usage": "Nutzung",
+    "selectAgency": "Agentur wählen",
+    "superAdmin": "Super-Admin",
+    "flexStaffing": "Flex-Staffing"
   },
   "koios": {
     "online": "Online",

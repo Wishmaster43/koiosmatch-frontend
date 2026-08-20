@@ -171,7 +171,10 @@
     "reports_tasks": "Taken",
     "reports_customerstructure": "Klantstructuur",
     "reports_people": "Mensen",
-    "reports_usage": "Verbruik"
+    "reports_usage": "Verbruik",
+    "selectAgency": "Selecteer bureau",
+    "superAdmin": "Super admin",
+    "flexStaffing": "Flex staffing"
   },
   "koios": {
     "online": "Online",
