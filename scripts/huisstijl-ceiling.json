@@ -628,6 +628,6 @@
   "src/pages/vacancies/VacanciesTable.tsx": 8,
   "src/pages/vacancies/VacancyDrawer.tsx": 2,
   "src/pages/whatsapp/QueueTab.tsx": 16,
-  "src/pages/whatsapp/WhatsAppPage.tsx": 3,
+  "src/pages/whatsapp/WhatsAppPage.tsx": 2,
   "src/types/api-generated.ts": 1
 }

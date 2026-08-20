@@ -49,7 +49,8 @@
   "noConn": {
     "title": "Aucune connexion WhatsApp",
     "desc": "Aucune connexion WhatsApp Business n'a encore été configurée pour ce locataire. Configurez une connexion via le backend pour voir les messages et les statistiques ici.",
-    "errorLabel": "Erreur backend"
+    "hintLabel": "Comment corriger",
+    "hint": "Créez une connexion Business via Paramètres → WhatsApp, ou demandez à l’administrateur de cette agence de le faire."
   },
   "filters": {
     "status": "Statut",

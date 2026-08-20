@@ -63,7 +63,8 @@
   "noConn": {
     "title": "No WhatsApp connection",
     "desc": "No WhatsApp Business connection has been set up for this tenant yet. Configure a connection via the backend to see messages and statistics here.",
-    "errorLabel": "Backend error"
+    "hintLabel": "How to fix this",
+    "hint": "Go to Settings → WhatsApp to create a Business connection, or ask this agency’s administrator to do so."
   },
   "queue": {
     "active": "Active",

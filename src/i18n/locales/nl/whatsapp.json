@@ -63,7 +63,8 @@
   "noConn": {
     "title": "Geen WhatsApp-verbinding",
     "desc": "Er is nog geen WhatsApp Business-koppeling ingesteld voor deze tenant. Configureer een verbinding via de backend om berichten en statistieken hier te zien.",
-    "errorLabel": "Foutmelding backend"
+    "hintLabel": "Hoe los ik dit op",
+    "hint": "Ga naar Instellingen → WhatsApp om een Business-verbinding aan te maken, of vraag de beheerder van dit bureau dat te doen."
   },
   "queue": {
     "active": "Actief",

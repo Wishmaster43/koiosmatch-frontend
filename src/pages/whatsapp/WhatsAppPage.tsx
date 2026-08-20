@@ -34,6 +34,7 @@ import BarChartCard from '@/components/charts/BarChartCard'
 import { MessageFeed, EscalationList, ActivityChart } from './components'
 import QueueTab from './QueueTab'
 import Button from '@/components/ui/Button'
+import { GroupLabel, BodyText } from '@/components/ui/typography'
 
 // The one house placeholder for "the server did not return this" — never a padded zero.
 const DASH = '—'
@@ -171,9 +172,12 @@ export default function WhatsAppPage({ intent }: { intent?: unknown } = {}) {
         </div>
         <h2 style={{ fontSize: 16, fontWeight: 700, color: 'var(--text)', marginBottom: 8 }}>{t('noConn.title')}</h2>
         <p style={{ fontSize: 13, color: 'var(--text-muted)', lineHeight: 1.6, marginBottom: 20 }}>{t('noConn.desc')}</p>
+        {/* Heraudit r5: this box used to print an INVENTED Eloquent quote under a
+            "backend error" label — §10 forbids raw server errors in the UI, so the
+            honest content is a translated next-step hint, via the atoms. */}
         <div style={{ background: 'var(--bg)', borderRadius: 10, padding: '12px 16px', border: '1px solid var(--border)', textAlign: 'left' }}>
-          <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 8 }}>{t('noConn.errorLabel')}</div>
-          <code style={{ fontSize: 11, color: 'var(--text)', fontFamily: 'monospace' }}>No query results for model WhatsappConnection</code>
+          <GroupLabel style={{ marginBottom: 8 }}>{t('noConn.hintLabel')}</GroupLabel>
+          <BodyText as="div" style={{ fontSize: 12 }}>{t('noConn.hint')}</BodyText>
         </div>
       </div>
     </div>
@@ -194,6 +198,7 @@ export default function WhatsAppPage({ intent }: { intent?: unknown } = {}) {
           const badgeDanger = id === 'escalations'
           return (
             <button key={id} role="tab" aria-selected={active} onClick={() => setTab(id)}
+              // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- role="tab" NAVIGATIE-face (rustende tab = plaatsmarkering, PRIMAIR-VLAK-1): underline-actief, geen actieknop; Button modelleert geen tabblad
               style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '9px 14px', border: 'none', background: 'transparent',
                 cursor: 'pointer', fontSize: 13, fontWeight: active ? 600 : 500,
                 // Text-colour accent uses the AA-contrast text token, not the raw brand primary.
@@ -203,6 +208,7 @@ export default function WhatsAppPage({ intent }: { intent?: unknown } = {}) {
               {badge > 0 && (
                 <span style={{ fontSize: 10, fontWeight: 700, minWidth: 16, height: 16, padding: '0 5px', borderRadius: 99,
                   display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+                  // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- meldingsbadge op een tab: DATA-signaal met het gedocumenteerde on-*-contrastpaar, geen actievlak
                   background: badgeDanger ? 'var(--color-danger)' : 'var(--color-primary)',
                   /* Text colour on a danger/primary badge fill uses the on-* contrast token, never raw white */
                   color: badgeDanger ? 'var(--color-on-danger)' : 'var(--color-on-accent)' }}>
