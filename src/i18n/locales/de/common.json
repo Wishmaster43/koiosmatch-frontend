@@ -463,6 +463,8 @@
     "firstName": "Jan",
     "lastName": "Janssen",
     "min": "min",
-    "max": "max"
+    "max": "max",
+    "fullNameExample": "Jan Janssen",
+    "phoneExample": "+49 151 2345678"
   }
 }

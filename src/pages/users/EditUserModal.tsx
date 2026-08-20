@@ -20,6 +20,7 @@ import { useLiveFieldValidation } from '@/hooks/useLiveFieldValidation'
 import { isValidEmailFormat } from '@/lib/contactFieldValidation'
 import { useUserBranches } from './hooks/useUserBranches'
 import type { ManagedUser } from '@/types/api'
+import { PageTitle, Caption } from '@/components/ui/typography'
 
 // VALIDATIE-LIVE-1-rest: `email` is the only field here the backend validates
 // with a shape rule (UserController's inline PATCH rules — `'email' =>
@@ -99,14 +100,14 @@ export default function EditUserModal({ user, onClose, onSaved }: {
     <FloatingPanel open onClose={onClose} ariaLabel={t('editUser')}
       persistKey="edit-user" width={420} bodyStyle={{ padding: '20px 24px 24px' }}
       header={
-        <h3 style={{ fontSize: 15, fontWeight: 700, color: 'var(--text)', flex: 1 }}>
+        <PageTitle as="h3" style={{ fontWeight: 700, flex: 1 }}>
           {t('editUser')}
           {(user.firstname || user.name) && (
             <span style={{ fontWeight: 400, color: 'var(--text-muted)', marginLeft: 8, fontSize: 13 }}>
               {user.firstname ? `${user.firstname} ${user.lastname ?? ''}`.trim() : user.name}
             </span>
           )}
-        </h3>
+        </PageTitle>
       }>
         <form onSubmit={handleSubmit}>
           {/* Name row */}
@@ -133,7 +134,7 @@ export default function EditUserModal({ user, onClose, onSaved }: {
           {/* Phone */}
           <div style={{ marginBottom: 12 }}>
             <label style={labelStyle}>{t('phone')}</label>
-            <input type="tel" value={form.phone} onChange={set('phone')} style={inputStyle} placeholder="+31 6 …" aria-label={t('phone')} />
+            <input type="tel" value={form.phone} onChange={set('phone')} style={inputStyle} placeholder={t('common:placeholders.phoneExample')} aria-label={t('phone')} />
           </div>
 
           {/* Branches (USERS-ROLES-LOC-1) — current coupling, editable via the shared
@@ -144,7 +145,7 @@ export default function EditUserModal({ user, onClose, onSaved }: {
               <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--text)' }}>{t('branches.title')}</span>
               {branchesSaving && <span style={{ color: 'var(--text-muted)' }}><Spinner size={12} /></span>}
             </div>
-            <p style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 10 }}>{t('branches.hint')}</p>
+            <Caption as="p" style={{ marginBottom: 10 }}>{t('branches.hint')}</Caption>
             {branchesLoading ? (
               <p style={{ fontSize: 12, color: 'var(--text-muted)' }}>{t('branches.loading')}</p>
             ) : (
@@ -159,7 +160,7 @@ export default function EditUserModal({ user, onClose, onSaved }: {
               />
             )}
             {!branchesLoading && branches.length === 0 && locationOptions.length > 0 && (
-              <p style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 8 }}>{t('branches.emptyHint')}</p>
+              <Caption as="p" style={{ marginTop: 8 }}>{t('branches.emptyHint')}</Caption>
             )}
           </div>
 

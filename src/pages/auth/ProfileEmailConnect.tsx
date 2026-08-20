@@ -23,6 +23,8 @@ import type { SmtpForm } from './useEmailConnection'
 import { fieldInputStyle } from '@/components/forms/fieldMetrics'
 import Button from '@/components/ui/Button'
 import Spinner from '@/components/ui/Spinner'
+import SegmentedControl from '@/components/ui/SegmentedControl'
+import { SectionTitle } from '@/components/ui/typography'
 
 const PROVIDERS = [
   { id: 'office', label: 'Office 365' },
@@ -68,9 +70,9 @@ export default function ProfileEmailConnect() {
             <Mail size={18} color="var(--color-primary)" />
           </div>
           <div style={{ flex: 1, minWidth: 0 }}>
-            <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)' }}>
+            <SectionTitle as="div">
               {t('profile.email.connected')}{info.provider ? ` · ${PROVIDERS.find(p => p.id === info.provider)?.label ?? info.provider}` : ''}
-            </div>
+            </SectionTitle>
             {info.email && <div style={{ fontSize: 12, color: 'var(--text-muted)', fontFamily: 'monospace', marginTop: 2 }}>{info.email}</div>}
           </div>
           <Button variant="secondary" onClick={disconnect} disabled={busy}>
@@ -81,19 +83,11 @@ export default function ProfileEmailConnect() {
 
       {status === 'disconnected' && (
         <>
-          {/* Provider choice — a segmented selector (active/inactive state), not an
-              action button, so it stays a bare <button> rather than a Button variant. */}
-          <div style={{ display: 'flex', gap: 10, marginBottom: 16 }}>
-            {PROVIDERS.map(p => (
-              <button key={p.id} onClick={() => setChoice(p.id)}
-                style={{ flex: 1, padding: '11px 12px', borderRadius: 10, cursor: 'pointer', fontSize: 13, fontWeight: 600,
-                         border: `1.5px solid ${choice === p.id ? 'var(--color-primary)' : 'var(--border)'}`,
-                         background: choice === p.id ? 'var(--color-primary-bg)' : 'var(--input-bg)',
-                         // Text-colour accent uses the AA-contrast text token, not the raw brand primary.
-                         color: choice === p.id ? 'var(--color-primary-text)' : 'var(--text-muted)' }}>
-                {p.label}
-              </button>
-            ))}
+          {/* Provider choice — the shared SegmentedControl IS the house segmented
+              selector (§4); the hand-rolled card row predates it (heraudit r4 paydown). */}
+          <div style={{ marginBottom: 16 }}>
+            <SegmentedControl options={PROVIDERS.map(p => ({ value: p.id, label: p.label }))}
+              value={choice} onChange={v => setChoice(v as typeof choice)} ariaLabel={t('profile.email.title')} />
           </div>
 
           {(choice === 'office' || choice === 'gmail') && (
@@ -107,13 +101,14 @@ export default function ProfileEmailConnect() {
             <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 100px', gap: 12 }}>
                 <div><label style={labelStyle}>{t('profile.email.smtpHost')}</label>
+                  {/* Hostname example is locale-invariant DATA (same carve-out as the KP- format). */}
                   <input value={smtp.host} onChange={setF('host')} placeholder="smtp.office365.com" aria-label={t('profile.email.smtpHost')} style={inputStyle} /></div>
                 <div><label style={labelStyle}>{t('profile.email.port')}</label>
                   <input type="number" value={smtp.port} onChange={setF('port')} aria-label={t('profile.email.port')} style={inputStyle} /></div>
               </div>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
                 <div><label style={labelStyle}>{t('profile.email.user')}</label>
-                  <input value={smtp.user} onChange={setF('user')} placeholder="naam@bedrijf.nl" aria-label={t('profile.email.user')} style={inputStyle} /></div>
+                  <input value={smtp.user} onChange={setF('user')} placeholder={t('common:placeholders.emailExample')} aria-label={t('profile.email.user')} style={inputStyle} /></div>
                 <div><label style={labelStyle}>{t('profile.email.pass')}</label>
                   <div style={{ position: 'relative' }}>
                     <input type={showPass ? 'text' : 'password'} value={smtp.pass} onChange={setF('pass')}
@@ -129,26 +124,15 @@ export default function ProfileEmailConnect() {
               </div>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
                 <div><label style={labelStyle}>{t('profile.email.fromName')}</label>
-                  <input value={smtp.from_name} onChange={setF('from_name')} placeholder="Danny Polak" aria-label={t('profile.email.fromName')} style={inputStyle} /></div>
+                  <input value={smtp.from_name} onChange={setF('from_name')} placeholder={t('common:placeholders.fullNameExample')} aria-label={t('profile.email.fromName')} style={inputStyle} /></div>
                 <div><label style={labelStyle}>{t('profile.email.fromEmail')}</label>
-                  <input type="email" value={smtp.from_email} onChange={setF('from_email')} placeholder="danny@bedrijf.nl" aria-label={t('profile.email.fromEmail')} style={inputStyle} /></div>
+                  <input type="email" value={smtp.from_email} onChange={setF('from_email')} placeholder={t('common:placeholders.emailExample')} aria-label={t('profile.email.fromEmail')} style={inputStyle} /></div>
               </div>
               <div>
                 <label style={labelStyle}>{t('profile.email.security')}</label>
-                {/* Security choice — a segmented selector (active/inactive state), same
-                    reasoning as the provider choice above: not an action button. */}
-                <div style={{ display: 'flex', gap: 8 }}>
-                  {['tls', 'ssl', 'none'].map(s => (
-                    <button key={s} onClick={() => setSmtp(v => ({ ...v, secure: s }))}
-                      style={{ padding: '6px 14px', borderRadius: 20, fontSize: 12, cursor: 'pointer',
-                               border: `1px solid ${smtp.secure === s ? 'var(--color-primary)' : 'var(--border)'}`,
-                               background: smtp.secure === s ? 'var(--color-primary-bg)' : 'var(--input-bg)',
-                               // Text-colour accent uses the AA-contrast text token, not the raw brand primary.
-                               color: smtp.secure === s ? 'var(--color-primary-text)' : 'var(--text-muted)' }}>
-                      {t(`profile.email.sec_${s}`)}
-                    </button>
-                  ))}
-                </div>
+                {/* TLS choice — compact SegmentedControl (same reasoning as the provider row). */}
+                <SegmentedControl size="compact" options={['tls', 'ssl', 'none'].map(sec => ({ value: sec, label: t(`profile.email.sec_${sec}`) }))}
+                  value={smtp.secure} onChange={sec => setSmtp(v => ({ ...v, secure: sec }))} ariaLabel={t('profile.email.security')} />
               </div>
               <Button variant="primary" onClick={() => saveSmtp(smtp)} disabled={busy || !smtp.host.trim()} style={{ alignSelf: 'flex-start' }}>
                 {busy ? <Spinner size={14} /> : <Mail size={14} />}

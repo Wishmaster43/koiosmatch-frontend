@@ -463,6 +463,8 @@
     "firstName": "John",
     "lastName": "Smith",
     "min": "min",
-    "max": "max"
+    "max": "max",
+    "fullNameExample": "John Smith",
+    "phoneExample": "+31 6 12345678"
   }
 }

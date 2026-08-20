@@ -11,6 +11,7 @@ import { interactive } from '@/lib/a11y'
 import Button from '@/components/ui/Button'
 import type { Shift } from '@/types/planning'
 import { tintBg, chipInk } from '@/lib/tint'
+import { GroupLabel, Caption, SectionTitle } from '@/components/ui/typography'
 
 // onShiftClick (SHIFT-STAFF-1): opens the real staffing drawer for that one
 // shift — optional so every view keeps working before it's wired everywhere.
@@ -19,7 +20,16 @@ interface ViewProps { current: Date; shifts: Shift[]; today: Date; onDayClick: (
 // ── Shift pill ────────────────────────────────────────────────────────────────
 function ShiftPill({ shift, small, onClick }: { shift: Shift; small?: boolean; onClick?: (e: MouseEvent) => void }) {
   return (
-    <div onClick={onClick} style={{ background: tintBg(shift.color, true), borderLeft: `3px solid ${shift.color}`,
+    // Keyboard path (heraudit r4): a clickable pill is button-like (role/tabIndex/
+    // Enter+Space); stopPropagation in the keydown mirrors the mouse handler so
+    // activating a pill never also fires the day cell behind it (§6).
+    <div onClick={onClick}
+      role={onClick ? 'button' : undefined} tabIndex={onClick ? 0 : undefined}
+      onKeyDown={onClick ? e => {
+        if (e.target !== e.currentTarget) return
+        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); e.stopPropagation(); onClick(e as unknown as MouseEvent) }
+      } : undefined}
+      style={{ background: tintBg(shift.color, true), borderLeft: `3px solid ${shift.color}`,
       borderRadius: 4, padding: small ? '2px 5px' : '3px 7px', marginBottom: 2,
       cursor: 'pointer', overflow: 'hidden' }}>
       <div style={{ fontSize: small ? 10 : 11, fontWeight: 600, color: chipInk(shift.color), whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
@@ -66,8 +76,7 @@ export function MonthView({ current, shifts, today, onDayClick, onShiftClick }: 
       {/* Day headers */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7,1fr)', borderBottom: '1px solid var(--border)' }}>
         {WEEK_DAYS.map(d => (
-          <div key={d} style={{ padding: '8px 0', textAlign: 'center', fontSize: 11,
-            fontWeight: 600, color: 'var(--text-muted)' }}>{d}</div>
+          <GroupLabel as="div" style={{ textTransform: 'none', letterSpacing: 0, padding: '8px 0', textAlign: 'center' }}>{d}</GroupLabel>
         ))}
       </div>
 
@@ -81,7 +90,8 @@ export function MonthView({ current, shifts, today, onDayClick, onShiftClick }: 
               const dayShifts = shifts.filter(s => isSameDay(s.date, date))
               return (
                 <div key={di}
-                  onClick={() => onDayClick(date)}
+                  // Keyboard path (heraudit r4): the day cell is clickable chrome too.
+                  {...interactive(() => onDayClick(date))}
                   style={{ borderRight: di < 6 ? '1px solid var(--border)' : 'none',
                     padding: '6px 6px 4px', background: outside ? 'var(--bg)' : 'var(--surface)',
                     cursor: 'pointer', minHeight: 110, position: 'relative' }}
@@ -132,7 +142,7 @@ export function WeekView({ current, shifts, today, onDayClick, onShiftClick }: V
           return (
             <div key={i} style={{ borderRight: i < 6 ? '1px solid var(--border)' : 'none', padding: '8px 6px' }}>
               <div style={{ textAlign: 'center', marginBottom: 6 }}>
-                <div style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 3 }}>{WEEK_LABELS[i]}</div>
+                <Caption as="div" style={{ marginBottom: 3 }}>{WEEK_LABELS[i]}</Caption>
                 <div style={{ width: 30, height: 30, borderRadius: '50%', margin: '0 auto',
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
                   background: isToday ? 'var(--button-fill)' : 'transparent',
@@ -184,7 +194,7 @@ export function DayView({ current, shifts, today, onDayClick, onShiftClick }: Vi
         : (
           <>
             {dayShifts.map(s => (
-              <div key={s.id} onClick={() => onShiftClick?.(s.id)} style={{ display: 'flex', gap: 14, padding: '14px 16px',
+              <div key={s.id} {...interactive(onShiftClick ? () => onShiftClick(s.id) : undefined)} style={{ display: 'flex', gap: 14, padding: '14px 16px',
                 border: '1px solid var(--border)', borderLeft: `4px solid ${s.color}`,
                 borderRadius: 10, marginBottom: 10, background: 'var(--surface)', cursor: onShiftClick ? 'pointer' : 'default' }}>
                 <div style={{ flex: 1 }}>
@@ -258,17 +268,17 @@ export function ListView({ shifts, today, onDayClick, onShiftClick }: Omit<ViewP
               </Button>
             </div>
             {ds.map(s => (
-              <div key={s.id} onClick={() => onShiftClick?.(s.id)} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '10px 14px',
+              <div key={s.id} {...interactive(onShiftClick ? () => onShiftClick(s.id) : undefined)} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '10px 14px',
                 border: '1px solid var(--border)', borderLeft: `4px solid ${s.color}`,
                 borderRadius: 8, marginBottom: 6, background: 'var(--surface)', cursor: onShiftClick ? 'pointer' : 'default' }}>
                 <div style={{ flex: 1 }}>
-                  <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)' }}>{s.title}</div>
+                  <SectionTitle as="div">{s.title}</SectionTitle>
                   <div style={{ display: 'flex', gap: 14, marginTop: 3 }}>
-                    <span style={{ fontSize: 11, color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: 3 }}>
+                    <Caption as="span" style={{ display: 'flex', alignItems: 'center', gap: 3 }}>
                       <Clock size={10} /> {s.start}–{s.end}
-                    </span>
-                    {s.location && <span style={{ fontSize: 11, color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: 3 }}><MapPin size={10} />{s.location}</span>}
-                    {s.candidate && <span style={{ fontSize: 11, color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: 3 }}><User size={10} />{s.candidate}</span>}
+                    </Caption>
+                    {s.location && <Caption as="span" style={{ display: 'flex', alignItems: 'center', gap: 3 }}><MapPin size={10} />{s.location}</Caption>}
+                    {s.candidate && <Caption as="span" style={{ display: 'flex', alignItems: 'center', gap: 3 }}><User size={10} />{s.candidate}</Caption>}
                   </div>
                 </div>
               </div>

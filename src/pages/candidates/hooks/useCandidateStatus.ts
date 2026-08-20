@@ -123,7 +123,7 @@ export function useCandidateStatus({ c, onUpdate, onConvertIncomplete }: Args) {
     if (!c) return
     if (v === currentStatus && (statusFlags?.requires_reason || statusFlags?.expects_return_date || statusFlags?.is_blacklist)) { openStatusEdit(); return }
     const it = statuses.find(s => s.value === v) as (LookupOption & { requires_match?: unknown; requires_reason?: unknown; expects_return_date?: unknown; is_blacklist?: unknown }) | undefined
-    if (it?.requires_match) { placed.setMatchChoice(null); placed.setMatchPrompt(true); return }
+    if (it?.requires_match) { placed.setMatchChoice(null); placed.setMatchTargetStatus(v); placed.setMatchPrompt(true); return }
     if (Boolean(it?.requires_reason) || Boolean(it?.expects_return_date)) {
       setStatusModal({ target: v, reason: '', date: '', needReason: Boolean(it?.requires_reason), needDate: Boolean(it?.expects_return_date), isBlacklist: Boolean(it?.is_blacklist) })
       return

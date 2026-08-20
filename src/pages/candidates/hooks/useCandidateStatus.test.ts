@@ -23,6 +23,8 @@ vi.mock('@/context/LookupsContext', () => ({
     statuses: [
       // eslint-disable-next-line no-restricted-syntax -- seed DATA: tenant status lookup colour (mirrors DEFAULT_STATUSES)
       { value: 'available', label: 'Available', color: '#4CAF50' },
+      // eslint-disable-next-line no-restricted-syntax -- seed DATA: tenant status lookup colour (renamed requires_match fixture, heraudit r4)
+      { value: 'ingezet', label: 'Ingezet', color: '#6E8FD6', requires_match: true },
       // eslint-disable-next-line no-restricted-syntax -- seed DATA: tenant status lookup colour (mirrors DEFAULT_STATUSES)
       { value: 'sick', label: 'Sick', color: '#F59E0B', requires_reason: true, expects_return_date: true },
       // eslint-disable-next-line no-restricted-syntax -- seed DATA: tenant status lookup colour (mirrors DEFAULT_STATUSES)
@@ -119,5 +121,20 @@ describe('useCandidateStatus · canEditStatusReason (flag-driven, never slug-har
     const c = candidate({ status: 'available', statusReason: null, statusReturnDate: null, blacklistReason: null })
     const { result } = renderHook(() => useCandidateStatus({ c }))
     expect(result.current.canEditStatusReason).toBe(false)
+  })
+})
+
+// Heraudit r4 HIGH regression: confirming the match prompt writes the PICKED
+// requires_match status value — never the literal 'placed' slug (a tenant may
+// carry a renamed/second flagged status; the axes model keys on the FLAG).
+describe('useCandidateStatus · requires_match writes the picked value', () => {
+  it('threads a renamed flagged status through the placed prompt into the PATCH', async () => {
+    const onUpdate = vi.fn()
+    const { result } = renderHook(() => useCandidateStatus({ c: candidate({ status: 'available' }), onUpdate }))
+    act(() => { result.current.changeStatus('ingezet') })
+    expect(result.current.matchPrompt).toBe(true)
+    act(() => { result.current.setMatchChoice('m-1') })
+    await act(async () => { await result.current.confirmPlacedMatch() })
+    expect(onUpdate).toHaveBeenCalledWith('c1', { status: 'ingezet', match_id: 'm-1' })
   })
 })

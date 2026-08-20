@@ -8,6 +8,7 @@ import { useTranslation } from 'react-i18next'
 import { User, Mail, Phone, Check, Shield, MapPin } from 'lucide-react'
 import { Section, Field, Pill, ROLE_META, inputStyle } from './profileParts'
 import Spinner from '@/components/ui/Spinner'
+import SaveButton from '@/components/ui/SaveButton'
 
 interface ProfileForm { firstname: string; lastname: string; email: string; phone: string }
 interface ProfileUser { roles?: Array<string | { name?: string }>; locations?: unknown[]; location?: unknown }
@@ -60,7 +61,7 @@ export default function ProfileDetailsTab({ form, onField, onSave, saving, saved
           <div style={{ position: 'relative' }}>
             <Phone size={13} style={{ position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
             <input value={form.phone} onChange={onField('phone')} type="tel"
-              style={{ ...inputStyle, paddingLeft: 30 }} placeholder="+31 6 12345678" aria-label={t('profile.phone')} />
+              style={{ ...inputStyle, paddingLeft: 30 }} placeholder={t('common:placeholders.phoneExample')} aria-label={t('profile.phone')} />
           </div>
         </Field>
 
@@ -68,19 +69,14 @@ export default function ProfileDetailsTab({ form, onField, onSave, saving, saved
           <p style={{ fontSize: 12, color: 'var(--color-danger-text)', marginTop: 4 }}>{error}</p>
         )}
 
-        <button onClick={onSave} disabled={saving}
-          style={{
-            marginTop: 8, padding: '9px 20px', fontSize: 13, fontWeight: 600,
-            background: saved ? 'var(--color-success)' : 'var(--color-primary)',
-            color: saved ? 'white' : 'var(--color-on-accent)', border: 'none', borderRadius: 8, cursor: saving ? 'default' : 'pointer',
-            display: 'flex', alignItems: 'center', gap: 6, transition: 'background 0.2s',
-          }}>
+        {/* The saved-state pair is defined ONCE in SaveButton (§4) — never re-approximated. */}
+        <SaveButton saved={saved} onClick={onSave} disabled={saving} style={{ marginTop: 8, gap: 6 }}>
           {saving
             ? <><Spinner size={13} /> {t('profile.saving')}</>
             : saved
               ? <><Check size={13} /> {t('profile.saved')}</>
               : t('profile.saveChanges')}
-        </button>
+        </SaveButton>
       </Section>
 
       {/* Access: linked roles + location(s) (read-only) */}

@@ -2,7 +2,9 @@
  * useCandidatePlacedMatch — the "Placed requires a Match" sub-flow, split out of
  * useCandidateStatus (§0.3 single-purpose): setting a candidate to a requires_match
  * status opens a prompt to pick an existing match or create one for a chosen vacancy;
- * confirming links it and sets deployability 'placed'. The parent still owns the
+ * confirming links it and writes the PICKED status value — never the literal
+ * 'placed' slug (heraudit r4: the axes model keys on the requires_match FLAG,
+ * and a tenant may carry a second/renamed flagged status). The parent still owns the
  * optimistic status override, so `setStatus` is passed in (the two share that state).
  */
 import { useState } from 'react'
@@ -21,6 +23,9 @@ interface Args {
 export function useCandidatePlacedMatch({ c, onUpdate, setStatus }: Args) {
   const { createMatch, creating: creatingMatch } = useCreateMatch(c?.id ?? '')
   const [matchPrompt,       setMatchPrompt]       = useState(false)
+  // WHICH requires_match status the user actually picked (set when the prompt
+  // opens); 'placed' only as a defensive seed-default when nothing was threaded.
+  const [matchTargetStatus, setMatchTargetStatus] = useState<string>('placed')
   const [matchChoice,       setMatchChoice]       = useState<string | null>(null)
   const [newMatchVacancyId, setNewMatchVacancyId] = useState('')
   // Vacancy picker options — only fetched while the placed prompt is open.
@@ -32,12 +37,12 @@ export function useCandidatePlacedMatch({ c, onUpdate, setStatus }: Args) {
     let mid = matchChoice
     if (!mid && newMatchVacancyId) mid = await createMatch(newMatchVacancyId)
     if (!mid) return
-    setStatus('placed'); onUpdate?.(c.id, { status: 'placed', match_id: mid })
+    setStatus(matchTargetStatus); onUpdate?.(c.id, { status: matchTargetStatus, match_id: mid })
     setMatchPrompt(false); setMatchChoice(null); setNewMatchVacancyId('')
   }
 
   return {
-    matchPrompt, setMatchPrompt, matchChoice, setMatchChoice,
+    matchPrompt, setMatchPrompt, matchChoice, setMatchChoice, setMatchTargetStatus,
     newMatchVacancyId, setNewMatchVacancyId, vacancyOptions, creatingMatch, confirmPlacedMatch,
   }
 }

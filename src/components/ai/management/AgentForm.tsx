@@ -21,10 +21,12 @@ import type { AiAgent, AiItem, ChatMessage } from '@/types/ai'
 // picker (GET /whatsapp-templates) instead of re-declaring it (§11 — one truth).
 import type { WaTemplateOption } from '@/components/layout/workflow/whatsappTemplate'
 import Button from '@/components/ui/Button'
+import { groupLabelStyle, SectionTitle, GroupLabel } from '@/components/ui/typography'
 
 // Mirrors shared.tsx's `Field` label style — used directly (not via `Field`) for the
 // two CreatableSelect pickers below, which need their own aria-labelledby wiring.
-const fieldLabelStyle: CSSProperties = { display: 'block', fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', marginBottom: 5, textTransform: 'uppercase', letterSpacing: '0.04em' }
+// r6: identity from the typography module; only display/margin are local layout.
+const fieldLabelStyle: CSSProperties = { ...groupLabelStyle, display: 'block', marginBottom: 5 }
 
 // The agent edit-form's local state. No `model` field (MODEL-1): the company-wide
 // model from Settings is used everywhere, never chosen per agent.
@@ -217,7 +219,7 @@ export function AgentForm({ agent, prompts, faqs, onSaved, onDelete }: {
             <Brain size={15} color="var(--color-violet)" />
           </div>
           <div>
-            <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text)' }}>{isNew ? t('ai.agent.newAgent') : form.name || t('ai.agent.fallback')}</div>
+            <SectionTitle as="div">{isNew ? t('ai.agent.newAgent') : form.name || t('ai.agent.fallback')}</SectionTitle>
             {/* AI-AGENTS-2: the agent mirrors this recruiter/manager user — same Avatar as elsewhere */}
             {agent?.user && (
               <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginTop: 2 }}>
@@ -302,9 +304,9 @@ export function AgentForm({ agent, prompts, faqs, onSaved, onDelete }: {
               FAQs, which ones this agent may draw on (soft chips, mirrors the entity
               multi-select convention rather than a hand-rolled checkbox list). */}
           <div style={{ marginBottom: 13 }}>
-            <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', marginBottom: 8, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+            <GroupLabel style={{ marginBottom: 8 }}>
               {t('ai.agent.knowledge')}
-            </div>
+            </GroupLabel>
             <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer', marginBottom: 10 }}>
               <Toggle checked={form.use_knowledge} onChange={v => set('use_knowledge', v)} ariaLabel={t('ai.agent.useKnowledge')} />
               <span style={{ fontSize: 12, color: 'var(--text)' }}>{t('ai.agent.useKnowledge')}</span>
@@ -342,14 +344,14 @@ export function AgentForm({ agent, prompts, faqs, onSaved, onDelete }: {
             {showCustomApi && (
               <div style={{ marginTop: 8 }}>
                 <Field label={t('ai.agent.apiEndpoint')}>
-                  <input value={form.custom_endpoint} onChange={e => set('custom_endpoint', e.target.value)} style={inputStyle} placeholder="https://api.mijnmodel.nl/v1/chat" />
+                  <input value={form.custom_endpoint} onChange={e => set('custom_endpoint', e.target.value)} style={inputStyle} placeholder="https://api.example.com/v1/chat" />
                 </Field>
                 {/* Masked write-only field (mirrors EmailSettings' smtp_pass /
                     FacebookLeadsSettings' SecretField, security audit finding D): the
                     stored key is never shown or re-sent — only a "✓ set" badge plus a
                     placeholder telling the user blank keeps the current key. */}
                 <div style={{ marginBottom: 13 }}>
-                  <label htmlFor={apiKeyId} style={{ display: 'block', fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', marginBottom: 5, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                  <label htmlFor={apiKeyId} style={fieldLabelStyle}>
                     {t('ai.agent.apiKey')}
                     {hasCustomApiKey && !form.custom_api_key && (
                       <span style={{ marginLeft: 6, fontSize: 11, color: 'var(--color-success-text)', fontWeight: 400, textTransform: 'none', letterSpacing: 'normal' }}>

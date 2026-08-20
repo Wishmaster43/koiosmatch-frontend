@@ -23,6 +23,8 @@ import ChipMultiSelect from '@/components/ui/ChipMultiSelect'
 import { useLiveFieldValidation } from '@/hooks/useLiveFieldValidation'
 import { isValidEmailFormat } from '@/lib/contactFieldValidation'
 import { roleLabel } from './usersParts'
+import { fieldInputStyle } from '@/components/forms/fieldMetrics'
+import { BodyText, Caption, GroupLabel } from '@/components/ui/typography'
 
 // VALIDATIE-LIVE-1-rest: `email` is the only field here the backend validates
 // with a shape rule (UserController's inline POST rules — `'email' =>
@@ -119,9 +121,8 @@ export default function NewUserModal({ onClose, onCreated }: {
     }
   }
 
-  const input: CSSProperties = { width: '100%', padding: '8px 10px', fontSize: 13, borderRadius: 8,
-                  border: '1px solid var(--border)', background: 'var(--input-bg)',
-                  color: 'var(--text)', outline: 'none' }
+  // Field faces come from fieldMetrics' canon (§4 2b) — never a local copy.
+  const input: CSSProperties = fieldInputStyle
   const label: CSSProperties = { display: 'block', fontSize: 12, fontWeight: 500, color: 'var(--text-muted)', marginBottom: 5 }
 
   return (
@@ -144,7 +145,7 @@ export default function NewUserModal({ onClose, onCreated }: {
               format error renders inline instead of only bouncing back as a 422. */}
           <div style={{ marginBottom: 12 }} onBlur={() => markTouched('email')}>
             <label style={label}>{t('email')}</label>
-            <input required type="email" value={form.email} onChange={set('email')} placeholder="jan@bedrijf.nl" aria-label={t('email')}
+            <input required type="email" value={form.email} onChange={set('email')} placeholder={t('common:placeholders.emailExample')} aria-label={t('email')}
               style={{ ...input, ...(fieldMessage('email') ? { borderColor: 'var(--color-danger)' } : {}) }} />
             {fieldMessage('email') && <p style={{ fontSize: 11, color: 'var(--color-danger-text)', marginTop: 5 }}>{fieldMessage('email')}</p>}
           </div>
@@ -175,9 +176,9 @@ export default function NewUserModal({ onClose, onCreated }: {
               <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                 <input type="checkbox" checked={createAgent} onChange={e => setCreateAgent(e.target.checked)}
                   aria-label={t('agent.label')} style={{ cursor: 'pointer' }} />
-                <label style={{ fontSize: 13, fontWeight: 500, color: 'var(--text)', cursor: 'pointer' }}>{t('agent.label')}</label>
+                <BodyText as="label" style={{ fontWeight: 500, cursor: 'pointer' }}>{t('agent.label')}</BodyText>
               </div>
-              <p style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 6, marginLeft: 24 }}>{t('agent.hint')}</p>
+              <Caption as="p" style={{ marginTop: 6, marginLeft: 24 }}>{t('agent.hint')}</Caption>
             </div>
           )}
 
@@ -185,10 +186,9 @@ export default function NewUserModal({ onClose, onCreated }: {
               (Danny ronde-2 punt 1.1: kies er 1 of meerdere bij het aanmaken). */}
           {form.role && (
             <div style={{ marginBottom: 20, padding: '10px 12px', borderRadius: 8, background: 'var(--hover-bg)' }}>
-              <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', marginBottom: 6,
-                            textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+              <GroupLabel style={{ marginBottom: 6 }}>
                 {t('branches.previewTitle')}
-              </div>
+              </GroupLabel>
               {templateLoading ? (
                 <p style={{ fontSize: 12, color: 'var(--text-muted)' }}>{t('branches.loading')}</p>
               ) : (

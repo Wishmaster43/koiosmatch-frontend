@@ -463,6 +463,8 @@
     "firstName": "Juan",
     "lastName": "García",
     "min": "mín",
-    "max": "máx"
+    "max": "máx",
+    "fullNameExample": "Juan García",
+    "phoneExample": "+34 612 345 678"
   }
 }

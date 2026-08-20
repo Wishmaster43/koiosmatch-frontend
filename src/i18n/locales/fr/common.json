@@ -463,6 +463,8 @@
     "firstName": "Jean",
     "lastName": "Dupont",
     "min": "min",
-    "max": "max"
+    "max": "max",
+    "fullNameExample": "Jean Dupont",
+    "phoneExample": "+33 6 12 34 56 78"
   }
 }
