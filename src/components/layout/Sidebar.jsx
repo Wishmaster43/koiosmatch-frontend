@@ -103,6 +103,7 @@ function SubNavItem({ item, active, onNavigate }) {
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
       className="flex items-center w-full rounded-lg mb-0.5 border-none cursor-pointer font-sans transition-all duration-150"
+      // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- app-chrome control (components/layout = chroom, HUISSTIJL-1): nav-rail/topbar place-marker met eigen actieve-staat, geen actieknop; Button-varianten dekken de rail bewust niet
       style={{
         gap: 8, padding: '6px 10px',
         background: active ? 'var(--color-primary-bg)' : hovered ? 'var(--sidebar-hover)' : 'transparent',
@@ -115,6 +116,7 @@ function SubNavItem({ item, active, onNavigate }) {
     >
       <div className="flex-shrink-0 rounded-full"
         style={{ width: 4, height: 4, marginLeft: 2,
+          // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- chrome-accentvlak (actieve nav-marker/merkcirkel, zie de aangrenzende ACCENT-INK/SIDEBAR-CONTRAST-comments), geen actieoppervlak
           background: active ? 'var(--color-primary)' : 'currentColor' }} />
       <span style={{ fontSize: 12, fontWeight: active ? 500 : 400 }}>{item.label}</span>
     </button>
@@ -140,10 +142,14 @@ function NavItem({ item, activePage, expanded, openItems, toggleOpen, onNavigate
     <div>
       <button
         onClick={handleClick}
+        // Unconditional name (milestone-heraudit): collapsed, the label span is
+        // gone and title alone is a tooltip, not a name (§6).
+        aria-label={item.label}
         title={!expanded ? item.label : undefined}
         onMouseEnter={() => setHovered(true)}
         onMouseLeave={() => setHovered(false)}
         className="flex items-center w-full rounded-lg mb-0.5 border-none cursor-pointer font-sans transition-all duration-150"
+        // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- app-chrome control (components/layout = chroom, HUISSTIJL-1): nav-rail/topbar place-marker met eigen actieve-staat, geen actieknop; Button-varianten dekken de rail bewust niet
         style={{
           gap:            expanded ? 9 : 0,
           padding:        expanded ? '7px 10px' : '7px',
@@ -177,6 +183,7 @@ function NavItem({ item, activePage, expanded, openItems, toggleOpen, onNavigate
             ) : (
               !item.soon && isActive && (
                 <span className="rounded-full"
+                  // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- chrome-accentvlak (actieve nav-marker/merkcirkel, zie de aangrenzende ACCENT-INK/SIDEBAR-CONTRAST-comments), geen actieoppervlak
                   style={{ width: 5, height: 5, background: 'var(--color-primary)', flexShrink: 0 }} />
               )
             )}
@@ -278,8 +285,12 @@ export default function Sidebar({ expanded, activePage, setActivePage, koiosOpen
         {koiosEntitled && (
         <button
           onClick={onToggleKoios}
+          // Brand name, identical in every locale — aria-label names the collapsed
+          // icon-only state (milestone-heraudit, same class as NavItem above).
+          aria-label="Koios AI"
           title="Koios AI"
           className="flex items-center w-full rounded-lg mb-1 border-none cursor-pointer font-sans transition-all duration-150"
+          // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- app-chrome control (components/layout = chroom, HUISSTIJL-1): nav-rail/topbar place-marker met eigen actieve-staat, geen actieknop; Button-varianten dekken de rail bewust niet
           style={{
             gap:            expanded ? 9 : 0,
             padding:        expanded ? '7px 10px' : '7px',
@@ -289,6 +300,7 @@ export default function Sidebar({ expanded, activePage, setActivePage, koiosOpen
               ? 'linear-gradient(135deg, var(--color-primary), var(--color-violet))'
               // color-mix — a var() cannot take a hex-alpha suffix ('var(--x)20' is
               // invalid CSS, the declaration was silently dropped; audit-consolidatie 23-07).
+              // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- chrome-/merktint met bewust eigen percentage (Koios-gradiënt zachte staat / sidebar-hover), predates lib/tint en is geen statuschip
               : 'linear-gradient(135deg, color-mix(in srgb, var(--color-primary) 12%, transparent), color-mix(in srgb, var(--color-violet) 12%, transparent))',
             // Solid accent gradient needs the tenant's readable-on-accent token; the
             // soft-tint (non-open) state is a light surface, so it uses the accent as TEXT
@@ -299,12 +311,14 @@ export default function Sidebar({ expanded, activePage, setActivePage, koiosOpen
           }}
         >
           <div className="flex items-center justify-center rounded-full flex-shrink-0"
+            // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- chrome-accentvlak (actieve nav-marker/merkcirkel, zie de aangrenzende ACCENT-INK/SIDEBAR-CONTRAST-comments), geen actieoppervlak
             style={{ width: 18, height: 18, background: koiosOpen ? 'rgba(255,255,255,0.25)' : 'var(--color-primary)' }}>
             {/* Translucent white circle (koiosOpen) stays white; the solid accent circle
                 (collapsed) needs the on-accent token so a light brand keeps a readable icon. */}
             <BrainCircuit size={11} color={koiosOpen ? 'white' : 'var(--color-on-accent)'} />
           </div>
           {expanded && (
+            // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- Koios-merklabel in het chroom met eigen kleurwissel per open-staat; SectionTitle-atoom draagt --text en past hier niet
             <span style={{ fontSize: 13, fontWeight: 600, flex: 1, textAlign: 'left',
               color: koiosOpen ? 'var(--color-on-accent)' : 'var(--color-primary-text)' }}>
               Koios
@@ -312,6 +326,7 @@ export default function Sidebar({ expanded, activePage, setActivePage, koiosOpen
           )}
           {expanded && !koiosOpen && (
             <span style={{ fontSize: 9, fontWeight: 600, padding: '2px 6px',
+              // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- chrome-accentvlak (actieve nav-marker/merkcirkel, zie de aangrenzende ACCENT-INK/SIDEBAR-CONTRAST-comments), geen actieoppervlak
               background: 'var(--color-primary)', color: 'var(--color-on-accent)', borderRadius: 99, letterSpacing: '0.04em' }}>
               AI
             </span>

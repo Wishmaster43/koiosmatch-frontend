@@ -120,7 +120,8 @@
     "title": "Filtres",
     "branch": "Filiale",
     "branchExcludesUnassigned": "Un filtre par filiale masque les enregistrements sans filiale liée.",
-    "button": "Filtrer"
+    "button": "Filtrer",
+    "toggleActive": "Afficher/masquer les filtres ({{count}} actifs)"
   },
   "nav": {
     "dashboard": "Tableau de bord",

@@ -120,7 +120,8 @@
     "title": "Filters",
     "branch": "Branch",
     "branchExcludesUnassigned": "A branch filter hides records with no branch linked yet.",
-    "button": "Filter"
+    "button": "Filter",
+    "toggleActive": "Show/hide filters ({{count}} active)"
   },
   "nav": {
     "dashboard": "Dashboard",

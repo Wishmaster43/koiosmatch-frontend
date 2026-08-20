@@ -120,7 +120,8 @@
     "title": "Filtros",
     "branch": "Sucursal",
     "branchExcludesUnassigned": "Un filtro por sucursal oculta los registros sin sucursal vinculada.",
-    "button": "Filtrar"
+    "button": "Filtrar",
+    "toggleActive": "Mostrar/ocultar filtros ({{count}} activos)"
   },
   "nav": {
     "dashboard": "Panel",
