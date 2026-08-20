@@ -9,6 +9,7 @@ import SoftChip from '@/components/ui/SoftChip'
 import type { Candidate } from '@/types/candidate'
 // PORTAL-MARKER-1: a click inside an open portalled picker menu is never "outside".
 import { isInsideDropdownPortal } from '@/lib/useDropdownPlacement'
+import { Z } from '@/lib/zIndexScale'
 
 /**
  * PoolsSection — the talent pools a candidate belongs to (chips), with an add
@@ -42,8 +43,10 @@ export default function PoolsSection({ c }: { c: Candidate }) {
         <div ref={ref} style={{ position: 'relative' }}>
           <DrawerAddButton onClick={() => setOpen(o => !o)} label={t('sections.poolAdd')} />
           {open && (
-            <div style={{ position: 'absolute', top: '100%', right: 0, zIndex: 200, marginTop: 4, minWidth: 280, maxWidth: 'min(420px, 90vw)',
+            // FROZEN candidate-drawer zone value-preserving swap: 200 → Z.modal (also 200).
+            <div style={{ position: 'absolute', top: '100%', right: 0, zIndex: Z.modal, marginTop: 4, minWidth: 280, maxWidth: 'min(420px, 90vw)',
               background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 10,
+              // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- frozen candidate-drawer zone (Danny 08-08): no restyle without discussion
               boxShadow: '0 4px 20px rgba(0,0,0,0.12)', overflow: 'hidden' }}>
               <div style={{ padding: '8px 10px', borderBottom: '1px solid var(--border)' }}>
                 <input value={search} onChange={e => setSearch(e.target.value)} placeholder={t('common:search')} autoFocus
@@ -66,6 +69,7 @@ export default function PoolsSection({ c }: { c: Candidate }) {
                     const icon = (p as { icon?: string | null }).icon
                     return (
                       <button key={p.id ?? p.name ?? i} onClick={() => toggle(p)}
+                        // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- frozen candidate-drawer zone (Danny 08-08): no restyle without discussion
                         style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between',
                           width: '100%', padding: '9px 12px', fontSize: 12, background: selected ? 'var(--color-primary-bg)' : 'none',
                           border: 'none', cursor: 'pointer', textAlign: 'left', color: 'var(--text)' }}>
@@ -107,6 +111,7 @@ export default function PoolsSection({ c }: { c: Candidate }) {
                       {icon && <LookupIcon icon={icon} size={11} color={color} />}
                       {p.name}
                       <button onClick={() => toggle(p)}
+                        // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- frozen candidate-drawer zone (Danny 08-08): no restyle without discussion
                         style={{ background: 'none', border: 'none', cursor: 'pointer', color, opacity: 0.7, padding: 0, lineHeight: 1, fontSize: 14 }}>×</button>
                     </span>
                   } />

@@ -35,8 +35,10 @@ interface Props { onClose: () => void; onCreated: (c: Campaign) => void }
 // Shared "wide form" frame (Danny 27-07): identical overlay/panel footprint to
 // MatchModal/AddCandidateModal — WIDE_MODAL caps width/height so the
 // call-list modal reads as the same kind of screen as +Match / +Kandidaat.
-const overlayStyle = { position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.35)', zIndex: 60 } as const
-const panelStyle = { position: 'fixed', top: '50%', left: '50%', transform: 'translate(-50%,-50%)', zIndex: 61, width: '94vw', maxWidth: WIDE_MODAL.maxWidth, maxHeight: WIDE_MODAL.maxHeight, overflowY: 'auto', background: 'var(--surface)', borderRadius: 12, padding: 22, boxShadow: '0 24px 70px rgba(0,0,0,0.22)' } as const
+// Fullscreen modal scrim + panel — both on the CSS overlay rung; the panel sits
+// after the scrim in DOM (see render below), so it stacks above it at the same z-index.
+const overlayStyle = { position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.35)', zIndex: 'var(--z-overlay)' } as const
+const panelStyle = { position: 'fixed', top: '50%', left: '50%', transform: 'translate(-50%,-50%)', zIndex: 'var(--z-overlay)', width: '94vw', maxWidth: WIDE_MODAL.maxWidth, maxHeight: WIDE_MODAL.maxHeight, overflowY: 'auto', background: 'var(--surface)', borderRadius: 12, padding: 22, boxShadow: 'var(--shadow-modal)' } as const
 const lbl = { fontSize: 11, fontWeight: 600, textTransform: 'uppercase' as const, letterSpacing: '0.04em', color: 'var(--text-muted)', marginBottom: 5 }
 // Canon field style (G33/fieldMetrics) — was its own height-36 copy.
 const inputStyle = fieldInputStyle

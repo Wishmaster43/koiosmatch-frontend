@@ -12,6 +12,8 @@ import { useReportList } from '@/components/reports/useReportList'
 import { useDateFormat } from '@/lib/datetime'
 import { formatDuration, StatusBadge } from '@/components/reports/runFormat'
 import RunDetailDrawer from '@/components/reports/RunDetailDrawer'
+import { PageTitle } from '@/components/ui/typography'
+import Button from '@/components/ui/Button'
 // RUN-HIST-EXPAND-1 (batch 4, P39): the chevron opens an inline row reusing the
 // drawer's own step viewer — no forked step-rendering, no extra fetch.
 import RunStepList from '@/components/reports/RunStepList'
@@ -63,7 +65,7 @@ export default function WorkflowHistoryView({ workflowId, initialRun }: {
         {/* Header */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 16 }}>
           <History size={16} color="var(--color-primary)" />
-          <h2 style={{ fontSize: 15, fontWeight: 600, color: 'var(--text)' }}>{t('runs.editorTitle')}</h2>
+          <PageTitle>{t('runs.editorTitle')}</PageTitle>
           {!loading && (
             <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>
               {t('runs.editorCount', { count: rows.length })}
@@ -118,12 +120,10 @@ export default function WorkflowHistoryView({ workflowId, initialRun }: {
                     onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}>
                     <td style={{ ...TD, textAlign: 'center' }}>
                       {/* Chevron toggles the inline row without opening the drawer (P39). */}
-                      <button type="button" aria-expanded={isOpen} aria-label={t('runs.cols.expand')}
-                        onClick={e => { e.stopPropagation(); toggleExpanded(rowKey) }}
-                        style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 4,
-                                 display: 'flex', color: 'var(--text-muted)' }}>
+                      <Button variant="ghost" iconOnly aria-expanded={isOpen} aria-label={t('runs.cols.expand')}
+                        onClick={e => { e.stopPropagation(); toggleExpanded(rowKey) }}>
                         {isOpen ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
-                      </button>
+                      </Button>
                     </td>
                     <td style={{ ...TD, whiteSpace: 'nowrap' }}>
                       <div style={{ fontWeight: 500 }}>{formatDate(r.started_at)}</div>
@@ -156,6 +156,7 @@ export default function WorkflowHistoryView({ workflowId, initialRun }: {
                             <div key={b.label} style={{ flex: 1, padding: '8px 14px', textAlign: 'center', background: 'var(--surface)', border: '1px solid var(--border)' }}>
                               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5 }}>
                                 <b.Icon size={11} color="var(--text-muted)" />
+                                {/* eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- a stat-block NUMBER readout, not a page/section title */}
                                 <span style={{ fontSize: 15, fontWeight: 700, color: 'var(--text)' }}>{b.value}</span>
                               </div>
                               <div style={{ fontSize: 10, color: 'var(--text-muted)', marginTop: 1 }}>{b.label}</div>

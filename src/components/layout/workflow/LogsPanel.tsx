@@ -13,6 +13,8 @@ import { StatusBadge, formatDT, formatDuration } from '@/components/reports/runF
 import { CANCELLABLE, StopRunButton } from './runControl'
 import { useModuleCatalog } from './useModuleCatalog'
 import StepOutputSlice from './StepOutputSlice'
+import { SectionTitle } from '@/components/ui/typography'
+import Button from '@/components/ui/Button'
 import type { RunRow, RunStep } from '@/types/reports'
 
 // Step time range, e.g. "14:03:11 → 14:03:14" (seconds matter inside one run).
@@ -88,11 +90,11 @@ export default function LogsPanel({ workflowId, liveRun, onClose, onOpenHistory 
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 16px', borderBottom: '1px solid var(--border)', flexShrink: 0 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
           <List size={14} color="var(--color-primary)" />
-          <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)' }}>{t('runs.title')}</span>
+          <SectionTitle as="span">{t('runs.title')}</SectionTitle>
         </div>
-        <button onClick={onClose} aria-label={t('common:close')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', display: 'flex' }}>
+        <Button variant="ghost" iconOnly onClick={onClose} aria-label={t('common:close')}>
           <X size={15} />
-        </button>
+        </Button>
       </div>
 
       {/* Run list — loading / empty / real executions */}
@@ -116,6 +118,7 @@ export default function LogsPanel({ workflowId, liveRun, onClose, onOpenHistory 
               <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '10px 16px' }}>
                 <button type="button"
                   onClick={() => steps.length && setExpanded(isOpen ? null : id)}
+                  // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- the whole run row is the disclosure toggle (badge + timestamps + chevron), a list row, not a Button
                   style={{ display: 'flex', alignItems: 'center', flex: 1, minWidth: 0, background: 'none', border: 'none', cursor: steps.length ? 'pointer' : 'default', gap: 8, textAlign: 'left', padding: 0 }}>
                   <StatusBadge status={run.status} />
                   <div style={{ flex: 1, minWidth: 0 }}>
@@ -153,13 +156,10 @@ export default function LogsPanel({ workflowId, liveRun, onClose, onOpenHistory 
                 </button>
                 {/* LOGS-DRILL-1: full run detail lives on the Geschiedenis tab. */}
                 {onOpenHistory && run.id != null && (
-                  <button type="button" title={t('runs.openHistory')} aria-label={t('runs.openHistory')}
-                    onClick={() => onOpenHistory(run)}
-                    style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
-                             width: 24, height: 24, borderRadius: 6, border: '1px solid var(--border)',
-                             background: 'var(--surface)', color: 'var(--text-muted)', cursor: 'pointer' }}>
+                  <Button variant="secondary" iconOnly title={t('runs.openHistory')} aria-label={t('runs.openHistory')}
+                    onClick={() => onOpenHistory(run)}>
                     <History size={12} />
-                  </button>
+                  </Button>
                 )}
                 {/* Stop — only while the run can still be cancelled (running/waiting). */}
                 {stoppable && (

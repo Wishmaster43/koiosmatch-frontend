@@ -8,6 +8,8 @@ import type { ReactNode } from 'react'
 import { X } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { useFocusTrap } from '@/hooks/useFocusTrap'
+import { PageTitle } from '@/components/ui/typography'
+import Button from '@/components/ui/Button'
 
 export default function RightDrawer({ title, subtitle, onClose, width = 480, children }: {
   title?: ReactNode; subtitle?: ReactNode; onClose: () => void; width?: number; children?: ReactNode
@@ -28,14 +30,12 @@ export default function RightDrawer({ title, subtitle, onClose, width = 480, chi
         style={{ zIndex: 'var(--z-drawer)',  width, maxWidth: '92vw', background: 'var(--surface)', boxShadow: 'var(--shadow-drawer)' }}>
         <div className="flex items-start justify-between flex-shrink-0" style={{ padding: '16px 20px', borderBottom: '1px solid var(--border)' }}>
           <div style={{ minWidth: 0 }}>
-            <div style={{ fontSize: 15, fontWeight: 600, color: 'var(--text)' }}>{title}</div>
+            <PageTitle as="div">{title}</PageTitle>
             {subtitle && <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>{subtitle}</div>}
           </div>
-          <button onClick={onClose} aria-label={t('close')}
-            style={{ width: 30, height: 30, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 8,
-              background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', marginLeft: 12, flexShrink: 0 }}>
+          <Button variant="ghost" iconOnly onClick={onClose} aria-label={t('close')} style={{ marginLeft: 12 }}>
             <X size={16} />
-          </button>
+          </Button>
         </div>
         <div className="flex-1 overflow-auto" style={{ padding: 16 }}>{children}</div>
       </div>

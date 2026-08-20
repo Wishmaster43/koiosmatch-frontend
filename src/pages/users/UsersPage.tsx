@@ -27,6 +27,7 @@ import { useUsersData } from './hooks/useUsersData'
 import { useUserDeletion } from './hooks/useUserDeletion'
 import { roleName } from './usersParts'
 import Button from '@/components/ui/Button'
+import { PageTitle } from '@/components/ui/typography'
 
 export default function UsersPage() {
   const { t } = useTranslation('users')
@@ -99,7 +100,7 @@ export default function UsersPage() {
       {/* Header — the settings-section shape (title + subtitle, actions right). */}
       <div className="flex items-center justify-between mb-5">
         <div>
-          <h2 style={{ fontSize: 15, fontWeight: 600, color: 'var(--text)' }}>{t('title')}</h2>
+          <PageTitle>{t('title')}</PageTitle>
           <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>
             {loading ? t('subtitle') : t('summary', { shown: filtered.length, total: rows.length })}
           </p>

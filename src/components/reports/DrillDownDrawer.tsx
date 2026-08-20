@@ -11,6 +11,8 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useDateFormat } from '@/lib/datetime'
 import DrillTabs from '@/components/ui/DrillTabs'
+import Button from '@/components/ui/Button'
+import { PageTitle } from '@/components/ui/typography'
 import { navigateToPage } from '@/lib/navigate'
 import type { ReportCandidate } from '@/types/reports'
 
@@ -92,13 +94,13 @@ export default function DrillDownDrawer({ title, subtitle, candidates = [], onCl
       {/* Drawer */}
       <div ref={panelRef} role="dialog" aria-modal="true" aria-label={typeof title === 'string' ? title : undefined} tabIndex={-1}
         className="fixed top-0 bottom-0 right-0 z-50 flex flex-col bg-[var(--surface)]"
-        style={{ width: expanded ? 900 : 560, transition: 'width 0.2s ease', boxShadow: '-4px 0 30px rgba(0,0,0,0.12)' }}>
+        style={{ width: expanded ? 900 : 560, transition: 'width 0.2s ease', boxShadow: 'var(--shadow-drawer)' }}>
 
         {/* Header */}
         <div className="flex items-start justify-between flex-shrink-0"
           style={{ padding: '16px 20px', borderBottom: '1px solid var(--border)' }}>
           <div>
-            <div className="font-semibold text-[var(--text)]" style={{ fontSize: 15 }}>{currentTab?.label ?? title}</div>
+            <PageTitle>{currentTab?.label ?? title}</PageTitle>
             <div className="text-sm text-[var(--text-muted)] mt-0.5">
               {t('drilldown.candidatesCount', { count: shown.length })}
               {subtitle && <span className="ml-1 text-[var(--text-muted)]">· {subtitle}</span>}
@@ -106,20 +108,16 @@ export default function DrillDownDrawer({ title, subtitle, candidates = [], onCl
           </div>
           {/* Expand/collapse + close — mirrors the candidate drawer header actions */}
           <div className="flex items-center flex-shrink-0" style={{ marginLeft: 12 }}>
-            <button onClick={() => setExpanded(v => !v)} aria-label={expanded ? t('common:collapse') : t('common:expand')}
-              className="flex items-center justify-center rounded-lg"
-              style={{ width: 30, height: 30, background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)' }}
+            <Button variant="ghost" iconOnly onClick={() => setExpanded(v => !v)} aria-label={expanded ? t('common:collapse') : t('common:expand')}
               onMouseEnter={e => (e.currentTarget.style.background = 'var(--hover-bg)')}
               onMouseLeave={e => (e.currentTarget.style.background = 'none')}>
               {expanded ? <Minimize2 size={15} /> : <Maximize2 size={15} />}
-            </button>
-            <button onClick={onClose} aria-label={t('common:close')}
-              className="flex items-center justify-center rounded-lg"
-              style={{ width: 30, height: 30, background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)' }}
+            </Button>
+            <Button variant="ghost" iconOnly onClick={onClose} aria-label={t('common:close')}
               onMouseEnter={e => (e.currentTarget.style.background = 'var(--hover-bg)')}
               onMouseLeave={e => (e.currentTarget.style.background = 'none')}>
               <X size={16} />
-            </button>
+            </Button>
           </div>
         </div>
 
@@ -216,16 +214,13 @@ export default function DrillDownDrawer({ title, subtitle, candidates = [], onCl
           </span>
           <div className="flex items-center gap-2">
             {/* Jump to the standalone candidates table (closes the drawer first). */}
-            <button onClick={() => { onClose(); navigateToPage('shiftmanager.candidates-table') }}
-              className="flex items-center gap-1.5 text-xs font-medium rounded-lg px-3 py-1.5"
-              style={{ background: 'var(--color-primary)', border: '1px solid var(--color-primary)', cursor: 'pointer', color: 'var(--color-on-accent)' }}>
+            <Button variant="primary" onClick={() => { onClose(); navigateToPage('shiftmanager.candidates-table') }}>
               {t('drilldown.viewDetails')}
               <ArrowRight size={13} />
-            </button>
-            <button onClick={onClose} className="text-xs rounded-lg px-3 py-1.5"
-              style={{ background: 'none', border: '1px solid var(--border)', cursor: 'pointer', color: 'var(--text-muted)' }}>
+            </Button>
+            <Button variant="secondary" onClick={onClose}>
               {t('dr.close')}
-            </button>
+            </Button>
           </div>
         </div>
       </div>

@@ -564,7 +564,10 @@ the code is worse than no rule, because the next reader builds on it. What is tr
     actief 16/50); maten via `BTN_H`; SPACING via `--space-1..8` (4px-grid);
     SCHADUW via `--shadow-card/float/modal` (drie niveaus, nooit een eigen
     boxShadow); STAPELING via `--z-sticky/drawer/overlay/popover/toast`
-    (nooit een los getal); BEWEGING via `--motion-fast`.
+    (nooit een los getal — de lintregel vangt numerieke én string-literals,
+    maar NIET Tailwind-klassen: een `z-40`/`z-50` in een className is dezelfde
+    fout en moet je zelf zien; ~10 oude zitten nog in report/sm-drawers);
+    BEWEGING via `--motion-fast`.
   Per-tenant instelbaarheid loopt uitsluitend via de tokens die Instellingen →
   Bedrijf → Branding in de backend-DB bewaart — een component dat een kleur
   hardcodeert onttrekt zich daaraan en is fout. Popupformaten mogen verschillen;
@@ -628,6 +631,15 @@ the code is worse than no rule, because the next reader builds on it. What is tr
   state (status/phase); this one governs *whether* something is on. In the shared
   `SegmentedControl` that is the **`activeFill`** prop (with `activeOnly`, since one shared
   colour means "this is the active one" — tinting the rest then states something untrue).
+  **The INK on that pastel is `--color-on-success-bg`, never `--color-success` itself
+  (Opus-review slotaudit 20-08: the success colour reads 3.0:1 on its own bg — a WCAG
+  fail that shipped 9× hand-copied before it was caught).** No single ink works on both
+  the solid success fill and the pastel across themes, hence the separate token (dark
+  redefines it). A saved-state save button is the shared `components/ui/SaveButton`
+  (`saved` prop) — the pair is defined ONCE there; re-approximating it per screen is a
+  finding. And the general lesson: **whoever moves text onto a different fill re-checks
+  the contrast pair** — `lib/tokenContrast.test.ts` gates the token pairs in CI, so a new
+  fill/ink combination gets a line there in the same change.
 - **IMPORT lives in the CREATE MODAL's header, never in the list toolbar (Danny
   2026-08-14, twice, with screenshots of the customers and the vacancies page: "Excel
   importeren moet in de pop-up + nieuwe vacature, niet hier boven de tabel").** The
@@ -675,6 +687,18 @@ the code is worse than no rule, because the next reader builds on it. What is tr
   **Italic** only for secondary/placeholder/empty-state text (e.g. "not registered yet") —
   **never for data**. Colour only via tokens (`--text`, `--text-muted`, `--color-*`); no
   ad-hoc hex, no per-screen font sizes/weights. Header/meta labels ~11px, body ~12–13px.
+- **Button drift is a finding, not a style choice (HUISSTIJL slotaudit, 2026-08-20 — 20
+  vondsten, all closed).** Three rules, all enforced by `eslint.config.js`'s HUISSTIJL
+  blocks (§ ESLint hardening) plus the pre-commit staged check: (1) **a raw `<button>`
+  sitting beside a `<Button>` in the same action row is a finding** — the two heights
+  always drift (`components/ui/Button`'s own sm/md are 28/34px; a hand-painted 34px is
+  never a legitimate third size). (2) **A file that imports `Button` and then hand-draws
+  its own `<button>` anyway is a finding** — the whole point of importing it is that
+  nothing else paints identity again. (3) **A button-looking `<a>` (mailto/tel/download)
+  renders via `Button`'s polymorphic `href` prop** (`<Button href="mailto:…">`), never an
+  inline-styled `<a>` — navigation stays a real link (§6) while still sharing the one
+  visual identity. A `<button>`/`<a>` with its own fill/border/height needs a written
+  eslint-disable reason (a calendar-grid cell, 34px search-chrome, …) or it is drift.
 
 ---
 
@@ -918,6 +942,12 @@ Be honest. If something is not done, say so — do not pretend.
   INSTRUCTIEFOUT van de manager: de les gaat dan in CLAUDE.md of in het
   prompt-sjabloon, niet alleen in de fix. Danny bepaalt de prioriteiten; de
   manager kiest nooit zelf een nieuw werkterrein terwijl er een opdracht loopt.
+  **Een SLAGBOOM landt alleen als de eigen levering er zelf doorheen kan
+  (Opus-review slotaudit 20-08):** wie een nieuwe poort bouwt (pre-commit-stap,
+  lint-error, CI-gate) draait die poort op zijn EIGEN diff vóór oplevering — de
+  staged-lint-stap blokkeerde de commit die hem introduceerde (70 warnings in de
+  eigen bestanden). Acceptatiecriterium bij elke nieuwe gate: "de gate passeert
+  op deze delivery", expliciet in de worker-brief én in de Opus-check.
 - **Subagent model policy (Danny 2026-07-22 — supersedes 2026-07-08/15/17; fallback updated 2026-07-24):**
   The MANAGER runs **Fable 5 at reasoning effort high**; when Fable's budget is
   exhausted, **Opus 5 (`claude-opus-5`) at high** takes over as the TEMPORARY

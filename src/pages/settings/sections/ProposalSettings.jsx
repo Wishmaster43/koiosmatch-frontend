@@ -6,6 +6,7 @@ import RichTextEditor from '@/components/ui/RichTextEditor'
 import SegmentedControl from '@/components/ui/SegmentedControl'
 import { Toggle } from '../components/SettingsKit'
 import { notifyError } from '@/lib/notify'
+import SaveButton from '@/components/ui/SaveButton'
 import { fieldInputStyle } from '@/components/forms/fieldMetrics'
 import { PageTitle, Mono } from '@/components/ui/typography'
 
@@ -121,15 +122,11 @@ export default function ProposalSettings() {
           </div>
         </div>
 
-        <button onClick={saveTemplate} disabled={templateSaving}
-          style={{ display: 'flex', alignItems: 'center', gap: 6, height: 32, padding: '0 12px', marginTop: 14,
-            fontSize: 12, fontWeight: 500, borderRadius: 7, border: 'none', cursor: templateSaving ? 'wait' : 'pointer',
-            opacity: templateSaving ? 0.7 : 1, background: templateSaved ? 'var(--color-success)' : 'var(--color-primary)',
-            // Success fill needs its own on-* token — white only reaches ~3.3:1 there (WCAG audit 2026-08).
-            color: templateSaved ? 'var(--color-on-success)' : 'var(--color-on-accent)' }}>
+        {/* SaveButton — the ONE saved-state save action (§4 success token pair). */}
+        <SaveButton saved={templateSaved} onClick={saveTemplate} disabled={templateSaving} style={{ marginTop: 14 }}>
           <Save size={12} />
           {templateSaved ? t('proposal.saved') : templateSaving ? t('common.saving') : t('common.save')}
-        </button>
+        </SaveButton>
       </div>
 
       {/* Phase automation */}

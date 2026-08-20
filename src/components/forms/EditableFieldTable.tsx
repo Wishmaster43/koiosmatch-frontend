@@ -24,6 +24,7 @@ import SafeHtml from '@/components/ui/SafeHtml'
 import FieldNotice from '@/components/ui/FieldNotice'
 import { CANON_LABEL_WIDTH } from '@/components/drawer/fieldRowCanon'
 import SoftChip from '@/components/ui/SoftChip'
+import Button from '@/components/ui/Button'
 import { tintBg, tintBorder } from '@/lib/tint'
 
 export interface FieldRow {
@@ -74,6 +75,7 @@ type Values = Record<string, unknown>
 // Compose the standard NL one-line address (mirrors candidates/drawer/ProfileTab's
 // addressRow): "Straat 12a, 1234 AB Plaats". Fixed key names — every 'address' row
 // across the app (candidate profile, customer location) shares this shape.
+// eslint-disable-next-line react-refresh/only-export-components -- pure formatter shared by several callers (customerBillingAddress, ZzpAddressCard) alongside this table's own components; not trivial to relocate without touching those unrelated files
 export const composeAddressLine = (v: Values): string => {
   const houseNo = [v.houseNumber, v.houseNumberSuffix].filter(Boolean).join('-')
   const line1 = [v.street, houseNo].filter(Boolean).join(' ')
@@ -84,6 +86,7 @@ export const composeAddressLine = (v: Values): string => {
 // Compose the standard "Voornaam tussenvoegsel Achternaam" one-line name — the
 // 'name' composite's sibling of composeAddressLine above. Skips empty parts;
 // fixed key names (firstName/middleName/lastName), same convention as address.
+// eslint-disable-next-line react-refresh/only-export-components -- pure formatter, sibling of composeAddressLine above, same shared-caller reasoning
 export const composeNameLine = (v: Values): string =>
   [v.firstName, v.middleName, v.lastName].filter(Boolean).map(String).join(' ')
 
@@ -112,6 +115,7 @@ const rowStyle = (dividers: boolean): CSSProperties => dividers
 // one pencil look on every card header, never the old borderless glyph.
 function EditPencil({ onClick, title, style }: { onClick: () => void; title: string; style?: CSSProperties }) {
   return (
+    // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- canon 26×26 pencil, deliberately matched to this table's 26px row minHeight (Button's iconOnly sm is 28px and would overflow the row)
     <button onClick={onClick} title={title} style={{ width: 26, height: 26, display: 'flex',
       alignItems: 'center', justifyContent: 'center', borderRadius: 6, cursor: 'pointer',
       background: 'none', color: 'var(--text-muted)', border: '1px solid var(--border)', ...style }}>
@@ -210,17 +214,19 @@ export default function EditableFieldTable({
   const startEdit = () => (controlled ? onStartEdit?.() : setEditingState(true))
   const cancel    = () => { setForm(saved); if (controlled) onCancel?.(); else setEditingState(false) }
   const save      = () => { if (hasBlockingError) return; setSaved(form); onSave?.(form); if (!controlled) setEditingState(false) }
-  const iconBtn: CSSProperties = { width: 26, height: 26, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 6, cursor: 'pointer' }
-  // In-place save (diskette) + cancel (✕), same spot as the pencil.
+  // In-place save (diskette) + cancel (✕), same spot as the pencil. House Button
+  // (HUISSTIJL-1, BTN-5) — an icon save button is Button size="sm" iconOnly,
+  // never a local iconBtn style constant re-painting the same identity.
   const editControls = () => (
     <div style={{ display: 'flex', gap: 4 }}>
-      {/* Accent-filled save button — follow the tenant's on-accent contrast token
-          instead of a hardcoded white (2026-08-08). Disabled (never hidden) while a
-          row reports a blocking format error, so the reason stays readable on screen. */}
-      <button onClick={save} disabled={hasBlockingError} title={t('save')}
-        style={{ ...iconBtn, background: 'var(--color-primary)', color: 'var(--color-on-accent)', border: 'none',
-          ...(hasBlockingError ? { opacity: 0.45, cursor: 'not-allowed' } : {}) }}><Save size={13} /></button>
-      <button onClick={cancel} title={t('cancel')} style={{ ...iconBtn, background: 'var(--bg)', color: 'var(--text-muted)', border: '1px solid var(--border)' }}><X size={13} /></button>
+      {/* Disabled (never hidden) while a row reports a blocking format error, so
+          the reason stays readable on screen. */}
+      <Button variant="primary" size="sm" iconOnly onClick={save} disabled={hasBlockingError} title={t('save')}>
+        <Save size={13} />
+      </Button>
+      <Button variant="secondary" size="sm" iconOnly onClick={cancel} title={t('cancel')}>
+        <X size={13} />
+      </Button>
     </div>
   )
 
@@ -263,10 +269,11 @@ export default function EditableFieldTable({
             const col = o.color ?? 'var(--color-primary)'
             return (
               <button key={o.value} type="button" onClick={() => setF(f.key, active ? '' : o.value)}
+                // Interactive toggle chip — stays a real <button> (SoftChip has no
+                // onClick), but the tint now uses the house tintBg/tintBorder formula
+                // instead of hex-concat (§4, HUISSTIJL-1).
+                // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- chip toggle, not a Button (SoftChip has no onClick and Button has no chip/pill identity)
                 style={{ padding: '3px 10px', borderRadius: 999, fontSize: 12, cursor: 'pointer', fontWeight: active ? 600 : 400, transition: 'all 0.12s',
-                  // Interactive toggle chip — stays a real <button> (SoftChip has no
-                  // onClick), but the tint now uses the house tintBg/tintBorder formula
-                  // instead of hex-concat (§4, HUISSTIJL-1).
                   ...(active ? { background: tintBg(col, true), color: col, border: tintBorder(col, true) } : { background: 'var(--surface)', color: 'var(--text-muted)', border: '1px solid var(--border)' }) }}>
                 {o.label}
               </button>

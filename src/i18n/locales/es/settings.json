@@ -717,7 +717,9 @@
       }
     },
     "signature": "Firma",
-    "signatureHint": "Se añade al final de cada correo de este tipo."
+    "signatureHint": "Se añade al final de cada correo de este tipo.",
+    "showPassword": "Mostrar contraseña",
+    "hidePassword": "Ocultar contraseña"
   },
   "notifications": {
     "email": {

@@ -13,6 +13,9 @@ import AvatarJs from '../ui/Avatar'
 import SelectMenuJs from '../ui/SelectMenu'
 // PORTAL-MARKER-1: a click inside an open portalled picker menu is never "outside".
 import { isInsideDropdownPortal } from '@/lib/useDropdownPlacement'
+import { Z } from '@/lib/zIndexScale'
+import Button from '@/components/ui/Button'
+import { PageTitle } from '@/components/ui/typography'
 
 type AnyProps = Record<string, unknown>
 // Still-untyped JS UI — accept any props at the boundary.
@@ -59,6 +62,7 @@ function PhotoAvatar({ avatar, onChange, labels }: { avatar: AvatarConfig; onCha
   return (
     <div ref={ref} style={{ position: 'relative', flexShrink: 0 }}>
       <button onClick={() => setMenuOpen(o => !o)}
+        // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- circular avatar photo-picker trigger (wraps the round Avatar itself), not a rectangular Button shape
         style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, display: 'block', position: 'relative', borderRadius: '50%' }}>
         <Avatar initials={avatar.initials} size={44} photo={avatar.photo} color={avatar.color} soft={avatar.soft} />
         {/* Fixed dark photo scrim (not a themed token on purpose — it darkens the avatar
@@ -76,14 +80,17 @@ function PhotoAvatar({ avatar, onChange, labels }: { avatar: AvatarConfig; onCha
       {menuOpen && (
         // Themed surface, not a raw 'white' — this menu floats over the app in both
         // light and dark mode, and a hardcoded white background broke dark mode.
-        <div style={{ position: 'absolute', top: '110%', left: 0, zIndex: 200, background: 'var(--surface)',
-          border: '1px solid var(--border)', borderRadius: 8, boxShadow: '0 4px 16px rgba(0,0,0,0.12)', overflow: 'hidden', minWidth: 140 }}>
+        // FROZEN candidate-drawer zone value-preserving swap: 200 → Z.modal (also 200).
+        <div style={{ position: 'absolute', top: '110%', left: 0, zIndex: Z.modal, background: 'var(--surface)',
+          border: '1px solid var(--border)', borderRadius: 8, boxShadow: 'var(--shadow-float)', overflow: 'hidden', minWidth: 140 }}>
           <button onClick={() => { fileRef.current?.click(); setMenuOpen(false) }}
+            // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- full-width dropdown menu-item row with an imperative hover swap, not a standalone Button
             style={{ display: 'block', width: '100%', padding: '9px 14px', fontSize: 12, textAlign: 'left', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text)' }}
             onMouseEnter={e => (e.currentTarget.style.background = 'var(--hover-bg)')} onMouseLeave={e => (e.currentTarget.style.background = 'none')}>
             {labels?.upload ?? 'Upload'}
           </button>
           <button onClick={() => { removePhoto(); setMenuOpen(false) }}
+            // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- full-width dropdown menu-item row with an imperative hover swap, not a standalone Button
             style={{ display: 'block', width: '100%', padding: '9px 14px', fontSize: 12, textAlign: 'left', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--color-danger)' }}
             onMouseEnter={e => (e.currentTarget.style.background = 'var(--color-danger-bg)')} onMouseLeave={e => (e.currentTarget.style.background = 'none')}>
             {labels?.remove ?? 'Remove'}
@@ -123,9 +130,11 @@ function TagRow({ items = [], onAdd, onRemove, addLabel }: { items?: string[]; o
         <span key={tag} style={{ display: 'flex', alignItems: 'center', gap: 3, fontSize: 11, padding: '3px 8px', borderRadius: 99,
           border: '1px solid var(--border)', background: 'var(--bg)', color: 'var(--text)' }}>
           <button onClick={() => { setEditing(tag); setEditValue(tag) }} title={tag}
+            // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- inline click-to-rename label inside the tag chip, inherits the chip's own text style, not a Button
             style={{ background: 'none', border: 'none', cursor: 'text', color: 'inherit', font: 'inherit', padding: 0 }}>
             {tag}
           </button>
+          {/* eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- inline chip-remove glyph sized to the 11px tag chip, not a standalone Button */}
           <button onClick={() => onRemove(tag)} aria-label={`× ${tag}`} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: 0, lineHeight: 1, fontSize: 13 }}>×</button>
         </span>
       ))}
@@ -136,6 +145,7 @@ function TagRow({ items = [], onAdd, onRemove, addLabel }: { items?: string[]; o
           style={{ fontSize: 11, padding: '3px 8px', borderRadius: 99, border: '1px solid var(--color-primary)', color: 'var(--text)', width: 110 }} />
       ) : (
         <button onClick={() => setAdding(true)}
+          // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- compact dashed-pill add-tag trigger sized to match the tag chip row (11px), not a toolbar Button
           style={{ fontSize: 11, padding: '3px 8px', borderRadius: 99, border: '1px dashed var(--border)', background: 'none', color: 'var(--text-muted)', cursor: 'pointer' }}>+</button>
       )}
     </div>
@@ -187,15 +197,15 @@ export default function EntityHeader({
       <div style={{ display: 'flex', alignItems: 'center', marginBottom: 12 }}>
         <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-muted)', flex: 1 }}>{label}</span>
         {titleActions}
-        <button onClick={onToggleExpand} aria-label={expanded ? t('collapse') : t('expand')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: 4, display: 'flex' }}>
+        <Button variant="ghost" iconOnly onClick={onToggleExpand} aria-label={expanded ? t('collapse') : t('expand')}>
           {expanded ? <Minimize2 size={14} /> : <Maximize2 size={14} />}
-        </button>
+        </Button>
         {/* SWEEP-ESC: `data-drawer-close` is the hook the shared EntityDrawer shell uses
             to close on Escape — it finds and clicks THIS exact button, so every entity
             drawer inherits Escape-to-close from one place with zero caller changes. */}
-        <button onClick={onClose} aria-label={t('close')} data-drawer-close style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: 4, display: 'flex' }}>
+        <Button variant="ghost" iconOnly onClick={onClose} aria-label={t('close')} data-drawer-close>
           <X size={15} />
-        </button>
+        </Button>
       </div>
 
       {/* Avatar + title + actions */}
@@ -204,7 +214,7 @@ export default function EntityHeader({
         <div style={{ flex: 1, minWidth: 0 }}>
           {renderTitle ? renderTitle() : (
             <>
-              <div style={{ fontSize: 15, fontWeight: 700, color: 'var(--text)' }}>{title}</div>
+              <PageTitle style={{ fontWeight: 700 }}>{title}</PageTitle>
               {subtitle != null && <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{subtitle || '—'}</div>}
             </>
           )}

@@ -12,6 +12,7 @@ import type { CSSProperties, ComponentType, KeyboardEvent as ReactKeyboardEvent,
 import { ChevronDown, ChevronRight, ArrowLeft, Search, Check } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { BTN_H } from '@/config/buttonMetrics'
+import Button from './Button'
 import SelectAllRow from './SelectAllRow'
 // PORTAL-MARKER-1: a click inside an open portalled picker menu is never "outside".
 import { isInsideDropdownPortal } from '@/lib/useDropdownPlacement'
@@ -181,6 +182,7 @@ export default function ActionMenu({
         aria-label={iconOnly ? (ariaLabel ?? label) : undefined}
         title={iconOnly ? (ariaLabel ?? label) : undefined}
         onClick={() => (open ? close() : setOpen(true))}
+        // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- the shared ActionMenu trigger itself: two shapes (iconOnly/labelled) plus an open-state ring Button's own variants don't express; this IS the house dropdown-trigger identity, not a copy of Button
         style={iconOnly ? {
           display: 'flex', alignItems: 'center', justifyContent: 'center', width: 26, height: 26, borderRadius: 6,
           // PRIMAIR-VLAK-1 (Danny 19-08, tweede aanwijzing op de sorteerknopjes):
@@ -211,6 +213,7 @@ export default function ActionMenu({
 
           {/* Back header when drilled into a sub-level */}
           {current && (
+            // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- persistent "you are here" orientation header (Opus-F residual triage: deliberately LEFT tinted, not the button trio), not a Button
             <button type="button" onClick={back} style={headerStyle} aria-label={t('back')}>
               <ArrowLeft size={14} />
               <span style={{ fontWeight: 600 }}>{current.label}</span>
@@ -241,12 +244,12 @@ export default function ActionMenu({
               <textarea value={query} onChange={e => setQuery(e.target.value)} rows={4} placeholder={inputNode.placeholder ?? ''}
                 style={{ width: '100%', resize: 'vertical', border: '1px solid var(--border)', borderRadius: 7, padding: '8px 10px',
                   fontSize: 12, color: 'var(--text)', background: 'var(--surface)', boxSizing: 'border-box' }} />
-              <button type="button" disabled={!query.trim()}
+              {/* House Button (HUISSTIJL-1, BTN-4) — the identity, not a hand-painted fill. */}
+              <Button variant="primary" size="sm" disabled={!query.trim()}
                 onClick={() => { const v = query.trim(); if (v) { inputNode.onSubmit?.(v); close() } }}
-                style={{ marginTop: 8, width: '100%', padding: '8px 10px', fontSize: 12, fontWeight: 500, border: 'none', borderRadius: 7,
-                  background: 'var(--color-primary)', color: 'var(--color-on-accent)', cursor: query.trim() ? 'pointer' : 'not-allowed', opacity: query.trim() ? 1 : 0.5 }}>
+                style={{ marginTop: 8, width: '100%' }}>
                 {inputNode.submitLabel ?? t('save')}
-              </button>
+              </Button>
             </div>
           )}
 
@@ -268,6 +271,7 @@ export default function ActionMenu({
             {/* Submenu / root: action + drill rows */}
             {levelItems && levelItems.map(node => (
               <button key={node.key} type="button" role="menuitem" data-menuitem onClick={() => choose(node)}
+                // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- menu-item row, not a Button
                 style={rowStyle(node.danger)} onMouseEnter={hoverOn} onMouseLeave={hoverOff}>
                 {node.icon && <node.icon size={14} style={{ flexShrink: 0 }} />}
                 <span style={{ flex: 1 }}>{node.label}</span>
@@ -284,6 +288,7 @@ export default function ActionMenu({
             {/* Single-pick options: fire + close */}
             {optionNode && shownOptions.map(o => (
               <button key={o.value} type="button" role="menuitem" data-menuitem onClick={() => pick(o.value)}
+                // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- menu-item row, not a Button
                 style={rowStyle(false)} onMouseEnter={hoverOn} onMouseLeave={hoverOff}>
                 {o.color && <span style={{ width: 8, height: 8, borderRadius: '50%', background: o.color, flexShrink: 0 }} />}
                 {o.icon && <o.icon size={14} style={{ flexShrink: 0 }} />}
@@ -295,10 +300,12 @@ export default function ActionMenu({
               const on = multiValues.includes(o.value)
               return (
                 <button key={o.value} type="button" role="menuitemcheckbox" aria-checked={on} data-menuitem
+                  // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- menu-item row, not a Button
                   onClick={() => toggleMulti(o.value)} style={rowStyle(false)} onMouseEnter={hoverOn} onMouseLeave={hoverOff}>
+                  {/* PRIMAIR-VLAK-1: selected state wears the button trio, not a raw accent fill. */}
                   <span style={{ width: 15, height: 15, borderRadius: 4, flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    border: `1.5px solid ${on ? 'var(--color-primary)' : 'var(--border)'}`, background: on ? 'var(--color-primary)' : 'transparent' }}>
-                    {on && <Check size={10} color="var(--color-on-accent)" />}
+                    border: `1.5px solid ${on ? 'var(--button-border)' : 'var(--border)'}`, background: on ? 'var(--button-fill)' : 'transparent' }}>
+                    {on && <Check size={10} color="var(--button-ink)" />}
                   </span>
                   {o.color && <span style={{ width: 8, height: 8, borderRadius: '50%', background: o.color, flexShrink: 0 }} />}
                   <span style={{ flex: 1 }}>{o.label}</span>
@@ -310,11 +317,11 @@ export default function ActionMenu({
           {/* Multi-select confirm bar — applies the exact chosen set (may be empty). */}
           {multiNode && (
             <div style={{ padding: 10, borderTop: '1px solid var(--border)' }}>
-              <button type="button" onClick={() => { multiNode.onSubmit?.(multiValues); close() }}
-                style={{ width: '100%', padding: '8px 10px', fontSize: 12, fontWeight: 500, border: 'none', borderRadius: 7,
-                  background: 'var(--color-primary)', color: 'var(--color-on-accent)', cursor: 'pointer' }}>
+              {/* House Button (HUISSTIJL-1, BTN-4) — the identity, not a hand-painted fill. */}
+              <Button variant="primary" size="sm" onClick={() => { multiNode.onSubmit?.(multiValues); close() }}
+                style={{ width: '100%' }}>
                 {(multiNode.submitLabel ?? t('save'))}{multiValues.length ? ` (${multiValues.length})` : ''}
-              </button>
+              </Button>
             </div>
           )}
         </div>

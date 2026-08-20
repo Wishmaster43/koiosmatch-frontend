@@ -28,12 +28,15 @@ import SettingsChangelogButton from './components/SettingsChangelogButton'
 // THE RULE (Danny 08-08, §4): searchable dropdown everywhere, no exceptions for
 // short lists — replaces the mobile category native <select> below.
 import SelectMenu from '@/components/ui/SelectMenu'
+import Button from '@/components/ui/Button'
+import { PageTitle } from '@/components/ui/typography'
 
 // SM-MODULE-TABS-1: a nav item may declare `requiresModuleOrApp: { module, app }` to
 // stay visible when EITHER the tenant module OR the app/koppeling flag is on (a plain
 // `requiresPage` ANDs on the module only — see lib/access.ts). Exported as a pure
 // function so the module/app/both/neither matrix is unit-testable without mounting
 // the whole registry-driven shell.
+// eslint-disable-next-line react-refresh/only-export-components -- pure predicate exported for unit tests + a sibling settings section (ShiftmanagerModuleSettings); relocating would touch three unrelated files
 export function passesModuleOrApp(requirement, { hasModule, isAppEnabled }) {
   if (!requirement) return true
   const { module, app } = requirement
@@ -181,7 +184,7 @@ export default function SettingsPage() {
           background: 'var(--surface)', overflowY: 'auto', padding: '20px 12px',
         }}>
           <div style={{ padding: '0 8px', marginBottom: 14 }}>
-            <div style={{ fontSize: 15, fontWeight: 700, color: 'var(--text)' }}>{t('shell.title')}</div>
+            <PageTitle style={{ fontWeight: 700 }}>{t('shell.title')}</PageTitle>
           </div>
 
           {/* Search trigger */}
@@ -190,8 +193,9 @@ export default function SettingsPage() {
               literal). The ⌘K hint stays a literal: it is deliberately lighter than
               --text-muted (a barely-there shortcut hint, not body text) and no existing
               token sits that light — kept as documented DATA-adjacent chrome. */}
-          <button onClick={() => setSearchOpen(true)} style={{
-            display: 'flex', alignItems: 'center', gap: 8, width: '100%', height: 34, padding: '0 10px',
+          <button onClick={() => setSearchOpen(true)}
+            // eslint-disable-next-line huisstijl/no-restricted-syntax, huisstijlLegacy/no-restricted-syntax -- the search-trigger bar, styled to the 34px search-chrome height Button's own docs carve out (§4), not a text/action Button copy
+            style={{ display: 'flex', alignItems: 'center', gap: 8, width: '100%', height: 34, padding: '0 10px',
             marginBottom: 16, border: '1px solid var(--border)', borderRadius: 9, background: 'var(--hover-bg)',
             cursor: 'pointer', color: 'var(--text-muted)',
           }}>
@@ -206,6 +210,7 @@ export default function SettingsPage() {
             const isActive = group.key === category
             return (
               <button key={group.key} onClick={() => selectCategory(group.key)}
+                // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- resting sidebar navigation item (§4: active nav is a tint/place-marker, not an action), not a Button
                 style={{
                   width: '100%', display: 'flex', alignItems: 'center', gap: 10,
                   padding: '8px 10px', borderRadius: 8, border: 'none', cursor: 'pointer',
@@ -237,11 +242,10 @@ export default function SettingsPage() {
               <SelectMenu aria-labelledby={categoryPickerLabelId} value={category} onChange={selectCategory}
                 options={visibleGroups.map(g => ({ value: g.key, label: t(`groups.${g.key}`) }))}
                 style={{ flex: 1, height: 38, fontSize: 14 }} />
-              <button onClick={() => setSearchOpen(true)} aria-label={t('shell.search')}
-                style={{ width: 38, height: 38, display: 'flex', alignItems: 'center', justifyContent: 'center',
-                         border: '1px solid var(--border)', borderRadius: 9, background: 'var(--surface)', cursor: 'pointer' }}>
+              <Button variant="secondary" iconOnly onClick={() => setSearchOpen(true)} aria-label={t('shell.search')}
+                style={{ width: 38, height: 38 }}>
                 <Search size={16} style={{ color: 'var(--text-muted)' }} />
-              </button>
+              </Button>
             </div>
           )}
 

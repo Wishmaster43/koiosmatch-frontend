@@ -15,20 +15,38 @@
  * (pages, modals, drawers), 'sm' = 28px/12px/r6 (settings rows, dense panels).
  * Layout concerns (width, margins, flex) stay with the caller via `style` —
  * identity concerns (colour, chrome, typography) never do.
+ *
+ * `href` (HUISSTIJL slotaudit V7) is the polymorphic escape hatch: a link that
+ * LOOKS like a button (mailto/tel/download) stays a real <a> semantically (§6 —
+ * navigation is a link, not a button), but shares the exact same SIZES/VARIANTS
+ * identity so it never drifts into its own inline-styled copy. `target="_blank"`
+ * gets `rel="noopener noreferrer"` unless the caller already set `rel`.
  */
 import { forwardRef } from 'react'
-import type { ButtonHTMLAttributes, CSSProperties } from 'react'
+import type { AnchorHTMLAttributes, ButtonHTMLAttributes, CSSProperties, Ref } from 'react'
 import { BTN_H } from '@/config/buttonMetrics'
 import { tintBg, tintBorder } from '@/lib/tint'
 
 export type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'soft' | 'danger' | 'dangerSoft'
 export type ButtonSize = 'md' | 'sm'
 
-export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
+interface ButtonIdentityProps {
   variant?: ButtonVariant
   size?: ButtonSize
   // Square icon button: fixed width = height, no horizontal padding.
   iconOnly?: boolean
+  // Shared across both the <button> and <a> renders — AnchorHTMLAttributes has
+  // no native `disabled`, so the <a> branch honours it manually (see below).
+  disabled?: boolean
+}
+
+export interface ButtonProps extends ButtonIdentityProps, ButtonHTMLAttributes<HTMLButtonElement> {
+  href?: undefined
+}
+
+// The <a> variant: same identity props, native anchor attributes, href required.
+export interface ButtonLinkProps extends ButtonIdentityProps, AnchorHTMLAttributes<HTMLAnchorElement> {
+  href: string
 }
 
 // Identity per variant — colour/chrome only; sizing lives in SIZES.
@@ -58,29 +76,62 @@ const SIZES: Record<ButtonSize, { height: number; padding: string; fontSize: num
   sm: { height: 28, padding: '0 10px', fontSize: 12, borderRadius: 6 },
 }
 
-const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button(
+const Button = forwardRef<HTMLButtonElement | HTMLAnchorElement, ButtonProps | ButtonLinkProps>(function Button(
   // DEFAULT = sm (Danny 19-08: "drill downs moeten allemaal zelfde zijn — zelfde
   // geldt voor de instellingen"): ONE height everywhere, width follows the text.
   // md is the explicit exception for the page toolbar's "+ Nieuw" beside 34px
   // search chrome ("boven elke tabel groot mag").
-  { variant = 'secondary', size = 'sm', iconOnly = false, disabled, style, type = 'button', children, ...rest }, ref,
+  { variant = 'secondary', size = 'sm', iconOnly = false, disabled, style, children, ...rest }, ref,
 ) {
   const s = SIZES[size]
+  const identityStyle: CSSProperties = {
+    display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 6,
+    whiteSpace: 'nowrap', cursor: disabled ? 'default' : 'pointer', flexShrink: 0,
+    height: s.height, padding: iconOnly ? 0 : s.padding, fontSize: s.fontSize, borderRadius: s.borderRadius,
+    ...(iconOnly ? { width: s.height } : {}),
+    ...VARIANTS[variant],
+    // Caller layout (width/margin/flex) may extend the identity; the §4 lint rule
+    // flags callers that repeat identity props.
+    ...style,
+    // Disabled keeps the shape but drops the claim to attention — one recipe, applied
+    // AFTER the caller's style: a caller's state tint (e.g. a saved-green fill) must
+    // never erase the only visual signal that the control is inert (Opus-review
+    // slotaudit, 20-08: InUseCountsDialog lost its disabled look to a style spread).
+    ...(disabled ? { background: 'var(--border)', color: 'var(--text-muted)', border: 'none', cursor: 'default' } : {}),
+  }
+
+  // href (HUISSTIJL slotaudit V7): a link that LOOKS like a button stays a real
+  // <a> — mailto/tel/download is navigation, not an action (§6) — but renders
+  // with the exact same SIZES/VARIANTS identity so it never grows its own
+  // inline-styled copy. target="_blank" without an explicit rel gets the safe
+  // noopener/noreferrer pair; a disabled link drops href/tabIndex/click instead
+  // of a native `disabled` attribute, which <a> does not support.
+  if ('href' in rest && rest.href !== undefined) {
+    const { href, target, rel, onClick, ...anchorRest } = rest as AnchorHTMLAttributes<HTMLAnchorElement>
+    const autoRel = target === '_blank' && !rel ? 'noopener noreferrer' : rel
+    // Button's own <a> render IS the canonical href identity (HUISSTIJL slotaudit
+    // V7) — the implementation the rule steers everyone else toward, not a copy of
+    // it. Block form (not -next-line): the flagged style attribute sits several
+    // lines into this opening tag, and a bare comment can't sit inside a JSX
+    // attribute list.
+    /* eslint-disable huisstijlLegacy/no-restricted-syntax */
+    return (
+      <a ref={ref as Ref<HTMLAnchorElement>} {...anchorRest}
+        href={disabled ? undefined : href} target={target} rel={autoRel}
+        aria-disabled={disabled || undefined} tabIndex={disabled ? -1 : undefined}
+        onClick={disabled ? e => e.preventDefault() : onClick}
+        style={identityStyle}>
+        {children}
+      </a>
+    )
+    /* eslint-enable huisstijlLegacy/no-restricted-syntax */
+  }
+
+  const { type = 'button', ...buttonRest } = rest as ButtonHTMLAttributes<HTMLButtonElement>
   return (
-    <button ref={ref} type={type} disabled={disabled} {...rest}
-      style={{
-        display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 6,
-        whiteSpace: 'nowrap', cursor: disabled ? 'default' : 'pointer', flexShrink: 0,
-        height: s.height, padding: iconOnly ? 0 : s.padding, fontSize: s.fontSize, borderRadius: s.borderRadius,
-        ...(iconOnly ? { width: s.height } : {}),
-        ...VARIANTS[variant],
-        // Disabled keeps the shape but drops the claim to attention — one recipe,
-        // instead of the per-file ternaries the audit found.
-        ...(disabled ? { background: 'var(--border)', color: 'var(--text-muted)', border: 'none' } : {}),
-        // Caller layout (width/margin/flex) may extend; identity props above win by order
-        // only when the caller repeats them — which the §4 lint rule now flags anyway.
-        ...style,
-      }}>
+    // Button's own <button> render IS the canonical style identity — not a copy.
+    // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax
+    <button ref={ref as Ref<HTMLButtonElement>} type={type} disabled={disabled} {...buttonRest} style={identityStyle}>
       {children}
     </button>
   )

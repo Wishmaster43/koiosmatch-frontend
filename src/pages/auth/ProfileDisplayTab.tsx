@@ -47,6 +47,7 @@ export default function ProfileDisplayTab({ form, setForm, theme, setTheme, lang
             return (
               <button key={n}
                 onClick={() => setForm(f => ({ ...f, default_per_page: n }))}
+                // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- §4 soft-tint multi-option toggle pill (selected/unselected identity Button's variants don't express), not a Button copy
                 style={{
                   padding: '7px 16px', borderRadius: 8, fontSize: 13, fontWeight: 500,
                   cursor: 'pointer', border: `1.5px solid ${active ? 'var(--color-primary)' : 'var(--border)'}`,
@@ -73,6 +74,7 @@ export default function ProfileDisplayTab({ form, setForm, theme, setTheme, lang
             { value: 'dark',  icon: <Moon size={14} />, label: t('profile.dark') },
           ].map(opt => (
             <button key={opt.value} onClick={() => setTheme(opt.value)}
+              // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- §4 soft-tint multi-option toggle pill (selected/unselected identity Button's variants don't express), not a Button copy
               style={{
                 flex: 1, padding: '10px 0', borderRadius: 8, fontSize: 13, fontWeight: 500,
                 cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
@@ -92,6 +94,7 @@ export default function ProfileDisplayTab({ form, setForm, theme, setTheme, lang
       <Field label={t('profile.language')}>
         <div style={{ position: 'relative' }}>
           <button onClick={() => setLangOpen(o => !o)}
+            // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- dropdown trigger rendering the current field value, mirrors the house field-input chrome, not a Button
             style={{
               ...inputStyle, display: 'flex', alignItems: 'center', gap: 8,
               cursor: 'pointer', textAlign: 'left',
@@ -101,14 +104,17 @@ export default function ProfileDisplayTab({ form, setForm, theme, setTheme, lang
             <span style={{ color: 'var(--text-muted)', fontSize: 10 }}>▾</span>
           </button>
           {langOpen && (
+            // Floating dropdown under its trigger, on a plain page (not inside a
+            // drawer/dialog) — the CSS popover rung, so it beats every dialog band.
             <div style={{
-              position: 'absolute', top: 'calc(100% + 4px)', left: 0, right: 0, zIndex: 50,
+              position: 'absolute', top: 'calc(100% + 4px)', left: 0, right: 0, zIndex: 'var(--z-popover)',
               background: 'var(--surface)', border: '1px solid var(--border)',
-              borderRadius: 8, boxShadow: '0 8px 24px rgba(0,0,0,0.1)', overflow: 'hidden',
+              borderRadius: 8, boxShadow: 'var(--shadow-float)', overflow: 'hidden',
             }}>
               {LANGUAGES.map(lang => (
                 <button key={lang.value}
                   onClick={() => { setLanguage(lang.value); setLangOpen(false) }}
+                  // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- dropdown menu-item row, not a Button
                   style={{
                     width: '100%', padding: '10px 14px', fontSize: 13, textAlign: 'left',
                     background: language === lang.value ? 'var(--color-primary-bg)' : 'transparent',
@@ -151,6 +157,7 @@ export default function ProfileDisplayTab({ form, setForm, theme, setTheme, lang
               ]).map(opt => (
                 <button key={opt.value} onClick={() => koios.setMode(opt.value)}
                   aria-pressed={koios.mode === opt.value}
+                  // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- §4 soft-tint multi-option toggle pill (selected/unselected identity Button's variants don't express), not a Button copy
                   style={{
                     flex: 1, padding: '10px 0', borderRadius: 8, fontSize: 13, fontWeight: 500,
                     cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,

@@ -59,8 +59,11 @@ describe('ViewConfigEditor', () => {
     const user = userEvent.setup()
     render(<ViewConfigEditor module="customers" />)
 
-    const hideButtons = await screen.findAllByRole('button', { name: st('viewConfig.hide') })
-    await user.click(hideButtons[0])
+    // The enable toggle is the shared Toggle switch (role="switch"), not a plain
+    // button. Its accessible NAME is the block's own label (stable); the state
+    // lives in aria-checked — a hide/show name would double-signal state.
+    const switches = await screen.findAllByRole('switch', { checked: true })
+    await user.click(switches[0])
     await user.click(screen.getByRole('button', { name: st('common.save') }))
 
     await waitFor(() => {

@@ -717,7 +717,9 @@
       }
     },
     "signature": "Signatur",
-    "signatureHint": "Wird an jede E-Mail dieses Typs angehängt."
+    "signatureHint": "Wird an jede E-Mail dieses Typs angehängt.",
+    "showPassword": "Passwort anzeigen",
+    "hidePassword": "Passwort verbergen"
   },
   "notifications": {
     "email": {

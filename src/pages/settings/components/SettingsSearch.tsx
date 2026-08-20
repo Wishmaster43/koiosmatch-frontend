@@ -77,14 +77,15 @@ export default function SettingsSearch({ open, onClose, groups, onSelect }: Sett
   }
 
   return (
+    // Fullscreen fixed scrim of a modal (command palette) — the CSS overlay rung.
     <div onMouseDown={onClose} style={{
-      position: 'fixed', inset: 0, zIndex: 200, background: 'rgba(17,24,39,0.35)',
+      position: 'fixed', inset: 0, zIndex: 'var(--z-overlay)', background: 'rgba(17,24,39,0.35)',
       display: 'flex', alignItems: 'flex-start', justifyContent: 'center', paddingTop: '12vh',
     }}>
       <div role="dialog" aria-modal="true" aria-label={t('shell.search')}
         onMouseDown={e => e.stopPropagation()} style={{
           width: 'min(560px, 92vw)', background: 'var(--surface)', borderRadius: 14,
-          boxShadow: '0 24px 64px rgba(0,0,0,0.25)', overflow: 'hidden',
+          boxShadow: 'var(--shadow-modal)', overflow: 'hidden',
         }}>
         {/* Query field — the only focus stop; the list is driven from here. */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '14px 16px', borderBottom: '1px solid var(--border)' }}>
@@ -93,6 +94,7 @@ export default function SettingsSearch({ open, onClose, groups, onSelect }: Sett
             placeholder={t('shell.search')} aria-label={t('shell.search')}
             role="combobox" aria-expanded aria-controls={LISTBOX_ID}
             aria-activedescendant={results[active] ? `${LISTBOX_ID}-${active}` : undefined}
+            // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- the search INPUT's own text size, not a title
             style={{ flex: 1, border: 'none', outline: 'none', fontSize: 15, color: 'var(--text)', background: 'transparent' }} />
         </div>
 
@@ -112,6 +114,7 @@ export default function SettingsSearch({ open, onClose, groups, onSelect }: Sett
                 ref={isActive ? activeRef : undefined}
                 role="option" aria-selected={isActive} tabIndex={-1}
                 onMouseEnter={() => setActive(i)} onClick={() => choose(entry)}
+                // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- listbox option row (role="option"), not a Button
                 style={{
                   width: '100%', display: 'flex', alignItems: 'center', gap: 10, padding: '10px 12px',
                   border: 'none', borderRadius: 8, cursor: 'pointer', textAlign: 'left',

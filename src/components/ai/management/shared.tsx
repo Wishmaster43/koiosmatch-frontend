@@ -9,6 +9,7 @@ import { useTranslation } from 'react-i18next'
 import { Check, ChevronDown, Clock, Copy, Plus, Save, Trash2 } from 'lucide-react'
 import { interactive } from '@/lib/a11y'
 import Spinner from '@/components/ui/Spinner'
+import Button from '@/components/ui/Button'
 import { useDateFormat } from '@/lib/datetime'
 import { notifySuccess } from '@/lib/notify'
 import { fieldInputStyle, fieldTextareaStyle } from '@/components/forms/fieldMetrics'
@@ -17,6 +18,7 @@ import { fieldInputStyle, fieldTextareaStyle } from '@/components/forms/fieldMet
 export interface Version { version?: number; created_at?: string; body?: string; content?: string; [k: string]: unknown }
 
 // Canon field style (G33/fieldMetrics) — was its own near-identical copy before the sweep.
+// eslint-disable-next-line react-refresh/only-export-components -- a style constant re-export alongside this file's components; only one external caller (AgentForm.tsx), not worth a new module for
 export const inputStyle: CSSProperties = fieldInputStyle
 
 // ── shared helpers ────────────────────────────────────────────────────────────
@@ -52,15 +54,12 @@ export function SaveBar({ saving, saved, onSave }: { saving?: boolean; saved?: b
           <Check size={11} /> {t('ai.saved')}
         </span>
       )}
-      <button onClick={onSave} disabled={saving}
-        style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '5px 12px', fontSize: 12, fontWeight: 600,
-          borderRadius: 8, border: 'none', background: 'var(--color-primary)', color: 'var(--color-on-accent)',
-          cursor: saving ? 'default' : 'pointer', opacity: saving ? 0.6 : 1 }}>
+      <Button variant="primary" size="sm" onClick={onSave} disabled={saving}>
         {saving
           ? <Spinner size={11} />
           : <Save size={11} />}
         {t('common:save')}
-      </button>
+      </Button>
     </div>
   )
 }
@@ -81,10 +80,9 @@ export function CopyableValue({ value, copyLabel, copiedMessage }: { value: stri
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
       <code style={{ flex: 1, fontFamily: 'JetBrains Mono, monospace', fontSize: 11, color: 'var(--text)', wordBreak: 'break-all' }}>{value}</code>
-      <button type="button" onClick={copy} title={copyLabel} aria-label={copyLabel}
-        style={{ display: 'flex', alignItems: 'center', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: 2, flexShrink: 0 }}>
+      <Button variant="ghost" iconOnly onClick={copy} title={copyLabel} aria-label={copyLabel}>
         {copied ? <Check size={12} color="var(--color-success)" /> : <Copy size={12} />}
-      </button>
+      </Button>
     </div>
   )
 }
@@ -96,11 +94,10 @@ export function VersionList({ versions, onRestore }: { versions?: Version[]; onR
   if (!versions?.length) return null
   return (
     <div style={{ marginTop: 6 }}>
-      <button onClick={() => setOpen(o => !o)}
-        style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 11, color: 'var(--text-muted)', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}>
+      <Button variant="ghost" onClick={() => setOpen(o => !o)} style={{ padding: 0, fontSize: 11 }}>
         <Clock size={11} /> {t('ai.versions', { count: versions.length })}
         <ChevronDown size={10} style={{ transform: open ? 'rotate(180deg)' : 'none', transition: 'transform 0.15s' }} />
-      </button>
+      </Button>
       {open && (
         <div style={{ marginTop: 5, border: '1px solid var(--border)', borderRadius: 8, overflow: 'hidden' }}>
           {versions.map((v, i) => (
@@ -110,10 +107,10 @@ export function VersionList({ versions, onRestore }: { versions?: Version[]; onR
               <span style={{ color: 'var(--text-muted)' }}>
                 v{v.version ?? i + 1} — {v.created_at ? formatDateTime(v.created_at) : ''}
               </span>
-              <button onClick={() => onRestore?.(v)}
-                style={{ fontSize: 11, color: 'var(--color-primary-text)', background: 'none', border: 'none', cursor: 'pointer', padding: '1px 5px' }}>
+              <Button variant="ghost" onClick={() => onRestore?.(v)}
+                style={{ fontSize: 11, color: 'var(--color-primary-text)', padding: '1px 5px' }}>
                 {t('ai.restore')}
-              </button>
+              </Button>
             </div>
           ))}
         </div>
@@ -157,9 +154,9 @@ export function SideList<T extends { id?: string | number }>({ title, items, sel
       <div style={{ border: '1px solid var(--border)', borderRadius: 10, overflow: 'hidden', display: 'flex', flexDirection: 'column', background: 'var(--surface)' }}>
         <div style={{ padding: '9px 11px', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--text)' }}>{title}</span>
-          <button onClick={onNew} aria-label={t('common:add')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--color-primary-text)', padding: 2 }}>
+          <Button variant="ghost" iconOnly onClick={onNew} aria-label={t('common:add')}>
             <Plus size={13} />
-          </button>
+          </Button>
         </div>
         <div style={{ flex: 1, overflowY: 'auto' }}>
           {loading && <p style={{ padding: '12px 11px', fontSize: 12, color: 'var(--text-muted)' }}>{t('ai.loading')}</p>}
@@ -201,6 +198,7 @@ export function ListRow<T>({ item, active, onSelect, label, sublabel, leading, o
         // fires for Tab navigation would leave it invisible-but-focusable.
         <button onClick={e => { e.stopPropagation(); onDelete(item) }}
           aria-label={t('delete')} title={t('delete')}
+          // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- reveal-on-hover/focus row action (colour goes transparent→danger imperatively); not a static Button variant
           style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'transparent', padding: 2, flexShrink: 0 }}
           onMouseEnter={e => (e.currentTarget.style.color = 'var(--color-danger)')}
           onMouseLeave={e => (e.currentTarget.style.color = 'transparent')}

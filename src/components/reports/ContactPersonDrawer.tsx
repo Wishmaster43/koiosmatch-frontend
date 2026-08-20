@@ -9,6 +9,8 @@ import { useTranslation } from 'react-i18next'
 import { X, Mail, Phone, Building2, MessageCircle, Briefcase, User } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import type { ReportContact } from '@/types/reports'
+import Button from '@/components/ui/Button'
+import { PageTitle } from '@/components/ui/typography'
 
 // One labeled row of contact info; renders a mailto/tel link when href is given.
 function InfoRow({ icon: Icon, label, value, href }: { icon: LucideIcon; label: ReactNode; value?: ReactNode; href?: string | null }) {
@@ -19,7 +21,11 @@ function InfoRow({ icon: Icon, label, value, href }: { icon: LucideIcon; label: 
       <Icon size={13} color="var(--border)" style={{ flexShrink: 0, marginTop: 1 }} />
       <span style={{ fontSize: 12, color: 'var(--text-muted)', width: 130, flexShrink: 0 }}>{label}</span>
       {href
-        ? <a href={href} style={{ fontSize: 12, color: 'var(--color-secondary)', textDecoration: 'none', wordBreak: 'break-all' }}>{value}</a>
+        ? <Button variant="ghost" href={href}
+            style={{ fontSize: 12, color: 'var(--color-secondary)', whiteSpace: 'normal', wordBreak: 'break-all',
+                     height: 'auto', padding: 0, justifyContent: 'flex-start', textAlign: 'left' }}>
+            {value}
+          </Button>
         : <span style={{ fontSize: 12, color: 'var(--text)' }}>{value}</span>}
     </div>
   )
@@ -38,7 +44,7 @@ export default function ContactPersonDrawer({ contact, onClose }: { contact: Rep
 
       <div ref={panelRef} role="dialog" aria-modal="true" aria-label={contact?.name as string | undefined} tabIndex={-1}
         className="fixed top-0 bottom-0 right-0 z-50 flex flex-col bg-[var(--surface)]"
-        style={{ width: 440, boxShadow: '-4px 0 30px rgba(0,0,0,0.12)' }}>
+        style={{ width: 440, boxShadow: 'var(--shadow-drawer)' }}>
 
         {/* Header */}
         <div style={{ padding: '18px 20px', borderBottom: '1px solid var(--border)', flexShrink: 0 }}>
@@ -47,13 +53,12 @@ export default function ContactPersonDrawer({ contact, onClose }: { contact: Rep
               <div style={{ width: 44, height: 44, borderRadius: '50%', flexShrink: 0,
                             background: 'var(--color-primary-bg)', color: 'var(--color-primary-text)',
                             display: 'flex', alignItems: 'center', justifyContent: 'center',
+                            // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- avatar-badge glyph (initials), not a title
                             fontSize: 15, fontWeight: 700 }}>
                 {initials || '?'}
               </div>
               <div>
-                <div style={{ fontWeight: 700, fontSize: 15, color: 'var(--text)', marginBottom: 2 }}>
-                  {fullName}
-                </div>
+                <PageTitle style={{ fontWeight: 700, marginBottom: 2 }}>{fullName}</PageTitle>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                   {contact.function_title && (
                     <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>{contact.function_title}</span>
@@ -72,14 +77,12 @@ export default function ContactPersonDrawer({ contact, onClose }: { contact: Rep
                 </div>
               </div>
             </div>
-            <button onClick={onClose} aria-label={t('common:close')}
-              style={{ width: 28, height: 28, display: 'flex', alignItems: 'center', justifyContent: 'center',
-                       background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)',
-                       borderRadius: 6, marginLeft: 10, flexShrink: 0 }}
+            <Button variant="ghost" iconOnly onClick={onClose} aria-label={t('common:close')}
+              style={{ marginLeft: 10 }}
               onMouseEnter={e => (e.currentTarget.style.background = 'var(--hover-bg)')}
               onMouseLeave={e => (e.currentTarget.style.background = 'none')}>
               <X size={15} />
-            </button>
+            </Button>
           </div>
         </div>
 
@@ -120,24 +123,20 @@ export default function ContactPersonDrawer({ contact, onClose }: { contact: Rep
           )}
         </div>
 
-        {/* Footer actions */}
+        {/* Footer actions — mailto/tel stay real links (§6: navigation, not an
+            action) via Button's href escape hatch (HUISSTIJL slotaudit V7), so
+            they share the house identity instead of their own inline style. */}
         <div style={{ padding: '12px 20px', borderTop: '1px solid var(--border)', flexShrink: 0,
                       display: 'flex', gap: 8 }}>
           {contact.email && (
-            <a href={`mailto:${contact.email}`}
-              style={{ display: 'flex', alignItems: 'center', gap: 6, height: 34, padding: '0 14px',
-                       fontSize: 13, fontWeight: 500, borderRadius: 8, textDecoration: 'none',
-                       border: '1px solid var(--border)', background: 'var(--hover-bg)', color: 'var(--text)' }}>
+            <Button variant="secondary" href={`mailto:${contact.email}`}>
               <Mail size={13} /> {t('contactDrawer.sendEmail')}
-            </a>
+            </Button>
           )}
           {contact.mobile && (
-            <a href={`tel:${contact.mobile}`}
-              style={{ display: 'flex', alignItems: 'center', gap: 6, height: 34, padding: '0 14px',
-                       fontSize: 13, fontWeight: 500, borderRadius: 8, textDecoration: 'none',
-                       border: '1px solid var(--border)', background: 'var(--hover-bg)', color: 'var(--text)' }}>
+            <Button variant="secondary" href={`tel:${contact.mobile}`}>
               <Phone size={13} /> {t('contactDrawer.call')}
-            </a>
+            </Button>
           )}
         </div>
       </div>

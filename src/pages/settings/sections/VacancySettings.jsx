@@ -5,6 +5,7 @@ import SelectMenu from '@/components/ui/SelectMenu'
 import { useAllSettings, getJsonSetting, saveSettingsKeys } from '@/lib/settings/useAllSettings'
 import StatusListEditor from './StatusListEditor'
 import { resolveGenericLookupIcon } from './lookupIcons'
+import SaveButton from '@/components/ui/SaveButton'
 
 // Curated icon subset for job boards — channels are web portals/career listings,
 // so scope the picker to web/portal-ish glyphs instead of the full generic set
@@ -47,13 +48,10 @@ export function VacancyApplicationDefaultsSettings() {
           </div>
         ))}
       </div>
-      <button onClick={save}
-        style={{ display: 'flex', alignItems: 'center', gap: 6, height: 34, padding: '0 14px', fontSize: 13, fontWeight: 500,
-          borderRadius: 8, border: 'none', cursor: 'pointer', background: ok ? 'var(--color-success)' : 'var(--color-primary)',
-          // Success fill needs its own on-* token — white only reaches ~3.3:1 there (WCAG audit 2026-08).
-          color: ok ? 'var(--color-on-success)' : 'var(--color-on-accent)' }}>
+      {/* SaveButton — the ONE saved-state save action (§4 success token pair). */}
+      <SaveButton saved={ok} onClick={save}>
         {ok ? <><Check size={13} /> {t('common.saved')}</> : <><Save size={13} /> {t('common.save')}</>}
-      </button>
+      </SaveButton>
     </div>
   )
 }

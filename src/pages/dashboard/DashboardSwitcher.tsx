@@ -38,22 +38,26 @@ export default function DashboardSwitcher({ value, options, onChange }: {
         <ChevronDown size={13} style={{ color: 'var(--text-muted)', transform: open ? 'rotate(180deg)' : 'none', transition: 'transform 0.15s' }} />
       </Button>
       {open && (
-        <div style={{ position: 'absolute', top: 'calc(100% + 4px)', right: 0, zIndex: 50, minWidth: 190,
+        // Topbar dropdown under its trigger, not inside a drawer/dialog — the CSS
+        // popover rung, so it beats every dialog band.
+        <div style={{ position: 'absolute', top: 'calc(100% + 4px)', right: 0, zIndex: 'var(--z-popover)', minWidth: 190,
           background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 10,
-          boxShadow: '0 8px 24px rgba(0,0,0,0.12)', overflow: 'hidden', padding: 4 }}>
+          boxShadow: 'var(--shadow-float)', overflow: 'hidden', padding: 4 }}>
           {/* Dropdown menu options (active-dot indicator) — a list/menu item, not an
               action button, so this stays a bare <button>. */}
           {options.map(opt => {
             const active = opt === value
             return (
               <button key={opt} onClick={() => { onChange(opt); setOpen(false) }} aria-pressed={active}
+                // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- menu-item row, not a Button
                 style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', gap: 8,
                   padding: '8px 10px', fontSize: 12.5, borderRadius: 6, border: 'none', cursor: 'pointer', textAlign: 'left',
                   background: active ? 'var(--color-primary-bg)' : 'transparent',
                   // Text-colour accent uses the AA-contrast text token, not the raw brand primary.
                   color: active ? 'var(--color-primary-text)' : 'var(--text)', fontWeight: active ? 600 : 400 }}>
                 {t(`types.${opt}`)}
-                {active && <span style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--color-primary)', flexShrink: 0 }} />}
+                {/* PRIMAIR-VLAK-1: selected-state dot wears the button fill, not a raw accent. */}
+                {active && <span style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--button-fill)', flexShrink: 0 }} />}
               </button>
             )
           })}

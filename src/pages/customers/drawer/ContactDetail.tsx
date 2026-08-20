@@ -255,6 +255,7 @@ export default function ContactDetail({ contact, locations, departments, statuse
           locaties, we moeten het consistent houden". */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', minWidth: 0 }}>
+          {/* eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- frozen customer-drawer zone (Danny 08-08): this title is 15/700 where PageTitle is 15/600 — converting is a visible restyle, so it waits for the drawer revisit, not a sweep */}
           <div style={{ fontSize: 15, fontWeight: 700, color: 'var(--text)' }}>{contact.name}</div>
           <ReferenceNumberChip value={contact.referenceNumber} />
           {editingStatus ? (
@@ -293,8 +294,9 @@ export default function ContactDetail({ contact, locations, departments, statuse
             </Button>
           )}
           {/* Archive: house secondary chrome; only the ICON colour is the archive token,
-              which rides in as a style override (Button merges caller style last —
-              Opus batch B R4: the chrome was the house secondary all along). Gated on
+              which rides in as a style override. Button merges caller style last EXCEPT
+              while disabled — the grey disabled recipe deliberately wins then (20-08),
+              which is right here too: in-flight archiving should look inert. Gated on
               `canMerge` (Archive is update-class too, §5). */}
           {canMerge && !contact.archived && (
             <Button variant="secondary" iconOnly size="sm" onClick={doArchive} disabled={archiving}

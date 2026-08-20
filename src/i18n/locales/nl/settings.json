@@ -962,7 +962,9 @@
       }
     },
     "signature": "Handtekening",
-    "signatureHint": "Wordt onder elke e-mail van dit type toegevoegd."
+    "signatureHint": "Wordt onder elke e-mail van dit type toegevoegd.",
+    "showPassword": "Wachtwoord tonen",
+    "hidePassword": "Wachtwoord verbergen"
   },
   "notifications": {
     "email": {

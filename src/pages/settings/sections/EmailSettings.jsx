@@ -18,6 +18,8 @@ import { loadSettings, saveSettings } from '../lib/settingsApi'
 import RichTextEditor from '@/components/ui/RichTextEditor'
 import Spinner from '@/components/ui/Spinner'
 import CalloutBox from '@/components/ui/CalloutBox'
+import Button from '@/components/ui/Button'
+import SaveButton from '@/components/ui/SaveButton'
 import { fieldInputStyle } from '@/components/forms/fieldMetrics'
 import { PageTitle, Caption } from '@/components/ui/typography'
 
@@ -110,24 +112,16 @@ export default function EmailSettings({ context = 'klanten' }) {
           <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>{t(`email.context.${context}.subtitle`)}</p>
         </div>
         <div style={{ display: 'flex', gap: 8, flexShrink: 0 }}>
-          <button onClick={testConnection} disabled={testing}
-            style={{ display: 'flex', alignItems: 'center', gap: 6, height: 34, padding: '0 12px', whiteSpace: 'nowrap',
-                     fontSize: 13, fontWeight: 500, borderRadius: 8, cursor: testing ? 'wait' : 'pointer',
-                     border: '1px solid var(--border)', background: 'var(--hover-bg)', color: 'var(--text)', opacity: testing ? 0.6 : 1 }}>
+          <Button variant="secondary" onClick={testConnection} disabled={testing}>
             {testing ? <Spinner size={13} /> : <Mail size={13} />}
             {t('email.testConnection')}
-          </button>
-          <button onClick={save} disabled={saving}
-            style={{ display: 'flex', alignItems: 'center', gap: 6, height: 34, padding: '0 14px', whiteSpace: 'nowrap',
-                     fontSize: 13, fontWeight: 500, borderRadius: 8, cursor: saving ? 'wait' : 'pointer',
-                     border: 'none', opacity: saving ? 0.7 : 1,
-                     background: saved ? 'var(--color-success)' : 'var(--color-primary)',
-                     // Success fill needs its own on-* token — white only reaches ~3.3:1 there (WCAG audit 2026-08).
-                     color: saved ? 'var(--color-on-success)' : 'var(--color-on-accent)', transition: 'background 0.2s' }}>
+          </Button>
+          {/* SaveButton — the ONE saved-state save action (§4 success token pair). */}
+          <SaveButton saved={saved} onClick={save} disabled={saving}>
             {saved   ? <><Check size={13} /> {t('common.saved')}</>                         :
              saving  ? <><Spinner size={13} /> {t('common.saving')}</> :
                        <><Save size={13} /> {t('common.save')}</>}
-          </button>
+          </SaveButton>
         </div>
       </div>
 
@@ -158,6 +152,7 @@ export default function EmailSettings({ context = 'klanten' }) {
           <div style={{ display: 'flex', gap: 8 }}>
             {PROVIDERS.map(p => (
               <button key={p.id} onClick={() => setProvider(p.id)}
+                // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- option-card (title + description), not a Button
                 style={{ flex: 1, padding: '10px 12px', borderRadius: 8, cursor: 'pointer', textAlign: 'left',
                          border: `1px solid ${provider === p.id ? 'var(--color-primary)' : 'var(--border)'}`,
                          background: provider === p.id ? 'var(--color-primary-bg, var(--color-secondary-bg))' : 'var(--hover-bg)',
@@ -227,11 +222,11 @@ export default function EmailSettings({ context = 'klanten' }) {
                     onChange={e => setSmtpPass(e.target.value)}
                     placeholder={smtpPassSet ? t('email.passwordKeepPlaceholder') : t('email.passwordPlaceholder')}
                     style={{ ...inputStyle, paddingRight: 36 }} />
-                  <button onClick={() => setShowPass(s => !s)}
-                    style={{ position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)',
-                             background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)' }}>
+                  <Button variant="ghost" iconOnly onClick={() => setShowPass(s => !s)}
+                    aria-label={showPass ? t('email.hidePassword') : t('email.showPassword')}
+                    style={{ position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)' }}>
                     {showPass ? <EyeOff size={14} /> : <Eye size={14} />}
-                  </button>
+                  </Button>
                 </div>
               </div>
             </div>
@@ -244,6 +239,7 @@ export default function EmailSettings({ context = 'klanten' }) {
                   { id: 'none', label: t('email.secNone') },
                 ].map(s => (
                   <button key={s.id} onClick={() => setSmtpSecure(s.id)}
+                    // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- §4 soft-tint multi-option toggle pill, not a Button
                     style={{ padding: '6px 14px', borderRadius: 20, fontSize: 12, cursor: 'pointer',
                              border: `1px solid ${smtpSecure === s.id ? 'var(--color-primary)' : 'var(--border)'}`,
                              background: smtpSecure === s.id ? 'var(--color-primary-bg, var(--color-secondary-bg))' : 'var(--hover-bg)',

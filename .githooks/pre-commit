@@ -16,6 +16,21 @@ npm run --silent lint || {
   echo "✗ eslint reported errors — fix them before committing"
   exit 1
 }
+# HUISSTIJL slotaudit §2.3: a handful of selectors (link-as-button, raw <button>
+# style, 15px titles, …) carry hundreds of pre-existing hits, so they stay 'warn'
+# in eslint.config.js — a global --max-warnings 0 would block on debt this audit
+# did not touch. Every file you STAGE still gets the hard check: --max-warnings 0
+# on exactly the staged .js/.jsx/.ts/.tsx files, so new drift can't land while the
+# rest of the tree pays down over time.
+echo "▶ pre-commit: staged HUISSTIJL check (--max-warnings 0 on files you touch)…"
+STAGED_JS_TS=$(git diff --cached --name-only --diff-filter=ACMR | grep -E '\.(t|j)sx?$')
+if [ -n "$STAGED_JS_TS" ]; then
+  # shellcheck disable=SC2086 — intentional word-splitting: each line is one path.
+  npx eslint --max-warnings=0 $STAGED_JS_TS || {
+    echo "✗ a staged file still carries a HUISSTIJL warning (raw-button style, link-as-button, 15px title, …) — fix it before committing (pre-existing debt elsewhere in the tree does not block; only files you touch do)"
+    exit 1
+  }
+fi
 echo "▶ pre-commit: i18n parity…"
 npx vitest run src/i18n/localeParity.test.ts || {
   echo "✗ i18n parity failed — a locale (de/fr/es/en) is missing keys nl has. Add them (all 5 locales) before committing."

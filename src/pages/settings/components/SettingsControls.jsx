@@ -21,11 +21,15 @@ function ColorPickerPopup({ color, onChange, onClose }) {
   // Curated soft palette only — no free colour wheel/hex, so labels stay calm and
   // consistent in light + dark across statuses / funnel / candidate types / pools / …
   return (
-    <div ref={ref} style={{ position: 'absolute', zIndex: 100, background: 'var(--surface)', border: '1px solid var(--border)',
-                             borderRadius: 10, padding: 12, boxShadow: '0 8px 24px rgba(0,0,0,0.12)', top: 36, left: 0, width: 192 }}>
+    // Floating popup under its trigger; used both on plain settings rows and inside
+    // modals (LocationFormModal, CandidateLookupItemModal) — the CSS popover rung
+    // mirrors SelectMenu/CreatableSelect so it always beats a hosting dialog's band.
+    <div ref={ref} style={{ position: 'absolute', zIndex: 'var(--z-popover)', background: 'var(--surface)', border: '1px solid var(--border)',
+                             borderRadius: 10, padding: 12, boxShadow: 'var(--shadow-float)', top: 36, left: 0, width: 192 }}>
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
         {COLOR_PRESETS.map(c => (
           <button key={c} onClick={() => apply(c)}
+            // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- palette swatch cell (its own fill IS the colour value), not a Button
             style={{ width: 26, height: 26, borderRadius: 6, background: c, border: c === hex ? '2px solid var(--text)' : '2px solid transparent', cursor: 'pointer' }} />
         ))}
       </div>
@@ -38,6 +42,7 @@ export function ColorSwatch({ color, onChange }) {
   return (
     <div style={{ position: 'relative', display: 'inline-block' }}>
       <button onClick={() => setOpen(o => !o)}
+        // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- swatch trigger (its own fill IS the picked colour value), not a Button
         style={{ width: 28, height: 28, borderRadius: 6, background: color, border: '1px solid rgba(0,0,0,0.1)', cursor: 'pointer' }} />
       {open && <ColorPickerPopup color={color} onChange={c => { onChange(c) }} onClose={() => setOpen(false)} />}
     </div>
@@ -78,6 +83,7 @@ export function DefaultToggle({ active, onClick, busy, activeLabel, inactiveLabe
   return (
     <button type="button" onClick={onClick} disabled={disabled}
       title={title ?? (active ? activeLabel : inactiveLabel)}
+      // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- §4 soft-tint singleton pill (undo-able active/inactive), not a Button
       style={{
         display: 'inline-flex', alignItems: 'center', gap: 4, height: 22, padding: '0 9px',
         fontSize: 11, fontWeight: active ? 600 : 500, borderRadius: 999, whiteSpace: 'nowrap', flexShrink: 0,
@@ -159,13 +165,17 @@ export function DragList({ items, onReorder, renderItem, sortable = true, bare =
             {sortable && (
               <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', flexShrink: 0 }}>
                 <button type="button" onClick={() => moveTo(i, i - 1)} disabled={isFirst}
-                  aria-label={t('dragList.moveUp')} title={t('dragList.moveUp')} style={moveBtnStyle(isFirst)}>
+                  aria-label={t('dragList.moveUp')} title={t('dragList.moveUp')}
+                  // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- tiny 14×12 keyboard-reorder arrow embedded in the drag row, not a Button
+                  style={moveBtnStyle(isFirst)}>
                   <ChevronUp size={11} />
                 </button>
                 {/* eslint-disable-next-line no-restricted-syntax -- no exact/close index.css token match for this grip-icon grey; kept literal to avoid changing the rendered tone */}
                 <GripVertical size={14} style={{ color: '#D1D5DB', cursor: 'grab' }} aria-hidden="true" />
                 <button type="button" onClick={() => moveTo(i, i + 1)} disabled={isLast}
-                  aria-label={t('dragList.moveDown')} title={t('dragList.moveDown')} style={moveBtnStyle(isLast)}>
+                  aria-label={t('dragList.moveDown')} title={t('dragList.moveDown')}
+                  // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- tiny 14×12 keyboard-reorder arrow embedded in the drag row, not a Button
+                  style={moveBtnStyle(isLast)}>
                   <ChevronDown size={11} />
                 </button>
               </div>

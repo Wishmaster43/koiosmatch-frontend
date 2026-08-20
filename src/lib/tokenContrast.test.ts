@@ -64,4 +64,11 @@ describe('house token pairs stay readable (defaults, light theme)', () => {
     expect(ratio(token('color-on-danger'), token('color-danger'))).toBeGreaterThanOrEqual(3)
     expect(ratio(token('color-on-success'), token('color-success'))).toBeGreaterThanOrEqual(4.5)
   })
+
+  // The §4 "aan/gelukt" pair (success-bg fill + success border) carries TEXT via
+  // its OWN ink token. The success colour itself reads only 3.0:1 on this bg — the
+  // exact WCAG fail the Opus slotaudit review caught on 9 saved-buttons (20-08).
+  it('on-success-bg clears 4.5:1 as text on the success-bg pastel', () => {
+    expect(ratio(token('color-on-success-bg'), token('color-success-bg'))).toBeGreaterThanOrEqual(4.5)
+  })
 })

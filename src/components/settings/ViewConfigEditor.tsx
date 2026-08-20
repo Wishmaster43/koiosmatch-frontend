@@ -11,6 +11,10 @@ import { MODULES } from '@/lib/settings/moduleRegistry'
 import { useAllSettings, getJsonSetting, saveSettingsKeys } from '@/lib/settings/useAllSettings'
 import { viewConfigKey } from '@/lib/settings/useModuleView'
 import Spinner from '@/components/ui/Spinner'
+import SaveButton from '@/components/ui/SaveButton'
+import Button from '@/components/ui/Button'
+import Toggle from '@/components/ui/Toggle'
+import { PageTitle } from '@/components/ui/typography'
 
 interface Row { id: string; enabled: boolean }
 interface SavedRow { id: string; enabled?: boolean }
@@ -72,17 +76,15 @@ export default function ViewConfigEditor({ module }: { module: string }) {
           {/* Module + block names are i18n keys in the registry (§5). No toLowerCase()
               on the interpolated label: lowercasing a translated noun is wrong in
               German ("Kunden" → "kunden") and the sentences read fine capitalised. */}
-          <h2 style={{ fontSize: 15, fontWeight: 600, color: 'var(--text)' }}>{t('viewConfig.title', { label: t(mod.labelKey) })}</h2>
+          <PageTitle>{t('viewConfig.title', { label: t(mod.labelKey) })}</PageTitle>
           <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>
             {t('viewConfig.description', { label: t(mod.labelKey) })}
           </p>
         </div>
-        <button onClick={save} disabled={saving} aria-label={t('common.save')}
-          style={{ display: 'flex', alignItems: 'center', gap: 6, height: 34, padding: '0 14px',
-            fontSize: 13, fontWeight: 500, borderRadius: 8, border: 'none', cursor: saving ? 'wait' : 'pointer',
-            background: saved ? 'var(--color-success)' : 'var(--color-primary)', color: saved ? 'var(--color-on-success)' : 'var(--color-on-accent)' }}>
+        {/* SaveButton — the ONE saved-state save action (§4 success token pair). */}
+        <SaveButton saved={saved} onClick={save} disabled={saving} aria-label={t('common.save')}>
           {saved ? <><Check size={13} /> {t('common.saved')}</> : saving ? <><Spinner size={13} /> {t('common.saving')}</> : <><Save size={13} /> {t('common.save')}</>}
-        </button>
+        </SaveButton>
       </div>
 
       <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12, overflow: 'hidden' }}>
@@ -102,26 +104,19 @@ export default function ViewConfigEditor({ module }: { module: string }) {
               )}
               <span style={{ flex: 1, fontSize: 13, color: 'var(--text)', fontWeight: 500 }}>{t(block.labelKey)}</span>
 
-              <button onClick={() => move(i, -1)} disabled={i === 0} title={t('viewConfig.moveUp')} aria-label={t('viewConfig.moveUp')}
-                style={{ width: 28, height: 28, display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  border: '1px solid var(--border)', borderRadius: 7, background: 'var(--surface)', cursor: i === 0 ? 'default' : 'pointer',
-                  color: i === 0 ? 'var(--border)' : 'var(--text-muted)' }}>
+              <Button variant="secondary" iconOnly onClick={() => move(i, -1)} disabled={i === 0} title={t('viewConfig.moveUp')} aria-label={t('viewConfig.moveUp')}>
                 <ArrowUp size={13} />
-              </button>
-              <button onClick={() => move(i, 1)} disabled={i === rows.length - 1} title={t('viewConfig.moveDown')} aria-label={t('viewConfig.moveDown')}
-                style={{ width: 28, height: 28, display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  border: '1px solid var(--border)', borderRadius: 7, background: 'var(--surface)', cursor: i === rows.length - 1 ? 'default' : 'pointer',
-                  color: i === rows.length - 1 ? 'var(--border)' : 'var(--text-muted)' }}>
+              </Button>
+              <Button variant="secondary" iconOnly onClick={() => move(i, 1)} disabled={i === rows.length - 1} title={t('viewConfig.moveDown')} aria-label={t('viewConfig.moveDown')}>
                 <ArrowDown size={13} />
-              </button>
+              </Button>
 
-              {/* enable toggle */}
-              <button onClick={() => toggle(row.id)} title={row.enabled ? t('viewConfig.hide') : t('viewConfig.show')} aria-label={row.enabled ? t('viewConfig.hide') : t('viewConfig.show')}
-                style={{ width: 40, height: 24, borderRadius: 99, border: 'none', cursor: 'pointer', flexShrink: 0,
-                  background: row.enabled ? 'var(--color-primary)' : 'var(--border)', position: 'relative', transition: 'background 0.15s' }}>
-                <span style={{ position: 'absolute', top: 2, left: row.enabled ? 18 : 2, width: 20, height: 20,
-                  borderRadius: '50%', background: 'var(--surface)', transition: 'left 0.15s' }} />
-              </button>
+              {/* Enable toggle — the shared switch, never a hand-rolled pill. The
+                  accessible NAME stays stable (the block's label); the STATE is
+                  aria-checked — a name that flips hide/show double-signals state. */}
+              <Toggle checked={row.enabled} onChange={() => toggle(row.id)}
+                title={row.enabled ? t('viewConfig.hide') : t('viewConfig.show')}
+                ariaLabel={t(block.labelKey)} />
             </div>
           )
         })}

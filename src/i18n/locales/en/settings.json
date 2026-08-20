@@ -962,7 +962,9 @@
       }
     },
     "signature": "Signature",
-    "signatureHint": "Added to the bottom of every email of this type."
+    "signatureHint": "Added to the bottom of every email of this type.",
+    "showPassword": "Show password",
+    "hidePassword": "Hide password"
   },
   "notifications": {
     "email": {

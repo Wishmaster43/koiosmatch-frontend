@@ -71,4 +71,45 @@ describe('Button', () => {
     expect(b.style.width).toBe('100%')
     expect(b.style.background).toBe('var(--button-fill)')
   })
+
+  // HUISSTIJL slotaudit V7 — a link that looks like a button stays a real <a>
+  // (mailto/tel/download, §6) but shares this exact identity, so it never grows
+  // its own inline-styled copy (ContactPersonDrawer's pseudo-buttons, V7).
+  it('href renders a real link with the Button identity, keyboard focusable', () => {
+    render(<Button variant="secondary" href="mailto:test@koiosmatch.nl">Mail</Button>)
+    const link = screen.getByRole('link', { name: 'Mail' })
+    expect(link.tagName).toBe('A')
+    expect(link).toHaveAttribute('href', 'mailto:test@koiosmatch.nl')
+    expect(link.style.background).toBe('var(--surface)')
+    expect(link.style.height).toBe('28px')
+    // A real <a href> is keyboard focusable by default — no tabIndex trickery needed.
+    link.focus()
+    expect(link).toHaveFocus()
+  })
+
+  it('href + target="_blank" gets the safe rel pair unless the caller overrides it', () => {
+    render(<Button href="https://example.com" target="_blank">Extern</Button>)
+    expect(screen.getByRole('link')).toHaveAttribute('rel', 'noopener noreferrer')
+  })
+
+  it('a disabled href link drops href/tabIndex and blocks the click', () => {
+    const onClick = vi.fn()
+    render(<Button href="mailto:test@koiosmatch.nl" disabled onClick={onClick}>Mail</Button>)
+    const link = screen.getByText('Mail')
+    expect(link).not.toHaveAttribute('href')
+    expect(link).toHaveAttribute('aria-disabled', 'true')
+    expect(link).toHaveAttribute('tabindex', '-1')
+    fireEvent.click(link)
+    expect(onClick).not.toHaveBeenCalled()
+  })
+
+  // Opus slotaudit review, 20-08: InUseCountsDialog's archive tint spread AFTER the
+  // disabled recipe and erased the only inert signal — the disabled identity must
+  // win over whatever state styling the caller passes.
+  it('the disabled recipe wins over a caller state tint', () => {
+    render(<Button variant="primary" disabled style={{ background: 'var(--color-archived-bg)', color: 'var(--color-archived)' }}>Archiveren</Button>)
+    const b = screen.getByRole('button')
+    expect(b.style.background).toBe('var(--border)')
+    expect(b.style.color).toBe('var(--text-muted)')
+  })
 })

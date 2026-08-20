@@ -26,6 +26,7 @@ import { SettingsDirtyContext } from '../lib/settingsDirty'
 import ToggleUi from '@/components/ui/Toggle'
 import Spinner from '@/components/ui/Spinner'
 import SearchSelect from '@/components/ui/SearchSelect'
+import SaveButton from '@/components/ui/SaveButton'
 // PRE-EXISTING BUG FIX (found while verifying this task, unrelated to SUB-TABS-1/
 // TENANT-DEFAULT-1 itself): ColorField's palette-swatch rebuild (Danny 02-08) called
 // <ColorSwatch> without ever importing it, so EVERY `type: 'color'` schema field threw
@@ -63,21 +64,14 @@ export function SettingsScaffold({ title, subtitle, form, maxWidth, actions, chi
         </div>
         <div className="flex items-center" style={{ gap: 8, flexShrink: 0 }}>
           {actions}
+          {/* The ONE save button every settings section renders through — SaveButton
+              owns the §4 success TOKEN PAIR (bg/border/ink), never approximated here. */}
           {save && (
-            <button onClick={save} disabled={!canSave}
-              style={{
-                display: 'flex', alignItems: 'center', gap: 6, height: 34, padding: '0 14px',
-                fontSize: 13, fontWeight: 500, borderRadius: 8, border: 'none',
-                cursor: canSave ? 'pointer' : 'default', opacity: canSave || saved ? 1 : 0.55,
-                background: saved ? 'var(--color-success)' : 'var(--color-primary)',
-                // Success fill needs its own on-* token — white only reaches ~3.3:1 there (WCAG audit 2026-08).
-                color: saved ? 'var(--color-on-success)' : 'var(--color-on-accent)',
-                transition: 'background 0.2s, opacity 0.2s',
-              }}>
+            <SaveButton saved={saved} onClick={save} disabled={!canSave}>
               {saved  ? <><Check size={13} /> {t('common.saved')}</>                                :
                saving ? <><Spinner size={13} /> {t('common.saving')}</> :
                         <><Save size={13} /> {t('common.save')}</>}
-            </button>
+            </SaveButton>
           )}
         </div>
       </div>
@@ -168,6 +162,7 @@ export function SelectField({ value, onChange, options, ariaLabel }) {
       triggerLabel={current?.label ?? value}
       renderTrigger={toggle => (
         <button type="button" onClick={toggle} aria-label={ariaLabel}
+          // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- dropdown trigger rendering the current field value, mirrors the house field-input chrome, not a Button
           style={{ ...inputStyle, paddingRight: 28, cursor: 'pointer', background: 'var(--surface)',
             display: 'flex', alignItems: 'center', justifyContent: 'space-between', minWidth: 160 }}>
           {current?.label ?? value}

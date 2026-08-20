@@ -14,6 +14,7 @@ import { notifyError } from '@/lib/notify'
 import { COLOR_PRESETS } from '@/lib/colorPresets'
 import RoleChip from '@/components/ui/RoleChip'
 import Spinner from '@/components/ui/Spinner'
+import Button from '@/components/ui/Button'
 import type { ManagedUser } from '@/types/api'
 import { tintBg, tintBorder } from '@/lib/tint'
 
@@ -26,6 +27,7 @@ export interface AvailableRole { id: string | number; name: string }
 type TFunc = (key: string, opts?: Record<string, unknown>) => string
 
 // Resolve a role reference to its name (a bare-string role is its own name).
+// eslint-disable-next-line react-refresh/only-export-components -- pure helper shared by many callers (UsersPage, UsersTable, NewUserModal, hooks, …); relocating touches nine unrelated files
 export const roleName = (r: RoleRef): string | undefined => typeof r === 'string' ? r : r.name
 
 // Super-admin accent colour — the shared violet token, also used by the "system" badge.
@@ -46,6 +48,7 @@ const ROLE_META: Record<string, { color: string; icon: LucideIcon }> = {
 // FIX (was `users.roles.<name>`, a dead key — users.json has no top-level "users"
 // object, so this always silently fell through to the raw role name): the seed
 // labels live at `roles.<name>` directly in the `users` namespace.
+// eslint-disable-next-line react-refresh/only-export-components -- pure helper, same shared-caller reasoning as roleName above
 export const roleLabel = (t: TFunc, name: string) => t(`roles.${name === 'default' ? 'user' : name}`, { defaultValue: name })
 
 // Icon-name fallback for the seeded/system roles (before a tenant sets an icon).
@@ -54,6 +57,7 @@ const LEGACY_ICON: Record<string, string> = {
 }
 
 const hasRole = (u: ManagedUser | undefined, role: string) => (u?.roles ?? []).some(r => roleName(r) === role)
+// eslint-disable-next-line react-refresh/only-export-components -- pure helper, same shared-caller reasoning as roleName above
 export const isSuperAdminUser = (u: ManagedUser) => hasRole(u, 'super_admin')
 
 // RoleBadge — the role as a coloured chip with its icon. Colour/icon come from the
@@ -117,6 +121,7 @@ export function RoleSelector({ user: u, availableRoles, onChanged }: {
       {/* Change role button — design tokens so it themes per tenant/dark mode */}
       <button ref={btnRef} onClick={toggle} disabled={saving}
         title={t('changeRole')} aria-label={t('changeRole')}
+        // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- compact 22×22 inline trigger sized to sit beside the role chips, not a Button
         style={{ display: 'flex', alignItems: 'center', justifyContent: 'center',
                  width: 22, height: 22, borderRadius: 6, border: '1px solid var(--border)',
                  background: open ? 'var(--hover-bg)' : 'var(--surface)', cursor: 'pointer',
@@ -130,10 +135,12 @@ export function RoleSelector({ user: u, availableRoles, onChanged }: {
 
       {open && menuPos && createPortal(
         <>
-          <div onClick={() => setOpen(false)} style={{ position: 'fixed', inset: 0, zIndex: 60 }} />
-          <div style={{ position: 'fixed', top: menuPos.top, left: menuPos.left, zIndex: 61,
+          {/* Invisible click-catcher + the portalled menu — both on the CSS popover
+              rung (mirrors SelectMenu/CreatableSelect), DOM order puts the menu on top. */}
+          <div onClick={() => setOpen(false)} style={{ position: 'fixed', inset: 0, zIndex: 'var(--z-popover)' }} />
+          <div style={{ position: 'fixed', top: menuPos.top, left: menuPos.left, zIndex: 'var(--z-popover)',
                          background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 10,
-                         boxShadow: '0 4px 20px rgba(0,0,0,0.1)', minWidth: 160, overflow: 'hidden' }}>
+                         boxShadow: 'var(--shadow-float)', minWidth: 160, overflow: 'hidden' }}>
             <div style={{ padding: '6px 10px', fontSize: 10, fontWeight: 700, color: 'var(--text-muted)',
                            textTransform: 'uppercase', letterSpacing: '0.06em', borderBottom: '1px solid var(--border)' }}>
               {t('changeRole')}
@@ -146,6 +153,7 @@ export function RoleSelector({ user: u, availableRoles, onChanged }: {
               const isCurrent = role.name === currentRoleName
               return (
                 <button key={role.id} onClick={() => assign(role.id)}
+                  // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- menu-item row, not a Button
                   style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 8,
                            padding: '9px 12px', border: 'none', textAlign: 'left', cursor: 'pointer',
                            background: isCurrent ? 'var(--hover-bg)' : 'transparent',
@@ -212,6 +220,7 @@ export function EditableAvatar({ user: u, onPick }: { user: ManagedUser; onPick?
   return (
     <div style={{ position: 'relative' }}>
       <button onClick={() => setOpen(o => !o)} title={t('avatarColor')} aria-label={t('avatarColor')}
+        // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- avatar swatch trigger (its own fill IS the user's picked colour), not a Button
         style={{ ...bubble, cursor: 'pointer', padding: 0 }}>
         {avatarInitials(u)}
       </button>
@@ -220,19 +229,18 @@ export function EditableAvatar({ user: u, onPick }: { user: ManagedUser; onPick?
           <div className="fixed inset-0 z-10" onClick={() => setOpen(false)} />
           <div style={{ position: 'absolute', top: 36, left: 0, zIndex: 20, width: 192,
                          background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 10,
-                         padding: 12, boxShadow: '0 8px 24px rgba(0,0,0,0.12)' }}>
+                         padding: 12, boxShadow: 'var(--shadow-float)' }}>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
               {COLOR_PRESETS.map(col => (
                 <button key={col} onClick={() => choose(col)} aria-label={col}
+                  // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- DATA: preset swatch, its own fill IS the colour value, not a Button
                   style={{ width: 26, height: 26, borderRadius: 6, background: col, cursor: 'pointer',
                            border: col.toUpperCase() === (c ?? '').toUpperCase() ? '2px solid var(--text)' : '2px solid transparent' }} />
               ))}
             </div>
-            <button onClick={() => choose(null)}
-              style={{ marginTop: 10, width: '100%', fontSize: 12, color: 'var(--text-muted)', background: 'none',
-                       border: '1px solid var(--border)', borderRadius: 7, padding: '5px 0', cursor: 'pointer' }}>
+            <Button variant="secondary" onClick={() => choose(null)} style={{ marginTop: 10, width: '100%' }}>
               {t('avatarColorAuto')}
-            </button>
+            </Button>
           </div>
         </>
       )}

@@ -74,16 +74,16 @@ export default function InUseCountsDialog({ open, counts, onClose, onArchive, ar
         </div>
         <div style={{ display: 'flex', justifyContent: 'space-between', gap: 8 }}>
           {/* ARCHIVE-SUBENTITY-1: "kan niet verwijderen, wél archiveren" — archiving
-              carries none of the in-use guard, so it is always a real way out here. */}
+              carries none of the in-use guard, so it is always a real way out here.
+              House Button (HUISSTIJL-1) — archive keeps its own soft-tint colour via
+              style, but the identity (height/radius/chrome) comes from Button. */}
           {onArchive ? (
-            <button onClick={onArchive} disabled={archiving}
-              style={{ display: 'flex', alignItems: 'center', gap: 6, height: 32, padding: '0 14px', borderRadius: 8,
-                border: '1px solid color-mix(in srgb, var(--color-archive) 40%, transparent)',
-                background: 'color-mix(in srgb, var(--color-archive) 10%, transparent)', color: 'var(--color-archive)',
-                cursor: archiving ? 'not-allowed' : 'pointer', fontSize: 13, opacity: archiving ? 0.6 : 1 }}>
+            <Button variant="secondary" onClick={onArchive} disabled={archiving}
+              style={{ border: '1px solid color-mix(in srgb, var(--color-archive) 40%, transparent)',
+                background: 'color-mix(in srgb, var(--color-archive) 10%, transparent)', color: 'var(--color-archive)' }}>
               {archiving ? <Spinner size={13} /> : <Archive size={13} />}
               {t('inUse.archive')}
-            </button>
+            </Button>
           ) : <span />}
           <Button variant="secondary" onClick={onClose}>
             {t('inUse.close')}

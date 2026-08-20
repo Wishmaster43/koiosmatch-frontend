@@ -139,11 +139,9 @@ export default function MfaSetupWizard({ setupMfa, confirmMfa, onConfirmed, onFi
         <Button variant="secondary" onClick={copyRecovery}>
           <Copy size={13} /> {copied ? t('security.copied') : t('security.copy')}
         </Button>
-        <button onClick={() => void finish()} disabled={busy}
-          style={{ height: 34, padding: '0 20px', fontSize: 13, fontWeight: 500, borderRadius: 8,
-                   cursor: busy ? 'not-allowed' : 'pointer', border: 'none', background: 'var(--color-primary)', color: 'var(--color-on-accent)' }}>
+        <Button variant="primary" onClick={() => void finish()} disabled={busy}>
           {busy ? t('security.working') : t('security.done')}
-        </button>
+        </Button>
       </div>
     </div>
   )
@@ -152,11 +150,9 @@ export default function MfaSetupWizard({ setupMfa, confirmMfa, onConfirmed, onFi
   return (
     <div style={{ maxWidth: 420 }}>
       {onCancel && (
-        <button onClick={onCancel} style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13,
-                                            color: 'var(--text-muted)', background: 'none', border: 'none',
-                                            cursor: 'pointer', padding: 0, marginBottom: 20 }}>
+        <Button variant="ghost" onClick={onCancel} style={{ padding: 0, marginBottom: 20 }}>
           <ArrowLeft size={13} /> {t('security.back')}
-        </button>
+        </Button>
       )}
       <h3 style={{ fontSize: 14, fontWeight: 700, color: 'var(--text)', marginBottom: 6 }}>{t('security.scanTitle')}</h3>
       <p style={{ fontSize: 13, color: 'var(--text-muted)', marginBottom: 20, lineHeight: 1.6 }}>{t('security.scanDesc')}</p>
@@ -196,12 +192,9 @@ export default function MfaSetupWizard({ setupMfa, confirmMfa, onConfirmed, onFi
             {error}
           </div>
         )}
-        <button type="submit" disabled={busy || code.length < 6}
-          style={{ height: 36, padding: '0 20px', fontSize: 13, fontWeight: 500, borderRadius: 8,
-                   border: 'none', cursor: (busy || code.length < 6) ? 'not-allowed' : 'pointer',
-                   background: (busy || code.length < 6) ? 'var(--border)' : 'var(--color-primary)', color: 'var(--color-on-accent)' }}>
+        <Button type="submit" variant="primary" disabled={busy || code.length < 6}>
           {busy ? t('security.working') : t('security.confirmEnable')}
-        </button>
+        </Button>
       </form>
     </div>
   )

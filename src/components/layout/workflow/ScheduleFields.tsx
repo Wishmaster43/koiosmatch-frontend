@@ -31,6 +31,7 @@ import type { ScheduleForm } from './useScheduleForm'
 // listener shares the plain <select>'s latent flaw in a trapped dialog —
 // only CreatableSelect's portalled popover truly survives it.
 import CreatableSelect from '@/components/ui/CreatableSelect'
+import Button from '@/components/ui/Button'
 
 // ISO weekdays, Monday-first (1..7) — matches the contract's own numbering.
 const ISO_WEEKDAYS = [1, 2, 3, 4, 5, 6, 7]
@@ -60,6 +61,7 @@ export function ScheduleFields({ form }: { form: ScheduleForm }) {
             { id: 'yearly',    label: t('scheduleModal.freq.yearly') },
           ].map(o => (
             <button key={o.id} type="button" onClick={() => setFrequency(o.id)}
+              // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- fixed 6-column choice grid, not the shared SegmentedControl's row/vertical layouts
               style={{
                 padding: '8px 4px', borderRadius: 8, fontSize: 12, fontWeight: frequency === o.id ? 600 : 400,
                 border: `1.5px solid ${frequency === o.id ? 'var(--color-primary)' : 'var(--border)'}`,
@@ -92,11 +94,13 @@ export function ScheduleFields({ form }: { form: ScheduleForm }) {
           <div style={{ display: 'flex', gap: 6 }}>
             {ISO_WEEKDAYS.map(iso => (
               <button key={iso} type="button" onClick={() => toggleWeekday(iso)}
+                // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- weekday circle picker cell, not a Button
                 style={{
                   width: 38, height: 38, borderRadius: '50%', fontSize: 11, fontWeight: 600, cursor: 'pointer',
-                  border: `1.5px solid ${weekdays.includes(iso) ? 'var(--color-primary)' : 'var(--border)'}`,
-                  background: weekdays.includes(iso) ? 'var(--color-primary)' : 'var(--surface)',
-                  color: weekdays.includes(iso) ? 'var(--color-on-accent)' : 'var(--text)',
+                  // PRIMAIR-VLAK-1: selected state wears the button trio, not a raw accent fill.
+                  border: `1.5px solid ${weekdays.includes(iso) ? 'var(--button-border)' : 'var(--border)'}`,
+                  background: weekdays.includes(iso) ? 'var(--button-fill)' : 'var(--surface)',
+                  color: weekdays.includes(iso) ? 'var(--button-ink)' : 'var(--text)',
                 }}>{dayNameIso(locale, iso)}</button>
             ))}
           </div>
@@ -121,11 +125,12 @@ export function ScheduleFields({ form }: { form: ScheduleForm }) {
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 34px)', gap: 6 }}>
               {Array.from({ length: 31 }, (_, i) => i + 1).map(d => (
                 <button key={d} type="button" onClick={() => setMonthday(d)}
-                  style={{
-                    width: 34, height: 34, borderRadius: 8, fontSize: 12, fontWeight: monthday === d ? 700 : 400, cursor: 'pointer',
-                    border: `1.5px solid ${monthday === d ? 'var(--color-primary)' : 'var(--border)'}`,
-                    background: monthday === d ? 'var(--color-primary)' : 'var(--surface)',
-                    color: monthday === d ? 'var(--color-on-accent)' : 'var(--text)',
+                  // PRIMAIR-VLAK-1: selected state wears the button trio, not a raw accent fill.
+                  // eslint-disable-next-line huisstijl/no-restricted-syntax, huisstijlLegacy/no-restricted-syntax -- a calendar day-grid cell (7-col grid, gridTemplateColumns 'repeat(7, 34px)'), not a text/action Button copy
+                  style={{ width: 34, height: 34, borderRadius: 8, fontSize: 12, fontWeight: monthday === d ? 700 : 400, cursor: 'pointer',
+                    border: `1.5px solid ${monthday === d ? 'var(--button-border)' : 'var(--border)'}`,
+                    background: monthday === d ? 'var(--button-fill)' : 'var(--surface)',
+                    color: monthday === d ? 'var(--button-ink)' : 'var(--text)',
                   }}>{d}</button>
               ))}
             </div>
@@ -139,23 +144,22 @@ export function ScheduleFields({ form }: { form: ScheduleForm }) {
         <div>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
             <label style={fieldLabelInline}>{t('scheduleModal.times')}</label>
-            <button type="button" onClick={addTime} disabled={times.length >= 12}
-              style={{
-                fontSize: 11, color: times.length >= 12 ? 'var(--text-muted)' : 'var(--color-primary-text)',
-                background: 'none', border: 'none', cursor: times.length >= 12 ? 'not-allowed' : 'pointer', fontWeight: 600,
-              }}>{t('scheduleModal.addTime')}</button>
+            <Button variant="ghost" onClick={addTime} disabled={times.length >= 12}
+              style={{ fontSize: 11, color: times.length >= 12 ? undefined : 'var(--color-primary-text)', fontWeight: 600, padding: 0 }}>
+              {t('scheduleModal.addTime')}
+            </Button>
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
             {times.map((tm, i) => (
               <div key={i} style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
                 <input type="time" value={tm} onChange={e => updateTime(i, e.target.value)} aria-label={t('scheduleModal.time')} style={{ ...inputStyle, flex: 1 }} />
                 {times.length > 1 && (
-                  <button type="button" onClick={() => removeTime(i)} aria-label={t('scheduleModal.cancel')}
-                    style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--border)', display: 'flex', padding: 4 }}
+                  <Button variant="ghost" iconOnly onClick={() => removeTime(i)} aria-label={t('scheduleModal.cancel')}
+                    style={{ color: 'var(--border)' }}
                     onMouseEnter={e => (e.currentTarget.style.color = 'var(--color-danger)')}
                     onMouseLeave={e => (e.currentTarget.style.color = 'var(--border)')}>
                     <X size={14} />
-                  </button>
+                  </Button>
                 )}
               </div>
             ))}

@@ -7,7 +7,7 @@
  * label between a start/end pair.
  */
 import { useState } from 'react'
-import type { CSSProperties, ReactNode } from 'react'
+import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Save, X } from 'lucide-react'
 import RichTextEditor from '@/components/ui/RichTextEditor'
@@ -16,6 +16,7 @@ import RichTextEditor from '@/components/ui/RichTextEditor'
 import CreatableSelect from '@/components/ui/CreatableSelect'
 import { TextField, TextArea, DateField, Label } from './fields'
 import FieldNotice from '@/components/ui/FieldNotice'
+import Button from '@/components/ui/Button'
 
 /** One dropdown's option list — a bare string or a {value,label} pair. */
 export type FieldOptions = Array<string | { value: string; label?: ReactNode }>
@@ -166,7 +167,6 @@ export default function AddForm({ fields, onSave, onCancel, initial }: {
     setValues(p => ({ ...p, [k]: v }))
     setInvalid(p => (p[k] ? { ...p, [k]: false } : p))
   }
-  const iconBtn: CSSProperties = { width: 28, height: 28, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 7, cursor: 'pointer' }
 
   // Fields whose hideWhen condition is active drop out entirely (pairing runs on what's left).
   const dis = (f: FieldDef) => !!(f.disabledWhen && values[f.disabledWhen])
@@ -223,17 +223,15 @@ export default function AddForm({ fields, onSave, onCancel, initial }: {
           <FieldInput f={footerCheckbox} value={values[footerCheckbox.key]}
             onChange={v => set(footerCheckbox.key, v)} values={values} disabled={dis(footerCheckbox)} />
         )}
+        {/* House Button (HUISSTIJL-1, BTN-5) — an icon save button is Button
+            size="sm" iconOnly, never a local iconBtn style constant. */}
         <div style={{ display: 'flex', gap: 6 }}>
-          <button onClick={handleSave} title={t('save')}
-            // Accent-filled save button — follow the tenant's on-accent contrast
-            // token instead of a hardcoded white (2026-08-08).
-            style={{ ...iconBtn, background: 'var(--color-primary)', color: 'var(--color-on-accent)', border: 'none' }}>
+          <Button variant="primary" size="sm" iconOnly onClick={handleSave} title={t('save')}>
             <Save size={14} />
-          </button>
-          <button onClick={onCancel} title={t('cancel')}
-            style={{ ...iconBtn, background: 'var(--bg)', color: 'var(--text-muted)', border: '1px solid var(--border)' }}>
+          </Button>
+          <Button variant="secondary" size="sm" iconOnly onClick={onCancel} title={t('cancel')}>
             <X size={14} />
-          </button>
+          </Button>
         </div>
       </div>
     </div>

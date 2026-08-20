@@ -20,6 +20,7 @@ import Spinner from '@/components/ui/Spinner'
 import { useConfirm } from '@/hooks/useConfirm'
 import { getCountryOptions } from '@/lib/countries'
 import Button from '@/components/ui/Button'
+import SaveButton from '@/components/ui/SaveButton'
 import { PageTitle } from '@/components/ui/typography'
 
 export default function ProvincesSettings() {
@@ -111,18 +112,10 @@ export default function ProvincesSettings() {
           <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>{t('provinces.subtitle')}</p>
         </div>
         <div style={{ display: 'flex', gap: 8, flexShrink: 0 }}>
-          <button onClick={saveOrder} disabled={saving}
-            style={{ display: 'flex', alignItems: 'center', gap: 6, height: 34, padding: '0 14px',
-                     fontSize: 13, fontWeight: 500, borderRadius: 8, border: 'none', cursor: 'pointer',
-                     whiteSpace: 'nowrap', flexShrink: 0,
-                     background: saved ? 'var(--color-success)' : 'var(--color-primary)',
-                     // Success fill needs its own on-* token — white only reaches ~3.3:1 there (WCAG audit 2026-08).
-                     color: saved ? 'var(--color-on-success)' : 'var(--color-on-accent)' }}>
+          {/* SaveButton — the ONE saved-state save action (§4 success token pair). */}
+          <SaveButton saved={saved} onClick={saveOrder} disabled={saving}>
             {saved ? <><Check size={13}/> {t('common.saved')}</> : <><Save size={13}/> {t('common.save')}</>}
-          </button>
-          {/* Section-header row at 34px (Opus batch D fix 4): the 26px drawer add
-              affordance sat 8px short beside Save. House Button at row height,
-              soft so it does not compete with the primary Save beside it. */}
+          </SaveButton>
           <Button variant="soft" onClick={openCreate}>
             <Plus size={14} /> {t('provinces.add')}
           </Button>
@@ -158,19 +151,14 @@ export default function ProvincesSettings() {
             <>
               <span style={{ fontSize: 13, color: 'var(--text)' }}>{item.name}</span>
               <div style={{ flex: 1 }} />
-              <button onClick={() => openEdit(item)} title={t('statusList.edit')}
-                style={{ width: 28, height: 28, display: 'flex', alignItems: 'center', justifyContent: 'center',
-                         background: 'var(--border)', border: 'none', borderRadius: 6, cursor: 'pointer', color: 'var(--text)' }}>
+              <Button variant="secondary" iconOnly onClick={() => openEdit(item)} title={t('statusList.edit')}>
                 <Pencil size={11} />
-              </button>
+              </Button>
               {/* Delete is disabled when the item is still referenced by a candidate. */}
-              <button onClick={() => remove(item)} disabled={deleting === item.id || item.in_use}
-                title={item.in_use ? t('statusList.inUse') : undefined}
-                style={{ width: 28, height: 28, display: 'flex', alignItems: 'center', justifyContent: 'center',
-                         background: 'var(--color-danger-bg)', border: 'none', borderRadius: 6, color: 'var(--color-danger)',
-                         cursor: item.in_use ? 'not-allowed' : 'pointer', opacity: item.in_use ? 0.4 : 1 }}>
+              <Button variant="dangerSoft" iconOnly onClick={() => remove(item)} disabled={deleting === item.id || item.in_use}
+                title={item.in_use ? t('statusList.inUse') : undefined}>
                 {deleting === item.id ? <Spinner size={11} /> : <Trash2 size={11} />}
-              </button>
+              </Button>
             </>
           )}
         />
@@ -179,11 +167,10 @@ export default function ProvincesSettings() {
       {showModal && (
         <>
           <div className="fixed inset-0 z-40" style={{ background: 'rgba(0,0,0,0.3)' }} onClick={() => setShowModal(false)} />
-          <div className="fixed z-50" style={{ top: '50%', left: '50%', transform: 'translate(-50%,-50%)', background: 'var(--surface)', borderRadius: 12, padding: 24, width: 400, boxShadow: '0 20px 60px rgba(0,0,0,0.15)' }}>
+          <div className="fixed z-50" style={{ top: '50%', left: '50%', transform: 'translate(-50%,-50%)', background: 'var(--surface)', borderRadius: 12, padding: 24, width: 400, boxShadow: 'var(--shadow-modal)' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 18 }}>
-              <span style={{ fontSize: 15, fontWeight: 700 }}>{editing ? t('statusList.editTitle') : t('provinces.add')}</span>
-              <button onClick={() => setShowModal(false)} aria-label={t('common.close')}
-                style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)' }}><X size={16} /></button>
+              <PageTitle style={{ fontWeight: 700 }}>{editing ? t('statusList.editTitle') : t('provinces.add')}</PageTitle>
+              <Button variant="ghost" iconOnly onClick={() => setShowModal(false)} aria-label={t('common.close')}><X size={16} /></Button>
             </div>
             <div style={{ marginBottom: 14 }}>
               <label htmlFor="province-name" style={{ display: 'block', fontSize: 12, color: 'var(--text-muted)', marginBottom: 5 }}>{t('statusList.nameLabel')}</label>

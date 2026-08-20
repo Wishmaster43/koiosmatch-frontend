@@ -9,6 +9,7 @@
 
 import { CANON_LABEL_STYLE } from '@/components/drawer/fieldRowCanon'
 
+// eslint-disable-next-line huisstijl/no-restricted-syntax -- frozen candidate-drawer zone: local stacking inside the drawer's own context, value predates the ladder; re-rung at the planned drawer revisit, not in a sweep
 export const overlay: React.CSSProperties = { position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.3)', zIndex: 60 }
 // S24a root-cause fix: this panel used to carry `overflowY:'auto', maxHeight:'88vh'`.
 // An ancestor with a non-visible `overflow` clips ANY absolutely-positioned descendant
@@ -17,6 +18,7 @@ export const overlay: React.CSSProperties = { position: 'fixed', inset: 0, backg
 // modal's content is short (mirrors the unconstrained candidates/drawer/
 // AddApplicationModal panel), it never genuinely needs to scroll; dropping the
 // scroll container removes the clipping context instead of fighting it with z-index.
+// eslint-disable-next-line huisstijl/no-restricted-syntax, huisstijlLegacy/no-restricted-syntax -- frozen candidate-drawer zone: local stacking inside the drawer's own context, value predates the ladder; re-rung at the planned drawer revisit, not in a sweep
 export const panel: React.CSSProperties = { position: 'fixed', top: '50%', left: '50%', transform: 'translate(-50%,-50%)', zIndex: 61, width: 440, maxWidth: '92vw', background: 'var(--surface)', borderRadius: 12, padding: 22, boxShadow: '0 20px 60px rgba(0,0,0,0.18)' }
 export const fieldLabel: React.CSSProperties = { fontSize: 12, color: 'var(--text-muted)', marginBottom: 5 }
 // S24c (Danny 24-07): the exact "+ Kandidaat toevoegen" text-input footprint

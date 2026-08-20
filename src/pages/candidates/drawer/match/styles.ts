@@ -13,6 +13,7 @@
  */
 import { CANON_LABEL_STYLE } from '@/components/drawer/fieldRowCanon'
 
+// eslint-disable-next-line huisstijl/no-restricted-syntax -- frozen candidate-drawer zone: local stacking inside the drawer's own context, value predates the ladder; re-rung at the planned drawer revisit, not in a sweep
 export const overlay: React.CSSProperties = { position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.35)', zIndex: 60 }
 export const input: React.CSSProperties = { width: '100%', height: 36, padding: '0 10px', fontSize: 13, border: '1px solid var(--border)', borderRadius: 8, outline: 'none', boxSizing: 'border-box', background: 'var(--surface)', color: 'var(--text)' }
 export const errMsg: React.CSSProperties = { fontSize: 11, color: 'var(--color-danger)', marginTop: 3 }

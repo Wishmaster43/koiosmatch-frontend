@@ -6,6 +6,8 @@ import type { ReactNode } from 'react'
 import { X, Search } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { useFocusTrap } from '@/hooks/useFocusTrap'
+import { PageTitle, Caption } from '@/components/ui/typography'
+import Button from '@/components/ui/Button'
 
 interface EntityListItem {
   primary: string
@@ -48,17 +50,15 @@ export default function EntityListDrawer({ title, items, onClose }: EntityListDr
         <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between',
                       padding: '14px 18px', borderBottom: '1px solid var(--border)', flexShrink: 0 }}>
           <div>
-            <div style={{ fontWeight: 600, fontSize: 15, color: 'var(--text)' }}>{title}</div>
+            <PageTitle as="div">{title}</PageTitle>
             <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>{t('resultsCount', { count: items.length })}</div>
           </div>
-          <button onClick={onClose} aria-label={t('common:close')}
-            style={{ width: 28, height: 28, display: 'flex', alignItems: 'center', justifyContent: 'center',
-                     background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)',
-                     borderRadius: 6, marginLeft: 10 }}
+          <Button variant="ghost" iconOnly onClick={onClose} aria-label={t('common:close')}
+            style={{ marginLeft: 10 }}
             onMouseEnter={e => (e.currentTarget.style.background = 'var(--hover-bg)')}
             onMouseLeave={e => (e.currentTarget.style.background = 'none')}>
             <X size={15} />
-          </button>
+          </Button>
         </div>
 
         {/* Search */}
@@ -93,7 +93,7 @@ export default function EntityListDrawer({ title, items, onClose }: EntityListDr
                   {item.primary}
                 </div>
                 {item.secondary && (
-                  <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 2 }}>{item.secondary}</div>
+                  <Caption as="div" style={{ marginTop: 2 }}>{item.secondary}</Caption>
                 )}
               </div>
               {item.badge && (
@@ -110,14 +110,12 @@ export default function EntityListDrawer({ title, items, onClose }: EntityListDr
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between',
                       padding: '8px 16px', borderTop: '1px solid var(--border)', background: 'var(--hover-bg)',
                       flexShrink: 0 }}>
-          <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>
+          <Caption as="span">
             {t('shownOf', { shown: filtered.length, total: items.length })}
-          </span>
-          <button onClick={onClose}
-            style={{ fontSize: 12, borderRadius: 6, padding: '4px 12px',
-                     background: 'none', border: '1px solid var(--border)', cursor: 'pointer', color: 'var(--text-muted)' }}>
+          </Caption>
+          <Button variant="secondary" onClick={onClose}>
             {t('close')}
-          </button>
+          </Button>
         </div>
       </div>
     </>

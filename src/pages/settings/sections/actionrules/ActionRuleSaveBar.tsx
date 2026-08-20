@@ -6,6 +6,7 @@
 import { useTranslation } from 'react-i18next'
 import { Check, Save, RotateCcw } from 'lucide-react'
 import Button from '@/components/ui/Button'
+import SaveButton from '@/components/ui/SaveButton'
 
 interface ActionRuleSaveBarProps {
   dirtyCount: number
@@ -32,15 +33,10 @@ export default function ActionRuleSaveBar({ dirtyCount, saving, saved, onSave, o
         <Button variant="secondary" onClick={onResetAll}>
           <RotateCcw size={13} /> {t('actionRules.saveBar.resetAll')}
         </Button>
-        <button type="button" onClick={onSave} disabled={!dirty || saving}
-          style={{ display: 'flex', alignItems: 'center', gap: 6, height: 34, padding: '0 14px', fontSize: 13,
-                   fontWeight: 500, borderRadius: 8, border: 'none', cursor: dirty && !saving ? 'pointer' : 'default',
-                   whiteSpace: 'nowrap', opacity: dirty || saved ? 1 : 0.5,
-                   background: saved ? 'var(--color-success)' : 'var(--color-primary)',
-                   // Success fill needs its own on-* token — white only reaches ~3.3:1 there (WCAG audit 2026-08).
-                   color: saved ? 'var(--color-on-success)' : 'var(--color-on-accent)' }}>
+        {/* SaveButton — the ONE saved-state save action (§4 success token pair). */}
+        <SaveButton saved={saved} onClick={onSave} disabled={!dirty || saving}>
           {saved ? <><Check size={13} /> {t('common.saved')}</> : <><Save size={13} /> {saving ? t('common.saving') : t('common.save')}</>}
-        </button>
+        </SaveButton>
       </div>
     </div>
   )

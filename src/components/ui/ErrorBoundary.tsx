@@ -2,6 +2,8 @@ import { Component } from 'react'
 import type { ReactNode, ErrorInfo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { AlertTriangle, RotateCcw } from 'lucide-react'
+import { PageTitle } from '@/components/ui/typography'
+import Button from '@/components/ui/Button'
 
 /**
  * ErrorBoundary — catches render-time crashes in its subtree so one broken widget
@@ -63,17 +65,12 @@ function ErrorFallback({ error, onReset, compact }: { error: Error | null; onRes
         <AlertTriangle size={22} />
       </span>
       <div>
-        <div style={{ fontSize: 15, fontWeight: 600 }}>{t('error.title')}</div>
+        <PageTitle as="div">{t('error.title')}</PageTitle>
         <div style={{ fontSize: 13, color: 'var(--text-muted)', marginTop: 4, maxWidth: 360 }}>{t('error.body')}</div>
       </div>
-      <button onClick={onReset} style={{
-        display: 'flex', alignItems: 'center', gap: 7, padding: '8px 14px', fontSize: 13, fontWeight: 500,
-        borderRadius: 8, cursor: 'pointer', border: '1px solid var(--color-primary)',
-        // Accent-filled button — follow the tenant's on-accent contrast token
-        // instead of a hardcoded white (2026-08-08).
-        background: 'var(--color-primary)', color: 'var(--color-on-accent)' }}>
+      <Button variant="primary" onClick={onReset}>
         <RotateCcw size={14} /> {t('error.retry')}
-      </button>
+      </Button>
       {/* Technical detail is dev-only — never leak server detail/PII in production (§8). */}
       {import.meta.env.DEV && error?.message && (
         <details style={{ marginTop: 8, fontSize: 11, color: 'var(--text-muted)', maxWidth: 480 }}>

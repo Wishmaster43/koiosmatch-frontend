@@ -7,6 +7,8 @@ import api from '@/lib/api'
 import { useAuth } from '@/context/AuthContext'
 import { loadSettings, saveSettings } from '../lib/settingsApi'
 import { BTN_H } from '@/config/buttonMetrics'
+import SaveButton from '@/components/ui/SaveButton'
+import Button from '@/components/ui/Button'
 import { PageTitle, Caption } from '@/components/ui/typography'
 
 // Preset swatches are tenant brand-colour DATA (persisted as brand_color) — literal hex by design, never tokens.
@@ -116,17 +118,12 @@ export default function BrandSettings() {
           <PageTitle>{t('brand.title')}</PageTitle>
           <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>{t('brand.subtitle')}</p>
         </div>
-        <button onClick={save} disabled={saving}
-          style={{ display: 'flex', alignItems: 'center', gap: 6, height: 34, padding: '0 14px',
-                   fontSize: 13, fontWeight: 500, borderRadius: 8, cursor: saving ? 'wait' : 'pointer',
-                   border: 'none', opacity: saving ? 0.7 : 1,
-                   background: saved ? 'var(--color-success)' : 'var(--color-primary)',
-                   // Success fill needs its own on-* token — white only reaches ~3.3:1 there (WCAG audit 2026-08).
-                   color: saved ? 'var(--color-on-success)' : 'var(--color-on-accent)', transition: 'background 0.2s' }}>
+        {/* SaveButton — the ONE saved-state save action (§4 success token pair). */}
+        <SaveButton saved={saved} onClick={save} disabled={saving}>
           {saved   ? <><Check size={13} /> {t('common.saved')}</>                         :
            saving  ? <><Spinner size={13} /> {t('common.saving')}</> :
                      <><Save size={13} /> {t('common.save')}</>}
-        </button>
+        </SaveButton>
       </div>
 
       {loading && <p style={{ fontSize: 13, color: 'var(--text-muted)', marginBottom: 12 }}>{t('common.loading')}</p>}
@@ -151,6 +148,7 @@ export default function BrandSettings() {
           <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
             {BRAND_COLOR_PRESETS.map(c => (
               <button key={c} onClick={() => applyColor(c)}
+                // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- DATA: preset swatch, its own fill IS the brand-colour value, not a Button
                 style={{ width: 28, height: 28, borderRadius: '50%', background: c, border: 'none',
                          cursor: 'pointer', outline: primaryColor === c ? `3px solid ${c}` : 'none',
                          outlineOffset: 2, transition: 'transform 0.1s', transform: primaryColor === c ? 'scale(1.2)' : 'scale(1)' }} />
@@ -180,6 +178,7 @@ export default function BrandSettings() {
             <div style={{ fontSize: 13, fontWeight: 500, color: 'var(--text)', marginBottom: 4 }}>{t('brand.textColor')}</div>
             <Caption as="div" style={{ marginBottom: 10 }}>{t('brand.textColorHint')}</Caption>
             <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
+              {/* eslint-disable-next-line no-restricted-syntax -- DATA: fixed light/dark text-colour option values, not styling */}
               {[{ v: '', label: t('brand.textColorAuto') }, { v: '#FFFFFF', label: t('brand.textColorLight') }, { v: '#1F2937', label: t('brand.textColorDark') }].map(o => {
                 const active = textColor === o.v
                 return (
@@ -188,6 +187,7 @@ export default function BrandSettings() {
                     // normally colours the label with its own token, but here that token
                     // is the tenant's accent — on a light brand (yellow, mint) accent-on-tint
                     // is unreadable. The tint + border still carry the colour; the label stays legible.
+                    // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- deliberate exception above: label stays --text (not the tint token) so it never goes accent-on-accent-tint unreadable, not a plain Button
                     style={{ padding: '5px 11px', fontSize: 12, fontWeight: active ? 600 : 500, borderRadius: 8, cursor: 'pointer',
                       color: 'var(--text)',
                       background: active ? 'color-mix(in srgb, var(--color-primary) 10%, transparent)' : 'var(--surface)',
@@ -196,6 +196,7 @@ export default function BrandSettings() {
                   </button>
                 )
               })}
+              {/* eslint-disable-next-line no-restricted-syntax -- DATA: fallback value for the native colour input, not styling */}
               <input type="color" value={textColor || '#FFFFFF'} aria-label={t('brand.textColor')}
                 onChange={e => { setTextColor(e.target.value); applyAccentTokens(primaryColor, e.target.value) }}
                 style={{ width: 32, height: 32, borderRadius: 6, border: '1px solid var(--border)', cursor: 'pointer', padding: 2 }} />
@@ -231,6 +232,7 @@ export default function BrandSettings() {
                 live-synced to --color-primary), so its label must read the same on-accent token the
                 Save button and every other accent-filled control uses — a hardcoded white here was
                 exactly Danny's 08-08 bug (yellow brand -> white-on-yellow, unreadable). */}
+            {/* eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- non-interactive brand-colour PREVIEW: must render the raw picked colour live, not the house Button identity */}
             <button style={{ height: BTN_H, padding: '0 14px', fontSize: 12, fontWeight: 500,
                              background: primaryColor, color: 'var(--color-on-accent)', border: 'none', borderRadius: 7, cursor: 'default' }}>
               {t('brand.buttonPreview')}
@@ -254,18 +256,13 @@ export default function BrandSettings() {
               </div>
             )}
             <div style={{ display: 'flex', gap: 8 }}>
-              <button onClick={() => fileRef.current?.click()}
-                style={{ display: 'flex', alignItems: 'center', gap: 6, height: BTN_H, padding: '0 12px',
-                         fontSize: 13, fontWeight: 500, borderRadius: 8, cursor: 'pointer',
-                         border: '1px solid var(--border)', background: 'var(--hover-bg)', color: 'var(--text)' }}>
+              <Button variant="secondary" onClick={() => fileRef.current?.click()}>
                 <Upload size={13} /> {t('common.upload')}
-              </button>
+              </Button>
               {logoPreview && (
-                <button onClick={() => { setLogoPreview(null); setLogoFile(null) }}
-                  style={{ height: BTN_H, padding: '0 12px', fontSize: 13, borderRadius: 8, cursor: 'pointer',
-                           border: '1px solid color-mix(in srgb, var(--color-danger) 40%, transparent)', background: 'var(--color-danger-bg)', color: 'var(--color-danger)' }}>
+                <Button variant="dangerSoft" onClick={() => { setLogoPreview(null); setLogoFile(null) }}>
                   {t('common.remove')}
-                </button>
+                </Button>
               )}
             </div>
             <input ref={fileRef} type="file" accept="image/png,image/jpeg,image/webp,image/svg+xml"
@@ -278,10 +275,9 @@ export default function BrandSettings() {
               borderRadius: 8, background: 'var(--color-danger-bg)',
               border: '1px solid color-mix(in srgb, var(--color-danger) 40%, transparent)' }}>
               <span style={{ fontSize: 12, color: 'var(--color-danger)', flex: 1 }}>{logoError}</span>
-              <button onClick={() => setLogoError(null)} aria-label={t('common.close')}
-                style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--color-danger)', display: 'flex' }}>
+              <Button variant="ghost" iconOnly onClick={() => setLogoError(null)} aria-label={t('common.close')} style={{ color: 'var(--color-danger)' }}>
                 <X size={13} />
-              </button>
+              </Button>
             </div>
           )}
         </div>

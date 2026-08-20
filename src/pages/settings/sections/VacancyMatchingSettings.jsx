@@ -5,6 +5,7 @@ import api, { unwrap } from '@/lib/api'
 import { notifyError } from '@/lib/notify'
 import Slider from '@/components/ui/Slider'
 import SegmentedControl from '@/components/ui/SegmentedControl'
+import SaveButton from '@/components/ui/SaveButton'
 import { PageTitle, SectionTitle, Mono } from '@/components/ui/typography'
 
 /**
@@ -69,14 +70,10 @@ export default function VacancyMatchingSettings() {
           <PageTitle>{t('matching.title')}</PageTitle>
           <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>{t('matching.subtitle')}</p>
         </div>
-        <button onClick={save} disabled={saving}
-          style={{ display: 'flex', alignItems: 'center', gap: 6, height: 34, padding: '0 14px', fontSize: 13, fontWeight: 500,
-            borderRadius: 8, border: 'none', cursor: 'pointer', whiteSpace: 'nowrap', flexShrink: 0,
-            background: saved ? 'var(--color-success)' : 'var(--color-primary)',
-            // Success fill needs its own on-* token — white only reaches ~3.3:1 there (WCAG audit 2026-08).
-            color: saved ? 'var(--color-on-success)' : 'var(--color-on-accent)' }}>
+        {/* SaveButton — the ONE saved-state save action (§4 success token pair). */}
+        <SaveButton saved={saved} onClick={save} disabled={saving}>
           {saved ? <><Check size={13} /> {t('matching.saved')}</> : <><Save size={13} /> {t('matching.save')}</>}
-        </button>
+        </SaveButton>
       </div>
 
       <div style={{ marginTop: 18 }}>

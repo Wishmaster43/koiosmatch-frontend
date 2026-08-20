@@ -13,6 +13,7 @@ import { sectionBlock, sectionTitle } from './constants'
 import ErrorBanner from '@/components/ui/ErrorBanner'
 // HUISSTIJL-1: the shared muted-caption atom (identity-only swap).
 import { Caption } from '@/components/ui/typography'
+import { Z } from '@/lib/zIndexScale'
 import type { Id } from '@/types/common'
 import type { LinkableType, Preference, PrefKind, PrefTargetGroup } from '../hooks/useCandidatePlanning'
 
@@ -79,6 +80,7 @@ export default function PlanningFavorites({ favorites, blacklist, targets, onAdd
               <span style={{ ...sectionTitle, marginBottom: 0, flex: 1 }}>{title}</span>
               {!isAdding && (
                 <button onClick={() => { setAddMode(kind); setQuery(''); setReason('') }} aria-label={t('common:add')}
+                  // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- frozen candidate-drawer zone (Danny 08-08): no restyle without discussion
                   style={{ width: 24, height: 24, display: 'flex', alignItems: 'center', justifyContent: 'center',
                     border: '1px solid var(--border)', borderRadius: 6, background: 'var(--bg)', cursor: 'pointer', color: 'var(--text-muted)', flexShrink: 0 }}>
                   <Plus size={13} />
@@ -106,6 +108,7 @@ export default function PlanningFavorites({ favorites, blacklist, targets, onAdd
                   {p.reason ? <div style={{ fontSize: 10, color: 'var(--text-muted)' }}>{p.reason}</div> : null}
                 </div>
                 <button onClick={() => onRemove(p.id)} aria-label={t('common:delete')}
+                  // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- frozen candidate-drawer zone (Danny 08-08): no restyle without discussion
                   style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: 2, display: 'flex' }}>
                   <X size={12} />
                 </button>
@@ -122,6 +125,7 @@ export default function PlanningFavorites({ favorites, blacklist, targets, onAdd
                     style={{ flex: 1, padding: '5px 9px', fontSize: 12, border: '1px solid var(--color-primary)',
                       borderRadius: 6, outline: 'none', background: 'var(--bg)', color: 'var(--text)' }} />
                   <button onClick={cancel} aria-label={t('common:cancel')}
+                    // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- frozen candidate-drawer zone (Danny 08-08): no restyle without discussion
                     style={{ padding: '4px 6px', border: '1px solid var(--border)', borderRadius: 6, background: 'none',
                       color: 'var(--text-muted)', cursor: 'pointer', display: 'flex', alignItems: 'center' }}>
                     <X size={11} />
@@ -132,8 +136,10 @@ export default function PlanningFavorites({ favorites, blacklist, targets, onAdd
                   style={{ width: '100%', boxSizing: 'border-box', marginTop: 6, padding: '5px 9px', fontSize: 12,
                     border: '1px solid var(--border)', borderRadius: 6, outline: 'none', background: 'var(--bg)', color: 'var(--text)' }} />
                 {results.length > 0 && (
-                  <div style={{ position: 'absolute', top: 'calc(100% + 4px)', left: 0, right: 0, zIndex: 200,
+                  // FROZEN candidate-drawer zone value-preserving swap: 200 → Z.modal (also 200).
+                  <div style={{ position: 'absolute', top: 'calc(100% + 4px)', left: 0, right: 0, zIndex: Z.modal,
                     background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 8,
+                    // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- frozen candidate-drawer zone (Danny 08-08): no restyle without discussion
                     boxShadow: '0 4px 20px rgba(0,0,0,0.12)', overflow: 'hidden', maxHeight: 260, overflowY: 'auto' }}>
                     {results.map(g => (
                       <div key={g.linkable_type}>

@@ -86,6 +86,11 @@
   /* #1F2937 measured 4.45:1 on the success fill — a hair under AA; caught by
      the new token-contrast CI gate the moment it existed (fase 3). */
   --color-on-success:    #111827;
+  /* Text on the success-bg PASTEL (§4 "aan/gelukt" pair: saved buttons, on-state
+     cards). Needs its OWN token: the success colour itself reads 3.0:1 on this bg
+     (WCAG fail, Opus slotaudit review 20-08) and no single ink works on both the
+     solid fill and the pastel across themes — dark redefines this one. */
+  --color-on-success-bg: #111827;
   /* Accent used as TEXT (active menu item, active chip label, links). Defaults to
      the accent itself; useTenantTheme replaces it with a readable variant when the
      tenant's brand is too light for the surface — darkened in light mode, lightened
@@ -198,6 +203,9 @@
   --color-primary-bg:   rgba(25, 165, 202, 0.18);
   --color-secondary-bg: rgba(27, 96, 169, 0.24);
   --color-success-bg:   rgba(22, 163, 74, 0.20);
+  /* On the dark success tint (composites to ≈#1B3734 on the dark surface) the
+     light pastel reads ≈12:1; near-black or the vivid green both fail there. */
+  --color-on-success-bg: #DCFCE7;
   --color-warning-bg:   rgba(217, 119, 6, 0.20);
   --color-danger-bg:    rgba(220, 38, 38, 0.22);
   --color-info-bg:      rgba(14, 165, 233, 0.18);

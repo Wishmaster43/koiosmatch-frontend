@@ -5,12 +5,14 @@ import DatePicker from 'react-datepicker'
 import SelectMenu from '@/components/ui/SelectMenu'
 import SelectAllRow from '@/components/ui/SelectAllRow'
 import Slider from '@/components/ui/Slider'
+import Button from '@/components/ui/Button'
 import { parseDate } from '@/components/forms/fields'
 import { toLocalIsoDate } from '@/lib/localDate'
 // PORTAL-MARKER-1: a click inside an open portalled picker menu is never "outside".
 import { isInsideDropdownPortal } from '@/lib/useDropdownPlacement'
 import { useFocusTrap } from '@/hooks/useFocusTrap'
 import { useBatchToggle } from '@/hooks/useBatchToggle'
+import { Z } from '@/lib/zIndexScale'
 
 export interface DrawerFilterOption { value: string; label: string }
 
@@ -313,6 +315,7 @@ export default function DrawerFilterMenu({ filters, label, title, clearAllLabel 
           DrawerAddButton (26/11.5/r6) so it sits flush next to it in the toolbar. */}
       <button type="button" onClick={() => setOpen(o => !o)}
         aria-haspopup="dialog" aria-expanded={open} aria-controls={open ? panelId : undefined}
+        // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- deliberately matches DrawerAddButton's own custom 26/11.5/r6 footprint (not a Button size) so the two sit flush together
         style={{
           display: 'inline-flex', alignItems: 'center', gap: 5, height: 26, padding: '0 10px',
           whiteSpace: 'nowrap', flexShrink: 0, fontSize: 11.5, fontWeight: activeCount > 0 ? 600 : 500, borderRadius: 6,
@@ -344,21 +347,22 @@ export default function DrawerFilterMenu({ filters, label, title, clearAllLabel 
           // ANY clipping ancestor traps it — the type list showed two rows inside a
           // tiny scrollbox instead of opening as a normal dropdown. That, not the
           // panel's size, was what made filtering unusable.
-          style={{ position: 'absolute', top: '100%', right: 0, zIndex: 200, marginTop: 4,
+          // In-flow popover inside a drawer's own stacking context (this menu is only
+          // ever mounted inside an entity drawer tab) — Z.popover, not the CSS
+          // dropdown-portal rung, so it competes only with its dialog siblings.
+          style={{ position: 'absolute', top: '100%', right: 0, zIndex: Z.popover, marginTop: 4,
             width: PANEL_WIDTH, maxWidth: 'calc(100vw - 24px)',
             background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 8,
-            boxShadow: '0 4px 16px rgba(0,0,0,0.1)', display: 'flex', flexDirection: 'column' }}>
+            boxShadow: 'var(--shadow-float)', display: 'flex', flexDirection: 'column' }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between',
             padding: '8px 10px', borderBottom: '1px solid var(--border)', flexShrink: 0 }}>
             <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--text)' }}>{title}</span>
             {/* Icon-only, mirrors ReportFilterSidebar's own clear-all affordance —
                 only shown once at least one filter is active. */}
             {activeCount > 0 && (
-              <button type="button" onClick={clearAll} title={clearAllLabel} aria-label={clearAllLabel}
-                style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 20, height: 20,
-                  background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', borderRadius: 4 }}>
+              <Button variant="ghost" iconOnly onClick={clearAll} title={clearAllLabel} aria-label={clearAllLabel}>
                 <RotateCcw size={12} />
-              </button>
+              </Button>
             )}
           </div>
           {/* FILTER-CLIP-1: deliberately UNCLIPPED — no maxHeight/overflow, or the

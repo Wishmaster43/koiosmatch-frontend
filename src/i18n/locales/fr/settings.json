@@ -717,7 +717,9 @@
       }
     },
     "signature": "Signature",
-    "signatureHint": "Ajoutée au bas de chaque e-mail de ce type."
+    "signatureHint": "Ajoutée au bas de chaque e-mail de ce type.",
+    "showPassword": "Afficher le mot de passe",
+    "hidePassword": "Masquer le mot de passe"
   },
   "notifications": {
     "email": {
