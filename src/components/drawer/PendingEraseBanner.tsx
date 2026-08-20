@@ -33,7 +33,8 @@ interface PendingEraseBannerProps {
 // shared by the 'button' unmark variant. Tint via lib/tint (house pair); ink via
 // chipInk — the raw colour on its own tint reads 2.4-3.0:1, AA fail (r3.5).
 const actionBtn = (color: string) => ({
-  display: 'inline-flex', alignItems: 'center', gap: 5, height: 26, padding: '0 10px',
+  // Height = the sm STANDARD 28 (maatwet; r7 caught this at a bespoke 26).
+  display: 'inline-flex', alignItems: 'center', gap: 5, height: 28, padding: '0 10px',
   fontSize: 11.5, fontWeight: 600, borderRadius: 6, cursor: 'pointer', whiteSpace: 'nowrap',
   color: chipInk(color), background: tintBg(color),
   border: tintBorder(color),
@@ -59,10 +60,13 @@ export default function PendingEraseBanner({
       border: tintBorder('var(--color-danger)') }}>
       <span style={{ flex: 1, minWidth: 0 }}>{message}</span>
       {onUnmark && unmarkVariant === 'button' && (
-        // Pre-existing bespoke §4 soft-tint pill (own busy-fade opacity), out of this
-        // ink/tint task's scope; not converted to avoid a size/identity regression.
+        // NECESSITY exception (r7 re-reasoned — "out of scope" is never a reason):
+        // this action deliberately wears the ARCHIVE colour's tint language
+        // (Danny's archive carve-out from the trio); Button models no tone, so the
+        // tint pair renders here at the sm-standard 28 height. Retires onto
+        // Button the day it grows a tone variant.
         <button type="button" onClick={() => onUnmark(id)} disabled={unmarkBusy}
-          // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- see comment above
+          // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- see necessity comment above
           style={{ ...actionBtn(unmarkColor), opacity: unmarkBusy ? 0.6 : 1 }}>
           <Icon size={12} aria-hidden="true" /> {unmarkLabel}
         </button>

@@ -723,6 +723,11 @@ the code is worse than no rule, because the next reader builds on it. What is tr
   inline-styled `<a>` — navigation stays a real link (§6) while still sharing the one
   visual identity. A `<button>`/`<a>` with its own fill/border/height needs a written
   eslint-disable reason (a calendar-grid cell, 34px search-chrome, …) or it is drift.
+  **Een disable-reden is een NOODZAAK-reden (r7, 20-08):** een functionele
+  uitzondering (kalendercel, zoekchrome, kleurdragende tint-actie zonder
+  Button-tone) — nooit "buiten de scope van deze taak"; dan blijft de warning
+  gewoon staan en rijdt hij mee in het plafond. Het plafond telt de
+  huisstijl-disables zélf ook mee, dus een disable wast geen schuld meer weg.
 
 ---
 

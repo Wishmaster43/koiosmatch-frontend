@@ -46,10 +46,19 @@ if (withErrors.length) {
   process.exit(1)
 }
 
-// Job 2 — per-file warning counts vs the frozen ceiling.
+// Job 2 — per-file counts vs the frozen ceiling. The count is warnings PLUS
+// huisstijl eslint-disables (r7: a disable with a scope-excuse laundered a 26px
+// button clean out of this administration — counting the disables themselves
+// keeps silenced debt on the books; genuine necessity exceptions simply sit in
+// the frozen number and never grow).
+const DISABLE_RE = /eslint-disable(?:-next-line)?[^\n]*huisstijl/g
 const counts = {}
 for (const r of results) {
-  if (r.warningCount > 0) counts[relative(ROOT, r.filePath)] = r.warningCount
+  let n = r.warningCount
+  try {
+    n += (readFileSync(r.filePath, 'utf8').match(DISABLE_RE) ?? []).length
+  } catch { /* unreadable file: count warnings only */ }
+  if (n > 0) counts[relative(ROOT, r.filePath)] = n
 }
 
 if (writeMode) {
