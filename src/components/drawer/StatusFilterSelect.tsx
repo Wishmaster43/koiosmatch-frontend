@@ -55,6 +55,7 @@ interface HasStatus { statusId?: unknown; status?: unknown }
  * Exported so Settings' `DefaultStatusFilterPicker` can show the SAME guess it would
  * fall back to today, instead of a second, drifting copy of this heuristic.
  */
+// eslint-disable-next-line react-refresh/only-export-components -- shared heuristic consumed by Settings' DefaultStatusFilterPicker (one source, no drifting copy); HMR-nicety only
 export const isActiveValue = (v: unknown) => ['active', 'actief', 'open'].includes(String(v ?? '').toLowerCase())
 
 /**
@@ -114,6 +115,7 @@ export const STATUS_FILTER_ALL = 'all'
  * proposed a non-empty selection — the exact gap this predicate closes. Callers that don't
  * pass it keep the original behaviour (a status-less row only shows while nothing is selected).
  */
+// eslint-disable-next-line react-refresh/only-export-components -- the filter hook lives beside its trigger component by design (one seam); HMR-nicety only
 export function useStatusFilter<T>(
   rows: T[],
   statuses: LookupOption[],
@@ -197,25 +199,28 @@ export default function StatusFilterSelect({ value, onToggle, statuses, optionKe
       : t('common:filters.selectedCount', { count: value.length })
 
   return (
-    // TOOLBAR-WIDTH-1 (Danny 04-08 "kan wat smaller", again 09-08 "Alle statussen
-    // kan minder breed toch?") — it was narrowed twice by picking a smaller fixed
-    // number, which is why it kept coming back: a fixed width is either too wide
-    // for a short label or too narrow for a long one, and this component serves
-    // ~20 screens with different vocabularies. It now sizes to its OWN content,
-    // floored so it never becomes a cramped stub and capped so a long tenant label
-    // cannot push the search box out of the toolbar. The MENU keeps its own wider
-    // width below, so a long option stays legible even on a narrow trigger.
-    <div style={{ minWidth: 96, maxWidth: 180, flexShrink: 0 }}>
+    // TOOLBAR-WIDTH-1 → superseded (Danny 20-08, screenshot: "spacing tussen
+    // status en andere knopje is groter dan bij filter en nieuw"): the old
+    // minWidth 96 belonged to the CALM FIELD face, which filled its wrapper.
+    // The trio pill sizes to its own content, so leftover wrapper width rendered
+    // as phantom space beside the pill — the toolbar gap looked bigger than the
+    // Filter/Nieuw gaps in the sibling tabs. The wrapper now shrink-wraps; the
+    // MENU keeps its own width via SearchSelect below, so long options stay legible.
+    <div style={{ flexShrink: 0 }}>
       <SearchSelect options={options} selected={value} onToggle={onToggle} menuAlign="right" width={190}
         triggerLabel={label}
         // HUISSTIJL-1: the trio pill (§4 tint-vs-trio law) replaces the calm
         // bordered box — same toggle/aria-haspopup, only the face changes, so
         // every one of this component's ~9 consumers picks it up at once.
         renderTrigger={(toggleOpen: () => void) => (
+          // Zero-chrome wrapper: the visual identity is FilterTriggerPill inside;
+          // the button only carries click/aria. Block form: the style attr spans the tag.
+          /* eslint-disable huisstijlLegacy/no-restricted-syntax */
           <button type="button" onClick={toggleOpen} title={t('filters.statusFilter')} aria-haspopup="listbox"
             style={{ background: 'none', border: 'none', padding: 0 }}>
             <FilterTriggerPill label={t('filters.status')} count={value.length} />
           </button>
+          /* eslint-enable huisstijlLegacy/no-restricted-syntax */
         )} />
     </div>
   )

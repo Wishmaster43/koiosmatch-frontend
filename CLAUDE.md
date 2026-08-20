@@ -723,6 +723,12 @@ the code is worse than no rule, because the next reader builds on it. What is tr
   inline-styled `<a>` — navigation stays a real link (§6) while still sharing the one
   visual identity. A `<button>`/`<a>` with its own fill/border/height needs a written
   eslint-disable reason (a calendar-grid cell, 34px search-chrome, …) or it is drift.
+  **HERAUDIT-CADANS (Danny akkoord 20-08):** de huisstijl-lus is formeel gesloten;
+  heraudit per milestone, niet continu — de slagbomen/plafond bewaken continu.
+  **FACE-WISSEL-LES (20-08, StatusFilterSelect):** wie een component een nieuw
+  GEZICHT geeft (veld → pil), reviewt ook de WRAPPER-maten van het oude gezicht —
+  een minWidth die bij het oude face hoorde rendert bij een krimpend face als
+  spookruimte, en dat leest als inconsistente toolbar-spacing.
   **Een disable-reden is een NOODZAAK-reden (r7, 20-08):** een functionele
   uitzondering (kalendercel, zoekchrome, kleurdragende tint-actie zonder
   Button-tone) — nooit "buiten de scope van deze taak"; dan blijft de warning
