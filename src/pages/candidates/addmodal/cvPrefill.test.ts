@@ -44,6 +44,7 @@ describe('toIsoBirthDate', () => {
     expect(toIsoBirthDate('31-02-1990')).toBeNull()
     expect(toIsoBirthDate('1990-13-01')).toBeNull()
     expect(toIsoBirthDate('12-03-1885')).toBeNull()
+    // eslint-disable-next-line huisstijl/no-restricted-syntax -- DATA: a test birthdate, not a colour-alpha suffix
     expect(toIsoBirthDate(`12-03-${new Date().getFullYear() + 1}`)).toBeNull()
   })
 })

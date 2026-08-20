@@ -30,6 +30,7 @@ import SettingsChangelogButton from './components/SettingsChangelogButton'
 import SelectMenu from '@/components/ui/SelectMenu'
 import Button from '@/components/ui/Button'
 import { PageTitle } from '@/components/ui/typography'
+import { FIELD_HEIGHT, FIELD_FONT_SIZE } from '@/components/forms/fieldMetrics'
 
 // SM-MODULE-TABS-1: a nav item may declare `requiresModuleOrApp: { module, app }` to
 // stay visible when EITHER the tenant module OR the app/koppeling flag is on (a plain
@@ -239,11 +240,12 @@ export default function SettingsPage() {
           {currentGroup && (
             <div className="md:hidden" style={{ display: 'flex', gap: 8, marginBottom: 20 }}>
               <span id={categoryPickerLabelId} className="sr-only">{t('shell.categoryPicker')}</span>
+              {/* Canon (r8 MV-1/2): the picker reads FIELD metrics, the search button
+                  the md search-chrome size — the ad-hoc 38px pair is retired. */}
               <SelectMenu aria-labelledby={categoryPickerLabelId} value={category} onChange={selectCategory}
                 options={visibleGroups.map(g => ({ value: g.key, label: t(`groups.${g.key}`) }))}
-                style={{ flex: 1, height: 38, fontSize: 14 }} />
-              <Button variant="secondary" iconOnly onClick={() => setSearchOpen(true)} aria-label={t('shell.search')}
-                style={{ width: 38, height: 38 }}>
+                style={{ flex: 1, height: FIELD_HEIGHT, fontSize: FIELD_FONT_SIZE }} />
+              <Button variant="secondary" size="md" iconOnly onClick={() => setSearchOpen(true)} aria-label={t('shell.search')}>
                 <Search size={16} style={{ color: 'var(--text-muted)' }} />
               </Button>
             </div>

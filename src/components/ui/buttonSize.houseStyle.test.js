@@ -42,6 +42,9 @@ const MD_ALLOWLIST = {
   // Doc mention, not a render: buttonMetrics' own docblock NAMES size="md" while
   // defining BTN_H (the simple text count cannot tell prose from JSX).
   'src/config/buttonMetrics.ts': 1,
+  // r8 MV-1 fix: the mobile settings category row — the search button pairs with
+  // the FIELD_HEIGHT (34) picker beside it, the documented search-chrome case.
+  'src/pages/settings/SettingsPage.jsx': 1,
 }
 
 describe('Button size ratchet (maatwet)', () => {
@@ -130,6 +133,46 @@ describe('raw <button> height ratchet (maatwet)', () => {
       if (count === 0) continue
       const allowed = OFF_STANDARD_HEIGHT_ALLOWLIST[file.replace(/\\/g, '/')] ?? 0
       if (count > allowed) offenders.push(`${file}: ${count} off-standard raw-button heights (toegestaan: ${allowed})`)
+    }
+    expect(offenders, offenders.join('\n')).toEqual([])
+  })
+})
+
+// Third ratchet (r8 MV-1): Button's OWN height overridden through the style prop
+// — outside every selector (they only see raw <button> tags). Zero tolerance:
+// there is no legitimate reason to restyle Button's size through style; the size
+// comes from `size=`. The scanner walks the OPENING tag only (brace-depth aware,
+// so an onClick arrow or a following sibling never false-positives the window).
+function buttonOpeningTags(content) {
+  const tags = []
+  let i = content.indexOf('<Button')
+  while (i !== -1) {
+    // Skip <ButtonX…> lookalikes: next char must be whitespace, '>' or '/'.
+    const after = content[i + 7]
+    if (after && !/[\s/>]/.test(after)) { i = content.indexOf('<Button', i + 1); continue }
+    let depth = 0
+    let j = i
+    for (; j < content.length; j++) {
+      const ch = content[j]
+      if (ch === '{') depth++
+      else if (ch === '}') depth--
+      else if (ch === '>' && depth === 0) break
+    }
+    tags.push(content.slice(i, j))
+    i = content.indexOf('<Button', j)
+  }
+  return tags
+}
+
+describe('Button height-through-style ratchet (maatwet)', () => {
+  it('no <Button> opening tag carries a height in its style prop', () => {
+    const offenders = []
+    for (const file of walkSourceFiles(SRC_ROOT)) {
+      const content = readFileSync(file, 'utf8')
+      if (!content.includes('<Button')) continue
+      for (const tag of buttonOpeningTags(content)) {
+        if (/height:\s*[\dF]/.test(tag)) offenders.push(`${file}: ${tag.replace(/\s+/g, ' ').slice(0, 120)}`)
+      }
     }
     expect(offenders, offenders.join('\n')).toEqual([])
   })

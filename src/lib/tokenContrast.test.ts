@@ -78,6 +78,47 @@ describe('house token pairs stay readable (defaults, light theme)', () => {
     expect(ratio(token('color-on-danger-bg'), token('color-danger-bg'))).toBeGreaterThanOrEqual(4.5)
   })
 
+  // The full on-*-bg family, BOTH themes (r8 CONTRAST-1: CalloutBox titles wore
+  // the raw tokens at 2.4-3.95:1; loose "(gemeten X:1)" comments enforce nothing
+  // — this table does). Dark pastels are rgba() tints composited over the dark
+  // surface, so the maths mirrors the browser's.
+  it('every on-*-bg ink clears 4.5:1 on its pastel, light AND dark', () => {
+    const lastDef = (name: string): string => {
+      const all = [...css.matchAll(new RegExp(`--${name}:\\s*([^;]+);`, 'g'))]
+      if (!all.length) throw new Error(`token --${name} niet gevonden`)
+      return all[all.length - 1][1].trim()
+    }
+    const hex2rgb = (h: string): number[] => {
+      const n = parseInt(h.slice(1), 16)
+      return [(n >> 16) & 255, (n >> 8) & 255, n & 255]
+    }
+    const lumRgb = (rgb: number[]): number => {
+      const c = rgb.map(v => { const s = v / 255; return s <= 0.03928 ? s / 12.92 : Math.pow((s + 0.055) / 1.055, 2.4) })
+      return 0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2]
+    }
+    const ratioRgb = (a: number[], b: number[]): number => {
+      const la = lumRgb(a); const lb = lumRgb(b)
+      return (Math.max(la, lb) + 0.05) / (Math.min(la, lb) + 0.05)
+    }
+    // rgba(r, g, b, a) composited over a ground; plain hex passes through.
+    const composite = (value: string, ground: number[]): number[] => {
+      const m = value.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*([\d.]+))?\)/)
+      if (!m) return hex2rgb(value)
+      const a = m[4] === undefined ? 1 : Number(m[4])
+      return [Number(m[1]), Number(m[2]), Number(m[3])].map((v, i) => a * v + (1 - a) * ground[i])
+    }
+    // eslint-disable-next-line no-restricted-syntax -- DATA: the dark surface fixture this table composites over
+    const darkSurface = hex2rgb('#1C1C2E')
+    for (const v of ['success', 'warning', 'info', 'danger']) {
+      // Light: first definitions.
+      const light = ratioRgb(hex2rgb(token(`color-on-${v}-bg`)), composite(token(`color-${v}-bg`), [255, 255, 255]))
+      expect(light, `on-${v}-bg licht`).toBeGreaterThanOrEqual(4.5)
+      // Dark: last definitions, tint composited over the dark surface.
+      const dark = ratioRgb(hex2rgb(lastDef(`color-on-${v}-bg`)), composite(lastDef(`color-${v}-bg`), darkSurface))
+      expect(dark, `on-${v}-bg donker`).toBeGreaterThanOrEqual(4.5)
+    }
+  })
+
   // The INVERTED count badge (CountBadge: bg --button-ink ≙ on-accent, text
   // --button-fill ≙ primary). Herhaal-audit r4: a hand-painted copy paired the
   // dark fill with ANOTHER dark token at 2.52:1 — this pins the real pair.

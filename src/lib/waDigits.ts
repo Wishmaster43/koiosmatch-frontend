@@ -10,6 +10,7 @@
  */
 export function waDigits(phone: string): string {
   const digits = phone.replace(/\D/g, '')
+  // eslint-disable-next-line huisstijl/no-restricted-syntax -- DATA: the NL country code prefix, not a colour-alpha suffix
   const withCountryCode = digits.startsWith('0') ? `31${digits.slice(1)}` : digits
   return withCountryCode.length >= 8 ? withCountryCode : ''
 }

@@ -65,6 +65,8 @@ import FloatingPanel from '@/components/ui/FloatingPanel'
 import { cardHead, cardBox } from '@/components/ui/modalCards'
 import Button from '@/components/ui/Button'
 import type { ShiftInput } from '@/types/planning'
+import { tint } from '@/lib/tint'
+import { Caption, SectionTitle } from '@/components/ui/typography'
 
 // ── Field helpers — house footprint (padding '8px 11px', fontSize 13,
 // borderRadius 8, §3A/§4) so this modal's inputs match every other create form,
@@ -149,9 +151,9 @@ export default function AddShiftModal({ date, onClose, onAdd }: { date: Date; on
               text, so opening this modal directly (without seeing PlanningPage's own
               banner) still tells the truth about what Save does right now. */}
           <div style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '6px 20px',
-            background: 'color-mix(in srgb, var(--text-muted) 8%, transparent)', flexShrink: 0 }}>
+            background: tint('var(--text-muted)', 8), flexShrink: 0 }}>
             <Info size={12} style={{ color: 'var(--text-muted)', flexShrink: 0 }} aria-hidden="true" />
-            <span style={{ fontSize: 11, fontStyle: 'italic', color: 'var(--text-muted)' }}>{t('previewNotice')}</span>
+            <Caption style={{ fontStyle: 'italic' }}>{t('previewNotice')}</Caption>
           </div>
 
           {/* Body: 3 kolommen */}
@@ -216,11 +218,13 @@ export default function AddShiftModal({ date, onClose, onAdd }: { date: Date; on
                         value itself isn't meaningful to a screen reader, so number them.
                         HUISSTIJL-1: left hand-styled — each swatch's fill IS the picked
                         colour value (data), not a Button identity. */}
+                    {/* eslint-disable huisstijlLegacy/no-restricted-syntax */}
                     {COLORS.map((c, i) => (
                       <button key={c} type="button" onClick={() => setColor(c)} aria-label={`${t('sectionColor')} ${i + 1}`}
                         style={{ width: 20, height: 20, borderRadius: '50%', background: c, border: 'none',
                           cursor: 'pointer', outline: color === c ? `2px solid ${c}` : 'none', outlineOffset: 2 }} />
                     ))}
+                    {/* eslint-enable huisstijlLegacy/no-restricted-syntax */}
                   </div>
                 </div>
               </div>
@@ -276,12 +280,12 @@ export default function AddShiftModal({ date, onClose, onAdd }: { date: Date; on
                 <div style={cardBox}>
                   {candidate ? (
                     <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 14px',
-                      border: `1px solid ${colorFor(getInitials(candidate.name))}40`, borderLeft: `4px solid ${colorFor(getInitials(candidate.name))}`,
+                      border: `1px solid ${tint(colorFor(getInitials(candidate.name)), 25)}`, borderLeft: `4px solid ${colorFor(getInitials(candidate.name))}`,
                       borderRadius: 8, background: 'var(--bg)' }}>
                       <Avatar initials={getInitials(candidate.name)} />
                       <div style={{ flex: 1 }}>
-                        <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)' }}>{candidate.name}</div>
-                        {candidate.functionTitle && <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>{candidate.functionTitle}</div>}
+                        <SectionTitle as="div">{candidate.name}</SectionTitle>
+                        {candidate.functionTitle && <Caption as="div">{candidate.functionTitle}</Caption>}
                       </div>
                       <Button variant="ghost" iconOnly size="sm" onClick={() => setCandidate(null)} aria-label={t('common:cancel')}>
                         <X size={14} />

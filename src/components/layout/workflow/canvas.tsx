@@ -17,6 +17,7 @@ import { NODE_W, NODE_H, countEdgeFilterConditions } from './serialization'
 import { EdgeAddContext, EdgeDeleteContext, EdgeFilterContext, NodeRunContext, StartContext } from './contexts'
 import OutputTree from './OutputTree'
 import type { FlowNodeData, EdgeFilters } from '@/types/workflow'
+import { tint } from '@/lib/tint'
 
 // ── Custom node ───────────────────────────────────────────────────────────────
 
@@ -36,7 +37,10 @@ function ModuleNode({ id, data, selected }: { id: string; data: FlowNodeData; se
   // the step becomes invisible/uneditable. --module-neutral (index.css) instead of
   // raw hex, so the fallback swatch stays theme-aware too.
   const meta = knownMeta
-    ?? { label: rawType ?? '', Icon: HelpCircle, color: 'var(--module-neutral)', bg: 'color-mix(in srgb, var(--module-neutral) 8%, transparent)', category: 'Overig' }
+    ?? { label: rawType ?? '', Icon: HelpCircle, color: 'var(--module-neutral)', bg: tint('var(--module-neutral)', 8), category: 'Overig' }
+  // nodeColor is TOTAL: a registry entry may omit color, and the old hex-concat
+  // silently rendered "undefined40" for such a module (r8).
+  const nodeColor = meta.color ?? 'var(--color-primary)'
   // The registry types Icon narrowly (size only); lucide icons also take `color`.
   const Icon = meta.Icon as unknown as LucideIcon
   // Node label — translated via the shared `modules.*` keys (§5), same mechanism
@@ -119,7 +123,7 @@ function ModuleNode({ id, data, selected }: { id: string; data: FlowNodeData; se
           title={t('canvas.dragStart')} aria-label={t('canvas.dragStart')}
           style={{
             position: 'absolute', top: -14, left: '50%', transform: 'translateX(-50%)',
-            background: 'var(--color-primary)', color: 'var(--color-on-accent)',
+            background: 'var(--button-fill)', color: 'var(--button-ink)',
             fontSize: 9, fontWeight: 700, letterSpacing: '0.05em',
             padding: '2px 8px', borderRadius: 999, whiteSpace: 'nowrap',
             cursor: 'grab', zIndex: 5,
@@ -176,15 +180,17 @@ function ModuleNode({ id, data, selected }: { id: string; data: FlowNodeData; se
         <div style={{
           width: 72, height: 72, borderRadius: '50%',
           background: meta.bg,
+          // nodeColor is TOTAL: meta.color is optional, and the old hex-concat
+          // silently rendered "undefined40" for a module without a colour (r8).
           border: failed ? '3px solid var(--color-danger)' : done ? '3px solid var(--color-success)'
-            : data.isRunning ? `3px solid ${meta.color}` : selected ? `3px solid ${meta.color}` : `2px solid ${meta.color}40`,
+            : data.isRunning ? `3px solid ${nodeColor}` : selected ? `3px solid ${nodeColor}` : `2px solid ${tint(nodeColor, 25)}`,
           display: 'flex', alignItems: 'center', justifyContent: 'center',
           // HUISSTIJL-1: failed/done/running/selected are semantic STATUS rings (none of
           // card/float/modal), kept as-is; only the true resting state maps to shadow-card.
           boxShadow: failed ? '0 0 0 4px var(--color-danger-bg)' : done ? '0 0 0 4px var(--color-success-bg)'
             : data.isRunning
-            ? `0 0 0 6px ${meta.color}30, 0 0 20px ${meta.color}50`
-            : selected ? `0 0 0 4px ${meta.color}20` : 'var(--shadow-card)',
+            ? `0 0 0 6px ${tint(nodeColor, 19)}, 0 0 20px ${tint(nodeColor, 31)}`
+            : selected ? `0 0 0 4px ${tint(nodeColor, 13)}` : 'var(--shadow-card)',
           transition: 'border 0.2s, box-shadow 0.2s',
           cursor: 'pointer', flexShrink: 0,
           animation: data.isRunning ? 'nodePulse 1s ease-in-out infinite' : 'none',
@@ -195,6 +201,7 @@ function ModuleNode({ id, data, selected }: { id: string; data: FlowNodeData; se
         <button
           onClick={handleRun}
           title={t('canvas.runModule')} aria-label={t('canvas.runModule')}
+          // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- 22px circular canvas-node run control riding the node's own colour; Button's square sm would not fit the node corner
           style={{
             position: 'absolute', bottom: -2, right: -2,
             width: 22, height: 22, borderRadius: '50%',
@@ -203,6 +210,7 @@ function ModuleNode({ id, data, selected }: { id: string; data: FlowNodeData; se
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             cursor: 'pointer', color: meta.color,
             // HUISSTIJL-1: tiny circular icon-button shadow, none of card/float/modal — kept.
+            // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- status-ring-class micro shadow on a 22px canvas control
             boxShadow: '0 1px 4px rgba(0,0,0,0.15)',
           }}
         >
@@ -261,6 +269,7 @@ export function OutputPanel({ output, onClose }: { output?: unknown; onClose: ()
       }} onClick={e => e.stopPropagation()}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 20px', borderBottom: '1px solid var(--border)' }}>
           <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--text)' }}>{t('canvas.outputTitle')} — {Array.isArray(output) ? t('canvas.records', { n: output.length }) : t('canvas.response')}</div>
+          {/* eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- bare close glyph in the output panel header, not a Button copy */}
           <button onClick={onClose} aria-label={t('common:close')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)' }}><X size={16} /></button>
         </div>
         <div style={{ flex: 1, overflowY: 'auto', padding: 16 }}>
@@ -313,8 +322,12 @@ function AddableEdge({ id, sourceX, sourceY, targetX, targetY, selected, data }:
               {t('canvas.filterCount', { count: filterCount })}
             </div>
           )}
-          {/* HUISSTIJL-1: these three tiny edge-action buttons (add/filter/delete) carry a
-              small circular icon-button shadow, none of card/float/modal — kept as-is. */}
+          {/* HUISSTIJL-1: these three tiny 22px circular edge-action buttons
+              (add/filter/delete) are canvas chrome riding the edge midpoint —
+              Button's square sm would not fit; their micro shadow is the
+              status-ring class, none of card/float/modal. Block form: the style
+              attributes span the tags. */}
+          {/* eslint-disable huisstijlLegacy/no-restricted-syntax */}
           <button onClick={() => onAdd && onAdd(id)} title={t('editor.addModule')} aria-label={t('editor.addModule')}
             style={{ width: 22, height: 22, borderRadius: '50%', background: 'var(--surface)', border: '1.5px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: 'var(--text-muted)', boxShadow: '0 1px 4px rgba(0,0,0,0.1)' }}
             onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--color-primary)'; e.currentTarget.style.color = 'var(--color-primary)' }}
@@ -333,6 +346,7 @@ function AddableEdge({ id, sourceX, sourceY, targetX, targetY, selected, data }:
             onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--border)'; e.currentTarget.style.color = 'var(--text-muted)' }}>
             <X size={11} />
           </button>
+          {/* eslint-enable huisstijlLegacy/no-restricted-syntax */}
         </div>
       </EdgeLabelRenderer>
     </>
@@ -340,5 +354,6 @@ function AddableEdge({ id, sourceX, sourceY, targetX, targetY, selected, data }:
 }
 
 // nodeTypes/edgeTypes must be stable (module-level) to prevent React Flow remounts
+/* eslint-disable react-refresh/only-export-components -- ReactFlow REQUIRES stable module-level type maps beside the node/edge components; HMR-nicety only */
 export const NODE_TYPES = { module: ModuleNode }
 export const EDGE_TYPES = { addable: AddableEdge }

@@ -123,6 +123,18 @@ export default defineConfig([
         message: "HUISSTIJL: hex-concat tint (colour + 'XX') breaks on tenant tokens, ongeacht het suffix — use tintBg/tintBorder/chipInk from lib/tint.",
       },
       {
+        // Same rule, template-literal form (r8 V1: `${color}40` has no '+', so the
+        // BinaryExpression selector never saw it). SHAPE (probed): a quasi that
+        // starts with a DIGIT pair followed by a non-alphanumeric — the hex-letter
+        // form ("ed…"/"ad…") false-fired on every word starting with two hex
+        // letters, and requiring non-alphanumeric spares "20px"-style quasis.
+        // Letter-pair alphas (`${c}CC`) escape this net; the ceiling still counts
+        // them the day any selector sees them. cvStyles/CvHtmlPreview carry the
+        // react-pdf/PDF-mirror file exceptions.
+        selector: "TemplateLiteral > TemplateElement[value.raw=/^[0-9]{2}([^0-9A-Za-z]|$)/]",
+        message: "HUISSTIJL: hex-suffix tint in een template (`${kleur}40`) breekt op tenant-tokens — use tint/tintBg/tintBorder from lib/tint.",
+      },
+      {
         // Z-index literals outside the ladder: stacking inversions only show with
         // two surfaces open at once (the toast-behind-datepicker class). Numeric
         // form — an esquery /regex/ only matches STRING literals, so `zIndex: 200`

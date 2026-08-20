@@ -5,6 +5,10 @@
  * translate fn; it is pulled out of CvTemplateSettings so the settings screen
  * stays a thin composer and this always-light document markup lives in one place.
  */
+/* eslint-disable huisstijl/no-restricted-syntax, huisstijlLegacy/no-restricted-syntax -- live HTML mirror of the PDF:
+   it reproduces cvStyles' hex+alpha palette byte-for-byte (react-pdf renders no
+   color-mix, and the preview must match the PDF exactly), and the colours are
+   guaranteed hex data — the one context where hex-suffix tints are safe. */
 import { groupCvSections } from '@/pages/candidates/CandidateCvTemplate'
 import { paletteFor } from '@/pages/candidates/cv/cvStyles'
 import { PREVIEW_CANDIDATE } from './previewCandidate'
