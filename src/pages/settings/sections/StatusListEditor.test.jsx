@@ -97,6 +97,7 @@ describe('StatusListEditor — defaultField singleton', () => {
 // SECOND SINGLETON (04-08): two independent defaultFields, each its own marker/undo,
 // promoting/clearing one never touches the other's flag on the same row.
 describe('StatusListEditor — multiple independent defaultFields', () => {
+  // eslint-disable-next-line no-restricted-syntax -- DATA: a fixture type's tenant-picked colour, not a style rule.
   const twoFlagType = (over = {}) => ({ id: 't1', name: 'Intake', color: '#3B8FD4', is_default: false, is_default_for_application: false, ...over })
 
   it('promoting one singleton PUTs only its own key, leaving the other singleton untouched', async () => {
@@ -168,6 +169,21 @@ describe('StatusListEditor — multiple independent flagFields', () => {
 
     await waitFor(() => expect(api.put).toHaveBeenCalledWith('/opportunity-stages/s1',
       expect.objectContaining({ is_won: true, is_lost: false })))
+  })
+})
+
+// HUISSTIJL herhaal-audit r6 (aria-label regression): the delete icon Button
+// must expose an accessible name in its non-in-use state — a name derived
+// only from a conditional `title` (undefined when not in_use) would leave
+// the control unlabelled for assistive tech and fail the Button iconOnly
+// discriminated-union flip that requires aria-label on every iconOnly Button.
+describe('StatusListEditor — delete button accessible name', () => {
+  it('exposes an accessible name on the not-in-use delete button', async () => {
+    api.get.mockResolvedValue({ data: [type({ id: 't1', name: 'Intake', in_use: false })] })
+    render(<StatusListEditor title="Fasen" subtitle="" endpoint="/phases" addLabel="Fase toevoegen" />)
+
+    await screen.findByText('Intake')
+    expect(screen.getByRole('button', { name: st('delete', { ns: 'common' }) })).toBeInTheDocument()
   })
 })
 

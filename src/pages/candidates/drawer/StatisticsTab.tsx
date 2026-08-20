@@ -1,7 +1,8 @@
 import { useEffect, useState, type ComponentType } from 'react'
 import { useTranslation } from 'react-i18next'
 import StatsTabJs from '@/components/drawer/tabs/StatsTab'
-import SectionCard, { sectionTitle } from '@/components/ui/SectionCard'
+import SectionCard from '@/components/ui/SectionCard'
+import { GroupLabel } from '@/components/ui/typography'
 import { useDateFormat } from '@/lib/datetime'
 import api, { unwrapList } from '@/lib/api'
 import { useCandidateNotes } from '@/pages/candidates/hooks/useCandidateNotes'
@@ -79,12 +80,13 @@ export default function StatisticsTab({ c, onJump }: { c: Candidate; onJump?: (t
           (an empty group list would say "no outcomes" of a candidate who never applied). */}
       {stats.applicationsByOutcome.length > 0 && (
         <div>
-          <div style={sectionTitle}>{t('statistics.byOutcome')}</div>
+          <GroupLabel style={{ letterSpacing: '0.04em' }}>{t('statistics.byOutcome')}</GroupLabel>
           <SectionCard>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
               {stats.applicationsByOutcome.map(b => (
                 <div key={b.key} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: 12 }}>
                   <span style={{ display: 'flex', alignItems: 'center', gap: 8, color: 'var(--text)' }}>
+                    {/* eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- an 8px legend-dot marker in the outcome's own DATA colour, not a button fill */}
                     <span style={{ width: 8, height: 8, borderRadius: '50%', background: b.color ?? 'var(--color-primary)', flexShrink: 0 }} />
                     {b.label}
                   </span>
@@ -99,7 +101,7 @@ export default function StatisticsTab({ c, onJump }: { c: Candidate; onJump?: (t
       {/* Intakes/appointments — only once the side-load resolved with real rows. */}
       {stats.appointments && (
         <div>
-          <div style={sectionTitle}>{t('statistics.appointments')}</div>
+          <GroupLabel style={{ letterSpacing: '0.04em' }}>{t('statistics.appointments')}</GroupLabel>
           <SectionCard>
             <div style={{ display: 'flex', gap: 16, fontSize: 12 }}>
               <span style={{ fontFamily: 'var(--font-mono, "JetBrains Mono", monospace)', color: 'var(--text)' }}>{stats.appointments.total}</span>
@@ -114,7 +116,7 @@ export default function StatisticsTab({ c, onJump }: { c: Candidate; onJump?: (t
       {/* Notes count + last contact — each half renders only when its own source exists. */}
       {(stats.notesCount !== null || stats.lastContactAt) && (
         <div>
-          <div style={sectionTitle}>{t('statistics.notes')}</div>
+          <GroupLabel style={{ letterSpacing: '0.04em' }}>{t('statistics.notes')}</GroupLabel>
           <SectionCard>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 6, fontSize: 12 }}>
               {stats.notesCount !== null && (
@@ -133,7 +135,7 @@ export default function StatisticsTab({ c, onJump }: { c: Candidate; onJump?: (t
       {/* Days since creation / last phase change — each line only when its own source date exists. */}
       {(stats.daysSinceCreated !== null || stats.daysSincePhaseChange !== null) && (
         <div>
-          <div style={sectionTitle}>{t('statistics.timeline')}</div>
+          <GroupLabel style={{ letterSpacing: '0.04em' }}>{t('statistics.timeline')}</GroupLabel>
           <SectionCard>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 6, fontSize: 12, color: 'var(--text-muted)' }}>
               {stats.daysSinceCreated !== null && <div>{t('statistics.daysSinceCreated', { count: stats.daysSinceCreated })}</div>}

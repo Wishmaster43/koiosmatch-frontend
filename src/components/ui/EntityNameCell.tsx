@@ -9,6 +9,7 @@
  */
 import type { CSSProperties } from 'react'
 import Avatar from './Avatar'
+import { Caption } from './typography'
 import { initialsOf } from '@/lib/initials'
 
 // The app-wide "missing value" marker (mapOpportunity/mapTask/…) — never render
@@ -38,7 +39,7 @@ export default function EntityNameCell({ name, initials, photo, color, size = 20
           whiteSpace: 'nowrap', display: 'block', maxWidth, ...textStyle }}>
         {name}
       </span>
-      {!!extra && <span style={{ fontSize: 11, color: 'var(--text-muted)', flexShrink: 0 }}>+{extra}</span>}
+      {!!extra && <Caption style={{ flexShrink: 0 }}>+{extra}</Caption>}
     </span>
   )
 }

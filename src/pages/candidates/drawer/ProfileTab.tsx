@@ -81,15 +81,15 @@ export default function ProfileTab({ c, onEditSave, autoEditSignal, onContactMom
   const blockStyle: CSSProperties = { borderRadius: 10, overflow: 'hidden', border: '1px solid var(--border)', background: 'var(--surface)' }
   const editControls = (isEditing: boolean, onSave: () => void, onCancel: () => void, onStart: () => void) => isEditing ? (
     <div style={{ display: 'flex', gap: 4 }}>
-      <Button variant="primary" size="sm" iconOnly onClick={onSave} title={t('common:save')}>
+      <Button variant="primary" size="sm" iconOnly onClick={onSave} title={t('common:save')} aria-label={t('common:save')}>
         <Save size={13} />
       </Button>
-      <Button variant="secondary" size="sm" iconOnly onClick={onCancel} title={t('common:cancel')}>
+      <Button variant="secondary" size="sm" iconOnly onClick={onCancel} title={t('common:cancel')} aria-label={t('common:cancel')}>
         <X size={13} />
       </Button>
     </div>
   ) : (
-    <Button variant="secondary" size="sm" iconOnly onClick={onStart} title={t('common:edit')}>
+    <Button variant="secondary" size="sm" iconOnly onClick={onStart} title={t('common:edit')} aria-label={t('common:edit')}>
       <Edit2 size={13} />
     </Button>
   )
@@ -124,6 +124,7 @@ export default function ProfileTab({ c, onEditSave, autoEditSignal, onContactMom
                 (needs a danger-tinted bg/border) — left as its own bespoke style. */}
             {summaryEditing && (
               <button onClick={() => changeSummary('')} title={t('profile.clear')} aria-label={t('profile.clear')}
+                // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- bespoke neutral-border/danger-icon hybrid, matches neither secondary nor dangerSoft (see comment above)
                 style={{ ...iconBtn, width: 28, height: 28, background: 'none', color: 'var(--color-danger)', border: '1px solid var(--border)' }}>
                 <Trash2 size={13} />
               </button>

@@ -17,6 +17,7 @@ import { GroupLabel } from '@/components/ui/typography'
 
 // Shared input styling for text/date/combobox controls across all three tabs
 // (G33/fieldMetrics canon — was its own padding-7/font-12/radius-6 copy).
+// eslint-disable-next-line react-refresh/only-export-components -- a style constant re-export alongside this file's components; HMR-nicety warning only
 export const inputStyle: CSSProperties = fieldInputStyle
 
 const blockStyle: CSSProperties = { borderRadius: 10, overflow: 'hidden', border: '1px solid var(--border)', background: 'var(--surface)' }
@@ -69,16 +70,16 @@ export function EditControls({ editing, onSave, onCancel, onStart }: {
 }) {
   const { t } = useTranslation('candidates')
   if (!editing) return (
-    <Button variant="secondary" size="sm" iconOnly onClick={onStart} title={t('common:edit')}>
+    <Button variant="secondary" size="sm" iconOnly onClick={onStart} title={t('common:edit')} aria-label={t('common:edit')}>
       <Edit2 size={13} />
     </Button>
   )
   return (
     <div style={{ display: 'flex', gap: 4 }}>
-      <Button variant="primary" size="sm" iconOnly onClick={onSave} title={t('common:save')}>
+      <Button variant="primary" size="sm" iconOnly onClick={onSave} title={t('common:save')} aria-label={t('common:save')}>
         <Save size={13} />
       </Button>
-      <Button variant="secondary" size="sm" iconOnly onClick={onCancel} title={t('common:cancel')}>
+      <Button variant="secondary" size="sm" iconOnly onClick={onCancel} title={t('common:cancel')} aria-label={t('common:cancel')}>
         <X size={13} />
       </Button>
     </div>

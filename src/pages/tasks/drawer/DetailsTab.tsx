@@ -7,7 +7,7 @@ import Avatar from '@/components/ui/Avatar'
 import SoftChip from '@/components/ui/SoftChip'
 import RichTextEditor from '@/components/ui/RichTextEditor'
 import SafeHtml from '@/components/ui/SafeHtml'
-import { sectionTitle } from '@/components/ui/SectionCard'
+import { GroupLabel } from '@/components/ui/typography'
 import KoiosAdviceBlock from '@/components/ai/KoiosAdviceBlock'
 import { useTaskAdvice } from '@/lib/useTaskAdvice'
 import { adviceInsightRows } from '@/lib/koiosAdviceInsight'
@@ -150,7 +150,7 @@ export default function DetailsTab({ task, onUpdate, onSubtaskCreated }: {
       <div>
         {/* Header with the edit toggle for the classification/scheduling/assignee block */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
-          <span style={sectionTitle}>{t('details.title')}</span>
+          <GroupLabel as="span" style={{ letterSpacing: '0.04em' }}>{t('details.title')}</GroupLabel>
           {editing ? (
             <EditControls onSave={save} onCancel={() => setEditing(false)} saveLabel={t('comments.send')} cancelLabel={t('modal.cancel')} />
           ) : !task.archived && (
@@ -227,7 +227,7 @@ export default function DetailsTab({ task, onUpdate, onSubtaskCreated }: {
         {/* Description — free-text rich block, own pencil (§3A: every prose field gets
             its own save/cancel, never bundled with the short fields above). */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
-          <span style={sectionTitle}>{t('details.description')}</span>
+          <GroupLabel as="span" style={{ letterSpacing: '0.04em' }}>{t('details.description')}</GroupLabel>
           {descEditing ? (
             <EditControls onSave={saveDesc} onCancel={cancelDesc} saveLabel={t('comments.send')} cancelLabel={t('modal.cancel')} />
           ) : !task.archived && (

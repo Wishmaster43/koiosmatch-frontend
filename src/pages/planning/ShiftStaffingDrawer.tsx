@@ -17,6 +17,8 @@ import FloatingPanel from '@/components/ui/FloatingPanel'
 import CreatableSelect from '@/components/ui/CreatableSelect'
 import { cardHead, cardBox } from '@/components/ui/modalCards'
 import Button from '@/components/ui/Button'
+import { Caption } from '@/components/ui/typography'
+import { tintBg } from '@/lib/tint'
 import { useDateFormat } from '@/lib/datetime'
 import { extractApiError } from '@/lib/extractApiError'
 import { useShiftEligibleCandidates, usePlanningCancellationReasons, useShiftStaffingMutations } from './hooks/useShiftStaffing'
@@ -116,16 +118,18 @@ export default function ShiftStaffingDrawer({ shift, onClose }: Props) {
               <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                 <span style={{ flex: 1, fontSize: 13, color: 'var(--text)' }}>{a.candidate || '—'}</span>
                 {a.status && a.status !== 'scheduled' && (
-                  <span style={{ fontSize: 11, padding: '2px 8px', borderRadius: 20,
-                    background: 'color-mix(in srgb, var(--text-muted) 12%, transparent)', color: 'var(--text-muted)' }}>
+                  <span
+                    // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- soft-tint status pill (§4 chip convention), not a Caption/label copy
+                    style={{ fontSize: 11, padding: '2px 8px', borderRadius: 20,
+                      background: tintBg('var(--text-muted)'), color: 'var(--text-muted)' }}>
                     {a.status}
                   </span>
                 )}
                 {a.status !== 'cancelled' && a.status !== 'no_show' && a.status !== 'completed' && (
                   <>
-                    <Button variant="secondary" iconOnly size="sm" onClick={() => startCheckout(a.scheduleId)} title={t('staffing.checkout')}><LogOut size={13} /></Button>
-                    <Button variant="secondary" iconOnly size="sm" onClick={() => startCancel(a.scheduleId)} title={t('staffing.cancel')}><Ban size={13} /></Button>
-                    <Button variant="secondary" iconOnly size="sm" onClick={() => handleUnassign(a.scheduleId)} title={t('staffing.unassign')}
+                    <Button variant="secondary" iconOnly size="sm" onClick={() => startCheckout(a.scheduleId)} title={t('staffing.checkout')} aria-label={t('staffing.checkout')}><LogOut size={13} /></Button>
+                    <Button variant="secondary" iconOnly size="sm" onClick={() => startCancel(a.scheduleId)} title={t('staffing.cancel')} aria-label={t('staffing.cancel')}><Ban size={13} /></Button>
+                    <Button variant="secondary" iconOnly size="sm" onClick={() => handleUnassign(a.scheduleId)} title={t('staffing.unassign')} aria-label={t('staffing.unassign')}
                       disabled={unassign.isPending}><UserMinus size={13} /></Button>
                   </>
                 )}
@@ -150,21 +154,21 @@ export default function ShiftStaffingDrawer({ shift, onClose }: Props) {
                   straight from the server response, never computed here (§ house rule). */}
               {checkingOut === a.scheduleId && (
                 <div style={{ display: 'flex', gap: 8, marginTop: 8, alignItems: 'flex-end', flexWrap: 'wrap' }}>
-                  <label style={{ fontSize: 11, color: 'var(--text-muted)' }}>
+                  <Caption as="label">
                     {t('staffing.actualStart')}
                     <input type="datetime-local" style={{ ...INPUT, marginTop: 3 }}
                       value={actualStart.slice(0, 16)} onChange={e => setActualStart(e.target.value)} />
-                  </label>
-                  <label style={{ fontSize: 11, color: 'var(--text-muted)' }}>
+                  </Caption>
+                  <Caption as="label">
                     {t('staffing.actualEnd')}
                     <input type="datetime-local" style={{ ...INPUT, marginTop: 3 }}
                       value={actualEnd.slice(0, 16)} onChange={e => setActualEnd(e.target.value)} />
-                  </label>
-                  <label style={{ fontSize: 11, color: 'var(--text-muted)', width: 90 }}>
+                  </Caption>
+                  <Caption as="label" style={{ width: 90 }}>
                     {t('staffing.actualBreak')}
                     <input type="number" min={0} style={{ ...INPUT, marginTop: 3 }}
                       value={actualBreak} onChange={e => setActualBreak(e.target.value)} />
-                  </label>
+                  </Caption>
                   <Button variant="primary" onClick={() => submitCheckout(a.scheduleId)} disabled={!actualStart || !actualEnd || checkout.isPending}>
                     <Check size={13} /> {t('staffing.confirmCheckout')}
                   </Button>
@@ -197,7 +201,7 @@ export default function ShiftStaffingDrawer({ shift, onClose }: Props) {
               {c.favourite && <Star size={13} style={{ color: 'var(--color-warning)', flexShrink: 0 }} fill="var(--color-warning)" aria-label={t('staffing.favourite')} />}
               <div style={{ flex: 1, minWidth: 0 }}>
                 <div style={{ fontSize: 13, color: 'var(--text)' }}>{c.firstName} {c.lastName}</div>
-                {c.reason && <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>{c.reason}</div>}
+                {c.reason && <Caption as="div">{c.reason}</Caption>}
               </div>
               <Button variant="primary" onClick={() => handleAssign(c.id)} disabled={assign.isPending}>
                 {t('staffing.assign')}

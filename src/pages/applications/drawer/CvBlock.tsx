@@ -3,17 +3,15 @@ import { useTranslation } from 'react-i18next'
 import { Download, Eye } from 'lucide-react'
 import { useDateFormat } from '@/lib/datetime'
 import DocPreviewModal from '@/components/drawer/DocPreviewModal'
-import { sectionTitle } from '@/components/ui/SectionCard'
-import { Caption } from '@/components/ui/typography'
+import { Caption, GroupLabel } from '@/components/ui/typography'
+import Button from '@/components/ui/Button'
 import { useCandidateCvDocument } from '../hooks/useCandidateCvDocument'
 import type { Id } from '@/types/common'
 
-// Icon-only action button (and the matching anchor variant for the download
-// link) — one shared visual so download/preview read as a pair, mirroring the
-// candidate Documents section's own row actions.
-const iconBtn = { width: 26, height: 26, display: 'flex', alignItems: 'center', justifyContent: 'center',
-  borderRadius: 6, cursor: 'pointer', color: 'var(--text-muted)', background: 'none',
-  border: 'none', textDecoration: 'none', flexShrink: 0 } as const
+// Disabled-look footprint for the non-interactive placeholder span when the
+// record carries no file url — the real download/preview actions are Button.
+const iconBtnDisabled = { width: 26, height: 26, display: 'flex', alignItems: 'center', justifyContent: 'center',
+  borderRadius: 6, color: 'var(--text-muted)', flexShrink: 0 } as const
 
 /**
  * CvBlock — S31 (refined 25-07, Danny: "ja/nee" told him nothing — he wants to
@@ -42,10 +40,10 @@ export default function CvBlock({ candidateId }: { candidateId: Id | null | unde
 
   return (
     <div>
-      {/* Canon (05-08): the shared sectionTitle, reused instead of a hand-rolled copy. */}
-      <div style={{ ...sectionTitle, marginBottom: 6 }}>
+      {/* Canon (05-08): the shared GroupLabel atom, reused instead of a hand-rolled copy. */}
+      <GroupLabel style={{ letterSpacing: '0.04em', marginBottom: 6 }}>
         {t('drawer.cv.title')}
-      </div>
+      </GroupLabel>
       {loading && <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{t('drawer.cv.loading')}</div>}
       {!loading && error && <div style={{ fontSize: 12, color: 'var(--color-danger)' }}>{t('drawer.cv.error')}</div>}
       {!loading && !error && (
@@ -68,16 +66,16 @@ export default function CvBlock({ candidateId }: { candidateId: Id | null | unde
                   Documents preview modal already uses (the one download pattern in
                   the app); disabled look when the record carries no file url. */}
               {fileUrl ? (
-                <a href={fileUrl} download={cv.name} target="_blank" rel="noopener noreferrer"
-                  title={t('drawer.cv.download')} aria-label={t('drawer.cv.download')} style={iconBtn}>
+                <Button variant="ghost" iconOnly size="sm" href={fileUrl} download={cv.name} target="_blank" rel="noopener noreferrer"
+                  title={t('drawer.cv.download')} aria-label={t('drawer.cv.download')}>
                   <Download size={14} />
-                </a>
+                </Button>
               ) : (
-                <span aria-hidden="true" style={{ ...iconBtn, opacity: 0.4, cursor: 'default' }}><Download size={14} /></span>
+                <span aria-hidden="true" style={{ ...iconBtnDisabled, opacity: 0.4 }}><Download size={14} /></span>
               )}
-              <button onClick={() => setPreviewOpen(true)} title={t('drawer.cv.view')} aria-label={t('drawer.cv.view')} style={iconBtn}>
+              <Button variant="ghost" iconOnly size="sm" onClick={() => setPreviewOpen(true)} title={t('drawer.cv.view')} aria-label={t('drawer.cv.view')}>
                 <Eye size={14} />
-              </button>
+              </Button>
             </>
           ) : (
             <span style={{ fontSize: 12, color: 'var(--text-muted)', fontStyle: 'italic' }}>{t('drawer.cv.none')}</span>

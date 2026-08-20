@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
-import { CalendarPlus, Search } from 'lucide-react'
+import { CalendarPlus, Search, ChevronLeft, ChevronRight } from 'lucide-react'
 import Avatar from '@/components/ui/Avatar'
 import EntityLink from '@/components/ui/EntityLink'
+import Button from '@/components/ui/Button'
 import DrawerAddButton from '@/components/drawer/DrawerAddButton'
 import StatusFilterSelect, { useStatusFilter } from '@/components/drawer/StatusFilterSelect'
-import { sectionTitle } from '@/components/ui/SectionCard'
+import { GroupLabel } from '@/components/ui/typography'
 import api, { unwrap } from '@/lib/api'
 import PlanIntakeModal from '@/pages/candidates/drawer/PlanIntakeModal'
 import AddApplicationModal from '@/pages/applications/AddApplicationModal'
@@ -187,7 +188,7 @@ export default function ApplicantsTab({ vacancy: v }: { vacancy: VacancyDetail }
 
       {/* Applications list header + house toolbar: search (grows) → phase filter →
           "+ Sollicitatie" (short — the sub-tab already names the entity, DRAWER-ADD-SHORT-1). */}
-      <div style={{ ...sectionTitle, marginBottom: 8 }}>{t('applicants.title')}</div>
+      <GroupLabel style={{ letterSpacing: '0.04em', marginBottom: 8 }}>{t('applicants.title')}</GroupLabel>
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, flex: 1, minWidth: 120, padding: '6px 10px',
           background: 'var(--bg)', border: '1px solid var(--border)', borderRadius: 8 }}>
@@ -221,13 +222,10 @@ export default function ApplicantsTab({ vacancy: v }: { vacancy: VacancyDetail }
                   {a.source && <Caption as="div">{a.source}</Caption>}
                   {/* Book an intake for this applicant — matches candidate + vacancy + application. */}
                   {a.candidateId != null && (
-                    <button onClick={() => setIntakeFor({ applicationId: a.id ?? null, candidateId: a.candidateId as Id })}
-                      title={t('applicants.planIntake')} aria-label={t('applicants.planIntake')}
-                      style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: 26, height: 26,
-                        borderRadius: 6, border: '1px solid var(--border)', background: 'var(--bg)', color: 'var(--text-muted)',
-                        cursor: 'pointer', flexShrink: 0 }}>
+                    <Button variant="secondary" iconOnly size="sm" onClick={() => setIntakeFor({ applicationId: a.id ?? null, candidateId: a.candidateId as Id })}
+                      title={t('applicants.planIntake')} aria-label={t('applicants.planIntake')}>
                       <CalendarPlus size={13} />
-                    </button>
+                    </Button>
                   )}
                 </div>
                 {/* Reused record row: EntityLink to the application, pencil-edit,
@@ -264,8 +262,10 @@ export default function ApplicantsTab({ vacancy: v }: { vacancy: VacancyDetail }
       {filteredApplications.length > 0 && (
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 8, marginTop: 8, fontSize: 12, color: 'var(--text-muted)' }}>
           <span>{(page - 1) * PER + 1}–{Math.min(page * PER, filteredApplications.length)} {t('applicants.of')} {filteredApplications.length}</span>
-          <button onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page <= 1} style={{ width: 24, height: 24, display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid var(--border)', borderRadius: 5, background: 'var(--bg)', cursor: page <= 1 ? 'default' : 'pointer', color: page <= 1 ? 'var(--border)' : 'var(--text-muted)' }}>‹</button>
-          <button onClick={() => setPage(p => Math.min(pages, p + 1))} disabled={page >= pages} style={{ width: 24, height: 24, display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid var(--border)', borderRadius: 5, background: 'var(--bg)', cursor: page >= pages ? 'default' : 'pointer', color: page >= pages ? 'var(--border)' : 'var(--text-muted)' }}>›</button>
+          <Button variant="secondary" iconOnly size="sm" onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page <= 1}
+            title={t('common:prevPage')} aria-label={t('common:prevPage')}><ChevronLeft size={13} /></Button>
+          <Button variant="secondary" iconOnly size="sm" onClick={() => setPage(p => Math.min(pages, p + 1))} disabled={page >= pages}
+            title={t('common:nextPage')} aria-label={t('common:nextPage')}><ChevronRight size={13} /></Button>
         </div>
       )}
 

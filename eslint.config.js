@@ -231,6 +231,20 @@ export default defineConfig([
         message: "HUISSTIJL: 15px is PageTitle — gebruik <PageTitle as='…'> uit components/ui/typography (rendert standaard als <h2>, dus ook een drop-in voor een kop).",
       },
       {
+        // Herhaal-audit r6 T-2/T-3: 11px + muted in one style object IS Caption
+        // (or GroupLabel with weight/uppercase) — a local copy of the atom.
+        // typography.tsx exports the raw identities for the rare object context.
+        selector: "ObjectExpression:has(Property[key.name='fontSize'] > Literal[value=11]):has(Property[key.name='color'] > Literal[value='var(--text-muted)'])",
+        message: 'HUISSTIJL: 11px muted is Caption/GroupLabel — gebruik het atoom uit components/ui/typography (layout via zijn style-prop, identiteit nooit lokaal).',
+      },
+      {
+        // Herhaal-audit r6 T-4: 13/600 in one style object IS SectionTitle
+        // (representative sample measured ~97 copies app-wide — frozen debt via
+        // the ceiling, paid down per touched file).
+        selector: "ObjectExpression:has(Property[key.name='fontSize'] > Literal[value=13]):has(Property[key.name='fontWeight'] > Literal[value=600])",
+        message: 'HUISSTIJL: 13/600 is SectionTitle — gebruik <SectionTitle> uit components/ui/typography.',
+      },
+      {
         // Herhaal-slotaudit finding 1: BTN_H feeds Button size="md" ONLY (its own
         // docblock says so) — a raw <button> reading it is by definition a copy of
         // Button. Warn bucket: 46 pre-existing hits / 35 files (measured r3.5); the

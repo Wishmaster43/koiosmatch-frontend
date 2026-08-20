@@ -24,7 +24,8 @@ import { useTranslation } from 'react-i18next'
 import { ListChecks, ArrowUpRight } from 'lucide-react'
 import api, { unwrapList } from '@/lib/api'
 import SoftChip from '@/components/ui/SoftChip'
-import { sectionTitle } from '@/components/ui/SectionCard'
+import { GroupLabel, Caption } from '@/components/ui/typography'
+import Button from '@/components/ui/Button'
 import DrawerAddButton from '@/components/drawer/DrawerAddButton'
 import AddTaskModal from '../AddTaskModal'
 import { useNavigation } from '@/context/NavigationContext'
@@ -97,9 +98,10 @@ export default function SubtasksSection({ task, onSubtaskCreated }: {
 
       {/* This task's own main task — a plain reference row, read-only. */}
       {task.parent && (
+        // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- full-width clickable reference row (structural, not an action button)
         <button onClick={() => openEntity('tasks', task.parent!.id)} style={rowBtnStyle}>
           <ArrowUpRight size={13} style={{ color: 'var(--text-muted)', flexShrink: 0 }} />
-          <span style={{ fontSize: 11, color: 'var(--text-muted)', flexShrink: 0 }}>{t('details.subtasks.parentLabel')}</span>
+          <Caption as="span" style={{ flexShrink: 0 }}>{t('details.subtasks.parentLabel')}</Caption>
           <span style={{ flex: 1, minWidth: 0, fontSize: 12, fontWeight: 500, color: 'var(--text)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
             {task.parent.title || '—'}
           </span>
@@ -110,7 +112,8 @@ export default function SubtasksSection({ task, onSubtaskCreated }: {
       {hasSubtasks && (
         <div>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
-            <span style={sectionTitle}>{t('details.subtasks.title')}</span>
+            <GroupLabel as="span" style={{ letterSpacing: '0.04em' }}>{t('details.subtasks.title')}</GroupLabel>
+            {/* eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- mono progress counter (JetBrains Mono per §1), not a Caption/label copy */}
             <span style={{ fontSize: 11, color: 'var(--text-muted)', fontFamily: 'JetBrains Mono, monospace' }}>
               {task.subtaskProgress!.done}/{task.subtaskProgress!.total}
             </span>
@@ -120,8 +123,7 @@ export default function SubtasksSection({ task, onSubtaskCreated }: {
           ) : error ? (
             <div style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: 12, color: 'var(--color-danger)' }}>
               <span>{t('details.subtasks.error')}</span>
-              <button onClick={fetchSubtasks} style={{ background: 'none', border: '1px solid var(--border)', borderRadius: 6,
-                padding: '3px 9px', cursor: 'pointer', color: 'var(--text)' }}>{t('common:error.retry')}</button>
+              <Button variant="secondary" size="sm" onClick={fetchSubtasks}>{t('common:error.retry')}</Button>
             </div>
           ) : rows.length === 0 ? (
             <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{t('details.subtasks.empty')}</div>
@@ -130,6 +132,7 @@ export default function SubtasksSection({ task, onSubtaskCreated }: {
             const label = typeof st === 'object' ? st?.label : st
             const color = (typeof st === 'object' ? st?.color : null) ?? 'var(--text-muted)'
             return (
+              // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- full-width clickable reference row (structural, not an action button)
               <button key={String(r.id)} onClick={() => openEntity('tasks', r.id)} style={rowBtnStyle}>
                 <ListChecks size={13} style={{ color: 'var(--text-muted)', flexShrink: 0 }} />
                 <span style={{ flex: 1, minWidth: 0, fontSize: 12, fontWeight: 500, color: 'var(--text)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>

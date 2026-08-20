@@ -194,7 +194,7 @@ export default function LanguagesSection({ c, onEditSave }: { c: Candidate; onEd
         padding: editing ? '10px 12px' : '10px 40px 10px 12px' }}>
         {!editing && (
           <div style={{ position: 'absolute', top: 8, right: 8, display: 'flex', gap: 4 }}>
-            <Button variant="secondary" size="sm" iconOnly onClick={() => { setRows(initial()); setEditing(true) }} title={t('common:edit')}><Edit2 size={13} /></Button>
+            <Button variant="secondary" size="sm" iconOnly onClick={() => { setRows(initial()); setEditing(true) }} title={t('common:edit')} aria-label={t('common:edit')}><Edit2 size={13} /></Button>
           </div>
         )}
         {editing ? (
@@ -229,7 +229,7 @@ export default function LanguagesSection({ c, onEditSave }: { c: Candidate; onEd
                   {/* Same 28×28 box (house Button size="sm") as every other icon button
                       in this card (Danny 08-08: "is stuk groter dan de andere 2 knopjes")
                       — one size for trash, save and ✕; the row centers it vertically. */}
-                  <Button variant="dangerSoft" size="sm" iconOnly onClick={() => removeRow(i)} title={t('common:remove')} style={{ flexShrink: 0 }}>
+                  <Button variant="dangerSoft" size="sm" iconOnly onClick={() => removeRow(i)} title={t('common:remove')} aria-label={t('common:remove')} style={{ flexShrink: 0 }}>
                     <Trash2 size={12} />
                   </Button>
                 </div>
@@ -259,8 +259,8 @@ export default function LanguagesSection({ c, onEditSave }: { c: Candidate; onEd
             ))}
             {/* Save/✕ as a real footer line — right-aligned under the rows. */}
             <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 4, marginTop: 2 }}>
-              <Button variant="primary" size="sm" iconOnly onClick={save} title={t('common:save')}><Save size={13} /></Button>
-              <Button variant="secondary" size="sm" iconOnly onClick={cancel} title={t('common:cancel')}><X size={13} /></Button>
+              <Button variant="primary" size="sm" iconOnly onClick={save} title={t('common:save')} aria-label={t('common:save')}><Save size={13} /></Button>
+              <Button variant="secondary" size="sm" iconOnly onClick={cancel} title={t('common:cancel')} aria-label={t('common:cancel')}><X size={13} /></Button>
             </div>
           </div>
         ) : view.length === 0 ? (
@@ -276,8 +276,10 @@ export default function LanguagesSection({ c, onEditSave }: { c: Candidate; onEd
                   {l.language ?? l.name}{l.spoken ? ` · ${l.spoken}` : ''}{l.written ? ` · ${l.written}` : ''}
                   {doc && (
                     <>
+                      {/* eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- inline chip-scoped glyph sized to the 11px language pill, not a standalone Button */}
                       <button type="button" onClick={() => setPreviewDoc(doc)} style={chipIconBtn}
                         aria-label={t('documents.preview')} title={doc.name ?? doc.file_name ?? t('documents.preview')}><Eye size={11} /></button>
+                      {/* eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- inline chip-scoped glyph sized to the 11px language pill, not a standalone Button */}
                       <button type="button" onClick={() => downloadDoc(doc)} style={chipIconBtn}
                         aria-label={t('documents.download')} title={t('documents.download')}><Download size={11} /></button>
                     </>

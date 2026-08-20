@@ -25,6 +25,7 @@ import FieldNotice from '@/components/ui/FieldNotice'
 import { CANON_LABEL_WIDTH } from '@/components/drawer/fieldRowCanon'
 import SoftChip from '@/components/ui/SoftChip'
 import Button from '@/components/ui/Button'
+import { GroupLabel } from '@/components/ui/typography'
 import { tintBg, tintBorder, chipInk } from '@/lib/tint'
 
 export interface FieldRow {
@@ -221,10 +222,10 @@ export default function EditableFieldTable({
     <div style={{ display: 'flex', gap: 4 }}>
       {/* Disabled (never hidden) while a row reports a blocking format error, so
           the reason stays readable on screen. */}
-      <Button variant="primary" size="sm" iconOnly onClick={save} disabled={hasBlockingError} title={t('save')}>
+      <Button variant="primary" size="sm" iconOnly onClick={save} disabled={hasBlockingError} title={t('save')} aria-label={t('save')}>
         <Save size={13} />
       </Button>
-      <Button variant="secondary" size="sm" iconOnly onClick={cancel} title={t('cancel')}>
+      <Button variant="secondary" size="sm" iconOnly onClick={cancel} title={t('cancel')} aria-label={t('cancel')}>
         <X size={13} />
       </Button>
     </div>
@@ -413,7 +414,6 @@ export default function EditableFieldTable({
     ? { borderRadius: 10, overflow: 'hidden', border: '1px solid var(--border)' }
     : { borderRadius: 10, overflow: 'hidden', border: '1px solid var(--border)', background: 'var(--surface)',
         padding: '6px 12px', display: 'flex', flexDirection: 'column', gap: 2 }
-  const groupTitleStyle: CSSProperties = { fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em', color: 'var(--text-muted)', marginBottom: 6 }
 
   // M7 (DRILL-DOWN-CONSISTENCY, 08-08): the top header bar only renders when there is
   // a real title for it to show — a titleless header on a GROUPED table produced an
@@ -433,7 +433,7 @@ export default function EditableFieldTable({
     <div>
       {showTopHeader && (
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
-          <span style={{ fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em', color: 'var(--text-muted)' }}>{title}</span>
+          <GroupLabel as="span" style={{ letterSpacing: '0.04em' }}>{title}</GroupLabel>
           {editing ? editControls() : <EditPencil onClick={startEdit} title={t('edit')} />}
         </div>
       )}
@@ -445,7 +445,7 @@ export default function EditableFieldTable({
             <div key={g.group}>
               {g.group && (
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
-                  <span style={{ ...groupTitleStyle, marginBottom: 0 }}>{g.group}</span>
+                  <GroupLabel as="span" style={{ letterSpacing: '0.04em' }}>{g.group}</GroupLabel>
                   {groupHeaderPencil && i === 0 && (editing ? editControls() : <EditPencil onClick={startEdit} title={t('edit')} />)}
                 </div>
               )}

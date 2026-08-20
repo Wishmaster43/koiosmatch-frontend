@@ -7,7 +7,7 @@ import DetailTableJs from '@/components/ui/DetailTable'
 import CreatableSelect from '@/components/ui/CreatableSelect'
 import SelectMenu from '@/components/ui/SelectMenu'
 import EntityLink from '@/components/ui/EntityLink'
-import { sectionTitle } from '@/components/ui/SectionCard'
+import { GroupLabel, Caption } from '@/components/ui/typography'
 import Button from '@/components/ui/Button'
 import { useCustomerCascade} from '../hooks/useCustomerCascade'
 import type { Opportunity } from '@/types/opportunity'
@@ -23,11 +23,11 @@ type UpdateFn = (id: Id | undefined, patch: Record<string, unknown>) => void
 // read-only DetailTable (its full-bleed row background needs the corner clip), but
 // MUST be false in edit mode — the overflow:hidden clipped the SelectMenu/
 // CreatableSelect dropdown against the card edge (Danny: "dropdown werkt niet goed").
-// Canon (05-08): the shared sectionTitle, reused instead of a hand-rolled heading.
+// Canon (05-08): the shared GroupLabel atom, reused instead of a hand-rolled heading.
 function Card({ title, children, clip = true }: { title: ReactNode; children: ReactNode; clip?: boolean }) {
   return (
     <div style={{ marginBottom: 16 }}>
-      <div style={{ ...sectionTitle, marginBottom: 6 }}>{title}</div>
+      <GroupLabel style={{ letterSpacing: '0.04em', marginBottom: 6 }}>{title}</GroupLabel>
       <div style={{ border: '1px solid var(--border)', borderRadius: 10, overflow: clip ? 'hidden' : 'visible' }}>{children}</div>
     </div>
   )
@@ -37,7 +37,7 @@ function Card({ title, children, clip = true }: { title: ReactNode; children: Re
 function F({ label, children }: { label: ReactNode; children: ReactNode }) {
   return (
     <div>
-      <div style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 4 }}>{label}</div>
+      <Caption as="div" style={{ marginBottom: 4 }}>{label}</Caption>
       {children}
     </div>
   )
@@ -146,11 +146,11 @@ export default function CustomerRelationTab({ opportunity: o, customers = [], on
         {/* In-place edit toggle: pencil → diskette + ✕, same spot (§0.3 pattern). */}
         {onUpdate && (editing ? (
           <div style={{ display: 'flex', gap: 4 }}>
-            <Button variant="primary" iconOnly size="sm" onClick={save} title={t('common:save')}><Save size={13} /></Button>
-            <Button variant="secondary" iconOnly size="sm" onClick={cancel} title={t('common:cancel')}><X size={13} /></Button>
+            <Button variant="primary" iconOnly size="sm" onClick={save} title={t('common:save')} aria-label={t('common:save')}><Save size={13} /></Button>
+            <Button variant="secondary" iconOnly size="sm" onClick={cancel} title={t('common:cancel')} aria-label={t('common:cancel')}><X size={13} /></Button>
           </div>
         ) : (
-          <Button variant="ghost" iconOnly size="sm" onClick={startEdit} title={t('common:edit')}><Edit2 size={13} /></Button>
+          <Button variant="ghost" iconOnly size="sm" onClick={startEdit} title={t('common:edit')} aria-label={t('common:edit')}><Edit2 size={13} /></Button>
         ))}
       </div>
 

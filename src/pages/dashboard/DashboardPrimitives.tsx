@@ -8,6 +8,7 @@ import type { ReactNode } from 'react'
 import { interactive } from '@/lib/a11y'
 import type { LucideIcon } from 'lucide-react'
 import SharedAvatar from '@/components/ui/Avatar'
+import { SectionTitle, Caption } from '@/components/ui/typography'
 import { tintBg, chipInk } from '@/lib/tint'
 
 export function KpiCard({ label, value, sub, color, bg, Icon, onClick }: {
@@ -25,7 +26,7 @@ export function KpiCard({ label, value, sub, color, bg, Icon, onClick }: {
         </div>
       </div>
       <div style={{ fontSize: 24, fontWeight: 700, color: 'var(--text)', marginBottom: 4 }}>{value}</div>
-      <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>{sub}</div>
+      <Caption as="div">{sub}</Caption>
     </div>
   )
 }
@@ -44,7 +45,7 @@ export function Block({ title, action, onAction, children }: { title?: ReactNode
     <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12, overflow: 'hidden' }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between',
         padding: '12px 16px', borderBottom: '1px solid var(--border)' }}>
-        <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)' }}>{title}</span>
+        <SectionTitle as="span">{title}</SectionTitle>
         {action && <span {...interactive(onAction)} style={{ fontSize: 12, color: 'var(--color-primary-text)', cursor: 'pointer' }}>{action} →</span>}
       </div>
       {children}

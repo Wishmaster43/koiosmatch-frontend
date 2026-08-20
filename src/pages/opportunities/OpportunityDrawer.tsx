@@ -10,6 +10,7 @@ import TitleBadge from '@/components/drawer/TitleBadge'
 import ReferenceNumberChip from '@/components/ui/ReferenceNumberChip'
 import CustomFieldsTab from '@/components/drawer/CustomFieldsTab'
 import Button from '@/components/ui/Button'
+import { PageTitle, Caption } from '@/components/ui/typography'
 import { useDateFormat } from '@/lib/datetime'
 import { useCustomFields } from '@/lib/useCustomFields'
 import DetailsTab from './drawer/DetailsTab'
@@ -97,19 +98,20 @@ export default function OpportunityDrawer({
   const renderTitle = () => editing ? (
     <input autoFocus value={titleDraft} onChange={e => setTitleDraft(e.target.value)}
       onKeyDown={e => { if (e.key === 'Enter') saveEdit(); if (e.key === 'Escape') setEditing(false) }}
+      // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- an <input> matching the title's own size while editing, not a PageTitle render
       style={{ width: '100%', boxSizing: 'border-box', padding: '6px 10px', fontSize: 15, fontWeight: 700,
         borderRadius: 6, border: '1px solid var(--border)', outline: 'none', color: 'var(--text)' }} />
   ) : (
     <>
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-        <div style={{ fontSize: 15, fontWeight: 700, color: 'var(--text)' }}>{o.title}</div>
+        <PageTitle as="div" style={{ fontWeight: 700 }}>{o.title}</PageTitle>
         {/* NUMMER-3: the copy chip, right after the title and before the phase badge (§3A). */}
         <ReferenceNumberChip value={o.referenceNumber} />
         {/* Phase = colour-coded read-only badge (shows Gewonnen/Verloren at a glance). */}
       </div>
       <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{o.client || '—'}</div>
       {o.expectedCloseAt && (
-        <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 2 }}>{t('drawer.expectedCloseOn', { date: formatDate(o.expectedCloseAt) })}</div>
+        <Caption as="div" style={{ marginTop: 2 }}>{t('drawer.expectedCloseOn', { date: formatDate(o.expectedCloseAt) })}</Caption>
       )}
     </>
   )
@@ -118,11 +120,11 @@ export default function OpportunityDrawer({
   // phase). ARCHIVED: no title edit on a soft-deleted deal — restore first.
   const actions = o.archived ? null : editing ? (
     <>
-      <Button variant="primary" iconOnly size="sm" onClick={saveEdit} title={t('common:save')}><Save size={14} /></Button>
-      <Button variant="secondary" iconOnly size="sm" onClick={() => setEditing(false)} title={t('common:cancel')}><X size={14} /></Button>
+      <Button variant="primary" iconOnly size="sm" onClick={saveEdit} title={t('common:save')} aria-label={t('common:save')}><Save size={14} /></Button>
+      <Button variant="secondary" iconOnly size="sm" onClick={() => setEditing(false)} title={t('common:cancel')} aria-label={t('common:cancel')}><X size={14} /></Button>
     </>
   ) : (
-    <Button variant="secondary" iconOnly size="sm" onClick={startEdit} title={t('common:edit')}><Edit2 size={13} /></Button>
+    <Button variant="secondary" iconOnly size="sm" onClick={startEdit} title={t('common:edit')} aria-label={t('common:edit')}><Edit2 size={13} /></Button>
   )
 
   return (
@@ -133,10 +135,10 @@ export default function OpportunityDrawer({
       // Two-sided footer (§3A(8)): created-at left, empty right (consistent spacing
       // with the candidate/other drawers even when there is no right-side content).
       footer={
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, fontSize: 11, color: 'var(--text-muted)' }}>
+        <Caption as="div" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
           <span>{t('drawer.createdAt', { date: formatDateTime(o.date) })}</span>
           <span />
-        </div>
+        </Caption>
       }
       tabs={tabs}
       header={() => (

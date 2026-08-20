@@ -37,15 +37,15 @@ export default function CustomerHeaderActions({ isEntryPhase, targetPhase, onCon
       {/* Edit-pencil that toggles to save/cancel (same pattern as the candidate header). */}
       {headerEditing ? (
         <>
-          <Button variant="primary" iconOnly size="sm" onClick={onSaveEdit} title={t('drawer.save')}>
+          <Button variant="primary" iconOnly size="sm" onClick={onSaveEdit} title={t('drawer.save')} aria-label={t('drawer.save')}>
             <Save size={14} />
           </Button>
-          <Button variant="secondary" iconOnly size="sm" onClick={onCancelEdit} title={t('drawer.cancel')}>
+          <Button variant="secondary" iconOnly size="sm" onClick={onCancelEdit} title={t('drawer.cancel')} aria-label={t('drawer.cancel')}>
             <X size={14} />
           </Button>
         </>
       ) : (
-        <Button variant="secondary" iconOnly size="sm" onClick={onStartEdit} title={t('drawer.edit')}>
+        <Button variant="secondary" iconOnly size="sm" onClick={onStartEdit} title={t('drawer.edit')} aria-label={t('drawer.edit')}>
           <Edit2 size={13} />
         </Button>
       )}

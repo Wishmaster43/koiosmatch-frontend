@@ -18,10 +18,10 @@ import CreatableSelect from '@/components/ui/CreatableSelect'
 import SectionCard, { sectionBlock } from '@/components/ui/SectionCard'
 import { fieldInputStyle } from '@/components/forms/fieldMetrics'
 import Button from '@/components/ui/Button'
+import { GroupLabel } from '@/components/ui/typography'
 
 // Canon field style (G33/fieldMetrics) — was its own padding-6/font-12/radius-6 copy.
 const inputStyle: CSSProperties = fieldInputStyle
-const labelStyle: CSSProperties = { fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: 3 }
 
 // Render one value read-only (boolean → yes/no, date → locale date, else string).
 function display(def: CustomFieldDef, raw: unknown, t: (k: string) => string, formatDate: (v: string) => string): string {
@@ -61,14 +61,14 @@ function RichTextField({ def, value, onSave }: { def: CustomFieldDef; value: unk
   return (
     <div style={{ gridColumn: '1 / -1' }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 4 }}>
-        <span style={labelStyle}>{def.label}</span>
+        <GroupLabel as="span" style={{ letterSpacing: '0.04em' }}>{def.label}</GroupLabel>
         {editing ? (
           <div style={{ display: 'flex', gap: 4 }}>
-            <Button variant="primary" size="sm" iconOnly onClick={save} title={t('save')}><Save size={12} /></Button>
-            <Button variant="secondary" size="sm" iconOnly onClick={cancel} title={t('cancel')}><X size={12} /></Button>
+            <Button variant="primary" size="sm" iconOnly onClick={save} title={t('save')} aria-label={t('save')}><Save size={12} /></Button>
+            <Button variant="secondary" size="sm" iconOnly onClick={cancel} title={t('cancel')} aria-label={t('cancel')}><X size={12} /></Button>
           </div>
         ) : (
-          <Button variant="secondary" size="sm" iconOnly onClick={start} title={t('edit')}><Edit2 size={12} /></Button>
+          <Button variant="secondary" size="sm" iconOnly onClick={start} title={t('edit')} aria-label={t('edit')}><Edit2 size={12} /></Button>
         )}
       </div>
       {editing
@@ -136,11 +136,11 @@ export default function CustomFieldsTab({ entityType, values, onSave }: Props) {
           title={t('customFieldsCard.title')}
           action={editing ? (
             <div style={{ display: 'flex', gap: 4 }}>
-              <Button variant="primary" size="sm" iconOnly onClick={save} title={t('save')}><Save size={13} /></Button>
-              <Button variant="secondary" size="sm" iconOnly onClick={cancel} title={t('cancel')}><X size={13} /></Button>
+              <Button variant="primary" size="sm" iconOnly onClick={save} title={t('save')} aria-label={t('save')}><Save size={13} /></Button>
+              <Button variant="secondary" size="sm" iconOnly onClick={cancel} title={t('cancel')} aria-label={t('cancel')}><X size={13} /></Button>
             </div>
           ) : (
-            <Button variant="secondary" size="sm" iconOnly onClick={startEdit} title={t('edit')}><Edit2 size={13} /></Button>
+            <Button variant="secondary" size="sm" iconOnly onClick={startEdit} title={t('edit')} aria-label={t('edit')}><Edit2 size={13} /></Button>
           )}
           style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px 20px' }}
         >
@@ -148,7 +148,7 @@ export default function CustomFieldsTab({ entityType, values, onSave }: Props) {
             const labelId = `${labelBaseId}-${def.key}`
             return (
               <div key={def.key}>
-                <div id={labelId} style={labelStyle}>{def.label}</div>
+                <GroupLabel id={labelId} style={{ letterSpacing: '0.04em', marginBottom: 3 }}>{def.label}</GroupLabel>
                 {editing
                   ? <FieldInput def={def} value={draft[def.key] ?? values[def.key]} onChange={val => setVal(def.key, val)} labelId={labelId} />
                   : <div style={{ fontSize: 13, color: 'var(--text)', minHeight: 18 }}>{display(def, values[def.key], t, formatDate)}</div>}

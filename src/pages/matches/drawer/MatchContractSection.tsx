@@ -19,7 +19,8 @@ import { useTranslation } from 'react-i18next'
 import { Unplug } from 'lucide-react'
 import EditableFieldTable from '@/components/forms/EditableFieldTable'
 import type { FieldRow } from '@/components/forms/EditableFieldTable'
-import { sectionTitle } from '@/components/ui/SectionCard'
+import { GroupLabel, Caption } from '@/components/ui/typography'
+import Button from '@/components/ui/Button'
 import { notifySuccess, notifyError } from '@/lib/notify'
 import { useContractTypes } from '@/lib/useContractTypes'
 import { useCao } from '@/lib/useCao'
@@ -151,8 +152,7 @@ export default function MatchContractSection({ matchId, onUpdate }: Props) {
     return (
       <div style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: 12, color: 'var(--color-danger)', padding: '10px 2px' }}>
         <span>{t('drawer.contract.error')}</span>
-        <button onClick={retry} style={{ background: 'none', border: '1px solid var(--border)', borderRadius: 6,
-          padding: '3px 9px', cursor: 'pointer', color: 'var(--text)' }}>{t('common:error.retry')}</button>
+        <Button variant="secondary" size="sm" onClick={retry}>{t('common:error.retry')}</Button>
       </div>
     )
   }
@@ -163,15 +163,15 @@ export default function MatchContractSection({ matchId, onUpdate }: Props) {
 
   return (
     <div>
-      {/* Canon (05-08): the shared sectionTitle, reused instead of a hand-rolled heading. */}
-      <div style={{ ...sectionTitle, marginBottom: 6 }}>{t('drawer.contract.title')}</div>
+      {/* Canon (05-08): the shared GroupLabel atom, reused instead of a hand-rolled heading. */}
+      <GroupLabel style={{ letterSpacing: '0.04em', marginBottom: 6 }}>{t('drawer.contract.title')}</GroupLabel>
       {/* MATCH-SOORT-1: Contractvorm chip + its CONTRACTREGELS read-list — edited
           only via MatchModal (the popup owns the write path); this section only
           displays what was set there, mirroring the changelog's split (§2). */}
       {data.contractForm && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 6, marginBottom: 10 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>{t('drawer.contract.contractForm')}</span>
+            <Caption as="span">{t('drawer.contract.contractForm')}</Caption>
             <ContractFormChip contractForm={data.contractForm} />
           </div>
           {data.contractLines.length > 0 && (

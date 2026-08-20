@@ -30,12 +30,30 @@ const make = (defaults: CSSProperties, defaultTag: ElementType) =>
     return <Tag style={{ margin: 0, ...defaults, ...style }} {...rest}>{children}</Tag>
   }
 
-export const PageTitle = make({ fontSize: 15, fontWeight: 600, color: 'var(--text)' }, 'h2')
-export const SectionTitle = make({ fontSize: 13, fontWeight: 600, color: 'var(--text)' }, 'h3')
-export const BodyText = make({ fontSize: 13, fontWeight: 400, color: 'var(--text)', lineHeight: 1.5 }, 'p')
-export const Caption = make({ fontSize: 11, fontWeight: 400, color: 'var(--text-muted)' }, 'span')
+// Raw style identities — the ONE legal source when code genuinely needs the
+// style OBJECT (r6 finding T-1: a style-object context, e.g. a style factory,
+// needs a legal source or it re-declares the identity — exactly how
+// SectionCard's sectionTitle copy was born). JSX always renders the atoms
+// below, never these directly.
+// eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- the canonical PageTitle style identity itself, not a hand-styled copy
+export const pageTitleStyle: CSSProperties = { fontSize: 15, fontWeight: 600, color: 'var(--text)' }
+// eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- the canonical SectionTitle style identity itself, not a hand-styled copy
+export const sectionTitleStyle: CSSProperties = { fontSize: 13, fontWeight: 600, color: 'var(--text)' }
+export const bodyTextStyle: CSSProperties = { fontSize: 13, fontWeight: 400, color: 'var(--text)', lineHeight: 1.5 }
+// eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- the canonical Caption style identity itself, not a hand-styled copy
+export const captionStyle: CSSProperties = { fontSize: 11, fontWeight: 400, color: 'var(--text-muted)' }
+// letterSpacing 0.04em (Opus r10): 41 of 42 call sites overrode the old 0.05em
+// default to 0.04 — reality had voted; the default now IS the identity and the
+// remaining overrides are same-value no-ops that retire per touch.
+// eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- the canonical GroupLabel style identity itself, not a hand-styled copy
+export const groupLabelStyle: CSSProperties = { fontSize: 11, fontWeight: 600, color: 'var(--text-muted)',
+  textTransform: 'uppercase', letterSpacing: '0.04em' }
+
+export const PageTitle = make(pageTitleStyle, 'h2')
+export const SectionTitle = make(sectionTitleStyle, 'h3')
+export const BodyText = make(bodyTextStyle, 'p')
+export const Caption = make(captionStyle, 'span')
 // Uppercase group label (the 11px/600 tracked heading the settings cards use).
-export const GroupLabel = make({ fontSize: 11, fontWeight: 600, color: 'var(--text-muted)',
-  textTransform: 'uppercase', letterSpacing: '0.05em' }, 'div')
+export const GroupLabel = make(groupLabelStyle, 'div')
 // Numbers/IDs/code — JetBrains Mono per §1; size rides with the surrounding text.
 export const Mono = make({ fontFamily: "'JetBrains Mono', monospace" }, 'span')

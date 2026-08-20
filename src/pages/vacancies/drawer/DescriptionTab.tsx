@@ -41,12 +41,12 @@ export default function DescriptionTab({ vacancy: v, onUpdate }: { vacancy: Vaca
   // Algemeen card — an independent editing state, own title row placement.
   const controls = descEditing ? (
     <div style={{ display: 'flex', gap: 4 }}>
-      <Button variant="dangerSoft" iconOnly size="sm" onClick={() => setDescription('')} title={t('common:remove')}><Trash2 size={13} /></Button>
-      <Button variant="primary" iconOnly size="sm" onClick={saveDesc} title={t('common:save')}><Save size={13} /></Button>
-      <Button variant="secondary" iconOnly size="sm" onClick={cancelDesc} title={t('common:cancel')}><X size={13} /></Button>
+      <Button variant="dangerSoft" iconOnly size="sm" onClick={() => setDescription('')} title={t('common:remove')} aria-label={t('common:remove')}><Trash2 size={13} /></Button>
+      <Button variant="primary" iconOnly size="sm" onClick={saveDesc} title={t('common:save')} aria-label={t('common:save')}><Save size={13} /></Button>
+      <Button variant="secondary" iconOnly size="sm" onClick={cancelDesc} title={t('common:cancel')} aria-label={t('common:cancel')}><X size={13} /></Button>
     </div>
   ) : (
-    <Button variant="secondary" iconOnly size="sm" onClick={() => setDescEditing(true)} title={t('common:edit')}><Edit2 size={13} /></Button>
+    <Button variant="secondary" iconOnly size="sm" onClick={() => setDescEditing(true)} title={t('common:edit')} aria-label={t('common:edit')}><Edit2 size={13} /></Button>
   )
 
   return (

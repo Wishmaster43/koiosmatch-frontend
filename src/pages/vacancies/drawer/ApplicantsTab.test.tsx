@@ -7,10 +7,12 @@ import { mapVacancyDetail } from '../data/mapVacancy'
 // The real tenant phase lookup — a stable `value` per phase, unlike WorkTab's
 // candidate-embed which only carries a resolved label (V14: this side wires the
 // filter directly to the lookup instead of a derived-from-rows fallback).
+/* eslint-disable no-restricted-syntax -- DATA: fixture tenant phase colours, not a style rule. */
 const PHASES = [
   { value: 'applied', label: 'Applied', color: '#3B82F6' },
   { value: 'hired', label: 'Hired', color: '#10B981' },
 ]
+/* eslint-enable no-restricted-syntax */
 vi.mock('@/context/VacancyLookupsContext', () => ({
   useVacancyLookups: () => ({ phases: PHASES, phaseMeta: () => ({ label: null, color: null }) }),
 }))
@@ -141,7 +143,9 @@ describe('ApplicantsTab · reuses the candidate drawer ApplicationRow (S-vacapp-
     render(<ApplicantsTab vacancy={vacancy(apps)} />)
     expect(screen.getByText('Candidate 0')).toBeInTheDocument()
     expect(screen.queryByText('Candidate 5')).toBeNull()
-    await userEvent.click(screen.getByText('›'))
+    // Pagination next/prev are now house Button iconOnly controls (accessible
+    // name, not a bare '›' glyph — HUISSTIJL herhaal-audit r6).
+    await userEvent.click(screen.getByRole('button', { name: 'common:nextPage' }))
     expect(screen.getByText('Candidate 5')).toBeInTheDocument()
     expect(screen.queryByText('Candidate 0')).toBeNull()
   })

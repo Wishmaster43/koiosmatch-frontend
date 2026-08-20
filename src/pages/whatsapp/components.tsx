@@ -6,6 +6,8 @@ import { useTranslation } from 'react-i18next'
 import { AlertTriangle, Clock, ArrowDownLeft, ArrowUpRight } from 'lucide-react'
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts'
 import ErrorBoundary from '@/components/ui/ErrorBoundary'
+import SoftChip from '@/components/ui/SoftChip'
+import { SectionTitle, Caption } from '@/components/ui/typography'
 import { useEscalationReasons } from './hooks/useEscalationReasons'
 import type { WaCandidate, WaMessage, WaEscalation, WaActivityDatum } from '@/types/whatsapp'
 
@@ -41,11 +43,6 @@ const DERIVED_REASON_STYLE: Record<string, string> = {
   no_reply:          'var(--color-warning)',
   negative_response: 'var(--color-violet)',
 }
-// One soft-tint formula (§4) for every escalation badge, whatever the colour
-// source (tenant hex from the lookup, or a --color-* token from the fallback
-// above) — color-mix works for both, unlike the old hex-only `color + '1A'`.
-const reasonBg = (color: string) => `color-mix(in srgb, ${color} 16%, transparent)`
-
 // ─── sub-components ─────────────────────────────────────────────────────────
 
 function Avatar({ candidate, size = 32 }: { candidate?: WaCandidate; size?: number }) {
@@ -79,8 +76,8 @@ export function MessageFeed({ messages, loading }: { messages: WaMessage[]; load
     }}>
       <div style={{ padding: '14px 16px', borderBottom: '1px solid var(--border)',
                     display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-        <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)' }}>{t('feed.title')}</span>
-        <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>{t('feed.live')}</span>
+        <SectionTitle as="span">{t('feed.title')}</SectionTitle>
+        <Caption as="span">{t('feed.live')}</Caption>
       </div>
       <div style={{ overflowY: 'auto', maxHeight: 420 }}>
         {loading && (
@@ -143,7 +140,7 @@ export function EscalationList({ escalations, loading }: { escalations: WaEscala
       <div style={{ padding: '14px 16px', borderBottom: '1px solid var(--border)',
                     display: 'flex', alignItems: 'center', gap: 8 }}>
         <AlertTriangle size={14} color="var(--color-danger)" />
-        <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)' }}>{t('escalations.title')}</span>
+        <SectionTitle as="span">{t('escalations.title')}</SectionTitle>
         {!loading && escalations.length > 0 && (
           <span style={{ marginLeft: 'auto', fontSize: 11, fontWeight: 600, color: 'var(--color-danger)',
                          background: 'var(--color-danger-bg)', borderRadius: 999, padding: '1px 7px' }}>
@@ -181,16 +178,14 @@ export function EscalationList({ escalations, loading }: { escalations: WaEscala
                 <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--text)', marginBottom: 2 }}>
                   {fullName(esc.candidate)}
                 </div>
-                <span style={{ fontSize: 10, fontWeight: 500, color,
-                               background: reasonBg(color), borderRadius: 999, padding: '1px 6px' }}>
-                  {reasonLabel}
-                </span>
+                {/* SoftChip — the §4 shared soft-tint chip (never a hand-rolled
+                    color-mix badge); size=10 matches this row's previous footprint. */}
+                <SoftChip label={reasonLabel} color={color} round size={10} />
               </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 3,
-                            fontSize: 11, color: 'var(--text-muted)', flexShrink: 0 }}>
+              <Caption as="div" style={{ display: 'flex', alignItems: 'center', gap: 3, flexShrink: 0 }}>
                 <Clock size={10} />
                 {esc.hours_waiting}u
-              </div>
+              </Caption>
             </div>
           )
         })}
@@ -212,9 +207,9 @@ export function ActivityChart({ data, loading }: { data: WaActivityDatum[]; load
       background: 'var(--surface)', borderRadius: 14,
       border: '1px solid var(--border)', padding: '16px 20px 12px',
     }}>
-      <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)', marginBottom: 16 }}>
+      <SectionTitle as="div" style={{ marginBottom: 16 }}>
         {t('chartTitle')}
-      </div>
+      </SectionTitle>
       {loading ? (
         <div style={{ height: 180, display: 'flex', alignItems: 'center', justifyContent: 'center',
                       color: 'var(--text-muted)', fontSize: 13 }}>{t('loading')}</div>
@@ -245,9 +240,9 @@ export function ActivityChart({ data, loading }: { data: WaActivityDatum[]; load
               labelFormatter={(label) => fmtAxisDate(String(label))}
             />
             <Legend iconType="circle" iconSize={7}
-              formatter={v => <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>
+              formatter={v => <Caption as="span">
                 {v === 'outbound' ? t('outbound') : t('inbound')}
-              </span>} />
+              </Caption>} />
             <Area type="monotone" dataKey="outbound" name="outbound"
               stroke="var(--color-secondary)" fill="url(#gradOut)" strokeWidth={2} dot={false} isAnimationActive={false} />
             <Area type="monotone" dataKey="inbound" name="inbound"

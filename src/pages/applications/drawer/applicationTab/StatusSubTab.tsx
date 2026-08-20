@@ -1,7 +1,7 @@
 import { useTranslation } from 'react-i18next'
 import RejectionSummary from '../RejectionSummary'
 import ApplicationStatusStrip from '../ApplicationStatusStrip'
-import { sectionTitle } from '@/components/ui/SectionCard'
+import { GroupLabel } from '@/components/ui/typography'
 import MatchScoreBlock from '@/components/match/MatchScoreBlock'
 import type { Criterion } from '@/components/match/MatchScoreBlock'
 import type { ApplicationDetail } from '@/types/application'
@@ -44,8 +44,8 @@ export default function StatusSubTab({ application: a, onNavigateTab, onAdjustSc
           this call suppresses it (showOverall=false) while keeping the
           edit/save affordance and, once editing, the sliders. */}
       <div style={{ borderTop: '1px solid var(--border)', paddingTop: 16 }}>
-        {/* Canon (05-08): shared sectionTitle (11px muted uppercase), reused rather than a hand-rolled heading. */}
-        <div style={{ ...sectionTitle, marginBottom: 12 }}>{t('matchScore.title')}</div>
+        {/* Canon (05-08): shared GroupLabel atom (11px muted uppercase), reused rather than a hand-rolled heading. */}
+        <GroupLabel style={{ letterSpacing: '0.04em', marginBottom: 12 }}>{t('matchScore.title')}</GroupLabel>
         <MatchScoreBlock score={a.score} criteria={a.matchCriteria as Criterion[]} summary={a.matchSummary}
           source={a.matchSource} aiScore={a.aiScore} showOverall={false}
           onSave={onAdjustScore ? payload => onAdjustScore(a.id, payload) : undefined} />

@@ -3,9 +3,9 @@
  * card + an optional recent-activity card. Entity-agnostic; everything via props.
  */
 import type { ComponentType, ReactNode } from 'react'
-import SectionCard, { sectionTitle } from '@/components/ui/SectionCard'
+import SectionCard from '@/components/ui/SectionCard'
 import DetailTableJs from '@/components/ui/DetailTable'
-import { Caption } from '@/components/ui/typography'
+import { Caption, GroupLabel } from '@/components/ui/typography'
 
 type AnyProps = Record<string, unknown>
 // DetailTable is still untyped JS — accept any props at the boundary.
@@ -21,7 +21,7 @@ export default function StatsTab({ kpis = [], kpisTitle, overview, activity }: {
     <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
       {/* KPI grid with its own grey section heading (kept outside the cards). */}
       <div>
-        {kpisTitle && <div style={{ ...sectionTitle, marginBottom: 6 }}>{kpisTitle}</div>}
+        {kpisTitle && <GroupLabel style={{ letterSpacing: '0.04em', marginBottom: 6 }}>{kpisTitle}</GroupLabel>}
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
         {kpis.map(k => (
           <div key={k.label} onClick={k.onClick} role={k.onClick ? 'button' : undefined} tabIndex={k.onClick ? 0 : undefined}

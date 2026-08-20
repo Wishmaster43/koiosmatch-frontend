@@ -18,6 +18,8 @@ import LinksTab from './drawer/LinksTab'
 import NotesTab from './drawer/NotesTab'
 import ChangelogPopover from '@/components/drawer/ChangelogPopover'
 import ActivityTab from './drawer/ActivityTab'
+import { Caption } from '@/components/ui/typography'
+import { PageTitle } from '@/components/ui/typography'
 import ArchivedBanner from '@/components/drawer/ArchivedBanner'
 import TrashLifecycleSection from '@/components/drawer/TrashLifecycleSection'
 import type { TrashSectionConfig } from '@/components/drawer/TrashLifecycleSection'
@@ -137,6 +139,7 @@ export default function TaskDrawer({ task, onClose, expanded, onToggleExpand, on
       <button onClick={() => onUpdate(task.id, { statusKey: doneValue })}
         // 28px/r6: matches its sm icon-button neighbours in this actions row (Opus batch B R6);
         // the success token pair itself stays — §4 names this exact surface.
+        // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- deliberate §4 "aan/gelukt" success token pair, not a Button variant (see comment above)
         style={{ display: 'flex', alignItems: 'center', gap: 5, height: 28, padding: '0 10px', fontSize: 11, fontWeight: 600,
           borderRadius: 6, cursor: 'pointer', border: '1px solid var(--color-success)', background: 'var(--color-success)', color: 'var(--color-on-success)' }}>
         <CheckCircle2 size={12} /> {t('drawer.markDone')}
@@ -151,10 +154,10 @@ export default function TaskDrawer({ task, onClose, expanded, onToggleExpand, on
       // Two-sided footer (§3A(8)): created-at left, empty right (consistent spacing
       // with the candidate/other drawers even when there is no right-side content).
       footer={
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, fontSize: 11, color: 'var(--text-muted)' }}>
+        <Caption as="div" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
           <span>{t('drawer.createdAt', { date: formatDateTime(task.createdAt) })}</span>
           <span />
-        </div>
+        </Caption>
       }
       tabs={tabIds.map(id => ({ id, label: t(`drawer.tabs.${id}`), render: () => renderTab(id) }))}
       header={() => (
@@ -168,12 +171,13 @@ export default function TaskDrawer({ task, onClose, expanded, onToggleExpand, on
             // T1: inline title edit — mirror VacancyDrawer's renderTitle swap.
             <input autoFocus value={titleDraft} onChange={e => setTitleDraft(e.target.value)}
               onKeyDown={e => { if (e.key === 'Enter') saveTitleEdit(); if (e.key === 'Escape') setEditingTitle(false) }}
+              // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- an <input> matching the title's own size while editing, not a PageTitle render
               style={{ width: '100%', boxSizing: 'border-box', padding: '6px 10px', fontSize: 15, fontWeight: 700,
                 borderRadius: 6, border: '1px solid var(--border)', outline: 'none', color: 'var(--text)' }} />
           ) : (
             <>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-                <span style={{ fontSize: 15, fontWeight: 700, color: 'var(--text)' }}>{task.title}</span>
+                <PageTitle as="span" style={{ fontWeight: 700 }}>{task.title}</PageTitle>
                 {/* NUMMER-3: the copy chip, right after the title and before the status badge (§3A). */}
                 <ReferenceNumberChip value={task.referenceNumber} />
                 {/* Status badge — colour-coded, read-only (mirrors the candidate phase badge,
@@ -192,12 +196,12 @@ export default function TaskDrawer({ task, onClose, expanded, onToggleExpand, on
           // choice per the meta-picker comment below, not a technical necessity).
           actions={editingTitle ? (
             <>
-              <Button variant="primary" iconOnly size="sm" onClick={saveTitleEdit} title={t('common:save')}><Save size={14} /></Button>
-              <Button variant="secondary" iconOnly size="sm" onClick={() => setEditingTitle(false)} title={t('common:cancel')}><X size={14} /></Button>
+              <Button variant="primary" iconOnly size="sm" onClick={saveTitleEdit} title={t('common:save')} aria-label={t('common:save')}><Save size={14} /></Button>
+              <Button variant="secondary" iconOnly size="sm" onClick={() => setEditingTitle(false)} title={t('common:cancel')} aria-label={t('common:cancel')}><X size={14} /></Button>
             </>
           ) : (
             <>
-              {!task.archived && <Button variant="secondary" iconOnly size="sm" onClick={startTitleEdit} title={t('common:edit')}><Edit2 size={13} /></Button>}
+              {!task.archived && <Button variant="secondary" iconOnly size="sm" onClick={startTitleEdit} title={t('common:edit')} aria-label={t('common:edit')}><Edit2 size={13} /></Button>}
               {markDone}
             </>
           )}

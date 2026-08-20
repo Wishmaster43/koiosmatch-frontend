@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { MessageCircle, FileText } from 'lucide-react'
 import CreatableSelect from '@/components/ui/CreatableSelect'
 import StatusPill from '@/components/ui/StatusPill'
-import { sectionTitle } from '@/components/ui/SectionCard'
+import { GroupLabel } from '@/components/ui/typography'
 import ConversationsSection from '@/components/drawer/ConversationsSection'
 import { useAuth } from '@/context/AuthContext'
 import api, { unwrap, unwrapList } from '@/lib/api'
@@ -243,7 +243,7 @@ export default function InterviewsTab({ application: a }: { application: Applica
           the shared ConversationsSection exactly like the candidate drawer does. */}
       {hasAnyInterviewActivity && (
         <div>
-          <div style={{ ...sectionTitle, marginBottom: 8 }}>{t('interview.conversation.title')}</div>
+          <GroupLabel style={{ letterSpacing: '0.04em', marginBottom: 8 }}>{t('interview.conversation.title')}</GroupLabel>
           {!resolved ? (
             <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>{t('common:loading')}</span>
           ) : scope ? (
@@ -292,10 +292,10 @@ export default function InterviewsTab({ application: a }: { application: Applica
             {iv.status && <StatusPill label={t(`interview.history.status.${iv.status}`)} color={HISTORY_STATUS_COLOR[iv.status]} />}
           </div>
 
-          {/* Transcript — canon (05-08): shared sectionTitle (11px muted uppercase). */}
+          {/* Transcript — canon (05-08): shared GroupLabel atom (11px muted uppercase). */}
           {iv.transcript.length > 0 && (
             <div>
-              <div style={{ ...sectionTitle, marginBottom: 8 }}>{t('interview.transcript')}</div>
+              <GroupLabel style={{ letterSpacing: '0.04em', marginBottom: 8 }}>{t('interview.transcript')}</GroupLabel>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
                 {iv.transcript.map((m, i) => <TranscriptBubble key={i} msg={m} />)}
               </div>

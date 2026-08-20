@@ -20,6 +20,8 @@ import DetachedCountBadge from '@/components/ui/DetachedCountBadge'
 import LookupIcon from '@/components/ui/LookupIcon'
 import Button from '@/components/ui/Button'
 import SoftChip from '@/components/ui/SoftChip'
+import { PageTitle } from '@/components/ui/typography'
+import { chipInk, tintBg, tintBorder } from '@/lib/tint'
 import type { Candidate } from '@/types/candidate'
 import type { Id, LookupOption } from '@/types/common'
 import type { HeaderForm } from '../hooks/useCandidateHeaderEdit'
@@ -56,14 +58,17 @@ export function CandidateTitle({ c, editing, hf, setHF }: {
     <div style={{ display: 'flex', flexDirection: 'column', gap: 6, minWidth: 0 }}>
       <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1fr)', gap: 6 }}>
         <input placeholder={t('modal.fields.firstName')} value={hf('firstname')} onChange={e => setHF('firstname', e.target.value)}
+          // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- name edit <input> matching the bold PageTitle it replaces while editing, not a SectionTitle heading
           style={{ ...inputBase, fontSize: 13, fontWeight: 600 }} />
         <input placeholder={t('modal.fields.lastName')} value={hf('lastname')} onChange={e => setHF('lastname', e.target.value)}
+          // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- name edit <input> matching the bold PageTitle it replaces while editing, not a SectionTitle heading
           style={{ ...inputBase, fontSize: 13, fontWeight: 600 }} />
       </div>
       {/* The tussenvoegsel is part of the NAME, so it carries the same weight as
           the first/last name beside it (Danny 17-08: "Van moet ook dik gedrukt") —
           it used to render a size smaller and muted, which read as a side note. */}
       <input placeholder={t('modal.fields.middleName')} value={hf('middleName')} onChange={e => setHF('middleName', e.target.value)}
+        // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- name edit <input> matching the bold PageTitle it replaces while editing, not a SectionTitle heading
         style={{ ...inputBase, fontSize: 13, fontWeight: 600 }} />
       <CreatableSelect value={hf('title')} options={functions} onChange={v => setHF('title', v)}
         allowCreate={allowFreeEntry} placeholder={t('columns.function')} menuWidth={260} />
@@ -72,7 +77,7 @@ export function CandidateTitle({ c, editing, hf, setHF }: {
   return (
     <>
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-        <div style={{ fontSize: 15, fontWeight: 700, color: 'var(--text)' }}>{c.name}</div>
+        <PageTitle as="span" style={{ fontWeight: 700 }}>{c.name}</PageTitle>
         {/* NUMMER-1: human-readable reference number, click-to-copy — same spot on every drawer. */}
         <ReferenceNumberChip value={c.referenceNumber} />
         {/* ONTKOPPEL-TELLER-1: whole-history CURRENTLY-detached count, warning-only (hidden at 0). */}
@@ -122,15 +127,15 @@ export function CandidateHeaderActions({ c, isEntryPhase, nextPhase, converting,
       )}
       {headerEditing ? (
         <>
-          <Button variant="primary" size="sm" iconOnly onClick={onSaveEdit} title={t('common:save')}>
+          <Button variant="primary" size="sm" iconOnly onClick={onSaveEdit} title={t('common:save')} aria-label={t('common:save')}>
             <Save size={14} />
           </Button>
-          <Button variant="secondary" size="sm" iconOnly onClick={onCancelEdit} title={t('common:cancel')}>
+          <Button variant="secondary" size="sm" iconOnly onClick={onCancelEdit} title={t('common:cancel')} aria-label={t('common:cancel')}>
             <X size={14} />
           </Button>
         </>
       ) : (
-        <Button variant="secondary" size="sm" iconOnly onClick={onStartEdit} title={t('drawer.edit')}>
+        <Button variant="secondary" size="sm" iconOnly onClick={onStartEdit} title={t('drawer.edit')} aria-label={t('drawer.edit')}>
           <Edit2 size={13} />
         </Button>
       )}
@@ -149,8 +154,8 @@ export function ArchivedBanner({ c, canHardDelete, onRestore, onMarkDeletion, on
   const inTrash = c.lifecycle === 'pending_erase'
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 8, padding: '7px 10px', borderRadius: 8, fontSize: 12,
-      color: 'var(--color-danger)', background: 'color-mix(in srgb, var(--color-danger) 8%, transparent)',
-      border: '1px solid color-mix(in srgb, var(--color-danger) 28%, transparent)' }}>
+      color: chipInk('var(--color-danger)'), background: tintBg('var(--color-danger)'),
+      border: tintBorder('var(--color-danger)') }}>
       <span style={{ flex: 1, minWidth: 0 }}>
         {inTrash
           ? [c.pendingEraseAt ? t('erase.inTrashSince', { date: formatDate(c.pendingEraseAt) }) : t('erase.inTrash'), c.archivedBy ? t('drawer.byWho', { name: c.archivedBy }) : null].filter(Boolean).join(' · ')
@@ -160,6 +165,7 @@ export function ArchivedBanner({ c, canHardDelete, onRestore, onMarkDeletion, on
           identity), not one of the four migrated Button patterns, left as-is. */}
       {onRestore && (
         <button onClick={() => onRestore(c.id)} title={t('drawer.restore')} aria-label={t('drawer.restore')}
+          // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- pre-existing bespoke icon-only control (mirrors PendingEraseBanner's icon variant), out of this task's scope
           style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 3, display: 'flex', color: 'var(--color-primary-text)' }}>
           <RotateCcw size={14} />
         </button>
@@ -171,6 +177,7 @@ export function ArchivedBanner({ c, canHardDelete, onRestore, onMarkDeletion, on
       {!inTrash && onMarkDeletion && (
         <button onClick={() => onMarkDeletion(c.id)}
           title={t('erase.markDelete')} aria-label={t('erase.markDelete')}
+          // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- pre-existing bespoke icon-only control (mirrors PendingEraseBanner's icon variant), out of this task's scope
           style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 3, display: 'flex', color: 'var(--color-danger)' }}>
           <Trash2 size={14} />
         </button>

@@ -317,7 +317,6 @@ export default function StatusListEditor({ title, subtitle, endpoint, addLabel, 
                            color: 'var(--text)', background: 'var(--surface)', border: '1px solid var(--border)',
                            borderRadius: 6, flexShrink: 0, outline: 'none' }} />
               )}
-              {/* eslint-disable-next-line no-restricted-syntax -- DATA: fallback swatch colour for a lookup row without one stored yet, not UI chrome */}
               {withColor && <ColorSwatch color={item.color ?? FALLBACK_SWATCH} onChange={c => updateColor(item, c)} />}
               {/* Curated icon picker IN the row, next to the colour (Danny 23-07). withIcon=true
                   without an explicit iconPicker prop now ALSO renders the picker, fed by the
@@ -364,19 +363,17 @@ export default function StatusListEditor({ title, subtitle, endpoint, addLabel, 
                 )
               })}
               <div style={{ flex: 1 }} />
-              <button onClick={() => openEdit(item)} title={t('statusList.edit')}
-                style={{ width: 28, height: 28, display: 'flex', alignItems: 'center', justifyContent: 'center',
-                         background: 'var(--border)', border: 'none', borderRadius: 6, cursor: 'pointer', color: 'var(--text)' }}>
+              <Button variant="secondary" iconOnly onClick={() => openEdit(item)} title={t('statusList.edit')} aria-label={t('statusList.edit')}>
                 <Pencil size={11} />
-              </button>
-              {/* Delete is disabled when the item is still referenced by existing data. */}
-              <button onClick={() => remove(item)} disabled={deleting === item.id || inUse(item)}
-                title={inUse(item) ? t('statusList.inUse') : undefined}
-                style={{ width: 28, height: 28, display: 'flex', alignItems: 'center', justifyContent: 'center',
-                         background: 'var(--color-danger-bg)', border: 'none', borderRadius: 6, color: 'var(--color-danger)',
-                         cursor: inUse(item) ? 'not-allowed' : 'pointer', opacity: inUse(item) ? 0.4 : 1 }}>
+              </Button>
+              {/* Delete is disabled when the item is still referenced by existing data.
+                  Accessible name stays the plain "delete" verb even while disabled —
+                  title carries the in-use reason as a tooltip, aria-label never goes
+                  undefined (VAC-CLEAR-style regression: name must survive both states). */}
+              <Button variant="dangerSoft" iconOnly onClick={() => remove(item)} disabled={deleting === item.id || inUse(item)}
+                title={inUse(item) ? t('statusList.inUse') : undefined} aria-label={t('common:delete')}>
                 {deleting === item.id ? <Spinner size={11} /> : <Trash2 size={11} />}
-              </button>
+              </Button>
             </>
           )}
         />
@@ -385,10 +382,10 @@ export default function StatusListEditor({ title, subtitle, endpoint, addLabel, 
       {showModal && (
         <>
           <div className="fixed inset-0 z-40" style={{ background: 'rgba(0,0,0,0.3)' }} onClick={() => setShowModal(false)} />
-          <div className="fixed z-50" style={{ top: '50%', left: '50%', transform: 'translate(-50%,-50%)', background: 'var(--surface)', borderRadius: 12, padding: 24, width: 400, boxShadow: '0 20px 60px rgba(0,0,0,0.15)' }}>
+          <div className="fixed z-50" style={{ top: '50%', left: '50%', transform: 'translate(-50%,-50%)', background: 'var(--surface)', borderRadius: 12, padding: 24, width: 400, boxShadow: 'var(--shadow-modal)' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 18 }}>
-              <span style={{ fontSize: 15, fontWeight: 700 }}>{editing ? t('statusList.editTitle') : addLabel}</span>
-              <button onClick={() => setShowModal(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)' }}><X size={16} /></button>
+              <PageTitle as="span">{editing ? t('statusList.editTitle') : addLabel}</PageTitle>
+              <Button variant="ghost" iconOnly size="sm" onClick={() => setShowModal(false)} title={t('common:close')} aria-label={t('common:close')}><X size={16} /></Button>
             </div>
             <div style={{ marginBottom: 14 }}>
               <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 5 }}>{t('statusList.nameLabel')}</div>

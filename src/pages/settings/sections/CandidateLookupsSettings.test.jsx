@@ -87,10 +87,12 @@ describe('CandidateLookupsSettings — funnel stage default singleton', () => {
   // 04-08 decision: phases stays add/remove-locked, but the default flag becomes settable.
   it('renders the DefaultToggle on the locked phases block and PUTs is_default:true', async () => {
     api.get.mockResolvedValue({ data: {
+      /* eslint-disable no-restricted-syntax -- DATA: fixture phase colours, not a style rule. */
       phases: [
         { id: 'p1', value: 'lead', label: 'Lead', color: '#3B8FD4', is_default: true },
         { id: 'p2', value: 'candidate', label: 'Candidate', color: '#6E8FD6', is_default: false },
       ],
+      /* eslint-enable no-restricted-syntax */
     } })
     api.put.mockResolvedValue({ data: {} })
     const user = userEvent.setup()
@@ -176,6 +178,24 @@ describe('CandidateLookupsSettings — phase is_applicant flag', () => {
     expect(screen.queryByRole('button', { name: st('lookups.add') })).not.toBeInTheDocument()
     const editBtn = screen.getByTitle(st('lookups.edit'))
     expect(editBtn).not.toBeDisabled()
+  })
+})
+
+// HUISSTIJL herhaal-audit r6 (aria-label regression): the delete icon Button
+// must expose an accessible name in its non-in-use state — a name derived
+// only from a conditional `title` (undefined when not in_use) would leave
+// the control unlabelled for assistive tech and fail the Button iconOnly
+// discriminated-union flip that requires aria-label on every iconOnly Button.
+describe('CandidateLookupsSettings — delete button accessible name', () => {
+  it('exposes an accessible name on the not-in-use delete button', async () => {
+    api.get.mockResolvedValue({ data: {
+      // eslint-disable-next-line no-restricted-syntax -- DATA: fixture contract-form colour, not a style rule.
+      candidate_types: [{ id: 'c1', value: 'zzp', label: 'ZZP', color: '#3B8FD4', in_use: false }],
+    } })
+    render(<ContractFormsSettings />)
+
+    await screen.findByText('ZZP')
+    expect(screen.getByRole('button', { name: st('delete', { ns: 'common' }) })).toBeInTheDocument()
   })
 })
 

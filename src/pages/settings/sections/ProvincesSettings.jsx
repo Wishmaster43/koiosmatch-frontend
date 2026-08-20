@@ -151,12 +151,15 @@ export default function ProvincesSettings() {
             <>
               <span style={{ fontSize: 13, color: 'var(--text)' }}>{item.name}</span>
               <div style={{ flex: 1 }} />
-              <Button variant="secondary" iconOnly onClick={() => openEdit(item)} title={t('statusList.edit')}>
+              <Button variant="secondary" iconOnly onClick={() => openEdit(item)} title={t('statusList.edit')} aria-label={t('statusList.edit')}>
                 <Pencil size={11} />
               </Button>
-              {/* Delete is disabled when the item is still referenced by a candidate. */}
+              {/* Delete is disabled when the item is still referenced by a candidate.
+                  Accessible name stays the plain "delete" verb even while disabled —
+                  title carries the in-use reason as a tooltip, aria-label never goes
+                  undefined (VAC-CLEAR-style regression: name must survive both states). */}
               <Button variant="dangerSoft" iconOnly onClick={() => remove(item)} disabled={deleting === item.id || item.in_use}
-                title={item.in_use ? t('statusList.inUse') : undefined}>
+                title={item.in_use ? t('statusList.inUse') : undefined} aria-label={t('common:delete')}>
                 {deleting === item.id ? <Spinner size={11} /> : <Trash2 size={11} />}
               </Button>
             </>

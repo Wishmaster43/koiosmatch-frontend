@@ -20,8 +20,6 @@ import { GroupLabel } from '@/components/ui/typography'
 // G33/fieldMetrics canon (was its own padding-7/font-12/radius-6 copy).
 export const inputStyle: CSSProperties = fieldInputStyle
 export const blockStyle: CSSProperties = { borderRadius: 10, overflow: 'hidden', border: '1px solid var(--border)', background: 'var(--surface)' }
-export const groupTitleText: CSSProperties = { fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em', color: 'var(--text-muted)' }
-export const groupTitle: CSSProperties = { ...groupTitleText, marginBottom: 3 }
 export const dash = <span style={{ color: 'var(--text-muted)' }}>-</span>
 
 // One label/value row — `editing` picks which of `read`/`edit` renders. Each
@@ -59,11 +57,11 @@ export function controls(t: TFunction, isEditing: boolean, onSave: () => void, o
   return isEditing ? (
     <div style={{ display: 'flex', gap: 4 }}>
       {extra}
-      <Button variant="primary" iconOnly size="sm" onClick={onSave} title={t('common:save')}><Save size={13} /></Button>
-      <Button variant="secondary" iconOnly size="sm" onClick={onCancel} title={t('common:cancel')}><X size={13} /></Button>
+      <Button variant="primary" iconOnly size="sm" onClick={onSave} title={t('common:save')} aria-label={t('common:save')}><Save size={13} /></Button>
+      <Button variant="secondary" iconOnly size="sm" onClick={onCancel} title={t('common:cancel')} aria-label={t('common:cancel')}><X size={13} /></Button>
     </div>
   ) : (
-    <Button variant="secondary" iconOnly size="sm" onClick={onStart} title={t('common:edit')}><Edit2 size={13} /></Button>
+    <Button variant="secondary" iconOnly size="sm" onClick={onStart} title={t('common:edit')} aria-label={t('common:edit')}><Edit2 size={13} /></Button>
   )
 }
 

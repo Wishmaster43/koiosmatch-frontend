@@ -4,8 +4,9 @@ import { useTranslation } from 'react-i18next'
 import SelectMenuJs from '@/components/ui/SelectMenu'
 import SubTabBar from '@/components/drawer/SubTabBar'
 import SelectAllRow from '@/components/ui/SelectAllRow'
-import { sectionTitle } from '@/components/ui/SectionCard'
+import { GroupLabel } from '@/components/ui/typography'
 import Toggle from '@/components/ui/Toggle'
+import { tintBg, tintBorder, chipInk } from '@/lib/tint'
 import { useVacancyLookups } from '@/context/VacancyLookupsContext'
 import { useAllSettings, getJsonSetting, getBoolSetting } from '@/lib/settings/useAllSettings'
 import { VACANCY_APP_DEFAULTS_KEY, FALLBACK_APP_SETTINGS } from '../data/applicationSettingsDefaults'
@@ -72,6 +73,9 @@ export default function PublishingTab({ vacancy: v, onUpdate }: { vacancy: Vacan
   // Vacancy's own settings win; the tenant default fills any gap.
   const buildSettings = (): Record<string, unknown> => ({ ...tenantDefaults, ...((v.applicationSettings ?? {}) as Record<string, unknown>) })
   const [settings, setSettings] = useState<Record<string, unknown>>(buildSettings)
+  // Sub-tab strip state — declared before the resync effect below, which
+  // resets it whenever the vacancy identity changes (no forward reference).
+  const [subTab, setSubTab] = useState('settings')
 
   // V-PUB-1: resync channels/settings/subTab whenever the vacancy identity changes —
   // without this, switching drawer target left stale channel/settings state from the
@@ -116,7 +120,6 @@ export default function PublishingTab({ vacancy: v, onUpdate }: { vacancy: Vacan
     { id: 'settings', label: t('publishing.tabs.settings') },
     { id: 'sites', label: t('publishing.tabs.sites') },
   ]
-  const [subTab, setSubTab] = useState('settings')
 
   return (
     <div>
@@ -124,9 +127,9 @@ export default function PublishingTab({ vacancy: v, onUpdate }: { vacancy: Vacan
 
       {subTab === 'settings' && (
         <div style={{ marginTop: 12 }}>
-          {/* Application settings — canon (05-08): the shared sectionTitle, reused
+          {/* Application settings — canon (05-08): the shared GroupLabel atom, reused
               instead of a hand-rolled heading. */}
-          <div style={{ ...sectionTitle, marginBottom: 8 }}>{t('publishing.applicationSettings')}</div>
+          <GroupLabel style={{ letterSpacing: '0.04em', marginBottom: 8 }}>{t('publishing.applicationSettings')}</GroupLabel>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 20 }}>
             {APP_FIELDS.map(field => (
               <div key={field} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
@@ -142,16 +145,16 @@ export default function PublishingTab({ vacancy: v, onUpdate }: { vacancy: Vacan
 
       {subTab === 'sites' && (
         <div style={{ marginTop: 12 }}>
-          {/* Job boards — canon (05-08): the shared sectionTitle. */}
-          <div style={{ ...sectionTitle, marginBottom: 8 }}>{t('publishing.channels')}</div>
+          {/* Job boards — canon (05-08): the shared GroupLabel atom. */}
+          <GroupLabel style={{ letterSpacing: '0.04em', marginBottom: 8 }}>{t('publishing.channels')}</GroupLabel>
           {/* Honest state (CAREER-SITE-ACTIVE): the tenant-wide switch actually gates
               the public surface (career site + apply + sitemap + Indeed/Werkzoeken
               feeds), so the banner reports the REAL current state instead of a
               permanent "under construction" claim once that backend went live. */}
-          <div style={{ fontSize: 11.5, color: careerSiteActive ? 'var(--color-success)' : 'var(--color-warning)',
-            border: `1px solid color-mix(in srgb, ${careerSiteActive ? 'var(--color-success)' : 'var(--color-warning)'} 35%, transparent)`,
+          <div style={{ fontSize: 11.5, color: chipInk(careerSiteActive ? 'var(--color-success)' : 'var(--color-warning)'),
+            border: tintBorder(careerSiteActive ? 'var(--color-success)' : 'var(--color-warning)'),
             borderRadius: 8, padding: '8px 10px', marginBottom: 10,
-            background: `color-mix(in srgb, ${careerSiteActive ? 'var(--color-success)' : 'var(--color-warning)'} 8%, transparent)` }}>
+            background: tintBg(careerSiteActive ? 'var(--color-success)' : 'var(--color-warning)') }}>
             {careerSiteActive ? t('publishing.siteLive') : t('publishing.siteOffline')}
           </div>
           {/* S-selectall-1: alles/niets above the channel list — same shared

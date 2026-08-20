@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { History } from 'lucide-react'
-import { sectionTitle } from '@/components/ui/SectionCard'
+import { GroupLabel } from '@/components/ui/typography'
 import FloatingPanel from '@/components/ui/FloatingPanel'
 // PORTAL-MARKER-1: a click inside an open portalled picker menu is never "outside".
 import { isInsideDropdownPortal } from '@/lib/useDropdownPlacement'
@@ -56,6 +56,7 @@ export default function ChangelogPopover({ label, children }: { label?: string; 
       {/* Toggle: a calm, muted meta-icon that tints when the popover is open. */}
       <button onClick={() => setOpen(o => !o)} title={title}
         aria-label={title} aria-haspopup="dialog" aria-expanded={open}
+        // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- aria-expanded popover toggle with its own open-state colour swap (mirrors ViewModeToggle), not one of Button's fixed variants
         style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 4, display: 'flex',
           color: open ? 'var(--color-primary-text)' : 'var(--text-muted)' }}>
         <History size={14} />
@@ -65,9 +66,9 @@ export default function ChangelogPopover({ label, children }: { label?: string; 
         width={900} maxWidth="92vw" persistKey="changelog" overlay={false}
         bodyStyle={{ padding: '12px 14px' }}
         header={(
-          <span style={{ ...sectionTitle, display: 'flex', alignItems: 'center', gap: 7 }}>
+          <GroupLabel as="span" style={{ letterSpacing: '0.04em', display: 'flex', alignItems: 'center', gap: 7 }}>
             <History size={14} style={{ color: 'var(--text-muted)' }} /> {title}
-          </span>
+          </GroupLabel>
         )}>
         {children}
       </FloatingPanel>

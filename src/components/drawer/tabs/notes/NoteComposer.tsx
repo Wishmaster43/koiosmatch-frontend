@@ -151,8 +151,10 @@ export default function NoteComposer({ open, initialNote, noteTypes, channels, l
       <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 6, padding: '10px 16px', borderTop: '1px solid var(--border)', flexShrink: 0 }}>
         {/* MAAT (r5 finding 1): drawer buttons ride the sm standard — md is the
             page-toolbar exception only. */}
-        <Button variant="primary" iconOnly onClick={save} title={labels.save}><Save size={14} /></Button>
-        <Button variant="secondary" iconOnly onClick={onCancel} title={labels.cancel}><X size={14} /></Button>
+        {/* aria-label is TOTAL (the Button type demands it): labels.save/cancel are
+            optional host overrides, so the common keys are the guaranteed floor. */}
+        <Button variant="primary" iconOnly onClick={save} title={labels.save ?? t('save')} aria-label={labels.save ?? t('save')}><Save size={14} /></Button>
+        <Button variant="secondary" iconOnly onClick={onCancel} title={labels.cancel ?? t('cancel')} aria-label={labels.cancel ?? t('cancel')}><X size={14} /></Button>
       </div>
     </FloatingPanel>
   )

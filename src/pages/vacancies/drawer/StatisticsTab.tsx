@@ -2,7 +2,7 @@ import type { ComponentType } from 'react'
 import { useTranslation } from 'react-i18next'
 import StatsTabJs from '@/components/drawer/tabs/StatsTab'
 import MiniDonutJs from '@/components/charts/MiniDonut'
-import { sectionTitle } from '@/components/ui/SectionCard'
+import { GroupLabel } from '@/components/ui/typography'
 import { useNavigation } from '@/context/NavigationContext'
 import { useVacancyLookups } from '@/context/VacancyLookupsContext'
 import { useDateFormat } from '@/lib/datetime'
@@ -113,11 +113,13 @@ export default function StatisticsTab({ vacancy: v, onNavigateTab }: { vacancy: 
             // V-stats-1: Leads deep-links to Kandidaten zoeken — real, keyboard-
             // operable buttons (not the row itself, which stays a static label).
             [t('columns.leads'), leadsKnown && onNavigateTab ? (
+              // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- inline mono value link inside a DetailTable cell (font: inherit, zero padding), not a button-shaped affordance
               <button type="button" style={linkBtn} aria-label={t('columns.leadsOpenSearch')}
                 onClick={() => onNavigateTab('candidateSearch')}>{String(leads)}</button>
             ) : (leadsKnown ? String(leads) : '—')],
             // V-stats-1: Sollicitaties deep-links to the applicants tab.
             [t('columns.applications'), onNavigateTab ? (
+              // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- inline mono value link inside a DetailTable cell (font: inherit, zero padding), not a button-shaped affordance
               <button type="button" style={linkBtn} aria-label={t('columns.applicationsOpen')}
                 onClick={() => onNavigateTab('applicants')}>{String(totalApps)}</button>
             ) : String(totalApps)],
@@ -128,7 +130,7 @@ export default function StatisticsTab({ vacancy: v, onNavigateTab }: { vacancy: 
       {/* Per-phase funnel — donut + clickable legend (same click-to-filter convention
           as the insights row's donuts, §3A), replacing the old hand-rolled bar list. */}
       <div style={{ marginTop: 16 }}>
-        <div style={{ ...sectionTitle, marginBottom: 8 }}>{t('applicants.byPhase')}</div>
+        <GroupLabel style={{ letterSpacing: '0.04em', marginBottom: 8 }}>{t('applicants.byPhase')}</GroupLabel>
         {phaseData.length === 0 ? (
           <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>—</span>
         ) : (
@@ -139,6 +141,7 @@ export default function StatisticsTab({ vacancy: v, onNavigateTab }: { vacancy: 
               {phaseData.map(p => (
                 <button key={p.key} type="button" onClick={() => jumpToPhase(p.key)}
                   title={t('statistics.openApplications')}
+                  // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- full-width clickable legend row (dot + label + value, structural), not an action button
                   style={{ display: 'flex', alignItems: 'center', gap: 8, background: 'none', border: 'none',
                     padding: 0, cursor: 'pointer', textAlign: 'left' }}>
                   <span style={{ width: 8, height: 8, borderRadius: '50%', background: p.color, flexShrink: 0 }} />

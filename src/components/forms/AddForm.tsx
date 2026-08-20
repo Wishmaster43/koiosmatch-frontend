@@ -226,10 +226,10 @@ export default function AddForm({ fields, onSave, onCancel, initial }: {
         {/* House Button (HUISSTIJL-1, BTN-5) — an icon save button is Button
             size="sm" iconOnly, never a local iconBtn style constant. */}
         <div style={{ display: 'flex', gap: 6 }}>
-          <Button variant="primary" size="sm" iconOnly onClick={handleSave} title={t('save')}>
+          <Button variant="primary" size="sm" iconOnly onClick={handleSave} title={t('save')} aria-label={t('save')}>
             <Save size={14} />
           </Button>
-          <Button variant="secondary" size="sm" iconOnly onClick={onCancel} title={t('cancel')}>
+          <Button variant="secondary" size="sm" iconOnly onClick={onCancel} title={t('cancel')} aria-label={t('cancel')}>
             <X size={14} />
           </Button>
         </div>

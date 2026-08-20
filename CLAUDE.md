@@ -558,7 +558,12 @@ the code is worse than no rule, because the next reader builds on it. What is tr
   · Typografie → `components/ui/typography`: `PageTitle` (15/600) ·
     `SectionTitle` (13/600) · `BodyText` (13/400) · `Caption` (11 muted) ·
     `GroupLabel` (11/600 uppercase) · `Mono` (JetBrains). Een losse
-    fontSize/fontWeight voor een kop/alinea/bijschrift is een finding.
+    fontSize/fontWeight voor een kop/alinea/bijschrift is een finding, en een
+    LOKALE label-/caption-STIJLCONSTANTE ook (r6: zo ontstaan de kopieën) —
+    het atoom neemt layout via zijn style-prop, identiteit nooit lokaal; wie
+    écht het stijl-OBJECT nodig heeft (stijlfabriek) importeert de raw
+    identiteit (`sectionTitleStyle`/`captionStyle`/`groupLabelStyle`) uit
+    dezelfde module. Lint bewaakt 15px, 11/muted en 13/600.
   · Laden → `Spinner` (nooit een losse Loader2+animate-spin meer).
   · Tokens → kleuren/tinten via `--color-*` + `lib/tint` (huispaar 10/33,
     actief 16/50); maten via `BTN_H`; SPACING via `--space-1..8` (4px-grid);
@@ -758,7 +763,11 @@ the code is worse than no rule, because the next reader builds on it. What is tr
   fill gaps, never to patch wrong markup.
 - **Full keyboard operability**: focus states visible, logical tab order, no
   keyboard traps. Drawers/modals trap focus _while open_ and restore it on close.
-- Every input has an associated `<label>`. Icon-only buttons have `aria-label`.
+- Every input has an associated `<label>`. Icon-only buttons have `aria-label` —
+  **afgedwongen door het typesysteem (r6, 20-08): `Button iconOnly` zonder
+  `aria-label` compileert niet.** Een `title` die alleen in een randgeval gevuld
+  is, is geen naam (drie verwijderknoppen scheepten zo naamloos in); `title`
+  blijft de tooltip, `aria-label` is de naam en is totaal.
 - Color is never the only signal (status uses icon + text, not just color).
 - Contrast ≥ 4.5:1 for text. Charts include accessible labels/legends.
 

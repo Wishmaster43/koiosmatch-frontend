@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { AlertTriangle, History } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import TimelineRail from './TimelineRail'
-import { sectionTitle } from './SectionCard'
+import { GroupLabel, Caption } from './typography'
 import { useDateFormat } from '@/lib/datetime'
 
 /** Icon + semantic token for one event kind — the ONLY place colour is spent here (§4). */
@@ -42,6 +42,7 @@ interface EventTimelineProps {
 
 // Times sit in their own right-aligned mono column: that column IS the second
 // vertical guide next to the axis, and tabular figures keep the digits aligned (§4).
+// eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- fixed-width mono time COLUMN (tabular-nums, right-aligned) beside the timeline axis, not a Caption/label copy
 const timeStyle: CSSProperties = {
   fontFamily: 'JetBrains Mono, monospace', fontSize: 11, fontVariantNumeric: 'tabular-nums',
   color: 'var(--text-muted)', width: 38, flexShrink: 0, textAlign: 'right', paddingTop: 3,
@@ -52,7 +53,7 @@ const timeStyle: CSSProperties = {
  * ziet er nog niet uit"). One calm row per event: a soft-tinted marker on a
  * continuous vertical axis, the time in mono, the event text at full contrast and
  * the author demoted to a muted meta line. Events are grouped per day under a
- * heading that reuses the app's own `sectionTitle` idiom, so the date is stated
+ * heading that reuses the shared `GroupLabel` atom, so the date is stated
  * once instead of repeated on every row.
  *
  * Presentational only (§2: components/ui is dumb) — no fetching, no business logic.
@@ -125,7 +126,7 @@ export default function EventTimeline({
           {g.day && (
             <div style={{ display: 'flex', gap: 10, alignItems: 'center', paddingTop: gi === 0 ? 0 : 10, paddingBottom: 8 }}>
               <TimelineRail variant={gi === 0 ? 'spacer' : 'connector'} />
-              <span style={sectionTitle}>{dayLabel(g.day)}</span>
+              <GroupLabel as="span" style={{ letterSpacing: '0.04em' }}>{dayLabel(g.day)}</GroupLabel>
             </div>
           )}
           {g.items.map(({ ev, index }) => {
@@ -142,7 +143,7 @@ export default function EventTimeline({
                     <span style={{ flex: 1, minWidth: 0, fontSize: 12, fontWeight: 400, lineHeight: 1.45, color: 'var(--text)' }}>{ev.text}</span>
                     {ev.trailing}
                   </div>
-                  {ev.meta && <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 2 }}>{ev.meta}</div>}
+                  {ev.meta && <Caption as="div" style={{ marginTop: 2 }}>{ev.meta}</Caption>}
                 </div>
               </div>
             )

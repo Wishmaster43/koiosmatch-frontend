@@ -7,7 +7,7 @@
  * all come from tenant lookups via their `useX()` hooks / LookupsContext.
  */
 import type { CSSProperties } from 'react'
-import { sectionTitle as uiSectionTitle } from '@/components/ui/SectionCard'
+import { groupLabelStyle } from '@/components/ui/typography'
 import type { Id } from '@/types/common'
 
 // Dutch provinces — a fixed real-world list, not tenant-configurable (so kept literal).
@@ -16,9 +16,10 @@ export const NL_PROVINCES: string[] = ['Drenthe','Flevoland','Friesland','Gelder
 // Section card styling used across the candidate tabs (note: title carries its own
 // bottom margin, unlike the shared ui/SectionCard — kept for visual parity).
 export const sectionBlock: CSSProperties = { border: '1px solid var(--border)', borderRadius: 10, padding: '14px 16px', background: 'var(--surface)' }
-// Same grey uppercase style as the shared ui/SectionCard (one visual source); the
-// block-level marginBottom is added here because Planning renders it as a bare span.
-export const sectionTitle: CSSProperties = { ...uiSectionTitle, display: 'block', marginBottom: 8 }
+// Same grey uppercase style as the shared GroupLabel atom (one visual source,
+// letterSpacing kept at 0.04em to match the pre-existing candidate-tab render);
+// the block-level marginBottom is added here because Planning renders it as a bare span.
+export const sectionTitle: CSSProperties = { ...groupLabelStyle, letterSpacing: '0.04em', display: 'block', marginBottom: 8 }
 
 // Soft-tint selectable pill (§4 color-mix formula, mirrors ApplicationsPage's bucket
 // tabs) — shared by the planning family (Availability / roles-pools chips / open-shift
@@ -30,6 +31,7 @@ export const softPill = (active: boolean, color: string = 'var(--color-primary)'
   // PRIMAIR-VLAK-1 (Danny 19-08): a SELECTED pill paints the solid colour with
   // on-accent ink — tints stay the language of unselected/status surfaces.
   // Accent selections read the button trio; DATA colours stay themselves.
+  // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- softPill IS the canonical shared selection-pill factory (§3A, mirrored by AvailabilityEditor/PlanningScheduling/PlanningFavorites), not a per-element copy of Button
   background: active ? (color === 'var(--color-primary)' ? 'var(--button-fill)' : color) : 'transparent',
   border: active ? '1px solid var(--button-border)' : '1px solid var(--border)',
 })

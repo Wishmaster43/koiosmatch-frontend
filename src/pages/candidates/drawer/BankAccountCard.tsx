@@ -116,11 +116,11 @@ export default function BankAccountCard({ value, onSave, bankDocumentId, documen
       <GroupHeader title={t('preferences.groupBankAccount')}>
         {editing ? (
           <div style={{ display: 'flex', gap: 4 }}>
-            <Button variant="primary" size="sm" iconOnly onClick={save} title={tc('save')}><Save size={13} /></Button>
-            <Button variant="secondary" size="sm" iconOnly onClick={cancel} title={tc('cancel')}><X size={13} /></Button>
+            <Button variant="primary" size="sm" iconOnly onClick={save} title={tc('save')} aria-label={tc('save')}><Save size={13} /></Button>
+            <Button variant="secondary" size="sm" iconOnly onClick={cancel} title={tc('cancel')} aria-label={tc('cancel')}><X size={13} /></Button>
           </div>
         ) : (
-          <Button variant="secondary" size="sm" iconOnly onClick={start} title={tc('edit')}><Edit2 size={13} /></Button>
+          <Button variant="secondary" size="sm" iconOnly onClick={start} title={tc('edit')} aria-label={tc('edit')}><Edit2 size={13} /></Button>
         )}
       </GroupHeader>
       <GroupCard>
@@ -142,10 +142,8 @@ export default function BankAccountCard({ value, onSave, bankDocumentId, documen
         {linkedDoc && (
           <FieldRow label={t('preferences.bankDocument')}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-              <button type="button" aria-label={t('documents.preview')} title={t('documents.preview')} onClick={() => setPreviewDoc(linkedDoc)}
-                style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: '2px 3px', display: 'flex' }}><Eye size={13} /></button>
-              <button type="button" aria-label={t('documents.download')} title={t('documents.download')} onClick={download}
-                style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: '2px 3px', display: 'flex' }}><Download size={13} /></button>
+              <Button variant="ghost" iconOnly size="sm" aria-label={t('documents.preview')} title={t('documents.preview')} onClick={() => setPreviewDoc(linkedDoc)}><Eye size={13} /></Button>
+              <Button variant="ghost" iconOnly size="sm" aria-label={t('documents.download')} title={t('documents.download')} onClick={download}><Download size={13} /></Button>
             </div>
           </FieldRow>
         )}

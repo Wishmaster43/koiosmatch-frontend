@@ -30,24 +30,30 @@ import { tintBg, tintBorder, chipInk } from '@/lib/tint'
 export type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'soft' | 'danger' | 'dangerSoft'
 export type ButtonSize = 'md' | 'sm'
 
-interface ButtonIdentityProps {
+// iconOnly REQUIRES an accessible name at the TYPE level (herhaal-audit r6
+// A11Y-1..3: three icon-only delete buttons shipped with no name because their
+// `title` was only filled in an edge case). A nameless icon button now fails
+// `tsc --noEmit` instead of an audit — the error is impossible, not findable.
+type IconOnlyNaming =
+  | { iconOnly: true; 'aria-label': string }
+  | { iconOnly?: false }
+
+interface ButtonIdentityBase {
   variant?: ButtonVariant
   size?: ButtonSize
-  // Square icon button: fixed width = height, no horizontal padding.
-  iconOnly?: boolean
   // Shared across both the <button> and <a> renders — AnchorHTMLAttributes has
   // no native `disabled`, so the <a> branch honours it manually (see below).
   disabled?: boolean
 }
 
-export interface ButtonProps extends ButtonIdentityProps, ButtonHTMLAttributes<HTMLButtonElement> {
-  href?: undefined
-}
+// Type aliases (not interfaces): an interface cannot extend a union-carrying
+// alias, and IconOnlyNaming is deliberately a union.
+export type ButtonProps = ButtonIdentityBase & IconOnlyNaming &
+  ButtonHTMLAttributes<HTMLButtonElement> & { href?: undefined }
 
 // The <a> variant: same identity props, native anchor attributes, href required.
-export interface ButtonLinkProps extends ButtonIdentityProps, AnchorHTMLAttributes<HTMLAnchorElement> {
-  href: string
-}
+export type ButtonLinkProps = ButtonIdentityBase & IconOnlyNaming &
+  AnchorHTMLAttributes<HTMLAnchorElement> & { href: string }
 
 // Identity per variant — colour/chrome only; sizing lives in SIZES.
 const VARIANTS: Record<ButtonVariant, CSSProperties> = {

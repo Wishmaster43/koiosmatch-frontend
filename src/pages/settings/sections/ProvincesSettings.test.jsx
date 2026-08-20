@@ -69,6 +69,19 @@ describe('ProvincesSettings', () => {
     expect(await screen.findByText('Zuid-Holland')).toBeInTheDocument()
   })
 
+  // HUISSTIJL herhaal-audit r6 (aria-label regression): the delete icon Button
+  // must expose an accessible name in its non-in-use state — a name derived
+  // only from a conditional `title` (undefined when not in_use) would leave
+  // the control unlabelled for assistive tech and fail the Button iconOnly
+  // discriminated-union flip that requires aria-label on every iconOnly Button.
+  it('exposes an accessible name on the not-in-use delete button', async () => {
+    api.get.mockResolvedValue({ data: [province()] })
+    render(<ProvincesSettings />)
+
+    await screen.findByText('Utrecht')
+    expect(screen.getByRole('button', { name: ct('delete') })).toBeInTheDocument()
+  })
+
   it('a 409 on delete keeps the row and flags it in-use instead of removing it', async () => {
     api.get.mockResolvedValue({ data: [province()] })
     api.delete.mockRejectedValue({ response: { status: 409 } })

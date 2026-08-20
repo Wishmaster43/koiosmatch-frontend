@@ -34,6 +34,7 @@ import IconPickerControl from './IconPickerControl'
 import { GENERIC_LOOKUP_ICON_NAMES, resolveGenericLookupIcon } from './lookupIcons'
 import CandidateLookupItemModal from './CandidateLookupItemModal'
 import DrawerAddButton from '@/components/drawer/DrawerAddButton'
+import Button from '@/components/ui/Button'
 
 const BASE = '/settings/candidate-lookups'
 
@@ -178,12 +179,13 @@ export function LookupBlock({ slug, title, subtitle, items, setItems, locked = f
             {/* Icon picker IN the row, next to the colour (mirrors StatusListEditor,
                 batch 12 P22-30) — statuses + contract forms only. */}
             {supportsIcon && (
-              // eslint-disable-next-line no-restricted-syntax -- DATA: fallback swatch colour for a lookup row without one stored yet, not UI chrome
               <IconPickerControl icons={GENERIC_LOOKUP_ICON_NAMES} resolve={resolveGenericLookupIcon} value={item.icon}
+                // eslint-disable-next-line no-restricted-syntax -- DATA: fallback swatch colour for a lookup row without one stored yet, not UI chrome
                 color={item.color ?? '#6B7280'} label={item.label} onPick={icon => updateIcon(item, icon)} />
             )}
             {/* eslint-disable-next-line no-restricted-syntax -- DATA: fallback swatch colour for a lookup row without one stored yet, not UI chrome */}
             <ColorBadge label={item.label} color={item.color ?? '#6B7280'} />
+            {/* eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- <code> renders the lookup's raw stored value/slug (an ID field, §3A), not a Caption/label copy */}
             <code style={{ fontSize: 11, color: 'var(--text-muted)' }}>{item.value}</code>
             {/* Reason badge: marks a status that requires a reason when set (e.g. Inactive). */}
             {isStatusBlock && item.requires_reason && (
@@ -232,19 +234,18 @@ export function LookupBlock({ slug, title, subtitle, items, setItems, locked = f
                 (PHASE-LOCK-1); update() carries NO phases restriction, so rename/colour/flag
                 edits stay open on a system phase. The edit pencil must therefore stay enabled
                 (audit finding, 04-08 — it used to be wrongly disabled here too). */}
-            <button onClick={() => openEdit(item)} title={t('lookups.edit')}
-              style={{ width: 28, height: 28, display: 'flex', alignItems: 'center', justifyContent: 'center',
-                       background: 'var(--border)', border: 'none', borderRadius: 6,
-                       cursor: 'pointer', color: 'var(--text-muted)' }}>
+            <Button variant="secondary" iconOnly onClick={() => openEdit(item)} title={t('lookups.edit')} aria-label={t('lookups.edit')}>
               <Pencil size={11} />
-            </button>
-            {!locked && <button onClick={() => remove(item)} disabled={deleting === item.id || inUse(item)}
-              title={inUse(item) ? t('lookups.inUse') : undefined}
-              style={{ width: 28, height: 28, display: 'flex', alignItems: 'center', justifyContent: 'center',
-                       background: 'var(--color-danger-bg)', border: 'none', borderRadius: 6, color: 'var(--color-danger)',
-                       cursor: inUse(item) ? 'not-allowed' : 'pointer', opacity: inUse(item) ? 0.4 : 1 }}>
-              {deleting === item.id ? <Spinner size={11} /> : <Trash2 size={11} />}
-            </button>}
+            </Button>
+            {/* Accessible name stays the plain "delete" verb even while disabled —
+                title carries the in-use reason as a tooltip, aria-label never goes
+                undefined (VAC-CLEAR-style regression: name must survive both states). */}
+            {!locked && (
+              <Button variant="dangerSoft" iconOnly onClick={() => remove(item)} disabled={deleting === item.id || inUse(item)}
+                title={inUse(item) ? t('lookups.inUse') : undefined} aria-label={t('common:delete')}>
+                {deleting === item.id ? <Spinner size={11} /> : <Trash2 size={11} />}
+              </Button>
+            )}
           </>
         )}
       />

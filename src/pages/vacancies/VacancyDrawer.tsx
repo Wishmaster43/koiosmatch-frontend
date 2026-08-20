@@ -36,7 +36,7 @@ import CustomFieldsTab from '@/components/drawer/CustomFieldsTab'
 import { useVacancyCustomFields } from '@/lib/useVacancyCustomFields'
 import Button from '@/components/ui/Button'
 // HUISSTIJL-1: the footer's 11px/muted meta line is the shared Caption atom.
-import { Caption } from '@/components/ui/typography'
+import { Caption, PageTitle } from '@/components/ui/typography'
 import type { VacancyDetail } from '@/types/vacancy'
 import type { Id } from '@/types/common'
 
@@ -226,6 +226,7 @@ export default function VacancyDrawer({ vacancy: v, onClose, expanded, onToggleE
                 return (
                   <button key={String(c.value)} type="button" onClick={() => setActiveTab('publishing')}
                     title={t('drawer.publishedOnChannel', { channel: c.label })}
+                    // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- deliberate §4 "aan/gelukt" success token pair, not a Button variant (see comment above)
                     style={{ display: 'inline-flex', alignItems: 'center', gap: 5, fontSize: 11, fontWeight: 500,
                       padding: '3px 9px', borderRadius: 999, cursor: 'pointer',
                       background: 'var(--color-success-bg)',
@@ -248,12 +249,13 @@ export default function VacancyDrawer({ vacancy: v, onClose, expanded, onToggleE
             // V7: inline title edit — mirror OpportunityDrawer's renderTitle swap.
             <input autoFocus value={titleDraft} onChange={e => setTitleDraft(e.target.value)}
               onKeyDown={e => { if (e.key === 'Enter') saveTitleEdit(); if (e.key === 'Escape') setEditingTitle(false) }}
+              // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- an <input> matching the title's own size while editing, not a PageTitle render
               style={{ width: '100%', boxSizing: 'border-box', padding: '6px 10px', fontSize: 15, fontWeight: 700,
                 borderRadius: 6, border: '1px solid var(--border)', outline: 'none', color: 'var(--text)' }} />
           ) : (
             <>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-                <span style={{ fontSize: 15, fontWeight: 700, color: 'var(--text)' }}>{v.title}</span>
+                <PageTitle as="span" style={{ fontWeight: 700 }}>{v.title}</PageTitle>
                 {/* NUMMER-1: human-readable reference number, click-to-copy — same spot on every drawer. */}
                 <ReferenceNumberChip value={v.referenceNumber} />
                 {/* ONTKOPPEL-TELLER-1: whole-history CURRENTLY-detached count, warning-only (hidden at 0). */}
@@ -271,11 +273,11 @@ export default function VacancyDrawer({ vacancy: v, onClose, expanded, onToggleE
           // V7: title pencil → save/cancel, same spot as the changelog icon's row.
           actions={editingTitle ? (
             <>
-              <Button variant="primary" iconOnly size="sm" onClick={saveTitleEdit} title={t('common:save')}><Save size={14} /></Button>
-              <Button variant="secondary" iconOnly size="sm" onClick={() => setEditingTitle(false)} title={t('common:cancel')}><X size={14} /></Button>
+              <Button variant="primary" iconOnly size="sm" onClick={saveTitleEdit} title={t('common:save')} aria-label={t('common:save')}><Save size={14} /></Button>
+              <Button variant="secondary" iconOnly size="sm" onClick={() => setEditingTitle(false)} title={t('common:cancel')} aria-label={t('common:cancel')}><X size={14} /></Button>
             </>
           ) : (
-            <Button variant="secondary" iconOnly size="sm" onClick={startTitleEdit} title={t('common:edit')}><Edit2 size={13} /></Button>
+            <Button variant="secondary" iconOnly size="sm" onClick={startTitleEdit} title={t('common:edit')} aria-label={t('common:edit')}><Edit2 size={13} /></Button>
           )}
           // Standard picker widths (§3A blueprint: Status ~160 + Eigenaar ~190).
           meta={[

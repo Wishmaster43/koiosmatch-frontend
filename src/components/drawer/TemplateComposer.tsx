@@ -21,9 +21,9 @@ import CreatableSelect from '@/components/ui/CreatableSelect'
 import { useWhatsAppTemplateSend } from './useWhatsAppTemplateSend'
 import type { Id } from '@/types/common'
 import Button from '@/components/ui/Button'
+import { Caption } from '@/components/ui/typography'
 
 // Shared field footprint for both pickers — one look, never two drifting inputs.
-const fieldLabel: React.CSSProperties = { fontSize: 11, color: 'var(--text-muted)', marginBottom: 4 }
 const fieldFootprint: React.CSSProperties = { padding: '6px 10px', borderRadius: 8, fontSize: 12 }
 
 // A configuration gap (no templates / no sender number) with the fix one click away.
@@ -32,6 +32,7 @@ function ConfigNotice({ text }: { text: string }) {
   return (
     <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4, marginTop: 3, fontSize: 11, color: 'var(--color-danger)' }}>
       <span>{text}</span>
+      {/* eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- inline text link (colour+weight only, no fill/border/padding), not a button-shaped affordance */}
       <a href="#settings/whatsapp/whatsapp" style={{ color: 'var(--color-primary-text)', fontWeight: 600, textDecoration: 'none' }}>
         {t('conversations.configureWhatsapp')}
       </a>
@@ -61,21 +62,21 @@ export default function TemplateComposer({ candidateId, windowKnown, onSent }: {
   return (
     <div style={{ marginTop: 6, padding: 10, borderRadius: 8, border: '1px solid var(--border)', background: 'var(--surface)' }}>
       {/* Why free text is not the way here — icon + text, colour is never the only cue (§6). */}
-      <div style={{ display: 'flex', alignItems: 'flex-start', gap: 6, fontSize: 11, color: 'var(--text-muted)' }}>
+      <Caption as="div" style={{ display: 'flex', alignItems: 'flex-start', gap: 6 }}>
         <Clock size={12} style={{ flexShrink: 0, marginTop: 1 }} />
         <span>{windowKnown ? t('conversations.sessionClosedHint') : t('conversations.windowUnknown')}</span>
-      </div>
+      </Caption>
 
       {/* A contact thread has no candidate to start from — an honest dead end, not a dead button. */}
       {!candidateId ? (
-        <div style={{ marginTop: 6, fontSize: 11, color: 'var(--text-muted)' }}>{t('conversations.templateNeedsCandidate')}</div>
+        <Caption as="div" style={{ marginTop: 6 }}>{t('conversations.templateNeedsCandidate')}</Caption>
       ) : loading ? (
-        <div style={{ marginTop: 6, fontSize: 11, color: 'var(--text-muted)' }}>{t('conversations.templateLoading')}</div>
+        <Caption as="div" style={{ marginTop: 6 }}>{t('conversations.templateLoading')}</Caption>
       ) : (
         <>
           {/* Template — searchable, pick-only: approved templates only, never a typed name. */}
           <div style={{ marginTop: 8 }}>
-            <div id={templateLabelId} style={fieldLabel}>{t('conversations.pickTemplate')}</div>
+            <Caption as="div" id={templateLabelId} style={{ marginBottom: 4 }}>{t('conversations.pickTemplate')}</Caption>
             <CreatableSelect value={templateName || null} onChange={pickTemplate} aria-labelledby={templateLabelId}
               allowCreate={false} placeholder={t('conversations.templatePlaceholder')} menuWidth={300}
               style={fieldFootprint} options={templates.map(tpl => ({ value: tpl.value, label: tpl.label }))} />
@@ -85,7 +86,7 @@ export default function TemplateComposer({ candidateId, windowKnown, onSent }: {
           {/* Sender number — asked only when the tenant really has a choice to make. */}
           {numbers.length > 1 && (
             <div style={{ marginTop: 8 }}>
-              <div id={numberLabelId} style={fieldLabel}>{t('conversations.pickNumber')}</div>
+              <Caption as="div" id={numberLabelId} style={{ marginBottom: 4 }}>{t('conversations.pickNumber')}</Caption>
               <CreatableSelect value={phoneNumberId || null} onChange={setPhoneNumberId} aria-labelledby={numberLabelId}
                 allowCreate={false} placeholder={t('conversations.numberPlaceholder')} menuWidth={300}
                 style={fieldFootprint} options={numbers} />
@@ -97,7 +98,7 @@ export default function TemplateComposer({ candidateId, windowKnown, onSent }: {
               literally, because that is exactly what the endpoint would send today. */}
           {hasPreview && (
             <div style={{ marginTop: 8 }}>
-              <div style={fieldLabel}>{t('conversations.preview')}</div>
+              <Caption as="div" style={{ marginBottom: 4 }}>{t('conversations.preview')}</Caption>
               <div style={{ background: 'var(--hover-bg)', border: '1px solid var(--border)', borderRadius: '10px 10px 10px 2px', padding: '8px 10px', fontSize: 12, color: 'var(--text)' }}>
                 {texts.header && <div style={{ fontWeight: 700, marginBottom: 4, whiteSpace: 'pre-wrap' }}>{texts.header}</div>}
                 {texts.body && <div style={{ whiteSpace: 'pre-wrap' }}>{texts.body}</div>}
