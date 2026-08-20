@@ -92,7 +92,7 @@ export default function WorkflowsListPanel({
           <Spinner size={14} /> {t('page.loading')}
         </div>
       ) : error ? (
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10, color: 'var(--color-danger)', fontSize: 13, padding: '24px 0' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, color: 'var(--color-danger-text)', fontSize: 13, padding: '24px 0' }}>
           <span>{t('page.error')}</span>
           <button onClick={retryLoad} style={{ background: 'none', border: '1px solid var(--border)', borderRadius: 6,
             padding: '4px 10px', cursor: 'pointer', color: 'var(--text)', fontSize: 12 }}>{t('common:error.retry')}</button>

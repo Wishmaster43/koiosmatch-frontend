@@ -166,6 +166,14 @@ export default defineConfig([
         message: 'HUISSTIJL: een inverse-vulling (--text als knopvlak) is geen losse knop — de primaire actie leest <Button variant="primary">.',
       },
       {
+        // Klus b (20-08): danger as TEXT ink rides its own twin — the raw fill
+        // colour measured 3.47:1 on the dark surface and 4.44:1 on the light --bg
+        // (both AA fails) across 182 ink sites + 30 banner sites, all migrated.
+        // Zero-hit at adoption; fills/borders keep --color-danger legitimately.
+        selector: "Property[key.name='color'] > Literal[value=/^var\\(--color-(danger|success)\\)$/]",
+        message: 'HUISSTIJL: danger/success als INKT is de -text-twin (var(--color-danger-text) / var(--color-success-text)), of de on-*-bg-inkt óp de eigen pastel — de rauwe vulkleur faalt AA als tekst (danger: dark 3.47:1; success: licht 3.03:1).',
+      },
+      {
         // Herhaal-audit r4 findings 5-7: a dropdown TRIGGER is a form field, not an
         // action button — it inherits its face from SearchSelect/fieldMetrics. A
         // hand-painted height inside a renderTrigger is exactly how 30/32px drift

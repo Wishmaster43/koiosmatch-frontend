@@ -84,7 +84,7 @@ export default function PriceAgreementRow({ agreement, onSave, onDelete }: {
         </div>
         <div style={{ display: 'flex', gap: 4, flexShrink: 0 }}>
           <button onClick={startEdit} title={t('drawer.edit')} style={iconBtn}><Pencil size={12} /></button>
-          <button onClick={remove} title={t('priceAgreements.delete')} style={{ ...iconBtn, color: 'var(--color-danger)' }}><Trash2 size={12} /></button>
+          <button onClick={remove} title={t('priceAgreements.delete')} style={{ ...iconBtn, color: 'var(--color-danger-text)' }}><Trash2 size={12} /></button>
         </div>
       </div>
 

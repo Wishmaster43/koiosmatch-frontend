@@ -21,7 +21,7 @@ function StatusBadge({ status }: { status?: string }) {
   const { t } = useTranslation('reports')
   /* eslint-disable no-restricted-syntax -- fixed status→colour mapping (DATA), mirrors the lookup-colour pattern used elsewhere; these shades have no exact token equivalent */
   const styles: Record<string, { bg: string; color: string }> = {
-    actief:     { bg: 'var(--color-success-bg)', color: 'var(--color-success)' },
+    actief:     { bg: 'var(--color-success-bg)', color: 'var(--color-success-text)' },
     nietactief: { bg: 'var(--color-warning-bg)', color: '#C2410C' },
     extern:     { bg: 'var(--color-secondary-bg)', color: '#1D4ED8' },
     intake:     { bg: '#FAF5FF', color: 'var(--color-violet)' },

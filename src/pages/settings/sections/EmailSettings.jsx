@@ -214,7 +214,7 @@ export default function EmailSettings({ context = 'klanten' }) {
                 <label style={labelStyle}>
                   {t('email.password')}
                   {smtpPassSet && !smtpPass && (
-                    <span style={{ marginLeft: 6, fontSize: 11, color: 'var(--color-success)', fontWeight: 400 }}>{t('email.passwordSet')}</span>
+                    <span style={{ marginLeft: 6, fontSize: 11, color: 'var(--color-success-text)', fontWeight: 400 }}>{t('email.passwordSet')}</span>
                   )}
                 </label>
                 <div style={{ position: 'relative' }}>

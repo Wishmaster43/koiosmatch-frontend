@@ -37,7 +37,7 @@ export function Label({ children, required, htmlFor, id }: { children: ReactNode
   return (
     <label id={id} htmlFor={htmlFor} style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', display: 'block',
       marginBottom: 5, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-      {children}{required && <span style={{ color: 'var(--color-danger)', marginLeft: 2 }}>*</span>}
+      {children}{required && <span style={{ color: 'var(--color-danger-text)', marginLeft: 2 }}>*</span>}
     </label>
   )
 }
@@ -55,7 +55,7 @@ export function FieldRow({ label, required, children }: { label: ReactNode; requ
   return (
     <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10 }}>
       <label id={labelId} htmlFor={id} style={{ ...CANON_LABEL_STYLE, paddingTop: 8 }}>
-        {label}{required && <span style={{ color: 'var(--color-danger)', marginLeft: 2 }}>*</span>}
+        {label}{required && <span style={{ color: 'var(--color-danger-text)', marginLeft: 2 }}>*</span>}
       </label>
       <div style={{ flex: 1, minWidth: 0 }}>{child}</div>
     </div>

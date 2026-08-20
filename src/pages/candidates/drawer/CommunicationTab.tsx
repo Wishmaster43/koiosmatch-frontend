@@ -284,7 +284,7 @@ export default function CommunicationTab({ c, onSave, onEditStatusEvent, initial
 
       {/* A failed notes GET must never read as "no notes" — real error, real retry (Class B fix). */}
       {subTab === 'notes' && notesError && (
-        <p style={{ fontSize: 12, color: 'var(--color-danger)', marginBottom: 8 }}>
+        <p style={{ fontSize: 12, color: 'var(--color-danger-text)', marginBottom: 8 }}>
           {t('communication.notesLoadError')}{' '}
           <button type="button" onClick={reloadNotes} style={{ color: 'var(--color-primary)', textDecoration: 'underline', background: 'none', border: 'none', padding: 0, cursor: 'pointer' }}>
             {t('common:error.retry')}

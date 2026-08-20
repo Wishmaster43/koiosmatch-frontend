@@ -106,7 +106,7 @@ export default function WorkflowTemplateLibrary({ open, onClose, onUseTemplate }
               <Spinner size={14} /> {t('templateLibrary.loading')}
             </div>
           )}
-          {!loading && error && <p style={{ fontSize: 13, color: 'var(--color-danger)' }}>{t('templateLibrary.error')}</p>}
+          {!loading && error && <p style={{ fontSize: 13, color: 'var(--color-danger-text)' }}>{t('templateLibrary.error')}</p>}
           {!loading && !error && templates.length === 0 && (
             <p style={{ fontSize: 13, color: 'var(--text-muted)' }}>{t('templateLibrary.empty')}</p>
           )}

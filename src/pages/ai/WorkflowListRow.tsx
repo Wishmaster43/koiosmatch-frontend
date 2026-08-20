@@ -162,14 +162,14 @@ export default function WorkflowListRow({ workflow, folderName, onRun, onEdit, o
           {/* TRASH-OVERAL-2: the trashed row says when it entered the trash and when
               it erases for good (DD-MM-YYYY via the house formatter). */}
           {inTrash && (
-            <span className="text-xs flex-shrink-0 truncate" style={{ color: 'var(--color-danger)', maxWidth: 320 }}>
+            <span className="text-xs flex-shrink-0 truncate" style={{ color: 'var(--color-danger-text)', maxWidth: 320 }}>
               {buildTrashNote(t, formatDate, workflow.pending_erase_at, graceDays)}
             </span>
           )}
 
           {/* Archived soft chip (§4 soft-chip convention) — read-only, no run/toggle for a deleted workflow */}
           <span className="flex-shrink-0 rounded-full px-2 py-1" style={{
-            fontSize: 11, fontWeight: 600, color: 'var(--color-danger)',
+            fontSize: 11, fontWeight: 600, color: 'var(--color-danger-text)',
             background: 'color-mix(in srgb, var(--color-danger) 12%, transparent)',
             border: '1px solid color-mix(in srgb, var(--color-danger) 40%, transparent)',
           }}>
@@ -182,7 +182,7 @@ export default function WorkflowListRow({ workflow, folderName, onRun, onEdit, o
             <button onClick={handleRestoreClick} disabled={restoring}
               aria-label={t('list.restoreWorkflow')} title={t('list.restoreWorkflow')}
               className="flex items-center gap-1 rounded-lg px-2.5 py-1 text-xs font-medium flex-shrink-0"
-              style={{ background: 'var(--color-success-bg)', color: 'var(--color-success)', border: '1px solid var(--color-success)', cursor: restoring ? 'not-allowed' : 'pointer' }}
+              style={{ background: 'var(--color-success-bg)', color: 'var(--color-on-success-bg)', border: '1px solid var(--color-success)', cursor: restoring ? 'not-allowed' : 'pointer' }}
             >
               {restoring ? <Spinner size={11} /> : <ArchiveRestore size={11} />}
               {t('list.restore')}
@@ -196,7 +196,7 @@ export default function WorkflowListRow({ workflow, folderName, onRun, onEdit, o
               aria-label={t('common:trash.markAction')} title={t('common:trash.markAction')}
               className="flex items-center justify-center rounded-lg flex-shrink-0"
               style={{ width: 26, height: 26, background: 'color-mix(in srgb, var(--color-danger) 10%, transparent)',
-                border: '1px solid color-mix(in srgb, var(--color-danger) 40%, transparent)', cursor: 'pointer', color: 'var(--color-danger)' }}
+                border: '1px solid color-mix(in srgb, var(--color-danger) 40%, transparent)', cursor: 'pointer', color: 'var(--color-danger-text)' }}
             >
               <Trash2 size={13} />
             </button>

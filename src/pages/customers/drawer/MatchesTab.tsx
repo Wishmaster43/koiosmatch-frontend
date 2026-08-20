@@ -65,7 +65,7 @@ export default function MatchesTab({ customerId }: { customerId?: Id }) {
 
   // Four explicit UI states (§3): loading / error / empty / success.
   if (loading) return <SectionCard><div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{t('customers:page.loading')}</div></SectionCard>
-  if (error) return <SectionCard><div style={{ fontSize: 12, color: 'var(--color-danger)' }}>{t('customers:matches.loadError')}</div></SectionCard>
+  if (error) return <SectionCard><div style={{ fontSize: 12, color: 'var(--color-danger-text)' }}>{t('customers:matches.loadError')}</div></SectionCard>
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>

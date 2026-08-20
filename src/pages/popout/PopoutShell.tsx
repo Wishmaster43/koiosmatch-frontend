@@ -57,7 +57,7 @@ function PopoutErrorRow({ message, retryLabel, onRetry }: { message: string; ret
   return (
     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
       height: '100vh', gap: 10, padding: 24, textAlign: 'center' }}>
-      <AlertTriangle size={22} style={{ color: 'var(--color-danger)' }} aria-hidden="true" />
+      <AlertTriangle size={22} style={{ color: 'var(--color-danger-text)' }} aria-hidden="true" />
       <p style={{ fontSize: 13, color: 'var(--text)' }}>{message}</p>
       <button onClick={onRetry} style={{ background: 'none', border: '1px solid var(--border)', borderRadius: 6,
         padding: '5px 12px', fontSize: 12, color: 'var(--text)', cursor: 'pointer' }}>

@@ -88,7 +88,7 @@ export default function ApplicationRowDetails({ applicationId, labelledBy, id }:
 
   // Four states, never a blank panel (§3): error → success → empty → loading.
   const body = errorMessage
-    ? <div style={{ ...line, fontSize: 12, color: 'var(--color-danger)' }}>{errorMessage}</div>
+    ? <div style={{ ...line, fontSize: 12, color: 'var(--color-danger-text)' }}>{errorMessage}</div>
     : rows.length > 0
       ? rows.map(({ key, label, value }) => (
           <div key={key} style={line}>

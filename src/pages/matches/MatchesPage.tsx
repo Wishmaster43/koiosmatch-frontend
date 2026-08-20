@@ -236,7 +236,7 @@ export default function MatchesPage({ intent }: { intent?: unknown } = {}) {
       onClick: () => { setStageFilter([]); setOwnerFilter([]); setKpiScored(false) } },
     { key: 'active',   label: t('kpi.active'),   value: activeCount, color: 'var(--color-primary-text)',
       onClick: () => toggleStages(activeStages), active: stageFilter.length > 0 && eqSet(stageFilter, activeStages) },
-    { key: 'closed',   label: t('kpi.closed'),   value: closedCount, color: 'var(--color-success)',
+    { key: 'closed',   label: t('kpi.closed'),   value: closedCount, color: 'var(--color-success-text)',
       onClick: () => toggleStages(closedStages), active: stageFilter.length > 0 && eqSet(stageFilter, closedStages) },
     { key: 'newThisMonth', label: t('kpi.newThisMonth'), value: newThisMonthCount, color: 'var(--color-primary-text)',
       onClick: () => { setStageFilter([]); setOwnerFilter([]); setClientFilter([]); setKpiScored(false) } },

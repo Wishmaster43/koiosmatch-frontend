@@ -27,7 +27,7 @@ export default function PersonalCard({ form, errors, set, isReq, genderOptions }
             houseNumber+suffix-paired. No field added or removed. */}
         <CvField name="firstName" label={t('modal.fields.firstName')} required={isReq('firstName')}>
           <TextField value={form.firstName} onChange={v => set('firstName', v)} placeholder={t('modal.fields.firstName')} error={errors.firstName} />
-          {errors.firstName && <div style={{ fontSize: 11, color: 'var(--color-danger)', marginTop: 3 }}>{t('common:required')}</div>}
+          {errors.firstName && <div style={{ fontSize: 11, color: 'var(--color-danger-text)', marginTop: 3 }}>{t('common:required')}</div>}
         </CvField>
         <div style={row('1fr 2fr')}>
           <Field label={t('modal.fields.middleName')}>
@@ -35,7 +35,7 @@ export default function PersonalCard({ form, errors, set, isReq, genderOptions }
           </Field>
           <CvField name="lastName" label={t('modal.fields.lastName')} required={isReq('lastName')}>
             <TextField value={form.lastName} onChange={v => set('lastName', v)} placeholder={t('modal.fields.lastName')} error={errors.lastName} />
-            {errors.lastName && <div style={{ fontSize: 11, color: 'var(--color-danger)', marginTop: 3 }}>{t('common:required')}</div>}
+            {errors.lastName && <div style={{ fontSize: 11, color: 'var(--color-danger-text)', marginTop: 3 }}>{t('common:required')}</div>}
           </CvField>
         </div>
         <div style={row('1fr 1fr')}>

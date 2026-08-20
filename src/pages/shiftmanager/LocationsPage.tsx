@@ -70,7 +70,7 @@ export default function LocationsPage() {
   // KPI cards — translated labels; values are derived from the live list.
   const kpis = [
     { label: t('locationsPage.kpi.total'),           value: locations.length,                                    color: 'var(--color-primary-text)',   bg: 'var(--color-primary-bg)',   Icon: MapPin },
-    { label: t('locationsPage.kpi.active'),          value: locations.filter(l => l.status === 'Actief').length, color: 'var(--color-success)',   bg: 'var(--color-success-bg)',   Icon: Building2 },
+    { label: t('locationsPage.kpi.active'),          value: locations.filter(l => l.status === 'Actief').length, color: 'var(--color-success-text)',   bg: 'var(--color-success-bg)',   Icon: Building2 },
     { label: t('locationsPage.kpi.departments'),     value: locations.reduce((s,l) => s + (l.departments ?? []).length, 0), color: 'var(--color-warning)', bg: 'var(--color-warning-bg)',   Icon: Layers },
     { label: t('locationsPage.kpi.linkedCustomers'), value: [...new Set(locations.map(l => l.customer))].length,  color: 'var(--color-secondary)', bg: 'var(--color-secondary-bg)', Icon: Building2 },
   ]

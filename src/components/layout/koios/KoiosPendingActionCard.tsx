@@ -117,7 +117,7 @@ export default function KoiosPendingActionCard({ action }: { action: KoiosPendin
 
       {/* Terminal states */}
       {status === 'confirmed' && (
-        <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, color: 'var(--color-success)' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, color: 'var(--color-success-text)' }}>
           <Check size={14} /> {t('koios.pendingAction.confirmed')}
         </div>
       )}
@@ -130,7 +130,7 @@ export default function KoiosPendingActionCard({ action }: { action: KoiosPendin
         </div>
       )}
       {status === 'error' && (
-        <div style={{ fontSize: 12, color: 'var(--color-danger)' }}>{t('koios.pendingAction.error')}</div>
+        <div style={{ fontSize: 12, color: 'var(--color-danger-text)' }}>{t('koios.pendingAction.error')}</div>
       )}
 
       {/* Actions — hidden once resolved (confirmed/cancelled/expired/error are terminal) */}

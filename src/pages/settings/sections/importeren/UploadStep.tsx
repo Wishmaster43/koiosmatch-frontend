@@ -115,7 +115,7 @@ export default function UploadStep({
           style={{ display: 'none' }} onChange={handleFileInput} disabled={!canImport} />
       </div>
 
-      {typeError && <p style={{ fontSize: 12, color: 'var(--color-danger)', marginTop: 10 }}>{typeError}</p>}
+      {typeError && <p style={{ fontSize: 12, color: 'var(--color-danger-text)', marginTop: 10 }}>{typeError}</p>}
 
       {file && (
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 14px',
@@ -132,7 +132,7 @@ export default function UploadStep({
       )}
 
       {previewStatus === 'error' && (
-        <p style={{ fontSize: 12, color: 'var(--color-danger)', marginTop: 10 }}>
+        <p style={{ fontSize: 12, color: 'var(--color-danger-text)', marginTop: 10 }}>
           {previewError || t('import.previewErrorFallback')}
         </p>
       )}

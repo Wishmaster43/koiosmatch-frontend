@@ -88,7 +88,7 @@ export default function LinkCard({ t, form, set, candidates, customers, contacts
             already uses. "Empty" needs no line of its own: an empty picker shows
             CreatableSelect's own "—" row once this line is gone. */}
         {optionsError ? (
-          <div role="alert" style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 11, color: 'var(--color-danger)' }}>
+          <div role="alert" style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 11, color: 'var(--color-danger-text)' }}>
             <span>{t('links.loadError')}</span>
             <button type="button" onClick={onRetryOptions}
               style={{ background: 'none', border: '1px solid var(--border)', borderRadius: 6,
@@ -125,7 +125,7 @@ export default function LinkCard({ t, form, set, candidates, customers, contacts
                   <button type="button" onClick={() => onRemoveExtra({ type: l.type, id: l.id })}
                     title={t('links.remove')} aria-label={t('links.remove')}
                     style={{ width: 22, height: 22, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
-                      background: 'var(--color-danger-bg)', border: 'none', borderRadius: 6, color: 'var(--color-danger)', cursor: 'pointer' }}>
+                      background: 'var(--color-danger-bg)', border: 'none', borderRadius: 6, color: 'var(--color-on-danger-bg)', cursor: 'pointer' }}>
                     <X size={12} />
                   </button>
                 </div>

@@ -55,7 +55,7 @@ export default function MfaEnforcementSetting() {
         <Toggle checked={enforced} onChange={toggle} />
       </SettingRow>
       {error && (
-        <div role="alert" style={{ fontSize: 13, color: 'var(--color-danger)', background: 'var(--color-danger-bg)',
+        <div role="alert" style={{ fontSize: 13, color: 'var(--color-on-danger-bg)', background: 'var(--color-danger-bg)',
                        border: '1px solid color-mix(in srgb, var(--color-danger) 45%, transparent)', borderRadius: 8, padding: '8px 12px', marginTop: 10 }}>
           {error}
         </div>

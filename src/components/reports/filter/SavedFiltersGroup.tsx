@@ -72,7 +72,7 @@ export default function SavedFiltersGroup({ group }: { group: ReportFilterGroup 
           </button>
           <button type="button" onClick={() => onDelete?.(s.id)} title={t('savedFilters.delete')} aria-label={t('savedFilters.delete')}
             style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 28, height: 28,
-              border: '1px solid var(--border)', borderRadius: 6, background: 'var(--surface)', color: 'var(--color-danger)', cursor: 'pointer' }}>
+              border: '1px solid var(--border)', borderRadius: 6, background: 'var(--surface)', color: 'var(--color-danger-text)', cursor: 'pointer' }}>
             <Trash2 size={13} />
           </button>
         </div>

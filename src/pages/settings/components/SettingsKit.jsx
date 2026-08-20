@@ -77,7 +77,7 @@ export function SettingsScaffold({ title, subtitle, form, maxWidth, actions, chi
       </div>
 
       {loading ? <SkeletonRows /> : loadError ? (
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '24px 0', color: 'var(--color-danger)', fontSize: 13 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '24px 0', color: 'var(--color-danger-text)', fontSize: 13 }}>
           <AlertTriangle size={14} /> {t('common.loadError')}
         </div>
       ) : children}
@@ -219,7 +219,7 @@ export function ColorField({ value, onChange, invalidLabel, ariaLabel }) {
             borderColor: invalid ? 'var(--color-danger)' : 'var(--border)',
           }} />
       </div>
-      {invalid && <span role="alert" style={{ fontSize: 11, color: 'var(--color-danger)' }}>{invalidLabel}</span>}
+      {invalid && <span role="alert" style={{ fontSize: 11, color: 'var(--color-danger-text)' }}>{invalidLabel}</span>}
     </div>
   )
 }

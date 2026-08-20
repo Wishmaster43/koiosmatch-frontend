@@ -367,7 +367,7 @@ export default function AddShiftModal({ date, onClose, onAdd }: { date: Date; on
                   <div style={{ padding: '12px 8px', fontSize: 12, color: 'var(--text-muted)' }}>{t('common:loading')}</div>
                 )}
                 {!candidatesLoading && candidatesError && (
-                  <div style={{ padding: '12px 8px', fontSize: 12, color: 'var(--color-danger)' }}>{t('common:errorGeneric')}</div>
+                  <div style={{ padding: '12px 8px', fontSize: 12, color: 'var(--color-danger-text)' }}>{t('common:errorGeneric')}</div>
                 )}
                 {!candidatesLoading && !candidatesError && candidates.length === 0 && (
                   <div style={{ padding: '12px 8px', fontSize: 12, color: 'var(--text-muted)' }}>{t('common:noResults')}</div>

@@ -212,7 +212,7 @@ export default function CustomerApplicationsList(props: Props) {
 
   // Explicit ERROR state — never a table that silently renders as "empty".
   if (error) {
-    return <div role="alert" style={{ fontSize: 12, color: 'var(--color-danger)', padding: '8px 0' }}>{t('applications:error')}</div>
+    return <div role="alert" style={{ fontSize: 12, color: 'var(--color-danger-text)', padding: '8px 0' }}>{t('applications:error')}</div>
   }
 
   return (

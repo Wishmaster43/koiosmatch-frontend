@@ -252,17 +252,17 @@ describe('AccountManagersReport — compare wiring (K-67)', () => {
 
     // customers: delta +2, up-good → good news → success token.
     const customersDelta = cardValue('Klanten in periode').getByText('+2')
-    expect(customersDelta.parentElement).toHaveStyle({ color: 'var(--color-success)' })
+    expect(customersDelta.parentElement).toHaveStyle({ color: 'var(--color-success-text)' })
 
     // renewalsDue (contract_ending): delta +2, down-good → MORE contracts due to
     // end soon is NOT good news even though the delta is positive — the exact
     // "more rejections rising" trap, applied to this report's own attention metric.
     const renewalsDelta = cardValue('Verlengingen te doen').getByText('+2')
-    expect(renewalsDelta.parentElement).toHaveStyle({ color: 'var(--color-danger)' })
+    expect(renewalsDelta.parentElement).toHaveStyle({ color: 'var(--color-danger-text)' })
 
     // notContacted: delta +1, down-good → also bad news, not green.
     const notContactedDelta = cardValue('Niet benaderd').getByText('+1')
-    expect(notContactedDelta.parentElement).toHaveStyle({ color: 'var(--color-danger)' })
+    expect(notContactedDelta.parentElement).toHaveStyle({ color: 'var(--color-danger-text)' })
 
     // openVacancies: delta +2, but this figure's meaning is genuinely ambiguous
     // (more open demand is neither clearly good nor bad) — neutral, never a

@@ -146,7 +146,7 @@ export default function NewUserModal({ onClose, onCreated }: {
             <label style={label}>{t('email')}</label>
             <input required type="email" value={form.email} onChange={set('email')} placeholder="jan@bedrijf.nl" aria-label={t('email')}
               style={{ ...input, ...(fieldMessage('email') ? { borderColor: 'var(--color-danger)' } : {}) }} />
-            {fieldMessage('email') && <p style={{ fontSize: 11, color: 'var(--color-danger)', marginTop: 5 }}>{fieldMessage('email')}</p>}
+            {fieldMessage('email') && <p style={{ fontSize: 11, color: 'var(--color-danger-text)', marginTop: 5 }}>{fieldMessage('email')}</p>}
           </div>
           <div style={{ marginBottom: 12 }}>
             <label style={label}>{t('password')}</label>
@@ -202,7 +202,7 @@ export default function NewUserModal({ onClose, onCreated }: {
             </div>
           )}
 
-          {error && <p style={{ fontSize: 12, color: 'var(--color-danger)', marginBottom: 12 }}>{error}</p>}
+          {error && <p style={{ fontSize: 12, color: 'var(--color-danger-text)', marginBottom: 12 }}>{error}</p>}
 
           <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
             <Button variant="secondary" onClick={onClose}>

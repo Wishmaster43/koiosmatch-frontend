@@ -63,7 +63,7 @@ export function buildCandidateInsights({
       onClick: () => toggleAttention('stale6m'),    active: attentionFilter === 'stale6m' },
     { key: 'neverContacted', label: t('analytics.neverContacted'), value: counts.neverContacted, sub: t('analytics.neverContactedSub'), color: 'var(--color-info)',
       onClick: () => toggleAttention('neverContacted'), active: attentionFilter === 'neverContacted' },
-    { key: 'noFollowup', label: t('analytics.noFollowup'), value: counts.noFollowup ?? '—', sub: t('analytics.noFollowupSub'), color: 'var(--color-danger)',
+    { key: 'noFollowup', label: t('analytics.noFollowup'), value: counts.noFollowup ?? '—', sub: t('analytics.noFollowupSub'), color: 'var(--color-danger-text)',
       onClick: () => toggleAttention('noFollowup'), active: attentionFilter === 'noFollowup' },
     // Click filters on the SAME definition as the stat (planned intake appointments) via
     // the intake_planned param (INTAKE-1) — the old funnel-stage set never matched the count.
@@ -75,7 +75,7 @@ export function buildCandidateInsights({
     // conversaties ≤14 dgn, niet geëscaleerd). De klik filtert server-side via
     // ?active_conversations (CONV-FILTER-1) — dezelfde subquery als de teller,
     // dus teller en lijst delen één definitie.
-    { key: 'conversations', label: t('analytics.conversations'), value: counts.activeConv, color: 'var(--color-success)',
+    { key: 'conversations', label: t('analytics.conversations'), value: counts.activeConv, color: 'var(--color-success-text)',
       onClick: () => toggleAttention('activeConv'), active: attentionFilter === 'activeConv' },
     { key: 'tasks', label: t('kpi.tasks'), value: counts.tasks, sub: t('kpi.tasksSub'), color: TASKS_ACCENT,
       onClick: () => toggleAttention('hasTasks'), active: attentionFilter === 'hasTasks' },

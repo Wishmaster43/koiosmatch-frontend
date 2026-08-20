@@ -22,7 +22,7 @@ const card = {
 // note-editor pencils elsewhere in RejectionModal at the same visual weight).
 const pencilBtn = {
   width: 22, height: 22, display: 'flex', alignItems: 'center', justifyContent: 'center',
-  borderRadius: 6, cursor: 'pointer', background: 'none', border: 'none', color: 'var(--color-danger)', flexShrink: 0,
+  borderRadius: 6, cursor: 'pointer', background: 'none', border: 'none', color: 'var(--color-danger-text)', flexShrink: 0,
 } as const
 
 /**
@@ -111,7 +111,7 @@ export default function RejectionSummary({ application: a }: { application: Appl
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
               <XCircle size={16} color="var(--color-danger)" />
-              <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--color-danger)' }}>{t('rejection.rejected')}</span>
+              <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--color-danger-text)' }}>{t('rejection.rejected')}</span>
             </div>
             {correctPencil}
           </div>
@@ -141,7 +141,7 @@ export default function RejectionSummary({ application: a }: { application: Appl
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
             <XCircle size={16} color="var(--color-danger)" />
-            <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--color-danger)' }}>{t('rejection.rejected')}</span>
+            <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--color-danger-text)' }}>{t('rejection.rejected')}</span>
           </div>
           {correctPencil}
         </div>

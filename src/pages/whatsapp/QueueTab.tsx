@@ -122,7 +122,7 @@ export default function QueueTab({ batches, loading, error, notAvailable }: Queu
   // never reads as "nothing queued today".
   if (error) {
     return (
-      <div style={{ padding: '32px 16px', textAlign: 'center', fontSize: 13, color: 'var(--color-danger)' }}>
+      <div style={{ padding: '32px 16px', textAlign: 'center', fontSize: 13, color: 'var(--color-danger-text)' }}>
         {t('queue.error')}
       </div>
     )

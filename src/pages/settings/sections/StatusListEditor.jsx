@@ -272,7 +272,7 @@ export default function StatusListEditor({ title, subtitle, endpoint, addLabel, 
         {compact
           ? <h3 style={{ fontSize: 14, fontWeight: 600, color: 'var(--text)' }}>{title}</h3>
           : <PageTitle>{title}</PageTitle>}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 8, color: 'var(--color-danger)', fontSize: 13 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 8, color: 'var(--color-danger-text)', fontSize: 13 }}>
           <AlertTriangle size={14} /> {t('statusList.loadError')}
         </div>
       </div>

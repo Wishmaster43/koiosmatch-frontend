@@ -119,7 +119,7 @@ export default function PreviewEditStep({
       </div>
 
       {previewStatus === 'error' && (
-        <p style={{ marginTop: 12, fontSize: 12, color: 'var(--color-danger)' }}>
+        <p style={{ marginTop: 12, fontSize: 12, color: 'var(--color-danger-text)' }}>
           {previewError || t('import.previewErrorFallback', { ns: 'settings' })}
         </p>
       )}

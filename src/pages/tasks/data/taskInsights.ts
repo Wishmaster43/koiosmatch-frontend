@@ -39,8 +39,10 @@ export function buildTaskInsights({
   ]
   const kpis: KpiSpec[] = [
     { key: 'open',      label: t('kpi.open'),      value: openCount,      color: 'var(--color-primary)', onClick: () => toggleKpi('open'),      active: kpiFilter === 'open' },
+    // eslint-disable-next-line huisstijl/no-restricted-syntax -- DATA: semantic colour VALUE for the shared chip/donut/series recipes (tinted/chipInked downstream), not text ink
     { key: 'overdue',   label: t('kpi.overdue'),   value: overdue,        color: 'var(--color-danger)',  onClick: () => toggleKpi('overdue'),   active: kpiFilter === 'overdue' },
     { key: 'dueToday',  label: t('kpi.dueToday'),  value: dueToday,       color: 'var(--color-warning)', onClick: () => toggleKpi('dueToday'),  active: kpiFilter === 'dueToday' },
+    // eslint-disable-next-line huisstijl/no-restricted-syntax -- DATA: semantic colour VALUE for the shared chip/donut/series recipes (tinted/chipInked downstream), not text ink
     { key: 'completed', label: t('kpi.completed'), value: completedCount, color: 'var(--color-success)', onClick: () => toggleKpi('completed'), active: kpiFilter === 'completed' },
   ]
   return { donuts, kpis }

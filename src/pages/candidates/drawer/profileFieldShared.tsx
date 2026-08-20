@@ -54,11 +54,11 @@ export function FieldRow({ label, required, errorText, labelIcon, children }: {
       {/* Canon width/color/size (fieldRowCanon) + the flex/gap this row alone needs to seat an optional labelIcon next to the label text. */}
       <span style={{ ...CANON_LABEL_STYLE, display: 'flex', alignItems: 'center', gap: 5 }}>
         {labelIcon}
-        {label}{required && <span style={{ color: 'var(--color-danger)' }}> *</span>}
+        {label}{required && <span style={{ color: 'var(--color-danger-text)' }}> *</span>}
       </span>
       <div style={{ flex: 1, minWidth: 0 }}>
         {children}
-        {errorText && <div style={{ fontSize: 11, color: 'var(--color-danger)', marginTop: 3 }}>{errorText}</div>}
+        {errorText && <div style={{ fontSize: 11, color: 'var(--color-danger-text)', marginTop: 3 }}>{errorText}</div>}
       </div>
     </div>
   )

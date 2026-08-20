@@ -91,7 +91,7 @@ export default function StatisticsTab({ vacancy: v, onNavigateTab }: { vacancy: 
         kpisTitle={t('drawer.tabs.statistics')}
         kpis={[
           { label: t('statistics.conversionRate'), value: pct(hired, applied || totalApps),
-            sub: t('statistics.appliedToHired'), color: 'var(--color-success)' },
+            sub: t('statistics.appliedToHired'), color: 'var(--color-success-text)' },
           // Never compute a percentage against an unknown lead count (that would
           // read as a real conversion rate derived from fiction) — the honest dash.
           { label: t('statistics.leadsToApplications'), value: leadsKnown ? pct(totalApps, leads ?? 0) : '—',

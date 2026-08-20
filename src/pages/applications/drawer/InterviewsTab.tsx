@@ -140,7 +140,7 @@ function StartInterviewAction({ applicationId, onStarted }: { applicationId: Id 
           {t('interview.start.label')}
         </Button>
       </div>
-      {error && <span style={{ fontSize: 11, color: 'var(--color-danger)' }}>{t('interview.start.loadError')}</span>}
+      {error && <span style={{ fontSize: 11, color: 'var(--color-danger-text)' }}>{t('interview.start.loadError')}</span>}
       {unavailable && (
         <Caption style={{ fontStyle: 'italic' }}>{t('interview.start.unavailable')}</Caption>
       )}

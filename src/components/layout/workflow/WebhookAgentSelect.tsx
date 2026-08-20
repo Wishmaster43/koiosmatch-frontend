@@ -59,7 +59,7 @@ export function WebhookAgentSelect({ value, onChange, label }: {
   // Failure state: distinct from "no agents yet" — a fetch error means we don't
   // actually know whether the tenant has agents, so never claim it is empty.
   if (loadError) return (
-    <p role="alert" style={{ fontSize: 12, color: 'var(--color-danger)', padding: '6px 10px', border: '1px solid var(--color-danger)', borderRadius: 8 }}>
+    <p role="alert" style={{ fontSize: 12, color: 'var(--color-danger-text)', padding: '6px 10px', border: '1px solid var(--color-danger)', borderRadius: 8 }}>
       {t('common:actionFailed')}
     </p>
   )

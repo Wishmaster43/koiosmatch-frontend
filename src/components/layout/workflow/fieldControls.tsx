@@ -121,7 +121,7 @@ export function WebhookSelectField({ value, onChange, fieldKey }: { value?: unkn
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-      {error && <div style={{ fontSize: 11, color: 'var(--color-danger)' }}>{t('fields.webhookError')}</div>}
+      {error && <div style={{ fontSize: 11, color: 'var(--color-danger-text)' }}>{t('fields.webhookError')}</div>}
 
       {/* Picker — existing inbound webhooks */}
       <span id={webhookLabelId} className="sr-only">{t('fields.webhookSelect')}</span>

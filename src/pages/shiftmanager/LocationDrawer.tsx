@@ -115,7 +115,7 @@ export default function LocationDrawer({ loc, onClose }: { loc: SmLocationRow | 
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 20 }}>
           {[
             { label: t('locationsPage.drawer.departments'),  value: deps.length, icon: Layers, color: 'var(--color-primary-text)', bg: 'var(--color-primary-bg)' },
-            { label: t('locationsPage.drawer.activeShifts'), value: loc.shifts, icon: Building2, color: 'var(--color-success)', bg: 'var(--color-success-bg)' },
+            { label: t('locationsPage.drawer.activeShifts'), value: loc.shifts, icon: Building2, color: 'var(--color-success-text)', bg: 'var(--color-success-bg)' },
           ].map(s => (
             <div key={s.label} style={{ background: 'var(--surface)', border: '1px solid var(--border)',
               borderRadius: 10, padding: '14px 16px', display: 'flex', alignItems: 'center', gap: 12 }}>

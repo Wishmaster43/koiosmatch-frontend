@@ -179,6 +179,7 @@ export function useDashboardViewModel({
       { key: 'kandidaten',    label: t('chart.series.candidates'),   color: 'var(--color-primary)' },
       { key: 'sollicitaties', label: t('chart.series.applications'), color: 'var(--color-secondary)' },
       { key: 'matches',       label: t('chart.series.matches'),      color: 'var(--color-accent)' },
+      // eslint-disable-next-line huisstijl/no-restricted-syntax -- DATA: semantic colour VALUE for the shared chip/donut/series recipes (tinted/chipInked downstream), not text ink
       { key: 'uitKandidaten', label: t('chart.series.candidatesOut'),       color: 'var(--color-danger)' },
       { key: 'uitAfgewezen',  label: t('chart.series.applicationsRejected'), color: 'var(--color-warning)' },
       // eslint-disable-next-line no-restricted-syntax -- DATA: chart series colour (matches-ended, neutral grey), no exact design-token match

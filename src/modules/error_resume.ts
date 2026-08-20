@@ -6,6 +6,7 @@ export default {
   category: 'Flow beheer',
   label:    'Hervatten (Resume)',
   Icon:     PlayCircle,
+  // eslint-disable-next-line huisstijl/no-restricted-syntax -- DATA: semantic colour VALUE for the shared chip/donut/series recipes (tinted/chipInked downstream), not text ink
   color:    'var(--color-success)',
   bg:       'var(--color-success-bg)',
   schema: [

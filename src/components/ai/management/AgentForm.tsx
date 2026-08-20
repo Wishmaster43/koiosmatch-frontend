@@ -245,7 +245,7 @@ export function AgentForm({ agent, prompts, faqs, onSaved, onDelete }: {
             <button onClick={() => agent && onDelete(agent)}
               aria-label={t('common:delete')} title={t('common:delete')}
               // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- pre-existing bespoke-size icon button, out of this ink/tint task's scope
-              style={{ padding: '5px 8px', borderRadius: 8, border: '1px solid var(--border)', background: 'var(--surface)', color: 'var(--color-danger)', cursor: 'pointer', display: 'flex' }}>
+              style={{ padding: '5px 8px', borderRadius: 8, border: '1px solid var(--border)', background: 'var(--surface)', color: 'var(--color-danger-text)', cursor: 'pointer', display: 'flex' }}>
               <Trash2 size={12} />
             </button>
           )}
@@ -352,7 +352,7 @@ export function AgentForm({ agent, prompts, faqs, onSaved, onDelete }: {
                   <label htmlFor={apiKeyId} style={{ display: 'block', fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', marginBottom: 5, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
                     {t('ai.agent.apiKey')}
                     {hasCustomApiKey && !form.custom_api_key && (
-                      <span style={{ marginLeft: 6, fontSize: 11, color: 'var(--color-success)', fontWeight: 400, textTransform: 'none', letterSpacing: 'normal' }}>
+                      <span style={{ marginLeft: 6, fontSize: 11, color: 'var(--color-success-text)', fontWeight: 400, textTransform: 'none', letterSpacing: 'normal' }}>
                         {t('ai.agent.apiKeySet')}
                       </span>
                     )}

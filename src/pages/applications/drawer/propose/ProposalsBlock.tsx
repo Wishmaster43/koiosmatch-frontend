@@ -133,7 +133,7 @@ export default function ProposalsBlock({ application }: ProposalsBlockProps) {
                 <button onClick={() => handleRevoke(p.id)} disabled={revoking} aria-label={t('propose.revoke')}
                   style={{ display: 'inline-flex', alignItems: 'center', gap: 4, height: 26, padding: '0 8px', fontSize: 11,
                     borderRadius: 6, border: '1px solid color-mix(in srgb, var(--color-danger) 30%, transparent)',
-                    background: 'color-mix(in srgb, var(--color-danger) 10%, transparent)', color: 'var(--color-danger)',
+                    background: 'color-mix(in srgb, var(--color-danger) 10%, transparent)', color: 'var(--color-danger-text)',
                     cursor: revoking ? 'not-allowed' : 'pointer', opacity: revoking ? 0.6 : 1 }}>
                   <X size={11} /> {t('propose.revoke')}
                 </button>

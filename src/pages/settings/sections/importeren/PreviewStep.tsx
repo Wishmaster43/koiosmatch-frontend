@@ -52,7 +52,7 @@ export default function PreviewStep({ result, runStatus, runError, canImport, on
       )}
 
       {runStatus === 'error' && (
-        <p style={{ marginTop: 16, fontSize: 12, color: 'var(--color-danger)' }}>
+        <p style={{ marginTop: 16, fontSize: 12, color: 'var(--color-danger-text)' }}>
           {runError || t('import.preview.confirmError')}
         </p>
       )}

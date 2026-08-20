@@ -30,7 +30,7 @@ const fieldFootprint: React.CSSProperties = { padding: '6px 10px', borderRadius:
 function ConfigNotice({ text }: { text: string }) {
   const { t } = useTranslation('candidates')
   return (
-    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4, marginTop: 3, fontSize: 11, color: 'var(--color-danger)' }}>
+    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4, marginTop: 3, fontSize: 11, color: 'var(--color-danger-text)' }}>
       <span>{text}</span>
       {/* eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- inline text link (colour+weight only, no fill/border/padding), not a button-shaped affordance */}
       <a href="#settings/whatsapp/whatsapp" style={{ color: 'var(--color-primary-text)', fontWeight: 600, textDecoration: 'none' }}>
@@ -126,7 +126,7 @@ export default function TemplateComposer({ candidateId, windowKnown, onSent }: {
 
           {/* The server's own reason (409) or our honest gateway notice (502), inline. */}
           {error && (
-            <div role="alert" style={{ display: 'flex', alignItems: 'center', gap: 4, marginTop: 6, fontSize: 11, color: 'var(--color-danger)' }}>
+            <div role="alert" style={{ display: 'flex', alignItems: 'center', gap: 4, marginTop: 6, fontSize: 11, color: 'var(--color-danger-text)' }}>
               <AlertTriangle size={11} style={{ flexShrink: 0 }} />
               {error}
             </div>

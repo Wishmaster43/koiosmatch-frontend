@@ -121,8 +121,8 @@ export default function AuditLogTable({ rows, sortCol, sortDir, onSort, onRowCli
                     {entry.description}
                   </span>
                 </td>
-                <td style={{ ...TD, fontSize: 11, color: 'var(--color-danger)' }}>{beforeCell}</td>
-                <td style={{ ...TD, fontSize: 11, color: 'var(--color-success)' }}>{afterCell}</td>
+                <td style={{ ...TD, fontSize: 11, color: 'var(--color-danger-text)' }}>{beforeCell}</td>
+                <td style={{ ...TD, fontSize: 11, color: 'var(--color-success-text)' }}>{afterCell}</td>
               </tr>
             )
           })}

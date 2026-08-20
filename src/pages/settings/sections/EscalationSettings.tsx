@@ -97,7 +97,7 @@ function EscalationRow({ signal, days, target, onDays, onTarget, options, error 
       </div>
       {/* Inline block reason: half a pair is never sent — the field alone won't say why Save did nothing. */}
       {error && (
-        <span role="alert" style={{ fontSize: 11, color: 'var(--color-danger)' }}>
+        <span role="alert" style={{ fontSize: 11, color: 'var(--color-danger-text)' }}>
           {t('escalation.missingTargetHint')}
         </span>
       )}

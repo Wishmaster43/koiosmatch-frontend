@@ -223,7 +223,7 @@ export default function SubEntityImportCard({ entity, customerName, wizard, canV
               </Caption>
             </div>
             {typeError && (
-              <div role="alert" style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 11, color: 'var(--color-danger)' }}>
+              <div role="alert" style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 11, color: 'var(--color-danger-text)' }}>
                 <AlertTriangle size={12} /> {typeError}
               </div>
             )}
@@ -254,7 +254,7 @@ export default function SubEntityImportCard({ entity, customerName, wizard, canV
               </Button>
             </div>
             {preview.status === 'error' && (
-              <div role="alert" style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 11, color: 'var(--color-danger)' }}>
+              <div role="alert" style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 11, color: 'var(--color-danger-text)' }}>
                 <AlertTriangle size={12} /> {preview.message || t('import.previewErrorFallback', { ns: 'settings' })}
               </div>
             )}
@@ -271,7 +271,7 @@ export default function SubEntityImportCard({ entity, customerName, wizard, canV
                 background: 'color-mix(in srgb, var(--color-danger) 10%, transparent)',
                 border: '1px solid color-mix(in srgb, var(--color-danger) 35%, transparent)',
                 borderRadius: 8, marginBottom: 12 }}>
-                <AlertTriangle size={14} style={{ color: 'var(--color-danger)', flexShrink: 0, marginTop: 1 }} aria-hidden="true" />
+                <AlertTriangle size={14} style={{ color: 'var(--color-danger-text)', flexShrink: 0, marginTop: 1 }} aria-hidden="true" />
                 <span style={{ fontSize: 12, color: 'var(--text)' }}>
                   {t('subModal.import.mismatchWarning', { count: mismatch.count, names: mismatch.names })}
                 </span>

@@ -56,7 +56,7 @@ export default function OrdersPanel() {
           <div style={{ padding: 24, textAlign: 'center', fontSize: 13, color: 'var(--text-muted)' }}>{t('common:loading')}</div>
         )}
         {!loading && error && (
-          <div role="alert" style={{ padding: 24, textAlign: 'center', fontSize: 13, color: 'var(--color-danger)' }}>{t('order.errorList')}</div>
+          <div role="alert" style={{ padding: 24, textAlign: 'center', fontSize: 13, color: 'var(--color-danger-text)' }}>{t('order.errorList')}</div>
         )}
         {!loading && !error && orders.length === 0 && (
           <div style={{ padding: 40, textAlign: 'center' }}>
@@ -110,7 +110,7 @@ export default function OrdersPanel() {
             <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 12 }}>{t('order.deleteConfirmBody')}</div>
             {deleteError && (
               <div role="alert" style={{ padding: '8px 10px', fontSize: 12, borderRadius: 8, marginBottom: 12,
-                color: 'var(--color-danger)', background: 'var(--color-danger-bg)',
+                color: 'var(--color-on-danger-bg)', background: 'var(--color-danger-bg)',
                 border: '1px solid color-mix(in srgb, var(--color-danger) 40%, transparent)' }}>
                 {deleteError}
               </div>

@@ -231,7 +231,7 @@ export default function PriceAgreementsTab({ customerId, c, onSave }: { customer
 
       {/* Error state — never a silent blank screen. */}
       {!loading && error && (
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: 16, fontSize: 12, color: 'var(--color-danger)' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: 16, fontSize: 12, color: 'var(--color-danger-text)' }}>
           <AlertTriangle size={13} />
           <span>{t('priceAgreements.loadError')}</span>
           {/* Arrow-wrap: reload now takes an optional AbortSignal (audit r4) — the

@@ -400,7 +400,7 @@ export default function AddCandidateModal({ onClose, onCreated }: AddCandidateMo
           {/* General submit error (non-422 responses) */}
           {submitErr && (
             <div style={{ margin: '0 24px 8px', padding: '10px 14px', borderRadius: 8, fontSize: 12,
-              background: 'var(--color-danger-bg)', color: 'var(--color-danger)', border: '1px solid var(--color-danger)' }}>
+              background: 'var(--color-danger-bg)', color: 'var(--color-on-danger-bg)', border: '1px solid var(--color-danger)' }}>
               {submitErr}
             </div>
           )}

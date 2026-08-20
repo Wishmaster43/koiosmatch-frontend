@@ -178,7 +178,7 @@ export function ArchivedBanner({ c, canHardDelete, onRestore, onMarkDeletion, on
         <button onClick={() => onMarkDeletion(c.id)}
           title={t('erase.markDelete')} aria-label={t('erase.markDelete')}
           // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- pre-existing bespoke icon-only control (mirrors PendingEraseBanner's icon variant), out of this task's scope
-          style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 3, display: 'flex', color: 'var(--color-danger)' }}>
+          style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 3, display: 'flex', color: 'var(--color-danger-text)' }}>
           <Trash2 size={14} />
         </button>
       )}

@@ -67,7 +67,7 @@ export default function SecuritySettings() {
           onFocus={e => (e.target.style.borderColor = 'var(--color-danger)')}
           onBlur={e  => (e.target.style.borderColor = 'var(--border)')} />
         {error && (
-          <div style={{ fontSize: 13, color: 'var(--color-danger)', background: 'var(--color-danger-bg)',
+          <div style={{ fontSize: 13, color: 'var(--color-on-danger-bg)', background: 'var(--color-danger-bg)',
                          border: tintBorder('var(--color-danger)', true), borderRadius: 8, padding: '8px 12px' }}>
             {error}
           </div>

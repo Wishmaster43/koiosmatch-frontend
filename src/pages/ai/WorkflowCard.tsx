@@ -35,7 +35,7 @@ interface WorkflowCardProps {
 
 // Status badge colours; label = t('status.<key>').
 const STATUS_STYLES: Record<string, { bg: string; color: string; dot: string }> = {
-  active:   { bg: 'var(--color-success-bg)', color: 'var(--color-success)', dot: 'var(--color-success)' },
+  active:   { bg: 'var(--color-success-bg)', color: 'var(--color-success-text)', dot: 'var(--color-success)' },
   draft:    { bg: 'var(--hover-bg)', color: 'var(--text-muted)', dot: 'var(--text-muted)' },
   // eslint-disable-next-line no-restricted-syntax -- DATA: per-status colour map (inactive badge shade), no exact token matches this specific orange
   inactive: { bg: 'var(--color-warning-bg)', color: '#C2410C', dot: '#F97316' },
@@ -111,7 +111,7 @@ export default function WorkflowCard({ workflow, onRun, onEdit, canManageFolders
         {archived ? (
           /* Archived soft chip (§4 soft-chip convention) — mirrors WorkflowListRow */
           <span className="flex-shrink-0 rounded-full px-2.5 py-1" style={{
-            fontSize: 11, fontWeight: 600, color: 'var(--color-danger)',
+            fontSize: 11, fontWeight: 600, color: 'var(--color-danger-text)',
             background: 'color-mix(in srgb, var(--color-danger) 12%, transparent)',
             border: '1px solid color-mix(in srgb, var(--color-danger) 40%, transparent)',
           }}>
@@ -152,7 +152,7 @@ export default function WorkflowCard({ workflow, onRun, onEdit, canManageFolders
             inTrash ? (
               /* TRASH-OVERAL-2: erase note + unmark (settings.update-gated at the page). */
               <>
-                <span className="text-xs truncate" style={{ color: 'var(--color-danger)', maxWidth: 220 }}>
+                <span className="text-xs truncate" style={{ color: 'var(--color-danger-text)', maxWidth: 220 }}>
                   {buildTrashNote(t, formatDate, workflow.pending_erase_at, graceDays)}
                 </span>
                 {onUnmark && (
@@ -174,7 +174,7 @@ export default function WorkflowCard({ workflow, onRun, onEdit, canManageFolders
                   <button onClick={handleRestoreClick} disabled={restoring}
                     aria-label={t('list.restoreWorkflow')} title={t('list.restoreWorkflow')}
                     className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium"
-                    style={{ background: 'var(--color-success-bg)', color: 'var(--color-success)', border: '1px solid var(--color-success)', cursor: restoring ? 'not-allowed' : 'pointer' }}
+                    style={{ background: 'var(--color-success-bg)', color: 'var(--color-on-success-bg)', border: '1px solid var(--color-success)', cursor: restoring ? 'not-allowed' : 'pointer' }}
                   >
                     {restoring ? <Spinner size={12} /> : <ArchiveRestore size={12} />}
                     {t('list.restore')}
@@ -186,7 +186,7 @@ export default function WorkflowCard({ workflow, onRun, onEdit, canManageFolders
                     aria-label={t('common:trash.markAction')} title={t('common:trash.markAction')}
                     className="flex items-center justify-center rounded-lg"
                     style={{ width: 28, height: 28, background: 'color-mix(in srgb, var(--color-danger) 10%, transparent)',
-                      border: '1px solid color-mix(in srgb, var(--color-danger) 40%, transparent)', cursor: 'pointer', color: 'var(--color-danger)' }}
+                      border: '1px solid color-mix(in srgb, var(--color-danger) 40%, transparent)', cursor: 'pointer', color: 'var(--color-danger-text)' }}
                   >
                     <Trash2 size={13} />
                   </button>

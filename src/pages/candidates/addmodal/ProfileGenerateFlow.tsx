@@ -88,7 +88,7 @@ export default function ProfileGenerateFlow({ form, onApply }: ProfileGenerateFl
       )}
 
       {status === 'error' && (
-        <div aria-live="polite" style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: 12, color: 'var(--color-danger)' }}>
+        <div aria-live="polite" style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: 12, color: 'var(--color-danger-text)' }}>
           <span>{t('generate.error')}</span>
           <button type="button" onClick={generate} style={linkBtn}>{t('common:error.retry')}</button>
         </div>

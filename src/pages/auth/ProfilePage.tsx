@@ -65,7 +65,7 @@ export default function ProfilePage() {
           {photo && (
             <button onClick={removeAvatar} disabled={avatarBusy}
               style={{ marginTop: 4, padding: 0, border: 'none', background: 'none', cursor: 'pointer',
-                       fontSize: 11, color: 'var(--color-danger)' }}>
+                       fontSize: 11, color: 'var(--color-danger-text)' }}>
               {t('profile.removePhoto')}
             </button>
           )}

@@ -226,7 +226,7 @@ export default function OutreachPage() {
       onClick: () => { setSelectedStatus([]); setSelectedChannel([]); setKpiTargets(false) },
       // Reset-to-all tile — clickable, but never highlighted (no filter = nothing active).
       active: false },
-    { key: 'active',  label: t('kpi.active'),  value: campaigns.filter((c) => statusKey(c) === 'active').length, sub: t('kpi.activeSub'), color: 'var(--color-success)',
+    { key: 'active',  label: t('kpi.active'),  value: campaigns.filter((c) => statusKey(c) === 'active').length, sub: t('kpi.activeSub'), color: 'var(--color-success-text)',
       onClick: () => pickStatus('active'), active: selectedStatus.length === 1 && selectedStatus[0] === 'active' },
     { key: 'targets', label: t('kpi.targets'), value: campaigns.reduce((n, c) => n + targetsOf(c), 0),           sub: t('kpi.targetsSub'), color: 'var(--color-primary-text)',
       onClick: () => setKpiTargets(v => !v), active: kpiTargets },

@@ -209,7 +209,7 @@ export function LookupBlock({ slug, title, subtitle, items, setItems, locked = f
                 locale for an unrelated, now-dead "statuses reveal the funnel" flag from
                 the retired model-A UI; reusing them would show stale copy here. */}
             {isPhaseBlock && item.is_applicant && (
-              <span style={{ fontSize: 10, fontWeight: 600, color: 'var(--color-success)',
+              <span style={{ fontSize: 10, fontWeight: 600, color: 'var(--color-on-success-bg)',
                              background: 'var(--color-success-bg)', padding: '2px 7px', borderRadius: 999 }}>
                 {t('lookups.phaseApplicantBadge')}
               </span>

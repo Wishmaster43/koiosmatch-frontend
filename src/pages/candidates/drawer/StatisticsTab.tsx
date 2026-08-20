@@ -71,7 +71,7 @@ export default function StatisticsTab({ c, onJump }: { c: Candidate; onJump?: (t
           // Re-enable once /sm_shifts returns rows — and only bound to the real field: the
           // former example fallbacks (24 shifts / 186 hours) were invented numbers and must
           // never come back.
-          // { label: t('statistics.shifts'),       value: c.shiftsCount ?? 0, sub: t('statistics.thisYear'), color: 'var(--color-success)' },
+          // { label: t('statistics.shifts'),       value: c.shiftsCount ?? 0, sub: t('statistics.thisYear'), color: 'var(--color-success-text)' },
           // { label: t('statistics.hoursWorked'),  value: c.hoursWorked ?? 0, sub: t('statistics.thisYear'), color: 'var(--color-warning)' },
         ]}
       />

@@ -105,7 +105,7 @@ export default function RejectionModal({ application: a, onCancel, onConfirm, su
       header={
         <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>
           <span style={{ display: 'inline-flex', width: 30, height: 30, borderRadius: 8, alignItems: 'center', justifyContent: 'center',
-            background: 'var(--color-danger-bg)', color: 'var(--color-danger)' }}><XCircle size={16} /></span>
+            background: 'var(--color-danger-bg)', color: 'var(--color-on-danger-bg)' }}><XCircle size={16} /></span>
           <span style={{ fontSize: 15, fontWeight: 700, color: 'var(--text)' }}>
             {isCorrection ? t('rejection.correctModalTitle') : t('rejection.modalTitle')}
           </span>

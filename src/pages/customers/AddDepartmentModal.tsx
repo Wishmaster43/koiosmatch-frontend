@@ -204,7 +204,7 @@ export default function AddDepartmentModal({ onClose, onCreate, onImported, loca
                 <FieldRow label={t('subModal.departmentName')} required>
                   <TextField value={form.name} onChange={v => set('name', v)} placeholder={t('subModal.departmentPlaceholder')} error={errors.name} />
                 </FieldRow>
-                {errors.name && <div style={{ fontSize: 11, color: 'var(--color-danger)', marginTop: 3 }}>{t('subModal.required')}</div>}
+                {errors.name && <div style={{ fontSize: 11, color: 'var(--color-danger-text)', marginTop: 3 }}>{t('subModal.required')}</div>}
               </div>
 
               {showLocationPicker ? (
@@ -225,7 +225,7 @@ export default function AddDepartmentModal({ onClose, onCreate, onImported, loca
                           options={locations.map(l => ({ value: String(l.id), label: l.name }))} />
                       )}
                     </FieldRow>
-                    {errors.locationId && <div style={{ fontSize: 11, color: 'var(--color-danger)', marginTop: 3 }}>{t('subModal.required')}</div>}
+                    {errors.locationId && <div style={{ fontSize: 11, color: 'var(--color-danger-text)', marginTop: 3 }}>{t('subModal.required')}</div>}
                   </div>
                   {/* STATUS-HIDDEN-1: hidden unless the tenant marked it required — an
                       empty filler keeps the location field at its half-width column
@@ -285,7 +285,7 @@ export default function AddDepartmentModal({ onClose, onCreate, onImported, loca
         {/* Server-side rejection (non-field 422 / other failure) — shown in place, modal stays open. */}
         {createError && (
           <div role="alert" style={{ margin: '0 22px 8px', padding: '8px 10px', fontSize: 12, borderRadius: 8,
-            color: 'var(--color-danger)', background: 'var(--color-danger-bg)',
+            color: 'var(--color-on-danger-bg)', background: 'var(--color-danger-bg)',
             border: tintBorder('var(--color-danger)', true), flexShrink: 0 }}>
             {createError}
           </div>

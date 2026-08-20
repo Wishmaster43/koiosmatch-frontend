@@ -153,7 +153,7 @@ export default function CandidateLookupItemModal({
           <div style={{ marginBottom: 14 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
               <Toggle checked={modal.is_blacklist} onChange={v => setModal(m => ({ ...m, is_blacklist: v }))} />
-              <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--color-danger)' }}>{t('lookups.isBlacklist')}</span>
+              <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--color-danger-text)' }}>{t('lookups.isBlacklist')}</span>
             </div>
             <Caption as="div" style={{ marginTop: 4 }}>{t('lookups.isBlacklistHint')}</Caption>
           </div>

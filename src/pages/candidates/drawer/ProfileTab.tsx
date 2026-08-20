@@ -125,7 +125,7 @@ export default function ProfileTab({ c, onEditSave, autoEditSignal, onContactMom
             {summaryEditing && (
               <button onClick={() => changeSummary('')} title={t('profile.clear')} aria-label={t('profile.clear')}
                 // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- bespoke neutral-border/danger-icon hybrid, matches neither secondary nor dangerSoft (see comment above)
-                style={{ ...iconBtn, width: 28, height: 28, background: 'none', color: 'var(--color-danger)', border: '1px solid var(--border)' }}>
+                style={{ ...iconBtn, width: 28, height: 28, background: 'none', color: 'var(--color-danger-text)', border: '1px solid var(--border)' }}>
                 <Trash2 size={13} />
               </button>
             )}

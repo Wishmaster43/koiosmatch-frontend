@@ -453,7 +453,7 @@ export default function AddApplicationModal({ onClose, onCreated, lockedVacancy 
         {/* Server-side rejection (validation / matrix-guard) — shown in place, modal stays open. */}
         {createError && (
           <div role="alert" style={{ margin: '0 22px 4px', padding: '8px 10px', fontSize: 12, borderRadius: 8,
-            color: 'var(--color-danger)', background: 'var(--color-danger-bg)',
+            color: 'var(--color-on-danger-bg)', background: 'var(--color-danger-bg)',
             border: '1px solid color-mix(in srgb, var(--color-danger) 40%, transparent)' }}>
             {createError}
           </div>

@@ -142,7 +142,7 @@ export function EscalationList({ escalations, loading }: { escalations: WaEscala
         <AlertTriangle size={14} color="var(--color-danger)" />
         <SectionTitle as="span">{t('escalations.title')}</SectionTitle>
         {!loading && escalations.length > 0 && (
-          <span style={{ marginLeft: 'auto', fontSize: 11, fontWeight: 600, color: 'var(--color-danger)',
+          <span style={{ marginLeft: 'auto', fontSize: 11, fontWeight: 600, color: 'var(--color-on-danger-bg)',
                          background: 'var(--color-danger-bg)', borderRadius: 999, padding: '1px 7px' }}>
             {escalations.length}
           </span>

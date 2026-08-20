@@ -30,17 +30,20 @@ export function buildTaskAdviceInsights(task: TaskDetail, t: Tx, now: Date = new
     dueInsight = { type: t('ai.dueLabel'), color: 'var(--text-muted)', text: t('ai.dueUnset') }
   } else if (isTaskOverdue(task, now)) {
     const days = Math.max(1, -calendarDaysDiff(dueMoment, now))
+    // eslint-disable-next-line huisstijl/no-restricted-syntax -- DATA: semantic colour VALUE for the shared chip/donut/series recipes (tinted/chipInked downstream), not text ink
     dueInsight = { type: t('ai.dueLabel'), color: 'var(--color-danger)', text: t('ai.dueOverdue', { count: days }) }
   } else {
     const days = calendarDaysDiff(dueMoment, now)
     dueInsight = days <= 0
       ? { type: t('ai.dueLabel'), color: 'var(--color-warning)', text: t('ai.dueToday') }
+      // eslint-disable-next-line huisstijl/no-restricted-syntax -- DATA: semantic colour VALUE for the shared chip/donut/series recipes (tinted/chipInked downstream), not text ink
       : { type: t('ai.dueLabel'), color: 'var(--color-success)', text: t('ai.dueUpcoming', { count: days }) }
   }
 
   // Assignment: bureau (unassigned) vs a named assignee.
   const assigneeInsight: KoiosAdviceInsight = task.assigneeId == null
     ? { type: t('ai.assigneeLabel'), color: 'var(--color-warning)', text: t('ai.unassigned') }
+    // eslint-disable-next-line huisstijl/no-restricted-syntax -- DATA: semantic colour VALUE for the shared chip/donut/series recipes (tinted/chipInked downstream), not text ink
     : { type: t('ai.assigneeLabel'), color: 'var(--color-success)', text: t('ai.assignedTo', { name: task.assignee?.name ?? '' }) }
 
   // Links: whether this task is coupled to any record at all (candidate/customer/…).

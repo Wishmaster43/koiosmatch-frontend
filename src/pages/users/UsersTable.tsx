@@ -148,7 +148,7 @@ export default function UsersTable({
         return (
           <button onClick={() => onDelete(u)} title={t('delete.action')} aria-label={t('delete.action')}
             style={{ ...ICON_BTN, width: 26, height: 26, border: 'none', borderRadius: 8,
-                     background: 'var(--color-danger-bg)', color: 'var(--color-danger)' }}>
+                     background: 'var(--color-danger-bg)', color: 'var(--color-on-danger-bg)' }}>
             <Trash2 size={12} aria-hidden="true" />
           </button>
         )

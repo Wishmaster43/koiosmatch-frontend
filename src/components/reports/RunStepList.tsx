@@ -89,7 +89,7 @@ function StepCard({ step, index, catalog }: { step: RunStep; index: number; cata
 
       {/* HIST-DETAIL-1: the one-line outcome ("466 gesynct") always visible. */}
       {step.summary != null && step.summary !== '' && (
-        <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--color-success)', padding: '0 12px 10px 33px' }}>{String(step.summary)}</div>
+        <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--color-success-text)', padding: '0 12px 10px 33px' }}>{String(step.summary)}</div>
       )}
 
       {/* WF-R3 live meta: retry count, error and when the next attempt fires. */}
@@ -99,7 +99,7 @@ function StepCard({ step, index, catalog }: { step: RunStep; index: number; cata
             <span style={{ color: 'var(--text-muted)' }}>{t('runs.drawer.attempts', { count: Number(step.attempts) })}</span>
           )}
           {(step.error ?? step.error_message) != null && (
-            <span style={{ color: 'var(--color-danger)' }}>{String(step.error ?? step.error_message)}</span>
+            <span style={{ color: 'var(--color-danger-text)' }}>{String(step.error ?? step.error_message)}</span>
           )}
           {step.next_attempt_at != null && (
             <span style={{ color: 'var(--text-muted)' }}>{t('runs.drawer.nextAttempt', { time: new Date(String(step.next_attempt_at)).toLocaleTimeString('nl-NL', { hour: '2-digit', minute: '2-digit' }) })}</span>

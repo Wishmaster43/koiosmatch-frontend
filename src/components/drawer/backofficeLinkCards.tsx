@@ -19,7 +19,7 @@ import type { BackofficeLink } from '@/lib/backofficeLink'
 
 // Shared inline styles (§4 tokens only — no ad-hoc hex).
 const mutedItalic: CSSProperties = { fontSize: 12, fontStyle: 'italic', color: 'var(--text-muted)', margin: 0 }
-const errorLine: CSSProperties = { fontSize: 11, color: 'var(--color-danger)', margin: 0 }
+const errorLine: CSSProperties = { fontSize: 11, color: 'var(--color-danger-text)', margin: 0 }
 const monoText: CSSProperties = { fontFamily: 'JetBrains Mono, monospace', fontSize: 12, color: 'var(--text)' }
 // PRIMAIR-VLAK-1 (Danny 19-08 op deze knop: "die ook!!"): action buttons read
 // the button trio — one token flip restyles them with every other accent action.

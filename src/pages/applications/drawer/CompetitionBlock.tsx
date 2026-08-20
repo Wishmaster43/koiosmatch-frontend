@@ -33,7 +33,7 @@ export default function CompetitionBlock({ application: a }: CompetitionBlockPro
     return <p style={{ fontSize: 12, color: 'var(--text-muted)' }}>{t('competition.loading')}</p>
   }
   if (error || !vacancy) {
-    return <p style={{ fontSize: 12, color: 'var(--color-danger)' }}>{t('competition.error')}</p>
+    return <p style={{ fontSize: 12, color: 'var(--color-danger-text)' }}>{t('competition.error')}</p>
   }
 
   // Funnel chips in the tenant's configured order, counts-only (no candidate data).

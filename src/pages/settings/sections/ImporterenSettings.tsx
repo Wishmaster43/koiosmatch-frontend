@@ -164,7 +164,7 @@ export default function ImporterenSettings() {
         </button>
 
         {phase === 'error' && (
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, color: 'var(--color-danger)', fontSize: 13 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, color: 'var(--color-danger-text)', fontSize: 13 }}>
             <AlertTriangle size={14} /> {t('import.loadTemplatesError')}
           </div>
         )}

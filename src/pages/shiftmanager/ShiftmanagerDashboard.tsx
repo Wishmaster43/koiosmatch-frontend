@@ -67,9 +67,9 @@ export default function ShiftmanagerDashboard() {
   // One combined "Activiteit" donut over ACTIVE candidates (Gewerkt deze maand /
   // Ingepland / Nooit gewerkt / Geen recente activiteit) — replaces 3 separate tiles.
   const activityBuckets = useMemo(() => ([
-    { key: 'worked',  label: t('dashboard.stats.workedThisMonth'), title: t('dashboard.stats.workedThisMonthHint'), list: derived.bWorked,  color: 'var(--color-success)' },
+    { key: 'worked',  label: t('dashboard.stats.workedThisMonth'), title: t('dashboard.stats.workedThisMonthHint'), list: derived.bWorked,  color: 'var(--color-success-text)' },
     { key: 'planned', label: t('dashboard.stats.planned'),         title: t('dashboard.stats.plannedHint'),         list: derived.bPlanned, color: 'var(--color-secondary)' },
-    { key: 'never',   label: t('dashboard.stats.neverWorked'),     title: t('dashboard.stats.neverWorkedHint'),     list: derived.bNever,   color: 'var(--color-danger)' },
+    { key: 'never',   label: t('dashboard.stats.neverWorked'),     title: t('dashboard.stats.neverWorkedHint'),     list: derived.bNever,   color: 'var(--color-danger-text)' },
     { key: 'idle',    label: t('dashboard.stats.idle'),            title: t('dashboard.stats.idleHint'),            list: derived.bIdle,    color: 'var(--text-muted)' },
   ]), [derived, t])
   // Drill-down: a candidate KPI opens the shared drawer — 'average' shows the per-month
@@ -95,7 +95,7 @@ export default function ShiftmanagerDashboard() {
   // Only the two candidate cards on the dashboard; ShiftsChartsBlock adds the seven
   // shift cards → one 9-card row. (Totaal/Inactief eruit — Danny: "ruk".)
   const leadingKpis: KpiSpec[] = [
-    { key: 'activity',  label: t('dashboard.stats.workedActive'), value: `${derived.bWorked.length}/${derived.active.length}`, color: 'var(--color-success)', onClick: openActivityDrill },
+    { key: 'activity',  label: t('dashboard.stats.workedActive'), value: `${derived.bWorked.length}/${derived.active.length}`, color: 'var(--color-success-text)', onClick: openActivityDrill },
     { key: 'new',       label: `${t('dashboard.stats.newThisMonth')} — ${t('dashboard.stats.avgOnly', { avg: derived.avg })}`, value: `${derived.newList.length}/${target}`, color: newColor, onClick: () => openDrill('average', t('monthlyKpi.averageCalc'), derived.all) },
     { key: 'attention', label: t('dashboard.stats.attentionCandidates'), value: `${derived.attention.length}/${derived.active.length}`, color: derived.attention.length > 0 ? 'var(--color-danger)' : 'var(--color-success)', onClick: openAttentionDrill },
   ]

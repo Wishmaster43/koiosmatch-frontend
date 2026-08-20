@@ -200,7 +200,7 @@ export default function ApplicationRow({ candidateId, row, appointment, canManag
           {canManage && applicationId != null && (
             <button type="button" onClick={() => onDetach(row)}
               title={t('work.detachApplication')} aria-label={t('work.detachApplication')}
-              style={{ ...iconBtn, background: 'color-mix(in srgb, var(--color-danger) 12%, transparent)', color: 'var(--color-danger)', border: '1px solid color-mix(in srgb, var(--color-danger) 40%, transparent)' }}>
+              style={{ ...iconBtn, background: 'color-mix(in srgb, var(--color-danger) 12%, transparent)', color: 'var(--color-danger-text)', border: '1px solid color-mix(in srgb, var(--color-danger) 40%, transparent)' }}>
               <Unlink size={12} />
             </button>
           )}

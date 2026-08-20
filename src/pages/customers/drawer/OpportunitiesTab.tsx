@@ -148,7 +148,7 @@ export default function OpportunitiesTab({ customerId, customerName }: { custome
           <Pencil size={12} />
         </button>
         <button onClick={e => { e.stopPropagation(); remove(o) }} title={t('common:delete')}
-          style={{ width: 24, height: 24, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', borderRadius: 6, cursor: 'pointer', border: 'none', background: 'var(--bg)', color: 'var(--color-danger)' }}>
+          style={{ width: 24, height: 24, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', borderRadius: 6, cursor: 'pointer', border: 'none', background: 'var(--bg)', color: 'var(--color-danger-text)' }}>
           <Trash2 size={12} />
         </button>
       </div>

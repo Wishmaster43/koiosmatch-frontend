@@ -86,7 +86,7 @@ export default function MatchingTab({ vacancy: v, onUpdate }: { vacancy: Vacancy
         {templatesLoading ? (
           <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{t('common:loading')}</div>
         ) : templatesError ? (
-          <div style={{ fontSize: 12, color: 'var(--color-danger)' }}>{t('matching.templatesError')}</div>
+          <div style={{ fontSize: 12, color: 'var(--color-danger-text)' }}>{t('matching.templatesError')}</div>
         ) : (
           <CreatableSelect value={v.matchWeightTemplateId ?? ''} onChange={pickTemplate} allowCreate={false}
             placeholder={t('matching.custom')}

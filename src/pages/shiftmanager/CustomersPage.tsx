@@ -154,7 +154,7 @@ export default function CustomersPage() {
     { key: 'locations',   label: t('insights.locations'),   value: totalLocations,   sub: t('insights.locationsSub'),   color: 'var(--color-secondary)' },
     { key: 'departments', label: t('insights.departments'), value: totalDepartments, sub: t('insights.departmentsSub'), color: 'var(--color-violet)' },
     { key: 'contacts',    label: t('insights.contacts'),    value: totalContacts,    sub: t('insights.contactsSub'),    color: 'var(--color-primary-text)' },
-    { key: 'noContact',   label: t('insights.noContact'),   value: noContactCount,   sub: t('insights.noContactSub'),   color: 'var(--color-danger)' },
+    { key: 'noContact',   label: t('insights.noContact'),   value: noContactCount,   sub: t('insights.noContactSub'),   color: 'var(--color-danger-text)' },
   ]
 
   // No create trigger here, deliberately (Danny 31-07). This page MIRRORS ShiftManager:

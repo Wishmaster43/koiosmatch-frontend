@@ -12,7 +12,7 @@
 import type { CSSProperties } from 'react'
 
 const TONE: Record<'error' | 'warning', { color: string; role: 'alert' | 'status' }> = {
-  error: { color: 'var(--color-danger)', role: 'alert' },
+  error: { color: 'var(--color-danger-text)', role: 'alert' },
   warning: { color: 'var(--color-warning)', role: 'status' },
 }
 

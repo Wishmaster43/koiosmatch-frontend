@@ -20,9 +20,11 @@ const OPEN_LABEL_KEY: Record<string, string> = {
 const KIND_META: Record<string, TimelineKindMeta> = {
   vacancy_created:   { icon: FilePlus2, color: 'var(--color-primary)' },
   vacancy_updated:   { icon: Pencil, color: 'var(--text-muted)' },
+  // eslint-disable-next-line huisstijl/no-restricted-syntax -- DATA: event-kind colour VALUE for the marker tint recipes (tintBg/chipInk downstream), not text ink
   vacancy_published: { icon: Globe, color: 'var(--color-success)' },
   note:              { icon: MessageSquare, color: 'var(--color-secondary)' },
   application:       { icon: UserPlus, color: 'var(--color-info)' },
+  // eslint-disable-next-line huisstijl/no-restricted-syntax -- DATA: event-kind colour VALUE for the marker tint recipes (tintBg/chipInk downstream), not text ink
   match:             { icon: Handshake, color: 'var(--color-success)' },
 }
 

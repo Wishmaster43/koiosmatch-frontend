@@ -181,7 +181,7 @@ export default function TargetsTab({ targets, loading, error, onSetStatus, onSet
 
   // Four UI states — never a blank panel.
   if (loading) return <p style={{ fontSize: 12, color: 'var(--text-muted)' }}>{t('drawer.loading')}</p>
-  if (error)   return <p style={{ fontSize: 12, color: 'var(--color-danger)' }}>{t('drawer.error')}</p>
+  if (error)   return <p style={{ fontSize: 12, color: 'var(--color-danger-text)' }}>{t('drawer.error')}</p>
   if (!targets.length) return <p style={{ fontSize: 12, color: 'var(--text-muted)' }}>{t('drawer.empty')}</p>
 
   return (

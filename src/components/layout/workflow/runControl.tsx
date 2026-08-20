@@ -58,7 +58,7 @@ export function StopRunButton({ runId, compact = false, onStopped, onError }: {
         padding: compact ? '4px 8px' : '6px 14px', borderRadius: 8,
         fontSize: compact ? 11 : 12, fontWeight: 500,
         background: 'color-mix(in srgb, var(--color-danger) 10%, transparent)',
-        color: 'var(--color-danger)',
+        color: 'var(--color-danger-text)',
         border: '1px solid color-mix(in srgb, var(--color-danger) 35%, transparent)',
         cursor: busy ? 'wait' : 'pointer',
       }}>

@@ -17,8 +17,8 @@ interface StatusStyle {
 
 // Common statuses shared across the app (candidates + active/inactive entities).
 const DEFAULT_MAP: Record<string, StatusStyle> = {
-  actief:     { color: 'var(--color-success)' },
-  active:     { color: 'var(--color-success)' },
+  actief:     { color: 'var(--color-success-text)' },
+  active:     { color: 'var(--color-success-text)' },
   nietactief: { color: 'var(--color-warning)' },
   inactive:   { color: 'var(--color-warning)' },
   extern:     { color: 'var(--color-secondary)' },

@@ -44,6 +44,7 @@ describe('buildTaskAdviceInsights', () => {
 
   it('reports the assignee name once assigned', () => {
     const [, assignee] = buildTaskAdviceInsights(base({ assigneeId: 'u1', assignee: { name: 'Anna', initials: 'A', color: null } }), t)
+    // eslint-disable-next-line huisstijl/no-restricted-syntax -- DATA: fixture/config colour VALUE mirrored from the component contract, not ink painted by this test
     expect(assignee).toEqual({ type: 'ai.assigneeLabel', color: 'var(--color-success)', text: 'ai.assignedTo|{"name":"Anna"}' })
   })
 

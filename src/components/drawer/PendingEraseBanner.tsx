@@ -75,7 +75,7 @@ export default function PendingEraseBanner({
         <button onClick={() => onUnmark(id)} disabled={unmarkBusy} title={unmarkLabel} aria-label={unmarkLabel}
           // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- pre-existing bespoke icon-only control with its own busy-fade opacity, out of this ink/tint task's scope
           style={{ background: 'none', border: 'none', cursor: unmarkBusy ? 'default' : 'pointer', padding: 3, display: 'flex',
-            color: 'var(--color-danger)', opacity: unmarkBusy ? 0.6 : 1 }}>
+            color: 'var(--color-danger-text)', opacity: unmarkBusy ? 0.6 : 1 }}>
           <Icon size={14} />
         </button>
       )}

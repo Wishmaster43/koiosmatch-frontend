@@ -432,7 +432,7 @@ export default function CustomerDrawer({
               <button onClick={requestDelete}
                 title={t('drawer.delete')} aria-label={t('drawer.delete')}
                 // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- frozen calm-header glyph control (Danny 08-08): deliberate bare 14px icon; Button iconOnly’s 28px chrome would change the frozen look
-                style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 4, display: 'flex', color: 'var(--color-danger)', opacity: 0.7 }}>
+                style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 4, display: 'flex', color: 'var(--color-danger-text)', opacity: 0.7 }}>
                 <Trash2 size={14} />
               </button>
             )}

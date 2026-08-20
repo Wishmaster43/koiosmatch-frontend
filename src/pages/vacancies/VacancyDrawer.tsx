@@ -230,7 +230,7 @@ export default function VacancyDrawer({ vacancy: v, onClose, expanded, onToggleE
                     style={{ display: 'inline-flex', alignItems: 'center', gap: 5, fontSize: 11, fontWeight: 500,
                       padding: '3px 9px', borderRadius: 999, cursor: 'pointer',
                       background: 'var(--color-success-bg)',
-                      color: 'var(--color-success)', border: '1px solid var(--color-success)' }}>
+                      color: 'var(--color-on-success-bg)', border: '1px solid var(--color-success)' }}>
                     <Icon size={12} /> {c.label}
                   </button>
                 )

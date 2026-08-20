@@ -69,7 +69,7 @@ export default function CandidateCustomRequiredFields({ phases }: { phases: Phas
             two halves of this screen genuinely save to different places. */}
         <p style={{ fontSize: 12, color: 'var(--text-muted)', margin: 0 }}>{t('requiredFields.customHint')}</p>
         {error && (
-          <p role="alert" style={{ fontSize: 12, color: 'var(--color-danger)', margin: '8px 0 0' }}>{error}</p>
+          <p role="alert" style={{ fontSize: 12, color: 'var(--color-danger-text)', margin: '8px 0 0' }}>{error}</p>
         )}
       </div>
 

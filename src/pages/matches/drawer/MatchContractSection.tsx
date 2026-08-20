@@ -150,7 +150,7 @@ export default function MatchContractSection({ matchId, onUpdate }: Props) {
   }
   if (error) {
     return (
-      <div style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: 12, color: 'var(--color-danger)', padding: '10px 2px' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: 12, color: 'var(--color-danger-text)', padding: '10px 2px' }}>
         <span>{t('drawer.contract.error')}</span>
         <Button variant="secondary" size="sm" onClick={retry}>{t('common:error.retry')}</Button>
       </div>

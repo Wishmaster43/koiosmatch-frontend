@@ -173,7 +173,7 @@ function CandidateTasksBody({ candidateId }: { candidateId: Id }) {
         <div style={{ marginBottom: 10 }}><ActionRuleBanner decision={taskRuleDecision} /></div>
       )}
       {loading && <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{t('drawer.tasksLoading')}</div>}
-      {!loading && error && <div style={{ fontSize: 12, color: 'var(--color-danger)' }}>{t('drawer.tasksError')}</div>}
+      {!loading && error && <div style={{ fontSize: 12, color: 'var(--color-danger-text)' }}>{t('drawer.tasksError')}</div>}
       {!loading && !error && visible.length === 0 && (
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 12, color: 'var(--text-muted)' }}>
           <ListChecks size={14} style={{ opacity: 0.6 }} /> {t('drawer.tasksEmpty')}

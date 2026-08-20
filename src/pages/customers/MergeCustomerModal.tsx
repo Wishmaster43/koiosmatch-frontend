@@ -166,7 +166,7 @@ export default function MergeCustomerModal({ current, onClose, onMerged }: {
               {infoCard(current, true)}
               {infoCard(duplicate, false)}
             </div>
-            <div style={{ fontSize: 12, color: 'var(--color-danger)', background: 'var(--color-danger-bg)', border: '1px solid color-mix(in srgb, var(--color-danger) 40%, transparent)', borderRadius: 8, padding: '8px 10px', lineHeight: 1.5, marginBottom: 12 }}>
+            <div style={{ fontSize: 12, color: 'var(--color-on-danger-bg)', background: 'var(--color-danger-bg)', border: '1px solid color-mix(in srgb, var(--color-danger) 40%, transparent)', borderRadius: 8, padding: '8px 10px', lineHeight: 1.5, marginBottom: 12 }}>
               {t('merge.warning', { source: duplicate.name, target: current.name })}
             </div>
           </>

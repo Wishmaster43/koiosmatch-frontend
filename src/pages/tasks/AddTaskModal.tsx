@@ -403,7 +403,7 @@ export default function AddTaskModal({ onClose, onCreated, onSaved, initial, ext
         {/* Server-side rejection (validation / matrix-guard) — shown in place, modal stays open. */}
         {createError && (
           <div role="alert" style={{ margin: '0 24px', padding: '8px 10px', fontSize: 12, borderRadius: 8,
-            color: 'var(--color-danger)', background: 'var(--color-danger-bg)',
+            color: 'var(--color-on-danger-bg)', background: 'var(--color-danger-bg)',
             border: tintBorder('var(--color-danger)', true), flexShrink: 0 }}>
             {createError}
           </div>

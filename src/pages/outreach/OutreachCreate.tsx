@@ -139,7 +139,7 @@ export default function OutreachCreate({ onClose, onCreated }: Props) {
           </div>
         </div>
 
-        {error && <div role="alert" style={{ fontSize: 12, color: 'var(--color-danger)', marginTop: 12 }}>{t('create.error')}</div>}
+        {error && <div role="alert" style={{ fontSize: 12, color: 'var(--color-danger-text)', marginTop: 12 }}>{t('create.error')}</div>}
 
         {/* Footer — Annuleren + primary create, BTN_H everywhere (§4/§9). */}
         <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, marginTop: 20 }}>

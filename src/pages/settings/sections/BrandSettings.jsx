@@ -274,8 +274,8 @@ export default function BrandSettings() {
             <div style={{ display: 'flex', alignItems: 'flex-start', gap: 8, marginTop: 12, padding: '10px 12px',
               borderRadius: 8, background: 'var(--color-danger-bg)',
               border: '1px solid color-mix(in srgb, var(--color-danger) 40%, transparent)' }}>
-              <span style={{ fontSize: 12, color: 'var(--color-danger)', flex: 1 }}>{logoError}</span>
-              <Button variant="ghost" iconOnly onClick={() => setLogoError(null)} aria-label={t('common.close')} style={{ color: 'var(--color-danger)' }}>
+              <span style={{ fontSize: 12, color: 'var(--color-danger-text)', flex: 1 }}>{logoError}</span>
+              <Button variant="ghost" iconOnly onClick={() => setLogoError(null)} aria-label={t('common.close')} style={{ color: 'var(--color-danger-text)' }}>
                 <X size={13} />
               </Button>
             </div>

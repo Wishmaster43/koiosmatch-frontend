@@ -62,7 +62,7 @@ export default function OutreachList({ campaigns, loading, error, onReload, onOp
   // Status pill colours for draft / active / done.
   const statusMap = {
     draft:  { label: t('status.draft'),  bg: 'var(--hover-bg)',        color: 'var(--text-muted)' },
-    active: { label: t('status.active'), bg: 'var(--color-success-bg)', color: 'var(--color-success)' },
+    active: { label: t('status.active'), bg: 'var(--color-success-bg)', color: 'var(--color-success-text)' },
     done:   { label: t('status.done'),   bg: 'var(--color-primary-bg)', color: 'var(--color-primary-text)' },
   }
 

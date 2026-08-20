@@ -12,7 +12,7 @@ import type { KoiosStep, TFn } from '@/types/koios'
 // reason → colour + icon + i18n label. Falls back to the organisational style.
 const REFUSAL: Record<string, { color: string; Icon: LucideIcon; labelKey: string }> = {
   organisatorisch: { color: 'var(--color-warning)', Icon: Ban,     labelKey: 'koios.refusedOrg' },
-  rechten:         { color: 'var(--color-danger)',  Icon: ShieldX, labelKey: 'koios.refusedRights' },
+  rechten:         { color: 'var(--color-danger-text)',  Icon: ShieldX, labelKey: 'koios.refusedRights' },
 }
 
 export default function KoiosSteps({ steps, t }: { steps?: KoiosStep[]; t: TFn }) {

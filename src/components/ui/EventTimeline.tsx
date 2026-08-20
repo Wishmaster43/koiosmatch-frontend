@@ -98,7 +98,7 @@ export default function EventTimeline({
 
   if (error) {
     return (
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 12, color: 'var(--color-danger)' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 12, color: 'var(--color-danger-text)' }}>
         <AlertTriangle size={14} /> {errorText}
       </div>
     )

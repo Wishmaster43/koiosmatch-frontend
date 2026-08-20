@@ -121,7 +121,7 @@ export default function SubtasksSection({ task, onSubtaskCreated }: {
           {loading ? (
             <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{t('details.subtasks.loading')}</div>
           ) : error ? (
-            <div style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: 12, color: 'var(--color-danger)' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: 12, color: 'var(--color-danger-text)' }}>
               <span>{t('details.subtasks.error')}</span>
               <Button variant="secondary" size="sm" onClick={fetchSubtasks}>{t('common:error.retry')}</Button>
             </div>

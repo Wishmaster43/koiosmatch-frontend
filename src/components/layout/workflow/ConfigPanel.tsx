@@ -91,7 +91,7 @@ export default function ConfigPanel({ node, onUpdate, onDelete, onTabChange, var
         <div key={field.key}>
           <label style={{ display: 'block', fontSize: 10, fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 6 }}>
             {fieldLabel(t, field.label as string | undefined)}
-            {!!(field as WorkflowField & { required?: boolean }).required && <span style={{ color: 'var(--color-danger)', marginLeft: 3 }}>*</span>}
+            {!!(field as WorkflowField & { required?: boolean }).required && <span style={{ color: 'var(--color-danger-text)', marginLeft: 3 }}>*</span>}
           </label>
           <FieldInput field={field as WorkflowField} value={config?.[field.key]} variables={variables} config={config}
             onChange={(key, val) => onUpdate(node.id, key, val)} />

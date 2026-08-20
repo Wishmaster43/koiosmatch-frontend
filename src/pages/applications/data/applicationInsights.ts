@@ -61,7 +61,9 @@ export const placedCount = (stats: AppStats | null, wideRows: Application[]): nu
 // the other three which partition the set.
 export const buildBucketData = (t: TFunction, counts: { active: number; matched: number; rejected: number; placed: number }): Aggregate[] => ([
   { name: t('buckets.active'),   key: 'active',   color: 'var(--color-primary)', value: counts.active },
+  // eslint-disable-next-line huisstijl/no-restricted-syntax -- DATA: semantic colour VALUE for the shared chip/donut/series recipes (tinted/chipInked downstream), not text ink
   { name: t('buckets.matched'),  key: 'matched',  color: 'var(--color-success)', value: counts.matched },
+  // eslint-disable-next-line huisstijl/no-restricted-syntax -- DATA: semantic colour VALUE for the shared chip/donut/series recipes (tinted/chipInked downstream), not text ink
   { name: t('buckets.rejected'), key: 'rejected', color: 'var(--color-danger)',  value: counts.rejected },
   { name: t('buckets.placed'),   key: 'placed',   color: 'var(--color-secondary)', value: counts.placed },
 ].filter(d => d.value > 0))
@@ -202,8 +204,10 @@ export function buildApplicationInsights({
       sub: t('kpi.newSub'), color: 'var(--color-warning)',
       onClick: () => { setShowArchived(false); setBucket('active'); toggleAttention('new') }, active: attention === 'new' },
     { key: 'matched', label: t('kpi.matched'), value: counts.matched, sub: t('kpi.matchedSub'),
+      // eslint-disable-next-line huisstijl/no-restricted-syntax -- DATA: semantic colour VALUE for the shared chip/donut/series recipes (tinted/chipInked downstream), not text ink
       color: 'var(--color-success)', onClick: () => { setShowArchived(false); setBucket('matched') }, active: !showArchived && bucket === 'matched' },
     { key: 'rejected', label: t('kpi.rejected'), value: counts.rejected, sub: t('kpi.rejectedSub'),
+      // eslint-disable-next-line huisstijl/no-restricted-syntax -- DATA: semantic colour VALUE for the shared chip/donut/series recipes (tinted/chipInked downstream), not text ink
       color: 'var(--color-danger)', onClick: () => { setShowArchived(false); setBucket('rejected') }, active: !showArchived && bucket === 'rejected' },
     { key: 'avgScore', label: t('kpi.avgScore'), value: avgScore, sub: t('kpi.avgScoreSub'), color: 'var(--color-secondary)',
       onClick: () => { setShowArchived(false); toggleAttention('scored') }, active: attention === 'scored' },

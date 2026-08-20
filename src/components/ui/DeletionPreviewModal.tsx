@@ -82,7 +82,7 @@ export default function DeletionPreviewModal({
       )}
       {/* Error state — never a blank panel with a dead button. */}
       {!loading && error && (
-        <div role="alert" style={{ fontSize: 13, color: 'var(--color-danger)' }}>{t('errorGeneric')}</div>
+        <div role="alert" style={{ fontSize: 13, color: 'var(--color-danger-text)' }}>{t('errorGeneric')}</div>
       )}
       {!loading && !error && (
         <>
@@ -105,7 +105,7 @@ export default function DeletionPreviewModal({
           )}
           {/* Honest notice whenever confirm is disabled by blockers (preview or fresh 409). */}
           {showBlockedNotice && (
-            <div role="status" style={{ fontSize: 12, color: 'var(--color-danger)', lineHeight: 1.5 }}>
+            <div role="status" style={{ fontSize: 12, color: 'var(--color-danger-text)', lineHeight: 1.5 }}>
               {t('trash.modal.blockedIntro')}
             </div>
           )}

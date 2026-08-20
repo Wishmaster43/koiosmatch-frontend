@@ -21,7 +21,7 @@ type Groups = { stale6m?: AttentionGroup; never_contacted?: AttentionGroup; no_f
 // { attention: '<value>' })).
 const GROUPS: Array<{ key: keyof Groups; i18n: string; color: string; intent: string }> = [
   { key: 'stale6m',         i18n: 'stale6m',        color: 'var(--color-warning)', intent: 'stale6m' },
-  { key: 'never_contacted', i18n: 'neverContacted', color: 'var(--color-danger)',  intent: 'neverContacted' },
+  { key: 'never_contacted', i18n: 'neverContacted', color: 'var(--color-danger-text)',  intent: 'neverContacted' },
   { key: 'no_followup',     i18n: 'noFollowup',     color: 'var(--color-secondary)', intent: 'noFollowup' },
 ]
 

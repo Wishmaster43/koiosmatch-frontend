@@ -51,7 +51,7 @@ export default function DeletionPreviewModal({ candidateId, candidateName, onClo
       persistKey="deletion-preview" width={420} maxWidth="92vw" bodyStyle={{ padding: 22 }}
       header={
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <span style={{ display: 'inline-flex', width: 30, height: 30, borderRadius: 8, alignItems: 'center', justifyContent: 'center', background: 'var(--color-danger-bg)', color: 'var(--color-danger)' }}><AlertTriangle size={16} /></span>
+          <span style={{ display: 'inline-flex', width: 30, height: 30, borderRadius: 8, alignItems: 'center', justifyContent: 'center', background: 'var(--color-danger-bg)', color: 'var(--color-on-danger-bg)' }}><AlertTriangle size={16} /></span>
           <span style={{ fontSize: 15, fontWeight: 700, color: 'var(--text)' }}>{t('erase.confirmTitle')}</span>
         </div>
       }>
@@ -76,7 +76,7 @@ export default function DeletionPreviewModal({ candidateId, candidateName, onClo
           </div>
         )}
 
-        <p style={{ fontSize: 11.5, color: 'var(--color-danger)', marginBottom: 16 }}>{t('erase.irreversible')}</p>
+        <p style={{ fontSize: 11.5, color: 'var(--color-danger-text)', marginBottom: 16 }}>{t('erase.irreversible')}</p>
 
         <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8 }}>
           <Button variant="secondary" onClick={onClose}>{t('common:cancel')}</Button>

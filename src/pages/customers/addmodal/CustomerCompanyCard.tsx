@@ -31,7 +31,7 @@ export default function CustomerCompanyCard({ form, set, errors, industries }: C
           <FieldRow label={t('modal.fields.name')} required>
             <TextField value={form.name} onChange={v => set('name', v)} placeholder={t('modal.fields.namePlaceholder')} error={errors.name} />
           </FieldRow>
-          {errors.name && <div style={{ fontSize: 11, color: 'var(--color-danger)', marginTop: 3 }}>{t('modal.required')}</div>}
+          {errors.name && <div style={{ fontSize: 11, color: 'var(--color-danger-text)', marginTop: 3 }}>{t('modal.required')}</div>}
         </div>
         {/* DEBITEURNUMMER-1 (Danny 02-08): the debtor number is no longer collected
             here — it is the customer's own accounting number, decided later, and

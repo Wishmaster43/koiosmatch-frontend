@@ -165,7 +165,7 @@ export default function TargetNoteField({ note, onSave, targetId, campaignId, on
           {/* Koios AI assist — Verbeteren / Samenvatten / Actiepunten, byte-for-byte
               the candidate note's own block (§11 one source, no second copy). */}
           <NoteAssistSection body={draft} onApply={changeDraft} />
-          {failed && <span style={{ fontSize: 10, color: 'var(--color-danger)' }}>{t('outreach:drawer.note.saveFailed')}</span>}
+          {failed && <span style={{ fontSize: 10, color: 'var(--color-danger-text)' }}>{t('outreach:drawer.note.saveFailed')}</span>}
         </div>
       )}
     </div>

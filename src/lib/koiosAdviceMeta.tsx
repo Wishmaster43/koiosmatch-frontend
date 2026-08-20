@@ -28,7 +28,7 @@ export const ADVICE_META: Record<string, AdviceMeta> = {
   // Matches: the contract end date is approaching or passed while still open.
   renew:       { icon: RefreshCw,     color: 'var(--color-info)' },
   // Tasks: past its due date — mirrors the due-column's own overdue colour.
-  overdue:     { icon: Clock,         color: 'var(--color-danger)' },
+  overdue:     { icon: Clock,         color: 'var(--color-danger-text)' },
   // Applications: the backend's free-text suggested next action (useApplicationAdvice).
   task:        { icon: ClipboardList, color: 'var(--text-muted)' },
   default:     { icon: Sparkles,     color: 'var(--text-muted)' },

@@ -125,7 +125,7 @@ export default function UploadStep({ entity, canView, canImport, onFileReady }: 
           style={{ display: 'none' }} onChange={handleFileInput} disabled={!canImport || parsing} />
       </div>
 
-      {typeError && <p style={{ fontSize: 12, color: 'var(--color-danger)', marginTop: 10 }}>{typeError}</p>}
+      {typeError && <p style={{ fontSize: 12, color: 'var(--color-danger-text)', marginTop: 10 }}>{typeError}</p>}
     </div>
   )
 }

@@ -260,7 +260,7 @@ export default function DocumentsTab({ vacancy: v }: { vacancy: VacancyDetail })
       {loading ? (
         <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{t('documents.loading')}</div>
       ) : error ? (
-        <div style={{ fontSize: 12, color: 'var(--color-danger)' }}>{t('documents.loadFailed')}</div>
+        <div style={{ fontSize: 12, color: 'var(--color-danger-text)' }}>{t('documents.loadFailed')}</div>
       ) : docs.length === 0 && !pending ? (
         <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{t('documents.empty')}</div>
       ) : filteredDocs.length === 0 ? (

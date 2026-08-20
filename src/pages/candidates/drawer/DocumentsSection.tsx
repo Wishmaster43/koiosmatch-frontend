@@ -390,7 +390,7 @@ export default function DocumentsSection({ c, onRefresh }: { c: Candidate; onRef
               {canManage && (
                 <button onClick={() => setConfirmDelete({ kind: 'many' })}
                   style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 11, fontWeight: 600, padding: '4px 10px', borderRadius: 99, cursor: 'pointer', whiteSpace: 'nowrap', flexShrink: 0,
-                    background: 'color-mix(in srgb, var(--color-danger) 12%, transparent)', color: 'var(--color-danger)',
+                    background: 'color-mix(in srgb, var(--color-danger) 12%, transparent)', color: 'var(--color-danger-text)',
                     border: '1px solid color-mix(in srgb, var(--color-danger) 40%, transparent)' }}>
                   <Trash2 size={11} /> {t('documents.deleteSelected', { count: selected.size })}
                 </button>

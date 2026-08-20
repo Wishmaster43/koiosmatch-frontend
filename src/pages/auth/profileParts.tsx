@@ -45,7 +45,7 @@ export const ROLE_META: Record<string, { color: string; bg: string }> = {
   super_admin:  { color: 'var(--color-violet)', bg: 'var(--color-violet-bg)' },
   tenant_admin: { color: 'var(--color-secondary)', bg: 'var(--color-secondary-bg)' },
   admin:        { color: 'var(--color-secondary)', bg: 'var(--color-secondary-bg)' },
-  planner:      { color: 'var(--color-success)', bg: 'var(--color-success-bg)' },
+  planner:      { color: 'var(--color-success-text)', bg: 'var(--color-success-bg)' },
   default:      { color: 'var(--text-muted)', bg: 'color-mix(in srgb, var(--text-muted) 12%, transparent)' },
 }
 

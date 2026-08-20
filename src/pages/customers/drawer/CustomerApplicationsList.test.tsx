@@ -29,6 +29,7 @@ vi.mock('../hooks/useCustomerDrawerData', () => ({
 // ApplicationDrawer.test.tsx's own useLookups stub.
 const FUNNEL_TYPES = [
   { value: 'applied', label: 'Aangemeld', color: 'var(--color-info)' },
+  // eslint-disable-next-line huisstijl/no-restricted-syntax -- DATA: fixture/config colour VALUE mirrored from the component contract, not ink painted by this test
   { value: 'hired', label: 'Aangenomen', color: 'var(--color-success)' },
 ]
 vi.mock('@/context/LookupsContext', () => ({

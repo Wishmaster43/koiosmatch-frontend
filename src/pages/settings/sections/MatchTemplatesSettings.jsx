@@ -225,7 +225,7 @@ export default function MatchTemplatesSettings() {
   if (phase === 'loading') return <div style={{ padding: 24, color: 'var(--text-muted)', fontSize: 13 }}>{t('common.loading')}</div>
   if (phase === 'error') {
     return (
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: 24, color: 'var(--color-danger)', fontSize: 13 }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: 24, color: 'var(--color-danger-text)', fontSize: 13 }}>
         <AlertTriangle size={14} /> {t('matchTemplatesSettings.loadError')}
       </div>
     )

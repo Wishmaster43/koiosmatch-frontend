@@ -52,7 +52,7 @@ export default function ScopedNotesTab({ scope, id, customerId }: {
 
   // Four explicit UI states (§3) — never a blank screen while the scoped fetch is in flight or failed.
   if (loading) return <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{t('page.loading')}</div>
-  if (error) return <div style={{ fontSize: 12, color: 'var(--color-danger)' }}>{t('scopedList.loadError')}</div>
+  if (error) return <div style={{ fontSize: 12, color: 'var(--color-danger-text)' }}>{t('scopedList.loadError')}</div>
 
   return (
     <NotesTab

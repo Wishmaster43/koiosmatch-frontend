@@ -78,6 +78,32 @@ describe('house token pairs stay readable (defaults, light theme)', () => {
     expect(ratio(token('color-on-danger-bg'), token('color-danger-bg'))).toBeGreaterThanOrEqual(4.5)
   })
 
+  // Klus b (20-08): danger as TEXT rides its own twin (mirrors --color-primary-text).
+  // The raw fill colour measured 3.47:1 on the dark surface — an AA fail that sat
+  // on 182 ink sites; this pins the twin on both grounds in both themes.
+  it('success-text clears 4.5:1 on surface and bg, light and dark', () => {
+    const lastDef = (name: string): string => {
+      const all = [...css.matchAll(new RegExp(`--${name}:\\s*([^;]+);`, 'g'))]
+      return all[all.length - 1][1].trim()
+    }
+    for (const ground of ['surface', 'bg']) {
+      expect(ratio(token('color-success-text'), token(ground)), `licht/${ground}`).toBeGreaterThanOrEqual(4.5)
+      expect(ratio(lastDef('color-success-text'), lastDef(ground)), `donker/${ground}`).toBeGreaterThanOrEqual(4.5)
+    }
+  })
+
+  it('danger-text clears 4.5:1 on surface and bg, light and dark', () => {
+    // Last definition in index.css = the dark block's value (mirrors the on-*-bg loop).
+    const lastDef = (name: string): string => {
+      const all = [...css.matchAll(new RegExp(`--${name}:\\s*([^;]+);`, 'g'))]
+      return all[all.length - 1][1].trim()
+    }
+    for (const ground of ['surface', 'bg']) {
+      expect(ratio(token('color-danger-text'), token(ground)), `licht/${ground}`).toBeGreaterThanOrEqual(4.5)
+      expect(ratio(lastDef('color-danger-text'), lastDef(ground)), `donker/${ground}`).toBeGreaterThanOrEqual(4.5)
+    }
+  })
+
   // The full on-*-bg family, BOTH themes (r8 CONTRAST-1: CalloutBox titles wore
   // the raw tokens at 2.4-3.95:1; loose "(gemeten X:1)" comments enforce nothing
   // — this table does). Dark pastels are rgba() tints composited over the dark

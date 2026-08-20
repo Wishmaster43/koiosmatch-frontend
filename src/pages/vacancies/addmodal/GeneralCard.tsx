@@ -29,7 +29,7 @@ export default function GeneralCard({
           <FieldRow label={t('modal.fields.title')} required>
             <TextField value={title} onChange={onTitleChange} placeholder={t('modal.titlePlaceholder')} error={titleError} />
           </FieldRow>
-          {titleError && <div style={{ fontSize: 11, color: 'var(--color-danger)', marginTop: 3 }}>{t('modal.required')}</div>}
+          {titleError && <div style={{ fontSize: 11, color: 'var(--color-danger-text)', marginTop: 3 }}>{t('modal.required')}</div>}
         </div>
         {/* Punt 5: "Categorie" -> "Functie" everywhere — the API key stays
             `category` (VacancyWriter aliases it onto `function_title`); only

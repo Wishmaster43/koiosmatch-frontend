@@ -99,11 +99,11 @@ export default function AssistActionItemCard({ item, onConfirm, onViewRun }: Ass
         onViewRun ? (
           <button type="button" onClick={onViewRun} title={t('notesAssist.execute.viewRun', { defaultValue: 'Bekijk workflow-run' })}
             style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 11, fontWeight: 500,
-              color: 'var(--color-success)', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}>
+              color: 'var(--color-success-text)', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}>
             <Check size={13} /> {t('notesAssist.execute.executed', { defaultValue: 'Uitgevoerd' })} <ExternalLink size={11} />
           </button>
         ) : (
-          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 11, color: 'var(--color-success)' }}>
+          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 11, color: 'var(--color-success-text)' }}>
             <Check size={13} /> {t('notesAssist.execute.executed', { defaultValue: 'Uitgevoerd' })}
           </span>
         )
@@ -119,7 +119,7 @@ export default function AssistActionItemCard({ item, onConfirm, onViewRun }: Ass
         <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}
           title={item.status === 'wizard_required' ? item.reason : undefined}>
           {item.confirmError && (
-            <span style={{ fontSize: 10, color: 'var(--color-danger)' }}>
+            <span style={{ fontSize: 10, color: 'var(--color-danger-text)' }}>
               {t('notesAssist.execute.confirmFailed', { defaultValue: 'Bevestigen mislukt' })}
             </span>
           )}
@@ -135,7 +135,7 @@ export default function AssistActionItemCard({ item, onConfirm, onViewRun }: Ass
           only as fallback), no fake retry button (retrying would 403 again). */}
       {item.status === 'forbidden' && (
         <span title={item.reason ?? t(`notesAssist.execute.forbiddenReason.${item.type}`, { defaultValue: FORBIDDEN_REASON_NL[item.type] })}
-          style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 11, color: 'var(--color-danger)', cursor: 'help' }}>
+          style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 11, color: 'var(--color-danger-text)', cursor: 'help' }}>
           <ShieldAlert size={13} /> {t('notesAssist.execute.forbidden', { defaultValue: 'Geen rechten' })}
         </span>
       )}

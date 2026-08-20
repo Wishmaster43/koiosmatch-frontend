@@ -88,7 +88,7 @@ export default function AddLinkRow({ existing, onAdd, onClose, types = TASK_LINK
       {/* Load error (§3, four UI states): distinct from "no matches" so the
           recruiter knows the search itself failed and can retry it. */}
       {error && (
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 11, color: 'var(--color-danger)' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 11, color: 'var(--color-danger-text)' }}>
           <span>{t('links.loadError')}</span>
           <button type="button" onClick={fetchOptions} style={{ background: 'none', border: '1px solid var(--border)', borderRadius: 6,
             padding: '2px 8px', cursor: 'pointer', color: 'var(--text)' }}>{t('common:error.retry')}</button>

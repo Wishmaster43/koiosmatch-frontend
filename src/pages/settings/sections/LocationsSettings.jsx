@@ -181,7 +181,7 @@ export default function LocationsSettings() {
       </div>
 
       {loading ? <p style={{ fontSize: 13, color: 'var(--text-muted)' }}>{t('common.loadingShort')}</p> : loadError ? (
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '24px 0', color: 'var(--color-danger)', fontSize: 13 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '24px 0', color: 'var(--color-danger-text)', fontSize: 13 }}>
           <AlertTriangle size={14} /> {t('locations.loadError')}
         </div>
       ) : view === 'map' ? (

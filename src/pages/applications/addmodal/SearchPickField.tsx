@@ -68,7 +68,7 @@ export default function SearchPickField({ label, placeholder, value, options, on
           is more likely and needs its own recovery path (retry re-issues the SAME query,
           which an unchanged search box would otherwise never re-trigger). */}
       {searchError && (
-        <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 4, fontSize: 11, color: 'var(--color-danger)' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 4, fontSize: 11, color: 'var(--color-danger-text)' }}>
           <span>{t(SEARCH_ERROR_KEY[searchError])}</span>
           <button type="button" onClick={onRetry}
             style={{ background: 'none', border: '1px solid var(--border)', borderRadius: 6, padding: '1px 6px', cursor: 'pointer', color: 'var(--text)' }}>

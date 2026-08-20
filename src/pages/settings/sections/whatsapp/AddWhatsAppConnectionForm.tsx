@@ -94,10 +94,10 @@ export default function AddWhatsAppConnectionForm({ onCreated }: { onCreated: ()
       </div>
 
       {(missingWaba || missingToken) && (
-        <div style={{ fontSize: 12, color: 'var(--color-danger)', marginTop: 10 }}>{t('whatsapp.addConnectionRequired')}</div>
+        <div style={{ fontSize: 12, color: 'var(--color-danger-text)', marginTop: 10 }}>{t('whatsapp.addConnectionRequired')}</div>
       )}
       {error && (
-        <div role="alert" style={{ fontSize: 12, color: 'var(--color-danger)', marginTop: 10 }}>{error}</div>
+        <div role="alert" style={{ fontSize: 12, color: 'var(--color-danger-text)', marginTop: 10 }}>{error}</div>
       )}
 
       <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 14 }}>

@@ -167,7 +167,7 @@ export default function PlanIntakeModal(props: PlanIntakeFormOptions) {
         {/* Server-side rejection (non-field 422 / other failure) — shown in place, modal stays open. */}
         {form.submitErr && (
           <div role="alert" style={{ marginBottom: 14, padding: '8px 10px', fontSize: 12, borderRadius: 8,
-            color: 'var(--color-danger)', background: 'var(--color-danger-bg)',
+            color: 'var(--color-on-danger-bg)', background: 'var(--color-danger-bg)',
             border: '1px solid color-mix(in srgb, var(--color-danger) 40%, transparent)' }}>
             {form.submitErr}
           </div>

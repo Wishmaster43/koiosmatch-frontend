@@ -17,7 +17,7 @@ import Button from '@/components/ui/Button'
 // noteBox covers the multi-line textarea below (height doesn't apply there).
 const fieldBox: CSSProperties = fieldInputStyle
 const noteBox: CSSProperties = fieldTextareaStyle
-const errorText: CSSProperties = { fontSize: 11, color: 'var(--color-danger)', marginTop: 4 }
+const errorText: CSSProperties = { fontSize: 11, color: 'var(--color-danger-text)', marginTop: 4 }
 const NOTE_MAX = 2000
 const NOTE_COUNTER_FROM = 1800
 
@@ -92,7 +92,7 @@ export default function TerminateMatchModal({ match, onClose, onUpdate }: Props)
       header={
         <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>
           <span style={{ display: 'inline-flex', width: 30, height: 30, borderRadius: 8, alignItems: 'center', justifyContent: 'center',
-            background: 'var(--color-danger-bg)', color: 'var(--color-danger)' }}><Ban size={16} /></span>
+            background: 'var(--color-danger-bg)', color: 'var(--color-on-danger-bg)' }}><Ban size={16} /></span>
           <span style={{ fontSize: 15, fontWeight: 700, color: 'var(--text)' }}>{t('drawer.terminate.modalTitle')}</span>
         </span>
       }>

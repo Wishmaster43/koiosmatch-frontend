@@ -58,7 +58,7 @@ export default function MatchRatesSettings() {
       {loading ? (
         <p style={{ fontSize: 13, color: 'var(--text-muted)', marginTop: 14 }}>{t('common.loadingShort')}</p>
       ) : loadError ? (
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 14, color: 'var(--color-danger)', fontSize: 13 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 14, color: 'var(--color-danger-text)', fontSize: 13 }}>
           <AlertTriangle size={14} /> {t('matchRates.loadError')}
         </div>
       ) : (

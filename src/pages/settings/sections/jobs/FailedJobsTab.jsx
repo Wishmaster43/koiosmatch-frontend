@@ -40,7 +40,7 @@ export default function FailedJobsTab() {
     { key: 'subject', header: t('jobs.recent.colSubject'), nowrap: true,
       render: (r) => r.subject ? <Mono style={{ fontSize: 12 }}>{r.subject.type} {r.subject.reference}</Mono> : '—' },
     { key: 'exception_summary', header: t('jobs.col.exception'),
-      render: (r) => <span style={{ fontSize: 12, color: 'var(--color-danger)' }}>{r.exception_summary}</span> },
+      render: (r) => <span style={{ fontSize: 12, color: 'var(--color-danger-text)' }}>{r.exception_summary}</span> },
     { key: 'failed_at', header: t('jobs.col.failedAt'), nowrap: true, render: (r) => formatDT(r.failed_at) },
     { key: 'actions', header: t('jobs.col.actions'), align: 'right', nowrap: true,
       render: (r) => (

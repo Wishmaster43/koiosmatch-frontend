@@ -16,16 +16,16 @@ import { Caption } from '@/components/ui/typography'
 
 // Phone-number quality ratings → colour. Label = t('whatsapp.quality<KEY>').
 const QUALITY_META = {
-  GREEN:  { color: 'var(--color-success)', bg: 'var(--color-success-bg)' },
+  GREEN:  { color: 'var(--color-success-text)', bg: 'var(--color-success-bg)' },
   YELLOW: { color: 'var(--color-warning)', bg: 'var(--color-warning-bg)' },
-  RED:    { color: 'var(--color-danger)',  bg: 'var(--color-danger-bg)' },
+  RED:    { color: 'var(--color-danger-text)',  bg: 'var(--color-danger-bg)' },
 }
 
 // Template review status → colour. Label = t('whatsapp.status<KEY>').
 const TEMPLATE_STATUS_META = {
-  APPROVED: { color: 'var(--color-success)', bg: 'var(--color-success-bg)' },
+  APPROVED: { color: 'var(--color-success-text)', bg: 'var(--color-success-bg)' },
   PENDING:  { color: 'var(--color-warning)', bg: 'var(--color-warning-bg)' },
-  REJECTED: { color: 'var(--color-danger)',  bg: 'var(--color-danger-bg)' },
+  REJECTED: { color: 'var(--color-danger-text)',  bg: 'var(--color-danger-bg)' },
   PAUSED:   { color: 'var(--text-muted)',              bg: 'var(--hover-bg)' },
 }
 
@@ -196,7 +196,7 @@ export default function WhatsAppSettings() {
                           background: 'var(--color-danger-bg)', border: '1px solid #FCA5A5', borderRadius: 12 }}>
               <div style={{ width: 10, height: 10, borderRadius: '50%', background: 'var(--color-danger)', flexShrink: 0 }} />
               <div>
-                <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--color-danger)' }}>{t('whatsapp.notConnected')}</div>
+                <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--color-danger-text)' }}>{t('whatsapp.notConnected')}</div>
                 <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>{t('whatsapp.notConnectedDesc')}</div>
               </div>
             </div>

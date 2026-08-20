@@ -45,7 +45,7 @@ export default function CvBlock({ candidateId }: { candidateId: Id | null | unde
         {t('drawer.cv.title')}
       </GroupLabel>
       {loading && <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{t('drawer.cv.loading')}</div>}
-      {!loading && error && <div style={{ fontSize: 12, color: 'var(--color-danger)' }}>{t('drawer.cv.error')}</div>}
+      {!loading && error && <div style={{ fontSize: 12, color: 'var(--color-danger-text)' }}>{t('drawer.cv.error')}</div>}
       {!loading && !error && (
         <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
           {cv ? (

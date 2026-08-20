@@ -120,7 +120,7 @@ export default function VacancyContentBlocksSettings() {
   if (phase === 'unavailable') return <p style={{ fontSize: 13, color: 'var(--text-muted)' }}>{t('vacancyContentBlocksSettings.unavailable')}</p>
   if (phase === 'error') {
     return (
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '12px 0', color: 'var(--color-danger)', fontSize: 13 }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '12px 0', color: 'var(--color-danger-text)', fontSize: 13 }}>
         <AlertTriangle size={14} /> {t('vacancyContentBlocksSettings.loadError')}
       </div>
     )

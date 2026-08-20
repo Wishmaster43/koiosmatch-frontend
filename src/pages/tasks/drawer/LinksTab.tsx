@@ -63,7 +63,7 @@ export default function LinksTab({ task, onAddLink, onRemoveLink }: {
               </div>
               <button onClick={() => onRemoveLink({ type: l.type, id: l.id })} title={t('links.remove')} aria-label={t('links.remove')}
                 style={{ width: 26, height: 26, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
-                  background: 'var(--color-danger-bg)', border: 'none', borderRadius: 6, color: 'var(--color-danger)', cursor: 'pointer' }}>
+                  background: 'var(--color-danger-bg)', border: 'none', borderRadius: 6, color: 'var(--color-on-danger-bg)', cursor: 'pointer' }}>
                 <X size={13} />
               </button>
             </div>

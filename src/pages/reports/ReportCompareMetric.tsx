@@ -14,8 +14,8 @@ import type { ComparePolarity } from './reportComparePolarity'
 import { compareTone } from './reportComparePolarity'
 
 const TONE_COLOR: Record<'good' | 'bad' | 'neutral', string> = {
-  good: 'var(--color-success)',
-  bad: 'var(--color-danger)',
+  good: 'var(--color-success-text)',
+  bad: 'var(--color-danger-text)',
   neutral: 'var(--text-muted)',
 }
 

@@ -43,7 +43,7 @@ export default function OpportunityGeneralCard({
       <div style={cardBox}>
         <FieldRow label={t('modal.fields.title')} required>
           <TextField value={title} onChange={onTitleChange} placeholder={titlePlaceholder} error={titleError} />
-          {titleError && <div style={{ fontSize: 11, color: 'var(--color-danger)', marginTop: 3 }}>{t('modal.required')}</div>}
+          {titleError && <div style={{ fontSize: 11, color: 'var(--color-danger-text)', marginTop: 3 }}>{t('modal.required')}</div>}
         </FieldRow>
         <div style={row2}>
           <FieldRow label={t('modal.fields.client')}>

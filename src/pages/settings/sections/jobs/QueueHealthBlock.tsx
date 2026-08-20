@@ -49,7 +49,7 @@ export default function QueueHealthBlock({ queueStatus }: { queueStatus?: QueueS
       {watch?.alerting && (
         <div role="alert" style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '10px 14px', marginBottom: 10,
           borderRadius: 8, background: 'var(--color-danger-bg)', border: '1px solid var(--color-danger)' }}>
-          <AlertTriangle size={16} style={{ color: 'var(--color-danger)', flexShrink: 0 }} />
+          <AlertTriangle size={16} style={{ color: 'var(--color-danger-text)', flexShrink: 0 }} />
           <SectionTitle as="span">
             {t('jobs.health.incidentBanner', { since: formatDateTime(watch.open_incident_since) })}
           </SectionTitle>
@@ -59,7 +59,7 @@ export default function QueueHealthBlock({ queueStatus }: { queueStatus?: QueueS
       {!horizon_running && (
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '10px 14px', marginBottom: 10,
           borderRadius: 8, background: 'var(--color-danger-bg)', border: '1px solid color-mix(in srgb, var(--color-danger) 40%, transparent)' }}>
-          <AlertTriangle size={16} style={{ color: 'var(--color-danger)', flexShrink: 0 }} />
+          <AlertTriangle size={16} style={{ color: 'var(--color-danger-text)', flexShrink: 0 }} />
           <span style={{ fontSize: 13, color: 'var(--text)' }}>{t('jobs.health.horizonDown')}</span>
         </div>
       )}
@@ -67,7 +67,7 @@ export default function QueueHealthBlock({ queueStatus }: { queueStatus?: QueueS
       {schedulerDown && (
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '10px 14px', marginBottom: 10,
           borderRadius: 8, background: 'var(--color-danger-bg)', border: '1px solid color-mix(in srgb, var(--color-danger) 40%, transparent)' }}>
-          <AlertTriangle size={16} style={{ color: 'var(--color-danger)', flexShrink: 0 }} />
+          <AlertTriangle size={16} style={{ color: 'var(--color-danger-text)', flexShrink: 0 }} />
           <span style={{ fontSize: 13, color: 'var(--text)' }}>{t('jobs.health.schedulerDown')}</span>
         </div>
       )}
@@ -76,7 +76,7 @@ export default function QueueHealthBlock({ queueStatus }: { queueStatus?: QueueS
       {horizon_running && !schedulerDown && (
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 14px', flexWrap: 'wrap',
           borderRadius: 8, background: 'var(--color-success-bg)', border: '1px solid var(--color-success)' }}>
-          <CheckCircle2 size={15} style={{ color: 'var(--color-success)', flexShrink: 0 }} />
+          <CheckCircle2 size={15} style={{ color: 'var(--color-success-text)', flexShrink: 0 }} />
           <span style={{ fontSize: 12, color: 'var(--text)' }}>
             {seenMinutes == null ? t('jobs.health.healthy') : t('jobs.health.healthySeen', { minutes: seenMinutes })}
           </span>

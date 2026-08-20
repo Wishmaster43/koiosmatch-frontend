@@ -187,8 +187,8 @@ export default function PlanningPage() {
       {shiftsError && (
         <div style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '8px 20px',
           background: 'color-mix(in srgb, var(--color-danger) 8%, transparent)', flexShrink: 0 }}>
-          <AlertCircle size={12} style={{ color: 'var(--color-danger)', flexShrink: 0 }} aria-hidden="true" />
-          <span style={{ fontSize: 12, color: 'var(--color-danger)' }}>{t('loadErrorShifts')}</span>
+          <AlertCircle size={12} style={{ color: 'var(--color-danger-text)', flexShrink: 0 }} aria-hidden="true" />
+          <span style={{ fontSize: 12, color: 'var(--color-danger-text)' }}>{t('loadErrorShifts')}</span>
         </div>
       )}
 

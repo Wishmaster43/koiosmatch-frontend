@@ -50,7 +50,7 @@ export function SaveBar({ saving, saved, onSave }: { saving?: boolean; saved?: b
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
       {saved && (
-        <span style={{ fontSize: 11, color: 'var(--color-success)', display: 'flex', alignItems: 'center', gap: 3 }}>
+        <span style={{ fontSize: 11, color: 'var(--color-success-text)', display: 'flex', alignItems: 'center', gap: 3 }}>
           <Check size={11} /> {t('ai.saved')}
         </span>
       )}

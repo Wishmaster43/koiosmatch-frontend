@@ -17,10 +17,20 @@
 
   /* ── Semantische statuskleuren ── */
   --color-success:       #16A34A;
+  /* Success as TEXT ink (klus b, same family as --color-danger-text): the fill
+     colour reads 3.03:1 on the light --bg — an AA fail; green-700 measures
+     5.02/4.61:1. Dark redefines the twin. Never --color-success itself as text. */
+  --color-success-text:  #15803D;
   --color-success-bg:    #DCFCE7;
   --color-warning:       #D97706;
   --color-warning-bg:    #FEF3C7;
   --color-danger:        #DC2626;
+  /* Danger as TEXT ink (mirrors --color-primary-text): the fill colour is NOT
+     readable ink — measured 4.44:1 on the light --bg and 3.47:1 on the dark
+     surface, both AA fails. Light rides the house red-700 (6.47/5.94:1, same as
+     on-danger-bg's light ink); dark redefines the twin below. Never use
+     --color-danger itself as text. */
+  --color-danger-text:   #B91C1C;
   --color-danger-bg:     #FEE2E2;
   --color-info:          #0EA5E9;
   --color-info-bg:       #E0F2FE;
@@ -224,6 +234,12 @@
   /* On the dark danger tint (composites to ≈#461E2C) the vivid danger reads
      2.92:1 — this lightened red measures 7.44:1. */
   --color-on-danger-bg:  #FCA5A5;
+  /* Danger-as-text twin on the dark surfaces: #DC2626 reads 3.47:1 there (AA
+     fail); this lightened red measures 6.05:1 on --surface, 6.6:1 on --bg. */
+  --color-danger-text:   #F87171;
+  /* Success-as-text twin: green-400 reads 9.60:1 on the dark surface (the fill
+     colour manages 5.08 there, but one twin per family keeps the rule simple). */
+  --color-success-text:  #4ADE80;
   /* Warm/light inks for the dark warning (≈#422E26) and info (≈#193550)
      composites — 10.21:1 and 9.53:1 (r8). */
   --color-on-warning-bg: #FDE68A;

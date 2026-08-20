@@ -85,7 +85,7 @@ export default function PlanningScheduling({
                   <span style={{ display: 'flex', alignItems: 'center', gap: 2, fontSize: 10, color: 'var(--text-muted)' }}>
                     <Clock size={9} />{d.time}
                   </span>
-                  {d._openId && <span style={{ fontSize: 9, padding: '0 4px', borderRadius: 3, background: 'var(--color-success-bg)', color: 'var(--color-success)', fontWeight: 600 }}>{t('planning.new')}</span>}
+                  {d._openId && <span style={{ fontSize: 9, padding: '0 4px', borderRadius: 3, background: 'var(--color-success-bg)', color: 'var(--color-on-success-bg)', fontWeight: 600 }}>{t('planning.new')}</span>}
                 </div>
                 <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--text)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{d.client}</div>
                 {!scheduleSelected && (
@@ -152,7 +152,7 @@ export default function PlanningScheduling({
             {d.workedBefore > 0 && (
               <div style={{ padding: '7px 14px', background: 'var(--color-success-bg)', borderBottom: '1px solid var(--color-success)', display: 'flex', alignItems: 'center', gap: 6 }}>
                 <Check size={11} color="var(--color-success)" />
-                <span style={{ fontSize: 11, color: 'var(--color-success)', fontWeight: 500 }}>{t('planning.knownShort')}</span>
+                <span style={{ fontSize: 11, color: 'var(--color-success-text)', fontWeight: 500 }}>{t('planning.knownShort')}</span>
               </div>
             )}
             {d.remarks ? (
@@ -164,7 +164,7 @@ export default function PlanningScheduling({
             <div style={{ padding: '10px 14px' }}>
               <button onClick={handleUnschedule}
                 style={{ width: '100%', padding: '7px 0', fontSize: 12, fontWeight: 600, borderRadius: 7, cursor: 'pointer',
-                  border: '1px solid var(--color-danger)', background: 'var(--color-danger-bg)', color: 'var(--color-danger)' }}>
+                  border: '1px solid var(--color-danger)', background: 'var(--color-danger-bg)', color: 'var(--color-on-danger-bg)' }}>
                 {t('planning.unschedule')}
               </button>
             </div>

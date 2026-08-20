@@ -230,7 +230,7 @@ export default function ConversationsSection({ threadsUrl, threadsParams, header
     // headerAction is the candidate drawer's own "Conversatie starten" trigger, when supplied.
     <SectionCard action={headerAction}>
       {loading && <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{t('conversations.loading')}</div>}
-      {!loading && error && <div style={{ fontSize: 12, color: 'var(--color-danger)' }}>{t('conversations.error')}</div>}
+      {!loading && error && <div style={{ fontSize: 12, color: 'var(--color-danger-text)' }}>{t('conversations.error')}</div>}
       {!loading && !error && rows.length === 0 && (
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 12, color: 'var(--text-muted)' }}>
           <MessageCircle size={14} style={{ opacity: 0.6 }} /> {t('sections.conversationsEmpty')}
@@ -255,7 +255,7 @@ export default function ConversationsSection({ threadsUrl, threadsParams, header
             <button onClick={() => toggle(row.id)} title={t('conversations.openThread')}
               style={{ display: 'flex', alignItems: 'center', gap: 8, width: '100%', textAlign: 'left', padding: '8px 10px', border: 'none', background: 'transparent', cursor: 'pointer' }}>
               {isOpen ? <ChevronDown size={13} style={{ color: 'var(--text-muted)', flexShrink: 0 }} /> : <ChevronRight size={13} style={{ color: 'var(--text-muted)', flexShrink: 0 }} />}
-              <MessageCircle size={13} style={{ color: 'var(--color-success)', flexShrink: 0 }} />
+              <MessageCircle size={13} style={{ color: 'var(--color-success-text)', flexShrink: 0 }} />
               <span style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: 1 }}>
                 <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--text)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                   {heading}
@@ -324,7 +324,7 @@ export default function ConversationsSection({ threadsUrl, threadsParams, header
                     {/* WA-SEND-TRANSPORT-1: the 409/502 inline explanation — role="alert" so
                         assistive tech announces it, icon + text so colour is never the only cue. */}
                     {sendError && (
-                      <div role="alert" style={{ display: 'flex', alignItems: 'center', gap: 4, marginTop: 4, fontSize: 11, color: 'var(--color-danger)' }}>
+                      <div role="alert" style={{ display: 'flex', alignItems: 'center', gap: 4, marginTop: 4, fontSize: 11, color: 'var(--color-danger-text)' }}>
                         <AlertTriangle size={11} style={{ flexShrink: 0 }} />
                         {sendError}
                       </div>

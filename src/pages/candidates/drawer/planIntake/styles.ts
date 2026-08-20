@@ -28,7 +28,7 @@ export const fieldLabel: React.CSSProperties = { fontSize: 12, color: 'var(--tex
 export const input: React.CSSProperties = { width: '100%', padding: '8px 11px', fontSize: 13, border: '1px solid var(--border)', borderRadius: 8, outline: 'none', boxSizing: 'border-box', background: 'var(--surface)', color: 'var(--text)' }
 // The exact combobox footprint (mirrors addmodal/fields.tsx's CreatableSelect wrapper).
 export const fieldFootprint: React.CSSProperties = { padding: '8px 11px', borderRadius: 8, fontSize: 13 }
-export const errMsg: React.CSSProperties = { fontSize: 11, color: 'var(--color-danger)', marginTop: 3 }
+export const errMsg: React.CSSProperties = { fontSize: 11, color: 'var(--color-danger-text)', marginTop: 3 }
 
 // P33 (13-08 decision 33-layout, batch 5): every field its own full-width
 // label-left row — the canon 120px label column (fieldRowCanon), field takes

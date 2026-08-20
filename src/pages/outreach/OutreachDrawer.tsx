@@ -201,7 +201,7 @@ export default function OutreachDrawer({ id, createdAt, archived = false, archiv
             {onMarkDeletion && archived && !inTrash && (
               <button onClick={() => onMarkDeletion(id)}
                 title={t('common:trash.markAction')} aria-label={t('common:trash.markAction')}
-                style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 4, display: 'flex', color: 'var(--color-danger)' }}>
+                style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 4, display: 'flex', color: 'var(--color-danger-text)' }}>
                 <Trash2 size={14} />
               </button>
             )}

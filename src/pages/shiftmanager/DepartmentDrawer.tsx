@@ -90,7 +90,7 @@ export default function DepartmentDrawer({ dep, onClose }: { dep: SmDepartmentRo
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 20 }}>
           {[
             { label: t('departmentsPage.employees'), value: dep.employees, Icon: Users,  color: 'var(--color-primary-text)', bg: 'var(--color-primary-bg)' },
-            { label: t('departmentsPage.shifts'),    value: dep.shifts,    Icon: Layers, color: 'var(--color-success)', bg: 'var(--color-success-bg)' },
+            { label: t('departmentsPage.shifts'),    value: dep.shifts,    Icon: Layers, color: 'var(--color-success-text)', bg: 'var(--color-success-bg)' },
           ].map(s => (
             <div key={s.label} style={{ background: 'var(--surface)', border: '1px solid var(--border)',
               borderRadius: 10, padding: '14px 16px', display: 'flex', alignItems: 'center', gap: 12 }}>

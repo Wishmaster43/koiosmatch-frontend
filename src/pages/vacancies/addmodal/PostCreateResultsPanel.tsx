@@ -19,8 +19,8 @@ interface Props {
 
 // One result row's status icon — shared shape for documents and the note.
 function StatusIcon({ status }: { status: AttachmentStatus }) {
-  if (status === 'done') return <Check size={14} style={{ color: 'var(--color-success)' }} aria-hidden="true" />
-  if (status === 'error') return <X size={14} style={{ color: 'var(--color-danger)' }} aria-hidden="true" />
+  if (status === 'done') return <Check size={14} style={{ color: 'var(--color-success-text)' }} aria-hidden="true" />
+  if (status === 'error') return <X size={14} style={{ color: 'var(--color-danger-text)' }} aria-hidden="true" />
   if (status === 'uploading') return <span style={{ color: 'var(--text-muted)' }}><Spinner size={14} /></span>
   return null
 }
@@ -47,7 +47,7 @@ export default function PostCreateResultsPanel({ files, noteText, noteStatus, no
             <span style={{ flex: 1, fontSize: 12, color: 'var(--text)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{f.name}</span>
             {f.status === 'error' && (
               <>
-                <span style={{ fontSize: 11, color: 'var(--color-danger)' }}>{f.error}</span>
+                <span style={{ fontSize: 11, color: 'var(--color-danger-text)' }}>{f.error}</span>
                 <button type="button" onClick={() => onRetryFile(f.id)}
                   style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--color-primary-text)', fontSize: 11, fontWeight: 600 }}>
                   {t('common:error.retry')}
@@ -62,7 +62,7 @@ export default function PostCreateResultsPanel({ files, noteText, noteStatus, no
             <span style={{ flex: 1, fontSize: 12, color: 'var(--text)' }}>{t('modal.attachments.noteLabel')}</span>
             {noteStatus === 'error' && (
               <>
-                <span style={{ fontSize: 11, color: 'var(--color-danger)' }}>{noteError}</span>
+                <span style={{ fontSize: 11, color: 'var(--color-danger-text)' }}>{noteError}</span>
                 <button type="button" onClick={onRetryNote}
                   style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--color-primary-text)', fontSize: 11, fontWeight: 600 }}>
                   {t('common:error.retry')}

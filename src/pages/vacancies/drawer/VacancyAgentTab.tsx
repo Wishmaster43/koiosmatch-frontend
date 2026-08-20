@@ -157,7 +157,7 @@ export default function VacancyAgentTab({ vacancy: v, onUpdate }: { vacancy: Vac
           {error ? (
             <>
               <span style={{ fontSize: 12, color: v.aiAgentName ? 'var(--text)' : 'var(--text-muted)' }}>{v.aiAgentName || t('aiagent.none')}</span>
-              <span style={{ fontSize: 11, color: 'var(--color-danger)' }}>{t('aiagent.loadError')}</span>
+              <span style={{ fontSize: 11, color: 'var(--color-danger-text)' }}>{t('aiagent.loadError')}</span>
             </>
           ) : (
             <>

@@ -252,7 +252,7 @@ export default function MatchDrawer({
             {onArchive && !match.archived && (
               <button onClick={() => onArchive(match.id)}
                 title={t('drawer.archive')} aria-label={t('drawer.archive')}
-                style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 4, display: 'flex', color: 'var(--color-danger)', opacity: 0.7 }}>
+                style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 4, display: 'flex', color: 'var(--color-danger-text)', opacity: 0.7 }}>
                 <Trash2 size={14} />
               </button>
             )}
@@ -261,7 +261,7 @@ export default function MatchDrawer({
             {onMarkDeletion && match.archived && !inTrash && (
               <button onClick={() => onMarkDeletion(match.id)}
                 title={t('common:trash.markAction')} aria-label={t('common:trash.markAction')}
-                style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 4, display: 'flex', color: 'var(--color-danger)' }}>
+                style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 4, display: 'flex', color: 'var(--color-danger-text)' }}>
                 <Trash2 size={14} />
               </button>
             )}

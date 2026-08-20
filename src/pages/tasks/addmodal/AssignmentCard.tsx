@@ -40,7 +40,7 @@ import type { TaskForm } from '../AddTaskModal'
 // One muted helper/status line under a picker — one look for all four states.
 const noticeStyle = { marginTop: 6, fontSize: 11, lineHeight: 1.4, color: 'var(--text-muted)' } as const
 // The load-error line reuses that footprint and only swaps in the danger token.
-const errorNoticeStyle = { ...noticeStyle, display: 'flex', alignItems: 'center', gap: 8, color: 'var(--color-danger)' } as const
+const errorNoticeStyle = { ...noticeStyle, display: 'flex', alignItems: 'center', gap: 8, color: 'var(--color-danger-text)' } as const
 // Ghost retry button, identical for both lists (§4: extract the repeated style).
 const retryStyle = { background: 'none', border: '1px solid var(--border)', borderRadius: 6,
   padding: '2px 8px', cursor: 'pointer', color: 'var(--text)', fontSize: 11 } as const

@@ -201,7 +201,7 @@ export default function MergeCandidateModal({ current, onClose, onMerged, initia
                 ariaLabel={t('merge.stays')}
               />
             </div>
-            <div style={{ fontSize: 12, color: 'var(--color-danger)', background: 'var(--color-danger-bg)', border: '1px solid color-mix(in srgb, var(--color-danger) 40%, transparent)', borderRadius: 8, padding: '8px 10px', lineHeight: 1.5, marginBottom: 12 }}>
+            <div style={{ fontSize: 12, color: 'var(--color-on-danger-bg)', background: 'var(--color-danger-bg)', border: '1px solid color-mix(in srgb, var(--color-danger) 40%, transparent)', borderRadius: 8, padding: '8px 10px', lineHeight: 1.5, marginBottom: 12 }}>
               {t('merge.warning', { source: String(survivorId) === String(current.id) ? other.name : current.name })}
             </div>
           </>

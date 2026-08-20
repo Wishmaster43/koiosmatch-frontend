@@ -95,7 +95,7 @@ export default function RunDetailDrawer({ run, onClose, zIndex = 50 }: {
                 {t('runs.drawer.startedColon')} {formatDT(shown.started_at ?? shown.created_at)}
               </div>
               {stopError && (
-                <div style={{ fontSize: 11, color: 'var(--color-danger)', marginTop: 4 }}>{stopError}</div>
+                <div style={{ fontSize: 11, color: 'var(--color-danger-text)', marginTop: 4 }}>{stopError}</div>
               )}
             </div>
             {/* Close icon button with an imperative hover highlight Button does not

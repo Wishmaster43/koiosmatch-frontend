@@ -36,7 +36,7 @@ export default function CampaignStatsTab({ campaignId, filter, onPick, onClear }
 
   // Four UI states — never a blank panel.
   if (loading) return <p style={{ fontSize: 12, color: 'var(--text-muted)' }}>{t('drawer.loading')}</p>
-  if (error) return <p style={{ fontSize: 12, color: 'var(--color-danger)' }}>{t('drawer.stats.error')}</p>
+  if (error) return <p style={{ fontSize: 12, color: 'var(--color-danger-text)' }}>{t('drawer.stats.error')}</p>
   if (!stats || stats.total === 0) return <p style={{ fontSize: 12, color: 'var(--text-muted)' }}>{t('drawer.empty')}</p>
 
   // Zero-count segments are dropped for the donut (backend zero-fills every
@@ -76,7 +76,7 @@ export default function CampaignStatsTab({ campaignId, filter, onPick, onClear }
   ]
   const kpis: KpiSpec[] = [
     { key: 'total', label: t('drawer.stats.total'), value: stats.total, color: 'var(--text)' },
-    { key: 'reached', label: t('drawer.stats.reached'), value: reached, color: 'var(--color-success)' },
+    { key: 'reached', label: t('drawer.stats.reached'), value: reached, color: 'var(--color-success-text)' },
   ]
 
   // padding: '0' — InsightsRow's page-top default (16px 24px 12px) would double

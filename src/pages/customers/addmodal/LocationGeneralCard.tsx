@@ -42,7 +42,7 @@ export default function LocationGeneralCard({
           <FieldRow label={t('subModal.locationName')} required>
             <TextField value={name} onChange={onNameChange} placeholder={t('subModal.locationPlaceholder')} error={nameError} />
           </FieldRow>
-          {nameError && <div style={{ fontSize: 11, color: 'var(--color-danger)', marginTop: 3 }}>{t('subModal.required')}</div>}
+          {nameError && <div style={{ fontSize: 11, color: 'var(--color-danger-text)', marginTop: 3 }}>{t('subModal.required')}</div>}
         </div>
         {/* STATUS-HIDDEN-1: hidden unless the tenant marked it required —
             LocationDetail's own title-row picker is where status is set. */}

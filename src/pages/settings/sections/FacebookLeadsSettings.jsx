@@ -41,7 +41,7 @@ function SecretField({ id, label, value, onChange, alreadySet, setBadge, placeho
       <label htmlFor={id} style={labelStyle}>
         {label}
         {alreadySet && !value && (
-          <span style={{ marginLeft: 6, fontSize: 11, color: 'var(--color-success)', fontWeight: 400 }}>{setBadge}</span>
+          <span style={{ marginLeft: 6, fontSize: 11, color: 'var(--color-success-text)', fontWeight: 400 }}>{setBadge}</span>
         )}
       </label>
       <div style={{ position: 'relative' }}>

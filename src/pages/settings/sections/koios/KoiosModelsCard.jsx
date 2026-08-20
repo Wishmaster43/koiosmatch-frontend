@@ -67,7 +67,7 @@ export default function KoiosModelsCard({ models, t, onChanged }) {
 
       <SegmentedControl commitOnFocus={false} options={modelOptions} value={active ?? ''} onChange={pick} ariaLabel={t('models.title')} />
 
-      {error && <div style={{ fontSize: 12, color: 'var(--color-danger)', marginTop: 10 }}>{error}</div>}
+      {error && <div style={{ fontSize: 12, color: 'var(--color-danger-text)', marginTop: 10 }}>{error}</div>}
     </div>
   )
 }

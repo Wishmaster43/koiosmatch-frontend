@@ -133,16 +133,16 @@ export default function WhatsAppPage({ intent }: { intent?: unknown } = {}) {
     { key: 'contacted', label: t('kpi.candidatesContacted'), value: cardValue(statsReady, stats?.candidates_contacted),
       color: 'var(--color-violet)', onClick: () => setDrill('contacted') },
     { key: 'filled', label: t('kpi.shiftsFilled'), value: cardValue(statsReady, stats?.shifts_filled_via_whatsapp),
-      color: 'var(--color-success)', onClick: () => setDrill('filled') },
+      color: 'var(--color-success-text)', onClick: () => setDrill('filled') },
     { key: 'escal', label: t('kpi.openEscalations'), value: cardValue(statsReady, stats?.open_escalations),
-      color: 'var(--color-danger)', onClick: () => setDrill('escal') },
+      color: 'var(--color-danger-text)', onClick: () => setDrill('escal') },
     { key: 'sentToday', label: t('kpi.sentToday'), value: cardValue(activityReady, todaysActivity?.outbound),
       color: 'var(--color-secondary)', onClick: () => drillDirection('outbound') },
     { key: 'receivedToday', label: t('kpi.receivedToday'), value: cardValue(activityReady, todaysActivity?.inbound),
-      color: 'var(--color-success)', onClick: () => drillDirection('inbound') },
+      color: 'var(--color-success-text)', onClick: () => drillDirection('inbound') },
     // Plain stats (no matching filter exists yet to drill into — §0 no fake affordances).
     { key: 'queuedToday', label: t('kpi.queuedToday'), value: cardValue(queueReady, queuedToday), color: 'var(--color-info)' },
-    { key: 'failedToday', label: t('kpi.failedToday'), value: cardValue(queueReady, failedToday), color: 'var(--color-danger)' },
+    { key: 'failedToday', label: t('kpi.failedToday'), value: cardValue(queueReady, failedToday), color: 'var(--color-danger-text)' },
     { key: 'noReplyEscalations', label: t('kpi.noReplyEscalations'), value: cardValue(escalationsReady, noReplyCount), color: 'var(--color-warning)' },
   ]
 

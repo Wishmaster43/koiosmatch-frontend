@@ -23,7 +23,7 @@ export default function NotesTab({ opportunity: o }: { opportunity: Opportunity 
   // Canon (05-08): 12px muted body text, matching the sibling drawers' loading/error copy.
   const muted = { fontSize: 12, color: 'var(--text-muted)', padding: '24px 0', textAlign: 'center' as const }
   if (loading) return <div style={muted}>{t('common:loading')}</div>
-  if (error) return <div style={{ ...muted, color: 'var(--color-danger)' }}>{t('notes.loadError')}</div>
+  if (error) return <div style={{ ...muted, color: 'var(--color-danger-text)' }}>{t('notes.loadError')}</div>
 
   return (
     <SharedNotesTab

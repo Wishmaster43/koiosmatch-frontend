@@ -92,6 +92,7 @@ export function useVacancyInsights({ stats, vacancies, statuses, phases, statusM
     const publishedCount = vacancies.filter(v => v.published).length
     const unpublishedCount = vacancies.length - publishedCount
     const out: Aggregate[] = []
+    // eslint-disable-next-line huisstijl/no-restricted-syntax -- DATA: semantic colour VALUE for the shared chip/donut/series recipes (tinted/chipInked downstream), not text ink
     if (publishedCount > 0)   out.push({ name: t('publishedState.yes'), key: 'published',   color: 'var(--color-success)', value: publishedCount })
     // eslint-disable-next-line no-restricted-syntax -- DATA fallback, not a UI colour choice (mirrors Avatar.tsx's identical constant)
     if (unpublishedCount > 0) out.push({ name: t('publishedState.no'),  key: 'unpublished', color: '#9CA3AF',              value: unpublishedCount })

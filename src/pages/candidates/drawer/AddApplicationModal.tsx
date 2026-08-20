@@ -322,7 +322,7 @@ export default function AddApplicationModal({ candidateId, candidateOwnerId, can
               {suggestedVacancyId != null && String(vacancyId) === String(suggestedVacancyId) && !editApplicationId && <KoiosSuggestionBadge />}
             </div>
           </div>
-          {errors.vacancyId && <div style={{ fontSize: 11, color: 'var(--color-danger)', marginTop: 3 }}>{t('work.applicationFailed')}</div>}
+          {errors.vacancyId && <div style={{ fontSize: 11, color: 'var(--color-danger-text)', marginTop: 3 }}>{t('work.applicationFailed')}</div>}
         </div>
         {/* Fase — searchable pick-only combobox; now submits the real stage id (S24b). */}
         <div style={{ marginBottom: 14 }}>
@@ -333,7 +333,7 @@ export default function AddApplicationModal({ candidateId, candidateOwnerId, can
                 style={fieldFootprint} options={stages.map(s => ({ value: s.id, label: s.label }))} />
             </div>
           </div>
-          {errors.phase && <div style={{ fontSize: 11, color: 'var(--color-danger)', marginTop: 3 }}>{t('work.applicationFailed')}</div>}
+          {errors.phase && <div style={{ fontSize: 11, color: 'var(--color-danger-text)', marginTop: 3 }}>{t('work.applicationFailed')}</div>}
         </div>
         {/* APP-OWNER-1: recruiter picker, seeded from the derivation chain above
             (vacancy recruiter > candidate owner > logged-in user) but always
@@ -346,7 +346,7 @@ export default function AddApplicationModal({ candidateId, candidateOwnerId, can
                 allowCreate={false} menuWidth={pickerMenuWidth} style={fieldFootprint} options={userOptions} />
             </div>
           </div>
-          {errors.ownerId && <div style={{ fontSize: 11, color: 'var(--color-danger)', marginTop: 3 }}>{t('work.applicationFailed')}</div>}
+          {errors.ownerId && <div style={{ fontSize: 11, color: 'var(--color-danger-text)', marginTop: 3 }}>{t('work.applicationFailed')}</div>}
         </div>
         {/* Soft warning (never a block, Danny: "wel een melding") — mirrors the
             AXIS-MATRIX banner's warn tint (ActionRuleBanner) so both notices in this

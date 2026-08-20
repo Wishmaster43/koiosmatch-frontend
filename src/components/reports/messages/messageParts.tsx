@@ -30,7 +30,7 @@ export const CHANNEL_META: Record<string, BadgeMeta> = {
 /* eslint-disable no-restricted-syntax -- fixed status→colour mapping (DATA), mirrors the lookup-colour pattern used elsewhere; these shades have no exact token equivalent */
 // eslint-disable-next-line react-refresh/only-export-components -- shared meta map every message table/drawer in this file imports; HMR-nicety warning only
 export const STATUS_META: Record<string, BadgeMeta> = {
-  sent:       { bg: 'var(--color-success-bg)', color: 'var(--color-success)', Icon: CheckCheck  },
+  sent:       { bg: 'var(--color-success-bg)', color: 'var(--color-success-text)', Icon: CheckCheck  },
   delivered:  { bg: '#ECFDF5', color: '#059669', Icon: CheckCheck  },
   read:       { bg: 'var(--color-secondary-bg)', color: 'var(--color-secondary)', Icon: CheckCheck  },
   // Ink is --color-on-danger-bg — the raw danger colour reads only 3.95:1 on its

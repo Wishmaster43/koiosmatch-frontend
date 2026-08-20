@@ -29,7 +29,7 @@ export default function StatisticsTab({ c, onGoToVacancies }: { c: Customer; onG
 
   const kpis = [
     { label: t('statistics.matchesTotal'),  value: matchesTotal,  sub: t('statistics.matchesTotalSub'),  color: 'var(--color-primary-text)', onClick: () => navigate('matches') },
-    { label: t('statistics.activeMatches'), value: activeMatches, sub: t('statistics.activeMatchesSub'), color: 'var(--color-success)', onClick: () => navigate('matches') },
+    { label: t('statistics.activeMatches'), value: activeMatches, sub: t('statistics.activeMatchesSub'), color: 'var(--color-success-text)', onClick: () => navigate('matches') },
     { label: t('statistics.openVacancies'), value: openVacancies, sub: t('statistics.openVacanciesSub'), color: 'var(--color-secondary)', onClick: onGoToVacancies },
     { label: t('statistics.fillRate'),      value: fillRate,      sub: t('statistics.fillRateFormula'),  color: 'var(--color-violet)' },
   ]

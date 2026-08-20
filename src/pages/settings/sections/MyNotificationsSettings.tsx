@@ -183,7 +183,7 @@ export default function MyNotificationsSettings() {
       {/* Four explicit UI states: loading skeleton, load error, empty (no known
           contexts), and the real row list. */}
       {loading ? <SkeletonRows /> : error ? (
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '24px 0', color: 'var(--color-danger)', fontSize: 13 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '24px 0', color: 'var(--color-danger-text)', fontSize: 13 }}>
           <AlertTriangle size={14} /> {t('common.loadError')}
         </div>
       ) : known.length === 0 ? (

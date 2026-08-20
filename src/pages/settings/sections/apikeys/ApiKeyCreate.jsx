@@ -87,7 +87,7 @@ export default function ApiKeyCreate({ onBack, onCreated }) {
                   {/* HUISSTIJL-1 necessity: success-tinted action, no Button variant covers a success-tinted border/text pairing (only primary/secondary/ghost/soft/danger/dangerSoft exist). */}
                   <button onClick={copySecret} aria-label={t('apiKeys.copySecret')}
                     // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- state-carrying success accent (secret-copy confirmation); Button has no success-tint variant
-                    style={{ height: BTN_H, padding: '0 12px', display: 'flex', alignItems: 'center', gap: 5, fontSize: 12, border: tintBorder('var(--color-success)'), borderRadius: 6, background: 'var(--surface)', cursor: 'pointer', color: 'var(--color-success)', whiteSpace: 'nowrap' }}>
+                    style={{ height: BTN_H, padding: '0 12px', display: 'flex', alignItems: 'center', gap: 5, fontSize: 12, border: tintBorder('var(--color-success)'), borderRadius: 6, background: 'var(--surface)', cursor: 'pointer', color: 'var(--color-success-text)', whiteSpace: 'nowrap' }}>
                     {copied ? <Check size={12} /> : <Copy size={12} />} {copied ? t('common.copied') : t('apiKeys.copySecret')}
                   </button>
                 </div>
@@ -154,7 +154,7 @@ export default function ApiKeyCreate({ onBack, onCreated }) {
               <ScopeEditor value={scopes} onChange={setScopes} />
             </div>
 
-            {error && <div style={{ fontSize: 12, color: 'var(--color-danger)' }}>{t('apiKeys.createError')}</div>}
+            {error && <div style={{ fontSize: 12, color: 'var(--color-danger-text)' }}>{t('apiKeys.createError')}</div>}
 
             <div style={{ display: 'flex', gap: 10 }}>
               <Button variant="primary" onClick={submit} disabled={saving || !form.friendly_name.trim()}>

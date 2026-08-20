@@ -28,6 +28,7 @@ describe('useVacancyInsights · published donut (V27)', () => {
     const stats = { by_published: [{ value: true, count: 7 }, { value: false, count: 3 }] }
     const { result } = renderHook(() => useVacancyInsights({ stats, vacancies: [], statuses: [], phases, statusMeta, t }))
     expect(result.current.publishedData).toEqual([
+      // eslint-disable-next-line huisstijl/no-restricted-syntax -- DATA: fixture/config colour VALUE mirrored from the component contract, not ink painted by this test
       { name: 'publishedState.yes', key: 'published', color: 'var(--color-success)', value: 7 },
       // eslint-disable-next-line no-restricted-syntax -- test fixture hex, asserts the hook's own DATA-annotated fallback colour
       { name: 'publishedState.no', key: 'unpublished', color: '#9CA3AF', value: 3 },
@@ -38,6 +39,7 @@ describe('useVacancyInsights · published donut (V27)', () => {
     const stats = { by_published: [{ value: true, count: 5 }, { value: false, count: 0 }] }
     const { result } = renderHook(() => useVacancyInsights({ stats, vacancies: [], statuses: [], phases, statusMeta, t }))
     expect(result.current.publishedData).toEqual([
+      // eslint-disable-next-line huisstijl/no-restricted-syntax -- DATA: fixture/config colour VALUE mirrored from the component contract, not ink painted by this test
       { name: 'publishedState.yes', key: 'published', color: 'var(--color-success)', value: 5 },
     ])
   })
@@ -46,6 +48,7 @@ describe('useVacancyInsights · published donut (V27)', () => {
     const vacancies = [vacancy({ id: 'a', published: true }), vacancy({ id: 'b', published: false })]
     const { result } = renderHook(() => useVacancyInsights({ stats: {}, vacancies, statuses: [], phases, statusMeta, t }))
     expect(result.current.publishedData).toEqual([
+      // eslint-disable-next-line huisstijl/no-restricted-syntax -- DATA: fixture/config colour VALUE mirrored from the component contract, not ink painted by this test
       { name: 'publishedState.yes', key: 'published', color: 'var(--color-success)', value: 1 },
       // eslint-disable-next-line no-restricted-syntax -- test fixture hex, asserts the hook's own DATA-annotated fallback colour
       { name: 'publishedState.no', key: 'unpublished', color: '#9CA3AF', value: 1 },

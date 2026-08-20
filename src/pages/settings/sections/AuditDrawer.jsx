@@ -132,7 +132,7 @@ export function AuditDrawer({ entry, onClose }) {
       return (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
           {[
-            { label: t('audit.sync.synced'),      value: p.synced ?? p.customers ?? p.candidates ?? '—', color: 'var(--color-success)' },
+            { label: t('audit.sync.synced'),      value: p.synced ?? p.customers ?? p.candidates ?? '—', color: 'var(--color-success-text)' },
             { label: t('audit.sync.total'),       value: p.total ?? '—' },
             { label: t('audit.sync.errors'),      value: p.errors ?? '0', color: p.errors > 0 ? 'var(--color-danger)' : undefined },
             { label: t('audit.sync.duration'),    value: p.duration ?? '—' },
@@ -170,7 +170,7 @@ export function AuditDrawer({ entry, onClose }) {
             <div style={{ marginTop: 14, display: 'flex', gap: 12 }}>
               {added.length > 0 && (
                 <div style={{ flex: 1, background: 'var(--color-success-bg)', borderRadius: 8, padding: '10px 12px' }}>
-                  <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--color-success)', marginBottom: 6 }}>
+                  <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--color-success-text)', marginBottom: 6 }}>
                     {t('audit.addedCount', { count: added.length })}
                   </div>
                   {added.map(perm => <div key={perm} style={{ fontSize: 12, color: 'var(--text)' }}>{perm}</div>)}
@@ -178,7 +178,7 @@ export function AuditDrawer({ entry, onClose }) {
               )}
               {removed.length > 0 && (
                 <div style={{ flex: 1, background: 'var(--color-danger-bg)', borderRadius: 8, padding: '10px 12px' }}>
-                  <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--color-danger)', marginBottom: 6 }}>
+                  <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--color-danger-text)', marginBottom: 6 }}>
                     {t('audit.removedCount', { count: removed.length })}
                   </div>
                   {removed.map(perm => <div key={perm} style={{ fontSize: 12, color: 'var(--text)' }}>{perm}</div>)}
@@ -204,8 +204,8 @@ export function AuditDrawer({ entry, onClose }) {
                 <div style={{ display: 'grid', gridTemplateColumns: '180px 1fr 1fr', gap: 8,
                               padding: '6px 0', marginBottom: 4 }}>
                   <span />
-                  <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--color-danger)' }}>{t('audit.oldValue')}</span>
-                  <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--color-success)' }}>{t('audit.newValue')}</span>
+                  <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--color-danger-text)' }}>{t('audit.oldValue')}</span>
+                  <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--color-success-text)' }}>{t('audit.newValue')}</span>
                 </div>
                 {changed.map(k => (
                   <DiffRow key={k} label={kpiLabel(k)} before={p.before[k] ?? '—'} after={p.after[k]} />
@@ -253,8 +253,8 @@ export function AuditDrawer({ entry, onClose }) {
         <div>
           <div style={{ display: 'grid', gridTemplateColumns: '180px 1fr 1fr', gap: 8, padding: '6px 0', marginBottom: 4 }}>
             <span />
-            <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--color-danger)' }}>{t('audit.oldValue')}</span>
-            <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--color-success)' }}>{t('audit.newValue')}</span>
+            <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--color-danger-text)' }}>{t('audit.oldValue')}</span>
+            <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--color-success-text)' }}>{t('audit.newValue')}</span>
           </div>
           {diffRows.map(row => (
             <DiffRow key={row.field} label={row.label} before={row.before} after={row.after} />

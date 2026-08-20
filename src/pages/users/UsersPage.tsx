@@ -121,7 +121,7 @@ export default function UsersPage() {
                     border: '1px solid var(--border)', overflow: 'auto' }}>
         {!loading && error ? (
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
-                        padding: '40px 0', fontSize: 13, color: 'var(--color-danger)' }}>
+                        padding: '40px 0', fontSize: 13, color: 'var(--color-danger-text)' }}>
             <AlertTriangle size={14} aria-hidden="true" /> {error}
           </div>
         ) : (

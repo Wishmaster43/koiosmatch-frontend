@@ -80,7 +80,7 @@ export default function ScopedListTab<T>({
   // ERROR state: an id outside the caller's branch grant 404s (LOC-DEPT-TAB-1) —
   // an honest message, never a table that silently renders as "empty".
   if (error) {
-    return <div role="alert" style={{ fontSize: 12, color: 'var(--color-danger)', padding: '8px 0' }}>{errorText}</div>
+    return <div role="alert" style={{ fontSize: 12, color: 'var(--color-danger-text)', padding: '8px 0' }}>{errorText}</div>
   }
 
   return (

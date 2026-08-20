@@ -123,8 +123,8 @@ export default function MfaSetupWizard({ setupMfa, confirmMfa, onConfirmed, onFi
                     background: 'var(--color-success-bg)', border: '1px solid var(--color-success)', borderRadius: 12, marginBottom: 24 }}>
         <ShieldCheck size={18} color="var(--color-success)" style={{ flexShrink: 0, marginTop: 1 }} />
         <div>
-          <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--color-success)' }}>{t('security.enabledTitle')}</div>
-          <div style={{ fontSize: 12, color: 'var(--color-success)', marginTop: 2 }}>{t('security.enabledDesc')}</div>
+          <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--color-success-text)' }}>{t('security.enabledTitle')}</div>
+          <div style={{ fontSize: 12, color: 'var(--color-success-text)', marginTop: 2 }}>{t('security.enabledDesc')}</div>
         </div>
       </div>
       <h3 style={{ fontSize: 13, fontWeight: 700, color: 'var(--text)', marginBottom: 12 }}>{t('security.recoveryCodes')}</h3>

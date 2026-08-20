@@ -129,8 +129,8 @@ export default function ShiftsChartsBlock({
     // Actieve klanten: ingeplande / totaal-actief (bv. 5/7), testklant al uitgesloten.
     { key: 'active_customers', label: t('dashboard.stats.activeCustomers'), value: `${fmtN(plannedCustomers)}/${fmtN(activeCustomers)}`, color: 'var(--color-secondary)' },
     // #8/#9 nog te bepalen (Danny) — voorlopig Niet ingevuld + Werkelijk deze maand.
-    { key: 'unfilled',         label: t('dashboard.stats.unfilled'),      value: val(H.niet_ingevuld, C.niet_ingevuld),  color: 'var(--color-danger)' },
-    { key: 'actual_month',     label: t('dashboard.stats.actualMonth'),   value: val(MH.werkelijk, MC.werkelijk),        color: 'var(--color-success)' },
+    { key: 'unfilled',         label: t('dashboard.stats.unfilled'),      value: val(H.niet_ingevuld, C.niet_ingevuld),  color: 'var(--color-danger-text)' },
+    { key: 'actual_month',     label: t('dashboard.stats.actualMonth'),   value: val(MH.werkelijk, MC.werkelijk),        color: 'var(--color-success-text)' },
   ]
   const donutRow: DonutSpec[] = [...(leadingDonuts ?? [])]
 

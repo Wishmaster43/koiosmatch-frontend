@@ -122,7 +122,7 @@ export default function AppsSettings() {
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                   <span style={{ fontSize: 14, fontWeight: 600, color: 'var(--text)' }}>{app.label}</span>
                   {on && (
-                    <span style={{ fontSize: 10, fontWeight: 600, color: 'var(--color-success)',
+                    <span style={{ fontSize: 10, fontWeight: 600, color: 'var(--color-on-success-bg)',
                                    background: 'var(--color-success-bg)', borderRadius: 999, padding: '1px 7px' }}>
                       {t('apps.active')}
                     </span>

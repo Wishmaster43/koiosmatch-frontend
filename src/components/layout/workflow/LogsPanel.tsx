@@ -143,10 +143,10 @@ export default function LogsPanel({ workflowId, liveRun, onClose, onOpenHistory 
                       {run.candidate?.name ? ` · ${run.candidate.name}${run.candidate.reference_number ? ` (${run.candidate.reference_number})` : ''}` : ''}
                     </div>
                     {run.error_message && (
-                      <div style={{ fontSize: 11, color: 'var(--color-danger)', marginTop: 2 }}>{run.error_message}</div>
+                      <div style={{ fontSize: 11, color: 'var(--color-danger-text)', marginTop: 2 }}>{run.error_message}</div>
                     )}
                     {stopError?.id === id && (
-                      <div style={{ fontSize: 11, color: 'var(--color-danger)', marginTop: 2 }}>{stopError.message}</div>
+                      <div style={{ fontSize: 11, color: 'var(--color-danger-text)', marginTop: 2 }}>{stopError.message}</div>
                     )}
                   </div>
                   {steps.length > 0 && (
@@ -192,11 +192,11 @@ export default function LogsPanel({ workflowId, liveRun, onClose, onOpenHistory 
                           <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--text)', fontFamily: 'monospace', marginTop: 4 }}>{time}</div>
                         )}
                         {step.error != null && (
-                          <div style={{ fontSize: 11, color: 'var(--color-danger)', marginTop: 4 }}>{String(step.error)}</div>
+                          <div style={{ fontSize: 11, color: 'var(--color-danger-text)', marginTop: 4 }}>{String(step.error)}</div>
                         )}
                         {/* One-line outcome, e.g. "460 gesynct · 2 overgeslagen". */}
                         {typeof step.summary === 'string' && step.summary && (
-                          <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--color-success)', marginTop: 4 }}>{step.summary}</div>
+                          <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--color-success-text)', marginTop: 4 }}>{step.summary}</div>
                         )}
                         {/* Router step: per-route distribution — "→ Dagdienst: 12/40". */}
                         {Array.isArray(step.routing) && step.routing.length > 0 && (

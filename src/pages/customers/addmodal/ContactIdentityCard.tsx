@@ -51,7 +51,7 @@ export default function ContactIdentityCard({
             <TextField value={lastName} onChange={onLastNameChange} error={lastNameError} />
           </FieldRow>
         </div>
-        {(firstNameError || lastNameError) && <div style={{ fontSize: 11, color: 'var(--color-danger)' }}>{t('subModal.required')}</div>}
+        {(firstNameError || lastNameError) && <div style={{ fontSize: 11, color: 'var(--color-danger-text)' }}>{t('subModal.required')}</div>}
         {/* Function is a searchable/creatable tenant lookup (contact-function
             vocabulary, honours the tenant's free-entry setting). It sits in the same
             two-column grid as the names so it lines up under Voornaam instead of

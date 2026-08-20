@@ -145,7 +145,7 @@ export default function ProfileDisplayTab({ form, setForm, theme, setTheme, lang
       </p>
 
       {koios.loading && <p style={{ fontSize: 13, color: 'var(--text-muted)' }}>{t('profile.koiosMode.loading')}</p>}
-      {koios.error && <p style={{ fontSize: 13, color: 'var(--color-danger)' }}>{t('profile.koiosMode.loadError')}</p>}
+      {koios.error && <p style={{ fontSize: 13, color: 'var(--color-danger-text)' }}>{t('profile.koiosMode.loadError')}</p>}
 
       {!koios.loading && (
         <>

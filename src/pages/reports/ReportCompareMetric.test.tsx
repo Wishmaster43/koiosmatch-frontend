@@ -18,12 +18,12 @@ describe('ReportCompareMetric', () => {
   it('colours a rise in an up-good figure with the success token', () => {
     render(<ReportCompareMetric metric={{ current: 12, previous: 10, delta: 2, delta_pct: 20 }} polarity="up-good" />)
     const value = screen.getByText('+2')
-    expect(value.parentElement).toHaveStyle({ color: 'var(--color-success)' })
+    expect(value.parentElement).toHaveStyle({ color: 'var(--color-success-text)' })
   })
 
   it('colours a rise in a down-good figure (e.g. rejections) with the danger token — not green', () => {
     render(<ReportCompareMetric metric={{ current: 12, previous: 10, delta: 2, delta_pct: 20 }} polarity="down-good" />)
     const value = screen.getByText('+2')
-    expect(value.parentElement).toHaveStyle({ color: 'var(--color-danger)' })
+    expect(value.parentElement).toHaveStyle({ color: 'var(--color-danger-text)' })
   })
 })

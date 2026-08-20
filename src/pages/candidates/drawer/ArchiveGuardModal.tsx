@@ -75,7 +75,7 @@ export default function ArchiveGuardModal({ mode, candidateName, aggregate, appl
       persistKey="archive-guard" width={460} maxWidth="92vw" bodyStyle={{ padding: 22 }}
       header={
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <span style={{ display: 'inline-flex', width: 30, height: 30, borderRadius: 8, alignItems: 'center', justifyContent: 'center', background: 'var(--color-danger-bg)', color: 'var(--color-danger)' }}><AlertTriangle size={16} /></span>
+          <span style={{ display: 'inline-flex', width: 30, height: 30, borderRadius: 8, alignItems: 'center', justifyContent: 'center', background: 'var(--color-danger-bg)', color: 'var(--color-on-danger-bg)' }}><AlertTriangle size={16} /></span>
           <span style={{ fontSize: 15, fontWeight: 700, color: 'var(--text)' }}>{t('archiveGuard.title')}</span>
         </div>
       }>
@@ -90,7 +90,7 @@ export default function ArchiveGuardModal({ mode, candidateName, aggregate, appl
           <div style={{ marginBottom: 14 }}>
             <div style={sectionHeader}>
               <GroupLabel as="span" style={{ letterSpacing: '0.04em' }}>{t('archiveGuard.applicationsTitle')}</GroupLabel>
-              <span style={{ fontSize: 11.5, color: 'var(--color-danger)', fontWeight: 600 }}>{t('archiveGuard.resolutionReject')}</span>
+              <span style={{ fontSize: 11.5, color: 'var(--color-danger-text)', fontWeight: 600 }}>{t('archiveGuard.resolutionReject')}</span>
             </div>
             <div style={{ border: '1px solid var(--border)', borderRadius: 8, overflow: 'hidden' }}>
               {applications.map((a, i) => (
@@ -110,7 +110,7 @@ export default function ArchiveGuardModal({ mode, candidateName, aggregate, appl
           <div style={{ marginBottom: 14 }}>
             <div style={sectionHeader}>
               <GroupLabel as="span" style={{ letterSpacing: '0.04em' }}>{t('archiveGuard.matchesTitle')}</GroupLabel>
-              <span style={{ fontSize: 11.5, color: 'var(--color-danger)', fontWeight: 600 }}>{t('archiveGuard.resolutionEndMatch')}</span>
+              <span style={{ fontSize: 11.5, color: 'var(--color-danger-text)', fontWeight: 600 }}>{t('archiveGuard.resolutionEndMatch')}</span>
             </div>
             <div style={{ border: '1px solid var(--border)', borderRadius: 8, overflow: 'hidden' }}>
               {matches.map((m, i) => (
@@ -123,7 +123,7 @@ export default function ArchiveGuardModal({ mode, candidateName, aggregate, appl
                     <SoftChip label={t(`archiveGuard.matchStatus.${m.statusKey}`, { defaultValue: m.statusKey })} color="var(--color-warning)" />
                   </div>
                   {matchErrors[String(m.id)] && (
-                    <div style={{ padding: '0 12px 8px', fontSize: 11.5, color: 'var(--color-danger)' }}>{t('archiveGuard.matchConflict')}</div>
+                    <div style={{ padding: '0 12px 8px', fontSize: 11.5, color: 'var(--color-danger-text)' }}>{t('archiveGuard.matchConflict')}</div>
                   )}
                 </div>
               ))}
@@ -132,7 +132,7 @@ export default function ArchiveGuardModal({ mode, candidateName, aggregate, appl
         )}
 
         {anyConflict && (
-          <p style={{ fontSize: 11.5, color: 'var(--color-danger)', marginBottom: 10 }}>{t('archiveGuard.stillBlocked')}</p>
+          <p style={{ fontSize: 11.5, color: 'var(--color-danger-text)', marginBottom: 10 }}>{t('archiveGuard.stillBlocked')}</p>
         )}
 
         <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, marginTop: 6 }}>

@@ -101,8 +101,8 @@ export default function ShiftStaffingDrawer({ shift, onClose }: Props) {
       {error && (
         <div style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '8px 10px', marginBottom: 12,
           background: 'var(--color-danger-bg)', border: '1px solid var(--color-danger)', borderRadius: 8 }}>
-          <AlertCircle size={13} style={{ color: 'var(--color-danger)', flexShrink: 0 }} aria-hidden="true" />
-          <span style={{ fontSize: 12, color: 'var(--color-danger)' }}>{error}</span>
+          <AlertCircle size={13} style={{ color: 'var(--color-danger-text)', flexShrink: 0 }} aria-hidden="true" />
+          <span style={{ fontSize: 12, color: 'var(--color-danger-text)' }}>{error}</span>
         </div>
       )}
 
@@ -178,7 +178,7 @@ export default function ShiftStaffingDrawer({ shift, onClose }: Props) {
 
               {/* Server-computed total after checkout — never a client-side recompute. */}
               {lastCheckout?.scheduleId === a.scheduleId && lastCheckout.hours != null && (
-                <div style={{ fontSize: 12, color: 'var(--color-success)', marginTop: 6 }}>
+                <div style={{ fontSize: 12, color: 'var(--color-success-text)', marginTop: 6 }}>
                   {t('staffing.checkoutSaved', { hours: lastCheckout.hours })}
                 </div>
               )}
@@ -192,7 +192,7 @@ export default function ShiftStaffingDrawer({ shift, onClose }: Props) {
         <div style={cardHead}>{t('staffing.eligible')}</div>
         <div style={cardBox}>
           {eligibleLoading && <div style={{ fontSize: 12, color: 'var(--text-muted)', padding: '8px 0' }}>{t('common:loading')}</div>}
-          {!eligibleLoading && eligibleError && <div style={{ fontSize: 12, color: 'var(--color-danger)', padding: '8px 0' }}>{t('common:errorGeneric')}</div>}
+          {!eligibleLoading && eligibleError && <div style={{ fontSize: 12, color: 'var(--color-danger-text)', padding: '8px 0' }}>{t('common:errorGeneric')}</div>}
           {!eligibleLoading && !eligibleError && eligible.length === 0 && (
             <div style={{ fontSize: 12, color: 'var(--text-muted)', fontStyle: 'italic', padding: '8px 0' }}>{t('staffing.noneEligible')}</div>
           )}

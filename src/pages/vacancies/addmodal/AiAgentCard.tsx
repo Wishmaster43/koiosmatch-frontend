@@ -32,7 +32,7 @@ export default function AiAgentCard({ agentId, onAgentChange, showSuggestion = f
   return (
     <div style={cardBox}>
       {error ? (
-        <div style={{ fontSize: 12, color: 'var(--color-danger)' }}>{t('aiagent.loadError')}</div>
+        <div style={{ fontSize: 12, color: 'var(--color-danger-text)' }}>{t('aiagent.loadError')}</div>
       ) : (
         <>
           {/* VAC-CLEAR-1: `ai_agent_id` is `sometimes|nullable` server-side (StoreVacancyRequest, VAC-AGENT-1's "null unlinks") — optional, so the picker carries the clear cross. */}

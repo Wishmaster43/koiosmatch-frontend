@@ -304,7 +304,7 @@ export default function CandidateDrawer({ candidate: c, onClose, expanded, onTog
               <button onClick={() => onArchive(c.id)}
                 title={t('drawer.archive')} aria-label={t('drawer.archive')}
                 // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- frozen calm-header glyph control (Danny 08-08): deliberate bare 14px icon; Button iconOnly’s 28px chrome would change the frozen look
-                style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 4, display: 'flex', color: 'var(--color-danger)', opacity: 0.7 }}>
+                style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 4, display: 'flex', color: 'var(--color-danger-text)', opacity: 0.7 }}>
                 <Trash2 size={14} />
               </button>
             )}

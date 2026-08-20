@@ -22,7 +22,7 @@ const monthName = (i: number) => new Date(2000, i, 1).toLocaleString('nl-NL', { 
 function StatusBadge({ status }: { status?: string }) {
   const { t } = useTranslation('reports')
   const styles: Record<string, { bg: string; color: string }> = {
-    actief:     { bg: 'var(--color-success-bg)', color: 'var(--color-success)' },
+    actief:     { bg: 'var(--color-success-bg)', color: 'var(--color-success-text)' },
     nietactief: { bg: 'var(--color-warning-bg)', color: 'var(--color-warning)' },
     extern:     { bg: 'var(--color-secondary-bg)', color: 'var(--color-secondary)' },
     intake:     { bg: 'var(--color-violet-bg)', color: 'var(--color-violet)' },

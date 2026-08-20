@@ -65,7 +65,7 @@ export default function PasteCvCard({ phase, errorKey, summary, onReset }: Paste
         {phase === 'error' && (
           <div role="alert" style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
             <AlertTriangle size={15} color="var(--color-danger)" />
-            <span style={{ fontSize: 12, color: 'var(--color-danger)' }}>{t(errorKey ?? 'modal.cv.error.generic')}</span>
+            <span style={{ fontSize: 12, color: 'var(--color-danger-text)' }}>{t(errorKey ?? 'modal.cv.error.generic')}</span>
             <button type="button" onClick={onReset} style={{ ...ghostBtn, marginLeft: 'auto' }}>
               <RotateCcw size={13} /> {t('modal.cv.retry')}
             </button>

@@ -218,7 +218,7 @@ describe('ApplicationRow · unlink follows the soft-tint convention, same size a
     expect(unlink.style.background).toContain('var(--color-danger)')
     expect(unlink.style.border).toContain('color-mix')
     expect(unlink.style.border).toContain('var(--color-danger)')
-    expect(unlink.style.color).toBe('var(--color-danger)')
+    expect(unlink.style.color).toBe('var(--color-danger-text)')
   })
 
   it('renders at the EXACT same box size as the pencil next to it', () => {

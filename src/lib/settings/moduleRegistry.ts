@@ -46,6 +46,7 @@ export const MODULES: Record<string, ModuleDef> = {
     labelKey: 'moduleView.modules.planning',
     blocks: [
       { id: 'open_shifts',   type: 'kpi', labelKey: 'moduleView.blocks.open_shifts',   icon: Calendar,      color: 'var(--color-primary)',   bg: 'var(--color-primary-bg)' },
+      // eslint-disable-next-line huisstijl/no-restricted-syntax -- DATA: semantic colour VALUE for the shared chip/donut/series recipes (tinted/chipInked downstream), not text ink
       { id: 'filled_shifts', type: 'kpi', labelKey: 'moduleView.blocks.filled_shifts', icon: CheckCircle,   color: 'var(--color-success)',   bg: '#ECFDF5' },
       { id: 'fill_rate',     type: 'kpi', labelKey: 'moduleView.blocks.fill_rate',     icon: Percent,       color: 'var(--color-secondary)', bg: 'var(--color-secondary-bg)' },
       { id: 'unfilled',      type: 'kpi', labelKey: 'moduleView.blocks.unfilled',      icon: AlertTriangle, color: 'var(--color-warning)',   bg: 'var(--color-warning-bg)' },
@@ -54,6 +55,7 @@ export const MODULES: Record<string, ModuleDef> = {
   sales: {
     labelKey: 'moduleView.modules.sales',
     blocks: [
+      // eslint-disable-next-line huisstijl/no-restricted-syntax -- DATA: semantic colour VALUE for the shared chip/donut/series recipes (tinted/chipInked downstream), not text ink
       { id: 'revenue',    type: 'kpi', labelKey: 'moduleView.blocks.revenue',    icon: Euro,      color: 'var(--color-success)',   bg: '#ECFDF5' },
       { id: 'open_deals', type: 'kpi', labelKey: 'moduleView.blocks.open_deals', icon: Briefcase, color: 'var(--color-primary)',   bg: 'var(--color-primary-bg)' },
       { id: 'won_deals',  type: 'kpi', labelKey: 'moduleView.blocks.won_deals',  icon: Trophy,    color: '#7C3AED',                bg: '#F5F3FF' },
@@ -64,6 +66,7 @@ export const MODULES: Record<string, ModuleDef> = {
     labelKey: 'moduleView.modules.candidates',
     blocks: [
       { id: 'total_candidates', type: 'kpi', labelKey: 'moduleView.blocks.total_candidates', icon: Users,     color: 'var(--color-primary)',   bg: 'var(--color-primary-bg)' },
+      // eslint-disable-next-line huisstijl/no-restricted-syntax -- DATA: semantic colour VALUE for the shared chip/donut/series recipes (tinted/chipInked downstream), not text ink
       { id: 'available',        type: 'kpi', labelKey: 'moduleView.blocks.available',        icon: UserCheck, color: 'var(--color-success)',   bg: '#ECFDF5' },
       { id: 'new_candidates',   type: 'kpi', labelKey: 'moduleView.blocks.new_candidates',   icon: UserPlus,  color: 'var(--color-secondary)', bg: 'var(--color-secondary-bg)' },
       { id: 'in_progress',      type: 'kpi', labelKey: 'moduleView.blocks.in_progress',      icon: Clock,     color: 'var(--color-warning)',   bg: 'var(--color-warning-bg)' },

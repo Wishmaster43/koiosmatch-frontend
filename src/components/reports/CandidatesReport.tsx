@@ -210,7 +210,7 @@ export default function CandidatesReport() {
             <div style={{ width: 1, height: 18, background: 'var(--border)', flexShrink: 0 }} />
             <div className="flex items-center gap-2">
               <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5,
-                             background: 'var(--color-success-bg)', color: 'var(--color-success)', borderRadius: 999,
+                             background: 'var(--color-success-bg)', color: 'var(--color-on-success-bg)', borderRadius: 999,
                              padding: '3px 10px', fontSize: 12, fontWeight: 500 }}>
                 <span style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--color-success)', flexShrink: 0 }} />
                 {filteredGeneral.length} {t('report.activeWord')}

@@ -155,7 +155,7 @@ function Matrix({ kind, rows, title, labelKey, isHidden, onToggle, t, td }: Matr
                         <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--text)' }}>
                           {td(`types.${type}`)}
                           {/* Super views (admin/management) may switch dashboards live. */}
-                          {canSwitchViews(type) && <span title={t('dashboardsCanSwitch')} style={{ color: 'var(--color-success)' }}> ●</span>}
+                          {canSwitchViews(type) && <span title={t('dashboardsCanSwitch')} style={{ color: 'var(--color-success-text)' }}> ●</span>}
                         </span>
                       </div>
                     </th>

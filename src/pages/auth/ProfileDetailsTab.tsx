@@ -65,7 +65,7 @@ export default function ProfileDetailsTab({ form, onField, onSave, saving, saved
         </Field>
 
         {error && (
-          <p style={{ fontSize: 12, color: 'var(--color-danger)', marginTop: 4 }}>{error}</p>
+          <p style={{ fontSize: 12, color: 'var(--color-danger-text)', marginTop: 4 }}>{error}</p>
         )}
 
         <button onClick={onSave} disabled={saving}

@@ -15,8 +15,8 @@ const KIND_META: Record<string, TimelineKindMeta> = {
   stage:       { icon: ArrowRightLeft, color: 'var(--color-primary)' },
   note:        { icon: MessageSquare, color: 'var(--color-secondary)' },
   interview:   { icon: Mic, color: 'var(--color-violet)' },
-  match:       { icon: Handshake, color: 'var(--color-success)' },
-  rejection:   { icon: XCircle, color: 'var(--color-danger)' },
+  match:       { icon: Handshake, color: 'var(--color-success-text)' },
+  rejection:   { icon: XCircle, color: 'var(--color-danger-text)' },
 }
 
 /**

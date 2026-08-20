@@ -61,7 +61,7 @@ const fieldFootprint: React.CSSProperties = { padding: '8px 11px', borderRadius:
  */
 function ConfigNotice({ text, t, style }: { text: string; t: (k: string, o?: Record<string, unknown>) => string; style?: React.CSSProperties }) {
   return (
-    <div style={{ fontSize: 11, color: 'var(--color-danger)', marginTop: 3, display: 'flex', flexWrap: 'wrap', gap: 4, ...style }}>
+    <div style={{ fontSize: 11, color: 'var(--color-danger-text)', marginTop: 3, display: 'flex', flexWrap: 'wrap', gap: 4, ...style }}>
       <span>{text}</span>
       <a href="#settings/whatsapp/whatsapp" style={{ color: 'var(--color-primary-text)', fontWeight: 600, textDecoration: 'none' }}>
         {t('conversations.configureWhatsapp')}
@@ -181,7 +181,7 @@ export default function StartConversationModal({ candidateId, onClose, onStarted
               <CreatableSelect value={agentId || null} onChange={v => { setAgentId(v); setAgentError(null) }}
                 placeholder={t('conversations.agentPlaceholder')} allowCreate={false} clearable menuWidth={pickerMenuWidth}
                 style={fieldFootprint} options={agents} />
-              {agentError && <div role="alert" style={{ fontSize: 11, color: 'var(--color-danger)', marginTop: 3 }}>{agentError}</div>}
+              {agentError && <div role="alert" style={{ fontSize: 11, color: 'var(--color-danger-text)', marginTop: 3 }}>{agentError}</div>}
             </div>
 
             {/* Read-only preview of the picked template's own text — see the file

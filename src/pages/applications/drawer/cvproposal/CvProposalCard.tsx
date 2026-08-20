@@ -111,7 +111,7 @@ export default function CvProposalCard({
           {/* Four states for the current-values fetch that the diff depends on. */}
           {currentLoading && <Caption as="div">{t('cvProposal.currentLoading')}</Caption>}
           {currentError && (
-            <div role="alert" style={{ fontSize: 12, color: 'var(--color-danger)' }}>{t('cvProposal.currentError')}</div>
+            <div role="alert" style={{ fontSize: 12, color: 'var(--color-danger-text)' }}>{t('cvProposal.currentError')}</div>
           )}
           {!hasContent && <Caption as="div" style={{ fontStyle: 'italic' }}>{t('cvProposal.noFields')}</Caption>}
 
@@ -146,7 +146,7 @@ export default function CvProposalCard({
               <button type="button" onClick={() => askDecide('reject')} disabled={deciding}
                 style={{ ...btnBase, border: '1px solid color-mix(in srgb, var(--color-danger) 30%, transparent)',
                   background: 'color-mix(in srgb, var(--color-danger) 10%, transparent)',
-                  color: 'var(--color-danger)', cursor: deciding ? 'not-allowed' : 'pointer',
+                  color: 'var(--color-danger-text)', cursor: deciding ? 'not-allowed' : 'pointer',
                   opacity: deciding ? 0.6 : 1 }}>
                 <X size={13} /> {t('cvProposal.reject')}
               </button>

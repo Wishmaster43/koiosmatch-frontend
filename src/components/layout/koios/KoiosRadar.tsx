@@ -26,8 +26,8 @@ const SIGNAL_META: Record<RadarSignalId, { Icon: LucideIcon; labelKey: string; c
   intakePlanned:  { Icon: CalendarCheck, labelKey: 'candidates:kpi.intake',               color: 'var(--color-violet)' },
   stale6m:        { Icon: Clock,         labelKey: 'candidates:analytics.stale6m',        color: 'var(--color-warning)' },
   neverContacted: { Icon: UserX,         labelKey: 'candidates:analytics.neverContacted', color: 'var(--color-info)' },
-  noFollowup:     { Icon: CalendarX,     labelKey: 'candidates:analytics.noFollowup',     color: 'var(--color-danger)' },
-  activeConv:     { Icon: MessageCircle, labelKey: 'candidates:analytics.conversations',  color: 'var(--color-success)' },
+  noFollowup:     { Icon: CalendarX,     labelKey: 'candidates:analytics.noFollowup',     color: 'var(--color-danger-text)' },
+  activeConv:     { Icon: MessageCircle, labelKey: 'candidates:analytics.conversations',  color: 'var(--color-success-text)' },
   hasTasks:       { Icon: CheckSquare,   labelKey: 'candidates:kpi.tasks',                color: TASKS_ACCENT },
 }
 

@@ -31,7 +31,7 @@ interface StatusMeta { bg: string; color: string; Icon: ComponentType<{ size?: n
 // stopped run is not a failure; red stays reserved for `failed`.
 // eslint-disable-next-line react-refresh/only-export-components -- shared meta map every run table/drawer in this file imports; HMR-nicety warning only
 export const STATUS_META: Record<string, StatusMeta> = {
-  success:   { bg: 'var(--color-success-bg)', color: 'var(--color-success)', Icon: CheckCircle },
+  success:   { bg: 'var(--color-success-bg)', color: 'var(--color-success-text)', Icon: CheckCircle },
   // Ink is --color-on-danger-bg — the raw danger colour reads only 3.95:1 on its
   // own pastel, AA fail (Opus r3.5).
   failed:    { bg: 'var(--color-danger-bg)',  color: 'var(--color-on-danger-bg)',  Icon: XCircle },

@@ -36,7 +36,7 @@ export default function FunnelConversion({ data, onStageClick }: {
                   <span style={{ color: 'var(--text)' }}>{d.name}</span>
                   <span style={{ color: 'var(--text-muted)', fontVariantNumeric: 'tabular-nums' }}>
                     {d.value} · {pct}%
-                    {i > 0 && drop > 0 && <span style={{ color: 'var(--color-danger)' }}> −{drop}%</span>}
+                    {i > 0 && drop > 0 && <span style={{ color: 'var(--color-danger-text)' }}> −{drop}%</span>}
                   </span>
                 </div>
                 <div style={{ height: 8, borderRadius: 4, background: 'var(--hover-bg)', overflow: 'hidden' }}>

@@ -148,7 +148,7 @@ export default function EntityImportCard({ wizard, canView, canImport, entity, i
             </span>
           </div>
           {typeError && (
-            <div role="alert" style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 11, color: 'var(--color-danger)' }}>
+            <div role="alert" style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 11, color: 'var(--color-danger-text)' }}>
               <AlertTriangle size={12} /> {typeError}
             </div>
           )}
@@ -179,7 +179,7 @@ export default function EntityImportCard({ wizard, canView, canImport, entity, i
             </Button>
           </div>
           {preview.status === 'error' && (
-            <div role="alert" style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 11, color: 'var(--color-danger)' }}>
+            <div role="alert" style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 11, color: 'var(--color-danger-text)' }}>
               <AlertTriangle size={12} /> {preview.message || t('import.previewErrorFallback')}
             </div>
           )}

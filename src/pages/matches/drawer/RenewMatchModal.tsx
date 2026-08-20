@@ -13,7 +13,7 @@ import Button from '@/components/ui/Button'
 
 // Canon field style (G33/fieldMetrics) — was its own padding-8/radius-8 copy.
 const fieldBox: CSSProperties = fieldInputStyle
-const errorText: CSSProperties = { fontSize: 11, color: 'var(--color-danger)', marginTop: 4 }
+const errorText: CSSProperties = { fontSize: 11, color: 'var(--color-danger-text)', marginTop: 4 }
 
 // One day after a YYYY-MM-DD date, in LOCAL time (never Date#toISOString(), which
 // is UTC and flips the date near midnight for most of Europe) — feeds the date

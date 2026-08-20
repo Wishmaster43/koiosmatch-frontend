@@ -41,6 +41,7 @@ export const DEFAULT_DOCUMENT_TYPES: LookupOption[] = [
   { value: 'ID-bewijs',   label: 'ID-bewijs',   color: '#8B5CF6',                icon: 'id-card' },
   { value: 'Diploma',     label: 'Diploma',     color: 'var(--color-warning)',   icon: 'graduation-cap' },
   { value: 'Contract',    label: 'Contract',    color: '#059669',                icon: 'file-signature' },
+  // eslint-disable-next-line huisstijl/no-restricted-syntax -- DATA: semantic colour VALUE for the shared chip/donut/series recipes (tinted/chipInked downstream), not text ink
   { value: 'VOG',         label: 'VOG',         color: 'var(--color-danger)',    icon: 'shield-check' },
   { value: 'Certificaat', label: 'Certificaat', color: '#EC4899',                icon: 'badge-check' },
   { value: 'Foto',        label: 'Foto',        color: 'var(--color-info)',      icon: 'image' },

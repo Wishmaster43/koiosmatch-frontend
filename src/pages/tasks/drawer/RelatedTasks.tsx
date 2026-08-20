@@ -157,7 +157,7 @@ export default function RelatedTasks({ task }: { task: TaskDetail }) {
       {loading ? (
         <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{t('related.loading')}</div>
       ) : error ? (
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: 12, color: 'var(--color-danger)' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: 12, color: 'var(--color-danger-text)' }}>
           <span>{t('related.error')}</span>
           <button onClick={fetchRelated} style={{ background: 'none', border: '1px solid var(--border)', borderRadius: 6,
             padding: '3px 9px', cursor: 'pointer', color: 'var(--text)' }}>{t('common:error.retry')}</button>

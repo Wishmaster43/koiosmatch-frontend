@@ -444,7 +444,7 @@ export default function NotesTab({
   // at all when the host hasn't wired a retry point (back-compat).
   if (error) {
     return (
-      <div style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: 12, color: 'var(--color-danger)', padding: '10px 2px' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: 12, color: 'var(--color-danger-text)', padding: '10px 2px' }}>
         <span>{labels.loadError}</span>
         {onRetry && (
           <button onClick={onRetry} style={{ background: 'none', border: '1px solid var(--border)', borderRadius: 6,

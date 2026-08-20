@@ -178,7 +178,7 @@ function EntityTasksTabBody({ linkType, id, labels, extraLinks = [] }: Props) {
 
       {loading && <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{labels.loading}</div>}
       {!loading && error && (
-        <div role="alert" style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 12, color: 'var(--color-danger)' }}>
+        <div role="alert" style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 12, color: 'var(--color-danger-text)' }}>
           <AlertTriangle size={14} /> {labels.error}
         </div>
       )}

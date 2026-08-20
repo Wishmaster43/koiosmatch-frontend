@@ -79,7 +79,7 @@ export default function AssistActionsResultsPanel({ items, source, onApplyAsText
           ))}
         </ul>
         {exec.status === 'error' && (
-          <div style={{ fontSize: 11, color: 'var(--color-danger)' }}>{exec.errorMessage}</div>
+          <div style={{ fontSize: 11, color: 'var(--color-danger-text)' }}>{exec.errorMessage}</div>
         )}
         <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
           <button type="button" onClick={() => exec.preview(items)} disabled={exec.status === 'loading'} style={{ ...primaryBtn, opacity: exec.status === 'loading' ? 0.7 : 1 }}>

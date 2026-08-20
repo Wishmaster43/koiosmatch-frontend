@@ -114,7 +114,7 @@ export default function ChangelogTab({ application: a }: { application: Applicat
       {loading && <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{t('changelog.loading')}</div>}
 
       {!loading && error && (
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 12, color: 'var(--color-danger)' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 12, color: 'var(--color-danger-text)' }}>
           <AlertTriangle size={14} /> {t('changelog.error')}
         </div>
       )}

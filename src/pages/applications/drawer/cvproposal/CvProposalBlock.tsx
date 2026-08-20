@@ -48,7 +48,7 @@ export default function CvProposalBlock({ candidateId, applicationId }: CvPropos
   if (error) {
     return (
       <SectionCard title={t('cvProposal.title')}>
-        <div role="alert" style={{ fontSize: 12, color: 'var(--color-danger)' }}>{t('cvProposal.error')}</div>
+        <div role="alert" style={{ fontSize: 12, color: 'var(--color-danger-text)' }}>{t('cvProposal.error')}</div>
       </SectionCard>
     )
   }
