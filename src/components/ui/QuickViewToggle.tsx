@@ -11,7 +11,7 @@
  * The label is a prop so each page passes its own i18n string (no strings live here).
  */
 import type { ComponentType } from 'react'
-import { tintBg, tintBorder } from '@/lib/tint'
+import { tintBg, tintBorder, chipInk } from '@/lib/tint'
 
 interface QuickViewToggleProps {
   active: boolean
@@ -47,12 +47,17 @@ export default function QuickViewToggle({ active, onToggle, label, color = 'var(
   // excluded from the trio by THE LAW's own danger/archive/status/data carve-out.
   const isPlainAccent = color === 'var(--color-primary)'
   // Text/icon colour must stay readable: the primary token has a dedicated
-  // readable-text variant (or the trio's own ink while ON); any other colour is
-  // darkened toward --text via color-mix so light per-toggle colours never
-  // render as low-contrast text.
+  // readable-text variant (or the trio's own ink while ON); any other colour
+  // reads chipInk — the shared 45% blend toward --text (the old private 60%
+  // failed AA for accent-yellow toggles at 3.75:1, herhaal-slotaudit 20-08).
   const textColor = isPlainAccent
     ? (active ? 'var(--button-ink)' : 'var(--color-primary-text)')
-    : `color-mix(in srgb, ${color} 60%, var(--text))`
+    : chipInk(color)
+  // This IS the shared quick-view toggle's own canonical render (a coloured
+  // aria-pressed chip, a different species than Button), not a copy of it.
+  // Block form: the flagged style attribute sits lines into the opening tag,
+  // and a bare comment can't sit inside a JSX attribute list (mirrors Button.tsx).
+  /* eslint-disable huisstijlLegacy/no-restricted-syntax */
   return (
     <button type="button" onClick={onToggle} title={title ?? label} aria-pressed={active}
       aria-label={squished ? label : undefined}
@@ -62,6 +67,7 @@ export default function QuickViewToggle({ active, onToggle, label, color = 'var(
           ? { height: compact ? 26 : 30, width: compact ? 26 : 30, padding: 0 }
           : compact ? { height: 26, padding: '0 10px' } : { padding: '6px 12px' }),
         fontSize: compact ? 11.5 : 12,
+        // eslint-disable-next-line huisstijl/no-restricted-syntax -- textColor IS chipInk-derived (see above); the identifier form is opaque to the tint-ink selector
         fontWeight: active ? 600 : 500, borderRadius: compact ? 6 : 8, cursor: 'pointer', color: textColor,
         // HUISSTIJL-1: one shared tint formula (lib/tint) for a COLOURED toggle —
         // was a private 8/28 pair. The plain-accent case bypasses it for the trio.
@@ -72,4 +78,5 @@ export default function QuickViewToggle({ active, onToggle, label, color = 'var(
       {!squished && label}
     </button>
   )
+  /* eslint-enable huisstijlLegacy/no-restricted-syntax */
 }

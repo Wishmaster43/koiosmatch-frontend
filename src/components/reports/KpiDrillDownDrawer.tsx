@@ -5,6 +5,9 @@
  */
 import { X, Search, TrendingUp, Target, Info } from 'lucide-react'
 import { useFocusTrap } from '@/hooks/useFocusTrap'
+import { PageTitle } from '@/components/ui/typography'
+import Button from '@/components/ui/Button'
+import { tint, tintBorder } from '@/lib/tint'
 import type { ReactNode } from 'react'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -171,7 +174,7 @@ function AverageBreakdown({ candidates, KPI_TARGET, onSelect }: { candidates: Re
 
       {/* Formula explanation */}
       <div style={{ display: 'flex', gap: 8, padding: '10px 12px', borderRadius: 8,
-                    background: 'var(--color-secondary-bg)', border: '1px solid color-mix(in srgb, var(--color-secondary) 30%, transparent)', marginBottom: 16 }}>
+                    background: 'var(--color-secondary-bg)', border: tintBorder('var(--color-secondary)'), marginBottom: 16 }}>
         <Info size={14} color="var(--color-secondary)" style={{ flexShrink: 0, marginTop: 1 }} />
         <div style={{ fontSize: 12, color: 'var(--color-secondary)', lineHeight: 1.5 }}>
           <strong>{t('drilldown.calcLabel')}</strong>{' '}
@@ -222,7 +225,7 @@ function AverageBreakdown({ candidates, KPI_TARGET, onSelect }: { candidates: Re
               style={{
                 padding: '7px 10px', borderRadius: 7, cursor: 'pointer',
                 background: sel ? 'var(--color-primary-bg)' : m.isCurrent ? 'var(--color-info-bg)' : 'var(--hover-bg)',
-                border: `1px solid ${sel ? 'var(--color-primary)' : m.isCurrent ? 'color-mix(in srgb, var(--color-info) 30%, transparent)' : 'var(--border)'}`,
+                border: `1px solid ${sel ? 'var(--color-primary)' : m.isCurrent ? tint('var(--color-info)', 33) : 'var(--border)'}`,
               }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
                 <span style={{ width: 70, fontSize: 12, color: m.isCurrent ? 'var(--color-info)' : 'var(--text)',
@@ -315,13 +318,14 @@ export default function KpiDrillDownDrawer({ mode, title, candidates = [], onClo
 
       <div ref={panelRef} role="dialog" aria-modal="true" aria-label={typeof title === 'string' ? title : undefined} tabIndex={-1}
         className="fixed top-0 bottom-0 right-0 z-50 flex flex-col bg-[var(--surface)]"
+        // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- pre-existing side-drawer panel shadow, shared verbatim by every drill-down/side-drawer shell in the app (RightDrawer, ShiftsDrillDownDrawer, …); an app-wide --shadow-drawer token migration is out of this task's mechanical scope
         style={{ width: 520, boxShadow: '-4px 0 30px rgba(0,0,0,0.12)' }}>
 
         {/* Header */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between',
                       padding: '14px 18px', borderBottom: '1px solid var(--border)', flexShrink: 0 }}>
           <div>
-            <div style={{ fontWeight: 600, fontSize: 15, color: 'var(--text)' }}>{currentTab?.label ?? title}</div>
+            <PageTitle as="div">{currentTab?.label ?? title}</PageTitle>
             {mode !== 'average' && (
               <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>
                 {t('drilldown.candidatesCount', { count: shown.length })}
@@ -331,20 +335,18 @@ export default function KpiDrillDownDrawer({ mode, title, candidates = [], onClo
           <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
             {mode !== 'average' && (
               <div style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '3px 8px',
-                            borderRadius: 6, background: 'var(--color-secondary-bg)', border: '1px solid color-mix(in srgb, var(--color-secondary) 30%, transparent)' }}>
+                            borderRadius: 6, background: 'var(--color-secondary-bg)', border: tintBorder('var(--color-secondary)') }}>
                 <TrendingUp size={11} color="var(--color-secondary)" />
                 <span style={{ fontSize: 11, color: 'var(--color-secondary)', fontWeight: 500 }}>
                   {t('drilldown.kpiPerMonth', { target: KPI_TARGET })}
                 </span>
               </div>
             )}
-            <button onClick={onClose} aria-label={t('common:close')}
-              style={{ width: 28, height: 28, display: 'flex', alignItems: 'center', justifyContent: 'center',
-                       background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', borderRadius: 6 }}
+            <Button variant="ghost" iconOnly onClick={onClose} aria-label={t('common:close')}
               onMouseEnter={e => (e.currentTarget.style.background = 'var(--hover-bg)')}
               onMouseLeave={e => (e.currentTarget.style.background = 'none')}>
               <X size={15} />
-            </button>
+            </Button>
           </div>
         </div>
 

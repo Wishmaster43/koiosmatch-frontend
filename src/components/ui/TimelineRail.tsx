@@ -1,5 +1,6 @@
 import type { CSSProperties } from 'react'
 import type { LucideIcon } from 'lucide-react'
+import { tintBg, tintBorder, chipInk } from '@/lib/tint'
 
 // One fixed rail width for every row that participates in the axis, so the
 // vertical line lands on the SAME x whether the row carries a marker, only the
@@ -72,8 +73,9 @@ export default function TimelineRail({
     ? {
         width: RAIL_WIDTH, height: RAIL_WIDTH, borderRadius: '50%', flexShrink: 0,
         display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
-        background: `color-mix(in srgb, ${color} 12%, transparent)`,
-        border: `1px solid color-mix(in srgb, ${color} 36%, transparent)`, color,
+        // House tint pair via lib/tint; icon ink via chipInk (raw colour on its
+        // own tint read 2.3-3.0:1 against even the 3:1 graphics floor — r3.5).
+        background: tintBg(color), border: tintBorder(color), color: chipInk(color),
       }
     : { width: size, height: size, borderRadius: '50%', background: color, flexShrink: 0, marginTop: 6 }
 
@@ -83,6 +85,10 @@ export default function TimelineRail({
           can assert the axis renders/terminates without scraping inline styles.
           onClick swaps the inert dot for a real button (same visual footprint,
           no layout shift) — the only case where the marker itself is interactive. */}
+      {/* The rail's own 22px circular marker made clickable (same footprint as
+          the inert dot), not a Button copy — block form: the flagged style
+          attribute sits a line into the opening tag. */}
+      {/* eslint-disable huisstijlLegacy/no-restricted-syntax */}
       {onClick ? (
         <button type="button" onClick={onClick} title={ariaLabel} aria-label={ariaLabel}
           style={{ ...dot, border: dot.border ?? 'none', cursor: 'pointer', padding: 0 }} data-testid="timeline-dot">
@@ -93,6 +99,7 @@ export default function TimelineRail({
           {Icon && <Icon size={12} />}
         </span>
       )}
+      {/* eslint-enable huisstijlLegacy/no-restricted-syntax */}
       {!isLast && <span style={{ ...segment, marginTop: 2 }} data-testid="timeline-connector" />}
     </div>
   )

@@ -25,7 +25,7 @@
 import { forwardRef } from 'react'
 import type { AnchorHTMLAttributes, ButtonHTMLAttributes, CSSProperties, Ref } from 'react'
 import { BTN_H } from '@/config/buttonMetrics'
-import { tintBg, tintBorder } from '@/lib/tint'
+import { tintBg, tintBorder, chipInk } from '@/lib/tint'
 
 export type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'soft' | 'danger' | 'dangerSoft'
 export type ButtonSize = 'md' | 'sm'
@@ -68,7 +68,10 @@ const VARIANTS: Record<ButtonVariant, CSSProperties> = {
   // Destructive main action. --color-on-danger is fixed white (4.83:1, audited).
   danger:     { background: 'var(--color-danger)', color: 'var(--color-on-danger)', border: 'none', fontWeight: 600 },
   // Destructive but not the primary action of the surface (row deletes, etc.).
-  dangerSoft: { background: tintBg('var(--color-danger)'), color: 'var(--color-danger)', border: tintBorder('var(--color-danger)'), fontWeight: 500 },
+  // A tinted variant never carries its source colour as ink: raw danger on its own
+  // 10% tint measured 4.13:1 (< 4.5, herhaal-slotaudit 20-08) — chipInk blends it
+  // toward --text far enough to read, in both themes.
+  dangerSoft: { background: tintBg('var(--color-danger)'), color: chipInk('var(--color-danger)'), border: tintBorder('var(--color-danger)'), fontWeight: 500 },
 }
 
 const SIZES: Record<ButtonSize, { height: number; padding: string; fontSize: number; borderRadius: number }> = {

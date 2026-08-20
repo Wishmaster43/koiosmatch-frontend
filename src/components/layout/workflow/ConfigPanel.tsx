@@ -9,6 +9,9 @@ import { useState, useEffect } from 'react'
 import { Zap, Trash2, Play } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
+import { SectionTitle } from '@/components/ui/typography'
+import Button from '@/components/ui/Button'
+import DrawerTabs from '@/components/drawer/DrawerTabs'
 import { MODULE_META, MODULE_SCHEMAS } from '@/modules/index'
 import { AgentsTab, PromptsTab, FAQTab, KnowledgeTab, ToolsTab } from '@/components/ai/AIManagementTabs'
 import { FieldInput } from './fields'
@@ -19,6 +22,7 @@ import FanoutSummary, { type WaFanout } from './FanoutSummary'
 import type { FlowNode, WorkflowField, WorkflowVarGroup } from '@/types/workflow'
 
 // '__wide__' is a sentinel that signals the editor to widen the right panel
+// eslint-disable-next-line react-refresh/only-export-components -- the editor and this panel share the tab-id contract; a constants-only split for one array is not worth the extra file (HMR-nicety warning only)
 export const MANAGE_TABS = ['agents', 'prompts', 'faq', 'knowledge', 'tools', '__wide__']
 
 export default function ConfigPanel({ node, onUpdate, onDelete, onTabChange, variables = [] }: {
@@ -110,39 +114,34 @@ export default function ConfigPanel({ node, onUpdate, onDelete, onTabChange, var
           <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{t('modules.' + type, { defaultValue: meta?.label ?? type })}</div>
           <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>{t('categories.' + categorySlug(meta?.category), { defaultValue: meta?.category ?? '' })}</div>
         </div>
-        <button onClick={() => onDelete(node.id)}
-          style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--border)', padding: 4, display: 'flex' }}
+        {/* HUISSTIJL-1: icon-action → Button iconOnly ghost; the hover-driven danger
+            colour rides along via onMouseEnter/onMouseLeave (Button forwards native
+            button props), so the imperative hover behaviour is unchanged. */}
+        <Button variant="ghost" iconOnly onClick={() => onDelete(node.id)}
+          style={{ color: 'var(--border)' }}
           onMouseEnter={e => (e.currentTarget.style.color = 'var(--color-danger)')}
           onMouseLeave={e => (e.currentTarget.style.color = 'var(--border)')}
-          title={t('config.deleteTitle')}>
+          title={t('config.deleteTitle')} aria-label={t('config.deleteTitle')}>
           <Trash2 size={14} />
-        </button>
+        </Button>
       </div>
 
-      {/* Tab bar — ai_agent gets 4 dedicated tabs; all others get 2 */}
-      <div style={{ display: 'flex', borderBottom: '1px solid var(--border)', flexShrink: 0, padding: '8px 16px 0', overflowX: 'auto' }}>
-        {(isAgent ? [
-          // ai_agent tabs — through i18n like everything else (§5; was hardcoded Dutch).
-          { id: 'standaard',   label: t('config.tabStandard') },
-          { id: 'geavanceerd', label: t('config.tabAdvanced') },
-          { id: 'testen',      label: `▶ ${t('config.tabTest')}` },
-          { id: 'uitvoering',  label: output ? `${t('config.tabExecution')} (${Array.isArray(output) ? output.length : 1})` : t('config.tabExecution') },
-        ] : [
-          { id: 'instellingen', label: t('config.tabSettings') },
-          { id: 'uitvoering',   label: output ? `${t('config.tabExecution')} (${Array.isArray(output) ? output.length : 1})` : t('config.tabExecution') },
-        ]).map(tab => (
-          <button key={tab.id} type="button" onClick={() => switchTab(tab.id)}
-            style={{
-              padding: '5px 10px', fontSize: 12, fontWeight: activeTab === tab.id ? 600 : 400,
-              // Text-colour accent uses the AA-contrast text token, not the raw brand primary.
-              color: activeTab === tab.id ? 'var(--color-primary-text)' : 'var(--text-muted)',
-              background: 'none', border: 'none',
-              borderBottom: activeTab === tab.id ? '2px solid var(--color-primary)' : '2px solid transparent',
-              cursor: 'pointer', marginBottom: -1, whiteSpace: 'nowrap',
-            }}>
-            {tab.label}
-          </button>
-        ))}
+      {/* Tab bar — ai_agent gets 4 dedicated tabs; all others get 2. The shared
+          DrawerTabs atom carries the identical underline-active identity plus
+          proper tablist/roving-tabindex a11y the hand-rolled buttons lacked. */}
+      <div style={{ borderBottom: '1px solid var(--border)', flexShrink: 0, padding: '8px 16px 0', overflowX: 'auto' }}>
+        <DrawerTabs
+          tabs={isAgent ? [
+            // ai_agent tabs — through i18n like everything else (§5; was hardcoded Dutch).
+            { id: 'standaard',   label: t('config.tabStandard') },
+            { id: 'geavanceerd', label: t('config.tabAdvanced') },
+            { id: 'testen',      label: `▶ ${t('config.tabTest')}` },
+            { id: 'uitvoering',  label: output ? `${t('config.tabExecution')} (${Array.isArray(output) ? output.length : 1})` : t('config.tabExecution') },
+          ] : [
+            { id: 'instellingen', label: t('config.tabSettings') },
+            { id: 'uitvoering',   label: output ? `${t('config.tabExecution')} (${Array.isArray(output) ? output.length : 1})` : t('config.tabExecution') },
+          ]}
+          active={activeTab} onChange={switchTab} />
       </div>
 
       {/* ── AI Agent tab content ─────────────────────────────────────────────── */}
@@ -198,7 +197,7 @@ export default function ConfigPanel({ node, onUpdate, onDelete, onTabChange, var
           {schema.length === 0 && (
             type === 'router' ? (
               <div style={{ padding: '12px 0', display: 'flex', flexDirection: 'column', gap: 8 }}>
-                <p style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)', margin: 0 }}>{t('config.routerTitle')}</p>
+                <SectionTitle as="p" style={{ margin: 0 }}>{t('config.routerTitle')}</SectionTitle>
                 <p style={{ fontSize: 12, color: 'var(--text-muted)', lineHeight: 1.6, margin: 0 }}>{t('config.routerDesc')}</p>
                 <p style={{ fontSize: 11, color: 'var(--text-muted)', margin: 0 }}>{t('config.routerNote')}</p>
               </div>

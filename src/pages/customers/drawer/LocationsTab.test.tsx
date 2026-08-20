@@ -13,6 +13,7 @@ import api from '@/lib/api'
 import { invalidateAllSettingsCache } from '@/lib/settings/useAllSettings'
 import LocationsTab from './LocationsTab'
 import type { Location } from '@/types/customer'
+import { chipInk } from '@/lib/tint'
 
 const cm = (key: string, opts?: Record<string, unknown>) => i18n.t(key, { ns: 'common', ...opts })
 const ct = (key: string, opts?: Record<string, unknown>) => i18n.t(key, { ns: 'customers', ...opts })
@@ -59,7 +60,7 @@ describe('LocationsTab · status colour on/off flag (CHIPKLEUR-INSTELBAAR-1)', (
   it('keeps the status chip coloured when no flag is saved (today\'s behaviour)', async () => {
     render(<LocationsTab {...base} />)
     // eslint-disable-next-line no-restricted-syntax -- DATA: fixture colour mirrors the tenant lookup colour set on `location()` above
-    await waitFor(() => expect(screen.getByText('Actief')).toHaveStyle({ color: '#22C55E' }))
+    await waitFor(() => expect(screen.getByText('Actief')).toHaveStyle({ color: chipInk('#22c55e') }))
   })
 
   it('renders the status chip as plain text once the flag is turned off', async () => {

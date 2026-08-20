@@ -17,6 +17,7 @@ import DepartmentsPanel from './DepartmentsPanel'
 import type { ComponentProps } from 'react'
 import type { Contact, Department } from '@/types/customer'
 import type { Id } from '@/types/common'
+import { chipInk } from '@/lib/tint'
 
 // The panel is CONTROLLED: the host owns "which department is open". This stand-in host
 // mirrors LocationDetail — it also renders a marker that must survive the drill-in.
@@ -160,7 +161,7 @@ describe('DepartmentsPanel · colour on/off flags per column (CHIPKLEUR-INSTELBA
     render(<DepartmentsPanel {...base} openId={null} onOpenChange={vi.fn()} scope="customer" departments={[department()]} />)
 
     await waitFor(() => {
-      expect(screen.getByText('Vestiging Noord')).toHaveStyle({ color: 'var(--color-secondary)' })
+      expect(screen.getByText('Vestiging Noord')).toHaveStyle({ color: chipInk('var(--color-secondary)') })
       // Scoped to the columnheader role: the toolbar's StatusFilterSelect trigger
       // now ALSO renders the literal word "Status" (HUISSTIJL-1 batch G), so an
       // unscoped getByText('Status') matches both and throws.

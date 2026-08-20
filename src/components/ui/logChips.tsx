@@ -1,11 +1,15 @@
 /**
  * logShared — small building blocks shared by every in/out log (email, WhatsApp, …):
- * a soft in/out direction chip and a status chip. Tinted (never solid), tokens only.
+ * a soft in/out direction chip and a status chip. Tinted (never solid) via the
+ * lib/tint house pair; ink via chipInk (the raw colour on its own tint reads
+ * 2.4-3.0:1 — herhaal-slotaudit r3.5). Tokens only.
  */
 import { useTranslation } from 'react-i18next'
 import { ArrowDownLeft, ArrowUpRight } from 'lucide-react'
+import { tintBg, tintBorder, chipInk } from '@/lib/tint'
 
 // Is this an incoming/received message? (accepts the common backend spellings).
+// eslint-disable-next-line react-refresh/only-export-components -- the shared inbound predicate every log table filters with; HMR-nicety warning only
 export const isInbound = (direction?: string) =>
   direction === 'in' || direction === 'inbound' || direction === 'received' || direction === 'incoming'
 
@@ -18,8 +22,8 @@ export function DirectionPill({ direction }: { direction?: string }) {
   return (
     <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 11, fontWeight: 600,
       padding: '2px 8px', borderRadius: 999, whiteSpace: 'nowrap',
-      background: `color-mix(in srgb, ${color} 12%, transparent)`,
-      border: `1px solid color-mix(in srgb, ${color} 32%, transparent)`, color }}>
+      background: tintBg(color),
+      border: tintBorder(color), color: chipInk(color) }}>
       <Icon size={11} />{inbound ? t('log.in') : t('log.out')}
     </span>
   )
@@ -35,8 +39,8 @@ export function StatusPill({ status }: { status?: string }) {
     : 'var(--text-muted)'
   return (
     <span style={{ fontSize: 11, fontWeight: 600, padding: '2px 8px', borderRadius: 999, whiteSpace: 'nowrap',
-      background: `color-mix(in srgb, ${color} 12%, transparent)`,
-      border: `1px solid color-mix(in srgb, ${color} 32%, transparent)`, color }}>
+      background: tintBg(color),
+      border: tintBorder(color), color: chipInk(color) }}>
       {status}
     </span>
   )

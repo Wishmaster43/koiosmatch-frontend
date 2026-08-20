@@ -32,11 +32,11 @@ import { notifyError } from '@/lib/notify'
 import { extractApiError } from '@/lib/extractApiError'
 import QuickViewToggle from '@/components/ui/QuickViewToggle'
 import Spinner from '@/components/ui/Spinner'
-import { card, cardTitle, sub, th, td, numCell, notice, Tile } from './usageCardStyles'
+import { card, sub, th, td, numCell, notice, Tile } from './usageCardStyles'
 import CreditsUsageCard from './CreditsUsageCard'
 import UsageDailySection from './UsageDailySection'
 import Button from '@/components/ui/Button'
-import { PageTitle, Caption } from '@/components/ui/typography'
+import { PageTitle, SectionTitle, Caption } from '@/components/ui/typography'
 
 // EXCEL-1 — stream the usage xlsx (per day / per workflow / per user tabs, sale
 // prices only, §9) to disk via a temporary object URL, never a bare <a href>.
@@ -65,7 +65,7 @@ function ComingSoonNotice({ title, text }) {
     <div style={card}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
         <Clock size={14} style={{ color: 'var(--text-muted)' }} aria-hidden="true" />
-        <div style={cardTitle}>{title}</div>
+        <SectionTitle style={{ marginBottom: 4 }}>{title}</SectionTitle>
       </div>
       <p style={notice}>{text}</p>
     </div>
@@ -177,7 +177,7 @@ export default function GebruikSettings() {
       {/* AI usage (Koios) — real data, period-scoped via the shared QuickViewToggle. */}
       <div style={card}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-          <div style={cardTitle}>{t('billing.usage.ai.title')}</div>
+          <SectionTitle style={{ marginBottom: 4 }}>{t('billing.usage.ai.title')}</SectionTitle>
           <div style={{ display: 'flex', gap: 6 }}>
             <QuickViewToggle active={period === 'today'} onToggle={() => setPeriod('today')} label={t('billing.usage.periodToday')} />
             <QuickViewToggle active={period === 'month'} onToggle={() => setPeriod('month')} label={t('billing.usage.periodMonth')} />
@@ -236,7 +236,7 @@ export default function GebruikSettings() {
       <div style={card}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 4 }}>
           <div>
-            <div style={cardTitle}>{t('billing.usage.koios.title')}</div>
+            <SectionTitle style={{ marginBottom: 4 }}>{t('billing.usage.koios.title')}</SectionTitle>
             <div style={sub}>{t('billing.usage.koios.subtitle')}</div>
           </div>
           <label style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
@@ -286,12 +286,10 @@ export default function GebruikSettings() {
                 customer" story from the K0 handoff. */}
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between',
                          padding: '10px 0', borderTop: '1px solid var(--border)' }}>
-              <button type="button" onClick={() => setBreakdownOpen((o) => !o)} aria-expanded={breakdownOpen}
-                style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, color: 'var(--text)',
-                         background: 'none', border: 'none', padding: 0, cursor: 'pointer', textAlign: 'left' }}>
+              <Button variant="ghost" size="sm" onClick={() => setBreakdownOpen((o) => !o)} aria-expanded={breakdownOpen}>
                 {breakdownOpen ? <ChevronDown size={13} /> : <ChevronRight size={13} />}
                 {t('billing.usage.koios.workflow.line', { n: formatNumber(billing.workflow?.total_module_runs) })}
-              </button>
+              </Button>
               <span style={{ fontSize: 12, fontFamily: 'monospace', color: 'var(--text)' }}>
                 {formatCurrency(billing.workflow?.amount, billing.currency)}
               </span>
@@ -332,7 +330,7 @@ export default function GebruikSettings() {
 
       {/* WhatsApp/messaging usage — real data, this month only. */}
       <div style={card}>
-        <div style={cardTitle}>{t('billing.usage.whatsapp.title')}</div>
+        <SectionTitle style={{ marginBottom: 4 }}>{t('billing.usage.whatsapp.title')}</SectionTitle>
         <div style={sub}>{t('billing.usage.whatsapp.subtitle')}</div>
 
         {waPhase === 'loading' && <p style={notice}>{t('common.loadingShort')}</p>}

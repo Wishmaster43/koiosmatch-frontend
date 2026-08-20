@@ -71,4 +71,56 @@ describe('house token pairs stay readable (defaults, light theme)', () => {
   it('on-success-bg clears 4.5:1 as text on the success-bg pastel', () => {
     expect(ratio(token('color-on-success-bg'), token('color-success-bg'))).toBeGreaterThanOrEqual(4.5)
   })
+
+  // chipInk (herhaal-slotaudit 20-08): every semantic token's TEXT on its own
+  // 10% AND 16% tint, composited over both page grounds, must clear AA. The raw
+  // colours measured 2.4-3.0:1 there (SoftChip app-wide); chipInk blends 45%
+  // colour toward --text. This loop replicates that math from the REAL tokens,
+  // so a token nudge or a TINT_INK change that breaks AA fails CI.
+  it('chipInk clears 4.5:1 for every semantic token on its own tints', () => {
+    const hex2rgb = (h: string): number[] => {
+      const n = parseInt(h.slice(1), 16)
+      return [(n >> 16) & 255, (n >> 8) & 255, n & 255]
+    }
+    const lumRgb = (rgb: number[]): number => {
+      const c = rgb.map(v => { const s = v / 255; return s <= 0.03928 ? s / 12.92 : Math.pow((s + 0.055) / 1.055, 2.4) })
+      return 0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2]
+    }
+    const ratioRgb = (a: number[], b: number[]): number => {
+      const la = lumRgb(a); const lb = lumRgb(b)
+      return (Math.max(la, lb) + 0.05) / (Math.min(la, lb) + 0.05)
+    }
+    // color-mix(in srgb, C p%, X) — linear per-channel blend, same as the browser.
+    const mixRgb = (a: number[], p: number, b: number[]): number[] => a.map((v, i) => p * v + (1 - p) * b[i])
+    const text = hex2rgb(token('text'))
+    const grounds = [hex2rgb(token('bg')), hex2rgb(token('surface'))]
+    // The semantic set + the DATA-grey fallback SoftChip uses. Primary is NOT in
+    // this loop: chipInk's primary branch returns --color-primary-text, a
+    // different recipe, asserted separately below (Opus r3: testing the 45%-blend
+    // for primary covered a branch that does not exist).
+    const chipTokens = ['color-success', 'color-warning', 'color-danger', 'color-info',
+      'color-secondary', 'color-violet', 'color-accent']
+    // eslint-disable-next-line no-restricted-syntax -- DATA: SoftChip's own grey fallback constant, measured alongside the tokens
+    for (const name of [...chipTokens.map(token), '#9CA3AF']) {
+      const c = hex2rgb(name)
+      const ink = mixRgb(c, 0.45, text)
+      for (const ground of grounds) {
+        for (const pct of [0.10, 0.16]) {
+          const fill = mixRgb(c, pct, ground)
+          expect(ratioRgb(ink, fill), `${name} @${pct * 100}%`).toBeGreaterThanOrEqual(4.5)
+        }
+      }
+    }
+
+    // chipInk's REAL primary branch: --color-primary-text on the primary tints.
+    // The old #117089 default measured 4.47:1 at 16% over --bg — darkened to
+    // #116E86 (r3). Static default only; useTenantTheme rederives per tenant.
+    const primary = hex2rgb(token('color-primary'))
+    const primaryInk = hex2rgb(token('color-primary-text'))
+    for (const ground of grounds) {
+      for (const pct of [0.10, 0.16]) {
+        expect(ratioRgb(primaryInk, mixRgb(primary, pct, ground)), `primary-text @${pct * 100}%`).toBeGreaterThanOrEqual(4.5)
+      }
+    }
+  })
 })

@@ -54,13 +54,15 @@ describe('TimelineRail', () => {
 // Punt 17: the marker is the ONE place colour is spent on a timeline row, so it
 // must follow the house soft-tint recipe — never a solid fill (§4).
 describe('TimelineRail · soft-tint marker', () => {
-  it('tints an icon marker with color-mix and paints the icon in the token itself', () => {
+  it('tints an icon marker with the house pair and inks the icon via chipInk', () => {
     render(<TimelineRail icon={CalendarClock} color="var(--color-info)" />)
     const style = screen.getByTestId('timeline-dot').getAttribute('style') ?? ''
-    expect(style).toMatch(/background:\s*color-mix\(in srgb, var\(--color-info\) 12%, transparent\)/)
-    expect(style).toMatch(/border:\s*1px solid color-mix\(in srgb, var\(--color-info\) 36%, transparent\)/)
-    // The icon inherits `color`, so the marker is never a solid block of the token.
-    expect(style).toMatch(/color:\s*var\(--color-info\)/)
+    // House tint pair from lib/tint (was a private 12/36 pair — r3.5).
+    expect(style).toMatch(/background:\s*color-mix\(in srgb, var\(--color-info\) 10%, transparent\)/)
+    expect(style).toMatch(/border:\s*1px solid color-mix\(in srgb, var\(--color-info\) 33%, transparent\)/)
+    // The icon inks via chipInk — the raw token on its own tint read under even
+    // the 3:1 graphics floor; the marker is never a solid block of the token.
+    expect(style).toMatch(/color:\s*color-mix\(in srgb, var\(--color-info\) 45%, var\(--text\)\)/)
     expect(style).not.toMatch(/background:\s*var\(--color-info\)/)
   })
 

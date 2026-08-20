@@ -20,6 +20,7 @@ import ContactsPanel from './ContactsPanel'
 import type { ComponentProps } from 'react'
 import type { Contact, Department } from '@/types/customer'
 import type { Id } from '@/types/common'
+import { chipInk } from '@/lib/tint'
 
 // The panel is CONTROLLED: the host owns "which contact is open". This stand-in host
 // mirrors LocationDetail — it also renders a marker that must survive the drill-in,
@@ -179,8 +180,8 @@ describe('ContactsPanel · chip colours read the tenant setting (CHIPKLEUR-INSTE
     // Documented backend fallbacks (SettingController.php, CHIPKLEUR-INSTELBAAR-1) —
     // absent must render exactly like before this setting existed.
     await waitFor(() => {
-      expect(screen.getByText('Vestiging Noord')).toHaveStyle({ color: 'var(--color-secondary)' })
-      expect(screen.getByText('Zorg')).toHaveStyle({ color: 'var(--color-violet)' })
+      expect(screen.getByText('Vestiging Noord')).toHaveStyle({ color: chipInk('var(--color-secondary)') })
+      expect(screen.getByText('Zorg')).toHaveStyle({ color: chipInk('var(--color-violet)') })
     })
   })
 
@@ -197,8 +198,8 @@ describe('ContactsPanel · chip colours read the tenant setting (CHIPKLEUR-INSTE
     render(<ContactsPanel {...base} openId={null} onOpenChange={vi.fn()} scope="customer" contacts={[contact()]} />)
 
     await waitFor(() => {
-      expect(screen.getByText('Vestiging Noord')).toHaveStyle({ color: savedLocationColor })
-      expect(screen.getByText('Zorg')).toHaveStyle({ color: savedDepartmentColor })
+      expect(screen.getByText('Vestiging Noord')).toHaveStyle({ color: chipInk(savedLocationColor) })
+      expect(screen.getByText('Zorg')).toHaveStyle({ color: chipInk(savedDepartmentColor) })
     })
   })
 })
@@ -210,8 +211,8 @@ describe('ContactsPanel · colour on/off flags per column (CHIPKLEUR-INSTELBAAR-
     render(<ContactsPanel {...base} openId={null} onOpenChange={vi.fn()} scope="customer" contacts={[contact()]} />)
 
     await waitFor(() => {
-      expect(screen.getByText('Vestiging Noord')).toHaveStyle({ color: 'var(--color-secondary)' })
-      expect(screen.getByText('Zorg')).toHaveStyle({ color: 'var(--color-violet)' })
+      expect(screen.getByText('Vestiging Noord')).toHaveStyle({ color: chipInk('var(--color-secondary)') })
+      expect(screen.getByText('Zorg')).toHaveStyle({ color: chipInk('var(--color-violet)') })
     })
   })
 
@@ -226,7 +227,7 @@ describe('ContactsPanel · colour on/off flags per column (CHIPKLEUR-INSTELBAAR-
     await waitFor(() => {
       expect(screen.getByText('Vestiging Noord')).toHaveStyle({ color: 'var(--text)' })
       // The Afdeling column keeps its colour — the two flags are independent.
-      expect(screen.getByText('Zorg')).toHaveStyle({ color: 'var(--color-violet)' })
+      expect(screen.getByText('Zorg')).toHaveStyle({ color: chipInk('var(--color-violet)') })
     })
   })
 
@@ -240,7 +241,7 @@ describe('ContactsPanel · colour on/off flags per column (CHIPKLEUR-INSTELBAAR-
 
     await waitFor(() => {
       expect(screen.getByText('Zorg')).toHaveStyle({ color: 'var(--text)' })
-      expect(screen.getByText('Vestiging Noord')).toHaveStyle({ color: 'var(--color-secondary)' })
+      expect(screen.getByText('Vestiging Noord')).toHaveStyle({ color: chipInk('var(--color-secondary)') })
     })
   })
 
@@ -248,10 +249,12 @@ describe('ContactsPanel · colour on/off flags per column (CHIPKLEUR-INSTELBAAR-
   // status column. It has one now, and no backend change was needed: SettingController
   // validates the whole `*_table_color_*` family by pattern, not against a fixed list.
   it('renders the status as a coloured chip by default, and as plain text once its flag is off', async () => {
+    // eslint-disable-next-line no-restricted-syntax -- DATA: test-seed colour, not a UI colour choice
     const withStatus = contact({ statusId: 's1', statusLabel: 'Actief', statusColor: '#10B981' })
 
     const { unmount } = render(<ContactsPanel {...base} openId={null} onOpenChange={vi.fn()} scope="customer" contacts={[withStatus]} />)
-    await waitFor(() => expect(screen.getByText('Actief')).toHaveStyle({ color: '#10B981' }))
+    // eslint-disable-next-line no-restricted-syntax -- DATA: test-seed colour, not a UI colour choice
+    await waitFor(() => expect(screen.getByText('Actief')).toHaveStyle({ color: chipInk('#10b981') }))
     unmount()
 
     invalidateAllSettingsCache()
@@ -263,9 +266,10 @@ describe('ContactsPanel · colour on/off flags per column (CHIPKLEUR-INSTELBAAR-
     render(<ContactsPanel {...base} openId={null} onOpenChange={vi.fn()} scope="customer" contacts={[withStatus]} />)
     await waitFor(() => {
       const cell = screen.getByText('Actief')
-      expect(cell).not.toHaveStyle({ color: '#10B981' })
+      // eslint-disable-next-line no-restricted-syntax -- DATA: test-seed colour, not a UI colour choice
+      expect(cell).not.toHaveStyle({ color: chipInk('#10b981') })
       // The other two columns are unaffected — the three flags are independent.
-      expect(screen.getByText('Vestiging Noord')).toHaveStyle({ color: 'var(--color-secondary)' })
+      expect(screen.getByText('Vestiging Noord')).toHaveStyle({ color: chipInk('var(--color-secondary)') })
     })
   })
 })

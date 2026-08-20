@@ -10,9 +10,9 @@ import { Zap, Sparkles, Crown } from 'lucide-react'
 import { updateKoiosModel } from './koiosApi'
 import { tierKeyForModel } from '@/lib/koiosModelTiers'
 import SegmentedControl from '@/components/ui/SegmentedControl'
+import { SectionTitle } from '@/components/ui/typography'
 
 const card = { border: '1px solid var(--border)', borderRadius: 10, padding: 16, marginBottom: 14, background: 'var(--surface)' }
-const cardTitle = { fontSize: 13, fontWeight: 600, color: 'var(--text)', marginBottom: 4 }
 
 // Icon per tier — presentation only. The id→tier MATCH itself lives in the shared
 // lib/koiosModelTiers (K-37) so this card and the floating Koios panel's model
@@ -62,7 +62,7 @@ export default function KoiosModelsCard({ models, t, onChanged }) {
 
   return (
     <div style={card}>
-      <div style={cardTitle}>{t('models.title')}</div>
+      <SectionTitle style={{ marginBottom: 4 }}>{t('models.title')}</SectionTitle>
       <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 12 }}>{t('models.pickHint')}</div>
 
       <SegmentedControl commitOnFocus={false} options={modelOptions} value={active ?? ''} onChange={pick} ariaLabel={t('models.title')} />

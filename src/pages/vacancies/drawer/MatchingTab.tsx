@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next'
 import { Save, Check, Info } from 'lucide-react'
 import SliderJs from '@/components/ui/Slider'
 import CreatableSelect from '@/components/ui/CreatableSelect'
+import SaveButton from '@/components/ui/SaveButton'
 // HUISSTIJL-1: title/group-label/weight-readout are the shared typography atoms.
 import { SectionTitle, GroupLabel, Mono } from '@/components/ui/typography'
 import { useMatchWeightTemplates } from '../hooks/useMatchWeightTemplates'
@@ -68,13 +69,11 @@ export default function MatchingTab({ vacancy: v, onUpdate }: { vacancy: Vacancy
           <SectionTitle as="div">{t('matching.title')}</SectionTitle>
           <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>{t('matching.subtitle')}</p>
         </div>
-        <button onClick={save}
-          style={{ display: 'flex', alignItems: 'center', gap: 6, height: 32, padding: '0 14px', fontSize: 13, fontWeight: 500,
-            borderRadius: 8, border: 'none', cursor: 'pointer', whiteSpace: 'nowrap', flexShrink: 0,
-            background: saved ? 'var(--color-success)' : 'var(--color-primary)',
-            color: saved ? 'white' : 'var(--color-on-accent)' }}>
+        {/* HUISSTIJL-1: the shared SaveButton paints the §4 success pair while `saved`
+            is true — a plain Button would grey it out via its disabled recipe. */}
+        <SaveButton saved={saved} onClick={save} style={{ flexShrink: 0 }}>
           {saved ? <><Check size={13} /> {t('matching.saved')}</> : <><Save size={13} /> {t('matching.save')}</>}
-        </button>
+        </SaveButton>
       </div>
 
       {/* Template picker (MATCH-TEMPLATE-1) — four explicit UI states: loading,

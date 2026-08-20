@@ -6,6 +6,8 @@
 import { useTranslation } from 'react-i18next'
 import { Mail, Phone, MessageCircle, MapPin, X, ChevronRight } from 'lucide-react'
 import SoftChip from '@/components/ui/SoftChip'
+import { PageTitle } from '@/components/ui/typography'
+import Button from '@/components/ui/Button'
 import { ac, ContactAvatar } from './contactParts'
 import type { SmContactRow } from '@/types/shiftmanager'
 
@@ -20,11 +22,10 @@ export default function ContactDrawer({ contact, onClose }: { contact: SmContact
 
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between',
         padding: '14px 20px', borderBottom: '1px solid var(--border)', flexShrink: 0 }}>
-        <span style={{ fontSize: 15, fontWeight: 600, color: 'var(--text)' }}>{t('contactsPage.drawerTitle')}</span>
-        <button onClick={onClose} aria-label={t('common:close')} style={{ background: 'none', border: 'none', cursor: 'pointer',
-          color: 'var(--text-muted)', display: 'flex', padding: 4 }}>
+        <PageTitle as="span">{t('contactsPage.drawerTitle')}</PageTitle>
+        <Button variant="ghost" iconOnly onClick={onClose} aria-label={t('common:close')}>
           <X size={16} />
-        </button>
+        </Button>
       </div>
 
       <div style={{ flex: 1, overflowY: 'auto', padding: 20 }}>
@@ -54,7 +55,20 @@ export default function ContactDrawer({ contact, onClose }: { contact: SmContact
               </div>
               <div>
                 <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>{t('contactsPage.email')}</div>
-                <a href={`mailto:${contact.email}`} style={{ fontSize: 13, color: 'var(--color-secondary)', textDecoration: 'none' }}>{contact.email}</a>
+                {/* A TEXT link, not a button-lookalike — V7 covers <a>'s that look
+                    like buttons; forcing this into Button chrome greyed the only
+                    action in the block, indented it 10px and blocked wrapping
+                    (Opus r3). Link-blue + wrap; underline stays the hover signal.
+                    Block-form disable: the style attribute sits a line into the
+                    opening tag, out of -next-line's reach. */}
+                {/* eslint-disable huisstijlLegacy/no-restricted-syntax */}
+                <a href={`mailto:${contact.email}`}
+                  style={{ fontSize: 13, color: 'var(--color-secondary)', textDecoration: 'none', overflowWrap: 'anywhere' }}
+                  onMouseEnter={e => { e.currentTarget.style.textDecoration = 'underline' }}
+                  onMouseLeave={e => { e.currentTarget.style.textDecoration = 'none' }}>
+                  {contact.email}
+                </a>
+                {/* eslint-enable huisstijlLegacy/no-restricted-syntax */}
               </div>
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>

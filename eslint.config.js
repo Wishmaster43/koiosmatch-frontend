@@ -137,6 +137,30 @@ export default defineConfig([
         // never a legitimate third height. Closed for every named finding in this audit.
         selector: "JSXOpeningElement[name.name='button'] Property[key.name='height'] > Literal[value=34]",
         message: 'HUISSTIJL: knophoogte komt uit Button (sm=28, md=34 via size="md") — een losse 34px raw <button> is altijd een kopie, gebruik <Button>.',
+      },
+      {
+        // Herhaal-slotaudit 20-08 (SoftChip WCAG-fail, 2.4-3.0:1): text sitting on
+        // its own tint never carries the raw colour as ink — that is chipInk's job.
+        // Matches an object that tints (tint/tintBg call anywhere in it) while its
+        // `color:` VALUE is a bare identifier/member/ternary — chipInk(x) is a
+        // CallExpression, so the fixed pattern passes. NOTE the shape (Opus ronde 3,
+        // measured): esquery does not resolve a two-level relative inside :has(),
+        // and a tail without `.value` also matches the property KEY — both earlier
+        // attempts were silently dead. Probe any edit to this selector via stdin.
+        selector: "ObjectExpression:has(CallExpression[callee.name=/^tint(Bg)?$/]) > Property[key.name='color'] > .value:matches(Identifier, MemberExpression)",
+        message: 'HUISSTIJL: tekst op zijn eigen tint leest chipInk(kleur) uit lib/tint — de bronkleur zelf haalt de 4.5:1 niet (gemeten 2.4-3.0:1).',
+      },
+      {
+        // Same rule, ternary form: `color: on ? col : 'var(--text-muted)'` — only a
+        // RAW identifier/member in a BRANCH is the violation; `on ? chipInk(col) : …`
+        // is the fix and must pass, so the whole ConditionalExpression is never
+        // flagged as one blob.
+        selector: "ObjectExpression:has(CallExpression[callee.name=/^tint(Bg)?$/]) > Property[key.name='color'] > ConditionalExpression.value > .consequent:matches(Identifier, MemberExpression)",
+        message: 'HUISSTIJL: tekst op zijn eigen tint leest chipInk(kleur) uit lib/tint — de bronkleur zelf haalt de 4.5:1 niet (gemeten 2.4-3.0:1).',
+      },
+      {
+        selector: "ObjectExpression:has(CallExpression[callee.name=/^tint(Bg)?$/]) > Property[key.name='color'] > ConditionalExpression.value > .alternate:matches(Identifier, MemberExpression)",
+        message: 'HUISSTIJL: tekst op zijn eigen tint leest chipInk(kleur) uit lib/tint — de bronkleur zelf haalt de 4.5:1 niet (gemeten 2.4-3.0:1).',
       }],
     },
   },
@@ -184,6 +208,36 @@ export default defineConfig([
         // HUISSTIJL slotaudit T1/T3/T4/T5: 15px is PageTitle's own size, nowhere else.
         selector: "Property[key.name='fontSize'] > Literal[value=15]",
         message: "HUISSTIJL: 15px is PageTitle — gebruik <PageTitle as='…'> uit components/ui/typography (rendert standaard als <h2>, dus ook een drop-in voor een kop).",
+      },
+      {
+        // Herhaal-slotaudit finding 1: BTN_H feeds Button size="md" ONLY (its own
+        // docblock says so) — a raw <button> reading it is by definition a copy of
+        // Button. Warn bucket: 46 pre-existing hits / 35 files (measured r3.5); the
+        // staged gate converts them per touched file. (BTN_H on an INPUT/SELECT
+        // aligned to button height is legitimate and stays out of this selector.)
+        selector: "JSXOpeningElement[name.name='button'] Property[key.name='height'] > Identifier[name='BTN_H']",
+        message: 'HUISSTIJL: een raw <button> op BTN_H is een kopie van Button size="md" — gebruik <Button size="md">.',
+      },
+      {
+        // Herhaal-slotaudit r3 (finding 6): a color-mix ENDING IN `%, transparent`
+        // is the §4 tint recipe hand-rolled — that formula lives in lib/tint
+        // (tint/tintBg/tintBorder), where the percentages stay one pair. String
+        // form; `.*` (not `[^)]*`) so a `var(--…)` token's own paren doesn't hide
+        // the tail (r3.5: the narrow form saw 4 of the real hits; the honest
+        // count with both working forms is 331 tree-wide — warn bucket, paid
+        // down per touched file by the staged gate). Other color-mix uses
+        // (hover shades, chipInk's output) are NOT this recipe and stay free.
+        selector: "Literal[value=/color-mix\\(in srgb,.*%,\\s*transparent\\)/]",
+        message: 'HUISSTIJL: een eigen color-mix-tint (…%, transparent) is de §4-formule met losse percentages — gebruik tint/tintBg/tintBorder uit lib/tint.',
+      },
+      {
+        // Same rule, template-literal form (`${col} 12%, transparent`): a template
+        // splits at ${…}, so the opening `color-mix(in srgb,` and the closing
+        // `%, transparent)` land in DIFFERENT TemplateElements — the parent
+        // TemplateLiteral ties them together. esquery Literal-regexes never match
+        // templates at all (the zIndex lesson, twice now).
+        selector: "TemplateLiteral:has(TemplateElement[value.raw=/color-mix\\(in srgb/]) > TemplateElement[value.raw=/%,\\s*transparent\\)/]",
+        message: 'HUISSTIJL: een eigen color-mix-tint (…%, transparent) is de §4-formule met losse percentages — gebruik tint/tintBg/tintBorder uit lib/tint.',
       }],
     },
   },

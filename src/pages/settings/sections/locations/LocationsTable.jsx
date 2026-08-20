@@ -12,6 +12,7 @@ import { useTranslation } from 'react-i18next'
 import { Pencil, Trash2 } from 'lucide-react'
 import GeocodeButton from '@/components/ui/GeocodeButton'
 import Spinner from '@/components/ui/Spinner'
+import Button from '@/components/ui/Button'
 import LocationBadge from './LocationBadge'
 
 const TH = { padding: '8px 14px', fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', textAlign: 'left', background: 'var(--hover-bg)', borderBottom: '1px solid var(--border)' }
@@ -71,23 +72,19 @@ export default function LocationsTable({ isLocked, rows, page, totalPages, onPag
                         never claims "done" (see GeocodeButton). No bulk for locations (BE spec). */}
                     <GeocodeButton endpoint={`/locations/${loc.id}/geocode`} permission="settings.update"
                       disabled={!loc.postal_code && !loc.city && !loc.street} variant="row" />
-                    <button onClick={() => onEdit(loc)} title={t('locations.edit')} aria-label={t('locations.edit')}
-                      style={{ width: 26, height: 26, display: 'flex', alignItems: 'center', justifyContent: 'center',
-                               background: 'var(--hover-bg)', border: 'none', borderRadius: 6, cursor: 'pointer', color: 'var(--text)' }}>
+                    <Button variant="secondary" iconOnly onClick={() => onEdit(loc)} title={t('locations.edit')} aria-label={t('locations.edit')}>
                       <Pencil size={12} />
-                    </button>
+                    </Button>
                     {/* Delete is live (LOC-DELETE-GUARD-1): disabled only when the backend
                         already flagged this location as in use; the 409 catch in the
-                        container is the belt-and-suspenders path for a race with a fresher link. */}
-                    <button onClick={() => onDelete(loc)} disabled={deletingId === loc.id || locked}
+                        container is the belt-and-suspenders path for a race with a fresher link.
+                        dangerSoft + Button's own disabled recipe reproduce the exact
+                        danger-tint→grey-out transition the hand-painted version had. */}
+                    <Button variant="dangerSoft" iconOnly onClick={() => onDelete(loc)} disabled={deletingId === loc.id || locked}
                       title={locked ? t('locations.deleteBlockedTooltip') : t('locations.delete')}
-                      aria-label={locked ? t('locations.deleteBlockedTooltip') : t('locations.delete')}
-                      style={{ width: 26, height: 26, display: 'flex', alignItems: 'center', justifyContent: 'center',
-                               background: locked ? 'var(--hover-bg)' : 'var(--color-danger-bg)', border: 'none', borderRadius: 6,
-                               cursor: (deletingId === loc.id || locked) ? 'not-allowed' : 'pointer',
-                               color: locked ? 'var(--text-muted)' : 'var(--color-danger)', opacity: locked ? 0.5 : 1 }}>
+                      aria-label={locked ? t('locations.deleteBlockedTooltip') : t('locations.delete')}>
                       {deletingId === loc.id ? <Spinner size={12} /> : <Trash2 size={12} />}
-                    </button>
+                    </Button>
                   </div>
                 </td>
               </tr>
@@ -96,15 +93,17 @@ export default function LocationsTable({ isLocked, rows, page, totalPages, onPag
         </tbody>
       </table>
       {totalPages > 1 && (
+        // The shared PaginationBar needs totalRows/pageSize/onPageSizeChange, which the
+        // container (client-side slicing, fixed PER_PAGE) does not carry down today —
+        // adding them means touching LocationsSettings.jsx, out of this file's scope. Falls
+        // back to the house Button (secondary/sm) instead of a hand-painted pager pair.
         <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, padding: '10px 14px', borderTop: '1px solid var(--border)' }}>
-          <button onClick={() => onPageChange(Math.max(1, page - 1))} disabled={page === 1}
-            style={{ height: 30, padding: '0 12px', fontSize: 12, border: '1px solid var(--border)', borderRadius: 7, background: 'var(--surface)', cursor: page === 1 ? 'not-allowed' : 'pointer', color: page === 1 ? 'var(--border)' : 'var(--text)' }}>
+          <Button variant="secondary" size="sm" onClick={() => onPageChange(Math.max(1, page - 1))} disabled={page === 1}>
             {t('locations.prev')}
-          </button>
-          <button onClick={() => onPageChange(Math.min(totalPages, page + 1))} disabled={page === totalPages}
-            style={{ height: 30, padding: '0 12px', fontSize: 12, border: '1px solid var(--border)', borderRadius: 7, background: 'var(--surface)', cursor: page === totalPages ? 'not-allowed' : 'pointer', color: page === totalPages ? 'var(--border)' : 'var(--text)' }}>
+          </Button>
+          <Button variant="secondary" size="sm" onClick={() => onPageChange(Math.min(totalPages, page + 1))} disabled={page === totalPages}>
             {t('locations.next')}
-          </button>
+          </Button>
         </div>
       )}
     </div>

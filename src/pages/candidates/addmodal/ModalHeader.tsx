@@ -11,10 +11,10 @@
  */
 import { useTranslation } from 'react-i18next'
 import { X } from 'lucide-react'
-import { BTN_H } from '@/config/buttonMetrics'
+import Button from '@/components/ui/Button'
+import QuickViewToggle from '@/components/ui/QuickViewToggle'
 import type { LookupOption } from '@/types/common'
 import CvEntryIcons from './CvEntryIcons'
-import { tintBg } from '@/lib/tint'
 
 interface ModalHeaderProps {
   status: string
@@ -55,24 +55,21 @@ export default function ModalHeader({ status, pickStatuses, selectedStatus, stat
       )}
       {/* Phase choice — two compact pills, same colour semantics as the old cards. */}
       <div style={{ display: 'flex', gap: 8, marginLeft: 'auto', flexShrink: 0 }}>
-        {pickStatuses.map(s => {
-          const active = status === s.value
-          return (
-            <button key={s.value} onClick={() => onSelectStatus(s.value)} aria-pressed={active}
-              style={{ display: 'flex', alignItems: 'center', gap: 8, height: BTN_H, padding: '0 14px',
-                borderRadius: 999, cursor: 'pointer', transition: 'all 0.15s',
-                border: `1.5px solid ${active ? s.color : 'var(--border)'}`,
-                background: active ? tintBg(s.color ?? 'var(--color-primary)', true) : 'var(--surface)' }}>
-              <div style={{ width: 8, height: 8, borderRadius: '50%', background: s.color, flexShrink: 0 }} />
-              <span style={{ fontSize: 13, fontWeight: active ? 600 : 500, color: active ? s.color : 'var(--text)' }}>{s.label}</span>
-            </button>
-          )
-        })}
+        {/* HUISSTIJL r3.5: the shared QuickViewToggle — the SAME control the
+            customer create-modal renders for its phase choice. At HEAD the two
+            pills were byte-identical hand-rolled copies; converting only one of
+            them (r3) introduced the exact sibling-drift this audit exists to
+            kill, so both now read the one component. */}
+        {pickStatuses.map(s => (
+          <QuickViewToggle key={s.value} active={status === s.value}
+            onToggle={() => onSelectStatus(s.value)}
+            label={s.label} color={s.color ?? 'var(--color-primary)'} />
+        ))}
       </div>
-      <button onClick={onClose} aria-label={t('common:close')}
-        style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', display: 'flex', padding: 4 }}>
+      {/* Close — the house ghost icon button (was a hand-styled bare <button>). */}
+      <Button variant="ghost" iconOnly onClick={onClose} aria-label={t('common:close')}>
         <X size={18} />
-      </button>
+      </Button>
     </div>
   )
 }

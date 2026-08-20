@@ -25,7 +25,7 @@ import FieldNotice from '@/components/ui/FieldNotice'
 import { CANON_LABEL_WIDTH } from '@/components/drawer/fieldRowCanon'
 import SoftChip from '@/components/ui/SoftChip'
 import Button from '@/components/ui/Button'
-import { tintBg, tintBorder } from '@/lib/tint'
+import { tintBg, tintBorder, chipInk } from '@/lib/tint'
 
 export interface FieldRow {
   key: string
@@ -274,7 +274,7 @@ export default function EditableFieldTable({
                 // instead of hex-concat (§4, HUISSTIJL-1).
                 // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- chip toggle, not a Button (SoftChip has no onClick and Button has no chip/pill identity)
                 style={{ padding: '3px 10px', borderRadius: 999, fontSize: 12, cursor: 'pointer', fontWeight: active ? 600 : 400, transition: 'all 0.12s',
-                  ...(active ? { background: tintBg(col, true), color: col, border: tintBorder(col, true) } : { background: 'var(--surface)', color: 'var(--text-muted)', border: '1px solid var(--border)' }) }}>
+                  ...(active ? { background: tintBg(col, true), color: chipInk(col), border: tintBorder(col, true) } : { background: 'var(--surface)', color: 'var(--text-muted)', border: '1px solid var(--border)' }) }}>
                 {o.label}
               </button>
             )

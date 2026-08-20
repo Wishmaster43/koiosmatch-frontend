@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Building2, Upload } from 'lucide-react'
+import { Building2, Upload, CheckCircle2 } from 'lucide-react'
 import FloatingPanel from '@/components/ui/FloatingPanel'
+import { tintBorder } from '@/lib/tint'
 import { useIndustries } from '@/lib/useIndustries'
 import { useLocations } from '@/lib/useLocations'
 import { useCustomerPhases } from '@/lib/useCustomerPhases'
@@ -9,7 +10,6 @@ import { useProvinces } from '@/hooks/useProvinces'
 import { useAuth } from '@/context/AuthContext'
 import { useLiveFieldValidation } from '@/hooks/useLiveFieldValidation'
 import { isValidEmailFormat } from '@/lib/contactFieldValidation'
-import { BTN_H } from '@/config/buttonMetrics'
 import { WIDE_MODAL } from '@/components/ui/modalMetrics'
 import { modalColumns, cardBox, cardHead } from '@/components/ui/modalCards'
 import CustomerCompanyCard from './addmodal/CustomerCompanyCard'
@@ -24,7 +24,7 @@ import EntityImportCard from '@/components/import/EntityImportCard'
 import { useEntityImportCard } from '@/components/import/useEntityImportCard'
 import type { Id, LookupOption } from '@/types/common'
 import Button from '@/components/ui/Button'
-import { tintBg } from '@/lib/tint'
+import QuickViewToggle from '@/components/ui/QuickViewToggle'
 
 // The ONE backend importer that builds a whole customer tree (customer + locations +
 // departments + contacts) from one flat file — verified against koiosmatch-api's
@@ -268,38 +268,26 @@ export default function AddCustomerModal({ onClose, onCreate, onImported, users 
             </div>
             <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>{t('modal.subtitle')}</div>
           </div>
-          {/* Phase choice — two compact pills, the same control the candidate uses. */}
+          {/* Phase choice — two compact pills, the same control the candidate uses.
+              HUISSTIJL-1: the shared QuickViewToggle carries the clickable coloured
+              chip identity (§4 soft-tint), never a hand-painted tintBg/border pair. */}
           <div style={{ display: 'flex', gap: 8, marginLeft: 'auto', marginRight: 12, flexShrink: 0 }}>
-            {phases.map(ph => {
-              const active = form.phase === ph.value
-              return (
-                <button key={String(ph.value)} type="button" onClick={() => set('phase', String(ph.value))}
-                  aria-pressed={active} title={ph.label}
-                  style={{ display: 'flex', alignItems: 'center', gap: 8, height: BTN_H, padding: '0 14px',
-                    borderRadius: 999, cursor: 'pointer', transition: 'all 0.15s',
-                    border: `1.5px solid ${active ? (ph.color ?? 'var(--color-primary)') : 'var(--border)'}`,
-                    background: active ? tintBg(ph.color ?? 'var(--color-primary)', true) : 'var(--surface)' }}>
-                  <div style={{ width: 8, height: 8, borderRadius: '50%', background: ph.color ?? 'var(--color-primary)', flexShrink: 0 }} />
-                  <span style={{ fontSize: 13, fontWeight: active ? 600 : 500,
-                    // Text-colour accent uses the AA-contrast text token, not the raw brand primary.
-                    color: active ? (ph.color ?? 'var(--color-primary-text)') : 'var(--text)' }}>{ph.label}</span>
-                </button>
-              )
-            })}
+            {phases.map(ph => (
+              <QuickViewToggle key={String(ph.value)} active={form.phase === ph.value}
+                onToggle={() => set('phase', String(ph.value))}
+                label={ph.label} color={ph.color ?? 'var(--color-primary)'} />
+            ))}
           </div>
           {/* KLANT-LAYOUT-3 (Danny 14-08): the import affordance lives top-right in the
-              header. Same accessible name as the old collapsed section, soft-tinted;
-              the tint deepens once a file is picked so a paused import stays visible. */}
-          <button type="button" onClick={() => setImportOpen(v => !v)} aria-expanded={importOpen}
-            style={{ display: 'flex', alignItems: 'center', gap: 6, height: BTN_H, padding: '0 12px', marginRight: 12,
-              flexShrink: 0, borderRadius: 8, cursor: 'pointer', fontSize: 12.5, fontWeight: 600,
-              color: 'var(--button-ink)',
-              // Trio + §4-IMPORT ring: a picked file (paused import) stays visible as the ink ring.
-                border: importWizard.file ? '1px solid var(--button-ink)' : '1px solid var(--button-border)',
-              background: 'var(--button-fill)' }}>
-            <Upload size={13} />
+              header, via the house Button (HUISSTIJL-1) — never a repainted fill/border.
+              A picked file (paused import) stays visible through the ICON swap instead
+              (upload → check), so the "paused import" signal survives without a second
+              identity paint on the button chrome. */}
+          <Button type="button" variant="primary" onClick={() => setImportOpen(v => !v)} aria-expanded={importOpen}
+            title={t('modal.import.title')} style={{ marginRight: 12, flexShrink: 0 }}>
+            {importWizard.file ? <CheckCircle2 size={13} /> : <Upload size={13} />}
             {t('modal.import.title')}
-          </button>
+          </Button>
         </div>
       }>
 
@@ -350,23 +338,22 @@ export default function AddCustomerModal({ onClose, onCreate, onImported, users 
         {createError && (
           <div role="alert" style={{ margin: '0 24px 8px', padding: '8px 10px', fontSize: 12, borderRadius: 8,
             color: 'var(--color-danger)', background: 'var(--color-danger-bg)',
-            border: '1px solid color-mix(in srgb, var(--color-danger) 40%, transparent)', flexShrink: 0 }}>
+            border: tintBorder('var(--color-danger)', true), flexShrink: 0 }}>
             {createError}
           </div>
         )}
 
-        {/* Footer — BTN_H (§4/§9): one explicit height for every text/action button, everywhere. */}
+        {/* Footer — the house Button (§4/§9) owns the one explicit height, everywhere. */}
         <div style={{ padding: '14px 24px', borderTop: '1px solid var(--border)', flexShrink: 0,
           display: 'flex', justifyContent: 'flex-end', gap: 8 }}>
           <Button variant="secondary" onClick={onClose}>
             {t('modal.cancel')}
           </Button>
-          <button onClick={handleSubmit} disabled={!canSubmit}
-            style={{ height: BTN_H, padding: '0 20px', fontSize: 13, fontWeight: 600, borderRadius: 8, border: 'none',
-              background: canSubmit ? 'var(--color-primary)' : 'var(--border)', color: canSubmit ? 'var(--color-on-accent)' : 'var(--text-muted)',
-              cursor: canSubmit ? 'pointer' : 'not-allowed' }}>
+          {/* Button's own disabled recipe already reproduces the exact grey-out this
+              hand-painted ternary used to do — no need to branch the fill manually. */}
+          <Button variant="primary" onClick={handleSubmit} disabled={!canSubmit}>
             {saving ? t('common:saving') : t('modal.create')}
-          </button>
+          </Button>
         </div>
     </FloatingPanel>
   )

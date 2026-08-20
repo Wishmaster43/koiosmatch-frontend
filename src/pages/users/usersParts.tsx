@@ -16,7 +16,7 @@ import RoleChip from '@/components/ui/RoleChip'
 import Spinner from '@/components/ui/Spinner'
 import Button from '@/components/ui/Button'
 import type { ManagedUser } from '@/types/api'
-import { tintBg, tintBorder } from '@/lib/tint'
+import { tintBg, tintBorder, chipInk } from '@/lib/tint'
 
 // A role reference as it can appear on a user: a bare name or a role object
 // (the backend now carries colour + icon on the object).
@@ -209,8 +209,9 @@ export function EditableAvatar({ user: u, onPick }: { user: ManagedUser; onPick?
     width: 30, height: 30, borderRadius: '50%', flexShrink: 0, boxSizing: 'border-box',
     display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 700,
     background: c ? tintBg(c) : 'var(--color-primary-bg)',
-    // Text-colour accent uses the AA-contrast text token, not the raw brand primary.
-    color: c || 'var(--color-primary-text)',
+    // Initials ink via chipInk — 11px/700 is not WCAG "large", and the raw colour
+    // on its own tint read 2.3-3.8:1 (herhaal-slotaudit r3).
+    color: c ? chipInk(c) : 'var(--color-primary-text)',
     border: c ? tintBorder(c) : '1px solid transparent',
   }
   if (!onPick) return <div style={bubble}>{avatarInitials(u)}</div>

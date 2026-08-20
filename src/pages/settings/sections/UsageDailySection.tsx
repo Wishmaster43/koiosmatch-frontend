@@ -33,7 +33,8 @@ import DataTable from '@/components/ui/DataTable'
 import SegmentedControl from '@/components/ui/SegmentedControl'
 import WeeklyBarChartCard from '@/components/charts/WeeklyBarChartCard'
 import type { BillingUsageResponse } from '@/types/billingUsage'
-import { card, cardTitle, sub, notice } from './usageCardStyles'
+import { SectionTitle } from '@/components/ui/typography'
+import { card, sub, notice } from './usageCardStyles'
 
 type Category = 'total' | 'workflow' | 'ai'
 
@@ -167,7 +168,7 @@ export default function UsageDailySection() {
     <div style={card}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 4, flexWrap: 'wrap', gap: 8 }}>
         <div>
-          <div style={cardTitle}>{t('billing.usage.daily.title')}</div>
+          <SectionTitle style={{ marginBottom: 4 }}>{t('billing.usage.daily.title')}</SectionTitle>
           <div style={sub}>{t('billing.usage.daily.subtitle')}</div>
         </div>
         <SegmentedControl

@@ -18,6 +18,7 @@ import OpportunitiesTab from './OpportunitiesTab'
 import api from '@/lib/api'
 import { invalidateAllSettingsCache } from '@/lib/settings/useAllSettings'
 import type { ApiOpportunity } from '@/types/opportunity'
+import { chipInk } from '@/lib/tint'
 
 // A controllable stand-in for the customer's opportunities so each test can hand it
 // a different fixture (mirrors EntityTasksTab.test.tsx's `mockTasks` pattern) — the
@@ -81,7 +82,9 @@ describe('OpportunitiesTab · "+ Nieuwe kans" trigger (Danny 27-07: house button
 
 describe('OpportunitiesTab · stage filter narrows the rows (Danny: "bij Kansen mis ik ook nog de statussen")', () => {
   const rows: ApiOpportunity[] = [
+    // eslint-disable-next-line no-restricted-syntax -- DATA: test-seed colour, not a UI colour choice
     { id: 'opp-lead', title: 'Nieuwe zorgvraag', stage: { value: 'lead', label: 'Lead', color: '#94A3B8' } },
+    // eslint-disable-next-line no-restricted-syntax -- DATA: test-seed colour, not a UI colour choice
     { id: 'opp-won', title: 'Contract getekend', stage: { value: 'won', label: 'Gewonnen', color: '#79B58E' } },
   ]
 
@@ -112,7 +115,9 @@ describe('OpportunitiesTab · stage filter narrows the rows (Danny: "bij Kansen 
  *  zoekbalk") — narrows on the opportunity title, on top of the stage filter. */
 describe('OpportunitiesTab · search narrows the rows', () => {
   const rows: ApiOpportunity[] = [
+    // eslint-disable-next-line no-restricted-syntax -- DATA: test-seed colour, not a UI colour choice
     { id: 'opp-a', title: 'Nieuwe zorgvraag Amsterdam', stage: { value: 'lead', label: 'Lead', color: '#94A3B8' } },
+    // eslint-disable-next-line no-restricted-syntax -- DATA: test-seed colour, not a UI colour choice
     { id: 'opp-b', title: 'Contract getekend Utrecht', stage: { value: 'won', label: 'Gewonnen', color: '#79B58E' } },
   ]
 
@@ -135,6 +140,7 @@ describe('OpportunitiesTab · search narrows the rows', () => {
 
 describe('OpportunitiesTab · stage colour toggle (customer_opportunity_table_color_stage)', () => {
   const oneRow: ApiOpportunity[] = [
+    // eslint-disable-next-line no-restricted-syntax -- DATA: test-seed colour, not a UI colour choice
     { id: 'opp-lead', title: 'Nieuwe zorgvraag', stage: { value: 'lead', label: 'Lead', color: '#94A3B8' } },
   ]
 
@@ -142,7 +148,7 @@ describe('OpportunitiesTab · stage colour toggle (customer_opportunity_table_co
     mockOpportunities(oneRow)
     render(<OpportunitiesTab customerId="cust-1" customerName="Acme" />)
     // eslint-disable-next-line no-restricted-syntax -- DATA: asserts the fixture's own stage colour, not a UI choice
-    await waitFor(() => expect(screen.getByText('Lead')).toHaveStyle({ color: '#94A3B8' }))
+    await waitFor(() => expect(screen.getByText('Lead')).toHaveStyle({ color: chipInk('#94a3b8') }))
   })
 
   it('renders the stage chip as plain text once the tenant setting is off', async () => {
@@ -164,6 +170,7 @@ describe('OpportunitiesTab · stage colour toggle (customer_opportunity_table_co
  */
 describe('OpportunitiesTab · value column follows opportunity_value_in_hours (K10c)', () => {
   const rowWithBoth: ApiOpportunity[] = [
+    // eslint-disable-next-line no-restricted-syntax -- DATA: test-seed colour, not a UI colour choice
     { id: 'opp-value', title: 'Nieuwe zorgvraag', stage: { value: 'lead', label: 'Lead', color: '#94A3B8' }, value: 1234, hours: 40 } as ApiOpportunity,
   ]
 

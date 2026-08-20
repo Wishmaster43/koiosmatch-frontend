@@ -3,8 +3,10 @@
  * a chart/KPI data point. Fetches the underlying shifts and shows them with a
  * status badge, searchable. STATUS_META maps a shift status to its label + colors.
  */
-import { X, Search, Clock, MapPin, Briefcase, User, Hash, Building2, CalendarCheck, Timer } from 'lucide-react'
+import { X, Search, Clock, MapPin, Briefcase, User, Hash, Building2, CalendarCheck, Timer, ChevronLeft, ChevronRight } from 'lucide-react'
 import { useFocusTrap } from '@/hooks/useFocusTrap'
+import { PageTitle } from '@/components/ui/typography'
+import Button from '@/components/ui/Button'
 import type { LucideIcon } from 'lucide-react'
 import { useState } from 'react'
 import type { ReactNode } from 'react'
@@ -154,14 +156,11 @@ export default function ShiftsDrillDownDrawer({ metric, metricOptions, periods, 
     )
   })
 
-  // Small pager button (prev/next period).
+  // Small pager button (prev/next period) — house Button, iconOnly/secondary.
   const pagerBtn = (label: string, onClick: () => void, disabled: boolean) => (
-    <button type="button" onClick={onClick} disabled={disabled} aria-label={label}
-      style={{ width: 22, height: 22, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 15,
-               border: '1px solid var(--border)', borderRadius: 6, background: 'var(--surface)',
-               color: disabled ? 'var(--border)' : 'var(--text-muted)', cursor: disabled ? 'default' : 'pointer' }}>
-      {label === 'prev' ? '‹' : '›'}
-    </button>
+    <Button type="button" variant="secondary" iconOnly onClick={onClick} disabled={disabled} aria-label={label}>
+      {label === 'prev' ? <ChevronLeft size={13} /> : <ChevronRight size={13} />}
+    </Button>
   )
 
   return (
@@ -171,13 +170,14 @@ export default function ShiftsDrillDownDrawer({ metric, metricOptions, periods, 
       <div ref={panelRef} role="dialog" aria-modal="true" aria-label={title} tabIndex={-1}
         onKeyDown={e => { if (e.target instanceof HTMLInputElement) return; if (e.key === 'ArrowLeft') goPeriod(-1); else if (e.key === 'ArrowRight') goPeriod(1) }}
         className="fixed top-0 bottom-0 right-0 z-50 flex flex-col bg-[var(--surface)]"
+        // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- pre-existing side-drawer panel shadow, shared verbatim by every drill-down/side-drawer shell in the app; an app-wide --shadow-drawer token migration is out of this task's mechanical scope
         style={{ width: 620, boxShadow: '-4px 0 30px rgba(0,0,0,0.12)' }}>
 
         {/* Header: title + month pager + count */}
         <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between',
                       padding: '14px 18px', borderBottom: '1px solid var(--border)', flexShrink: 0 }}>
           <div>
-            <div style={{ fontWeight: 600, fontSize: 15, color: 'var(--text)' }}>{title}</div>
+            <PageTitle as="div">{title}</PageTitle>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 4 }}>
               {periods.length > 1 && (
                 <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
@@ -191,14 +191,11 @@ export default function ShiftsDrillDownDrawer({ metric, metricOptions, periods, 
               </span>
             </div>
           </div>
-          <button onClick={onClose} aria-label={t('common:close')}
-            style={{ width: 28, height: 28, display: 'flex', alignItems: 'center', justifyContent: 'center',
-                     background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)',
-                     borderRadius: 6, marginLeft: 10 }}
+          <Button variant="ghost" iconOnly onClick={onClose} aria-label={t('common:close')} style={{ marginLeft: 10 }}
             onMouseEnter={e => (e.currentTarget.style.background = 'var(--hover-bg)')}
             onMouseLeave={e => (e.currentTarget.style.background = 'none')}>
             <X size={15} />
-          </button>
+          </Button>
         </div>
 
         {/* Series chips (the standard switcher) — badge = count in the current period */}
@@ -209,16 +206,13 @@ export default function ShiftsDrillDownDrawer({ metric, metricOptions, periods, 
         {/* View toggle (Totalen | Details) + search — search only applies to the details list */}
         <div style={{ flexShrink: 0, padding: '8px 14px', borderBottom: '1px solid var(--hover-bg)',
                       display: 'flex', alignItems: 'center', gap: 8 }}>
-          <div style={{ display: 'inline-flex', border: '1px solid var(--border)', borderRadius: 8, overflow: 'hidden', flexShrink: 0 }}>
-            {(['totals', 'details'] as const).map(v => (
-              <button key={v} type="button" onClick={() => setView(v)}
-                style={{ padding: '5px 12px', fontSize: 12, fontWeight: view === v ? 600 : 400, border: 'none', cursor: 'pointer',
-                  background: view === v ? 'var(--color-primary-bg)' : 'transparent',
-                  // Text-colour accent uses the AA-contrast text token, not the raw brand primary.
-                  color: view === v ? 'var(--color-primary-text)' : 'var(--text-muted)' }}>
-                {v === 'totals' ? t('shiftsDrawer.viewTotals') : t('shiftsDrawer.viewDetails')}
-              </button>
-            ))}
+          {/* HUISSTIJL-1: the shared DrillTabs atom (already used above for the metric
+              series switcher) replaces the hand-rolled two-button toggle pair. */}
+          <div style={{ flexShrink: 0 }}>
+            <DrillTabs tabs={[
+              { key: 'totals', label: t('shiftsDrawer.viewTotals') },
+              { key: 'details', label: t('shiftsDrawer.viewDetails') },
+            ]} active={view} onChange={v => setView(v as 'totals' | 'details')} />
           </div>
           {view === 'details' && (
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '5px 10px', flex: 1,
@@ -341,11 +335,9 @@ export default function ShiftsDrillDownDrawer({ metric, metricOptions, periods, 
           <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>
             {loading ? '…' : t('shiftsDrawer.shownOf', { shown: filtered.length, total: shifts.length })}
           </span>
-          <button onClick={onClose}
-            style={{ fontSize: 12, borderRadius: 6, padding: '4px 12px',
-                     background: 'none', border: '1px solid var(--border)', cursor: 'pointer', color: 'var(--text-muted)' }}>
+          <Button variant="secondary" onClick={onClose}>
             {t('shiftsDrawer.close')}
-          </button>
+          </Button>
         </div>
       </div>
     </>

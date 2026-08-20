@@ -36,6 +36,14 @@ npx vitest run src/i18n/localeParity.test.ts || {
   echo "✗ i18n parity failed — a locale (de/fr/es/en) is missing keys nl has. Add them (all 5 locales) before committing."
   exit 1
 }
+# HUISSTIJL slotaudit: the typography ratchet (frozen, shrink-only SectionTitle/
+# Caption allowlists) — a file's hand-styled count may never grow, and a file
+# migrated to the shared atom must drop out of (or shrink in) the allowlist.
+echo "▶ pre-commit: typografie-ratchet…"
+npx vitest run src/components/ui/typography.houseStyle.test.js || {
+  echo "✗ typography ratchet failed — a file's hand-styled SectionTitle/Caption count grew beyond its frozen allowlist entry. Use <SectionTitle>/<Caption> from components/ui/typography, or lower the allowlist entry if it genuinely shrank."
+  exit 1
+}
 # gen:types freshness (C-CHIP #4): api-generated.ts must match the backend spec.
 # Regenerates when the sibling spec exists; a diff means the contract moved — the
 # regenerated file is left in place: `git add src/types/api-generated.ts` and retry.
@@ -47,4 +55,4 @@ if [ -f ../koiosmatch-api/docs/openapi.yaml ]; then
     exit 1
   fi
 fi
-echo "✓ gate passed (tsc 0, lint 0 errors, i18n parity, types fresh)"
+echo "✓ gate passed (tsc 0, lint 0 errors, i18n parity, typography ratchet, types fresh)"

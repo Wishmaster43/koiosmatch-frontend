@@ -16,9 +16,9 @@ import { Percent, Euro } from 'lucide-react'
 import api, { unwrap } from '@/lib/api'
 import { notifyError, notifySuccess } from '@/lib/notify'
 import { extractApiError } from '@/lib/extractApiError'
+import { SectionTitle } from '@/components/ui/typography'
 
 const card = { border: '1px solid var(--border)', borderRadius: 10, padding: 16, marginBottom: 28, background: 'var(--surface)' }
-const cardTitle = { fontSize: 13, fontWeight: 600, color: 'var(--text)', marginBottom: 4 }
 const sub = { fontSize: 12, color: 'var(--text-muted)', marginBottom: 14 }
 const label = { fontSize: 12, color: 'var(--text-muted)', marginBottom: 4, display: 'block' }
 const inputWrap = { display: 'flex', alignItems: 'center', gap: 6, border: '1px solid var(--border)', borderRadius: 8, padding: '6px 10px', background: 'var(--input-bg)' }
@@ -71,7 +71,7 @@ export default function PlatformPricingCard() {
   if (phase === 'loading') {
     return (
       <div style={card}>
-        <div style={cardTitle}>{t('platformPricing.title')}</div>
+        <SectionTitle style={{ marginBottom: 4 }}>{t('platformPricing.title')}</SectionTitle>
         <p style={{ fontSize: 13, color: 'var(--text-muted)' }}>{t('common.loadingShort')}</p>
       </div>
     )
@@ -80,7 +80,7 @@ export default function PlatformPricingCard() {
   if (phase === 'error') {
     return (
       <div style={card}>
-        <div style={cardTitle}>{t('platformPricing.title')}</div>
+        <SectionTitle style={{ marginBottom: 4 }}>{t('platformPricing.title')}</SectionTitle>
         <p style={{ fontSize: 13, color: 'var(--text-muted)' }}>{t('platformPricing.loadError')}</p>
       </div>
     )
@@ -88,7 +88,7 @@ export default function PlatformPricingCard() {
 
   return (
     <div style={card}>
-      <div style={cardTitle}>{t('platformPricing.title')}</div>
+      <SectionTitle style={{ marginBottom: 4 }}>{t('platformPricing.title')}</SectionTitle>
       <div style={sub}>{t('platformPricing.subtitle')}</div>
 
       <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap' }}>

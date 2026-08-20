@@ -35,7 +35,8 @@ import api from '@/lib/api'
 import { notifyError, notifySuccess } from '@/lib/notify'
 import { initialsOf } from '@/lib/initials'
 import { useDateFormat } from '@/lib/datetime'
-import { useNavigation } from '@/context/NavigationContext'
+import EntityLink from '@/components/ui/EntityLink'
+import SoftChip from '@/components/ui/SoftChip'
 import { useOutreachOutcomes } from '@/lib/useOutreachOutcomes'
 import { useOutreachStatuses } from '@/lib/useOutreachStatuses'
 import { useVacancyOptions } from '@/pages/candidates/hooks/useVacancyOptions'
@@ -45,6 +46,7 @@ import type { OutreachTarget, AssignResult } from '../hooks/useOutreachDetail'
 import type { TargetSelection, AssigneeAxes } from '../data/outreachApi'
 import type { TargetFilter } from './targetFilter'
 import Button from '@/components/ui/Button'
+import QuickViewToggle from '@/components/ui/QuickViewToggle'
 
 interface RecruiterOption { value: string; label: string }
 
@@ -75,7 +77,6 @@ export default function TargetsTab({ targets, loading, error, onSetStatus, onSet
 }) {
   const { t } = useTranslation('outreach')
   const { formatDate } = useDateFormat()
-  const { openEntity } = useNavigation()
   const { outcomes } = useOutreachOutcomes()
   // Entry statuses from the tenant lookup (R-1b) — the is_reached FLAG drives
   // behaviour, so tenant-added statuses appear here without any code change.
@@ -183,15 +184,6 @@ export default function TargetsTab({ targets, loading, error, onSetStatus, onSet
   if (error)   return <p style={{ fontSize: 12, color: 'var(--color-danger)' }}>{t('drawer.error')}</p>
   if (!targets.length) return <p style={{ fontSize: 12, color: 'var(--text-muted)' }}>{t('drawer.empty')}</p>
 
-  const actBtn = (title: string, onClick: () => void, icon: React.ReactNode, color: string, key?: string) => (
-    <button key={key} onClick={onClick} title={title} aria-label={title}
-      style={{ width: 26, height: 26, display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
-        borderRadius: 6, cursor: 'pointer', color, border: `1px solid color-mix(in srgb, ${color} 30%, transparent)`,
-        background: `color-mix(in srgb, ${color} 8%, transparent)` }}>
-      {icon}
-    </button>
-  )
-
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
       {/* BELLIJST-SCALE-1 — search on name + client-side status/outcome/assignee
@@ -215,24 +207,29 @@ export default function TargetsTab({ targets, loading, error, onSetStatus, onSet
           placeholder={t('drawer.stats.byStatus')}
           options={statuses.map(o => ({ value: o.value, label: o.label }))}
           renderTrigger={toggle => (
+            /* eslint-disable huisstijlLegacy/no-restricted-syntax -- zero-chrome CreatableSelect renderTrigger wrapper (no fill/border/padding of its own); visible identity is entirely FilterTriggerPill's, mirrors StatusFilterSelect.tsx/VacancySearchFilters.tsx */
             <button type="button" onClick={toggle} aria-haspopup="listbox" aria-label={t('drawer.stats.byStatus')}
               style={{ background: 'none', border: 'none', padding: 0 }}>
               <FilterTriggerPill label={t('drawer.stats.byStatus')} count={statusPick ? 1 : 0} />
             </button>
+            /* eslint-enable huisstijlLegacy/no-restricted-syntax */
           )} />
         <CreatableSelect value={outcomePick} onChange={setOutcomePick} allowCreate={false}
           placeholder={t('drawer.stats.byOutcome')}
           options={outcomes.map(o => ({ value: o.value, label: o.label }))}
           renderTrigger={toggle => (
+            /* eslint-disable huisstijlLegacy/no-restricted-syntax -- zero-chrome CreatableSelect renderTrigger wrapper (no fill/border/padding of its own); visible identity is entirely FilterTriggerPill's, mirrors StatusFilterSelect.tsx/VacancySearchFilters.tsx */
             <button type="button" onClick={toggle} aria-haspopup="listbox" aria-label={t('drawer.stats.byOutcome')}
               style={{ background: 'none', border: 'none', padding: 0 }}>
               <FilterTriggerPill label={t('drawer.stats.byOutcome')} count={outcomePick ? 1 : 0} />
             </button>
+            /* eslint-enable huisstijlLegacy/no-restricted-syntax */
           )} />
         <CreatableSelect value={assigneePick} onChange={setAssigneePick} allowCreate={false}
           placeholder={t('drawer.stats.byAssignee')}
           options={assigneeOptions}
           renderTrigger={toggle => (
+            /* eslint-disable huisstijlLegacy/no-restricted-syntax -- zero-chrome CreatableSelect renderTrigger wrapper (no fill/border/padding of its own); visible identity is entirely FilterTriggerPill's, mirrors StatusFilterSelect.tsx/VacancySearchFilters.tsx */
             <button type="button" onClick={toggle} aria-haspopup="listbox" aria-label={t('drawer.stats.byAssignee')}
               style={{ background: 'none', border: 'none', padding: 0 }}>
               {/* assigneePick === '' is the real "unassigned" pick (matchesLocalFilters
@@ -240,12 +237,12 @@ export default function TargetsTab({ targets, loading, error, onSetStatus, onSet
                   or picking "unassigned" would show an active filter with no badge. */}
               <FilterTriggerPill label={t('drawer.stats.byAssignee')} count={assigneePick !== null ? 1 : 0} />
             </button>
+            /* eslint-enable huisstijlLegacy/no-restricted-syntax */
           )} />
         {hasLocalFilters && (
-          <button onClick={() => { setSearch(''); setStatusPick(null); setOutcomePick(null); setAssigneePick(null) }}
-            style={{ fontSize: 11, color: 'var(--text-muted)', background: 'none', border: 'none', cursor: 'pointer', padding: '4px 6px' }}>
+          <Button variant="ghost" size="sm" onClick={() => { setSearch(''); setStatusPick(null); setOutcomePick(null); setAssigneePick(null) }}>
             {t('common:filters.clearAll')}
-          </button>
+          </Button>
         )}
       </div>
 
@@ -256,10 +253,12 @@ export default function TargetsTab({ targets, loading, error, onSetStatus, onSet
           borderRadius: 7, color: 'var(--color-primary-text)', background: 'var(--color-primary-bg)',
           border: '1px solid var(--color-primary)', width: 'fit-content' }}>
           <span>{t('drawer.stats.filteredBy', { axis: filterLabel, value: filter.value })}</span>
+          {/* eslint-disable huisstijlLegacy/no-restricted-syntax -- tiny inline remove-X inside a compact filter chip; Button's fixed iconOnly footprint (28px) would overflow this pill, mirrors DocumentsTab.tsx's compact row-icon buttons */}
           <button onClick={onClearFilter} title={t('insights.clearFilter')} aria-label={t('insights.clearFilter')}
             style={{ display: 'flex', background: 'none', border: 'none', cursor: 'pointer', color: 'inherit', padding: 0 }}>
             <FilterX size={12} />
           </button>
+          {/* eslint-enable huisstijlLegacy/no-restricted-syntax */}
         </div>
       )}
 
@@ -282,11 +281,9 @@ export default function TargetsTab({ targets, loading, error, onSetStatus, onSet
               <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>{t('common:selectAll')}</span>
             </div>
             {hasAnyFilter && (
-              <button onClick={() => setAssignAllFiltered(true)}
-                style={{ fontSize: 11, fontWeight: 600, color: 'var(--color-primary)', background: 'none',
-                  border: 'none', cursor: 'pointer', padding: 0 }}>
+              <Button variant="ghost" size="sm" onClick={() => setAssignAllFiltered(true)}>
                 {t('drawer.assign.assignAllMatching', { count: visibleTargets.length })}
-              </button>
+              </Button>
             )}
           </div>
         )
@@ -316,15 +313,13 @@ export default function TargetsTab({ targets, loading, error, onSetStatus, onSet
               )}
               <Avatar initials={initialsOf(candidateName(tg))} size={26} />
               <div style={{ flex: 1, minWidth: 0 }}>
-                {/* Name → jump to the candidate drawer (cross-entity intent) + the shared
+                {/* Name → jump to the candidate drawer (cross-entity intent) via the shared
+                    EntityLink (renders plain text when there is no candidate id) + the
                     deployability chip (C-CHIP) — it handles Lead→dash and lookup colours. */}
                 <div style={{ display: 'flex', alignItems: 'center', gap: 6, minWidth: 0 }}>
-                  <button onClick={() => tg.candidate?.id && openEntity('candidates', tg.candidate.id)}
-                    title={t('drawer.action.openCandidate')}
-                    style={{ display: 'block', minWidth: 0, padding: 0, background: 'none', border: 'none', cursor: tg.candidate?.id ? 'pointer' : 'default',
-                      fontSize: 12, fontWeight: 600, color: 'var(--text)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', textAlign: 'left' }}>
-                    {candidateName(tg)}
-                  </button>
+                  <EntityLink page="candidates" id={tg.candidate?.id} title={t('drawer.action.openCandidate')} tone="neutral" hideIcon>
+                    <span style={{ fontSize: 12, fontWeight: 600 }}>{candidateName(tg)}</span>
+                  </EntityLink>
                   <span style={{ fontSize: 11, flexShrink: 0 }}>
                     <CandidateStatusChip status={tg.candidate?.status} phase={tg.candidate?.phase} />
                   </span>
@@ -339,53 +334,66 @@ export default function TargetsTab({ targets, loading, error, onSetStatus, onSet
                   </div>
                 )}
               </div>
-              {/* Status soft-chip */}
-              <span style={{ fontSize: 10, fontWeight: 600, padding: '2px 8px', borderRadius: 99, color: col,
-                background: `color-mix(in srgb, ${col} 12%, transparent)`, border: `1px solid color-mix(in srgb, ${col} 35%, transparent)` }}>
-                {meta?.label ?? t(`drawer.target.${st}`, { defaultValue: st })}
-              </span>
+              {/* Status chip — the shared SoftChip (was a hand-rolled 12/35 tint
+                  with raw ink, 2.2-3.5:1 — herhaal-slotaudit r3.5). */}
+              <SoftChip round size={10} color={col}
+                label={meta?.label ?? t(`drawer.target.${st}`, { defaultValue: st })} />
               {/* Quick check-off: contacted / answered / skipped; done rows can reset to todo. */}
+              {/* Quick check-off / follow-up actions — Button iconOnly carries the chrome
+                  (§4 tint-vs-trio law: these are ACTIONS, not status/data chips); the
+                  per-action meaning stays on the icon glyph's own colour, never the
+                  button fill/border. variant="secondary" (not ghost): a borderless
+                  ghost button reads as invisible on this row's flat --bg card. */}
               <div style={{ display: 'flex', gap: 4, flexShrink: 0 }}>
                 {!handled ? (
                   <>
-                    {statuses.filter(o => o.value !== (initial?.value ?? 'todo')).map(o =>
-                      actBtn(o.label, () => onSetStatus(tg.id, o.value),
-                        o.is_reached ? <Phone size={12} /> : <X size={12} />, o.color ?? 'var(--color-primary)', o.value))}
+                    {statuses.filter(o => o.value !== (initial?.value ?? 'todo')).map(o => (
+                      <Button key={o.value} iconOnly size="sm" variant="secondary" title={o.label} aria-label={o.label}
+                        onClick={() => onSetStatus(tg.id, o.value)}>
+                        {o.is_reached
+                          ? <Phone size={12} color={o.color ?? 'var(--color-primary)'} />
+                          : <X size={12} color={o.color ?? 'var(--color-primary)'} />}
+                      </Button>
+                    ))}
                   </>
                 ) : (
                   <>
-                    {actBtn(t('drawer.action.newTask'),   () => setTaskFor(tg), <ListChecks size={12} />, 'var(--color-primary)')}
-                    {actBtn(t('drawer.action.makeMatch'), () => { setMatchFor(tg); setMatchVacancyId('') }, <Handshake size={12} />, 'var(--color-success)')}
-                    {actBtn(t('drawer.action.reset'),     () => onSetStatus(tg.id, initial?.value ?? 'todo'), <RotateCcw size={12} />, 'var(--text-muted)')}
+                    <Button iconOnly size="sm" variant="secondary" title={t('drawer.action.newTask')} aria-label={t('drawer.action.newTask')}
+                      onClick={() => setTaskFor(tg)}>
+                      <ListChecks size={12} color="var(--color-primary)" />
+                    </Button>
+                    <Button iconOnly size="sm" variant="secondary" title={t('drawer.action.makeMatch')} aria-label={t('drawer.action.makeMatch')}
+                      onClick={() => { setMatchFor(tg); setMatchVacancyId('') }}>
+                      <Handshake size={12} color="var(--color-success)" />
+                    </Button>
+                    <Button iconOnly size="sm" variant="secondary" title={t('drawer.action.reset')} aria-label={t('drawer.action.reset')}
+                      onClick={() => onSetStatus(tg.id, initial?.value ?? 'todo')}>
+                      <RotateCcw size={12} color="var(--text-muted)" />
+                    </Button>
                   </>
                 )}
               </div>
               {/* BELLIJST-SCALE-1 — expand toggle: outcome chips + note stay tucked
                   away so a long list reads as one line per candidate by default. */}
               {(handled || onSetNote) && (
-                <button onClick={() => toggleExpanded(tg.id)} title={t('common:clickForDetails')}
-                  aria-label={t('common:clickForDetails')} aria-expanded={expanded.has(tg.id)}
-                  style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 22, height: 22,
-                    flexShrink: 0, background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)' }}>
+                <Button variant="ghost" iconOnly onClick={() => toggleExpanded(tg.id)} title={t('common:clickForDetails')}
+                  aria-label={t('common:clickForDetails')} aria-expanded={expanded.has(tg.id)}>
                   {expanded.has(tg.id) ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
-                </button>
+                </Button>
               )}
             </div>
 
-            {/* Outcome chips — record HOW the call ended (lookup-driven; click again to clear). */}
+            {/* Outcome chips — record HOW the call ended (lookup-driven; click again to
+                clear). Clickable choices → the shared QuickViewToggle (§4), never a
+                hand-rebuilt soft-chip recipe. */}
             {handled && expanded.has(tg.id) && (
               <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap', paddingLeft: 36 }}>
                 <span style={{ fontSize: 10, color: 'var(--text-muted)' }}>{t('drawer.outcomeLabel')}</span>
                 {outcomes.map(o => {
                   const active = tg.outcome === o.value
-                  const oc = o.color ?? 'var(--color-primary)'
                   return (
-                    <button key={o.value} onClick={() => onSetOutcome(tg.id, active ? null : o.value)}
-                      style={{ padding: '2px 9px', fontSize: 10, fontWeight: active ? 600 : 500, borderRadius: 99, cursor: 'pointer',
-                        color: oc, background: `color-mix(in srgb, ${oc} ${active ? 16 : 8}%, transparent)`,
-                        border: `1px solid color-mix(in srgb, ${oc} ${active ? 50 : 28}%, transparent)` }}>
-                      {o.label}
-                    </button>
+                    <QuickViewToggle key={o.value} active={active} onToggle={() => onSetOutcome(tg.id, active ? null : o.value)}
+                      label={o.label} color={o.color ?? 'var(--color-primary)'} size="compact" />
                   )
                 })}
               </div>
@@ -413,10 +421,9 @@ export default function TargetsTab({ targets, loading, error, onSetStatus, onSet
                 <Button variant="primary" size="sm" onClick={confirmMatch} disabled={!matchVacancyId || matchSaving}>
                   {t('drawer.matchConfirm')}
                 </Button>
-                <button onClick={() => setMatchFor(null)} title={t('common:cancel')} aria-label={t('common:cancel')}
-                  style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', display: 'flex', padding: 2 }}>
+                <Button variant="ghost" iconOnly onClick={() => setMatchFor(null)} title={t('common:cancel')} aria-label={t('common:cancel')}>
                   <X size={14} />
-                </button>
+                </Button>
               </div>
             )}
           </div>

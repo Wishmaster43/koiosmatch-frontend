@@ -26,9 +26,14 @@ describe('QuickViewToggle', () => {
 
   // Text colour must be darkened toward readable --text; background/border keep the raw colour.
   it('darkens text colour for readability while background/border keep the raw colour', () => {
+    // eslint-disable-next-line no-restricted-syntax -- DATA: a deliberately hostile light-yellow test colour, not a UI colour choice
     render(<QuickViewToggle active onToggle={() => {}} label="Sick" color="#ffdd00" />)
     const btn = screen.getByRole('button', { name: 'Sick' })
-    expect(btn.style.color).toBe('color-mix(in srgb, #ffdd00 60%, var(--text))')
+    // chipInk: 45% blend toward --text — the old private 60% failed AA for
+    // accent-yellow toggles (3.75:1, herhaal-slotaudit 20-08).
+    // eslint-disable-next-line no-restricted-syntax -- DATA: asserting the exact chipInk output for that test colour
+    expect(btn.style.color).toBe('color-mix(in srgb, #ffdd00 45%, var(--text))')
+    // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- DATA: asserting tintBg's exact output string, not hand-rolling the recipe
     expect(btn.style.background).toBe('color-mix(in srgb, rgb(255, 221, 0) 16%, transparent)')
     expect(btn.style.border).toContain('color-mix(in srgb, rgb(255, 221, 0)')
   })

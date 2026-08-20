@@ -5,6 +5,8 @@
  */
 import { useTranslation } from 'react-i18next'
 import { MapPin, Building2, Layers, X, Phone, Mail, ChevronRight } from 'lucide-react'
+import { PageTitle } from '@/components/ui/typography'
+import Button from '@/components/ui/Button'
 import { Avatar, StatusBadge, ac } from './locationParts'
 import type { SmLocationRow } from '@/types/shiftmanager'
 import ChangelogPopover from '@/components/drawer/ChangelogPopover'
@@ -22,16 +24,15 @@ export default function LocationDrawer({ loc, onClose }: { loc: SmLocationRow | 
       {/* Header */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between',
         padding: '14px 20px', borderBottom: '1px solid var(--border)', flexShrink: 0 }}>
-        <span style={{ fontSize: 15, fontWeight: 600, color: 'var(--text)' }}>{t('locationsPage.drawerTitle')}</span>
+        <PageTitle as="span">{t('locationsPage.drawerTitle')}</PageTitle>
         {/* §3A(d): record history is a changelog icon-popover in the title row, never a tab. */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
           {loc.id !== undefined && (
             <ChangelogPopover><EntityChangelog subjectType="Location" subjectId={loc.id} /></ChangelogPopover>
           )}
-          <button onClick={onClose} aria-label={t('common:close')} style={{ background: 'none', border: 'none', cursor: 'pointer',
-            color: 'var(--text-muted)', display: 'flex', padding: 4, borderRadius: 6 }}>
+          <Button variant="ghost" iconOnly onClick={onClose} aria-label={t('common:close')}>
             <X size={16} />
-          </button>
+          </Button>
         </div>
       </div>
 
@@ -41,7 +42,7 @@ export default function LocationDrawer({ loc, onClose }: { loc: SmLocationRow | 
         <div style={{ display: 'flex', gap: 14, marginBottom: 24 }}>
           <Avatar label={loc.name} size={52} />
           <div style={{ flex: 1, minWidth: 0 }}>
-            <div style={{ fontSize: 15, fontWeight: 700, color: 'var(--text)', lineHeight: 1.35, marginBottom: 4 }}>{loc.name}</div>
+            <PageTitle as="div" style={{ lineHeight: 1.35, marginBottom: 4 }}>{loc.name}</PageTitle>
             <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
               <Building2 size={12} color="var(--text-muted)" />
               <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>{loc.customer}</span>

@@ -3,8 +3,13 @@
  * Koios billing, WhatsApp usage) — one place so the four cards keep one look
  * (mirrors the Koios settings cards: KoiosStatusCard/KoiosPricingCard).
  */
+/* eslint-disable react-refresh/only-export-components -- a style-constants module
+   that also carries the tiny Tile atom its four consumers share; HMR-nicety only.
+   Follow-up (grand audit): lift Tile to its own file and unify it with
+   TenantUsageSettings' near-identical local Tile. */
 export const card = { border: '1px solid var(--border)', borderRadius: 10, padding: 16, marginBottom: 14, background: 'var(--surface)' }
-export const cardTitle = { fontSize: 13, fontWeight: 600, color: 'var(--text)', marginBottom: 4 }
+// HUISSTIJL-1: the card TITLE is the shared SectionTitle atom (13/600), not a
+// local re-declaration — consumers render <SectionTitle style={{ marginBottom: 4 }}>.
 export const sub = { fontSize: 12, color: 'var(--text-muted)', marginBottom: 12 }
 export const th = { textAlign: 'left', fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', padding: '6px 8px', borderBottom: '1px solid var(--border)' }
 export const td = { fontSize: 12, color: 'var(--text)', padding: '8px', borderBottom: '1px solid var(--border)' }

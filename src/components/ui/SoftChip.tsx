@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react'
-import { tintBg, tintBorder } from '@/lib/tint'
+import { tintBg, tintBorder, chipInk } from '@/lib/tint'
 
 /**
  * SoftChip — THE §3A/§4 soft-chip: a tinted label with a matching border, never a
@@ -26,10 +26,11 @@ export default function SoftChip({ label, color, dot = false, title, round = fal
   return (
     <span title={title} style={{ display: 'inline-flex', alignItems: 'center', gap: 5,
       fontSize: size, fontWeight: 500, padding: '2px 8px', borderRadius: round ? 99 : 6,
-      // ACCENT-INK-1 (Opus batch D, measured): raw --color-primary as text on its
-      // own 10% tint is 2.61:1; the derived twin measures 5.17:1. Every other
-      // colour stays itself — data colours are the chip's meaning.
-      background: tintBg(c), color: c === 'var(--color-primary)' ? 'var(--color-primary-text)' : c,
+      // Ink via chipInk (herhaal-slotaudit 20-08, measured): the raw colour as text
+      // on its own tint reads 2.4-3.0:1 for every non-primary token — AA fail. The
+      // hue still carries the meaning via dot, border and tint; the TEXT blends
+      // toward --text far enough to read (≥5.3:1 both themes).
+      background: tintBg(c), color: chipInk(c),
       border: tintBorder(c), whiteSpace: 'nowrap' }}>
       {dot && <span style={{ width: 6, height: 6, borderRadius: '50%', background: c, flexShrink: 0 }} />}
       {label}

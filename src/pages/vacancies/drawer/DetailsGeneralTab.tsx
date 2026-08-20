@@ -5,7 +5,7 @@ import { row, card, controls, dash, dateRange, makeFieldHelpers } from './detail
 import type { GeneralSection } from '../hooks/useVacancyDetailsForm'
 import type { VacancyDetail } from '@/types/vacancy'
 import SoftChip from '@/components/ui/SoftChip'
-import { tintBg, tintBorder } from '@/lib/tint'
+import { tintBg, tintBorder, chipInk } from '@/lib/tint'
 
 interface Props {
   vacancy: VacancyDetail
@@ -42,15 +42,18 @@ export default function DetailsGeneralTab({ vacancy: v, general, candidateTypes,
         {candidateTypes.map(ct => {
           const on = types.includes(ct.value)
           const col = ct.color ?? 'var(--color-primary)'
+          // Interactive toggle chip — stays a real <button> (SoftChip has no onClick,
+          // Button has no chip/pill identity); tint via the house formula. Block form:
+          // the flagged style attribute sits a line into the opening tag.
+          /* eslint-disable huisstijlLegacy/no-restricted-syntax */
           return (
-            // Interactive toggle chip — stays a real <button> (SoftChip has no onClick),
-            // but the tint now uses the house tintBg/tintBorder formula (§4, HUISSTIJL-1).
             <button key={ct.value} type="button" onClick={() => toggleType(ct.value)}
               style={{ padding: '3px 10px', borderRadius: 999, fontSize: 12, cursor: 'pointer', fontWeight: on ? 600 : 400,
                 background: on ? tintBg(col, true) : 'var(--surface)',
-                color: on ? col : 'var(--text-muted)',
+                color: on ? chipInk(col) : 'var(--text-muted)',
                 border: on ? tintBorder(col, true) : '1px solid var(--border)' }}>{ct.label}</button>
           )
+          /* eslint-enable huisstijlLegacy/no-restricted-syntax */
         })}
       </div>, editing)}
     {/* V7 (Danny vacatures-ronde): the Vacature-ID row (`v.code`) is removed —

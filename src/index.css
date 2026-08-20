@@ -98,11 +98,15 @@
   /* G-FLAG-1: static default was `var(--color-primary)`, which on the light surface
      only clears 2.89:1 (below the readableAccentText 5.5 target used by
      useTenantTheme.ts) — an untenanted install (no brand_color saved yet) shipped
-     unreadable accent text before the runtime hook ever ran. This is the same
-     colour readableAccentText('#19A5CA', '#FFFFFF') computes, hardcoded so the
-     default itself is AA-safe without waiting on JS; a tenant brand_color still
-     overrides it live via useTenantTheme.ts. */
-  --color-primary-text:  #117089;
+     unreadable accent text before the runtime hook ever ran. A tenant brand_color
+     still overrides it live via useTenantTheme.ts. */
+  /* Herhaal-slotaudit r3: this is DELIBERATELY 2% darker than the #117089 that
+     readableAccentText('#19A5CA','#FFFFFF') computes — that value measured 4.47:1
+     on the 16% primary tint over --bg (chipInk's primary branch); #116E86 clears
+     every pair ≥4.60 with bg/surface only roomier. Do NOT "restore" the computed
+     value; the runtime hook targets the surface, not the tints (known gap for
+     branded tenants, logged in the slotaudit doc). */
+  --color-primary-text:  #116E86;
   --sidebar-bg: #FFFFFF;
   --sidebar-text: #111827;
   /* SIDEBAR-CONTRAST-1 (measured 08-08): the resting nav label sat at 2.54:1 on the

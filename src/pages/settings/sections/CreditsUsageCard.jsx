@@ -11,7 +11,8 @@ import { useTranslation } from 'react-i18next'
 import api, { unwrap } from '@/lib/api'
 import { useNumberFormat } from '@/lib/formatters'
 import QuickViewToggle from '@/components/ui/QuickViewToggle'
-import { card, cardTitle, sub, notice, Tile } from './usageCardStyles'
+import { SectionTitle } from '@/components/ui/typography'
+import { card, sub, notice, Tile } from './usageCardStyles'
 
 export default function CreditsUsageCard() {
   const { t } = useTranslation('settings')
@@ -44,7 +45,7 @@ export default function CreditsUsageCard() {
     <div style={card}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
         <div>
-          <div style={cardTitle}>{t('billing.usage.credits.title')}</div>
+          <SectionTitle style={{ marginBottom: 4 }}>{t('billing.usage.credits.title')}</SectionTitle>
           <div style={sub}>{t('billing.usage.credits.subtitle')}</div>
         </div>
         <div style={{ display: 'flex', gap: 6 }}>
