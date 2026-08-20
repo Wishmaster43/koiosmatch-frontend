@@ -28,22 +28,14 @@ import type { ReportPeriod, CandidateTimeseriesPoint } from '@/types/analytics'
 import { useAllSettings, getJsonSetting } from '@/lib/settings/useAllSettings'
 import { getReportKpiCatalog, getReportKpiDefaultOrder, reportKpiSettingsKey } from './kpiCatalog'
 import { resolveReportKpiOrder } from './resolveReportKpiOrder'
+import SharedStatTile from '@/components/ui/StatTile'
+import { BodyText } from '@/components/ui/typography'
 
 // One match stat tile; with an onClick it becomes a drillable surface (keyboard
 // operable — same affordance pattern as SegmentBars).
+// The shared StatTile atom (klus c) — value-first, clickable, accent for the live bucket.
 function StatTile({ label, value, accent, onClick }: { label: string; value: number; accent?: boolean; onClick?: () => void }) {
-  return (
-    <div role={onClick ? 'button' : undefined} tabIndex={onClick ? 0 : undefined}
-         onClick={onClick}
-         onKeyDown={onClick ? (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onClick() } } : undefined}
-         style={{ flex: 1, minWidth: 120, padding: '14px 16px', borderRadius: 10, background: 'var(--bg)',
-                  border: '1px solid var(--border)', cursor: onClick ? 'pointer' : 'default' }}>
-      <div style={{ fontSize: 22, fontWeight: 700, fontVariantNumeric: 'tabular-nums',
-                    // Text-colour accent uses the AA-contrast text token, not the raw brand primary.
-                    color: accent ? 'var(--color-primary-text)' : 'var(--text)' }}>{value}</div>
-      <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>{label}</div>
-    </div>
-  )
+  return <SharedStatTile label={label} value={value} accent={accent} onClick={onClick} />
 }
 
 // The under_contract tile keys — each drills contract_status=<key> (portie 7 XOR).
@@ -206,11 +198,12 @@ export default function MatchesReport({ period, filters = EMPTY_REPORT_FILTERS }
       )}
 
       {/* The report's data window, rendered prominently from the RESPONSE —
-          DD-MM-YYYY (never ISO, §3B DATUM-1). */}
+          DD-MM-YYYY (never ISO, §3B DATUM-1). 500 = the top of §4's body/label
+          weight range: an emphasized data line, not a heading. */}
       {!loading && !error && data && (
-        <div style={{ fontSize: 13, fontWeight: 500, color: 'var(--text)', marginBottom: 12 }}>
+        <BodyText as="div" style={{ fontWeight: 500, marginBottom: 12 }}>
           {t('matches.window', { from: formatDate(data.from), to: formatDate(data.to) })}
-        </div>
+        </BodyText>
       )}
 
       {/* One outer section-card holding the state block and, on success, the

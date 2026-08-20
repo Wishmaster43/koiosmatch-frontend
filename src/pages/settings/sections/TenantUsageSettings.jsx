@@ -11,7 +11,9 @@ import { useAuth } from '@/context/AuthContext'
 import SearchSelect from '@/components/ui/SearchSelect'
 import TenantUsageDetailsTable from './TenantUsageDetailsTable'
 import TenantUsageBreakdownTable from './TenantUsageBreakdownTable'
-import { Mono } from '@/components/ui/typography'
+import { Mono, GroupLabel, BodyText } from '@/components/ui/typography'
+import StatTile from '@/components/ui/StatTile'
+import { fieldSelectStyle } from '@/components/forms/fieldMetrics'
 
 const num = (v) => (v == null ? '—' : Number(v).toLocaleString('nl-NL'))
 
@@ -30,15 +32,9 @@ function buildMonths() {
   })
 }
 
-// Small metric tile.
+// Small metric tile — the shared StatTile atom (klus c), usage face.
 function Tile({ label, value }) {
-  return (
-    <div style={{ flex: '1 1 0', minWidth: 130, background: 'var(--surface)', border: '1px solid var(--border)',
-      borderRadius: 10, padding: '12px 14px' }}>
-      <div style={{ fontSize: 11, color: 'var(--text-muted)', fontWeight: 500, marginBottom: 6 }}>{label}</div>
-      <div style={{ fontSize: 20, fontWeight: 700, color: 'var(--text)', fontFamily: "'JetBrains Mono', monospace" }}>{value}</div>
-    </div>
-  )
+  return <StatTile label={label} value={value} size="sm" labelFirst />
 }
 
 export default function TenantUsageSettings() {
@@ -89,9 +85,11 @@ export default function TenantUsageSettings() {
             onToggle={setMonth}
             closeOnToggle
             renderTrigger={toggle => (
+              // §4 2b: a dropdown TRIGGER is a FORM FIELD — its face comes from
+              // fieldMetrics' select canon, never a hand-painted box.
               <button type="button" onClick={toggle}
-                style={{ fontSize: 13, padding: '6px 10px', borderRadius: 8, border: '1px solid var(--border)',
-                  background: 'var(--surface)', color: 'var(--text)', textTransform: 'capitalize', cursor: 'pointer' }}>
+                // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- form-field trigger face (fieldSelectStyle canon), not an action button
+                style={{ ...fieldSelectStyle, width: 'auto', textTransform: 'capitalize' }}>
                 {months.find(m => m.value === month)?.label ?? month}
               </button>
             )}
@@ -120,18 +118,18 @@ export default function TenantUsageSettings() {
           </div>
 
           {/* Connectors (per connector — for invoicing) */}
-          <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase',
-            letterSpacing: '0.05em', marginBottom: 10 }}>
+          <GroupLabel style={{ marginBottom: 10 }}>
             {t('usage.col.connectors')}
-          </div>
+          </GroupLabel>
           <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 10, overflow: 'hidden' }}>
             {connectors.length === 0
-              ? <div style={{ padding: '11px 16px', fontSize: 13, color: 'var(--text-muted)' }}>—</div>
+              // Muted override: empty-state placeholder, secondary by design (§4 typografie).
+              ? <BodyText as="div" style={{ padding: '11px 16px', color: 'var(--text-muted)' }}>—</BodyText>
               : connectors.map((c, i) => (
                 <div key={c.key ?? i} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between',
                   padding: '10px 16px', borderTop: i ? '1px solid var(--border)' : 'none' }}>
-                  <span style={{ fontSize: 13, color: 'var(--text)' }}>{CONNECTOR_LABELS[c.key] ?? c.key}</span>
-                  <Mono style={{ fontSize: 13, color: 'var(--text)' }}>{num(c.usage)}</Mono>
+                  <BodyText as="span">{CONNECTOR_LABELS[c.key] ?? c.key}</BodyText>
+                  <Mono style={{ fontSize: 13 }}>{num(c.usage)}</Mono>
                 </div>
               ))}
           </div>
@@ -139,18 +137,16 @@ export default function TenantUsageSettings() {
           {/* Per-month detail — the 12-month history the endpoint already returns,
               expandable per row into AI cost / workflow-per-module / connector
               breakdowns (§ usage details, 14-08). */}
-          <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase',
-            letterSpacing: '0.05em', marginTop: 24, marginBottom: 10 }}>
+          <GroupLabel style={{ marginTop: 24, marginBottom: 10 }}>
             {t('usage.details.title')}
-          </div>
+          </GroupLabel>
           <TenantUsageDetailsTable history={usage?.history} />
 
           {/* Selected-month breakdown by activity/model/user/day — sums to the
               total above by server contract (CMBE, 14-08). */}
-          <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase',
-            letterSpacing: '0.05em', marginTop: 24, marginBottom: 10 }}>
+          <GroupLabel style={{ marginTop: 24, marginBottom: 10 }}>
             {t('usage.breakdown.title')}
-          </div>
+          </GroupLabel>
           <TenantUsageBreakdownTable tenantId={activeTenant?.id} month={month} />
         </>
       )}
