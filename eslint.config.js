@@ -396,4 +396,12 @@ export default defineConfig([
     files: ['src/types/api-generated.ts'],
     rules: { 'max-lines': 'off' },
   },
+  // Testbestanden vallen buiten §3's splitstabel (die noemt component/hook/util)
+  // — een testsuite groeit legitiem met zijn gedragsoppervlak mee, en de
+  // 400-regel-warn maakte elke kleine assertion-toevoeging een verplichte
+  // bestandssplitsing (gemeten 21-08: AddApplicationModal.test).
+  {
+    files: ['**/*.test.*'],
+    rules: { 'max-lines': 'off' },
+  },
 ])

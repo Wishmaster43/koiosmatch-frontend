@@ -183,7 +183,9 @@ describe('AddApplicationModal', () => {
     // + 1 NEWCAND-1 "+ New candidate" button.
     // +1 sinds HUISSTIJL-1: de voetregel-annuleerknop is nu een house Button en
     // draagt daarmee expliciet type="button" (nooit meer impliciet submit).
-    expect(document.querySelectorAll('button[type="button"]').length).toBe(10)
+    // +1 sinds blok 1 (bd335fca): FloatingPanel's close-X is ook een house
+    // Button en telt dus mee als expliciete type="button".
+    expect(document.querySelectorAll('button[type="button"]').length).toBe(11)
   })
 
   it('shows the vacancy as a locked, non-editable display when opened from a vacancy', () => {
@@ -192,7 +194,8 @@ describe('AddApplicationModal', () => {
     // Locked vacancy: 4 picker triggers (candidate + owner + phase + source) + 2 clear
     // crosses (owner + phase, both pre-seeded — see CLEAR-SWEEP note above)
     // + 1 NEWCAND-1 "+ New candidate" button.
-    expect(document.querySelectorAll('button[type="button"]').length).toBe(9)
+    // +1: FloatingPanel-close is een house Button sinds blok 1 (bd335fca).
+    expect(document.querySelectorAll('button[type="button"]').length).toBe(10)
   })
 
   // CLEAR-SWEEP (Danny 13-08, "eenmaal gekozen blijft hij staan"): owner and start
