@@ -227,7 +227,9 @@
     "cancel": "Abbrechen",
     "manualNote": "Manuell angepasst · KI: {{score}}%",
     "detailsSoon": "Die Kriterienaufschlüsselung erscheint hier, sobald das Scoring konfiguriert ist.",
-    "weightLabel": "Gewichtung"
+    "weightLabel": "Gewichtung",
+    "saveOverride": "Score speichern",
+    "cancelOverride": "Score-Änderung abbrechen"
   },
   "profile": {
     "function": "Funktion",
@@ -541,7 +543,6 @@
     "inProcess": "In Bearbeitung",
     "days": "{{count}} Tage",
     "matchScore": "Match-Score",
-    "notScored": "Noch nicht bewertet",
     "nextAppointment": "Nächster Termin",
     "noAppointment": "Kein Termin geplant",
     "interview": "Interview",
@@ -565,7 +566,9 @@
     "total_one": "{{count}} Bewerber für diese Stelle",
     "total_other": "{{count}} Bewerber für diese Stelle",
     "inPhase_one": "Dieser Kandidat befindet sich in {{phase}}, zusammen mit 1 weiteren.",
-    "inPhase_other": "Dieser Kandidat befindet sich in {{phase}}, zusammen mit {{count}} weiteren."
+    "inPhase_other": "Dieser Kandidat befindet sich in {{phase}}, zusammen mit {{count}} weiteren.",
+    "showList": "Liste anzeigen",
+    "hideList": "Liste ausblenden"
   },
   "filters": {
     "categories": {

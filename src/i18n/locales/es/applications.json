@@ -227,7 +227,9 @@
     "cancel": "Cancelar",
     "manualNote": "Ajustado manualmente · IA: {{score}}%",
     "detailsSoon": "El desglose de criterios aparece aquí una vez configurada la puntuación.",
-    "weightLabel": "Ponderación"
+    "weightLabel": "Ponderación",
+    "saveOverride": "Guardar puntuación",
+    "cancelOverride": "Cancelar el cambio de puntuación"
   },
   "profile": {
     "function": "Función",
@@ -541,7 +543,6 @@
     "inProcess": "En trámite",
     "days": "{{count}} días",
     "matchScore": "Puntuación de match",
-    "notScored": "Aún sin puntuar",
     "nextAppointment": "Próxima cita",
     "noAppointment": "Sin cita programada",
     "interview": "Entrevista",
@@ -565,7 +566,9 @@
     "total_one": "{{count}} solicitante para esta vacante",
     "total_other": "{{count}} solicitantes para esta vacante",
     "inPhase_one": "Este candidato está en {{phase}}, junto con 1 más.",
-    "inPhase_other": "Este candidato está en {{phase}}, junto con {{count}} más."
+    "inPhase_other": "Este candidato está en {{phase}}, junto con {{count}} más.",
+    "showList": "Mostrar lista",
+    "hideList": "Ocultar lista"
   },
   "filters": {
     "categories": {

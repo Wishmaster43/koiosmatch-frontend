@@ -11,7 +11,6 @@ import { useApplicationAdvice } from '@/lib/useApplicationAdvice'
 import type { ApplicationDetail } from '@/types/application'
 
 vi.mock('@/lib/datetime', () => ({ useDateFormat: () => ({ formatDate: (v: string) => v, formatDateTime: (v: string) => v }) }))
-vi.mock('../CompetitionBlock', () => ({ default: () => null }))
 // The advice-block WIRING is under test (KOIOS-ADVIES-OVERAL-1), not its chrome —
 // the stub exposes each insight's collapsed label as plain text (no buttons, so
 // the motivation tests' queryByRole('button') stays meaningful).

@@ -178,11 +178,11 @@ export default function MatchScoreBlock({ score, criteria = [], summary, onSave,
                 {/* Pre-existing bespoke 26x26 cancel/edit controls (bg/ink combo not
                     covered by a Button variant), out of this ink/tint task's scope. */}
                 {/* eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- see comment above */}
-                <button onClick={cancel} title={t('matchScore.cancel')} style={{ display: 'flex', width: 26, height: 26, alignItems: 'center', justifyContent: 'center', borderRadius: 6, background: 'var(--bg)', color: 'var(--text-muted)', border: '1px solid var(--border)', cursor: 'pointer' }}><X size={13} /></button>
+                <button onClick={cancel} title={t('matchScore.cancel')} aria-label={t('matchScore.cancel')} style={{ display: 'flex', width: 26, height: 26, alignItems: 'center', justifyContent: 'center', borderRadius: 6, background: 'var(--bg)', color: 'var(--text-muted)', border: '1px solid var(--border)', cursor: 'pointer' }}><X size={13} /></button>
               </>
             ) : (
               // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- pre-existing bespoke 26x26 edit control (bg/ink combo not covered by a Button variant), out of this ink/tint task's scope
-              <button onClick={startEdit} title={t('matchScore.edit')} style={{ display: 'flex', width: 26, height: 26, alignItems: 'center', justifyContent: 'center', borderRadius: 6, background: 'var(--bg)', color: 'var(--text-muted)', border: '1px solid var(--border)', cursor: 'pointer' }}><Pencil size={12} /></button>
+              <button onClick={startEdit} title={t('matchScore.edit')} aria-label={t('matchScore.edit')} style={{ display: 'flex', width: 26, height: 26, alignItems: 'center', justifyContent: 'center', borderRadius: 6, background: 'var(--bg)', color: 'var(--text-muted)', border: '1px solid var(--border)', cursor: 'pointer' }}><Pencil size={12} /></button>
             ))}
           </span>
         </div>

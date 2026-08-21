@@ -227,7 +227,9 @@
     "save": "Save",
     "cancel": "Cancel",
     "manualNote": "Manually adjusted · AI: {{score}}%",
-    "detailsSoon": "The criteria breakdown appears here once scoring is configured."
+    "detailsSoon": "The criteria breakdown appears here once scoring is configured.",
+    "saveOverride": "Save score",
+    "cancelOverride": "Cancel score change"
   },
   "profile": {
     "function": "Function",
@@ -541,7 +543,6 @@
     "inProcess": "In process",
     "days": "{{count}} days",
     "matchScore": "Match score",
-    "notScored": "Not scored yet",
     "nextAppointment": "Next appointment",
     "noAppointment": "No appointment scheduled",
     "interview": "Interview",
@@ -565,7 +566,9 @@
     "total_one": "{{count}} applicant for this vacancy",
     "total_other": "{{count}} applicants for this vacancy",
     "inPhase_one": "This candidate is in {{phase}}, together with 1 other.",
-    "inPhase_other": "This candidate is in {{phase}}, together with {{count}} others."
+    "inPhase_other": "This candidate is in {{phase}}, together with {{count}} others.",
+    "showList": "Show list",
+    "hideList": "Hide list"
   },
   "filters": {
     "categories": {

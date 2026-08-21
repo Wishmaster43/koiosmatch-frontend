@@ -227,7 +227,9 @@
     "save": "Opslaan",
     "cancel": "Annuleren",
     "manualNote": "Handmatig aangepast · AI: {{score}}%",
-    "detailsSoon": "De criteria-uitsplitsing verschijnt hier zodra de scoring is ingesteld."
+    "detailsSoon": "De criteria-uitsplitsing verschijnt hier zodra de scoring is ingesteld.",
+    "saveOverride": "Score opslaan",
+    "cancelOverride": "Score-aanpassing annuleren"
   },
   "profile": {
     "function": "Functie",
@@ -541,7 +543,6 @@
     "inProcess": "In behandeling",
     "days": "{{count}} dagen",
     "matchScore": "Matchscore",
-    "notScored": "Nog niet gescoord",
     "nextAppointment": "Volgende afspraak",
     "noAppointment": "Geen afspraak gepland",
     "interview": "Interview",
@@ -565,7 +566,9 @@
     "total_one": "{{count}} sollicitant op deze vacature",
     "total_other": "{{count}} sollicitanten op deze vacature",
     "inPhase_one": "Deze kandidaat staat in {{phase}}, samen met nog 1 andere.",
-    "inPhase_other": "Deze kandidaat staat in {{phase}}, samen met nog {{count}} anderen."
+    "inPhase_other": "Deze kandidaat staat in {{phase}}, samen met nog {{count}} anderen.",
+    "showList": "Toon lijst",
+    "hideList": "Verberg lijst"
   },
   "filters": {
     "categories": {

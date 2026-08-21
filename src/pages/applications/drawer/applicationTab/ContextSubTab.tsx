@@ -8,7 +8,6 @@ import { adviceInsightRows } from '@/lib/koiosAdviceInsight'
 import SectionCard from '@/components/ui/SectionCard'
 import SafeHtml from '@/components/ui/SafeHtml'
 import { buildApplicationAdviceInsights } from '../applicationAiInsights'
-import CompetitionBlock from '../CompetitionBlock'
 import type { ApplicationDetail } from '@/types/application'
 
 interface ContextSubTabProps {
@@ -29,13 +28,17 @@ const COLLAPSE_THRESHOLD = 400
 const collapsedHeight = 160
 
 /**
- * ContextSubTab — APP-TAB-SPLIT-1, group (d): everything that is CONTEXT
- * rather than the application's own core state — competing applicants on the
- * same vacancy, the motivation letter, interview-consent evidence and the
- * Koios AI advisory (carrying the task, if any). Same original order and
- * behaviour, unchanged. DD-FE-9 (08-08 drill-down audit): the match-score
- * criteria breakdown moved OUT of here into the Status sub-tab, directly
- * under the score cell — adjusting now sits where reading is.
+ * ContextSubTab — APP-TAB-SPLIT-1, group (d): canon step 2 (the motivation
+ * letter — the application's own free text, applicant-authored so read-only;
+ * its TEKST-POPOUT reading affordance is a registered follow-up) followed by
+ * canon step 3 (interview-consent evidence + the Koios AI advisory carrying
+ * the task, if any). CompetitionBlock ("Andere
+ * sollicitanten") moved OUT of this group (ruling 3) into its own position on
+ * ApplicationTab, between the Match score block and this one — everything
+ * that stays here keeps its original relative order/behaviour. DD-FE-9
+ * (08-08 drill-down audit): the match-score criteria breakdown moved OUT of
+ * here earlier into the Status sub-tab, directly under the score cell —
+ * adjusting now sits where reading is.
  */
 export default function ContextSubTab({ application: a }: ContextSubTabProps) {
   const { t } = useTranslation(['applications', 'common'])
@@ -49,10 +52,6 @@ export default function ContextSubTab({ application: a }: ContextSubTabProps) {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-      {/* How busy is this vacancy, and where does this candidate stand among the
-          other applicants (Danny 25-07 d). */}
-      <CompetitionBlock application={a} />
-
       {/* MOTIVATIE-ZICHTBAAR-1: the applicant's motivation letter, delivered by the
           drawer's own GET /applications/{id} (ApplicationDetailResource.cover_letter).
           The truthiness check is permanent, NOT a gate on an awaited field: only the
@@ -70,6 +69,7 @@ export default function ContextSubTab({ application: a }: ContextSubTabProps) {
           </div>
           {letterIsLong && (
             <button type="button" onClick={() => setLetterExpanded(v => !v)}
+              // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- text-link show more/less toggle, not a chrome action — no Button variant fits
               style={{ marginTop: 6, background: 'none', border: 'none', cursor: 'pointer', padding: 0,
                 fontSize: 11, fontWeight: 600, color: 'var(--color-primary-text)' }}>
               {letterExpanded ? t('motivation.showLess') : t('motivation.showMore')}

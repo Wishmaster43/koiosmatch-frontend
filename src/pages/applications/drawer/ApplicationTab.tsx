@@ -1,7 +1,10 @@
 import StatusSubTab from './applicationTab/StatusSubTab'
 import DetailsSubTab from './applicationTab/DetailsSubTab'
 import CvSubTab from './applicationTab/CvSubTab'
+import MatchScoreSection from './MatchScoreSection'
+import CompetitionBlock from './CompetitionBlock'
 import ContextSubTab from './applicationTab/ContextSubTab'
+import ApplicationBranchSection from './ApplicationBranchSection'
 import type { Criterion } from '@/components/match/MatchScoreBlock'
 import type { ApplicationDetail } from '@/types/application'
 import type { Id } from '@/types/common'
@@ -27,23 +30,29 @@ interface ApplicationTabProps {
 /**
  * ApplicationTab — the "Sollicitatie" tab, ONE flat scroll (PDF-SOLLICITATIES
  * point 9, Danny 14-08: "Alle subtabjes onder Sollicitatie worden één
- * tabblad" — reverses APP-TAB-SPLIT-1's four-sub-tab strip). Every section that
- * used to sit behind Status/Details/CV/Context now stacks in ONE column, in the
- * same relative order: outcome + status strip + match score, the editable
- * details card (source/client/location/vacancy — this is also where the
- * customer's establishment, "Vestiging", now reads without an extra click,
- * PDF point 10), the CV blocks, and finally the context blocks including the
- * Koios advisory (PDF point 11 — was buried on the last sub-tab, now visible
- * on first open). No behaviour change per section, only layout: same props,
- * same PATCH bodies.
+ * tabblad"). Danny 21-08 ("Heel deze tab is anders dan de kandidaten of
+ * klant") — the block order now follows the same DRILLDOWN-VOLGORDE-CANON
+ * every other entity drilldown uses: INFORMATION cards first (the outcome +
+ * status strip, the editable details card, the CV blocks), then the Match
+ * score block (ruling 1: the strip's own score cell is retired, this titled
+ * card is the ONE score surface left), then Andere sollicitanten (ruling 3,
+ * now an expandable list of the vacancy's other applicants), then the Koios
+ * AI block (the motivation letter, interview-consent evidence and the
+ * advisory itself), and finally VESTIGING LAST (ruling 4 — renders nothing
+ * when the application has no linked vacancy to derive a branch from, see
+ * ApplicationBranchSection's own doc comment). No behaviour change per
+ * section beyond ruling 1/3 above — same props, same PATCH bodies.
  */
 export default function ApplicationTab({ application: a, onAdjustScore, onLinkVacancy, onUpdateSource, onNavigateTab }: ApplicationTabProps) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-      <StatusSubTab application={a} onNavigateTab={onNavigateTab} onAdjustScore={onAdjustScore} />
+      <StatusSubTab application={a} onNavigateTab={onNavigateTab} />
       <DetailsSubTab application={a} onLinkVacancy={onLinkVacancy} onUpdateSource={onUpdateSource} />
       <CvSubTab application={a} />
+      <MatchScoreSection application={a} onAdjustScore={onAdjustScore} />
+      <CompetitionBlock application={a} />
       <ContextSubTab application={a} />
+      <ApplicationBranchSection application={a} />
     </div>
   )
 }

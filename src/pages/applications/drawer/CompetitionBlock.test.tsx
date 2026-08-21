@@ -1,10 +1,16 @@
 /**
  * CompetitionBlock — covers the no-vacancy/loading/error states, the funnel chip
- * row derived from applicationsByPhase, "alone in phase" vs "with N others", and
- * the privacy guarantee (§8): never render another candidate's name/data.
+ * row derived from applicationsByPhase, "alone in phase" vs "with N others", the
+ * privacy guarantee (§8: never render another candidate's name/data in the
+ * SUMMARY line) and, since Danny 21-08 ruling 3 ("ik zie geen lijst??"), the
+ * expandable list of the vacancy's OTHER applicants — collapsed by default,
+ * sourced from the already-fetched vacancy.applications (no second request),
+ * and navigating via the SAME openEntity('applications', id) every other
+ * cross-record click in the app uses.
  */
 import { describe, it, expect, vi } from 'vitest'
 import { render, screen } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import CompetitionBlock from './CompetitionBlock'
 import type { ApplicationDetail } from '@/types/application'
 import type { VacancyDetail } from '@/types/vacancy'
@@ -29,6 +35,11 @@ vi.mock('@/context/LookupsContext', () => ({
   }),
 }))
 
+// SOLLICITANTEN-2: row click navigates the same way every other cross-record
+// click does — mirrors CustomerApplicationsList.test.tsx's own mock shape.
+const openEntity = vi.fn()
+vi.mock('@/context/NavigationContext', () => ({ useNavigation: () => ({ openEntity, navigate: vi.fn() }) }))
+
 // Mock the shared hook directly — this file tests CompetitionBlock's own
 // rendering, not useApplicationVacancy's fetch (that has its own use elsewhere).
 const mockUseApplicationVacancy = vi.fn()
@@ -41,7 +52,7 @@ const app = (over: Partial<ApplicationDetail> = {}) => ({
 } as unknown as ApplicationDetail)
 
 const vac = (over: Partial<VacancyDetail> = {}) => ({
-  applicationsCount: 3, applicationsByPhase: { applied: 2, hired: 1 }, ...over,
+  applicationsCount: 3, applicationsByPhase: { applied: 2, hired: 1 }, applications: [], ...over,
 } as unknown as VacancyDetail)
 
 describe('CompetitionBlock', () => {
@@ -109,5 +120,62 @@ describe('CompetitionBlock', () => {
     render(<CompetitionBlock application={app({ vacancyId: 'v1' })} />)
     const link = screen.getByText(/competition\.total/)
     expect(link.closest('button')).not.toBeNull()
+  })
+})
+
+// SOLLICITANTEN-2 (Danny 21-08 ruling 3): the expandable list of the vacancy's
+// OTHER applicants. Measured data source: vacancy.applications — the SAME
+// GET /vacancies/{id} response the vacancy drawer's own ApplicantsTab reads —
+// so no second request is fired to expand; the toggle only reveals rows
+// already in memory (see the component's own doc comment).
+describe('CompetitionBlock · expandable other-applicants list (Danny 21-08 ruling 3)', () => {
+  // The application row shape (VacancyDetail.applications[number]) — cast once
+  // here so every fixture below stays a plain object literal.
+  const row = (over: Partial<VacancyDetail['applications'][number]>): VacancyDetail['applications'][number] => ({
+    id: over.id, candidateId: null, candidateName: '', candidateInitials: '',
+    phaseValue: null, phaseLabel: '', phaseColor: '', source: '', created: '', ...over,
+  })
+  const others = [
+    // eslint-disable-next-line no-restricted-syntax -- DATA fixture (a tenant lookup colour), not a UI colour choice
+    row({ id: 'a2', candidateId: 'c2', candidateName: 'Anna de Vries', candidateInitials: 'AV', phaseValue: 'invited', phaseLabel: 'Invited', phaseColor: '#8C86D9', source: 'Website' }),
+    // eslint-disable-next-line no-restricted-syntax -- DATA fixture (a tenant lookup colour), not a UI colour choice
+    row({ id: 'a3', candidateId: 'c3', candidateName: 'Bram Bakker', candidateInitials: 'BB', phaseValue: 'applied', phaseLabel: 'Applied', phaseColor: '#94A3B8', source: 'Indeed' }),
+  ]
+
+  it('is collapsed by default — no other-applicant row visible', () => {
+    mockUseApplicationVacancy.mockReturnValue({ vacancy: vac({ applications: [...others, row({ id: 1 })] }), loading: false, error: false })
+    render(<CompetitionBlock application={app()} />)
+    expect(screen.queryByText('Anna de Vries')).toBeNull()
+    expect(screen.getByRole('button', { name: /competition\.showList/ })).toBeInTheDocument()
+  })
+
+  it('expands to show one compact row per OTHER applicant, excluding this application itself', async () => {
+    const user = userEvent.setup()
+    mockUseApplicationVacancy.mockReturnValue({ vacancy: vac({ applications: [...others, row({ id: 1, candidateName: 'This applicant' })] }), loading: false, error: false })
+    render(<CompetitionBlock application={app({ id: 1 })} />)
+    await user.click(screen.getByRole('button', { name: /competition\.showList/ }))
+    expect(screen.getByText('Anna de Vries')).toBeInTheDocument()
+    expect(screen.getByText('Bram Bakker')).toBeInTheDocument()
+    // The current application's own row is filtered out, never listed as "other".
+    expect(screen.queryByText('This applicant')).toBeNull()
+    // Each row shows the phase as a StatusPill (soft chip), not a raw string.
+    expect(screen.getAllByText('Invited').length).toBeGreaterThan(0)
+    await user.click(screen.getByRole('button', { name: /competition\.hideList/ }))
+    expect(screen.queryByText('Anna de Vries')).toBeNull()
+  })
+
+  it('navigates to the clicked applicant via the same cross-record navigation the app uses elsewhere', async () => {
+    const user = userEvent.setup()
+    mockUseApplicationVacancy.mockReturnValue({ vacancy: vac({ applications: others }), loading: false, error: false })
+    render(<CompetitionBlock application={app()} />)
+    await user.click(screen.getByRole('button', { name: /competition\.showList/ }))
+    await user.click(screen.getByText('Anna de Vries'))
+    expect(openEntity).toHaveBeenCalledWith('applications', 'a2')
+  })
+
+  it('renders no expand toggle at all when there are no other applicants', () => {
+    mockUseApplicationVacancy.mockReturnValue({ vacancy: vac({ applications: [row({ id: 1 })] }), loading: false, error: false })
+    render(<CompetitionBlock application={app({ id: 1 })} />)
+    expect(screen.queryByRole('button', { name: /competition\.showList/ })).toBeNull()
   })
 })

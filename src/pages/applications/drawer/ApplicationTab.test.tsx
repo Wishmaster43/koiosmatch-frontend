@@ -322,3 +322,36 @@ describe('ApplicationTab', () => {
     })
   })
 })
+
+// Danny 21-08 ("Heel deze tab is anders dan de kandidaten of klant"): the tab's
+// block order now follows the DRILLDOWN-VOLGORDE-CANON — information cards
+// first, then the Match score block, then Andere sollicitanten, then the
+// Koios AI block, then Vestiging LAST.
+describe('ApplicationTab · drilldown-canon block order (Danny 21-08 ruling 4)', () => {
+  it('orders details card -> match score -> competition -> vestiging LAST', async () => {
+    // The linked vacancy carries a branch (vestiging) — the ONLY source
+    // ApplicationBranchSection can derive one from (see its own doc comment).
+    mockGet.mockImplementation((url: string) => String(url).includes('/vacancies/v9')
+      ? Promise.resolve({ data: { data: { id: 'v9', title: 'Chirurg', branch: { id: 'b1', name: 'Utrecht' }, applications: [] } } })
+      : Promise.resolve({ data: [] }))
+    renderTab(<ApplicationTab application={app({ vacancyId: 'v9', vacancyTitle: 'Chirurg', score: 75, matchCriteria: [] })} />)
+
+    const detailsTitle = screen.getByText('drawer.detailsTitle')
+    const matchScoreTitle = screen.getByText('matchScore.title')
+    // Both depend on the async vacancy fetch (React Query) to render at all.
+    const competitionTitle = await screen.findByText('competition.title')
+    const branchLabel = await screen.findByText('matchesView.branch')
+
+    expect(detailsTitle.compareDocumentPosition(matchScoreTitle) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
+    expect(matchScoreTitle.compareDocumentPosition(competitionTitle) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
+    expect(competitionTitle.compareDocumentPosition(branchLabel) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
+  })
+
+  // Ruling 4 / ApplicationBranchSection: an application with no linked vacancy
+  // has nothing to derive a branch from — the block renders nothing at all
+  // rather than a fake/empty vestiging block (§3 no fake affordance).
+  it('skips the vestiging block entirely when no vacancy is linked', () => {
+    renderTab(<ApplicationTab application={app({ vacancyId: null })} />)
+    expect(screen.queryByText('matchesView.branch')).toBeNull()
+  })
+})

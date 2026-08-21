@@ -227,7 +227,9 @@
     "cancel": "Annuler",
     "manualNote": "Ajusté manuellement · IA : {{score}}%",
     "detailsSoon": "Le détail des critères apparaît ici une fois le scoring configuré.",
-    "weightLabel": "Pondération"
+    "weightLabel": "Pondération",
+    "saveOverride": "Enregistrer le score",
+    "cancelOverride": "Annuler la modification du score"
   },
   "profile": {
     "function": "Fonction",
@@ -541,7 +543,6 @@
     "inProcess": "En traitement",
     "days": "{{count}} jours",
     "matchScore": "Score de match",
-    "notScored": "Pas encore noté",
     "nextAppointment": "Prochain rendez-vous",
     "noAppointment": "Aucun rendez-vous planifié",
     "interview": "Entretien",
@@ -565,7 +566,9 @@
     "total_one": "{{count}} candidat pour ce poste",
     "total_other": "{{count}} candidats pour ce poste",
     "inPhase_one": "Ce candidat est en phase {{phase}}, avec 1 autre.",
-    "inPhase_other": "Ce candidat est en phase {{phase}}, avec {{count}} autres."
+    "inPhase_other": "Ce candidat est en phase {{phase}}, avec {{count}} autres.",
+    "showList": "Afficher la liste",
+    "hideList": "Masquer la liste"
   },
   "filters": {
     "categories": {
