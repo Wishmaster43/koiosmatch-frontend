@@ -14,6 +14,7 @@
 import { useState, useRef, useEffect } from 'react'
 import type { ReactNode, KeyboardEvent } from 'react'
 import DrawerTabs from './DrawerTabs'
+import { DrawerPopoutRegistryProvider } from './DrawerPopoutRegistry'
 import ErrorBoundary from '../ui/ErrorBoundary'
 
 export interface EntityTab { id: string; label: ReactNode; badge?: string | number; autoExpand?: boolean; render: (setActiveTab?: (id: string) => void) => ReactNode }
@@ -80,6 +81,9 @@ export default function EntityDrawer({
   if (!entity) return null
 
   return (
+    // KLANTEN 5: popout windows opened from any tab close when THIS subtree
+    // unmounts (the drawer really closed) — see DrawerPopoutRegistry's header.
+    <DrawerPopoutRegistryProvider>
     <div ref={rootRef} onKeyDown={handleKeyDown}
       style={{ width: expanded ? widthExpanded : widthCollapsed, flexShrink: 0, height: '100%',
       borderLeft: '1px solid var(--border)', background: 'var(--surface)',
@@ -102,5 +106,6 @@ export default function EntityDrawer({
         <div style={{ padding: '8px 16px', borderTop: '1px solid var(--border)', flexShrink: 0 }}>{footer}</div>
       )}
     </div>
+    </DrawerPopoutRegistryProvider>
   )
 }

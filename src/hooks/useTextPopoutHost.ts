@@ -19,6 +19,7 @@ import { notifyError } from '@/lib/notify'
 import { openTextPopout, textPopoutTopic } from '@/lib/secondScreen'
 import type { PopoutEntity, PopoutTextField } from '@/lib/secondScreen'
 import { useTextPopoutSync } from './useTextPopoutSync'
+import { useDrawerPopoutRegistry } from '@/components/drawer/DrawerPopoutRegistry'
 
 interface TextPopoutHostOptions {
   entity: PopoutEntity
@@ -37,6 +38,8 @@ interface TextPopoutHostOptions {
 
 export function useTextPopoutHost({ entity, id, field, value, dirty, onDraft, onSaved }: TextPopoutHostOptions) {
   const { t } = useTranslation('common')
+  // Null outside any drawer (modal hosts) — then no auto-close, today's behaviour.
+  const registry = useDrawerPopoutRegistry()
   // Joined only after the user pops the field out (see `open` below).
   const [active, setActive] = useState(false)
   // Latest draft + its saved state for the `hello` reply — refs so the message
@@ -44,6 +47,7 @@ export function useTextPopoutHost({ entity, id, field, value, dirty, onDraft, on
   const valueRef = useRef(value)
   const dirtyRef = useRef(dirty)
   useEffect(() => { valueRef.current = value; dirtyRef.current = dirty })
+
 
   const post = useTextPopoutSync({
     topic: textPopoutTopic(entity, id, field),
@@ -61,8 +65,14 @@ export function useTextPopoutHost({ entity, id, field, value, dirty, onDraft, on
   // notice through the central error path instead of failing silently (§3).
   const open = useCallback(() => {
     setActive(true)
-    if (!openTextPopout(entity, id, field)) notifyError(t('popupBlocked'))
-  }, [entity, id, field, t])
+    const win = openTextPopout(entity, id, field)
+    if (!win) { notifyError(t('popupBlocked')); return }
+    // KLANTEN 5 (rebuilt after verify-round REJECT): the window joins the
+    // DRAWER's registry, so it closes when the drawer really closes — never on
+    // a mere tab switch (the host unmounts on every switch; a host-scoped
+    // close destroyed the second screen and its unsaved text on nine hosts).
+    registry?.register(win)
+  }, [entity, id, field, t, registry])
 
   // Mirror one local edit (typing, dictation, Koios assist) to the other window.
   const publishDraft = useCallback((html: string) => post({ kind: 'draft', html }), [post])
