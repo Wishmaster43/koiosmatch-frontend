@@ -212,6 +212,40 @@ export default function AddTaskModal({ onClose, onCreated, onSaved, initial, ext
   // The three dedicated relational pickers + their honest load state (§3: a
   // failed list used to be swallowed here and read as "no records" — see the hook).
   const linkOptions = useLinkOptions()
+  // KLANTEN 9-screenshot (21-08): een voorgevulde koppeling buiten de 200-cap
+  // van de optielijst toonde zijn RAUWE uuid als label. Resolve de naam per id
+  // en injecteer hem als optie — de kiezer toont dan altijd de naam.
+  const [resolvedOpts, setResolvedOpts] = useState<Record<string, { value: string; label: string }[]>>({})
+  useEffect(() => {
+    if (linkOptions.loading) return
+    const jobs: Array<[key: 'candidates' | 'customers' | 'contacts', id: string, url: string]> = []
+    const misses = (key: 'candidates' | 'customers' | 'contacts', id: string, url: string) => {
+      if (!id) return
+      const known = [...linkOptions[key], ...(resolvedOpts[key] ?? [])].some(o => String(o.value) === String(id))
+      if (!known) jobs.push([key, id, url])
+    }
+    misses('candidates', form.candidateId, `/candidates/${form.candidateId}`)
+    misses('customers', form.customerId, `/customers/${form.customerId}`)
+    misses('contacts', form.contactId, `/contacts/${form.contactId}`)
+    if (!jobs.length) return
+    let alive = true
+    Promise.all(jobs.map(async ([key, id, url]) => {
+      try {
+        const d = unwrap<{ name?: string; first_name?: string; last_name?: string }>(await api.get(url))
+        const label = d?.name ?? [d?.first_name, d?.last_name].filter(Boolean).join(' ')
+        return label ? { key, opt: { value: String(id), label } } : null
+      } catch { return null }
+    })).then(found => {
+      if (!alive) return
+      setResolvedOpts(prev => {
+        const next = { ...prev }
+        for (const f of found) if (f) next[f.key] = [...(next[f.key] ?? []), f.opt]
+        return next
+      })
+    })
+    return () => { alive = false }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- bewust smalle deps: her-runnen op resolvedOpts (eigen setState) zou loopen; de misses-check dedupliceert al tegen de actuele lijsten
+  }, [linkOptions.loading, form.candidateId, form.customerId, form.contactId])
 
   // Edit mode: GET the full task (description/links aren't on the row), then
   // prefill the form. A failed load means there is nothing sensible to edit —
@@ -391,7 +425,9 @@ export default function AddTaskModal({ onClose, onCreated, onSaved, initial, ext
                 teams={teams} teamsLoading={teamsLoading} teamsError={teamsError} onRetryTeams={retryTeams} />
             </div>
             <LinkCard t={t} form={form} set={set}
-              candidates={linkOptions.candidates} customers={linkOptions.customers} contacts={linkOptions.contacts}
+              candidates={[...linkOptions.candidates, ...(resolvedOpts.candidates ?? [])]}
+              customers={[...linkOptions.customers, ...(resolvedOpts.customers ?? [])]}
+              contacts={[...linkOptions.contacts, ...(resolvedOpts.contacts ?? [])]}
               optionsLoading={linkOptions.loading} optionsError={linkOptions.error} onRetryOptions={linkOptions.retry}
               lockCustomerId={lockCustomerId} lockCustomerName={lockCustomerName}
               extraLinks={otherLinks} onAddExtra={addOtherLink} onRemoveExtra={removeOtherLink} />

@@ -25,8 +25,10 @@ import DrawerAddButton from '@/components/drawer/DrawerAddButton'
 import AddLinkRow from '../links/AddLinkRow'
 import type { NewLink } from '../links/AddLinkRow'
 import { TASK_LINK_TYPES } from '../links/taskLinkTypes'
-import { cardHead, cardBox, row2, pickerStyle, PICKER_MENU_W } from './fields'
+import { cardHead, cardBox, pickerStyle, PICKER_MENU_W } from './fields'
 import type { TaskForm } from '../AddTaskModal'
+import Button from '@/components/ui/Button'
+import { Caption, GroupLabel } from '@/components/ui/typography'
 
 interface Opt { value: string; label: string }
 
@@ -58,7 +60,10 @@ export default function LinkCard({ t, form, set, candidates, customers, contacts
       <div style={cardBox}>
         {/* Gekoppeld record — candidate/customer/contact, each a searchable
             relational picker (allowCreate=false: a real id, never free-text). */}
-        <div style={row2}>
+        {/* KLANTEN 9-screenshot (21-08): geen row2 hier — de kaart leeft al in
+            een halve modalkolom, dus nóg eens halveren drukte de klant-kiezer
+            het scherm af (zelfde les als de postcode-rij). */}
+        <div>
           <FieldRow label={t('modal.candidate')}>
             <CreatableSelect value={form.candidateId || null} onChange={(v: string) => set('candidateId', v)} allowCreate={false}
               placeholder={t('modal.candidatePlaceholder')} style={pickerStyle} menuWidth={PICKER_MENU_W} options={candidates} />
@@ -90,21 +95,19 @@ export default function LinkCard({ t, form, set, candidates, customers, contacts
         {optionsError ? (
           <div role="alert" style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 11, color: 'var(--color-danger-text)' }}>
             <span>{t('links.loadError')}</span>
-            <button type="button" onClick={onRetryOptions}
-              style={{ background: 'none', border: '1px solid var(--border)', borderRadius: 6,
-                padding: '2px 8px', cursor: 'pointer', color: 'var(--text)' }}>{t('common:error.retry')}</button>
+            <Button type="button" variant="secondary" onClick={onRetryOptions}>{t('common:error.retry')}</Button>
           </div>
         ) : optionsLoading ? (
-          <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>{t('common:loading')}</div>
+          <Caption as="div">{t('common:loading')}</Caption>
         ) : null}
 
         {/* PUNT 15 — the rest of the shared vocabulary (afdeling, locatie, vacature,
             …). A real BUTTON opens the picker row, never coloured text (Danny 08-08). */}
         <div>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8, marginBottom: 6 }}>
-            <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+            <GroupLabel as="span" style={{ letterSpacing: '0.04em' }}>
               {t('modal.otherLinks')}
-            </span>
+            </GroupLabel>
             {!adding && <DrawerAddButton onClick={() => setAdding(true)} label={t('links.add')} />}
           </div>
           {adding && (
@@ -122,12 +125,10 @@ export default function LinkCard({ t, form, set, candidates, customers, contacts
                     color: 'var(--text-muted)', flexShrink: 0 }}>{t(`links.${l.type}`)}</span>
                   <span style={{ flex: 1, minWidth: 0, fontSize: 12, color: 'var(--text)', overflow: 'hidden',
                     textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{l.label || '—'}</span>
-                  <button type="button" onClick={() => onRemoveExtra({ type: l.type, id: l.id })}
-                    title={t('links.remove')} aria-label={t('links.remove')}
-                    style={{ width: 22, height: 22, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
-                      background: 'var(--color-danger-bg)', border: 'none', borderRadius: 6, color: 'var(--color-on-danger-bg)', cursor: 'pointer' }}>
+                  <Button type="button" variant="dangerSoft" iconOnly onClick={() => onRemoveExtra({ type: l.type, id: l.id })}
+                    title={t('links.remove')} aria-label={t('links.remove')} style={{ flexShrink: 0 }}>
                     <X size={12} />
-                  </button>
+                  </Button>
                 </div>
               ))}
             </div>
