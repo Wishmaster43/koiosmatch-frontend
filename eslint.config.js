@@ -389,4 +389,11 @@ export default defineConfig([
     },
   },
   ...crossEntityBlocks,
+  // api-generated.ts is MACHINE OUTPUT (openapi-typescript; pre-commit keeps it
+  // fresh, hand-editing is forbidden) — the §3 split trigger is a rule for code
+  // humans maintain, so max-lines is off here and only here.
+  {
+    files: ['src/types/api-generated.ts'],
+    rules: { 'max-lines': 'off' },
+  },
 ])

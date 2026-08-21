@@ -14,6 +14,7 @@ import api, { unwrapList } from '@/lib/api'
 import { useDateFormat } from '@/lib/datetime'
 import { buildFieldDiff } from '@/pages/settings/shared'
 import type { Id } from '@/types/common'
+import { Caption } from '@/components/ui/typography'
 
 interface ActivityEntry {
   id?: Id
@@ -28,7 +29,7 @@ interface ActivityEntry {
 // apikeys, …): those log via activity('<name>') WITHOUT performedOn, so their
 // subject_type is NULL — filtering on it returns nothing (verified 14-08,
 // ActivityLogController). Exactly one of the two must be given.
-export default function EntityChangelog({ subjectType, subjectId, logName }: { subjectType?: string; subjectId?: Id; logName?: string }) {
+export default function EntityChangelog({ subjectType, subjectId, logName, endpoint }: { subjectType?: string; subjectId?: Id; logName?: string; endpoint?: string }) {
   const { t } = useTranslation('settings')
   const { formatDateTime } = useDateFormat()
   const [items, setItems] = useState<ActivityEntry[]>([])
@@ -37,17 +38,20 @@ export default function EntityChangelog({ subjectType, subjectId, logName }: { s
   // One fetch per subject — the shared ChangelogPopover shell only mounts this
   // content while its panel is open. Aborted on subject change/unmount.
   useEffect(() => {
-    if (!subjectType && !logName) return
+    if (!subjectType && !logName && !endpoint) return
     const ctrl = new AbortController()
     const params: Record<string, string | Id> = subjectType ? { subject_type: subjectType } : { log_name: logName as string }
     if (subjectType && subjectId !== undefined && subjectId !== null) params.subject_id = subjectId
     setLoading(true)
-    api.get('/activity-log', { params, signal: ctrl.signal })
+    // F1c: an entity with a DEDICATED /…/activity route (same controller shape as
+    // /candidates|/vacancies) passes it via `endpoint`; params only apply to the
+    // generic /activity-log form.
+    api.get(endpoint ?? '/activity-log', endpoint ? { signal: ctrl.signal } : { params, signal: ctrl.signal })
       .then(res => setItems(unwrapList<ActivityEntry>(res).rows))
       .catch(() => { if (!ctrl.signal.aborted) setItems([]) })
       .finally(() => { if (!ctrl.signal.aborted) setLoading(false) })
     return () => ctrl.abort()
-  }, [subjectType, subjectId, logName])
+  }, [subjectType, subjectId, logName, endpoint])
 
   if (loading) return <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{t('audit.loading')}</div>
   if (items.length === 0) return <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{t('audit.noEntries')}</div>
@@ -58,10 +62,10 @@ export default function EntityChangelog({ subjectType, subjectId, logName }: { s
         const rows = buildFieldDiff(entry, t)
         return (
           <div key={entry.id ?? i} style={{ border: '1px solid var(--border)', borderRadius: 8, background: 'var(--bg)', padding: '9px 12px', marginBottom: 8 }}>
-            <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>
+            <Caption as="div">
               {entry.created_at ? formatDateTime(entry.created_at) : '—'}
               {' · '}{entry.causer_name ?? t('audit.system')}{' · '}{entry.description ?? entry.event ?? '—'}
-            </div>
+            </Caption>
             {rows.length > 0 ? (
               rows.map(row => (
                 <div key={row.field} style={{ display: 'flex', alignItems: 'center', gap: 10, marginTop: 5, fontSize: 12 }}>

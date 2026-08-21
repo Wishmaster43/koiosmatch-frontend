@@ -23,8 +23,13 @@ import { useDateFormat } from '@/lib/datetime'
 import { extractApiError } from '@/lib/extractApiError'
 import { useShiftEligibleCandidates, usePlanningCancellationReasons, useShiftStaffingMutations } from './hooks/useShiftStaffing'
 import type { PlanningBoardShift } from './hooks/usePlanningBoard'
+import ChangelogPopover from '@/components/drawer/ChangelogPopover'
+import EntityChangelog from '@/components/drawer/EntityChangelog'
+import { fieldInputStyle } from '@/components/forms/fieldMetrics'
+import { BodyText } from '@/components/ui/typography'
 
-const INPUT = { padding: '8px 11px', fontSize: 13, border: '1px solid var(--border)', borderRadius: 8,
+// Field faces come from fieldMetrics' canon (§4 2b) — never a local copy.
+const INPUT = { ...fieldInputStyle,
   outline: 'none', background: 'var(--bg)', color: 'var(--text)', width: '100%', boxSizing: 'border-box' } as const
 
 interface Props { shift: PlanningBoardShift; onClose: () => void }
@@ -89,11 +94,17 @@ export default function ShiftStaffingDrawer({ shift, onClose }: Props) {
     <FloatingPanel open onClose={onClose} ariaLabel={t('staffing.title')}
       persistKey="shift-staffing" width={640} maxWidth="92vw"
       header={
-        <div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
           <span style={{ fontSize: 14, fontWeight: 700, color: 'var(--text)' }}>{t('staffing.title')}</span>
-          <span style={{ fontSize: 12, color: 'var(--text-muted)', marginLeft: 10 }}>
+          <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>
             {shift.function || shift.shiftType || ''} · {formatDateTime(shift.startTime)}
           </span>
+          {/* F1c (heraudit): record history as the §3A(d) title-row ICON — the shared
+              popover over the shift's own activity route (CMBE bfe82882), the last
+              drawer that lacked it. */}
+          <ChangelogPopover>
+            <EntityChangelog endpoint={`/planning/shifts/${shift.id}/activity`} />
+          </ChangelogPopover>
         </div>
       }>
 
@@ -116,7 +127,7 @@ export default function ShiftStaffingDrawer({ shift, onClose }: Props) {
           {shift.assigned.map(a => (
             <div key={a.scheduleId} style={{ borderBottom: '1px solid var(--border)', padding: '8px 0' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                <span style={{ flex: 1, fontSize: 13, color: 'var(--text)' }}>{a.candidate || '—'}</span>
+                <BodyText as="span" style={{ flex: 1 }}>{a.candidate || '—'}</BodyText>
                 {a.status && a.status !== 'scheduled' && (
                   <span
                     // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- soft-tint status pill (§4 chip convention), not a Caption/label copy
@@ -200,7 +211,7 @@ export default function ShiftStaffingDrawer({ shift, onClose }: Props) {
             <div key={c.id} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 0', borderBottom: '1px solid var(--border)' }}>
               {c.favourite && <Star size={13} style={{ color: 'var(--color-warning)', flexShrink: 0 }} fill="var(--color-warning)" aria-label={t('staffing.favourite')} />}
               <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ fontSize: 13, color: 'var(--text)' }}>{c.firstName} {c.lastName}</div>
+                <BodyText as="div">{c.firstName} {c.lastName}</BodyText>
                 {c.reason && <Caption as="div">{c.reason}</Caption>}
               </div>
               <Button variant="primary" onClick={() => handleAssign(c.id)} disabled={assign.isPending}>

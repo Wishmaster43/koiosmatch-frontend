@@ -25,6 +25,17 @@ describe('EntityChangelog', () => {
     ))
   })
 
+  // F1c: an entity with a dedicated activity route passes it via `endpoint` —
+  // the request hits that URL verbatim, without /activity-log params.
+  it('requests the dedicated endpoint verbatim when given', async () => {
+    vi.mocked(api.get).mockResolvedValueOnce({ data: { data: [] } })
+    render(<EntityChangelog endpoint="/planning/shifts/7/activity" />)
+    await waitFor(() => expect(api.get).toHaveBeenCalled())
+    const [url, config] = vi.mocked(api.get).mock.calls[0]
+    expect(url).toBe('/planning/shifts/7/activity')
+    expect((config as { params?: unknown } | undefined)?.params).toBeUndefined()
+  })
+
   it('omits subject_id when not given (type-only filter, e.g. Settings)', async () => {
     vi.mocked(api.get).mockResolvedValue({ data: [] })
     render(<EntityChangelog subjectType="Setting" />)
