@@ -29,7 +29,7 @@
 // only ever appears in TEXT_POPOUT_PAGES below, never in NotesPopoutPage's
 // dispatch — the same asymmetry `application` already has in the other
 // direction (a notes thread, no text-field entry).
-export type PopoutEntity = 'candidate' | 'customer' | 'vacancy' | 'application' | 'outreachTarget'
+export type PopoutEntity = 'candidate' | 'customer' | 'vacancy' | 'application' | 'outreachTarget' | 'match'
 
 /**
  * Feature string for every second-screen window this app opens, sized to the
@@ -162,7 +162,7 @@ export function openNoteEditPopout(entity: PopoutEntity, id: string | number, no
 // 'outreachTarget'; no standalone `GET /outreach-targets/{id}` exists (measured
 // — routes/api/tenant/tasks-outreach.php only wires PATCH), so this field's `id`
 // is the COMPOSITE `outreachTargetPopoutId()` below, mirroring `departmentText`.
-export type PopoutTextField = 'summary' | 'matchRemarks' | 'companyText' | 'departmentText' | 'description' | 'locationText' | 'targetNote'
+export type PopoutTextField = 'summary' | 'matchRemarks' | 'companyText' | 'departmentText' | 'description' | 'locationText' | 'targetNote' | 'text'
 
 // K5a: encodes/decodes the composite id `departmentText` travels under —
 // `<customerId>:<departmentId>` — so ONE string still fits the existing

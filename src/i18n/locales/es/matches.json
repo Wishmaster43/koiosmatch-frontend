@@ -269,5 +269,9 @@
     "reasons": {
       "endDateApproaching": "La fecha de fin del contrato se acerca o ya pasó. Considera renovarlo."
     }
+  },
+  "popout": {
+    "textWindowTitle": "Texto del match — {{name}}",
+    "loadError": "No se pudo cargar este match."
   }
 }

@@ -42,11 +42,14 @@
 import { useState, useEffect } from 'react'
 import type { ComponentType } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Edit2, Save, X } from 'lucide-react'
+import { Edit2, Save, X, ExternalLink } from 'lucide-react'
 import RichTextEditorJs from '@/components/ui/RichTextEditor'
 import SafeHtmlJs from '@/components/ui/SafeHtml'
 import Button from '@/components/ui/Button'
+import { GroupLabel } from '@/components/ui/typography'
 import { notifySuccess, notifyError } from '@/lib/notify'
+import { useTextPopoutHost } from '@/hooks/useTextPopoutHost'
+import type { Id } from '@/types/common'
 import type { MatchContract } from '../hooks/useMatchContract'
 
 type AnyProps = Record<string, unknown>
@@ -55,6 +58,8 @@ const RichTextEditor = RichTextEditorJs as unknown as ComponentType<AnyProps>
 const SafeHtml = SafeHtmlJs as unknown as ComponentType<AnyProps>
 
 interface Props {
+  // For the second-screen popout (TEKST-POPOUT-1) — the match this text belongs to.
+  matchId?: Id
   value: string | null | undefined
   // Whether the GET /matches/{id} payload actually carried the `match_text`
   // key — false hides the whole block (OFFERED-IFF-READ, see file header).
@@ -63,7 +68,7 @@ interface Props {
   save: (patch: Partial<MatchContract>) => Promise<void>
 }
 
-export default function MatchTextBlock({ value, present, loading, save }: Props) {
+export default function MatchTextBlock({ matchId, value, present, loading, save }: Props) {
   const { t } = useTranslation('matches')
 
   const [editing, setEditing] = useState(false)
@@ -71,12 +76,26 @@ export default function MatchTextBlock({ value, present, loading, save }: Props)
   // grows the editor's min-height 120→320 via RichTextEditor's own expanded prop.
   const [expanded, setExpanded] = useState(false)
   const [draft, setDraft] = useState('')
+  // What the read-only branch shows: follows the prop, but a save from the
+  // popped-out window updates it immediately (the prop only refreshes on the
+  // next contract fetch) — mirrors useVacancyDescription's savedDescription.
+  const [shown, setShown] = useState<string | null | undefined>(value)
   // Seed the draft once the fetch resolves (not on every render) — mirrors
   // MatchRemarksBlock's uncontrolled-then-synced pattern for a detail-only field.
-  useEffect(() => { if (!loading) setDraft(value ?? '') }, [loading, value])
+  useEffect(() => { if (!loading) { setShown(value); setDraft(value ?? '') } }, [loading, value])
 
-  const startEdit  = () => { setDraft(value ?? ''); setEditing(true) }
-  const cancelEdit = () => { setDraft(value ?? ''); setEditing(false) }
+  // TEKST-POPOUT-1: the profile-text second-screen affordance, one shared draft
+  // between drawer and popped-out window (mirrors useVacancyDescription).
+  const popout = useTextPopoutHost({
+    entity: 'match', id: matchId != null ? String(matchId) : '', field: 'text', value: draft, dirty: editing && draft !== (shown ?? ''),
+    onDraft: (html: string) => { setDraft(html); setEditing(true) },
+    onSaved: (html: string) => { setDraft(html); setShown(html); setEditing(false) },
+  })
+  const changeDraft = (html: string) => { setDraft(html); popout.publishDraft(html) }
+  const openPopout = () => { if (matchId == null) return; setEditing(true); popout.open() }
+
+  const startEdit  = () => { setDraft(shown ?? ''); setEditing(true) }
+  const cancelEdit = () => { setDraft(shown ?? ''); setEditing(false) }
   const saveEdit = async () => {
     try {
       await save({ match_text: draft || null })
@@ -97,7 +116,7 @@ export default function MatchTextBlock({ value, present, loading, save }: Props)
   return (
     <div>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
-        <span style={{ fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em', color: 'var(--text-muted)' }}>{t('drawer.matchText.title')}</span>
+        <GroupLabel>{t('drawer.matchText.title')}</GroupLabel>
         {editing ? (
           <div style={{ display: 'flex', gap: 4 }}>
             <Button variant="primary" iconOnly size="sm" onClick={saveEdit} title={t('common:save')} aria-label={t('common:save')}>
@@ -108,18 +127,26 @@ export default function MatchTextBlock({ value, present, loading, save }: Props)
             </Button>
           </div>
         ) : (
+          <div style={{ display: 'flex', gap: 4 }}>
+          {matchId != null && (
+            <Button variant="secondary" iconOnly size="sm" onClick={openPopout}
+              title={t('common:openSecondScreen')} aria-label={t('common:openSecondScreen')}>
+              <ExternalLink size={13} />
+            </Button>
+          )}
           <Button variant="secondary" iconOnly size="sm" onClick={startEdit} title={t('common:edit')} aria-label={t('common:edit')}>
             <Edit2 size={13} />
           </Button>
+          </div>
         )}
       </div>
       {loading ? (
         <div style={{ ...blockStyle, padding: '10px 12px', fontSize: 12, color: 'var(--text-muted)' }}>{t('drawer.contract.loading')}</div>
       ) : editing ? (
-        <RichTextEditor value={draft} onChange={setDraft} expanded={expanded} onToggleExpand={() => setExpanded(v => !v)} />
-      ) : value ? (
+        <RichTextEditor value={draft} onChange={changeDraft} expanded={expanded} onToggleExpand={() => setExpanded(v => !v)} />
+      ) : shown ? (
         <div style={{ ...blockStyle, padding: '10px 12px', maxHeight: 220, overflow: 'auto' }}>
-          <SafeHtml html={value} style={{ fontSize: 12, color: 'var(--text)', lineHeight: 1.5 }} />
+          <SafeHtml html={shown} style={{ fontSize: 12, color: 'var(--text)', lineHeight: 1.5 }} />
         </div>
       ) : (
         <div style={{ ...blockStyle, padding: '10px 12px', fontSize: 12, color: 'var(--text-muted)' }}>—</div>

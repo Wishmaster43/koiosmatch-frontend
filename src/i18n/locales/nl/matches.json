@@ -269,5 +269,9 @@
     "reasons": {
       "endDateApproaching": "De einddatum van het contract nadert of is verstreken. Overweeg verlenging."
     }
+  },
+  "popout": {
+    "textWindowTitle": "Matchtekst — {{name}}",
+    "loadError": "Deze match kon niet worden geladen."
   }
 }

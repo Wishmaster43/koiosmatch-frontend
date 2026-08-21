@@ -35,6 +35,9 @@
 import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import SectionCard from '@/components/ui/SectionCard'
+import { CANON_LABEL_STYLE } from '@/components/drawer/fieldRowCanon'
+import SharedBranchSection from '@/components/drawer/BranchSection'
+import { Caption } from '@/components/ui/typography'
 import { useDateFormat } from '@/lib/datetime'
 import StatusPill from '@/components/ui/StatusPill'
 import EntityLink from '@/components/ui/EntityLink'
@@ -52,13 +55,14 @@ import MatchRemarksBlock from './MatchRemarksBlock'
 import type { MatchRow } from '@/types/match'
 import type { MatchOrdinals } from '../matchOrdinals'
 
-// One read-only field: label above, value below (§3B field layout).
-// Canon (05-08): label 11px muted, value 12px (candidate FieldRow convention).
+// One read-only field row: label LEFT (canon width), value right — the
+// DRILLDOWN-VOLGORDE-CANON (Danny 21-08 "tekst links waarde rechts") applied:
+// the same EditableFieldTable/FieldRow look every candidate card uses.
 function Field({ label, children }: { label: string; children: ReactNode }) {
   return (
-    <div style={{ minWidth: 0 }}>
-      <div style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 4 }}>{label}</div>
-      <div style={{ fontSize: 12, color: 'var(--text)', wordBreak: 'break-word' }}>{children}</div>
+    <div style={{ display: 'flex', alignItems: 'center', gap: 12, minHeight: 26 }}>
+      <span style={CANON_LABEL_STYLE}>{label}</span>
+      <div style={{ flex: 1, minWidth: 0, fontSize: 12, color: 'var(--text)', wordBreak: 'break-word' }}>{children}</div>
     </div>
   )
 }
@@ -118,8 +122,7 @@ export default function OverviewTab({ match, onSetStatus, onUpdate, ordinals, on
           SectionCard — same border/radius, --surface background, grey uppercase
           title outside the block — exactly like every other drawer. */}
       <SectionCard title={t('drawer.sectionDetails')}>
-        {/* Two-column grid; short fields pair up (§3B) */}
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px 16px' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
           <Field label={t('drawer.fields.candidate')}>
             {match.candidate && match.candidate !== '—'
               ? <EntityLink page="candidates" id={match.candidateId} title={t('drawer.openCandidate')}>{match.candidate}</EntityLink>
@@ -160,9 +163,6 @@ export default function OverviewTab({ match, onSetStatus, onUpdate, ordinals, on
               elapsed/remaining, never the dates themselves. */}
           <Field label={t('drawer.contract.startDate')}>{match.startDate ? formatDate(match.startDate) : dash}</Field>
           <Field label={t('drawer.contract.endDate')}>{match.endDate ? formatDate(match.endDate) : dash}</Field>
-          {/* M19: vestiging — reuses the existing matchesView.branch label (candidates
-            namespace) instead of a new duplicate key, mirroring how MatchCard already labels it. */}
-          <Field label={t('candidates:matchesView.branch')}>{textOrDash(match.branchName ?? '')}</Field>
         </div>
         {/* MATCH-ORDINAL-1 (M14/M15): this match's position among the tenant's
             other matches sharing the same candidate/client/location/department —
@@ -170,7 +170,7 @@ export default function OverviewTab({ match, onSetStatus, onUpdate, ordinals, on
         {ordinalLines.length > 0 && (
           <div style={{ marginTop: 14, paddingTop: 12, borderTop: '1px solid var(--border)', display: 'flex', flexDirection: 'column', gap: 4 }}>
             {ordinalLines.map((line, i) => (
-              <div key={i} style={{ fontSize: 11, color: 'var(--text-muted)' }}>{line}</div>
+              <Caption as="div" key={i}>{line}</Caption>
             ))}
           </div>
         )}
@@ -185,7 +185,7 @@ export default function OverviewTab({ match, onSetStatus, onUpdate, ordinals, on
           never a blank card — an unconfigured integration/never-synced match just
           reads as an honest dash, not an error. */}
       <SectionCard title={t('drawer.detailSection')}>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px 16px' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
           <Field label={t('drawer.contract.hoursPerWeek')}>
             {contractLoading ? dash : (contract.hours_per_week != null ? contract.hours_per_week : dash)}
           </Field>
@@ -201,16 +201,18 @@ export default function OverviewTab({ match, onSetStatus, onUpdate, ordinals, on
         </div>
       </SectionCard>
 
-      {/* M18: Koios AI advice — the table-identical advice row first (KOIOS-ADVIES-
-          OVERAL-1; [] when there is none), then the score/contract-window heuristics. */}
-      <KoiosAdviceBlock namespace="matches"
-        insights={[...adviceInsightRows(resolveAdvice(match)), ...buildMatchAdviceInsights(match, t)]} />
-
+      {/* DRILLDOWN-VOLGORDE-CANON (Danny 21-08): informatie → TEKST met pop-out
+          → Koios AI → vestiging. De matchtekst staat dus vóór het Koios-blok. */}
       {/* M17/optie A: Matchtekst — OFFERED-IFF-READ, hidden until the backend
           payload actually carries the `match_text` key (see file header). Koios
           assist + dictation ride the editor's own toolbar (RichTextAssistBar),
           so no per-block AI wiring is needed here anymore. */}
-      <MatchTextBlock value={contract.match_text} present={matchTextPresent} loading={contractLoading} save={saveContract} />
+      <MatchTextBlock matchId={match.id} value={contract.match_text} present={matchTextPresent} loading={contractLoading} save={saveContract} />
+
+      {/* M18: Koios AI advice — the table-identical advice row first (KOIOS-ADVIES-
+          OVERAL-1; [] when there is none), then the score/contract-window heuristics. */}
+      <KoiosAdviceBlock namespace="matches"
+        insights={[...adviceInsightRows(resolveAdvice(match)), ...buildMatchAdviceInsights(match, t)]} />
 
       {/* REMARKS-INTO-NOTES-1: the retired Opmerkingen field. Mounted only while it
           still holds content (read-only + move-into-notes), so Matchtekst above is
@@ -221,6 +223,12 @@ export default function OverviewTab({ match, onSetStatus, onUpdate, ordinals, on
         <MatchRemarksBlock remarks={contract.remarks} loading={contractLoading} save={saveContract}
           matchId={match.id} onOpenNotes={onOpenNotes} />
       ) : null}
+
+      {/* DRILLDOWN-VOLGORDE-CANON: vestiging LAST — the shared branch block in
+          display-only mode (M19 label reuse from the candidates namespace). */}
+      <SharedBranchSection readOnly label={t('candidates:matchesView.branch')}
+        emptyLabel={t('candidates:sections.branchEmpty')}
+        branches={match.branchName ? [{ name: match.branchName }] : []} />
     </div>
   )
 }

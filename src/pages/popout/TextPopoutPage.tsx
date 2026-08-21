@@ -26,6 +26,7 @@ import { CustomerLocationTextPopout } from '@/pages/customers/shared'
 // V-desc-1: the vacancy description popout lives under pages/vacancies/popout
 // (this task's own folder scope), not here — this dispatcher only imports it.
 import { VacancyDescriptionPopout } from '@/pages/vacancies/shared'
+import { MatchTextPopout } from '@/pages/matches/shared'
 // BELLIJST-NOTE-POPOUT-1: the outreach (call-list) target note popout lives
 // under pages/outreach/popout (this task's own folder scope), not here.
 import { OutreachTargetNotePopout } from '@/pages/outreach/shared'
@@ -39,6 +40,7 @@ const TEXT_POPOUT_PAGES: Record<string, ComponentType<{ id: string | undefined }
   'customer:departmentText': CustomerDepartmentTextPopout,
   'customer:locationText': CustomerLocationTextPopout,
   'vacancy:description': VacancyDescriptionPopout,
+  'match:text': MatchTextPopout,
   'outreachTarget:targetNote': OutreachTargetNotePopout,
 }
 

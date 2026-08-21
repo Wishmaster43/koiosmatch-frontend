@@ -14,12 +14,16 @@ interface BranchSectionProps {
   // Already-translated strings (§5): each caller supplies its own namespace so
   // this shared component never hardcodes one entity's i18n keys.
   label: string
-  addLabel: string
+  addLabel?: string
   emptyLabel: string
-  options: BranchOption[]
-  selectedIds: string[]
+  options?: BranchOption[]
+  selectedIds?: string[]
   branches: EntityBranch[]
-  onToggle: (id: string) => void
+  onToggle?: (id: string) => void
+  // Display-only mode (match drawer): the entity's branch DERIVES from its links
+  // and has no membership routes — hide the add trigger and the remove × so the
+  // block never offers a coupling that cannot persist (§3 no fake affordances).
+  readOnly?: boolean
 }
 
 /**
@@ -34,7 +38,7 @@ interface BranchSectionProps {
  * VESTIGING-2 fase 4's dedicated GET/POST/DELETE), so this component never
  * assumes how an entity persists the coupling.
  */
-export default function BranchSection({ label, addLabel, emptyLabel, options, selectedIds, branches, onToggle }: BranchSectionProps) {
+export default function BranchSection({ label, addLabel, emptyLabel, options, selectedIds, branches, onToggle, readOnly }: BranchSectionProps) {
   const { t } = useTranslation('common')
   return (
     <div>
@@ -43,8 +47,10 @@ export default function BranchSection({ label, addLabel, emptyLabel, options, se
       <div style={{ display: 'flex', alignItems: 'center',
         justifyContent: label ? 'space-between' : 'flex-end', marginBottom: 6 }}>
         {label ? <div style={cardHead}>{label}</div> : null}
-        <SearchSelect triggerLabel={addLabel} options={options} selected={selectedIds} onToggle={onToggle}
-          menuAlign="right" renderTrigger={(toggleOpen: () => void) => <DrawerAddButton onClick={toggleOpen} label={addLabel} />} />
+        {!readOnly && (
+          <SearchSelect triggerLabel={addLabel} options={options ?? []} selected={selectedIds ?? []} onToggle={onToggle ?? (() => {})}
+            menuAlign="right" renderTrigger={(toggleOpen: () => void) => <DrawerAddButton onClick={toggleOpen} label={addLabel} />} />
+        )}
       </div>
       <div style={cardBox}>
         {branches.length > 0 ? (
@@ -55,8 +61,11 @@ export default function BranchSection({ label, addLabel, emptyLabel, options, se
                 <span key={id} style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 11, padding: '3px 8px',
                   borderRadius: 6, border: '1px solid var(--border)', background: 'var(--bg)', color: 'var(--text)' }}>
                   {b.name}
-                  <button onClick={() => onToggle(id)} aria-label={t('remove')}
-                    style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: 0, lineHeight: 1, fontSize: 14 }}>×</button>
+                  {!readOnly && (
+                    <button onClick={() => onToggle?.(id)} aria-label={t('remove')}
+                      // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- bare × INSIDE a chip: a nested Button would paint a second face inside the chip (PoolsSection precedent)
+                      style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: 0, lineHeight: 1, fontSize: 14 }}>×</button>
+                  )}
                 </span>
               )
             })}

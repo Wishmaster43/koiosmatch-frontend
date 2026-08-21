@@ -269,5 +269,9 @@
     "reasons": {
       "endDateApproaching": "The contract end date is approaching or has passed. Consider renewing."
     }
+  },
+  "popout": {
+    "textWindowTitle": "Match text — {{name}}",
+    "loadError": "This match could not be loaded."
   }
 }

@@ -384,8 +384,6 @@
   "src/pages/matches/drawer/MatchContractSection.tsx": 2,
   "src/pages/matches/drawer/MatchDurationBar.tsx": 3,
   "src/pages/matches/drawer/MatchRemarksBlock.tsx": 7,
-  "src/pages/matches/drawer/MatchTextBlock.tsx": 1,
-  "src/pages/matches/drawer/OverviewTab.tsx": 2,
   "src/pages/matches/drawer/RenewMatchModal.tsx": 2,
   "src/pages/matches/MatchCard.tsx": 4,
   "src/pages/matches/MatchDrawer.tsx": 5,

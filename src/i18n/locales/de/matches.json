@@ -269,5 +269,9 @@
     "reasons": {
       "endDateApproaching": "Das Vertragsende naht oder ist bereits verstrichen. Verlängerung erwägen."
     }
+  },
+  "popout": {
+    "textWindowTitle": "Matchtext — {{name}}",
+    "loadError": "Dieser Match konnte nicht geladen werden."
   }
 }

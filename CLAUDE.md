@@ -206,6 +206,21 @@ surface, built from the same shared parts** — an `<Entity>Page` composing an
 > active** (Settings-driven). If the candidate feature and an entity disagree, the candidate
 > feature wins and the entity is brought in line.
 
+**DRILLDOWN-VOLGORDE-CANON (Danny 21-08, na twee gemiste rondes op de match-drilldown:
+"We hebben een volgorde … neem het nu eens goed op!!").** De overzichtstab van ELKE
+entity-drilldown volgt één vaste blokvolgorde, de kandidaat-volgorde: (1) **INFORMATIE**
+— de veldenkaarten; (2) de **VRIJE TEKST** van de entiteit (profieltekst / vacaturetekst /
+matchtekst / bedrijfstekst), gebouwd "zoals de profieltekst": rich text mét het
+second-screen-pop-out-icoon (TEKST-POPOUT-1-recept, registratie in
+`pages/popout/TextPopoutPage.tsx`); (3) het **KOIOS AI**-blok; (4) **VESTIGING** als
+LAATSTE blok — het gedeelde `components/drawer/BranchSection` (met `readOnly` wanneer de
+koppeling afgeleid is en er geen membership-routes zijn, §3 geen nep-affordance). En BINNEN
+de veldenkaarten: **LABEL LINKS, WAARDE RECHTS** (`CANON_LABEL_STYLE` ~120px, de
+EditableFieldTable/FieldRow-look) — nooit label-boven-waarde, nooit een per-scherm
+labelbreedte. Een drilldown die hiervan afwijkt zonder geschreven reden is een finding;
+de match-drilldown (`pages/matches/drawer/OverviewTab.tsx`) is naast de kandidaat de
+tweede referentie-implementatie.
+
 **Table** — `<Entity>Table` only declares **columns** and hands them to the shared
 `components/ui/DataTable` (sorting, selection, loading/empty/row-click live there). Cells
 reuse `Avatar`, `StatusPill` and the soft-chip convention. No table chrome re-implemented.
