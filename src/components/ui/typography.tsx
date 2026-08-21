@@ -22,6 +22,8 @@ interface TypoProps {
   style?: CSSProperties
   id?: string
   title?: string
+  // as='label' hosts (POP-UPS 4-veeg): the atom must reach the field it names.
+  htmlFor?: string
 }
 
 const make = (defaults: CSSProperties, defaultTag: ElementType) =>

@@ -88,6 +88,7 @@ import { useRichTextAssist } from './richtext/useRichTextAssist'
 import { appendDictatedText, applyRichTextAssist, hasPlainText } from './richtext/richTextAssistApply'
 import type { GenerateEntity, RichTextAssistMode } from './richtext/richTextAssistApi'
 import Spinner from './Spinner'
+import { Caption } from './typography'
 
 // See the LAZY EXECUTE WIZARD docblock note above for why this is lazy, not a
 // plain static import.
@@ -96,6 +97,10 @@ const AssistActionsResultsPanel = lazy(() => import('./richtext/AssistActionsRes
 interface RichTextAssistBarProps {
   // The field's CURRENT html — what dictation appends to and what assist runs over.
   value: string
+  // POP-UPS 4 (walkthrough 21-08): plain-text host (a reason <textarea> whose
+  // storage is plain, not HTML) — dictation appends RAW text. Only meaningful
+  // with modes=[] (assist modes produce HTML and stay off plain hosts).
+  plainText?: boolean
   onChange: (html: string) => void
   // Dictation + spellcheck language (2-letter code) — the editor's own picker.
   language?: string
@@ -122,7 +127,7 @@ const MODES: { mode: RichTextAssistMode; icon: typeof Wand2 }[] = [
 ]
 
 
-export default function RichTextAssistBar({ value, onChange, language, modes = ['improve', 'summarize'], generate }: RichTextAssistBarProps) {
+export default function RichTextAssistBar({ value, onChange, plainText = false, language, modes = ['improve', 'summarize'], generate }: RichTextAssistBarProps) {
   const { t } = useTranslation('common')
   const { mode, status, result, errorMessage, tone, run, runGenerate, discard } = useRichTextAssist(language)
   const hasModes = modes.length > 0
@@ -136,7 +141,9 @@ export default function RichTextAssistBar({ value, onChange, language, modes = [
 
   // Append one recognised dictation chunk — escaped, continuing the last
   // paragraph, never replacing what the user already wrote.
-  const appendVoiceText = (chunk: string) => onChange(appendDictatedText(value, chunk))
+  const appendVoiceText = (chunk: string) => onChange(plainText
+    ? (value ? value.replace(/\s+$/, '') + ' ' + chunk : chunk)
+    : appendDictatedText(value, chunk))
 
   // "Overnemen" — apply per-mode semantics (replace/append), then clear the
   // suggestion so a stale result can never be applied twice.
@@ -193,7 +200,7 @@ export default function RichTextAssistBar({ value, onChange, language, modes = [
               hover-only tooltip alone (§3). Only applies to the text modes:
               generate needs no existing text, so it stays out of this gate. */}
           {!hasText && hasModes && (
-            <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>{t('notesAssist.needsText')}</div>
+            <Caption as="div">{t('notesAssist.needsText')}</Caption>
           )}
 
           {/* Failure — the server's own pointable message; budget/unconfigured

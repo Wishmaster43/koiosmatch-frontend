@@ -8,15 +8,16 @@ import { notifySuccess, notifyError } from '@/lib/notify'
 import { extractApiError } from '@/lib/extractApiError'
 import { useMatchStopReasons } from '../hooks/useMatchStopReasons'
 import { useMatchTerminate } from '../hooks/useMatchTerminate'
-import { fieldInputStyle, fieldTextareaStyle } from '@/components/forms/fieldMetrics'
+import { fieldInputStyle } from '@/components/forms/fieldMetrics'
 import type { MatchRow } from '@/types/match'
 import Button from '@/components/ui/Button'
+import DictationTextarea from '@/components/forms/DictationTextarea'
+import { PageTitle, Caption } from '@/components/ui/typography'
 
 // Canon field style (G33/fieldMetrics) — was its own padding-8/radius-8 copy;
-// fieldBox covers the single-line date input + the disabled-lookup notice,
-// noteBox covers the multi-line textarea below (height doesn't apply there).
+// fieldBox covers the single-line date input + the disabled-lookup notice;
+// the note field is the shared DictationTextarea (POP-UPS 4) with its own canon.
 const fieldBox: CSSProperties = fieldInputStyle
-const noteBox: CSSProperties = fieldTextareaStyle
 const errorText: CSSProperties = { fontSize: 11, color: 'var(--color-danger-text)', marginTop: 4 }
 const NOTE_MAX = 2000
 const NOTE_COUNTER_FROM = 1800
@@ -93,7 +94,7 @@ export default function TerminateMatchModal({ match, onClose, onUpdate }: Props)
         <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>
           <span style={{ display: 'inline-flex', width: 30, height: 30, borderRadius: 8, alignItems: 'center', justifyContent: 'center',
             background: 'var(--color-danger-bg)', color: 'var(--color-on-danger-bg)' }}><Ban size={16} /></span>
-          <span style={{ fontSize: 15, fontWeight: 700, color: 'var(--text)' }}>{t('drawer.terminate.modalTitle')}</span>
+          <PageTitle as="span" style={{ fontWeight: 700 }}>{t('drawer.terminate.modalTitle')}</PageTitle>
         </span>
       }>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
@@ -101,7 +102,7 @@ export default function TerminateMatchModal({ match, onClose, onUpdate }: Props)
               picked, never free-typed). No seed fallback: an honest disabled
               notice replaces the picker when the tenant hasn't configured any yet. */}
           <div>
-            <div style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 5 }}>{t('drawer.terminate.reasonLabel')}</div>
+            <Caption as="div" style={{ marginBottom: 5 }}>{t('drawer.terminate.reasonLabel')}</Caption>
             {noReasonsConfigured ? (
               <div style={{ ...fieldBox, color: 'var(--text-muted)', fontStyle: 'italic', cursor: 'default' }}>
                 {t('drawer.terminate.noReasonsConfigured')}
@@ -116,7 +117,7 @@ export default function TerminateMatchModal({ match, onClose, onUpdate }: Props)
 
           {/* Effective date — defaults to today, the recruiter can back/forward-date it. */}
           <div>
-            <div style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 5 }}>{t('drawer.terminate.effectiveDateLabel')}</div>
+            <Caption as="div" style={{ marginBottom: 5 }}>{t('drawer.terminate.effectiveDateLabel')}</Caption>
             <input type="date" value={effectiveDate} onChange={e => setEffectiveDate(e.target.value)}
               aria-label={t('drawer.terminate.effectiveDateLabel')} style={fieldBox} />
             {fieldErrors.effective_date && <div style={errorText}>{fieldErrors.effective_date}</div>}
@@ -126,14 +127,14 @@ export default function TerminateMatchModal({ match, onClose, onUpdate }: Props)
               exception as DetachReasonModal/StatusReasonModal — never rich text). */}
           <div>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 5 }}>
-              <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>{t('drawer.terminate.noteLabel')}</span>
+              <Caption>{t('drawer.terminate.noteLabel')}</Caption>
               {note.length > NOTE_COUNTER_FROM && (
                 <span style={{ fontSize: 10, color: 'var(--text-muted)' }}>{t('drawer.terminate.noteCounter', { count: note.length, max: NOTE_MAX })}</span>
               )}
             </div>
-            <textarea value={note} maxLength={NOTE_MAX} onChange={e => setNote(e.target.value)}
-              placeholder={t('drawer.terminate.notePlaceholder')} rows={3}
-              aria-label={t('drawer.terminate.noteLabel')} style={noteBox} />
+            {/* POP-UPS 4: de toelichting krijgt de house-mic (plain-text dictatie). */}
+            <DictationTextarea value={note} rows={3} onChange={v => setNote(v.slice(0, NOTE_MAX))}
+              placeholder={t('drawer.terminate.notePlaceholder')} aria-label={t('drawer.terminate.noteLabel')} />
             {fieldErrors.note && <div style={errorText}>{fieldErrors.note}</div>}
           </div>
         </div>

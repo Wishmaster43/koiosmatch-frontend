@@ -37,6 +37,7 @@ import { useCreatePlanningOrder, useUpdatePlanningOrder } from './hooks/usePlann
 import type { PlanningOrderInput, PlanningOrderRow } from './hooks/usePlanningOrders'
 import { extractApiError } from '@/lib/extractApiError'
 import Button from '@/components/ui/Button'
+import DictationTextarea from '@/components/forms/DictationTextarea'
 
 // The three status values PlanningOrder::STATUSES accepts — a fixed backend enum
 // (not yet a tenant lookup), so the values stay literal but every LABEL still runs
@@ -203,12 +204,13 @@ export default function AddOrderModal({ onClose, onCreated, order }: { onClose: 
             <div style={cardBox}>
               <div style={cardHead}>{t('notes')}</div>
               <FieldRow label={t('order.fDescription')}>
-                <textarea style={{ ...inputStyle, height: 60, resize: 'none' as const }} value={form.description}
-                  onChange={e => set('description', e.target.value)} />
+                {/* POP-UPS 4: omschrijving krijgt de house-mic (plain-text dictatie). */}
+                <DictationTextarea value={form.description} rows={2} style={{ resize: 'none' }}
+                  onChange={v => set('description', v)} aria-label={t('order.fDescription')} />
               </FieldRow>
               <FieldRow label={t('notes')}>
-                <textarea style={{ ...inputStyle, height: 60, resize: 'none' as const }} value={form.notes}
-                  onChange={e => set('notes', e.target.value)} />
+                <DictationTextarea value={form.notes} rows={2} style={{ resize: 'none' }}
+                  onChange={v => set('notes', v)} aria-label={t('notes')} />
               </FieldRow>
             </div>
           </div>
