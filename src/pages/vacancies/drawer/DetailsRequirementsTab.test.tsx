@@ -6,7 +6,7 @@
  *
  * DRILLDOWN-VOLGORDE-CANON (Danny 21-08, VACATURES 4): the required-skills
  * list moved off this component onto DescriptionTab (under the vacancy text) —
- * its own RequiredSkillsSection.test.tsx and DescriptionTab.test.tsx now cover
+ * its own AdditionalSkillsSection.test.tsx and DescriptionTab.test.tsx now cover
  * that behaviour; this component owns only the three field rows.
  */
 import { describe, it, expect, vi } from 'vitest'

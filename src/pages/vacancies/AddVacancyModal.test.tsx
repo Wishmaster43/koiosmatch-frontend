@@ -42,7 +42,9 @@ vi.mock('react-i18next', () => ({
 const { lookupState } = vi.hoisted(() => ({
   lookupState: {
     statuses: [
+      // eslint-disable-next-line no-restricted-syntax -- test fixture lookup colour (DATA, not UI styling)
       { value: 'open', label: 'Open', color: '#79B58E' },
+      // eslint-disable-next-line no-restricted-syntax -- test fixture lookup colour (DATA, not UI styling)
       { value: 'closed', label: 'Closed', color: '#8A94A6' },
     ] as Array<{ value: string; label: string; color?: string }>,
     // SLICE 2: PublicationCard's channel list — empty by default so the
@@ -60,6 +62,7 @@ vi.mock('@/context/VacancyLookupsContext', () => ({
   }),
 }))
 vi.mock('@/context/LookupsContext', () => ({
+  // eslint-disable-next-line no-restricted-syntax -- test fixture lookup colour (DATA, not UI styling)
   useLookups: () => ({ candidateTypes: [{ value: 'flex', label: 'Flex', color: '#6E8FD6' }, { value: 'zzp', label: 'ZZP', color: '#79B58E' }] }),
 }))
 vi.mock('@/lib/useIndustries', () => ({ useIndustries: () => ({ industries: ['Zorg', 'IT'] }) }))
@@ -183,7 +186,9 @@ const noop = () => {}
 beforeEach(() => {
   detailByCustomer.clear()
   lookupState.statuses = [
+    // eslint-disable-next-line no-restricted-syntax -- test fixture lookup colour (DATA, not UI styling)
     { value: 'open', label: 'Open', color: '#79B58E' },
+    // eslint-disable-next-line no-restricted-syntax -- test fixture lookup colour (DATA, not UI styling)
     { value: 'closed', label: 'Closed', color: '#8A94A6' },
   ]
   lookupState.channels = []
@@ -569,7 +574,7 @@ describe('AddVacancyModal · Functie-eisen — senioriteit/opleiding + skills (p
     render(<AddVacancyModal onClose={noop} users={users} customers={customers} />)
     await user.click(screen.getByRole('button', { name: 'details.seniority' }))
     await user.click(screen.getByRole('button', { name: 'Senior' }))
-    // K6e: RequiredSkillsSection's add/edit/remove list — the "+" trigger opens
+    // K6e: AdditionalSkillsSection's add/edit/remove list — the "+" trigger opens
     // an inline AddForm (placeholder = the field label), saved via the diskette icon.
     await user.click(screen.getByRole('button', { name: /details\.addSkill/ }))
     await user.type(screen.getByPlaceholderText('details.addSkill'), 'BIG-registratie')
@@ -586,7 +591,7 @@ describe('AddVacancyModal · Functie-eisen — senioriteit/opleiding + skills (p
     await user.click(screen.getByRole('button', { name: /details\.addSkill/ }))
     await user.type(screen.getByPlaceholderText('details.addSkill'), 'BIG-registratie')
     await user.click(screen.getByTitle('save'))
-    // The saved row now carries an edit pencil (RequiredSkillsSection/AddableSection).
+    // The saved row now carries an edit pencil (AdditionalSkillsSection/AddableSection).
     await user.click(screen.getByTitle('edit'))
     const input = screen.getByPlaceholderText('details.addSkill')
     await user.clear(input)

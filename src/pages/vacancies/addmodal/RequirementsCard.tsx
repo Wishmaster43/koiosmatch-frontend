@@ -7,7 +7,7 @@
  *
  * K6e (pop-out parity): the skills list used to be remove-only, a second,
  * simpler implementation of the same list the drawer's DetailsRequirementsTab
- * already builds via RequiredSkillsSection (add/edit/remove, edit pencil per
+ * already builds via AdditionalSkillsSection (add/edit/remove, edit pencil per
  * row). Reused here as-is instead of forking a rename UI — one component, one
  * look, on both the create-modal and the drawer (§3A: extend, never duplicate).
  */
@@ -15,7 +15,7 @@ import { useTranslation } from 'react-i18next'
 import { FieldRow } from '@/components/forms/fields'
 import CreatableSelect from '@/components/ui/CreatableSelect'
 import { cardHead, cardBox } from '@/components/ui/modalCards'
-import RequiredSkillsSection from '../drawer/RequiredSkillsSection'
+import AdditionalSkillsSection from '../drawer/AdditionalSkillsSection'
 
 interface Level { value: string; label: string }
 interface Props {
@@ -49,7 +49,7 @@ export default function RequirementsCard({
         </FieldRow>
         {/* K6e: required skills — the shared add/edit/remove list, mirrors
             DetailsRequirementsTab.tsx (drawer) 1:1. */}
-        <RequiredSkillsSection skills={skills} onAddSkill={onAddSkill} onEditSkill={onEditSkill} onRemoveSkill={onRemoveSkill} />
+        <AdditionalSkillsSection skills={skills} onAddSkill={onAddSkill} onEditSkill={onEditSkill} onRemoveSkill={onRemoveSkill} />
       </div>
     </div>
   )

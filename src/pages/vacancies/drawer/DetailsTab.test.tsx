@@ -193,8 +193,10 @@ describe('DetailsTab · vestiging is the drill-down\'s LAST block (DRILLDOWN-VOL
     const onUpdate = vi.fn()
     const user = userEvent.setup()
     render(<DetailsTab vacancy={vacancy} onUpdate={onUpdate} />)
-    await user.click(screen.getByRole('button', { name: 'common:select' }))
-    await user.click(screen.getByRole('button', { name: 'Hoofdkantoor Assen' }))
+    // Chips-look (Danny 21-08 "zoals kandidaat en klant"): pick via the shared
+    // BranchSection's "+" trigger, not a dropdown.
+    await user.click(screen.getByRole('button', { name: 'candidates:sections.branchLink' }))
+    await user.click(await screen.findByText('Hoofdkantoor Assen'))
     expect(onUpdate).toHaveBeenCalledWith('v1', { branchId: 'branch-1', branchName: 'Hoofdkantoor Assen' })
   })
 })

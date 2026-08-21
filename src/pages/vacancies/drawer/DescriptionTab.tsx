@@ -6,7 +6,7 @@ import SafeHtmlJs from '@/components/ui/SafeHtml'
 import Button from '@/components/ui/Button'
 import { useVacancyDescription } from '../hooks/useVacancyDescription'
 import { useVacancySkills } from '../hooks/useVacancySkills'
-import RequiredSkillsSection from './RequiredSkillsSection'
+import AdditionalSkillsSection from './AdditionalSkillsSection'
 import type { VacancyDetail } from '@/types/vacancy'
 import type { Id } from '@/types/common'
 
@@ -89,7 +89,7 @@ export default function DescriptionTab({ vacancy: v, onUpdate }: { vacancy: Vaca
       </div>
       {/* VACATURES 4: required skills now live directly under the vacancy text,
           moved out of the Eisen card (DetailsRequirementsTab). */}
-      <RequiredSkillsSection skills={skills} onAddSkill={addSkill} onEditSkill={editSkill} onRemoveSkill={removeSkill} />
+      <AdditionalSkillsSection skills={skills} onAddSkill={addSkill} onEditSkill={editSkill} onRemoveSkill={removeSkill} />
     </div>
   )
 }

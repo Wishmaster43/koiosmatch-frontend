@@ -236,12 +236,12 @@
     "customerDepartment": "Department",
     "contactPerson": "Contact person",
     "pickClientFirst": "Pick a client first",
-    "skills": "Required skills",
+    "skills": "Additional skills",
     "addSkill": "Add skill",
     "description": "Vacancy text",
     "matchContractType": "Proposed contract type",
     "matchCao": "Proposed CBA",
-    "skillsEmpty": "No required skills yet."
+    "skillsEmpty": "No additional skills yet."
   },
   "aiagent": {
     "pickerLabel": "AI agent",

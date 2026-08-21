@@ -236,12 +236,12 @@
     "customerDepartment": "Afdeling",
     "contactPerson": "Contactpersoon",
     "pickClientFirst": "Kies eerst een klant",
-    "skills": "Vereiste vaardigheden",
+    "skills": "Additionele vaardigheden",
     "addSkill": "Vaardigheid toevoegen",
     "description": "Vacaturetekst",
     "matchContractType": "Voorgestelde contractsoort",
     "matchCao": "Voorgestelde CAO",
-    "skillsEmpty": "Nog geen vereiste vaardigheden."
+    "skillsEmpty": "Nog geen additionele vaardigheden."
   },
   "aiagent": {
     "pickerLabel": "AI-agent",

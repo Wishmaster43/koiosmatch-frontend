@@ -218,12 +218,12 @@ export function useAddVacancyForm({
   })
 
   // Required skills — free strings, add/edit/remove (punt 15; K6e widened
-  // add to accept a name directly — RequiredSkillsSection's own inline form
+  // add to accept a name directly — AdditionalSkillsSection's own inline form
   // owns the input now, no separate `newSkill` field state needed here).
   const [skills, setSkills] = useState<string[]>([])
   const addSkill = (name: string) => { const sk = name.trim(); if (sk && !skills.includes(sk)) setSkills(s => [...s, sk]) }
   const removeSkill = (s: string) => setSkills(list => list.filter(x => x !== s))
-  // K6e: rename a staged skill in place (mirrors the drawer's RequiredSkillsSection
+  // K6e: rename a staged skill in place (mirrors the drawer's AdditionalSkillsSection
   // edit pencil) — same list position, never a remove+re-add.
   const editSkill = (i: number, name: string) => {
     const sk = name.trim()

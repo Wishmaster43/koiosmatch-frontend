@@ -218,7 +218,7 @@
     "education": "Ausbildung",
     "industry": "Branche",
     "category": "Funktion",
-    "skills": "Erforderliche Fähigkeiten",
+    "skills": "Zusätzliche Fähigkeiten",
     "addSkill": "Fähigkeit hinzufügen",
     "description": "Stellentext",
     "contractType": "Vertragsart",
@@ -241,7 +241,7 @@
     "pickClientFirst": "Zuerst einen Kunden wählen",
     "matchContractType": "Vorgeschlagene Vertragsart",
     "matchCao": "Vorgeschlagener Tarifvertrag",
-    "skillsEmpty": "Noch keine erforderlichen Fähigkeiten."
+    "skillsEmpty": "Noch keine zusätzlichen Fähigkeiten."
   },
   "aiagent": {
     "pickerLabel": "KI-Agent",

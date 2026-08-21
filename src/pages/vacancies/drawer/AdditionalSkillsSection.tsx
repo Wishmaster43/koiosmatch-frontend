@@ -1,5 +1,6 @@
 import type { ComponentType } from 'react'
 import { useTranslation } from 'react-i18next'
+import { BodyText } from '@/components/ui/typography'
 import AddableSectionJs from '@/components/forms/AddableSection'
 
 type AnyProps = Record<string, unknown>
@@ -17,7 +18,7 @@ interface Props {
 }
 
 /**
- * RequiredSkillsSection — the vacancy's required-skills list, brought onto the
+ * AdditionalSkillsSection — the vacancy's required-skills list, brought onto the
  * SAME add/edit/remove interaction as the candidate drawer's (frozen canon)
  * SkillsTab (SectionTabs.tsx): a "+ Toevoegen"-style trigger reveals an inline
  * add form instead of an always-visible text+button row, and each row gets its
@@ -33,7 +34,7 @@ interface Props {
  * `name`, and `editInitial`/`renderItem` wrap/unwrap the plain string at this
  * component's boundary rather than changing what gets persisted.
  */
-export default function RequiredSkillsSection({ skills, onAddSkill, onEditSkill, onRemoveSkill }: Props) {
+export default function AdditionalSkillsSection({ skills, onAddSkill, onEditSkill, onRemoveSkill }: Props) {
   const { t } = useTranslation('vacancies')
   const fields = [{ key: 'name', label: t('details.addSkill') }]
 
@@ -58,8 +59,9 @@ export default function RequiredSkillsSection({ skills, onAddSkill, onEditSkill,
         return (
           <div key={`${name}-${i}`} style={{ display: 'flex', gap: 8, padding: '8px 0', paddingRight: 56,
             borderBottom: i < arr.length - 1 ? '1px solid var(--border)' : 'none' }}>
+            {/* eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- decorative list-bullet dot, not an action face; mirrors the frozen candidate SkillsTab row 1:1 */}
             <div style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--color-primary)', flexShrink: 0, marginTop: 6 }} />
-            <span style={{ fontSize: 13, fontWeight: 500, color: 'var(--text)' }}>{name}</span>
+            <BodyText as="span" style={{ fontWeight: 500 }}>{name}</BodyText>
           </div>
         )
       }}

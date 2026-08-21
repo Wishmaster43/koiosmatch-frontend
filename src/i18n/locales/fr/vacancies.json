@@ -218,7 +218,7 @@
     "education": "Formation",
     "industry": "Secteur",
     "category": "Fonction",
-    "skills": "Compétences requises",
+    "skills": "Compétences additionnelles",
     "addSkill": "Ajouter une compétence",
     "description": "Texte de l'offre",
     "contractType": "Type de contrat",
@@ -241,7 +241,7 @@
     "pickClientFirst": "Choisissez d'abord un client",
     "matchContractType": "Type de contrat proposé",
     "matchCao": "CCT proposée",
-    "skillsEmpty": "Aucune compétence requise pour l'instant."
+    "skillsEmpty": "Aucune compétence additionnelle pour l'instant."
   },
   "aiagent": {
     "pickerLabel": "Agent IA",

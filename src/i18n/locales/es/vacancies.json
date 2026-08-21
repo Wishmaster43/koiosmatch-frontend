@@ -218,7 +218,7 @@
     "education": "Formación",
     "industry": "Sector",
     "category": "Función",
-    "skills": "Habilidades requeridas",
+    "skills": "Habilidades adicionales",
     "addSkill": "Añadir habilidad",
     "description": "Texto de la vacante",
     "contractType": "Tipo de contrato",
@@ -241,7 +241,7 @@
     "pickClientFirst": "Elige primero un cliente",
     "matchContractType": "Tipo de contrato propuesto",
     "matchCao": "Convenio propuesto",
-    "skillsEmpty": "Aún no hay aptitudes requeridas."
+    "skillsEmpty": "Aún no hay habilidades adicionales."
   },
   "aiagent": {
     "pickerLabel": "Agente IA",
