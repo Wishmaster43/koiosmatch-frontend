@@ -8,7 +8,7 @@
  * · ModulePicker · ConfigPanel · LogsPanel · fields · canvas · ScheduleModal).
  * This component stays declarative: hook in, JSX out.
  */
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import {
   ReactFlow, Background, Controls, MiniMap, ReactFlowProvider,
 } from '@xyflow/react'
@@ -58,6 +58,14 @@ function EditorInner({ workflow, onClose, onSave, initialRunId }: {
   // Leaving the editor (X, browser-back, tab close) runs one guarded action —
   // unsaved-changes + live-run confirms live in the hook.
   const confirmClose = useEditorExitGuards({ isDirty, liveRunActive, onClose, confirm })
+  // Esc = the same guarded exit as the X (blok 1 punt 3.3). Nested panels'
+  // useFocusTrap stopPropagations their own Escape first, so this only fires
+  // when the editor itself has focus.
+  useEffect(() => {
+    const h = (e: KeyboardEvent) => { if (e.key === 'Escape') confirmClose() }
+    document.addEventListener('keydown', h)
+    return () => document.removeEventListener('keydown', h)
+  }, [confirmClose])
 
   // Top-level editor view: the node diagram, or this workflow's run history.
   const [view, setView] = useState<EditorView>('diagram')
@@ -138,10 +146,12 @@ function EditorInner({ workflow, onClose, onSave, initialRunId }: {
             {/* Floating add button */}
             <button
               onClick={() => setPickerState({ append: true })}
+              // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- FAB over het ReactFlow-canvas (rond, zwevend, shadow-float): een face die Button bewust niet modelleert
               style={{
                 position: 'absolute', bottom: 24, right: 24,
                 display: 'flex', alignItems: 'center', gap: 8,
                 padding: '9px 16px', borderRadius: 999,
+                // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- FAB-vlak: de zwevende canvasknop draagt het volle accent bewust (zie de knopreden hierboven)
                 background: 'var(--color-primary)', color: 'var(--color-on-accent)',
                 border: 'none', cursor: 'pointer', fontSize: 13, fontWeight: 500,
                 boxShadow: 'var(--shadow-float)',

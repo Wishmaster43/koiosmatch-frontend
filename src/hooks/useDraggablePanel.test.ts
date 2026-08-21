@@ -142,14 +142,22 @@ describe('useDraggablePanel · the window can never be dragged out of reach', ()
     act(() => { window.innerWidth = 1024; window.innerHeight = 768 })
   })
 
-  it('re-clamps a placement restored from a bigger monitor on boot', () => {
+  // Walkthrough 21-08 POP-UPS 3.4: POSITION never survives a close — a stored
+  // spot restores SIZE only and the panel opens CSS-centered again.
+  it('restores size only on boot — position opens centered (x/y null)', () => {
     localStorage.setItem('km-float-test-panel', JSON.stringify({ x: 3800, y: 2000, w: 900, h: 600 }))
     const { result } = renderHook(() => useDraggablePanel('test-panel'))
-    expect(result.current.placement).toMatchObject({ x: 1024 - 80, y: 768 - 48 })
+    expect(result.current.placement).toMatchObject({ x: null, y: null, w: 900, h: 600 })
+  })
+
+  it('a stored position WITHOUT a size restores nothing at all', () => {
+    localStorage.setItem('km-float-test-panel', JSON.stringify({ x: 300, y: 200, w: null, h: null }))
+    const { result } = renderHook(() => useDraggablePanel('test-panel'))
+    expect(result.current.placement).toBeNull()
   })
 
   it('double-clicking the handle resets to centered and forgets the stored spot', () => {
-    localStorage.setItem('km-float-test-panel', JSON.stringify({ x: 300, y: 200, w: null, h: null }))
+    localStorage.setItem('km-float-test-panel', JSON.stringify({ x: 300, y: 200, w: 900, h: 600 }))
     const { result } = renderHook(() => useDraggablePanel('test-panel'))
     expect(result.current.placement).not.toBeNull()
 

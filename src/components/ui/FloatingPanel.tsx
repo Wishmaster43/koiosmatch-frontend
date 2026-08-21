@@ -20,6 +20,7 @@ import { useFocusTrap } from '@/hooks/useFocusTrap'
 import { useDraggablePanel } from '@/hooks/useDraggablePanel'
 import { usePrefersReducedMotion } from '@/hooks/usePrefersReducedMotion'
 import { nextFloatingZ } from '@/lib/zIndexScale'
+import Button from './Button'
 
 export interface FloatingPanelProps {
   open: boolean
@@ -80,7 +81,13 @@ function Panel({ onClose, ariaLabel, title, header, children, width, maxWidth, p
 
   // Before any drag: CSS-centered exactly like every modal today. After: absolute.
   const positioned: CSSProperties = placement
-    ? { position: 'fixed', left: placement.x, top: placement.y, ...(placement.w ? { width: placement.w } : { width }), ...(placement.h ? { height: placement.h } : {}) }
+    ? (placement.x != null && placement.y != null
+
+        ? { position: 'fixed' as const, left: placement.x, top: placement.y, ...(placement.w ? { width: placement.w } : { width }), ...(placement.h ? { height: placement.h } : {}) }
+
+        // Size-only restore: stay in the CSS-centered flex layout, size applied.
+
+        : { ...(placement.w ? { width: placement.w } : { width }), ...(placement.h ? { height: placement.h } : {}) })
     : { position: 'relative', width }
 
   return (
@@ -123,19 +130,15 @@ function Panel({ onClose, ariaLabel, title, header, children, width, maxWidth, p
           {/* Pop-out to a second browser window (NOTITIE-POPOUT-1 F5) — sits before the
               close X, same 26x26 bordered icon-button footprint as the other header buttons. */}
           {onPopOut && (
-            <button onClick={onPopOut} type="button" aria-label={t('openSecondScreen')} title={t('openSecondScreen')}
-              style={{ width: 26, height: 26, display: 'flex', alignItems: 'center', justifyContent: 'center',
-                borderRadius: 6, background: 'var(--bg)', border: '1px solid var(--border)',
-                color: 'var(--text-muted)', cursor: 'pointer', flexShrink: 0 }}>
+            <Button variant="secondary" iconOnly type="button" onClick={onPopOut}
+              aria-label={t('openSecondScreen')} title={t('openSecondScreen')} style={{ flexShrink: 0 }}>
               <ExternalLink size={13} />
-            </button>
+            </Button>
           )}
           {!hideClose && (
-            <button onClick={onClose} aria-label={t('close')}
-              style={{ border: 'none', background: 'none', cursor: 'pointer', color: 'var(--text-muted)',
-                display: 'inline-flex', padding: 4, borderRadius: 6 }}>
+            <Button variant="ghost" iconOnly onClick={onClose} aria-label={t('close')} data-drawer-close>
               <X size={16} />
-            </button>
+            </Button>
           )}
         </div>
         {/* Body scrolls inside the panel so a resized-small window never clips chrome —

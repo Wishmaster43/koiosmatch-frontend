@@ -11,6 +11,8 @@ import { MODULE_META, MODULE_APP_MAP, MODULE_REQUIRED_MODULE } from '@/modules/i
 import { useApps } from '@/context/AppsContext'
 import { useAuth } from '@/context/AuthContext'
 import { categorySlug } from './moduleI18n'
+import { useFocusTrap } from '@/hooks/useFocusTrap'
+import Button from '@/components/ui/Button'
 
 // One [type, meta] pair from the module registry (used by the picker rows).
 type ModuleMetaEntry = [string, (typeof MODULE_META)[string]]
@@ -22,6 +24,8 @@ export default function ModulePicker({ insertAfterEdgeId, onSelect, onClose }: {
   onSelect: (type: string, edgeId: string | null) => void
   onClose: () => void
 }) {
+  // Esc closes + Tab stays inside (useFocusTrap owns both, §6).
+  const trapRef = useFocusTrap<HTMLDivElement>(onClose)
   const { t } = useTranslation('workflows')
   const [search, setSearch] = useState('')
   const [tab,    setTab]    = useState('Alle')
@@ -66,6 +70,7 @@ export default function ModulePicker({ insertAfterEdgeId, onSelect, onClose }: {
       <button key={type} type="button"
         onClick={() => { onSelect(type, insertAfterEdgeId); onClose() }}
         title={modLabel(type, meta.label)}
+        // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- module-KEUZETILE (icooncirkel + 2-regel-label, grid): een kaartface die Button-varianten niet modelleren; geen actieknop
         style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8, padding: '12px 6px', background: 'none', border: '1px solid transparent', borderRadius: 10, cursor: 'pointer' }}
         onMouseEnter={e => { e.currentTarget.style.background = 'var(--hover-bg)'; e.currentTarget.style.borderColor = 'var(--border)' }}
         onMouseLeave={e => { e.currentTarget.style.background = 'none'; e.currentTarget.style.borderColor = 'transparent' }}>
@@ -109,16 +114,17 @@ export default function ModulePicker({ insertAfterEdgeId, onSelect, onClose }: {
     // HUISSTIJL-1: modal dialog — z-overlay ladder tier, shadow-modal role.
     <div style={{ position: 'fixed', inset: 0, zIndex: 'var(--z-overlay)', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.35)' }}
       onClick={onClose}>
-      <div style={{ width: 1100, maxWidth: '94vw', maxHeight: '82vh', background: 'var(--surface)', borderRadius: 16, overflow: 'hidden', boxShadow: 'var(--shadow-modal)', display: 'flex', flexDirection: 'column' }}
+      {/* Esc + focus trap via the §6-canonical hook (blok 1 punt 3.3). */}
+      <div ref={trapRef} role="dialog" aria-modal="true" style={{ width: 1100, maxWidth: '94vw', maxHeight: '82vh', background: 'var(--surface)', borderRadius: 16, overflow: 'hidden', boxShadow: 'var(--shadow-modal)', display: 'flex', flexDirection: 'column' }}
         onClick={e => e.stopPropagation()}>
 
         {/* Header + zoeken */}
         <div style={{ padding: '14px 16px 0', flexShrink: 0 }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
             <span style={{ fontSize: 14, fontWeight: 700, color: 'var(--text)' }}>{t('picker.title')}</span>
-            <button onClick={onClose} aria-label={t('common:close')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', display: 'flex' }}>
+            <Button variant="ghost" iconOnly onClick={onClose} aria-label={t('common:close')}>
               <X size={16} />
-            </button>
+            </Button>
           </div>
           <input autoFocus value={search} onChange={e => setSearch(e.target.value)}
             placeholder={t('picker.search')}
@@ -129,6 +135,7 @@ export default function ModulePicker({ insertAfterEdgeId, onSelect, onClose }: {
         <div style={{ display: 'flex', flexWrap: 'wrap', borderBottom: '1px solid var(--border)', flexShrink: 0, padding: '0 8px' }}>
           {CATEGORY_ORDER.filter(c => c === 'Alle' || counts[c]).map(cat => (
             <button key={cat} type="button" onClick={() => { setTab(cat); }}
+              // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- rustende categorie-TAB (plaatsmarkering, PRIMAIR-VLAK-1): underline-actief, geen actieknop
               style={{
                 padding: '7px 12px', fontSize: 12, fontWeight: tab === cat ? 700 : 400,
                 // Text-colour accent uses the AA-contrast text token, not the raw brand primary.

@@ -15,8 +15,10 @@ import { useCallback, useEffect, useRef, useState } from 'react'
  * popup shell goes through FloatingPanel (§11).
  */
 export interface PanelPlacement {
-  x: number
-  y: number
+  // null = CSS-centered (walkthrough 21-08 POP-UPS 3.4: position never survives
+  // a close; only size does). Real numbers appear once the user drags.
+  x: number | null
+  y: number | null
   w: number | null
   h: number | null
 }
@@ -51,14 +53,19 @@ function storageKey(key: string): string {
 export function useDraggablePanel(persistKey?: string, resizable = true) {
   const panelRef = useRef<HTMLDivElement>(null)
   // null = centered via CSS (the pre-drag default every modal has today).
+  // POSITION deliberately does NOT survive a close (walkthrough 21-08, POP-UPS
+  // 3.4: "soms opent deze hoog in je scherm en niet in het midden" — a panel
+  // once parked high reopened there forever). Every open starts centered; only
+  // the user's chosen SIZE is restored, dragging works within the open panel.
   const [placement, setPlacement] = useState<PanelPlacement | null>(() => {
     if (!persistKey) return null
     try {
       const raw = localStorage.getItem(storageKey(persistKey))
       if (!raw) return null
       const p = JSON.parse(raw) as PanelPlacement
-      // A stored spot from a bigger monitor may be off-screen here — reclamp on boot.
-      return { ...p, ...clampToViewport(p.x, p.y, p.w) }
+      if (p.w == null && p.h == null) return null
+      // Size-only restore: x/y null keeps the CSS-centered layout path.
+      return { x: null, y: null, w: p.w ?? null, h: p.h ?? null }
     } catch {
       return null
     }
@@ -99,7 +106,10 @@ export function useDraggablePanel(persistKey?: string, resizable = true) {
     if (!node) return
     e.preventDefault()
     const rect = node.getBoundingClientRect()
-    const start = placementRef.current ?? { x: rect.left, y: rect.top, w: null, h: null }
+    const stored = placementRef.current
+    const start = (stored && stored.x != null && stored.y != null)
+      ? (stored as { x: number; y: number; w: number | null; h: number | null })
+      : { x: rect.left, y: rect.top, w: stored?.w ?? null, h: stored?.h ?? null }
     const offsetX = e.clientX - rect.left
     const offsetY = e.clientY - rect.top
     const restoreSelection = suppressSelection()
@@ -176,7 +186,8 @@ export function useDraggablePanel(persistKey?: string, resizable = true) {
   useEffect(() => {
     const onWinResize = () => {
       const p = placementRef.current
-      if (!p) return
+      // Centered placements (x/y null) have nothing to reclamp — CSS keeps them centered.
+      if (!p || p.x == null || p.y == null) return
       const next = { ...p, ...clampToViewport(p.x, p.y, p.w) }
       placementRef.current = next
       setPlacement(next)
