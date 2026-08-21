@@ -3156,5 +3156,11 @@
       "prospects": "Prospectos",
       "usage": "Consumo (total)"
     }
+  },
+  "freeEntry": {
+    "blockedTitle": "La entrada libre aún no se puede desactivar",
+    "blockedIntro": "Todavía hay registros con un valor que no está en la lista. Haga la lista estricta solo después de corregir estos valores o añadirlos como valores de lista:",
+    "blockedHint": "Corrija los registros o añada el valor a la lista y desactive después la entrada libre. Los datos nunca se pierden en silencio.",
+    "blockedClose": "Entendido"
   }
 }

@@ -7,6 +7,7 @@ import { extractApiError } from '@/lib/extractApiError'
 import { notifyError } from '@/lib/notify'
 import { useApplicationSources } from '@/lib/useApplicationSources'
 import { useConfirm } from '@/hooks/useConfirm'
+import FreeEntryMismatchDialog, { mismatchesFromError } from '../components/FreeEntryMismatchDialog'
 
 /**
  * ApplicationSourcesSettings — S-SOURCE-1 GRADUATION (2026-08-14): the tenant
@@ -45,6 +46,8 @@ export default function ApplicationSourcesSettings() {
   const [override, setOverride] = useState(null)
   const freeEntry = override ?? allowFreeEntry
   const [busy, setBusy] = useState(false)
+  // §3B preflight (settings-ronde 21-08 punt 1): the 409 mismatches list.
+  const [mismatches, setMismatches] = useState(null)
   const { confirm, dialog } = useConfirm()
 
   // Persist the mode via the REAL dedicated route (see the doc comment above for
@@ -61,7 +64,11 @@ export default function ApplicationSourcesSettings() {
         invalidate()
       } catch (e) {
         setOverride(null)
-        notifyError(extractApiError(e, t('statusList.saveFailed')))
+        // Strict-preflight 409: SHOW the non-conforming values (§3B) — a toast
+        // alone made the toggle look broken (gemeten 21-08).
+        const mm = mismatchesFromError(e)
+        if (mm) setMismatches(mm)
+        else notifyError(extractApiError(e, t('statusList.saveFailed')))
       } finally {
         setBusy(false)
       }
@@ -76,6 +83,7 @@ export default function ApplicationSourcesSettings() {
         <SettingRow label={t('applicationSourcesSettings.freeEntry')} description={t('applicationSourcesSettings.freeEntryHint')}>
           <Toggle checked={freeEntry} onChange={onToggle} />
         </SettingRow>
+        {mismatches && <FreeEntryMismatchDialog mismatches={mismatches} onClose={() => setMismatches(null)} />}
       </SettingCard>
 
       <div style={{ marginTop: 20 }}>

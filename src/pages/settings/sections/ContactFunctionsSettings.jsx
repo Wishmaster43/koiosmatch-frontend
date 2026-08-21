@@ -7,6 +7,7 @@ import { extractApiError } from '@/lib/extractApiError'
 import { notifyError } from '@/lib/notify'
 import { useContactFunctions } from '@/lib/useContactFunctions'
 import { useConfirm } from '@/hooks/useConfirm'
+import FreeEntryMismatchDialog, { mismatchesFromError } from '../components/FreeEntryMismatchDialog'
 
 /**
  * ContactFunctionsSettings — the contact-person job-title list (/contact-functions,
@@ -32,6 +33,8 @@ export default function ContactFunctionsSettings() {
   const [override, setOverride] = useState(null)
   const freeEntry = override ?? allowFreeEntry
   const [busy, setBusy] = useState(false)
+  // §3B preflight (settings-ronde 21-08 punt 1): the 409 mismatches list.
+  const [mismatches, setMismatches] = useState(null)
   const { confirm, dialog } = useConfirm()
 
   // Persist the mode via the REAL dedicated route (see the doc comment above for
@@ -48,7 +51,11 @@ export default function ContactFunctionsSettings() {
         invalidate()
       } catch (e) {
         setOverride(null)
-        notifyError(extractApiError(e, t('statusList.saveFailed')))
+        // Strict-preflight 409: SHOW the non-conforming values (§3B) — a toast
+        // alone made the toggle look broken (gemeten 21-08).
+        const mm = mismatchesFromError(e)
+        if (mm) setMismatches(mm)
+        else notifyError(extractApiError(e, t('statusList.saveFailed')))
       } finally {
         setBusy(false)
       }
@@ -63,6 +70,7 @@ export default function ContactFunctionsSettings() {
         <SettingRow label={t('contactFunctionsSettings.freeEntry')} description={t('contactFunctionsSettings.freeEntryHint')}>
           <Toggle checked={freeEntry} onChange={onToggle} />
         </SettingRow>
+        {mismatches && <FreeEntryMismatchDialog mismatches={mismatches} onClose={() => setMismatches(null)} />}
       </SettingCard>
 
       <div style={{ marginTop: 20 }}>

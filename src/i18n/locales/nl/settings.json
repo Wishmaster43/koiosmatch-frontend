@@ -3156,5 +3156,11 @@
       "prospects": "Prospects",
       "usage": "Verbruik (totaal)"
     }
+  },
+  "freeEntry": {
+    "blockedTitle": "Vrije invoer kan nog niet uit",
+    "blockedIntro": "Er bestaan nog records met een waarde die niet in de lijst staat. Zet de lijst pas op strikt nadat deze waarden zijn aangepast of als lijstwaarde zijn toegevoegd:",
+    "blockedHint": "Pas de records aan of voeg de waarde toe aan de lijst, en zet daarna vrije invoer uit. Er gaat nooit stilletjes data verloren.",
+    "blockedClose": "Begrepen"
   }
 }

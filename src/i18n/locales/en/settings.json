@@ -3156,5 +3156,11 @@
       "prospects": "Prospects",
       "usage": "Usage (total)"
     }
+  },
+  "freeEntry": {
+    "blockedTitle": "Free entry cannot be turned off yet",
+    "blockedIntro": "Records still carry a value that is not in the list. Make the list strict only after these values are fixed or added as list values:",
+    "blockedHint": "Fix the records or add the value to the list, then turn free entry off. Data is never silently dropped.",
+    "blockedClose": "Got it"
   }
 }

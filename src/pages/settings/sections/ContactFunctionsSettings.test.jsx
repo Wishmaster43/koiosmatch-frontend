@@ -101,6 +101,23 @@ describe('ContactFunctionsSettings — free-entry toggle (real dedicated route)'
     await waitFor(() => expect(apiMod.put).toHaveBeenCalledWith('/contact-functions/free-entry', { allow_free_entry: false }))
   })
 
+  // §3B preflight regression (settings-ronde 21-08 punt 1, gemeten): the backend
+  // refuses strict with 409 + mismatches while records carry off-list values —
+  // the dialog LISTS them; a vanishing toast made the toggle look broken.
+  it('renders the mismatch preflight dialog on a strict-switch 409', async () => {
+    const apiMod = await renderWithContactFunctions([], true)
+    apiMod.put.mockRejectedValue({ response: { status: 409, data: {
+      message: 'Niet alle bestaande waarden staan in de lijst.',
+      mismatches: [{ entity: 'contact', id: 'c1', name: 'Sanne Vries', function: 'HR Manager', count: 16 }],
+    } } })
+    const user = userEvent.setup()
+    await user.click(await screen.findByRole('switch'))
+    expect(await screen.findByText(st('freeEntry.blockedTitle'))).toBeInTheDocument()
+    expect(screen.getByText('HR Manager')).toBeInTheDocument()
+    expect(screen.getByText('Sanne Vries')).toBeInTheDocument()
+    expect(screen.getByText('×16')).toBeInTheDocument()
+  })
+
   it('reverts the optimistic flip and notifies on a 409 (the strict-tightening mismatch guard)', async () => {
     const apiMod = await renderWithContactFunctions([], true)
     apiMod.put.mockRejectedValue({ response: { status: 409, data: { message: 'Niet alle bestaande waarden staan in de lijst.' } } })

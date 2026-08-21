@@ -3156,5 +3156,11 @@
       "prospects": "Interessenten",
       "usage": "Verbrauch (gesamt)"
     }
+  },
+  "freeEntry": {
+    "blockedTitle": "Freie Eingabe kann noch nicht deaktiviert werden",
+    "blockedIntro": "Es gibt noch Datensätze mit einem Wert, der nicht in der Liste steht. Stellen Sie die Liste erst auf strikt, nachdem diese Werte korrigiert oder als Listenwerte hinzugefügt wurden:",
+    "blockedHint": "Korrigieren Sie die Datensätze oder fügen Sie den Wert der Liste hinzu, und deaktivieren Sie dann die freie Eingabe. Daten gehen nie stillschweigend verloren.",
+    "blockedClose": "Verstanden"
   }
 }

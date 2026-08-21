@@ -3156,5 +3156,11 @@
       "prospects": "Prospects",
       "usage": "Consommation (total)"
     }
+  },
+  "freeEntry": {
+    "blockedTitle": "La saisie libre ne peut pas encore être désactivée",
+    "blockedIntro": "Des enregistrements portent encore une valeur absente de la liste. Ne rendez la liste stricte qu’après avoir corrigé ces valeurs ou les avoir ajoutées à la liste :",
+    "blockedHint": "Corrigez les enregistrements ou ajoutez la valeur à la liste, puis désactivez la saisie libre. Aucune donnée n’est perdue en silence.",
+    "blockedClose": "Compris"
   }
 }
