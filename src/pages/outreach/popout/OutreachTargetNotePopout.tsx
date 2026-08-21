@@ -22,12 +22,12 @@
  */
 import { useCallback, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
-import PopoutShell from '@/pages/popout/PopoutShell'
-import PopoutSaveFooter from '@/pages/popout/PopoutSaveFooter'
+import { PopoutShell } from '@/pages/popout/shared'
+import { PopoutSaveFooter } from '@/pages/popout/shared'
 import RichTextEditor from '@/components/ui/RichTextEditor'
 import RichTextAssistBar from '@/components/ui/RichTextAssistBar'
 import NoteAssistSection from '@/components/drawer/tabs/notes/NoteAssistSection'
-import { useTextPopoutDraft } from '@/pages/popout/hooks/useTextPopoutDraft'
+import { useTextPopoutDraft } from '@/pages/popout/shared'
 import { useOutreachTargetTextLite, patchTargetNote } from '../hooks/useOutreachTargetTextPopout'
 import { textPopoutTopic, parseOutreachTargetPopoutId } from '@/lib/secondScreen'
 

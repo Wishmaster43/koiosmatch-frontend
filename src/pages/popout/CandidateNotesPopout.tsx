@@ -13,7 +13,7 @@ import NotesTabJs from '@/components/drawer/tabs/NotesTab'
 import PopoutShell from './PopoutShell'
 import { useNoteTypes, SYSTEM_NOTE_TYPES } from '@/lib/useNoteTypes'
 import { useLastContactTypes } from '@/lib/useLastContactTypes'
-import { useCandidateNotes } from '@/pages/candidates/hooks/useCandidateNotes'
+import { useCandidateNotes } from '@/pages/candidates/shared'
 import { useCandidateLite } from './hooks/useCandidateLite'
 
 type AnyProps = Record<string, unknown>

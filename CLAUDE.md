@@ -128,6 +128,16 @@ Rules:
 
 - Everything is `.ts/.tsx`; an entity page never imports another entity page's
   internals — shared behaviour lives in `components/` / `hooks/` / `lib/`.
+- **Cross-entity hergebruik loopt door de PUBLIEKE surface (§2 barrel-besluit,
+  Danny 21-08):** wat een entiteit aan anderen aanbiedt staat in
+  `pages/<entiteit>/shared.ts`; elke import vanuit een andere map gebruikt dat
+  pad, nooit een diep intern pad (lint-gehandhaafd, per-entiteit gegenereerde
+  blokken in eslint.config.js). Wie een module wijzigt die in shared.ts staat,
+  weet dat buitenstaanders meerijden. TESTLES (zelfde dag gemeten): een barrel
+  laadt ál zijn modules eager — een unit-test mockt de barrel PLAT met precies
+  wat de component eruit gebruikt (pure functies via `vi.importActual` op hun
+  eigen diepe module), nooit `importOriginal` op de barrel zelf, anders trekt
+  de test de hele boom (en de i18n-init-bijwerking) binnen.
 - Shared UI in `components/ui` is **dumb**: no API calls, no business logic.
 - If a file doesn't clearly belong somewhere, the design is wrong — stop and fix.
 - A `features/`-style layout (per-domain barrels) remains the long-term target if

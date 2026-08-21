@@ -22,8 +22,8 @@ import SectionCard from '@/components/ui/SectionCard'
 import DrawerTabs from '@/components/drawer/DrawerTabs'
 import { useDateFormat } from '@/lib/datetime'
 import { initialsOf } from '@/lib/initials'
-import { SM_CANDIDATE_STATUS_COLORS } from '@/pages/shiftmanager/data/smCandidateStatus'
-import { endDateOf, noShowCountOf, cancellationsOf, featureNamesOf } from '@/pages/shiftmanager/data/smCandidateFields'
+import { SM_CANDIDATE_STATUS_COLORS } from '@/pages/shiftmanager/shared'
+import { endDateOf, noShowCountOf, cancellationsOf, featureNamesOf } from '@/pages/shiftmanager/shared'
 import type { ReportCandidate, GlobalRate } from '@/types/reports'
 
 // Label-above field row (§4 drawer card idiom): 11px muted label, 13px value, em-dash when empty.

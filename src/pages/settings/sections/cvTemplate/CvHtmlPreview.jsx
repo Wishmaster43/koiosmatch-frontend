@@ -9,8 +9,8 @@
    it reproduces cvStyles' hex+alpha palette byte-for-byte (react-pdf renders no
    color-mix, and the preview must match the PDF exactly), and the colours are
    guaranteed hex data — the one context where hex-suffix tints are safe. */
-import { groupCvSections } from '@/pages/candidates/CandidateCvTemplate'
-import { paletteFor } from '@/pages/candidates/cv/cvStyles'
+import { groupCvSections } from '@/pages/candidates/shared'
+import { paletteFor } from '@/pages/candidates/shared'
 import { PREVIEW_CANDIDATE } from './previewCandidate'
 
 // Live HTML mock of the PDF; `t` is the candidates translate fn (cv.* labels).

@@ -7,10 +7,10 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import api, { unwrap, unwrapList } from '@/lib/api'
 // MATCHES-TAB-1: reuse the matches PAGE's own mapper rather than a third one.
-import { mapMatch } from '@/pages/matches/hooks/useMatches'
+import { mapMatch } from '@/pages/matches/shared'
 // SOLLICITATIES-TAB-1: same reuse call as MATCHES-TAB-1 above — the applications
 // PAGE's own mapper, not a forked copy (mirrors ScopedMatchesTab's mapMatch reuse).
-import { mapApplication } from '@/pages/applications/data/mapApplication'
+import { mapApplication } from '@/pages/applications/shared'
 // SOLLICITATIES-SCOPE-1: the generic scoped fetch (department/location Vacatures
 // sub-tab) reused below to resolve a level's OWN vacancy ids for its Sollicitaties
 // sub-tab — same hook, same queryKey shape, so the two sub-tabs share one cache entry.

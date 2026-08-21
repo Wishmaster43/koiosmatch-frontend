@@ -37,10 +37,8 @@ import { BTN_H } from '@/config/buttonMetrics'
 // template call are reused straight from Settings' working import wizard — cross-
 // page import, deliberate and written up here: reusing beats a second import
 // client or a second result renderer.
-import PreviewStep from '@/pages/settings/sections/importeren/PreviewStep'
-import ResultStep from '@/pages/settings/sections/importeren/ResultStep'
-import { downloadImportTemplate } from '@/pages/settings/sections/importeren/importApi'
-import type { useImportWizard } from '@/pages/settings/sections/importeren/useImportWizard'
+import { PreviewStep, ResultStep, downloadImportTemplate } from '@/pages/settings/shared'
+import type { useImportWizard } from '@/pages/settings/shared'
 import Button from '@/components/ui/Button'
 
 // Mirrors ImportUploadRequest::rules (mimes:csv,txt,xlsx) — this card only forwards

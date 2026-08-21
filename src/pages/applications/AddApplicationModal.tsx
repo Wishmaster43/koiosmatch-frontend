@@ -32,7 +32,7 @@ import CustomFieldInput from './addmodal/CustomFieldInput'
 import type { PickOption, RawPickRow } from './addmodal/types'
 // NEWCAND-1 (register pt.4): reuse the real candidate create flow (incl. its own
 // CV-parse entry points) — never a second, thinner "create candidate" form here.
-import AddCandidateModal from '@/pages/candidates/AddCandidateModal'
+import { AddCandidateModal } from '@/pages/candidates/shared'
 import { UserPlus } from 'lucide-react'
 import type { Candidate } from '@/types/candidate'
 import Button from '@/components/ui/Button'

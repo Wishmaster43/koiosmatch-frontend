@@ -9,8 +9,8 @@
  * control; a title hint on the Auto pill explains the message-confirm rule).
  */
 import { useTranslation } from 'react-i18next'
-import { useMyKoiosMode } from '@/pages/auth/useMyKoiosMode'
-import type { KoiosMode } from '@/pages/auth/useMyKoiosMode'
+import { useMyKoiosMode } from '@/pages/auth/shared'
+import type { KoiosMode } from '@/pages/auth/shared'
 
 const MODES: KoiosMode[] = ['wizard', 'auto']
 

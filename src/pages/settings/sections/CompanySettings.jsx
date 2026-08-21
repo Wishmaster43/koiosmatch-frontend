@@ -12,7 +12,7 @@ import Spinner from '@/components/ui/Spinner'
 import { cardHead } from '@/components/ui/modalCards'
 // One language source for the whole app (Danny 14/7): the same five shipped
 // locales the profile picker offers — never a diverging local list.
-import { LANGUAGES as APP_LANGUAGES } from '@/pages/auth/profileParts'
+import { LANGUAGES as APP_LANGUAGES } from '@/pages/auth/shared'
 import Button from '@/components/ui/Button'
 import SaveButton from '@/components/ui/SaveButton'
 import { PageTitle } from '@/components/ui/typography'

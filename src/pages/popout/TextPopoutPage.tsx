@@ -19,16 +19,16 @@ import MatchRemarksPopout from './MatchRemarksPopout'
 // K3/K5 (batch 5): the customer bedrijfstekst + department omschrijving popouts
 // live under pages/customers/popout (this task's own folder scope), not here —
 // this dispatcher only imports them.
-import CustomerCompanyTextPopout from '@/pages/customers/popout/CustomerCompanyTextPopout'
-import CustomerDepartmentTextPopout from '@/pages/customers/popout/CustomerDepartmentTextPopout'
+import { CustomerCompanyTextPopout } from '@/pages/customers/shared'
+import { CustomerDepartmentTextPopout } from '@/pages/customers/shared'
 // K3/K4c: a customer location's own description gets the same pop-out.
-import CustomerLocationTextPopout from '@/pages/customers/popout/CustomerLocationTextPopout'
+import { CustomerLocationTextPopout } from '@/pages/customers/shared'
 // V-desc-1: the vacancy description popout lives under pages/vacancies/popout
 // (this task's own folder scope), not here — this dispatcher only imports it.
-import VacancyDescriptionPopout from '@/pages/vacancies/popout/VacancyDescriptionPopout'
+import { VacancyDescriptionPopout } from '@/pages/vacancies/shared'
 // BELLIJST-NOTE-POPOUT-1: the outreach (call-list) target note popout lives
 // under pages/outreach/popout (this task's own folder scope), not here.
-import OutreachTargetNotePopout from '@/pages/outreach/popout/OutreachTargetNotePopout'
+import { OutreachTargetNotePopout } from '@/pages/outreach/shared'
 
 // One entry per supported `<entity>:<field>` pair — keep in sync with
 // PopoutTextField / openTextPopout in lib/secondScreen.ts.

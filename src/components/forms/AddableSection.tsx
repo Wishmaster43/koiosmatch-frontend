@@ -22,7 +22,7 @@ import { Edit2, Trash2 } from 'lucide-react'
 import SectionCardJs from '../ui/SectionCard'
 import AddFormJs from './AddForm'
 import { AddButton as AddButtonJs } from './fields'
-import { DragList } from '@/pages/settings/components/SettingsControls'
+import { DragList } from '@/pages/settings/shared'
 
 type AnyProps = Record<string, unknown>
 // Still-untyped JS helpers — accept any props at the boundary.

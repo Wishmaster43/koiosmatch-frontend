@@ -12,7 +12,7 @@ import { useTranslation } from 'react-i18next'
 import { ArrowRight } from 'lucide-react'
 import api, { unwrapList } from '@/lib/api'
 import { useDateFormat } from '@/lib/datetime'
-import { buildFieldDiff } from '@/pages/settings/sections/auditShared'
+import { buildFieldDiff } from '@/pages/settings/shared'
 import type { Id } from '@/types/common'
 
 interface ActivityEntry {

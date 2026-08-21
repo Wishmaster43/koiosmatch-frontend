@@ -19,12 +19,9 @@ import SubTabBar from '@/components/drawer/SubTabBar'
 import SectionCard from '@/components/ui/SectionCard'
 import { DragList } from '../components/SettingsControls'
 import CreatableSelect from '@/components/ui/CreatableSelect'
-import {
-  REPORT_KPI_SCOPE_IDS, REPORT_KPI_FAMILY, REPORT_KPI_PINNED_FIRST,
-  getReportKpiCatalog, getReportKpiDefaultOrder, reportHasSpareKpiCards, reportKpiSettingsKey,
-} from '@/pages/reports/kpiCatalog'
-import type { ReportKpiScopeId } from '@/pages/reports/kpiCatalog'
-import { resolveReportKpiOrder } from '@/pages/reports/resolveReportKpiOrder'
+import { REPORT_KPI_SCOPE_IDS, REPORT_KPI_FAMILY, REPORT_KPI_PINNED_FIRST, getReportKpiCatalog, getReportKpiDefaultOrder, reportHasSpareKpiCards, reportKpiSettingsKey } from '@/pages/reports/shared'
+import type { ReportKpiScopeId } from '@/pages/reports/shared'
+import { resolveReportKpiOrder } from '@/pages/reports/shared'
 import { Caption } from '@/components/ui/typography'
 
 // Only scopes with a known catalogue (axis or fixed) get a block — a scope

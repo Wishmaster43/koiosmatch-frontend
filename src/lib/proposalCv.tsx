@@ -7,8 +7,8 @@
  * browser download.
  */
 import { pdf } from '@react-pdf/renderer'
-import { CvDocument } from '@/pages/candidates/CandidateCvTemplate'
-import type { CvCandidate, CvSettings, TranslateFn } from '@/pages/candidates/CandidateCvTemplate'
+import { CvDocument } from '@/pages/candidates/shared'
+import type { CvCandidate, CvSettings, TranslateFn } from '@/pages/candidates/shared'
 
 // 'proposal' = redacted (name visible, contact hidden — the default a tenant offers
 // when proposing to a customer); 'full' = the unredacted house-style CV.

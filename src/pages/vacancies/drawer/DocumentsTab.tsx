@@ -21,9 +21,9 @@ import { downloadFilesSequentially } from '@/lib/downloadFiles'
 // controls at all (never a dead "koppelen" button). `canReplace={false}` for the
 // same reason: there is no /vacancies/{id}/documents/{id}/replace route yet
 // (reported in skipped, not silently wired to a 404).
-import DocumentRow from '@/pages/candidates/drawer/DocumentRow'
-import { docKey, docUrl, splitExt, DOC_GRID_COLUMNS } from '@/pages/candidates/drawer/documentHelpers'
-import type { DocItem } from '@/pages/candidates/drawer/documentHelpers'
+import { DocumentRow } from '@/pages/candidates/shared'
+import { docKey, docUrl, splitExt, DOC_GRID_COLUMNS } from '@/pages/candidates/shared'
+import type { DocItem } from '@/pages/candidates/shared'
 import Button from '@/components/ui/Button'
 import { tintBg, tintBorder, chipInk } from '@/lib/tint'
 // HUISSTIJL-1: the doc-type hint line (11px/muted) is the shared Caption atom.

@@ -16,7 +16,7 @@ import { useTranslation } from 'react-i18next'
 import api, { unwrapList } from '@/lib/api'
 import { notifyError } from '@/lib/notify'
 import { extractApiError } from '@/lib/extractApiError'
-import { mapCustomerNoteRow, type ApiCustomerNoteRow } from '@/pages/customers/data/mapCustomer'
+import { mapCustomerNoteRow, type ApiCustomerNoteRow } from '@/pages/customers/shared'
 import type { CustomerNote } from '@/types/customer'
 
 // NotesTab hands back the editor payload on save (add/edit share this shape).

@@ -25,7 +25,7 @@
 import type { AxiosResponse } from 'axios'
 import { useCachedLookup } from '@/lib/useCachedLookup'
 import { lookupNames } from '@/lib/lookupUtils'
-import { NL_PROVINCES } from '@/pages/candidates/drawer/constants'
+import { NL_PROVINCES } from '@/pages/candidates/shared'
 
 // Always the real (possibly empty) list — an empty response for a given country
 // IS meaningful now (no seeded provinces there), unlike the old NL-only endpoint

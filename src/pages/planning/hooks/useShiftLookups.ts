@@ -22,7 +22,7 @@
 import { useState, useEffect } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import api, { unwrapList } from '@/lib/api'
-import { useCustomerDepartments } from '@/pages/customers/hooks/useCustomerDepartments'
+import { useCustomerDepartments } from '@/pages/customers/shared'
 import type { Id } from '@/types/common'
 
 export interface ShiftLookupOption { id: Id; name: string }

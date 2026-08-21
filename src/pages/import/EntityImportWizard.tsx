@@ -7,10 +7,10 @@
  * already uses for its own EntityWizard.
  */
 import { useCallback } from 'react'
-import ImportOrderBanner from '@/pages/settings/sections/importeren/ImportOrderBanner'
-import WholeTreeBanner from '@/pages/settings/sections/importeren/WholeTreeBanner'
-import ResultStep from '@/pages/settings/sections/importeren/ResultStep'
-import { isWholeTreeTemplate } from '@/pages/settings/sections/importeren/importTemplateShape'
+import { ImportOrderBanner } from '@/pages/settings/shared'
+import { WholeTreeBanner } from '@/pages/settings/shared'
+import { ResultStep } from '@/pages/settings/shared'
+import { isWholeTreeTemplate } from '@/pages/settings/shared'
 import { buildImportFile, type ImportTemplateSummary } from './api'
 import { useMappingWizard } from './hooks/useMappingWizard'
 import { useValidateAndRun } from './hooks/useValidateAndRun'

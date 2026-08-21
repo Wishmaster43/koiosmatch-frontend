@@ -73,8 +73,8 @@ import { useDateFormat } from '@/lib/datetime'
 import { queryClient } from '@/lib/queryClient'
 // S-custlist-1: reuse, never fork — the exact candidate-drawer edit form and
 // detail panel (see the docblock above).
-import CandidateAddApplicationModal from '@/pages/candidates/drawer/AddApplicationModal'
-import ApplicationRowDetails from '@/pages/candidates/drawer/ApplicationRowDetails'
+import { CandidateAddApplicationModal } from '@/pages/candidates/shared'
+import { ApplicationRowDetails } from '@/pages/candidates/shared'
 import { useCustomerApplications, useApplicationsByVacancyIds } from '../hooks/useCustomerDrawerData'
 import type { Application } from '@/types/application'
 import type { Id } from '@/types/common'

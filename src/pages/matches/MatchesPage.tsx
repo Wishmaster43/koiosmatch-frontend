@@ -20,7 +20,7 @@ import { usePageMemory } from '@/lib/usePageMemory'
 import MatchesBulkBar from './MatchesBulkBar'
 // The full match form (§3B "direct match" path) — shared with the candidate
 // drawer; without a fixed candidateId it shows its own candidate picker.
-import MatchModal from '@/pages/candidates/drawer/MatchModal'
+import { MatchModal } from '@/pages/candidates/shared'
 import { useListPageSize } from '@/hooks/useListPageSize'
 import PaginationBar from '@/components/ui/PaginationBar'
 import ViewSwitch from '@/components/ui/ViewSwitch'

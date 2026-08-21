@@ -10,7 +10,7 @@
  * dry-run of what is about to be sent, never a stale one.
  */
 import { useTranslation } from 'react-i18next'
-import PreviewStep from '@/pages/settings/sections/importeren/PreviewStep'
+import { PreviewStep } from '@/pages/settings/shared'
 import { fieldLabel } from '../lib/fieldLabels'
 import type { ColumnMapping } from '../lib/mapping'
 import type { ImportRunResult } from '../api'

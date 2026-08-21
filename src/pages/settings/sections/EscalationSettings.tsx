@@ -25,7 +25,7 @@ import { SettingsScaffold, SettingCard } from '../components/SettingsKit'
 import { fieldInputStyle } from '@/components/forms/fieldMetrics'
 import SearchSelect from '@/components/ui/SearchSelect'
 import { useUsers } from '@/lib/queries'
-import { useAssignableRoles } from '@/pages/users/hooks/useAssignableRoles'
+import { useAssignableRoles } from '@/pages/users/shared'
 import { Caption } from '@/components/ui/typography'
 
 // The four stilstand signals the backend escalates today (11-escalatie 3b).

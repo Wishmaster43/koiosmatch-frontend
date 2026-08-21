@@ -7,8 +7,8 @@ import Button from '@/components/ui/Button'
 import DrawerAddButton from '@/components/drawer/DrawerAddButton'
 import StatusFilterSelect, { useStatusFilter } from '@/components/drawer/StatusFilterSelect'
 import api, { unwrap } from '@/lib/api'
-import PlanIntakeModal from '@/pages/candidates/drawer/PlanIntakeModal'
-import AddApplicationModal from '@/pages/applications/AddApplicationModal'
+import { PlanIntakeModal } from '@/pages/candidates/shared'
+import { AddApplicationModal } from '@/pages/applications/shared'
 // S-vacapp-1: the coupled-application ROW itself is the candidate drawer's own
 // ApplicationRow — never a second row implementation. It owns the record link,
 // pencil-edit, reason-gated unlink and the lazy expand panel; this tab only
@@ -17,11 +17,11 @@ import AddApplicationModal from '@/pages/applications/AddApplicationModal'
 // candidate's own drawer, see applicationRowModel.ts's docblock). Reusing the
 // candidates' own edit/detach modals too (same reasoning, never a vacancies-side
 // fork) — see AddApplicationModal/DetachApplicationModal imports below.
-import ApplicationRow from '@/pages/candidates/drawer/ApplicationRow'
-import CandidateAddApplicationModal from '@/pages/candidates/drawer/AddApplicationModal'
-import DetachApplicationModal from '@/pages/candidates/drawer/DetachApplicationModal'
-import { vacancyLabelOf } from '@/pages/candidates/drawer/applicationRowModel'
-import type { AppRow } from '@/pages/candidates/drawer/applicationRowModel'
+import { ApplicationRow } from '@/pages/candidates/shared'
+import { CandidateAddApplicationModal } from '@/pages/candidates/shared'
+import { DetachApplicationModal } from '@/pages/candidates/shared'
+import { vacancyLabelOf } from '@/pages/candidates/shared'
+import type { AppRow } from '@/pages/candidates/shared'
 // HUISSTIJL-1: the source-channel meta text (11px/muted) is the shared Caption atom.
 import { Caption } from '@/components/ui/typography'
 // PDF-VACATURES-13: the shared prev/next stepper (customer locations/contacts/

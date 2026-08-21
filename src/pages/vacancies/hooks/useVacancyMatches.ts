@@ -7,7 +7,7 @@
  */
 import { useQuery } from '@tanstack/react-query'
 import api, { unwrapList } from '@/lib/api'
-import { mapMatch } from '@/pages/matches/hooks/useMatches'
+import { mapMatch } from '@/pages/matches/shared'
 import type { RawMatch, MatchRow } from '@/types/match'
 import type { Id } from '@/types/common'
 

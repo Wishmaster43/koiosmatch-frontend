@@ -1,7 +1,7 @@
 import { useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useAllSettings, getNumberSetting } from '@/lib/settings/useAllSettings'
-import { deriveVacancyAdvice } from '@/pages/vacancies/data/vacancyAdvice'
+import { deriveVacancyAdvice } from '@/pages/vacancies/shared'
 import type { KoiosAdvice } from '@/lib/koiosAdviceMeta'
 import type { Vacancy } from '@/types/vacancy'
 

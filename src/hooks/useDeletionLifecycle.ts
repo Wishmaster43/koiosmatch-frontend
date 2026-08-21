@@ -7,7 +7,7 @@
  */
 import { useCallback, useEffect, useRef, useState } from 'react'
 import api, { unwrap } from '@/lib/api'
-import { loadSettings } from '@/pages/settings/lib/settingsApi'
+import { loadSettings } from '@/pages/settings/shared'
 import type {
   DeletionBlocker, DeletionConflictBody, DeletionMarkResponse, DeletionPreview, MarkDeletionBody,
 } from '@/types/deletion'

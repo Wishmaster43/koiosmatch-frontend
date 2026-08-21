@@ -7,7 +7,7 @@
 import { lazy } from 'react'
 import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
-import { LEGACY_REPORT_ROUTE_ALIASES } from '@/pages/reports/reportIds'
+import { LEGACY_REPORT_ROUTE_ALIASES } from '@/pages/reports/shared'
 
 const Dashboard              = lazy(() => import('@/pages/dashboard/Dashboard'))
 const ReportsPage            = lazy(() => import('@/pages/reports/ReportsPage'))

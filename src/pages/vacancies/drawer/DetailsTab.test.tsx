@@ -16,6 +16,12 @@ import type { VacancyDetail } from '@/types/vacancy'
 
 // Deterministic stand-in for the real ISO-3166 + Intl.DisplayNames lookup — the
 // real function is exercised by countries.test.ts, not here.
+// §2 barrel-besluit: useVacancyAdvice (lib) reads the vacancies BARREL — mock it
+// flat with just the pure advice fn, so the barrel's nine modules (and their
+// i18n-initialising import chains) never load into this raw-key suite.
+vi.mock('@/pages/vacancies/shared', async () => ({
+  deriveVacancyAdvice: (await vi.importActual<typeof import('@/pages/vacancies/data/vacancyAdvice')>('@/pages/vacancies/data/vacancyAdvice')).deriveVacancyAdvice,
+}))
 vi.mock('@/lib/countries', () => ({
   getCountryOptions: () => [{ value: 'NL', label: 'Netherlands' }, { value: 'BE', label: 'Belgium' }],
   getCountryName: (code: string) => (code === 'NL' ? 'Netherlands' : code),

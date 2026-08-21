@@ -15,7 +15,7 @@ export {
   fetchImportTemplates, downloadImportTemplate, dryRunImport, runImport,
   type ImportTemplateSummary, type ImportRowAction, type ImportRowResult,
   type ImportSummary, type ImportRunResult,
-} from '@/pages/settings/sections/importeren/importApi'
+} from '@/pages/settings/shared'
 
 /**
  * Build the CSV file to upload: headers = the entity's OWN target columns, in their

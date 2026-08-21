@@ -17,7 +17,7 @@ import PopoutShell from './PopoutShell'
 import TextPopoutEditor from './TextPopoutEditor'
 import { useCandidateLite } from './hooks/useCandidateLite'
 import { useTextPopoutDraft } from './hooks/useTextPopoutDraft'
-import { useCandidateRecord } from '@/pages/candidates/hooks/useCandidateMutations'
+import { useCandidateRecord } from '@/pages/candidates/shared'
 import { textPopoutTopic } from '@/lib/secondScreen'
 
 export default function CandidateSummaryPopout({ id }: { id: string | undefined }) {

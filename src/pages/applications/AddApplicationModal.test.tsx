@@ -91,8 +91,10 @@ vi.mock('@/lib/useCustomFields', () => ({
 // NEWCAND-1: stub the real create-candidate modal — its own extensive dependency
 // tree (genders/locations/functions/provinces/…) is out of scope here; this test
 // file only asserts the INTEGRATION seam (opening it, and what onCreated does).
-vi.mock('@/pages/candidates/AddCandidateModal', () => ({
-  default: ({ onCreated, onClose }: { onCreated: (c: unknown) => void; onClose: () => void }) => (
+// Mocks the BARREL flat (§2 barrel-besluit): only the one integration seam this
+// file asserts — the real barrel would eagerly load all candidate internals.
+vi.mock('@/pages/candidates/shared', () => ({
+  AddCandidateModal: ({ onCreated, onClose }: { onCreated: (c: unknown) => void; onClose: () => void }) => (
     <div>
       <button onClick={() => onCreated({ id: 'c9', name: 'Nieuwe Kandidaat', title: 'Verpleegkundige', city: 'Utrecht', ownerId: 'u2', owner: 'Klaas Anders' })}>
         mock-create-candidate

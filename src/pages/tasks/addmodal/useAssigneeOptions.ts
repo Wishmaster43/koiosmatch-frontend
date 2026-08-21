@@ -20,7 +20,7 @@
 import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useUsers } from '@/lib/queries'
-import { roleLabel } from '@/pages/users/usersParts'
+import { roleLabel } from '@/pages/users/shared'
 import { buildAssigneeOptions } from './assigneeOptions'
 import type { AssigneeOption } from './assigneeOptions'
 import type { UserLike } from './formHelpers'

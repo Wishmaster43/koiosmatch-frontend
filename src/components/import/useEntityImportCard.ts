@@ -14,8 +14,8 @@
  * correctly gates on vacancies.view/vacancies.create instead of the customers pair.
  */
 import { useEffect } from 'react'
-import { useImportWizard } from '@/pages/settings/sections/importeren/useImportWizard'
-import { importPermissionsFor } from '@/pages/settings/sections/importeren/importTemplateShape'
+import { useImportWizard } from '@/pages/settings/shared'
+import { importPermissionsFor } from '@/pages/settings/shared'
 
 interface UseEntityImportCardArgs {
   /** The backend importer key (ImportRegistry::IMPORTERS), e.g. 'customer_tree' or 'vacancies'. */

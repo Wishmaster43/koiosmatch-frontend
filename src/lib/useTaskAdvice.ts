@@ -1,6 +1,6 @@
 import { useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
-import { isTaskOverdue } from '@/pages/tasks/data/mapTask'
+import { isTaskOverdue } from '@/pages/tasks/shared'
 import type { KoiosAdvice } from '@/lib/koiosAdviceMeta'
 import type { Task } from '@/types/task'
 

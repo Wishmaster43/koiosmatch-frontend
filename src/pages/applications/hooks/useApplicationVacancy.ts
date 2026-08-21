@@ -11,7 +11,7 @@
  */
 import { useQuery } from '@tanstack/react-query'
 import api, { unwrap } from '@/lib/api'
-import { mapVacancyDetail } from '@/pages/vacancies/data/mapVacancy'
+import { mapVacancyDetail } from '@/pages/vacancies/shared'
 import type { VacancyDetail } from '@/types/vacancy'
 import type { Id } from '@/types/common'
 

@@ -26,10 +26,7 @@ import type { LucideIcon } from 'lucide-react'
 import { useAllSettings, useSettingsLoaded, getJsonSetting, saveSettingsKeys } from '@/lib/settings/useAllSettings'
 import SubTabBar from '@/components/drawer/SubTabBar'
 import SectionCard from '@/components/ui/SectionCard'
-import {
-  DASHBOARD_TYPES, KPI_ROWS, DASHBOARD_TEMPLATES, KPI_LABEL_KEY, BLOCK_LABEL_KEY, canSwitchViews,
-  type DashboardType,
-} from '@/pages/dashboard/templates'
+import { DASHBOARD_TYPES, KPI_ROWS, DASHBOARD_TEMPLATES, KPI_LABEL_KEY, BLOCK_LABEL_KEY, canSwitchViews, type DashboardType } from '@/pages/dashboard/shared'
 
 // Per-type icon (calm, one accent). Labels/descriptions come from i18n, never hardcoded.
 const TYPE_ICON: Record<DashboardType, LucideIcon> = {

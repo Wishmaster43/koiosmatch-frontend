@@ -1,6 +1,6 @@
 import { useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
-import { deriveOpportunityAdvice } from '@/pages/opportunities/data/opportunityAdvice'
+import { deriveOpportunityAdvice } from '@/pages/opportunities/shared'
 import type { KoiosAdvice } from '@/lib/koiosAdviceMeta'
 import type { Opportunity } from '@/types/opportunity'
 import type { LookupOption } from '@/types/common'

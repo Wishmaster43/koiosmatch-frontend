@@ -50,6 +50,42 @@ const huisstijlPlugin = {
   },
 }
 
+// §2 BARREL-BESLUIT (Danny 21-08): cross-entity imports gaan door de PUBLIEKE
+// surface van de doel-entiteit (pages/<entiteit>/shared.ts) — diepe internals
+// zijn buiten de eigen map verboden. Eén bloklijst genereert alle entiteiten;
+// een nieuwe entiteit = één naam hier. Flat config VERVANGT een regel per
+// bestand (zie de merge-les bovenaan), dus elk blok herhaalt het
+// deep-relative-patroon in dezelfde regelinstantie. Warn-niveau: het plafond
+// en de staged gate handhaven (zero-hit bij oplevering, gemeten).
+const ENTITY_DIRS = ['ai', 'applications', 'auth', 'candidates', 'customers', 'dashboard', 'import', 'matches', 'opportunities', 'outreach', 'planning', 'popout', 'reports', 'settings', 'shiftmanager', 'tasks', 'users', 'vacancies', 'whatsapp']
+const DEEP_RELATIVE_PATTERN = {
+  group: ['../../**'],
+  message: 'Use the "@/" alias instead of deep relative imports (../../…). See CLAUDE.md §11.',
+}
+const barrelMessage = 'Cross-entity import: ga via de publieke surface van de doel-entiteit (@/pages/<entiteit>/shared) — §2 barrel-besluit (Danny 21-08); wat daar niet in staat is intern.'
+const crossEntityBlocks = [
+  ...ENTITY_DIRS.map(ent => ({
+    files: [`src/pages/${ent}/**`],
+    ignores: ['**/*.test.*'],
+    rules: {
+      'no-restricted-imports': ['warn', { patterns: [DEEP_RELATIVE_PATTERN, {
+        group: ['@/pages/*/**', `!@/pages/${ent}/**`, '!@/pages/*/shared', '!@/pages/*/*Page'],
+        message: barrelMessage,
+      }] }],
+    },
+  })),
+  {
+    files: ['src/components/**', 'src/context/**', 'src/hooks/**', 'src/lib/**', 'src/modules/**', 'src/*.ts', 'src/*.tsx'],
+    ignores: ['**/*.test.*'],
+    rules: {
+      'no-restricted-imports': ['warn', { patterns: [DEEP_RELATIVE_PATTERN, {
+        group: ['@/pages/*/**', '!@/pages/*/shared', '!@/pages/*/*Page'],
+        message: barrelMessage,
+      }] }],
+    },
+  },
+]
+
 export default defineConfig([
   globalIgnores(['dist', 'dist-careersite']),
   // typography.houseStyle.test.js (HUISSTIJL slotaudit T6/T7) walks the source
@@ -352,4 +388,5 @@ export default defineConfig([
       }],
     },
   },
+  ...crossEntityBlocks,
 ])

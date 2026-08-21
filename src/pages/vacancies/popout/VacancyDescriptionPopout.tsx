@@ -8,9 +8,9 @@
  */
 import { useCallback, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
-import PopoutShell from '@/pages/popout/PopoutShell'
-import TextPopoutEditor from '@/pages/popout/TextPopoutEditor'
-import { useTextPopoutDraft } from '@/pages/popout/hooks/useTextPopoutDraft'
+import { PopoutShell } from '@/pages/popout/shared'
+import { TextPopoutEditor } from '@/pages/popout/shared'
+import { useTextPopoutDraft } from '@/pages/popout/shared'
 import { useVacancyTextLite, patchVacancyText } from '../hooks/useVacancyTextPopout'
 import { textPopoutTopic } from '@/lib/secondScreen'
 

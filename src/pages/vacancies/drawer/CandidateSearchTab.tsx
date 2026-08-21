@@ -18,7 +18,7 @@ import DrawerAddButton from '@/components/drawer/DrawerAddButton'
 // Reuse the candidate-anchored "+ Solliciteren" flow (mirrors ApplicantsTab's own
 // CandidateAddApplicationModal reuse, §2 sanctioned cross-entity import for this
 // exact shared flow) — never a second apply form.
-import CandidateAddApplicationModal from '@/pages/candidates/drawer/AddApplicationModal'
+import { CandidateAddApplicationModal } from '@/pages/candidates/shared'
 // HUISSTIJL-1: filter labels/meta captions (11/muted) and distance readouts (Mono) are the shared atoms.
 import { Caption, Mono } from '@/components/ui/typography'
 import { useCandidateSearch } from '../hooks/useCandidateSearch'

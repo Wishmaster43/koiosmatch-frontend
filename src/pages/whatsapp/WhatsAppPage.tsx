@@ -26,7 +26,7 @@ import { useWhatsAppQueue, sumBatches } from './hooks/useWhatsAppQueue'
 // nine-card KPI strip (also used by the dashboard and all 17 reports) — no
 // surface of its own, two-line labels, dev-time nine-card guard. Reusing it here
 // keeps one look instead of a second hand-rolled strip (CLAUDE.md §0.9/§11).
-import ReportKpiBand from '@/pages/reports/ReportKpiBand'
+import { ReportKpiBand } from '@/pages/reports/shared'
 import type { KpiSpec } from '@/components/insights/InsightsRow'
 import RightDrawer from '@/components/ui/RightDrawer'
 import PieChartCard from '@/components/charts/PieChartCard'

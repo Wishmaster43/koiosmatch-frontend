@@ -2,7 +2,7 @@ import { useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useAllSettings, getNumberSetting } from '@/lib/settings/useAllSettings'
 import { useMatchStatuses } from '@/lib/useMatchStatuses'
-import { deriveMatchAdvice } from '@/pages/matches/data/matchAdvice'
+import { deriveMatchAdvice } from '@/pages/matches/shared'
 import type { KoiosAdvice } from '@/lib/koiosAdviceMeta'
 import type { MatchRow } from '@/types/match'
 

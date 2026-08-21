@@ -1,8 +1,8 @@
 import { useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
-import { deriveCampaignAdvice } from '@/pages/outreach/data/campaignAdvice'
+import { deriveCampaignAdvice } from '@/pages/outreach/shared'
 import type { KoiosAdvice } from '@/lib/koiosAdviceMeta'
-import type { Campaign } from '@/pages/outreach/hooks/useOutreachCampaigns'
+import type { Campaign } from '@/pages/outreach/shared'
 
 /**
  * useCampaignAdvice — the ONE resolver both the outreach (bellijsten) TABLE

@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { useAllSettings, getJsonSetting, saveSettingsKeys } from '@/lib/settings/useAllSettings'
 import { useLookups } from '@/context/LookupsContext'
 import { VacancyLookupsProvider, useVacancyLookups } from '@/context/VacancyLookupsContext'
-import { getVacancyTabDefaults } from '@/pages/candidates/lib/vacancyTabVisibility'
+import { getVacancyTabDefaults } from '@/pages/candidates/shared'
 import SubTabBar from '@/components/drawer/SubTabBar'
 import LookupChipSelect from '../components/LookupChipSelect'
 

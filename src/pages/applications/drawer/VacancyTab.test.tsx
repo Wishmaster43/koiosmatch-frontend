@@ -26,18 +26,20 @@ vi.mock('@/lib/api', async () => {
 })
 // S20: the mock exposes onUpdate so a test can prove it actually fires a PATCH
 // (the whole point of the fix — DetailsTab's pencils used to no-op here).
-vi.mock('@/pages/vacancies/drawer/DetailsTab', () => ({
-  default: ({ onUpdate }: { onUpdate?: (id: number, patch: Record<string, unknown>) => void }) => (
+// Mocks the BARREL flat (§2 barrel-besluit): the tabs are stubs, the pure
+// buildVacancyPatch comes straight from its own module so the seam stays real.
+vi.mock('@/pages/vacancies/shared', async () => ({
+  DetailsTab: ({ onUpdate }: { onUpdate?: (id: number, patch: Record<string, unknown>) => void }) => (
     <div>
       details-tab
       <button onClick={() => onUpdate?.(7, { skills: ['Triage'] })}>save-skill</button>
     </div>
   ),
-}))
-// Danny 21-07: Beschrijving now renders alongside DetailsTab in this drill-down
-// (its own drawer main-tab on the real vacancy has no equivalent tab bar here).
-vi.mock('@/pages/vacancies/drawer/DescriptionTab', () => ({
-  default: () => <div>description-tab</div>,
+  // Danny 21-07: Beschrijving renders alongside DetailsTab in this drill-down.
+  DescriptionTab: () => <div>description-tab</div>,
+  buildVacancyPatch: (await vi.importActual<typeof import('@/pages/vacancies/data/vacanciesShared')>('@/pages/vacancies/data/vacanciesShared')).buildVacancyPatch,
+  // The hook under this tab maps the fetched detail through the real mapper.
+  mapVacancyDetail: (await vi.importActual<typeof import('@/pages/vacancies/data/mapVacancy')>('@/pages/vacancies/data/mapVacancy')).mapVacancyDetail,
 }))
 vi.mock('@/context/VacancyLookupsContext', () => ({ VacancyLookupsProvider: ({ children }: { children: ReactNode }) => <>{children}</> }))
 // OPTIMISTIC-REVERT-1: mock notify so a failed save's error toast is assertable.
