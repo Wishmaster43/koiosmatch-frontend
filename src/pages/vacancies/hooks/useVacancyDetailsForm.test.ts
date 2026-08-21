@@ -11,6 +11,12 @@
  * the `location` section: province options scope to the picked country, and
  * an already-filled province that no longer exists in the new country's list
  * is cleared rather than silently kept mismatched.
+ *
+ * DRILLDOWN-VOLGORDE-CANON (Danny 21-08, VACATURES 1/3/4): the bureau branch
+ * (vestiging) and the required-skills list both moved OUT of this hook — the
+ * branch is now VacancyBranchBlock's own field (VacancyBranchBlock.test.tsx),
+ * and skills now live in useVacancySkills (useVacancySkills.test.ts). Neither
+ * is covered here any more.
  */
 import { describe, it, expect, vi } from 'vitest'
 import { renderHook, act } from '@testing-library/react'
@@ -31,9 +37,6 @@ vi.mock('@/lib/useCao', () => ({
 }))
 vi.mock('@/lib/datetime', () => ({ useDateFormat: () => ({ formatDate: (d: string) => d }) }))
 vi.mock('./useCustomerOptions', () => ({ useCustomerOptions: () => [] }))
-// VAC-VESTIGING-1: the bureau-branch lookup — stubbed (no QueryClient here,
-// mirrors every other lookup mock in this file).
-vi.mock('@/lib/useLocations', () => ({ useLocations: () => [{ value: 'branch-1', label: 'Hoofdkantoor Assen' }] }))
 vi.mock('./useCascadePickers', () => ({ useCascadePickers: () => ({ locationPicker: null, departmentPicker: null, contactPicker: null }) }))
 
 // The country cascade itself: a per-country list (mirrors useProvinces' real
@@ -93,35 +96,6 @@ describe('useVacancyDetailsForm · location section · province cascades on coun
     expect(patch).not.toHaveProperty('experienceMin')
     expect(patch).not.toHaveProperty('contractTypes')
   })
-
-  // VAC-VESTIGING-1: the bureau branch (vestiging) round-trips through this
-  // same section — picking it PATCHes `branchId`, clearing it PATCHes `null`
-  // (never omitted), and Cancel reverts the draft to the last saved value.
-  it('picking a branch and saving PATCHes branchId + the resolved branchName', () => {
-    const onUpdate = vi.fn()
-    const { result } = renderHook(() => useVacancyDetailsForm(vacancy(), onUpdate))
-    act(() => { result.current.location.setBranchId('branch-1') })
-    act(() => { result.current.location.save() })
-    const [, patch] = onUpdate.mock.calls[0]
-    expect(patch).toEqual(expect.objectContaining({ branchId: 'branch-1', branchName: 'Hoofdkantoor Assen' }))
-  })
-
-  it('clearing a picked branch and saving PATCHes branchId: null, never omitting the key', () => {
-    const onUpdate = vi.fn()
-    const { result } = renderHook(() => useVacancyDetailsForm(vacancy({ branchId: 'branch-1' }), onUpdate))
-    act(() => { result.current.location.setBranchId('') })
-    act(() => { result.current.location.save() })
-    const [, patch] = onUpdate.mock.calls[0]
-    expect(patch).toHaveProperty('branchId', null)
-  })
-
-  it('Cancel reverts an unsaved branch pick back to the last saved value', () => {
-    const { result } = renderHook(() => useVacancyDetailsForm(vacancy({ branchId: 'branch-1' })))
-    act(() => { result.current.location.setBranchId('') })
-    expect(result.current.location.branchId).toBe('')
-    act(() => { result.current.location.cancel() })
-    expect(result.current.location.branchId).toBe('branch-1')
-  })
 })
 
 describe('useVacancyDetailsForm · sections are independent (VAC-DETAILS-SPLIT-1)', () => {
@@ -162,14 +136,16 @@ describe('useVacancyDetailsForm · sections are independent (VAC-DETAILS-SPLIT-1
     expect(patch).not.toHaveProperty('skills')
   })
 
-  it('requirements save PATCHes experience/seniority/education AND skills, never salary/address', () => {
+  it('requirements save PATCHes experience/seniority/education, never salary/address/skills', () => {
     const onUpdate = vi.fn()
     const { result } = renderHook(() => useVacancyDetailsForm(vacancy({ experienceMin: '1', experienceMax: '3' }), onUpdate))
     act(() => { result.current.requirements.save() })
     const [, patch] = onUpdate.mock.calls[0]
-    expect(patch).toEqual(expect.objectContaining({ experienceMin: '1', experienceMax: '3', skills: [] }))
+    expect(patch).toEqual(expect.objectContaining({ experienceMin: '1', experienceMax: '3' }))
     expect(patch).not.toHaveProperty('salaryMin')
     expect(patch).not.toHaveProperty('street')
+    // Skills moved to useVacancySkills (VACATURES 4) — this section never PATCHes them.
+    expect(patch).not.toHaveProperty('skills')
   })
 
   it('conditions save PATCHes only salary/hours', () => {
@@ -211,49 +187,5 @@ describe('useVacancyDetailsForm · sections are independent (VAC-DETAILS-SPLIT-1
     // The Requirements pencil, opened independently, stays open — cancelling
     // Conditions must not touch it.
     expect(result.current.requirements.editing).toBe(true)
-  })
-
-  // VACANCY-SKILLS-PARITY-1 (Danny 08-08): addSkill now takes the value
-  // directly — RequiredSkillsSection's AddForm submits it in one call, so
-  // there is no more separate `newSkill` input-state to seed first.
-  it('skills add/remove persists immediately when the Eisen pencil is closed', () => {
-    const onUpdate = vi.fn()
-    const { result } = renderHook(() => useVacancyDetailsForm(vacancy(), onUpdate))
-    act(() => { result.current.requirements.addSkill('Triage') })
-    expect(result.current.requirements.skills).toEqual(['Triage'])
-    expect(onUpdate).toHaveBeenCalledWith('v1', { skills: ['Triage'] })
-    act(() => { result.current.requirements.removeSkill('Triage') })
-    expect(result.current.requirements.skills).toEqual([])
-    expect(onUpdate).toHaveBeenCalledWith('v1', { skills: [] })
-  })
-
-  it('skills add rides along with the Eisen Save (no immediate PATCH) while its pencil is open', () => {
-    const onUpdate = vi.fn()
-    const { result } = renderHook(() => useVacancyDetailsForm(vacancy(), onUpdate))
-    act(() => { result.current.requirements.setEditing(true) })
-    act(() => { result.current.requirements.addSkill('Triage') })
-    expect(onUpdate).not.toHaveBeenCalled()
-    act(() => { result.current.requirements.save() })
-    const [, patch] = onUpdate.mock.calls[0]
-    expect(patch).toEqual(expect.objectContaining({ skills: ['Triage'] }))
-  })
-
-  // VACANCY-SKILLS-PARITY-1: the candidate SkillsTab's per-row pencil equivalent
-  // — renames a skill IN PLACE (same array position), never a remove+re-add,
-  // and still PATCHes the plain `skills: string[]` shape unchanged.
-  it('editSkill renames a skill at its own index and PATCHes the updated array', () => {
-    const onUpdate = vi.fn()
-    const { result } = renderHook(() => useVacancyDetailsForm(vacancy({ skills: ['Triage', 'Wondzorg'] }), onUpdate))
-    act(() => { result.current.requirements.editSkill(1, 'Wondverzorging') })
-    expect(result.current.requirements.skills).toEqual(['Triage', 'Wondverzorging'])
-    expect(onUpdate).toHaveBeenCalledWith('v1', { skills: ['Triage', 'Wondverzorging'] })
-  })
-
-  it('editSkill ignores a rename that collides with a different existing skill', () => {
-    const onUpdate = vi.fn()
-    const { result } = renderHook(() => useVacancyDetailsForm(vacancy({ skills: ['Triage', 'Wondzorg'] }), onUpdate))
-    act(() => { result.current.requirements.editSkill(1, 'Triage') })
-    expect(result.current.requirements.skills).toEqual(['Triage', 'Wondzorg'])
-    expect(onUpdate).not.toHaveBeenCalled()
   })
 })

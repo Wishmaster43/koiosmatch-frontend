@@ -203,7 +203,7 @@
       "general": "General",
       "requirements": "Requisitos",
       "conditions": "Condiciones",
-      "location": "Ubicación"
+      "location": "Ubicación de la vacante"
     },
     "id": "ID de vacante",
     "startDate": "Fecha de inicio",

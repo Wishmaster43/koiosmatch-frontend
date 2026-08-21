@@ -201,7 +201,7 @@
   "details": {
     "groups": {
       "general": "General",
-      "location": "Location",
+      "location": "Vacancy location",
       "requirements": "Requirements",
       "conditions": "Conditions"
     },

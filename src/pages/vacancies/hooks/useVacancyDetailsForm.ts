@@ -1,6 +1,6 @@
 /**
- * useVacancyDetailsForm — the DetailsTab form/cascade/types/skills/save/cancel
- * logic (audit R1 item 6: DetailsTab crossed ~320 lines mixing state with card
+ * useVacancyDetailsForm — the DetailsTab form/cascade/types/save/cancel logic
+ * (audit R1 item 6: DetailsTab crossed ~320 lines mixing state with card
  * layout; extracted here mirroring how VacanciesPage got useVacancyInsights).
  *
  * VAC-DETAILS-SPLIT-1 (Danny 24-07): "een potlood zet 21 velden tegelijk in
@@ -16,6 +16,13 @@
  *
  * The description block's own edit state lives in useVacancyDescription
  * (Danny 21-07: Beschrijving moved to its own drawer tab) — untouched here.
+ *
+ * DRILLDOWN-VOLGORDE-CANON (Danny 21-08, VACATURES 1/2/3/4): the required
+ * skills list moved to the Vacaturetekst tab (its own useVacancySkills hook,
+ * next to the vacancy text) and the bureau branch (vestiging) moved out of
+ * this Locatie section entirely, onto its own LAST block in the drill-down
+ * (VacancyBranchBlock, its own useLocations()) — neither lives in this hook
+ * any more.
  */
 import { useState, useEffect } from 'react'
 import type { ReactNode } from 'react'
@@ -27,7 +34,6 @@ import { useContractTypes } from '@/lib/useContractTypes'
 import { useCao } from '@/lib/useCao'
 import { useDateFormat } from '@/lib/datetime'
 import { useProvinces } from '@/hooks/useProvinces'
-import { useLocations } from '@/lib/useLocations'
 import { useCustomerOptions } from './useCustomerOptions'
 import { useCascadePickers } from './useCascadePickers'
 import type { VacancyDetail } from '@/types/vacancy'
@@ -68,33 +74,17 @@ export interface LocationSection {
   form: LocationForm; setF: (k: LocationKey, val: string) => void
   save: () => void; cancel: () => void
   provinces: string[]
-  // VAC-VESTIGING-1: the tenant's own bureau branch (`location_id`) — a real
-  // relational id, kept OUTSIDE the text-only LocationForm above (mirrors how
-  // Algemeen keeps `clientId` beside its own text form).
-  branchId: string; setBranchId: (v: string) => void
-  branchOptions: Array<{ value: Id; label: string }>
 }
 export interface RequirementsSection {
   editing: boolean; setEditing: (v: boolean) => void
   form: RequirementsForm; setF: (k: RequirementsKey, val: string) => void
   save: () => void; cancel: () => void
-  // VACANCY-SKILLS-PARITY-1 (Danny 08-08): addSkill/editSkill now take the
-  // value directly (the RequiredSkillsSection editor's own AddForm submits it)
-  // instead of reading a separate `newSkill` input-state field — the always-
-  // visible text+button row is gone, so that state has no reader left.
-  skills: string[]
-  addSkill: (name: string) => void
-  editSkill: (i: number, name: string) => void
-  removeSkill: (s: string) => void
 }
 export interface ConditionsSection {
   editing: boolean; setEditing: (v: boolean) => void
   form: ConditionsForm; setF: (k: ConditionsKey, val: string) => void
   save: () => void; cancel: () => void
 }
-
-// Normalise a skill entry (string, or an object shape some seeds still carry) to plain text.
-const skillStr = (s: unknown): string => (typeof s === 'string' ? s : ((s as { name?: string; label?: string })?.name ?? (s as { label?: string })?.label ?? ''))
 
 // Compose a one-line address from the structured fields (street nr-suffix, postcode city).
 export function composeAddress(street: string, houseNumber: string, suffix: string, postalCode: string, city: string): string {
@@ -199,11 +189,6 @@ export function useVacancyDetailsForm(v: VacancyDetail, onUpdate?: UpdateFn) {
     province: v.province, country: v.country,
   })
   const locationForm = useEditableForm(seedLocation)
-  // VAC-VESTIGING-1: bureau branch — own id state (not a LocationForm text key),
-  // seeded from the mapped `branchId`, clearable (optional field, VAC-CLEAR-1).
-  const [branchId, setBranchId] = useState<string>(v.branchId ?? '')
-  const [savedBranchId, setSavedBranchId] = useState<string>(v.branchId ?? '')
-  const branchOptions = useLocations()
   // VAC-COUNTRY-1 (Danny 22-07, punt 2): province list CASCADES on the picked
   // country, mirroring the candidate ProfileTab/AddCandidateModal pattern exactly
   // — its own cache slot per country (useProvinces), so switching country never
@@ -220,17 +205,12 @@ export function useVacancyDetailsForm(v: VacancyDetail, onUpdate?: UpdateFn) {
     onUpdate?.(v.id, {
       street: locationForm.form.street, houseNumber: locationForm.form.houseNumber, houseNumberSuffix: locationForm.form.houseNumberSuffix,
       postalCode: locationForm.form.postalCode, city: locationForm.form.city, province: locationForm.form.province, country: locationForm.form.country, location,
-      // VAC-VESTIGING-1: `null` when cleared, never omitted — buildVacancyPatch
-      // gates on `'branchId' in patch`, so this always reaches the PATCH body.
-      branchId: branchId || null,
-      branchName: branchOptions.find(o => String(o.value) === branchId)?.label ?? '',
     })
-    setSavedBranchId(branchId)
     locationForm.setEditing(false)
   }
-  const cancelLocation = () => { locationForm.reset(); setBranchId(savedBranchId); locationForm.setEditing(false) }
+  const cancelLocation = () => { locationForm.reset(); locationForm.setEditing(false) }
 
-  // ---- Eisen: ervaring/senioriteit/opleiding + the required-skills list ----
+  // ---- Eisen: ervaring/senioriteit/opleiding ----
   const seedRequirements = (): RequirementsForm => ({
     experienceMin: v.experienceMin, experienceMax: v.experienceMax, seniority: v.seniorityValue, education: v.educationValue,
   })
@@ -246,22 +226,6 @@ export function useVacancyDetailsForm(v: VacancyDetail, onUpdate?: UpdateFn) {
     if (!requirementsForm.form.education && defaultEducation) requirementsForm.setF('education', defaultEducation)
     // eslint-disable-next-line react-hooks/exhaustive-deps -- only react to opening the editor / the lookups resolving, never to the recruiter's own pick
   }, [requirementsForm.editing, defaultSeniority, defaultEducation])
-  const [skills, setSkills] = useState<string[]>(() => (v.skills ?? []).map(skillStr).filter(Boolean))
-  // Skills are quick-editable OUTSIDE the pencil (Danny 2026-07-06: "kan ik niet
-  // invullen"): adding/removing persists immediately; while the Eisen pencil is
-  // open the change rides along with ITS Save instead (skills moved into this
-  // section — see DetailsRequirementsTab's file comment for why).
-  const persistSkills = (next: string[]) => { setSkills(next); if (!requirementsForm.editing) onUpdate?.(v.id, { skills: next }) }
-  const addSkill = (name: string) => { const sk = name.trim(); if (sk && !skills.includes(sk)) persistSkills([...skills, sk]) }
-  // VACANCY-SKILLS-PARITY-1: rename a skill IN PLACE (same list position) — the
-  // candidate SkillsTab's per-row pencil equivalent, since a plain string[]
-  // field has no id to PATCH individually against.
-  const editSkill = (i: number, name: string) => {
-    const sk = name.trim()
-    if (!sk || skills.some((s, idx) => idx !== i && s === sk)) return
-    persistSkills(skills.map((s, idx) => (idx === i ? sk : s)))
-  }
-  const removeSkill = (s: string) => persistSkills(skills.filter(x => x !== s))
   const saveRequirements = () => {
     const sen = seniorityLevels.find(s => s.value === requirementsForm.form.seniority)
     const edu = educationLevels.find(e => e.value === requirementsForm.form.education)
@@ -269,13 +233,11 @@ export function useVacancyDetailsForm(v: VacancyDetail, onUpdate?: UpdateFn) {
       experienceMin: requirementsForm.form.experienceMin, experienceMax: requirementsForm.form.experienceMax,
       seniorityValue: requirementsForm.form.seniority, seniority: sen?.label ?? '',
       educationValue: requirementsForm.form.education, education: edu?.label ?? '',
-      skills,
     })
     requirementsForm.setEditing(false)
   }
   const cancelRequirements = () => {
     requirementsForm.reset()
-    setSkills((v.skills ?? []).map(skillStr).filter(Boolean))
     requirementsForm.setEditing(false)
   }
 
@@ -314,12 +276,10 @@ export function useVacancyDetailsForm(v: VacancyDetail, onUpdate?: UpdateFn) {
     location: {
       editing: locationForm.editing, setEditing: locationForm.setEditing, form: locationForm.form, setF: locationForm.setF,
       save: saveLocation, cancel: cancelLocation, provinces,
-      branchId, setBranchId, branchOptions,
     } satisfies LocationSection,
     requirements: {
       editing: requirementsForm.editing, setEditing: requirementsForm.setEditing, form: requirementsForm.form, setF: requirementsForm.setF,
       save: saveRequirements, cancel: cancelRequirements,
-      skills, addSkill, editSkill, removeSkill,
     } satisfies RequirementsSection,
     conditions: {
       editing: conditionsForm.editing, setEditing: conditionsForm.setEditing, form: conditionsForm.form, setF: conditionsForm.setF,

@@ -26,6 +26,12 @@ vi.mock('@/lib/countries', () => ({
   getCountryOptions: () => [{ value: 'NL', label: 'Netherlands' }, { value: 'BE', label: 'Belgium' }],
   getCountryName: (code: string) => (code === 'NL' ? 'Netherlands' : code),
 }))
+// DRILLDOWN-VOLGORDE-CANON: VacancyBranchBlock (the drill-down's LAST block)
+// reads its own useLocations() — stubbed here (no QueryClient in this suite,
+// mirrors useVacancyDetailsForm.test.ts's own stub of the same hook).
+vi.mock('@/lib/useLocations', () => ({
+  useLocations: () => [{ value: 'branch-1', label: 'Hoofdkantoor Assen' }],
+}))
 // The advice-block WIRING is under test (KOIOS-ADVIES-OVERAL-1), not its chrome —
 // the stub exposes each insight's collapsed label as plain text.
 vi.mock('@/components/ai/KoiosAdviceBlock', () => ({
@@ -58,7 +64,9 @@ const makeHookReturn = (overrides: { general?: object; location?: object; requir
     ...overrides.general,
   }),
   location: baseSection({ provinces: ['Utrecht', 'Zuid-Holland'], ...overrides.location }),
-  requirements: baseSection({ skills: [], newSkill: '', setNewSkill: vi.fn(), addSkill: vi.fn(), removeSkill: vi.fn(), ...overrides.requirements }),
+  // Skills moved to useVacancySkills (VACATURES 4) — this section is back to
+  // just the three field rows, no skills fields left to stub.
+  requirements: baseSection({ ...overrides.requirements }),
   conditions: baseSection({ ...overrides.conditions }),
 })
 
@@ -164,5 +172,29 @@ describe('DetailsTab · land→provincie cascade (Danny 22-07, punt 2)', () => {
     render(<DetailsTab vacancy={v} onUpdate={vi.fn()} />)
     // Both the Location card's province and country rows fall back to the dash.
     expect(screen.getAllByText('-').length).toBeGreaterThanOrEqual(2)
+  })
+})
+
+// DRILLDOWN-VOLGORDE-CANON (Danny 21-08, VACATURES 1/3): informatie → vrije
+// tekst → Koios AI → vestiging LAST — this suite guards the block ORDER on
+// this one tab (the vrije-tekst tab itself lives elsewhere, on DescriptionTab).
+describe('DetailsTab · vestiging is the drill-down\'s LAST block (DRILLDOWN-VOLGORDE-CANON)', () => {
+  it('renders VacancyBranchBlock as the final child, after the Koios advice block', () => {
+    hookReturn = makeHookReturn()
+    const { container } = render(<DetailsTab vacancy={vacancy} onUpdate={vi.fn()} />)
+    const blocks = Array.from(container.firstElementChild?.children ?? [])
+    expect(blocks[blocks.length - 1].textContent).toContain('modal.fields.branch')
+    // ... and the Koios advice stub sits immediately before it.
+    expect(blocks[blocks.length - 2].getAttribute('data-testid')).toBe('koios-advice')
+  })
+
+  it('picking a branch persists via onUpdate(id, { branchId, branchName })', async () => {
+    hookReturn = makeHookReturn()
+    const onUpdate = vi.fn()
+    const user = userEvent.setup()
+    render(<DetailsTab vacancy={vacancy} onUpdate={onUpdate} />)
+    await user.click(screen.getByRole('button', { name: 'common:select' }))
+    await user.click(screen.getByRole('button', { name: 'Hoofdkantoor Assen' }))
+    expect(onUpdate).toHaveBeenCalledWith('v1', { branchId: 'branch-1', branchName: 'Hoofdkantoor Assen' })
   })
 })

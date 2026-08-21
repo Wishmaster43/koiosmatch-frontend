@@ -10,6 +10,10 @@
  * this component imports `composeAddress` from the real hook module, which
  * transitively pulls in `lib/datetime` → `src/i18n`, so `t()` resolves to
  * the actual NL strings (fallback locale) instead of echoing raw keys.
+ *
+ * DRILLDOWN-VOLGORDE-CANON (Danny 21-08, VACATURES 1/3): the bureau branch
+ * (vestiging) picker moved OUT of this card onto the drill-down's own LAST
+ * block (VacancyBranchBlock.test.tsx) — this suite no longer covers it.
  */
 import { describe, it, expect, vi } from 'vitest'
 import { render, screen } from '@testing-library/react'
@@ -35,9 +39,6 @@ const makeLocation = (overrides: Partial<LocationSection> = {}): LocationSection
   editing: false, setEditing: vi.fn(),
   form: { street: 'Kerkstraat', houseNumber: '12', houseNumberSuffix: 'a', postalCode: '1234 AB', city: 'Utrecht', province: 'Utrecht', country: 'NL' },
   setF: vi.fn(), save: vi.fn(), cancel: vi.fn(), provinces: ['Utrecht'],
-  // VAC-VESTIGING-1: the bureau branch id/setter/options — defaults mirror the
-  // other sections' empty state (nothing picked, one option available).
-  branchId: '', setBranchId: vi.fn(), branchOptions: [{ value: 'branch-1', label: 'Hoofdkantoor Assen' }],
   ...overrides,
 })
 
@@ -71,37 +72,5 @@ describe('DetailsLocationTab · address canon (V9)', () => {
     const empty = { ...vacancy, province: '', country: '' } as VacancyDetail
     render(<DetailsLocationTab vacancy={empty} location={makeLocation()} />)
     expect(screen.getAllByText('-').length).toBeGreaterThanOrEqual(2)
-  })
-})
-
-// VAC-VESTIGING-1: the vacancy's own bureau branch (vestiging) round-trips
-// through mapVacancy.ts and is now a real editable picker (was read-only).
-describe('DetailsLocationTab · bureau branch / vestiging (VAC-VESTIGING-1)', () => {
-  it('renders the resolved branch name in read mode', () => {
-    // A name distinct from the fixture's own province ('Utrecht') so this
-    // assertion can't accidentally match that unrelated row instead.
-    const withBranch = { ...vacancy, branchName: 'Hoofdkantoor Assen' } as VacancyDetail
-    render(<DetailsLocationTab vacancy={withBranch} location={makeLocation()} />)
-    expect(screen.getByText('Hoofdkantoor Assen')).toBeInTheDocument()
-  })
-
-  it('falls back to a dash when no branch was ever picked', () => {
-    const noBranch = { ...vacancy, branchName: '' } as VacancyDetail
-    render(<DetailsLocationTab vacancy={noBranch} location={makeLocation()} />)
-    expect(screen.getAllByText('-').length).toBeGreaterThanOrEqual(1)
-  })
-
-  it('edit mode offers a searchable branch picker seeded with the tenant\'s branches', () => {
-    render(<DetailsLocationTab vacancy={vacancy} location={makeLocation({ editing: true, branchId: 'branch-1' })} />)
-    expect(screen.getByText('Hoofdkantoor Assen')).toBeInTheDocument()
-  })
-
-  it('picking a branch calls setBranchId with the picked id', async () => {
-    const setBranchId = vi.fn()
-    const { default: userEvent } = await import('@testing-library/user-event')
-    render(<DetailsLocationTab vacancy={vacancy} location={makeLocation({ editing: true, setBranchId })} />)
-    await userEvent.click(screen.getByRole('button', { name: 'Selecteer' }))
-    await userEvent.click(screen.getByRole('button', { name: 'Hoofdkantoor Assen' }))
-    expect(setBranchId).toHaveBeenCalledWith('branch-1')
   })
 })

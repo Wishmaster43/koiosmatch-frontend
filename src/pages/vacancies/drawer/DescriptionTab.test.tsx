@@ -6,6 +6,7 @@
  */
 import { describe, it, expect, vi } from 'vitest'
 import { render, screen, fireEvent } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import DescriptionTab from './DescriptionTab'
 import type { VacancyDetail } from '@/types/vacancy'
 
@@ -96,5 +97,28 @@ describe('DescriptionTab · second-screen pop-out', () => {
     // Opening it also starts an edit, same as the pencil.
     expect(screen.getByLabelText('rich-text-editor')).toBeInTheDocument()
     openSpy.mockRestore()
+  })
+})
+
+// DRILLDOWN-VOLGORDE-CANON (Danny 21-08, VACATURES 4): the required-skills
+// list moved off DetailsRequirementsTab onto THIS tab, directly under the
+// vacancy text, via its own useVacancySkills hook.
+describe('DescriptionTab · required skills under the text (VACATURES 4)', () => {
+  it('renders the required-skills list below the text block', () => {
+    const withSkills = { ...vacancy, skills: ['Triage', 'Wondzorg'] } as unknown as VacancyDetail
+    render(<DescriptionTab vacancy={withSkills} onUpdate={vi.fn()} />)
+    expect(screen.getByTestId('safe-html')).toBeInTheDocument()
+    expect(screen.getByText('Triage')).toBeInTheDocument()
+    expect(screen.getByText('Wondzorg')).toBeInTheDocument()
+  })
+
+  it('adding a skill persists immediately via onUpdate(id, { skills: [...] }) — asserts the PATCH-shaped body', async () => {
+    const onUpdate = vi.fn()
+    const user = userEvent.setup()
+    render(<DescriptionTab vacancy={vacancy} onUpdate={onUpdate} />)
+    await user.click(screen.getByRole('button', { name: /details\.addSkill/ }))
+    await user.type(screen.getByPlaceholderText('details.addSkill'), 'BIG-registratie')
+    await user.click(screen.getByTitle('save'))
+    expect(onUpdate).toHaveBeenCalledWith('v1', { skills: ['BIG-registratie'] })
   })
 })

@@ -8,6 +8,7 @@ import DetailsGeneralTab from './DetailsGeneralTab'
 import DetailsLocationTab from './DetailsLocationTab'
 import DetailsRequirementsTab from './DetailsRequirementsTab'
 import DetailsConditionsTab from './DetailsConditionsTab'
+import VacancyBranchBlock from './VacancyBranchBlock'
 import type { VacancyDetail } from '@/types/vacancy'
 import type { Id } from '@/types/common'
 
@@ -41,9 +42,9 @@ export default function DetailsTab({ vacancy: v, onUpdate }: { vacancy: VacancyD
           functie — the "Algemeen" block, first. */}
       <DetailsGeneralTab vacancy={v} general={general} candidateTypes={candidateTypes} typeMeta={typeMeta}
         industries={industries} fnOptions={fnOptions} formatDate={formatDate} />
-      {/* Werkadres (straat/postcode/plaats/land/provincie) + de eigen vestiging
-          (location_id) van de vacature — VAC-VESTIGING-1's picker, nu zichtbaar
-          op dit eerste tabblad in plaats van een apart Locatie-subtabblad. */}
+      {/* Werkadres (straat/postcode/plaats/land/provincie) — the vacancy's own
+          bureau branch (vestiging, location_id) no longer lives on this card;
+          it is now the drill-down's own LAST block (VacancyBranchBlock, below). */}
       <DetailsLocationTab vacancy={v} location={location} />
       <DetailsRequirementsTab vacancy={v} requirements={requirements} seniorityLevels={seniorityLevels} educationLevels={educationLevels} />
       <DetailsConditionsTab vacancy={v} conditions={conditions} contractTypeOptions={contractTypeOptions} caoOptions={caoOptions} />
@@ -51,6 +52,10 @@ export default function DetailsTab({ vacancy: v, onUpdate }: { vacancy: VacancyD
           bottom of the merged tab, unaffected by the sub-tab removal. */}
       <KoiosAdviceBlock namespace="vacancies"
         insights={[...adviceInsightRows(resolveAdvice(v)), ...buildVacancyAdviceInsights(v, t)]} />
+      {/* DRILLDOWN-VOLGORDE-CANON (Danny 21-08): informatie → vrije tekst (own
+          tab) → Koios AI → vestiging LAST — the bureau branch picker closes
+          out the drill-down, mirroring the candidate/match canon. */}
+      <VacancyBranchBlock vacancy={v} onUpdate={onUpdate} />
     </div>
   )
 }

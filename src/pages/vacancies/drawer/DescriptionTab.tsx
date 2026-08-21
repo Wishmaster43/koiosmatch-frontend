@@ -5,6 +5,8 @@ import RichTextEditorJs from '@/components/ui/RichTextEditor'
 import SafeHtmlJs from '@/components/ui/SafeHtml'
 import Button from '@/components/ui/Button'
 import { useVacancyDescription } from '../hooks/useVacancyDescription'
+import { useVacancySkills } from '../hooks/useVacancySkills'
+import RequiredSkillsSection from './RequiredSkillsSection'
 import type { VacancyDetail } from '@/types/vacancy'
 import type { Id } from '@/types/common'
 
@@ -27,6 +29,11 @@ const blockStyle: CSSProperties = { borderRadius: 10, overflow: 'hidden', border
  * it never opts into "Actiepunten" — it rides RichTextAssistBar's own
  * improve+summarize-only default (ACTIONS-SCOPE-DEFAULT-FLIP), no per-field
  * override needed.
+ *
+ * DRILLDOWN-VOLGORDE-CANON (Danny 21-08, VACATURES 4): the required-skills
+ * list now renders directly under the vacancy text on THIS tab, moved out of
+ * the Eisen card (DetailsRequirementsTab) — text first, required skills right
+ * below it, via its own useVacancySkills hook.
  */
 export default function DescriptionTab({ vacancy: v, onUpdate }: { vacancy: VacancyDetail; onUpdate?: UpdateFn }) {
   const { t } = useTranslation('vacancies')
@@ -34,6 +41,7 @@ export default function DescriptionTab({ vacancy: v, onUpdate }: { vacancy: Vaca
     descEditing, setDescEditing, descExpanded, setDescExpanded, description, setDescription, saveDesc, cancelDesc,
     openDescriptionPopout,
   } = useVacancyDescription(v, onUpdate)
+  const { skills, addSkill, editSkill, removeSkill } = useVacancySkills(v, onUpdate)
 
   // Edit-toggle control block (pencil ↔ save/cancel), same pattern as DetailsTab's
   // Algemeen card — an independent editing state, own title row placement.
@@ -48,33 +56,40 @@ export default function DescriptionTab({ vacancy: v, onUpdate }: { vacancy: Vaca
   )
 
   return (
-    <div>
-      {/* No heading here: since VAC-TEKST-TAB-1 the tab itself is named
-          "Vacaturetekst", so repeating it was dubbel (Danny 20-08) — the row
-          keeps only the pop-out + edit controls, right-aligned. */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', marginBottom: 6 }}>
-        <div style={{ display: 'flex', gap: 4, alignItems: 'center' }}>
-          {/* V-desc-1: second screen — same icon + footprint the candidate
-              profile-text pop-out uses, in this block's own title row. */}
-          <Button variant="secondary" iconOnly size="sm" onClick={openDescriptionPopout} title={t('common:openSecondScreen')} aria-label={t('common:openSecondScreen')}>
-            <ExternalLink size={13} />
-          </Button>
-          {controls}
+    // DRILLDOWN-VOLGORDE-CANON (VACATURES 4): text block first, required
+    // skills directly under it — one column, one gap, on this single tab.
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+      <div>
+        {/* No heading here: since VAC-TEKST-TAB-1 the tab itself is named
+            "Vacaturetekst", so repeating it was dubbel (Danny 20-08) — the row
+            keeps only the pop-out + edit controls, right-aligned. */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', marginBottom: 6 }}>
+          <div style={{ display: 'flex', gap: 4, alignItems: 'center' }}>
+            {/* V-desc-1: second screen — same icon + footprint the candidate
+                profile-text pop-out uses, in this block's own title row. */}
+            <Button variant="secondary" iconOnly size="sm" onClick={openDescriptionPopout} title={t('common:openSecondScreen')} aria-label={t('common:openSecondScreen')}>
+              <ExternalLink size={13} />
+            </Button>
+            {controls}
+          </div>
         </div>
+        {descEditing
+          ? <RichTextEditor value={description} onChange={setDescription} expanded={descExpanded} onToggleExpand={() => setDescExpanded(x => !x)}
+              // VACGEN-1/KOIOS-GENERATE-1: "Genereer met Koios" now rides the SAME
+              // shared RichTextAssistBar affordance every other rich-text field uses
+              // (mirrors ProfileTab/OverviewTab) instead of the bespoke
+              // VacancyGenerateFlow chip — one generate UX everywhere, editor-gated
+              // like the others (Genereren only while editing).
+              assistGenerate={v.id ? { entity: 'vacancy', id: String(v.id) } : undefined} />
+          : (v.description
+              // Full height — the block grows with the text; the drawer body scrolls
+              // when it overflows (Danny 23-07: no inner 220px scrollbox on a full tab).
+              ? <div style={{ ...blockStyle, padding: '10px 12px' }}><SafeHtml html={v.description} style={{ fontSize: 12, color: 'var(--text)', lineHeight: 1.5 }} /></div>
+              : <div style={{ ...blockStyle, padding: '10px 12px', fontSize: 12, color: 'var(--text-muted)' }}>—</div>)}
       </div>
-      {descEditing
-        ? <RichTextEditor value={description} onChange={setDescription} expanded={descExpanded} onToggleExpand={() => setDescExpanded(x => !x)}
-            // VACGEN-1/KOIOS-GENERATE-1: "Genereer met Koios" now rides the SAME
-            // shared RichTextAssistBar affordance every other rich-text field uses
-            // (mirrors ProfileTab/OverviewTab) instead of the bespoke
-            // VacancyGenerateFlow chip — one generate UX everywhere, editor-gated
-            // like the others (Genereren only while editing).
-            assistGenerate={v.id ? { entity: 'vacancy', id: String(v.id) } : undefined} />
-        : (v.description
-            // Full height — the block grows with the text; the drawer body scrolls
-            // when it overflows (Danny 23-07: no inner 220px scrollbox on a full tab).
-            ? <div style={{ ...blockStyle, padding: '10px 12px' }}><SafeHtml html={v.description} style={{ fontSize: 12, color: 'var(--text)', lineHeight: 1.5 }} /></div>
-            : <div style={{ ...blockStyle, padding: '10px 12px', fontSize: 12, color: 'var(--text-muted)' }}>—</div>)}
+      {/* VACATURES 4: required skills now live directly under the vacancy text,
+          moved out of the Eisen card (DetailsRequirementsTab). */}
+      <RequiredSkillsSection skills={skills} onAddSkill={addSkill} onEditSkill={editSkill} onRemoveSkill={removeSkill} />
     </div>
   )
 }
