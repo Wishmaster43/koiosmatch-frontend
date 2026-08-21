@@ -631,13 +631,11 @@
     "cancel": "Cancel",
     "fields": {
       "name": "Name",
-      "namePlaceholder": "E.g. Rivas Care Group",
       "accountManager": "Account manager",
       "selectOwner": "Choose account manager",
       "industry": "Industry",
       "selectIndustry": "Choose industry",
       "city": "City",
-      "cityPlaceholder": "E.g. Gorinchem",
       "cardCompany": "Company",
       "cardBranch": "Branch & city",
       "cardOwner": "Owner",

@@ -46,14 +46,17 @@ function setup() {
 describe('PersonalCard layout', () => {
   it('renders first, middle, last name and dob/gender fields', () => {
     setup()
-    expect(screen.getByPlaceholderText('modal.fields.firstName')).toBeInTheDocument()
+    // POP-UPS 1 (21-08): placeholders now resolve via the shared common:placeholders.*
+    // keys; the ns prefix is stripped by this real-but-resourceless i18next instance
+    // (same fallback behaviour already proven by the middleName assertion below).
+    expect(screen.getByPlaceholderText('placeholders.firstName')).toBeInTheDocument()
     expect(screen.getByPlaceholderText('placeholders.middleName')).toBeInTheDocument()
-    expect(screen.getByPlaceholderText('modal.fields.lastName')).toBeInTheDocument()
+    expect(screen.getByPlaceholderText('placeholders.lastName')).toBeInTheDocument()
   })
 
   it('keeps first name on its own row, separate from middle/last name', () => {
     setup()
-    const firstNameRow = screen.getByPlaceholderText('modal.fields.firstName').closest('div[style]')
+    const firstNameRow = screen.getByPlaceholderText('placeholders.firstName').closest('div[style]')
     const middleNameRow = screen.getByPlaceholderText('placeholders.middleName').closest('div[style]')
     // Different row containers (first name is no longer grid-mated with middle/last).
     expect(firstNameRow).not.toBe(middleNameRow)
@@ -62,9 +65,9 @@ describe('PersonalCard layout', () => {
   it('still calls set() per field on edit (same onChange wiring)', async () => {
     const { set } = setup()
     const user = userEvent.setup()
-    await user.type(screen.getByPlaceholderText('modal.fields.firstName'), 'J')
+    await user.type(screen.getByPlaceholderText('placeholders.firstName'), 'J')
     expect(set).toHaveBeenCalledWith('firstName', 'J')
-    await user.type(screen.getByPlaceholderText('modal.fields.lastName'), 'D')
+    await user.type(screen.getByPlaceholderText('placeholders.lastName'), 'D')
     expect(set).toHaveBeenCalledWith('lastName', 'D')
   })
 })

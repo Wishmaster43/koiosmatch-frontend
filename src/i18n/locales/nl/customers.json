@@ -631,13 +631,11 @@
     "cancel": "Annuleren",
     "fields": {
       "name": "Naam",
-      "namePlaceholder": "Bijv. Stichting Rivas Zorggroep",
       "accountManager": "Accountmanager",
       "selectOwner": "Kies accountmanager",
       "industry": "Branche",
       "selectIndustry": "Kies branche",
       "city": "Plaats",
-      "cityPlaceholder": "Bijv. Gorinchem",
       "cardCompany": "Bedrijf",
       "cardBranch": "Vestiging & plaats",
       "cardOwner": "Eigenaar",

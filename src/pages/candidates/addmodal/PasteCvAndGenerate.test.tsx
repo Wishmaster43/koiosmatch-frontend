@@ -120,7 +120,7 @@ describe('Paste-CV · the request', () => {
     render(<AddCandidateModal onClose={noop} />)
     await pasteAndSubmit(user, LONG_TEXT)
 
-    await waitFor(() => expect((screen.getByPlaceholderText('modal.fields.firstName') as HTMLInputElement).value).toBe('Anna'))
+    await waitFor(() => expect((screen.getByPlaceholderText('common:placeholders.firstName') as HTMLInputElement).value).toBe('Anna'))
     expect(screen.getAllByText('modal.cv.badge')).toHaveLength(2)
     expect(createCandidate).not.toHaveBeenCalled()
   })
@@ -139,7 +139,7 @@ describe('Profile-text generate · the request', () => {
     const user = userEvent.setup()
     render(<AddCandidateModal onClose={noop} />)
 
-    await user.type(screen.getByPlaceholderText('modal.fields.firstName'), 'Anna')
+    await user.type(screen.getByPlaceholderText('common:placeholders.firstName'), 'Anna')
     await user.click(screen.getByRole('button', { name: 'generate.button' }))
     await user.click(screen.getByRole('button', { name: 'generate.cta' }))
 
@@ -157,7 +157,7 @@ describe('Profile-text generate · the request', () => {
     postMock.mockResolvedValue({ data: { text: 'Concepttekst.' } })
     const user = userEvent.setup()
     render(<AddCandidateModal onClose={noop} />)
-    await user.type(screen.getByPlaceholderText('modal.fields.firstName'), 'Anna')
+    await user.type(screen.getByPlaceholderText('common:placeholders.firstName'), 'Anna')
     await user.click(screen.getByRole('button', { name: 'generate.button' }))
     await user.click(screen.getByRole('button', { name: 'generate.cta' }))
     await user.click(await screen.findByRole('button', { name: 'generate.apply' }))
@@ -172,7 +172,7 @@ describe('Profile-text generate · the request', () => {
     postMock.mockRejectedValueOnce({ response: { status: 402 } })
     const user = userEvent.setup()
     render(<AddCandidateModal onClose={noop} />)
-    await user.type(screen.getByPlaceholderText('modal.fields.firstName'), 'Anna')
+    await user.type(screen.getByPlaceholderText('common:placeholders.firstName'), 'Anna')
     await user.click(screen.getByRole('button', { name: 'generate.button' }))
     await user.click(screen.getByRole('button', { name: 'generate.cta' }))
     expect(await screen.findByText('common:errors.koiosCreditExhausted')).toBeInTheDocument()

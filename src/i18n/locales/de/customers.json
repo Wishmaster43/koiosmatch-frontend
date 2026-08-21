@@ -631,13 +631,11 @@
     "cancel": "Abbrechen",
     "fields": {
       "name": "Name",
-      "namePlaceholder": "z. B. Rivas Pflegegruppe",
       "accountManager": "Account-Manager",
       "selectOwner": "Account-Manager wählen",
       "industry": "Branche",
       "selectIndustry": "Branche wählen",
       "city": "Ort",
-      "cityPlaceholder": "z. B. Gorinchem",
       "cardCompany": "Unternehmen",
       "cardBranch": "Niederlassung & Ort",
       "cardOwner": "Inhaber",

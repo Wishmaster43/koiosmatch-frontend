@@ -135,11 +135,12 @@ describe('CV upload · prefill', () => {
     render(<AddCandidateModal onClose={noop} />)
     await upload(pdfFile())
 
-    await waitFor(() => expect((screen.getByPlaceholderText('modal.fields.firstName') as HTMLInputElement).value).toBe('Anna'))
-    expect((screen.getByPlaceholderText('modal.fields.lastName') as HTMLInputElement).value).toBe('de Vries')
-    expect((screen.getByPlaceholderText('modal.fields.emailPlaceholder') as HTMLInputElement).value).toBe('anna@example.nl')
-    expect((screen.getByPlaceholderText('modal.fields.mobilePlaceholder') as HTMLInputElement).value).toBe('0612345678')
-    expect((screen.getByPlaceholderText('modal.fields.cityPlaceholder') as HTMLInputElement).value).toBe('Amsterdam')
+    await waitFor(() => expect((screen.getByPlaceholderText('common:placeholders.firstName') as HTMLInputElement).value).toBe('Anna'))
+    expect((screen.getByPlaceholderText('common:placeholders.lastName') as HTMLInputElement).value).toBe('de Vries')
+    expect((screen.getByPlaceholderText('common:placeholders.emailExample') as HTMLInputElement).value).toBe('anna@example.nl')
+    // Mobile is the second of the two shared-placeholder matches (phone renders first).
+    expect((screen.getAllByPlaceholderText('common:placeholders.phoneExample')[1] as HTMLInputElement).value).toBe('0612345678')
+    expect((screen.getByPlaceholderText('common:placeholders.cityExample') as HTMLInputElement).value).toBe('Amsterdam')
     // Dutch DD-MM-YYYY normalised to the ISO value a <input type="date"> needs.
     expect((screen.getByLabelText(/modal\.fields\.dob/) as HTMLInputElement).value).toBe('1985-03-12')
     // Seven fields filled ⇒ seven "from CV, check me" badges.
@@ -158,7 +159,7 @@ describe('CV upload · prefill', () => {
     await upload(pdfFile())
     await waitFor(() => expect(screen.getAllByText('modal.cv.badge')).toHaveLength(7))
 
-    await user.type(screen.getByPlaceholderText('modal.fields.firstName'), 'x')
+    await user.type(screen.getByPlaceholderText('common:placeholders.firstName'), 'x')
     expect(screen.getAllByText('modal.cv.badge')).toHaveLength(6)
   })
 
@@ -166,11 +167,11 @@ describe('CV upload · prefill', () => {
     getMock.mockResolvedValue({ data: readyPayload })
     const user = userEvent.setup()
     render(<AddCandidateModal onClose={noop} />)
-    await user.type(screen.getByPlaceholderText('modal.fields.firstName'), 'Annelies')
+    await user.type(screen.getByPlaceholderText('common:placeholders.firstName'), 'Annelies')
     await upload(pdfFile())
 
-    await waitFor(() => expect((screen.getByPlaceholderText('modal.fields.lastName') as HTMLInputElement).value).toBe('de Vries'))
-    expect((screen.getByPlaceholderText('modal.fields.firstName') as HTMLInputElement).value).toBe('Annelies')
+    await waitFor(() => expect((screen.getByPlaceholderText('common:placeholders.lastName') as HTMLInputElement).value).toBe('de Vries'))
+    expect((screen.getByPlaceholderText('common:placeholders.firstName') as HTMLInputElement).value).toBe('Annelies')
     expect(screen.getByText('modal.cv.skipped')).toBeInTheDocument()
   })
 
@@ -187,7 +188,7 @@ describe('CV upload · prefill', () => {
     getMock.mockResolvedValue({ data: readyPayload })
     render(<AddCandidateModal onClose={noop} />)
     await upload(pdfFile())
-    await waitFor(() => expect((screen.getByPlaceholderText('modal.fields.firstName') as HTMLInputElement).value).toBe('Anna'))
+    await waitFor(() => expect((screen.getByPlaceholderText('common:placeholders.firstName') as HTMLInputElement).value).toBe('Anna'))
     expect(createCandidate).not.toHaveBeenCalled()
   })
 
@@ -202,7 +203,7 @@ describe('CV upload · prefill', () => {
     const user = userEvent.setup()
     render(<AddCandidateModal onClose={noop} onCreated={noop} />)
     await upload(pdfFile())
-    await waitFor(() => expect((screen.getByPlaceholderText('modal.fields.firstName') as HTMLInputElement).value).toBe('Anna'))
+    await waitFor(() => expect((screen.getByPlaceholderText('common:placeholders.firstName') as HTMLInputElement).value).toBe('Anna'))
 
     expect(screen.queryByText(/burn-out/i)).not.toBeInTheDocument()
     expect(screen.queryByText(/Chronische/i)).not.toBeInTheDocument()
@@ -231,7 +232,7 @@ describe('CV upload · failure states are honest', () => {
 
     await waitFor(() => expect(screen.getByText('modal.cv.reading')).toBeInTheDocument())
     await waitFor(
-      () => expect((screen.getByPlaceholderText('modal.fields.firstName') as HTMLInputElement).value).toBe('Anna'),
+      () => expect((screen.getByPlaceholderText('common:placeholders.firstName') as HTMLInputElement).value).toBe('Anna'),
       { timeout: CV_POLL_INTERVAL_MS + 3000 },
     )
     expect(getMock).toHaveBeenCalledTimes(2)

@@ -29,7 +29,8 @@ export default function CustomerCompanyCard({ form, set, errors, industries }: C
       <div style={cardBox}>
         <div>
           <FieldRow label={t('modal.fields.name')} required>
-            <TextField value={form.name} onChange={v => set('name', v)} placeholder={t('modal.fields.namePlaceholder')} error={errors.name} />
+            {/* A company name is not a person's name — its own example, never fullNameExample. */}
+            <TextField value={form.name} onChange={v => set('name', v)} placeholder={t('common:placeholders.companyNameExample')} error={errors.name} />
           </FieldRow>
           {errors.name && <div style={{ fontSize: 11, color: 'var(--color-danger-text)', marginTop: 3 }}>{t('modal.required')}</div>}
         </div>

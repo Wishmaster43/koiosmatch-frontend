@@ -26,7 +26,7 @@ export default function PersonalCard({ form, errors, set, isReq, genderOptions }
             pairs with last name below it, exactly like street-own-row /
             houseNumber+suffix-paired. No field added or removed. */}
         <CvField name="firstName" label={t('modal.fields.firstName')} required={isReq('firstName')}>
-          <TextField value={form.firstName} onChange={v => set('firstName', v)} placeholder={t('modal.fields.firstName')} error={errors.firstName} />
+          <TextField value={form.firstName} onChange={v => set('firstName', v)} placeholder={t('common:placeholders.firstName')} error={errors.firstName} />
           {errors.firstName && <div style={{ fontSize: 11, color: 'var(--color-danger-text)', marginTop: 3 }}>{t('common:required')}</div>}
         </CvField>
         <div style={row('1fr 2fr')}>
@@ -34,7 +34,7 @@ export default function PersonalCard({ form, errors, set, isReq, genderOptions }
             <TextField value={form.middleName} onChange={v => set('middleName', v)} placeholder={t('common:placeholders.middleName')} />
           </Field>
           <CvField name="lastName" label={t('modal.fields.lastName')} required={isReq('lastName')}>
-            <TextField value={form.lastName} onChange={v => set('lastName', v)} placeholder={t('modal.fields.lastName')} error={errors.lastName} />
+            <TextField value={form.lastName} onChange={v => set('lastName', v)} placeholder={t('common:placeholders.lastName')} error={errors.lastName} />
             {errors.lastName && <div style={{ fontSize: 11, color: 'var(--color-danger-text)', marginTop: 3 }}>{t('common:required')}</div>}
           </CvField>
         </div>

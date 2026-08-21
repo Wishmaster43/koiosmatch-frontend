@@ -466,6 +466,9 @@
     "min": "min",
     "max": "max",
     "fullNameExample": "Jan Janssen",
-    "phoneExample": "+49 151 2345678"
+    "phoneExample": "+49 151 2345678",
+    "streetExample": "Hauptstraße 12",
+    "cityExample": "Berlin",
+    "companyNameExample": "Jansen Pflegegruppe GmbH"
   }
 }

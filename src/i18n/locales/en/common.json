@@ -466,6 +466,9 @@
     "min": "min",
     "max": "max",
     "fullNameExample": "John Smith",
-    "phoneExample": "+31 6 12345678"
+    "phoneExample": "+31 6 12345678",
+    "streetExample": "Main Street 12",
+    "cityExample": "Amsterdam",
+    "companyNameExample": "Jansen Care Group Ltd"
   }
 }

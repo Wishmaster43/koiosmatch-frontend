@@ -26,7 +26,7 @@ export default function AddressCard({ form, errors, set, isReq, provinces }: Add
       <div style={cardBox}>
         <div style={row('2fr 1fr 1fr')}>
           <CvField name="street" label={t('modal.fields.street')} required={isReq('street')}>
-            <TextField value={form.street} onChange={v => set('street', v)} placeholder={t('modal.fields.streetPlaceholder')} error={errors.street} />
+            <TextField value={form.street} onChange={v => set('street', v)} placeholder={t('common:placeholders.streetExample')} error={errors.street} />
           </CvField>
           <CvField name="houseNumber" label={t('modal.fields.houseNumber')}>
             <TextField value={form.houseNumber} onChange={v => set('houseNumber', v)} />
@@ -40,7 +40,7 @@ export default function AddressCard({ form, errors, set, isReq, provinces }: Add
             <TextField value={form.postalCode} onChange={v => set('postalCode', v)} error={errors.postalCode} />
           </CvField>
           <CvField name="city" label={t('modal.fields.city')} required={isReq('city')}>
-            <TextField value={form.city} onChange={v => set('city', v)} placeholder={t('modal.fields.cityPlaceholder')} error={errors.city} />
+            <TextField value={form.city} onChange={v => set('city', v)} placeholder={t('common:placeholders.cityExample')} error={errors.city} />
           </CvField>
         </div>
         <div style={row('1fr 1fr')}>

@@ -48,7 +48,7 @@ export default function ContactDetailsCard({
         <div style={row3Even}>
           <div onBlur={onEmailBlur}>
             <FieldRow label={emailLabel}>
-              <TextField type="email" value={email} onChange={onEmailChange} placeholder={t('placeholders.emailExample')} error={emailError} />
+              <TextField type="email" value={email} onChange={onEmailChange} placeholder={t('common:placeholders.emailExample')} error={emailError} />
             </FieldRow>
             <FieldError text={emailMessage} />
           </div>

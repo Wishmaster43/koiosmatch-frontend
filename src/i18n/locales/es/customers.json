@@ -631,13 +631,11 @@
     "cancel": "Cancelar",
     "fields": {
       "name": "Nombre",
-      "namePlaceholder": "P. ej. Grupo de cuidados Rivas",
       "accountManager": "Gestor de cuenta",
       "selectOwner": "Elegir gestor",
       "industry": "Sector",
       "selectIndustry": "Elegir sector",
       "city": "Ciudad",
-      "cityPlaceholder": "P. ej. Gorinchem",
       "cardCompany": "Empresa",
       "cardBranch": "Oficina & ciudad",
       "cardOwner": "Responsable",

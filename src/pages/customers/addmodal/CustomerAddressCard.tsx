@@ -59,7 +59,7 @@ export default function AddressCard({ form, set, provinces }: AddressCardProps) 
           <TextField value={form.postalCode} onChange={v => set('postalCode', v)} />
         </FieldRow>
         <FieldRow label={t('modal.fields.city')}>
-          <TextField value={form.city} onChange={v => set('city', v)} placeholder={t('modal.fields.cityPlaceholder')} />
+          <TextField value={form.city} onChange={v => set('city', v)} placeholder={t('common:placeholders.cityExample')} />
         </FieldRow>
         <div style={row('1fr 1fr')}>
           {/* Sends `province` (the backend's preferred key, per CustomerRequest — `state`

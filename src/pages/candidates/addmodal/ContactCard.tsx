@@ -40,7 +40,7 @@ export default function ContactCard({ form, errors, set, isReq, onBlur, fieldMes
       <div style={cardBox}>
         <div onBlur={() => onBlur('email')}>
           <CvField name="email" label={t('modal.fields.email')} required={isReq('email')}>
-            <TextField type="email" value={form.email} onChange={v => set('email', v)} placeholder={t('modal.fields.emailPlaceholder')} error={errors.email || !!fieldMessage('email')} />
+            <TextField type="email" value={form.email} onChange={v => set('email', v)} placeholder={t('common:placeholders.emailExample')} error={errors.email || !!fieldMessage('email')} />
           </CvField>
           <FieldNotice text={fieldMessage('email')} />
         </div>
@@ -49,13 +49,15 @@ export default function ContactCard({ form, errors, set, isReq, onBlur, fieldMes
             postage stamps inside this half-width card. */}
         <div onBlur={() => onBlur('phone')}>
           <CvField name="phone" label={t('modal.fields.phone')} required={isReq('phone')}>
-            <TextField type="tel" value={form.phone} onChange={v => set('phone', v)} placeholder={t('modal.fields.phonePlaceholder')} error={errors.phone || !!fieldMessage('phone')} />
+            <TextField type="tel" value={form.phone} onChange={v => set('phone', v)} placeholder={t('common:placeholders.phoneExample')} error={errors.phone || !!fieldMessage('phone')} />
           </CvField>
           <FieldNotice text={fieldMessage('phone')} />
         </div>
         <div onBlur={() => onBlur('mobile')}>
           <CvField name="mobile" label={t('modal.fields.mobile')}>
-            <TextField type="tel" value={form.mobile} onChange={v => set('mobile', v)} placeholder={t('modal.fields.mobilePlaceholder')} error={!!fieldMessage('mobile')} />
+            {/* No distinct mobileExample key: NL landline/mobile examples share one
+                shape, so this reuses the common phone placeholder (§ consolidation). */}
+            <TextField type="tel" value={form.mobile} onChange={v => set('mobile', v)} placeholder={t('common:placeholders.phoneExample')} error={!!fieldMessage('mobile')} />
           </CvField>
           <FieldNotice text={fieldMessage('mobile')} />
         </div>

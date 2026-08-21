@@ -85,8 +85,8 @@ describe('AddCandidateModal · Optie A card layout', () => {
     expect(screen.getByText('modal.fields.cardContact')).toBeInTheDocument()
     expect(screen.getByText('modal.fields.cardWork')).toBeInTheDocument()
     // A representative field per card still renders (names / email / function).
-    expect(screen.getByPlaceholderText('modal.fields.firstName')).toBeInTheDocument()
-    expect(screen.getByPlaceholderText('modal.fields.emailPlaceholder')).toBeInTheDocument()
+    expect(screen.getByPlaceholderText('common:placeholders.firstName')).toBeInTheDocument()
+    expect(screen.getByPlaceholderText('common:placeholders.emailExample')).toBeInTheDocument()
     // Trigger's name is the field label now, not its empty-state placeholder text.
     expect(screen.getByRole('button', { name: 'modal.fields.functionTitle' })).toBeInTheDocument()
     // Branch chips seed from /auth/me (punt 10) — the b1 chip is visible.
@@ -96,8 +96,8 @@ describe('AddCandidateModal · Optie A card layout', () => {
   it('renders the address card open by default (Danny r2: geen inklap)', () => {
     render(<AddCandidateModal onClose={noop} />)
     expect(screen.getByText('modal.fields.cardAddress')).toBeInTheDocument()
-    expect(screen.getByPlaceholderText('modal.fields.streetPlaceholder')).toBeInTheDocument()
-    expect(screen.getByPlaceholderText('modal.fields.cityPlaceholder')).toBeInTheDocument()
+    expect(screen.getByPlaceholderText('common:placeholders.streetExample')).toBeInTheDocument()
+    expect(screen.getByPlaceholderText('common:placeholders.cityExample')).toBeInTheDocument()
   })
 
   it('geslacht/provincie/functietitel are searchable comboboxen (drill-down pattern)', async () => {
@@ -141,7 +141,7 @@ describe('AddCandidateModal · Optie A card layout', () => {
     ;['modal.fields.cardPersonal', 'modal.fields.cardContact', 'modal.fields.cardWork', 'modal.fields.cardAddress']
       .forEach(key => expect(screen.getByText(key)).toBeInTheDocument())
 
-    const firstNameInput = screen.getByPlaceholderText('modal.fields.firstName')
+    const firstNameInput = screen.getByPlaceholderText('common:placeholders.firstName')
     const label = screen.getByText('modal.fields.firstName', { selector: 'label' })
     // Label and control share the same row wrapper (label's parent = the row div).
     expect(label.parentElement).toContainElement(firstNameInput)
@@ -156,8 +156,8 @@ describe('AddCandidateModal · submit body unchanged by the layout rework', () =
     // short-circuits the whole call (argument included) when the prop is absent.
     const user = userEvent.setup()
     render(<AddCandidateModal onClose={noop} onCreated={noop} />)
-    await user.type(screen.getByPlaceholderText('modal.fields.firstName'), 'Jan')
-    await user.type(screen.getByPlaceholderText('modal.fields.lastName'), 'Jansen')
+    await user.type(screen.getByPlaceholderText('common:placeholders.firstName'), 'Jan')
+    await user.type(screen.getByPlaceholderText('common:placeholders.lastName'), 'Jansen')
     await user.click(screen.getByRole('button', { name: 'modal.create' }))
     expect(createCandidate).toHaveBeenCalledWith({
       first_name: 'Jan', middle_name: null, last_name: 'Jansen', function_title: null,
@@ -180,8 +180,8 @@ describe('AddCandidateModal · submit body unchanged by the layout rework', () =
     render(<AddCandidateModal onClose={noop} onCreated={noop} />)
     // Remove the single seeded chip, then submit with only the required names.
     await user.click(screen.getByRole('button', { name: 'common:remove' }))
-    await user.type(screen.getByPlaceholderText('modal.fields.firstName'), 'Jan')
-    await user.type(screen.getByPlaceholderText('modal.fields.lastName'), 'Jansen')
+    await user.type(screen.getByPlaceholderText('common:placeholders.firstName'), 'Jan')
+    await user.type(screen.getByPlaceholderText('common:placeholders.lastName'), 'Jansen')
     await user.click(screen.getByRole('button', { name: 'modal.create' }))
     expect(createCandidate).toHaveBeenCalledTimes(1)
     expect(createCandidate.mock.calls[0][0]).not.toHaveProperty('location_ids')
@@ -202,8 +202,8 @@ describe('AddCandidateModal · profile text card (PROFILE-TEXT-1)', () => {
   it('POSTs the typed prose under `summary`', async () => {
     const user = userEvent.setup()
     render(<AddCandidateModal onClose={noop} onCreated={noop} />)
-    await user.type(screen.getByPlaceholderText('modal.fields.firstName'), 'Jan')
-    await user.type(screen.getByPlaceholderText('modal.fields.lastName'), 'Jansen')
+    await user.type(screen.getByPlaceholderText('common:placeholders.firstName'), 'Jan')
+    await user.type(screen.getByPlaceholderText('common:placeholders.lastName'), 'Jansen')
     // The collapsed ghost has no distinct aria-label here (no collision with this
     // modal's own submit button, unlike Location/Department's ARIA-LABEL-1 fix) —
     // its accessible name is the generic common:add placeholder text.
@@ -220,16 +220,19 @@ describe('AddCandidateModal · profile text card (PROFILE-TEXT-1)', () => {
 describe('AddCandidateModal · Mobiel field (job B)', () => {
   it('renders a Mobiel field next to Telefoon in the Contact card', () => {
     render(<AddCandidateModal onClose={noop} />)
-    expect(screen.getByPlaceholderText('modal.fields.phonePlaceholder')).toBeInTheDocument()
-    expect(screen.getByPlaceholderText('modal.fields.mobilePlaceholder')).toBeInTheDocument()
+    // POP-UPS 1 (21-08): phone and mobile now share the one common:placeholders.phoneExample
+    // key (they already rendered the same literal text before this consolidation) — assert
+    // both fields exist via the two matches, rather than a per-field unique placeholder.
+    expect(screen.getAllByPlaceholderText('common:placeholders.phoneExample')).toHaveLength(2)
   })
 
   it('POSTs the mobile value under its own `mobile` body key', async () => {
     const user = userEvent.setup()
     render(<AddCandidateModal onClose={noop} onCreated={noop} />)
-    await user.type(screen.getByPlaceholderText('modal.fields.firstName'), 'Jan')
-    await user.type(screen.getByPlaceholderText('modal.fields.lastName'), 'Jansen')
-    await user.type(screen.getByPlaceholderText('modal.fields.mobilePlaceholder'), '0612345678')
+    await user.type(screen.getByPlaceholderText('common:placeholders.firstName'), 'Jan')
+    await user.type(screen.getByPlaceholderText('common:placeholders.lastName'), 'Jansen')
+    // Phone renders before mobile in ContactCard's DOM order — index 1 is the mobile field.
+    await user.type(screen.getAllByPlaceholderText('common:placeholders.phoneExample')[1], '0612345678')
     await user.click(screen.getByRole('button', { name: 'modal.create' }))
     // DUP-PHONE-1 (08-08): still its own `mobile` key — but canonicalised at the save
     // boundary now, so the server's exact-match dedupe key cannot be dodged by writing
@@ -249,8 +252,8 @@ describe('AddCandidateModal · LinkedIn field (CONTACT-LINKEDIN-1)', () => {
   it('normalises a pasted full profile URL to its bare slug AT THE SAVE BOUNDARY', async () => {
     const user = userEvent.setup()
     render(<AddCandidateModal onClose={noop} onCreated={noop} />)
-    await user.type(screen.getByPlaceholderText('modal.fields.firstName'), 'Jan')
-    await user.type(screen.getByPlaceholderText('modal.fields.lastName'), 'Jansen')
+    await user.type(screen.getByPlaceholderText('common:placeholders.firstName'), 'Jan')
+    await user.type(screen.getByPlaceholderText('common:placeholders.lastName'), 'Jansen')
     await user.type(screen.getByPlaceholderText('modal.fields.linkedinPlaceholder'), 'https://www.linkedin.com/in/jane-doe/')
     await user.click(screen.getByRole('button', { name: 'modal.create' }))
     expect(createCandidate.mock.calls[0][0]).toMatchObject({ linkedin_slug: 'jane-doe' })
@@ -263,15 +266,15 @@ describe('AddCandidateModal · LinkedIn field (CONTACT-LINKEDIN-1)', () => {
 // of only bouncing back as a 422 after a round trip.
 describe('AddCandidateModal · live format validation (VALIDATIE-LIVE-1)', () => {
   const fillRequired = async (user: ReturnType<typeof userEvent.setup>) => {
-    await user.type(screen.getByPlaceholderText('modal.fields.firstName'), 'Jan')
-    await user.type(screen.getByPlaceholderText('modal.fields.lastName'), 'Jansen')
+    await user.type(screen.getByPlaceholderText('common:placeholders.firstName'), 'Jan')
+    await user.type(screen.getByPlaceholderText('common:placeholders.lastName'), 'Jansen')
   }
 
   it('shows an inline error under e-mail once blurred with a malformed value, and disables Create', async () => {
     const user = userEvent.setup()
     render(<AddCandidateModal onClose={noop} onCreated={noop} />)
     await fillRequired(user)
-    const emailField = screen.getByPlaceholderText('modal.fields.emailPlaceholder')
+    const emailField = screen.getByPlaceholderText('common:placeholders.emailExample')
     await user.type(emailField, 'not-an-email')
     // fireEvent.focusOut (not user.tab()): this modal's dialog shell traps Tab via an
     // `offsetParent !== null` focusable-items check, which jsdom never sets (no real
@@ -286,7 +289,8 @@ describe('AddCandidateModal · live format validation (VALIDATIE-LIVE-1)', () =>
     const user = userEvent.setup()
     render(<AddCandidateModal onClose={noop} onCreated={noop} />)
     await fillRequired(user)
-    const phoneInput = screen.getByPlaceholderText('modal.fields.phonePlaceholder') as HTMLInputElement
+    // Phone is the first of the two shared-placeholder matches (see ContactCard DOM order).
+    const phoneInput = screen.getAllByPlaceholderText('common:placeholders.phoneExample')[0] as HTMLInputElement
     await user.type(phoneInput, '06-12')
     fireEvent.focusOut(phoneInput)
     expect(await screen.findByText('validation.phoneFormat')).toBeInTheDocument()
@@ -301,7 +305,7 @@ describe('AddCandidateModal · live format validation (VALIDATIE-LIVE-1)', () =>
     const user = userEvent.setup()
     render(<AddCandidateModal onClose={noop} onCreated={noop} />)
     await fillRequired(user)
-    const emailInput = screen.getByPlaceholderText('modal.fields.emailPlaceholder') as HTMLInputElement
+    const emailInput = screen.getByPlaceholderText('common:placeholders.emailExample') as HTMLInputElement
     await user.type(emailInput, 'jan@example.nl')
     await user.click(screen.getByRole('button', { name: 'modal.create' }))
     expect(await screen.findByText('Dit e-mailadres is al in gebruik.')).toBeInTheDocument()
@@ -328,8 +332,8 @@ describe('AddCandidateModal · duplicate 409 panel', () => {
 
   // Fill the two required fields and submit.
   const submit = async (user: ReturnType<typeof userEvent.setup>) => {
-    await user.type(screen.getByPlaceholderText('modal.fields.firstName'), 'Jan')
-    await user.type(screen.getByPlaceholderText('modal.fields.lastName'), 'Jansen')
+    await user.type(screen.getByPlaceholderText('common:placeholders.firstName'), 'Jan')
+    await user.type(screen.getByPlaceholderText('common:placeholders.lastName'), 'Jansen')
     await user.click(screen.getByRole('button', { name: 'modal.create' }))
   }
 
@@ -404,9 +408,10 @@ describe('AddCandidateModal · duplicate key is notation-independent', () => {
   const submitWithMobile = async (mobile: string): Promise<Record<string, unknown>> => {
     const user = userEvent.setup()
     render(<AddCandidateModal onClose={noop} onCreated={noop} />)
-    await user.type(screen.getByPlaceholderText('modal.fields.firstName'), 'Jan')
-    await user.type(screen.getByPlaceholderText('modal.fields.lastName'), 'Jansen')
-    await user.type(screen.getByPlaceholderText('modal.fields.mobilePlaceholder'), mobile)
+    await user.type(screen.getByPlaceholderText('common:placeholders.firstName'), 'Jan')
+    await user.type(screen.getByPlaceholderText('common:placeholders.lastName'), 'Jansen')
+    // Mobile is the second of the two shared-placeholder matches (see ContactCard DOM order).
+    await user.type(screen.getAllByPlaceholderText('common:placeholders.phoneExample')[1], mobile)
     await user.click(screen.getByRole('button', { name: 'modal.create' }))
     await waitFor(() => expect(createCandidate).toHaveBeenCalled())
     return createCandidate.mock.calls[0][0]
@@ -423,9 +428,10 @@ describe('AddCandidateModal · duplicate key is notation-independent', () => {
   it('canonicalises the landline on the same save boundary', async () => {
     const user = userEvent.setup()
     render(<AddCandidateModal onClose={noop} onCreated={noop} />)
-    await user.type(screen.getByPlaceholderText('modal.fields.firstName'), 'Jan')
-    await user.type(screen.getByPlaceholderText('modal.fields.lastName'), 'Jansen')
-    await user.type(screen.getByPlaceholderText('modal.fields.phonePlaceholder'), '030-1234567')
+    await user.type(screen.getByPlaceholderText('common:placeholders.firstName'), 'Jan')
+    await user.type(screen.getByPlaceholderText('common:placeholders.lastName'), 'Jansen')
+    // Phone is the first of the two shared-placeholder matches (see ContactCard DOM order).
+    await user.type(screen.getAllByPlaceholderText('common:placeholders.phoneExample')[0], '030-1234567')
     await user.click(screen.getByRole('button', { name: 'modal.create' }))
     await waitFor(() => expect(createCandidate).toHaveBeenCalled())
     expect(createCandidate.mock.calls[0][0].phone).toBe('+31301234567')
@@ -451,9 +457,10 @@ describe('AddCandidateModal · duplicate on a differently written mobile', () =>
         <AddCandidateModal onClose={noop} onCreated={noop} />
       </NavigationProvider>
     )
-    await user.type(screen.getByPlaceholderText('modal.fields.firstName'), 'Jan')
-    await user.type(screen.getByPlaceholderText('modal.fields.lastName'), 'Jansen')
-    const mobileInput = screen.getByPlaceholderText('modal.fields.mobilePlaceholder') as HTMLInputElement
+    await user.type(screen.getByPlaceholderText('common:placeholders.firstName'), 'Jan')
+    await user.type(screen.getByPlaceholderText('common:placeholders.lastName'), 'Jansen')
+    // Mobile is the second of the two shared-placeholder matches (see ContactCard DOM order).
+    const mobileInput = screen.getAllByPlaceholderText('common:placeholders.phoneExample')[1] as HTMLInputElement
     await user.type(mobileInput, '06-65277265')
     await user.click(screen.getByRole('button', { name: 'modal.create' }))
 
@@ -479,8 +486,9 @@ describe('AddCandidateModal · geen PII in de URL', () => {
   it('vraagt nooit /candidates/check-duplicate op terwijl je typt', async () => {
     const user = userEvent.setup()
     render(<AddCandidateModal onClose={noop} />)
-    await user.type(screen.getByPlaceholderText('modal.fields.emailPlaceholder'), 'piet@example.com')
-    await user.type(screen.getByPlaceholderText('modal.fields.mobilePlaceholder'), '0612345678')
+    await user.type(screen.getByPlaceholderText('common:placeholders.emailExample'), 'piet@example.com')
+    // Mobile is the second of the two shared-placeholder matches (see ContactCard DOM order).
+    await user.type(screen.getAllByPlaceholderText('common:placeholders.phoneExample')[1], '0612345678')
     await new Promise(r => setTimeout(r, 900))
     const probed = getMock.mock.calls.some(([url]) => String(url).includes('check-duplicate'))
     expect(probed).toBe(false)
