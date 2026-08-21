@@ -29,10 +29,9 @@
 import { useRef, useState } from 'react'
 import type { ChangeEvent, DragEvent } from 'react'
 import { useTranslation } from 'react-i18next'
-import { FileUp, FileText, AlertTriangle } from 'lucide-react'
+import { FileUp, FileText, AlertTriangle, Download } from 'lucide-react'
 import { cardBox } from '@/components/ui/modalCards'
 import Spinner from '@/components/ui/Spinner'
-import { BTN_H } from '@/config/buttonMetrics'
 // CUSTOMER-IMPORT-1 (Danny 02-08): the PREVIEW/RESULT panels and the download-
 // template call are reused straight from Settings' working import wizard — cross-
 // page import, deliberate and written up here: reusing beats a second import
@@ -40,6 +39,8 @@ import { BTN_H } from '@/config/buttonMetrics'
 import { PreviewStep, ResultStep, downloadImportTemplate } from '@/pages/settings/shared'
 import type { useImportWizard } from '@/pages/settings/shared'
 import Button from '@/components/ui/Button'
+import { tintBg, tintBorder } from '@/lib/tint'
+import { Caption } from '@/components/ui/typography'
 
 // Mirrors ImportUploadRequest::rules (mimes:csv,txt,xlsx) — this card only forwards
 // the raw File to the backend (no client-side parsing), so .xlsx works exactly like
@@ -61,13 +62,6 @@ interface EntityImportCardProps {
   /** True only for a combined file where one row can touch several linked records (e.g. customer_tree). */
   wholeTree?: boolean
 }
-
-// Ghost button — one style, several labels.
-const ghostBtn = {
-  height: BTN_H, padding: '0 12px', fontSize: 12, borderRadius: 8, cursor: 'pointer',
-  border: '1px solid var(--border)', background: 'none', color: 'var(--text)',
-  display: 'inline-flex', alignItems: 'center', gap: 6,
-} as const
 
 export default function EntityImportCard({ wizard, canView, canImport, entity, intro, wholeTree = false }: EntityImportCardProps) {
   const { t } = useTranslation('settings')
@@ -116,8 +110,8 @@ export default function EntityImportCard({ wizard, canView, canImport, entity, i
       onDragLeave={() => setDragOver(false)}
       onDrop={handleDrop}
       style={{ ...cardBox, gap: 8,
-        border: dragOver ? '1px solid var(--color-primary)' : cardBox.border,
-        background: dragOver ? 'color-mix(in srgb, var(--color-primary) 6%, transparent)' : cardBox.background }}>
+        border: dragOver ? tintBorder('var(--button-fill)', true) : cardBox.border,
+        background: dragOver ? tintBg('var(--button-fill)') : cardBox.background }}>
 
       {/* Step 1, no file yet: the honest distinction + ONE compact action row —
           select, download example, accepted-types hint, all on one line. */}
@@ -127,23 +121,19 @@ export default function EntityImportCard({ wizard, canView, canImport, entity, i
           <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
             {/* HUISSTIJL-1: the primary create action of this step reads the house
                 trio, solid — same as every other accent action button. */}
-            <button type="button" onClick={() => inputRef.current?.click()} disabled={!canImport}
-              title={canImport ? undefined : t('import.noImportPermission')}
-              style={{ ...ghostBtn, borderColor: 'var(--button-border)',
-                background: 'var(--button-fill)',
-                color: 'var(--button-ink)', fontWeight: 600, opacity: canImport ? 1 : 0.5,
-                cursor: canImport ? 'pointer' : 'not-allowed' }}>
+            <Button type="button" variant="primary" onClick={() => inputRef.current?.click()} disabled={!canImport}
+              title={canImport ? undefined : t('import.noImportPermission')} style={{ gap: 6 }}>
               <FileUp size={14} /> {t('import.selectCsv')}
-            </button>
-            <button type="button" onClick={handleDownloadTemplate} disabled={!canView}
-              title={canView ? undefined : t('import.noViewPermission')}
-              style={{ fontSize: 12, color: 'var(--color-primary-text)', background: 'none', border: 'none',
-                padding: 0, cursor: canView ? 'pointer' : 'not-allowed', opacity: canView ? 1 : 0.5 }}>
-              {t('import.downloadTemplate')}
-            </button>
-            <span style={{ fontSize: 11, color: 'var(--text-muted)', marginLeft: 'auto' }}>
+            </Button>
+            {/* POP-UPS 3.5: de template-download is een KNOP met icoon — de oude
+                gekleurde tekstlink was precies het 08-08-anti-patroon. */}
+            <Button type="button" variant="secondary" onClick={handleDownloadTemplate} disabled={!canView}
+              title={canView ? undefined : t('import.noViewPermission')} style={{ gap: 6 }}>
+              <Download size={13} /> {t('import.downloadTemplate')}
+            </Button>
+            <Caption style={{ marginLeft: 'auto' }}>
               {t('import.acceptedTypes')}
-            </span>
+            </Caption>
           </div>
           {typeError && (
             <div role="alert" style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 11, color: 'var(--color-danger-text)' }}>
@@ -165,11 +155,9 @@ export default function EntityImportCard({ wizard, canView, canImport, entity, i
             <span style={{ fontSize: 12, color: 'var(--text)', minWidth: 0, overflowWrap: 'anywhere' }}>
               {t('import.fileSelected', { name: file.name })}
             </span>
-            <button type="button" onClick={() => inputRef.current?.click()} disabled={checking}
-              style={{ fontSize: 12, color: 'var(--color-primary-text)', background: 'none', border: 'none',
-                padding: 0, cursor: checking ? 'not-allowed' : 'pointer' }}>
+            <Button type="button" variant="secondary" onClick={() => inputRef.current?.click()} disabled={checking}>
               {t('import.replaceFile')}
-            </button>
+            </Button>
             <Button variant="primary" size="sm" onClick={wizard.runPreview} disabled={!canImport || checking}
               style={{ marginLeft: 'auto' }}>
               {checking && <Spinner size={13} />}

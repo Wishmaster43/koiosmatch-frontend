@@ -53,14 +53,14 @@ export default function AddressCard({ form, set, provinces }: AddressCardProps) 
             <TextField value={form.houseNumberSuffix} onChange={v => set('houseNumberSuffix', v)} />
           </FieldRow>
         </div>
-        <div style={row('1fr 2fr')}>
-          <FieldRow label={t('locations.detail.postalCode')}>
-            <TextField value={form.postalCode} onChange={v => set('postalCode', v)} />
-          </FieldRow>
-          <FieldRow label={t('modal.fields.city')}>
-            <TextField value={form.city} onChange={v => set('city', v)} placeholder={t('modal.fields.cityPlaceholder')} />
-          </FieldRow>
-        </div>
+        {/* KLANTEN 2.3 (walkthrough 21-08): postcode en plaats elk een volle rij —
+            in de 1fr/2fr-split at de canon-labelbreedte het postcodeveld op. */}
+        <FieldRow label={t('locations.detail.postalCode')}>
+          <TextField value={form.postalCode} onChange={v => set('postalCode', v)} />
+        </FieldRow>
+        <FieldRow label={t('modal.fields.city')}>
+          <TextField value={form.city} onChange={v => set('city', v)} placeholder={t('modal.fields.cityPlaceholder')} />
+        </FieldRow>
         <div style={row('1fr 1fr')}>
           {/* Sends `province` (the backend's preferred key, per CustomerRequest — `state`
               is only a legacy input alias) — the same key the candidate's home address uses. */}
