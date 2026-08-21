@@ -90,3 +90,35 @@ describe('OpportunityDescriptionBlock · pencil → edit → save/cancel', () =>
     expect(screen.getByText('Origineel')).toBeInTheDocument()
   })
 })
+
+// TEKST-POPOUT-1 (Danny 21-08): the second-screen pop-out icon, mirrored from
+// vacancies/drawer/DescriptionTab.test.tsx's own coverage of the same recipe.
+describe('OpportunityDescriptionBlock · second-screen pop-out', () => {
+  it('does not render the pop-out icon without an opportunityId (no record to address)', () => {
+    render(<OpportunityDescriptionBlock value="<p>Origineel</p>" onSave={() => {}} />)
+    expect(screen.queryByTitle('Open op tweede scherm')).toBeNull()
+  })
+
+  it('renders a pop-out icon that opens /popout/text/opportunity/{id}/description', async () => {
+    const user = userEvent.setup()
+    const openSpy = vi.spyOn(window, 'open').mockReturnValue({} as Window)
+    render(<OpportunityDescriptionBlock opportunityId="opp-1" value="<p>Origineel</p>" onSave={() => {}} />)
+    await user.click(screen.getByTitle('Open op tweede scherm'))
+    expect(openSpy).toHaveBeenCalledWith('/popout/text/opportunity/opp-1/description',
+      expect.stringContaining('koios-text-opportunity-opp-1-description'), expect.any(String))
+    // Opening it also starts an edit, same as the pencil.
+    expect(screen.getByTestId('rte')).toBeInTheDocument()
+    openSpy.mockRestore()
+  })
+
+  it('publishes every local edit to the sync channel while a popout window is open (no crash without one)', async () => {
+    const user = userEvent.setup()
+    const openSpy = vi.spyOn(window, 'open').mockReturnValue({} as Window)
+    render(<OpportunityDescriptionBlock opportunityId="opp-1" value="<p>Origineel</p>" onSave={() => {}} />)
+    await user.click(screen.getByTitle('Open op tweede scherm'))
+    const rte = screen.getByTestId('rte')
+    await user.type(rte, 'x')
+    expect(rte).toHaveValue('<p>Origineel</p>x')
+    openSpy.mockRestore()
+  })
+})

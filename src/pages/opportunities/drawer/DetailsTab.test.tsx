@@ -1,10 +1,11 @@
 /**
- * DetailsTab — OPP-DESCRIPTION-1 wiring: the "Kanstekst" block sits above the
- * deal fields and its `onSave` PATCHes straight through onUpdate as
- * `{ description }` (mapped to the real API field by useOpportunitiesData —
- * see that hook's own PATCH-mapping test). The deal-fields EditableFieldTable
- * itself already has broad coverage via the shared component's own tests, so
- * this file focuses on the new description wiring only.
+ * DetailsTab — DRILLDOWN-VOLGORDE-CANON (Danny 21-08) block order: deal fields
+ * → "Kanstekst" (OPP-DESCRIPTION-1) → Koios AI → vestiging. The "Kanstekst"
+ * block's `onSave` PATCHes straight through onUpdate as `{ description }`
+ * (mapped to the real API field by useOpportunitiesData — see that hook's own
+ * PATCH-mapping test). The deal-fields EditableFieldTable itself already has
+ * broad coverage via the shared component's own tests, so this file focuses
+ * on the description wiring, the block order and the read-only branch section.
  */
 import { describe, it, expect, vi } from 'vitest'
 import { render, screen, within, renderHook } from '@testing-library/react'
@@ -40,12 +41,17 @@ const descriptionSaveButton = () =>
   within(screen.getByText('Omschrijving').parentElement as HTMLElement).getByTitle('Opslaan')
 
 describe('DetailsTab · Kanstekst wiring (OPP-DESCRIPTION-1)', () => {
-  it('renders the description block above the deal fields', () => {
+  it('renders the description block below the deal fields (DRILLDOWN-VOLGORDE-CANON)', () => {
     render(<DetailsTab opportunity={baseOpportunity} onUpdate={() => {}} />)
     // Real nl translation for opportunities:details.groups.description; 'deal'
     // resolves to "Deal".
-    expect(screen.getByText('Omschrijving')).toBeInTheDocument()
-    expect(screen.getByText('Deal')).toBeInTheDocument()
+    const dealLabel = screen.getByText('Deal')
+    const descriptionLabel = screen.getByText('Omschrijving')
+    expect(dealLabel).toBeInTheDocument()
+    expect(descriptionLabel).toBeInTheDocument()
+    // DOCUMENT_POSITION_FOLLOWING: the description card comes AFTER the deal
+    // card in DOM order — the canon fix, deal fields now lead.
+    expect(dealLabel.compareDocumentPosition(descriptionLabel) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
   })
 
   it('calls onUpdate with { description } — the id + PATCH-ready patch shape', async () => {
@@ -126,3 +132,37 @@ describe('DetailsTab · table-identical Koios advice (KOIOS-ADVIES-OVERAL-1)', (
     expect(screen.queryByText(i18n.t('ai.title', { ns: 'common' }))).not.toBeInTheDocument()
   })
 })
+
+// DRILLDOWN-VOLGORDE-CANON: vestiging (C-41's tenant branch) LAST, read-only —
+// mirrors matches/drawer/OverviewTab.tsx's bottom block exactly.
+describe('DetailsTab · vestiging last, read-only (DRILLDOWN-VOLGORDE-CANON)', () => {
+  it('shows the linked branch as a read-only chip, with no add/remove affordance', () => {
+    const withBranch = { ...baseOpportunity, branch: 'Bureau Amsterdam' } as unknown as Opportunity
+    render(<DetailsTab opportunity={withBranch} onUpdate={vi.fn()} />)
+    // Real nl translation for candidates:matchesView.branch is "Vestiging".
+    expect(screen.getByText('Vestiging')).toBeInTheDocument()
+    expect(screen.getByText('Bureau Amsterdam')).toBeInTheDocument()
+    // readOnly hides BranchSection's own remove (×) button.
+    expect(screen.queryByLabelText('Verwijderen')).toBeNull()
+  })
+
+  it('shows the honest empty state when no branch is linked', () => {
+    render(<DetailsTab opportunity={baseOpportunity} onUpdate={vi.fn()} />)
+    // Real nl translation for candidates:sections.branchEmpty.
+    expect(screen.getByText('Nog geen vestiging gekoppeld.')).toBeInTheDocument()
+  })
+
+  it('renders the vestiging block AFTER the Koios advice block', () => {
+    const withBranch = { ...overdueDealStages(), branch: 'Bureau Amsterdam' } as unknown as Opportunity
+    const stages: LookupOption[] = [{ value: 'open', label: 'Open' }]
+    render(<DetailsTab opportunity={withBranch} onUpdate={vi.fn()} stages={stages} />)
+    const koiosLabel = screen.getByText(i18n.t('ai.title', { ns: 'common' }))
+    const branchLabel = screen.getByText('Vestiging')
+    expect(koiosLabel.compareDocumentPosition(branchLabel) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
+  })
+})
+
+// Helper: a deal whose Koios advice block is guaranteed to render (overdue, open).
+function overdueDealStages(): Opportunity {
+  return { ...baseOpportunity, stageValue: 'open', expectedCloseAt: '2026-01-01' } as unknown as Opportunity
+}

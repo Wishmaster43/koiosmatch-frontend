@@ -178,5 +178,9 @@
       "organisation": "Organisation",
       "display": "Ansicht"
     }
+  },
+  "popout": {
+    "textWindowTitle": "Chancentext — {{name}}",
+    "loadError": "Diese Chance konnte nicht geladen werden."
   }
 }

@@ -4,6 +4,7 @@ import type { FieldRow } from '@/components/forms/EditableFieldTable'
 import { useOpportunityServiceTypes, useOpportunityAgreementTypes } from '@/lib/useOpportunityLookups'
 import OpportunityDescriptionBlock from './OpportunityDescriptionBlock'
 import OpportunityKoiosBlock from './OpportunityKoiosBlock'
+import SharedBranchSection from '@/components/drawer/BranchSection'
 import { hasDescriptionText } from '../data/descriptionText'
 import type { Opportunity } from '@/types/opportunity'
 import type { Id, LookupOption } from '@/types/common'
@@ -21,12 +22,14 @@ interface DetailsTabProps {
  * department → contact, edited via the header pickers / dependent pickers per C-42).
  * Service/agreement types come from tenant lookups (seed fallback until the backend).
  *
- * OPP-DESCRIPTION-1 (CMBE golf 2a/2b): the "Kanstekst" rich-text block sits above
- * the deal fields — its own house pencil → save/cancel, PATCHing `description`
- * straight through (OpportunityRequest::sharedRules, nullable HTML, max 20000).
+ * DRILLDOWN-VOLGORDE-CANON (Danny 21-08, §3A): the block order follows the
+ * candidate/match blueprint — (1) INFORMATIE (the deal fields), (2) VRIJE TEKST
+ * with its own second-screen pop-out (OPP-DESCRIPTION-1, "Kanstekst"),
+ * (3) KOIOS AI, (4) VESTIGING last, read-only. This corrects the previous
+ * order, which had the description block first, above the deal fields.
  */
 export default function DetailsTab({ opportunity: o, onUpdate, stages = [] }: DetailsTabProps) {
-  const { t } = useTranslation('opportunities')
+  const { t } = useTranslation(['opportunities', 'candidates'])
   const { serviceTypes }   = useOpportunityServiceTypes()
   const { agreementTypes } = useOpportunityAgreementTypes()
 
@@ -85,21 +88,31 @@ export default function DetailsTab({ opportunity: o, onUpdate, stages = [] }: De
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-      {/* OPP-DESCRIPTION-1: the free-text "Kanstekst" — own pencil/save/cancel,
-          independent of the EditableFieldTable's own edit state below. A cleared
-          editor still emits stray markup ('<p></p>'), not '' — hasDescriptionText
-          strips tags first so the clear path PATCHes description: null, never
-          that literal markup string (measured live, 08-08). */}
-      <OpportunityDescriptionBlock value={o.description ?? ''}
-        onSave={html => onUpdate?.(o.id, { description: hasDescriptionText(html) ? html : null })} />
-      {/* Canon (05-08): no row dividers, 11px labels (candidate ProfileTab convention). */}
+      {/* (1) INFORMATIE — the deal fields. Canon (05-08): no row dividers,
+          11px labels (candidate ProfileTab convention). */}
       <EditableFieldTable title={t('details.groups.deal')} fields={dealFields} value={dealValue}
         onSave={onUpdate ? saveDeal : undefined} />
       {/* Organisation card dropped (Danny 2026-07-13): fase/eigenaar/aangemaakt all live in the drawer header already. */}
-      {/* KOIOS-ADVIES-OVERAL-1: the SAME advice the table's Koios column shows,
-          bottom of the main tab (mirrors the other drawers); renders nothing
-          when there is no advice. */}
+      {/* (2) VRIJE TEKST — the "Kanstekst" (OPP-DESCRIPTION-1), own pencil/save/✕
+          and second-screen pop-out (TEKST-POPOUT-1), independent of the
+          EditableFieldTable's own edit state above. A cleared editor still
+          emits stray markup ('<p></p>'), not '' — hasDescriptionText strips
+          tags first so the clear path PATCHes description: null, never that
+          literal markup string (measured live, 08-08). */}
+      <OpportunityDescriptionBlock opportunityId={o.id} value={o.description ?? ''}
+        onSave={html => onUpdate?.(o.id, { description: hasDescriptionText(html) ? html : null })} />
+      {/* (3) KOIOS AI — the SAME advice the table's Koios column shows;
+          renders nothing when there is no advice. */}
       <OpportunityKoiosBlock opportunity={o} stages={stages} />
+      {/* (4) VESTIGING last — the tenant's OWN branch (C-41, distinct from the
+          customer's own site on the Customer tab). Read-only display: this deal
+          derives its branch from the CREATE modal's Vestiging picker (no edit-modal
+          route exists from this drill-down yet), so
+          the drawer never offers a second, disconnected edit surface here
+          (mirrors matches/drawer/OverviewTab.tsx's bottom block exactly). */}
+      <SharedBranchSection readOnly label={t('candidates:matchesView.branch')}
+        emptyLabel={t('candidates:sections.branchEmpty')}
+        branches={o.branch ? [{ name: o.branch }] : []} />
     </div>
   )
 }

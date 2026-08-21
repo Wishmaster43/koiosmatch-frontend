@@ -178,5 +178,9 @@
       "organisation": "Organisation",
       "display": "Affichage"
     }
+  },
+  "popout": {
+    "textWindowTitle": "Texte de l'opportunité — {{name}}",
+    "loadError": "Cette opportunité n'a pas pu être chargée."
   }
 }

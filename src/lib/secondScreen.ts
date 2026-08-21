@@ -29,7 +29,7 @@
 // only ever appears in TEXT_POPOUT_PAGES below, never in NotesPopoutPage's
 // dispatch — the same asymmetry `application` already has in the other
 // direction (a notes thread, no text-field entry).
-export type PopoutEntity = 'candidate' | 'customer' | 'vacancy' | 'application' | 'outreachTarget' | 'match'
+export type PopoutEntity = 'candidate' | 'customer' | 'vacancy' | 'application' | 'outreachTarget' | 'match' | 'opportunity' | 'task'
 
 /**
  * Feature string for every second-screen window this app opens, sized to the

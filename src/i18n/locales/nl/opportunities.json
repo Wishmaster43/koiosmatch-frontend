@@ -178,5 +178,9 @@
       "organisation": "Organisatie",
       "display": "Weergave"
     }
+  },
+  "popout": {
+    "textWindowTitle": "Kanstekst — {{name}}",
+    "loadError": "Deze kans kon niet worden geladen."
   }
 }
