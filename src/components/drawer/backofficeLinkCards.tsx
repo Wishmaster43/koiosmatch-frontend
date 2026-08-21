@@ -16,19 +16,12 @@ import { useDateFormat } from '@/lib/datetime'
 import helloflexIcon from '@/assets/integrations/helloflex.png'
 import shiftmanagerIcon from '@/assets/integrations/shiftmanager.png'
 import type { BackofficeLink } from '@/lib/backofficeLink'
+import Button from '@/components/ui/Button'
+import { Caption, Mono } from '@/components/ui/typography'
 
 // Shared inline styles (§4 tokens only — no ad-hoc hex).
 const mutedItalic: CSSProperties = { fontSize: 12, fontStyle: 'italic', color: 'var(--text-muted)', margin: 0 }
 const errorLine: CSSProperties = { fontSize: 11, color: 'var(--color-danger-text)', margin: 0 }
-const monoText: CSSProperties = { fontFamily: 'JetBrains Mono, monospace', fontSize: 12, color: 'var(--text)' }
-// PRIMAIR-VLAK-1 (Danny 19-08 op deze knop: "die ook!!"): action buttons read
-// the button trio — one token flip restyles them with every other accent action.
-const actionBtn = (disabled: boolean): CSSProperties => ({
-  display: 'inline-flex', alignItems: 'center', gap: 5, padding: '4px 10px',
-  fontSize: 11, fontWeight: 500, borderRadius: 7, border: '1px solid var(--button-border)',
-  cursor: disabled ? 'not-allowed' : 'pointer', background: 'var(--button-fill)',
-  color: 'var(--button-ink)', opacity: disabled ? 0.6 : 1, flexShrink: 0,
-})
 
 // Small brand icon, fixed at a 16px footprint in every card header (never
 // hotlinked — local assets only, §7 CSP); alt text always comes through i18n.
@@ -50,10 +43,10 @@ function LinkButton({ onClick, busy, retry, disabled }: { onClick: () => void; b
   const { t } = useTranslation('common')
   const isDisabled = busy || !!disabled
   return (
-    <button type="button" onClick={onClick} disabled={isDisabled} style={actionBtn(isDisabled)}>
+    <Button variant="primary" size="sm" onClick={onClick} disabled={isDisabled} style={{ flexShrink: 0 }}>
       {busy ? <Spinner size={11} /> : <Link2 size={11} />}
       {busy ? t('backofficeLinks.common.linking') : t(retry ? 'backofficeLinks.common.retry' : 'backofficeLinks.common.linkButton')}
-    </button>
+    </Button>
   )
 }
 
@@ -64,9 +57,9 @@ function LinkedByLine({ link }: { link: BackofficeLink | null }) {
   const { formatDate } = useDateFormat()
   if (!link?.linkedBy || !link.linkedAt) return null
   return (
-    <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>
+    <Caption as="span">
       {t('backofficeLinks.common.linkedByOn', { name: link.linkedBy.name ?? '—', date: formatDate(link.linkedAt) })}
-    </span>
+    </Caption>
   )
 }
 
@@ -78,15 +71,23 @@ interface CardProps { status: string | null; link: BackofficeLink | null; canLin
 // real, surfaced state, not a placeholder).
 export function HelloflexCard({ status, link, canLink, busy, onLink }: CardProps) {
   const { t } = useTranslation('common')
+  const { formatDateTime } = useDateFormat()
   return (
     <SectionCard title={<CardTitle icon={helloflexIcon} alt={t('backofficeLinks.helloflex.alt')} label={t('backofficeLinks.helloflex.name')} />}>
       {status === 'linked' ? (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
             <SoftChip label={t('backofficeLinks.common.statusLinked')} color="var(--color-success)" />
-            {link?.externalId && <span style={monoText}>{link.externalId}</span>}
+            {link?.externalId && <Mono style={{ fontSize: 12 }}>{link.externalId}</Mono>}
           </div>
           <LinkedByLine link={link} />
+          {/* MATCHES 16 (21-08): sync metadata lives with the coupling, not on the
+              Overview tab — mirrors ShiftmanagerCard's own lastSynced line. */}
+          {link?.lastSyncedAt && (
+            <Caption as="span">
+              {t('backofficeLinks.helloflex.lastSynced', { date: formatDateTime(link.lastSyncedAt) })}
+            </Caption>
+          )}
         </div>
       ) : status === 'pending' ? (
         <SoftChip label={t('backofficeLinks.common.statusPending')} color="var(--color-warning)" />
@@ -120,19 +121,19 @@ export function ShiftmanagerCard({ status, link, canLink, busy, syncing, canSync
       {status === 'linked' && externalId ? (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
-            <span style={monoText}>{t('backofficeLinks.shiftmanager.externalId')}: {externalId}</span>
+            <Mono style={{ fontSize: 12 }}>{t('backofficeLinks.shiftmanager.externalId')}: {externalId}</Mono>
             {canSyncNow && (
-              <button type="button" onClick={onSyncNow} disabled={syncing} style={actionBtn(syncing)}>
+              <Button variant="primary" size="sm" onClick={onSyncNow} disabled={syncing} style={{ flexShrink: 0 }}>
                 <RefreshCw size={11} className={syncing ? 'animate-spin' : ''} />
                 {syncing ? t('backofficeLinks.shiftmanager.syncing') : t('backofficeLinks.shiftmanager.syncNow')}
-              </button>
+              </Button>
             )}
           </div>
           <LinkedByLine link={link} />
           {link?.lastSyncedAt && (
-            <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>
+            <Caption as="span">
               {t('backofficeLinks.shiftmanager.lastSynced', { date: formatDateTime(link.lastSyncedAt) })}
-            </span>
+            </Caption>
           )}
         </div>
       ) : status === 'pending' ? (

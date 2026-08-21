@@ -44,6 +44,8 @@ import BackofficeLinksTab from '@/components/drawer/BackofficeLinksTab'
 import { useBackofficeLinksVisible } from '@/components/drawer/useBackofficeLinksVisible'
 import { useDateFormat } from '@/lib/datetime'
 import { useMatchStatuses } from '@/lib/useMatchStatuses'
+import StatusPill from '@/components/ui/StatusPill'
+import { Caption, PageTitle } from '@/components/ui/typography'
 import { useCustomFields } from '@/lib/useCustomFields'
 import { useUsers } from '@/lib/queries'
 import { initialsOf } from '@/lib/initials'
@@ -125,7 +127,9 @@ export default function MatchDrawer({
   const { approvalMode } = useMatchApprovalMode()
   // R-1b lifecycle status — the same tenant lookup the board/table use. metaOf
   // also drives the terminate button's is_closed gate below (MATCH-TERMINATE-1).
-  const { statuses: matchStatuses, metaOf: matchStatusMeta } = useMatchStatuses()
+  const { metaOf: matchStatusMeta } = useMatchStatuses()
+  // Colour + label for the header's read-only status badge (MATCHES 14).
+  const headerStatusMeta = matchStatusMeta(match?.status)
   // The Extra tab only shows when the tenant has defined match custom fields (§3A(f)).
   const { fields: customFieldDefs } = useCustomFields('match')
   // DD-FE-6 ("no empty tabs"): this file passes no extra children into
@@ -225,8 +229,8 @@ export default function MatchDrawer({
       // the rejected reason (when applicable) already shows via MatchApprovalActions
       // in the header actions, so it is not duplicated here.
       footer={
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, fontSize: 11, color: 'var(--text-muted)' }}>
-          <span>{t('drawer.createdAt', { date: formatDateTime(match.date) })}</span>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
+          <Caption as="span">{t('drawer.createdAt', { date: formatDateTime(match.date) })}</Caption>
           <span />
         </div>
       }
@@ -252,6 +256,7 @@ export default function MatchDrawer({
             {onArchive && !match.archived && (
               <button onClick={() => onArchive(match.id)}
                 title={t('drawer.archive')} aria-label={t('drawer.archive')}
+                // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- danger-ink ghost icon: no Button tone carries danger ink on a bare face (ghost=neutral, dangerSoft=tinted); ProfileTab precedent
                 style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 4, display: 'flex', color: 'var(--color-danger-text)', opacity: 0.7 }}>
                 <Trash2 size={14} />
               </button>
@@ -261,6 +266,7 @@ export default function MatchDrawer({
             {onMarkDeletion && match.archived && !inTrash && (
               <button onClick={() => onMarkDeletion(match.id)}
                 title={t('common:trash.markAction')} aria-label={t('common:trash.markAction')}
+                // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- danger-ink ghost icon: no Button tone carries danger ink on a bare face (ghost=neutral, dangerSoft=tinted); ProfileTab precedent
                 style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 4, display: 'flex', color: 'var(--color-danger-text)' }}>
                 <Trash2 size={14} />
               </button>
@@ -269,10 +275,14 @@ export default function MatchDrawer({
           renderTitle={() => (
             <>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-                <span style={{ fontSize: 15, fontWeight: 700, color: 'var(--text)' }}>{match.candidate}</span>
+                <PageTitle as="span">{match.candidate}</PageTitle>
                 {/* Approval badge — colour-coded, read-only, next to the title (§3A calm header).
                     Only rendered when it means something (goedkeuring-badge-eerlijk) — see the gate in MatchApprovalBadge. */}
                 <MatchApprovalBadge status={match.approval_status} approvalMode={approvalMode} />
+                {/* MATCHES 14 (21-08): the lifecycle status as a READ-ONLY colour-coded
+                    badge (§3A calm header) — editing it happens in the Overview tab's
+                    own status field, the drawer's single edit surface for it. */}
+                {headerStatusMeta && <StatusPill label={headerStatusMeta.label} color={headerStatusMeta.color} />}
                 {/* Score sits beside the title (moved out of the old ad-hoc headerChips row). */}
                 <ScorePill value={match.score} />
                 {/* NUMMER-1: human-readable reference number, click-to-copy — same spot on every drawer. */}
@@ -309,15 +319,12 @@ export default function MatchDrawer({
               )}
             </>
           }
-          // Standard meta-picker row (§3A(c)): Status (~160, tenant lookup) + Eigenaar
-          // (MATCH-OWNER-1 — a real picker now that PATCH /matches/{id} takes owner_id).
-          // ARCHIVED: no status/owner changes on a soft-deleted match — restore first (mirrors candidates).
+          // Meta-picker row (§3A(c)): Eigenaar only (MATCH-OWNER-1 — a real picker
+          // now that PATCH /matches/{id} takes owner_id). MATCHES 14 (21-08): the
+          // status PICKER left this row — the drawer showed status twice; the header
+          // now carries the read-only badge, Overview owns the edit.
+          // ARCHIVED: no owner changes on a soft-deleted match — restore first (mirrors candidates).
           meta={[
-            ...(onSetStatus && !match.archived ? [{
-              key: 'status', label: t('drawer.fields.status'), value: match.status,
-              options: matchStatuses.map(s => ({ value: s.value, label: s.label })),
-              onChange: onSetStatus, menuWidth: 170, width: 160,
-            }] : []),
             ...(canEditOwner ? [{
               key: 'owner', label: t('drawer.fields.owner'), value: ownerValue,
               options: ownerOptions, onChange: handleOwnerChange,
@@ -327,7 +334,7 @@ export default function MatchDrawer({
           // Read-only owner whenever the picker is gated off — the fact stays visible.
           metaExtra={canEditOwner ? undefined : (
             <div style={{ maxWidth: 190 }}>
-              <div style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 4 }}>{t('drawer.fields.owner')}</div>
+              <Caption as="div" style={{ marginBottom: 4 }}>{t('drawer.fields.owner')}</Caption>
               <div style={{ fontSize: 12, padding: '5px 10px', border: '1px solid var(--border)', borderRadius: 7,
                 background: 'var(--bg)', color: match.owner ? 'var(--text)' : 'var(--text-muted)' }}>
                 {match.owner || t('drawer.ownerUnassigned')}

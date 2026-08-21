@@ -308,7 +308,8 @@
     "helloflex": {
       "name": "HelloFlex",
       "alt": "HelloFlex-Logo",
-      "notLinked": "Nicht mit HelloFlex verknüpft"
+      "notLinked": "Nicht mit HelloFlex verknüpft",
+      "lastSynced": "Zuletzt synchronisiert: {{date}}"
     },
     "shiftmanager": {
       "name": "Shiftmanager",

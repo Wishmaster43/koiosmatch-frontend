@@ -19,7 +19,7 @@ import { useTranslation } from 'react-i18next'
 import { Unplug } from 'lucide-react'
 import EditableFieldTable from '@/components/forms/EditableFieldTable'
 import type { FieldRow } from '@/components/forms/EditableFieldTable'
-import { GroupLabel, Caption } from '@/components/ui/typography'
+import { Caption, Mono } from '@/components/ui/typography'
 import Button from '@/components/ui/Button'
 import { notifySuccess, notifyError } from '@/lib/notify'
 import { useContractTypes } from '@/lib/useContractTypes'
@@ -163,8 +163,8 @@ export default function MatchContractSection({ matchId, onUpdate }: Props) {
 
   return (
     <div>
-      {/* Canon (05-08): the shared GroupLabel atom, reused instead of a hand-rolled heading. */}
-      <GroupLabel style={{ letterSpacing: '0.04em', marginBottom: 6 }}>{t('drawer.contract.title')}</GroupLabel>
+      {/* MATCHES 13 (21-08): no inner heading — the drawer TAB already carries
+          drawer.contract.title; repeating it here was the "kopje dubbel". */}
       {/* MATCH-SOORT-1: Contractvorm chip + its CONTRACTREGELS read-list — edited
           only via MatchModal (the popup owns the write path); this section only
           displays what was set there, mirroring the changelog's split (§2). */}
@@ -180,9 +180,9 @@ export default function MatchContractSection({ matchId, onUpdate }: Props) {
                 <li key={l.id ?? i} style={{ display: 'flex', justifyContent: 'space-between', gap: 8, fontSize: 12,
                   padding: '4px 8px', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 6 }}>
                   <span style={{ color: 'var(--text)' }}>{l.functionTitle || '—'}</span>
-                  <span style={{ fontFamily: 'JetBrains Mono, monospace', color: 'var(--text-muted)' }}>
+                  <Mono style={{ color: 'var(--text-muted)' }}>
                     {l.rate != null ? l.rate.toFixed(2) : '—'}
-                  </span>
+                  </Mono>
                 </li>
               ))}
             </ul>
@@ -202,7 +202,7 @@ export default function MatchContractSection({ matchId, onUpdate }: Props) {
           background: 'var(--surface)', border: '1px solid var(--border)',
           color: margin != null ? (margin >= 0 ? 'var(--color-success)' : 'var(--color-danger)') : 'var(--text-muted)' }}>
           <span style={{ color: 'var(--text-muted)' }}>{t('drawer.contract.margin')}</span>
-          <span style={{ fontWeight: 700, fontFamily: 'JetBrains Mono, monospace' }}>{margin != null ? margin.toFixed(2) : '—'}</span>
+          <Mono style={{ fontWeight: 700 }}>{margin != null ? margin.toFixed(2) : '—'}</Mono>
         </div>
       )}
     </div>

@@ -88,7 +88,7 @@ interface OverviewTabProps {
 
 export default function OverviewTab({ match, onSetStatus, onUpdate, ordinals, onOpenNotes }: OverviewTabProps) {
   const { t } = useTranslation(['matches', 'candidates'])
-  const { formatDate, formatDateTime } = useDateFormat()
+  const { formatDate } = useDateFormat()
   // KOIOS-ADVIES-OVERAL-1: the SAME resolver the matches table's Koios column
   // uses — the advisory block below prepends its advice so the two never disagree.
   const resolveAdvice = useMatchAdvice()
@@ -115,14 +115,14 @@ export default function OverviewTab({ match, onSetStatus, onUpdate, ordinals, on
   ].filter(Boolean) as string[] : []
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
       {/* Danny 27-07 ("achtergrond kleur???"): this card was hand-rolled with
           background --bg (the grey page tint) and its own bold title, so the match
           drawer was the only one with a tinted panel. It now uses the shared
           SectionCard — same border/radius, --surface background, grey uppercase
           title outside the block — exactly like every other drawer. */}
       <SectionCard title={t('drawer.sectionDetails')}>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
           <Field label={t('drawer.fields.candidate')}>
             {match.candidate && match.candidate !== '—'
               ? <EntityLink page="candidates" id={match.candidateId} title={t('drawer.openCandidate')}>{match.candidate}</EntityLink>
@@ -185,7 +185,7 @@ export default function OverviewTab({ match, onSetStatus, onUpdate, ordinals, on
           never a blank card — an unconfigured integration/never-synced match just
           reads as an honest dash, not an error. */}
       <SectionCard title={t('drawer.detailSection')}>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
           <Field label={t('drawer.contract.hoursPerWeek')}>
             {contractLoading ? dash : (contract.hours_per_week != null ? contract.hours_per_week : dash)}
           </Field>
@@ -194,9 +194,6 @@ export default function OverviewTab({ match, onSetStatus, onUpdate, ordinals, on
           </Field>
           <Field label={t('drawer.contract.billingEmails')}>
             {contractLoading ? dash : (contract.billing_emails.length > 0 ? contract.billing_emails.join(', ') : dash)}
-          </Field>
-          <Field label={t('drawer.fields.lastSynced')}>
-            {match.helloflexLink?.lastSyncedAt ? formatDateTime(match.helloflexLink.lastSyncedAt) : dash}
           </Field>
         </div>
       </SectionCard>
