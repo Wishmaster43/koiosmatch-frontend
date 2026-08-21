@@ -95,7 +95,8 @@
       "empty": "No subtasks yet.",
       "parentLabel": "Main task",
       "progressLabel": "{{done}}/{{total}} subtasks done",
-      "add": "Add subtask"
+      "add": "Add subtask",
+      "openFull": "Open as task"
     }
   },
   "comments": {

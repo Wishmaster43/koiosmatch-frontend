@@ -27,6 +27,18 @@ vi.mock('../AddTaskModal', () => ({
   ),
 }))
 
+// TAKEN 3: SubtaskQuickView itself is covered by its own test file — stubbed here
+// to a marker div so this file proves the WIRING (which id opened, close/onChanged
+// wired to the right callbacks), not the popup's own content.
+vi.mock('./SubtaskQuickView', () => ({
+  default: ({ id, onClose, onChanged }: { id: string; onClose: () => void; onChanged?: () => void }) => (
+    <div data-testid="subtask-quick-view" data-id={id}>
+      <button onClick={onClose}>fake-close-quick-view</button>
+      <button onClick={onChanged}>fake-changed</button>
+    </div>
+  ),
+}))
+
 import api from '@/lib/api'
 const mockGet = api.get as unknown as ReturnType<typeof vi.fn>
 
@@ -45,6 +57,7 @@ describe('SubtasksSection (task drawer, SUBTASK-1)', () => {
   it('fetches the subtasks with ?parent_id= when the task has subtasks, and shows the progress tally', async () => {
     mockGet.mockClear()
     mockGet.mockResolvedValueOnce({ data: [
+      // eslint-disable-next-line no-restricted-syntax -- test fixture lookup colour (DATA, not UI styling)
       { id: 's1', title: 'Bel terug', status: { label: 'Open', color: '#888888' } },
     ] })
     render(<SubtasksSection task={task({ subtaskProgress: { done: 2, total: 5 } })} />)
@@ -74,13 +87,33 @@ describe('SubtasksSection (task drawer, SUBTASK-1)', () => {
     expect(openEntity).toHaveBeenCalledWith('tasks', 'p1')
   })
 
-  it('opens a subtask row on click, navigating to that task', async () => {
+  it('opens the compact quick view on a subtask row click — NOT the full drawer', async () => {
     mockGet.mockClear()
+    openEntity.mockClear()
     mockGet.mockResolvedValueOnce({ data: [{ id: 's1', title: 'Bel terug' }] })
+    const user = userEvent.setup()
     render(<SubtasksSection task={task({ subtaskProgress: { done: 0, total: 1 } })} />)
     const row = await screen.findByText('Bel terug')
-    row.closest('button')?.click()
-    expect(openEntity).toHaveBeenCalledWith('tasks', 's1')
+    await user.click(row.closest('button')!)
+    expect(screen.getByTestId('subtask-quick-view')).toHaveAttribute('data-id', 's1')
+    expect(openEntity).not.toHaveBeenCalled()
+  })
+
+  it('closing the quick view removes it, and its onChanged refetches this subtask list', async () => {
+    mockGet.mockClear()
+    mockGet.mockResolvedValue({ data: [{ id: 's1', title: 'Bel terug' }] })
+    const user = userEvent.setup()
+    render(<SubtasksSection task={task({ subtaskProgress: { done: 0, total: 1 } })} />)
+    const row = await screen.findByText('Bel terug')
+    await user.click(row.closest('button')!)
+    expect(screen.getByTestId('subtask-quick-view')).toBeInTheDocument()
+
+    mockGet.mockClear()
+    await user.click(screen.getByText('fake-changed'))
+    await waitFor(() => expect(mockGet).toHaveBeenCalledWith('/tasks', { params: { parent_id: 't1' } }))
+
+    await user.click(screen.getByText('fake-close-quick-view'))
+    expect(screen.queryByTestId('subtask-quick-view')).not.toBeInTheDocument()
   })
 
   describe('SUBTASK-CREATE-1: add-subtask flow', () => {

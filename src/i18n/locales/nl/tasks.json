@@ -95,7 +95,8 @@
       "empty": "Nog geen subtaken.",
       "parentLabel": "Hoofdtaak",
       "progressLabel": "{{done}}/{{total}} subtaken afgerond",
-      "add": "Subtaak toevoegen"
+      "add": "Subtaak toevoegen",
+      "openFull": "Openen als taak"
     }
   },
   "comments": {

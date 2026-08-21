@@ -81,7 +81,8 @@
       "empty": "Noch keine Unteraufgaben.",
       "parentLabel": "Hauptaufgabe",
       "progressLabel": "{{done}}/{{total}} Unteraufgaben erledigt",
-      "add": "Unteraufgabe hinzufügen"
+      "add": "Unteraufgabe hinzufügen",
+      "openFull": "Als Aufgabe öffnen"
     }
   },
   "comments": {

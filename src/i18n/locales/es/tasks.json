@@ -81,7 +81,8 @@
       "empty": "Aún no hay subtareas.",
       "parentLabel": "Tarea principal",
       "progressLabel": "{{done}}/{{total}} subtareas completadas",
-      "add": "Añadir subtarea"
+      "add": "Añadir subtarea",
+      "openFull": "Abrir como tarea"
     }
   },
   "comments": {

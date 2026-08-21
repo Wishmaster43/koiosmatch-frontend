@@ -18,6 +18,11 @@
  * `onSubtaskCreated` bumps this task's own `subtaskProgress.total` — a LOCAL-only
  * count update (no PATCH — subtask_progress is a derived, read-only tally, never
  * a task field the API would accept a write for).
+ *
+ * TAKEN 3 (walkthrough 21-08, Danny: "eigen compacte pop-up"): a subtask ROW no
+ * longer opens the full TaskDrawer — it opens the compact SubtaskQuickView
+ * instead. The PARENT reference row keeps opening the full drawer (a parent is a
+ * main task, not a subtask, and deserves its full context).
  */
 import { useEffect, useState, useCallback, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -28,6 +33,7 @@ import { GroupLabel, Caption } from '@/components/ui/typography'
 import Button from '@/components/ui/Button'
 import DrawerAddButton from '@/components/drawer/DrawerAddButton'
 import AddTaskModal from '../AddTaskModal'
+import SubtaskQuickView from './SubtaskQuickView'
 import { useNavigation } from '@/context/NavigationContext'
 import type { TaskDetail } from '@/types/task'
 import type { Id } from '@/types/common'
@@ -56,6 +62,10 @@ export default function SubtasksSection({ task, onSubtaskCreated }: {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(false)
   const [addOpen, setAddOpen] = useState(false)
+  // TAKEN 3: which subtask's compact quick view is open (null = none). A row
+  // click sets this instead of navigating — the full drawer stays reserved for
+  // the parent-reference row and the quick view's own "open as task" escape hatch.
+  const [quickViewId, setQuickViewId] = useState<Id | null>(null)
   // Freshness guard (§9, mirrors RelatedTasks): a monotonic request id so a slow
   // response for a previously-opened task can never overwrite the current one.
   const requestIdRef = useRef(0)
@@ -132,8 +142,10 @@ export default function SubtasksSection({ task, onSubtaskCreated }: {
             const label = typeof st === 'object' ? st?.label : st
             const color = (typeof st === 'object' ? st?.color : null) ?? 'var(--text-muted)'
             return (
+              // TAKEN 3: a subtask row opens the compact quick view, never the full
+              // drawer (that is the parent-reference row's job, above).
               // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- full-width clickable reference row (structural, not an action button)
-              <button key={String(r.id)} onClick={() => openEntity('tasks', r.id)} style={rowBtnStyle}>
+              <button key={String(r.id)} onClick={() => setQuickViewId(r.id)} style={rowBtnStyle}>
                 <ListChecks size={13} style={{ color: 'var(--text-muted)', flexShrink: 0 }} />
                 <span style={{ flex: 1, minWidth: 0, fontSize: 12, fontWeight: 500, color: 'var(--text)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                   {r.title ?? '—'}
@@ -143,6 +155,13 @@ export default function SubtasksSection({ task, onSubtaskCreated }: {
             )
           })}
         </div>
+      )}
+
+      {/* TAKEN 3: the compact quick view — status is editable there and persists
+          immediately, so closing it must refetch this list (mirrors fetchSubtasks
+          already used as the retry handler above). */}
+      {quickViewId != null && (
+        <SubtaskQuickView id={quickViewId} onClose={() => setQuickViewId(null)} onChanged={fetchSubtasks} />
       )}
     </div>
   )

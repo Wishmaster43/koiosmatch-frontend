@@ -81,7 +81,8 @@
       "empty": "Pas encore de sous-tâches.",
       "parentLabel": "Tâche principale",
       "progressLabel": "{{done}}/{{total}} sous-tâches terminées",
-      "add": "Ajouter une sous-tâche"
+      "add": "Ajouter une sous-tâche",
+      "openFull": "Ouvrir comme tâche"
     }
   },
   "comments": {
