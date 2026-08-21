@@ -33,6 +33,7 @@ import { useEditorExitGuards } from './workflow/useEditorExitGuards'
 import { useModuleCatalog } from './workflow/useModuleCatalog'
 import type { Workflow } from '@/types/workflow'
 import type { RunRow } from '@/types/reports'
+import { handlePopupKeydown } from '@/hooks/popupCommands'
 
 // ── Inner editor ──────────────────────────────────────────────────────────────
 
@@ -62,7 +63,7 @@ function EditorInner({ workflow, onClose, onSave, initialRunId }: {
   // useFocusTrap stopPropagations their own Escape first, so this only fires
   // when the editor itself has focus.
   useEffect(() => {
-    const h = (e: KeyboardEvent) => { if (e.key === 'Escape') confirmClose() }
+    const h = (e: KeyboardEvent) => { handlePopupKeydown(e, { onClose: confirmClose }) }
     document.addEventListener('keydown', h)
     return () => document.removeEventListener('keydown', h)
   }, [confirmClose])

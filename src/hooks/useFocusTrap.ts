@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import type { MutableRefObject } from 'react'
+import { handlePopupKeydown } from './popupCommands'
 
 /**
  * useFocusTrap — accessible dialog behaviour for an overlay (§6, WCAG 2.2 AA):
@@ -48,15 +49,10 @@ export function useFocusTrap<T extends HTMLElement = HTMLDivElement>(onClose?: (
       // Move focus into the panel on open (fall back to the panel itself).
       ;(focusables()[0] ?? el).focus({ preventScroll: true })
 
-      // Trap Tab inside the panel; Escape closes via the LATEST onClose.
+      // POP-UPS 3.2: de toetsafhandeling woont in HET ene sneltoetsen-bestand
+      // (hooks/popupCommands) — deze trap levert alleen zijn eigen context aan.
       const onKeyDown = (e: KeyboardEvent) => {
-        if (e.key === 'Escape') { e.stopPropagation(); onCloseRef.current?.(); return }
-        if (e.key !== 'Tab') return
-        const items = focusables()
-        if (items.length === 0) { e.preventDefault(); return }
-        const first = items[0], last = items[items.length - 1]
-        if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus() }
-        else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus() }
+        handlePopupKeydown(e, { onClose: () => onCloseRef.current?.(), focusables })
       }
       el.addEventListener('keydown', onKeyDown)
       return () => {
