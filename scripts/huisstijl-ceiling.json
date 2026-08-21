@@ -348,7 +348,6 @@
   "src/pages/customers/drawer/LocationBranchSection.tsx": 3,
   "src/pages/customers/drawer/LocationContactSection.tsx": 1,
   "src/pages/customers/drawer/LocationLogoAvatar.tsx": 1,
-  "src/pages/customers/drawer/MatchesTab.test.tsx": 3,
   "src/pages/customers/drawer/MergeContactModal.tsx": 4,
   "src/pages/customers/drawer/MergeSubEntityModal.tsx": 4,
   "src/pages/customers/drawer/OpportunitiesTab.tsx": 4,

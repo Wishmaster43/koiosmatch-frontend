@@ -35,7 +35,9 @@ export default makeEntityModule({
     { key: 'reason',         label: 'Reden',        type: 'text', showIf: { key: 'action', value: 'Bijwerken' } },
     { key: 'effective_from', label: 'Ingangsdatum', type: 'date', showIf: { key: 'action', value: 'Bijwerken' } },
     // Werkervaring toevoegen (was experience_add).
+    // KANDIDATEN 9 (21-08): the old experience_position (top/bottom) option is
+    // GONE — the backend deliberately ignores it (auto rows always append, §3B
+    // ordering law), so it was a dead setting promising an effect it never had.
     { key: 'experience_source',   label: 'Bron',      type: 'select', options: ['match'],          showIf: { key: 'action', value: 'Werkervaring toevoegen' } },
-    { key: 'experience_position', label: 'Plaatsing', type: 'select', options: ['top', 'bottom'],  showIf: { key: 'action', value: 'Werkervaring toevoegen' } },
   ],
 })
