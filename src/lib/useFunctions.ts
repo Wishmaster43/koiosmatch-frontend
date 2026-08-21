@@ -44,14 +44,16 @@ interface FunctionsLookupData { functions: string[]; apiFreeEntry: boolean }
 // being briefly too strict costs the user the ability to work at all.
 const FALLBACK: FunctionsLookupData = { functions: DEFAULT_FUNCTIONS, apiFreeEntry: true }
 
-// Names keep the seed when empty; apiFreeEntry stays permissive when the
+// Names keep the seed when empty; apiFreeEntry defaults STRICT when the response omits the flag
 // response doesn't carry a boolean flag (e.g. a genuinely empty/failed response).
 const mapFunctions = (res: AxiosResponse): FunctionsLookupData => {
   const names = lookupNames(res)
   const free = (res?.data as { allow_free_entry?: unknown })?.allow_free_entry
   return {
     functions: names.length ? names : DEFAULT_FUNCTIONS,
-    apiFreeEntry: typeof free === 'boolean' ? free : true,
+    // Danny 21-08 (settings-ronde): vrije invoer staat STANDAARD UIT — strikt is
+    // de norm, vrije invoer is de bewuste uitzondering die de tenant zelf aanzet.
+    apiFreeEntry: typeof free === 'boolean' ? free : false,
   }
 }
 

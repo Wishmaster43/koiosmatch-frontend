@@ -68,14 +68,16 @@ export const DEFAULT_APPLICATION_SOURCES = [
 interface SourcesLookupData { sources: string[]; apiFreeEntry: boolean }
 const FALLBACK: SourcesLookupData = { sources: DEFAULT_APPLICATION_SOURCES, apiFreeEntry: true }
 
-// Names keep the seed when empty; apiFreeEntry stays permissive when the response
+// Names keep the seed when empty; apiFreeEntry defaults STRICT when the response omits the flag
 // carries no boolean flag (a genuinely empty or failed response), per the reasoning above.
 const mapSources = (res: AxiosResponse): SourcesLookupData => {
   const names = lookupNames(res)
   const free = (res?.data as { allow_free_entry?: unknown })?.allow_free_entry
   return {
     sources: names.length ? names : DEFAULT_APPLICATION_SOURCES,
-    apiFreeEntry: typeof free === 'boolean' ? free : true,
+    // Danny 21-08 (settings-ronde): vrije invoer staat STANDAARD UIT — strikt is
+    // de norm, vrije invoer is de bewuste uitzondering die de tenant zelf aanzet.
+    apiFreeEntry: typeof free === 'boolean' ? free : false,
   }
 }
 
