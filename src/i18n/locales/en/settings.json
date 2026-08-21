@@ -316,6 +316,11 @@
         "label": "Active-conversation window",
         "description": "A WhatsApp conversation counts as 'active' when its last message falls within this many weeks",
         "unit": "weeks"
+      },
+      "candidate_no_followup_workdays": {
+        "label": "No follow-up after N workdays",
+        "description": "After this many workdays without an open task, appointment or contact moment a candidate counts as 'no follow-up'",
+        "unit": "workdays"
       }
     }
   },

@@ -316,6 +316,11 @@
         "label": "Fenêtre de conversation active",
         "description": "Une conversation WhatsApp est « active » si son dernier message date de ce nombre de semaines",
         "unit": "semaines"
+      },
+      "candidate_no_followup_workdays": {
+        "label": "Aucun suivi après N jours ouvrés",
+        "description": "Après ce nombre de jours ouvrés sans tâche ouverte, rendez-vous ou contact, un candidat compte comme 'sans suivi'",
+        "unit": "jours ouvrés"
       }
     }
   },

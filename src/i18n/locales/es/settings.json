@@ -316,6 +316,11 @@
         "label": "Ventana de conversación activa",
         "description": "Una conversación de WhatsApp cuenta como «activa» si su último mensaje entra en estas semanas",
         "unit": "semanas"
+      },
+      "candidate_no_followup_workdays": {
+        "label": "Sin seguimiento tras N días laborables",
+        "description": "Tras esos días laborables sin tarea abierta, cita o contacto, un candidato cuenta como 'sin seguimiento'",
+        "unit": "días laborables"
       }
     }
   },

@@ -316,6 +316,11 @@
         "label": "Actief-gesprek venster",
         "description": "Een WhatsApp-gesprek telt als 'actief' als het laatste bericht binnen zoveel weken viel",
         "unit": "weken"
+      },
+      "candidate_no_followup_workdays": {
+        "label": "Geen opvolging na N werkdagen",
+        "description": "Na zoveel werkdagen zonder open taak, afspraak of contactmoment telt een kandidaat als 'geen opvolging'",
+        "unit": "werkdagen"
       }
     }
   },

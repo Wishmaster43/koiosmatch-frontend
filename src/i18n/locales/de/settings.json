@@ -316,6 +316,11 @@
         "label": "Fenster für aktive Gespräche",
         "description": "Ein WhatsApp-Gespräch gilt als „aktiv\", wenn die letzte Nachricht innerhalb dieser Wochen liegt",
         "unit": "Wochen"
+      },
+      "candidate_no_followup_workdays": {
+        "label": "Keine Nachverfolgung nach N Werktagen",
+        "description": "Nach so vielen Werktagen ohne offene Aufgabe, Termin oder Kontaktmoment zählt ein Kandidat als 'keine Nachverfolgung'",
+        "unit": "Werktage"
       }
     }
   },

@@ -31,6 +31,10 @@ export const kpisCandidates = {
     // Active-conversation window (CONV-DRILLDOWN-FE): drives the drawer's
     // is_active badge AND the "actieve gesprekken" KPI (same server derivation).
     { key: 'conversation_active_weeks', type: 'number', default: 4, min: 1, max: 52 },
+    // No-followup window (walkthrough 21-08): workdays without an open task,
+    // appointment or contact before the "geen opvolging" KPI counts a candidate —
+    // server-derived (default 5, clamped 1-60); this is its one settings surface.
+    { key: 'candidate_no_followup_workdays', type: 'number', default: 5, min: 1, max: 60 },
     ...noContactAlert,
   ],
 }
