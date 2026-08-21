@@ -1,6 +1,6 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Edit2, Save, X } from 'lucide-react'
+import { Edit2, ExternalLink, Save, X } from 'lucide-react'
 import { Field, SelectField, DateField, TextField } from '@/components/forms/fields'
 import CreatableSelect from '@/components/ui/CreatableSelect'
 import Avatar from '@/components/ui/Avatar'
@@ -19,6 +19,7 @@ import { useTeams } from '@/lib/useTeams'
 import { useLocations } from '@/lib/useLocations'
 import { useDateFormat } from '@/lib/datetime'
 import { initialsOf } from '@/lib/initials'
+import { useTextPopoutHost } from '@/hooks/useTextPopoutHost'
 import { isTaskOverdue, dueDateTime } from '../data/mapTask'
 import SubtasksSection from './SubtasksSection'
 import Button from '@/components/ui/Button'
@@ -96,6 +97,15 @@ export default function DetailsTab({ task, onUpdate, onSubtaskCreated }: {
   const [descEditing, setDescEditing] = useState(false)
   const [descDraft, setDescDraft] = useState('')
   const [descExpanded, setDescExpanded] = useState(false)
+  // TEKST-POPOUT-1: what the read view shows. Follows `task.description`, but a
+  // save from the popped-out second-screen window updates it immediately (the
+  // prop itself only refreshes once the parent's own PATCH round-trips) —
+  // mirrors MatchTextBlock's `shown` state.
+  // Safe against cross-record leaks on TWO invariants (verify round 21-08):
+  // the drawer is keyed by task id (TasksPage), and the light LIST row never
+  // maps `description` (only mapTaskDetail does) — if either changes, resync.
+  const [descShown, setDescShown] = useState<string | null | undefined>(task.description)
+  useEffect(() => { setDescShown(task.description) }, [task.description])
 
   // Enter edit mode with a draft seeded from the current field values (description
   // is seeded/saved separately below — it never rides along in this patch).
@@ -125,9 +135,20 @@ export default function DetailsTab({ task, onUpdate, onSubtaskCreated }: {
   }
 
   // Description block: its own start/save/cancel, isolated from the fields' draft above.
-  const startDescEdit = () => { setDescDraft(task.description ?? ''); setDescEditing(true) }
+  const startDescEdit = () => { setDescDraft(descShown ?? ''); setDescEditing(true) }
   const saveDesc = () => { onUpdate({ description: descDraft }); setDescEditing(false) }
   const cancelDesc = () => setDescEditing(false)
+
+  // TEKST-POPOUT-1 (TAKEN 2): the description's second-screen affordance, one
+  // shared draft between drawer and popped-out window (mirrors MatchTextBlock).
+  const descPopout = useTextPopoutHost({
+    entity: 'task', id: task.id != null ? String(task.id) : '', field: 'description',
+    value: descDraft, dirty: descEditing && descDraft !== (descShown ?? ''),
+    onDraft: (html: string) => { setDescDraft(html); setDescEditing(true) },
+    onSaved: (html: string) => { setDescDraft(html); setDescShown(html); setDescEditing(false) },
+  })
+  const changeDescDraft = (html: string) => { setDescDraft(html); descPopout.publishDraft(html) }
+  const openDescPopout = () => { if (task.id == null) return; setDescEditing(true); descPopout.open() }
 
   // `icon` holds a tenant emoji/string (BE task-types R-2) — pass it through so
   // CreatableSelect's own icon slot renders it, never prefix it into the label text.
@@ -231,9 +252,20 @@ export default function DetailsTab({ task, onUpdate, onSubtaskCreated }: {
           {descEditing ? (
             <EditControls onSave={saveDesc} onCancel={cancelDesc} saveLabel={t('comments.send')} cancelLabel={t('modal.cancel')} />
           ) : !task.archived && (
-            <Button variant="ghost" iconOnly size="sm" onClick={startDescEdit} title={t('details.description')} aria-label={t('details.description')}>
-              <Edit2 size={13} />
-            </Button>
+            <div style={{ display: 'flex', gap: 4 }}>
+              {/* TEKST-POPOUT-1 (TAKEN 2): write the description full-size on a
+                  second screen — the shared house recipe (§3A), never a
+                  bespoke widget. */}
+              {task.id != null && (
+                <Button variant="secondary" iconOnly size="sm" onClick={openDescPopout}
+                  title={t('common:openSecondScreen')} aria-label={t('common:openSecondScreen')}>
+                  <ExternalLink size={13} />
+                </Button>
+              )}
+              <Button variant="ghost" iconOnly size="sm" onClick={startDescEdit} title={t('details.description')} aria-label={t('details.description')}>
+                <Edit2 size={13} />
+              </Button>
+            </div>
           )}
         </div>
         {descEditing ? (
@@ -241,12 +273,12 @@ export default function DetailsTab({ task, onUpdate, onSubtaskCreated }: {
           // RichTextAssistBar that RichTextEditor mounts on every editor — the same
           // KoiosVoiceButton the note composer uses. Never pass a second local mic
           // here (that renders two identical buttons, §11).
-          <RichTextEditor value={descDraft} onChange={setDescDraft}
+          <RichTextEditor value={descDraft} onChange={changeDescDraft}
             expanded={descExpanded} onToggleExpand={() => setDescExpanded(e => !e)} />
         ) : (
           <div style={{ borderRadius: 10, overflow: 'hidden', border: '1px solid var(--border)', padding: '9px 12px' }}>
-            {task.description
-              ? <SafeHtml html={task.description} style={{ fontSize: 12, color: 'var(--text)', lineHeight: 1.5 }} />
+            {descShown
+              ? <SafeHtml html={descShown} style={{ fontSize: 12, color: 'var(--text)', lineHeight: 1.5 }} />
               : <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>—</span>}
           </div>
         )}

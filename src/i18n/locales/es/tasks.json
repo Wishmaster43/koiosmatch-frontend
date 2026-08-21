@@ -242,5 +242,9 @@
       "organisation": "Organización",
       "display": "Visualización"
     }
+  },
+  "popout": {
+    "textWindowTitle": "Descripción de la tarea — {{name}}",
+    "loadError": "Esta tarea no se pudo cargar."
   }
 }

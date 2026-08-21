@@ -242,5 +242,9 @@
       "organisation": "Organisation",
       "display": "Affichage"
     }
+  },
+  "popout": {
+    "textWindowTitle": "Description de la tâche — {{name}}",
+    "loadError": "Cette tâche n'a pas pu être chargée."
   }
 }

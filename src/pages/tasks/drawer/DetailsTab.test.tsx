@@ -72,6 +72,19 @@ describe('tasks DetailsTab — split fields/description edit sections', () => {
     expect(screen.queryByTitle('Plaatsen')).toBeNull()
   })
 
+  // TEKST-POPOUT-1 (TAKEN 2): the description gets the same second-screen
+  // affordance as the profile/match/vacancy text, beside its own pencil.
+  it('renders the second-screen popout button beside the description pencil', () => {
+    render(<DetailsTab task={task} onUpdate={vi.fn()} />)
+    expect(screen.getByTitle('Open op tweede scherm')).toBeInTheDocument()
+  })
+
+  it('hides the popout button once description editing starts (mirrors MatchTextBlock)', () => {
+    render(<DetailsTab task={task} onUpdate={vi.fn()} />)
+    fireEvent.click(screen.getByTitle('Omschrijving'))
+    expect(screen.queryByTitle('Open op tweede scherm')).toBeNull()
+  })
+
   it('saving the fields section sends the field patch WITHOUT description', () => {
     const onUpdate = vi.fn()
     render(<DetailsTab task={task} onUpdate={onUpdate} />)

@@ -242,5 +242,9 @@
       "organisation": "Organisation",
       "display": "Ansicht"
     }
+  },
+  "popout": {
+    "textWindowTitle": "Aufgabenbeschreibung — {{name}}",
+    "loadError": "Diese Aufgabe konnte nicht geladen werden."
   }
 }

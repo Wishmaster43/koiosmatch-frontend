@@ -7,3 +7,4 @@
  */
 export { default as AddTaskModal } from './AddTaskModal'
 export { isTaskOverdue } from './data/mapTask'
+export { default as TaskDescriptionPopout } from './popout/TaskDescriptionPopout'

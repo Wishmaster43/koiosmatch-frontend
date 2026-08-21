@@ -242,5 +242,9 @@
       "organisation": "Organisation",
       "display": "Display"
     }
+  },
+  "popout": {
+    "textWindowTitle": "Task description — {{name}}",
+    "loadError": "This task could not be loaded."
   }
 }

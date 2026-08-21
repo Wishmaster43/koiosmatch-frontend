@@ -242,5 +242,9 @@
       "organisation": "Organisatie",
       "display": "Weergave"
     }
+  },
+  "popout": {
+    "textWindowTitle": "Taakomschrijving — {{name}}",
+    "loadError": "Deze taak kon niet worden geladen."
   }
 }
