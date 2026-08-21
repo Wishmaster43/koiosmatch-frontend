@@ -44,12 +44,10 @@ import BackofficeLinksTab from '@/components/drawer/BackofficeLinksTab'
 import { useBackofficeLinksVisible } from '@/components/drawer/useBackofficeLinksVisible'
 import { useDateFormat } from '@/lib/datetime'
 import { useMatchStatuses } from '@/lib/useMatchStatuses'
-import StatusPill from '@/components/ui/StatusPill'
 import { Caption, PageTitle } from '@/components/ui/typography'
 import { useCustomFields } from '@/lib/useCustomFields'
 import { useUsers } from '@/lib/queries'
 import { initialsOf } from '@/lib/initials'
-import ScorePill from './ScorePill'
 import OverviewTab from './drawer/OverviewTab'
 import MatchContractSection from './drawer/MatchContractSection'
 import NotesTab from './drawer/NotesTab'
@@ -127,9 +125,7 @@ export default function MatchDrawer({
   const { approvalMode } = useMatchApprovalMode()
   // R-1b lifecycle status — the same tenant lookup the board/table use. metaOf
   // also drives the terminate button's is_closed gate below (MATCH-TERMINATE-1).
-  const { metaOf: matchStatusMeta } = useMatchStatuses()
-  // Colour + label for the header's read-only status badge (MATCHES 14).
-  const headerStatusMeta = matchStatusMeta(match?.status)
+  const { statuses: matchStatuses, metaOf: matchStatusMeta } = useMatchStatuses()
   // The Extra tab only shows when the tenant has defined match custom fields (§3A(f)).
   const { fields: customFieldDefs } = useCustomFields('match')
   // DD-FE-6 ("no empty tabs"): this file passes no extra children into
@@ -201,7 +197,7 @@ export default function MatchDrawer({
     // ordinal footnote too — the whole match, one tab.
     // REMARKS-INTO-NOTES-1: the shell hands each tab its own setActiveTab, so the
     // retired Opmerkingen block can jump to Notes right after moving its text there.
-    { id: 'overview',  label: t('drawer.tabs.overview'), render: setTab => <OverviewTab match={match} onSetStatus={onSetStatus} onUpdate={onUpdate} ordinals={ordinals} onOpenNotes={() => setTab?.('notes')} /> },
+    { id: 'overview',  label: t('drawer.tabs.overview'), render: setTab => <OverviewTab match={match} onUpdate={onUpdate} ordinals={ordinals} onOpenNotes={() => setTab?.('notes')} /> },
     { id: 'contract',  label: t('drawer.contract.title'), render: () => <MatchContractSection matchId={match.id} onUpdate={onUpdate} /> },
     // NT-MATCH-1: notes, after the content tabs above and before Extra/Koppelingen
     // (there is no Changelog TAB — record history stays the icon-popover, §3A(d)).
@@ -279,12 +275,11 @@ export default function MatchDrawer({
                 {/* Approval badge — colour-coded, read-only, next to the title (§3A calm header).
                     Only rendered when it means something (goedkeuring-badge-eerlijk) — see the gate in MatchApprovalBadge. */}
                 <MatchApprovalBadge status={match.approval_status} approvalMode={approvalMode} />
-                {/* MATCHES 14 (21-08): the lifecycle status as a READ-ONLY colour-coded
-                    badge (§3A calm header) — editing it happens in the Overview tab's
-                    own status field, the drawer's single edit surface for it. */}
-                {headerStatusMeta && <StatusPill label={headerStatusMeta.label} color={headerStatusMeta.color} />}
-                {/* Score sits beside the title (moved out of the old ad-hoc headerChips row). */}
-                <ScorePill value={match.score} />
+                {/* MATCHES 14-v2 (Danny 21-08, tweede screenshot): status leeft ÉÉN
+                    keer, BEWERKBAAR bovenin (the meta picker below — mirrors the
+                    candidate header's own pickers, §3B); the title chip and the
+                    title ScorePill both read as doubles and went — the score's one
+                    home is the Matchgegevens card. */}
                 {/* NUMMER-1: human-readable reference number, click-to-copy — same spot on every drawer. */}
                 <ReferenceNumberChip value={match.referenceNumber} />
               </div>
@@ -319,12 +314,16 @@ export default function MatchDrawer({
               )}
             </>
           }
-          // Meta-picker row (§3A(c)): Eigenaar only (MATCH-OWNER-1 — a real picker
-          // now that PATCH /matches/{id} takes owner_id). MATCHES 14 (21-08): the
-          // status PICKER left this row — the drawer showed status twice; the header
-          // now carries the read-only badge, Overview owns the edit.
-          // ARCHIVED: no owner changes on a soft-deleted match — restore first (mirrors candidates).
+          // Meta-picker row (§3A(c)/§3B): Status + Eigenaar — MATCHES 14-v2
+          // (Danny 21-08): "status hoort bovenin", editable, exactly once; the
+          // Overview card's status row went with it.
+          // ARCHIVED: no status/owner changes on a soft-deleted match — restore first (mirrors candidates).
           meta={[
+            ...(onSetStatus && !match.archived ? [{
+              key: 'status', label: t('drawer.fields.status'), value: match.status,
+              options: matchStatuses.map(s => ({ value: s.value, label: s.label })),
+              onChange: onSetStatus, menuWidth: 170, width: 160,
+            }] : []),
             ...(canEditOwner ? [{
               key: 'owner', label: t('drawer.fields.owner'), value: ownerValue,
               options: ownerOptions, onChange: handleOwnerChange,

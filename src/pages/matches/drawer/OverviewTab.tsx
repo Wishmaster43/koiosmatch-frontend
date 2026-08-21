@@ -45,8 +45,6 @@ import KoiosAdviceBlock from '@/components/ai/KoiosAdviceBlock'
 import { useMatchAdvice } from '@/lib/useMatchAdvice'
 import { adviceInsightRows } from '@/lib/koiosAdviceInsight'
 import ScorePill from '../ScorePill'
-import SelectMenu from '@/components/ui/SelectMenu'
-import { useMatchStatuses } from '@/lib/useMatchStatuses'
 import { useMatchContract } from '../hooks/useMatchContract'
 import { buildMatchAdviceInsights } from './matchAiInsights'
 import MatchDurationBar from './MatchDurationBar'
@@ -76,7 +74,6 @@ const dash = <span style={{ color: 'var(--text-muted)' }}>—</span>
 
 interface OverviewTabProps {
   match: MatchRow
-  onSetStatus?: (status: string) => void
   onUpdate?: (id: MatchRow['id'], patch: Partial<MatchRow>) => void
   // MATCH-ORDINAL-1 (M14/M15): this match's position among the tenant's other
   // matches per axis — omitting it just hides the ordinal footnote.
@@ -86,15 +83,12 @@ interface OverviewTabProps {
   onOpenNotes?: () => void
 }
 
-export default function OverviewTab({ match, onSetStatus, onUpdate, ordinals, onOpenNotes }: OverviewTabProps) {
+export default function OverviewTab({ match, onUpdate, ordinals, onOpenNotes }: OverviewTabProps) {
   const { t } = useTranslation(['matches', 'candidates'])
   const { formatDate } = useDateFormat()
   // KOIOS-ADVIES-OVERAL-1: the SAME resolver the matches table's Koios column
   // uses — the advisory block below prepends its advice so the two never disagree.
   const resolveAdvice = useMatchAdvice()
-  // Lifecycle status from the tenant lookup — the is_closed FLAG ends the match (R-1b).
-  const { statuses, metaOf } = useMatchStatuses()
-  const statusMeta = metaOf(match.status)
   // M3/M28/M12: hours/week + cost centre + billing e-mail are DETAIL-only fields
   // (§8 — never on the list row), so this tab fetches them itself, same as every
   // other lazy per-tab fetch in this drawer (§0.19 abort/alive-guard lives inside the hook).
@@ -140,21 +134,15 @@ export default function OverviewTab({ match, onSetStatus, onUpdate, ordinals, on
           </Field>
           <Field label={t('drawer.fields.owner')}>{textOrDash(match.owner)}</Field>
           <Field label={t('drawer.fields.score')}><ScorePill value={match.score} /></Field>
-          <Field label={t('drawer.fields.stage')}>
-            {match.stage
-              ? <StatusPill label={match.stage} color={match.stageColor} />
-              : dash}
-          </Field>
-          {/* Lifecycle status — editable from the tenant lookup; closing statuses end the match. */}
-          <Field label={t('drawer.fields.status')}>
-            {onSetStatus ? (
-              <SelectMenu value={match.status || null} onChange={onSetStatus}
-                placeholder={t('drawer.fields.status')}
-                options={statuses.map(o => ({ value: o.value, label: o.label }))} />
-            ) : statusMeta ? (
-              <StatusPill label={statusMeta.label} color={statusMeta.color} />
-            ) : dash}
-          </Field>
+          {/* MATCHES 18 + punt 2 (21-08): the fase derives from the application
+              this match grew out of — a DIRECT match has none, and a dash row
+              that can never be filled is dead weight, so the row only renders
+              when a stage actually exists. */}
+          {match.stage && (
+            <Field label={t('drawer.fields.stage')}>
+              <StatusPill label={match.stage} color={match.stageColor} />
+            </Field>
+          )}
           <Field label={t('drawer.fields.created')}>{formatDate(match.date)}</Field>
           {/* M1: contract form — MatchListResource already ships `contract_type` on
               every list row; the mapper just never picked it up before this wave. */}
