@@ -20,9 +20,9 @@ import type { CSSProperties } from 'react'
  * MATCH_COL_ACTIONS, the exact "two loose numbers" bug this file exists to
  * prevent; both header and row now read every column from here.
  *
- * These apply ONLY to the flat, header-barred list (the candidate drawer's Matches
- * tab, `flatRow`). The customer drawer renders the same card without a header bar,
- * where a content-width summary row is the right thing.
+ * These apply to the flat, header-barred list — since KLANTEN 4 (21-08) that is
+ * ALL three drawer Matches tabs (candidate, customer, vacancy), each rendering
+ * the shared MatchListHeaderBar above `flatRow` cards.
  */
 
 // Shared base width for the other-party column, kept as its own constant because

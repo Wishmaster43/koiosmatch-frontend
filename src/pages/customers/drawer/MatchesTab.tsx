@@ -6,7 +6,7 @@ import DrawerAddButton from '@/components/drawer/DrawerAddButton'
 import StatusFilterSelect, { useStatusFilter } from '@/components/drawer/StatusFilterSelect'
 import { useMatchStatuses } from '@/lib/useMatchStatuses'
 import { useApps } from '@/context/AppsContext'
-import { MatchCard } from '@/pages/matches/shared'
+import { MatchCard, MatchListHeaderBar } from '@/pages/matches/shared'
 import { MatchModal } from '@/pages/candidates/shared'
 import { useCustomerMatches } from '../hooks/useCustomerDrawerData'
 import type { CustomerMatchRow } from '../hooks/useCustomerDrawerData'
@@ -87,6 +87,9 @@ export default function MatchesTab({ customerId }: { customerId?: Id }) {
         <DrawerAddButton onClick={() => setAdding(true)} label={t('customers:matches.add')} short />
       </div>
       <SectionCard>
+      {/* KLANTEN 4 (Danny 21-08 "Weergeven zoals bij de kandidaat"): the same
+          shared column-header bar + collapsed flat rows the candidate tab has. */}
+      <MatchListHeaderBar otherPartyLabel={t('matches:cols.candidate')} />
       {matches.length === 0 ? (
         <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{t('candidates:matchesView.empty')}</div>
       ) : matches.map((m, i) => {
@@ -105,6 +108,7 @@ export default function MatchesTab({ customerId }: { customerId?: Id }) {
             functionTitle={m.functionTitle} branchName={m.branchName} ownerName={m.owner}
             startDate={m.startDate} endDate={m.endDate}
             isClosed={statusMeta?.is_closed} archived={m.archived}
+            collapsible flatRow
           />
         )
       })}

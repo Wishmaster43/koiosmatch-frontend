@@ -5,7 +5,7 @@ import SectionCard from '@/components/ui/SectionCard'
 import StatusFilterSelect, { useStatusFilter } from '@/components/drawer/StatusFilterSelect'
 import { useMatchStatuses } from '@/lib/useMatchStatuses'
 import { useApps } from '@/context/AppsContext'
-import { MatchCard } from '@/pages/matches/shared'
+import { MatchCard, MatchListHeaderBar } from '@/pages/matches/shared'
 import { useVacancyMatches } from '../hooks/useVacancyMatches'
 import type { MatchRow } from '@/types/match'
 import type { Id } from '@/types/common'
@@ -58,6 +58,9 @@ export default function MatchesTab({ vacancyId }: { vacancyId?: Id }) {
         <StatusFilterSelect value={statusFilter} onToggle={toggleStatus} statuses={matchStatuses} />
       </div>
       <SectionCard>
+      {/* KLANTEN 4 (Danny 21-08): the same shared column-header bar the
+          candidate/customer tabs carry above their flat rows. */}
+      <MatchListHeaderBar otherPartyLabel={t('matches:cols.candidate')} />
       {matches.length === 0 ? (
         <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{t('candidates:matchesView.empty')}</div>
       ) : matches.map((m, i) => {

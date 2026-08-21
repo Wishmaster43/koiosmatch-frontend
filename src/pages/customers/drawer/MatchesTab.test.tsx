@@ -33,9 +33,10 @@ const metaOf = vi.fn((v?: string) => (v === 'open' ? { value: 'open', label: 'Op
 // DEFAULT filter (same behaviour as Locations/Departments/Vacancies today), which
 // would make "nothing picked = all" below false. Neutral slugs isolate the NEW
 // toolbar behaviour from that pre-existing, unrelated guess.
-// eslint-disable-next-line no-restricted-syntax -- test fixture hex, not a UI colour
 const statuses = [
+  // eslint-disable-next-line no-restricted-syntax -- test fixture hex, not a UI colour
   { value: 'pending', label: 'In behandeling', color: '#123456', is_closed: false },
+  // eslint-disable-next-line no-restricted-syntax -- test fixture hex, not a UI colour
   { value: 'confirmed', label: 'Bevestigd', color: '#789ABC', is_closed: true },
 ]
 vi.mock('@/lib/useMatchStatuses', () => ({ useMatchStatuses: () => ({ statuses, metaOf }) }))
@@ -87,12 +88,17 @@ describe('CustomerDrawer · MatchesTab', () => {
     expect(screen.getByText(i18n.t('matches.loadError', { ns: 'customers' }))).toBeInTheDocument()
   })
 
-  it('renders the candidate (swapped from the candidate card\'s "Client" row), vacancy, contract form and contract status', () => {
+  it('renders the candidate (swapped from the candidate card\'s "Client" row), vacancy, contract form and contract status', async () => {
+    const user = userEvent.setup()
     mockUseCustomerMatches.mockReturnValue({ rows: [row({ contractType: 'Fase 1-2 z.u.b.', contractStatus: 'active' })], loading: false, error: false, reload: vi.fn() })
     render(<MatchesTab customerId="cust-1" />)
 
+    // KLANTEN 4 (21-08): rows are COLLAPSED flat rows now, like the candidate
+    // tab — candidate + vacancy show in the summary row, detail rows (contract
+    // form/status) only after expanding via the chevron.
     expect(screen.getByText('Jane Doe')).toBeInTheDocument()
     expect(screen.getByText('Verpleegkundige')).toBeInTheDocument()
+    await user.click(screen.getByTitle(i18n.t('expand', { ns: 'common' })))
     expect(screen.getByText('Fase 1-2 z.u.b.')).toBeInTheDocument()
     expect(screen.getByText(ct('matchesView.contractStatus.active'))).toBeInTheDocument()
   })
