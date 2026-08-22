@@ -93,7 +93,10 @@
     "multiselectSearch": "Zoeken…",
     "multiselectNoResults": "Geen resultaten.",
     "multiselectFreeEntry": "Typ een waarde en druk op Enter om toe te voegen.",
-    "removeCondition": "Voorwaarde verwijderen"
+    "removeCondition": "Voorwaarde verwijderen",
+    "workflowLoading": "Workflows ophalen…",
+    "workflowSelect": "Selecteer een workflow…",
+    "workflowEmpty": "Nog geen workflows"
   },
   "scheduleModal": {
     "title": "Planning instellen",
@@ -233,7 +236,15 @@
     "pdok_geocode": "Adres geocoderen (PDOK)",
     "backoffice_sync": "Backoffice koppelen",
     "interview_start": "AI-interview starten",
-    "notification_send": "Melding versturen"
+    "notification_send": "Melding versturen",
+    "task_create": "Taak aanmaken",
+    "appointment_create": "Afspraak/intake plannen",
+    "calllist_add": "Toevoegen aan bellijst",
+    "webhook_send": "Webhook versturen",
+    "candidate_archive": "Kandidaat archiveren",
+    "experience_add": "Werkervaring toevoegen",
+    "sm_employee_create": "SM medewerker aanmaken",
+    "workflow_call": "Workflow aanroepen"
   },
   "categories": {
     "all": "Alle",
@@ -783,7 +794,17 @@
     "Ontvangers": "Ontvangers",
     "Rol": "Rol",
     "Type (event)": "Type (event)",
-    "WhatsApp-consent": "WhatsApp-consent"
+    "WhatsApp-consent": "WhatsApp-consent",
+    "Toewijzen aan": "Toewijzen aan",
+    "Deadline over (dagen)": "Deadline over (dagen)",
+    "Starttijd": "Starttijd",
+    "Notities": "Notities",
+    "Bellijst-naam": "Bellijst-naam",
+    "Endpoint-slug": "Endpoint-slug",
+    "Richting": "Richting",
+    "Archiefreden": "Archiefreden",
+    "Positie in CV": "Positie in CV",
+    "Workflow": "Workflow"
   },
   "fieldOptions": {
     "Array (meerdere bundles)": "Array (meerdere bundles)",
@@ -910,7 +931,10 @@
     "matchcreated": "match aangemaakt",
     "taskcreated": "taak aangemaakt",
     "taskdue": "taak vervalt",
-    "workflowcustom": "aangepast (workflow)"
+    "workflowcustom": "aangepast (workflow)",
+    "customer_owner": "eigenaar klant",
+    "vacancy_owner": "eigenaar vacature",
+    "top": "bovenaan"
   },
   "agentTest": {
     "title": "Test-variabelen",
@@ -1023,7 +1047,15 @@
     "Alleen relevant wanneer de gekoppelde entiteit een klant is": "Alleen relevant wanneer de gekoppelde entiteit een klant is.",
     "Sla records over die al een koppeling met dit systeem hebben — aan te raden bij bulk": "Sla records over die al een koppeling met dit systeem hebben. Aan te raden bij bulk.",
     "Leeg = geen contactfilter (alle kandidaten komen mee)": "Leeg = geen contactfilter (alle kandidaten komen mee).",
-    "{{kandidaatid}} = draait per kandidaat uit de vorige stap (bulk; leeg werkt ook) Voor één kandidaat {{triggercandidate_id}} (drill-down-knop of adreswijziging)": "{{kandidaat.id}} = draait per kandidaat uit de vorige stap (bulk; leeg werkt ook). Voor één kandidaat: {{trigger.candidate_id}} (drill-down-knop of adreswijziging)."
+    "{{kandidaatid}} = draait per kandidaat uit de vorige stap (bulk; leeg werkt ook) Voor één kandidaat {{triggercandidate_id}} (drill-down-knop of adreswijziging)": "{{kandidaat.id}} = draait per kandidaat uit de vorige stap (bulk; leeg werkt ook). Voor één kandidaat: {{trigger.candidate_id}} (drill-down-knop of adreswijziging).",
+    "Leeg = geen toewijzing (bureau)": "Leeg = geen toewijzing (bureau).",
+    "Ondersteunt {maand} voor de huidige maandnaam": "Ondersteunt {maand} voor de huidige maandnaam.",
+    "De tenant-instelling webhook_endpoint_<slug> bepaalt de URL": "De tenant-instelling webhook_endpoint_<slug> bepaalt de URL.",
+    "Vrije tekst/label voor de ontvanger": "Vrije tekst/label voor de ontvanger.",
+    "Tekst die op de kandidaat en in de audit-trail komt te staan": "Tekst die op de kandidaat en in de audit-trail komt te staan.",
+    "De workflow die als kind wordt gestart (async, via de wachtrij) Zelf-aanroep en kringlopen worden geweigerd; maximaal 5 niveaus diep": "De workflow die als kind wordt gestart (async, via de wachtrij). Zelf-aanroep en kringlopen worden geweigerd; maximaal 5 niveaus diep.",
+    "Eerst proefdraaien rapporteert WIE er aangemaakt zou worden (incl payload), schrijft niets Zet expliciet uit om echt in Shiftmanager aan te maken": "Eerst proefdraaien: rapporteert WIE er aangemaakt zou worden (incl. payload), schrijft niets. Zet expliciet uit om echt in Shiftmanager aan te maken.",
+    "Datum en tijd (bv 10-08-2026 1400) of een variabele": "Datum en tijd (bv. 10-08-2026 14:00) of een variabele."
   },
   "triggers": {
     "events": {

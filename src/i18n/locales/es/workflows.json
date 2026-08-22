@@ -54,7 +54,10 @@
     "multiselectSearch": "Buscar…",
     "multiselectNoResults": "Sin resultados.",
     "multiselectFreeEntry": "Escribe un valor y pulsa Enter para añadirlo.",
-    "removeCondition": "Eliminar condición"
+    "removeCondition": "Eliminar condición",
+    "workflowLoading": "Cargando workflows…",
+    "workflowSelect": "Selecciona un workflow…",
+    "workflowEmpty": "Aún no hay workflows"
   },
   "scheduleModal": {
     "title": "Configurar programación",
@@ -194,7 +197,15 @@
     "pdok_geocode": "Geocodificar dirección (PDOK)",
     "backoffice_sync": "Vincular con el backoffice",
     "interview_start": "Iniciar entrevista IA",
-    "notification_send": "Enviar notificación"
+    "notification_send": "Enviar notificación",
+    "task_create": "Crear tarea",
+    "appointment_create": "Planificar cita/intake",
+    "calllist_add": "Añadir a la lista de llamadas",
+    "webhook_send": "Enviar webhook",
+    "candidate_archive": "Archivar candidato",
+    "experience_add": "Añadir experiencia laboral",
+    "sm_employee_create": "Crear empleado SM",
+    "workflow_call": "Llamar a un workflow"
   },
   "status": {
     "active": "Activo",
@@ -748,7 +759,17 @@
     "Ontvangers": "Destinatarios",
     "Rol": "Rol",
     "Type (event)": "Tipo (evento)",
-    "WhatsApp-consent": "Consentimiento de WhatsApp"
+    "WhatsApp-consent": "Consentimiento de WhatsApp",
+    "Toewijzen aan": "Asignar a",
+    "Deadline over (dagen)": "Plazo en (días)",
+    "Starttijd": "Hora de inicio",
+    "Notities": "Notas",
+    "Bellijst-naam": "Nombre de la lista de llamadas",
+    "Endpoint-slug": "Slug del endpoint",
+    "Richting": "Dirección",
+    "Archiefreden": "Motivo de archivo",
+    "Positie in CV": "Posición en el CV",
+    "Workflow": "Workflow"
   },
   "fieldOptions": {
     "Array (meerdere bundles)": "Array (varios bundles)",
@@ -875,7 +896,10 @@
     "matchcreated": "coincidencia creada",
     "taskcreated": "tarea creada",
     "taskdue": "tarea vence",
-    "workflowcustom": "personalizado (workflow)"
+    "workflowcustom": "personalizado (workflow)",
+    "customer_owner": "propietario del cliente",
+    "vacancy_owner": "propietario de la vacante",
+    "top": "arriba"
   },
   "agentTest": {
     "title": "Variables de prueba",
@@ -1023,7 +1047,15 @@
     "Alleen relevant wanneer de gekoppelde entiteit een klant is": "Solo relevante cuando la entidad vinculada es un cliente.",
     "Sla records over die al een koppeling met dit systeem hebben — aan te raden bij bulk": "Omitir registros que ya tienen un enlace con este sistema. Recomendado en bulk.",
     "Leeg = geen contactfilter (alle kandidaten komen mee)": "Vacío = sin filtro de contacto (se incluyen todos los candidatos).",
-    "{{kandidaatid}} = draait per kandidaat uit de vorige stap (bulk; leeg werkt ook) Voor één kandidaat {{triggercandidate_id}} (drill-down-knop of adreswijziging)": "{{kandidaat.id}} = se ejecuta por candidato del paso anterior (bulk; vacío también funciona). Para un solo candidato: {{trigger.candidate_id}} (botón de detalle o cambio de dirección)."
+    "{{kandidaatid}} = draait per kandidaat uit de vorige stap (bulk; leeg werkt ook) Voor één kandidaat {{triggercandidate_id}} (drill-down-knop of adreswijziging)": "{{kandidaat.id}} = se ejecuta por candidato del paso anterior (bulk; vacío también funciona). Para un solo candidato: {{trigger.candidate_id}} (botón de detalle o cambio de dirección).",
+    "Leeg = geen toewijzing (bureau)": "Vacío = sin asignación (agencia).",
+    "Ondersteunt {maand} voor de huidige maandnaam": "Admite {maand} para el nombre del mes actual.",
+    "De tenant-instelling webhook_endpoint_<slug> bepaalt de URL": "El ajuste del tenant webhook_endpoint_<slug> determina la URL.",
+    "Vrije tekst/label voor de ontvanger": "Texto libre/etiqueta para el destinatario.",
+    "Tekst die op de kandidaat en in de audit-trail komt te staan": "Texto que queda registrado en el candidato y en el registro de auditoría.",
+    "De workflow die als kind wordt gestart (async, via de wachtrij) Zelf-aanroep en kringlopen worden geweigerd; maximaal 5 niveaus diep": "El workflow que se inicia como hijo (async, mediante la cola). Las autollamadas y los bucles se rechazan; máximo 5 niveles de profundidad.",
+    "Eerst proefdraaien rapporteert WIE er aangemaakt zou worden (incl payload), schrijft niets Zet expliciet uit om echt in Shiftmanager aan te maken": "Primero simulación: informa QUIÉN se crearía (incl. payload), no escribe nada. Desactívalo explícitamente para crear de verdad en Shiftmanager.",
+    "Datum en tijd (bv 10-08-2026 1400) of een variabele": "Fecha y hora (p. ej. 10-08-2026 14:00) o una variable."
   },
   "triggers": {
     "events": {

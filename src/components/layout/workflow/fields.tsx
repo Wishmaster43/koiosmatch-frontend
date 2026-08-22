@@ -10,7 +10,7 @@ import { X } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import type { WorkflowField, EdgeFilters, WorkflowVarGroup } from '@/types/workflow'
 import {
-  FaqSelectField, WebhookSelectField, LookupSelectField,
+  FaqSelectField, WebhookSelectField, LookupSelectField, WorkflowSelectField,
   FiltersField, ResponseStructureField, type OnChange,
 } from './fieldControls'
 import { TextFieldWithVars } from './VariablePicker'
@@ -21,6 +21,9 @@ import MultiSelectField from './MultiSelectField'
 // <select> for the generic 'select' field type below.
 import CreatableSelect from '@/components/ui/CreatableSelect'
 import DrawerAddButton from '@/components/drawer/DrawerAddButton'
+// HUISSTIJL-1: the ONE toggle-switch implementation — replaces the hand-rolled
+// track+thumb <button> the 'boolean' field used to paint itself.
+import Toggle from '@/components/ui/Toggle'
 
 export function FieldInput({ field, value, onChange, variables, config }: {
   field: WorkflowField; value?: unknown; onChange: OnChange; variables?: WorkflowVarGroup[]
@@ -44,6 +47,11 @@ export function FieldInput({ field, value, onChange, variables, config }: {
   if (field.type === 'lookup_select') {
     return <LookupSelectField value={value} onChange={onChange} fieldKey={field.key} endpoint={String(field.endpoint ?? '')} valueKey={typeof field.valueKey === 'string' ? field.valueKey : undefined} />
   }
+  if (field.type === 'workflow') {
+    // workflow_call's workflow_id picker (WF-RELATIONS-1): a searchable list of
+    // this tenant's own workflows, fed by GET /workflows.
+    return <WorkflowSelectField value={value} onChange={onChange} fieldKey={field.key} />
+  }
   if (field.type === 'response_structure') {
     return <ResponseStructureField value={value} onChange={onChange} fieldKey={field.key} />
   }
@@ -53,14 +61,15 @@ export function FieldInput({ field, value, onChange, variables, config }: {
     return <WhatsappTemplateField value={value} onChange={onChange} config={config} variables={variables ?? []} />
   }
   if (field.type === 'boolean') {
+    // Unset config falls back to the schema default — the toggle must paint what
+    // the ENGINE will do (dry_run defaults ON server-side; showing "Uit" on a
+    // fresh node would read as live writes while the engine dry-runs).
+    const on = !!(value ?? field.default)
     return (
-      <button type="button" onClick={() => onChange(field.key, !value)}
-        style={{ display: 'flex', alignItems: 'center', gap: 8, background: 'none', border: 'none', padding: 0, cursor: 'pointer' }}>
-        <div style={{ position: 'relative', width: 32, height: 17, borderRadius: 999, background: value ? 'var(--color-primary)' : 'var(--border)', flexShrink: 0, transition: 'background 0.2s' }}>
-          <div style={{ position: 'absolute', top: 2, left: value ? 17 : 2, width: 13, height: 13, borderRadius: '50%', background: 'var(--surface)', transition: 'left 0.2s' }} />
-        </div>
-        <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>{value ? t('fields.boolOn') : t('fields.boolOff')}</span>
-      </button>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+        <Toggle checked={on} onChange={v => onChange(field.key, v)} ariaLabel={fieldLabel(t, field.label) || field.key} />
+        <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>{on ? t('fields.boolOn') : t('fields.boolOff')}</span>
+      </div>
     )
   }
   if (field.type === 'multiselect') {
@@ -117,7 +126,8 @@ export function FieldInput({ field, value, onChange, variables, config }: {
               style={{ flex: 1, padding: '5px 7px', fontSize: 12, border: '1px solid var(--border)', borderRadius: 6, outline: 'none' }} />
             <input value={p.value} onChange={e => update(i, 'value', e.target.value)} placeholder={t('fields.keyValue')} aria-label={t('fields.keyValue')}
               style={{ flex: 1, padding: '5px 7px', fontSize: 12, border: '1px solid var(--border)', borderRadius: 6, outline: 'none' }} />
-            <button type="button" onClick={() => remove(i)}
+            <button type="button" onClick={() => remove(i)} aria-label={t('common:remove')} title={t('common:remove')}
+              // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- dense inline row-remove inside a ~26px input row; Button sm's fixed 28px footprint breaks the row height (§14 r7 necessity)
               style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--color-danger-text)', padding: '0 4px' }}>
               <X size={12} />
             </button>
@@ -137,6 +147,7 @@ export function FieldInput({ field, value, onChange, variables, config }: {
       value={(value ?? field.default ?? '') as string}
       placeholder={fieldPlaceholder(t, field.placeholder)} aria-label={fieldLabel(t, field.label)}
       onChange={e => onChange(field.key, field.type === 'number' ? Number(e.target.value) : e.target.value)}
+      // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- the config-panel text INPUT's own size/colour (SettingsSearch precedent), not a BodyText paragraph render
       style={{ width: '100%', padding: '7px 9px', border: '1px solid var(--border)', borderRadius: 8, fontSize: 13, color: 'var(--text)', background: 'var(--surface)', outline: 'none', boxSizing: 'border-box' }}
       onFocus={e => (e.target.style.borderColor = 'var(--color-primary)')}
       onBlur={e  => (e.target.style.borderColor = 'var(--border)')} />

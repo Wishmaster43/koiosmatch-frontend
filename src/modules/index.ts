@@ -1,3 +1,11 @@
+import task_create        from './task_create'
+import appointment_create from './appointment_create'
+import calllist_add       from './calllist_add'
+import webhook_send       from './webhook_send'
+import candidate_archive  from './candidate_archive'
+import experience_add     from './experience_add'
+import sm_employee_create from './sm_employee_create'
+import workflow_call      from './workflow_call'
 import webhook           from './webhook'
 import sm_candidates     from './sm_candidates'
 import sm_customers      from './sm_customers'
@@ -79,7 +87,27 @@ import type { ModuleDef } from './types'
  *   MAKE_MODULE_MAP — Make.com identifier → internal type (for import/mapping)
  * To add a module: import it and append it here; the maps update automatically.
  */
+
+// ENGINE-INTERNAL TYPES (WF-MODULE-RECONCILE-FE-1) — module_type strings the
+// backend engine runs but that must NEVER get an FE registry card, because the
+// engine synthesises them itself rather than a builder ever picking one. 'trigger'
+// (App\Workflow\WorkflowEngine::$moduleMap) is the internal step every workflow
+// implicitly starts with; the workflow's OWN trigger (webhook/scheduled/event/…)
+// is authored via the trigger/trigger_config fields (WorkflowEditorHeader +
+// ScheduleModal), never via a canvas node of this type. Listed here so a future
+// registry reconcile (grepping the engine's moduleMap for FE gaps) recognises the
+// omission as deliberate instead of re-flagging it as a missing module.
+export const ENGINE_INTERNAL_TYPES = ['trigger'] as const
+
 const MODULES: ModuleDef[] = [
+  task_create,
+  appointment_create,
+  calllist_add,
+  webhook_send,
+  candidate_archive,
+  experience_add,
+  sm_employee_create,
+  workflow_call,
   webhook,
   sm_candidates,
   sm_customers,

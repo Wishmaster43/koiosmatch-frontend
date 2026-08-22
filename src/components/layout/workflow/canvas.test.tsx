@@ -14,6 +14,7 @@
 import { describe, it, expect, vi } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import { NODE_TYPES } from './canvas'
+import { MODULE_META } from '@/modules/index'
 import type { FlowNodeData } from '@/types/workflow'
 import type { ModuleCatalog } from './filterFieldCatalog'
 
@@ -67,5 +68,27 @@ describe('ModuleNode · PICKER-INTERSECT "not executable" marker', () => {
     mockCatalog = {}
     render(<ModuleNode {...node('condition')} />)
     expect(screen.queryByLabelText('canvas.notExecutable')).not.toBeInTheDocument()
+  })
+})
+
+// WF-MODULE-RECONCILE-FE-1 — the eight engine modules that used to fall through
+// to the "Onbekende module" fallback (no MODULE_META entry → knownMeta undefined
+// → nodeLabel = t('canvas.unknownModule')) because they had no FE registry card.
+// A saved workflow like "Heractivering" (task_create at step 3) rendered exactly
+// that. Each type below must now resolve knownMeta and render its real label.
+const RECONCILED_TYPES = [
+  'task_create', 'appointment_create', 'calllist_add', 'webhook_send',
+  'candidate_archive', 'experience_add', 'sm_employee_create', 'workflow_call',
+]
+
+describe('ModuleNode · WF-MODULE-RECONCILE-FE-1 (no more "Onbekende module")', () => {
+  it.each(RECONCILED_TYPES)('renders the real label for a saved %s node, never the unknown-module fallback', (type) => {
+    mockCatalog = {}
+    render(<ModuleNode {...node(type)} />)
+    // i18next has no instance in this test environment (see setup.js) — t() falls
+    // back to `defaultValue`, so a resolved registry entry renders its raw source
+    // label; an unresolved one would render the literal key 'canvas.unknownModule'.
+    expect(screen.getByText(MODULE_META[type].label)).toBeInTheDocument()
+    expect(screen.queryByText('canvas.unknownModule')).not.toBeInTheDocument()
   })
 })

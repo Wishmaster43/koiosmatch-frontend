@@ -58,7 +58,10 @@
     "multiselectSearch": "Search…",
     "multiselectNoResults": "No results.",
     "multiselectFreeEntry": "Type a value and press Enter to add it.",
-    "removeCondition": "Remove condition"
+    "removeCondition": "Remove condition",
+    "workflowLoading": "Loading workflows…",
+    "workflowSelect": "Select a workflow…",
+    "workflowEmpty": "No workflows yet"
   },
   "scheduleModal": {
     "title": "Set schedule",
@@ -198,7 +201,15 @@
     "pdok_geocode": "Geocode address (PDOK)",
     "backoffice_sync": "Link to backoffice",
     "interview_start": "Start AI interview",
-    "notification_send": "Send notification"
+    "notification_send": "Send notification",
+    "task_create": "Create task",
+    "appointment_create": "Schedule appointment/intake",
+    "calllist_add": "Add to call list",
+    "webhook_send": "Send webhook",
+    "candidate_archive": "Archive candidate",
+    "experience_add": "Add work experience",
+    "sm_employee_create": "Create SM employee",
+    "workflow_call": "Call workflow"
   },
   "status": {
     "active": "Active",
@@ -748,7 +759,17 @@
     "Ontvangers": "Recipients",
     "Rol": "Role",
     "Type (event)": "Type (event)",
-    "WhatsApp-consent": "WhatsApp consent"
+    "WhatsApp-consent": "WhatsApp consent",
+    "Toewijzen aan": "Assign to",
+    "Deadline over (dagen)": "Deadline in (days)",
+    "Starttijd": "Start time",
+    "Notities": "Notes",
+    "Bellijst-naam": "Call list name",
+    "Endpoint-slug": "Endpoint slug",
+    "Richting": "Direction",
+    "Archiefreden": "Archive reason",
+    "Positie in CV": "Position in CV",
+    "Workflow": "Workflow"
   },
   "fieldOptions": {
     "Array (meerdere bundles)": "Array (multiple bundles)",
@@ -875,7 +896,10 @@
     "matchcreated": "match created",
     "taskcreated": "task created",
     "taskdue": "task due",
-    "workflowcustom": "custom (workflow)"
+    "workflowcustom": "custom (workflow)",
+    "customer_owner": "customer owner",
+    "vacancy_owner": "vacancy owner",
+    "top": "top"
   },
   "agentTest": {
     "title": "Test variables",
@@ -1023,7 +1047,15 @@
     "Alleen relevant wanneer de gekoppelde entiteit een klant is": "Only relevant when the linked entity is a customer.",
     "Sla records over die al een koppeling met dit systeem hebben — aan te raden bij bulk": "Skip records that already have a link with this system. Recommended for bulk.",
     "Leeg = geen contactfilter (alle kandidaten komen mee)": "Empty = no contact filter (all candidates are included).",
-    "{{kandidaatid}} = draait per kandidaat uit de vorige stap (bulk; leeg werkt ook) Voor één kandidaat {{triggercandidate_id}} (drill-down-knop of adreswijziging)": "{{kandidaat.id}} = runs per candidate from the previous step (bulk; empty works too). For a single candidate: {{trigger.candidate_id}} (drill-down button or address change)."
+    "{{kandidaatid}} = draait per kandidaat uit de vorige stap (bulk; leeg werkt ook) Voor één kandidaat {{triggercandidate_id}} (drill-down-knop of adreswijziging)": "{{kandidaat.id}} = runs per candidate from the previous step (bulk; empty works too). For a single candidate: {{trigger.candidate_id}} (drill-down button or address change).",
+    "Leeg = geen toewijzing (bureau)": "Empty = no assignment (agency).",
+    "Ondersteunt {maand} voor de huidige maandnaam": "Supports {maand} for the current month name.",
+    "De tenant-instelling webhook_endpoint_<slug> bepaalt de URL": "The tenant setting webhook_endpoint_<slug> determines the URL.",
+    "Vrije tekst/label voor de ontvanger": "Free text/label for the recipient.",
+    "Tekst die op de kandidaat en in de audit-trail komt te staan": "Text that is stamped on the candidate and in the audit trail.",
+    "De workflow die als kind wordt gestart (async, via de wachtrij) Zelf-aanroep en kringlopen worden geweigerd; maximaal 5 niveaus diep": "The workflow started as a child (async, via the queue). Self-calls and cycles are refused; maximum 5 levels deep.",
+    "Eerst proefdraaien rapporteert WIE er aangemaakt zou worden (incl payload), schrijft niets Zet expliciet uit om echt in Shiftmanager aan te maken": "Dry-run first: reports WHO would be created (incl. payload), writes nothing. Turn off explicitly to really create in Shiftmanager.",
+    "Datum en tijd (bv 10-08-2026 1400) of een variabele": "Date and time (e.g. 10-08-2026 14:00) or a variable."
   },
   "triggers": {
     "events": {

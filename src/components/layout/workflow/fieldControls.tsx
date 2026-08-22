@@ -222,6 +222,54 @@ export function LookupSelectField({ value, onChange, fieldKey, endpoint, valueKe
   )
 }
 
+// ── Workflow select field ───────────────────────────────────────────────────────
+// The workflow_call module's `workflow_id` picker (WF-RELATIONS-1): a searchable
+// list of this tenant's OWN workflows, fed by the same GET /workflows the
+// workflows page list uses (useWorkflowsData) — never a hardcoded/static option
+// list (§3A: every choice list is searchable). Archived workflows are excluded
+// (a soft-deleted child can never actually run); self-call/cycle/depth are the
+// backend's own guard at run time (WorkflowCallModule), not re-implemented here.
+export function WorkflowSelectField({ value, onChange, fieldKey }: { value?: unknown; onChange: OnChange; fieldKey: string }) {
+  const { t } = useTranslation('workflows')
+  const [workflows, setWorkflows] = useState<Array<{ value: string; label: string }>>([])
+  const [loading,   setLoading]   = useState(true)
+  // CreatableSelect's trigger is a <button>, which a plain aria-label cannot
+  // name — a sr-only span + aria-labelledby names it instead (§4).
+  const workflowLabelId = useId()
+
+  useEffect(() => {
+    let alive = true
+    import('@/lib/api').then(m => m.default.get('/workflows'))
+      .then(r => {
+        const rows = unwrapList<Record<string, unknown>>(r).rows
+        if (!alive) return
+        setWorkflows(rows
+          .filter(w => !w.archived && !w.deleted_at)
+          .map(w => ({ value: String(w.id ?? ''), label: String(w.name ?? w.id ?? '') }))
+          .filter(o => o.value))
+      })
+      .catch(() => {})
+      .finally(() => { if (alive) setLoading(false) })
+    return () => { alive = false }
+  }, [])
+
+  if (loading) return <div style={{ fontSize: 12, color: 'var(--text-muted)', padding: '4px 0' }}>{t('fields.workflowLoading')}</div>
+
+  return (
+    <>
+      <span id={workflowLabelId} className="sr-only">{t('fields.workflowSelect')}</span>
+      <CreatableSelect value={(value as string) ?? ''} onChange={v => onChange(fieldKey, v)}
+        aria-labelledby={workflowLabelId} allowCreate={false}
+        placeholder={workflows.length ? t('fields.workflowSelect') : t('fields.workflowEmpty')}
+        options={[
+          { value: '', label: workflows.length ? t('fields.workflowSelect') : t('fields.workflowEmpty') },
+          ...workflows,
+        ]}
+        style={{ width: '100%', padding: '7px 9px', fontSize: 13 }} />
+    </>
+  )
+}
+
 // ── Filters field ───────────────────────────────────────────────────────────────
 // Inline conditions builder (field / operator / value + AND-OR), used inside an
 // entity module so fetch + filter live in one module. Shares FilterFieldPicker +
@@ -332,7 +380,7 @@ export function ResponseStructureField({ value, onChange, fieldKey }: { value?: 
           </button>
         </div>
       ))}
-      // HUISSTIJL-1: the ONE "+ add" affordance, app-wide (§3A).
+      {/* HUISSTIJL-1: the ONE "+ add" affordance, app-wide (§3A). */}
       <div style={{ marginTop: 2 }}>
         <DrawerAddButton onClick={add} label={t('fields.addItem')} />
       </div>
