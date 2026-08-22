@@ -186,7 +186,7 @@ export function useVacancyInsights({ stats, vacancies, statuses, phases, statusM
   }, [s, vacancies, t])
 
   // "Sollicitaties totaal" KPI (VAC-KPI-REDESIGN proposal, easy to swap) — the sum
-  // across every funnel phase, server-wide when stats honours the active filters.
+  // across every funnel phase, server-wide (STATS-SCOPE-1: stats ignores dimension filters).
   const applicationsTotal = useMemo(() => Object.values(phaseCounts).reduce((sum, n) => sum + (Number(n) || 0), 0), [phaseCounts])
 
   return { statusData, ownerData, clientData, publishedData, categoryData, funnelData, agentData, applicationsTotal }

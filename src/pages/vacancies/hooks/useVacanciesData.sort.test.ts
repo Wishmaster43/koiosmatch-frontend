@@ -70,3 +70,52 @@ describe('useVacanciesData · sort wired into the /vacancies request', () => {
     expect(listParams()).toMatchObject({ sort: 'status', sort_by: 'applications_count', sort_dir: 'asc' })
   })
 })
+
+// STATS-SCOPE-1 (2026-08-22 audit): the stats request must carry ONLY the view-scope
+// subset of filterParams — never a dimension/attention filter — while the LIST request
+// keeps receiving the full filterParams unchanged (§3B: KPI totals are server-wide).
+describe('useVacanciesData · stats stays server-wide (STATS-SCOPE-1)', () => {
+  const t = ((k: string) => k) as unknown as Parameters<typeof useVacanciesData>[0]['t']
+
+  function statsParamsSent() {
+    const call = vi.mocked(api.get).mock.calls.find(([url]) => url === '/vacancies/stats')
+    return call?.[1]?.params as Record<string, unknown> | undefined
+  }
+
+  it('a dimension/attention filter (status/closing_soon) reaches the list but NOT the stats request', async () => {
+    const filterParams = { status: ['open'], closing_soon: 1, owner_id: ['u1'] }
+    renderHook(() => useVacanciesData({ filterParams, page: 1, pageSize: 25, t, sort: null }), { wrapper })
+
+    await waitFor(() => expect(api.get).toHaveBeenCalledWith('/vacancies', expect.anything()))
+    expect(listParams()).toMatchObject({ status: ['open'], closing_soon: 1, owner_id: ['u1'] })
+
+    await waitFor(() => expect(api.get).toHaveBeenCalledWith('/vacancies/stats', expect.anything()))
+    expect(statsParamsSent()).toEqual({})
+  })
+
+  it('the archived view-scope flag reaches the stats request too', async () => {
+    const filterParams = { include_archived: 1, category: ['nurse'] }
+    renderHook(() => useVacanciesData({ filterParams, page: 1, pageSize: 25, t, sort: null }), { wrapper })
+
+    await waitFor(() => expect(api.get).toHaveBeenCalledWith('/vacancies/stats', expect.anything()))
+    expect(statsParamsSent()).toEqual({ include_archived: 1 })
+  })
+
+  it('changing only a dimension filter never re-fires the stats request (stable statsParams key)', async () => {
+    const { rerender } = renderHook(
+      ({ filterParams }) => useVacanciesData({ filterParams, page: 1, pageSize: 25, t, sort: null }),
+      { wrapper, initialProps: { filterParams: { status: ['open'] } as Record<string, unknown> } },
+    )
+    await waitFor(() => expect(api.get).toHaveBeenCalledWith('/vacancies/stats', expect.anything()))
+    const listCallsBefore  = vi.mocked(api.get).mock.calls.filter(([url]) => url === '/vacancies').length
+    const statsCallsBefore = vi.mocked(api.get).mock.calls.filter(([url]) => url === '/vacancies/stats').length
+
+    rerender({ filterParams: { status: ['closed'] } })
+    await waitFor(() => {
+      const listCallsAfter = vi.mocked(api.get).mock.calls.filter(([url]) => url === '/vacancies').length
+      expect(listCallsAfter).toBeGreaterThan(listCallsBefore)
+    })
+    const statsCallsAfter = vi.mocked(api.get).mock.calls.filter(([url]) => url === '/vacancies/stats').length
+    expect(statsCallsAfter).toBe(statsCallsBefore) // stats did not refetch — statsParams stayed {} both times
+  })
+})

@@ -157,3 +157,58 @@ describe('useCandidatesData · sort request shape (CAND-SORT-1)', () => {
     expect(statsParams).not.toHaveProperty('sort_dir')
   })
 })
+
+// STATS-SCOPE-1 (2026-08-22 audit): the stats request must carry ONLY the view-scope
+// subset of filterParams — never a dimension/attention filter — while the LIST request
+// keeps receiving the full filterParams unchanged (§3B: KPI totals are server-wide).
+describe('useCandidatesData · stats stays server-wide (STATS-SCOPE-1)', () => {
+  it('a dimension/attention filter (intake_planned) reaches the list but NOT the stats request', async () => {
+    vi.mocked(api.get).mockResolvedValue({ data: { data: [] } })
+    heavyGetMock.mockResolvedValue({ data: { data: null } })
+
+    const filterParams = { intake_planned: 1, status: ['available'], search: 'jan' }
+    renderHook(() => useCandidatesData({ filterParams, page: 1, pageSize: 25, t, setActionMsg: vi.fn() }), { wrapper })
+
+    await waitFor(() => expect(api.get).toHaveBeenCalledWith('/candidates', expect.anything()))
+    const listParams = vi.mocked(api.get).mock.calls.find(([url]) => url === '/candidates')?.[1]?.params as Record<string, unknown> | undefined
+    expect(listParams).toMatchObject({ intake_planned: 1, status: ['available'], search: 'jan' })
+
+    await waitFor(() => expect(heavyGetMock).toHaveBeenCalledWith('/candidates/stats', expect.anything()))
+    const statsParams = heavyGetMock.mock.calls[0][1]?.params as Record<string, unknown> | undefined
+    expect(statsParams).not.toHaveProperty('intake_planned')
+    expect(statsParams).not.toHaveProperty('status')
+    expect(statsParams).not.toHaveProperty('search')
+    expect(statsParams).toEqual({})
+  })
+
+  it('the archived view-scope flag reaches the stats request too', async () => {
+    vi.mocked(api.get).mockResolvedValue({ data: { data: [] } })
+    heavyGetMock.mockResolvedValue({ data: { data: null } })
+
+    const filterParams = { include_archived: 1, status: ['blacklist'] }
+    renderHook(() => useCandidatesData({ filterParams, page: 1, pageSize: 25, t, setActionMsg: vi.fn() }), { wrapper })
+
+    await waitFor(() => expect(heavyGetMock).toHaveBeenCalledWith('/candidates/stats', expect.anything()))
+    const statsParams = heavyGetMock.mock.calls[0][1]?.params as Record<string, unknown> | undefined
+    expect(statsParams).toEqual({ include_archived: 1 })
+  })
+
+  it('changing only a dimension filter never re-fires the stats request (stable statsParams key)', async () => {
+    vi.mocked(api.get).mockResolvedValue({ data: { data: [] } })
+    heavyGetMock.mockResolvedValue({ data: { data: null } })
+
+    const { rerender } = renderHook(
+      ({ filterParams }) => useCandidatesData({ filterParams, page: 1, pageSize: 25, t, setActionMsg: vi.fn() }),
+      { wrapper, initialProps: { filterParams: { status: ['available'] } as Record<string, unknown> } },
+    )
+    await waitFor(() => expect(heavyGetMock).toHaveBeenCalledTimes(1))
+    const candidatesCallsBefore = vi.mocked(api.get).mock.calls.filter(([url]) => url === '/candidates').length
+
+    rerender({ filterParams: { status: ['placed'] } })
+    await waitFor(() => {
+      const candidatesCallsAfter = vi.mocked(api.get).mock.calls.filter(([url]) => url === '/candidates').length
+      expect(candidatesCallsAfter).toBe(candidatesCallsBefore + 1) // list refetches on the new dimension value
+    })
+    expect(heavyGetMock).toHaveBeenCalledTimes(1) // stats does not refetch — statsParams stayed {} both times
+  })
+})

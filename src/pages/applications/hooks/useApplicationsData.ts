@@ -12,19 +12,23 @@
  * Stats (`/applications/stats`) — W27 (verified 2026-08-07): the backend's
  * `ApplicationQuery::stats()` returns real server-wide `by_owner`/`by_source`/
  * `avg_score`/`attention` alongside `by_phase`/`by_bucket` (via the shared
- * `ownerDistribution()` helper) — this was a BE gap when the wide-sample
- * fallback was first built, it no longer is. `statsParams` is now the SAME
- * `filterParams` object the list/wide queries use (every filter except bucket
- * applies to stats too — phase_key is harmlessly ignored there, the backend's
- * own `scopeOnly` guard skips it so the KPI strip keeps showing the full
- * distribution to pick between). `statsFailed` (mirrors CandidatesPage) lets
- * the page fall back to the wide sample AND say so, instead of silently
- * presenting a partial count as the true total (STATS-OOM-1 pattern).
+ * `ownerDistribution()` helper). STATS-SCOPE-1 (2026-08-22 audit): `statsParams`
+ * is NOT the same object the list/wide queries use anymore — measured live, the
+ * full `filterParams` (phase_key/owner_id/source/customer_id/too_long_in_stage/…)
+ * was reaching this request, so any dimension/attention filter collapsed the KPI
+ * strip to that filtered subset (§3B: KPI totals are server-wide, never
+ * page/filter-scoped). Only the view-scope subset (`include_archived`, shared by
+ * the archived/trash quick views — see `pickStatsScopeParams`) rides into this
+ * request now; bucket/phase_key never did (kept out on purpose, see below).
+ * `statsFailed` (mirrors CandidatesPage) lets the page fall back to the wide
+ * sample AND say so, instead of silently presenting a partial count as the true
+ * total (STATS-OOM-1 pattern).
  */
 import { useCallback, useMemo } from 'react'
 import type { Dispatch, SetStateAction } from 'react'
 import { useQuery, useQueryClient, keepPreviousData } from '@tanstack/react-query'
 import api, { unwrap, unwrapList } from '@/lib/api'
+import { pickStatsScopeParams } from '@/lib/statsScopeParams'
 import { mapApplication } from '../data/mapApplication'
 import type { ApiApplication, Application } from '@/types/application'
 import type { LookupItem } from '@/context/LookupsContext'
@@ -179,17 +183,18 @@ export function useApplicationsData({ view, filterParams, bucketParam, page, pag
   const wideIsPartial = wideTotal > wideRows.length
 
   // Stats — real server-wide by_phase/by_bucket/by_owner/by_source/avg_score/
-  // attention (W27). Reuses `filterParams` as-is: `ApplicationQuery::stats()`
-  // applies every filter EXCEPT bucket/phase_key (its own scopeOnly guard skips
-  // those two selectors specifically, so the KPI strip keeps showing the full
-  // distribution to pick between) — bucket never enters filterParams anyway
-  // (kept separate as `bucketParam`, list-only), and phase_key validates fine
-  // here but has no effect, so sending the same object as the list is safe.
+  // attention (W27), narrowed only by the VIEW-SCOPE subset of filterParams
+  // (STATS-SCOPE-1: include_archived, see pickStatsScopeParams) — never by a
+  // dimension/attention filter (phase_key/owner_id/source/customer_id/
+  // too_long_in_stage/…), so the KPI strip keeps showing the stable server-wide
+  // distribution while the active card stays highlighted. bucket never entered
+  // filterParams anyway (kept separate as `bucketParam`, list-only).
+  const statsParams = useMemo(() => pickStatsScopeParams(filterParams), [filterParams])
   const statsQuery = useQuery({
-    queryKey: ['applications', 'stats', filterParams],
+    queryKey: ['applications', 'stats', statsParams],
     queryFn: async ({ signal }): Promise<AppStats | null> => {
       try {
-        const res = await api.get('/applications/stats', { params: filterParams, signal })
+        const res = await api.get('/applications/stats', { params: statsParams, signal })
         return (unwrap(res) ?? null) as AppStats | null
       } catch (err) {
         if (isMissingEndpoint(err)) return null

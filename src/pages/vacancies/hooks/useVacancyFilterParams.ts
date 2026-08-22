@@ -1,9 +1,11 @@
 /**
- * useVacancyFilterParams — builds the server-side filter params for the vacancy list
- * AND stats (both requests send this exact object, so every KPI/donut filter narrows
- * the aggregates too). Extracted from VacanciesPage once the page crossed the ~400
- * line split trigger (§3), and so the WIRE SHAPE is unit-testable on its own: a
- * filter that ships the wrong key is a dead control, not a cosmetic bug.
+ * useVacancyFilterParams — builds the server-side filter params for the vacancy LIST
+ * request. STATS-SCOPE-1 (2026-08-22): the stats request no longer reuses this object
+ * as-is — useVacanciesData narrows it down to its view-scope subset first (see
+ * pickStatsScopeParams), so a dimension/donut filter here never collapses the KPI row
+ * (§3B: KPI totals stay server-wide). Extracted from VacanciesPage once the page
+ * crossed the ~400 line split trigger (§3), and so the WIRE SHAPE is unit-testable on
+ * its own: a filter that ships the wrong key is a dead control, not a cosmetic bug.
  *
  * Booleans go out as numeric 1/0 — Laravel's strict `boolean` rule rejects the
  * "true"/"false" strings a JS boolean serialises to in a query string (a real 422

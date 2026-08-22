@@ -4,11 +4,12 @@
  * filter/page, keepPreviousData). A missing endpoint (404) is an empty list, not an
  * error. Returns setter wrappers over the cache so optimistic updates keep working.
  */
-import { useCallback } from 'react'
+import { useCallback, useMemo } from 'react'
 import type { Dispatch, SetStateAction } from 'react'
 import { useQuery, useQueryClient, keepPreviousData } from '@tanstack/react-query'
 import type { TFunction } from 'i18next'
 import api, { unwrap, unwrapList } from '@/lib/api'
+import { pickStatsScopeParams } from '@/lib/statsScopeParams'
 import { mapCustomer } from '../data/mapCustomer'
 import type { Customer, ApiCustomer } from '@/types/customer'
 import type { Id } from '@/types/common'
@@ -63,11 +64,16 @@ export function useCustomersData({ filterParams, page, pageSize, t }: Args) {
   const loading   = listQuery.isLoading
   const error     = listQuery.isError ? t('page.loadError') : null
 
-  // Stats (server-wide totals, honour the filters).
+  // Stats — real SERVER-WIDE totals (§3B), narrowed only by the VIEW-SCOPE subset
+  // of filterParams (STATS-SCOPE-1: include_archived, see pickStatsScopeParams) —
+  // never by a dimension filter (status/phase/owner_id/city/state/industry/…,
+  // measured 2026-08-22: the full filterParams was reaching this request,
+  // collapsing the KPI row to the filtered subset).
+  const statsParams = useMemo(() => pickStatsScopeParams(filterParams), [filterParams])
   const { data: stats = null } = useQuery({
-    queryKey: ['customers', 'stats', filterParams],
+    queryKey: ['customers', 'stats', statsParams],
     queryFn: async ({ signal }): Promise<PageStats | null> => {
-      const res = await api.get('/customers/stats', { params: filterParams, signal })
+      const res = await api.get('/customers/stats', { params: statsParams, signal })
       return (unwrap(res) ?? null) as PageStats | null
     },
   })

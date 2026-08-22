@@ -68,3 +68,58 @@ describe('useCustomersData · per_page never exceeds the endpoint cap', () => {
     expect(params?.per_page).toBe(100)
   })
 })
+
+// STATS-SCOPE-1 (2026-08-22 audit): the stats request must carry ONLY the view-scope
+// subset of filterParams — never a dimension filter — while the LIST request keeps
+// receiving the full filterParams unchanged (§3B: KPI totals are server-wide).
+describe('useCustomersData · stats stays server-wide (STATS-SCOPE-1)', () => {
+  function statsParamsSent() {
+    const call = vi.mocked(api.get).mock.calls.find(([url]) => url === '/customers/stats')
+    return call?.[1]?.params as Record<string, unknown> | undefined
+  }
+
+  it('a dimension filter (status/owner_id) reaches the list but NOT the stats request', async () => {
+    vi.mocked(api.get).mockImplementation((url: string) =>
+      url === '/customers/stats' ? Promise.resolve({ data: { data: null } }) : Promise.resolve({ data: { data: [] } }))
+    const filterParams = { status: ['active'], owner_id: ['u1'], search: 'acme' }
+    renderHook(() => useCustomersData({ filterParams, page: 1, pageSize: 25, t }), { wrapper })
+
+    await waitFor(() => expect(api.get).toHaveBeenCalledWith('/customers', expect.anything()))
+    const call = vi.mocked(api.get).mock.calls.find(([url]) => url === '/customers')
+    const listParams = call?.[1]?.params as Record<string, unknown> | undefined
+    expect(listParams).toMatchObject({ status: ['active'], owner_id: ['u1'], search: 'acme' })
+
+    await waitFor(() => expect(api.get).toHaveBeenCalledWith('/customers/stats', expect.anything()))
+    expect(statsParamsSent()).toEqual({})
+  })
+
+  it('the archived view-scope flag reaches the stats request too', async () => {
+    vi.mocked(api.get).mockImplementation((url: string) =>
+      url === '/customers/stats' ? Promise.resolve({ data: { data: null } }) : Promise.resolve({ data: { data: [] } }))
+    const filterParams = { include_archived: 1, industry: ['zorg'] }
+    renderHook(() => useCustomersData({ filterParams, page: 1, pageSize: 25, t }), { wrapper })
+
+    await waitFor(() => expect(api.get).toHaveBeenCalledWith('/customers/stats', expect.anything()))
+    expect(statsParamsSent()).toEqual({ include_archived: 1 })
+  })
+
+  it('changing only a dimension filter never re-fires the stats request (stable statsParams key)', async () => {
+    vi.mocked(api.get).mockImplementation((url: string) =>
+      url === '/customers/stats' ? Promise.resolve({ data: { data: null } }) : Promise.resolve({ data: { data: [] } }))
+    const { rerender } = renderHook(
+      ({ filterParams }) => useCustomersData({ filterParams, page: 1, pageSize: 25, t }),
+      { wrapper, initialProps: { filterParams: { status: ['active'] } as Record<string, unknown> } },
+    )
+    await waitFor(() => expect(api.get).toHaveBeenCalledWith('/customers/stats', expect.anything()))
+    const listCallsBefore  = vi.mocked(api.get).mock.calls.filter(([url]) => url === '/customers').length
+    const statsCallsBefore = vi.mocked(api.get).mock.calls.filter(([url]) => url === '/customers/stats').length
+
+    rerender({ filterParams: { status: ['inactive'] } })
+    await waitFor(() => {
+      const listCallsAfter = vi.mocked(api.get).mock.calls.filter(([url]) => url === '/customers').length
+      expect(listCallsAfter).toBeGreaterThan(listCallsBefore)
+    })
+    const statsCallsAfter = vi.mocked(api.get).mock.calls.filter(([url]) => url === '/customers/stats').length
+    expect(statsCallsAfter).toBe(statsCallsBefore) // stats did not refetch — statsParams stayed {} both times
+  })
+})

@@ -4,11 +4,12 @@
  * React Query (A-3: cached per filter/page, keepPreviousData). Returns setter wrappers
  * over the list cache so the container's optimistic bulk/drawer updates keep working.
  */
-import { useCallback } from 'react'
+import { useCallback, useMemo } from 'react'
 import type { Dispatch, SetStateAction } from 'react'
 import { useQuery, useQueryClient, keepPreviousData } from '@tanstack/react-query'
 import type { TFunction } from 'i18next'
 import api, { unwrap, unwrapList } from '@/lib/api'
+import { pickStatsScopeParams } from '@/lib/statsScopeParams'
 import { mapVacancy } from '../data/mapVacancy'
 import type { Vacancy, ApiVacancy } from '@/types/vacancy'
 import type { Id } from '@/types/common'
@@ -109,11 +110,16 @@ export function useVacanciesData({ filterParams, page, pageSize, t, sort }: UseV
   const loading   = listQuery.isLoading
   const error     = listQuery.isError ? t('page.loadError') : null
 
-  // Stats (server-wide totals; honour the filters).
+  // Stats — real SERVER-WIDE totals (§3B), narrowed only by the VIEW-SCOPE subset
+  // of filterParams (STATS-SCOPE-1: include_archived, see pickStatsScopeParams) —
+  // never by a dimension/attention filter (status/owner_id/customer_id/category/
+  // agent_id/published/closing_soon/…, measured 2026-08-22: the full filterParams
+  // was reaching this request, collapsing the KPI row to the filtered subset).
+  const statsParams = useMemo(() => pickStatsScopeParams(filterParams), [filterParams])
   const { data: stats = null } = useQuery({
-    queryKey: ['vacancies', 'stats', filterParams],
+    queryKey: ['vacancies', 'stats', statsParams],
     queryFn: async ({ signal }): Promise<VacancyStats | null> => {
-      const res = await api.get('/vacancies/stats', { params: filterParams, signal })
+      const res = await api.get('/vacancies/stats', { params: statsParams, signal })
       return (unwrap(res) ?? null) as VacancyStats | null
     },
   })

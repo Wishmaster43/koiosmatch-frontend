@@ -1,6 +1,7 @@
 /**
  * useCandidatesData — data layer for CandidatesPage: the paginated + server-filtered
- * candidate list, the server-wide stats (totals across the whole filtered set) and the
+ * candidate list, the server-wide stats (STATS-SCOPE-1: view-scope params only, see
+ * pickStatsScopeParams — never the active dimension/attention filters) and the
  * location filter options — all via React Query (A-3: cached per filter/page, dedup,
  * keepPreviousData so paging doesn't flash). Returns setter wrappers over the query cache
  * so the container's optimistic bulk/drawer updates keep mutating the list directly.
@@ -12,12 +13,13 @@
  * whitelist this maps into; an unmapped column reorders the loaded page locally
  * (DataTable's own sortedRows) without ever reaching the request.
  */
-import { useCallback } from 'react'
+import { useCallback, useMemo } from 'react'
 import type { Dispatch, SetStateAction } from 'react'
 import { useQuery, useQueryClient, keepPreviousData } from '@tanstack/react-query'
 import type { TFunction } from 'i18next'
 import api, { unwrap, unwrapList } from '@/lib/api'
 import { heavyGet } from '@/lib/heavyGet'
+import { pickStatsScopeParams } from '@/lib/statsScopeParams'
 import { mapCandidate } from '../data/mapCandidate'
 import type { ApiCandidate, Candidate, CandidateStats } from '@/types/candidate'
 import type { Id } from '@/types/common'
@@ -110,11 +112,18 @@ export function useCandidatesData({ filterParams, page, pageSize, t, setActionMs
   const loading    = listQuery.isLoading
   const error      = listQuery.isError ? t('page.loadError', { defaultValue: 'Kandidaten laden is mislukt.' }) : null
 
-  // Stats: real totals across the whole filtered set (not just the page); filter-only key.
+  // Stats: real SERVER-WIDE totals (§3B) — a dimension/attention filter (status,
+  // owner, search, intake_planned, …) must never narrow the KPI row, only the
+  // list. Only the view-scope subset of filterParams (today: include_archived,
+  // shared by the archived/trash quick views) rides into the stats request; see
+  // pickStatsScopeParams. Keyed on statsParams, not filterParams, so a dimension
+  // filter change never refetches stats (STATS-SCOPE-1, fixes the 2026-08-22 audit:
+  // ?intake_planned=1 was collapsing every other attention count to 0).
+  const statsParams = useMemo(() => pickStatsScopeParams(filterParams), [filterParams])
   const statsQuery = useQuery({
-    queryKey: ['candidates', 'stats', filterParams],
+    queryKey: ['candidates', 'stats', statsParams],
     queryFn: async ({ signal }): Promise<CandidateStats | null> => {
-      const res = await heavyGet('/candidates/stats', { params: filterParams, signal })
+      const res = await heavyGet('/candidates/stats', { params: statsParams, signal })
       return (unwrap(res) ?? null) as CandidateStats | null
     },
   })

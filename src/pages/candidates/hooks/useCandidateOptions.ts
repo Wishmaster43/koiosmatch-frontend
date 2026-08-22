@@ -45,7 +45,9 @@ export function useCandidateOptions({ stats, candidates, locations, statuses, fu
           return { value: v, label: m?.label ?? v, color: m?.color, count: o.count }
         })
       : statuses.map(s => ({ value: s.value, label: s.label, color: s.color, count: candidates.filter(c => c.status === s.value).length })).filter(o => o.count > 0)
-  , [stats, candidates, statuses])
+  // phases/t in deps: the Leads-bucket label/colour must refresh once the phase
+  // lookup arrives after stats (it read stale otherwise — exhaustive-deps payoff).
+  , [stats, candidates, statuses, phases, t])
   const funnelOptions = useMemo(() =>
     stats?.by_funnel
       ? stats.by_funnel.map(o => { const v = o.value ?? o.funnel_type; return { value: v, label: o.label ?? metaOf(funnelTypes, v)?.label ?? v, color: o.color, count: o.count } })
@@ -90,11 +92,12 @@ export function useCandidateOptions({ stats, candidates, locations, statuses, fu
     ownerOptions.map(o => ({ name: o.label, value: o.count, filterValue: o.value }))
   , [ownerOptions])
 
-  // Attention counts: prefer server-wide totals from /candidates/stats (they honour
-  // the active filters); fall back to counting the loaded page.
+  // Attention counts: prefer the server-wide totals from /candidates/stats
+  // (STATS-SCOPE-1: stats never carries dimension filters, only the archive
+  // view-scope); fall back to counting the loaded page.
   const staleCount          = stats?.attention?.stale_6m        ?? candidates.filter(isStale).length
   const neverContactedCount = stats?.attention?.never_contacted ?? candidates.filter(isNeverContacted).length
-  // "No follow-up planned": server-wide total (C-13, honours the active filters).
+  // "No follow-up planned": server-wide total (C-13; STATS-SCOPE-1 scope).
   // Deliberately has NO page-local fallback — see noFollowupUncomputable: the rule
   // needs appointments and open tasks, which a list row does not carry, so a
   // fallback here would count a different set of people than the list it filters.
@@ -102,8 +105,8 @@ export function useCandidateOptions({ stats, candidates, locations, statuses, fu
   const noFollowupCount = stats?.attention?.no_followup_planned ?? noFollowupUncomputable()
   // Intake stages are flag-driven (§3B: requires_appointment), never a hardcoded value key.
   const intakeStages = useMemo(() => new Set(funnelTypes.filter(f => (f as { requires_appointment?: boolean }).requires_appointment).map(f => f.value)), [funnelTypes])
-  // "Intake planned" = the server-wide appointment-based total from /candidates/stats (honours the
-  // active filters); page-local stage-count fallback while stats is unavailable.
+  // "Intake planned" = the server-wide appointment-based total from /candidates/stats
+  // (STATS-SCOPE-1 scope); page-local stage-count fallback while stats is unavailable.
   const intakeCount  = useMemo(() =>
     stats?.attention?.intake_planned ?? candidates.filter(c => c.stage && intakeStages.has(c.stage)).length
   , [stats, candidates, intakeStages])

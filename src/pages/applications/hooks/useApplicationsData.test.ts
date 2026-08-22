@@ -102,3 +102,56 @@ describe('useApplicationsData · sort request shape (DATATABLE-SORT-1)', () => {
     }
   })
 })
+
+// STATS-SCOPE-1 (2026-08-22 audit): the stats request must carry ONLY the view-scope
+// subset of filterParams — never a dimension/attention filter — while the list/wide
+// requests keep receiving the full filterParams unchanged (§3B: KPI totals are
+// server-wide).
+describe('useApplicationsData · stats stays server-wide (STATS-SCOPE-1)', () => {
+  function statsParamsSent() {
+    const call = vi.mocked(api.get).mock.calls.find(([url]) => url === '/applications/stats')
+    return call?.[1]?.params as Record<string, unknown> | undefined
+  }
+
+  it('a dimension/attention filter (too_long_in_stage) reaches list/wide but NOT stats', async () => {
+    const filterParams = { too_long_in_stage: 1, phase_key: ['applied'], owner_id: ['u1'] }
+    renderHook(() => useApplicationsData({
+      view: 'table', filterParams, page: 1, pageSize: 25, funnelTypes: [], sort: null,
+    }), { wrapper })
+
+    await waitFor(() => expect(api.get).toHaveBeenCalledWith('/applications', expect.anything()))
+    expect(paramsFor(25)).toMatchObject({ too_long_in_stage: 1, phase_key: ['applied'], owner_id: ['u1'] })
+    expect(paramsFor(500)).toMatchObject({ too_long_in_stage: 1, phase_key: ['applied'], owner_id: ['u1'] })
+
+    await waitFor(() => expect(api.get).toHaveBeenCalledWith('/applications/stats', expect.anything()))
+    expect(statsParamsSent()).toEqual({})
+  })
+
+  it('the archived view-scope flag reaches the stats request too', async () => {
+    const filterParams = { include_archived: 1, source: ['website'] }
+    renderHook(() => useApplicationsData({
+      view: 'table', filterParams, page: 1, pageSize: 25, funnelTypes: [], sort: null,
+    }), { wrapper })
+
+    await waitFor(() => expect(api.get).toHaveBeenCalledWith('/applications/stats', expect.anything()))
+    expect(statsParamsSent()).toEqual({ include_archived: 1 })
+  })
+
+  it('changing only a dimension filter never re-fires the stats request (stable statsParams key)', async () => {
+    const { rerender } = renderHook(
+      ({ filterParams }) => useApplicationsData({ view: 'table', filterParams, page: 1, pageSize: 25, funnelTypes: [], sort: null }),
+      { wrapper, initialProps: { filterParams: { source: ['website'] } as Record<string, unknown> } },
+    )
+    await waitFor(() => expect(api.get).toHaveBeenCalledWith('/applications/stats', expect.anything()))
+    const listCallsBefore  = vi.mocked(api.get).mock.calls.filter(([url]) => url === '/applications').length
+    const statsCallsBefore = vi.mocked(api.get).mock.calls.filter(([url]) => url === '/applications/stats').length
+
+    rerender({ filterParams: { source: ['referral'] } })
+    await waitFor(() => {
+      const listCallsAfter = vi.mocked(api.get).mock.calls.filter(([url]) => url === '/applications').length
+      expect(listCallsAfter).toBeGreaterThan(listCallsBefore) // list + wide both refetch on the new dimension value
+    })
+    const statsCallsAfter = vi.mocked(api.get).mock.calls.filter(([url]) => url === '/applications/stats').length
+    expect(statsCallsAfter).toBe(statsCallsBefore) // stats did not refetch — statsParams stayed {} both times
+  })
+})
