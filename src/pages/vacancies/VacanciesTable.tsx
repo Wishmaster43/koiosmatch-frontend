@@ -14,6 +14,8 @@ import { useAllSettings, getBoolSetting } from '@/lib/settings/useAllSettings'
 import { useVacancyAdvice } from '@/lib/useVacancyAdvice'
 import type { Vacancy } from '@/types/vacancy'
 import type { Id } from '@/types/common'
+// Raw mono identity from the typography atom (HUISSTIJL: the font name lives in ONE place).
+import { monoStyle } from '@/components/ui/typography'
 
 const mutedCell = { color: 'var(--text-muted)', fontSize: 12 }
 const plainCell = { color: 'var(--text)', fontSize: 12 }
@@ -28,7 +30,7 @@ const plainCell = { color: 'var(--text)', fontSize: 12 }
 // number in the row. The affordance stays: pointer cursor plus an underline on
 // hover and on keyboard focus, which is what actually says "clickable" (§4:
 // colour only where it carries meaning, never as decoration).
-const leadsBtn = { display: 'inline-flex', fontFamily: 'JetBrains Mono, monospace', fontSize: 12,
+const leadsBtn = { display: 'inline-flex', ...monoStyle, fontSize: 12,
   color: 'var(--text)', background: 'none', border: 'none', padding: 0, cursor: 'pointer', font: 'inherit' }
 
 interface VacanciesTableProps {
@@ -99,7 +101,7 @@ export default function VacanciesTable({ rows, loading, selectedId, onSelect, on
       // a click-to-copy button nested inside this row's own click-to-open would either
       // double-fire or need stopPropagation contortions; the drawer chip already copies.
       key: 'referenceNumber', header: t('columns.referenceNumber'), nowrap: true,
-      cellStyle: { ...mutedCell, fontFamily: 'JetBrains Mono, monospace', fontVariantNumeric: 'tabular-nums' },
+      cellStyle: { ...mutedCell, ...monoStyle, fontVariantNumeric: 'tabular-nums' },
       sortable: true, sortValue: r => r.referenceNumber ?? '', render: r => r.referenceNumber || '—',
     },
     {
@@ -147,7 +149,7 @@ export default function VacanciesTable({ rows, loading, selectedId, onSelect, on
       // above the vacancy with the most real leads on the descending click.
       key: 'leads', header: t('columns.leads'), align: 'left', sortable: true,
       sortValue: r => r.leadsCount,
-      cellStyle: { fontFamily: 'JetBrains Mono, monospace', fontSize: 12, color: 'var(--text)' },
+      cellStyle: { ...monoStyle, fontSize: 12, color: 'var(--text)' },
       // A ghost button when the caller wired the deep-link, else the plain number/
       // dash (unchanged behaviour otherwise). stopPropagation so the click opens
       // the "Kandidaten zoeken" tab instead of double-firing the row's own open.
@@ -166,7 +168,10 @@ export default function VacanciesTable({ rows, loading, selectedId, onSelect, on
           if (state.isStale) caveat = t('columns.leadsStale', { date: formatDate(state.computedAt) })
           else if (state.geoMissing) caveat = t('columns.leadsGeoMissing')
           else if (state.partial) caveat = t('columns.leadsPartial')
-          else if (state.computedAt) caveat = t('columns.leadsComputedAt', { date: formatDate(state.computedAt) })
+          // A FRESH count keeps its computed-at as hover info only — NO dot: the
+          // dot means "this number carries a caveat", and a correct, current
+          // number carries none (Danny 22-08: "dat stomme ballentje moet weg").
+          else if (state.computedAt) title = t('columns.leadsComputedAt', { date: formatDate(state.computedAt) })
         }
         if (caveat) title = caveat
         // The caveat must ALSO be visible without hovering — a small muted dot
@@ -178,6 +183,7 @@ export default function VacanciesTable({ rows, loading, selectedId, onSelect, on
         return onOpenCandidateSearch ? (
           // A not-yet-computed count stays muted: the dash is genuinely less
           // certain than a real number, which is a meaning worth colouring.
+          // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- count deep-link rendered AS the cell's own mono number; Button's fixed sm footprint cannot sit inside a 12px table cell (§14 r7 necessity)
           <button type="button" style={{ ...leadsBtn, color: known ? 'var(--text)' : 'var(--text-muted)' }}
             aria-label={t('columns.leadsOpenSearch')} title={title}
             onClick={e => { e.stopPropagation(); onOpenCandidateSearch(r.id as Id) }}
@@ -196,12 +202,13 @@ export default function VacanciesTable({ rows, loading, selectedId, onSelect, on
       // NEW, separate pair from the old `sort=status` param, which stays wired
       // untouched via the status column's own `serverKey: 'status'` above.
       key: 'applications', header: t('columns.applications'), sortable: true, serverKey: 'applications_count', sortValue: r => r.applicationsCount,
-      cellStyle: { fontFamily: 'JetBrains Mono, monospace', fontSize: 12, color: 'var(--text)' },
+      cellStyle: { ...monoStyle, fontSize: 12, color: 'var(--text)' },
       // V4 (vacatures-tabel-cluster): same ghost-button deep-link treatment as the
       // Leads column — clicking the count opens the drawer on the Sollicitaties
       // (applicants) tab instead of the default tab. stopPropagation so it never
       // double-fires the row's own onSelect.
       render: r => onOpenApplicants ? (
+        // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- count deep-link rendered AS the cell's own mono number; Button's fixed sm footprint cannot sit inside a 12px table cell (§14 r7 necessity)
         <button type="button" style={leadsBtn} aria-label={t('columns.applicationsOpen')}
           onClick={e => { e.stopPropagation(); onOpenApplicants(r.id as Id) }}
           onFocus={e => { e.currentTarget.style.textDecoration = 'underline' }}
@@ -216,8 +223,9 @@ export default function VacanciesTable({ rows, loading, selectedId, onSelect, on
       // V-table-2: third count column — Matches, deep-linking to the drawer's
       // read-only Matches tab (mirrors the Sollicitaties column's ghost button).
       key: 'matches', header: t('columns.matches'), sortable: true, sortValue: r => r.matchesCount,
-      cellStyle: { fontFamily: 'JetBrains Mono, monospace', fontSize: 12, color: 'var(--text)' },
+      cellStyle: { ...monoStyle, fontSize: 12, color: 'var(--text)' },
       render: r => onOpenMatches ? (
+        // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- count deep-link rendered AS the cell's own mono number; Button's fixed sm footprint cannot sit inside a 12px table cell (§14 r7 necessity)
         <button type="button" style={leadsBtn} aria-label={t('columns.matchesOpen')}
           onClick={e => { e.stopPropagation(); onOpenMatches(r.id as Id) }}
           onFocus={e => { e.currentTarget.style.textDecoration = 'underline' }}

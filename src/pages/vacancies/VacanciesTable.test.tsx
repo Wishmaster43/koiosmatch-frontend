@@ -164,6 +164,21 @@ describe('VacanciesTable · match count state caveats (VACANCY-LEADS-COUNT-1)', 
     expect(leadsCell.querySelector('[role="img"]')).not.toBeInTheDocument()
   })
 
+  it('renders NO dot for a fresh, complete count — computed-at is hover info only', () => {
+    // Danny 22-08: a correct, current number carries no caveat dot; the dot is
+    // reserved for stale/geo-missing/partial. Regression pin on the fix.
+    const freshRows = [
+      { id: 'v1', title: 'Verpleegkundige', leadsCount: 36, created: '2024-02-01', createdSort: '2024-02-01',
+        matchCountState: { computedAt: '2026-08-22', isStale: false, geoMissing: false, partial: false } },
+    ] as unknown as Vacancy[]
+    const { container } = render(<VacanciesTable rows={freshRows} />)
+    const headerCell = screen.getByText('Leads').closest('th') as HTMLElement
+    const colIndex = Array.from(headerCell.parentElement?.children ?? []).indexOf(headerCell)
+    const leadsCell = container.querySelectorAll('tbody tr')[0].children[colIndex]
+    expect(leadsCell.querySelector('[role="img"]')).not.toBeInTheDocument()
+    expect(leadsCell.textContent).toContain('36')
+  })
+
   it('shows the geo-missing caveat when coordinates were unavailable', () => {
     const geoRows = [
       { id: 'v1', title: 'Verpleegkundige', leadsCount: 2, created: '2024-02-01', createdSort: '2024-02-01',
