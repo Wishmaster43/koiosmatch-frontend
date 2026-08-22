@@ -19,7 +19,9 @@
     "owner": "Responsable",
     "date": "Créé",
     "hoursValue": "{{count}} h",
-    "expectedClose": "Clôture prévue"
+    "expectedClose": "Clôture prévue",
+    "startDate": "Date de début",
+    "endDate": "Date de fin"
   },
   "insights": {
     "stage": "Phase",
@@ -60,6 +62,7 @@
     },
     "tabs": {
       "details": "Détails",
+      "statistics": "Statistiques",
       "changelog": "Modifications",
       "notes": "Notes",
       "tasks": "Tâches",
@@ -69,7 +72,15 @@
     "markWon": "Gagné",
     "markLost": "Perdu",
     "expectedCloseOn": "Clôture prévue le {{date}}",
-    "tags": "Tags"
+    "tags": "Tags",
+    "ordinal": {
+      "client": "Opportunité {{position}} sur {{total}} pour ce client"
+    },
+    "statistics": {
+      "empty": "Aucune statistique d'opportunité disponible pour le moment.",
+      "onlyOpportunity": "Aucune autre opportunité trouvée.",
+      "openOpportunity": "Ouvrir l'opportunité"
+    }
   },
   "details": {
     "stage": "Phase",
@@ -80,8 +91,7 @@
     "created": "Créé",
     "groups": {
       "deal": "Affaire",
-      "organisation": "Organisation",
-      "description": "Description"
+      "opportunityDescription": "Description de l'opportunité"
     },
     "currency": "Devise",
     "hours": "Heures",
@@ -167,6 +177,20 @@
     "reasons": {
       "expectedCloseOverdue": "La date de clôture prévue est dépassée. Relancez cette opportunité."
     }
+  },
+  "ai": {
+    "title": "Koios AI conseille",
+    "beta": "Beta",
+    "refresh": "Actualiser",
+    "analyzing": "Koios AI analyse l'opportunité…",
+    "dealHealthLabel": "Ampleur de l'affaire",
+    "dealHealthSet": "Une valeur ou un nombre d'heures est renseigné.",
+    "dealHealthMissing": "Aucune valeur ni nombre d'heures n'est encore renseigné.",
+    "closeWindowLabel": "Date de clôture",
+    "closeWindowTerminal": "Cette opportunité est clôturée (gagnée ou perdue). Plus de conseil.",
+    "closeWindowUnknown": "Aucune date de clôture prévue n'est connue.",
+    "closeWindowOverdue": "La date de clôture prévue est dépassée de {{days}} jour(s).",
+    "closeWindowUpcoming": "Encore {{days}} jour(s) avant la clôture prévue."
   },
   "richText": {
     "empty": "Rien d'enregistré pour l'instant"

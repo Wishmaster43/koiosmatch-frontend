@@ -19,7 +19,9 @@
     "owner": "Eigenaar",
     "date": "Aangemaakt",
     "hoursValue": "{{count}} u",
-    "expectedClose": "Verwachte sluiting"
+    "expectedClose": "Verwachte sluiting",
+    "startDate": "Startdatum",
+    "endDate": "Einddatum"
   },
   "insights": {
     "stage": "Fase",
@@ -63,13 +65,22 @@
     "expectedCloseOn": "Verwacht te sluiten op {{date}}",
     "tabs": {
       "details": "Details",
+      "statistics": "Statistieken",
       "notes": "Notities",
       "tasks": "Taken",
       "changelog": "Wijzigingen",
       "extra": "Extra",
       "customer": "Klant"
     },
-    "tags": "Tags"
+    "tags": "Tags",
+    "ordinal": {
+      "client": "Kans {{position}} van {{total}} bij deze klant"
+    },
+    "statistics": {
+      "empty": "Nog geen kansstatistieken beschikbaar.",
+      "onlyOpportunity": "Geen andere kansen gevonden.",
+      "openOpportunity": "Kans openen"
+    }
   },
   "notes": {
     "title": "Notities",
@@ -115,8 +126,7 @@
     "created": "Aangemaakt",
     "groups": {
       "deal": "Deal",
-      "organisation": "Organisatie",
-      "description": "Omschrijving"
+      "opportunityDescription": "Kansomschrijving"
     }
   },
   "changelog": {
@@ -167,6 +177,20 @@
     "reasons": {
       "expectedCloseOverdue": "De verwachte sluitingsdatum is verstreken. Volg deze kans op."
     }
+  },
+  "ai": {
+    "title": "Koios AI adviseert",
+    "beta": "Beta",
+    "refresh": "Vernieuwen",
+    "analyzing": "Koios AI analyseert de kans…",
+    "dealHealthLabel": "Dealomvang",
+    "dealHealthSet": "Waarde of uren zijn vastgelegd.",
+    "dealHealthMissing": "Nog geen waarde of uren vastgelegd.",
+    "closeWindowLabel": "Sluitingsdatum",
+    "closeWindowTerminal": "Deze kans is gesloten (gewonnen of verloren). Geen advies meer.",
+    "closeWindowUnknown": "Geen verwachte sluitingsdatum bekend.",
+    "closeWindowOverdue": "De verwachte sluitingsdatum is {{days}} dag(en) gepasseerd.",
+    "closeWindowUpcoming": "Nog {{days}} dag(en) tot de verwachte sluiting."
   },
   "richText": {
     "empty": "Nog niets vastgelegd"

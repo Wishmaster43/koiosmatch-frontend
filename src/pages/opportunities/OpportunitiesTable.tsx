@@ -7,6 +7,7 @@ import SoftChip from '@/components/ui/SoftChip'
 import type { Column } from '@/components/ui/DataTable'
 import Avatar from '@/components/ui/Avatar'
 import EntityNameCell from '@/components/ui/EntityNameCell'
+import { Mono } from '@/components/ui/typography'
 import { makeKoiosColumn } from '@/components/ui/koiosColumn'
 import { initialsOf } from '@/lib/initials'
 import { useAllSettings, getBoolSetting } from '@/lib/settings/useAllSettings'
@@ -70,8 +71,10 @@ export default function OpportunitiesTable({ rows, loading, error, onRowClick, s
       // button nested inside this row's own click-to-open would double-fire; the
       // drawer chip already copies.
       key: 'referenceNumber', header: t('cols.referenceNumber'), nowrap: true,
-      cellStyle: { color: 'var(--text-muted)', fontSize: 12, fontFamily: 'JetBrains Mono, monospace', fontVariantNumeric: 'tabular-nums' },
-      sortable: true, sortValue: r => r.referenceNumber ?? '', render: r => r.referenceNumber || '—',
+      sortable: true, sortValue: r => r.referenceNumber ?? '',
+      // HUISSTIJL-1: the shared <Mono> atom carries the JetBrains Mono identity
+      // (one font declaration, components/ui/typography) — never a local fontFamily.
+      render: r => <Mono style={{ color: 'var(--text-muted)', fontSize: 12, fontVariantNumeric: 'tabular-nums' }}>{r.referenceNumber || '—'}</Mono>,
     },
     // Klant — soft avatar + name (AVATAR-CHIP-1: same chip as the candidates identity
     // column), muted text keeps it reading as a secondary reference, not the row's own identity.
@@ -105,6 +108,14 @@ export default function OpportunitiesTable({ rows, loading, error, onRowClick, s
           {formatOpportunityValue(r, valueInHours, t)}
         </span>
       } },
+    // Contract term (start/end date) — plain info columns, muted dash when empty.
+    // CEL-DOORKLIK-CANON: a NEW column never decides its own link target — the
+    // routing question for these two (link, or stay unlinked?) is on Danny's
+    // open list (OPP-DATE-ROUTE); unlinked until he answers.
+    { key: 'startDate', header: t('cols.startDate'), sortable: true, sortValue: r => r.startDate || '',
+      render: r => <span style={{ color: 'var(--text-muted)', fontSize: 12 }}>{r.startDate ? formatDate(r.startDate) : '—'}</span> },
+    { key: 'endDate', header: t('cols.endDate'), sortable: true, sortValue: r => r.endDate || '',
+      render: r => <span style={{ color: 'var(--text-muted)', fontSize: 12 }}>{r.endDate ? formatDate(r.endDate) : '—'}</span> },
     // Expected close date — red + bold when past AND the stage isn't already won/lost
     // (mirrors the tasks due-column overdue treatment).
     { key: 'expectedClose', header: t('cols.expectedClose'), sortable: true, sortValue: r => r.expectedCloseAt || '',

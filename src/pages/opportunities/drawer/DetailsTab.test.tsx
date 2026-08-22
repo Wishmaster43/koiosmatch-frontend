@@ -35,18 +35,21 @@ const baseOpportunity = { id: 'opp-1', title: 'Deal A', description: '' } as unk
 // The deal-fields EditableFieldTable ALSO renders a "Bewerken" pencil (its own
 // onUpdate wiring), so the description block's own pencil is scoped to its
 // header row — the label span's parent — rather than a bare getByTitle.
+// KANSOMSCHRIJVING-1: the block's own entity-named heading ("Kansomschrijving"),
+// no longer the generic "Omschrijving" (details.groups.description stays as-is
+// for the popout/other consumers — see OpportunityDescriptionBlock.tsx).
 const descriptionEditButton = () =>
-  within(screen.getByText('Omschrijving').parentElement as HTMLElement).getByTitle('Bewerken')
+  within(screen.getByText('Kansomschrijving').parentElement as HTMLElement).getByTitle('Bewerken')
 const descriptionSaveButton = () =>
-  within(screen.getByText('Omschrijving').parentElement as HTMLElement).getByTitle('Opslaan')
+  within(screen.getByText('Kansomschrijving').parentElement as HTMLElement).getByTitle('Opslaan')
 
 describe('DetailsTab · Kanstekst wiring (OPP-DESCRIPTION-1)', () => {
   it('renders the description block below the deal fields (DRILLDOWN-VOLGORDE-CANON)', () => {
     render(<DetailsTab opportunity={baseOpportunity} onUpdate={() => {}} />)
-    // Real nl translation for opportunities:details.groups.description; 'deal'
-    // resolves to "Deal".
+    // Real nl translation for opportunities:details.groups.deal ("Deal") and
+    // details.groups.opportunityDescription ("Kansomschrijving").
     const dealLabel = screen.getByText('Deal')
-    const descriptionLabel = screen.getByText('Omschrijving')
+    const descriptionLabel = screen.getByText('Kansomschrijving')
     expect(dealLabel).toBeInTheDocument()
     expect(descriptionLabel).toBeInTheDocument()
     // DOCUMENT_POSITION_FOLLOWING: the description card comes AFTER the deal
@@ -98,10 +101,12 @@ describe('DetailsTab · Kanstekst wiring (OPP-DESCRIPTION-1)', () => {
   })
 })
 
-// KOIOS-ADVIES-OVERAL-1: the drawer's advice section shows EXACTLY the advice
-// the opportunities table's Koios column derives — asserted through the SAME
-// resolver (useOpportunityAdvice), never a copied literal. With no advice the
-// whole section stays unmounted (no empty shell).
+// KOIOS-ADVIES-OVERAL-1 + ALWAYS-VISIBLE (Danny, mirrors matches/candidates):
+// the drawer's advice section shows EXACTLY the advice the opportunities
+// table's Koios column derives — asserted through the SAME resolver
+// (useOpportunityAdvice), never a copied literal — but the block itself now
+// ALWAYS renders (honest derived default rows take over when there is no
+// real advice; see OpportunityKoiosBlock.test.tsx for the block's own coverage).
 describe('DetailsTab · table-identical Koios advice (KOIOS-ADVIES-OVERAL-1)', () => {
   const stages: LookupOption[] = [
     { value: 'open', label: 'Open' },
@@ -116,20 +121,26 @@ describe('DetailsTab · table-identical Koios advice (KOIOS-ADVIES-OVERAL-1)', (
     expect(expected).toBeTruthy()
     render(<DetailsTab opportunity={overdueDeal} onUpdate={vi.fn()} stages={stages} />)
     expect(screen.getByText(expected as string)).toBeInTheDocument()
-    expect(screen.getByText(i18n.t('ai.title', { ns: 'common' }))).toBeInTheDocument()
+    expect(screen.getByText(i18n.t('ai.title', { ns: 'opportunities' }))).toBeInTheDocument()
   })
 
-  it('renders NO advice block at all on a clean deal (resolver returns null)', () => {
+  it('still renders the block on a clean deal (resolver returns null) — honest default rows, no fake advice', () => {
     expect(resolveVia(baseOpportunity)).toBeNull()
     render(<DetailsTab opportunity={baseOpportunity} onUpdate={vi.fn()} stages={stages} />)
-    expect(screen.queryByText(i18n.t('ai.title', { ns: 'common' }))).not.toBeInTheDocument()
+    expect(screen.getByText(i18n.t('ai.title', { ns: 'opportunities' }))).toBeInTheDocument()
+    // Real nl translation for opportunities:ai.dealHealthLabel — the derived
+    // default row, present even though there is no resolved advice.
+    expect(screen.getByText(i18n.t('ai.dealHealthLabel', { ns: 'opportunities' }))).toBeInTheDocument()
+    // The specific advice label from the overdue-deal test above must be absent here.
+    expect(screen.queryByText(resolveVia(overdueDeal)?.label as string)).not.toBeInTheDocument()
   })
 
-  it('renders NO advice block on a WON deal even when its close date has passed', () => {
+  it('still renders the block on a WON deal — terminal close-window note, no advice row', () => {
     const wonDeal = { ...overdueDeal, stageValue: 'won' } as unknown as Opportunity
     expect(resolveVia(wonDeal)).toBeNull()
     render(<DetailsTab opportunity={wonDeal} onUpdate={vi.fn()} stages={stages} />)
-    expect(screen.queryByText(i18n.t('ai.title', { ns: 'common' }))).not.toBeInTheDocument()
+    expect(screen.getByText(i18n.t('ai.title', { ns: 'opportunities' }))).toBeInTheDocument()
+    expect(screen.queryByText(resolveVia(overdueDeal)?.label as string)).not.toBeInTheDocument()
   })
 })
 
@@ -156,7 +167,7 @@ describe('DetailsTab · vestiging last, read-only (DRILLDOWN-VOLGORDE-CANON)', (
     const withBranch = { ...overdueDealStages(), branch: 'Bureau Amsterdam' } as unknown as Opportunity
     const stages: LookupOption[] = [{ value: 'open', label: 'Open' }]
     render(<DetailsTab opportunity={withBranch} onUpdate={vi.fn()} stages={stages} />)
-    const koiosLabel = screen.getByText(i18n.t('ai.title', { ns: 'common' }))
+    const koiosLabel = screen.getByText(i18n.t('ai.title', { ns: 'opportunities' }))
     const branchLabel = screen.getByText('Vestiging')
     expect(koiosLabel.compareDocumentPosition(branchLabel) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
   })

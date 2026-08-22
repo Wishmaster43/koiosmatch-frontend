@@ -14,10 +14,14 @@ vi.mock('@/lib/settings/useAllSettings', () => ({
   useAllSettings: () => ({}),
   getBoolSetting: (_s: unknown, _key: string, fallback: boolean) => fallback,
 }))
-// Identity date formatter + nl locale — this file doesn't cover date rendering itself.
+// DD-MM-YYYY date formatter mock (mirrors the house formatter's notation) — DATUM-1:
+// the date cells must prove the house format renders, never raw ISO (Opus-check 22-08).
 vi.mock('@/lib/datetime', () => ({
   useLocale: () => 'nl-NL',
-  useDateFormat: () => ({ formatDate: (v: unknown) => (v == null ? '—' : String(v)), formatDateTime: (v: unknown) => String(v) }),
+  useDateFormat: () => ({
+    formatDate: (v: unknown) => (v == null ? '—' : String(v).split('-').reverse().join('-')),
+    formatDateTime: (v: unknown) => String(v),
+  }),
 }))
 // Real (nl) translations, since mocking '@/lib/datetime' above removes the
 // transitive '@/i18n' side-effect import the production component relies on.
@@ -102,5 +106,68 @@ describe('OpportunitiesTable · value column via shared opportunityValue helper'
     const row = { ...baseRow, id: 'o41', value: null, hours: 40 }
     const { container } = render(<OpportunitiesTable rows={[row]} valueInHours={true} />)
     expect(getValueCell(container).textContent).toBe('40 u')
+  })
+})
+
+// KANSEN-A-4: contract-term columns (start/end date), added after the value
+// column — plain info, muted dash when empty, sortable, unlinked until Danny
+// answers the CEL-DOORKLIK routing question (OPP-DATE-ROUTE). Dates assert the
+// house DD-MM-YYYY notation (DATUM-1), never raw ISO.
+describe('OpportunitiesTable · start/end date columns', () => {
+  const getCol = (header: string) => {
+    const headerCell = screen.getByText(header).closest('th') as HTMLElement
+    return Array.from(headerCell.parentElement?.children ?? []).indexOf(headerCell)
+  }
+
+  it('renders the real dates, and an honest dash when unset — never a blank cell', () => {
+    const withDates = { ...baseRow, id: 'o50', startDate: '2026-03-01', endDate: '2026-09-30' }
+    const withoutDates = { ...baseRow, id: 'o51', startDate: null, endDate: null }
+    const { container } = render(<OpportunitiesTable rows={[withDates, withoutDates]} />)
+
+    // Unordered containment (mirrors the referenceNumber test above) — the
+    // table's own default sort (by `date`) may reorder these two identical-date
+    // rows, so row POSITION is not asserted, only that both values are present.
+    const startCol = getCol('Startdatum')
+    const endCol = getCol('Einddatum')
+    const startValues = Array.from(container.querySelectorAll('tbody tr')).map(r => r.children[startCol].textContent)
+    const endValues = Array.from(container.querySelectorAll('tbody tr')).map(r => r.children[endCol].textContent)
+    expect(startValues).toContain('01-03-2026')
+    expect(startValues).toContain('—')
+    expect(endValues).toContain('30-09-2026')
+    expect(endValues).toContain('—')
+  })
+
+  it('sorts by start date when the column header is clicked', async () => {
+    const user = userEvent.setup()
+    const rows = [
+      { ...baseRow, id: 'o60', startDate: '2026-06-01' },
+      { ...baseRow, id: 'o61', startDate: '2026-01-01' },
+      { ...baseRow, id: 'o62', startDate: '2026-03-01' },
+    ]
+    const { container } = render(<OpportunitiesTable rows={rows} />)
+    const startCol = getCol('Startdatum')
+    const headerCell = screen.getByText('Startdatum').closest('th') as HTMLElement
+    await user.click(within(headerCell).getByRole('button'))
+
+    const values = Array.from(container.querySelectorAll('tbody tr')).map(r => r.children[startCol].textContent)
+    // Display is DD-MM-YYYY while the sort key stays the raw ISO date — the
+    // expected order below proves sortValue reads the data, not the rendering.
+    expect(values).toEqual(['01-01-2026', '01-03-2026', '01-06-2026'])
+  })
+
+  it('sorts by end date when the column header is clicked', async () => {
+    const user = userEvent.setup()
+    const rows = [
+      { ...baseRow, id: 'o70', endDate: '2026-12-01' },
+      { ...baseRow, id: 'o71', endDate: '2026-02-01' },
+      { ...baseRow, id: 'o72', endDate: '2026-07-01' },
+    ]
+    const { container } = render(<OpportunitiesTable rows={rows} />)
+    const endCol = getCol('Einddatum')
+    const headerCell = screen.getByText('Einddatum').closest('th') as HTMLElement
+    await user.click(within(headerCell).getByRole('button'))
+
+    const values = Array.from(container.querySelectorAll('tbody tr')).map(r => r.children[endCol].textContent)
+    expect(values).toEqual(['01-02-2026', '01-07-2026', '01-12-2026'])
   })
 })

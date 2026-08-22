@@ -19,7 +19,9 @@
     "owner": "Inhaber",
     "date": "Erstellt",
     "hoursValue": "{{count}} Std.",
-    "expectedClose": "Voraussichtlicher Abschluss"
+    "expectedClose": "Voraussichtlicher Abschluss",
+    "startDate": "Startdatum",
+    "endDate": "Enddatum"
   },
   "insights": {
     "stage": "Phase",
@@ -60,6 +62,7 @@
     },
     "tabs": {
       "details": "Details",
+      "statistics": "Statistiken",
       "changelog": "Änderungen",
       "notes": "Notizen",
       "tasks": "Aufgaben",
@@ -69,7 +72,15 @@
     "markWon": "Gewonnen",
     "markLost": "Verloren",
     "expectedCloseOn": "Voraussichtlicher Abschluss am {{date}}",
-    "tags": "Tags"
+    "tags": "Tags",
+    "ordinal": {
+      "client": "Chance {{position}} von {{total}} für diesen Kunden"
+    },
+    "statistics": {
+      "empty": "Noch keine Chancen-Statistiken verfügbar.",
+      "onlyOpportunity": "Keine weiteren Chancen gefunden.",
+      "openOpportunity": "Chance öffnen"
+    }
   },
   "details": {
     "stage": "Phase",
@@ -80,8 +91,7 @@
     "created": "Erstellt",
     "groups": {
       "deal": "Deal",
-      "organisation": "Organisation",
-      "description": "Beschreibung"
+      "opportunityDescription": "Chancenbeschreibung"
     },
     "currency": "Währung",
     "hours": "Stunden",
@@ -167,6 +177,20 @@
     "reasons": {
       "expectedCloseOverdue": "Das erwartete Abschlussdatum ist verstrichen. Bei dieser Chance nachfassen."
     }
+  },
+  "ai": {
+    "title": "Koios AI empfiehlt",
+    "beta": "Beta",
+    "refresh": "Aktualisieren",
+    "analyzing": "Koios AI analysiert die Chance…",
+    "dealHealthLabel": "Dealumfang",
+    "dealHealthSet": "Wert oder Stunden sind erfasst.",
+    "dealHealthMissing": "Noch kein Wert oder keine Stunden erfasst.",
+    "closeWindowLabel": "Abschlussdatum",
+    "closeWindowTerminal": "Diese Chance ist abgeschlossen (gewonnen oder verloren). Keine weitere Empfehlung.",
+    "closeWindowUnknown": "Kein voraussichtliches Abschlussdatum bekannt.",
+    "closeWindowOverdue": "Das voraussichtliche Abschlussdatum ist seit {{days}} Tag(en) überschritten.",
+    "closeWindowUpcoming": "Noch {{days}} Tag(e) bis zum voraussichtlichen Abschluss."
   },
   "richText": {
     "empty": "Noch nichts erfasst"

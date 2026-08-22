@@ -1,5 +1,5 @@
 /**
- * OpportunityDescriptionBlock — the "Kanstekst" pencil → save/cancel cycle, the
+ * OpportunityDescriptionBlock — the "Kansomschrijving" pencil → save/cancel cycle, the
  * SafeHtml read display, and the italic-muted empty state (§4: italic reserved
  * for placeholder text; house rule Danny 2026-07-14: every prose field is a
  * rich-text block with its own edit dance) — mirrors
@@ -8,7 +8,7 @@
  * internals (§2) — the same small per-entity pattern already exists as
  * customers/drawer/EditableRichTextField and matches/drawer/MatchTextBlock.
  *
- * The "Kanstekst" is a description of the opportunity, not a conversation, so
+ * The "Kansomschrijving" is a description of the opportunity, not a conversation, so
  * it never opts into "Actiepunten" — it rides RichTextAssistBar's own
  * improve+summarize-only default (ACTIONS-SCOPE-DEFAULT-FLIP), no per-field
  * override needed.
@@ -75,7 +75,7 @@ export default function OpportunityDescriptionBlock({ opportunityId, value, onSa
   return (
     <div>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
-        <GroupLabel>{t('details.groups.description')}</GroupLabel>
+        <GroupLabel>{t('details.groups.opportunityDescription')}</GroupLabel>
         {editing ? (
           <div style={{ display: 'flex', gap: 4 }}>
             <Button variant="primary" iconOnly size="sm" onClick={save} title={t('common:save')} aria-label={t('common:save')}>

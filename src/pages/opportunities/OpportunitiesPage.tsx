@@ -123,7 +123,10 @@ export default function OpportunitiesPage({ intent }: { intent?: unknown } = {})
       setStage([s ? s.label : String(i.stage)])
     }
     if (i.kpi === 'expiring') setExpiringOnly(true)
-  }, [intent, stages])
+    // setStage is usePageMemory's own useState setter (stable identity, never
+    // actually changes) — listed to satisfy exhaustive-deps, not because this
+    // effect should re-run on it.
+  }, [intent, stages, setStage])
 
   // Reset to the first page + drop the selection whenever a filter changes.
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -212,10 +215,11 @@ export default function OpportunitiesPage({ intent }: { intent?: unknown } = {})
             {selectedIds.size > 0 && (
               <div style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: 12, color: 'var(--text)' }}>
                 <span>{t('page.selected', { count: selectedIds.size })}</span>
-                <button onClick={clearSelection}
-                  style={{ fontSize: 12, color: 'var(--color-primary-text)', background: 'none', border: 'none', cursor: 'pointer' }}>
+                {/* HUISSTIJL-1: the shared Button atom (ghostAccent = plain coloured
+                    text link, no fill/border) — never a hand-styled <button>. */}
+                <Button variant="ghostAccent" size="sm" onClick={clearSelection}>
                   {t('page.clearSelection')}
-                </button>
+                </Button>
               </div>
             )}
             <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 8 }}>
@@ -267,6 +271,10 @@ export default function OpportunitiesPage({ intent }: { intent?: unknown } = {})
         <OpportunityDrawer
           key={selected?.id ?? 'none'}
           opportunity={selected}
+          // KANSEN-A-3: the full tenant set (already fetch-all looped) — the
+          // Statistieken tab's "other opportunities at this customer" source.
+          allRows={rows}
+          valueInHours={valueInHours}
           onClose={closeDrawer}
           expanded={drawerExpanded}
           onToggleExpand={() => setDrawerExpanded(v => !v)}

@@ -5,7 +5,7 @@
  * rich-text block with its own edit dance) — mirrors
  * customers/drawer/EditableRichTextField.test.tsx's coverage. Real i18n (nl)
  * side-effect init so common:edit/save/cancel AND the opportunities-namespace
- * keys (details.groups.description, richText.empty) resolve genuine Dutch text.
+ * keys (details.groups.opportunityDescription, richText.empty) resolve genuine Dutch text.
  */
 import { describe, it, expect, vi } from 'vitest'
 import { render, screen } from '@testing-library/react'

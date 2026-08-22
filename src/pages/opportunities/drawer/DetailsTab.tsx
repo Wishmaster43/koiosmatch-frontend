@@ -18,13 +18,13 @@ interface DetailsTabProps {
 
 /**
  * DetailsTab — the deal fields (value · hours · term · service/agreement type) as an
- * in-place editable card, plus a read-only organisation card (customer → location →
- * department → contact, edited via the header pickers / dependent pickers per C-42).
+ * in-place editable card (the organisation card was dropped 2026-07-13: customer /
+ * location / department / contact live in the drawer-header pickers per C-42).
  * Service/agreement types come from tenant lookups (seed fallback until the backend).
  *
  * DRILLDOWN-VOLGORDE-CANON (Danny 21-08, §3A): the block order follows the
  * candidate/match blueprint — (1) INFORMATIE (the deal fields), (2) VRIJE TEKST
- * with its own second-screen pop-out (OPP-DESCRIPTION-1, "Kanstekst"),
+ * with its own second-screen pop-out (OPP-DESCRIPTION-1, "Kansomschrijving"),
  * (3) KOIOS AI, (4) VESTIGING last, read-only. This corrects the previous
  * order, which had the description block first, above the deal fields.
  */
@@ -93,7 +93,7 @@ export default function DetailsTab({ opportunity: o, onUpdate, stages = [] }: De
       <EditableFieldTable title={t('details.groups.deal')} fields={dealFields} value={dealValue}
         onSave={onUpdate ? saveDeal : undefined} />
       {/* Organisation card dropped (Danny 2026-07-13): fase/eigenaar/aangemaakt all live in the drawer header already. */}
-      {/* (2) VRIJE TEKST — the "Kanstekst" (OPP-DESCRIPTION-1), own pencil/save/✕
+      {/* (2) VRIJE TEKST — the "Kansomschrijving" (OPP-DESCRIPTION-1), own pencil/save/✕
           and second-screen pop-out (TEKST-POPOUT-1), independent of the
           EditableFieldTable's own edit state above. A cleared editor still
           emits stray markup ('<p></p>'), not '' — hasDescriptionText strips
@@ -101,8 +101,9 @@ export default function DetailsTab({ opportunity: o, onUpdate, stages = [] }: De
           literal markup string (measured live, 08-08). */}
       <OpportunityDescriptionBlock opportunityId={o.id} value={o.description ?? ''}
         onSave={html => onUpdate?.(o.id, { description: hasDescriptionText(html) ? html : null })} />
-      {/* (3) KOIOS AI — the SAME advice the table's Koios column shows;
-          renders nothing when there is no advice. */}
+      {/* (3) KOIOS AI — the SAME advice the table's Koios column shows, plus
+          honest derived default rows (deal health, close-date window) so the
+          block ALWAYS renders, even with no real advice (mirrors matches/candidates). */}
       <OpportunityKoiosBlock opportunity={o} stages={stages} />
       {/* (4) VESTIGING last — the tenant's OWN branch (C-41, distinct from the
           customer's own site on the Customer tab). Read-only display: this deal

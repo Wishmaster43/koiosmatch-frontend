@@ -39,7 +39,7 @@ export default function OpportunityDescriptionPopout({ id }: { id: string | unde
     <PopoutShell
       loading={loading} error={error || !opportunity} onRetry={reload}
       loadingLabel={t('common:loading')} errorLabel={t('popout.loadError')} retryLabel={t('common:error.retry')}
-      name={opportunity?.title ?? ''} initials={opportunity?.initials ?? ''} subtitle={t('details.groups.description')}
+      name={opportunity?.title ?? ''} initials={opportunity?.initials ?? ''} subtitle={t('details.groups.opportunityDescription')}
     >
       <TextPopoutEditor value={text ?? ''} onChange={change} onSave={save} dirty={dirty} />
     </PopoutShell>

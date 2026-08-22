@@ -14,6 +14,7 @@ import { PageTitle, Caption } from '@/components/ui/typography'
 import { useDateFormat } from '@/lib/datetime'
 import { useCustomFields } from '@/lib/useCustomFields'
 import DetailsTab from './drawer/DetailsTab'
+import StatisticsTab from './drawer/StatisticsTab'
 import CustomerRelationTab from './drawer/CustomerRelationTab'
 import NotesTab from './drawer/NotesTab'
 import TasksTab from './drawer/TasksTab'
@@ -28,6 +29,11 @@ type UpdateFn = (id: Id | undefined, patch: Record<string, unknown>) => void
 
 interface OpportunityDrawerProps {
   opportunity: Opportunity | null
+  // The full tenant opportunity set (useOpportunitiesData's `rows`) — the source
+  // the Statistieken tab derives this deal's customer-ordinal position and its
+  // customer-mates from (mirrors MatchDrawer's own `allRows`). Omitting it just
+  // hides the ordinal/statistics content, never a crash.
+  allRows?: Opportunity[]
   onClose: () => void
   expanded?: boolean
   onToggleExpand?: () => void
@@ -35,6 +41,8 @@ interface OpportunityDrawerProps {
   stages?: LookupOption[]
   users?: DrawerUser[]
   customers?: DrawerCustomer[]
+  // Tenant setting: show the deal magnitude in hours instead of euro (mirrors the table).
+  valueInHours?: boolean
   // ARCHIVE-1: per-id soft-delete/restore (§7 — UI-only gate; the backend
   // re-checks opportunities.delete / opportunities.update). Absent = no
   // permission, so the trash icon/restore button simply don't render.
@@ -52,8 +60,8 @@ interface OpportunityDrawerProps {
  * not a tab. Outcome (Won/Lost) is read from the phase, not a separate button.
  */
 export default function OpportunityDrawer({
-  opportunity: o, onClose, expanded, onToggleExpand, onUpdate, stages = [], users = [], customers = [],
-  onArchive, onRestore, trash,
+  opportunity: o, allRows = [], onClose, expanded, onToggleExpand, onUpdate, stages = [], users = [], customers = [],
+  onArchive, onRestore, trash, valueInHours = false,
 }: OpportunityDrawerProps) {
   const { t } = useTranslation('opportunities')
   const { formatDate, formatDateTime } = useDateFormat()
@@ -86,6 +94,8 @@ export default function OpportunityDrawer({
 
   const tabs = [
     { id: 'details', label: t('drawer.tabs.details'), render: () => <DetailsTab opportunity={o} onUpdate={onUpdate} stages={stages} /> },
+    // KANSEN-A-3: this customer's OTHER opportunities (mirrors matches/drawer/StatisticsTab).
+    { id: 'statistics', label: t('drawer.tabs.statistics'), render: () => <StatisticsTab opportunity={o} allRows={allRows} valueInHours={valueInHours} /> },
     { id: 'customer', label: t('drawer.tabs.customer'), render: () => <CustomerRelationTab opportunity={o} customers={customers} onUpdate={onUpdate} /> },
     { id: 'notes',   label: t('drawer.tabs.notes'),   render: () => <NotesTab opportunity={o} /> },
     { id: 'tasks',   label: t('drawer.tabs.tasks'),   render: () => <TasksTab opportunity={o} /> },

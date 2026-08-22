@@ -19,7 +19,9 @@
     "owner": "Owner",
     "date": "Created",
     "hoursValue": "{{count}} h",
-    "expectedClose": "Expected close"
+    "expectedClose": "Expected close",
+    "startDate": "Start date",
+    "endDate": "End date"
   },
   "insights": {
     "stage": "Stage",
@@ -63,13 +65,22 @@
     "expectedCloseOn": "Expected to close on {{date}}",
     "tabs": {
       "details": "Details",
+      "statistics": "Statistics",
       "notes": "Notes",
       "tasks": "Tasks",
       "changelog": "Changelog",
       "extra": "Extra",
       "customer": "Client"
     },
-    "tags": "Tags"
+    "tags": "Tags",
+    "ordinal": {
+      "client": "Opportunity {{position}} of {{total}} for this client"
+    },
+    "statistics": {
+      "empty": "No opportunity statistics available yet.",
+      "onlyOpportunity": "No other opportunities found.",
+      "openOpportunity": "Open opportunity"
+    }
   },
   "notes": {
     "title": "Notes",
@@ -115,8 +126,7 @@
     "created": "Created",
     "groups": {
       "deal": "Deal",
-      "organisation": "Organisation",
-      "description": "Description"
+      "opportunityDescription": "Opportunity description"
     }
   },
   "changelog": {
@@ -167,6 +177,20 @@
     "reasons": {
       "expectedCloseOverdue": "The expected close date has passed. Follow up on this deal."
     }
+  },
+  "ai": {
+    "title": "Koios AI advises",
+    "beta": "Beta",
+    "refresh": "Refresh",
+    "analyzing": "Koios AI is analysing the opportunity…",
+    "dealHealthLabel": "Deal magnitude",
+    "dealHealthSet": "A value or hours figure is on file.",
+    "dealHealthMissing": "No value or hours figure has been filled in yet.",
+    "closeWindowLabel": "Close date",
+    "closeWindowTerminal": "This opportunity is closed (won or lost). No more advice.",
+    "closeWindowUnknown": "No expected close date is known.",
+    "closeWindowOverdue": "The expected close date passed {{days}} day(s) ago.",
+    "closeWindowUpcoming": "{{days}} day(s) left until the expected close."
   },
   "richText": {
     "empty": "Nothing recorded yet"
